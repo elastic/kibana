@@ -65,6 +65,7 @@ import {
 } from '../screens/common/filter_group';
 import { LOADING_SPINNER } from '../screens/common/page';
 import { ALERTS_URL } from '../urls/navigation';
+import { FIELDS_BROWSER_BTN } from '../screens/rule_details';
 
 export const addExceptionFromFirstAlert = () => {
   expandFirstAlertActions();
@@ -288,9 +289,13 @@ export const markAcknowledgedFirstAlert = () => {
   cy.get(MARK_ALERT_ACKNOWLEDGED_BTN).click();
 };
 
+export const openAlertsFieldBrowser = () => {
+  cy.get(FIELDS_BROWSER_BTN).click();
+};
+
 export const selectNumberOfAlerts = (numberOfAlerts: number) => {
-  waitForAlerts();
   for (let i = 0; i < numberOfAlerts; i++) {
+    waitForAlerts();
     cy.get(ALERT_CHECKBOX).eq(i).as('checkbox').click({ force: true });
     cy.get('@checkbox').should('have.attr', 'checked');
   }

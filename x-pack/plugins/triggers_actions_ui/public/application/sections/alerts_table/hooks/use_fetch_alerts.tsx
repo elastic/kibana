@@ -197,7 +197,7 @@ const useFetchAlerts = ({
         if (data && data.search) {
           searchSubscription$.current = data.search
             .search<RuleRegistrySearchRequest, RuleRegistrySearchResponse>(
-              { ...request, featureIds, fields: undefined, query },
+              { ...request, featureIds, fields, query },
               {
                 strategy: 'privateRuleRegistryAlertsSearchStrategy',
                 abortSignal: abortCtrl.current.signal,
@@ -278,7 +278,7 @@ const useFetchAlerts = ({
       asyncSearch();
       refetch.current = asyncSearch;
     },
-    [skip, data, featureIds, query]
+    [skip, data, featureIds, query, fields]
   );
 
   useEffect(() => {

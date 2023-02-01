@@ -89,7 +89,6 @@ const timelineSearchStrategy = <T extends TimelineFactoryQueryTypes>({
   options,
   deps,
   queryFactory,
-  logger,
 }: {
   es: ISearchStrategy;
   request: TimelineStrategyRequestType<T>;

@@ -16,8 +16,8 @@ import { createCustomRuleEnabled } from '../../tasks/api_calls/rules';
 import { getNewRule } from '../../objects/rule';
 import { refreshPage } from '../../tasks/security_header';
 import { waitForAlertsToPopulate } from '../../tasks/create_new_rule';
-import { openEventsViewerFieldsBrowser } from '../../tasks/hosts/events';
 import { assertFieldDisplayed, createField } from '../../tasks/create_runtime_field';
+import { openAlertsFieldBrowser } from '../../tasks/alerts';
 
 describe('Create DataView runtime field', () => {
   before(() => {
@@ -30,7 +30,7 @@ describe('Create DataView runtime field', () => {
     createCustomRuleEnabled(getNewRule());
     refreshPage();
     waitForAlertsToPopulate();
-    openEventsViewerFieldsBrowser();
+    openAlertsFieldBrowser();
 
     createField(fieldName);
     assertFieldDisplayed(fieldName, 'alerts');

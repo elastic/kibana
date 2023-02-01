@@ -46,7 +46,7 @@ export const getUseActionColumnHook =
         rowIndex,
         cveProps,
         setIsActionLoading,
-        refresh,
+        refresh: alertsTableRefresh,
         clearSelection,
         ecsAlert: alert,
         nonEcsData,
@@ -88,7 +88,7 @@ export const getUseActionColumnHook =
               if (setIsActionLoading) setIsActionLoading(isLoading);
             }}
             setEventsDeleted={() => {}}
-            refetch={refresh}
+            refetch={alertsTableRefresh}
           />
         );
       },

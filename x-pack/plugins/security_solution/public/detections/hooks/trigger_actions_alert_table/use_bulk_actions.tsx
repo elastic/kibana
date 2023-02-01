@@ -10,6 +10,10 @@ import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/type
 import type { SerializableRecord } from '@kbn/utility-types';
 import { isEqual } from 'lodash';
 import type { Filter } from '@kbn/es-query';
+import { useCallback } from 'react';
+import type { inputsModel, State } from '../../../common/store';
+import { useShallowEqualSelector } from '../../../common/hooks/use_selector';
+import { inputsSelectors } from '../../../common/store';
 import type { TableId } from '../../../../common/types';
 import { SourcererScopeName } from '../../../common/store/sourcerer/model';
 import { useGlobalTime } from '../../../common/containers/use_global_time';
@@ -60,6 +64,13 @@ export const getBulkActionHook =
   (query) => {
     const { from, to } = useGlobalTime();
     const filters = getFiltersForDSLQuery(query);
+    const getGlobalQueries = inputsSelectors.globalQuery();
+
+    const globalQuery = useShallowEqualSelector((state: State) => getGlobalQueries(state));
+
+    const refetchGlobalQuery = useCallback(() => {
+      globalQuery.forEach((q) => q.refetch && (q.refetch as inputsModel.Refetch)());
+    }, [globalQuery]);
 
     const timelineAction = useAddBulkToTimelineAction({
       localFilters: filters,
@@ -75,6 +86,7 @@ export const getBulkActionHook =
       from,
       to,
       tableId,
+      refetch: refetchGlobalQuery,
     });
 
     const caseActions = useBulkAddToCaseActions();

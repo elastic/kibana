@@ -10,6 +10,7 @@ import { EuiIcon, EuiToolTip, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
 import type { GetRenderCellValue } from '@kbn/triggers-actions-ui-plugin/public';
 import { find } from 'lodash/fp';
+import type { SourcererScopeName } from '../../../common/store/sourcerer/model';
 import { GuidedOnboardingTourStep } from '../../../common/components/guided_onboarding_tour/tour_step';
 import { isDetectionsAlertsTable } from '../../../common/components/top_n/helpers';
 import {
@@ -18,7 +19,6 @@ import {
 } from '../../../common/components/guided_onboarding_tour/tour_config';
 import { SIGNAL_RULE_NAME_FIELD_NAME } from '../../../timelines/components/timeline/body/renderers/constants';
 import { useSourcererDataView } from '../../../common/containers/sourcerer';
-import { SourcererScopeName } from '../../../common/store/sourcerer/model';
 
 import type { CellValueElementProps } from '../../../timelines/components/timeline/cell_rendering';
 import { DefaultCellRenderer } from '../../../timelines/components/timeline/cell_rendering/default_cell_renderer';
@@ -79,9 +79,9 @@ export const RenderCellValue: React.FC<EuiDataGridCellValueElementProps & CellVa
   );
 };
 
-export const getRenderCellValueHook = ({ scopeId }: { scopeId: string }) => {
+export const getRenderCellValueHook = ({ scopeId }: { scopeId: SourcererScopeName }) => {
   const useRenderCellValue: GetRenderCellValue = () => {
-    const { browserFields } = useSourcererDataView(SourcererScopeName.detections);
+    const { browserFields } = useSourcererDataView(scopeId);
 
     const result = useCallback(
       ({

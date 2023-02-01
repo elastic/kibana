@@ -187,6 +187,11 @@ const AlertsTableState = ({
     [propBrowserFields, browserFields]
   );
 
+  const fieldsToFetch = useMemo(
+    () => columns.map((col) => ({ field: col.id, include_unmapped: true })),
+    [columns]
+  );
+
   const [
     isLoading,
     {
@@ -200,7 +205,7 @@ const AlertsTableState = ({
       updatedAt,
     },
   ] = useFetchAlerts({
-    fields: EMPTY_FIELDS,
+    fields: fieldsToFetch,
     featureIds,
     query,
     pagination,

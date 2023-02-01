@@ -33,6 +33,7 @@ interface UseBulkAlertActionItemsArgs {
   scopeId: SourcererScopeName;
   /* filter of the Alerts Query*/
   filters: Filter[];
+  refetch?: () => void;
 }
 
 export const useBulkAlertActionItems = ({
@@ -40,6 +41,7 @@ export const useBulkAlertActionItems = ({
   filters,
   from,
   to,
+  refetch: refetchProp,
 }: UseBulkAlertActionItemsArgs) => {
   const { startTransaction } = useStartTransaction();
 
@@ -97,7 +99,7 @@ export const useBulkAlertActionItems = ({
       const onActionClick: BulkActionsConfig['onClick'] = async (
         items,
         isSelectAllChecked,
-        setLoading,
+        setAlertLoading,
         clearSelection,
         refresh
       ) => {
@@ -117,14 +119,15 @@ export const useBulkAlertActionItems = ({
         }
 
         try {
-          setLoading(true);
+          setAlertLoading(true);
           const response = await updateAlertStatus({
             index: selectedPatterns.join(','),
             status,
             query,
           });
 
-          setLoading(false);
+          setAlertLoading(false);
+          if (refetchProp) refetchProp();
           refresh();
           clearSelection();
 
@@ -153,6 +156,7 @@ export const useBulkAlertActionItems = ({
       filters,
       from,
       to,
+      refetchProp,
     ]
   );
 

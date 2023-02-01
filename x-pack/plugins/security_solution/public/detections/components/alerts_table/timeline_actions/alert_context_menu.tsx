@@ -139,7 +139,6 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps & PropsFromRedux
   };
 
   const refetchAll = useCallback(() => {
-    if (refetch) refetch();
     if (isActiveTimeline(scopeId ?? '')) {
       refetchQuery([timelineQuery]);
       if (routeProps.pageName === 'alerts') {
@@ -147,6 +146,7 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps & PropsFromRedux
       }
     } else {
       refetchQuery(globalQuery);
+      if (refetch) refetch();
     }
   }, [scopeId, globalQuery, timelineQuery, routeProps, refetch]);
 
