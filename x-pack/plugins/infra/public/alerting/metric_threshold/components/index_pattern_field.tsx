@@ -11,7 +11,7 @@ import { EuiFieldText, EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { IndexPatternOverride, INDEX_PATTERN_INVALID } from '../../../../common/alerting/metrics';
 
-interface IndexPatternFieldProps {
+export interface IndexPatternFieldProps {
   label: string;
   helpText?: string;
   onChange: (indexPattern: IndexPatternOverride | undefined) => void;
