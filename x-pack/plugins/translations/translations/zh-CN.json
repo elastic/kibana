@@ -10059,7 +10059,6 @@
     "xpack.csp.findings.distributionBar.showingPageOfTotalLabel": "正在显示第 {pageStart}-{pageEnd} 个（共 {total} 个）{type}",
     "xpack.csp.findings.findingsTableCell.addFilterButton": "添加 {field} 筛选",
     "xpack.csp.findings.findingsTableCell.addNegateFilterButton": "添加 {field} 作废筛选",
-    "xpack.csp.findings.resourceFindings.resourceFindingsPageTitle": "{resourceName} - 结果",
     "xpack.csp.rules.header.rulesCountLabel": "{count, plural, other { 规则}}",
     "xpack.csp.rules.header.totalRulesCount": "正在显示 {rules}",
     "xpack.csp.rules.rulePageHeader.pageHeaderTitle": "规则 - {integrationName}",
