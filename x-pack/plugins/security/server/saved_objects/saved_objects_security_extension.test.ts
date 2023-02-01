@@ -6,7 +6,6 @@
  */
 
 import type { LegacyUrlAliasTarget } from '@kbn/core-saved-objects-common';
-import { AuditAction } from '@kbn/core-saved-objects-server';
 import type {
   AuthorizeBulkGetObject,
   AuthorizeCreateObject,
@@ -25,7 +24,11 @@ import { auditLoggerMock } from '../audit/mocks';
 import type { CheckSavedObjectsPrivileges } from '../authorization';
 import { Actions } from '../authorization';
 import type { CheckPrivilegesResponse } from '../authorization/types';
-import { SavedObjectsSecurityExtension, SecurityAction } from './saved_objects_security_extension';
+import {
+  AuditAction,
+  SavedObjectsSecurityExtension,
+  SecurityAction,
+} from './saved_objects_security_extension';
 
 const checkAuthorizationSpy = jest.spyOn(
   SavedObjectsSecurityExtension.prototype as any,

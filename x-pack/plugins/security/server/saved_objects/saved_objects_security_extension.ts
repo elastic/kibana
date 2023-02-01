@@ -14,11 +14,8 @@ import type { SavedObjectsClient } from '@kbn/core-saved-objects-api-server-inte
 import { isBulkResolveError } from '@kbn/core-saved-objects-api-server-internal/src/lib/internal_bulk_resolve';
 import { LEGACY_URL_ALIAS_TYPE } from '@kbn/core-saved-objects-base-server-internal';
 import type { LegacyUrlAliasTarget } from '@kbn/core-saved-objects-common';
-import { AuditAction, SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
+import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
 import type {
-  AddAuditEventParams,
-  AuditHelperParams,
-  AuditOptions,
   AuthorizationTypeEntry,
   AuthorizationTypeMap,
   AuthorizeAndRedactInternalBulkResolveParams,
@@ -37,16 +34,14 @@ import type {
   AuthorizeUpdateParams,
   AuthorizeUpdateSpacesParams,
   BulkResolveError,
-  CheckAuthorizationParams,
   CheckAuthorizationResult,
   GetFindRedactTypeMapParams,
   ISavedObjectsSecurityExtension,
   RedactNamespacesParams,
   SavedObject,
-  UpdateSpacesAuditHelperParams,
-  UpdateSpacesAuditOptions,
 } from '@kbn/core-saved-objects-server';
 import { ALL_NAMESPACES_STRING, SavedObjectsUtils } from '@kbn/core-saved-objects-utils-server';
+import type { EcsEvent } from '@kbn/ecs';
 
 import { ALL_SPACES_ID, UNKNOWN_SPACE } from '../../common/constants';
 import type { AuditLogger } from '../audit';
@@ -84,6 +79,59 @@ export enum SecurityAction {
   UPDATE,
   BULK_UPDATE,
   UPDATE_OBJECTS_SPACES,
+}
+
+/**
+ * The AuditAction enumeration contains values for all
+ * valid audit actions for use in AddAuditEventParams.
+ */
+export enum AuditAction {
+  CREATE = 'saved_object_create',
+  GET = 'saved_object_get',
+  RESOLVE = 'saved_object_resolve',
+  UPDATE = 'saved_object_update',
+  DELETE = 'saved_object_delete',
+  FIND = 'saved_object_find',
+  REMOVE_REFERENCES = 'saved_object_remove_references',
+  OPEN_POINT_IN_TIME = 'saved_object_open_point_in_time',
+  CLOSE_POINT_IN_TIME = 'saved_object_close_point_in_time',
+  COLLECT_MULTINAMESPACE_REFERENCES = 'saved_object_collect_multinamespace_references', // this is separate from 'saved_object_get' because the user is only accessing an object's metadata
+  UPDATE_OBJECTS_SPACES = 'saved_object_update_objects_spaces', // this is separate from 'saved_object_update' because the user is only updating an object's metadata
+}
+
+/**
+ * The AddAuditEventParams interface contains settings for adding
+ * audit events via the ISavedObjectsSecurityExtension. This is
+ * used only for the private addAuditEvent method.
+ */
+export interface AddAuditEventParams {
+  /** The relevant action */
+  action: AuditAction;
+  /**
+   * The outcome of the operation
+   * 'failure' | 'success' | 'unknown'
+   */
+  outcome?: EcsEvent['outcome'];
+  /**
+   * Relevant saved object information
+   * object containing type & id strings
+   */
+  savedObject?: { type: string; id: string };
+  /**
+   * Array of spaces being added. For
+   * UPDATE_OBJECTS_SPACES action only
+   */
+  addToSpaces?: readonly string[];
+  /**
+   * Array of spaces being removed. For
+   * UPDATE_OBJECTS_SPACES action only
+   */
+  deleteFromSpaces?: readonly string[];
+  /**
+   * Relevant error information to add to
+   * the audit event
+   */
+  error?: Error;
 }
 
 /**
@@ -143,6 +191,112 @@ interface EnforceAuthorizationParams<A extends string> {
   typeMap: AuthorizationTypeMap<A>;
   /** auditOptions - options for audit logging */
   auditOptions?: AuditOptions | UpdateSpacesAuditOptions;
+}
+
+/**
+ * The AuditHelperParams interface contains parameters to log audit events
+ * within the ISavedObjectsSecurityExtension.
+ */
+interface AuditHelperParams {
+  /** The audit action to log */
+  action: AuditAction;
+  /** The objects applicable to the action */
+  objects?: Array<{ type: string; id: string }>;
+  /** Whether or not to use success as the non-failure outcome. Default is 'unknown' */
+  useSuccessOutcome?: boolean;
+  /** The spaces in which to add the objects. Default is none */
+  addToSpaces?: string[];
+  /** The spaces from which to remove the objects. Default is none */
+  deleteFromSpaces?: string[];
+  /** Error information produced by the action */
+  error?: Error;
+}
+
+/**
+ * The UpdateSpacesAuditHelperParams interface contains parameters to log
+ * audit events for the UPDATE_OBJECTS_SPACES audit action within the
+ * ISavedObjectsSecurityExtension.
+ */
+interface UpdateSpacesAuditHelperParams extends AuditHelperParams {
+  /** The audit action to log is always UPDATE_OBJECTS_SPACES */
+  action: AuditAction.UPDATE_OBJECTS_SPACES;
+  /** Spaces to which the the object(s) are being added */
+  addToSpaces?: string[];
+  /** Spaces from which the the object(s) are being removed */
+  deleteFromSpaces?: string[];
+}
+
+/**
+ * FUTURE: The TypesAndSpacesAuditHelperParams interface contains parameters to log
+ * audit events for the FIND and OPEN_POINT_IN_TIME audit actions within the
+ * ISavedObjectsSecurityExtension.
+ */
+// export interface TypesAndSpacesAuditHelperParams extends AuditHelperParams {
+//   /**
+//    * The audit action to log is either FIND or OPEN_POINT_IN_TIME.
+//    */
+//   action: AuditAction.FIND | AuditAction.OPEN_POINT_IN_TIME;
+//   /**
+//    * The spaces requested for the action.
+//    */
+//   spaces?: Set<string>;
+//   /**
+//    * The types requested for the action.
+//    */
+//   types?: Set<string>;
+// }
+
+/**
+ * The AuditOptions interface contains optional settings for audit
+ * logging within the ISavedObjectsSecurityExtension.
+ */
+interface AuditOptions {
+  /**
+   * An array of applicable objects for the authorization action
+   * If undefined or empty, general auditing will occur (one log/action)
+   */
+  objects?: Array<{ type: string; id: string }>;
+  /**
+   * Whether or not to bypass audit logging on authz success, authz failure, always, or never. Default never.
+   */
+  bypass?: 'never' | 'on_success' | 'on_failure' | 'always';
+  /** If authz success should be logged as 'success'. Default false */
+  useSuccessOutcome?: boolean;
+}
+
+/**
+ * The UpdateSpacesAuditOptions interface contains optional settings for
+ * auditing the UPDATE_OBJECTS_SPACES action.
+ */
+interface UpdateSpacesAuditOptions extends AuditOptions {
+  /**
+   * An array of spaces which to add the objects (used in updateObjectsSpaces)
+   */
+  addToSpaces?: string[];
+  /**
+   * An array of spaces from which to remove the objects (used in updateObjectsSpaces)
+   */
+  deleteFromSpaces?: string[];
+}
+
+/**
+ * The CheckAuthorizationParams interface contains settings for checking
+ * authorization via the ISavedObjectsSecurityExtension.
+ */
+interface CheckAuthorizationParams<A extends string> {
+  /** A set of types to check */
+  types: Set<string>;
+  /** A set of spaces to check */
+  spaces: Set<string>;
+  /** An set of actions to check */
+  actions: Set<A>;
+  /** Authorization options */
+  options?: {
+    /**
+     * allowGlobalResource - whether or not to allow global resources, false if options are undefined
+     */
+    allowGlobalResource: boolean;
+  };
 }
 
 export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExtension {

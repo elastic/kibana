@@ -362,7 +362,6 @@ export type {
   AuthorizationTypeEntry,
   AuthorizationTypeMap,
   CheckAuthorizationResult,
-  AddAuditEventParams,
   RedactNamespacesParams,
   ISavedObjectsSecurityExtension,
   ISavedObjectsSpacesExtension,
