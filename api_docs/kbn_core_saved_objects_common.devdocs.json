@@ -1565,6 +1565,14 @@
             "path": "x-pack/plugins/cases/server/services/so_references.ts"
           },
           {
+            "plugin": "cases",
+            "path": "x-pack/plugins/cases/server/services/so_references.ts"
+          },
+          {
+            "plugin": "cases",
+            "path": "x-pack/plugins/cases/server/services/so_references.ts"
+          },
+          {
             "plugin": "lists",
             "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client.mock.ts"
           },
@@ -3291,6 +3299,18 @@
           },
           {
             "plugin": "infra",
+            "path": "x-pack/plugins/infra/server/lib/alerting/log_threshold/log_threshold_references_manager.ts"
+          },
+          {
+            "plugin": "infra",
+            "path": "x-pack/plugins/infra/server/lib/alerting/log_threshold/log_threshold_references_manager.ts"
+          },
+          {
+            "plugin": "infra",
+            "path": "x-pack/plugins/infra/server/lib/alerting/log_threshold/log_threshold_references_manager.ts"
+          },
+          {
+            "plugin": "infra",
             "path": "x-pack/plugins/infra/public/common/visualizations/lens/types.ts"
           },
           {
@@ -3360,6 +3380,14 @@
           {
             "plugin": "cases",
             "path": "x-pack/plugins/cases/server/services/user_actions/test_utils.ts"
+          },
+          {
+            "plugin": "infra",
+            "path": "x-pack/plugins/infra/server/lib/alerting/log_threshold/log_threshold_references_manager.test.ts"
+          },
+          {
+            "plugin": "infra",
+            "path": "x-pack/plugins/infra/server/lib/alerting/log_threshold/log_threshold_references_manager.test.ts"
           }
         ],
         "initialIsOpen": false
