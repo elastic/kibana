@@ -17,7 +17,7 @@ interface Props {
   onClick: () => void;
   theme: EuiTheme | undefined;
   children: ReactNode;
-  showKubernetesInfo: boolean;
+  showKubernetesInfo?: boolean;
 }
 
 const ButtonLabel = (label: string, theme?: EuiTheme) => (

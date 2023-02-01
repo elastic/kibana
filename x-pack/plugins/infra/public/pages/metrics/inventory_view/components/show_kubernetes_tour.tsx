@@ -13,29 +13,27 @@ interface Props {
   children: ReactElement;
 }
 
-const STORAGE_KEY = 'showKubernetesTour';
+const KUBERNETES_TOUR_STORAGE_KEY = 'showKubernetesTour';
 
 export const ShowKubernetesTour = ({ children }: Props) => {
   const [isTourOpen, setIsTourOpen] = useState(() => {
-    const initialState = localStorage.getItem(STORAGE_KEY);
+    const initialState = localStorage.getItem(KUBERNETES_TOUR_STORAGE_KEY);
     return initialState !== 'false' ? true : false;
   });
 
   useEffect(() => {
-    localStorage.setItem(STORAGE_KEY, isTourOpen ? 'true' : 'false');
+    localStorage.setItem(KUBERNETES_TOUR_STORAGE_KEY, isTourOpen ? 'true' : 'false');
   }, [isTourOpen]);
 
   return (
     <div>
       <EuiTourStep
         content={
-          <EuiText>
-            <p>
-              {i18n.translate('xpack.infra.homePage.kubernetesTour.text', {
-                defaultMessage:
-                  'Click here to see your infrastructure in different ways, including Kubernetes pods.',
-              })}
-            </p>
+          <EuiText data-test-subj="infra-kubernetesTour-text">
+            {i18n.translate('xpack.infra.homePage.kubernetesTour.text', {
+              defaultMessage:
+                'Click here to see your infrastructure in different ways, including Kubernetes pods.',
+            })}
           </EuiText>
         }
         isStepOpen={isTourOpen}
@@ -47,7 +45,7 @@ export const ShowKubernetesTour = ({ children }: Props) => {
           defaultMessage: 'Want a different view?',
         })}
         anchorPosition="downCenter"
-        footerAction={[
+        footerAction={
           <EuiButtonEmpty
             data-test-subj="infra-kubernetesTour-dismiss"
             size="s"
@@ -57,8 +55,8 @@ export const ShowKubernetesTour = ({ children }: Props) => {
             {i18n.translate('xpack.infra.homePage.kubernetesTour.dismiss', {
               defaultMessage: 'Dismiss',
             })}
-          </EuiButtonEmpty>,
-        ]}
+          </EuiButtonEmpty>
+        }
       >
         {children}
       </EuiTourStep>
