@@ -14,6 +14,7 @@ import type {
   ConnectorMappingsService,
   AttachmentService,
 } from '.';
+import type { AttachmentGetter } from './attachments/operations/get';
 import type { LicensingService } from './licensing';
 import type { EmailNotificationService } from './notifications/email_notification_service';
 import type { UserActionPersister } from './user_actions/operations/create';
@@ -24,6 +25,12 @@ interface UserActionServiceOperations {
   finder: CaseUserActionFinderServiceMock;
 }
 
+interface AttachmentServiceOperations {
+  getter: AttachmentGetterServiceMock;
+}
+
+export type AttachmentGetterServiceMock = jest.Mocked<AttachmentGetter>;
+
 export type CaseServiceMock = jest.Mocked<CasesService>;
 export type CaseConfigureServiceMock = jest.Mocked<CaseConfigureService>;
 export type ConnectorMappingsServiceMock = jest.Mocked<ConnectorMappingsService>;
@@ -33,7 +40,7 @@ export type CaseUserActionServiceMock = jest.Mocked<
 export type CaseUserActionPersisterServiceMock = jest.Mocked<UserActionPersister>;
 export type CaseUserActionFinderServiceMock = jest.Mocked<UserActionFinder>;
 export type AlertServiceMock = jest.Mocked<AlertService>;
-export type AttachmentServiceMock = jest.Mocked<AttachmentService>;
+export type AttachmentServiceMock = jest.Mocked<AttachmentService & AttachmentServiceOperations>;
 export type LicensingServiceMock = jest.Mocked<LicensingService>;
 export type NotificationServiceMock = jest.Mocked<EmailNotificationService>;
 
@@ -134,22 +141,33 @@ export const createAlertServiceMock = (): AlertServiceMock => {
   return service as unknown as AlertServiceMock;
 };
 
-export const createAttachmentServiceMock = (): AttachmentServiceMock => {
-  const service: PublicMethodsOf<AttachmentService> = {
+const createAttachmentGetterServiceMock = (): AttachmentGetterServiceMock => {
+  const service: PublicMethodsOf<AttachmentGetter> = {
     get: jest.fn(),
+    bulkGet: jest.fn(),
+    getAllAlertsAttachToCase: jest.fn(),
+    getCaseCommentStats: jest.fn(),
+    getAttachmentIdsForCases: jest.fn(),
+  };
+
+  return service as unknown as AttachmentGetterServiceMock;
+};
+
+type FakeAttachmentService = PublicMethodsOf<AttachmentService> & AttachmentServiceOperations;
+
+export const createAttachmentServiceMock = (): AttachmentServiceMock => {
+  const service: FakeAttachmentService = {
+    getter: createAttachmentGetterServiceMock(),
     delete: jest.fn(),
     create: jest.fn(),
     bulkCreate: jest.fn(),
     update: jest.fn(),
     bulkUpdate: jest.fn(),
     find: jest.fn(),
-    getAllAlertsAttachToCase: jest.fn(),
     countAlertsAttachedToCase: jest.fn(),
     executeCaseActionsAggregations: jest.fn(),
-    getCaseCommentStats: jest.fn(),
     valueCountAlertsAttachedToCase: jest.fn(),
     executeCaseAggregations: jest.fn(),
-    getAttachmentIdsForCases: jest.fn(),
   };
 
   // the cast here is required because jest.Mocked tries to include private members and would throw an error

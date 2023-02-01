@@ -51,7 +51,8 @@ export const ACTION_CONNECTORS_WARNING_TITLE = (totalConnectors: number) =>
     'xpack.securitySolution.detectionEngine.components.importRuleModal.actionConnectorsWarningTitle',
     {
       values: { totalConnectors },
-      defaultMessage: '{totalConnectors} connector imported',
+      defaultMessage:
+        '{totalConnectors} {totalConnectors, plural, =1 {connector} other {connectors}} imported',
     }
   );
 

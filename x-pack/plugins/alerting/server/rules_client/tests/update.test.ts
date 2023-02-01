@@ -1767,7 +1767,7 @@ describe('update()', () => {
           },
         })
       ).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"Cannot specify per-action frequency params when notify_when or throttle are defined at the rule level: default, group2"`
+        `"Failed to validate actions due to the following error: Cannot specify per-action frequency params when notify_when or throttle are defined at the rule level: default, group2"`
       );
       expect(unsecuredSavedObjectsClient.create).not.toHaveBeenCalled();
       expect(taskManager.schedule).not.toHaveBeenCalled();
@@ -1808,7 +1808,7 @@ describe('update()', () => {
           },
         })
       ).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"Cannot specify per-action frequency params when notify_when or throttle are defined at the rule level: default"`
+        `"Failed to validate actions due to the following error: Cannot specify per-action frequency params when notify_when or throttle are defined at the rule level: default"`
       );
       expect(unsecuredSavedObjectsClient.create).not.toHaveBeenCalled();
       expect(taskManager.schedule).not.toHaveBeenCalled();
@@ -1844,7 +1844,7 @@ describe('update()', () => {
           },
         })
       ).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"Actions missing frequency parameters: default"`
+        `"Failed to validate actions due to the following error: Actions missing frequency parameters: default"`
       );
       expect(unsecuredSavedObjectsClient.create).not.toHaveBeenCalled();
       expect(taskManager.schedule).not.toHaveBeenCalled();
@@ -1892,7 +1892,7 @@ describe('update()', () => {
           },
         })
       ).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"Actions missing frequency parameters: default"`
+        `"Failed to validate actions due to the following error: Actions missing frequency parameters: default"`
       );
       expect(unsecuredSavedObjectsClient.create).not.toHaveBeenCalled();
       expect(taskManager.schedule).not.toHaveBeenCalled();
@@ -2016,7 +2016,9 @@ describe('update()', () => {
           ],
         },
       })
-    ).rejects.toThrowErrorMatchingInlineSnapshot(`"Invalid connectors: another connector"`);
+    ).rejects.toThrowErrorMatchingInlineSnapshot(
+      `"Failed to validate actions due to the following error: Invalid connectors: another connector"`
+    );
     expect(unsecuredSavedObjectsClient.create).not.toHaveBeenCalled();
     expect(taskManager.schedule).not.toHaveBeenCalled();
   });

@@ -1,0 +1,66 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+import React from 'react';
+import { render } from '@testing-library/react';
+import { ActionConnectorWarnings } from '.';
+
+jest.mock('../../../lib/kibana/kibana_react', () => ({
+  useKibana: jest.fn().mockReturnValue({
+    services: { http: { basePath: { prepend: jest.fn() } } },
+  }),
+}));
+describe('ActionConnectorWarnings', () => {
+  test('should not render if importedActionConnectorsCount is falsy and empty warnings array', () => {
+    const wrapper = render(
+      <ActionConnectorWarnings actionConnectorsWarnings={[]} importedActionConnectorsCount={0} />
+    );
+    expect(wrapper).toMatchSnapshot();
+    expect(wrapper.queryByTestId('actionConnectorsWarningsCallOut')).not.toBeInTheDocument();
+  });
+  test('should not render if importedActionConnectorsCount is truthy and empty warnings array', () => {
+    const wrapper = render(
+      <ActionConnectorWarnings actionConnectorsWarnings={[]} importedActionConnectorsCount={2} />
+    );
+    expect(wrapper).toMatchSnapshot();
+    expect(wrapper.queryByTestId('actionConnectorsWarningsCallOut')).not.toBeInTheDocument();
+  });
+  test('should render if 1 connectors were imported and has warning', () => {
+    const wrapper = render(
+      <ActionConnectorWarnings
+        actionConnectorsWarnings={[{ actionPath: '/', buttonLabel: '', message: '', type: '' }]}
+        importedActionConnectorsCount={1}
+      />
+    );
+    const { getByTestId } = wrapper;
+    expect(wrapper).toMatchSnapshot();
+    expect(getByTestId('actionConnectorsWarningsCallOutTitle').textContent).toBe(
+      '1 connector imported'
+    );
+    expect(getByTestId('actionConnectorsWarningsCallOutMessage').textContent).toBe(
+      '1 connector has sensitive information that requires updates, review in connectors'
+    );
+  });
+  test('should render if 2 connectors were imported and 2 have warning', () => {
+    const wrapper = render(
+      <ActionConnectorWarnings
+        actionConnectorsWarnings={[
+          { actionPath: '/', buttonLabel: '', message: '', type: '' },
+          { actionPath: '/', buttonLabel: '', message: '', type: '' },
+        ]}
+        importedActionConnectorsCount={2}
+      />
+    );
+    const { getByTestId } = wrapper;
+    expect(wrapper).toMatchSnapshot();
+    expect(getByTestId('actionConnectorsWarningsCallOutTitle').textContent).toBe(
+      '2 connectors imported'
+    );
+    expect(getByTestId('actionConnectorsWarningsCallOutMessage').textContent).toBe(
+      '2 connectors have sensitive information that requires updates, review in connectors'
+    );
+  });
+});
