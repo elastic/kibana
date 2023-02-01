@@ -22,7 +22,6 @@ import {
   removeServerGeneratedPropertiesIncludingRuleId,
   createRule,
   createLegacyRuleAction,
-  LegacyRuleWithoutServerGeneratedProperties,
 } from '../../utils';
 
 // eslint-disable-next-line import/no-default-export
@@ -182,10 +181,8 @@ export default ({ getService }: FtrProviderContext) => {
 
         // @ts-expect-error
         body.forEach((response) => {
-          const outputRule: LegacyRuleWithoutServerGeneratedProperties = getSimpleRuleOutput(
-            response.rule_id,
-            false
-          );
+          const bodyToCompare = removeServerGeneratedProperties(response);
+          const outputRule = getSimpleRuleOutput(response.rule_id, false);
           outputRule.actions = [
             {
               action_type_id: '.slack',
@@ -195,10 +192,10 @@ export default ({ getService }: FtrProviderContext) => {
                 message:
                   'Hourly\nRule {{context.rule.name}} generated {{state.signals_count}} alerts',
               },
+              uuid: bodyToCompare.actions[0].uuid,
             },
           ];
           outputRule.throttle = '1h';
-          const bodyToCompare = removeServerGeneratedProperties(response);
           expect(bodyToCompare).to.eql(outputRule);
         });
       });
