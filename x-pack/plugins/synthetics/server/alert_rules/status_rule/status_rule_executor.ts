@@ -99,6 +99,7 @@ export class StatusRuleExecutor {
       listOfLocations,
       monitorLocationMap,
       projectMonitorsCount,
+      monitorQueryIdToConfigIdMap,
     } = await processMonitors(
       this.monitors,
       this.server,
@@ -112,6 +113,7 @@ export class StatusRuleExecutor {
       allIds,
       monitorLocationMap,
       projectMonitorsCount,
+      monitorQueryIdToConfigIdMap,
     };
   }
 
@@ -124,6 +126,7 @@ export class StatusRuleExecutor {
       allIds,
       monitorLocationMap,
       projectMonitorsCount,
+      monitorQueryIdToConfigIdMap,
     } = await this.getMonitors();
 
     if (enabledMonitorQueryIds.length > 0) {
@@ -135,7 +138,8 @@ export class StatusRuleExecutor {
           from: this.previousStartedAt?.toISOString() ?? 'now-1m',
         },
         enabledMonitorQueryIds,
-        monitorLocationMap
+        monitorLocationMap,
+        monitorQueryIdToConfigIdMap
       );
 
       const downConfigs = currentStatus.downConfigs;

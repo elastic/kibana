@@ -50,7 +50,7 @@ describe('processMonitors', () => {
       allIds: [
         'aa925d91-40b0-4f8f-b695-bb9b53cd4e22',
         '7f796001-a795-4c0b-afdb-3ce74edea775',
-        '5e203f47-1261-4978-a915-cc3315d90fb1',
+        'test-project-id-default',
       ],
       disabledCount: 2,
       disabledMonitorsCount: 1,
@@ -69,6 +69,11 @@ describe('processMonitors', () => {
         ],
         'aa925d91-40b0-4f8f-b695-bb9b53cd4e22': ['US Central QA', 'US Central Staging'],
       },
+      monitorQueryIdToConfigIdMap: {
+        '7f796001-a795-4c0b-afdb-3ce74edea775': '7f796001-a795-4c0b-afdb-3ce74edea775',
+        'aa925d91-40b0-4f8f-b695-bb9b53cd4e22': 'aa925d91-40b0-4f8f-b695-bb9b53cd4e22',
+        'test-project-id-default': '5e203f47-1261-4978-a915-cc3315d90fb1',
+      },
     });
   });
 
@@ -80,7 +85,7 @@ describe('processMonitors', () => {
       allIds: [
         'aa925d91-40b0-4f8f-b695-bb9b53cd4e22',
         '7f796001-a795-4c0b-afdb-3ce74edea775',
-        '5e203f47-1261-4978-a915-cc3315d90fb1',
+        'test-project-id-default',
       ],
       disabledCount: 2,
       disabledMonitorsCount: 1,
@@ -103,6 +108,11 @@ describe('processMonitors', () => {
           'US Central Staging',
         ],
         'aa925d91-40b0-4f8f-b695-bb9b53cd4e22': ['US Central Staging', 'us_central_qa'],
+      },
+      monitorQueryIdToConfigIdMap: {
+        '7f796001-a795-4c0b-afdb-3ce74edea775': '7f796001-a795-4c0b-afdb-3ce74edea775',
+        'aa925d91-40b0-4f8f-b695-bb9b53cd4e22': 'aa925d91-40b0-4f8f-b695-bb9b53cd4e22',
+        'test-project-id-default': '5e203f47-1261-4978-a915-cc3315d90fb1',
       },
     });
   });
@@ -153,7 +163,7 @@ describe('processMonitors', () => {
       allIds: [
         'aa925d91-40b0-4f8f-b695-bb9b53cd4e22',
         '7f796001-a795-4c0b-afdb-3ce74edea775',
-        '5e203f47-1261-4978-a915-cc3315d90fb1',
+        'test-project-id-default',
       ],
       disabledCount: 2,
       disabledMonitorsCount: 1,
@@ -172,6 +182,11 @@ describe('processMonitors', () => {
         ],
         'aa925d91-40b0-4f8f-b695-bb9b53cd4e22': ['US Central Staging', 'US Central QA'],
       },
+      monitorQueryIdToConfigIdMap: {
+        '7f796001-a795-4c0b-afdb-3ce74edea775': '7f796001-a795-4c0b-afdb-3ce74edea775',
+        'aa925d91-40b0-4f8f-b695-bb9b53cd4e22': 'aa925d91-40b0-4f8f-b695-bb9b53cd4e22',
+        'test-project-id-default': '5e203f47-1261-4978-a915-cc3315d90fb1',
+      },
     });
   });
 });
@@ -188,6 +203,7 @@ const testMonitors: any = [
         { isServiceManaged: true, id: 'us_central_staging', label: 'US Central Staging' },
       ],
       id: 'aa925d91-40b0-4f8f-b695-bb9b53cd4e22',
+      config_id: 'aa925d91-40b0-4f8f-b695-bb9b53cd4e22',
     },
     references: [],
     migrationVersion: { 'synthetics-monitor': '8.6.0' },
@@ -210,6 +226,7 @@ const testMonitors: any = [
         { isServiceManaged: true, id: 'us_central_staging', label: 'US Central Staging' },
       ],
       id: '7f796001-a795-4c0b-afdb-3ce74edea775',
+      config_id: '7f796001-a795-4c0b-afdb-3ce74edea775',
     },
     references: [],
     migrationVersion: { 'synthetics-monitor': '8.6.0' },
@@ -230,7 +247,8 @@ const testMonitors: any = [
         { id: 'us_central_qa', label: 'US Central QA', isServiceManaged: true },
         { id: 'us_central_staging', label: 'US Central Staging', isServiceManaged: true },
       ],
-      id: '5e203f47-1261-4978-a915-cc3315d90fb1',
+      id: 'test-project-id-default',
+      config_id: '5e203f47-1261-4978-a915-cc3315d90fb1',
       origin: 'project',
     },
     references: [],
