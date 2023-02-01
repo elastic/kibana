@@ -9,7 +9,11 @@ import { v4 as uuidv4 } from 'uuid';
 import { getMigrations } from './migrations';
 import { SavedObjectUnsanitizedDoc } from '@kbn/core/server';
 import { migrationMocks } from '@kbn/core/server/mocks';
-import { TaskInstanceWithDeprecatedFields } from '../task';
+import {
+  TaskInstanceWithDeprecatedFields,
+  SerializedConcreteTaskInstance,
+  TaskStatus,
+} from '../task';
 
 const migrationContext = migrationMocks.createContext();
 
@@ -267,6 +271,236 @@ describe('successful migrations', () => {
       });
     });
   });
+
+  describe('8.7.0', () => {
+    const migration870 = getMigrations()['8.7.0'];
+
+    describe('moves start/end/duration in alert state to meta', () => {
+      const BaseRuleTaskState = {
+        alertInstances: {
+          alertA: {
+            state: {
+              start: '2023-01-18T14:59:57.596Z',
+              duration: '1000000',
+              stateField: '11',
+            },
+            meta: { metaField: 1 },
+          },
+          alertB: {
+            state: {
+              start: '2023-01-18T14:59:57.596Z',
+              duration: '2000000',
+              end: '2023-01-18T14:59:57.598Z',
+              stateField: '22',
+            },
+            meta: { metaField: 2 },
+          },
+        },
+        alertRecoveredInstances: {
+          alertC: {
+            state: {
+              start: '2022-01-18T14:59:57.596Z',
+              duration: '3000000',
+              stateField: '33',
+            },
+            meta: { metaField: 3 },
+          },
+          alertD: {
+            state: {
+              start: '2022-01-18T14:59:57.596Z',
+              duration: '4000000',
+              end: '2022-01-18T14:59:57.600Z',
+              stateField: '44',
+            },
+            meta: { metaField: 4 },
+          },
+        },
+      };
+
+      test('does not modify tasks that are not alerting tasks', () => {
+        const oldTask = getMockData();
+        expect(migration870(oldTask, migrationContext)).toBe(oldTask);
+      });
+
+      test('does not modify tasks that have no state', () => {
+        const oldTask = getMockStateData();
+        expect(migration870(oldTask, migrationContext)).toBe(oldTask);
+      });
+
+      test('modifies tasks that have meta, start, duration and optionally end', () => {
+        const oldTask = getMockStateData(BaseRuleTaskState);
+
+        const newTask = migration870(oldTask, migrationContext);
+
+        const newState = JSON.parse(newTask.attributes.state);
+        expect(newState).toMatchInlineSnapshot(`
+          Object {
+            "alertInstances": Object {
+              "alertA": Object {
+                "meta": Object {
+                  "duration": "1000000",
+                  "metaField": 1,
+                  "start": "2023-01-18T14:59:57.596Z",
+                },
+                "state": Object {
+                  "duration": "1000000",
+                  "start": "2023-01-18T14:59:57.596Z",
+                  "stateField": "11",
+                },
+              },
+              "alertB": Object {
+                "meta": Object {
+                  "duration": "2000000",
+                  "end": "2023-01-18T14:59:57.598Z",
+                  "metaField": 2,
+                  "start": "2023-01-18T14:59:57.596Z",
+                },
+                "state": Object {
+                  "duration": "2000000",
+                  "end": "2023-01-18T14:59:57.598Z",
+                  "start": "2023-01-18T14:59:57.596Z",
+                  "stateField": "22",
+                },
+              },
+            },
+            "alertRecoveredInstances": Object {
+              "alertC": Object {
+                "meta": Object {
+                  "duration": "3000000",
+                  "metaField": 3,
+                  "start": "2022-01-18T14:59:57.596Z",
+                },
+                "state": Object {
+                  "duration": "3000000",
+                  "start": "2022-01-18T14:59:57.596Z",
+                  "stateField": "33",
+                },
+              },
+              "alertD": Object {
+                "meta": Object {
+                  "duration": "4000000",
+                  "end": "2022-01-18T14:59:57.600Z",
+                  "metaField": 4,
+                  "start": "2022-01-18T14:59:57.596Z",
+                },
+                "state": Object {
+                  "duration": "4000000",
+                  "end": "2022-01-18T14:59:57.600Z",
+                  "start": "2022-01-18T14:59:57.596Z",
+                  "stateField": "44",
+                },
+              },
+            },
+          }
+        `);
+      });
+
+      test('modifies tasks without alertInstances', () => {
+        const state = JSON.parse(JSON.stringify(BaseRuleTaskState));
+        delete state.alertInstances;
+        delete state.alertRecoveredInstances.alertC;
+        const oldTask = getMockStateData(state);
+
+        const newTask = migration870(oldTask, migrationContext);
+
+        const newState = JSON.parse(newTask.attributes.state);
+        expect(newState).toMatchInlineSnapshot(`
+          Object {
+            "alertRecoveredInstances": Object {
+              "alertD": Object {
+                "meta": Object {
+                  "duration": "4000000",
+                  "end": "2022-01-18T14:59:57.600Z",
+                  "metaField": 4,
+                  "start": "2022-01-18T14:59:57.596Z",
+                },
+                "state": Object {
+                  "duration": "4000000",
+                  "end": "2022-01-18T14:59:57.600Z",
+                  "start": "2022-01-18T14:59:57.596Z",
+                  "stateField": "44",
+                },
+              },
+            },
+          }
+        `);
+      });
+
+      test('modifies tasks without alertRecoveredInstances', () => {
+        const state = JSON.parse(JSON.stringify(BaseRuleTaskState));
+        delete state.alertRecoveredInstances;
+        delete state.alertInstances.alertA;
+        const oldTask = getMockStateData(state);
+
+        const newTask = migration870(oldTask, migrationContext);
+
+        const newState = JSON.parse(newTask.attributes.state);
+        expect(newState).toMatchInlineSnapshot(`
+          Object {
+            "alertInstances": Object {
+              "alertB": Object {
+                "meta": Object {
+                  "duration": "2000000",
+                  "end": "2023-01-18T14:59:57.598Z",
+                  "metaField": 2,
+                  "start": "2023-01-18T14:59:57.596Z",
+                },
+                "state": Object {
+                  "duration": "2000000",
+                  "end": "2023-01-18T14:59:57.598Z",
+                  "start": "2023-01-18T14:59:57.596Z",
+                  "stateField": "22",
+                },
+              },
+            },
+          }
+        `);
+      });
+
+      test('modifies alerting tasks that do not have meta', () => {
+        const state = JSON.parse(JSON.stringify(BaseRuleTaskState));
+        delete state.alertInstances.alertA.meta;
+        delete state.alertInstances.alertB;
+        delete state.alertRecoveredInstances.alertC.meta;
+        delete state.alertRecoveredInstances.alertD;
+        const oldTask = getMockStateData(state);
+
+        const newTask = migration870(oldTask, migrationContext);
+
+        const newState = JSON.parse(newTask.attributes.state);
+        expect(newState).toMatchInlineSnapshot(`
+          Object {
+            "alertInstances": Object {
+              "alertA": Object {
+                "meta": Object {
+                  "duration": "1000000",
+                  "start": "2023-01-18T14:59:57.596Z",
+                },
+                "state": Object {
+                  "duration": "1000000",
+                  "start": "2023-01-18T14:59:57.596Z",
+                  "stateField": "11",
+                },
+              },
+            },
+            "alertRecoveredInstances": Object {
+              "alertC": Object {
+                "meta": Object {
+                  "duration": "3000000",
+                  "start": "2022-01-18T14:59:57.596Z",
+                },
+                "state": Object {
+                  "duration": "3000000",
+                  "start": "2022-01-18T14:59:57.596Z",
+                  "stateField": "33",
+                },
+              },
+            },
+          }
+        `);
+      });
+    });
+  });
 });
 
 describe('handles errors during migrations', () => {
@@ -309,7 +543,6 @@ function getMockData(
   return {
     attributes: {
       scheduledAt: new Date(),
-      state: { runs: 0, total_cleaned_up: 0 },
       runAt: new Date(),
       startedAt: new Date(),
       retryAt: new Date(),
@@ -320,6 +553,31 @@ function getMockData(
         bar: true,
       },
       ...overwrites,
+    },
+    updated_at: getUpdatedAt(),
+    id: uuidv4(),
+    type: 'task',
+  };
+}
+
+function getMockStateData(
+  state?: Record<string, unknown>
+): SavedObjectUnsanitizedDoc<SerializedConcreteTaskInstance> {
+  return {
+    attributes: {
+      scheduledAt: new Date().toISOString(),
+      runAt: new Date().toISOString(),
+      startedAt: new Date().toISOString(),
+      retryAt: new Date().toISOString(),
+      ownerId: '234',
+      taskType: 'alerting:foo',
+      schedule: { interval: '10s' },
+      params: JSON.stringify({ bar: true }),
+      id: 'some id',
+      attempts: 0,
+      status: TaskStatus.Idle,
+      traceparent: 'pappy',
+      state: JSON.stringify(state),
     },
     updated_at: getUpdatedAt(),
     id: uuidv4(),

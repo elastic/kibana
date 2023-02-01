@@ -99,10 +99,10 @@ describe('createAlertEventLogRecordObject', () => {
         group: 'group 1',
         message: 'message text here',
         namespace: 'default',
-        state: {
-          start: '1970-01-01T00:00:00.000Z',
-          end: '1970-01-01T00:05:00.000Z',
-          duration: 5,
+        meta: {
+          start: new Date('1970-01-01T00:00:00.000Z'),
+          end: new Date('1970-01-01T00:05:00.000Z'),
+          duration: '5',
         },
         savedObjects: [
           {
@@ -118,7 +118,7 @@ describe('createAlertEventLogRecordObject', () => {
       event: {
         action: 'recovered-instance',
         category: ['alerts'],
-        duration: 5,
+        duration: '5',
         end: '1970-01-01T00:05:00.000Z',
         kind: 'alert',
         start: '1970-01-01T00:00:00.000Z',
@@ -172,10 +172,10 @@ describe('createAlertEventLogRecordObject', () => {
         group: 'group 1',
         message: 'action execution start',
         namespace: 'default',
-        state: {
-          start: '1970-01-01T00:00:00.000Z',
-          end: '1970-01-01T00:05:00.000Z',
-          duration: 5,
+        meta: {
+          start: new Date('1970-01-01T00:00:00.000Z'),
+          end: new Date('1970-01-01T00:05:00.000Z'),
+          duration: '5',
         },
         savedObjects: [
           {
@@ -196,7 +196,7 @@ describe('createAlertEventLogRecordObject', () => {
       event: {
         action: 'execute-action',
         category: ['alerts'],
-        duration: 5,
+        duration: '5',
         end: '1970-01-01T00:05:00.000Z',
         kind: 'alert',
         start: '1970-01-01T00:00:00.000Z',

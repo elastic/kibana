@@ -84,8 +84,8 @@ describe('processAlerts', () => {
       updatedAlerts['3'].scheduleActions('default' as never, { foo: '1' });
       updatedAlerts['4'].scheduleActions('default' as never, { foo: '2' });
 
-      expect(newAlert1.getState()).toStrictEqual({});
-      expect(newAlert2.getState()).toStrictEqual({});
+      expect(newAlert1.getMeta()).toStrictEqual({ flappingHistory: [] });
+      expect(newAlert2.getMeta()).toStrictEqual({ flappingHistory: [] });
 
       const { newAlerts } = processAlerts({
         alerts: updatedAlerts,
@@ -99,17 +99,17 @@ describe('processAlerts', () => {
 
       expect(newAlerts).toEqual({ '1': newAlert1, '2': newAlert2 });
 
-      const newAlert1State = newAlerts['1'].getState();
-      const newAlert2State = newAlerts['2'].getState();
+      const newAlert1Meta = newAlerts['1'].getMeta();
+      const newAlert2Meta = newAlerts['2'].getMeta();
 
-      expect(newAlert1State.start).toEqual('1970-01-01T00:00:00.000Z');
-      expect(newAlert2State.start).toEqual('1970-01-01T00:00:00.000Z');
+      expect(newAlert1Meta.start).toEqual(new Date('1970-01-01T00:00:00.000Z'));
+      expect(newAlert2Meta.start).toEqual(new Date('1970-01-01T00:00:00.000Z'));
 
-      expect(newAlert1State.duration).toEqual('0');
-      expect(newAlert2State.duration).toEqual('0');
+      expect(newAlert1Meta.duration).toEqual('0');
+      expect(newAlert2Meta.duration).toEqual('0');
 
-      expect(newAlert1State.end).not.toBeDefined();
-      expect(newAlert2State.end).not.toBeDefined();
+      expect(newAlert1Meta.end).not.toBeDefined();
+      expect(newAlert2Meta.end).not.toBeDefined();
     });
   });
 
@@ -159,8 +159,14 @@ describe('processAlerts', () => {
         '2': existingAlert1,
         '3': existingAlert2,
       };
-      existingAlerts['2'].replaceState({ start: '1969-12-30T00:00:00.000Z', duration: 33000 });
-      existingAlerts['3'].replaceState({ start: '1969-12-31T07:34:00.000Z', duration: 23532 });
+      existingAlerts['2'].replaceMeta({
+        start: new Date('1969-12-30T00:00:00.000Z'),
+        duration: '33000',
+      });
+      existingAlerts['3'].replaceMeta({
+        start: new Date('1969-12-31T07:34:00.000Z'),
+        duration: '23532',
+      });
 
       const updatedAlerts = {
         ...cloneDeep(existingAlerts),
@@ -187,17 +193,17 @@ describe('processAlerts', () => {
         '3': updatedAlerts['3'],
       });
 
-      const activeAlert1State = activeAlerts['2'].getState();
-      const activeAlert2State = activeAlerts['3'].getState();
+      const activeAlert1Meta = activeAlerts['2'].getMeta();
+      const activeAlert2Meta = activeAlerts['3'].getMeta();
 
-      expect(activeAlert1State.start).toEqual('1969-12-30T00:00:00.000Z');
-      expect(activeAlert2State.start).toEqual('1969-12-31T07:34:00.000Z');
+      expect(activeAlert1Meta.start).toEqual(new Date('1969-12-30T00:00:00.000Z'));
+      expect(activeAlert2Meta.start).toEqual(new Date('1969-12-31T07:34:00.000Z'));
 
-      expect(activeAlert1State.duration).toEqual('172800000000000');
-      expect(activeAlert2State.duration).toEqual('59160000000000');
+      expect(activeAlert1Meta.duration).toEqual('172800000000000');
+      expect(activeAlert2Meta.duration).toEqual('59160000000000');
 
-      expect(activeAlert1State.end).not.toBeDefined();
-      expect(activeAlert2State.end).not.toBeDefined();
+      expect(activeAlert1Meta.end).not.toBeDefined();
+      expect(activeAlert2Meta.end).not.toBeDefined();
     });
 
     test('does not update duration in active alerts if start is not available', () => {
@@ -235,17 +241,17 @@ describe('processAlerts', () => {
         '3': updatedAlerts['3'],
       });
 
-      const activeAlert1State = activeAlerts['2'].getState();
-      const activeAlert2State = activeAlerts['3'].getState();
+      const activeAlert1Meta = activeAlerts['2'].getMeta();
+      const activeAlert2Meta = activeAlerts['3'].getMeta();
 
-      expect(activeAlert1State.start).not.toBeDefined();
-      expect(activeAlert2State.start).not.toBeDefined();
+      expect(activeAlert1Meta.start).not.toBeDefined();
+      expect(activeAlert2Meta.start).not.toBeDefined();
 
-      expect(activeAlert1State.duration).not.toBeDefined();
-      expect(activeAlert2State.duration).not.toBeDefined();
+      expect(activeAlert1Meta.duration).not.toBeDefined();
+      expect(activeAlert2Meta.duration).not.toBeDefined();
 
-      expect(activeAlert1State.end).not.toBeDefined();
-      expect(activeAlert2State.end).not.toBeDefined();
+      expect(activeAlert1Meta.end).not.toBeDefined();
+      expect(activeAlert2Meta.end).not.toBeDefined();
     });
 
     test('preserves other state fields', () => {
@@ -257,15 +263,17 @@ describe('processAlerts', () => {
         '2': existingAlert1,
         '3': existingAlert2,
       };
-      existingAlerts['2'].replaceState({
-        stateField1: 'xyz',
-        start: '1969-12-30T00:00:00.000Z',
-        duration: 33000,
+
+      existingAlerts['2'].replaceState({ stateField1: 'xyz' });
+      existingAlerts['3'].replaceState({ anotherState: true });
+
+      existingAlerts['2'].replaceMeta({
+        start: new Date('1969-12-30T00:00:00.000Z'),
+        duration: '33000',
       });
-      existingAlerts['3'].replaceState({
-        anotherState: true,
-        start: '1969-12-31T07:34:00.000Z',
-        duration: 23532,
+      existingAlerts['3'].replaceMeta({
+        start: new Date('1969-12-31T07:34:00.000Z'),
+        duration: '23532',
       });
 
       const updatedAlerts = {
@@ -295,18 +303,20 @@ describe('processAlerts', () => {
 
       const activeAlert1State = activeAlerts['2'].getState();
       const activeAlert2State = activeAlerts['3'].getState();
-
-      expect(activeAlert1State.start).toEqual('1969-12-30T00:00:00.000Z');
-      expect(activeAlert2State.start).toEqual('1969-12-31T07:34:00.000Z');
-
       expect(activeAlert1State.stateField1).toEqual('xyz');
       expect(activeAlert2State.anotherState).toEqual(true);
 
-      expect(activeAlert1State.duration).toEqual('172800000000000');
-      expect(activeAlert2State.duration).toEqual('59160000000000');
+      const activeAlert1Meta = activeAlerts['2'].getMeta();
+      const activeAlert2Meta = activeAlerts['3'].getMeta();
 
-      expect(activeAlert1State.end).not.toBeDefined();
-      expect(activeAlert2State.end).not.toBeDefined();
+      expect(activeAlert1Meta.start).toEqual(new Date('1969-12-30T00:00:00.000Z'));
+      expect(activeAlert2Meta.start).toEqual(new Date('1969-12-31T07:34:00.000Z'));
+
+      expect(activeAlert1Meta.duration).toEqual('172800000000000');
+      expect(activeAlert2Meta.duration).toEqual('59160000000000');
+
+      expect(activeAlert1Meta.end).not.toBeDefined();
+      expect(activeAlert2Meta.end).not.toBeDefined();
     });
 
     test('sets start time in active alert state if alert was previously recovered', () => {
@@ -352,17 +362,17 @@ describe('processAlerts', () => {
         Object.keys(activeAlerts).map((id) => ({ [id]: activeAlerts[id].getFlappingHistory() }))
       ).toEqual([{ '1': [true] }, { '2': [true] }, { '3': [false] }, { '4': [false] }]);
 
-      const previouslyRecoveredAlert1State = activeAlerts['1'].getState();
-      const previouslyRecoveredAlert2State = activeAlerts['2'].getState();
+      const previouslyRecoveredAlert1Meta = activeAlerts['1'].getMeta();
+      const previouslyRecoveredAlert2Meta = activeAlerts['2'].getMeta();
 
-      expect(previouslyRecoveredAlert1State.start).toEqual('1970-01-01T00:00:00.000Z');
-      expect(previouslyRecoveredAlert2State.start).toEqual('1970-01-01T00:00:00.000Z');
+      expect(previouslyRecoveredAlert1Meta.start).toEqual(new Date('1970-01-01T00:00:00.000Z'));
+      expect(previouslyRecoveredAlert2Meta.start).toEqual(new Date('1970-01-01T00:00:00.000Z'));
 
-      expect(previouslyRecoveredAlert1State.duration).toEqual('0');
-      expect(previouslyRecoveredAlert2State.duration).toEqual('0');
+      expect(previouslyRecoveredAlert1Meta.duration).toEqual('0');
+      expect(previouslyRecoveredAlert2Meta.duration).toEqual('0');
 
-      expect(previouslyRecoveredAlert1State.end).not.toBeDefined();
-      expect(previouslyRecoveredAlert2State.end).not.toBeDefined();
+      expect(previouslyRecoveredAlert1Meta.end).not.toBeDefined();
+      expect(previouslyRecoveredAlert2Meta.end).not.toBeDefined();
     });
   });
 
@@ -432,8 +442,14 @@ describe('processAlerts', () => {
         '2': recoveredAlert1,
         '3': recoveredAlert2,
       };
-      existingAlerts['2'].replaceState({ start: '1969-12-30T00:00:00.000Z', duration: 33000 });
-      existingAlerts['3'].replaceState({ start: '1969-12-31T07:34:00.000Z', duration: 23532 });
+      existingAlerts['2'].replaceMeta({
+        start: new Date('1969-12-30T00:00:00.000Z'),
+        duration: '33000',
+      });
+      existingAlerts['3'].replaceMeta({
+        start: new Date('1969-12-31T07:34:00.000Z'),
+        duration: '23532',
+      });
 
       const updatedAlerts = cloneDeep(existingAlerts);
 
@@ -451,17 +467,17 @@ describe('processAlerts', () => {
 
       expect(recoveredAlerts).toEqual({ '2': updatedAlerts['2'], '3': updatedAlerts['3'] });
 
-      const recoveredAlert1State = recoveredAlerts['2'].getState();
-      const recoveredAlert2State = recoveredAlerts['3'].getState();
+      const recoveredAlert1Meta = recoveredAlerts['2'].getMeta();
+      const recoveredAlert2Meta = recoveredAlerts['3'].getMeta();
 
-      expect(recoveredAlert1State.start).toEqual('1969-12-30T00:00:00.000Z');
-      expect(recoveredAlert2State.start).toEqual('1969-12-31T07:34:00.000Z');
+      expect(recoveredAlert1Meta.start).toEqual(new Date('1969-12-30T00:00:00.000Z'));
+      expect(recoveredAlert2Meta.start).toEqual(new Date('1969-12-31T07:34:00.000Z'));
 
-      expect(recoveredAlert1State.duration).toEqual('172800000000000');
-      expect(recoveredAlert2State.duration).toEqual('59160000000000');
+      expect(recoveredAlert1Meta.duration).toEqual('172800000000000');
+      expect(recoveredAlert2Meta.duration).toEqual('59160000000000');
 
-      expect(recoveredAlert1State.end).toEqual('1970-01-01T00:00:00.000Z');
-      expect(recoveredAlert2State.end).toEqual('1970-01-01T00:00:00.000Z');
+      expect(recoveredAlert1Meta.end).toEqual(new Date('1970-01-01T00:00:00.000Z'));
+      expect(recoveredAlert2Meta.end).toEqual(new Date('1970-01-01T00:00:00.000Z'));
     });
 
     test('does not update duration or set end in recovered alerts if start is not available', () => {
@@ -490,17 +506,17 @@ describe('processAlerts', () => {
 
       expect(recoveredAlerts).toEqual({ '2': updatedAlerts['2'], '3': updatedAlerts['3'] });
 
-      const recoveredAlert1State = recoveredAlerts['2'].getState();
-      const recoveredAlert2State = recoveredAlerts['3'].getState();
+      const recoveredAlert1Meta = recoveredAlerts['2'].getMeta();
+      const recoveredAlert2Meta = recoveredAlerts['3'].getMeta();
 
-      expect(recoveredAlert1State.start).not.toBeDefined();
-      expect(recoveredAlert2State.start).not.toBeDefined();
+      expect(recoveredAlert1Meta.start).not.toBeDefined();
+      expect(recoveredAlert2Meta.start).not.toBeDefined();
 
-      expect(recoveredAlert1State.duration).not.toBeDefined();
-      expect(recoveredAlert2State.duration).not.toBeDefined();
+      expect(recoveredAlert1Meta.duration).not.toBeDefined();
+      expect(recoveredAlert2Meta.duration).not.toBeDefined();
 
-      expect(recoveredAlert1State.end).not.toBeDefined();
-      expect(recoveredAlert2State.end).not.toBeDefined();
+      expect(recoveredAlert1Meta.end).not.toBeDefined();
+      expect(recoveredAlert2Meta.end).not.toBeDefined();
     });
 
     test('considers alert recovered if it was previously recovered and not active', () => {
@@ -737,14 +753,13 @@ describe('processAlerts', () => {
         Object {
           "1": Object {
             "meta": Object {
+              "duration": "0",
               "flappingHistory": Array [
                 true,
               ],
-            },
-            "state": Object {
-              "duration": "0",
               "start": "1970-01-01T00:00:00.000Z",
             },
+            "state": Object {},
           },
         }
       `);
@@ -752,14 +767,13 @@ describe('processAlerts', () => {
         Object {
           "1": Object {
             "meta": Object {
+              "duration": "0",
               "flappingHistory": Array [
                 true,
               ],
-            },
-            "state": Object {
-              "duration": "0",
               "start": "1970-01-01T00:00:00.000Z",
             },
+            "state": Object {},
           },
         }
       `);
@@ -825,15 +839,14 @@ describe('processAlerts', () => {
         Object {
           "1": Object {
             "meta": Object {
+              "duration": "0",
               "flappingHistory": Array [
                 false,
                 true,
               ],
-            },
-            "state": Object {
-              "duration": "0",
               "start": "1970-01-01T00:00:00.000Z",
             },
+            "state": Object {},
           },
         }
       `);
@@ -841,15 +854,14 @@ describe('processAlerts', () => {
         Object {
           "1": Object {
             "meta": Object {
+              "duration": "0",
               "flappingHistory": Array [
                 false,
                 true,
               ],
-            },
-            "state": Object {
-              "duration": "0",
               "start": "1970-01-01T00:00:00.000Z",
             },
+            "state": Object {},
           },
         }
       `);
@@ -957,12 +969,11 @@ describe('processAlerts', () => {
         Object {
           "1": Object {
             "meta": Object {
-              "flappingHistory": Array [],
-            },
-            "state": Object {
               "duration": "0",
+              "flappingHistory": Array [],
               "start": "1970-01-01T00:00:00.000Z",
             },
+            "state": Object {},
           },
           "2": Object {
             "meta": Object {
@@ -978,12 +989,11 @@ describe('processAlerts', () => {
         Object {
           "1": Object {
             "meta": Object {
-              "flappingHistory": Array [],
-            },
-            "state": Object {
               "duration": "0",
+              "flappingHistory": Array [],
               "start": "1970-01-01T00:00:00.000Z",
             },
+            "state": Object {},
           },
         }
       `);
@@ -1070,14 +1080,13 @@ describe('processAlerts', () => {
             },
             "2": Object {
               "meta": Object {
+                "duration": "0",
                 "flappingHistory": Array [
                   true,
                 ],
-              },
-              "state": Object {
-                "duration": "0",
                 "start": "1970-01-01T00:00:00.000Z",
               },
+              "state": Object {},
             },
           }
         `);
@@ -1085,14 +1094,13 @@ describe('processAlerts', () => {
           Object {
             "2": Object {
               "meta": Object {
+                "duration": "0",
                 "flappingHistory": Array [
                   true,
                 ],
-              },
-              "state": Object {
-                "duration": "0",
                 "start": "1970-01-01T00:00:00.000Z",
               },
+              "state": Object {},
             },
           }
         `);
@@ -1123,26 +1131,24 @@ describe('processAlerts', () => {
           Object {
             "1": Object {
               "meta": Object {
+                "duration": "0",
                 "flappingHistory": Array [
                   false,
                   true,
                 ],
-              },
-              "state": Object {
-                "duration": "0",
                 "start": "1970-01-01T00:00:00.000Z",
               },
+              "state": Object {},
             },
             "2": Object {
               "meta": Object {
+                "duration": "0",
                 "flappingHistory": Array [
                   true,
                 ],
-              },
-              "state": Object {
-                "duration": "0",
                 "start": "1970-01-01T00:00:00.000Z",
               },
+              "state": Object {},
             },
           }
         `);
@@ -1150,26 +1156,24 @@ describe('processAlerts', () => {
           Object {
             "1": Object {
               "meta": Object {
+                "duration": "0",
                 "flappingHistory": Array [
                   false,
                   true,
                 ],
-              },
-              "state": Object {
-                "duration": "0",
                 "start": "1970-01-01T00:00:00.000Z",
               },
+              "state": Object {},
             },
             "2": Object {
               "meta": Object {
+                "duration": "0",
                 "flappingHistory": Array [
                   true,
                 ],
-              },
-              "state": Object {
-                "duration": "0",
                 "start": "1970-01-01T00:00:00.000Z",
               },
+              "state": Object {},
             },
           }
         `);
@@ -1208,12 +1212,11 @@ describe('processAlerts', () => {
             },
             "2": Object {
               "meta": Object {
-                "flappingHistory": Array [],
-              },
-              "state": Object {
                 "duration": "0",
+                "flappingHistory": Array [],
                 "start": "1970-01-01T00:00:00.000Z",
               },
+              "state": Object {},
             },
           }
         `);
@@ -1221,12 +1224,11 @@ describe('processAlerts', () => {
           Object {
             "2": Object {
               "meta": Object {
-                "flappingHistory": Array [],
-              },
-              "state": Object {
                 "duration": "0",
+                "flappingHistory": Array [],
                 "start": "1970-01-01T00:00:00.000Z",
               },
+              "state": Object {},
             },
           }
         `);

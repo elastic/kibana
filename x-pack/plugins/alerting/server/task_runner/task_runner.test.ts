@@ -94,6 +94,26 @@ const mockUsageCountersSetup = usageCountersServiceMock.createSetupContract();
 const mockUsageCounter = mockUsageCountersSetup.createUsageCounter('test');
 const alertingEventLogger = alertingEventLoggerMock.create();
 
+const DefaultAlertMeta = {
+  duration: '0',
+  flapping: false,
+  flappingHistory: [true],
+  lastScheduledActions: {
+    date: new Date('1970-01-01T00:00:00.000Z'),
+    group: 'default',
+  },
+  start: new Date('1970-01-01T00:00:00.000Z'),
+};
+
+const DefaultAlertMetaPersisted = {
+  ...DefaultAlertMeta,
+  lastScheduledActions: {
+    date: DefaultAlertMeta.lastScheduledActions.date.toISOString(),
+    group: 'default',
+  },
+  start: DefaultAlertMeta.start.toISOString(),
+};
+
 describe('Task Runner', () => {
   let mockedTaskInstance: ConcreteTaskInstance;
   let alertingEventLoggerInitializer: RuleContextOpts;
@@ -376,7 +396,7 @@ describe('Task Runner', () => {
         generateAlertOpts({
           action: EVENT_LOG_ACTIONS.newInstance,
           group: 'default',
-          state: { start: DATE_1970, duration: '0' },
+          meta: { ...DefaultAlertMeta, pendingRecoveredCount: 0 },
         })
       );
       expect(alertingEventLogger.logAlert).toHaveBeenNthCalledWith(
@@ -384,7 +404,7 @@ describe('Task Runner', () => {
         generateAlertOpts({
           action: EVENT_LOG_ACTIONS.activeInstance,
           group: 'default',
-          state: { start: DATE_1970, duration: '0' },
+          meta: { ...DefaultAlertMeta, pendingRecoveredCount: 0 },
         })
       );
       expect(alertingEventLogger.logAction).toHaveBeenNthCalledWith(1, generateActionOpts());
@@ -460,7 +480,13 @@ describe('Task Runner', () => {
       generateAlertOpts({
         action: EVENT_LOG_ACTIONS.newInstance,
         group: 'default',
-        state: { start: DATE_1970, duration: '0' },
+        meta: {
+          start: new Date('1970-01-01T00:00:00.000Z'),
+          duration: '0',
+          flapping: false,
+          flappingHistory: [true],
+          pendingRecoveredCount: 0,
+        },
       })
     );
     expect(alertingEventLogger.logAlert).toHaveBeenNthCalledWith(
@@ -468,7 +494,13 @@ describe('Task Runner', () => {
       generateAlertOpts({
         action: EVENT_LOG_ACTIONS.activeInstance,
         group: 'default',
-        state: { start: DATE_1970, duration: '0' },
+        meta: {
+          start: new Date('1970-01-01T00:00:00.000Z'),
+          duration: '0',
+          flapping: false,
+          flappingHistory: [true],
+          pendingRecoveredCount: 0,
+        },
       })
     );
 
@@ -804,7 +836,15 @@ describe('Task Runner', () => {
       generateAlertOpts({
         action: EVENT_LOG_ACTIONS.activeInstance,
         group: 'default',
-        state: { start: DATE_1969, duration: MOCK_DURATION, bar: false },
+        meta: {
+          flapping: false,
+          flappingHistory: [false],
+          pendingRecoveredCount: 0,
+          lastScheduledActions: {
+            date: new Date('1970-01-01T00:00:00.000Z'),
+            group: 'default',
+          },
+        },
       })
     );
 
@@ -876,7 +916,15 @@ describe('Task Runner', () => {
         generateAlertOpts({
           action: EVENT_LOG_ACTIONS.activeInstance,
           group: 'default',
-          state: { bar: false },
+          meta: {
+            flapping: false,
+            flappingHistory: [false],
+            pendingRecoveredCount: 0,
+            lastScheduledActions: {
+              date: new Date('1970-01-01T00:00:00.000Z'),
+              group: 'default',
+            },
+          },
         })
       );
       expect(alertingEventLogger.logAction).toHaveBeenNthCalledWith(1, generateActionOpts({}));
@@ -960,7 +1008,7 @@ describe('Task Runner', () => {
         generateAlertOpts({
           action: EVENT_LOG_ACTIONS.newInstance,
           group: 'default',
-          state: { start: DATE_1970, duration: '0' },
+          meta: { ...DefaultAlertMeta, pendingRecoveredCount: 0 },
         })
       );
       expect(alertingEventLogger.logAlert).toHaveBeenNthCalledWith(
@@ -968,7 +1016,7 @@ describe('Task Runner', () => {
         generateAlertOpts({
           action: EVENT_LOG_ACTIONS.activeInstance,
           group: 'default',
-          state: { start: DATE_1970, duration: '0' },
+          meta: { ...DefaultAlertMeta, pendingRecoveredCount: 0 },
         })
       );
       expect(alertingEventLogger.logAction).toHaveBeenNthCalledWith(1, generateActionOpts({}));
@@ -1010,19 +1058,21 @@ describe('Task Runner', () => {
             ...mockedTaskInstance.state,
             alertInstances: {
               '1': {
-                meta: {},
-                state: {
-                  bar: false,
+                meta: {
                   start: DATE_1969,
                   duration: '80000000000',
                 },
-              },
-              '2': {
-                meta: {},
                 state: {
                   bar: false,
+                },
+              },
+              '2': {
+                meta: {
                   start: '1969-12-31T06:00:00.000Z',
                   duration: '70000000000',
+                },
+                state: {
+                  bar: false,
                 },
               },
             },
@@ -1040,7 +1090,7 @@ describe('Task Runner', () => {
         generateAlertInstance({
           id: 1,
           duration: MOCK_DURATION,
-          start: DATE_1969,
+          start: new Date(DATE_1969),
           flappingHistory: [false],
         })
       );
@@ -1082,11 +1132,12 @@ describe('Task Runner', () => {
         generateAlertOpts({
           action: EVENT_LOG_ACTIONS.recoveredInstance,
           id: '2',
-          state: {
-            bar: false,
-            start: '1969-12-31T06:00:00.000Z',
+          meta: {
+            start: new Date('1969-12-31T06:00:00.000Z'),
+            end: new Date('1970-01-01T00:00:00.000Z'),
             duration: '64800000000000',
-            end: DATE_1970,
+            flapping: false,
+            flappingHistory: [true],
           },
         })
       );
@@ -1095,7 +1146,17 @@ describe('Task Runner', () => {
         generateAlertOpts({
           action: EVENT_LOG_ACTIONS.activeInstance,
           group: 'default',
-          state: { bar: false, start: DATE_1969, duration: MOCK_DURATION },
+          meta: {
+            start: new Date('1969-12-31T00:00:00.000Z'),
+            duration: '86400000000000',
+            flapping: false,
+            flappingHistory: [false],
+            pendingRecoveredCount: 0,
+            lastScheduledActions: {
+              date: new Date('1970-01-01T00:00:00.000Z'),
+              group: 'default',
+            },
+          },
         })
       );
       expect(alertingEventLogger.logAction).toHaveBeenNthCalledWith(1, generateActionOpts({}));
@@ -1506,19 +1567,23 @@ describe('Task Runner', () => {
           ...mockedTaskInstance.state,
           alertInstances: {
             '1': {
-              meta: { lastScheduledActions: { group: 'default', date } },
-              state: {
-                bar: false,
+              meta: {
+                lastScheduledActions: { group: 'default', date },
                 start: DATE_1969,
                 duration: '80000000000',
               },
-            },
-            '2': {
-              meta: { lastScheduledActions: { group: 'default', date } },
               state: {
                 bar: false,
+              },
+            },
+            '2': {
+              meta: {
+                lastScheduledActions: { group: 'default', date },
                 start: '1969-12-31T06:00:00.000Z',
                 duration: '70000000000',
+              },
+              state: {
+                bar: false,
               },
             },
           },
@@ -1536,7 +1601,7 @@ describe('Task Runner', () => {
       generateAlertInstance({
         id: 1,
         duration: MOCK_DURATION,
-        start: DATE_1969,
+        start: new Date(DATE_1969),
         flappingHistory: [false],
         flapping: false,
       })
@@ -1556,11 +1621,11 @@ describe('Task Runner', () => {
         action: EVENT_LOG_ACTIONS.recoveredInstance,
         id: '2',
         group: 'default',
-        state: {
-          bar: false,
-          start: '1969-12-31T06:00:00.000Z',
+        meta: {
+          ...DefaultAlertMeta,
+          start: new Date('1969-12-31T06:00:00.000Z'),
+          end: new Date('1970-01-01T00:00:00.000Z'),
           duration: '64800000000000',
-          end: DATE_1970,
         },
       })
     );
@@ -1569,7 +1634,13 @@ describe('Task Runner', () => {
       generateAlertOpts({
         action: EVENT_LOG_ACTIONS.activeInstance,
         group: 'default',
-        state: { bar: false, start: DATE_1969, duration: MOCK_DURATION },
+        meta: {
+          ...DefaultAlertMeta,
+          start: new Date('1969-12-31T00:00:00.000Z'),
+          duration: '86400000000000',
+          flappingHistory: [false],
+          pendingRecoveredCount: 0,
+        },
       })
     );
 
@@ -1923,9 +1994,12 @@ describe('Task Runner', () => {
       generateAlertOpts({
         action: EVENT_LOG_ACTIONS.newInstance,
         group: 'default',
-        state: {
-          start: DATE_1970,
+        meta: {
+          start: new Date('1970-01-01T00:00:00.000Z'),
           duration: '0',
+          flapping: false,
+          flappingHistory: [true],
+          pendingRecoveredCount: 0,
         },
       })
     );
@@ -1935,9 +2009,12 @@ describe('Task Runner', () => {
         id: '2',
         action: EVENT_LOG_ACTIONS.newInstance,
         group: 'default',
-        state: {
-          start: DATE_1970,
+        meta: {
+          start: new Date('1970-01-01T00:00:00.000Z'),
           duration: '0',
+          flapping: false,
+          flappingHistory: [true],
+          pendingRecoveredCount: 0,
         },
       })
     );
@@ -1946,7 +2023,13 @@ describe('Task Runner', () => {
       generateAlertOpts({
         action: EVENT_LOG_ACTIONS.activeInstance,
         group: 'default',
-        state: { start: DATE_1970, duration: '0' },
+        meta: {
+          start: new Date('1970-01-01T00:00:00.000Z'),
+          duration: '0',
+          flapping: false,
+          flappingHistory: [true],
+          pendingRecoveredCount: 0,
+        },
       })
     );
     expect(alertingEventLogger.logAlert).toHaveBeenNthCalledWith(
@@ -1955,7 +2038,13 @@ describe('Task Runner', () => {
         action: EVENT_LOG_ACTIONS.activeInstance,
         id: '2',
         group: 'default',
-        state: { start: DATE_1970, duration: '0' },
+        meta: {
+          start: new Date('1970-01-01T00:00:00.000Z'),
+          duration: '0',
+          flapping: false,
+          flappingHistory: [true],
+          pendingRecoveredCount: 0,
+        },
       })
     );
 
@@ -1988,19 +2077,21 @@ describe('Task Runner', () => {
           ...mockedTaskInstance.state,
           alertInstances: {
             '1': {
-              meta: {},
-              state: {
-                bar: false,
+              meta: {
                 start: DATE_1969,
                 duration: '80000000000',
               },
-            },
-            '2': {
-              meta: {},
               state: {
                 bar: false,
+              },
+            },
+            '2': {
+              meta: {
                 start: '1969-12-31T06:00:00.000Z',
                 duration: '70000000000',
+              },
+              state: {
+                bar: false,
               },
             },
           },
@@ -2030,7 +2121,13 @@ describe('Task Runner', () => {
       generateAlertOpts({
         action: EVENT_LOG_ACTIONS.activeInstance,
         group: 'default',
-        state: { bar: false, start: DATE_1969, duration: MOCK_DURATION },
+        meta: {
+          start: new Date('1969-12-31T00:00:00.000Z'),
+          duration: '86400000000000',
+          flapping: false,
+          flappingHistory: [false],
+          pendingRecoveredCount: 0,
+        },
       })
     );
     expect(alertingEventLogger.logAlert).toHaveBeenNthCalledWith(
@@ -2039,7 +2136,13 @@ describe('Task Runner', () => {
         action: EVENT_LOG_ACTIONS.activeInstance,
         id: '2',
         group: 'default',
-        state: { bar: false, start: '1969-12-31T06:00:00.000Z', duration: '64800000000000' },
+        meta: {
+          start: new Date('1969-12-31T06:00:00.000Z'),
+          duration: '64800000000000',
+          flapping: false,
+          flappingHistory: [false],
+          pendingRecoveredCount: 0,
+        },
       })
     );
 
@@ -2105,7 +2208,11 @@ describe('Task Runner', () => {
       generateAlertOpts({
         action: EVENT_LOG_ACTIONS.activeInstance,
         group: 'default',
-        state: { bar: false },
+        meta: {
+          flapping: false,
+          flappingHistory: [false],
+          pendingRecoveredCount: 0,
+        },
       })
     );
     expect(alertingEventLogger.logAlert).toHaveBeenNthCalledWith(
@@ -2114,7 +2221,11 @@ describe('Task Runner', () => {
         action: EVENT_LOG_ACTIONS.activeInstance,
         id: '2',
         group: 'default',
-        state: { bar: false },
+        meta: {
+          flapping: false,
+          flappingHistory: [false],
+          pendingRecoveredCount: 0,
+        },
       })
     );
 
@@ -2135,19 +2246,21 @@ describe('Task Runner', () => {
           ...mockedTaskInstance.state,
           alertInstances: {
             '1': {
-              meta: {},
-              state: {
-                bar: false,
+              meta: {
                 start: DATE_1969,
                 duration: '80000000000',
               },
-            },
-            '2': {
-              meta: {},
               state: {
                 bar: false,
+              },
+            },
+            '2': {
+              meta: {
                 start: '1969-12-31T06:00:00.000Z',
                 duration: '70000000000',
+              },
+              state: {
+                bar: false,
               },
             },
           },
@@ -2175,7 +2288,13 @@ describe('Task Runner', () => {
       1,
       generateAlertOpts({
         action: EVENT_LOG_ACTIONS.recoveredInstance,
-        state: { bar: false, start: DATE_1969, end: DATE_1970, duration: MOCK_DURATION },
+        meta: {
+          start: new Date('1969-12-31T00:00:00.000Z'),
+          end: new Date('1970-01-01T00:00:00.000Z'),
+          duration: '86400000000000',
+          flapping: false,
+          flappingHistory: [true],
+        },
       })
     );
     expect(alertingEventLogger.logAlert).toHaveBeenNthCalledWith(
@@ -2183,11 +2302,12 @@ describe('Task Runner', () => {
       generateAlertOpts({
         action: EVENT_LOG_ACTIONS.recoveredInstance,
         id: '2',
-        state: {
-          bar: false,
-          start: '1969-12-31T06:00:00.000Z',
-          end: DATE_1970,
+        meta: {
+          start: new Date('1969-12-31T06:00:00.000Z'),
+          end: new Date('1970-01-01T00:00:00.000Z'),
           duration: '64800000000000',
+          flapping: false,
+          flappingHistory: [true],
         },
       })
     );
@@ -2219,11 +2339,11 @@ describe('Task Runner', () => {
           ...mockedTaskInstance.state,
           alertInstances: {
             '1': {
-              meta: {},
+              meta: DefaultAlertMetaPersisted,
               state: { bar: false },
             },
             '2': {
-              meta: {},
+              meta: DefaultAlertMetaPersisted,
               state: { bar: false },
             },
           },
@@ -2251,7 +2371,12 @@ describe('Task Runner', () => {
       1,
       generateAlertOpts({
         action: EVENT_LOG_ACTIONS.recoveredInstance,
-        state: { bar: false },
+        group: 'default',
+        meta: {
+          ...DefaultAlertMeta,
+          end: DefaultAlertMeta.start,
+          flappingHistory: [true, true],
+        },
       })
     );
     expect(alertingEventLogger.logAlert).toHaveBeenNthCalledWith(
@@ -2259,8 +2384,11 @@ describe('Task Runner', () => {
       generateAlertOpts({
         action: EVENT_LOG_ACTIONS.recoveredInstance,
         id: '2',
-        state: {
-          bar: false,
+        group: 'default',
+        meta: {
+          ...DefaultAlertMeta,
+          end: DefaultAlertMeta.start,
+          flappingHistory: [true, true],
         },
       })
     );
@@ -2620,11 +2748,10 @@ describe('Task Runner', () => {
               flappingHistory: [true],
               flapping: false,
               pendingRecoveredCount: 0,
-            },
-            state: {
               duration: '0',
-              start: '1970-01-01T00:00:00.000Z',
+              start: new Date(DATE_1970),
             },
+            state: {},
           },
         },
       })
@@ -2652,7 +2779,7 @@ describe('Task Runner', () => {
       generateAlertOpts({
         action: EVENT_LOG_ACTIONS.newInstance,
         group: 'default',
-        state: { start: DATE_1970, duration: '0' },
+        meta: { ...DefaultAlertMeta, pendingRecoveredCount: 0 },
       })
     );
     expect(alertingEventLogger.logAlert).toHaveBeenNthCalledWith(
@@ -2660,7 +2787,7 @@ describe('Task Runner', () => {
       generateAlertOpts({
         action: EVENT_LOG_ACTIONS.activeInstance,
         group: 'default',
-        state: { start: DATE_1970, duration: '0' },
+        meta: { ...DefaultAlertMeta, pendingRecoveredCount: 0 },
       })
     );
     expect(alertingEventLogger.logAction).toHaveBeenNthCalledWith(1, generateActionOpts({}));
@@ -2786,11 +2913,10 @@ describe('Task Runner', () => {
               flappingHistory: [true],
               flapping: false,
               pendingRecoveredCount: 0,
-            },
-            state: {
               duration: '0',
-              start: '1970-01-01T00:00:00.000Z',
+              start: new Date('1970-01-01T00:00:00.000Z'),
             },
+            state: {},
           },
           '2': {
             meta: {
@@ -2801,11 +2927,10 @@ describe('Task Runner', () => {
               flappingHistory: [true],
               flapping: false,
               pendingRecoveredCount: 0,
-            },
-            state: {
               duration: '0',
-              start: '1970-01-01T00:00:00.000Z',
+              start: new Date('1970-01-01T00:00:00.000Z'),
             },
+            state: {},
           },
         },
       })
@@ -2946,7 +3071,15 @@ describe('Task Runner', () => {
       generateAlertOpts({
         action: EVENT_LOG_ACTIONS.activeInstance,
         group: 'default',
-        state: { bar: false, start: DATE_1969, duration: MOCK_DURATION },
+        meta: {
+          flapping: false,
+          flappingHistory: [false],
+          pendingRecoveredCount: 0,
+          lastScheduledActions: {
+            date: new Date('1970-01-01T00:00:00.000Z'),
+            group: 'default',
+          },
+        },
       })
     );
 

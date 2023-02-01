@@ -214,3 +214,37 @@
     }
   }
 }
+
+{
+  "type": "doc",
+  "value": {
+    "id": "task:24faa970-928b-11ed-b5c4-27d1f241d08e",
+    "index": ".kibana_task_manager_1",
+    "source": {
+      "migrationVersion": {
+        "task": "8.4.0"
+      },
+      "task": {
+        "retryAt": "2023-01-18T16:01:28.226Z",
+        "runAt": "2023-01-18T15:01:28.226Z",
+        "startedAt": null,
+        "params": "{\"alertId\":\"24faa970-928b-11ed-b5c4-27d1f241d08e\",\"spaceId\":\"default\",\"consumer\":\"alerts\"}",
+        "ownerId": null,
+        "schedule": {
+          "interval": "1s"
+        },
+        "taskType": "alerting:.index-threshold",
+        "scope": [
+          "alerting"
+        ],
+        "state": "{\"alertInstances\":{\"host-1\":{\"state\":{\"start\":\"2023-01-18T14:59:57.596Z\",\"duration\":\"90264000000\"},\"meta\":{\"lastScheduledActions\":{\"group\":\"threshold met\",\"date\":\"2023-01-18T15:01:27.881Z\"}}},\"host-2\":{\"state\":{\"start\":\"2023-01-18T14:59:57.596Z\",\"duration\":\"90264000000\"},\"meta\":{\"lastScheduledActions\":{\"group\":\"threshold met\",\"date\":\"2023-01-18T15:01:27.889Z\"}}}},\"previousStartedAt\":\"2023-01-18T15:01:27.226Z\"}",
+        "scheduledAt": "2023-01-18T15:01:01.225Z",
+        "attempts": 0,
+        "status": "idle"
+      },
+      "references": [],
+      "type": "task",
+      "updated_at": "2023-01-18T15:01:28.257Z"
+    }
+  }
+}
