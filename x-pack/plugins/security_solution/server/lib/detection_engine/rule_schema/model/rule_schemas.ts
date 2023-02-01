@@ -40,7 +40,7 @@ import type { SanitizedRuleConfig } from '@kbn/alerting-plugin/common';
 import {
   AlertsIndex,
   AlertsIndexNamespace,
-  AlertSuppressionGroupBy,
+  AlertSuppressionCamel,
   BuildingBlockType,
   DataViewId,
   EventCategoryOverride,
@@ -86,13 +86,6 @@ import { SERVER_APP_ID } from '../../../../../common/constants';
 import { ResponseActionRuleParamsOrUndefined } from '../../../../../common/detection_engine/rule_response_actions/schemas';
 
 const nonEqlLanguages = t.keyof({ kuery: null, lucene: null });
-
-export type AlertSuppressionCamel = t.TypeOf<typeof AlertSuppressionCamel>;
-const AlertSuppressionCamel = t.exact(
-  t.type({
-    groupBy: AlertSuppressionGroupBy,
-  })
-);
 
 export const baseRuleParams = t.exact(
   t.type({
