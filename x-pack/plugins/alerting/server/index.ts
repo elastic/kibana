@@ -45,10 +45,7 @@ export type {
   RuleTagsAggregateResult,
   RuleTagsAggregationOptions,
 } from './rules_client';
-export {
-  getRuleTagsAggregation,
-  formatRuleTagsAggregationResult,
-} from './rules_client/lib';
+export { getRuleTagsAggregation, formatRuleTagsAggregationResult } from './rules_client/lib';
 export type { PublicAlert as Alert } from './alert';
 export { parseDuration, isRuleSnoozed } from './lib';
 export { getEsErrorMessage } from './lib/errors';
