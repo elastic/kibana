@@ -150,28 +150,6 @@ export function WelcomePanel(props: Props) {
             example={examples.variablesExample}
             linesOfExampleCode={9}
           />
-
-          <h4>
-            <FormattedMessage
-              id="console.welcomePage.keyboardShortcutsTitle"
-              defaultMessage="Keyboard shortcuts"
-            />
-          </h4>
-          <p>
-            <FormattedMessage
-              id="console.welcomePage.keyboardShortcutsDescription"
-              defaultMessage="For a list of keyboard shortcuts, click {helpText}."
-              values={{
-                helpText: <strong>Help</strong>,
-              }}
-            />
-          </p>
-
-          {/* Animated gif here */}
-          <img
-            src={examples.keyboardShortcutsImageUrl}
-            alt="Keyboard shortcut for auto-indenting a command"
-          />
         </EuiText>
       </EuiFlyoutBody>
       <EuiFlyoutFooter>
