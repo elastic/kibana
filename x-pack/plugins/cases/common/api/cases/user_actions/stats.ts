@@ -5,4 +5,12 @@
  * 2.0.
  */
 
-export const enterpriseSearchFeatureId = 'enterpriseSearch';
+import * as rt from 'io-ts';
+
+export const CaseUserActionStatsRt = rt.type({
+  total: rt.number,
+  total_comments: rt.number,
+  total_other_actions: rt.number,
+});
+
+export type CaseUserActionStats = rt.TypeOf<typeof CaseUserActionStatsRt>;
