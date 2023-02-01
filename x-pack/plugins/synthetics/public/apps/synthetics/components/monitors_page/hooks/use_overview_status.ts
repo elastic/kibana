@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useCallback } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useSyntheticsRefreshContext } from '../../../contexts/synthetics_refresh_context';
 import {
@@ -22,18 +22,22 @@ export function useOverviewStatus({ pageState }: { pageState: MonitorOverviewPag
   const lastRefreshRef = useRef(lastRefresh);
 
   const dispatch = useDispatch();
+  const reload = useCallback(() => {
+    dispatch(fetchOverviewStatusAction.get(pageState));
+  }, [dispatch, pageState]);
 
   useEffect(() => {
     if (lastRefresh !== lastRefreshRef.current) {
       dispatch(quietFetchOverviewStatusAction.get(pageState));
       lastRefreshRef.current = lastRefresh;
     } else {
-      dispatch(fetchOverviewStatusAction.get(pageState));
+      reload();
     }
-  }, [dispatch, lastRefresh, pageState]);
+  }, [dispatch, reload, lastRefresh, pageState]);
 
   return {
     status,
     statusError,
+    reload,
   };
 }

@@ -51,6 +51,7 @@ const initVisualizationData: {
 const style = { height: '100%', minWidth: '100px' };
 
 const LensEmbeddableComponent: React.FC<LensEmbeddableComponentProps> = ({
+  applyGlobalQueriesAndFilters = true,
   extraActions,
   extraOptions,
   getLensAttributes,
@@ -72,6 +73,7 @@ const LensEmbeddableComponent: React.FC<LensEmbeddableComponentProps> = ({
   const getGlobalQuery = inputsSelectors.globalQueryByIdSelector();
   const { searchSessionId } = useDeepEqualSelector((state) => getGlobalQuery(state, id));
   const attributes = useLensAttributes({
+    applyGlobalQueriesAndFilters,
     extraOptions,
     getLensAttributes,
     lensAttributes,

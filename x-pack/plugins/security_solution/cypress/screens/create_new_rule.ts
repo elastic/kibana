@@ -111,6 +111,8 @@ export const LOOK_BACK_TIME_TYPE =
 export const MACHINE_LEARNING_DROPDOWN_INPUT =
   '[data-test-subj="mlJobSelect"] [data-test-subj="comboBoxInput"]';
 
+export const MACHINE_LEARNING_DROPDOWN_OPTION = '[data-test-subj="comboBoxOptionsList "] button';
+
 export const MACHINE_LEARNING_TYPE = '[data-test-subj="machineLearningRuleType"]';
 
 export const MITRE_TACTIC = '.euiContextMenuItem__text';
@@ -142,7 +144,7 @@ export const RISK_OVERRIDE =
 
 export const RULES_CREATION_FORM = '[data-test-subj="stepDefineRule"]';
 
-export const RULES_CREATION_PREVIEW_BUTTON = '[data-test-subj="preview-flyout"]';
+export const RULES_CREATION_PREVIEW_BUTTON = '[data-test-subj="preview-container"]';
 
 export const RULES_CREATION_PREVIEW_REFRESH_BUTTON = '[data-test-subj="previewSubmitButton"]';
 

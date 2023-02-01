@@ -39,7 +39,9 @@ export const JourneyStepScreenshotContainer = ({
 
   const { basePath } = useContext(SyntheticsSettingsContext);
 
-  const imgPath = `${basePath}/internal/uptime/journey/screenshot/${checkGroup}/${initialStepNumber}`;
+  const imgPath = checkGroup
+    ? `${basePath}/internal/uptime/journey/screenshot/${checkGroup}/${initialStepNumber}`
+    : '';
 
   const intersection = useIntersection(intersectionRef, {
     root: null,

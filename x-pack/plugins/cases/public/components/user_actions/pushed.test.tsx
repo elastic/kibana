@@ -14,13 +14,13 @@ import { getUserAction } from '../../containers/mock';
 import { TestProviders } from '../../common/mock';
 import { createPushedUserActionBuilder } from './pushed';
 import { getMockBuilderArgs } from './mock';
+import { getCaseConnectorsMockResponse } from '../../common/mock/connectors';
 
 jest.mock('../../common/lib/kibana');
 jest.mock('../../common/navigation/hooks');
 
 describe('createPushedUserActionBuilder ', () => {
   const builderArgs = getMockBuilderArgs();
-  const caseServices = builderArgs.caseServices;
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -31,8 +31,6 @@ describe('createPushedUserActionBuilder ', () => {
     const builder = createPushedUserActionBuilder({
       ...builderArgs,
       userAction,
-      caseServices,
-      index: 0,
     });
 
     const createdUserAction = builder.build();
@@ -42,20 +40,42 @@ describe('createPushedUserActionBuilder ', () => {
       </TestProviders>
     );
 
-    expect(screen.getByText('pushed as new incident connector name')).toBeInTheDocument();
+    expect(screen.getByText('pushed as new incident My SN connector')).toBeInTheDocument();
     expect(screen.getByText('external title').closest('a')).toHaveAttribute(
       'href',
       'basicPush.com'
     );
   });
 
+  it('renders correctly if oldestUserActionPushDate is not defined', async () => {
+    const userAction = getUserAction('pushed', Actions.push_to_service);
+    const caseConnectors = getCaseConnectorsMockResponse({ oldestUserActionPushDate: undefined });
+    const builder = createPushedUserActionBuilder({
+      ...builderArgs,
+      caseConnectors,
+      userAction,
+    });
+
+    const createdUserAction = builder.build();
+    render(
+      <TestProviders>
+        <EuiCommentList comments={createdUserAction} />
+      </TestProviders>
+    );
+
+    expect(screen.getByText('pushed as new incident My SN connector')).toBeInTheDocument();
+  });
+
   it('renders correctly when updating an external service', async () => {
     const userAction = getUserAction('pushed', Actions.push_to_service);
+    const caseConnectors = getCaseConnectorsMockResponse({
+      oldestUserActionPushDate: '2023-01-16T09:46:29.813Z',
+    });
+
     const builder = createPushedUserActionBuilder({
       ...builderArgs,
+      caseConnectors,
       userAction,
-      caseServices,
-      index: 1,
     });
 
     const createdUserAction = builder.build();
@@ -65,22 +85,17 @@ describe('createPushedUserActionBuilder ', () => {
       </TestProviders>
     );
 
-    expect(screen.getByText('updated incident connector name')).toBeInTheDocument();
+    expect(screen.getByText('updated incident My SN connector')).toBeInTheDocument();
   });
 
-  it('renders the pushing indicators correctly', async () => {
-    const userAction = getUserAction('pushed', Actions.push_to_service);
+  it('shows only the top footer if it is the latest push and there is nothing to push', async () => {
+    const userAction = getUserAction('pushed', Actions.push_to_service, {
+      createdAt: '2023-01-17T09:46:29.813Z',
+    });
+
     const builder = createPushedUserActionBuilder({
       ...builderArgs,
       userAction,
-      caseServices: {
-        ...caseServices,
-        '123': {
-          ...caseServices['123'],
-          lastPushIndex: 1,
-        },
-      },
-      index: 1,
     });
 
     const createdUserAction = builder.build();
@@ -90,41 +105,99 @@ describe('createPushedUserActionBuilder ', () => {
       </TestProviders>
     );
 
-    expect(screen.getByText('Already pushed to connector name incident')).toBeInTheDocument();
-    expect(screen.getByText('Requires update to connector name incident')).toBeInTheDocument();
-  });
-
-  it('shows only the already pushed indicator if has no data to push', async () => {
-    const userAction = getUserAction('pushed', Actions.push_to_service);
-    const builder = createPushedUserActionBuilder({
-      ...builderArgs,
-      userAction,
-      caseServices: {
-        ...caseServices,
-        '123': {
-          ...caseServices['123'],
-          lastPushIndex: 1,
-          hasDataToPush: false,
-        },
-      },
-      index: 1,
-    });
-
-    const createdUserAction = builder.build();
-    render(
-      <TestProviders>
-        <EuiCommentList comments={createdUserAction} />
-      </TestProviders>
-    );
-
-    expect(screen.getByText('Already pushed to connector name incident')).toBeInTheDocument();
+    expect(screen.getByText('Already pushed to My SN connector incident')).toBeInTheDocument();
     expect(
-      screen.queryByText('Requires update to connector name incident')
+      screen.queryByText('Requires update to My SN connector incident')
+    ).not.toBeInTheDocument();
+  });
+
+  it('shows both footers if the connectors needs to be pushed and is the latest push', async () => {
+    const caseConnectors = getCaseConnectorsMockResponse({
+      needsToBePushed: true,
+    });
+
+    const userAction = getUserAction('pushed', Actions.push_to_service, {
+      createdAt: '2023-01-17T09:46:29.813Z',
+    });
+    const builder = createPushedUserActionBuilder({
+      ...builderArgs,
+      caseConnectors,
+      userAction,
+    });
+
+    const createdUserAction = builder.build();
+    render(
+      <TestProviders>
+        <EuiCommentList comments={createdUserAction} />
+      </TestProviders>
+    );
+
+    expect(screen.getByText('Already pushed to My SN connector incident')).toBeInTheDocument();
+    expect(screen.getByText('Requires update to My SN connector incident')).toBeInTheDocument();
+  });
+
+  it('does not show the footers if it is not the latest push', async () => {
+    const userAction = getUserAction('pushed', Actions.push_to_service, {
+      createdAt: '2020-01-17T09:46:29.813Z',
+    });
+
+    const builder = createPushedUserActionBuilder({
+      ...builderArgs,
+      userAction,
+    });
+
+    const createdUserAction = builder.build();
+    render(
+      <TestProviders>
+        <EuiCommentList comments={createdUserAction} />
+      </TestProviders>
+    );
+
+    expect(
+      screen.queryByText('Already pushed to My SN connector incident')
+    ).not.toBeInTheDocument();
+
+    expect(
+      screen.queryByText('Requires update to My SN connector incident')
+    ).not.toBeInTheDocument();
+  });
+
+  it('does not show the footers if latestUserActionPushDate is not defined', async () => {
+    const caseConnectors = getCaseConnectorsMockResponse({
+      needsToBePushed: true,
+      latestUserActionPushDate: undefined,
+    });
+
+    const userAction = getUserAction('pushed', Actions.push_to_service, {
+      createdAt: '2023-01-17T09:46:29.813Z',
+    });
+
+    const builder = createPushedUserActionBuilder({
+      ...builderArgs,
+      caseConnectors,
+      userAction,
+    });
+
+    const createdUserAction = builder.build();
+    render(
+      <TestProviders>
+        <EuiCommentList comments={createdUserAction} />
+      </TestProviders>
+    );
+
+    expect(
+      screen.queryByText('Already pushed to My SN connector incident')
+    ).not.toBeInTheDocument();
+
+    expect(
+      screen.queryByText('Requires update to My SN connector incident')
     ).not.toBeInTheDocument();
   });
 
   it('does not show the push information if the connector is none', async () => {
+    const caseConnectors = getCaseConnectorsMockResponse({ needsToBePushed: true });
     const userAction = getUserAction('pushed', Actions.push_to_service, {
+      createdAt: '2023-01-17T09:46:29.813Z',
       payload: {
         externalService: { connectorId: NONE_CONNECTOR_ID, connectorName: 'none connector' },
       },
@@ -132,15 +205,8 @@ describe('createPushedUserActionBuilder ', () => {
 
     const builder = createPushedUserActionBuilder({
       ...builderArgs,
+      caseConnectors,
       userAction,
-      caseServices: {
-        ...caseServices,
-        '123': {
-          ...caseServices['123'],
-          lastPushIndex: 1,
-        },
-      },
-      index: 1,
     });
 
     const createdUserAction = builder.build();
@@ -152,9 +218,11 @@ describe('createPushedUserActionBuilder ', () => {
 
     expect(screen.queryByText('pushed as new incident none connector')).not.toBeInTheDocument();
     expect(screen.queryByText('updated incident none connector')).not.toBeInTheDocument();
-    expect(screen.queryByText('Already pushed to connector name incident')).not.toBeInTheDocument();
     expect(
-      screen.queryByText('Requires update to connector name incident')
+      screen.queryByText('Already pushed to My SN connector incident')
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByText('Requires update to My SN connector incident')
     ).not.toBeInTheDocument();
   });
 });

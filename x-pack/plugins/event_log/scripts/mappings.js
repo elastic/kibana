@@ -178,6 +178,9 @@ exports.EcsCustomPropertyMappings = {
             type: 'keyword',
             ignore_above: 1024,
           },
+          space_agnostic: {
+            type: 'boolean',
+          },
         },
       },
       space_ids: {
@@ -186,6 +189,26 @@ exports.EcsCustomPropertyMappings = {
       },
       version: {
         type: 'version',
+      },
+      action: {
+        properties: {
+          name: {
+            ignore_above: 1024,
+            type: 'keyword',
+          },
+          id: {
+            type: 'keyword',
+            ignore_above: 1024,
+          },
+          execution: {
+            properties: {
+              uuid: {
+                ignore_above: 1024,
+                type: 'keyword',
+              },
+            },
+          },
+        },
       },
     },
   },

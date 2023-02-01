@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { get } from 'lodash';
+import { get, isNumber } from 'lodash';
 import { SnapshotMetricType } from '../../../../../common/inventory_models/types';
 import { InfraFormatterType } from '../../../../lib/lib';
 import {
@@ -95,7 +95,7 @@ export const createInventoryMetricFormatter =
   (metric: SnapshotMetricInput) => (val: string | number) => {
     if (SnapshotCustomMetricInputRT.is(metric)) {
       const formatter = createFormatterForMetric(metric);
-      return formatter(val);
+      return isNumber(val) ? formatter(val) : val;
     }
     const metricFormatter = get(METRIC_FORMATTERS, metric.type, METRIC_FORMATTERS.count);
     if (val == null || !metricFormatter) {

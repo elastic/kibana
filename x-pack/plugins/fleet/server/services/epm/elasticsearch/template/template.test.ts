@@ -109,6 +109,73 @@ describe('EPM template', () => {
     expect(templateWithoutHidden.data_stream.hidden).toEqual(undefined);
   });
 
+  it('adds index_template.data_stream.hidden field correctly', () => {
+    const templateIndexPattern = 'logs-nginx.access-abcd-*';
+
+    const templateWithGlobalAndDataStreamHidden = getTemplate({
+      templateIndexPattern,
+      packageName: 'nginx',
+      composedOfTemplates: [],
+      templatePriority: 200,
+      hidden: false,
+      mappings: { properties: [] },
+      registryElasticsearch: {
+        'index_template.data_stream': {
+          hidden: true,
+        },
+      },
+    });
+    expect(templateWithGlobalAndDataStreamHidden.data_stream.hidden).toEqual(true);
+
+    const templateWithDataStreamHidden = getTemplate({
+      templateIndexPattern,
+      packageName: 'nginx',
+      composedOfTemplates: [],
+      templatePriority: 200,
+      mappings: { properties: [] },
+      registryElasticsearch: {
+        'index_template.data_stream': {
+          hidden: true,
+        },
+      },
+    });
+    expect(templateWithDataStreamHidden.data_stream.hidden).toEqual(true);
+
+    const templateWithoutDataStreamHidden = getTemplate({
+      templateIndexPattern,
+      packageName: 'nginx',
+      composedOfTemplates: [],
+      templatePriority: 200,
+      hidden: true,
+      mappings: { properties: [] },
+    });
+    expect(templateWithoutDataStreamHidden.data_stream.hidden).toEqual(true);
+
+    const templateWithGlobalHiddenTrueAndDataStreamHiddenFalse = getTemplate({
+      templateIndexPattern,
+      packageName: 'nginx',
+      composedOfTemplates: [],
+      templatePriority: 200,
+      hidden: true,
+      mappings: { properties: [] },
+      registryElasticsearch: {
+        'index_template.data_stream': {
+          hidden: false,
+        },
+      },
+    });
+    expect(templateWithGlobalHiddenTrueAndDataStreamHiddenFalse.data_stream.hidden).toEqual(true);
+
+    const templateWithoutHidden = getTemplate({
+      templateIndexPattern,
+      packageName: 'nginx',
+      composedOfTemplates: [],
+      templatePriority: 200,
+      mappings: { properties: [] },
+    });
+    expect(templateWithoutHidden.data_stream.hidden).toEqual(undefined);
+  });
+
   it('tests loading base.yml', () => {
     const ymlPath = path.join(__dirname, '../../fields/tests/base.yml');
     const fieldsYML = readFileSync(ymlPath, 'utf-8');

@@ -1,5 +1,5 @@
 post:
-  summary: Unmute all alerts.
+  summary: Unmutes all alerts.
   operationId: unmuteAllAlerts
   description: >
     If the rule has its notifications snoozed indefinitely, this API cancels the snooze.
@@ -18,6 +18,12 @@ post:
   responses:
     '204':
       description: Indicates a successful call.
+    '401':
+      description: Authorization information is missing or invalid.
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/401_response.yaml'
   servers:
     - url: https://localhost:5601
 servers:

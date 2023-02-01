@@ -1280,7 +1280,7 @@
         "label": "showSaveModal",
         "description": [],
         "signature": [
-          "(saveModal: React.ReactElement<MinimalSaveModalProps, string | React.JSXElementConstructor<any>>, I18nContext: ({ children }: { children: React.ReactNode; }) => JSX.Element, Wrapper: React.FC<{}> | undefined) => void"
+          "(saveModal: React.ReactElement<MinimalSaveModalProps, string | React.JSXElementConstructor<any>>, Wrapper: React.FC<{}> | undefined) => void"
         ],
         "path": "src/plugins/saved_objects/public/save_modal/show_saved_object_save_modal.tsx",
         "deprecated": false,
@@ -1304,21 +1304,6 @@
           {
             "parentPluginId": "savedObjects",
             "id": "def-public.showSaveModal.$2",
-            "type": "Function",
-            "tags": [],
-            "label": "I18nContext",
-            "description": [],
-            "signature": [
-              "({ children }: { children: React.ReactNode; }) => JSX.Element"
-            ],
-            "path": "src/plugins/saved_objects/public/save_modal/show_saved_object_save_modal.tsx",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          },
-          {
-            "parentPluginId": "savedObjects",
-            "id": "def-public.showSaveModal.$3",
             "type": "Function",
             "tags": [],
             "label": "Wrapper",

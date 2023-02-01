@@ -34,20 +34,22 @@ import {
   updateCase,
   deleteAllCaseItems,
   superUserSpace1Auth,
-  createCaseWithConnector,
-  createConnector,
-  getServiceNowConnector,
   getConnectorMappingsFromES,
   getCase,
-  getServiceNowSimulationServer,
   createConfiguration,
   getSignalsWithES,
   delay,
   calculateDuration,
-  getRecordingServiceNowSimulatorServer,
   getComment,
   bulkCreateAttachments,
 } from '../../../../common/lib/utils';
+import {
+  getServiceNowConnector,
+  createCaseWithConnector,
+  getRecordingServiceNowSimulatorServer,
+  getServiceNowSimulationServer,
+  createConnector,
+} from '../../../../common/lib/connectors';
 import {
   globalRead,
   noKibanaPrivileges,

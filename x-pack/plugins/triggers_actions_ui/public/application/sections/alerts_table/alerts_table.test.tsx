@@ -4,43 +4,68 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React from 'react';
+import React, { useReducer } from 'react';
 
-import { render } from '@testing-library/react';
+import { fireEvent, render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 import { EcsFieldsResponse } from '@kbn/rule-registry-plugin/common/search_strategy';
-
+import { ALERT_RULE_NAME, ALERT_REASON, ALERT_FLAPPING, ALERT_STATUS } from '@kbn/rule-data-utils';
 import { AlertsTable } from './alerts_table';
-import { AlertsField, AlertsTableProps } from '../../../types';
+import { AlertsTableProps, BulkActionsState, RowSelectionState } from '../../../types';
 import { EuiButtonIcon, EuiFlexItem } from '@elastic/eui';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
+import { BulkActionsContext } from './bulk_actions/context';
+import { bulkActionsReducer } from './bulk_actions/reducer';
 
 jest.mock('@kbn/data-plugin/public');
+jest.mock('@kbn/kibana-react-plugin/public/ui_settings/use_ui_setting', () => ({
+  useUiSetting$: jest.fn((value: string) => ['0,0']),
+}));
 
 const columns = [
   {
-    id: AlertsField.name,
+    id: ALERT_RULE_NAME,
     displayAsText: 'Name',
   },
   {
-    id: AlertsField.reason,
+    id: ALERT_REASON,
     displayAsText: 'Reason',
+  },
+  {
+    id: ALERT_STATUS,
+    displayAsText: 'Alert status',
   },
 ];
 
-describe('AlertsTable', () => {
-  const alerts = [
-    {
-      [AlertsField.name]: ['one'],
-      [AlertsField.reason]: ['two'],
-    },
-    {
-      [AlertsField.name]: ['three'],
-      [AlertsField.reason]: ['four'],
-    },
-  ] as unknown as EcsFieldsResponse[];
+const alerts = [
+  {
+    [ALERT_RULE_NAME]: ['one'],
+    [ALERT_REASON]: ['two'],
+    [ALERT_STATUS]: ['active'],
+    [ALERT_FLAPPING]: [true],
+  },
+  {
+    [ALERT_RULE_NAME]: ['three'],
+    [ALERT_REASON]: ['four'],
+    [ALERT_STATUS]: ['active'],
+    [ALERT_FLAPPING]: [false],
+  },
+  {
+    [ALERT_RULE_NAME]: ['five'],
+    [ALERT_REASON]: ['six'],
+    [ALERT_STATUS]: ['recovered'],
+    [ALERT_FLAPPING]: [true],
+  },
+  {
+    [ALERT_RULE_NAME]: ['seven'],
+    [ALERT_REASON]: ['eight'],
+    [ALERT_STATUS]: ['recovered'],
+    [ALERT_FLAPPING]: [false],
+  },
+] as unknown as EcsFieldsResponse[];
 
+describe('AlertsTable', () => {
   const fetchAlertsData = {
     activePage: 0,
     alerts,
@@ -73,6 +98,15 @@ describe('AlertsTable', () => {
       jest.fn().mockImplementation((props) => {
         return `${props.colIndex}:${props.rowIndex}`;
       }),
+    useBulkActions: () => [
+      {
+        label: 'Fake Bulk Action',
+        key: 'fakeBulkAction',
+        'data-test-subj': 'fake-bulk-action',
+        disableOnQuery: false,
+        onClick: () => {},
+      },
+    ],
   };
 
   const tableProps = {
@@ -84,7 +118,6 @@ describe('AlertsTable', () => {
     pageSize: 1,
     pageSizeOptions: [1, 10, 20, 50, 100],
     leadingControlColumns: [],
-    showCheckboxes: false,
     showExpandToDetails: true,
     trailingControlColumns: [],
     alerts,
@@ -99,11 +132,29 @@ describe('AlertsTable', () => {
     browserFields: {},
   };
 
-  const AlertsTableWithLocale: React.FunctionComponent<AlertsTableProps> = (props) => (
-    <IntlProvider locale="en">
-      <AlertsTable {...props} />
-    </IntlProvider>
-  );
+  const defaultBulkActionsState = {
+    rowSelection: new Map<number, RowSelectionState>(),
+    isAllSelected: false,
+    areAllVisibleRowsSelected: false,
+    rowCount: 2,
+  };
+
+  const AlertsTableWithLocale: React.FunctionComponent<
+    AlertsTableProps & { initialBulkActionsState?: BulkActionsState }
+  > = (props) => {
+    const initialBulkActionsState = useReducer(
+      bulkActionsReducer,
+      props.initialBulkActionsState || defaultBulkActionsState
+    );
+
+    return (
+      <IntlProvider locale="en">
+        <BulkActionsContext.Provider value={initialBulkActionsState}>
+          <AlertsTable {...props} />
+        </BulkActionsContext.Provider>
+      </IntlProvider>
+    );
+  };
 
   describe('Alerts table UI', () => {
     it('should support sorting', async () => {
@@ -131,6 +182,24 @@ describe('AlertsTable', () => {
     it('should show alerts count', () => {
       const { getByTestId } = render(<AlertsTableWithLocale {...tableProps} />);
       expect(getByTestId('toolbar-alerts-count')).not.toBe(null);
+    });
+
+    it('should show alert status', () => {
+      const props = {
+        ...tableProps,
+        showAlertStatusWithFlapping: true,
+        pageSize: alerts.length,
+        alertsTableConfiguration: {
+          ...alertsTableConfiguration,
+          getRenderCellValue: undefined,
+        },
+      };
+
+      const { queryAllByTestId } = render(<AlertsTableWithLocale {...props} />);
+      expect(queryAllByTestId('alertLifecycleStatusBadge')[0].textContent).toEqual('Flapping');
+      expect(queryAllByTestId('alertLifecycleStatusBadge')[1].textContent).toEqual('Active');
+      expect(queryAllByTestId('alertLifecycleStatusBadge')[2].textContent).toEqual('Recovered');
+      expect(queryAllByTestId('alertLifecycleStatusBadge')[3].textContent).toEqual('Recovered');
     });
 
     describe('leading control columns', () => {
@@ -175,6 +244,7 @@ describe('AlertsTable', () => {
                           onClick={() => {}}
                           size="s"
                           data-test-subj="testActionColumn"
+                          aria-label="testActionLabel"
                         />
                       </EuiFlexItem>
                       <EuiFlexItem grow={false}>
@@ -184,6 +254,7 @@ describe('AlertsTable', () => {
                           onClick={() => {}}
                           size="s"
                           data-test-subj="testActionColumn2"
+                          aria-label="testActionLabel2"
                         />
                       </EuiFlexItem>
                     </>
@@ -218,6 +289,7 @@ describe('AlertsTable', () => {
                           onClick={() => {}}
                           size="s"
                           data-test-subj="testActionColumn"
+                          aria-label="testActionLabel"
                         />
                       </EuiFlexItem>
                       <EuiFlexItem grow={false}>
@@ -227,6 +299,7 @@ describe('AlertsTable', () => {
                           onClick={() => {}}
                           size="s"
                           data-test-subj="testActionColumn2"
+                          aria-label="testActionLabel2"
                         />
                       </EuiFlexItem>
                     </>
@@ -252,6 +325,79 @@ describe('AlertsTable', () => {
         const { queryByTestId } = render(<AlertsTableWithLocale {...customTableProps} />);
         expect(queryByTestId('expandColumnHeaderLabel')).toBe(null);
         expect(queryByTestId('expandColumnCellOpenFlyoutButton')).toBe(null);
+      });
+
+      describe('row loading state on action', () => {
+        let mockedFn: jest.Mock;
+        let customTableProps: AlertsTableProps;
+
+        beforeEach(() => {
+          mockedFn = jest.fn();
+          customTableProps = {
+            ...tableProps,
+            pageSize: 2,
+            alertsTableConfiguration: {
+              ...alertsTableConfiguration,
+              useActionsColumn: () => {
+                return {
+                  renderCustomActionsRow: mockedFn.mockReturnValue(
+                    <>
+                      <EuiFlexItem grow={false}>
+                        <EuiButtonIcon
+                          iconType="analyzeEvent"
+                          color="primary"
+                          onClick={() => {}}
+                          size="s"
+                          data-test-subj="testActionColumn"
+                          aria-label="testActionLabel"
+                        />
+                      </EuiFlexItem>
+                    </>
+                  ),
+                };
+              },
+            },
+          };
+        });
+
+        it('should show the row loader when callback triggered', async () => {
+          render(<AlertsTableWithLocale {...customTableProps} />);
+          fireEvent.click((await screen.findAllByTestId('testActionColumn'))[0]);
+
+          // the callback given to our clients to run when they want to update the loading state
+          mockedFn.mock.calls[0][0].setIsActionLoading(true);
+
+          expect(await screen.findAllByTestId('row-loader')).toHaveLength(1);
+          const selectedOptions = await screen.findAllByTestId('dataGridRowCell');
+
+          // first row, first column
+          expect(within(selectedOptions[0]).getByLabelText('Loading')).toBeDefined();
+          expect(within(selectedOptions[0]).queryByRole('checkbox')).not.toBeInTheDocument();
+
+          // second row, first column
+          expect(within(selectedOptions[5]).queryByLabelText('Loading')).not.toBeInTheDocument();
+          expect(within(selectedOptions[5]).getByRole('checkbox')).toBeDefined();
+        });
+
+        it('should show the row loader when callback triggered with false', async () => {
+          const initialBulkActionsState = {
+            ...defaultBulkActionsState,
+            rowSelection: new Map([[0, { isLoading: true }]]),
+          };
+
+          render(
+            <AlertsTableWithLocale
+              {...customTableProps}
+              initialBulkActionsState={initialBulkActionsState}
+            />
+          );
+          fireEvent.click((await screen.findAllByTestId('testActionColumn'))[0]);
+
+          // the callback given to our clients to run when they want to update the loading state
+          mockedFn.mock.calls[0][0].setIsActionLoading(false);
+
+          expect(screen.queryByTestId('row-loader')).not.toBeInTheDocument();
+        });
       });
     });
   });

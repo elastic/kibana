@@ -28,8 +28,6 @@ import { MapByValueInput, MapByReferenceInput } from './embeddable/types';
 import { APP_ID } from '../common/constants';
 import { registerLayerWizards } from './classes/layers/wizards/load_layer_wizards';
 
-export let goToSpecifiedPath: (path: string) => void;
-
 function setAppChrome() {
   if (!getMapsCapabilities().save) {
     getCoreChrome().setBadge({
@@ -73,8 +71,6 @@ export async function renderApp(
     AppUsageTracker: React.FC;
   }
 ) {
-  goToSpecifiedPath = (path) => history.push(path);
-
   const stateTransfer = getEmbeddableService().getStateTransfer();
 
   registerLayerWizards();
@@ -137,7 +133,7 @@ export async function renderApp(
                       const newPath = hash.substr(1);
                       return <Redirect to={newPath} />;
                     } else if (pathname === '/' || pathname === '') {
-                      return <ListPage stateTransfer={stateTransfer} />;
+                      return <ListPage history={history} stateTransfer={stateTransfer} />;
                     } else {
                       return <Redirect to="/" />;
                     }

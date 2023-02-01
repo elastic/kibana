@@ -1,0 +1,105 @@
+post:
+  summary: Runs a connector.
+  operationId: runConnector
+  description: >
+    You can use this API to test an action that involves interaction with Kibana services or integrations with third-party systems.
+    You must have `read` privileges for the **Actions and Connectors** feature in the **Management** section of the Kibana feature privileges.
+    If you use an index connector, you must also have `all`, `create`, `index`, or `write` indices privileges.
+  tags:
+    - connectors
+  parameters:
+    - $ref: '../components/headers/kbn_xsrf.yaml'
+    - $ref: '../components/parameters/connector_id.yaml'
+    - $ref: '../components/parameters/space_id.yaml'
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          title: Run connector request body properties
+          description: The properties vary depending on the connector type.
+          type: object
+          required: 
+            - params
+          properties:
+            params:
+              oneOf:
+                - $ref: '../components/schemas/run_connector_params_documents.yaml'
+                - $ref: '../components/schemas/run_connector_params_level_message.yaml'
+                - title: Subaction parameters
+                  description: Test an action that involves a subaction.
+                  oneOf:
+                    - $ref: '../components/schemas/run_connector_subaction_addevent.yaml'
+                    - $ref: '../components/schemas/run_connector_subaction_closealert.yaml'
+                    - $ref: '../components/schemas/run_connector_subaction_createalert.yaml'
+                    - $ref: '../components/schemas/run_connector_subaction_fieldsbyissuetype.yaml'
+                    - $ref: '../components/schemas/run_connector_subaction_getchoices.yaml'
+                    - $ref: '../components/schemas/run_connector_subaction_getfields.yaml'
+                    - $ref: '../components/schemas/run_connector_subaction_getincident.yaml'
+                    - $ref: '../components/schemas/run_connector_subaction_issue.yaml'
+                    - $ref: '../components/schemas/run_connector_subaction_issues.yaml'
+                    - $ref: '../components/schemas/run_connector_subaction_issuetypes.yaml'
+                    - $ref: '../components/schemas/run_connector_subaction_pushtoservice.yaml'
+                  discriminator:
+                    propertyName: subAction     
+        examples:
+          runIndexConnectorRequest:
+            $ref: '../components/examples/run_index_connector_request.yaml'
+          runJiraConnectorRequest:
+            $ref: '../components/examples/run_jira_connector_request.yaml'
+          runServerLogConnectorRequest:
+            $ref: '../components/examples/run_server_log_connector_request.yaml'
+          runServiceNowITOMConnectorRequest:
+            $ref: '../components/examples/run_servicenow_itom_connector_request.yaml'
+          runSwimlaneConnectorRequest:
+            $ref: '../components/examples/run_swimlane_connector_request.yaml'
+  responses:
+    '200':
+      description: Indicates a successful call.
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - connector_id
+              - status
+            properties:
+              connector_id:
+                type: string
+                description: The identifier for the connector.
+              data:
+                oneOf:
+                  - type: object
+                    description: Information returned from the action.
+                    additionalProperties: true
+                  - type: array
+                    description: An array of information returned from the action.
+                    items:
+                      type: object
+              status:
+                type: string
+                description: The status of the action.
+                enum:
+                  - error
+                  - ok
+          examples:
+            runIndexConnectorResponse:
+              $ref: '../components/examples/run_index_connector_response.yaml'
+            runJiraConnectorResponse:
+              $ref: '../components/examples/run_jira_connector_response.yaml'
+            runServerLogConnectorResponse:
+              $ref: '../components/examples/run_server_log_connector_response.yaml'
+            runServiceNowITOMConnectorResponse:
+              $ref: '../components/examples/run_servicenow_itom_connector_response.yaml'
+            runSwimlaneConnectorResponse:
+              $ref: '../components/examples/run_swimlane_connector_response.yaml'
+    '401':
+      description: Authorization information is missing or invalid.
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/401_response.yaml'
+  servers:
+    - url: https://localhost:5601
+servers:
+  - url: https://localhost:5601

@@ -16,7 +16,7 @@ import {
   Point2D,
   PointLike,
 } from '@kbn/mapbox-gl';
-import uuid from 'uuid/v4';
+import { v4 as uuidv4 } from 'uuid';
 import { Geometry } from 'geojson';
 import { Filter } from '@kbn/es-query';
 import { ActionExecutionContext, Action } from '@kbn/ui-actions-plugin/public';
@@ -251,7 +251,7 @@ export class TooltipControl extends Component<Props, {}> {
     const popupAnchorLocation = justifyAnchorLocation(e.lngLat, targetMbFeataure);
 
     const isLocked = true;
-    const tooltipId = uuid();
+    const tooltipId = uuidv4();
     const features = this._getTooltipFeatures(mbFeatures, isLocked, tooltipId);
     if (features.length === 0) {
       return;
@@ -293,7 +293,7 @@ export class TooltipControl extends Component<Props, {}> {
     const popupAnchorLocation = justifyAnchorLocation(e.lngLat, targetMbFeature);
 
     const isLocked = false;
-    const tooltipId = uuid();
+    const tooltipId = uuidv4();
     const features = this._getTooltipFeatures(mbFeatures, isLocked, tooltipId);
     if (features.length === 0) {
       return;

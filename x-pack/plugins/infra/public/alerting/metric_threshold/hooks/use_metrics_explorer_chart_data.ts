@@ -7,10 +7,12 @@
 
 import { DataViewBase } from '@kbn/es-query';
 import { useMemo } from 'react';
+import { MetricExpressionCustomMetric } from '../../../../common/alerting/metrics';
 import { MetricsSourceConfiguration } from '../../../../common/metrics_sources';
 import { MetricExpression } from '../types';
 import { MetricsExplorerOptions } from '../../../pages/metrics/metrics_explorer/hooks/use_metrics_explorer_options';
 import { useMetricsExplorerData } from '../../../pages/metrics/metrics_explorer/hooks/use_metrics_explorer_data';
+import { MetricExplorerCustomMetricAggregations } from '../../../../common/http_api/metrics_explorer';
 
 export const useMetricsExplorerChartData = (
   expression: MetricExpression,
@@ -20,6 +22,7 @@ export const useMetricsExplorerChartData = (
   groupBy?: string | string[]
 ) => {
   const { timeSize, timeUnit } = expression || { timeSize: 1, timeUnit: 'm' };
+
   const options: MetricsExplorerOptions = useMemo(
     () => ({
       limit: 1,
@@ -28,14 +31,26 @@ export const useMetricsExplorerChartData = (
       groupBy,
       filterQuery,
       metrics: [
-        {
-          field: expression.metric,
-          aggregation: expression.aggType,
-        },
+        expression.aggType === 'custom'
+          ? {
+              aggregation: 'custom',
+              custom_metrics:
+                expression?.customMetrics?.map(mapMetricThresholdMetricToMetricsExplorerMetric) ??
+                [],
+              equation: expression.equation,
+            }
+          : { field: expression.metric, aggregation: expression.aggType },
       ],
       aggregation: expression.aggType || 'avg',
     }),
-    [expression.aggType, expression.metric, filterQuery, groupBy]
+    [
+      expression.aggType,
+      expression.equation,
+      expression.metric,
+      expression.customMetrics,
+      filterQuery,
+      groupBy,
+    ]
   );
   const timerange = useMemo(
     () => ({
@@ -54,4 +69,20 @@ export const useMetricsExplorerChartData = (
     null,
     null
   );
+};
+
+const mapMetricThresholdMetricToMetricsExplorerMetric = (metric: MetricExpressionCustomMetric) => {
+  if (metric.aggType === 'count') {
+    return {
+      name: metric.name,
+      aggregation: 'count' as MetricExplorerCustomMetricAggregations,
+      filter: metric.filter,
+    };
+  }
+
+  return {
+    name: metric.name,
+    aggregation: metric.aggType as MetricExplorerCustomMetricAggregations,
+    field: metric.field,
+  };
 };

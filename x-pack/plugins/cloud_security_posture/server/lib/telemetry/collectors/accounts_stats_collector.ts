@@ -6,8 +6,8 @@
  */
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { Logger } from '@kbn/core/server';
-import type { SearchRequest } from '@elastic/elasticsearch/lib/api/types';
-import { calculatePostureScore } from '../../../routes/compliance_dashboard/get_stats';
+import type { MappingRuntimeFields, SearchRequest } from '@elastic/elasticsearch/lib/api/types';
+import { calculatePostureScore } from '../../../../common/utils/helpers';
 import type { CspmAccountsStats } from './types';
 import { LATEST_FINDINGS_INDEX_DEFAULT_NS } from '../../../../common/constants';
 
@@ -52,15 +52,57 @@ interface AccountEntity {
   };
 }
 
+// The runtime field help to have unique identifier for CSPM and KSPM
+export const getIdentifierRuntimeMapping = (): MappingRuntimeFields => ({
+  asset_identifier: {
+    type: 'keyword',
+    script: {
+      source: `
+        if (!doc.containsKey('rule.benchmark.posture_type')) 
+          {
+            def identifier = doc["cluster_id"].value;
+            emit(identifier);
+            return
+          }
+        else
+        {
+          if(doc["rule.benchmark.posture_type"].size() > 0)
+            {
+              def policy_template_type = doc["rule.benchmark.posture_type"].value; 
+              if (policy_template_type == "cspm")
+              {
+                def identifier = doc["cloud.account.id"].value;
+                emit(identifier);
+                return
+              }
+      
+              if (policy_template_type == "kspm")
+              {
+                def identifier = doc["cluster_id"].value;
+                emit(identifier);
+                return
+              }
+            }
+            
+            def identifier = doc["cluster_id"].value;
+            emit(identifier);
+            return
+        }
+      `,
+    },
+  },
+});
+
 const getAccountsStatsQuery = (index: string): SearchRequest => ({
   index,
+  runtime_mappings: getIdentifierRuntimeMapping(),
   query: {
     match_all: {},
   },
   aggs: {
     accounts: {
       terms: {
-        field: 'cluster_id',
+        field: 'asset_identifier',
         order: {
           _count: 'desc',
         },

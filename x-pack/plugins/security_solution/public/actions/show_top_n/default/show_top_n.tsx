@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import type { CellActionExecutionContext } from '@kbn/ui-actions-plugin/public';
-import { createAction } from '@kbn/ui-actions-plugin/public';
 import { i18n } from '@kbn/i18n';
+import type { CellAction, CellActionExecutionContext } from '@kbn/cell-actions';
 import ReactDOM, { unmountComponentAtNode } from 'react-dom';
 import React from 'react';
 
@@ -19,7 +18,7 @@ import { Router } from 'react-router-dom';
 import { KibanaContextProvider } from '../../../common/lib/kibana';
 import { APP_NAME, DEFAULT_DARK_MODE } from '../../../../common/constants';
 import type { SecurityAppStore } from '../../../common/store';
-import { isInSecurityApp } from '../../utils';
+import { fieldHasCellActions, isInSecurityApp } from '../../utils';
 import { TopNAction } from '../show_top_n_component';
 import type { StartServices } from '../../../types';
 
@@ -49,14 +48,14 @@ export const createShowTopNAction = ({
   history: H.History;
   services: StartServices;
   order?: number;
-}) => {
+}): CellAction<ShowTopNActionContext> => {
   let currentAppId: string | undefined;
 
   services.application.currentAppId$.subscribe((appId) => {
     currentAppId = appId;
   });
 
-  return createAction<ShowTopNActionContext>({
+  return {
     id: ID,
     type: ID,
     order,
@@ -65,14 +64,14 @@ export const createShowTopNAction = ({
     getDisplayNameTooltip: ({ field }) => SHOW_TOP(field.name),
     isCompatible: async ({ field }) =>
       isInSecurityApp(currentAppId) &&
-      field.name != null &&
-      field.value != null &&
+      fieldHasCellActions(field.name) &&
       !UNSUPPORTED_FIELD_TYPES.includes(field.type),
     execute: async (context) => {
+      const node = context.extraContentNodeRef?.current;
+      if (!node) return;
+
       const onClose = () => {
-        if (context.extraContentNodeRef.current !== null) {
-          unmountComponentAtNode(context.extraContentNodeRef.current);
-        }
+        unmountComponentAtNode(node);
       };
 
       const element = (
@@ -92,7 +91,7 @@ export const createShowTopNAction = ({
         </KibanaContextProvider>
       );
 
-      ReactDOM.render(element, context.extraContentNodeRef.current);
+      ReactDOM.render(element, node);
     },
-  });
+  };
 };

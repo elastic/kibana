@@ -8,7 +8,7 @@
 import { render, screen } from '@testing-library/react';
 import React from 'react';
 
-import type { Ecs } from '../../../../../../../../common/ecs';
+import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import { TestProviders } from '../../../../../../../common/mock';
 import { TableId, TimelineId } from '../../../../../../../../common/types';
 import { AlertFieldFlexGroup, DEFAULT_GAP, eventKindMatches, showWith } from '.';

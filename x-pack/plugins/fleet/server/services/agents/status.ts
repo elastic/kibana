@@ -16,6 +16,8 @@ import type {
   QueryDslQueryContainer,
 } from '@elastic/elasticsearch/lib/api/types';
 
+import { agentStatusesToSummary } from '../../../common/services';
+
 import { AGENTS_INDEX } from '../../constants';
 import type { AgentStatus } from '../../types';
 import { FleetUnauthorizedError } from '../../errors';
@@ -106,9 +108,10 @@ export async function getAgentStatusForAgentPolicy(
           },
         },
       },
+      ignore_unavailable: true,
     });
   } catch (error) {
-    logger.warn(`Error getting agent statuses: ${error}`);
+    logger.debug(`Error getting agent statuses: ${error}`);
     throw error;
   }
 
@@ -121,15 +124,8 @@ export async function getAgentStatusForAgentPolicy(
     }
   });
 
-  const combinedStatuses = {
-    online: statuses.online,
-    error: statuses.error + statuses.degraded,
-    inactive: statuses.inactive,
-    offline: statuses.offline,
-    updating: statuses.updating + statuses.enrolling + statuses.unenrolling,
-    unenrolled: statuses.unenrolled,
-  };
-
+  const { healthy: online, unhealthy: error, ...otherStatuses } = agentStatusesToSummary(statuses);
+  const combinedStatuses = { online, error, ...otherStatuses };
   return {
     ...combinedStatuses,
     /* @deprecated no agents will have other status */

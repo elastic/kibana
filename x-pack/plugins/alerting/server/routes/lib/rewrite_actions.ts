@@ -14,7 +14,7 @@ type ReqRuleAction = Omit<RuleAction, 'actionTypeId' | 'frequency'> & {
     >[K];
   };
 };
-export const rewriteActions: (
+export const rewriteActionsReq: (
   actions?: ReqRuleAction[]
 ) => Array<Omit<RuleAction, 'actionTypeId'>> = (actions) => {
   const rewriteFrequency: RewriteRequestCase<NonNullable<RuleAction['frequency']>> = ({
@@ -29,4 +29,17 @@ export const rewriteActions: (
         ...(action.frequency ? { frequency: rewriteFrequency(action.frequency) } : {}),
       } as RuleAction)
   );
+};
+
+export const rewriteActionsRes = (actions?: RuleAction[]) => {
+  const rewriteFrequency = ({ notifyWhen, ...rest }: NonNullable<RuleAction['frequency']>) => ({
+    ...rest,
+    notify_when: notifyWhen,
+  });
+  if (!actions) return [];
+  return actions.map(({ actionTypeId, frequency, ...action }) => ({
+    ...action,
+    connector_type_id: actionTypeId,
+    ...(frequency ? { frequency: rewriteFrequency(frequency) } : {}),
+  }));
 };

@@ -17,7 +17,7 @@ import {
   isSupportedEsServer,
   isNotFoundFromUnsupportedServer,
 } from '@kbn/core-elasticsearch-server-internal';
-import type { SavedObject } from '@kbn/core-saved-objects-common';
+import type { SavedObject } from '@kbn/core-saved-objects-server';
 import type {
   SavedObjectsBaseOptions,
   SavedObjectsIncrementCounterOptions,
@@ -1957,7 +1957,7 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
         ...(savedObjectNamespace && { namespace: savedObjectNamespace }),
         ...(savedObjectNamespaces && { namespaces: savedObjectNamespaces }),
         attributes: {
-          ...(await this.optionallyEncryptAttributes(type, id, options.namespace, upsert)),
+          ...(await this.optionallyEncryptAttributes(type, id, namespace, upsert)),
         },
         updated_at: time,
       });
@@ -1965,7 +1965,7 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
     }
 
     const doc = {
-      [type]: await this.optionallyEncryptAttributes(type, id, options.namespace, attributes),
+      [type]: await this.optionallyEncryptAttributes(type, id, namespace, attributes),
       updated_at: time,
       ...(Array.isArray(references) && { references }),
     };

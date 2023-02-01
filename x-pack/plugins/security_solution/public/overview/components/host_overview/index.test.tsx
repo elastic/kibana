@@ -42,6 +42,7 @@ describe('Host Summary Component', () => {
     narrowDateRange: jest.fn(),
     startDate: '2019-06-15T06:00:00.000Z',
     hostName: 'testHostName',
+    jobNameById: {},
   };
 
   beforeEach(() => {
