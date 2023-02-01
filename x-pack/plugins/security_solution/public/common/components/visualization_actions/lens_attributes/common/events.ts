@@ -22,6 +22,7 @@ export const getEventsHistogramLensAttributes: GetLensAttributes = (
         legend: {
           isVisible: true,
           position: 'left',
+          legendSize: 'xlarge',
         },
         valueLabels: 'hide',
         preferredSeriesType: 'bar_stacked',
