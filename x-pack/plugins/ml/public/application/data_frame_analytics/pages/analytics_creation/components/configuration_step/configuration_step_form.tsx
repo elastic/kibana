@@ -707,7 +707,7 @@ export const ConfigurationStepForm: FC<ConfigurationStepProps> = ({
               'xpack.ml.dataframe.analytics.create.scatterplotMatrixLabelHelpText',
               {
                 defaultMessage:
-                  'Visualizes the relationships between pairs of selected included fields.',
+                  'Visualize the relationships between pairs of selected included fields.',
               }
             )}
             fullWidth
@@ -731,7 +731,7 @@ export const ConfigurationStepForm: FC<ConfigurationStepProps> = ({
           })}
           helpText={i18n.translate('xpack.ml.dataframe.analytics.create.trainingPercentHelpText', {
             defaultMessage:
-              'Defines the percentage of eligible documents that will be used for training.',
+              'Define the percentage of eligible documents that will be used for training.',
           })}
         >
           <EuiRange
