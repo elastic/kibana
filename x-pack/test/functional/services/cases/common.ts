@@ -121,14 +121,13 @@ export function CasesCommonServiceProvider({ getService, getPageObject }: FtrPro
 
       await header.waitUntilLoadingHasFinished();
     },
-    
+
     async filterCaseByStatusFromModal(status: CaseStatuses) {
       await testSubjects.click('case-status-filter');
 
       await header.waitUntilLoadingHasFinished();
 
       await testSubjects.click(`case-status-filter-${status}`);
-
-    }
+    },
   };
 }
