@@ -25,6 +25,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         formula: `count() + average(bytes)`,
       });
 
+      expect(await PageObjects.lens.getErrorCount()).to.eql(0);
       const data = await PageObjects.lens.getCurrentChartDebugState('xyVisChart');
       expect(data).to.be.ok();
     });
