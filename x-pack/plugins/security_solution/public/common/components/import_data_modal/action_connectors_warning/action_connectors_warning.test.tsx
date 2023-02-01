@@ -28,7 +28,7 @@ describe('ActionConnectorWarnings', () => {
     expect(wrapper).toMatchSnapshot();
     expect(wrapper.queryByTestId('actionConnectorsWarningsCallOut')).not.toBeInTheDocument();
   });
-  test('should render if 1 connectors were imported and has warning', () => {
+  test('should render if 1 connectors were imported and use the warning message with the correct imported number', () => {
     const wrapper = render(
       <ActionConnectorWarnings
         actionConnectorsWarnings={[
@@ -51,7 +51,7 @@ describe('ActionConnectorWarnings', () => {
       '1 connector has sensitive information that requires updates. review in connectors'
     );
   });
-  test('should render if 2 connectors were imported and 2 have warning', () => {
+  test('should render if 2 connectors were imported and use the warning message with the correct imported number', () => {
     const wrapper = render(
       <ActionConnectorWarnings
         actionConnectorsWarnings={[

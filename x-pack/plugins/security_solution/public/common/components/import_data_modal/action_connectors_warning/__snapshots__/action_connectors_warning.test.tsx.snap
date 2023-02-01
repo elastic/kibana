@@ -122,7 +122,7 @@ Object {
 }
 `;
 
-exports[`ActionConnectorWarnings should render if 1 connectors were imported and has warning 1`] = `
+exports[`ActionConnectorWarnings should render if 1 connectors were imported and use the warning message with the correct imported number 1`] = `
 Object {
   "asFragment": [Function],
   "baseElement": <body>
@@ -273,7 +273,7 @@ Object {
 }
 `;
 
-exports[`ActionConnectorWarnings should render if 2 connectors were imported and 2 have warning 1`] = `
+exports[`ActionConnectorWarnings should render if 2 connectors were imported and use the warning message with the correct imported number 1`] = `
 Object {
   "asFragment": [Function],
   "baseElement": <body>
