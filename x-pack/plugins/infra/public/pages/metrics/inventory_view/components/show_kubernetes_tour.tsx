@@ -29,7 +29,7 @@ export const ShowKubernetesTour = ({ children }: Props) => {
     <div>
       <EuiTourStep
         content={
-          <EuiText data-test-subj="infra-kubernetesTour-text">
+          <EuiText size="s" color="subdued" data-test-subj="infra-kubernetesTour-text">
             {i18n.translate('xpack.infra.homePage.kubernetesTour.text', {
               defaultMessage:
                 'Click here to see your infrastructure in different ways, including Kubernetes pods.',
@@ -37,7 +37,7 @@ export const ShowKubernetesTour = ({ children }: Props) => {
           </EuiText>
         }
         isStepOpen={isTourOpen}
-        maxWidth={260}
+        maxWidth={350}
         onFinish={() => setIsTourOpen(false)}
         step={1}
         stepsTotal={1}

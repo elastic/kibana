@@ -13,7 +13,6 @@ import { ShowKubernetesTour } from './show_kubernetes_tour';
 interface Props {
   'data-test-subj'?: string;
   label: string;
-  onLabelClick?: () => void;
   onClick: () => void;
   theme: EuiTheme | undefined;
   children: ReactNode;
