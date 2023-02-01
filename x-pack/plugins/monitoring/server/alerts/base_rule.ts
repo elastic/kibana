@@ -265,6 +265,7 @@ export class BaseRule {
   ) {
     const currentUTC = +new Date();
     // for each cluster filter the nodes that belong to this cluster
+
     for (const cluster of clusters) {
       const nodes = data.filter((node) => node.clusterUuid === cluster.clusterUuid);
       if (!nodes.length) {

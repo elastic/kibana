@@ -129,10 +129,13 @@ export interface AlertUiState {
   triggeredMS: number;
 }
 
-export interface AlertDataQualityState extends AlertNodeState {}
+export interface AlertDataQualityState extends AlertNodeState {
+  unallowedValues: number;
+}
 
 export interface AlertDataQualityStats {
   unallowedValues: number;
+  indexName: string;
   clusterUuid: string;
 }
 

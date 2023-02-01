@@ -50,6 +50,7 @@ import {
   RULE_MISSING_MONITORING_DATA,
   RULE_CCR_READ_EXCEPTIONS,
   RULE_LARGE_SHARD_SIZE,
+  RULE_DATA_QUALITY,
 } from '../../../../common/constants';
 import { AlertsBadge } from '../../../alerts/badge';
 import { shouldShowAlertBadge } from '../../../alerts/lib/should_show_alert_badge';
@@ -166,6 +167,7 @@ const OVERVIEW_PANEL_RULES = [
   RULE_CLUSTER_HEALTH,
   RULE_LICENSE_EXPIRATION,
   RULE_CCR_READ_EXCEPTIONS,
+  RULE_DATA_QUALITY,
 ];
 
 const NODES_PANEL_RULES = [

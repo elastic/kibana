@@ -11,15 +11,8 @@ import { ElasticsearchClient } from '@kbn/core/server';
 import { Alert } from '@kbn/alerting-plugin/server';
 import { RawAlertInstance, SanitizedRule } from '@kbn/alerting-plugin/common';
 import { parseDuration } from '@kbn/alerting-plugin/common/parse_duration';
-import {
-  IndicesGetMappingIndexMappingRecord,
-  MsearchRequestItem,
-} from '@elastic/elasticsearch/lib/api/types';
-import * as t from 'io-ts';
-import {
-  MsearchMultisearchHeader,
-  MsearchMultisearchBody,
-} from '@elastic/elasticsearch/lib/api/types';
+import { IndicesGetMappingIndexMappingRecord } from '@elastic/elasticsearch/lib/api/types';
+
 import { BaseRule } from './base_rule';
 import {
   AlertData,
@@ -39,112 +32,7 @@ import { ROUNDED_FLOAT } from '../../common/formatting';
 import { AlertMessageTokenType, AlertSeverity } from '../../common/enums';
 import { AlertingDefaults, createLink } from './alert_helpers';
 import { Globals } from '../static_globals';
-
-// TODO move all this to separate files
-export const AllowedValues = t.array(
-  t.partial({
-    description: t.string,
-    name: t.string,
-  })
-);
-
-export type AllowedValuesInputs = t.TypeOf<typeof AllowedValues>;
-
-export const GetUnallowedFieldValuesBody = t.array(
-  t.type({
-    indexName: t.string,
-    indexFieldName: t.string,
-    allowedValues: AllowedValues,
-    from: t.string,
-    to: t.string,
-  })
-);
-
-export type GetUnallowedFieldValuesInputs = t.TypeOf<typeof GetUnallowedFieldValuesBody>;
-
-export const getMSearchRequestHeader = (indexName: string): MsearchMultisearchHeader => ({
-  expand_wildcards: ['open'],
-  index: indexName,
-});
-
-export const getMSearchRequestBody = ({
-  indexFieldName,
-  allowedValues,
-  from,
-  to,
-}: {
-  indexFieldName: string;
-  allowedValues: AllowedValuesInputs;
-  from: string;
-  to: string;
-}): MsearchMultisearchBody => ({
-  aggregations: {
-    unallowedValues: {
-      terms: {
-        field: indexFieldName,
-        order: {
-          _count: 'desc',
-        },
-      },
-    },
-  },
-  query: {
-    bool: {
-      filter: [
-        {
-          bool: {
-            must: [],
-            filter: [],
-            should: [],
-            must_not:
-              allowedValues.length > 0
-                ? [
-                    {
-                      bool: {
-                        should: allowedValues.map(({ name: allowedValue }) => ({
-                          match_phrase: {
-                            [indexFieldName]: allowedValue,
-                          },
-                        })),
-                        minimum_should_match: 1,
-                      },
-                    },
-                  ]
-                : [],
-          },
-        },
-        {
-          range: {
-            '@timestamp': {
-              gte: from,
-              lte: to,
-            },
-          },
-        },
-      ],
-    },
-  },
-  runtime_mappings: {},
-  size: 0,
-});
-
-export const getUnallowedFieldValues = (
-  esClient: ElasticsearchClient,
-  items: GetUnallowedFieldValuesInputs
-) => {
-  const searches: MsearchRequestItem[] = items.reduce<MsearchRequestItem[]>(
-    (acc, { indexName, indexFieldName, allowedValues, from, to }) =>
-      acc.concat([
-        getMSearchRequestHeader(indexName),
-        getMSearchRequestBody({ indexFieldName, allowedValues, from, to }),
-      ]),
-    []
-  );
-
-  return esClient.msearch({
-    searches,
-  });
-};
+import { runDataQualityCheck } from './data_quality/run_data_quality_check';
 
 export const fetchMappings = async (
   client: ElasticsearchClient,
@@ -155,9 +43,7 @@ export const fetchMappings = async (
     index: indexName,
   });
 
-// END files TODO
-
-async function fetchKibanaNodeDataQuality(
+async function fetchDataQuality(
   esClient: ElasticsearchClient,
   clusters: AlertCluster[],
   startMs: number,
@@ -166,13 +52,25 @@ async function fetchKibanaNodeDataQuality(
   filterQuery: string | undefined
 ): Promise<AlertDataQualityStats[]> {
   const { indices = {} } = await esClient.indices.stats();
-  console.log('indices found', Object.keys(indices));
 
-  // TODO fetch allowed values
-  // TODO use Andrew's APIs here for each index
+  const cluster = clusters[0];
 
-  // 1. find the relevant code
-  throw new Error('Function not implemented.');
+  const checkResults = await runDataQualityCheck(
+    esClient,
+    Object.keys(indices),
+    `${startMs}`,
+    `${endMs}`
+  );
+
+  const results: AlertDataQualityStats[] = checkResults.map(([indexName, fieldCheckSummary]) => {
+    return {
+      indexName,
+      unallowedValues: fieldCheckSummary.length,
+      clusterUuid: cluster.clusterUuid,
+    };
+  });
+
+  return results;
 }
 
 export class DataQualityRule extends BaseRule {
@@ -180,7 +78,7 @@ export class DataQualityRule extends BaseRule {
     super(sanitizedRule, {
       id: RULE_DATA_QUALITY,
       name: RULE_DETAILS[RULE_DATA_QUALITY].label,
-      accessorKey: 'rulesFailure',
+      accessorKey: 'dataQuality',
       defaultParams: {
         threshold: 1,
         duration: '1m',
@@ -188,12 +86,9 @@ export class DataQualityRule extends BaseRule {
       actionVariables: [
         {
           name: 'cluster',
-          description: i18n.translate(
-            'xpack.monitoring.alerts.rulesFailures.actionVariables.node',
-            {
-              defaultMessage: 'The cluster reporting rules falures.',
-            }
-          ),
+          description: i18n.translate('xpack.monitoring.alerts.dataQuality.actionVariables.node', {
+            defaultMessage: 'The cluster reporting data quality issues.',
+          }),
         },
         ...Object.values(AlertingDefaults.ALERT_TYPE.context),
       ],
@@ -208,7 +103,7 @@ export class DataQualityRule extends BaseRule {
     const duration = parseDuration(params.duration);
     const endMs = +new Date();
     const startMs = endMs - duration;
-    const stats = await fetchKibanaNodeDataQuality(
+    const stats = await fetchDataQuality(
       esClient,
       clusters,
       startMs,
@@ -216,9 +111,12 @@ export class DataQualityRule extends BaseRule {
       Globals.app.config.ui.max_bucket_size,
       params.filterQuery
     );
+
+    const [firstCluster] = clusters;
+
     return stats.map((stat) => {
       return {
-        clusterUuid: stat.clusterUuid,
+        clusterUuid: firstCluster.clusterUuid,
         shouldFire: stat.unallowedValues > 0,
         severity: AlertSeverity.Warning,
         meta: stat,
@@ -241,12 +139,11 @@ export class DataQualityRule extends BaseRule {
     };
   }
 
-  // TODO update texts here
   protected getUiMessage(alertState: AlertState, item: AlertData): AlertMessage {
     const stat = item.meta as AlertDataQualityStats;
     return {
-      text: i18n.translate('xpack.monitoring.alerts.rulesFailures.ui.firingMessage', {
-        defaultMessage: `Cluster {clusterUuid} is reporting unallowed values of {unallowedValues}% at #absolute`,
+      text: i18n.translate('xpack.monitoring.alerts.dataQuality.ui.firingMessage', {
+        defaultMessage: `Cluster {clusterUuid} is reporting {unallowedValues} unallowed values at #absolute`,
         values: {
           clusterUuid: stat.clusterUuid,
           unallowedValues: numeral(stat.unallowedValues).format(ROUNDED_FLOAT),
@@ -254,16 +151,17 @@ export class DataQualityRule extends BaseRule {
       }),
       nextSteps: [
         createLink(
-          i18n.translate('xpack.monitoring.alerts.rulesFailures.ui.nextSteps.hotThreads', {
-            defaultMessage: '#start_linkCheck hot threads#end_link',
+          i18n.translate('xpack.monitoring.alerts.dataQuality.ui.nextSteps.hotThreads', {
+            defaultMessage:
+              '#start_linkInvestigate data quality using dedicated dashboard#end_link',
           }),
-          `{elasticWebsiteUrl}guide/en/elasticsearch/reference/{docLinkVersion}/cluster-nodes-hot-threads.html`
+          `security/data_quality`
         ),
         createLink(
-          i18n.translate('xpack.monitoring.alerts.rulesFailures.ui.nextSteps.runningTasks', {
-            defaultMessage: '#start_linkCheck long running tasks#end_link',
+          i18n.translate('xpack.monitoring.alerts.dataQuality.ui.nextSteps.hotThreads', {
+            defaultMessage: '#start_linkRead about Elastic Common Schema#end_link',
           }),
-          `{elasticWebsiteUrl}guide/en/elasticsearch/reference/{docLinkVersion}/tasks.html`
+          `{elasticWebsiteUrl}guide/en/ecs/{docLinkVersion}/ecs-reference.html`
         ),
       ],
       tokens: [
@@ -284,7 +182,6 @@ export class DataQualityRule extends BaseRule {
     };
   }
 
-  // TODO update texts here
   protected executeActions(
     instance: Alert,
     { alertStates }: AlertInstanceState,
@@ -298,11 +195,11 @@ export class DataQualityRule extends BaseRule {
     if (!firingNode || !firingNode.ui.isFiring) {
       return;
     }
-    const shortActionText = i18n.translate('xpack.monitoring.alerts.rulesFailures.shortAction', {
-      defaultMessage: 'Verify cluster rules.',
+    const shortActionText = i18n.translate('xpack.monitoring.alerts.dataQuality.shortAction', {
+      defaultMessage: 'Verify cluster data quality.',
     });
-    const fullActionText = i18n.translate('xpack.monitoring.alerts.rulesFailures.fullAction', {
-      defaultMessage: 'Verify cluster rules',
+    const fullActionText = i18n.translate('xpack.monitoring.alerts.dataQuality.fullAction', {
+      defaultMessage: 'Verify cluster data quality',
     });
 
     const ccs = firingNode.ccs;
@@ -313,9 +210,9 @@ export class DataQualityRule extends BaseRule {
     );
     const action = `[${fullActionText}](${globalStateLink})`;
     const internalShortMessage = i18n.translate(
-      'xpack.monitoring.alerts.rulesFailures.firing.internalShortMessage',
+      'xpack.monitoring.alerts.dataQuality.firing.internalShortMessage',
       {
-        defaultMessage: `Rules failures is firing in cluster: {clusterName}. {shortActionText}`,
+        defaultMessage: `Data quality is firing in cluster: {clusterName}. {shortActionText}`,
         values: {
           clusterName: cluster.clusterName,
           shortActionText,
@@ -323,9 +220,9 @@ export class DataQualityRule extends BaseRule {
       }
     );
     const internalFullMessage = i18n.translate(
-      'xpack.monitoring.alerts.rulesFailures.firing.internalFullMessage',
+      'xpack.monitoring.alerts.dataQuality.firing.internalFullMessage',
       {
-        defaultMessage: `Rules failures alert is firing in cluster: {clusterName}. {action}`,
+        defaultMessage: `Data quality alert is firing in cluster: {clusterName}. {action}`,
         values: {
           clusterName: cluster.clusterName,
           action,
