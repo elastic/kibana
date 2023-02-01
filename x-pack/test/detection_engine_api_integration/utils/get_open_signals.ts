@@ -21,9 +21,10 @@ export const getOpenSignals = async (
   es: Client,
   rule: RuleResponse,
   status: RuleExecutionStatus = RuleExecutionStatus.succeeded,
-  size?: number
+  size?: number,
+  afterDate?: Date
 ) => {
-  await waitForRuleSuccessOrStatus(supertest, log, rule.id, status);
+  await waitForRuleSuccessOrStatus(supertest, log, rule.id, status, afterDate);
   // Critically important that we wait for rule success AND refresh the write index in that order before we
   // assert that no signals were created. Otherwise, signals could be written but not available to query yet
   // when we search, causing tests that check that signals are NOT created to pass when they should fail.

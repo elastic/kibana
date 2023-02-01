@@ -11,8 +11,10 @@ import { Status } from '../../../../../common/types/api';
 
 import {
   EnterpriseSearchEngine,
+  EnterpriseSearchEngineDetails,
   EnterpriseSearchEnginesResponse,
 } from '../../../../../common/types/engines';
+import { Page } from '../../../../../common/types/pagination';
 
 import { Actions } from '../../../shared/api_logic/create_api_logic';
 
@@ -26,13 +28,13 @@ import {
   FetchEnginesAPILogic,
 } from '../../api/engines/fetch_engines_api_logic';
 
-import { DEFAULT_META, Meta, updateMetaPageIndex } from './types';
+import { DEFAULT_META, updateMetaPageIndex } from './types';
 
 interface EuiBasicTableOnChange {
   page: { index: number };
 }
 
-type EnginesListActions = Pick<
+export type EnginesListActions = Pick<
   Actions<EnginesListAPIArguments, EnterpriseSearchEnginesResponse>,
   'apiError' | 'apiSuccess' | 'makeRequest'
 > & {
@@ -45,10 +47,13 @@ type EnginesListActions = Pick<
   fetchEngines(): void;
 
   onPaginate(args: EuiBasicTableOnChange): { pageNumber: number };
-  openDeleteEngineModal: (engine: EnterpriseSearchEngine) => { engine: EnterpriseSearchEngine };
+  openDeleteEngineModal: (engine: EnterpriseSearchEngine | EnterpriseSearchEngineDetails) => {
+    engine: EnterpriseSearchEngine;
+  };
   openEngineCreate(): void;
   setSearchQuery(searchQuery: string): { searchQuery: string };
 };
+
 interface EngineListValues {
   createEngineFlyoutOpen: boolean;
   data: typeof FetchEnginesAPILogic.values.data;
@@ -58,8 +63,8 @@ interface EngineListValues {
   isDeleteLoading: boolean;
   isDeleteModalVisible: boolean;
   isLoading: boolean;
-  meta: Meta;
-  parameters: { meta: Meta; searchQuery?: string }; // Added this variable to store to the search Query value as well
+  meta: Page;
+  parameters: { meta: Page; searchQuery?: string }; // Added this variable to store to the search Query value as well
   results: EnterpriseSearchEngine[]; // stores engine list value from data
   searchQuery: string;
   status: typeof FetchEnginesAPILogic.values.status;

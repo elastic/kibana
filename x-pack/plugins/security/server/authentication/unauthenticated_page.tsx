@@ -10,6 +10,7 @@ import { EuiButton } from '@elastic/eui/lib/components/button';
 import React from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 
+import type { CustomBranding } from '@kbn/core-custom-branding-common';
 import type { IBasePath } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -20,9 +21,10 @@ interface Props {
   originalURL: string;
   buildNumber: number;
   basePath: IBasePath;
+  customBranding: CustomBranding;
 }
 
-export function UnauthenticatedPage({ basePath, originalURL, buildNumber }: Props) {
+export function UnauthenticatedPage({ basePath, originalURL, buildNumber, customBranding }: Props) {
   return (
     <PromptPage
       buildNumber={buildNumber}
@@ -46,6 +48,7 @@ export function UnauthenticatedPage({ basePath, originalURL, buildNumber }: Prop
           />
         </EuiButton>,
       ]}
+      customBranding={customBranding}
     />
   );
 }

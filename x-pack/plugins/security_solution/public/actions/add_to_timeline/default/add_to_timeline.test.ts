@@ -71,7 +71,7 @@ describe('Default createAddToTimelineAction', () => {
               and: [],
               enabled: true,
               excluded: false,
-              id: 'event-details-value-default-draggable-timeline-1-user_name-0-the-value',
+              id: 'event-field-default-timeline-1-user_name-0-the-value',
               kqlQuery: '',
               name: 'user.name',
               queryMatch: {

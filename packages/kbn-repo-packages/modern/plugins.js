@@ -18,7 +18,7 @@ function getPluginSearchPaths({ rootDir }) {
 
 /**
  * @param {import('./types').PluginSelector} selector
- * @param {import('./types').PluginTypeInfo} type
+ * @param {import('./types').PluginCategoryInfo} type
  */
 function matchType(selector, type) {
   if (!type.oss && selector.oss) {
@@ -79,9 +79,9 @@ function getPluginPackagesFilter(selector = {}) {
    * @returns {pkg is import('./types').PluginPackage}
    */
   return (pkg) =>
-    pkg.isPlugin &&
+    pkg.isPlugin() &&
     matchParentDirsLimit(selector, pkg.directory) &&
-    (matchType(selector, pkg.getPlguinType()) ||
+    (matchType(selector, pkg.getPluginCategories()) ||
       matchPluginPaths(selector, pkg.directory) ||
       matchPluginParentDirs(selector, pkg.directory));
 }
@@ -99,11 +99,11 @@ function getDistributablePacakgesFilter() {
       return false;
     }
 
-    if (!pkg.isPlugin) {
+    if (!pkg.isPlugin()) {
       return true;
     }
 
-    const type = pkg.getPlguinType();
+    const type = pkg.getPluginCategories();
     return !(type.example || type.testPlugin);
   };
 }

@@ -22,7 +22,7 @@ import { checkMlNodesAvailable } from '../../../ml_nodes_check/check_ml_nodes';
 import { EditFilterList } from '../../../settings/filter_lists';
 import { NavigateToPath } from '../../../contexts/kibana';
 
-import { MlRoute, PageLoader, PageProps } from '../../router';
+import { createPath, MlRoute, PageLoader, PageProps } from '../../router';
 import { useResolver } from '../../use_resolver';
 import { getBreadcrumbWithUrlForApp } from '../../breadcrumbs';
 
@@ -39,7 +39,7 @@ export const newFilterListRouteFactory = (
   navigateToPath: NavigateToPath,
   basePath: string
 ): MlRoute => ({
-  path: '/settings/filter_lists/new_filter_list',
+  path: createPath(ML_PAGES.FILTER_LISTS_NEW),
   title: i18n.translate('xpack.ml.settings.createFilter.docTitle', {
     defaultMessage: 'Create Filter',
   }),
@@ -61,7 +61,7 @@ export const editFilterListRouteFactory = (
   navigateToPath: NavigateToPath,
   basePath: string
 ): MlRoute => ({
-  path: '/settings/filter_lists/edit_filter_list/:filterId',
+  path: createPath(ML_PAGES.FILTER_LISTS_EDIT, '/:filterId'),
   title: i18n.translate('xpack.ml.settings.editFilter.docTitle', {
     defaultMessage: 'Edit Filter',
   }),

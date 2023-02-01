@@ -88,7 +88,6 @@ export const deleteMonitor = async ({
   request: KibanaRequest;
 }) => {
   const { logger, telemetry, stackVersion } = server;
-  const spaceId = server.spaces.spacesService.getSpaceId(request);
 
   const { monitor, monitorWithSecret } = await getMonitorToDelete(
     monitorId,
@@ -96,6 +95,7 @@ export const deleteMonitor = async ({
     server
   );
   try {
+    const { id: spaceId } = await server.spaces.spacesService.getActiveSpace(request);
     const deleteSyncPromise = syntheticsMonitorClient.deleteMonitors(
       [
         {
