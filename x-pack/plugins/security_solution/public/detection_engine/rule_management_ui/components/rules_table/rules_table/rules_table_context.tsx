@@ -325,7 +325,7 @@ export const RulesTableContextProvider = ({ children }: RulesTableContextProvide
         loadingRulesAction: loadingRules.action,
         selectedRuleIds,
         sortingOptions,
-        hasSavedState: savedFilter || savedSorting || savedPagination,
+        hasSavedState: !!savedFilter || !!savedSorting || !!savedPagination,
       },
       actions,
     }),
