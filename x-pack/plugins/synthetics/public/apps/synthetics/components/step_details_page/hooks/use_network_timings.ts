@@ -82,7 +82,7 @@ export const useNetworkTimings = (checkGroupIdArg?: string, stepIndexArg?: numbe
               field: SYNTHETICS_DNS_TIMINGS,
             },
           },
-          ssl: {
+          tls: {
             sum: {
               field: SYNTHETICS_SSL_TIMINGS,
             },
@@ -138,7 +138,7 @@ export const useNetworkTimings = (checkGroupIdArg?: string, stepIndexArg?: numbe
     send: aggs?.send.value ?? 0,
     wait: aggs?.wait.value ?? 0,
     blocked: aggs?.blocked.value ?? 0,
-    ssl: aggs?.ssl.value ?? 0,
+    tls: aggs?.tls.value ?? 0,
     transferSize: aggs?.transferSize.value ?? 0,
   };
 
@@ -148,58 +148,62 @@ export const useNetworkTimings = (checkGroupIdArg?: string, stepIndexArg?: numbe
       value: timings.transferSize,
       label: CONTENT_SIZE_LABEL,
     },
-    timingsWithLabels: [
-      {
-        value: timings.dns,
-        label: SYNTHETICS_DNS_TIMINGS_LABEL,
-      },
-      {
-        value: timings.ssl,
-        label: SYNTHETICS_SSL_TIMINGS_LABEL,
-      },
-      {
-        value: timings.blocked,
-        label: SYNTHETICS_BLOCKED_TIMINGS_LABEL,
-      },
-      {
-        value: timings.connect,
-        label: SYNTHETICS_CONNECT_TIMINGS_LABEL,
-      },
-      {
-        value: timings.receive,
-        label: SYNTHETICS_RECEIVE_TIMINGS_LABEL,
-      },
-      {
-        value: timings.send,
-        label: SYNTHETICS_SEND_TIMINGS_LABEL,
-      },
-      {
-        value: timings.wait,
-        label: SYNTHETICS_WAIT_TIMINGS_LABEL,
-      },
-    ].sort((a, b) => b.value - a.value),
+    timingsWithLabels: getTimingWithLabels(timings),
   };
 };
 
-const SYNTHETICS_CONNECT_TIMINGS_LABEL = i18n.translate('xpack.synthetics.connect.label', {
+export const getTimingWithLabels = (timings: Record<string, number>) => {
+  return [
+    {
+      value: timings.blocked,
+      label: SYNTHETICS_BLOCKED_TIMINGS_LABEL,
+    },
+    {
+      value: timings.dns,
+      label: SYNTHETICS_DNS_TIMINGS_LABEL,
+    },
+    {
+      value: timings.connect,
+      label: SYNTHETICS_CONNECT_TIMINGS_LABEL,
+    },
+    {
+      value: timings.tls,
+      label: SYNTHETICS_TLS_TIMINGS_LABEL,
+    },
+    {
+      value: timings.wait,
+      label: SYNTHETICS_WAIT_TIMINGS_LABEL,
+    },
+    {
+      value: timings.receive,
+      label: SYNTHETICS_RECEIVE_TIMINGS_LABEL,
+    },
+    {
+      value: timings.send,
+      label: SYNTHETICS_SEND_TIMINGS_LABEL,
+    },
+  ];
+};
+
+export const SYNTHETICS_CONNECT_TIMINGS_LABEL = i18n.translate('xpack.synthetics.connect.label', {
   defaultMessage: 'Connect',
 });
-const SYNTHETICS_DNS_TIMINGS_LABEL = i18n.translate('xpack.synthetics.dns', {
+export const SYNTHETICS_DNS_TIMINGS_LABEL = i18n.translate('xpack.synthetics.dns', {
   defaultMessage: 'DNS',
 });
-const SYNTHETICS_WAIT_TIMINGS_LABEL = i18n.translate('xpack.synthetics.wait', {
+export const SYNTHETICS_WAIT_TIMINGS_LABEL = i18n.translate('xpack.synthetics.wait', {
   defaultMessage: 'Wait',
 });
 
-const SYNTHETICS_SSL_TIMINGS_LABEL = i18n.translate('xpack.synthetics.ssl', {
-  defaultMessage: 'SSL',
+export const SYNTHETICS_TLS_TIMINGS_LABEL = i18n.translate('xpack.synthetics.tls', {
+  defaultMessage: 'TLS',
 });
-const SYNTHETICS_BLOCKED_TIMINGS_LABEL = i18n.translate('xpack.synthetics.blocked', {
+export const SYNTHETICS_BLOCKED_TIMINGS_LABEL = i18n.translate('xpack.synthetics.blocked', {
   defaultMessage: 'Blocked',
 });
-const SYNTHETICS_SEND_TIMINGS_LABEL = i18n.translate('xpack.synthetics.send', {
+export const SYNTHETICS_SEND_TIMINGS_LABEL = i18n.translate('xpack.synthetics.send', {
   defaultMessage: 'Send',
 });
-const SYNTHETICS_RECEIVE_TIMINGS_LABEL = i18n.translate('xpack.synthetics.receive', {
+export const SYNTHETICS_RECEIVE_TIMINGS_LABEL = i18n.translate('xpack.synthetics.receive', {
   defaultMessage: 'Receive',
 });
