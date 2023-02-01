@@ -22,8 +22,12 @@ const DEFAULT_QUERY = {
   query: '',
 };
 const DEFAULT_FROM_MINUTES_VALUE = 15;
+const DEFAULT_FROM_IN_MILLISECONDS = DEFAULT_FROM_MINUTES_VALUE * 60000;
 
 export const INITIAL_DATE_RANGE = { from: `now-${DEFAULT_FROM_MINUTES_VALUE}m`, to: 'now' };
+
+const getDefaultFromTimestamp = () => Date.now() - DEFAULT_FROM_IN_MILLISECONDS
+const getDefaultToTimestamp = () => Date.now()
 
 const INITIAL_HOSTS_STATE: HostsState = {
   query: DEFAULT_QUERY,
@@ -74,8 +78,8 @@ export const useHostsUrlState = () => {
   const [state, dispatch] = useReducer(reducer, urlState);
 
   const getDateRangeAsTimestamp = useCallback(() => {
-    const from = DateMath.parse(state.dateRange.from)?.valueOf();
-    const to = DateMath.parse(state.dateRange.to)?.valueOf();
+    const from = DateMath.parse(state.dateRange.from)?.valueOf() ?? getDefaultFromTimestamp();
+    const to = DateMath.parse(state.dateRange.to)?.valueOf() ?? getDefaultToTimestamp();
 
     return { from, to };
   }, [state.dateRange]);
