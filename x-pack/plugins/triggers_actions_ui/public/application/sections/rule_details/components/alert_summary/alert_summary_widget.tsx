@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiLoadingSpinner } from '@elastic/eui';
+import { EuiLoadingChart } from '@elastic/eui';
 import React from 'react';
 import { useLoadAlertSummary } from '../../../../hooks/use_load_alert_summary';
 import { AlertSummaryWidgetProps } from '.';
@@ -33,7 +33,19 @@ export const AlertSummaryWidget = ({
     timeRange,
   });
 
-  if (isLoading) return <EuiLoadingSpinner data-test-subj="alertSummaryWidgetLoading" />;
+  if (isLoading)
+    return (
+      <div
+        style={{
+          minHeight: fullSize ? 238 : 224,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+        }}
+      >
+        <EuiLoadingChart size="l" data-test-subj="alertSummaryWidgetLoading" />
+      </div>
+    );
   if (error) return <AlertSummaryWidgetError />;
 
   return fullSize ? (
