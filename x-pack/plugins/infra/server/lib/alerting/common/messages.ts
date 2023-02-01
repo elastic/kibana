@@ -20,6 +20,13 @@ export const DOCUMENT_COUNT_I18N = i18n.translate(
   }
 );
 
+export const CUSTOM_EQUATION_I18N = i18n.translate(
+  'xpack.infra.metrics.alerting.threshold.customEquation',
+  {
+    defaultMessage: 'Custom equation',
+  }
+);
+
 export const stateToAlertMessage = {
   [AlertStates.ALERT]: i18n.translate('xpack.infra.metrics.alerting.threshold.alertState', {
     defaultMessage: 'ALERT',
@@ -76,7 +83,7 @@ const thresholdToI18n = ([a, b]: Array<number | string>) => {
   });
 };
 
-const formatGroup = (group: string) => (group === UNGROUPED_FACTORY_KEY ? 'all hosts' : group);
+const formatGroup = (group: string) => (group === UNGROUPED_FACTORY_KEY ? '' : ` for ${group}`);
 
 export const buildFiredAlertReason: (alertResult: {
   group: string;
@@ -89,7 +96,7 @@ export const buildFiredAlertReason: (alertResult: {
 }) => string = ({ group, metric, comparator, threshold, currentValue, timeSize, timeUnit }) =>
   i18n.translate('xpack.infra.metrics.alerting.threshold.firedAlertReason', {
     defaultMessage:
-      '{metric} is {currentValue} in the last {duration} for {group}. Alert when {comparator} {threshold}.',
+      '{metric} is {currentValue} in the last {duration}{group}. Alert when {comparator} {threshold}.',
     values: {
       group: formatGroup(group),
       metric,
