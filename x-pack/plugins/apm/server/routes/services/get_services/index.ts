@@ -42,23 +42,26 @@ export async function getServices({
   randomSampler: RandomSampler;
 }) {
   return withApmSpan('get_services', async () => {
-    const items = await getServicesItems({
-      environment,
-      kuery,
-      mlClient,
-      apmEventClient,
-      apmAlertsClient,
-      searchAggregatedTransactions,
-      searchAggregatedServiceMetrics,
-      logger,
-      start,
-      end,
-      serviceGroup,
-      randomSampler,
-    });
+    const { items, maxServiceCountExceeded, serviceOverflowCount } =
+      await getServicesItems({
+        environment,
+        kuery,
+        mlClient,
+        apmEventClient,
+        apmAlertsClient,
+        searchAggregatedTransactions,
+        searchAggregatedServiceMetrics,
+        logger,
+        start,
+        end,
+        serviceGroup,
+        randomSampler,
+      });
 
     return {
       items,
+      maxServiceCountExceeded,
+      serviceOverflowCount,
     };
   });
 }

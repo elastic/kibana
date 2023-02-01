@@ -50,8 +50,6 @@ export const useRulesListUiState = ({
   showRulesList: boolean;
   showNoAuthPrompt: boolean;
   showCreateFirstRulePrompt: boolean;
-  showHeaderWithoutCreateButton: boolean;
-  showHeaderWithCreateButton: boolean;
 } => {
   const hasEmptyTypesFilter = hasDefaultRuleTypesFiltersOn ? true : isEmpty(filters.types);
   const isFilterApplied = getFilterApplied({ hasEmptyTypesFilter, filters });
@@ -63,15 +61,11 @@ export const useRulesListUiState = ({
   const showSpinner =
     isInitialLoading && (isLoadingRuleTypes || (!showNoAuthPrompt && isLoadingRules));
   const showRulesList = !showSpinner && !showCreateFirstRulePrompt && !showNoAuthPrompt;
-  const showHeaderWithCreateButton = showRulesList && authorizedToCreateAnyRules;
-  const showHeaderWithoutCreateButton = showRulesList && !authorizedToCreateAnyRules;
 
   return {
     showSpinner,
     showRulesList,
     showNoAuthPrompt,
     showCreateFirstRulePrompt,
-    showHeaderWithoutCreateButton,
-    showHeaderWithCreateButton,
   };
 };
