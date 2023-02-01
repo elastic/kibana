@@ -22,7 +22,7 @@ export function NoResultsSuggestionDefault() {
         {dataViewName && dataViewPattern ? (
           <FormattedMessage
             id="discover.noResults.noDocumentsOrCheckIndicesAndPermissionsDescription"
-            defaultMessage="Make sure data view {dataViewName} with index pattern {dataViewPattern} has matching indices and documents and that you have permission to view them."
+            defaultMessage="Make sure that the data view {dataViewName} with index pattern {dataViewPattern} has matching indices and documents and that you have permission to view them."
             values={{
               dataViewName: <strong>{dataViewName}</strong>,
               dataViewPattern: <EuiCode>{dataViewPattern}</EuiCode>,
