@@ -12,6 +12,7 @@ import {
   EuiPageTemplate_Deprecated as EuiPageTemplate,
   EuiLink,
 } from '@elastic/eui';
+import { useLocation } from 'react-router-dom';
 import { usePolicyDetailsArtifactsNavigateCallback } from '../../policy_hooks';
 import { useGetLinkTo } from './use_policy_artifacts_empty_hooks';
 import { useUserPrivileges } from '../../../../../../common/components/user_privileges';
@@ -45,13 +46,17 @@ export const PolicyArtifactsEmptyUnassigned = memo<CommonProps>(
       getArtifactPath
     );
 
+    const { state: routeState } = useLocation();
     const navigateCallback = usePolicyDetailsArtifactsNavigateCallback(listId);
     const onClickPrimaryButtonHandler = useCallback(
       () =>
-        navigateCallback({
-          show: 'list',
-        }),
-      [navigateCallback]
+        navigateCallback(
+          {
+            show: 'list',
+          },
+          routeState
+        ),
+      [navigateCallback, routeState]
     );
     return (
       <EuiPageTemplate template="centeredContent">

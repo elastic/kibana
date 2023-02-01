@@ -13,6 +13,7 @@ import {
   ENDPOINT_EVENT_FILTERS_LIST_ID,
   ENDPOINT_TRUSTED_APPS_LIST_ID,
 } from '@kbn/securitysolution-list-constants';
+import type { PolicyDetailsRouteState } from '../../../../../common/endpoint/types';
 import { useKibana } from '../../../../common/lib/kibana';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
 import type { PolicyDetailsArtifactsPageLocation, PolicyDetailsState } from '../types';
@@ -79,7 +80,8 @@ export function usePolicyDetailsArtifactsNavigateCallback(listId: string) {
   );
 
   return useCallback(
-    (args: Partial<PolicyDetailsArtifactsPageLocation>) => history.push(getPath(args)),
+    (args: Partial<PolicyDetailsArtifactsPageLocation>, state?: PolicyDetailsRouteState) =>
+      history.push(getPath(args), state),
     [getPath, history]
   );
 }
