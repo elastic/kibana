@@ -968,9 +968,36 @@ describe('last_value', () => {
           } as LastValueIndexPatternColumn,
         },
       };
-      expect(lastValueOperation.getErrorMessage!(errorLayer, 'col1', indexPattern)).toEqual([
-        'Field notExisting was not found',
-      ]);
+      expect(lastValueOperation.getErrorMessage!(errorLayer, 'col1', indexPattern))
+        .toMatchInlineSnapshot(`
+        Array [
+          Object {
+            "displayLocations": Array [
+              Object {
+                "id": "toolbar",
+              },
+              Object {
+                "dimensionId": "col1",
+                "id": "dimensionButton",
+              },
+              Object {
+                "id": "embeddableBadge",
+              },
+            ],
+            "message": <FormattedMessage
+              defaultMessage="Sort field {sortField} was not found."
+              id="xpack.lens.indexPattern.lastValue.sortFieldNotFound"
+              values={
+                Object {
+                  "sortField": <EuiCode>
+                    notExisting
+                  </EuiCode>,
+                }
+              }
+            />,
+          },
+        ]
+      `);
     });
     it('shows error message if the sourceField is of unsupported type', () => {
       indexPattern.getFieldByName('start_date')!.type = 'unsupported_type';

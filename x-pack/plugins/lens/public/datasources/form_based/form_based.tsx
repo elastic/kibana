@@ -1032,31 +1032,35 @@ function getLayerErrorMessages(
     // Single layer case, no need to explain more
     errorMessages = layerErrors[0]?.length ? layerErrors[0] : [];
   } else {
-    // For multiple layers we will prepend each error with the layer number
     errorMessages = layerErrors.flatMap((errors, index) => {
       return errors.map((error) => {
-        const message: UserMessage = {
-          ...error,
-          shortMessage: i18n.translate('xpack.lens.indexPattern.layerErrorWrapper', {
-            defaultMessage: 'Layer {position} error: {wrappedMessage}',
-            values: {
-              position: index + 1,
-              wrappedMessage: error.shortMessage,
-            },
-          }),
-          longMessage: (
-            <FormattedMessage
-              id="xpack.lens.indexPattern.layerErrorWrapper"
-              defaultMessage="Layer {position} error: {wrappedMessage}"
-              values={{
+        // we will prepend each error with the layer number
+        if (error.displayLocations.find((location) => location.id === 'visualization')) {
+          const message: UserMessage = {
+            ...error,
+            shortMessage: i18n.translate('xpack.lens.indexPattern.layerErrorWrapper', {
+              defaultMessage: 'Layer {position} error: {wrappedMessage}',
+              values: {
                 position: index + 1,
-                wrappedMessage: <>{error.longMessage}</>,
-              }}
-            />
-          ),
-        };
+                wrappedMessage: error.shortMessage,
+              },
+            }),
+            longMessage: (
+              <FormattedMessage
+                id="xpack.lens.indexPattern.layerErrorWrapper"
+                defaultMessage="Layer {position} error: {wrappedMessage}"
+                values={{
+                  position: index + 1,
+                  wrappedMessage: <>{error.longMessage}</>,
+                }}
+              />
+            ),
+          };
 
-        return message;
+          return message;
+        }
+
+        return error;
       });
     });
   }

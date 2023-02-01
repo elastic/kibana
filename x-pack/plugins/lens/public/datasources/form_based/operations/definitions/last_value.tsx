@@ -15,9 +15,11 @@ import {
   EuiSwitch,
   EuiToolTip,
   EuiText,
+  EuiCode,
 } from '@elastic/eui';
 import { AggFunctionsMapping } from '@kbn/data-plugin/public';
 import { buildExpressionFunction } from '@kbn/expressions-plugin/public';
+import { FormattedMessage } from '@kbn/i18n-react';
 import type { FieldBasedOperationErrorMessage, OperationDefinition } from '.';
 import { FieldBasedIndexPatternColumn, ValueFormatConfig } from './column_types';
 import type { IndexPatternField, IndexPattern } from '../../../../types';
@@ -62,16 +64,32 @@ const supportedTypes = new Set([
   'date_range',
 ]);
 
-export function getInvalidSortFieldMessage(sortField: string, indexPattern?: IndexPattern) {
+export function getInvalidSortFieldMessage(
+  sortField: string,
+  columnId: string,
+  indexPattern?: IndexPattern
+) {
   if (!indexPattern) {
     return;
   }
   const field = indexPattern.getFieldByName(sortField);
   if (!field) {
-    return i18n.translate('xpack.lens.indexPattern.lastValue.sortFieldNotFound', {
-      defaultMessage: 'Field {invalidField} was not found',
-      values: { invalidField: sortField },
-    });
+    return {
+      message: (
+        <FormattedMessage
+          id="xpack.lens.indexPattern.lastValue.sortFieldNotFound"
+          defaultMessage="Sort field {sortField} was not found."
+          values={{
+            sortField: <EuiCode>{sortField}</EuiCode>,
+          }}
+        />
+      ),
+      displayLocations: [
+        { id: 'toolbar' },
+        { id: 'dimensionButton', dimensionId: columnId },
+        { id: 'embeddableBadge' },
+      ],
+    };
   }
   if (field.type !== 'date') {
     return i18n.translate('xpack.lens.indexPattern.lastValue.invalidTypeSortField', {
@@ -205,13 +223,14 @@ export const lastValueOperation: OperationDefinition<
     const invalidSourceFieldMessage = getInvalidFieldMessage(layer, columnId, indexPattern);
     const invalidSortFieldMessage = getInvalidSortFieldMessage(
       column.params.sortField,
+      columnId,
       indexPattern
     );
-    if (invalidSourceFieldMessage) {
-      errorMessages = [...invalidSourceFieldMessage];
-    }
     if (invalidSortFieldMessage) {
       errorMessages = [invalidSortFieldMessage];
+    }
+    if (invalidSourceFieldMessage) {
+      errorMessages = [...invalidSourceFieldMessage];
     }
     errorMessages.push(...(getColumnReducedTimeRangeError(layer, columnId, indexPattern) || []));
     return errorMessages.length ? errorMessages : undefined;
@@ -316,6 +335,7 @@ export const lastValueOperation: OperationDefinition<
     const dateFields = getDateFields(indexPattern);
     const isSortFieldInvalid = !!getInvalidSortFieldMessage(
       currentColumn.params.sortField,
+      '',
       indexPattern
     );
 
