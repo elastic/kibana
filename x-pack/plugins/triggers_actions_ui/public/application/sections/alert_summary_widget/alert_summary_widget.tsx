@@ -7,7 +7,7 @@
 
 import { EuiLoadingChart } from '@elastic/eui';
 import React from 'react';
-import { useLoadAlertSummary } from '../../../../hooks/use_load_alert_summary';
+import { useLoadAlertSummary } from '../../hooks/use_load_alert_summary';
 import { AlertSummaryWidgetProps } from '.';
 import {
   AlertSummaryWidgetError,

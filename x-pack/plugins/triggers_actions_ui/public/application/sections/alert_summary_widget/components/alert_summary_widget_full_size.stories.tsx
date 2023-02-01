@@ -6,10 +6,7 @@
  */
 
 import { AlertsSummaryWidgetFullSize as Component } from './alert_summary_widget_full_size';
-import {
-  mockedAlertSummaryResponse,
-  mockedChartThemes,
-} from '../../../../../mock/alert_summary_widget';
+import { mockedAlertSummaryResponse, mockedChartThemes } from '../../../mock/alert_summary_widget';
 
 export default {
   component: Component,
