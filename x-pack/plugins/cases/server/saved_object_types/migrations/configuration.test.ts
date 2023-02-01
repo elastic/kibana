@@ -114,7 +114,7 @@ describe('configuration migrations', () => {
 
     it('removes the connector_id and connector_name fields', () => {
       const config = createConnectorAttributeMigration(
-        create_7_9_0_configSchema({ connector_name: undefined, connector_id: undefined })
+        create_7_9_0_configSchema({ connector_name: 'name', connector_id: 'id' })
       );
 
       expect(config.attributes).not.toHaveProperty('connector_id');
