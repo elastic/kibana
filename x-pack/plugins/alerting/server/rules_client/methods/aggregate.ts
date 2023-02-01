@@ -29,6 +29,8 @@ export interface AggregateOptions extends IndexType {
   };
   filter?: string | KueryNode;
   maxTags?: number;
+  page?: number;
+  perPage?: number;
 }
 
 export interface AggregateParams<T> {
@@ -41,7 +43,7 @@ export async function aggregate<T extends Record<string, unknown>>(
   params: AggregateParams<T>
 ): Promise<T | undefined> {
   const { options = {}, aggs } = params;
-  const { filter, maxTags, ...restOptions } = options;
+  const { filter, maxTags, page = 1, perPage = 0, ...restOptions } = options;
 
   let authorizationTuple;
   try {
@@ -69,8 +71,8 @@ export async function aggregate<T extends Record<string, unknown>>(
       authorizationFilter && filterKueryNode
         ? nodeBuilder.and([filterKueryNode, authorizationFilter as KueryNode])
         : authorizationFilter,
-    page: 1,
-    perPage: 0,
+    page,
+    perPage,
     type: 'alert',
     aggs,
   });

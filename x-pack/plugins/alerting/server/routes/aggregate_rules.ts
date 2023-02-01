@@ -9,12 +9,8 @@ import { IRouter } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
 import { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import { ILicenseState } from '../lib';
-import { AggregateResult, AggregateOptions } from '../rules_client';
-import {
-  getDefaultRuleAggregation,
-  formateDefaultAggregationResult,
-  RuleAggregation,
-} from '../rules_client/lib';
+import { AggregateResult, AggregateOptions, RuleAggregation } from '../rules_client';
+import { getDefaultRuleAggregation, formatDefaultAggregationResult } from '../rules_client/lib';
 import { RewriteResponseCase, RewriteRequestCase, verifyAccessAndContext } from './lib';
 import { AlertingRequestHandlerContext, INTERNAL_BASE_ALERTING_API_PATH } from '../types';
 import { trackLegacyTerminology } from './lib/track_legacy_terminology';
@@ -96,7 +92,7 @@ export const aggregateRulesRoute = (
           aggs: getDefaultRuleAggregation(options.maxTags),
         });
         return res.ok({
-          body: rewriteBodyRes(formateDefaultAggregationResult(aggregateResult)),
+          body: rewriteBodyRes(formatDefaultAggregationResult(aggregateResult)),
         });
       })
     )
@@ -124,7 +120,7 @@ export const aggregateRulesRoute = (
           aggs: getDefaultRuleAggregation(options.maxTags),
         });
         return res.ok({
-          body: rewriteBodyRes(formateDefaultAggregationResult(aggregateResult)),
+          body: rewriteBodyRes(formatDefaultAggregationResult(aggregateResult)),
         });
       })
     )

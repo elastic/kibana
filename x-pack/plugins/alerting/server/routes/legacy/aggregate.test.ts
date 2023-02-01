@@ -31,6 +31,15 @@ jest.mock('../lib/track_legacy_terminology', () => ({
   trackLegacyTerminology: jest.fn(),
 }));
 
+jest.mock('../../rules_client/lib/default_rule_aggregation', () => ({
+  ...jest.requireActual('../../rules_client/lib/default_rule_aggregation'),
+  formatDefaultAggregationResult: jest.fn(),
+}));
+
+const { formatDefaultAggregationResult } = jest.requireMock(
+  '../../rules_client/lib/default_rule_aggregation'
+);
+
 beforeEach(() => {
   jest.resetAllMocks();
 });
@@ -60,7 +69,7 @@ describe('aggregateAlertRoute', () => {
         warning: 3,
       },
     };
-    rulesClient.aggregate.mockResolvedValueOnce(aggregateResult);
+    formatDefaultAggregationResult.mockReturnValueOnce(aggregateResult);
 
     const [context, req, res] = mockHandlerArguments(
       { rulesClient },
@@ -95,6 +104,51 @@ describe('aggregateAlertRoute', () => {
     expect(rulesClient.aggregate.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
         Object {
+          "aggs": Object {
+            "enabled": Object {
+              "terms": Object {
+                "field": "alert.attributes.enabled",
+              },
+            },
+            "muted": Object {
+              "terms": Object {
+                "field": "alert.attributes.muteAll",
+              },
+            },
+            "outcome": Object {
+              "terms": Object {
+                "field": "alert.attributes.lastRun.outcome",
+              },
+            },
+            "snoozed": Object {
+              "aggs": Object {
+                "count": Object {
+                  "filter": Object {
+                    "exists": Object {
+                      "field": "alert.attributes.snoozeSchedule.duration",
+                    },
+                  },
+                },
+              },
+              "nested": Object {
+                "path": "alert.attributes.snoozeSchedule",
+              },
+            },
+            "status": Object {
+              "terms": Object {
+                "field": "alert.attributes.executionStatus.status",
+              },
+            },
+            "tags": Object {
+              "terms": Object {
+                "field": "alert.attributes.tags",
+                "order": Object {
+                  "_key": "asc",
+                },
+                "size": 50,
+              },
+            },
+          },
           "options": Object {
             "defaultSearchOperator": "AND",
           },
@@ -115,7 +169,7 @@ describe('aggregateAlertRoute', () => {
 
     const [, handler] = router.get.mock.calls[0];
 
-    rulesClient.aggregate.mockResolvedValueOnce({
+    formatDefaultAggregationResult.mockReturnValueOnce({
       alertExecutionStatus: {
         ok: 15,
         error: 2,

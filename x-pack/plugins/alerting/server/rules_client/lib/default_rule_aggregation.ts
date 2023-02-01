@@ -92,9 +92,7 @@ export const getDefaultRuleAggregation = (
   };
 };
 
-export const formateDefaultAggregationResult = (
-  aggregations?: RuleAggregation
-): AggregateResult => {
+export const formatDefaultAggregationResult = (aggregations?: RuleAggregation): AggregateResult => {
   if (!aggregations) {
     // Return a placeholder with all zeroes
     const placeholder: AggregateResult = {

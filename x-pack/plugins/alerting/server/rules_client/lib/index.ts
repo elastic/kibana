@@ -17,6 +17,6 @@ export { createNewAPIKeySet } from './create_new_api_key_set';
 export { recoverRuleAlerts } from './recover_rule_alerts';
 export {
   getDefaultRuleAggregation,
-  formateDefaultAggregationResult,
+  formatDefaultAggregationResult,
 } from './default_rule_aggregation';
-export type { RuleAggregation, AggregateResult } from './default_rule_aggregation';
+export { getRuleTagsAggregation, formatRuleTagsAggregationResult } from './rule_tags_aggregation';
