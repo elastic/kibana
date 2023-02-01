@@ -64,7 +64,7 @@ export function DiscoverMainRoute(props: Props) {
   const [hasESData, setHasESData] = useState(false);
   const [hasUserDataView, setHasUserDataView] = useState(false);
   const [showNoDataPage, setShowNoDataPage] = useState<boolean>(false);
-  const hasCustomBranding = useObservable(core.customBranding.hasCustomBranding$) ?? false;
+  const hasCustomBranding = useObservable(core.customBranding.hasCustomBranding$, false);
   const { id } = useParams<DiscoverLandingParams>();
 
   /**

@@ -26,7 +26,7 @@ import { MainNavigation } from './main_navigation';
 const OsqueryAppComponent = () => {
   const { customBranding } = useKibana().services;
   const { data: osqueryIntegration, isFetched } = useOsqueryIntegrationStatus();
-  const hasCustomBranding = useObservable(customBranding?.hasCustomBranding$ || of(false)) ?? false;
+  const hasCustomBranding = useObservable(customBranding?.hasCustomBranding$ || of(false), false);
   if (!isFetched) {
     return (
       <EuiPage paddingSize="none">

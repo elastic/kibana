@@ -30,7 +30,7 @@ export interface Props {
 export const NewsfeedNavButton = ({ newsfeedApi, hasCustomBranding$ }: Props) => {
   const [flyoutVisible, setFlyoutVisible] = useState<boolean>(false);
   const [newsFetchResult, setNewsFetchResult] = useState<FetchResult | null | void>(null);
-  const hasCustomBranding = useObservable(hasCustomBranding$) ?? false;
+  const hasCustomBranding = useObservable(hasCustomBranding$, false);
   const hasNew = useMemo(() => {
     return newsFetchResult ? newsFetchResult.hasNew : false;
   }, [newsFetchResult]);
