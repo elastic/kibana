@@ -11,17 +11,35 @@ export function KibanaReactStorybookDecorator(Story: ComponentType) {
   return (
     <KibanaContextProvider
       services={{
+        application: {
+          navigateToUrl: () => {},
+        },
         charts: {
           theme: {
-            useChartsTheme: () => {},
             useChartsBaseTheme: () => {},
+            useChartsTheme: () => {},
           },
         },
-        application: { navigateToUrl: () => {} },
-        http: { basePath: { prepend: (_: string) => '' } },
-        docLinks: { links: { query: {} } },
-        notifications: { toasts: {} },
-        storage: { get: () => {} },
+        data: {},
+        dataViews: {
+          create: () => {},
+        },
+        docLinks: {
+          links: {
+            query: {},
+          },
+        },
+        http: {
+          basePath: {
+            prepend: (_: string) => '',
+          },
+        },
+        notifications: {
+          toasts: {},
+        },
+        storage: {
+          get: () => {},
+        },
         uiSettings: {
           get: (setting: string) => {
             if (setting === 'dateFormat') {
@@ -29,6 +47,7 @@ export function KibanaReactStorybookDecorator(Story: ComponentType) {
             }
           },
         },
+        unifiedSearch: {},
       }}
     >
       <Story />
