@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import { getPreviewTransformRequestBody, SimpleQuery } from '.';
+import type { DataView } from '@kbn/data-views-plugin/common';
 
-import { getIndexDevConsoleStatement, getPivotPreviewDevConsoleStatement } from './data_grid';
+import { getPreviewTransformRequestBody, SimpleQuery } from '.';
+import { getIndexDevConsoleStatement, getTransformPreviewDevConsoleStatement } from './data_grid';
 
 describe('Transform: Data Grid', () => {
-  test('getPivotPreviewDevConsoleStatement()', () => {
+  test('getTransformPreviewDevConsoleStatement()', () => {
     const query: SimpleQuery = {
       query_string: {
         query: '*',
@@ -18,26 +19,30 @@ describe('Transform: Data Grid', () => {
       },
     };
 
-    const request = getPreviewTransformRequestBody('the-index-pattern-title', query, {
-      pivot: {
-        group_by: {
-          'the-group-by-agg-name': {
-            terms: {
-              field: 'the-group-by-field',
+    const request = getPreviewTransformRequestBody(
+      { getIndexPattern: () => 'the-index-pattern-title' } as DataView,
+      query,
+      {
+        pivot: {
+          group_by: {
+            'the-group-by-agg-name': {
+              terms: {
+                field: 'the-group-by-field',
+              },
+            },
+          },
+          aggregations: {
+            'the-agg-agg-name': {
+              avg: {
+                field: 'the-agg-field',
+              },
             },
           },
         },
-        aggregations: {
-          'the-agg-agg-name': {
-            avg: {
-              field: 'the-agg-field',
-            },
-          },
-        },
-      },
-    });
+      }
+    );
 
-    const pivotPreviewDevConsoleStatement = getPivotPreviewDevConsoleStatement(request);
+    const pivotPreviewDevConsoleStatement = getTransformPreviewDevConsoleStatement(request);
 
     expect(pivotPreviewDevConsoleStatement).toBe(`POST _transform/_preview
 {
