@@ -6,18 +6,20 @@
  */
 
 import React from 'react';
-import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiFormLabel, EuiSuggest } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { Control, Controller } from 'react-hook-form';
+import { Control, UseFormWatch } from 'react-hook-form';
 import type { CreateSLOInput } from '@kbn/slo-schema';
 
 import { IndexSelection } from './custom_kql/index_selection';
+import { QueryBuilder } from './custom_kql/query_builder';
 
 export interface Props {
   control: Control<CreateSLOInput>;
+  watch: UseFormWatch<CreateSLOInput>;
 }
 
-export function SloEditFormDefinitionCustomKql({ control }: Props) {
+export function SloEditFormDefinitionCustomKql({ control, watch }: Props) {
   return (
     <EuiFlexGroup direction="column" gutterSize="l">
       <EuiFlexItem>
@@ -25,88 +27,64 @@ export function SloEditFormDefinitionCustomKql({ control }: Props) {
       </EuiFlexItem>
 
       <EuiFlexItem>
-        <EuiFormLabel>
-          {i18n.translate('xpack.observability.slos.sloEdit.sloDefinition.customKql.queryFilter', {
-            defaultMessage: 'Query filter',
-          })}
-        </EuiFormLabel>
-        <Controller
+        <QueryBuilder
+          control={control}
+          dataTestSubj="sloFormCustomKqlFilterQueryInput"
+          indexPatternString={watch('indicator.params.index')}
+          label={i18n.translate(
+            'xpack.observability.slos.sloEdit.sloDefinition.customKql.queryFilter',
+            {
+              defaultMessage: 'Query filter',
+            }
+          )}
           name="indicator.params.filter"
-          control={control}
-          rules={{ required: true }}
-          render={({ field }) => (
-            <EuiSuggest
-              append={<EuiButtonEmpty>KQL</EuiButtonEmpty>}
-              status="unchanged"
-              aria-label="Filter query"
-              data-test-subj="sloFormCustomKqlFilterQueryInput"
-              placeholder={i18n.translate(
-                'xpack.observability.slos.sloEdit.sloDefinition.customKql.customFilter',
-                {
-                  defaultMessage: 'Custom filter to apply on the index',
-                }
-              )}
-              suggestions={[]}
-              {...field}
-            />
+          placeholder={i18n.translate(
+            'xpack.observability.slos.sloEdit.sloDefinition.customKql.customFilter',
+            {
+              defaultMessage: 'Custom filter to apply on the index',
+            }
           )}
         />
       </EuiFlexItem>
 
       <EuiFlexItem>
-        <EuiFormLabel>
-          {i18n.translate('xpack.observability.slos.sloEdit.sloDefinition.customKql.goodQuery', {
-            defaultMessage: 'Good query',
-          })}
-        </EuiFormLabel>
-        <Controller
+        <QueryBuilder
+          control={control}
+          dataTestSubj="sloFormCustomKqlGoodQueryInput"
+          indexPatternString={watch('indicator.params.index')}
+          label={i18n.translate(
+            'xpack.observability.slos.sloEdit.sloDefinition.customKql.goodQuery',
+            {
+              defaultMessage: 'Good query',
+            }
+          )}
           name="indicator.params.good"
-          control={control}
-          rules={{ required: true }}
-          render={({ field }) => (
-            <EuiSuggest
-              append={<EuiButtonEmpty>KQL</EuiButtonEmpty>}
-              status="unchanged"
-              aria-label="Good filter"
-              data-test-subj="sloFormCustomKqlGoodQueryInput"
-              placeholder={i18n.translate(
-                'xpack.observability.slos.sloEdit.sloDefinition.customKql.goodQueryPlaceholder',
-                {
-                  defaultMessage: 'Define the good events',
-                }
-              )}
-              suggestions={[]}
-              {...field}
-            />
+          placeholder={i18n.translate(
+            'xpack.observability.slos.sloEdit.sloDefinition.customKql.goodQueryPlaceholder',
+            {
+              defaultMessage: 'Define the good events',
+            }
           )}
         />
       </EuiFlexItem>
 
       <EuiFlexItem>
-        <EuiFormLabel>
-          {i18n.translate('xpack.observability.slos.sloEdit.sloDefinition.customKql.totalQuery', {
-            defaultMessage: 'Total query',
-          })}
-        </EuiFormLabel>
-        <Controller
-          name="indicator.params.total"
+        <QueryBuilder
           control={control}
-          rules={{ required: true }}
-          render={({ field }) => (
-            <EuiSuggest
-              append={<EuiButtonEmpty>KQL</EuiButtonEmpty>}
-              status="unchanged"
-              aria-label="Total filter"
-              data-test-subj="sloFormCustomKqlTotalQueryInput"
-              placeholder={i18n.translate(
-                'xpack.observability.slos.sloEdit.sloDefinition.customKql.totalQueryPlaceholder',
-                {
-                  defaultMessage: 'Define the total events',
-                }
-              )}
-              suggestions={[]}
-              {...field}
-            />
+          dataTestSubj="sloFormCustomKqlTotalQueryInput"
+          indexPatternString={watch('indicator.params.index')}
+          label={i18n.translate(
+            'xpack.observability.slos.sloEdit.sloDefinition.customKql.totalQuery',
+            {
+              defaultMessage: 'Total query',
+            }
+          )}
+          name="indicator.params.total"
+          placeholder={i18n.translate(
+            'xpack.observability.slos.sloEdit.sloDefinition.customKql.totalQueryPlaceholder',
+            {
+              defaultMessage: 'Define the total events',
+            }
           )}
         />
       </EuiFlexItem>

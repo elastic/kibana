@@ -208,7 +208,7 @@ export function useOnSubmit({
         packageToPackagePolicy(
           packageInfo,
           agentPolicy?.id || '',
-          DEFAULT_PACKAGE_POLICY.namespace,
+          agentPolicy?.namespace || DEFAULT_PACKAGE_POLICY.namespace,
           DEFAULT_PACKAGE_POLICY.name || incrementedName,
           DEFAULT_PACKAGE_POLICY.description,
           integrationToEnable

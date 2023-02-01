@@ -35,7 +35,7 @@ import {
 } from '../../../../integrations/hooks';
 import {
   Loading,
-  Error,
+  Error as ErrorComponent,
   ExtensionWrapper,
   EuiButtonWithTooltip,
   DevtoolsRequestFlyoutButton,
@@ -240,10 +240,21 @@ export const EditPackagePolicyForm = memo<{
   };
 
   const extensionView = useUIExtension(packagePolicy.package?.name ?? '', 'package-policy-edit');
+  const replaceDefineStepView = useUIExtension(
+    packagePolicy.package?.name ?? '',
+    'package-policy-replace-define-step'
+  );
   const extensionTabsView = useUIExtension(
     packagePolicy.package?.name ?? '',
     'package-policy-edit-tabs'
   );
+
+  if (replaceDefineStepView && extensionView) {
+    throw new Error(
+      "'package-policy-create' and 'package-policy-replace-define-step' cannot both be registered as UI extensions"
+    );
+  }
+
   const tabsViews = extensionTabsView?.tabs;
   const [selectedTab, setSelectedTab] = useState(0);
 
@@ -339,6 +350,20 @@ export const EditPackagePolicyForm = memo<{
     ]
   );
 
+  const replaceConfigurePackage = replaceDefineStepView && originalPackagePolicy && packageInfo && (
+    <ExtensionWrapper>
+      <replaceDefineStepView.Component
+        agentPolicy={agentPolicy}
+        packageInfo={packageInfo}
+        policy={originalPackagePolicy}
+        newPolicy={packagePolicy}
+        onChange={handleExtensionViewOnChange}
+        validationResults={validationResults}
+        isEditPage={true}
+      />
+    </ExtensionWrapper>
+  );
+
   const { showDevtoolsRequest: isShowDevtoolRequestExperimentEnabled } =
     ExperimentalFeaturesService.get();
 
@@ -361,7 +386,7 @@ export const EditPackagePolicyForm = memo<{
         {isLoadingData ? (
           <Loading />
         ) : loadingError || !agentPolicy || !packageInfo ? (
-          <Error
+          <ErrorComponent
             title={
               <FormattedMessage
                 id="xpack.fleet.editPackagePolicy.errorLoadingDataTitle"
@@ -399,7 +424,7 @@ export const EditPackagePolicyForm = memo<{
                 <EuiSpacer size="xxl" />
               </>
             )}
-            {configurePackage}
+            {replaceConfigurePackage || configurePackage}
             {/* Extra space to accomodate the EuiBottomBar height */}
             <EuiSpacer size="xxl" />
             <EuiSpacer size="xxl" />
