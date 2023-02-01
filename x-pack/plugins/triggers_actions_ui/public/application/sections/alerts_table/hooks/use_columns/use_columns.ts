@@ -23,6 +23,8 @@ interface UseColumnsArgs {
   defaultColumns: EuiDataGridColumn[];
 }
 
+const EMPTY_FIELDS = [{ field: '*', include_unmapped: true }];
+
 const fieldTypeToDataGridColumnTypeMapper = (fieldType: string | undefined) => {
   if (fieldType === 'date') return 'datetime';
   if (fieldType === 'number') return 'numeric';
@@ -215,6 +217,19 @@ export const useColumns = ({
     setColumnsAndSave(populatedDefaultColumns);
   }, [browserFields, defaultColumns, setColumnsAndSave]);
 
+  /*
+   * In some case such security, we need some special fields such as threat.enrichments which are
+   * not fetched when passing only EMPTY_FIELDS. Hence, we will fetch all the fields that user has added to the table.
+   *
+   * Additionaly, system such as o11y needs fields which are not even added in the table such as rule_type_id and hence we
+   * additionly pass EMPTY_FIELDS so that it brings all fields apart from special fields
+   *
+   * */
+  const fieldsToFetch = useMemo(
+    () => [...columns.map((col) => ({ field: col.id, include_unmapped: true })), ...EMPTY_FIELDS],
+    [columns]
+  );
+
   return {
     columns,
     visibleColumns: getColumnIds(columns),
@@ -224,5 +239,6 @@ export const useColumns = ({
     onToggleColumn,
     onResetColumns,
     onChangeVisibleColumns: setColumnsByColumnIds,
+    fields: fieldsToFetch,
   };
 };

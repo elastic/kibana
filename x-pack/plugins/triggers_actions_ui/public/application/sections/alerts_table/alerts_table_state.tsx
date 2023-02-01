@@ -93,7 +93,6 @@ const AlertsTableWithBulkActionsContextComponent: React.FunctionComponent<{
 );
 
 const AlertsTableWithBulkActionsContext = React.memo(AlertsTableWithBulkActionsContextComponent);
-
 const AlertsTableState = ({
   alertsTableConfigurationRegistry,
   configurationId,
@@ -173,6 +172,7 @@ const AlertsTableState = ({
     onResetColumns,
     visibleColumns,
     onChangeVisibleColumns,
+    fields,
   } = useColumns({
     featureIds,
     storageAlertsTable,
@@ -184,11 +184,6 @@ const AlertsTableState = ({
   const finalBrowserFields = useMemo(
     () => propBrowserFields ?? browserFields,
     [propBrowserFields, browserFields]
-  );
-
-  const fieldsToFetch = useMemo(
-    () => columns.map((col) => ({ field: col.id, include_unmapped: true })),
-    [columns]
   );
 
   const [
@@ -204,7 +199,7 @@ const AlertsTableState = ({
       updatedAt,
     },
   ] = useFetchAlerts({
-    fields: fieldsToFetch,
+    fields,
     featureIds,
     query,
     pagination,

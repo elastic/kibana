@@ -90,7 +90,10 @@ describe('useFetchAlerts', () => {
   let clock: sinon.SinonFakeTimers;
   const args: FetchAlertsArgs = {
     featureIds: ['siem'],
-    fields: [{ field: '*', include_unmapped: true }],
+    fields: [
+      { field: 'kibana.rule.type.id', include_unmapped: true },
+      { field: '*', include_unmapped: true },
+    ],
     query: {
       ids: { values: ['alert-id-1'] },
     },
@@ -248,7 +251,7 @@ describe('useFetchAlerts', () => {
     expect(dataSearchMock).toHaveBeenCalledWith(
       {
         featureIds: args.featureIds,
-        fields: args.fields,
+        fields: [...args.fields],
         pagination: args.pagination,
         query: {
           ids: {
@@ -416,7 +419,7 @@ describe('useFetchAlerts', () => {
     expect(dataSearchMock).toHaveBeenCalledWith(
       {
         featureIds: args.featureIds,
-        fields: args.fields,
+        fields: [...args.fields],
         pagination: {
           pageIndex: 5,
           pageSize: 10,
@@ -438,9 +441,9 @@ describe('useFetchAlerts', () => {
     expect(dataSearchMock).toHaveBeenCalledWith(
       {
         featureIds: args.featureIds,
-        fields: args.fields,
+        fields: [...args.fields],
         pagination: {
-          pageIndex: 5,
+          pageIndex: 0,
           pageSize: 10,
         },
         query: {
