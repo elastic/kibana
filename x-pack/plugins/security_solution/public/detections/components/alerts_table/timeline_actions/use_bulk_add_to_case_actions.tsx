@@ -21,26 +21,15 @@ export const useBulkAddToCaseActions = ({ onClose, onSuccess }: UseAddToCaseActi
 
   const userCasesPermissions = useGetUserCasesPermissions();
 
-  const createCaseFlyout = useCallback(
-    (caseAttachments?: CaseAttachmentsWithoutOwner) =>
-      casesUi.hooks
-        .getUseCasesAddToNewCaseFlyout({
-          onClose,
-          onSuccess,
-        })
-        .open({ attachments: caseAttachments }),
-    [casesUi.hooks, onClose, onSuccess]
-  );
-  const selectCaseModal = useCallback(
-    (caseAttachments?: CaseAttachmentsWithoutOwner) =>
-      casesUi.hooks
-        .getUseCasesAddToExistingCaseModal({
-          onClose,
-          onRowClick: onSuccess,
-        })
-        .open({ attachments: caseAttachments }),
-    [casesUi.hooks, onClose, onSuccess]
-  );
+  const addToNewCase = casesUi.hooks.getUseCasesAddToNewCaseFlyout({
+    onClose,
+    onSuccess,
+  });
+
+  const addToExisting = casesUi.hooks.getUseCasesAddToExistingCaseModal({
+    onClose,
+    onRowClick: onSuccess,
+  });
 
   return useMemo(() => {
     return userCasesPermissions.create && userCasesPermissions.read
@@ -53,7 +42,8 @@ export const useBulkAddToCaseActions = ({ onClose, onSuccess }: UseAddToCaseActi
             disabledLabel: ADD_TO_CASE_DISABLED,
             onClick: (items?: TimelineItem[]) => {
               const caseAttachments = items ? casesUi.helpers.groupAlertsByRule(items) : [];
-              createCaseFlyout(caseAttachments);
+
+              addToNewCase.open({ attachments: caseAttachments });
             },
           },
           {
@@ -64,16 +54,17 @@ export const useBulkAddToCaseActions = ({ onClose, onSuccess }: UseAddToCaseActi
             'data-test-subj': 'attach-existing-case',
             onClick: (items?: TimelineItem[]) => {
               const caseAttachments = items ? casesUi.helpers.groupAlertsByRule(items) : [];
-              selectCaseModal(caseAttachments);
+
+              addToExisting.open({ attachments: caseAttachments });
             },
           },
         ]
       : [];
   }, [
     casesUi.helpers,
-    createCaseFlyout,
+    addToExisting,
+    addToNewCase,
     userCasesPermissions.create,
     userCasesPermissions.read,
-    selectCaseModal,
   ]);
 };
