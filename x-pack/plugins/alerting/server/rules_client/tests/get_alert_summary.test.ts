@@ -222,6 +222,7 @@ describe('getAlertSummary()', () => {
         ],
         Object {
           "end": "2019-02-12T21:01:22.479Z",
+          "filter": "NOT kibana.alerting.instance_id: summary",
           "page": 1,
           "per_page": 10000,
           "sort": Array [
@@ -264,6 +265,7 @@ describe('getAlertSummary()', () => {
         ],
         Object {
           "end": "2019-02-12T21:01:22.479Z",
+          "filter": "NOT kibana.alerting.instance_id: summary",
           "page": 1,
           "per_page": 10000,
           "sort": Array [
