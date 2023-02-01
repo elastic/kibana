@@ -161,12 +161,13 @@ export const createLogThresholdExecutor = (libs: InfraBackendLibs) =>
     };
 
     const [, , { logViews }] = await libs.getStartServices();
-    const { indices, timestampField, runtimeMappings } = await logViews
-      .getClient(savedObjectsClient, scopedClusterClient.asCurrentUser)
-      .getResolvedLogView('default'); // TODO: move to params
 
     try {
       const validatedParams = decodeOrThrow(ruleParamsRT)(params);
+
+      const { indices, timestampField, runtimeMappings } = await logViews
+        .getClient(savedObjectsClient, scopedClusterClient.asCurrentUser)
+        .getResolvedLogView(validatedParams.logView.logViewId);
 
       if (!isRatioRuleParams(validatedParams)) {
         await executeAlert(

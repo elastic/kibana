@@ -59,6 +59,7 @@ export interface AlertsTableStateProps {
   query: Pick<QueryDslQueryContainer, 'bool' | 'ids'>;
   pageSize?: number;
   showExpandToDetails: boolean;
+  showAlertStatusWithFlapping?: boolean;
 }
 
 export interface AlertsTableStorage {
@@ -96,6 +97,7 @@ const AlertsTableState = ({
   query,
   pageSize,
   showExpandToDetails,
+  showAlertStatusWithFlapping,
 }: AlertsTableStateProps) => {
   const { cases } = useKibana<{ cases: CaseUi }>().services;
 
@@ -246,6 +248,7 @@ const AlertsTableState = ({
       id,
       leadingControlColumns: [],
       showExpandToDetails,
+      showAlertStatusWithFlapping,
       trailingControlColumns: [],
       useFetchAlertsData,
       visibleColumns,
@@ -265,6 +268,7 @@ const AlertsTableState = ({
       pagination.pageSize,
       id,
       showExpandToDetails,
+      showAlertStatusWithFlapping,
       useFetchAlertsData,
       visibleColumns,
       updatedAt,
