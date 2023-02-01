@@ -33,6 +33,7 @@ describe('EntryPointsTable', () => {
     deduplicationFields: ['title'],
     documentCount: 10,
     entryPoints,
+    extractionRules: [],
     id: '6113e1407a2f2e6f42489794',
     sitemaps: [],
     url: 'https://www.elastic.co',
