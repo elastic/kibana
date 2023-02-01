@@ -23,8 +23,9 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { Query } from '@kbn/es-query';
+import { ChangePointTypeFilter } from './change_point_type_filter';
 import { SearchBarWrapper } from './search_bar';
-import { useChangePointDetectionContext } from './change_point_detection_context';
+import { ChangePointType, useChangePointDetectionContext } from './change_point_detection_context';
 import { MetricFieldSelector } from './metric_field_selector';
 import { SplitFieldSelector } from './split_field_selector';
 import { FunctionPicker } from './function_picker';
@@ -70,6 +71,13 @@ export const ChangePointDetectionPage: FC = () => {
     [updateRequestParams]
   );
 
+  const setChangePointType = useCallback(
+    (changePointType: ChangePointType) => {
+      updateRequestParams({ changePointType });
+    },
+    [updateRequestParams]
+  );
+
   const selectControlCss = { width: '300px' };
 
   return (
@@ -92,6 +100,12 @@ export const ChangePointDetectionPage: FC = () => {
         </EuiFlexItem>
         <EuiFlexItem grow={false} css={selectControlCss}>
           <SplitFieldSelector value={requestParams.splitField} onChange={setSplitField} />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false} css={selectControlCss}>
+          <ChangePointTypeFilter
+            value={requestParams.changePointType}
+            onChange={setChangePointType}
+          />
         </EuiFlexItem>
 
         <EuiFlexItem css={{ visibility: progress === 100 ? 'hidden' : 'visible' }} grow={false}>
