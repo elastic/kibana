@@ -243,9 +243,9 @@ export const CrawlDetailsSummary: React.FC<CrawlerDetailsSummaryProps> = ({
           <p>
             <FormattedMessage
               id="xpack.enterpriseSearch.crawler.crawlDetailsSummary.logsDisabledMessage"
-              defaultMessage="{link} in your enterprise-search.yml or user settings for more detailed crawl statistics."
+              defaultMessage="{configLink} in your enterprise-search.yml or user settings for more detailed crawl statistics."
               values={{
-                link: (
+                configLink: (
                   <EuiLink href={docLinks.enterpriseSearchConfig} external>
                     {i18n.translate(
                       'xpack.enterpriseSearch.crawler.crawlDetailsSummary.configLink',
