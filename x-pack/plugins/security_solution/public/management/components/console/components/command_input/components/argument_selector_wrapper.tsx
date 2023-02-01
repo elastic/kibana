@@ -16,6 +16,10 @@ import type { CommandArgDefinition, CommandArgumentValueSelectorProps } from '..
 const ArgumentSelectorWrapperContainer = styled.span`
   user-select: none;
 
+  .argName {
+    white-space: nowrap;
+  }
+
   .selectorContainer {
     max-width: 25vw;
     display: flex;

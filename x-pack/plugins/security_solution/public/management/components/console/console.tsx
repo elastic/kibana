@@ -27,7 +27,10 @@ const ConsoleWindow = styled.div`
 
   .layout {
     height: 100%;
+    width: 100%;
     min-height: 300px;
+    min-width: 300px;
+    overflow: hidden;
 
     &-hideOverflow {
       overflow: hidden;
@@ -74,6 +77,10 @@ const ConsoleWindow = styled.div`
     &-historyViewport {
       height: 100%;
       overflow-x: hidden;
+    }
+
+    .euiFlexItem:not(.noMinWidth) {
+      min-width: 0;
     }
   }
 
