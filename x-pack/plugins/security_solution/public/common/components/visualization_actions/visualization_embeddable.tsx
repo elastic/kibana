@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect } from 'react';
+import React, { useCallback, useEffect, useRef } from 'react';
 import { useDispatch } from 'react-redux';
 import { css } from 'styled-components';
 import { ChartLabel } from '../../../overview/components/detection_response/alerts_by_status/chart_label';
@@ -18,6 +18,7 @@ import { InputsModelId } from '../../store/inputs/constants';
 import { useRefetchByRestartingSession } from '../page/use_refetch_by_session';
 import { LensEmbeddable } from './lens_embeddable';
 import type { EmbeddableData, VisualizationEmbeddableProps } from './types';
+import { useSourcererDataView } from '../../containers/sourcerer';
 
 const VisualizationEmbeddableComponent: React.FC<VisualizationEmbeddableProps> = (props) => {
   const dispatch = useDispatch();
@@ -35,6 +36,9 @@ const VisualizationEmbeddableComponent: React.FC<VisualizationEmbeddableProps> =
       inputId,
       queryId: id,
     });
+  const { indicesExist } = useSourcererDataView(lensProps.scopeId);
+
+  const memorizedTimerange = useRef(lensProps.timerange);
   const getGlobalQuery = inputsSelectors.globalQueryByIdSelector();
   const { inspect, searchSessionId } = useDeepEqualSelector((state) => getGlobalQuery(state, id));
   const visualizationData = inspect?.response
@@ -71,7 +75,18 @@ const VisualizationEmbeddableComponent: React.FC<VisualizationEmbeddableProps> =
   );
 
   useEffect(() => {
-    // This handles refetch when (alert) indices not found
+    // This handles timerange update when (alert) indices not found
+    if (
+      (!indicesExist && memorizedTimerange.current?.from !== lensProps.timerange.from) ||
+      memorizedTimerange.current?.to !== lensProps.timerange.to
+    ) {
+      memorizedTimerange.current = lensProps.timerange;
+      dispatch(inputsActions.deleteOneQuery({ inputId, id }));
+    }
+  }, [dispatch, id, indicesExist, inputId, lensProps.timerange]);
+
+  useEffect(() => {
+    // This handles initial mount and refetch when (alert) indices not found
     if (!searchSessionId) {
       setTimeout(() => {
         dispatch(
