@@ -47,6 +47,7 @@ const enabledActionTypes = [
   '.tines',
   '.webhook',
   '.xmatters',
+  '.torq',
   'test.sub-action-connector',
   'test.sub-action-connector-without-sub-actions',
   'test.authorization',
@@ -185,6 +186,7 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
           `--xpack.alerting.rules.run.actions.connectorTypeOverrides=${JSON.stringify([
             { id: 'test.capped', max: '1' },
           ])}`,
+          `--xpack.alerting.enableFrameworkAlerts=true`,
           `--xpack.actions.enabledActionTypes=${JSON.stringify(enabledActionTypes)}`,
           `--xpack.actions.rejectUnauthorized=${rejectUnauthorized}`,
           `--xpack.actions.microsoftGraphApiUrl=${servers.kibana.protocol}://${servers.kibana.hostname}:${servers.kibana.port}/api/_actions-FTS-external-service-simulators/exchange/users/test@/sendMail`,

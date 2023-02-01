@@ -23,6 +23,7 @@ jest.mock('react-router-dom', () => {
 
   return {
     ...original,
+    useLocation: jest.fn().mockReturnValue({ pathname: '' }),
     useHistory: () => ({
       useHistory: jest.fn(),
     }),
@@ -37,8 +38,8 @@ jest.mock('../visualization_actions', () => ({
 
 jest.mock('uuid', () => {
   return {
-    v1: jest.fn(() => 'uuid.v1()'),
-    v4: jest.fn(() => 'uuid.v4()'),
+    v1: jest.fn(() => 'uuidv1()'),
+    v4: jest.fn(() => 'uuidv4()'),
   };
 });
 

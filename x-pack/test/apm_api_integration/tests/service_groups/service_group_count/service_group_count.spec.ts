@@ -4,10 +4,15 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import expect from '@kbn/expect';
 import { ApmRuleType } from '@kbn/apm-plugin/common/rules/apm_rule_types';
+import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
 import { waitForActiveAlert } from '../../../common/utils/wait_for_active_alert';
+import {
+  createServiceGroupApi,
+  deleteAllServiceGroups,
+  getServiceGroupCounts,
+} from '../service_groups_api_methods';
 import { generateData } from './generate_data';
 
 export default function ApiTest({ getService }: FtrProviderContext) {
@@ -20,61 +25,6 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   const log = getService('log');
   const start = Date.now() - 24 * 60 * 60 * 1000;
   const end = Date.now();
-
-  async function getServiceGroupCounts() {
-    return apmApiClient.readUser({
-      endpoint: 'GET /internal/apm/service-group/counts',
-    });
-  }
-
-  async function saveServiceGroup({
-    serviceGroupId,
-    groupName,
-    kuery,
-    description,
-    color,
-  }: {
-    serviceGroupId?: string;
-    groupName: string;
-    kuery: string;
-    description?: string;
-    color?: string;
-  }) {
-    return apmApiClient.writeUser({
-      endpoint: 'POST /internal/apm/service-group',
-      params: {
-        query: {
-          serviceGroupId,
-        },
-        body: {
-          groupName,
-          kuery,
-          description,
-          color,
-        },
-      },
-    });
-  }
-
-  async function getServiceGroupsApi() {
-    return apmApiClient.writeUser({
-      endpoint: 'GET /internal/apm/service-groups',
-    });
-  }
-
-  async function deleteAllServiceGroups() {
-    return await getServiceGroupsApi().then((response) => {
-      const promises = response.body.serviceGroups.map((item) => {
-        if (item.id) {
-          return apmApiClient.writeUser({
-            endpoint: 'DELETE /internal/apm/service-group',
-            params: { query: { serviceGroupId: item.id } },
-          });
-        }
-      });
-      return Promise.all(promises);
-    });
-  }
 
   async function createRule() {
     return supertest
@@ -107,11 +57,13 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       const [, { body: synthbeansServiceGroup }, { body: opbeansServiceGroup }] = await Promise.all(
         [
           generateData({ start, end, synthtraceEsClient }),
-          saveServiceGroup({
+          createServiceGroupApi({
+            apmApiClient,
             groupName: 'synthbeans',
             kuery: 'service.name: synth*',
           }),
-          saveServiceGroup({
+          createServiceGroupApi({
+            apmApiClient,
             groupName: 'opbeans',
             kuery: 'service.name: opbeans*',
           }),
@@ -122,12 +74,12 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     });
 
     after(async () => {
-      await deleteAllServiceGroups();
+      await deleteAllServiceGroups(apmApiClient);
       await synthtraceEsClient.clean();
     });
 
     it('returns the correct number of services', async () => {
-      const response = await getServiceGroupCounts();
+      const response = await getServiceGroupCounts(apmApiClient);
       expect(response.status).to.be(200);
       expect(Object.keys(response.body).length).to.be(2);
       expect(response.body[synthbeansServiceGroupId]).to.have.property('services', 2);
@@ -148,7 +100,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       });
 
       it('returns the correct number of alerts', async () => {
-        const response = await getServiceGroupCounts();
+        const response = await getServiceGroupCounts(apmApiClient);
         expect(response.status).to.be(200);
         expect(Object.keys(response.body).length).to.be(2);
         expect(response.body[synthbeansServiceGroupId]).to.have.property('alerts', 1);

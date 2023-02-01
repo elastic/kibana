@@ -6,14 +6,15 @@
  */
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import createContainer from 'constate';
-import { useCallback } from 'react';
+import { useCallback, useEffect } from 'react';
 import { buildEsQuery, Filter, Query, TimeRange } from '@kbn/es-query';
-import { debounce } from 'lodash';
 import type { SavedQuery } from '@kbn/data-plugin/public';
+import { debounce } from 'lodash';
+import deepEqual from 'fast-deep-equal';
 import type { InfraClientStartDeps } from '../../../../types';
 import { useMetricsDataViewContext } from './use_data_view';
 import { useSyncKibanaTimeFilterTime } from '../../../../hooks/use_kibana_timefilter_time';
-import { useHostsUrlState, INITIAL_DATE_RANGE } from './use_hosts_url_state';
+import { useHostsUrlState, INITIAL_DATE_RANGE } from './use_unified_search_url_state';
 
 export const useUnifiedSearch = () => {
   const { state, dispatch, getRangeInTimestamp, getTime } = useHostsUrlState();
@@ -30,6 +31,37 @@ export const useUnifiedSearch = () => {
 
   const { filterManager } = queryManager;
 
+  useEffect(() => {
+    const { filters } = state;
+    if (!deepEqual(filters, filterManager.getFilters())) {
+      filterManager.setFilters(filters);
+    }
+  }, [filterManager, state]);
+
+  // This will listen and react to all changes in filterManager and timefilter values,
+  // to allow other components in the page to communicate with the unified search
+  useEffect(() => {
+    const next = () => {
+      const globalFilters = filterManager.getFilters();
+      debounceOnSubmit({
+        filters: globalFilters,
+        dateRange: getTime(),
+      });
+    };
+
+    const filterSubscription = filterManager.getUpdates$().subscribe({
+      next,
+    });
+    const timeSubscription = queryManager.timefilter.timefilter.getTimeUpdate$().subscribe({
+      next,
+    });
+
+    return () => {
+      filterSubscription.unsubscribe();
+      timeSubscription.unsubscribe();
+    };
+  });
+
   const onSubmit = useCallback(
     (data?: {
       query?: Query;
@@ -40,22 +72,18 @@ export const useUnifiedSearch = () => {
       const { query, dateRange, filters, panelFilters } = data ?? {};
       const newDateRange = dateRange ?? getTime();
 
-      if (filters) {
-        filterManager.setFilters(filters);
-      }
-
       dispatch({
         type: 'setQuery',
         payload: {
           query,
-          filters: filters ? filterManager.getFilters() : undefined,
+          filters,
           dateRange: newDateRange,
           dateRangeTimestamp: getRangeInTimestamp(newDateRange),
           panelFilters,
         },
       });
     },
-    [getTime, dispatch, filterManager, getRangeInTimestamp]
+    [getTime, dispatch, getRangeInTimestamp]
   );
 
   // This won't prevent onSubmit from being fired twice when `clear filters` is clicked,
@@ -107,7 +135,7 @@ export const useUnifiedSearch = () => {
     onSubmit: debounceOnSubmit,
     saveQuery,
     unifiedSearchQuery: state.query,
-    unifiedSearchDateRange: getTime(),
+    unifiedSearchDateRange: state.dateRange,
     unifiedSearchFilters: state.filters,
   };
 };

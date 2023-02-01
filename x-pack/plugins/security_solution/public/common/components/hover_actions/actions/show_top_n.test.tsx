@@ -34,6 +34,14 @@ jest.mock('../../../lib/kibana', () => {
   };
 });
 
+jest.mock('react-router-dom', () => {
+  const original = jest.requireActual('react-router-dom');
+  return {
+    ...original,
+    useLocation: jest.fn().mockReturnValue({ pathname: '/test' }),
+  };
+});
+
 describe('show topN button', () => {
   const defaultProps = {
     field: 'signal.rule.name',

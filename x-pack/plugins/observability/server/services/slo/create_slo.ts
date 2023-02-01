@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import uuid from 'uuid';
+import { v1 as uuidv1 } from 'uuid';
 
 import { CreateSLOParams, CreateSLOResponse } from '@kbn/slo-schema';
 
@@ -55,13 +55,14 @@ export class CreateSLO {
     const now = new Date();
     return {
       ...params,
-      id: uuid.v1(),
+      id: uuidv1(),
       settings: {
         timestampField: params.settings?.timestampField ?? '@timestamp',
         syncDelay: params.settings?.syncDelay ?? new Duration(1, DurationUnit.Minute),
         frequency: params.settings?.frequency ?? new Duration(1, DurationUnit.Minute),
       },
       revision: 1,
+      enabled: true,
       createdAt: now,
       updatedAt: now,
     };

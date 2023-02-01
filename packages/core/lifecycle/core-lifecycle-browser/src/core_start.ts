@@ -46,7 +46,10 @@ export interface CoreStart {
   executionContext: ExecutionContextStart;
   /** {@link HttpStart} */
   http: HttpStart;
-  /** {@link SavedObjectsStart} */
+  /**
+   * {@link SavedObjectsStart}
+   * @deprecated See https://github.com/elastic/kibana/issues/149098
+   */
   savedObjects: SavedObjectsStart;
   /** {@link I18nStart} */
   i18n: I18nStart;

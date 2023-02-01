@@ -1,0 +1,4948 @@
+{
+  "id": "@kbn/securitysolution-ecs",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/securitysolution-ecs",
+        "id": "def-common.AgentEcs",
+        "type": "Interface",
+        "tags": [],
+        "label": "AgentEcs",
+        "description": [],
+        "path": "packages/kbn-securitysolution-ecs/src/agent/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/securitysolution-ecs",
+            "id": "def-common.AgentEcs.type",
+            "type": "Array",
+            "tags": [],
+            "label": "type",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "packages/kbn-securitysolution-ecs/src/agent/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-ecs",
+            "id": "def-common.AgentEcs.id",
+            "type": "Array",
+            "tags": [],
+            "label": "id",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "packages/kbn-securitysolution-ecs/src/agent/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/securitysolution-ecs",
+        "id": "def-common.AuditdEcs",
+        "type": "Interface",
+        "tags": [],
+        "label": "AuditdEcs",
+        "description": [],
+        "path": "packages/kbn-securitysolution-ecs/src/auditd/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/securitysolution-ecs",
+            "id": "def-common.AuditdEcs.result",
+            "type": "Array",
+            "tags": [],
+            "label": "result",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "packages/kbn-securitysolution-ecs/src/auditd/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-ecs",
+            "id": "def-common.AuditdEcs.session",
+            "type": "Array",
+            "tags": [],
+            "label": "session",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "packages/kbn-securitysolution-ecs/src/auditd/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-ecs",
+            "id": "def-common.AuditdEcs.data",
+            "type": "Object",
+            "tags": [],
+            "label": "data",
+            "description": [],
+            "signature": [
+              "AuditdDataEcs",
+              " | undefined"
+            ],
+            "path": "packages/kbn-securitysolution-ecs/src/auditd/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-ecs",
+            "id": "def-common.AuditdEcs.summary",
+            "type": "Object",
+            "tags": [],
+            "label": "summary",
+            "description": [],
+            "signature": [
+              "SummaryEcs",
+              " | undefined"
+            ],
+            "path": "packages/kbn-securitysolution-ecs/src/auditd/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-ecs",
+            "id": "def-common.AuditdEcs.sequence",
+            "type": "Array",
+            "tags": [],
+            "label": "sequence",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "packages/kbn-securitysolution-ecs/src/auditd/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/securitysolution-ecs",
+        "id": "def-common.CloudEcs",
+        "type": "Interface",
+        "tags": [],
+        "label": "CloudEcs",
+        "description": [],
+        "path": "packages/kbn-securitysolution-ecs/src/cloud/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/securitysolution-ecs",
+            "id": "def-common.CloudEcs.instance",
+            "type": "Object",
+            "tags": [],
+            "label": "instance",
+            "description": [],
+            "signature": [
+              "CloudInstanceEcs",
+              " | undefined"
+            ],
+            "path": "packages/kbn-securitysolution-ecs/src/cloud/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-ecs",
+            "id": "def-common.CloudEcs.machine",
+            "type": "Object",
+            "tags": [],
+            "label": "machine",
+            "description": [],
+            "signature": [
+              "CloudMachineEcs",
+              " | undefined"
+            ],
+            "path": "packages/kbn-securitysolution-ecs/src/cloud/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-ecs",
+            "id": "def-common.CloudEcs.provider",
+            "type": "Array",
+            "tags": [],
+            "label": "provider",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "packages/kbn-securitysolution-ecs/src/cloud/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-ecs",
+            "id": "def-common.CloudEcs.region",
+            "type": "Array",
+            "tags": [],
+            "label": "region",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "packages/kbn-securitysolution-ecs/src/cloud/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/securitysolution-ecs",
+        "id": "def-common.CodeSignature",
+        "type": "Interface",
+        "tags": [],
+        "label": "CodeSignature",
+        "description": [],
+        "path": "packages/kbn-securitysolution-ecs/src/file/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/securitysolution-ecs",
+            "id": "def-common.CodeSignature.subject_name",
+            "type": "Array",
+            "tags": [],
+            "label": "subject_name",
+            "description": [],
+            "signature": [
+              "string[]"
+            ],
+            "path": "packages/kbn-securitysolution-ecs/src/file/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-ecs",
+            "id": "def-common.CodeSignature.trusted",
+            "type": "Array",
+            "tags": [],
+            "label": "trusted",
+            "description": [],
+            "signature": [
+              "string[]"
+            ],
+            "path": "packages/kbn-securitysolution-ecs/src/file/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/securitysolution-ecs",
+        "id": "def-common.DestinationEcs",
+        "type": "Interface",
+        "tags": [],
+        "label": "DestinationEcs",
+        "description": [],
+        "path": "packages/kbn-securitysolution-ecs/src/destination/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/securitysolution-ecs",
+            "id": "def-common.DestinationEcs.bytes",
+            "type": "Array",
+            "tags": [],
+            "label": "bytes",
+            "description": [],
+            "signature": [
+              "number[] | undefined"
+            ],
+            "path": "packages/kbn-securitysolution-ecs/src/destination/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-ecs",
+            "id": "def-common.DestinationEcs.ip",
+            "type": "Array",
+            "tags": [],
+            "label": "ip",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "packages/kbn-securitysolution-ecs/src/destination/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-ecs",
+            "id": "def-common.DestinationEcs.port",
+            "type": "Array",
+            "tags": [],
+            "label": "port",
+            "description": [],
+            "signature": [
+              "number[] | undefined"
+            ],
+            "path": "packages/kbn-securitysolution-ecs/src/destination/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-ecs",
+            "id": "def-common.DestinationEcs.domain",
+            "type": "Array",
+            "tags": [],
+            "label": "domain",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "packages/kbn-securitysolution-ecs/src/destination/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-ecs",
+            "id": "def-common.DestinationEcs.geo",
+            "type": "Object",
+            "tags": [],
+            "label": "geo",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/securitysolution-ecs",
+                "scope": "common",
+                "docId": "kibKbnSecuritysolutionEcsPluginApi",
+                "section": "def-common.GeoEcs",
+                "text": "GeoEcs"
+              },
+              " | undefined"
+            ],
+            "path": "packages/kbn-securitysolution-ecs/src/destination/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-ecs",
+            "id": "def-common.DestinationEcs.packets",
+            "type": "Array",
+            "tags": [],
+            "label": "packets",
+            "description": [],
+            "signature": [
+              "number[] | undefined"
+            ],
+            "path": "packages/kbn-securitysolution-ecs/src/destination/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/securitysolution-ecs",
+        "id": "def-common.DllEcs",
+        "type": "Interface",
+        "tags": [],
+        "label": "DllEcs",
+        "description": [],
+        "path": "packages/kbn-securitysolution-ecs/src/dll/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/securitysolution-ecs",
+            "id": "def-common.DllEcs.path",
+            "type": "string",
+            "tags": [],
+            "label": "path",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/kbn-securitysolution-ecs/src/dll/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-ecs",
+            "id": "def-common.DllEcs.code_signature",
+            "type": "Object",
+            "tags": [],
+            "label": "code_signature",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/securitysolution-ecs",
+                "scope": "common",
+                "docId": "kibKbnSecuritysolutionEcsPluginApi",
+                "section": "def-common.CodeSignature",
+                "text": "CodeSignature"
+              },
+              " | undefined"
+            ],
+            "path": "packages/kbn-securitysolution-ecs/src/dll/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-ecs",
+            "id": "def-common.DllEcs.pe",
+            "type": "Object",
+            "tags": [],
+            "label": "pe",
+            "description": [],
+            "signature": [
+              "ProcessPe",
+              " | undefined"
+            ],
+            "path": "packages/kbn-securitysolution-ecs/src/dll/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/securitysolution-ecs",
+        "id": "def-common.DnsEcs",
+        "type": "Interface",
+        "tags": [],
+        "label": "DnsEcs",
+        "description": [],
+        "path": "packages/kbn-securitysolution-ecs/src/dns/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/securitysolution-ecs",
+            "id": "def-common.DnsEcs.question",
+            "type": "Object",
+            "tags": [],
+            "label": "question",
+            "description": [],
+            "signature": [
+              "DnsQuestionEcs",
+              " | undefined"
+            ],
+            "path": "packages/kbn-securitysolution-ecs/src/dns/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-ecs",
+            "id": "def-common.DnsEcs.resolved_ip",
+            "type": "Array",
+            "tags": [],
+            "label": "resolved_ip",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "packages/kbn-securitysolution-ecs/src/dns/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-ecs",
+            "id": "def-common.DnsEcs.response_code",
+            "type": "Array",
+            "tags": [],
+            "label": "response_code",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "packages/kbn-securitysolution-ecs/src/dns/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/securitysolution-ecs",
+        "id": "def-common.EcsSecurityExtension",
+        "type": "Interface",
+        "tags": [],
+        "label": "EcsSecurityExtension",
+        "description": [],
+        "path": "packages/kbn-securitysolution-ecs/src/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/securitysolution-ecs",
+            "id": "def-common.EcsSecurityExtension.agent",
+            "type": "Object",
+            "tags": [],
+            "label": "agent",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/securitysolution-ecs",
+                "scope": "common",
+                "docId": "kibKbnSecuritysolutionEcsPluginApi",
+                "section": "def-common.AgentEcs",
+                "text": "AgentEcs"
+              },
+              " | undefined"
+            ],
+            "path": "packages/kbn-securitysolution-ecs/src/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-ecs",
+            "id": "def-common.EcsSecurityExtension.destination",
+            "type": "Object",
+            "tags": [],
+            "label": "destination",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/securitysolution-ecs",
+                "scope": "common",
+                "docId": "kibKbnSecuritysolutionEcsPluginApi",
+                "section": "def-common.DestinationEcs",
+                "text": "DestinationEcs"
+              },
+              " | undefined"
+            ],
+            "path": "packages/kbn-securitysolution-ecs/src/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-ecs",
+            "id": "def-common.EcsSecurityExtension.dns",
+            "type": "Object",
+            "tags": [],
+            "label": "dns",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/securitysolution-ecs",
+                "scope": "common",
+                "docId": "kibKbnSecuritysolutionEcsPluginApi",
+                "section": "def-common.DnsEcs",
+                "text": "DnsEcs"
+              },
+              " | undefined"
+            ],
+            "path": "packages/kbn-securitysolution-ecs/src/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-ecs",
+            "id": "def-common.EcsSecurityExtension.event",
+            "type": "Object",
+            "tags": [],
+            "label": "event",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/securitysolution-ecs",
+                "scope": "common",
+                "docId": "kibKbnSecuritysolutionEcsPluginApi",
+                "section": "def-common.EventEcs",
+                "text": "EventEcs"
+              },
+              " | undefined"
+            ],
+            "path": "packages/kbn-securitysolution-ecs/src/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-ecs",
+            "id": "def-common.EcsSecurityExtension.file",
+            "type": "Object",
+            "tags": [],
+            "label": "file",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/securitysolution-ecs",
+                "scope": "common",
+                "docId": "kibKbnSecuritysolutionEcsPluginApi",
+                "section": "def-common.FileEcs",
+                "text": "FileEcs"
+              },
+              " | undefined"
+            ],
+            "path": "packages/kbn-securitysolution-ecs/src/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-ecs",
+            "id": "def-common.EcsSecurityExtension.host",
+            "type": "Object",
+            "tags": [],
+            "label": "host",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/securitysolution-ecs",
+                "scope": "common",
+                "docId": "kibKbnSecuritysolutionEcsPluginApi",
+                "section": "def-common.HostEcs",
+                "text": "HostEcs"
+              },
+              " | undefined"
+            ],
+            "path": "packages/kbn-securitysolution-ecs/src/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-ecs",
+            "id": "def-common.EcsSecurityExtension.http",
+            "type": "Object",
+            "tags": [],
+            "label": "http",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/securitysolution-ecs",
+                "scope": "common",
+                "docId": "kibKbnSecuritysolutionEcsPluginApi",
+                "section": "def-common.HttpEcs",
+                "text": "HttpEcs"
+              },
+              " | undefined"
+            ],
+            "path": "packages/kbn-securitysolution-ecs/src/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-ecs",
+            "id": "def-common.EcsSecurityExtension.message",
+            "type": "Array",
+            "tags": [],
+            "label": "message",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "packages/kbn-securitysolution-ecs/src/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-ecs",
+            "id": "def-common.EcsSecurityExtension.network",
+            "type": "Object",
+            "tags": [],
+            "label": "network",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/securitysolution-ecs",
+                "scope": "common",
+                "docId": "kibKbnSecuritysolutionEcsPluginApi",
+                "section": "def-common.NetworkEcs",
+                "text": "NetworkEcs"
+              },
+              " | undefined"
+            ],
+            "path": "packages/kbn-securitysolution-ecs/src/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-ecs",
+            "id": "def-common.EcsSecurityExtension.process",
+            "type": "Object",
+            "tags": [],
+            "label": "process",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/securitysolution-ecs",
+                "scope": "common",
+                "docId": "kibKbnSecuritysolutionEcsPluginApi",
+                "section": "def-common.ProcessEcs",
+                "text": "ProcessEcs"
+              },
+              " | undefined"
+            ],
+            "path": "packages/kbn-securitysolution-ecs/src/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-ecs",
+            "id": "def-common.EcsSecurityExtension.registry",
+            "type": "Object",
+            "tags": [],
+            "label": "registry",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/securitysolution-ecs",
+                "scope": "common",
+                "docId": "kibKbnSecuritysolutionEcsPluginApi",
+                "section": "def-common.RegistryEcs",
+                "text": "RegistryEcs"
+              },
+              " | undefined"
+            ],
+            "path": "packages/kbn-securitysolution-ecs/src/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-ecs",
+            "id": "def-common.EcsSecurityExtension.rule",
+            "type": "Object",
+            "tags": [],
+            "label": "rule",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/securitysolution-ecs",
+                "scope": "common",
+                "docId": "kibKbnSecuritysolutionEcsPluginApi",
+                "section": "def-common.RuleEcs",
+                "text": "RuleEcs"
+              },
+              " | undefined"
+            ],
+            "path": "packages/kbn-securitysolution-ecs/src/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-ecs",
+            "id": "def-common.EcsSecurityExtension.source",
+            "type": "Object",
+            "tags": [],
+            "label": "source",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/securitysolution-ecs",
+                "scope": "common",
+                "docId": "kibKbnSecuritysolutionEcsPluginApi",
+                "section": "def-common.SourceEcs",
+                "text": "SourceEcs"
+              },
+              " | undefined"
+            ],
+            "path": "packages/kbn-securitysolution-ecs/src/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-ecs",
+            "id": "def-common.EcsSecurityExtension.threat",
+            "type": "Object",
+            "tags": [],
+            "label": "threat",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/securitysolution-ecs",
+                "scope": "common",
+                "docId": "kibKbnSecuritysolutionEcsPluginApi",
+                "section": "def-common.ThreatEcs",
+                "text": "ThreatEcs"
+              },
+              " | undefined"
+            ],
+            "path": "packages/kbn-securitysolution-ecs/src/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-ecs",
+            "id": "def-common.EcsSecurityExtension.tls",
+            "type": "Object",
+            "tags": [],
+            "label": "tls",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/securitysolution-ecs",
+                "scope": "common",
+                "docId": "kibKbnSecuritysolutionEcsPluginApi",
+                "section": "def-common.TlsEcs",
+                "text": "TlsEcs"
+              },
+              " | undefined"
+            ],
+            "path": "packages/kbn-securitysolution-ecs/src/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-ecs",
+            "id": "def-common.EcsSecurityExtension.url",
+            "type": "Object",
+            "tags": [],
+            "label": "url",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/securitysolution-ecs",
+                "scope": "common",
+                "docId": "kibKbnSecuritysolutionEcsPluginApi",
+                "section": "def-common.UrlEcs",
+                "text": "UrlEcs"
+              },
+              " | undefined"
+            ],
+            "path": "packages/kbn-securitysolution-ecs/src/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-ecs",
+            "id": "def-common.EcsSecurityExtension.user",
+            "type": "Object",
+            "tags": [],
+            "label": "user",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/securitysolution-ecs",
+                "scope": "common",
+                "docId": "kibKbnSecuritysolutionEcsPluginApi",
+                "section": "def-common.UserEcs",
+                "text": "UserEcs"
+              },
+              " | undefined"
+            ],
+            "path": "packages/kbn-securitysolution-ecs/src/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-ecs",
+            "id": "def-common.EcsSecurityExtension._id",
+            "type": "string",
+            "tags": [],
+            "label": "_id",
+            "description": [],
+            "path": "packages/kbn-securitysolution-ecs/src/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-ecs",
+            "id": "def-common.EcsSecurityExtension._index",
+            "type": "string",
+            "tags": [],
+            "label": "_index",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/kbn-securitysolution-ecs/src/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-ecs",
+            "id": "def-common.EcsSecurityExtension.auditd",
+            "type": "Object",
+            "tags": [],
+            "label": "auditd",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/securitysolution-ecs",
+                "scope": "common",
+                "docId": "kibKbnSecuritysolutionEcsPluginApi",
+                "section": "def-common.AuditdEcs",
+                "text": "AuditdEcs"
+              },
+              " | undefined"
+            ],
+            "path": "packages/kbn-securitysolution-ecs/src/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-ecs",
+            "id": "def-common.EcsSecurityExtension.endgame",
+            "type": "Object",
+            "tags": [],
+            "label": "endgame",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/securitysolution-ecs",
+                "scope": "common",
+                "docId": "kibKbnSecuritysolutionEcsPluginApi",
+                "section": "def-common.EndgameEcs",
+                "text": "EndgameEcs"
+              },
+              " | undefined"
+            ],
+            "path": "packages/kbn-securitysolution-ecs/src/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-ecs",
+            "id": "def-common.EcsSecurityExtension.geo",
+            "type": "Object",
+            "tags": [],
+            "label": "geo",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/securitysolution-ecs",
+                "scope": "common",
+                "docId": "kibKbnSecuritysolutionEcsPluginApi",
+                "section": "def-common.GeoEcs",
+                "text": "GeoEcs"
+              },
+              " | undefined"
+            ],
+            "path": "packages/kbn-securitysolution-ecs/src/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-ecs",
+            "id": "def-common.EcsSecurityExtension.kibana",
+            "type": "Object",
+            "tags": [],
+            "label": "kibana",
+            "description": [],
+            "signature": [
+              "{ alert: ",
+              "SignalEcsAAD",
+              "; } | undefined"
+            ],
+            "path": "packages/kbn-securitysolution-ecs/src/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-ecs",
+            "id": "def-common.EcsSecurityExtension.kibana.alert.rule.parameters",
+            "type": "Object",
+            "tags": [],
+            "label": "'kibana.alert.rule.parameters'",
+            "description": [],
+            "signature": [
+              "{ index: string[]; data_view_id?: string | undefined; } | undefined"
+            ],
+            "path": "packages/kbn-securitysolution-ecs/src/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-ecs",
+            "id": "def-common.EcsSecurityExtension.kibana.alert.workflow_status",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "'kibana.alert.workflow_status'",
+            "description": [],
+            "signature": [
+              "\"open\" | \"closed\" | \"in-progress\" | \"acknowledged\" | undefined"
+            ],
+            "path": "packages/kbn-securitysolution-ecs/src/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-ecs",
+            "id": "def-common.EcsSecurityExtension.Memory_protection",
+            "type": "Object",
+            "tags": [],
+            "label": "Memory_protection",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/securitysolution-ecs",
+                "scope": "common",
+                "docId": "kibKbnSecuritysolutionEcsPluginApi",
+                "section": "def-common.MemoryProtection",
+                "text": "MemoryProtection"
+              },
+              " | undefined"
+            ],
+            "path": "packages/kbn-securitysolution-ecs/src/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-ecs",
+            "id": "def-common.EcsSecurityExtension.Ransomware",
+            "type": "Object",
+            "tags": [],
+            "label": "Ransomware",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/securitysolution-ecs",
+                "scope": "common",
+                "docId": "kibKbnSecuritysolutionEcsPluginApi",
+                "section": "def-common.Ransomware",
+                "text": "Ransomware"
+              },
+              " | undefined"
+            ],
+            "path": "packages/kbn-securitysolution-ecs/src/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-ecs",
+            "id": "def-common.EcsSecurityExtension.Target",
+            "type": "Object",
+            "tags": [],
+            "label": "Target",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/securitysolution-ecs",
+                "scope": "common",
+                "docId": "kibKbnSecuritysolutionEcsPluginApi",
+                "section": "def-common.Target",
+                "text": "Target"
+              },
+              " | undefined"
+            ],
+            "path": "packages/kbn-securitysolution-ecs/src/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-ecs",
+            "id": "def-common.EcsSecurityExtension.dll",
+            "type": "Object",
+            "tags": [],
+            "label": "dll",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/securitysolution-ecs",
+                "scope": "common",
+                "docId": "kibKbnSecuritysolutionEcsPluginApi",
+                "section": "def-common.DllEcs",
+                "text": "DllEcs"
+              },
+              " | undefined"
+            ],
+            "path": "packages/kbn-securitysolution-ecs/src/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-ecs",
+            "id": "def-common.EcsSecurityExtension.eql",
+            "type": "Object",
+            "tags": [],
+            "label": "eql",
+            "description": [],
+            "signature": [
+              "{ parentId: string; sequenceNumber: string; } | undefined"
+            ],
+            "path": "packages/kbn-securitysolution-ecs/src/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-ecs",
+            "id": "def-common.EcsSecurityExtension.signal",
+            "type": "Object",
+            "tags": [],
+            "label": "signal",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/securitysolution-ecs",
+                "scope": "common",
+                "docId": "kibKbnSecuritysolutionEcsPluginApi",
+                "section": "def-common.SignalEcs",
+                "text": "SignalEcs"
+              },
+              " | undefined"
+            ],
+            "path": "packages/kbn-securitysolution-ecs/src/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-ecs",
+            "id": "def-common.EcsSecurityExtension.suricata",
+            "type": "Object",
+            "tags": [],
+            "label": "suricata",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/securitysolution-ecs",
+                "scope": "common",
+                "docId": "kibKbnSecuritysolutionEcsPluginApi",
+                "section": "def-common.SuricataEcs",
+                "text": "SuricataEcs"
+              },
+              " | undefined"
+            ],
+            "path": "packages/kbn-securitysolution-ecs/src/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-ecs",
+            "id": "def-common.EcsSecurityExtension.system",
+            "type": "Object",
+            "tags": [],
+            "label": "system",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/securitysolution-ecs",
+                "scope": "common",
+                "docId": "kibKbnSecuritysolutionEcsPluginApi",
+                "section": "def-common.SystemEcs",
+                "text": "SystemEcs"
+              },
+              " | undefined"
+            ],
+            "path": "packages/kbn-securitysolution-ecs/src/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-ecs",
+            "id": "def-common.EcsSecurityExtension.timestamp",
+            "type": "string",
+            "tags": [],
+            "label": "timestamp",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/kbn-securitysolution-ecs/src/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-ecs",
+            "id": "def-common.EcsSecurityExtension.winlog",
+            "type": "Object",
+            "tags": [],
+            "label": "winlog",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/securitysolution-ecs",
+                "scope": "common",
+                "docId": "kibKbnSecuritysolutionEcsPluginApi",
+                "section": "def-common.WinlogEcs",
+                "text": "WinlogEcs"
+              },
+              " | undefined"
+            ],
+            "path": "packages/kbn-securitysolution-ecs/src/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-ecs",
+            "id": "def-common.EcsSecurityExtension.zeek",
+            "type": "Object",
+            "tags": [],
+            "label": "zeek",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/securitysolution-ecs",
+                "scope": "common",
+                "docId": "kibKbnSecuritysolutionEcsPluginApi",
+                "section": "def-common.ZeekEcs",
+                "text": "ZeekEcs"
+              },
+              " | undefined"
+            ],
+            "path": "packages/kbn-securitysolution-ecs/src/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/securitysolution-ecs",
+        "id": "def-common.EndgameEcs",
+        "type": "Interface",
+        "tags": [],
+        "label": "EndgameEcs",
+        "description": [],
+        "path": "packages/kbn-securitysolution-ecs/src/endgame/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/securitysolution-ecs",
+            "id": "def-common.EndgameEcs.exit_code",
+            "type": "Array",
+            "tags": [],
+            "label": "exit_code",
+            "description": [],
+            "signature": [
+              "number[] | undefined"
+            ],
+            "path": "packages/kbn-securitysolution-ecs/src/endgame/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-ecs",
+            "id": "def-common.EndgameEcs.file_name",
+            "type": "Array",
+            "tags": [],
+            "label": "file_name",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "packages/kbn-securitysolution-ecs/src/endgame/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-ecs",
+            "id": "def-common.EndgameEcs.file_path",
+            "type": "Array",
+            "tags": [],
+            "label": "file_path",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "packages/kbn-securitysolution-ecs/src/endgame/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-ecs",
+            "id": "def-common.EndgameEcs.logon_type",
+            "type": "Array",
+            "tags": [],
+            "label": "logon_type",
+            "description": [],
+            "signature": [
+              "number[] | undefined"
+            ],
+            "path": "packages/kbn-securitysolution-ecs/src/endgame/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-ecs",
+            "id": "def-common.EndgameEcs.parent_process_name",
+            "type": "Array",
+            "tags": [],
+            "label": "parent_process_name",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "packages/kbn-securitysolution-ecs/src/endgame/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-ecs",
+            "id": "def-common.EndgameEcs.pid",
+            "type": "Array",
+            "tags": [],
+            "label": "pid",
+            "description": [],
+            "signature": [
+              "number[] | undefined"
+            ],
+            "path": "packages/kbn-securitysolution-ecs/src/endgame/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-ecs",
+            "id": "def-common.EndgameEcs.process_name",
+            "type": "Array",
+            "tags": [],
+            "label": "process_name",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "packages/kbn-securitysolution-ecs/src/endgame/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-ecs",
+            "id": "def-common.EndgameEcs.subject_domain_name",
+            "type": "Array",
+            "tags": [],
+            "label": "subject_domain_name",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "packages/kbn-securitysolution-ecs/src/endgame/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-ecs",
+            "id": "def-common.EndgameEcs.subject_logon_id",
+            "type": "Array",
+            "tags": [],
+            "label": "subject_logon_id",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "packages/kbn-securitysolution-ecs/src/endgame/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-ecs",
+            "id": "def-common.EndgameEcs.subject_user_name",
+            "type": "Array",
+            "tags": [],
+            "label": "subject_user_name",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "packages/kbn-securitysolution-ecs/src/endgame/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-ecs",
+            "id": "def-common.EndgameEcs.target_domain_name",
+            "type": "Array",
+            "tags": [],
+            "label": "target_domain_name",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "packages/kbn-securitysolution-ecs/src/endgame/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-ecs",
+            "id": "def-common.EndgameEcs.target_logon_id",
+            "type": "Array",
+            "tags": [],
+            "label": "target_logon_id",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "packages/kbn-securitysolution-ecs/src/endgame/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-ecs",
+            "id": "def-common.EndgameEcs.target_user_name",
+            "type": "Array",
+            "tags": [],
+            "label": "target_user_name",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "packages/kbn-securitysolution-ecs/src/endgame/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/securitysolution-ecs",
+        "id": "def-common.EventEcs",
+        "type": "Interface",
+        "tags": [],
+        "label": "EventEcs",
+        "description": [],
+        "path": "packages/kbn-securitysolution-ecs/src/event/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/securitysolution-ecs",
+            "id": "def-common.EventEcs.action",
+            "type": "Array",
+            "tags": [],
+            "label": "action",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "packages/kbn-securitysolution-ecs/src/event/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-ecs",
+            "id": "def-common.EventEcs.category",
+            "type": "Array",
+            "tags": [],
+            "label": "category",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "packages/kbn-securitysolution-ecs/src/event/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-ecs",
+            "id": "def-common.EventEcs.code",
+            "type": "Array",
+            "tags": [],
+            "label": "code",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "packages/kbn-securitysolution-ecs/src/event/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-ecs",
+            "id": "def-common.EventEcs.created",
+            "type": "Array",
+            "tags": [],
+            "label": "created",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "packages/kbn-securitysolution-ecs/src/event/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-ecs",
+            "id": "def-common.EventEcs.dataset",
+            "type": "Array",
+            "tags": [],
+            "label": "dataset",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "packages/kbn-securitysolution-ecs/src/event/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-ecs",
+            "id": "def-common.EventEcs.duration",
+            "type": "Array",
+            "tags": [],
+            "label": "duration",
+            "description": [],
+            "signature": [
+              "number[] | undefined"
+            ],
+            "path": "packages/kbn-securitysolution-ecs/src/event/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-ecs",
+            "id": "def-common.EventEcs.end",
+            "type": "Array",
+            "tags": [],
+            "label": "end",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "packages/kbn-securitysolution-ecs/src/event/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-ecs",
+            "id": "def-common.EventEcs.hash",
+            "type": "Array",
+            "tags": [],
+            "label": "hash",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "packages/kbn-securitysolution-ecs/src/event/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-ecs",
+            "id": "def-common.EventEcs.id",
+            "type": "Array",
+            "tags": [],
+            "label": "id",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "packages/kbn-securitysolution-ecs/src/event/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-ecs",
+            "id": "def-common.EventEcs.kind",
+            "type": "Array",
+            "tags": [],
+            "label": "kind",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "packages/kbn-securitysolution-ecs/src/event/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-ecs",
+            "id": "def-common.EventEcs.module",
+            "type": "Array",
+            "tags": [],
+            "label": "module",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "packages/kbn-securitysolution-ecs/src/event/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-ecs",
+            "id": "def-common.EventEcs.original",
+            "type": "Array",
+            "tags": [],
+            "label": "original",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "packages/kbn-securitysolution-ecs/src/event/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-ecs",
+            "id": "def-common.EventEcs.outcome",
+            "type": "Array",
+            "tags": [],
+            "label": "outcome",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "packages/kbn-securitysolution-ecs/src/event/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-ecs",
+            "id": "def-common.EventEcs.risk_score",
+            "type": "Array",
+            "tags": [],
+            "label": "risk_score",
+            "description": [],
+            "signature": [
+              "number[] | undefined"
+            ],
+            "path": "packages/kbn-securitysolution-ecs/src/event/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-ecs",
+            "id": "def-common.EventEcs.risk_score_norm",
+            "type": "Array",
+            "tags": [],
+            "label": "risk_score_norm",
+            "description": [],
+            "signature": [
+              "number[] | undefined"
+            ],
+            "path": "packages/kbn-securitysolution-ecs/src/event/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-ecs",
+            "id": "def-common.EventEcs.severity",
+            "type": "Array",
+            "tags": [],
+            "label": "severity",
+            "description": [],
+            "signature": [
+              "number[] | undefined"
+            ],
+            "path": "packages/kbn-securitysolution-ecs/src/event/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-ecs",
+            "id": "def-common.EventEcs.start",
+            "type": "Array",
+            "tags": [],
+            "label": "start",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "packages/kbn-securitysolution-ecs/src/event/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-ecs",
+            "id": "def-common.EventEcs.timezone",
+            "type": "Array",
+            "tags": [],
+            "label": "timezone",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "packages/kbn-securitysolution-ecs/src/event/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-ecs",
+            "id": "def-common.EventEcs.type",
+            "type": "Array",
+            "tags": [],
+            "label": "type",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "packages/kbn-securitysolution-ecs/src/event/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/securitysolution-ecs",
+        "id": "def-common.FileEcs",
+        "type": "Interface",
+        "tags": [],
+        "label": "FileEcs",
+        "description": [],
+        "path": "packages/kbn-securitysolution-ecs/src/file/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/securitysolution-ecs",
+            "id": "def-common.FileEcs.name",
+            "type": "Array",
+            "tags": [],
+            "label": "name",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "packages/kbn-securitysolution-ecs/src/file/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-ecs",
+            "id": "def-common.FileEcs.path",
+            "type": "Array",
+            "tags": [],
+            "label": "path",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "packages/kbn-securitysolution-ecs/src/file/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-ecs",
+            "id": "def-common.FileEcs.target_path",
+            "type": "Array",
+            "tags": [],
+            "label": "target_path",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "packages/kbn-securitysolution-ecs/src/file/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-ecs",
+            "id": "def-common.FileEcs.extension",
+            "type": "Array",
+            "tags": [],
+            "label": "extension",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "packages/kbn-securitysolution-ecs/src/file/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-ecs",
+            "id": "def-common.FileEcs.Ext",
+            "type": "Object",
+            "tags": [],
+            "label": "Ext",
+            "description": [],
+            "signature": [
+              "Ext",
+              " | undefined"
+            ],
+            "path": "packages/kbn-securitysolution-ecs/src/file/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-ecs",
+            "id": "def-common.FileEcs.type",
+            "type": "Array",
+            "tags": [],
+            "label": "type",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "packages/kbn-securitysolution-ecs/src/file/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-ecs",
+            "id": "def-common.FileEcs.device",
+            "type": "Array",
+            "tags": [],
+            "label": "device",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "packages/kbn-securitysolution-ecs/src/file/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-ecs",
+            "id": "def-common.FileEcs.inode",
+            "type": "Array",
+            "tags": [],
+            "label": "inode",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "packages/kbn-securitysolution-ecs/src/file/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-ecs",
+            "id": "def-common.FileEcs.uid",
+            "type": "Array",
+            "tags": [],
+            "label": "uid",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "packages/kbn-securitysolution-ecs/src/file/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-ecs",
+            "id": "def-common.FileEcs.owner",
+            "type": "Array",
+            "tags": [],
+            "label": "owner",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "packages/kbn-securitysolution-ecs/src/file/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-ecs",
+            "id": "def-common.FileEcs.gid",
+            "type": "Array",
+            "tags": [],
+            "label": "gid",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "packages/kbn-securitysolution-ecs/src/file/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-ecs",
+            "id": "def-common.FileEcs.group",
+            "type": "Array",
+            "tags": [],
+            "label": "group",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "packages/kbn-securitysolution-ecs/src/file/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-ecs",
+            "id": "def-common.FileEcs.mode",
+            "type": "Array",
+            "tags": [],
+            "label": "mode",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "packages/kbn-securitysolution-ecs/src/file/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-ecs",
+            "id": "def-common.FileEcs.size",
+            "type": "Array",
+            "tags": [],
+            "label": "size",
+            "description": [],
+            "signature": [
+              "number[] | undefined"
+            ],
+            "path": "packages/kbn-securitysolution-ecs/src/file/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-ecs",
+            "id": "def-common.FileEcs.mtime",
+            "type": "Array",
+            "tags": [],
+            "label": "mtime",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "packages/kbn-securitysolution-ecs/src/file/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-ecs",
+            "id": "def-common.FileEcs.ctime",
+            "type": "Array",
+            "tags": [],
+            "label": "ctime",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "packages/kbn-securitysolution-ecs/src/file/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-ecs",
+            "id": "def-common.FileEcs.hash",
+            "type": "Object",
+            "tags": [],
+            "label": "hash",
+            "description": [],
+            "signature": [
+              "Hash",
+              " | undefined"
+            ],
+            "path": "packages/kbn-securitysolution-ecs/src/file/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/securitysolution-ecs",
+        "id": "def-common.GeoEcs",
+        "type": "Interface",
+        "tags": [],
+        "label": "GeoEcs",
+        "description": [],
+        "path": "packages/kbn-securitysolution-ecs/src/geo/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/securitysolution-ecs",
+            "id": "def-common.GeoEcs.city_name",
+            "type": "Array",
+            "tags": [],
+            "label": "city_name",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "packages/kbn-securitysolution-ecs/src/geo/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-ecs",
+            "id": "def-common.GeoEcs.continent_name",
+            "type": "Array",
+            "tags": [],
+            "label": "continent_name",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "packages/kbn-securitysolution-ecs/src/geo/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-ecs",
+            "id": "def-common.GeoEcs.country_iso_code",
+            "type": "Array",
+            "tags": [],
+            "label": "country_iso_code",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "packages/kbn-securitysolution-ecs/src/geo/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-ecs",
+            "id": "def-common.GeoEcs.country_name",
+            "type": "Array",
+            "tags": [],
+            "label": "country_name",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "packages/kbn-securitysolution-ecs/src/geo/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-ecs",
+            "id": "def-common.GeoEcs.location",
+            "type": "Object",
+            "tags": [],
+            "label": "location",
+            "description": [],
+            "signature": [
+              "Location",
+              " | undefined"
+            ],
+            "path": "packages/kbn-securitysolution-ecs/src/geo/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-ecs",
+            "id": "def-common.GeoEcs.region_iso_code",
+            "type": "Array",
+            "tags": [],
+            "label": "region_iso_code",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "packages/kbn-securitysolution-ecs/src/geo/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-ecs",
+            "id": "def-common.GeoEcs.region_name",
+            "type": "Array",
+            "tags": [],
+            "label": "region_name",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "packages/kbn-securitysolution-ecs/src/geo/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/securitysolution-ecs",
+        "id": "def-common.HostEcs",
+        "type": "Interface",
+        "tags": [],
+        "label": "HostEcs",
+        "description": [],
+        "path": "packages/kbn-securitysolution-ecs/src/host/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/securitysolution-ecs",
+            "id": "def-common.HostEcs.architecture",
+            "type": "Array",
+            "tags": [],
+            "label": "architecture",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "packages/kbn-securitysolution-ecs/src/host/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-ecs",
+            "id": "def-common.HostEcs.id",
+            "type": "Array",
+            "tags": [],
+            "label": "id",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "packages/kbn-securitysolution-ecs/src/host/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-ecs",
+            "id": "def-common.HostEcs.ip",
+            "type": "Array",
+            "tags": [],
+            "label": "ip",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "packages/kbn-securitysolution-ecs/src/host/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-ecs",
+            "id": "def-common.HostEcs.mac",
+            "type": "Array",
+            "tags": [],
+            "label": "mac",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "packages/kbn-securitysolution-ecs/src/host/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-ecs",
+            "id": "def-common.HostEcs.name",
+            "type": "Array",
+            "tags": [],
+            "label": "name",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "packages/kbn-securitysolution-ecs/src/host/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-ecs",
+            "id": "def-common.HostEcs.os",
+            "type": "Object",
+            "tags": [],
+            "label": "os",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/securitysolution-ecs",
+                "scope": "common",
+                "docId": "kibKbnSecuritysolutionEcsPluginApi",
+                "section": "def-common.OsEcs",
+                "text": "OsEcs"
+              },
+              " | undefined"
+            ],
+            "path": "packages/kbn-securitysolution-ecs/src/host/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-ecs",
+            "id": "def-common.HostEcs.type",
+            "type": "Array",
+            "tags": [],
+            "label": "type",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "packages/kbn-securitysolution-ecs/src/host/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/securitysolution-ecs",
+        "id": "def-common.HttpEcs",
+        "type": "Interface",
+        "tags": [],
+        "label": "HttpEcs",
+        "description": [],
+        "path": "packages/kbn-securitysolution-ecs/src/http/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/securitysolution-ecs",
+            "id": "def-common.HttpEcs.version",
+            "type": "Array",
+            "tags": [],
+            "label": "version",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "packages/kbn-securitysolution-ecs/src/http/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-ecs",
+            "id": "def-common.HttpEcs.request",
+            "type": "Object",
+            "tags": [],
+            "label": "request",
+            "description": [],
+            "signature": [
+              "HttpRequestData",
+              " | undefined"
+            ],
+            "path": "packages/kbn-securitysolution-ecs/src/http/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-ecs",
+            "id": "def-common.HttpEcs.response",
+            "type": "Object",
+            "tags": [],
+            "label": "response",
+            "description": [],
+            "signature": [
+              "HttpResponseData",
+              " | undefined"
+            ],
+            "path": "packages/kbn-securitysolution-ecs/src/http/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/securitysolution-ecs",
+        "id": "def-common.MemoryProtection",
+        "type": "Interface",
+        "tags": [],
+        "label": "MemoryProtection",
+        "description": [],
+        "path": "packages/kbn-securitysolution-ecs/src/memory_protection/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/securitysolution-ecs",
+            "id": "def-common.MemoryProtection.cross_session",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "cross_session",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "packages/kbn-securitysolution-ecs/src/memory_protection/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-ecs",
+            "id": "def-common.MemoryProtection.feature",
+            "type": "string",
+            "tags": [],
+            "label": "feature",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/kbn-securitysolution-ecs/src/memory_protection/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-ecs",
+            "id": "def-common.MemoryProtection.parent_to_child",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "parent_to_child",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "packages/kbn-securitysolution-ecs/src/memory_protection/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-ecs",
+            "id": "def-common.MemoryProtection.self_injection",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "self_injection",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "packages/kbn-securitysolution-ecs/src/memory_protection/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-ecs",
+            "id": "def-common.MemoryProtection.unique_key_v1",
+            "type": "string",
+            "tags": [],
+            "label": "unique_key_v1",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/kbn-securitysolution-ecs/src/memory_protection/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/securitysolution-ecs",
+        "id": "def-common.NetworkEcs",
+        "type": "Interface",
+        "tags": [],
+        "label": "NetworkEcs",
+        "description": [],
+        "path": "packages/kbn-securitysolution-ecs/src/network/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/securitysolution-ecs",
+            "id": "def-common.NetworkEcs.bytes",
+            "type": "Array",
+            "tags": [],
+            "label": "bytes",
+            "description": [],
+            "signature": [
+              "number[] | undefined"
+            ],
+            "path": "packages/kbn-securitysolution-ecs/src/network/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-ecs",
+            "id": "def-common.NetworkEcs.community_id",
+            "type": "Array",
+            "tags": [],
+            "label": "community_id",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "packages/kbn-securitysolution-ecs/src/network/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-ecs",
+            "id": "def-common.NetworkEcs.direction",
+            "type": "Array",
+            "tags": [],
+            "label": "direction",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "packages/kbn-securitysolution-ecs/src/network/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-ecs",
+            "id": "def-common.NetworkEcs.packets",
+            "type": "Array",
+            "tags": [],
+            "label": "packets",
+            "description": [],
+            "signature": [
+              "number[] | undefined"
+            ],
+            "path": "packages/kbn-securitysolution-ecs/src/network/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-ecs",
+            "id": "def-common.NetworkEcs.protocol",
+            "type": "Array",
+            "tags": [],
+            "label": "protocol",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "packages/kbn-securitysolution-ecs/src/network/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-ecs",
+            "id": "def-common.NetworkEcs.transport",
+            "type": "Array",
+            "tags": [],
+            "label": "transport",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "packages/kbn-securitysolution-ecs/src/network/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/securitysolution-ecs",
+        "id": "def-common.OsEcs",
+        "type": "Interface",
+        "tags": [],
+        "label": "OsEcs",
+        "description": [],
+        "path": "packages/kbn-securitysolution-ecs/src/host/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/securitysolution-ecs",
+            "id": "def-common.OsEcs.platform",
+            "type": "Array",
+            "tags": [],
+            "label": "platform",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "packages/kbn-securitysolution-ecs/src/host/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-ecs",
+            "id": "def-common.OsEcs.name",
+            "type": "Array",
+            "tags": [],
+            "label": "name",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "packages/kbn-securitysolution-ecs/src/host/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-ecs",
+            "id": "def-common.OsEcs.full",
+            "type": "Array",
+            "tags": [],
+            "label": "full",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "packages/kbn-securitysolution-ecs/src/host/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-ecs",
+            "id": "def-common.OsEcs.family",
+            "type": "Array",
+            "tags": [],
+            "label": "family",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "packages/kbn-securitysolution-ecs/src/host/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-ecs",
+            "id": "def-common.OsEcs.version",
+            "type": "Array",
+            "tags": [],
+            "label": "version",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "packages/kbn-securitysolution-ecs/src/host/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-ecs",
+            "id": "def-common.OsEcs.kernel",
+            "type": "Array",
+            "tags": [],
+            "label": "kernel",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "packages/kbn-securitysolution-ecs/src/host/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/securitysolution-ecs",
+        "id": "def-common.ProcessEcs",
+        "type": "Interface",
+        "tags": [],
+        "label": "ProcessEcs",
+        "description": [],
+        "path": "packages/kbn-securitysolution-ecs/src/process/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/securitysolution-ecs",
+            "id": "def-common.ProcessEcs.Ext",
+            "type": "Object",
+            "tags": [],
+            "label": "Ext",
+            "description": [],
+            "signature": [
+              "Ext",
+              " | undefined"
+            ],
+            "path": "packages/kbn-securitysolution-ecs/src/process/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-ecs",
+            "id": "def-common.ProcessEcs.command_line",
+            "type": "Array",
+            "tags": [],
+            "label": "command_line",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "packages/kbn-securitysolution-ecs/src/process/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-ecs",
+            "id": "def-common.ProcessEcs.entity_id",
+            "type": "Array",
+            "tags": [],
+            "label": "entity_id",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "packages/kbn-securitysolution-ecs/src/process/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-ecs",
+            "id": "def-common.ProcessEcs.entry_leader",
+            "type": "Object",
+            "tags": [],
+            "label": "entry_leader",
+            "description": [],
+            "signature": [
+              "ProcessSessionData",
+              " | undefined"
+            ],
+            "path": "packages/kbn-securitysolution-ecs/src/process/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-ecs",
+            "id": "def-common.ProcessEcs.session_leader",
+            "type": "Object",
+            "tags": [],
+            "label": "session_leader",
+            "description": [],
+            "signature": [
+              "ProcessSessionData",
+              " | undefined"
+            ],
+            "path": "packages/kbn-securitysolution-ecs/src/process/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-ecs",
+            "id": "def-common.ProcessEcs.group_leader",
+            "type": "Object",
+            "tags": [],
+            "label": "group_leader",
+            "description": [],
+            "signature": [
+              "ProcessSessionData",
+              " | undefined"
+            ],
+            "path": "packages/kbn-securitysolution-ecs/src/process/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-ecs",
+            "id": "def-common.ProcessEcs.exit_code",
+            "type": "Array",
+            "tags": [],
+            "label": "exit_code",
+            "description": [],
+            "signature": [
+              "number[] | undefined"
+            ],
+            "path": "packages/kbn-securitysolution-ecs/src/process/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-ecs",
+            "id": "def-common.ProcessEcs.hash",
+            "type": "Object",
+            "tags": [],
+            "label": "hash",
+            "description": [],
+            "signature": [
+              "ProcessHashData",
+              " | undefined"
+            ],
+            "path": "packages/kbn-securitysolution-ecs/src/process/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-ecs",
+            "id": "def-common.ProcessEcs.parent",
+            "type": "Object",
+            "tags": [],
+            "label": "parent",
+            "description": [],
+            "signature": [
+              "ProcessParentData",
+              " | undefined"
+            ],
+            "path": "packages/kbn-securitysolution-ecs/src/process/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-ecs",
+            "id": "def-common.ProcessEcs.code_signature",
+            "type": "Object",
+            "tags": [],
+            "label": "code_signature",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/securitysolution-ecs",
+                "scope": "common",
+                "docId": "kibKbnSecuritysolutionEcsPluginApi",
+                "section": "def-common.CodeSignature",
+                "text": "CodeSignature"
+              },
+              " | undefined"
+            ],
+            "path": "packages/kbn-securitysolution-ecs/src/process/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-ecs",
+            "id": "def-common.ProcessEcs.pid",
+            "type": "Array",
+            "tags": [],
+            "label": "pid",
+            "description": [],
+            "signature": [
+              "number[] | undefined"
+            ],
+            "path": "packages/kbn-securitysolution-ecs/src/process/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-ecs",
+            "id": "def-common.ProcessEcs.name",
+            "type": "Array",
+            "tags": [],
+            "label": "name",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "packages/kbn-securitysolution-ecs/src/process/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-ecs",
+            "id": "def-common.ProcessEcs.ppid",
+            "type": "Array",
+            "tags": [],
+            "label": "ppid",
+            "description": [],
+            "signature": [
+              "number[] | undefined"
+            ],
+            "path": "packages/kbn-securitysolution-ecs/src/process/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-ecs",
+            "id": "def-common.ProcessEcs.args",
+            "type": "Array",
+            "tags": [],
+            "label": "args",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "packages/kbn-securitysolution-ecs/src/process/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-ecs",
+            "id": "def-common.ProcessEcs.executable",
+            "type": "Array",
+            "tags": [],
+            "label": "executable",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "packages/kbn-securitysolution-ecs/src/process/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-ecs",
+            "id": "def-common.ProcessEcs.title",
+            "type": "Array",
+            "tags": [],
+            "label": "title",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "packages/kbn-securitysolution-ecs/src/process/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-ecs",
+            "id": "def-common.ProcessEcs.thread",
+            "type": "Object",
+            "tags": [],
+            "label": "thread",
+            "description": [],
+            "signature": [
+              "Thread",
+              " | undefined"
+            ],
+            "path": "packages/kbn-securitysolution-ecs/src/process/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-ecs",
+            "id": "def-common.ProcessEcs.working_directory",
+            "type": "Array",
+            "tags": [],
+            "label": "working_directory",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "packages/kbn-securitysolution-ecs/src/process/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/securitysolution-ecs",
+        "id": "def-common.Ransomware",
+        "type": "Interface",
+        "tags": [],
+        "label": "Ransomware",
+        "description": [],
+        "path": "packages/kbn-securitysolution-ecs/src/ransomware/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/securitysolution-ecs",
+            "id": "def-common.Ransomware.feature",
+            "type": "Array",
+            "tags": [],
+            "label": "feature",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "packages/kbn-securitysolution-ecs/src/ransomware/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-ecs",
+            "id": "def-common.Ransomware.score",
+            "type": "Array",
+            "tags": [],
+            "label": "score",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "packages/kbn-securitysolution-ecs/src/ransomware/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-ecs",
+            "id": "def-common.Ransomware.version",
+            "type": "Array",
+            "tags": [],
+            "label": "version",
+            "description": [],
+            "signature": [
+              "number[] | undefined"
+            ],
+            "path": "packages/kbn-securitysolution-ecs/src/ransomware/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-ecs",
+            "id": "def-common.Ransomware.child_pids",
+            "type": "Array",
+            "tags": [],
+            "label": "child_pids",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "packages/kbn-securitysolution-ecs/src/ransomware/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-ecs",
+            "id": "def-common.Ransomware.files",
+            "type": "Object",
+            "tags": [],
+            "label": "files",
+            "description": [],
+            "signature": [
+              "RansomwareFiles",
+              " | undefined"
+            ],
+            "path": "packages/kbn-securitysolution-ecs/src/ransomware/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/securitysolution-ecs",
+        "id": "def-common.RegistryEcs",
+        "type": "Interface",
+        "tags": [],
+        "label": "RegistryEcs",
+        "description": [],
+        "path": "packages/kbn-securitysolution-ecs/src/registry/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/securitysolution-ecs",
+            "id": "def-common.RegistryEcs.hive",
+            "type": "Array",
+            "tags": [],
+            "label": "hive",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "packages/kbn-securitysolution-ecs/src/registry/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-ecs",
+            "id": "def-common.RegistryEcs.key",
+            "type": "Array",
+            "tags": [],
+            "label": "key",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "packages/kbn-securitysolution-ecs/src/registry/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-ecs",
+            "id": "def-common.RegistryEcs.path",
+            "type": "Array",
+            "tags": [],
+            "label": "path",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "packages/kbn-securitysolution-ecs/src/registry/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-ecs",
+            "id": "def-common.RegistryEcs.value",
+            "type": "Array",
+            "tags": [],
+            "label": "value",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "packages/kbn-securitysolution-ecs/src/registry/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-ecs",
+            "id": "def-common.RegistryEcs.data",
+            "type": "Object",
+            "tags": [],
+            "label": "data",
+            "description": [],
+            "signature": [
+              "RegistryEcsData",
+              " | undefined"
+            ],
+            "path": "packages/kbn-securitysolution-ecs/src/registry/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/securitysolution-ecs",
+        "id": "def-common.RuleEcs",
+        "type": "Interface",
+        "tags": [],
+        "label": "RuleEcs",
+        "description": [],
+        "path": "packages/kbn-securitysolution-ecs/src/rule/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/securitysolution-ecs",
+            "id": "def-common.RuleEcs.id",
+            "type": "Array",
+            "tags": [],
+            "label": "id",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "packages/kbn-securitysolution-ecs/src/rule/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-ecs",
+            "id": "def-common.RuleEcs.rule_id",
+            "type": "Array",
+            "tags": [],
+            "label": "rule_id",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "packages/kbn-securitysolution-ecs/src/rule/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-ecs",
+            "id": "def-common.RuleEcs.name",
+            "type": "Array",
+            "tags": [],
+            "label": "name",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "packages/kbn-securitysolution-ecs/src/rule/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-ecs",
+            "id": "def-common.RuleEcs.false_positives",
+            "type": "Array",
+            "tags": [],
+            "label": "false_positives",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "packages/kbn-securitysolution-ecs/src/rule/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-ecs",
+            "id": "def-common.RuleEcs.saved_id",
+            "type": "Array",
+            "tags": [],
+            "label": "saved_id",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "packages/kbn-securitysolution-ecs/src/rule/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-ecs",
+            "id": "def-common.RuleEcs.timeline_id",
+            "type": "Array",
+            "tags": [],
+            "label": "timeline_id",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "packages/kbn-securitysolution-ecs/src/rule/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-ecs",
+            "id": "def-common.RuleEcs.timeline_title",
+            "type": "Array",
+            "tags": [],
+            "label": "timeline_title",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "packages/kbn-securitysolution-ecs/src/rule/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-ecs",
+            "id": "def-common.RuleEcs.max_signals",
+            "type": "Array",
+            "tags": [],
+            "label": "max_signals",
+            "description": [],
+            "signature": [
+              "number[] | undefined"
+            ],
+            "path": "packages/kbn-securitysolution-ecs/src/rule/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-ecs",
+            "id": "def-common.RuleEcs.risk_score",
+            "type": "Array",
+            "tags": [],
+            "label": "risk_score",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "packages/kbn-securitysolution-ecs/src/rule/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-ecs",
+            "id": "def-common.RuleEcs.output_index",
+            "type": "Array",
+            "tags": [],
+            "label": "output_index",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "packages/kbn-securitysolution-ecs/src/rule/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-ecs",
+            "id": "def-common.RuleEcs.description",
+            "type": "Array",
+            "tags": [],
+            "label": "description",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "packages/kbn-securitysolution-ecs/src/rule/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-ecs",
+            "id": "def-common.RuleEcs.exceptions_list",
+            "type": "Array",
+            "tags": [],
+            "label": "exceptions_list",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "packages/kbn-securitysolution-ecs/src/rule/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-ecs",
+            "id": "def-common.RuleEcs.from",
+            "type": "Array",
+            "tags": [],
+            "label": "from",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "packages/kbn-securitysolution-ecs/src/rule/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-ecs",
+            "id": "def-common.RuleEcs.immutable",
+            "type": "Array",
+            "tags": [],
+            "label": "immutable",
+            "description": [],
+            "signature": [
+              "boolean[] | undefined"
+            ],
+            "path": "packages/kbn-securitysolution-ecs/src/rule/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-ecs",
+            "id": "def-common.RuleEcs.index",
+            "type": "Array",
+            "tags": [],
+            "label": "index",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "packages/kbn-securitysolution-ecs/src/rule/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-ecs",
+            "id": "def-common.RuleEcs.data_view_id",
+            "type": "string",
+            "tags": [],
+            "label": "data_view_id",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/kbn-securitysolution-ecs/src/rule/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-ecs",
+            "id": "def-common.RuleEcs.interval",
+            "type": "Array",
+            "tags": [],
+            "label": "interval",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "packages/kbn-securitysolution-ecs/src/rule/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-ecs",
+            "id": "def-common.RuleEcs.language",
+            "type": "Array",
+            "tags": [],
+            "label": "language",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "packages/kbn-securitysolution-ecs/src/rule/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-ecs",
+            "id": "def-common.RuleEcs.query",
+            "type": "Array",
+            "tags": [],
+            "label": "query",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "packages/kbn-securitysolution-ecs/src/rule/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-ecs",
+            "id": "def-common.RuleEcs.references",
+            "type": "Array",
+            "tags": [],
+            "label": "references",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "packages/kbn-securitysolution-ecs/src/rule/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-ecs",
+            "id": "def-common.RuleEcs.severity",
+            "type": "Array",
+            "tags": [],
+            "label": "severity",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "packages/kbn-securitysolution-ecs/src/rule/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-ecs",
+            "id": "def-common.RuleEcs.tags",
+            "type": "Array",
+            "tags": [],
+            "label": "tags",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "packages/kbn-securitysolution-ecs/src/rule/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-ecs",
+            "id": "def-common.RuleEcs.threat",
+            "type": "Unknown",
+            "tags": [],
+            "label": "threat",
+            "description": [],
+            "signature": [
+              "unknown"
+            ],
+            "path": "packages/kbn-securitysolution-ecs/src/rule/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-ecs",
+            "id": "def-common.RuleEcs.threshold",
+            "type": "Unknown",
+            "tags": [],
+            "label": "threshold",
+            "description": [],
+            "signature": [
+              "unknown"
+            ],
+            "path": "packages/kbn-securitysolution-ecs/src/rule/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-ecs",
+            "id": "def-common.RuleEcs.type",
+            "type": "Array",
+            "tags": [],
+            "label": "type",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "packages/kbn-securitysolution-ecs/src/rule/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-ecs",
+            "id": "def-common.RuleEcs.size",
+            "type": "Array",
+            "tags": [],
+            "label": "size",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "packages/kbn-securitysolution-ecs/src/rule/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-ecs",
+            "id": "def-common.RuleEcs.to",
+            "type": "Array",
+            "tags": [],
+            "label": "to",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "packages/kbn-securitysolution-ecs/src/rule/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-ecs",
+            "id": "def-common.RuleEcs.enabled",
+            "type": "Array",
+            "tags": [],
+            "label": "enabled",
+            "description": [],
+            "signature": [
+              "boolean[] | undefined"
+            ],
+            "path": "packages/kbn-securitysolution-ecs/src/rule/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-ecs",
+            "id": "def-common.RuleEcs.filters",
+            "type": "Unknown",
+            "tags": [],
+            "label": "filters",
+            "description": [],
+            "signature": [
+              "unknown"
+            ],
+            "path": "packages/kbn-securitysolution-ecs/src/rule/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-ecs",
+            "id": "def-common.RuleEcs.created_at",
+            "type": "Array",
+            "tags": [],
+            "label": "created_at",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "packages/kbn-securitysolution-ecs/src/rule/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-ecs",
+            "id": "def-common.RuleEcs.updated_at",
+            "type": "Array",
+            "tags": [],
+            "label": "updated_at",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "packages/kbn-securitysolution-ecs/src/rule/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-ecs",
+            "id": "def-common.RuleEcs.created_by",
+            "type": "Array",
+            "tags": [],
+            "label": "created_by",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "packages/kbn-securitysolution-ecs/src/rule/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-ecs",
+            "id": "def-common.RuleEcs.updated_by",
+            "type": "Array",
+            "tags": [],
+            "label": "updated_by",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "packages/kbn-securitysolution-ecs/src/rule/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-ecs",
+            "id": "def-common.RuleEcs.version",
+            "type": "Array",
+            "tags": [],
+            "label": "version",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "packages/kbn-securitysolution-ecs/src/rule/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-ecs",
+            "id": "def-common.RuleEcs.note",
+            "type": "Array",
+            "tags": [],
+            "label": "note",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "packages/kbn-securitysolution-ecs/src/rule/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-ecs",
+            "id": "def-common.RuleEcs.building_block_type",
+            "type": "Array",
+            "tags": [],
+            "label": "building_block_type",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "packages/kbn-securitysolution-ecs/src/rule/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/securitysolution-ecs",
+        "id": "def-common.SignalEcs",
+        "type": "Interface",
+        "tags": [],
+        "label": "SignalEcs",
+        "description": [],
+        "path": "packages/kbn-securitysolution-ecs/src/signal/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/securitysolution-ecs",
+            "id": "def-common.SignalEcs.rule",
+            "type": "Object",
+            "tags": [],
+            "label": "rule",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/securitysolution-ecs",
+                "scope": "common",
+                "docId": "kibKbnSecuritysolutionEcsPluginApi",
+                "section": "def-common.RuleEcs",
+                "text": "RuleEcs"
+              },
+              " | undefined"
+            ],
+            "path": "packages/kbn-securitysolution-ecs/src/signal/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-ecs",
+            "id": "def-common.SignalEcs.original_time",
+            "type": "Array",
+            "tags": [],
+            "label": "original_time",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "packages/kbn-securitysolution-ecs/src/signal/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-ecs",
+            "id": "def-common.SignalEcs.status",
+            "type": "Array",
+            "tags": [],
+            "label": "status",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "packages/kbn-securitysolution-ecs/src/signal/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-ecs",
+            "id": "def-common.SignalEcs.group",
+            "type": "Object",
+            "tags": [],
+            "label": "group",
+            "description": [],
+            "signature": [
+              "{ id?: string[] | undefined; } | undefined"
+            ],
+            "path": "packages/kbn-securitysolution-ecs/src/signal/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-ecs",
+            "id": "def-common.SignalEcs.threshold_result",
+            "type": "Unknown",
+            "tags": [],
+            "label": "threshold_result",
+            "description": [],
+            "signature": [
+              "unknown"
+            ],
+            "path": "packages/kbn-securitysolution-ecs/src/signal/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/securitysolution-ecs",
+        "id": "def-common.SourceEcs",
+        "type": "Interface",
+        "tags": [],
+        "label": "SourceEcs",
+        "description": [],
+        "path": "packages/kbn-securitysolution-ecs/src/source/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/securitysolution-ecs",
+            "id": "def-common.SourceEcs.bytes",
+            "type": "Array",
+            "tags": [],
+            "label": "bytes",
+            "description": [],
+            "signature": [
+              "number[] | undefined"
+            ],
+            "path": "packages/kbn-securitysolution-ecs/src/source/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-ecs",
+            "id": "def-common.SourceEcs.ip",
+            "type": "Array",
+            "tags": [],
+            "label": "ip",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "packages/kbn-securitysolution-ecs/src/source/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-ecs",
+            "id": "def-common.SourceEcs.port",
+            "type": "Array",
+            "tags": [],
+            "label": "port",
+            "description": [],
+            "signature": [
+              "number[] | undefined"
+            ],
+            "path": "packages/kbn-securitysolution-ecs/src/source/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-ecs",
+            "id": "def-common.SourceEcs.domain",
+            "type": "Array",
+            "tags": [],
+            "label": "domain",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "packages/kbn-securitysolution-ecs/src/source/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-ecs",
+            "id": "def-common.SourceEcs.geo",
+            "type": "Object",
+            "tags": [],
+            "label": "geo",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/securitysolution-ecs",
+                "scope": "common",
+                "docId": "kibKbnSecuritysolutionEcsPluginApi",
+                "section": "def-common.GeoEcs",
+                "text": "GeoEcs"
+              },
+              " | undefined"
+            ],
+            "path": "packages/kbn-securitysolution-ecs/src/source/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-ecs",
+            "id": "def-common.SourceEcs.packets",
+            "type": "Array",
+            "tags": [],
+            "label": "packets",
+            "description": [],
+            "signature": [
+              "number[] | undefined"
+            ],
+            "path": "packages/kbn-securitysolution-ecs/src/source/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/securitysolution-ecs",
+        "id": "def-common.SuricataEcs",
+        "type": "Interface",
+        "tags": [],
+        "label": "SuricataEcs",
+        "description": [],
+        "path": "packages/kbn-securitysolution-ecs/src/suricata/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/securitysolution-ecs",
+            "id": "def-common.SuricataEcs.eve",
+            "type": "Object",
+            "tags": [],
+            "label": "eve",
+            "description": [],
+            "signature": [
+              "SuricataEveData",
+              " | undefined"
+            ],
+            "path": "packages/kbn-securitysolution-ecs/src/suricata/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/securitysolution-ecs",
+        "id": "def-common.SystemEcs",
+        "type": "Interface",
+        "tags": [],
+        "label": "SystemEcs",
+        "description": [],
+        "path": "packages/kbn-securitysolution-ecs/src/system/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/securitysolution-ecs",
+            "id": "def-common.SystemEcs.audit",
+            "type": "Object",
+            "tags": [],
+            "label": "audit",
+            "description": [],
+            "signature": [
+              "AuditEcs",
+              " | undefined"
+            ],
+            "path": "packages/kbn-securitysolution-ecs/src/system/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-ecs",
+            "id": "def-common.SystemEcs.auth",
+            "type": "Object",
+            "tags": [],
+            "label": "auth",
+            "description": [],
+            "signature": [
+              "AuthEcs",
+              " | undefined"
+            ],
+            "path": "packages/kbn-securitysolution-ecs/src/system/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/securitysolution-ecs",
+        "id": "def-common.Target",
+        "type": "Interface",
+        "tags": [],
+        "label": "Target",
+        "description": [],
+        "path": "packages/kbn-securitysolution-ecs/src/target_type/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/securitysolution-ecs",
+            "id": "def-common.Target.process",
+            "type": "Object",
+            "tags": [],
+            "label": "process",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/securitysolution-ecs",
+                "scope": "common",
+                "docId": "kibKbnSecuritysolutionEcsPluginApi",
+                "section": "def-common.ProcessEcs",
+                "text": "ProcessEcs"
+              }
+            ],
+            "path": "packages/kbn-securitysolution-ecs/src/target_type/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/securitysolution-ecs",
+        "id": "def-common.ThreatEcs",
+        "type": "Interface",
+        "tags": [],
+        "label": "ThreatEcs",
+        "description": [],
+        "path": "packages/kbn-securitysolution-ecs/src/threat/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/securitysolution-ecs",
+            "id": "def-common.ThreatEcs.indicator",
+            "type": "Array",
+            "tags": [],
+            "label": "indicator",
+            "description": [],
+            "signature": [
+              "LegacyThreatIndicatorEcs",
+              "[] | undefined"
+            ],
+            "path": "packages/kbn-securitysolution-ecs/src/threat/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-ecs",
+            "id": "def-common.ThreatEcs.enrichments",
+            "type": "Array",
+            "tags": [],
+            "label": "enrichments",
+            "description": [],
+            "signature": [
+              "ThreatEnrichmentEcs",
+              "[] | undefined"
+            ],
+            "path": "packages/kbn-securitysolution-ecs/src/threat/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/securitysolution-ecs",
+        "id": "def-common.ThreatIndicatorEcs",
+        "type": "Interface",
+        "tags": [],
+        "label": "ThreatIndicatorEcs",
+        "description": [],
+        "path": "packages/kbn-securitysolution-ecs/src/threat/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/securitysolution-ecs",
+            "id": "def-common.ThreatIndicatorEcs.url",
+            "type": "Object",
+            "tags": [],
+            "label": "url",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/securitysolution-ecs",
+                "scope": "common",
+                "docId": "kibKbnSecuritysolutionEcsPluginApi",
+                "section": "def-common.UrlEcs",
+                "text": "UrlEcs"
+              },
+              " | undefined"
+            ],
+            "path": "packages/kbn-securitysolution-ecs/src/threat/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-ecs",
+            "id": "def-common.ThreatIndicatorEcs.provider",
+            "type": "Array",
+            "tags": [],
+            "label": "provider",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "packages/kbn-securitysolution-ecs/src/threat/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-ecs",
+            "id": "def-common.ThreatIndicatorEcs.reference",
+            "type": "Array",
+            "tags": [],
+            "label": "reference",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "packages/kbn-securitysolution-ecs/src/threat/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-ecs",
+            "id": "def-common.ThreatIndicatorEcs.type",
+            "type": "Array",
+            "tags": [],
+            "label": "type",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "packages/kbn-securitysolution-ecs/src/threat/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/securitysolution-ecs",
+        "id": "def-common.TlsEcs",
+        "type": "Interface",
+        "tags": [],
+        "label": "TlsEcs",
+        "description": [],
+        "path": "packages/kbn-securitysolution-ecs/src/tls/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/securitysolution-ecs",
+            "id": "def-common.TlsEcs.client_certificate",
+            "type": "Object",
+            "tags": [],
+            "label": "client_certificate",
+            "description": [],
+            "signature": [
+              "TlsClientCertificateData",
+              " | undefined"
+            ],
+            "path": "packages/kbn-securitysolution-ecs/src/tls/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-ecs",
+            "id": "def-common.TlsEcs.fingerprints",
+            "type": "Object",
+            "tags": [],
+            "label": "fingerprints",
+            "description": [],
+            "signature": [
+              "TlsFingerprintsData",
+              " | undefined"
+            ],
+            "path": "packages/kbn-securitysolution-ecs/src/tls/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-ecs",
+            "id": "def-common.TlsEcs.server_certificate",
+            "type": "Object",
+            "tags": [],
+            "label": "server_certificate",
+            "description": [],
+            "signature": [
+              "TlsServerCertificateData",
+              " | undefined"
+            ],
+            "path": "packages/kbn-securitysolution-ecs/src/tls/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/securitysolution-ecs",
+        "id": "def-common.UrlEcs",
+        "type": "Interface",
+        "tags": [],
+        "label": "UrlEcs",
+        "description": [],
+        "path": "packages/kbn-securitysolution-ecs/src/url/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/securitysolution-ecs",
+            "id": "def-common.UrlEcs.domain",
+            "type": "Array",
+            "tags": [],
+            "label": "domain",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "packages/kbn-securitysolution-ecs/src/url/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-ecs",
+            "id": "def-common.UrlEcs.original",
+            "type": "Array",
+            "tags": [],
+            "label": "original",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "packages/kbn-securitysolution-ecs/src/url/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-ecs",
+            "id": "def-common.UrlEcs.username",
+            "type": "Array",
+            "tags": [],
+            "label": "username",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "packages/kbn-securitysolution-ecs/src/url/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-ecs",
+            "id": "def-common.UrlEcs.password",
+            "type": "Array",
+            "tags": [],
+            "label": "password",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "packages/kbn-securitysolution-ecs/src/url/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/securitysolution-ecs",
+        "id": "def-common.UserEcs",
+        "type": "Interface",
+        "tags": [],
+        "label": "UserEcs",
+        "description": [],
+        "path": "packages/kbn-securitysolution-ecs/src/user/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/securitysolution-ecs",
+            "id": "def-common.UserEcs.domain",
+            "type": "Array",
+            "tags": [],
+            "label": "domain",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "packages/kbn-securitysolution-ecs/src/user/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-ecs",
+            "id": "def-common.UserEcs.id",
+            "type": "Array",
+            "tags": [],
+            "label": "id",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "packages/kbn-securitysolution-ecs/src/user/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-ecs",
+            "id": "def-common.UserEcs.name",
+            "type": "Array",
+            "tags": [],
+            "label": "name",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "packages/kbn-securitysolution-ecs/src/user/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-ecs",
+            "id": "def-common.UserEcs.full_name",
+            "type": "Array",
+            "tags": [],
+            "label": "full_name",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "packages/kbn-securitysolution-ecs/src/user/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-ecs",
+            "id": "def-common.UserEcs.email",
+            "type": "Array",
+            "tags": [],
+            "label": "email",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "packages/kbn-securitysolution-ecs/src/user/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-ecs",
+            "id": "def-common.UserEcs.hash",
+            "type": "Array",
+            "tags": [],
+            "label": "hash",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "packages/kbn-securitysolution-ecs/src/user/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-ecs",
+            "id": "def-common.UserEcs.group",
+            "type": "Array",
+            "tags": [],
+            "label": "group",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "packages/kbn-securitysolution-ecs/src/user/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/securitysolution-ecs",
+        "id": "def-common.WinlogEcs",
+        "type": "Interface",
+        "tags": [],
+        "label": "WinlogEcs",
+        "description": [],
+        "path": "packages/kbn-securitysolution-ecs/src/winlog/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/securitysolution-ecs",
+            "id": "def-common.WinlogEcs.event_id",
+            "type": "Array",
+            "tags": [],
+            "label": "event_id",
+            "description": [],
+            "signature": [
+              "number[] | undefined"
+            ],
+            "path": "packages/kbn-securitysolution-ecs/src/winlog/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/securitysolution-ecs",
+        "id": "def-common.ZeekEcs",
+        "type": "Interface",
+        "tags": [],
+        "label": "ZeekEcs",
+        "description": [],
+        "path": "packages/kbn-securitysolution-ecs/src/zeek/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/securitysolution-ecs",
+            "id": "def-common.ZeekEcs.session_id",
+            "type": "Array",
+            "tags": [],
+            "label": "session_id",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "packages/kbn-securitysolution-ecs/src/zeek/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-ecs",
+            "id": "def-common.ZeekEcs.connection",
+            "type": "Object",
+            "tags": [],
+            "label": "connection",
+            "description": [],
+            "signature": [
+              "ZeekConnectionData",
+              " | undefined"
+            ],
+            "path": "packages/kbn-securitysolution-ecs/src/zeek/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-ecs",
+            "id": "def-common.ZeekEcs.notice",
+            "type": "Object",
+            "tags": [],
+            "label": "notice",
+            "description": [],
+            "signature": [
+              "ZeekNoticeData",
+              " | undefined"
+            ],
+            "path": "packages/kbn-securitysolution-ecs/src/zeek/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-ecs",
+            "id": "def-common.ZeekEcs.dns",
+            "type": "Object",
+            "tags": [],
+            "label": "dns",
+            "description": [],
+            "signature": [
+              "ZeekDnsData",
+              " | undefined"
+            ],
+            "path": "packages/kbn-securitysolution-ecs/src/zeek/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-ecs",
+            "id": "def-common.ZeekEcs.http",
+            "type": "Object",
+            "tags": [],
+            "label": "http",
+            "description": [],
+            "signature": [
+              "ZeekHttpData",
+              " | undefined"
+            ],
+            "path": "packages/kbn-securitysolution-ecs/src/zeek/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-ecs",
+            "id": "def-common.ZeekEcs.files",
+            "type": "Object",
+            "tags": [],
+            "label": "files",
+            "description": [],
+            "signature": [
+              "ZeekFileData",
+              " | undefined"
+            ],
+            "path": "packages/kbn-securitysolution-ecs/src/zeek/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-ecs",
+            "id": "def-common.ZeekEcs.ssl",
+            "type": "Object",
+            "tags": [],
+            "label": "ssl",
+            "description": [],
+            "signature": [
+              "ZeekSslData",
+              " | undefined"
+            ],
+            "path": "packages/kbn-securitysolution-ecs/src/zeek/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [
+      {
+        "parentPluginId": "@kbn/securitysolution-ecs",
+        "id": "def-common.EventCategory",
+        "type": "Enum",
+        "tags": [],
+        "label": "EventCategory",
+        "description": [],
+        "path": "packages/kbn-securitysolution-ecs/src/event/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/securitysolution-ecs",
+        "id": "def-common.EventCode",
+        "type": "Enum",
+        "tags": [],
+        "label": "EventCode",
+        "description": [],
+        "path": "packages/kbn-securitysolution-ecs/src/event/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "misc": [],
+    "objects": [
+      {
+        "parentPluginId": "@kbn/securitysolution-ecs",
+        "id": "def-common.cloudFieldsMap",
+        "type": "Object",
+        "tags": [],
+        "label": "cloudFieldsMap",
+        "description": [],
+        "path": "packages/kbn-securitysolution-ecs/src/ecs_fields/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/securitysolution-ecs",
+            "id": "def-common.cloudFieldsMap.cloud.account.id",
+            "type": "string",
+            "tags": [],
+            "label": "'cloud.account.id'",
+            "description": [],
+            "path": "packages/kbn-securitysolution-ecs/src/ecs_fields/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-ecs",
+            "id": "def-common.cloudFieldsMap.cloud.availability_zone",
+            "type": "string",
+            "tags": [],
+            "label": "'cloud.availability_zone'",
+            "description": [],
+            "path": "packages/kbn-securitysolution-ecs/src/ecs_fields/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-ecs",
+            "id": "def-common.cloudFieldsMap.cloud.instance.id",
+            "type": "string",
+            "tags": [],
+            "label": "'cloud.instance.id'",
+            "description": [],
+            "path": "packages/kbn-securitysolution-ecs/src/ecs_fields/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-ecs",
+            "id": "def-common.cloudFieldsMap.cloud.instance.name",
+            "type": "string",
+            "tags": [],
+            "label": "'cloud.instance.name'",
+            "description": [],
+            "path": "packages/kbn-securitysolution-ecs/src/ecs_fields/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-ecs",
+            "id": "def-common.cloudFieldsMap.cloud.machine.type",
+            "type": "string",
+            "tags": [],
+            "label": "'cloud.machine.type'",
+            "description": [],
+            "path": "packages/kbn-securitysolution-ecs/src/ecs_fields/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-ecs",
+            "id": "def-common.cloudFieldsMap.cloud.provider",
+            "type": "string",
+            "tags": [],
+            "label": "'cloud.provider'",
+            "description": [],
+            "path": "packages/kbn-securitysolution-ecs/src/ecs_fields/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-ecs",
+            "id": "def-common.cloudFieldsMap.cloud.region",
+            "type": "string",
+            "tags": [],
+            "label": "'cloud.region'",
+            "description": [],
+            "path": "packages/kbn-securitysolution-ecs/src/ecs_fields/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/securitysolution-ecs",
+        "id": "def-common.hostFieldsMap",
+        "type": "Object",
+        "tags": [],
+        "label": "hostFieldsMap",
+        "description": [],
+        "path": "packages/kbn-securitysolution-ecs/src/ecs_fields/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/securitysolution-ecs",
+            "id": "def-common.hostFieldsMap.host.architecture",
+            "type": "string",
+            "tags": [],
+            "label": "'host.architecture'",
+            "description": [],
+            "path": "packages/kbn-securitysolution-ecs/src/ecs_fields/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-ecs",
+            "id": "def-common.hostFieldsMap.host.id",
+            "type": "string",
+            "tags": [],
+            "label": "'host.id'",
+            "description": [],
+            "path": "packages/kbn-securitysolution-ecs/src/ecs_fields/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-ecs",
+            "id": "def-common.hostFieldsMap.host.ip",
+            "type": "string",
+            "tags": [],
+            "label": "'host.ip'",
+            "description": [],
+            "path": "packages/kbn-securitysolution-ecs/src/ecs_fields/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-ecs",
+            "id": "def-common.hostFieldsMap.host.mac",
+            "type": "string",
+            "tags": [],
+            "label": "'host.mac'",
+            "description": [],
+            "path": "packages/kbn-securitysolution-ecs/src/ecs_fields/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-ecs",
+            "id": "def-common.hostFieldsMap.host.name",
+            "type": "string",
+            "tags": [],
+            "label": "'host.name'",
+            "description": [],
+            "path": "packages/kbn-securitysolution-ecs/src/ecs_fields/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-ecs",
+            "id": "def-common.hostFieldsMap.Unnamed",
+            "type": "Any",
+            "tags": [],
+            "label": "Unnamed",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "packages/kbn-securitysolution-ecs/src/ecs_fields/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/securitysolution-ecs",
+        "id": "def-common.osFieldsMap",
+        "type": "Object",
+        "tags": [],
+        "label": "osFieldsMap",
+        "description": [],
+        "path": "packages/kbn-securitysolution-ecs/src/ecs_fields/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/securitysolution-ecs",
+            "id": "def-common.osFieldsMap.os.platform",
+            "type": "string",
+            "tags": [],
+            "label": "'os.platform'",
+            "description": [],
+            "path": "packages/kbn-securitysolution-ecs/src/ecs_fields/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-ecs",
+            "id": "def-common.osFieldsMap.os.name",
+            "type": "string",
+            "tags": [],
+            "label": "'os.name'",
+            "description": [],
+            "path": "packages/kbn-securitysolution-ecs/src/ecs_fields/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-ecs",
+            "id": "def-common.osFieldsMap.os.full",
+            "type": "string",
+            "tags": [],
+            "label": "'os.full'",
+            "description": [],
+            "path": "packages/kbn-securitysolution-ecs/src/ecs_fields/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-ecs",
+            "id": "def-common.osFieldsMap.os.family",
+            "type": "string",
+            "tags": [],
+            "label": "'os.family'",
+            "description": [],
+            "path": "packages/kbn-securitysolution-ecs/src/ecs_fields/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-ecs",
+            "id": "def-common.osFieldsMap.os.version",
+            "type": "string",
+            "tags": [],
+            "label": "'os.version'",
+            "description": [],
+            "path": "packages/kbn-securitysolution-ecs/src/ecs_fields/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-ecs",
+            "id": "def-common.osFieldsMap.os.kernel",
+            "type": "string",
+            "tags": [],
+            "label": "'os.kernel'",
+            "description": [],
+            "path": "packages/kbn-securitysolution-ecs/src/ecs_fields/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/securitysolution-ecs",
+        "id": "def-common.processFieldsMap",
+        "type": "Object",
+        "tags": [],
+        "label": "processFieldsMap",
+        "description": [],
+        "path": "packages/kbn-securitysolution-ecs/src/ecs_fields/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/securitysolution-ecs",
+            "id": "def-common.processFieldsMap.process.hash.md5",
+            "type": "string",
+            "tags": [],
+            "label": "'process.hash.md5'",
+            "description": [],
+            "path": "packages/kbn-securitysolution-ecs/src/ecs_fields/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-ecs",
+            "id": "def-common.processFieldsMap.process.hash.sha1",
+            "type": "string",
+            "tags": [],
+            "label": "'process.hash.sha1'",
+            "description": [],
+            "path": "packages/kbn-securitysolution-ecs/src/ecs_fields/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-ecs",
+            "id": "def-common.processFieldsMap.process.hash.sha256",
+            "type": "string",
+            "tags": [],
+            "label": "'process.hash.sha256'",
+            "description": [],
+            "path": "packages/kbn-securitysolution-ecs/src/ecs_fields/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-ecs",
+            "id": "def-common.processFieldsMap.process.pid",
+            "type": "string",
+            "tags": [],
+            "label": "'process.pid'",
+            "description": [],
+            "path": "packages/kbn-securitysolution-ecs/src/ecs_fields/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-ecs",
+            "id": "def-common.processFieldsMap.process.name",
+            "type": "string",
+            "tags": [],
+            "label": "'process.name'",
+            "description": [],
+            "path": "packages/kbn-securitysolution-ecs/src/ecs_fields/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-ecs",
+            "id": "def-common.processFieldsMap.process.ppid",
+            "type": "string",
+            "tags": [],
+            "label": "'process.ppid'",
+            "description": [],
+            "path": "packages/kbn-securitysolution-ecs/src/ecs_fields/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-ecs",
+            "id": "def-common.processFieldsMap.process.args",
+            "type": "string",
+            "tags": [],
+            "label": "'process.args'",
+            "description": [],
+            "path": "packages/kbn-securitysolution-ecs/src/ecs_fields/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-ecs",
+            "id": "def-common.processFieldsMap.process.entity_id",
+            "type": "string",
+            "tags": [],
+            "label": "'process.entity_id'",
+            "description": [],
+            "path": "packages/kbn-securitysolution-ecs/src/ecs_fields/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-ecs",
+            "id": "def-common.processFieldsMap.process.executable",
+            "type": "string",
+            "tags": [],
+            "label": "'process.executable'",
+            "description": [],
+            "path": "packages/kbn-securitysolution-ecs/src/ecs_fields/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-ecs",
+            "id": "def-common.processFieldsMap.process.title",
+            "type": "string",
+            "tags": [],
+            "label": "'process.title'",
+            "description": [],
+            "path": "packages/kbn-securitysolution-ecs/src/ecs_fields/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-ecs",
+            "id": "def-common.processFieldsMap.process.thread",
+            "type": "string",
+            "tags": [],
+            "label": "'process.thread'",
+            "description": [],
+            "path": "packages/kbn-securitysolution-ecs/src/ecs_fields/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-ecs",
+            "id": "def-common.processFieldsMap.process.working_directory",
+            "type": "string",
+            "tags": [],
+            "label": "'process.working_directory'",
+            "description": [],
+            "path": "packages/kbn-securitysolution-ecs/src/ecs_fields/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/securitysolution-ecs",
+        "id": "def-common.sourceFieldsMap",
+        "type": "Object",
+        "tags": [],
+        "label": "sourceFieldsMap",
+        "description": [],
+        "path": "packages/kbn-securitysolution-ecs/src/ecs_fields/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/securitysolution-ecs",
+            "id": "def-common.sourceFieldsMap.source.bytes",
+            "type": "string",
+            "tags": [],
+            "label": "'source.bytes'",
+            "description": [],
+            "path": "packages/kbn-securitysolution-ecs/src/ecs_fields/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-ecs",
+            "id": "def-common.sourceFieldsMap.source.ip",
+            "type": "string",
+            "tags": [],
+            "label": "'source.ip'",
+            "description": [],
+            "path": "packages/kbn-securitysolution-ecs/src/ecs_fields/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-ecs",
+            "id": "def-common.sourceFieldsMap.source.packets",
+            "type": "string",
+            "tags": [],
+            "label": "'source.packets'",
+            "description": [],
+            "path": "packages/kbn-securitysolution-ecs/src/ecs_fields/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-ecs",
+            "id": "def-common.sourceFieldsMap.source.port",
+            "type": "string",
+            "tags": [],
+            "label": "'source.port'",
+            "description": [],
+            "path": "packages/kbn-securitysolution-ecs/src/ecs_fields/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-ecs",
+            "id": "def-common.sourceFieldsMap.source.domain",
+            "type": "string",
+            "tags": [],
+            "label": "'source.domain'",
+            "description": [],
+            "path": "packages/kbn-securitysolution-ecs/src/ecs_fields/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-ecs",
+            "id": "def-common.sourceFieldsMap.source.geo.continent_name",
+            "type": "string",
+            "tags": [],
+            "label": "'source.geo.continent_name'",
+            "description": [],
+            "path": "packages/kbn-securitysolution-ecs/src/ecs_fields/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-ecs",
+            "id": "def-common.sourceFieldsMap.source.geo.country_name",
+            "type": "string",
+            "tags": [],
+            "label": "'source.geo.country_name'",
+            "description": [],
+            "path": "packages/kbn-securitysolution-ecs/src/ecs_fields/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-ecs",
+            "id": "def-common.sourceFieldsMap.source.geo.country_iso_code",
+            "type": "string",
+            "tags": [],
+            "label": "'source.geo.country_iso_code'",
+            "description": [],
+            "path": "packages/kbn-securitysolution-ecs/src/ecs_fields/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-ecs",
+            "id": "def-common.sourceFieldsMap.source.geo.city_name",
+            "type": "string",
+            "tags": [],
+            "label": "'source.geo.city_name'",
+            "description": [],
+            "path": "packages/kbn-securitysolution-ecs/src/ecs_fields/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-ecs",
+            "id": "def-common.sourceFieldsMap.source.geo.region_iso_code",
+            "type": "string",
+            "tags": [],
+            "label": "'source.geo.region_iso_code'",
+            "description": [],
+            "path": "packages/kbn-securitysolution-ecs/src/ecs_fields/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-ecs",
+            "id": "def-common.sourceFieldsMap.source.geo.region_name",
+            "type": "string",
+            "tags": [],
+            "label": "'source.geo.region_name'",
+            "description": [],
+            "path": "packages/kbn-securitysolution-ecs/src/ecs_fields/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/securitysolution-ecs",
+        "id": "def-common.userFieldsMap",
+        "type": "Object",
+        "tags": [],
+        "label": "userFieldsMap",
+        "description": [],
+        "path": "packages/kbn-securitysolution-ecs/src/ecs_fields/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/securitysolution-ecs",
+            "id": "def-common.userFieldsMap.user.domain",
+            "type": "string",
+            "tags": [],
+            "label": "'user.domain'",
+            "description": [],
+            "path": "packages/kbn-securitysolution-ecs/src/ecs_fields/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-ecs",
+            "id": "def-common.userFieldsMap.user.id",
+            "type": "string",
+            "tags": [],
+            "label": "'user.id'",
+            "description": [],
+            "path": "packages/kbn-securitysolution-ecs/src/ecs_fields/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-ecs",
+            "id": "def-common.userFieldsMap.user.name",
+            "type": "string",
+            "tags": [],
+            "label": "'user.name'",
+            "description": [],
+            "path": "packages/kbn-securitysolution-ecs/src/ecs_fields/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-ecs",
+            "id": "def-common.userFieldsMap.user.full_name",
+            "type": "string",
+            "tags": [],
+            "label": "'user.full_name'",
+            "description": [
+              "// NOTE: This field is not tested and available from ECS. Please remove this tag once it is"
+            ],
+            "path": "packages/kbn-securitysolution-ecs/src/ecs_fields/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-ecs",
+            "id": "def-common.userFieldsMap.user.email",
+            "type": "string",
+            "tags": [],
+            "label": "'user.email'",
+            "description": [
+              "// NOTE: This field is not tested and available from ECS. Please remove this tag once it is"
+            ],
+            "path": "packages/kbn-securitysolution-ecs/src/ecs_fields/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-ecs",
+            "id": "def-common.userFieldsMap.user.hash",
+            "type": "string",
+            "tags": [],
+            "label": "'user.hash'",
+            "description": [
+              "// NOTE: This field is not tested and available from ECS. Please remove this tag once it is"
+            ],
+            "path": "packages/kbn-securitysolution-ecs/src/ecs_fields/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-ecs",
+            "id": "def-common.userFieldsMap.user.group",
+            "type": "string",
+            "tags": [],
+            "label": "'user.group'",
+            "description": [
+              "// NOTE: This field is not tested and available from ECS. Please remove this tag once it is"
+            ],
+            "path": "packages/kbn-securitysolution-ecs/src/ecs_fields/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ]
+  }
+}

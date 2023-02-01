@@ -241,7 +241,6 @@ export const push = async (
       }),
 
       attachmentService.bulkUpdate({
-        unsecuredSavedObjectsClient,
         comments: comments.saved_objects
           .filter((comment) => comment.attributes.pushed_at == null)
           .map((comment) => ({
@@ -257,7 +256,7 @@ export const push = async (
     ]);
 
     if (shouldMarkAsClosed) {
-      await userActionService.createUserAction({
+      await userActionService.creator.createUserAction({
         type: ActionTypes.status,
         payload: { status: CaseStatuses.closed },
         user,
@@ -271,7 +270,7 @@ export const push = async (
       }
     }
 
-    await userActionService.createUserAction({
+    await userActionService.creator.createUserAction({
       type: ActionTypes.pushed,
       payload: { externalService },
       user,

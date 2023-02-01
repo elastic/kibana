@@ -11,10 +11,10 @@ import {
   EuiEmptyPrompt,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiHorizontalRule,
   EuiPageBody,
-  EuiPageContentBody_Deprecated as EuiPageContentBody,
+  EuiPageSection,
   EuiPanel,
+  EuiSpacer,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
@@ -170,8 +170,8 @@ export const ExplainLogRateSpikesPage: FC = () => {
   return (
     <EuiPageBody data-test-subj="aiopsExplainLogRateSpikesPage" paddingSize="none" panelled={false}>
       <PageHeader />
-      <EuiHorizontalRule />
-      <EuiPageContentBody>
+      <EuiSpacer size="m" />
+      <EuiPageSection paddingSize="none">
         <EuiFlexGroup gutterSize="m" direction="column">
           <EuiFlexItem>
             <SearchPanel
@@ -236,7 +236,7 @@ export const ExplainLogRateSpikesPage: FC = () => {
             </EuiPanel>
           </EuiFlexItem>
         </EuiFlexGroup>
-      </EuiPageContentBody>
+      </EuiPageSection>
     </EuiPageBody>
   );
 };

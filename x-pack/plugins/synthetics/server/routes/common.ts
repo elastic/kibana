@@ -70,7 +70,7 @@ export const getMonitors = (
     type: syntheticsMonitorType,
     perPage,
     page,
-    sortField: sortField === 'schedule.keyword' ? 'schedule.number' : sortField,
+    sortField: parseMappingKey(sortField),
     sortOrder,
     searchFields: SEARCH_FIELDS,
     search: query ? `${query}*` : undefined,
@@ -170,3 +170,14 @@ export const isMonitorsQueryFiltered = (monitorQuery: MonitorsQuery) => {
     !!status?.length
   );
 };
+
+function parseMappingKey(key: string | undefined) {
+  switch (key) {
+    case 'schedule.keyword':
+      return 'schedule.number';
+    case 'project_id.keyword':
+      return 'project_id';
+    default:
+      return key;
+  }
+}

@@ -12,19 +12,10 @@ import { AsApiContract } from '@kbn/actions-plugin/common';
 import { HttpSetup } from '@kbn/core/public';
 import { BASE_RAC_ALERTS_API_PATH } from '@kbn/rule-registry-plugin/common/constants';
 import { useKibana } from '../../common/lib/kibana';
-
-export interface AlertSummaryTimeRange {
-  utcFrom: string;
-  utcTo: string;
-  // fixed_interval condition in ES query such as '1m', '1d'
-  fixedInterval: string;
-  title: JSX.Element | string;
-}
-
-export interface Alert {
-  key: number;
-  doc_count: number;
-}
+import {
+  Alert,
+  AlertSummaryTimeRange,
+} from '../sections/rule_details/components/alert_summary/types';
 
 interface UseLoadAlertSummaryProps {
   featureIds?: ValidFeatureId[];
@@ -36,7 +27,6 @@ interface AlertSummary {
   activeAlertCount: number;
   activeAlerts: Alert[];
   recoveredAlertCount: number;
-  recoveredAlerts: Alert[];
 }
 
 interface LoadAlertSummaryResponse {
@@ -53,7 +43,6 @@ export function useLoadAlertSummary({ featureIds, timeRange, filter }: UseLoadAl
       activeAlertCount: 0,
       activeAlerts: [],
       recoveredAlertCount: 0,
-      recoveredAlerts: [],
     },
   });
   const isCancelledRef = useRef(false);
@@ -65,23 +54,20 @@ export function useLoadAlertSummary({ featureIds, timeRange, filter }: UseLoadAl
     abortCtrlRef.current = new AbortController();
 
     try {
-      const { activeAlertCount, activeAlerts, recoveredAlertCount, recoveredAlerts } =
-        await fetchAlertSummary({
-          featureIds,
-          filter,
-          http,
-          signal: abortCtrlRef.current.signal,
-          timeRange,
-        });
+      const { activeAlertCount, activeAlerts, recoveredAlertCount } = await fetchAlertSummary({
+        featureIds,
+        filter,
+        http,
+        signal: abortCtrlRef.current.signal,
+        timeRange,
+      });
 
       if (!isCancelledRef.current) {
-        setAlertSummary((oldState) => ({
-          ...oldState,
+        setAlertSummary(() => ({
           alertSummary: {
             activeAlertCount,
             activeAlerts,
             recoveredAlertCount,
-            recoveredAlerts,
           },
           isLoading: false,
         }));
@@ -133,12 +119,10 @@ async function fetchAlertSummary({
   const activeAlertCount = res?.activeAlertCount ?? 0;
   const activeAlerts = res?.activeAlerts ?? [];
   const recoveredAlertCount = res?.recoveredAlertCount ?? 0;
-  const recoveredAlerts = res?.recoveredAlerts ?? [];
 
   return {
     activeAlertCount,
     activeAlerts,
     recoveredAlertCount,
-    recoveredAlerts,
   };
 }

@@ -22,6 +22,7 @@
   "requiredPlugins": [
     "alerting",
     "cases",
+    "charts",
     "data",
     "dataViews",
     "features",

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiBadge, EuiBasicTableColumn } from '@elastic/eui';
+import { EuiBasicTableColumn } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { useHistory } from 'react-router-dom';
@@ -21,13 +21,13 @@ import { MonitorDetailsLink } from './monitor_details_link';
 
 import {
   ConfigKey,
-  DataStream,
   EncryptedSyntheticsSavedMonitor,
   OverviewStatusState,
   ServiceLocations,
   SyntheticsMonitorSchedule,
 } from '../../../../../../../common/runtime_types';
 
+import { MonitorTypeBadge } from '../../../common/components/monitor_type_badge';
 import { getFrequencyLabel } from './labels';
 import { MonitorEnabled } from './monitor_enabled';
 import { MonitorLocations } from './monitor_locations';
@@ -65,6 +65,19 @@ export function useMonitorListColumns({
         <MonitorDetailsLink monitor={monitor} />
       ),
     },
+    // Only show Project ID column if project monitors are present
+    ...(status?.projectMonitorsCount ?? 0 > 0
+      ? [
+          {
+            align: 'left' as const,
+            field: ConfigKey.PROJECT_ID as string,
+            name: i18n.translate('xpack.synthetics.management.monitorList.projectId', {
+              defaultMessage: 'Project ID',
+            }),
+            sortable: true,
+          },
+        ]
+      : []),
     {
       align: 'left' as const,
       field: ConfigKey.MONITOR_TYPE,
@@ -72,8 +85,18 @@ export function useMonitorListColumns({
         defaultMessage: 'Type',
       }),
       sortable: true,
-      render: (monitorType: DataStream) => (
-        <EuiBadge>{monitorType === DataStream.BROWSER ? 'Browser' : 'Ping'}</EuiBadge>
+      render: (_: string, monitor: EncryptedSyntheticsSavedMonitor) => (
+        <MonitorTypeBadge
+          monitor={monitor}
+          ariaLabel={labels.getFilterForTypeMessage(monitor[ConfigKey.MONITOR_TYPE])}
+          onClick={() => {
+            history.push({
+              search: `monitorType=${encodeURIComponent(
+                JSON.stringify([monitor[ConfigKey.MONITOR_TYPE]])
+              )}`,
+            });
+          }}
+        />
       ),
     },
     {
@@ -110,7 +133,7 @@ export function useMonitorListColumns({
         <TagsBadges
           tags={tags}
           onClick={(tag) => {
-            history.push({ search: `tags=${JSON.stringify([tag])}` });
+            history.push({ search: `tags=${encodeURIComponent(JSON.stringify([tag]))}` });
           }}
         />
       ),

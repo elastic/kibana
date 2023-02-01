@@ -10,16 +10,19 @@ import type { Duration } from 'moment';
 import type { Logger } from '@kbn/core/server';
 
 import type {
+  PublicRuleResultService,
+  PublicRuleMonitoringService,
+} from '@kbn/alerting-plugin/server/types';
+import type {
   RuleExecutionMetrics,
   RuleExecutionSettings,
-  RuleExecutionStatus,
 } from '../../../../../../../common/detection_engine/rule_monitoring';
 import {
   LogLevel,
   logLevelFromExecutionStatus,
   LogLevelSetting,
   logLevelToNumber,
-  ruleExecutionStatusToNumber,
+  RuleExecutionStatus,
 } from '../../../../../../../common/detection_engine/rule_monitoring';
 
 import { assertUnreachable } from '../../../../../../../common/utility_types';
@@ -29,7 +32,6 @@ import type { ExtMeta } from '../utils/console_logging';
 import { getCorrelationIds } from './correlation_ids';
 
 import type { IEventLogWriter } from '../event_log/event_log_writer';
-import type { IRuleExecutionSavedObjectsClient } from '../execution_saved_object/saved_objects_client';
 import type {
   IRuleExecutionLogForExecutors,
   RuleExecutionContext,
@@ -38,10 +40,11 @@ import type {
 
 export const createClientForExecutors = (
   settings: RuleExecutionSettings,
-  soClient: IRuleExecutionSavedObjectsClient,
   eventLog: IEventLogWriter,
   logger: Logger,
-  context: RuleExecutionContext
+  context: RuleExecutionContext,
+  ruleMonitoringService: PublicRuleMonitoringService,
+  ruleResultService: PublicRuleResultService
 ): IRuleExecutionLogForExecutors => {
   const baseCorrelationIds = getCorrelationIds(context);
   const baseLogSuffix = baseCorrelationIds.getLogSuffix();
@@ -84,7 +87,7 @@ export const createClientForExecutors = (
 
           await Promise.all([
             writeStatusChangeToConsole(normalizedArgs, logMeta),
-            writeStatusChangeToSavedObjects(normalizedArgs),
+            writeStatusChangeToRuleObject(normalizedArgs),
             writeStatusChangeToEventLog(normalizedArgs),
           ]);
         } catch (e) {
@@ -157,21 +160,38 @@ export const createClientForExecutors = (
     writeMessageToConsole(logMessage, logLevel, logMeta);
   };
 
-  // TODO: Add executionId to new status SO?
-  const writeStatusChangeToSavedObjects = async (
-    args: NormalizedStatusChangeArgs
-  ): Promise<void> => {
+  const writeStatusChangeToRuleObject = async (args: NormalizedStatusChangeArgs): Promise<void> => {
     const { newStatus, message, metrics } = args;
 
-    await soClient.createOrUpdate(ruleId, {
-      last_execution: {
-        date: nowISO(),
-        status: newStatus,
-        status_order: ruleExecutionStatusToNumber(newStatus),
-        message,
-        metrics: metrics ?? {},
-      },
-    });
+    if (newStatus === RuleExecutionStatus.running) {
+      return;
+    }
+
+    const {
+      total_search_duration_ms: totalSearchDurationMs,
+      total_indexing_duration_ms: totalIndexingDurationMs,
+      execution_gap_duration_s: executionGapDurationS,
+    } = metrics ?? {};
+
+    if (totalSearchDurationMs) {
+      ruleMonitoringService.setLastRunMetricsTotalSearchDurationMs(totalSearchDurationMs);
+    }
+
+    if (totalIndexingDurationMs) {
+      ruleMonitoringService.setLastRunMetricsTotalIndexingDurationMs(totalIndexingDurationMs);
+    }
+
+    if (executionGapDurationS) {
+      ruleMonitoringService.setLastRunMetricsGapDurationS(executionGapDurationS);
+    }
+
+    if (newStatus === RuleExecutionStatus.failed) {
+      ruleResultService.addLastRunError(message);
+    } else if (newStatus === RuleExecutionStatus['partial failure']) {
+      ruleResultService.addLastRunWarning(message);
+    }
+
+    ruleResultService.setLastRunOutcomeMessage(message);
   };
 
   const writeStatusChangeToEventLog = (args: NormalizedStatusChangeArgs): void => {
@@ -204,8 +224,6 @@ export const createClientForExecutors = (
   return client;
 };
 
-const nowISO = () => new Date().toISOString();
-
 interface NormalizedStatusChangeArgs {
   newStatus: RuleExecutionStatus;
   message: string;
@@ -213,6 +231,12 @@ interface NormalizedStatusChangeArgs {
 }
 
 const normalizeStatusChangeArgs = (args: StatusChangeArgs): NormalizedStatusChangeArgs => {
+  if (args.newStatus === RuleExecutionStatus.running) {
+    return {
+      newStatus: args.newStatus,
+      message: '',
+    };
+  }
   const { newStatus, message, metrics } = args;
 
   return {

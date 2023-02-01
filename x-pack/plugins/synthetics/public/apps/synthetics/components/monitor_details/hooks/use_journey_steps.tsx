@@ -16,11 +16,18 @@ import {
   selectBrowserJourneyLoading,
 } from '../../../state';
 
-export const useJourneySteps = (checkGroup?: string, lastRefresh?: number) => {
-  const { stepIndex, checkGroupId: urlCheckGroup } = useParams<{
+export const useJourneySteps = (
+  checkGroup?: string,
+  lastRefresh?: number,
+  stepIndexArg?: number
+) => {
+  const { stepIndex: stepIndexUrl, checkGroupId: urlCheckGroup } = useParams<{
     stepIndex: string;
     checkGroupId: string;
   }>();
+
+  const stepIndex = stepIndexArg ?? stepIndexUrl;
+
   const checkGroupId = checkGroup ?? urlCheckGroup;
 
   const journeyData = useSelector(selectBrowserJourney(checkGroupId));
@@ -34,12 +41,6 @@ export const useJourneySteps = (checkGroup?: string, lastRefresh?: number) => {
     }
   }, [checkGroupId, dispatch, lastRefresh]);
 
-  const isFailed =
-    journeyData?.steps.some(
-      (step) =>
-        step.synthetics?.step?.status === 'failed' || step.synthetics?.step?.status === 'skipped'
-    ) ?? false;
-
   const stepEnds: JourneyStep[] = (journeyData?.steps ?? []).filter(isStepEnd);
   const failedStep = journeyData?.steps.find((step) => step.synthetics?.step?.status === 'failed');
   const stepLabels = stepEnds.map((stepEnd) => stepEnd?.synthetics?.step?.name ?? '');
@@ -48,13 +49,17 @@ export const useJourneySteps = (checkGroup?: string, lastRefresh?: number) => {
     ? stepEnds.find((step) => step.synthetics?.step?.index === Number(stepIndex))
     : undefined;
 
+  const isFailedStep =
+    failedStep?.synthetics?.step && failedStep.synthetics.step.index === Number(stepIndex);
+
   return {
     data: journeyData as SyntheticsJourneyApiResponse,
     loading: loading ?? false,
-    isFailed,
     stepEnds,
     stepLabels,
     currentStep,
     failedStep,
+    isFailedStep,
+    isFailed: false,
   };
 };

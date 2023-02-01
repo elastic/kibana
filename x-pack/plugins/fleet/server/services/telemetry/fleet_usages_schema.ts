@@ -125,18 +125,6 @@ export const fleetUsagesSchema: RootSchema<any> = {
           description: 'The number of Fleet Server hosts configured in Fleet settings.',
         },
       },
-      inactive: {
-        type: 'long',
-        _meta: {
-          description: 'The total number of enrolled agents currently inactive',
-        },
-      },
-      unenrolled: {
-        type: 'long',
-        _meta: {
-          description: 'The total number of unenrolled agents',
-        },
-      },
     },
   },
   packages: {
@@ -201,18 +189,26 @@ export const fleetUsagesSchema: RootSchema<any> = {
       },
     },
   },
-  agent_logs_top_errors: {
+  agent_logs_panics_last_hour: {
     type: 'array',
-    items: {
-      type: 'text',
-      _meta: { description: 'Top messages from agent error logs' },
+    _meta: {
+      description: 'Array of log messages containing the word panic from the last hour',
     },
-  },
-  fleet_server_logs_top_errors: {
-    type: 'array',
     items: {
-      type: 'text',
-      _meta: { description: 'Top messages from fleet server error logs' },
+      properties: {
+        timestamp: {
+          type: 'date',
+          _meta: {
+            description: 'Timestamp of the log message containing the word panic',
+          },
+        },
+        message: {
+          type: 'text',
+          _meta: {
+            description: 'Log message containing the word panic',
+          },
+        },
+      },
     },
   },
 };

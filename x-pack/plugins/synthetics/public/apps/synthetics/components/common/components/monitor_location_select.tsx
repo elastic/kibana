@@ -52,7 +52,10 @@ export const MonitorLocationSelect = ({
       return '';
     }
 
-    if (monitorLocations.length > 1) {
+    const showSelection =
+      monitorLocations.length === 1 && monitorLocations[0].id !== selectedLocation?.id;
+
+    if (monitorLocations.length > 1 || showSelection) {
       const button = (
         <EuiLink onClick={openLocationList} disabled={isDisabled}>
           {selectedLocation.label} <EuiIcon type="arrowDown" />

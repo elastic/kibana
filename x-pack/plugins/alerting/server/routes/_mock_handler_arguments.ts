@@ -10,17 +10,20 @@ import { identity } from 'lodash';
 import type { MethodKeysOf } from '@kbn/utility-types';
 import { httpServerMock } from '@kbn/core/server/mocks';
 import { rulesClientMock, RulesClientMock } from '../rules_client.mock';
+import { rulesSettingsClientMock, RulesSettingsClientMock } from '../rules_settings_client.mock';
 import { AlertsHealth, RuleType } from '../../common';
 import type { AlertingRequestHandlerContext } from '../types';
 
 export function mockHandlerArguments(
   {
     rulesClient = rulesClientMock.create(),
+    rulesSettingsClient = rulesSettingsClientMock.create(),
     listTypes: listTypesRes = [],
     getFrameworkHealth,
     areApiKeysEnabled,
   }: {
     rulesClient?: RulesClientMock;
+    rulesSettingsClient?: RulesSettingsClientMock;
     listTypes?: RuleType[];
     getFrameworkHealth?: jest.MockInstance<Promise<AlertsHealth>, []> &
       (() => Promise<AlertsHealth>);
@@ -40,6 +43,9 @@ export function mockHandlerArguments(
         listTypes,
         getRulesClient() {
           return rulesClient || rulesClientMock.create();
+        },
+        getRulesSettingsClient() {
+          return rulesSettingsClient || rulesSettingsClientMock.create();
         },
         getFrameworkHealth,
         areApiKeysEnabled: areApiKeysEnabled ? areApiKeysEnabled : () => Promise.resolve(true),

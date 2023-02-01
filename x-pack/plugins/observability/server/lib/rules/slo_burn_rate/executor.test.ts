@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import { IUiSettingsClient, SavedObjectsClientContract } from '@kbn/core/server';
 import {
   ElasticsearchClientMock,
@@ -257,7 +257,7 @@ describe('BurnRateRuleExecutor', () => {
 
 function someRuleParams(params: Partial<BurnRateRuleParams> = {}): BurnRateRuleParams {
   return {
-    sloId: uuid(),
+    sloId: uuidv4(),
     burnRateThreshold: 2,
     maxBurnRateThreshold: 720,
     longWindow: { value: 1, unit: 'h' },

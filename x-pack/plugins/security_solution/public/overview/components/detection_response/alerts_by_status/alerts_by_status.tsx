@@ -71,10 +71,11 @@ const StyledLegendFlexItem = styled(EuiFlexItem)`
   padding-top: 45px;
 `;
 
-const ChartSize = '135px';
+const ChartSize = '120px';
 
 interface AlertsByStatusProps {
   additionalFilters?: ESBoolQuery[];
+  applyGlobalQueriesAndFilters?: boolean;
   entityFilter?: EntityFilter;
   signalIndexName: string | null;
 }
@@ -98,6 +99,7 @@ const closedDonutOptions = { status: 'closed' as Status };
 
 export const AlertsByStatus = ({
   additionalFilters,
+  applyGlobalQueriesAndFilters = true,
   signalIndexName,
   entityFilter,
 }: AlertsByStatusProps) => {
@@ -220,7 +222,7 @@ export const AlertsByStatus = ({
                     <StyledFlexItem key="alerts-status-open" grow={isChartEmbeddablesEnabled}>
                       {isChartEmbeddablesEnabled ? (
                         <VisualizationEmbeddable
-                          applyGlobalQueriesAndFilters={false}
+                          applyGlobalQueriesAndFilters={applyGlobalQueriesAndFilters}
                           extraOptions={openDonutOptions}
                           getLensAttributes={getAlertsByStatusAttributes}
                           height={ChartSize}
@@ -250,7 +252,7 @@ export const AlertsByStatus = ({
                     >
                       {isChartEmbeddablesEnabled ? (
                         <VisualizationEmbeddable
-                          applyGlobalQueriesAndFilters={false}
+                          applyGlobalQueriesAndFilters={applyGlobalQueriesAndFilters}
                           extraOptions={acknowledgedDonutOptions}
                           getLensAttributes={getAlertsByStatusAttributes}
                           height={ChartSize}
@@ -277,7 +279,7 @@ export const AlertsByStatus = ({
                     <StyledFlexItem key="alerts-status-closed" grow={isChartEmbeddablesEnabled}>
                       {isChartEmbeddablesEnabled ? (
                         <VisualizationEmbeddable
-                          applyGlobalQueriesAndFilters={false}
+                          applyGlobalQueriesAndFilters={applyGlobalQueriesAndFilters}
                           extraOptions={closedDonutOptions}
                           getLensAttributes={getAlertsByStatusAttributes}
                           height={ChartSize}

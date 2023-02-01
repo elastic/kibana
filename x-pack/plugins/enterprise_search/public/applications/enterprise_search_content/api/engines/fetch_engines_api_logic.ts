@@ -6,24 +6,25 @@
  */
 
 import { EnterpriseSearchEnginesResponse } from '../../../../../common/types/engines';
+import { Page } from '../../../../../common/types/pagination';
 
 import { createApiLogic } from '../../../shared/api_logic/create_api_logic';
 import { HttpLogic } from '../../../shared/http';
 
-import { Meta } from '../../components/engines/types';
-
 export interface EnginesListAPIArguments {
-  meta: Meta;
-  // searchQuery?: string;
+  meta: Page;
+  searchQuery?: string;
 }
 
 export const fetchEngines = async ({
   meta,
+  searchQuery,
 }: EnginesListAPIArguments): Promise<EnterpriseSearchEnginesResponse> => {
   const route = '/internal/enterprise_search/engines';
   const query = {
     from: meta.from,
     size: meta.size,
+    ...(searchQuery && searchQuery.trim() !== '' ? { q: searchQuery } : {}),
   };
   return await HttpLogic.values.http.get<EnterpriseSearchEnginesResponse>(route, {
     query,
