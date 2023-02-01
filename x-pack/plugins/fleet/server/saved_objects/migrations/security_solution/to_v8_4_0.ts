@@ -7,6 +7,7 @@
 
 import type { SavedObjectMigrationFn, SavedObjectUnsanitizedDoc } from '@kbn/core/server';
 import { cloneDeep } from 'lodash';
+
 import type { PackagePolicy } from '../../../../common';
 
 export const migratePackagePolicyToV840: SavedObjectMigrationFn<PackagePolicy, PackagePolicy> = (
