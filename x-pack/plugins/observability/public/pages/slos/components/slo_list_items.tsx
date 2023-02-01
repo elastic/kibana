@@ -17,11 +17,21 @@ export interface Props {
   sloList: SLOWithSummaryResponse[];
   loading: boolean;
   error: boolean;
+  onCloned: () => void;
+  onCloning: () => void;
   onDeleted: () => void;
   onDeleting: () => void;
 }
 
-export function SloListItems({ sloList, loading, error, onDeleted, onDeleting }: Props) {
+export function SloListItems({
+  sloList,
+  loading,
+  error,
+  onCloned,
+  onCloning,
+  onDeleted,
+  onDeleting,
+}: Props) {
   const [sloIds, setSloIds] = useState<string[]>([]);
   useEffect(() => {
     setSloIds(sloList.map((slo) => slo.id));
@@ -45,6 +55,8 @@ export function SloListItems({ sloList, loading, error, onDeleted, onDeleting }:
             slo={slo}
             historicalSummary={historicalSummaryBySlo[slo.id]}
             historicalSummaryLoading={historicalSummaryLoading}
+            onCloned={onCloned}
+            onCloning={onCloning}
             onDeleted={onDeleted}
             onDeleting={onDeleting}
           />
