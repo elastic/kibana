@@ -110,11 +110,11 @@ async function createPackagePolicy(
       },
       vars: {
         deployment: {
-          value: 'vanilla',
+          value: deployment,
           type: 'text',
         },
         posture: {
-          value: 'kspm',
+          value: posture,
           type: 'text',
         },
       },
