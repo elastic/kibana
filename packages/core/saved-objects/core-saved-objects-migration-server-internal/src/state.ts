@@ -209,8 +209,10 @@ export interface PrepareCompatibleMigration extends PostInitWithSource {
 }
 
 export interface CleanupUnknownAndExcluded extends PostInitWithSource {
-  /** We want to clean SO with unknown and excluded types from the source index */
+  /** Clean the source index, removing SOs with unknown and excluded types */
   readonly controlState: 'CLEANUP_UNKNOWN_AND_EXCLUDED';
+  readonly sourceIndexMappings: IndexMapping;
+  readonly aliases: Record<string, string | undefined>;
 }
 
 export interface FatalState extends BaseState {

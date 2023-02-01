@@ -278,12 +278,42 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
         ],
       };
     }
+  } else if (stateP.controlState === 'CLEANUP_UNKNOWN_AND_EXCLUDED') {
+    const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;
+    if (Either.isRight(res)) {
+      // we didn't need to cleanup, or the cleanup went well
+      // The source index .kibana is pointing to. E.g: ".xx8.7.0_001"
+      const source = stateP.sourceIndex.value;
+      return {
+        ...stateP,
+        controlState: 'PREPARE_COMPATIBLE_MIGRATION',
+        targetIndexRawMappings: stateP.sourceIndexMappings,
+        targetIndexMappings: mergeMigrationMappingPropertyHashes(
+          stateP.targetIndexMappings,
+          stateP.sourceIndexMappings
+        ),
+        preTransformDocsActions: [
+          // Point the version alias to the source index. This let's other Kibana
+          // instances know that a migration for the current version is "done"
+          // even though we may be waiting for document transformations to finish.
+          { add: { index: source!, alias: stateP.versionAlias } },
+          ...buildRemoveAliasActions(source!, Object.keys(stateP.aliases), [
+            stateP.currentAlias,
+            stateP.versionAlias,
+          ]),
+        ],
+      };
+    } else if (Either.isLeft(res)) {
+      return throwBadResponse(stateP, res.left as never);
+    } else {
+      return throwBadResponse(stateP, res);
+    }
   } else if (stateP.controlState === 'PREPARE_COMPATIBLE_MIGRATION') {
     const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;
     if (Either.isRight(res)) {
       return {
         ...stateP,
-        controlState: 'CLEANUP_UNKNOWN_AND_EXCLUDED',
+        controlState: 'OUTDATED_DOCUMENTS_SEARCH_OPEN_PIT',
       };
     } else if (Either.isLeft(res)) {
       // Note: if multiple newer Kibana versions are competing with each other to perform a migration,
@@ -294,26 +324,13 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
         // We assume that the alias was already deleted by another Kibana instance
         return {
           ...stateP,
-          controlState: 'CLEANUP_UNKNOWN_AND_EXCLUDED',
+          controlState: 'OUTDATED_DOCUMENTS_SEARCH_OPEN_PIT',
         };
       } else {
         throwBadResponse(stateP, res.left as never);
       }
     } else {
       throwBadResponse(stateP, res);
-    }
-  } else if (stateP.controlState === 'CLEANUP_UNKNOWN_AND_EXCLUDED') {
-    const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;
-    if (Either.isRight(res)) {
-      // we didn't need to cleanup, or the cleanup went well
-      return {
-        ...stateP,
-        controlState: 'OUTDATED_DOCUMENTS_SEARCH_OPEN_PIT',
-      };
-    } else if (Either.isLeft(res)) {
-      return throwBadResponse(stateP, res.left as never);
-    } else {
-      return throwBadResponse(stateP, res);
     }
   } else if (stateP.controlState === 'LEGACY_SET_WRITE_BLOCK') {
     const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;
@@ -472,28 +489,10 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
           stateP.targetIndexMappings
         )
       ) {
-        // The source index .kibana is pointing to. E.g: ".xx8.7.0_001"
-        const source = stateP.sourceIndex.value;
-
         return {
           ...stateP,
-          controlState: 'PREPARE_COMPATIBLE_MIGRATION',
-          targetIndex: source!,
-          targetIndexRawMappings: stateP.sourceIndexMappings,
-          targetIndexMappings: mergeMigrationMappingPropertyHashes(
-            stateP.targetIndexMappings,
-            stateP.sourceIndexMappings
-          ),
-          preTransformDocsActions: [
-            // Point the version alias to the source index. This let's other Kibana
-            // instances know that a migration for the current version is "done"
-            // even though we may be waiting for document transformations to finish.
-            { add: { index: source!, alias: stateP.versionAlias } },
-            ...buildRemoveAliasActions(source!, Object.keys(stateP.aliases), [
-              stateP.currentAlias,
-              stateP.versionAlias,
-            ]),
-          ],
+          controlState: 'CLEANUP_UNKNOWN_AND_EXCLUDED',
+          targetIndex: stateP.sourceIndex.value!, // We preserve the same index, source == target (E.g: ".xx8.7.0_001")
           versionIndexReadyActions: Option.none,
         };
       } else {
