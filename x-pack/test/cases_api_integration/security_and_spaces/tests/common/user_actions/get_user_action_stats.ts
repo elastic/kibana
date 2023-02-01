@@ -101,11 +101,11 @@ export default ({ getService }: FtrProviderContext): void => {
       );
     });
 
-    it('all "other" user action types are included', async () => {
+    it('returns the correct stats when a case update occurs', async () => {
       // 1 creation action
       const theCase = await createCase(supertest, postCaseReq);
 
-      // this update should account for 8 "other actions"
+      // this update should account for 7 "other actions"
       await updateCase({
         supertest,
         params: {
