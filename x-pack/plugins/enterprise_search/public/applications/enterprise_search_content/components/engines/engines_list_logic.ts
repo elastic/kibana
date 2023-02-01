@@ -11,6 +11,7 @@ import { Status } from '../../../../../common/types/api';
 
 import {
   EnterpriseSearchEngine,
+  EnterpriseSearchEngineDetails,
   EnterpriseSearchEnginesResponse,
 } from '../../../../../common/types/engines';
 import { Page } from '../../../../../common/types/pagination';
@@ -33,7 +34,7 @@ interface EuiBasicTableOnChange {
   page: { index: number };
 }
 
-type EnginesListActions = Pick<
+export type EnginesListActions = Pick<
   Actions<EnginesListAPIArguments, EnterpriseSearchEnginesResponse>,
   'apiError' | 'apiSuccess' | 'makeRequest'
 > & {
@@ -46,10 +47,13 @@ type EnginesListActions = Pick<
   fetchEngines(): void;
 
   onPaginate(args: EuiBasicTableOnChange): { pageNumber: number };
-  openDeleteEngineModal: (engine: EnterpriseSearchEngine) => { engine: EnterpriseSearchEngine };
+  openDeleteEngineModal: (engine: EnterpriseSearchEngine | EnterpriseSearchEngineDetails) => {
+    engine: EnterpriseSearchEngine;
+  };
   openEngineCreate(): void;
   setSearchQuery(searchQuery: string): { searchQuery: string };
 };
+
 interface EngineListValues {
   createEngineFlyoutOpen: boolean;
   data: typeof FetchEnginesAPILogic.values.data;
