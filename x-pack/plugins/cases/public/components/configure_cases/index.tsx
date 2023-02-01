@@ -29,7 +29,7 @@ import { HeaderPage } from '../header_page';
 import { useCasesContext } from '../cases_context/use_cases_context';
 import { useCasesBreadcrumbs } from '../use_breadcrumbs';
 import { CasesDeepLinkId } from '../../common/navigation';
-import { useGetConnectors } from '../../containers/configure/use_connectors';
+import { useGetSupportedActionConnectors } from '../../containers/configure/use_get_supported_action_connectors';
 
 const FormWrapper = styled.div`
   ${({ theme }) => css`
@@ -77,7 +77,7 @@ export const ConfigureCases: React.FC = React.memo(() => {
     isLoading: isLoadingConnectors,
     data: connectors = [],
     refetch: refetchConnectors,
-  } = useGetConnectors();
+  } = useGetSupportedActionConnectors();
   const {
     isLoading: isLoadingActionTypes,
     data: actionTypes = [],
