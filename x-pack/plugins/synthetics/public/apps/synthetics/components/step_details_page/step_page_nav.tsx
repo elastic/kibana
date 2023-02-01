@@ -18,8 +18,8 @@ import {
 import { i18n } from '@kbn/i18n';
 import { useParams } from 'react-router-dom';
 import { useStepDetailLink } from './hooks/use_step_detail_page';
-import { useFormatTestRunAt } from '../../utils/monitor_test_result/test_time_formats';
 import { useJourneySteps } from '../monitor_details/hooks/use_journey_steps';
+import { useDateFormat } from '../../../../hooks/use_date_format';
 
 export const StepRunDate = () => {
   return (
@@ -37,8 +37,9 @@ export const StepPageNavigation = () => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
   const { data } = useJourneySteps();
+  const formatter = useDateFormat();
 
-  let startedAt: string | ReactElement = useFormatTestRunAt(data?.details?.timestamp);
+  let startedAt: string | ReactElement = formatter(data?.details?.timestamp);
 
   const { stepIndex } = useParams<{ stepIndex: string; monitorId: string }>();
 

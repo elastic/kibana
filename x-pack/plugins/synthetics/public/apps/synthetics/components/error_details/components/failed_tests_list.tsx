@@ -9,13 +9,10 @@ import { i18n } from '@kbn/i18n';
 import React, { MouseEvent, useState } from 'react';
 import { EuiBasicTable, EuiLink, EuiSpacer, EuiText } from '@elastic/eui';
 import { useHistory, useParams } from 'react-router-dom';
-import { useKibanaDateFormat } from '../../../../../hooks/use_kibana_date_format';
 import { Ping } from '../../../../../../common/runtime_types';
-import {
-  formatTestDuration,
-  formatTestRunAt,
-} from '../../../utils/monitor_test_result/test_time_formats';
+import { formatTestDuration } from '../../../utils/monitor_test_result/test_time_formats';
 import { useSyntheticsSettingsContext } from '../../../contexts';
+import { useDateFormat } from '../../../../../hooks/use_date_format';
 
 export const FailedTestsList = ({
   failedTests,
@@ -37,7 +34,7 @@ export const FailedTestsList = ({
 
   const history = useHistory();
 
-  const format = useKibanaDateFormat();
+  const formatter = useDateFormat();
 
   const columns = [
     {
@@ -49,7 +46,7 @@ export const FailedTestsList = ({
           <EuiLink
             href={`${basePath}/app/synthetics/monitor/${monitorId}/test-run/${item.monitor.check_group}`}
           >
-            {formatTestRunAt(value, format)}
+            {formatter(value)}
           </EuiLink>
         );
       },

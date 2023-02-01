@@ -25,7 +25,7 @@ import { selectErrorPopoverState, toggleErrorPopoverOpen } from '../../../../sta
 import { useErrorDetailsLink } from '../../../common/links/error_details_link';
 import { MonitorOverviewItem, OverviewPing } from '../../../../../../../common/runtime_types';
 import { manualTestRunSelector } from '../../../../state/manual_test_runs';
-import { useFormatTestRunAt } from '../../../../utils/monitor_test_result/test_time_formats';
+import { useDateFormat } from '../../../../../../hooks/use_date_format';
 
 const Container = styled.div`
   display: inline-block;
@@ -66,7 +66,8 @@ export const MetricItemIcon = ({
   });
   const euiShadow = useEuiShadow('s');
 
-  const testTime = useFormatTestRunAt(timestamp);
+  const formatter = useDateFormat();
+  const testTime = formatter(timestamp);
 
   if (inProgress) {
     return (

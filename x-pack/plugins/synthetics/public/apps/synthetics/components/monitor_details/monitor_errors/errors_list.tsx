@@ -6,7 +6,6 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { useSelector } from 'react-redux';
 import React, { MouseEvent, useMemo } from 'react';
 import {
   EuiSpacer,
@@ -21,13 +20,9 @@ import moment from 'moment';
 import { ErrorDetailsLink } from '../../common/links/error_details_link';
 import { useSelectedLocation } from '../hooks/use_selected_location';
 import { Ping, PingState } from '../../../../../../common/runtime_types';
-import { DEFAULT_FORMAT, getDateFormat } from '../../../../../hooks/use_kibana_date_format';
 import { useErrorFailedStep } from '../hooks/use_error_failed_step';
-import {
-  formatTestDuration,
-  formatTestRunAt,
-} from '../../../utils/monitor_test_result/test_time_formats';
-import { selectScaledDateFormat } from '../../../state';
+import { formatTestDuration } from '../../../utils/monitor_test_result/test_time_formats';
+import { useDateFormat } from '../../../../../hooks/use_date_format';
 
 export const ErrorsList = ({
   errorStates,
@@ -37,7 +32,6 @@ export const ErrorsList = ({
   loading: boolean;
 }) => {
   const { monitorId } = useParams<{ monitorId: string }>();
-  const { format } = useSelector(selectScaledDateFormat);
 
   const checkGroups = useMemo(() => {
     return errorStates.map((error) => error.monitor.check_group!);
@@ -50,6 +44,7 @@ export const ErrorsList = ({
   const history = useHistory();
 
   const selectedLocation = useSelectedLocation();
+  const formatter = useDateFormat();
 
   const columns = [
     {
@@ -59,17 +54,11 @@ export const ErrorsList = ({
         return moment(a.state.started_at).valueOf();
       },
       render: (value: string, item: PingState) => {
-        const timestamp = item.state!.started_at;
         const link = (
           <ErrorDetailsLink
             configId={monitorId}
             stateId={item.state?.id!}
-            label={formatTestRunAt(
-              item.state!.started_at,
-              format
-                ? getDateFormat(format, Date.now().valueOf() - Number(timestamp)) ?? DEFAULT_FORMAT
-                : DEFAULT_FORMAT
-            )}
+            label={formatter(item.state!.started_at)}
           />
         );
         const isActive = isActiveState(item);
