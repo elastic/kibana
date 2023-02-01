@@ -9,7 +9,7 @@ import expect from '@kbn/expect';
 import { Spaces } from '../../../scenarios';
 import { getUrlPrefix, getTestRuleData, ObjectRemover, getEventLog } from '../../../../common/lib';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
-import { validateEvent } from '../../../../spaces_only/tests/alerting/event_log';
+import { validateEvent } from '../../../../spaces_only/tests/alerting/group1/event_log';
 
 // eslint-disable-next-line import/no-default-export
 export default function eventLogTests({ getService }: FtrProviderContext) {
