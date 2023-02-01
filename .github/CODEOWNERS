@@ -1031,6 +1031,7 @@ packages/kbn-utils @elastic/kibana-operations
 packages/kbn-web-worker-stub @elastic/kibana-operations
 packages/kbn-whereis-pkg-cli @elastic/kibana-operations
 packages/kbn-yarn-lock-validator @elastic/kibana-operations
+packages/serverless/cli @elastic/appex-sharedux
 packages/shared-ux/avatar/solution @elastic/appex-sharedux
 packages/shared-ux/avatar/user_profile/impl @elastic/appex-sharedux
 packages/shared-ux/button_toolbar @elastic/appex-sharedux
