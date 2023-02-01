@@ -28,7 +28,7 @@ async function runKibana({ log, projectName }: { log: ToolingLog; projectName: s
 
   const proc = new ProcRunner(log);
   proc.run('kibana', {
-    cmd: winVersion('node'),
+    cmd: process.argv0,
     args: ['scripts/kibana', '--dev', '--config', yml],
     cwd: REPO_ROOT,
     wait: true,
