@@ -19,7 +19,6 @@ import {
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
 
 import { OverviewStatusState } from '../../../../../../../common/runtime_types';
-import { useSyntheticsRefreshContext } from '../../../../contexts/synthetics_refresh_context';
 
 import * as labels from '../labels';
 import { MonitorTestRunsCount } from './monitor_test_runs';
@@ -27,8 +26,6 @@ import { MonitorTestRunsSparkline } from './monitor_test_runs_sparkline';
 
 export const MonitorStats = ({ status }: { status: OverviewStatusState | null }) => {
   const { euiTheme } = useEuiTheme();
-  const { lastRefresh } = useSyntheticsRefreshContext();
-  const to = new Date(lastRefresh).toISOString();
 
   return (
     <>
@@ -67,9 +64,9 @@ export const MonitorStats = ({ status }: { status: OverviewStatusState | null })
           <EuiFlexItem
             css={{ display: 'flex', flexDirection: 'row', gap: euiTheme.size.l, height: '200px' }}
           >
-            <MonitorTestRunsCount to={to} />
+            <MonitorTestRunsCount />
             <EuiFlexItem grow={true}>
-              <MonitorTestRunsSparkline to={to} />
+              <MonitorTestRunsSparkline />
             </EuiFlexItem>
           </EuiFlexItem>
         </EuiPanel>

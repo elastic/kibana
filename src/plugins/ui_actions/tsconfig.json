@@ -13,7 +13,6 @@
     "@kbn/utility-types",
     "@kbn/i18n",
     "@kbn/es-query",
-    "@kbn/ui-theme",
     "@kbn/ui-actions-browser",
   ],
   "exclude": [

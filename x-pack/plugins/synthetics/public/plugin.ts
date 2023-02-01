@@ -144,8 +144,9 @@ export class UptimePlugin
         return await dataHelper.overviewData(params);
       },
     });
+    const isSyntheticsViewEnabled = core.uiSettings.get<boolean>(enableNewSyntheticsView);
 
-    registerUptimeRoutesWithNavigation(core, plugins);
+    registerUptimeRoutesWithNavigation(core, plugins, isSyntheticsViewEnabled);
 
     core.getStartServices().then(([coreStart, clientPluginsStart]) => {});
 
@@ -186,17 +187,17 @@ export class UptimePlugin
       },
     });
 
-    const isSyntheticsViewEnabled = core.uiSettings.get<boolean>(enableNewSyntheticsView);
-
     if (isSyntheticsViewEnabled) {
-      registerSyntheticsRoutesWithNavigation(core, plugins);
-
       // Register the Synthetics UI plugin
       core.application.register({
         id: 'synthetics',
         euiIconType: 'logoObservability',
         order: 8400,
-        title: PLUGIN.SYNTHETICS,
+        title:
+          PLUGIN.SYNTHETICS +
+          i18n.translate('xpack.synthetics.overview.headingBeta', {
+            defaultMessage: ' (beta)',
+          }),
         category: DEFAULT_APP_CATEGORIES.observability,
         keywords: appKeywords,
         deepLinks: [],
@@ -257,42 +258,10 @@ export class UptimePlugin
   public stop(): void {}
 }
 
-function registerSyntheticsRoutesWithNavigation(
-  core: CoreSetup<ClientPluginsStart, unknown>,
-  plugins: ClientPluginsSetup
-) {
-  plugins.observability.navigation.registerSections(
-    from(core.getStartServices()).pipe(
-      map(([coreStart]) => {
-        if (coreStart.application.capabilities.uptime.show) {
-          return [
-            {
-              label: 'Synthetics',
-              sortKey: 499,
-              entries: [
-                {
-                  label: i18n.translate('xpack.synthetics.overview.heading', {
-                    defaultMessage: 'Monitors',
-                  }),
-                  app: 'synthetics',
-                  path: OVERVIEW_ROUTE,
-                  matchFullPath: false,
-                  ignoreTrailingSlash: true,
-                },
-              ],
-            },
-          ];
-        }
-
-        return [];
-      })
-    )
-  );
-}
-
 function registerUptimeRoutesWithNavigation(
   core: CoreSetup<ClientPluginsStart, unknown>,
-  plugins: ClientPluginsSetup
+  plugins: ClientPluginsSetup,
+  isSyntheticsViewEnabled: boolean
 ) {
   plugins.observability.navigation.registerSections(
     from(core.getStartServices()).pipe(
@@ -304,8 +273,8 @@ function registerUptimeRoutesWithNavigation(
               sortKey: 500,
               entries: [
                 {
-                  label: i18n.translate('xpack.synthetics.overview.heading', {
-                    defaultMessage: 'Monitors',
+                  label: i18n.translate('xpack.synthetics.overview.uptimeHeading', {
+                    defaultMessage: 'Uptime Monitors',
                   }),
                   app: 'uptime',
                   path: '/',
@@ -320,6 +289,20 @@ function registerUptimeRoutesWithNavigation(
                   path: '/certificates',
                   matchFullPath: true,
                 },
+                ...(isSyntheticsViewEnabled
+                  ? [
+                      {
+                        label: i18n.translate('xpack.synthetics.overview.headingBetaSection', {
+                          defaultMessage: 'Synthetics',
+                        }),
+                        app: 'synthetics',
+                        path: OVERVIEW_ROUTE,
+                        matchFullPath: false,
+                        ignoreTrailingSlash: true,
+                        isBetaFeature: true,
+                      },
+                    ]
+                  : []),
               ],
             },
           ];
