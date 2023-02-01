@@ -29,7 +29,9 @@ import {
   DEFAULT_FILTER_OPTIONS,
   DEFAULT_SORTING_OPTIONS,
 } from './rules_table_defaults';
+import { RuleSource } from './rules_table_saved_state';
 import { useFindRulesInMemory } from './use_find_rules_in_memory';
+import { useRulesTableSavedState } from './use_rules_table_saved_state';
 import { getRulesComparator } from './utils';
 
 export interface RulesTableState {
@@ -101,6 +103,11 @@ export interface RulesTableState {
    * Currently selected table sorting
    */
   sortingOptions: SortingOptions;
+  /**
+   * Indicates whether the table's state is saved. With persistence rules table state functionality filters, sorting and pagination
+   * information is persisted in the url and session storage. This field says if persisted state was detected in either url or sessions storage or both
+   */
+  hasSavedState: boolean;
 }
 
 export type LoadingRuleAction =
@@ -164,12 +171,27 @@ export const RulesTableContextProvider = ({ children }: RulesTableContextProvide
     idleTimeout: number;
   }>(DEFAULT_RULES_TABLE_REFRESH_SETTING);
   const { storage } = useKibana().services;
+  const {
+    filter: savedFilter,
+    sorting: savedSorting,
+    pagination: savedPagination,
+  } = useRulesTableSavedState();
 
   const [isInMemorySorting, setIsInMemorySorting] = useState<boolean>(
     storage.get(IN_MEMORY_STORAGE_KEY) ?? false
   );
-  const [filterOptions, setFilterOptions] = useState<FilterOptions>(DEFAULT_FILTER_OPTIONS);
-  const [sortingOptions, setSortingOptions] = useState<SortingOptions>(DEFAULT_SORTING_OPTIONS);
+  const [filterOptions, setFilterOptions] = useState<FilterOptions>({
+    filter: savedFilter?.searchTerm ?? DEFAULT_FILTER_OPTIONS.filter,
+    tags: savedFilter?.tags ?? DEFAULT_FILTER_OPTIONS.tags,
+    showCustomRules:
+      savedFilter?.source === RuleSource.Custom ?? DEFAULT_FILTER_OPTIONS.showCustomRules,
+    showElasticRules:
+      savedFilter?.source === RuleSource.Elastic ?? DEFAULT_FILTER_OPTIONS.showElasticRules,
+  });
+  const [sortingOptions, setSortingOptions] = useState<SortingOptions>({
+    field: savedSorting?.field ?? DEFAULT_SORTING_OPTIONS.field,
+    order: savedSorting?.order ?? DEFAULT_SORTING_OPTIONS.order,
+  });
   const [isAllSelected, setIsAllSelected] = useState(false);
   const [isRefreshOn, setIsRefreshOn] = useState(autoRefreshSettings.on);
   const [loadingRules, setLoadingRules] = useState<LoadingRules>({
@@ -177,8 +199,8 @@ export const RulesTableContextProvider = ({ children }: RulesTableContextProvide
     action: null,
   });
   const [isPreflightInProgress, setIsPreflightInProgress] = useState(false);
-  const [page, setPage] = useState(DEFAULT_PAGE);
-  const [perPage, setPerPage] = useState(DEFAULT_RULES_PER_PAGE);
+  const [page, setPage] = useState(savedPagination?.page ?? DEFAULT_PAGE);
+  const [perPage, setPerPage] = useState(savedPagination?.perPage ?? DEFAULT_RULES_PER_PAGE);
   const [selectedRuleIds, setSelectedRuleIds] = useState<string[]>([]);
   const autoRefreshBeforePause = useRef<boolean | null>(null);
 
@@ -303,6 +325,7 @@ export const RulesTableContextProvider = ({ children }: RulesTableContextProvide
         loadingRulesAction: loadingRules.action,
         selectedRuleIds,
         sortingOptions,
+        hasSavedState: savedFilter || savedSorting || savedPagination,
       },
       actions,
     }),
@@ -327,6 +350,9 @@ export const RulesTableContextProvider = ({ children }: RulesTableContextProvide
       loadingRules.action,
       selectedRuleIds,
       sortingOptions,
+      savedFilter,
+      savedSorting,
+      savedPagination,
       actions,
     ]
   );
