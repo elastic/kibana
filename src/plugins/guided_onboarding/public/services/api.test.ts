@@ -18,6 +18,7 @@ import {
   testGuideFirstStep,
   testGuideLastStep,
   testGuideManualCompletionStep,
+  testGuideDefaultState,
   testGuideStep1ActiveState,
   testGuideStep1InProgressState,
   testGuideStep2ActiveState,
@@ -172,7 +173,7 @@ describe('GuidedOnboarding ApiService', () => {
       expect(httpClient.put).toHaveBeenCalledWith(`${API_BASE_PATH}/state`, {
         body: JSON.stringify({
           status: 'in_progress',
-          guide: { ...testGuideStep1ActiveState, status: 'not_started' },
+          guide: { ...testGuideDefaultState, status: 'not_started' },
         }),
       });
     });

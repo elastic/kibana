@@ -16,14 +16,14 @@ export const testGuideLastStep: GuideStepIds = 'step3';
 export const testIntegration = 'testIntegration';
 export const wrongIntegration = 'notTestIntegration';
 
-export const testGuideStep1ActiveState: GuideState = {
+export const testGuideDefaultState: GuideState = {
   guideId: 'testGuide',
   isActive: true,
   status: 'in_progress',
   steps: [
     {
       id: 'step1',
-      status: 'active',
+      status: 'inactive',
     },
     {
       id: 'step2',
@@ -33,6 +33,18 @@ export const testGuideStep1ActiveState: GuideState = {
       id: 'step3',
       status: 'inactive',
     },
+  ],
+};
+
+export const testGuideStep1ActiveState: GuideState = {
+  ...testGuideDefaultState,
+  steps: [
+    {
+      id: testGuideDefaultState.steps[0].id,
+      status: 'active', // update the first step status
+    },
+    testGuideDefaultState.steps[1],
+    testGuideDefaultState.steps[2],
   ],
 };
 
