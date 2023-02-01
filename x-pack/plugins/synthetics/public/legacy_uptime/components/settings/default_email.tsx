@@ -79,7 +79,6 @@ export function DefaultEmail({
           bcc: value?.bcc ?? [],
         }}
         errors={errors ?? {}}
-        warnings={{}}
         editAction={(key, val, index) => onEmailChange(key, val as string[])}
         showEmailSubjectAndMessage={false}
         index={1}

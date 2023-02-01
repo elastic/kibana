@@ -45,7 +45,6 @@ describe('SwimlaneParamsFields renders', () => {
       'subActionParams.incident.ruleName': [],
       'subActionParams.incident.alertId': [],
     },
-    warnings: {},
     editAction,
     index: 0,
     messageVariables: [],

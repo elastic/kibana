@@ -136,7 +136,7 @@ const WebhookParamsFields: React.FunctionComponent<ActionParamsProps<CasesWebhoo
             defaultMessage: 'Description',
           }
         )}
-        warning={warnings.description}
+        warning={warnings?.description}
       />
       <EuiFormRow
         fullWidth
@@ -185,7 +185,7 @@ const WebhookParamsFields: React.FunctionComponent<ActionParamsProps<CasesWebhoo
               defaultMessage: 'Additional comments',
             }
           )}
-          warning={warnings.comments}
+          warning={warnings?.comments}
         />
         {(!createCommentUrl || !createCommentJson) && (
           <>

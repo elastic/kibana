@@ -40,7 +40,6 @@ describe('XmattersParamsFields renders', () => {
           date: [],
           spaceId: [],
         }}
-        warnings={{}}
         editAction={() => {}}
         index={0}
         messageVariables={[
@@ -77,7 +76,6 @@ describe('XmattersParamsFields renders', () => {
           date: [],
           spaceId: [],
         }}
-        warnings={{}}
         editAction={editAction}
         index={0}
         messageVariables={[

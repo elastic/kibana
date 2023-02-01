@@ -34,7 +34,6 @@ describe('CreateAlert', () => {
       'subActionParams.message': [],
       'subActionParams.alias': [],
     },
-    warnings: {},
     index: 0,
     editAction,
     editSubAction,

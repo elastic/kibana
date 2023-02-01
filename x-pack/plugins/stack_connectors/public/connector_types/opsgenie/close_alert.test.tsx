@@ -20,7 +20,6 @@ describe('CloseAlert', () => {
       'subActionParams.message': [],
       'subActionParams.alias': [],
     },
-    warnings: {},
     index: 0,
     editSubAction,
     editOptionalSubAction,

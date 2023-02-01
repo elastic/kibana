@@ -243,7 +243,7 @@ export const EmailParamsFields = ({
             }
           )}
           errors={(errors.message ?? []) as string[]}
-          warning={warnings.message}
+          warning={warnings?.message}
         />
       )}
     </>

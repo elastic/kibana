@@ -153,7 +153,7 @@ const ServiceNowITOMParamsFields: React.FunctionComponent<
         paramsProperty={'description'}
         inputTargetValue={description ?? undefined}
         label={i18n.DESCRIPTION_LABEL}
-        warning={warnings.description}
+        warning={warnings?.description}
       />
     </>
   );

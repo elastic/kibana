@@ -32,7 +32,6 @@ describe('TorqParamsFields renders', () => {
       <TorqParamsFields
         actionParams={actionParams}
         errors={{ body: [] }}
-        warnings={{}}
         editAction={() => {}}
         index={0}
         messageVariables={[

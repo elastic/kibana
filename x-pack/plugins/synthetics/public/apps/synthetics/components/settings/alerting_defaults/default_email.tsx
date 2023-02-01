@@ -56,7 +56,6 @@ export function DefaultEmail({
         isLoading={loading}
         actionParams={value ?? {}}
         errors={errors}
-        warnings={{}}
         editAction={(key, val, index) => {
           if (key !== 'message') {
             onChange({ ...(value ?? {}), [key]: val });

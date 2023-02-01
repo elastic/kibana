@@ -92,7 +92,7 @@ const FormView: React.FC<FormViewProps> = ({
         paramsProperty={'description'}
         inputTargetValue={subActionParams?.description}
         label={i18n.DESCRIPTION_FIELD_LABEL}
-        warning={warnings.description}
+        warning={warnings?.description}
       />
       <EuiFormRow
         data-test-subj="opsgenie-alias-row"

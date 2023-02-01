@@ -28,7 +28,6 @@ describe('PagerDutyParamsFields renders', () => {
       <PagerDutyParamsFields
         actionParams={actionParams}
         errors={{ summary: [], timestamp: [], dedupKey: [] }}
-        warnings={{}}
         editAction={() => {}}
         index={0}
         messageVariables={[
@@ -65,7 +64,6 @@ describe('PagerDutyParamsFields renders', () => {
       <PagerDutyParamsFields
         actionParams={actionParams}
         errors={{ summary: [], timestamp: [], dedupKey: [] }}
-        warnings={{}}
         editAction={() => {}}
         index={0}
       />
@@ -86,7 +84,6 @@ describe('PagerDutyParamsFields renders', () => {
       <PagerDutyParamsFields
         actionParams={actionParams}
         errors={{ summary: [], timestamp: [], dedupKey: [] }}
-        warnings={{}}
         editAction={() => {}}
         index={0}
       />
@@ -107,7 +104,6 @@ describe('PagerDutyParamsFields renders', () => {
       <PagerDutyParamsFields
         actionParams={actionParams}
         errors={{ summary: [], timestamp: [], dedupKey: [] }}
-        warnings={{}}
         editAction={() => {}}
         index={0}
       />

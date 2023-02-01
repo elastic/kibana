@@ -132,7 +132,7 @@ const CloseAlertComponent: React.FC<CloseAlertProps> = ({
         paramsProperty={'note'}
         inputTargetValue={subActionParams?.note}
         label={i18n.NOTE_FIELD_LABEL}
-        warning={warnings.note}
+        warning={warnings?.note}
       />
 
       {showingMoreOptions ? (

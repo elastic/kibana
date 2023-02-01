@@ -56,7 +56,6 @@ const defaultProps = {
   actionConnector: connector,
   actionParams,
   errors: { ['subActionParams.incident.short_description']: [] },
-  warnings: {},
   editAction,
   index: 0,
   messageVariables: [],

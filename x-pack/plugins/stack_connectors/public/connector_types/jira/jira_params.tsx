@@ -359,7 +359,7 @@ const JiraParamsFields: React.FunctionComponent<ActionParamsProps<JiraActionPara
                 defaultMessage: 'Description',
               }
             )}
-            warning={warnings.description}
+            warning={warnings?.description}
           />
         )}
         <TextAreaWithMessageVariables
@@ -374,7 +374,7 @@ const JiraParamsFields: React.FunctionComponent<ActionParamsProps<JiraActionPara
               defaultMessage: 'Additional comments',
             }
           )}
-          warning={warnings.comments}
+          warning={warnings?.comments}
         />
       </>
     </>
