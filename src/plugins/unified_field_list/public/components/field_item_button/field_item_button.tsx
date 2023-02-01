@@ -33,7 +33,10 @@ export function FieldItemButton<T extends FieldListItem = DataViewField>({
   fieldInfoIcon,
   getCustomFieldType,
   onClick,
+  ...otherProps
 }: FieldItemButtonProps<T>) {
+  const displayName = field.displayName || field.name;
+
   return (
     <FieldButton
       className={className}
@@ -43,8 +46,8 @@ export function FieldItemButton<T extends FieldListItem = DataViewField>({
         ['aria-label']: i18n.translate('unifiedFieldList.fieldItemButtonAriaLabel', {
           defaultMessage: 'Preview {fieldName}: {fieldType}',
           values: {
-            fieldName: field.displayName,
-            fieldType: field.type,
+            fieldName: displayName,
+            fieldType: getCustomFieldType ? getCustomFieldType(field) : field.type,
           },
         }),
       }}
@@ -57,10 +60,11 @@ export function FieldItemButton<T extends FieldListItem = DataViewField>({
       }
       fieldName={
         <EuiHighlight search={wrapFieldNameOnDot(fieldSearchHighlight)}>
-          {wrapFieldNameOnDot(field.displayName)}
+          {wrapFieldNameOnDot(displayName)}
         </EuiHighlight>
       }
       fieldInfoIcon={fieldInfoIcon}
+      {...otherProps}
     />
   );
 }
