@@ -8,11 +8,7 @@
 
 import React, { useMemo, useState } from 'react';
 
-import {
-  DashboardContainer,
-  LazyDashboardContainerRenderer,
-  useDashboardContainerContext,
-} from '@kbn/dashboard-plugin/public';
+import { DashboardContainer, LazyDashboardContainerRenderer } from '@kbn/dashboard-plugin/public';
 import {
   EuiButtonGroup,
   EuiFlexGroup,
@@ -24,6 +20,7 @@ import {
 } from '@elastic/eui';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
 import { withSuspense } from '@kbn/presentation-util-plugin/public';
+import { useDashboardContainerContext } from '@kbn/dashboard-plugin/public';
 
 const DashboardContainerRenderer = withSuspense(LazyDashboardContainerRenderer);
 

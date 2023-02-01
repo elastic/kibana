@@ -19,6 +19,7 @@ export {
   type DashboardContainer,
   type DashboardCreationOptions,
   LazyDashboardContainerRenderer,
+  useDashboardContainerContext,
 } from './dashboard_container';
 export type { DashboardSetup, DashboardStart, DashboardFeatureFlagConfig } from './plugin';
 
