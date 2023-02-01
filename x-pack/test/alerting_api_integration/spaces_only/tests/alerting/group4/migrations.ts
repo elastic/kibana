@@ -634,8 +634,8 @@ export default function createGetTests({ getService }: FtrProviderContext) {
         { meta: true }
       );
 
-      expect(response.body._source?.alert?.params.logView).to.eql(logView);
-      expect(response.body._source?.references).to.eql(references);
+      expect(response.body._source?.alert?.params.logView).toEqual(logView);
+      expect(response.body._source?.references).toEqual(references);
     });
 
     it('8.7 adds uuid to the actions', async () => {
