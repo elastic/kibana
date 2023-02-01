@@ -48,11 +48,11 @@ export function CspDashboardPageProvider({ getService, getPageObjects }: FtrProv
   };
 
   const dashboard = {
-    getDashboardContainer: () => testSubjects.find('dashboard-container'),
+    getDashboardPageHeader: () => testSubjects.find('cloud-posture-dashboard-page-header'),
 
     getDashboardTabs: async () => {
-      const dashboardContainer = await dashboard.getDashboardContainer();
-      return await dashboardContainer.findByClassName('euiTabs');
+      const dashboardPageHeader = await dashboard.getDashboardPageHeader();
+      return await dashboardPageHeader.findByClassName('euiTabs');
     },
 
     getCloudTab: async () => {
@@ -75,6 +75,8 @@ export function CspDashboardPageProvider({ getService, getPageObjects }: FtrProv
         await k8sTab.click();
       }
     },
+
+    getIntegrationDashboardContainer: () => testSubjects.find('dashboard-container'),
 
     // Cloud Dashboard
 

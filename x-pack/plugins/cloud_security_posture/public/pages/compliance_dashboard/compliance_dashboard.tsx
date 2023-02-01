@@ -288,6 +288,7 @@ export const ComplianceDashboard = () => {
   return (
     <CloudPosturePage query={selectedTab === 'cspm' ? getCspmDashboardData : getKspmDashboardData}>
       <EuiPageHeader
+        data-test-subj={'cloud-posture-dashboard-page-header'}
         bottomBorder
         pageTitle={
           <CloudPosturePageTitle

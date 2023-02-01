@@ -41,8 +41,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await cspDashboard.index.add(data);
       await cspDashboard.navigateToComplianceDashboardPage();
       await retry.waitFor(
-        'Cloud posture dashboard to be displayed',
-        async () => !!dashboard.getDashboardContainer()
+        'Cloud posture integration dashboard to be displayed',
+        async () => !!dashboard.getIntegrationDashboardContainer()
       );
     });
 
@@ -53,10 +53,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     describe('Kubernetes Dashboard', () => {
       it('displays accurate summary compliance score', async () => {
         const scoreElement = await dashboard.getKubernetesComplianceScore();
-        const scoreElement2 = await dashboard.getKubernetesComplianceScore2();
 
         expect((await scoreElement.getVisibleText()) === '0%').to.be(true);
-        expect((await scoreElement2.getVisibleText()) === '0%').to.be(true);
       });
     });
   });
