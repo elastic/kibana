@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export const overflowCss = { overflow: 'auto' };
+export const overflowCss = { overflow: 'hidden' };

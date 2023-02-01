@@ -8,13 +8,13 @@
 
 import UiSharedDepsNpm from '@kbn/ui-shared-deps-npm';
 import * as UiSharedDepsSrc from '@kbn/ui-shared-deps-src';
-import type { PublicUiSettingsParams, UserProvidedValues } from '@kbn/core-ui-settings-common';
+import type { UiSettingsParams, UserProvidedValues } from '@kbn/core-ui-settings-common';
 
 export const getSettingValue = <T>(
   settingName: string,
   settings: {
     user?: Record<string, UserProvidedValues<unknown>>;
-    defaults: Readonly<Record<string, PublicUiSettingsParams>>;
+    defaults: Readonly<Record<string, Omit<UiSettingsParams, 'schema'>>>;
   },
   convert: (raw: unknown) => T
 ): T => {
