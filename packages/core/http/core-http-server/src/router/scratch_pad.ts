@@ -17,7 +17,7 @@ import { HttpServiceSetup } from '../..';
 /**
  * Constituents of a route in Kibana
  *
- * 1. Route method: put, post, get
+ * 1. Route method: put, post, get etc.
  * 2. Path
  * 3. Validation
  * 4. Extra configuration like auth and timeout
