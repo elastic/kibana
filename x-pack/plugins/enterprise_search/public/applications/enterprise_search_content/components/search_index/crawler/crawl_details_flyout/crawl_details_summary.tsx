@@ -14,12 +14,17 @@ import {
   EuiFlexItem,
   EuiHorizontalRule,
   EuiIconTip,
+  EuiLink,
   EuiPanel,
   EuiSpacer,
   EuiStat,
   EuiText,
 } from '@elastic/eui';
+
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
+
+import { docLinks } from '../../../../../shared/doc_links';
 
 import { CrawlRequestStats } from '../../../../api/crawler/types';
 
@@ -236,13 +241,20 @@ export const CrawlDetailsSummary: React.FC<CrawlerDetailsSummaryProps> = ({
         <EuiText size="xs" textAlign="center" data-test-subj="logsDisabledMessage">
           <EuiSpacer size="m" />
           <p>
-            {i18n.translate(
-              'xpack.enterpriseSearch.crawler.crawlDetailsSummary.logsDisabledMessage',
-              {
-                defaultMessage:
-                  'Enable web crawler logs in your enterprise-search.yml or user settings for more detailed crawl statistics.',
-              }
-            )}
+            <FormattedMessage
+              id="xpack.enterpriseSearch.crawler.crawlDetailsSummary.logsDisabledMessage"
+              defaultMessage="{link} in your enterprise-search.yml or user settings for more detailed crawl statistics."
+              values={{
+                link: (
+                  <EuiLink href={docLinks.enterpriseSearchConfig} external>
+                    {i18n.translate(
+                      'xpack.enterpriseSearch.crawler.crawlDetailsSummary.configLink',
+                      { defaultMessage: 'Enable web crawler logs' }
+                    )}
+                  </EuiLink>
+                ),
+              }}
+            />
           </p>
         </EuiText>
       )}
