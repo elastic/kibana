@@ -8,6 +8,7 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 
+import '@kbn/es-ui-shared-plugin/public/components/code_editor/jest_mock';
 import { setupEnvironment, pageHelpers } from './helpers';
 import { API_BASE_PATH } from '../../common/constants';
 import { PipelinesCreateTestBed } from './helpers/pipelines_create.helpers';
@@ -149,7 +150,20 @@ describe('<PipelinesCreate />', () => {
       });
 
       test('should send the correct payload', async () => {
-        const { actions } = testBed;
+        const { component, actions } = testBed;
+
+        await act(async () => {
+          actions.toggleMetaSwitch();
+        });
+        component.update();
+        const metaData = {
+          field1: 'hello',
+          field2: 10,
+        };
+        await act(async () => {
+          actions.setMetaField(metaData);
+        });
+        component.simulate('click');
 
         await actions.clickSubmitButton();
 
@@ -159,6 +173,7 @@ describe('<PipelinesCreate />', () => {
             body: JSON.stringify({
               name: 'my_pipeline',
               description: 'pipeline description',
+              _meta: metaData,
               processors: [],
             }),
           })

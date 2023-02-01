@@ -43,11 +43,16 @@ export const getFormActions = (testBed: TestBed) => {
     });
   };
 
+  const setMetaField = (value: object) => {
+    find('metaEditor').simulate('change', { jsonString: JSON.stringify(value) });
+  };
+
   return {
     clickSubmitButton,
     clickShowRequestLink,
     toggleVersionSwitch,
     toggleMetaSwitch,
+    setMetaField,
   };
 };
 
