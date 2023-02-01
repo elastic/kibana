@@ -134,41 +134,6 @@ const baseRuleParams: Pick<RuleParams, 'count' | 'timeSize' | 'timeUnit'> = {
   timeUnit: 'm',
 };
 
-const availableFields = {
-  'host.name': {
-    keyword: {
-      type: 'keyword',
-      metadata_field: false,
-      searchable: true,
-      aggregatable: true,
-    },
-  },
-  'host.disk.read.bytes': {
-    long: {
-      type: 'long',
-      metadata_field: false,
-      searchable: true,
-      aggregatable: true,
-    },
-  },
-  'host.network.egress.bytes': {
-    long: {
-      type: 'long',
-      metadata_field: false,
-      searchable: true,
-      aggregatable: true,
-    },
-  },
-  'host.cpu.usage': {
-    scaled_float: {
-      type: 'scaled_float',
-      metadata_field: false,
-      searchable: true,
-      aggregatable: true,
-    },
-  },
-};
-
 const TIMESTAMP_FIELD = '@timestamp';
 const FILEBEAT_INDEX = 'filebeat-*';
 const EXECUTION_TIMESTAMP = new Date('2022-01-01T00:00:00.000Z').valueOf();
@@ -482,13 +447,7 @@ describe('Log threshold executor', () => {
           },
         } as UngroupedSearchQueryResponse;
 
-        processUngroupedResults(
-          results,
-          ruleParams,
-          alertFactoryMock,
-          alertLimitMock,
-          availableFields
-        );
+        processUngroupedResults(results, ruleParams, alertFactoryMock, alertLimitMock);
 
         // first call, fifth argument
         expect(alertFactoryMock.mock.calls[0][4]).toEqual([
@@ -524,13 +483,7 @@ describe('Log threshold executor', () => {
           },
         } as UngroupedSearchQueryResponse;
 
-        processUngroupedResults(
-          results,
-          ruleParams,
-          alertFactoryMock,
-          alertLimitMock,
-          availableFields
-        );
+        processUngroupedResults(results, ruleParams, alertFactoryMock, alertLimitMock);
 
         expect(alertFactoryMock).toBeCalledTimes(1);
         expect(alertLimitMock.setLimitReached).toHaveBeenCalledWith(true);
@@ -555,13 +508,7 @@ describe('Log threshold executor', () => {
           },
         } as UngroupedSearchQueryResponse;
 
-        processUngroupedResults(
-          results,
-          ruleParams,
-          alertFactoryMock,
-          alertLimitMock,
-          availableFields
-        );
+        processUngroupedResults(results, ruleParams, alertFactoryMock, alertLimitMock);
 
         expect(alertFactoryMock).toBeCalledTimes(1);
         expect(alertLimitMock.setLimitReached).toHaveBeenCalledWith(false);
@@ -586,13 +533,7 @@ describe('Log threshold executor', () => {
           },
         } as UngroupedSearchQueryResponse;
 
-        processUngroupedResults(
-          results,
-          ruleParams,
-          alertFactoryMock,
-          alertLimitMock,
-          availableFields
-        );
+        processUngroupedResults(results, ruleParams, alertFactoryMock, alertLimitMock);
 
         expect(alertFactoryMock).not.toHaveBeenCalled();
         expect(alertLimitMock.setLimitReached).toHaveBeenCalledWith(false);
@@ -679,13 +620,7 @@ describe('Log threshold executor', () => {
           },
         ] as GroupedSearchQueryResponse['aggregations']['groups']['buckets'];
 
-        processGroupByResults(
-          results,
-          ruleParams,
-          alertFactoryMock,
-          alertLimitMock,
-          availableFields
-        );
+        processGroupByResults(results, ruleParams, alertFactoryMock, alertLimitMock);
         expect(alertFactoryMock.mock.calls.length).toBe(2);
 
         // First call, fifth argument
@@ -820,13 +755,7 @@ describe('Log threshold executor', () => {
           },
         ] as GroupedSearchQueryResponse['aggregations']['groups']['buckets'];
 
-        processGroupByResults(
-          results,
-          ruleParams,
-          alertFactoryMock,
-          alertLimitMock,
-          availableFields
-        );
+        processGroupByResults(results, ruleParams, alertFactoryMock, alertLimitMock);
 
         expect(alertFactoryMock).toHaveBeenCalledTimes(1);
         expect(alertLimitMock.setLimitReached).toHaveBeenCalledWith(true);
@@ -911,13 +840,7 @@ describe('Log threshold executor', () => {
           },
         ] as GroupedSearchQueryResponse['aggregations']['groups']['buckets'];
 
-        processGroupByResults(
-          results,
-          ruleParams,
-          alertFactoryMock,
-          alertLimitMock,
-          availableFields
-        );
+        processGroupByResults(results, ruleParams, alertFactoryMock, alertLimitMock);
 
         expect(alertFactoryMock).toHaveBeenCalledTimes(2);
         expect(alertLimitMock.setLimitReached).toHaveBeenCalledWith(false);

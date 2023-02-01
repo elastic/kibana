@@ -21,41 +21,6 @@ import {
 import { DATES } from '../metrics_ui/constants';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
-const availableFields = {
-  'host.name': {
-    keyword: {
-      type: 'keyword',
-      metadata_field: false,
-      searchable: true,
-      aggregatable: true,
-    },
-  },
-  'host.disk.read.bytes': {
-    long: {
-      type: 'long',
-      metadata_field: false,
-      searchable: true,
-      aggregatable: true,
-    },
-  },
-  'host.network.egress.bytes': {
-    long: {
-      type: 'long',
-      metadata_field: false,
-      searchable: true,
-      aggregatable: true,
-    },
-  },
-  'host.cpu.usage': {
-    scaled_float: {
-      type: 'scaled_float',
-      metadata_field: false,
-      searchable: true,
-      aggregatable: true,
-    },
-  },
-};
-
 export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const esClient = getService('es');
@@ -96,8 +61,7 @@ export default function ({ getService }: FtrProviderContext) {
             esClient,
             alertFactory,
             alertLimit,
-            timestamp.valueOf(),
-            availableFields
+            timestamp.valueOf()
           );
 
           expect(alertFactory.callCount).to.equal(1);
@@ -157,8 +121,7 @@ export default function ({ getService }: FtrProviderContext) {
             esClient,
             alertFactory,
             alertLimit,
-            timestamp.valueOf(),
-            availableFields
+            timestamp.valueOf()
           );
 
           expect(alertFactory.callCount).to.equal(2);
@@ -219,8 +182,7 @@ export default function ({ getService }: FtrProviderContext) {
             esClient,
             alertFactory,
             alertLimit,
-            timestamp.valueOf(),
-            availableFields
+            timestamp.valueOf()
           );
 
           expect(alertFactory.callCount).to.equal(1);
@@ -290,8 +252,7 @@ export default function ({ getService }: FtrProviderContext) {
             esClient,
             alertFactory,
             alertLimit,
-            timestamp.valueOf(),
-            availableFields
+            timestamp.valueOf()
           );
 
           expect(alertFactory.callCount).to.equal(1);
@@ -332,8 +293,7 @@ export default function ({ getService }: FtrProviderContext) {
             esClient,
             alertFactory,
             alertLimit,
-            timestamp.valueOf(),
-            availableFields
+            timestamp.valueOf()
           );
 
           expect(alertFactory.callCount).to.equal(1);
@@ -397,8 +357,7 @@ export default function ({ getService }: FtrProviderContext) {
             esClient,
             alertFactory,
             alertLimit,
-            timestamp.valueOf(),
-            availableFields
+            timestamp.valueOf()
           );
           expect(alertFactory.callCount).to.equal(1);
           expect(alertFactory.getCall(0).args).to.eql([
@@ -456,8 +415,7 @@ export default function ({ getService }: FtrProviderContext) {
             esClient,
             alertFactory,
             alertLimit,
-            timestamp.valueOf(),
-            availableFields
+            timestamp.valueOf()
           );
           expect(alertFactory.callCount).to.equal(1);
           expect(alertFactory.getCall(0).args).to.eql([

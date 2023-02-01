@@ -26,8 +26,7 @@ import { addSpaceIdToPath } from '@kbn/spaces-plugin/common';
 
 import { ParsedTechnicalFields } from '@kbn/rule-registry-plugin/common';
 import { ParsedExperimentalFields } from '@kbn/rule-registry-plugin/common/parse_experimental_fields';
-import { FieldCapsFieldCapability } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { ES_FIELD_TYPES } from '@kbn/field-types';
+import { ecsFieldMap } from '@kbn/rule-registry-plugin/common/assets/field_maps/ecs_field_map';
 import {
   RuleParams,
   ruleParamsRT,
@@ -190,8 +189,6 @@ export const createLogThresholdExecutor = (libs: InfraBackendLibs) =>
     try {
       const validatedParams = decodeOrThrow(ruleParamsRT)(params);
 
-      const availableFields = await getAvailableFields(scopedClusterClient.asCurrentUser, indices);
-
       if (!isRatioRuleParams(validatedParams)) {
         await executeAlert(
           validatedParams,
@@ -201,8 +198,7 @@ export const createLogThresholdExecutor = (libs: InfraBackendLibs) =>
           scopedClusterClient.asCurrentUser,
           alertFactory,
           alertLimit,
-          startedAt.valueOf(),
-          availableFields
+          startedAt.valueOf()
         );
       } else {
         await executeRatioAlert(
@@ -213,8 +209,7 @@ export const createLogThresholdExecutor = (libs: InfraBackendLibs) =>
           scopedClusterClient.asCurrentUser,
           alertFactory,
           alertLimit,
-          startedAt.valueOf(),
-          availableFields
+          startedAt.valueOf()
         );
       }
 
@@ -245,8 +240,7 @@ export async function executeAlert(
   esClient: ElasticsearchClient,
   alertFactory: LogThresholdAlertFactory,
   alertLimit: LogThresholdAlertLimit,
-  executionTimestamp: number,
-  availableFields: Record<string, Record<string, FieldCapsFieldCapability>>
+  executionTimestamp: number
 ) {
   const query = getESQuery(
     ruleParams,
@@ -265,16 +259,14 @@ export async function executeAlert(
       await getGroupedResults(query, esClient),
       ruleParams,
       alertFactory,
-      alertLimit,
-      availableFields
+      alertLimit
     );
   } else {
     processUngroupedResults(
       await getUngroupedResults(query, esClient),
       ruleParams,
       alertFactory,
-      alertLimit,
-      availableFields
+      alertLimit
     );
   }
 }
@@ -287,8 +279,7 @@ export async function executeRatioAlert(
   esClient: ElasticsearchClient,
   alertFactory: LogThresholdAlertFactory,
   alertLimit: LogThresholdAlertLimit,
-  executionTimestamp: number,
-  availableFields: Record<string, Record<string, FieldCapsFieldCapability>>
+  executionTimestamp: number
 ) {
   // Ratio alert params are separated out into two standard sets of alert params
   const numeratorParams: RuleParams = {
@@ -330,8 +321,7 @@ export async function executeRatioAlert(
       denominatorGroupedResults,
       ruleParams,
       alertFactory,
-      alertLimit,
-      availableFields
+      alertLimit
     );
   } else {
     const [numeratorUngroupedResults, denominatorUngroupedResults] = await Promise.all([
@@ -343,8 +333,7 @@ export async function executeRatioAlert(
       denominatorUngroupedResults,
       ruleParams,
       alertFactory,
-      alertLimit,
-      availableFields
+      alertLimit
     );
   }
 }
@@ -377,13 +366,12 @@ export const processUngroupedResults = (
   results: UngroupedSearchQueryResponse,
   params: CountRuleParams,
   alertFactory: LogThresholdAlertFactory,
-  alertLimit: LogThresholdAlertLimit,
-  availableFields: Record<string, Record<string, FieldCapsFieldCapability>>
+  alertLimit: LogThresholdAlertLimit
 ) => {
   const { count, criteria, timeSize, timeUnit } = params;
   const documentCount = results.hits.total.value;
   const additionalContextHits = results.aggregations?.additionalContext?.hits?.hits;
-  const additionalContext = formatFields(additionalContextHits?.[0]?.fields, availableFields);
+  const additionalContext = formatFields(additionalContextHits?.[0]?.fields);
   const reasonMessage = getReasonMessageForUngroupedCountAlert(
     documentCount,
     count.value,
@@ -425,15 +413,14 @@ export const processUngroupedRatioResults = (
   denominatorResults: UngroupedSearchQueryResponse,
   params: RatioRuleParams,
   alertFactory: LogThresholdAlertFactory,
-  alertLimit: LogThresholdAlertLimit,
-  availableFields: Record<string, Record<string, FieldCapsFieldCapability>>
+  alertLimit: LogThresholdAlertLimit
 ) => {
   const { count, criteria, timeSize, timeUnit } = params;
 
   const numeratorCount = numeratorResults.hits.total.value;
   const denominatorCount = denominatorResults.hits.total.value;
   const additionalContextHits = numeratorResults.aggregations?.additionalContext?.hits?.hits;
-  const additionalContext = formatFields(additionalContextHits?.[0]?.fields, availableFields);
+  const additionalContext = formatFields(additionalContextHits?.[0]?.fields);
   const ratio = getRatio(numeratorCount, denominatorCount);
 
   if (ratio !== undefined && checkValueAgainstComparatorMap[count.comparator](ratio, count.value)) {
@@ -488,8 +475,7 @@ interface ReducedGroupByResult {
 type ReducedGroupByResults = ReducedGroupByResult[];
 
 const getReducedGroupByResults = (
-  results: GroupedSearchQueryResponse['aggregations']['groups']['buckets'],
-  availableFields: Record<string, Record<string, FieldCapsFieldCapability>>
+  results: GroupedSearchQueryResponse['aggregations']['groups']['buckets']
 ): ReducedGroupByResults => {
   const getGroupName = (
     key: GroupedSearchQueryResponse['aggregations']['groups']['buckets'][0]['key']
@@ -503,7 +489,7 @@ const getReducedGroupByResults = (
       reducedGroupByResults.push({
         name: groupName,
         documentCount: groupBucket.doc_count,
-        context: formatFields(additionalContextHits?.[0]?.fields, availableFields),
+        context: formatFields(additionalContextHits?.[0]?.fields),
       });
     }
   } else {
@@ -513,7 +499,7 @@ const getReducedGroupByResults = (
       reducedGroupByResults.push({
         name: groupName,
         documentCount: groupBucket.filtered_results.doc_count,
-        context: formatFields(additionalContextHits?.[0]?.fields, availableFields),
+        context: formatFields(additionalContextHits?.[0]?.fields),
       });
     }
   }
@@ -524,12 +510,11 @@ export const processGroupByResults = (
   results: GroupedSearchQueryResponse['aggregations']['groups']['buckets'],
   params: CountRuleParams,
   alertFactory: LogThresholdAlertFactory,
-  alertLimit: LogThresholdAlertLimit,
-  availableFields: Record<string, Record<string, FieldCapsFieldCapability>>
+  alertLimit: LogThresholdAlertLimit
 ) => {
   const { count, criteria, timeSize, timeUnit } = params;
 
-  const groupResults = getReducedGroupByResults(results, availableFields);
+  const groupResults = getReducedGroupByResults(results);
 
   let remainingAlertCount = alertLimit.getValue();
 
@@ -582,13 +567,12 @@ export const processGroupByRatioResults = (
   denominatorResults: GroupedSearchQueryResponse['aggregations']['groups']['buckets'],
   params: RatioRuleParams,
   alertFactory: LogThresholdAlertFactory,
-  alertLimit: LogThresholdAlertLimit,
-  availableFields: Record<string, Record<string, FieldCapsFieldCapability>>
+  alertLimit: LogThresholdAlertLimit
 ) => {
   const { count, criteria, timeSize, timeUnit } = params;
 
-  const numeratorGroupResults = getReducedGroupByResults(numeratorResults, availableFields);
-  const denominatorGroupResults = getReducedGroupByResults(denominatorResults, availableFields);
+  const numeratorGroupResults = getReducedGroupByResults(numeratorResults);
+  const denominatorGroupResults = getReducedGroupByResults(denominatorResults);
 
   let remainingAlertCount = alertLimit.getValue();
 
@@ -1110,19 +1094,6 @@ const getContextAggregation = (
   return additionalContextAgg;
 };
 
-const getAvailableFields = async (
-  esClient: ElasticsearchClient,
-  index: string
-): Promise<Record<string, Record<string, FieldCapsFieldCapability>>> => {
-  // Get all supported fields
-  const respMapping = await esClient.fieldCaps({
-    index,
-    fields: '*',
-  });
-
-  return respMapping.fields;
-};
-
 const getFieldsSet = (groupBy: string[] | undefined, validPrefix: string[]): Set<string> => {
   return new Set<string>(
     groupBy
@@ -1134,25 +1105,16 @@ const getFieldsSet = (groupBy: string[] | undefined, validPrefix: string[]): Set
 const fieldsToExclude = ['disk', 'network', 'cpu', 'memory'];
 
 const formatFields = (
-  contextFields: AdditionalContext | undefined,
-  availableFields: Record<string, Record<string, FieldCapsFieldCapability>>
+  contextFields: AdditionalContext | undefined
 ): AdditionalContext | undefined => {
   if (!contextFields) return undefined;
   const formattedContextFields: Record<string, any> = {};
 
   Object.entries(contextFields).forEach(([key, value]) => {
-    if (key in availableFields && !excludeField(key)) {
-      const fieldType = (Object.keys(availableFields[key]) as ES_FIELD_TYPES[])?.[0];
-      if (
-        (fieldType === ES_FIELD_TYPES.KEYWORD ||
-          fieldType === ES_FIELD_TYPES.TEXT ||
-          fieldType === ES_FIELD_TYPES.OBJECT) &&
-        value.length === 1
-      ) {
-        formattedContextFields[key] = value?.[0];
-      } else {
-        formattedContextFields[key] = value;
-      }
+    if (key in ecsFieldMap && !excludeField(key)) {
+      formattedContextFields[key] = ecsFieldMap[key as keyof typeof ecsFieldMap].array
+        ? value
+        : value?.[0];
     }
   });
 
