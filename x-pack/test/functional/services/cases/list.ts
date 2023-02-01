@@ -81,9 +81,6 @@ export function CasesTableServiceProvider(
         rows = await find.allByCssSelector('[data-test-subj*="cases-table-row-"', 100);
         if (rows.length > 0) {
           await this.bulkDeleteAllCases();
-          // wait for a second
-          await new Promise((r) => setTimeout(r, 1000));
-          await header.waitUntilLoadingHasFinished();
         }
       } while (rows.length > 0);
     },
