@@ -6,7 +6,7 @@
  */
 
 import type { ReactNode } from 'react';
-import React, { memo } from 'react';
+import React, { memo, useEffect, useRef } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import styled from 'styled-components';
 import { useTestIdGenerator } from '../../../../../hooks/use_test_id_generator';
@@ -38,11 +38,56 @@ export interface InputDisplayProps {
 
 export const InputDisplay = memo<InputDisplayProps>(({ leftOfCursor, rightOfCursor }) => {
   const getTestId = useTestIdGenerator(useDataTestSubj());
+  const containerRef = useRef<HTMLDivElement | null>(null);
+  const cursorRef = useRef<HTMLSpanElement | null>(null);
 
-  // FIXME:PT need to adjust left/right scroll if cursor is close to the left/right edge
+  useEffect(() => {
+    if (containerRef.current && cursorRef.current) {
+      const scrollPadding = 20;
+      const handleIntersection: IntersectionObserverCallback = (entries) => {
+        if (containerRef.current) {
+          const intersection = entries[0];
+
+          if (intersection && intersection.rootBounds) {
+            const currentScrollLeftValue = containerRef.current.scrollLeft;
+            const viewportRightEdge = intersection.rootBounds.right;
+            const viewportLeftEdge = intersection.rootBounds.left;
+            const cursorPosition = intersection.boundingClientRect.right;
+
+            if (cursorPosition > viewportRightEdge - scrollPadding) {
+              // cursor is close to the Right Edge of the display input area.
+              // scroll right so that cursor remains visible.
+              containerRef.current.scrollLeft =
+                currentScrollLeftValue +
+                (cursorPosition - intersection.rootBounds.width) +
+                scrollPadding;
+            } else if (cursorPosition < viewportLeftEdge + scrollPadding) {
+              // cursor is close to the Left edge of the display input area.
+              // scroll left so that cursor remains visible;
+              containerRef.current.scrollLeft = currentScrollLeftValue - scrollPadding;
+            }
+          }
+        }
+      };
+
+      const observer = new IntersectionObserver(handleIntersection, {
+        root: containerRef.current,
+        // The `-10px` ensure that the observer is triggered when the cursor is within
+        // 10px of the edge of the viewport (the scrolling container).
+        rootMargin: '0px -10px',
+        threshold: 0,
+      });
+
+      observer.observe(cursorRef.current);
+
+      return () => {
+        observer.disconnect();
+      };
+    }
+  }, []);
 
   return (
-    <InputDisplayContainer>
+    <InputDisplayContainer ref={containerRef}>
       <EuiFlexGroup
         responsive={false}
         alignItems="center"
@@ -57,7 +102,7 @@ export const InputDisplay = memo<InputDisplayProps>(({ leftOfCursor, rightOfCurs
           {leftOfCursor}
         </EuiFlexItem>
         <EuiFlexItem grow={false} className="noMinWidth">
-          <span className="cursor essentialAnimation" />
+          <span className="cursor essentialAnimation" ref={cursorRef} />
         </EuiFlexItem>
         <EuiFlexItem className="noMinWidth" data-test-subj={getTestId('cmdInput-rightOfCursor')}>
           {rightOfCursor}
