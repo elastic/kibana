@@ -210,6 +210,8 @@ exports[`Error SERVICE_NAME 1`] = `"service name"`;
 
 exports[`Error SERVICE_NODE_NAME 1`] = `undefined`;
 
+exports[`Error SERVICE_OVERFLOW_COUNT 1`] = `undefined`;
+
 exports[`Error SERVICE_RUNTIME_NAME 1`] = `undefined`;
 
 exports[`Error SERVICE_RUNTIME_VERSION 1`] = `undefined`;
@@ -271,6 +273,8 @@ exports[`Error TRANSACTION_FAILURE_COUNT 1`] = `undefined`;
 exports[`Error TRANSACTION_ID 1`] = `"transaction id"`;
 
 exports[`Error TRANSACTION_NAME 1`] = `undefined`;
+
+exports[`Error TRANSACTION_OVERFLOW_COUNT 1`] = `undefined`;
 
 exports[`Error TRANSACTION_PAGE_URL 1`] = `undefined`;
 
@@ -485,6 +489,8 @@ exports[`Span SERVICE_NAME 1`] = `"service name"`;
 
 exports[`Span SERVICE_NODE_NAME 1`] = `undefined`;
 
+exports[`Span SERVICE_OVERFLOW_COUNT 1`] = `undefined`;
+
 exports[`Span SERVICE_RUNTIME_NAME 1`] = `undefined`;
 
 exports[`Span SERVICE_RUNTIME_VERSION 1`] = `undefined`;
@@ -546,6 +552,8 @@ exports[`Span TRANSACTION_FAILURE_COUNT 1`] = `undefined`;
 exports[`Span TRANSACTION_ID 1`] = `"transaction id"`;
 
 exports[`Span TRANSACTION_NAME 1`] = `undefined`;
+
+exports[`Span TRANSACTION_OVERFLOW_COUNT 1`] = `undefined`;
 
 exports[`Span TRANSACTION_PAGE_URL 1`] = `undefined`;
 
@@ -778,6 +786,8 @@ exports[`Transaction SERVICE_NAME 1`] = `"service name"`;
 
 exports[`Transaction SERVICE_NODE_NAME 1`] = `undefined`;
 
+exports[`Transaction SERVICE_OVERFLOW_COUNT 1`] = `undefined`;
+
 exports[`Transaction SERVICE_RUNTIME_NAME 1`] = `undefined`;
 
 exports[`Transaction SERVICE_RUNTIME_VERSION 1`] = `undefined`;
@@ -839,6 +849,8 @@ exports[`Transaction TRANSACTION_FAILURE_COUNT 1`] = `undefined`;
 exports[`Transaction TRANSACTION_ID 1`] = `"transaction id"`;
 
 exports[`Transaction TRANSACTION_NAME 1`] = `"transaction name"`;
+
+exports[`Transaction TRANSACTION_OVERFLOW_COUNT 1`] = `undefined`;
 
 exports[`Transaction TRANSACTION_PAGE_URL 1`] = `undefined`;
 

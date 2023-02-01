@@ -5,9 +5,12 @@
  * 2.0.
  */
 
-import React from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiTitle, useEuiTheme } from '@elastic/eui';
+import React, { useMemo } from 'react';
+import useLocalStorage from 'react-use/lib/useLocalStorage';
+import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiTitle, useEuiTheme } from '@elastic/eui';
+import type { EuiIconProps } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { CloudPostureScoreChart } from '../compliance_charts/cloud_posture_score_chart';
 import type {
@@ -15,11 +18,18 @@ import type {
   Evaluation,
   PosturePolicyTemplate,
 } from '../../../../common/types';
+import { LOCAL_STORAGE_DASHBOARD_CLUSTER_SORT_KEY } from '../../../common/constants';
 import { RisksTable } from '../compliance_charts/risks_table';
 import { KSPM_POLICY_TEMPLATE, RULE_FAILED } from '../../../../common/constants';
 import { useNavigateFindings } from '../../../common/hooks/use_navigate_findings';
 import { ClusterDetailsBox } from './cluster_details_box';
 import { dashboardColumnsGrow, getPolicyTemplateQuery } from './summary_section';
+import {
+  DASHBOARD_TABLE_COLUMN_SCORE_TEST_ID,
+  DASHBOARD_TABLE_HEADER_SCORE_TEST_ID,
+} from '../../findings/test_subjects';
+
+const CLUSTER_DEFAULT_SORT_ORDER = 'asc';
 
 export const BenchmarksSection = ({
   complianceData,
@@ -31,45 +41,66 @@ export const BenchmarksSection = ({
   const { euiTheme } = useEuiTheme();
   const navToFindings = useNavigateFindings();
 
-  const handleEvalCounterClick = (clusterId: string, evaluation: Evaluation) => {
+  const [clusterSorting, setClusterSorting] = useLocalStorage<'asc' | 'desc'>(
+    LOCAL_STORAGE_DASHBOARD_CLUSTER_SORT_KEY,
+    CLUSTER_DEFAULT_SORT_ORDER
+  );
+
+  const isClusterSortingAsc = clusterSorting === 'asc';
+
+  const clusterSortingIcon: EuiIconProps['type'] = isClusterSortingAsc ? 'sortUp' : 'sortDown';
+
+  const navToFindingsByClusterAndEvaluation = (clusterId: string, evaluation: Evaluation) => {
     navToFindings({
+      ...getPolicyTemplateQuery(dashboardType),
       cluster_id: clusterId,
       'result.evaluation': evaluation,
-      ...getPolicyTemplateQuery(dashboardType),
     });
   };
 
-  const handleCellClick = (clusterId: string, ruleSection: string) => {
+  const navToFailedFindingsByClusterAndSection = (clusterId: string, ruleSection: string) => {
     navToFindings({
+      ...getPolicyTemplateQuery(dashboardType),
       cluster_id: clusterId,
       'rule.section': ruleSection,
       'result.evaluation': RULE_FAILED,
-      ...getPolicyTemplateQuery(dashboardType),
     });
   };
 
-  const handleViewAllClick = (clusterId: string) => {
-    navToFindings({
-      cluster_id: clusterId,
-      'result.evaluation': RULE_FAILED,
-      ...getPolicyTemplateQuery(dashboardType),
-    });
+  const navToFailedFindingsByCluster = (clusterId: string) => {
+    navToFindingsByClusterAndEvaluation(clusterId, RULE_FAILED);
   };
+
+  const toggleClustersSortingDirection = () => {
+    setClusterSorting(isClusterSortingAsc ? 'desc' : 'asc');
+  };
+
+  const clusters = useMemo(() => {
+    return [...complianceData.clusters].sort((clusterA, clusterB) =>
+      isClusterSortingAsc
+        ? clusterA.stats.postureScore - clusterB.stats.postureScore
+        : clusterB.stats.postureScore - clusterA.stats.postureScore
+    );
+  }, [complianceData.clusters, isClusterSortingAsc]);
 
   return (
     <>
       <EuiFlexGroup
-        alignItems="flexStart"
-        gutterSize="none"
-        style={{
-          borderBottom: euiTheme.border.thick,
-          borderBottomColor: euiTheme.colors.text,
-          paddingBottom: euiTheme.size.s,
-        }}
+        css={css`
+        border-bottom: ${euiTheme.border.thick};
+        border-bottom-color: ${euiTheme.colors.text};
+        padding-bottom: ${euiTheme.size.s};
+        .euiTitle {
+          font-weight: ${euiTheme.font.weight.semiBold};
+        };
+        button {
+          text-align: left;
+        },
+      `}
       >
         <EuiFlexItem grow={dashboardColumnsGrow.first}>
-          <EuiTitle size="xxs" css={{ fontWeight: euiTheme.font.weight.semiBold }}>
-            <h5>
+          <EuiTitle size="xxs">
+            <div>
               {dashboardType === KSPM_POLICY_TEMPLATE ? (
                 <FormattedMessage
                   id="xpack.csp.dashboard.benchmarkSection.columnsHeader.clusterNameTitle"
@@ -81,83 +112,77 @@ export const BenchmarksSection = ({
                   defaultMessage="Account Name"
                 />
               )}
-            </h5>
+            </div>
           </EuiTitle>
         </EuiFlexItem>
         <EuiFlexItem grow={dashboardColumnsGrow.second}>
-          <EuiTitle
-            size="xxs"
-            css={{ fontWeight: euiTheme.font.weight.semiBold, paddingLeft: euiTheme.size.xl }}
+          <button
+            data-test-subj={DASHBOARD_TABLE_HEADER_SCORE_TEST_ID}
+            onClick={toggleClustersSortingDirection}
           >
-            <h5>
-              <FormattedMessage
-                id="xpack.csp.dashboard.benchmarkSection.columnsHeader.complianceScoreTitle"
-                defaultMessage="Compliance Score"
-              />
-            </h5>
-          </EuiTitle>
+            <EuiTitle size="xxs">
+              <div>
+                <FormattedMessage
+                  id="xpack.csp.dashboard.benchmarkSection.columnsHeader.complianceScoreTitle"
+                  defaultMessage="Compliance Score"
+                />
+                <EuiIcon className="euiTableSortIcon" type={clusterSortingIcon} />
+              </div>
+            </EuiTitle>
+          </button>
         </EuiFlexItem>
         <EuiFlexItem grow={dashboardColumnsGrow.third}>
-          <EuiTitle
-            size="xxs"
-            css={{ fontWeight: euiTheme.font.weight.semiBold, paddingLeft: euiTheme.size.xl }}
-          >
-            <h5>
+          <EuiTitle size="xxs">
+            <div>
               <FormattedMessage
                 id="xpack.csp.dashboard.benchmarkSection.columnsHeader.complianceByCisSectionTitle"
                 defaultMessage="Compliance by CIS Section"
               />
-            </h5>
+            </div>
           </EuiTitle>
         </EuiFlexItem>
       </EuiFlexGroup>
-      {complianceData.clusters.map((cluster) => (
-        <React.Fragment key={cluster.meta.clusterId}>
-          <EuiFlexGroup
-            key={cluster.meta.clusterId}
-            style={{ borderBottom: euiTheme.border.thin, padding: `${euiTheme.size.base} 0` }}
+      {clusters.map((cluster) => (
+        <EuiFlexGroup
+          key={cluster.meta.clusterId}
+          css={css`
+            border-bottom: ${euiTheme.border.thin};
+            padding: ${euiTheme.size.base} 0 ${euiTheme.size.l};
+          `}
+        >
+          <EuiFlexItem grow={dashboardColumnsGrow.first}>
+            <ClusterDetailsBox cluster={cluster} />
+          </EuiFlexItem>
+          <EuiFlexItem
+            grow={dashboardColumnsGrow.second}
+            data-test-subj={DASHBOARD_TABLE_COLUMN_SCORE_TEST_ID}
           >
-            <EuiFlexItem grow={dashboardColumnsGrow.first}>
-              <ClusterDetailsBox cluster={cluster} />
-            </EuiFlexItem>
-            <EuiFlexItem grow={dashboardColumnsGrow.second}>
-              <div
-                style={{
-                  paddingLeft: euiTheme.size.base,
-                  paddingRight: euiTheme.size.base,
-                  height: '100%',
-                }}
-              >
-                <CloudPostureScoreChart
-                  compact
-                  id={`${cluster.meta.clusterId}_score_chart`}
-                  data={cluster.stats}
-                  trend={cluster.trend}
-                  onEvalCounterClick={(evaluation) =>
-                    handleEvalCounterClick(cluster.meta.clusterId, evaluation)
-                  }
-                />
-              </div>
-            </EuiFlexItem>
-            <EuiFlexItem grow={dashboardColumnsGrow.third}>
-              <div style={{ paddingLeft: euiTheme.size.base, paddingRight: euiTheme.size.base }}>
-                <RisksTable
-                  compact
-                  data={cluster.groupedFindingsEvaluation}
-                  maxItems={3}
-                  onCellClick={(resourceTypeName) =>
-                    handleCellClick(cluster.meta.clusterId, resourceTypeName)
-                  }
-                  viewAllButtonTitle={i18n.translate(
-                    'xpack.csp.dashboard.risksTable.clusterCardViewAllButtonTitle',
-                    { defaultMessage: 'View all failed findings for this cluster' }
-                  )}
-                  onViewAllClick={() => handleViewAllClick(cluster.meta.clusterId)}
-                />
-              </div>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </React.Fragment>
+            <CloudPostureScoreChart
+              compact
+              id={`${cluster.meta.clusterId}_score_chart`}
+              data={cluster.stats}
+              trend={cluster.trend}
+              onEvalCounterClick={(evaluation) =>
+                navToFindingsByClusterAndEvaluation(cluster.meta.clusterId, evaluation)
+              }
+            />
+          </EuiFlexItem>
+          <EuiFlexItem grow={dashboardColumnsGrow.third}>
+            <RisksTable
+              compact
+              data={cluster.groupedFindingsEvaluation}
+              maxItems={3}
+              onCellClick={(resourceTypeName) =>
+                navToFailedFindingsByClusterAndSection(cluster.meta.clusterId, resourceTypeName)
+              }
+              viewAllButtonTitle={i18n.translate(
+                'xpack.csp.dashboard.risksTable.clusterCardViewAllButtonTitle',
+                { defaultMessage: 'View all failed findings for this cluster' }
+              )}
+              onViewAllClick={() => navToFailedFindingsByCluster(cluster.meta.clusterId)}
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
       ))}
     </>
   );

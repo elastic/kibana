@@ -22,6 +22,7 @@ import moment from 'moment';
 import { useJourneySteps } from '../../monitor_details/hooks/use_journey_steps';
 import { SYNTHETICS_INDEX_PATTERN } from '../../../../../../common/constants';
 import { useReduxEsSearch } from '../../../hooks/use_redux_es_search';
+import { getTimingWithLabels } from './use_network_timings';
 
 export const useStepFilters = (checkGroupId: string, stepIndex: number) => {
   return [
@@ -38,11 +39,15 @@ export const useStepFilters = (checkGroupId: string, stepIndex: number) => {
   ];
 };
 
-export const useNetworkTimingsPrevious24Hours = (stepIndexArg?: number, timestampArg?: string) => {
+export const useNetworkTimingsPrevious24Hours = (
+  stepIndexArg?: number,
+  timestampArg?: string,
+  checkGroupIdArg?: string
+) => {
   const params = useParams<{ checkGroupId: string; stepIndex: string; monitorId: string }>();
 
   const configId = params.monitorId;
-  const checkGroupId = params.checkGroupId;
+  const checkGroupId = checkGroupIdArg ?? params.checkGroupId;
   const stepIndex = stepIndexArg ?? Number(params.stepIndex);
 
   const { currentStep } = useJourneySteps();
@@ -210,36 +215,7 @@ export const useNetworkTimingsPrevious24Hours = (stepIndexArg?: number, timestam
       value: timings.transferSize,
       label: CONTENT_SIZE_LABEL,
     },
-    timingsWithLabels: [
-      {
-        value: timings.dns,
-        label: SYNTHETICS_DNS_TIMINGS_LABEL,
-      },
-      {
-        value: timings.ssl,
-        label: SYNTHETICS_SSL_TIMINGS_LABEL,
-      },
-      {
-        value: timings.blocked,
-        label: SYNTHETICS_BLOCKED_TIMINGS_LABEL,
-      },
-      {
-        value: timings.connect,
-        label: SYNTHETICS_CONNECT_TIMINGS_LABEL,
-      },
-      {
-        value: timings.receive,
-        label: SYNTHETICS_RECEIVE_TIMINGS_LABEL,
-      },
-      {
-        value: timings.send,
-        label: SYNTHETICS_SEND_TIMINGS_LABEL,
-      },
-      {
-        value: timings.wait,
-        label: SYNTHETICS_WAIT_TIMINGS_LABEL,
-      },
-    ].sort((a, b) => b.value - a.value),
+    timingsWithLabels: getTimingWithLabels(timings),
   };
 };
 
@@ -249,29 +225,6 @@ const median = (arr: number[]): number => {
   const mid = Math.floor(s.length / 2);
   return s.length % 2 === 0 ? (s[mid - 1] + s[mid]) / 2 : s[mid];
 };
-
-const SYNTHETICS_CONNECT_TIMINGS_LABEL = i18n.translate('xpack.synthetics.connect.label', {
-  defaultMessage: 'Connect',
-});
-const SYNTHETICS_DNS_TIMINGS_LABEL = i18n.translate('xpack.synthetics.dns', {
-  defaultMessage: 'DNS',
-});
-const SYNTHETICS_WAIT_TIMINGS_LABEL = i18n.translate('xpack.synthetics.wait', {
-  defaultMessage: 'Wait',
-});
-
-const SYNTHETICS_SSL_TIMINGS_LABEL = i18n.translate('xpack.synthetics.ssl', {
-  defaultMessage: 'SSL',
-});
-const SYNTHETICS_BLOCKED_TIMINGS_LABEL = i18n.translate('xpack.synthetics.blocked', {
-  defaultMessage: 'Blocked',
-});
-const SYNTHETICS_SEND_TIMINGS_LABEL = i18n.translate('xpack.synthetics.send', {
-  defaultMessage: 'Send',
-});
-const SYNTHETICS_RECEIVE_TIMINGS_LABEL = i18n.translate('xpack.synthetics.receive', {
-  defaultMessage: 'Receive',
-});
 
 export const CONTENT_SIZE_LABEL = i18n.translate('xpack.synthetics.contentSize', {
   defaultMessage: 'Content Size',
