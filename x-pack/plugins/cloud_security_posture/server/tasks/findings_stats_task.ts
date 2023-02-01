@@ -113,8 +113,7 @@ const getScoreQuery = (): SearchRequest => ({
   aggs: {
     score_by_policy_template: {
       terms: {
-        // TODO: CIS AWS - replace with policy_template when available
-        field: 'rule.benchmark.id',
+        field: 'rule.benchmark.posture_type',
       },
       aggs: {
         total_findings: {
