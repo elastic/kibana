@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useRef } from 'react';
+import React, { useCallback, useEffect } from 'react';
 import { useDispatch } from 'react-redux';
 import { css } from 'styled-components';
 import { ChartLabel } from '../../../overview/components/detection_response/alerts_by_status/chart_label';
