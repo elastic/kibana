@@ -5,10 +5,6 @@
  * 2.0.
  */
 
-// import type {
-//   AuditAction,
-//   AddAuditEventParams as SavedObjectEventParams,
-// } from '@kbn/core-saved-objects-server';
 import type { EcsEvent, KibanaRequest, LogMeta } from '@kbn/core/server';
 import type { ArrayElement } from '@kbn/utility-types';
 
