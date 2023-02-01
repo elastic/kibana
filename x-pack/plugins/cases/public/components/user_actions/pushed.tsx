@@ -10,29 +10,52 @@ import type { EuiCommentProps } from '@elastic/eui';
 import { EuiFlexGroup, EuiFlexItem, EuiLink } from '@elastic/eui';
 
 import type { PushedUserAction } from '../../../common/api';
-import { Actions, NONE_CONNECTOR_ID } from '../../../common/api';
+import { Actions } from '../../../common/api';
 import type { UserActionBuilder, UserActionResponse } from './types';
 import { createCommonUpdateUserActionBuilder } from './common';
 import * as i18n from './translations';
-import type { CaseServices } from '../../containers/use_find_case_user_actions';
-import type { CaseExternalService } from '../../containers/types';
+import type { CaseConnectors } from '../../containers/types';
 
-const getPushInfo = (
-  caseServices: CaseServices,
-  externalService: CaseExternalService | undefined,
-  index: number
-) =>
-  externalService != null && externalService.connectorId !== NONE_CONNECTOR_ID
-    ? {
-        firstPush: caseServices[externalService.connectorId]?.firstPushIndex === index,
-        parsedConnectorId: externalService.connectorId,
-        parsedConnectorName: externalService.connectorName,
-      }
-    : {
-        firstPush: false,
-        parsedConnectorId: NONE_CONNECTOR_ID,
-        parsedConnectorName: NONE_CONNECTOR_ID,
-      };
+const getPushDates = (
+  userActionPushedAt: string,
+  connectorPushedAt: string | undefined
+): { userActionDate: Date; connectorDate: Date } | undefined => {
+  if (!connectorPushedAt) {
+    return;
+  }
+
+  const pushedDate = new Date(userActionPushedAt);
+  const connectorDate = new Date(connectorPushedAt);
+
+  if (isNaN(pushedDate.getTime()) || isNaN(connectorDate.getTime())) {
+    return;
+  }
+
+  return {
+    userActionDate: pushedDate,
+    connectorDate,
+  };
+};
+
+const isLatestPush = (pushedAt: string, latestPush: string | undefined) => {
+  const dates = getPushDates(pushedAt, latestPush);
+
+  if (!dates) {
+    return false;
+  }
+
+  return dates.userActionDate.getTime() >= dates.connectorDate.getTime();
+};
+
+const isFirstPush = (pushedAt: string, oldestPush: string | undefined) => {
+  const dates = getPushDates(pushedAt, oldestPush);
+
+  if (!dates) {
+    return true;
+  }
+
+  return dates.userActionDate.getTime() <= dates.connectorDate.getTime();
+};
 
 const getLabelTitle = (action: UserActionResponse<PushedUserAction>, firstPush: boolean) => {
   const externalService = action.payload.externalService;
@@ -60,50 +83,36 @@ const getLabelTitle = (action: UserActionResponse<PushedUserAction>, firstPush: 
 
 const getFooters = ({
   userAction,
-  caseServices,
-  connectorId,
-  connectorName,
-  index,
+  connectorInfo,
 }: {
   userAction: UserActionResponse<PushedUserAction>;
-  caseServices: CaseServices;
-  connectorId: string;
-  connectorName: string;
-  index: number;
+  connectorInfo: CaseConnectors[string];
 }): EuiCommentProps[] => {
-  const showTopFooter =
-    userAction.action === Actions.push_to_service &&
-    index === caseServices[connectorId]?.lastPushIndex;
+  const footers: EuiCommentProps[] = [];
+  const latestPush = isLatestPush(
+    userAction.createdAt,
+    connectorInfo.push.latestUserActionPushDate
+  );
 
-  const showBottomFooter =
-    userAction.action === Actions.push_to_service &&
-    index === caseServices[connectorId]?.lastPushIndex &&
-    caseServices[connectorId].hasDataToPush;
-
-  let footers: EuiCommentProps[] = [];
+  const showTopFooter = userAction.action === Actions.push_to_service && latestPush;
+  const showBottomFooter = showTopFooter && connectorInfo.push.needsToBePushed;
 
   if (showTopFooter) {
-    footers = [
-      ...footers,
-      {
-        username: '',
-        event: i18n.ALREADY_PUSHED_TO_SERVICE(`${connectorName}`),
-        timelineAvatar: 'sortUp',
-        'data-test-subj': 'top-footer',
-      },
-    ];
+    footers.push({
+      username: '',
+      event: i18n.ALREADY_PUSHED_TO_SERVICE(`${connectorInfo.name}`),
+      timelineAvatar: 'sortUp',
+      'data-test-subj': 'top-footer',
+    });
   }
 
   if (showBottomFooter) {
-    footers = [
-      ...footers,
-      {
-        username: '',
-        event: i18n.REQUIRED_UPDATE_TO_SERVICE(`${connectorName}`),
-        timelineAvatar: 'sortDown',
-        'data-test-subj': 'bottom-footer',
-      },
-    ];
+    footers.push({
+      username: '',
+      event: i18n.REQUIRED_UPDATE_TO_SERVICE(`${connectorInfo.name}`),
+      timelineAvatar: 'sortDown',
+      'data-test-subj': 'bottom-footer',
+    });
   }
 
   return footers;
@@ -112,31 +121,25 @@ const getFooters = ({
 export const createPushedUserActionBuilder: UserActionBuilder = ({
   userAction,
   userProfiles,
-  caseServices,
-  index,
+  caseConnectors,
   handleOutlineComment,
 }) => ({
   build: () => {
     const pushedUserAction = userAction as UserActionResponse<PushedUserAction>;
-    const { firstPush, parsedConnectorId, parsedConnectorName } = getPushInfo(
-      caseServices,
-      pushedUserAction.payload.externalService,
-      index
-    );
+    const connectorId = pushedUserAction.payload.externalService.connectorId;
+    const connectorInfo = caseConnectors[connectorId];
 
-    if (parsedConnectorId === NONE_CONNECTOR_ID) {
+    if (!connectorInfo) {
       return [];
     }
 
-    const footers = getFooters({
-      userAction: pushedUserAction,
-      caseServices,
-      connectorId: parsedConnectorId,
-      connectorName: parsedConnectorName,
-      index,
-    });
-
+    const firstPush = isFirstPush(
+      userAction.createdAt,
+      connectorInfo.push.oldestUserActionPushDate
+    );
+    const footers = getFooters({ userAction: pushedUserAction, connectorInfo });
     const label = getLabelTitle(pushedUserAction, firstPush);
+
     const commonBuilder = createCommonUpdateUserActionBuilder({
       userProfiles,
       userAction,

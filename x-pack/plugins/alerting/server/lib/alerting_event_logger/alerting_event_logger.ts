@@ -184,7 +184,7 @@ export class AlertingEventLogger {
           alertingOutcome: 'failure',
           reason: status.error?.reason || 'unknown',
           error: this.event?.error?.message || status.error.message,
-          ...(this.event.message
+          ...(this.event.message && this.event.event?.outcome === 'failure'
             ? {}
             : {
                 message: `${this.ruleContext.ruleType.id}:${this.ruleContext.ruleId}: execution failed`,

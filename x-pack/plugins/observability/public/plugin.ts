@@ -42,6 +42,7 @@ import { SecurityPluginStart } from '@kbn/security-plugin/public';
 import { GuidedOnboardingPluginStart } from '@kbn/guided-onboarding-plugin/public';
 import { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import { LicensingPluginStart } from '@kbn/licensing-plugin/public';
+import { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import { RuleDetailsLocatorDefinition } from './locators/rule_details';
 import { observabilityAppId, observabilityFeatureId, casesPath } from '../common';
 import { createLazyObservabilityPageTemplate } from './components/shared';
@@ -107,6 +108,7 @@ export interface ObservabilityPublicPluginsStart {
   spaces: SpacesPluginStart;
   triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
   usageCollection: UsageCollectionSetup;
+  unifiedSearch: UnifiedSearchPublicPluginStart;
   home?: HomePublicPluginStart;
 }
 
