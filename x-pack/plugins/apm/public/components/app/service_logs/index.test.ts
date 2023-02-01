@@ -23,7 +23,7 @@ describe('service logs', () => {
           environment,
         })
       ).toEqual(
-        '(service.name: "opbeans-node" AND service.environment: "production") or (service.name: "opbeans-node" AND not service.environment: *)'
+        '(service.name: "opbeans-node" and service.environment: "production") or (service.name: "opbeans-node" and not service.environment: *)'
       );
     });
 
@@ -39,7 +39,7 @@ describe('service logs', () => {
           environment,
         })
       ).toEqual(
-        '(service.name: "opbeans-node" AND service.environment: "production") or (service.name: "opbeans-node" AND not service.environment: *) or ((container.id: "foo" or container.id: "bar") and not service.name: *)'
+        '(service.name: "opbeans-node" and service.environment: "production") or (service.name: "opbeans-node" and not service.environment: *) or ((container.id: "foo" or container.id: "bar") and not service.name: *)'
       );
     });
 
@@ -55,7 +55,7 @@ describe('service logs', () => {
           environment,
         })
       ).toEqual(
-        '(service.name: "opbeans-node" AND service.environment: "production") or (service.name: "opbeans-node" AND not service.environment: *)'
+        '(service.name: "opbeans-node" and service.environment: "production") or (service.name: "opbeans-node" and not service.environment: *)'
       );
     });
   });

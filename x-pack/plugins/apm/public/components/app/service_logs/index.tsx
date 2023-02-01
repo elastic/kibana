@@ -75,17 +75,23 @@ export function getInfrastructureKQLFilter({
   serviceName: string;
   environment: string;
 }) {
-  const containerIds: string[] = data?.containerIds ?? [];
-  const containerIdKql = containerIds
+  // correlate on service.name + service.environment
+  const serviceNameAndEnvironmentCorrelation = `(${SERVICE_NAME}: "${serviceName}" and ${SERVICE_ENVIRONMENT}: "${environment}")`;
+
+  // correlate on service.name
+  const serviceNameCorrelation = `(${SERVICE_NAME}: "${serviceName}" and not ${SERVICE_ENVIRONMENT}: *)`;
+
+  // correlate on container.id
+  const containerIdKql = (data?.containerIds ?? [])
     .map((id) => `${CONTAINER_ID}: "${id}"`)
     .join(' or ');
+  const containerIdCorrelation = containerIdKql
+    ? [`((${containerIdKql}) and not ${SERVICE_NAME}: *)`]
+    : [];
 
-  // correlate on service and (if available) environment
-  const serviceNameAndEnvironmentCorrelation = `(${SERVICE_NAME}: "${serviceName}" AND ${SERVICE_ENVIRONMENT}: "${environment}")`;
-  const serviceNameCorrelation = `(${SERVICE_NAME}: "${serviceName}" AND not ${SERVICE_ENVIRONMENT}: *)`;
-  const containerIdCorrelation = `((${containerIdKql}) and not ${SERVICE_NAME}: *)`;
-
-  return containerIds.length
-    ? `${serviceNameAndEnvironmentCorrelation} or ${serviceNameCorrelation} or ${containerIdCorrelation}`
-    : `${serviceNameAndEnvironmentCorrelation} or ${serviceNameCorrelation}`;
+  return [
+    serviceNameAndEnvironmentCorrelation,
+    serviceNameCorrelation,
+    ...containerIdCorrelation,
+  ].join(' or ');
 }
