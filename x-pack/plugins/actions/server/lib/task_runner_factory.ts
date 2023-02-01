@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { v4 as uuidv4 } from 'uuid';
 import { pick } from 'lodash';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { map, fromNullable, getOrElse } from 'fp-ts/lib/Option';
@@ -84,6 +85,7 @@ export class TaskRunnerFactory {
       scheduled: taskInstance.runAt,
       attempts: taskInstance.attempts,
     };
+    const actionExecutionId = uuidv4();
 
     return {
       async run() {
@@ -122,6 +124,7 @@ export class TaskRunnerFactory {
             executionId,
             consumer,
             relatedSavedObjects: validatedRelatedSavedObjects(logger, relatedSavedObjects),
+            actionExecutionId,
           });
         } catch (e) {
           logger.error(
@@ -208,6 +211,7 @@ export class TaskRunnerFactory {
           executionId,
           relatedSavedObjects: (relatedSavedObjects || []) as RelatedSavedObjects,
           ...getSourceFromReferences(references),
+          actionExecutionId,
         });
 
         inMemoryMetrics.increment(IN_MEMORY_METRICS.ACTION_TIMEOUTS);

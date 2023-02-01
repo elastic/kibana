@@ -50,6 +50,11 @@ import { getESAssetMetadata } from '../meta';
 import { retryTransientEsErrors } from '../retry';
 
 import {
+  applyDocOnlyValueToMapping,
+  forEachMappings,
+} from '../../../experimental_datastream_features_helper';
+
+import {
   generateMappings,
   generateTemplateName,
   generateTemplateIndexPattern,
@@ -262,6 +267,7 @@ export function buildComponentTemplates(params: {
     defaultSettings,
     mappings,
     pipelineName,
+    experimentalDataStreamFeature,
   } = params;
   const packageTemplateName = `${templateName}${PACKAGE_TEMPLATE_SUFFIX}`;
   const userSettingsTemplateName = `${templateName}${USER_SETTINGS_TEMPLATE_SUFFIX}`;
@@ -275,6 +281,23 @@ export function buildComponentTemplates(params: {
 
   const indexTemplateMappings = registryElasticsearch?.['index_template.mappings'] ?? {};
 
+  const isDocValueOnlyNumericEnabled =
+    experimentalDataStreamFeature?.features.doc_value_only_numeric === true;
+  const isDocValueOnlyOtherEnabled =
+    experimentalDataStreamFeature?.features.doc_value_only_other === true;
+
+  if (isDocValueOnlyNumericEnabled || isDocValueOnlyOtherEnabled) {
+    forEachMappings(mappings.properties, (mappingProp, name) =>
+      applyDocOnlyValueToMapping(
+        mappingProp,
+        name,
+        experimentalDataStreamFeature,
+        isDocValueOnlyNumericEnabled,
+        isDocValueOnlyOtherEnabled
+      )
+    );
+  }
+
   const mappingsProperties = merge(mappings.properties, indexTemplateMappings.properties ?? {});
 
   const mappingsDynamicTemplates = uniqBy(
@@ -286,8 +309,8 @@ export function buildComponentTemplates(params: {
   const isSyntheticSourceEnabledByDefault = registryElasticsearch?.source_mode === 'synthetic';
 
   const sourceModeSynthetic =
-    params.experimentalDataStreamFeature?.features.synthetic_source !== false &&
-    (params.experimentalDataStreamFeature?.features.synthetic_source === true ||
+    experimentalDataStreamFeature?.features.synthetic_source !== false &&
+    (experimentalDataStreamFeature?.features.synthetic_source === true ||
       isSyntheticSourceEnabledByDefault ||
       isTimeSeriesEnabledByDefault);
 

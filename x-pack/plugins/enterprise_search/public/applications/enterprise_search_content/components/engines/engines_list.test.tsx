@@ -13,18 +13,34 @@ import { shallow } from 'enzyme';
 
 import { Status } from '../../../../../common/types/api';
 
+import { EnterpriseSearchEnginesPageTemplate } from '../layout/engines_page_template';
+
+import { EmptyEnginesPrompt } from './components/empty_engines_prompt';
 import { EnginesListTable } from './components/tables/engines_table';
 import { EnginesList } from './engines_list';
 import { DEFAULT_META } from './types';
 
 const DEFAULT_VALUES = {
   data: undefined,
-  results: [],
+  isLoading: true,
   meta: DEFAULT_META,
   parameters: { meta: DEFAULT_META },
+  results: [],
   status: Status.IDLE,
 };
-const mockValues = { ...DEFAULT_VALUES };
+const mockValues = {
+  ...DEFAULT_VALUES,
+  isLoading: false,
+  results: [
+    {
+      created: '1999-12-31T23:59:59Z',
+      indices: ['index-18', 'index-23'],
+      name: 'engine-name-1',
+      updated: '1999-12-31T23:59:59Z',
+    },
+  ],
+  status: Status.SUCCESS,
+};
 
 const mockActions = {
   fetchEngines: jest.fn(),
@@ -36,7 +52,23 @@ describe('EnginesList', () => {
     jest.clearAllMocks();
     global.localStorage.clear();
   });
-  describe('Empty state', () => {});
+  it('renders loading when isLoading', () => {
+    setMockValues(DEFAULT_VALUES);
+    setMockActions(mockActions);
+
+    const wrapper = shallow(<EnginesList />);
+    const pageTemplate = wrapper.find(EnterpriseSearchEnginesPageTemplate);
+
+    expect(pageTemplate.prop('isLoading')).toEqual(true);
+  });
+  it('renders empty prompt when no data is available', () => {
+    setMockValues(DEFAULT_VALUES);
+    setMockActions(mockActions);
+    const wrapper = shallow(<EnginesList />);
+
+    expect(wrapper.find(EmptyEnginesPrompt)).toHaveLength(1);
+    expect(wrapper.find(EnginesListTable)).toHaveLength(0);
+  });
 
   it('renders with Engines data ', async () => {
     setMockValues(mockValues);
@@ -45,5 +77,6 @@ describe('EnginesList', () => {
     const wrapper = shallow(<EnginesList />);
 
     expect(wrapper.find(EnginesListTable)).toHaveLength(1);
+    expect(wrapper.find(EmptyEnginesPrompt)).toHaveLength(0);
   });
 });

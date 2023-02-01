@@ -7,20 +7,19 @@
 import React from 'react';
 import { render, screen, within } from '@testing-library/react';
 import * as TEST_SUBJECTS from '../test_subjects';
-import { FindingsByResourceTable, formatNumber, getResourceId } from './findings_by_resource_table';
+import { FindingsByResourceTable, getResourceId } from './findings_by_resource_table';
 import type { PropsOf } from '@elastic/eui';
 import Chance from 'chance';
-import numeral from '@elastic/numeral';
 import { TestProvider } from '../../../test/test_provider';
 import type { FindingsByResourcePage } from './use_findings_by_resource';
+import { calculatePostureScore } from '../../../../common/utils/helpers';
 
 const chance = new Chance();
 
 const getFakeFindingsByResource = (): FindingsByResourcePage => {
-  const count = chance.integer();
-  const total = chance.integer() + count + 1;
-  const normalized = count / total;
-
+  const failed = chance.natural();
+  const passed = chance.natural();
+  const total = failed + passed;
   const [resourceName, resourceSubtype, ruleBenchmarkName, ...cisSections] = chance.unique(
     chance.word,
     5
@@ -33,9 +32,11 @@ const getFakeFindingsByResource = (): FindingsByResourcePage => {
     'resource.sub_type': resourceSubtype,
     'rule.section': cisSections,
     'rule.benchmark.name': ruleBenchmarkName,
-    failed_findings: {
-      count,
-      normalized,
+    compliance_score: passed / total,
+    findings: {
+      failed_findings: failed,
+      passed_findings: passed,
+      normalized: passed / total,
       total_findings: total,
     },
   };
@@ -50,7 +51,7 @@ describe('<FindingsByResourceTable />', () => {
       items: [],
       pagination: { pageIndex: 0, pageSize: 10, totalItemCount: 0 },
       sorting: {
-        sort: { field: 'failed_findings', direction: 'desc' },
+        sort: { field: 'compliance_score', direction: 'desc' },
       },
       setTableOptions: jest.fn(),
       onAddFilter: jest.fn(),
@@ -75,7 +76,7 @@ describe('<FindingsByResourceTable />', () => {
       items: data,
       pagination: { pageIndex: 0, pageSize: 10, totalItemCount: 0 },
       sorting: {
-        sort: { field: 'failed_findings', direction: 'desc' },
+        sort: { field: 'compliance_score', direction: 'desc' },
       },
       setTableOptions: jest.fn(),
       onAddFilter: jest.fn(),
@@ -97,10 +98,13 @@ describe('<FindingsByResourceTable />', () => {
         expect(within(row).getByText(item['resource.name'])).toBeInTheDocument();
       if (item['resource.sub_type'])
         expect(within(row).getByText(item['resource.sub_type'])).toBeInTheDocument();
-      expect(within(row).getByText(item['rule.section'].join(', '))).toBeInTheDocument();
-      expect(within(row).getByText(formatNumber(item.failed_findings.count))).toBeInTheDocument();
       expect(
-        within(row).getByText(new RegExp(numeral(item.failed_findings.normalized).format('0%')))
+        within(row).getByText(
+          `${calculatePostureScore(
+            item.findings.passed_findings,
+            item.findings.failed_findings
+          ).toFixed(0)}%`
+        )
       ).toBeInTheDocument();
     });
   });

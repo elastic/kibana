@@ -300,6 +300,7 @@ export class LensPlugin {
         attributeService: getLensAttributeService(coreStart, plugins),
         capabilities: coreStart.application.capabilities,
         coreHttp: coreStart.http,
+        coreStart,
         data: plugins.data,
         timefilter: plugins.data.query.timefilter.timefilter,
         expressionRenderer: plugins.expressions.ReactExpressionRenderer,

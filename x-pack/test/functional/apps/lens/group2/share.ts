@@ -72,7 +72,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await browser.navigateTo(url);
       // check that it's the same configuration in the new URL when ready
-      await PageObjects.header.waitUntilLoadingHasFinished();
+      await PageObjects.lens.waitForVisualization('xyVisChart');
       expect(await PageObjects.lens.getDimensionTriggerText('lnsXY_yDimensionPanel')).to.eql(
         'Average of bytes'
       );
@@ -92,7 +92,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await filterBarService.addFilter({ field: 'bytes', operation: 'is', value: '1' });
       await queryBar.setQuery('host.keyword www.elastic.co');
       await queryBar.submitQuery();
-      await PageObjects.header.waitUntilLoadingHasFinished();
+      await PageObjects.lens.waitForVisualization('xyVisChart');
 
       const url = await PageObjects.lens.getUrl('snapshot');
       await browser.openNewTab();
@@ -101,7 +101,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await browser.navigateTo(url);
       // check that it's the same configuration in the new URL when ready
-      await PageObjects.header.waitUntilLoadingHasFinished();
+      await PageObjects.lens.waitForVisualization('xyVisChart');
       expect(await filterBarService.getFiltersLabel()).to.eql(['bytes: 1']);
       expect(await queryBar.getQueryString()).to.be('host.keyword www.elastic.co');
       await browser.closeCurrentWindow();

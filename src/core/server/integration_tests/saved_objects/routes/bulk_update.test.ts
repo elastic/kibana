@@ -13,13 +13,20 @@ import {
   coreUsageStatsClientMock,
   coreUsageDataServiceMock,
 } from '@kbn/core-usage-data-server-mocks';
-import { setupServer } from '@kbn/core-test-helpers-test-utils';
+import { createHiddenTypeVariants, setupServer } from '@kbn/core-test-helpers-test-utils';
 import {
   registerBulkUpdateRoute,
   type InternalSavedObjectsRequestHandlerContext,
 } from '@kbn/core-saved-objects-server-internal';
 
 type SetupServerReturn = Awaited<ReturnType<typeof setupServer>>;
+
+const testTypes = [
+  { name: 'visualization', hide: false },
+  { name: 'dashboard', hide: false },
+  { name: 'index-pattern', hide: false },
+  { name: 'hidden-from-http', hide: false, hideFromHttpApis: true },
+];
 
 describe('PUT /api/saved_objects/_bulk_update', () => {
   let server: SetupServerReturn['server'];
@@ -30,7 +37,14 @@ describe('PUT /api/saved_objects/_bulk_update', () => {
 
   beforeEach(async () => {
     ({ server, httpSetup, handlerContext } = await setupServer());
+
     savedObjectsClient = handlerContext.savedObjects.client;
+
+    handlerContext.savedObjects.typeRegistry.getType.mockImplementation((typename: string) => {
+      return testTypes
+        .map((typeDesc) => createHiddenTypeVariants(typeDesc))
+        .find((fullTest) => fullTest.name === typename);
+    });
 
     const router =
       httpSetup.createRouter<InternalSavedObjectsRequestHandlerContext>('/api/saved_objects/');
@@ -138,5 +152,21 @@ describe('PUT /api/saved_objects/_bulk_update', () => {
         },
       },
     ]);
+  });
+
+  it('returns with status 400 when a type is hidden from the HTTP APIs', async () => {
+    const result = await supertest(httpSetup.server.listener)
+      .put('/api/saved_objects/_bulk_update')
+      .send([
+        {
+          type: 'hidden-from-http',
+          id: 'hiddenID',
+          attributes: {
+            title: 'bar',
+          },
+        },
+      ])
+      .expect(400);
+    expect(result.body.message).toContain('Unsupported saved object type(s):');
   });
 });

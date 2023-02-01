@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { GeoEcs } from '../../../../ecs/geo';
+import type { GeoEcs } from '@kbn/securitysolution-ecs';
 import type { Maybe } from '../../..';
 
 export enum NetworkDirectionEcs {

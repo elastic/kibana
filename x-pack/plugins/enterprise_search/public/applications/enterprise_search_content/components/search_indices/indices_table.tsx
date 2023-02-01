@@ -19,6 +19,7 @@ import {
 import { i18n } from '@kbn/i18n';
 
 import { Meta } from '../../../../../common/types';
+import { healthColorsMap } from '../../../shared/constants/health_colors';
 import { generateEncodedPath } from '../../../shared/encode_path_params';
 import { KibanaLogic } from '../../../shared/kibana';
 import { EuiLinkTo } from '../../../shared/react_router_helpers';
@@ -31,13 +32,6 @@ import {
   ingestionStatusToColor,
   ingestionStatusToText,
 } from '../../utils/ingestion_status_helpers';
-
-const healthColorsMap = {
-  green: 'success',
-  red: 'danger',
-  unavailable: '',
-  yellow: 'warning',
-};
 
 interface IndicesTableProps {
   indices: ElasticsearchViewIndex[];

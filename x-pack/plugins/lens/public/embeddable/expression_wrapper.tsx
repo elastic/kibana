@@ -19,13 +19,13 @@ import { ExecutionContextSearch } from '@kbn/data-plugin/public';
 import { DefaultInspectorAdapters, RenderMode } from '@kbn/expressions-plugin/common';
 import classNames from 'classnames';
 import { getOriginalRequestErrorMessages } from '../editor_frame_service/error_helper';
-import { ErrorMessage } from '../editor_frame_service/types';
 import { LensInspector } from '../lens_inspector_service';
+import { UserMessage } from '../types';
 
 export interface ExpressionWrapperProps {
   ExpressionRenderer: ReactExpressionRendererType;
   expression: string | null;
-  errors: ErrorMessage[] | undefined;
+  errors: UserMessage[];
   variables?: Record<string, unknown>;
   interactive?: boolean;
   searchContext: ExecutionContextSearch;
@@ -57,8 +57,8 @@ interface VisualizationErrorProps {
 }
 
 export function VisualizationErrorPanel({ errors, canEdit }: VisualizationErrorProps) {
-  const showMore = errors && errors.length > 1;
-  const canFixInLens = canEdit && errors?.some(({ type }) => type === 'fixable');
+  const showMore = errors.length > 1;
+  const canFixInLens = canEdit && errors.some(({ fixableInEditor }) => fixableInEditor);
   return (
     <div className="lnsEmbeddedError">
       <EuiEmptyPrompt
@@ -67,7 +67,7 @@ export function VisualizationErrorPanel({ errors, canEdit }: VisualizationErrorP
         data-test-subj="embeddable-lens-failure"
         body={
           <>
-            {errors ? (
+            {errors.length ? (
               <>
                 <p>{errors[0].longMessage}</p>
                 {showMore && !canFixInLens ? (
@@ -129,7 +129,7 @@ export function ExpressionWrapper({
 }: ExpressionWrapperProps) {
   return (
     <I18nProvider>
-      {errors || expression === null || expression === '' ? (
+      {errors.length || expression === null || expression === '' ? (
         <VisualizationErrorPanel errors={errors} canEdit={canEdit} />
       ) : (
         <div className={classNames('lnsExpressionRenderer', className)} style={style}>

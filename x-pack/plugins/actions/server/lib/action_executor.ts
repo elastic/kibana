@@ -59,6 +59,7 @@ export interface TaskInfo {
 
 export interface ExecuteOptions<Source = unknown> {
   actionId: string;
+  actionExecutionId: string;
   isEphemeral?: boolean;
   request: KibanaRequest;
   params: Record<string, unknown>;
@@ -100,6 +101,7 @@ export class ActionExecutor {
     executionId,
     consumer,
     relatedSavedObjects,
+    actionExecutionId,
   }: ExecuteOptions): Promise<ActionTypeExecutorResult<unknown>> {
     if (!this.isInitialized) {
       throw new Error('ActionExecutor not initialized');
@@ -189,6 +191,9 @@ export class ActionExecutor {
             },
           ],
           relatedSavedObjects,
+          name,
+          actionExecutionId,
+          isPreconfigured: this.actionInfo.isPreconfigured,
         });
 
         eventLogger.startTiming(event);
@@ -297,8 +302,10 @@ export class ActionExecutor {
     executionId,
     taskInfo,
     consumer,
+    actionExecutionId,
   }: {
     actionId: string;
+    actionExecutionId: string;
     request: KibanaRequest;
     taskInfo?: TaskInfo;
     executionId?: string;
@@ -357,6 +364,8 @@ export class ActionExecutor {
         },
       ],
       relatedSavedObjects,
+      actionExecutionId,
+      isPreconfigured: this.actionInfo.isPreconfigured,
     });
 
     eventLogger.logEvent(event);
@@ -369,6 +378,7 @@ interface ActionInfo {
   config: unknown;
   secrets: unknown;
   actionId: string;
+  isPreconfigured?: boolean;
 }
 
 async function getActionInfoInternal<Source = unknown>(
@@ -395,6 +405,7 @@ async function getActionInfoInternal<Source = unknown>(
       config: pcAction.config,
       secrets: pcAction.secrets,
       actionId,
+      isPreconfigured: true,
     };
   }
 

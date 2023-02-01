@@ -7,7 +7,7 @@
 
 import { v4 as uuidv4 } from 'uuid';
 import type { CreateExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
-import type { Ecs } from '../../../../../common/ecs';
+import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import { ENDPOINT_EVENT_FILTERS_LIST_ID } from '../constants';
 
 const osTypeBasedOnAgentType = (data?: Ecs) => {
