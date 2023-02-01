@@ -26,13 +26,11 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     environment = ENVIRONMENT_ALL.value,
     kuery = '',
     serviceName,
-    transactionType = 'mobile',
     locationField = 'client.geo.country_name',
   }: {
     environment?: string;
     kuery?: string;
     serviceName: string;
-    transactionType?: string;
     locationField?: string;
   }) {
     return await apmApiClient
@@ -45,7 +43,6 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             start: new Date(start).toISOString(),
             end: new Date(end).toISOString(),
             kuery,
-            transactionType,
             locationField,
           },
         },
