@@ -60,7 +60,6 @@ export class UiSettingsService
 
     const { overrides } = await firstValueFrom(this.config$);
     this.overrides = overrides;
-
     this.register(getCoreSettings({ isDist: this.isDist }));
 
     return {

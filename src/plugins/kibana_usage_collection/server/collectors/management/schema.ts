@@ -357,6 +357,10 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'keyword',
     _meta: { description: 'Non-default value of setting.' },
   },
+  primaryRoute: {
+    type: 'keyword',
+    _meta: { description: 'Non-default value of setting.' },
+  },
   'dateFormat:tz': {
     type: 'keyword',
     _meta: { description: 'Non-default value of setting.' },

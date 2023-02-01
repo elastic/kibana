@@ -55,7 +55,7 @@ export interface UptimeServerSetup {
   config: UptimeConfig;
   cloud?: CloudSetup;
   spaces: SpacesPluginSetup;
-  fleet: FleetStartContract;
+  fleet?: FleetStartContract;
   security: SecurityPluginStart;
   savedObjectsClient?: SavedObjectsClientContract;
   authSavedObjectsClient?: SavedObjectsClientContract;

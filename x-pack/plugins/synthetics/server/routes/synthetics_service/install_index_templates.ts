@@ -21,9 +21,9 @@ export const installIndexTemplatesRoute: SyntheticsRestApiRouteFactory = () => (
 export async function installSyntheticsIndexTemplates(server: UptimeServerSetup) {
   // no need to add error handling here since fleetSetupCompleted is already wrapped in try/catch and will log
   // warning if setup fails to complete
-  await server.fleet.fleetSetupCompleted();
+  await server.fleet?.fleetSetupCompleted();
 
-  const installation = await server.fleet.packageService.asInternalUser.ensureInstalledPackage({
+  const installation = await server.fleet?.packageService.asInternalUser.ensureInstalledPackage({
     pkgName: 'synthetics',
   });
 

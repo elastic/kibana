@@ -236,6 +236,7 @@ export class ChromeService {
           onIsLockedUpdate={setIsNavDrawerLocked}
           isLocked$={getIsNavDrawerLocked$}
           customBranding$={customBranding$}
+          primaryCategory={injectedMetadata.getPrimaryCategory()}
         />
       ),
 

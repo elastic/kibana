@@ -73,6 +73,7 @@ export interface HeaderProps {
   loadingCount$: ReturnType<HttpStart['getLoadingCount$']>;
   onIsLockedUpdate: OnIsLockedUpdate;
   customBranding$: Observable<CustomBranding>;
+  primaryCategory: string;
 }
 
 export function Header({
@@ -85,6 +86,7 @@ export function Header({
   breadcrumbsAppendExtension$,
   globalHelpExtensionMenuLinks$,
   customBranding$,
+  primaryCategory,
   ...observables
 }: HeaderProps) {
   const isVisible = useObservable(observables.isVisible$, false);
@@ -199,6 +201,7 @@ export function Header({
                       forwardRef={toggleCollapsibleNavRef}
                     />
                   }
+                  primaryCategory={primaryCategory}
                 />
               </EuiHeaderSectionItem>
 

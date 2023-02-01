@@ -4013,6 +4013,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/serverless-cli@link:packages/serverless/cli":
+  version "0.0.0"
+  uid ""
+
 "@kbn/set-map@link:packages/kbn-set-map":
   version "0.0.0"
   uid ""

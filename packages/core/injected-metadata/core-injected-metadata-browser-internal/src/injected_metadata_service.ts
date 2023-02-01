@@ -99,6 +99,10 @@ export class InjectedMetadataService {
       getCustomBranding: () => {
         return this.state.customBranding;
       },
+
+      getPrimaryCategory: () => {
+        return this.state.primaryCategory;
+      },
     };
   }
 }

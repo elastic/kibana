@@ -60,10 +60,18 @@ function getCategoryLocalStorageKey(id: string) {
   return `core.navGroup.${id}`;
 }
 
-function getIsCategoryOpen(id: string, storage: Storage) {
-  const value = storage.getItem(getCategoryLocalStorageKey(id)) ?? 'true';
+function getIsCategoryOpen(id: string, storage: Storage, primaryCategory?: string) {
+  const localKey = storage.getItem(getCategoryLocalStorageKey(id));
 
-  return value === 'true';
+  if (localKey) {
+    return localKey === 'true';
+  }
+
+  if (primaryCategory !== 'kibana' && id !== primaryCategory) {
+    return false;
+  }
+
+  return true;
 }
 
 function setIsCategoryOpen(id: string, isOpen: boolean, storage: Storage) {
@@ -85,6 +93,7 @@ interface Props {
   navigateToUrl: InternalApplicationStart['navigateToUrl'];
   customNavLink$: Rx.Observable<ChromeNavLink | undefined>;
   button: EuiCollapsibleNavProps['button'];
+  primaryCategory?: string;
 }
 
 const overviewIDsToHide = ['kibanaOverview'];
@@ -107,6 +116,7 @@ export function CollapsibleNav({
   navigateToApp,
   navigateToUrl,
   button,
+  primaryCategory,
   ...observables
 }: Props) {
   const allLinks = useObservable(observables.navLinks$, []);
@@ -137,7 +147,14 @@ export function CollapsibleNav({
   const groupedNavLinks = groupBy(allowedLinks, (link) => link?.category?.id);
   const { undefined: unknowns = [], ...allCategorizedLinks } = groupedNavLinks;
   const categoryDictionary = getAllCategories(allCategorizedLinks);
+
   const orderedCategories = getOrderedCategories(allCategorizedLinks, categoryDictionary);
+
+  if (primaryCategory && orderedCategories.includes(primaryCategory)) {
+    orderedCategories.splice(orderedCategories.indexOf(primaryCategory), 1);
+    orderedCategories.unshift(primaryCategory);
+  }
+
   const readyForEUI = (link: ChromeNavLink, needsIcon: boolean = false) => {
     return createEuiListItem({
       link,
@@ -310,7 +327,7 @@ export function CollapsibleNav({
                 )
               }
               isCollapsible={true}
-              initialIsOpen={getIsCategoryOpen(category.id, storage)}
+              initialIsOpen={getIsCategoryOpen(category.id, storage, primaryCategory)}
               onToggle={(isCategoryOpen) => setIsCategoryOpen(category.id, isCategoryOpen, storage)}
               data-test-subj={`collapsibleNavGroup-${category.id}`}
             >

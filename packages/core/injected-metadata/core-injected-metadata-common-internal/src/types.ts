@@ -72,4 +72,5 @@ export interface InjectedMetadata {
     };
   };
   customBranding: Pick<CustomBranding, 'logo' | 'customizedLogo'>;
+  primaryCategory: string;
 }

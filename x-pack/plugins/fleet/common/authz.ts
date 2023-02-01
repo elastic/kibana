@@ -99,7 +99,7 @@ export function calculatePackagePrivilegesFromCapabilities(
       return {
         ...acc,
         [privilege]: {
-          executePackageAction: capabilities.siem[privilegeName] || false,
+          executePackageAction: (capabilities.siem && capabilities.siem[privilegeName]) || false,
         },
       };
     },

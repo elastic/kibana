@@ -37,5 +37,13 @@ export const getNavigationSettings = (): Record<string, UiSettingsParams> => {
           'The route must be a relative URL.',
       }),
     },
+    primaryCategory: {
+      name: i18n.translate('core.ui_settings.params.primaryCategory.primaryCategoryTitle', {
+        defaultMessage: 'Primary category',
+      }),
+      value: 'kibana',
+      schema: schema.string(),
+      description: 'TODO',
+    },
   };
 };

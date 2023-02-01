@@ -1,0 +1,11 @@
+# Security Serverless configuration
+
+xpack.apm.enabled: false
+xpack.canvas.enabled: false
+xpack.observability.enabled: false
+xpack.reporting.enabled: false
+xpack.uptime.enabled: false
+xpack.watcher.enabled: false
+
+uiSettings.overrides.defaultRoute: /app/security/get_started
+uiSettings.overrides.primaryCategory: securitySolution

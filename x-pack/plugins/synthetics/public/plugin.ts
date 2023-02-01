@@ -62,7 +62,7 @@ import { syntheticsAlertTypeInitializers } from './apps/synthetics/lib/alert_typ
 
 export interface ClientPluginsSetup {
   home?: HomePublicPluginSetup;
-  data: DataPublicPluginSetup;
+  data?: DataPublicPluginSetup;
   observability: ObservabilityPublicSetup;
   share: SharePluginSetup;
   triggersActionsUi: TriggersAndActionsUIPublicPluginSetup;
@@ -70,8 +70,8 @@ export interface ClientPluginsSetup {
 }
 
 export interface ClientPluginsStart {
-  fleet: FleetStart;
-  data: DataPublicPluginStart;
+  fleet?: FleetStart;
+  data?: DataPublicPluginStart;
   unifiedSearch: UnifiedSearchPublicPluginStart;
   discover: DiscoverStart;
   inspector: InspectorPluginStart;
@@ -211,11 +211,13 @@ export class UptimePlugin
   }
 
   public start(coreStart: CoreStart, pluginsStart: ClientPluginsStart): void {
-    const { triggersActionsUi } = pluginsStart;
+    const { triggersActionsUi, fleet } = pluginsStart;
 
-    const { registerExtension } = pluginsStart.fleet;
+    if (fleet) {
+      registerUptimeFleetExtensions(fleet.registerExtension);
+    }
+
     setStartServices(coreStart);
-    registerUptimeFleetExtensions(registerExtension);
 
     syntheticsAlertTypeInitializers.forEach((init) => {
       const { observabilityRuleTypeRegistry } = pluginsStart.observability;

@@ -123,6 +123,7 @@ export interface UsageStats {
   'fields:popularLimit': number;
   dateNanosFormat: string;
   defaultRoute: string;
+  primaryRoute: string;
   'dateFormat:tz': string;
   'dateFormat:scaled': string;
   'csv:quoteValues': boolean;

@@ -1,0 +1,9 @@
+# Elasticsearch Serverless configuration
+
+xpack.canvas.enabled: false
+xpack.cloudSecurityPosture.enabled: false
+xpack.fleet.enabled: false
+xpack.observability.enabled: false
+xpack.reporting.enabled: false
+xpack.securitySolution.enabled: false
+xpack.watcher.enabled: false

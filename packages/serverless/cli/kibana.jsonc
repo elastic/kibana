@@ -1,0 +1,6 @@
+{
+  "type": "shared-common",
+  "id": "@kbn/serverless-cli",
+  "owner": "@elastic/appex-sharedux",
+  "devOnly": true
+}

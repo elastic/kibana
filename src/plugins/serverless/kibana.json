@@ -1,0 +1,14 @@
+{
+  "id": "serverless",
+  "version": "1.0.0",
+  "kibanaVersion": "kibana",
+  "owner": {
+    "name": "appex-sharedux",
+    "githubTeam": "appex-sharedux"
+  },
+  "description": "A proof-of-concept.",
+  "server": true,
+  "ui": true,
+  "requiredPlugins": [],
+  "optionalPlugins": []
+}

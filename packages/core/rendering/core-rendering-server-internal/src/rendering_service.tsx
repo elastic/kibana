@@ -191,6 +191,7 @@ export class RenderingService {
           uiSettings: settings,
           globalUiSettings: globalSettings,
         },
+        primaryCategory: getSettingValue('primaryCategory', settings, String),
       },
     };
 
