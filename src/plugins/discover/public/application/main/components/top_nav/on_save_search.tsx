@@ -135,6 +135,10 @@ export async function onSaveSearch({
       isTitleDuplicateConfirmed,
     };
 
+    if (newCopyOnSave) {
+      state.actions.updateAdHocDataViewId();
+    }
+
     const navigateOrReloadSavedSearch = !Boolean(onSaveCb);
     try {
       const response = await saveDataSource({

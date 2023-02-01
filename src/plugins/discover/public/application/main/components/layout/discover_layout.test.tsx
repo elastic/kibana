@@ -118,7 +118,6 @@ function mountComponent(
     stateContainer,
     setExpandedDoc: jest.fn(),
     persistDataView: jest.fn(),
-    updateAdHocDataViewId: jest.fn(),
     searchSessionManager: createSearchSessionMock(session).searchSessionManager,
     updateDataViewList: jest.fn(),
   };

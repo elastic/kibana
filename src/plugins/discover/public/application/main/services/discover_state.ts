@@ -25,6 +25,7 @@ import {
 } from '@kbn/data-plugin/public';
 import { DataView } from '@kbn/data-views-plugin/public';
 import { getEmptySavedSearch, SavedSearch } from '@kbn/saved-search-plugin/public';
+import { v4 as uuidv4 } from 'uuid';
 import { loadDataView, resolveDataView } from '../utils/resolve_data_view';
 import { DataStateContainer, getDataStateContainer } from './discover_data_state_container';
 import { DiscoverSearchSessionManager } from './discover_search_session';
@@ -40,6 +41,8 @@ import {
 } from './discover_internal_state_container';
 import { DiscoverServices } from '../../../build_services';
 import { getSavedSearchContainer, SavedSearchContainer } from './discover_saved_search_container';
+import { updateFiltersReferences } from '../utils/update_filter_references';
+import { getUrlTracker } from '../../../kibana_services';
 
 export interface AppStateUrl extends Omit<AppState, 'sort'> {
   /**
@@ -175,6 +178,7 @@ export interface DiscoverStateContainer {
      * @param dataView
      */
     replaceAdHocDataViewWithId: (id: string, dataView: DataView) => void;
+    updateAdHocDataViewId: () => void;
   };
 }
 
@@ -272,6 +276,26 @@ export function getDiscoverStateContainer({
     return { fallback: !nextDataViewData.stateValFound, dataView: nextDataView };
   };
 
+  /**
+   * When saving a saved search with an ad hoc data view, a new id needs to be generated for the data view
+   * This is to prevent duplicate ids messing with our system
+   */
+  const updateAdHocDataViewId = async () => {
+    const prevDataView = internalStateContainer.getState().dataView;
+    if (!prevDataView || prevDataView.isPersisted()) return;
+    const newDataView = await services.dataViews.create({ ...prevDataView.toSpec(), id: uuidv4() });
+    services.dataViews.clearInstanceCache(prevDataView.id);
+
+    updateFiltersReferences(prevDataView, newDataView);
+
+    replaceAdHocDataViewWithId(prevDataView.id!, newDataView);
+    await replaceUrlAppState({ index: newDataView.id });
+    const trackingEnabled = Boolean(newDataView.isPersisted() || savedSearch.id);
+    getUrlTracker().setTrackingEnabled(trackingEnabled);
+
+    return newDataView;
+  };
+
   return {
     kbnUrlStateStorage: stateStorage,
     appState: appStateContainer,
@@ -302,6 +326,7 @@ export function getDiscoverStateContainer({
       appendAdHocDataViews,
       replaceAdHocDataViewWithId,
       removeAdHocDataViewById,
+      updateAdHocDataViewId,
     },
   };
 }

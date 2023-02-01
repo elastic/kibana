@@ -40,7 +40,6 @@ test('getTopNavLinks result', () => {
     persistDataView: jest.fn(),
     updateDataViewList: jest.fn(),
     adHocDataViews: [],
-    updateAdHocDataViewId: jest.fn(),
   });
   expect(topNavLinks).toMatchInlineSnapshot(`
     Array [
@@ -106,7 +105,6 @@ test('getTopNavLinks result for sql mode', () => {
     persistDataView: jest.fn(),
     updateDataViewList: jest.fn(),
     adHocDataViews: [],
-    updateAdHocDataViewId: jest.fn(),
   });
   expect(topNavLinks).toMatchInlineSnapshot(`
     Array [

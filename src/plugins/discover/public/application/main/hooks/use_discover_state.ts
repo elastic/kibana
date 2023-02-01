@@ -72,12 +72,10 @@ export function useDiscoverState({
    * Adhoc data views functionality
    */
   const isTextBasedMode = state?.query && isOfAggregateQueryType(state?.query);
-  const { persistDataView, updateAdHocDataViewId } = useAdHocDataViews({
+  const { persistDataView } = useAdHocDataViews({
     dataView,
-    dataViews,
     stateContainer,
     savedSearch,
-    setUrlTracking,
     filterManager,
     toastNotifications,
     trackUiMetric,
@@ -225,7 +223,6 @@ export function useDiscoverState({
     searchSource,
     stateContainer,
     persistDataView,
-    updateAdHocDataViewId,
     searchSessionManager,
     updateDataViewList,
   };

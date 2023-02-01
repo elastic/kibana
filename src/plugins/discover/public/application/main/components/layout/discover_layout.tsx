@@ -67,7 +67,6 @@ export function DiscoverLayout({
   searchSource,
   stateContainer,
   persistDataView,
-  updateAdHocDataViewId,
   searchSessionManager,
   updateDataViewList,
 }: DiscoverLayoutProps) {
@@ -161,10 +160,10 @@ export function DiscoverLayout({
 
   const onFieldEdited = useCallback(async () => {
     if (!dataView.isPersisted()) {
-      await updateAdHocDataViewId(dataView);
+      await stateContainer.actions.updateAdHocDataViewId();
     }
     stateContainer.dataState.refetch$.next('reset');
-  }, [dataView, stateContainer, updateAdHocDataViewId]);
+  }, [dataView, stateContainer]);
 
   const onDisableFilters = useCallback(() => {
     const disabledFilters = filterManager
@@ -311,7 +310,6 @@ export function DiscoverLayout({
         textBasedLanguageModeErrors={textBasedLanguageModeErrors}
         onFieldEdited={onFieldEdited}
         persistDataView={persistDataView}
-        updateAdHocDataViewId={updateAdHocDataViewId}
         updateDataViewList={updateDataViewList}
       />
       <EuiPageBody className="dscPageBody" aria-describedby="savedSearchTitle">
