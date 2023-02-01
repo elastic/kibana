@@ -297,7 +297,7 @@ const createConnectorInfoResult = ({
         push: {
           needsToBePushed,
           hasBeenPushed: hasBeenPushed(enrichedPushInfo),
-          details: pushDetails,
+          ...(pushDetails && { details: pushDetails }),
         },
       };
     }
