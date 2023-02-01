@@ -12,6 +12,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiButtonIcon, EuiResizeObserver } from '@el
 import styled from 'styled-components';
 import classNames from 'classnames';
 import type { EuiResizeObserverProps } from '@elastic/eui/src/components/observer/resize_observer/resize_observer';
+import { InputDisplay } from './components/input_display';
 import type { ExecuteCommandPayload, ConsoleDataState } from '../console_state/types';
 import { useWithInputShowPopover } from '../../hooks/state_selectors/use_with_input_show_popover';
 import { EnteredInput } from './lib/entered_input';
@@ -41,17 +42,6 @@ const CommandInputContainer = styled.div`
     border-bottom-color: ${({ theme: { eui } }) => eui.euiColorDanger};
   }
 
-  .inputDisplayContainer {
-    overflow: hidden !important;
-  }
-
-  .inputDisplay {
-    & > * {
-      flex-direction: row;
-      align-items: center;
-    }
-  }
-
   .textEntered {
     white-space: break-spaces;
   }
@@ -60,35 +50,9 @@ const CommandInputContainer = styled.div`
     padding-right: 1ch;
   }
 
-  .cursor {
-    display: inline-block;
-    width: 1px;
-    height: ${({ theme: { eui } }) => eui.euiLineHeight}em;
-    background-color: ${({ theme }) => theme.eui.euiTextSubduedColor};
-  }
-
   &.withPopover {
     border-top-left-radius: 0;
     border-top-right-radius: 0;
-  }
-
-  &.hasFocus {
-    .cursor {
-      background-color: ${({ theme: { eui } }) => eui.euiTextColor};
-      animation: cursor-blink-animation 1s steps(5, start) infinite;
-      -webkit-animation: cursor-blink-animation 1s steps(5, start) infinite;
-
-      @keyframes cursor-blink-animation {
-        to {
-          visibility: hidden;
-        }
-      }
-      @-webkit-keyframes cursor-blink-animation {
-        to {
-          visibility: hidden;
-        }
-      }
-    }
   }
 `;
 
@@ -289,31 +253,10 @@ export const CommandInput = memo<CommandInputProps>(({ prompt = '', focusRef, ..
                     onChangeFocus={handleOnChangeFocus}
                     focusRef={focusRef}
                   >
-                    <div className="inputDisplayContainer">
-                      <EuiFlexGroup
-                        responsive={false}
-                        alignItems="center"
-                        gutterSize="none"
-                        className="inputDisplay"
-                      >
-                        <EuiFlexItem
-                          grow={false}
-                          data-test-subj={getTestId('cmdInput-leftOfCursor')}
-                          className="noMinWidth"
-                        >
-                          {userInput.getLeftOfCursorRenderingContent()}
-                        </EuiFlexItem>
-                        <EuiFlexItem grow={false} className="noMinWidth">
-                          <span className="cursor essentialAnimation" />
-                        </EuiFlexItem>
-                        <EuiFlexItem
-                          className="noMinWidth"
-                          data-test-subj={getTestId('cmdInput-rightOfCursor')}
-                        >
-                          {userInput.getRightOfCursorRenderingContent()}
-                        </EuiFlexItem>
-                      </EuiFlexGroup>
-                    </div>
+                    <InputDisplay
+                      leftOfCursor={userInput.getLeftOfCursorRenderingContent()}
+                      rightOfCursor={userInput.getRightOfCursorRenderingContent()}
+                    />
                   </InputCapture>
                   <InputPlaceholder />
                 </EuiFlexItem>

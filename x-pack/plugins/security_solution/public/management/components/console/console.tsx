@@ -79,6 +79,7 @@ const ConsoleWindow = styled.div`
       overflow-x: hidden;
     }
 
+    // FIXME:PT this does not scale well. need better solution
     .euiFlexItem:not(.noMinWidth) {
       min-width: 0;
     }
