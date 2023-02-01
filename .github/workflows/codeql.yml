@@ -17,14 +17,13 @@ jobs:
       fail-fast: false
       matrix:
         language: [ 'javascript' ]
-        # branch: [ 'main', '7.17' ]
+        branch: [ 'main', '7.17' ]
 
     steps:
     - name: Checkout repository
       uses: actions/checkout@v3
-      # TODO: Enable once a `.github/codeql/codeql-config.yml` file has been committed to 7.17
-      # with:
-      #   ref: ${{ matrix.branch }}
+      with:
+        ref: ${{ matrix.branch }}
 
     - name: Initialize CodeQL
       uses: github/codeql-action/init@v2
