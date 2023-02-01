@@ -17,8 +17,6 @@ import { FormattedMessage, FormattedNumber } from '@kbn/i18n-react';
 
 import { INPUT_THROTTLE_DELAY_MS } from '../../../shared/constants/timers';
 
-import { DataPanel } from '../../../shared/data_panel/data_panel';
-
 import { EnterpriseSearchEnginesPageTemplate } from '../layout/engines_page_template';
 
 import { EmptyEnginesPrompt } from './components/empty_engines_prompt';
@@ -126,7 +124,6 @@ export const EnginesList: React.FC = () => {
         pageViewTelemetry="Engines"
         isLoading={isLoading}
       >
-        <EuiSpacer />
         {!hasNoEngines ? (
           <>
             <div>
@@ -155,12 +152,12 @@ export const EnginesList: React.FC = () => {
               {i18n.translate(
                 'xpack.enterpriseSearch.content.engines.searchPlaceholder.description',
                 {
-                  defaultMessage: 'Locate an engine via name or indices',
+                  defaultMessage: "Locate an engine via name or by it's included indices indices.",
                 }
               )}
             </EuiText>
 
-            <EuiSpacer size="m" />
+            <EuiSpacer />
             <EuiText size="s">
               <FormattedMessage
                 id="xpack.enterpriseSearch.content.engines.enginesList.description"
@@ -181,24 +178,14 @@ export const EnginesList: React.FC = () => {
               />
             </EuiText>
 
-            <DataPanel
-              title={
-                <h2>
-                  {i18n.translate('xpack.enterpriseSearch.content.engines.title', {
-                    defaultMessage: 'Engines',
-                  })}
-                </h2>
-              }
-            >
-              <EnginesListTable
-                enginesList={results}
-                meta={meta}
-                onChange={onPaginate}
-                onDelete={openDeleteEngineModal}
-                viewEngineIndices={openFetchEngineFlyout}
-                loading={false}
-              />
-            </DataPanel>
+            <EnginesListTable
+              enginesList={results}
+              meta={meta}
+              onChange={onPaginate}
+              onDelete={openDeleteEngineModal}
+              viewEngineIndices={openFetchEngineFlyout}
+              loading={false}
+            />
           </>
         ) : (
           <EmptyEnginesPrompt>
