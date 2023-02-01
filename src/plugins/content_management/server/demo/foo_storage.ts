@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import uuid from 'uuid';
+import * as uuid from 'uuid';
 import moment from 'moment';
 
 import { ContentStorage } from '../core';
