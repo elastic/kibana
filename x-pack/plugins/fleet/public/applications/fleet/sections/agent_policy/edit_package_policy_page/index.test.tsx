@@ -394,7 +394,7 @@ describe('edit package policy page', () => {
         useLatestPackageVersion: true,
         Component: TestComponent,
       })
-      .mockReturnValueOnce(undefined) //
+      .mockReturnValueOnce(undefined)
       .mockReturnValueOnce({
         view: 'package-policy-edit-tabs',
         useLatestPackageVersion: true,
