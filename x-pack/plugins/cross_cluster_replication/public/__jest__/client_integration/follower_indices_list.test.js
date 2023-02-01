@@ -309,8 +309,7 @@ describe('<FollowerIndicesList />', () => {
       });
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/142774
-    describe.skip('detail panel', () => {
+    describe('detail panel', () => {
       test('should open a detail panel when clicking on a follower index', async () => {
         expect(exists('followerIndexDetail')).toBe(false);
 
@@ -334,7 +333,7 @@ describe('<FollowerIndicesList />', () => {
       test('should have a "settings" section', async () => {
         await actions.clickFollowerIndexAt(0);
         expect(find('followerIndexDetail.settingsSection').find('h3').text()).toEqual('Settings');
-        expect(exists('followerIndexDetail.settingsValues')).toBe(true);
+        expect(find('followerIndexDetail.settingsValues').length).toBe(10);
       });
 
       test('should set the correct follower index settings values', async () => {

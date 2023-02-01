@@ -12,6 +12,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
+  EuiImage,
   EuiSpacer,
   EuiText,
   EuiTitle,
@@ -19,11 +20,14 @@ import {
 import classNames from 'classnames';
 import React, { Component } from 'react';
 import ReactDOM from 'react-dom';
+import type { Subscription } from 'rxjs';
 import { BehaviorSubject } from 'rxjs';
 
+import type { CustomBranding } from '@kbn/core-custom-branding-common';
 import type {
   AppMountParameters,
   CoreStart,
+  CustomBrandingStart,
   FatalErrorsStart,
   HttpStart,
   NotificationsStart,
@@ -48,10 +52,12 @@ interface Props {
   fatalErrors: FatalErrorsStart;
   loginAssistanceMessage: string;
   sameSiteCookies?: ConfigType['sameSiteCookies'];
+  customBranding: CustomBrandingStart;
 }
 
 interface State {
   loginState: LoginState | null;
+  customBranding: CustomBranding;
 }
 
 const loginFormMessages: Record<LogoutReason, NonNullable<LoginFormProps['message']>> = {
@@ -83,20 +89,32 @@ const loginFormMessages: Record<LogoutReason, NonNullable<LoginFormProps['messag
 };
 
 export class LoginPage extends Component<Props, State> {
-  state = { loginState: null } as State;
+  state = { loginState: null, customBranding: {} } as State;
+  private customBrandingSubscription?: Subscription;
 
   public async componentDidMount() {
     const loadingCount$ = new BehaviorSubject(1);
+    this.customBrandingSubscription = this.props.customBranding.customBranding$.subscribe(
+      (next) => {
+        this.setState({ ...this.state, customBranding: next });
+      }
+    );
     this.props.http.addLoadingCountSource(loadingCount$.asObservable());
 
     try {
-      this.setState({ loginState: await this.props.http.get('/internal/security/login_state') });
+      this.setState({
+        loginState: await this.props.http.get('/internal/security/login_state'),
+      });
     } catch (err) {
       this.props.fatalErrors.add(err as Error);
     }
 
     loadingCount$.next(0);
     loadingCount$.complete();
+  }
+
+  public componentWillUnmount() {
+    this.customBrandingSubscription?.unsubscribe();
   }
 
   public render() {
@@ -122,14 +140,18 @@ export class LoginPage extends Component<Props, State> {
       ['loginWelcome__contentDisabledForm']: !loginIsSupported,
     });
 
+    const customLogo = this.state.customBranding?.logo;
+    const logo = customLogo ? (
+      <EuiImage src={customLogo} size={40} alt="logo" />
+    ) : (
+      <EuiIcon type="logoElastic" size="xxl" />
+    );
     return (
       <div className="loginWelcome login-form">
         <header className="loginWelcome__header">
           <div className={contentHeaderClasses}>
             <EuiSpacer size="xxl" />
-            <span className="loginWelcome__logo">
-              <EuiIcon type="logoElastic" size="xxl" />
-            </span>
+            <span className="loginWelcome__logo">{logo}</span>
             <EuiTitle size="m" className="loginWelcome__title" data-test-subj="loginWelcomeTitle">
               <h1>
                 <FormattedMessage
