@@ -20,8 +20,13 @@ export const createMockUnifiedHistogramApi = (
     initialize: jest.fn(() => {
       api.initialized = true;
     }),
-    getState$: jest.fn(() => new Observable()),
-    updateState: jest.fn(),
+    state$: new Observable(),
+    setChartHidden: jest.fn(),
+    setTopPanelHeight: jest.fn(),
+    setBreakdownField: jest.fn(),
+    setTimeInterval: jest.fn(),
+    setRequestParams: jest.fn(),
+    setTotalHits: jest.fn(),
     refetch: jest.fn(),
   };
   return api;

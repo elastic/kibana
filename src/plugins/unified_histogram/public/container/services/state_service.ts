@@ -9,7 +9,7 @@
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
 import type { RequestAdapter } from '@kbn/inspector-plugin/common';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, Observable } from 'rxjs';
 import { UnifiedHistogramFetchStatus } from '../..';
 import type { UnifiedHistogramServices } from '../../types';
 import {
@@ -97,7 +97,9 @@ export interface UnifiedHistogramStateOptions {
   initialState: Partial<UnifiedHistogramState> & Pick<UnifiedHistogramState, 'dataView'>;
 }
 
-export type UnifiedHistogramStateService = ReturnType<typeof createStateService>;
+export type UnifiedHistogramStateService = Omit<ReturnType<typeof createStateService>, 'state$'> & {
+  state$: Observable<UnifiedHistogramState>;
+};
 
 export const createStateService = (options: UnifiedHistogramStateOptions) => {
   const { services, localStorageKeyPrefix, initialState } = options;
@@ -112,7 +114,7 @@ export const createStateService = (options: UnifiedHistogramStateOptions) => {
     initialBreakdownField = getBreakdownField(services.storage, localStorageKeyPrefix);
   }
 
-  const state$ = new BehaviorSubject<UnifiedHistogramState>({
+  const state$ = new BehaviorSubject({
     breakdownField: initialBreakdownField,
     chartHidden: initialChartHidden,
     filters: [],

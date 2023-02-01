@@ -10,7 +10,7 @@ import React, { ReactElement } from 'react';
 import { buildDataTableRecord } from '../../../../utils/build_data_record';
 import { esHits } from '../../../../__mocks__/es_hits';
 import { act, renderHook, WrapperComponent } from '@testing-library/react-hooks';
-import { BehaviorSubject, map, Subject } from 'rxjs';
+import { BehaviorSubject, Subject } from 'rxjs';
 import { FetchStatus } from '../../../types';
 import {
   AvailableFields$,
@@ -197,10 +197,11 @@ describe('useDiscoverHistogram', () => {
     it('should subscribe to state changes', async () => {
       const { hook } = await renderUseDiscoverHistogram();
       const api = createMockUnifiedHistogramApi({ initialized: true });
+      jest.spyOn(api.state$, 'subscribe');
       act(() => {
         hook.result.current.setUnifiedHistogramApi(api);
       });
-      expect(api.getState$).toHaveBeenCalledTimes(2);
+      expect(api.state$.subscribe).toHaveBeenCalledTimes(2);
     });
 
     it('should sync Unified Histogram state with the state container', async () => {
@@ -216,13 +217,7 @@ describe('useDiscoverHistogram', () => {
         totalHitsResult: undefined,
       } as unknown as UnifiedHistogramState;
       const api = createMockUnifiedHistogramApi({ initialized: true });
-      api.getState$ = jest.fn((selector) => {
-        const returnedState = { ...state, lensRequestAdapter };
-        if (selector) {
-          return new BehaviorSubject(selector(returnedState));
-        }
-        return new BehaviorSubject(returnedState);
-      }) as typeof api['getState$'];
+      api.state$ = new BehaviorSubject({ ...state, lensRequestAdapter });
       act(() => {
         hook.result.current.setUnifiedHistogramApi(api);
       });
@@ -246,12 +241,7 @@ describe('useDiscoverHistogram', () => {
         totalHitsResult: undefined,
       } as unknown as UnifiedHistogramState;
       const api = createMockUnifiedHistogramApi({ initialized: true });
-      api.getState$ = jest.fn((selector) => {
-        if (selector) {
-          return new BehaviorSubject(selector(state));
-        }
-        return new BehaviorSubject(state);
-      }) as typeof api['getState$'];
+      api.state$ = new BehaviorSubject(state);
       act(() => {
         hook.result.current.setUnifiedHistogramApi(api);
       });
@@ -262,14 +252,30 @@ describe('useDiscoverHistogram', () => {
       const stateContainer = getStateContainer();
       const { hook } = await renderUseDiscoverHistogram({ stateContainer });
       const api = createMockUnifiedHistogramApi({ initialized: true });
-      let params: Partial<UnifiedHistogramState> | undefined;
-      api.updateState = jest.fn((p) => {
-        params = p;
+      let params: Partial<UnifiedHistogramState> = {};
+      api.setRequestParams = jest.fn((p) => {
+        params = { ...params, ...p };
+      });
+      api.setTotalHits = jest.fn((p) => {
+        params = { ...params, ...p };
+      });
+      api.setChartHidden = jest.fn((chartHidden) => {
+        params = { ...params, chartHidden };
+      });
+      api.setTimeInterval = jest.fn((timeInterval) => {
+        params = { ...params, timeInterval };
+      });
+      api.setBreakdownField = jest.fn((breakdownField) => {
+        params = { ...params, breakdownField };
       });
       act(() => {
         hook.result.current.setUnifiedHistogramApi(api);
       });
-      expect(api.updateState).toHaveBeenCalled();
+      expect(api.setRequestParams).toHaveBeenCalled();
+      expect(api.setTotalHits).toHaveBeenCalled();
+      expect(api.setChartHidden).toHaveBeenCalled();
+      expect(api.setTimeInterval).toHaveBeenCalled();
+      expect(api.setBreakdownField).toHaveBeenCalled();
       expect(Object.keys(params ?? {})).toEqual([
         'dataView',
         'query',
@@ -279,12 +285,15 @@ describe('useDiscoverHistogram', () => {
         'requestAdapter',
         'totalHitsStatus',
         'totalHitsResult',
+        'chartHidden',
+        'timeInterval',
+        'breakdownField',
       ]);
     });
 
     it('should exclude totalHitsStatus and totalHitsResult from Unified Histogram state updates after the first load', async () => {
       const stateContainer = getStateContainer();
-      const { hook } = await renderUseDiscoverHistogram({ stateContainer });
+      const { hook, initialProps } = await renderUseDiscoverHistogram({ stateContainer });
       const containerState = stateContainer.appState.getState();
       const state = {
         timeInterval: containerState.interval,
@@ -294,17 +303,15 @@ describe('useDiscoverHistogram', () => {
         totalHitsResult: undefined,
       } as unknown as UnifiedHistogramState;
       const api = createMockUnifiedHistogramApi({ initialized: true });
-      let params: Partial<UnifiedHistogramState> | undefined;
-      api.updateState = jest.fn((p) => {
-        params = p;
+      let params: Partial<UnifiedHistogramState> = {};
+      api.setRequestParams = jest.fn((p) => {
+        params = { ...params, ...p };
+      });
+      api.setTotalHits = jest.fn((p) => {
+        params = { ...params, ...p };
       });
       const subject$ = new BehaviorSubject(state);
-      api.getState$ = jest.fn((selector) => {
-        if (selector) {
-          return subject$.pipe(map(selector));
-        }
-        return subject$;
-      }) as typeof api['getState$'];
+      api.state$ = subject$;
       act(() => {
         hook.result.current.setUnifiedHistogramApi(api);
       });
@@ -318,6 +325,8 @@ describe('useDiscoverHistogram', () => {
         'totalHitsStatus',
         'totalHitsResult',
       ]);
+      params = {};
+      hook.rerender({ ...initialProps, searchSessionId: '321' });
       act(() => {
         subject$.next({
           ...state,
@@ -357,17 +366,11 @@ describe('useDiscoverHistogram', () => {
         totalHitsResult: undefined,
       } as unknown as UnifiedHistogramState;
       const api = createMockUnifiedHistogramApi({ initialized: true });
-      api.getState$ = jest.fn((selector) => {
-        const returnedState = {
-          ...state,
-          totalHitsStatus: UnifiedHistogramFetchStatus.complete,
-          totalHitsResult: 100,
-        };
-        if (selector) {
-          return new BehaviorSubject(selector(returnedState));
-        }
-        return new BehaviorSubject(returnedState);
-      }) as typeof api['getState$'];
+      api.state$ = new BehaviorSubject({
+        ...state,
+        totalHitsStatus: UnifiedHistogramFetchStatus.complete,
+        totalHitsResult: 100,
+      });
       act(() => {
         hook.result.current.setUnifiedHistogramApi(api);
       });
@@ -396,17 +399,11 @@ describe('useDiscoverHistogram', () => {
         totalHitsResult: undefined,
       } as unknown as UnifiedHistogramState;
       const api = createMockUnifiedHistogramApi({ initialized: true });
-      api.getState$ = jest.fn((selector) => {
-        const returnedState = {
-          ...state,
-          totalHitsStatus: UnifiedHistogramFetchStatus.error,
-          totalHitsResult: error,
-        };
-        if (selector) {
-          return new BehaviorSubject(selector(returnedState));
-        }
-        return new BehaviorSubject(returnedState);
-      }) as typeof api['getState$'];
+      api.state$ = new BehaviorSubject({
+        ...state,
+        totalHitsStatus: UnifiedHistogramFetchStatus.error,
+        totalHitsResult: error,
+      });
       act(() => {
         hook.result.current.setUnifiedHistogramApi(api);
       });

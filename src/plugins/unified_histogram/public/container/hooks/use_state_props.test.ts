@@ -9,14 +9,15 @@
 import { DataView, DataViewField, DataViewType } from '@kbn/data-views-plugin/common';
 import { RequestAdapter } from '@kbn/inspector-plugin/common';
 import { renderHook } from '@testing-library/react-hooks';
+import { act } from 'react-test-renderer';
 import { UnifiedHistogramFetchStatus } from '../../types';
 import { dataViewMock } from '../../__mocks__/data_view';
 import { dataViewWithTimefieldMock } from '../../__mocks__/data_view_with_timefield';
 import { unifiedHistogramServicesMock } from '../../__mocks__/services';
 import {
+  createStateService,
   UnifiedHistogramState,
   UnifiedHistogramStateOptions,
-  UnifiedHistogramStateService,
 } from '../services/state_service';
 import { useStateProps } from './use_state_props';
 
@@ -38,17 +39,23 @@ describe('useStateProps', () => {
   };
 
   const getStateService = (options: Omit<UnifiedHistogramStateOptions, 'services'>) => {
-    const stateService = new UnifiedHistogramStateService({
+    const stateService = createStateService({
       ...options,
       services: unifiedHistogramServicesMock,
     });
-    jest.spyOn(stateService, 'updateState');
+    jest.spyOn(stateService, 'setChartHidden');
+    jest.spyOn(stateService, 'setTopPanelHeight');
+    jest.spyOn(stateService, 'setBreakdownField');
+    jest.spyOn(stateService, 'setTimeInterval');
+    jest.spyOn(stateService, 'setRequestParams');
+    jest.spyOn(stateService, 'setLensRequestAdapter');
+    jest.spyOn(stateService, 'setTotalHits');
     return stateService;
   };
 
   it('should return the correct props', () => {
     const stateService = getStateService({ initialState });
-    const { result } = renderHook(() => useStateProps({ state: initialState, stateService }));
+    const { result } = renderHook(() => useStateProps(stateService));
     expect(result.current).toMatchInlineSnapshot(`
       Object {
         "breakdown": Object {
@@ -89,36 +96,11 @@ describe('useStateProps', () => {
     `);
   });
 
-  it('should return the correct props when the state is undefined', () => {
-    const stateService = getStateService({ initialState });
-    const { result } = renderHook(() => useStateProps({ state: undefined, stateService }));
-    expect(result.current).toMatchInlineSnapshot(`
-      Object {
-        "breakdown": undefined,
-        "chart": undefined,
-        "hits": undefined,
-        "onBreakdownFieldChange": [Function],
-        "onChartHiddenChange": [Function],
-        "onChartLoad": [Function],
-        "onTimeIntervalChange": [Function],
-        "onTopPanelHeightChange": [Function],
-        "onTotalHitsChange": [Function],
-        "request": undefined,
-      }
-    `);
-  });
-
   it('should return the correct props when an SQL query is used', () => {
-    const stateService = getStateService({ initialState });
-    const { result } = renderHook(() =>
-      useStateProps({
-        state: {
-          ...initialState,
-          query: { sql: 'SELECT * FROM index' },
-        },
-        stateService,
-      })
-    );
+    const stateService = getStateService({
+      initialState: { ...initialState, query: { sql: 'SELECT * FROM index' } },
+    });
+    const { result } = renderHook(() => useStateProps(stateService));
     expect(result.current).toMatchInlineSnapshot(`
       Object {
         "breakdown": undefined,
@@ -145,19 +127,16 @@ describe('useStateProps', () => {
   });
 
   it('should return the correct props when a rollup data view is used', () => {
-    const stateService = getStateService({ initialState });
-    const { result } = renderHook(() =>
-      useStateProps({
-        state: {
-          ...initialState,
-          dataView: {
-            ...dataViewWithTimefieldMock,
-            type: DataViewType.ROLLUP,
-          } as DataView,
-        },
-        stateService,
-      })
-    );
+    const stateService = getStateService({
+      initialState: {
+        ...initialState,
+        dataView: {
+          ...dataViewWithTimefieldMock,
+          type: DataViewType.ROLLUP,
+        } as DataView,
+      },
+    });
+    const { result } = renderHook(() => useStateProps(stateService));
     expect(result.current).toMatchInlineSnapshot(`
       Object {
         "breakdown": undefined,
@@ -187,16 +166,10 @@ describe('useStateProps', () => {
   });
 
   it('should return the correct props when a non time based data view is used', () => {
-    const stateService = getStateService({ initialState });
-    const { result } = renderHook(() =>
-      useStateProps({
-        state: {
-          ...initialState,
-          dataView: dataViewMock,
-        },
-        stateService,
-      })
-    );
+    const stateService = getStateService({
+      initialState: { ...initialState, dataView: dataViewMock },
+    });
+    const { result } = renderHook(() => useStateProps(stateService));
     expect(result.current).toMatchInlineSnapshot(`
       Object {
         "breakdown": undefined,
@@ -227,7 +200,7 @@ describe('useStateProps', () => {
 
   it('should execute callbacks correctly', () => {
     const stateService = getStateService({ initialState });
-    const { result } = renderHook(() => useStateProps({ state: initialState, stateService }));
+    const { result } = renderHook(() => useStateProps(stateService));
     const {
       onTopPanelHeightChange,
       onTimeIntervalChange,
@@ -236,56 +209,57 @@ describe('useStateProps', () => {
       onChartLoad,
       onBreakdownFieldChange,
     } = result.current;
-    onTopPanelHeightChange(200);
-    expect(stateService.updateState).toHaveBeenLastCalledWith({ topPanelHeight: 200 });
-    onTimeIntervalChange('1d');
-    expect(stateService.updateState).toHaveBeenLastCalledWith({ timeInterval: '1d' });
-    onTotalHitsChange(UnifiedHistogramFetchStatus.complete, 100);
-    expect(stateService.updateState).toHaveBeenLastCalledWith({
+    act(() => {
+      onTopPanelHeightChange(200);
+    });
+    expect(stateService.setTopPanelHeight).toHaveBeenLastCalledWith(200);
+    act(() => {
+      onTimeIntervalChange('1d');
+    });
+    expect(stateService.setTimeInterval).toHaveBeenLastCalledWith('1d');
+    act(() => {
+      onTotalHitsChange(UnifiedHistogramFetchStatus.complete, 100);
+    });
+    expect(stateService.setTotalHits).toHaveBeenLastCalledWith({
       totalHitsStatus: UnifiedHistogramFetchStatus.complete,
       totalHitsResult: 100,
     });
-    onChartHiddenChange(true);
-    expect(stateService.updateState).toHaveBeenLastCalledWith({ chartHidden: true });
+    act(() => {
+      onChartHiddenChange(true);
+    });
+    expect(stateService.setChartHidden).toHaveBeenLastCalledWith(true);
     const requests = new RequestAdapter();
-    onChartLoad({ adapters: { requests } });
-    expect(stateService.updateState).toHaveBeenLastCalledWith({ lensRequestAdapter: requests });
-    onBreakdownFieldChange({ name: 'field' } as DataViewField);
-    expect(stateService.updateState).toHaveBeenLastCalledWith({ breakdownField: 'field' });
-  });
-
-  it('should not update total hits to loading when the current status is partial', () => {
-    const state = {
-      ...initialState,
-      totalHitsStatus: UnifiedHistogramFetchStatus.partial,
-      totalHitsResult: 100,
-    };
-    const stateService = getStateService({ initialState: state });
-    const { result } = renderHook(() => useStateProps({ state, stateService }));
-    const { onTotalHitsChange } = result.current;
-    onTotalHitsChange(UnifiedHistogramFetchStatus.loading, 100);
-    expect(stateService.updateState).not.toHaveBeenCalled();
+    act(() => {
+      onChartLoad({ adapters: { requests } });
+    });
+    expect(stateService.setLensRequestAdapter).toHaveBeenLastCalledWith(requests);
+    act(() => {
+      onBreakdownFieldChange({ name: 'field' } as DataViewField);
+    });
+    expect(stateService.setBreakdownField).toHaveBeenLastCalledWith('field');
   });
 
   it('should clear lensRequestAdapter when chart is hidden', () => {
     const stateService = getStateService({ initialState });
-    const hook = renderHook(
-      (state: UnifiedHistogramState) => useStateProps({ state, stateService }),
-      { initialProps: initialState }
-    );
-    expect(stateService.updateState).not.toHaveBeenCalled();
-    hook.rerender({ ...initialState, chartHidden: true });
-    expect(stateService.updateState).toHaveBeenLastCalledWith({ lensRequestAdapter: undefined });
+    const hook = renderHook(() => useStateProps(stateService));
+    (stateService.setLensRequestAdapter as jest.Mock).mockClear();
+    expect(stateService.setLensRequestAdapter).not.toHaveBeenCalled();
+    act(() => {
+      stateService.setChartHidden(true);
+    });
+    hook.rerender();
+    expect(stateService.setLensRequestAdapter).toHaveBeenLastCalledWith(undefined);
   });
 
   it('should clear lensRequestAdapter when chart is undefined', () => {
     const stateService = getStateService({ initialState });
-    const hook = renderHook(
-      (state: UnifiedHistogramState) => useStateProps({ state, stateService }),
-      { initialProps: initialState }
-    );
-    expect(stateService.updateState).not.toHaveBeenCalled();
-    hook.rerender({ ...initialState, dataView: dataViewMock });
-    expect(stateService.updateState).toHaveBeenLastCalledWith({ lensRequestAdapter: undefined });
+    const hook = renderHook(() => useStateProps(stateService));
+    (stateService.setLensRequestAdapter as jest.Mock).mockClear();
+    expect(stateService.setLensRequestAdapter).not.toHaveBeenCalled();
+    act(() => {
+      stateService.setRequestParams({ dataView: dataViewMock });
+    });
+    hook.rerender();
+    expect(stateService.setLensRequestAdapter).toHaveBeenLastCalledWith(undefined);
   });
 });
