@@ -16,7 +16,7 @@ export const kibanaContextValueMock = {
     language: 'the-query-language',
   },
   currentDataView: dataViewMock,
-  currentSavedSearch: savedSearchMock,
+  deprecatedSavedSearchObj: savedSearchMock,
   dataViewsContract: dataViewsContractMock,
   kibanaConfig: kibanaConfigMock,
 };

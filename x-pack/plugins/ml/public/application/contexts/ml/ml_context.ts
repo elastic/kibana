@@ -15,7 +15,7 @@ export interface MlContextValue {
   combinedQuery: any;
   currentDataView: DataView; // TODO this should be DataView or null
   // @deprecated currentSavedSearch is of SavedSearchSavedObject type, change to selectedSavedSearch
-  currentSavedSearch: SavedSearchSavedObject | null;
+  deprecatedSavedSearchObj: SavedSearchSavedObject | null;
   selectedSavedSearch: SavedSearch | null;
   dataViewsContract: DataViewsContract;
   kibanaConfig: any; // IUiSettingsClient;

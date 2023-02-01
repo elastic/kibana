@@ -196,8 +196,7 @@ export function getEsQueryFromSavedSearch({
   // which might differ from extracted saved search data
   if (savedSearchSource) {
     const globalFilters = filterManager?.getGlobalFilters();
-    // FIXME: Add support for AggregateQuery type
-    // https://github.com/elastic/kibana/issues/150091
+    // FIXME: Add support for AggregateQuery type #150091
     const currentQuery = userQuery ?? (savedSearchSource.getField('query') as Query);
     const currentFilters =
       userFilters ?? mapAndFlattenFilters(savedSearchSource.getField('filter') as Filter[]);

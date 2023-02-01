@@ -86,28 +86,27 @@ export const useResolver = (
           savedSearch: null,
           dataView: null,
         };
-        let savedSearch;
+        let savedSearch = null;
 
         if (savedSearchId !== undefined) {
-          // @todo: use better name
           savedSearch = await getSavedSearch(savedSearchId, getSavedSearchDeps);
           dataViewAndSavedSearch = await getDataViewAndSavedSearch(savedSearchId);
         } else if (dataViewId !== undefined) {
           dataViewAndSavedSearch.dataView = await getDataViewById(dataViewId);
         }
 
-        const { savedSearch: savedSearchSimpleObj, dataView } = dataViewAndSavedSearch;
+        const { savedSearch: deprecatedSavedSearchObj, dataView } = dataViewAndSavedSearch;
 
         const { combinedQuery } = createSearchItems(
           config,
           dataView !== null ? dataView : undefined,
-          savedSearchSimpleObj
+          deprecatedSavedSearchObj
         );
 
         setContext({
           combinedQuery,
           currentDataView: dataView,
-          currentSavedSearch: savedSearchSimpleObj,
+          deprecatedSavedSearchObj,
           selectedSavedSearch: savedSearch,
           dataViewsContract,
           kibanaConfig: config,

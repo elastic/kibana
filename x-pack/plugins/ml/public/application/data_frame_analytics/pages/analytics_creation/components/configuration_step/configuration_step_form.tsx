@@ -101,7 +101,7 @@ export const ConfigurationStepForm: FC<ConfigurationStepProps> = ({
   setCurrentStep,
 }) => {
   const mlContext = useMlContext();
-  const { currentSavedSearch, currentDataView } = mlContext;
+  const { currentDataView, selectedSavedSearch } = mlContext;
   const { savedSearchQuery, savedSearchQueryStr } = useSavedSearch();
 
   const [fieldOptionsFetchFail, setFieldOptionsFetchFail] = useState<boolean>(false);
@@ -573,9 +573,7 @@ export const ConfigurationStepForm: FC<ConfigurationStepProps> = ({
               </EuiText>
             )}
             <EuiBadge color="hollow">
-              {savedSearchQuery !== null
-                ? currentSavedSearch?.attributes.title
-                : currentDataView.title}
+              {selectedSavedSearch !== null ? selectedSavedSearch.title : currentDataView.getName()}
             </EuiBadge>
           </Fragment>
         }

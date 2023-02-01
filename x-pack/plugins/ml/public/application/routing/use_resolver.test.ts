@@ -73,7 +73,7 @@ describe('useResolver', () => {
           },
         },
         currentDataView: null,
-        currentSavedSearch: null,
+        deprecatedSavedSearchObj: null,
         dataViewsContract: {},
         kibanaConfig: {},
         selectedSavedSearch: undefined,

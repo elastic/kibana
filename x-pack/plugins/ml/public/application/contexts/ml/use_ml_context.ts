@@ -17,7 +17,8 @@ export const useMlContext = () => {
     context.currentDataView === undefined ||
     // @deprecated currentSavedSearch is of SavedSearchSavedObject type
     // and should be migrated to selectedSavedSearch
-    context.currentSavedSearch === undefined ||
+    context.deprecatedSavedSearchObj === undefined ||
+    context.selectedSavedSearch === undefined ||
     context.dataViewsContract === undefined ||
     context.kibanaConfig === undefined
   ) {
