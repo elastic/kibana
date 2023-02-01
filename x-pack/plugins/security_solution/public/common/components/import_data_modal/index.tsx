@@ -110,23 +110,21 @@ export const ImportDataModalComponent = ({
       const abortCtrl = new AbortController();
 
       try {
-        const {
-          action_connectors_warnings: warnings,
-          action_connectors_success_count: connectorsCount,
-          ...importResponse
-        } = await importData({
+        const { action_connectors_warnings: warnings, ...importResponse } = await importData({
           fileToImport: selectedFiles[0],
           overwrite,
           overwriteExceptions,
           overwriteActionConnectors,
           signal: abortCtrl.signal,
         });
+        const connectorsCount = importResponse.action_connectors_success_count;
         setActionConnectorsWarnings(warnings as WarningSchema[]);
         setImportedActionConnectorsCount(connectorsCount);
 
         showToasterMessage({
           importResponse,
           exceptionsIncluded: showExceptionsCheckBox,
+          actionConnectorsIncluded: showActionConnectorsCheckBox && !!connectorsCount,
           successMessage,
           errorMessage,
           errorMessageDetailed: failedDetailed,
@@ -151,6 +149,7 @@ export const ImportDataModalComponent = ({
     failedDetailed,
     addError,
     addSuccess,
+    showActionConnectorsCheckBox,
     onImportComplete,
     cleanupAndCloseModal,
   ]);

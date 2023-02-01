@@ -68,7 +68,8 @@ export const SitemapsTable: React.FC<SitemapsTableProps> = ({ domain, indexName,
       description={
         <p>
           {i18n.translate('xpack.enterpriseSearch.crawler.sitemapsTable.description', {
-            defaultMessage: 'Specify sitemap URLs for the crawler on this domain.',
+            defaultMessage:
+              'Add custom sitemap URLs for this domain. The crawler automatically detects existing sitemaps.',
           })}
         </p>
       }

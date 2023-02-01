@@ -307,6 +307,7 @@ export interface ImportDataResponse {
   exceptions_errors?: ExceptionsImportError[];
   action_connectors_success?: boolean;
   action_connectors_success_count?: number;
+  action_connectors_errors?: Array<ImportRulesResponseError | ImportResponseError>;
   action_connectors_warnings?: WarningSchema[];
 }
 

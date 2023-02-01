@@ -35,6 +35,15 @@ export const SUCCESSFULLY_IMPORTED_EXCEPTIONS = (totalExceptions: number) =>
         'Successfully imported {totalExceptions} {totalExceptions, plural, =1 {exception} other {exceptions}}.',
     }
   );
+export const SUCCESSFULLY_IMPORTED_CONNECTORS = (totalConnectors: number) =>
+  i18n.translate(
+    'xpack.securitySolution.detectionEngine.components.importRuleModal.connectorsSuccessLabel',
+    {
+      values: { totalConnectors },
+      defaultMessage:
+        'Successfully imported {totalConnectors} {totalConnectors, plural, =1 {connector} other {connectors}}.',
+    }
+  );
 
 export const IMPORT_FAILED = (totalExceptions: number) =>
   i18n.translate(
@@ -43,6 +52,15 @@ export const IMPORT_FAILED = (totalExceptions: number) =>
       values: { totalExceptions },
       defaultMessage:
         'Failed to import {totalExceptions} {totalExceptions, plural, =1 {exception} other {exceptions}}',
+    }
+  );
+export const IMPORT_CONNECTORS_FAILED = (totalConnectors: number) =>
+  i18n.translate(
+    'xpack.securitySolution.detectionEngine.components.importRuleModal.importConnectorsFailedLabel',
+    {
+      values: { totalConnectors },
+      defaultMessage:
+        'Failed to import {totalConnectors} {totalConnectors, plural, =1 {connector} other {connectors}}',
     }
   );
 
