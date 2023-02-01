@@ -38,7 +38,6 @@ import { EnterpriseSearchEnginesPageTemplate } from '../layout/engines_page_temp
 import { AddIndicesFlyout } from './add_indices_flyout';
 import { EngineIndicesLogic } from './engine_indices_logic';
 import { EngineViewHeaderActions } from './engine_view_header_actions';
-import { EngineViewLogic } from './engine_view_logic';
 
 export const EngineIndices: React.FC = () => {
   const { engineData, engineName, isLoadingEngine, addIndicesFlyoutOpen } =
