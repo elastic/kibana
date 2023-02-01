@@ -230,8 +230,7 @@ describe('getExportAll', () => {
       exceptionsClient,
       clients.savedObjectsClient,
       logger,
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      exporterMockWithConnector as any,
+      exporterMockWithConnector as never,
       requestMock
     );
     const rulesJson = JSON.parse(exports.rulesNdjson);

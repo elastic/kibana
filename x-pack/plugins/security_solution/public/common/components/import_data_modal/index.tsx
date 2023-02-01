@@ -124,7 +124,7 @@ export const ImportDataModalComponent = ({
         showToasterMessage({
           importResponse,
           exceptionsIncluded: showExceptionsCheckBox,
-          actionConnectorsIncluded: showActionConnectorsCheckBox && !!connectorsCount,
+          actionConnectorsIncluded: showActionConnectorsCheckBox,
           successMessage,
           errorMessage,
           errorMessageDetailed: failedDetailed,

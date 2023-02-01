@@ -17,8 +17,6 @@ export const getExportDetailsNdjson = (
   actionConnectorDetails?: DefaultActionConnectorDetails
 ): string => {
   let exportedCount = rules.length;
-
-  // TODO check what will be the default
   if (actionConnectorDetails != null)
     exportedCount += actionConnectorDetails.exported_action_connector_count;
   if (exceptionDetails != null)
