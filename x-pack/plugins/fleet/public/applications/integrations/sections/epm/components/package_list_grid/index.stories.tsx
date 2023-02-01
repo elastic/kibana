@@ -9,8 +9,8 @@ import React from 'react';
 
 import { action } from '@storybook/addon-actions';
 
-import type { Props } from './package_list_grid';
-import { PackageListGrid } from './package_list_grid';
+import type { Props } from '.';
+import { PackageListGrid } from '.';
 
 export default {
   component: PackageListGrid,
