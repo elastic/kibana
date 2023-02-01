@@ -24,6 +24,11 @@
       "@timestamp": {
         "type": "date",
         "format": "epoch_second"
+      },
+      "Symbolization.lastprocessed": {
+        "type": "date",
+        "format": "epoch_second",
+        "index": false
       }
     }
   }
