@@ -40,7 +40,7 @@ const EditScreenStepTitle = () => (
 );
 
 interface IntegrationInfoFieldsProps {
-  fields: Array<{ id: string; value: string; label: JSX.Element; error: string[] | null }>;
+  fields: Array<{ id: string; value: string; label: React.ReactNode; error: string[] | null }>;
   onChange(field: string, value: string): void;
 }
 
@@ -60,7 +60,7 @@ const IntegrationSettings = ({ onChange, fields }: IntegrationInfoFieldsProps) =
 );
 
 export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensionComponentProps>(
-  ({ newPolicy, onChange, validationResults, isEditPage: edit }) => {
+  ({ newPolicy, onChange, validationResults, isEditPage }) => {
     const { integration } = useParams<{ integration: PosturePolicyTemplate }>();
     const input = getEnabledPostureInput(newPolicy);
 
@@ -103,7 +103,7 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
     ];
 
     useEffect(() => {
-      if (edit) return;
+      if (isEditPage) return;
 
       // Pick default input type for policy template.
       // Only 1 enabled input is supported when all inputs are initially enabled.
@@ -111,20 +111,20 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
 
       // Required for mount only to ensure a single input type is selected
       // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [edit]);
+    }, [isEditPage]);
 
     return (
       <div>
-        {edit && <EditScreenStepTitle />}
+        {isEditPage && <EditScreenStepTitle />}
 
         {/* Defines the enabled policy template */}
         {!integration && (
           <>
             <PolicyTemplateSelector
-              selectedTemplate={input.policy_template!}
+              selectedTemplate={input.policy_template}
               policy={newPolicy}
               setPolicyTemplate={(template) => setEnabledPolicyInput(DEFAULT_INPUT_TYPE[template])}
-              disabled={edit}
+              disabled={isEditPage}
             />
             <EuiSpacer size="l" />
           </>
@@ -138,7 +138,7 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
         <PolicyTemplateInputSelector
           input={input}
           setInput={setEnabledPolicyInput}
-          disabled={edit}
+          disabled={isEditPage}
         />
         <EuiSpacer size="l" />
 
