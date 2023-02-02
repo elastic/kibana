@@ -47,11 +47,26 @@ const CreateButton: React.FC = () => {
 };
 
 export const EnginesList: React.FC = () => {
-  const { closeEngineCreate, fetchEngines, onPaginate, openDeleteEngineModal, setSearchQuery } =
-    useActions(EnginesListLogic);
+  const {
+    closeDeleteEngineModal,
+    closeEngineCreate,
+    fetchEngines,
+    onPaginate,
+    openDeleteEngineModal,
+    setSearchQuery,
+  } = useActions(EnginesListLogic);
+
   const { openFetchEngineFlyout } = useActions(EnginesListFlyoutLogic);
-  const { isLoading, meta, results, createEngineFlyoutOpen, searchQuery } =
-    useValues(EnginesListLogic);
+
+  const {
+    createEngineFlyoutOpen,
+    deleteModalEngineName,
+    isDeleteModalVisible,
+    isLoading,
+    meta,
+    results,
+    searchQuery,
+  } = useValues(EnginesListLogic);
 
   const throttledSearchQuery = useThrottle(searchQuery, INPUT_THROTTLE_DELAY_MS);
 
@@ -61,7 +76,9 @@ export const EnginesList: React.FC = () => {
 
   return (
     <>
-      <DeleteEngineModal />
+      {isDeleteModalVisible ? (
+        <DeleteEngineModal engineName={deleteModalEngineName} onClose={closeDeleteEngineModal} />
+      ) : null}
 
       <EngineListIndicesFlyout />
       {createEngineFlyoutOpen && <CreateEngineFlyout onClose={closeEngineCreate} />}
