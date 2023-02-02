@@ -14,16 +14,14 @@ import { useTimeRangeUpdates } from '@kbn/ml-date-picker';
 import { useDataSource } from '../../hooks/use_data_source';
 import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
 
-import { useChangePointDetectionContext } from './change_point_detection_context';
+import {
+  type ChangePointAnnotation,
+  useChangePointDetectionContext,
+} from './change_point_detection_context';
 import { fnOperationTypeMapping } from './constants';
 
 export interface ChartComponentProps {
-  annotation: {
-    group_field: string;
-    label: string;
-    timestamp: string;
-    reason: string;
-  };
+  annotation: ChangePointAnnotation;
 }
 
 export const ChartComponent: FC<ChartComponentProps> = React.memo(({ annotation }) => {
@@ -44,14 +42,14 @@ export const ChartComponent: FC<ChartComponentProps> = React.memo(({ annotation 
           negate: false,
           disabled: false,
           type: 'phrase',
-          key: requestParams.splitField,
+          key: annotation.group.name,
           params: {
-            query: annotation.group_field,
+            query: annotation.group.value,
           },
         },
         query: {
           match_phrase: {
-            [requestParams.splitField]: annotation.group_field,
+            [annotation.group.name]: annotation.group.value,
           },
         },
         $state: {
@@ -59,13 +57,13 @@ export const ChartComponent: FC<ChartComponentProps> = React.memo(({ annotation 
         },
       },
     ],
-    [dataView.id, requestParams.splitField, annotation.group_field]
+    [dataView.id, annotation.group]
   );
 
   // @ts-ignore incorrect types for attributes
   const attributes = useMemo<TypedLensByValueInput['attributes']>(() => {
     return {
-      title: annotation.group_field,
+      title: annotation.group.value,
       description: '',
       visualizationType: 'lnsXY',
       type: 'lens',
@@ -204,7 +202,7 @@ export const ChartComponent: FC<ChartComponentProps> = React.memo(({ annotation 
 
   return (
     <EmbeddableComponent
-      id={`changePointChart_${annotation.group_field}`}
+      id={`changePointChart_${annotation.group.value}`}
       style={{ height: 350 }}
       timeRange={timeRange}
       attributes={attributes}

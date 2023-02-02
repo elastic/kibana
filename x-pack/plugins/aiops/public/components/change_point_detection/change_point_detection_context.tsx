@@ -96,7 +96,10 @@ export interface ChangePointAnnotation {
   label: string;
   reason: string;
   timestamp: string;
-  group_field: string;
+  group: {
+    name: string;
+    value: string;
+  };
   type: ChangePointType;
   p_value: number;
 }

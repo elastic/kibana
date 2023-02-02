@@ -12,13 +12,13 @@ import {
   EuiFlexGrid,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiHorizontalRule,
   EuiIcon,
   EuiPagination,
   EuiPanel,
   EuiProgress,
   EuiSpacer,
   EuiText,
-  EuiTitle,
   EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -164,15 +164,16 @@ export const ChangePointDetectionPage: FC = () => {
       <EuiFlexGrid columns={annotations.length >= 2 ? 2 : 1} responsive gutterSize={'m'}>
         {annotations.map((v) => {
           return (
-            <EuiFlexItem key={v.group_field}>
+            <EuiFlexItem key={v.group.value}>
               <EuiPanel paddingSize="s" hasBorder hasShadow={false}>
                 <EuiFlexGroup justifyContent={'spaceBetween'} alignItems={'center'}>
                   <EuiFlexItem grow={false}>
                     <EuiFlexGroup alignItems={'center'} gutterSize={'s'}>
                       <EuiFlexItem grow={false}>
-                        <EuiTitle size="xxs">
-                          <h3>{v.group_field}</h3>
-                        </EuiTitle>
+                        <EuiDescriptionList
+                          type="inline"
+                          listItems={[{ title: v.group.name, description: v.group.value }]}
+                        />
                       </EuiFlexItem>
                       {v.reason ? (
                         <EuiFlexItem grow={false}>
@@ -193,17 +194,24 @@ export const ChangePointDetectionPage: FC = () => {
                       ) : null}
                     </EuiFlexGroup>
                   </EuiFlexItem>
+                </EuiFlexGroup>
+
+                <EuiHorizontalRule margin="xs" />
+
+                <EuiFlexGroup justifyContent={'spaceBetween'} alignItems={'center'}>
+                  {v.p_value !== undefined ? (
+                    <EuiFlexItem grow={false}>
+                      <EuiDescriptionList
+                        type="inline"
+                        listItems={[{ title: 'p-value', description: v.p_value.toPrecision(3) }]}
+                      />
+                    </EuiFlexItem>
+                  ) : null}
                   <EuiFlexItem grow={false}>
                     <EuiBadge color="hollow">{v.type}</EuiBadge>
                   </EuiFlexItem>
                 </EuiFlexGroup>
 
-                {v.p_value !== undefined ? (
-                  <EuiDescriptionList
-                    type="inline"
-                    listItems={[{ title: 'p-value', description: v.p_value.toPrecision(3) }]}
-                  />
-                ) : null}
                 <ChartComponent annotation={v} />
               </EuiPanel>
             </EuiFlexItem>

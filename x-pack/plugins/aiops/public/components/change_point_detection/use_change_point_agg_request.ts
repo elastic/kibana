@@ -166,7 +166,10 @@ export function useChangePointResults(
             const rawPValue = v.change_point_request.type[changePointType].p_value;
 
             return {
-              group_field: v.key.splitFieldTerm,
+              group: {
+                name: requestParams.splitField,
+                value: v.key.splitFieldTerm,
+              },
               type: changePointType,
               p_value: rawPValue,
               timestamp: timeAsString,
