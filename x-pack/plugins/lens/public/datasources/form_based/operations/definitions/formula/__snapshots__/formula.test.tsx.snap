@@ -23,9 +23,9 @@ Array [
           "count": 1,
           "missingFields": <React.Fragment>
             <React.Fragment>
-              <EuiCode>
+              <strong>
                 noField
-              </EuiCode>
+              </strong>
               
             </React.Fragment>
           </React.Fragment>,
@@ -59,9 +59,9 @@ Array [
           "count": 1,
           "missingFields": <React.Fragment>
             <React.Fragment>
-              <EuiCode>
+              <strong>
                 noField
-              </EuiCode>
+              </strong>
               
             </React.Fragment>
           </React.Fragment>,
@@ -95,9 +95,9 @@ Array [
           "count": 1,
           "missingFields": <React.Fragment>
             <React.Fragment>
-              <EuiCode>
+              <strong>
                 noField
-              </EuiCode>
+              </strong>
               
             </React.Fragment>
           </React.Fragment>,
@@ -131,9 +131,9 @@ Array [
           "count": 1,
           "missingFields": <React.Fragment>
             <React.Fragment>
-              <EuiCode>
+              <strong>
                 noField
-              </EuiCode>
+              </strong>
               
             </React.Fragment>
           </React.Fragment>,
@@ -167,15 +167,15 @@ Array [
           "count": 2,
           "missingFields": <React.Fragment>
             <React.Fragment>
-              <EuiCode>
+              <strong>
                 noField
-              </EuiCode>
+              </strong>
               , 
             </React.Fragment>
             <React.Fragment>
-              <EuiCode>
+              <strong>
                 noField2
-              </EuiCode>
+              </strong>
               
             </React.Fragment>
           </React.Fragment>,
@@ -209,15 +209,15 @@ Array [
           "count": 2,
           "missingFields": <React.Fragment>
             <React.Fragment>
-              <EuiCode>
+              <strong>
                 noField
-              </EuiCode>
+              </strong>
               , 
             </React.Fragment>
             <React.Fragment>
-              <EuiCode>
+              <strong>
                 noField2
-              </EuiCode>
+              </strong>
               
             </React.Fragment>
           </React.Fragment>,
