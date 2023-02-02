@@ -5,6 +5,4 @@
  * 2.0.
  */
 
-export { MapsStorage } from './maps_storage';
-
-export { savedObjectToKibanaContent } from './lib';
+export { getContentConfiguration } from './map_content_registry';

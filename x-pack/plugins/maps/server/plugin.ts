@@ -16,7 +16,6 @@ import {
 import { HomeServerPluginSetup } from '@kbn/home-plugin/server';
 import { DataViewPersistableStateService } from '@kbn/data-views-plugin/common';
 import type { EMSSettings } from '@kbn/maps-ems-plugin/server';
-import { schema } from '@kbn/config-schema';
 import { getEcommerceSavedObjects } from './sample_data/ecommerce_saved_objects';
 import { getFlightsSavedObjects } from './sample_data/flights_saved_objects';
 import { getWebLogsSavedObjects } from './sample_data/web_logs_saved_objects';
@@ -30,7 +29,7 @@ import { setupEmbeddable } from './embeddable';
 import { setupSavedObjects } from './saved_objects';
 import { registerIntegrations } from './register_integrations';
 import { StartDeps, SetupDeps } from './types';
-import { MapsStorage, savedObjectToKibanaContent } from './poc_content_management';
+import { getContentConfiguration } from './poc_content_management';
 
 export class MapsPlugin implements Plugin {
   readonly _initializerContext: PluginInitializerContext<MapsXPackConfig>;
@@ -202,45 +201,7 @@ export class MapsPlugin implements Plugin {
 
     setupEmbeddable(plugins.embeddable, getFilterMigrations, getDataViewMigrations);
 
-    plugins.contentManagement.register('map', {
-      storage: new MapsStorage(),
-      toSearchContentSerializer: savedObjectToKibanaContent,
-      schemas: {
-        content: {
-          get: {
-            in: {
-              options: schema.maybe(
-                schema.object({
-                  references: schema.maybe(schema.arrayOf(schema.string())),
-                })
-              ),
-            },
-            out: {
-              result: schema.any(), // This will have to be a proper Maps Saved object schema
-            },
-          },
-          create: {
-            in: {
-              data: schema.object({
-                title: schema.string(),
-                description: schema.string(),
-                layerListJSON: schema.string(),
-                mapStateJSON: schema.string(),
-                uiStateJSON: schema.string(),
-              }),
-              options: schema.maybe(
-                schema.object({
-                  references: schema.maybe(schema.arrayOf(schema.string())),
-                })
-              ),
-            },
-            out: {
-              result: schema.any(), // This will be a proper schema of a map created
-            },
-          },
-        },
-      },
-    });
+    plugins.contentManagement.register('map', getContentConfiguration());
 
     return {
       config: config$,
