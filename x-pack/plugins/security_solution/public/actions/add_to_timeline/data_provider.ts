@@ -88,6 +88,7 @@ export const createDataProviders = ({
     }
 
     if (isCountField(fieldType, sourceParamType)) {
+      id = `value-count-data-provider-${contextId}-${field}`;
       dataProviders.push(
         getDataProvider({ field, id, value: '', excluded: false, operator: EXISTS_OPERATOR })
       );
