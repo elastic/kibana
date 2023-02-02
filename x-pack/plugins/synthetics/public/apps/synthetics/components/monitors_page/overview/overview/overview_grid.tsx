@@ -17,8 +17,8 @@ import {
 } from '@elastic/eui';
 import { selectOverviewStatus } from '../../../../state/overview_status';
 import { useInfiniteScroll } from './use_infinite_scroll';
-import { GridItemsByGroup } from './grid_items_by_group';
-import { GroupFields } from './group_fields';
+import { GridItemsByGroup } from './grid_by_group/grid_items_by_group';
+import { GroupFields } from './grid_by_group/group_fields';
 import {
   quietFetchOverviewAction,
   selectOverviewState,

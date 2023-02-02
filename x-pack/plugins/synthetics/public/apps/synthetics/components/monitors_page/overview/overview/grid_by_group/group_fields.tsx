@@ -8,15 +8,15 @@ import React, { useEffect, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { i18n } from '@kbn/i18n';
 import { EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
-import { useUrlParams } from '../../../../hooks';
+import { useUrlParams } from '../../../../../hooks';
 import { GroupMenu } from './group_menu';
-import { ConfigKey } from '../../../../../../../common/runtime_types';
+import { ConfigKey } from '../../../../../../../../common/runtime_types';
 
 import {
   GroupByState,
   selectOverviewState,
   setOverviewGroupByAction,
-} from '../../../../state/overview';
+} from '../../../../../state/overview';
 
 export const GroupFields = () => {
   const {

@@ -10,16 +10,15 @@ import React, { useRef, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { get, invert, orderBy } from 'lodash';
 import styled from 'styled-components';
-import { selectOverviewStatus } from '../../../../state/overview_status';
 import {
   getSyntheticsFilterDisplayValues,
   monitorTypeKeyLabelMap,
-} from '../../common/monitor_filters/filter_fields';
-import { useFilters } from '../../common/monitor_filters/use_filters';
+} from '../../../common/monitor_filters/filter_fields';
+import { useFilters } from '../../../common/monitor_filters/use_filters';
 import { GroupGridItem } from './grid_group_item';
-import { ConfigKey, MonitorOverviewItem } from '../../../../../../../common/runtime_types';
-import { FlyoutParamProps } from './overview_grid_item';
-import { selectOverviewState, selectServiceLocationsState } from '../../../../state';
+import { ConfigKey, MonitorOverviewItem } from '../../../../../../../../common/runtime_types';
+import { FlyoutParamProps } from '../overview_grid_item';
+import { selectOverviewState, selectServiceLocationsState } from '../../../../../state';
 
 export const GridItemsByGroup = ({
   loaded,
@@ -31,9 +30,6 @@ export const GridItemsByGroup = ({
   setFlyoutConfigCallback: (params: FlyoutParamProps) => void;
 }) => {
   const [fullScreenGroup, setFullScreenGroup] = useState('');
-
-  const { status } = useSelector(selectOverviewStatus);
-
   const {
     groupBy: { field: groupField, order: groupOrder },
   } = useSelector(selectOverviewState);
@@ -103,13 +99,6 @@ export const GridItemsByGroup = ({
 
   const selectedValues = orderBy(selectedGroup.values, 'label', groupOrder ?? 'asc');
 
-  const otherDownMonitors = selectedGroup.otherValues.items.filter((monitor) => {
-    const downConfigs = status?.downConfigs;
-    if (downConfigs) {
-      return downConfigs[`${monitor.configId}-${monitor.location?.label}`]?.status === 'down';
-    }
-  });
-
   return (
     <>
       {selectedValues.map((groupItem) => {
@@ -124,19 +113,12 @@ export const GridItemsByGroup = ({
           }
           return get(monitor, selectedGroup.key) === groupItem.label;
         });
-        const downMonitors = filteredMonitors.filter((monitor) => {
-          const downConfigs = status?.downConfigs;
-          if (downConfigs) {
-            return downConfigs[`${monitor.configId}-${monitor.location?.label}`]?.status === 'down';
-          }
-        });
         return (
           <>
             <WrappedPanel isFullScreen={fullScreenGroup === groupItem.label}>
               <GroupGridItem
                 groupLabel={groupItem.label}
                 groupMonitors={filteredMonitors}
-                downMonitorsCount={downMonitors.length}
                 loaded={loaded}
                 setFlyoutConfigCallback={setFlyoutConfigCallback}
                 setFullScreenGroup={setFullScreenGroup}
@@ -152,7 +134,6 @@ export const GridItemsByGroup = ({
           <GroupGridItem
             groupLabel={selectedGroup.otherValues.label}
             groupMonitors={selectedGroup.otherValues.items}
-            downMonitorsCount={otherDownMonitors.length}
             loaded={loaded}
             setFlyoutConfigCallback={setFlyoutConfigCallback}
             setFullScreenGroup={setFullScreenGroup}

@@ -19,30 +19,41 @@ import {
 import React, { useState } from 'react';
 import { useSelector } from 'react-redux';
 import { useKey } from 'react-use';
-import { MonitorOverviewItem } from '../types';
-import { FlyoutParamProps, OverviewGridItem } from './overview_grid_item';
-import { selectOverviewStatus } from '../../../../state/overview_status';
+import { useFilteredGroupMonitors } from './use_filtered_group_monitors';
+import { MonitorOverviewItem } from '../../types';
+import { FlyoutParamProps, OverviewGridItem } from '../overview_grid_item';
+import { selectOverviewStatus } from '../../../../../state/overview_status';
 
 const PER_ROW = 4;
 const DEFAULT_ROW_SIZE = 2;
 
 export const GroupGridItem = ({
   loaded,
-  downMonitorsCount,
   groupLabel,
   fullScreenGroup,
   setFullScreenGroup,
-  groupMonitors,
+  groupMonitors: allGroupMonitors,
   setFlyoutConfigCallback,
 }: {
   loaded: boolean;
   groupMonitors: MonitorOverviewItem[];
-  downMonitorsCount: number;
   groupLabel: string;
   fullScreenGroup: string;
   setFullScreenGroup: (group: string) => void;
   setFlyoutConfigCallback: (params: FlyoutParamProps) => void;
 }) => {
+  const { status: overviewStatus } = useSelector(selectOverviewStatus);
+
+  const groupMonitors = useFilteredGroupMonitors({ groupMonitors: allGroupMonitors });
+  const downMonitors = groupMonitors.filter((monitor) => {
+    const downConfigs = overviewStatus?.downConfigs;
+    if (downConfigs) {
+      return downConfigs[`${monitor.configId}-${monitor.location?.label}`]?.status === 'down';
+    }
+  });
+
+  const downMonitorsCount = downMonitors.length;
+
   const totalEntries = groupMonitors.length / PER_ROW;
   const [activePage, setActivePage] = useState(0);
   const [rowSize, setRowSize] = useState(DEFAULT_ROW_SIZE);
@@ -126,7 +137,7 @@ export const GroupGridItem = ({
         onChangePage={goToPage}
         itemsPerPage={rowSize}
         onChangeItemsPerPage={changeItemsPerPage}
-        itemsPerPageOptions={[2, 5, 10, 20, 50]}
+        itemsPerPageOptions={[2, 3, 4, 5, 10]}
       />
     </EuiAccordion>
   );
