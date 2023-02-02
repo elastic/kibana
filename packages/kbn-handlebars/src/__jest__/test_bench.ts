@@ -38,6 +38,7 @@ export function forEachCompileFunctionName(
 class HandlebarsTestBench {
   private template: string;
   private options: TestOptions;
+  private beforeRenderFn: Function = () => {};
   private compileOptions?: ExtendedCompileOptions;
   private runtimeOptions?: ExtendedRuntimeOptions;
   private helpers: { [name: string]: Handlebars.HelperDelegate | undefined } = {};
@@ -47,6 +48,11 @@ class HandlebarsTestBench {
   constructor(template: string, options: TestOptions = {}) {
     this.template = template;
     this.options = options;
+  }
+
+  beforeRender(fn: Function) {
+    this.beforeRenderFn = fn;
+    return this;
   }
 
   withCompileOptions(compileOptions?: ExtendedCompileOptions) {
@@ -147,6 +153,8 @@ class HandlebarsTestBench {
       this.runtimeOptions
     );
 
+    this.beforeRenderFn();
+
     return renderEval(this.input, runtimeOptions);
   }
 
@@ -160,6 +168,8 @@ class HandlebarsTestBench {
       },
       this.runtimeOptions
     );
+
+    this.beforeRenderFn();
 
     return renderAST(this.input, runtimeOptions);
   }
