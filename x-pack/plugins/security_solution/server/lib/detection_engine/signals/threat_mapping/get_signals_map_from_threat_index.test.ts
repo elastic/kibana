@@ -5,7 +5,9 @@
  * 2.0.
  */
 
-import { getSignalsMapFromThreatIndex } from './get_signals_map_from_threat_index';
+import { ThreatMatchQueryType } from './types';
+
+import { getSignalsQueryMapFromThreatIndex } from './get_signals_map_from_threat_index';
 import { getThreatList } from './get_threat_list';
 import { encodeThreatMatchNamedQuery } from './utils';
 import { MAX_NUMBER_OF_SIGNAL_MATCHES } from './enrich_signal_threat_matches';
@@ -21,6 +23,7 @@ export const namedQuery = encodeThreatMatchNamedQuery({
   index: 'source-*',
   field: 'host.name',
   value: 'localhost-1',
+  queryType: ThreatMatchQueryType.match,
 });
 
 export const threatMock = {
@@ -29,11 +32,11 @@ export const threatMock = {
   matched_queries: [namedQuery],
 };
 
-describe('getSignalsMapFromThreatIndex', () => {
+describe('getSignalsQueryMapFromThreatIndex', () => {
   it('should call getThreatList to fetch threats from ES', async () => {
     getThreatListMock.mockReturnValue({ hits: { hits: [] } });
 
-    await getSignalsMapFromThreatIndex({
+    await getSignalsQueryMapFromThreatIndex({
       threatSearchParams: threatSearchParamsMock,
       eventsCount: 50,
     });
@@ -45,7 +48,7 @@ describe('getSignalsMapFromThreatIndex', () => {
   it('should return empty signals map if getThreatList return empty results', async () => {
     getThreatListMock.mockReturnValue({ hits: { hits: [] } });
 
-    const signalsMap = await getSignalsMapFromThreatIndex({
+    const signalsMap = await getSignalsQueryMapFromThreatIndex({
       threatSearchParams: threatSearchParamsMock,
       eventsCount: 50,
     });
@@ -59,6 +62,7 @@ describe('getSignalsMapFromThreatIndex', () => {
       index: 'source-*',
       field: 'host.name',
       value: 'localhost-1',
+      queryType: ThreatMatchQueryType.match,
     });
 
     // the third request return empty results
@@ -77,7 +81,7 @@ describe('getSignalsMapFromThreatIndex', () => {
     });
     getThreatListMock.mockReturnValueOnce({ hits: { hits: [] } });
 
-    const signalsMap = await getSignalsMapFromThreatIndex({
+    const signalsMap = await getSignalsQueryMapFromThreatIndex({
       threatSearchParams: threatSearchParamsMock,
       eventsCount: 50,
     });
@@ -128,7 +132,7 @@ describe('getSignalsMapFromThreatIndex', () => {
       },
     });
 
-    const signalsMap = await getSignalsMapFromThreatIndex({
+    const signalsMap = await getSignalsQueryMapFromThreatIndex({
       threatSearchParams: threatSearchParamsMock,
       eventsCount: 50,
     });
