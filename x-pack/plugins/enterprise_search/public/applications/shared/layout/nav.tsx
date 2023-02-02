@@ -271,17 +271,6 @@ export const useEnterpriseSearchEngineNav = (engineName?: string, isEmptyState?:
                 to: `${enginePath}/${EngineViewTabs.INDICES}`,
               }),
             },
-
-            {
-              id: 'enterpriseSearchEngineDocuments',
-              name: i18n.translate('xpack.enterpriseSearch.nav.engine.documentsTitle', {
-                defaultMessage: 'Documents',
-              }),
-              ...generateNavLink({
-                shouldNotCreateHref: true,
-                to: `${enginePath}/${EngineViewTabs.DOCUMENTS}`,
-              }),
-            },
             {
               id: 'enterpriseSearchEngineSchema',
               name: i18n.translate('xpack.enterpriseSearch.nav.engine.schemaTitle', {

@@ -469,11 +469,6 @@ describe('useEnterpriseSearchEngineNav', () => {
           name: 'Indices',
         },
         {
-          href: `/app/enterprise_search/content/engines/${engineName}/documents`,
-          id: 'enterpriseSearchEngineDocuments',
-          name: 'Documents',
-        },
-        {
           href: `/app/enterprise_search/content/engines/${engineName}/schema`,
           id: 'enterpriseSearchEngineSchema',
           name: 'Schema',
