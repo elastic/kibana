@@ -4,8 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useEffect } from 'react';
-import type { PayloadAction } from '@reduxjs/toolkit';
+import React, { useEffect, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { i18n } from '@kbn/i18n';
 import { EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
@@ -13,30 +12,45 @@ import { useUrlParams } from '../../../../hooks';
 import { GroupMenu } from './group_menu';
 import { ConfigKey } from '../../../../../../../common/runtime_types';
 
-import { selectOverviewState, setOverviewGroupByAction } from '../../../../state/overview';
+import {
+  GroupByState,
+  selectOverviewState,
+  setOverviewGroupByAction,
+} from '../../../../state/overview';
 
-export const GroupFields = ({ onGroupChange }: { onGroupChange?: () => void }) => {
+export const GroupFields = () => {
   const {
     groupBy: { field: groupField, order: groupOrder },
   } = useSelector(selectOverviewState);
   const dispatch = useDispatch();
   const [urlParams, updateUrlParams] = useUrlParams();
 
-  const { groupBy: urlGroupField } = urlParams();
+  const { groupBy: urlGroupField, groupOrderBy: urlGroupOrderBy } = urlParams();
 
+  const isUrlHydratedFromRedux = useRef(false);
   useEffect(() => {
-    if (urlGroupField && urlGroupField !== groupField) {
-      dispatch(
-        setOverviewGroupByAction({
-          field: urlGroupField,
-          order: 'asc',
-        })
-      );
+    if (urlGroupField !== groupField) {
+      if (!urlGroupField && groupField !== 'none' && !isUrlHydratedFromRedux.current) {
+        // Hydrate url only during initialization
+        updateUrlParams({ groupBy: groupField, groupOrderBy: groupOrder });
+      } else {
+        dispatch(
+          setOverviewGroupByAction({
+            field: urlGroupField ?? 'none',
+            order: urlGroupOrderBy ?? 'asc',
+          })
+        );
+      }
     }
-  }, [dispatch, groupField, urlGroupField]);
+    isUrlHydratedFromRedux.current = true;
 
-  const handleGroupChange = (payloadAction: PayloadAction<unknown>) => {
-    dispatch(payloadAction);
+    // Only depend on the serialized snapshot
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [dispatch, groupField, groupOrder, urlGroupField, urlGroupOrderBy]);
+
+  const handleChange = (groupByState: GroupByState) => {
+    dispatch(setOverviewGroupByAction(groupByState));
+    updateUrlParams({ groupBy: groupByState.field, groupOrderBy: groupByState.order });
   };
 
   const groupByOptions = [
@@ -46,13 +60,10 @@ export const GroupFields = ({ onGroupChange }: { onGroupChange?: () => void }) =
       checked: groupField === 'none',
       defaultSortOrder: 'asc',
       onClick: () => {
-        handleGroupChange(
-          setOverviewGroupByAction({
-            field: 'none',
-            order: 'asc',
-          })
-        );
-        updateUrlParams({ groupBy: 'none' });
+        handleChange({
+          field: 'none',
+          order: groupOrder,
+        });
       },
     },
     {
@@ -61,13 +72,10 @@ export const GroupFields = ({ onGroupChange }: { onGroupChange?: () => void }) =
       checked: groupField === 'locationId',
       defaultSortOrder: 'asc',
       onClick: () => {
-        handleGroupChange(
-          setOverviewGroupByAction({
-            field: 'locationId',
-            order: 'asc',
-          })
-        );
-        updateUrlParams({ groupBy: 'locationId' });
+        handleChange({
+          field: 'locationId',
+          order: groupOrder,
+        });
       },
     },
     {
@@ -76,13 +84,10 @@ export const GroupFields = ({ onGroupChange }: { onGroupChange?: () => void }) =
       checked: groupField === ConfigKey.MONITOR_TYPE,
       defaultSortOrder: 'desc',
       onClick: () => {
-        handleGroupChange(
-          setOverviewGroupByAction({
-            field: ConfigKey.MONITOR_TYPE,
-            order: 'desc',
-          })
-        );
-        updateUrlParams({ groupBy: ConfigKey.MONITOR_TYPE });
+        handleChange({
+          field: ConfigKey.MONITOR_TYPE,
+          order: groupOrder,
+        });
       },
     },
     {
@@ -91,13 +96,10 @@ export const GroupFields = ({ onGroupChange }: { onGroupChange?: () => void }) =
       checked: groupField === ConfigKey.TAGS,
       defaultSortOrder: 'desc',
       onClick: () => {
-        handleGroupChange(
-          setOverviewGroupByAction({
-            field: ConfigKey.TAGS,
-            order: 'desc',
-          })
-        );
-        updateUrlParams({ groupBy: ConfigKey.TAGS });
+        handleChange({
+          field: ConfigKey.TAGS,
+          order: groupOrder,
+        });
       },
     },
     {
@@ -106,13 +108,10 @@ export const GroupFields = ({ onGroupChange }: { onGroupChange?: () => void }) =
       checked: groupField === ConfigKey.PROJECT_ID,
       defaultSortOrder: 'desc',
       onClick: () => {
-        handleGroupChange(
-          setOverviewGroupByAction({
-            field: ConfigKey.PROJECT_ID,
-            order: 'desc',
-          })
-        );
-        updateUrlParams({ groupBy: ConfigKey.PROJECT_ID });
+        handleChange({
+          field: ConfigKey.PROJECT_ID,
+          order: groupOrder,
+        });
       },
     },
   ];
@@ -125,12 +124,10 @@ export const GroupFields = ({ onGroupChange }: { onGroupChange?: () => void }) =
       value: 'asc',
       checked: groupOrder === 'asc',
       onClick: () => {
-        handleGroupChange(
-          setOverviewGroupByAction({
-            order: 'asc',
-            field: groupField,
-          })
-        );
+        handleChange({
+          field: groupField,
+          order: 'asc',
+        });
       },
     },
     {
@@ -138,12 +135,10 @@ export const GroupFields = ({ onGroupChange }: { onGroupChange?: () => void }) =
       value: 'desc',
       checked: groupOrder === 'desc',
       onClick: () => {
-        handleGroupChange(
-          setOverviewGroupByAction({
-            order: 'desc',
-            field: groupField,
-          })
-        );
+        handleChange({
+          field: groupField,
+          order: 'desc',
+        });
       },
     },
   ];

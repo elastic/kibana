@@ -16,11 +16,11 @@ import {
 import React from 'react';
 import { useSelector } from 'react-redux';
 import { i18n } from '@kbn/i18n';
+import { selectOverviewStatus } from '../../../../../state/overview_status';
 import { OverviewErrorsSparklines } from './overview_errors_sparklines';
 import { useAbsoluteDate } from '../../../../../hooks';
 import { OverviewErrorsCount } from './overview_errors_count';
 import { ErrorsLink } from '../../../../common/links/view_errors';
-import { selectOverviewStatus } from '../../../../../state';
 
 export function OverviewErrors() {
   const { status } = useSelector(selectOverviewStatus);

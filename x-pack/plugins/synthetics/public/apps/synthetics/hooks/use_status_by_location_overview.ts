@@ -6,10 +6,11 @@
  */
 
 import { useSelector } from 'react-redux';
-import { selectOverviewStatus } from '../state/overview';
+import { selectOverviewStatus } from '../state/overview_status';
 
 export function useStatusByLocationOverview(configId: string, locationName?: string) {
   const { status } = useSelector(selectOverviewStatus);
+
   if (!locationName || !status) {
     return { status: 'unknown' };
   }

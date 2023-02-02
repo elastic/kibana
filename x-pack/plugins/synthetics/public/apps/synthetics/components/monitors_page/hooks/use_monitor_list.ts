@@ -5,17 +5,16 @@
  * 2.0.
  */
 
-import { useCallback, useRef, useEffect } from 'react';
+import { useCallback, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useDebounce } from 'react-use';
+import { useOverviewStatus } from './use_overview_status';
 import {
   fetchMonitorListAction,
   quietFetchMonitorListAction,
-  fetchOverviewStatusAction,
   MonitorListPageState,
   selectEncryptedSyntheticsSavedMonitors,
   selectMonitorListState,
-  selectOverviewStatus,
   updateManagementPageStateAction,
 } from '../../../state';
 import { useSyntheticsRefreshContext } from '../../../contexts';
@@ -23,11 +22,11 @@ import { useMonitorFiltersState } from '../common/monitor_filters/use_filters';
 
 export function useMonitorList() {
   const dispatch = useDispatch();
-  const isDataQueriedRef = useRef(false);
 
   const { pageState, loading, loaded, error, data } = useSelector(selectMonitorListState);
   const syntheticsMonitors = useSelector(selectEncryptedSyntheticsSavedMonitors);
-  const { status: overviewStatus } = useSelector(selectOverviewStatus);
+
+  const { status: overviewStatus } = useOverviewStatus();
 
   const { handleFilterChange } = useMonitorFiltersState();
   const { refreshInterval } = useSyntheticsRefreshContext();
@@ -57,12 +56,9 @@ export function useMonitorList() {
 
   useDebounce(
     () => {
-      const overviewStatusArgs = { ...pageState, perPage: pageState.pageSize };
-
-      dispatch(fetchOverviewStatusAction.get(overviewStatusArgs));
       dispatch(fetchMonitorListAction.get(pageState));
     },
-    500,
+    200,
     [pageState]
   );
 
@@ -75,7 +71,6 @@ export function useMonitorList() {
     total: data?.total ?? 0,
     loadPage,
     reloadPage,
-    isDataQueried: isDataQueriedRef.current,
     absoluteTotal: data.absoluteTotal ?? 0,
     overviewStatus,
     handleFilterChange,

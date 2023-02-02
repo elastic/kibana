@@ -7,17 +7,17 @@
 
 import { debounce } from 'redux-saga/effects';
 import { fetchEffectFactory } from '../utils/fetch_effect';
-import { fetchMonitorOverviewAction, quietFetchOverviewAction } from './actions';
-import { fetchMonitorOverview } from './api';
+import { fetchOverviewStatusAction, quietFetchOverviewStatusAction } from './actions';
+import { fetchOverviewStatus } from './api';
 
-export function* fetchMonitorOverviewEffect() {
+export function* fetchOverviewStatusEffect() {
   yield debounce(
     300, // Only take the latest while ignoring any intermediate triggers
-    [fetchMonitorOverviewAction.get, quietFetchOverviewAction.get],
+    [fetchOverviewStatusAction.get, quietFetchOverviewStatusAction.get],
     fetchEffectFactory(
-      fetchMonitorOverview,
-      fetchMonitorOverviewAction.success,
-      fetchMonitorOverviewAction.fail
-    )
+      fetchOverviewStatus,
+      fetchOverviewStatusAction.success,
+      fetchOverviewStatusAction.fail
+    ) as ReturnType<typeof fetchEffectFactory>
   );
 }

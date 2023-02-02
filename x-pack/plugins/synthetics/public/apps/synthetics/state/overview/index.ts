@@ -10,10 +10,7 @@ import { isStatusEnabled } from '../../../../../common/runtime_types/monitor_man
 import { MonitorOverviewState } from './models';
 
 import {
-  clearOverviewStatusErrorAction,
   fetchMonitorOverviewAction,
-  fetchOverviewStatusAction,
-  quietFetchOverviewAction,
   setFlyoutConfig,
   setOverviewGroupByAction,
   setOverviewPageStateAction,
@@ -38,8 +35,6 @@ const initialState: MonitorOverviewState = {
   loading: false,
   loaded: false,
   error: null,
-  status: null,
-  statusError: null,
   isErrorPopoverOpen: null,
 };
 
@@ -58,12 +53,6 @@ export const monitorOverviewReducer = createReducer(initialState, (builder) => {
       state.loading = false;
       state.error = action.payload;
     })
-    .addCase(quietFetchOverviewAction.success, (state, action) => {
-      state.data = action.payload;
-    })
-    .addCase(quietFetchOverviewAction.fail, (state, action) => {
-      state.error = action.payload;
-    })
     .addCase(setOverviewPageStateAction, (state, action) => {
       state.pageState = {
         ...state.pageState,
@@ -77,17 +66,8 @@ export const monitorOverviewReducer = createReducer(initialState, (builder) => {
         ...action.payload,
       };
     })
-    .addCase(fetchOverviewStatusAction.get, (state) => {
-      state.status = null;
-    })
     .addCase(setFlyoutConfig, (state, action) => {
       state.flyoutConfig = action.payload;
-    })
-    .addCase(fetchOverviewStatusAction.success, (state, action) => {
-      state.status = {
-        ...action.payload,
-        allConfigs: { ...action.payload.upConfigs, ...action.payload.downConfigs },
-      };
     })
     .addCase(enableMonitorAlertAction.success, (state, action) => {
       const attrs = action.payload.attributes;
@@ -107,14 +87,8 @@ export const monitorOverviewReducer = createReducer(initialState, (builder) => {
         });
       }
     })
-    .addCase(fetchOverviewStatusAction.fail, (state, action) => {
-      state.statusError = action.payload;
-    })
     .addCase(toggleErrorPopoverOpen, (state, action) => {
       state.isErrorPopoverOpen = action.payload;
-    })
-    .addCase(clearOverviewStatusErrorAction, (state) => {
-      state.statusError = null;
     });
 });
 

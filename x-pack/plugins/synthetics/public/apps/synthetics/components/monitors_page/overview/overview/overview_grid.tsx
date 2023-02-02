@@ -15,6 +15,7 @@ import {
   EuiButtonEmpty,
   EuiText,
 } from '@elastic/eui';
+import { selectOverviewStatus } from '../../../../state/overview_status';
 import { useInfiniteScroll } from './use_infinite_scroll';
 import { GridItemsByGroup } from './grid_items_by_group';
 import { GroupFields } from './group_fields';
@@ -32,9 +33,10 @@ import { NoMonitorsFound } from '../../common/no_monitors_found';
 import { MonitorDetailFlyout } from './monitor_detail_flyout';
 
 export const OverviewGrid = memo(() => {
+  const { status } = useSelector(selectOverviewStatus);
+
   const {
     data: { monitors },
-    status,
     flyoutConfig,
     loaded,
     pageState,
@@ -78,7 +80,7 @@ export const OverviewGrid = memo(() => {
           <SortFields onSortChange={() => setPage(1)} />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <GroupFields onGroupChange={() => setPage(1)} />
+          <GroupFields />
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer size="m" />

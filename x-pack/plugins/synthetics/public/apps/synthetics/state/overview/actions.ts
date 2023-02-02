@@ -12,7 +12,7 @@ import {
   MonitorOverviewPageState,
   MonitorOverviewState,
 } from './models';
-import { MonitorOverviewResult, OverviewStatus } from '../../../../../common/runtime_types';
+import { MonitorOverviewResult } from '../../../../../common/runtime_types';
 
 export const fetchMonitorOverviewAction = createAsyncAction<
   MonitorOverviewPageState,
@@ -33,15 +33,3 @@ export const quietFetchOverviewAction = createAsyncAction<
   MonitorOverviewPageState,
   MonitorOverviewResult
 >('quietFetchOverviewAction');
-
-export const fetchOverviewStatusAction = createAsyncAction<
-  MonitorOverviewPageState,
-  OverviewStatus
->('fetchOverviewStatusAction');
-
-export const quietFetchOverviewStatusAction = createAsyncAction<
-  MonitorOverviewPageState,
-  OverviewStatus
->('quietFetchOverviewStatusAction');
-
-export const clearOverviewStatusErrorAction = createAction<void>('clearOverviewStatusErrorAction');

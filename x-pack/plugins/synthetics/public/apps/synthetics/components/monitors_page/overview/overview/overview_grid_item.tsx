@@ -23,17 +23,11 @@ export const OverviewGridItem = ({
   monitor: MonitorOverviewItem;
   onClick: (params: FlyoutParamProps) => void;
 }) => {
-  const { data, loading, averageDuration } = useLast50DurationChart({
+  const { data, averageDuration } = useLast50DurationChart({
     locationId: monitor.location?.id,
     monitorId: monitor.id,
   });
   return (
-    <MetricItem
-      data={data}
-      monitor={monitor}
-      loaded={!loading}
-      averageDuration={averageDuration}
-      onClick={onClick}
-    />
+    <MetricItem data={data} monitor={monitor} averageDuration={averageDuration} onClick={onClick} />
   );
 };

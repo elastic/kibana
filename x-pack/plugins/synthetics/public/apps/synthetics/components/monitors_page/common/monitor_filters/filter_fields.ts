@@ -10,7 +10,7 @@ import { invert } from 'lodash';
 import { DataStream, ServiceLocations } from '../../../../../../../common/runtime_types';
 import { MonitorFilterState } from '../../../../state';
 
-export type SyntheticsMonitorFilterField = keyof MonitorFilterState;
+export type SyntheticsMonitorFilterField = keyof Omit<MonitorFilterState, 'query'>;
 
 export interface LabelWithCountValue {
   label: string;

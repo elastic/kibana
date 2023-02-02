@@ -133,7 +133,6 @@ export const useFilters = (): Record<
 };
 
 type FilterFieldWithQuery = SyntheticsMonitorFilterField | 'query';
-type FilterStateWithQuery = MonitorFilterState & { query?: string };
 
 export function useMonitorFiltersState() {
   const [getUrlParams, updateUrlParams] = useUrlParams();
@@ -162,7 +161,7 @@ export function useMonitorFiltersState() {
   );
 
   const serializeStateValues = useCallback(
-    (state: FilterStateWithQuery) => {
+    (state: MonitorFilterState) => {
       return filterFieldsWithQuery.reduce(
         (acc, cur) => ({
           ...acc,

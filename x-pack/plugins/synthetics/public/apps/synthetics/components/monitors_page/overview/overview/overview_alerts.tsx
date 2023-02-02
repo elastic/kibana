@@ -18,10 +18,10 @@ import { i18n } from '@kbn/i18n';
 import { RECORDS_FIELD, useTheme } from '@kbn/observability-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useSelector } from 'react-redux';
+import { selectOverviewStatus } from '../../../../state/overview_status';
 import { AlertsLink } from '../../../common/links/view_alerts';
 import { useAbsoluteDate } from '../../../../hooks';
 import { ClientPluginsStart } from '../../../../../../plugin';
-import { selectOverviewStatus } from '../../../../state';
 
 export const OverviewAlerts = () => {
   const { from, to } = useAbsoluteDate({ from: 'now-12h', to: 'now' });
