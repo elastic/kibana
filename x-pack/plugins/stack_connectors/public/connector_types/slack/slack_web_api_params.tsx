@@ -140,7 +140,11 @@ export const SlackWebApiParamsFields: React.FunctionComponent<
 
   return (
     <>
-      <EuiFormRow fullWidth error={errors['subActionParams.channels']} isInvalid>
+      <EuiFormRow
+        fullWidth
+        error={errors['subActionParams.channels']}
+        isInvalid={errors['subActionParams.channels']?.length > 0 && channels !== undefined}
+      >
         <EuiFilterGroup>
           <EuiPopover
             id={'id'}
