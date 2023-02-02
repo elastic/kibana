@@ -143,6 +143,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await testSubjects.click(`control-action-${secondId}-edit`);
         await dashboardControls.editExistingControl(secondId);
         await dashboardControls.controlEditorSetTitle(newTitle);
+        await dashboardControls.controlEditorSetWidth('small');
         await dashboardControls.controlEditorSave();
         expect(await dashboardControls.doesControlTitleExist(newTitle)).to.be(true);
 
