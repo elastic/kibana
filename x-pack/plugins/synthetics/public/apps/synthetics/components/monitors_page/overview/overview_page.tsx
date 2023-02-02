@@ -9,13 +9,13 @@ import { EuiFlexGroup, EuiSpacer, EuiFlexItem } from '@elastic/eui';
 import { useDispatch, useSelector } from 'react-redux';
 import { useTrackPageview } from '@kbn/observability-plugin/public';
 import { Redirect, useLocation } from 'react-router-dom';
+import { FilterGroup } from '../common/monitor_filters/filter_group';
 import { OverviewAlerts } from './overview/overview_alerts';
-import { useEnablement, useGetUrlParams } from '../../../hooks';
+import { useEnablement } from '../../../hooks';
 import { useSyntheticsRefreshContext } from '../../../contexts/synthetics_refresh_context';
 import {
   fetchMonitorOverviewAction,
   quietFetchOverviewAction,
-  setOverviewPageStateAction,
   selectOverviewPageState,
   selectServiceLocationsState,
 } from '../../../state';
@@ -40,7 +40,6 @@ export const OverviewPage: React.FC = () => {
   const dispatch = useDispatch();
 
   const { lastRefresh } = useSyntheticsRefreshContext();
-  const { query } = useGetUrlParams();
   const { search } = useLocation();
 
   const pageState = useSelector(selectOverviewPageState);
@@ -51,14 +50,6 @@ export const OverviewPage: React.FC = () => {
       dispatch(getServiceLocations());
     }
   }, [dispatch, locationsLoaded, locationsLoading]);
-
-  // fetch overview for query state changes
-  useEffect(() => {
-    if (pageState.query !== query) {
-      dispatch(fetchMonitorOverviewAction.get({ ...pageState, query }));
-      dispatch(setOverviewPageStateAction({ query }));
-    }
-  }, [dispatch, pageState, query]);
 
   // fetch overview for all other page state changes
   useEffect(() => {
@@ -75,13 +66,19 @@ export const OverviewPage: React.FC = () => {
     loading: enablementLoading,
   } = useEnablement();
 
-  const { syntheticsMonitors, loading: monitorsLoading, loaded: monitorsLoaded } = useMonitorList();
+  const {
+    syntheticsMonitors,
+    loading: monitorsLoading,
+    loaded: monitorsLoaded,
+    handleFilterChange,
+  } = useMonitorList();
 
   if (
     !search &&
     !enablementLoading &&
     isEnabled &&
     !monitorsLoading &&
+    monitorsLoaded &&
     syntheticsMonitors.length === 0
   ) {
     return <Redirect to={GETTING_STARTED_ROUTE} />;
@@ -99,12 +96,15 @@ export const OverviewPage: React.FC = () => {
 
   return (
     <>
-      <EuiFlexGroup>
+      <EuiFlexGroup gutterSize="s" wrap={true}>
         <EuiFlexItem>
           <SearchField />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <QuickFilters />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <FilterGroup handleFilterChange={handleFilterChange} />
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer />

@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { get } from 'lodash';
+import { get, pick } from 'lodash';
 import { ConfigKey, DataStream, FormMonitorType, MonitorFields } from '../types';
 import { DEFAULT_FIELDS } from '../constants';
 
@@ -20,7 +20,9 @@ export const formatter = (fields: Record<string, any>) => {
   return monitorFields as MonitorFields;
 };
 
-export const format = (fields: Record<string, unknown>) => {
+export const READ_ONLY_FIELDS = [ConfigKey.ENABLED];
+
+export const format = (fields: Record<string, unknown>, readOnly: boolean = false) => {
   const formattedFields = formatter(fields) as MonitorFields;
   const formattedMap = {
     [FormMonitorType.SINGLE]: {
@@ -38,7 +40,7 @@ export const format = (fields: Record<string, unknown>) => {
       [ConfigKey.METADATA]: {
         script_source: {
           is_generated_script: get(fields, 'source.inline.type') === 'recorder' ? true : false,
-          file_name: get(fields, 'source.inline.fileName'),
+          file_name: get(fields, 'source.inline.fileName') || '',
         },
       },
       [ConfigKey.FORM_MONITOR_TYPE]: FormMonitorType.MULTISTEP,
@@ -62,5 +64,6 @@ export const format = (fields: Record<string, unknown>) => {
       [ConfigKey.FORM_MONITOR_TYPE]: FormMonitorType.ICMP,
     },
   };
-  return formattedMap[fields[ConfigKey.FORM_MONITOR_TYPE] as FormMonitorType];
+  const formFields = formattedMap[fields[ConfigKey.FORM_MONITOR_TYPE] as FormMonitorType];
+  return readOnly ? pick(formFields, READ_ONLY_FIELDS) : formFields;
 };
