@@ -50,7 +50,20 @@ export const formatMonitorConfig = (configKeys: ConfigKey[], config: Partial<Mon
         return;
       }
 
-      formattedMonitor[key] = !!formatters[key] ? formatters[key]?.(config) : value;
+      if (config.type !== 'browser' && key === ConfigKey.PARAMS) {
+        return;
+      }
+
+      if (!!formatters[key]) {
+        const formatter = formatters[key];
+        if (typeof formatter === 'function') {
+          formattedMonitor[key] = formatter(config, key);
+        } else {
+          formattedMonitor[key] = formatter;
+        }
+      } else {
+        formattedMonitor[key] = value;
+      }
     }
   });
 

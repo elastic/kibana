@@ -6,6 +6,7 @@
  */
 import { useEffect, useRef, useState } from 'react';
 import { NewPackagePolicy } from '@kbn/fleet-plugin/public';
+import { isEqual } from 'lodash';
 import { formatSyntheticsPolicy } from '../../../../../common/formatters/format_synthetics_policy';
 import { ConfigKey, DataStream, Validation, MonitorFields } from '../types';
 
@@ -38,11 +39,13 @@ export const useUpdatePolicy = ({
   useEffect(() => {
     const configKeys = Object.keys(config) as ConfigKey[];
     const validationKeys = Object.keys(validate[monitorType]) as ConfigKey[];
-    const configDidUpdate = configKeys.some((key) => config[key] !== currentConfig.current[key]);
+    const configDidUpdate = configKeys.some(
+      (key) => !isEqual(config[key], currentConfig.current[key])
+    );
     const isValid =
       !!newPolicy.name && !validationKeys.find((key) => validate[monitorType]?.[key]?.(config));
 
-    const { formattedPolicy, dataStream, currentInput } = formatSyntheticsPolicy(
+    const { formattedPolicy, hasInput, hasDataStream } = formatSyntheticsPolicy(
       newPolicy,
       monitorType,
       config,
@@ -50,7 +53,7 @@ export const useUpdatePolicy = ({
     );
 
     // prevent an infinite loop of updating the policy
-    if (currentInput && dataStream && configDidUpdate) {
+    if (hasInput && hasDataStream && configDidUpdate) {
       currentConfig.current = config;
       setUpdatedPolicy(formattedPolicy);
       onChange({

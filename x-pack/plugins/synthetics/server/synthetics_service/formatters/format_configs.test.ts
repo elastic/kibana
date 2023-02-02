@@ -31,7 +31,7 @@ const testHTTPConfig: Partial<MonitorFields> = {
   urls: 'https://www.google.com',
   max_redirects: '0',
   password: '3z9SBOQWW5F0UrdqLVFqlF6z',
-  proxy_url: '',
+  proxy_url: '${proxyUrl}',
   'check.response.body.negative': [],
   'check.response.body.positive': [],
   'response.include_body': 'on_error' as ResponseBodyIndexPolicy,
@@ -43,6 +43,7 @@ const testHTTPConfig: Partial<MonitorFields> = {
   'check.request.method': 'GET',
   'ssl.verification_mode': VerificationMode.NONE,
   username: '',
+  params: '{"proxyUrl":"https://www.google.com"}',
 };
 
 const testBrowserConfig: Partial<MonitorFields> = {
@@ -102,6 +103,7 @@ describe('formatMonitorConfig', () => {
         timeout: '16s',
         type: 'http',
         urls: 'https://www.google.com',
+        proxy_url: 'https://www.google.com',
       });
     });
 
@@ -120,6 +122,7 @@ describe('formatMonitorConfig', () => {
           max_redirects: '0',
           name: 'Test',
           password: '3z9SBOQWW5F0UrdqLVFqlF6z',
+          proxy_url: 'https://www.google.com',
           'response.include_body': 'on_error',
           'response.include_headers': true,
           schedule: '@every 3m',

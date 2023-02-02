@@ -14,7 +14,6 @@ import { NewPackagePolicy } from '@kbn/fleet-plugin/public';
 import { SyntheticsPolicyEditExtensionWrapper } from './synthetics_policy_edit_extension_wrapper';
 import { ConfigKey, DataStream, ScheduleUnit } from './types';
 import { defaultConfig } from './synthetics_policy_create_extension';
-
 // ensures that fields appropriately match to their label
 jest.mock('@elastic/eui/lib/services/accessibility/html_id_generator', () => ({
   ...jest.requireActual('@elastic/eui/lib/services/accessibility/html_id_generator'),
@@ -63,7 +62,7 @@ const defaultNewPolicy: NewPackagePolicy = {
           },
           vars: {
             __ui: {
-              value: JSON.stringify({ is_tls_enabled: true }),
+              value: JSON.stringify({ is_tls_enabled: true, is_zip_url_tls_enabled: false }),
               type: 'yaml',
             },
             type: {
@@ -71,7 +70,7 @@ const defaultNewPolicy: NewPackagePolicy = {
               type: 'text',
             },
             name: {
-              value: 'Sample name',
+              value: 'samplePolicyName',
               type: 'text',
             },
             schedule: {
@@ -99,7 +98,7 @@ const defaultNewPolicy: NewPackagePolicy = {
               type: 'text',
             },
             tags: {
-              value: '[]',
+              value: null,
               type: 'yaml',
             },
             'response.include_headers': {
@@ -115,42 +114,43 @@ const defaultNewPolicy: NewPackagePolicy = {
               type: 'text',
             },
             'check.request.headers': {
-              value: '{}',
+              value: null,
               type: 'yaml',
             },
             'check.request.body': {
-              value: '""',
+              value: null,
               type: 'yaml',
             },
             'check.response.status': {
-              value: '[]',
+              value: null,
               type: 'yaml',
             },
             'check.response.headers': {
-              value: '{}',
+              value: null,
               type: 'yaml',
             },
             'check.response.body.positive': {
-              value: '[]',
+              value: null,
               type: 'yaml',
             },
             'check.response.body.negative': {
-              value: '[]',
+              value: null,
               type: 'yaml',
             },
             'ssl.certificate_authorities': {
-              value: '',
+              value: null,
               type: 'yaml',
             },
             'ssl.certificate': {
-              value: '',
+              value: null,
               type: 'yaml',
             },
             'ssl.key': {
-              value: '',
+              value: null,
               type: 'yaml',
             },
             'ssl.key_passphrase': {
+              value: null,
               type: 'text',
             },
             'ssl.verification_mode': {
@@ -437,53 +437,51 @@ describe('<SyntheticsPolicyEditExtension />', () => {
     expect(maxRedirects.value).toEqual('2');
     expect(timeout.value).toEqual('3');
 
-    await waitFor(() => {
-      expect(onChange).toBeCalledWith({
-        isValid: true,
-        updatedPolicy: {
-          ...defaultNewPolicy,
-          inputs: [
-            {
-              ...defaultNewPolicy.inputs[0],
-              streams: [
-                {
-                  ...defaultNewPolicy.inputs[0].streams[0],
-                  vars: {
-                    ...defaultNewPolicy.inputs[0].streams[0].vars,
-                    urls: {
-                      value: 'http://elastic.co',
-                      type: 'text',
-                    },
-                    proxy_url: {
-                      value: 'http://proxy.co',
-                      type: 'text',
-                    },
-                    schedule: {
-                      value: '"@every 1m"',
-                      type: 'text',
-                    },
-                    'service.name': {
-                      value: 'APM Service',
-                      type: 'text',
-                    },
-                    max_redirects: {
-                      value: '2',
-                      type: 'integer',
-                    },
-                    timeout: {
-                      value: '3s',
-                      type: 'text',
-                    },
+    expect(onChange).toHaveBeenLastCalledWith({
+      isValid: true,
+      updatedPolicy: {
+        ...defaultNewPolicy,
+        inputs: [
+          {
+            ...defaultNewPolicy.inputs[0],
+            streams: [
+              {
+                ...defaultNewPolicy.inputs[0].streams[0],
+                vars: {
+                  ...defaultNewPolicy.inputs[0].streams[0].vars,
+                  urls: {
+                    value: 'http://elastic.co',
+                    type: 'text',
+                  },
+                  proxy_url: {
+                    value: 'http://proxy.co',
+                    type: 'text',
+                  },
+                  schedule: {
+                    value: '"@every 1m"',
+                    type: 'text',
+                  },
+                  'service.name': {
+                    value: 'APM Service',
+                    type: 'text',
+                  },
+                  max_redirects: {
+                    value: '2',
+                    type: 'integer',
+                  },
+                  timeout: {
+                    value: '3s',
+                    type: 'text',
                   },
                 },
-              ],
-            },
-            defaultNewPolicy.inputs[1],
-            defaultNewPolicy.inputs[2],
-            defaultNewPolicy.inputs[3],
-          ],
-        },
-      });
+              },
+            ],
+          },
+          defaultNewPolicy.inputs[1],
+          defaultNewPolicy.inputs[2],
+          defaultNewPolicy.inputs[3],
+        ],
+      },
     });
   });
 
@@ -493,33 +491,31 @@ describe('<SyntheticsPolicyEditExtension />', () => {
 
     fireEvent.change(url, { target: { value: 'http://elastic.co' } });
 
-    await waitFor(() => {
-      expect(onChange).toBeCalledWith({
-        isValid: true,
-        updatedPolicy: {
-          ...defaultNewPolicy,
-          inputs: [
-            {
-              ...defaultNewPolicy.inputs[0],
-              streams: [
-                {
-                  ...defaultNewPolicy.inputs[0].streams[0],
-                  vars: {
-                    ...defaultNewPolicy.inputs[0].streams[0].vars,
-                    urls: {
-                      value: 'http://elastic.co',
-                      type: 'text',
-                    },
+    expect(onChange).toHaveBeenLastCalledWith({
+      isValid: true,
+      updatedPolicy: {
+        ...defaultNewPolicy,
+        inputs: [
+          {
+            ...defaultNewPolicy.inputs[0],
+            streams: [
+              {
+                ...defaultNewPolicy.inputs[0].streams[0],
+                vars: {
+                  ...defaultNewPolicy.inputs[0].streams[0].vars,
+                  urls: {
+                    value: 'http://elastic.co',
+                    type: 'text',
                   },
                 },
-              ],
-            },
-            defaultNewPolicy.inputs[1],
-            defaultNewPolicy.inputs[2],
-            defaultNewPolicy.inputs[3],
-          ],
-        },
-      });
+              },
+            ],
+          },
+          defaultNewPolicy.inputs[1],
+          defaultNewPolicy.inputs[2],
+          defaultNewPolicy.inputs[3],
+        ],
+      },
     });
   });
 

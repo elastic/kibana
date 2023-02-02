@@ -487,7 +487,7 @@ describe('useUpdatePolicy', () => {
     const onChange = jest.fn();
     const initialProps = {
       defaultConfig: defaultConfig[DataStream.TCP],
-      config: defaultConfig[DataStream.TCP],
+      config: { ...defaultConfig[DataStream.TCP], tags: ['test'] },
       newPolicy,
       onChange,
       validate,
@@ -553,7 +553,7 @@ describe('useUpdatePolicy', () => {
     const onChange = jest.fn();
     const initialProps = {
       defaultConfig: defaultConfig[DataStream.ICMP],
-      config: defaultConfig[DataStream.ICMP],
+      config: { ...defaultConfig[DataStream.ICMP], tags: ['test'] },
       newPolicy,
       onChange,
       validate,
@@ -567,6 +567,7 @@ describe('useUpdatePolicy', () => {
       ...defaultCommonFields,
       [ConfigKey.WAIT]: '2',
       [ConfigKey.HOSTS]: 'sampleHost',
+      tags: ['test'],
     };
 
     // expect only icmp to be enabled
@@ -606,7 +607,7 @@ describe('useUpdatePolicy', () => {
     const onChange = jest.fn();
     const initialProps = {
       defaultConfig: defaultConfig[DataStream.BROWSER] as Partial<MonitorFields>,
-      config: defaultConfig[DataStream.BROWSER] as Partial<MonitorFields>,
+      config: { ...defaultConfig[DataStream.BROWSER], tags: ['test'] } as Partial<MonitorFields>,
       newPolicy,
       onChange,
       validate,
