@@ -12,7 +12,6 @@ import { AccessorConfig, UserMessage } from '../../../types';
 import { IconError, IconWarning } from '../custom_icons';
 
 const baseIconProps = {
-  size: 's',
   className: 'lnsLayerPanel__colorIndicator',
 } as const;
 
@@ -65,7 +64,7 @@ const getIconFromAccessorConfig = (accessorConfig: AccessorConfig) => (
     {accessorConfig.triggerIconType === 'colorBy' && (
       <EuiIcon
         {...baseIconProps}
-        type="brush"
+        type="color"
         color="text"
         aria-label={i18n.translate('xpack.lens.editorFrame.paletteColorIndicatorLabel', {
           defaultMessage: 'This dimension is using a palette',
@@ -75,7 +74,6 @@ const getIconFromAccessorConfig = (accessorConfig: AccessorConfig) => (
     {accessorConfig.triggerIconType === 'custom' && accessorConfig.customIcon && (
       <EuiIcon
         {...baseIconProps}
-        size="m"
         type={accessorConfig.customIcon}
         color={accessorConfig.color}
         aria-label={i18n.translate('xpack.lens.editorFrame.customIconIndicatorLabel', {
