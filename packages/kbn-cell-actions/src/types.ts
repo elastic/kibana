@@ -95,15 +95,21 @@ export interface CellActionExecutionContext extends ActionExecutionContext {
   metadata?: Record<string, unknown>;
 }
 
-export interface CellActionCompatibilityContext extends ActionExecutionContext {
+/**
+ * Subset of `CellActionExecutionContext` used only for the compatibility check in the `isCompatible` function.
+ * It omits the references and the `field.value`.
+ */
+export interface CellActionCompatibilityContext<
+  C extends CellActionExecutionContext = CellActionExecutionContext
+> extends ActionExecutionContext {
   /**
    * The object containing the field name and type, needed for the compatibility check
    */
-  field: Pick<CellActionField, 'name' | 'type'>;
+  field: Omit<C['field'], 'value'>;
   /**
    * Extra configurations for actions.
    */
-  metadata?: Record<string, unknown>;
+  metadata?: C['metadata'];
 }
 
 export interface CellAction<C extends CellActionExecutionContext = CellActionExecutionContext>
@@ -112,7 +118,7 @@ export interface CellAction<C extends CellActionExecutionContext = CellActionExe
    * Returns a promise that resolves to true if this action is compatible given the context,
    * otherwise resolves to false.
    */
-  isCompatible(context: CellActionCompatibilityContext): Promise<boolean>;
+  isCompatible(context: CellActionCompatibilityContext<C>): Promise<boolean>;
 }
 
 export type GetActions = (context: CellActionCompatibilityContext) => Promise<CellAction[]>;

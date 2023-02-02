@@ -26,11 +26,8 @@ import { FormattedRelativePreferenceDate } from '../../../common/components/form
 import { HostDetailsLink, ReputationLink, WhoIsLink } from '../../../common/components/links';
 import { Spacer } from '../../../common/components/page';
 import * as i18n from '../../../explore/network/components/details/translations';
-import {
-  CELL_ACTIONS_DEFAULT_TRIGGER,
-  CELL_ACTIONS_TIMELINE_TRIGGER,
-} from '../../../../common/constants';
-import { TimelineContext } from '../timeline';
+import { CELL_ACTIONS_DEFAULT_TRIGGER } from '../../../../common/constants';
+import { StatefulEventContext } from '../../../common/components/events_viewer/stateful_event_context';
 
 const DraggableContainerFlexGroup = styled(EuiFlexGroup)`
   flex-grow: unset;
@@ -295,7 +292,7 @@ interface MoreContainerProps {
 
 export const MoreContainer = React.memo<MoreContainerProps>(
   ({ fieldName, fieldType, idPrefix, moreMaxHeight, overflowIndexStart, render, values }) => {
-    const { timelineId } = useContext(TimelineContext);
+    const { timelineID, tabType } = useContext(StatefulEventContext) ?? {};
 
     const moreItemsWithHoverActions = useMemo(
       () =>
@@ -310,13 +307,15 @@ export const MoreContainer = React.memo<MoreContainerProps>(
                   mode={CellActionsMode.HOVER}
                   visibleCellActions={5}
                   showActionTooltips
-                  triggerId={
-                    timelineId ? CELL_ACTIONS_TIMELINE_TRIGGER : CELL_ACTIONS_DEFAULT_TRIGGER
-                  }
+                  triggerId={CELL_ACTIONS_DEFAULT_TRIGGER}
                   field={{
                     name: fieldName,
                     value,
                     type: fieldType,
+                  }}
+                  metadata={{
+                    scopeId: timelineID,
+                    timelineTab: tabType,
                   }}
                 >
                   <>{render ? render(value) : defaultToEmptyTag(value)}</>
@@ -327,7 +326,7 @@ export const MoreContainer = React.memo<MoreContainerProps>(
 
           return acc;
         }, []),
-      [fieldName, fieldType, idPrefix, overflowIndexStart, render, values, timelineId]
+      [fieldName, fieldType, idPrefix, overflowIndexStart, render, values, timelineID, tabType]
     );
 
     return (

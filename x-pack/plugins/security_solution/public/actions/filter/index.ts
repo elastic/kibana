@@ -7,6 +7,3 @@
 
 export { createFilterInAction as createDefaultFilterInAction } from './default/filter_in';
 export { createFilterOutAction as createDefaultFilterOutAction } from './default/filter_out';
-
-export { createFilterInAction as createTimelineFilterInAction } from './timeline/filter_in';
-export { createFilterOutAction as createTimelineFilterOutAction } from './timeline/filter_out';

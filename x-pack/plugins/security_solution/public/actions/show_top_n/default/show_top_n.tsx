@@ -6,7 +6,6 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { CellAction, CellActionExecutionContext } from '@kbn/cell-actions';
 import ReactDOM, { unmountComponentAtNode } from 'react-dom';
 import React from 'react';
 
@@ -21,6 +20,7 @@ import type { SecurityAppStore } from '../../../common/store';
 import { fieldHasCellActions, isInSecurityApp } from '../../utils';
 import { TopNAction } from '../show_top_n_component';
 import type { StartServices } from '../../../types';
+import type { SecurityCellAction } from '../../types';
 
 const SHOW_TOP = (fieldName: string) =>
   i18n.translate('xpack.securitySolution.actions.showTopTooltip', {
@@ -32,12 +32,6 @@ const ID = 'security_showTopN';
 const ICON = 'visBarVertical';
 const UNSUPPORTED_FIELD_TYPES = ['date', 'text'];
 
-export interface ShowTopNActionContext extends CellActionExecutionContext {
-  metadata?: {
-    scopeId?: string;
-  };
-}
-
 export const createShowTopNAction = ({
   store,
   history,
@@ -48,7 +42,7 @@ export const createShowTopNAction = ({
   history: H.History;
   services: StartServices;
   order?: number;
-}): CellAction<ShowTopNActionContext> => {
+}): SecurityCellAction => {
   let currentAppId: string | undefined;
 
   services.application.currentAppId$.subscribe((appId) => {

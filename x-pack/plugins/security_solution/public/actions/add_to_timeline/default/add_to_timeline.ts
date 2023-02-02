@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { CellAction } from '@kbn/cell-actions';
 import { addProvider } from '../../../timelines/store/timeline/actions';
 import { TimelineId } from '../../../../common/types';
 import { KibanaServices } from '../../../common/lib/kibana';
@@ -19,6 +18,7 @@ import {
   ADD_TO_TIMELINE_SUCCESS_TITLE,
 } from '../constants';
 import { createDataProviders } from '../data_provider';
+import type { SecurityCellAction } from '../../types';
 
 export const ACTION_ID = 'security_addToTimeline';
 
@@ -28,7 +28,7 @@ export const createAddToTimelineAction = ({
 }: {
   store: SecurityAppStore;
   order?: number;
-}): CellAction => {
+}): SecurityCellAction => {
   const { application: applicationService, notifications: notificationsService } =
     KibanaServices.get();
   let currentAppId: string | undefined;

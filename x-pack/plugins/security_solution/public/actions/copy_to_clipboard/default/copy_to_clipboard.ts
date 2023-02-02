@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import type { CellAction } from '@kbn/cell-actions';
 import copy from 'copy-to-clipboard';
 import { COPY_TO_CLIPBOARD, COPY_TO_CLIPBOARD_ICON, COPY_TO_CLIPBOARD_SUCCESS } from '../constants';
 import { KibanaServices } from '../../../common/lib/kibana';
 import { fieldHasCellActions } from '../../utils';
+import type { SecurityCellAction } from '../../types';
 
 const ID = 'security_copyToClipboard';
 
-export const createCopyToClipboardAction = ({ order }: { order?: number }): CellAction => ({
+export const createCopyToClipboardAction = ({ order }: { order?: number }): SecurityCellAction => ({
   id: ID,
   type: ID,
   order,
