@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { type EuiComboBoxOptionOption } from '@elastic/eui';
 // The display label used for an aggregation e.g. sum(bytes).
 export type Label = string;

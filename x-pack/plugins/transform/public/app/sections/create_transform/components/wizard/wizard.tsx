@@ -250,6 +250,7 @@ export const Wizard: FC<WizardProps> = React.memo(({ cloneConfig, searchItems })
       dataView={dataView}
       fieldStatsServices={fieldStatsServices}
       timeRangeMs={stepDefineState.timeRangeMs}
+      dslQuery={transformConfig.source.query}
     >
       <CreateTransformWizardContext.Provider
         value={{ dataView, runtimeMappings: stepDefineState.runtimeMappings }}
