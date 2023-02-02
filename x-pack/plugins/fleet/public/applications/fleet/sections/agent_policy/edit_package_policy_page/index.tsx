@@ -53,9 +53,8 @@ import type { PackagePolicyEditExtensionComponentProps } from '../../../types';
 import { ExperimentalFeaturesService, pkgKeyFromPackageInfo } from '../../../services';
 import { generateUpdatePackagePolicyDevToolsRequest } from '../services';
 
-import { useHistoryBlock } from './hooks';
 import { UpgradeStatusCallout } from './components';
-import { usePackagePolicyWithRelatedData } from './hooks/use_package_policy';
+import { usePackagePolicyWithRelatedData, useHistoryBlock } from './hooks';
 
 export const EditPackagePolicyPage = memo(() => {
   const {
@@ -163,7 +162,6 @@ export const EditPackagePolicyForm = memo<{
     }
     return '/';
   }, [from, getHref, packageInfo, policyId]);
-
   const successRedirectPath = useMemo(() => {
     if (packageInfo && policyId) {
       return from === 'package-edit' || from === 'upgrade-from-integrations-policy-list'
