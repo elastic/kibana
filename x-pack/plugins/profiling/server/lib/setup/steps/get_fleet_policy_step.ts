@@ -35,7 +35,7 @@ async function createIngestAPIKey(esClient: ElasticsearchClient) {
     },
   });
 
-  return btoa(apiKeyResponse.encoded);
+  return atob(apiKeyResponse.encoded);
 }
 
 export function getFleetPolicyStep({

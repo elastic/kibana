@@ -38,7 +38,7 @@ export function NoDataPage() {
   );
 
   const secretToken = data?.variables.secretToken;
-  const collectionAgentHostPort = data?.variables.apmServerUrl;
+  const collectionAgentHostPort = data?.variables.apmServerUrl.replace('https://', '');
 
   const tabs = [
     {
