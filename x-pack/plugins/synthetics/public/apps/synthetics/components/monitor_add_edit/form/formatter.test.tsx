@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { format } from './formatter';
+import { format, READ_ONLY_FIELDS } from './formatter';
 import { DataStream } from '../../../../../../common/runtime_types';
 import { DEFAULT_FIELDS } from '../../../../../../common/constants/monitor_defaults';
 
@@ -357,5 +357,14 @@ describe('format', () => {
       username: '',
       id: '',
     });
+  });
+
+  it('handles read only', () => {
+    expect(format(formValues, true)).toEqual(
+      READ_ONLY_FIELDS.reduce<Record<string, unknown>>((acc, key) => {
+        acc[key] = formValues[key];
+        return acc;
+      }, {})
+    );
   });
 });
