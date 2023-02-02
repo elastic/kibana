@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { isEqual } from 'lodash';
 import { createReducer } from '@reduxjs/toolkit';
 import { FETCH_STATUS } from '@kbn/observability-plugin/public';
 
@@ -26,6 +25,7 @@ import {
   fetchUpsertFailureAction,
   fetchUpsertMonitorAction,
   fetchUpsertSuccessAction,
+  updateManagementPageStateAction,
 } from './actions';
 
 export interface MonitorListState {
@@ -56,10 +56,10 @@ const initialState: MonitorListState = {
 
 export const monitorListReducer = createReducer(initialState, (builder) => {
   builder
-    .addCase(fetchMonitorListAction.get, (state, action) => {
-      if (!isEqual(state.pageState, action.payload)) {
-        state.pageState = action.payload;
-      }
+    .addCase(updateManagementPageStateAction, (state, action) => {
+      state.pageState = { ...state.pageState, ...action.payload };
+    })
+    .addCase(fetchMonitorListAction.get, (state) => {
       state.loading = true;
       state.loaded = false;
     })
