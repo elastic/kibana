@@ -27,7 +27,9 @@ export interface CustomScheduling {
 
 export type ConnectorCustomScheduling = Record<string, CustomScheduling | null>;
 
-export type ConnectorPreferences = Record<string, unknown>;
+export interface ConnectorPreferences {
+  extract_full_html: boolean | null;
+}
 
 export enum ConnectorStatus {
   CREATED = 'created',
