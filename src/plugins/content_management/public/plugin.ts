@@ -13,8 +13,7 @@ import {
   SetupDependencies,
   StartDependencies,
 } from './types';
-import { ContentClient } from './content_client';
-import { RpcClient } from './rpc_client';
+import type { ContentClient } from './content_client';
 
 export class ContentManagementPlugin
   implements
@@ -30,8 +29,10 @@ export class ContentManagementPlugin
   }
 
   public start(core: CoreStart, deps: StartDependencies) {
-    const rpcClient = new RpcClient(core.http);
-    const contentClient = new ContentClient(rpcClient);
-    return { client: contentClient };
+    // don't actually expose the client until it is used to avoid increasing bundle size
+    // const rpcClient = new RpcClient(core.http);
+    // const contentClient = new ContentClient(rpcClient);
+    // return { client: contentClient };
+    return { client: {} as ContentClient };
   }
 }

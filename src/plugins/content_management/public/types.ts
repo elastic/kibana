@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { ContentClient } from './content_client';
+import type { ContentClient } from './content_client';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface SetupDependencies {}
