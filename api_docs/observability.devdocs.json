@@ -4653,16 +4653,16 @@
                 "pluginId": "@kbn/es-query",
                 "scope": "common",
                 "docId": "kibKbnEsQueryPluginApi",
-                "section": "def-common.ExistsFilter",
-                "text": "ExistsFilter"
+                "section": "def-common.PhraseFilter",
+                "text": "PhraseFilter"
               },
               " | ",
               {
                 "pluginId": "@kbn/es-query",
                 "scope": "common",
                 "docId": "kibKbnEsQueryPluginApi",
-                "section": "def-common.PhraseFilter",
-                "text": "PhraseFilter"
+                "section": "def-common.ExistsFilter",
+                "text": "ExistsFilter"
               },
               " | ",
               {
@@ -4691,16 +4691,16 @@
                 "pluginId": "@kbn/es-query",
                 "scope": "common",
                 "docId": "kibKbnEsQueryPluginApi",
-                "section": "def-common.ExistsFilter",
-                "text": "ExistsFilter"
+                "section": "def-common.PhraseFilter",
+                "text": "PhraseFilter"
               },
               " | ",
               {
                 "pluginId": "@kbn/es-query",
                 "scope": "common",
                 "docId": "kibKbnEsQueryPluginApi",
-                "section": "def-common.PhraseFilter",
-                "text": "PhraseFilter"
+                "section": "def-common.ExistsFilter",
+                "text": "ExistsFilter"
               },
               " | ",
               {

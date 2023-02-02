@@ -23,3 +23,4 @@ export * from './data_retention.journey';
 export * from './monitor_details_page/monitor_summary.journey';
 export * from './test_run_details.journey';
 export * from './step_details.journey';
+export * from './project_monitor_read_only.journey';
