@@ -13,11 +13,19 @@ echo "--- Defend Workflows Cypress tests"
 
 sudo apt update
 
+echo "Installing snapd"
+
 sudo apt install snapd
+
+echo "snap install snapd"
 
 sudo snap install snapd
 
+echo "Installing multipass"
+
 sudo snap install multipass
+
+echo "run tests"
 
 node scripts/functional_tests \
   --debug --bail \
