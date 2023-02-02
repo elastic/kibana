@@ -60,3 +60,10 @@ export const CHARTS_TITLE = i18n.translate(
     defaultMessage: 'Summary',
   }
 );
+
+export const LEGEND_TITLE = i18n.translate(
+  'xpack.securitySolution.components.chartSelect.legendTitle',
+  {
+    defaultMessage: 'Select a tab',
+  }
+);

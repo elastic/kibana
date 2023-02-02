@@ -17,6 +17,7 @@ import { AlertsByTypePanel } from '../alerts_by_type_panel';
 import { AlertsProgressBarPanel } from '../alerts_progress_bar_panel';
 import { useQueryToggle } from '../../../../common/containers/query_toggle';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
+import type { GroupBySelection } from '../alerts_progress_bar_panel/types';
 
 const StyledFlexGroup = styled(EuiFlexGroup)`
   @media only screen and (min-width: ${({ theme }) => theme.eui.euiBreakpoints.l});
@@ -39,6 +40,8 @@ interface Props {
   runtimeMappings?: MappingRuntimeFields;
   isExpanded?: boolean;
   setIsExpanded?: (status: boolean) => void;
+  groupBySelection: GroupBySelection;
+  setGroupBySelection: (groupBySelection: GroupBySelection) => void;
 }
 
 export const AlertsSummaryChartsPanel: React.FC<Props> = ({
@@ -52,6 +55,8 @@ export const AlertsSummaryChartsPanel: React.FC<Props> = ({
   title = i18n.CHARTS_TITLE,
   isExpanded,
   setIsExpanded,
+  groupBySelection,
+  setGroupBySelection,
 }: Props) => {
   const isAlertsPageChartsEnabled = useIsExperimentalFeatureEnabled('alertsPageChartsEnabled');
 
@@ -137,12 +142,13 @@ export const AlertsSummaryChartsPanel: React.FC<Props> = ({
           </StyledFlexItem>
           <StyledFlexItem>
             <AlertsProgressBarPanel
-              addFilter={addFilter}
               filters={filters}
               query={query}
               signalIndexName={signalIndexName}
               runtimeMappings={runtimeMappings}
               skip={querySkip}
+              groupBySelection={groupBySelection}
+              setGroupBySelection={setGroupBySelection}
             />
           </StyledFlexItem>
         </StyledFlexGroup>

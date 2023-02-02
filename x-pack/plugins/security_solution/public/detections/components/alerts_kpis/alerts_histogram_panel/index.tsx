@@ -163,6 +163,7 @@ export const AlertsHistogramPanel = memo<AlertsHistogramPanelProps>(
     const [selectedStackByOption, setSelectedStackByOption] = useState<string>(
       onlyField == null ? defaultStackByOption : onlyField
     );
+    const isChartEmbeddablesEnabled = useIsExperimentalFeatureEnabled('chartEmbeddablesEnabled');
     const isAlertsPageChartsEnabled = useIsExperimentalFeatureEnabled('alertsPageChartsEnabled');
 
     const onSelect = useCallback(
@@ -184,7 +185,7 @@ export const AlertsHistogramPanel = memo<AlertsHistogramPanelProps>(
       isAlertsPageChartsEnabled ? !isExpanded : !toggleStatus
     );
     useEffect(() => {
-      if (isAlertsPageChartsEnabled) {
+      if (isAlertsPageChartsEnabled && isExpanded !== undefined) {
         setQuerySkip(!isExpanded);
       } else {
         setQuerySkip(!toggleStatus);
@@ -193,7 +194,7 @@ export const AlertsHistogramPanel = memo<AlertsHistogramPanelProps>(
 
     const toggleQuery = useCallback(
       (newToggleStatus: boolean) => {
-        if (isAlertsPageChartsEnabled && setIsExpanded) {
+        if (isAlertsPageChartsEnabled && setIsExpanded !== undefined) {
           setIsExpanded(newToggleStatus);
         } else {
           setToggleStatus(newToggleStatus);
@@ -204,7 +205,6 @@ export const AlertsHistogramPanel = memo<AlertsHistogramPanelProps>(
       [setQuerySkip, setToggleStatus, setIsExpanded, isAlertsPageChartsEnabled]
     );
 
-    const isChartEmbeddablesEnabled = useIsExperimentalFeatureEnabled('chartEmbeddablesEnabled');
     const timerange = useMemo(() => ({ from, to }), [from, to]);
 
     const {
@@ -364,24 +364,28 @@ export const AlertsHistogramPanel = memo<AlertsHistogramPanelProps>(
       [onlyField, title]
     );
 
-    const toggle = useMemo(
-      () => (isAlertsPageChartsEnabled && isExpanded !== undefined ? isExpanded : toggleStatus),
-      [isAlertsPageChartsEnabled, isExpanded, toggleStatus]
-    );
+    const showHistogram = useMemo(() => {
+      if (isAlertsPageChartsEnabled) {
+        if (isExpanded !== undefined) {
+          // alerts page
+          return isExpanded;
+        } else {
+          // rule details page and overview page
+          return toggleStatus;
+        }
+      } else {
+        return toggleStatus;
+      }
+    }, [isAlertsPageChartsEnabled, isExpanded, toggleStatus]);
 
-    const showHistogram = useMemo(
-      () =>
-        (isAlertsPageChartsEnabled && isExpanded) || (!isAlertsPageChartsEnabled && toggleStatus),
-      [isAlertsPageChartsEnabled, isExpanded, toggleStatus]
-    );
     return (
-      <InspectButtonContainer show={!isInitialLoading && toggle}>
+      <InspectButtonContainer show={!isInitialLoading && showHistogram}>
         <KpiPanel
           height={panelHeight}
           hasBorder
           paddingSize={paddingSize}
           data-test-subj="alerts-histogram-panel"
-          $toggleStatus={toggle}
+          $toggleStatus={showHistogram}
         >
           <HeaderSection
             alignHeader={alignHeader}
@@ -390,7 +394,7 @@ export const AlertsHistogramPanel = memo<AlertsHistogramPanelProps>(
             outerDirection="row"
             title={titleText}
             titleSize={titleSize}
-            toggleStatus={toggle}
+            toggleStatus={showHistogram}
             toggleQuery={hideQueryToggle ? undefined : toggleQuery}
             showInspectButton={isChartEmbeddablesEnabled ? false : chartOptionsContextMenu == null}
             subtitle={!isInitialLoading && showTotalAlertsCount && totalAlerts}

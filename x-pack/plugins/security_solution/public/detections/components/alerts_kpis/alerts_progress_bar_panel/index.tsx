@@ -7,7 +7,8 @@
 import { EuiPanel, EuiLoadingSpinner } from '@elastic/eui';
 import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import { v4 as uuid } from 'uuid';
-import type { ChartsPanelProps } from '../alerts_summary_charts_panel/types';
+import type { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/types';
+import type { Filter, Query } from '@kbn/es-query';
 import { HeaderSection } from '../../../../common/components/header_section';
 import { InspectButtonContainer } from '../../../../common/components/inspect';
 import { StackByComboBox } from '../common/components';
@@ -17,28 +18,45 @@ import { alertsGroupingAggregations } from '../alerts_summary_charts_panel/aggre
 import { showInitialLoadingSpinner } from '../alerts_histogram_panel/helpers';
 import { isAlertsProgressBarData } from './helpers';
 import * as i18n from './translations';
+import type { GroupBySelection } from './types';
 
 const TOP_ALERTS_CHART_ID = 'alerts-summary-top-alerts';
 const DEFAULT_COMBOBOX_WIDTH = 150;
 const DEFAULT_OPTIONS = ['host.name', 'user.name', 'source.ip', 'destination.ip'];
 
-export const AlertsProgressBarPanel: React.FC<ChartsPanelProps> = ({
+interface Props {
+  filters?: Filter[];
+  query?: Query;
+  signalIndexName: string | null;
+  runtimeMappings?: MappingRuntimeFields;
+  skip?: boolean;
+  groupBySelection: GroupBySelection;
+  setGroupBySelection: (groupBySelection: GroupBySelection) => void;
+}
+export const AlertsProgressBarPanel: React.FC<Props> = ({
   filters,
   query,
   signalIndexName,
   runtimeMappings,
   skip,
+  groupBySelection,
+  setGroupBySelection,
 }) => {
-  const [stackByField, setStackByField] = useState('host.name');
   const [isInitialLoading, setIsInitialLoading] = useState(true);
   const uniqueQueryId = useMemo(() => `${TOP_ALERTS_CHART_ID}-${uuid()}`, []);
   const dropDownOptions = DEFAULT_OPTIONS.map((field) => {
     return { value: field, label: field };
   });
-  const aggregations = useMemo(() => alertsGroupingAggregations(stackByField), [stackByField]);
-  const onSelect = useCallback((field: string) => {
-    setStackByField(field);
-  }, []);
+  const aggregations = useMemo(
+    () => alertsGroupingAggregations(groupBySelection),
+    [groupBySelection]
+  );
+  const onSelect = useCallback(
+    (field: string) => {
+      setGroupBySelection(field as GroupBySelection);
+    },
+    [setGroupBySelection]
+  );
 
   const { items, isLoading } = useSummaryChartData({
     aggregations,
@@ -61,7 +79,7 @@ export const AlertsProgressBarPanel: React.FC<ChartsPanelProps> = ({
       <EuiPanel hasBorder hasShadow={false} data-test-subj="alerts-progress-bar-panel">
         <HeaderSection
           id={uniqueQueryId}
-          inspectTitle={`${i18n.ALERT_BY_TITLE} ${stackByField}`}
+          inspectTitle={`${i18n.ALERT_BY_TITLE} ${groupBySelection}`}
           outerDirection="row"
           title={i18n.ALERT_BY_TITLE}
           titleSize="xs"
@@ -69,7 +87,7 @@ export const AlertsProgressBarPanel: React.FC<ChartsPanelProps> = ({
         >
           <StackByComboBox
             data-test-subj="stackByComboBox"
-            selected={stackByField}
+            selected={groupBySelection}
             onSelect={onSelect}
             prepend={''}
             width={DEFAULT_COMBOBOX_WIDTH}
@@ -79,7 +97,11 @@ export const AlertsProgressBarPanel: React.FC<ChartsPanelProps> = ({
         {isInitialLoading ? (
           <EuiLoadingSpinner size="l" />
         ) : (
-          <AlertsProgressBar data={data} isLoading={isLoading} stackByField={stackByField} />
+          <AlertsProgressBar
+            data={data}
+            isLoading={isLoading}
+            groupBySelection={groupBySelection}
+          />
         )}
       </EuiPanel>
     </InspectButtonContainer>
