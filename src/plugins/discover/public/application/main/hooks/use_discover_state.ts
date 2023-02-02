@@ -219,6 +219,7 @@ export function useDiscoverState({
   const onChangeDataView = useCallback(
     async (id: string) => {
       const nextDataView = await dataViews.get(id);
+      console.log('#### onChangeDataView', nextDataView.title);
       if (nextDataView && dataView) {
         const nextAppState = getDataViewAppState(
           dataView,

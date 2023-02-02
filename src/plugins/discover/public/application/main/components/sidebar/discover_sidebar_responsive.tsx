@@ -46,6 +46,7 @@ import {
   DiscoverSidebarReducerActionType,
   DiscoverSidebarReducerStatus,
 } from './lib/sidebar_reducer';
+import { DiscoverStateContainer } from '../../services/discover_state';
 
 const EMPTY_FIELD_COUNTS = {};
 
@@ -113,6 +114,8 @@ export interface DiscoverSidebarResponsiveProps {
    * list of available fields fetched from ES
    */
   availableFields$: AvailableFields$;
+
+  stateContainer: DiscoverStateContainer;
 }
 
 /**
@@ -126,7 +129,7 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
   const isPlainRecord = useAppStateSelector(
     (state) => getRawRecordType(state.query) === RecordRawType.PLAIN
   );
-  const { selectedDataView, onFieldEdited, onDataViewCreated } = props;
+  const { selectedDataView, onFieldEdited, onDataViewCreated, stateContainer } = props;
   const [isFlyoutVisible, setIsFlyoutVisible] = useState(false);
   const [sidebarState, dispatchSidebarStateAction] = useReducer(
     discoverSidebarReducer,
@@ -150,6 +153,11 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
           });
           break;
         case FetchStatus.LOADING:
+          console.log('*** LOADING - dataViewRef', selectedDataViewRef.current?.title);
+          console.log(
+            '*** LOADING - stateContainer dataView',
+            stateContainer.internalState.get().dataView?.title
+          );
           dispatchSidebarStateAction({
             type: DiscoverSidebarReducerActionType.DOCUMENTS_LOADING,
             payload: {
@@ -158,6 +166,11 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
           });
           break;
         case FetchStatus.COMPLETE:
+          console.log('*** COMPLETE', selectedDataViewRef.current?.title);
+          console.log(
+            '*** COMPLETE - stateContainer dataView',
+            stateContainer.internalState.get().dataView?.title
+          );
           dispatchSidebarStateAction({
             type: DiscoverSidebarReducerActionType.DOCUMENTS_LOADED,
             payload: {

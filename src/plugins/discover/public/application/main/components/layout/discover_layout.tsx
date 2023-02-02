@@ -335,6 +335,7 @@ export function DiscoverLayout({
               viewMode={viewMode}
               onDataViewCreated={onDataViewCreated}
               availableFields$={stateContainer.dataState.data$.availableFields$}
+              stateContainer={stateContainer}
             />
           </EuiFlexItem>
           <EuiHideFor sizes={['xs', 's']}>

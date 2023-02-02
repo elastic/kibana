@@ -694,6 +694,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.discover.waitUntilSidebarHasLoaded();
 
+        await new Promise((resolve) => setTimeout(resolve, 1000 * 60 * 15));
+
         expect(await PageObjects.discover.getSidebarAriaDescription()).to.be(
           '7 available fields. 0 empty fields. 3 meta fields.'
         );

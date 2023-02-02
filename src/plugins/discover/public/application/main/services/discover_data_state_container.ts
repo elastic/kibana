@@ -202,6 +202,7 @@ export function getDataStateContainer({
       abortController = new AbortController();
       const prevAutoRefreshDone = autoRefreshDone;
 
+      console.log('### fetchAll dataView:', getSavedSearch().searchSource.getField('index')?.title);
       await fetchAll(dataSubjects, getSavedSearch().searchSource, reset, {
         abortController,
         data,
