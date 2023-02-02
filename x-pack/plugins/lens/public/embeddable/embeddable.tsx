@@ -1170,11 +1170,14 @@ export class Embeddable
     }
 
     const title = input.hidePanelTitles ? '' : input.title ?? this.savedVis.title;
+    const description = input.hidePanelTitles ? '' : input.description ?? this.savedVis.description;
     const savedObjectId = (input as LensByReferenceInput).savedObjectId;
     this.updateOutput({
       defaultTitle: this.savedVis.title,
+      defaultDescription: this.savedVis.description,
       editable: this.getIsEditable(),
       title,
+      description,
       editPath: getEditPath(savedObjectId),
       editUrl: this.deps.basePath.prepend(`/app/lens${getEditPath(savedObjectId)}`),
       indexPatterns: this.dataViews,
@@ -1204,12 +1207,6 @@ export class Embeddable
   public getInputAsValueType = async (): Promise<LensByValueInput> => {
     return this.deps.attributeService.getInputAsValueType(this.getExplicitInput());
   };
-
-  // same API as Visualize
-  public getDescription() {
-    // mind that savedViz is loaded in async way here
-    return this.savedVis && this.savedVis.description;
-  }
 
   /**
    * Gets the Lens embeddable's local filters
