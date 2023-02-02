@@ -45,5 +45,19 @@ export function TransformDatePickerProvider({ getService, getPageObjects }: FtrP
     async setTimeRange(fromTime: string, toTime: string) {
       await pageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
     },
+
+    async clickUseFullDataButton(expectedTimeConfig: { start: string; end: string }) {
+      await testSubjects.existOrFail('mlDatePickerButtonUseFullData');
+      await testSubjects.clickWhenNotDisabledWithoutRetry('mlDatePickerButtonUseFullData');
+
+      const actualTimeConfig = await pageObjects.timePicker.getTimeConfig();
+
+      expect(actualTimeConfig).to.eql(
+        expectedTimeConfig,
+        `Transform time config should be '${JSON.stringify(
+          expectedTimeConfig
+        )}' (got '${JSON.stringify(actualTimeConfig)}')`
+      );
+    },
   };
 }
