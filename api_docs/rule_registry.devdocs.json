@@ -3112,7 +3112,7 @@
             "label": "getAlertByAlertUuid",
             "description": [],
             "signature": [
-              "(alertUuid: string) => { [x: string]: any; } | null"
+              "(alertUuid: string) => Promise<{ [id: string]: any; }[] | null>"
             ],
             "path": "x-pack/plugins/rule_registry/server/utils/create_lifecycle_executor.ts",
             "deprecated": false,
