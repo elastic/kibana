@@ -3047,7 +3047,7 @@ describe('create()', () => {
     expect(unsecuredSavedObjectsClient.create).not.toHaveBeenCalled();
     expect(taskManager.schedule).not.toHaveBeenCalled();
   });
-  test('should create a rule even if action is missing secret when skipMissingSecretsValidation is true', async () => {
+  test('should create a rule even if action is missing secret when allowMissingConnectorSecrets is true', async () => {
     const data = getMockData({
       actions: [
         {
@@ -3135,7 +3135,7 @@ describe('create()', () => {
       },
       references: [],
     });
-    const result = await rulesClient.create({ data, skipMissingSecretsValidation: true });
+    const result = await rulesClient.create({ data, allowMissingConnectorSecrets: true });
     expect(result).toMatchInlineSnapshot(`
       Object {
         "actions": Array [

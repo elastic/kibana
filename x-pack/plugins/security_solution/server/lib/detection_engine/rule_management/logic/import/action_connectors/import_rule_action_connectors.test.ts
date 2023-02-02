@@ -41,7 +41,6 @@ describe('checkRuleExceptionReferences', () => {
     jest.clearAllMocks();
   });
   it('should show an error message when the user has a Read Actions permission and stops the importing ', async () => {
-    // jest.resetAllMocks();
     const newCore = coreMock.createRequestHandlerContext();
     const error = {
       output: { payload: { message: 'Unable to bulk_create action' }, statusCode: 403 },

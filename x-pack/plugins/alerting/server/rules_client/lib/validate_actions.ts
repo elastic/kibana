@@ -20,7 +20,7 @@ export async function validateActions(
   data: Pick<RawRule, 'notifyWhen' | 'throttle' | 'schedule'> & {
     actions: NormalizedAlertAction[];
   },
-  skipMissingSecretsValidation?: boolean
+  allowMissingConnectorSecrets?: boolean
 ): Promise<void> {
   const { actions, notifyWhen, throttle } = data;
   const hasRuleLevelNotifyWhen = typeof notifyWhen !== 'undefined';
@@ -31,16 +31,21 @@ export async function validateActions(
 
   const errors = [];
 
-  if (!skipMissingSecretsValidation) {
-    // check for actions using connectors with missing secrets
-    const actionsClient = await context.getActionsClient();
-    const actionIds = [...new Set(actions.map((action) => action.id))];
-    const actionResults = (await actionsClient.getBulk(actionIds)) || [];
-    const actionsUsingConnectorsWithMissingSecrets = actionResults.filter(
-      (result) => result.isMissingSecrets
-    );
-
-    if (actionsUsingConnectorsWithMissingSecrets.length) {
+  // check for actions using connectors with missing secrets
+  const actionsClient = await context.getActionsClient();
+  const actionIds = [...new Set(actions.map((action) => action.id))];
+  const actionResults = (await actionsClient.getBulk(actionIds)) || [];
+  const actionsUsingConnectorsWithMissingSecrets = actionResults.filter(
+    (result) => result.isMissingSecrets
+  );
+  if (actionsUsingConnectorsWithMissingSecrets.length) {
+    if (allowMissingConnectorSecrets) {
+      context.logger.error(
+        `Invalid connectors with "allowMissingConnectorSecrets": ${actionsUsingConnectorsWithMissingSecrets
+          .map((connector) => connector.name)
+          .join(', ')}`
+      );
+    } else {
       errors.push(
         i18n.translate('xpack.alerting.rulesClient.validateActions.misconfiguredConnector', {
           defaultMessage: 'Invalid connectors: {groups}',

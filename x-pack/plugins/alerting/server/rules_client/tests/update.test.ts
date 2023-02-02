@@ -2022,7 +2022,7 @@ describe('update()', () => {
     expect(unsecuredSavedObjectsClient.create).not.toHaveBeenCalled();
     expect(taskManager.schedule).not.toHaveBeenCalled();
   });
-  test('should update a rule even if action is missing secret when skipMissingSecretsValidation is true', async () => {
+  test('should update a rule even if action is missing secret when allowMissingConnectorSecrets is true', async () => {
     // Reset from default behaviour
     actionsClient.getBulk.mockReset();
     actionsClient.getBulk.mockResolvedValue([
@@ -2098,7 +2098,7 @@ describe('update()', () => {
           },
         ],
       },
-      skipMissingSecretsValidation: true,
+      allowMissingConnectorSecrets: true,
     });
 
     expect(unsecuredSavedObjectsClient.create).toHaveBeenNthCalledWith(

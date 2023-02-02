@@ -19,7 +19,7 @@ export interface CreateRulesOptions<T extends RuleCreateProps = RuleCreateProps>
   id?: string;
   immutable?: boolean;
   defaultEnabled?: boolean;
-  skipMissingSecretsValidation?: boolean;
+  allowMissingConnectorSecrets?: boolean;
 }
 
 export const createRules = async ({
@@ -28,7 +28,7 @@ export const createRules = async ({
   id,
   immutable = false,
   defaultEnabled = true,
-  skipMissingSecretsValidation,
+  allowMissingConnectorSecrets,
 }: CreateRulesOptions): Promise<SanitizedRule<RuleParams>> => {
   const internalRule = convertCreateAPIToInternalSchema(params, immutable, defaultEnabled);
   const rule = await rulesClient.create<RuleParams>({
@@ -36,7 +36,7 @@ export const createRules = async ({
       id,
     },
     data: internalRule,
-    skipMissingSecretsValidation,
+    allowMissingConnectorSecrets,
   });
 
   // Mute the rule if it is first created with the explicit no actions
