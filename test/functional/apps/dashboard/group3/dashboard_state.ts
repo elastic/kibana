@@ -31,6 +31,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const elasticChart = getService('elasticChart');
   const dashboardAddPanel = getService('dashboardAddPanel');
   const xyChartSelector = 'xyVisChart';
+  const log = getService('log');
+
+  const replaceInUrl = (url: string, pattern: string, replacement: string) => {
+    log.debug(`replaceInUrl, url: ${url}, pattern: ${pattern}, replacement: ${replacement}`);
+    expect(url.includes(pattern)).to.be(true);
+    // Use 'String' constructor to create a new string instance so 'url' parameter is not mutated
+    return String(url).replace(pattern, replacement);
+  }
 
   const enableNewChartLibraryDebug = async (force = false) => {
     if ((await PageObjects.visChart.isNewChartsLibraryEnabled()) || force) {
@@ -39,8 +47,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     }
   };
 
-  // Failing: See https://github.com/elastic/kibana/issues/139762
-  describe.skip('dashboard state', function describeIndexTests() {
+  describe.only('dashboard state', function describeIndexTests() {
     // Used to track flag before and after reset
 
     before(async function () {
@@ -141,7 +148,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       const currentQuery = await queryBar.getQueryString();
       expect(currentQuery).to.equal('');
       const currentUrl = await getUrlFromShare();
-      const newUrl = currentUrl.replace(`query:''`, `query:'abc12345678910'`);
+      const newUrl = replaceInUrl(currentUrl, `_a=()`, `_a=(query:(language:kuery,query:'abc12345678910'))`);
 
       // We need to add a timestamp to the URL because URL changes now only work with a hard refresh.
       await browser.get(newUrl.toString());
@@ -153,9 +160,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     const getUrlFromShare = async () => {
+      log.debug(`getUrlFromShare`);
       await PageObjects.share.clickShareTopNavButton();
       const sharedUrl = await PageObjects.share.getSharedUrl();
       await PageObjects.share.clickShareTopNavButton();
+      log.debug(`sharedUrl: ${sharedUrl}`);
       return sharedUrl;
     };
 
@@ -179,7 +188,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await queryBar.clickQuerySubmitButton();
         const oldQuery = await queryBar.getQueryString();
         const currentUrl = await getUrlFromShare();
-        const newUrl = currentUrl.replace(`query:'${oldQuery}'`, `query:'${newQuery}'`);
+        const newUrl = currentUrl.includes('query')
+          ? replaceInUrl(currentUrl, `query:'${oldQuery}'`, `query:'${newQuery}'`);
+          : replaceInUrl(currentUrl, '_a=()', `_a=(query:(language:kuery,query:'${newQuery}'))`);
 
         await browser.get(newUrl.toString(), !useHardRefresh);
         const queryBarContentsAfterRefresh = await queryBar.getQueryString();
@@ -202,10 +213,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await dashboardAddPanel.addVisualization(PIE_CHART_VIS_NAME);
         const currentUrl = await getUrlFromShare();
         const currentPanelDimensions = await PageObjects.dashboard.getPanelDimensions();
-        const newUrl = currentUrl.replace(
-          `w:${DEFAULT_PANEL_WIDTH}`,
-          `w:${DEFAULT_PANEL_WIDTH * 2}`
-        );
+        const newUrl = replaceInUrl(currentUrl, `w:${DEFAULT_PANEL_WIDTH}`, `w:${DEFAULT_PANEL_WIDTH * 2}`);
         await hardRefresh(newUrl);
 
         await retry.try(async () => {
@@ -255,7 +263,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           );
           await PageObjects.visChart.selectNewLegendColorChoice('#F9D9F9');
           const currentUrl = await getUrlFromShare();
-          const newUrl = currentUrl.replace('F9D9F9', 'FFFFFF');
+          const newUrl = replaceInUrl(currentUrl, 'F9D9F9', 'FFFFFF');
           await hardRefresh(newUrl);
           await PageObjects.header.waitUntilLoadingHasFinished();
 
@@ -280,7 +288,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         it('resets a pie slice color to the original when removed', async function () {
           const currentUrl = await getUrlFromShare();
-          const newUrl = currentUrl.replace(`'80000':%23FFFFFF`, '');
+          const newUrl = replaceInUrl(currentUrl, `'80000':%23FFFFFF`, '');
 
           await hardRefresh(newUrl);
           await PageObjects.header.waitUntilLoadingHasFinished();
