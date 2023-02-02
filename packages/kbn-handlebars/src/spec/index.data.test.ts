@@ -134,6 +134,18 @@ describe('data', () => {
       .toCompileTo('2hello world1');
   });
 
+  it('passing in data to a compiled function that expects data - works with helpers in partials', () => {
+    expectTemplate('{{>myPartial}}')
+      .withCompileOptions({ data: true })
+      .withPartial('myPartial', '{{hello}}')
+      .withHelper('hello', function (this: any, options: Handlebars.HelperOptions) {
+        return options.data.adjective + ' ' + this.noun;
+      })
+      .withInput({ noun: 'cat' })
+      .withRuntimeOptions({ data: { adjective: 'happy' } })
+      .toCompileTo('happy cat');
+  });
+
   it('passing in data to a compiled function that expects data - works with helpers and parameters', () => {
     expectTemplate('{{hello world}}')
       .withCompileOptions({ data: true })
