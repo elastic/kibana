@@ -724,7 +724,7 @@ class ElasticHandlebarsVisitor extends Handlebars.Visitor {
       context = Object.assign({}, context, options.hash);
     }
 
-    const partialTemplate: Handlebars.Template =
+    const partialTemplate: Handlebars.Template | undefined =
       this.container.partials[name] ??
       partialBlock ??
       Handlebars.VM.resolvePartial(undefined, undefined, options);
@@ -745,12 +745,9 @@ class ElasticHandlebarsVisitor extends Handlebars.Visitor {
 
     let result = render(context, options);
 
-    // TypeScript note: The `partial` object can be either `hbs.AST.PartialStatement` or ` as hbs.AST.PartialBlockStatement`.
-    // The `indent` property only exists on the former, so it will always be `undefined` on the latter, which isn't an issue.
-    // So to satisfy TypeScript I cast it to `hbs.AST.PartialStatement`. I wish there were a better approach.
-    if ((partial as hbs.AST.PartialStatement).indent) {
+    if ('indent' in partial) {
       result =
-        (partial as hbs.AST.PartialStatement).indent +
+        partial.indent +
         (this.compileOptions.preventIndent
           ? result
           : result.replace(/\n(?!$)/g, `\n${(partial as hbs.AST.PartialStatement).indent}`)); // indent each line, ignoring any trailing linebreak
