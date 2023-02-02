@@ -546,7 +546,6 @@ export const RULE_PANEL_MENU = [
       { ruleName: RULE_ELASTICSEARCH_VERSION_MISMATCH },
       { ruleName: RULE_KIBANA_VERSION_MISMATCH },
       { ruleName: RULE_LOGSTASH_VERSION_MISMATCH },
-      { ruleName: RULE_DATA_QUALITY },
     ],
   },
   {
@@ -570,6 +569,7 @@ export const RULE_PANEL_MENU = [
       { ruleName: RULE_THREAD_POOL_SEARCH_REJECTIONS },
       { ruleName: RULE_THREAD_POOL_WRITE_REJECTIONS },
       { ruleName: RULE_CCR_READ_EXCEPTIONS },
+      { ruleName: RULE_DATA_QUALITY },
     ],
   },
 ];
