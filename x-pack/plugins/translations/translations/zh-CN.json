@@ -18060,7 +18060,7 @@
     "xpack.lens.indexPattern.formulaWithTooManyArguments": "运算 {operation} 的参数过多",
     "xpack.lens.indexPattern.invalidReferenceConfiguration": "维度“{dimensionLabel}”配置不正确",
     "xpack.lens.indexPattern.lastValue.invalidTypeSortField": "字段 {invalidField} 不是日期字段，不能用于排序",
-    "xpack.lens.indexPattern.lastValue.sortFieldNotFound": "未找到字段 {invalidField}",
+    "xpack.lens.indexPattern.lastValue.sortFieldNotFound": "未找到字段 {sortField}",
     "xpack.lens.indexPattern.lastValueOf": "{name} 的最后一个值",
     "xpack.lens.indexPattern.layerErrorWrapper": "图层 {position} 错误：{wrappedMessage}",
     "xpack.lens.indexPattern.maxOf": "{name} 的最大值",
