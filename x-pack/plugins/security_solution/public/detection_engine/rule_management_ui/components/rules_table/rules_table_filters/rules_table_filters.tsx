@@ -77,7 +77,7 @@ const RulesTableFiltersComponent = () => {
   );
 
   return (
-    <FilterWrapper gutterSize="m" justifyContent="flexEnd">
+    <FilterWrapper gutterSize="m" justifyContent="flexEnd" wrap>
       <RuleSearchField initialValue={filterOptions.filter} onSearch={handleOnSearch} />
       <EuiFlexItem grow={false}>
         <EuiFilterGroup>
