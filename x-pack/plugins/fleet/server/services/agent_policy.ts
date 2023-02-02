@@ -6,7 +6,7 @@
  */
 
 import { omit, isEqual, keyBy, groupBy } from 'lodash';
-import uuidv5 from 'uuid/v5';
+import { v5 as uuidv5 } from 'uuid';
 import { safeDump } from 'js-yaml';
 import pMap from 'p-map';
 import { lt } from 'semver';
@@ -38,7 +38,7 @@ import type {
   ListWithKuery,
   NewPackagePolicy,
 } from '../types';
-import { packageToPackagePolicy } from '../../common/services';
+import { getAllowedOutputTypeForPolicy, packageToPackagePolicy } from '../../common/services';
 import {
   agentPolicyStatuses,
   AGENT_POLICY_INDEX,
@@ -122,7 +122,7 @@ class AgentPolicyService {
       soClient,
       agentPolicy,
       existingAgentPolicy,
-      this.hasAPMIntegration(existingAgentPolicy)
+      getAllowedOutputTypeForPolicy(existingAgentPolicy)
     );
     await soClient.update<AgentPolicySOAttributes>(SAVED_OBJECT_TYPE, id, {
       ...agentPolicy,
@@ -1042,7 +1042,7 @@ class AgentPolicyService {
       type: SAVED_OBJECT_TYPE,
       page: 1,
       perPage: SO_SEARCH_LIMIT,
-      filter: `${SAVED_OBJECT_TYPE}.attributes.inactivity_timeout: *`,
+      filter: `${SAVED_OBJECT_TYPE}.attributes.inactivity_timeout > 0`,
       fields: [`inactivity_timeout`],
     });
 

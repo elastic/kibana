@@ -29,6 +29,7 @@ export default ({ loadTestFile, getService }: FtrProviderContext): void => {
     // Trial
     loadTestFile(require.resolve('./cases/push_case'));
     loadTestFile(require.resolve('./cases/user_actions/get_all_user_actions'));
+    loadTestFile(require.resolve('./cases/user_actions/find_user_actions'));
     loadTestFile(require.resolve('./cases/assignees'));
     loadTestFile(require.resolve('./cases/find_cases'));
     loadTestFile(require.resolve('./configure'));
@@ -38,6 +39,7 @@ export default ({ loadTestFile, getService }: FtrProviderContext): void => {
 
     // Internal routes
     loadTestFile(require.resolve('./internal/suggest_user_profiles'));
+    loadTestFile(require.resolve('./internal/get_connectors'));
 
     // Common
     loadTestFile(require.resolve('../common'));

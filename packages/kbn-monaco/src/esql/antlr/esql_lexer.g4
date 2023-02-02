@@ -114,9 +114,12 @@ NULLS_ORDERING_DIRECTION
     | 'last'
     ;
 
-UNARY_FUNCTION
+MATH_FUNCTION
     : 'round'
-    | 'avg'
+    ;
+
+UNARY_FUNCTION
+    : 'avg'
     | 'min'
     | 'max'
     | 'sum'

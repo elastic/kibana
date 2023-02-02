@@ -7,7 +7,7 @@
  */
 
 import React, { useEffect, useState } from 'react';
-import uuid from 'uuid/v4';
+import { v4 as uuidv4 } from 'uuid';
 import { lastValueFrom } from 'rxjs';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
@@ -74,7 +74,7 @@ export const SearchExample = ({ data, dataView, navigation }: Props) => {
       const { rawResponse: resp } = await lastValueFrom(
         searchSource.fetch$({
           abortSignal: abortController.signal,
-          sessionId: uuid(),
+          sessionId: uuidv4(),
           legacyHitsTotal: false,
         })
       );

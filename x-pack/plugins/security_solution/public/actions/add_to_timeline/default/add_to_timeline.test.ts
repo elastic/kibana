@@ -12,7 +12,7 @@ import { Subject } from 'rxjs';
 import { TimelineId } from '../../../../common/types';
 import { addProvider } from '../../../timelines/store/timeline/actions';
 import { createAddToTimelineAction } from './add_to_timeline';
-import type { CellActionExecutionContext } from '@kbn/ui-actions-plugin/public';
+import type { CellActionExecutionContext } from '@kbn/cell-actions';
 import { GEO_FIELD_TYPE } from '../../../timelines/components/timeline/body/renderers/constants';
 
 jest.mock('../../../common/lib/kibana');
@@ -71,7 +71,7 @@ describe('Default createAddToTimelineAction', () => {
               and: [],
               enabled: true,
               excluded: false,
-              id: 'event-details-value-default-draggable-timeline-1-user_name-0-the-value',
+              id: 'event-field-default-timeline-1-user_name-0-the-value',
               kqlQuery: '',
               name: 'user.name',
               queryMatch: {

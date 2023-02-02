@@ -444,7 +444,7 @@ export const update = async (
       ];
     }, [] as CaseResponse[]);
 
-    await userActionService.bulkCreateUpdateCase({
+    await userActionService.creator.bulkCreateUpdateCase({
       originalCases: myCases.saved_objects,
       updatedCases: updatedCases.saved_objects,
       user,

@@ -6,7 +6,7 @@
  */
 import { apm, timerange } from '@kbn/apm-synthtrace-client';
 import { SpanLink } from '@kbn/apm-plugin/typings/es_schemas/raw/fields/span_links';
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 
 function getProducerInternalOnly() {
   const producerInternalOnlyInstance = apm
@@ -125,7 +125,7 @@ function getProducerConsumer({
   producerExternalOnlySpanBLink: SpanLink;
   producerExternalOnlyTransactionBLink: SpanLink;
 }) {
-  const externalTraceId = uuid.v4();
+  const externalTraceId = uuidv4();
 
   const producerConsumerInstance = apm
     .service({ name: 'producer-consumer', environment: 'production', agentName: 'ruby' })

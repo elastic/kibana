@@ -307,7 +307,7 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
               mode: 'absolute' as 'absolute',
             }
           : globalTimeRange;
-      const { suggestions, invalidSelections, totalCardinality } =
+      const { suggestions, invalidSelections, totalCardinality, rejected } =
         await this.optionsListService.runOptionsListRequest(
           {
             sort,
@@ -322,6 +322,12 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
           },
           this.abortController.signal
         );
+      if (rejected) {
+        // This prevents a rejected request (which can happen, for example, when a user types a search string too quickly)
+        // from prematurely setting loading to `false` and updating the suggestions to show "No results"
+        return;
+      }
+
       if (
         (!selectedOptions && !existsSelected) ||
         isEmpty(invalidSelections) ||
@@ -400,6 +406,8 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
   };
 
   reload = () => {
+    // clear cache when reload is requested
+    this.optionsListService.clearOptionsListCache();
     this.runOptionsListQuery();
   };
 

@@ -12,6 +12,7 @@ import moment from 'moment';
 import { AllSeries, createExploratoryViewUrl } from '@kbn/observability-plugin/public';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { SYNTHETICS_INDEX_PATTERN } from '../../../../../../common/constants';
 import { JourneyStep } from '../../../../../../common/runtime_types';
 import { useSyntheticsStartPlugins } from '../../../contexts';
 
@@ -78,7 +79,7 @@ export function StepFieldTrend({
         axisTitlesVisibility={{ x: false, yLeft: false, yRight: false }}
         legendIsVisible={false}
         dataTypesIndexPatterns={{
-          synthetics: 'synthetics-*',
+          synthetics: SYNTHETICS_INDEX_PATTERN,
         }}
         withActions={false}
       />

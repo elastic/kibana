@@ -12,7 +12,8 @@ import React, { useMemo, useState } from 'react';
 import { createHtmlPortalNode, InPortal, OutPortal } from 'react-reverse-portal';
 import { css } from '@emotion/css';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
-import type { TypedLensByValueInput } from '@kbn/lens-plugin/public';
+import type { LensEmbeddableInput, TypedLensByValueInput } from '@kbn/lens-plugin/public';
+import type { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
 import { Chart } from '../chart';
 import { Panels, PANELS_MODE } from '../panels';
 import type {
@@ -23,6 +24,7 @@ import type {
   UnifiedHistogramFetchStatus,
   UnifiedHistogramRequestContext,
   UnifiedHistogramChartLoadEvent,
+  UnifiedHistogramInput$,
 } from '../types';
 
 export interface UnifiedHistogramLayoutProps extends PropsWithChildren<unknown> {
@@ -39,9 +41,17 @@ export interface UnifiedHistogramLayoutProps extends PropsWithChildren<unknown> 
    */
   dataView: DataView;
   /**
-   * Can be updated to `Date.now()` to force a refresh
+   * The current query
    */
-  lastReloadRequestTime?: number;
+  query?: Query | AggregateQuery;
+  /**
+   * The current filters
+   */
+  filters?: Filter[];
+  /**
+   * The current time range
+   */
+  timeRange?: TimeRange;
   /**
    * Context object for requests made by unified histogram components -- optional
    */
@@ -73,6 +83,22 @@ export interface UnifiedHistogramLayoutProps extends PropsWithChildren<unknown> 
    */
   appendHitsCounter?: ReactElement;
   /**
+   * Disable automatic refetching based on props changes, and instead wait for a `refetch` message
+   */
+  disableAutoFetching?: boolean;
+  /**
+   * Disable triggers for the Lens embeddable
+   */
+  disableTriggers?: LensEmbeddableInput['disableTriggers'];
+  /**
+   * Disabled action IDs for the Lens embeddable
+   */
+  disabledActions?: LensEmbeddableInput['disabledActions'];
+  /**
+   * Input observable
+   */
+  input$?: UnifiedHistogramInput$;
+  /**
    * Callback to update the topPanelHeight prop when a resize is triggered
    */
   onTopPanelHeightChange?: (topPanelHeight: number | undefined) => void;
@@ -101,13 +127,23 @@ export interface UnifiedHistogramLayoutProps extends PropsWithChildren<unknown> 
    * Called when the histogram loading status changes
    */
   onChartLoad?: (event: UnifiedHistogramChartLoadEvent) => void;
+  /**
+   * Callback to pass to the Lens embeddable to handle filter changes
+   */
+  onFilter?: LensEmbeddableInput['onFilter'];
+  /**
+   * Callback to pass to the Lens embeddable to handle brush events
+   */
+  onBrushEnd?: LensEmbeddableInput['onBrushEnd'];
 }
 
 export const UnifiedHistogramLayout = ({
   className,
   services,
   dataView,
-  lastReloadRequestTime,
+  query,
+  filters,
+  timeRange,
   request,
   hits,
   chart,
@@ -116,6 +152,10 @@ export const UnifiedHistogramLayout = ({
   resizeRef,
   topPanelHeight,
   appendHitsCounter,
+  disableAutoFetching,
+  disableTriggers,
+  disabledActions,
+  input$,
   onTopPanelHeightChange,
   onEditVisualization,
   onChartHiddenChange,
@@ -123,6 +163,8 @@ export const UnifiedHistogramLayout = ({
   onBreakdownFieldChange,
   onTotalHitsChange,
   onChartLoad,
+  onFilter,
+  onBrushEnd,
   children,
 }: UnifiedHistogramLayoutProps) => {
   const [chartVisible, setChartVisible] = useState(true);
@@ -171,7 +213,9 @@ export const UnifiedHistogramLayout = ({
           className={chartVisible ? chartClassName : undefined}
           services={services}
           dataView={dataView}
-          lastReloadRequestTime={lastReloadRequestTime}
+          query={query}
+          filters={filters}
+          timeRange={timeRange}
           request={request}
           hits={hits}
           chart={chart}
@@ -181,6 +225,10 @@ export const UnifiedHistogramLayout = ({
           breakdown={breakdown}
           appendHitsCounter={appendHitsCounter}
           appendHistogram={showFixedPanels ? <EuiSpacer size="s" /> : <EuiSpacer size="l" />}
+          disableAutoFetching={disableAutoFetching}
+          disableTriggers={disableTriggers}
+          disabledActions={disabledActions}
+          input$={input$}
           onEditVisualization={onEditVisualization}
           onResetChartHeight={onResetChartHeight}
           onChartHiddenChange={onChartHiddenChange}
@@ -188,6 +236,8 @@ export const UnifiedHistogramLayout = ({
           onBreakdownFieldChange={onBreakdownFieldChange}
           onTotalHitsChange={onTotalHitsChange}
           onChartLoad={onChartLoad}
+          onFilter={onFilter}
+          onBrushEnd={onBrushEnd}
         />
       </InPortal>
       <InPortal node={mainPanelNode}>{children}</InPortal>

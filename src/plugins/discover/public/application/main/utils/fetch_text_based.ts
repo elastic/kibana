@@ -14,7 +14,7 @@ import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import type { Datatable } from '@kbn/expressions-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { textBasedQueryStateToAstWithValidation } from '@kbn/data-plugin/common';
-import { DataTableRecord } from '../../../types';
+import type { RecordsFetchResponse, DataTableRecord } from '../../../types';
 
 interface TextBasedErrorResponse {
   error: {
@@ -31,7 +31,7 @@ export function fetchTextBased(
   inspectorAdapters: Adapters,
   filters?: Filter[],
   inputQuery?: Query
-) {
+): Promise<RecordsFetchResponse> {
   const timeRange = data.query.timefilter.timefilter.getTime();
   return textBasedQueryStateToAstWithValidation({
     filters,
@@ -46,6 +46,7 @@ export function fetchTextBased(
           inspectorAdapters,
         });
         let finalData: DataTableRecord[] = [];
+        let textBasedQueryColumns: Datatable['columns'] | undefined;
         let error: string | undefined;
         execution.pipe(pluck('result')).subscribe((resp) => {
           const response = resp as Datatable | TextBasedErrorResponse;
@@ -54,6 +55,7 @@ export function fetchTextBased(
           } else {
             const table = response as Datatable;
             const rows = table?.rows ?? [];
+            textBasedQueryColumns = table?.columns ?? undefined;
             finalData = rows.map(
               (row: Record<string, string>, idx: number) =>
                 ({
@@ -68,11 +70,17 @@ export function fetchTextBased(
           if (error) {
             throw new Error(error);
           } else {
-            return finalData || [];
+            return {
+              records: finalData || [],
+              textBasedQueryColumns,
+            };
           }
         });
       }
-      return [];
+      return {
+        records: [] as DataTableRecord[],
+        textBasedQueryColumns: [],
+      };
     })
     .catch((err) => {
       throw new Error(err.message);

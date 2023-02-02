@@ -31,6 +31,7 @@ import {
   AlertsTableProps,
   BulkActionsReducerAction,
   BulkActionsState,
+  RowSelectionState,
 } from '../../../types';
 import { ALERTS_TABLE_CONF_ERROR_MESSAGE, ALERTS_TABLE_CONF_ERROR_TITLE } from './translations';
 import { TypeRegistry } from '../../type_registry';
@@ -58,6 +59,7 @@ export interface AlertsTableStateProps {
   query: Pick<QueryDslQueryContainer, 'bool' | 'ids'>;
   pageSize?: number;
   showExpandToDetails: boolean;
+  showAlertStatusWithFlapping?: boolean;
 }
 
 export interface AlertsTableStorage {
@@ -66,21 +68,11 @@ export interface AlertsTableStorage {
   sort: SortCombinations[];
 }
 
-const EmptyConfiguration = {
+const EmptyConfiguration: AlertsTableConfigurationRegistry = {
   id: '',
   casesFeatureId: '',
   columns: [],
   sort: [],
-  externalFlyout: {
-    header: () => null,
-    body: () => null,
-    footer: () => null,
-  },
-  internalFlyout: {
-    header: () => null,
-    body: () => null,
-    footer: () => null,
-  },
   getRenderCellValue: () => () => null,
 };
 
@@ -105,6 +97,7 @@ const AlertsTableState = ({
   query,
   pageSize,
   showExpandToDetails,
+  showAlertStatusWithFlapping,
 }: AlertsTableStateProps) => {
   const { cases } = useKibana<{ cases: CaseUi }>().services;
 
@@ -116,6 +109,7 @@ const AlertsTableState = ({
 
   const storage = useRef(new Storage(window.localStorage));
   const localAlertsTableConfig = storage.current.get(id) as Partial<AlertsTableStorage>;
+  const persistentControls = alertsTableConfiguration?.usePersistentControls?.();
 
   const columnsLocal =
     localAlertsTableConfig &&
@@ -187,7 +181,7 @@ const AlertsTableState = ({
   }, []);
 
   const initialBulkActionsState = useReducer(bulkActionsReducer, {
-    rowSelection: new Set<number>(),
+    rowSelection: new Map<number, RowSelectionState>(),
     isAllSelected: false,
     areAllVisibleRowsSelected: false,
     rowCount: alerts.length,
@@ -254,6 +248,7 @@ const AlertsTableState = ({
       id,
       leadingControlColumns: [],
       showExpandToDetails,
+      showAlertStatusWithFlapping,
       trailingControlColumns: [],
       useFetchAlertsData,
       visibleColumns,
@@ -264,6 +259,7 @@ const AlertsTableState = ({
       onResetColumns,
       onColumnsChange,
       onChangeVisibleColumns,
+      controls: persistentControls,
     }),
     [
       alertsTableConfiguration,
@@ -272,6 +268,7 @@ const AlertsTableState = ({
       pagination.pageSize,
       id,
       showExpandToDetails,
+      showAlertStatusWithFlapping,
       useFetchAlertsData,
       visibleColumns,
       updatedAt,
@@ -280,6 +277,7 @@ const AlertsTableState = ({
       onResetColumns,
       onColumnsChange,
       onChangeVisibleColumns,
+      persistentControls,
     ]
   );
 
@@ -288,7 +286,7 @@ const AlertsTableState = ({
 
   return hasAlertsTableConfiguration ? (
     <>
-      {!isLoading && alertsCount === 0 && <EmptyState />}
+      {!isLoading && alertsCount === 0 && <EmptyState controls={persistentControls} />}
       {(isLoading || isBrowserFieldDataLoading) && (
         <EuiProgress size="xs" color="accent" data-test-subj="internalAlertsPageLoading" />
       )}

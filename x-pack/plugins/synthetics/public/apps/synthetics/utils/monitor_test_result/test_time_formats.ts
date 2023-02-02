@@ -36,13 +36,20 @@ export function formatTestRunAt(timestamp: string, format: string) {
   return stampedMoment.format(format);
 }
 
-export function useFormatTestRunAt(timestamp?: string) {
+export function useDateFormatForTest() {
   let format = useKibanaDateFormat();
-  if (!timestamp) {
-    return '';
-  }
+
   if (format.endsWith('.SSS')) {
     format = format.replace('.SSS', '');
+  }
+  return format;
+}
+
+export function useFormatTestRunAt(timestamp?: string) {
+  const format = useDateFormatForTest();
+
+  if (!timestamp) {
+    return '';
   }
   return formatTestRunAt(timestamp, format);
 }

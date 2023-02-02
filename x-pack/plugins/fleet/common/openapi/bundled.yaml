@@ -247,7 +247,31 @@ paths:
               schema:
                 $ref: '#/components/schemas/bulk_install_packages_response'
       operationId: bulk-install-packages
-    parameters: []
+      parameters:
+        - in: query
+          name: prerelease
+          schema:
+            type: boolean
+            default: false
+          description: >-
+            Whether to return prerelease versions of packages (e.g. beta, rc,
+            preview) 
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                packages:
+                  type: array
+                  items:
+                    type: string
+                  description: list of package names to install
+                force:
+                  type: boolean
+                  description: force install to ignore package verification errors
+              required:
+                - packages
   /epm/packages/{pkgkey}:
     get:
       summary: Packages - Info
@@ -285,6 +309,14 @@ paths:
           name: pkgkey
           in: path
           required: true
+        - in: query
+          name: prerelease
+          schema:
+            type: boolean
+            default: false
+          description: >-
+            Whether to return prerelease versions of packages (e.g. beta, rc,
+            preview) 
       deprecated: true
     post:
       summary: Packages - Install
@@ -437,6 +469,14 @@ paths:
           Return all fields from the package manifest, not just those supported
           by the Elastic Package Registry
         in: query
+      - in: query
+        name: prerelease
+        schema:
+          type: boolean
+          default: false
+        description: >-
+          Whether to return prerelease versions of packages (e.g. beta, rc,
+          preview) 
     post:
       summary: Packages - Install
       tags: []
@@ -816,6 +856,7 @@ paths:
         - $ref: '#/components/parameters/show_upgradeable'
         - $ref: '#/components/parameters/sort_field'
         - $ref: '#/components/parameters/sort_order'
+        - $ref: '#/components/parameters/with_metrics'
       security:
         - basicAuth: []
   /agents/bulk_upgrade:
@@ -943,6 +984,8 @@ paths:
                 required:
                   - item
       operationId: get-agent
+      parameters:
+        - $ref: '#/components/parameters/with_metrics'
     put:
       summary: Agent - Update
       tags: []
@@ -2894,6 +2937,13 @@ components:
         enum:
           - asc
           - desc
+    with_metrics:
+      name: withMetrics
+      in: query
+      description: Return agent metrics, false by default
+      required: false
+      schema:
+        type: boolean
   schemas:
     fleet_setup_response:
       title: Fleet Setup response
@@ -3365,6 +3415,17 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/agent_component'
+        metrics:
+          type: object
+          properties:
+            cpu_avg:
+              type: number
+              description: >-
+                Average agent CPU usage during the last 5 minute, number between
+                0-1
+            memory_size_byte_avg:
+              type: number
+              description: Average agent memory consumption during the last 5 minute
       required:
         - type
         - active

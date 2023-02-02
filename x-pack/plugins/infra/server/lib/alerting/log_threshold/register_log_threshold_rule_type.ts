@@ -8,6 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import { PluginSetupContract } from '@kbn/alerting-plugin/server';
 import { createLogThresholdExecutor, FIRED_ACTIONS } from './log_threshold_executor';
+import { extractReferences, injectReferences } from './log_threshold_references_manager';
 import {
   LOG_DOCUMENT_COUNT_RULE_TYPE_ID,
   ruleParamsRT,
@@ -146,5 +147,9 @@ export async function registerLogThresholdRuleType(
     },
     producer: 'logs',
     getSummarizedAlerts: libs.logsRules.createGetSummarizedAlerts(),
+    useSavedObjectReferences: {
+      extractReferences,
+      injectReferences,
+    },
   });
 }

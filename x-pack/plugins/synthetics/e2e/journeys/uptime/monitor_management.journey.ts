@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import { journey, step, expect, after, Page } from '@elastic/synthetics';
 import { byTestId } from '@kbn/observability-plugin/e2e/utils';
 import { recordVideo } from '@kbn/observability-plugin/e2e/record_video';
@@ -18,10 +18,10 @@ const basicMonitorDetails = {
   location: customLocation || 'US Central',
   schedule: '3',
 };
-const httpName = `http monitor ${uuid.v4()}`;
-const icmpName = `icmp monitor ${uuid.v4()}`;
-const tcpName = `tcp monitor ${uuid.v4()}`;
-const browserName = `browser monitor ${uuid.v4()}`;
+const httpName = `http monitor ${uuidv4()}`;
+const icmpName = `icmp monitor ${uuidv4()}`;
+const tcpName = `tcp monitor ${uuidv4()}`;
+const browserName = `browser monitor ${uuidv4()}`;
 
 const configuration = {
   [DataStream.HTTP]: {
@@ -154,7 +154,7 @@ journey('Monitor Management breadcrumbs', async ({ page, params }: { page: Page;
   recordVideo(page);
   const uptime = monitorManagementPageProvider({ page, kibanaUrl: params.kibanaUrl });
   const defaultMonitorDetails = {
-    name: `Sample monitor ${uuid.v4()}`,
+    name: `Sample monitor ${uuidv4()}`,
     location: 'US Central',
     schedule: '3',
     apmServiceName: 'service',
@@ -218,13 +218,13 @@ journey(
 
     const sortedMonitors = [
       Object.assign({}, configuration[DataStream.ICMP].monitorConfig, {
-        name: `A ${uuid.v4()}`,
+        name: `A ${uuidv4()}`,
       }),
       Object.assign({}, configuration[DataStream.ICMP].monitorConfig, {
-        name: `B ${uuid.v4()}`,
+        name: `B ${uuidv4()}`,
       }),
       Object.assign({}, configuration[DataStream.ICMP].monitorConfig, {
-        name: `aa ${uuid.v4()}`,
+        name: `aa ${uuidv4()}`,
       }),
     ];
 

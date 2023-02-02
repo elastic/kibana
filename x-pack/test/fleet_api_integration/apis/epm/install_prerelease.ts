@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { skipIfNoDockerRegistry } from '../../helpers';
 import { setupFleetAndAgents } from '../agents/services';
@@ -38,6 +38,65 @@ export default function (providerContext: FtrProviderContext) {
         .post(`/api/fleet/epm/packages/${testPackage}/${testPackageVersion}`)
         .set('kbn-xsrf', 'xxxx')
         .expect(200);
+    });
+
+    const pkg = 'endpoint';
+    const gaVersion = '8.6.1';
+    const betaVersion = '8.7.0-next';
+
+    afterEach(async () => {
+      await deletePackage(pkg, gaVersion);
+      await deletePackage(pkg, betaVersion);
+    });
+
+    it('should install the GA package correctly', async function () {
+      const response = await supertest
+        .post(`/api/fleet/epm/packages/${pkg}/${gaVersion}`)
+        .set('kbn-xsrf', 'xxxx')
+        .send({ force: true })
+        .expect(200);
+
+      expect(response.body.items.find((item: any) => item.id.includes(gaVersion)));
+    });
+
+    it('should install the GA package when no version is provided', async function () {
+      const response = await supertest
+        .post(`/api/fleet/epm/packages/${pkg}`)
+        .set('kbn-xsrf', 'xxxx')
+        .send({ force: true })
+        .expect(200);
+
+      expect(response.body.items.find((item: any) => item.id.includes(gaVersion)));
+    });
+
+    it('should install the beta package when no version is provided and prerelease is true', async function () {
+      const response = await supertest
+        .post(`/api/fleet/epm/packages/${pkg}?prerelease=true`)
+        .set('kbn-xsrf', 'xxxx')
+        .send({ force: true }) // using force to ignore package verification error
+        .expect(200);
+
+      expect(response.body.items.find((item: any) => item.id.includes(betaVersion)));
+    });
+
+    it('should bulk install the beta packages when prerelease is true', async function () {
+      const response = await supertest
+        .post(`/api/fleet/epm/packages/_bulk?prerelease=true`)
+        .set('kbn-xsrf', 'xxxx')
+        .send({ packages: ['endpoint'], force: true })
+        .expect(200);
+
+      expect(response.body.items[0].version).equal(betaVersion);
+    });
+
+    it('should bulk install the GA packages when prerelease is not set', async function () {
+      const response = await supertest
+        .post(`/api/fleet/epm/packages/_bulk`)
+        .set('kbn-xsrf', 'xxxx')
+        .send({ packages: ['endpoint'], force: true })
+        .expect(200);
+
+      expect(response.body.items[0].version).equal(gaVersion);
     });
   });
 }

@@ -28,6 +28,7 @@ import {
   TableChangeType,
   DatasourceDimensionTriggerProps,
   DataSourceInfo,
+  UserMessage,
 } from '../../types';
 import { generateId } from '../../id_generator';
 import { toExpression } from './to_expression';
@@ -164,7 +165,7 @@ export function getTextBasedDatasource({
     checkIntegrity: () => {
       return [];
     },
-    getErrorMessages: (state) => {
+    getUserMessages: (state) => {
       const errors: Error[] = [];
 
       Object.values(state.layers).forEach((layer) => {
@@ -173,21 +174,15 @@ export function getTextBasedDatasource({
         }
       });
       return errors.map((err) => {
-        return {
+        const message: UserMessage = {
+          severity: 'error',
+          fixableInEditor: true,
+          displayLocations: [{ id: 'visualization' }, { id: 'textBasedLanguagesQueryInput' }],
           shortMessage: err.message,
           longMessage: err.message,
         };
+        return message;
       });
-    },
-    getUnifiedSearchErrors: (state) => {
-      const errors: Error[] = [];
-
-      Object.values(state.layers).forEach((layer) => {
-        if (layer.errors && layer.errors.length > 0) {
-          errors.push(...layer.errors);
-        }
-      });
-      return errors;
     },
     initialize(
       state?: TextBasedPersistedState,

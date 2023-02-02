@@ -43,7 +43,7 @@ export function DimensionButton({
         onClick={() => onClick(accessorConfig.columnId)}
         aria-label={triggerLinkA11yText(label)}
         title={triggerLinkA11yText(label)}
-        color={invalid || group.invalid ? 'danger' : undefined}
+        color={invalid ? 'danger' : undefined}
       >
         <ColorIndicator accessorConfig={accessorConfig}>{children}</ColorIndicator>
       </EuiLink>

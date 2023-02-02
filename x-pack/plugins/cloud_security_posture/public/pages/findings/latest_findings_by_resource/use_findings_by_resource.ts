@@ -9,12 +9,12 @@ import { lastValueFrom } from 'rxjs';
 import { IKibanaSearchRequest, IKibanaSearchResponse } from '@kbn/data-plugin/common';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { Pagination } from '@elastic/eui';
+import { MAX_FINDINGS_TO_LOAD } from '../../../common/constants';
 import { useKibana } from '../../../common/hooks/use_kibana';
 import { showErrorToast } from '../latest_findings/use_latest_findings';
 import type { FindingsBaseEsQuery, Sort } from '../types';
 import { getAggregationCount, getFindingsCountAggQuery } from '../utils/utils';
 import { CSP_LATEST_FINDINGS_DATA_VIEW } from '../../../../common/constants';
-import { MAX_FINDINGS_TO_LOAD } from '../../../common/constants';
 
 interface UseFindingsByResourceOptions extends FindingsBaseEsQuery {
   enabled: boolean;
@@ -35,11 +35,13 @@ type FindingsAggResponse = IKibanaSearchResponse<
 >;
 
 export interface FindingsByResourcePage {
-  failed_findings: {
-    count: number;
+  findings: {
+    failed_findings: number;
+    passed_findings: number;
     normalized: number;
     total_findings: number;
   };
+  compliance_score: number;
   resource_id: string;
   cluster_id: string;
   'resource.name': string;
@@ -56,6 +58,8 @@ interface FindingsByResourceAggs {
 
 interface FindingsAggBucket extends estypes.AggregationsStringRareTermsBucketKeys {
   failed_findings: estypes.AggregationsMultiBucketBase;
+  compliance_score: estypes.AggregationsScriptedMetricAggregate;
+  passed_findings: estypes.AggregationsMultiBucketBase;
   name: estypes.AggregationsMultiBucketAggregateBase<estypes.AggregationsStringTermsBucketKeys>;
   subtype: estypes.AggregationsMultiBucketAggregateBase<estypes.AggregationsStringTermsBucketKeys>;
   cluster_id: estypes.AggregationsMultiBucketAggregateBase<estypes.AggregationsStringTermsBucketKeys>;
@@ -92,15 +96,27 @@ export const getFindingsByResourceAggQuery = ({
           failed_findings: {
             filter: { term: { 'result.evaluation': 'failed' } },
           },
+          passed_findings: {
+            filter: { term: { 'result.evaluation': 'passed' } },
+          },
           cluster_id: {
             terms: { field: 'cluster_id', size: 1 },
           },
-          sort_failed_findings: {
+          compliance_score: {
+            bucket_script: {
+              buckets_path: {
+                passed: 'passed_findings>_count',
+                failed: 'failed_findings>_count',
+              },
+              script: 'params.passed / (params.passed + params.failed)',
+            },
+          },
+          sort_by_compliance_score: {
             bucket_sort: {
               size: MAX_FINDINGS_TO_LOAD,
               sort: [
                 {
-                  'failed_findings>_count': { order: sortDirection },
+                  compliance_score: { order: sortDirection },
                   _count: { order: 'desc' },
                   _key: { order: 'asc' },
                 },
@@ -177,11 +193,13 @@ const createFindingsByResource = (resource: FindingsAggBucket): FindingsByResour
     cluster_id: resource.cluster_id.buckets[0]?.key,
     ['rule.section']: resource.cis_sections.buckets.map((v) => v.key),
     ['rule.benchmark.name']: resource.benchmarkName.buckets[0]?.key,
-    failed_findings: {
-      count: resource.failed_findings.doc_count,
+    compliance_score: resource.compliance_score.value,
+    findings: {
+      failed_findings: resource.failed_findings.doc_count,
       normalized:
         resource.doc_count > 0 ? resource.failed_findings.doc_count / resource.doc_count : 0,
       total_findings: resource.doc_count,
+      passed_findings: resource.passed_findings.doc_count,
     },
   };
 };

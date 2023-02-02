@@ -10,9 +10,9 @@ Array [
     >
       <span
         data-euiicon-type="tokenGeo"
-        title="Geo point field"
+        title="Geo point"
       >
-        Geo point field
+        Geo point
       </span>
     </span>
   </div>,
@@ -44,9 +44,9 @@ Array [
     >
       <span
         data-euiicon-type="tokenNumber"
-        title="Number field"
+        title="Number"
       >
-        Number field
+        Number
       </span>
     </span>
   </div>,
@@ -78,9 +78,9 @@ Array [
     >
       <span
         data-euiicon-type="tokenString"
-        title="String field"
+        title="String"
       >
-        String field
+        String
       </span>
     </span>
   </div>,
@@ -146,9 +146,9 @@ Array [
     >
       <span
         data-euiicon-type="tokenNumber"
-        title="Number field"
+        title="Number"
       >
-        Number field
+        Number
       </span>
     </span>
   </div>,
@@ -180,9 +180,9 @@ Array [
     >
       <span
         data-euiicon-type="tokenNumber"
-        title="Number field"
+        title="Number"
       >
-        Number field
+        Number
       </span>
     </span>
   </div>,

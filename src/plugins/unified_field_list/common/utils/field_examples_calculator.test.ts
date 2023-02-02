@@ -11,11 +11,17 @@ import type { DataView } from '@kbn/data-views-plugin/public';
 import { stubLogstashDataView as dataView } from '@kbn/data-views-plugin/common/data_view.stub';
 import { getFieldExampleBuckets, groupValues, getFieldValues } from './field_examples_calculator';
 
-const hitsAsValues: Array<Record<string, string | number | string[]>> = [
+const hitsAsValues: Array<Record<string, string | number | string[] | object>> = [
   {
     extension: 'html',
     bytes: 360.20000000000005,
     '@tags': ['success', 'info'],
+    point: [
+      {
+        type: 'Point',
+        coordinates: [100, 20],
+      },
+    ],
   },
   {
     extension: 'gif',
@@ -25,10 +31,22 @@ const hitsAsValues: Array<Record<string, string | number | string[]>> = [
   {
     extension: 'png',
     bytes: 841.6,
+    point: [
+      {
+        type: 'Point',
+        coordinates: [100, 20],
+      },
+    ],
   },
   {
     extension: 'html',
     bytes: 1626.4,
+    point: [
+      {
+        type: 'Point',
+        coordinates: [100, 20],
+      },
+    ],
   },
   {
     extension: 'php',
@@ -106,7 +124,7 @@ const hits = hitsAsValues.map((value) => ({
   _id: '1945',
   _score: 1,
   fields: Object.keys(value).reduce(
-    (result: Record<string, Array<string | number>>, fieldName: string) => {
+    (result: Record<string, Array<string | number | object>>, fieldName: string) => {
       const fieldValue = value[fieldName];
       result[fieldName] = Array.isArray(fieldValue) ? fieldValue : [fieldValue];
       return result;
@@ -211,13 +229,23 @@ describe('fieldExamplesCalculator', function () {
       expect(map(result.buckets, 'key')).toEqual(['html', 'php', 'gif']);
     });
 
-    it('fails to analyze geo and attachment types', function () {
+    it('analyzes geo types', function () {
       params.field = dataView.fields.getByName('point');
-      expect(() => getFieldExampleBuckets(params)).toThrowError();
+      expect(getFieldExampleBuckets(params)).toEqual({
+        buckets: [{ count: 3, key: { coordinates: [100, 20], type: 'Point' } }],
+        sampledDocuments: 20,
+        sampledValues: 3,
+      });
 
       params.field = dataView.fields.getByName('area');
-      expect(() => getFieldExampleBuckets(params)).toThrowError();
+      expect(getFieldExampleBuckets(params)).toEqual({
+        buckets: [],
+        sampledDocuments: 20,
+        sampledValues: 0,
+      });
+    });
 
+    it('fails to analyze attachment types', function () {
       params.field = dataView.fields.getByName('request_body');
       expect(() => getFieldExampleBuckets(params)).toThrowError();
 

@@ -35,7 +35,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { useTheme } from '@kbn/observability-plugin/public';
 import { MonitorDetailsPanel } from '../../../common/components/monitor_details_panel';
 import { ClientPluginsStart } from '../../../../../../plugin';
-import { useStatusByLocation } from '../../../../hooks/use_status_by_location';
+import { LocationsStatus, useStatusByLocation } from '../../../../hooks/use_status_by_location';
 import { MonitorEnabled } from '../../management/monitor_list_table/monitor_enabled';
 import { ActionsPopover } from './actions_popover';
 import {
@@ -51,7 +51,7 @@ import {
   MonitorOverviewItem,
   SyntheticsMonitor,
 } from '../types';
-import { useMonitorDetailLocator } from '../../hooks/use_monitor_detail_locator';
+import { useMonitorDetailLocator } from '../../../../hooks/use_monitor_detail_locator';
 import { fetchSyntheticsMonitor } from '../../../../state/overview/api';
 import { MonitorStatus } from '../../../common/components/monitor_status';
 import { MonitorLocationSelect } from '../../../common/components/monitor_location_select';
@@ -170,14 +170,14 @@ function DetailedFlyoutHeader({
   monitor,
   onEnabledChange,
 }: {
-  locations: ReturnType<typeof useStatusByLocation>['locations'];
+  locations: LocationsStatus;
   currentLocation: string;
   configId: string;
   monitor: EncryptedSyntheticsMonitor;
   onEnabledChange: () => void;
   setCurrentLocation: (location: string, locationId: string) => void;
 }) {
-  const status = locations.find((l) => l.observer?.geo?.name === currentLocation)?.monitor?.status;
+  const status = locations.find((l) => l.label === currentLocation)?.status;
   const { locations: allLocations } = useSelector(selectServiceLocationsState);
 
   const selectedLocation = allLocations.find((ll) => ll.label === currentLocation);
@@ -270,8 +270,10 @@ export function MonitorDetailFlyout(props: Props) {
   const [isActionsPopoverOpen, setIsActionsPopoverOpen] = useState(false);
 
   const monitorDetail = useMonitorDetail(configId, props.location);
-  const locationStatuses = useStatusByLocation(configId);
-  const locations = locationStatuses.locations?.filter((l: any) => !!l?.observer?.geo?.name) ?? [];
+  const { locations } = useStatusByLocation({
+    configId,
+    monitorLocations: monitorSavedObject?.attributes.locations,
+  });
 
   const isOverlay = useIsWithinMaxBreakpoint('xl');
 

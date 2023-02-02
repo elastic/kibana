@@ -12,26 +12,34 @@ import {
   EuiContextMenuPanel,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiLink,
   EuiPanel,
   EuiPopover,
+  EuiText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { SLOWithSummaryResponse } from '@kbn/slo-schema';
+import { HistoricalSummaryResponse, SLOWithSummaryResponse } from '@kbn/slo-schema';
 import { useKibana } from '../../../utils/kibana_react';
-import { SloSummaryStats } from './slo_summary_stats';
+import { SloSummary } from './slo_summary';
 import { SloDeleteConfirmationModal } from './slo_delete_confirmation_modal';
-import { SloBadges } from './slo_badges';
+import { SloBadges } from './badges/slo_badges';
 import { paths } from '../../../config';
 
 export interface SloListItemProps {
   slo: SLOWithSummaryResponse;
+  historicalSummary?: HistoricalSummaryResponse[];
+  historicalSummaryLoading: boolean;
   onDeleted: () => void;
   onDeleting: () => void;
 }
 
-export function SloListItem({ slo, onDeleted, onDeleting }: SloListItemProps) {
+export function SloListItem({
+  slo,
+  historicalSummary = [],
+  historicalSummaryLoading,
+  onDeleted,
+  onDeleting,
+}: SloListItemProps) {
   const {
     application: { navigateToUrl },
     http: { basePath },
@@ -53,10 +61,6 @@ export function SloListItem({ slo, onDeleted, onDeleting }: SloListItemProps) {
     setDeleteConfirmationModalOpen(true);
     setIsDeleting(true);
     setIsActionsPopoverOpen(false);
-  };
-
-  const handleNavigate = () => {
-    navigateToUrl(basePath.prepend(paths.observability.sloDetails(slo.id)));
   };
 
   const handleDeleteCancel = () => {
@@ -83,14 +87,18 @@ export function SloListItem({ slo, onDeleted, onDeleting }: SloListItemProps) {
             <EuiFlexItem grow>
               <EuiFlexGroup direction="column" gutterSize="m">
                 <EuiFlexItem>
-                  <EuiLink onClick={handleNavigate}>{slo.name}</EuiLink>
+                  <EuiText size="s">{slo.name}</EuiText>
                 </EuiFlexItem>
                 <SloBadges slo={slo} />
               </EuiFlexGroup>
             </EuiFlexItem>
 
             <EuiFlexItem grow={false}>
-              <SloSummaryStats slo={slo} />
+              <SloSummary
+                slo={slo}
+                historicalSummary={historicalSummary}
+                historicalSummaryLoading={historicalSummaryLoading}
+              />
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>

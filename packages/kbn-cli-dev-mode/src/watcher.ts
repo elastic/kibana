@@ -18,14 +18,15 @@ import { Log } from './log';
 const packageMatcher = makeMatcher(['**/*', '!**/.*']);
 
 /**
- * Any non-package code must match this in order to trigger a restart
+ * Any code that is outside of a package must match this in order to trigger a restart
  */
 const nonPackageMatcher = makeMatcher([
+  'config/**/*.yml',
   'src/**',
   '!src/{dev,fixtures}/**',
   'x-pack/plugins/**',
-  '!x-pack/plugins/screenshotting/chromium',
-  '!x-pack/plugins/canvas/canvas_plugin_src',
+  '!x-pack/plugins/screenshotting/chromium/**',
+  '!x-pack/plugins/canvas/shareable_runtime/**',
 ]);
 
 export interface Options {

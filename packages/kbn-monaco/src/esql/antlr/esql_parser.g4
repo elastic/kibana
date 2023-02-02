@@ -58,9 +58,14 @@ mathFn
     : functionIdentifier LP (functionExpressionArgument (COMMA functionExpressionArgument)*)? RP
     ;
 
+mathEvalFn
+    : mathFunctionIdentifier LP (mathFunctionExpressionArgument (COMMA mathFunctionExpressionArgument)*)? RP
+    ;
+
 operatorExpression
     : primaryExpression
     | mathFn
+    | mathEvalFn
     | operator=(MINUS | PLUS) operatorExpression
     | left=operatorExpression operator=(ASTERISK | SLASH | PERCENT) right=operatorExpression
     | left=operatorExpression operator=(PLUS | MINUS) right=operatorExpression
@@ -112,6 +117,13 @@ functionExpressionArgument
    | string
    ;
 
+mathFunctionExpressionArgument
+   : qualifiedName
+   | string
+   | number
+   | operatorExpression
+   ;
+
 qualifiedName
     : identifier (DOT identifier)*
     ;
@@ -123,6 +135,10 @@ qualifiedNames
 identifier
     : UNQUOTED_IDENTIFIER
     | QUOTED_IDENTIFIER
+    ;
+
+mathFunctionIdentifier
+    : MATH_FUNCTION
     ;
 
 functionIdentifier

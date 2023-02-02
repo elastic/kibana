@@ -282,7 +282,7 @@ describe('Create case', () => {
 
       await waitFor(() => {
         expect(
-          screen.getByText('The length of the title is too long. The maximum length is 160.')
+          screen.getByText('The length of the name is too long. The maximum length is 160.')
         ).toBeInTheDocument();
       });
 
