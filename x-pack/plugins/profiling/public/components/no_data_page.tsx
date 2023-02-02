@@ -10,6 +10,7 @@ import {
   EuiFlexItem,
   EuiIcon,
   EuiLink,
+  EuiLoadingSpinner,
   EuiPanel,
   EuiSpacer,
   EuiSplitPanel,
@@ -20,9 +21,25 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
+import { AsyncStatus, useAsync } from '../hooks/use_async';
+import { useProfilingDependencies } from './contexts/profiling_dependencies/use_profiling_dependencies';
 import { ProfilingAppPageTemplate } from './profiling_app_page_template';
 
 export function NoDataPage() {
+  const {
+    services: { setupDataCollectionInstructions },
+  } = useProfilingDependencies();
+
+  const { data, status } = useAsync(
+    ({ http }) => {
+      return setupDataCollectionInstructions({ http });
+    },
+    [setupDataCollectionInstructions]
+  );
+
+  const secretToken = data?.variables.secretToken;
+  const collectionAgentHostPort = data?.variables.apmServerUrl;
+
   const tabs = [
     {
       key: 'kubernetes',
@@ -47,9 +64,9 @@ export function NoDataPage() {
           content: (
             <EuiCodeBlock paddingSize="s" isCopyable>
               {`helm install --create-namespace -n=universal-profiling universal-profiling-agent \\
---set "projectID=1,secretToken=iHgi4nyWuQQlkLA2nH" \\
---set "collectionAgentHostPort=[661b123f0bbf472e9b80719ada47f548.apm.us-central1.gcp.cloud.es.io.apm.us-central1.gcp.cloud.es.io](http://661b123f0bbf472e9b80719ada47f548.apm.us-central1.gcp.cloud.es.io.apm.us-central1.gcp.cloud.es.io/):443" \\
---set "image.baseUrl=[docker.elastic.co](http://docker.elastic.co/),image.repository=observability,[image.name](http://image.name/)=profiling-agent" \\
+--set "projectID=1,secretToken=${secretToken}" \\
+--set "collectionAgentHostPort=${collectionAgentHostPort}" \\
+--set "image.baseUrl=docker.elastic.co,image.repository=observability,image.name=profiling-agent" \\
 optimyze/pf-host-agent`}
             </EuiCodeBlock>
           ),
@@ -85,11 +102,11 @@ optimyze/pf-host-agent`}
           }),
           content: (
             <EuiCodeBlock paddingSize="s" isCopyable>
-              {`docker run --name host-agent --privileged --pid=host -v /etc/[machine-id:/etc/machine-id:ro](http://machine-id/etc/machine-id:ro) \\
--v /var/run/docker.[sock:/var/run/docker.sock](http://sock/var/run/docker.sock) -v /sys/kernel/[debug:/sys/kernel/debug:ro](http://debug/sys/kernel/debug:ro) \\
-[docker.elastic.co/observability/profiling-agent:stable](http://docker.elastic.co/observability/profiling-agent:stable) /root/pf-host-agent \\
--project-id=1 -secret-token=iHgi4nyWuQQlkLA2nH \\
--collection-agent=[661b123f0bbf472e9b80719ada47f548.apm.us-central1.gcp.cloud.es.io.apm.us-central1.gcp.cloud.es.io](http://661b123f0bbf472e9b80719ada47f548.apm.us-central1.gcp.cloud.es.io.apm.us-central1.gcp.cloud.es.io/):443`}
+              {`docker run --name host-agent --privileged --pid=host -v /etc/machine-id:/etc/machine-id:ro \\
+-v /var/run/docker.sock:/var/run/docker.sock -v /sys/kernel/debug:/sys/kernel/debug:ro \\
+docker.elastic.co/observability/profiling-agent:stable /root/pf-host-agent \\
+-project-id=1 -secret-token=${secretToken} \\
+-collection-agent=${collectionAgentHostPort}`}
             </EuiCodeBlock>
           ),
         },
@@ -127,7 +144,7 @@ optimyze/pf-host-agent`}
           }),
           content: (
             <EuiCodeBlock paddingSize="s" isCopyable>
-              {`sudo pf-host-agent/pf-host-agent -project-id=1 -secret-token=iHgi4nyWuQQlkLA2nH -collection-agent=[661b123f0bbf472e9b80719ada47f548.apm.us-central1.gcp.cloud.es.io.apm.us-central1.gcp.cloud.es.io](http://661b123f0bbf472e9b80719ada47f548.apm.us-central1.gcp.cloud.es.io.apm.us-central1.gcp.cloud.es.io/):443`}
+              {`sudo pf-host-agent/pf-host-agent -project-id=1 -secret-token=${secretToken} -collection-agent=${collectionAgentHostPort}`}
             </EuiCodeBlock>
           ),
         },
@@ -166,7 +183,7 @@ optimyze/pf-host-agent`}
           }),
           content: (
             <EuiCodeBlock paddingSize="s" isCopyable>
-              {`echo -e "project-id 1\nsecret-token iHgi4nyWuQQlkLA2nH\ncollection-agent 661b123f0bbf472e9b80719ada47f548.apm.us-central1.gcp.cloud.es.io.apm.us-central1.gcp.cloud.es.io:443" | sudo tee -a /etc/prodfiler/prodfiler.conf`}
+              {`echo -e "project-id 1\nsecret-token ${secretToken}\ncollection-agent ${collectionAgentHostPort}" | sudo tee -a /etc/prodfiler/prodfiler.conf`}
             </EuiCodeBlock>
           ),
         },
@@ -216,7 +233,7 @@ optimyze/pf-host-agent`}
           }),
           content: (
             <EuiCodeBlock paddingSize="s" isCopyable>
-              {`echo -e "project-id 1\nsecret-token iHgi4nyWuQQlkLA2nH\ncollection-agent 661b123f0bbf472e9b80719ada47f548.apm.us-central1.gcp.cloud.es.io.apm.us-central1.gcp.cloud.es.io:443" | sudo tee -a /etc/prodfiler/prodfiler.conf`}
+              {`echo -e "project-id 1\nsecret-token ${secretToken}\ncollection-agent ${collectionAgentHostPort}" | sudo tee -a /etc/prodfiler/prodfiler.conf`}
             </EuiCodeBlock>
           ),
         },
@@ -241,6 +258,8 @@ optimyze/pf-host-agent`}
 
   const displayedSteps = displayedTab.steps ?? [];
 
+  const isLoading = status === AsyncStatus.Loading;
+
   return (
     <ProfilingAppPageTemplate
       tabs={[]}
@@ -256,48 +275,57 @@ optimyze/pf-host-agent`}
               defaultMessage: 'Add profiling data ',
             })}
           </EuiFlexItem>
+          {isLoading ? (
+            <EuiFlexItem>
+              <EuiLoadingSpinner />
+            </EuiFlexItem>
+          ) : null}
         </EuiFlexGroup>
       }
     >
-      <>
-        <EuiText>
-          {i18n.translate('xpack.profiling.noDataPage.introduction', {
-            defaultMessage: `You're almost there! Follow the instructions below to add data.`,
-          })}
-        </EuiText>
-        <EuiSpacer />
-        <EuiSplitPanel.Outer>
-          <EuiPanel hasBorder={false} hasShadow={false} grow={false} paddingSize="none">
-            <EuiSplitPanel.Inner color="subdued" paddingSize="none">
-              <EuiTabs style={{ padding: '0 24px' }}>
-                {tabs.map((tab) => {
-                  return (
-                    <EuiTab
-                      key={tab.key}
-                      onClick={() => setSelectedTab(tab.key)}
-                      isSelected={tab.key === selectedTab}
-                    >
-                      {tab.title}
-                    </EuiTab>
-                  );
-                })}
-              </EuiTabs>
-            </EuiSplitPanel.Inner>
-            <EuiSplitPanel.Inner style={{ padding: '0 24px' }}>
-              <EuiSpacer size="xxl" />
-              <EuiSteps
-                steps={displayedSteps.map((step) => {
-                  return {
-                    title: step.title,
-                    children: step.content,
-                    status: 'incomplete',
-                  };
-                })}
-              />
-            </EuiSplitPanel.Inner>
-          </EuiPanel>
-        </EuiSplitPanel.Outer>
-      </>
+      {isLoading ? (
+        <></>
+      ) : (
+        <>
+          <EuiText>
+            {i18n.translate('xpack.profiling.noDataPage.introduction', {
+              defaultMessage: `You're almost there! Follow the instructions below to add data.`,
+            })}
+          </EuiText>
+          <EuiSpacer />
+          <EuiSplitPanel.Outer>
+            <EuiPanel hasBorder={false} hasShadow={false} grow={false} paddingSize="none">
+              <EuiSplitPanel.Inner color="subdued" paddingSize="none">
+                <EuiTabs style={{ padding: '0 24px' }}>
+                  {tabs.map((tab) => {
+                    return (
+                      <EuiTab
+                        key={tab.key}
+                        onClick={() => setSelectedTab(tab.key)}
+                        isSelected={tab.key === selectedTab}
+                      >
+                        {tab.title}
+                      </EuiTab>
+                    );
+                  })}
+                </EuiTabs>
+              </EuiSplitPanel.Inner>
+              <EuiSplitPanel.Inner style={{ padding: '0 24px' }}>
+                <EuiSpacer size="xxl" />
+                <EuiSteps
+                  steps={displayedSteps.map((step) => {
+                    return {
+                      title: step.title,
+                      children: step.content,
+                      status: 'incomplete',
+                    };
+                  })}
+                />
+              </EuiSplitPanel.Inner>
+            </EuiPanel>
+          </EuiSplitPanel.Outer>
+        </>
+      )}
     </ProfilingAppPageTemplate>
   );
 }
