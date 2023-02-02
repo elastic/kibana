@@ -10,6 +10,7 @@ import React, { useRef, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { get, invert, orderBy } from 'lodash';
 import styled from 'styled-components';
+import { selectOverviewStatus } from '../../../../state/overview_status';
 import {
   getSyntheticsFilterDisplayValues,
   monitorTypeKeyLabelMap,
@@ -31,8 +32,9 @@ export const GridItemsByGroup = ({
 }) => {
   const [fullScreenGroup, setFullScreenGroup] = useState('');
 
+  const { status } = useSelector(selectOverviewStatus);
+
   const {
-    status,
     groupBy: { field: groupField, order: groupOrder },
   } = useSelector(selectOverviewState);
 
