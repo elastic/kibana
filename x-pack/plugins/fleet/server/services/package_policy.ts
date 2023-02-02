@@ -566,8 +566,9 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
 
     inputs = enforceFrozenInputs(oldPackagePolicy.inputs, inputs, options?.force);
     let elasticsearchPrivileges: NonNullable<PackagePolicy['elasticsearch']>['privileges'];
+    let pkgInfo;
     if (packagePolicy.package?.name) {
-      const pkgInfo = await getPackageInfo({
+      pkgInfo = await getPackageInfo({
         savedObjectsClient: soClient,
         pkgName: packagePolicy.package.name,
         pkgVersion: packagePolicy.package.version,
@@ -608,6 +609,29 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
 
     const newPolicy = (await this.get(soClient, id)) as PackagePolicy;
 
+    // if we have moved to an input package we need to create the index templates
+    // for the package policy as input packages create index templates per package policy
+    if (pkgInfo && pkgInfo.type === 'input') {
+      if (oldPackagePolicy.package) {
+        const oldPackage = await getPackageInfo({
+          savedObjectsClient: soClient,
+          pkgName: oldPackagePolicy.package?.name,
+          pkgVersion: oldPackagePolicy.package?.version,
+          prerelease: true,
+        });
+
+        if (oldPackage.type === 'integration') {
+          installAssetsForInputPackagePolicy({
+            logger: appContextService.getLogger(),
+            soClient,
+            esClient,
+            pkgInfo,
+            packagePolicy: newPolicy,
+            force: true,
+          });
+        }
+      }
+    }
     // Bump revision of associated agent policy
     const bumpPromise = agentPolicyService.bumpRevision(
       soClient,
