@@ -33,7 +33,7 @@ export const OverviewAlerts = () => {
 
   const { status } = useSelector(selectOverviewStatus);
 
-  const loading = !status?.enabledIds || status?.enabledIds.length === 0;
+  const loading = !status?.allIds || status?.allIds.length === 0;
 
   return (
     <EuiPanel hasShadow={false} paddingSize="m" hasBorder>

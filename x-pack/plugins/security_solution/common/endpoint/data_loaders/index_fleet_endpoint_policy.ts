@@ -33,7 +33,8 @@ export interface IndexedFleetEndpointPolicyResponse {
 export const indexFleetEndpointPolicy = async (
   kbnClient: KbnClient,
   policyName: string,
-  endpointPackageVersion: string = '8.0.0'
+  endpointPackageVersion: string = '8.0.0',
+  agentPolicyName?: string
 ): Promise<IndexedFleetEndpointPolicyResponse> => {
   const response: IndexedFleetEndpointPolicyResponse = {
     integrationPolicies: [],
@@ -42,7 +43,8 @@ export const indexFleetEndpointPolicy = async (
 
   // Create Agent Policy first
   const newAgentPolicyData: CreateAgentPolicyRequest['body'] = {
-    name: `Policy for ${policyName} (${Math.random().toString(36).substr(2, 5)})`,
+    name:
+      agentPolicyName || `Policy for ${policyName} (${Math.random().toString(36).substr(2, 5)})`,
     description: `Policy created with endpoint data generator (${policyName})`,
     namespace: 'default',
   };
