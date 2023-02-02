@@ -38,6 +38,9 @@ describe('Setup Indices', () => {
       configuration: {
         type: 'object',
       },
+      custom_scheduling: {
+        type: 'object',
+      },
       description: { type: 'text' },
       error: { type: 'keyword' },
       features: {
