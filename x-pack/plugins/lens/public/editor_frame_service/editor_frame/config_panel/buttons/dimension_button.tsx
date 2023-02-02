@@ -6,8 +6,10 @@
  */
 
 import React from 'react';
-import { EuiButtonEmpty, EuiFlexItem, EuiIcon, EuiLink, EuiToolTip } from '@elastic/eui';
+import { EuiButtonIcon, EuiFlexItem, EuiLink, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { css } from '@emotion/react';
+import { euiThemeVars } from '@kbn/ui-theme';
 import { DimensionButtonIcon } from '../dimension_button_icon';
 import { PaletteIndicator } from '../palette_indicator';
 import { VisualizationDimensionGroupConfig, AccessorConfig, UserMessage } from '../../../../types';
@@ -62,26 +64,28 @@ export function DimensionButton({
           </EuiLink>
         </EuiToolTip>
       </EuiFlexItem>
-      <EuiButtonEmpty
-        size="s"
+      <EuiButtonIcon
         className="lnsLayerPanel__dimensionRemove"
         data-test-subj="indexPattern-dimension-remove"
+        iconType="trash"
+        size="s"
+        color="danger"
+        aria-label={i18n.translate('xpack.lens.indexPattern.removeColumnLabel', {
+          defaultMessage: 'Remove configuration from "{groupLabel}"',
+          values: { groupLabel: group.groupLabel },
+        })}
+        title={i18n.translate('xpack.lens.indexPattern.removeColumnLabel', {
+          defaultMessage: 'Remove configuration from "{groupLabel}"',
+          values: { groupLabel: group.groupLabel },
+        })}
         onClick={() => onRemoveClick(accessorConfig.columnId)}
-      >
-        <EuiIcon
-          type="trash"
-          size="s"
-          color="subdued"
-          aria-label={i18n.translate('xpack.lens.indexPattern.removeColumnLabel', {
-            defaultMessage: 'Remove configuration from "{groupLabel}"',
-            values: { groupLabel: group.groupLabel },
-          })}
-          title={i18n.translate('xpack.lens.indexPattern.removeColumnLabel', {
-            defaultMessage: 'Remove configuration from "{groupLabel}"',
-            values: { groupLabel: group.groupLabel },
-          })}
-        />
-      </EuiButtonEmpty>
+        css={css`
+          color: ${euiThemeVars.euiTextSubduedColor};
+          &:hover {
+            color: ${euiThemeVars.euiColorDangerText};
+          }
+        `}
+      />
       <PaletteIndicator accessorConfig={accessorConfig} />
     </>
   );
