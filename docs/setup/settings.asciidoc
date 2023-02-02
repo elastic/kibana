@@ -28,9 +28,9 @@ Add sources for the https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Co
 `csp.disableUnsafeEval`::
 experimental[] Set this to `true` to remove the https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy/script-src#unsafe_eval_expressions[`unsafe-eval`] source expression from the `script-src` directive. *Default: `false`*
 +
-By enabling `csp.disableUnsafeEval`, Kibana will use a custom version of the Handlebars template library which doesn't support https://handlebarsjs.com/guide/partials.html#inline-partials[inline partials].
+By enabling `csp.disableUnsafeEval`, Kibana will use a custom version of the Handlebars template library.
 Handlebars is used in various locations in the Kibana frontend where custom templates can be supplied by the user when for instance setting up a visualisation.
-If you experience any issues rendering Handlebars templates after turning on `csp.disableUnsafeEval`, or if you rely on inline partials, please revert this setting to `false` and https://github.com/elastic/kibana/issues/new/choose[open an issue] in the Kibana GitHub repository.
+If you experience any issues rendering Handlebars templates after turning on `csp.disableUnsafeEval`, please revert this setting to `false` and https://github.com/elastic/kibana/issues/new/choose[open an issue] in the Kibana GitHub repository.
 
 `csp.worker_src`::
 Add sources for the https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy/worker-src[Content Security Policy `worker-src` directive].
