@@ -6,6 +6,4 @@
  * Side Public License, v 1.
  */
 
-export { PLUGIN_ID, API_ENDPOINT } from './constants';
-export type { ProcedureSchemas, ProcedureName, GetIn, CreateIn } from './rpc';
-export { procedureNames, schemas as rpcSchemas } from './rpc';
+export { RpcClient } from './rpc_client';

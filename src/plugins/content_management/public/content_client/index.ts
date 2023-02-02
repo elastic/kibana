@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
-export { PLUGIN_ID, API_ENDPOINT } from './constants';
-export type { ProcedureSchemas, ProcedureName, GetIn, CreateIn } from './rpc';
-export { procedureNames, schemas as rpcSchemas } from './rpc';
+export { ContentClient } from './content_client';
+export { ContentClientProvider, useContentClient } from './content_client_context';
+export { useGetContentQuery } from './content_client_query_hooks';
+export { useCreateContentMutation } from './content_client_mutation_hooks';
