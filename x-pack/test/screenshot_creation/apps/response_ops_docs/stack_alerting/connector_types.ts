@@ -16,6 +16,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const comboBox = getService('comboBox');
   const es = getService('es');
   const testIndex = `test-index`;
+  const indexDocument =
+    `{\n` +
+    `"rule_id": "{{rule.id}}",\n` +
+    `"rule_name": "{{rule.name}}",\n` +
+    `"alert_id": "{{alert.id}}",\n` +
+    `"context_message": "{{context.message}}"\n`;
 
   describe('connector types', function () {
     beforeEach(async () => {
@@ -23,7 +29,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await pageObjects.header.waitUntilLoadingHasFinished();
     });
 
-    it('serverlog connector screenshot', async () => {
+    it('server log connector screenshots', async () => {
       await pageObjects.common.navigateToApp('connectors');
       await pageObjects.header.waitUntilLoadingHasFinished();
       await actions.common.openNewConnectorForm('server-log');
@@ -36,7 +42,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await flyOutCancelButton.click();
     });
 
-    it('index connector screenshot', async () => {
+    it('index connector screenshots', async () => {
       await es.indices.create({
         index: testIndex,
         body: {
@@ -58,6 +64,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       const timeFieldToggle = await testSubjects.find('hasTimeFieldCheckbox');
       await timeFieldToggle.click();
       await commonScreenshots.takeScreenshot('index-connector', screenshotDirectories);
+      const saveTestButton = await testSubjects.find('create-connector-flyout-save-test-btn');
+      await saveTestButton.click();
+      await testSubjects.setValue('actionJsonEditor', indexDocument);
+      await commonScreenshots.takeScreenshot('index-params-test', screenshotDirectories);
       const flyOutCancelButton = await testSubjects.find('euiFlyoutCloseButton');
       await flyOutCancelButton.click();
     });
