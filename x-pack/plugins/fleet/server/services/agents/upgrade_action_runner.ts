@@ -70,6 +70,14 @@ export async function upgradeBatch(
       actionId: options.actionId,
     };
   }
+  if (options.actionId) {
+    appContextService
+      .getLogger()
+      .info(
+        `Continuing batch of actionId:${options.actionId} of ${givenAgents.length} agents of upgrade`
+      );
+  }
+
   const errors: Record<Agent['id'], Error> = { ...outgoingErrors };
 
   const hostedPolicies = await getHostedPolicies(soClient, givenAgents);
