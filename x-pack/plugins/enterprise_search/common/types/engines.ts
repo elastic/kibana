@@ -8,7 +8,6 @@
 import { HealthStatus } from '@elastic/elasticsearch/lib/api/types';
 
 export interface EnterpriseSearchEnginesResponse {
-  isInitialRequest?: boolean;
   meta: {
     from: number;
     size: number;

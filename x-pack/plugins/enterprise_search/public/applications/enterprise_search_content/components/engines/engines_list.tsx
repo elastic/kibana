@@ -152,7 +152,7 @@ export const EnginesList: React.FC = () => {
               {i18n.translate(
                 'xpack.enterpriseSearch.content.engines.searchPlaceholder.description',
                 {
-                  defaultMessage: "Locate an engine via name or by it's included indices indices.",
+                  defaultMessage: 'Locate an engine via name or by its included indices.',
                 }
               )}
             </EuiText>
