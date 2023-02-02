@@ -30,6 +30,9 @@ export const fieldHasCellActions = (field?: string): boolean => {
   return !!field && !FIELDS_WITHOUT_CELL_ACTIONS.includes(field);
 };
 
-export const isCountField = (fieldType: string | undefined, sourceParamType: Serializable) => {
+export const isCountField = (
+  fieldType: string | undefined,
+  sourceParamType: Serializable | undefined
+) => {
   return fieldType === 'number' && sourceParamType === 'value_count';
 };
