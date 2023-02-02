@@ -19,7 +19,7 @@ jest.mock('@kbn/kibana-react-plugin/public/ui_settings/use_ui_setting', () => ({
 
 const TITLE_DATA_TEST_SUBJ = 'mockedTimeRangeTitle';
 
-jest.mock('../../../../hooks/use_load_alert_summary', () => ({
+jest.mock('../../hooks/use_load_alert_summary', () => ({
   useLoadAlertSummary: jest.fn().mockReturnValue({
     alertSummary: {
       activeAlertCount: 1,

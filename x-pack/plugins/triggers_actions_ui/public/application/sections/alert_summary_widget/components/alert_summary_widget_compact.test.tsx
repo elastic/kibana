@@ -12,10 +12,7 @@ import {
   AlertsSummaryWidgetCompactProps,
 } from './alert_summary_widget_compact';
 import { render } from '@testing-library/react';
-import {
-  mockedAlertSummaryResponse,
-  mockedChartThemes,
-} from '../../../../../mock/alert_summary_widget';
+import { mockedAlertSummaryResponse, mockedChartThemes } from '../../../mock/alert_summary_widget';
 
 describe('AlertsSummaryWidgetCompact', () => {
   const renderComponent = (props: Partial<AlertsSummaryWidgetCompactProps> = {}) =>
