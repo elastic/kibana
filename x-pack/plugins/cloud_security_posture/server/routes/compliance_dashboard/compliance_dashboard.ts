@@ -9,7 +9,11 @@ import { transformError } from '@kbn/securitysolution-es-utils';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { schema } from '@kbn/config-schema';
 import type { PosturePolicyTemplate, ComplianceDashboardData } from '../../../common/types';
-import { LATEST_FINDINGS_INDEX_DEFAULT_NS, STATS_ROUTE_PATH } from '../../../common/constants';
+import {
+  FINDINGS_INDEX_DEFAULT_NS,
+  LATEST_FINDINGS_INDEX_DEFAULT_NS,
+  STATS_ROUTE_PATH,
+} from '../../../common/constants';
 import { getGroupedFindingsEvaluation } from './get_grouped_findings_evaluation';
 import { ClusterWithoutTrend, getClusters } from './get_clusters';
 import { getStats } from './get_stats';
@@ -56,7 +60,7 @@ export const defineGetComplianceDashboardRoute = (router: CspRouter): void =>
         const esClient = cspContext.esClient.asCurrentUser;
 
         const { id: pitId } = await esClient.openPointInTime({
-          index: LATEST_FINDINGS_INDEX_DEFAULT_NS,
+          index: FINDINGS_INDEX_DEFAULT_NS,
           keep_alive: '30s',
         });
 
@@ -66,11 +70,19 @@ export const defineGetComplianceDashboardRoute = (router: CspRouter): void =>
           bool: {
             // TODO: CIS AWS - replace filtered field to `policy_template` when available
             filter: [{ term: { 'rule.benchmark.id': policyTemplate } }],
+            must: {
+              range: {
+                '@timestamp': {
+                  gte: 'now-24h',
+                },
+              },
+            },
           },
         };
 
         const [stats, groupedFindingsEvaluation, clustersWithoutTrends, trends] = await Promise.all(
           [
+            // TODO: edit the queries to use the Findings index
             getStats(esClient, query, pitId),
             getGroupedFindingsEvaluation(esClient, query, pitId),
             getClusters(esClient, query, pitId),

@@ -28,7 +28,7 @@ import {
 } from '../../lib/fleet_util';
 import { checkIndexStatus } from '../../lib/check_index_status';
 
-export const INDEX_TIMEOUT_IN_MINUTES = 10;
+export const INDEX_TIMEOUT_IN_MINUTES = 100000000;
 
 const calculateDiffFromNowInMinutes = (date: string | number): number =>
   moment().diff(moment(date), 'minutes');
@@ -110,7 +110,7 @@ const getCspStatus = async ({
     installedPackagePolicies,
     installedPolicyTemplates,
   ] = await Promise.all([
-    checkIndexStatus(esClient.asCurrentUser, LATEST_FINDINGS_INDEX_DEFAULT_NS, logger),
+    checkIndexStatus(esClient.asCurrentUser, FINDINGS_INDEX_PATTERN, logger),
     checkIndexStatus(esClient.asCurrentUser, FINDINGS_INDEX_PATTERN, logger),
     checkIndexStatus(esClient.asCurrentUser, BENCHMARK_SCORE_INDEX_DEFAULT_NS, logger),
     packageService.asInternalUser.getInstallation(CLOUD_SECURITY_POSTURE_PACKAGE_NAME),

@@ -118,13 +118,13 @@ export const getFindingsPageSizeInfo = ({
 
 export const getFindingsCountAggQuery = () => ({
   count: { terms: { field: 'result.evaluation' } },
-  '2': {
+  latest_findings: {
     multi_terms: {
       terms: [{ field: 'resource.id' }, { field: 'rule.id' }],
       size: 10000,
     },
     aggs: {
-      '1': {
+      last_finding: {
         top_hits: {
           _source: true,
           size: 1,

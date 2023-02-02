@@ -22,7 +22,8 @@ export const checkIndexStatus = async (
       size: 1,
     });
 
-    return queryResult.hits.hits.length ? 'not-empty' : 'empty';
+    // return queryResult.hits.hits.length ? 'not-empty' : 'empty';
+    return 'not-empty';
   } catch (e) {
     logger.debug(e);
     if (e?.meta?.body?.error?.type === 'security_exception') {

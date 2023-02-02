@@ -39,6 +39,53 @@ const uniqueResourcesCountQuery = {
   },
 };
 
+export const getUniqueResourcesQuery = (
+  query: QueryDslQueryContainer,
+  pitId: string
+): SearchRequest => ({
+  query,
+  size: 0,
+  aggs: {
+    ...uniqueResourcesCountQuery,
+  },
+  pit: {
+    id: pitId,
+  },
+});
+
+export const getEvaluationsQuery2 = (
+  query: QueryDslQueryContainer,
+  pitId: string
+): SearchRequest => ({
+  query,
+  size: 0,
+  aggs: {
+    // ...uniqueResourcesCountQuery,
+    latest_findings: {
+      multi_terms: {
+        terms: [{ field: 'resource.id' }, { field: 'rule.id' }],
+        size: 10000,
+      },
+      aggs: {
+        evaluation: {
+          top_metrics: {
+            metrics: {
+              field: 'result.evaluation',
+            },
+            size: 1,
+            sort: {
+              '@timestamp': 'desc',
+            },
+          },
+        },
+      },
+    },
+  },
+  pit: {
+    id: pitId,
+  },
+});
+
 export const getEvaluationsQuery = (
   query: QueryDslQueryContainer,
   pitId: string
@@ -72,6 +119,21 @@ export const getStatsFromFindingsEvaluationsAggs = (
   };
 };
 
+// export const getStats = async (
+//   esClient: ElasticsearchClient,
+//   query: QueryDslQueryContainer,
+//   pitId: string
+// ): Promise<ComplianceDashboardData['stats']> => {
+//   const evaluationsQueryResult = await esClient.search<unknown, FindingsEvaluationsQueryResult>(
+//     getEvaluationsQuery(query, pitId)
+//   );
+
+//   const findingsEvaluations = evaluationsQueryResult.aggregations;
+//   if (!findingsEvaluations) throw new Error('missing findings evaluations');
+
+//   return getStatsFromFindingsEvaluationsAggs(findingsEvaluations);
+// };
+
 export const getStats = async (
   esClient: ElasticsearchClient,
   query: QueryDslQueryContainer,
@@ -81,8 +143,30 @@ export const getStats = async (
     getEvaluationsQuery(query, pitId)
   );
 
+  const evaluationsQueryResult2 = await esClient.search<unknown, FindingsEvaluationsQueryResult>(
+    getEvaluationsQuery2(query, pitId)
+  );
+
+  const occurrences = { passed: 0, failed: 0 };
+
+  for (const element of evaluationsQueryResult2.aggregations!.latest_findings!.buckets) {
+    if (element) {
+      if (element.evaluation.top[0].metrics['result.evaluation'] === 'passed') {
+        occurrences.passed++;
+      } else if (element.evaluation.top[0].metrics['result.evaluation'] === 'failed') {
+        occurrences.failed++;
+      }
+    }
+  }
+
+  const boo = {
+    resources_evaluated: { value: evaluationsQueryResult.aggregations!.resources_evaluated?.value },
+    failed_findings: { doc_count: occurrences.failed },
+    passed_findings: { doc_count: occurrences.passed },
+  };
+
   const findingsEvaluations = evaluationsQueryResult.aggregations;
   if (!findingsEvaluations) throw new Error('missing findings evaluations');
 
-  return getStatsFromFindingsEvaluationsAggs(findingsEvaluations);
+  return getStatsFromFindingsEvaluationsAggs(boo);
 };

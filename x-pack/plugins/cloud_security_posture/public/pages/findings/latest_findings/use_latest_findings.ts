@@ -115,7 +115,10 @@ export const useLatestFindings = (options: UseFindingsOptions) => {
         throw new Error('expected buckets to be an array');
 
       return {
-        page: hits.hits.map((hit) => hit._source!),
+        // page: hits.hits.map((hit) => hit._source!),
+        page: aggregations.latest_findings.buckets.map(
+          (hit) => hit.last_finding.hits.hits[0]._source
+        ),
         total: number.is(hits.total) ? hits.total : 0,
         count: getAggregationCount(aggregations.count.buckets),
       };
