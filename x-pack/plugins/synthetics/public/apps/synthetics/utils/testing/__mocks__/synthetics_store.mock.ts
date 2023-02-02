@@ -29,8 +29,6 @@ export const mockState: SyntheticsAppState = {
     integrationsPopoverOpen: null,
     searchText: '',
     monitorId: '',
-    scaledDateFormat: null,
-    scaledDateFormatString: '',
   },
   serviceLocations: {
     throttling: DEFAULT_THROTTLING,

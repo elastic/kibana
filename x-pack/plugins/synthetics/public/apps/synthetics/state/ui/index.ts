@@ -16,7 +16,6 @@ import {
   setAlertFlyoutVisible,
   setSearchTextAction,
   setSelectedMonitorId,
-  setScaledDateAction,
 } from './actions';
 
 export interface UiState {
@@ -27,8 +26,6 @@ export interface UiState {
   searchText: string;
   integrationsPopoverOpen: PopoverState | null;
   monitorId: string;
-  scaledDateFormatString: string;
-  scaledDateFormat: { [key: number]: string } | null;
 }
 
 const initialState: UiState = {
@@ -38,8 +35,6 @@ const initialState: UiState = {
   searchText: '',
   integrationsPopoverOpen: null,
   monitorId: '',
-  scaledDateFormatString: '',
-  scaledDateFormat: null,
 };
 
 export const uiReducer = createReducer(initialState, (builder) => {
@@ -64,10 +59,6 @@ export const uiReducer = createReducer(initialState, (builder) => {
     })
     .addCase(setSelectedMonitorId, (state, action) => {
       state.monitorId = action.payload;
-    })
-    .addCase(setScaledDateAction, (state, action) => {
-      state.scaledDateFormat = action.payload.format;
-      state.scaledDateFormatString = action.payload.formatString;
     });
 });
 
