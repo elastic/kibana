@@ -44,8 +44,12 @@ const getInputCharacters = (input: string): InputCharacter[] => {
   });
 };
 
-const toReactJsxFragment = (prefix: string, item: InputCharacter, index: number) => {
-  return <span key={`${prefix}.${index}.${item.value ?? '$'}`}>{item.renderValue}</span>;
+const toValueDisplayElement = (prefix: string, item: InputCharacter, index: number) => {
+  return (
+    <span className="chr" key={`${prefix}.${index}.${item.value ?? '$'}`}>
+      {item.renderValue}
+    </span>
+  );
 };
 
 const toInputCharacterDisplayString = (
@@ -234,11 +238,11 @@ export class EnteredInput {
   }
 
   getLeftOfCursorRenderingContent(): ReactNode {
-    return <>{this.leftOfCursorContent.map(toReactJsxFragment.bind(null, 'left'))}</>;
+    return <>{this.leftOfCursorContent.map(toValueDisplayElement.bind(null, 'left'))}</>;
   }
 
   getRightOfCursorRenderingContent(): ReactNode {
-    return <>{this.rightOfCursorContent.map(toReactJsxFragment.bind(null, 'right'))}</>;
+    return <>{this.rightOfCursorContent.map(toValueDisplayElement.bind(null, 'right'))}</>;
   }
 
   getArgState(): undefined | EnteredCommand['argState'] {

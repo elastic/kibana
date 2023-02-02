@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import type { ReactNode } from 'react';
-import React, { memo, useEffect, useMemo, useRef } from 'react';
+import type { MouseEventHandler, ReactNode } from 'react';
+import React, { memo, useCallback, useEffect, useRef } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import styled from 'styled-components';
+import { useConsoleStateDispatch } from '../../../hooks/state_selectors/use_console_state_dispatch';
 import { useWithInputTextEntered } from '../../../hooks/state_selectors/use_with_input_text_entered';
 import { useTestIdGenerator } from '../../../../../hooks/use_test_id_generator';
 import { useDataTestSubj } from '../../../hooks/state_selectors/use_data_test_subj';
@@ -39,38 +40,45 @@ export interface InputDisplayProps {
 
 export const InputDisplay = memo<InputDisplayProps>(({ leftOfCursor, rightOfCursor }) => {
   const getTestId = useTestIdGenerator(useDataTestSubj());
+  const dispatch = useConsoleStateDispatch();
+  const { leftOfCursorText, fullTextEntered } = useWithInputTextEntered();
 
   const containerRef = useRef<HTMLDivElement | null>(null);
   const cursorRef = useRef<HTMLSpanElement | null>(null);
-  const lastCursorPosition = useRef<number>(0);
-  const observableNeedsUpdate = useRef(true);
 
-  const { leftOfCursorText } = useWithInputTextEntered();
   const currentCursorPosition = leftOfCursorText.length;
 
-  // When the HOME | END keys are used, or long text is pasted, the cursor will "jump"
-  // to a location that is beyond the viewport which causes the Observable not to trigger.
-  // In order to force the Observable to trigger we need to create it - that is what this
-  // `useMemo()` + the `recreateObservable` variable below are doing.
-  useMemo(() => {
-    const diff = Math.abs(lastCursorPosition.current - currentCursorPosition);
-    lastCursorPosition.current = currentCursorPosition;
-    if (diff > 1) {
-      observableNeedsUpdate.current = true;
-    }
-  }, [currentCursorPosition]);
+  const handleSingleClick: MouseEventHandler<HTMLDivElement> = useCallback(
+    (ev) => {
+      const clickedTarget = ev.target as HTMLElement;
 
-  const recreateObservable = observableNeedsUpdate.current;
+      // Handle moving the cursor to the click position
+      if (
+        fullTextEntered.length &&
+        clickedTarget.classList &&
+        clickedTarget.classList.contains('chr')
+      ) {
+        const allInputChars = Array.from(ev.currentTarget.querySelectorAll('span.chr'));
+        const newCursorPosition = allInputChars.indexOf(clickedTarget);
+        const newLeftOfCursorText = fullTextEntered.substring(0, newCursorPosition + 1);
+        const newRightOfCursorText = fullTextEntered.substring(newCursorPosition + 1);
 
-  // TODO:PT support user clicking anywhere in the input area and moving the cursor to that position
+        // reset input
+        dispatch({
+          type: 'updateInputTextEnteredState',
+          payload: {
+            leftOfCursorText: newLeftOfCursorText,
+            rightOfCursorText: newRightOfCursorText,
+          },
+        });
+      }
+    },
+    [dispatch, fullTextEntered]
+  );
 
   // TODO:PT support double clicking the input text area - highlight the entire content
 
   useEffect(() => {
-    // The weird assignment here is only used to ensure that `recreateObservable` remains
-    // a dependency of this `useEffect()`.
-    observableNeedsUpdate.current = recreateObservable ? false : false;
-
     if (containerRef.current && cursorRef.current) {
       const scrollPadding = 20;
       const handleIntersection: IntersectionObserverCallback = (entries) => {
@@ -86,14 +94,19 @@ export const InputDisplay = memo<InputDisplayProps>(({ leftOfCursor, rightOfCurs
             if (cursorPosition > viewportRightEdge - scrollPadding) {
               // cursor is close to the Right Edge of the display input area.
               // scroll right so that cursor remains visible.
-              containerRef.current.scrollLeft =
+              const newScrollLeftValue =
                 currentScrollLeftValue +
                 (cursorPosition - intersection.rootBounds.width) +
                 scrollPadding;
+
+              containerRef.current.scrollLeft = newScrollLeftValue;
             } else if (cursorPosition < viewportLeftEdge + scrollPadding) {
               // cursor is close to the Left edge of the display input area.
               // scroll left so that cursor remains visible;
-              containerRef.current.scrollLeft = currentScrollLeftValue - scrollPadding;
+              const newScrollLeftValue =
+                cursorPosition - scrollPadding < 0 ? 0 : currentScrollLeftValue - scrollPadding;
+
+              containerRef.current.scrollLeft = newScrollLeftValue;
             }
           }
         }
@@ -113,7 +126,7 @@ export const InputDisplay = memo<InputDisplayProps>(({ leftOfCursor, rightOfCurs
         observer.disconnect();
       };
     }
-  }, [recreateObservable]);
+  }, [currentCursorPosition]);
 
   return (
     <InputDisplayContainer ref={containerRef}>
@@ -122,6 +135,7 @@ export const InputDisplay = memo<InputDisplayProps>(({ leftOfCursor, rightOfCurs
         alignItems="center"
         gutterSize="none"
         className="inputDisplay"
+        onClick={handleSingleClick}
       >
         <EuiFlexItem
           grow={false}
