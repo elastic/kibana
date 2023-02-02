@@ -41,7 +41,7 @@ export const getClusterIdQuery = (cluster: Cluster) => {
     return { 'cloud.account.name': cluster.meta.cloud?.account.name };
   }
   if (cluster.meta.benchmark.posture_type === 'kspm') {
-    return { cluster_id: cluster.meta.cluster.id };
+    return { cluster_id: cluster.meta.assetIdentifierId };
   }
 
   return {};
@@ -160,9 +160,10 @@ export const BenchmarksSection = ({
       </EuiFlexGroup>
       {clusters.map((cluster) => (
         <EuiFlexGroup
-          key={cluster.meta.clusterId}
+          key={cluster.meta.assetIdentifierId}
           css={css`
-            min-height: 220px;
+            // card height with 3 items in risk table
+            height: 200px;
             border-bottom: ${euiTheme.border.thin};
             padding: ${euiTheme.size.base} 0 ${euiTheme.size.l};
           `}
@@ -176,7 +177,7 @@ export const BenchmarksSection = ({
           >
             <CloudPostureScoreChart
               compact
-              id={`${cluster.meta.clusterId}_score_chart`}
+              id={`${cluster.meta.assetIdentifierId}_score_chart`}
               data={cluster.stats}
               trend={cluster.trend}
               onEvalCounterClick={(evaluation) =>

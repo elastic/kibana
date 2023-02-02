@@ -67,31 +67,26 @@ export const getClustersQuery = (query: QueryDslQueryContainer, pitId: string): 
 });
 
 export const getClustersFromAggs = (clusters: ClusterBucket[]): ClusterWithoutTrend[] =>
-  clusters.map((cluster) => {
-    const latestFindingHit: SearchHit<CspFinding> = cluster.latestFindingTopHit.hits.hits[0];
+  clusters.map((clusterBucket) => {
+    const latestFindingHit: SearchHit<CspFinding> = clusterBucket.latestFindingTopHit.hits.hits[0];
     if (!latestFindingHit._source) throw new Error('Missing findings top hits');
 
     const meta = {
-      clusterId: cluster.key,
-      assetIdentifierId: cluster.key,
+      clusterId: clusterBucket.key,
+      assetIdentifierId: clusterBucket.key,
       lastUpdate: latestFindingHit._source['@timestamp'],
-      cloud: latestFindingHit._source.cloud, // only available on CSPM findings
       benchmark: latestFindingHit._source.rule.benchmark,
-      cluster: latestFindingHit._source.orchestrator?.cluster,
-
-      // TODO: deprecate in favour of `cluster` and `benchmark` fields
-      clusterName: latestFindingHit._source.orchestrator?.cluster?.name,
-      benchmarkName: latestFindingHit._source.rule.benchmark.name,
-      benchmarkId: latestFindingHit._source.rule.benchmark.id,
+      cloud: latestFindingHit._source.cloud, // only available on CSPM findings
+      cluster: latestFindingHit._source.orchestrator?.cluster, // only available on KSPM findings
     };
 
     // get cluster's stats
-    if (!cluster.failed_findings || !cluster.passed_findings)
-      throw new Error('missing findings evaluations per cluster');
-    const stats = getStatsFromFindingsEvaluationsAggs(cluster);
+    if (!clusterBucket.failed_findings || !clusterBucket.passed_findings)
+      throw new Error('missing findings evaluations per cluster bucket');
+    const stats = getStatsFromFindingsEvaluationsAggs(clusterBucket);
 
     // get cluster's resource types aggs
-    const resourcesTypesAggs = cluster.aggs_by_resource_type.buckets;
+    const resourcesTypesAggs = clusterBucket.aggs_by_resource_type.buckets;
     if (!Array.isArray(resourcesTypesAggs))
       throw new Error('missing aggs by resource type per cluster');
     const groupedFindingsEvaluation = getFailedFindingsFromAggs(resourcesTypesAggs);

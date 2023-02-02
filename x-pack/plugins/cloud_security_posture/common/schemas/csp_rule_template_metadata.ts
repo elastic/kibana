@@ -33,7 +33,9 @@ export const cspRuleTemplateMetadataSchemaV870 = rt.object({
   audit: rt.string(),
   benchmark: rt.object({
     name: rt.string(),
-    posture_type: rt.oneOf([rt.literal(CSPM_POLICY_TEMPLATE), rt.literal(KSPM_POLICY_TEMPLATE)]),
+    posture_type: rt.maybe(
+      rt.oneOf([rt.literal(CSPM_POLICY_TEMPLATE), rt.literal(KSPM_POLICY_TEMPLATE)])
+    ),
     id: rt.string(),
     version: rt.string(),
     rule_number: rt.maybe(rt.string()),

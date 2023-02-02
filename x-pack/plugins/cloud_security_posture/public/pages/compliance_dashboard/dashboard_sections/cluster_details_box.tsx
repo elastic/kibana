@@ -27,12 +27,12 @@ import { CISBenchmarkIcon } from '../../../components/cis_benchmark_icon';
 
 const defaultClusterTitle = i18n.translate(
   'xpack.csp.dashboard.benchmarkSection.defaultClusterTitle',
-  { defaultMessage: 'Cluster ID' }
+  { defaultMessage: 'ID' }
 );
 
 const getClusterTitle = (cluster: Cluster) => {
   if (cluster.meta.benchmark.posture_type === 'cspm') return cluster.meta.cloud?.account.name;
-  if (cluster.meta.benchmark.posture_type === 'kspm') return cluster.meta.cluster.name;
+  if (cluster.meta.benchmark.posture_type === 'kspm') return cluster.meta.cluster?.name;
 };
 
 export const ClusterDetailsBox = ({ cluster }: { cluster: Cluster }) => {
@@ -99,7 +99,7 @@ export const ClusterDetailsBox = ({ cluster }: { cluster: Cluster }) => {
         grow={true}
         style={{ justifyContent: 'flex-end', paddingBottom: euiTheme.size.m }}
       >
-        <CISBenchmarkIcon type={cluster.meta.benchmarkId} name={cluster.meta.benchmarkName} />
+        <CISBenchmarkIcon type={cluster.meta.benchmark.id} name={cluster.meta.benchmark.name} />
       </EuiFlexItem>
       {INTERNAL_FEATURE_FLAGS.showManageRulesMock && (
         <EuiFlexItem grow={false}>

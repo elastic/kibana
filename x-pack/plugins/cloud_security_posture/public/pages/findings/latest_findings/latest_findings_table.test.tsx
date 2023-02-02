@@ -32,6 +32,7 @@ const getFakeFindings = (name: string): CspFinding & { id: string } => ({
   rule: {
     audit: chance.paragraph(),
     benchmark: {
+      posture_type: 'kspm',
       rule_number: '1.1.1',
       name: 'CIS Kubernetes',
       version: '1.6.0',

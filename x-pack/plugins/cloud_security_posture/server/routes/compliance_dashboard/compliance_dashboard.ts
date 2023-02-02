@@ -31,7 +31,7 @@ const getClustersTrends = (clustersWithoutTrends: ClusterWithoutTrend[], trends:
     ...cluster,
     trend: trends.map(({ timestamp, clusters: clustersTrendData }) => ({
       timestamp,
-      ...clustersTrendData[cluster.meta.clusterId],
+      ...clustersTrendData[cluster.meta.assetIdentifierId],
     })),
   }));
 
