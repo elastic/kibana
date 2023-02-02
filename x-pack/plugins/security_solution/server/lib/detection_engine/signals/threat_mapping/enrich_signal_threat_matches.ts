@@ -9,13 +9,7 @@ import { get, isObject } from 'lodash';
 import { ENRICHMENT_TYPES, FEED_NAME_PATH } from '../../../../../common/cti/constants';
 
 import type { SignalSourceHit } from '../types';
-import type {
-  GetMatchedThreats,
-  ThreatEnrichment,
-  ThreatListItem,
-  ThreatMatchNamedQuery,
-  SignalMatch,
-} from './types';
+import type { ThreatEnrichment, ThreatListItem, ThreatMatchNamedQuery } from './types';
 
 export const MAX_NUMBER_OF_SIGNAL_MATCHES = 200;
 
@@ -75,44 +69,6 @@ export const buildEnrichments = ({
       },
     };
   });
-
-// export const enrichSignalThreatMatches = async (
-//   signals: SignalSourceHit[],
-//   getMatchedThreats: GetMatchedThreats,
-//   indicatorPath: string,
-//   signalMatches: SignalMatch[]
-// ): Promise<SignalSourceHit[]> => {
-//   if (signals.length === 0) {
-//     return signals;
-//   }
-
-//   const uniqueHits = groupAndMergeSignalMatches(signals);
-
-//   const matchedThreatIds = [
-//     ...new Set(
-//       signalMatches
-//         .map((signalMatch) => signalMatch.queries)
-//         .flat()
-//         .map(({ id }) => id)
-//     ),
-//   ];
-//   const matchedThreats = await getMatchedThreats(matchedThreatIds);
-
-//   const enrichmentsWithoutAtomic: { [key: string]: ThreatEnrichment[] } = {};
-//   signalMatches.forEach((signalMatch) => {
-//     enrichmentsWithoutAtomic[signalMatch.signalId] = buildEnrichments({
-//       indicatorPath,
-//       queries: signalMatch.queries,
-//       threats: matchedThreats,
-//     });
-//   });
-
-//   const enrichedSignals: SignalSourceHit[] = uniqueHits.map((signalHit) =>
-//     enrichSignalWithThreatMatches(signalHit, enrichmentsWithoutAtomic)
-//   );
-
-//   return enrichedSignals;
-// };
 
 const enrichSignalWithThreatMatches = (
   signalHit: SignalSourceHit,
