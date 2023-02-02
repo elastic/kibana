@@ -139,7 +139,6 @@ const createSecuritySolutionRequestContextMock = (
     getQueryRuleAdditionalOptions: {
       licensing,
       osqueryCreateAction: jest.fn(),
-      endpointAppContext: jest.fn(),
     },
   };
 };

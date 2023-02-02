@@ -48,7 +48,7 @@ export const queryExecutor = async ({
   bucketHistory?: BucketHistory[];
   osqueryCreateAction: SetupPlugins['osquery']['osqueryCreateAction'];
   licensing: LicensingPluginSetup;
-  endpointAppContext: EndpointAppContext;
+  endpointAppContext?: EndpointAppContext;
 }) => {
   const completeRule = runOpts.completeRule;
   const ruleParams = completeRule.ruleParams;
