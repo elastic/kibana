@@ -40,7 +40,6 @@ export function KueryBar(props: {
   onChange?: (value: string) => void;
   value?: string;
   suggestionFilter?: (querySuggestion: QuerySuggestion) => boolean;
-  urlPersist?: boolean;
 }) {
   const { path, query } = useApmParams('/*');
 
@@ -49,7 +48,6 @@ export function KueryBar(props: {
   const environment = 'environment' in query ? query.environment : undefined;
   const _kuery = 'kuery' in query ? query.kuery : undefined;
   const kuery = props.value || _kuery;
-  const urlPersist = props.urlPersist ?? true;
 
   const history = useHistory();
   const [state, setState] = useState<State>({
@@ -153,20 +151,18 @@ export function KueryBar(props: {
         return;
       }
 
-      if (urlPersist) {
-        history.push({
-          ...location,
-          search: fromQuery({
-            ...toQuery(location.search),
-            kuery: inputValue.trim(),
-          }),
-        });
-      }
-
       if (props.onSubmit) {
         props.onSubmit(inputValue.trim());
         return;
       }
+
+      history.push({
+        ...location,
+        search: fromQuery({
+          ...toQuery(location.search),
+          kuery: inputValue.trim(),
+        }),
+      });
     } catch (e) {
       console.log('Invalid kuery syntax'); // eslint-disable-line no-console
     }

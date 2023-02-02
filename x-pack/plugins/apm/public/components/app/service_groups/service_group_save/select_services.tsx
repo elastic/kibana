@@ -145,7 +145,6 @@ export function SelectServices({
                   'xpack.apm.serviceGroups.selectServicesForm.kql',
                   { defaultMessage: 'E.g. labels.team: "web"' }
                 )}
-                urlPersist={false}
                 onSubmit={(value) => {
                   setKuery(value);
                 }}
