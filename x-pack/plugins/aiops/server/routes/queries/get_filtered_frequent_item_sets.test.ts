@@ -6,14 +6,14 @@
  */
 
 import { changePoints } from '../../../common/__mocks__/artificial_logs/change_points';
-import { FrequentItemSets } from '../../../common/__mocks__/artificial_logs/frequent_item_sets';
+import { frequentItemSets } from '../../../common/__mocks__/artificial_logs/frequent_item_sets';
 import { filteredFrequentItemSets } from '../../../common/__mocks__/artificial_logs/filtered_frequent_item_sets';
 
 import { getFilteredFrequentItemSets } from './get_filtered_frequent_item_sets';
 
 describe('getFilteredFrequentItemSets', () => {
   it('filter frequent item set based on provided change points', () => {
-    expect(getFilteredFrequentItemSets(FrequentItemSets, changePoints)).toStrictEqual(
+    expect(getFilteredFrequentItemSets(frequentItemSets, changePoints)).toStrictEqual(
       filteredFrequentItemSets
     );
   });
