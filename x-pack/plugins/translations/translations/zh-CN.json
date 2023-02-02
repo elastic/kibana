@@ -12121,7 +12121,6 @@
     "xpack.enterpriseSearch.crawler.crawlDetailsSummary.avgResponseTimeLabel": "平均响应",
     "xpack.enterpriseSearch.crawler.crawlDetailsSummary.clientErrorsLabel": "4xx 错误",
     "xpack.enterpriseSearch.crawler.crawlDetailsSummary.durationTooltipTitle": "持续时间",
-    "xpack.enterpriseSearch.crawler.crawlDetailsSummary.logsDisabledMessage": "在设置中启用网络爬虫日志以获取更详细的爬网统计信息。",
     "xpack.enterpriseSearch.crawler.crawlDetailsSummary.pagesTooltip": "在爬网期间访问并提取的 URL。",
     "xpack.enterpriseSearch.crawler.crawlDetailsSummary.pagesTooltipTitle": "访问的页面",
     "xpack.enterpriseSearch.crawler.crawlDetailsSummary.pagesVisitedTooltipTitle": "页面",
