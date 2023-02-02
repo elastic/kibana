@@ -14,7 +14,7 @@ import { APIReturnType } from '../../../services/rest/create_call_apm_api';
 
 import {
   CONTAINER_ID,
-  HOST_NAME,
+  SERVICE_ENVIRONMENT,
   SERVICE_NAME,
 } from '../../../../common/es_fields/apm';
 import { useApmParams } from '../../../hooks/use_apm_params';
@@ -58,28 +58,40 @@ export function ServiceLogs() {
       height={'60vh'}
       startTimestamp={moment(start).valueOf()}
       endTimestamp={moment(end).valueOf()}
-      query={getInfrastructureKQLFilter(data, serviceName)}
+      query={getInfrastructureKQLFilter({ data, serviceName, environment })}
       showFlyoutAction
     />
   );
 }
 
-export const getInfrastructureKQLFilter = (
+export function getInfrastructureKQLFilter({
+  data,
+  serviceName,
+  environment,
+}: {
   data:
     | APIReturnType<'GET /internal/apm/services/{serviceName}/infrastructure_attributes'>
-    | undefined,
-  serviceName: string
-) => {
-  const containerIds = data?.containerIds ?? [];
-  const hostNames = data?.hostNames ?? [];
+    | undefined;
+  serviceName: string;
+  environment: string;
+}) {
+  // correlate on service.name + service.environment
+  const serviceNameAndEnvironmentCorrelation = `(${SERVICE_NAME}: "${serviceName}" and ${SERVICE_ENVIRONMENT}: "${environment}")`;
 
-  const infraAttributes = containerIds.length
-    ? containerIds.map((id) => `${CONTAINER_ID}: "${id}"`)
-    : hostNames.map((id) => `${HOST_NAME}: "${id}"`);
+  // correlate on service.name
+  const serviceNameCorrelation = `(${SERVICE_NAME}: "${serviceName}" and not ${SERVICE_ENVIRONMENT}: *)`;
 
-  const infraAttributesJoined = infraAttributes.join(' or ');
+  // correlate on container.id
+  const containerIdKql = (data?.containerIds ?? [])
+    .map((id) => `${CONTAINER_ID}: "${id}"`)
+    .join(' or ');
+  const containerIdCorrelation = containerIdKql
+    ? [`((${containerIdKql}) and not ${SERVICE_NAME}: *)`]
+    : [];
 
-  return infraAttributes.length
-    ? `${SERVICE_NAME}: "${serviceName}" or (not ${SERVICE_NAME} and (${infraAttributesJoined}))`
-    : `${SERVICE_NAME}: "${serviceName}"`;
-};
+  return [
+    serviceNameAndEnvironmentCorrelation,
+    serviceNameCorrelation,
+    ...containerIdCorrelation,
+  ].join(' or ');
+}

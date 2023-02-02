@@ -32,7 +32,7 @@ const LensComponentWrapper = styled.div<{ height?: string; width?: string }>`
     background-color: transparent;
   }
   .expExpressionRenderer__expression {
-    padding: 0 !important;
+    padding: 2px 0 0 0 !important;
   }
   .legacyMtrVis__container {
     padding: 0;
@@ -49,8 +49,6 @@ const initVisualizationData: {
   isLoading: true,
 };
 
-const style = { height: '100%', minWidth: '100px' };
-
 const LensEmbeddableComponent: React.FC<LensEmbeddableComponentProps> = ({
   applyGlobalQueriesAndFilters = true,
   extraActions,
@@ -66,7 +64,16 @@ const LensEmbeddableComponent: React.FC<LensEmbeddableComponentProps> = ({
   stackByField,
   timerange,
   width: wrapperWidth,
+  withActions = true,
 }) => {
+  const style = useMemo(
+    () => ({
+      height: wrapperHeight ?? '100%',
+      minWidth: '100px',
+      width: wrapperWidth ?? '100%',
+    }),
+    [wrapperHeight, wrapperWidth]
+  );
   const { lens } = useKibana().services;
   const dispatch = useDispatch();
   const [isShowingModal, setIsShowingModal] = useState(false);
@@ -82,7 +89,6 @@ const LensEmbeddableComponent: React.FC<LensEmbeddableComponentProps> = ({
     stackByField,
     title: '',
   });
-
   const LensComponent = lens.EmbeddableComponent;
   const inspectActionProps = useMemo(
     () => ({
@@ -99,7 +105,7 @@ const LensEmbeddableComponent: React.FC<LensEmbeddableComponentProps> = ({
     extraActions,
     inspectActionProps,
     timeRange: timerange,
-    withActions: true,
+    withActions,
   });
 
   const handleCloseModal = useCallback(() => {
@@ -165,6 +171,10 @@ const LensEmbeddableComponent: React.FC<LensEmbeddableComponentProps> = ({
         : null,
     [attributes?.state?.adHocDataViews]
   );
+
+  if (!searchSessionId) {
+    return null;
+  }
 
   if (
     !attributes ||

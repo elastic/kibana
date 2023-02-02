@@ -18,7 +18,6 @@ export class AlertsCount extends SingleCaseBaseHandler {
 
   public async compute(): Promise<SingleCaseMetricsResponse> {
     const {
-      unsecuredSavedObjectsClient,
       authorization,
       services: { attachmentService },
       logger,
@@ -38,7 +37,6 @@ export class AlertsCount extends SingleCaseBaseHandler {
       );
 
       const alertsCount = await attachmentService.countAlertsAttachedToCase({
-        unsecuredSavedObjectsClient,
         caseId: theCase.id,
         filter: authorizationFilter,
       });

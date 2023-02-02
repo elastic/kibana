@@ -59,6 +59,7 @@ export interface LensEmbeddableComponentProps {
   stackByField?: string;
   timerange: { from: string; to: string };
   width?: string;
+  withActions?: boolean;
 }
 
 export enum RequestStatus {

@@ -15,8 +15,6 @@ import { EuiSideNavItemType } from '@elastic/eui';
 
 import { ProductAccess } from '../../../../common/types';
 
-import { enableEnginesSection } from '../../../../common/ui_settings_keys';
-
 import { useEnterpriseSearchNav, useEnterpriseSearchEngineNav } from './nav';
 
 describe('useEnterpriseSearchContentNav', () => {
@@ -28,6 +26,7 @@ describe('useEnterpriseSearchContentNav', () => {
   it('returns an array of top-level Enterprise Search nav items', () => {
     const fullProductAccess: ProductAccess = {
       hasAppSearchAccess: true,
+      hasSearchEnginesAccess: false,
       hasWorkplaceSearchAccess: true,
     };
     setMockValues({ productAccess: fullProductAccess });
@@ -93,12 +92,12 @@ describe('useEnterpriseSearchContentNav', () => {
         name: 'Search',
       },
     ]);
-    expect(mockKibanaValues.uiSettings.get).toHaveBeenCalledWith(enableEnginesSection, false);
   });
 
   it('excludes legacy products when the user has no access to them', () => {
     const noProductAccess: ProductAccess = {
       hasAppSearchAccess: false,
+      hasSearchEnginesAccess: false,
       hasWorkplaceSearchAccess: false,
     };
 
@@ -129,6 +128,7 @@ describe('useEnterpriseSearchContentNav', () => {
   it('excludes App Search when the user has no access to it', () => {
     const workplaceSearchProductAccess: ProductAccess = {
       hasAppSearchAccess: false,
+      hasSearchEnginesAccess: false,
       hasWorkplaceSearchAccess: true,
     };
 
@@ -163,6 +163,7 @@ describe('useEnterpriseSearchContentNav', () => {
   it('excludes Workplace Search when the user has no access to it', () => {
     const appSearchProductAccess: ProductAccess = {
       hasAppSearchAccess: true,
+      hasSearchEnginesAccess: false,
       hasWorkplaceSearchAccess: false,
     };
 
@@ -197,6 +198,7 @@ describe('useEnterpriseSearchContentNav', () => {
   it('excludes engines when feature flag is off', () => {
     const fullProductAccess: ProductAccess = {
       hasAppSearchAccess: true,
+      hasSearchEnginesAccess: false,
       hasWorkplaceSearchAccess: true,
     };
     setMockValues({ productAccess: fullProductAccess });
@@ -209,12 +211,12 @@ describe('useEnterpriseSearchContentNav', () => {
 describe('useEnterpriseSearchContentNav Engines feature flag', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    mockKibanaValues.uiSettings.get.mockReturnValue(true);
   });
 
   it('returns an array of top-level Enterprise Search nav items', () => {
     const fullProductAccess: ProductAccess = {
       hasAppSearchAccess: true,
+      hasSearchEnginesAccess: true,
       hasWorkplaceSearchAccess: true,
     };
     setMockValues({ productAccess: fullProductAccess });
@@ -286,12 +288,12 @@ describe('useEnterpriseSearchContentNav Engines feature flag', () => {
         name: 'Standalone Experiences',
       },
     ]);
-    expect(mockKibanaValues.uiSettings.get).toHaveBeenCalledWith(enableEnginesSection, false);
   });
 
   it('excludes standalone experiences when the user has no access to them', () => {
     const fullProductAccess: ProductAccess = {
       hasAppSearchAccess: false,
+      hasSearchEnginesAccess: true,
       hasWorkplaceSearchAccess: false,
     };
     setMockValues({ productAccess: fullProductAccess });
@@ -302,6 +304,7 @@ describe('useEnterpriseSearchContentNav Engines feature flag', () => {
   it('excludes App Search when the user has no access to it', () => {
     const fullProductAccess: ProductAccess = {
       hasAppSearchAccess: false,
+      hasSearchEnginesAccess: true,
       hasWorkplaceSearchAccess: true,
     };
     setMockValues({ productAccess: fullProductAccess });
@@ -324,6 +327,7 @@ describe('useEnterpriseSearchContentNav Engines feature flag', () => {
   it('excludes Workplace Search when the user has no access to it', () => {
     const fullProductAccess: ProductAccess = {
       hasAppSearchAccess: true,
+      hasSearchEnginesAccess: true,
       hasWorkplaceSearchAccess: false,
     };
     setMockValues({ productAccess: fullProductAccess });
@@ -351,6 +355,7 @@ describe('useEnterpriseSearchEngineNav', () => {
     mockKibanaValues.uiSettings.get.mockReturnValue(true);
     const fullProductAccess: ProductAccess = {
       hasAppSearchAccess: true,
+      hasSearchEnginesAccess: true,
       hasWorkplaceSearchAccess: true,
     };
     setMockValues({ productAccess: fullProductAccess });
@@ -424,7 +429,6 @@ describe('useEnterpriseSearchEngineNav', () => {
         name: 'Standalone Experiences',
       },
     ]);
-    expect(mockKibanaValues.uiSettings.get).toHaveBeenCalledWith(enableEnginesSection, false);
   });
 
   it('returns selected engine sub nav items', () => {
