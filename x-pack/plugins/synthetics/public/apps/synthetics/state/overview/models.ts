@@ -7,13 +7,11 @@
 import { MonitorOverviewResult, OverviewStatusState } from '../../../../../common/runtime_types';
 
 import { IHttpSerializedFetchError } from '../utils/http_error';
+import { MonitorFilterState } from '../monitor_list';
 
-export interface MonitorOverviewPageState {
+export interface MonitorOverviewPageState extends MonitorFilterState {
   perPage: number;
   query?: string;
-  tags?: string[];
-  monitorType?: string[];
-  locations?: string[];
   sortOrder: 'asc' | 'desc';
   sortField: string;
 }
