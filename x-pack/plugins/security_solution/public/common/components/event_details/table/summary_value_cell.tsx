@@ -12,7 +12,7 @@ import { FieldValueCell } from './field_value_cell';
 import type { AlertSummaryRow } from '../helpers';
 import { hasHoverOrRowActions } from '../helpers';
 import { TimelineId } from '../../../../../common/types';
-import { CELL_ACTIONS_DEFAULT_TRIGGER } from '../../../../../common/constants';
+import { CELL_ACTIONS_DETAILS_FLYOUT_TRIGGER } from '../../../../../common/constants';
 
 const style = { flexGrow: 0 };
 
@@ -48,7 +48,7 @@ export const SummaryValueCell: React.FC<AlertSummaryRow['description']> = ({
             type: data.type,
             aggregatable: fieldFromBrowserField?.aggregatable,
           }}
-          triggerId={CELL_ACTIONS_DEFAULT_TRIGGER}
+          triggerId={CELL_ACTIONS_DETAILS_FLYOUT_TRIGGER}
           mode={CellActionsMode.INLINE}
           visibleCellActions={3}
           metadata={{ scopeId }}

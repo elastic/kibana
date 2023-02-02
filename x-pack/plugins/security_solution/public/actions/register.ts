@@ -24,6 +24,7 @@ import { createLensAddToTimelineAction, createDefaultAddToTimelineAction } from 
 import { createDefaultShowTopNAction } from './show_top_n';
 import {
   CELL_ACTIONS_DEFAULT_TRIGGER,
+  CELL_ACTIONS_DETAILS_FLYOUT_TRIGGER,
   CELL_ACTIONS_TIMELINE_TRIGGER,
 } from '../../common/constants';
 import { createDefaultToggleColumnAction } from './toggle_column';
@@ -37,6 +38,7 @@ export const registerUIActions = (
   registerLensActions(plugins.uiActions, store);
   registerDefaultActions(plugins.uiActions, store, history, services);
   registerTimelineActions(plugins.uiActions, store, history, services);
+  registerTableFlyoutActions(plugins.uiActions, store, history, services);
 };
 
 const registerLensActions = (uiActions: UiActionsStart, store: SecurityAppStore) => {
@@ -54,15 +56,14 @@ const registerDefaultActions = (
   services: StartServices
 ) => {
   const filterInAction = createDefaultFilterInAction({
-    order: 1,
+    order: 10,
   });
   const filterOutAction = createDefaultFilterOutAction({
-    order: 2,
+    order: 20,
   });
-  const toggleAction = createDefaultToggleColumnAction({ store, order: 3 });
-  const addToTimeline = createDefaultAddToTimelineAction({ store, order: 4 });
-  const showTopNAction = createDefaultShowTopNAction({ store, history, services, order: 5 });
-  const copyAction = createDefaultCopyToClipboardAction({ order: 6 });
+  const addToTimeline = createDefaultAddToTimelineAction({ store, order: 30 });
+  const showTopNAction = createDefaultShowTopNAction({ store, history, services, order: 40 });
+  const copyAction = createDefaultCopyToClipboardAction({ order: 50 });
 
   uiActions.registerTrigger({
     id: CELL_ACTIONS_DEFAULT_TRIGGER,
@@ -73,7 +74,6 @@ const registerDefaultActions = (
   uiActions.addTriggerAction(CELL_ACTIONS_DEFAULT_TRIGGER, filterOutAction);
   uiActions.addTriggerAction(CELL_ACTIONS_DEFAULT_TRIGGER, showTopNAction);
   uiActions.addTriggerAction(CELL_ACTIONS_DEFAULT_TRIGGER, addToTimeline);
-  uiActions.addTriggerAction(CELL_ACTIONS_DEFAULT_TRIGGER, toggleAction);
 };
 
 const registerTimelineActions = (
@@ -84,16 +84,15 @@ const registerTimelineActions = (
 ) => {
   const filterInAction = createTimelineFilterInAction({
     store,
-    order: 1,
+    order: 10,
   });
   const filterOutAction = createTimelineFilterOutAction({
     store,
-    order: 2,
+    order: 20,
   });
-  const toggleAction = createDefaultToggleColumnAction({ store, order: 3 });
-  const addToTimeline = createDefaultAddToTimelineAction({ store, order: 4 });
-  const showTopNAction = createDefaultShowTopNAction({ store, history, services, order: 5 });
-  const copyAction = createDefaultCopyToClipboardAction({ order: 6 });
+  const addToTimeline = createDefaultAddToTimelineAction({ store, order: 30 });
+  const showTopNAction = createDefaultShowTopNAction({ store, history, services, order: 40 });
+  const copyAction = createDefaultCopyToClipboardAction({ order: 50 });
 
   uiActions.registerTrigger({
     id: CELL_ACTIONS_TIMELINE_TRIGGER,
@@ -104,5 +103,36 @@ const registerTimelineActions = (
   uiActions.addTriggerAction(CELL_ACTIONS_TIMELINE_TRIGGER, filterOutAction);
   uiActions.addTriggerAction(CELL_ACTIONS_TIMELINE_TRIGGER, showTopNAction);
   uiActions.addTriggerAction(CELL_ACTIONS_TIMELINE_TRIGGER, addToTimeline);
-  uiActions.addTriggerAction(CELL_ACTIONS_TIMELINE_TRIGGER, toggleAction);
+};
+
+/**
+ * This actions show up in when a details flyout is open from a table field.
+ */
+const registerTableFlyoutActions = (
+  uiActions: UiActionsStart,
+  store: SecurityAppStore,
+  history: H.History,
+  services: StartServices
+) => {
+  const filterInAction = createDefaultFilterInAction({
+    order: 10,
+  });
+  const filterOutAction = createDefaultFilterOutAction({
+    order: 20,
+  });
+  const toggleAction = createDefaultToggleColumnAction({ store, order: 25 });
+  const addToTimeline = createDefaultAddToTimelineAction({ store, order: 30 });
+  const showTopNAction = createDefaultShowTopNAction({ store, history, services, order: 40 });
+  const copyAction = createDefaultCopyToClipboardAction({ order: 50 });
+
+  uiActions.registerTrigger({
+    id: CELL_ACTIONS_DETAILS_FLYOUT_TRIGGER,
+  });
+
+  uiActions.addTriggerAction(CELL_ACTIONS_DETAILS_FLYOUT_TRIGGER, copyAction);
+  uiActions.addTriggerAction(CELL_ACTIONS_DETAILS_FLYOUT_TRIGGER, filterInAction);
+  uiActions.addTriggerAction(CELL_ACTIONS_DETAILS_FLYOUT_TRIGGER, filterOutAction);
+  uiActions.addTriggerAction(CELL_ACTIONS_DETAILS_FLYOUT_TRIGGER, showTopNAction);
+  uiActions.addTriggerAction(CELL_ACTIONS_DETAILS_FLYOUT_TRIGGER, addToTimeline);
+  uiActions.addTriggerAction(CELL_ACTIONS_DETAILS_FLYOUT_TRIGGER, toggleAction);
 };

@@ -11,7 +11,7 @@ import React from 'react';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { CellActions, CellActionsMode } from '@kbn/cell-actions';
 import type { EnrichedFieldInfo } from '../types';
-import { CELL_ACTIONS_DEFAULT_TRIGGER } from '../../../../../common/constants';
+import { CELL_ACTIONS_DETAILS_FLYOUT_TRIGGER } from '../../../../../common/constants';
 
 const ActionWrapper = euiStyled.div`
   margin-left: ${({ theme }) => theme.eui.euiSizeS};
@@ -95,7 +95,7 @@ export const OverviewCardWithActions: React.FC<OverviewCardWithActionsProps> = (
             type: enrichedFieldInfo.data.type,
             aggregatable: enrichedFieldInfo.fieldFromBrowserField?.aggregatable,
           }}
-          triggerId={CELL_ACTIONS_DEFAULT_TRIGGER}
+          triggerId={CELL_ACTIONS_DETAILS_FLYOUT_TRIGGER}
           mode={CellActionsMode.INLINE}
           metadata={{ scopeId: contextId }}
           visibleCellActions={3}
