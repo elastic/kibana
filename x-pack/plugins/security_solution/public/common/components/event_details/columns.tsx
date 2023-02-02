@@ -110,18 +110,7 @@ export const getColumns = ({
     sortable: true,
     truncateText: false,
     render: (field: string, data: EventFieldsData) => {
-      const fieldFromBrowserField = getFieldFromBrowserField(
-        [data.category, 'fields', field],
-        browserFields
-      );
-      return (
-        <FieldNameCell
-          data={data}
-          field={field}
-          fieldMapping={undefined}
-          fieldFromBrowserField={fieldFromBrowserField}
-        />
-      );
+      return <FieldNameCell data={data} field={field} fieldMapping={undefined} />;
     },
   },
   {
