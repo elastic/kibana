@@ -40,7 +40,6 @@ export function decodeStackTraceResponse(response: StackTraceResponse) {
       FunctionName: value.function_name,
       FunctionOffset: value.function_offset,
       LineNumber: value.line_number,
-      SourceType: value.source_type,
     } as StackFrame);
   }
 
