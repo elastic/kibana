@@ -12,7 +12,7 @@ import type {
   AddDataControlProps,
   AddOptionsListControlProps,
   AddRangeSliderControlProps,
-} from '../control_group_input_builder';
+} from '../external_api/control_group_input_builder';
 import { ControlGroupStrings } from '../control_group_strings';
 import { ControlGroupContainer, setFlyoutRef } from '../embeddable/control_group_container';
 import { pluginServices } from '../../services';

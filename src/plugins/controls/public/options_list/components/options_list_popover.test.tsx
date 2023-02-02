@@ -14,9 +14,10 @@ import { findTestSubject } from '@elastic/eui/lib/test';
 
 import { OptionsListPopover, OptionsListPopoverProps } from './options_list_popover';
 import { OptionsListComponentState, OptionsListReduxState } from '../types';
-import { mockOptionsListReduxEmbeddableTools } from '../../../common/mocks';
 import { OptionsListField } from '../../../common/options_list/types';
+import { mockOptionsListEmbeddable } from '../../../common/mocks';
 import { ControlOutput, OptionsListEmbeddableInput } from '../..';
+import { OptionsListEmbeddableContext } from '../embeddable/options_list_embeddable';
 
 describe('Options list popover', () => {
   const defaultProps = {
@@ -34,16 +35,16 @@ describe('Options list popover', () => {
 
   async function mountComponent(options?: Partial<MountOptions>) {
     const compProps = { ...defaultProps, ...(options?.popoverProps ?? {}) };
-    const mockReduxEmbeddableTools = await mockOptionsListReduxEmbeddableTools({
+    const optionsListEmbeddable = await mockOptionsListEmbeddable({
       componentState: options?.componentState ?? {},
       explicitInput: options?.explicitInput ?? {},
       output: options?.output ?? {},
     } as Partial<OptionsListReduxState>);
 
     return mountWithIntl(
-      <mockReduxEmbeddableTools.Wrapper>
+      <OptionsListEmbeddableContext.Provider value={optionsListEmbeddable}>
         <OptionsListPopover {...compProps} />
-      </mockReduxEmbeddableTools.Wrapper>
+      </OptionsListEmbeddableContext.Provider>
     );
   }
 
