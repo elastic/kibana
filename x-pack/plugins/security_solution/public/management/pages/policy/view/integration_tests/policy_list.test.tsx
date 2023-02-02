@@ -76,7 +76,9 @@ describe('When on the policy list page', () => {
   });
 
   describe('and data exists', () => {
-    const policies: GetPolicyListResponse = sendGetEndpointSpecificPackagePoliciesMock();
+    const policies: GetPolicyListResponse = sendGetEndpointSpecificPackagePoliciesMock({
+      agentsPerPolicy: 4,
+    });
 
     beforeEach(async () => {
       getPackagePolicies.mockReturnValue(policies);
