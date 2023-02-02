@@ -33,11 +33,9 @@ export interface ContentStorage<T extends { id: string } = { id: string } & obje
 
 export type SearchContentSerializer<T extends object = object> = (item: T) => Content;
 
-export interface ContentConfig<S extends ContentStorage> {
+export interface ContentConfig<S extends ContentStorage = ContentStorage> {
   /** The storage layer for the content.*/
   storage: S;
-  /** Optional handler to convert the DB item to a KibanaContent */
-  toSearchContentSerializer?: SearchContentSerializer<any>;
   schemas: {
     content: {
       // TODO
@@ -79,3 +77,5 @@ export interface ContentConfig<S extends ContentStorage> {
     };
   };
 }
+
+export type ContentSchemas = ContentConfig['schemas']['content'];

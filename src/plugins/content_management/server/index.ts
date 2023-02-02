@@ -13,5 +13,11 @@ export function plugin(initializerContext: PluginInitializerContext) {
   return new ContentManagementPlugin(initializerContext);
 }
 
-export type { ContentCore, ContentStorage, ContentConfig, SearchContentSerializer } from './core';
+export type {
+  ContentCore,
+  ContentStorage,
+  ContentConfig,
+  ContentSchemas,
+  SearchContentSerializer,
+} from './core';
 export type { ContentManagementSetup } from './types';
