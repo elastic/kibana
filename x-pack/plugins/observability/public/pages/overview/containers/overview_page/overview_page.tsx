@@ -54,6 +54,7 @@ export function OverviewPage() {
       getAlertsStateTable: AlertsStateTable,
       getAlertSummaryWidget: AlertSummaryWidget,
     },
+    kibanaVersion,
   } = useKibana<ObservabilityAppServices>().services;
 
   const { ObservabilityPageTemplate } = usePluginContext();
@@ -66,7 +67,10 @@ export function OverviewPage() {
     },
   ]);
 
-  const { data: newsFeed } = useFetcher(() => getNewsFeed({ http }), [http]);
+  const { data: newsFeed } = useFetcher(
+    () => getNewsFeed({ http, kibanaVersion }),
+    [http, kibanaVersion]
+  );
   const { hasAnyData, isAllRequestsComplete } = useHasData();
 
   const { trackMetric } = useOverviewMetrics({ hasAnyData });
