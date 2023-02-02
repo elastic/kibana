@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import os from 'node:os';
 import execa from 'execa';
 import { find } from 'lodash';
 import { ToolingLog } from '@kbn/tooling-log';
@@ -111,10 +112,7 @@ export class AgentManager extends Manager {
       (item) => item.policy_id === agentPolicyId
     ).api_key;
 
-    const hostIp = execa.commandSync(
-      "ipconfig getifaddr `scutil --dns |awk -F'[()]' '$1~/if_index/ {print $2;exit;}'`",
-      { shell: true }
-    ).stdout;
+    const hostIp = find(os.networkInterfaces().en0, { family: 'IPv4' })?.address ?? '0.0.0.0';
 
     // TODO: Receive the name of the VM and store in the variable
     execa.commandSync(`multipass launch --name ${VM_NAME}`, { forceKillAfterTimeout: false });

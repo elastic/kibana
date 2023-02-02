@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import execa from 'execa';
+import os from 'node:os';
+import { find } from 'lodash';
 import { FtrConfigProviderContext } from '@kbn/test';
 import { CA_CERT_PATH } from '@kbn/dev-utils';
 import { services } from './services';
@@ -18,10 +19,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
     require.resolve('../functional/config.base.js')
   );
 
-  const hostIp = execa.commandSync(
-    "ipconfig getifaddr `scutil --dns |awk -F'[()]' '$1~/if_index/ {print $2;exit;}'`",
-    { shell: true }
-  ).stdout;
+  const hostIp = find(os.networkInterfaces().en0, { family: 'IPv4' })?.address ?? '0.0.0.0';
 
   return {
     ...kibanaCommonTestsConfig.getAll(),
