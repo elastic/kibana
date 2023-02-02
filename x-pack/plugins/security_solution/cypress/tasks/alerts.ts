@@ -13,7 +13,6 @@ import {
   CLOSE_SELECTED_ALERTS_BTN,
   EXPAND_ALERT_BTN,
   GROUP_BY_TOP_INPUT,
-  LOADING_ALERTS_PANEL,
   MANAGE_ALERT_DETECTION_RULES_BTN,
   MARK_ALERT_ACKNOWLEDGED_BTN,
   OPEN_ALERT_BTN,
@@ -26,8 +25,6 @@ import {
   TAKE_ACTION_BTN,
   TAKE_ACTION_MENU,
   ADD_ENDPOINT_EXCEPTION_BTN,
-  ALERTS_HISTOGRAM_PANEL_LOADER,
-  ALERTS_CONTAINER_LOADING_BAR,
   DATAGRID_CHANGES_IN_PROGRESS,
   CLOSED_ALERTS_FILTER_BTN,
   OPENED_ALERTS_FILTER_BTN,
@@ -50,6 +47,7 @@ import {
   CELL_EXPAND_VALUE,
   CELL_EXPANSION_POPOVER,
   USER_DETAILS_LINK,
+  ALERT_FLYOUT,
 } from '../screens/alerts_details';
 import { FIELD_INPUT } from '../screens/exceptions';
 import {
@@ -151,12 +149,12 @@ export const expandFirstAlertActions = () => {
 };
 
 export const expandFirstAlert = () => {
-  cy.get(EXPAND_ALERT_BTN).should('exist');
-
-  cy.get(EXPAND_ALERT_BTN)
-    .first()
-    .should('exist')
-    .pipe(($el) => $el.trigger('click'));
+  cy.root()
+    .pipe(($el) => {
+      $el.find(EXPAND_ALERT_BTN).trigger('click');
+      return $el.find(ALERT_FLYOUT);
+    })
+    .should('be.visible');
 };
 
 export const closeAlertFlyout = () => cy.get(CLOSE_FLYOUT).click();
@@ -327,13 +325,6 @@ export const waitForAlerts = () => {
   cy.get(DATAGRID_CHANGES_IN_PROGRESS).should('not.be.true');
   cy.get(EVENT_CONTAINER_TABLE_LOADING).should('not.exist');
   cy.get(LOADING_INDICATOR).should('not.exist');
-};
-
-export const waitForAlertsPanelToBeLoaded = () => {
-  cy.get(LOADING_ALERTS_PANEL).should('exist');
-  cy.get(LOADING_ALERTS_PANEL).should('not.exist');
-  cy.get(ALERTS_CONTAINER_LOADING_BAR).should('not.exist');
-  cy.get(ALERTS_HISTOGRAM_PANEL_LOADER).should('not.exist');
 };
 
 export const expandAlertTableCellValue = (columnSelector: string, row = 1) => {

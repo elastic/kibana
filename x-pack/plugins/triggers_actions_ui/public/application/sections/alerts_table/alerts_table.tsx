@@ -44,7 +44,7 @@ const basicRenderCellValue = ({
   columnId,
 }: {
   data: Array<{ field: string; value: string[] }>;
-  ecsData: FetchAlertData['ecsAlertsData'][number];
+  ecsData?: FetchAlertData['ecsAlertsData'][number];
   columnId: string;
 }) => {
   const value = data.find((d) => d.field === columnId)?.value ?? [];

@@ -120,6 +120,7 @@ import { refreshPage } from './security_header';
 import { EUI_FILTER_SELECT_ITEM, COMBO_BOX_INPUT } from '../screens/common/controls';
 import { ruleFields } from '../data/detection_engine';
 import { BACK_TO_RULES_TABLE } from '../screens/rule_details';
+import { waitForAlerts } from './alerts';
 
 export const createAndEnableRule = () => {
   cy.get(CREATE_AND_ENABLE_BTN).click({ force: true });
@@ -682,6 +683,7 @@ export const waitForAlertsToPopulate = async (alertCountThreshold = 1) => {
     },
     { interval: 500, timeout: 12000 }
   );
+  waitForAlerts();
 };
 
 export const waitForTheRuleToBeExecuted = () => {
