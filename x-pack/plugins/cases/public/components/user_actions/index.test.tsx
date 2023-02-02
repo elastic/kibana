@@ -294,14 +294,14 @@ describe(`UserActions`, () => {
 
     wrapper
       .find(
-        `[data-test-subj="description-action"] [data-test-subj="property-actions-user-action-ellipses"]`
+        `[data-test-subj="description-action"] [data-test-subj="property-actions-description-ellipses"]`
       )
       .first()
       .simulate('click');
 
     wrapper
       .find(
-        `[data-test-subj="description-action"] [data-test-subj="property-actions-user-action-pencil"]`
+        `[data-test-subj="description-action"] [data-test-subj="property-actions-description-pencil"]`
       )
       .first()
       .simulate('click');
@@ -346,14 +346,14 @@ describe(`UserActions`, () => {
 
     wrapper
       .find(
-        `[data-test-subj="description-action"] [data-test-subj="property-actions-user-action-ellipses"]`
+        `[data-test-subj="description-action"] [data-test-subj="property-actions-description-ellipses"]`
       )
       .first()
       .simulate('click');
 
     wrapper
       .find(
-        `[data-test-subj="description-action"] [data-test-subj="property-actions-user-action-quote"]`
+        `[data-test-subj="description-action"] [data-test-subj="property-actions-description-quote"]`
       )
       .first()
       .simulate('click');
@@ -472,14 +472,14 @@ describe(`UserActions`, () => {
 
     wrapper
       .find(
-        `[data-test-subj="description-action"] [data-test-subj="property-actions-user-action-ellipses"]`
+        `[data-test-subj="description-action"] [data-test-subj="property-actions-description-ellipses"]`
       )
       .first()
       .simulate('click');
 
     wrapper
       .find(
-        `[data-test-subj="description-action"] [data-test-subj="property-actions-user-action-pencil"]`
+        `[data-test-subj="description-action"] [data-test-subj="property-actions-description-pencil"]`
       )
       .first()
       .simulate('click');
