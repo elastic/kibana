@@ -117,7 +117,8 @@ const getSavedObjectTypes = (
           properties: {
             name: { type: 'keyword' },
             enabled: { type: 'boolean' },
-        }
+          },
+        },
       },
     },
     migrations: {
