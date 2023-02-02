@@ -9,7 +9,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiSpacer, EuiStat, EuiTitle } fro
 import { i18n } from '@kbn/i18n';
 import React, { useEffect, useState } from 'react';
 import { useDispatch } from 'react-redux';
-import { clearOverviewStatusErrorAction } from '../../../../state';
+import { clearOverviewStatusErrorAction } from '../../../../state/overview_status';
 import { kibanaService } from '../../../../../../utils/kibana_service';
 import { useGetUrlParams } from '../../../../hooks/use_url_params';
 import { useOverviewStatus } from '../../hooks/use_overview_status';
@@ -21,7 +21,7 @@ function title(t?: number) {
 export function OverviewStatus() {
   const { statusFilter } = useGetUrlParams();
 
-  const { status, statusError } = useOverviewStatus();
+  const { status, error: statusError } = useOverviewStatus();
   const dispatch = useDispatch();
   const [statusConfig, setStatusConfig] = useState({
     up: status?.up,

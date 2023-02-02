@@ -81,6 +81,8 @@ describe('Overview Grid', () => {
           },
           loaded: true,
           loading: false,
+        },
+        overviewStatus: {
           status: {
             downConfigs: {},
             upConfigs: {},
@@ -139,6 +141,8 @@ describe('Overview Grid', () => {
           },
           loaded: true,
           loading: false,
+        },
+        overviewStatus: {
           status: {
             downConfigs: {},
             upConfigs: {},

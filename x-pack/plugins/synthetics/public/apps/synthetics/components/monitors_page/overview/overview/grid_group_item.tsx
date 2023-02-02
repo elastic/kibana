@@ -19,9 +19,9 @@ import {
 import React, { useState } from 'react';
 import { useSelector } from 'react-redux';
 import { useKey } from 'react-use';
-import { selectOverviewState } from '../../../../state';
 import { MonitorOverviewItem } from '../types';
 import { FlyoutParamProps, OverviewGridItem } from './overview_grid_item';
+import { selectOverviewStatus } from '../../../../state/overview_status';
 
 const PER_ROW = 4;
 const DEFAULT_ROW_SIZE = 2;
@@ -58,7 +58,7 @@ export const GroupGridItem = ({
     setActivePage(0);
   };
 
-  const { status } = useSelector(selectOverviewState);
+  const { status } = useSelector(selectOverviewStatus);
 
   useKey('Escape', () => {
     if (fullScreenGroup === groupLabel) {
