@@ -15,14 +15,14 @@ export const WEBHOOK_URL_INVALID = i18n.translate(
 );
 
 export const MESSAGE_REQUIRED = i18n.translate(
-  'xpack.stackConnectors.components.slack..error.requiredSlackMessageText',
+  'xpack.stackConnectors.components.slack.error.requiredSlackMessageText',
   {
     defaultMessage: 'Message is required.',
   }
 );
 
 export const CHANNEL_REQUIRED = i18n.translate(
-  'xpack.stackConnectors.components.slack..error.requiredSlackMessageText',
+  'xpack.stackConnectors.components.slack.error.requiredSlackChannel',
   {
     defaultMessage: 'At least one selected channel is required.',
   }
@@ -46,21 +46,9 @@ export const URL_TEXT = i18n.translate('xpack.stackConnectors.components.slack.u
   defaultMessage: 'URL',
 });
 
-// new
-
-export const BASIC_AUTH_LABEL = i18n.translate(
-  'xpack.stackConnectors.components.xmatters.connectorSettingsLabel',
-  {
-    defaultMessage: 'Select the Webhook or Web API slack communication type',
-  }
-);
-
-export const BASIC_AUTH_BUTTON_GROUP_LEGEND = i18n.translate(
-  'xpack.stackConnectors.components.xmatters.basicAuthButtonGroupLegend',
-  {
-    defaultMessage: 'Slack type',
-  }
-);
+export const SLACK_LEGEND = i18n.translate('xpack.stackConnectors.components.slack.slackLegend', {
+  defaultMessage: 'Slack type',
+});
 
 export const WEBHOOK = i18n.translate('xpack.stackConnectors.components.slack.webhook', {
   defaultMessage: 'Webhook',

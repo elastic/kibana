@@ -108,7 +108,7 @@ export const SlackWebApiParamsFields: React.FunctionComponent<
       data-test-subj="slackChannelsButton"
     >
       <FormattedMessage
-        id="xpack.triggersActionsUI.sections.rulesList.ruleTagFilterButton"
+        id="xpack.stackConnectors.slack.params..showChannelsListButton"
         defaultMessage="Channels"
       />
     </EuiFilterButton>

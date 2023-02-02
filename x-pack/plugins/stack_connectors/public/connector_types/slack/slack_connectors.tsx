@@ -48,7 +48,7 @@ const SlackActionFields: React.FunctionComponent<ActionConnectorFieldsProps> = (
         isFullWidth
         buttonSize="m"
         color="primary"
-        legend={i18n.BASIC_AUTH_BUTTON_GROUP_LEGEND}
+        legend={i18n.SLACK_LEGEND}
         options={slackTypeButtons}
         idSelected={selectedSlackType}
         onChange={onChange}
