@@ -20,22 +20,23 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import { EnterpriseSearchEngine } from '../../../../../../../common/types/engines';
+import { Page } from '../../../../../../../common/types/pagination';
+
 import { MANAGE_BUTTON_LABEL } from '../../../../../shared/constants';
 
 import { generateEncodedPath } from '../../../../../shared/encode_path_params';
 import { FormattedDateTime } from '../../../../../shared/formatted_date_time';
 import { KibanaLogic } from '../../../../../shared/kibana';
+import { pageToPagination } from '../../../../../shared/pagination/page_to_pagination';
 import { EuiLinkTo } from '../../../../../shared/react_router_helpers';
 
 import { ENGINE_PATH } from '../../../../routes';
-
-import { convertMetaToPagination, Meta } from '../../types';
 
 interface EnginesListTableProps {
   enginesList: EnterpriseSearchEngine[];
   isLoading?: boolean;
   loading: boolean;
-  meta: Meta;
+  meta: Page;
   onChange: (criteria: CriteriaWithPagination<EnterpriseSearchEngine>) => void;
   onDelete: (engine: EnterpriseSearchEngine) => void;
   viewEngineIndices: (engineName: string) => void;
@@ -157,7 +158,7 @@ export const EnginesListTable: React.FC<EnginesListTableProps> = ({
     <EuiBasicTable
       items={enginesList}
       columns={columns}
-      pagination={{ ...convertMetaToPagination(meta), showPerPageOptions: false }}
+      pagination={{ ...pageToPagination(meta), showPerPageOptions: false }}
       onChange={onChange}
       loading={isLoading}
     />

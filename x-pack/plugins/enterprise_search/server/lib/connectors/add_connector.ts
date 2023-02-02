@@ -93,6 +93,7 @@ export const addConnector = async (
   const document: ConnectorDocument = {
     api_key_id: null,
     configuration: {},
+    custom_scheduling: {},
     description: null,
     error: null,
     features: null,
