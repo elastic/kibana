@@ -52,17 +52,26 @@ export const OptionsListPopoverActionBar = ({
   return (
     <div className="optionsList__actions">
       <EuiFormRow fullWidth>
-        <EuiFieldSearch
-          isInvalid={!searchString.valid}
-          compressed
-          disabled={showOnlySelected}
-          fullWidth
-          onChange={(event) => updateSearchString(event.target.value)}
-          value={searchString.value}
-          data-test-subj="optionsList-control-search-input"
-          placeholder={OptionsListStrings.popover.getSearchPlaceholder()}
-          autoFocus={true}
-        />
+        <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
+          <EuiFlexItem grow={true}>
+            <EuiFieldSearch
+              isInvalid={!searchString.valid}
+              compressed
+              disabled={showOnlySelected}
+              fullWidth
+              onChange={(event) => updateSearchString(event.target.value)}
+              value={searchString.value}
+              data-test-subj="optionsList-control-search-input"
+              placeholder={OptionsListStrings.popover.getSearchPlaceholder()}
+              autoFocus={true}
+            />
+          </EuiFlexItem>
+          {!hideSort && (
+            <EuiFlexItem grow={false}>
+              <OptionsListPopoverSortingButton showOnlySelected={showOnlySelected} />
+            </EuiFlexItem>
+          )}
+        </EuiFlexGroup>
       </EuiFormRow>
       <EuiFormRow className="optionsList__actionsRow" fullWidth>
         <EuiFlexGroup
@@ -90,11 +99,6 @@ export const OptionsListPopoverActionBar = ({
           )}
           <EuiFlexItem grow={false}>
             <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
-              {!hideSort && (
-                <EuiFlexItem grow={false}>
-                  <OptionsListPopoverSortingButton showOnlySelected={showOnlySelected} />
-                </EuiFlexItem>
-              )}
               <EuiFlexItem grow={false}>
                 <EuiToolTip
                   position="top"

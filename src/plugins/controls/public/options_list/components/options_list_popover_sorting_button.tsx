@@ -12,12 +12,11 @@ import {
   EuiButtonGroupOptionProps,
   EuiSelectableOption,
   EuiPopoverTitle,
+  EuiButtonEmpty,
   EuiButtonGroup,
-  EuiButtonIcon,
   EuiSelectable,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiToolTip,
   EuiPopover,
   Direction,
 } from '@elastic/eui';
@@ -94,23 +93,16 @@ export const OptionsListPopoverSortingButton = ({
   return (
     <EuiPopover
       button={
-        <EuiToolTip
-          position="top"
-          content={
-            showOnlySelected
-              ? OptionsListStrings.popover.getSortDisabledTooltip()
-              : OptionsListStrings.popover.getSortPopoverDescription()
-          }
+        <EuiButtonEmpty
+          size="s"
+          color="text"
+          iconSide="right"
+          iconType="arrowDown"
+          className="euiFilterGroup" // this gives the button a nice border
+          onClick={() => setIsSortingPopoverOpen(!isSortingPopoverOpen)}
         >
-          <EuiButtonIcon
-            size="xs"
-            iconType="sortable"
-            disabled={showOnlySelected}
-            data-test-subj="optionsListControl__sortingOptionsButton"
-            onClick={() => setIsSortingPopoverOpen(!isSortingPopoverOpen)}
-            aria-label={OptionsListStrings.popover.getSortPopoverDescription()}
-          />
-        </EuiToolTip>
+          {OptionsListStrings.popover.getSortPopoverTitle()}
+        </EuiButtonEmpty>
       }
       panelPaddingSize="none"
       isOpen={isSortingPopoverOpen}
