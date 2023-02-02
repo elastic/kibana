@@ -159,6 +159,7 @@ export class StatusRuleExecutor {
         projectMonitorsCount,
         allMonitorsCount: allIds.length,
         disabledMonitorsCount: allIds.length - enabledMonitorQueryIds.length,
+        allIds,
       };
     }
     const staleDownConfigs = this.markDeletedConfigs(prevDownConfigs);

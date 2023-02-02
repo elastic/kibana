@@ -8,7 +8,12 @@ import { cloneDeep, intersection } from 'lodash';
 import { SearchRequest } from '@elastic/elasticsearch/lib/api/types';
 import { SUMMARY_FILTER } from '../../common/constants/client_defaults';
 import { UptimeEsClient } from '../legacy_uptime/lib/lib';
-import { OverviewStatus, OverviewStatusMetaData, Ping } from '../../common/runtime_types';
+import {
+  OverviewStatus,
+  OverviewStatusMetaData,
+  OverviewPendingStatusMetaData,
+  Ping,
+} from '../../common/runtime_types';
 
 const DEFAULT_MAX_ES_BUCKET_SIZE = 10000;
 
@@ -22,7 +27,11 @@ export async function queryMonitorStatus(
 ): Promise<
   Omit<
     OverviewStatus,
-    'disabledCount' | 'allMonitorsCount' | 'disabledMonitorsCount' | 'projectMonitorsCount'
+    | 'disabledCount'
+    | 'allMonitorsCount'
+    | 'disabledMonitorsCount'
+    | 'projectMonitorsCount'
+    | 'allIds'
   >
 > {
   const idSize = Math.trunc(DEFAULT_MAX_ES_BUCKET_SIZE / listOfLocations.length || 1);
@@ -115,7 +124,7 @@ export async function queryMonitorStatus(
   let pending = 0;
   const upConfigs: Record<string, OverviewStatusMetaData> = {};
   const downConfigs: Record<string, OverviewStatusMetaData> = {};
-  const pendingConfigs: Record<string, OverviewStatusMetaData> = {};
+  const pendingConfigs: Record<string, OverviewPendingStatusMetaData> = {};
 
   for await (const response of promises) {
     response.body.aggregations?.id.buckets.forEach(
@@ -200,6 +209,5 @@ export async function queryMonitorStatus(
     downConfigs,
     pendingConfigs,
     enabledMonitorQueryIds: monitorQueryIds,
-    allIds: monitorQueryIds,
   };
 }

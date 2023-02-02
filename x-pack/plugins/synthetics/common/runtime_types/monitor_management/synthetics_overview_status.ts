@@ -8,7 +8,16 @@
 import * as t from 'io-ts';
 import { PingType } from '..';
 
-export const OverviewStatusMetaDataCodec = t.intersection([
+export const OverviewStatusMetaDataCodec = t.interface({
+  monitorQueryId: t.string,
+  configId: t.string,
+  status: t.string,
+  location: t.string,
+  timestamp: t.string,
+  ping: PingType,
+});
+
+export const OverviewPendingStatusMetaDataCodec = t.intersection([
   t.interface({
     monitorQueryId: t.string,
     configId: t.string,
@@ -31,7 +40,7 @@ export const OverviewStatusCodec = t.interface({
   disabledCount: t.number,
   upConfigs: t.record(t.string, OverviewStatusMetaDataCodec),
   downConfigs: t.record(t.string, OverviewStatusMetaDataCodec),
-  pendingConfigs: t.record(t.string, OverviewStatusMetaDataCodec),
+  pendingConfigs: t.record(t.string, OverviewPendingStatusMetaDataCodec),
   enabledMonitorQueryIds: t.array(t.string),
   allIds: t.array(t.string),
 });
@@ -46,3 +55,4 @@ export const OverviewStatusStateCodec = t.intersection([
 export type OverviewStatus = t.TypeOf<typeof OverviewStatusCodec>;
 export type OverviewStatusState = t.TypeOf<typeof OverviewStatusStateCodec>;
 export type OverviewStatusMetaData = t.TypeOf<typeof OverviewStatusMetaDataCodec>;
+export type OverviewPendingStatusMetaData = t.TypeOf<typeof OverviewPendingStatusMetaDataCodec>;
