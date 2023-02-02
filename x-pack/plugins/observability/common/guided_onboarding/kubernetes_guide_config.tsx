@@ -11,10 +11,10 @@ import { i18n } from '@kbn/i18n';
 export const kubernetesGuideId = 'kubernetes';
 export const kubernetesGuideConfig: GuideConfig = {
   title: i18n.translate('xpack.observability.guideConfig.title', {
-    defaultMessage: 'Observe my Kubernetes infrastructure',
+    defaultMessage: 'Monitor my Kubernetes clusters',
   }),
   description: i18n.translate('xpack.observability.guideConfig.description', {
-    defaultMessage: `We'll help you quickly get visibility into your Kubernetes environment with our Elastic integration. Gain deep insights from your logs, metrics, and traces to proactively detect issues and take action to resolve them.`,
+    defaultMessage: `We'll help you connect Elastic and Kubernetes to start collecting and analyzing logs and metrics.`,
   }),
   guideName: 'Kubernetes',
   telemetryId: 'kubernetes',
@@ -28,30 +28,26 @@ export const kubernetesGuideConfig: GuideConfig = {
     {
       id: 'add_data',
       title: i18n.translate('xpack.observability.guideConfig.addDataStep.title', {
-        defaultMessage: 'Add and verify your data',
+        defaultMessage: 'Add data',
       }),
       integration: 'kubernetes',
-      descriptionList: [
-        {
-          descriptionText: i18n.translate(
-            'xpack.observability.guideConfig.addDataStep.descriptionList.item1.descriptionText',
-            {
-              defaultMessage: 'Deploy kube-state-metrics service to your Kubernetes.',
-            }
-          ),
-          linkText: i18n.translate(
-            'xpack.observability.guideConfig.addDataStep.descriptionList.item1.linkText',
-            {
-              defaultMessage: 'Learn more',
-            }
-          ),
-          linkUrl: 'https://github.com/kubernetes/kube-state-metrics',
-          isLinkExternal: true,
-        },
-        i18n.translate('xpack.observability.guideConfig.addDataStep.descriptionList.item2', {
-          defaultMessage: 'Add the Elastic Kubernetes integration.',
-        }),
-      ],
+      description: {
+        descriptionText: i18n.translate(
+          'xpack.observability.guideConfig.addDataStep.description.descriptionText',
+          {
+            defaultMessage:
+              'Install an Elastic Agent to get your Kubernetes data flowing. Optionally, deploy kube-state-metrics to your Kubernetes for more comprehensive metrics coverage.',
+          }
+        ),
+        linkText: i18n.translate(
+          'xpack.observability.guideConfig.addDataStep.descriptionList.item1.linkText',
+          {
+            defaultMessage: 'Learn more',
+          }
+        ),
+        linkUrl: 'https://github.com/kubernetes/kube-state-metrics',
+        isLinkExternal: true,
+      },
       location: {
         appID: 'integrations',
         path: '/detail/kubernetes/overview',
@@ -60,10 +56,10 @@ export const kubernetesGuideConfig: GuideConfig = {
     {
       id: 'view_dashboard',
       title: i18n.translate('xpack.observability.guideConfig.viewDashboardStep.title', {
-        defaultMessage: 'Explore Kubernetes metrics',
+        defaultMessage: 'Explore Kubernetes metrics and logs',
       }),
       description: i18n.translate('xpack.observability.guideConfig.viewDashboardStep.description', {
-        defaultMessage: 'Stream, visualize, and analyze your Kubernetes infrastructure metrics.',
+        defaultMessage: 'Visualize and analyze your Kubernetes environment.',
       }),
       location: {
         appID: 'dashboards',
@@ -93,8 +89,7 @@ export const kubernetesGuideConfig: GuideConfig = {
       description: i18n.translate(
         'xpack.observability.guideConfig.tourObservabilityStep.description',
         {
-          defaultMessage:
-            'Get familiar with the rest of Elastic Observability and explore even more integrations.',
+          defaultMessage: 'Get familiar with the rest of Elastic Observability.',
         }
       ),
       location: {
