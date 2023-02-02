@@ -42,7 +42,7 @@ export const SurveyKubernetes = () => {
           >
             <FormattedMessage
               id="xpack.infra.homePage.tellUsWhatYouThinkK8sLink"
-              defaultMessage="Tell us what you think: K8s!"
+              defaultMessage="Tell us what you think! (K8s)"
             />
           </EuiButton>
           {!isToastSeen && (
@@ -80,7 +80,10 @@ export const SurveyKubernetes = () => {
                             }}
                             size="s"
                           >
-                            Start survey
+                            <FormattedMessage
+                              id="xpack.infra.homePage.kubernetesToastButton"
+                              defaultMessage="Start survey"
+                            />
                           </EuiButton>
                         </EuiFlexItem>
                       </EuiFlexGroup>
