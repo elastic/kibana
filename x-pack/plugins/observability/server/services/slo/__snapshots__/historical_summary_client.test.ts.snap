@@ -2,12 +2,12 @@
 
 exports[`FetchHistoricalSummary Calendar Aligned and Occurrences SLOs returns the summary 1`] = `
 Object {
-  "date": Any<Date>,
+  "date": Any<ClockDate>,
   "errorBudget": Object {
-    "consumed": 0.004449,
+    "consumed": 0.004019,
     "initial": 0.05,
     "isEstimated": true,
-    "remaining": 0.995551,
+    "remaining": 0.995981,
   },
   "sliValue": 0.97,
   "status": "HEALTHY",
@@ -16,12 +16,12 @@ Object {
 
 exports[`FetchHistoricalSummary Calendar Aligned and Occurrences SLOs returns the summary 2`] = `
 Object {
-  "date": Any<Date>,
+  "date": Any<ClockDate>,
   "errorBudget": Object {
-    "consumed": 0.025879,
+    "consumed": 0.023374,
     "initial": 0.05,
     "isEstimated": true,
-    "remaining": 0.974121,
+    "remaining": 0.976626,
   },
   "sliValue": 0.97,
   "status": "HEALTHY",
@@ -30,12 +30,12 @@ Object {
 
 exports[`FetchHistoricalSummary Calendar Aligned and Occurrences SLOs returns the summary 3`] = `
 Object {
-  "date": Any<Date>,
+  "date": Any<ClockDate>,
   "errorBudget": Object {
-    "consumed": 0.047306,
+    "consumed": 0.042725,
     "initial": 0.05,
     "isEstimated": true,
-    "remaining": 0.952694,
+    "remaining": 0.957275,
   },
   "sliValue": 0.97,
   "status": "HEALTHY",
@@ -44,12 +44,12 @@ Object {
 
 exports[`FetchHistoricalSummary Calendar Aligned and Occurrences SLOs returns the summary 4`] = `
 Object {
-  "date": Any<Date>,
+  "date": Any<ClockDate>,
   "errorBudget": Object {
-    "consumed": 0.068729,
+    "consumed": 0.06208,
     "initial": 0.05,
     "isEstimated": true,
-    "remaining": 0.931271,
+    "remaining": 0.93792,
   },
   "sliValue": 0.97,
   "status": "HEALTHY",
@@ -58,12 +58,12 @@ Object {
 
 exports[`FetchHistoricalSummary Calendar Aligned and Occurrences SLOs returns the summary 5`] = `
 Object {
-  "date": Any<Date>,
+  "date": Any<ClockDate>,
   "errorBudget": Object {
-    "consumed": 0.090171,
+    "consumed": 0.081433,
     "initial": 0.05,
     "isEstimated": true,
-    "remaining": 0.909829,
+    "remaining": 0.918567,
   },
   "sliValue": 0.97,
   "status": "HEALTHY",
@@ -72,12 +72,12 @@ Object {
 
 exports[`FetchHistoricalSummary Calendar Aligned and Occurrences SLOs returns the summary 6`] = `
 Object {
-  "date": Any<Date>,
+  "date": Any<ClockDate>,
   "errorBudget": Object {
-    "consumed": 0.111593,
+    "consumed": 0.100784,
     "initial": 0.05,
     "isEstimated": true,
-    "remaining": 0.888407,
+    "remaining": 0.899216,
   },
   "sliValue": 0.97,
   "status": "HEALTHY",
@@ -86,12 +86,12 @@ Object {
 
 exports[`FetchHistoricalSummary Calendar Aligned and Occurrences SLOs returns the summary 7`] = `
 Object {
-  "date": Any<Date>,
+  "date": Any<ClockDate>,
   "errorBudget": Object {
-    "consumed": 0.133038,
+    "consumed": 0.120137,
     "initial": 0.05,
     "isEstimated": true,
-    "remaining": 0.866962,
+    "remaining": 0.879863,
   },
   "sliValue": 0.97,
   "status": "HEALTHY",
@@ -100,12 +100,12 @@ Object {
 
 exports[`FetchHistoricalSummary Calendar Aligned and Occurrences SLOs returns the summary 8`] = `
 Object {
-  "date": Any<Date>,
+  "date": Any<ClockDate>,
   "errorBudget": Object {
-    "consumed": 0.15444,
+    "consumed": 0.139494,
     "initial": 0.05,
     "isEstimated": true,
-    "remaining": 0.84556,
+    "remaining": 0.860506,
   },
   "sliValue": 0.97,
   "status": "HEALTHY",
@@ -114,12 +114,12 @@ Object {
 
 exports[`FetchHistoricalSummary Calendar Aligned and Occurrences SLOs returns the summary 9`] = `
 Object {
-  "date": Any<Date>,
+  "date": Any<ClockDate>,
   "errorBudget": Object {
-    "consumed": 0.175896,
+    "consumed": 0.15887,
     "initial": 0.05,
     "isEstimated": true,
-    "remaining": 0.824104,
+    "remaining": 0.84113,
   },
   "sliValue": 0.97,
   "status": "HEALTHY",
@@ -128,12 +128,12 @@ Object {
 
 exports[`FetchHistoricalSummary Calendar Aligned and Occurrences SLOs returns the summary 10`] = `
 Object {
-  "date": Any<Date>,
+  "date": Any<ClockDate>,
   "errorBudget": Object {
-    "consumed": 0.197304,
+    "consumed": 0.1782,
     "initial": 0.05,
     "isEstimated": true,
-    "remaining": 0.802696,
+    "remaining": 0.8218,
   },
   "sliValue": 0.97,
   "status": "HEALTHY",
@@ -142,12 +142,12 @@ Object {
 
 exports[`FetchHistoricalSummary Calendar Aligned and Occurrences SLOs returns the summary 11`] = `
 Object {
-  "date": Any<Date>,
+  "date": Any<ClockDate>,
   "errorBudget": Object {
-    "consumed": 0.21876,
+    "consumed": 0.197546,
     "initial": 0.05,
     "isEstimated": true,
-    "remaining": 0.78124,
+    "remaining": 0.802454,
   },
   "sliValue": 0.97,
   "status": "HEALTHY",
@@ -156,12 +156,12 @@ Object {
 
 exports[`FetchHistoricalSummary Calendar Aligned and Occurrences SLOs returns the summary 12`] = `
 Object {
-  "date": Any<Date>,
+  "date": Any<ClockDate>,
   "errorBudget": Object {
-    "consumed": 0.24016,
+    "consumed": 0.216933,
     "initial": 0.05,
     "isEstimated": true,
-    "remaining": 0.75984,
+    "remaining": 0.783067,
   },
   "sliValue": 0.97,
   "status": "HEALTHY",
@@ -170,12 +170,12 @@ Object {
 
 exports[`FetchHistoricalSummary Calendar Aligned and Occurrences SLOs returns the summary 13`] = `
 Object {
-  "date": Any<Date>,
+  "date": Any<ClockDate>,
   "errorBudget": Object {
-    "consumed": 0.261569,
+    "consumed": 0.236292,
     "initial": 0.05,
     "isEstimated": true,
-    "remaining": 0.738431,
+    "remaining": 0.763708,
   },
   "sliValue": 0.97,
   "status": "HEALTHY",
@@ -184,12 +184,12 @@ Object {
 
 exports[`FetchHistoricalSummary Calendar Aligned and Occurrences SLOs returns the summary 14`] = `
 Object {
-  "date": Any<Date>,
+  "date": Any<ClockDate>,
   "errorBudget": Object {
-    "consumed": 0.283019,
+    "consumed": 0.25563,
     "initial": 0.05,
     "isEstimated": true,
-    "remaining": 0.716981,
+    "remaining": 0.74437,
   },
   "sliValue": 0.97,
   "status": "HEALTHY",
@@ -198,12 +198,12 @@ Object {
 
 exports[`FetchHistoricalSummary Calendar Aligned and Occurrences SLOs returns the summary 15`] = `
 Object {
-  "date": Any<Date>,
+  "date": Any<ClockDate>,
   "errorBudget": Object {
-    "consumed": 0.304465,
+    "consumed": 0.274977,
     "initial": 0.05,
     "isEstimated": true,
-    "remaining": 0.695535,
+    "remaining": 0.725023,
   },
   "sliValue": 0.97,
   "status": "HEALTHY",
@@ -212,12 +212,12 @@ Object {
 
 exports[`FetchHistoricalSummary Calendar Aligned and Occurrences SLOs returns the summary 16`] = `
 Object {
-  "date": Any<Date>,
+  "date": Any<ClockDate>,
   "errorBudget": Object {
-    "consumed": 0.325866,
+    "consumed": 0.294298,
     "initial": 0.05,
     "isEstimated": true,
-    "remaining": 0.674134,
+    "remaining": 0.705702,
   },
   "sliValue": 0.97,
   "status": "HEALTHY",
@@ -226,12 +226,12 @@ Object {
 
 exports[`FetchHistoricalSummary Calendar Aligned and Occurrences SLOs returns the summary 17`] = `
 Object {
-  "date": Any<Date>,
+  "date": Any<ClockDate>,
   "errorBudget": Object {
-    "consumed": 0.347293,
+    "consumed": 0.313653,
     "initial": 0.05,
     "isEstimated": true,
-    "remaining": 0.652707,
+    "remaining": 0.686347,
   },
   "sliValue": 0.97,
   "status": "HEALTHY",
@@ -240,12 +240,12 @@ Object {
 
 exports[`FetchHistoricalSummary Calendar Aligned and Occurrences SLOs returns the summary 18`] = `
 Object {
-  "date": Any<Date>,
+  "date": Any<ClockDate>,
   "errorBudget": Object {
-    "consumed": 0.368727,
+    "consumed": 0.333025,
     "initial": 0.05,
     "isEstimated": true,
-    "remaining": 0.631273,
+    "remaining": 0.666975,
   },
   "sliValue": 0.97,
   "status": "HEALTHY",
@@ -254,12 +254,12 @@ Object {
 
 exports[`FetchHistoricalSummary Calendar Aligned and Timeslices SLOs returns the summary 1`] = `
 Object {
-  "date": Any<Date>,
+  "date": Any<ClockDate>,
   "errorBudget": Object {
-    "consumed": 0.001488,
+    "consumed": 0.001344,
     "initial": 0.05,
     "isEstimated": false,
-    "remaining": 0.998512,
+    "remaining": 0.998656,
   },
   "sliValue": 0.97,
   "status": "HEALTHY",
@@ -268,12 +268,12 @@ Object {
 
 exports[`FetchHistoricalSummary Calendar Aligned and Timeslices SLOs returns the summary 2`] = `
 Object {
-  "date": Any<Date>,
+  "date": Any<ClockDate>,
   "errorBudget": Object {
-    "consumed": 0.002976,
+    "consumed": 0.002688,
     "initial": 0.05,
     "isEstimated": false,
-    "remaining": 0.997024,
+    "remaining": 0.997312,
   },
   "sliValue": 0.97,
   "status": "HEALTHY",
@@ -282,12 +282,12 @@ Object {
 
 exports[`FetchHistoricalSummary Calendar Aligned and Timeslices SLOs returns the summary 3`] = `
 Object {
-  "date": Any<Date>,
+  "date": Any<ClockDate>,
   "errorBudget": Object {
-    "consumed": 0.004464,
+    "consumed": 0.004032,
     "initial": 0.05,
     "isEstimated": false,
-    "remaining": 0.995536,
+    "remaining": 0.995968,
   },
   "sliValue": 0.97,
   "status": "HEALTHY",
@@ -296,12 +296,12 @@ Object {
 
 exports[`FetchHistoricalSummary Calendar Aligned and Timeslices SLOs returns the summary 4`] = `
 Object {
-  "date": Any<Date>,
+  "date": Any<ClockDate>,
   "errorBudget": Object {
-    "consumed": 0.005952,
+    "consumed": 0.005376,
     "initial": 0.05,
     "isEstimated": false,
-    "remaining": 0.994048,
+    "remaining": 0.994624,
   },
   "sliValue": 0.97,
   "status": "HEALTHY",
@@ -310,12 +310,12 @@ Object {
 
 exports[`FetchHistoricalSummary Calendar Aligned and Timeslices SLOs returns the summary 5`] = `
 Object {
-  "date": Any<Date>,
+  "date": Any<ClockDate>,
   "errorBudget": Object {
-    "consumed": 0.00744,
+    "consumed": 0.00672,
     "initial": 0.05,
     "isEstimated": false,
-    "remaining": 0.99256,
+    "remaining": 0.99328,
   },
   "sliValue": 0.97,
   "status": "HEALTHY",
@@ -324,12 +324,12 @@ Object {
 
 exports[`FetchHistoricalSummary Calendar Aligned and Timeslices SLOs returns the summary 6`] = `
 Object {
-  "date": Any<Date>,
+  "date": Any<ClockDate>,
   "errorBudget": Object {
-    "consumed": 0.008929,
+    "consumed": 0.008065,
     "initial": 0.05,
     "isEstimated": false,
-    "remaining": 0.991071,
+    "remaining": 0.991935,
   },
   "sliValue": 0.97,
   "status": "HEALTHY",
@@ -338,12 +338,12 @@ Object {
 
 exports[`FetchHistoricalSummary Calendar Aligned and Timeslices SLOs returns the summary 7`] = `
 Object {
-  "date": Any<Date>,
+  "date": Any<ClockDate>,
   "errorBudget": Object {
-    "consumed": 0.010417,
+    "consumed": 0.009409,
     "initial": 0.05,
     "isEstimated": false,
-    "remaining": 0.989583,
+    "remaining": 0.990591,
   },
   "sliValue": 0.97,
   "status": "HEALTHY",
@@ -352,12 +352,12 @@ Object {
 
 exports[`FetchHistoricalSummary Calendar Aligned and Timeslices SLOs returns the summary 8`] = `
 Object {
-  "date": Any<Date>,
+  "date": Any<ClockDate>,
   "errorBudget": Object {
-    "consumed": 0.011905,
+    "consumed": 0.010753,
     "initial": 0.05,
     "isEstimated": false,
-    "remaining": 0.988095,
+    "remaining": 0.989247,
   },
   "sliValue": 0.97,
   "status": "HEALTHY",
@@ -366,12 +366,12 @@ Object {
 
 exports[`FetchHistoricalSummary Calendar Aligned and Timeslices SLOs returns the summary 9`] = `
 Object {
-  "date": Any<Date>,
+  "date": Any<ClockDate>,
   "errorBudget": Object {
-    "consumed": 0.013393,
+    "consumed": 0.012097,
     "initial": 0.05,
     "isEstimated": false,
-    "remaining": 0.986607,
+    "remaining": 0.987903,
   },
   "sliValue": 0.97,
   "status": "HEALTHY",
@@ -380,12 +380,12 @@ Object {
 
 exports[`FetchHistoricalSummary Calendar Aligned and Timeslices SLOs returns the summary 10`] = `
 Object {
-  "date": Any<Date>,
+  "date": Any<ClockDate>,
   "errorBudget": Object {
-    "consumed": 0.014881,
+    "consumed": 0.013441,
     "initial": 0.05,
     "isEstimated": false,
-    "remaining": 0.985119,
+    "remaining": 0.986559,
   },
   "sliValue": 0.97,
   "status": "HEALTHY",
@@ -394,12 +394,12 @@ Object {
 
 exports[`FetchHistoricalSummary Calendar Aligned and Timeslices SLOs returns the summary 11`] = `
 Object {
-  "date": Any<Date>,
+  "date": Any<ClockDate>,
   "errorBudget": Object {
-    "consumed": 0.016369,
+    "consumed": 0.014785,
     "initial": 0.05,
     "isEstimated": false,
-    "remaining": 0.983631,
+    "remaining": 0.985215,
   },
   "sliValue": 0.97,
   "status": "HEALTHY",
@@ -408,12 +408,12 @@ Object {
 
 exports[`FetchHistoricalSummary Calendar Aligned and Timeslices SLOs returns the summary 12`] = `
 Object {
-  "date": Any<Date>,
+  "date": Any<ClockDate>,
   "errorBudget": Object {
-    "consumed": 0.017857,
+    "consumed": 0.016129,
     "initial": 0.05,
     "isEstimated": false,
-    "remaining": 0.982143,
+    "remaining": 0.983871,
   },
   "sliValue": 0.97,
   "status": "HEALTHY",
@@ -422,12 +422,12 @@ Object {
 
 exports[`FetchHistoricalSummary Calendar Aligned and Timeslices SLOs returns the summary 13`] = `
 Object {
-  "date": Any<Date>,
+  "date": Any<ClockDate>,
   "errorBudget": Object {
-    "consumed": 0.019345,
+    "consumed": 0.017473,
     "initial": 0.05,
     "isEstimated": false,
-    "remaining": 0.980655,
+    "remaining": 0.982527,
   },
   "sliValue": 0.97,
   "status": "HEALTHY",
@@ -436,12 +436,12 @@ Object {
 
 exports[`FetchHistoricalSummary Calendar Aligned and Timeslices SLOs returns the summary 14`] = `
 Object {
-  "date": Any<Date>,
+  "date": Any<ClockDate>,
   "errorBudget": Object {
-    "consumed": 0.020833,
+    "consumed": 0.018817,
     "initial": 0.05,
     "isEstimated": false,
-    "remaining": 0.979167,
+    "remaining": 0.981183,
   },
   "sliValue": 0.97,
   "status": "HEALTHY",
@@ -450,12 +450,12 @@ Object {
 
 exports[`FetchHistoricalSummary Calendar Aligned and Timeslices SLOs returns the summary 15`] = `
 Object {
-  "date": Any<Date>,
+  "date": Any<ClockDate>,
   "errorBudget": Object {
-    "consumed": 0.022321,
+    "consumed": 0.020161,
     "initial": 0.05,
     "isEstimated": false,
-    "remaining": 0.977679,
+    "remaining": 0.979839,
   },
   "sliValue": 0.97,
   "status": "HEALTHY",
@@ -464,12 +464,12 @@ Object {
 
 exports[`FetchHistoricalSummary Calendar Aligned and Timeslices SLOs returns the summary 16`] = `
 Object {
-  "date": Any<Date>,
+  "date": Any<ClockDate>,
   "errorBudget": Object {
-    "consumed": 0.02381,
+    "consumed": 0.021505,
     "initial": 0.05,
     "isEstimated": false,
-    "remaining": 0.97619,
+    "remaining": 0.978495,
   },
   "sliValue": 0.97,
   "status": "HEALTHY",
@@ -478,12 +478,12 @@ Object {
 
 exports[`FetchHistoricalSummary Calendar Aligned and Timeslices SLOs returns the summary 17`] = `
 Object {
-  "date": Any<Date>,
+  "date": Any<ClockDate>,
   "errorBudget": Object {
-    "consumed": 0.025298,
+    "consumed": 0.022849,
     "initial": 0.05,
     "isEstimated": false,
-    "remaining": 0.974702,
+    "remaining": 0.977151,
   },
   "sliValue": 0.97,
   "status": "HEALTHY",
@@ -492,12 +492,12 @@ Object {
 
 exports[`FetchHistoricalSummary Calendar Aligned and Timeslices SLOs returns the summary 18`] = `
 Object {
-  "date": Any<Date>,
+  "date": Any<ClockDate>,
   "errorBudget": Object {
-    "consumed": 0.026786,
+    "consumed": 0.024194,
     "initial": 0.05,
     "isEstimated": false,
-    "remaining": 0.973214,
+    "remaining": 0.975806,
   },
   "sliValue": 0.97,
   "status": "HEALTHY",
@@ -506,7 +506,7 @@ Object {
 
 exports[`FetchHistoricalSummary Rolling and Occurrences SLOs returns the summary 1`] = `
 Object {
-  "date": Any<Date>,
+  "date": Any<ClockDate>,
   "errorBudget": Object {
     "consumed": 0.6,
     "initial": 0.05,
@@ -520,7 +520,7 @@ Object {
 
 exports[`FetchHistoricalSummary Rolling and Occurrences SLOs returns the summary 2`] = `
 Object {
-  "date": Any<Date>,
+  "date": Any<ClockDate>,
   "errorBudget": Object {
     "consumed": 0.6,
     "initial": 0.05,
@@ -534,7 +534,7 @@ Object {
 
 exports[`FetchHistoricalSummary Rolling and Occurrences SLOs returns the summary 3`] = `
 Object {
-  "date": Any<Date>,
+  "date": Any<ClockDate>,
   "errorBudget": Object {
     "consumed": 0.6,
     "initial": 0.05,
@@ -548,7 +548,7 @@ Object {
 
 exports[`FetchHistoricalSummary Rolling and Occurrences SLOs returns the summary 4`] = `
 Object {
-  "date": Any<Date>,
+  "date": Any<ClockDate>,
   "errorBudget": Object {
     "consumed": 0.6,
     "initial": 0.05,
@@ -562,7 +562,7 @@ Object {
 
 exports[`FetchHistoricalSummary Rolling and Occurrences SLOs returns the summary 5`] = `
 Object {
-  "date": Any<Date>,
+  "date": Any<ClockDate>,
   "errorBudget": Object {
     "consumed": 0.6,
     "initial": 0.05,
@@ -576,7 +576,7 @@ Object {
 
 exports[`FetchHistoricalSummary Rolling and Occurrences SLOs returns the summary 6`] = `
 Object {
-  "date": Any<Date>,
+  "date": Any<ClockDate>,
   "errorBudget": Object {
     "consumed": 0.6,
     "initial": 0.05,
@@ -590,7 +590,7 @@ Object {
 
 exports[`FetchHistoricalSummary Rolling and Occurrences SLOs returns the summary 7`] = `
 Object {
-  "date": Any<Date>,
+  "date": Any<ClockDate>,
   "errorBudget": Object {
     "consumed": 0.6,
     "initial": 0.05,
@@ -604,7 +604,7 @@ Object {
 
 exports[`FetchHistoricalSummary Rolling and Occurrences SLOs returns the summary 8`] = `
 Object {
-  "date": Any<Date>,
+  "date": Any<ClockDate>,
   "errorBudget": Object {
     "consumed": 0.6,
     "initial": 0.05,
@@ -618,7 +618,7 @@ Object {
 
 exports[`FetchHistoricalSummary Rolling and Occurrences SLOs returns the summary 9`] = `
 Object {
-  "date": Any<Date>,
+  "date": Any<ClockDate>,
   "errorBudget": Object {
     "consumed": 0.6,
     "initial": 0.05,
@@ -632,7 +632,7 @@ Object {
 
 exports[`FetchHistoricalSummary Rolling and Occurrences SLOs returns the summary 10`] = `
 Object {
-  "date": Any<Date>,
+  "date": Any<ClockDate>,
   "errorBudget": Object {
     "consumed": 0.6,
     "initial": 0.05,
@@ -646,7 +646,7 @@ Object {
 
 exports[`FetchHistoricalSummary Rolling and Occurrences SLOs returns the summary 11`] = `
 Object {
-  "date": Any<Date>,
+  "date": Any<ClockDate>,
   "errorBudget": Object {
     "consumed": 0.6,
     "initial": 0.05,
@@ -660,7 +660,7 @@ Object {
 
 exports[`FetchHistoricalSummary Rolling and Occurrences SLOs returns the summary 12`] = `
 Object {
-  "date": Any<Date>,
+  "date": Any<ClockDate>,
   "errorBudget": Object {
     "consumed": 0.6,
     "initial": 0.05,
@@ -674,7 +674,7 @@ Object {
 
 exports[`FetchHistoricalSummary Rolling and Occurrences SLOs returns the summary 13`] = `
 Object {
-  "date": Any<Date>,
+  "date": Any<ClockDate>,
   "errorBudget": Object {
     "consumed": 0.6,
     "initial": 0.05,
@@ -688,7 +688,7 @@ Object {
 
 exports[`FetchHistoricalSummary Rolling and Occurrences SLOs returns the summary 14`] = `
 Object {
-  "date": Any<Date>,
+  "date": Any<ClockDate>,
   "errorBudget": Object {
     "consumed": 0.6,
     "initial": 0.05,
@@ -702,7 +702,7 @@ Object {
 
 exports[`FetchHistoricalSummary Rolling and Occurrences SLOs returns the summary 15`] = `
 Object {
-  "date": Any<Date>,
+  "date": Any<ClockDate>,
   "errorBudget": Object {
     "consumed": 0.6,
     "initial": 0.05,
@@ -716,7 +716,7 @@ Object {
 
 exports[`FetchHistoricalSummary Rolling and Occurrences SLOs returns the summary 16`] = `
 Object {
-  "date": Any<Date>,
+  "date": Any<ClockDate>,
   "errorBudget": Object {
     "consumed": 0.6,
     "initial": 0.05,
@@ -730,7 +730,7 @@ Object {
 
 exports[`FetchHistoricalSummary Rolling and Occurrences SLOs returns the summary 17`] = `
 Object {
-  "date": Any<Date>,
+  "date": Any<ClockDate>,
   "errorBudget": Object {
     "consumed": 0.6,
     "initial": 0.05,
@@ -744,7 +744,7 @@ Object {
 
 exports[`FetchHistoricalSummary Rolling and Occurrences SLOs returns the summary 18`] = `
 Object {
-  "date": Any<Date>,
+  "date": Any<ClockDate>,
   "errorBudget": Object {
     "consumed": 0.6,
     "initial": 0.05,
@@ -758,7 +758,7 @@ Object {
 
 exports[`FetchHistoricalSummary Rolling and Occurrences SLOs returns the summary 19`] = `
 Object {
-  "date": Any<Date>,
+  "date": Any<ClockDate>,
   "errorBudget": Object {
     "consumed": 0.6,
     "initial": 0.05,
@@ -772,7 +772,7 @@ Object {
 
 exports[`FetchHistoricalSummary Rolling and Occurrences SLOs returns the summary 20`] = `
 Object {
-  "date": Any<Date>,
+  "date": Any<ClockDate>,
   "errorBudget": Object {
     "consumed": 0.6,
     "initial": 0.05,
@@ -786,7 +786,7 @@ Object {
 
 exports[`FetchHistoricalSummary Rolling and Occurrences SLOs returns the summary 21`] = `
 Object {
-  "date": Any<Date>,
+  "date": Any<ClockDate>,
   "errorBudget": Object {
     "consumed": 0.6,
     "initial": 0.05,
@@ -800,7 +800,7 @@ Object {
 
 exports[`FetchHistoricalSummary Rolling and Occurrences SLOs returns the summary 22`] = `
 Object {
-  "date": Any<Date>,
+  "date": Any<ClockDate>,
   "errorBudget": Object {
     "consumed": 0.6,
     "initial": 0.05,
@@ -814,7 +814,7 @@ Object {
 
 exports[`FetchHistoricalSummary Rolling and Occurrences SLOs returns the summary 23`] = `
 Object {
-  "date": Any<Date>,
+  "date": Any<ClockDate>,
   "errorBudget": Object {
     "consumed": 0.6,
     "initial": 0.05,
@@ -828,7 +828,7 @@ Object {
 
 exports[`FetchHistoricalSummary Rolling and Occurrences SLOs returns the summary 24`] = `
 Object {
-  "date": Any<Date>,
+  "date": Any<ClockDate>,
   "errorBudget": Object {
     "consumed": 0.6,
     "initial": 0.05,
@@ -842,7 +842,7 @@ Object {
 
 exports[`FetchHistoricalSummary Rolling and Occurrences SLOs returns the summary 25`] = `
 Object {
-  "date": Any<Date>,
+  "date": Any<ClockDate>,
   "errorBudget": Object {
     "consumed": 0.6,
     "initial": 0.05,
@@ -856,7 +856,7 @@ Object {
 
 exports[`FetchHistoricalSummary Rolling and Occurrences SLOs returns the summary 26`] = `
 Object {
-  "date": Any<Date>,
+  "date": Any<ClockDate>,
   "errorBudget": Object {
     "consumed": 0.6,
     "initial": 0.05,
@@ -870,7 +870,7 @@ Object {
 
 exports[`FetchHistoricalSummary Rolling and Occurrences SLOs returns the summary 27`] = `
 Object {
-  "date": Any<Date>,
+  "date": Any<ClockDate>,
   "errorBudget": Object {
     "consumed": 0.6,
     "initial": 0.05,
@@ -884,7 +884,7 @@ Object {
 
 exports[`FetchHistoricalSummary Rolling and Occurrences SLOs returns the summary 28`] = `
 Object {
-  "date": Any<Date>,
+  "date": Any<ClockDate>,
   "errorBudget": Object {
     "consumed": 0.6,
     "initial": 0.05,
@@ -898,7 +898,7 @@ Object {
 
 exports[`FetchHistoricalSummary Rolling and Occurrences SLOs returns the summary 29`] = `
 Object {
-  "date": Any<Date>,
+  "date": Any<ClockDate>,
   "errorBudget": Object {
     "consumed": 0.6,
     "initial": 0.05,
@@ -912,7 +912,7 @@ Object {
 
 exports[`FetchHistoricalSummary Rolling and Occurrences SLOs returns the summary 30`] = `
 Object {
-  "date": Any<Date>,
+  "date": Any<ClockDate>,
   "errorBudget": Object {
     "consumed": 0.6,
     "initial": 0.05,
@@ -926,7 +926,7 @@ Object {
 
 exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary 1`] = `
 Object {
-  "date": Any<Date>,
+  "date": Any<ClockDate>,
   "errorBudget": Object {
     "consumed": 0.6,
     "initial": 0.05,
@@ -940,7 +940,7 @@ Object {
 
 exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary 2`] = `
 Object {
-  "date": Any<Date>,
+  "date": Any<ClockDate>,
   "errorBudget": Object {
     "consumed": 0.6,
     "initial": 0.05,
@@ -954,7 +954,7 @@ Object {
 
 exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary 3`] = `
 Object {
-  "date": Any<Date>,
+  "date": Any<ClockDate>,
   "errorBudget": Object {
     "consumed": 0.6,
     "initial": 0.05,
@@ -968,7 +968,7 @@ Object {
 
 exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary 4`] = `
 Object {
-  "date": Any<Date>,
+  "date": Any<ClockDate>,
   "errorBudget": Object {
     "consumed": 0.6,
     "initial": 0.05,
@@ -982,7 +982,7 @@ Object {
 
 exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary 5`] = `
 Object {
-  "date": Any<Date>,
+  "date": Any<ClockDate>,
   "errorBudget": Object {
     "consumed": 0.6,
     "initial": 0.05,
@@ -996,7 +996,7 @@ Object {
 
 exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary 6`] = `
 Object {
-  "date": Any<Date>,
+  "date": Any<ClockDate>,
   "errorBudget": Object {
     "consumed": 0.6,
     "initial": 0.05,
@@ -1010,7 +1010,7 @@ Object {
 
 exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary 7`] = `
 Object {
-  "date": Any<Date>,
+  "date": Any<ClockDate>,
   "errorBudget": Object {
     "consumed": 0.6,
     "initial": 0.05,
@@ -1024,7 +1024,7 @@ Object {
 
 exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary 8`] = `
 Object {
-  "date": Any<Date>,
+  "date": Any<ClockDate>,
   "errorBudget": Object {
     "consumed": 0.6,
     "initial": 0.05,
@@ -1038,7 +1038,7 @@ Object {
 
 exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary 9`] = `
 Object {
-  "date": Any<Date>,
+  "date": Any<ClockDate>,
   "errorBudget": Object {
     "consumed": 0.6,
     "initial": 0.05,
@@ -1052,7 +1052,7 @@ Object {
 
 exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary 10`] = `
 Object {
-  "date": Any<Date>,
+  "date": Any<ClockDate>,
   "errorBudget": Object {
     "consumed": 0.6,
     "initial": 0.05,
@@ -1066,7 +1066,7 @@ Object {
 
 exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary 11`] = `
 Object {
-  "date": Any<Date>,
+  "date": Any<ClockDate>,
   "errorBudget": Object {
     "consumed": 0.6,
     "initial": 0.05,
@@ -1080,7 +1080,7 @@ Object {
 
 exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary 12`] = `
 Object {
-  "date": Any<Date>,
+  "date": Any<ClockDate>,
   "errorBudget": Object {
     "consumed": 0.6,
     "initial": 0.05,
@@ -1094,7 +1094,7 @@ Object {
 
 exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary 13`] = `
 Object {
-  "date": Any<Date>,
+  "date": Any<ClockDate>,
   "errorBudget": Object {
     "consumed": 0.6,
     "initial": 0.05,
@@ -1108,7 +1108,7 @@ Object {
 
 exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary 14`] = `
 Object {
-  "date": Any<Date>,
+  "date": Any<ClockDate>,
   "errorBudget": Object {
     "consumed": 0.6,
     "initial": 0.05,
@@ -1122,7 +1122,7 @@ Object {
 
 exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary 15`] = `
 Object {
-  "date": Any<Date>,
+  "date": Any<ClockDate>,
   "errorBudget": Object {
     "consumed": 0.6,
     "initial": 0.05,
@@ -1136,7 +1136,7 @@ Object {
 
 exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary 16`] = `
 Object {
-  "date": Any<Date>,
+  "date": Any<ClockDate>,
   "errorBudget": Object {
     "consumed": 0.6,
     "initial": 0.05,
@@ -1150,7 +1150,7 @@ Object {
 
 exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary 17`] = `
 Object {
-  "date": Any<Date>,
+  "date": Any<ClockDate>,
   "errorBudget": Object {
     "consumed": 0.6,
     "initial": 0.05,
@@ -1164,7 +1164,7 @@ Object {
 
 exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary 18`] = `
 Object {
-  "date": Any<Date>,
+  "date": Any<ClockDate>,
   "errorBudget": Object {
     "consumed": 0.6,
     "initial": 0.05,
@@ -1178,7 +1178,7 @@ Object {
 
 exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary 19`] = `
 Object {
-  "date": Any<Date>,
+  "date": Any<ClockDate>,
   "errorBudget": Object {
     "consumed": 0.6,
     "initial": 0.05,
@@ -1192,7 +1192,7 @@ Object {
 
 exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary 20`] = `
 Object {
-  "date": Any<Date>,
+  "date": Any<ClockDate>,
   "errorBudget": Object {
     "consumed": 0.6,
     "initial": 0.05,
@@ -1206,7 +1206,7 @@ Object {
 
 exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary 21`] = `
 Object {
-  "date": Any<Date>,
+  "date": Any<ClockDate>,
   "errorBudget": Object {
     "consumed": 0.6,
     "initial": 0.05,
@@ -1220,7 +1220,7 @@ Object {
 
 exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary 22`] = `
 Object {
-  "date": Any<Date>,
+  "date": Any<ClockDate>,
   "errorBudget": Object {
     "consumed": 0.6,
     "initial": 0.05,
@@ -1234,7 +1234,7 @@ Object {
 
 exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary 23`] = `
 Object {
-  "date": Any<Date>,
+  "date": Any<ClockDate>,
   "errorBudget": Object {
     "consumed": 0.6,
     "initial": 0.05,
@@ -1248,7 +1248,7 @@ Object {
 
 exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary 24`] = `
 Object {
-  "date": Any<Date>,
+  "date": Any<ClockDate>,
   "errorBudget": Object {
     "consumed": 0.6,
     "initial": 0.05,
@@ -1262,7 +1262,7 @@ Object {
 
 exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary 25`] = `
 Object {
-  "date": Any<Date>,
+  "date": Any<ClockDate>,
   "errorBudget": Object {
     "consumed": 0.6,
     "initial": 0.05,
@@ -1276,7 +1276,7 @@ Object {
 
 exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary 26`] = `
 Object {
-  "date": Any<Date>,
+  "date": Any<ClockDate>,
   "errorBudget": Object {
     "consumed": 0.6,
     "initial": 0.05,
@@ -1290,7 +1290,7 @@ Object {
 
 exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary 27`] = `
 Object {
-  "date": Any<Date>,
+  "date": Any<ClockDate>,
   "errorBudget": Object {
     "consumed": 0.6,
     "initial": 0.05,
@@ -1304,7 +1304,7 @@ Object {
 
 exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary 28`] = `
 Object {
-  "date": Any<Date>,
+  "date": Any<ClockDate>,
   "errorBudget": Object {
     "consumed": 0.6,
     "initial": 0.05,
@@ -1318,7 +1318,7 @@ Object {
 
 exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary 29`] = `
 Object {
-  "date": Any<Date>,
+  "date": Any<ClockDate>,
   "errorBudget": Object {
     "consumed": 0.6,
     "initial": 0.05,
@@ -1332,7 +1332,7 @@ Object {
 
 exports[`FetchHistoricalSummary Rolling and Timeslices SLOs returns the summary 30`] = `
 Object {
-  "date": Any<Date>,
+  "date": Any<ClockDate>,
   "errorBudget": Object {
     "consumed": 0.6,
     "initial": 0.05,
