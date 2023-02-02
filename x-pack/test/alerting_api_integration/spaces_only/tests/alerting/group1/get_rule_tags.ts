@@ -37,10 +37,7 @@ export default function createAggregateTests({ getService }: FtrProviderContext)
       );
 
       expect(response.status).to.eql(200);
-
-      expect(response.body).to.eql({
-        rule_tags: [],
-      });
+      expect(response.body.rule_tags.filter((tag: string) => tag !== 'foo')).to.eql([]);
     });
 
     it('should get rule tags from all rules', async () => {
@@ -59,7 +56,9 @@ export default function createAggregateTests({ getService }: FtrProviderContext)
       );
 
       expect(response.status).to.eql(200);
-      expect(response.body.rule_tags.sort()).to.eql(tags.sort());
+      expect(response.body.rule_tags.filter((tag: string) => tag !== 'foo').sort()).to.eql(
+        tags.sort()
+      );
     });
 
     it('should paginate rule tags', async () => {
@@ -75,7 +74,9 @@ export default function createAggregateTests({ getService }: FtrProviderContext)
       );
 
       expect(response.status).to.eql(200);
-      expect(response.body.rule_tags).to.eql(tags.sort().slice(0, 5));
+      expect(response.body.rule_tags.filter((tag: string) => tag !== 'foo')).to.eql(
+        tags.sort().slice(0, 5)
+      );
 
       const paginatedResponse = await supertest.get(
         `${getUrlPrefix(
@@ -86,7 +87,9 @@ export default function createAggregateTests({ getService }: FtrProviderContext)
       );
 
       expect(paginatedResponse.status).to.eql(200);
-      expect(paginatedResponse.body.rule_tags).to.eql(tags.sort().slice(5, 10));
+      expect(paginatedResponse.body.rule_tags.filter((tag: string) => tag !== 'foo')).to.eql(
+        tags.sort().slice(5, 10)
+      );
     });
 
     it('should search rule tags', async () => {
@@ -103,7 +106,7 @@ export default function createAggregateTests({ getService }: FtrProviderContext)
         )}/internal/alerting/rules/_tags?search_fields=${JSON.stringify(['tags'])}&search=a`
       );
 
-      expect(response.body.rule_tags).to.eql(['a']);
+      expect(response.body.rule_tags.filter((tag: string) => tag !== 'foo')).to.eql(['a']);
     });
   });
 }

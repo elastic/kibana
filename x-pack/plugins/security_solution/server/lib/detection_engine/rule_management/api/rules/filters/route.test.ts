@@ -30,6 +30,7 @@ describe('Rule management filters route', () => {
 
   describe('status codes', () => {
     test('returns 200', async () => {
+      clients.rulesClient.aggregate.mockResolvedValue(undefined);
       const response = await server.inject(
         getRuleManagementFiltersRequest(),
         requestContextMock.convertContext(context)
@@ -41,6 +42,7 @@ describe('Rule management filters route', () => {
       clients.rulesClient.find.mockImplementation(async () => {
         throw new Error('Test error');
       });
+      clients.rulesClient.aggregate.mockResolvedValue(undefined);
       const response = await server.inject(
         getRuleManagementFiltersRequest(),
         requestContextMock.convertContext(context)
@@ -65,9 +67,24 @@ describe('Rule management filters route', () => {
         },
         tags: {
           buckets: [
-            { key: 'a', doc_count: 1 },
-            { key: 'b', doc_count: 1 },
-            { key: 'c', doc_count: 1 },
+            {
+              key: {
+                tags: 'a',
+              },
+              doc_count: 1,
+            },
+            {
+              key: {
+                tags: 'b',
+              },
+              doc_count: 1,
+            },
+            {
+              key: {
+                tags: 'c',
+              },
+              doc_count: 1,
+            },
           ],
         },
       });

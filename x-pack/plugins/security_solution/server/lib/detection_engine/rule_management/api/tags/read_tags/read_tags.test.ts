@@ -19,10 +19,30 @@ describe('read_tags', () => {
       rulesClient.aggregate.mockResolvedValue({
         tags: {
           buckets: [
-            { key: 'tag 1', doc_count: 1 },
-            { key: 'tag 2', doc_count: 1 },
-            { key: 'tag 3', doc_count: 1 },
-            { key: 'tag 4', doc_count: 1 },
+            {
+              key: {
+                tags: 'tag 1',
+              },
+              doc_count: 1,
+            },
+            {
+              key: {
+                tags: 'tag 2',
+              },
+              doc_count: 1,
+            },
+            {
+              key: {
+                tags: 'tag 3',
+              },
+              doc_count: 1,
+            },
+            {
+              key: {
+                tags: 'tag 4',
+              },
+              doc_count: 1,
+            },
           ],
         },
       });
