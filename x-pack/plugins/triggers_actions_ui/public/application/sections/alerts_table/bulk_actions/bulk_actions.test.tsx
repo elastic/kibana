@@ -127,6 +127,15 @@ describe('AlertsTable.BulkActions', () => {
             onClick: () => {},
           },
           {
+            label: 'Fake Bulk Action with clear selection',
+            key: 'fakeBulkActionClear',
+            'data-test-subj': 'fake-bulk-action-clear',
+            disableOnQuery: false,
+            onClick: (ids, isSelectAll, setIsBulkActionLoading, clearSelection, refresh) => {
+              clearSelection();
+            },
+          },
+          {
             label: 'Fake Bulk Action with loading and clear selection',
             key: 'fakeBulkActionLoadingClear',
             'data-test-subj': 'fake-bulk-action-loading-clear',
@@ -694,7 +703,7 @@ describe('AlertsTable.BulkActions', () => {
 
               initialBulkActionsState: {
                 ...defaultBulkActionsState,
-                areAllVisibleRowsSelected: true,
+                areAllVisibleRowsSelected: false,
                 rowSelection: new Map(),
               },
             };
@@ -722,6 +731,41 @@ describe('AlertsTable.BulkActions', () => {
             expect(refreshMockFn.mock.calls.length).toBe(0);
             fireEvent.click(screen.getByTestId('fake-bulk-action-refresh'));
             expect(refreshMockFn.mock.calls.length).toBeGreaterThan(0);
+          });
+
+          it('should clear all selection on bulk action click', async () => {
+            const props = {
+              ...tablePropsWithBulkActions,
+
+              initialBulkActionsState: {
+                ...defaultBulkActionsState,
+                areAllVisibleRowsSelected: true,
+                rowSelection: new Map([[0, { isLoading: true }]]),
+              },
+            };
+            render(<AlertsTableWithBulkActionsContext {...props} />);
+
+            let bulkActionsCells = screen.getAllByTestId(
+              'bulk-actions-row-cell'
+            ) as HTMLInputElement[];
+
+            fireEvent.click(screen.getByTestId('bulk-actions-header'));
+
+            expect(screen.getByTestId('selectedShowBulkActionsButton')).toBeVisible();
+
+            fireEvent.click(screen.getByTestId('selectedShowBulkActionsButton'));
+            await waitForEuiPopoverOpen();
+
+            fireEvent.click(screen.getByTestId('fake-bulk-action-clear'));
+
+            // clear Selection happens after 150ms
+            await waitFor(() => {
+              bulkActionsCells = screen.getAllByTestId(
+                'bulk-actions-row-cell'
+              ) as HTMLInputElement[];
+              expect(bulkActionsCells[0].checked).toBeFalsy();
+              expect(bulkActionsCells[1].checked).toBeFalsy();
+            });
           });
         });
       });

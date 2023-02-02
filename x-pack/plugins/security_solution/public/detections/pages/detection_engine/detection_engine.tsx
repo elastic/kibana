@@ -14,7 +14,6 @@ import {
   EuiSpacer,
   EuiWindowEvent,
   EuiHorizontalRule,
-  EuiText,
   EuiFlexItem,
 } from '@elastic/eui';
 import styled from 'styled-components';
@@ -435,11 +434,8 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ({
                 signalIndexName={signalIndexName}
                 updateDateRangeCallback={updateDateRangeCallback}
               />
-
               <EuiSpacer size="l" />
             </Display>
-            <EuiText size="m"> {`Trigger Actions UI`}</EuiText>
-            <EuiHorizontalRule />
             <AlertsTableComponent
               configId={`${APP_ID}`}
               flyoutSize="m"

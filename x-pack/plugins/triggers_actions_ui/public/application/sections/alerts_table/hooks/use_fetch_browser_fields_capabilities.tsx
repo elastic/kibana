@@ -9,7 +9,7 @@ import type { ValidFeatureId } from '@kbn/rule-data-utils';
 import type { EcsFieldsResponse } from '@kbn/rule-registry-plugin/common/search_strategy';
 import { BASE_RAC_ALERTS_API_PATH, BrowserFields } from '@kbn/rule-registry-plugin/common';
 import { useCallback, useEffect, useState } from 'react';
-import { isEmptyObject } from 'jquery';
+import { isEmpty } from 'lodash';
 import { useKibana } from '../../../../common/lib/kibana';
 import { ERROR_FETCH_BROWSER_FIELDS } from './translations';
 
@@ -54,7 +54,7 @@ export const useFetchBrowserFieldCapabilities = ({
   }, [featureIds, http, toasts]);
 
   useEffect(() => {
-    if (initialBrowserFields && !isEmptyObject(initialBrowserFields)) {
+    if (initialBrowserFields && !isEmpty(initialBrowserFields)) {
       setBrowserFields(initialBrowserFields);
       return;
     }

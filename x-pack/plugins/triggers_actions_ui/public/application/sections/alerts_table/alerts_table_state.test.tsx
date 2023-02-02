@@ -379,7 +379,6 @@ describe('AlertsTableState', () => {
             .querySelectorAll('.euiDataGridHeaderCell__content')[1]
             .getAttribute('title')
         ).toBe('Name');
-        // Failing because browserfield not picking up `displayAsText` from columns
       });
     });
 

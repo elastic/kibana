@@ -156,19 +156,19 @@ export const useColumns = ({
 
   const defaultColumnsRef = useRef<typeof defaultColumns>(defaultColumns);
 
-  const didDefaultColumnChanged = useMemo(
+  const didDefaultColumnChange = useMemo(
     () => !isEqual(defaultColumns, defaultColumnsRef.current),
     [defaultColumns]
   );
 
   useEffect(() => {
     // if defaultColumns have changed, populate again
-    if (didDefaultColumnChanged) {
+    if (didDefaultColumnChange) {
       defaultColumnsRef.current = defaultColumns;
       setColumns(storageAlertsTable.current.columns);
       return;
     }
-  }, [didDefaultColumnChanged, storageAlertsTable, defaultColumns]);
+  }, [didDefaultColumnChange, storageAlertsTable, defaultColumns]);
 
   useEffect(() => {
     if (isBrowserFieldDataLoading !== false || isColumnsPopulated) return;
