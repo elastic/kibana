@@ -266,7 +266,7 @@ export async function cancelAgentAction(esClient: ElasticsearchClient, actionId:
     }, []);
   for (const action of upgradeActions) {
     await createAgentAction(esClient, {
-      id: `${cancelActionId}_${Date.now()}`,
+      id: cancelActionId,
       type: 'CANCEL',
       agents: action.agents!,
       data: {
