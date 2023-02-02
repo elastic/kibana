@@ -30,10 +30,25 @@ interface ChannelsStatus {
 
 export const SlackWebApiParamsFields: React.FunctionComponent<
   ActionParamsProps<ExecutorPostMessageParams>
-> = ({ actionConnector, actionParams, editAction, index, errors, messageVariables }) => {
+> = ({
+  actionConnector,
+  actionParams,
+  editAction,
+  index,
+  errors,
+  messageVariables,
+  defaultMessage,
+}) => {
   const { subAction, subActionParams } = actionParams;
   const { channels, text } = subActionParams ?? {};
   const { toasts } = useKibana().notifications;
+
+  useEffect(() => {
+    if (!text && defaultMessage) {
+      editAction('subActionParams', { channels, text: defaultMessage }, index);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   if (!subAction) {
     editAction('subAction', 'postMessage', index);
@@ -90,6 +105,7 @@ export const SlackWebApiParamsFields: React.FunctionComponent<
       numFilters={selectedChannels.length}
       hasActiveFilters={selectedChannels.length > 0}
       numActiveFilters={selectedChannels.length}
+      data-test-subj="slackChannelsButton"
     >
       <FormattedMessage
         id="xpack.triggersActionsUI.sections.rulesList.ruleTagFilterButton"
@@ -134,7 +150,7 @@ export const SlackWebApiParamsFields: React.FunctionComponent<
           >
             <EuiSelectable
               searchable
-              data-test-subj={'slackChannelsSelectableList'}
+              data-test-subj="slackChannelsSelectableList"
               isLoading={isLoadingChannels}
               options={options}
               loadingMessage={i18n.translate(

@@ -14,10 +14,6 @@ import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { actionsConfigMock } from '@kbn/actions-plugin/server/actions_config.mock';
 const logger = loggingSystemMock.create().get() as jest.Mocked<Logger>;
 
-interface ResponseError extends Error {
-  response?: { data: { errors: Record<string, string>; errorMessages?: string[] } };
-}
-
 jest.mock('axios');
 jest.mock('@kbn/actions-plugin/server/lib/axios_utils', () => {
   const originalUtils = jest.requireActual('@kbn/actions-plugin/server/lib/axios_utils');
@@ -103,7 +99,7 @@ describe('Slack service', () => {
           logger,
           configurationUtilities
         )
-      ).toThrow('[Action][Slack]: Wrong configuration.');
+      ).toThrowErrorMatchingInlineSnapshot(`"[Action][Slack]: Wrong configuration."`);
     });
   });
 
@@ -129,19 +125,19 @@ describe('Slack service', () => {
         url: 'conversations.list?types=public_channel,private_channel',
       });
     });
+
+    test('should throw an error if request to slack fail', async () => {
+      requestMock.mockImplementation(() => {
+        throw new Error('request fail');
+      });
+
+      await expect(service.getChannels()).rejects.toThrowErrorMatchingInlineSnapshot(
+        `"[Action][Slack]: Unable to get slack channels. Error: request fail."`
+      );
+    });
   });
 
   describe('postMessage', () => {
-    test('should post a message', async () => {
-      requestMock.mockImplementation(() => postMessageResponse);
-
-      const res = await service.getChannels();
-      expect(res).toEqual([
-        { channel: 'general', message: { text: 'a message', type: 'message' }, ok: true },
-        { channel: 'privat', message: { text: 'a message', type: 'message' }, ok: true },
-      ]);
-    });
-
     test('should call request with correct arguments', async () => {
       requestMock.mockImplementation(() => postMessageResponse);
 
@@ -164,6 +160,18 @@ describe('Slack service', () => {
         url: 'chat.postMessage',
         data: { channel: 'privat', text: 'a message' },
       });
+    });
+
+    test('should throw an error if request to slack fail', async () => {
+      requestMock.mockImplementation(() => {
+        throw new Error('request fail');
+      });
+
+      await expect(
+        service.postMessage({ channels: ['general', 'privat'], text: 'a message' })
+      ).rejects.toThrowErrorMatchingInlineSnapshot(
+        `"[Action][Slack]: Unable to post a message in the Slack. Error: request fail."`
+      );
     });
   });
 });

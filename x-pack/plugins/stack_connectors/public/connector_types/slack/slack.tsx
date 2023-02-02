@@ -35,6 +35,7 @@ export function getConnectorType(): ConnectorTypeModel<
       const translations = await import('./translations');
       const errors = {
         message: new Array<string>(),
+        'subActionParams.channels': new Array<string>(),
       };
       const validationResult = { errors };
 
@@ -44,7 +45,7 @@ export function getConnectorType(): ConnectorTypeModel<
             errors.message.push(translations.MESSAGE_REQUIRED);
           }
           if (!actionParams.subActionParams.channels?.length) {
-            errors.message.push(translations.CHANNEL_REQUIRED);
+            errors['subActionParams.channels'].push(translations.CHANNEL_REQUIRED);
           }
         }
       } else {

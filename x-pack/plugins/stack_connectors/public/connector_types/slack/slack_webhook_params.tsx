@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { ActionParamsProps } from '@kbn/triggers-actions-ui-plugin/public';
 import { TextAreaWithMessageVariables } from '@kbn/triggers-actions-ui-plugin/public';
@@ -17,21 +17,12 @@ export const SlackWebhookParamsFields: React.FunctionComponent<ActionParamsProps
   const { actionParams, editAction, index, errors, messageVariables, defaultMessage } = props;
   const { message } = actionParams;
 
-  const [[isUsingDefault, defaultMessageUsed], setDefaultMessageUsage] = useState<
-    [boolean, string | undefined]
-  >([false, defaultMessage]);
   useEffect(() => {
-    if (
-      !actionParams?.message ||
-      (isUsingDefault &&
-        actionParams?.message === defaultMessageUsed &&
-        defaultMessageUsed !== defaultMessage)
-    ) {
-      setDefaultMessageUsage([true, defaultMessage]);
+    if (!message && defaultMessage) {
       editAction('message', defaultMessage, index);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [defaultMessage]);
+  }, []);
 
   return (
     <TextAreaWithMessageVariables

@@ -10,6 +10,7 @@ import type { ActionParamsProps } from '@kbn/triggers-actions-ui-plugin/public';
 import { SlackWebApiParamsFields } from './slack_web_api_params';
 import { SlackWebhookParamsFields } from './slack_webhook_params';
 import { WebhookParams, ExecutorPostMessageParams } from '../../../common/slack/types';
+import type { SlackActionConnector } from './types';
 
 const SlackParamsFields: React.FunctionComponent<
   ActionParamsProps<WebhookParams | ExecutorPostMessageParams>

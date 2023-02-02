@@ -6,15 +6,56 @@
  */
 
 import React from 'react';
-import { mountWithIntl } from '@kbn/test-jest-helpers';
+import { render, screen, fireEvent } from '@testing-library/react';
 import SlackParamsFields from './slack_params';
+import type { UseSubActionParams } from '@kbn/triggers-actions-ui-plugin/public/application/hooks/use_sub_action';
+import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
+
+interface Result {
+  isLoading: boolean;
+  response: Record<string, unknown>;
+  error: null | Error;
+}
+
+const triggersActionsPath = '@kbn/triggers-actions-ui-plugin/public';
+
+const mockUseSubAction = jest.fn<Result, [UseSubActionParams<unknown>]>(
+  jest.fn<Result, [UseSubActionParams<unknown>]>(() => ({
+    isLoading: false,
+    response: {
+      channels: [
+        {
+          id: 'id',
+          name: 'general',
+          is_channel: true,
+          is_archived: false,
+          is_private: true,
+        },
+      ],
+    },
+    error: null,
+  }))
+);
+
+const mockToasts = { danger: jest.fn(), warning: jest.fn() };
+jest.mock(triggersActionsPath, () => {
+  const original = jest.requireActual(triggersActionsPath);
+  return {
+    ...original,
+    useSubAction: (params: UseSubActionParams<unknown>) => mockUseSubAction(params),
+    useKibana: () => ({
+      ...original.useKibana(),
+      notifications: { toasts: mockToasts },
+    }),
+  };
+});
 
 describe('SlackParamsFields renders', () => {
   test('all params fields is rendered, Webhook', () => {
-    const wrapper = mountWithIntl(
+    render(
       <SlackParamsFields
         actionConnector={{ config: { type: 'webhook' } } as any}
-        actionParams={{ message: 'test message' }}
+        actionParams={{ message: 'some message' }}
         errors={{ message: [] }}
         editAction={() => {}}
         index={0}
@@ -23,31 +64,55 @@ describe('SlackParamsFields renders', () => {
       />
     );
 
-    expect(wrapper.find('[data-test-subj="messageTextArea"]').length > 0).toBeTruthy();
-    expect(wrapper.find('[data-test-subj="messageTextArea"]').first().prop('value')).toStrictEqual(
-      'test message'
-    );
+    expect(screen.getByTestId('messageTextArea')).toBeInTheDocument();
+    expect(screen.getByTestId('messageTextArea')).toHaveValue('some message');
   });
 
-  test('all params fields is rendered, Web API', () => {
-    const wrapper = mountWithIntl(
-      <SlackParamsFields
-        actionConnector={{ config: { type: 'web_api' } } as any}
-        actionParams={{
-          subAction: 'postMessage',
-          subActionParams: { channels: ['general'], text: 'some text' },
-        }}
-        errors={{ message: [] }}
-        editAction={() => {}}
-        index={0}
-        defaultMessage="default message"
-        messageVariables={[]}
-      />
+  test('all params fields is rendered, Web API, postMessage', async () => {
+    render(
+      <IntlProvider locale="en">
+        <SlackParamsFields
+          actionConnector={{ config: { type: 'web_api' } } as any}
+          actionParams={{
+            subAction: 'postMessage',
+            subActionParams: { channels: ['general'], text: 'some text' },
+          }}
+          errors={{ message: [] }}
+          editAction={() => {}}
+          index={0}
+          defaultMessage="default message"
+          messageVariables={[]}
+        />
+      </IntlProvider>
     );
 
-    expect(wrapper.find('[data-test-subj="webApiTextArea"]').length > 0).toBeTruthy();
-    expect(wrapper.find('[data-test-subj="webApiTextArea"]').first().prop('value')).toStrictEqual(
-      'some text'
+    expect(screen.getByTestId('webApiTextArea')).toBeInTheDocument();
+    expect(screen.getByTestId('webApiTextArea')).toHaveValue('some text');
+  });
+
+  test('all params fields is rendered, Web API, getChannels', async () => {
+    render(
+      <IntlProvider locale="en">
+        <SlackParamsFields
+          actionConnector={{ config: { type: 'web_api' } } as any}
+          actionParams={{
+            subAction: 'postMessage',
+            subActionParams: { channels: ['general'], text: 'some text' },
+          }}
+          errors={{ message: [] }}
+          editAction={() => {}}
+          index={0}
+          defaultMessage="default message"
+          messageVariables={[]}
+        />
+      </IntlProvider>
     );
+
+    expect(screen.getByTestId('slackChannelsButton')).toHaveTextContent('Channels');
+    fireEvent.click(screen.getByTestId('slackChannelsButton'));
+    expect(screen.getByTestId('slackChannelsSelectableList')).toBeInTheDocument();
+    expect(screen.getByTestId('slackChannelsSelectableList')).toHaveTextContent('general');
+    fireEvent.click(screen.getByText('general'));
+    expect(screen.getByTitle('general').getAttribute('aria-checked')).toEqual('true');
   });
 });
