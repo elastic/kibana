@@ -21,6 +21,7 @@ interface UseColumnsArgs {
   storage: React.MutableRefObject<IStorageWrapper>;
   id: string;
   defaultColumns: EuiDataGridColumn[];
+  initialBrowserFields?: BrowserFields;
 }
 
 const EMPTY_FIELDS = [{ field: '*', include_unmapped: true }];
@@ -143,9 +144,11 @@ export const useColumns = ({
   storage,
   id,
   defaultColumns,
+  initialBrowserFields,
 }: UseColumnsArgs) => {
   const [isBrowserFieldDataLoading, browserFields] = useFetchBrowserFieldCapabilities({
     featureIds,
+    initialBrowserFields,
   });
 
   const [columns, setColumns] = useState<EuiDataGridColumn[]>(storageAlertsTable.current.columns);

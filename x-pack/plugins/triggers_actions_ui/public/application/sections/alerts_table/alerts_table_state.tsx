@@ -179,12 +179,8 @@ const AlertsTableState = ({
     storage,
     id,
     defaultColumns: columnConfigByClient,
+    initialBrowserFields: propBrowserFields,
   });
-
-  const finalBrowserFields = useMemo(
-    () => propBrowserFields ?? browserFields,
-    [propBrowserFields, browserFields]
-  );
 
   const [
     isLoading,
@@ -295,7 +291,7 @@ const AlertsTableState = ({
       visibleColumns,
       'data-test-subj': 'internalAlertsState',
       updatedAt,
-      browserFields: finalBrowserFields,
+      browserFields,
       onToggleColumn,
       onResetColumns,
       onColumnsChange,
@@ -317,7 +313,7 @@ const AlertsTableState = ({
       useFetchAlertsData,
       visibleColumns,
       updatedAt,
-      finalBrowserFields,
+      browserFields,
       onToggleColumn,
       onResetColumns,
       onColumnsChange,
