@@ -30,6 +30,7 @@ interface IndexDefinition {
 const connectorMappingsProperties: Record<string, MappingProperty> = {
   api_key_id: { type: 'keyword' },
   configuration: { type: 'object' },
+  custom_scheduling: { type: 'object' },
   description: { type: 'text' },
   error: { type: 'keyword' },
   features: {
