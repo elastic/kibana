@@ -22,7 +22,6 @@ import { InspectButtonContainer } from '../../../../common/components/inspect';
 
 import { getAlertsCountQuery } from './helpers';
 import * as i18n from './translations';
-import { AlertsCount } from './alerts_count';
 import type { AlertsCountAggregation } from './types';
 import { KpiPanel } from '../common/components';
 import { useInspectButton } from '../common/hooks';
@@ -31,7 +30,7 @@ import { FieldSelection } from '../../../../common/components/field_selection';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { getAlertsTableLensAttributes as getLensAttributes } from '../../../../common/components/visualization_actions/lens_attributes/common/alerts/alerts_table';
 import { SourcererScopeName } from '../../../../common/store/sourcerer/model';
-import { VisualizationEmbeddable } from '../../../../common/components/visualization_actions/visualization_embeddable';
+import { ChartContent } from './chart_content';
 
 export const DETECTIONS_ALERTS_COUNT_ID = 'detections-alerts-count';
 
@@ -215,27 +214,23 @@ export const AlertsCountPanel = memo<AlertsCountPanelProps>(
             />
           </HeaderSection>
           {toggleStatus ? (
-            isChartEmbeddablesEnabled ? (
-              <VisualizationEmbeddable
-                data-test-subj="embeddable-matrix-histogram"
-                extraActions={extraActions}
-                extraOptions={extraVisualizationOptions}
-                getLensAttributes={getLensAttributes}
-                height={CHART_HEIGHT}
-                id={`${uniqueQueryId}-embeddable`}
-                inspectTitle={inspectTitle}
-                scopeId={SourcererScopeName.detections}
-                stackByField={stackByField0}
-                timerange={timerange}
-              />
-            ) : alertsData != null ? (
-              <AlertsCount
-                data={alertsData}
-                loading={isLoadingAlerts}
-                stackByField0={stackByField0}
-                stackByField1={stackByField1}
-              />
-            ) : null
+            <ChartContent
+              alertsData={alertsData}
+              data-test-subj="embeddable-matrix-histogram"
+              extraActions={extraActions}
+              extraOptions={extraVisualizationOptions}
+              getLensAttributes={getLensAttributes}
+              height={CHART_HEIGHT}
+              id={`${uniqueQueryId}-embeddable`}
+              inspectTitle={inspectTitle}
+              isChartEmbeddablesEnabled={isChartEmbeddablesEnabled}
+              isLoadingAlerts={isLoadingAlerts}
+              scopeId={SourcererScopeName.detections}
+              stackByField0={stackByField0}
+              stackByField1={stackByField1}
+              stackByField={stackByField0}
+              timerange={timerange}
+            />
           ) : null}
         </KpiPanel>
       </InspectButtonContainer>

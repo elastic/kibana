@@ -12,8 +12,6 @@ import styled from 'styled-components';
 
 import { useUiSetting$ } from '../../../../common/lib/kibana';
 import { DEFAULT_NUMBER_FORMAT } from '../../../../../common/constants';
-import type { AlertSearchResponse } from '../../../containers/detection_engine/alerts/types';
-import type { AlertsCountAggregation } from './types';
 import {
   getMaxRiskSubAggregations,
   getUpToMaxBuckets,

@@ -8,6 +8,8 @@
 import { useEffect, useState, useMemo } from 'react';
 import { useLocation } from 'react-router-dom';
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
+import type { IFieldSubTypeNested } from '@kbn/es-query';
+
 import type { BrowserField } from '@kbn/timelines-plugin/common';
 import type { GlobalTimeArgs } from '../../../../common/containers/use_global_time';
 import { getScopeFromPath, useSourcererDataView } from '../../../../common/containers/sourcerer';
@@ -58,12 +60,21 @@ export const useInspectButton = ({
   }, [setQuery, loading, response, request, refetch, uniqueQueryId, deleteQuery, searchSessionId]);
 };
 
+export function isDataViewFieldSubtypeNested(field: Partial<BrowserField>) {
+  const subTypeNested = field?.subType as IFieldSubTypeNested;
+  return !!subTypeNested?.nested?.path;
+}
+
+export function isKeyword(field: Partial<BrowserField>) {
+  return field.esTypes && field.esTypes?.indexOf('keyword') >= 0;
+}
+
 export function getAggregatableFields(fields: {
   [fieldName: string]: Partial<BrowserField>;
 }): EuiComboBoxOptionOption[] {
   const result = [];
   for (const [key, field] of Object.entries(fields)) {
-    if (field.aggregatable === true && field.esTypes && field.esTypes?.indexOf('keyword') >= 0) {
+    if (field.aggregatable === true && isKeyword(field) && !isDataViewFieldSubtypeNested(field)) {
       result.push({ label: key, value: key });
     }
   }
