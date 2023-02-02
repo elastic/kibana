@@ -12,7 +12,7 @@ import { ActionVariable } from '@kbn/alerting-plugin/common';
 const publicUrlWarning = i18n.translate(
   'xpack.triggersActionsUI.sections.actionTypeForm.warning.publicUrl',
   {
-    defaultMessage: 'Kibana missing publicUrl environment variable. Action will use relative URLs.',
+    defaultMessage: 'server.publicBaseUrl is not set. Actions will use relative URLs.',
   }
 );
 

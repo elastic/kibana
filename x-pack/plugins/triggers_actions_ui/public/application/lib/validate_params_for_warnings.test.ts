@@ -37,11 +37,10 @@ describe('validateParamsForWarnings', () => {
       )
     ).toEqual({
       warnings: {
-        comments: 'Kibana missing publicUrl environment variable. Action will use relative URLs.',
-        description:
-          'Kibana missing publicUrl environment variable. Action will use relative URLs.',
-        message: 'Kibana missing publicUrl environment variable. Action will use relative URLs.',
-        note: 'Kibana missing publicUrl environment variable. Action will use relative URLs.',
+        comments: 'server.publicBaseUrl is not set. Actions will use relative URLs.',
+        description: 'server.publicBaseUrl is not set. Actions will use relative URLs.',
+        message: 'server.publicBaseUrl is not set. Actions will use relative URLs.',
+        note: 'server.publicBaseUrl is not set. Actions will use relative URLs.',
       },
     });
 
@@ -58,11 +57,10 @@ describe('validateParamsForWarnings', () => {
       )
     ).toEqual({
       warnings: {
-        comments: 'Kibana missing publicUrl environment variable. Action will use relative URLs.',
-        description:
-          'Kibana missing publicUrl environment variable. Action will use relative URLs.',
-        message: 'Kibana missing publicUrl environment variable. Action will use relative URLs.',
-        note: 'Kibana missing publicUrl environment variable. Action will use relative URLs.',
+        comments: 'server.publicBaseUrl is not set. Actions will use relative URLs.',
+        description: 'server.publicBaseUrl is not set. Actions will use relative URLs.',
+        message: 'server.publicBaseUrl is not set. Actions will use relative URLs.',
+        note: 'server.publicBaseUrl is not set. Actions will use relative URLs.',
       },
     });
   });
