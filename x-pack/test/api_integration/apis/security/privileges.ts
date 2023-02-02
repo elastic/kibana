@@ -51,6 +51,7 @@ export default function ({ getService }: FtrProviderContext) {
         'host_isolation_all',
         'process_operations_all',
         'file_operations_all',
+        'execute_operations_all',
       ],
       uptime: ['all', 'read', 'minimal_all', 'minimal_read'],
       securitySolutionCases: ['all', 'read', 'minimal_all', 'minimal_read', 'cases_delete'],

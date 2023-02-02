@@ -21,5 +21,10 @@ export const getFindingsTableCellTestId = (columnId: string, rowId: string) =>
 export const FINDINGS_TABLE_CELL_ADD_FILTER = 'findings_table_cell_add_filter';
 export const FINDINGS_TABLE_CELL_ADD_NEGATED_FILTER = 'findings_table_cell_add_negated_filter';
 
+export const RESOURCES_FINDINGS_TABLE_EMPTY_STATE = 'resource_findings_table_empty_state';
+export const RESOURCES_FINDINGS_TABLE = 'resource_findings_table';
+export const getResourceFindingsTableRowTestId = (id: string) =>
+  `resource_findings_table_row_${id}`;
+
 export const DASHBOARD_TABLE_HEADER_SCORE_TEST_ID = 'csp:dashboard-sections-table-header-score';
 export const DASHBOARD_TABLE_COLUMN_SCORE_TEST_ID = 'csp:dashboard-sections-table-column-score';
