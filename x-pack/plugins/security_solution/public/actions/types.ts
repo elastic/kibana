@@ -6,12 +6,10 @@
  */
 
 import type { CellAction, CellActionExecutionContext } from '@kbn/cell-actions';
-import type { TimelineTabs } from '../../common/types';
 
 export interface SecurityCellActionExecutionContext extends CellActionExecutionContext {
   metadata?: {
-    scopeId?: string; // needed in all cellActions
-    timelineTab?: TimelineTabs; // needed in cellActions inside timeline
+    scopeId?: string; // needed in dataTables (events/alerts tables) and Timeline
   };
 }
 

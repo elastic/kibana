@@ -18,7 +18,6 @@ import { createDefaultFilterInAction, createDefaultFilterOutAction } from './fil
 import { createLensAddToTimelineAction, createDefaultAddToTimelineAction } from './add_to_timeline';
 import { createDefaultShowTopNAction } from './show_top_n';
 import { CELL_ACTIONS_DEFAULT_TRIGGER } from '../../common/constants';
-import { createDefaultShowDetailsAction } from './show_details/default/show_details';
 
 export const registerUIActions = (
   plugins: StartPlugins,
@@ -55,7 +54,6 @@ const registerDefaultActions = (
   const addToTimeline = createDefaultAddToTimelineAction({ store, order: 3 });
   const showTopNAction = createDefaultShowTopNAction({ store, history, services, order: 4 });
   const copyAction = createDefaultCopyToClipboardAction({ order: 5 });
-  const showDetails = createDefaultShowDetailsAction({ store, order: 6 });
 
   uiActions.registerTrigger({
     id: CELL_ACTIONS_DEFAULT_TRIGGER,
@@ -66,5 +64,4 @@ const registerDefaultActions = (
   uiActions.addTriggerAction(CELL_ACTIONS_DEFAULT_TRIGGER, addToTimeline);
   uiActions.addTriggerAction(CELL_ACTIONS_DEFAULT_TRIGGER, showTopNAction);
   uiActions.addTriggerAction(CELL_ACTIONS_DEFAULT_TRIGGER, copyAction);
-  uiActions.addTriggerAction(CELL_ACTIONS_DEFAULT_TRIGGER, showDetails);
 };

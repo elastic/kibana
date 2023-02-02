@@ -27,7 +27,7 @@ import { HostDetailsLink, ReputationLink, WhoIsLink } from '../../../common/comp
 import { Spacer } from '../../../common/components/page';
 import * as i18n from '../../../explore/network/components/details/translations';
 import { CELL_ACTIONS_DEFAULT_TRIGGER } from '../../../../common/constants';
-import { StatefulEventContext } from '../../../common/components/events_viewer/stateful_event_context';
+import { TimelineContext } from '../timeline';
 
 const DraggableContainerFlexGroup = styled(EuiFlexGroup)`
   flex-grow: unset;
@@ -292,7 +292,7 @@ interface MoreContainerProps {
 
 export const MoreContainer = React.memo<MoreContainerProps>(
   ({ fieldName, fieldType, idPrefix, moreMaxHeight, overflowIndexStart, render, values }) => {
-    const { timelineID, tabType } = useContext(StatefulEventContext) ?? {};
+    const { timelineId } = useContext(TimelineContext);
 
     const moreItemsWithHoverActions = useMemo(
       () =>
@@ -314,8 +314,7 @@ export const MoreContainer = React.memo<MoreContainerProps>(
                     type: fieldType,
                   }}
                   metadata={{
-                    scopeId: timelineID,
-                    timelineTab: tabType,
+                    scopeId: timelineId,
                   }}
                 >
                   <>{render ? render(value) : defaultToEmptyTag(value)}</>
@@ -326,7 +325,7 @@ export const MoreContainer = React.memo<MoreContainerProps>(
 
           return acc;
         }, []),
-      [fieldName, fieldType, idPrefix, overflowIndexStart, render, values, timelineID, tabType]
+      [fieldName, fieldType, idPrefix, overflowIndexStart, render, values, timelineId]
     );
 
     return (
