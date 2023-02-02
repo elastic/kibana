@@ -19,9 +19,11 @@ import {
 import { i18n } from '@kbn/i18n';
 import { type ChangePointType } from './change_point_detection_context';
 
+export type ChangePointUIValue = ChangePointType | undefined;
+
 interface ChangePointTypeFilterProps {
-  value: ChangePointType;
-  onChange: (ChangePointType: ChangePointType) => void;
+  value: ChangePointUIValue;
+  onChange: (ChangePointType: ChangePointUIValue) => void;
 }
 
 const changePointTypes: Array<{ value: ChangePointType; description: string }> = [
@@ -59,16 +61,16 @@ const changePointTypes: Array<{ value: ChangePointType; description: string }> =
 ];
 
 interface FilterOption {
-  value: ChangePointType;
+  value: ChangePointUIValue;
   label: string;
   description: string;
 }
 
 export const ChangePointTypeFilter: FC<ChangePointTypeFilterProps> = ({ value, onChange }) => {
-  const options = useMemo<Array<EuiComboBoxOptionOption<ChangePointType>>>(() => {
-    return changePointTypes.map((v) => ({
+  const options = useMemo<Array<EuiComboBoxOptionOption<ChangePointUIValue>>>(() => {
+    return [{ value: undefined, description: '' }, ...changePointTypes].map((v) => ({
       value: v.value,
-      label: v.value,
+      label: v.value ?? '*',
       description: v.description,
     }));
   }, []);
@@ -76,17 +78,19 @@ export const ChangePointTypeFilter: FC<ChangePointTypeFilterProps> = ({ value, o
   const selection = options.filter((v) => v.value === value);
 
   const onChangeCallback = useCallback(
-    (selectedOptions: Array<EuiComboBoxOptionOption<ChangePointType>>) => {
+    (selectedOptions: Array<EuiComboBoxOptionOption<ChangePointUIValue>>) => {
       const option = selectedOptions[0];
-      if (typeof option.value !== 'undefined') {
-        onChange(option.value);
-      }
+      onChange(option.value);
     },
     [onChange]
   );
 
   const renderOption = ((option: FilterOption) => {
     const { label, description } = option;
+
+    if (!description) {
+      return <>{label}</>;
+    }
     return (
       <EuiToolTip position="left" content={description}>
         <EuiFlexGroup gutterSize={'s'} alignItems={'center'}>
@@ -97,11 +101,11 @@ export const ChangePointTypeFilter: FC<ChangePointTypeFilterProps> = ({ value, o
         </EuiFlexGroup>
       </EuiToolTip>
     );
-  }) as unknown as EuiComboBoxOptionsListProps<ChangePointType>['renderOption'];
+  }) as unknown as EuiComboBoxOptionsListProps<ChangePointUIValue>['renderOption'];
 
   return (
     <EuiFormRow>
-      <EuiComboBox<ChangePointType>
+      <EuiComboBox<ChangePointType | undefined>
         prepend={i18n.translate('xpack.aiops.changePointDetection.changePointTypeLabel', {
           defaultMessage: 'Change point type',
         })}

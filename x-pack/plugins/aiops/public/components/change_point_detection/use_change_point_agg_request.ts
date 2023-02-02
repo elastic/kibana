@@ -159,25 +159,27 @@ export function useChangePointResults(
           )
         );
 
-        const groups = buckets
-          .map((v) => {
-            const changePointType = Object.keys(v.change_point_request.type)[0] as ChangePointType;
-            const timeAsString = v.change_point_request.bucket?.key;
-            const rawPValue = v.change_point_request.type[changePointType].p_value;
+        let groups = buckets.map((v) => {
+          const changePointType = Object.keys(v.change_point_request.type)[0] as ChangePointType;
+          const timeAsString = v.change_point_request.bucket?.key;
+          const rawPValue = v.change_point_request.type[changePointType].p_value;
 
-            return {
-              group: {
-                name: requestParams.splitField,
-                value: v.key.splitFieldTerm,
-              },
-              type: changePointType,
-              p_value: rawPValue,
-              timestamp: timeAsString,
-              label: changePointType,
-              reason: v.change_point_request.type[changePointType].reason,
-            } as ChangePointAnnotation;
-          })
-          .filter((v) => v.type === requestParams.changePointType);
+          return {
+            group: {
+              name: requestParams.splitField,
+              value: v.key.splitFieldTerm,
+            },
+            type: changePointType,
+            p_value: rawPValue,
+            timestamp: timeAsString,
+            label: changePointType,
+            reason: v.change_point_request.type[changePointType].reason,
+          } as ChangePointAnnotation;
+        });
+
+        if (requestParams.changePointType) {
+          groups = groups.filter((v) => v.type === requestParams.changePointType);
+        }
 
         setResults((prev) => {
           return (
