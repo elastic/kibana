@@ -7,9 +7,8 @@
  */
 
 import React from 'react';
-import { Subject } from 'rxjs';
 import { i18n } from '@kbn/i18n';
-import { OverlayStart, ThemeServiceStart } from '@kbn/core/public';
+import { OverlayRef, OverlayStart, ThemeServiceStart } from '@kbn/core/public';
 import { Action, IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 import { toMountPoint } from '@kbn/kibana-react-plugin/public';
 import { TimeRange } from '@kbn/es-query';
@@ -28,6 +27,15 @@ export const ACTION_CUSTOMIZE_PANEL = 'ACTION_CUSTOMIZE_PANEL';
 const VISUALIZE_EMBEDDABLE_TYPE = 'visualization';
 
 type VisualizeEmbeddable = IEmbeddable<{ id: string }, EmbeddableOutput & { visTypeName: string }>;
+
+interface TracksOverlays {
+  openOverlay: (ref: OverlayRef) => void;
+  clearOverlays: () => void;
+}
+
+function tracksOverlays(root: unknown): root is TracksOverlays {
+  return Boolean((root as TracksOverlays).openOverlay && (root as TracksOverlays).clearOverlays);
+}
 
 function isVisualizeEmbeddable(
   embeddable: IEmbeddable | VisualizeEmbeddable
@@ -100,11 +108,9 @@ export class CustomizePanelAction implements Action<CustomizePanelActionContext>
       throw new IncompatibleActionError();
     }
 
-    const closed$ = new Subject<true>();
-    const close = () => {
-      closed$.next(true);
-      handle.close();
-    };
+    // send the overlay ref to the root embeddable if it is capable of tracking overlays
+    const rootEmbeddable = embeddable.getRoot();
+    const overlayTracker = tracksOverlays(rootEmbeddable) ? rootEmbeddable : undefined;
 
     const handle = this.overlays.openFlyout(
       toMountPoint(
@@ -113,7 +119,10 @@ export class CustomizePanelAction implements Action<CustomizePanelActionContext>
           timeRangeCompatible={this.isTimeRangeCompatible({ embeddable })}
           dateFormat={this.dateFormat}
           commonlyUsedRanges={this.commonlyUsedRanges}
-          onClose={close}
+          onClose={() => {
+            if (overlayTracker) overlayTracker.clearOverlays();
+            handle.close();
+          }}
         />,
         { theme$: this.theme.theme$ }
       ),
@@ -122,5 +131,6 @@ export class CustomizePanelAction implements Action<CustomizePanelActionContext>
         'data-test-subj': 'customizePanel',
       }
     );
+    overlayTracker?.openOverlay(handle);
   }
 }
