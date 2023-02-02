@@ -15,10 +15,13 @@ import { PolicyList } from '../policy_list';
 import type { GetPolicyListResponse } from '../../types';
 import { getEndpointListPath, getPoliciesPath } from '../../../../common/routing';
 import { APP_UI_ID } from '../../../../../../common/constants';
+import { useUserPrivileges } from '../../../../../common/components/user_privileges';
 
 jest.mock('../../../../services/policies/policies');
+jest.mock('../../../../../common/components/user_privileges');
 
 const getPackagePolicies = sendGetEndpointSpecificPackagePolicies as jest.Mock;
+const useUserPrivilegesMock = useUserPrivileges as jest.Mock;
 
 
 describe('When on the policy list page', () => {
@@ -28,6 +31,10 @@ describe('When on the policy list page', () => {
   let mockedContext: AppContextTestRender;
 
   beforeEach(() => {
+    useUserPrivilegesMock.mockReturnValue({
+      endpointPrivileges: { canReadEndpointList: true, canAccessFleet: true, loading: false },
+    });
+
     mockedContext = createAppRootMockRenderer();
     ({ history } = mockedContext);
     render = () => (renderResult = mockedContext.render(<PolicyList />));
