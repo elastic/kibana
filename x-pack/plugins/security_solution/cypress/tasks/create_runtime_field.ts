@@ -19,11 +19,7 @@ export const createField = (fieldName: string): Cypress.Chainable<JQuery<HTMLEle
 
 export const assertFieldDisplayed = (fieldName: string, view: 'alerts' | 'timeline' = 'timeline') =>
   view === 'alerts'
-    ? cy
-        .get(
-          `[data-test-subj="events-viewer-panel"] [data-test-subj="dataGridHeaderCell-${fieldName}"]`
-        )
-        .should('exist')
+    ? cy.get(`[data-test-subj="dataGridHeaderCell-${fieldName}"]`).should('exist')
     : cy
         .get(`[data-test-subj="timeline"] [data-test-subj="header-text-${fieldName}"]`)
         .should('exist');

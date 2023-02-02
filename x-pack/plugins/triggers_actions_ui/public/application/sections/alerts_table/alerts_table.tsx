@@ -149,6 +149,12 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
     [alerts, setFlyoutAlertIndex]
   );
 
+  const fieldBrowserOptions = props.alertsTableConfiguration.useFieldBrowserOptions
+    ? props.alertsTableConfiguration?.useFieldBrowserOptions({
+        onToggleColumn,
+      })
+    : undefined;
+
   const toolbarVisibility = useCallback(() => {
     const { rowSelection } = bulkActionsState;
     return getToolbarVisibility({
@@ -166,6 +172,7 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
       setIsBulkActionsLoading,
       clearSelection,
       refresh,
+      fieldBrowserOptions,
     });
   }, [
     bulkActionsState,
@@ -182,6 +189,7 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
     setIsBulkActionsLoading,
     clearSelection,
     refresh,
+    fieldBrowserOptions,
   ])();
 
   const leadingControlColumns = useMemo(() => {

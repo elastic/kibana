@@ -16,6 +16,7 @@ import { AlertsCount } from './components/alerts_count/alerts_count';
 import { BulkActionsConfig, RowSelection } from '../../../../types';
 import { LastUpdatedAt } from './components/last_updated_at';
 import { FieldBrowser } from '../../field_browser';
+import { FieldBrowserOptions } from '../../field_browser/types';
 
 const BulkActionsToolbar = lazy(() => import('../bulk_actions/components/toolbar'));
 
@@ -40,6 +41,7 @@ const getDefaultVisibility = ({
   onResetColumns,
   browserFields,
   controls,
+  fieldBrowserOptions,
 }: {
   alertsCount: number;
   updatedAt: number;
@@ -48,6 +50,7 @@ const getDefaultVisibility = ({
   onResetColumns: () => void;
   browserFields: BrowserFields;
   controls?: EuiDataGridToolBarAdditionalControlsOptions;
+  fieldBrowserOptions?: FieldBrowserOptions;
 }): EuiDataGridToolBarVisibilityOptions => {
   const hasBrowserFields = Object.keys(browserFields).length > 0;
   const additionalControls = {
@@ -62,6 +65,7 @@ const getDefaultVisibility = ({
               browserFields={browserFields}
               onResetColumns={onResetColumns}
               onToggleColumn={onToggleColumn}
+              options={fieldBrowserOptions}
             />
           )}
         </>
@@ -93,6 +97,7 @@ export const getToolbarVisibility = ({
   clearSelection,
   controls,
   refresh,
+  fieldBrowserOptions,
 }: {
   bulkActions: BulkActionsConfig[];
   alertsCount: number;
@@ -108,6 +113,7 @@ export const getToolbarVisibility = ({
   clearSelection: () => void;
   controls?: EuiDataGridToolBarAdditionalControlsOptions;
   refresh: () => void;
+  fieldBrowserOptions?: FieldBrowserOptions;
 }): EuiDataGridToolBarVisibilityOptions => {
   const selectedRowsCount = rowSelection.size;
   const defaultVisibility = getDefaultVisibility({
@@ -118,6 +124,7 @@ export const getToolbarVisibility = ({
     onResetColumns,
     browserFields,
     controls,
+    fieldBrowserOptions,
   });
   const isBulkActionsActive =
     selectedRowsCount === 0 || selectedRowsCount === undefined || bulkActions.length === 0;

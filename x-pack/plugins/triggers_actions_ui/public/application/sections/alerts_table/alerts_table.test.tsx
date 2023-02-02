@@ -14,16 +14,18 @@ import { ALERT_RULE_NAME, ALERT_REASON, ALERT_FLAPPING, ALERT_STATUS } from '@kb
 import { AlertsTable } from './alerts_table';
 import {
   AlertsField,
+  AlertsTableConfigurationRegistry,
   AlertsTableProps,
   BulkActionsState,
   FetchAlertData,
   RowSelectionState,
   UseCellActions,
 } from '../../../types';
-import { EuiButtonIcon, EuiDataGridColumnCellAction, EuiFlexItem } from '@elastic/eui';
+import { EuiButton, EuiButtonIcon, EuiDataGridColumnCellAction, EuiFlexItem } from '@elastic/eui';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { BulkActionsContext } from './bulk_actions/context';
 import { bulkActionsReducer } from './bulk_actions/reducer';
+import { BrowserFields } from '@kbn/rule-registry-plugin/common';
 
 jest.mock('@kbn/data-plugin/public');
 jest.mock('@kbn/kibana-react-plugin/public/ui_settings/use_ui_setting', () => ({
@@ -133,6 +135,9 @@ const cellActionOnClickMockedFn = jest.fn();
 const TEST_ID = {
   CELL_ACTIONS_POPOVER: 'euiDataGridExpansionPopover',
   CELL_ACTIONS_EXPAND: 'euiDataGridCellExpandButton',
+  FIELD_BROWSER: 'fields-browser-container',
+  FIELD_BROWSER_BTN: 'show-field-browser',
+  FIELD_BROWSER_CUSTOM_CREATE_BTN: 'field-browser-custom-create-btn',
 };
 
 const mockedUseCellActions: UseCellActions = () => {
@@ -177,7 +182,7 @@ describe('AlertsTable', () => {
     return fetchAlertsData;
   };
 
-  const alertsTableConfiguration = {
+  const alertsTableConfiguration: AlertsTableConfigurationRegistry = {
     id: '',
     casesFeatureId: '',
     columns,
@@ -200,6 +205,32 @@ describe('AlertsTable', () => {
         onClick: () => {},
       },
     ],
+    useFieldBrowserOptions: () => {
+      return {
+        createFieldButton: () => (
+          <EuiButton data-test-subj={TEST_ID.FIELD_BROWSER_CUSTOM_CREATE_BTN} />
+        ),
+      };
+    },
+  };
+
+  const browserFields: BrowserFields = {
+    kibana: {
+      fields: {
+        [AlertsField.uuid]: {
+          category: 'kibana',
+          name: AlertsField.uuid,
+        },
+        [AlertsField.name]: {
+          category: 'kibana',
+          name: AlertsField.name,
+        },
+        [AlertsField.reason]: {
+          category: 'kibana',
+          name: AlertsField.reason,
+        },
+      },
+    },
   };
 
   const tableProps: AlertsTableProps = {
@@ -220,7 +251,7 @@ describe('AlertsTable', () => {
     onResetColumns: () => {},
     onColumnsChange: () => {},
     onChangeVisibleColumns: () => {},
-    browserFields: {},
+    browserFields,
     query: {},
   };
 
@@ -228,7 +259,7 @@ describe('AlertsTable', () => {
     rowSelection: new Map<number, RowSelectionState>(),
     isAllSelected: false,
     areAllVisibleRowsSelected: false,
-    rowCount: 2,
+    rowCount: 4,
   };
 
   const AlertsTableWithLocale: React.FunctionComponent<
@@ -518,8 +549,6 @@ describe('AlertsTable', () => {
         await waitFor(() => {
           expect(screen.getByTestId('fake-cell-first-action')).toBeInTheDocument();
         });
-
-        screen.debug(undefined, 100000);
       });
       it('cell Actions can be expanded', async () => {
         render(<AlertsTableWithLocale {...customTableProps} />);
@@ -533,6 +562,32 @@ describe('AlertsTable', () => {
 
         expect(await screen.findByTestId(TEST_ID.CELL_ACTIONS_POPOVER)).toBeVisible();
         expect(await screen.findAllByLabelText(/fake cell first action/i)).toHaveLength(2);
+      });
+    });
+
+    describe('Alert Registry use field Browser Hook', () => {
+      beforeAll(() => {
+        jest.resetAllMocks();
+      });
+      it('field Browser Options hook is working correctly', async () => {
+        render(
+          <AlertsTableWithLocale
+            {...tableProps}
+            initialBulkActionsState={{
+              ...defaultBulkActionsState,
+              rowSelection: new Map(),
+            }}
+          />
+        );
+
+        const fieldBrowserBtn = screen.getByTestId(TEST_ID.FIELD_BROWSER_BTN);
+        expect(fieldBrowserBtn).toBeVisible();
+
+        fireEvent.click(fieldBrowserBtn);
+
+        expect(await screen.findByTestId(TEST_ID.FIELD_BROWSER)).toBeVisible();
+
+        expect(await screen.findByTestId(TEST_ID.FIELD_BROWSER_CUSTOM_CREATE_BTN)).toBeVisible();
       });
     });
   });

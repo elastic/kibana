@@ -18,9 +18,11 @@ import { refreshPage } from '../../tasks/security_header';
 import { waitForAlertsToPopulate } from '../../tasks/create_new_rule';
 import { assertFieldDisplayed, createField } from '../../tasks/create_runtime_field';
 import { openAlertsFieldBrowser } from '../../tasks/alerts';
+import { deleteAlertsIndex } from '../../tasks/sourcerer';
 
 describe('Create DataView runtime field', () => {
   before(() => {
+    deleteAlertsIndex();
     login();
   });
 

@@ -574,6 +574,12 @@ export type UseActionsColumnRegistry = () => {
   width?: number;
 };
 
+export interface UseFieldBrowserOptionsArgs {
+  onToggleColumn: (columnId: string) => void;
+}
+
+export type UseFieldBrowserOptions = (args: UseFieldBrowserOptionsArgs) => FieldBrowserOptions;
+
 export interface AlertsTableConfigurationRegistry {
   id: string;
   casesFeatureId: string;
@@ -591,6 +597,7 @@ export interface AlertsTableConfigurationRegistry {
   usePersistentControls?: () => {
     right?: ReactNode;
   };
+  useFieldBrowserOptions?: UseFieldBrowserOptions;
 }
 
 export enum BulkActionsVerbs {

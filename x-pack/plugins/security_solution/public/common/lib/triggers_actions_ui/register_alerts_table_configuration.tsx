@@ -9,6 +9,7 @@ import type { Storage } from '@kbn/kibana-utils-plugin/public';
 import type { AlertsTableConfigurationRegistryContract } from '@kbn/triggers-actions-ui-plugin/public';
 
 import type { AlertsTableConfigurationRegistry } from '@kbn/triggers-actions-ui-plugin/public/types';
+import { getUseTriggersActionsFieldBrowserOptions } from '../../../detections/hooks/trigger_actions_alert_table/use_trigger_actions_browser_fields_options';
 import { getUseCellActionsHook } from '../../../detections/hooks/trigger_actions_alert_table/use_cell_actions';
 import { getBulkActionHook } from '../../../detections/hooks/trigger_actions_alert_table/use_bulk_actions';
 import { getUseActionColumnHook } from '../../../detections/hooks/trigger_actions_alert_table/use_actions_column';
@@ -65,6 +66,7 @@ const registerAlertsTableConfiguration = (
     useCellActions: getUseCellActionsHook(TableId.alertsOnAlertsPage),
     usePersistentControls: getPersistentControlsHook(TableId.alertsOnAlertsPage),
     sort,
+    useFieldBrowserOptions: getUseTriggersActionsFieldBrowserOptions(SourcererScopeName.detections),
   });
 
   // register Alert Table on RuleDetails Page
@@ -79,6 +81,7 @@ const registerAlertsTableConfiguration = (
     useCellActions: getUseCellActionsHook(TableId.alertsOnRuleDetailsPage),
     usePersistentControls: getPersistentControlsHook(TableId.alertsOnRuleDetailsPage),
     sort,
+    useFieldBrowserOptions: getUseTriggersActionsFieldBrowserOptions(SourcererScopeName.detections),
   });
 
   registry.register({
