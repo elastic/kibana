@@ -35,6 +35,12 @@ export class EndpointMetadataGenerator extends BaseDataGenerator {
       capabilities.push('get_file');
     }
 
+    // v8.8 introduced execute capability
+    //  change this to 8.8.0 before merging
+    if (gte(agentVersion, '8.7.0')) {
+      capabilities.push('execute');
+    }
+
     const hostMetadataDoc: HostMetadataInterface = {
       '@timestamp': ts,
       event: {

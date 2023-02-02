@@ -21,12 +21,15 @@ import { KillProcessActionResult } from '../command_render_components/kill_proce
 import { SuspendProcessActionResult } from '../command_render_components/suspend_process_action';
 import { EndpointStatusActionResult } from '../command_render_components/status_action';
 import { GetProcessesActionResult } from '../command_render_components/get_processes_action';
+import { ExecuteActionResult } from '../command_render_components/execute_action';
 import type { EndpointPrivileges, ImmutableArray } from '../../../../../common/endpoint/types';
 import {
   INSUFFICIENT_PRIVILEGES_FOR_COMMAND,
   UPGRADE_ENDPOINT_FOR_RESPONDER,
 } from '../../../../common/translations';
 import { getCommandAboutInfo } from './get_command_about_info';
+
+import { EXECUTE_TIMEOUT_REGEX } from './utils';
 
 const emptyArgumentValidator = (argData: ParsedArgData): true | string => {
   if (argData?.length > 0 && typeof argData[0] === 'string' && argData[0]?.trim().length > 0) {
@@ -51,6 +54,21 @@ const pidValidator = (argData: ParsedArgData): true | string => {
   }
 };
 
+const executeTimeoutValidator = (argData: ParsedArgData): true | string => {
+  const emptyResult = emptyArgumentValidator(argData);
+
+  if (emptyResult !== true) {
+    return emptyResult;
+  } else if (String(argData).trim().length && EXECUTE_TIMEOUT_REGEX.test(String(argData).trim())) {
+    return true;
+  } else {
+    return i18n.translate('xpack.securitySolution.endpointConsoleCommands.invalidExecuteTimeout', {
+      defaultMessage:
+        'Argument must be a string with a positive integer value followed by a unit of time (h for hours, m for minutes, s for seconds)',
+    });
+  }
+};
+
 const commandToCapabilitiesMap = new Map<ConsoleResponseActionCommands, EndpointCapabilities>([
   ['isolate', 'isolation'],
   ['release', 'isolation'],
@@ -58,6 +76,7 @@ const commandToCapabilitiesMap = new Map<ConsoleResponseActionCommands, Endpoint
   ['suspend-process', 'suspend_process'],
   ['processes', 'running_processes'],
   ['get-file', 'get_file'],
+  ['execute', 'execute'],
 ]);
 
 const getRbacControl = ({
@@ -74,6 +93,7 @@ const getRbacControl = ({
     ['suspend-process', privileges.canSuspendProcess],
     ['processes', privileges.canGetRunningProcesses],
     ['get-file', privileges.canWriteFileOperations],
+    ['execute', privileges.canWriteExecuteOperations],
   ]);
   return commandToPrivilegeMap.get(commandName as ConsoleResponseActionCommands) ?? false;
 };
@@ -137,6 +157,7 @@ export const getEndpointConsoleCommands = ({
   endpointPrivileges: EndpointPrivileges;
 }): CommandDefinition[] => {
   const isGetFileEnabled = ExperimentalFeaturesService.get().responseActionGetFileEnabled;
+  const isExecuteEnabled = ExperimentalFeaturesService.get().responseActionExecuteEnabled;
 
   const doesEndpointSupportCommand = (commandName: ConsoleResponseActionCommands) => {
     const responderCapability = commandToCapabilitiesMap.get(commandName);
@@ -430,5 +451,68 @@ export const getEndpointConsoleCommands = ({
     });
   }
 
+  // `execute` is currently behind feature flag
+  // planned for 8.8
+  if (isExecuteEnabled) {
+    consoleCommands.push({
+      name: 'execute',
+      about: getCommandAboutInfo({
+        aboutInfo: i18n.translate('xpack.securitySolution.endpointConsoleCommands.execute.about', {
+          defaultMessage: 'Execute a script on the host',
+        }),
+        isSupported: doesEndpointSupportCommand('execute'),
+      }),
+      RenderComponent: ExecuteActionResult,
+      meta: {
+        endpointId: endpointAgentId,
+        capabilities: endpointCapabilities,
+        privileges: endpointPrivileges,
+      },
+      exampleUsage: 'execute --command "ls -al" --timeout 2s --comment "Get list of all files"',
+      exampleInstruction: ENTER_OR_ADD_COMMENT_ARG_INSTRUCTION,
+      validate: capabilitiesAndPrivilegesValidator,
+      mustHaveArgs: true,
+      args: {
+        command: {
+          required: true,
+          allowMultiples: false,
+          about: i18n.translate(
+            'xpack.securitySolution.endpointConsoleCommands.execute.args.command.about',
+            {
+              defaultMessage: 'The script to execute',
+            }
+          ),
+          validate: (argData) => {
+            return emptyArgumentValidator(argData);
+          },
+        },
+        timeout: {
+          required: false,
+          allowMultiples: false,
+          about: i18n.translate(
+            'xpack.securitySolution.endpointConsoleCommands.execute.args.timeout.about',
+            {
+              defaultMessage:
+                'The timeout in units of time (h, m or s) for the endpoint to wait for the script to complete',
+            }
+          ),
+          validate: executeTimeoutValidator,
+        },
+        comment: {
+          required: false,
+          allowMultiples: false,
+          about: COMMENT_ARG_ABOUT,
+        },
+      },
+      helpGroupLabel: HELP_GROUPS.responseActions.label,
+      helpGroupPosition: HELP_GROUPS.responseActions.position,
+      helpCommandPosition: 6,
+      helpDisabled: !doesEndpointSupportCommand('execute'),
+      helpHidden: !getRbacControl({
+        commandName: 'execute',
+        privileges: endpointPrivileges,
+      }),
+    });
+  }
   return consoleCommands;
 };

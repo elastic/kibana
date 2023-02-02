@@ -22,6 +22,8 @@ import type {
   ActionResponseOutput,
   ResponseActionGetFileOutputContent,
   ResponseActionGetFileParameters,
+  ResponseActionsExecuteParameters,
+  ResponseActionExecuteOutputContent,
 } from '../types';
 import { ActivityLogItemTypes } from '../types';
 import { RESPONSE_ACTION_API_COMMANDS_NAMES } from '../service/response_actions/constants';
@@ -80,8 +82,11 @@ export class EndpointActionGenerator extends BaseDataGenerator {
     });
 
     const command = overrides?.EndpointActions?.data?.command ?? this.randomResponseActionCommand();
-    let output: ActionResponseOutput<ResponseActionGetFileOutputContent> = overrides
-      ?.EndpointActions?.data?.output as ActionResponseOutput<ResponseActionGetFileOutputContent>;
+    let output: ActionResponseOutput<
+      ResponseActionGetFileOutputContent | ResponseActionExecuteOutputContent
+    > = overrides?.EndpointActions?.data?.output as ActionResponseOutput<
+      ResponseActionGetFileOutputContent | ResponseActionExecuteOutputContent
+    >;
 
     if (command === 'get-file') {
       if (!output) {
@@ -101,6 +106,12 @@ export class EndpointActionGenerator extends BaseDataGenerator {
             ],
           },
         };
+      }
+    }
+
+    if (command === 'execute') {
+      if (!output) {
+        output = this.generateExecuteActionResponseOutput();
       }
     }
 
@@ -197,6 +208,26 @@ export class EndpointActionGenerator extends BaseDataGenerator {
       }
     }
 
+    if (details.command === 'execute') {
+      if (!details.parameters) {
+        (
+          details as ActionDetails<
+            ResponseActionExecuteOutputContent,
+            ResponseActionsExecuteParameters
+          >
+        ).parameters = {
+          command: (overrides.parameters as ResponseActionsExecuteParameters).command ?? 'ls -al',
+          timeout: (overrides.parameters as ResponseActionsExecuteParameters).timeout ?? 7200000, // 2hrs
+        };
+      }
+
+      if (!details.outputs || Object.keys(details.outputs).length === 0) {
+        details.outputs = {
+          [details.agents[0]]: this.generateExecuteActionResponseOutput(),
+        };
+      }
+    }
+
     return details as unknown as ActionDetails<TOutputType, TParameters>;
   }
 
@@ -258,6 +289,28 @@ export class EndpointActionGenerator extends BaseDataGenerator {
       },
       overrides
     );
+  }
+
+  generateExecuteActionResponseOutput(
+    overrides?: ActionResponseOutput<ResponseActionExecuteOutputContent>
+  ): ActionResponseOutput<ResponseActionExecuteOutputContent> {
+    return merge(
+      {
+        type: 'json',
+        content: {
+          stdout: `-rw-r--r--    1 elastic  staff      458 Jan 26 09:10 doc.txt\
+          -rw-r--r--     1 elastic  staff  298 Feb  2 09:10 readme.md`,
+          stderr: '',
+          stdoutTruncated: true,
+          stderrTruncated: false,
+          shell_code: 0,
+          shell: 'bash',
+          cwd: '/some/path',
+          outputFieldId: 'some-output-field-id',
+        },
+      },
+      overrides
+    ) as ActionResponseOutput<ResponseActionExecuteOutputContent>;
   }
 
   randomFloat(): number {

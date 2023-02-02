@@ -31,6 +31,7 @@ import type {
   ResponseActionGetFileOutputContent,
   ResponseActionGetFileParameters,
   FileUploadMetadata,
+  ResponseActionExecuteOutputContent,
 } from '../../../../common/endpoint/types';
 import type { EndpointActionListRequestQuery } from '../../../../common/endpoint/schema/actions';
 import { EndpointActionGenerator } from '../../../../common/endpoint/data_generators/endpoint_action_generator';
@@ -140,6 +141,12 @@ export const sendEndpointActionResponse = async (
       (
         endpointResponse.EndpointActions.data.output?.content as ResponseActionGetFileOutputContent
       ).code = endpointActionGenerator.randomGetFileFailureCode();
+    }
+
+    if (endpointResponse.EndpointActions.data.command === 'execute') {
+      (
+        endpointResponse.EndpointActions.data.output?.content as ResponseActionExecuteOutputContent
+      ).stderr = 'execute command timed out';
     }
   }
 
@@ -302,6 +309,11 @@ const getOutputDataIfNeeded = (action: ActionDetails): ResponseOutput => {
           },
         },
       } as ResponseOutput<ResponseActionGetFileOutputContent>;
+
+    case 'execute':
+      return {
+        output: endpointActionGenerator.generateExecuteActionResponseOutput(),
+      } as ResponseOutput<ResponseActionExecuteOutputContent>;
 
     default:
       return { output: undefined };

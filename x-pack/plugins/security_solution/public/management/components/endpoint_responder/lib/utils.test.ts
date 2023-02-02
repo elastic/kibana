@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { parsedPidOrEntityIdParameter } from './utils';
+import { parsedPidOrEntityIdParameter, parsedTimeoutInMilliseconds } from './utils';
 
 describe('Endpoint Responder - Utilities', () => {
   describe('when using parsedPidOrEntityIdParameter()', () => {
@@ -19,9 +19,27 @@ describe('Endpoint Responder - Utilities', () => {
       expect(parameters).toEqual({ entity_id: '123qwe' });
     });
 
-    it('should return entity id with emtpy string if no params are defined', () => {
+    it('should return entity id with empty string if no params are defined', () => {
       const parameters = parsedPidOrEntityIdParameter({});
       expect(parameters).toEqual({ entity_id: '' });
+    });
+  });
+
+  describe('#parsedTimeoutInMilliseconds', () => {
+    it('should return milliseconds for 2h if no timeout is defined', () => {
+      expect(parsedTimeoutInMilliseconds()).toEqual(7200000);
+    });
+    it('should return milliseconds for 2h if timeout does not match pattern', () => {
+      expect(parsedTimeoutInMilliseconds('23d')).toEqual(7200000);
+    });
+    it('should return correct milliseconds for hours', () => {
+      expect(parsedTimeoutInMilliseconds('23h')).toEqual(82800000);
+    });
+    it('should return correct milliseconds for minutes', () => {
+      expect(parsedTimeoutInMilliseconds('23m')).toEqual(1380000);
+    });
+    it('should return correct milliseconds for seconds', () => {
+      expect(parsedTimeoutInMilliseconds('23s')).toEqual(23000);
     });
   });
 });
