@@ -21,14 +21,17 @@ import type { Case } from '../../../../common';
 import type { CaseViewProps } from '../types';
 import { useFindCaseUserActions } from '../../../containers/use_find_case_user_actions';
 import { usePostPushToService } from '../../../containers/use_post_push_to_service';
-import { useGetConnectors } from '../../../containers/configure/use_connectors';
+import { useGetSupportedActionConnectors } from '../../../containers/configure/use_get_supported_action_connectors';
 import { useGetTags } from '../../../containers/use_get_tags';
 import { useBulkGetUserProfiles } from '../../../containers/user_profiles/use_bulk_get_user_profiles';
+import { useGetCaseConnectors } from '../../../containers/use_get_case_connectors';
 import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
 import { waitForComponentToUpdate } from '../../../common/test_utils';
+import { waitFor } from '@testing-library/dom';
+import { getCaseConnectorsMockResponse } from '../../../common/mock/connectors';
 
 jest.mock('../../../containers/use_find_case_user_actions');
-jest.mock('../../../containers/configure/use_connectors');
+jest.mock('../../../containers/configure/use_get_supported_action_connectors');
 jest.mock('../../../containers/use_post_push_to_service');
 jest.mock('../../user_actions/timestamp', () => ({
   UserActionTimestamp: () => <></>,
@@ -37,6 +40,7 @@ jest.mock('../../../common/navigation/hooks');
 jest.mock('../../../containers/use_get_action_license');
 jest.mock('../../../containers/use_get_tags');
 jest.mock('../../../containers/user_profiles/use_bulk_get_user_profiles');
+jest.mock('../../../containers/use_get_case_connectors');
 
 (useGetTags as jest.Mock).mockReturnValue({ data: ['coke', 'pepsi'], refetch: jest.fn() });
 
@@ -76,8 +80,6 @@ const pushCaseToExternalService = jest.fn();
 const defaultUseFindCaseUserActions = {
   data: {
     caseUserActions: [...caseUserActions, getAlertUserAction()],
-    caseServices: {},
-    hasDataToPush: false,
     participants: [caseData.createdBy],
   },
   refetch: fetchCaseUserActions,
@@ -92,16 +94,23 @@ export const caseProps = {
 };
 
 const useFindCaseUserActionsMock = useFindCaseUserActions as jest.Mock;
-const useGetConnectorsMock = useGetConnectors as jest.Mock;
+const useGetConnectorsMock = useGetSupportedActionConnectors as jest.Mock;
 const usePostPushToServiceMock = usePostPushToService as jest.Mock;
 const useBulkGetUserProfilesMock = useBulkGetUserProfiles as jest.Mock;
+const useGetCaseConnectorsMock = useGetCaseConnectors as jest.Mock;
 
 describe('Case View Page activity tab', () => {
+  const caseConnectors = getCaseConnectorsMockResponse();
+
   beforeAll(() => {
     useFindCaseUserActionsMock.mockReturnValue(defaultUseFindCaseUserActions);
     useGetConnectorsMock.mockReturnValue({ data: connectorsMock, isLoading: false });
     usePostPushToServiceMock.mockReturnValue({ isLoading: false, pushCaseToExternalService });
     useBulkGetUserProfilesMock.mockReturnValue({ isLoading: false, data: new Map() });
+    useGetCaseConnectorsMock.mockReturnValue({
+      isLoading: false,
+      data: caseConnectors,
+    });
   });
   let appMockRender: AppMockRenderer;
 
@@ -126,7 +135,7 @@ describe('Case View Page activity tab', () => {
     expect(result.getByTestId('case-tags')).toBeTruthy();
     expect(result.getByTestId('connector-edit-header')).toBeTruthy();
     expect(result.getByTestId('case-view-status-action-button')).toBeTruthy();
-    expect(useFindCaseUserActionsMock).toHaveBeenCalledWith(caseData.id, caseData.connector.id);
+    expect(useFindCaseUserActionsMock).toHaveBeenCalledWith(caseData.id);
 
     await waitForComponentToUpdate();
   });
@@ -143,7 +152,7 @@ describe('Case View Page activity tab', () => {
     expect(result.getByTestId('case-tags')).toBeTruthy();
     expect(result.getByTestId('connector-edit-header')).toBeTruthy();
     expect(result.queryByTestId('case-view-status-action-button')).not.toBeInTheDocument();
-    expect(useFindCaseUserActionsMock).toHaveBeenCalledWith(caseData.id, caseData.connector.id);
+    expect(useFindCaseUserActionsMock).toHaveBeenCalledWith(caseData.id);
 
     await waitForComponentToUpdate();
   });
@@ -160,7 +169,7 @@ describe('Case View Page activity tab', () => {
     expect(result.getByTestId('case-tags')).toBeTruthy();
     expect(result.getByTestId('connector-edit-header')).toBeTruthy();
     expect(result.getByTestId('case-severity-selection')).toBeDisabled();
-    expect(useFindCaseUserActionsMock).toHaveBeenCalledWith(caseData.id, caseData.connector.id);
+    expect(useFindCaseUserActionsMock).toHaveBeenCalledWith(caseData.id);
 
     await waitForComponentToUpdate();
   });
@@ -174,7 +183,7 @@ describe('Case View Page activity tab', () => {
     const result = appMockRender.render(<CaseViewActivity {...caseProps} />);
     expect(result.getByTestId('case-view-loading-content')).toBeTruthy();
     expect(result.queryByTestId('case-view-activity')).toBeFalsy();
-    expect(useFindCaseUserActionsMock).toHaveBeenCalledWith(caseData.id, caseData.connector.id);
+    expect(useFindCaseUserActionsMock).toHaveBeenCalledWith(caseData.id);
   });
 
   it('should not render the assignees on basic license', () => {
@@ -205,7 +214,8 @@ describe('Case View Page activity tab', () => {
 
     const result = appMockRender.render(<CaseViewActivity {...caseProps} />);
 
-    expect(result.getByTestId('case-view-edit-connector')).toBeInTheDocument();
-    await waitForComponentToUpdate();
+    await waitFor(() => {
+      expect(result.getByTestId('case-view-edit-connector')).toBeInTheDocument();
+    });
   });
 });
