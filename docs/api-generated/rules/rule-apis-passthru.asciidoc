@@ -26,6 +26,19 @@ Any modifications made to this file will be overwritten.
   <li><a href="#getAlertingHealth"><code><span class="http-method">get</span> /s/{spaceId}/api/alerting/_health</code></a></li>
   <li><a href="#getRule"><code><span class="http-method">get</span> /s/{spaceId}/api/alerting/rule/{ruleId}</code></a></li>
   <li><a href="#getRuleTypes"><code><span class="http-method">get</span> /s/{spaceId}/api/alerting/rule_types</code></a></li>
+  <li><a href="#legacyCreateAlert"><code><span class="http-method">post</span> /s/{spaceId}/api/alerts/alert/{alertId}</code></a></li>
+  <li><a href="#legacyDisableAlert"><code><span class="http-method">post</span> /s/{spaceId}/api/alerts/alert/{alertId}/_disable</code></a></li>
+  <li><a href="#legacyEnableAlert"><code><span class="http-method">post</span> /s/{spaceId}/api/alerts/alert/{alertId}/_enable</code></a></li>
+  <li><a href="#legacyFindAlerts"><code><span class="http-method">get</span> /s/{spaceId}/api/alerts/alerts/_find</code></a></li>
+  <li><a href="#legacyGetAlert"><code><span class="http-method">get</span> /s/{spaceId}/api/alerts/alert/{alertId}</code></a></li>
+  <li><a href="#legacyGetAlertTypes"><code><span class="http-method">get</span> /s/{spaceId}/api/alerts/alerts/list_alert_types</code></a></li>
+  <li><a href="#legacyGetAlertingHealth"><code><span class="http-method">get</span> /s/{spaceId}/api/alerts/alerts/_health</code></a></li>
+  <li><a href="#legacyMuteAlertInstance"><code><span class="http-method">post</span> /s/{spaceId}/api/alerts/alert/{alertId}/alert_instance/{alertInstanceId}/_mute</code></a></li>
+  <li><a href="#legacyMuteAllAlertInstances"><code><span class="http-method">post</span> /s/{spaceId}/api/alerts/alert/{alertId}/_mute_all</code></a></li>
+  <li><a href="#legacyUnmuteAlertInstance"><code><span class="http-method">post</span> /s/{spaceId}/api/alerts/alert/{alertId}/alert_instance/{alertInstanceId}/_unmute</code></a></li>
+  <li><a href="#legacyUnmuteAllAlertInstances"><code><span class="http-method">post</span> /s/{spaceId}/api/alerts/alert/{alertId}/_unmute_all</code></a></li>
+  <li><a href="#legacyUpdateAlert"><code><span class="http-method">put</span> /s/{spaceId}/api/alerts/alert/{alertId}</code></a></li>
+  <li><a href="#legaryDeleteAlert"><code><span class="http-method">delete</span> /s/{spaceId}/api/alerts/alert/{alertId}</code></a></li>
   <li><a href="#muteAlert"><code><span class="http-method">post</span> /s/{spaceId}/api/alerting/rule/{ruleId}/alert/{alertId}/_mute</code></a></li>
   <li><a href="#muteAllAlerts"><code><span class="http-method">post</span> /s/{spaceId}/api/alerting/rule/{ruleId}/_mute_all</code></a></li>
   <li><a href="#unmuteAlert"><code><span class="http-method">post</span> /s/{spaceId}/api/alerting/rule/{ruleId}/alert/{alertId}/_unmute</code></a></li>
@@ -812,6 +825,896 @@ Any modifications made to this file will be overwritten.
         <a href="#401_response">401_response</a>
   </div> <!-- method -->
   <hr/>
+  <div class="method"><a name="legacyCreateAlert"/>
+    <div class="method-path">
+    <a class="up" href="#__Methods">Up</a>
+    <pre class="post"><code class="huge"><span class="http-method">post</span> /s/{spaceId}/api/alerts/alert/{alertId}</code></pre></div>
+    <div class="method-summary">Create an alert. (<span class="nickname">legacyCreateAlert</span>)</div>
+    <div class="method-notes">Deprecated in 7.13.0. Use the create rule API instead.</div>
+
+    <h3 class="field-label">Path parameters</h3>
+    <div class="field-items">
+      <div class="param">alertId (required)</div>
+
+      <div class="param-desc"><span class="param-type">Path Parameter</span> &mdash; An UUID v1 or v4 identifier for the alert. If this parameter is omitted, the identifier is randomly generated. default: null </div><div class="param">spaceId (required)</div>
+
+      <div class="param-desc"><span class="param-type">Path Parameter</span> &mdash; An identifier for the space. If <code>/s/</code> and the identifier are omitted from the path, the default space is used. default: null </div>
+    </div>  <!-- field-items -->
+
+    <h3 class="field-label">Consumes</h3>
+    This API call consumes the following media types via the <span class="header">Content-Type</span> request header:
+    <ul>
+      <li><code>application/json</code></li>
+    </ul>
+
+    <h3 class="field-label">Request body</h3>
+    <div class="field-items">
+      <div class="param">Legacy_create_alert_request_properties <a href="#Legacy_create_alert_request_properties">Legacy_create_alert_request_properties</a> (required)</div>
+
+      <div class="param-desc"><span class="param-type">Body Parameter</span> &mdash;  </div>
+
+    </div>  <!-- field-items -->
+
+    <h3 class="field-label">Request headers</h3>
+    <div class="field-items">
+      <div class="param">kbn-xsrf (required)</div>
+
+      <div class="param-desc"><span class="param-type">Header Parameter</span> &mdash; Cross-site request forgery protection default: null </div>
+
+    </div>  <!-- field-items -->
+
+
+
+    <h3 class="field-label">Return type</h3>
+    <div class="return-type">
+      <a href="#alert_response_properties">alert_response_properties</a>
+      
+    </div>
+
+    <!--Todo: process Response Object and its headers, schema, examples -->
+
+    <h3 class="field-label">Example data</h3>
+    <div class="example-data-content-type">Content-Type: application/json</div>
+    <pre class="example"><code>{
+  "alertTypeId" : ".index-threshold",
+  "throttle" : "throttle",
+  "updatedBy" : "elastic",
+  "executionStatus" : {
+    "lastExecutionDate" : "2022-12-06T00:13:43.89Z",
+    "status" : "ok"
+  },
+  "params" : {
+    "key" : ""
+  },
+  "enabled" : true,
+  "mutedInstanceIds" : [ "mutedInstanceIds", "mutedInstanceIds" ],
+  "tags" : [ "tags", "tags" ],
+  "createdAt" : "2022-12-05T23:36:58.284Z",
+  "schedule" : {
+    "interval" : "interval"
+  },
+  "notifyWhen" : "onActionGroupChange",
+  "createdBy" : "elastic",
+  "muteAll" : false,
+  "name" : "my alert",
+  "scheduledTaskId" : "b530fed0-74f5-11ed-9801-35303b735aef",
+  "id" : "b530fed0-74f5-11ed-9801-35303b735aef",
+  "actions" : [ "{}", "{}" ],
+  "apiKeyOwner" : "elastic",
+  "updatedAt" : "2022-12-05T23:36:58.284Z"
+}</code></pre>
+
+    <h3 class="field-label">Produces</h3>
+    This API call produces the following media types according to the <span class="header">Accept</span> request header;
+    the media type will be conveyed by the <span class="header">Content-Type</span> response header.
+    <ul>
+      <li><code>application/json</code></li>
+    </ul>
+
+    <h3 class="field-label">Responses</h3>
+    <h4 class="field-label">200</h4>
+    Indicates a successful call.
+        <a href="#alert_response_properties">alert_response_properties</a>
+    <h4 class="field-label">401</h4>
+    Authorization information is missing or invalid.
+        <a href="#401_response">401_response</a>
+  </div> <!-- method -->
+  <hr/>
+  <div class="method"><a name="legacyDisableAlert"/>
+    <div class="method-path">
+    <a class="up" href="#__Methods">Up</a>
+    <pre class="post"><code class="huge"><span class="http-method">post</span> /s/{spaceId}/api/alerts/alert/{alertId}/_disable</code></pre></div>
+    <div class="method-summary">Disables an alert. (<span class="nickname">legacyDisableAlert</span>)</div>
+    <div class="method-notes">Deprecated in 7.13.0. Use the disable rule API instead.</div>
+
+    <h3 class="field-label">Path parameters</h3>
+    <div class="field-items">
+      <div class="param">spaceId (required)</div>
+
+      <div class="param-desc"><span class="param-type">Path Parameter</span> &mdash; An identifier for the space. If <code>/s/</code> and the identifier are omitted from the path, the default space is used. default: null </div><div class="param">alertId (required)</div>
+
+      <div class="param-desc"><span class="param-type">Path Parameter</span> &mdash; The identifier for the alert. default: null </div>
+    </div>  <!-- field-items -->
+
+
+
+    <h3 class="field-label">Request headers</h3>
+    <div class="field-items">
+      <div class="param">kbn-xsrf (required)</div>
+
+      <div class="param-desc"><span class="param-type">Header Parameter</span> &mdash; Cross-site request forgery protection default: null </div>
+
+    </div>  <!-- field-items -->
+
+
+
+
+    <!--Todo: process Response Object and its headers, schema, examples -->
+
+
+    <h3 class="field-label">Produces</h3>
+    This API call produces the following media types according to the <span class="header">Accept</span> request header;
+    the media type will be conveyed by the <span class="header">Content-Type</span> response header.
+    <ul>
+      <li><code>application/json</code></li>
+    </ul>
+
+    <h3 class="field-label">Responses</h3>
+    <h4 class="field-label">204</h4>
+    Indicates a successful call.
+        <a href="#"></a>
+    <h4 class="field-label">401</h4>
+    Authorization information is missing or invalid.
+        <a href="#401_response">401_response</a>
+  </div> <!-- method -->
+  <hr/>
+  <div class="method"><a name="legacyEnableAlert"/>
+    <div class="method-path">
+    <a class="up" href="#__Methods">Up</a>
+    <pre class="post"><code class="huge"><span class="http-method">post</span> /s/{spaceId}/api/alerts/alert/{alertId}/_enable</code></pre></div>
+    <div class="method-summary">Enables an alert. (<span class="nickname">legacyEnableAlert</span>)</div>
+    <div class="method-notes">Deprecated in 7.13.0. Use the enable rule API instead.</div>
+
+    <h3 class="field-label">Path parameters</h3>
+    <div class="field-items">
+      <div class="param">spaceId (required)</div>
+
+      <div class="param-desc"><span class="param-type">Path Parameter</span> &mdash; An identifier for the space. If <code>/s/</code> and the identifier are omitted from the path, the default space is used. default: null </div><div class="param">alertId (required)</div>
+
+      <div class="param-desc"><span class="param-type">Path Parameter</span> &mdash; The identifier for the alert. default: null </div>
+    </div>  <!-- field-items -->
+
+
+
+    <h3 class="field-label">Request headers</h3>
+    <div class="field-items">
+      <div class="param">kbn-xsrf (required)</div>
+
+      <div class="param-desc"><span class="param-type">Header Parameter</span> &mdash; Cross-site request forgery protection default: null </div>
+
+    </div>  <!-- field-items -->
+
+
+
+
+    <!--Todo: process Response Object and its headers, schema, examples -->
+
+
+    <h3 class="field-label">Produces</h3>
+    This API call produces the following media types according to the <span class="header">Accept</span> request header;
+    the media type will be conveyed by the <span class="header">Content-Type</span> response header.
+    <ul>
+      <li><code>application/json</code></li>
+    </ul>
+
+    <h3 class="field-label">Responses</h3>
+    <h4 class="field-label">204</h4>
+    Indicates a successful call.
+        <a href="#"></a>
+    <h4 class="field-label">401</h4>
+    Authorization information is missing or invalid.
+        <a href="#401_response">401_response</a>
+  </div> <!-- method -->
+  <hr/>
+  <div class="method"><a name="legacyFindAlerts"/>
+    <div class="method-path">
+    <a class="up" href="#__Methods">Up</a>
+    <pre class="get"><code class="huge"><span class="http-method">get</span> /s/{spaceId}/api/alerts/alerts/_find</code></pre></div>
+    <div class="method-summary">Retrieves a paginated set of alerts. (<span class="nickname">legacyFindAlerts</span>)</div>
+    <div class="method-notes">Deprecated in 7.13.0. Use the find rules API instead. NOTE: Alert <code>params</code> are stored as a flattened field type and analyzed as keywords. As alerts change in Kibana, the results on each page of the response also change. Use the find API for traditional paginated results, but avoid using it to export large amounts of data.</div>
+
+    <h3 class="field-label">Path parameters</h3>
+    <div class="field-items">
+      <div class="param">spaceId (required)</div>
+
+      <div class="param-desc"><span class="param-type">Path Parameter</span> &mdash; An identifier for the space. If <code>/s/</code> and the identifier are omitted from the path, the default space is used. default: null </div>
+    </div>  <!-- field-items -->
+
+
+
+
+    <h3 class="field-label">Query parameters</h3>
+    <div class="field-items">
+      <div class="param">default_search_operator (optional)</div>
+
+      <div class="param-desc"><span class="param-type">Query Parameter</span> &mdash; The default operator to use for the <code>simple_query_string</code>. default: OR </div><div class="param">fields (optional)</div>
+
+      <div class="param-desc"><span class="param-type">Query Parameter</span> &mdash; The fields to return in the <code>attributes</code> key of the response. default: null </div><div class="param">filter (optional)</div>
+
+      <div class="param-desc"><span class="param-type">Query Parameter</span> &mdash; A KQL string that you filter with an attribute from your saved object. It should look like <code>savedObjectType.attributes.title: &quot;myTitle&quot;</code>. However, if you used a direct attribute of a saved object, such as <code>updatedAt</code>, you must define your filter, for example, <code>savedObjectType.updatedAt &gt; 2018-12-22</code>. default: null </div><div class="param">has_reference (optional)</div>
+
+      <div class="param-desc"><span class="param-type">Query Parameter</span> &mdash; Filters the rules that have a relation with the reference objects with a specific type and identifier. default: null </div><div class="param">page (optional)</div>
+
+      <div class="param-desc"><span class="param-type">Query Parameter</span> &mdash; The page number to return. default: 1 </div><div class="param">per_page (optional)</div>
+
+      <div class="param-desc"><span class="param-type">Query Parameter</span> &mdash; The number of alerts to return per page. default: 20 </div><div class="param">search (optional)</div>
+
+      <div class="param-desc"><span class="param-type">Query Parameter</span> &mdash; An Elasticsearch <code>simple_query_string</code> query that filters the alerts in the response. default: null </div><div class="param">search_fields (optional)</div>
+
+      <div class="param-desc"><span class="param-type">Query Parameter</span> &mdash; The fields to perform the <code>simple_query_string</code> parsed query against. default: null </div><div class="param">sort_field (optional)</div>
+
+      <div class="param-desc"><span class="param-type">Query Parameter</span> &mdash; Determines which field is used to sort the results. The field must exist in the <code>attributes</code> key of the response. default: null </div><div class="param">sort_order (optional)</div>
+
+      <div class="param-desc"><span class="param-type">Query Parameter</span> &mdash; Determines the sort order. default: desc </div>
+    </div>  <!-- field-items -->
+
+
+    <h3 class="field-label">Return type</h3>
+    <div class="return-type">
+      <a href="#legacyFindAlerts_200_response">legacyFindAlerts_200_response</a>
+      
+    </div>
+
+    <!--Todo: process Response Object and its headers, schema, examples -->
+
+    <h3 class="field-label">Example data</h3>
+    <div class="example-data-content-type">Content-Type: application/json</div>
+    <pre class="example"><code>{
+  "total" : 1,
+  "perPage" : 6,
+  "data" : [ {
+    "alertTypeId" : ".index-threshold",
+    "throttle" : "throttle",
+    "updatedBy" : "elastic",
+    "executionStatus" : {
+      "lastExecutionDate" : "2022-12-06T00:13:43.89Z",
+      "status" : "ok"
+    },
+    "params" : {
+      "key" : ""
+    },
+    "enabled" : true,
+    "mutedInstanceIds" : [ "mutedInstanceIds", "mutedInstanceIds" ],
+    "tags" : [ "tags", "tags" ],
+    "createdAt" : "2022-12-05T23:36:58.284Z",
+    "schedule" : {
+      "interval" : "interval"
+    },
+    "notifyWhen" : "onActionGroupChange",
+    "createdBy" : "elastic",
+    "muteAll" : false,
+    "name" : "my alert",
+    "scheduledTaskId" : "b530fed0-74f5-11ed-9801-35303b735aef",
+    "id" : "b530fed0-74f5-11ed-9801-35303b735aef",
+    "actions" : [ "{}", "{}" ],
+    "apiKeyOwner" : "elastic",
+    "updatedAt" : "2022-12-05T23:36:58.284Z"
+  }, {
+    "alertTypeId" : ".index-threshold",
+    "throttle" : "throttle",
+    "updatedBy" : "elastic",
+    "executionStatus" : {
+      "lastExecutionDate" : "2022-12-06T00:13:43.89Z",
+      "status" : "ok"
+    },
+    "params" : {
+      "key" : ""
+    },
+    "enabled" : true,
+    "mutedInstanceIds" : [ "mutedInstanceIds", "mutedInstanceIds" ],
+    "tags" : [ "tags", "tags" ],
+    "createdAt" : "2022-12-05T23:36:58.284Z",
+    "schedule" : {
+      "interval" : "interval"
+    },
+    "notifyWhen" : "onActionGroupChange",
+    "createdBy" : "elastic",
+    "muteAll" : false,
+    "name" : "my alert",
+    "scheduledTaskId" : "b530fed0-74f5-11ed-9801-35303b735aef",
+    "id" : "b530fed0-74f5-11ed-9801-35303b735aef",
+    "actions" : [ "{}", "{}" ],
+    "apiKeyOwner" : "elastic",
+    "updatedAt" : "2022-12-05T23:36:58.284Z"
+  } ],
+  "page" : 0
+}</code></pre>
+
+    <h3 class="field-label">Produces</h3>
+    This API call produces the following media types according to the <span class="header">Accept</span> request header;
+    the media type will be conveyed by the <span class="header">Content-Type</span> response header.
+    <ul>
+      <li><code>application/json</code></li>
+    </ul>
+
+    <h3 class="field-label">Responses</h3>
+    <h4 class="field-label">200</h4>
+    Indicates a successful call.
+        <a href="#legacyFindAlerts_200_response">legacyFindAlerts_200_response</a>
+    <h4 class="field-label">401</h4>
+    Authorization information is missing or invalid.
+        <a href="#401_response">401_response</a>
+  </div> <!-- method -->
+  <hr/>
+  <div class="method"><a name="legacyGetAlert"/>
+    <div class="method-path">
+    <a class="up" href="#__Methods">Up</a>
+    <pre class="get"><code class="huge"><span class="http-method">get</span> /s/{spaceId}/api/alerts/alert/{alertId}</code></pre></div>
+    <div class="method-summary">Retrieves an alert by its identifier. (<span class="nickname">legacyGetAlert</span>)</div>
+    <div class="method-notes">Deprecated in 7.13.0. Use the get rule API instead.</div>
+
+    <h3 class="field-label">Path parameters</h3>
+    <div class="field-items">
+      <div class="param">spaceId (required)</div>
+
+      <div class="param-desc"><span class="param-type">Path Parameter</span> &mdash; An identifier for the space. If <code>/s/</code> and the identifier are omitted from the path, the default space is used. default: null </div><div class="param">alertId (required)</div>
+
+      <div class="param-desc"><span class="param-type">Path Parameter</span> &mdash; The identifier for the alert. default: null </div>
+    </div>  <!-- field-items -->
+
+
+
+
+
+
+    <h3 class="field-label">Return type</h3>
+    <div class="return-type">
+      <a href="#alert_response_properties">alert_response_properties</a>
+      
+    </div>
+
+    <!--Todo: process Response Object and its headers, schema, examples -->
+
+    <h3 class="field-label">Example data</h3>
+    <div class="example-data-content-type">Content-Type: application/json</div>
+    <pre class="example"><code>{
+  "alertTypeId" : ".index-threshold",
+  "throttle" : "throttle",
+  "updatedBy" : "elastic",
+  "executionStatus" : {
+    "lastExecutionDate" : "2022-12-06T00:13:43.89Z",
+    "status" : "ok"
+  },
+  "params" : {
+    "key" : ""
+  },
+  "enabled" : true,
+  "mutedInstanceIds" : [ "mutedInstanceIds", "mutedInstanceIds" ],
+  "tags" : [ "tags", "tags" ],
+  "createdAt" : "2022-12-05T23:36:58.284Z",
+  "schedule" : {
+    "interval" : "interval"
+  },
+  "notifyWhen" : "onActionGroupChange",
+  "createdBy" : "elastic",
+  "muteAll" : false,
+  "name" : "my alert",
+  "scheduledTaskId" : "b530fed0-74f5-11ed-9801-35303b735aef",
+  "id" : "b530fed0-74f5-11ed-9801-35303b735aef",
+  "actions" : [ "{}", "{}" ],
+  "apiKeyOwner" : "elastic",
+  "updatedAt" : "2022-12-05T23:36:58.284Z"
+}</code></pre>
+
+    <h3 class="field-label">Produces</h3>
+    This API call produces the following media types according to the <span class="header">Accept</span> request header;
+    the media type will be conveyed by the <span class="header">Content-Type</span> response header.
+    <ul>
+      <li><code>application/json</code></li>
+    </ul>
+
+    <h3 class="field-label">Responses</h3>
+    <h4 class="field-label">200</h4>
+    Indicates a successful call.
+        <a href="#alert_response_properties">alert_response_properties</a>
+    <h4 class="field-label">401</h4>
+    Authorization information is missing or invalid.
+        <a href="#401_response">401_response</a>
+  </div> <!-- method -->
+  <hr/>
+  <div class="method"><a name="legacyGetAlertTypes"/>
+    <div class="method-path">
+    <a class="up" href="#__Methods">Up</a>
+    <pre class="get"><code class="huge"><span class="http-method">get</span> /s/{spaceId}/api/alerts/alerts/list_alert_types</code></pre></div>
+    <div class="method-summary">Retrieves a list of alert types. (<span class="nickname">legacyGetAlertTypes</span>)</div>
+    <div class="method-notes">Deprecated in 7.13.0. Use the get rule types API instead.</div>
+
+    <h3 class="field-label">Path parameters</h3>
+    <div class="field-items">
+      <div class="param">spaceId (required)</div>
+
+      <div class="param-desc"><span class="param-type">Path Parameter</span> &mdash; An identifier for the space. If <code>/s/</code> and the identifier are omitted from the path, the default space is used. default: null </div>
+    </div>  <!-- field-items -->
+
+
+
+
+
+
+    <h3 class="field-label">Return type</h3>
+    <div class="return-type">
+      array[<a href="#legacyGetAlertTypes_200_response_inner">legacyGetAlertTypes_200_response_inner</a>]
+      
+    </div>
+
+    <!--Todo: process Response Object and its headers, schema, examples -->
+
+    <h3 class="field-label">Example data</h3>
+    <div class="example-data-content-type">Content-Type: application/json</div>
+    <pre class="example"><code>{
+  "defaultActionGroupId" : "defaultActionGroupId",
+  "isExportable" : true,
+  "actionVariables" : {
+    "context" : [ {
+      "name" : "name",
+      "description" : "description"
+    }, {
+      "name" : "name",
+      "description" : "description"
+    } ],
+    "state" : [ {
+      "name" : "name",
+      "description" : "description"
+    }, {
+      "name" : "name",
+      "description" : "description"
+    } ],
+    "params" : [ {
+      "name" : "name",
+      "description" : "description"
+    }, {
+      "name" : "name",
+      "description" : "description"
+    } ]
+  },
+  "actionGroups" : [ {
+    "name" : "name",
+    "id" : "id"
+  }, {
+    "name" : "name",
+    "id" : "id"
+  } ],
+  "name" : "name",
+  "producer" : "producer",
+  "authorizedConsumers" : "{}",
+  "recoveryActionGroup" : {
+    "name" : "name",
+    "id" : "id"
+  },
+  "enabledInLicense" : true,
+  "id" : "id",
+  "minimumLicenseRequired" : "minimumLicenseRequired"
+}</code></pre>
+
+    <h3 class="field-label">Produces</h3>
+    This API call produces the following media types according to the <span class="header">Accept</span> request header;
+    the media type will be conveyed by the <span class="header">Content-Type</span> response header.
+    <ul>
+      <li><code>application/json</code></li>
+    </ul>
+
+    <h3 class="field-label">Responses</h3>
+    <h4 class="field-label">200</h4>
+    Indicates a successful call.
+        
+    <h4 class="field-label">401</h4>
+    Authorization information is missing or invalid.
+        <a href="#401_response">401_response</a>
+  </div> <!-- method -->
+  <hr/>
+  <div class="method"><a name="legacyGetAlertingHealth"/>
+    <div class="method-path">
+    <a class="up" href="#__Methods">Up</a>
+    <pre class="get"><code class="huge"><span class="http-method">get</span> /s/{spaceId}/api/alerts/alerts/_health</code></pre></div>
+    <div class="method-summary">Retrieves the health status of the alerting framework. (<span class="nickname">legacyGetAlertingHealth</span>)</div>
+    <div class="method-notes">Deprecated in 7.13.0. Use the get alerting framework health API instead.</div>
+
+    <h3 class="field-label">Path parameters</h3>
+    <div class="field-items">
+      <div class="param">spaceId (required)</div>
+
+      <div class="param-desc"><span class="param-type">Path Parameter</span> &mdash; An identifier for the space. If <code>/s/</code> and the identifier are omitted from the path, the default space is used. default: null </div>
+    </div>  <!-- field-items -->
+
+
+
+
+
+
+    <h3 class="field-label">Return type</h3>
+    <div class="return-type">
+      <a href="#legacyGetAlertingHealth_200_response">legacyGetAlertingHealth_200_response</a>
+      
+    </div>
+
+    <!--Todo: process Response Object and its headers, schema, examples -->
+
+    <h3 class="field-label">Example data</h3>
+    <div class="example-data-content-type">Content-Type: application/json</div>
+    <pre class="example"><code>{
+  "hasPermanentEncryptionKey" : true,
+  "alertingFrameworkHealth" : {
+    "executionHealth" : {
+      "status" : "ok",
+      "timestamp" : "2023-01-13T01:28:00.28Z"
+    },
+    "decryptionHealth" : {
+      "status" : "ok",
+      "timestamp" : "2023-01-13T01:28:00.28Z"
+    },
+    "readHealth" : {
+      "status" : "ok",
+      "timestamp" : "2023-01-13T01:28:00.28Z"
+    }
+  },
+  "isSufficientlySecure" : true
+}</code></pre>
+
+    <h3 class="field-label">Produces</h3>
+    This API call produces the following media types according to the <span class="header">Accept</span> request header;
+    the media type will be conveyed by the <span class="header">Content-Type</span> response header.
+    <ul>
+      <li><code>application/json</code></li>
+    </ul>
+
+    <h3 class="field-label">Responses</h3>
+    <h4 class="field-label">200</h4>
+    Indicates a successful call.
+        <a href="#legacyGetAlertingHealth_200_response">legacyGetAlertingHealth_200_response</a>
+    <h4 class="field-label">401</h4>
+    Authorization information is missing or invalid.
+        <a href="#401_response">401_response</a>
+  </div> <!-- method -->
+  <hr/>
+  <div class="method"><a name="legacyMuteAlertInstance"/>
+    <div class="method-path">
+    <a class="up" href="#__Methods">Up</a>
+    <pre class="post"><code class="huge"><span class="http-method">post</span> /s/{spaceId}/api/alerts/alert/{alertId}/alert_instance/{alertInstanceId}/_mute</code></pre></div>
+    <div class="method-summary">Mutes an alert instance. (<span class="nickname">legacyMuteAlertInstance</span>)</div>
+    <div class="method-notes">Deprecated in 7.13.0. Use the mute alert API instead.</div>
+
+    <h3 class="field-label">Path parameters</h3>
+    <div class="field-items">
+      <div class="param">spaceId (required)</div>
+
+      <div class="param-desc"><span class="param-type">Path Parameter</span> &mdash; An identifier for the space. If <code>/s/</code> and the identifier are omitted from the path, the default space is used. default: null </div><div class="param">alertId (required)</div>
+
+      <div class="param-desc"><span class="param-type">Path Parameter</span> &mdash; An identifier for the alert. default: null </div><div class="param">alertInstanceId (required)</div>
+
+      <div class="param-desc"><span class="param-type">Path Parameter</span> &mdash; An identifier for the alert instance. default: null </div>
+    </div>  <!-- field-items -->
+
+
+
+    <h3 class="field-label">Request headers</h3>
+    <div class="field-items">
+      <div class="param">kbn-xsrf (required)</div>
+
+      <div class="param-desc"><span class="param-type">Header Parameter</span> &mdash; Cross-site request forgery protection default: null </div>
+
+    </div>  <!-- field-items -->
+
+
+
+
+    <!--Todo: process Response Object and its headers, schema, examples -->
+
+
+    <h3 class="field-label">Produces</h3>
+    This API call produces the following media types according to the <span class="header">Accept</span> request header;
+    the media type will be conveyed by the <span class="header">Content-Type</span> response header.
+    <ul>
+      <li><code>application/json</code></li>
+    </ul>
+
+    <h3 class="field-label">Responses</h3>
+    <h4 class="field-label">204</h4>
+    Indicates a successful call.
+        <a href="#"></a>
+    <h4 class="field-label">401</h4>
+    Authorization information is missing or invalid.
+        <a href="#401_response">401_response</a>
+  </div> <!-- method -->
+  <hr/>
+  <div class="method"><a name="legacyMuteAllAlertInstances"/>
+    <div class="method-path">
+    <a class="up" href="#__Methods">Up</a>
+    <pre class="post"><code class="huge"><span class="http-method">post</span> /s/{spaceId}/api/alerts/alert/{alertId}/_mute_all</code></pre></div>
+    <div class="method-summary">Mutes all alert instances. (<span class="nickname">legacyMuteAllAlertInstances</span>)</div>
+    <div class="method-notes">Deprecated in 7.13.0. Use the mute all alerts API instead.</div>
+
+    <h3 class="field-label">Path parameters</h3>
+    <div class="field-items">
+      <div class="param">spaceId (required)</div>
+
+      <div class="param-desc"><span class="param-type">Path Parameter</span> &mdash; An identifier for the space. If <code>/s/</code> and the identifier are omitted from the path, the default space is used. default: null </div><div class="param">alertId (required)</div>
+
+      <div class="param-desc"><span class="param-type">Path Parameter</span> &mdash; The identifier for the alert. default: null </div>
+    </div>  <!-- field-items -->
+
+
+
+    <h3 class="field-label">Request headers</h3>
+    <div class="field-items">
+      <div class="param">kbn-xsrf (required)</div>
+
+      <div class="param-desc"><span class="param-type">Header Parameter</span> &mdash; Cross-site request forgery protection default: null </div>
+
+    </div>  <!-- field-items -->
+
+
+
+
+    <!--Todo: process Response Object and its headers, schema, examples -->
+
+
+    <h3 class="field-label">Produces</h3>
+    This API call produces the following media types according to the <span class="header">Accept</span> request header;
+    the media type will be conveyed by the <span class="header">Content-Type</span> response header.
+    <ul>
+      <li><code>application/json</code></li>
+    </ul>
+
+    <h3 class="field-label">Responses</h3>
+    <h4 class="field-label">204</h4>
+    Indicates a successful call.
+        <a href="#"></a>
+    <h4 class="field-label">401</h4>
+    Authorization information is missing or invalid.
+        <a href="#401_response">401_response</a>
+  </div> <!-- method -->
+  <hr/>
+  <div class="method"><a name="legacyUnmuteAlertInstance"/>
+    <div class="method-path">
+    <a class="up" href="#__Methods">Up</a>
+    <pre class="post"><code class="huge"><span class="http-method">post</span> /s/{spaceId}/api/alerts/alert/{alertId}/alert_instance/{alertInstanceId}/_unmute</code></pre></div>
+    <div class="method-summary">Unmutes an alert instance. (<span class="nickname">legacyUnmuteAlertInstance</span>)</div>
+    <div class="method-notes">Deprecated in 7.13.0. Use the unmute alert API instead.</div>
+
+    <h3 class="field-label">Path parameters</h3>
+    <div class="field-items">
+      <div class="param">spaceId (required)</div>
+
+      <div class="param-desc"><span class="param-type">Path Parameter</span> &mdash; An identifier for the space. If <code>/s/</code> and the identifier are omitted from the path, the default space is used. default: null </div><div class="param">alertId (required)</div>
+
+      <div class="param-desc"><span class="param-type">Path Parameter</span> &mdash; An identifier for the alert. default: null </div><div class="param">alertInstanceId (required)</div>
+
+      <div class="param-desc"><span class="param-type">Path Parameter</span> &mdash; An identifier for the alert instance. default: null </div>
+    </div>  <!-- field-items -->
+
+
+
+    <h3 class="field-label">Request headers</h3>
+    <div class="field-items">
+      <div class="param">kbn-xsrf (required)</div>
+
+      <div class="param-desc"><span class="param-type">Header Parameter</span> &mdash; Cross-site request forgery protection default: null </div>
+
+    </div>  <!-- field-items -->
+
+
+
+
+    <!--Todo: process Response Object and its headers, schema, examples -->
+
+
+    <h3 class="field-label">Produces</h3>
+    This API call produces the following media types according to the <span class="header">Accept</span> request header;
+    the media type will be conveyed by the <span class="header">Content-Type</span> response header.
+    <ul>
+      <li><code>application/json</code></li>
+    </ul>
+
+    <h3 class="field-label">Responses</h3>
+    <h4 class="field-label">204</h4>
+    Indicates a successful call.
+        <a href="#"></a>
+    <h4 class="field-label">401</h4>
+    Authorization information is missing or invalid.
+        <a href="#401_response">401_response</a>
+  </div> <!-- method -->
+  <hr/>
+  <div class="method"><a name="legacyUnmuteAllAlertInstances"/>
+    <div class="method-path">
+    <a class="up" href="#__Methods">Up</a>
+    <pre class="post"><code class="huge"><span class="http-method">post</span> /s/{spaceId}/api/alerts/alert/{alertId}/_unmute_all</code></pre></div>
+    <div class="method-summary">Unmutes all alert instances. (<span class="nickname">legacyUnmuteAllAlertInstances</span>)</div>
+    <div class="method-notes">Deprecated in 7.13.0. Use the unmute all alerts API instead.</div>
+
+    <h3 class="field-label">Path parameters</h3>
+    <div class="field-items">
+      <div class="param">spaceId (required)</div>
+
+      <div class="param-desc"><span class="param-type">Path Parameter</span> &mdash; An identifier for the space. If <code>/s/</code> and the identifier are omitted from the path, the default space is used. default: null </div><div class="param">alertId (required)</div>
+
+      <div class="param-desc"><span class="param-type">Path Parameter</span> &mdash; The identifier for the alert. default: null </div>
+    </div>  <!-- field-items -->
+
+
+
+    <h3 class="field-label">Request headers</h3>
+    <div class="field-items">
+      <div class="param">kbn-xsrf (required)</div>
+
+      <div class="param-desc"><span class="param-type">Header Parameter</span> &mdash; Cross-site request forgery protection default: null </div>
+
+    </div>  <!-- field-items -->
+
+
+
+
+    <!--Todo: process Response Object and its headers, schema, examples -->
+
+
+    <h3 class="field-label">Produces</h3>
+    This API call produces the following media types according to the <span class="header">Accept</span> request header;
+    the media type will be conveyed by the <span class="header">Content-Type</span> response header.
+    <ul>
+      <li><code>application/json</code></li>
+    </ul>
+
+    <h3 class="field-label">Responses</h3>
+    <h4 class="field-label">204</h4>
+    Indicates a successful call.
+        <a href="#"></a>
+    <h4 class="field-label">401</h4>
+    Authorization information is missing or invalid.
+        <a href="#401_response">401_response</a>
+  </div> <!-- method -->
+  <hr/>
+  <div class="method"><a name="legacyUpdateAlert"/>
+    <div class="method-path">
+    <a class="up" href="#__Methods">Up</a>
+    <pre class="put"><code class="huge"><span class="http-method">put</span> /s/{spaceId}/api/alerts/alert/{alertId}</code></pre></div>
+    <div class="method-summary">Updates the attributes for an alert. (<span class="nickname">legacyUpdateAlert</span>)</div>
+    <div class="method-notes">Deprecated in 7.13.0. Use the update rule API instead.</div>
+
+    <h3 class="field-label">Path parameters</h3>
+    <div class="field-items">
+      <div class="param">spaceId (required)</div>
+
+      <div class="param-desc"><span class="param-type">Path Parameter</span> &mdash; An identifier for the space. If <code>/s/</code> and the identifier are omitted from the path, the default space is used. default: null </div><div class="param">alertId (required)</div>
+
+      <div class="param-desc"><span class="param-type">Path Parameter</span> &mdash; The identifier for the alert. default: null </div>
+    </div>  <!-- field-items -->
+
+    <h3 class="field-label">Consumes</h3>
+    This API call consumes the following media types via the <span class="header">Content-Type</span> request header:
+    <ul>
+      <li><code>application/json</code></li>
+    </ul>
+
+    <h3 class="field-label">Request body</h3>
+    <div class="field-items">
+      <div class="param">Legacy_update_alert_request_properties <a href="#Legacy_update_alert_request_properties">Legacy_update_alert_request_properties</a> (required)</div>
+
+      <div class="param-desc"><span class="param-type">Body Parameter</span> &mdash;  </div>
+
+    </div>  <!-- field-items -->
+
+    <h3 class="field-label">Request headers</h3>
+    <div class="field-items">
+      <div class="param">kbn-xsrf (required)</div>
+
+      <div class="param-desc"><span class="param-type">Header Parameter</span> &mdash; Cross-site request forgery protection default: null </div>
+
+    </div>  <!-- field-items -->
+
+
+
+    <h3 class="field-label">Return type</h3>
+    <div class="return-type">
+      <a href="#alert_response_properties">alert_response_properties</a>
+      
+    </div>
+
+    <!--Todo: process Response Object and its headers, schema, examples -->
+
+    <h3 class="field-label">Example data</h3>
+    <div class="example-data-content-type">Content-Type: application/json</div>
+    <pre class="example"><code>{
+  "alertTypeId" : ".index-threshold",
+  "throttle" : "throttle",
+  "updatedBy" : "elastic",
+  "executionStatus" : {
+    "lastExecutionDate" : "2022-12-06T00:13:43.89Z",
+    "status" : "ok"
+  },
+  "params" : {
+    "key" : ""
+  },
+  "enabled" : true,
+  "mutedInstanceIds" : [ "mutedInstanceIds", "mutedInstanceIds" ],
+  "tags" : [ "tags", "tags" ],
+  "createdAt" : "2022-12-05T23:36:58.284Z",
+  "schedule" : {
+    "interval" : "interval"
+  },
+  "notifyWhen" : "onActionGroupChange",
+  "createdBy" : "elastic",
+  "muteAll" : false,
+  "name" : "my alert",
+  "scheduledTaskId" : "b530fed0-74f5-11ed-9801-35303b735aef",
+  "id" : "b530fed0-74f5-11ed-9801-35303b735aef",
+  "actions" : [ "{}", "{}" ],
+  "apiKeyOwner" : "elastic",
+  "updatedAt" : "2022-12-05T23:36:58.284Z"
+}</code></pre>
+
+    <h3 class="field-label">Produces</h3>
+    This API call produces the following media types according to the <span class="header">Accept</span> request header;
+    the media type will be conveyed by the <span class="header">Content-Type</span> response header.
+    <ul>
+      <li><code>application/json</code></li>
+    </ul>
+
+    <h3 class="field-label">Responses</h3>
+    <h4 class="field-label">200</h4>
+    Indicates a successful call.
+        <a href="#alert_response_properties">alert_response_properties</a>
+    <h4 class="field-label">401</h4>
+    Authorization information is missing or invalid.
+        <a href="#401_response">401_response</a>
+  </div> <!-- method -->
+  <hr/>
+  <div class="method"><a name="legaryDeleteAlert"/>
+    <div class="method-path">
+    <a class="up" href="#__Methods">Up</a>
+    <pre class="delete"><code class="huge"><span class="http-method">delete</span> /s/{spaceId}/api/alerts/alert/{alertId}</code></pre></div>
+    <div class="method-summary">Permanently removes an alert. (<span class="nickname">legaryDeleteAlert</span>)</div>
+    <div class="method-notes">Deprecated in 7.13.0. Use the delete rule API instead. WARNING: After you delete an alert, you cannot recover it.</div>
+
+    <h3 class="field-label">Path parameters</h3>
+    <div class="field-items">
+      <div class="param">spaceId (required)</div>
+
+      <div class="param-desc"><span class="param-type">Path Parameter</span> &mdash; An identifier for the space. If <code>/s/</code> and the identifier are omitted from the path, the default space is used. default: null </div><div class="param">alertId (required)</div>
+
+      <div class="param-desc"><span class="param-type">Path Parameter</span> &mdash; The identifier for the alert. default: null </div>
+    </div>  <!-- field-items -->
+
+
+
+    <h3 class="field-label">Request headers</h3>
+    <div class="field-items">
+      <div class="param">kbn-xsrf (required)</div>
+
+      <div class="param-desc"><span class="param-type">Header Parameter</span> &mdash; Cross-site request forgery protection default: null </div>
+
+    </div>  <!-- field-items -->
+
+
+
+
+    <!--Todo: process Response Object and its headers, schema, examples -->
+
+
+    <h3 class="field-label">Produces</h3>
+    This API call produces the following media types according to the <span class="header">Accept</span> request header;
+    the media type will be conveyed by the <span class="header">Content-Type</span> response header.
+    <ul>
+      <li><code>application/json</code></li>
+    </ul>
+
+    <h3 class="field-label">Responses</h3>
+    <h4 class="field-label">204</h4>
+    Indicates a successful call.
+        <a href="#"></a>
+    <h4 class="field-label">401</h4>
+    Authorization information is missing or invalid.
+        <a href="#401_response">401_response</a>
+  </div> <!-- method -->
+  <hr/>
   <div class="method"><a name="muteAlert"/>
     <div class="method-path">
     <a class="up" href="#__Methods">Up</a>
@@ -1140,7 +2043,15 @@ Any modifications made to this file will be overwritten.
   <ol>
     <li><a href="#401_response"><code>401_response</code> - Unsuccessful rule API response</a></li>
     <li><a href="#404_response"><code>404_response</code> - </a></li>
+    <li><a href="#Legacy_create_alert_request_properties"><code>Legacy_create_alert_request_properties</code> - Legacy create alert request properties</a></li>
+    <li><a href="#Legacy_create_alert_request_properties_schedule"><code>Legacy_create_alert_request_properties_schedule</code> - </a></li>
+    <li><a href="#Legacy_update_alert_request_properties"><code>Legacy_update_alert_request_properties</code> - Legacy update alert request properties</a></li>
+    <li><a href="#Legacy_update_alert_request_properties_actions_inner"><code>Legacy_update_alert_request_properties_actions_inner</code> - </a></li>
+    <li><a href="#Legacy_update_alert_request_properties_schedule"><code>Legacy_update_alert_request_properties_schedule</code> - </a></li>
     <li><a href="#actions_inner"><code>actions_inner</code> - </a></li>
+    <li><a href="#alert_response_properties"><code>alert_response_properties</code> - Legacy alert response properties</a></li>
+    <li><a href="#alert_response_properties_executionStatus"><code>alert_response_properties_executionStatus</code> - </a></li>
+    <li><a href="#alert_response_properties_schedule"><code>alert_response_properties_schedule</code> - </a></li>
     <li><a href="#create_rule_request"><code>create_rule_request</code> - Create rule request</a></li>
     <li><a href="#findRules_200_response"><code>findRules_200_response</code> - </a></li>
     <li><a href="#findRules_has_reference_parameter"><code>findRules_has_reference_parameter</code> - </a></li>
@@ -1160,6 +2071,16 @@ Any modifications made to this file will be overwritten.
     <li><a href="#getRuleTypes_200_response_inner_authorized_consumers"><code>getRuleTypes_200_response_inner_authorized_consumers</code> - </a></li>
     <li><a href="#getRuleTypes_200_response_inner_authorized_consumers_alerts"><code>getRuleTypes_200_response_inner_authorized_consumers_alerts</code> - </a></li>
     <li><a href="#getRuleTypes_200_response_inner_recovery_action_group"><code>getRuleTypes_200_response_inner_recovery_action_group</code> - </a></li>
+    <li><a href="#legacyFindAlerts_200_response"><code>legacyFindAlerts_200_response</code> - </a></li>
+    <li><a href="#legacyGetAlertTypes_200_response_inner"><code>legacyGetAlertTypes_200_response_inner</code> - </a></li>
+    <li><a href="#legacyGetAlertTypes_200_response_inner_actionVariables"><code>legacyGetAlertTypes_200_response_inner_actionVariables</code> - </a></li>
+    <li><a href="#legacyGetAlertTypes_200_response_inner_actionVariables_context_inner"><code>legacyGetAlertTypes_200_response_inner_actionVariables_context_inner</code> - </a></li>
+    <li><a href="#legacyGetAlertTypes_200_response_inner_recoveryActionGroup"><code>legacyGetAlertTypes_200_response_inner_recoveryActionGroup</code> - </a></li>
+    <li><a href="#legacyGetAlertingHealth_200_response"><code>legacyGetAlertingHealth_200_response</code> - </a></li>
+    <li><a href="#legacyGetAlertingHealth_200_response_alertingFrameworkHealth"><code>legacyGetAlertingHealth_200_response_alertingFrameworkHealth</code> - </a></li>
+    <li><a href="#legacyGetAlertingHealth_200_response_alertingFrameworkHealth_decryptionHealth"><code>legacyGetAlertingHealth_200_response_alertingFrameworkHealth_decryptionHealth</code> - </a></li>
+    <li><a href="#legacyGetAlertingHealth_200_response_alertingFrameworkHealth_executionHealth"><code>legacyGetAlertingHealth_200_response_alertingFrameworkHealth_executionHealth</code> - </a></li>
+    <li><a href="#legacyGetAlertingHealth_200_response_alertingFrameworkHealth_readHealth"><code>legacyGetAlertingHealth_200_response_alertingFrameworkHealth_readHealth</code> - </a></li>
     <li><a href="#notify_when"><code>notify_when</code> - </a></li>
     <li><a href="#rule_response_properties"><code>rule_response_properties</code> - Rule response properties</a></li>
     <li><a href="#rule_response_properties_execution_status"><code>rule_response_properties_execution_status</code> - </a></li>
@@ -1196,12 +2117,109 @@ Any modifications made to this file will be overwritten.
     </div>  <!-- field-items -->
   </div>
   <div class="model">
+    <h3><a name="Legacy_create_alert_request_properties"><code>Legacy_create_alert_request_properties</code> - Legacy create alert request properties</a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'></div>
+    <div class="field-items">
+      <div class="param">actions (optional)</div><div class="param-desc"><span class="param-type"><a href="#Legacy_update_alert_request_properties_actions_inner">array[Legacy_update_alert_request_properties_actions_inner]</a></span>  </div>
+<div class="param">alertTypeId </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The ID of the alert type that you want to call when the alert is scheduled to run. </div>
+<div class="param">consumer </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The name of the application that owns the alert. This name has to match the Kibana feature name, as that dictates the required role-based access control privileges. </div>
+<div class="param">enabled (optional)</div><div class="param-desc"><span class="param-type"><a href="#boolean">Boolean</a></span> Indicates if you want to run the alert on an interval basis after it is created. </div>
+<div class="param">name </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> A name to reference and search. </div>
+<div class="param">notifyWhen </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The condition for throttling the notification. </div>
+        <div class="param-enum-header">Enum:</div>
+        <div class="param-enum">onActionGroupChange</div><div class="param-enum">onActiveAlert</div><div class="param-enum">onThrottleInterval</div>
+<div class="param">params </div><div class="param-desc"><span class="param-type"><a href="#">Object</a></span> The parameters to pass to the alert type executor <code>params</code> value. This will also validate against the alert type params validator, if defined. </div>
+<div class="param">schedule </div><div class="param-desc"><span class="param-type"><a href="#Legacy_create_alert_request_properties_schedule">Legacy_create_alert_request_properties_schedule</a></span>  </div>
+<div class="param">tags (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">array[String]</a></span> A list of keywords to reference and search. </div>
+<div class="param">throttle (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> How often this alert should fire the same actions. This will prevent the alert from sending out the same notification over and over. For example, if an alert with a schedule of 1 minute stays in a triggered state for 90 minutes, setting a throttle of <code>10m</code> or <code>1h</code> will prevent it from sending 90 notifications during this period. </div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="Legacy_create_alert_request_properties_schedule"><code>Legacy_create_alert_request_properties_schedule</code> - </a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'>The schedule specifying when this alert should be run. A schedule is structured such that the key specifies the format you wish to use and its value specifies the schedule.</div>
+    <div class="field-items">
+      <div class="param">interval (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The interval format specifies the interval in seconds, minutes, hours or days at which the alert should execute. </div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="Legacy_update_alert_request_properties"><code>Legacy_update_alert_request_properties</code> - Legacy update alert request properties</a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'></div>
+    <div class="field-items">
+      <div class="param">actions (optional)</div><div class="param-desc"><span class="param-type"><a href="#Legacy_update_alert_request_properties_actions_inner">array[Legacy_update_alert_request_properties_actions_inner]</a></span>  </div>
+<div class="param">name </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> A name to reference and search. </div>
+<div class="param">notifyWhen </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The condition for throttling the notification. </div>
+        <div class="param-enum-header">Enum:</div>
+        <div class="param-enum">onActionGroupChange</div><div class="param-enum">onActiveAlert</div><div class="param-enum">onThrottleInterval</div>
+<div class="param">params </div><div class="param-desc"><span class="param-type"><a href="#">Object</a></span> The parameters to pass to the alert type executor <code>params</code> value. This will also validate against the alert type params validator, if defined. </div>
+<div class="param">schedule </div><div class="param-desc"><span class="param-type"><a href="#Legacy_update_alert_request_properties_schedule">Legacy_update_alert_request_properties_schedule</a></span>  </div>
+<div class="param">tags (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">array[String]</a></span> A list of keywords to reference and search. </div>
+<div class="param">throttle (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> How often this alert should fire the same actions. This will prevent the alert from sending out the same notification over and over. For example, if an alert with a schedule of 1 minute stays in a triggered state for 90 minutes, setting a throttle of <code>10m</code> or <code>1h</code> will prevent it from sending 90 notifications during this period. </div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="Legacy_update_alert_request_properties_actions_inner"><code>Legacy_update_alert_request_properties_actions_inner</code> - </a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'></div>
+    <div class="field-items">
+      <div class="param">actionTypeId </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The identifier for the action type. </div>
+<div class="param">group </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> Grouping actions is recommended for escalations for different types of alert instances. If you don't need this functionality, set it to <code>default</code>. </div>
+<div class="param">id </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The ID of the action saved object to execute. </div>
+<div class="param">params </div><div class="param-desc"><span class="param-type"><a href="#">Object</a></span> The map to the <code>params</code> that the action type will receive. <code>params</code> are handled as Mustache templates and passed a default set of context. </div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="Legacy_update_alert_request_properties_schedule"><code>Legacy_update_alert_request_properties_schedule</code> - </a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'>The schedule specifying when this alert should be run. A schedule is structured such that the key specifies the format you wish to use and its value specifies the schedule.</div>
+    <div class="field-items">
+      <div class="param">interval (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The interval format specifies the interval in seconds, minutes, hours or days at which the alert should execute. </div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
     <h3><a name="actions_inner"><code>actions_inner</code> - </a> <a class="up" href="#__Models">Up</a></h3>
     <div class='model-description'></div>
     <div class="field-items">
       <div class="param">group (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The group name for the actions. If you don't need to group actions, set to <code>default</code>. </div>
 <div class="param">id (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The identifier for the connector saved object. </div>
 <div class="param">params (optional)</div><div class="param-desc"><span class="param-type"><a href="#AnyType">map[String, oas_any_type_not_mapped]</a></span> The parameters for the action, which are sent to the connector. The <code>params</code> are handled as Mustache templates and passed a default set of context. </div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="alert_response_properties"><code>alert_response_properties</code> - Legacy alert response properties</a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'></div>
+    <div class="field-items">
+      <div class="param">actions (optional)</div><div class="param-desc"><span class="param-type"><a href="#object">array[Object]</a></span>  </div>
+<div class="param">alertTypeId (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+<div class="param">apiKeyOwner (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+<div class="param">createdAt (optional)</div><div class="param-desc"><span class="param-type"><a href="#DateTime">Date</a></span> The date and time that the alert was created. format: date-time</div>
+<div class="param">createdBy (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The identifier for the user that created the alert. </div>
+<div class="param">enabled (optional)</div><div class="param-desc"><span class="param-type"><a href="#boolean">Boolean</a></span> Indicates whether the alert is currently enabled. </div>
+<div class="param">executionStatus (optional)</div><div class="param-desc"><span class="param-type"><a href="#alert_response_properties_executionStatus">alert_response_properties_executionStatus</a></span>  </div>
+<div class="param">id (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The identifier for the alert. </div>
+<div class="param">muteAll (optional)</div><div class="param-desc"><span class="param-type"><a href="#boolean">Boolean</a></span>  </div>
+<div class="param">mutedInstanceIds (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">array[String]</a></span>  </div>
+<div class="param">name (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The name of the alert. </div>
+<div class="param">notifyWhen (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+<div class="param">params (optional)</div><div class="param-desc"><span class="param-type"><a href="#AnyType">map[String, oas_any_type_not_mapped]</a></span>  </div>
+<div class="param">schedule (optional)</div><div class="param-desc"><span class="param-type"><a href="#alert_response_properties_schedule">alert_response_properties_schedule</a></span>  </div>
+<div class="param">scheduledTaskId (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+<div class="param">tags (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">array[String]</a></span>  </div>
+<div class="param">throttle (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+<div class="param">updatedAt (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+<div class="param">updatedBy (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The identifier for the user that updated this alert most recently. </div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="alert_response_properties_executionStatus"><code>alert_response_properties_executionStatus</code> - </a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'></div>
+    <div class="field-items">
+      <div class="param">lastExecutionDate (optional)</div><div class="param-desc"><span class="param-type"><a href="#DateTime">Date</a></span>  format: date-time</div>
+<div class="param">status (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="alert_response_properties_schedule"><code>alert_response_properties_schedule</code> - </a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'></div>
+    <div class="field-items">
+      <div class="param">interval (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
     </div>  <!-- field-items -->
   </div>
   <div class="model">
@@ -1394,6 +2412,106 @@ Any modifications made to this file will be overwritten.
     <div class="field-items">
       <div class="param">id (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
 <div class="param">name (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="legacyFindAlerts_200_response"><code>legacyFindAlerts_200_response</code> - </a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'></div>
+    <div class="field-items">
+      <div class="param">data (optional)</div><div class="param-desc"><span class="param-type"><a href="#alert_response_properties">array[alert_response_properties]</a></span>  </div>
+<div class="param">page (optional)</div><div class="param-desc"><span class="param-type"><a href="#integer">Integer</a></span>  </div>
+<div class="param">perPage (optional)</div><div class="param-desc"><span class="param-type"><a href="#integer">Integer</a></span>  </div>
+<div class="param">total (optional)</div><div class="param-desc"><span class="param-type"><a href="#integer">Integer</a></span>  </div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="legacyGetAlertTypes_200_response_inner"><code>legacyGetAlertTypes_200_response_inner</code> - </a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'></div>
+    <div class="field-items">
+      <div class="param">actionGroups (optional)</div><div class="param-desc"><span class="param-type"><a href="#getRuleTypes_200_response_inner_action_groups_inner">array[getRuleTypes_200_response_inner_action_groups_inner]</a></span> An explicit list of groups for which the alert type can schedule actions, each with the action group's unique ID and human readable name. Alert actions validation uses this configuration to ensure that groups are valid. </div>
+<div class="param">actionVariables (optional)</div><div class="param-desc"><span class="param-type"><a href="#legacyGetAlertTypes_200_response_inner_actionVariables">legacyGetAlertTypes_200_response_inner_actionVariables</a></span>  </div>
+<div class="param">authorizedConsumers (optional)</div><div class="param-desc"><span class="param-type"><a href="#">Object</a></span> The list of the plugins IDs that have access to the alert type. </div>
+<div class="param">defaultActionGroupId (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The default identifier for the alert type group. </div>
+<div class="param">enabledInLicense (optional)</div><div class="param-desc"><span class="param-type"><a href="#boolean">Boolean</a></span> Indicates whether the rule type is enabled based on the subscription. </div>
+<div class="param">id (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The unique identifier for the alert type. </div>
+<div class="param">isExportable (optional)</div><div class="param-desc"><span class="param-type"><a href="#boolean">Boolean</a></span> Indicates whether the alert type is exportable in Saved Objects Management UI. </div>
+<div class="param">minimumLicenseRequired (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The subscriptions required to use the alert type. </div>
+<div class="param">name (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The descriptive name of the alert type. </div>
+<div class="param">producer (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> An identifier for the application that produces this alert type. </div>
+<div class="param">recoveryActionGroup (optional)</div><div class="param-desc"><span class="param-type"><a href="#legacyGetAlertTypes_200_response_inner_recoveryActionGroup">legacyGetAlertTypes_200_response_inner_recoveryActionGroup</a></span>  </div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="legacyGetAlertTypes_200_response_inner_actionVariables"><code>legacyGetAlertTypes_200_response_inner_actionVariables</code> - </a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'>A list of action variables that the alert type makes available via context and state in action parameter templates, and a short human readable description. The Alert UI will use this information to prompt users for these variables in action parameter editors.</div>
+    <div class="field-items">
+      <div class="param">context (optional)</div><div class="param-desc"><span class="param-type"><a href="#legacyGetAlertTypes_200_response_inner_actionVariables_context_inner">array[legacyGetAlertTypes_200_response_inner_actionVariables_context_inner]</a></span>  </div>
+<div class="param">params (optional)</div><div class="param-desc"><span class="param-type"><a href="#getRuleTypes_200_response_inner_action_variables_params_inner">array[getRuleTypes_200_response_inner_action_variables_params_inner]</a></span>  </div>
+<div class="param">state (optional)</div><div class="param-desc"><span class="param-type"><a href="#getRuleTypes_200_response_inner_action_variables_params_inner">array[getRuleTypes_200_response_inner_action_variables_params_inner]</a></span>  </div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="legacyGetAlertTypes_200_response_inner_actionVariables_context_inner"><code>legacyGetAlertTypes_200_response_inner_actionVariables_context_inner</code> - </a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'></div>
+    <div class="field-items">
+      <div class="param">name (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+<div class="param">description (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="legacyGetAlertTypes_200_response_inner_recoveryActionGroup"><code>legacyGetAlertTypes_200_response_inner_recoveryActionGroup</code> - </a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'>An action group to use when an alert instance goes from an active state to an inactive one. If it is not specified, the default recovered action group is used.</div>
+    <div class="field-items">
+      <div class="param">id (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+<div class="param">name (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="legacyGetAlertingHealth_200_response"><code>legacyGetAlertingHealth_200_response</code> - </a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'></div>
+    <div class="field-items">
+      <div class="param">alertingFrameworkHealth (optional)</div><div class="param-desc"><span class="param-type"><a href="#legacyGetAlertingHealth_200_response_alertingFrameworkHealth">legacyGetAlertingHealth_200_response_alertingFrameworkHealth</a></span>  </div>
+<div class="param">hasPermanentEncryptionKey (optional)</div><div class="param-desc"><span class="param-type"><a href="#boolean">Boolean</a></span> If <code>false</code>, the encrypted saved object plugin does not have a permanent encryption key. </div>
+<div class="param">isSufficientlySecure (optional)</div><div class="param-desc"><span class="param-type"><a href="#boolean">Boolean</a></span> If <code>false</code>, security is enabled but TLS is not. </div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="legacyGetAlertingHealth_200_response_alertingFrameworkHealth"><code>legacyGetAlertingHealth_200_response_alertingFrameworkHealth</code> - </a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'>Three substates identify the health of the alerting framework: <code>decryptionHealth</code>, <code>executionHealth</code>, and <code>readHealth</code>.</div>
+    <div class="field-items">
+      <div class="param">decryptionHealth (optional)</div><div class="param-desc"><span class="param-type"><a href="#legacyGetAlertingHealth_200_response_alertingFrameworkHealth_decryptionHealth">legacyGetAlertingHealth_200_response_alertingFrameworkHealth_decryptionHealth</a></span>  </div>
+<div class="param">executionHealth (optional)</div><div class="param-desc"><span class="param-type"><a href="#legacyGetAlertingHealth_200_response_alertingFrameworkHealth_executionHealth">legacyGetAlertingHealth_200_response_alertingFrameworkHealth_executionHealth</a></span>  </div>
+<div class="param">readHealth (optional)</div><div class="param-desc"><span class="param-type"><a href="#legacyGetAlertingHealth_200_response_alertingFrameworkHealth_readHealth">legacyGetAlertingHealth_200_response_alertingFrameworkHealth_readHealth</a></span>  </div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="legacyGetAlertingHealth_200_response_alertingFrameworkHealth_decryptionHealth"><code>legacyGetAlertingHealth_200_response_alertingFrameworkHealth_decryptionHealth</code> - </a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'>The timestamp and status of the alert decryption.</div>
+    <div class="field-items">
+      <div class="param">status (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+        <div class="param-enum-header">Enum:</div>
+        <div class="param-enum">error</div><div class="param-enum">ok</div><div class="param-enum">warn</div>
+<div class="param">timestamp (optional)</div><div class="param-desc"><span class="param-type"><a href="#DateTime">Date</a></span>  format: date-time</div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="legacyGetAlertingHealth_200_response_alertingFrameworkHealth_executionHealth"><code>legacyGetAlertingHealth_200_response_alertingFrameworkHealth_executionHealth</code> - </a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'>The timestamp and status of the alert execution.</div>
+    <div class="field-items">
+      <div class="param">status (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+        <div class="param-enum-header">Enum:</div>
+        <div class="param-enum">error</div><div class="param-enum">ok</div><div class="param-enum">warn</div>
+<div class="param">timestamp (optional)</div><div class="param-desc"><span class="param-type"><a href="#DateTime">Date</a></span>  format: date-time</div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="legacyGetAlertingHealth_200_response_alertingFrameworkHealth_readHealth"><code>legacyGetAlertingHealth_200_response_alertingFrameworkHealth_readHealth</code> - </a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'>The timestamp and status of the alert reading events.</div>
+    <div class="field-items">
+      <div class="param">status (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+        <div class="param-enum-header">Enum:</div>
+        <div class="param-enum">error</div><div class="param-enum">ok</div><div class="param-enum">warn</div>
+<div class="param">timestamp (optional)</div><div class="param-desc"><span class="param-type"><a href="#DateTime">Date</a></span>  format: date-time</div>
     </div>  <!-- field-items -->
   </div>
   <div class="model">
