@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
+import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
 import { AsyncStatus, useAsync } from '../hooks/use_async';
@@ -38,7 +38,7 @@ export function CheckSetup({ children }: { children: React.ReactElement }) {
 
   const displayUi = data?.has_data === true;
 
-  const docsLink = core.docLinks.links.observability.guide;
+  const docsLink = `https://elastic.github.io/universal-profiling-documentation`;
 
   const displayLoadingScreen = status !== AsyncStatus.Settled;
 
@@ -69,12 +69,19 @@ export function CheckSetup({ children }: { children: React.ReactElement }) {
         noDataConfig={{
           docsLink,
           logo: 'logoObservability',
+          pageTitle: i18n.translate('xpack.profiling.noDataConfig.pageTitle', {
+            defaultMessage: 'Universal Profiling (now in Beta)',
+          }),
           action: {
             elasticAgent: {
-              title: i18n.translate('xpack.profiling.noDataConfig.action.title', {
-                defaultMessage:
-                  '[Placeholder] Use APM agents to collect APM data. We make it easy with agents for many popular languages.',
-              }),
+              description: (
+                <EuiText>
+                  {i18n.translate('xpack.profiling.noDataConfig.action.title', {
+                    defaultMessage: `Universal Profiling provides fleet-wide, whole-system, continuous profiling with zero instrumentation.
+              Understand what lines of code are consuming compute resources, at all times, and across your entire infrastructure.`,
+                  })}
+                </EuiText>
+              ),
               onClick: (event: React.MouseEvent<HTMLElement, MouseEvent>) => {
                 event.preventDefault();
               },
@@ -107,7 +114,7 @@ export function CheckSetup({ children }: { children: React.ReactElement }) {
             },
           },
           solution: i18n.translate('xpack.profiling.noDataConfig.solutionName', {
-            defaultMessage: 'Profiling',
+            defaultMessage: 'Universal Profiling',
           }),
         }}
         hideSearchBar
