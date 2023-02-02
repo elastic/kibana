@@ -119,14 +119,7 @@ export function CasesCreateViewServiceProvider(
 
     async createCaseFromModal(params: CreateCaseParams) {
       await casesCommon.assertCaseModalVisible(true);
-      const createCaseBtnExists = await testSubjects.exists('cases-table-add-case');
-
-      if (createCaseBtnExists) {
-        await testSubjects.click('cases-table-add-case');
-      } else {
-        await casesCommon.filterCaseByStatusFromModal(CaseStatuses['in-progress']);
-        await testSubjects.click('cases-table-add-case');
-      }
+      await testSubjects.click('cases-table-add-case-filter-bar');
 
       await casesCommon.assertCaseModalVisible(false);
       await this.creteCaseFromFlyout(params);

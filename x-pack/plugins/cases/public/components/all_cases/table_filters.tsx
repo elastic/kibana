@@ -8,13 +8,14 @@
 import React, { useCallback, useEffect, useState, useMemo } from 'react';
 import { isEqual } from 'lodash/fp';
 import styled from 'styled-components';
-import { EuiFlexGroup, EuiFlexItem, EuiFieldSearch, EuiFilterGroup } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiFieldSearch, EuiFilterGroup, EuiButton } from '@elastic/eui';
 
 import type { CaseStatusWithAllStatus, CaseSeverityWithAll } from '../../../common/ui/types';
 import { StatusAll } from '../../../common/ui/types';
 import { CaseStatuses } from '../../../common/api';
 import type { FilterOptions } from '../../containers/types';
 import { FilterPopover } from '../filter_popover';
+import { SolutionFilter } from './solution_filter';
 import { StatusFilter } from './status_filter';
 import * as i18n from './translations';
 import { SeverityFilter } from './severity_filter';
@@ -35,6 +36,7 @@ interface CasesTableFiltersProps {
   hiddenStatuses?: CaseStatusWithAllStatus[];
   availableSolutions: Solution[];
   isSelectorView?: boolean;
+  onCreateCasePressed?: () => void;
   isLoading: boolean;
   currentUserProfile: CurrentUserProfile;
 }
@@ -61,6 +63,7 @@ const CasesTableFiltersComponent = ({
   hiddenStatuses,
   availableSolutions,
   isSelectorView = false,
+  onCreateCasePressed,
   isLoading,
   currentUserProfile,
 }: CasesTableFiltersProps) => {
@@ -145,10 +148,28 @@ const CasesTableFiltersComponent = ({
     [countClosedCases, countInProgressCases, countOpenCases]
   );
 
+  const handleOnCreateCasePressed = useCallback(() => {
+    if (onCreateCasePressed) {
+      onCreateCasePressed();
+    }
+  }, [onCreateCasePressed]);
+
   return (
     <EuiFlexGroup gutterSize="s" justifyContent="flexEnd">
       <EuiFlexItem>
         <EuiFlexGroup gutterSize="s">
+          {isSelectorView && onCreateCasePressed ? (
+            <EuiFlexItem grow={false}>
+              <EuiButton
+                fill
+                onClick={handleOnCreateCasePressed}
+                iconType="plusInCircle"
+                data-test-subj="cases-table-add-case-filter-bar"
+              >
+                {i18n.CREATE_CASE_TITLE}
+              </EuiButton>
+            </EuiFlexItem>
+          ) : null}
           <EuiFlexItem>
             <EuiFieldSearch
               aria-label={i18n.SEARCH_CASES}
@@ -195,8 +216,7 @@ const CasesTableFiltersComponent = ({
             optionsEmptyLabel={i18n.NO_TAGS_AVAILABLE}
           />
           {availableSolutions.length > 1 && (
-            <FilterPopover
-              buttonLabel={i18n.SOLUTION}
+            <SolutionFilter
               onSelectedOptionsChanged={handleSelectedSolution}
               selectedOptions={selectedOwner}
               options={availableSolutions}

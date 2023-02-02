@@ -147,7 +147,7 @@ describe('useCasesColumns ', () => {
             "name": "Name",
             "render": [Function],
             "sortable": true,
-            "width": undefined,
+            "width": "55%",
           },
           Object {
             "field": "createdAt",
@@ -521,7 +521,7 @@ describe('useCasesColumns ', () => {
             "name": "Name",
             "render": [Function],
             "sortable": true,
-            "width": undefined,
+            "width": "55%",
           },
           Object {
             "field": "createdAt",
@@ -560,7 +560,7 @@ describe('useCasesColumns ', () => {
             "name": "Name",
             "render": [Function],
             "sortable": true,
-            "width": undefined,
+            "width": "55%",
           },
           Object {
             "field": "createdAt",

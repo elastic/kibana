@@ -10,6 +10,7 @@ import { screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
+import { waitForComponentToUpdate } from '../../common/test_utils';
 
 import { CaseStatuses } from '../../../common/api';
 import {
@@ -55,31 +56,31 @@ describe('CasesTableFilters ', () => {
   });
 
   it('should render the case status filter dropdown', () => {
-    const result = appMockRender.render(<CasesTableFilters {...props} />);
+    appMockRender.render(<CasesTableFilters {...props} />);
 
-    expect(result.getByTestId('case-status-filter')).toBeInTheDocument();
+    expect(screen.getByTestId('case-status-filter')).toBeInTheDocument();
   });
 
   it('should render the case severity filter dropdown', () => {
-    const result = appMockRender.render(<CasesTableFilters {...props} />);
-    expect(result.getByTestId('case-severity-filter')).toBeTruthy();
+    appMockRender.render(<CasesTableFilters {...props} />);
+    expect(screen.getByTestId('case-severity-filter')).toBeTruthy();
   });
 
   it('should call onFilterChange when the severity filter changes', async () => {
-    const result = appMockRender.render(<CasesTableFilters {...props} />);
-    userEvent.click(result.getByTestId('case-severity-filter'));
+    appMockRender.render(<CasesTableFilters {...props} />);
+    userEvent.click(screen.getByTestId('case-severity-filter'));
     await waitForEuiPopoverOpen();
-    userEvent.click(result.getByTestId('case-severity-filter-high'));
+    userEvent.click(screen.getByTestId('case-severity-filter-high'));
 
     expect(onFilterChanged).toBeCalledWith({ severity: 'high' });
   });
 
   it('should call onFilterChange when selected tags change', async () => {
-    const result = appMockRender.render(<CasesTableFilters {...props} />);
+    appMockRender.render(<CasesTableFilters {...props} />);
 
-    userEvent.click(result.getByTestId('options-filter-popover-button-Tags'));
+    userEvent.click(screen.getByTestId('options-filter-popover-button-Tags'));
     await waitForEuiPopoverOpen();
-    userEvent.click(result.getByTestId('options-filter-popover-item-coke'));
+    userEvent.click(screen.getByTestId('options-filter-popover-item-coke'));
 
     expect(onFilterChanged).toBeCalledWith({ tags: ['coke'] });
   });
@@ -107,19 +108,19 @@ describe('CasesTableFilters ', () => {
   });
 
   it('should call onFilterChange when search changes', async () => {
-    const result = appMockRender.render(<CasesTableFilters {...props} />);
+    appMockRender.render(<CasesTableFilters {...props} />);
 
-    await userEvent.type(result.getByTestId('search-cases'), 'My search{enter}');
+    await userEvent.type(screen.getByTestId('search-cases'), 'My search{enter}');
 
     expect(onFilterChanged).toBeCalledWith({ search: 'My search' });
   });
 
   it('should call onFilterChange when changing status', async () => {
-    const result = appMockRender.render(<CasesTableFilters {...props} />);
+    appMockRender.render(<CasesTableFilters {...props} />);
 
-    userEvent.click(result.getByTestId('case-status-filter'));
+    userEvent.click(screen.getByTestId('case-status-filter'));
     await waitForEuiPopoverOpen();
-    userEvent.click(result.getByTestId('case-status-filter-closed'));
+    userEvent.click(screen.getByTestId('case-status-filter-closed'));
 
     expect(onFilterChanged).toBeCalledWith({ status: CaseStatuses.closed });
   });
@@ -172,9 +173,9 @@ describe('CasesTableFilters ', () => {
   });
 
   it('StatusFilterWrapper should have a fixed width of 180px', () => {
-    const result = appMockRender.render(<CasesTableFilters {...props} />);
+    appMockRender.render(<CasesTableFilters {...props} />);
 
-    expect(result.getByTestId('status-filter-wrapper')).toHaveStyleRule('flex-basis', '180px', {
+    expect(screen.getByTestId('status-filter-wrapper')).toHaveStyleRule('flex-basis', '180px', {
       modifier: '&&',
     });
   });
@@ -192,70 +193,74 @@ describe('CasesTableFilters ', () => {
     };
 
     it('shows Solution filter when provided more than 1 availableSolutions', () => {
-      const result = appMockRender.render(
+      appMockRender.render(
         <CasesTableFilters
           {...props}
           availableSolutions={[securitySolution, observabilitySolution]}
         />
       );
-      expect(result.getByTestId('options-filter-popover-button-Solution')).toBeInTheDocument();
+      expect(screen.getByTestId('solution-filter-popover-button')).toBeInTheDocument();
     });
 
     it('does not show Solution filter when provided less than 1 availableSolutions', () => {
-      const result = appMockRender.render(
+      appMockRender.render(
         <CasesTableFilters {...props} availableSolutions={[observabilitySolution]} />
       );
-      expect(
-        result.queryByTestId('options-filter-popover-button-Solution')
-      ).not.toBeInTheDocument();
+      expect(screen.queryByTestId('solution-filter-popover-button')).not.toBeInTheDocument();
     });
 
     it('should call onFilterChange when selected solution changes', async () => {
-      const result = appMockRender.render(
+      appMockRender.render(
         <CasesTableFilters
           {...props}
           availableSolutions={[securitySolution, observabilitySolution]}
         />
       );
-      userEvent.click(result.getByTestId('options-filter-popover-button-Solution'));
+      userEvent.click(screen.getByTestId('solution-filter-popover-button'));
 
       await waitForEuiPopoverOpen();
 
-      userEvent.click(result.getByTestId(`options-filter-popover-item-${SECURITY_SOLUTION_OWNER}`));
+      userEvent.click(
+        screen.getByTestId(`solution-filter-popover-item-${SECURITY_SOLUTION_OWNER}`)
+      );
 
       expect(onFilterChanged).toBeCalledWith({ owner: [SECURITY_SOLUTION_OWNER] });
     });
 
     it('should deselect all solutions', async () => {
-      const result = appMockRender.render(
+      appMockRender.render(
         <CasesTableFilters
           {...props}
           availableSolutions={[securitySolution, observabilitySolution]}
         />
       );
 
-      userEvent.click(result.getByTestId('options-filter-popover-button-Solution'));
+      userEvent.click(screen.getByTestId('solution-filter-popover-button'));
 
       await waitForEuiPopoverOpen();
 
-      userEvent.click(result.getByTestId(`options-filter-popover-item-${SECURITY_SOLUTION_OWNER}`));
+      userEvent.click(
+        screen.getByTestId(`solution-filter-popover-item-${SECURITY_SOLUTION_OWNER}`)
+      );
 
       expect(onFilterChanged).toBeCalledWith({ owner: [SECURITY_SOLUTION_OWNER] });
 
-      userEvent.click(result.getByTestId(`options-filter-popover-item-${SECURITY_SOLUTION_OWNER}`));
+      userEvent.click(
+        screen.getByTestId(`solution-filter-popover-item-${SECURITY_SOLUTION_OWNER}`)
+      );
 
       expect(onFilterChanged).toBeCalledWith({ owner: [] });
     });
 
     it('does not select a solution on initial render', () => {
-      const result = appMockRender.render(
+      appMockRender.render(
         <CasesTableFilters
           {...props}
           availableSolutions={[securitySolution, observabilitySolution]}
         />
       );
 
-      expect(result.getByTestId('options-filter-popover-button-Solution')).not.toHaveAttribute(
+      expect(screen.getByTestId('solution-filter-popover-button')).not.toHaveAttribute(
         'hasActiveFilters'
       );
     });
@@ -263,9 +268,9 @@ describe('CasesTableFilters ', () => {
 
   describe('assignees filter', () => {
     it('should hide the assignees filters on basic license', async () => {
-      const result = appMockRender.render(<CasesTableFilters {...props} />);
+      appMockRender.render(<CasesTableFilters {...props} />);
 
-      expect(result.queryByTestId('options-filter-popover-button-assignees')).toBeNull();
+      expect(screen.queryByTestId('options-filter-popover-button-assignees')).toBeNull();
     });
 
     it('should show the assignees filters on platinum license', async () => {
@@ -274,9 +279,45 @@ describe('CasesTableFilters ', () => {
       });
 
       appMockRender = createAppMockRenderer({ license });
-      const result = appMockRender.render(<CasesTableFilters {...props} />);
+      appMockRender.render(<CasesTableFilters {...props} />);
 
-      expect(result.getByTestId('options-filter-popover-button-assignees')).toBeInTheDocument();
+      expect(screen.getByTestId('options-filter-popover-button-assignees')).toBeInTheDocument();
+    });
+  });
+
+  describe('create case button', () => {
+    it('should not render the create case button when isSelectorView is false and onCreateCasePressed are not passed', () => {
+      appMockRender.render(<CasesTableFilters {...props} />);
+      expect(screen.queryByTestId('cases-table-add-case-filter-bar')).not.toBeInTheDocument();
+    });
+
+    it('should render the create case button when isSelectorView is true and onCreateCasePressed are passed', () => {
+      const onCreateCasePressed = jest.fn();
+      appMockRender.render(
+        <CasesTableFilters
+          {...props}
+          isSelectorView={true}
+          onCreateCasePressed={onCreateCasePressed}
+        />
+      );
+      expect(screen.getByTestId('cases-table-add-case-filter-bar')).toBeInTheDocument();
+    });
+
+    it('should call the onCreateCasePressed when create case is clicked', async () => {
+      const onCreateCasePressed = jest.fn();
+      appMockRender.render(
+        <CasesTableFilters
+          {...props}
+          isSelectorView={true}
+          onCreateCasePressed={onCreateCasePressed}
+        />
+      );
+
+      userEvent.click(screen.getByTestId('cases-table-add-case-filter-bar'));
+
+      await waitForComponentToUpdate();
+      // NOTE: intentionally checking no arguments are passed
+      expect(onCreateCasePressed).toHaveBeenCalledWith();
     });
   });
 });

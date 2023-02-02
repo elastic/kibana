@@ -14,12 +14,16 @@ import {
   EuiPanel,
   EuiPopover,
   EuiText,
+  EuiIcon,
 } from '@elastic/eui';
 import styled from 'styled-components';
+
+import * as i18n from './translations';
+import type { Solution } from './types';
+
 interface FilterPopoverProps {
-  buttonLabel: string;
   onSelectedOptionsChanged: (value: string[]) => void;
-  options: string[];
+  options: Solution[];
   optionsEmptyLabel?: string;
   selectedOptions: string[];
 }
@@ -27,6 +31,10 @@ interface FilterPopoverProps {
 const ScrollableDiv = styled.div`
   max-height: 250px;
   overflow: auto;
+`;
+
+const Icon = styled(EuiIcon)`
+  padding-right: 4px;
 `;
 
 const toggleSelectedGroup = (group: string, selectedGroups: string[]): string[] => {
@@ -49,8 +57,7 @@ const toggleSelectedGroup = (group: string, selectedGroups: string[]): string[] 
  * @param optionsEmptyLabel shows when options empty
  * @param selectedOptions manage state of selectedOptions
  */
-export const FilterPopoverComponent = ({
-  buttonLabel,
+export const SolutionFilterComponent = ({
   onSelectedOptionsChanged,
   options,
   optionsEmptyLabel,
@@ -69,16 +76,16 @@ export const FilterPopoverComponent = ({
       ownFocus
       button={
         <EuiFilterButton
-          data-test-subj={`options-filter-popover-button-${buttonLabel}`}
+          data-test-subj={'solution-filter-popover-button'}
           iconType="arrowDown"
           onClick={setIsPopoverOpenCb}
           isSelected={isPopoverOpen}
           numFilters={options.length}
           hasActiveFilters={selectedOptions.length > 0}
           numActiveFilters={selectedOptions.length}
-          aria-label={buttonLabel}
+          aria-label={i18n.SOLUTION}
         >
-          {buttonLabel}
+          {i18n.SOLUTION}
         </EuiFilterButton>
       }
       isOpen={isPopoverOpen}
@@ -89,12 +96,15 @@ export const FilterPopoverComponent = ({
       <ScrollableDiv>
         {options.map((option, index) => (
           <EuiFilterSelectItem
-            checked={selectedOptions.includes(option) ? 'on' : undefined}
-            data-test-subj={`options-filter-popover-item-${option}`}
-            key={`${index}-${option}`}
-            onClick={toggleSelectedGroupCb.bind(null, option)}
+            checked={selectedOptions.includes(option.id) ? 'on' : undefined}
+            data-test-subj={`solution-filter-popover-item-${option.id}`}
+            key={`${index}-${option.id}`}
+            onClick={toggleSelectedGroupCb.bind(null, option.id)}
           >
-            {option}
+            <span>
+              <Icon size="m" type={option.iconType} title={option.label} />
+              {option.label}
+            </span>
           </EuiFilterSelectItem>
         ))}
       </ScrollableDiv>
@@ -111,8 +121,8 @@ export const FilterPopoverComponent = ({
   );
 };
 
-FilterPopoverComponent.displayName = 'FilterPopoverComponent';
+SolutionFilterComponent.displayName = 'SolutionFilterComponent';
 
-export const FilterPopover = React.memo(FilterPopoverComponent);
+export const SolutionFilter = React.memo(SolutionFilterComponent);
 
-FilterPopover.displayName = 'FilterPopover';
+SolutionFilter.displayName = 'SolutionFilter';

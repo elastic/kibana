@@ -272,6 +272,7 @@ export const AllCasesList = React.memo<AllCasesListProps>(
             severity: filterOptions.severity,
           }}
           hiddenStatuses={hiddenStatuses}
+          onCreateCasePressed={onRowClick}
           isSelectorView={isSelectorView}
           isLoading={isLoadingCurrentUserProfile}
           currentUserProfile={currentUserProfile}

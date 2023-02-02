@@ -14,7 +14,7 @@ import type {
 import {
   EuiBadgeGroup,
   EuiBadge,
-  EuiButtonEmpty,
+  EuiButton,
   EuiLink,
   EuiFlexGroup,
   EuiFlexItem,
@@ -118,7 +118,7 @@ export const useCasesColumns = ({
       render: (title: string, theCase: Case) => {
         if (theCase.id != null && theCase.title != null) {
           const caseDetailsLinkComponent = isSelectorView ? (
-            <TruncatedText text={theCase.title} />
+            theCase.title
           ) : (
             <CaseDetailsLink detailName={theCase.id} title={theCase.title}>
               <TruncatedText text={theCase.title} />
@@ -137,7 +137,7 @@ export const useCasesColumns = ({
         }
         return getEmptyTagValue();
       },
-      width: !isSelectorView ? '20%' : undefined,
+      width: !isSelectorView ? '20%' : '55%',
     },
   ];
 
@@ -352,7 +352,7 @@ export const useCasesColumns = ({
       render: (theCase: Case) => {
         if (theCase.id != null) {
           return (
-            <EuiButtonEmpty
+            <EuiButton
               data-test-subj={`cases-table-row-select-${theCase.id}`}
               onClick={() => {
                 assignCaseAction(theCase);
@@ -360,7 +360,7 @@ export const useCasesColumns = ({
               size="s"
             >
               {i18n.SELECT}
-            </EuiButtonEmpty>
+            </EuiButton>
           );
         }
         return getEmptyTagValue();
