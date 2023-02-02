@@ -23,8 +23,7 @@ import { inventoryTitle } from '../../../translations';
 import { SavedViews } from './components/saved_views';
 import { SnapshotContainer } from './components/snapshot_container';
 import { fullHeightContentStyles } from '../../../page_template.styles';
-import { SurveyKubernetesLink } from './components/survey_kubernetes_link';
-import { SurveyKubernetesToast } from './components/survey_kubernetes_toast';
+import { SurveyKubernetes } from './components/survey_kubernetes';
 
 export const SnapshotPage = () => {
   const {
@@ -37,19 +36,13 @@ export const SnapshotPage = () => {
   } = useSourceContext();
   useTrackPageview({ app: 'infra_metrics', path: 'inventory' });
   useTrackPageview({ app: 'infra_metrics', path: 'inventory', delay: 15000 });
-  const { source: optionsSource, nodeType } = useWaffleOptionsContext();
-  const podNodeType: typeof nodeType = 'pod';
-  const showKubernetesSurvey = nodeType === podNodeType;
+  const { source: optionsSource } = useWaffleOptionsContext();
 
   useMetricsBreadcrumbs([
     {
       text: inventoryTitle,
     },
   ]);
-
-  if (!isLoading) {
-    SurveyKubernetesToast(showKubernetesSurvey);
-  }
 
   return (
     <EuiErrorBoundary>
@@ -67,10 +60,7 @@ export const SnapshotPage = () => {
                 hasData={metricIndicesExist}
                 pageHeader={{
                   pageTitle: inventoryTitle,
-                  rightSideItems: [
-                    <SavedViews />,
-                    <SurveyKubernetesLink isPodNodeType={showKubernetesSurvey} />,
-                  ],
+                  rightSideItems: [<SavedViews />, <SurveyKubernetes />],
                 }}
                 pageSectionProps={{
                   contentProps: {

@@ -21,14 +21,14 @@ export const SurveyKubernetes = () => {
   const { nodeType } = useWaffleOptionsContext();
   const podNodeType: typeof nodeType = 'pod';
 
-  const [isToastOpen, setIsToastOpen] = useState(() => {
+  const [isToastSeen, setIsToastSeen] = useState(() => {
     const initialState = localStorage.getItem(KUBERNETES_TOAST_STORAGE_KEY);
-    return initialState !== 'false' ? true : false;
+    return initialState === 'true';
   });
 
   useEffect(() => {
-    localStorage.setItem(KUBERNETES_TOAST_STORAGE_KEY, isToastOpen ? 'true' : 'false');
-  }, [isToastOpen]);
+    localStorage.setItem(KUBERNETES_TOAST_STORAGE_KEY, isToastSeen ? 'true' : 'false');
+  }, [isToastSeen]);
 
   return (
     <>
@@ -45,11 +45,11 @@ export const SurveyKubernetes = () => {
               defaultMessage="Tell us what you think: K8s!"
             />
           </EuiButton>
-          {isToastOpen && (
+          {!isToastSeen && (
             <EuiGlobalToastList
               toastLifeTimeMs={Infinity}
               dismissToast={() => {
-                setIsToastOpen(false);
+                setIsToastSeen(true);
               }}
               toasts={[
                 {
@@ -57,6 +57,7 @@ export const SurveyKubernetes = () => {
                   title: 'We need your help!',
                   color: 'primary',
                   iconType: 'help',
+                  toastLifeTimeMs: 0x7fffffff, // Biggest possible lifetime because we control when it should be visible using isToastSeen
                   text: (
                     <>
                       <p>
@@ -70,7 +71,7 @@ export const SurveyKubernetes = () => {
                           <EuiButton
                             onClick={() => {
                               openInNewTab(KUBERNETES_FEEDBACK_LINK);
-                              setIsToastOpen(false);
+                              setIsToastSeen(true);
                             }}
                             size="s"
                           >
