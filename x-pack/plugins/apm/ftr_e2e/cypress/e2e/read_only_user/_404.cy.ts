@@ -5,5 +5,14 @@
  * 2.0.
  */
 
-export { useHistoryBlock } from './use_history_block';
-export { usePackagePolicyWithRelatedData } from './use_package_policy';
+describe('404', () => {
+  beforeEach(() => {
+    cy.loginAsViewerUser();
+  });
+
+  it('Shows 404 page', () => {
+    cy.visitKibana('/app/apm/foo');
+
+    cy.contains('Page not found');
+  });
+});
