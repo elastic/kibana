@@ -148,7 +148,7 @@ export const useData = (
   }
 
   useEffect(() => {
-    const timeUpdateSubscription = merge(
+    const timefilterUpdateSubscription = merge(
       timefilter.getAutoRefreshFetch$(),
       timefilter.getTimeUpdate$(),
       mlTimefilterRefresh$
@@ -161,22 +161,20 @@ export const useData = (
       }
       updateFieldStatsRequest();
     });
-    return () => {
-      timeUpdateSubscription.unsubscribe();
-    };
-  });
 
-  // This hook listens just for an initial update of the timefilter to be switched on.
-  useEffect(() => {
-    const timeUpdateSubscription = timefilter.getEnabledUpdated$().subscribe(() => {
+    // This listens just for an initial update of the timefilter to be switched on.
+    const timefilterEnabledSubscription = timefilter.getEnabledUpdated$().subscribe(() => {
       if (fieldStatsRequest === undefined) {
         updateFieldStatsRequest();
       }
     });
+
     return () => {
-      timeUpdateSubscription.unsubscribe();
+      timefilterUpdateSubscription.unsubscribe();
+      timefilterEnabledSubscription.unsubscribe();
     };
-  });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // Ensure request is updated when search changes
   useEffect(() => {

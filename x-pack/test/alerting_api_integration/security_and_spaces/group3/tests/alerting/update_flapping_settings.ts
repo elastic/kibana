@@ -6,18 +6,9 @@
  */
 
 import expect from '@kbn/expect';
-import { DEFAULT_FLAPPING_SETTINGS } from '@kbn/alerting-plugin/common';
 import { UserAtSpaceScenarios, Superuser } from '../../../scenarios';
-import { getUrlPrefix } from '../../../../common/lib';
+import { getUrlPrefix, resetRulesSettings } from '../../../../common/lib';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
-
-const resetRulesSettings = (supertestWithoutAuth: any, space: string) => {
-  return supertestWithoutAuth
-    .post(`${getUrlPrefix(space)}/internal/alerting/rules/settings/_flapping`)
-    .set('kbn-xsrf', 'foo')
-    .auth(Superuser.username, Superuser.password)
-    .send(DEFAULT_FLAPPING_SETTINGS);
-};
 
 // eslint-disable-next-line import/no-default-export
 export default function updateFlappingSettingsTest({ getService }: FtrProviderContext) {

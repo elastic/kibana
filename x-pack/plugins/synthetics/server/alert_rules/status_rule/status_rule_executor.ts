@@ -174,6 +174,7 @@ export class StatusRuleExecutor {
       allMonitorsCount: allIds.length,
       disabledMonitorsCount: allIds.length,
       projectMonitorsCount,
+      allIds,
     };
   }
 
