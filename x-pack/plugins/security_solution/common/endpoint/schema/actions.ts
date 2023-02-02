@@ -191,3 +191,5 @@ export const ExecuteActionRequestSchema = {
     }),
   }),
 };
+
+export type ExecuteActionRequestBody = TypeOf<typeof ExecuteActionRequestSchema.body>;
