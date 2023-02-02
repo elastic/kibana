@@ -17,13 +17,14 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { isDefined } from '@kbn/ml-is-defined';
 import { type ChangePointType } from './change_point_detection_context';
 
 export type ChangePointUIValue = ChangePointType | undefined;
 
 interface ChangePointTypeFilterProps {
-  value: ChangePointUIValue;
-  onChange: (ChangePointType: ChangePointUIValue) => void;
+  value: ChangePointType[] | undefined;
+  onChange: (changePointType: ChangePointType[] | undefined) => void;
 }
 
 const changePointTypes: Array<{ value: ChangePointType; description: string }> = [
@@ -70,17 +71,30 @@ export const ChangePointTypeFilter: FC<ChangePointTypeFilterProps> = ({ value, o
   const options = useMemo<Array<EuiComboBoxOptionOption<ChangePointUIValue>>>(() => {
     return [{ value: undefined, description: '' }, ...changePointTypes].map((v) => ({
       value: v.value,
-      label: v.value ?? '*',
+      label:
+        v.value ??
+        i18n.translate('xpack.aiops.changePointDetection.selectAllChangePoints', {
+          defaultMessage: 'Select all',
+        }),
       description: v.description,
     }));
   }, []);
 
-  const selection = options.filter((v) => v.value === value);
+  const selection: Array<EuiComboBoxOptionOption<ChangePointUIValue>> = !value
+    ? [options[0]]
+    : options.filter((v) => value?.includes(v.value!));
 
   const onChangeCallback = useCallback(
     (selectedOptions: Array<EuiComboBoxOptionOption<ChangePointUIValue>>) => {
-      const option = selectedOptions[0];
-      onChange(option.value);
+      if (
+        selectedOptions.length === 0 ||
+        selectedOptions[selectedOptions.length - 1].value === undefined
+      ) {
+        onChange(undefined);
+        return;
+      }
+
+      onChange(selectedOptions.map((v) => v.value as ChangePointType).filter(isDefined));
     },
     [onChange]
   );
@@ -109,11 +123,10 @@ export const ChangePointTypeFilter: FC<ChangePointTypeFilterProps> = ({ value, o
         prepend={i18n.translate('xpack.aiops.changePointDetection.changePointTypeLabel', {
           defaultMessage: 'Change point type',
         })}
-        singleSelection={{ asPlainText: true }}
         options={options}
         selectedOptions={selection}
         onChange={onChangeCallback}
-        isClearable={false}
+        isClearable
         data-test-subj="aiopsChangePointTypeFilter"
         renderOption={renderOption}
       />

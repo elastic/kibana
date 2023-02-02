@@ -41,7 +41,7 @@ export interface ChangePointDetectionRequestParams {
   interval: string;
   query: Query;
   filters: Filter[];
-  changePointType?: ChangePointType;
+  changePointType?: ChangePointType[];
 }
 
 export const ChangePointDetectionContext = createContext<{

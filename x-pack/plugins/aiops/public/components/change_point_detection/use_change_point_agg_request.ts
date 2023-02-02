@@ -177,8 +177,8 @@ export function useChangePointResults(
           } as ChangePointAnnotation;
         });
 
-        if (requestParams.changePointType) {
-          groups = groups.filter((v) => v.type === requestParams.changePointType);
+        if (Array.isArray(requestParams.changePointType)) {
+          groups = groups.filter((v) => requestParams.changePointType!.includes(v.type));
         }
 
         setResults((prev) => {
