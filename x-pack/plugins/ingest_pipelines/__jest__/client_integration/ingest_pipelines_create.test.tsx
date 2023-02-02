@@ -163,7 +163,6 @@ describe('<PipelinesCreate />', () => {
         await act(async () => {
           actions.setMetaField(metaData);
         });
-        component.simulate('click');
 
         await actions.clickSubmitButton();
 
