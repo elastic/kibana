@@ -388,6 +388,10 @@ export class JobsListView extends Component {
     }
   }
 
+  test(thing) {
+    console.log(thing);
+  }
+
   renderJobsListComponents() {
     const { isRefreshing, loading, jobsSummaryList, jobsAwaitingNodeCount } = this.state;
     const jobIds = jobsSummaryList.map((j) => j.id);
@@ -396,7 +400,7 @@ export class JobsListView extends Component {
 
     return (
       <div data-test-subj="ml-jobs-list">
-        <NodeAvailableWarning />
+        <NodeAvailableWarning callback={this.test} />
 
         <JobsAwaitingNodeWarning jobCount={jobsAwaitingNodeCount} />
 

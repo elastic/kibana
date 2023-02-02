@@ -5,30 +5,44 @@
  * 2.0.
  */
 
-import React, { Fragment, FC } from 'react';
+import React, { FC, useEffect } from 'react';
 
 import { EuiCallOut, EuiLink, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { mlNodesAvailable, permissionToViewMlNodeCount } from '../../ml_nodes_check';
 import { getCloudDeploymentId, isCloud } from '../../services/ml_server_info';
 import {
   TRIAL_MAX_RAM_FOR_ML_NODES,
   PLATINUM_MAX_RAM_FOR_ML_NODES,
 } from '../../../../common/constants/cloud';
 import { isTrialLicense } from '../../license/check_license';
+import { useMlNodeCheck } from './use_ml_node_check';
 
-export const NodeAvailableWarning: FC = () => {
-  if (mlNodesAvailable() === true || permissionToViewMlNodeCount() === false) {
+interface Props {
+  callback?: (mlAvailable: boolean) => void;
+}
+
+export const NodeAvailableWarning: FC<Props> = ({ callback }) => {
+  const { mlNodesAvailable } = useMlNodeCheck();
+
+  useEffect(
+    function callCallback() {
+      if (typeof callback === 'function') {
+        callback(mlNodesAvailable);
+      }
+    },
+    [callback, mlNodesAvailable]
+  );
+
+  if (mlNodesAvailable) {
     return null;
   }
-
   const maxRamForMLNodes = isTrialLicense()
     ? TRIAL_MAX_RAM_FOR_ML_NODES
     : PLATINUM_MAX_RAM_FOR_ML_NODES;
 
   const id = getCloudDeploymentId();
   return (
-    <Fragment>
+    <>
       <EuiCallOut
         title={
           <FormattedMessage
@@ -72,6 +86,6 @@ export const NodeAvailableWarning: FC = () => {
         )}
       </EuiCallOut>
       <EuiSpacer size="m" />
-    </Fragment>
+    </>
   );
 };
