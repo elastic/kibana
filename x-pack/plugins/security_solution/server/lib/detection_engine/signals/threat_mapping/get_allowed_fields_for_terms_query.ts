@@ -15,8 +15,8 @@ const allowedFieldTypes = ['keyword', 'constant_keyword', 'wildcard', 'ip'];
  */
 export const getAllowedFieldForTermQueryFromMapping = (
   indexMapping: IndicesGetFieldMappingResponse
-): { [key: string]: boolean } => {
-  const result: { [key: string]: boolean } = {};
+): Record<string, boolean> => {
+  const result: Record<string, boolean> = {};
   const notAllowedFields: string[] = [];
 
   const indices = Object.values(indexMapping);

@@ -194,9 +194,7 @@ export interface BooleanFilter {
 }
 
 export interface TermQuery {
-  terms: {
-    [key: string]: string[] | string;
-  };
+  terms: Record<string, string[] | string>;
 }
 
 interface ThreatListConfig {
