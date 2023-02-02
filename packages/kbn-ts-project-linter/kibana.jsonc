@@ -1,6 +1,0 @@
-{
-  "type": "shared-common",
-  "id": "@kbn/ts-project-linter",
-  "owner": "@elastic/kibana-operations",
-  "devOnly": true
-}

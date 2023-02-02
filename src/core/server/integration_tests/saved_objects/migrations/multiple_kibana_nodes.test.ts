@@ -106,8 +106,7 @@ async function createRoot({ logFileName }: CreateRootConfig) {
 // suite is very long, the 10mins default can cause timeouts
 jest.setTimeout(15 * 60 * 1000);
 
-// FLAKY: https://github.com/elastic/kibana/issues/148263
-describe.skip('migration v2', () => {
+describe('migration v2', () => {
   let esServer: TestElasticsearchUtils;
   let rootA: Root;
   let rootB: Root;

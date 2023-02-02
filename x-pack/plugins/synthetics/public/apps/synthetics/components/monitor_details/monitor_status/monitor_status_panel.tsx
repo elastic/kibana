@@ -7,7 +7,7 @@
 
 import React, { useMemo } from 'react';
 
-import { EuiPanel, useEuiTheme, EuiResizeObserver } from '@elastic/eui';
+import { EuiPanel, useEuiTheme, EuiResizeObserver, EuiSpacer } from '@elastic/eui';
 import { Chart, Settings, Heatmap, ScaleType } from '@elastic/charts';
 
 import { MonitorStatusHeader } from './monitor_status_header';
@@ -48,6 +48,8 @@ export const MonitorStatusPanel = ({
         showViewHistoryButton={showViewHistoryButton}
         onBrushed={onBrushed}
       />
+
+      <EuiSpacer size="m" />
 
       <EuiResizeObserver onResize={handleResize}>
         {(resizeRef) => (

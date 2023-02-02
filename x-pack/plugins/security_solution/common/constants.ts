@@ -477,11 +477,13 @@ export const DEFAULT_DETECTION_PAGE_FILTERS = [
     title: 'Status',
     fieldName: 'kibana.alert.workflow_status',
     selectedOptions: ['open'],
+    hideActionBar: true,
   },
   {
     title: 'Severity',
     fieldName: 'kibana.alert.severity',
     selectedOptions: [],
+    hideActionBar: true,
   },
   {
     title: 'User',
@@ -492,3 +494,6 @@ export const DEFAULT_DETECTION_PAGE_FILTERS = [
     fieldName: 'host.name',
   },
 ];
+
+export const CELL_ACTIONS_DEFAULT_TRIGGER = 'security-solution-default-cellActions';
+export const CELL_ACTIONS_TIMELINE_TRIGGER = 'security-solution-timeline-cellActions';

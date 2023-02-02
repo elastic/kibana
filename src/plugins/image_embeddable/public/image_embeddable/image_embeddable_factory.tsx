@@ -8,6 +8,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { IExternalUrl } from '@kbn/core-http-browser';
+import type { AuthenticatedUser } from '@kbn/security-plugin/common/model';
 import {
   IContainer,
   EmbeddableInput,
@@ -32,6 +33,7 @@ export interface ImageEmbeddableFactoryDeps {
     files: FilesClient<FileImageMetadata>;
     externalUrl: IExternalUrl;
     theme: ThemeServiceStart;
+    getUser: () => Promise<AuthenticatedUser | undefined>;
     uiActions: UiActionsStart;
   };
 }
@@ -84,15 +86,19 @@ export class ImageEmbeddableFactoryDefinition
 
   public async getExplicitInput(initialInput: ImageEmbeddableInput) {
     const { configureImage } = await import('../image_editor');
+    const start = this.deps.start();
+    const { files, overlays, theme, application, externalUrl, getUser } = start;
+    const user = await getUser();
 
     const imageConfig = await configureImage(
       {
-        files: this.deps.start().files,
-        overlays: this.deps.start().overlays,
-        currentAppId$: this.deps.start().application.currentAppId$,
-        validateUrl: createValidateUrl(this.deps.start().externalUrl),
+        files,
+        overlays,
+        theme,
+        user,
+        currentAppId$: application.currentAppId$,
+        validateUrl: createValidateUrl(externalUrl),
         getImageDownloadHref: this.getImageDownloadHref,
-        theme: this.deps.start().theme,
       },
       initialInput ? initialInput.imageConfig : undefined
     );

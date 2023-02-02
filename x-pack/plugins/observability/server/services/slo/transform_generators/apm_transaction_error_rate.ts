@@ -6,7 +6,11 @@
  */
 
 import { TransformPutTransformRequest } from '@elastic/elasticsearch/lib/api/types';
-import { ALL_VALUE, apmTransactionErrorRateIndicatorSchema } from '@kbn/slo-schema';
+import {
+  ALL_VALUE,
+  apmTransactionErrorRateIndicatorSchema,
+  timeslicesBudgetingMethodSchema,
+} from '@kbn/slo-schema';
 
 import { InvalidTransformError } from '../../../errors';
 import { getSLOTransformTemplate } from '../../../assets/transform_templates/slo_transform_template';
@@ -127,6 +131,17 @@ export class ApmTransactionErrorRateTransformGenerator extends TransformGenerato
           field: 'transaction.duration.histogram',
         },
       },
+      ...(timeslicesBudgetingMethodSchema.is(slo.budgetingMethod) && {
+        'slo.isGoodSlice': {
+          bucket_script: {
+            buckets_path: {
+              goodEvents: 'slo.numerator>_count',
+              totalEvents: 'slo.denominator.value',
+            },
+            script: `params.goodEvents / params.totalEvents >= ${slo.objective.timesliceTarget} ? 1 : 0`,
+          },
+        },
+      }),
     };
   }
 

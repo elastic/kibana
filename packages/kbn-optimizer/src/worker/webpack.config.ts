@@ -25,8 +25,6 @@ import { BundleMetricsPlugin } from './bundle_metrics_plugin';
 import { EmitStatsPlugin } from './emit_stats_plugin';
 import { PopulateBundleCachePlugin } from './populate_bundle_cache_plugin';
 
-const IS_CODE_COVERAGE = !!process.env.CODE_COVERAGE;
-const ISTANBUL_PRESET_PATH = require.resolve('@kbn/babel-preset/istanbul_preset');
 const BABEL_PRESET = [
   require.resolve('@kbn/babel-preset/webpack_preset'),
   {
@@ -232,7 +230,7 @@ export function getWebpackConfig(bundle: Bundle, bundleRefs: BundleRefs, worker:
             options: {
               babelrc: false,
               envName: worker.dist ? 'production' : 'development',
-              presets: IS_CODE_COVERAGE ? [ISTANBUL_PRESET_PATH, BABEL_PRESET] : [BABEL_PRESET],
+              presets: [BABEL_PRESET],
             },
           },
         },

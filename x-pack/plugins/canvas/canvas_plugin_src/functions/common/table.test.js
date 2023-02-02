@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { functionWrapper, fontStyle } from '@kbn/presentation-util-plugin/common';
+import { functionWrapper, fontStyle } from '@kbn/presentation-util-plugin/test_helpers';
 import { testTable } from './__fixtures__/test_tables';
 import { table } from './table';
 

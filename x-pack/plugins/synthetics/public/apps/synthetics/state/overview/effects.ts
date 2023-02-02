@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import { takeLatest, takeLeading } from 'redux-saga/effects';
-import { fetchUpsertSuccessAction } from '../monitor_list';
+import { takeLatest, debounce } from 'redux-saga/effects';
 import { fetchEffectFactory } from '../utils/fetch_effect';
 import {
   fetchMonitorOverviewAction,
@@ -17,7 +16,8 @@ import {
 import { fetchMonitorOverview, fetchOverviewStatus } from './api';
 
 export function* fetchMonitorOverviewEffect() {
-  yield takeLeading(
+  yield debounce(
+    300, // Only take the latest while ignoring any intermediate triggers
     [fetchMonitorOverviewAction.get, quietFetchOverviewAction.get],
     fetchEffectFactory(
       fetchMonitorOverview,
@@ -29,7 +29,7 @@ export function* fetchMonitorOverviewEffect() {
 
 export function* fetchOverviewStatusEffect() {
   yield takeLatest(
-    [fetchOverviewStatusAction.get, quietFetchOverviewStatusAction.get, fetchUpsertSuccessAction],
+    [fetchOverviewStatusAction.get, quietFetchOverviewStatusAction.get],
     fetchEffectFactory(
       fetchOverviewStatus,
       fetchOverviewStatusAction.success,

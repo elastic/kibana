@@ -6,8 +6,4 @@
     "outDir": "target/types",
     "types": [ "node"],
   },
-  "kbn_references": [
-    "@kbn/apm-plugin",
-    "@kbn/test",
-  ]
 }

@@ -4,10 +4,11 @@
   "server": false,
   "ui": true,
   "owner": {
-    "name": "@elastic/kibana-global-experience",
-    "githubTeam": "@elastic/kibana-global-experience"
+    "name": "@elastic/appex-sharedux",
+    "githubTeam": "@elastic/appex-sharedux"
   },
   "description": "Image embeddable",
   "requiredPlugins": ["embeddable", "files", "uiActions"],
-  "requiredBundles": ["kibanaUtils", "kibanaReact"]
+  "requiredBundles": ["kibanaUtils", "kibanaReact"],
+  "optionalPlugins": ["security"]
 }

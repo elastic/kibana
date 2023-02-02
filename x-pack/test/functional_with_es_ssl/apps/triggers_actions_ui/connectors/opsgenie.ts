@@ -356,13 +356,12 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await retry.try(async () => {
         await rules.common.defineIndexThresholdAlert(alertName);
       });
-
-      await rules.common.setNotifyThrottleInput();
     };
 
     const selectOpsgenieConnectorInRuleAction = async (name: string) => {
       await testSubjects.click('.opsgenie-alerting-ActionTypeSelectOption');
       await testSubjects.selectValue('comboBoxInput', name);
+      await rules.common.setNotifyThrottleInput();
     };
 
     const createOpsgenieConnector = async (name: string) => {

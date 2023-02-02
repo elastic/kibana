@@ -10,7 +10,6 @@ import React from 'react';
 import { take } from 'rxjs/operators';
 import { EuiFlexGroup, EuiFlexItem, EuiBadge } from '@elastic/eui';
 import { METRIC_TYPE } from '@kbn/analytics';
-import { reactToUiComponent } from '@kbn/kibana-react-plugin/public';
 import { ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
 import { TimefilterContract } from '@kbn/data-plugin/public';
 import { i18n } from '@kbn/i18n';
@@ -30,7 +29,7 @@ const displayName = i18n.translate('visualizations.actions.editInLens.displayNam
   defaultMessage: 'Convert to Lens',
 });
 
-const ReactMenuItem: React.FC = () => {
+const MenuItem: React.FC = () => {
   return (
     <EuiFlexGroup alignItems="center">
       <EuiFlexItem>{displayName}</EuiFlexItem>
@@ -44,8 +43,6 @@ const ReactMenuItem: React.FC = () => {
     </EuiFlexGroup>
   );
 };
-
-const UiMenuItem = reactToUiComponent(ReactMenuItem);
 
 const isVisualizeEmbeddable = (embeddable: IEmbeddable): embeddable is VisualizeEmbeddable => {
   return 'getVis' in embeddable;
@@ -106,7 +103,7 @@ export class EditInLensAction implements Action<EditInLensContext> {
     return displayName;
   }
 
-  MenuItem = UiMenuItem;
+  MenuItem = MenuItem;
 
   getIconType(context: ActionExecutionContext<EditInLensContext>): string | undefined {
     return 'merge';

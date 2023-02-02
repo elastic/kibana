@@ -14,6 +14,7 @@ import type { FatalErrorsSetup } from '@kbn/core-fatal-errors-browser';
 import type { IUiSettingsClient, SettingsStart } from '@kbn/core-ui-settings-browser';
 import type { NotificationsSetup } from '@kbn/core-notifications-browser';
 import type { ApplicationSetup } from '@kbn/core-application-browser';
+import type { CustomBrandingSetup } from '@kbn/core-custom-branding-browser';
 import type { CoreStart } from './core_start';
 
 /**
@@ -35,6 +36,8 @@ export interface CoreSetup<TPluginsStart extends object = object, TStart = unkno
   analytics: AnalyticsServiceSetup;
   /** {@link ApplicationSetup} */
   application: ApplicationSetup;
+  /** {@link CustomBrandingSetup} */
+  customBranding: CustomBrandingSetup;
   /** {@link FatalErrorsSetup} */
   fatalErrors: FatalErrorsSetup;
   /** {@link HttpSetup} */

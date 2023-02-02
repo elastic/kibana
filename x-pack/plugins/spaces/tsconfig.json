@@ -26,6 +26,7 @@
     "@kbn/core-test-helpers-kbn-server",
     "@kbn/test",
     "@kbn/utils",
+    "@kbn/shared-ux-page-kibana-template",
   ],
   "exclude": [
     "target/**/*",

@@ -16,18 +16,12 @@ import { REPO_ROOT } from '../../lib/paths.mjs';
 
 /**
  *
- * @param {import('@kbn/bazel-packages').BazelPackage[]} packages
+ * @param {import('@kbn/repo-packages').Package[]} packages
  * @param {import('@kbn/plugin-discovery').KibanaPlatformPlugin[]} plugins
  * @param {import('@kbn/some-dev-log').SomeDevLog} log
  */
 export async function regeneratePackageMap(packages, plugins, log) {
-  // clean up old version of package map package
-  Fs.rmSync(Path.resolve(REPO_ROOT, 'packages/kbn-synthetic-package-map'), {
-    recursive: true,
-    force: true,
-  });
-
-  const path = Path.resolve(REPO_ROOT, 'packages/kbn-package-map/package-map.json');
+  const path = Path.resolve(REPO_ROOT, 'packages/kbn-repo-packages/package-map.json');
   const existingContent = Fs.existsSync(path) ? await Fsp.readFile(path, 'utf8') : undefined;
 
   /** @type {Array<[string, string]>} */
@@ -52,6 +46,6 @@ export async function regeneratePackageMap(packages, plugins, log) {
 
   if (content !== existingContent) {
     await Fsp.writeFile(path, content);
-    log.warning('updated package map, many caches may be invalidated');
+    log.warning('updated package map');
   }
 }

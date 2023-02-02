@@ -53,6 +53,7 @@ import { EVENT_LOG_ACTIONS } from '../plugin';
 import { SharePluginStart } from '@kbn/share-plugin/server';
 import { DataViewsServerPluginStart } from '@kbn/data-views-plugin/server';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
+import { rulesSettingsClientMock } from '../rules_settings_client.mock';
 
 jest.mock('uuid', () => ({
   v4: () => '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
@@ -138,6 +139,7 @@ describe('Task Runner Cancel', () => {
         max: 1000,
       },
     },
+    getRulesSettingsClientWithRequest: jest.fn().mockReturnValue(rulesSettingsClientMock.create()),
   };
 
   beforeEach(() => {
@@ -164,6 +166,9 @@ describe('Task Runner Cancel', () => {
     ruleTypeRegistry.get.mockReturnValue(ruleType);
     taskRunnerFactoryInitializerParams.executionContext.withContext.mockImplementation((ctx, fn) =>
       fn()
+    );
+    taskRunnerFactoryInitializerParams.getRulesSettingsClientWithRequest.mockReturnValue(
+      rulesSettingsClientMock.create()
     );
     rulesClient.getAlertFromRaw.mockReturnValue(mockedRuleTypeSavedObject as Rule);
 
@@ -251,6 +256,7 @@ describe('Task Runner Cancel', () => {
           },
         },
         nextRun: '1970-01-01T00:00:10.000Z',
+        running: false,
       },
       { refresh: false, namespace: undefined }
     );
@@ -273,6 +279,7 @@ describe('Task Runner Cancel', () => {
         string
       >) => {
         executorServices.alertFactory.create('1').scheduleActions('default');
+        return { state: {} };
       }
     );
     // setting cancelAlertsOnRuleTimeout to false here
@@ -340,6 +347,7 @@ describe('Task Runner Cancel', () => {
         string
       >) => {
         executorServices.alertFactory.create('1').scheduleActions('default');
+        return { state: {} };
       }
     );
     // setting cancelAlertsOnRuleTimeout for ruleType to false here
@@ -401,6 +409,7 @@ describe('Task Runner Cancel', () => {
         string
       >) => {
         executorServices.alertFactory.create('1').scheduleActions('default');
+        return { state: {} };
       }
     );
     const taskRunner = new TaskRunner(

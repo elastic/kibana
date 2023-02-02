@@ -20,6 +20,7 @@ import {
 import { isEqual, merge } from 'lodash';
 import moment from 'moment';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
+import { addExcludeFrozenToQuery } from '@kbn/ml-query-utils';
 import { useMlKibana, useMlLocator } from '../../../contexts/kibana';
 import { useMlContext } from '../../../contexts/ml';
 import {
@@ -41,7 +42,6 @@ import { ML_PAGES } from '../../../../../common/constants/locator';
 import { TIME_FORMAT } from '../../../../../common/constants/time_format';
 import { JobsAwaitingNodeWarning } from '../../../components/jobs_awaiting_node_warning';
 import { RuntimeMappings } from '../../../../../common/types/fields';
-import { addExcludeFrozenToQuery } from '../../../../../common/util/query_utils';
 import { MlPageHeader } from '../../../components/page_header';
 
 export interface ModuleJobUI extends ModuleJob {

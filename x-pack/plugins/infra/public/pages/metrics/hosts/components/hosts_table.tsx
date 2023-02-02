@@ -9,7 +9,6 @@ import React, { useCallback, useEffect } from 'react';
 import { EuiInMemoryTable } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { isEqual } from 'lodash';
-import { HostsTableColumns } from './hosts_table_columns';
 import { NoData } from '../../../../components/empty_states';
 import { InfraLoadingPanel } from '../../../../components/loading';
 import { useHostsTable } from '../hooks/use_hosts_table';
@@ -30,7 +29,7 @@ const HOST_TABLE_METRICS: Array<{ type: SnapshotMetricType }> = [
 
 export const HostsTable = () => {
   const { baseRequest, setHostViewState, hostViewState } = useHostsViewContext();
-  const { onSubmit } = useUnifiedSearchContext();
+  const { onSubmit, unifiedSearchDateRange } = useUnifiedSearchContext();
   const [properties, setProperties] = useTableProperties();
 
   // Snapshot endpoint internally uses the indices stored in source.configuration.metricAlias.
@@ -40,6 +39,8 @@ export const HostsTable = () => {
     ...baseRequest,
     metrics: HOST_TABLE_METRICS,
   });
+
+  const { columns, items } = useHostsTable(nodes, { time: unifiedSearchDateRange });
 
   useEffect(() => {
     if (hostViewState.loading !== loading || nodes.length !== hostViewState.totalHits) {
@@ -58,7 +59,6 @@ export const HostsTable = () => {
     setHostViewState,
   ]);
 
-  const items = useHostsTable(nodes);
   const noData = items.length === 0;
 
   const onTableChange = useCallback(
@@ -82,7 +82,7 @@ export const HostsTable = () => {
   if (loading) {
     return (
       <InfraLoadingPanel
-        height="100%"
+        height="185px"
         width="auto"
         text={i18n.translate('xpack.infra.waffle.loadingDataText', {
           defaultMessage: 'Loading data',
@@ -120,7 +120,7 @@ export const HostsTable = () => {
         'data-test-subj': 'hostsView-tableRow',
       }}
       items={items}
-      columns={HostsTableColumns}
+      columns={columns}
       onTableChange={onTableChange}
     />
   );

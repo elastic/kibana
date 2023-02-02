@@ -33,12 +33,14 @@ const MarkdownContainer = styled.div`
 `;
 
 const TruncateComp = styled.div`
-  text-overflow: ellipsis;
-  display: -webkit-box;
-  -webkit-line-clamp: 3;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-  word-break: break-word;
+  & .euiMarkdownFormat {
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    word-break: break-word;
+  }
 `;
 
 export interface RecentCasesProps {

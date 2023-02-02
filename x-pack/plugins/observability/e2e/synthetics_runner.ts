@@ -12,6 +12,7 @@ import { run as syntheticsRun } from '@elastic/synthetics';
 import { PromiseType } from 'utility-types';
 import { createApmUsers } from '@kbn/apm-plugin/server/test_helpers/create_apm_users/create_apm_users';
 
+import { EsArchiver } from '@kbn/es-archiver';
 import { esArchiverUnload } from './tasks/es_archiver';
 import { TestReporter } from './test_reporter';
 
@@ -59,9 +60,17 @@ export class SyntheticsRunner {
     try {
       console.log('Loading esArchiver...');
 
-      const esArchiver = this.getService('esArchiver');
+      const esArchiver: EsArchiver = this.getService('esArchiver');
 
-      const promises = dataArchives.map((archive) => esArchiver.loadIfNeeded(e2eDir + archive));
+      const promises = dataArchives.map((archive) => {
+        if (archive === 'synthetics_data') {
+          return esArchiver.load(e2eDir + archive, {
+            docsOnly: true,
+            skipExisting: true,
+          });
+        }
+        return esArchiver.load(e2eDir + archive, { skipExisting: true });
+      });
 
       await Promise.all([...promises]);
     } catch (e) {

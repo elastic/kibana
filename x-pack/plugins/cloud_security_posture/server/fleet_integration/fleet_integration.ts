@@ -9,7 +9,7 @@ import { SavedObjectsClientContract } from '@kbn/core/server';
 import { PackagePolicyClient } from '@kbn/fleet-plugin/server';
 import { PackagePolicy } from '@kbn/fleet-plugin/common';
 import { DataViewSavedObjectAttrs } from '@kbn/data-views-plugin/common';
-import { getCSPKuery } from '../../common/utils/helpers';
+import { CSP_FLEET_PACKAGE_KUERY } from '../../common/utils/helpers';
 import { CLOUD_SECURITY_POSTURE_PACKAGE_NAME } from '../../common/constants';
 
 export const onPackagePolicyPostCreateCallback = async (
@@ -41,7 +41,7 @@ export const isCspPackagePolicyInstalled = async (
 ): Promise<boolean> => {
   try {
     const { total } = await packagePolicyClient.list(soClient, {
-      kuery: getCSPKuery,
+      kuery: CSP_FLEET_PACKAGE_KUERY,
       page: 1,
     });
 

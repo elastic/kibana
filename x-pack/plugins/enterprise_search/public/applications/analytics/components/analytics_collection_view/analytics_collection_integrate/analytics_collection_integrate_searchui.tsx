@@ -32,9 +32,9 @@ export const searchUIEmbedSteps = (setSelectedTab: (tab: TabKey) => void) => [
               values={{
                 embedLink: (
                   <EuiLink
-                    data-telemetry-id={'entSearch-analytics-integrate-javascriptClientEmbed-tab'}
+                    data-telemetry-id={'entSearch-analytics-integrate-javascriptEmbed-tab'}
                     onClick={() => {
-                      setSelectedTab('javascriptClientEmbed');
+                      setSelectedTab('javascriptEmbed');
                     }}
                   >
                     {i18n.translate(
@@ -47,9 +47,9 @@ export const searchUIEmbedSteps = (setSelectedTab: (tab: TabKey) => void) => [
                 ),
                 clientLink: (
                   <EuiLink
-                    data-telemetry-id={'entSearch-analytics-integrate-javascriptEmbed-tab'}
+                    data-telemetry-id={'entSearch-analytics-integrate-javascriptClientEmbed-tab'}
                     onClick={() => {
-                      setSelectedTab('javascriptEmbed');
+                      setSelectedTab('javascriptClientEmbed');
                     }}
                   >
                     {i18n.translate(
@@ -106,13 +106,13 @@ export const searchUIEmbedSteps = (setSelectedTab: (tab: TabKey) => void) => [
               'xpack.enterpriseSearch.analytics.collections.collectionsView.integrateTab.searchui.stepTwo.setupDescription',
               {
                 defaultMessage:
-                  'Finally, add the plugin to your Search UI configuration. Depending on how you have embedded Behavioral analytics, you may need to pass in the client. The example below shows how to pass in the client when using the Javascript client.',
+                  'Finally, add the plugin to your Search UI configuration. Depending on how you have embedded Behavioral Analytics, you may need to pass in the client. The example below shows how to pass in the client when using the Javascript client.',
               }
             )}
           </p>
           <EuiCodeBlock language="javascript" isCopyable>
             {`
-import { getTracker } from "@elastic/behavioral-analytics-tracker";
+import { getTracker } from "@elastic/behavioral-analytics-javascript-tracker";
 
 const searchUIConfig = {
 ...
@@ -124,6 +124,31 @@ plugins: [
 ...
 }`}
           </EuiCodeBlock>
+          <EuiSpacer size="m" />
+          <p>
+            <FormattedMessage
+              id="xpack.enterpriseSearch.analytics.collections.collectionsView.integrateTab.searchui.stepTwo.moreInfoDescription"
+              defaultMessage="See the {link} for more information on initializing the tracker and firing events."
+              values={{
+                link: (
+                  <EuiLink
+                    href="https://docs.elastic.co/search-ui/api/core/plugins/analytics-plugin"
+                    target="_blank"
+                    data-telemetry-id={
+                      'entSearch-analytics-integrate-javascriptEmbed-analyticsPluginDocumentationLink'
+                    }
+                  >
+                    {i18n.translate(
+                      'xpack.enterpriseSearch.analytics.collections.collectionsView.integrateTab.searchui.stepTwo.analyticsPluginDoc',
+                      {
+                        defaultMessage: 'Analytics Plugin Documentation',
+                      }
+                    )}
+                  </EuiLink>
+                ),
+              }}
+            />
+          </p>
         </EuiText>
       </>
     ),

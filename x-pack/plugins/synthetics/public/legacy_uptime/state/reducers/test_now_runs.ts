@@ -8,6 +8,7 @@
 import { createReducer, type PayloadAction } from '@reduxjs/toolkit';
 import type { WritableDraft } from 'immer/dist/types/types-external';
 import type { IHttpFetchError } from '@kbn/core-http-browser';
+import { TestNowResponse } from '../../../../common/types';
 import {
   type Locations,
   ScheduleUnit,
@@ -15,7 +16,6 @@ import {
   type SyntheticsMonitorSchedule,
 } from '../../../../common/runtime_types';
 import { clearTestNowMonitorAction, testNowMonitorAction } from '../actions';
-import type { TestNowResponse } from '../api';
 import type { AppState } from '..';
 
 export enum TestRunStats {
@@ -58,8 +58,8 @@ export const testNowRunsReducer = createReducer(initialState, (builder) => {
       String(testNowMonitorAction.success),
       (state: WritableDraft<TestNowRunsState>, { payload }: PayloadAction<TestNowResponse>) => ({
         ...state,
-        [payload.monitorId]: {
-          monitorId: payload.monitorId,
+        [payload.configId]: {
+          monitorId: payload.configId,
           testRunId: payload.testRunId,
           status: TestRunStats.IN_PROGRESS,
           errors: payload.errors,
@@ -93,11 +93,11 @@ export const testNowRunsReducer = createReducer(initialState, (builder) => {
           }
         }
 
-        if (action.payload.monitorId) {
+        if (action.payload.configId) {
           return {
             ...state,
-            [action.payload.monitorId]: {
-              ...state[action.payload.monitorId],
+            [action.payload.configId]: {
+              ...state[action.payload.configId],
               status: TestRunStats.COMPLETED,
               errors: action.payload.errors,
               fetchError: undefined,

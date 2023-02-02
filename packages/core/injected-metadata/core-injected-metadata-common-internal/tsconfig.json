@@ -14,7 +14,8 @@
   "kbn_references": [
     "@kbn/config",
     "@kbn/ui-shared-deps-npm",
-    "@kbn/core-base-common"
+    "@kbn/core-base-common",
+    "@kbn/core-custom-branding-common"
   ],
   "exclude": [
     "target/**/*",

@@ -5,4 +5,5 @@
  * 2.0.
  */
 
-export { CopyToClipboardAction } from './copy_to_clipboard_action';
+export { createCopyToClipboardAction as createLensCopyToClipboardAction } from './lens/copy_to_clipboard';
+export { createCopyToClipboardAction as createDefaultCopyToClipboardAction } from './default/copy_to_clipboard';

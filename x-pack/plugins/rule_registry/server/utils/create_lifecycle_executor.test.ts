@@ -44,10 +44,10 @@ describe('createLifecycleExecutor', () => {
         aRuleStateKey: 'NEXT_RULE_STATE_VALUE',
       };
 
-      return nextRuleState;
+      return { state: nextRuleState };
     });
 
-    const newRuleState = await executor(
+    const newExecutorResult = await executor(
       createDefaultAlertExecutorOptions({
         params: {},
         state: { wrapped: initialRuleState, trackedAlerts: {}, trackedAlertsRecovered: {} },
@@ -55,7 +55,7 @@ describe('createLifecycleExecutor', () => {
       })
     );
 
-    expect(newRuleState).toEqual({
+    expect(newExecutorResult.state).toEqual({
       wrapped: {
         aRuleStateKey: 'NEXT_RULE_STATE_VALUE',
       },
@@ -80,7 +80,7 @@ describe('createLifecycleExecutor', () => {
         fields: {},
       });
 
-      return state;
+      return { state };
     });
 
     await executor(
@@ -181,7 +181,7 @@ describe('createLifecycleExecutor', () => {
         fields: {},
       });
 
-      return state;
+      return { state };
     });
 
     await executor(
@@ -197,6 +197,7 @@ describe('createLifecycleExecutor', () => {
               started: '2020-01-01T12:00:00.000Z',
               flappingHistory: [],
               flapping: false,
+              pendingRecoveredCount: 0,
             },
             TEST_ALERT_1: {
               alertId: 'TEST_ALERT_1',
@@ -204,6 +205,7 @@ describe('createLifecycleExecutor', () => {
               started: '2020-01-02T12:00:00.000Z',
               flappingHistory: [],
               flapping: false,
+              pendingRecoveredCount: 0,
             },
           },
           trackedAlertsRecovered: {},
@@ -302,7 +304,7 @@ describe('createLifecycleExecutor', () => {
         fields: {},
       });
 
-      return state;
+      return { state };
     });
 
     await executor(
@@ -318,6 +320,7 @@ describe('createLifecycleExecutor', () => {
               started: '2020-01-01T12:00:00.000Z',
               flappingHistory: [],
               flapping: false,
+              pendingRecoveredCount: 0,
             },
             TEST_ALERT_1: {
               alertId: 'TEST_ALERT_1',
@@ -325,6 +328,7 @@ describe('createLifecycleExecutor', () => {
               started: '2020-01-02T12:00:00.000Z',
               flappingHistory: [],
               flapping: false,
+              pendingRecoveredCount: 0,
             },
           },
           trackedAlertsRecovered: {},
@@ -381,7 +385,7 @@ describe('createLifecycleExecutor', () => {
         aRuleStateKey: 'NEXT_RULE_STATE_VALUE',
       };
 
-      return nextRuleState;
+      return { state: nextRuleState };
     });
 
     await executor(
@@ -410,7 +414,7 @@ describe('createLifecycleExecutor', () => {
         aRuleStateKey: 'NEXT_RULE_STATE_VALUE',
       };
 
-      return nextRuleState;
+      return { state: nextRuleState };
     });
 
     await expect(() =>
@@ -442,10 +446,12 @@ describe('createLifecycleExecutor', () => {
           fields: {},
         });
 
-        return state;
+        return { state };
       });
 
-      const { trackedAlerts, trackedAlertsRecovered } = await executor(
+      const {
+        state: { trackedAlerts, trackedAlertsRecovered },
+      } = await executor(
         createDefaultAlertExecutorOptions({
           params: {},
           state: { wrapped: initialRuleState, trackedAlerts: {}, trackedAlertsRecovered: {} },
@@ -530,10 +536,12 @@ describe('createLifecycleExecutor', () => {
           fields: {},
         });
 
-        return state;
+        return { state };
       });
 
-      const { trackedAlerts, trackedAlertsRecovered } = await executor(
+      const {
+        state: { trackedAlerts, trackedAlertsRecovered },
+      } = await executor(
         createDefaultAlertExecutorOptions({
           alertId: 'TEST_ALERT_0',
           params: {},
@@ -546,6 +554,7 @@ describe('createLifecycleExecutor', () => {
                 started: '2020-01-01T12:00:00.000Z',
                 flappingHistory: [],
                 flapping: false,
+                pendingRecoveredCount: 0,
               },
               TEST_ALERT_1: {
                 alertId: 'TEST_ALERT_1',
@@ -553,6 +562,7 @@ describe('createLifecycleExecutor', () => {
                 started: '2020-01-02T12:00:00.000Z',
                 flappingHistory: [],
                 flapping: false,
+                pendingRecoveredCount: 0,
               },
             },
             trackedAlertsRecovered: {},
@@ -638,10 +648,12 @@ describe('createLifecycleExecutor', () => {
           fields: {},
         });
 
-        return state;
+        return { state };
       });
 
-      const { trackedAlerts, trackedAlertsRecovered } = await executor(
+      const {
+        state: { trackedAlerts, trackedAlertsRecovered },
+      } = await executor(
         createDefaultAlertExecutorOptions({
           alertId: 'TEST_ALERT_0',
           params: {},
@@ -654,6 +666,7 @@ describe('createLifecycleExecutor', () => {
                 started: '2020-01-01T12:00:00.000Z',
                 flappingHistory: [],
                 flapping: false,
+                pendingRecoveredCount: 0,
               },
               TEST_ALERT_1: {
                 alertId: 'TEST_ALERT_1',
@@ -661,6 +674,7 @@ describe('createLifecycleExecutor', () => {
                 started: '2020-01-02T12:00:00.000Z',
                 flappingHistory: [],
                 flapping: false,
+                pendingRecoveredCount: 0,
               },
             },
             trackedAlerts: {},
@@ -741,10 +755,12 @@ describe('createLifecycleExecutor', () => {
           fields: {},
         });
 
-        return state;
+        return { state };
       });
 
-      const { trackedAlerts, trackedAlertsRecovered } = await executor(
+      const {
+        state: { trackedAlerts, trackedAlertsRecovered },
+      } = await executor(
         createDefaultAlertExecutorOptions({
           alertId: 'TEST_ALERT_0',
           params: {},
@@ -757,6 +773,7 @@ describe('createLifecycleExecutor', () => {
                 started: '2020-01-01T12:00:00.000Z',
                 flappingHistory: [],
                 flapping: false,
+                pendingRecoveredCount: 0,
               },
               TEST_ALERT_1: {
                 alertId: 'TEST_ALERT_1',
@@ -764,6 +781,7 @@ describe('createLifecycleExecutor', () => {
                 started: '2020-01-02T12:00:00.000Z',
                 flappingHistory: [],
                 flapping: false,
+                pendingRecoveredCount: 0,
               },
             },
             trackedAlertsRecovered: {},
@@ -845,10 +863,12 @@ describe('createLifecycleExecutor', () => {
           fields: {},
         });
 
-        return state;
+        return { state };
       });
 
-      const { trackedAlerts, trackedAlertsRecovered } = await executor(
+      const {
+        state: { trackedAlerts, trackedAlertsRecovered },
+      } = await executor(
         createDefaultAlertExecutorOptions({
           alertId: 'TEST_ALERT_0',
           params: {},
@@ -861,6 +881,7 @@ describe('createLifecycleExecutor', () => {
                 started: '2020-01-02T12:00:00.000Z',
                 flappingHistory: [],
                 flapping: false,
+                pendingRecoveredCount: 0,
               },
             },
             trackedAlertsRecovered: {
@@ -870,6 +891,7 @@ describe('createLifecycleExecutor', () => {
                 started: '2020-01-01T12:00:00.000Z',
                 flappingHistory: [],
                 flapping: false,
+                pendingRecoveredCount: 0,
               },
             },
           },
@@ -990,7 +1012,7 @@ describe('createLifecycleExecutor', () => {
           fields: {},
         });
 
-        return state;
+        return { state };
       });
 
       await executor(
@@ -1006,6 +1028,7 @@ describe('createLifecycleExecutor', () => {
                 started: '2020-01-01T12:00:00.000Z',
                 flappingHistory: flapping,
                 flapping: false,
+                pendingRecoveredCount: 0,
               },
               TEST_ALERT_1: {
                 alertId: 'TEST_ALERT_1',
@@ -1013,6 +1036,7 @@ describe('createLifecycleExecutor', () => {
                 started: '2020-01-02T12:00:00.000Z',
                 flappingHistory: [false, false],
                 flapping: false,
+                pendingRecoveredCount: 0,
               },
               TEST_ALERT_2: {
                 alertId: 'TEST_ALERT_2',
@@ -1020,6 +1044,7 @@ describe('createLifecycleExecutor', () => {
                 started: '2020-01-01T12:00:00.000Z',
                 flappingHistory: flapping,
                 flapping: true,
+                pendingRecoveredCount: 0,
               },
               TEST_ALERT_3: {
                 alertId: 'TEST_ALERT_3',
@@ -1027,6 +1052,7 @@ describe('createLifecycleExecutor', () => {
                 started: '2020-01-02T12:00:00.000Z',
                 flappingHistory: [false, false],
                 flapping: true,
+                pendingRecoveredCount: 0,
               },
             },
             trackedAlertsRecovered: {},
@@ -1153,7 +1179,7 @@ describe('createLifecycleExecutor', () => {
         logger,
         ruleDataClientMock
       )<{}, TestRuleState, never, never, never>(async ({ services, state }) => {
-        return state;
+        return { state };
       });
 
       await executor(
@@ -1169,6 +1195,7 @@ describe('createLifecycleExecutor', () => {
                 started: '2020-01-01T12:00:00.000Z',
                 flappingHistory: [true, true, true, true],
                 flapping: false,
+                pendingRecoveredCount: 0,
               },
               TEST_ALERT_1: {
                 alertId: 'TEST_ALERT_1',
@@ -1176,6 +1203,7 @@ describe('createLifecycleExecutor', () => {
                 started: '2020-01-02T12:00:00.000Z',
                 flappingHistory: notFlapping,
                 flapping: false,
+                pendingRecoveredCount: 0,
               },
               TEST_ALERT_2: {
                 alertId: 'TEST_ALERT_2',
@@ -1183,6 +1211,7 @@ describe('createLifecycleExecutor', () => {
                 started: '2020-01-02T12:00:00.000Z',
                 flappingHistory: [true, true],
                 flapping: true,
+                pendingRecoveredCount: 0,
               },
               TEST_ALERT_3: {
                 alertId: 'TEST_ALERT_3',
@@ -1190,6 +1219,7 @@ describe('createLifecycleExecutor', () => {
                 started: '2020-01-02T12:00:00.000Z',
                 flappingHistory: notFlapping,
                 flapping: false,
+                pendingRecoveredCount: 0,
               },
             },
             trackedAlertsRecovered: {},
@@ -1205,8 +1235,8 @@ describe('createLifecycleExecutor', () => {
             { index: { _id: 'TEST_ALERT_0_UUID' } },
             expect.objectContaining({
               [ALERT_INSTANCE_ID]: 'TEST_ALERT_0',
-              [ALERT_STATUS]: ALERT_STATUS_RECOVERED,
-              [EVENT_ACTION]: 'close',
+              [ALERT_STATUS]: ALERT_STATUS_ACTIVE,
+              [EVENT_ACTION]: 'active',
               [EVENT_KIND]: 'signal',
               [ALERT_FLAPPING]: true,
             }),
@@ -1221,8 +1251,8 @@ describe('createLifecycleExecutor', () => {
             { index: { _id: 'TEST_ALERT_2_UUID' } },
             expect.objectContaining({
               [ALERT_INSTANCE_ID]: 'TEST_ALERT_2',
-              [ALERT_STATUS]: ALERT_STATUS_RECOVERED,
-              [EVENT_ACTION]: 'close',
+              [ALERT_STATUS]: ALERT_STATUS_ACTIVE,
+              [EVENT_ACTION]: 'active',
               [EVENT_KIND]: 'signal',
               [ALERT_FLAPPING]: true,
             }),

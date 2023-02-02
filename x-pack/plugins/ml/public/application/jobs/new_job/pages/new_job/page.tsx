@@ -12,6 +12,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { getTimeFilterRange, useTimefilter } from '@kbn/ml-date-picker';
 import { useTimeBuckets } from '../../../../components/custom_hooks/use_time_buckets';
 import { Wizard } from './wizard';
 import { WIZARD_STEPS } from '../components/step_types';
@@ -34,7 +35,6 @@ import { ResultsLoader } from '../../common/results_loader';
 import { JobValidator } from '../../common/job_validator';
 import { useMlContext } from '../../../../contexts/ml';
 import { useMlKibana } from '../../../../contexts/kibana';
-import { getTimeFilterRange } from '../../../../components/full_time_range_selector';
 import { ExistingJobsAndGroups, mlJobService } from '../../../../services/job_service';
 import { newJobCapsService } from '../../../../services/new_job_capabilities/new_job_capabilities_service';
 import { EVENT_RATE_FIELD_ID } from '../../../../../../common/types/fields';
@@ -52,6 +52,7 @@ export interface PageProps {
 }
 
 export const Page: FC<PageProps> = ({ existingJobsAndGroups, jobType }) => {
+  const timefilter = useTimefilter();
   const mlContext = useMlContext();
   const {
     services: { maps: mapsPlugin },
@@ -74,7 +75,7 @@ export const Page: FC<PageProps> = ({ existingJobsAndGroups, jobType }) => {
 
   const { displayErrorToast } = useToastNotificationService();
 
-  const { from, to } = getTimeFilterRange();
+  const { from, to } = getTimeFilterRange(timefilter);
   jobCreator.setTimeRange(from, to);
 
   let firstWizardStep =

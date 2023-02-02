@@ -79,8 +79,12 @@ export class CustomizePanelModal extends Component<CustomizePanelProps, State> {
               }}
             >
               <EuiModalHeader>
-                <EuiModalHeaderTitle data-test-subj="customizePanelTitle">
-                  <h2 id={titleId}>Customize panel</h2>
+                <EuiModalHeaderTitle
+                  data-test-subj="customizePanelTitle"
+                  id={titleId}
+                  component="h2"
+                >
+                  Customize panel
                 </EuiModalHeaderTitle>
               </EuiModalHeader>
 

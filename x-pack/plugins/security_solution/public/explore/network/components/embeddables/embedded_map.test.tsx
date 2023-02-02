@@ -5,221 +5,237 @@
  * 2.0.
  */
 
-import type { ReactWrapper } from 'enzyme';
-import { mount, shallow } from 'enzyme';
+import { render, waitFor } from '@testing-library/react';
 import React from 'react';
 import * as redux from 'react-redux';
-import { waitFor } from '@testing-library/react';
 
 import '../../../../common/mock/match_media';
 import { TestProviders } from '../../../../common/mock';
 
 import { EmbeddedMapComponent } from './embedded_map';
 import { createEmbeddable } from './create_embeddable';
+import { useSourcererDataView } from '../../../../common/containers/sourcerer';
+import { getLayerList } from './map_config';
+import { useIsFieldInIndexPattern } from '../../../containers/fields';
 
-jest.mock('../../../../common/lib/kibana');
-jest.mock('./create_embeddable', () => ({
-  createEmbeddable: jest.fn(),
+jest.mock('./create_embeddable');
+jest.mock('./map_config');
+jest.mock('../../../../common/containers/sourcerer');
+jest.mock('../../../containers/fields');
+jest.mock('./index_patterns_missing_prompt', () => ({
+  IndexPatternsMissingPrompt: jest.fn(() => <div data-test-subj="IndexPatternsMissingPrompt" />),
 }));
-
-const mockGetStorage = jest.fn();
-const mockSetStorage = jest.fn();
-
-jest.mock('../../../../common/lib/kibana', () => {
-  return {
-    useKibana: () => ({
-      services: {
-        embeddable: {
-          EmbeddablePanel: jest.fn(() => <div data-test-subj="EmbeddablePanel" />),
-        },
-        docLinks: {
-          ELASTIC_WEBSITE_URL: 'ELASTIC_WEBSITE_URL',
-          links: {
-            siem: { networkMap: '' },
-          },
-        },
-        storage: {
-          get: mockGetStorage,
-          set: mockSetStorage,
+jest.mock('../../../../common/lib/kibana', () => ({
+  useKibana: () => ({
+    services: {
+      embeddable: {
+        EmbeddablePanel: jest.fn(() => <div data-test-subj="EmbeddablePanel" />),
+      },
+      docLinks: {
+        ELASTIC_WEBSITE_URL: 'ELASTIC_WEBSITE_URL',
+        links: {
+          siem: { networkMap: '' },
         },
       },
-    }),
-  };
-});
-jest.mock('../../../../common/containers/sourcerer', () => {
-  return {
-    useSourcererDataView: () => ({
-      selectedPatterns: ['filebeat-*', 'packetbeat-*'],
-    }),
-  };
-});
-jest.mock('./index_patterns_missing_prompt', () => {
-  return {
-    IndexPatternsMissingPrompt: jest.fn(() => <div data-test-subj="IndexPatternsMissingPrompt" />),
-  };
-});
-
-describe('EmbeddedMapComponent', () => {
-  const setQuery: jest.Mock = jest.fn();
-  const mockSelector = {
-    kibanaDataViews: [
-      { id: '6f1eeb50-023d-11eb-bcb6-6ba0578012a9', title: 'filebeat-*' },
-      { id: '28995490-023d-11eb-bcb6-6ba0578012a9', title: 'auditbeat-*' },
-    ],
-  };
-  const mockCreateEmbeddable = {
-    destroyed: false,
-    enhancements: { dynamicActions: {} },
-    getActionContext: jest.fn(),
-    getFilterActions: jest.fn(),
-    id: '70969ddc-4d01-4048-8073-4ea63d595638',
-    input: {
-      viewMode: 'view',
-      title: 'Source -> Destination Point-to-Point Map',
-      id: '70969ddc-4d01-4048-8073-4ea63d595638',
-      filters: Array(0),
-      hidePanelTitles: true,
+      storage: {
+        get: mockGetStorage,
+        set: mockSetStorage,
+      },
     },
-    input$: {},
-    isContainer: false,
-    output: {},
-    output$: {},
-    parent: undefined,
-    parentSubscription: undefined,
-    renderComplete: {},
-    runtimeId: 1,
-    reload: jest.fn(),
-    setLayerList: jest.fn(),
-    setEventHandlers: jest.fn(),
-    setRenderTooltipContent: jest.fn(),
-    type: 'map',
-    updateInput: jest.fn(),
-  };
-  const testProps = {
-    endDate: '2019-08-28T05:50:57.877Z',
-    filters: [],
-    query: { query: '', language: 'kuery' },
-    setQuery,
-    startDate: '2019-08-28T05:50:47.877Z',
-  };
+  }),
+  useToasts: jest.fn().mockReturnValue({
+    addError: jest.fn(),
+    addSuccess: jest.fn(),
+    addWarning: jest.fn(),
+    remove: jest.fn(),
+  }),
+}));
 
+const mockUseSourcererDataView = useSourcererDataView as jest.Mock;
+const mockCreateEmbeddable = createEmbeddable as jest.Mock;
+const mockUseIsFieldInIndexPattern = useIsFieldInIndexPattern as jest.Mock;
+const mockGetStorage = jest.fn();
+const mockSetStorage = jest.fn();
+const setQuery: jest.Mock = jest.fn();
+const filebeatDataView = { id: '6f1eeb50-023d-11eb-bcb6-6ba0578012a9', title: 'filebeat-*' };
+const auditbeatDataView = { id: '28995490-023d-11eb-bcb6-6ba0578012a9', title: 'auditbeat-*' };
+const mockSelector = {
+  kibanaDataViews: [filebeatDataView, auditbeatDataView],
+};
+const embeddableValue = {
+  destroyed: false,
+  enhancements: { dynamicActions: {} },
+  getActionContext: jest.fn(),
+  getFilterActions: jest.fn(),
+  id: '70969ddc-4d01-4048-8073-4ea63d595638',
+  input: {
+    viewMode: 'view',
+    title: 'Source -> Destination Point-to-Point Map',
+    id: '70969ddc-4d01-4048-8073-4ea63d595638',
+    filters: Array(0),
+    hidePanelTitles: true,
+  },
+  input$: {},
+  isContainer: false,
+  output: {},
+  output$: {},
+  parent: undefined,
+  parentSubscription: undefined,
+  renderComplete: {},
+  runtimeId: 1,
+  reload: jest.fn(),
+  setLayerList: jest.fn(),
+  setEventHandlers: jest.fn(),
+  setRenderTooltipContent: jest.fn(),
+  type: 'map',
+  updateInput: jest.fn(),
+};
+const testProps = {
+  endDate: '2019-08-28T05:50:57.877Z',
+  filters: [],
+  query: { query: '', language: 'kuery' },
+  setQuery,
+  startDate: '2019-08-28T05:50:47.877Z',
+};
+describe('EmbeddedMapComponent', () => {
   beforeEach(() => {
     setQuery.mockClear();
     mockGetStorage.mockReturnValue(true);
+    jest.spyOn(redux, 'useSelector').mockReturnValue(mockSelector);
+    mockUseSourcererDataView.mockReturnValue({ selectedPatterns: ['filebeat-*', 'packetbeat-*'] });
+    mockCreateEmbeddable.mockResolvedValue(embeddableValue);
+    mockUseIsFieldInIndexPattern.mockReturnValue(() => [true, true]);
   });
 
   afterEach(() => {
     jest.clearAllMocks();
   });
 
-  test('renders correctly against snapshot', () => {
-    const wrapper = shallow(
+  test('renders', async () => {
+    const { getByTestId } = render(
       <TestProviders>
         <EmbeddedMapComponent {...testProps} />
       </TestProviders>
     );
-    expect(wrapper.find('EmbeddedMapComponent')).toMatchSnapshot();
+    await waitFor(() => {
+      expect(getByTestId('EmbeddedMapComponent')).toBeInTheDocument();
+    });
   });
 
   test('renders services.embeddable.EmbeddablePanel', async () => {
-    const spy = jest.spyOn(redux, 'useSelector');
-    spy.mockReturnValue(mockSelector);
-
-    (createEmbeddable as jest.Mock).mockResolvedValue(mockCreateEmbeddable);
-
-    const wrapper: ReactWrapper = mount(
+    const { getByTestId, queryByTestId } = render(
       <TestProviders>
         <EmbeddedMapComponent {...testProps} />
       </TestProviders>
     );
 
     await waitFor(() => {
-      wrapper.update();
-
-      expect(wrapper.find('[data-test-subj="EmbeddablePanel"]').exists()).toEqual(true);
-      expect(wrapper.find('[data-test-subj="IndexPatternsMissingPrompt"]').exists()).toEqual(false);
-      expect(wrapper.find('[data-test-subj="loading-panel"]').exists()).toEqual(false);
+      expect(getByTestId('EmbeddablePanel')).toBeInTheDocument();
+      expect(queryByTestId('IndexPatternsMissingPrompt')).not.toBeInTheDocument();
+      expect(queryByTestId('loading-spinner')).not.toBeInTheDocument();
     });
   });
 
   test('renders IndexPatternsMissingPrompt', async () => {
-    const spy = jest.spyOn(redux, 'useSelector');
-    spy.mockReturnValue({
+    jest.spyOn(redux, 'useSelector').mockReturnValue({
       ...mockSelector,
       kibanaDataViews: [],
     });
 
-    (createEmbeddable as jest.Mock).mockResolvedValue(mockCreateEmbeddable);
-
-    const wrapper: ReactWrapper = mount(
+    const { getByTestId, queryByTestId } = render(
       <TestProviders>
         <EmbeddedMapComponent {...testProps} />
       </TestProviders>
     );
     await waitFor(() => {
-      wrapper.update();
-
-      expect(wrapper.find('[data-test-subj="EmbeddablePanel"]').exists()).toEqual(false);
-      expect(wrapper.find('[data-test-subj="IndexPatternsMissingPrompt"]').exists()).toEqual(true);
-      expect(wrapper.find('[data-test-subj="loading-panel"]').exists()).toEqual(false);
+      expect(queryByTestId('EmbeddablePanel')).not.toBeInTheDocument();
+      expect(getByTestId('IndexPatternsMissingPrompt')).toBeInTheDocument();
+      expect(queryByTestId('loading-spinner')).not.toBeInTheDocument();
     });
   });
 
   test('renders Loader', async () => {
-    const spy = jest.spyOn(redux, 'useSelector');
-    spy.mockReturnValue(mockSelector);
+    mockCreateEmbeddable.mockResolvedValue(null);
 
-    (createEmbeddable as jest.Mock).mockResolvedValue(null);
-
-    const wrapper: ReactWrapper = mount(
+    const { getByTestId, queryByTestId } = render(
       <TestProviders>
         <EmbeddedMapComponent {...testProps} />
       </TestProviders>
     );
     await waitFor(() => {
-      wrapper.update();
-
-      expect(wrapper.find('[data-test-subj="EmbeddablePanel"]').exists()).toEqual(false);
-      expect(wrapper.find('[data-test-subj="IndexPatternsMissingPrompt"]').exists()).toEqual(false);
-      expect(wrapper.find('[data-test-subj="loading-panel"]').exists()).toEqual(true);
+      expect(queryByTestId('EmbeddablePanel')).not.toBeInTheDocument();
+      expect(queryByTestId('IndexPatternsMissingPrompt')).not.toBeInTheDocument();
+      expect(getByTestId('loading-spinner')).toBeInTheDocument();
     });
   });
 
   test('map hidden on close', async () => {
     mockGetStorage.mockReturnValue(false);
-    const wrapper = mount(
+    const { getByTestId, queryByTestId } = render(
       <TestProviders>
         <EmbeddedMapComponent {...testProps} />
       </TestProviders>
     );
 
-    expect(wrapper.find('[data-test-subj="siemEmbeddable"]').first().exists()).toEqual(false);
-
-    const container = wrapper.find('[data-test-subj="false-toggle-network-map"]').last();
-    container.simulate('click');
+    expect(queryByTestId('siemEmbeddable')).not.toBeInTheDocument();
+    getByTestId('false-toggle-network-map').click();
 
     await waitFor(() => {
-      wrapper.update();
       expect(mockSetStorage).toHaveBeenNthCalledWith(1, 'network_map_visbile', true);
-      expect(wrapper.find('[data-test-subj="siemEmbeddable"]').first().exists()).toEqual(true);
+      expect(getByTestId('siemEmbeddable')).toBeInTheDocument();
     });
   });
 
   test('map visible on open', async () => {
-    const wrapper = mount(
+    const { getByTestId, queryByTestId } = render(
       <TestProviders>
         <EmbeddedMapComponent {...testProps} />
       </TestProviders>
     );
 
-    expect(wrapper.find('[data-test-subj="siemEmbeddable"]').first().exists()).toEqual(true);
-    const container = wrapper.find('[data-test-subj="true-toggle-network-map"]').last();
-    container.simulate('click');
+    expect(getByTestId('siemEmbeddable')).toBeInTheDocument();
+    getByTestId('true-toggle-network-map').click();
 
     await waitFor(() => {
-      wrapper.update();
       expect(mockSetStorage).toHaveBeenNthCalledWith(1, 'network_map_visbile', false);
-      expect(wrapper.find('[data-test-subj="siemEmbeddable"]').first().exists()).toEqual(false);
+      expect(queryByTestId('siemEmbeddable')).not.toBeInTheDocument();
+    });
+  });
+
+  test('On mount, selects existing Kibana data views that match any selected index pattern', async () => {
+    render(
+      <TestProviders>
+        <EmbeddedMapComponent {...testProps} />
+      </TestProviders>
+    );
+    await waitFor(() => {
+      const dataViewArg = (getLayerList as jest.Mock).mock.calls[0][0];
+      expect(dataViewArg).toEqual([filebeatDataView]);
+    });
+  });
+
+  test('On rerender with new selected patterns, selects existing Kibana data views that match any selected index pattern', async () => {
+    mockUseSourcererDataView
+      .mockReturnValueOnce({ selectedPatterns: ['filebeat-*', 'packetbeat-*'] })
+      .mockReturnValue({ selectedPatterns: ['filebeat-*', 'auditbeat-*'] });
+    const { rerender } = render(
+      <TestProviders>
+        <EmbeddedMapComponent {...testProps} />
+      </TestProviders>
+    );
+    await waitFor(() => {
+      const dataViewArg = (getLayerList as jest.Mock).mock.calls[0][0];
+      expect(dataViewArg).toEqual([filebeatDataView]);
+    });
+    rerender(
+      <TestProviders>
+        <EmbeddedMapComponent {...testProps} />
+      </TestProviders>
+    );
+    await waitFor(() => {
+      // data view is updated with the returned embeddable.setLayerList callback, which is passesd getLayerList(dataViews)
+      const dataViewArg = (getLayerList as jest.Mock).mock.calls[1][0];
+      expect(dataViewArg).toEqual([filebeatDataView, auditbeatDataView]);
     });
   });
 });

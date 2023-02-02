@@ -35,7 +35,7 @@ export const DataRetentionTab = () => {
       }),
     },
     {
-      field: 'name',
+      field: 'policy.name',
       name: i18n.translate('xpack.synthetics.settingsRoute.table.policy', {
         defaultMessage: 'Policy',
       }),

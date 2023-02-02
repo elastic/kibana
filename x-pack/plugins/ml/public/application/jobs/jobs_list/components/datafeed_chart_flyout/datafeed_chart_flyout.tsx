@@ -131,7 +131,7 @@ export const DatafeedChartFlyout: FC<DatafeedChartFlyoutProps> = ({
   const [messageData, setMessageData] = useState<LineAnnotationDatum[]>([]);
   const [sourceData, setSourceData] = useState<ChartDataWithNullValues>([]);
   const [showAnnotations, setShowAnnotations] = useState<boolean>(true);
-  const [showModelSnapshots, setShowModelSnapshots] = useState<boolean>(true);
+  const [showModelSnapshots, setShowModelSnapshots] = useState<boolean>(false);
   const [range, setRange] = useState<{ start: string; end: string } | undefined>();
   const canUpdateDatafeed = useMemo(() => checkPermission('canUpdateDatafeed'), []);
   const canCreateJob = useMemo(() => checkPermission('canCreateJob'), []);
@@ -443,7 +443,7 @@ export const DatafeedChartFlyout: FC<DatafeedChartFlyoutProps> = ({
                             defaultMessage: 'Count',
                           })}
                           position={Position.Left}
-                          tickFormat={(d) => (d === null ? notAvailableMessage : d)}
+                          tickFormat={(d) => (d === null ? notAvailableMessage : String(d))}
                         />
                         {showAnnotations ? (
                           <>

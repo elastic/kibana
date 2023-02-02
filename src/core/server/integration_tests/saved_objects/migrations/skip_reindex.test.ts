@@ -63,7 +63,8 @@ describe('skip reindexing', () => {
 
     logs = await fs.readFile(logFilePath, 'utf-8');
 
-    expect(logs).toMatch('INIT -> PREPARE_COMPATIBLE_MIGRATION');
+    expect(logs).toMatch('INIT -> WAIT_FOR_YELLOW_SOURCE');
+    expect(logs).toMatch('WAIT_FOR_YELLOW_SOURCE -> PREPARE_COMPATIBLE_MIGRATION');
     expect(logs).toMatch('PREPARE_COMPATIBLE_MIGRATION -> OUTDATED_DOCUMENTS_SEARCH_OPEN_PIT');
     expect(logs).toMatch('CHECK_TARGET_MAPPINGS -> CHECK_VERSION_INDEX_READY_ACTIONS');
     expect(logs).toMatch('CHECK_VERSION_INDEX_READY_ACTIONS -> DONE');

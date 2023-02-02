@@ -5,29 +5,14 @@
  * 2.0.
  */
 
-export interface Meta {
-  from: number;
-  size: number;
-  total: number;
-}
+import { Page } from '../../../../../common/types/pagination';
 
-export interface EngineListDetails {
-  name: string;
-  indices: string[];
-  last_updated: string;
-  document_count: number;
-}
 export const DEFAULT_META = {
-  from: 1,
-  size: 3,
+  from: 0,
+  size: 10,
   total: 0,
 };
 
-export const convertMetaToPagination = (meta: Meta) => ({
-  pageIndex: meta.from - 1,
-  pageSize: meta.size,
-  totalItemCount: meta.total,
-});
-export const updateMetaPageIndex = (oldState: Meta, newPageIndex: number) => {
-  return { ...oldState, from: newPageIndex };
+export const updateMetaPageIndex = (oldState: Page, newPageIndex: number) => {
+  return { ...oldState, from: newPageIndex * oldState.size };
 };

@@ -73,8 +73,8 @@ export const confirmCreateWithUnsaved = (
             aria-describedby={descriptionId}
           >
             <EuiModalHeader data-test-subj="dashboardCreateConfirm">
-              <EuiModalHeaderTitle>
-                <h2 id={titleId}>{createConfirmStrings.getCreateTitle()}</h2>
+              <EuiModalHeaderTitle id={titleId} component="h2">
+                {createConfirmStrings.getCreateTitle()}
               </EuiModalHeaderTitle>
             </EuiModalHeader>
 

@@ -149,6 +149,7 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
                 ],
                 enabled: true,
                 rule_type_id: 'test.noop',
+                running: false,
                 consumer: 'alertsFixture',
                 params: {},
                 created_by: user.username,

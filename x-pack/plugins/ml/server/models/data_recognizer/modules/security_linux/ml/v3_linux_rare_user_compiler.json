@@ -1,5 +1,4 @@
 {
-  "job_type": "anomaly_detector",
   "description": "Security: Linux - Looks for compiler activity by a user context which does not normally run compilers. This can be ad-hoc software changes or unauthorized software deployment. This can also be due to local privilege elevation via locally run exploits or malware activity.",
   "groups": [
     "security",

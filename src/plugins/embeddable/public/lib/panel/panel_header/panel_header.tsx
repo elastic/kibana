@@ -19,7 +19,6 @@ import {
 import classNames from 'classnames';
 import React from 'react';
 import { Action } from '@kbn/ui-actions-plugin/public';
-import { uiToReactComponent } from '@kbn/kibana-react-plugin/public';
 import { PanelOptionsMenu } from './panel_options_menu';
 import { IEmbeddable } from '../../embeddables';
 import { EmbeddableContext, panelBadgeTrigger, panelNotificationTrigger } from '../../triggers';
@@ -65,7 +64,7 @@ function renderNotifications(
     const context = { embeddable };
 
     let badge = notification.MenuItem ? (
-      React.createElement(uiToReactComponent(notification.MenuItem), {
+      React.createElement(notification.MenuItem, {
         key: notification.id,
         context: {
           embeddable,

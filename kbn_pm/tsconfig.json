@@ -15,14 +15,13 @@
   ],
   "kbn_references": [
     "@kbn/babel-register",
-    "@kbn/bazel-packages",
     "@kbn/repo-info",
     "@kbn/yarn-lock-validator",
     "@kbn/get-repo-files",
     "@kbn/sort-package-json",
     { "path": "../src/dev/tsconfig.json" },
     "@kbn/ci-stats-reporter",
-    "@kbn/package-map",
-    "@kbn/ts-projects"
+    "@kbn/ts-projects",
+    "@kbn/repo-packages"
   ]
 }

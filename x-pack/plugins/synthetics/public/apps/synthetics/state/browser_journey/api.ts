@@ -17,7 +17,7 @@ import {
   Ping,
   PingType,
 } from '../../../../../common/runtime_types';
-import { API_URLS } from '../../../../../common/constants';
+import { API_URLS, SYNTHETICS_API_URLS } from '../../../../../common/constants';
 
 export interface FetchJourneyStepsParams {
   checkGroup: string;
@@ -30,11 +30,11 @@ export async function fetchScreenshotBlockSet(params: string[]): Promise<Screens
   });
 }
 
-export async function fetchJourneySteps(
+export async function fetchBrowserJourney(
   params: FetchJourneyStepsParams
 ): Promise<SyntheticsJourneyApiResponse> {
   return apiService.get(
-    API_URLS.JOURNEY.replace('{checkGroup}', params.checkGroup),
+    SYNTHETICS_API_URLS.JOURNEY.replace('{checkGroup}', params.checkGroup),
     { syntheticEventTypes: params.syntheticEventTypes },
     SyntheticsJourneyApiResponseType
   );

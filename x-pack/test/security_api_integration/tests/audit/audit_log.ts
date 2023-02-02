@@ -16,7 +16,7 @@ export default function ({ getService }: FtrProviderContext) {
   const { username, password } = getService('config').get('servers.kibana');
 
   describe('Audit Log', function () {
-    const logFilePath = Path.resolve(__dirname, '../../fixtures/audit/audit.log');
+    const logFilePath = Path.resolve(__dirname, '../../plugins/audit_log/audit.log');
     const logFile = new FileWrapper(logFilePath, retry);
 
     beforeEach(async () => {

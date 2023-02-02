@@ -20,6 +20,7 @@
     "@kbn/alerting-plugin",
     "@kbn/utility-types",
     "@kbn/es-query",
+    "@kbn/securitysolution-ecs",
     "@kbn/securitysolution-t-grid",
     "@kbn/rule-data-utils",
     "@kbn/rule-registry-plugin",

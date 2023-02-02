@@ -39,9 +39,9 @@ export type ComponentOpts = {
   item: RuleTableItem;
   onRuleChanged: () => Promise<void>;
   onLoading: (isLoading: boolean) => void;
-  setRulesToDelete: React.Dispatch<React.SetStateAction<string[]>>;
+  onDeleteRule: (item: RuleTableItem) => void;
   onEditRule: (item: RuleTableItem) => void;
-  onUpdateAPIKey: (id: string[]) => void;
+  onUpdateAPIKey: (item: RuleTableItem) => void;
   onRunRule: (item: RuleTableItem) => void;
   onCloneRule: (ruleId: string) => void;
 } & Pick<
@@ -55,7 +55,7 @@ export const CollapsedItemActions: React.FunctionComponent<ComponentOpts> = ({
   onRuleChanged,
   bulkDisableRules,
   bulkEnableRules,
-  setRulesToDelete,
+  onDeleteRule,
   onEditRule,
   onUpdateAPIKey,
   snoozeRule,
@@ -243,7 +243,7 @@ export const CollapsedItemActions: React.FunctionComponent<ComponentOpts> = ({
           'data-test-subj': 'updateApiKey',
           onClick: () => {
             setIsPopoverOpen(!isPopoverOpen);
-            onUpdateAPIKey([item.id]);
+            onUpdateAPIKey(item);
           },
           name: i18n.translate(
             'xpack.triggersActionsUI.sections.rulesList.collapsedItemActions.updateApiKey',
@@ -268,7 +268,7 @@ export const CollapsedItemActions: React.FunctionComponent<ComponentOpts> = ({
           'data-test-subj': 'deleteRule',
           onClick: () => {
             setIsPopoverOpen(!isPopoverOpen);
-            setRulesToDelete([item.id]);
+            onDeleteRule(item);
           },
           name: i18n.translate(
             'xpack.triggersActionsUI.sections.rulesList.collapsedItemActons.deleteRuleTitle',

@@ -12,7 +12,7 @@ import { createAbsolutePathSerializer } from '@kbn/jest-serializers';
 import { getOptimizerCacheKey } from './optimizer_cache_key';
 import { OptimizerConfig } from './optimizer_config';
 
-jest.mock('@kbn/package-map', () => {
+jest.mock('@kbn/repo-packages', () => {
   return {
     readHashOfPackageMap() {
       return '<hash of package map>';

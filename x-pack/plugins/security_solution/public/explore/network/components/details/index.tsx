@@ -56,6 +56,7 @@ export interface IpOverviewProps {
   startDate: string;
   type: networkModel.NetworkType;
   indexPatterns: string[];
+  jobNameById: Record<string, string | undefined>;
 }
 
 export const IpOverview = React.memo<IpOverviewProps>(
@@ -74,6 +75,7 @@ export const IpOverview = React.memo<IpOverviewProps>(
     anomaliesData,
     narrowDateRange,
     indexPatterns,
+    jobNameById,
   }) => {
     const capabilities = useMlCapabilities();
     const userPermissions = hasMlUserPermissions(capabilities);
@@ -109,6 +111,7 @@ export const IpOverview = React.memo<IpOverviewProps>(
                 endDate={endDate}
                 isLoading={isLoadingAnomaliesData}
                 narrowDateRange={narrowDateRange}
+                jobNameById={jobNameById}
               />
             ),
           },

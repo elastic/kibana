@@ -6,53 +6,42 @@
  * Side Public License, v 1.
  */
 
-import { connectToQueryState, QueryState } from '@kbn/data-plugin/public';
-import { createStateContainer, useContainerState } from '@kbn/kibana-utils-plugin/public';
-import { useEffect, useMemo, useRef } from 'react';
-import type { UnifiedHistogramRequestContext, UnifiedHistogramServices } from '../types';
+import { getAbsoluteTimeRange } from '@kbn/data-plugin/common';
+import type { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
+import { useCallback, useMemo, useRef } from 'react';
+import type { UnifiedHistogramServices } from '../types';
+import { useStableCallback } from './use_stable_callback';
 
 export const useRequestParams = ({
   services,
-  lastReloadRequestTime,
-  request,
+  query: originalQuery,
+  filters: originalFilters,
+  timeRange: originalTimeRange,
 }: {
   services: UnifiedHistogramServices;
-  lastReloadRequestTime: number | undefined;
-  request?: UnifiedHistogramRequestContext;
+  query?: Query | AggregateQuery;
+  filters?: Filter[];
+  timeRange?: TimeRange;
 }) => {
   const { data } = services;
 
-  const queryStateContainer = useRef(
-    createStateContainer<QueryState>({
-      filters: data.query.filterManager.getFilters(),
-      query: data.query.queryString.getQuery(),
-      refreshInterval: data.query.timefilter.timefilter.getRefreshInterval(),
-      time: data.query.timefilter.timefilter.getTime(),
-    })
-  ).current;
-
-  const queryState = useContainerState(queryStateContainer);
-
-  useEffect(() => {
-    return connectToQueryState(data.query, queryStateContainer, {
-      time: true,
-      query: true,
-      filters: true,
-      refreshInterval: true,
-    });
-  }, [data.query, queryStateContainer]);
-
-  const filters = useMemo(() => queryState.filters ?? [], [queryState.filters]);
+  const filters = useMemo(() => originalFilters ?? [], [originalFilters]);
 
   const query = useMemo(
-    () => queryState.query ?? data.query.queryString.getDefaultQuery(),
-    [data.query.queryString, queryState.query]
+    () => originalQuery ?? data.query.queryString.getDefaultQuery(),
+    [data.query.queryString, originalQuery]
   );
 
   const relativeTimeRange = useMemo(
-    () => queryState.time ?? data.query.timefilter.timefilter.getTimeDefaults(),
-    [data.query.timefilter.timefilter, queryState.time]
+    () => originalTimeRange ?? data.query.timefilter.timefilter.getTimeDefaults(),
+    [data.query.timefilter.timefilter, originalTimeRange]
   );
 
-  return { filters, query, relativeTimeRange };
+  const timeRange = useRef(getAbsoluteTimeRange(relativeTimeRange));
+  const getTimeRange = useCallback(() => timeRange.current, []);
+  const updateTimeRange = useStableCallback(() => {
+    timeRange.current = getAbsoluteTimeRange(relativeTimeRange);
+  });
+
+  return { filters, query, getTimeRange, updateTimeRange, relativeTimeRange };
 };

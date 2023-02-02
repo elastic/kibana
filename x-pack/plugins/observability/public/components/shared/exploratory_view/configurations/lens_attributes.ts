@@ -50,6 +50,7 @@ import {
   RECORDS_FIELD,
   RECORDS_PERCENTAGE_FIELD,
   REPORT_METRIC_FIELD,
+  REPORT_METRIC_TIMESTAMP,
   ReportTypes,
   TERMS_COLUMN,
   USE_BREAK_DOWN_COLUMN,
@@ -488,7 +489,7 @@ export class LensAttributes {
       isBucketed: true,
       label: '@timestamp',
       operationType: 'date_histogram',
-      params: { interval: 'auto' },
+      params: { interval: 'auto', includeEmptyRows: true },
       scale: 'interval',
     };
   }
@@ -515,11 +516,13 @@ export class LensAttributes {
   getXAxis(layerConfig: LayerConfig, layerId: string) {
     const { xAxisColumn } = layerConfig.seriesConfig;
 
-    if (!xAxisColumn.sourceField) {
+    let xSourceFiled = xAxisColumn?.sourceField;
+
+    if (!xSourceFiled) {
       return [xAxisColumn as LastValueIndexPatternColumn];
     }
 
-    if (xAxisColumn?.sourceField === USE_BREAK_DOWN_COLUMN) {
+    if (xSourceFiled === USE_BREAK_DOWN_COLUMN) {
       return this.getBreakdownColumn({
         layerId,
         layerConfig,
@@ -527,10 +530,22 @@ export class LensAttributes {
       });
     }
 
-    if (xAxisColumn.sourceField === REPORT_METRIC_FIELD) {
-      const { paramFilters } = this.getFieldMeta(xAxisColumn.sourceField, layerConfig);
+    if (xSourceFiled === REPORT_METRIC_FIELD) {
+      const { paramFilters } = this.getFieldMeta(xSourceFiled, layerConfig);
       if (paramFilters) {
         return this.getFiltersColumn({ paramFilters });
+      }
+    }
+
+    if (xSourceFiled === REPORT_METRIC_TIMESTAMP) {
+      const metricOption = parseCustomFieldName(
+        layerConfig.seriesConfig,
+        layerConfig.selectedMetricField
+      );
+
+      if (!Array.isArray(metricOption)) {
+        const { timestampField = '@timestamp' } = metricOption;
+        xSourceFiled = timestampField;
       }
     }
 
@@ -538,7 +553,7 @@ export class LensAttributes {
       layerConfig,
       layerId,
       label: xAxisColumn.label,
-      sourceField: xAxisColumn.sourceField,
+      sourceField: xSourceFiled,
     });
   }
 
@@ -737,6 +752,10 @@ export class LensAttributes {
     }
 
     const fieldMetaInfo = this.getFieldMeta(sourceField, layerConfig);
+
+    if (!fieldMetaInfo.fieldMeta && fieldMetaInfo.fieldName === RECORDS_FIELD) {
+      return [this.getRecordsColumn(label, fieldMetaInfo.columnFilters?.[0], timeScale)];
+    }
 
     if ('items' in fieldMetaInfo) {
       const { items } = fieldMetaInfo;

@@ -26,7 +26,7 @@
         "tags": [],
         "label": "getImportResolver",
         "description": [
-          "\nCreate a request resolver for ESLint, requires a PluginPackageResolver from @kbn/bazel-packages which will\nbe created and cached on contextServices automatically.\n\nAll import requests in the repository should return a result, if they don't it's a bug\nwhich should be caught by the `@kbn/import/no_unresolved` rule, which should never be disabled. If you need help\nadding support for an import style please reach out to operations."
+          "\nCreate a request resolver for ESLint, requires a PluginPackageResolver from @kbn/repo-packages which will\nbe created and cached on contextServices automatically.\n\nAll import requests in the repository should return a result, if they don't it's a bug\nwhich should be caught by the `@kbn/import/no_unresolved` rule, which should never be disabled. If you need help\nadding support for an import style please reach out to operations."
         ],
         "signature": [
           "(context: ",

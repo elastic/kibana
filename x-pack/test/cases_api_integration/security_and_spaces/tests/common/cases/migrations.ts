@@ -29,11 +29,16 @@ export default function createGetTests({ getService }: FtrProviderContext) {
     // tests upgrading a 7.10.0 saved object to the latest version
     describe('7.10.0 -> latest stack version', () => {
       before(async () => {
-        await esArchiver.load('x-pack/test/functional/es_archives/cases/migrations/7.10.0');
+        await kibanaServer.importExport.load(
+          'x-pack/test/functional/fixtures/kbn_archiver/cases/7.10.0/data.json'
+        );
       });
 
       after(async () => {
-        await esArchiver.unload('x-pack/test/functional/es_archives/cases/migrations/7.10.0');
+        await kibanaServer.importExport.unload(
+          'x-pack/test/functional/fixtures/kbn_archiver/cases/7.10.0/data.json'
+        );
+        await deleteAllCaseItems(es);
       });
 
       it('migrates cases connector', async () => {
@@ -526,6 +531,24 @@ export default function createGetTests({ getService }: FtrProviderContext) {
             const caseID = hit._id;
             expect(expectedStatusValues[caseID]).not.to.be(undefined);
             expect(hit._source?.cases.status).to.eql(expectedStatusValues[caseID]);
+          }
+        });
+      });
+
+      describe('total_alerts', () => {
+        it('total_alerts field has default value -1', async () => {
+          const casesFromES = await getCaseSavedObjectsFromES({ es });
+          for (const hit of casesFromES.body.hits.hits) {
+            expect(hit._source?.cases.total_alerts).to.eql(-1);
+          }
+        });
+      });
+
+      describe('total_comments', () => {
+        it('total_comments field has default value -1', async () => {
+          const casesFromES = await getCaseSavedObjectsFromES({ es });
+          for (const hit of casesFromES.body.hits.hits) {
+            expect(hit._source?.cases.total_comments).to.eql(-1);
           }
         });
       });

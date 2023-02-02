@@ -161,6 +161,6 @@ export const tlsLegacyAlertFactory: UptimeAlertTypeFactory<ActionGroupIds> = (_s
       alertInstance.scheduleActions(TLS_LEGACY.id);
     }
 
-    return updateState(state, foundCerts);
+    return { state: updateState(state, foundCerts) };
   },
 });

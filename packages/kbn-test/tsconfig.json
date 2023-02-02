@@ -30,6 +30,7 @@
     "@kbn/jest-serializers",
     "@kbn/stdio-dev-helpers",
     "@kbn/babel-register",
-    "@kbn/package-map",
+    "@kbn/repo-packages",
+    "@kbn/core-saved-objects-api-server",
   ]
 }

@@ -1,22 +1,22 @@
 {
-    "extends": "../../../../tsconfig.base.json",
-    "compilerOptions": {
-      "outDir": "target/types",
-    },
-    "include": [
-      "common/**/*",
-      "public/**/*",
-      "server/**/*",
-      "*.ts"
-    ],
-    "kbn_references": [
-      "@kbn/core",
-      "@kbn/charts-plugin",
-      "@kbn/data-plugin",
-      "@kbn/expressions-plugin",
-      "@kbn/expression-gauge-plugin",
-      "@kbn/visualizations-plugin",
-      "@kbn/vis-default-editor-plugin",
+  "extends": "../../../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "target/types",
+  },
+  "include": [
+    "common/**/*",
+    "public/**/*",
+    "server/**/*",
+    "*.ts"
+  ],
+  "kbn_references": [
+    "@kbn/core",
+    "@kbn/charts-plugin",
+    "@kbn/data-plugin",
+    "@kbn/expressions-plugin",
+    "@kbn/expression-gauge-plugin",
+    "@kbn/visualizations-plugin",
+    "@kbn/vis-default-editor-plugin",
     "@kbn/kibana-utils-plugin",
     "@kbn/data-views-plugin",
     "@kbn/utility-types",
@@ -24,8 +24,8 @@
     "@kbn/i18n-react",
     "@kbn/coloring",
     "@kbn/config-schema",
-    ],
+  ],
   "exclude": [
     "target/**/*",
   ]
-  }
+}

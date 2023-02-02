@@ -21,7 +21,8 @@ function findFeature(layer, callbackFn) {
 export default function ({ getService }) {
   const supertest = getService('supertest');
 
-  describe('getGridTile', () => {
+  // FAILING ES PROMOTION: https://github.com/elastic/kibana/issues/149068
+  describe.skip('getGridTile', () => {
     const URL = `/api/maps/mvt/getGridTile/3/2/3.pbf\
 ?geometryFieldName=geo.coordinates\
 &hasLabels=false\

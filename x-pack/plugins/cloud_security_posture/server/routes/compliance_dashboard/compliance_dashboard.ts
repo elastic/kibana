@@ -7,7 +7,8 @@
 
 import { transformError } from '@kbn/securitysolution-es-utils';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
-import type { ComplianceDashboardData } from '../../../common/types';
+import { schema } from '@kbn/config-schema';
+import type { PosturePolicyTemplate, ComplianceDashboardData } from '../../../common/types';
 import { LATEST_FINDINGS_INDEX_DEFAULT_NS, STATS_ROUTE_PATH } from '../../../common/constants';
 import { getGroupedFindingsEvaluation } from './get_grouped_findings_evaluation';
 import { ClusterWithoutTrend, getClusters } from './get_clusters';
@@ -32,16 +33,23 @@ const getClustersTrends = (clustersWithoutTrends: ClusterWithoutTrend[], trends:
 const getSummaryTrend = (trends: Trends) =>
   trends.map(({ timestamp, summary }) => ({ timestamp, ...summary }));
 
+const queryParamsSchema = {
+  params: schema.object({
+    // TODO: CIS AWS - replace with strict policy template values once available
+    policy_template: schema.string(),
+  }),
+};
+
 export const defineGetComplianceDashboardRoute = (router: CspRouter): void =>
   router.get(
     {
       path: STATS_ROUTE_PATH,
-      validate: false,
+      validate: queryParamsSchema,
       options: {
         tags: ['access:cloud-security-posture-read'],
       },
     },
-    async (context, _, response) => {
+    async (context, request, response) => {
       const cspContext = await context.csp;
 
       try {
@@ -52,8 +60,13 @@ export const defineGetComplianceDashboardRoute = (router: CspRouter): void =>
           keep_alive: '30s',
         });
 
+        const policyTemplate = request.params.policy_template as PosturePolicyTemplate;
+
         const query: QueryDslQueryContainer = {
-          match_all: {},
+          bool: {
+            // TODO: CIS AWS - replace filtered field to `policy_template` when available
+            filter: [{ term: { 'rule.benchmark.id': policyTemplate } }],
+          },
         };
 
         const [stats, groupedFindingsEvaluation, clustersWithoutTrends, trends] = await Promise.all(
@@ -61,7 +74,7 @@ export const defineGetComplianceDashboardRoute = (router: CspRouter): void =>
             getStats(esClient, query, pitId),
             getGroupedFindingsEvaluation(esClient, query, pitId),
             getClusters(esClient, query, pitId),
-            getTrends(esClient),
+            getTrends(esClient, policyTemplate),
           ]
         );
 

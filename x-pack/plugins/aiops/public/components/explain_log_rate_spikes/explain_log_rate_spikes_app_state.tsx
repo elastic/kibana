@@ -6,6 +6,7 @@
  */
 
 import React, { FC } from 'react';
+import { pick } from 'lodash';
 
 import { EuiCallOut } from '@elastic/eui';
 
@@ -16,6 +17,9 @@ import type { DataView } from '@kbn/data-views-plugin/public';
 import { StorageContextProvider } from '@kbn/ml-local-storage';
 import { UrlStateProvider } from '@kbn/ml-url-state';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
+import { DatePickerContextProvider } from '@kbn/ml-date-picker';
+import { UI_SETTINGS } from '@kbn/data-plugin/common';
+import { toMountPoint, wrapWithTheme } from '@kbn/kibana-react-plugin/public';
 
 import {
   SEARCH_QUERY_LANGUAGE,
@@ -24,6 +28,7 @@ import {
 } from '../../application/utils/search_utils';
 import type { AiopsAppDependencies } from '../../hooks/use_aiops_app_context';
 import { AiopsAppContext } from '../../hooks/use_aiops_app_context';
+import { DataSourceContext } from '../../hooks/use_data_source';
 import { AIOPS_STORAGE_KEYS } from '../../types/storage';
 
 import { SpikeAnalysisTableRowStateProvider } from '../spike_analysis_table/spike_analysis_table_row_provider';
@@ -95,14 +100,25 @@ export const ExplainLogRateSpikesAppState: FC<ExplainLogRateSpikesAppStateProps>
     );
   }
 
+  const datePickerDeps = {
+    ...pick(appDependencies, ['data', 'http', 'notifications', 'theme', 'uiSettings']),
+    toMountPoint,
+    wrapWithTheme,
+    uiSettingsKeys: UI_SETTINGS,
+  };
+
   return (
     <AiopsAppContext.Provider value={appDependencies}>
       <UrlStateProvider>
-        <SpikeAnalysisTableRowStateProvider>
-          <StorageContextProvider storage={localStorage} storageKeys={AIOPS_STORAGE_KEYS}>
-            <ExplainLogRateSpikesPage dataView={dataView} savedSearch={savedSearch} />
-          </StorageContextProvider>
-        </SpikeAnalysisTableRowStateProvider>
+        <DataSourceContext.Provider value={{ dataView, savedSearch }}>
+          <SpikeAnalysisTableRowStateProvider>
+            <StorageContextProvider storage={localStorage} storageKeys={AIOPS_STORAGE_KEYS}>
+              <DatePickerContextProvider {...datePickerDeps}>
+                <ExplainLogRateSpikesPage />
+              </DatePickerContextProvider>
+            </StorageContextProvider>
+          </SpikeAnalysisTableRowStateProvider>
+        </DataSourceContext.Provider>
       </UrlStateProvider>
     </AiopsAppContext.Provider>
   );

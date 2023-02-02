@@ -43,7 +43,6 @@ jest.mock('../../../common/components/charts/barchart', () => {
 jest.mock('../../../common/components/visualization_actions', () => {
   return {
     VisualizationActions: () => <div className="visualizationActions" />,
-    HISTOGRAM_ACTIONS_BUTTON_CLASS: 'histogram-actions-trigger',
   };
 });
 

@@ -14,7 +14,7 @@
 const Path = require('path');
 const resolve = require('resolve');
 const { REPO_ROOT } = require('@kbn/repo-info');
-const { readPackageMap } = require('@kbn/package-map');
+const { readPackageMap } = require('@kbn/repo-packages');
 
 const pkgMap = readPackageMap();
 

@@ -65,7 +65,7 @@ export type AlertInstanceMock<
   Context extends AlertInstanceContext = AlertInstanceContext
 > = jest.Mocked<Alert<State, Context>>;
 
-const createAlertFactoryMock = {
+export const createAlertFactoryMock = {
   create: <
     InstanceState extends AlertInstanceState = AlertInstanceState,
     InstanceContext extends AlertInstanceContext = AlertInstanceContext

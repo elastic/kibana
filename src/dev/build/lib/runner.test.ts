@@ -48,7 +48,9 @@ const setup = async () => {
     versionQualifier: '-SNAPSHOT',
     dockerContextUseLocalArtifact: false,
     dockerCrossCompile: false,
+    dockerNamespace: null,
     dockerPush: false,
+    dockerTag: '',
     dockerTagQualifier: '',
   });
 

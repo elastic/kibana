@@ -9,12 +9,13 @@ import React, { useEffect, useState } from 'react';
 import { ControlGroupContainer, CONTROL_GROUP_TYPE } from '@kbn/controls-plugin/public';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
 import { Filter, TimeRange } from '@kbn/es-query';
+import { DataView } from '@kbn/data-views-plugin/public';
 import { LazyControlsRenderer } from './lazy_controls_renderer';
 import { useControlPanels } from '../hooks/use_control_panels_url_state';
 
 interface Props {
   timeRange: TimeRange;
-  dataViewId: string;
+  dataView: DataView;
   filters: Filter[];
   query: {
     language: string;
@@ -31,12 +32,12 @@ const REFRESH_CONFIG = {
 
 export const ControlsContent: React.FC<Props> = ({
   timeRange,
-  dataViewId,
+  dataView,
   query,
   filters,
   onFilterChange,
 }) => {
-  const [controlPanel, setControlPanels] = useControlPanels(dataViewId);
+  const [controlPanel, setControlPanels] = useControlPanels(dataView);
   const [controlGroup, setControlGroup] = useState<ControlGroupContainer | undefined>();
 
   useEffect(() => {
@@ -60,7 +61,7 @@ export const ControlsContent: React.FC<Props> = ({
     <LazyControlsRenderer
       filters={filters}
       getInitialInput={async () => ({
-        id: dataViewId,
+        id: dataView.id ?? '',
         type: CONTROL_GROUP_TYPE,
         timeRange,
         refreshConfig: REFRESH_CONFIG,

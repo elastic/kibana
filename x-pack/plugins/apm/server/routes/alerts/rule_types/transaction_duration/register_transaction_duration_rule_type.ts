@@ -59,8 +59,8 @@ import {
 } from '../get_service_group_fields';
 
 const paramsSchema = schema.object({
-  serviceName: schema.string(),
-  transactionType: schema.string(),
+  serviceName: schema.maybe(schema.string()),
+  transactionType: schema.maybe(schema.string()),
   windowSize: schema.number(),
   windowUnit: schema.string(),
   threshold: schema.number(),
@@ -199,7 +199,7 @@ export function registerTransactionDurationRuleType({
       });
 
       if (!response.aggregations) {
-        return {};
+        return { state: {} };
       }
 
       // Converts threshold to microseconds because this is the unit used on transactionDuration
@@ -299,7 +299,7 @@ export function registerTransactionDurationRuleType({
           });
       }
 
-      return {};
+      return { state: {} };
     },
   });
 

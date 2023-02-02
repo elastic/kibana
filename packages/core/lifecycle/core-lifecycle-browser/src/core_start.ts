@@ -20,6 +20,7 @@ import type { SavedObjectsStart } from '@kbn/core-saved-objects-browser';
 import type { NotificationsStart } from '@kbn/core-notifications-browser';
 import type { ApplicationStart } from '@kbn/core-application-browser';
 import type { ChromeStart } from '@kbn/core-chrome-browser';
+import type { CustomBrandingStart } from '@kbn/core-custom-branding-browser';
 
 /**
  * Core services exposed to the `Plugin` start lifecycle
@@ -37,13 +38,18 @@ export interface CoreStart {
   application: ApplicationStart;
   /** {@link ChromeStart} */
   chrome: ChromeStart;
+  /** {@link CustomBrandingStart} */
+  customBranding: CustomBrandingStart;
   /** {@link DocLinksStart} */
   docLinks: DocLinksStart;
   /** {@link ExecutionContextStart} */
   executionContext: ExecutionContextStart;
   /** {@link HttpStart} */
   http: HttpStart;
-  /** {@link SavedObjectsStart} */
+  /**
+   * {@link SavedObjectsStart}
+   * @deprecated See https://github.com/elastic/kibana/issues/149098
+   */
   savedObjects: SavedObjectsStart;
   /** {@link I18nStart} */
   i18n: I18nStart;

@@ -7,13 +7,11 @@
 import { MonitorOverviewResult, OverviewStatusState } from '../../../../../common/runtime_types';
 
 import { IHttpSerializedFetchError } from '../utils/http_error';
+import { MonitorFilterState } from '../monitor_list';
 
-export interface MonitorOverviewPageState {
+export interface MonitorOverviewPageState extends MonitorFilterState {
   perPage: number;
   query?: string;
-  tags?: string[];
-  monitorType?: string[];
-  locations?: string[];
   sortOrder: 'asc' | 'desc';
   sortField: string;
 }
@@ -22,6 +20,7 @@ export type MonitorOverviewFlyoutConfig = {
   configId: string;
   id: string;
   location: string;
+  locationId: string;
 } | null;
 
 export interface MonitorOverviewState {
@@ -30,6 +29,7 @@ export interface MonitorOverviewState {
   pageState: MonitorOverviewPageState;
   loading: boolean;
   loaded: boolean;
+  isErrorPopoverOpen?: string | null;
   error: IHttpSerializedFetchError | null;
   status: OverviewStatusState | null;
   statusError: IHttpSerializedFetchError | null;

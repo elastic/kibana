@@ -299,6 +299,7 @@ export const createNewTermsAlertType = (
             mergeStrategy,
             indicesToQuery: inputIndex,
             alertTimestampOverride,
+            ruleExecutionLogger,
           });
 
           const bulkCreateResult = await bulkCreate(

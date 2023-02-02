@@ -49,10 +49,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await alerts.setAlertInterval('11');
       });
 
-      it('can set alert throttle interval', async () => {
-        await alerts.setAlertThrottleInterval('30');
-      });
-
       it('can set alert status number of time', async () => {
         await alerts.setAlertStatusNumTimes('3');
       });
@@ -170,10 +166,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       it('can set alert interval', async () => {
         await alerts.setAlertInterval('11');
-      });
-
-      it('can set alert throttle interval', async () => {
-        await alerts.setAlertThrottleInterval('30');
       });
 
       it('can save alert', async () => {

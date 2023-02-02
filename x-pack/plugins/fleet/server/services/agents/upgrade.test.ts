@@ -13,6 +13,7 @@ import { createAppContextStartContractMock } from '../../mocks';
 
 import { sendUpgradeAgentsActions } from './upgrade';
 import { createClientMock } from './action.mock';
+import { getRollingUpgradeOptions } from './upgrade_action_runner';
 
 describe('sendUpgradeAgentsActions (plural)', () => {
   beforeEach(async () => {
@@ -100,5 +101,50 @@ describe('sendUpgradeAgentsActions (plural)', () => {
       expect(doc).toHaveProperty('upgrade_started_at');
       expect(doc.upgraded_at).toEqual(null);
     }
+  });
+});
+
+describe('getRollingUpgradeOptions', () => {
+  it('should set longer expiration for 1h duration', () => {
+    const options = getRollingUpgradeOptions('2023-01-06T00:00:00Z', 3600);
+    expect(options).toEqual({
+      expiration: '2023-01-06T02:00:00.000Z',
+      minimum_execution_duration: 3600,
+      rollout_duration_seconds: 3600,
+      start_time: '2023-01-06T00:00:00Z',
+    });
+  });
+  it('should set longer expiration for 2h duration', () => {
+    const options = getRollingUpgradeOptions('2023-01-06T00:00:00Z', 7200);
+    expect(options).toEqual({
+      expiration: '2023-01-06T04:00:00.000Z',
+      minimum_execution_duration: 7200,
+      rollout_duration_seconds: 7200,
+      start_time: '2023-01-06T00:00:00Z',
+    });
+  });
+
+  it('should set normal expiration for longer duration', () => {
+    const options = getRollingUpgradeOptions('2023-01-06T00:00:00Z', 36000);
+    expect(options).toEqual({
+      expiration: '2023-01-06T10:00:00.000Z',
+      minimum_execution_duration: 7200,
+      rollout_duration_seconds: 36000,
+      start_time: '2023-01-06T00:00:00Z',
+    });
+  });
+
+  it('should set min expiration for no duration', () => {
+    const options = getRollingUpgradeOptions('2023-01-06T00:00:00Z');
+    expect(options).toEqual({
+      expiration: '2023-01-06T02:00:00.000Z',
+      minimum_execution_duration: 7200,
+      start_time: '2023-01-06T00:00:00Z',
+    });
+  });
+
+  it('should return empty options for no start time, no duration', () => {
+    const options = getRollingUpgradeOptions();
+    expect(options).toEqual({});
   });
 });

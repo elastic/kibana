@@ -9,7 +9,7 @@ import React, { Fragment, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiPopover, EuiFilterButton, EuiFilterSelectItem, EuiTitle } from '@elastic/eui';
 
-interface TypeFilterProps {
+export interface TypeFilterProps {
   options: Array<{
     groupName: string;
     subOptions: Array<{

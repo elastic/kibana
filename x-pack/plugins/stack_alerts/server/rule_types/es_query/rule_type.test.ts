@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import type { Writable } from '@kbn/utility-types';
 import { RuleExecutorServices } from '@kbn/alerting-plugin/server';
 import {
@@ -24,6 +24,7 @@ import { ActionGroupId, ConditionMetAlertInstanceId } from './constants';
 import { OnlyEsQueryRuleParams, OnlySearchSourceRuleParams } from './types';
 import { searchSourceInstanceMock } from '@kbn/data-plugin/common/search/search_source/mocks';
 import { Comparator } from '../../../common/comparator_types';
+import { DEFAULT_FLAPPING_SETTINGS } from '@kbn/alerting-plugin/common/rules_settings';
 
 const logger = loggingSystemMock.create().get();
 const coreSetup = coreMock.createSetup();
@@ -168,7 +169,9 @@ describe('ruleType', () => {
 
       expect(result).toMatchInlineSnapshot(`
         Object {
-          "latestTimestamp": undefined,
+          "state": Object {
+            "latestTimestamp": undefined,
+          },
         }
       `);
     });
@@ -218,7 +221,9 @@ describe('ruleType', () => {
       });
 
       expect(result).toMatchObject({
-        latestTimestamp: new Date(newestDocumentTimestamp).toISOString(),
+        state: {
+          latestTimestamp: new Date(newestDocumentTimestamp).toISOString(),
+        },
       });
     });
 
@@ -270,7 +275,9 @@ describe('ruleType', () => {
       });
 
       expect(result).toMatchObject({
-        latestTimestamp: new Date(newestDocumentTimestamp).toISOString(),
+        state: {
+          latestTimestamp: new Date(newestDocumentTimestamp).toISOString(),
+        },
       });
     });
 
@@ -316,7 +323,9 @@ describe('ruleType', () => {
       });
 
       expect(result).toMatchObject({
-        latestTimestamp: new Date(oldestDocumentTimestamp).toISOString(),
+        state: {
+          latestTimestamp: new Date(oldestDocumentTimestamp).toISOString(),
+        },
       });
     });
 
@@ -358,7 +367,7 @@ describe('ruleType', () => {
         dateEnd: expect.any(String),
       });
 
-      expect(result).toMatchObject({
+      expect(result?.state).toMatchObject({
         latestTimestamp: new Date(oldestDocumentTimestamp).toISOString(),
       });
 
@@ -379,7 +388,7 @@ describe('ruleType', () => {
       const secondResult = await invokeExecutor({
         params,
         ruleServices,
-        state: result as EsQueryRuleState,
+        state: result?.state as EsQueryRuleState,
       });
 
       const existingInstance: AlertInstanceMock =
@@ -391,7 +400,9 @@ describe('ruleType', () => {
       });
 
       expect(secondResult).toMatchObject({
-        latestTimestamp: new Date(newestDocumentTimestamp).toISOString(),
+        state: {
+          latestTimestamp: new Date(newestDocumentTimestamp).toISOString(),
+        },
       });
     });
 
@@ -440,7 +451,9 @@ describe('ruleType', () => {
       });
 
       expect(result).toMatchObject({
-        latestTimestamp: new Date(oldestDocumentTimestamp).toISOString(),
+        state: {
+          latestTimestamp: new Date(oldestDocumentTimestamp).toISOString(),
+        },
       });
     });
 
@@ -490,7 +503,9 @@ describe('ruleType', () => {
       });
 
       expect(result).toMatchObject({
-        latestTimestamp: new Date(oldestDocumentTimestamp - 1000).toISOString(),
+        state: {
+          latestTimestamp: new Date(oldestDocumentTimestamp - 1000).toISOString(),
+        },
       });
     });
   });
@@ -677,7 +692,7 @@ async function invokeExecutor({
   state?: EsQueryRuleState;
 }) {
   return await ruleType.executor({
-    executionId: uuid.v4(),
+    executionId: uuidv4(),
     startedAt: new Date(),
     previousStartedAt: new Date(),
     services: ruleServices as unknown as RuleExecutorServices<
@@ -690,10 +705,10 @@ async function invokeExecutor({
       latestTimestamp: undefined,
       ...state,
     },
-    spaceId: uuid.v4(),
+    spaceId: uuidv4(),
     rule: {
-      id: uuid.v4(),
-      name: uuid.v4(),
+      id: uuidv4(),
+      name: uuidv4(),
       tags: [],
       consumer: '',
       producer: '',
@@ -712,5 +727,6 @@ async function invokeExecutor({
       notifyWhen: null,
     },
     logger,
+    flappingSettings: DEFAULT_FLAPPING_SETTINGS,
   });
 }

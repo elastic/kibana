@@ -1,8 +1,6 @@
 {
   "extends": "../tsconfig.base.json",
   "compilerOptions": {
-    "incremental": false,
-    "composite": false,
     "outDir": "target/types",
     "types": ["node", "mocha"],
     "paths": {

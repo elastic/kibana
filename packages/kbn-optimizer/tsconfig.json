@@ -22,12 +22,12 @@
     "@kbn/ui-shared-deps-npm",
     "@kbn/ui-shared-deps-src",
     "@kbn/tooling-log",
-    "@kbn/package-map",
     "@kbn/ci-stats-reporter",
     "@kbn/dev-cli-errors",
     "@kbn/repo-info",
     "@kbn/dev-cli-runner",
     "@kbn/jest-serializers",
     "@kbn/plugin-discovery",
+    "@kbn/repo-packages",
   ]
 }

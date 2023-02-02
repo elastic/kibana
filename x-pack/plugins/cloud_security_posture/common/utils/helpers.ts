@@ -18,7 +18,7 @@ import {
   CLOUDBEAT_VANILLA,
   CSP_RULE_TEMPLATE_SAVED_OBJECT_TYPE,
 } from '../constants';
-import { BenchmarkId } from '../types';
+import type { BenchmarkId, Score } from '../types';
 
 /**
  * @example
@@ -64,10 +64,23 @@ const getInputType = (inputType: string): string => {
   // Get the last part of the input type, input type structure: cloudbeat/<benchmark_id>
   return inputType.split('/')[1];
 };
-export const getCSPKuery = `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name:${CLOUD_SECURITY_POSTURE_PACKAGE_NAME}`;
+
+export const CSP_FLEET_PACKAGE_KUERY = `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name:${CLOUD_SECURITY_POSTURE_PACKAGE_NAME}`;
 
 export function assert(condition: any, msg?: string): asserts condition {
   if (!condition) {
     throw new Error(msg);
   }
 }
+
+/**
+ * @param value value is [0, 1] range
+ */
+export const roundScore = (value: number): Score => Number((value * 100).toFixed(1));
+
+export const calculatePostureScore = (passed: number, failed: number): Score => {
+  const total = passed + failed;
+  if (total === 0) return total;
+
+  return roundScore(passed / (passed + failed));
+};

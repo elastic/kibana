@@ -30,6 +30,7 @@ interface EngineValues {
   engineNotFound: boolean;
   searchKey: string;
   intervalId: number | null;
+  hasIncompleteFields: boolean;
 }
 
 interface EngineActions {
@@ -127,6 +128,10 @@ export const EngineLogic = kea<MakeLogicType<EngineValues, EngineActions>>({
         const searchKey = (engine.apiTokens || []).find(isSearchKey);
         return searchKey?.key || '';
       },
+    ],
+    hasIncompleteFields: [
+      () => [selectors.engine],
+      ({ incompleteFields }) => incompleteFields?.length > 0,
     ],
   }),
   listeners: ({ actions, values }) => ({

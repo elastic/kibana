@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 module.exports = {
-  ['@kbn/bazel-packages']() {
+  ['@kbn/repo-packages']() {
     require('@kbn/babel-register').install();
-    return require('@kbn/bazel-packages');
+    return require('@kbn/repo-packages');
   },
 
   ['@kbn/ci-stats-reporter']() {
@@ -24,11 +24,6 @@ module.exports = {
   ['@kbn/sort-package-json']() {
     require('@kbn/babel-register').install();
     return require('@kbn/sort-package-json');
-  },
-
-  ['@kbn/package-map']() {
-    require('@kbn/babel-register').install();
-    return require('@kbn/package-map');
   },
 
   ['@kbn/get-repo-files']() {

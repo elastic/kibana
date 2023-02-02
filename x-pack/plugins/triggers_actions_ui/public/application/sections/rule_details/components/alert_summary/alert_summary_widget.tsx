@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiLoadingSpinner } from '@elastic/eui';
+import { EuiLoadingChart } from '@elastic/eui';
 import React from 'react';
 import { useLoadAlertSummary } from '../../../../hooks/use_load_alert_summary';
 import { AlertSummaryWidgetProps } from '.';
@@ -21,9 +21,10 @@ export const AlertSummaryWidget = ({
   fullSize,
   onClick = () => {},
   timeRange,
+  chartThemes,
 }: AlertSummaryWidgetProps) => {
   const {
-    alertSummary: { activeAlertCount, activeAlerts, recoveredAlertCount, recoveredAlerts },
+    alertSummary: { activeAlertCount, activeAlerts, recoveredAlertCount },
     isLoading,
     error,
   } = useLoadAlertSummary({
@@ -32,24 +33,40 @@ export const AlertSummaryWidget = ({
     timeRange,
   });
 
-  if (isLoading) return <EuiLoadingSpinner data-test-subj="alertSummaryWidgetLoading" />;
+  if (isLoading)
+    return (
+      <div
+        style={{
+          minHeight: fullSize ? 238 : 224,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+        }}
+      >
+        <EuiLoadingChart size="l" data-test-subj="alertSummaryWidgetLoading" />
+      </div>
+    );
   if (error) return <AlertSummaryWidgetError />;
 
   return fullSize ? (
-    <AlertsSummaryWidgetFullSize
-      activeAlertCount={activeAlertCount}
-      activeAlerts={activeAlerts}
-      recoveredAlertCount={recoveredAlertCount}
-      recoveredAlerts={recoveredAlerts}
-    />
+    // Only show full size version if there is data
+    activeAlertCount || recoveredAlertCount ? (
+      <AlertsSummaryWidgetFullSize
+        activeAlertCount={activeAlertCount}
+        activeAlerts={activeAlerts}
+        recoveredAlertCount={recoveredAlertCount}
+        dateFormat={timeRange.dateFormat}
+        chartThemes={chartThemes}
+      />
+    ) : null
   ) : (
     <AlertsSummaryWidgetCompact
       activeAlertCount={activeAlertCount}
       activeAlerts={activeAlerts}
       onClick={onClick}
       recoveredAlertCount={recoveredAlertCount}
-      recoveredAlerts={recoveredAlerts}
       timeRangeTitle={timeRange.title}
+      chartThemes={chartThemes}
     />
   );
 };

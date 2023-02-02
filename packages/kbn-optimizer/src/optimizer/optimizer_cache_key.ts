@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { readHashOfPackageMap } from '@kbn/package-map';
+import { readHashOfPackageMap } from '@kbn/repo-packages';
 
 import { CacheableWorkerConfig, Hashes } from '../common';
 import { OptimizerConfig } from './optimizer_config';

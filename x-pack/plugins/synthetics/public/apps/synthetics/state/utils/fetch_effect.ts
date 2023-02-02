@@ -57,7 +57,7 @@ export const sendErrorToast = (payload: ToastParams<ErrorToastOptions>, error: E
 export function fetchEffectFactory<T, R, S, F>(
   fetch: (request: T) => Promise<R>,
   success: (response: R) => PayloadAction<S>,
-  fail: (error: IHttpSerializedFetchError) => PayloadAction<F>,
+  fail: (error: IHttpSerializedFetchError<T>) => PayloadAction<F>,
   onSuccess?: ((response: R) => void) | string,
   onFailure?: ((error: Error) => void) | string
 ) {
@@ -68,7 +68,7 @@ export function fetchEffectFactory<T, R, S, F>(
         // eslint-disable-next-line no-console
         console.error(response);
 
-        yield put(fail(serializeHttpFetchError(response as IHttpFetchError)));
+        yield put(fail(serializeHttpFetchError(response as IHttpFetchError, action.payload)));
         if (typeof onFailure === 'function') {
           onFailure?.(response);
         } else if (typeof onFailure === 'string') {
@@ -91,7 +91,7 @@ export function fetchEffectFactory<T, R, S, F>(
 
         if (typeof onSuccess === 'function') {
           onSuccess?.(response as R);
-        } else if (typeof onSuccess === 'string') {
+        } else if (onSuccess && typeof onSuccess === 'string') {
           kibanaService.core.notifications.toasts.addSuccess(onSuccess);
         }
       }
@@ -107,7 +107,7 @@ export function fetchEffectFactory<T, R, S, F>(
         });
       }
 
-      yield put(fail(serializeHttpFetchError(error)));
+      yield put(fail(serializeHttpFetchError(error, action.payload)));
       if (typeof onFailure === 'function') {
         onFailure?.(error);
       } else if (typeof onFailure === 'string') {

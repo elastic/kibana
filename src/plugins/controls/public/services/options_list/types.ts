@@ -13,4 +13,6 @@ export interface ControlsOptionsListService {
     request: OptionsListRequest,
     abortSignal: AbortSignal
   ) => Promise<OptionsListResponse>;
+
+  clearOptionsListCache: () => void;
 }

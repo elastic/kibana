@@ -10,7 +10,10 @@ import { render } from '@testing-library/react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { AlertSummaryWidget } from './alert_summary_widget';
 import { AlertSummaryWidgetProps } from './types';
-import { mockAlertSummaryTimeRange } from '../../../../mock/alert_summary_widget';
+import {
+  mockedAlertSummaryTimeRange,
+  mockedChartThemes,
+} from '../../../../mock/alert_summary_widget';
 import { useLoadAlertSummary } from '../../../../hooks/use_load_alert_summary';
 
 jest.mock('@kbn/kibana-react-plugin/public/ui_settings/use_ui_setting', () => ({
@@ -28,10 +31,6 @@ jest.mock('../../../../hooks/use_load_alert_summary', () => ({
         { key: 1671321600000, doc_count: 0 },
         { key: 1671408000000, doc_count: 1 },
       ],
-      recoveredAlerts: [
-        { key: 1671321600000, doc_count: 2 },
-        { key: 1671408000000, doc_count: 5 },
-      ],
     },
   }),
 }));
@@ -39,7 +38,7 @@ const useLoadAlertSummaryMock = useLoadAlertSummary as jest.Mock;
 
 describe('AlertSummaryWidget', () => {
   const mockedTimeRange = {
-    ...mockAlertSummaryTimeRange,
+    ...mockedAlertSummaryTimeRange,
     title: <h3 data-test-subj={TITLE_DATA_TEST_SUBJ}>mockedTimeRangeTitle</h3>,
   };
 
@@ -47,6 +46,7 @@ describe('AlertSummaryWidget', () => {
     render(
       <IntlProvider locale="en">
         <AlertSummaryWidget
+          chartThemes={mockedChartThemes}
           featureIds={['apm', 'uptime', 'logs']}
           onClick={jest.fn}
           timeRange={mockedTimeRange}
@@ -70,9 +70,50 @@ describe('AlertSummaryWidget', () => {
   it('should render counts and title correctly', async () => {
     const alertSummaryWidget = renderComponent();
     expect(alertSummaryWidget.queryByTestId('activeAlertsCount')).toHaveTextContent('1');
-    expect(alertSummaryWidget.queryByTestId('recoveredAlertsCount')).toHaveTextContent('7');
     expect(alertSummaryWidget.queryByTestId('totalAlertsCount')).toHaveTextContent('8');
     expect(alertSummaryWidget.queryByTestId(TITLE_DATA_TEST_SUBJ)).toBeTruthy();
+  });
+
+  it('should render AlertSummaryWidget when there is only active alerts', async () => {
+    useLoadAlertSummaryMock.mockImplementation(() => ({
+      alertSummary: {
+        activeAlertCount: 1,
+        activeAlerts: [{ key: 1671408000000, doc_count: 1 }],
+        recoveredAlertCount: 0,
+      },
+      isLoading: false,
+    }));
+    const alertSummaryWidget = renderComponent();
+
+    expect(alertSummaryWidget.queryByTestId('alertSummaryWidgetCompact')).toBeTruthy();
+  });
+
+  it('should render AlertSummaryWidget compact version even when there is no active and recovered alerts', async () => {
+    useLoadAlertSummaryMock.mockImplementation(() => ({
+      alertSummary: {
+        activeAlertCount: 0,
+        activeAlerts: [],
+        recoveredAlertCount: 0,
+      },
+      isLoading: false,
+    }));
+    const alertSummaryWidget = renderComponent();
+
+    expect(alertSummaryWidget.queryByTestId('alertSummaryWidgetCompact')).toBeTruthy();
+  });
+
+  it('should not render AlertSummaryWidget full-size version when there is no active and recovered alerts', async () => {
+    useLoadAlertSummaryMock.mockImplementation(() => ({
+      alertSummary: {
+        activeAlertCount: 0,
+        activeAlerts: [],
+        recoveredAlertCount: 0,
+      },
+      isLoading: false,
+    }));
+    const alertSummaryWidget = renderComponent({ fullSize: true });
+
+    expect(alertSummaryWidget.queryByTestId('alertSummaryWidgetFullSzie')).toBeFalsy();
   });
 
   it('should render AlertSummaryWidgetError when API call fails', async () => {
@@ -81,7 +122,6 @@ describe('AlertSummaryWidget', () => {
         activeAlertCount: 0,
         activeAlerts: [],
         recoveredAlertCount: 0,
-        recoveredAlerts: [],
       },
       isLoading: false,
       error: 'Fetch Alert Summary Failed',
@@ -97,7 +137,6 @@ describe('AlertSummaryWidget', () => {
         activeAlertCount: 0,
         activeAlerts: [],
         recoveredAlertCount: 0,
-        recoveredAlerts: [],
       },
       isLoading: true,
     }));

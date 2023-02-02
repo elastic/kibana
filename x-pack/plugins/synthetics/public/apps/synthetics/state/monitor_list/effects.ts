@@ -6,11 +6,12 @@
  */
 
 import { PayloadAction } from '@reduxjs/toolkit';
-import { call, put, takeEvery, takeLeading, select } from 'redux-saga/effects';
+import { call, put, takeEvery, select, debounce } from 'redux-saga/effects';
 import { SavedObject } from '@kbn/core-saved-objects-common';
 import { enableDefaultAlertingAction } from '../alert_rules';
+import { ConfigKey, SyntheticsMonitor } from '../../../../../common/runtime_types';
 import { kibanaService } from '../../../../utils/kibana_service';
-import { MonitorOverviewPageState } from '../overview';
+import { MonitorOverviewPageState, quietFetchOverviewStatusAction } from '../overview';
 import { quietFetchOverviewAction } from '../overview/actions';
 import { selectOverviewState } from '../overview/selectors';
 import { fetchEffectFactory, sendErrorToast, sendSuccessToast } from '../utils/fetch_effect';
@@ -22,15 +23,16 @@ import {
   fetchUpsertFailureAction,
   fetchUpsertMonitorAction,
   fetchUpsertSuccessAction,
-  UpsertMonitorRequest,
+  quietFetchMonitorListAction,
 } from './actions';
 import { fetchMonitorManagementList, fetchUpsertMonitor } from './api';
 import { toastTitle } from './toast_title';
-import { ConfigKey, SyntheticsMonitor } from '../../../../../common/runtime_types';
+import { UpsertMonitorRequest } from './models';
 
 export function* fetchMonitorListEffect() {
-  yield takeLeading(
-    fetchMonitorListAction.get,
+  yield debounce(
+    300, // Only take the latest while ignoring any intermediate triggers
+    [fetchMonitorListAction.get, quietFetchMonitorListAction],
     fetchEffectFactory(
       fetchMonitorManagementList,
       fetchMonitorListAction.success,
@@ -58,7 +60,7 @@ export function* enableMonitorAlertEffect() {
         yield put(
           enableMonitorAlertAction.fail({
             configId: action.payload.configId,
-            error: serializeHttpFetchError(error),
+            error: serializeHttpFetchError(error, action.payload),
           })
         );
       }
@@ -90,7 +92,7 @@ export function* upsertMonitorEffect() {
         yield put(
           fetchUpsertFailureAction({
             configId: action.payload.configId,
-            error: serializeHttpFetchError(error),
+            error: serializeHttpFetchError(error, action.payload),
           })
         );
       } finally {
@@ -99,6 +101,9 @@ export function* upsertMonitorEffect() {
           if (hasPageState(monitorState)) {
             yield put(
               quietFetchOverviewAction.get(monitorState.pageState as MonitorOverviewPageState)
+            );
+            yield put(
+              quietFetchOverviewStatusAction.get(monitorState.pageState as MonitorOverviewPageState)
             );
           }
         }

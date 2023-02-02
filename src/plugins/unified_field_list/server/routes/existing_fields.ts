@@ -14,7 +14,6 @@ import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import { fetchFieldExistence, isBoomError } from '../../common/utils/field_existing_utils';
 import { FIELD_EXISTING_API_PATH } from '../../common/constants';
-import { FIELD_EXISTENCE_SETTING } from '../../common';
 import { PluginStart } from '../types';
 
 export async function existingFieldsRoute(setup: CoreSetup<PluginStart>, logger: Logger) {
@@ -40,9 +39,8 @@ export async function existingFieldsRoute(setup: CoreSetup<PluginStart>, logger:
         await setup.getStartServices();
       const savedObjectsClient = savedObjects.getScopedClient(req);
       const uiSettingsClient = uiSettings.asScopedToClient(savedObjectsClient);
-      const [includeFrozen, useSampling, metaFields] = await Promise.all([
+      const [includeFrozen, metaFields] = await Promise.all([
         uiSettingsClient.get(UI_SETTINGS.SEARCH_INCLUDE_FROZEN),
-        uiSettingsClient.get(FIELD_EXISTENCE_SETTING),
         uiSettingsClient.get(UI_SETTINGS.META_FIELDS),
       ]);
       const esClient = elasticsearch.client.asScoped(req).asCurrentUser;
@@ -56,7 +54,6 @@ export async function existingFieldsRoute(setup: CoreSetup<PluginStart>, logger:
             ...req.body,
             dataViewsService,
             includeFrozen,
-            useSampling,
             metaFields,
             dataView: await dataViewsService.get(req.params.dataViewId),
             search: async (params) => {

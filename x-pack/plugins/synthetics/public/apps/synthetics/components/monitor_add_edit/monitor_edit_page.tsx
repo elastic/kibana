@@ -6,11 +6,11 @@
  */
 
 import React, { useEffect } from 'react';
-import { EuiLoadingSpinner } from '@elastic/eui';
 import { useParams } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import { useTrackPageview, useFetcher } from '@kbn/observability-plugin/public';
-import { ConfigKey } from '../../../../../common/runtime_types';
+import { LoadingState } from '../monitors_page/overview/overview/monitor_detail_flyout';
+import { ConfigKey, SourceType } from '../../../../../common/runtime_types';
 import { getServiceLocations } from '../../state';
 import { ServiceAllowedWrapper } from '../common/wrappers/service_allowed_wrapper';
 import { MonitorSteps } from './steps';
@@ -35,16 +35,24 @@ const MonitorEditPage: React.FC = () => {
     return getMonitorAPI({ id: monitorId });
   }, []);
 
+  const isReadOnly = data?.attributes[ConfigKey.MONITOR_SOURCE_TYPE] === SourceType.PROJECT;
+  const projectId = data?.attributes[ConfigKey.PROJECT_ID];
+
   return data && !loading && !error ? (
-    <MonitorForm defaultValues={data?.attributes}>
-      <MonitorSteps stepMap={EDIT_MONITOR_STEPS} isEditFlow={true} />
+    <MonitorForm defaultValues={data?.attributes} readOnly={isReadOnly}>
+      <MonitorSteps
+        stepMap={EDIT_MONITOR_STEPS(isReadOnly)}
+        isEditFlow={true}
+        readOnly={isReadOnly}
+        projectId={projectId}
+      />
       <MonitorDetailsLinkPortal
         configId={data?.attributes[ConfigKey.CONFIG_ID]}
         name={data?.attributes.name}
       />
     </MonitorForm>
   ) : (
-    <EuiLoadingSpinner />
+    <LoadingState />
   );
 };
 

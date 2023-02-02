@@ -5,4 +5,5 @@
  * 2.0.
  */
 
-export { AddToTimelineAction } from './add_to_timeline_action';
+export { createAddToTimelineAction as createDefaultAddToTimelineAction } from './default/add_to_timeline';
+export { createAddToTimelineAction as createLensAddToTimelineAction } from './lens/add_to_timeline';

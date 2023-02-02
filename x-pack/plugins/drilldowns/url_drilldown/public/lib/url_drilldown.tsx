@@ -18,15 +18,8 @@ import {
 import { IMAGE_CLICK_TRIGGER } from '@kbn/image-embeddable-plugin/public';
 import { ActionExecutionContext, ROW_CLICK_TRIGGER } from '@kbn/ui-actions-plugin/public';
 import type { Query, Filter, TimeRange } from '@kbn/es-query';
-import type {
-  CollectConfigProps as CollectConfigPropsBase,
-  UiComponent,
-} from '@kbn/kibana-utils-plugin/public';
-import {
-  reactToUiComponent,
-  UrlTemplateEditorVariable,
-  KibanaContextProvider,
-} from '@kbn/kibana-react-plugin/public';
+import type { CollectConfigProps as CollectConfigPropsBase } from '@kbn/kibana-utils-plugin/public';
+import { UrlTemplateEditorVariable, KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import {
   UiActionsEnhancedDrilldownDefinition as Drilldown,
   UrlDrilldownGlobalScope,
@@ -88,10 +81,10 @@ export class UrlDrilldown implements Drilldown<Config, ActionContext, ActionFact
 
   public readonly getDisplayName = () => txtUrlDrilldownDisplayName;
 
-  public readonly actionMenuItem: UiComponent<{
+  public readonly actionMenuItem: React.FC<{
     config: Omit<SerializedAction<UrlDrilldownConfig>, 'factoryId'>;
     context: ActionContext | ActionExecutionContext<ActionContext>;
-  }> = reactToUiComponent(({ config, context }) => {
+  }> = ({ config, context }) => {
     const [title, setTitle] = React.useState(config.name);
     React.useEffect(() => {
       let unmounted = false;
@@ -107,7 +100,7 @@ export class UrlDrilldown implements Drilldown<Config, ActionContext, ActionFact
       };
     });
     return <>{title}</>;
-  });
+  };
 
   public readonly euiIcon = 'link';
 
@@ -120,12 +113,7 @@ export class UrlDrilldown implements Drilldown<Config, ActionContext, ActionFact
       IMAGE_CLICK_TRIGGER,
     ];
   }
-
-  private readonly ReactCollectConfig: React.FC<CollectConfigProps> = ({
-    config,
-    onConfig,
-    context,
-  }) => {
+  public readonly CollectConfig: React.FC<CollectConfigProps> = ({ config, onConfig, context }) => {
     const [variables, exampleUrl] = React.useMemo(
       () => [this.getVariableList(context), this.getExampleUrl(context)],
       [context]
@@ -148,8 +136,6 @@ export class UrlDrilldown implements Drilldown<Config, ActionContext, ActionFact
       </KibanaContextProvider>
     );
   };
-
-  public readonly CollectConfig = reactToUiComponent(this.ReactCollectConfig);
 
   public readonly createConfig = () => ({
     url: {

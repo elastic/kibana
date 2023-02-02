@@ -132,7 +132,13 @@ export const CloudDataMigrationApp = ({ http, breadcrumbService }: CloudDataMigr
           <EuiSpacer size="l" />
 
           <div>
-            <EuiButton fill={true} target="_blank" href="https://ela.st/cloud-migration">
+            <EuiButton
+              fill={true}
+              target="_blank"
+              href="https://ela.st/cloud-migration"
+              // data-test-subj used for Telemetry
+              data-test-subj="migrate_data_to_cloud__stack_management_link"
+            >
               <FormattedMessage
                 id="xpack.cloudDataMigration.readInstructionsButtonLabel"
                 defaultMessage="Help me move"

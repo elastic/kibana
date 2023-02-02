@@ -10,7 +10,7 @@ import { schema } from '@kbn/config-schema';
 import type { SavedObjectsUpdateOptions } from '@kbn/core-saved-objects-api-server';
 import type { InternalCoreUsageDataSetup } from '@kbn/core-usage-data-base-server-internal';
 import type { InternalSavedObjectRouter } from '../internal_types';
-import { catchAndReturnBoomErrors } from './utils';
+import { catchAndReturnBoomErrors, throwIfTypeNotVisibleByAPI } from './utils';
 
 interface RouteDependencies {
   coreUsageData: InternalCoreUsageDataSetup;
@@ -51,8 +51,10 @@ export const registerUpdateRoute = (
 
       const usageStatsClient = coreUsageData.getClient();
       usageStatsClient.incrementSavedObjectsUpdate({ request: req }).catch(() => {});
-
       const { savedObjects } = await context.core;
+
+      throwIfTypeNotVisibleByAPI(type, savedObjects.typeRegistry);
+
       const result = await savedObjects.client.update(type, id, attributes, options);
       return res.ok({ body: result });
     })

@@ -28,6 +28,7 @@ export type {
   ExternalCallback,
   PutPackagePolicyUpdateCallback,
   PostPackagePolicyDeleteCallback,
+  PostPackagePolicyPostDeleteCallback,
   PostPackagePolicyCreateCallback,
   FleetRequestHandlerContext,
   PostPackagePolicyPostCreateCallback,

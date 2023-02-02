@@ -14,9 +14,10 @@ import { haveNodeModulesBeenManuallyDeleted, removeYarnIntegrityFileIfExists } f
 import { setupRemoteCache } from './setup_remote_cache.mjs';
 import { sortPackageJson } from './sort_package_json.mjs';
 import { regeneratePackageMap } from './regenerate_package_map.mjs';
+import { regenerateTsconfigPaths } from './regenerate_tsconfig_paths.mjs';
 import { regenerateBaseTsconfig } from './regenerate_base_tsconfig.mjs';
-import { packageDiscovery, pluginDiscovery } from './discovery.mjs';
-import { validatePackageJson } from './validate_package_json.mjs';
+import { discovery } from './discovery.mjs';
+import { updatePackageJson } from './update_package_json.mjs';
 
 /** @type {import('../../lib/command').Command} */
 export const command = {
@@ -61,13 +62,33 @@ export const command = {
     const forceInstall =
       args.getBooleanValue('force-install') ?? (await haveNodeModulesBeenManuallyDeleted());
 
-    await Bazel.tryRemovingBazeliskFromYarnGlobal(log);
+    const [{ packages, plugins, tsConfigsPaths }] = await Promise.all([
+      // discover the location of packages, plugins, etc
+      await time('discovery', discovery),
 
-    // Install bazel machinery tools if needed
-    await Bazel.ensureInstalled(log);
+      (async () => {
+        await Bazel.tryRemovingBazeliskFromYarnGlobal(log);
 
-    // Setup remote cache settings in .bazelrc.cache if needed
-    await setupRemoteCache(log);
+        // Install bazel machinery tools if needed
+        await Bazel.ensureInstalled(log);
+
+        // Setup remote cache settings in .bazelrc.cache if needed
+        await setupRemoteCache(log);
+      })(),
+    ]);
+
+    // generate the package map and package.json file, if necessary
+    await Promise.all([
+      time('regenerate package map', async () => {
+        await regeneratePackageMap(packages, plugins, log);
+      }),
+      time('regenerate tsconfig map', async () => {
+        await regenerateTsconfigPaths(tsConfigsPaths, log);
+      }),
+      time('update package json', async () => {
+        await updatePackageJson(packages, log);
+      }),
+    ]);
 
     // Bootstrap process for Bazel packages
     // Bazel is now managing dependencies so yarn install
@@ -85,34 +106,16 @@ export const command = {
       });
     }
 
-    // discover the location of packages and plugins
-    const [plugins, packages] = await Promise.all([
-      time('plugin discovery', pluginDiscovery),
-      time('package discovery', packageDiscovery),
-    ]);
-
-    // generate the package map which powers the resolver and several other features
-    // needed as an input to the bazel builds
-    await time('regenerate package map', async () => {
-      await regeneratePackageMap(packages, plugins, log);
-    });
-
     await time('pre-build webpack bundles for packages', async () => {
       await Bazel.buildWebpackBundles(log, { offline, quiet });
     });
 
-    await time('regenerate tsconfig.base.json', async () => {
-      await regenerateBaseTsconfig();
-    });
-
     await Promise.all([
-      time('sort package json', async () => {
-        await sortPackageJson();
+      time('regenerate tsconfig.base.json', async () => {
+        await regenerateBaseTsconfig();
       }),
-      time('validate package json', async () => {
-        // now that deps are installed we can import `@kbn/yarn-lock-validator`
-        const { kibanaPackageJson } = External['@kbn/repo-info']();
-        await validatePackageJson(kibanaPackageJson, log);
+      time('sort package json', async () => {
+        await sortPackageJson(log);
       }),
       validate
         ? time('validate dependencies', async () => {

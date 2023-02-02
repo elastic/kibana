@@ -8,10 +8,9 @@
 import { EuiFlexGroup, EuiFlexItem, EuiText, EuiLoadingChart, EuiCallOut } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { useEffect } from 'react';
-import { useSelector, useDispatch } from 'react-redux';
+import React, { useMemo } from 'react';
+import { useSelector } from 'react-redux';
 import { networkEventsSelector } from '../../../../state/network_events/selectors';
-import { getNetworkEvents } from '../../../../state/network_events/actions';
 import { JourneyStep } from '../../../../../../../common/runtime_types';
 import { WaterfallChartWrapper } from './waterfall_chart_wrapper';
 import { extractItems } from '../../common/network_data/data_formatting';
@@ -31,30 +30,20 @@ interface Props {
 }
 
 export const WaterfallChartContainer: React.FC<Props> = ({ checkGroup, stepIndex, activeStep }) => {
-  const dispatch = useDispatch();
-
-  useEffect(() => {
-    if (checkGroup && stepIndex) {
-      dispatch(
-        getNetworkEvents({
-          checkGroup,
-          stepIndex,
-        })
-      );
-    }
-  }, [dispatch, stepIndex, checkGroup]);
-
   const _networkEvents = useSelector(networkEventsSelector);
   const networkEvents = _networkEvents[checkGroup ?? '']?.[stepIndex];
+  const hasEvents = networkEvents?.events?.length > 0;
+
   const waterfallLoaded = networkEvents && !networkEvents.loading;
   const isWaterfallSupported = networkEvents?.isWaterfallSupported;
-  const hasEvents = networkEvents?.events?.length > 0;
 
   const { metrics } = useStepWaterfallMetrics({
     checkGroup,
     stepIndex,
     hasNavigationRequest: networkEvents?.hasNavigationRequest,
   });
+
+  const data = useMemo(() => extractItems(networkEvents?.events ?? []), [networkEvents?.events]);
 
   return (
     <>
@@ -84,7 +73,7 @@ export const WaterfallChartContainer: React.FC<Props> = ({ checkGroup, stepIndex
       )}
       {waterfallLoaded && hasEvents && isWaterfallSupported && (
         <WaterfallChartWrapper
-          data={extractItems(networkEvents.events)}
+          data={data}
           markerItems={metrics}
           total={networkEvents.total}
           activeStep={activeStep}

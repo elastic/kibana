@@ -6,6 +6,7 @@
  */
 
 import React, { MouseEvent, useMemo, useState } from 'react';
+import { useHistory, useParams } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import { i18n } from '@kbn/i18n';
 import {
@@ -14,6 +15,7 @@ import {
   EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiLink,
   EuiPanel,
   EuiText,
   EuiTitle,
@@ -21,21 +23,23 @@ import {
 import { Criteria } from '@elastic/eui/src/components/basic_table/basic_table';
 import { EuiTableSortingType } from '@elastic/eui/src/components/basic_table/table_types';
 
-import { useHistory, useParams } from 'react-router-dom';
-import { useSelectedLocation } from '../hooks/use_selected_location';
-import { MONITOR_TYPES } from '../../../../../../common/constants';
-import { getTestRunDetailLink, TestDetailsLink } from '../../common/links/test_details_link';
+import { MONITOR_HISTORY_ROUTE, MONITOR_TYPES } from '../../../../../../common/constants';
+import {
+  getTestRunDetailRelativeLink,
+  TestDetailsLink,
+} from '../../common/links/test_details_link';
 import { ConfigKey, DataStream, Ping } from '../../../../../../common/runtime_types';
 import { formatTestDuration } from '../../../utils/monitor_test_result/test_time_formats';
-import { useSyntheticsSettingsContext } from '../../../contexts/synthetics_settings_context';
-
+import { useGetUrlParams } from '../../../hooks';
+import { stringifyUrlParams } from '../../../utils/url_params';
 import { sortPings } from '../../../utils/monitor_test_result/sort_pings';
 import { selectPingsError } from '../../../state';
 import { parseBadgeStatus, StatusBadge } from '../../common/monitor_test_result/status_badge';
 
 import { useSelectedMonitor } from '../hooks/use_selected_monitor';
+import { useSelectedLocation } from '../hooks/use_selected_location';
 import { useMonitorPings } from '../hooks/use_monitor_pings';
-import { JourneyScreenshot } from '../../common/screenshot/journey_screenshot';
+import { JourneyLastScreenshot } from '../../common/screenshot/journey_last_screenshot';
 import { useSyntheticsRefreshContext } from '../../../contexts';
 
 type SortableField = 'timestamp' | 'monitor.status' | 'monitor.duration.us';
@@ -44,12 +48,18 @@ interface TestRunsTableProps {
   from: string;
   to: string;
   paginable?: boolean;
+  showViewHistoryButton?: boolean;
 }
 
-export const TestRunsTable = ({ paginable = true, from, to }: TestRunsTableProps) => {
+export const TestRunsTable = ({
+  paginable = true,
+  from,
+  to,
+  showViewHistoryButton = true,
+}: TestRunsTableProps) => {
   const history = useHistory();
+  const params = useGetUrlParams();
   const { monitorId } = useParams<{ monitorId: string }>();
-  const { basePath } = useSyntheticsSettingsContext();
   const [page, setPage] = useState({ index: 0, size: 10 });
 
   const [sortField, setSortField] = useState<SortableField>('timestamp');
@@ -72,6 +82,7 @@ export const TestRunsTable = ({ paginable = true, from, to }: TestRunsTableProps
 
   const pingsError = useSelector(selectPingsError);
   const { monitor } = useSelectedMonitor();
+  const selectedLocation = useSelectedLocation();
 
   const isBrowserMonitor = monitor?.[ConfigKey.MONITOR_TYPE] === DataStream.BROWSER;
 
@@ -100,7 +111,7 @@ export const TestRunsTable = ({ paginable = true, from, to }: TestRunsTableProps
             field: 'timestamp',
             name: SCREENSHOT_LABEL,
             render: (_timestamp: string, item) => (
-              <JourneyScreenshot checkGroupId={item.monitor.check_group} />
+              <JourneyLastScreenshot checkGroupId={item.monitor.check_group} size={[100, 64]} />
             ),
           },
         ]
@@ -142,8 +153,6 @@ export const TestRunsTable = ({ paginable = true, from, to }: TestRunsTableProps
     },
   ];
 
-  const selectedLocation = useSelectedLocation();
-
   const getRowProps = (item: Ping) => {
     if (item.monitor.type !== MONITOR_TYPES.BROWSER) {
       return {};
@@ -160,7 +169,7 @@ export const TestRunsTable = ({ paginable = true, from, to }: TestRunsTableProps
           !targetElem.parentElement?.classList.contains('euiLink')
         ) {
           history.push(
-            getTestRunDetailLink({
+            getTestRunDetailRelativeLink({
               monitorId,
               checkGroup: item.monitor.check_group,
               locationId: selectedLocation?.id,
@@ -171,8 +180,6 @@ export const TestRunsTable = ({ paginable = true, from, to }: TestRunsTableProps
     };
   };
 
-  const historyIdParam =
-    monitor?.[ConfigKey.CUSTOM_HEARTBEAT_ID] ?? monitor?.[ConfigKey.MONITOR_QUERY_ID];
   return (
     <EuiPanel hasShadow={false} hasBorder css={{ minHeight: 200 }}>
       <EuiFlexGroup alignItems="center" gutterSize="s">
@@ -183,18 +190,34 @@ export const TestRunsTable = ({ paginable = true, from, to }: TestRunsTableProps
         </EuiFlexItem>
         <EuiFlexItem grow={true} />
         <EuiFlexItem grow={false}>
-          <EuiButtonEmpty
-            size="xs"
-            iconType="list"
-            iconSide="left"
-            data-test-subj="monitorSummaryViewLastTestRun"
-            disabled={!historyIdParam}
-            href={`${basePath}/app/uptime/monitor/${btoa(historyIdParam ?? '')}`}
-          >
-            {i18n.translate('xpack.synthetics.monitorDetails.summary.viewHistory', {
-              defaultMessage: 'View History',
-            })}
-          </EuiButtonEmpty>
+          {showViewHistoryButton ? (
+            <EuiLink
+              href={
+                monitor?.[ConfigKey.CONFIG_ID]
+                  ? history.createHref({
+                      pathname: MONITOR_HISTORY_ROUTE.replace(
+                        ':monitorId',
+                        monitor[ConfigKey.CONFIG_ID]
+                      ),
+                      search: stringifyUrlParams(
+                        { ...params, dateRangeStart: 'now-24h', dateRangeEnd: 'now' },
+                        true
+                      ),
+                    })
+                  : undefined
+              }
+            >
+              <EuiButtonEmpty
+                data-test-subj="monitorStatusChartViewHistoryButton"
+                size="xs"
+                iconType="list"
+              >
+                {i18n.translate('xpack.synthetics.monitorDetails.summary.viewHistory', {
+                  defaultMessage: 'View History',
+                })}
+              </EuiButtonEmpty>
+            </EuiLink>
+          ) : null}
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiBasicTable

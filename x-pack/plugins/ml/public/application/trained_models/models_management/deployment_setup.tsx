@@ -23,10 +23,7 @@ import {
   EuiCallOut,
   EuiSpacer,
   EuiDescribedFormGroup,
-  EuiFlexGroup,
-  EuiFlexItem,
   EuiLink,
-  EuiTitle,
 } from '@elastic/eui';
 import { toMountPoint, wrapWithTheme } from '@kbn/kibana-react-plugin/public';
 import type { Observable } from 'rxjs';
@@ -285,30 +282,20 @@ export const StartUpdateDeploymentModal: FC<StartDeploymentModalProps> = ({
       data-test-subj="mlModelsStartDeploymentModal"
     >
       <EuiModalHeader>
-        <EuiModalHeaderTitle>
-          <EuiFlexGroup justifyContent={'spaceBetween'}>
-            <EuiFlexItem grow={false}>
-              <EuiTitle size={'s'}>
-                <h2>
-                  {isUpdate ? (
-                    <FormattedMessage
-                      id="xpack.ml.trainedModels.modelsList.updateDeployment.modalTitle"
-                      defaultMessage="Update {modelId} deployment"
-                      values={{ modelId }}
-                    />
-                  ) : (
-                    <FormattedMessage
-                      id="xpack.ml.trainedModels.modelsList.startDeployment.modalTitle"
-                      defaultMessage="Start {modelId} deployment"
-                      values={{ modelId }}
-                    />
-                  )}
-                </h2>
-              </EuiTitle>
-            </EuiFlexItem>
-
-            <EuiFlexItem grow={false} />
-          </EuiFlexGroup>
+        <EuiModalHeaderTitle size="s">
+          {isUpdate ? (
+            <FormattedMessage
+              id="xpack.ml.trainedModels.modelsList.updateDeployment.modalTitle"
+              defaultMessage="Update {modelId} deployment"
+              values={{ modelId }}
+            />
+          ) : (
+            <FormattedMessage
+              id="xpack.ml.trainedModels.modelsList.startDeployment.modalTitle"
+              defaultMessage="Start {modelId} deployment"
+              values={{ modelId }}
+            />
+          )}
         </EuiModalHeaderTitle>
       </EuiModalHeader>
 

@@ -8,7 +8,6 @@
 
 export { Defer, defer } from './defer';
 export { fieldWildcardMatcher, fieldWildcardFilter } from './field_wildcard';
-export type { UiComponent, UiComponentInstance } from './ui';
 export { of } from './of';
 export type {
   BaseState,

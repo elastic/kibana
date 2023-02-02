@@ -30,6 +30,7 @@ export type {
   PreconfiguredAgentPolicy,
   AgentPolicyStatus,
   DataStream,
+  ShipperOutput,
   Output,
   NewOutput,
   OutputSOAttributes,

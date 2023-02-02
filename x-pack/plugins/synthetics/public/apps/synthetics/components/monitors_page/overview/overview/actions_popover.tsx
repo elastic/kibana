@@ -13,10 +13,17 @@ import {
   useEuiShadow,
   EuiPanel,
   EuiLoadingSpinner,
+  EuiContextMenuPanelItemDescriptor,
+  EuiToolTip,
 } from '@elastic/eui';
 import { FETCH_STATUS } from '@kbn/observability-plugin/public';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import styled from 'styled-components';
+import { PRIVATE_AVAILABLE_LABEL } from '../../../monitor_add_edit/form/run_test_btn';
+import {
+  manualTestMonitorAction,
+  manualTestRunInProgressSelector,
+} from '../../../../state/manual_test_runs';
 import { toggleStatusAlert } from '../../../../../../../common/runtime_types/monitor_management/alert_config';
 import { useSelectedMonitor } from '../../../monitor_details/hooks/use_selected_monitor';
 import { useMonitorAlertEnable } from '../../../../hooks/use_monitor_alert_enable';
@@ -24,7 +31,7 @@ import { ConfigKey, MonitorOverviewItem } from '../../../../../../../common/runt
 import { useMonitorEnableHandler } from '../../../../hooks/use_monitor_enable_handler';
 import { setFlyoutConfig } from '../../../../state/overview/actions';
 import { useEditMonitorLocator } from '../../hooks/use_edit_monitor_locator';
-import { useMonitorDetailLocator } from '../../hooks/use_monitor_detail_locator';
+import { useMonitorDetailLocator } from '../../../../hooks/use_monitor_detail_locator';
 import { useLocationName } from '../../../../hooks';
 
 type PopoverPosition = 'relative' | 'default';
@@ -94,7 +101,10 @@ export function ActionsPopover({
 }: Props) {
   const euiShadow = useEuiShadow('l');
   const dispatch = useDispatch();
-  const locationName = useLocationName({ locationId: monitor.location.id });
+  const location = useLocationName({ locationId: monitor.location.id });
+  const locationName = location?.label || monitor.location.id;
+
+  const isPrivateLocation = !Boolean(location?.isServiceManaged);
 
   const detailUrl = useMonitorDetailLocator({
     configId: monitor.configId,
@@ -124,6 +134,8 @@ export function ActionsPopover({
     monitor.isEnabled ? disableMonitorLabel : enableMonitorLabel
   );
 
+  const testInProgress = useSelector(manualTestRunInProgressSelector(monitor.configId));
+
   useEffect(() => {
     if (status === FETCH_STATUS.LOADING) {
       setEnableLabel(loadingLabel(monitor.isEnabled));
@@ -140,7 +152,12 @@ export function ActionsPopover({
     onClick: () => {
       if (locationName) {
         dispatch(
-          setFlyoutConfig({ configId: monitor.configId, location: locationName, id: monitor.id })
+          setFlyoutConfig({
+            configId: monitor.configId,
+            location: locationName,
+            id: monitor.id,
+            locationId: monitor.location.id,
+          })
         );
         setIsPopoverOpen(false);
       }
@@ -149,19 +166,29 @@ export function ActionsPopover({
 
   const alertLoading = alertStatus(monitor.configId) === FETCH_STATUS.LOADING;
 
-  let popoverItems = [
+  let popoverItems: EuiContextMenuPanelItemDescriptor[] = [
     {
       name: actionsMenuGoToMonitorName,
       icon: 'sortRight',
       href: detailUrl,
     },
     quickInspectPopoverItem,
-    // not rendering this for now because the manual test flyout is
-    // still in the design phase
-    // {
-    //   name: 'Run test manually',
-    //   icon: 'beaker',
-    // },
+    {
+      name: isPrivateLocation ? (
+        <EuiToolTip content={PRIVATE_AVAILABLE_LABEL}>
+          <span>{runTestManually}</span>
+        </EuiToolTip>
+      ) : (
+        runTestManually
+      ),
+      icon: 'beaker',
+      disabled: testInProgress || isPrivateLocation,
+      onClick: () => {
+        dispatch(manualTestMonitorAction.get({ configId: monitor.configId, name: monitor.name }));
+        dispatch(setFlyoutConfig(null));
+        setIsPopoverOpen(false);
+      },
+    },
     {
       name: actionsMenuEditMonitorName,
       icon: 'pencil',
@@ -212,6 +239,7 @@ export function ActionsPopover({
               size={iconSize}
               display="empty"
               onClick={() => setIsPopoverOpen((b: boolean) => !b)}
+              title={openActionsMenuAria}
             />
           </IconPanel>
         }
@@ -238,6 +266,10 @@ export function ActionsPopover({
 
 const quickInspectName = i18n.translate('xpack.synthetics.overview.actions.quickInspect.title', {
   defaultMessage: 'Quick inspect',
+});
+
+const runTestManually = i18n.translate('xpack.synthetics.overview.actions.runTestManually.title', {
+  defaultMessage: 'Run test manually',
 });
 
 const openActionsMenuAria = i18n.translate(

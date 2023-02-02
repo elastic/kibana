@@ -171,11 +171,14 @@ describe('current status route', () => {
           uptimeEsClient,
           ['Europe - Germany', 'Asia/Pacific - Japan'],
           { from: 140000, to: 'now' },
-          ['id1', 'id2']
+          ['id1', 'id2'],
+          { id1: ['Asia/Pacific - Japan'], id2: ['Europe - Germany', 'Asia/Pacific - Japan'] }
         )
       ).toEqual({
+        pending: 0,
         down: 1,
         enabledIds: ['id1', 'id2'],
+        allIds: ['id1', 'id2'],
         up: 2,
         upConfigs: {
           'id1-Asia/Pacific - Japan': {
@@ -184,6 +187,7 @@ describe('current status route', () => {
             location: 'Asia/Pacific - Japan',
             status: 'up',
             ping: expect.any(Object),
+            timestamp: expect.any(String),
           },
           'id2-Asia/Pacific - Japan': {
             configId: 'id2',
@@ -191,6 +195,7 @@ describe('current status route', () => {
             location: 'Asia/Pacific - Japan',
             status: 'up',
             ping: expect.any(Object),
+            timestamp: expect.any(String),
           },
         },
         downConfigs: {
@@ -200,6 +205,7 @@ describe('current status route', () => {
             location: 'Europe - Germany',
             status: 'down',
             ping: expect.any(Object),
+            timestamp: expect.any(String),
           },
         },
       });
@@ -316,16 +322,24 @@ describe('current status route', () => {
        *
        * The expectation here is we will send the test client two separate "requests", one for each of the two IDs.
        */
+      const concernedLocations = [
+        'Asia/Pacific - Japan',
+        'Europe - Germany',
+        'Asia/Pacific - Japan',
+      ];
       expect(
         await queryMonitorStatus(
           uptimeEsClient,
-          times(10000).map((n) => 'Europe - Germany' + n),
+          [...concernedLocations, ...times(9997).map((n) => 'Europe - Germany' + n)],
           { from: 2500, to: 'now' },
-          ['id1', 'id2']
+          ['id1', 'id2'],
+          { id1: [concernedLocations[0]], id2: [concernedLocations[1], concernedLocations[2]] }
         )
       ).toEqual({
+        pending: 0,
         down: 1,
         enabledIds: ['id1', 'id2'],
+        allIds: ['id1', 'id2'],
         up: 2,
         upConfigs: {
           'id1-Asia/Pacific - Japan': {
@@ -334,6 +348,7 @@ describe('current status route', () => {
             location: 'Asia/Pacific - Japan',
             status: 'up',
             ping: expect.any(Object),
+            timestamp: expect.any(String),
           },
           'id2-Asia/Pacific - Japan': {
             configId: 'id2',
@@ -341,6 +356,7 @@ describe('current status route', () => {
             location: 'Asia/Pacific - Japan',
             status: 'up',
             ping: expect.any(Object),
+            timestamp: expect.any(String),
           },
         },
         downConfigs: {
@@ -350,6 +366,7 @@ describe('current status route', () => {
             location: 'Europe - Germany',
             status: 'down',
             ping: expect.any(Object),
+            timestamp: expect.any(String),
           },
         },
       });

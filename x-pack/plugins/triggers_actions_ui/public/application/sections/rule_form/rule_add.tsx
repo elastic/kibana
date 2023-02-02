@@ -65,7 +65,6 @@ const RuleAdd = ({
       },
       actions: [],
       tags: [],
-      notifyWhen: 'onActionGroupChange',
       ...(initialValues ? initialValues : {}),
     };
   }, [ruleTypeId, consumer, initialValues]);
