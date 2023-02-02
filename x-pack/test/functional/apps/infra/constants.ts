@@ -41,4 +41,4 @@ export const ML_JOB_IDS = [
   'kibana-metrics-ui-default-default-k8s_memory_usage',
 ];
 
-export const KUBERNETES_TOUR_STORAGE_KEY = 'showKubernetesTour';
+export const KUBERNETES_TOUR_STORAGE_KEY = 'isKubernetesTourSeen';

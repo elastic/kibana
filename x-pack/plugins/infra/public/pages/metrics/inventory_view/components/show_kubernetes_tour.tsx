@@ -13,17 +13,16 @@ interface Props {
   children: ReactElement;
 }
 
-const KUBERNETES_TOUR_STORAGE_KEY = 'showKubernetesTour';
+const KUBERNETES_TOUR_STORAGE_KEY = 'isKubernetesTourSeen';
 
 export const ShowKubernetesTour = ({ children }: Props) => {
-  const [isTourOpen, setIsTourOpen] = useState(() => {
-    const initialState = localStorage.getItem(KUBERNETES_TOUR_STORAGE_KEY);
-    return initialState !== 'false' ? true : false;
-  });
+  const [isTourSeen, setIsTourSeen] = useState(
+    () => localStorage.getItem(KUBERNETES_TOUR_STORAGE_KEY) === 'true'
+  );
 
   useEffect(() => {
-    localStorage.setItem(KUBERNETES_TOUR_STORAGE_KEY, isTourOpen ? 'true' : 'false');
-  }, [isTourOpen]);
+    localStorage.setItem(KUBERNETES_TOUR_STORAGE_KEY, isTourSeen ? 'true' : 'false');
+  }, [isTourSeen]);
 
   return (
     <div>
@@ -36,9 +35,9 @@ export const ShowKubernetesTour = ({ children }: Props) => {
             })}
           </EuiText>
         }
-        isStepOpen={isTourOpen}
+        isStepOpen={!isTourSeen}
         maxWidth={350}
-        onFinish={() => setIsTourOpen(false)}
+        onFinish={() => setIsTourSeen(true)}
         step={1}
         stepsTotal={1}
         title={i18n.translate('xpack.infra.homePage.kubernetesTour.title', {
@@ -50,7 +49,7 @@ export const ShowKubernetesTour = ({ children }: Props) => {
             data-test-subj="infra-kubernetesTour-dismiss"
             size="s"
             color="text"
-            onClick={() => setIsTourOpen(false)}
+            onClick={() => setIsTourSeen(true)}
           >
             {i18n.translate('xpack.infra.homePage.kubernetesTour.dismiss', {
               defaultMessage: 'Dismiss',
