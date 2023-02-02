@@ -9,7 +9,7 @@ import { has } from 'lodash';
 import type { AlertsBySeverityAgg } from './types';
 import type { AlertSearchResponse } from '../../../containers/detection_engine/alerts/types';
 import type { SeverityBuckets as SeverityData } from '../../../../overview/components/detection_response/alerts_by_status/types';
-import type { SummaryChartsData } from '../alerts_summary_charts_panel/types';
+import type { SummaryChartsData, SummaryChartsAgg } from '../alerts_summary_charts_panel/types';
 import { severityLabels } from '../../../../overview/components/detection_response/alerts_by_status/use_alerts_by_status';
 import { emptyDonutColor } from '../../../../common/components/charts/donutchart_empty';
 import { SEVERITY_COLOR } from '../../../../overview/components/detection_response/utils';
@@ -37,4 +37,10 @@ export const parseSeverityData = (
 
 export const isAlertsBySeverityData = (data: SummaryChartsData[]): data is SeverityData[] => {
   return data?.every((x) => has(x, 'key'));
+};
+
+export const isAlertsBySeverityAgg = (
+  data: AlertSearchResponse<{}, SummaryChartsAgg>
+): data is AlertSearchResponse<{}, AlertsBySeverityAgg> => {
+  return has(data, 'aggregations.statusBySeverity');
 };

@@ -70,13 +70,14 @@ const ChartSelectComponent: React.FC<Props> = ({
     <>
       {isAlertsPageChartsEnabled ? (
         <EuiButtonGroup
-          name="coarsness"
-          legend="This is a basic group"
+          name="chart-select"
+          legend={i18n.LEGEND_TITLE}
           options={options}
           idSelected={alertViewSelection}
           onChange={(id) => setAlertViewSelection(id as AlertViewSelection)}
           buttonSize="compressed"
           color="primary"
+          data-test-subj="chart-select-tabs"
         />
       ) : (
         <EuiPopover

@@ -5,10 +5,13 @@
  * 2.0.
  */
 import type { BucketItem } from '../../../../../../common/search_strategy/security_solution/cti';
-import type { SeverityBucket } from '../../../../../overview/components/detection_response/alerts_by_status/types';
+import type {
+  SeverityBucket,
+  SeverityBuckets as SeverityData,
+} from '../../../../../overview/components/detection_response/alerts_by_status/types';
 
 export interface ChartCollapseAgg {
-  statusBySeverity: {
+  severities: {
     doc_count_error_upper_bound: number;
     sum_other_doc_count: number;
     buckets: SeverityBucket[];
@@ -25,8 +28,7 @@ export interface ChartCollapseAgg {
   };
 }
 export interface ChartCollapseData {
-  key: string;
-  value: number;
-  percentage: number;
-  label: string;
+  rule: string | null;
+  group: string | null;
+  severities: SeverityData[];
 }

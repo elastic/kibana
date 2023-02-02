@@ -84,6 +84,7 @@ export const AlertsCountPanel = memo<AlertsCountPanelProps>(
     setIsExpanded,
   }) => {
     const { to, from, deleteQuery, setQuery } = useGlobalTime(false);
+    const isChartEmbeddablesEnabled = useIsExperimentalFeatureEnabled('chartEmbeddablesEnabled');
     const isAlertsPageChartsEnabled = useIsExperimentalFeatureEnabled('alertsPageChartsEnabled');
     // create a unique, but stable (across re-renders) query id
     const uniqueQueryId = useMemo(() => `${DETECTIONS_ALERTS_COUNT_ID}-${uuidv4()}`, []);
@@ -130,7 +131,6 @@ export const AlertsCountPanel = memo<AlertsCountPanelProps>(
       [setQuerySkip, setToggleStatus, setIsExpanded, isAlertsPageChartsEnabled]
     );
 
-    const isChartEmbeddablesEnabled = useIsExperimentalFeatureEnabled('chartEmbeddablesEnabled');
     const timerange = useMemo(() => ({ from, to }), [from, to]);
 
     const extraVisualizationOptions = useMemo(
@@ -234,7 +234,7 @@ export const AlertsCountPanel = memo<AlertsCountPanelProps>(
           (!isAlertsPageChartsEnabled && toggleStatus) ? (
             <ChartContent
               alertsData={alertsData}
-              data-test-subj="embeddable-matrix-histogram"
+              data-test-subj="embeddable-count-table"
               extraActions={extraActions}
               extraOptions={extraVisualizationOptions}
               getLensAttributes={getLensAttributes}

@@ -104,33 +104,37 @@ describe('helpers', () => {
   describe('getOptionProperties', () => {
     test('it returns the expected properties when alertViewSelection is Trend', () => {
       expect(getOptionProperties(TREND_ID)).toEqual({
-        id: CHARTS_ID,
-        'data-test-subj': TREND_ID,
+        id: TREND_ID,
+        'data-test-subj': `chart-select-${TREND_ID}`,
         label: i18n.TREND_TITLE,
+        value: TREND_ID,
       });
     });
 
     test('it returns the expected properties when alertViewSelection is Table', () => {
       expect(getOptionProperties(TABLE_ID)).toEqual({
         id: TABLE_ID,
-        'data-test-subj': TABLE_ID,
-        label: i18n.TABLE,
+        'data-test-subj': `chart-select-${TABLE_ID}`,
+        label: i18n.TABLE_TITLE,
+        value: TABLE_ID,
       });
     });
 
     test('it returns the expected properties when alertViewSelection is Treemap', () => {
       expect(getOptionProperties(TREEMAP_ID)).toEqual({
         id: TREEMAP_ID,
-        'data-test-subj': TREEMAP_ID,
-        label: i18n.TREEMAP,
+        'data-test-subj': `chart-select-${TREEMAP_ID}`,
+        label: i18n.TREEMAP_TITLE,
+        value: TREEMAP_ID,
       });
     });
 
     test('it returns the expected properties when alertViewSelection is charts', () => {
       expect(getOptionProperties(CHARTS_ID)).toEqual({
         id: CHARTS_ID,
-        'data-test-subj': CHARTS_ID,
-        label: i18n.CHARTS,
+        'data-test-subj': `chart-select-${CHARTS_ID}`,
+        label: i18n.CHARTS_TITLE,
+        value: CHARTS_ID,
       });
     });
   });

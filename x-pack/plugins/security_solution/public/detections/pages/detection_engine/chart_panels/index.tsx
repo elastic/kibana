@@ -8,8 +8,8 @@
 import type { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
 import type { Filter, Query } from '@kbn/es-query';
-import { EuiFlexItem, EuiLoadingContent, EuiLoadingSpinner } from '@elastic/eui';
-import React, { useCallback, useMemo, useState } from 'react';
+import { EuiFlexItem, EuiLoadingContent } from '@elastic/eui';
+import React, { useCallback, useMemo } from 'react';
 import styled from 'styled-components';
 
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
@@ -17,6 +17,7 @@ import { useAlertsLocalStorage } from './alerts_local_storage';
 import type { AlertsSettings } from './alerts_local_storage/types';
 import { ChartContextMenu } from './chart_context_menu';
 import { ChartSelect } from './chart_select';
+import { ChartCollapse } from './chart_collapse';
 import * as i18n from './chart_select/translations';
 import { AlertsTreemapPanel } from '../../../../common/components/alerts_treemap_panel';
 import type { UpdateDateRange } from '../../../../common/components/charts/common';
@@ -49,7 +50,7 @@ const ChartSelectContainer = styled.div`
 
 export interface Props {
   addFilter: ({ field, value }: { field: string; value: string | number }) => void;
-  alertsHistogramDefaultFilters: Filter[];
+  alertsDefaultFilters: Filter[];
   isLoadingIndexPattern: boolean;
   query: Query;
   runtimeMappings: MappingRuntimeFields;
@@ -59,7 +60,7 @@ export interface Props {
 
 const ChartPanelsComponent: React.FC<Props> = ({
   addFilter,
-  alertsHistogramDefaultFilters,
+  alertsDefaultFilters,
   isLoadingIndexPattern,
   query,
   runtimeMappings,
@@ -69,19 +70,20 @@ const ChartPanelsComponent: React.FC<Props> = ({
   const { toggleStatus: isExpanded, setToggleStatus: setIsExpanded } = useQueryToggle(
     DETECTIONS_ALERTS_CHARTS_PANEL_ID
   );
-  const [stackByValue, _] = useState('host.name');
   const isAlertsPageChartsEnabled = useIsExperimentalFeatureEnabled('alertsPageChartsEnabled');
 
   const {
     alertViewSelection,
     countTableStackBy0,
     countTableStackBy1,
+    groupBySelection,
     isTreemapPanelExpanded,
     riskChartStackBy0,
     riskChartStackBy1,
     setAlertViewSelection,
     setCountTableStackBy0,
     setCountTableStackBy1,
+    setGroupBySelection,
     setIsTreemapPanelExpanded,
     setRiskChartStackBy0,
     setRiskChartStackBy1,
@@ -176,7 +178,13 @@ const ChartPanelsComponent: React.FC<Props> = ({
           />
         </ChartSelectContainer>
       ) : (
-        <h1>{stackByValue}</h1> // collapsed
+        <ChartCollapse
+          groupBySelection={groupBySelection}
+          filters={alertsDefaultFilters}
+          query={query}
+          signalIndexName={signalIndexName}
+          runtimeMappings={runtimeMappings}
+        />
       );
     } else {
       return (
@@ -193,7 +201,11 @@ const ChartPanelsComponent: React.FC<Props> = ({
     setAlertViewSelection,
     isAlertsPageChartsEnabled,
     isExpanded,
-    stackByValue,
+    groupBySelection,
+    alertsDefaultFilters,
+    query,
+    signalIndexName,
+    runtimeMappings,
   ]);
 
   return (
@@ -210,7 +222,7 @@ const ChartPanelsComponent: React.FC<Props> = ({
               comboboxRef={stackByField0ComboboxRef}
               defaultStackByOption={trendChartStackBy}
               extraActions={resetGroupByFieldAction}
-              filters={alertsHistogramDefaultFilters}
+              filters={alertsDefaultFilters}
               inspectTitle={i18n.TREND}
               onFieldSelected={updateCommonStackBy0}
               panelHeight={TREND_CHART_PANEL_HEIGHT}
@@ -241,7 +253,7 @@ const ChartPanelsComponent: React.FC<Props> = ({
               alignHeader="flexStart"
               chartOptionsContextMenu={chartOptionsContextMenu}
               extraActions={resetGroupByFieldAction}
-              filters={alertsHistogramDefaultFilters}
+              filters={alertsDefaultFilters}
               inspectTitle={i18n.TABLE}
               panelHeight={TABLE_PANEL_HEIGHT}
               query={query}
@@ -272,9 +284,9 @@ const ChartPanelsComponent: React.FC<Props> = ({
               addFilter={addFilter}
               alignHeader="flexStart"
               chartOptionsContextMenu={chartOptionsContextMenu}
-              filters={alertsHistogramDefaultFilters}
               inspectTitle={i18n.TREEMAP}
               isPanelExpanded={isAlertsPageChartsEnabled ? isExpanded : isTreemapPanelExpanded}
+              filters={alertsDefaultFilters}
               query={query}
               riskSubAggregationField="kibana.alert.risk_score"
               setIsPanelExpanded={
@@ -298,12 +310,12 @@ const ChartPanelsComponent: React.FC<Props> = ({
       {isAlertsPageChartsEnabled && alertViewSelection === 'charts' && (
         <FullHeightFlexItem grow={1}>
           {isLoadingIndexPattern ? (
-            <EuiLoadingSpinner data-test-subj="alertsChartsLoadingSpinner" size="xl" />
+            <EuiLoadingContent lines={10} data-test-subj="chartsLoadingSpinner" />
           ) : (
             <AlertsSummaryChartsPanel
               alignHeader="flexStart"
               addFilter={addFilter}
-              filters={alertsHistogramDefaultFilters}
+              filters={alertsDefaultFilters}
               query={query}
               panelHeight={ALERTS_CHARTS_PANEL_HEIGHT}
               signalIndexName={signalIndexName}
@@ -311,6 +323,8 @@ const ChartPanelsComponent: React.FC<Props> = ({
               runtimeMappings={runtimeMappings}
               isExpanded={isExpanded}
               setIsExpanded={setIsExpanded}
+              groupBySelection={groupBySelection}
+              setGroupBySelection={setGroupBySelection}
             />
           )}
         </FullHeightFlexItem>
