@@ -26,7 +26,7 @@ export const siemGuideConfig: GuideConfig = {
     text: i18n.translate('xpack.observability.guideConfig.documentationLink', {
       defaultMessage: 'Learn more',
     }),
-    url: 'https://docs.elastic.co/en/integrations/endpoint',
+    url: 'https://www.elastic.co/guide/en/security/current/ingest-data.html',
   },
   steps: [
     {
@@ -34,10 +34,23 @@ export const siemGuideConfig: GuideConfig = {
       title: i18n.translate('xpack.securitySolution.guideConfig.addDataStep.title', {
         defaultMessage: 'Add data with Elastic Defend',
       }),
-      description: i18n.translate('xpack.securitySolution.guideConfig.addDataStep.description', {
-        defaultMessage:
-          'Install Elastic Agent and its Elastic Defend integration on one of your computers to get SIEM data flowing.',
-      }),
+      description: {
+        descriptionText: i18n.translate(
+          'xpack.securitySolution.guideConfig.addDataStep.description',
+          {
+            defaultMessage:
+              'Install Elastic Agent and its Elastic Defend integration on one of your computers to get SIEM data flowing.',
+          }
+        ),
+        linkUrl: 'https://docs.elastic.co/en/integrations/endpoint',
+        isLinkExternal: true,
+        linkText: i18n.translate(
+          'xpack.securitySolution.guideConfig.addDataStep.description.linkText',
+          {
+            defaultMessage: 'Learn more',
+          }
+        ),
+      },
       integration: 'endpoint',
       location: {
         appID: 'integrations',
