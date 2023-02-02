@@ -69,14 +69,15 @@ export default function createAggregateTests({ getService }: FtrProviderContext)
         })
       );
 
+      const ruleId = await createRule({ tags: ['foo'] });
+      objectRemover.add(Spaces.space1.id, ruleId, 'rule', 'alerting');
+
       const response = await supertest.get(
         `${getUrlPrefix(Spaces.space1.id)}/internal/alerting/rules/_tags?max_tags=5`
       );
 
       expect(response.status).to.eql(200);
-      expect(response.body.rule_tags.filter((tag: string) => tag !== 'foo')).to.eql(
-        tags.sort().slice(0, 5)
-      );
+      expect(response.body.rule_tags).to.eql(tags.sort().slice(0, 5));
 
       const paginatedResponse = await supertest.get(
         `${getUrlPrefix(
@@ -87,9 +88,7 @@ export default function createAggregateTests({ getService }: FtrProviderContext)
       );
 
       expect(paginatedResponse.status).to.eql(200);
-      expect(paginatedResponse.body.rule_tags.filter((tag: string) => tag !== 'foo')).to.eql(
-        tags.sort().slice(5, 10)
-      );
+      expect(paginatedResponse.body.rule_tags).to.eql(['f', 'foo', 'g', 'h', 'i']);
     });
 
     it('should search rule tags', async () => {
