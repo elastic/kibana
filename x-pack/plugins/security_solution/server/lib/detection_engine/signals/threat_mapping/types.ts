@@ -17,6 +17,7 @@ import type {
   LanguageOrUndefined,
   Type,
 } from '@kbn/securitysolution-io-ts-alerting-types';
+import type { QueryDslBoolQuery } from '@elastic/elasticsearch/lib/api/types';
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import type { OpenPointInTimeResponse } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { ListClient } from '@kbn/lists-plugin/server';
@@ -189,7 +190,7 @@ export interface SplitShouldClausesOptions {
 }
 
 export interface BooleanFilter {
-  bool: { should: unknown[]; minimum_should_match: number };
+  bool: QueryDslBoolQuery;
 }
 
 export interface TermQuery {

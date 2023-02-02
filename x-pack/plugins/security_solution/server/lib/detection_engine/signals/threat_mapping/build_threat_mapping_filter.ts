@@ -11,6 +11,7 @@ import type {
   ThreatMapping,
   ThreatMappingEntries,
 } from '@kbn/securitysolution-io-ts-alerting-types';
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type {
   BooleanFilter,
   BuildEntriesMappingFilterOptions,
@@ -117,8 +118,8 @@ export const createAndOrClauses = ({
   threatMapping,
   threatListItem,
   entryKey,
-}: CreateAndOrClausesOptions): unknown[] => {
-  const should = threatMapping.reduce<unknown[]>((accum, threatMap) => {
+}: CreateAndOrClausesOptions): QueryDslQueryContainer[] => {
+  const should = threatMapping.reduce<QueryDslQueryContainer[]>((accum, threatMap) => {
     const innerAndClauses = createInnerAndClauses({
       threatMappingEntries: threatMap.entries,
       threatListItem,
@@ -149,7 +150,7 @@ export const buildEntriesMappingFilter = ({
         allowedFieldsForTermsQuery?.threat?.[entry.value]
     );
   const combinedShould = threatMapping.reduce<{
-    match: unknown[];
+    match: QueryDslQueryContainer[];
     term: TermQuery[];
   }>(
     (acc, threatMap) => {
@@ -219,7 +220,10 @@ export const splitShouldClauses = ({
         accum[chunkIndex] = { bool: { should: [], minimum_should_match: 1 } };
       }
       // Add to the existing array element. Using mutatious push here since these arrays can get very large such as 10k+ and this is going to be a hot code spot.
-      accum[chunkIndex].bool.should.push(item);
+      if (Array.isArray(accum[chunkIndex].bool?.should)) {
+        (accum[chunkIndex].bool?.should as QueryDslQueryContainer[]).push(item);
+      }
+
       return accum;
     }, []);
   }
