@@ -10,6 +10,7 @@ import React, { useMemo, useRef } from 'react';
 import { EuiLoadingSpinner, type EuiDataGridColumnCellAction } from '@elastic/eui';
 import type {
   CellAction,
+  CellActionCompatibilityContext,
   CellActionExecutionContext,
   CellActionField,
   CellActionsProps,
@@ -32,7 +33,7 @@ export const useDataGridColumnsCellActions = ({
   triggerId,
   metadata,
 }: UseDataGridColumnsCellActionsProps): EuiDataGridColumnCellAction[][] => {
-  const bulkContexts: CellActionExecutionContext[] = useMemo(
+  const bulkContexts: CellActionCompatibilityContext[] = useMemo(
     () =>
       fields.map(({ values, ...field }) => ({
         field, // we are getting the actions for the whole column field, so the compatibility check will be done without the value
@@ -74,7 +75,7 @@ const createColumnCellAction = ({
   triggerId,
 }: CreateColumnCellActionParams): EuiDataGridColumnCellAction =>
   function ColumnCellAction({ Component, rowIndex }) {
-    const nodeRef = useRef<HTMLElement | null>(null);
+    const nodeRef = useRef<HTMLAnchorElement | null>(null);
     const extraContentNodeRef = useRef<HTMLDivElement | null>(null);
 
     const { name, type, values } = field;
@@ -91,7 +92,7 @@ const createColumnCellAction = ({
 
     return (
       <Component
-        buttonRef={() => nodeRef}
+        buttonRef={nodeRef}
         aria-label={action.getDisplayName(actionContext)}
         title={action.getDisplayName(actionContext)}
         data-test-subj={`dataGridColumnCellAction-${action.id}`}
@@ -101,7 +102,7 @@ const createColumnCellAction = ({
         }}
       >
         {action.getDisplayName(actionContext)}
-        <div ref={() => extraContentNodeRef} />
+        <div ref={extraContentNodeRef} />
       </Component>
     );
   };

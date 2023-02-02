@@ -58,21 +58,14 @@
           {
             "parentPluginId": "@kbn/core-saved-objects-server",
             "id": "def-common.AddAuditEventParams.outcome",
-            "type": "CompoundType",
+            "type": "string",
             "tags": [],
             "label": "outcome",
             "description": [
               "\nThe outcome of the operation\n'failure' | 'success' | 'unknown'"
             ],
             "signature": [
-              {
-                "pluginId": "@kbn/ecs",
-                "scope": "common",
-                "docId": "kibKbnEcsPluginApi",
-                "section": "def-common.EcsEventOutcome",
-                "text": "EcsEventOutcome"
-              },
-              " | undefined"
+              "string | undefined"
             ],
             "path": "packages/core/saved-objects/core-saved-objects-server/src/extensions/security.ts",
             "deprecated": false,
@@ -5799,10 +5792,6 @@
               {
                 "plugin": "securitySolution",
                 "path": "x-pack/plugins/security_solution/server/lib/timeline/saved_object_mappings/pinned_events.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/detection_engine/rule_monitoring/logic/rule_execution_log/execution_saved_object/saved_objects_type.ts"
               },
               {
                 "plugin": "securitySolution",

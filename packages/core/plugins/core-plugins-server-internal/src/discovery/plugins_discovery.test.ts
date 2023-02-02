@@ -12,6 +12,7 @@ import { mockPackage, scanPluginSearchPathsMock } from './plugins_discovery.test
 import mockFs from 'mock-fs';
 import { getEnvOptions, rawConfigServiceMock } from '@kbn/config-mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
+import type { Package } from '@kbn/repo-packages';
 
 import { firstValueFrom, from } from 'rxjs';
 import { map, toArray } from 'rxjs/operators';
@@ -25,6 +26,35 @@ import { discover } from './plugins_discovery';
 import { PluginType } from '@kbn/core-base-common';
 
 const KIBANA_ROOT = process.cwd();
+jest.mock('@kbn/repo-packages', () => ({
+  ...jest.requireActual('@kbn/repo-packages'),
+  getPackages: jest.fn().mockReturnValue([]),
+  getPluginPackagesFilter: jest.fn().mockReturnValue(() => true),
+}));
+
+jest.mock('./plugin_manifest_from_plugin_package', () => ({
+  pluginManifestFromPluginPackage: jest.fn((version, pkgManifest) => ({
+    version,
+    ...pkgManifest,
+  })),
+}));
+
+const getPluginPackagesFilterMock: jest.Mock =
+  jest.requireMock('@kbn/repo-packages').getPluginPackagesFilter;
+const pluginManifestFromPluginPackageMock: jest.Mock = jest.requireMock(
+  './plugin_manifest_from_plugin_package'
+).pluginManifestFromPluginPackage;
+
+function getMockPackage(id: string) {
+  return {
+    id,
+    manifest: {
+      id,
+      type: 'plugin',
+    },
+    directory: resolve(REPO_ROOT, `packages/${id}`),
+  } as Package;
+}
 
 const Plugins = {
   invalid: () => ({
@@ -180,6 +210,8 @@ describe('plugins discovery system', () => {
     jest.spyOn(console, 'log').mockImplementation((...args) => {
       process.stdout.write(args + '\n');
     });
+
+    jest.clearAllMocks();
   });
 
   afterEach(() => {
@@ -542,9 +574,61 @@ describe('plugins discovery system', () => {
     expect(loggingSystemMock.collect(logger).warn).toEqual([]);
   });
 
+  describe('plugin packages', () => {
+    it('filters repoPackages in the env and converts them to PluginWrappers', async () => {
+      const foo = getMockPackage('foo');
+      const bar = getMockPackage('bar');
+      coreContext.env = {
+        ...env,
+        pluginSearchPaths: [],
+        repoPackages: [foo, bar],
+      };
+      const filterFn = jest.fn((p: Package) => p === foo);
+      getPluginPackagesFilterMock.mockReturnValue(filterFn);
+
+      const { plugin$ } = discover({
+        config: new PluginsConfig(pluginConfig, coreContext.env),
+        coreContext,
+        instanceInfo,
+        nodeInfo,
+      });
+
+      const [plugin, ...empty] = await firstValueFrom(plugin$.pipe(toArray()));
+      expect(empty).toHaveLength(0);
+
+      expect(getPluginPackagesFilterMock).toHaveBeenCalledTimes(1);
+      const filterArgs = getPluginPackagesFilterMock.mock.calls[0];
+      expect(filterArgs).toEqual([
+        {
+          examples: false,
+          oss: false,
+          parentDirs: [],
+          paths: [],
+        },
+      ]);
+
+      expect(filterFn).toHaveBeenCalledTimes(2);
+      expect(filterFn.mock.calls[0]).toEqual([foo, 0]);
+      expect(filterFn.mock.calls[1]).toEqual([bar, 1]);
+      expect(filterFn.mock.results).toEqual([
+        { type: 'return', value: true },
+        { type: 'return', value: false },
+      ]);
+
+      expect(pluginManifestFromPluginPackageMock).toHaveBeenCalledTimes(1);
+      const manifestArgs = pluginManifestFromPluginPackageMock.mock.calls[0];
+      expect(manifestArgs).toEqual([coreContext.env.packageInfo.version, foo.manifest]);
+      expect(pluginManifestFromPluginPackageMock.mock.results[0]).toEqual({
+        type: 'return',
+        value: plugin.manifest,
+      });
+    });
+  });
+
   describe('discovery order', () => {
     beforeEach(() => {
       scanPluginSearchPathsMock.mockClear();
+      getPluginPackagesFilterMock.mockReturnValue(() => true);
     });
 
     it('returns the plugins in a deterministic order', async () => {
@@ -565,8 +649,13 @@ describe('plugins discovery system', () => {
         ])
       );
 
+      coreContext.env = {
+        ...env,
+        repoPackages: [getMockPackage('foo'), getMockPackage('bar')],
+      };
+
       let { plugin$ } = discover({
-        config: new PluginsConfig(pluginConfig, env),
+        config: new PluginsConfig(pluginConfig, coreContext.env),
         coreContext,
         instanceInfo,
         nodeInfo,
@@ -576,9 +665,8 @@ describe('plugins discovery system', () => {
       let plugins = await firstValueFrom(plugin$.pipe(toArray()));
       let pluginNames = plugins.map((plugin) => plugin.name);
 
-      expect(pluginNames).toHaveLength(3);
-      // order coming from `ROOT/plugin` -> `ROOT/src/plugins` -> // ROOT/x-pack
-      expect(pluginNames).toEqual(['pluginB', 'pluginA', 'pluginC']);
+      // order coming from `ROOT/packages` -> `ROOT/plugin` -> `ROOT/src/plugins` -> // ROOT/x-pack
+      expect(pluginNames).toEqual(['bar', 'foo', 'pluginB', 'pluginA', 'pluginC']);
 
       // second pass
       scanPluginSearchPathsMock.mockReturnValue(
@@ -588,6 +676,11 @@ describe('plugins discovery system', () => {
           `${KIBANA_ROOT}/src/plugins/plugin_a`,
         ])
       );
+
+      coreContext.env = {
+        ...env,
+        repoPackages: [getMockPackage('bar'), getMockPackage('foo')],
+      };
 
       plugin$ = discover({
         config: new PluginsConfig(pluginConfig, env),
@@ -600,9 +693,8 @@ describe('plugins discovery system', () => {
       plugins = await firstValueFrom(plugin$.pipe(toArray()));
       pluginNames = plugins.map((plugin) => plugin.name);
 
-      expect(pluginNames).toHaveLength(3);
-      // order coming from `ROOT/plugin` -> `ROOT/src/plugins` -> // ROOT/x-pack
-      expect(pluginNames).toEqual(['pluginB', 'pluginA', 'pluginC']);
+      // order coming from `ROOT/packages` -> `ROOT/plugin` -> `ROOT/src/plugins` -> // ROOT/x-pack
+      expect(pluginNames).toEqual(['bar', 'foo', 'pluginB', 'pluginA', 'pluginC']);
     });
   });
 });
