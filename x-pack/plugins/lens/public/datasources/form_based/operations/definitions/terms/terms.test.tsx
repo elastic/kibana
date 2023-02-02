@@ -2659,9 +2659,9 @@ describe('terms', () => {
                   "count": 1,
                   "missingFields": <React.Fragment>
                     <React.Fragment>
-                      <EuiCode>
+                      <strong>
                         notExisting
-                      </EuiCode>
+                      </strong>
                       
                     </React.Fragment>
                   </React.Fragment>,
