@@ -32,7 +32,6 @@ export const cancelSyncs = async (
         ],
       },
     },
-    refresh: true,
     script: {
       lang: 'painless',
       source: `ctx._source['status'] = '${SyncStatus.CANCELED}';
@@ -59,7 +58,6 @@ ctx._source['completed_at'] = '${new Date(Date.now()).toISOString()}';`,
         ],
       },
     },
-    refresh: true,
     script: {
       lang: 'painless',
       source: `ctx._source['status'] = '${SyncStatus.CANCELING}';

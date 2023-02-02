@@ -5,25 +5,46 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 
 import { useActions, useValues } from 'kea';
 
-import { EuiConfirmModal } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiCallOut,
+  EuiConfirmModal,
+  EuiFieldText,
+  EuiForm,
+  EuiFormRow,
+  EuiSpacer,
+} from '@elastic/eui';
+
 import { i18n } from '@kbn/i18n';
 
-import { ingestionMethodToText } from '../../utils/indices';
+import { Status } from '../../../../../common/types/api';
+
+import { CancelSyncsApiLogic } from '../../api/connector/cancel_syncs_api_logic';
+import { ingestionMethodToText, isConnectorIndex } from '../../utils/indices';
 
 import { IndicesLogic } from './indices_logic';
 
 export const DeleteIndexModal: React.FC = () => {
   const { closeDeleteModal, deleteIndex } = useActions(IndicesLogic);
   const {
+    deleteModalIndex,
     deleteModalIndexName: indexName,
+    deleteModalIndexHasInProgressSyncs,
     deleteModalIngestionMethod: ingestionMethod,
     isDeleteModalVisible,
     isDeleteLoading,
+    isFetchIndexDetailsLoading,
   } = useValues(IndicesLogic);
+
+  const { makeRequest } = useActions(CancelSyncsApiLogic);
+  const { status: cancelStatus } = useValues(CancelSyncsApiLogic);
+
+  const [inputIndexName, setInputIndexName] = useState('');
+
   return isDeleteModalVisible ? (
     <EuiConfirmModal
       title={i18n.translate('xpack.enterpriseSearch.content.searchIndices.deleteModal.title', {
@@ -59,20 +80,85 @@ export const DeleteIndexModal: React.FC = () => {
       )}
       defaultFocusedButton="confirm"
       buttonColor="danger"
-      isLoading={isDeleteLoading}
+      confirmButtonDisabled={inputIndexName.trim() !== indexName}
+      isLoading={isDeleteLoading || isFetchIndexDetailsLoading}
     >
       <p>
         {i18n.translate(
           'xpack.enterpriseSearch.content.searchIndices.deleteModal.delete.description',
           {
             defaultMessage:
-              'Deleting this index will also delete all of its data and its {ingestionMethod} configuration. Any associated search engines will no longer be able to access any data stored in this index.This can not be undone.',
+              'Deleting this index will also delete all of its data and its {ingestionMethod} configuration. Any associated search engines will no longer be able to access any data stored in this index.',
             values: {
               ingestionMethod: ingestionMethodToText(ingestionMethod),
             },
           }
         )}
       </p>
+      {deleteModalIndexHasInProgressSyncs && (
+        <>
+          <EuiCallOut
+            color="warning"
+            iconType="alert"
+            title={i18n.translate(
+              'xpack.enterpriseSearch.content.searchIndices.deleteModal.syncsWarning.title',
+              {
+                defaultMessage: 'Syncs in progress',
+              }
+            )}
+          >
+            <p>
+              {i18n.translate(
+                'xpack.enterpriseSearch.content.searchIndices.deleteModal.syncsWarning.description',
+                {
+                  defaultMessage:
+                    'This index has in-progress syncs. Deleting the index without stopping these syncs may result in dangling sync job records or the index being re-created.',
+                }
+              )}
+            </p>
+            <EuiButton
+              onClick={() => {
+                if (isConnectorIndex(deleteModalIndex)) {
+                  makeRequest({ connectorId: deleteModalIndex.connector.id });
+                }
+              }}
+              isLoading={cancelStatus === Status.LOADING}
+            >
+              {i18n.translate(
+                'xpack.enterpriseSearch.content.searchIndices.deleteModal.cancelSyncsButton.label',
+                {
+                  defaultMessage: 'Cancel syncs',
+                }
+              )}
+            </EuiButton>
+          </EuiCallOut>
+          <EuiSpacer />
+        </>
+      )}
+      <p>
+        {i18n.translate(
+          'xpack.enterpriseSearch.content.searchIndices.deleteModal.syncsWarning.description',
+          {
+            defaultMessage: 'This action cannot be undone. Please type {indexName} to confirm.',
+            values: { indexName },
+          }
+        )}
+      </p>
+      <EuiForm>
+        <EuiFormRow
+          label={i18n.translate(
+            'xpack.enterpriseSearch.content.searchIndices.deleteModal.indexNameInput.label',
+            {
+              defaultMessage: 'Index name',
+            }
+          )}
+        >
+          <EuiFieldText
+            onChange={(e) => setInputIndexName(e.target.value)}
+            value={inputIndexName}
+          />
+        </EuiFormRow>
+      </EuiForm>
     </EuiConfirmModal>
   ) : (
     <></>
