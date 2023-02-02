@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { Embeddable, IContainer, ContainerInput } from '@kbn/embeddable-plugin/public';
 import type { TimeRange } from '@kbn/es-query';
-import { TimeRangeInput } from './custom_time_range_action';
+import { Embeddable, IContainer, ContainerInput } from '../../../../..';
+import { TimeRangeInput } from './customize_panel_action';
 
 interface ContainerTimeRangeInput extends ContainerInput<TimeRangeInput> {
   timeRange: TimeRange;

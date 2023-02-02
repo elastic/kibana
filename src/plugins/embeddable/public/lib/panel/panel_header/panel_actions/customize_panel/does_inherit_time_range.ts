@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { Embeddable, IContainer, ContainerInput } from '@kbn/embeddable-plugin/public';
-import { TimeRangeInput } from './custom_time_range_action';
+import { Embeddable, IContainer, ContainerInput } from '../../../..';
+import { TimeRangeInput } from './customize_panel_action';
 
 export function doesInheritTimeRange(embeddable: Embeddable<TimeRangeInput>) {
   if (!embeddable.parent) {

@@ -12,11 +12,8 @@ import type { CspRuleTemplateMetadata } from './csp_rule_template_metadata';
 export interface CspFinding {
   '@timestamp': string;
   cluster_id: string;
-  orchestrator?: {
-    cluster?: {
-      name?: string;
-    };
-  };
+  orchestrator?: CspFindingOrchestrator;
+  cloud?: CspFindingCloud; // only available on CSPM findings
   result: CspFindingResult;
   resource: CspFindingResource;
   rule: CspRuleTemplateMetadata;
@@ -25,6 +22,20 @@ export interface CspFinding {
   agent: CspFindingAgent;
   ecs: {
     version: string;
+  };
+}
+
+interface CspFindingOrchestrator {
+  cluster?: {
+    name?: string;
+  };
+}
+
+interface CspFindingCloud {
+  provider: 'aws';
+  account: {
+    name: string;
+    id: string;
   };
 }
 

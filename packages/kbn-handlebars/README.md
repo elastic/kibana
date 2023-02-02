@@ -11,14 +11,15 @@ A custom version of the handlebars package which, to improve security, does not 
   - `noEscape`
   - `strict`
   - `assumeObjects`
+  - `preventIndent`
+  - `explicitPartialContext`
 
 - Only the following runtime options are supported:
   - `data`
   - `helpers`
+  - `partials`
   - `decorators` (not documented in the official Handlebars [runtime options documentation](https://handlebarsjs.com/api-reference/runtime-options.html))
   - `blockParams` (not documented in the official Handlebars [runtime options documentation](https://handlebarsjs.com/api-reference/runtime-options.html))
-
-The [Inline partials](https://handlebarsjs.com/guide/partials.html#inline-partials) handlebars template feature is currently not supported by `@kbn/handlebars`.
 
 ## Implementation differences
 
