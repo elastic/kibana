@@ -124,7 +124,6 @@ export function fieldIsInvalid(
 const accuracyModeDisabledWarning = (
   columnName: string,
   columnId: string,
-  docLink: string,
   enableAccuracyMode: () => void
 ): UserMessage => ({
   severity: 'warning',
@@ -341,28 +340,23 @@ export function getPrecisionErrorWarningMessages(
                     column.id,
                     docLinks.links.aggs.terms_doc_count_error
                   )
-                : accuracyModeDisabledWarning(
-                    column.name,
-                    column.id,
-                    docLinks.links.aggs.terms_doc_count_error,
-                    () => {
-                      setState((prevState) =>
-                        mergeLayer({
-                          state: prevState,
-                          layerId,
-                          newLayer: updateDefaultLabels(
-                            updateColumnParam({
-                              layer: currentLayer,
-                              columnId: column.id,
-                              paramName: 'accuracyMode',
-                              value: true,
-                            }),
-                            indexPattern
-                          ),
-                        })
-                      );
-                    }
-                  )
+                : accuracyModeDisabledWarning(column.name, column.id, () => {
+                    setState((prevState) =>
+                      mergeLayer({
+                        state: prevState,
+                        layerId,
+                        newLayer: updateDefaultLabels(
+                          updateColumnParam({
+                            layer: currentLayer,
+                            columnId: column.id,
+                            paramName: 'accuracyMode',
+                            value: true,
+                          }),
+                          indexPattern
+                        ),
+                      })
+                    );
+                  })
             );
           } else {
             warningMessages.push({

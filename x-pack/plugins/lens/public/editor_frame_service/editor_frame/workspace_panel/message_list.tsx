@@ -19,7 +19,7 @@ import {
   EuiFlexItem,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { SerializedStyles } from '@emotion/react';
+import { css, SerializedStyles } from '@emotion/react';
 import { IconError, IconWarning } from '../custom_icons';
 import { UserMessage } from '../../../types';
 
@@ -91,7 +91,12 @@ export const MessageList = ({
             )}
             {warningCount > 0 && (
               <>
-                <EuiIcon type={IconWarning} />
+                <EuiIcon
+                  type={IconWarning}
+                  css={css`
+                    margin-left: 4px;
+                  `}
+                />
                 {warningCount}
               </>
             )}
