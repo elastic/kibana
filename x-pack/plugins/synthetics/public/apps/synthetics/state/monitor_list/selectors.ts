@@ -9,6 +9,7 @@ import { createSelector } from 'reselect';
 
 import { ConfigKey, EncryptedSyntheticsSavedMonitor } from '../../../../../common/runtime_types';
 import { SyntheticsAppState } from '../root_reducer';
+import { MonitorFilterState } from './models';
 
 export const selectMonitorListState = (state: SyntheticsAppState) => state.monitorList;
 export const selectEncryptedSyntheticsSavedMonitors = createSelector(
@@ -21,6 +22,15 @@ export const selectEncryptedSyntheticsSavedMonitors = createSelector(
       created_at: monitor.created_at,
     })) as EncryptedSyntheticsSavedMonitor[]
 );
+
+export const selectMonitorFiltersAndQueryState = createSelector(selectMonitorListState, (state) => {
+  const { monitorTypes, tags, locations, projects, schedules }: MonitorFilterState =
+    state.pageState;
+  const { query } = state.pageState;
+
+  return { monitorTypes, tags, locations, projects, schedules, query };
+});
+
 export const selectMonitorUpsertStatuses = (state: SyntheticsAppState) =>
   state.monitorList.monitorUpsertStatuses;
 
