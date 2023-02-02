@@ -81,6 +81,9 @@ export const ChartComponent: FC<ChartComponentProps> = React.memo(({ annotation 
       ],
       state: {
         visualization: {
+          yLeftExtent: {
+            mode: 'dataBounds',
+          },
           legend: {
             isVisible: false,
             position: 'right',
