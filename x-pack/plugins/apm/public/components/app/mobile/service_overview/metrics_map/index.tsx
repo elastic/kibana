@@ -84,11 +84,14 @@ export function MetricsMap({
           </EuiTitle>
           <EuiText size="s" color="subdued">
             <p>
-              {i18n.translate('xpack.apm.serviceOverview.embeddedMap.title', {
-                defaultMessage:
-                  'Map showing the total number of {currentMap} based on country and region',
-                values: { currentMap: currentMap.label },
-              })}
+              {i18n.translate(
+                'xpack.apm.serviceOverview.embeddedMap.subtitle',
+                {
+                  defaultMessage:
+                    'Map showing the total number of {currentMap} based on country and region',
+                  values: { currentMap: currentMap.label },
+                }
+              )}
             </p>
           </EuiText>
         </EuiFlexItem>

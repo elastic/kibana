@@ -83,7 +83,7 @@ export async function getHttpRequestsLayerList(maps?: MapsStartApi) {
     style: getLayerStyle(HTTP_REQUEST_PER_COUNTRY, PalleteColors.BluetoRed),
     id: uuidv4(),
     label: i18n.translate(
-      'xpack.apm.serviceOverview.embeddedMap.httpRequests.metric.label',
+      'xpack.apm.serviceOverview.embeddedMap.httpRequests.country.label',
       {
         defaultMessage: 'HTTP requests per country',
       }
@@ -125,7 +125,7 @@ export async function getHttpRequestsLayerList(maps?: MapsStartApi) {
     style: getLayerStyle(HTTP_REQUESTS_PER_REGION, PalleteColors.YellowtoRed),
     id: uuidv4(),
     label: i18n.translate(
-      'xpack.apm.serviceOverview.embeddedMap.httpRequests.metric.label',
+      'xpack.apm.serviceOverview.embeddedMap.httpRequests.region.label',
       {
         defaultMessage: 'HTTP requests per region',
       }
