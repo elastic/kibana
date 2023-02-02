@@ -119,7 +119,7 @@ interface ParticipantsAggsResult {
 
 interface GetUsersResponse {
   participants: Array<{ id: string; owner: string; user: User }>;
-  assignees: Set<string>;
+  users: Set<string>;
 }
 
 export class CaseUserActionService {
@@ -753,7 +753,7 @@ export class CaseUserActionService {
       aggs: CaseUserActionService.buildParticipantsAgg(),
     });
 
-    const assignees: GetUsersResponse['assignees'] = new Set<string>();
+    const users: GetUsersResponse['users'] = new Set<string>();
     const participants: GetUsersResponse['participants'] = [];
     const participantsBuckets = response.aggregations?.participants.buckets ?? [];
     const assigneesBuckets = response.aggregations?.assignees.buckets ?? [];
@@ -779,16 +779,16 @@ export class CaseUserActionService {
     }
 
     /**
-     * The assignees set includes any
+     * The users set includes any
      * user that got assigned in the
      * case even if they removed as
      * assignee at some point in time.
      */
     for (const bucket of assigneesBuckets) {
-      assignees.add(bucket.key);
+      users.add(bucket.key);
     }
 
-    return { participants, assignees };
+    return { participants, users };
   }
 
   private static buildParticipantsAgg(): Record<string, estypes.AggregationsAggregationContainer> {

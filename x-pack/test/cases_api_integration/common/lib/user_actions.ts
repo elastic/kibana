@@ -107,5 +107,5 @@ export const getCaseUsers = async ({
     .get(`${getSpaceUrlPrefix(auth.space)}${getCaseUsersUrl(caseId)}`)
     .auth(auth.user.username, auth.user.password)
     .expect(expectedHttpCode);
-  return users as GetCaseUsersResponse;
+  return users;
 };

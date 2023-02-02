@@ -35,6 +35,10 @@ export default ({ getService }: FtrProviderContext): void => {
   const es = getService('es');
 
   describe('user_actions_get_users', () => {
+    afterEach(async () => {
+      await deleteAllCaseItems(es);
+    });
+
     describe('no profiles', () => {
       it('returns the users correctly without profile ids', async () => {
         const postedCase = await createCase(supertest, getPostCaseRequest());
@@ -99,10 +103,6 @@ export default ({ getService }: FtrProviderContext): void => {
 
         superUserProfile = userProfiles[0];
         secUserProfile = userProfiles[1];
-      });
-
-      afterEach(async () => {
-        await deleteAllCaseItems(es);
       });
 
       after(async () => {

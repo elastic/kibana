@@ -122,7 +122,7 @@ export default ({ getService }: FtrProviderContext): void => {
               email: secUserProfile.user.email,
               profile_uid: secUserProfile.uid,
             },
-            type: 'user',
+            type: 'participant',
           },
         ]);
       });
@@ -233,7 +233,7 @@ export default ({ getService }: FtrProviderContext): void => {
               email: secUserProfile.user.email,
               profile_uid: secUserProfile.uid,
             },
-            type: 'user',
+            type: 'participant',
           },
         ]);
       });

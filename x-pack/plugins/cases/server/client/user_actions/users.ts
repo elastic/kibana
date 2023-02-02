@@ -31,12 +31,12 @@ export const getUsers = async (
   } = clientArgs;
 
   try {
-    const users: User[] = [];
+    const usersResponse: User[] = [];
 
     // ensure that we have authorization for reading the case
-    await casesClient.cases.resolve({ id: caseId, includeComments: false });
+    const theCase = await casesClient.cases.resolve({ id: caseId, includeComments: false });
 
-    const { participants, assignees } = await userActionService.getUsers({
+    const { participants, users } = await userActionService.getUsers({
       caseId,
     });
 
@@ -54,20 +54,22 @@ export const getUsers = async (
       .filter((participant) => participant.user.profile_uid != null)
       .map((participant) => participant.user.profile_uid) as string[];
 
-    const userProfileUids = new Set([...assignees, ...participantsUids]);
+    /**
+     * To avoid duplicates, a user that is already participant
+     * should be removed from the assignees returned by the case.
+     */
+
+    const assigneesUids = theCase.case.assignees
+      .map((assignee) => assignee.uid)
+      .filter((uid) => !participantsUids.includes(uid));
+
+    const userProfileUids = new Set([...users, ...participantsUids, ...assigneesUids]);
     const userProfiles = await getUserProfiles(securityStartPlugin, userProfileUids);
 
     for (const participant of participants) {
-      const user =
-        participant.user.profile_uid != null
-          ? getUserInformation(userProfiles, participant.user.profile_uid)
-          : {
-              email: participant.user.email,
-              full_name: participant.user.full_name,
-              username: participant.user.username,
-            };
+      const user = getUserInformation(userProfiles, participant.user.profile_uid, participant.user);
 
-      users.push({
+      usersResponse.push({
         user,
         type: 'participant',
       });
@@ -76,21 +78,36 @@ export const getUsers = async (
        * To avoid duplicates, a user that is
        * a participant should not be also added
        * as a user. For that reason, we remove
-       * its profile_uid from the assignees Set
+       * its profile_uid from the usersUids Set
        */
       if (participant.user.profile_uid) {
-        assignees.delete(participant.user.profile_uid);
+        users.delete(participant.user.profile_uid);
       }
     }
 
-    for (const uid of assignees.values()) {
-      users.push({
+    for (const uid of assigneesUids) {
+      usersResponse.push({
+        user: getUserInformation(userProfiles, uid),
+        type: 'participant',
+      });
+
+      /**
+       * To avoid duplicates, a user that is
+       * an assignee and thus a participant should not be also added
+       * as a user. For that reason, we remove
+       * its uid from the usersUids Set
+       */
+      users.delete(uid);
+    }
+
+    for (const uid of users.values()) {
+      usersResponse.push({
         user: getUserInformation(userProfiles, uid),
         type: 'user',
       });
     }
 
-    const results = { users };
+    const results = { users: usersResponse };
 
     return GetCaseUsersResponseRt.encode(results);
   } catch (error) {
@@ -102,13 +119,17 @@ export const getUsers = async (
   }
 };
 
-const getUserInformation = (userProfiles: Map<string, UserProfile>, uid: string): User['user'] => {
-  const userProfile = userProfiles.get(uid);
+const getUserInformation = (
+  userProfiles: Map<string, UserProfile>,
+  uid: string | undefined,
+  userInfo?: User['user']
+): User['user'] => {
+  const userProfile = uid != null ? userProfiles.get(uid) : undefined;
 
   return {
-    email: userProfile?.user.email,
-    full_name: userProfile?.user.full_name,
-    username: userProfile?.user.username,
-    profile_uid: userProfile?.uid ?? uid,
+    email: userProfile?.user.email ?? userInfo?.email,
+    full_name: userProfile?.user.full_name ?? userInfo?.full_name,
+    username: userProfile?.user.username ?? userInfo?.username,
+    profile_uid: userProfile?.uid ?? uid ?? userInfo?.profile_uid,
   };
 };
