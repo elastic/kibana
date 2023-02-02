@@ -166,4 +166,30 @@ test('pluginSearchPaths only includes kibana-extra, regardless of plugin filters
   );
 
   expect(env2.pluginSearchPaths).toEqual(['/some/home/kibana-extra']);
+
+  const env3 = new Env(
+    '/some/home/dir',
+    packageInfos,
+    getEnvOptions({
+      cliArgs: {
+        oss: true,
+        runExamples: false,
+      },
+    })
+  );
+
+  expect(env3.pluginSearchPaths).toEqual(['/some/home/kibana-extra']);
+
+  const env4 = new Env(
+    '/some/home/dir',
+    packageInfos,
+    getEnvOptions({
+      cliArgs: {
+        oss: false,
+        runExamples: true,
+      },
+    })
+  );
+
+  expect(env4.pluginSearchPaths).toEqual(['/some/home/kibana-extra']);
 });
