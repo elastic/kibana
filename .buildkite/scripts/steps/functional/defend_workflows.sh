@@ -11,11 +11,13 @@ export JOB=kibana-defend-workflows-cypress
 
 echo "--- Defend Workflows Cypress tests"
 
-lsb_release -d
+sudo apt update
 
 sudo apt install snapd
 
-snap install multipass
+sudo snap install snapd
+
+sudo snap install multipass
 
 node scripts/functional_tests \
   --debug --bail \
