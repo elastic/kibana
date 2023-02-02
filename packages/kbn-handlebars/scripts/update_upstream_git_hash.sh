@@ -5,15 +5,6 @@ set -e
 TMP=.tmp-handlebars
 HASH_FILE=packages/kbn-handlebars/src/spec/.upstream_git_hash
 
-# Try to detect Windows environment (I've not tested this!)
-if [[ "$OSTYPE" == "msys" ]]; then
-  # Windows environment
-  DEVNULL=NUL
-else
-  # Everything else (including Cygwin on Windows)
-  DEVNULL=/dev/null
-fi
-
 function cleanup {
   rm -fr $TMP
 }

@@ -5,15 +5,6 @@ set -e
 TMP=.tmp-handlebars
 HASH_FILE=packages/kbn-handlebars/src/spec/.upstream_git_hash
 
-# Try to detect Windows environment (I've not tested this!)
-if [[ "$OSTYPE" == "msys" ]]; then
-  # Windows environment
-  DEVNULL=NUL
-else
-  # Everything else (including Cygwin on Windows)
-  DEVNULL=/dev/null
-fi
-
 function cleanup {
   rm -fr $TMP
 }
@@ -27,8 +18,8 @@ echo "Cloning handlebars repo..."
 git clone -q --depth 1 https://github.com/handlebars-lang/handlebars.js.git -b 4.x $TMP
 
 echo "Looking for updates..."
-hash=`git -C $TMP rev-parse HEAD`
-expected_hash=`cat $HASH_FILE`
+hash=$(git -C $TMP rev-parse HEAD)
+expected_hash=$(cat $HASH_FILE)
 
 if [ "$hash" = "$expected_hash" ]; then
   echo "You're all up to date :)"
