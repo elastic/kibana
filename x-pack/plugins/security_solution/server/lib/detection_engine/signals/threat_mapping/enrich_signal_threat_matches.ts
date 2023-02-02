@@ -64,18 +64,26 @@ export const getSignalMatchesFromThreatList = (
 
       if (query.queryType === ThreatMatchQueryType.term) {
         const threatValue = get(threatHit?._source, query.value);
-        // TODO: check types
-        if (threatValue && typeof threatValue === 'string' && signalValueMap) {
-          const ids = signalValueMap[query.field][threatValue];
-
-          ids.forEach((id: string) => {
-            addSignalValueToMap({
-              id,
-              threatHit,
-              query,
-            });
-          });
+        let values;
+        if (Array.isArray(threatValue)) {
+          values = threatValue;
+        } else {
+          values = [threatValue];
         }
+
+        values.forEach((value) => {
+          if (value && signalValueMap) {
+            const ids = signalValueMap[query.field][value?.toString()];
+
+            ids?.forEach((id: string) => {
+              addSignalValueToMap({
+                id,
+                threatHit,
+                query,
+              });
+            });
+          }
+        });
       } else {
         if (!signalId) {
           return;

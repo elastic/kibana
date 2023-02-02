@@ -903,6 +903,40 @@ describe('getSignalMatchesFromThreatList', () => {
     expect(signalMatches).toEqual([]);
   });
 
+  it('return empty array for terms query if there wrong value in threat indicator', () => {
+    const threat = getThreatListItemMock({
+      _id: 'threatId',
+      matched_queries: [
+        encodeThreatMatchNamedQuery(
+          getNamedQueryMock({
+            value: 'threat.indicator.domain',
+            field: 'event.domain',
+            queryType: 'tq',
+          })
+        ),
+      ],
+    });
+
+    threat._source = {
+      ...threat._source,
+      threat: {
+        indicator: {
+          domain: { a: 'b' },
+        },
+      },
+    };
+
+    const singnalValueMap = {
+      'event.domain': {
+        domain_1: ['signalId1', 'signalId2'],
+      },
+    };
+
+    const signalMatches = getSignalMatchesFromThreatList([threat], singnalValueMap);
+
+    expect(signalMatches).toEqual([]);
+  });
+
   it('return signal matches from threat indicators for termsQuery', () => {
     const threat = getThreatListItemMock({
       _id: 'threatId',
@@ -929,6 +963,60 @@ describe('getSignalMatchesFromThreatList', () => {
     const singnalValueMap = {
       'event.domain': {
         domain_1: ['signalId1', 'signalId2'],
+      },
+    };
+
+    const signalMatches = getSignalMatchesFromThreatList([threat], singnalValueMap);
+
+    const queries = [
+      {
+        field: 'event.domain',
+        value: 'threat.indicator.domain',
+        index: 'threat_index',
+        id: 'threatId',
+        queryType: 'mq',
+      },
+    ];
+
+    expect(signalMatches).toEqual([
+      {
+        signalId: 'signalId1',
+        queries,
+      },
+      {
+        signalId: 'signalId2',
+        queries,
+      },
+    ]);
+  });
+
+  it('return signal matches from threat indicators which has array values for termsQuery', () => {
+    const threat = getThreatListItemMock({
+      _id: 'threatId',
+      matched_queries: [
+        encodeThreatMatchNamedQuery(
+          getNamedQueryMock({
+            value: 'threat.indicator.domain',
+            field: 'event.domain',
+            queryType: 'tq',
+          })
+        ),
+      ],
+    });
+
+    threat._source = {
+      ...threat._source,
+      threat: {
+        indicator: {
+          domain: ['domain_3', 'domain_1', 'domain_2'],
+        },
+      },
+    };
+
+    const singnalValueMap = {
+      'event.domain': {
+        domain_1: ['signalId1'],
+        domain_2: ['signalId2'],
       },
     };
 
