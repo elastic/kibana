@@ -16,7 +16,6 @@ import type {
   ThreatMatchNamedQuery,
   SignalMatch,
 } from './types';
-import { extractNamedQueries } from './utils';
 
 export const MAX_NUMBER_OF_SIGNAL_MATCHES = 200;
 
@@ -77,49 +76,43 @@ export const buildEnrichments = ({
     };
   });
 
-export const enrichSignalThreatMatches = async (
-  signals: SignalSourceHit[],
-  getMatchedThreats: GetMatchedThreats,
-  indicatorPath: string,
-  signalMatchesArg?: SignalMatch[]
-): Promise<SignalSourceHit[]> => {
-  if (signals.length === 0) {
-    return signals;
-  }
+// export const enrichSignalThreatMatches = async (
+//   signals: SignalSourceHit[],
+//   getMatchedThreats: GetMatchedThreats,
+//   indicatorPath: string,
+//   signalMatches: SignalMatch[]
+// ): Promise<SignalSourceHit[]> => {
+//   if (signals.length === 0) {
+//     return signals;
+//   }
 
-  const uniqueHits = groupAndMergeSignalMatches(signals);
-  const signalMatches: SignalMatch[] = signalMatchesArg
-    ? signalMatchesArg
-    : uniqueHits.map((signalHit) => ({
-        signalId: signalHit._id,
-        queries: extractNamedQueries(signalHit),
-      }));
+//   const uniqueHits = groupAndMergeSignalMatches(signals);
 
-  const matchedThreatIds = [
-    ...new Set(
-      signalMatches
-        .map((signalMatch) => signalMatch.queries)
-        .flat()
-        .map(({ id }) => id)
-    ),
-  ];
-  const matchedThreats = await getMatchedThreats(matchedThreatIds);
+//   const matchedThreatIds = [
+//     ...new Set(
+//       signalMatches
+//         .map((signalMatch) => signalMatch.queries)
+//         .flat()
+//         .map(({ id }) => id)
+//     ),
+//   ];
+//   const matchedThreats = await getMatchedThreats(matchedThreatIds);
 
-  const enrichmentsWithoutAtomic: { [key: string]: ThreatEnrichment[] } = {};
-  signalMatches.forEach((signalMatch) => {
-    enrichmentsWithoutAtomic[signalMatch.signalId] = buildEnrichments({
-      indicatorPath,
-      queries: signalMatch.queries,
-      threats: matchedThreats,
-    });
-  });
+//   const enrichmentsWithoutAtomic: { [key: string]: ThreatEnrichment[] } = {};
+//   signalMatches.forEach((signalMatch) => {
+//     enrichmentsWithoutAtomic[signalMatch.signalId] = buildEnrichments({
+//       indicatorPath,
+//       queries: signalMatch.queries,
+//       threats: matchedThreats,
+//     });
+//   });
 
-  const enrichedSignals: SignalSourceHit[] = uniqueHits.map((signalHit) =>
-    enrichSignalWithThreatMatches(signalHit, enrichmentsWithoutAtomic)
-  );
+//   const enrichedSignals: SignalSourceHit[] = uniqueHits.map((signalHit) =>
+//     enrichSignalWithThreatMatches(signalHit, enrichmentsWithoutAtomic)
+//   );
 
-  return enrichedSignals;
-};
+//   return enrichedSignals;
+// };
 
 const enrichSignalWithThreatMatches = (
   signalHit: SignalSourceHit,

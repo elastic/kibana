@@ -4,31 +4,75 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { get } from 'lodash';
 
-import type { GetThreatListOptions, ThreatMatchNamedQuery } from './types';
+import { ThreatMatchQueryType } from './types';
+import type {
+  GetThreatListOptions,
+  ThreatMatchNamedQuery,
+  ThreatTermNamedQuery,
+  ThreatListItem,
+  SignalValuesMap,
+} from './types';
 import { getThreatList } from './get_threat_list';
 import { decodeThreatMatchNamedQuery } from './utils';
 
 import { MAX_NUMBER_OF_SIGNAL_MATCHES } from './enrich_signal_threat_matches';
 
-export type SignalsMap = Map<string, ThreatMatchNamedQuery[]>;
+export type SignalsQueryMap = Map<string, ThreatMatchNamedQuery[]>;
 
 interface GetSignalsMatchesFromThreatIndexOptions {
   threatSearchParams: Omit<GetThreatListOptions, 'searchAfter'>;
   eventsCount: number;
+  signalValueMap?: SignalValuesMap
 }
 
 /**
  * fetches threats and creates signals map from results, that matches signal is with list of threat queries
  */
-export const getSignalsMapFromThreatIndex = async ({
+export const getSignalsQueryMapFromThreatIndex = async ({
   threatSearchParams,
   eventsCount,
-}: GetSignalsMatchesFromThreatIndexOptions): Promise<SignalsMap> => {
+  signalValueMap
+}: GetSignalsMatchesFromThreatIndexOptions): Promise<SignalsQueryMap> => {
   let threatList: Awaited<ReturnType<typeof getThreatList>> | undefined;
-  const signalsMap = new Map<string, ThreatMatchNamedQuery[]>();
+  const signalsQueryMap = new Map<string, ThreatMatchNamedQuery[]>();
   // number of threat matches per signal is limited by MAX_NUMBER_OF_SIGNAL_MATCHES. Once it hits this number, threats stop to be processed for a signal
   const maxThreatsReachedMap = new Map<string, boolean>();
+
+  const addSignalValueToMap = ({
+    signalId,
+    threatHit,
+    decodedQuery,
+  }: {
+    signalId: string;
+    threatHit: ThreatListItem;
+    decodedQuery: ThreatMatchNamedQuery | ThreatTermNamedQuery;
+  }) => {
+    const signalMatch = signalsQueryMap.get(signalId);
+    if (!signalMatch) {
+      signalsQueryMap.set(signalId, []);
+    }
+
+    const threatQuery = {
+      id: threatHit._id,
+      index: threatHit._index,
+      field: decodedQuery.field,
+      value: decodedQuery.value,
+      queryType: decodedQuery.queryType,
+    };
+
+    if (!signalMatch) {
+      signalsQueryMap.set(signalId, [threatQuery]);
+      return;
+    }
+
+    if (signalMatch.length === MAX_NUMBER_OF_SIGNAL_MATCHES) {
+      maxThreatsReachedMap.set(signalId, true);
+    } else if (signalMatch.length < MAX_NUMBER_OF_SIGNAL_MATCHES) {
+      signalMatch.push(threatQuery);
+    }
+  };
 
   while (
     maxThreatsReachedMap.size < eventsCount &&
@@ -43,34 +87,45 @@ export const getSignalsMapFromThreatIndex = async ({
       const matchedQueries = threatHit?.matched_queries || [];
 
       matchedQueries.forEach((matchedQuery) => {
-        const matchDecoded = decodeThreatMatchNamedQuery(matchedQuery);
+        const decodedQuery = decodeThreatMatchNamedQuery(matchedQuery);
+        const signalId = decodedQuery.id;
 
-        if (maxThreatsReachedMap.get(matchDecoded.id)) {
-          return;
-        }
+        if (decodedQuery.queryType === ThreatMatchQueryType.term) {
+          const threatValue = get(threatHit?._source, decodedQuery.value);
+          let values;
+          if (Array.isArray(threatValue)) {
+            values = threatValue;
+          } else {
+            values = [threatValue];
+          }
 
-        const threatQuery = {
-          id: threatHit._id,
-          index: threatHit._index,
-          field: matchDecoded.field,
-          value: matchDecoded.value,
-        };
+          values.forEach((value) => {
+            if (value && signalValueMap) {
+              const ids = signalValueMap[decodedQuery.field][value?.toString()];
 
-        const signalMatch = signalsMap.get(matchDecoded.id);
+              ids?.forEach((signalId: string) => {
+                addSignalValueToMap({
+                  signalId,
+                  threatHit,
+                  decodedQuery,
+                });
+              });
+            }
+          });
+        } else {
+          if (!signalId) {
+            return;
+          }
 
-        if (!signalMatch) {
-          signalsMap.set(matchDecoded.id, [threatQuery]);
-          return;
-        }
-
-        if (signalMatch.length === MAX_NUMBER_OF_SIGNAL_MATCHES) {
-          maxThreatsReachedMap.set(matchDecoded.id, true);
-        } else if (signalMatch.length < MAX_NUMBER_OF_SIGNAL_MATCHES) {
-          signalMatch.push(threatQuery);
+          addSignalValueToMap({
+            signalId,
+            threatHit,
+            decodedQuery,
+          });
         }
       });
     });
   }
 
-  return signalsMap;
+  return signalsQueryMap;
 };

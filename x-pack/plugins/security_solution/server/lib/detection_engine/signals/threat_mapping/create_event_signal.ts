@@ -11,9 +11,10 @@ import { searchAfterAndBulkCreate } from '../search_after_bulk_create';
 import { buildReasonMessageForThreatMatchAlert } from '../reason_formatters';
 import type { CreateEventSignalOptions } from './types';
 import type { SearchAfterAndBulkCreateReturnType } from '../types';
-import { getSignalsMapFromThreatIndex } from './get_signals_map_from_threat_index';
+import { getSignalsQueryMapFromThreatIndex } from './get_signals_map_from_threat_index';
 
 import { threatEnrichmentFactory } from './threat_enrichment_factory';
+import { getSignalValueMap } from './utils';
 
 export const createEventSignal = async ({
   bulkCreate,
@@ -45,14 +46,17 @@ export const createEventSignal = async ({
   secondaryTimestamp,
   exceptionFilter,
   unprocessedExceptions,
+  allowedFieldsForTermsQuery,
+  threatMatchedFields,
 }: CreateEventSignalOptions): Promise<SearchAfterAndBulkCreateReturnType> => {
-  const threatFilter = buildThreatMappingFilter({
+  const threatFiltersFromEvents = buildThreatMappingFilter({
     threatMapping,
     threatList: currentEventList,
     entryKey: 'field',
+    allowedFieldsForTermsQuery,
   });
 
-  if (!threatFilter.query || threatFilter.query?.bool.should.length === 0) {
+  if (!threatFiltersFromEvents.query || threatFiltersFromEvents.query?.bool.should.length === 0) {
     // empty event list and we do not want to return everything as being
     // a hit so opt to return the existing result.
     ruleExecutionLogger.debug(
@@ -62,13 +66,13 @@ export const createEventSignal = async ({
   } else {
     const threatSearchParams = {
       esClient: services.scopedClusterClient.asCurrentUser,
-      threatFilters: [...threatFilters, threatFilter],
+      threatFilters: [...threatFilters, threatFiltersFromEvents],
       query: threatQuery,
       language: threatLanguage,
       index: threatIndex,
       ruleExecutionLogger,
       threatListConfig: {
-        _source: false,
+        _source: threatMatchedFields.threat,
         fields: undefined,
       },
       pitId: threatPitId,
@@ -78,9 +82,10 @@ export const createEventSignal = async ({
       exceptionFilter,
     };
 
-    const signalsMap = await getSignalsMapFromThreatIndex({
+    const signalsMap = await getSignalsQueryMapFromThreatIndex({
       threatSearchParams,
       eventsCount: currentEventList.length,
+      signalValueMap: getSignalValueMap({ eventList: currentEventList, threatMatchedFields }),
     });
 
     const ids = Array.from(signalsMap.keys());
@@ -137,7 +142,7 @@ export const createEventSignal = async ({
 
     ruleExecutionLogger.debug(
       `${
-        threatFilter.query?.bool.should.length
+        threatFiltersFromEvents.query?.bool.should.length
       } items have completed match checks and the total times to search were ${
         result.searchAfterTimes.length !== 0 ? result.searchAfterTimes : '(unknown) '
       }ms`
