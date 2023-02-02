@@ -25,6 +25,7 @@ import { bulkUpdateAgents } from './crud';
 import { createErrorActionResults, createAgentAction } from './actions';
 import { getHostedPolicies, isHostedAgent } from './hosted_agent';
 import { BulkActionTaskType } from './bulk_action_types';
+import { getCancelledActions } from './action_status';
 
 export class UpgradeActionRunner extends ActionRunner {
   protected async processAgents(agents: Agent[]): Promise<{ actionId: string }> {
@@ -55,6 +56,20 @@ export async function upgradeBatch(
     total?: number;
   }
 ): Promise<{ actionId: string }> {
+  const isActionIdCancelled = async (actionId: string) => {
+    const cancelledActions = await getCancelledActions(esClient);
+    return cancelledActions.some((a) => a.actionId === actionId);
+  };
+  if (options.actionId && (await isActionIdCancelled(options.actionId))) {
+    appContextService
+      .getLogger()
+      .info(
+        `Skipping batch of actionId:${options.actionId} of ${givenAgents.length} agents as the upgrade was cancelled`
+      );
+    return {
+      actionId: options.actionId,
+    };
+  }
   const errors: Record<Agent['id'], Error> = { ...outgoingErrors };
 
   const hostedPolicies = await getHostedPolicies(soClient, givenAgents);

@@ -23,7 +23,7 @@ export async function getActionStatuses(
   options: ListWithKuery
 ): Promise<ActionStatus[]> {
   const actions = await _getActions(esClient, options);
-  const cancelledActions = await _getCancelledActions(esClient);
+  const cancelledActions = await getCancelledActions(esClient);
   let acks: any;
 
   try {
@@ -135,7 +135,7 @@ export async function getActionStatuses(
   return results;
 }
 
-async function _getCancelledActions(
+export async function getCancelledActions(
   esClient: ElasticsearchClient
 ): Promise<Array<{ actionId: string; timestamp?: string }>> {
   const res = await esClient.search<FleetServerAgentAction>({
