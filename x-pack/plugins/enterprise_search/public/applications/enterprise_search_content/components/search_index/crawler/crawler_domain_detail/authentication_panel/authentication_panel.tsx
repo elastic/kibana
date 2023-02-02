@@ -29,7 +29,7 @@ export const AuthenticationPanel: React.FC = () => {
       <div className="authenticationPanel">
         <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
           <EuiFlexItem grow={false}>
-            <EuiTitle size="xs">
+            <EuiTitle size="s">
               <h2>
                 {i18n.translate('xpack.enterpriseSearch.crawler.authenticationPanel.title', {
                   defaultMessage: 'Authentication',

@@ -32,32 +32,34 @@ export const INITAL_VALUE = {
 
 export const useHostsView = () => {
   const { sourceId } = useSourceContext();
-  const { buildQuery, dateRangeTimestamp } = useUnifiedSearchContext();
+  const { buildQuery, getDateRangeAsTimestamp } = useUnifiedSearchContext();
   const [hostViewState, setHostViewState] = useState<HostViewState>(INITAL_VALUE);
 
   const baseRequest = useMemo(() => {
     const esQuery = buildQuery();
+    const { from, to } = getDateRangeAsTimestamp();
+
     const snapshotRequest: UseSnapshotRequest = {
       filterQuery: esQuery ? JSON.stringify(esQuery) : null,
       metrics: [],
       groupBy: [],
       nodeType: 'host',
       sourceId,
-      currentTime: dateRangeTimestamp.to,
+      currentTime: to,
       includeTimeseries: false,
       sendRequestImmediately: true,
       timerange: {
         interval: '1m',
-        from: dateRangeTimestamp.from,
-        to: dateRangeTimestamp.to,
+        from,
+        to,
         ignoreLookback: true,
       },
       // The user might want to click on the submit button without changing the filters
-      // This makes sure all child componets will re-render.
+      // This makes sure all child components will re-render.
       requestTs: Date.now(),
     };
     return snapshotRequest;
-  }, [buildQuery, dateRangeTimestamp.from, dateRangeTimestamp.to, sourceId]);
+  }, [buildQuery, getDateRangeAsTimestamp, sourceId]);
 
   return {
     baseRequest,
