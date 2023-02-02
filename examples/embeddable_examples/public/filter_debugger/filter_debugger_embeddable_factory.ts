@@ -12,7 +12,14 @@ import {
   EmbeddableFactoryDefinition,
   EmbeddableFactory,
 } from '@kbn/embeddable-plugin/public';
-import { FilterDebuggerEmbeddable, FILTER_DEBUGGER_EMBEDDABLE } from './filter_debugger_embeddable';
+import { type Filter, type Query } from '@kbn/es-query';
+import { FilterDebuggerEmbeddable } from './filter_debugger_embeddable';
+
+export const FILTER_DEBUGGER_EMBEDDABLE = 'filterDebuggerEmbeddable';
+export interface FilterDebuggerEmbeddableInput extends EmbeddableInput {
+  filters?: Filter[];
+  query?: Query;
+}
 
 export type FilterDebuggerEmbeddableFactory = EmbeddableFactory;
 export class FilterDebuggerEmbeddableFactoryDefinition implements EmbeddableFactoryDefinition {
@@ -22,7 +29,7 @@ export class FilterDebuggerEmbeddableFactoryDefinition implements EmbeddableFact
     return true;
   }
 
-  public async create(initialInput: EmbeddableInput, parent?: IContainer) {
+  public async create(initialInput: FilterDebuggerEmbeddableInput, parent?: IContainer) {
     return new FilterDebuggerEmbeddable(initialInput, parent);
   }
 

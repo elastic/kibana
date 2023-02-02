@@ -98,9 +98,6 @@ export const DualReduxExample = () => {
             )}
             <EuiSpacer size="m" />
             <DashboardContainerRenderer
-              getCreationOptions={() => {
-                return {}; // no custom creation options - just creating an empty dashboard
-              }}
               onDashboardContainerLoaded={(container) => {
                 setFirstDashboardContainer(container);
               }}
@@ -118,9 +115,6 @@ export const DualReduxExample = () => {
             )}
             <EuiSpacer size="m" />
             <DashboardContainerRenderer
-              getCreationOptions={() => {
-                return {}; // no custom creation options - just creating an empty dashboard
-              }}
               onDashboardContainerLoaded={(container) => {
                 setSecondDashboardContainer(container);
               }}

@@ -55,9 +55,9 @@ import {
   SimpleEmbeddableFactoryDefinition,
 } from './migrations';
 import {
+  FILTER_DEBUGGER_EMBEDDABLE,
   FilterDebuggerEmbeddableFactory,
   FilterDebuggerEmbeddableFactoryDefinition,
-  FILTER_DEBUGGER_EMBEDDABLE,
 } from './filter_debugger';
 
 export interface EmbeddableExamplesSetupDependencies {

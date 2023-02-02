@@ -115,11 +115,11 @@ export function DashboardApp({
    * Create options to pass into the dashboard renderer
    */
   const stateFromLocator = loadDashboardHistoryLocationState(getScopedHistory);
-  const getCreationOptions = useCallback((): DashboardCreationOptions => {
+  const getCreationOptions = useCallback((): Promise<DashboardCreationOptions> => {
     const initialUrlState = loadAndRemoveDashboardState(kbnUrlStateStorage);
     const searchSessionIdFromURL = getSearchSessionIdFromURL(history);
 
-    return {
+    return Promise.resolve({
       incomingEmbeddable,
 
       // integrations
@@ -151,7 +151,7 @@ export function DashboardApp({
       },
 
       validateLoadedSavedObject: validateOutcome,
-    };
+    });
   }, [
     history,
     validateOutcome,

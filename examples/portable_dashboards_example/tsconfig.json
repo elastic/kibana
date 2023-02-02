@@ -15,15 +15,18 @@
   "exclude": ["target/**/*"],
   "kbn_references": [
     "@kbn/core",
-    "@kbn/developer-examples-plugin",
+    "@kbn/es-query",
     "@kbn/data-plugin",
     "@kbn/dashboard-plugin",
     "@kbn/navigation-plugin",
-    "@kbn/shared-ux-page-kibana-template",
     "@kbn/embeddable-plugin",
     "@kbn/data-views-plugin",
-    "@kbn/es-query",
     "@kbn/visualizations-plugin",
-    "@kbn/presentation-util-plugin"
+    "@kbn/presentation-util-plugin",
+    "@kbn/developer-examples-plugin",
+    "@kbn/embeddable-examples-plugin",
+    "@kbn/shared-ux-page-kibana-template",
+    "@kbn/shared-ux-utility",
+    "@kbn/controls-plugin"
   ]
 }

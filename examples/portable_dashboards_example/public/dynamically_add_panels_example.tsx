@@ -8,7 +8,6 @@
 
 import React, { useMemo, useState } from 'react';
 
-import type { DataView } from '@kbn/data-views-plugin/public';
 import { DashboardContainer, LazyDashboardContainerRenderer } from '@kbn/dashboard-plugin/public';
 import {
   EuiButton,
@@ -30,7 +29,7 @@ const INPUT_KEY = 'portableDashboard:saveExample:input';
 
 const DashboardContainerRenderer = withSuspense(LazyDashboardContainerRenderer); // make this so we don't have two loading states - loading in the dashboard plugin instead
 
-export const DynamicByReferenceExample = ({ dataView }: { dataView: DataView }) => {
+export const DynamicByReferenceExample = () => {
   const [isSaving, setIsSaving] = useState(false);
   const [dashboardContainer, setDashboardContainer] = useState<DashboardContainer | undefined>();
 
@@ -143,7 +142,7 @@ export const DynamicByReferenceExample = ({ dataView }: { dataView: DataView }) 
         <EuiSpacer size="m" />
 
         <DashboardContainerRenderer
-          getCreationOptions={() => {
+          getCreationOptions={async () => {
             const persistedInput = getPersistableInput();
             return {
               initialInput: {

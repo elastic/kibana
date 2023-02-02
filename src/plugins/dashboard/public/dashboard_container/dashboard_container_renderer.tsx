@@ -10,8 +10,10 @@ import './_dashboard_container.scss';
 
 import { v4 as uuidv4 } from 'uuid';
 import classNames from 'classnames';
-import { EuiLoadingElastic, EuiLoadingSpinner } from '@elastic/eui';
+import useObservable from 'react-use/lib/useObservable';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
+
+import { EuiLoadingElastic, EuiLoadingSpinner } from '@elastic/eui';
 
 import {
   DashboardContainerFactory,
@@ -25,7 +27,7 @@ import { DashboardContainer } from './embeddable/dashboard_container';
 
 export interface DashboardContainerRendererProps {
   savedObjectId?: string;
-  getCreationOptions?: () => DashboardCreationOptions;
+  getCreationOptions?: () => Promise<DashboardCreationOptions>;
   onDashboardContainerLoaded?: (dashboardContainer: DashboardContainer) => void;
 }
 
@@ -62,7 +64,7 @@ export const DashboardContainerRenderer = ({
     let destroyContainer: () => void;
 
     (async () => {
-      const creationOptions = getCreationOptions?.();
+      const creationOptions = await getCreationOptions?.();
       const dashboardFactory = embeddable.getEmbeddableFactory(
         DASHBOARD_CONTAINER_TYPE
       ) as DashboardContainerFactory & { create: DashboardContainerFactoryDefinition['create'] };

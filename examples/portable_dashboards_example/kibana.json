@@ -8,12 +8,15 @@
   "kibanaVersion": "kibana",
   "ui": true,
   "requiredPlugins": [
+    "data",
     "controls",
     "dashboard",
-    "data",
-    "developerExamples",
     "embeddable",
     "navigation",
-    "presentationUtil"
-  ]
+    "savedObjects",
+    "unifiedSearch",
+    "developerExamples",
+    "embeddableExamples"
+  ],
+  "requiredBundles": ["presentationUtil"]
 }

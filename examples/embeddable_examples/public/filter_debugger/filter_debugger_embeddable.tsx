@@ -8,17 +8,13 @@
 
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { Embeddable, EmbeddableInput, IContainer } from '@kbn/embeddable-plugin/public';
-import { compareFilters, COMPARE_ALL_OPTIONS, type Filter, type Query } from '@kbn/es-query';
-import { distinctUntilChanged, Observable, skip, Subject, Subscription } from 'rxjs';
+import { Embeddable, IContainer } from '@kbn/embeddable-plugin/public';
+
+import {
+  FilterDebuggerEmbeddableInput,
+  FILTER_DEBUGGER_EMBEDDABLE,
+} from './filter_debugger_embeddable_factory';
 import { FilterDebuggerEmbeddableComponent } from './filter_debugger_embeddable_component';
-
-export const FILTER_DEBUGGER_EMBEDDABLE = 'FILTER_DEBUGGER_EMBEDDABLE';
-
-export interface FilterDebuggerEmbeddableInput extends EmbeddableInput {
-  filters: Filter[];
-  query: Query;
-}
 
 export class FilterDebuggerEmbeddable extends Embeddable<FilterDebuggerEmbeddableInput> {
   public readonly type = FILTER_DEBUGGER_EMBEDDABLE;

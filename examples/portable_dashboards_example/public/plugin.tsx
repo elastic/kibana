@@ -12,7 +12,6 @@ import {
   CoreSetup,
   CoreStart,
   Plugin,
-  SavedObjectsClientContract,
 } from '@kbn/core/public';
 import type { DeveloperExamplesSetup } from '@kbn/developer-examples-plugin/public';
 import type { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
@@ -30,7 +29,6 @@ export interface PortableDashboardsExampleStartDeps {
   dashboard: DashboardStart;
   data: DataPublicPluginStart;
   navigation: NavigationPublicPluginStart;
-  savedObjectsClient: SavedObjectsClientContract;
 }
 
 export class PortableDashboardsExamplePlugin

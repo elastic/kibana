@@ -30,7 +30,7 @@ export const StaticByValueExample = () => {
       <EuiSpacer size="m" />
       <EuiPanel hasBorder={true}>
         <DashboardContainerRenderer
-          getCreationOptions={() => {
+          getCreationOptions={async () => {
             return {
               initialInput: {
                 timeRange: { from: 'now-30d', to: 'now' },

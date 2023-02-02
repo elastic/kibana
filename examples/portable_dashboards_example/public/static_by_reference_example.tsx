@@ -49,7 +49,7 @@ export const StaticByReferenceExample = ({
       >
         <DashboardContainerRenderer
           savedObjectId={dashboardId}
-          getCreationOptions={() => {
+          getCreationOptions={async () => {
             const field = dataView.getFieldByName('machine.os.keyword');
             let filter: Filter;
             let creationOptions: DashboardCreationOptions = {

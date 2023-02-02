@@ -18,6 +18,7 @@ import { PortableDashboardsExampleStartDeps } from './plugin';
 import { StaticByValueExample } from './static_by_value_example';
 import { StaticByReferenceExample } from './static_by_reference_example';
 import { DynamicByReferenceExample } from './dynamically_add_panels_example';
+import { DashboardWithControlsExample } from './dashboard_with_controls_example';
 
 export const renderApp = async (
   { data, dashboard }: PortableDashboardsExampleStartDeps,
@@ -25,14 +26,15 @@ export const renderApp = async (
 ) => {
   const dataViews = await data.dataViews.find('kibana_sample_data_logs');
   const findDashboardsService = await dashboard.findDashboardsService();
-
   const logsSampleDashboardId = (await findDashboardsService?.findByTitle('[Logs] Web Traffic'))
     ?.id;
 
   const examples =
     dataViews.length > 0 ? (
       <>
-        <DynamicByReferenceExample dataView={dataViews[0]} />
+        <DashboardWithControlsExample dataView={dataViews[0]} />
+        <EuiSpacer size="xl" />
+        <DynamicByReferenceExample />
         <EuiSpacer size="xl" />
         <DualReduxExample />
         <EuiSpacer size="xl" />
