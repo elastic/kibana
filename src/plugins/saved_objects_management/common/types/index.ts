@@ -6,8 +6,14 @@
  * Side Public License, v 1.
  */
 
-import { mapKeys, camelCase } from 'lodash';
+export type {
+  SavedObjectInvalidRelation,
+  SavedObjectManagementTypeInfo,
+  SavedObjectMetadata,
+  SavedObjectRelation,
+  SavedObjectRelationKind,
+  SavedObjectWithMetadata,
+} from './latest';
 
-export function keysToCamelCaseShallow(object: Record<string, any>) {
-  return mapKeys(object, (value, key) => camelCase(key));
-}
+import type * as v1 from './v1';
+export type { v1 };
