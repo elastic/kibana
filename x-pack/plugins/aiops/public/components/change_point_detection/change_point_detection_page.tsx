@@ -24,9 +24,9 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { Query } from '@kbn/es-query';
-import { ChangePointTypeFilter, type ChangePointUIValue } from './change_point_type_filter';
+import { ChangePointTypeFilter } from './change_point_type_filter';
 import { SearchBarWrapper } from './search_bar';
-import { useChangePointDetectionContext } from './change_point_detection_context';
+import { ChangePointType, useChangePointDetectionContext } from './change_point_detection_context';
 import { MetricFieldSelector } from './metric_field_selector';
 import { SplitFieldSelector } from './split_field_selector';
 import { FunctionPicker } from './function_picker';
@@ -73,7 +73,7 @@ export const ChangePointDetectionPage: FC = () => {
   );
 
   const setChangePointType = useCallback(
-    (changePointType: ChangePointUIValue) => {
+    (changePointType: ChangePointType[] | undefined) => {
       updateRequestParams({ changePointType });
     },
     [updateRequestParams]
