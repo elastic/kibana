@@ -45,7 +45,7 @@ export const OptionsListPopover = ({
   const field = select((state) => state.componentState.field);
 
   const hideActionBar = select((state) => state.explicitInput.hideActionBar);
-  const hideFooter = select((state) => state.explicitInput.hideFooter);
+  const hideExclude = select((state) => state.explicitInput.hideExclude);
   const fieldName = select((state) => state.explicitInput.fieldName);
   const id = select((state) => state.explicitInput.id);
 
@@ -65,6 +65,7 @@ export const OptionsListPopover = ({
           <OptionsListPopoverActionBar
             showOnlySelected={showOnlySelected}
             updateSearchString={updateSearchString}
+            setShowOnlySelected={setShowOnlySelected}
           />
         )}
         <div
@@ -80,13 +81,7 @@ export const OptionsListPopover = ({
             <OptionsListPopoverInvalidSelections />
           )}
         </div>
-        {!hideFooter && (
-          <OptionsListPopoverFooter
-            isLoading={isLoading}
-            showOnlySelected={showOnlySelected}
-            setShowOnlySelected={setShowOnlySelected}
-          />
-        )}
+        {!hideExclude && <OptionsListPopoverFooter isLoading={isLoading} />}
       </div>
     </>
   );

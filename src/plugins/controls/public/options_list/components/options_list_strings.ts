@@ -92,10 +92,10 @@ export const OptionsListStrings = {
       i18n.translate('controls.optionsList.popover.searchPlaceholder', {
         defaultMessage: 'Search',
       }),
-    getCardinalityTooltip: (totalOptions: number) =>
-      i18n.translate('controls.optionsList.popover.cardinalityTooltip', {
+    getCardinalityLabel: (totalOptions: number) =>
+      i18n.translate('controls.optionsList.popover.cardinalityLabel', {
         defaultMessage:
-          'There {totalOptions, plural, one {is} other {are}} {totalOptions, number} {totalOptions, plural, one {option} other {options}} available.',
+          '{totalOptions, number} {totalOptions, plural, one {option} other {options}}',
         values: { totalOptions },
       }),
     getInvalidSelectionsSectionAriaLabel: (fieldName: string, invalidSelectionCount: number) =>
@@ -110,10 +110,10 @@ export const OptionsListStrings = {
           'Ignored {invalidSelectionCount, plural, one {selection} other {selections}}',
         values: { invalidSelectionCount },
       }),
-    getInvalidSelectionsTooltip: (selectedOptions: number) =>
-      i18n.translate('controls.optionsList.popover.invalidSelectionsTooltip', {
+    getInvalidSelectionsLabel: (selectedOptions: number) =>
+      i18n.translate('controls.optionsList.popover.invalidSelectionsLabel', {
         defaultMessage:
-          '{selectedOptions} selected {selectedOptions, plural, one {option} other {options}} {selectedOptions, plural, one {is} other {are}} ignored because {selectedOptions, plural, one {it is} other {they are}} no longer in the data.',
+          '{selectedOptions} {selectedOptions, plural, one {selection} other {selections}} ignored',
         values: { selectedOptions },
       }),
     getInvalidSelectionScreenReaderText: () =>

@@ -14,7 +14,8 @@ import {
   EuiFlexItem,
   EuiFormRow,
   EuiToolTip,
-  EuiBadge,
+  EuiText,
+  EuiButtonIcon,
 } from '@elastic/eui';
 import { useReduxEmbeddableContext } from '@kbn/presentation-util-plugin/public';
 
@@ -26,20 +27,23 @@ import { OptionsListPopoverSortingButton } from './options_list_popover_sorting_
 interface OptionsListPopoverProps {
   showOnlySelected: boolean;
   updateSearchString: (newSearchString: string) => void;
+  setShowOnlySelected: (value: boolean) => void;
 }
 
 export const OptionsListPopoverActionBar = ({
   showOnlySelected,
   updateSearchString,
+  setShowOnlySelected,
 }: OptionsListPopoverProps) => {
   // Redux embeddable container Context
-  const { useEmbeddableSelector: select } = useReduxEmbeddableContext<
-    OptionsListReduxState,
-    typeof optionsListReducers
-  >();
+  const {
+    useEmbeddableDispatch,
+    useEmbeddableSelector: select,
+    actions: { clearSelections },
+  } = useReduxEmbeddableContext<OptionsListReduxState, typeof optionsListReducers>();
+  const dispatch = useEmbeddableDispatch();
 
   // Select current state from Redux using multiple selectors to avoid rerenders.
-  const allowExpensiveQueries = select((state) => state.componentState.allowExpensiveQueries);
   const invalidSelections = select((state) => state.componentState.invalidSelections);
   const totalCardinality = select((state) => state.componentState.totalCardinality) ?? 0;
   const searchString = select((state) => state.componentState.searchString);
@@ -48,63 +52,91 @@ export const OptionsListPopoverActionBar = ({
   return (
     <div className="optionsList__actions">
       <EuiFormRow fullWidth>
+        <EuiFieldSearch
+          isInvalid={!searchString.valid}
+          compressed
+          disabled={showOnlySelected}
+          fullWidth
+          onChange={(event) => updateSearchString(event.target.value)}
+          value={searchString.value}
+          data-test-subj="optionsList-control-search-input"
+          placeholder={OptionsListStrings.popover.getSearchPlaceholder()}
+          autoFocus={true}
+        />
+      </EuiFormRow>
+      <EuiFormRow className="optionsList__actionsRow" fullWidth>
         <EuiFlexGroup
-          gutterSize="xs"
-          direction="row"
           justifyContent="spaceBetween"
           alignItems="center"
+          gutterSize="s"
           responsive={false}
         >
-          <EuiFlexItem>
-            <EuiFieldSearch
-              isInvalid={!searchString.valid}
-              compressed
-              disabled={showOnlySelected}
-              fullWidth
-              onChange={(event) => updateSearchString(event.target.value)}
-              value={searchString.value}
-              data-test-subj="optionsList-control-search-input"
-              placeholder={OptionsListStrings.popover.getSearchPlaceholder()}
-              autoFocus={true}
-            />
+          <EuiFlexItem grow={false}>
+            <EuiText size="xs" color="subdued">
+              {OptionsListStrings.popover.getCardinalityLabel(totalCardinality)}
+            </EuiText>
           </EuiFlexItem>
-          {allowExpensiveQueries && (
-            <EuiFlexItem grow={false}>
-              <EuiToolTip
-                content={OptionsListStrings.popover.getCardinalityTooltip(totalCardinality)}
-              >
-                <EuiBadge
-                  tabIndex={0}
-                  data-test-subj="optionsList-cardinality-badge"
-                  className="optionsList__actionBarFirstBadge"
-                >
-                  {totalCardinality.toLocaleString()}
-                </EuiBadge>
-              </EuiToolTip>
-            </EuiFlexItem>
+          {invalidSelections && invalidSelections.length > 0 && (
+            <>
+              <EuiFlexItem grow={false}>
+                <div className="optionsList__actionBarDivider" />
+              </EuiFlexItem>
+              <EuiFlexItem grow={true}>
+                <EuiText size="xs" color="subdued">
+                  {OptionsListStrings.popover.getInvalidSelectionsLabel(invalidSelections.length)}
+                </EuiText>
+              </EuiFlexItem>
+            </>
           )}
           <EuiFlexItem grow={false}>
-            {(invalidSelections?.length ?? 0) > 0 && (
-              <EuiToolTip
-                content={OptionsListStrings.popover.getInvalidSelectionsTooltip(
-                  invalidSelections?.length ?? 0
-                )}
-              >
-                <EuiBadge
-                  tabIndex={0}
-                  color="warning"
-                  className={allowExpensiveQueries ? undefined : 'optionsList__actionBarFirstBadge'}
+            <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
+              {!hideSort && (
+                <EuiFlexItem grow={false}>
+                  <OptionsListPopoverSortingButton showOnlySelected={showOnlySelected} />
+                </EuiFlexItem>
+              )}
+              <EuiFlexItem grow={false}>
+                <EuiToolTip
+                  position="top"
+                  content={
+                    showOnlySelected
+                      ? OptionsListStrings.popover.getAllOptionsButtonTitle()
+                      : OptionsListStrings.popover.getSelectedOptionsButtonTitle()
+                  }
                 >
-                  {invalidSelections?.length}
-                </EuiBadge>
-              </EuiToolTip>
-            )}
+                  <EuiButtonIcon
+                    size="xs"
+                    iconType="list"
+                    aria-pressed={showOnlySelected}
+                    color={showOnlySelected ? 'primary' : 'text'}
+                    display={showOnlySelected ? 'base' : 'empty'}
+                    onClick={() => setShowOnlySelected(!showOnlySelected)}
+                    data-test-subj="optionsList-control-show-only-selected"
+                    aria-label={
+                      showOnlySelected
+                        ? OptionsListStrings.popover.getAllOptionsButtonTitle()
+                        : OptionsListStrings.popover.getSelectedOptionsButtonTitle()
+                    }
+                  />
+                </EuiToolTip>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiToolTip
+                  position="top"
+                  content={OptionsListStrings.popover.getClearAllSelectionsButtonTitle()}
+                >
+                  <EuiButtonIcon
+                    size="xs"
+                    color="danger"
+                    iconType="eraser"
+                    onClick={() => dispatch(clearSelections({}))}
+                    data-test-subj="optionsList-control-clear-all-selections"
+                    aria-label={OptionsListStrings.popover.getClearAllSelectionsButtonTitle()}
+                  />
+                </EuiToolTip>
+              </EuiFlexItem>
+            </EuiFlexGroup>
           </EuiFlexItem>
-          {!hideSort && (
-            <EuiFlexItem grow={false}>
-              <OptionsListPopoverSortingButton showOnlySelected={showOnlySelected} />
-            </EuiFlexItem>
-          )}
         </EuiFlexGroup>
       </EuiFormRow>
     </div>

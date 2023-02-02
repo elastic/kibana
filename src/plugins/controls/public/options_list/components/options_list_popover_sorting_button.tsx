@@ -103,6 +103,7 @@ export const OptionsListPopoverSortingButton = ({
           }
         >
           <EuiButtonIcon
+            size="xs"
             iconType="sortable"
             disabled={showOnlySelected}
             data-test-subj="optionsListControl__sortingOptionsButton"

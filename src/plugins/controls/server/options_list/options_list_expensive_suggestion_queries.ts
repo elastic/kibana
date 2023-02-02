@@ -85,11 +85,11 @@ const expensiveSuggestionAggSubtypes: { [key: string]: OptionsListSuggestionAggr
       }
       return textOrKeywordQuery;
     },
-    parse: (rawEsResult, { fieldSpec, searchString }) => {
+    parse: (rawEsResult, request) => {
       let basePath = 'aggregations';
-      const isNested = fieldSpec && getFieldSubtypeNested(fieldSpec);
+      const isNested = request.fieldSpec && getFieldSubtypeNested(request.fieldSpec);
       basePath += isNested ? '.nestedSuggestions' : '';
-      basePath += searchString ? '.filteredSuggestions' : '';
+      basePath += request.searchString ? '.filteredSuggestions' : '';
 
       const suggestions = get(rawEsResult, `${basePath}.suggestions.buckets`)?.reduce(
         (acc: OptionsListSuggestions, suggestion: EsBucket) => {
@@ -181,7 +181,7 @@ const expensiveSuggestionAggSubtypes: { [key: string]: OptionsListSuggestionAggr
         },
       };
     },
-    parse: (rawEsResult, { size, sort }) => {
+    parse: (rawEsResult, request) => {
       if (!Boolean(rawEsResult.aggregations?.suggestions)) {
         // if this is happens, that means there is an invalid search that snuck through to the server side code;
         // so, might as well early return with no suggestions
@@ -192,7 +192,7 @@ const expensiveSuggestionAggSubtypes: { [key: string]: OptionsListSuggestionAggr
       getIpBuckets(rawEsResult, buckets, 'ipv6');
 
       const sortedSuggestions =
-        sort?.direction === 'asc'
+        request.sort?.direction === 'asc'
           ? buckets.sort(
               (bucketA: EsBucket, bucketB: EsBucket) => bucketA.doc_count - bucketB.doc_count
             )
@@ -201,7 +201,7 @@ const expensiveSuggestionAggSubtypes: { [key: string]: OptionsListSuggestionAggr
             );
 
       const suggestions: OptionsListSuggestions = sortedSuggestions
-        .slice(0, size)
+        .slice(0, request.size)
         .reduce((acc: OptionsListSuggestions, suggestion: EsBucket) => {
           return { ...acc, [suggestion.key]: { doc_count: suggestion.doc_count } };
         }, {});

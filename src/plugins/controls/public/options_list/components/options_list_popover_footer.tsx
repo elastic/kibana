@@ -12,11 +12,7 @@ import {
   useEuiPaddingSize,
   EuiPopoverFooter,
   EuiButtonGroup,
-  EuiButtonIcon,
-  EuiFlexGroup,
-  EuiFlexItem,
   EuiProgress,
-  EuiToolTip,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { useReduxEmbeddableContext } from '@kbn/presentation-util-plugin/public';
@@ -36,25 +32,16 @@ const aggregationToggleButtons = [
   },
 ];
 
-export const OptionsListPopoverFooter = ({
-  isLoading,
-  showOnlySelected,
-  setShowOnlySelected,
-}: {
-  isLoading: boolean;
-  showOnlySelected: boolean;
-  setShowOnlySelected: (value: boolean) => void;
-}) => {
+export const OptionsListPopoverFooter = ({ isLoading }: { isLoading: boolean }) => {
   // Redux embeddable container Context
   const {
     useEmbeddableDispatch,
     useEmbeddableSelector: select,
-    actions: { setExclude, clearSelections },
+    actions: { setExclude },
   } = useReduxEmbeddableContext<OptionsListReduxState, typeof optionsListReducers>();
   const dispatch = useEmbeddableDispatch();
 
   // Select current state from Redux using multiple selectors to avoid rerenders.
-  const hideExclude = select((state) => state.explicitInput.hideExclude);
   const exclude = select((state) => state.explicitInput.exclude);
 
   return (
@@ -70,73 +57,22 @@ export const OptionsListPopoverFooter = ({
             <EuiProgress size="xs" color="accent" />
           </div>
         )}
-        <EuiFlexGroup
-          justifyContent={hideExclude ? 'flexEnd' : 'spaceBetween'}
-          alignItems="center"
-          responsive={false}
+        <div
           css={css`
             padding: ${useEuiPaddingSize('s')};
           `}
         >
-          {!hideExclude && (
-            <EuiFlexItem grow={false}>
-              <EuiButtonGroup
-                legend={OptionsListStrings.popover.getIncludeExcludeLegend()}
-                options={aggregationToggleButtons}
-                idSelected={exclude ? 'optionsList__excludeResults' : 'optionsList__includeResults'}
-                onChange={(optionId) =>
-                  dispatch(setExclude(optionId === 'optionsList__excludeResults'))
-                }
-                buttonSize="compressed"
-                data-test-subj="optionsList__includeExcludeButtonGroup"
-              />
-            </EuiFlexItem>
-          )}
-          <EuiFlexItem grow={false}>
-            <EuiFlexGroup gutterSize="none" responsive={false}>
-              <EuiFlexItem grow={false}>
-                <EuiToolTip
-                  position="top"
-                  content={
-                    showOnlySelected
-                      ? OptionsListStrings.popover.getAllOptionsButtonTitle()
-                      : OptionsListStrings.popover.getSelectedOptionsButtonTitle()
-                  }
-                >
-                  <EuiButtonIcon
-                    size="s"
-                    iconType="list"
-                    aria-pressed={showOnlySelected}
-                    color={showOnlySelected ? 'primary' : 'text'}
-                    display={showOnlySelected ? 'base' : 'empty'}
-                    onClick={() => setShowOnlySelected(!showOnlySelected)}
-                    data-test-subj="optionsList-control-show-only-selected"
-                    aria-label={
-                      showOnlySelected
-                        ? OptionsListStrings.popover.getAllOptionsButtonTitle()
-                        : OptionsListStrings.popover.getSelectedOptionsButtonTitle()
-                    }
-                  />
-                </EuiToolTip>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiToolTip
-                  position="top"
-                  content={OptionsListStrings.popover.getClearAllSelectionsButtonTitle()}
-                >
-                  <EuiButtonIcon
-                    size="s"
-                    color="danger"
-                    iconType="eraser"
-                    onClick={() => dispatch(clearSelections({}))}
-                    data-test-subj="optionsList-control-clear-all-selections"
-                    aria-label={OptionsListStrings.popover.getClearAllSelectionsButtonTitle()}
-                  />
-                </EuiToolTip>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiFlexItem>
-        </EuiFlexGroup>
+          <EuiButtonGroup
+            legend={OptionsListStrings.popover.getIncludeExcludeLegend()}
+            options={aggregationToggleButtons}
+            idSelected={exclude ? 'optionsList__excludeResults' : 'optionsList__includeResults'}
+            onChange={(optionId) =>
+              dispatch(setExclude(optionId === 'optionsList__excludeResults'))
+            }
+            buttonSize="compressed"
+            data-test-subj="optionsList__includeExcludeButtonGroup"
+          />
+        </div>
       </EuiPopoverFooter>
     </>
   );
