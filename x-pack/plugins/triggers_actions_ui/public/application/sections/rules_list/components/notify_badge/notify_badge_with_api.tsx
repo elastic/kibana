@@ -9,6 +9,7 @@ import React, { useCallback, useState } from 'react';
 import { useKibana } from '../../../../../common/lib/kibana';
 import { SnoozeSchedule } from '../../../../../types';
 import {
+  loadRule,
   snoozeRule as snoozeRuleApi,
   unsnoozeRule as unsnoozeRuleApi,
 } from '../../../../lib/rule_api';
@@ -18,22 +19,42 @@ import { RulesListNotifyBadgePropsWithApi } from './types';
 export const RulesListNotifyBadgeWithApi: React.FunctionComponent<
   RulesListNotifyBadgePropsWithApi
 > = (props) => {
+  const { onRuleChanged, rule, isLoading, showTooltipInline, showOnHover } = props;
   const { http } = useKibana().services;
   const [currentlyOpenNotify, setCurrentlyOpenNotify] = useState<string>();
   const [loadingSnoozeAction, setLoadingSnoozeAction] = useState<boolean>(false);
+  const [ruleSnoozeInfo, setRuleSnoozeInfo] =
+    useState<RulesListNotifyBadgePropsWithApi['rule']>(rule);
+
   const onSnoozeRule = useCallback(
     (snoozeSchedule: SnoozeSchedule) => {
-      return snoozeRuleApi({ http, id: props.rule.id, snoozeSchedule });
+      return snoozeRuleApi({ http, id: ruleSnoozeInfo.id, snoozeSchedule });
     },
-    [http, props.rule.id]
+    [http, ruleSnoozeInfo.id]
   );
 
   const onUnsnoozeRule = useCallback(
     (scheduleIds?: string[]) => {
-      return unsnoozeRuleApi({ http, id: props.rule.id, scheduleIds });
+      return unsnoozeRuleApi({ http, id: ruleSnoozeInfo.id, scheduleIds });
     },
-    [http, props.rule.id]
+    [http, ruleSnoozeInfo.id]
   );
+
+  const onRuleChangedCallback = useCallback(async () => {
+    onRuleChanged();
+    const updatedRule = await loadRule({
+      http,
+      ruleId: ruleSnoozeInfo.id,
+    });
+    setLoadingSnoozeAction(false);
+    setRuleSnoozeInfo((prevRule) => ({
+      ...prevRule,
+      activeSnoozes: updatedRule.activeSnoozes,
+      isSnoozedUntil: updatedRule.isSnoozedUntil,
+      muteAll: updatedRule.muteAll,
+      snoozeSchedule: updatedRule.snoozeSchedule,
+    }));
+  }, [http, ruleSnoozeInfo.id, onRuleChanged]);
 
   const openSnooze = useCallback(() => {
     setCurrentlyOpenNotify(props.rule.id);
@@ -44,22 +65,24 @@ export const RulesListNotifyBadgeWithApi: React.FunctionComponent<
   }, []);
 
   const onLoading = useCallback((value: boolean) => {
-    setLoadingSnoozeAction(value);
+    if (value) {
+      setLoadingSnoozeAction(value);
+    }
   }, []);
 
   return (
     <RulesListNotifyBadge
-      rule={props.rule}
-      isOpen={currentlyOpenNotify === props.rule.id}
-      isLoading={props.isLoading || loadingSnoozeAction}
+      rule={ruleSnoozeInfo}
+      isOpen={currentlyOpenNotify === ruleSnoozeInfo.id}
+      isLoading={isLoading || loadingSnoozeAction}
       onClick={openSnooze}
       onClose={closeSnooze}
       onLoading={onLoading}
-      onRuleChanged={props.onRuleChanged}
+      onRuleChanged={onRuleChangedCallback}
       snoozeRule={onSnoozeRule}
       unsnoozeRule={onUnsnoozeRule}
-      showTooltipInline={props.showTooltipInline}
-      showOnHover={props.showOnHover}
+      showTooltipInline={showTooltipInline}
+      showOnHover={showOnHover}
     />
   );
 };
