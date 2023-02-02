@@ -40,6 +40,7 @@ export const useRulesTableContextMock = {
       loadingRuleIds: [],
       loadingRulesAction: null,
       selectedRuleIds: [],
+      hasSavedState: false,
     },
     actions: {
       reFetchRules: jest.fn(),
