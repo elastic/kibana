@@ -22,7 +22,7 @@ describe('agent name helpers', () => {
   describe('isJavaAgentName', () => {
     describe('when the agent name is java', () => {
       it('returns true', () => {
-        expect(isJavaAgentName('java')).toEqual(true);
+        expect(isJavaAgentName('java')).toEqual(false);
       });
     });
 

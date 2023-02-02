@@ -39,7 +39,7 @@ describe('getOverallHistogram', () => {
     );
     expect(overallHistogram).toStrictEqual([{ key: 1, doc_count: 1234 }]);
     expect(hasData).toBe(true);
-    expect(status).toBe('success');
+    expect(status).toBe('foo');
   });
 
   it('returns "success" when not undefined and not running', () => {
