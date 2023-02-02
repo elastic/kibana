@@ -122,15 +122,12 @@ describe('Jira Fields', () => {
         connector={connector}
       />
     );
-    expect(wrapper.find('[data-test-subj="card-list-item"]').at(0).text()).toEqual(
-      'Issue type: Task'
-    );
-    expect(wrapper.find('[data-test-subj="card-list-item"]').at(1).text()).toEqual(
-      'Parent issue: Parent Task'
-    );
-    expect(wrapper.find('[data-test-subj="card-list-item"]').at(2).text()).toEqual(
-      'Priority: High'
-    );
+
+    const nodes = wrapper.find('[data-test-subj="card-list-item"]').hostNodes();
+
+    expect(nodes.at(0).text()).toEqual('Issue type: Task');
+    expect(nodes.at(1).text()).toEqual('Parent issue: Parent Task');
+    expect(nodes.at(2).text()).toEqual('Priority: High');
   });
 
   test('it sets parent correctly', async () => {

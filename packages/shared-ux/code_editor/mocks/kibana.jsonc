@@ -1,5 +1,5 @@
 {
   "type": "shared-common",
   "id": "@kbn/code-editor-mocks",
-  "owner": "@elastic/shared-ux"
+  "owner": "@elastic/appex-sharedux"
 }
