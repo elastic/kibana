@@ -20,48 +20,6 @@ import { extractNamedQueries } from './utils';
 
 export const MAX_NUMBER_OF_SIGNAL_MATCHES = 200;
 
-export const getSignalMatchesFromThreatList = (
-  threatList: ThreatListItem[] = []
-): SignalMatch[] => {
-  const signalMap: { [key: string]: ThreatMatchNamedQuery[] } = {};
-
-  threatList.forEach((threatHit) =>
-    extractNamedQueries(threatHit).forEach((item) => {
-      const signalId = item.id;
-      if (!signalId) {
-        return;
-      }
-
-      if (!signalMap[signalId]) {
-        signalMap[signalId] = [];
-      }
-
-      // creating map of signal with large number of threats could lead to out of memory Kibana crash
-      // large number of threats also can cause signals bulk create failure due too large payload (413)
-      // large number of threats significantly slower alert details page render
-      // so, its number is limited to MAX_NUMBER_OF_SIGNAL_MATCHES
-      // more details https://github.com/elastic/kibana/issues/143595#issuecomment-1335433592
-      if (signalMap[signalId].length >= MAX_NUMBER_OF_SIGNAL_MATCHES) {
-        return;
-      }
-
-      signalMap[signalId].push({
-        id: threatHit._id,
-        index: threatHit._index,
-        field: item.field,
-        value: item.value,
-      });
-    })
-  );
-
-  const signalMatches = Object.entries(signalMap).map(([key, value]) => ({
-    signalId: key,
-    queries: value,
-  }));
-
-  return signalMatches;
-};
-
 const getSignalId = (signal: SignalSourceHit): string => signal._id;
 
 export const groupAndMergeSignalMatches = (signalHits: SignalSourceHit[]): SignalSourceHit[] => {
@@ -134,7 +92,7 @@ export const enrichSignalThreatMatches = async (
     ? signalMatchesArg
     : uniqueHits.map((signalHit) => ({
         signalId: signalHit._id,
-        queries: extractNamedQueries(signalHit).slice(0, MAX_NUMBER_OF_SIGNAL_MATCHES),
+        queries: extractNamedQueries(signalHit),
       }));
 
   const matchedThreatIds = [
