@@ -11,7 +11,6 @@ export interface KeyValuePair {
 }
 
 export type ConnectorConfiguration = Record<string, KeyValuePair | null>;
-export type ConnectorPreferences = Record<string, KeyValuePair | null>;
 
 export interface ConnectorScheduling {
   enabled: boolean;
@@ -27,6 +26,8 @@ export interface CustomScheduling {
 }
 
 export type ConnectorCustomScheduling = Record<string, CustomScheduling | null>;
+
+export type ConnectorPreferences = Record<string, unknown | null>;
 
 export enum ConnectorStatus {
   CREATED = 'created',
