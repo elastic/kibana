@@ -34,11 +34,20 @@ const isFleetMissingAgentHttpError = (error: unknown) =>
 const isPolicyTemplate = (input: any): input is PosturePolicyTemplate =>
   SUPPORTED_POLICY_TEMPLATES.includes(input);
 
-const getPackageNameQuery = (packageName: string, benchmarkFilter?: string): string => {
+const getPackageNameQuery = (
+  benchMarkPostureType: 'kspm',
+  packageName: string,
+  benchmarkFilter?: string
+): string => {
   const integrationNameQuery = `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name:${packageName}`;
+
   const kquery = benchmarkFilter
     ? `${integrationNameQuery} AND ${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.name: *${benchmarkFilter}*`
     : integrationNameQuery;
+
+  // const kquery = benchmarkFilter
+  //   ? `${integrationNameQuery} AND ${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.name: *${benchmarkFilter}* AND ${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.posture_type: ${benchMarkPostureType}`
+  //   : `${integrationNameQuery} AND ${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.posture_type: ${benchMarkPostureType}`;   
 
   return kquery;
 };
@@ -116,7 +125,6 @@ export const getInstalledPolicyTemplates = async (
         return policy.inputs.find((input) => input.enabled)?.policy_template;
       })
       .filter(isPolicyTemplate);
-
     // removing duplicates
     return [...new Set(enabledPolicyTemplates)];
   } catch (e) {

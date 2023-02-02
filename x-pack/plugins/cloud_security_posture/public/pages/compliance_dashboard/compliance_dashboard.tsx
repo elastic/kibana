@@ -177,15 +177,16 @@ const IntegrationPostureDashboard = ({
 export const ComplianceDashboard = () => {
   const [selectedTab, setSelectedTab] = useState(CSPM_POLICY_TEMPLATE);
   const getSetupStatus = useCspSetupStatusApi();
-  const hasFindings = getSetupStatus.data?.status === 'indexed';
+  const hasFindingsCspm = getSetupStatus.data?.cspm.status === 'indexed';
+  const hasFindingsKspm = getSetupStatus.data?.kspm.status === 'indexed';
   const cspmIntegrationLink = useCspIntegrationLink(CSPM_POLICY_TEMPLATE);
   const kspmIntegrationLink = useCspIntegrationLink(KSPM_POLICY_TEMPLATE);
 
   const getCspmDashboardData = useCspmStatsApi({
-    enabled: hasFindings,
+    enabled: hasFindingsCspm,
   });
   const getKspmDashboardData = useKspmStatsApi({
-    enabled: hasFindings,
+    enabled: hasFindingsKspm,
   });
 
   useEffect(() => {
@@ -283,7 +284,7 @@ export const ComplianceDashboard = () => {
     ]
   );
 
-  if (!hasFindings) return <NoFindingsStates />;
+  if (!hasFindingsKspm && !hasFindingsCspm) return <NoFindingsStates />;
 
   return (
     <CloudPosturePage query={selectedTab === 'cspm' ? getCspmDashboardData : getKspmDashboardData}>

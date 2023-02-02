@@ -82,9 +82,55 @@ const calculateCspStatusCode = (
   throw new Error('Could not determine csp status');
 };
 
+const calculateCspStatusCodeCspm = (
+  indicesStatus: {
+    findingsLatest: IndexStatus;
+    findings: IndexStatus;
+    score: IndexStatus;
+  },
+  installedCspPackagePolicies: number,
+  healthyAgents: number,
+  timeSinceInstallationInMinutes: number,
+  installedPolicyTemplates: string[]
+): CspStatusCode => {
+  // We check privileges only for the relevant indices for our pages to appear
+  if (indicesStatus.findingsLatest === 'unprivileged' || indicesStatus.score === 'unprivileged')
+    return 'unprivileged';
+  if (!installedPolicyTemplates.includes('cspm')) return 'not-installed';
+  if (indicesStatus.findingsLatest === 'not-empty') return 'indexed';
+  if (healthyAgents === 0) return 'not-deployed'; //NEED TO CHANGE THIS
+  if (timeSinceInstallationInMinutes <= INDEX_TIMEOUT_IN_MINUTES) return 'indexing';
+  if (timeSinceInstallationInMinutes > INDEX_TIMEOUT_IN_MINUTES) return 'index-timeout';
+
+  throw new Error('Could not determine csp status');
+};
+
+const calculateCspStatusCodeKspm = (
+  indicesStatus: {
+    findingsLatest: IndexStatus;
+    findings: IndexStatus;
+    score: IndexStatus;
+  },
+  installedCspPackagePolicies: number,
+  healthyAgents: number,
+  timeSinceInstallationInMinutes: number,
+  installedPolicyTemplates: string[],
+): CspStatusCode => {
+  // We check privileges only for the relevant indices for our pages to appear
+  if (indicesStatus.findingsLatest === 'unprivileged' || indicesStatus.score === 'unprivileged')
+    return 'unprivileged';
+  if (!installedPolicyTemplates.includes('kspm')) return 'not-installed';
+  if (indicesStatus.findingsLatest === 'not-empty') return 'indexed';
+  if (healthyAgents === 0) return 'not-deployed'; //NEED TO CHANGE THIS
+  if (timeSinceInstallationInMinutes <= INDEX_TIMEOUT_IN_MINUTES) return 'indexing';
+  if (timeSinceInstallationInMinutes > INDEX_TIMEOUT_IN_MINUTES) return 'index-timeout';
+
+  throw new Error('Could not determine csp status');
+};
+
 const assertResponse = (resp: CspSetupStatus, logger: CspApiRequestHandlerContext['logger']) => {
   if (
-    resp.status === 'unprivileged' &&
+    (resp.cspm.status || resp.kspm.status) === 'unprivileged' &&
     !resp.indicesDetails.some((idxDetails) => idxDetails.status === 'unprivileged')
   ) {
     logger.warn('Returned status in `unprivileged` but response is missing the unprivileged index');
@@ -159,26 +205,64 @@ const getCspStatus = async ({
     calculateDiffFromNowInMinutes(installation?.install_started_at || MIN_DATE)
   );
 
-  if (status === 'not-installed')
+  const statusCspm = calculateCspStatusCodeCspm(
+    {
+      findingsLatest: findingsLatestIndexStatus,
+      findings: findingsIndexStatus,
+      score: scoreIndexStatus,
+    },
+    installedPackagePoliciesTotal,
+    healthyAgents,
+    calculateDiffFromNowInMinutes(installation?.install_started_at || MIN_DATE),
+    installedPolicyTemplates
+  );
+
+  const statusKspm = calculateCspStatusCodeKspm(
+    {
+      findingsLatest: findingsLatestIndexStatus,
+      findings: findingsIndexStatus,
+      score: scoreIndexStatus,
+    },
+    installedPackagePoliciesTotal,
+    healthyAgents,
+    calculateDiffFromNowInMinutes(installation?.install_started_at || MIN_DATE),
+    installedPolicyTemplates
+  );
+
+  if ((statusCspm && statusKspm) === 'not-installed')
     return {
-      status,
+      cspm: {
+        status: statusCspm,
+        healthyAgents,
+        installedPackagePolicies: installedPackagePoliciesTotal,
+      },
+      kspm: {
+        status: statusKspm,
+        healthyAgents,
+        installedPackagePolicies: installedPackagePoliciesTotal,
+      },
       indicesDetails,
       latestPackageVersion: latestCspPackageVersion,
-      installedPolicyTemplates,
-      healthyAgents,
-      installedPackagePolicies: installedPackagePoliciesTotal,
       isPluginInitialized: isPluginInitialized(),
+      installedPolicyTemplates, //need to remove this
     };
 
   const response = {
-    status,
+    cspm: {
+      status: statusCspm,
+      healthyAgents,
+      installedPackagePolicies: installedPackagePoliciesTotal,
+    },
+    kspm: {
+      status: statusKspm,
+      healthyAgents,
+      installedPackagePolicies: installedPackagePoliciesTotal,
+    },
     indicesDetails,
     latestPackageVersion: latestCspPackageVersion,
-    healthyAgents,
-    installedPolicyTemplates,
-    installedPackagePolicies: installedPackagePoliciesTotal,
     installedPackageVersion: installation?.install_version,
     isPluginInitialized: isPluginInitialized(),
+    installedPolicyTemplates, //need to remove this
   };
 
   assertResponse(response, logger);
