@@ -36,7 +36,7 @@ const RulesTableFiltersComponent = () => {
   const rulesCustomCount = ruleManagementFields?.rules_summary.custom_count;
   const rulesPrebuiltInstalledCount = ruleManagementFields?.rules_summary.prebuilt_installed_count;
 
-  const { showCustomRules, showElasticRules, tags: selectedTags } = filterOptions;
+  const { showCustomRules, showElasticRules, tags: selectedTags, enabled } = filterOptions;
 
   const handleOnSearch = useCallback(
     (filterString) => {
@@ -55,6 +55,16 @@ const RulesTableFiltersComponent = () => {
     startTransaction({ name: RULES_TABLE_ACTIONS.FILTER });
     setFilterOptions({ showCustomRules: !showCustomRules, showElasticRules: false });
   }, [setFilterOptions, showCustomRules, startTransaction]);
+
+  const handleShowEnabledRulesClick = useCallback(() => {
+    startTransaction({ name: RULES_TABLE_ACTIONS.FILTER });
+    setFilterOptions(enabled === true ? { enabled: undefined } : { enabled: true });
+  }, [setFilterOptions, enabled, startTransaction]);
+
+  const handleShowDisabledRulesClick = useCallback(() => {
+    startTransaction({ name: RULES_TABLE_ACTIONS.FILTER });
+    setFilterOptions(enabled === false ? { enabled: undefined } : { enabled: false });
+  }, [setFilterOptions, enabled, startTransaction]);
 
   const handleSelectedTags = useCallback(
     (newTags: string[]) => {
@@ -98,6 +108,26 @@ const RulesTableFiltersComponent = () => {
           >
             {i18n.CUSTOM_RULES}
             {rulesCustomCount != null ? ` (${rulesCustomCount})` : ''}
+          </EuiFilterButton>
+        </EuiFilterGroup>
+      </EuiFlexItem>
+
+      <EuiFlexItem grow={false}>
+        <EuiFilterGroup>
+          <EuiFilterButton
+            hasActiveFilters={enabled === true}
+            onClick={handleShowEnabledRulesClick}
+            data-test-subj="showEnabledRulesFilterButton"
+            withNext
+          >
+            {i18n.ENABLED_RULES}
+          </EuiFilterButton>
+          <EuiFilterButton
+            hasActiveFilters={enabled === false}
+            onClick={handleShowDisabledRulesClick}
+            data-test-subj="showDisabledRulesFilterButton"
+          >
+            {i18n.DISABLED_RULES}
           </EuiFilterButton>
         </EuiFilterGroup>
       </EuiFlexItem>
