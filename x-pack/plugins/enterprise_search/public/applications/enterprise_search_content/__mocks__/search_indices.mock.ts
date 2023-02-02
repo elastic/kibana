@@ -105,6 +105,7 @@ export const indices: ElasticsearchIndexWithIngestion[] = [
       last_sync_status: SyncStatus.COMPLETED,
       last_synced: null,
       name: 'connector',
+      preferences: { foo: { label: 'bar', value: 'barbar' } },
       scheduling: {
         enabled: false,
         interval: '',
@@ -200,6 +201,7 @@ export const indices: ElasticsearchIndexWithIngestion[] = [
       last_sync_status: SyncStatus.COMPLETED,
       last_synced: null,
       name: 'crawler',
+      preferences: { foo: { label: 'bar', value: 'barbar' } },
       scheduling: {
         enabled: false,
         interval: '',

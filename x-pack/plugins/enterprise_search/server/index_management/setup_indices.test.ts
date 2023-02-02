@@ -140,6 +140,9 @@ describe('Setup Indices', () => {
           run_ml_inference: { type: 'boolean' },
         },
       },
+      preferences: {
+        type: 'object',
+      },
       scheduling: {
         properties: {
           enabled: { type: 'boolean' },

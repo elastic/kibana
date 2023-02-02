@@ -11,6 +11,7 @@ export interface KeyValuePair {
 }
 
 export type ConnectorConfiguration = Record<string, KeyValuePair | null>;
+export type ConnectorPreferences = Record<string, KeyValuePair | null>;
 
 export interface ConnectorScheduling {
   enabled: boolean;
@@ -150,6 +151,7 @@ export interface Connector {
   last_synced: string | null;
   name: string;
   pipeline?: IngestPipelineParams | null;
+  preferences: ConnectorPreferences;
   scheduling: {
     enabled: boolean;
     interval: string; // crontab syntax
