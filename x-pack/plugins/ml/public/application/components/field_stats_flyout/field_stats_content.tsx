@@ -15,10 +15,12 @@ import { isDefined } from '@kbn/ml-is-defined';
 import type { DataView } from '@kbn/data-plugin/common';
 import type { TimeRange as TimeRangeMs } from '@kbn/ml-date-picker';
 import moment from 'moment';
+import { euiPaletteColorBlind } from '@elastic/eui';
 import { getDefaultDatafeedQuery } from '../../jobs/new_job/utils/new_job_utils';
 import { useFieldStatsFlyoutContext } from './use_field_stats_flytout_context';
 
-const defaultDatafeedQuery = getDefaultDatafeedQuery();
+const DEFAULT_DSL_QUERY = getDefaultDatafeedQuery();
+const DEFAULT_COLOR = euiPaletteColorBlind()[0];
 
 export const FieldStatsContent: FC<{
   dataView: DataView;
@@ -55,12 +57,13 @@ export const FieldStatsContent: FC<{
     <FieldStats
       key={fieldForStats.name}
       services={fieldStatsServices}
-      dslQuery={dslQuery ?? defaultDatafeedQuery}
+      dslQuery={dslQuery ?? DEFAULT_DSL_QUERY}
       fromDate={timeRange.from}
       toDate={timeRange.to}
       dataViewOrDataViewId={currentDataView}
       field={fieldForStats}
       data-test-subj={`jobCreatorFieldStatsPopover ${fieldForStats.name}`}
+      color={DEFAULT_COLOR}
     />
   ) : null;
 };
