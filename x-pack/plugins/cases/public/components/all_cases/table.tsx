@@ -87,7 +87,7 @@ export const CasesTable: FunctionComponent<CasesTableProps> = ({
         totalCases={data.total ?? 0}
         selectedCases={selectedCases}
         deselectCases={deselectCases}
-        shouldShowClearFilters={defaultFiltersSelected}
+        shouldShowClearFilters={!defaultFiltersSelected}
         clearFilters={clearFilters}
       />
       <EuiBasicTable

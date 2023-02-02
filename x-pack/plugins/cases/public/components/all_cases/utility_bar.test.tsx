@@ -22,13 +22,14 @@ import { CasesTableUtilityBar } from './utility_bar';
 describe('Severity form field', () => {
   let appMockRender: AppMockRenderer;
   const deselectCases = jest.fn();
+  const clearFilters = jest.fn();
 
   const props = {
     totalCases: 5,
     selectedCases: [basicCase],
     deselectCases,
-    shouldShowClearFilters: false,
-    clearFilters: () => {},
+    shouldShowClearFilters: true,
+    clearFilters,
   };
 
   beforeEach(() => {
@@ -41,6 +42,7 @@ describe('Severity form field', () => {
     expect(result.getByText('Selected 1 case')).toBeInTheDocument();
     expect(result.getByTestId('case-table-bulk-actions-link-icon')).toBeInTheDocument();
     expect(result.getByTestId('all-cases-refresh-link-icon')).toBeInTheDocument();
+    expect(result.getByTestId('all-cases-cross-link-icon')).toBeInTheDocument();
   });
 
   it('opens the bulk actions correctly', async () => {
@@ -88,6 +90,27 @@ describe('Severity form field', () => {
       expect(queryClientSpy).toHaveBeenCalledWith(casesQueriesKeys.casesList());
       expect(queryClientSpy).toHaveBeenCalledWith(casesQueriesKeys.tags());
       expect(queryClientSpy).toHaveBeenCalledWith(casesQueriesKeys.userProfiles());
+    });
+  });
+
+  it('clearFilters correctly', async () => {
+    const result = appMockRender.render(<CasesTableUtilityBar {...props} />);
+
+    act(() => {
+      userEvent.click(result.getByTestId('all-cases-cross-link-icon'));
+    });
+
+    await waitFor(() => {
+      expect(clearFilters).toHaveBeenCalled();
+    });
+  });
+
+  it('does not render clearFilters if shouldShowClearFilters is false', async () => {
+    const newProps = { ...props, shouldShowClearFilters: false };
+    const result = appMockRender.render(<CasesTableUtilityBar {...newProps} />);
+
+    await waitFor(() => {
+      expect(result.queryByTestId('all-cases-cross-link-icon')).toBeFalsy();
     });
   });
 

@@ -214,7 +214,7 @@ export function useAllCasesState(
   }, [isModalView, updateLocation]);
 
   const defaultFiltersSelected = useMemo(() => {
-    return !isEqual(filterOptions, {
+    return isEqual(filterOptions, {
       ...DEFAULT_FILTER_OPTIONS,
       ...initialFilterOptions,
     });

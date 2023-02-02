@@ -20,6 +20,7 @@ import { stringify } from 'query-string';
 import { DEFAULT_TABLE_ACTIVE_PAGE, DEFAULT_TABLE_LIMIT } from '../../containers/constants';
 import { CaseStatuses } from '../../../common';
 import { SortFieldCase } from '../../containers/types';
+import { isEqual } from 'lodash';
 
 const LOCAL_STORAGE_QUERY_PARAMS_DEFAULTS = {
   perPage: DEFAULT_QUERY_PARAMS.perPage,
@@ -63,6 +64,7 @@ describe('useAllCasesQueryParams', () => {
 
   afterEach(() => {
     jest.clearAllMocks();
+    mockLocation.search = '';
   });
 
   it('calls setState with default values on first run', () => {
@@ -243,5 +245,79 @@ describe('useAllCasesQueryParams', () => {
     });
 
     expect(result.current.filterOptions).toMatchObject(nonDefaultUrlParams);
+  });
+
+  it('defaultFiltersSelected is true initially', () => {
+    const { result } = renderHook(() => useAllCasesState(), {
+      wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
+    });
+
+    expect(result.current.defaultFiltersSelected).toBeTruthy();
+  });
+
+  it('defaultFiltersSelected changes if filters are altered', () => {
+    const { result } = renderHook(() => useAllCasesState(), {
+      wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
+    });
+
+    expect(result.current.defaultFiltersSelected).toBeTruthy();
+
+    act(() => {
+      result.current.setFilterOptions({ status: CaseStatuses.open });
+    });
+
+    expect(result.current.defaultFiltersSelected).toBeFalsy();
+  });
+
+  it('defaultFiltersSelected does not change if queryParams altered', () => {
+    const { result } = renderHook(() => useAllCasesState(), {
+      wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
+    });
+
+    expect(result.current.defaultFiltersSelected).toBeTruthy();
+
+    act(() => {
+      result.current.setQueryParams({ perPage: DEFAULT_TABLE_LIMIT + 10 });
+    });
+
+    expect(result.current.defaultFiltersSelected).toBeTruthy();
+  });
+
+  it('clearFilterOptions resets filterOptions', () => {
+    const { result } = renderHook(() => useAllCasesState(), {
+      wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
+    });
+
+    act(() => {
+      result.current.setFilterOptions({ severity: 'critical' });
+    });
+
+    expect(isEqual(result.current.filterOptions, DEFAULT_FILTER_OPTIONS)).toBeFalsy();
+    expect(result.current.defaultFiltersSelected).toBeFalsy();
+
+    act(() => {
+      result.current.clearFilterOptions();
+    });
+
+    expect(isEqual(result.current.filterOptions, DEFAULT_FILTER_OPTIONS)).toBeTruthy();
+    expect(result.current.defaultFiltersSelected).toBeTruthy();
+  });
+
+  it('clearFilterOptions does not reset queryParams', () => {
+    const { result } = renderHook(() => useAllCasesState(), {
+      wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
+    });
+
+    const nonDefaultQueryParams = { ...DEFAULT_QUERY_PARAMS, perPage: DEFAULT_TABLE_LIMIT + 10 };
+
+    act(() => {
+      result.current.setQueryParams(nonDefaultQueryParams);
+    });
+
+    act(() => {
+      result.current.clearFilterOptions();
+    });
+
+    expect(isEqual(result.current.queryParams, nonDefaultQueryParams)).toBeTruthy();
   });
 });
