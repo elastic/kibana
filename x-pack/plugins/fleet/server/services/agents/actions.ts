@@ -256,44 +256,52 @@ export async function cancelAgentAction(esClient: ElasticsearchClient, actionId:
 
   const cancelActionId = uuidv4();
   const now = new Date().toISOString();
-  for (const hit of res.hits.hits) {
-    if (!hit._source || !hit._source.agents || !hit._source.action_id) {
-      continue;
-    }
-    if (hit._source.type === 'UPGRADE') {
-      appContextService
-        .getLogger()
-        .info(
-          `Moving back ${hit._source.agents.length} agents from updating to healthy state after cancel upgrade`
-        );
-      const errors = {};
-      await bulkUpdateAgents(
-        esClient,
-        hit._source.agents.map((agentId) => ({
-          agentId,
-          data: {
-            upgraded_at: null,
-            upgrade_started_at: null,
-          },
-        })),
-        errors
-      );
-      if (Object.keys(errors).length > 0) {
-        appContextService
-          .getLogger()
-          .info(`Errors while bulk updating agents for cancel action: ${JSON.stringify(errors)}`);
+  const upgradeActions = res.hits.hits
+    .map((hit) => hit._source)
+    .reduce((acc: FleetServerAgentAction[], action: FleetServerAgentAction | undefined) => {
+      if (action && action.agents && action.action_id && action.type === 'UPGRADE') {
+        acc.push(action);
       }
-    }
+      return acc;
+    }, []);
+  for (const action of upgradeActions) {
     await createAgentAction(esClient, {
       id: cancelActionId,
       type: 'CANCEL',
-      agents: hit._source.agents,
+      agents: action.agents!,
       data: {
-        target_id: hit._source.action_id,
+        target_id: action.action_id,
       },
       created_at: now,
-      expiration: hit._source.expiration,
+      expiration: action.expiration,
     });
+  }
+
+  for (const action of upgradeActions) {
+    appContextService
+      .getLogger()
+      .info(
+        `Moving back ${
+          action.agents!.length
+        } agents from updating to healthy state after cancel upgrade`
+      );
+    const errors = {};
+    await bulkUpdateAgents(
+      esClient,
+      action.agents!.map((agentId) => ({
+        agentId,
+        data: {
+          upgraded_at: null,
+          upgrade_started_at: null,
+        },
+      })),
+      errors
+    );
+    if (Object.keys(errors).length > 0) {
+      appContextService
+        .getLogger()
+        .info(`Errors while bulk updating agents for cancel action: ${JSON.stringify(errors)}`);
+    }
   }
 
   return {
