@@ -28,7 +28,7 @@ When upgrading to a new major version of Node.js, the following extra steps must
   - Compare the new Node.js versions list of supported platforms with the https://www.elastic.co/support/matrix#matrix_os[Kibana Support Matrix].
     As an example, here's the https://github.com/nodejs/node/blob/v18.x/BUILDING.md#platform-list[Node.js 18 supported platform list].
     You can change which Node.js major version to view, by changing the selected branch.
-    If Node.js has dropped support for platform still supported by Kibana, appropriate steps must be taken as soon as possible to deprecate support for this platform, so that support for it can be dropped before the current major version of Node.js reaches End-of-Life.
+    If Node.js has dropped support for platform still supported by Kibana, appropriate steps must be taken as soon as possible to deprecate support for this platform. This way support for it can be dropped before the currently used major version of Node.js https://github.com/nodejs/release#release-schedule[reaches End-of-Life].
 
 === Backporting
 
