@@ -388,6 +388,53 @@ describe('getFullAgentPolicy', () => {
       },
     });
   });
+
+  it('should add + transform agent features', async () => {
+    mockAgentPolicy({
+      namespace: 'default',
+      revision: 1,
+      monitoring_enabled: ['metrics'],
+      agent_features: [
+        { name: 'fqdn', enabled: true, config_1: 'something' },
+        { name: 'feature2', enabled: true, config_2: 'something' },
+      ],
+    });
+    const agentPolicy = await getFullAgentPolicy(savedObjectsClientMock.create(), 'agent-policy');
+
+    expect(agentPolicy).toMatchObject({
+      id: 'agent-policy',
+      outputs: {
+        default: {
+          type: 'elasticsearch',
+          hosts: ['http://127.0.0.1:9201'],
+        },
+      },
+      inputs: [],
+      revision: 1,
+      fleet: {
+        hosts: ['http://fleetserver:8220'],
+      },
+      agent: {
+        monitoring: {
+          namespace: 'default',
+          use_output: 'default',
+          enabled: true,
+          logs: false,
+          metrics: true,
+        },
+        features: {
+          fqdn: {
+            enabled: true,
+            config_1: 'something',
+          },
+          feature2: {
+            enabled: true,
+            config_2: 'something',
+          },
+        },
+      },
+    });
+  });
 });
 
 describe('transformOutputToFullPolicyOutput', () => {

@@ -113,6 +113,7 @@ export interface FullAgentPolicy {
       logs: boolean;
     };
     download: { sourceURI: string };
+    features: Record<string, { enabled: boolean; [key: string]: any }>;
   };
 }
 
