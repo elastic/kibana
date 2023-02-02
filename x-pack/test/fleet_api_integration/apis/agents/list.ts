@@ -17,7 +17,6 @@ export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const es = getService('es');
   let elasticAgentpkgVersion: string;
-  // FLAKY: https://github.com/elastic/kibana/issues/149937
   describe('fleet_list_agent', () => {
     before(async () => {
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/fleet/agents');
@@ -130,7 +129,7 @@ export default function ({ getService }: FtrProviderContext) {
       expect(apiResponse.items).to.eql(['existingTag', 'tag1']);
     });
 
-    it.only('should return metrics if available and called with withMetrics', async () => {
+    it('should return metrics if available and called with withMetrics', async () => {
       const now = Date.now();
       await es.index({
         index: 'metrics-elastic_agent.elastic_agent-default',
