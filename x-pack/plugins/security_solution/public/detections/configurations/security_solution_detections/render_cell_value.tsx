@@ -10,6 +10,8 @@ import { EuiIcon, EuiToolTip, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
 import type { GetRenderCellValue } from '@kbn/triggers-actions-ui-plugin/public';
 import { find } from 'lodash/fp';
+import type { TimelineNonEcsData } from '@kbn/timelines-plugin/common';
+import { defaultRowRenderers } from '../../../timelines/components/timeline/body/renderers';
 import type { SourcererScopeName } from '../../../common/store/sourcerer/model';
 import { GuidedOnboardingTourStep } from '../../../common/components/guided_onboarding_tour/tour_step';
 import { isDetectionsAlertsTable } from '../../../common/components/top_n/helpers';
@@ -112,11 +114,33 @@ export const getRenderCellValueHook = ({ scopeId }: { scopeId: SourcererScopeNam
           const attr = (browserFields.base.fields ?? {})[columnId] ?? {};
           myHeader = { ...myHeader, ...attr };
         }
+
+        /**
+         * There is difference between how `triggers actions` fetched data v/s
+         * how security solution fetches data via timelineSearchStrategy
+         *
+         * _id and _index fields are array in timelineSearchStrategy  but not in
+         * ruleStrategy
+         *
+         *
+         */
+        const finalData = (data as TimelineNonEcsData[]).map((field) => {
+          let localField = field;
+          if (['_id', '_index'].includes(field.field)) {
+            const newValue = field.value ?? '';
+            localField = {
+              field: field.field,
+              value: Array.isArray(newValue) ? newValue : [newValue],
+            };
+          }
+          return localField;
+        });
+
         return (
           <DefaultCellRenderer
             browserFields={browserFields}
             columnId={columnId}
-            data={data}
+            data={finalData}
             ecsData={ecsData}
             eventId={eventId}
             globalFilters={globalFilters}
@@ -128,7 +152,7 @@ export const getRenderCellValueHook = ({ scopeId }: { scopeId: SourcererScopeNam
             linkValues={linkValues}
             rowIndex={rowIndex}
             colIndex={colIndex}
-            rowRenderers={rowRenderers}
+            rowRenderers={defaultRowRenderers}
             setCellProps={setCellProps}
             scopeId={scopeId}
             truncate={truncate}
@@ -137,7 +161,6 @@ export const getRenderCellValueHook = ({ scopeId }: { scopeId: SourcererScopeNam
       },
       [browserFields]
     );
-
     return result;
   };
 

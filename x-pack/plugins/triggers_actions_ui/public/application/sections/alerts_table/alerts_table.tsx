@@ -20,7 +20,7 @@ import {
   EuiDataGridRefProps,
 } from '@elastic/eui';
 import { useSorting, usePagination, useBulkActions, useActionsColumn } from './hooks';
-import { AlertsTableProps } from '../../../types';
+import { AlertsTableProps, FetchAlertData } from '../../../types';
 import {
   ALERTS_TABLE_CONTROL_COLUMNS_ACTIONS_LABEL,
   ALERTS_TABLE_CONTROL_COLUMNS_VIEW_DETAILS_LABEL,
@@ -44,6 +44,7 @@ const basicRenderCellValue = ({
   columnId,
 }: {
   data: Array<{ field: string; value: string[] }>;
+  ecsData: FetchAlertData['ecsAlertsData'][number];
   columnId: string;
 }) => {
   const value = data.find((d) => d.field === columnId)?.value ?? [];
@@ -292,7 +293,10 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
   const handleRenderCellValue = useCallback(
     (_props: EuiDataGridCellValueElementProps) => {
       // https://github.com/elastic/eui/issues/5811
-      const alert = alerts[_props.rowIndex - pagination.pageSize * pagination.pageIndex];
+      const idx = _props.rowIndex - pagination.pageSize * pagination.pageIndex;
+      const alert = alerts[idx];
+      // ecsAlert is needed for security solution
+      const ecsAlert = ecsAlertsData[idx];
       if (alert) {
         const data: Array<{ field: string; value: string[] }> = [];
         Object.entries(alert ?? {}).forEach(([key, value]) => {
@@ -304,9 +308,11 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
             data,
           });
         }
+
         return renderCellValue({
           ..._props,
           data,
+          ecsData: ecsAlert,
         });
       } else if (isLoading) {
         return <EuiLoadingContent lines={1} />;
@@ -315,6 +321,7 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
     },
     [
       alerts,
+      ecsAlertsData,
       isLoading,
       pagination.pageIndex,
       pagination.pageSize,

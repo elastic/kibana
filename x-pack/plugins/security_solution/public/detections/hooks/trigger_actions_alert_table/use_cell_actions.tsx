@@ -39,6 +39,28 @@ export const getUseCellActionsHook = (
     pageSize: number;
   }) => {
     const { browserFields } = useSourcererDataView(SourcererScopeName.detections);
+    /**
+     * There is difference between how `triggers actions` fetched data v/s
+     * how security solution fetches data via timelineSearchStrategy
+     *
+     * _id and _index fields are array in timelineSearchStrategy  but not in
+     * ruleStrategy
+     *
+     *
+     */
+    const finalData = (data as TimelineNonEcsData[][]).map((row) =>
+      row.map((field) => {
+        let localField = field;
+        if (['_id', '_index'].includes(field.field)) {
+          const newValue = field.value ?? '';
+          localField = {
+            field: field.field,
+            value: Array.isArray(newValue) ? newValue : [newValue],
+          };
+        }
+        return localField;
+      })
+    );
 
     const getTable = useMemo(() => dataTableSelectors.getTableByIdSelector(), []);
 
@@ -56,7 +78,7 @@ export const getUseCellActionsHook = (
         return defaultCellActions.map((dca) => {
           return dca({
             browserFields,
-            data: data as TimelineNonEcsData[][],
+            data: finalData,
             ecsData: ecsData as Ecs[],
             header: columns
               .filter((col) => col.id === columnId)
@@ -81,12 +103,12 @@ export const getUseCellActionsHook = (
           });
         });
       },
-      [browserFields, columns, data, dataGridRef, ecsData, pageSize, viewMode]
+      [browserFields, columns, finalData, dataGridRef, ecsData, pageSize, viewMode]
     );
 
     return {
       getCellActions,
-      visibleCellActions: 5,
+      visibleCellActions: 3,
       disabledCellActions: FIELDS_WITHOUT_CELL_ACTIONS,
     };
   };
