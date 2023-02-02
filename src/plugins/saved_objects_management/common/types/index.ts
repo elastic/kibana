@@ -16,4 +16,4 @@ export type {
 } from './latest';
 
 import type * as v1 from './v1';
-export { v1 };
+export type { v1 };
