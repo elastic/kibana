@@ -10,6 +10,7 @@ import React, { useRef, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { get, invert, orderBy } from 'lodash';
 import styled from 'styled-components';
+import { OverviewLoader } from '../overview_loader';
 import {
   getSyntheticsFilterDisplayValues,
   monitorTypeKeyLabelMap,
@@ -90,7 +91,7 @@ export const GridItemsByGroup = ({
         values: getSyntheticsFilterDisplayValues(projects, 'projects', allLocations),
         otherValues: {
           label: 'UI Monitors',
-          items: currentMonitors.filter((monitor) => !get(monitor, ConfigKey.PROJECT_ID)),
+          items: currentMonitors.filter((monitor) => !Boolean(monitor.projectId)),
         },
       };
       break;
@@ -98,6 +99,10 @@ export const GridItemsByGroup = ({
   }
 
   const selectedValues = orderBy(selectedGroup.values, 'label', groupOrder ?? 'asc');
+
+  if (monitorTypes.length === 0) {
+    return <OverviewLoader />;
+  }
 
   return (
     <>

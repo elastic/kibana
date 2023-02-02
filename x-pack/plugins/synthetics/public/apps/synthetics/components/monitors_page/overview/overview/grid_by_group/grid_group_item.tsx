@@ -19,6 +19,7 @@ import {
 import React, { useState } from 'react';
 import { useSelector } from 'react-redux';
 import { useKey } from 'react-use';
+import { OverviewLoader } from '../overview_loader';
 import { useFilteredGroupMonitors } from './use_filtered_group_monitors';
 import { MonitorOverviewItem } from '../../types';
 import { FlyoutParamProps, OverviewGridItem } from '../overview_grid_item';
@@ -77,6 +78,8 @@ export const GroupGridItem = ({
     }
   });
 
+  const isLoading = !loaded || !status;
+
   return (
     <EuiAccordion
       initialIsOpen={fullScreenGroup === groupLabel}
@@ -116,19 +119,28 @@ export const GroupGridItem = ({
           </EuiFlexItem>
         </EuiFlexGroup>
       }
-      isLoading={!loaded || !status}
+      isLoading={isLoading}
     >
       <EuiSpacer size="m" />
-      <EuiFlexGrid columns={4} gutterSize="m" data-test-subj="syntheticsOverviewGridItemContainer">
-        {visibleMonitors.map((monitor) => (
-          <EuiFlexItem
-            key={`${monitor.id}-${monitor.location?.id}`}
-            data-test-subj="syntheticsOverviewGridItem"
-          >
-            <OverviewGridItem monitor={monitor} onClick={setFlyoutConfigCallback} />
-          </EuiFlexItem>
-        ))}
-      </EuiFlexGrid>
+
+      {!isLoading ? (
+        <EuiFlexGrid
+          columns={4}
+          gutterSize="m"
+          data-test-subj="syntheticsOverviewGridItemContainer"
+        >
+          {visibleMonitors.map((monitor) => (
+            <EuiFlexItem
+              key={`${monitor.id}-${monitor.location?.id}`}
+              data-test-subj="syntheticsOverviewGridItem"
+            >
+              <OverviewGridItem monitor={monitor} onClick={setFlyoutConfigCallback} />
+            </EuiFlexItem>
+          ))}
+        </EuiFlexGrid>
+      ) : (
+        <OverviewLoader rows={2} />
+      )}
       <EuiSpacer size="m" />
       <EuiTablePagination
         aria-label="Monitor grid pagination"
