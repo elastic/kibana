@@ -27,7 +27,7 @@ export interface SavedObjectMetadata {
 /**
  * One saved object's reference to another saved object.
  */
-export interface SavedObjectReferenceV1 {
+export interface SavedObjectReference {
   name: string;
   type: string;
   id: string;
@@ -48,7 +48,7 @@ export interface SavedObjectWithMetadata<T = unknown> {
   updated_at?: string;
   attributes: T;
   namespaces?: string[];
-  references: SavedObjectReferenceV1[];
+  references: SavedObjectReference[];
 }
 
 export type SavedObjectRelationKind = 'child' | 'parent';
