@@ -76,8 +76,6 @@ export const InputDisplay = memo<InputDisplayProps>(({ leftOfCursor, rightOfCurs
     [dispatch, fullTextEntered]
   );
 
-  // TODO:PT support double clicking the input text area - highlight the entire content
-
   useEffect(() => {
     if (containerRef.current && cursorRef.current) {
       const scrollPadding = 20;
