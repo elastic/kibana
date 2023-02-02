@@ -24,7 +24,7 @@ export type SignalsQueryMap = Map<string, ThreatMatchNamedQuery[]>;
 interface GetSignalsMatchesFromThreatIndexOptions {
   threatSearchParams: Omit<GetThreatListOptions, 'searchAfter'>;
   eventsCount: number;
-  signalValueMap?: SignalValuesMap
+  signalValueMap?: SignalValuesMap;
 }
 
 /**
@@ -33,7 +33,7 @@ interface GetSignalsMatchesFromThreatIndexOptions {
 export const getSignalsQueryMapFromThreatIndex = async ({
   threatSearchParams,
   eventsCount,
-  signalValueMap
+  signalValueMap,
 }: GetSignalsMatchesFromThreatIndexOptions): Promise<SignalsQueryMap> => {
   let threatList: Awaited<ReturnType<typeof getThreatList>> | undefined;
   const signalsQueryMap = new Map<string, ThreatMatchNamedQuery[]>();
