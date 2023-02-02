@@ -86,6 +86,18 @@ export const getConsoleTestSetup = (): ConsoleTestSetup => {
     'data-test-subj': dataTestSubj = 'test',
     ...others
   } = {}) => {
+    if (!window.IntersectionObserver) {
+      // IntersectionObserver isn't available in Jest environment
+      // @ts-expect-error
+      window.IntersectionObserver = jest.fn(() => {
+        return {
+          observe: jest.fn(),
+          unobserve: jest.fn(),
+          disconnect: jest.fn(),
+        };
+      }) as unknown as jest.Mocked<IntersectionObserver>;
+    }
+
     return (renderResult = mockedContext.render(
       <Console prompt={prompt} commands={commands} data-test-subj={dataTestSubj} {...others} />
     ));
