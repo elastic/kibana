@@ -532,7 +532,7 @@ export const ScatterplotMatrix: FC<ScatterplotMatrixProps> = ({
                       openInNewTab: false,
                     });
                   }}
-                  data-test-subj="mlSplomoExploreInCustomVisualizationLink"
+                  data-test-subj="mlSplomExploreInCustomVisualizationLink"
                 >
                   <EuiIconTip
                     content={i18n.translate('xpack.ml.splom.exploreInCustomVisualizationLabel', {
