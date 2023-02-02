@@ -35,6 +35,7 @@ import { getDocLinks } from './doc_links';
 import { getCloud } from './cloud';
 import { getShare } from './share';
 import { getExecutionContext } from './execution_context';
+import { getCustomBranding } from './custom_branding';
 
 // TODO: clintandrewhall - this is not ideal, or complete.  The root context of Fleet applications
 // requires full start contracts of its dependencies.  As a result, we have to mock all of those contracts
@@ -75,6 +76,7 @@ export const StorybookContext: React.FC<{ storyContext?: Parameters<DecoratorFn>
         ContextProvider: getStorybookContextProvider(),
         languageClientsUiComponents: {},
       },
+      customBranding: getCustomBranding(),
       docLinks: getDocLinks(),
       http: getHttp(),
       i18n: {

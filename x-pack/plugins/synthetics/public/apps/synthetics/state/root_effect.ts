@@ -6,6 +6,7 @@
  */
 
 import { all, fork } from 'redux-saga/effects';
+import { fetchManualTestRunsEffect } from './manual_test_runs/effects';
 import { enableDefaultAlertingEffect, updateDefaultAlertingEffect } from './alert_rules/effects';
 import { executeEsQueryEffect } from './elasticsearch';
 import {
@@ -17,7 +18,6 @@ import { syncGlobalParamsEffect } from './settings';
 import { fetchAgentPoliciesEffect } from './private_locations';
 import { fetchNetworkEventsEffect } from './network_events/effects';
 import { fetchSyntheticsMonitorEffect } from './monitor_details';
-import { fetchIndexStatusEffect } from './index_status';
 import { fetchSyntheticsEnablementEffect } from './synthetics_enablement';
 import {
   enableMonitorAlertEffect,
@@ -31,7 +31,6 @@ import { fetchPingStatusesEffect } from './ping_status';
 
 export const rootEffect = function* root(): Generator {
   yield all([
-    fork(fetchIndexStatusEffect),
     fork(fetchSyntheticsEnablementEffect),
     fork(upsertMonitorEffect),
     fork(fetchServiceLocationsEffect),
@@ -53,5 +52,6 @@ export const rootEffect = function* root(): Generator {
     fork(updateDefaultAlertingEffect),
     fork(executeEsQueryEffect),
     fork(fetchJourneyStepsEffect),
+    fork(fetchManualTestRunsEffect),
   ]);
 };

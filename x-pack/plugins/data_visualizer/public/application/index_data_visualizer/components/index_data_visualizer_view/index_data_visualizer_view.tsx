@@ -5,10 +5,13 @@
  * 2.0.
  */
 
+import { css } from '@emotion/react';
 import React, { FC, useEffect, useMemo, useState, useCallback, useRef } from 'react';
 import type { Required } from 'utility-types';
 
 import {
+  useEuiBreakpoint,
+  useIsWithinMaxBreakpoint,
   EuiFlexGroup,
   EuiFlexItem,
   EuiPageBody,
@@ -26,15 +29,20 @@ import { Filter, FilterStateStore, Query } from '@kbn/es-query';
 import { generateFilters } from '@kbn/data-plugin/public';
 import { DataView, DataViewField } from '@kbn/data-views-plugin/public';
 import { usePageUrlState, useUrlState } from '@kbn/ml-url-state';
-
+import {
+  DatePickerWrapper,
+  FullTimeRangeSelector,
+  FROZEN_TIER_PREFERENCE,
+} from '@kbn/ml-date-picker';
 import { useStorage } from '@kbn/ml-local-storage';
+
 import { useCurrentEuiTheme } from '../../../common/hooks/use_current_eui_theme';
 import {
+  DV_FROZEN_TIER_PREFERENCE,
   DV_RANDOM_SAMPLER_PREFERENCE,
   type DVKey,
   type DVStorageMapped,
 } from '../../types/storage';
-import { FullTimeRangeSelector } from '../full_time_range_selector';
 import {
   DataVisualizerTable,
   ItemIdToExpandedRowMap,
@@ -57,7 +65,6 @@ import { OMIT_FIELDS } from '../../../../../common/constants';
 import { kbnTypeToJobType } from '../../../common/util/field_types_utils';
 import { SearchPanel } from '../search_panel';
 import { ActionsPanel } from '../actions_panel';
-import { DatePickerWrapper } from '../../../common/components/date_picker_wrapper';
 import { createMergedEsQuery } from '../../utils/saved_search_utils';
 import { DataVisualizerDataViewManagement } from '../data_view_management';
 import { GetAdditionalLinks } from '../../../common/components/results_links';
@@ -125,7 +132,6 @@ export interface IndexDataVisualizerViewProps {
   currentSavedSearch: SavedSearchSavedObject | null;
   currentSessionId?: string;
   getAdditionalLinks?: GetAdditionalLinks;
-  compact?: boolean;
 }
 
 export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVisualizerProps) => {
@@ -135,6 +141,15 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
     DVKey,
     DVStorageMapped<typeof DV_RANDOM_SAMPLER_PREFERENCE>
   >(DV_RANDOM_SAMPLER_PREFERENCE, RANDOM_SAMPLER_OPTION.ON_AUTOMATIC);
+
+  const [frozenDataPreference, setFrozenDataPreference] = useStorage<
+    DVKey,
+    DVStorageMapped<typeof DV_FROZEN_TIER_PREFERENCE>
+  >(
+    DV_FROZEN_TIER_PREFERENCE,
+    // By default we will exclude frozen data tier
+    FROZEN_TIER_PREFERENCE.EXCLUDE
+  );
 
   const restorableDefaults = useMemo(
     () =>
@@ -161,7 +176,7 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
     dataVisualizerProps.currentSavedSearch
   );
 
-  const { currentDataView, currentSessionId, getAdditionalLinks, compact } = dataVisualizerProps;
+  const { currentDataView, currentSessionId, getAdditionalLinks } = dataVisualizerProps;
 
   useEffect(() => {
     if (dataVisualizerProps?.currentSavedSearch !== undefined) {
@@ -458,14 +473,21 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
     () => currentDataView.timeFieldName !== undefined && currentDataView.timeFieldName !== '',
     [currentDataView.timeFieldName]
   );
+
+  const dvPageHeader = css({
+    [useEuiBreakpoint(['xs', 's', 'm', 'l', 'xl'])]: {
+      flexDirection: 'column',
+      alignItems: 'flex-start',
+    },
+  });
+
+  const isWithinXl = useIsWithinMaxBreakpoint('xl');
+
   return (
     <EuiPageBody data-test-subj="dataVisualizerIndexPage" paddingSize="none" panelled={false}>
       <EuiFlexGroup gutterSize="m">
         <EuiFlexItem>
-          <EuiPageContentHeader
-            data-test-subj="dataVisualizerPageHeader"
-            css={compact ? { flexDirection: 'column', alignItems: 'flex-start' } : null}
-          >
+          <EuiPageContentHeader data-test-subj="dataVisualizerPageHeader" css={dvPageHeader}>
             <EuiPageContentHeaderSection>
               <EuiFlexGroup
                 data-test-subj="dataViewTitleHeader"
@@ -483,7 +505,7 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
               </EuiFlexGroup>
             </EuiPageContentHeaderSection>
 
-            {compact ? <EuiSpacer size="m" /> : null}
+            {isWithinXl ? <EuiSpacer size="m" /> : null}
             <EuiFlexGroup
               alignItems="center"
               justifyContent="flexEnd"
@@ -493,6 +515,8 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
               {hasValidTimeField ? (
                 <EuiFlexItem grow={false}>
                   <FullTimeRangeSelector
+                    frozenDataPreference={frozenDataPreference}
+                    setFrozenDataPreference={setFrozenDataPreference}
                     dataView={currentDataView}
                     query={undefined}
                     disabled={false}
@@ -504,7 +528,7 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
                 <DatePickerWrapper
                   isAutoRefreshOnly={!hasValidTimeField}
                   showRefresh={!hasValidTimeField}
-                  compact={compact}
+                  width="full"
                 />
               </EuiFlexItem>
             </EuiFlexGroup>
@@ -513,7 +537,7 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
       </EuiFlexGroup>
       <EuiSpacer size="m" />
       <EuiPageContentBody>
-        <EuiFlexGroup gutterSize="m" direction={compact ? 'column' : 'row'}>
+        <EuiFlexGroup gutterSize="m" direction={isWithinXl ? 'column' : 'row'}>
           <EuiFlexItem>
             <EuiPanel hasShadow={false} hasBorder>
               <SearchPanel
@@ -530,7 +554,6 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
                 setVisibleFieldNames={setVisibleFieldNames}
                 showEmptyFields={showEmptyFields}
                 onAddFilter={onAddFilter}
-                compact={compact}
               />
 
               {overallStats?.totalCount !== undefined && (
@@ -576,14 +599,13 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
               />
             </EuiPanel>
           </EuiFlexItem>
-          {compact ? <EuiSpacer size="m" /> : null}
+          {isWithinXl ? <EuiSpacer size="m" /> : null}
           <EuiFlexItem grow={false}>
             <ActionsPanel
               dataView={currentDataView}
               searchQueryLanguage={searchQueryLanguage}
               searchString={searchString}
               getAdditionalLinks={getAdditionalLinks}
-              compact={compact}
             />
           </EuiFlexItem>
         </EuiFlexGroup>

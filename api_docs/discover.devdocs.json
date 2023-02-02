@@ -1489,6 +1489,10 @@
               {
                 "plugin": "synthetics",
                 "path": "x-pack/plugins/synthetics/public/legacy_uptime/components/synthetics/check_steps/stderr_logs.tsx"
+              },
+              {
+                "plugin": "synthetics",
+                "path": "x-pack/plugins/synthetics/public/apps/synthetics/components/common/components/stderr_logs.tsx"
               }
             ]
           },

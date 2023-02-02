@@ -20,7 +20,7 @@ import { licenseService as _licenseService } from '../common/hooks/use_license';
 import type { LicenseService } from '../../common/license';
 import { createLicenseServiceMock } from '../../common/license/mocks';
 import type { FleetAuthz } from '@kbn/fleet-plugin/common';
-import { createFleetAuthzMock } from '@kbn/fleet-plugin/common';
+import { createFleetAuthzMock } from '@kbn/fleet-plugin/common/mocks';
 import type { DeepPartial } from '@kbn/utility-types';
 import { merge } from 'lodash';
 import { ENDPOINT_ARTIFACT_LISTS } from '@kbn/securitysolution-list-constants';

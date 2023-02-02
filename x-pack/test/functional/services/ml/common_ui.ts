@@ -344,7 +344,7 @@ export function MachineLearningCommonUIProvider({
     },
 
     async waitForRefreshButtonEnabled() {
-      await testSubjects.waitForEnabled('~mlRefreshPageButton');
+      await testSubjects.waitForEnabled('~mlDatePickerRefreshPageButton');
     },
 
     async assertOneOfExists(subjectsToCheck: string[], timeout: number = 0) {

@@ -27,7 +27,8 @@
     "@kbn/core-saved-objects-server",
     "@kbn/core-status-server",
     "@kbn/core-ui-settings-server",
-    "@kbn/core-usage-data-server"
+    "@kbn/core-usage-data-server",
+    "@kbn/core-custom-branding-server"
   ],
   "exclude": [
     "target/**/*",

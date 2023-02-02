@@ -68,6 +68,7 @@ export const optionsListReducers = {
     action: PayloadAction<string>
   ) => {
     state.explicitInput.selectedOptions = [action.payload];
+    if (state.explicitInput.existsSelected) state.explicitInput.existsSelected = false;
   },
   clearSelections: (state: WritableDraft<OptionsListReduxState>) => {
     if (state.explicitInput.existsSelected) state.explicitInput.existsSelected = false;

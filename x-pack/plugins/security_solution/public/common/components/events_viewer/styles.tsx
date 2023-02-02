@@ -40,11 +40,11 @@ export const UpdatedFlexGroup = styled(EuiFlexGroup)<{
   ${({ $hasRightOffset, theme }) =>
     $hasRightOffset
       ? `margin-right: ${theme.eui.euiSizeXL};`
-      : `margin-right: ${theme.eui.euiSizeXS};`}
+      : `margin-right: ${theme.eui.euiSizeL};`}
   position: absolute;
   z-index: ${({ theme }) => theme.eui.euiZLevel1 - 3};
   ${({ $hasRightOffset, theme }) =>
-    $hasRightOffset ? `right: ${theme.eui.euiSizeXL};` : `right: ${theme.eui.euiSizeXS};`}
+    $hasRightOffset ? `right: ${theme.eui.euiSizeXL};` : `right: ${theme.eui.euiSizeL};`}
 `;
 
 export const UpdatedFlexItem = styled(EuiFlexItem)<{ $show: boolean }>`

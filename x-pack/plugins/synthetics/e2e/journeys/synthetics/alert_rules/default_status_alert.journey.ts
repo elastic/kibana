@@ -8,7 +8,7 @@
 import { journey, step, before, after, expect } from '@elastic/synthetics';
 import { byTestId } from '@kbn/ux-plugin/e2e/journeys/utils';
 import { RetryService } from '@kbn/ftr-common-functional-services';
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import { recordVideo } from '@kbn/observability-plugin/e2e/record_video';
 import { getReasonMessage } from '../../../../server/legacy_uptime/lib/alerts/status_check';
 import { syntheticsAppPageProvider } from '../../../page_objects/synthetics/synthetics_app';
@@ -28,26 +28,25 @@ journey(`DefaultStatusAlert`, async ({ page, params }) => {
   const firstCheckTime = new Date(Date.now()).toISOString();
   let downCheckTime = new Date(Date.now()).toISOString();
 
+  let configId: string;
+  let configId2: string;
+
   before(async () => {
-    await services.cleaUpRules();
-    await services.cleaUpAlerts();
-    await services.cleanTestMonitors();
+    await services.cleaUp();
     await services.enableMonitorManagedViaApi();
-    await services.addTestMonitor('Test Monitor', {
+    configId = await services.addTestMonitor('Test Monitor', {
       type: 'http',
       urls: 'https://www.google.com',
       custom_heartbeat_id: 'b9d9e146-746f-427f-bbf5-6e786b5b4e73',
       locations: [
-        { id: 'Test private location', label: 'Test private location', isServiceManaged: true },
+        { id: 'us_central', label: 'North America - US Central', isServiceManaged: true },
       ],
     });
-    await services.addTestSummaryDocument({ timestamp: firstCheckTime });
+    await services.addTestSummaryDocument({ timestamp: firstCheckTime, configId });
   });
 
   after(async () => {
-    await services.cleaUpRules();
-    await services.cleaUpAlerts();
-    await services.cleanTestMonitors();
+    await services.cleaUp();
   });
 
   step('Go to monitors page', async () => {
@@ -60,13 +59,13 @@ journey(`DefaultStatusAlert`, async ({ page, params }) => {
     await page.click(byTestId('xpack.synthetics.toggleAlertFlyout'));
     await page.waitForSelector('text=Edit rule');
     await page.selectOption(byTestId('intervalInputUnit'), { label: 'second' });
-    await page.fill(byTestId('intervalInput'), '10');
+    await page.fill(byTestId('intervalInput'), '20');
     await page.click(byTestId('saveEditedRuleButton'));
     await page.waitForSelector("text=Updated 'Synthetics internal alert'");
   });
 
   step('Monitor is as up in overview page', async () => {
-    await retry.tryForTime(60 * 1000, async () => {
+    await retry.tryForTime(90 * 1000, async () => {
       const totalDown = await page.textContent(
         byTestId('xpack.uptime.synthetics.overview.status.up')
       );
@@ -86,8 +85,9 @@ journey(`DefaultStatusAlert`, async ({ page, params }) => {
   step('set the monitor status as down', async () => {
     downCheckTime = new Date(Date.now()).toISOString();
     await services.addTestSummaryDocument({
-      isDown: true,
+      docType: 'summaryDown',
       timestamp: downCheckTime,
+      configId,
     });
     await page.waitForTimeout(5 * 1000);
 
@@ -105,29 +105,27 @@ journey(`DefaultStatusAlert`, async ({ page, params }) => {
 
     const reasonMessage = getReasonMessage({
       name: 'Test Monitor',
-      location: 'Test private location',
+      location: 'North America - US Central',
       timestamp: downCheckTime,
       status: 'is down.',
     });
-    await retry.tryForTime(2 * 60 * 1000, async () => {
+
+    await retry.tryForTime(3 * 60 * 1000, async () => {
       await page.click(byTestId('querySubmitButton'));
-      expect(
-        await page.isVisible(`text=1 Alert`, {
-          timeout: 10 * 1000,
-        })
-      ).toBe(true);
+
+      const alerts = await page.waitForSelector(`text=1 Alert`, { timeout: 20 * 1000 });
+      expect(await alerts.isVisible()).toBe(true);
 
       const text = await page.textContent(`${byTestId('dataGridRowCell')} .euiLink`);
 
       expect(text).toBe(reasonMessage);
-      expect(await page.isVisible(`text=1 Alert`)).toBe(true);
     });
   });
 
   step('set monitor status to up and verify that alert recovers', async () => {
-    await services.addTestSummaryDocument();
+    await services.addTestSummaryDocument({ configId });
 
-    await retry.tryForTime(2 * 60 * 1000, async () => {
+    await retry.tryForTime(3 * 60 * 1000, async () => {
       await page.click(byTestId('querySubmitButton'));
       await page.isVisible(`text=Recovered`, { timeout: 5 * 1000 });
       await page.isVisible(`text=1 Alert`, { timeout: 5 * 1000 });
@@ -135,9 +133,9 @@ journey(`DefaultStatusAlert`, async ({ page, params }) => {
   });
 
   step('set the status down again to generate another alert', async () => {
-    await services.addTestSummaryDocument({ isDown: true });
+    await services.addTestSummaryDocument({ docType: 'summaryDown', configId });
 
-    await retry.tryForTime(2 * 60 * 1000, async () => {
+    await retry.tryForTime(3 * 60 * 1000, async () => {
       await page.click(byTestId('querySubmitButton'));
       await page.isVisible(`text=Active`, { timeout: 5 * 1000 });
       await page.isVisible(`text=1 Alert`);
@@ -145,14 +143,14 @@ journey(`DefaultStatusAlert`, async ({ page, params }) => {
   });
 
   step('Adds another down monitor and it auto adds the alert', async () => {
-    const monitorId = uuid.v4();
+    const monitorId = uuidv4();
     const name = `Test Monitor 2`;
-    await services.addTestMonitor(name, {
+    configId2 = await services.addTestMonitor(name, {
       type: 'http',
       urls: 'https://www.google.com',
       custom_heartbeat_id: monitorId,
       locations: [
-        { id: 'Test private location', label: 'Test private location', isServiceManaged: true },
+        { id: 'us_central', label: 'North America - US Central', isServiceManaged: true },
       ],
     });
 
@@ -161,22 +159,23 @@ journey(`DefaultStatusAlert`, async ({ page, params }) => {
     await services.addTestSummaryDocument({
       timestamp: downCheckTime,
       monitorId,
-      isDown: true,
+      docType: 'summaryDown',
       name,
+      configId: configId2,
     });
 
     const reasonMessage = getReasonMessage({
       name,
-      location: 'Test private location',
+      location: 'North America - US Central',
       timestamp: downCheckTime,
       status: 'is down.',
     });
 
-    await retry.tryForTime(2 * 60 * 1000, async () => {
+    await retry.tryForTime(3 * 60 * 1000, async () => {
       await page.click(byTestId('querySubmitButton'));
-      await page.isVisible(`text=2 Alerts`, { timeout: 5 * 1000 });
+      await page.waitForSelector(`text=2 Alerts`, { timeout: 10 * 1000 });
       const alertReasonElem = await page.waitForSelector(`text=${reasonMessage}`, {
-        timeout: 5 * 1000,
+        timeout: 10 * 1000,
       });
 
       expect(await alertReasonElem?.innerText()).toBe(reasonMessage);
@@ -188,8 +187,13 @@ journey(`DefaultStatusAlert`, async ({ page, params }) => {
     await page.click(byTestId('alert-status-filter-recovered-button'));
     await retry.tryForTime(3 * 60 * 1000, async () => {
       await page.click(byTestId('querySubmitButton'));
-      expect(await page.isVisible(`text=1 Alert`)).toBe(true);
+
+      const alertsCount = await page.waitForSelector(`text=1 Alert`, { timeout: 10 * 1000 });
+      expect(await alertsCount.isVisible()).toBe(true);
     });
+
+    await page.click(byTestId('alert-status-filter-active-button'));
+    await page.waitForTimeout(5 * 1000);
 
     await page.click('[aria-label="View in app"]');
     await page.click(byTestId('syntheticsMonitorOverviewTab'));

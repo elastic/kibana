@@ -8,7 +8,7 @@
 import { journey, step, expect, Page } from '@elastic/synthetics';
 import { assertText, byTestId } from '@kbn/observability-plugin/e2e/utils';
 import { RetryService } from '@kbn/ftr-common-functional-services';
-import { recordVideo } from '../../helpers/record_video';
+import { recordVideo } from '@kbn/observability-plugin/e2e/record_video';
 import { syntheticsAppPageProvider } from '../../page_objects/synthetics/synthetics_app';
 
 let page1: Page;

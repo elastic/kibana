@@ -107,6 +107,11 @@ export class ImportResolver {
     return this.pkgIdForDir(Path.dirname(relative));
   }
 
+  getPackageManifestForPath(path: string) {
+    const pkgId = this.getPackageIdForPath(path);
+    return pkgId ? this.getPkgManifest(pkgId) : undefined;
+  }
+
   getAbsolutePackageDir(pkgId: string) {
     const dir = this.pkgMap.get(pkgId);
     return dir ? Path.resolve(this.cwd, dir) : null;

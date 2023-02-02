@@ -1,5 +1,5 @@
 get:
-  summary: Retrieve a rule by its identifier.
+  summary: Retrieves a rule by its identifier.
   operationId: getRule
   description: >
     You must have `read` privileges for the appropriate Kibana features,
@@ -21,8 +21,22 @@ get:
           schema:
             $ref: '../components/schemas/rule_response_properties.yaml' 
           examples:
-            updateRuleResponse:
+            getRuleResponse:
               $ref: '../components/examples/get_rule_response.yaml'
+    '401':
+      description: Authorization information is missing or invalid.
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/401_response.yaml'
+    '404':
+      description: Object is not found.
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/404_response.yaml'
+  servers:
+    - url: https://localhost:5601
 
 delete:
   summary: Deletes a rule.
@@ -42,6 +56,81 @@ delete:
   responses:
     '204':
       description: Indicates a successful call.
+    '401':
+      description: Authorization information is missing or invalid.
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/401_response.yaml'
+    '404':
+      description: Object is not found.
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/404_response.yaml'
+  servers:
+    - url: https://localhost:5601
+
+post:
+  summary: Creates a rule.
+  operationId: createRule
+  description: >
+    You must have `all` privileges for the appropriate Kibana features,
+    depending on the `consumer` and `rule_type_id` of the rule you're creating.
+    For example, you must have privileges for the **Management > Stack rules**
+    feature, **Analytics > Discover** and **Machine Learning** features,
+    **Observability** features, or **Security** features.  If the rule has
+    actions, you must also have `read` privileges for the
+    **Management > Actions and Connectors** feature. NOTE: This API supports
+    only token-based authentication. When you create a rule, it identifies which
+    roles you have at that point in time. Thereafter, when the rule performs
+    queries, it uses those security privileges. If a user with different
+    privileges updates the rule, its behavior might change.
+  tags:
+    - alerting
+  parameters:
+    - $ref: ../components/headers/kbn_xsrf.yaml
+    - $ref: '../components/parameters/space_id.yaml'
+    - in: path
+      name: ruleId
+      description: >
+        An UUID v1 or v4 identifier for the rule. If you omit this parameter,
+        an identifier is randomly generated.
+      required: true
+      schema:
+        type: string
+        example: ac4e6b90-6be7-11eb-ba0d-9b1c1f912d74
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: '../components/schemas/create_rule_request.yaml' 
+        examples:
+          createCaseRequest:
+            $ref: '../components/examples/create_rule_request.yaml'
+  responses:
+    '200':
+      description: Indicates a successful call.
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/rule_response_properties.yaml' 
+          examples:
+            createRuleResponse:
+              $ref: '../components/examples/create_rule_response.yaml'
+    '401':
+      description: Authorization information is missing or invalid.
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/401_response.yaml'
+    '404':
+      description: Object is not found.
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/404_response.yaml'
   servers:
     - url: https://localhost:5601
 
@@ -88,6 +177,18 @@ put:
           examples:
             updateRuleResponse:
               $ref: '../components/examples/update_rule_response.yaml'
+    '401':
+      description: Authorization information is missing or invalid.
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/401_response.yaml'
+    '404':
+      description: Object is not found.
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/404_response.yaml'
   servers:
     - url: https://localhost:5601
 servers:

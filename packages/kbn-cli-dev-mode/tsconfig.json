@@ -21,6 +21,9 @@
     "@kbn/jest-serializers",
     "@kbn/stdio-dev-helpers",
     "@kbn/tooling-log",
+    "@kbn/repo-source-classifier",
+    "@kbn/import-resolver",
+    "@kbn/picomatcher",
     "@kbn/repo-packages",
   ],
   "exclude": [

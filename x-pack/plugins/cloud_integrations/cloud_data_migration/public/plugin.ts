@@ -5,13 +5,16 @@
  * 2.0.
  */
 
+import { i18n } from '@kbn/i18n';
 import { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 import { ManagementAppMountParams } from '@kbn/management-plugin/public';
 import { CloudDataMigrationPluginSetup, CloudDataMigrationPluginStart } from './types';
 import { PLUGIN_ID, PLUGIN_NAME } from '../common';
 import { BreadcrumbService } from './application/services/breadcrumbs';
 
-export class CloudDataMigrationPlugin implements Plugin<void, CloudDataMigrationPluginStart> {
+export class CloudDataMigrationPlugin
+  implements Plugin<void, void, CloudDataMigrationPluginSetup, CloudDataMigrationPluginStart>
+{
   private breadcrumbService = new BreadcrumbService();
 
   public setup(core: CoreSetup, { cloud, management }: CloudDataMigrationPluginSetup) {
@@ -41,8 +44,20 @@ export class CloudDataMigrationPlugin implements Plugin<void, CloudDataMigration
     }
   }
 
-  public start(core: CoreStart): CloudDataMigrationPluginStart {
-    return {};
+  public start(core: CoreStart, { cloud }: CloudDataMigrationPluginStart) {
+    if (!cloud?.isCloudEnabled) {
+      core.chrome.registerGlobalHelpExtensionMenuLink({
+        linkType: 'custom',
+        target: '_blank',
+        href: 'https://ela.st/cloud-migration',
+        content: i18n.translate('xpack.cloudDataMigration.helpMenuMoveDataTitle', {
+          defaultMessage: 'Move data to Elastic Cloud',
+        }),
+        'data-test-subj': 'migrate_data_to_cloud__help_menu_link',
+        priority: 200,
+        external: true,
+      });
+    }
   }
 
   public stop() {}

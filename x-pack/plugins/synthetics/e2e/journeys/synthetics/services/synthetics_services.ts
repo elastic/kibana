@@ -10,7 +10,8 @@ import type { Client } from '@elastic/elasticsearch';
 import { KbnClient, uriencode } from '@kbn/test';
 import pMap from 'p-map';
 import { SYNTHETICS_API_URLS } from '../../../../common/constants';
-import { firstDownHit, firstUpHit } from '../alert_rules/sample_docs/sample_docs';
+import { journeyStart, journeySummary, step1, step2 } from './data/browser_docs';
+import { firstDownHit, getUpHit } from './data/sample_docs';
 
 export class SyntheticsServices {
   kibanaUrl: string;
@@ -34,7 +35,11 @@ export class SyntheticsServices {
     }
   }
 
-  async addTestMonitor(name: string, data: Record<string, any> = { type: 'browser' }) {
+  async addTestMonitor(
+    name: string,
+    data: Record<string, any> = { type: 'browser' },
+    configId?: string
+  ) {
     const testData = {
       alert: { status: { enabled: true } },
       locations: [{ id: 'us_central', isServiceManaged: true }],
@@ -43,10 +48,18 @@ export class SyntheticsServices {
       name,
     };
     try {
-      await axios.post(this.kibanaUrl + '/internal/uptime/service/monitors', testData, {
-        auth: { username: 'elastic', password: 'changeme' },
-        headers: { 'kbn-xsrf': 'true' },
-      });
+      const response = await axios.post(
+        this.kibanaUrl +
+          (configId
+            ? `/internal/uptime/service/monitors?id=${configId}`
+            : `/internal/uptime/service/monitors`),
+        testData,
+        {
+          auth: { username: 'elastic', password: 'changeme' },
+          headers: { 'kbn-xsrf': 'true' },
+        }
+      );
+      return response.data.id;
     } catch (e) {
       // eslint-disable-next-line no-console
       console.log(JSON.stringify(e));
@@ -98,20 +111,90 @@ export class SyntheticsServices {
   }
 
   async addTestSummaryDocument({
-    isDown = false,
+    docType = 'summaryUp',
     timestamp = new Date(Date.now()).toISOString(),
     monitorId,
     name,
-  }: { monitorId?: string; isDown?: boolean; timestamp?: string; name?: string } = {}) {
+    testRunId,
+    stepIndex = 1,
+    locationName,
+    configId,
+  }: {
+    monitorId?: string;
+    docType?: 'summaryUp' | 'summaryDown' | 'journeyStart' | 'journeyEnd' | 'stepEnd';
+    timestamp?: string;
+    name?: string;
+    testRunId?: string;
+    stepIndex?: number;
+    locationName?: string;
+    configId?: string;
+  } = {}) {
     const getService = this.params.getService;
     const es: Client = getService('es');
+
+    let document = {
+      '@timestamp': timestamp,
+    };
+
+    let index = 'synthetics-http-default';
+
+    const commonData = { timestamp, monitorId, name, testRunId, locationName, configId };
+
+    switch (docType) {
+      case 'stepEnd':
+        index = 'synthetics-browser-default';
+
+        const stepDoc = stepIndex === 1 ? step1(commonData) : step2(commonData);
+
+        document = { ...stepDoc, ...document };
+        break;
+      case 'journeyEnd':
+        index = 'synthetics-browser-default';
+        document = { ...journeySummary(commonData), ...document };
+        break;
+      case 'journeyStart':
+        index = 'synthetics-browser-default';
+        document = { ...journeyStart(commonData), ...document };
+        break;
+      case 'summaryDown':
+        document = {
+          ...firstDownHit(commonData),
+          ...document,
+        };
+        break;
+      case 'summaryUp':
+        document = {
+          ...getUpHit(commonData),
+          ...document,
+        };
+        break;
+      default:
+        document = {
+          ...getUpHit(commonData),
+          ...document,
+        };
+    }
+
     await es.index({
-      index: 'synthetics-http-default',
-      document: {
-        ...(isDown ? firstDownHit({ timestamp, monitorId, name }) : firstUpHit),
-        '@timestamp': timestamp,
-      },
+      index,
+      document,
     });
+  }
+
+  async cleaUp(things: Array<'monitors' | 'alerts' | 'rules'> = ['monitors', 'alerts', 'rules']) {
+    const promises = [];
+    if (things.includes('monitors')) {
+      promises.push(this.cleanTestMonitors());
+    }
+    if (things.includes('alerts')) {
+      promises.push(this.cleaUpAlerts());
+    }
+
+    if (things.includes('rules')) {
+      promises.push(this.cleaUpRules());
+    }
+
+    await Promise.all(promises);
   }
 
   async cleaUpAlerts() {

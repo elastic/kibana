@@ -15,6 +15,7 @@
     "@kbn/license-api-guard-plugin",
     "@kbn/i18n",
     "@kbn/core-http-request-handler-context-server",
+    "@kbn/core-custom-branding-common",
   ],
   "exclude": [
     "target/**/*",

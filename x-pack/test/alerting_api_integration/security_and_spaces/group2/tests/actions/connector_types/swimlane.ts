@@ -10,9 +10,9 @@ import expect from '@kbn/expect';
 import getPort from 'get-port';
 import http from 'http';
 
-import { getHttpProxyServer } from '../../../../../common/lib/get_proxy_server';
+import { getHttpProxyServer } from '@kbn/alerting-api-integration-helpers';
 import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
-import { getSwimlaneServer } from '../../../../../common/fixtures/plugins/actions_simulators/server/plugin';
+import { getSwimlaneServer } from '../../../../../common/plugins/actions_simulators/server/plugin';
 
 // eslint-disable-next-line import/no-default-export
 export default function swimlaneTest({ getService }: FtrProviderContext) {

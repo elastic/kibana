@@ -40,7 +40,7 @@ export const useMonitorLatestPing = (params?: UseMonitorLatestPingParams) => {
   const isUpToDate = isIdSame && isLocationSame;
 
   useEffect(() => {
-    if (monitorId && locationLabel && !isUpToDate) {
+    if (monitorId && locationLabel) {
       dispatch(getMonitorLastRunAction.get({ monitorId, locationId: locationLabel }));
     }
   }, [dispatch, monitorId, locationLabel, isUpToDate, lastRefresh]);

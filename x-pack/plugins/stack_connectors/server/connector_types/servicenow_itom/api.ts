@@ -20,7 +20,7 @@ const formatTimeOfEvent = (timeOfEvent: string | null): string | undefined => {
 
     return isValidDate(date)
       ? // The format is: yyyy-MM-dd HH:mm:ss GMT
-        date.toLocaleDateString('en-CA', {
+        date.toLocaleDateString('eo', {
           year: 'numeric',
           month: '2-digit',
           day: '2-digit',

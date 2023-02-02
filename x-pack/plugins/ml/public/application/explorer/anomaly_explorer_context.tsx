@@ -6,9 +6,10 @@
  */
 
 import React, { useContext, useEffect, useMemo, useState, type FC } from 'react';
+import { useTimefilter } from '@kbn/ml-date-picker';
 import { AnomalyTimelineStateService } from './anomaly_timeline_state_service';
 import { AnomalyExplorerCommonStateService } from './anomaly_explorer_common_state';
-import { useMlKibana, useTimefilter } from '../contexts/kibana';
+import { useMlKibana } from '../contexts/kibana';
 import { mlResultsServiceProvider } from '../services/results_service';
 import { AnomalyTimelineService } from '../services/anomaly_timeline_service';
 import { useExplorerUrlState } from './hooks/use_explorer_url_state';

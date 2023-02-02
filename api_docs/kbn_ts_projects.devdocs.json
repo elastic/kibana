@@ -37,7 +37,7 @@
             "label": "loadAll",
             "description": [],
             "signature": [
-              "(options: { ignore: string[]; disableTypeCheck: string[]; }) => ",
+              "(options: { ignore: string[]; disableTypeCheck: string[]; noTsconfigPathsRefresh?: boolean | undefined; }) => ",
               {
                 "pluginId": "@kbn/ts-projects",
                 "scope": "common",
@@ -85,6 +85,20 @@
                     "description": [],
                     "signature": [
                       "string[]"
+                    ],
+                    "path": "packages/kbn-ts-projects/ts_project.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "@kbn/ts-projects",
+                    "id": "def-common.TsProject.loadAll.$1.noTsconfigPathsRefresh",
+                    "type": "CompoundType",
+                    "tags": [],
+                    "label": "noTsconfigPathsRefresh",
+                    "description": [],
+                    "signature": [
+                      "boolean | undefined"
                     ],
                     "path": "packages/kbn-ts-projects/ts_project.ts",
                     "deprecated": false,

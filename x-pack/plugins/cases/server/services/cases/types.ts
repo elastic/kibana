@@ -48,4 +48,6 @@ export type ESCaseAttributes = Omit<
   status: ESCaseStatus;
   connector: ESCaseConnector;
   external_service: ExternalServicesWithoutConnectorId | null;
+  total_alerts: number;
+  total_comments: number;
 };

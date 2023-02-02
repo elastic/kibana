@@ -122,5 +122,5 @@ export abstract class UserActionBuilder {
 
   public abstract build<T extends keyof BuilderParameters>(
     args: UserActionParameters<T>
-  ): UserActionEvent;
+  ): UserActionEvent | void;
 }

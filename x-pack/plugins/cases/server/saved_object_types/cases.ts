@@ -179,6 +179,12 @@ export const createCaseSavedObjectType = (
       severity: {
         type: 'keyword',
       },
+      total_alerts: {
+        type: 'integer',
+      },
+      total_comments: {
+        type: 'integer',
+      },
     },
   },
   migrations: caseMigrations,

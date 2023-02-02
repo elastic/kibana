@@ -124,6 +124,11 @@ export const createThreatSignals = async ({
     _source: false,
   };
 
+  const eventListConfig = {
+    fields: threatMapping.map((mapping) => mapping.entries.map((item) => item.field)).flat(),
+    _source: false,
+  };
+
   const threatEnrichment = buildThreatEnrichment({
     ruleExecutionLogger,
     services,

@@ -9,6 +9,7 @@ import type {
   GetActionStatusResponse,
   GetAgentTagsResponse,
   GetAgentUploadsResponse,
+  GetOneAgentRequest,
   PostBulkRequestDiagnosticsResponse,
   PostBulkUpdateAgentTagsRequest,
   PostRequestBulkDiagnosticsRequest,
@@ -49,7 +50,12 @@ import type { UseRequestConfig } from './use_request';
 
 type RequestOptions = Pick<Partial<UseRequestConfig>, 'pollIntervalMs'>;
 
-export function useGetOneAgent(agentId: string, options?: RequestOptions) {
+export function useGetOneAgent(
+  agentId: string,
+  options?: RequestOptions & {
+    query?: GetOneAgentRequest['query'];
+  }
+) {
   return useRequest<GetOneAgentResponse>({
     path: agentRouteService.getInfoPath(agentId),
     method: 'get',

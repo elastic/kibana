@@ -21,6 +21,7 @@ interface Options {
   versionQualifier?: string;
   dockerContextUseLocalArtifact: boolean | null;
   dockerCrossCompile: boolean;
+  dockerNamespace: string | null;
   dockerTag: string | null;
   dockerTagQualifier: string | null;
   dockerPush: boolean;
@@ -36,6 +37,7 @@ export class Config {
     dockerTag,
     dockerTagQualifier,
     dockerPush,
+    dockerNamespace,
   }: Options) {
     const nodeVersion = kibanaPackageJson.engines?.node;
     if (!nodeVersion) {
@@ -54,6 +56,7 @@ export class Config {
       }),
       dockerContextUseLocalArtifact,
       dockerCrossCompile,
+      dockerNamespace,
       dockerTag,
       dockerTagQualifier,
       dockerPush,
@@ -69,6 +72,7 @@ export class Config {
     private readonly versionInfo: VersionInfo,
     private readonly dockerContextUseLocalArtifact: boolean | null,
     private readonly dockerCrossCompile: boolean,
+    private readonly dockerNamespace: string | null,
     private readonly dockerTag: string | null,
     private readonly dockerTagQualifier: string | null,
     private readonly dockerPush: boolean,
@@ -108,6 +112,13 @@ export class Config {
    */
   getDockerPush() {
     return this.dockerPush;
+  }
+
+  /**
+   * Get docker repository namespace
+   */
+  getDockerNamespace() {
+    return this.dockerNamespace;
   }
 
   /**

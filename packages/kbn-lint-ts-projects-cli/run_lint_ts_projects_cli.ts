@@ -98,7 +98,7 @@ function validateProjectOwnership(
   if (isNotInTsProject.length) {
     failed = true;
     log.error(
-      `The following files do not belong to a tsconfig.json file, or that tsconfig.json file is not listed in packages/kbn-ts-projects/projects.ts\n${isNotInTsProject
+      `The following files do not belong to a tsconfig.json file\n${isNotInTsProject
         .map((file) => ` - ${file.repoRel}`)
         .join('\n')}`
     );

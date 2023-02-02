@@ -14,8 +14,13 @@ import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/
 import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
-import type { CoreStart, CoreSetup, HttpStart, IUiSettingsClient } from '@kbn/core/public';
-import type { ThemeServiceStart } from '@kbn/core/public';
+import type {
+  CoreStart,
+  CoreSetup,
+  HttpStart,
+  IUiSettingsClient,
+  ThemeServiceStart,
+} from '@kbn/core/public';
 import type { LensPublicStart } from '@kbn/lens-plugin/public';
 
 export interface AiopsAppDependencies {

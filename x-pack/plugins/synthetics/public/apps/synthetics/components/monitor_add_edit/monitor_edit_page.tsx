@@ -6,10 +6,10 @@
  */
 
 import React, { useEffect } from 'react';
-import { EuiLoadingSpinner } from '@elastic/eui';
 import { useParams } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import { useTrackPageview, useFetcher } from '@kbn/observability-plugin/public';
+import { LoadingState } from '../monitors_page/overview/overview/monitor_detail_flyout';
 import { ConfigKey } from '../../../../../common/runtime_types';
 import { getServiceLocations } from '../../state';
 import { ServiceAllowedWrapper } from '../common/wrappers/service_allowed_wrapper';
@@ -44,7 +44,7 @@ const MonitorEditPage: React.FC = () => {
       />
     </MonitorForm>
   ) : (
-    <EuiLoadingSpinner />
+    <LoadingState />
   );
 };
 

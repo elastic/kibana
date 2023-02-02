@@ -248,7 +248,9 @@
                   "IncomingMessage",
                   "; res: ",
                   "ServerResponse",
-                  "; }> | undefined; readonly route?: ",
+                  "<",
+                  "IncomingMessage",
+                  ">; }> | undefined; readonly route?: ",
                   {
                     "pluginId": "@kbn/utility-types",
                     "scope": "common",

@@ -28,9 +28,9 @@ import useDebounce from 'react-use/lib/useDebounce';
 import useObservable from 'react-use/lib/useObservable';
 import type { Query } from '@kbn/es-query';
 import { isDefined } from '@kbn/ml-is-defined';
+import { useTimeRangeUpdates } from '@kbn/ml-date-picker';
 import { SEARCH_QUERY_LANGUAGE } from '../../../common/constants/search';
 import { useCasesModal } from '../contexts/kibana/use_cases_modal';
-import { useTimeRangeUpdates } from '../contexts/kibana/use_timefilter';
 import { ANOMALY_SWIMLANE_EMBEDDABLE_TYPE } from '../..';
 import {
   OVERALL_LABEL,

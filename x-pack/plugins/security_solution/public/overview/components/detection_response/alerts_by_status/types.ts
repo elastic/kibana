@@ -20,7 +20,7 @@ interface StatusBucket {
   statusBySeverity?: StatusBySeverity;
 }
 
-interface SeverityBucket {
+export interface SeverityBucket {
   key: Severity;
   doc_count: number;
 }
@@ -76,12 +76,6 @@ export type ParsedAlertsData = Partial<
 > | null;
 
 export type AlertsByStatus = 'open' | 'acknowledged' | 'closed';
-
-export interface AlertDonutEmbeddableProps {
-  status: AlertsByStatus;
-  timerange: { from: string; to: string };
-  label: string;
-}
 
 export interface VisualizationAlertsByStatusData {
   responses: VisualizationAlertsByStatusResponse[];

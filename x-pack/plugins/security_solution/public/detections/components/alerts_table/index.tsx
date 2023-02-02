@@ -8,7 +8,7 @@
 import { isEmpty } from 'lodash/fp';
 import React, { useCallback, useEffect, useMemo } from 'react';
 import type { ConnectedProps } from 'react-redux';
-import { connect, useDispatch, useSelector } from 'react-redux';
+import { connect, useDispatch } from 'react-redux';
 import type { Filter } from '@kbn/es-query';
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
 import { combineQueries } from '../../../common/lib/kuery';
@@ -17,7 +17,6 @@ import type { TableIdLiteral } from '../../../../common/types';
 import { tableDefaults } from '../../../common/store/data_table/defaults';
 import { dataTableActions, dataTableSelectors } from '../../../common/store/data_table';
 import type { Status } from '../../../../common/detection_engine/schemas/common/schemas';
-import { eventsViewerSelector } from '../../../common/components/events_viewer/selectors';
 import { StatefulEventsViewer } from '../../../common/components/events_viewer';
 import { useSourcererDataView } from '../../../common/containers/sourcerer';
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
@@ -81,8 +80,6 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
   filterGroup,
 }) => {
   const dispatch = useDispatch();
-
-  const { globalQueries } = useSelector((state: State) => eventsViewerSelector(state, tableId));
 
   const {
     browserFields,
@@ -198,10 +195,6 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
     [ACTION_BUTTON_COUNT]
   );
 
-  const refetchQuery = useCallback((newQueries: inputsModel.GlobalQuery[]) => {
-    newQueries.forEach((q) => q.refetch && (q.refetch as inputsModel.Refetch)());
-  }, []);
-
   const addToCaseBulkActions = useBulkAddToCaseActions();
   const addBulkToTimelineAction = useAddBulkToTimelineAction({
     localFilters: defaultFiltersMemo ?? [],
@@ -213,12 +206,9 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
 
   const bulkActions = useMemo(
     () => ({
-      onAlertStatusActionSuccess: () => {
-        refetchQuery(globalQueries);
-      },
       customBulkActions: [...addToCaseBulkActions, addBulkToTimelineAction],
     }),
-    [globalQueries, refetchQuery, addToCaseBulkActions, addBulkToTimelineAction]
+    [addToCaseBulkActions, addBulkToTimelineAction]
   );
 
   if (loading || isEmpty(selectedPatterns)) {

@@ -27,6 +27,7 @@ export type { FleetSetupContract, FleetSetupDeps, FleetStartContract } from './p
 export type {
   ExternalCallback,
   PutPackagePolicyUpdateCallback,
+  PostPackagePolicyDeleteCallback,
   PostPackagePolicyPostDeleteCallback,
   PostPackagePolicyCreateCallback,
   FleetRequestHandlerContext,

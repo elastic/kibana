@@ -529,6 +529,24 @@ export default function createGetTests({ getService }: FtrProviderContext) {
           }
         });
       });
+
+      describe('total_alerts', () => {
+        it('total_alerts field has default value -1', async () => {
+          const casesFromES = await getCaseSavedObjectsFromES({ es });
+          for (const hit of casesFromES.body.hits.hits) {
+            expect(hit._source?.cases.total_alerts).to.eql(-1);
+          }
+        });
+      });
+
+      describe('total_comments', () => {
+        it('total_comments field has default value -1', async () => {
+          const casesFromES = await getCaseSavedObjectsFromES({ es });
+          for (const hit of casesFromES.body.hits.hits) {
+            expect(hit._source?.cases.total_comments).to.eql(-1);
+          }
+        });
+      });
     });
   });
 }

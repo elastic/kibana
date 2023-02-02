@@ -230,11 +230,15 @@ export const useAddBulkToTimelineAction = ({
       : INVESTIGATE_BULK_IN_TIMELINE;
   }, [disableActionOnSelectAll]);
 
-  return {
-    label: investigateInTimelineTitle,
-    key: 'add-bulk-to-timeline',
-    'data-test-subj': 'investigate-bulk-in-timeline',
-    disableOnQuery: disableActionOnSelectAll,
-    onClick: onActionClick,
-  };
+  const memoized = useMemo(
+    () => ({
+      label: investigateInTimelineTitle,
+      key: 'add-bulk-to-timeline',
+      'data-test-subj': 'investigate-bulk-in-timeline',
+      disableOnQuery: disableActionOnSelectAll,
+      onClick: onActionClick,
+    }),
+    [disableActionOnSelectAll, investigateInTimelineTitle, onActionClick]
+  );
+  return memoized;
 };

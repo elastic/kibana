@@ -27,10 +27,11 @@ import {
   SavedObjectsBulkUpdateObject,
 } from '@kbn/core-saved-objects-api-server';
 import { SavedObjectsSerializer } from '@kbn/core-saved-objects-base-server-internal';
-import { SavedObject } from '@kbn/core-saved-objects-common';
+import { SavedObject } from '@kbn/core-saved-objects-server';
 import {
   ISavedObjectsSpacesExtension,
   ISavedObjectsSecurityExtension,
+  ISavedObjectsEncryptionExtension,
 } from '@kbn/core-saved-objects-server';
 import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-utils-server';
 import { kibanaMigratorMock } from '../mocks';
@@ -56,6 +57,7 @@ import {
   setupPerformAuthUnauthorized,
   generateIndexPatternSearchResults,
   bulkDeleteSuccess,
+  ENCRYPTED_TYPE,
 } from '../test_helpers/repository.test.common';
 import { savedObjectsExtensionsMock } from '../mocks/saved_objects_extensions.mock';
 
@@ -72,6 +74,7 @@ describe('SavedObjectsRepository Spaces Extension', () => {
   let serializer: jest.Mocked<SavedObjectsSerializer>;
   let mockSpacesExt: jest.Mocked<ISavedObjectsSpacesExtension>;
   let mockSecurityExt: jest.Mocked<ISavedObjectsSecurityExtension>;
+  let mockEncryptionExt: jest.Mocked<ISavedObjectsEncryptionExtension>;
 
   const registry = createRegistry();
   const documentMigrator = createDocumentMigrator(registry);
@@ -93,7 +96,11 @@ describe('SavedObjectsRepository Spaces Extension', () => {
       serializer,
       allowedTypes,
       logger,
-      extensions: { spacesExtension: mockSpacesExt, securityExtension: mockSecurityExt },
+      extensions: {
+        spacesExtension: mockSpacesExt,
+        securityExtension: mockSecurityExt,
+        encryptionExtension: mockEncryptionExt,
+      },
     });
   };
 
@@ -919,6 +926,200 @@ describe('SavedObjectsRepository Spaces Extension', () => {
         client.search.mockResponseOnce(generatedResults);
         const result = await repository.find({ type, namespaces: [spaceOverride] });
         expect(result).toEqual(expect.objectContaining({ total: 0 }));
+      });
+    });
+  });
+
+  describe(`with encryption extension`, () => {
+    const currentSpace = 'current_space';
+    const encryptedSO = {
+      id: 'encrypted-id',
+      type: ENCRYPTED_TYPE,
+      namespaces: ['foo-namespace'],
+      attributes: {
+        attrNotSoSecret: '*not-so-secret*',
+        attrOne: 'one',
+        attrSecret: '*secret*',
+        attrThree: 'three',
+        title: 'Testing',
+      },
+      references: [],
+    };
+    const decryptedStrippedAttributes = {
+      attributes: { attrOne: 'one', attrNotSoSecret: 'not-so-secret', attrThree: 'three' },
+    };
+
+    beforeEach(() => {
+      pointInTimeFinderMock.mockClear();
+      client = elasticsearchClientMock.createElasticsearchClient();
+      migrator = kibanaMigratorMock.create();
+      documentMigrator.prepareMigrations();
+      migrator.migrateDocument = jest.fn().mockImplementation(documentMigrator.migrate);
+      migrator.runMigrations = jest.fn().mockResolvedValue([{ status: 'skipped' }]);
+      logger = loggerMock.create();
+      serializer = createSpySerializer(registry);
+      mockSpacesExt = savedObjectsExtensionsMock.createSpacesExtension();
+      mockEncryptionExt = savedObjectsExtensionsMock.createEncryptionExtension();
+      mockGetCurrentTime.mockReturnValue(mockTimestamp);
+      mockGetSearchDsl.mockClear();
+      repository = instantiateRepository();
+      mockSpacesExt.getCurrentNamespace.mockImplementation((namespace: string | undefined) => {
+        if (namespace) {
+          throw SavedObjectsErrorHelpers.createBadRequestError(ERROR_NAMESPACE_SPECIFIED);
+        }
+        return currentSpace;
+      });
+    });
+
+    describe(`#create`, () => {
+      test(`calls encryptAttributes with the current namespace by default`, async () => {
+        mockEncryptionExt.isEncryptableType.mockReturnValue(true);
+        await repository.create(encryptedSO.type, encryptedSO.attributes);
+        expect(mockSpacesExt.getCurrentNamespace).toBeCalledTimes(1);
+        expect(mockSpacesExt.getCurrentNamespace).toHaveBeenCalledWith(undefined);
+        expect(client.create).toHaveBeenCalledTimes(1);
+        expect(mockEncryptionExt.isEncryptableType).toHaveBeenCalledTimes(3); // (no upsert) optionallyEncryptAttributes, optionallyDecryptAndRedactSingleResult
+        expect(mockEncryptionExt.isEncryptableType).toHaveBeenNthCalledWith(1, encryptedSO.type);
+        expect(mockEncryptionExt.isEncryptableType).toHaveBeenNthCalledWith(2, encryptedSO.type);
+        expect(mockEncryptionExt.isEncryptableType).toHaveBeenNthCalledWith(3, encryptedSO.type);
+        expect(mockEncryptionExt.encryptAttributes).toHaveBeenCalledTimes(1);
+        expect(mockEncryptionExt.encryptAttributes).toHaveBeenCalledWith(
+          {
+            id: expect.objectContaining(/[0-9a-f]{8}-([0-9a-f]{4}-){3}[0-9a-f]{12}/),
+            namespace: currentSpace,
+            type: ENCRYPTED_TYPE,
+          },
+          encryptedSO.attributes
+        );
+      });
+    });
+
+    describe(`#bulkCreate`, () => {
+      const obj1 = {
+        type: 'config',
+        id: '6.0.0-alpha1',
+        attributes: { title: 'Test One' },
+        references: [{ name: 'ref_0', type: 'test', id: '1' }],
+      };
+
+      test(`calls encryptAttributes with the current namespace by default`, async () => {
+        mockEncryptionExt.isEncryptableType.mockReturnValueOnce(false);
+        mockEncryptionExt.isEncryptableType.mockReturnValueOnce(true);
+        mockEncryptionExt.isEncryptableType.mockReturnValueOnce(false);
+        mockEncryptionExt.isEncryptableType.mockReturnValueOnce(true);
+        mockEncryptionExt.isEncryptableType.mockReturnValueOnce(false);
+        mockEncryptionExt.isEncryptableType.mockReturnValueOnce(true);
+        await bulkCreateSuccess(client, repository, [
+          obj1,
+          { ...encryptedSO, id: undefined }, // Predefined IDs are not allowed for saved objects with encrypted attributes unless the ID is a UUID
+        ]);
+        expect(mockSpacesExt.getCurrentNamespace).toBeCalledTimes(1);
+        expect(mockSpacesExt.getCurrentNamespace).toHaveBeenCalledWith(undefined);
+        expect(mockSpacesExt.getSearchableNamespaces).not.toHaveBeenCalled();
+        expect(client.bulk).toHaveBeenCalledTimes(1);
+        expect(mockEncryptionExt.isEncryptableType).toHaveBeenCalledTimes(6);
+        expect(mockEncryptionExt.isEncryptableType).toHaveBeenNthCalledWith(1, obj1.type);
+        expect(mockEncryptionExt.isEncryptableType).toHaveBeenNthCalledWith(2, encryptedSO.type);
+        expect(mockEncryptionExt.isEncryptableType).toHaveBeenNthCalledWith(3, obj1.type);
+        expect(mockEncryptionExt.isEncryptableType).toHaveBeenNthCalledWith(4, encryptedSO.type);
+        expect(mockEncryptionExt.isEncryptableType).toHaveBeenNthCalledWith(5, obj1.type);
+        expect(mockEncryptionExt.isEncryptableType).toHaveBeenNthCalledWith(6, encryptedSO.type);
+
+        expect(mockEncryptionExt.encryptAttributes).toHaveBeenCalledTimes(1);
+        expect(mockEncryptionExt.encryptAttributes).toHaveBeenCalledWith(
+          {
+            id: expect.objectContaining(/[0-9a-f]{8}-([0-9a-f]{4}-){3}[0-9a-f]{12}/),
+            namespace: currentSpace,
+            type: ENCRYPTED_TYPE,
+          },
+          encryptedSO.attributes
+        );
+      });
+    });
+
+    describe(`#update`, () => {
+      it('calls encryptAttributes with the current namespace by default', async () => {
+        mockEncryptionExt.isEncryptableType.mockReturnValue(true);
+        mockEncryptionExt.decryptOrStripResponseAttributes.mockResolvedValue({
+          ...encryptedSO,
+          ...decryptedStrippedAttributes,
+        });
+        await updateSuccess(
+          client,
+          repository,
+          registry,
+          encryptedSO.type,
+          encryptedSO.id,
+          encryptedSO.attributes,
+          {
+            // no namespace provided
+            references: encryptedSO.references,
+          }
+        );
+        expect(mockSpacesExt.getCurrentNamespace).toBeCalledTimes(1);
+        expect(mockSpacesExt.getCurrentNamespace).toHaveBeenCalledWith(undefined);
+        expect(client.update).toHaveBeenCalledTimes(1);
+        expect(mockEncryptionExt.isEncryptableType).toHaveBeenCalledTimes(2); // (no upsert) optionallyEncryptAttributes, optionallyDecryptAndRedactSingleResult
+        expect(mockEncryptionExt.isEncryptableType).toHaveBeenCalledWith(encryptedSO.type);
+        expect(mockEncryptionExt.encryptAttributes).toHaveBeenCalledTimes(1);
+        expect(mockEncryptionExt.encryptAttributes).toHaveBeenCalledWith(
+          {
+            id: encryptedSO.id,
+            namespace: currentSpace,
+            type: ENCRYPTED_TYPE,
+          },
+          encryptedSO.attributes
+        );
+      });
+    });
+
+    describe(`#bulkUpdate`, () => {
+      const obj1: SavedObjectsBulkUpdateObject = {
+        type: 'config',
+        id: '6.0.0-alpha1',
+        attributes: { title: 'Test One' },
+      };
+      const obj2: SavedObjectsBulkUpdateObject = {
+        type: 'index-pattern',
+        id: 'logstash-*',
+        attributes: { title: 'Test Two' },
+      };
+
+      it(`calls encryptAttributes with the current namespace by default`, async () => {
+        mockEncryptionExt.isEncryptableType.mockReturnValueOnce(false);
+        mockEncryptionExt.isEncryptableType.mockReturnValueOnce(true);
+        mockEncryptionExt.isEncryptableType.mockReturnValueOnce(false);
+        mockEncryptionExt.isEncryptableType.mockReturnValueOnce(false);
+        mockEncryptionExt.isEncryptableType.mockReturnValueOnce(true);
+        mockEncryptionExt.isEncryptableType.mockReturnValueOnce(false);
+        await bulkUpdateSuccess(
+          client,
+          repository,
+          registry,
+          [obj1, encryptedSO, obj2],
+          undefined, // No options/namespace specified
+          undefined,
+          undefined
+        );
+        expect(mockSpacesExt.getCurrentNamespace).toBeCalledTimes(1);
+        expect(mockSpacesExt.getCurrentNamespace).toHaveBeenCalledWith(undefined);
+        expect(mockSpacesExt.getSearchableNamespaces).not.toHaveBeenCalled();
+        expect(mockEncryptionExt.isEncryptableType).toHaveBeenCalledTimes(6); // (no upsert) optionallyEncryptAttributes, optionallyDecryptAndRedactSingleResult
+        expect(mockEncryptionExt.isEncryptableType).toHaveBeenNthCalledWith(1, obj1.type);
+        expect(mockEncryptionExt.isEncryptableType).toHaveBeenNthCalledWith(2, encryptedSO.type);
+        expect(mockEncryptionExt.isEncryptableType).toHaveBeenNthCalledWith(3, obj2.type);
+        expect(mockEncryptionExt.isEncryptableType).toHaveBeenNthCalledWith(4, obj1.type);
+        expect(mockEncryptionExt.isEncryptableType).toHaveBeenNthCalledWith(5, encryptedSO.type);
+        expect(mockEncryptionExt.isEncryptableType).toHaveBeenNthCalledWith(6, obj2.type);
+        expect(mockEncryptionExt.encryptAttributes).toHaveBeenCalledTimes(1);
+        expect(mockEncryptionExt.encryptAttributes).toHaveBeenCalledWith(
+          {
+            id: encryptedSO.id,
+            namespace: currentSpace,
+            type: ENCRYPTED_TYPE,
+          },
+          encryptedSO.attributes
+        );
       });
     });
   });

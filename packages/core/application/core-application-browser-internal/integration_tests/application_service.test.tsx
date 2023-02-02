@@ -15,6 +15,7 @@ import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import { themeServiceMock } from '@kbn/core-theme-browser-mocks';
 import type { AppMountParameters, AppUpdater } from '@kbn/core-application-browser';
 import { overlayServiceMock } from '@kbn/core-overlays-browser-mocks';
+import { customBrandingServiceMock } from '@kbn/core-custom-branding-browser-mocks';
 import type { MountPoint } from '@kbn/core-mount-utils-browser';
 import type { MockLifecycle } from '../src/test_helpers/test_types';
 import { ApplicationService } from '../src/application_service';
@@ -48,6 +49,7 @@ describe('ApplicationService', () => {
       http,
       overlays: overlayServiceMock.createStartContract(),
       theme: themeServiceMock.createStartContract(),
+      customBranding: customBrandingServiceMock.createStartContract(),
     };
     service = new ApplicationService();
   });

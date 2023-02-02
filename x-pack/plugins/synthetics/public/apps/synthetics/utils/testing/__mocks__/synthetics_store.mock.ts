@@ -30,11 +30,6 @@ export const mockState: SyntheticsAppState = {
     searchText: '',
     monitorId: '',
   },
-  indexStatus: {
-    data: null,
-    error: null,
-    loading: false,
-  },
   serviceLocations: {
     throttling: DEFAULT_THROTTLING,
     locations: [
@@ -134,6 +129,7 @@ export const mockState: SyntheticsAppState = {
     loading: {},
     error: {},
   },
+  manualTestRuns: {},
 };
 
 function getBrowserJourneyMockSlice() {

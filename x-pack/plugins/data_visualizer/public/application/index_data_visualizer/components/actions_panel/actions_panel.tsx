@@ -11,7 +11,7 @@ import React, { FC, useState, useEffect } from 'react';
 
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import { EuiSpacer, EuiTitle } from '@elastic/eui';
+import { useEuiBreakpoint, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { DataView } from '@kbn/data-views-plugin/public';
 import { useUrlState } from '@kbn/ml-url-state';
 import { isDefined } from '@kbn/ml-is-defined';
@@ -26,7 +26,6 @@ interface Props {
   searchString?: string | { [key: string]: any };
   searchQueryLanguage?: string;
   getAdditionalLinks?: GetAdditionalLinks;
-  compact?: boolean;
 }
 
 const ACTIONS_PANEL_WIDTH = '240px';
@@ -36,7 +35,6 @@ export const ActionsPanel: FC<Props> = ({
   searchString,
   searchQueryLanguage,
   getAdditionalLinks,
-  compact,
 }) => {
   const [globalState] = useUrlState('_g');
 
@@ -121,19 +119,17 @@ export const ActionsPanel: FC<Props> = ({
   const showActionsPanel =
     discoverLink || (Array.isArray(asyncHrefCards) && asyncHrefCards.length > 0);
 
+  const dvActionsPanel = css({
+    [useEuiBreakpoint(['xs', 's', 'm', 'l', 'xl'])]: {
+      width: ACTIONS_PANEL_WIDTH,
+    },
+  });
+
   // Note we use display:none for the DataRecognizer section as it needs to be
   // passed the recognizerResults object, and then run the recognizer check which
   // controls whether the recognizer section is ultimately displayed.
   return showActionsPanel ? (
-    <div
-      data-test-subj="dataVisualizerActionsPanel"
-      css={
-        !compact &&
-        css`
-          width: ${ACTIONS_PANEL_WIDTH};
-        `
-      }
-    >
+    <div data-test-subj="dataVisualizerActionsPanel" css={dvActionsPanel}>
       <EuiTitle size="s">
         <h2>
           <FormattedMessage

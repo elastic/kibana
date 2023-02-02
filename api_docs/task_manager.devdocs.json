@@ -473,15 +473,15 @@
               "\nlist of failed tasks and errors caused failure"
             ],
             "signature": [
-              "{ task: ",
+              "{ type: string; id: string; error: ",
               {
-                "pluginId": "taskManager",
-                "scope": "server",
-                "docId": "kibTaskManagerPluginApi",
-                "section": "def-server.ConcreteTaskInstance",
-                "text": "ConcreteTaskInstance"
+                "pluginId": "@kbn/core-saved-objects-common",
+                "scope": "common",
+                "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
+                "section": "def-common.SavedObjectError",
+                "text": "SavedObjectError"
               },
-              "; error: Error; }[]"
+              "; }[]"
             ],
             "path": "x-pack/plugins/task_manager/server/task_scheduling.ts",
             "deprecated": false,

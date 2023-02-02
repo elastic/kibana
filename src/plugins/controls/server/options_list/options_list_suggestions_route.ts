@@ -144,6 +144,7 @@ export const setupOptionsListSuggestionsRoute = (
       suggestions,
       totalCardinality,
       invalidSelections,
+      rejected: false,
     };
   };
 };

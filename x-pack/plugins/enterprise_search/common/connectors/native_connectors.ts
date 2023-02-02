@@ -70,6 +70,10 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
     features: {
       [FeatureName.FILTERING_ADVANCED_CONFIG]: true,
       [FeatureName.FILTERING_RULES]: true,
+      [FeatureName.SYNC_RULES]: {
+        advanced: { enabled: true },
+        basic: { enabled: true },
+      },
     },
     name: i18n.translate('xpack.enterpriseSearch.nativeConnectors.mongodb.name', {
       defaultMessage: 'MongoDB',
@@ -124,7 +128,12 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         value: '',
       },
     },
-    features: {},
+    features: {
+      [FeatureName.SYNC_RULES]: {
+        advanced: { enabled: true },
+        basic: { enabled: true },
+      },
+    },
     name: i18n.translate('xpack.enterpriseSearch.nativeConnectors.mysql.name', {
       defaultMessage: 'MySQL',
     }),

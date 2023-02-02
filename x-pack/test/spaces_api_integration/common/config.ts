@@ -64,7 +64,7 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
           // disable anonymouse access so that we're testing both on and off in different suites
           '--status.allowAnonymous=false',
           '--server.xsrf.disableProtection=true',
-          `--plugin-path=${path.join(__dirname, 'fixtures', 'spaces_test_plugin')}`,
+          `--plugin-path=${path.resolve(__dirname, 'plugins/spaces_test_plugin')}`,
           ...disabledPlugins
             .filter((k) => k !== 'security')
             .map((key) => `--xpack.${key}.enabled=false`),

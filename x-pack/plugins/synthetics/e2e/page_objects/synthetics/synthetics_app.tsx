@@ -50,6 +50,24 @@ export function syntheticsAppPageProvider({ page, kibanaUrl }: { page: Page; kib
       }
     },
 
+    async navigateToStepDetails({
+      configId,
+      stepIndex,
+      checkGroup,
+      doLogin = true,
+    }: {
+      checkGroup: string;
+      configId: string;
+      stepIndex: number;
+      doLogin?: boolean;
+    }) {
+      const stepDetails = `/monitor/${configId}/test-run/${checkGroup}/step/${stepIndex}?locationId=us_central`;
+      await page.goto(overview + stepDetails, { waitUntil: 'networkidle' });
+      if (doLogin) {
+        await this.loginToKibana();
+      }
+    },
+
     async waitForMonitorManagementLoadingToFinish() {
       while (true) {
         if ((await page.$(this.byTestId('uptimeLoader'))) === null) break;
@@ -89,7 +107,9 @@ export function syntheticsAppPageProvider({ page, kibanaUrl }: { page: Page; kib
     async deleteMonitors() {
       let isSuccessful: boolean = false;
       while (true) {
-        if ((await page.$(this.byTestId('euiCollapsedItemActionsButton'))) === null) {
+        if (
+          !(await page.isVisible(this.byTestId('euiCollapsedItemActionsButton'), { timeout: 0 }))
+        ) {
           isSuccessful = true;
           break;
         }

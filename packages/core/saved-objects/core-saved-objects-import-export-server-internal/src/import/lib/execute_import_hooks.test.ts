@@ -6,7 +6,8 @@
  * Side Public License, v 1.
  */
 
-import type { SavedObject, SavedObjectsImportWarning } from '@kbn/core-saved-objects-common';
+import type { SavedObjectsImportWarning } from '@kbn/core-saved-objects-common';
+import type { SavedObject } from '@kbn/core-saved-objects-server';
 import type { SavedObjectsImportHookResult } from '@kbn/core-saved-objects-server';
 import { executeImportHooks } from './execute_import_hooks';
 

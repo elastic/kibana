@@ -215,6 +215,8 @@ describe('Task Runner', () => {
     alertingEventLogger.getStartAndDuration.mockImplementation(() => ({ start: new Date() }));
     (AlertingEventLogger as jest.Mock).mockImplementation(() => alertingEventLogger);
     logger.get.mockImplementation(() => logger);
+
+    ruleType.executor.mockResolvedValue({ state: {} });
   });
 
   test('successfully executes the task', async () => {
@@ -322,6 +324,7 @@ describe('Task Runner', () => {
           string
         >) => {
           executorServices.alertFactory.create('1').scheduleActions('default');
+          return { state: {} };
         }
       );
       const taskRunner = new TaskRunner(
@@ -404,6 +407,7 @@ describe('Task Runner', () => {
         string
       >) => {
         executorServices.alertFactory.create('1').scheduleActions('default');
+        return { state: {} };
       }
     );
     const taskRunner = new TaskRunner(
@@ -529,6 +533,7 @@ describe('Task Runner', () => {
           string
         >) => {
           executorServices.alertFactory.create('1').scheduleActions('default');
+          return { state: {} };
         }
       );
       const taskRunner = new TaskRunner(
@@ -582,6 +587,7 @@ describe('Task Runner', () => {
         >) => {
           executorServices.alertFactory.create('1').scheduleActions('default');
           executorServices.alertFactory.create('2').scheduleActions('default');
+          return { state: {} };
         }
       );
       const taskRunner = new TaskRunner(
@@ -648,6 +654,7 @@ describe('Task Runner', () => {
         >) => {
           executorServices.alertFactory.create('1').scheduleActions('default');
           executorServices.alertFactory.create('2').scheduleActions('default');
+          return { state: {} };
         }
       );
       const taskRunner = new TaskRunner(
@@ -710,6 +717,7 @@ describe('Task Runner', () => {
         >) => {
           executorServices.alertFactory.create('1').scheduleActions('default');
           executorServices.alertFactory.create('2').scheduleActions('default');
+          return { state: {} };
         }
       );
       const taskRunner = new TaskRunner(
@@ -750,6 +758,7 @@ describe('Task Runner', () => {
         string
       >) => {
         executorServices.alertFactory.create('1').scheduleActions('default');
+        return { state: {} };
       }
     );
     const taskRunner = new TaskRunner(
@@ -822,6 +831,7 @@ describe('Task Runner', () => {
           string
         >) => {
           executorServices.alertFactory.create('1').scheduleActions('default');
+          return { state: {} };
         }
       );
       const taskRunner = new TaskRunner(
@@ -897,6 +907,7 @@ describe('Task Runner', () => {
           string
         >) => {
           executorServices.alertFactory.create('1').scheduleActions('default');
+          return { state: {} };
         }
       );
       const taskRunner = new TaskRunner(
@@ -988,6 +999,7 @@ describe('Task Runner', () => {
           string
         >) => {
           executorServices.alertFactory.create('1').scheduleActions('default');
+          return { state: {} };
         }
       );
       const taskRunner = new TaskRunner(
@@ -1131,6 +1143,7 @@ describe('Task Runner', () => {
 
           // create an instance, but don't schedule any actions, so it doesn't go active
           executorServices.alertFactory.create('3');
+          return { state: {} };
         }
       );
       const taskRunner = new TaskRunner(
@@ -1236,6 +1249,7 @@ describe('Task Runner', () => {
           string
         >) => {
           executorServices.alertFactory.create('1').scheduleActions('default');
+          return { state: {} };
         }
       );
       const taskRunner = new TaskRunner(
@@ -1333,6 +1347,7 @@ describe('Task Runner', () => {
           string
         >) => {
           executorServices.alertFactory.create('1').scheduleActions('default');
+          return { state: {} };
         }
       );
 
@@ -1408,6 +1423,7 @@ describe('Task Runner', () => {
           string
         >) => {
           executorServices.alertFactory.create('1').scheduleActions('default');
+          return { state: {} };
         }
       );
 
@@ -1478,6 +1494,7 @@ describe('Task Runner', () => {
         string
       >) => {
         executorServices.alertFactory.create('1').scheduleActions('default');
+        return { state: {} };
       }
     );
     const date = new Date().toISOString();
@@ -1869,6 +1886,7 @@ describe('Task Runner', () => {
       >) => {
         executorServices.alertFactory.create('1').scheduleActions('default');
         executorServices.alertFactory.create('2').scheduleActions('default');
+        return { state: {} };
       }
     );
     const taskRunner = new TaskRunner(
@@ -1959,6 +1977,7 @@ describe('Task Runner', () => {
       >) => {
         executorServices.alertFactory.create('1').scheduleActions('default');
         executorServices.alertFactory.create('2').scheduleActions('default');
+        return { state: {} };
       }
     );
     const taskRunner = new TaskRunner(
@@ -2042,6 +2061,7 @@ describe('Task Runner', () => {
       >) => {
         executorServices.alertFactory.create('1').scheduleActions('default');
         executorServices.alertFactory.create('2').scheduleActions('default');
+        return { state: {} };
       }
     );
     const taskRunner = new TaskRunner(
@@ -2104,7 +2124,9 @@ describe('Task Runner', () => {
   test('end is logged for active alerts when alert state contains start time and alert recovers', async () => {
     taskRunnerFactoryInitializerParams.actionsPlugin.isActionTypeEnabled.mockReturnValue(true);
     taskRunnerFactoryInitializerParams.actionsPlugin.isActionExecutable.mockReturnValue(true);
-    ruleType.executor.mockImplementation(async () => {});
+    ruleType.executor.mockImplementation(async () => {
+      return { state: {} };
+    });
     const taskRunner = new TaskRunner(
       ruleType,
       {
@@ -2185,7 +2207,9 @@ describe('Task Runner', () => {
         AlertInstanceState,
         AlertInstanceContext,
         string
-      >) => {}
+      >) => {
+        return { state: {} };
+      }
     );
     const taskRunner = new TaskRunner(
       ruleType,
@@ -2513,6 +2537,7 @@ describe('Task Runner', () => {
         string
       >) => {
         executorServices.alertFactory.create('1').scheduleActions('default');
+        return { state: {} };
       }
     );
 
@@ -2594,6 +2619,7 @@ describe('Task Runner', () => {
               },
               flappingHistory: [true],
               flapping: false,
+              pendingRecoveredCount: 0,
             },
             state: {
               duration: '0',
@@ -2678,6 +2704,7 @@ describe('Task Runner', () => {
       >) => {
         executorServices.alertFactory.create('1').scheduleActions('default');
         executorServices.alertFactory.create('2').scheduleActions('default');
+        return { state: {} };
       }
     );
 
@@ -2758,6 +2785,7 @@ describe('Task Runner', () => {
               },
               flappingHistory: [true],
               flapping: false,
+              pendingRecoveredCount: 0,
             },
             state: {
               duration: '0',
@@ -2772,6 +2800,7 @@ describe('Task Runner', () => {
               },
               flappingHistory: [true],
               flapping: false,
+              pendingRecoveredCount: 0,
             },
             state: {
               duration: '0',
@@ -2848,6 +2877,80 @@ describe('Task Runner', () => {
     expect(inMemoryMetrics.increment.mock.calls[3][0]).toBe(IN_MEMORY_METRICS.RULE_EXECUTIONS);
     expect(inMemoryMetrics.increment.mock.calls[4][0]).toBe(IN_MEMORY_METRICS.RULE_FAILURES);
     expect(inMemoryMetrics.increment.mock.calls[5][0]).toBe(IN_MEMORY_METRICS.RULE_TIMEOUTS);
+  });
+
+  test('does not persist alertInstances or recoveredAlertInstances passed in from state if autoRecoverAlerts is false', async () => {
+    ruleType.autoRecoverAlerts = false;
+    ruleType.executor.mockImplementation(
+      async ({
+        services: executorServices,
+      }: RuleExecutorOptions<
+        RuleTypeParams,
+        RuleTypeState,
+        AlertInstanceState,
+        AlertInstanceContext,
+        string
+      >) => {
+        executorServices.alertFactory.create('1').scheduleActions('default');
+        return { state: {} };
+      }
+    );
+    const date = new Date().toISOString();
+    const taskRunner = new TaskRunner(
+      ruleType,
+      {
+        ...mockedTaskInstance,
+        state: {
+          ...mockedTaskInstance.state,
+          alertInstances: {
+            '1': {
+              meta: { lastScheduledActions: { group: 'default', date } },
+              state: {
+                bar: false,
+                start: DATE_1969,
+                duration: '80000000000',
+              },
+            },
+            '2': {
+              meta: { lastScheduledActions: { group: 'default', date } },
+              state: {
+                bar: false,
+                start: '1969-12-31T06:00:00.000Z',
+                duration: '70000000000',
+              },
+            },
+          },
+        },
+      },
+      taskRunnerFactoryInitializerParams,
+      inMemoryMetrics
+    );
+    expect(AlertingEventLogger).toHaveBeenCalled();
+
+    rulesClient.getAlertFromRaw.mockReturnValue(mockedRuleTypeSavedObject as Rule);
+    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue(SAVED_OBJECT);
+    const runnerResult = await taskRunner.run();
+    expect(runnerResult.state.alertInstances).toEqual({});
+    expect(runnerResult.state.alertRecoveredInstances).toEqual({});
+
+    testAlertingEventLogCalls({
+      activeAlerts: 1,
+      recoveredAlerts: 0,
+      triggeredActions: 0,
+      generatedActions: 1,
+      status: 'ok',
+      logAlert: 1,
+    });
+    expect(alertingEventLogger.logAlert).toHaveBeenNthCalledWith(
+      1,
+      generateAlertOpts({
+        action: EVENT_LOG_ACTIONS.activeInstance,
+        group: 'default',
+        state: { bar: false, start: DATE_1969, duration: MOCK_DURATION },
+      })
+    );
+
+    expect(mockUsageCounter.incrementCounter).not.toHaveBeenCalled();
   });
 
   function testAlertingEventLogCalls({

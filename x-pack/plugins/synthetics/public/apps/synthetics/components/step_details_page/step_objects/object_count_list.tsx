@@ -14,6 +14,10 @@ import { useObjectMetrics } from '../hooks/use_object_metrics';
 export const ObjectCountList = () => {
   const objectMetrics = useObjectMetrics();
 
+  const hasAnyThresholdBreach = objectMetrics.items.some(
+    ({ countDelta }) => Math.abs(Number(countDelta)) > 5
+  );
+
   return (
     <>
       <EuiFlexGroup>
@@ -28,17 +32,19 @@ export const ObjectCountList = () => {
           </EuiText>
         </EuiFlexItem>
       </EuiFlexGroup>
-      <EuiSpacer size="s" />
+      <EuiSpacer size="m" />
       <div>
-        {objectMetrics.items.map(({ label, mimeType, percent, count }) => (
+        {objectMetrics.items.map(({ label, mimeType, percent, count, countDelta }) => (
           <Fragment key={mimeType}>
             <ColorPalette
+              hasAnyThresholdBreach={hasAnyThresholdBreach}
               label={label}
               mimeType={mimeType}
               percent={percent}
               value={String(count)}
               valueWidth={30}
               loading={objectMetrics.loading}
+              delta={Number(countDelta)}
             />
             <EuiSpacer size="m" />
           </Fragment>

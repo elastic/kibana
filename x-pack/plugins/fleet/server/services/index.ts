@@ -45,6 +45,7 @@ export { packagePolicyService } from './package_policy';
 export { outputService } from './output';
 export { downloadSourceService } from './download_source';
 export { settingsService };
+export { dataStreamService } from './data_streams';
 
 // Plugin services
 export { appContextService } from './app_context';

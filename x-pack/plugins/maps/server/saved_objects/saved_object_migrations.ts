@@ -28,7 +28,7 @@ function logMigrationWarning(
   errorMsg: string,
   doc: SavedObjectUnsanitizedDoc<MapSavedObjectAttributes>
 ) {
-  context.log.warning(
+  context.log.warn(
     `map migration failed (${context.migrationVersion}). ${errorMsg}. attributes: ${JSON.stringify(
       doc
     )}`

@@ -30,7 +30,9 @@
     "@kbn/core-saved-objects-server-internal",
     "@kbn/core-status-server-internal",
     "@kbn/core-usage-data-base-server-internal",
-    "@kbn/core-usage-data-server"
+    "@kbn/core-usage-data-server",
+    "@kbn/core-custom-branding-server-internal",
+    "@kbn/core-custom-branding-server"
   ],
   "exclude": [
     "target/**/*",

@@ -85,9 +85,12 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
           } = params;
           const {
             alertWithPersistence,
+            alertWithSuppression,
             savedObjectsClient,
             scopedClusterClient,
             uiSettingsClient,
+            ruleMonitoringService,
+            ruleResultService,
           } = services;
           const searchAfterSize = Math.min(maxSignals, DEFAULT_SEARCH_AFTER_PAGE_SIZE);
 
@@ -95,6 +98,8 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
 
           const ruleExecutionLogger = await ruleExecutionLoggerFactory({
             savedObjectsClient,
+            ruleMonitoringService,
+            ruleResultService,
             context: {
               executionId,
               ruleId: rule.id,
@@ -190,7 +195,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
                 message: errorMessage,
               });
 
-              return result.state;
+              return { state: result.state };
             }
           }
 
@@ -294,10 +299,11 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
               spaceId,
               indicesToQuery: inputIndex,
               alertTimestampOverride,
+              ruleExecutionLogger,
             });
 
             const wrapSequences = wrapSequencesFactory({
-              logger,
+              ruleExecutionLogger,
               ignoreFields: [...ignoreFields, ...legacySignalFields],
               mergeStrategy,
               completeRule,
@@ -342,6 +348,8 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
                     ruleExecutionLogger,
                     aggregatableTimestampField,
                     alertTimestampOverride,
+                    alertWithSuppression,
+                    refreshOnIndexingAlerts: refresh,
                   },
                 });
 
@@ -497,7 +505,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
             }
           }
 
-          return result.state;
+          return { state: result.state };
         });
       },
     });

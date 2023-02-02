@@ -28,6 +28,10 @@ import { usePreviousPeriodLabel } from '../../../../hooks/use_previous_period_te
 import { useTheme } from '../../../../hooks/use_theme';
 import { APIReturnType } from '../../../../services/rest/create_call_apm_api';
 import { ChartContainer } from '../../../shared/charts/chart_container';
+import {
+  ChartType,
+  getTimeSeriesColor,
+} from '../../../shared/charts/helper/get_timeseries_color';
 import { getTimeZone } from '../../../shared/charts/helper/timezone';
 
 type ErrorDistributionAPIResponse =
@@ -47,19 +51,22 @@ export function ErrorDistribution({ distribution, title, fetchStatus }: Props) {
   const { comparisonEnabled } = urlParams;
 
   const previousPeriodLabel = usePreviousPeriodLabel();
+  const { currentPeriodColor, previousPeriodColor } = getTimeSeriesColor(
+    ChartType.ERROR_OCCURRENCES
+  );
   const timeseries = [
     {
       data: distribution.currentPeriod,
-      color: theme.eui.euiColorVis1,
+      color: currentPeriodColor,
       title: i18n.translate('xpack.apm.errorGroup.chart.ocurrences', {
-        defaultMessage: 'Occurrences',
+        defaultMessage: 'Error occurrences',
       }),
     },
     ...(comparisonEnabled
       ? [
           {
             data: distribution.previousPeriod,
-            color: theme.eui.euiColorMediumShade,
+            color: previousPeriodColor,
             title: previousPeriodLabel,
           },
         ]

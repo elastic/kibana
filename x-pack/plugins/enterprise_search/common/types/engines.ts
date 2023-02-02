@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { HealthStatus } from '@elastic/elasticsearch/lib/api/types';
+
 export interface EnterpriseSearchEnginesResponse {
   meta: {
     from: number;
@@ -15,6 +17,22 @@ export interface EnterpriseSearchEnginesResponse {
 }
 
 export interface EnterpriseSearchEngine {
-  name: string;
+  created: string;
   indices: string[];
+  name: string;
+  updated: string;
+}
+
+export interface EnterpriseSearchEngineDetails {
+  created: string;
+  indices: EnterpriseSearchEngineIndex[];
+  name: string;
+  updated: string;
+}
+
+export interface EnterpriseSearchEngineIndex {
+  count: number;
+  health: HealthStatus | 'unknown';
+  name: string;
+  source: 'api' | 'connector' | 'crawler';
 }

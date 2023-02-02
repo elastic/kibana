@@ -119,7 +119,9 @@ describe('bulkDelete', () => {
       minimumLicenseRequired: 'basic',
       isExportable: true,
       recoveryActionGroup: RecoveredActionGroup,
-      async executor() {},
+      async executor() {
+        return { state: {} };
+      },
       producer: 'alerts',
     });
   });

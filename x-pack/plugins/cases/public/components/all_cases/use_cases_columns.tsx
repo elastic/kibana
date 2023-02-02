@@ -137,7 +137,7 @@ export const useCasesColumns = ({
         }
         return getEmptyTagValue();
       },
-      width: '20%',
+      width: !isSelectorView ? '20%' : undefined,
     },
   ];
 
@@ -197,7 +197,7 @@ export const useCasesColumns = ({
       }
       return getEmptyTagValue();
     },
-    width: '15%',
+    width: !isSelectorView ? '15%' : undefined,
   });
 
   if (isAlertsEnabled) {
@@ -209,7 +209,7 @@ export const useCasesColumns = ({
         totalAlerts != null
           ? renderStringField(`${totalAlerts}`, `case-table-column-alertsCount`)
           : getEmptyTagValue(),
-      width: '80px',
+      width: !isSelectorView ? '80px' : '55px',
     });
   }
 
@@ -278,6 +278,23 @@ export const useCasesColumns = ({
     });
   }
 
+  columns.push({
+    field: 'updatedAt',
+    name: i18n.UPDATED_ON,
+    sortable: true,
+    render: (updatedAt: Case['updatedAt']) => {
+      if (updatedAt != null) {
+        return (
+          <span data-test-subj="case-table-column-updatedAt">
+            <FormattedRelativePreferenceDate value={updatedAt} stripMs={true} />
+          </span>
+        );
+      }
+      return getEmptyTagValue();
+    },
+    width: isSelectorView ? '80px' : undefined,
+  });
+
   columns.push(
     {
       name: i18n.EXTERNAL_INCIDENT,
@@ -287,6 +304,7 @@ export const useCasesColumns = ({
         }
         return getEmptyTagValue();
       },
+      width: isSelectorView ? '80px' : undefined,
     },
     {
       field: 'status',

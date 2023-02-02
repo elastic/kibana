@@ -14,7 +14,7 @@ import { BaseValidatorMock, createExceptionItemLikeOptionsMock } from './mocks';
 import { EndpointArtifactExceptionValidationError } from './errors';
 import { httpServerMock } from '@kbn/core/server/mocks';
 import type { PackagePolicy } from '@kbn/fleet-plugin/common';
-import { createFleetAuthzMock } from '@kbn/fleet-plugin/common';
+import { createFleetAuthzMock } from '@kbn/fleet-plugin/common/mocks';
 import type { PackagePolicyClient } from '@kbn/fleet-plugin/server';
 import type { ExceptionItemLikeOptions } from '../types';
 import {
@@ -37,7 +37,8 @@ describe('When using Artifacts Exceptions BaseValidator', () => {
 
     const servicesStart = createMockEndpointAppContextServiceStartContract();
 
-    packagePolicyService = servicesStart.packagePolicyService as jest.Mocked<PackagePolicyClient>;
+    packagePolicyService = servicesStart.endpointFleetServicesFactory.asInternalUser()
+      .packagePolicy as jest.Mocked<PackagePolicyClient>;
 
     endpointAppContextServices = new EndpointAppContextService();
     endpointAppContextServices.setup(createMockEndpointAppContextServiceSetupContract());

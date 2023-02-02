@@ -24,6 +24,7 @@ import {
 } from './utils';
 
 export const useLensAttributes = ({
+  applyGlobalQueriesAndFilters = true,
   extraOptions,
   getLensAttributes,
   lensAttributes,
@@ -31,6 +32,7 @@ export const useLensAttributes = ({
   stackByField,
   title,
 }: {
+  applyGlobalQueriesAndFilters?: boolean;
   extraOptions?: ExtraOptions;
   getLensAttributes?: GetLensAttributes;
   lensAttributes?: LensAttributes | null;
@@ -97,10 +99,10 @@ export const useLensAttributes = ({
       ...(title != null ? { title } : {}),
       state: {
         ...attrs.state,
-        query,
+        ...(applyGlobalQueriesAndFilters ? { query } : {}),
         filters: [
           ...attrs.state.filters,
-          ...filters,
+          ...(applyGlobalQueriesAndFilters ? filters : []),
           ...pageFilters,
           ...tabsFilters,
           ...indexFilters,
@@ -112,6 +114,7 @@ export const useLensAttributes = ({
       })),
     } as LensAttributes;
   }, [
+    applyGlobalQueriesAndFilters,
     attrs,
     dataViewId,
     filters,

@@ -10,13 +10,13 @@ import http from 'http';
 import expect from '@kbn/expect';
 import { URL, format as formatUrl } from 'url';
 import getPort from 'get-port';
-import { getHttpProxyServer } from '../../../../../common/lib/get_proxy_server';
+import { getHttpProxyServer } from '@kbn/alerting-api-integration-helpers';
 import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
 import {
   getExternalServiceSimulatorPath,
   ExternalServiceSimulator,
   getWebhookServer,
-} from '../../../../../common/fixtures/plugins/actions_simulators/server/plugin';
+} from '../../../../../common/plugins/actions_simulators/server/plugin';
 
 const defaultValues: Record<string, any> = {
   headers: null,

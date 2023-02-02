@@ -81,6 +81,7 @@ const mockOptions = {
         started: '2020-01-01T12:00:00.000Z',
         flappingHistory: [],
         flapping: false,
+        pendingRecoveredCount: 0,
       },
       TEST_ALERT_1: {
         alertId: 'TEST_ALERT_1',
@@ -88,6 +89,7 @@ const mockOptions = {
         started: '2020-01-02T12:00:00.000Z',
         flappingHistory: [],
         flapping: false,
+        pendingRecoveredCount: 0,
       },
     },
     trackedAlertsRecovered: {},
@@ -428,7 +430,12 @@ describe('The metric threshold alert type', () => {
           },
         },
       ]);
-      const stateResult1 = await execute(Comparator.GT, [0.75], ['something'], 'test.metric.2');
+      const { state: stateResult1 } = await execute(
+        Comparator.GT,
+        [0.75],
+        ['something'],
+        'test.metric.2'
+      );
       expect(stateResult1.missingGroups).toEqual(expect.arrayContaining([]));
       setEvaluationResults([
         {
@@ -470,7 +477,7 @@ describe('The metric threshold alert type', () => {
           },
         },
       ]);
-      const stateResult2 = await execute(
+      const { state: stateResult2 } = await execute(
         Comparator.GT,
         [0.75],
         ['something'],
@@ -508,7 +515,7 @@ describe('The metric threshold alert type', () => {
           },
         },
       ]);
-      const stateResult3 = await execute(
+      const { state: stateResult3 } = await execute(
         Comparator.GT,
         [0.75],
         ['something', 'something-else'],
@@ -583,7 +590,7 @@ describe('The metric threshold alert type', () => {
           },
         },
       ]);
-      const stateResult1 = await executeWithFilter(
+      const { state: stateResult1 } = await executeWithFilter(
         Comparator.GT,
         [0.75],
         JSON.stringify({ query: 'q' }),
@@ -630,7 +637,7 @@ describe('The metric threshold alert type', () => {
           },
         },
       ]);
-      const stateResult2 = await executeWithFilter(
+      const { state: stateResult2 } = await executeWithFilter(
         Comparator.GT,
         [0.75],
         JSON.stringify({ query: 'q' }),
@@ -668,7 +675,7 @@ describe('The metric threshold alert type', () => {
           },
         },
       ]);
-      const stateResult3 = await executeWithFilter(
+      const { state: stateResult3 } = await executeWithFilter(
         Comparator.GT,
         [0.75],
         JSON.stringify({ query: 'different' }),
@@ -871,8 +878,6 @@ describe('The metric threshold alert type', () => {
       expect(reasons[1]).toContain('Alert when >= 3');
       expect(reasons[0]).toContain('in the last 1 min');
       expect(reasons[1]).toContain('in the last 1 min');
-      expect(reasons[0]).toContain('for all hosts');
-      expect(reasons[1]).toContain('for all hosts');
     });
   });
   describe('querying with the count aggregator', () => {
@@ -1652,9 +1657,7 @@ describe('The metric threshold alert type', () => {
 
       const { action } = mostRecentAction(instanceID);
       expect(action.group).toBe('*');
-      expect(action.reason).toBe(
-        'test.metric.1 is 2.5 in the last 1 min for all hosts. Alert when > 2.49.'
-      );
+      expect(action.reason).toBe('test.metric.1 is 2.5 in the last 1 min. Alert when > 2.49.');
     });
 
     test('reports expected warning values to the action context for percentage metric', async () => {
@@ -1668,9 +1671,7 @@ describe('The metric threshold alert type', () => {
 
       const { action } = mostRecentAction(instanceID);
       expect(action.group).toBe('*');
-      expect(action.reason).toBe(
-        'system.cpu.user.pct is 82% in the last 1 min for all hosts. Alert when > 81%.'
-      );
+      expect(action.reason).toBe('system.cpu.user.pct is 82% in the last 1 min. Alert when > 81%.');
     });
   });
 });
@@ -1816,18 +1817,19 @@ declare global {
   }
 }
 
-const baseNonCountCriterion: Pick<
-  NonCountMetricExpressionParams,
-  'aggType' | 'metric' | 'timeSize' | 'timeUnit'
-> = {
+const baseNonCountCriterion = {
   aggType: Aggregators.AVERAGE,
   metric: 'test.metric.1',
   timeSize: 1,
   timeUnit: 'm',
-};
+  threshold: [0],
+  comparator: Comparator.GT,
+} as NonCountMetricExpressionParams;
 
-const baseCountCriterion: Pick<CountMetricExpressionParams, 'aggType' | 'timeSize' | 'timeUnit'> = {
+const baseCountCriterion = {
   aggType: Aggregators.COUNT,
   timeSize: 1,
   timeUnit: 'm',
-};
+  threshold: [0],
+  comparator: Comparator.GT,
+} as CountMetricExpressionParams;

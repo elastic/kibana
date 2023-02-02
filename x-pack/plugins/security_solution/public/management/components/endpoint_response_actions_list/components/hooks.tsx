@@ -242,6 +242,15 @@ export const useActionsLogFilter = ({
             return false;
           }
 
+          // TODO: remove this when `execute` is no longer behind FF
+          // planned for 8.8
+          if (
+            commandName === 'execute' &&
+            !ExperimentalFeaturesService.get().responseActionExecuteEnabled
+          ) {
+            return false;
+          }
+
           return true;
         }).map((commandName) => ({
           key: commandName,

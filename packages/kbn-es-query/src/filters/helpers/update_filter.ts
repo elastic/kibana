@@ -8,7 +8,7 @@
 
 import { identity, pickBy } from 'lodash';
 
-import type { Filter, FilterMeta } from '..';
+import type { Filter, FilterMeta, RangeFilterParams } from '..';
 
 type FilterOperator = Pick<FilterMeta, 'type' | 'negate'>;
 
@@ -16,7 +16,8 @@ export const updateFilter = (
   filter: Filter,
   field?: string,
   operator?: FilterOperator,
-  params?: Filter['meta']['params']
+  params?: Filter['meta']['params'],
+  fieldType?: string
 ) => {
   if (!field || !operator) {
     return updateField(filter, field);
@@ -32,7 +33,7 @@ export const updateFilter = (
     return updateWithIsOneOfOperator(filter, operator, params);
   }
 
-  return updateWithIsOperator(filter, operator, params);
+  return updateWithIsOperator(filter, operator, params, fieldType);
 };
 
 function updateField(filter: Filter, field?: string) {
@@ -68,8 +69,10 @@ function updateWithExistsOperator(filter: Filter, operator?: FilterOperator) {
 function updateWithIsOperator(
   filter: Filter,
   operator?: FilterOperator,
-  params?: Filter['meta']['params']
+  params?: Filter['meta']['params'],
+  fieldType?: string
 ) {
+  const safeParams = fieldType === 'number' && !params ? 0 : params;
   return {
     ...filter,
     meta: {
@@ -77,24 +80,26 @@ function updateWithIsOperator(
       negate: operator?.negate,
       type: operator?.type,
       params: { ...filter.meta.params, query: params },
+      value: undefined,
     },
-    query: { match_phrase: { [filter.meta.key!]: params ?? '' } },
+    query: { match_phrase: { [filter.meta.key!]: safeParams ?? '' } },
   };
 }
 
 function updateWithRangeOperator(
   filter: Filter,
   operator: FilterOperator,
-  rawParams: Array<Filter['meta']['params']>,
+  rawParams: RangeFilterParams,
   field: string
 ) {
-  const params = {
-    ...filter.meta.params,
+  const rangeParams = {
     ...pickBy(rawParams, identity),
   };
 
-  params.gte = params.from;
-  params.lt = params.to;
+  const params = {
+    gte: rangeParams?.from,
+    lt: rangeParams?.to,
+  };
 
   const updatedFilter = {
     ...filter,

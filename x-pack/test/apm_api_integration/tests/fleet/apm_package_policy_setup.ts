@@ -4,51 +4,41 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { FtrProviderContext } from '../../common/ftr_provider_context';
+import { PackagePolicy, NewPackagePolicy, AgentPolicy } from '@kbn/fleet-plugin/common';
+import { BetterTest } from '../../common/bettertest';
 
-export async function setupFleet(ftrProviderContext: FtrProviderContext) {
-  const { getService } = ftrProviderContext;
-  const supertest = getService('supertest');
-  // Initialize fleet setup
-  await supertest.post('/api/fleet/setup').set('kbn-xsrf', 'xxx').send().expect(200);
+export function setupFleet(bettertest: BetterTest) {
+  return bettertest({ pathname: '/api/fleet/setup', method: 'post' });
 }
 
-export async function createAgentPolicy(ftrProviderContext: FtrProviderContext) {
-  const { getService } = ftrProviderContext;
-  const supertest = getService('supertest');
-  // Ceate agent policy and get id
-  const agentPolicyResponse = await supertest
-    .post('/api/fleet/agent_policies?sys_monitoring=true')
-    .set('kbn-xsrf', 'true')
-    .send({
+export async function createAgentPolicy(bettertest: BetterTest) {
+  const agentPolicyResponse = await bettertest<{ item: AgentPolicy }>({
+    pathname: '/api/fleet/agent_policies',
+    method: 'post',
+    query: { sys_monitoring: true },
+    body: {
       name: 'test_agent_policy',
       description: '',
       namespace: 'default',
       monitoring_enabled: ['logs', 'metrics'],
-    })
-    .expect(200);
+    },
+  });
+
   return agentPolicyResponse.body.item.id;
 }
 
-export async function createPackagePolicy(
-  ftrProviderContext: FtrProviderContext,
-  agentPolicyId: string
-) {
-  const { getService } = ftrProviderContext;
-  const supertest = getService('supertest');
-
+export async function createPackagePolicy(bettertest: BetterTest, agentPolicyId: string) {
   // Get version of available APM package
-  const apmPackageResponse = await supertest
-    .get(`/api/fleet/epm/packages/apm`)
-    .set('kbn-xsrf', 'true')
-    .expect(200);
+  const apmPackageResponse = await bettertest<{ item: any }>({
+    pathname: `/api/fleet/epm/packages/apm`,
+  });
   const apmPackageVersion = apmPackageResponse.body.item.version;
 
   // Create package policy for APM attached to given agent policy id
-  const packagePolicyResponse = await supertest
-    .post('/api/fleet/package_policies')
-    .set('kbn-xsrf', 'true')
-    .send({
+  const packagePolicyResponse = await bettertest<{ item: NewPackagePolicy }>({
+    pathname: '/api/fleet/package_policies',
+    method: 'post',
+    body: {
       name: 'apm-integration-test-policy',
       description: '',
       namespace: 'default',
@@ -56,33 +46,33 @@ export async function createPackagePolicy(
       enabled: true,
       inputs: [{ type: 'apm', policy_template: 'apmserver', enabled: true, streams: [], vars: {} }],
       package: { name: 'apm', title: 'Elastic APM', version: apmPackageVersion },
-    })
-    .expect(200);
-  return packagePolicyResponse.body.item;
+    },
+  });
+  return packagePolicyResponse.body.item.id as string;
 }
 
-export async function deleteAgentPolicy(
-  ftrProviderContext: FtrProviderContext,
-  agentPolicyId: string
-) {
-  const { getService } = ftrProviderContext;
-  const supertest = getService('supertest');
-  await supertest
-    .post('/api/fleet/agent_policies/delete')
-    .set('kbn-xsrf', 'true')
-    .send({ agentPolicyId })
-    .expect(200);
+export async function deleteAgentPolicy(bettertest: BetterTest, agentPolicyId: string) {
+  return await bettertest({
+    pathname: '/api/fleet/agent_policies/delete',
+    method: 'post',
+    body: { agentPolicyId },
+  });
 }
 
-export async function deletePackagePolicy(
-  ftrProviderContext: FtrProviderContext,
+export async function deletePackagePolicy(bettertest: BetterTest, packagePolicyId: string) {
+  return bettertest({
+    pathname: `/api/fleet/package_policies/delete`,
+    method: 'post',
+    body: { packagePolicyIds: [packagePolicyId] },
+  });
+}
+
+export async function getPackagePolicy(
+  bettertest: BetterTest,
   packagePolicyId: string
-) {
-  const { getService } = ftrProviderContext;
-  const supertest = getService('supertest');
-  await supertest
-    .post(`/api/fleet/package_policies/delete`)
-    .set('kbn-xsrf', 'true')
-    .send({ packagePolicyIds: [packagePolicyId] })
-    .expect(200);
+): Promise<PackagePolicy> {
+  const res = await bettertest<{ item: PackagePolicy }>({
+    pathname: `/api/fleet/package_policies/${packagePolicyId}`,
+  });
+  return res.body.item;
 }

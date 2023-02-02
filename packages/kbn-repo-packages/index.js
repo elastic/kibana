@@ -13,15 +13,11 @@
 /** @typedef {import('./modern/types').KibanaPackageType} KibanaPackageType */
 /** @typedef {import('./modern/types').ParsedPackageJson} ParsedPackageJson */
 /** @typedef {import('./modern/types').KbnImportReq} KbnImportReq */
-/** @typedef {import('./modern/types').PluginTypeInfo} PluginTypeInfo */
+/** @typedef {import('./modern/types').PluginCategoryInfo} PluginCategoryInfo */
 /** @typedef {Map<string, string>} PackageMap */
 
-const { getPackages, findPackageInfoForPath } = require('./modern/get_packages');
-const {
-  parsePackageManifest,
-  readPackageManifest,
-  validatePackageManifest,
-} = require('./modern/parse_package_manifest');
+const { getPackages, findPackageInfoForPath, getPkgMap } = require('./modern/get_packages');
+const { readPackageManifest } = require('./modern/parse_package_manifest');
 const { Package } = require('./modern/package');
 const { parseKbnImportReq } = require('./modern/parse_kbn_import_req');
 const Jsonc = require('./utils/jsonc');
@@ -38,9 +34,8 @@ module.exports = {
   readPackageMap,
   getPackages,
   findPackageInfoForPath,
-  parsePackageManifest,
+  getPkgMap,
   readPackageManifest,
-  validatePackageManifest,
   Jsonc,
   getDistributablePacakgesFilter,
   getPluginPackagesFilter,

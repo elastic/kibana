@@ -22,10 +22,15 @@ import { OptionsListPopoverInvalidSelections } from './options_list_popover_inva
 
 export interface OptionsListPopoverProps {
   width: number;
+  isLoading: boolean;
   updateSearchString: (newSearchString: string) => void;
 }
 
-export const OptionsListPopover = ({ width, updateSearchString }: OptionsListPopoverProps) => {
+export const OptionsListPopover = ({
+  width,
+  isLoading,
+  updateSearchString,
+}: OptionsListPopoverProps) => {
   // Redux embeddable container Context
   const { useEmbeddableSelector: select } = useReduxEmbeddableContext<
     OptionsListReduxState,
@@ -38,6 +43,7 @@ export const OptionsListPopover = ({ width, updateSearchString }: OptionsListPop
   const field = select((state) => state.componentState.field);
 
   const hideExclude = select((state) => state.explicitInput.hideExclude);
+  const hideActionBar = select((state) => state.explicitInput.hideActionBar);
   const fieldName = select((state) => state.explicitInput.fieldName);
   const title = select((state) => state.explicitInput.title);
   const id = select((state) => state.explicitInput.id);
@@ -45,13 +51,14 @@ export const OptionsListPopover = ({ width, updateSearchString }: OptionsListPop
   const [showOnlySelected, setShowOnlySelected] = useState(false);
 
   return (
-    <span
-      role="listbox"
+    <div
       id={`control-popover-${id}`}
+      style={{ width, minWidth: 300 }}
+      data-test-subj={`optionsList-control-popover`}
       aria-label={OptionsListStrings.popover.getAriaLabel(fieldName)}
     >
       <EuiPopoverTitle paddingSize="s">{title}</EuiPopoverTitle>
-      {field?.type !== 'boolean' && (
+      {field?.type !== 'boolean' && !hideActionBar && (
         <OptionsListPopoverActionBar
           showOnlySelected={showOnlySelected}
           setShowOnlySelected={setShowOnlySelected}
@@ -59,17 +66,15 @@ export const OptionsListPopover = ({ width, updateSearchString }: OptionsListPop
         />
       )}
       <div
-        className="optionsList __items"
-        style={{ width: width > 300 ? width : undefined }}
         data-test-subj={`optionsList-control-available-options`}
-        data-option-count={Object.keys(availableOptions ?? {}).length}
+        data-option-count={isLoading ? 0 : Object.keys(availableOptions ?? {}).length}
       >
-        <OptionsListPopoverSuggestions showOnlySelected={showOnlySelected} />
+        <OptionsListPopoverSuggestions showOnlySelected={showOnlySelected} isLoading={isLoading} />
         {!showOnlySelected && invalidSelections && !isEmpty(invalidSelections) && (
           <OptionsListPopoverInvalidSelections />
         )}
       </div>
       {!hideExclude && <OptionsListPopoverFooter />}
-    </span>
+    </div>
   );
 };

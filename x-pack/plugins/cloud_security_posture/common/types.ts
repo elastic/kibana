@@ -7,7 +7,7 @@
 
 import type { PackagePolicy, AgentPolicy } from '@kbn/fleet-plugin/common';
 import { SUPPORTED_CLOUDBEAT_INPUTS, SUPPORTED_POLICY_TEMPLATES } from './constants';
-import type { CspRuleMetadata } from './schemas/csp_rule_metadata';
+import type { CspRuleTemplateMetadata } from './schemas/csp_rule_template_metadata';
 
 export type Evaluation = 'passed' | 'failed' | 'NA';
 /** number between 1-100 */
@@ -100,8 +100,8 @@ export interface Benchmark {
   rules_count: number;
 }
 
-export type BenchmarkId = CspRuleMetadata['benchmark']['id'];
-export type BenchmarkName = CspRuleMetadata['benchmark']['name'];
+export type BenchmarkId = CspRuleTemplateMetadata['benchmark']['id'];
+export type BenchmarkName = CspRuleTemplateMetadata['benchmark']['name'];
 
 // Fleet Integration types
 export type PostureInput = typeof SUPPORTED_CLOUDBEAT_INPUTS[number];

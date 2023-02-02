@@ -8,7 +8,7 @@
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import React, { useMemo } from 'react';
 import { ReportTypes } from '@kbn/observability-plugin/public';
-import { EuiLoadingContent } from '@elastic/eui';
+import { ERRORS_LABEL } from '../../../../monitor_details/monitor_summary/monitor_errors_count';
 import { ClientPluginsStart } from '../../../../../../../plugin';
 
 interface MonitorErrorsCountProps {
@@ -30,10 +30,6 @@ export const OverviewErrorsCount = ({
 
   const time = useMemo(() => ({ from, to }), [from, to]);
 
-  if (!monitorId) {
-    return <EuiLoadingContent lines={3} />;
-  }
-
   return (
     <ExploratoryViewEmbeddable
       align="left"
@@ -48,7 +44,7 @@ export const OverviewErrorsCount = ({
           },
           dataType: 'synthetics',
           selectedMetricField: 'monitor_errors',
-          name: 'synthetics-series-1',
+          name: ERRORS_LABEL,
         },
       ]}
     />
