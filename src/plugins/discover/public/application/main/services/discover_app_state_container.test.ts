@@ -28,7 +28,11 @@ describe('Test discover app state container', () => {
       history,
       ...(toasts && withNotifyOnErrors(toasts)),
     });
-    state = getDiscoverAppStateContainer(stateStorage, savedSearchMock, discoverServiceMock);
+    state = getDiscoverAppStateContainer({
+      stateStorage,
+      savedSearch: savedSearchMock,
+      services: discoverServiceMock,
+    });
   });
 
   test('hasChanged returns whether the current state has changed', async () => {

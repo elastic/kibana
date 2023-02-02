@@ -50,6 +50,6 @@ export async function changeDataView(
     );
 
     setUrlTracking(nextDataView);
-    discoverState.setAppState(nextAppState);
+    discoverState.replaceUrlAppState(nextAppState);
   }
 }

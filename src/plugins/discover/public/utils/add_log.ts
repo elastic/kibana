@@ -8,14 +8,14 @@
 
 /**
  * Conditional (window.ELASTIC_DISCOVER_LOGGER needs to be set to true) logger function
- * @param args
+ * @param message - mandatory message to log
+ * @param payload - optional object to log
  */
-// @ts-expect-error
-export const addLog = (...args) => {
+
+export const addLog = (message: string, payload?: unknown) => {
   // @ts-expect-error
   if (window?.ELASTIC_DISCOVER_LOGGER) {
-    args[0] = `[Discover] ${args[0]}`;
     // eslint-disable-next-line no-console
-    console.log(...args);
+    console.log(`[Discover] ${message}`, payload);
   }
 };

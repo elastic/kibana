@@ -43,16 +43,11 @@ export interface DiscoverAppStateContainer extends ReduxLikeStateContainer<AppSt
    * Resets the state by the given saved search
    * @param savedSearch
    */
-  resetBySavedSearch: (savedSearch: SavedSearch) => void;
+  resetWithSavedSearch: (savedSearch: SavedSearch) => void;
   /**
    * Resets the current state to the initial state
    */
   resetInitialState: () => void;
-  /**
-   * Replaces the given state in the URL, instead of pushing a new history entry
-   * @param newState
-   */
-  replaceUrlState: (newState: AppState) => void;
   /**
    * Start syncing the state with the URL
    */
@@ -133,11 +128,15 @@ export const { Provider: DiscoverAppStateProvider, useSelector: useAppStateSelec
  * @param savedSearch
  * @param services
  */
-export const getDiscoverAppStateContainer = (
-  stateStorage: IKbnUrlStateStorage,
-  savedSearch: SavedSearch,
-  services: DiscoverServices
-): DiscoverAppStateContainer => {
+export const getDiscoverAppStateContainer = ({
+  stateStorage,
+  savedSearch,
+  services,
+}: {
+  stateStorage: IKbnUrlStateStorage;
+  savedSearch: SavedSearch;
+  services: DiscoverServices;
+}): DiscoverAppStateContainer => {
   let previousState: AppState = {};
   let initialState = getInitialState(stateStorage, savedSearch, services);
   const appStateContainer = createStateContainer<AppState>(initialState);
@@ -229,7 +228,7 @@ export const getDiscoverAppStateContainer = (
     };
   };
 
-  const resetBySavedSearch = (nextSavedSearch: SavedSearch) => {
+  const resetWithSavedSearch = (nextSavedSearch: SavedSearch) => {
     addLog('[appState] reset to saved search', { nextSavedSearch });
     const nextAppState = getInitialState(stateStorage, nextSavedSearch, services);
     appStateContainer.set(nextAppState);
@@ -252,9 +251,8 @@ export const getDiscoverAppStateContainer = (
     getPrevious,
     hasChanged,
     initAndSync: initializeAndSync,
-    resetBySavedSearch,
+    resetWithSavedSearch,
     resetInitialState,
-    replaceUrlState,
     syncState: startAppStateUrlSync,
     update,
   };

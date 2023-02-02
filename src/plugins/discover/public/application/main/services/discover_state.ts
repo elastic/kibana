@@ -204,10 +204,10 @@ export function getDiscoverStateContainer({
   /**
    * App State Container, synced with URL
    */
-  const appStateContainer = getDiscoverAppStateContainer(stateStorage, savedSearch, services);
+  const appStateContainer = getDiscoverAppStateContainer({ stateStorage, savedSearch, services });
 
   const replaceUrlAppState = async (newPartial: AppState = {}) => {
-    await appStateContainer.replaceUrlState(newPartial);
+    await appStateContainer.update(newPartial, true);
   };
 
   const internalStateContainer = getInternalStateContainer();
@@ -276,7 +276,7 @@ export function getDiscoverStateContainer({
     replaceUrlAppState,
     resetInitialAppState: () => appStateContainer.resetInitialState(),
     resetAppState: (nextSavedSearch: SavedSearch) =>
-      appStateContainer.resetBySavedSearch(nextSavedSearch),
+      appStateContainer.resetWithSavedSearch(nextSavedSearch),
     getPreviousAppState: () => appStateContainer.getPrevious(),
     flushToUrl: () => stateStorage.kbnUrlControls.flush(),
     isAppStateDirty: () => appStateContainer.hasChanged(),
@@ -317,15 +317,6 @@ export function isEqualFilters(filtersA?: Filter[] | Filter, filtersB?: Filter[]
     return false;
   }
   return compareFilters(filtersA, filtersB, COMPARE_ALL_OPTIONS);
-}
-
-/**
- * helper function to extract filters of the given state
- * returns a state object without filters and an array of filters
- */
-export function splitState(state: AppState = {}) {
-  const { filters = [], ...statePartial } = state;
-  return { filters, state: statePartial };
 }
 
 /**
