@@ -9,7 +9,7 @@ import { render } from '@testing-library/react';
 import { CspPolicyTemplateForm } from './policy_template_form';
 import { TestProvider } from '../../test/test_provider';
 import { getMockPolicyAWS, getMockPolicyEKS, getMockPolicyK8s } from './mocks';
-import type { NewPackagePolicy } from '@kbn/fleet-plugin/common';
+import type { NewPackagePolicy, PackageInfo, PackagePolicy } from '@kbn/fleet-plugin/common';
 import userEvent from '@testing-library/user-event';
 import { getPosturePolicy } from './utils';
 import { CLOUDBEAT_AWS, CLOUDBEAT_EKS } from '../../../common/constants';
@@ -25,12 +25,60 @@ describe('<CspPolicyTemplateForm />', () => {
     newPolicy: NewPackagePolicy;
   }) => (
     <TestProvider>
-      <CspPolicyTemplateForm newPolicy={newPolicy} onChange={onChange} edit={edit} />
+      {edit && (
+        <CspPolicyTemplateForm
+          policy={newPolicy as PackagePolicy}
+          newPolicy={newPolicy}
+          onChange={onChange}
+          packageInfo={{} as PackageInfo}
+          isEditPage={true}
+        />
+      )}
+      {!edit && (
+        <CspPolicyTemplateForm
+          newPolicy={newPolicy}
+          onChange={onChange}
+          packageInfo={{} as PackageInfo}
+          isEditPage={false}
+        />
+      )}
     </TestProvider>
   );
 
   beforeEach(() => {
     onChange.mockClear();
+  });
+
+  it('renders and updates name field', () => {
+    const policy = getMockPolicyK8s();
+    const { getByLabelText } = render(<WrappedComponent newPolicy={policy} />);
+    const name = getByLabelText('Name');
+    expect(name).toBeInTheDocument();
+
+    userEvent.type(name, '1');
+
+    // Listen to the 2nd triggered by the test.
+    // The 1st is done on mount to ensure initial state is valid.
+    expect(onChange).toHaveBeenNthCalledWith(2, {
+      isValid: true,
+      updatedPolicy: { ...policy, name: `${policy.name}1` },
+    });
+  });
+
+  it('renders and updates description field', () => {
+    const policy = getMockPolicyK8s();
+    const { getByLabelText } = render(<WrappedComponent newPolicy={policy} />);
+    const description = getByLabelText('Description');
+    expect(description).toBeInTheDocument();
+
+    userEvent.type(description, '1');
+
+    // Listen to the 2nd triggered by the test.
+    // The 1st is done on mount to ensure initial state is valid.
+    expect(onChange).toHaveBeenNthCalledWith(2, {
+      isValid: true,
+      updatedPolicy: { ...policy, description: `${policy.description}1` },
+    });
   });
 
   it('renders KSPM input selector', () => {
