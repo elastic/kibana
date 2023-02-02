@@ -17,5 +17,9 @@ describe('unwrapValue()', () => {
     expect(
       unwrapValue({ fields: { [RawIndicatorFieldId.Type]: ['ip'] } }, RawIndicatorFieldId.Type)
     ).toEqual('ip');
+
+    expect(
+      unwrapValue({ fields: { [RawIndicatorFieldId.Type]: [{}] } }, RawIndicatorFieldId.Type)
+    ).toEqual(null);
   });
 });
