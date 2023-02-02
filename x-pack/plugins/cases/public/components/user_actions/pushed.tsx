@@ -91,7 +91,7 @@ const getFooters = ({
   const footers: EuiCommentProps[] = [];
   const latestPush = isLatestPush(
     userAction.createdAt,
-    connectorInfo.push.latestUserActionPushDate
+    connectorInfo.push.details?.latestUserActionPushDate
   );
 
   const showTopFooter = userAction.action === Actions.push_to_service && latestPush;
@@ -135,7 +135,7 @@ export const createPushedUserActionBuilder: UserActionBuilder = ({
 
     const firstPush = isFirstPush(
       userAction.createdAt,
-      connectorInfo.push.oldestUserActionPushDate
+      connectorInfo.push.details?.oldestUserActionPushDate
     );
     const footers = getFooters({ userAction: pushedUserAction, connectorInfo });
     const label = getLabelTitle(pushedUserAction, firstPush);
