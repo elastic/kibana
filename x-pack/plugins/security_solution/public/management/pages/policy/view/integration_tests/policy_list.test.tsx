@@ -60,8 +60,10 @@ describe('When on the policy list page', () => {
     afterEach(() => {
       getPackagePolicies.mockReset();
     });
-    it('should show the empty page', () => {
-      expect(renderResult.getByTestId('emptyPolicyTable')).toBeTruthy();
+    it('should show the empty page', async () => {
+      await waitFor(() => {
+        expect(renderResult.getByTestId('emptyPolicyTable')).toBeTruthy();
+      });
     });
     it('should show instruction text and a button to add the Endpoint Security integration', async () => {
       await waitFor(() => {
@@ -117,7 +119,7 @@ describe('When on the policy list page', () => {
       expect(firstUpdatedByName.textContent).toEqual(expectedAvatarName);
     });
 
-    it('should show the correct endpoint count', async () => {
+    it('should show the correct endpoint count', () => {
       const endpointCount = renderResult.getAllByTestId('policyEndpointCountLink');
       expect(endpointCount[0].textContent).toBe('4');
     });
@@ -145,8 +147,9 @@ describe('When on the policy list page', () => {
       expect(history.location.state).toEqual(backLink);
 
       // reset test to the policy page
-      history.push('/administration/policies');
-      render();
+      act(() => {
+        history.push('/administration/policies');
+      });
     });
   });
   describe('pagination', () => {
@@ -230,20 +233,19 @@ describe('When on the policy list page', () => {
       });
 
       // change pageSize
-      await act(async () => {
-        (await renderResult.getByTestId('tablePaginationPopoverButton')).click();
+      act(() => {
+        renderResult.getByTestId('tablePaginationPopoverButton').click();
       });
-      const pageSize10 = await renderResult.findByTestId('tablePagination-10-rows');
+      const pageSize10 = renderResult.getByTestId('tablePagination-10-rows');
       act(() => {
         pageSize10.click();
       });
 
-      expect(sendGetEndpointSpecificPackagePolicies).toHaveBeenLastCalledWith(expect.any(Object), {
-        query: {
-          page: 1,
-          perPage: 10,
-          withAgentCount: true,
-        },
+      await waitFor(() => {
+        expect(sendGetEndpointSpecificPackagePolicies).toHaveBeenLastCalledWith(
+          expect.any(Object),
+          { query: { page: 1, perPage: 10, withAgentCount: true } }
+        );
       });
     });
     it('should set page to 1 if user tries to force an invalid page number', async () => {
