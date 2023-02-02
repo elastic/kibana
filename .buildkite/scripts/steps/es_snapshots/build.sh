@@ -34,7 +34,7 @@ export JENKINS_URL=""
 export BUILD_URL=""
 export JOB_NAME=""
 export NODE_NAME=""
-export DOCKER_BUILDKIT=""
+export DOCKER_BUILDKIT=0
 
 # Reads the ES_BUILD_JAVA env var out of .ci/java-versions.properties and exports it
 export "$(grep '^ES_BUILD_JAVA' .ci/java-versions.properties | xargs)"
