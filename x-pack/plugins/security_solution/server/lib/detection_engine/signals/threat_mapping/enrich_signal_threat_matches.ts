@@ -55,7 +55,7 @@ export const getSignalMatchesFromThreatList = (
       index: threatHit._index,
       field: query.field,
       value: query.value,
-      queryType: ThreatMatchQueryType.match,
+      queryType: query.queryType,
     });
   };
   threatList.forEach((threatHit) =>

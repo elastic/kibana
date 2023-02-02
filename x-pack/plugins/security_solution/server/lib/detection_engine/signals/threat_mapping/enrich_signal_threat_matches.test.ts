@@ -926,13 +926,13 @@ describe('getSignalMatchesFromThreatList', () => {
       },
     };
 
-    const singnalValueMap = {
+    const signalValueMap = {
       'event.domain': {
         domain_1: ['signalId1', 'signalId2'],
       },
     };
 
-    const signalMatches = getSignalMatchesFromThreatList([threat], singnalValueMap);
+    const signalMatches = getSignalMatchesFromThreatList([threat], signalValueMap);
 
     expect(signalMatches).toEqual([]);
   });
@@ -960,13 +960,13 @@ describe('getSignalMatchesFromThreatList', () => {
       },
     };
 
-    const singnalValueMap = {
+    const signalValueMap = {
       'event.domain': {
         domain_1: ['signalId1', 'signalId2'],
       },
     };
 
-    const signalMatches = getSignalMatchesFromThreatList([threat], singnalValueMap);
+    const signalMatches = getSignalMatchesFromThreatList([threat], signalValueMap);
 
     const queries = [
       {
@@ -1013,14 +1013,14 @@ describe('getSignalMatchesFromThreatList', () => {
       },
     };
 
-    const singnalValueMap = {
+    const signalValueMap = {
       'event.domain': {
         domain_1: ['signalId1'],
         domain_2: ['signalId2'],
       },
     };
 
-    const signalMatches = getSignalMatchesFromThreatList([threat], singnalValueMap);
+    const signalMatches = getSignalMatchesFromThreatList([threat], signalValueMap);
 
     const queries = [
       {
