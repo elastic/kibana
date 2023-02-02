@@ -21,6 +21,15 @@ import { I18nProvider } from '@kbn/i18n-react';
 import { render, waitFor, screen } from '@testing-library/react';
 
 jest.mock('../../../common/lib/kibana');
+jest.mock('../../lib/validate_params_for_warnings', () => {
+  return {
+    validateParamsForWarnings: jest.fn().mockReturnValue({
+      warnings: {
+        message: 'This is a warning',
+      },
+    }),
+  };
+});
 const actionTypeRegistry = actionTypeRegistryMock.create();
 
 describe('action_type_form', () => {
@@ -282,7 +291,7 @@ describe('action_type_form', () => {
         actionTypeId: '.test-action-type',
         group: 'recovered',
         params: {
-          message: `{{context.alertDetailsUrl}}`,
+          message: `{{rule.url}}`,
         },
       })
     );
