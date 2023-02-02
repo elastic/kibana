@@ -11,24 +11,20 @@ import React, { useEffect, useRef } from 'react';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
 import { ExitFullScreenButton } from '@kbn/shared-ux-button-exit-full-screen';
 
+import { css } from '@emotion/react';
 import { DashboardGrid } from '../grid';
 import { pluginServices } from '../../../services/plugin_services';
 import { DashboardEmptyScreen } from '../empty_screen/dashboard_empty_screen';
 import { useDashboardContainerContext } from '../../dashboard_container_renderer';
 
-export const DashboardViewport = () => {
+export const DashboardViewportComponent = () => {
   const {
     settings: { isProjectEnabledInLabs },
   } = pluginServices.getServices();
   const controlsRoot = useRef(null);
 
-  const {
-    useEmbeddableDispatch,
-    useEmbeddableSelector: select,
-    actions: { setFullScreenMode },
-    embeddableInstance: dashboardContainer,
-  } = useDashboardContainerContext();
-  const dispatch = useEmbeddableDispatch();
+  const { useEmbeddableSelector: select, embeddableInstance: dashboardContainer } =
+    useDashboardContainerContext();
 
   /**
    * Render Control group
@@ -47,9 +43,10 @@ export const DashboardViewport = () => {
   const dashboardTitle = select((state) => state.explicitInput.title);
   const useMargins = select((state) => state.explicitInput.useMargins);
   const description = select((state) => state.explicitInput.description);
-  const isFullScreenMode = select((state) => state.componentState.fullScreenMode);
-  const isEmbeddedExternally = select((state) => state.componentState.isEmbeddedExternally);
-
+  const expandedPanelId = select((state) => state.componentState.expandedPanelId);
+  const expandedPanelStyles = css`
+    flex: 1;
+  `;
   const controlsEnabled = isProjectEnabledInLabs('labs:dashboard:dashboardControls');
 
   return (
@@ -66,13 +63,8 @@ export const DashboardViewport = () => {
         data-title={dashboardTitle}
         data-description={description}
         className={useMargins ? 'dshDashboardViewport-withMargins' : 'dshDashboardViewport'}
+        css={expandedPanelId ? expandedPanelStyles : undefined}
       >
-        {isFullScreenMode && (
-          <ExitFullScreenButton
-            onExit={() => dispatch(setFullScreenMode(false))}
-            toggleChrome={!isEmbeddedExternally}
-          />
-        )}
         {panelCount === 0 && (
           <div className="dshDashboardEmptyScreen">
             <DashboardEmptyScreen isEditMode={viewMode === ViewMode.EDIT} />
@@ -83,3 +75,35 @@ export const DashboardViewport = () => {
     </>
   );
 };
+
+// Created this fullscreen button HOC to separate fullscreen button and dashboard content rerendering
+// because ExitFullScreenButton sets isFullscreenMode to false on unmount
+const WithFullScreenButton = ({ children }: { children: JSX.Element }) => {
+  const {
+    useEmbeddableDispatch,
+    useEmbeddableSelector: select,
+    actions: { setFullScreenMode },
+  } = useDashboardContainerContext();
+  const dispatch = useEmbeddableDispatch();
+
+  const isFullScreenMode = select((state) => state.componentState.fullScreenMode);
+  const isEmbeddedExternally = select((state) => state.componentState.isEmbeddedExternally);
+
+  return (
+    <>
+      {children}
+      {isFullScreenMode && (
+        <ExitFullScreenButton
+          onExit={() => dispatch(setFullScreenMode(false))}
+          toggleChrome={!isEmbeddedExternally}
+        />
+      )}
+    </>
+  );
+};
+
+export const DashboardViewport = () => (
+  <WithFullScreenButton>
+    <DashboardViewportComponent />
+  </WithFullScreenButton>
+);

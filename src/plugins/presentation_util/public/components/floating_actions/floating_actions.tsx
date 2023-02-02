@@ -73,7 +73,6 @@ export const FloatingActions: FC<FloatingActionsProps> = ({
       <span
         className="floatingActions__anchor"
         ref={anchorRef}
-        onMouseEnter={showFloatingActions}
         onMouseOver={showFloatingActions}
         onFocus={showFloatingActions}
         onMouseLeave={hideFloatingActions}
