@@ -23,7 +23,6 @@ jest.mock('../../../../../common/components/user_privileges');
 const getPackagePolicies = sendGetEndpointSpecificPackagePolicies as jest.Mock;
 const useUserPrivilegesMock = useUserPrivileges as jest.Mock;
 
-
 describe('When on the policy list page', () => {
   let render: () => ReturnType<AppContextTestRender['render']>;
   let renderResult: ReturnType<typeof render>;
@@ -85,6 +84,7 @@ describe('When on the policy list page', () => {
       await waitFor(() => {
         expect(sendGetEndpointSpecificPackagePolicies).toHaveBeenCalled();
         expect(getPackagePolicies).toHaveBeenCalled();
+        expect(renderResult.getByTestId('policyListTable')).toBeTruthy();
       });
     });
     it('should display the policy list table', () => {
