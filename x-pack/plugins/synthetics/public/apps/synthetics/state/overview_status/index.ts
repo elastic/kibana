@@ -7,15 +7,21 @@
 
 import { createReducer } from '@reduxjs/toolkit';
 
+import { FiltersList } from '../../components/monitors_page/common/monitor_filters/use_filters';
 import { OverviewStatusState } from '../../../../../common/runtime_types';
 import { IHttpSerializedFetchError } from '..';
-import { clearOverviewStatusErrorAction, fetchOverviewStatusAction } from './actions';
+import {
+  clearOverviewStatusErrorAction,
+  fetchOverviewStatusAction,
+  setListOfFiltersActions,
+} from './actions';
 
 export interface OverviewStatusStateReducer {
   loading: boolean;
   loaded: boolean;
   status: OverviewStatusState | null;
   error: IHttpSerializedFetchError | null;
+  filtersData?: FiltersList | null;
 }
 
 const initialState: OverviewStatusStateReducer = {
@@ -23,6 +29,7 @@ const initialState: OverviewStatusStateReducer = {
   loaded: false,
   status: null,
   error: null,
+  filtersData: null,
 };
 
 export const overviewStatusReducer = createReducer(initialState, (builder) => {
@@ -39,6 +46,9 @@ export const overviewStatusReducer = createReducer(initialState, (builder) => {
     })
     .addCase(fetchOverviewStatusAction.fail, (state, action) => {
       state.error = action.payload;
+    })
+    .addCase(setListOfFiltersActions, (state, action) => {
+      state.filtersData = action.payload;
     })
     .addCase(clearOverviewStatusErrorAction, (state) => {
       state.error = null;

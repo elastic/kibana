@@ -5,6 +5,7 @@
  * 2.0.
  */
 import { createAction } from '@reduxjs/toolkit';
+import { FiltersList } from '../../components/monitors_page/common/monitor_filters/use_filters';
 import { MonitorOverviewPageState } from '..';
 import { createAsyncAction } from '../utils/actions';
 
@@ -19,5 +20,7 @@ export const quietFetchOverviewStatusAction = createAsyncAction<
   MonitorOverviewPageState,
   OverviewStatus
 >('quietFetchOverviewStatusAction');
+
+export const setListOfFiltersActions = createAction<FiltersList>('setListOfFiltersActions');
 
 export const clearOverviewStatusErrorAction = createAction<void>('clearOverviewStatusErrorAction');

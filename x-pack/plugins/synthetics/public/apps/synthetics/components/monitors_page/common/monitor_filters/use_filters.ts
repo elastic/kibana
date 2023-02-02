@@ -10,6 +10,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useFetcher } from '@kbn/observability-plugin/public';
 
+import { selectFiltersData, setListOfFiltersActions } from '../../../../state/overview_status';
 import { ConfigKey } from '../../../../../../../common/runtime_types';
 import { syntheticsMonitorType } from '../../../../../../../common/types/saved_objects';
 import {
@@ -83,10 +84,12 @@ interface AggsResponse {
   };
 }
 
-export const useFilters = (): Record<
+export type FiltersList = Record<
   SyntheticsMonitorFilterField,
   Array<{ label: string; count: number }>
-> => {
+>;
+
+export const useFilters = (): FiltersList => {
   const { savedObjects } = useKibana().services;
 
   const { data } = useFetcher(async () => {
@@ -97,7 +100,11 @@ export const useFilters = (): Record<
     });
   }, []);
 
-  return useMemo(() => {
+  const filtersData = useSelector(selectFiltersData);
+
+  const dispatch = useDispatch();
+
+  const newFiltersData = useMemo(() => {
     const { monitorTypes, tags, locations, projects, schedules } =
       (data?.aggregations as AggsResponse) ?? {};
     return {
@@ -130,6 +137,18 @@ export const useFilters = (): Record<
         })) ?? [],
     };
   }, [data]);
+
+  useEffect(() => {
+    if (data) {
+      dispatch(setListOfFiltersActions(newFiltersData));
+    }
+  }, [data, dispatch, newFiltersData]);
+
+  if (!data && filtersData) {
+    return filtersData;
+  }
+
+  return newFiltersData;
 };
 
 type FilterFieldWithQuery = SyntheticsMonitorFilterField | 'query';
