@@ -141,7 +141,9 @@ describe('Setup Indices', () => {
         },
       },
       preferences: {
-        type: 'object',
+        properties: {
+          extract_full_html: { type: 'boolean' },
+        },
       },
       scheduling: {
         properties: {

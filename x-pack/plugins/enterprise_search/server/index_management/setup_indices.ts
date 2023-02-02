@@ -130,7 +130,11 @@ const connectorMappingsProperties: Record<string, MappingProperty> = {
       run_ml_inference: { type: 'boolean' },
     },
   },
-  preferences: { type: 'object' },
+  preferences: {
+    properties: {
+      extract_full_html: { type: 'boolean' },
+    },
+  },
   scheduling: {
     properties: {
       enabled: { type: 'boolean' },
