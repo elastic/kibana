@@ -162,6 +162,7 @@ export const BenchmarksSection = ({
         <EuiFlexGroup
           key={cluster.meta.clusterId}
           css={css`
+            min-height: 220px;
             border-bottom: ${euiTheme.border.thin};
             padding: ${euiTheme.size.base} 0 ${euiTheme.size.l};
           `}

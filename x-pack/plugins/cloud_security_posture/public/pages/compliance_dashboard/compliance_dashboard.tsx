@@ -302,7 +302,6 @@ export const ComplianceDashboard = () => {
       <div
         data-test-subj={DASHBOARD_CONTAINER}
         css={css`
-          max-width: 1600px;
           margin-left: auto;
           margin-right: auto;
           height: 100%;
