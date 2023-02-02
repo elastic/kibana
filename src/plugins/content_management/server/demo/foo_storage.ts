@@ -9,7 +9,7 @@
 import * as uuid from 'uuid';
 import moment from 'moment';
 
-import { ContentStorage } from '../core';
+import { ContentStorage, StorageContext } from '../core';
 import type { FooContent } from './types';
 
 const getTimestamp = () => moment().toISOString();
@@ -25,11 +25,11 @@ const generateMeta = (): FooContent['meta'] => {
   };
 };
 
-export class FooStorage implements ContentStorage<FooContent> {
+export class FooStorage implements ContentStorage {
   private db: Map<string, FooContent> = new Map();
   private contentType = 'foo' as const;
 
-  async get(id: string, options?: unknown): Promise<FooContent> {
+  async get(ctx: StorageContext, id: string): Promise<FooContent> {
     const content = this.db.get(id);
 
     if (!content) {
@@ -39,7 +39,10 @@ export class FooStorage implements ContentStorage<FooContent> {
     return content;
   }
 
-  async create(fields: Pick<FooContent, 'title' | 'description' | 'foo'>): Promise<FooContent> {
+  async create(
+    ctx: StorageContext,
+    fields: Pick<FooContent, 'title' | 'description' | 'foo'>
+  ): Promise<FooContent> {
     const id = uuid.v4();
 
     const content: FooContent = {
