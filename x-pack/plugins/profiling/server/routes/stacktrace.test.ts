@@ -119,7 +119,7 @@ describe('Stack frame operations', () => {
     expect(stackFrameCache.length).toEqual(1);
   });
 
-  test('updateStackFrameMap with one partial frame', () => {
+  test('updateStackFrameMap with one partial non-inlined frame', () => {
     const stackFrameMap = new Map<StackFrameID, StackFrame>();
     const stackFrameCache = new LRUCache<StackFrameID, StackFrame>();
 
@@ -127,6 +127,43 @@ describe('Stack frame operations', () => {
     const source = {
       'ecs.version': '1.0.0',
       'Stackframe.function.name': 'calloc',
+    };
+    const expected = {
+      FileName: undefined,
+      FunctionName: 'calloc',
+      FunctionOffset: undefined,
+      LineNumber: undefined,
+      SourceType: undefined,
+    };
+
+    const stackFrames = [
+      {
+        _index: 'profiling-stackframes',
+        _id: id,
+        _version: 1,
+        _seq_no: 1,
+        _primary_term: 1,
+        found: true,
+        _source: source,
+      },
+    ];
+
+    const hits = updateStackFrameMap(stackFrames, stackFrameMap, stackFrameCache);
+
+    expect(hits).toEqual(1);
+    expect(stackFrameMap.size).toEqual(1);
+    expect(stackFrameCache.length).toEqual(1);
+    expect(stackFrameMap.get(id)).toEqual(expected);
+  });
+
+  test('updateStackFrameMap with one partial inlined frame', () => {
+    const stackFrameMap = new Map<StackFrameID, StackFrame>();
+    const stackFrameCache = new LRUCache<StackFrameID, StackFrame>();
+
+    const id = 'stackframe-001';
+    const source = {
+      'ecs.version': '1.0.0',
+      'Stackframe.function.name': ['calloc', 'memset'],
     };
     const expected = {
       FileName: undefined,

@@ -297,13 +297,37 @@ export function updateStackFrameMap(
     }
     if (frame.found) {
       found++;
-      const stackFrame = {
-        FileName: frame._source![ProfilingESField.StackframeFileName],
-        FunctionName: frame._source![ProfilingESField.StackframeFunctionName],
-        FunctionOffset: frame._source![ProfilingESField.StackframeFunctionOffset],
-        LineNumber: frame._source![ProfilingESField.StackframeLineNumber],
-        SourceType: frame._source![ProfilingESField.StackframeSourceType],
-      };
+
+      const fileName = frame._source[ProfilingESField.StackframeFileName];
+      const functionName = frame._source[ProfilingESField.StackframeFunctionName];
+      const functionOffset = frame._source[ProfilingESField.StackframeFunctionOffset];
+      const lineNumber = frame._source[ProfilingESField.StackframeLineNumber];
+      const sourceType = frame._source[ProfilingESField.StackframeSourceType];
+
+      let stackFrame;
+      if (Array.isArray(functionName)) {
+        // Each field in a stackframe is represented by an array. This is
+        // necessary to support inline frames.
+        //
+        // We only take the first available inline stackframe until the UI
+        // can support all of them.
+        stackFrame = {
+          FileName: fileName && fileName[0],
+          FunctionName: functionName && functionName[0],
+          FunctionOffset: functionOffset && functionOffset[0],
+          LineNumber: lineNumber && lineNumber[0],
+          SourceType: sourceType && sourceType[0],
+        };
+      } else {
+        stackFrame = {
+          FileName: fileName,
+          FunctionName: functionName,
+          FunctionOffset: functionOffset,
+          LineNumber: lineNumber,
+          SourceType: sourceType,
+        };
+      }
+
       stackFrameMap.set(frame._id, stackFrame);
       stackFrameCache.set(frame._id, stackFrame);
       continue;
