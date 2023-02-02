@@ -69,8 +69,7 @@ export const OverviewPage: React.FC = () => {
       dispatch(fetchMonitorOverviewAction.get(pageState));
     }
     // change only needs to be triggered on pageState change
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [dispatch, pageState]);
+  }, [dispatch, pageState, monitorsLoaded]);
 
   // fetch overview for refresh
   useEffect(() => {

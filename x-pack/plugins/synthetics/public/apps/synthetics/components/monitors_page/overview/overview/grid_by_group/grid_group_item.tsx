@@ -83,7 +83,7 @@ export const GroupGridItem = ({
   return (
     <EuiAccordion
       initialIsOpen={fullScreenGroup === groupLabel}
-      isDisabled={fullScreenGroup === groupLabel}
+      isDisabled={fullScreenGroup === groupLabel || groupMonitors.length === 0}
       id={'groupAccordion' + groupLabel}
       buttonContent={
         <EuiFlexGroup alignItems="center" gutterSize="s">
@@ -99,6 +99,7 @@ export const GroupGridItem = ({
         <EuiFlexGroup alignItems="center" gutterSize="s">
           <EuiFlexItem>
             <EuiButtonIcon
+              isDisabled={groupMonitors.length === 0}
               className="fullScreenButton"
               iconType="fullScreen"
               aria-label="Full screen"
