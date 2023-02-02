@@ -15,7 +15,6 @@ import {
   EuiSwitch,
   EuiToolTip,
   EuiText,
-  EuiCode,
 } from '@elastic/eui';
 import { AggFunctionsMapping } from '@kbn/data-plugin/public';
 import { buildExpressionFunction } from '@kbn/expressions-plugin/public';
@@ -80,7 +79,7 @@ function getInvalidSortFieldMessage(
           id="xpack.lens.indexPattern.lastValue.sortFieldNotFound"
           defaultMessage="Sort field {sortField} was not found."
           values={{
-            sortField: <EuiCode>{sortField}</EuiCode>,
+            sortField: <strong>{sortField}</strong>,
           }}
         />
       ),

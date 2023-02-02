@@ -8,7 +8,6 @@
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiCode } from '@elastic/eui';
 import type { IndexPattern, IndexPatternField } from '../../../../types';
 import {
   type FieldBasedOperationErrorMessage,
@@ -105,7 +104,7 @@ export const generateMissingFieldMessage = (
           <>
             {missingFields.map((field, index) => (
               <>
-                <EuiCode>{field}</EuiCode>
+                <strong>{field}</strong>
                 {index + 1 === missingFields.length ? '' : ', '}
               </>
             ))}

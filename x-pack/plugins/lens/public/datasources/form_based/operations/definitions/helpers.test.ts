@@ -58,9 +58,9 @@ describe('helpers', () => {
                 "count": 1,
                 "missingFields": <React.Fragment>
                   <React.Fragment>
-                    <EuiCode>
+                    <strong>
                       NoBytes
-                    </EuiCode>
+                    </strong>
                     
                   </React.Fragment>
                 </React.Fragment>,
@@ -125,9 +125,9 @@ describe('helpers', () => {
                 "count": 1,
                 "missingFields": <React.Fragment>
                   <React.Fragment>
-                    <EuiCode>
+                    <strong>
                       NoBytes
-                    </EuiCode>
+                    </strong>
                     
                   </React.Fragment>
                 </React.Fragment>,
@@ -176,15 +176,15 @@ describe('helpers', () => {
                 "count": 2,
                 "missingFields": <React.Fragment>
                   <React.Fragment>
-                    <EuiCode>
+                    <strong>
                       NotExisting
-                    </EuiCode>
+                    </strong>
                     , 
                   </React.Fragment>
                   <React.Fragment>
-                    <EuiCode>
+                    <strong>
                       NoBytes
-                    </EuiCode>
+                    </strong>
                     
                   </React.Fragment>
                 </React.Fragment>,

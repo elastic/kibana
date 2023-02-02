@@ -941,9 +941,9 @@ describe('last_value', () => {
                   "count": 1,
                   "missingFields": <React.Fragment>
                     <React.Fragment>
-                      <EuiCode>
+                      <strong>
                         notExisting
-                      </EuiCode>
+                      </strong>
                       
                     </React.Fragment>
                   </React.Fragment>,
@@ -992,9 +992,9 @@ describe('last_value', () => {
               id="xpack.lens.indexPattern.lastValue.sortFieldNotFound"
               values={
                 Object {
-                  "sortField": <EuiCode>
+                  "sortField": <strong>
                     notExisting
-                  </EuiCode>,
+                  </strong>,
                 }
               }
             />,
