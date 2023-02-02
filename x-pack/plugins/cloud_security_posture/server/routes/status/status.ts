@@ -98,7 +98,7 @@ const calculateCspStatusCodeCspm = (
     return 'unprivileged';
   if (!installedPolicyTemplates.includes('cspm')) return 'not-installed';
   if (indicesStatus.findingsLatest === 'not-empty') return 'indexed';
-  if (healthyAgents === 0) return 'not-deployed'; //NEED TO CHANGE THIS
+  if (healthyAgents === 0) return 'not-deployed'; // NEED TO CHANGE THIS
   if (timeSinceInstallationInMinutes <= INDEX_TIMEOUT_IN_MINUTES) return 'indexing';
   if (timeSinceInstallationInMinutes > INDEX_TIMEOUT_IN_MINUTES) return 'index-timeout';
 
@@ -114,14 +114,14 @@ const calculateCspStatusCodeKspm = (
   installedCspPackagePolicies: number,
   healthyAgents: number,
   timeSinceInstallationInMinutes: number,
-  installedPolicyTemplates: string[],
+  installedPolicyTemplates: string[]
 ): CspStatusCode => {
   // We check privileges only for the relevant indices for our pages to appear
   if (indicesStatus.findingsLatest === 'unprivileged' || indicesStatus.score === 'unprivileged')
     return 'unprivileged';
   if (!installedPolicyTemplates.includes('kspm')) return 'not-installed';
   if (indicesStatus.findingsLatest === 'not-empty') return 'indexed';
-  if (healthyAgents === 0) return 'not-deployed'; //NEED TO CHANGE THIS
+  if (healthyAgents === 0) return 'not-deployed'; // NEED TO CHANGE THIS
   if (timeSinceInstallationInMinutes <= INDEX_TIMEOUT_IN_MINUTES) return 'indexing';
   if (timeSinceInstallationInMinutes > INDEX_TIMEOUT_IN_MINUTES) return 'index-timeout';
 
@@ -244,7 +244,7 @@ const getCspStatus = async ({
       indicesDetails,
       latestPackageVersion: latestCspPackageVersion,
       isPluginInitialized: isPluginInitialized(),
-      installedPolicyTemplates, //need to remove this
+      installedPolicyTemplates, // need to remove this
     };
 
   const response = {
@@ -262,7 +262,7 @@ const getCspStatus = async ({
     latestPackageVersion: latestCspPackageVersion,
     installedPackageVersion: installation?.install_version,
     isPluginInitialized: isPluginInitialized(),
-    installedPolicyTemplates, //need to remove this
+    installedPolicyTemplates, // need to remove this
   };
 
   assertResponse(response, logger);
