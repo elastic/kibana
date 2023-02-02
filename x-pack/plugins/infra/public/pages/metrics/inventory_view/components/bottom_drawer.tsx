@@ -10,6 +10,9 @@ import { i18n } from '@kbn/i18n';
 import { EuiFlexGroup, EuiFlexItem, EuiButtonEmpty } from '@elastic/eui';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { useUiTracker } from '@kbn/observability-plugin/public';
+import { EuiPanel } from '@elastic/eui';
+import useLocalStorage from 'react-use/lib/useLocalStorage';
+import { TryItButton } from '../../../../components/try_it_button/try_it_button';
 import { useWaffleOptionsContext } from '../hooks/use_waffle_options';
 import { InfraFormatter } from '../../../../lib/lib';
 import { Timeline } from './timeline/timeline';
@@ -21,14 +24,43 @@ const hideHistory = i18n.translate('xpack.infra.hideHistory', {
   defaultMessage: 'Hide history',
 });
 
-const TRANSITION_MS = 300;
-
-export const BottomDrawer: React.FC<{
-  measureRef: (instance: HTMLElement | null) => void;
+interface Props {
   interval: string;
   formatter: InfraFormatter;
-  width: number;
-}> = ({ measureRef, width, interval, formatter, children }) => {
+  view: string;
+}
+
+const LOCAL_STORAGE_KEY = 'infraUI:k8sDashboardClicked';
+const KubernetesButton = () => {
+  const [clickedOnLocalStorage, setClickedOnLocalStorage] = useLocalStorage<boolean>(
+    LOCAL_STORAGE_KEY,
+    false
+  );
+  const [clicked, _] = useState<boolean>(clickedOnLocalStorage ?? false);
+
+  return (
+    <TryItButton
+      color={clicked ? 'primary' : 'accent'}
+      label="Kubernetes dashboards"
+      data-test-subj="inventory-kubernetesDashboard-link"
+      link={{
+        app: 'dashboards',
+        hash: '/list',
+        search: {
+          _g: '()',
+          s: 'kubernetes tag:(Managed)',
+        },
+      }}
+      onClick={() => {
+        if (!clicked) {
+          setClickedOnLocalStorage(true);
+        }
+      }}
+      showBadge={!clicked}
+    />
+  );
+};
+export const BottomDrawer = ({ interval, formatter, view }: Props) => {
   const { timelineOpen, changeTimelineOpen } = useWaffleOptionsContext();
 
   const [isOpen, setIsOpen] = useState(Boolean(timelineOpen));
@@ -44,45 +76,53 @@ export const BottomDrawer: React.FC<{
     changeTimelineOpen(!isOpen);
   }, [isOpen, trackDrawerOpen, changeTimelineOpen]);
 
-  return (
-    <BottomActionContainer ref={isOpen ? measureRef : null} isOpen={isOpen} outerWidth={width}>
-      <BottomActionTopBar ref={isOpen ? null : measureRef}>
-        <EuiFlexItem grow={false}>
-          <ShowHideButton
-            aria-expanded={isOpen}
-            iconType={isOpen ? 'arrowDown' : 'arrowRight'}
-            onClick={onClick}
-            data-test-subj="toggleTimelineButton"
-          >
-            {isOpen ? hideHistory : showHistory}
-          </ShowHideButton>
-        </EuiFlexItem>
-      </BottomActionTopBar>
-      <EuiFlexGroup style={{ marginTop: 0 }}>
+  return view === 'table' ? (
+    <BottomPanel hasBorder={false} hasShadow={false} borderRadius="none" paddingSize="s">
+      <KubernetesButton />
+    </BottomPanel>
+  ) : (
+    <BottomActionContainer>
+      <StickyPanel borderRadius="none" paddingSize="s">
+        <EuiFlexGroup responsive={false} justifyContent="flexStart" alignItems="center">
+          <EuiFlexItem grow={false}>
+            <EuiButtonEmpty
+              aria-expanded={isOpen}
+              iconType={isOpen ? 'arrowDown' : 'arrowRight'}
+              onClick={onClick}
+              data-test-subj="toggleTimelineButton"
+            >
+              {isOpen ? hideHistory : showHistory}
+            </EuiButtonEmpty>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <KubernetesButton />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </StickyPanel>
+      <TimelineContainer isOpen={isOpen} style={{ marginTop: 0 }}>
         <Timeline isVisible={isOpen} interval={interval} yAxisFormatter={formatter} />
-      </EuiFlexGroup>
+      </TimelineContainer>
     </BottomActionContainer>
   );
 };
-
-const BottomActionContainer = euiStyled.div<{ isOpen: boolean; outerWidth: number }>`
-  padding: ${(props) => props.theme.eui.euiSizeM} 0;
-  position: fixed;
+const TimelineContainer = euiStyled(EuiFlexGroup)<{ isOpen: boolean }>`
+  max-height: ${(props) => (props.isOpen ? '224px' : 0)};
+  transition: ${(props) => `max-height 0.15s ${props.isOpen ? 'ease-out' : 'ease-in'}`};
+  overflow: hidden;
+`;
+const BottomActionContainer = euiStyled.div`
+  position: sticky;
   bottom: 0;
   right: 0;
-  transition: transform ${TRANSITION_MS}ms;
-  transform: translateY(${(props) => (props.isOpen ? 0 : '224px')});
-  width: ${(props) => props.outerWidth + 34}px;
+  background: ${(props) => props.theme.eui.euiColorGhost};
+  width: calc(100% + ${(props) => props.theme.eui.euiSizeL} * 2);
+  margin-left: -${(props) => props.theme.eui.euiSizeL};
 `; // Additional width comes from the padding on the EuiPageBody and inner nodes container
 
-const BottomActionTopBar = euiStyled(EuiFlexGroup).attrs({
-  justifyContent: 'spaceBetween',
-  alignItems: 'center',
-})`
- margin-bottom: 0;
- height: 48px;
+const BottomPanel = euiStyled(EuiPanel)`
+  padding: ${(props) => props.theme.eui.euiSizeL} 0;
 `;
 
-const ShowHideButton = euiStyled(EuiButtonEmpty).attrs({ size: 's' })`
-  width: 140px;
+const StickyPanel = euiStyled(EuiPanel)`
+  padding: 0 ${(props) => props.theme.eui.euiSizeL};
 `;
