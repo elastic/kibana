@@ -182,28 +182,36 @@ const expectedSummaryTransformResult = [
     name: 'rule.spaceId',
   },
   {
-    description: 'The number of new alerts.',
+    description: 'The count of new alerts.',
     name: 'alerts.new.count',
   },
   {
-    description: 'The data for new alerts.',
+    description: 'An array of objects for new alerts.',
     name: 'alerts.new.data',
   },
   {
-    description: 'The number of ongoing alerts.',
+    description: 'The count of ongoing alerts.',
     name: 'alerts.ongoing.count',
   },
   {
-    description: 'The data for ongoing alerts.',
+    description: 'An array of objects for ongoing alerts.',
     name: 'alerts.ongoing.data',
   },
   {
-    description: 'The number of recovered alerts.',
+    description: 'The count of recovered alerts.',
     name: 'alerts.recovered.count',
   },
   {
-    description: 'The data for recovered alerts.',
+    description: 'An array of objects for recovered alerts.',
     name: 'alerts.recovered.data',
+  },
+  {
+    description: 'The count of all alerts.',
+    name: 'alerts.all.count',
+  },
+  {
+    description: 'An array of objects for all alerts.',
+    name: 'alerts.all.data',
   },
 ];
 

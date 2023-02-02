@@ -75,6 +75,8 @@ export enum SummaryAlertProvidedActionVariables {
   ongoingAlertsData = 'alerts.ongoing.data',
   recoveredAlertsCount = 'alerts.recovered.count',
   recoveredAlertsData = 'alerts.recovered.data',
+  allAlertsCount = 'alerts.all.count',
+  allAlertsData = 'alerts.all.data',
 }
 
 const AlertProvidedActionVariableDescriptions = {
@@ -330,25 +332,25 @@ function getSummaryAlertActionVariables(): ActionVariable[] {
   result.push({
     name: SummaryAlertProvidedActionVariables.newAlertsCount,
     description: i18n.translate('xpack.triggersActionsUI.actionVariables.newAlertsCountLabel', {
-      defaultMessage: 'The number of new alerts.',
+      defaultMessage: 'The count of new alerts.',
     }),
   });
   result.push({
     name: SummaryAlertProvidedActionVariables.newAlertsData,
     description: i18n.translate('xpack.triggersActionsUI.actionVariables.newAlertsDataLabel', {
-      defaultMessage: 'The data for new alerts.',
+      defaultMessage: 'An array of objects for new alerts.',
     }),
   });
   result.push({
     name: SummaryAlertProvidedActionVariables.ongoingAlertsCount,
     description: i18n.translate('xpack.triggersActionsUI.actionVariables.ongoingAlertsCountLabel', {
-      defaultMessage: 'The number of ongoing alerts.',
+      defaultMessage: 'The count of ongoing alerts.',
     }),
   });
   result.push({
     name: SummaryAlertProvidedActionVariables.ongoingAlertsData,
     description: i18n.translate('xpack.triggersActionsUI.actionVariables.ongoingAlertsDataLabel', {
-      defaultMessage: 'The data for ongoing alerts.',
+      defaultMessage: 'An array of objects for ongoing alerts.',
     }),
   });
   result.push({
@@ -356,7 +358,7 @@ function getSummaryAlertActionVariables(): ActionVariable[] {
     description: i18n.translate(
       'xpack.triggersActionsUI.actionVariables.recoveredAlertsCountLabel',
       {
-        defaultMessage: 'The number of recovered alerts.',
+        defaultMessage: 'The count of recovered alerts.',
       }
     ),
   });
@@ -365,9 +367,21 @@ function getSummaryAlertActionVariables(): ActionVariable[] {
     description: i18n.translate(
       'xpack.triggersActionsUI.actionVariables.recoveredAlertsDataLabel',
       {
-        defaultMessage: 'The data for recovered alerts.',
+        defaultMessage: 'An array of objects for recovered alerts.',
       }
     ),
+  });
+  result.push({
+    name: SummaryAlertProvidedActionVariables.allAlertsCount,
+    description: i18n.translate('xpack.triggersActionsUI.actionVariables.allAlertsCountLabel', {
+      defaultMessage: 'The count of all alerts.',
+    }),
+  });
+  result.push({
+    name: SummaryAlertProvidedActionVariables.allAlertsData,
+    description: i18n.translate('xpack.triggersActionsUI.actionVariables.allAlertsDataLabel', {
+      defaultMessage: 'An array of objects for all alerts.',
+    }),
   });
 
   return result;
