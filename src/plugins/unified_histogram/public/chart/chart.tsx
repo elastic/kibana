@@ -19,13 +19,13 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { DataView, DataViewField, DataViewType } from '@kbn/data-views-plugin/public';
-<<<<<<< HEAD
-import type { TypedLensByValueInput, Suggestion } from '@kbn/lens-plugin/public';
-=======
-import type { LensEmbeddableInput, TypedLensByValueInput } from '@kbn/lens-plugin/public';
+import type {
+  LensEmbeddableInput,
+  TypedLensByValueInput,
+  Suggestion,
+} from '@kbn/lens-plugin/public';
 import type { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
 import { Subject } from 'rxjs';
->>>>>>> feature-esql
 import { HitsCounter } from '../hits_counter';
 import { Histogram } from './histogram';
 import { useChartPanels } from './use_chart_panels';
