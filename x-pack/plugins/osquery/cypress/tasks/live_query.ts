@@ -75,3 +75,18 @@ export const toggleRuleOffAndOn = (ruleName: string) => {
   cy.getBySel('ruleSwitch').click();
   cy.getBySel('ruleSwitch').should('have.attr', 'aria-checked', 'true');
 };
+
+export const loadAlertsEvents = () => {
+  cy.visit('/app/security/alerts');
+  cy.getBySel('header-page-title').contains('Alerts').should('exist');
+  cy.getBySel('expand-event')
+    .first()
+    .within(() => {
+      cy.get(`[data-is-loading="true"]`).should('exist');
+    });
+  cy.getBySel('expand-event')
+    .first()
+    .within(() => {
+      cy.get(`[data-is-loading="true"]`).should('not.exist');
+    });
+};
