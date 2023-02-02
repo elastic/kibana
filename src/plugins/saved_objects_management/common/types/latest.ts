@@ -6,14 +6,4 @@
  * Side Public License, v 1.
  */
 
-import type { HttpStart } from '@kbn/core/public';
-import type { v1 } from '../../common';
-
-export function bulkDeleteObjects(
-  http: HttpStart,
-  objects: v1.BulkDeleteBodyHTTP
-): Promise<v1.BulkDeleteResponseHTTP> {
-  return http.post('/internal/kibana/management/saved_objects/_bulk_delete', {
-    body: JSON.stringify(objects),
-  });
-}
+export * from './v1';
