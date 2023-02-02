@@ -513,8 +513,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     esClient: ElasticsearchClient,
     id: string,
     packagePolicyUpdate: UpdatePackagePolicy,
-    options?: { user?: AuthenticatedUser; force?: boolean; skipUniqueNameVerification?: boolean },
-    currentVersion?: string
+    options?: { user?: AuthenticatedUser; force?: boolean; skipUniqueNameVerification?: boolean }
   ): Promise<PackagePolicy> {
     let enrichedPackagePolicy: UpdatePackagePolicy;
 
@@ -1076,14 +1075,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       ...options,
     };
 
-    await this.update(
-      soClient,
-      esClient,
-      id,
-      updatePackagePolicy,
-      updateOptions,
-      packagePolicy.package!.version
-    );
+    await this.update(soClient, esClient, id, updatePackagePolicy, updateOptions);
 
     // Persist any experimental feature opt-ins that come through the upgrade process to the Installation SO
     await updateDatastreamExperimentalFeatures(
