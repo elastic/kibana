@@ -15,6 +15,7 @@ import type { AlertsTableStateProps } from '@kbn/triggers-actions-ui-plugin/publ
 import styled from 'styled-components';
 import { useDispatch, useSelector } from 'react-redux';
 import { getEsQueryConfig } from '@kbn/data-plugin/public';
+import { useLicense } from '../../../common/hooks/use_license';
 import { updateIsLoading, updateTotalCount } from '../../../common/store/data_table/actions';
 import { VIEW_SELECTION } from '../../../../common/constants';
 import { DEFAULT_COLUMN_MIN_WIDTH } from '../../../timelines/components/timeline/body/constants';
@@ -109,6 +110,7 @@ export const AlertsTableComponent: FC<DetectionEngineAlertTableProps> = ({
     enableIpDetailsFlyout: true,
   });
   const { browserFields, indexPattern: indexPatterns } = useSourcererDataView(sourcererScope);
+  const license = useLicense();
 
   const getGlobalInputs = inputsSelectors.globalSelector();
   const globalInputs = useSelector((state: State) => getGlobalInputs(state));
@@ -187,7 +189,7 @@ export const AlertsTableComponent: FC<DetectionEngineAlertTableProps> = ({
 
   const dataTableStorage = getDataTablesInStorageByIds(storage, [TableId.alertsOnAlertsPage]);
   const columnsFormStorage = dataTableStorage?.[TableId.alertsOnAlertsPage]?.columns ?? [];
-  const alertColumns = columnsFormStorage.length ? columnsFormStorage : getColumns();
+  const alertColumns = columnsFormStorage.length ? columnsFormStorage : getColumns(license);
 
   const evenRenderedColumns = useMemo(
     () => getColumnHeaders(alertColumns, browserFields, true),
