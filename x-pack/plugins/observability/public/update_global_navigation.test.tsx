@@ -7,7 +7,7 @@
 
 import { Subject } from 'rxjs';
 import { App, AppDeepLink, ApplicationStart, AppNavLinkStatus, AppUpdater } from '@kbn/core/public';
-import { casesFeatureId } from '../common';
+import { casesFeatureId, sloFeatureId } from '../common';
 import { updateGlobalNavigation } from './update_global_navigation';
 
 // Used in updater callback
@@ -167,6 +167,7 @@ describe('updateGlobalNavigation', () => {
       it('shows the slos deep link', () => {
         const capabilities = {
           [casesFeatureId]: { read_cases: true },
+          [sloFeatureId]: { show: true },
           navLinks: { apm: true, logs: false, metrics: false, uptime: false },
         } as unknown as ApplicationStart['capabilities'];
 
