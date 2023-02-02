@@ -8,7 +8,6 @@ import React, { useMemo } from 'react';
 import { useController } from 'react-hook-form';
 import { EuiFormRow, EuiSuperSelect } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { getUiCommand } from '../../../management/components/endpoint_response_actions_list/components/hooks';
 import { getRbacControl } from '../../../management/components/endpoint_responder/lib/utils';
 import { useUserPrivileges } from '../../../common/components/user_privileges';
@@ -31,13 +30,7 @@ const ActionTypeFieldComponent = ({ euiFieldProps }: ActionTypeFieldProps) => {
   const FIELD_OPTIONS = useMemo(() => {
     return RESPONSE_ACTION_API_COMMANDS_NAMES.map((name, index) => ({
       value: name,
-      inputDisplay: (
-        <FormattedMessage
-          // temporary
-          id="xpack.osquery.pack.queryFlyoutForm.resultsTypeField.snapshotValueLabel"
-          defaultMessage={name}
-        />
-      ),
+      inputDisplay: name,
       disabled: !getRbacControl({
         commandName: getUiCommand(name),
         privileges: endpointPrivileges,
@@ -50,7 +43,7 @@ const ActionTypeFieldComponent = ({ euiFieldProps }: ActionTypeFieldProps) => {
   return (
     <EuiFormRow
       // fix path
-      label={i18n.translate('xpack.osquery.pack.form.commandFieldLabel', {
+      label={i18n.translate('xpack.securitySolution.responseActions.endpoint.commandLabel', {
         defaultMessage: 'Command',
       })}
       error={error?.message}
@@ -60,7 +53,7 @@ const ActionTypeFieldComponent = ({ euiFieldProps }: ActionTypeFieldProps) => {
       <EuiSuperSelect
         isInvalid={hasError}
         name={fieldName}
-        data-test-subj={'resultsTypeField'}
+        data-test-subj={'commandTypeField'}
         options={FIELD_OPTIONS}
         fullWidth
         valueOfSelected={value}

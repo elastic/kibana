@@ -26,7 +26,7 @@ const CommentFieldComponent = ({ euiFieldProps }: ActionTypeFieldProps) => {
 
   return (
     <EuiFormRow
-      label={i18n.translate('xpack.osquery.pack.form.descriptionFieldLabel', {
+      label={i18n.translate('xpack.securitySolution.responseActions.endpoint.commentLabel', {
         defaultMessage: 'Comment (optional)',
       })}
       error={error?.message}
