@@ -28,11 +28,9 @@ export interface ShowTopNActionContext extends CellActionExecutionContext {
   };
 }
 
-export const COLUMN_TOGGLE = (field: string) =>
-  i18n.translate('xpack.timelines.hoverActions.columnToggleLabel', {
-    values: { field },
-    defaultMessage: 'Toggle {field} column in table',
-  });
+export const COLUMN_TOGGLE = i18n.translate('xpack.timelines.hoverActions.columnToggleLabel', {
+  defaultMessage: 'Toggle column in table',
+});
 
 export const NESTED_COLUMN = (field: string) =>
   i18n.translate('xpack.timelines.hoverActions.nestedColumnToggleLabel', {
@@ -61,9 +59,9 @@ export const createToggleColumnAction = ({
     type: ACTION_ID,
     order,
     getIconType: (): string => ICON,
-    getDisplayName: ({ field }) => COLUMN_TOGGLE(field.name),
+    getDisplayName: () => COLUMN_TOGGLE,
     getDisplayNameTooltip: ({ field, metadata }) =>
-      metadata?.isObjectArray ? NESTED_COLUMN(field.name) : COLUMN_TOGGLE(field.name),
+      metadata?.isObjectArray ? NESTED_COLUMN(field.name) : COLUMN_TOGGLE,
     isCompatible: async ({ field, metadata }) => {
       return (
         isInSecurityApp(currentAppId) &&

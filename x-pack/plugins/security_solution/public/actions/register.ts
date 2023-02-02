@@ -120,8 +120,9 @@ const registerTableFlyoutActions = (
   const filterOutAction = createDefaultFilterOutAction({
     order: 20,
   });
-  const toggleAction = createDefaultToggleColumnAction({ store, order: 25 });
+
   const addToTimeline = createDefaultAddToTimelineAction({ store, order: 30 });
+  const toggleAction = createDefaultToggleColumnAction({ store, order: 35 });
   const showTopNAction = createDefaultShowTopNAction({ store, history, services, order: 40 });
   const copyAction = createDefaultCopyToClipboardAction({ order: 50 });
 

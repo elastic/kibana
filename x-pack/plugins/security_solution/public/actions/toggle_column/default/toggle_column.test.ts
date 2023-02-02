@@ -47,7 +47,7 @@ describe('Default createToggleColumnAction', () => {
   });
 
   it('should return display name', () => {
-    expect(toggleColumnAction.getDisplayName(context)).toEqual('Toggle user.name column in table');
+    expect(toggleColumnAction.getDisplayName(context)).toEqual('Toggle column in table');
   });
 
   it('should return icon type', () => {
