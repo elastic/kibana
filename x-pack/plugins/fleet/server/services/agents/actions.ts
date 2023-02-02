@@ -234,37 +234,46 @@ export async function getUnenrollAgentActions(
 }
 
 export async function cancelAgentAction(esClient: ElasticsearchClient, actionId: string) {
-  const res = await esClient.search<FleetServerAgentAction>({
-    index: AGENT_ACTIONS_INDEX,
-    query: {
-      bool: {
-        must: [
-          {
-            term: {
-              action_id: actionId,
+  // console.log(new Date().toISOString() + ' query agent upgrade actions');
+  const getUpgradeActions = async () => {
+    const res = await esClient.search<FleetServerAgentAction>({
+      index: AGENT_ACTIONS_INDEX,
+      query: {
+        bool: {
+          must: [
+            {
+              term: {
+                action_id: actionId,
+              },
             },
-          },
-        ],
+          ],
+        },
       },
-    },
-    size: SO_SEARCH_LIMIT,
-  });
+      size: SO_SEARCH_LIMIT,
+    });
 
-  if (res.hits.hits.length === 0) {
-    throw new AgentActionNotFoundError('Action not found');
-  }
+    if (res.hits.hits.length === 0) {
+      throw new AgentActionNotFoundError('Action not found');
+    }
+
+    // console.log(new Date().toISOString() + ' create cancel actions for batches: ' + JSON.stringify(res.hits.total));
+    const upgradeActions = res.hits.hits
+      .map((hit) => hit._source)
+      .reduce((acc: FleetServerAgentAction[], action: FleetServerAgentAction | undefined) => {
+        if (action && action.agents && action.action_id && action.type === 'UPGRADE') {
+          acc.push(action);
+        }
+        return acc;
+      }, []);
+    return upgradeActions;
+  };
 
   const cancelActionId = uuidv4();
   const now = new Date().toISOString();
-  const upgradeActions = res.hits.hits
-    .map((hit) => hit._source)
-    .reduce((acc: FleetServerAgentAction[], action: FleetServerAgentAction | undefined) => {
-      if (action && action.agents && action.action_id && action.type === 'UPGRADE') {
-        acc.push(action);
-      }
-      return acc;
-    }, []);
-  for (const action of upgradeActions) {
+
+  const cancelledActions: Array<{ agents: string[] }> = [];
+
+  const createAction = async (action: FleetServerAgentAction) => {
     await createAgentAction(esClient, {
       id: cancelActionId,
       type: 'CANCEL',
@@ -275,9 +284,17 @@ export async function cancelAgentAction(esClient: ElasticsearchClient, actionId:
       created_at: now,
       expiration: action.expiration,
     });
+    cancelledActions.push({
+      agents: action.agents!,
+    });
+  };
+
+  let upgradeActions = await getUpgradeActions();
+  for (const action of upgradeActions) {
+    await createAction(action);
   }
 
-  for (const action of upgradeActions) {
+  const updateAgentsToHealthy = async (action: FleetServerAgentAction) => {
     appContextService
       .getLogger()
       .info(
@@ -288,7 +305,7 @@ export async function cancelAgentAction(esClient: ElasticsearchClient, actionId:
     const errors = {};
     await bulkUpdateAgents(
       esClient,
-      action.agents!.map((agentId) => ({
+      action.agents!.map((agentId: string) => ({
         agentId,
         data: {
           upgraded_at: null,
@@ -301,6 +318,29 @@ export async function cancelAgentAction(esClient: ElasticsearchClient, actionId:
       appContextService
         .getLogger()
         .info(`Errors while bulk updating agents for cancel action: ${JSON.stringify(errors)}`);
+    }
+  };
+
+  for (const action of upgradeActions) {
+    await updateAgentsToHealthy(action);
+  }
+
+  // find missing batch
+  upgradeActions = await getUpgradeActions();
+  if (cancelledActions.length < upgradeActions.length) {
+    // console.log(`cancelledActions.length < upgradeActions.length ${cancelledActions.length} < ${upgradeActions.length}`)
+    const missingBatches = upgradeActions.filter(
+      (upgradeAction) =>
+        !cancelledActions.some(
+          (cancelled) => upgradeAction.agents && cancelled.agents[0] === upgradeAction.agents[0]
+        )
+    );
+    appContextService.getLogger().info(`missing batches to cancel: ${missingBatches.length}`);
+    if (missingBatches.length > 0) {
+      for (const missingBatch of missingBatches) {
+        await createAction(missingBatch);
+        await updateAgentsToHealthy(missingBatch);
+      }
     }
   }
 

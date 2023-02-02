@@ -136,7 +136,8 @@ export async function getActionStatuses(
 }
 
 export async function getCancelledActions(
-  esClient: ElasticsearchClient
+  esClient: ElasticsearchClient,
+  actionId?: string
 ): Promise<Array<{ actionId: string; timestamp?: string }>> {
   const res = await esClient.search<FleetServerAgentAction>({
     index: AGENT_ACTIONS_INDEX,
@@ -150,6 +151,15 @@ export async function getCancelledActions(
               type: 'CANCEL',
             },
           },
+          ...(actionId
+            ? [
+                {
+                  term: {
+                    'data.target_id': actionId,
+                  },
+                },
+              ]
+            : []),
         ],
       },
     },

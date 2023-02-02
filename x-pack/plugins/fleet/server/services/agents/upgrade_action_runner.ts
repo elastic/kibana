@@ -41,6 +41,11 @@ export class UpgradeActionRunner extends ActionRunner {
   }
 }
 
+const isActionIdCancelled = async (esClient: ElasticsearchClient, actionId: string) => {
+  const cancelledActions = await getCancelledActions(esClient, actionId);
+  return cancelledActions.length > 0;
+};
+
 export async function upgradeBatch(
   soClient: SavedObjectsClientContract,
   esClient: ElasticsearchClient,
@@ -56,28 +61,6 @@ export async function upgradeBatch(
     total?: number;
   }
 ): Promise<{ actionId: string }> {
-  const isActionIdCancelled = async (actionId: string) => {
-    const cancelledActions = await getCancelledActions(esClient);
-    return cancelledActions.some((a) => a.actionId === actionId);
-  };
-  if (options.actionId && (await isActionIdCancelled(options.actionId))) {
-    appContextService
-      .getLogger()
-      .info(
-        `Skipping batch of actionId:${options.actionId} of ${givenAgents.length} agents as the upgrade was cancelled`
-      );
-    return {
-      actionId: options.actionId,
-    };
-  }
-  if (options.actionId) {
-    appContextService
-      .getLogger()
-      .info(
-        `Continuing batch of actionId:${options.actionId} of ${givenAgents.length} agents of upgrade`
-      );
-  }
-
   const errors: Record<Agent['id'], Error> = { ...outgoingErrors };
 
   const hostedPolicies = await getHostedPolicies(soClient, givenAgents);
@@ -130,6 +113,26 @@ export async function upgradeBatch(
     options?.startTime,
     options.upgradeDurationSeconds
   );
+
+  if (options.actionId && (await isActionIdCancelled(esClient, options.actionId))) {
+    appContextService
+      .getLogger()
+      .info(
+        `Skipping batch of actionId:${options.actionId} of ${givenAgents.length} agents as the upgrade was cancelled`
+      );
+    return {
+      actionId: options.actionId,
+    };
+  }
+  if (options.actionId) {
+    appContextService
+      .getLogger()
+      .info(
+        `Continuing batch of actionId:${options.actionId} of ${givenAgents.length} agents of upgrade`
+      );
+  }
+
+  // console.log(new Date().toISOString() + ' updating agents, creating upgrade action doc')
 
   await bulkUpdateAgents(
     esClient,
