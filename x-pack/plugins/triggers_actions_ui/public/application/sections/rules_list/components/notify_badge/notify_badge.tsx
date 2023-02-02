@@ -23,7 +23,7 @@ import { i18nAbbrMonthDayDate, i18nMonthDayDate } from '../../../../lib/i18n_mon
 import { SnoozePanel, futureTimeToInterval } from '../rule_snooze';
 import { getNextRuleSnoozeSchedule, isRuleSnoozed } from './helpers';
 import {
-  openSnoozePanelAriaLabel,
+  OPEN_SNOOZE_PANEL_ARIA_LABEL,
   SNOOZE_FAILED_MESSAGE,
   SNOOZE_SUCCESS_MESSAGE,
   UNSNOOZE_SUCCESS_MESSAGE,
@@ -126,7 +126,7 @@ export const RulesListNotifyBadge: React.FunctionComponent<RulesListNotifyBadgeP
         isLoading={isLoading}
         disabled={isLoading || !isEditable}
         data-test-subj="rulesListNotifyBadge-snoozed"
-        aria-label={openSnoozePanelAriaLabel}
+        aria-label={OPEN_SNOOZE_PANEL_ARIA_LABEL}
         minWidth={85}
         iconType="bellSlash"
         color="accent"
@@ -148,7 +148,7 @@ export const RulesListNotifyBadge: React.FunctionComponent<RulesListNotifyBadgeP
         minWidth={85}
         iconType="calendar"
         color="text"
-        aria-label={openSnoozePanelAriaLabel}
+        aria-label={OPEN_SNOOZE_PANEL_ARIA_LABEL}
         onClick={onClick}
       >
         <EuiText size="xs">{formattedSnoozeText}</EuiText>
@@ -168,7 +168,7 @@ export const RulesListNotifyBadge: React.FunctionComponent<RulesListNotifyBadgeP
         disabled={isLoading || !isEditable}
         display={isLoading ? 'base' : 'empty'}
         data-test-subj="rulesListNotifyBadge-unsnoozed"
-        aria-label={openSnoozePanelAriaLabel}
+        aria-label={OPEN_SNOOZE_PANEL_ARIA_LABEL}
         className={isOpen || isLoading ? '' : showOnHoverClass}
         iconType="bell"
         onClick={onClick}
@@ -184,7 +184,7 @@ export const RulesListNotifyBadge: React.FunctionComponent<RulesListNotifyBadgeP
         disabled={isLoading || !isEditable}
         display="base"
         data-test-subj="rulesListNotifyBadge-snoozedIndefinitely"
-        aria-label={openSnoozePanelAriaLabel}
+        aria-label={OPEN_SNOOZE_PANEL_ARIA_LABEL}
         iconType="bellSlash"
         color="accent"
         onClick={onClick}
