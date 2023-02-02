@@ -21,9 +21,9 @@ import { EngineViewLogic } from './engine_view_logic';
 export const EngineOverview: React.FC = () => {
   const { engineName, engineData, isLoadingEngine } = useValues(EngineViewLogic);
 
-  const indicesCount = engineData?.indices?.length;
+  const indicesCount = engineData?.indices?.length ?? 0;
   const documentsCount = useMemo(
-    () => engineData?.indices?.reduce((sum, { count }) => sum + count, 0),
+    () => engineData?.indices?.reduce((sum, { count }) => sum + count, 0) ?? 0,
     [engineData]
   );
 
@@ -49,7 +49,7 @@ export const EngineOverview: React.FC = () => {
                 <EuiStat
                   titleSize="l"
                   isLoading={isLoadingEngine}
-                  title={`${indicesCount}`}
+                  title={indicesCount.toLocaleString()}
                   description={i18n.translate(
                     'xpack.enterpriseSearch.content.engine.overview.indicesDescription',
                     { defaultMessage: 'Indices' }
@@ -64,7 +64,7 @@ export const EngineOverview: React.FC = () => {
                 <EuiStat
                   titleSize="l"
                   isLoading={isLoadingEngine}
-                  title={`${documentsCount}`}
+                  title={documentsCount.toLocaleString()}
                   description={i18n.translate(
                     'xpack.enterpriseSearch.content.engine.overview.documentsDescription',
                     { defaultMessage: 'Documents' }
