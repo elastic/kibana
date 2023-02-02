@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import type { CaseAttachmentsWithoutOwner } from '@kbn/cases-plugin/public';
-import { useCallback, useMemo } from 'react';
+import { useMemo } from 'react';
 import type { TimelineItem } from '../../../../../common/search_strategy';
 import { useGetUserCasesPermissions, useKibana } from '../../../../common/lib/kibana';
 import { ADD_TO_CASE_DISABLED, ADD_TO_EXISTING_CASE, ADD_TO_NEW_CASE } from '../translations';
