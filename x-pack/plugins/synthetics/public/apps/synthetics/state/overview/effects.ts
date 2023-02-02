@@ -12,7 +12,7 @@ import { fetchMonitorOverview } from './api';
 
 export function* fetchMonitorOverviewEffect() {
   yield debounce(
-    300, // Only take the latest while ignoring any intermediate triggers
+    200, // Only take the latest while ignoring any intermediate triggers
     [fetchMonitorOverviewAction.get, quietFetchOverviewAction.get],
     fetchEffectFactory(
       fetchMonitorOverview,

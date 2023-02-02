@@ -62,7 +62,7 @@ export const OverviewGrid = memo(() => {
   const { currentMonitors } = useInfiniteScroll({ intersectionRef, monitorsSortedByStatus });
 
   // Display no monitors found when down, up, or disabled filter produces no results
-  if (status && !monitorsSortedByStatus.length) {
+  if (status && !monitorsSortedByStatus.length && loaded) {
     return <NoMonitorsFound />;
   }
 
