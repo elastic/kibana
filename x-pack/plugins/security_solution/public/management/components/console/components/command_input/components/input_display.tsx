@@ -6,9 +6,10 @@
  */
 
 import type { ReactNode } from 'react';
-import React, { memo, useEffect, useRef } from 'react';
+import React, { memo, useEffect, useMemo, useRef } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import styled from 'styled-components';
+import { useWithInputTextEntered } from '../../../hooks/state_selectors/use_with_input_text_entered';
 import { useTestIdGenerator } from '../../../../../hooks/use_test_id_generator';
 import { useDataTestSubj } from '../../../hooks/state_selectors/use_data_test_subj';
 
@@ -38,10 +39,38 @@ export interface InputDisplayProps {
 
 export const InputDisplay = memo<InputDisplayProps>(({ leftOfCursor, rightOfCursor }) => {
   const getTestId = useTestIdGenerator(useDataTestSubj());
+
   const containerRef = useRef<HTMLDivElement | null>(null);
   const cursorRef = useRef<HTMLSpanElement | null>(null);
+  const lastCursorPosition = useRef<number>(0);
+  const observableNeedsUpdate = useRef(true);
+
+  const { leftOfCursorText } = useWithInputTextEntered();
+  const currentCursorPosition = leftOfCursorText.length;
+
+  // When the HOME | END keys are used, or long text is pasted, the cursor will "jump"
+  // to a location that is beyond the viewport which causes the Observable not to trigger.
+  // In order to force the Observable to trigger we need to create it - that is what this
+  // `useMemo()` + the `recreateObservable` variable below are doing.
+  useMemo(() => {
+    const diff = Math.abs(lastCursorPosition.current - currentCursorPosition);
+    lastCursorPosition.current = currentCursorPosition;
+    if (diff > 1) {
+      observableNeedsUpdate.current = true;
+    }
+  }, [currentCursorPosition]);
+
+  const recreateObservable = observableNeedsUpdate.current;
+
+  // TODO:PT support user clicking anywhere in the input area and moving the cursor to that position
+
+  // TODO:PT support double clicking the input text area - highlight the entire content
 
   useEffect(() => {
+    // The weird assignment here is only used to ensure that `recreateObservable` remains
+    // a dependency of this `useEffect()`.
+    observableNeedsUpdate.current = recreateObservable ? false : false;
+
     if (containerRef.current && cursorRef.current) {
       const scrollPadding = 20;
       const handleIntersection: IntersectionObserverCallback = (entries) => {
@@ -84,7 +113,7 @@ export const InputDisplay = memo<InputDisplayProps>(({ leftOfCursor, rightOfCurs
         observer.disconnect();
       };
     }
-  }, []);
+  }, [recreateObservable]);
 
   return (
     <InputDisplayContainer ref={containerRef}>
