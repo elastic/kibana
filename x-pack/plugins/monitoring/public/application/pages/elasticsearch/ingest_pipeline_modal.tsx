@@ -126,6 +126,7 @@ export const IngestPipelineModal = ({
           navigateToDashboard();
         } catch (e) {
           setError(e.body?.error || e.message);
+          setInstalling(false);
         }
       }}
     >
