@@ -9,7 +9,6 @@ import React, { useCallback, useMemo, useState } from 'react';
 import type { Pagination } from '@elastic/eui';
 import { EuiSpacer, EuiText } from '@elastic/eui';
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
-import { useLocation } from 'react-router-dom';
 import { useAppUrl } from '../../../../../../common/lib/kibana';
 import { APP_UI_ID } from '../../../../../../../common/constants';
 import { SearchExceptions } from '../../../../../components/search_exceptions';
@@ -56,7 +55,6 @@ export const PolicyArtifactsList = React.memo<PolicyArtifactsListProps>(
     const { getAppUrl } = useAppUrl();
     const { canCreateArtifactsByPolicy } = useUserPrivileges().endpointPrivileges;
     const policiesRequest = useGetEndpointSpecificPolicies({ perPage: 1000 });
-    const { state: routeState } = useLocation();
     const navigateCallback = usePolicyDetailsArtifactsNavigateCallback(apiClient.listId);
     const { urlParams } = useUrlParams();
     const [expandedItemsMap, setExpandedItemsMap] = useState<Map<string, boolean>>(new Map());
@@ -92,9 +90,9 @@ export const PolicyArtifactsList = React.memo<PolicyArtifactsListProps>(
 
     const handleOnSearch = useCallback(
       (filter) => {
-        navigateCallback({ filter }, routeState);
+        navigateCallback({ filter });
       },
-      [navigateCallback, routeState]
+      [navigateCallback]
     );
 
     const handleOnExpandCollapse = useCallback<ArtifactCardGridProps['onExpandCollapse']>(

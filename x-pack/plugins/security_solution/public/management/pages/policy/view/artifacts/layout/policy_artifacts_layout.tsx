@@ -17,7 +17,6 @@ import {
   EuiButton,
   EuiPageContent_Deprecated as EuiPageContent,
 } from '@elastic/eui';
-import { useLocation } from 'react-router-dom';
 import { useAppUrl } from '../../../../../../common/lib/kibana';
 import { APP_UI_ID } from '../../../../../../../common/constants';
 import type { ImmutableObject, PolicyData } from '../../../../../../../common/endpoint/types';
@@ -61,7 +60,6 @@ export const PolicyArtifactsLayout = React.memo<PolicyArtifactsLayoutProps>(
       [getExceptionsListApiClient]
     );
 
-    const { state: routeState } = useLocation();
     const { getAppUrl } = useAppUrl();
     const navigateCallback = usePolicyDetailsArtifactsNavigateCallback(
       exceptionsListApiClient.listId
@@ -94,11 +92,11 @@ export const PolicyArtifactsLayout = React.memo<PolicyArtifactsLayoutProps>(
     } = useListArtifact(exceptionsListApiClient, {}, searchableFields, {}, ['allExisting']);
 
     const handleOnClickAssignButton = useCallback(() => {
-      navigateCallback({ show: 'list' }, routeState);
-    }, [navigateCallback, routeState]);
+      navigateCallback({ show: 'list' });
+    }, [navigateCallback]);
     const handleOnCloseFlyout = useCallback(() => {
-      navigateCallback({ show: undefined }, routeState);
-    }, [navigateCallback, routeState]);
+      navigateCallback({ show: undefined });
+    }, [navigateCallback]);
 
     const handleDeleteModalClose = useCallback(() => {
       setExceptionItemToDelete(undefined);
