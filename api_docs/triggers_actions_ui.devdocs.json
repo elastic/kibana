@@ -3548,6 +3548,20 @@
           },
           {
             "parentPluginId": "triggersActionsUi",
+            "id": "def-public.AlertsTableProps.showAlertStatusWithFlapping",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "showAlertStatusWithFlapping",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "triggersActionsUi",
             "id": "def-public.AlertsTableProps.trailingControlColumns",
             "type": "Array",
             "tags": [],
@@ -8706,6 +8720,22 @@
               "isRequired": true
             }
           ],
+          "returnComment": []
+        },
+        {
+          "parentPluginId": "triggersActionsUi",
+          "id": "def-public.TriggersAndActionsUIPublicPluginStart.getRulesSettingsLink",
+          "type": "Function",
+          "tags": [],
+          "label": "getRulesSettingsLink",
+          "description": [],
+          "signature": [
+            "() => React.ReactElement<any, string | React.JSXElementConstructor<any>>"
+          ],
+          "path": "x-pack/plugins/triggers_actions_ui/public/plugin.ts",
+          "deprecated": false,
+          "trackAdoption": false,
+          "children": [],
           "returnComment": []
         }
       ],
