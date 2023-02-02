@@ -9,15 +9,11 @@ import React, { FC, useContext, useEffect, useMemo, useState } from 'react';
 import { FieldStats, FieldStatsServices } from '@kbn/unified-field-list-plugin/public';
 import moment from 'moment';
 import { isDefined } from '@kbn/ml-is-defined';
-import { type DataView } from '@kbn/data-plugin/common';
+import type { DataView } from '@kbn/data-plugin/common';
+import type { TimeRange as TimeRangeMs } from '@kbn/ml-date-picker';
 import { getDefaultDatafeedQuery } from '../../jobs/new_job/utils/new_job_utils';
 import { JobCreatorContext } from '../../jobs/new_job/pages/components/job_creator_context';
 import { useFieldStatsFlyoutContext } from './use_field_stats_flytout_context';
-
-export interface TimeRangeMs {
-  from: number;
-  to: number;
-}
 
 const defaultDatafeedQuery = getDefaultDatafeedQuery();
 

@@ -21,8 +21,9 @@ import {
 import { css } from '@emotion/react';
 import { type DataView } from '@kbn/data-plugin/common';
 import { FieldStatsServices } from '@kbn/unified-field-list-plugin/public';
+import type { TimeRange as TimeRangeMs } from '@kbn/ml-date-picker';
 import { useFieldStatsFlyoutContext } from './use_field_stats_flytout_context';
-import { FieldStatsContent, TimeRangeMs } from './field_stats_content';
+import { FieldStatsContent } from './field_stats_content';
 
 export const FieldStatsFlyout: FC<{
   dataView: DataView;

@@ -6,9 +6,9 @@
  */
 
 import React, { useCallback, useState } from 'react';
-import { type DataView } from '@kbn/data-plugin/common';
-import { type FieldStatsServices } from '@kbn/unified-field-list-plugin/public';
-import { TimeRangeMs } from './field_stats_content';
+import type { DataView } from '@kbn/data-plugin/common';
+import type { FieldStatsServices } from '@kbn/unified-field-list-plugin/public';
+import type { TimeRange as TimeRangeMs } from '@kbn/ml-date-picker';
 import { MLJobWizardFieldStatsFlyoutContext } from './use_field_stats_flytout_context';
 import { FieldStatsFlyout } from './field_stats_flyout';
 

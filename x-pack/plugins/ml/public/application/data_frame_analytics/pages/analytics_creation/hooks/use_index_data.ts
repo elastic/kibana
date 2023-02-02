@@ -13,7 +13,7 @@ import { CoreSetup } from '@kbn/core/public';
 
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
-import { TimeRangeMs } from '../../../../components/field_stats_flyout/field_stats_content';
+import type { TimeRange as TimeRangeMs } from '@kbn/ml-date-picker';
 import { isRuntimeMappings } from '../../../../../../common/util/runtime_field_utils';
 import { RuntimeMappings } from '../../../../../../common/types/fields';
 import { DEFAULT_SAMPLER_SHARD_SIZE } from '../../../../../../common/constants/field_histograms';
