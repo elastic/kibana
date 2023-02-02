@@ -92,12 +92,7 @@ export const getSignalsQueryMapFromThreatIndex = async ({
 
         if (decodedQuery.queryType === ThreatMatchQueryType.term) {
           const threatValue = get(threatHit?._source, decodedQuery.value);
-          let values;
-          if (Array.isArray(threatValue)) {
-            values = threatValue;
-          } else {
-            values = [threatValue];
-          }
+          const values = Array.isArray(threatValue) ? threatValue : [threatValue];
 
           values.forEach((value) => {
             if (value && signalValueMap) {
