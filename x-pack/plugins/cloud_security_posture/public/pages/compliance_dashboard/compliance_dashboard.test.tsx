@@ -13,7 +13,7 @@ import { TestProvider } from '../../test/test_provider';
 import { ComplianceDashboard } from '.';
 import { useCspSetupStatusApi } from '../../common/api/use_setup_status_api';
 import { useSubscriptionStatus } from '../../common/hooks/use_subscription_status';
-import { useCspmStatsApi } from '../../common/api/use_stats_api';
+import { useKspmStatsApi, useCspmStatsApi } from '../../common/api/use_stats_api';
 import {
   CLOUD_DASHBOARD_CONTAINER,
   DASHBOARD_CONTAINER,
