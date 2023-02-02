@@ -54,7 +54,12 @@ export const SurveyKubernetes = () => {
               toasts={[
                 {
                   id: 'k8s-toast',
-                  title: 'We need your help!',
+                  title: (
+                    <FormattedMessage
+                      id="xpack.infra.homePage.kubernetesToastTitle"
+                      defaultMessage="We need your help!"
+                    />
+                  ),
                   color: 'primary',
                   iconType: 'help',
                   toastLifeTimeMs: 0x7fffffff, // Biggest possible lifetime because we control when it should be visible using isToastSeen
