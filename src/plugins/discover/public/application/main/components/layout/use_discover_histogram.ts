@@ -29,6 +29,7 @@ import { FetchStatus } from '../../../types';
 import type { DiscoverSearchSessionManager } from '../../services/discover_search_session';
 import type { InspectorAdapters } from '../../hooks/use_inspector';
 import { checkHitCount, sendErrorTo } from '../../hooks/use_saved_search_messages';
+import { getResolvedDateRange } from './utils';
 
 export const CHART_HIDDEN_KEY = 'discover:chartHidden';
 export const HISTOGRAM_HEIGHT_KEY = 'discover:histogramHeight';
@@ -250,10 +251,18 @@ export const useDiscoverHistogram = ({
    */
 
   const { query, filters, fromDate: from, toDate: to } = useQuerySubscriber({ data });
-  const timeRange = useMemo(
+  let timeRange = useMemo(
     () => (from && to ? { from, to } : data.query.timefilter.timefilter.getTimeDefaults()),
     [data.query.timefilter.timefilter, from, to]
   );
+
+  if (isPlainRecord) {
+    const dateRange = getResolvedDateRange(data.query.timefilter.timefilter);
+    timeRange = {
+      from: dateRange.fromDate,
+      to: dateRange.toDate,
+    };
+  }
 
   /**
    * Request

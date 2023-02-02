@@ -39,9 +39,20 @@ export const useRequestParams = ({
 
   const timeRange = useRef(getAbsoluteTimeRange(relativeTimeRange));
   const getTimeRange = useCallback(() => timeRange.current, []);
+  const getTimeRangePlainRecord = useCallback(
+    () => getAbsoluteTimeRange(relativeTimeRange),
+    [relativeTimeRange]
+  );
   const updateTimeRange = useStableCallback(() => {
     timeRange.current = getAbsoluteTimeRange(relativeTimeRange);
   });
 
-  return { filters, query, getTimeRange, updateTimeRange, relativeTimeRange };
+  return {
+    filters,
+    query,
+    getTimeRange,
+    getTimeRangePlainRecord,
+    updateTimeRange,
+    relativeTimeRange,
+  };
 };

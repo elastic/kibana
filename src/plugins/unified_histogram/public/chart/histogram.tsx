@@ -39,6 +39,7 @@ export interface HistogramProps {
   hits?: UnifiedHistogramHitsContext;
   chart: UnifiedHistogramChartContext;
   getTimeRange: () => TimeRange;
+  isDynamic: boolean;
   refetch$: Observable<UnifiedHistogramInputMessage>;
   lensAttributes: TypedLensByValueInput['attributes'];
   disableTriggers?: LensEmbeddableInput['disableTriggers'];
@@ -56,6 +57,7 @@ export function Histogram({
   hits,
   chart: { timeInterval },
   getTimeRange,
+  isDynamic,
   refetch$,
   lensAttributes: attributes,
   disableTriggers,
@@ -133,6 +135,7 @@ export function Histogram({
     refetch$,
     attributes,
     onLoad,
+    isDynamic,
   });
 
   const { euiTheme } = useEuiTheme();

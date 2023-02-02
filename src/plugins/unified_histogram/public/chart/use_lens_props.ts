@@ -21,12 +21,14 @@ export const useLensProps = ({
   refetch$,
   attributes,
   onLoad,
+  isDynamic,
 }: {
   request?: UnifiedHistogramRequestContext;
   getTimeRange: () => TimeRange;
   refetch$: Observable<UnifiedHistogramInputMessage>;
   attributes: TypedLensByValueInput['attributes'];
   onLoad: (isLoading: boolean, adapters: Partial<DefaultInspectorAdapters> | undefined) => void;
+  isDynamic: boolean;
 }) => {
   const buildLensProps = useCallback(
     () =>
@@ -47,7 +49,14 @@ export const useLensProps = ({
     return () => subscription.unsubscribe();
   }, [refetch$, updateLensProps]);
 
-  return lensProps;
+  return isDynamic
+    ? getLensProps({
+        searchSessionId: request?.searchSessionId,
+        getTimeRange,
+        attributes,
+        onLoad,
+      })
+    : lensProps;
 };
 
 export const getLensProps = ({

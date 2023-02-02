@@ -150,7 +150,14 @@ export function Chart({
     [originalInput$]
   );
 
-  const { filters, query, getTimeRange, updateTimeRange, relativeTimeRange } = useRequestParams({
+  const {
+    filters,
+    query,
+    getTimeRange,
+    updateTimeRange,
+    getTimeRangePlainRecord,
+    relativeTimeRange,
+  } = useRequestParams({
     services,
     query: originalQuery,
     filters: originalFilters,
@@ -384,8 +391,9 @@ export function Chart({
               request={request}
               hits={hits}
               chart={chart}
-              getTimeRange={getTimeRange}
+              getTimeRange={isOfAggregateQueryType(query) ? getTimeRangePlainRecord : getTimeRange}
               refetch$={refetch$}
+              isDynamic={Boolean(isOfAggregateQueryType(query))}
               lensAttributes={lensAttributes}
               disableTriggers={disableTriggers}
               disabledActions={disabledActions}
