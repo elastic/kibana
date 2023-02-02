@@ -10,7 +10,9 @@ import type { AllowedFieldsForTermsQuery, GetAllowedFieldsForTermQuery } from '.
 
 const allowedFieldTypes = ['keyword', 'constant_keyword', 'wildcard', 'ip'];
 
-// Return map of fields allowed for term query
+/*
+ * Return map of fields allowed for term query
+ */
 export const getAllowedFieldForTermQueryFromMapping = (
   indexMapping: IndicesGetFieldMappingResponse
 ): { [key: string]: boolean } => {

@@ -974,7 +974,7 @@ describe('getSignalMatchesFromThreatList', () => {
         value: 'threat.indicator.domain',
         index: 'threat_index',
         id: 'threatId',
-        queryType: 'mq',
+        queryType: 'tq',
       },
     ];
 
@@ -1028,7 +1028,7 @@ describe('getSignalMatchesFromThreatList', () => {
         value: 'threat.indicator.domain',
         index: 'threat_index',
         id: 'threatId',
-        queryType: 'mq',
+        queryType: 'tq',
       },
     ];
 

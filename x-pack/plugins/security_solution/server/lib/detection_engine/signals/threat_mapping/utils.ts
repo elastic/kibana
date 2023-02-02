@@ -196,7 +196,9 @@ export const buildExecutionIntervalValidator: (interval: string) => () => void =
   };
 };
 
-// Return list of fields by type used for matching in IM rule
+/*
+ * Return list of fields by type used for matching in IM rule
+ */
 export const getMatchedFields = (threatMapping: ThreatMapping): ThreatMatchedFields =>
   threatMapping.reduce(
     (acc: ThreatMatchedFields, val) => {
