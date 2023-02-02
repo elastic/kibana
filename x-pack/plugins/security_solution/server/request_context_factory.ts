@@ -115,6 +115,7 @@ export class RequestContextFactory implements IRequestContextFactory {
       getQueryRuleAdditionalOptions: {
         licensing,
         osqueryCreateAction: osquery.osqueryCreateAction,
+        endpointAppContext: endpointAppContextService,
       },
     };
   }

@@ -13,6 +13,7 @@ import type {
 
 import { firstValueFrom } from 'rxjs';
 import type { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
+import type { EndpointAppContext } from '../../../../endpoint/types';
 import { getFilter } from '../get_filter';
 import type { BucketHistory } from '../alert_suppression/group_and_bulk_create';
 import { groupAndBulkCreate } from '../alert_suppression/group_and_bulk_create';
@@ -36,6 +37,7 @@ export const queryExecutor = async ({
   bucketHistory,
   osqueryCreateAction,
   licensing,
+  endpointAppContext,
 }: {
   runOpts: RunOpts<UnifiedQueryRuleParams>;
   experimentalFeatures: ExperimentalFeatures;
@@ -46,6 +48,7 @@ export const queryExecutor = async ({
   bucketHistory?: BucketHistory[];
   osqueryCreateAction: SetupPlugins['osquery']['osqueryCreateAction'];
   licensing: LicensingPluginSetup;
+  endpointAppContext: EndpointAppContext;
 }) => {
   const completeRule = runOpts.completeRule;
   const ruleParams = completeRule.ruleParams;
@@ -105,7 +108,8 @@ export const queryExecutor = async ({
             signals: result.createdSignals,
             responseActions: completeRule.ruleParams.responseActions,
           },
-          osqueryCreateAction
+          osqueryCreateAction,
+          endpointAppContext
         );
       }
     }

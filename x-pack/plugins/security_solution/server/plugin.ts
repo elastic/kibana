@@ -159,11 +159,6 @@ export class Plugin implements ISecuritySolutionPlugin {
     const ruleExecutionLogService = createRuleExecutionLogService(config, logger, core, plugins);
     ruleExecutionLogService.registerEventLogProvider();
 
-    const queryRuleAdditionalOptions: CreateQueryRuleAdditionalOptions = {
-      licensing: plugins.licensing,
-      osqueryCreateAction: plugins.osquery.osqueryCreateAction,
-    };
-
     const requestContextFactory = new RequestContextFactory({
       config,
       logger,
@@ -183,7 +178,14 @@ export class Plugin implements ISecuritySolutionPlugin {
       logFactory: pluginContext.logger,
       service: this.endpointAppContextService,
       config: (): Promise<ConfigType> => Promise.resolve(config),
+      getStartServices: core.getStartServices,
       experimentalFeatures,
+    };
+
+    const queryRuleAdditionalOptions: CreateQueryRuleAdditionalOptions = {
+      licensing: plugins.licensing,
+      osqueryCreateAction: plugins.osquery.osqueryCreateAction,
+      endpointAppContext: endpointContext,
     };
 
     this.endpointAppContextService.setup({

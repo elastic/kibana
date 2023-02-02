@@ -139,6 +139,7 @@ export interface CreateRuleOptions {
 export interface CreateQueryRuleAdditionalOptions {
   osqueryCreateAction: SetupPlugins['osquery']['osqueryCreateAction'];
   licensing: LicensingPluginSetup;
+  endpointAppContext: any;
 }
 
 export interface CreateQueryRuleOptions

@@ -75,6 +75,7 @@ export const createMockEndpointAppContext = (
     logFactory: loggingSystemMock.create(),
     config: () => Promise.resolve(createMockConfig()),
     service: createMockEndpointAppContextService(mockManifestManager),
+    getStartServices: jest.fn(),
     experimentalFeatures: parseExperimentalConfigValue(createMockConfig().enableExperimental),
   };
 };

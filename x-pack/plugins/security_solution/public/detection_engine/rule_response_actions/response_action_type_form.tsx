@@ -18,6 +18,7 @@ import { i18n } from '@kbn/i18n';
 import { get } from 'lodash';
 import styled from 'styled-components';
 
+import { EndpointResponseAction } from './endpoint/endpoint_response_action';
 import { RESPONSE_ACTION_TYPES } from '../../../common/detection_engine/rule_response_actions/schemas';
 import { OsqueryResponseAction } from './osquery/osquery_response_action';
 import { getActionDetails } from './constants';
@@ -46,6 +47,9 @@ const ResponseActionTypeFormComponent = ({ item, onDeleteAction }: ResponseActio
   const getResponseActionTypeForm = useCallback(() => {
     if (action?.actionTypeId === RESPONSE_ACTION_TYPES.OSQUERY) {
       return <OsqueryResponseAction item={item} />;
+    }
+    if (action?.actionTypeId === RESPONSE_ACTION_TYPES.ENDPOINT) {
+      return <EndpointResponseAction item={item} />;
     }
     // Place for other ResponseActionTypes
     return null;
