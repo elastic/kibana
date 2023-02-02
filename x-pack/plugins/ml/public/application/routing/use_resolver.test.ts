@@ -76,7 +76,7 @@ describe('useResolver', () => {
         deprecatedSavedSearchObj: null,
         dataViewsContract: {},
         kibanaConfig: {},
-        selectedSavedSearch: undefined,
+        selectedSavedSearch: null,
       },
       results: {},
     });

@@ -32,15 +32,15 @@ import {
   type Dictionary,
   type SetUrlState,
 } from '@kbn/ml-url-state';
-import { getSavedSearch, SavedSearch } from '@kbn/saved-search-plugin/public';
+import { getSavedSearch, type SavedSearch } from '@kbn/saved-search-plugin/public';
 import { getCoreStart, getPluginsStart } from '../../kibana_services';
 import {
-  IndexDataVisualizerViewProps,
+  type IndexDataVisualizerViewProps,
   IndexDataVisualizerView,
 } from './components/index_data_visualizer_view';
 import { useDataVisualizerKibana } from '../kibana_context';
-import { GetAdditionalLinks } from '../common/components/results_links';
-import { DATA_VISUALIZER_APP_LOCATOR, IndexDataVisualizerLocatorParams } from './locator';
+import type { GetAdditionalLinks } from '../common/components/results_links';
+import { DATA_VISUALIZER_APP_LOCATOR, type IndexDataVisualizerLocatorParams } from './locator';
 import { DATA_VISUALIZER_INDEX_VIEWER } from './constants/index_data_visualizer_viewer';
 import { INDEX_DATA_VISUALIZER_NAME } from '../common/constants';
 import { DV_STORAGE_KEYS } from './types/storage';

@@ -27,8 +27,8 @@ import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-pl
 import type { Query } from '@kbn/es-query';
 import { DataView, DataViewField } from '@kbn/data-views-plugin/public';
 import { DatePickerContextProvider } from '@kbn/ml-date-picker';
-import { SavedSearch } from '@kbn/discover-plugin/public';
-import { SamplingOption } from '../../../../../common/types/field_stats';
+import type { SavedSearch } from '@kbn/discover-plugin/public';
+import type { SamplingOption } from '../../../../../common/types/field_stats';
 import { DATA_VISUALIZER_GRID_EMBEDDABLE_TYPE } from './constants';
 import { EmbeddableLoading } from './embeddable_loading_fallback';
 import { DataVisualizerStartDependencies } from '../../../../plugin';

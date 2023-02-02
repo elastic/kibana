@@ -7,7 +7,7 @@
 
 import React from 'react';
 import type { DataView, DataViewsContract } from '@kbn/data-views-plugin/public';
-import { SavedSearch } from '@kbn/saved-search-plugin/public';
+import type { SavedSearch } from '@kbn/saved-search-plugin/public';
 import type { SavedSearchSavedObject } from '../../../../common/types/kibana';
 import type { MlServicesContext } from '../../app';
 
