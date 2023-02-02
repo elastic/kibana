@@ -34,13 +34,13 @@ export JENKINS_URL=""
 export BUILD_URL=""
 export JOB_NAME=""
 export NODE_NAME=""
-export DOCKER_BUILDKIT=0
 
 # Reads the ES_BUILD_JAVA env var out of .ci/java-versions.properties and exports it
 export "$(grep '^ES_BUILD_JAVA' .ci/java-versions.properties | xargs)"
 
 export PATH="$HOME/.java/$ES_BUILD_JAVA/bin:$PATH"
 export JAVA_HOME="$HOME/.java/$ES_BUILD_JAVA"
+export DOCKER_BUILDKIT=1
 
 # The Elasticsearch Dockerfile needs to be built with root privileges, but Docker on our servers is running using a non-root user
 # So, let's use docker-in-docker to temporarily create a privileged docker daemon to run `docker build` on
