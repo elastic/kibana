@@ -98,14 +98,9 @@ export function ApmIndices() {
   const [apmIndices, setApmIndices] = useState<Record<string, string>>({});
   const [isSaving, setIsSaving] = useState(false);
 
-  const { data = INITIAL_STATE, refetch } = useFetcher(
-    (_callApmApi) => {
-      if (canSave) {
-        return _callApmApi(`GET /internal/apm/settings/apm-index-settings`);
-      }
-    },
-    [canSave]
-  );
+  const { data = INITIAL_STATE, refetch } = useFetcher((_callApmApi) => {
+    return _callApmApi(`GET /internal/apm/settings/apm-index-settings`);
+  }, []);
 
   const { data: space } = useFetcher(() => {
     return services.spaces?.getActiveSpace();
