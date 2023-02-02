@@ -1,0 +1,134 @@
+{
+  "id": "@kbn/core-custom-branding-browser-internal",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [
+      {
+        "parentPluginId": "@kbn/core-custom-branding-browser-internal",
+        "id": "def-common.CustomBrandingService",
+        "type": "Class",
+        "tags": [],
+        "label": "CustomBrandingService",
+        "description": [],
+        "path": "packages/core/custom-branding/core-custom-branding-browser-internal/src/custom_branding_service.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-custom-branding-browser-internal",
+            "id": "def-common.CustomBrandingService.setup",
+            "type": "Function",
+            "tags": [],
+            "label": "setup",
+            "description": [],
+            "signature": [
+              "({ injectedMetadata }: ",
+              {
+                "pluginId": "@kbn/core-custom-branding-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreCustomBrandingBrowserPluginApi",
+                "section": "def-common.CustomBrandingSetupDeps",
+                "text": "CustomBrandingSetupDeps"
+              },
+              ") => ",
+              {
+                "pluginId": "@kbn/core-custom-branding-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreCustomBrandingBrowserPluginApi",
+                "section": "def-common.CustomBrandingSetup",
+                "text": "CustomBrandingSetup"
+              }
+            ],
+            "path": "packages/core/custom-branding/core-custom-branding-browser-internal/src/custom_branding_service.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-custom-branding-browser-internal",
+                "id": "def-common.CustomBrandingService.setup.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "{ injectedMetadata }",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/core-custom-branding-browser",
+                    "scope": "common",
+                    "docId": "kibKbnCoreCustomBrandingBrowserPluginApi",
+                    "section": "def-common.CustomBrandingSetupDeps",
+                    "text": "CustomBrandingSetupDeps"
+                  }
+                ],
+                "path": "packages/core/custom-branding/core-custom-branding-browser-internal/src/custom_branding_service.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-custom-branding-browser-internal",
+            "id": "def-common.CustomBrandingService.start",
+            "type": "Function",
+            "tags": [],
+            "label": "start",
+            "description": [],
+            "signature": [
+              "() => ",
+              {
+                "pluginId": "@kbn/core-custom-branding-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreCustomBrandingBrowserPluginApi",
+                "section": "def-common.CustomBrandingStart",
+                "text": "CustomBrandingStart"
+              }
+            ],
+            "path": "packages/core/custom-branding/core-custom-branding-browser-internal/src/custom_branding_service.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-custom-branding-browser-internal",
+            "id": "def-common.CustomBrandingService.stop",
+            "type": "Function",
+            "tags": [],
+            "label": "stop",
+            "description": [],
+            "signature": [
+              "() => void"
+            ],
+            "path": "packages/core/custom-branding/core-custom-branding-browser-internal/src/custom_branding_service.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

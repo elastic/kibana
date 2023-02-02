@@ -5,6 +5,5 @@
   "homepage": "https://docs.elastic.dev/kibana-dev-docs/api/kbn-ml-agg-utils",
   "private": true,
   "version": "1.0.0",
-  "main": "./target_node/index.js",
   "license": "SSPL-1.0 OR Elastic License 2.0"
 }

@@ -44,14 +44,6 @@ const defaultProps = {
   toggleFullscreen: jest.fn(),
   setIsCloseable: jest.fn(),
   layerId: '1',
-  existingFields: {
-    my_index_pattern: {
-      timestamp: true,
-      bytes: true,
-      memory: true,
-      source: true,
-    },
-  },
 };
 
 describe('last_value', () => {
@@ -298,6 +290,44 @@ describe('last_value', () => {
         ).params.showArrayValues
       ).toBeTruthy();
     });
+
+    it('should set show array values if field is runtime and not of type number', () => {
+      const oldColumn: LastValueIndexPatternColumn = {
+        operationType: 'last_value',
+        sourceField: 'bytes',
+        label: 'Last value of bytes',
+        isBucketed: false,
+        dataType: 'number',
+        params: {
+          sortField: 'datefield',
+          showArrayValues: false,
+        },
+      };
+      const indexPattern = createMockedIndexPattern();
+      const field = indexPattern.fields.find((i) => i.name === 'runtime-keyword')!;
+
+      expect(
+        lastValueOperation.onFieldChange(oldColumn, field).params.showArrayValues
+      ).toBeTruthy();
+    });
+
+    it('should not set show array values if field is runtime and of type number', () => {
+      const oldColumn: LastValueIndexPatternColumn = {
+        operationType: 'last_value',
+        sourceField: 'bytes',
+        label: 'Last value of bytes',
+        isBucketed: false,
+        dataType: 'number',
+        params: {
+          sortField: 'datefield',
+          showArrayValues: false,
+        },
+      };
+      const indexPattern = createMockedIndexPattern();
+      const field = indexPattern.fields.find((i) => i.name === 'runtime-number')!;
+
+      expect(lastValueOperation.onFieldChange(oldColumn, field).params.showArrayValues).toBeFalsy();
+    });
   });
 
   describe('getPossibleOperationForField', () => {
@@ -327,7 +357,7 @@ describe('last_value', () => {
       ).toEqual({
         dataType: 'ip',
         isBucketed: false,
-        scale: 'ratio',
+        scale: 'ordinal',
       });
     });
 
@@ -488,11 +518,19 @@ describe('last_value', () => {
       );
     });
 
-    it('should set showArrayValues if field is scripted or comes from existing params', () => {
+    it('should set showArrayValues if field is scripted, non-numeric runtime or comes from existing params', () => {
       const indexPattern = createMockedIndexPattern();
 
       const scriptedField = indexPattern.fields.find((field) => field.scripted);
-      const nonScriptedField = indexPattern.fields.find((field) => !field.scripted);
+      const runtimeKeywordField = indexPattern.fields.find(
+        (field) => field.runtime && field.type !== 'number'
+      );
+      const runtimeNumericField = indexPattern.fields.find(
+        (field) => field.runtime && field.type === 'number'
+      );
+      const nonScriptedField = indexPattern.fields.find(
+        (field) => !field.scripted && !field.runtime
+      );
 
       const localLayer = {
         columns: {
@@ -515,6 +553,22 @@ describe('last_value', () => {
           field: scriptedField!,
         }).params.showArrayValues
       ).toBeTruthy();
+
+      expect(
+        lastValueOperation.buildColumn({
+          indexPattern,
+          layer: localLayer,
+          field: runtimeKeywordField!,
+        }).params.showArrayValues
+      ).toBeTruthy();
+
+      expect(
+        lastValueOperation.buildColumn({
+          indexPattern,
+          layer: localLayer,
+          field: runtimeNumericField!,
+        }).params.showArrayValues
+      ).toBeFalsy();
 
       expect(
         lastValueOperation.buildColumn(

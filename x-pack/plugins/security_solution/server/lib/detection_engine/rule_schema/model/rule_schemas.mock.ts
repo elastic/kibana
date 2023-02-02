@@ -125,6 +125,7 @@ export const getQueryRuleParams = (): QueryRuleParams => {
       },
     ],
     savedId: undefined,
+    alertSuppression: undefined,
     responseActions: undefined,
   };
 };
@@ -148,6 +149,7 @@ export const getSavedQueryRuleParams = (): SavedQueryRuleParams => {
     ],
     savedId: 'some-id',
     responseActions: undefined,
+    alertSuppression: undefined,
   };
 };
 
@@ -195,6 +197,7 @@ export const getThreatRuleParams = (): ThreatRuleParams => {
 };
 
 export const getRuleConfigMock = (type: string = 'rule-type'): SanitizedRuleConfig => ({
+  id: sampleRuleGuid,
   actions: [],
   enabled: true,
   name: 'rule-name',

@@ -12,7 +12,7 @@ import { getPrecisionErrorWarningMessages, cloneLayer } from './utils';
 import type { FormBasedPrivateState, GenericIndexPatternColumn } from './types';
 import type { FramePublicAPI } from '../../types';
 import type { DocLinksStart } from '@kbn/core/public';
-import { EuiButton } from '@elastic/eui';
+import { EuiLink } from '@elastic/eui';
 import { TermsIndexPatternColumn } from './operations';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -187,7 +187,7 @@ describe('indexpattern_datasource utils', () => {
       expect(warnings).toHaveLength(1);
       const DummyComponent = () => <>{warnings[0]}</>;
       const warningUi = shallow(<DummyComponent />);
-      warningUi.find(EuiButton).simulate('click');
+      warningUi.find(EuiLink).simulate('click');
       const stateSetter = setState.mock.calls[0][0];
       const newState = stateSetter(state);
       expect(newState.layers.id.columns.col1.label).toEqual('Rare values of category');

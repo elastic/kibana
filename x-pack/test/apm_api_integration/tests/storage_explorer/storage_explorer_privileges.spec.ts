@@ -20,7 +20,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
   registry.when('Storage explorer privileges', { config: 'basic', archives: [] }, () => {
     it('returns true when the user has the required indices privileges', async () => {
-      const { status, body } = await callApi(apmApiClient.monitorIndicesUser);
+      const { status, body } = await callApi(apmApiClient.monitorClusterAndIndicesUser);
       expect(status).to.be(200);
       expect(body.hasPrivileges).to.be(true);
     });

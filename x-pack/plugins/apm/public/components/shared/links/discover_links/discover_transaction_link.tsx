@@ -10,7 +10,7 @@ import {
   PROCESSOR_EVENT,
   TRACE_ID,
   TRANSACTION_ID,
-} from '../../../../../common/elasticsearch_fieldnames';
+} from '../../../../../common/es_fields/apm';
 import { Transaction } from '../../../../../typings/es_schemas/ui/transaction';
 import { DiscoverLink } from './discover_link';
 

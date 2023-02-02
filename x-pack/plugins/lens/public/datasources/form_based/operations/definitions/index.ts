@@ -198,8 +198,8 @@ export interface ParamEditorProps<
   activeData?: FormBasedDimensionEditorProps['activeData'];
   operationDefinitionMap: Record<string, GenericOperationDefinition>;
   paramEditorCustomProps?: ParamEditorCustomProps;
-  existingFields: Record<string, Record<string, boolean>>;
   isReferenced?: boolean;
+  dataSectionExtra?: React.ReactNode;
 }
 
 export interface FieldInputProps<C> {
@@ -215,10 +215,6 @@ export interface FieldInputProps<C> {
   incompleteParams: Omit<IncompleteColumn, 'sourceField' | 'operationType'>;
   dimensionGroups: FormBasedDimensionEditorProps['dimensionGroups'];
   groupId: FormBasedDimensionEditorProps['groupId'];
-  /**
-   * indexPatternId -> fieldName -> boolean
-   */
-  existingFields: Record<string, Record<string, boolean>>;
   operationSupportMatrix: OperationSupportMatrix;
   helpMessage?: React.ReactNode;
   operationDefinitionMap: Record<string, GenericOperationDefinition>;
@@ -314,6 +310,7 @@ interface BaseOperationDefinitionProps<
     layer: FormBasedLayer,
     columnId: string,
     indexPattern: IndexPattern,
+    dateRange?: DateRange,
     operationDefinitionMap?: Record<string, GenericOperationDefinition>
   ) =>
     | Array<
@@ -448,6 +445,10 @@ interface BaseOperationDefinitionProps<
    *    more than 5 values returned or 6 if the "Other" bucket is enabled)
    */
   getMaxPossibleNumValues?: (column: C) => number;
+  /**
+   * Boolean flag whether the data section extra element passed in from the visualization is handled by the param editor of the operation or whether the datasource general logic should be used.
+   */
+  handleDataSectionExtra?: boolean;
 }
 
 interface BaseBuildColumnArgs {

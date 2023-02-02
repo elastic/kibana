@@ -19,7 +19,6 @@ import { SeverityBadge } from '../../../../detections/components/rules/severity_
 import type { State } from '../../../store';
 import { createStore } from '../../../store';
 import { TimelineId } from '../../../../../common/types';
-import { tGridReducer } from '@kbn/timelines-plugin/public';
 
 const state: State = {
   ...mockGlobalState,
@@ -35,13 +34,7 @@ const state: State = {
 };
 
 const { storage } = createSecuritySolutionStorageMock();
-const store = createStore(
-  state,
-  SUB_PLUGINS_REDUCER,
-  { dataTable: tGridReducer },
-  kibanaObservable,
-  storage
-);
+const store = createStore(state, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
 
 const props = {
   title: 'Severity',

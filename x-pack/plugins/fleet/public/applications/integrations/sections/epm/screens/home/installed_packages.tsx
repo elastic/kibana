@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import { useLocation, useHistory, useParams } from 'react-router-dom';
 import semverLt from 'semver/functions/lt';
 import { i18n } from '@kbn/i18n';
@@ -19,7 +19,9 @@ import { PackageListGrid } from '../../components/package_list_grid';
 
 import type { PackageListItem } from '../../../../types';
 
-import type { CategoryFacet } from './category_facets';
+import type { IntegrationsURLParameters } from './hooks/use_available_packages';
+
+import type { CategoryFacet, ExtendedIntegrationCategory } from './category_facets';
 import { CategoryFacets } from './category_facets';
 
 import type { CategoryParams } from '.';
@@ -42,7 +44,7 @@ const AnnouncementLink = () => {
   );
 };
 
-const InstalledIntegrationsInfoCallout = () => (
+const InstalledIntegrationsInfoCallout: React.FC = () => (
   <EuiCallOut
     title={i18n.translate('xpack.fleet.epmList.availableCalloutTitle', {
       defaultMessage: 'Only installed Elastic Agent Integrations are displayed.',
@@ -56,6 +58,27 @@ const InstalledIntegrationsInfoCallout = () => (
         values={{
           link: <AnnouncementLink />,
         }}
+      />
+    </p>
+  </EuiCallOut>
+);
+
+const UpdatesAvailableCallout: React.FC<{ count: number }> = ({ count }) => (
+  <EuiCallOut
+    title={i18n.translate('xpack.fleet.epmList.updatesAvailableCalloutTitle', {
+      defaultMessage:
+        '{count, number} of your installed integrations {count, plural, one {has an update} other {have updates}} available.',
+      values: {
+        count,
+      },
+    })}
+    iconType="alert"
+    color="warning"
+  >
+    <p>
+      <FormattedMessage
+        id="xpack.fleet.epmList.updatesAvailableCalloutText"
+        defaultMessage="Update your integrations to get the latest features."
       />
     </p>
   </EuiCallOut>
@@ -92,8 +115,6 @@ const VerificationWarningCallout: React.FC = () => {
   );
 };
 
-// TODO: clintandrewhall - this component is hard to test due to the hooks, particularly those that use `http`
-// or `location` to load data.  Ideally, we'll split this into "connected" and "pure" components.
 export const InstalledPackages: React.FC<{
   installedPackages: PackageListItem[];
   isLoading: boolean;
@@ -104,34 +125,42 @@ export const InstalledPackages: React.FC<{
 
   const { getHref, getAbsolutePath } = useLink();
 
-  const { selectedCategory, searchParam } = getParams(
+  const { selectedCategory: initialSelectedCategory, searchParam } = getParams(
     useParams<CategoryParams>(),
     useLocation().search
   );
+  const [selectedCategory, setCategory] = useState(initialSelectedCategory);
+  const [searchTerm, setSearchTerm] = useState(searchParam || '');
 
   const { http } = useStartServices();
   const addBasePath = http.basePath.prepend;
 
   const history = useHistory();
 
-  function setUrlCategory(categoryId: string) {
+  const buildUrl = ({ searchString, categoryId, subCategoryId }: IntegrationsURLParameters) => {
     const url = pagePathGetters.integrations_installed({
-      category: categoryId,
-      searchTerm: searchParam,
+      category: categoryId ? categoryId : '',
+      query: searchString ? searchString : '',
     })[1];
+    return url;
+  };
 
+  const setUrlandPushHistory = ({ searchString, categoryId }: IntegrationsURLParameters) => {
+    const url = buildUrl({
+      categoryId,
+      searchString,
+    });
     history.push(url);
-  }
+  };
 
-  function setUrlSearchTerm(search: string) {
+  const setUrlandReplaceHistory = ({ searchString, categoryId }: IntegrationsURLParameters) => {
+    const url = buildUrl({
+      categoryId,
+      searchString,
+    });
     // Use .replace so the browser's back button is not tied to single keystroke
-    history.replace(
-      pagePathGetters.integrations_installed({
-        searchTerm: search,
-        selectedCategory,
-      })[1]
-    );
-  }
+    history.replace(url);
+  };
 
   const updatablePackages = useMemo(
     () =>
@@ -157,10 +186,7 @@ export const InstalledPackages: React.FC<{
   );
 
   if (!categoryExists(selectedCategory, categories)) {
-    history.replace(
-      pagePathGetters.integrations_installed({ category: '', searchTerm: searchParam })[1]
-    );
-
+    setUrlandReplaceHistory({ searchString: searchTerm, categoryId: '' });
     return null;
   }
 
@@ -168,7 +194,11 @@ export const InstalledPackages: React.FC<{
     <CategoryFacets
       categories={categories}
       selectedCategory={selectedCategory}
-      onCategoryChange={({ id }: CategoryFacet) => setUrlCategory(id)}
+      onCategoryChange={({ id }: CategoryFacet) => {
+        setCategory(id as ExtendedIntegrationCategory);
+        setSearchTerm('');
+        setUrlandPushHistory({ searchString: '', categoryId: id });
+      }}
     />
   );
 
@@ -185,18 +215,26 @@ export const InstalledPackages: React.FC<{
     })
   );
 
-  const CalloutComponent = cards.some((c) => c.isUnverified)
-    ? VerificationWarningCallout
-    : InstalledIntegrationsInfoCallout;
-  const callout = selectedCategory === UPDATES_AVAILABLE || isLoading ? null : <CalloutComponent />;
+  let CalloutComponent = <InstalledIntegrationsInfoCallout />;
+
+  const unverifiedCount = cards.filter((c) => c.isUnverified).length;
+  const updateAvailableCount = cards.filter((c) => c.isUpdateAvailable).length;
+  if (unverifiedCount) {
+    CalloutComponent = <VerificationWarningCallout />;
+  } else if (updateAvailableCount) {
+    CalloutComponent = <UpdatesAvailableCallout count={updateAvailableCount} />;
+  }
+  const callout = selectedCategory === UPDATES_AVAILABLE || isLoading ? null : CalloutComponent;
 
   return (
     <PackageListGrid
       {...{ isLoading, controls, callout, categories }}
       selectedCategory={selectedCategory}
-      setSelectedCategory={setUrlCategory}
-      onSearchChange={setUrlSearchTerm}
-      initialSearch={searchParam}
+      setCategory={setCategory}
+      setUrlandPushHistory={setUrlandPushHistory}
+      setUrlandReplaceHistory={setUrlandReplaceHistory}
+      searchTerm={searchTerm}
+      setSearchTerm={setSearchTerm}
       list={cards}
     />
   );

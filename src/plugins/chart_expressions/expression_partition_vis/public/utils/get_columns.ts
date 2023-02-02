@@ -9,7 +9,7 @@
 import { ExpressionValueVisDimension } from '@kbn/visualizations-plugin/common';
 import { getColumnByAccessor, getFormatByAccessor } from '@kbn/visualizations-plugin/common/utils';
 import { DatatableColumn, Datatable } from '@kbn/expressions-plugin/public';
-import { BucketColumns, PartitionVisParams } from '../../common/types';
+import { BucketColumns } from '../../common/types';
 
 const getMetricColumn = (
   metricAccessor: ExpressionValueVisDimension | string,
@@ -19,14 +19,17 @@ const getMetricColumn = (
 };
 
 export const getColumns = (
-  visParams: PartitionVisParams,
+  dimensions: {
+    metric: string | ExpressionValueVisDimension | undefined;
+    buckets: Array<string | ExpressionValueVisDimension>;
+  },
   visData: Datatable
 ): {
   metricColumn: DatatableColumn;
   bucketColumns: Array<Partial<BucketColumns>>;
 } => {
-  const { metric, buckets } = visParams.dimensions;
-  if (buckets && buckets.length > 0) {
+  const { metric, buckets } = dimensions;
+  if (buckets.length > 0) {
     const bucketColumns: Array<Partial<BucketColumns>> = buckets.map((bucket) => {
       const column = getColumnByAccessor(bucket, visData.columns);
       return {

@@ -17,9 +17,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const find = getService('find');
   const comboBox = getService('comboBox');
 
-  // FLAKY: https://github.com/elastic/kibana/issues/96997
-  // FLAKY: https://github.com/elastic/kibana/issues/100372
-  describe.skip('chained controls', function () {
+  describe('chained controls', function () {
     this.tags('includeFirefox');
 
     before(async () => {
@@ -42,7 +40,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('should filter child control options by parent control value', async () => {
       await comboBox.set('listControlSelect0', 'BR');
-
       const childControlMenu = await comboBox.getOptionsList('listControlSelect1');
       expect(childControlMenu.trim().split('\n').join()).to.equal(
         '14.61.182.136,3.174.21.181,6.183.121.70,71.241.97.89,9.69.255.135'

@@ -6,12 +6,10 @@
  */
 
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
-import { Setup } from '../../lib/helpers/setup_request';
+import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
 
 // Note: this logic is duplicated in tutorials/apm/envs/on_prem
-export async function hasHistoricalAgentData(setup: Setup) {
-  const { apmEventClient } = setup;
-
+export async function hasHistoricalAgentData(apmEventClient: APMEventClient) {
   const params = {
     terminate_after: 1,
     apm: {

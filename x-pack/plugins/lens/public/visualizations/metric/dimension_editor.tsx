@@ -17,6 +17,8 @@ import {
   EuiColorPicker,
   euiPaletteColorBlind,
   EuiSpacer,
+  EuiText,
+  useEuiTheme,
 } from '@elastic/eui';
 import { LayoutDirection } from '@elastic/charts';
 import React, { useCallback, useState } from 'react';
@@ -30,6 +32,7 @@ import {
 } from '@kbn/coloring';
 import { getDataBoundsForPalette } from '@kbn/expression-metric-vis-plugin/public';
 import { getColumnByAccessor } from '@kbn/visualizations-plugin/common/utils';
+import { css } from '@emotion/react';
 import { isNumericFieldForDatatable } from '../../../common/expressions/datatable/utils';
 import {
   applyPaletteParams,
@@ -263,170 +266,8 @@ function PrimaryMetricEditor(props: SubProps) {
 
   const togglePalette = () => setIsPaletteOpen(!isPaletteOpen);
 
-  const supportingVisLabel = i18n.translate('xpack.lens.metric.supportingVis.label', {
-    defaultMessage: 'Supporting visualization',
-  });
-
-  const hasDefaultTimeField = props.datasource?.hasDefaultTimeField();
-  const metricHasReducedTimeRange = Boolean(
-    state.metricAccessor &&
-      props.datasource?.getOperationForColumnId(state.metricAccessor)?.hasReducedTimeRange
-  );
-  const secondaryMetricHasReducedTimeRange = Boolean(
-    state.secondaryMetricAccessor &&
-      props.datasource?.getOperationForColumnId(state.secondaryMetricAccessor)?.hasReducedTimeRange
-  );
-
-  const supportingVisHelpTexts: string[] = [];
-
-  const supportsTrendline =
-    hasDefaultTimeField && !metricHasReducedTimeRange && !secondaryMetricHasReducedTimeRange;
-
-  if (!supportsTrendline) {
-    supportingVisHelpTexts.push(
-      !hasDefaultTimeField
-        ? i18n.translate('xpack.lens.metric.supportingVis.needDefaultTimeField', {
-            defaultMessage: 'Use a data view with a default time field to enable trend lines.',
-          })
-        : metricHasReducedTimeRange
-        ? i18n.translate('xpack.lens.metric.supportingVis.metricHasReducedTimeRange', {
-            defaultMessage:
-              'Remove the reduced time range on this dimension to enable trend lines.',
-          })
-        : secondaryMetricHasReducedTimeRange
-        ? i18n.translate('xpack.lens.metric.supportingVis.secondaryMetricHasReducedTimeRange', {
-            defaultMessage:
-              'Remove the reduced time range on the secondary metric dimension to enable trend lines.',
-          })
-        : ''
-    );
-  }
-
-  if (!state.maxAccessor) {
-    supportingVisHelpTexts.push(
-      i18n.translate('xpack.lens.metric.summportingVis.needMaxDimension', {
-        defaultMessage: 'Add a maximum dimension to enable the progress bar.',
-      })
-    );
-  }
-
-  const buttonIdPrefix = `${idPrefix}--`;
-
   return (
     <>
-      <EuiFormRow
-        display="columnCompressed"
-        fullWidth
-        label={supportingVisLabel}
-        helpText={supportingVisHelpTexts.map((text) => (
-          <div>{text}</div>
-        ))}
-      >
-        <EuiButtonGroup
-          isFullWidth
-          buttonSize="compressed"
-          legend={supportingVisLabel}
-          data-test-subj="lnsMetric_supporting_visualization_buttons"
-          options={[
-            {
-              id: `${buttonIdPrefix}none`,
-              label: i18n.translate('xpack.lens.metric.supportingVisualization.none', {
-                defaultMessage: 'None',
-              }),
-              'data-test-subj': 'lnsMetric_supporting_visualization_none',
-            },
-            {
-              id: `${buttonIdPrefix}trendline`,
-              label: i18n.translate('xpack.lens.metric.supportingVisualization.trendline', {
-                defaultMessage: 'Trend line',
-              }),
-              isDisabled: !supportsTrendline,
-              'data-test-subj': 'lnsMetric_supporting_visualization_trendline',
-            },
-            {
-              id: `${buttonIdPrefix}bar`,
-              label: i18n.translate('xpack.lens.metric.supportingVisualization.bar', {
-                defaultMessage: 'Bar',
-              }),
-              isDisabled: !state.maxAccessor,
-              'data-test-subj': 'lnsMetric_supporting_visualization_bar',
-            },
-          ]}
-          idSelected={`${buttonIdPrefix}${
-            state.trendlineLayerId ? 'trendline' : showingBar(state) ? 'bar' : 'none'
-          }`}
-          onChange={(id) => {
-            const supportingVisualizationType = id.split('--')[1] as SupportingVisType;
-
-            switch (supportingVisualizationType) {
-              case 'trendline':
-                setState({
-                  ...state,
-                  showBar: false,
-                });
-                props.addLayer('metricTrendline');
-                break;
-              case 'bar':
-                setState({
-                  ...state,
-                  showBar: true,
-                });
-                if (state.trendlineLayerId) props.removeLayer(state.trendlineLayerId);
-                break;
-              case 'none':
-                setState({
-                  ...state,
-                  showBar: false,
-                });
-                if (state.trendlineLayerId) props.removeLayer(state.trendlineLayerId);
-                break;
-            }
-          }}
-        />
-      </EuiFormRow>
-      {showingBar(state) && (
-        <EuiFormRow
-          label={i18n.translate('xpack.lens.metric.progressDirectionLabel', {
-            defaultMessage: 'Bar direction',
-          })}
-          fullWidth
-          display="columnCompressed"
-        >
-          <EuiButtonGroup
-            isFullWidth
-            buttonSize="compressed"
-            legend={i18n.translate('xpack.lens.metric.progressDirectionLabel', {
-              defaultMessage: 'Bar direction',
-            })}
-            data-test-subj="lnsMetric_progress_direction_buttons"
-            name="alignment"
-            options={[
-              {
-                id: `${idPrefix}vertical`,
-                label: i18n.translate('xpack.lens.metric.progressDirection.vertical', {
-                  defaultMessage: 'Vertical',
-                }),
-                'data-test-subj': 'lnsMetric_progress_bar_vertical',
-              },
-              {
-                id: `${idPrefix}horizontal`,
-                label: i18n.translate('xpack.lens.metric.progressDirection.horizontal', {
-                  defaultMessage: 'Horizontal',
-                }),
-                'data-test-subj': 'lnsMetric_progress_bar_horizontal',
-              },
-            ]}
-            idSelected={`${idPrefix}${state.progressDirection ?? 'vertical'}`}
-            onChange={(id) => {
-              const newDirection = id.replace(idPrefix, '') as LayoutDirection;
-              setState({
-                ...state,
-                progressDirection: newDirection,
-              });
-            }}
-          />
-        </EuiFormRow>
-      )}
       <EuiFormRow
         display="columnCompressed"
         fullWidth
@@ -578,5 +419,205 @@ function StaticColorControls({ state, setState }: Pick<Props, 'state' | 'setStat
         swatches={euiPaletteColorBlind()}
       />
     </EuiFormRow>
+  );
+}
+
+export function DimensionEditorAdditionalSection({
+  state,
+  datasource,
+  setState,
+  addLayer,
+  removeLayer,
+  accessor,
+}: VisualizationDimensionEditorProps<MetricVisualizationState>) {
+  const { euiTheme } = useEuiTheme();
+
+  if (accessor !== state.metricAccessor) {
+    return null;
+  }
+
+  const idPrefix = htmlIdGenerator()();
+
+  const hasDefaultTimeField = datasource?.hasDefaultTimeField();
+  const metricHasReducedTimeRange = Boolean(
+    state.metricAccessor &&
+      datasource?.getOperationForColumnId(state.metricAccessor)?.hasReducedTimeRange
+  );
+  const secondaryMetricHasReducedTimeRange = Boolean(
+    state.secondaryMetricAccessor &&
+      datasource?.getOperationForColumnId(state.secondaryMetricAccessor)?.hasReducedTimeRange
+  );
+
+  const supportingVisHelpTexts: string[] = [];
+
+  const supportsTrendline =
+    hasDefaultTimeField && !metricHasReducedTimeRange && !secondaryMetricHasReducedTimeRange;
+
+  if (!supportsTrendline) {
+    supportingVisHelpTexts.push(
+      !hasDefaultTimeField
+        ? i18n.translate('xpack.lens.metric.supportingVis.needDefaultTimeField', {
+            defaultMessage:
+              'Line visualizations require use of a data view with a default time field.',
+          })
+        : metricHasReducedTimeRange
+        ? i18n.translate('xpack.lens.metric.supportingVis.metricHasReducedTimeRange', {
+            defaultMessage:
+              'Line visualizations cannot be used when a reduced time range is applied to the primary metric.',
+          })
+        : secondaryMetricHasReducedTimeRange
+        ? i18n.translate('xpack.lens.metric.supportingVis.secondaryMetricHasReducedTimeRange', {
+            defaultMessage:
+              'Line visualizations cannot be used when a reduced time range is applied to the secondary metric.',
+          })
+        : ''
+    );
+  }
+
+  if (!state.maxAccessor) {
+    supportingVisHelpTexts.push(
+      i18n.translate('xpack.lens.metric.summportingVis.needMaxDimension', {
+        defaultMessage: 'Bar visualizations require a maximum value to be defined.',
+      })
+    );
+  }
+
+  const buttonIdPrefix = `${idPrefix}--`;
+
+  return (
+    <div className="lnsIndexPatternDimensionEditor--padded lnsIndexPatternDimensionEditor--collapseNext">
+      <EuiText
+        size="s"
+        css={css`
+          margin-bottom: ${euiTheme.size.base};
+        `}
+      >
+        <h4>
+          {i18n.translate('xpack.lens.metric.supportingVis.label', {
+            defaultMessage: 'Supporting visualization',
+          })}
+        </h4>
+      </EuiText>
+
+      <>
+        <EuiFormRow
+          display="columnCompressed"
+          fullWidth
+          label={i18n.translate('xpack.lens.metric.supportingVis.type', {
+            defaultMessage: 'Type',
+          })}
+          helpText={supportingVisHelpTexts.map((text) => (
+            <p>{text}</p>
+          ))}
+        >
+          <EuiButtonGroup
+            isFullWidth
+            buttonSize="compressed"
+            legend={i18n.translate('xpack.lens.metric.supportingVis.type', {
+              defaultMessage: 'Type',
+            })}
+            data-test-subj="lnsMetric_supporting_visualization_buttons"
+            options={[
+              {
+                id: `${buttonIdPrefix}none`,
+                label: i18n.translate('xpack.lens.metric.supportingVisualization.none', {
+                  defaultMessage: 'None',
+                }),
+                'data-test-subj': 'lnsMetric_supporting_visualization_none',
+              },
+              {
+                id: `${buttonIdPrefix}trendline`,
+                label: i18n.translate('xpack.lens.metric.supportingVisualization.trendline', {
+                  defaultMessage: 'Line',
+                }),
+                isDisabled: !supportsTrendline,
+                'data-test-subj': 'lnsMetric_supporting_visualization_trendline',
+              },
+              {
+                id: `${buttonIdPrefix}bar`,
+                label: i18n.translate('xpack.lens.metric.supportingVisualization.bar', {
+                  defaultMessage: 'Bar',
+                }),
+                isDisabled: !state.maxAccessor,
+                'data-test-subj': 'lnsMetric_supporting_visualization_bar',
+              },
+            ]}
+            idSelected={`${buttonIdPrefix}${
+              state.trendlineLayerId ? 'trendline' : showingBar(state) ? 'bar' : 'none'
+            }`}
+            onChange={(id) => {
+              const supportingVisualizationType = id.split('--')[1] as SupportingVisType;
+
+              switch (supportingVisualizationType) {
+                case 'trendline':
+                  setState({
+                    ...state,
+                    showBar: false,
+                  });
+                  addLayer('metricTrendline');
+                  break;
+                case 'bar':
+                  setState({
+                    ...state,
+                    showBar: true,
+                  });
+                  if (state.trendlineLayerId) removeLayer(state.trendlineLayerId);
+                  break;
+                case 'none':
+                  setState({
+                    ...state,
+                    showBar: false,
+                  });
+                  if (state.trendlineLayerId) removeLayer(state.trendlineLayerId);
+                  break;
+              }
+            }}
+          />
+        </EuiFormRow>
+        {showingBar(state) && (
+          <EuiFormRow
+            label={i18n.translate('xpack.lens.metric.progressDirectionLabel', {
+              defaultMessage: 'Bar orientation',
+            })}
+            fullWidth
+            display="columnCompressed"
+          >
+            <EuiButtonGroup
+              isFullWidth
+              buttonSize="compressed"
+              legend={i18n.translate('xpack.lens.metric.progressDirectionLabel', {
+                defaultMessage: 'Bar orientation',
+              })}
+              data-test-subj="lnsMetric_progress_direction_buttons"
+              name="alignment"
+              options={[
+                {
+                  id: `${idPrefix}vertical`,
+                  label: i18n.translate('xpack.lens.metric.progressDirection.vertical', {
+                    defaultMessage: 'Vertical',
+                  }),
+                  'data-test-subj': 'lnsMetric_progress_bar_vertical',
+                },
+                {
+                  id: `${idPrefix}horizontal`,
+                  label: i18n.translate('xpack.lens.metric.progressDirection.horizontal', {
+                    defaultMessage: 'Horizontal',
+                  }),
+                  'data-test-subj': 'lnsMetric_progress_bar_horizontal',
+                },
+              ]}
+              idSelected={`${idPrefix}${state.progressDirection ?? 'vertical'}`}
+              onChange={(id) => {
+                const newDirection = id.replace(idPrefix, '') as LayoutDirection;
+                setState({
+                  ...state,
+                  progressDirection: newDirection,
+                });
+              }}
+            />
+          </EuiFormRow>
+        )}
+      </>
+    </div>
   );
 }

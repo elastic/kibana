@@ -9,12 +9,24 @@ import { MetricItem } from './metric_item';
 import { useLast50DurationChart } from '../../../../hooks';
 import { MonitorOverviewItem } from '../../../../../../../common/runtime_types';
 
-export const OverviewGridItem = ({ monitor }: { monitor: MonitorOverviewItem }) => {
+export const OverviewGridItem = ({
+  monitor,
+  onClick,
+}: {
+  monitor: MonitorOverviewItem;
+  onClick: (params: { id: string; configId: string; location: string; locationId: string }) => void;
+}) => {
   const { data, loading, averageDuration } = useLast50DurationChart({
     locationId: monitor.location?.id,
     monitorId: monitor.id,
   });
   return (
-    <MetricItem monitor={monitor} data={data} loaded={!loading} averageDuration={averageDuration} />
+    <MetricItem
+      data={data}
+      monitor={monitor}
+      loaded={!loading}
+      averageDuration={averageDuration}
+      onClick={onClick}
+    />
   );
 };

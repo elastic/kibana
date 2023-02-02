@@ -6,7 +6,13 @@
  * Side Public License, v 1.
  */
 
-import { EuiContextMenuPanelDescriptor, EuiPanel, htmlIdGenerator } from '@elastic/eui';
+import {
+  EuiContextMenuPanelDescriptor,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiPanel,
+  htmlIdGenerator,
+} from '@elastic/eui';
 import classNames from 'classnames';
 import React, { ReactNode } from 'react';
 import { Subscription } from 'rxjs';
@@ -27,11 +33,11 @@ import {
   contextMenuTrigger,
 } from '../triggers';
 import {
-  IEmbeddable,
-  EmbeddableOutput,
-  EmbeddableError,
+  EmbeddableErrorHandler,
   EmbeddableInput,
-} from '../embeddables/i_embeddable';
+  EmbeddableOutput,
+  IEmbeddable,
+} from '../embeddables';
 import { ViewMode } from '../types';
 
 import { EmbeddablePanelError } from './embeddable_panel_error';
@@ -105,7 +111,7 @@ interface State {
   badges: Array<Action<EmbeddableContext>>;
   notifications: Array<Action<EmbeddableContext>>;
   loading?: boolean;
-  error?: EmbeddableError;
+  error?: Error;
   destroyError?(): void;
   node?: ReactNode;
 }
@@ -157,10 +163,15 @@ export class EmbeddablePanel extends React.Component<Props, State> {
     if (this.props.showBadges === false) {
       return;
     }
-    let badges =
-      (await this.props.getActions?.(PANEL_BADGE_TRIGGER, {
+
+    type BadgeAction = Action<
+      EmbeddableContext<IEmbeddable<EmbeddableInput, EmbeddableOutput, any>>
+    >;
+
+    let badges: BadgeAction[] =
+      ((await this.props.getActions?.(PANEL_BADGE_TRIGGER, {
         embeddable: this.props.embeddable,
-      })) ?? [];
+      })) as BadgeAction[]) ?? [];
 
     const { disabledActions } = this.props.embeddable.getInput();
     if (disabledActions) {
@@ -181,10 +192,15 @@ export class EmbeddablePanel extends React.Component<Props, State> {
     if (this.props.showNotifications === false) {
       return;
     }
-    let notifications =
-      (await this.props.getActions?.(PANEL_NOTIFICATION_TRIGGER, {
+
+    type NotificationAction = Action<
+      EmbeddableContext<IEmbeddable<EmbeddableInput, EmbeddableOutput, any>>
+    >;
+
+    let notifications: NotificationAction[] =
+      ((await this.props.getActions?.(PANEL_NOTIFICATION_TRIGGER, {
         embeddable: this.props.embeddable,
-      })) ?? [];
+      })) as NotificationAction[]) ?? [];
 
     const { disabledActions } = this.props.embeddable.getInput();
     if (disabledActions) {
@@ -301,11 +317,24 @@ export class EmbeddablePanel extends React.Component<Props, State> {
           />
         )}
         {this.state.error && (
-          <EmbeddablePanelError
-            editPanelAction={this.state.universalActions.editPanel}
-            embeddable={this.props.embeddable}
-            error={this.state.error}
-          />
+          <EuiFlexGroup
+            alignItems="center"
+            className="eui-fullHeight embPanel__error"
+            data-test-subj="embeddableError"
+            justifyContent="center"
+          >
+            <EuiFlexItem>
+              <EmbeddableErrorHandler embeddable={this.props.embeddable} error={this.state.error}>
+                {(error) => (
+                  <EmbeddablePanelError
+                    editPanelAction={this.state.universalActions.editPanel}
+                    embeddable={this.props.embeddable}
+                    error={error}
+                  />
+                )}
+              </EmbeddableErrorHandler>
+            </EuiFlexItem>
+          </EuiFlexGroup>
         )}
         <div className="embPanel__content" ref={this.embeddableRoot} {...contentAttrs}>
           {this.state.node}
@@ -436,7 +465,7 @@ export class EmbeddablePanel extends React.Component<Props, State> {
       sortedActions = sortedActions.filter(({ id }) => this.props.actionPredicate!(id));
     }
 
-    return await buildContextMenuForActions({
+    const panels = await buildContextMenuForActions({
       actions: sortedActions.map((action) => ({
         action,
         context: { embeddable: this.props.embeddable },
@@ -444,5 +473,10 @@ export class EmbeddablePanel extends React.Component<Props, State> {
       })),
       closeMenu: this.closeMyContextMenuPanel,
     });
+
+    return {
+      panels,
+      actions: sortedActions,
+    };
   };
 }

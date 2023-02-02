@@ -92,6 +92,20 @@
 {
   "type": "doc",
   "value": {
+    "id": "fleet-server-host-1",
+    "index": ".fleet-fleet-server-host",
+    "source": {
+      "id": "test-default-123",
+      "name": "Default",
+      "is_default": true,
+      "host_urls": ["https://test.fr:8080", "https://test.fr:8081"]
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
     "id": "fleet-agent-actions:b400439c-bbbf-43d5-83cb-cf8b7e32506f",
     "index": ".kibana",
     "source": {

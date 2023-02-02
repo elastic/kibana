@@ -113,14 +113,6 @@ const defaultOptions = {
   isFullscreen: false,
   toggleFullscreen: jest.fn(),
   setIsCloseable: jest.fn(),
-  existingFields: {
-    my_index_pattern: {
-      timestamp: true,
-      bytes: true,
-      memory: true,
-      source: true,
-    },
-  },
 };
 
 describe('date_histogram', () => {

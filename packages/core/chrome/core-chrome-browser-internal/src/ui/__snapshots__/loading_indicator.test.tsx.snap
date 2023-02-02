@@ -19,3 +19,12 @@ exports[`kbnLoadingIndicator is visible when loadingCount is > 0 1`] = `
   type="logoElastic"
 />
 `;
+
+exports[`kbnLoadingIndicator shows logo image when customLogo is set 1`] = `
+<EuiImage
+  alt="logo"
+  aria-label="User logo"
+  size={24}
+  src="customLogo"
+/>
+`;

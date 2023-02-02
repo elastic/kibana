@@ -25,7 +25,7 @@ export const AddMLInferencePipelineButton: React.FC<AddMLInferencePipelineButton
   const { capabilities } = useValues(KibanaLogic);
   const { ingestionMethod } = useValues(IndexViewLogic);
   const { canUseMlInferencePipeline, hasIndexIngestionPipeline } = useValues(PipelinesLogic);
-  const hasMLPermissions = capabilities?.ml?.canAccessML ?? false;
+  const hasMLPermissions = capabilities?.ml?.canGetTrainedModels ?? false;
   if (!hasMLPermissions) {
     return (
       <EuiToolTip

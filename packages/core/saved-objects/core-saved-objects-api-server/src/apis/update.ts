@@ -10,6 +10,7 @@ import type { SavedObjectReference, SavedObject } from '@kbn/core-saved-objects-
 import type { MutatingOperationRefreshSetting, SavedObjectsBaseOptions } from './base';
 
 /**
+ * Options for the saved objects update operation
  *
  * @public
  */
@@ -23,7 +24,7 @@ export interface SavedObjectsUpdateOptions<Attributes = unknown> extends SavedOb
   references?: SavedObjectReference[];
   /** The Elasticsearch Refresh setting for this operation */
   refresh?: MutatingOperationRefreshSetting;
-  /** If specified, will be used to perform an upsert if the document doesn't exist */
+  /** If specified, will be used to perform an upsert if the object doesn't exist */
   upsert?: Attributes;
   /**
    * The Elasticsearch `retry_on_conflict` setting for this operation.
@@ -33,11 +34,14 @@ export interface SavedObjectsUpdateOptions<Attributes = unknown> extends SavedOb
 }
 
 /**
+ * Return type of the Saved Objects `update()` method.
  *
  * @public
  */
 export interface SavedObjectsUpdateResponse<T = unknown>
   extends Omit<SavedObject<T>, 'attributes' | 'references'> {
+  /** partial attributes of the saved object */
   attributes: Partial<T>;
+  /** optionally included references to other saved objects */
   references: SavedObjectReference[] | undefined;
 }

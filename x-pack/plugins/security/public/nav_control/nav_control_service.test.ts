@@ -75,7 +75,9 @@ describe('SecurityNavControlService', () => {
 
     expect(target).toMatchInlineSnapshot(`
       <div>
-        <div>
+        <div
+          css="You have tried to stringify object returned from \`css\` function. It isn't supposed to be used directly (e.g. as value of the \`className\` prop), but rather handed to emotion so it can handle it (e.g. as value of \`css\` prop)."
+        >
           <div
             class="euiPopover emotion-euiPopover"
             id="headerUserMenu"
@@ -88,7 +90,7 @@ describe('SecurityNavControlService', () => {
                 aria-expanded="false"
                 aria-haspopup="true"
                 aria-label="Account menu"
-                class="euiButtonEmpty euiButtonEmpty--text euiHeaderSectionItemButton"
+                class="euiButtonEmpty euiHeaderSectionItemButton css-wvaqcf-empty-text"
                 data-test-subj="userMenuButton"
                 style="line-height: normal;"
                 type="button"

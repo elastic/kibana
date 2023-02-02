@@ -5,6 +5,7 @@ post:
     You must have `all` privileges for the **Cases** feature in the
     **Management**, **Observability**, or **Security** section of the Kibana
     feature privileges, depending on the owner of the case you're creating.
+    NOTE: Each case can have a maximum of 1,000 alerts.
   tags:
     - cases
   parameters:
@@ -30,6 +31,12 @@ post:
           examples:
             createCaseCommentResponse:
               $ref: '../components/examples/add_comment_response.yaml'
+    '401':
+      description: Authorization information is missing or invalid.
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/4xx_response.yaml'
   servers:
      - url: https://localhost:5601
 
@@ -49,6 +56,12 @@ delete:
   responses:
     '204':
       description: Indicates a successful call.
+    '401':
+      description: Authorization information is missing or invalid.
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/4xx_response.yaml'
   servers:
     - url: https://localhost:5601
 
@@ -85,6 +98,12 @@ patch:
           examples:
             updateCaseCommentResponse:
               $ref: '../components/examples/update_comment_response.yaml'
+    '401':
+      description: Authorization information is missing or invalid.
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/4xx_response.yaml'
   servers:
         - url: https://localhost:5601
 
@@ -108,9 +127,13 @@ get:
         application/json:
           schema:
             $ref: '../components/schemas/case_response_properties.yaml'
-
+    '401':
+      description: Authorization information is missing or invalid.
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/4xx_response.yaml'
   servers:
     - url: https://localhost:5601
-
 servers:
       - url: https://localhost:5601

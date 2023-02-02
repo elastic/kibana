@@ -35,9 +35,12 @@ interface Props {
   onChange: (roleTempplate: RoleTemplate) => void;
   canUseStoredScripts: boolean;
   canUseInlineScripts: boolean;
+  readOnly?: boolean;
 }
 
 export const RoleTemplateTypeSelect = (props: Props) => {
+  if (props.readOnly === undefined) props.readOnly = false;
+
   const availableOptions = templateTypeOptions.filter(
     ({ id }) =>
       (id === 'inline' && props.canUseInlineScripts) ||
@@ -75,6 +78,7 @@ export const RoleTemplateTypeSelect = (props: Props) => {
         }
       }}
       isClearable={false}
+      isDisabled={props.readOnly}
     />
   );
 };

@@ -60,7 +60,8 @@ describe('#toExpression', () => {
     const datasourceExpression = mockDatasource.toExpression(
       frame.datasourceLayers.first,
       'first',
-      frame.dataViews.indexPatterns
+      frame.dataViews.indexPatterns,
+      frame.dateRange
     ) ?? {
       type: 'expression',
       chain: [],
@@ -205,9 +206,9 @@ describe('#toExpression', () => {
       undefined,
       datasourceExpressionsByLayers
     ) as Ast;
-    expect((expression.chain[0].arguments.layers[0] as Ast).chain[0].arguments.xAccessor).toEqual(
-      []
-    );
+    expect(
+      (expression.chain[0].arguments.layers[0] as Ast).chain[0].arguments.xAccessor
+    ).toBeUndefined();
   });
 
   it('should not generate an expression when missing y', () => {
@@ -499,7 +500,7 @@ describe('#toExpression', () => {
       datasourceExpressionsByLayers
     ) as Ast;
     expect(
-      (expression.chain[0].arguments.legend[0] as Ast).chain[0].arguments.legendSize[0]
+      (expression.chain[0].arguments.legend[0] as Ast).chain[0].arguments.legendSize
     ).toBeUndefined();
   });
 
@@ -537,7 +538,7 @@ describe('#toExpression', () => {
         (ast.chain[0].arguments.layers[index] as Ast).chain[0].arguments.decorations[0] as Ast
       ).chain[0].arguments.color;
     }
-    expect(getYConfigColorForLayer(expression, 0)).toEqual([]);
+    expect(getYConfigColorForLayer(expression, 0)).toBeUndefined();
     expect(getYConfigColorForLayer(expression, 1)).toEqual([defaultReferenceLineColor]);
   });
 

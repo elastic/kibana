@@ -29,7 +29,7 @@
           "\nAn entire page that can be displayed when Kibana \"has no data\", specifically for Analytics.  Uses\nservices from a Provider to supply props to a pure component."
         ],
         "signature": [
-          "({ onDataViewCreated }: ",
+          "({ onDataViewCreated, allowAdHocDataView, }: ",
           "AnalyticsNoDataPageProps",
           ") => JSX.Element"
         ],
@@ -42,7 +42,7 @@
             "id": "def-common.AnalyticsNoDataPage.$1",
             "type": "Object",
             "tags": [],
-            "label": "{ onDataViewCreated }",
+            "label": "{\n  onDataViewCreated,\n  allowAdHocDataView,\n}",
             "description": [],
             "signature": [
               "AnalyticsNoDataPageProps"
@@ -66,7 +66,7 @@
           "\nA pure component of an entire page that can be displayed when Kibana \"has no data\", specifically for Analytics."
         ],
         "signature": [
-          "({ kibanaGuideDocLink, onDataViewCreated }: ",
+          "({ kibanaGuideDocLink, onDataViewCreated, allowAdHocDataView, showPlainSpinner, }: ",
           "Props",
           ") => JSX.Element"
         ],
@@ -79,7 +79,7 @@
             "id": "def-common.AnalyticsNoDataPage.$1",
             "type": "Object",
             "tags": [],
-            "label": "{ kibanaGuideDocLink, onDataViewCreated }",
+            "label": "{\n  kibanaGuideDocLink,\n  onDataViewCreated,\n  allowAdHocDataView,\n  showPlainSpinner,\n}",
             "description": [],
             "signature": [
               "Props"
@@ -182,7 +182,7 @@
         "description": [
           "\nProps for the `AnalyticsNoDataPage` component."
         ],
-        "path": "node_modules/@kbn/shared-ux-page-analytics-no-data-types/index.d.ts",
+        "path": "packages/shared-ux/page/analytics_no_data/types/index.d.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -198,7 +198,7 @@
             "signature": [
               "(dataView: unknown) => void"
             ],
-            "path": "node_modules/@kbn/shared-ux-page-analytics-no-data-types/index.d.ts",
+            "path": "packages/shared-ux/page/analytics_no_data/types/index.d.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -212,13 +212,29 @@
                 "signature": [
                   "unknown"
                 ],
-                "path": "node_modules/@kbn/shared-ux-page-analytics-no-data-types/index.d.ts",
+                "path": "packages/shared-ux/page/analytics_no_data/types/index.d.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
               }
             ],
             "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/shared-ux-page-analytics-no-data",
+            "id": "def-common.AnalyticsNoDataPageProps.allowAdHocDataView",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "allowAdHocDataView",
+            "description": [
+              "if set to true allows creation of an ad-hoc data view from data view editor"
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "packages/shared-ux/page/analytics_no_data/types/index.d.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -246,7 +262,7 @@
           " & ",
           "RedirectAppLinksKibanaDependencies"
         ],
-        "path": "node_modules/@kbn/shared-ux-page-analytics-no-data-types/index.d.ts",
+        "path": "packages/shared-ux/page/analytics_no_data/types/index.d.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -271,7 +287,7 @@
           " & ",
           "NoDataViewsPromptServices"
         ],
-        "path": "node_modules/@kbn/shared-ux-page-analytics-no-data-types/index.d.ts",
+        "path": "packages/shared-ux/page/analytics_no_data/types/index.d.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

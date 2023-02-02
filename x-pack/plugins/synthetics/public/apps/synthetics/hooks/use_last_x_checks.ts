@@ -44,7 +44,7 @@ export function useLastXChecks<Fields>({
             EXCLUDE_RUN_ONCE_FILTER,
             {
               term: {
-                config_id: monitorId,
+                'monitor.id': monitorId,
               },
             },
           ],

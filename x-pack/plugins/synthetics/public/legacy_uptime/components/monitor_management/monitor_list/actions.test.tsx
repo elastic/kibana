@@ -23,7 +23,7 @@ describe('<Actions />', () => {
   it('navigates to edit monitor flow on edit pencil', () => {
     render(
       <Actions
-        id="test-id"
+        configId="test-id"
         name="sample name"
         onUpdate={onUpdate}
         monitors={
@@ -31,6 +31,7 @@ describe('<Actions />', () => {
             {
               id: 'test-id',
               attributes: {
+                [ConfigKey.CONFIG_ID]: 'test-id',
                 [ConfigKey.MONITOR_SOURCE_TYPE]: SourceType.PROJECT,
               } as BrowserFields,
             },
@@ -45,16 +46,17 @@ describe('<Actions />', () => {
     );
   });
 
-  it('disables deleting for project monitors', () => {
+  it('allows deleting for project monitors', () => {
     render(
       <Actions
-        id="test-id"
+        configId="test-id"
         name="sample name"
         onUpdate={onUpdate}
         monitors={
           [
             {
               id: 'test-id',
+              [ConfigKey.CONFIG_ID]: 'test-id',
               attributes: {
                 [ConfigKey.MONITOR_SOURCE_TYPE]: SourceType.PROJECT,
               } as BrowserFields,
@@ -64,6 +66,6 @@ describe('<Actions />', () => {
       />
     );
 
-    expect(screen.getByLabelText('Delete monitor')).toBeDisabled();
+    expect(screen.getByLabelText('Delete monitor')).not.toBeDisabled();
   });
 });

@@ -13,11 +13,11 @@ privileges:
 | Give full access to manage cases 
 a|
 * `All` for the *Cases* feature under *Management*.
-* `All` for the *Actions and Connectors* feature under *Management*.
+* `All` for the *{connectors-feature}* feature under *Management*.
 
 [NOTE]
 ====
-The *Actions and Connectors* feature privilege is required to create, add,
+The *{connectors-feature}* feature privilege is required to create, add,
 delete, and modify case connectors and to send updates to external systems.
 
 By default, `All` for the *Cases* feature includes authority to delete cases
@@ -40,3 +40,8 @@ least once, which creates a user profile.
 |=== 
 
 For more details, refer to <<kibana-privileges>>.
+
+NOTE: If you are using an on-premises {kib} deployment and you want the email
+notifications and the external incident management systems to contain
+links back to {kib}, you must configure the 
+<<server-publicBaseUrl,`server.publicBaseUrl`>> setting.

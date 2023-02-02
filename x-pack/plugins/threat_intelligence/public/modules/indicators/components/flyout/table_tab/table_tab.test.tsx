@@ -8,22 +8,34 @@
 import React from 'react';
 import { render } from '@testing-library/react';
 import { TestProvidersComponent } from '../../../../../common/mocks/test_providers';
-import { generateMockIndicator, Indicator, RawIndicatorFieldId } from '../../../types';
-import { IndicatorsFlyoutTable, TABLE_TEST_ID } from '.';
+import {
+  generateMockIndicator,
+  Indicator,
+  RawIndicatorFieldId,
+} from '../../../../../../common/types/indicator';
+import { IndicatorsFlyoutTable } from '.';
 import { unwrapValue } from '../../../utils';
 import { EMPTY_PROMPT_TEST_ID } from '../empty_prompt';
+import { IndicatorsFlyoutContext } from '../context';
+import { FLYOUT_TABLE_TEST_ID } from './test_ids';
 
 const mockIndicator: Indicator = generateMockIndicator();
 
 describe('<IndicatorsFlyoutTable />', () => {
   it('should render fields and values in table', () => {
+    const context = {
+      kqlBarIntegration: false,
+    };
+
     const { getByTestId, getByText, getAllByText } = render(
       <TestProvidersComponent>
-        <IndicatorsFlyoutTable indicator={mockIndicator} />
+        <IndicatorsFlyoutContext.Provider value={context}>
+          <IndicatorsFlyoutTable indicator={mockIndicator} />
+        </IndicatorsFlyoutContext.Provider>
       </TestProvidersComponent>
     );
 
-    expect(getByTestId(TABLE_TEST_ID)).toBeInTheDocument();
+    expect(getByTestId(FLYOUT_TABLE_TEST_ID)).toBeInTheDocument();
 
     expect(getByText(RawIndicatorFieldId.Feed)).toBeInTheDocument();
 

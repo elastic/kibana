@@ -37,6 +37,9 @@ export function HitsCounter({ hits, append }: HitsCounterProps) {
   const hitsCounterCss = css`
     flex-grow: 0;
   `;
+  const hitsCounterTextCss = css`
+    overflow: hidden;
+  `;
 
   return (
     <EuiFlexGroup
@@ -46,8 +49,8 @@ export function HitsCounter({ hits, append }: HitsCounterProps) {
       alignItems="center"
       css={hitsCounterCss}
     >
-      <EuiFlexItem grow={false} aria-live="polite">
-        <EuiText>
+      <EuiFlexItem grow={false} aria-live="polite" css={hitsCounterTextCss}>
+        <EuiText className="eui-textTruncate">
           {hits.status === 'partial' && (
             <FormattedMessage
               id="unifiedHistogram.partialHits"

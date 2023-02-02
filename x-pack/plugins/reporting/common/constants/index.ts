@@ -86,6 +86,7 @@ export const ILM_POLICY_NAME = 'kibana-reporting';
 
 // Usage counter types
 export const API_USAGE_COUNTER_TYPE = 'reportingApi';
+export const API_USAGE_ERROR_TYPE = 'reportingApiError';
 
 // Management UI route
 export const REPORTING_MANAGEMENT_HOME = '/app/management/insightsAndAlerting/reporting';

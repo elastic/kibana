@@ -70,7 +70,9 @@ describe('getColumnsFromVis', () => {
   );
   const aggConfig = new AggConfig(aggConfigs, {} as AggConfigOptions);
 
-  const vis = {} as Vis;
+  const vis = {
+    type: { name: 'heatmap' },
+  } as Vis;
   beforeEach(() => {
     jest.clearAllMocks();
     mockGetVisSchemas.mockReturnValue({});

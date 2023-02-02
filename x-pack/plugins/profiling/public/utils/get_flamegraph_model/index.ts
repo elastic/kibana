@@ -4,10 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { ColumnarViewModel } from '@elastic/charts';
 import d3 from 'd3';
-import { sum, uniqueId } from 'lodash';
-import { createColumnarViewModel, rgbToRGBA } from '../../../common/columnar_view_model';
+import { compact, sum, uniqueId, range } from 'lodash';
+import { i18n } from '@kbn/i18n';
+import { createColumnarViewModel } from '../../../common/columnar_view_model';
 import { ElasticFlameGraph, FlameGraphComparisonMode } from '../../../common/flamegraph';
+import { FRAME_TYPE_COLOR_MAP, rgbToRGBA } from '../../../common/frame_type_colors';
+import { describeFrameType, FrameType } from '../../../common/profiling';
 import { getInterpolationValue } from './get_interpolation_value';
 
 const nullColumnarViewModel = {
@@ -34,27 +38,78 @@ export function getFlamegraphModel({
   colorDanger: string;
   colorNeutral: string;
   comparisonMode: FlameGraphComparisonMode;
-}) {
+}): {
+  key: string;
+  viewModel: ColumnarViewModel;
+  comparisonNodesById: Record<string, { CountInclusive: number; CountExclusive: number }>;
+  legendItems: Array<{ label: string; color: string }>;
+} {
   const comparisonNodesById: Record<string, { CountInclusive: number; CountExclusive: number }> =
     {};
 
   if (!primaryFlamegraph || !primaryFlamegraph.Label || primaryFlamegraph.Label.length === 0) {
-    return { key: uniqueId(), viewModel: nullColumnarViewModel, comparisonNodesById };
+    return {
+      key: uniqueId(),
+      viewModel: nullColumnarViewModel,
+      comparisonNodesById,
+      legendItems: [],
+    };
   }
 
   const viewModel = createColumnarViewModel(primaryFlamegraph, comparisonFlamegraph === undefined);
 
-  if (comparisonFlamegraph) {
+  let legendItems: Array<{ label: string; color: string }>;
+
+  if (!comparisonFlamegraph) {
+    const usedFrameTypes = new Set([...primaryFlamegraph.FrameType]);
+    legendItems = compact(
+      Object.entries(FRAME_TYPE_COLOR_MAP).map(([frameTypeKey, colors]) => {
+        const frameType = Number(frameTypeKey) as FrameType;
+
+        return usedFrameTypes.has(frameType)
+          ? {
+              color: `#${colors[0].toString(16)}`,
+              label: describeFrameType(frameType),
+            }
+          : undefined;
+      })
+    );
+  } else {
+    const positiveChangeInterpolator = d3.interpolateRgb(colorNeutral, colorSuccess);
+
+    const negativeChangeInterpolator = d3.interpolateRgb(colorNeutral, colorDanger);
+
+    function getColor(interpolationValue: number) {
+      const nodeColor =
+        interpolationValue >= 0
+          ? positiveChangeInterpolator(interpolationValue)
+          : negativeChangeInterpolator(Math.abs(interpolationValue));
+
+      return nodeColor;
+    }
+
+    legendItems = range(1, -1, -0.2)
+      .concat(-1)
+      .map((value) => {
+        const rounded = Math.round(value * 100) / 100;
+        const color = getColor(rounded);
+        return {
+          color,
+          label:
+            rounded === 0
+              ? i18n.translate('xpack.profiling.flamegraphModel.noChange', {
+                  defaultMessage: 'No change',
+                })
+              : '',
+        };
+      });
+
     comparisonFlamegraph.ID.forEach((nodeID, index) => {
       comparisonNodesById[nodeID] = {
         CountInclusive: comparisonFlamegraph.CountInclusive[index],
         CountExclusive: comparisonFlamegraph.CountExclusive[index],
       };
     });
-
-    const positiveChangeInterpolator = d3.interpolateRgb(colorNeutral, colorSuccess);
-
-    const negativeChangeInterpolator = d3.interpolateRgb(colorNeutral, colorDanger);
 
     // per @thomasdullien:
     // In "relative" mode: Take the percentage of CPU time consumed by block A and subtract
@@ -100,10 +155,7 @@ export function getFlamegraphModel({
         denominator
       );
 
-      const nodeColor =
-        interpolationValue >= 0
-          ? positiveChangeInterpolator(interpolationValue)
-          : negativeChangeInterpolator(Math.abs(interpolationValue));
+      const nodeColor = getColor(interpolationValue);
 
       const rgba = rgbToRGBA(Number(nodeColor.replace('#', '0x')));
       viewModel.color.set(rgba, 4 * index);
@@ -114,5 +166,6 @@ export function getFlamegraphModel({
     key: uniqueId(),
     viewModel,
     comparisonNodesById,
+    legendItems,
   };
 }

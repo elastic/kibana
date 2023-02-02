@@ -7,7 +7,8 @@
 
 import React, { FC } from 'react';
 import { Paywall } from '../../components/paywall';
-import { useKibana, useSecurityContext } from '../../hooks';
+import { useKibana } from '../../hooks/use_kibana';
+import { useSecurityContext } from '../../hooks/use_security_context';
 import { SecuritySolutionPluginTemplateWrapper } from '../security_solution_plugin_template_wrapper';
 
 export const EnterpriseGuard: FC = ({ children }) => {

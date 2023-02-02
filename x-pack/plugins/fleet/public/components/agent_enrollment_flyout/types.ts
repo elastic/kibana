@@ -5,11 +5,15 @@
  * 2.0.
  */
 
-import type { AgentPolicy, Settings } from '../../types';
+import type { AgentPolicy, FleetProxy } from '../../types';
 
 import type { InstalledIntegrationPolicy } from './use_get_agent_incoming_data';
 
-export type K8sMode = 'IS_LOADING' | 'IS_KUBERNETES' | 'IS_NOT_KUBERNETES';
+export type K8sMode =
+  | 'IS_LOADING'
+  | 'IS_KUBERNETES'
+  | 'IS_NOT_KUBERNETES'
+  | 'IS_KUBERNETES_MULTIPAGE';
 export type FlyoutMode = 'managed' | 'standalone';
 export type SelectionType = 'tabs' | 'radio' | undefined;
 
@@ -18,8 +22,6 @@ export interface BaseProps {
    * The user selected policy to be used. If this value is `undefined` a value must be provided for `agentPolicies`.
    */
   agentPolicy?: AgentPolicy;
-
-  settings?: Settings;
 
   isFleetServerPolicySelected?: boolean;
 
@@ -51,4 +53,6 @@ export interface InstructionProps extends BaseProps {
   setSelectionType: (type: SelectionType) => void;
   selectedApiKeyId?: string;
   setSelectedAPIKeyId: (key?: string) => void;
+  fleetServerHosts: string[];
+  fleetProxy?: FleetProxy;
 }

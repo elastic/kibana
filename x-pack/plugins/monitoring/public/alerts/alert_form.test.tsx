@@ -143,6 +143,7 @@ describe('alert_form', () => {
               operation="create"
               actionTypeRegistry={actionTypeRegistry}
               ruleTypeRegistry={ruleTypeRegistry}
+              onChangeMetaData={() => {}}
             />
           </KibanaReactContext.Provider>
         </I18nProvider>
@@ -163,19 +164,6 @@ describe('alert_form', () => {
     it('renders registered selected alert type', async () => {
       const alertTypeSelectOptions = wrapper.find('[data-test-subj="selectedRuleTypeTitle"]');
       expect(alertTypeSelectOptions.exists()).toBeTruthy();
-    });
-
-    it('should update throttle value', async () => {
-      wrapper.find('button[data-test-subj="notifyWhenSelect"]').simulate('click');
-      wrapper.update();
-      wrapper.find('button[data-test-subj="onThrottleInterval"]').simulate('click');
-      wrapper.update();
-      const newThrottle = 17;
-      const throttleField = wrapper.find('[data-test-subj="throttleInput"]');
-      expect(throttleField.exists()).toBeTruthy();
-      throttleField.at(1).simulate('change', { target: { value: newThrottle.toString() } });
-      const throttleFieldAfterUpdate = wrapper.find('[data-test-subj="throttleInput"]');
-      expect(throttleFieldAfterUpdate.at(1).prop('value')).toEqual(newThrottle);
     });
   });
 
@@ -250,6 +238,9 @@ describe('alert_form', () => {
                 }}
                 setActions={(_updatedActions: AlertAction[]) => {}}
                 setActionParamsProperty={(key: string, value: any, index: number) =>
+                  (initialAlert.actions[index] = { ...initialAlert.actions[index], [key]: value })
+                }
+                setActionFrequencyProperty={(key: string, value: any, index: number) =>
                   (initialAlert.actions[index] = { ...initialAlert.actions[index], [key]: value })
                 }
                 actionTypeRegistry={actionTypeRegistry}

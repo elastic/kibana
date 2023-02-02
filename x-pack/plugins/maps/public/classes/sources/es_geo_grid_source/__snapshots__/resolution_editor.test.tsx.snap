@@ -5,26 +5,17 @@ exports[`should render 3 tick slider when renderAs is HEX 1`] = `
   <EuiFormRow
     describedByIds={Array []}
     display="columnCompressed"
-    fullWidth={false}
     hasChildLabel={true}
     hasEmptyLabelSpace={false}
     label="Resolution"
     labelType="label"
   >
-    <EuiRange
+    <EuiRangeClass
       compressed={true}
-      fullWidth={false}
-      isLoading={false}
-      levels={Array []}
       max={3}
       min={1}
       onChange={[Function]}
-      showInput={false}
-      showLabels={false}
-      showRange={false}
       showTicks={true}
-      showValue={false}
-      step={1}
       tickInterval={1}
       ticks={
         Array [
@@ -53,26 +44,17 @@ exports[`should render 4 tick slider when renderAs is GRID 1`] = `
   <EuiFormRow
     describedByIds={Array []}
     display="columnCompressed"
-    fullWidth={false}
     hasChildLabel={true}
     hasEmptyLabelSpace={false}
     label="Resolution"
     labelType="label"
   >
-    <EuiRange
+    <EuiRangeClass
       compressed={true}
-      fullWidth={false}
-      isLoading={false}
-      levels={Array []}
       max={4}
       min={1}
       onChange={[Function]}
-      showInput={false}
-      showLabels={false}
-      showRange={false}
       showTicks={true}
-      showValue={false}
-      step={1}
       tickInterval={1}
       ticks={
         Array [
@@ -105,26 +87,17 @@ exports[`should render 4 tick slider when renderAs is HEATMAP 1`] = `
   <EuiFormRow
     describedByIds={Array []}
     display="columnCompressed"
-    fullWidth={false}
     hasChildLabel={true}
     hasEmptyLabelSpace={false}
     label="Resolution"
     labelType="label"
   >
-    <EuiRange
+    <EuiRangeClass
       compressed={true}
-      fullWidth={false}
-      isLoading={false}
-      levels={Array []}
       max={4}
       min={1}
       onChange={[Function]}
-      showInput={false}
-      showLabels={false}
-      showRange={false}
       showTicks={true}
-      showValue={false}
-      step={1}
       tickInterval={1}
       ticks={
         Array [
@@ -157,26 +130,17 @@ exports[`should render 4 tick slider when renderAs is POINT 1`] = `
   <EuiFormRow
     describedByIds={Array []}
     display="columnCompressed"
-    fullWidth={false}
     hasChildLabel={true}
     hasEmptyLabelSpace={false}
     label="Resolution"
     labelType="label"
   >
-    <EuiRange
+    <EuiRangeClass
       compressed={true}
-      fullWidth={false}
-      isLoading={false}
-      levels={Array []}
       max={4}
       min={1}
       onChange={[Function]}
-      showInput={false}
-      showLabels={false}
-      showRange={false}
       showTicks={true}
-      showValue={false}
-      step={1}
       tickInterval={1}
       ticks={
         Array [

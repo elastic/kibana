@@ -6,7 +6,7 @@
  */
 
 import { tableDefaults } from '../../store/data_table/defaults';
-import type { SubsetTGridModel } from '../../store/data_table/model';
+import type { SubsetDataTableModel } from '../../store/data_table/model';
 import type { ColumnHeaderOptions } from '../../../../common/types/timeline';
 import { defaultColumnHeaderType } from '../../../timelines/components/timeline/body/column_headers/default_headers';
 import { DEFAULT_DATE_COLUMN_MIN_WIDTH } from '../../../timelines/components/timeline/body/constants';
@@ -62,7 +62,7 @@ export const sessionsHeaders: ColumnHeaderOptions[] = [
 export const getSessionsDefaultModel = (
   columns: ColumnHeaderOptions[],
   defaultColumns: ColumnHeaderOptions[]
-): SubsetTGridModel => ({
+): SubsetDataTableModel => ({
   ...tableDefaults,
   columns,
   defaultColumns,

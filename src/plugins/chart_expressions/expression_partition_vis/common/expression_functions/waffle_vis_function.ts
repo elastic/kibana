@@ -25,10 +25,15 @@ export const waffleVisFunction = (): WaffleVisExpressionFunctionDefinition => ({
   inputTypes: ['datatable'],
   help: strings.getPieVisFunctionName(),
   args: {
-    metric: {
+    metrics: {
       types: ['vis_dimension'],
       help: strings.getMetricArgHelp(),
       required: true,
+      multi: true,
+    },
+    metricsToLabels: {
+      types: ['string'],
+      help: strings.getMetricToLabelHelp(),
     },
     bucket: {
       types: ['vis_dimension'],
@@ -111,7 +116,8 @@ export const waffleVisFunction = (): WaffleVisExpressionFunctionDefinition => ({
       throw new Error(errors.splitRowAndSplitColumnAreSpecifiedError());
     }
 
-    validateAccessor(args.metric, context.columns);
+    args.metrics.forEach((accessor) => validateAccessor(accessor, context.columns));
+
     if (args.bucket) {
       validateAccessor(args.bucket, context.columns);
     }
@@ -125,13 +131,14 @@ export const waffleVisFunction = (): WaffleVisExpressionFunctionDefinition => ({
     const buckets = args.bucket ? [args.bucket] : [];
     const visConfig: PartitionVisParams = {
       ...args,
+      metricsToLabels: args.metricsToLabels ? JSON.parse(args.metricsToLabels) : {},
       ariaLabel:
         args.ariaLabel ??
         (handlers.variables?.embeddableTitle as string) ??
         handlers.getExecutionContext?.()?.description,
       palette: args.palette,
       dimensions: {
-        metric: args.metric,
+        metrics: args.metrics,
         buckets,
         splitColumn: args.splitColumn,
         splitRow: args.splitRow,
@@ -145,7 +152,7 @@ export const waffleVisFunction = (): WaffleVisExpressionFunctionDefinition => ({
       const logTable = prepareLogTable(
         context,
         [
-          [[args.metric], strings.getSliceSizeHelp()],
+          [args.metrics, strings.getSliceSizeHelp()],
           [buckets, strings.getSliceHelp()],
           [args.splitColumn, strings.getColumnSplitHelp()],
           [args.splitRow, strings.getRowSplitHelp()],

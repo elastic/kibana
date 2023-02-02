@@ -8,14 +8,9 @@
 import { i18n } from '@kbn/i18n';
 import { TrainedModelConfigResponse } from '@kbn/ml-plugin/common/types/trained_models';
 
-export const NLP_CONFIG_KEYS = [
-  'fill_mask',
-  'ner',
-  'text_classification',
-  'text_embedding',
-  'question_answering',
-  'zero_shot_classification',
-];
+import { SUPPORTED_PYTORCH_TASKS } from '../../../../../../common/ml_inference_pipeline';
+
+export const NLP_CONFIG_KEYS: string[] = Object.values(SUPPORTED_PYTORCH_TASKS);
 export const RECOMMENDED_FIELDS = ['body', 'body_content', 'title'];
 
 export const NLP_DISPLAY_TITLES: Record<string, string | undefined> = {

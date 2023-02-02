@@ -10,7 +10,7 @@ Object {
         data-test-subj="sessionView:detail-panel-list-item"
       >
         <span
-          class="euiToolTipAnchor"
+          class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
         >
           <span>
             copy component test
@@ -25,7 +25,7 @@ Object {
       data-test-subj="sessionView:detail-panel-list-item"
     >
       <span
-        class="euiToolTipAnchor"
+        class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
       >
         <span>
           copy component test

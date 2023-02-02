@@ -74,6 +74,7 @@ export class UsersGridPage extends Component<Props, State> {
       isTableLoading: false,
     };
   }
+
   public componentDidMount() {
     this.loadUsersAndRoles();
   }

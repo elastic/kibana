@@ -34,6 +34,7 @@ describe('interpreter/functions#treemapVis', () => {
 
   const visConfig: TreemapVisConfig = {
     addTooltip: true,
+    metricsToLabels: JSON.stringify({}),
     legendDisplay: LegendDisplay.SHOW,
     legendPosition: 'right',
     nestedLegend: true,
@@ -52,15 +53,18 @@ describe('interpreter/functions#treemapVis', () => {
       percentDecimals: 2,
       truncate: 100,
       last_level: false,
+      colorOverrides: {},
     },
-    metric: {
-      type: 'vis_dimension',
-      accessor: 0,
-      format: {
-        id: 'number',
-        params: {},
+    metrics: [
+      {
+        type: 'vis_dimension',
+        accessor: 0,
+        format: {
+          id: 'number',
+          params: {},
+        },
       },
-    },
+    ],
     buckets: [
       {
         type: 'vis_dimension',

@@ -35,13 +35,17 @@ export const esSearchStrategyProvider = (
       throw new KbnServerError(`Unsupported index pattern type ${request.indexType}`, 400);
     }
 
+    const isPit = request.params?.body?.pit != null;
+
     const search = async () => {
       try {
         const config = await firstValueFrom(config$);
         // @ts-expect-error params fall back to any, but should be valid SearchRequest params
         const { terminateAfter, ...requestParams } = request.params ?? {};
+        const defaults = await getDefaultSearchParams(uiSettingsClient, { isPit });
+
         const params = {
-          ...(await getDefaultSearchParams(uiSettingsClient)),
+          ...defaults,
           ...getShardTimeout(config),
           ...(terminateAfter ? { terminate_after: terminateAfter } : {}),
           ...requestParams,

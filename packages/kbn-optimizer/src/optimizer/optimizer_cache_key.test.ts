@@ -6,13 +6,13 @@
  * Side Public License, v 1.
  */
 
-import { REPO_ROOT } from '@kbn/utils';
+import { REPO_ROOT } from '@kbn/repo-info';
 import { createAbsolutePathSerializer } from '@kbn/jest-serializers';
 
 import { getOptimizerCacheKey } from './optimizer_cache_key';
 import { OptimizerConfig } from './optimizer_config';
 
-jest.mock('@kbn/synthetic-package-map', () => {
+jest.mock('@kbn/repo-packages', () => {
   return {
     readHashOfPackageMap() {
       return '<hash of package map>';
@@ -23,7 +23,7 @@ jest.mock('@kbn/synthetic-package-map', () => {
 jest.mock('../common/hashes', () => {
   return {
     Hashes: class MockHashes {
-      static ofFiles = jest.fn(() => {
+      static ofFiles: any = jest.fn(() => {
         return new MockHashes();
       });
 

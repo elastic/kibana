@@ -5,55 +5,58 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { MouseEventHandler } from 'react';
 
-import { useValues } from 'kea';
+import { useActions, useValues } from 'kea';
 
-import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiStat, EuiStatProps, EuiText } from '@elastic/eui';
+import {
+  EuiButtonEmpty,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiPanel,
+  EuiStat,
+  EuiStatProps,
+  EuiText,
+} from '@elastic/eui';
 
 import { DESCRIPTION_LABEL, NAME_LABEL } from '../../../shared/constants';
-import { generateEncodedPath } from '../../../shared/encode_path_params';
-import { EuiLinkTo } from '../../../shared/react_router_helpers';
-import { SEARCH_INDEX_TAB_PATH } from '../../routes';
-import { isConnectorIndex } from '../../utils/indices';
+import { isConnectorIndex, isCrawlerIndex } from '../../utils/indices';
 
-import { IndexNameLogic } from './index_name_logic';
+import { ConnectorNameAndDescriptionFlyout } from './connector/connector_name_and_description/connector_name_and_description_flyout';
+import { ConnectorNameAndDescriptionLogic } from './connector/connector_name_and_description/connector_name_and_description_logic';
 import { OverviewLogic } from './overview.logic';
-import { SearchIndexTabId } from './search_index';
 
-const EditDescription: React.FC<{ label: string; indexName: string }> = ({ label, indexName }) => (
+const EditDescription: React.FC<{
+  label: string;
+  onClick: MouseEventHandler<HTMLButtonElement>;
+}> = ({ label, onClick }) => (
   <EuiFlexGroup justifyContent="spaceBetween">
     <EuiFlexItem grow={false}>{label}</EuiFlexItem>
     <EuiFlexItem grow={false}>
-      <EuiLinkTo
-        to={generateEncodedPath(SEARCH_INDEX_TAB_PATH, {
-          indexName,
-          tabId: SearchIndexTabId.CONFIGURATION,
-        })}
-      >
-        Edit
-      </EuiLinkTo>
+      <EuiButtonEmpty onClick={onClick}>Edit</EuiButtonEmpty>
     </EuiFlexItem>
   </EuiFlexGroup>
 );
 
 export const NameAndDescriptionStats: React.FC = () => {
-  const { indexName } = useValues(IndexNameLogic);
   const { indexData, isError, isLoading } = useValues(OverviewLogic);
   const hideStats = isLoading || isError;
+  const { setIsEditing: setIsFlyoutVisible } = useActions(ConnectorNameAndDescriptionLogic);
 
-  if (!isConnectorIndex(indexData)) {
+  if (!(isConnectorIndex(indexData) || isCrawlerIndex(indexData))) {
     return <></>;
   }
 
   const stats: EuiStatProps[] = [
     {
-      description: <EditDescription label={NAME_LABEL} indexName={indexName} />,
+      description: <EditDescription label={NAME_LABEL} onClick={() => setIsFlyoutVisible(true)} />,
       isLoading: hideStats,
       title: indexData.connector.name,
     },
     {
-      description: <EditDescription label={DESCRIPTION_LABEL} indexName={indexName} />,
+      description: (
+        <EditDescription label={DESCRIPTION_LABEL} onClick={() => setIsFlyoutVisible(true)} />
+      ),
       isLoading: hideStats,
       title: <EuiText size="s">{indexData.connector.description || ''}</EuiText>,
       titleElement: 'p',
@@ -61,14 +64,17 @@ export const NameAndDescriptionStats: React.FC = () => {
   ];
 
   return (
-    <EuiFlexGroup direction="row">
-      {stats.map((item, index) => (
-        <EuiFlexItem key={index}>
-          <EuiPanel color={'subdued'} hasShadow={false} paddingSize="l">
-            <EuiStat {...item} />
-          </EuiPanel>
-        </EuiFlexItem>
-      ))}
-    </EuiFlexGroup>
+    <>
+      <EuiFlexGroup direction="row">
+        {stats.map((item, index) => (
+          <EuiFlexItem key={index}>
+            <EuiPanel color={'subdued'} hasShadow={false} paddingSize="l">
+              <EuiStat {...item} />
+            </EuiPanel>
+          </EuiFlexItem>
+        ))}
+      </EuiFlexGroup>
+      <ConnectorNameAndDescriptionFlyout />
+    </>
   );
 };

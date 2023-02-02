@@ -79,6 +79,7 @@ export function HomeApp({ directories, solutions }) {
               localStorage={localStorage}
               urlBasePath={getBasePath()}
               hasUserDataView={() => dataViewsService.hasUserDataView()}
+              isCloudEnabled={isCloudEnabled}
             />
           </Route>
           <Redirect to="/" />

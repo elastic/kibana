@@ -6,7 +6,7 @@
  */
 
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
-import { usePageUrlState } from '../../../../util/url_state';
+import { usePageUrlState } from '@kbn/ml-url-state';
 import { ML_PAGES } from '../../../../../../common/constants/locator';
 import { ExplorationPageUrlState } from '../../../../../../common/types/locator';
 import { SEARCH_QUERY_LANGUAGE } from '../../../../../../common/constants/search';
@@ -28,8 +28,13 @@ export function getDefaultExplorationPageUrlState(
   };
 }
 
+interface UsePageUrlState {
+  pageKey: typeof ML_PAGES.DATA_FRAME_ANALYTICS_EXPLORATION;
+  pageUrlState: ExplorationPageUrlState;
+}
+
 export function useExplorationUrlState(overrides?: Partial<ExplorationPageUrlState>) {
-  return usePageUrlState<ExplorationPageUrlState>(
+  return usePageUrlState<UsePageUrlState>(
     ML_PAGES.DATA_FRAME_ANALYTICS_EXPLORATION,
     getDefaultExplorationPageUrlState(overrides)
   );

@@ -6,18 +6,24 @@
  */
 import moment from 'moment';
 import { schema } from '@kbn/config-schema';
-import { ALERT_REASON } from '@kbn/rule-data-utils';
+import { ALERT_REASON, ALERT_UUID } from '@kbn/rule-data-utils';
 import { ActionGroupIdsOf } from '@kbn/alerting-plugin/common';
 import { UptimeAlertTypeFactory } from './types';
-import { updateState, generateAlertMessage, setRecoveredAlertsContext } from './common';
-import { CLIENT_ALERT_TYPES, TLS } from '../../../../common/constants/alerts';
+import {
+  updateState,
+  generateAlertMessage,
+  setRecoveredAlertsContext,
+  getAlertDetailsUrl,
+} from './common';
+import { CLIENT_ALERT_TYPES, TLS } from '../../../../common/constants/uptime_alerts';
 import { DYNAMIC_SETTINGS_DEFAULTS } from '../../../../common/constants';
 import { Cert, CertResult } from '../../../../common/runtime_types';
 import { commonStateTranslations, tlsTranslations } from './translations';
 import { TlsTranslations } from '../../../../common/translations';
 
 import { savedObjectsAdapter } from '../saved_objects/saved_objects';
-import { createUptimeESClient } from '../lib';
+import { UptimeEsClient } from '../lib';
+import { ACTION_VARIABLES, ALERT_DETAILS_URL } from './action_variables';
 
 export type ActionGroupIds = ActionGroupIdsOf<typeof TLS>;
 
@@ -93,7 +99,11 @@ export const getCertSummary = (
   };
 };
 
-export const tlsAlertFactory: UptimeAlertTypeFactory<ActionGroupIds> = (_server, libs) => ({
+export const tlsAlertFactory: UptimeAlertTypeFactory<ActionGroupIds> = (
+  _server,
+  libs,
+  plugins
+) => ({
   id: CLIENT_ALERT_TYPES.TLS,
   producer: 'uptime',
   name: tlsTranslations.alertFactoryName,
@@ -108,22 +118,36 @@ export const tlsAlertFactory: UptimeAlertTypeFactory<ActionGroupIds> = (_server,
     },
   ],
   actionVariables: {
-    context: [...tlsTranslations.actionVariables, ...commonStateTranslations],
+    context: [
+      ...tlsTranslations.actionVariables,
+      ...commonStateTranslations,
+      ...(plugins.observability.getAlertDetailsConfig()?.uptime.enabled
+        ? [ACTION_VARIABLES[ALERT_DETAILS_URL]]
+        : []),
+    ],
     state: [...tlsTranslations.actionVariables, ...commonStateTranslations],
   },
   isExportable: true,
   minimumLicenseRequired: 'basic',
   doesSetRecoveryContext: true,
   async executor({
-    services: { alertWithLifecycle, savedObjectsClient, scopedClusterClient, alertFactory },
+    services: {
+      alertFactory,
+      alertWithLifecycle,
+      getAlertUuid,
+      savedObjectsClient,
+      scopedClusterClient,
+    },
+    spaceId,
     state,
   }) {
+    const { basePath } = _server;
     const dynamicSettings = await savedObjectsAdapter.getUptimeDynamicSettings(savedObjectsClient);
 
-    const uptimeEsClient = createUptimeESClient({
-      esClient: scopedClusterClient.asCurrentUser,
+    const uptimeEsClient = new UptimeEsClient(
       savedObjectsClient,
-    });
+      scopedClusterClient.asCurrentUser
+    );
 
     const { certs, total }: CertResult = await libs.requests.getCerts({
       uptimeEsClient,
@@ -159,8 +183,15 @@ export const tlsAlertFactory: UptimeAlertTypeFactory<ActionGroupIds> = (_server,
           .valueOf();
         const summary = getCertSummary(cert, absoluteExpirationThreshold, absoluteAgeThreshold);
 
+        if (!summary.summary || !summary.status) {
+          return;
+        }
+
+        const id = `${cert.common_name}-${cert.issuer?.replace(/\s/g, '_')}-${cert.sha256}`;
+        const alertUuid = getAlertUuid(id);
+
         const alertInstance = alertWithLifecycle({
-          id: `${cert.common_name}-${cert.issuer?.replace(/\s/g, '_')}-${cert.sha256}`,
+          id,
           fields: {
             'tls.server.x509.subject.common_name': cert.common_name,
             'tls.server.x509.issuer.common_name': cert.issuer,
@@ -168,18 +199,24 @@ export const tlsAlertFactory: UptimeAlertTypeFactory<ActionGroupIds> = (_server,
             'tls.server.x509.not_before': cert.not_before,
             'tls.server.hash.sha256': cert.sha256,
             [ALERT_REASON]: generateAlertMessage(TlsTranslations.defaultActionMessage, summary),
+            [ALERT_UUID]: alertUuid,
           },
         });
+
         alertInstance.replaceState({
           ...updateState(state, foundCerts),
           ...summary,
         });
-        alertInstance.scheduleActions(TLS.id, { ...summary });
+
+        alertInstance.scheduleActions(TLS.id, {
+          alertDetailsUrl: getAlertDetailsUrl(basePath, spaceId, alertUuid),
+          ...summary,
+        });
       });
     }
 
-    setRecoveredAlertsContext(alertFactory);
+    setRecoveredAlertsContext({ alertFactory, basePath, getAlertUuid, spaceId });
 
-    return updateState(state, foundCerts);
+    return { state: updateState(state, foundCerts) };
   },
 });

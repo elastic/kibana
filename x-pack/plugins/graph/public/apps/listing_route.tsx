@@ -21,19 +21,13 @@ import { GraphServices } from '../application';
 const SAVED_OBJECTS_LIMIT_SETTING = 'savedObjects:listingLimit';
 const SAVED_OBJECTS_PER_PAGE_SETTING = 'savedObjects:perPage';
 
-interface GraphUserContent extends UserContentCommonSchema {
-  type: string;
-  attributes: {
-    title: string;
-    description?: string;
-  };
-}
+type GraphUserContent = UserContentCommonSchema;
 
 const toTableListViewSavedObject = (savedObject: GraphWorkspaceSavedObject): GraphUserContent => {
   return {
     id: savedObject.id!,
     updatedAt: savedObject.updatedAt!,
-    references: savedObject.references,
+    references: savedObject.references ?? [],
     type: savedObject.type,
     attributes: {
       title: savedObject.title,

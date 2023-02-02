@@ -7196,10 +7196,6 @@
                 "handled": {
                   "type": "boolean"
                 },
-                "message": {
-                  "norms": false,
-                  "type": "text"
-                },
                 "module": {
                   "ignore_above": 1024,
                   "type": "keyword"
@@ -7232,19 +7228,11 @@
                   "ignore_above": 1024,
                   "type": "keyword"
                 },
-                "message": {
-                  "norms": false,
-                  "type": "text"
-                },
                 "param_message": {
                   "ignore_above": 1024,
                   "type": "keyword"
                 }
               }
-            },
-            "message": {
-              "norms": false,
-              "type": "text"
             },
             "stack_trace": {
               "fields": {
@@ -8459,10 +8447,6 @@
               }
             }
           }
-        },
-        "message": {
-          "norms": false,
-          "type": "text"
         },
         "metricset": {
           "properties": {

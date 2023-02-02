@@ -13,12 +13,12 @@ import { Logger } from '@kbn/core/server';
 import { asOk } from './lib/result_type';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import moment from 'moment';
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import { TaskRunningStage } from './task_running';
 
 describe('TaskPool', () => {
   beforeEach(() => {
-    jest.useFakeTimers('modern');
+    jest.useFakeTimers();
     jest.setSystemTime(new Date(2021, 12, 30));
   });
 
@@ -375,7 +375,7 @@ describe('TaskPool', () => {
     const shouldRun = mockRun();
     const shouldNotRun = mockRun();
 
-    const taskId = uuid.v4();
+    const taskId = uuidv4();
     const task1 = mockTask({ id: taskId, run: shouldRun });
     const task2 = mockTask({
       id: taskId,
@@ -402,8 +402,8 @@ describe('TaskPool', () => {
   function mockTask(overrides = {}) {
     return {
       isExpired: false,
-      taskExecutionId: uuid.v4(),
-      id: uuid.v4(),
+      taskExecutionId: uuidv4(),
+      id: uuidv4(),
       cancel: async () => undefined,
       markTaskAsRunning: jest.fn(async () => true),
       run: mockRun(),

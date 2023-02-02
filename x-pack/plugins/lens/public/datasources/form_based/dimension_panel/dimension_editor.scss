@@ -34,6 +34,7 @@
 }
 
 .lnsIndexPatternDimensionEditor__columns {
+  display: block;
   column-count: 2;
   column-gap: $euiSizeM;
 }
@@ -45,6 +46,7 @@
 .lnsIndexPatternDimensionEditor__operation > button {
   padding-top: 0;
   padding-bottom: 0;
+  min-block-size: $euiSizeL;
 }
 
 .lnsIndexPatternDimensionEditor__warning {

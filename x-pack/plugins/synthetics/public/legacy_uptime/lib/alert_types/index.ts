@@ -14,12 +14,12 @@ import { initTlsLegacyAlertType } from './tls_legacy';
 import { ClientPluginsStart } from '../../../plugin';
 import { initDurationAnomalyAlertType } from './duration_anomaly';
 
-export type AlertTypeInitializer<TAlertTypeModel = ObservabilityRuleTypeModel> = (dependenies: {
+export type AlertTypeInitializer<TAlertTypeModel = ObservabilityRuleTypeModel> = (dependencies: {
   core: CoreStart;
   plugins: ClientPluginsStart;
 }) => TAlertTypeModel;
 
-export const alertTypeInitializers: AlertTypeInitializer[] = [
+export const uptimeAlertTypeInitializers: AlertTypeInitializer[] = [
   initMonitorStatusAlertType,
   initTlsAlertType,
   initDurationAnomalyAlertType,

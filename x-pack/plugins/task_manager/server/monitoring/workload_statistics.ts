@@ -62,7 +62,7 @@ export interface WorkloadAggregation {
       };
     };
     schedule: {
-      terms: { field: string };
+      terms: { field: string; size: number };
     };
     idleTasks: {
       filter: {
@@ -141,7 +141,7 @@ export function createWorkloadAggregator(
             },
           },
           schedule: {
-            terms: { field: 'task.schedule.interval' },
+            terms: { field: 'task.schedule.interval', size: 100 },
           },
           nonRecurringTasks: {
             missing: { field: 'task.schedule' },

@@ -27,6 +27,7 @@ import { ObservabilityAppServices } from '../../../application/types';
 import type { NavigationSection } from '../../../services/navigation_registry';
 import { ObservabilityTour } from '../tour';
 import { NavNameWithBadge, hideBadge } from './nav_name_with_badge';
+import { NavNameWithBetaBadge } from './nav_name_with_beta_badge';
 
 export type WrappedPageTemplateProps = Pick<
   KibanaPageTemplateProps,
@@ -80,9 +81,9 @@ export function ObservabilityPageTemplate({
 
   const sideNavItems = useMemo<Array<EuiSideNavItemType<unknown>>>(
     () =>
-      sections.map(({ label, entries }, sectionIndex) => ({
+      sections.map(({ label, entries, isBetaFeature }, sectionIndex) => ({
         id: `${sectionIndex}`,
-        name: label,
+        name: isBetaFeature ? <NavNameWithBetaBadge label={label} /> : label,
         items: entries.map((entry, entryIndex) => {
           const href = getUrlForApp(entry.app, {
             path: entry.path,
@@ -98,16 +99,26 @@ export function ObservabilityPageTemplate({
                   strict: !entry.ignoreTrailingSlash,
                 }) != null);
           const badgeLocalStorageId = `observability.nav_item_badge_visible_${entry.app}${entry.path}`;
+          const navId = entry.label.toLowerCase().split(' ').join('_');
           return {
             id: `${sectionIndex}.${entryIndex}`,
-            name: entry.isNewFeature ? (
+            name: entry.isBetaFeature ? (
+              <NavNameWithBetaBadge label={entry.label} />
+            ) : entry.isNewFeature ? (
               <NavNameWithBadge label={entry.label} localStorageId={badgeLocalStorageId} />
+            ) : entry.isTechnicalPreview ? (
+              <NavNameWithBetaBadge
+                label={entry.label}
+                iconType="beaker"
+                isTechnicalPreview={true}
+              />
             ) : (
               entry.label
             ),
             href,
             isSelected,
-            'data-nav-id': entry.label.toLowerCase().split(' ').join('_'),
+            'data-nav-id': navId,
+            'data-test-subj': `observability-nav-${entry.app}-${navId}`,
             onClick: (event) => {
               if (entry.onClick) {
                 entry.onClick(event);

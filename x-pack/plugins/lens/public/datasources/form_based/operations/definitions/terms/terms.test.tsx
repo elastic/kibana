@@ -50,6 +50,16 @@ jest.mock('@kbn/unified-field-list-plugin/public/services/field_stats', () => ({
   }),
 }));
 
+jest.mock('@kbn/unified-field-list-plugin/public/hooks/use_existing_fields', () => ({
+  useExistingFieldsReader: jest.fn(() => {
+    return {
+      hasFieldData: (dataViewId: string, fieldName: string) => {
+        return ['timestamp', 'bytes', 'memory', 'source'].includes(fieldName);
+      },
+    };
+  }),
+}));
+
 // mocking random id generator function
 jest.mock('@elastic/eui', () => {
   const original = jest.requireActual('@elastic/eui');
@@ -93,14 +103,6 @@ const defaultProps = {
   setIsCloseable: jest.fn(),
   layerId: '1',
   ReferenceEditor,
-  existingFields: {
-    'my-fake-index-pattern': {
-      timestamp: true,
-      bytes: true,
-      memory: true,
-      source: true,
-    },
-  },
 };
 
 describe('terms', () => {
@@ -337,6 +339,29 @@ describe('terms', () => {
         'col1',
         {} as IndexPattern,
         newLayer,
+        uiSettingsMock,
+        ['col1', 'col2']
+      );
+      expect(esAggsFn).toEqual(
+        expect.objectContaining({
+          function: 'aggTerms',
+          arguments: expect.objectContaining({
+            orderBy: ['_key'],
+          }),
+        })
+      );
+    });
+
+    it('should default to alphabetical sort when the referenced column does not exist anymore', () => {
+      const termsColumn = layer.columns.col1 as TermsIndexPatternColumn;
+      const esAggsFn = termsOperation.toEsAggsFn(
+        {
+          ...termsColumn,
+          params: { ...termsColumn.params, orderBy: { type: 'column', columnId: 'unknownCol' } },
+        },
+        'col1',
+        {} as IndexPattern,
+        layer,
         uiSettingsMock,
         ['col1', 'col2']
       );
@@ -1170,20 +1195,7 @@ describe('terms', () => {
       >,
     };
 
-    function getExistingFields() {
-      const fields: Record<string, boolean> = {};
-      for (const field of defaultProps.indexPattern.fields) {
-        fields[field.name] = true;
-      }
-      return {
-        [defaultProps.indexPattern.title]: fields,
-      };
-    }
-
-    function getDefaultOperationSupportMatrix(
-      columnId: string,
-      existingFields: Record<string, Record<string, boolean>>
-    ) {
+    function getDefaultOperationSupportMatrix(columnId: string) {
       return getOperationSupportMatrix({
         state: {
           layers: { layer1: layer },
@@ -1199,15 +1211,13 @@ describe('terms', () => {
 
     it('should render the default field input for no field (incomplete operation)', () => {
       const updateLayerSpy = jest.fn();
-      const existingFields = getExistingFields();
-      const operationSupportMatrix = getDefaultOperationSupportMatrix('col1', existingFields);
+      const operationSupportMatrix = getDefaultOperationSupportMatrix('col1');
       const instance = mount(
         <InlineFieldInput
           {...defaultFieldInputProps}
           layer={layer}
           updateLayer={updateLayerSpy}
           columnId="col1"
-          existingFields={existingFields}
           operationSupportMatrix={operationSupportMatrix}
           incompleteOperation="terms"
         />
@@ -1226,8 +1236,7 @@ describe('terms', () => {
 
     it('should show an error message when first field is invalid', () => {
       const updateLayerSpy = jest.fn();
-      const existingFields = getExistingFields();
-      const operationSupportMatrix = getDefaultOperationSupportMatrix('col1', existingFields);
+      const operationSupportMatrix = getDefaultOperationSupportMatrix('col1');
 
       layer.columns.col1 = {
         label: 'Top value of unsupported',
@@ -1247,7 +1256,6 @@ describe('terms', () => {
           layer={layer}
           updateLayer={updateLayerSpy}
           columnId="col1"
-          existingFields={existingFields}
           operationSupportMatrix={operationSupportMatrix}
           currentFieldIsInvalid
         />
@@ -1259,8 +1267,7 @@ describe('terms', () => {
 
     it('should show an error message when first field is not supported', () => {
       const updateLayerSpy = jest.fn();
-      const existingFields = getExistingFields();
-      const operationSupportMatrix = getDefaultOperationSupportMatrix('col1', existingFields);
+      const operationSupportMatrix = getDefaultOperationSupportMatrix('col1');
 
       layer.columns.col1 = {
         label: 'Top value of timestamp',
@@ -1280,7 +1287,6 @@ describe('terms', () => {
           layer={layer}
           updateLayer={updateLayerSpy}
           columnId="col1"
-          existingFields={existingFields}
           operationSupportMatrix={operationSupportMatrix}
           selectedColumn={layer.columns.col1 as TermsIndexPatternColumn}
           incompleteOperation="terms"
@@ -1293,8 +1299,7 @@ describe('terms', () => {
 
     it('should show an error message when any field but the first is invalid', () => {
       const updateLayerSpy = jest.fn();
-      const existingFields = getExistingFields();
-      const operationSupportMatrix = getDefaultOperationSupportMatrix('col1', existingFields);
+      const operationSupportMatrix = getDefaultOperationSupportMatrix('col1');
 
       layer.columns.col1 = {
         label: 'Top value of geo.src + 1 other',
@@ -1315,7 +1320,6 @@ describe('terms', () => {
           layer={layer}
           updateLayer={updateLayerSpy}
           columnId="col1"
-          existingFields={existingFields}
           operationSupportMatrix={operationSupportMatrix}
           selectedColumn={layer.columns.col1 as TermsIndexPatternColumn}
         />
@@ -1327,8 +1331,7 @@ describe('terms', () => {
 
     it('should show an error message when any field but the first is not supported', () => {
       const updateLayerSpy = jest.fn();
-      const existingFields = getExistingFields();
-      const operationSupportMatrix = getDefaultOperationSupportMatrix('col1', existingFields);
+      const operationSupportMatrix = getDefaultOperationSupportMatrix('col1');
 
       layer.columns.col1 = {
         label: 'Top value of geo.src + 1 other',
@@ -1349,7 +1352,6 @@ describe('terms', () => {
           layer={layer}
           updateLayer={updateLayerSpy}
           columnId="col1"
-          existingFields={existingFields}
           operationSupportMatrix={operationSupportMatrix}
           selectedColumn={layer.columns.col1 as TermsIndexPatternColumn}
         />
@@ -1361,15 +1363,13 @@ describe('terms', () => {
 
     it('should render the an add button for single layer and disabled the remove button', () => {
       const updateLayerSpy = jest.fn();
-      const existingFields = getExistingFields();
-      const operationSupportMatrix = getDefaultOperationSupportMatrix('col1', existingFields);
+      const operationSupportMatrix = getDefaultOperationSupportMatrix('col1');
       const instance = mount(
         <InlineFieldInput
           {...defaultFieldInputProps}
           layer={layer}
           updateLayer={updateLayerSpy}
           columnId="col1"
-          existingFields={existingFields}
           operationSupportMatrix={operationSupportMatrix}
           selectedColumn={layer.columns.col1 as TermsIndexPatternColumn}
         />
@@ -1392,15 +1392,13 @@ describe('terms', () => {
 
     it('should switch to the first supported operation when in single term mode and the picked field is not supported', () => {
       const updateLayerSpy = jest.fn();
-      const existingFields = getExistingFields();
-      const operationSupportMatrix = getDefaultOperationSupportMatrix('col1', existingFields);
+      const operationSupportMatrix = getDefaultOperationSupportMatrix('col1');
       const instance = mount(
         <InlineFieldInput
           {...defaultFieldInputProps}
           layer={layer}
           updateLayer={updateLayerSpy}
           columnId="col1"
-          existingFields={existingFields}
           operationSupportMatrix={operationSupportMatrix}
           selectedColumn={layer.columns.col1 as TermsIndexPatternColumn}
         />
@@ -1426,8 +1424,7 @@ describe('terms', () => {
 
     it('should render the multi terms specific UI', () => {
       const updateLayerSpy = jest.fn();
-      const existingFields = getExistingFields();
-      const operationSupportMatrix = getDefaultOperationSupportMatrix('col1', existingFields);
+      const operationSupportMatrix = getDefaultOperationSupportMatrix('col1');
 
       (layer.columns.col1 as TermsIndexPatternColumn).params.secondaryFields = ['bytes'];
       const instance = mount(
@@ -1436,7 +1433,6 @@ describe('terms', () => {
           layer={layer}
           updateLayer={updateLayerSpy}
           columnId="col1"
-          existingFields={existingFields}
           operationSupportMatrix={operationSupportMatrix}
           selectedColumn={layer.columns.col1 as TermsIndexPatternColumn}
         />
@@ -1457,8 +1453,7 @@ describe('terms', () => {
 
     it('should return to single value UI when removing second item of two', () => {
       const updateLayerSpy = jest.fn();
-      const existingFields = getExistingFields();
-      const operationSupportMatrix = getDefaultOperationSupportMatrix('col1', existingFields);
+      const operationSupportMatrix = getDefaultOperationSupportMatrix('col1');
 
       (layer.columns.col1 as TermsIndexPatternColumn).params.secondaryFields = ['memory'];
       const instance = mount(
@@ -1467,7 +1462,6 @@ describe('terms', () => {
           layer={layer}
           updateLayer={updateLayerSpy}
           columnId="col1"
-          existingFields={existingFields}
           operationSupportMatrix={operationSupportMatrix}
           selectedColumn={layer.columns.col1 as TermsIndexPatternColumn}
         />
@@ -1489,8 +1483,7 @@ describe('terms', () => {
 
     it('should disable remove button and reorder drag when single value and one temporary new field', () => {
       const updateLayerSpy = jest.fn();
-      const existingFields = getExistingFields();
-      const operationSupportMatrix = getDefaultOperationSupportMatrix('col1', existingFields);
+      const operationSupportMatrix = getDefaultOperationSupportMatrix('col1');
 
       let instance = mount(
         <InlineFieldInput
@@ -1498,7 +1491,6 @@ describe('terms', () => {
           layer={layer}
           updateLayer={updateLayerSpy}
           columnId="col1"
-          existingFields={existingFields}
           operationSupportMatrix={operationSupportMatrix}
           selectedColumn={layer.columns.col1 as TermsIndexPatternColumn}
         />
@@ -1532,8 +1524,7 @@ describe('terms', () => {
 
     it('should accept scripted fields for single value', () => {
       const updateLayerSpy = jest.fn();
-      const existingFields = getExistingFields();
-      const operationSupportMatrix = getDefaultOperationSupportMatrix('col1', existingFields);
+      const operationSupportMatrix = getDefaultOperationSupportMatrix('col1');
 
       (layer.columns.col1 as TermsIndexPatternColumn).sourceField = 'scripted';
       const instance = mount(
@@ -1542,7 +1533,6 @@ describe('terms', () => {
           layer={layer}
           updateLayer={updateLayerSpy}
           columnId="col1"
-          existingFields={existingFields}
           operationSupportMatrix={operationSupportMatrix}
           selectedColumn={layer.columns.col1 as TermsIndexPatternColumn}
         />
@@ -1558,8 +1548,7 @@ describe('terms', () => {
 
     it('should mark scripted fields for multiple values', () => {
       const updateLayerSpy = jest.fn();
-      const existingFields = getExistingFields();
-      const operationSupportMatrix = getDefaultOperationSupportMatrix('col1', existingFields);
+      const operationSupportMatrix = getDefaultOperationSupportMatrix('col1');
 
       (layer.columns.col1 as TermsIndexPatternColumn).sourceField = 'scripted';
       (layer.columns.col1 as TermsIndexPatternColumn).params.secondaryFields = ['memory'];
@@ -1569,7 +1558,6 @@ describe('terms', () => {
           layer={layer}
           updateLayer={updateLayerSpy}
           columnId="col1"
-          existingFields={existingFields}
           operationSupportMatrix={operationSupportMatrix}
           selectedColumn={layer.columns.col1 as TermsIndexPatternColumn}
         />
@@ -1588,8 +1576,7 @@ describe('terms', () => {
 
     it('should not filter scripted fields when in single value', () => {
       const updateLayerSpy = jest.fn();
-      const existingFields = getExistingFields();
-      const operationSupportMatrix = getDefaultOperationSupportMatrix('col1', existingFields);
+      const operationSupportMatrix = getDefaultOperationSupportMatrix('col1');
 
       const instance = mount(
         <InlineFieldInput
@@ -1597,7 +1584,6 @@ describe('terms', () => {
           layer={layer}
           updateLayer={updateLayerSpy}
           columnId="col1"
-          existingFields={existingFields}
           operationSupportMatrix={operationSupportMatrix}
           selectedColumn={layer.columns.col1 as TermsIndexPatternColumn}
         />
@@ -1618,8 +1604,7 @@ describe('terms', () => {
 
     it('should filter scripted fields when in multi terms mode', () => {
       const updateLayerSpy = jest.fn();
-      const existingFields = getExistingFields();
-      const operationSupportMatrix = getDefaultOperationSupportMatrix('col1', existingFields);
+      const operationSupportMatrix = getDefaultOperationSupportMatrix('col1');
 
       (layer.columns.col1 as TermsIndexPatternColumn).params.secondaryFields = ['memory'];
       const instance = mount(
@@ -1628,7 +1613,6 @@ describe('terms', () => {
           layer={layer}
           updateLayer={updateLayerSpy}
           columnId="col1"
-          existingFields={existingFields}
           operationSupportMatrix={operationSupportMatrix}
           selectedColumn={layer.columns.col1 as TermsIndexPatternColumn}
         />
@@ -1650,8 +1634,7 @@ describe('terms', () => {
 
     it('should filter already used fields when displaying fields list', () => {
       const updateLayerSpy = jest.fn();
-      const existingFields = getExistingFields();
-      const operationSupportMatrix = getDefaultOperationSupportMatrix('col1', existingFields);
+      const operationSupportMatrix = getDefaultOperationSupportMatrix('col1');
 
       (layer.columns.col1 as TermsIndexPatternColumn).params.secondaryFields = ['memory', 'bytes'];
       let instance = mount(
@@ -1660,7 +1643,6 @@ describe('terms', () => {
           layer={layer}
           updateLayer={updateLayerSpy}
           columnId="col1"
-          existingFields={existingFields}
           operationSupportMatrix={operationSupportMatrix}
           selectedColumn={layer.columns.col1 as TermsIndexPatternColumn}
         />
@@ -1690,8 +1672,7 @@ describe('terms', () => {
 
     it('should filter fields with unsupported types when in multi terms mode', () => {
       const updateLayerSpy = jest.fn();
-      const existingFields = getExistingFields();
-      const operationSupportMatrix = getDefaultOperationSupportMatrix('col1', existingFields);
+      const operationSupportMatrix = getDefaultOperationSupportMatrix('col1');
 
       (layer.columns.col1 as TermsIndexPatternColumn).params.secondaryFields = ['memory'];
       const instance = mount(
@@ -1700,7 +1681,6 @@ describe('terms', () => {
           layer={layer}
           updateLayer={updateLayerSpy}
           columnId="col1"
-          existingFields={existingFields}
           operationSupportMatrix={operationSupportMatrix}
           selectedColumn={layer.columns.col1 as TermsIndexPatternColumn}
         />
@@ -1722,8 +1702,7 @@ describe('terms', () => {
 
     it('should limit the number of multiple fields', () => {
       const updateLayerSpy = jest.fn();
-      const existingFields = getExistingFields();
-      const operationSupportMatrix = getDefaultOperationSupportMatrix('col1', existingFields);
+      const operationSupportMatrix = getDefaultOperationSupportMatrix('col1');
 
       (layer.columns.col1 as TermsIndexPatternColumn).params.secondaryFields = [
         'memory',
@@ -1736,7 +1715,6 @@ describe('terms', () => {
           layer={layer}
           updateLayer={updateLayerSpy}
           columnId="col1"
-          existingFields={existingFields}
           operationSupportMatrix={operationSupportMatrix}
           selectedColumn={layer.columns.col1 as TermsIndexPatternColumn}
         />
@@ -1757,8 +1735,7 @@ describe('terms', () => {
 
     it('should let the user add new empty field up to the limit', () => {
       const updateLayerSpy = jest.fn();
-      const existingFields = getExistingFields();
-      const operationSupportMatrix = getDefaultOperationSupportMatrix('col1', existingFields);
+      const operationSupportMatrix = getDefaultOperationSupportMatrix('col1');
 
       let instance = mount(
         <InlineFieldInput
@@ -1766,7 +1743,6 @@ describe('terms', () => {
           layer={layer}
           updateLayer={updateLayerSpy}
           columnId="col1"
-          existingFields={existingFields}
           operationSupportMatrix={operationSupportMatrix}
           selectedColumn={layer.columns.col1 as TermsIndexPatternColumn}
         />
@@ -1793,8 +1769,7 @@ describe('terms', () => {
 
     it('should update the parentFormatter on transition between single to multi terms', () => {
       const updateLayerSpy = jest.fn();
-      const existingFields = getExistingFields();
-      const operationSupportMatrix = getDefaultOperationSupportMatrix('col1', existingFields);
+      const operationSupportMatrix = getDefaultOperationSupportMatrix('col1');
 
       let instance = mount(
         <InlineFieldInput
@@ -1802,7 +1777,6 @@ describe('terms', () => {
           layer={layer}
           updateLayer={updateLayerSpy}
           columnId="col1"
-          existingFields={existingFields}
           operationSupportMatrix={operationSupportMatrix}
           selectedColumn={layer.columns.col1 as TermsIndexPatternColumn}
         />
@@ -1834,8 +1808,7 @@ describe('terms', () => {
 
     it('should preserve custom label when set by the user', () => {
       const updateLayerSpy = jest.fn();
-      const existingFields = getExistingFields();
-      const operationSupportMatrix = getDefaultOperationSupportMatrix('col1', existingFields);
+      const operationSupportMatrix = getDefaultOperationSupportMatrix('col1');
 
       layer.columns.col1 = {
         label: 'MyCustomLabel',
@@ -1857,7 +1830,6 @@ describe('terms', () => {
           layer={layer}
           updateLayer={updateLayerSpy}
           columnId="col1"
-          existingFields={existingFields}
           operationSupportMatrix={operationSupportMatrix}
           selectedColumn={layer.columns.col1 as TermsIndexPatternColumn}
         />

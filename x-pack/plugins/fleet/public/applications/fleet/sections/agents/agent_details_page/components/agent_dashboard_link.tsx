@@ -8,8 +8,9 @@
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiButton, EuiToolTip } from '@elastic/eui';
+import styled from 'styled-components';
 
-import { useGetPackageInfoByKey, useKibanaLink } from '../../../../hooks';
+import { useGetPackageInfoByKey, useKibanaLink, useLink } from '../../../../hooks';
 import type { Agent, AgentPolicy } from '../../../../types';
 import {
   FLEET_ELASTIC_AGENT_PACKAGE,
@@ -32,11 +33,16 @@ function useAgentDashboardLink(agent: Agent) {
   };
 }
 
+const EuiButtonCompressed = styled(EuiButton)`
+  height: 32px;
+`;
+
 export const AgentDashboardLink: React.FunctionComponent<{
   agent: Agent;
   agentPolicy?: AgentPolicy;
 }> = ({ agent, agentPolicy }) => {
   const { isInstalled, link, isLoading } = useAgentDashboardLink(agent);
+  const { getHref } = useLink();
 
   const isLogAndMetricsEnabled = agentPolicy?.monitoring_enabled?.length ?? 0 > 0;
 
@@ -44,15 +50,15 @@ export const AgentDashboardLink: React.FunctionComponent<{
     !isInstalled || isLoading || !isLogAndMetricsEnabled ? { disabled: true } : { href: link };
 
   const button = (
-    <EuiButton fill {...buttonArgs} isLoading={isLoading}>
+    <EuiButtonCompressed {...buttonArgs} isLoading={isLoading} color="primary">
       <FormattedMessage
         id="xpack.fleet.agentDetails.viewDashboardButtonLabel"
-        defaultMessage="View agent dashboard"
+        defaultMessage="View more agent metrics"
       />
-    </EuiButton>
+    </EuiButtonCompressed>
   );
 
-  if (!isLogAndMetricsEnabled) {
+  if (!isLoading && !isLogAndMetricsEnabled && agentPolicy) {
     return (
       <EuiToolTip
         content={
@@ -62,7 +68,16 @@ export const AgentDashboardLink: React.FunctionComponent<{
           />
         }
       >
-        {button}
+        <EuiButtonCompressed
+          isLoading={isLoading}
+          color="primary"
+          href={getHref('policy_details', { policyId: agentPolicy.id, tabId: 'settings' })}
+        >
+          <FormattedMessage
+            id="xpack.fleet.agentDetails.enableLogsAndMetricsLabel"
+            defaultMessage="Enable logs and metrics"
+          />
+        </EuiButtonCompressed>
       </EuiToolTip>
     );
   }

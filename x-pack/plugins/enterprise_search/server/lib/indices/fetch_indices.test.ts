@@ -385,7 +385,13 @@ describe('fetchIndices lib function', () => {
     expect(mockClient.asCurrentUser.indices.stats).not.toHaveBeenCalled();
   });
 
-  describe('alwaysShowSearchPattern', () => {
+  describe('alwaysShowPattern', () => {
+    const sortIndices = (index1: any, index2: any) => {
+      if (index1.name < index2.name) return -1;
+      if (index1.name > index2.name) return 1;
+      return 0;
+    };
+
     beforeEach(() => {
       mockClient.asCurrentUser.indices.get.mockImplementation(() => mockMultiIndexResponse);
       mockClient.asCurrentUser.indices.stats.mockImplementation(() => mockMultiStatsResponse);
@@ -401,13 +407,14 @@ describe('fetchIndices lib function', () => {
         '*',
         false,
         true,
-        'search-'
+        { alias_pattern: 'search-', index_pattern: '.ent-search-engine-documents' }
       );
 
       // This is the list of mock indices and aliases that are:
       // - Non-hidden indices and aliases
+      // - hidden indices that starts with ".ent-search-engine-documents"
       // - search- prefixed aliases that point to hidden indices
-      expect(returnValue).toEqual(
+      expect(returnValue.sort(sortIndices)).toEqual(
         [
           'regular-index',
           'alias-regular-index',
@@ -415,9 +422,14 @@ describe('fetchIndices lib function', () => {
           'search-prefixed-regular-index',
           'alias-search-prefixed-regular-index',
           'search-alias-search-prefixed-regular-index',
+          '.ent-search-engine-documents-12345',
+          'search-alias-.ent-search-engine-documents-12345',
+          'search-alias-search-prefixed-.ent-search-engine-documents-12345',
           'search-alias-hidden-index',
           'search-alias-search-prefixed-hidden-index',
-        ].map(getIndexReturnValue)
+        ]
+          .map(getIndexReturnValue)
+          .sort(sortIndices)
       );
 
       // This is the list of mock indices and aliases that are:
@@ -430,6 +442,9 @@ describe('fetchIndices lib function', () => {
             'search-prefixed-hidden-index',
             'alias-hidden-index',
             'alias-search-prefixed-hidden-index',
+            'alias-.ent-search-engine-documents-12345',
+            'search-prefixed-.ent-search-engine-documents-12345',
+            'alias-search-prefixed-.ent-search-engine-documents-12345',
           ].map(getIndexReturnValue)
         )
       );
@@ -463,11 +478,19 @@ describe('fetchIndices lib function', () => {
         '*',
         true,
         true,
-        'search-'
+        { alias_pattern: 'search-', index_pattern: '.ent-search-engine-documents' }
       );
 
       expect(returnValue).toEqual(
-        expect.arrayContaining(Object.keys(mockMultiStatsResponse.indices).map(getIndexReturnValue))
+        expect.not.arrayContaining(['alias-.ent-search-engine-documents-12345'])
+      );
+
+      // this specific alias should not be returned because...
+      const expectedIndices = Object.keys(mockMultiStatsResponse.indices).filter(
+        (indexName) => indexName !== 'alias-.ent-search-engine-documents-12345'
+      );
+      expect(returnValue.sort(sortIndices)).toEqual(
+        expectedIndices.map(getIndexReturnValue).sort(sortIndices)
       );
 
       expect(mockClient.asCurrentUser.indices.get).toHaveBeenCalledWith({

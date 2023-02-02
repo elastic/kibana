@@ -25,7 +25,6 @@ import {
   ValueFormatConfig,
 } from './column_types';
 import { adjustTimeScaleLabelSuffix } from '../time_scale_utils';
-import { getDisallowedPreviousShiftMessage } from '../../time_shift_utils';
 import { updateColumnParam } from '../layer_helpers';
 import { getColumnReducedTimeRangeError } from '../../reduced_time_range_utils';
 import { getGroupByKey } from './get_group_by_key';
@@ -215,7 +214,6 @@ function buildMetricOperation<T extends MetricColumn<string>>({
           layer.columns[columnId] as FieldBasedIndexPatternColumn,
           indexPattern
         ),
-        getDisallowedPreviousShiftMessage(layer, columnId),
         getColumnReducedTimeRangeError(layer, columnId, indexPattern),
       ]),
     filterable: true,
@@ -318,7 +316,7 @@ export const averageOperation = buildMetricOperation<AvgIndexPatternColumn>({
   quickFunctionDocumentation: i18n.translate(
     'xpack.lens.indexPattern.avg.quickFunctionDescription',
     {
-      defaultMessage: 'The average value of a number field.',
+      defaultMessage: 'The mean value of a set of number fields.',
     }
   ),
 });

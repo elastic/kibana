@@ -16,7 +16,11 @@ import { RouteDependencies } from '../types';
 /**
  * Note that this route is primarily intended for consumption by Cloud.
  */
-export function registerUpgradeStatusRoute({ router, lib: { handleEsError } }: RouteDependencies) {
+export function registerUpgradeStatusRoute({
+  config: { featureSet },
+  router,
+  lib: { handleEsError },
+}: RouteDependencies) {
   router.get(
     {
       path: `${API_BASE_PATH}/status`,
@@ -30,7 +34,8 @@ export function registerUpgradeStatusRoute({ router, lib: { handleEsError } }: R
         } = await core;
         // Fetch ES upgrade status
         const { totalCriticalDeprecations: esTotalCriticalDeps } = await getESUpgradeStatus(
-          esClient
+          esClient,
+          featureSet
         );
         // Fetch system indices migration status
         const { migration_status: systemIndicesMigrationStatus, features } =

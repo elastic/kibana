@@ -1,7 +1,5 @@
 {
   "type": "shared-common",
   "id": "@kbn/coloring",
-  "owner": "@elastic/kibana-vis-editors",
-  "runtimeDeps": [],
-  "typeDeps": []
+  "owner": "@elastic/kibana-visualizations"
 }

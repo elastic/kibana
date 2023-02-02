@@ -22,17 +22,6 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
 
       await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/logstash_functional');
       await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/long_window_logstash');
-
-      await kibanaServer.uiSettings.update({
-        'visualization:visualize:legacyPieChartsLibrary': true,
-      });
-      await browser.refresh();
-    });
-
-    after(async () => {
-      await kibanaServer.uiSettings.update({
-        'visualization:visualize:legacyPieChartsLibrary': false,
-      });
       await browser.refresh();
     });
 

@@ -24,6 +24,7 @@ const createClusterClientMock = () => {
     getExistingIndexAliases: jest.fn(),
     setIndexAliasToHidden: jest.fn(),
     queryEventsBySavedObjects: jest.fn(),
+    queryEventsWithAuthFilter: jest.fn(),
     aggregateEventsBySavedObjects: jest.fn(),
     aggregateEventsWithAuthFilter: jest.fn(),
     shutdown: jest.fn(),

@@ -48,12 +48,8 @@ const createTestCases = (spaceId: string) => [
   { ...CASES.DOES_NOT_EXIST, ...fail404() },
 ];
 
-export default function ({ getService }: FtrProviderContext) {
-  const supertest = getService('supertest');
-  const esArchiver = getService('esArchiver');
-  const es = getService('es');
-
-  const { addTests, createTestDefinitions } = bulkDeleteTestSuiteFactory(es, esArchiver, supertest);
+export default function (context: FtrProviderContext) {
+  const { addTests, createTestDefinitions } = bulkDeleteTestSuiteFactory(context);
   const createTests = (spaceId: string) => {
     const testCases = createTestCases(spaceId);
     return createTestDefinitions(testCases, false, { spaceId });

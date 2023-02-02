@@ -7,7 +7,7 @@
  */
 
 import { basename } from 'path';
-import { fromRoot } from '@kbn/utils';
+import { fromRoot } from '@kbn/repo-info';
 import { getTranslationPaths } from './get_translation_paths';
 
 export const getKibanaTranslationFiles = async (

@@ -1,0 +1,31 @@
+load("@build_bazel_rules_nodejs//:index.bzl", "js_library")
+
+SRCS = [
+  "babel_plugin_package_imports.js",
+  "index.js",
+]
+
+# In this array place runtime dependencies, including other packages and NPM packages
+# which must be available for this code to run.
+#
+#  To reference other packages use:
+#    "//repo/relative/path/to/package"
+#    eg. "//packages/kbn-utils"
+#
+#  To reference a NPM package use:
+#    "@npm//name-of-package"
+#    eg. "@npm//lodash"
+BUNDLER_DEPS = [
+  "@npm//@babel/helper-plugin-utils",
+  "@npm//normalize-path",
+  "//packages/kbn-repo-info",
+  "//packages/kbn-repo-packages",
+]
+
+js_library(
+  name = "kbn-babel-plugin-package-imports",
+  package_name = "@kbn/babel-plugin-package-imports",
+  srcs = ["package.json"] + SRCS,
+  deps = BUNDLER_DEPS,
+  visibility = ["//visibility:public"],
+)

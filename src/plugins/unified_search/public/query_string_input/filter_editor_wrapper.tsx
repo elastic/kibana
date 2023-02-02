@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Filter, buildEmptyFilter } from '@kbn/es-query';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
@@ -17,27 +17,48 @@ import { FILTER_EDITOR_WIDTH } from '../filter_bar/filter_item/filter_item';
 import { FilterEditor } from '../filter_bar/filter_editor';
 import { fetchIndexPatterns } from './fetch_index_patterns';
 
+interface QueryDslFilter {
+  queryDsl: string;
+  customLabel: string | null;
+}
+
 interface FilterEditorWrapperProps {
   indexPatterns?: Array<DataView | string>;
   filters: Filter[];
   timeRangeForSuggestionsOverride?: boolean;
-  closePopover?: () => void;
+  closePopoverOnAdd?: () => void;
+  closePopoverOnCancel?: () => void;
   onFiltersUpdated?: (filters: Filter[]) => void;
+  onLocalFilterUpdate?: (filter: Filter | QueryDslFilter) => void;
+  onLocalFilterCreate?: (initialState: { filter: Filter; queryDslFilter: QueryDslFilter }) => void;
 }
 
 export const FilterEditorWrapper = React.memo(function FilterEditorWrapper({
   indexPatterns,
   filters,
   timeRangeForSuggestionsOverride,
-  closePopover,
+  closePopoverOnAdd,
+  closePopoverOnCancel,
   onFiltersUpdated,
+  onLocalFilterUpdate,
+  onLocalFilterCreate,
 }: FilterEditorWrapperProps) {
+  const fetchIndexAbortController = useRef<AbortController>();
+
   const kibana = useKibana<IUnifiedSearchPluginServices>();
   const { uiSettings, data, usageCollection, appName } = kibana.services;
   const reportUiCounter = usageCollection?.reportUiCounter.bind(usageCollection, appName);
   const [dataViews, setDataviews] = useState<DataView[]>([]);
   const [newFilter, setNewFilter] = useState<Filter | undefined>(undefined);
   const isPinned = uiSettings!.get(UI_SETTINGS.FILTERS_PINNED_BY_DEFAULT);
+
+  useEffect(() => {
+    fetchIndexAbortController.current = new AbortController();
+
+    return () => {
+      fetchIndexAbortController.current?.abort();
+    };
+  }, []);
 
   useEffect(() => {
     const fetchDataViews = async () => {
@@ -48,24 +69,31 @@ export const FilterEditorWrapper = React.memo(function FilterEditorWrapper({
         (indexPattern) => typeof indexPattern !== 'string'
       ) as DataView[];
 
+      fetchIndexAbortController.current?.abort();
+      fetchIndexAbortController.current = new AbortController();
+      const currentFetchIndexAbortController = fetchIndexAbortController.current;
+
       const objectPatternsFromStrings = (await fetchIndexPatterns(
         data.dataViews,
         stringPatterns.map((value) => ({ type: 'title', value }))
       )) as DataView[];
-      setDataviews([...objectPatterns, ...objectPatternsFromStrings]);
-      const [dataView] = [...objectPatterns, ...objectPatternsFromStrings];
-      const index = dataView && dataView.id;
-      const emptyFilter = buildEmptyFilter(isPinned, index);
-      setNewFilter(emptyFilter);
+
+      if (!currentFetchIndexAbortController.signal.aborted) {
+        setDataviews([...objectPatterns, ...objectPatternsFromStrings]);
+        const [dataView] = [...objectPatterns, ...objectPatternsFromStrings];
+        const index = dataView && dataView.id;
+        const emptyFilter = buildEmptyFilter(isPinned, index);
+        setNewFilter(emptyFilter);
+      }
     };
     if (indexPatterns) {
       fetchDataViews();
     }
-  }, [data.dataViews, indexPatterns, isPinned]);
+  }, [data.dataViews, indexPatterns, onLocalFilterCreate, onLocalFilterUpdate, isPinned]);
 
   function onAdd(filter: Filter) {
     reportUiCounter?.(METRIC_TYPE.CLICK, `filter:added`);
-    closePopover?.();
+    closePopoverOnAdd?.();
     const updatedFilters = [...filters, filter];
     onFiltersUpdated?.(updatedFilters);
   }
@@ -74,13 +102,15 @@ export const FilterEditorWrapper = React.memo(function FilterEditorWrapper({
     <div style={{ width: FILTER_EDITOR_WIDTH, maxWidth: '100%' }}>
       {newFilter && (
         <FilterEditor
+          mode="add"
           filter={newFilter}
           indexPatterns={dataViews}
-          onSubmit={onAdd}
-          onCancel={() => closePopover?.()}
           key={JSON.stringify(newFilter)}
+          onSubmit={onAdd}
+          onCancel={() => closePopoverOnCancel?.()}
+          onLocalFilterUpdate={onLocalFilterUpdate}
+          onLocalFilterCreate={onLocalFilterCreate}
           timeRangeForSuggestionsOverride={timeRangeForSuggestionsOverride}
-          mode="add"
         />
       )}
     </div>

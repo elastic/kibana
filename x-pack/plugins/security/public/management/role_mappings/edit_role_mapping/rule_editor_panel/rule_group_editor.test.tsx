@@ -14,6 +14,7 @@ import { AllRule, AnyRule, ExceptAnyRule, FieldRule } from '../../model';
 import { AddRuleButton } from './add_rule_button';
 import { FieldRuleEditor } from './field_rule_editor';
 import { RuleGroupEditor } from './rule_group_editor';
+import { RuleGroupTitle } from './rule_group_title';
 
 describe('RuleGroupEditor', () => {
   it('renders an empty group', () => {
@@ -143,5 +144,54 @@ describe('RuleGroupEditor', () => {
     };
     const wrapper = shallowWithIntl(<RuleGroupEditor {...props} />);
     expect(wrapper.find(AddRuleButton)).toHaveLength(0);
+  });
+
+  it('can render a readonly view', async () => {
+    const props = {
+      rule: new AllRule([new ExceptAnyRule([new FieldRule('my_custom_field', 'foo*')])]),
+      allowAdd: true,
+      ruleDepth: 0,
+      onChange: jest.fn(),
+      onDelete: jest.fn(),
+      readOnly: true,
+    };
+    const wrapper = mountWithIntl(<RuleGroupEditor {...props} />);
+
+    // Any/all title selectors are read-only
+    const ruleGroupTitles = wrapper.find(RuleGroupTitle);
+    expect(ruleGroupTitles).not.toHaveLength(0);
+    ruleGroupTitles.map((title) => {
+      expect(title.props().readOnly).toBeTruthy();
+    });
+
+    // Any/all title links are disabled
+    const titleLinks = wrapper.find('EuiLink[data-test-subj="ruleGroupTitle"]');
+    expect(titleLinks).not.toHaveLength(0);
+    titleLinks.map((titleLink) => {
+      expect(titleLink.props().disabled).toBeTruthy();
+    });
+
+    // No goup delete buttons
+    const groupDeleteButtons = wrapper.find(
+      'EuiButtonEmpty[data-test-subj="deleteRuleGroupButton"]'
+    );
+    expect(groupDeleteButtons).toHaveLength(0);
+
+    // No add rule buttons
+    expect(wrapper.find(AddRuleButton)).toHaveLength(0);
+
+    // Any/all sub groups are read-only
+    const groupEditors = wrapper.find(RuleGroupEditor);
+    expect(groupEditors).not.toHaveLength(0);
+    groupEditors.map((groupEditor) => {
+      expect(groupEditor.props().readOnly).toBeTruthy();
+    });
+
+    // Any/all field rules are read-only
+    const fieldEditors = wrapper.find(FieldRuleEditor);
+    expect(fieldEditors).not.toHaveLength(0);
+    fieldEditors.map((fieldEditor) => {
+      expect(fieldEditor.props().readOnly).toBeTruthy();
+    });
   });
 });

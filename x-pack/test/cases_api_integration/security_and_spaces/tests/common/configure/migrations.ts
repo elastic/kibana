@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { CASE_CONFIGURE_URL, SECURITY_SOLUTION_OWNER } from '@kbn/cases-plugin/common/constants';
+import { SECURITY_SOLUTION_OWNER } from '@kbn/cases-plugin/common/constants';
 import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
 import {
   getConfiguration,
@@ -21,34 +21,6 @@ export default function ({ getService }: FtrProviderContext) {
   const es = getService('es');
 
   describe('migrations', () => {
-    describe('7.10.0', () => {
-      before(async () => {
-        await esArchiver.load('x-pack/test/functional/es_archives/cases/migrations/7.10.0');
-      });
-
-      after(async () => {
-        await esArchiver.unload('x-pack/test/functional/es_archives/cases/migrations/7.10.0');
-      });
-
-      it('7.10.0 migrates configure cases connector', async () => {
-        const { body } = await supertest
-          .get(`${CASE_CONFIGURE_URL}`)
-          .set('kbn-xsrf', 'true')
-          .send()
-          .expect(200);
-
-        expect(body.length).to.be(1);
-        expect(body[0]).key('connector');
-        expect(body[0]).not.key('connector_id');
-        expect(body[0].connector).to.eql({
-          id: 'connector-1',
-          name: 'Connector 1',
-          type: '.none',
-          fields: null,
-        });
-      });
-    });
-
     describe('7.13.2', () => {
       before(async () => {
         await esArchiver.load('x-pack/test/functional/es_archives/cases/migrations/7.13.2');

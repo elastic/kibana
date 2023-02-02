@@ -17,6 +17,7 @@ import {
   Comparator,
   TimeUnit,
   RatioCriteria,
+  RuleParams,
 } from '@kbn/infra-plugin/common/alerting/logs/log_threshold/types';
 import { DATES } from '../metrics_ui/constants';
 import { FtrProviderContext } from '../../ftr_provider_context';
@@ -37,7 +38,11 @@ export default function ({ getService }: FtrProviderContext) {
             getValue: sinon.fake.returns(10),
             setLimitReached: sinon.fake(),
           } as SinonSpiesOf<LogThresholdAlertLimit>;
-          const ruleParams = {
+          const ruleParams: RuleParams = {
+            logView: {
+              logViewId: 'Default',
+              type: 'log-view-reference',
+            },
             count: {
               comparator: Comparator.GT_OR_EQ,
               value: 1,
@@ -95,7 +100,11 @@ export default function ({ getService }: FtrProviderContext) {
             getValue: sinon.fake.returns(2),
             setLimitReached: sinon.fake(),
           } as SinonSpiesOf<LogThresholdAlertLimit>;
-          const ruleParams = {
+          const ruleParams: RuleParams = {
+            logView: {
+              logViewId: 'Default',
+              type: 'log-view-reference',
+            },
             count: {
               comparator: Comparator.GT_OR_EQ,
               value: 1,
@@ -135,6 +144,9 @@ export default function ({ getService }: FtrProviderContext) {
                 context: {
                   conditions: 'env does not equal test',
                   group: 'dev',
+                  groupByKeys: {
+                    env: 'dev',
+                  },
                   isRatio: false,
                   matchingDocuments: 2,
                   reason: '2 log entries in the last 5 mins for dev. Alert when ≥ 1.',
@@ -152,7 +164,11 @@ export default function ({ getService }: FtrProviderContext) {
             getValue: sinon.fake.returns(1),
             setLimitReached: sinon.fake(),
           } as SinonSpiesOf<LogThresholdAlertLimit>;
-          const ruleParams = {
+          const ruleParams: RuleParams = {
+            logView: {
+              logViewId: 'Default',
+              type: 'log-view-reference',
+            },
             count: {
               comparator: Comparator.GT_OR_EQ,
               value: 1,
@@ -192,6 +208,9 @@ export default function ({ getService }: FtrProviderContext) {
                 context: {
                   conditions: 'env does not equal test',
                   group: 'dev',
+                  groupByKeys: {
+                    env: 'dev',
+                  },
                   isRatio: false,
                   matchingDocuments: 2,
                   reason: '2 log entries in the last 5 mins for dev. Alert when ≥ 1.',
@@ -216,7 +235,11 @@ export default function ({ getService }: FtrProviderContext) {
             getValue: sinon.fake.returns(2),
             setLimitReached: sinon.fake(),
           } as SinonSpiesOf<LogThresholdAlertLimit>;
-          const ruleParams = {
+          const ruleParams: RuleParams = {
+            logView: {
+              logViewId: 'Default',
+              type: 'log-view-reference',
+            },
             count: {
               comparator: Comparator.GT_OR_EQ,
               value: 0.5,
@@ -271,7 +294,11 @@ export default function ({ getService }: FtrProviderContext) {
             getValue: sinon.fake.returns(2),
             setLimitReached: sinon.fake(),
           } as SinonSpiesOf<LogThresholdAlertLimit>;
-          const ruleParams = {
+          const ruleParams: RuleParams = {
+            logView: {
+              logViewId: 'Default',
+              type: 'log-view-reference',
+            },
             count: {
               comparator: Comparator.GT_OR_EQ,
               value: 0.5,
@@ -306,6 +333,11 @@ export default function ({ getService }: FtrProviderContext) {
                 context: {
                   denominatorConditions: 'event.dataset does not equal nginx.error',
                   group: 'web',
+                  groupByKeys: {
+                    event: {
+                      category: 'web',
+                    },
+                  },
                   isRatio: true,
                   numeratorConditions: 'event.dataset equals nginx.error',
                   ratio: 0.5526081141328578,

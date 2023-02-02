@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { loggerMock, MockedLogger } from '@kbn/logging-mocks';
+import { loggerMock, type MockedLogger } from '@kbn/logging-mocks';
 import type {
   SavedObjectsClientContract,
   ISavedObjectsRepository,

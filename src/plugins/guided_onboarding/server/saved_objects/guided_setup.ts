@@ -8,12 +8,12 @@
 
 import { SavedObjectsType } from '@kbn/core/server';
 
-export const guidedSetupSavedObjectsType = 'guided-onboarding-guide-state';
+export const guideStateSavedObjectsType = 'guided-onboarding-guide-state';
 
-export const guidedSetupSavedObjects: SavedObjectsType = {
-  name: guidedSetupSavedObjectsType,
+export const guideStateSavedObjects: SavedObjectsType = {
+  name: guideStateSavedObjectsType,
   hidden: false,
-  // make it available in all spaces for now
+  // make it available in all spaces for now https://github.com/elastic/kibana/issues/144227
   namespaceType: 'agnostic',
   mappings: {
     dynamic: false,
@@ -27,3 +27,24 @@ export const guidedSetupSavedObjects: SavedObjectsType = {
     },
   },
 };
+
+export const pluginStateSavedObjectsType = 'guided-onboarding-plugin-state';
+export const pluginStateSavedObjectsId = 'guided-onboarding-plugin-state-id';
+
+export const pluginStateSavedObjects: SavedObjectsType = {
+  name: pluginStateSavedObjectsType,
+  hidden: false,
+  // make it available in all spaces for now https://github.com/elastic/kibana/issues/144227
+  namespaceType: 'agnostic',
+  mappings: {
+    dynamic: false,
+    // we don't query this SO so no need for mapping properties, see PluginState intefrace
+    properties: {},
+  },
+};
+
+// plugin state SO interface
+export interface PluginStateSO {
+  status: string;
+  creationDate: string;
+}

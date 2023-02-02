@@ -7,7 +7,15 @@
 
 import type { SearchHit } from '@kbn/es-types';
 
-import type { Agent, AgentAction, ActionStatus, CurrentUpgrade, NewAgentAction } from '../models';
+import type {
+  Agent,
+  AgentAction,
+  ActionStatus,
+  CurrentUpgrade,
+  NewAgentAction,
+  AgentDiagnostics,
+  AgentStatus,
+} from '../models';
 
 import type { ListResult, ListWithKuery } from './common';
 
@@ -15,13 +23,14 @@ export interface GetAgentsRequest {
   query: ListWithKuery & {
     showInactive: boolean;
     showUpgradeable?: boolean;
+    withMetrics?: boolean;
   };
 }
 
 export interface GetAgentsResponse extends ListResult<Agent> {
-  totalInactive: number;
   // deprecated in 8.x
   list?: Agent[];
+  statusSummary?: Record<AgentStatus, number>;
 }
 
 export interface GetAgentTagsResponse {
@@ -32,10 +41,17 @@ export interface GetOneAgentRequest {
   params: {
     agentId: string;
   };
+  query: {
+    withMetrics?: boolean;
+  };
 }
 
 export interface GetOneAgentResponse {
   item: Agent;
+}
+
+export interface GetAgentUploadsResponse {
+  items: AgentDiagnostics[];
 }
 
 export interface PostNewAgentActionRequest {
@@ -121,6 +137,16 @@ export interface PostBulkAgentReassignRequest {
   };
 }
 
+export type PostRequestDiagnosticsResponse = BulkAgentAction;
+export type PostBulkRequestDiagnosticsResponse = BulkAgentAction;
+
+export interface PostRequestBulkDiagnosticsRequest {
+  body: {
+    agents: string[] | string;
+    batchSize?: number;
+  };
+}
+
 export type PostBulkAgentReassignResponse = BulkAgentAction;
 
 export type PostBulkUpdateAgentTagsResponse = BulkAgentAction;
@@ -165,6 +191,8 @@ export interface GetAgentStatusResponse {
     offline: number;
     other: number;
     updating: number;
+    inactive: number;
+    unenrolled: number;
   };
 }
 

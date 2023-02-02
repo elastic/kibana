@@ -5,18 +5,21 @@
  * 2.0.
  */
 
+import { CASE_SAVED_OBJECT } from '../../../../common/constants';
 import { Actions, ActionTypes, CaseStatuses } from '../../../../common/api';
 import { UserActionBuilder } from '../abstract_builder';
-import type { UserActionParameters, BuilderReturnValue } from '../types';
+import type { EventDetails, UserActionParameters, UserActionEvent } from '../types';
 
 export class CreateCaseUserActionBuilder extends UserActionBuilder {
-  build(args: UserActionParameters<'create_case'>): BuilderReturnValue {
+  build(args: UserActionParameters<'create_case'>): UserActionEvent {
     const { payload, caseId, owner, user } = args;
+    const action = Actions.create;
+
     const connectorWithoutId = this.extractConnectorId(payload.connector);
-    return {
+    const parameters = {
       attributes: {
         ...this.getCommonUserActionAttributes({ user, owner }),
-        action: Actions.create,
+        action,
         payload: { ...payload, connector: connectorWithoutId, status: CaseStatuses.open },
         type: ActionTypes.create_case,
       },
@@ -24,6 +27,21 @@ export class CreateCaseUserActionBuilder extends UserActionBuilder {
         ...this.createCaseReferences(caseId),
         ...this.createConnectorReference(payload.connector.id),
       ],
+    };
+
+    const getMessage = (id?: string) => `User created case id: ${caseId} - user action id: ${id}`;
+
+    const eventDetails: EventDetails = {
+      getMessage,
+      action,
+      descriptiveAction: 'case_user_action_create_case',
+      savedObjectId: caseId,
+      savedObjectType: CASE_SAVED_OBJECT,
+    };
+
+    return {
+      parameters,
+      eventDetails,
     };
   }
 }

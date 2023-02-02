@@ -51,7 +51,7 @@ export interface SavedObjectMetaData<T = unknown> {
   defaultSearchField?: string;
 }
 
-interface FinderAttributes {
+export interface FinderAttributes {
   title?: string;
   name?: string;
   type: string;

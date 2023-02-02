@@ -102,7 +102,9 @@ describe('SubmitErrorCallout', () => {
         }
       >
         <EuiButton
+          color="primary"
           onClick={[Function]}
+          size="m"
         >
           <FormattedMessage
             defaultMessage="Continue to Kibana"
@@ -180,7 +182,9 @@ describe('SubmitErrorCallout', () => {
         }
       >
         <EuiButton
+          color="primary"
           onClick={[Function]}
+          size="m"
         >
           <FormattedMessage
             defaultMessage="Continue to Kibana"
@@ -338,7 +342,9 @@ describe('SubmitErrorCallout', () => {
         }
       >
         <EuiButton
+          color="primary"
           onClick={[Function]}
+          size="m"
         >
           <FormattedMessage
             defaultMessage="Continue to Kibana"

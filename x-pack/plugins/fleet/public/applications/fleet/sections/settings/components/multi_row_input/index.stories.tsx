@@ -74,3 +74,27 @@ HostsInputDisabled.argTypes = {
     control: { type: 'object' },
   },
 };
+
+export const HostsInputUrl = () => {
+  const [value, setValue] = useState<string[]>([]);
+  return (
+    <div style={{ maxWidth: '350px' }}>
+      <Component
+        id="test-host-input"
+        helpText={'Host input help text'}
+        value={value}
+        onChange={setValue}
+        label={'Host input label'}
+        disabled={false}
+        isUrl={true}
+      />
+    </div>
+  );
+};
+
+HostsInputUrl.args = { value: ['https://test1.com', 'https://test2.com', 'https://test3.com'] };
+HostsInputUrl.argTypes = {
+  value: {
+    control: { type: 'object' },
+  },
+};

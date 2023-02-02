@@ -82,7 +82,7 @@ const renderUseLinkExists = (id: SecurityPageName) =>
     wrapper: TestProviders,
   });
 
-describe('Security app links', () => {
+describe('Security links', () => {
   beforeEach(() => {
     mockLicense.hasAtLeast = licensePremiumMock;
 

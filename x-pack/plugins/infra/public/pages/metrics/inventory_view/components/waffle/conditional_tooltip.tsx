@@ -50,7 +50,16 @@ export const ConditionalToolTip = withTheme(({ theme, node, nodeType, currentTim
       },
     },
   });
-  const { nodes } = useSnapshot(query, requestMetrics, [], nodeType, sourceId, currentTime, '', '');
+  const { nodes } = useSnapshot({
+    filterQuery: query,
+    metrics: requestMetrics,
+    groupBy: [],
+    nodeType,
+    sourceId,
+    currentTime,
+    accountId: '',
+    region: '',
+  });
 
   const dataNode = first(nodes);
   const metrics = (dataNode && dataNode.metrics) || [];

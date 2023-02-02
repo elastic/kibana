@@ -15,7 +15,6 @@ import { ApplicationStart } from '@kbn/core/public';
 import { RedirectAppLinks } from '@kbn/kibana-react-plugin/public';
 import { FeatureCatalogueEntry } from '../../../services';
 import { createAppNavigationHandler } from '../app_navigation_handler';
-// @ts-expect-error untyped component
 import { Synopsis } from '../synopsis';
 import { getServices } from '../../kibana_services';
 

@@ -9,19 +9,18 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
 import { ObjectRemover as ActionsRemover } from '../../../../../alerting_api_integration/common/lib';
+import { getAuthWithSuperUser, getActionsSpace } from '../../../../common/lib/utils';
 import {
   getServiceNowConnector,
+  getServiceNowSIRConnector,
+  getEmailConnector,
+  getCaseConnectors,
+  getCasesWebhookConnector,
   getServiceNowOAuthConnector,
   getJiraConnector,
-  getResilientConnector,
   createConnector,
-  getServiceNowSIRConnector,
-  getAuthWithSuperUser,
-  getCaseConnectors,
-  getActionsSpace,
-  getEmailConnector,
-  getCasesWebhookConnector,
-} from '../../../../common/lib/utils';
+  getResilientConnector,
+} from '../../../../common/lib/connectors';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {

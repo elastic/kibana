@@ -31,19 +31,22 @@ describe('fetchSyncJobs lib', () => {
         Promise.resolve({ hits: { hits: ['result1', 'result2'] }, total: 2 })
       );
       await expect(fetchSyncJobsByConnectorId(mockClient as any, 'id', 0, 10)).resolves.toEqual({
+        _meta: {
+          page: {
+            from: 0,
+            has_more_hits_than_total: false,
+            size: 10,
+            total: 0,
+          },
+        },
         data: [],
-        has_more_hits_than_total: false,
-        pageIndex: 0,
-        pageSize: 10,
-        size: 0,
-        total: 0,
       });
       expect(mockClient.asCurrentUser.search).toHaveBeenCalledWith({
         from: 0,
         index: '.elastic-connectors-sync-jobs',
         query: {
           term: {
-            connector_id: 'id',
+            'connector.id': 'id',
           },
         },
         size: 10,
@@ -56,12 +59,15 @@ describe('fetchSyncJobs lib', () => {
     });
     it('should return empty result if size is 0', async () => {
       await expect(fetchSyncJobsByConnectorId(mockClient as any, 'id', 0, 0)).resolves.toEqual({
+        _meta: {
+          page: {
+            from: 0,
+            has_more_hits_than_total: false,
+            size: 10,
+            total: 0,
+          },
+        },
         data: [],
-        has_more_hits_than_total: false,
-        pageIndex: 0,
-        pageSize: 0,
-        size: 0,
-        total: 0,
       });
       expect(mockClient.asCurrentUser.search).not.toHaveBeenCalled();
     });
@@ -78,19 +84,22 @@ describe('fetchSyncJobs lib', () => {
         })
       );
       await expect(fetchSyncJobsByConnectorId(mockClient as any, 'id', 0, 10)).resolves.toEqual({
+        _meta: {
+          page: {
+            from: 0,
+            has_more_hits_than_total: false,
+            size: 10,
+            total: 0,
+          },
+        },
         data: [],
-        has_more_hits_than_total: false,
-        pageIndex: 0,
-        pageSize: 10,
-        size: 0,
-        total: 0,
       });
       expect(mockClient.asCurrentUser.search).toHaveBeenCalledWith({
         from: 0,
         index: '.elastic-connectors-sync-jobs',
         query: {
           term: {
-            connector_id: 'id',
+            'connector.id': 'id',
           },
         },
         size: 10,
@@ -114,20 +123,21 @@ describe('fetchSyncJobs lib', () => {
           },
         })
       );
-      await expect(fetchSyncJobsByConnectorId(mockClient as any, 'id', 0, 10)).resolves.toEqual({
-        data: [],
-        has_more_hits_than_total: false,
-        pageIndex: 0,
-        pageSize: 10,
-        size: 0,
-        total: 0,
+      await expect(fetchSyncJobsByConnectorId(mockClient as any, 'id', 0, 10)).rejects.toEqual({
+        meta: {
+          body: {
+            error: {
+              type: 'other error',
+            },
+          },
+        },
       });
       expect(mockClient.asCurrentUser.search).toHaveBeenCalledWith({
         from: 0,
         index: '.elastic-connectors-sync-jobs',
         query: {
           term: {
-            connector_id: 'id',
+            'connector.id': 'id',
           },
         },
         size: 10,

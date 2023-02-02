@@ -17,6 +17,13 @@ export function useGetSettings() {
   });
 }
 
+export function sendGetSettings() {
+  return sendRequest<GetSettingsResponse>({
+    method: 'get',
+    path: settingsRoutesService.getInfoPath(),
+  });
+}
+
 export function sendPutSettings(body: PutSettingsRequest['body']) {
   return sendRequest<PutSettingsResponse>({
     method: 'put',

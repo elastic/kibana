@@ -1,10 +1,7 @@
 {
   "extends": "../../../tsconfig.base.json",
   "compilerOptions": {
-    "outDir": "./target/types",
-    "emitDeclarationOnly": true,
-    "declaration": true,
-    "declarationMap": true,
+    "outDir": "target/types",
     "isolatedModules": true
   },
   "include": [
@@ -15,10 +12,14 @@
     "schema/xpack_plugins.json",
     "schema/xpack_root.json",
   ],
-  "references": [
-    { "path": "../../../src/core/tsconfig.json" },
-    { "path": "../../../src/plugins/telemetry_collection_manager/tsconfig.json" },
-    { "path": "../../../src/plugins/telemetry/tsconfig.json" }
+  "kbn_references": [
+    "@kbn/core",
+    "@kbn/telemetry-collection-manager-plugin",
+    "@kbn/telemetry-plugin",
+    "@kbn/usage-collection-plugin",
+  ],
+  "exclude": [
+    "target/**/*",
   ]
 }
 

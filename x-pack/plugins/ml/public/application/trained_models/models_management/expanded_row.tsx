@@ -24,8 +24,8 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 import { FIELD_FORMAT_IDS } from '@kbn/field-formats-plugin/common';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
+import { isDefined } from '@kbn/ml-is-defined';
 import type { ModelItemFull } from './models_list';
-import { isDefined } from '../../../../common/types/guards';
 import { ModelPipelines } from './pipelines';
 import { AllocatedModels } from '../nodes_overview/allocated_models';
 import type { AllocatedModel } from '../../../../common/types/trained_models';

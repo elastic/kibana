@@ -69,3 +69,4 @@ export type {
   KibanaResponseFactory,
   LifecycleResponseFactory,
 } from './response_factory';
+export type { RawRequest, FakeRawRequest } from './raw_request';

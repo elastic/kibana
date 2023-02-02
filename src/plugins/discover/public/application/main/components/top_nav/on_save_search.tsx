@@ -14,7 +14,7 @@ import { SavedObjectSaveModal, showSaveModal, OnSaveProps } from '@kbn/saved-obj
 import { DataView } from '@kbn/data-views-plugin/public';
 import { SavedSearch, SaveSavedSearchOptions } from '@kbn/saved-search-plugin/public';
 import { DiscoverServices } from '../../../../build_services';
-import { GetStateReturn } from '../../services/discover_state';
+import { DiscoverStateContainer } from '../../services/discover_state';
 import { setBreadcrumbsTitle } from '../../../../utils/breadcrumbs';
 import { persistSavedSearch } from '../../utils/persist_saved_search';
 import { DOC_TABLE_LEGACY } from '../../../../../common';
@@ -33,7 +33,7 @@ async function saveDataSource({
   savedSearch: SavedSearch;
   saveOptions: SaveSavedSearchOptions;
   services: DiscoverServices;
-  state: GetStateReturn;
+  state: DiscoverStateContainer;
   navigateOrReloadSavedSearch: boolean;
 }) {
   const prevSavedSearchId = savedSearch.id;
@@ -85,7 +85,7 @@ async function saveDataSource({
     onSuccess,
     saveOptions,
     services,
-    state: state.appStateContainer.getState(),
+    state: state.appState.getState(),
   });
 }
 
@@ -103,7 +103,7 @@ export async function onSaveSearch({
   navigateTo: (path: string) => void;
   savedSearch: SavedSearch;
   services: DiscoverServices;
-  state: GetStateReturn;
+  state: DiscoverStateContainer;
   updateAdHocDataViewId: (dataView: DataView) => Promise<DataView>;
   onClose?: () => void;
   onSaveCb?: () => void;
@@ -136,7 +136,7 @@ export async function onSaveSearch({
     savedSearch.timeRestore = newTimeRestore;
     savedSearch.rowsPerPage = uiSettings.get(DOC_TABLE_LEGACY)
       ? currentRowsPerPage
-      : state.appStateContainer.getState().rowsPerPage;
+      : state.appState.getState().rowsPerPage;
     if (savedObjectsTagging) {
       savedSearch.tags = newTags;
     }
@@ -187,7 +187,7 @@ export async function onSaveSearch({
       onClose={onClose ?? (() => {})}
     />
   );
-  showSaveModal(saveModal, services.core.i18n.Context);
+  showSaveModal(saveModal);
 }
 
 const SaveSearchObjectModal: React.FC<{

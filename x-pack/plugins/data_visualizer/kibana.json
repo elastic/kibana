@@ -26,6 +26,7 @@
   ],
   "requiredBundles": [
     "kibanaReact",
+    "kibanaUtils",
     "maps",
     "esUiShared",
     "fieldFormats",

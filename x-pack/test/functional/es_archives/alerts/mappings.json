@@ -175,6 +175,79 @@
             },
             "isSnoozedUntil": {
               "type": "date"
+            },
+            "monitoring": {
+              "properties": {
+                "execution": {
+                  "properties": {
+                    "history": {
+                      "properties": {
+                        "duration": {
+                          "type": "long"
+                        },
+                        "success": {
+                          "type": "boolean"
+                        },
+                        "timestamp": {
+                          "type": "date"
+                        }
+                      }
+                    },
+                    "calculated_metrics": {
+                      "properties": {
+                        "p50": {
+                          "type": "long"
+                        },
+                        "p95": {
+                          "type": "long"
+                        },
+                        "p99": {
+                          "type": "long"
+                        },
+                        "success_ratio": {
+                          "type": "float"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "executionStatus": {
+              "properties": {
+                "numberOfTriggeredActions": {
+                  "type": "long"
+                },
+                "status": {
+                  "type": "keyword"
+                },
+                "lastExecutionDate": {
+                  "type": "date"
+                },
+                "lastDuration": {
+                  "type": "long"
+                },
+                "error": {
+                  "properties": {
+                    "reason": {
+                      "type": "keyword"
+                    },
+                    "message": {
+                      "type": "keyword"
+                    }
+                  }
+                },
+                "warning": {
+                  "properties": {
+                    "reason": {
+                      "type": "keyword"
+                    },
+                    "message": {
+                      "type": "keyword"
+                    }
+                  }
+                }
+              }
             }
           }
         },

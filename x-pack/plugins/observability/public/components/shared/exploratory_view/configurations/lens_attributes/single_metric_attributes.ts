@@ -5,16 +5,12 @@
  * 2.0.
  */
 
-import {
-  FormulaPublicApi,
-  MetricState,
-  OperationType,
-  TypedLensByValueInput,
-} from '@kbn/lens-plugin/public';
+import { FormulaPublicApi, MetricState, OperationType } from '@kbn/lens-plugin/public';
 
 import type { DataView } from '@kbn/data-views-plugin/common';
 
 import { Query } from '@kbn/es-query';
+import { getColorPalette } from '../synthetics/single_metric_config';
 import { FORMULA_COLUMN, RECORDS_FIELD } from '../constants';
 import { ColumnFilter, MetricOption } from '../../types';
 import { SeriesConfig } from '../../../../..';
@@ -44,11 +40,17 @@ export class SingleMetricLensAttributes extends LensAttributes {
     this.columnId = 'layer-0-column-1';
 
     this.globalFilter = this.getGlobalFilter(this.isMultiSeries);
-    this.layers = this.getSingleMetricLayer()!;
+    const layer0 = this.getSingleMetricLayer()!;
+
+    this.layers = {
+      layer0,
+    };
+    this.visualization = this.getMetricState();
   }
 
   getSingleMetricLayer() {
-    const { seriesConfig, selectedMetricField, operationType, dataView } = this.layerConfigs[0];
+    const { seriesConfig, selectedMetricField, operationType, dataView, name } =
+      this.layerConfigs[0];
 
     const metricOption = parseCustomFieldName(seriesConfig, selectedMetricField);
 
@@ -61,6 +63,7 @@ export class SingleMetricLensAttributes extends LensAttributes {
         formula,
         metricStateOptions,
         format,
+        emptyAsNull = true,
       } = metricOption;
 
       this.metricStateOptions = metricStateOptions;
@@ -68,7 +71,7 @@ export class SingleMetricLensAttributes extends LensAttributes {
       if (columnType === FORMULA_COLUMN && formula) {
         return this.getFormulaLayer({
           formula,
-          label: columnLabel,
+          label: name ?? columnLabel,
           dataView,
           format,
           filter: columnFilter,
@@ -100,18 +103,19 @@ export class SingleMetricLensAttributes extends LensAttributes {
       }
 
       return {
-        layer0: {
-          columns: {
-            [this.columnId]: {
-              ...buildNumberColumn(sourceField),
-              label: columnLabel ?? '',
-              operationType: sourceField === RECORDS_FIELD ? 'count' : operationType || 'median',
-              filter: columnFilter,
+        columns: {
+          [this.columnId]: {
+            ...buildNumberColumn(sourceField),
+            label: name ?? columnLabel,
+            operationType: sourceField === RECORDS_FIELD ? 'count' : operationType || 'median',
+            filter: columnFilter,
+            params: {
+              emptyAsNull,
             },
           },
-          columnOrder: [this.columnId],
-          incompleteColumns: {},
         },
+        columnOrder: [this.columnId],
+        incompleteColumns: {},
       };
     }
   }
@@ -149,9 +153,7 @@ export class SingleMetricLensAttributes extends LensAttributes {
       dataView
     );
 
-    return {
-      layer0: layer!,
-    };
+    return layer!;
   }
 
   getPercentileLayer({
@@ -168,54 +170,32 @@ export class SingleMetricLensAttributes extends LensAttributes {
     columnFilter?: ColumnFilter;
   }) {
     return {
-      layer0: {
-        columns: {
-          [this.columnId]: {
-            ...this.getPercentileNumberColumn(sourceField, operationType!, seriesConfig),
-            label: columnLabel ?? '',
-            filter: columnFilter,
-          },
+      columns: {
+        [this.columnId]: {
+          ...this.getPercentileNumberColumn(sourceField, operationType!, seriesConfig),
+          label: columnLabel ?? '',
+          filter: columnFilter,
         },
-        columnOrder: [this.columnId],
-        incompleteColumns: {},
       },
+      columnOrder: [this.columnId],
+      incompleteColumns: {},
     };
   }
 
   getMetricState(): MetricState {
+    const { color } = this.layerConfigs[0];
+
+    const metricStateOptions: MetricOption['metricStateOptions'] = {
+      ...(this.metricStateOptions ?? {}),
+      ...(color ? { colorMode: 'Labels', palette: getColorPalette(color) } : {}),
+    };
+
     return {
       accessor: this.columnId,
       layerId: 'layer0',
       layerType: 'data',
-      ...(this.metricStateOptions ?? {}),
+      ...metricStateOptions,
       size: 's',
-    };
-  }
-
-  getJSON(refresh?: number): TypedLensByValueInput['attributes'] {
-    const query = this.globalFilter || this.layerConfigs[0].seriesConfig.query;
-
-    const visualization = this.getMetricState();
-
-    const { internalReferences, adHocDataViews } = this.getReferences();
-
-    return {
-      title: 'Prefilled from exploratory view app',
-      description: String(refresh),
-      visualizationType: 'lnsLegacyMetric',
-      references: [],
-      state: {
-        internalReferences,
-        adHocDataViews,
-        visualization,
-        datasourceStates: {
-          formBased: {
-            layers: this.layers,
-          },
-        },
-        query: query || { query: '', language: 'kuery' },
-        filters: [],
-      },
     };
   }
 }

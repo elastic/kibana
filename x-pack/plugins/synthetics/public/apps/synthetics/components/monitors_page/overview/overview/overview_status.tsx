@@ -7,29 +7,29 @@
 
 import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiSpacer, EuiStat, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import {
-  clearOverviewStatusErrorAction,
-  fetchOverviewStatusAction,
-  selectOverviewStatus,
-} from '../../../../state';
+import { clearOverviewStatusErrorAction, selectOverviewPageState } from '../../../../state';
 import { kibanaService } from '../../../../../../utils/kibana_service';
-import { useSyntheticsRefreshContext } from '../../../../contexts';
+import { useGetUrlParams } from '../../../../hooks/use_url_params';
+import { useOverviewStatus } from '../../hooks/use_overview_status';
 
 function title(t?: number) {
   return t ?? '-';
 }
 
 export function OverviewStatus() {
-  const { status, statusError } = useSelector(selectOverviewStatus);
+  const { statusFilter } = useGetUrlParams();
+
+  const pageState = useSelector(selectOverviewPageState);
+  const { status, statusError } = useOverviewStatus({ pageState });
   const dispatch = useDispatch();
-
-  const { lastRefresh } = useSyntheticsRefreshContext();
-
-  useEffect(() => {
-    dispatch(fetchOverviewStatusAction.get());
-  }, [dispatch, lastRefresh]);
+  const [statusConfig, setStatusConfig] = useState({
+    up: status?.up,
+    down: status?.down,
+    pending: status?.pending,
+    disabledCount: status?.disabledCount,
+  });
 
   useEffect(() => {
     if (statusError) {
@@ -41,19 +41,59 @@ export function OverviewStatus() {
     }
   }, [dispatch, statusError]);
 
+  useEffect(() => {
+    if (statusFilter) {
+      switch (statusFilter) {
+        case 'up':
+          setStatusConfig({
+            up: status?.up || 0,
+            down: 0,
+            disabledCount: 0,
+            pending: status?.pending,
+          });
+          break;
+        case 'down': {
+          setStatusConfig({
+            up: 0,
+            down: status?.down || 0,
+            disabledCount: 0,
+            pending: status?.pending,
+          });
+          break;
+        }
+        case 'disabled': {
+          setStatusConfig({
+            up: 0,
+            down: 0,
+            disabledCount: status?.disabledCount || 0,
+            pending: status?.pending,
+          });
+          break;
+        }
+      }
+    } else if (status) {
+      setStatusConfig({
+        up: status.up,
+        down: status.down,
+        disabledCount: status.disabledCount,
+        pending: status?.pending,
+      });
+    }
+  }, [status, statusFilter]);
+
   return (
-    <EuiPanel>
+    <EuiPanel hasShadow={false} hasBorder>
       <EuiTitle size="xs">
         <h3>{headingText}</h3>
       </EuiTitle>
-      <EuiSpacer size="s" />
+      <EuiSpacer size="m" />
       <EuiFlexGroup gutterSize="xl">
         <EuiFlexItem grow={false}>
           <EuiStat
             data-test-subj="xpack.uptime.synthetics.overview.status.up"
             description={upDescription}
             reverse
-            title={title(status?.up)}
+            title={title(statusConfig?.up)}
             titleColor="success"
             titleSize="m"
           />
@@ -63,7 +103,7 @@ export function OverviewStatus() {
             data-test-subj="xpack.uptime.synthetics.overview.status.down"
             description={downDescription}
             reverse
-            title={title(status?.down)}
+            title={title(statusConfig?.down)}
             titleColor="danger"
             titleSize="m"
           />
@@ -73,11 +113,23 @@ export function OverviewStatus() {
             data-test-subj="xpack.uptime.synthetics.overview.status.disabled"
             description={disabledDescription}
             reverse
-            title={title(status?.disabledCount)}
+            title={title(statusConfig?.disabledCount)}
             titleColor="subdued"
             titleSize="m"
           />
         </EuiFlexItem>
+        {(statusConfig?.pending || 0) > 0 && (
+          <EuiFlexItem grow={false}>
+            <EuiStat
+              data-test-subj="xpack.uptime.synthetics.overview.status.pending"
+              description={pendingDescription}
+              reverse
+              title={title(statusConfig?.pending)}
+              titleColor="subdued"
+              titleSize="m"
+            />
+          </EuiFlexItem>
+        )}
       </EuiFlexGroup>
     </EuiPanel>
   );
@@ -93,6 +145,10 @@ const upDescription = i18n.translate('xpack.synthetics.overview.status.up.descri
 
 const downDescription = i18n.translate('xpack.synthetics.overview.status.down.description', {
   defaultMessage: 'Down',
+});
+
+const pendingDescription = i18n.translate('xpack.synthetics.overview.status.pending.description', {
+  defaultMessage: 'Pending',
 });
 
 const disabledDescription = i18n.translate(

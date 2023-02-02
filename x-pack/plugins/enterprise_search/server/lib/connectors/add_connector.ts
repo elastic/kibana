@@ -7,9 +7,14 @@
 
 import { IScopedClusterClient } from '@kbn/core/server';
 
-import { CONNECTORS_INDEX } from '../..';
-import { CONNECTORS_VERSION } from '../..';
-import { ConnectorDocument, ConnectorStatus } from '../../../common/types/connectors';
+import { CONNECTORS_INDEX, CONNECTORS_VERSION } from '../..';
+import {
+  ConnectorDocument,
+  ConnectorStatus,
+  FilteringPolicy,
+  FilteringRuleRule,
+  FilteringValidationState,
+} from '../../../common/types/connectors';
 import { ErrorCode } from '../../../common/types/error_codes';
 import {
   DefaultConnectorsPipelineMeta,
@@ -54,9 +59,9 @@ const createConnector = async (
   const result = await client.asCurrentUser.index({
     document,
     index: CONNECTORS_INDEX,
+    refresh: true,
   });
   await createIndex(client, document.index_name, language, false);
-  await client.asCurrentUser.indices.refresh({ index: CONNECTORS_INDEX });
 
   return { id: result._id, index_name: document.index_name };
 };
@@ -84,11 +89,65 @@ export const addConnector = async (
     connectorsIndicesMapping[`${CONNECTORS_INDEX}-v${CONNECTORS_VERSION}`]?.mappings?._meta
       ?.pipeline;
 
+  const currentTimestamp = new Date().toISOString();
   const document: ConnectorDocument = {
     api_key_id: null,
     configuration: {},
+    custom_scheduling: {},
     description: null,
     error: null,
+    features: null,
+    filtering: [
+      {
+        active: {
+          advanced_snippet: {
+            created_at: currentTimestamp,
+            updated_at: currentTimestamp,
+            value: {},
+          },
+          rules: [
+            {
+              created_at: currentTimestamp,
+              field: '_',
+              id: 'DEFAULT',
+              order: 0,
+              policy: FilteringPolicy.INCLUDE,
+              rule: FilteringRuleRule.REGEX,
+              updated_at: currentTimestamp,
+              value: '.*',
+            },
+          ],
+          validation: {
+            errors: [],
+            state: FilteringValidationState.VALID,
+          },
+        },
+        domain: 'DEFAULT',
+        draft: {
+          advanced_snippet: {
+            created_at: currentTimestamp,
+            updated_at: currentTimestamp,
+            value: {},
+          },
+          rules: [
+            {
+              created_at: currentTimestamp,
+              field: '_',
+              id: 'DEFAULT',
+              order: 0,
+              policy: FilteringPolicy.INCLUDE,
+              rule: FilteringRuleRule.REGEX,
+              updated_at: currentTimestamp,
+              value: '.*',
+            },
+          ],
+          validation: {
+            errors: [],
+            state: FilteringValidationState.VALID,
+          },
+        },
+      },
+    ],
     index_name: input.index_name,
     is_native: input.is_native,
     language: input.language,

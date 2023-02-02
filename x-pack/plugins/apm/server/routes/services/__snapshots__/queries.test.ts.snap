@@ -30,6 +30,8 @@ Object {
     "_source": Array [
       "agent.name",
       "service.runtime.name",
+      "cloud.provider",
+      "cloud.service.name",
     ],
     "query": Object {
       "bool": Object {
@@ -54,11 +56,23 @@ Object {
             },
           },
         ],
-        "should": Object {
-          "exists": Object {
-            "field": "service.runtime.name",
+        "should": Array [
+          Object {
+            "exists": Object {
+              "field": "service.runtime.name",
+            },
           },
-        },
+          Object {
+            "exists": Object {
+              "field": "cloud.provider",
+            },
+          },
+          Object {
+            "exists": Object {
+              "field": "cloud.service.name",
+            },
+          },
+        ],
       },
     },
     "size": 1,
@@ -85,6 +99,11 @@ Array [
       "aggs": Object {
         "sample": Object {
           "aggs": Object {
+            "service_overflow_count": Object {
+              "sum": Object {
+                "field": "service_transaction.aggregation.overflow_count",
+              },
+            },
             "services": Object {
               "aggs": Object {
                 "transactionType": Object {
@@ -128,7 +147,7 @@ Array [
               },
               "terms": Object {
                 "field": "service.name",
-                "size": 500,
+                "size": 1000,
               },
             },
           },
@@ -190,7 +209,7 @@ Array [
               },
               "terms": Object {
                 "field": "service.name",
-                "size": 500,
+                "size": 1000,
               },
             },
           },
@@ -219,6 +238,7 @@ Array [
       "track_total_hits": false,
     },
   },
+  undefined,
 ]
 `;
 

@@ -10,7 +10,7 @@ import React from 'react';
 import { CoreTheme } from '@kbn/core/public';
 import { Observable } from 'rxjs';
 import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
-import { defaultTheme$ } from '@kbn/presentation-util-plugin/common/lib';
+import { defaultTheme$ } from '@kbn/presentation-util-plugin/common';
 import { StartInitializer } from '../plugin';
 import { Datatable as DatatableComponent } from '../../public/components/datatable';
 import { RendererStrings } from '../../i18n';

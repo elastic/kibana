@@ -13,13 +13,11 @@ import {
   EuiProgress,
 } from '@elastic/eui';
 import React, { useCallback, useMemo, useRef } from 'react';
-import { RULES_TABLE_PAGE_SIZE_OPTIONS } from '../../../../../common/constants';
 import { Loader } from '../../../../common/components/loader';
 import { useBoolState } from '../../../../common/hooks/use_bool_state';
 import { useValueChanged } from '../../../../common/hooks/use_value_changed';
 import { PrePackagedRulesPrompt } from '../../../../detections/components/rules/pre_packaged_rules/load_empty_prompt';
 import type { Rule, RulesSortingFields } from '../../../rule_management/logic';
-import { usePrePackagedRulesStatus } from '../../../rule_management/logic/use_pre_packaged_rules_status';
 import * as i18n from '../../../../detections/pages/detection_engine/rules/translations';
 import type { EuiBasicTableOnChange } from '../../../../detections/pages/detection_engine/rules/types';
 import { BulkActionDryRunConfirmation } from './bulk_actions/bulk_action_dry_run_confirmation';
@@ -36,6 +34,11 @@ import { RulesTableUtilityBar } from './rules_table_utility_bar';
 import { useMonitoringColumns, useRulesColumns } from './use_columns';
 import { useUserData } from '../../../../detections/components/user_info';
 import { hasUserCRUDPermission } from '../../../../common/utils/privileges';
+import { useBulkDuplicateExceptionsConfirmation } from './bulk_actions/use_bulk_duplicate_confirmation';
+import { BulkActionDuplicateExceptionsConfirmation } from './bulk_actions/bulk_duplicate_exceptions_confirmation';
+import { useStartMlJobs } from '../../../rule_management/logic/use_start_ml_jobs';
+import { RULES_TABLE_PAGE_SIZE_OPTIONS } from './constants';
+import { useRuleManagementFilters } from '../../../rule_management/logic/use_rule_management_filters';
 
 const INITIAL_SORT_FIELD = 'enabled';
 
@@ -62,14 +65,13 @@ export const RulesTables = React.memo<RulesTableProps>(({ selectedTab }) => {
 
   const tableRef = useRef<EuiBasicTable>(null);
   const rulesTableContext = useRulesTableContext();
-  const { data: prePackagedRulesStatus, isLoading: isPrepackagedStatusLoading } =
-    usePrePackagedRulesStatus();
+  const { data: ruleManagementFilters } = useRuleManagementFilters();
 
   const {
     state: {
       rules,
       filterOptions,
-      isActionInProgress,
+      isPreflightInProgress,
       isAllSelected,
       isFetched,
       isLoading,
@@ -101,6 +103,13 @@ export const RulesTables = React.memo<RulesTableProps>(({ selectedTab }) => {
   } = useBulkActionsConfirmation();
 
   const {
+    isBulkDuplicateConfirmationVisible,
+    showBulkDuplicateConfirmation,
+    cancelRuleDuplication,
+    confirmRuleDuplication,
+  } = useBulkDuplicateExceptionsConfirmation();
+
+  const {
     bulkEditActionType,
     isBulkEditFlyoutVisible,
     handleBulkEditFormConfirm,
@@ -114,6 +123,7 @@ export const RulesTables = React.memo<RulesTableProps>(({ selectedTab }) => {
     filterOptions,
     confirmDeletion,
     showBulkActionConfirmation,
+    showBulkDuplicateConfirmation,
     completeBulkEditForm,
     executeBulkActionsDryRun,
   });
@@ -140,8 +150,21 @@ export const RulesTables = React.memo<RulesTableProps>(({ selectedTab }) => {
     [setPage, setPerPage, setSortingOptions]
   );
 
-  const rulesColumns = useRulesColumns({ hasCRUDPermissions: hasPermissions });
-  const monitoringColumns = useMonitoringColumns({ hasCRUDPermissions: hasPermissions });
+  const { loading: isLoadingJobs, jobs: mlJobs, startMlJobs } = useStartMlJobs();
+  const rulesColumns = useRulesColumns({
+    hasCRUDPermissions: hasPermissions,
+    isLoadingJobs,
+    mlJobs,
+    startMlJobs,
+    showExceptionsDuplicateConfirmation: showBulkDuplicateConfirmation,
+  });
+  const monitoringColumns = useMonitoringColumns({
+    hasCRUDPermissions: hasPermissions,
+    isLoadingJobs,
+    mlJobs,
+    startMlJobs,
+    showExceptionsDuplicateConfirmation: showBulkDuplicateConfirmation,
+  });
 
   const isSelectAllCalled = useRef(false);
 
@@ -190,14 +213,13 @@ export const RulesTables = React.memo<RulesTableProps>(({ selectedTab }) => {
   }, [rules, isAllSelected, setIsAllSelected, setSelectedRuleIds]);
 
   const isTableEmpty =
-    !isPrepackagedStatusLoading &&
-    prePackagedRulesStatus?.rules_custom_installed === 0 &&
-    prePackagedRulesStatus.rules_installed === 0;
+    ruleManagementFilters?.rules_summary.custom_count === 0 &&
+    ruleManagementFilters?.rules_summary.prebuilt_installed_count === 0;
 
-  const shouldShowRulesTable = !isPrepackagedStatusLoading && !isLoading && !isTableEmpty;
+  const shouldShowRulesTable = !isLoading && !isTableEmpty;
 
   const tableProps =
-    selectedTab === AllRulesTabs.rules
+    selectedTab === AllRulesTabs.management
       ? {
           'data-test-subj': 'rules-table',
           columns: rulesColumns,
@@ -205,7 +227,7 @@ export const RulesTables = React.memo<RulesTableProps>(({ selectedTab }) => {
       : { 'data-test-subj': 'monitoring-table', columns: monitoringColumns };
 
   const shouldShowLinearProgress = isFetched && isRefetching;
-  const shouldShowLoadingOverlay = (!isFetched && isRefetching) || isActionInProgress;
+  const shouldShowLoadingOverlay = (!isFetched && isRefetching) || isPreflightInProgress;
 
   return (
     <>
@@ -220,7 +242,6 @@ export const RulesTables = React.memo<RulesTableProps>(({ selectedTab }) => {
       {shouldShowLoadingOverlay && (
         <Loader data-test-subj="loadingPanelAllRulesTable" overlay size="xl" />
       )}
-      {shouldShowRulesTable && <RulesTableFilters />}
       {isTableEmpty && <PrePackagedRulesPrompt />}
       {isLoading && (
         <EuiLoadingContent data-test-subj="initialLoadingPanelAllRulesTable" lines={10} />
@@ -247,6 +268,13 @@ export const RulesTables = React.memo<RulesTableProps>(({ selectedTab }) => {
           onConfirm={approveBulkActionConfirmation}
         />
       )}
+      {isBulkDuplicateConfirmationVisible && (
+        <BulkActionDuplicateExceptionsConfirmation
+          onCancel={cancelRuleDuplication}
+          onConfirm={confirmRuleDuplication}
+          rulesCount={selectedRuleIds?.length ? selectedRuleIds?.length : 1}
+        />
+      )}
       {isBulkEditFlyoutVisible && bulkEditActionType !== undefined && (
         <BulkEditFlyout
           rulesCount={bulkActionsDryRunResult?.succeededRulesCount ?? 0}
@@ -257,6 +285,7 @@ export const RulesTables = React.memo<RulesTableProps>(({ selectedTab }) => {
       )}
       {shouldShowRulesTable && (
         <>
+          <RulesTableFilters />
           <RulesTableUtilityBar
             canBulkEdit={hasPermissions}
             onGetBulkItemsPopoverContent={getBulkItemsPopoverContent}

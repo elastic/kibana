@@ -28,11 +28,9 @@ export function loadInitialDataViews() {
   const restricted = createMockedRestrictedIndexPattern();
   return {
     indexPatternRefs: [],
-    existingFields: {},
     indexPatterns: {
       [indexPattern.id]: indexPattern,
       [restricted.id]: restricted,
     },
-    isFirstExistenceFetch: false,
   };
 }

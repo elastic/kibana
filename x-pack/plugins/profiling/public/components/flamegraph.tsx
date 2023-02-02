@@ -6,7 +6,16 @@
  */
 
 import { Chart, Datum, Flame, FlameLayerValue, PartialTheme, Settings } from '@elastic/charts';
-import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiSwitch, useEuiTheme } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiPanel,
+  EuiSpacer,
+  EuiSwitch,
+  EuiText,
+  EuiTextColor,
+  useEuiTheme,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { Maybe } from '@kbn/observability-plugin/common/typings';
 import { isNumber } from 'lodash';
@@ -15,6 +24,7 @@ import { ElasticFlameGraph, FlameGraphComparisonMode } from '../../common/flameg
 import { asPercentage } from '../utils/formatters/as_percentage';
 import { getFlamegraphModel } from '../utils/get_flamegraph_model';
 import { FlamegraphInformationWindow } from './flame_graphs_view/flamegraph_information_window';
+import { FlameGraphLegend } from './flame_graphs_view/flame_graph_legend';
 
 function TooltipRow({
   value,
@@ -29,46 +39,62 @@ function TooltipRow({
   formatAsPercentage: boolean;
   showChange: boolean;
 }) {
-  const valueLabel = formatAsPercentage ? asPercentage(value) : value.toString();
+  const valueLabel = formatAsPercentage ? asPercentage(Math.abs(value)) : value.toString();
   const comparisonLabel =
     formatAsPercentage && isNumber(comparison) ? asPercentage(comparison) : comparison?.toString();
 
-  const diff = showChange && isNumber(comparison) ? comparison - value : undefined;
+  let diff: number | undefined;
+  let diffLabel = '';
+  let color = '';
 
-  let diffLabel: string | undefined = diff?.toString();
-
-  if (diff === 0) {
-    diffLabel = i18n.translate('xpack.profiling.flameGraphToolTip.diffNoChange', {
-      defaultMessage: 'no change',
-    });
-  } else if (formatAsPercentage && diff !== undefined) {
-    diffLabel = asPercentage(diff);
+  if (isNumber(comparison)) {
+    if (showChange) {
+      color = value < comparison ? 'danger' : 'success';
+      if (formatAsPercentage) {
+        // CPU percent values
+        diff = comparison - value;
+        diffLabel =
+          '(' + (diff > 0 ? '+' : diff < 0 ? '-' : '') + asPercentage(Math.abs(diff)) + ')';
+      } else {
+        // Sample counts
+        diff = 1 - comparison / value;
+        diffLabel =
+          '(' + (diff > 0 ? '-' : diff < 0 ? '+' : '') + asPercentage(Math.abs(diff)) + ')';
+      }
+      if (Math.abs(diff) < 0.0001) {
+        diffLabel = '';
+      }
+    }
   }
 
   return (
-    <EuiFlexItem style={{ width: 200, overflowWrap: 'anywhere' }}>
+    <EuiFlexItem style={{ width: 256, overflowWrap: 'anywhere' }}>
       <EuiFlexGroup direction="row" gutterSize="xs">
-        <EuiFlexItem grow={false} style={{ fontWeight: 'bold' }}>
-          {label}
-        </EuiFlexItem>
         <EuiFlexItem style={{}}>
-          {comparison
-            ? i18n.translate('xpack.profiling.flameGraphTooltip.valueLabel', {
-                defaultMessage: `{value} vs {comparison}`,
-                values: {
-                  value: valueLabel,
-                  comparison: comparisonLabel,
-                },
-              })
-            : valueLabel}
-          {diffLabel ? ` (${diffLabel})` : ''}
+          <EuiText size="xs">
+            <strong>{label}</strong>
+          </EuiText>
+          <EuiText size="xs" style={{ marginLeft: '20px' }}>
+            {comparison !== undefined
+              ? i18n.translate('xpack.profiling.flameGraphTooltip.valueLabel', {
+                  defaultMessage: `{value} vs {comparison}`,
+                  values: {
+                    value: valueLabel,
+                    comparison: comparisonLabel,
+                  },
+                })
+              : valueLabel}
+            <EuiTextColor color={color}> {diffLabel}</EuiTextColor>
+          </EuiText>
         </EuiFlexItem>
       </EuiFlexGroup>
+      <EuiSpacer size="xs" />
     </EuiFlexItem>
   );
 }
 
 function FlameGraphTooltip({
+  isRoot,
   label,
   countInclusive,
   countExclusive,
@@ -79,6 +105,7 @@ function FlameGraphTooltip({
   comparisonSamples,
   comparisonTotalSamples,
 }: {
+  isRoot: boolean;
   samples: number;
   label: string;
   countInclusive: number;
@@ -101,40 +128,44 @@ function FlameGraphTooltip({
         <EuiFlexItem>{label}</EuiFlexItem>
         <EuiFlexItem>
           <EuiFlexGroup direction="column" gutterSize="xs">
-            <TooltipRow
-              label={i18n.translate('xpack.profiling.flameGraphTooltip.inclusiveCpuLabel', {
-                defaultMessage: `Inclusive CPU:`,
-              })}
-              value={countInclusive / totalSamples}
-              comparison={
-                isNumber(comparisonCountInclusive) && isNumber(comparisonTotalSamples)
-                  ? comparisonCountInclusive / comparisonTotalSamples
-                  : undefined
-              }
-              formatAsPercentage
-              showChange
-            />
-            <TooltipRow
-              label={i18n.translate('xpack.profiling.flameGraphTooltip.exclusiveCpuLabel', {
-                defaultMessage: `Exclusive CPU:`,
-              })}
-              value={countExclusive / totalSamples}
-              comparison={
-                isNumber(comparisonCountExclusive) && isNumber(comparisonTotalSamples)
-                  ? comparisonCountExclusive / comparisonTotalSamples
-                  : undefined
-              }
-              formatAsPercentage
-              showChange
-            />
+            {isRoot === false && (
+              <>
+                <TooltipRow
+                  label={i18n.translate('xpack.profiling.flameGraphTooltip.inclusiveCpuLabel', {
+                    defaultMessage: `CPU incl. subfunctions`,
+                  })}
+                  value={countInclusive / totalSamples}
+                  comparison={
+                    isNumber(comparisonCountInclusive) && isNumber(comparisonTotalSamples)
+                      ? comparisonCountInclusive / comparisonTotalSamples
+                      : undefined
+                  }
+                  formatAsPercentage
+                  showChange
+                />
+                <TooltipRow
+                  label={i18n.translate('xpack.profiling.flameGraphTooltip.exclusiveCpuLabel', {
+                    defaultMessage: `CPU`,
+                  })}
+                  value={countExclusive / totalSamples}
+                  comparison={
+                    isNumber(comparisonCountExclusive) && isNumber(comparisonTotalSamples)
+                      ? comparisonCountExclusive / comparisonTotalSamples
+                      : undefined
+                  }
+                  formatAsPercentage
+                  showChange
+                />
+              </>
+            )}
             <TooltipRow
               label={i18n.translate('xpack.profiling.flameGraphTooltip.samplesLabel', {
-                defaultMessage: `Samples:`,
+                defaultMessage: `Samples`,
               })}
-              value={samples}
-              comparison={comparisonSamples}
+              value={countInclusive}
+              comparison={comparisonCountInclusive}
               formatAsPercentage={false}
-              showChange={false}
+              showChange
             />
           </EuiFlexGroup>
         </EuiFlexItem>
@@ -251,6 +282,7 @@ export const FlameGraph: React.FC<FlameGraphProps> = ({
 
                       return (
                         <FlameGraphTooltip
+                          isRoot={valueIndex === 0}
                           label={label}
                           samples={samples}
                           countInclusive={countInclusive}
@@ -289,6 +321,9 @@ export const FlameGraph: React.FC<FlameGraphProps> = ({
             </EuiFlexItem>
           ) : undefined}
         </EuiFlexGroup>
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <FlameGraphLegend legendItems={columnarData.legendItems} asScale={!!comparisonFlamegraph} />
       </EuiFlexItem>
     </EuiFlexGroup>
   );

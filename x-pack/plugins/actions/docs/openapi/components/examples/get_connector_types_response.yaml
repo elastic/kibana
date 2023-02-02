@@ -1,0 +1,31 @@
+summary: A list of connector types
+value:
+  - id: .swimlane
+    name: Swimlane
+    enabled: true
+    enabled_in_config: true
+    enabled_in_license: true
+    minimum_license_required: gold
+    supported_feature_ids:
+      - alerting
+      - cases
+      - siem
+  - id: .index
+    name: Index
+    enabled: true
+    enabled_in_config: true
+    enabled_in_license: true
+    minimum_license_required: basic
+    supported_feature_ids:
+      - alerting
+      - uptime
+      - siem
+  - id: .server-log
+    name: Server log
+    enabled: true
+    enabled_in_config: true
+    enabled_in_license: true
+    minimum_license_required: basic
+    supported_feature_ids:
+      - alerting
+      - uptime

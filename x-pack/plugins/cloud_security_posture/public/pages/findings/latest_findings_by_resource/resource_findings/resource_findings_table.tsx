@@ -13,6 +13,7 @@ import {
   type EuiBasicTableColumn,
   type EuiTableActionsColumnType,
   type EuiBasicTableProps,
+  useEuiTheme,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { CspFinding } from '../../../../../common/schemas/csp_finding';
@@ -23,8 +24,10 @@ import {
   type OnAddFilter,
 } from '../../layout/findings_layout';
 import { FindingsRuleFlyout } from '../../findings_flyout/findings_flyout';
+import { getSelectedRowStyle } from '../../utils/utils';
+import * as TEST_SUBJECTS from '../../test_subjects';
 
-interface Props {
+export interface ResourceFindingsTableProps {
   items: CspFinding[];
   loading: boolean;
   pagination: Pagination;
@@ -40,8 +43,14 @@ const ResourceFindingsTableComponent = ({
   sorting,
   setTableOptions,
   onAddFilter,
-}: Props) => {
+}: ResourceFindingsTableProps) => {
+  const { euiTheme } = useEuiTheme();
   const [selectedFinding, setSelectedFinding] = useState<CspFinding>();
+
+  const getRowProps = (row: CspFinding) => ({
+    style: getSelectedRowStyle(euiTheme, row, selectedFinding),
+    'data-test-subj': TEST_SUBJECTS.getResourceFindingsTableRowTestId(row.resource.id),
+  });
 
   const columns: [
     EuiTableActionsColumnType<CspFinding>,
@@ -50,10 +59,9 @@ const ResourceFindingsTableComponent = ({
     () => [
       getExpandColumn<CspFinding>({ onClick: setSelectedFinding }),
       createColumnWithFilters(baseFindingsColumns['result.evaluation'], { onAddFilter }),
+      baseFindingsColumns['rule.benchmark.rule_number'],
       createColumnWithFilters(baseFindingsColumns['rule.name'], { onAddFilter }),
-      createColumnWithFilters(baseFindingsColumns['rule.benchmark.name'], { onAddFilter }),
       baseFindingsColumns['rule.section'],
-      baseFindingsColumns['rule.tags'],
       baseFindingsColumns['@timestamp'],
     ],
     [onAddFilter]
@@ -63,6 +71,7 @@ const ResourceFindingsTableComponent = ({
     return (
       <EuiEmptyPrompt
         iconType="logoKibana"
+        data-test-subj={TEST_SUBJECTS.RESOURCES_FINDINGS_TABLE_EMPTY_STATE}
         title={
           <h2>
             <FormattedMessage
@@ -77,12 +86,14 @@ const ResourceFindingsTableComponent = ({
   return (
     <>
       <EuiBasicTable
+        data-test-subj={TEST_SUBJECTS.RESOURCES_FINDINGS_TABLE}
         loading={loading}
         items={items}
         columns={columns}
         onChange={setTableOptions}
         pagination={pagination}
         sorting={sorting}
+        rowProps={getRowProps}
       />
       {selectedFinding && (
         <FindingsRuleFlyout

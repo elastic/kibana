@@ -469,7 +469,7 @@ Pipeline aggregations are dependent on the outputs calculated from other aggrega
 
 | Bucket script 
 | 
-| 
+| &check;
 | &check;
 | &check;
 

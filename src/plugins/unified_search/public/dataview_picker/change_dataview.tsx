@@ -7,7 +7,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { css } from '@emotion/react';
 import {
   EuiPopover,
@@ -24,16 +24,17 @@ import {
   EuiFlexItem,
   EuiButtonEmpty,
   EuiToolTip,
-  EuiSpacer,
 } from '@elastic/eui';
-import type { DataViewListItem } from '@kbn/data-views-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import type { DataView } from '@kbn/data-views-plugin/public';
 import type { IUnifiedSearchPluginServices } from '../types';
-import type { DataViewPickerPropsExtended } from '.';
-import { DataViewsList } from './dataview_list';
+import type { DataViewPickerPropsExtended } from './data_view_picker';
+import type { DataViewListItemEnhanced } from './dataview_list';
 import type { TextBasedLanguagesListProps } from './text_languages_list';
 import type { TextBasedLanguagesTransitionModalProps } from './text_languages_transition_modal';
+import adhoc from './assets/adhoc.svg';
 import { changeDataViewStyles } from './change_dataview.styles';
+import { DataViewSelector } from './data_view_selector';
 
 // local storage key for the text based languages transition modal
 const TEXT_LANG_TRANSITION_MODAL_KEY = 'data.textLangTransitionModal';
@@ -58,10 +59,20 @@ export const TextBasedLanguagesList = (props: TextBasedLanguagesListProps) => (
   </React.Suspense>
 );
 
+const mapAdHocDataView = (adHocDataView: DataView) => {
+  return {
+    title: adHocDataView.title,
+    name: adHocDataView.name,
+    id: adHocDataView.id!,
+    isAdhoc: true,
+  };
+};
+
 export function ChangeDataView({
   isMissingCurrent,
   currentDataViewId,
   adHocDataViews,
+  savedDataViews,
   onChangeDataView,
   onAddField,
   onDataViewCreated,
@@ -77,10 +88,7 @@ export function ChangeDataView({
 }: DataViewPickerPropsExtended) {
   const { euiTheme } = useEuiTheme();
   const [isPopoverOpen, setPopoverIsOpen] = useState(false);
-  const [noDataViewMatches, setNoDataViewMatches] = useState(false);
-  const [dataViewSearchString, setDataViewSearchString] = useState('');
-  const [indexMatches, setIndexMatches] = useState(0);
-  const [dataViewsList, setDataViewsList] = useState<DataViewListItem[]>([]);
+  const [dataViewsList, setDataViewsList] = useState<DataViewListItemEnhanced[]>([]);
   const [triggerLabel, setTriggerLabel] = useState('');
   const [isTextBasedLangSelected, setIsTextBasedLangSelected] = useState(
     Boolean(textBasedLanguage)
@@ -100,48 +108,22 @@ export function ChangeDataView({
 
   useEffect(() => {
     const fetchDataViews = async () => {
-      const dataViewsRefs = await data.dataViews.getIdsWithTitle();
-      if (adHocDataViews?.length) {
-        adHocDataViews.forEach((adHocDataView) => {
-          if (adHocDataView.id) {
-            dataViewsRefs.push({
-              title: adHocDataView.title,
-              name: adHocDataView.name,
-              id: adHocDataView.id,
-            });
-          }
-        });
-      }
-      setDataViewsList(dataViewsRefs);
+      const savedDataViewRefs: DataViewListItemEnhanced[] = savedDataViews
+        ? savedDataViews
+        : await data.dataViews.getIdsWithTitle();
+      const adHocDataViewRefs: DataViewListItemEnhanced[] =
+        adHocDataViews?.map(mapAdHocDataView) || [];
+
+      setDataViewsList(savedDataViewRefs.concat(adHocDataViewRefs));
     };
     fetchDataViews();
-  }, [data, currentDataViewId, adHocDataViews]);
-
-  const pendingIndexMatch = useRef<undefined | NodeJS.Timeout>();
-  useEffect(() => {
-    async function checkIndices() {
-      if (dataViewSearchString !== '' && noDataViewMatches) {
-        const matches = await kibana.services.dataViews.getIndices({
-          pattern: dataViewSearchString,
-          isRollupIndex: () => false,
-          showAllIndices: false,
-        });
-        setIndexMatches(matches.length);
-      }
-    }
-    if (pendingIndexMatch.current) {
-      clearTimeout(pendingIndexMatch.current);
-    }
-    pendingIndexMatch.current = setTimeout(checkIndices, 250);
-  }, [dataViewSearchString, kibana.services.dataViews, noDataViewMatches]);
+  }, [data, currentDataViewId, adHocDataViews, savedDataViews, isTextBasedLangSelected]);
 
   useEffect(() => {
-    if (trigger.label) {
-      if (textBasedLanguage) {
-        setTriggerLabel(textBasedLanguage.toUpperCase());
-      } else {
-        setTriggerLabel(trigger.label);
-      }
+    if (textBasedLanguage) {
+      setTriggerLabel(textBasedLanguage.toUpperCase());
+    } else {
+      setTriggerLabel(trigger.label);
     }
   }, [textBasedLanguage, trigger.label]);
 
@@ -150,6 +132,10 @@ export function ChangeDataView({
       setIsTextBasedLangSelected(Boolean(textBasedLanguage));
     }
   }, [isTextBasedLangSelected, textBasedLanguage]);
+
+  const isAdHocSelected = useMemo(() => {
+    return adHocDataViews?.some((dataView) => dataView.id === currentDataViewId);
+  }, [adHocDataViews, currentDataViewId]);
 
   const createTrigger = function () {
     const { label, title, 'data-test-subj': dataTestSubj, fullWidth, ...rest } = trigger;
@@ -166,9 +152,22 @@ export function ChangeDataView({
         title={triggerLabel}
         fullWidth={fullWidth}
         disabled={isDisabled}
+        textProps={{ className: 'eui-textTruncate' }}
         {...rest}
       >
-        {triggerLabel}
+        <>
+          {/* we don't want to display the adHoc icon on text based mode */}
+          {isAdHocSelected && !isTextBasedLangSelected && (
+            <EuiIcon
+              type={adhoc}
+              color="primary"
+              css={css`
+                margin-right: ${euiTheme.size.s};
+              `}
+            />
+          )}
+          {triggerLabel}
+        </>
       </EuiButton>
     );
   };
@@ -219,11 +218,11 @@ export function ChangeDataView({
         ) : (
           <React.Fragment />
         ),
-        <EuiHorizontalRule margin="none" />
+        <EuiHorizontalRule margin="none" key="dataviewActions-divider" />
       );
     }
     panelItems.push(
-      <>
+      <React.Fragment key="add-dataview">
         {onDataViewCreated && (
           <EuiFlexGroup
             alignItems="center"
@@ -296,12 +295,16 @@ export function ChangeDataView({
             </EuiFlexItem>
           </EuiFlexGroup>
         )}
-
-        <DataViewsList
+        <DataViewSelector
+          currentDataViewId={currentDataViewId}
+          searchListInputId={searchListInputId}
           dataViewsList={dataViewsList}
+          selectableProps={selectableProps}
+          isTextBasedLangSelected={isTextBasedLangSelected}
+          setPopoverIsOpen={setPopoverIsOpen}
           onChangeDataView={async (newId) => {
-            const dataView = await data.dataViews.get(newId);
-            await data.dataViews.refreshFields(dataView);
+            // refreshing the field list
+            await dataViews.get(newId, undefined, true);
             setSelectedDataViewId(newId);
             setPopoverIsOpen(false);
             if (isTextBasedLangSelected && !isTextLangTransitionModalDismissed) {
@@ -319,69 +322,20 @@ export function ChangeDataView({
               onChangeDataView(newId);
             }
           }}
-          currentDataViewId={currentDataViewId}
-          selectableProps={{
-            ...(selectableProps || {}),
-            // @ts-expect-error Some EUI weirdness
-            searchProps: {
-              ...(selectableProps?.searchProps || {}),
-              onChange: (value, matches) => {
-                selectableProps?.searchProps?.onChange?.(value, matches);
-                setNoDataViewMatches(matches.length === 0 && dataViewsList.length > 0);
-                setDataViewSearchString(value);
-              },
-            },
-          }}
-          searchListInputId={searchListInputId}
-          isTextBasedLangSelected={isTextBasedLangSelected}
+          onCreateDefaultAdHocDataView={onCreateDefaultAdHocDataView}
         />
-        {onCreateDefaultAdHocDataView && noDataViewMatches && indexMatches > 0 && (
-          <EuiFlexGroup
-            alignItems="center"
-            gutterSize="none"
-            justifyContent="spaceBetween"
-            data-test-subj="select-text-based-language-panel"
-            css={css`
-              margin: ${euiTheme.size.s};
-              margin-bottom: 0;
-            `}
-          >
-            <EuiFlexItem grow={true}>
-              <EuiButton
-                fullWidth
-                size="s"
-                onClick={() => {
-                  setPopoverIsOpen(false);
-                  onCreateDefaultAdHocDataView(dataViewSearchString);
-                }}
-              >
-                {i18n.translate(
-                  'unifiedSearch.query.queryBar.indexPattern.createForMatchingIndices',
-                  {
-                    defaultMessage: `Explore {indicesLength, plural,
-            one {# matching index}
-            other {# matching indices}}`,
-                    values: {
-                      indicesLength: indexMatches,
-                    },
-                  }
-                )}
-              </EuiButton>
-              <EuiSpacer size="s" />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        )}
-      </>
+      </React.Fragment>
     );
 
     if (textBasedLanguages?.length) {
       panelItems.push(
-        <EuiHorizontalRule margin="none" />,
+        <EuiHorizontalRule margin="none" key="textbasedLanguages-divider" />,
         <EuiFlexGroup
           alignItems="center"
           gutterSize="none"
           justifyContent="spaceBetween"
           data-test-subj="select-text-based-language-panel"
+          key="text-based-languages-switcher"
           css={css`
             margin: ${euiTheme.size.s};
             margin-bottom: 0;

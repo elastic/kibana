@@ -6,7 +6,7 @@
  */
 
 import { useState, useEffect, useMemo } from 'react';
-import { filter, head, orderBy, pipe, has } from 'lodash/fp';
+import { has, sortBy } from 'lodash/fp';
 
 import { DEFAULT_ANOMALY_SCORE } from '../../../../../common/constants';
 import * as i18n from './translations';
@@ -20,13 +20,13 @@ import type { inputsModel } from '../../../store';
 import { useSecurityJobs } from '../../ml_popover/hooks/use_security_jobs';
 import type { SecurityJob } from '../../ml_popover/types';
 
-export const enum AnomalyEntity {
+export enum AnomalyEntity {
   User,
   Host,
 }
 
 export interface AnomaliesCount {
-  name: NotableAnomaliesJobId;
+  name: NotableAnomaliesJobId | string;
   count: number;
   entity: AnomalyEntity;
   job?: SecurityJob;
@@ -47,7 +47,7 @@ export const useNotableAnomaliesSearch = ({
   data: AnomaliesCount[];
   refetch: inputsModel.Refetch;
 } => {
-  const [data, setData] = useState<AnomaliesCount[]>(formatResultData([], []));
+  const [data, setData] = useState<AnomaliesCount[]>([]);
 
   const {
     loading: jobsLoading,
@@ -62,7 +62,7 @@ export const useNotableAnomaliesSearch = ({
 
   const { notableAnomaliesJobs, query } = useMemo(() => {
     const newNotableAnomaliesJobs = securityJobs.filter(({ id }) =>
-      NOTABLE_ANOMALIES_IDS.some((notableJobId) => matchJobId(id, notableJobId))
+      NOTABLE_ANOMALIES_IDS.some((notableJobId) => id === notableJobId)
     );
 
     const newQuery = getAggregatedAnomaliesQuery({
@@ -131,33 +131,19 @@ function formatResultData(
   }>,
   notableAnomaliesJobs: SecurityJob[]
 ): AnomaliesCount[] {
-  return NOTABLE_ANOMALIES_IDS.map((notableJobId) => {
-    const job = findJobWithId(notableJobId)(notableAnomaliesJobs);
+  const unsortedAnomalies: AnomaliesCount[] = NOTABLE_ANOMALIES_IDS.map((notableJobId) => {
+    const job = notableAnomaliesJobs.find(({ id }) => id === notableJobId);
+
     const bucket = buckets.find(({ key }) => key === job?.id);
     const hasUserName = has("entity.hits.hits[0]._source['user.name']", bucket);
 
     return {
-      name: notableJobId,
+      name: job?.customSettings?.security_app_display_name ?? notableJobId,
       count: bucket?.doc_count ?? 0,
       entity: hasUserName ? AnomalyEntity.User : AnomalyEntity.Host,
       job,
     };
   });
+
+  return sortBy(['name'], unsortedAnomalies);
 }
-
-/**
- * ML module allows users to add a prefix to the job id.
- * So we need to match jobs that end with the notableJobId.
- */
-const matchJobId = (jobId: string, notableJobId: NotableAnomaliesJobId) =>
-  jobId.endsWith(notableJobId);
-
-/**
- * When multiple jobs match a notable job id, it returns the most recent one.
- */
-const findJobWithId = (notableJobId: NotableAnomaliesJobId) =>
-  pipe<SecurityJob[][], SecurityJob[], SecurityJob[], SecurityJob | undefined>(
-    filter<SecurityJob>(({ id }) => matchJobId(id, notableJobId)),
-    orderBy<SecurityJob>('latestTimestampSortValue', 'desc'),
-    head
-  );

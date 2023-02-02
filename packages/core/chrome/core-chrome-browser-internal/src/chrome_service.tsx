@@ -23,9 +23,11 @@ import type {
   ChromeBadge,
   ChromeBreadcrumb,
   ChromeBreadcrumbsAppendExtension,
+  ChromeGlobalHelpExtensionMenuLink,
   ChromeHelpExtension,
   ChromeUserBanner,
 } from '@kbn/core-chrome-browser';
+import type { CustomBrandingStart } from '@kbn/core-custom-branding-browser';
 import { KIBANA_ASK_ELASTIC_LINK } from './constants';
 import { DocTitleService } from './doc_title';
 import { NavControlsService } from './nav_controls';
@@ -48,6 +50,7 @@ export interface StartDeps {
   http: HttpStart;
   injectedMetadata: InternalInjectedMetadataStart;
   notifications: NotificationsStart;
+  customBranding: CustomBrandingStart;
 }
 
 /** @internal */
@@ -100,9 +103,13 @@ export class ChromeService {
     http,
     injectedMetadata,
     notifications,
+    customBranding,
   }: StartDeps): Promise<InternalChromeStart> {
     this.initVisibility(application);
 
+    const globalHelpExtensionMenuLinks$ = new BehaviorSubject<ChromeGlobalHelpExtensionMenuLink[]>(
+      []
+    );
     const helpExtension$ = new BehaviorSubject<ChromeHelpExtension | undefined>(undefined);
     const breadcrumbs$ = new BehaviorSubject<ChromeBreadcrumb[]>([]);
     const breadcrumbsAppendExtension$ = new BehaviorSubject<
@@ -139,6 +146,7 @@ export class ChromeService {
     const navLinks = this.navLinks.start({ application, http });
     const recentlyAccessed = await this.recentlyAccessed.start({ http });
     const docTitle = this.docTitle.start({ document: window.document });
+    const { customBranding$ } = customBranding;
 
     // erase chrome fields from a previous app while switching to a next app
     application.currentAppId$.subscribe(() => {
@@ -213,6 +221,7 @@ export class ChromeService {
           customNavLink$={customNavLink$.pipe(takeUntil(this.stop$))}
           kibanaDocLink={docLinks.links.kibana.guide}
           forceAppSwitcherNavigation$={navLinks.getForceAppSwitcherNavigation$()}
+          globalHelpExtensionMenuLinks$={globalHelpExtensionMenuLinks$}
           helpExtension$={helpExtension$.pipe(takeUntil(this.stop$))}
           helpSupportUrl$={helpSupportUrl$.pipe(takeUntil(this.stop$))}
           homeHref={http.basePath.prepend('/app/home')}
@@ -226,6 +235,7 @@ export class ChromeService {
           navControlsExtension$={navControls.getExtension$()}
           onIsLockedUpdate={setIsNavDrawerLocked}
           isLocked$={getIsNavDrawerLocked$}
+          customBranding$={customBranding$}
         />
       ),
 
@@ -251,6 +261,17 @@ export class ChromeService {
         breadcrumbsAppendExtension?: ChromeBreadcrumbsAppendExtension
       ) => {
         breadcrumbsAppendExtension$.next(breadcrumbsAppendExtension);
+      },
+
+      getGlobalHelpExtensionMenuLinks$: () => globalHelpExtensionMenuLinks$.asObservable(),
+
+      registerGlobalHelpExtensionMenuLink: (
+        globalHelpExtensionMenuLink: ChromeGlobalHelpExtensionMenuLink
+      ) => {
+        globalHelpExtensionMenuLinks$.next([
+          ...globalHelpExtensionMenuLinks$.value,
+          globalHelpExtensionMenuLink,
+        ]);
       },
 
       getHelpExtension$: () => helpExtension$.pipe(takeUntil(this.stop$)),

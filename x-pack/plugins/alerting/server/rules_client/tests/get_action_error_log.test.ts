@@ -5,9 +5,11 @@
  * 2.0.
  */
 
-import { RulesClient, ConstructorOptions, GetActionErrorLogByIdParams } from '../rules_client';
+import { RulesClient, ConstructorOptions } from '../rules_client';
+import { GetActionErrorLogByIdParams } from '../methods/get_action_error_log';
 import { savedObjectsClientMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
+import { fromKueryExpression } from '@kbn/es-query';
 import { ruleTypeRegistryMock } from '../../rule_type_registry.mock';
 import { alertingAuthorizationMock } from '../../authorization/alerting_authorization.mock';
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
@@ -571,6 +573,66 @@ describe('getActionErrorLog()', () => {
           },
         })
       );
+    });
+  });
+});
+
+describe('getActionErrorLogWithAuth()', () => {
+  let rulesClient: RulesClient;
+
+  beforeEach(() => {
+    rulesClient = new RulesClient(rulesClientParams);
+  });
+
+  test('returns the expected return values when called', async () => {
+    const ruleSO = getRuleSavedObject({});
+    authorization.getFindAuthorizationFilter.mockResolvedValue({
+      filter: fromKueryExpression('*'),
+      ensureRuleTypeIsAuthorized() {},
+    });
+    unsecuredSavedObjectsClient.get.mockResolvedValueOnce(ruleSO);
+    eventLogClient.findEventsWithAuthFilter.mockResolvedValueOnce(findResults);
+
+    const result = await rulesClient.getActionErrorLogWithAuth(getActionErrorLogParams());
+    expect(result).toEqual({
+      totalErrors: 5,
+      errors: [
+        {
+          id: '08d9b0f5-0b41-47c9-951f-a666b5788ddc',
+          timestamp: '2022-03-23T17:37:07.106Z',
+          type: 'actions',
+          message:
+            'action execution failure: .server-log:9e67b8b0-9e2c-11ec-bd64-774ed95c43ef: s - an error occurred while running the action executor: something funky with the server log',
+        },
+        {
+          id: '08d9b0f5-0b41-47c9-951f-a666b5788ddc',
+          timestamp: '2022-03-23T17:37:07.102Z',
+          type: 'actions',
+          message:
+            'action execution failure: .server-log:9e67b8b0-9e2c-11ec-bd64-774ed95c43ef: s - an error occurred while running the action executor: something funky with the server log',
+        },
+        {
+          id: '08d9b0f5-0b41-47c9-951f-a666b5788ddc',
+          timestamp: '2022-03-23T17:37:07.098Z',
+          type: 'actions',
+          message:
+            'action execution failure: .server-log:9e67b8b0-9e2c-11ec-bd64-774ed95c43ef: s - an error occurred while running the action executor: something funky with the server log',
+        },
+        {
+          id: '08d9b0f5-0b41-47c9-951f-a666b5788ddc',
+          timestamp: '2022-03-23T17:37:07.096Z',
+          type: 'actions',
+          message:
+            'action execution failure: .server-log:9e67b8b0-9e2c-11ec-bd64-774ed95c43ef: s - an error occurred while running the action executor: something funky with the server log',
+        },
+        {
+          id: '08d9b0f5-0b41-47c9-951f-a666b5788ddc',
+          timestamp: '2022-03-23T17:37:07.086Z',
+          type: 'actions',
+          message:
+            'action execution failure: .server-log:9e67b8b0-9e2c-11ec-bd64-774ed95c43ef: s - an error occurred while running the action executor: something funky with the server log',
+        },
+      ],
     });
   });
 });

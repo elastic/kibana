@@ -9,17 +9,13 @@ import {
   EuiPageHeaderProps,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiButtonIcon,
   EuiLoadingContent,
-  EuiLoadingSpinner,
+  EuiIcon,
 } from '@elastic/eui';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { KibanaPageTemplateProps } from '@kbn/shared-ux-page-kibana-template';
-import { enableServiceGroups } from '@kbn/observability-plugin/public';
-import { useFetcher, FETCH_STATUS } from '../../../hooks/use_fetcher';
-import { ApmPluginStartDeps } from '../../../plugin';
+import { useFetcher } from '../../../hooks/use_fetcher';
 import { useApmRouter } from '../../../hooks/use_apm_router';
 import { useAnyOfApmParams } from '../../../hooks/use_apm_params';
 import { ApmMainTemplate } from './apm_main_template';
@@ -39,11 +35,6 @@ export function ServiceGroupTemplate({
   environmentFilter?: boolean;
   serviceGroupContextTab: ServiceGroupContextTab['key'];
 } & KibanaPageTemplateProps) {
-  const {
-    services: { uiSettings },
-  } = useKibana<ApmPluginStartDeps>();
-  const isServiceGroupsEnabled = uiSettings?.get<boolean>(enableServiceGroups);
-
   const router = useApmRouter();
   const {
     query,
@@ -61,18 +52,9 @@ export function ServiceGroupTemplate({
     [serviceGroupId]
   );
 
-  const { data: serviceGroupsData, status: serviceGroupsStatus } = useFetcher(
-    (callApmApi) => {
-      if (!serviceGroupId && isServiceGroupsEnabled) {
-        return callApmApi('GET /internal/apm/service-groups');
-      }
-    },
-    [serviceGroupId, isServiceGroupsEnabled]
-  );
-
   const serviceGroupName = data?.serviceGroup.groupName;
   const loadingServiceGroupName = !!serviceGroupId && !serviceGroupName;
-  const hasServiceGroups = !!serviceGroupsData?.serviceGroups.length;
+  const isAllServices = !serviceGroupId;
   const serviceGroupsLink = router.link('/service-groups', {
     query: { ...query, serviceGroup: '' },
   });
@@ -85,29 +67,13 @@ export function ServiceGroupTemplate({
       justifyContent="flexStart"
       responsive={false}
     >
-      {serviceGroupsStatus === FETCH_STATUS.LOADING && (
-        <EuiFlexItem grow={false}>
-          <EuiLoadingSpinner size="l" />
-        </EuiFlexItem>
-      )}
-      {(serviceGroupId || hasServiceGroups) && (
-        <EuiFlexItem grow={false}>
-          <EuiButtonIcon
-            iconType="layers"
-            color="text"
-            aria-label="Go to service groups"
-            iconSize="xl"
-            href={serviceGroupsLink}
-          />
-        </EuiFlexItem>
-      )}
       <EuiFlexItem grow={false}>
         {loadingServiceGroupName ? (
           <EuiLoadingContent lines={2} style={{ width: 180, height: 40 }} />
         ) : (
           serviceGroupName ||
           i18n.translate('xpack.apm.serviceGroup.allServices.title', {
-            defaultMessage: 'All services',
+            defaultMessage: 'Services',
           })
         )}
       </EuiFlexItem>
@@ -145,13 +111,33 @@ export function ServiceGroupTemplate({
   );
   return (
     <ApmMainTemplate
-      pageTitle={isServiceGroupsEnabled ? serviceGroupsPageTitle : pageTitle}
+      pageTitle={serviceGroupsPageTitle}
       pageHeader={{
-        tabs: isServiceGroupsEnabled ? tabs : undefined,
+        tabs,
+        breadcrumbs: !isAllServices
+          ? [
+              {
+                text: (
+                  <>
+                    <EuiIcon size="s" type="arrowLeft" />{' '}
+                    {i18n.translate(
+                      'xpack.apm.serviceGroups.breadcrumb.return',
+                      { defaultMessage: 'Return to service groups' }
+                    )}
+                  </>
+                ),
+                color: 'primary',
+                'aria-current': false,
+                href: serviceGroupsLink,
+              },
+            ]
+          : undefined,
         ...pageHeader,
       }}
       environmentFilter={environmentFilter}
-      showServiceGroupSaveButton={true}
+      showServiceGroupSaveButton={!isAllServices}
+      showServiceGroupsNav={isAllServices}
+      selectedNavButton={isAllServices ? 'allServices' : 'serviceGroups'}
       {...pageTemplateProps}
     >
       {children}

@@ -92,4 +92,36 @@ describe('buildDefaultSettings', () => {
       'large amount of default fields detected for index template test_template in package test_package, applying the first 1024 fields'
     );
   });
+
+  it('should not add field with index:false or doc_values:false to default fields', () => {
+    const fields = [
+      {
+        name: 'field_valid',
+        type: 'keyword',
+      },
+      {
+        name: 'field_invalid_index_false',
+        type: 'keyword',
+        index: false,
+      },
+      {
+        name: 'field_invalid_docvalues_false',
+        type: 'keyword',
+        doc_values: false,
+      },
+      {
+        name: 'field_invalid_default_field_false',
+        type: 'keyword',
+        default_field: false,
+      },
+    ];
+    const settings = buildDefaultSettings({
+      type: 'logs',
+      templateName: 'test_template',
+      packageName: 'test_package',
+      fields,
+    });
+
+    expect(settings.index.query?.default_field).toEqual(['field_valid']);
+  });
 });

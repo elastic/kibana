@@ -11,7 +11,7 @@ export const ADD_TO_LISTS_DESCRIPTION = i18n.translate(
   'xpack.securitySolution.rule_exceptions.flyoutComponents.addToListsTableSelection.addToListsDescription',
   {
     defaultMessage:
-      'Select shared exception list to add to. We will make a copy of this exception if multiple lists are selected.',
+      'After you create the exception, it is added to the exception lists you select.',
   }
 );
 

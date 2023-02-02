@@ -20,14 +20,37 @@ export const getSLOMappingsTemplate = (name: string) => ({
               type: 'keyword',
               ignore_above: 256,
             },
+            revision: {
+              type: 'long',
+            },
             numerator: {
               type: 'long',
             },
             denominator: {
               type: 'long',
             },
+            isGoodSlice: {
+              type: 'byte',
+            },
             context: {
               type: 'flattened',
+            },
+            _internal: {
+              properties: {
+                name: { type: 'keyword', ignore_above: 256 },
+                budgeting_method: { type: 'keyword' },
+                objective: {
+                  properties: {
+                    target: { type: 'double' },
+                  },
+                },
+                time_window: {
+                  properties: {
+                    duration: { type: 'keyword' },
+                    is_rolling: { type: 'boolean' },
+                  },
+                },
+              },
             },
           },
         },

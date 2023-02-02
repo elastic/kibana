@@ -17,7 +17,6 @@ import { ChartsPluginSetup } from '@kbn/charts-plugin/public';
 import { VisTypeVislibCoreSetup } from './plugin';
 import { VislibRenderValue, vislibVisName } from './vis_type_vislib_vis_fn';
 import { VislibChartType } from './types';
-import { PieRenderValue } from './pie_fn';
 
 const VislibWrapper = lazy(() => import('./vis_wrapper'));
 
@@ -35,7 +34,7 @@ function shouldShowNoResultsMessage(visData: any, visType: VislibChartType): boo
 export const getVislibVisRenderer: (
   core: VisTypeVislibCoreSetup,
   charts: ChartsPluginSetup
-) => ExpressionRenderDefinition<VislibRenderValue | PieRenderValue> = (core, charts) => ({
+) => ExpressionRenderDefinition<VislibRenderValue> = (core, charts) => ({
   name: vislibVisName,
   displayName: 'Vislib visualization',
   reuseDomNode: true,

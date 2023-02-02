@@ -15,15 +15,16 @@ jest.mock('./focus_bundles');
 jest.mock('../limits');
 
 jest.mock('os', () => {
-  const realOs = jest.requireActual('os');
-  jest.spyOn(realOs, 'cpus').mockImplementation(() => {
-    return ['foo'] as any;
-  });
-  return realOs;
+  return {
+    ...jest.requireActual('os'),
+    cpus() {
+      return ['foo'] as any;
+    },
+  };
 });
 
 import Path from 'path';
-import { REPO_ROOT } from '@kbn/utils';
+import { REPO_ROOT } from '@kbn/repo-info';
 import { createAbsolutePathSerializer } from '@kbn/jest-serializers';
 
 import { OptimizerConfig, ParsedOptions } from './optimizer_config';

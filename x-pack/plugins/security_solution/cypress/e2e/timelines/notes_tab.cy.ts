@@ -13,6 +13,7 @@ import {
   NOTES_LINK,
   NOTES_TEXT,
   NOTES_TEXT_AREA,
+  MARKDOWN_INVESTIGATE_BUTTON,
 } from '../../screens/timeline';
 import { createTimeline } from '../../tasks/api_calls/timelines';
 
@@ -43,10 +44,15 @@ describe('Timeline notes tab', () => {
         refreshTimelinesUntilTimeLinePresent(timelineId)
           // This cy.wait is here because we cannot do a pipe on a timeline as that will introduce multiple URL
           // request responses and indeterminism since on clicks to activates URL's.
-          .then(() => cy.wait(1000))
-          .then(() => openTimelineById(timelineId))
-          .then(() => goToNotesTab())
+          .then(() => cy.wrap(timelineId).as('timelineId'))
       );
+  });
+
+  beforeEach(function () {
+    visitWithoutDateRange(TIMELINES_URL);
+    openTimelineById(this?.timelineId as string)
+      .then(() => goToNotesTab())
+      .then(() => cy.wait(1000));
   });
 
   it('should render mockdown', () => {
@@ -83,5 +89,12 @@ describe('Timeline notes tab', () => {
     addNotesToTimeline(`[${text}](${link})`);
     cy.get(NOTES_LINK).last().should('have.text', `${text}(opens in a new tab or window)`);
     cy.get(NOTES_LINK).last().click();
+  });
+
+  it('should render insight query from markdown', () => {
+    addNotesToTimeline(
+      `!{insight{"description":"2 top level OR providers, 1 nested AND","label":"test insight", "providers": [[{ "field": "event.id", "value": "kibana.alert.original_event.id", "type": "parameter" }], [{ "field": "event.category", "value": "network", "type": "literal" }, {"field": "process.pid", "value": "process.pid", "type": "parameter"}]]}}`
+    );
+    cy.get(MARKDOWN_INVESTIGATE_BUTTON).should('exist');
   });
 });

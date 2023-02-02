@@ -32,6 +32,7 @@ export interface ConfiguredLimits {
 
 export interface ProductAccess {
   hasAppSearchAccess: boolean;
+  hasSearchEnginesAccess: boolean;
   hasWorkplaceSearchAccess: boolean;
 }
 
@@ -52,3 +53,4 @@ export interface Meta {
 }
 
 export type { ElasticsearchIndexWithPrivileges } from './indices';
+export type { KibanaDeps } from './kibana_deps';

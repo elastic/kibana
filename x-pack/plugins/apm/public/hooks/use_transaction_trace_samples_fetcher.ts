@@ -9,12 +9,8 @@ import { useMemo } from 'react';
 import { useFetcher } from './use_fetcher';
 import { useLegacyUrlParams } from '../context/url_params_context/use_url_params';
 import { useApmServiceContext } from '../context/apm_service/use_apm_service_context';
-import { useApmParams } from './use_apm_params';
+import { useAnyOfApmParams } from './use_apm_params';
 import { useTimeRange } from './use_time_range';
-
-const INITIAL_DATA = {
-  traceSamples: [],
-};
 
 export type TraceSamplesFetchResult = ReturnType<
   typeof useTransactionTraceSamplesFetcher
@@ -33,7 +29,10 @@ export function useTransactionTraceSamplesFetcher({
 
   const {
     query: { rangeFrom, rangeTo },
-  } = useApmParams('/services/{serviceName}');
+  } = useAnyOfApmParams(
+    '/services/{serviceName}',
+    '/mobile-services/{serviceName}'
+  );
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 
@@ -41,11 +40,7 @@ export function useTransactionTraceSamplesFetcher({
     urlParams: { transactionId, traceId, sampleRangeFrom, sampleRangeTo },
   } = useLegacyUrlParams();
 
-  const {
-    data = INITIAL_DATA,
-    status,
-    error,
-  } = useFetcher(
+  const { data, status, error } = useFetcher(
     (callApmApi) => {
       if (serviceName && start && end && transactionType && transactionName) {
         return callApmApi(

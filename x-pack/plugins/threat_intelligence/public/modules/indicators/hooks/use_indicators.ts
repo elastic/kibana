@@ -10,7 +10,7 @@ import { Filter, Query, TimeRange } from '@kbn/es-query';
 import { useQuery } from '@tanstack/react-query';
 import { EuiDataGridSorting } from '@elastic/eui';
 import { useInspector, useKibana } from '../../../hooks';
-import { Indicator } from '../types';
+import { Indicator } from '../../../../common/types/indicator';
 import { useSourcererDataView } from './use_sourcerer_data_view';
 import { createFetchIndicators, FetchParams, Pagination } from '../services/fetch_indicators';
 
@@ -26,8 +26,6 @@ export interface UseIndicatorsParams {
 }
 
 export interface UseIndicatorsValue {
-  handleRefresh: () => void;
-
   /**
    * Array of {@link Indicator} ready to render inside the IndicatorTable component
    */
@@ -48,7 +46,11 @@ export interface UseIndicatorsValue {
   isFetching: boolean;
 
   dataUpdatedAt: number;
+
+  query: { refetch: VoidFunction; id: string; loading: boolean };
 }
+
+const QUERY_ID = 'indicatorsTable';
 
 export const useIndicators = ({
   filters,
@@ -98,7 +100,7 @@ export const useIndicators = ({
 
   const { isLoading, isFetching, data, refetch, dataUpdatedAt } = useQuery(
     [
-      'indicatorsTable',
+      QUERY_ID,
       {
         timeRange,
         filterQuery,
@@ -119,10 +121,10 @@ export const useIndicators = ({
     }
   );
 
-  const handleRefresh = useCallback(() => {
-    onChangePage(0);
-    refetch();
-  }, [onChangePage, refetch]);
+  const query = useMemo(
+    () => ({ refetch, id: QUERY_ID, loading: isLoading }),
+    [isLoading, refetch]
+  );
 
   return {
     indicators: data?.indicators || [],
@@ -132,7 +134,7 @@ export const useIndicators = ({
     onChangeItemsPerPage,
     isLoading,
     isFetching,
-    handleRefresh,
     dataUpdatedAt,
+    query,
   };
 };

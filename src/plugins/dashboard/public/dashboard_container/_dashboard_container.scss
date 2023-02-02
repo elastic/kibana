@@ -1,0 +1,40 @@
+@import '../../../embeddable/public/variables';
+
+@import './component/grid/index';
+@import './component/panel/index';
+@import './component/viewport/index';
+
+.dashboardViewport {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.dashboardViewport--loading {
+  justify-content: center;
+  align-items: center;
+}
+
+.dshStartScreen {
+  text-align: center;
+}
+
+.dshStartScreen__pageContent {
+  padding: $euiSizeXXL;
+}
+
+.dshStartScreen__panelDesc {
+  max-width: 260px;
+  margin: 0 auto;
+}
+
+.dshEmptyWidget {
+  background-color: $euiColorLightestShade;
+  border: $euiBorderThin;
+  border-style: dashed;
+  border-radius: $euiBorderRadius;
+  padding: $euiSizeXXL * 2;
+  max-width: 400px;
+  margin-left: $euiSizeS;
+  text-align: center;
+}

@@ -89,22 +89,17 @@ exports[`Storyshots Home Home Page 1`] = `
                 className="euiFlexItem euiFlexItem--flexGrowZero"
               >
                 <button
-                  className="euiButton euiButton--primary euiButton--fill"
+                  className="euiButton emotion-euiButtonDisplay-m-m-fill-primary"
                   data-test-subj="create-workpad-button"
                   disabled={false}
                   onClick={[Function]}
-                  style={
-                    Object {
-                      "minWidth": undefined,
-                    }
-                  }
                   type="button"
                 >
                   <span
-                    className="euiButtonContent euiButton__content"
+                    className="emotion-euiButtonDisplayContent"
                   >
                     <span
-                      className="euiButtonContent__icon"
+                      className="emotion-euiButtonDisplayContent__icon-m"
                       color="inherit"
                       data-euiicon-type="plusInCircleFilled"
                       size="m"
@@ -112,7 +107,7 @@ exports[`Storyshots Home Home Page 1`] = `
                       
                     </span>
                     <span
-                      className="euiButton__text"
+                      className="eui-textTruncate"
                     >
                       Create workpad
                     </span>

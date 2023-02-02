@@ -65,3 +65,10 @@ export const INVALID_ASSIGNEES = i18n.translate('xpack.cases.create.invalidAssig
     maxAssignees: MAX_ASSIGNEES_PER_CASE,
   },
 });
+
+export const MAX_SELECTED_ASSIGNEES = (limit: number) =>
+  i18n.translate('xpack.cases.userProfile.maxSelectedAssignees', {
+    defaultMessage:
+      "You've selected the maximum number of {count, plural, one {# assignee} other {# assignees}}",
+    values: { count: limit },
+  });

@@ -41,14 +41,13 @@ import type {
 } from '@kbn/saved-objects-tagging-oss-plugin/public';
 import type { ThreatIntelligencePluginStart } from '@kbn/threat-intelligence-plugin/public';
 import type { CloudExperimentsPluginStart } from '@kbn/cloud-experiments-plugin/common';
+import type { GuidedOnboardingPluginStart } from '@kbn/guided-onboarding-plugin/public';
+import type { DataViewsServicePublic } from '@kbn/data-views-plugin/public';
 import type { ResolverPluginSetup } from './resolver/types';
 import type { Inspect } from '../common/search_strategy';
 import type { Detections } from './detections';
 import type { Cases } from './cases';
 import type { Exceptions } from './exceptions';
-import type { Hosts } from './hosts';
-import type { Users } from './users';
-import type { Network } from './network';
 import type { Kubernetes } from './kubernetes';
 import type { Overview } from './overview';
 import type { Rules } from './rules';
@@ -58,6 +57,7 @@ import type { LandingPages } from './landing_pages';
 import type { CloudSecurityPosture } from './cloud_security_posture';
 import type { ThreatIntelligence } from './threat_intelligence';
 import type { SecuritySolutionTemplateWrapper } from './app/home/template_wrapper';
+import type { Explore } from './explore';
 
 export interface SetupPlugins {
   home?: HomePublicPluginSetup;
@@ -76,6 +76,7 @@ export interface StartPlugins {
   embeddable: EmbeddableStart;
   inspector: InspectorStart;
   fleet?: FleetStart;
+  guidedOnboarding: GuidedOnboardingPluginStart;
   kubernetesSecurity: KubernetesSecurityStart;
   lens: LensPublicStart;
   lists?: ListsPluginStart;
@@ -93,6 +94,7 @@ export interface StartPlugins {
   cloudSecurityPosture: CspClientPluginStart;
   threatIntelligence: ThreatIntelligencePluginStart;
   cloudExperiments?: CloudExperimentsPluginStart;
+  dataViews: DataViewsServicePublic;
 }
 
 export interface StartPluginsDependencies extends StartPlugins {
@@ -102,6 +104,7 @@ export interface StartPluginsDependencies extends StartPlugins {
 export type StartServices = CoreStart &
   StartPlugins & {
     storage: Storage;
+    sessionStorage: Storage;
     apm: ApmBase;
     savedObjectsTagging?: SavedObjectsTaggingApi;
     onAppLeave: (handler: AppLeaveHandler) => void;
@@ -133,9 +136,7 @@ export interface SubPlugins {
   rules: Rules;
   exceptions: Exceptions;
   [CASES_SUB_PLUGIN_KEY]: Cases;
-  hosts: Hosts;
-  users: Users;
-  network: Network;
+  explore: Explore;
   kubernetes: Kubernetes;
   overview: Overview;
   timelines: Timelines;
@@ -151,9 +152,7 @@ export interface StartedSubPlugins {
   rules: ReturnType<Rules['start']>;
   exceptions: ReturnType<Exceptions['start']>;
   [CASES_SUB_PLUGIN_KEY]: ReturnType<Cases['start']>;
-  hosts: ReturnType<Hosts['start']>;
-  users: ReturnType<Users['start']>;
-  network: ReturnType<Network['start']>;
+  explore: ReturnType<Explore['start']>;
   kubernetes: ReturnType<Kubernetes['start']>;
   overview: ReturnType<Overview['start']>;
   timelines: ReturnType<Timelines['start']>;

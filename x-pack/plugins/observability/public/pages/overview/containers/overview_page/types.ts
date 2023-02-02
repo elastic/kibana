@@ -10,10 +10,3 @@ export interface Bucket {
   end?: number;
 }
 export type BucketSize = { bucketSize: number; intervalString: string } | undefined;
-
-export interface PageHeaderProps {
-  showTour?: boolean;
-  onTourDismiss: () => void;
-  handleGuidedSetupClick: () => void;
-  onTimeRangeRefresh: () => void;
-}

@@ -20,15 +20,21 @@ export const getMlInferencePipelines = async (
   trainedModelsProvider: MlTrainedModels | undefined
 ): Promise<Record<string, IngestPipeline>> => {
   if (!trainedModelsProvider) {
-    return Promise.reject(new Error('Machine Learning is not enabled'));
+    throw new Error('Machine Learning is not enabled');
   }
 
   // Fetch all ML inference pipelines and trained models that are accessible in the current
   // Kibana space
   const [fetchedInferencePipelines, trainedModels] = await Promise.all([
-    esClient.ingest.getPipeline({
-      id: 'ml-inference-*',
-    }),
+    esClient.ingest
+      .getPipeline({
+        id: 'ml-inference-*',
+      })
+      .catch((e) => {
+        // handle no pipelines 404 error and return empty record
+        if (e?.meta?.statusCode === 404) return {};
+        throw e;
+      }),
     trainedModelsProvider.getTrainedModels({}),
   ]);
   const accessibleModelIds = Object.values(trainedModels.trained_model_configs).map(
@@ -37,17 +43,22 @@ export const getMlInferencePipelines = async (
 
   // Process pipelines: check if the model_id is one of the redacted ones, if so, redact it in the
   // result as well
-  const inferencePipelinesResult: Record<string, IngestPipeline> = {};
-  Object.entries(fetchedInferencePipelines).forEach(([name, inferencePipeline]) => {
-    inferencePipelinesResult[name] = {
-      ...inferencePipeline,
-      processors: inferencePipeline.processors?.map((processor) =>
-        redactModelIdIfInaccessible(processor, accessibleModelIds)
-      ),
-    };
-  });
+  const inferencePipelinesResult: Record<string, IngestPipeline> = Object.entries(
+    fetchedInferencePipelines
+  ).reduce(
+    (currentPipelines, [name, inferencePipeline]) => ({
+      ...currentPipelines,
+      [name]: {
+        ...inferencePipeline,
+        processors: inferencePipeline.processors?.map((processor) =>
+          redactModelIdIfInaccessible(processor, accessibleModelIds)
+        ),
+      },
+    }),
+    {}
+  );
 
-  return Promise.resolve(inferencePipelinesResult);
+  return inferencePipelinesResult;
 };
 
 /**

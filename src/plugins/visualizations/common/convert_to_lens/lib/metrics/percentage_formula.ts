@@ -14,8 +14,9 @@ export const getPercentageColumnFormulaColumn = ({
   agg,
   aggs,
   dataView,
+  visType,
 }: ExtendedColumnConverterArgs<METRIC_TYPES>): FormulaColumn | null => {
-  const metricFormula = getFormulaForAgg({ agg, aggs, dataView });
+  const metricFormula = getFormulaForAgg({ agg, aggs, dataView, visType });
   if (!metricFormula) {
     return null;
   }

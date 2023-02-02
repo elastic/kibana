@@ -7,53 +7,7 @@
 
 import React, { lazy, Suspense } from 'react';
 import { EuiLoadingSpinner } from '@elastic/eui';
-import type { Store } from 'redux';
-import type { Storage } from '@kbn/kibana-utils-plugin/public';
-import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import type { TGridProps } from '../types';
-import type { LastUpdatedAtProps, LoadingPanelProps } from '../components';
-import { initialTGridState } from '../store/t_grid/reducer';
-import { createStore } from '../store/t_grid';
-import { TGridLoading } from '../components/t_grid/shared';
-
-const initializeStore = ({
-  store,
-  storage,
-  setStore,
-}: {
-  store?: Store;
-  storage: Storage;
-  setStore: (store: Store) => void;
-}) => {
-  let tGridStore = store;
-  if (!tGridStore) {
-    tGridStore = createStore(initialTGridState, storage);
-    setStore(tGridStore);
-  }
-};
-
-const TimelineLazy = lazy(() => import('../components'));
-export const getTGridLazy = (
-  props: TGridProps,
-  {
-    store,
-    storage,
-    data,
-    setStore,
-  }: {
-    store?: Store;
-    storage: Storage;
-    data: DataPublicPluginStart;
-    setStore: (store: Store) => void;
-  }
-) => {
-  initializeStore({ store, storage, setStore });
-  return (
-    <Suspense fallback={<TGridLoading height={'short'} />}>
-      <TimelineLazy {...props} store={store} storage={storage} data={data} setStore={setStore} />
-    </Suspense>
-  );
-};
+import { LastUpdatedAtProps, LoadingPanelProps } from '../components';
 
 const LastUpdatedLazy = lazy(() => import('../components/last_updated'));
 export const getLastUpdatedLazy = (props: LastUpdatedAtProps) => {

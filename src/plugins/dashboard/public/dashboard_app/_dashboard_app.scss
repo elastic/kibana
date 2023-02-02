@@ -1,0 +1,33 @@
+.dshUnsavedListingItem {
+  margin-top: $euiSizeM;
+}
+
+.dshUnsavedListingItem__icon {
+  margin-right: $euiSizeM;
+}
+
+.dshUnsavedListingItem__title {
+  margin-bottom: 0 !important;
+}
+
+.dshUnsavedListingItem__loading {
+  color: $euiTextSubduedColor !important;
+}
+
+.dshUnsavedListingItem__actions {
+  margin-left: $euiSizeL + $euiSizeXS;
+}
+
+@include euiBreakpoint('xs', 's') {
+  .dshUnsavedListingItem {
+    margin-top: $euiSize;
+  }
+
+  .dshUnsavedListingItem__heading {
+    margin-bottom: $euiSizeXS;
+  }
+
+  .dshUnsavedListingItem__actions {
+    flex-direction: column;
+  }
+}

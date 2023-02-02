@@ -8,6 +8,7 @@
 import React from 'react';
 import type { ComponentType } from 'react';
 import { from } from 'rxjs';
+import { ContentEditorProvider } from '@kbn/content-management-content-editor';
 
 import { TagList } from '../mocks';
 import { TableListViewProvider, Services } from '../services';
@@ -20,7 +21,10 @@ export const getMockServices = (overrides?: Partial<Services>) => {
     currentAppId$: from('mockedApp'),
     navigateToUrl: () => undefined,
     TagList,
+    getTagList: () => [],
     itemHasTags: () => true,
+    getTagManagementUrl: () => '',
+    getTagIdsFromReferences: () => [],
     ...overrides,
   };
 
@@ -31,9 +35,11 @@ export function WithServices<P>(Comp: ComponentType<P>, overrides: Partial<Servi
   return (props: P) => {
     const services = getMockServices(overrides);
     return (
-      <TableListViewProvider {...services}>
-        <Comp {...(props as any)} />
-      </TableListViewProvider>
+      <ContentEditorProvider openFlyout={jest.fn()} notifyError={() => undefined}>
+        <TableListViewProvider {...services}>
+          <Comp {...(props as any)} />
+        </TableListViewProvider>
+      </ContentEditorProvider>
     );
   };
 }

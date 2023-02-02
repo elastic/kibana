@@ -19,9 +19,10 @@ import { ActionTypes, NONE_CONNECTOR_ID } from '../../../common/api';
 import type {
   BuilderDeps,
   BuilderParameters,
-  BuilderReturnValue,
   CommonBuilderArguments,
+  SavedObjectParameters,
   UserActionParameters,
+  UserActionEvent,
 } from './types';
 import type { PersistableStateAttachmentTypeRegistry } from '../../attachment_framework/persistable_state_registry';
 
@@ -98,7 +99,7 @@ export abstract class UserActionBuilder {
     attachmentId,
     connectorId,
     type,
-  }: CommonBuilderArguments): BuilderReturnValue => {
+  }: CommonBuilderArguments): SavedObjectParameters => {
     return {
       attributes: {
         ...this.getCommonUserActionAttributes({ user, owner }),
@@ -121,5 +122,5 @@ export abstract class UserActionBuilder {
 
   public abstract build<T extends keyof BuilderParameters>(
     args: UserActionParameters<T>
-  ): BuilderReturnValue;
+  ): UserActionEvent | void;
 }

@@ -26,11 +26,11 @@ export const ANOMALY_THRESHOLD_INPUT = '[data-test-subj="anomalyThresholdSlider"
 
 export const ADVANCED_SETTINGS_BTN = '[data-test-subj="advancedSettings"] .euiAccordion__button';
 
-export const BACK_TO_ALL_RULES_LINK = '[data-test-subj="ruleDetailsBackToAllRules"]';
-
 export const COMBO_BOX_CLEAR_BTN = '[data-test-subj="comboBoxClearButton"]';
 
 export const CREATE_AND_ENABLE_BTN = '[data-test-subj="create-enable"]';
+
+export const CREATE_WITHOUT_ENABLING_BTN = '[data-test-subj="create-enabled-false"]';
 
 export const CUSTOM_QUERY_INPUT = '[data-test-subj="queryInput"]';
 
@@ -72,6 +72,8 @@ export const DATA_VIEW_COMBO_BOX =
 
 export const DATA_VIEW_OPTION = '[data-test-subj="rule-index-toggle-dataView"]';
 
+export const CONTINUE_BUTTON = '[data-test-subj$=-continue]';
+
 export const DEFINE_CONTINUE_BUTTON = '[data-test-subj="define-continue"]';
 
 export const DEFINE_EDIT_BUTTON = '[data-test-subj="edit-define-rule"]';
@@ -109,6 +111,8 @@ export const LOOK_BACK_TIME_TYPE =
 export const MACHINE_LEARNING_DROPDOWN_INPUT =
   '[data-test-subj="mlJobSelect"] [data-test-subj="comboBoxInput"]';
 
+export const MACHINE_LEARNING_DROPDOWN_OPTION = '[data-test-subj="comboBoxOptionsList "] button';
+
 export const MACHINE_LEARNING_TYPE = '[data-test-subj="machineLearningRuleType"]';
 
 export const MITRE_TACTIC = '.euiContextMenuItem__text';
@@ -140,7 +144,7 @@ export const RISK_OVERRIDE =
 
 export const RULES_CREATION_FORM = '[data-test-subj="stepDefineRule"]';
 
-export const RULES_CREATION_PREVIEW_BUTTON = '[data-test-subj="preview-flyout"]';
+export const RULES_CREATION_PREVIEW_BUTTON = '[data-test-subj="preview-container"]';
 
 export const RULES_CREATION_PREVIEW_REFRESH_BUTTON = '[data-test-subj="previewSubmitButton"]';
 
@@ -224,3 +228,8 @@ export const savedQueryByName = (savedQueryName: string) =>
 
 export const APPLY_SELECTED_SAVED_QUERY_BUTTON =
   '[data-test-subj="saved-query-management-apply-changes-button"]';
+
+export const RULE_INDICES =
+  '[data-test-subj="detectionEngineStepDefineRuleIndices"] [data-test-subj="comboBoxInput"]';
+
+export const ALERTS_INDEX_BUTTON = 'span[title=".alerts-security.alerts-default"] button';

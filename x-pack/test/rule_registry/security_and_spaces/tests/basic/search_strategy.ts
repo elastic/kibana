@@ -19,7 +19,6 @@ import {
   waitForSignalsToBePresent,
   waitForRuleSuccessOrStatus,
 } from '../../../../detection_engine_api_integration/utils';
-import { ID } from '../../../../detection_engine_api_integration/security_and_spaces/group1/generating_signals';
 import {
   obsOnlySpacesAllEsRead,
   obsOnlySpacesAll,
@@ -30,6 +29,8 @@ type RuleRegistrySearchResponseWithErrors = RuleRegistrySearchResponse & {
   statusCode: number;
   message: string;
 };
+
+const ID = 'BhbXBmkBR346wHgn4PeZ';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext) => {
@@ -42,9 +43,7 @@ export default ({ getService }: FtrProviderContext) => {
 
   const SPACE1 = 'space1';
 
-  // Failing: See https://github.com/elastic/kibana/issues/129219
-  // Failing: See https://github.com/elastic/kibana/issues/129219
-  describe.skip('ruleRegistryAlertsSearchStrategy', () => {
+  describe('ruleRegistryAlertsSearchStrategy', () => {
     let kibanaVersion: string;
     before(async () => {
       kibanaVersion = await kbnClient.version.get();

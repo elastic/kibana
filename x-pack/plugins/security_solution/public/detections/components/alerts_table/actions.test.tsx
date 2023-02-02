@@ -7,10 +7,19 @@
 
 import sinon from 'sinon';
 import moment from 'moment';
+import set from 'lodash/set';
+import cloneDeep from 'lodash/cloneDeep';
 
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
+import type { Filter } from '@kbn/es-query';
+import { FilterStateStore } from '@kbn/es-query';
 
-import { sendAlertToTimelineAction, determineToAndFrom } from './actions';
+import {
+  sendAlertToTimelineAction,
+  sendBulkEventsToTimelineAction,
+  determineToAndFrom,
+  getNewTermsData,
+} from './actions';
 import {
   defaultTimelineProps,
   getThresholdDetectionAlertAADMock,
@@ -19,9 +28,11 @@ import {
   mockTimelineResult,
   mockAADEcsDataWithAlert,
   mockGetOneTimelineResult,
+  mockTimelineData,
 } from '../../../common/mock';
 import type { CreateTimeline, UpdateTimelineLoading } from './types';
-import type { Ecs } from '../../../../common/ecs';
+import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
+import type { DataProvider } from '../../../../common/types/timeline';
 import {
   TimelineId,
   TimelineType,
@@ -50,6 +61,7 @@ import {
   USER,
 } from '@kbn/lists-plugin/common/constants.mock';
 import { of } from 'rxjs';
+import { timelineDefaults } from '../../../timelines/store/timeline/defaults';
 
 jest.mock('../../../timelines/containers/api', () => ({
   getTimelineTemplate: jest.fn(),
@@ -81,6 +93,38 @@ export const getExceptionListItemSchemaMock = (
   ...(overrides || {}),
 });
 
+const getExpectedcreateTimelineParam = (
+  from: string,
+  to: string,
+  dataProviders: DataProvider[],
+  filters: Filter[]
+) => ({
+  from,
+  notes: null,
+  timeline: {
+    ...timelineDefaults,
+    dataProviders,
+    id: TimelineId.active,
+    indexNames: [],
+    dateRange: {
+      start: from,
+      end: to,
+    },
+    eventType: 'all',
+    filters,
+    kqlQuery: {
+      filterQuery: {
+        kuery: {
+          kind: 'kuery',
+          expression: '',
+        },
+        serializedQuery: '',
+      },
+    },
+  },
+  to,
+});
+
 describe('alert actions', () => {
   const anchor = '2020-03-01T17:59:46.349Z';
   const unix = moment(anchor).valueOf();
@@ -92,6 +136,8 @@ describe('alert actions', () => {
   let mockGetExceptionFilter: jest.Mock;
   let fetchMock: jest.Mock;
   let toastMock: jest.Mock;
+  const mockEcsData = mockTimelineData.map((item) => item.ecs);
+  const eventIds = mockEcsData.map((ecs) => ecs._id);
 
   const ecsDataMockWithNoTemplateTimeline = getThresholdDetectionAlertAADMock({
     ...mockAADEcsDataWithAlert,
@@ -393,6 +439,7 @@ describe('alert actions', () => {
             queryFields: [],
             resolveTimelineConfig: undefined,
             savedObjectId: null,
+            selectAll: false,
             selectedEventIds: {},
             sessionViewConfig: null,
             show: true,
@@ -411,7 +458,9 @@ describe('alert actions', () => {
             version: null,
           },
           to: '2018-11-05T19:03:25.937Z',
+          resolveTimelineConfig: undefined,
           ruleNote: '# this is some markdown documentation',
+          ruleAuthor: ['elastic'],
         };
 
         expect(mockGetExceptionFilter).not.toHaveBeenCalled();
@@ -460,6 +509,7 @@ describe('alert actions', () => {
         const defaultTimelinePropsWithoutNote = { ...defaultTimelineProps };
 
         delete defaultTimelinePropsWithoutNote.ruleNote;
+        delete defaultTimelinePropsWithoutNote.ruleAuthor;
 
         expect(updateTimelineIsLoading).toHaveBeenCalledWith({
           id: TimelineId.active,
@@ -890,6 +940,63 @@ describe('alert actions', () => {
       });
     });
 
+    describe('New terms', () => {
+      describe('getNewTermsData', () => {
+        it('should return new terms data correctly for single value field', () => {
+          const newTermsEcsMock = cloneDeep(ecsDataMockWithNoTemplateTimeline[0]);
+          set(newTermsEcsMock, 'kibana.alert.new_terms', ['host-0']);
+          set(newTermsEcsMock, 'kibana.alert.rule.parameters.new_terms_fields', ['host.name']);
+
+          expect(getNewTermsData(newTermsEcsMock).dataProviders).toEqual([
+            {
+              and: [],
+              enabled: true,
+              excluded: false,
+              id: 'send-alert-to-timeline-action-default-draggable-event-details-value-formatted-field-value-timeline-1-host-name-host-0',
+              kqlQuery: '',
+              name: 'host.name',
+              queryMatch: { field: 'host.name', operator: ':', value: 'host-0' },
+            },
+          ]);
+        });
+
+        it('should return new terms data as AND query for multiple values field', () => {
+          const newTermsEcsMock = cloneDeep(ecsDataMockWithNoTemplateTimeline[0]);
+          set(newTermsEcsMock, 'kibana.alert.new_terms', ['host-0', '127.0.0.1']);
+          set(newTermsEcsMock, 'kibana.alert.rule.parameters.new_terms_fields', [
+            'host.name',
+            'host.ip',
+          ]);
+
+          expect(getNewTermsData(newTermsEcsMock).dataProviders).toEqual([
+            {
+              and: [
+                {
+                  and: [],
+                  enabled: true,
+                  excluded: false,
+                  id: 'send-alert-to-timeline-action-default-draggable-event-details-value-formatted-field-value-timeline-1-host-ip-127.0.0.1',
+                  kqlQuery: '',
+                  name: 'host.ip',
+                  queryMatch: {
+                    field: 'host.ip',
+                    operator: ':',
+                    value: '127.0.0.1',
+                  },
+                },
+              ],
+              enabled: true,
+              excluded: false,
+              id: 'send-alert-to-timeline-action-default-draggable-event-details-value-formatted-field-value-timeline-1-host-name-host-0',
+              kqlQuery: '',
+              name: 'host.name',
+              queryMatch: { field: 'host.name', operator: ':', value: 'host-0' },
+            },
+          ]);
+        });
+      });
+    });
+
     describe('determineToAndFrom', () => {
       beforeEach(() => {
         fetchMock.mockResolvedValue({
@@ -1018,6 +1125,7 @@ describe('alert actions', () => {
         };
 
         delete timelineProps.ruleNote;
+        delete timelineProps.ruleAuthor;
 
         await sendAlertToTimelineAction({
           createTimeline,
@@ -1030,6 +1138,168 @@ describe('alert actions', () => {
         expect(createTimeline).toHaveBeenCalledWith(timelineProps);
         expect(toastMock).toHaveBeenCalled();
       });
+    });
+  });
+
+  describe('sendBulkEventsToTimelineAction', () => {
+    test('send multiple events to timeline  with dataProviders preference ', () => {
+      sendBulkEventsToTimelineAction(createTimeline, mockEcsData, 'dataProvider');
+      const { from, to } = determineToAndFrom({ ecs: mockEcsData });
+      const expectedDataProviders: DataProvider[] = [
+        {
+          and: [],
+          id: `send-alert-to-timeline-action-default-draggable-event-details-value-formatted-field-value-${
+            TimelineId.active
+          }-alert-id-${eventIds.join(',')}`,
+          name: eventIds.join(','),
+          enabled: true,
+          excluded: false,
+          kqlQuery: '',
+          queryMatch: {
+            field: '_id',
+            // @ts-ignore till https://github.com/elastic/kibana/pull/142436 is merged
+            value: eventIds,
+            // @ts-ignore till https://github.com/elastic/kibana/pull/142436 is merged
+            operator: 'includes',
+          },
+        },
+      ];
+      const expected = getExpectedcreateTimelineParam(from, to, expectedDataProviders, []);
+      expect(createTimeline).toHaveBeenCalledWith(expected);
+    });
+
+    test('send single event to timeline with data provider preference', () => {
+      const mockEcsDataModified = mockEcsData.slice(0, 1);
+      sendBulkEventsToTimelineAction(createTimeline, mockEcsDataModified);
+      const { from, to } = determineToAndFrom({ ecs: mockEcsDataModified });
+      const expectedDataProviders: DataProvider[] = [
+        {
+          and: [],
+          id: `send-alert-to-timeline-action-default-draggable-event-details-value-formatted-field-value-${TimelineId.active}-alert-id-${eventIds[0]}`,
+          name: eventIds[0],
+          enabled: true,
+          excluded: false,
+          kqlQuery: '',
+          queryMatch: {
+            field: '_id',
+            value: eventIds[0],
+            operator: ':',
+          },
+        },
+      ];
+      const expected = getExpectedcreateTimelineParam(from, to, expectedDataProviders, []);
+      expect(createTimeline).toHaveBeenCalledWith(expected);
+    });
+    test('send single event to timeline with filter preference', () => {
+      const mockEcsDataModified = mockEcsData.slice(0, 1);
+      sendBulkEventsToTimelineAction(createTimeline, mockEcsDataModified, 'KqlFilter');
+      const { from, to } = determineToAndFrom({ ecs: mockEcsDataModified });
+      const expectedDataProviders: DataProvider[] = [];
+      const expectedFilters: Filter[] = [
+        {
+          meta: {
+            alias: null,
+            negate: false,
+            disabled: false,
+            type: 'phrase',
+            key: '_id',
+            params: {
+              query: eventIds[0],
+            },
+          },
+          query: {
+            match_phrase: {
+              _id: eventIds[0],
+            },
+          },
+          $state: {
+            store: FilterStateStore.APP_STATE,
+          },
+        },
+      ];
+      const expected = getExpectedcreateTimelineParam(
+        from,
+        to,
+        expectedDataProviders,
+        expectedFilters
+      );
+      expect(createTimeline).toHaveBeenCalledWith(expected);
+    });
+
+    test('send multiple events to timeline with filter preference without label', () => {
+      sendBulkEventsToTimelineAction(createTimeline, mockEcsData, 'KqlFilter');
+      const { from, to } = determineToAndFrom({ ecs: mockEcsData });
+      const expectedDataProviders: DataProvider[] = [];
+      const expectedFilters: Filter[] = [
+        {
+          query: {
+            bool: {
+              filter: {
+                ids: {
+                  values: eventIds,
+                },
+              },
+            },
+          },
+          meta: {
+            alias: `${mockEcsData.length} event IDs`,
+            negate: false,
+            disabled: false,
+            type: 'phrases',
+            key: '_id',
+            value: eventIds.join(),
+            params: eventIds,
+          },
+          $state: {
+            store: FilterStateStore.APP_STATE,
+          },
+        },
+      ];
+      const expected = getExpectedcreateTimelineParam(
+        from,
+        to,
+        expectedDataProviders,
+        expectedFilters
+      );
+      expect(createTimeline).toHaveBeenCalledWith(expected);
+    });
+
+    test('send multiple events to timeline with filter preference with label', () => {
+      sendBulkEventsToTimelineAction(createTimeline, mockEcsData, 'KqlFilter', 'test-label');
+      const { from, to } = determineToAndFrom({ ecs: mockEcsData });
+      const expectedDataProviders: DataProvider[] = [];
+      const expectedFilters: Filter[] = [
+        {
+          query: {
+            bool: {
+              filter: {
+                ids: {
+                  values: eventIds,
+                },
+              },
+            },
+          },
+          meta: {
+            alias: 'test-label',
+            negate: false,
+            disabled: false,
+            type: 'phrases',
+            key: '_id',
+            value: eventIds.join(),
+            params: eventIds,
+          },
+          $state: {
+            store: FilterStateStore.APP_STATE,
+          },
+        },
+      ];
+      const expected = getExpectedcreateTimelineParam(
+        from,
+        to,
+        expectedDataProviders,
+        expectedFilters
+      );
+      expect(createTimeline).toHaveBeenCalledWith(expected);
     });
   });
 });

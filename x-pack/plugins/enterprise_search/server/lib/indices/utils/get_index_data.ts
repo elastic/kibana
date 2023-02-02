@@ -9,6 +9,8 @@ import { ExpandWildcard } from '@elastic/elasticsearch/lib/api/types';
 
 import { IScopedClusterClient } from '@kbn/core/server';
 
+import { AlwaysShowPattern } from '../../../../common/types/indices';
+
 import { TotalIndexData } from '../fetch_indices';
 
 import { mapIndexStats } from './map_index_stats';
@@ -19,7 +21,7 @@ export const getIndexData = async (
   expandWildcards: ExpandWildcard[],
   returnHiddenIndices: boolean,
   includeAliases: boolean,
-  alwaysShowSearchPattern?: 'search-'
+  alwaysShowPattern?: AlwaysShowPattern
 ) => {
   const totalIndices = await client.asCurrentUser.indices.get({
     expand_wildcards: expandWildcards,
@@ -31,7 +33,7 @@ export const getIndexData = async (
     index: indexPattern,
   });
 
-  // Index names that with one of their aliases match with the alwaysShowSearchPattern
+  // Index names that with one of their aliases match with the alwaysShowPattern
   const alwaysShowPatternMatches = new Set<string>();
 
   const indexAndAliasNames: string[] = Object.keys(totalIndices).reduce(
@@ -44,7 +46,10 @@ export const getIndexData = async (
           accum.push(alias);
 
           // Add indexName to the set if an alias matches the pattern
-          if (alwaysShowSearchPattern && alias.startsWith(alwaysShowSearchPattern)) {
+          if (
+            alwaysShowPattern?.alias_pattern &&
+            alias.startsWith(alwaysShowPattern?.alias_pattern)
+          ) {
             alwaysShowPatternMatches.add(indexName);
           }
         });
@@ -57,7 +62,10 @@ export const getIndexData = async (
   const indicesNames = returnHiddenIndices
     ? Object.keys(totalIndices)
     : Object.keys(totalIndices).filter(
-        (indexName) => !(totalIndices[indexName]?.settings?.index?.hidden === 'true')
+        (indexName) =>
+          !(totalIndices[indexName]?.settings?.index?.hidden === 'true') ||
+          (alwaysShowPattern?.index_pattern &&
+            indexName.startsWith(alwaysShowPattern.index_pattern))
       );
   return {
     allIndexMatches: totalIndices,

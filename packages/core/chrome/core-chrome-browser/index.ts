@@ -23,6 +23,7 @@ export type {
   ChromeHelpExtensionMenuDocumentationLink,
   ChromeHelpExtensionMenuDiscussLink,
   ChromeHelpExtensionMenuCustomLink,
+  ChromeGlobalHelpExtensionMenuLink,
   ChromeDocTitle,
   ChromeStart,
   ChromeRecentlyAccessed,

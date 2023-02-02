@@ -13,11 +13,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
   const retry = getService('retry');
   const PageObjects = getPageObjects(['settings']);
-  const esArchiver = getService('esArchiver');
 
   describe('index pattern filter', function describeIndexTests() {
     before(async function () {
-      await esArchiver.emptyKibanaIndex();
+      await kibanaServer.savedObjects.cleanStandardList();
       await kibanaServer.uiSettings.replace({});
       await PageObjects.settings.navigateTo();
       await PageObjects.settings.clickKibanaIndexPatterns();
@@ -29,6 +28,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     afterEach(async function () {
       await PageObjects.settings.removeIndexPattern();
+      await kibanaServer.savedObjects.cleanStandardList();
     });
 
     it('should filter indexed fields', async function () {

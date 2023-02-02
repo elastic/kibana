@@ -154,3 +154,8 @@ export const Wrapper = styled.div`
 export const ChartWrapper = styled(EuiFlexGroup)`
   z-index: 0;
 `;
+
+export const BarChartWrapper = styled(EuiFlexGroup)`
+  z-index: 0;
+  padding-right: 20px;
+`;

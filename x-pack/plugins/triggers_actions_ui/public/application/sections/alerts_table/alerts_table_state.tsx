@@ -4,7 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useState, useCallback, useRef, useMemo, useReducer, useEffect } from 'react';
+
+import React, { useState, useCallback, useRef, useMemo, useReducer } from 'react';
 import { isEmpty } from 'lodash';
 import {
   EuiDataGridColumn,
@@ -30,6 +31,7 @@ import {
   AlertsTableProps,
   BulkActionsReducerAction,
   BulkActionsState,
+  RowSelectionState,
 } from '../../../types';
 import { ALERTS_TABLE_CONF_ERROR_MESSAGE, ALERTS_TABLE_CONF_ERROR_TITLE } from './translations';
 import { TypeRegistry } from '../../type_registry';
@@ -56,8 +58,8 @@ export interface AlertsTableStateProps {
   flyoutSize?: EuiFlyoutSize;
   query: Pick<QueryDslQueryContainer, 'bool' | 'ids'>;
   pageSize?: number;
-  refreshNow?: number;
   showExpandToDetails: boolean;
+  showAlertStatusWithFlapping?: boolean;
 }
 
 export interface AlertsTableStorage {
@@ -66,21 +68,11 @@ export interface AlertsTableStorage {
   sort: SortCombinations[];
 }
 
-const EmptyConfiguration = {
+const EmptyConfiguration: AlertsTableConfigurationRegistry = {
   id: '',
   casesFeatureId: '',
   columns: [],
   sort: [],
-  externalFlyout: {
-    header: () => null,
-    body: () => null,
-    footer: () => null,
-  },
-  internalFlyout: {
-    header: () => null,
-    body: () => null,
-    footer: () => null,
-  },
   getRenderCellValue: () => () => null,
 };
 
@@ -104,8 +96,8 @@ const AlertsTableState = ({
   flyoutSize,
   query,
   pageSize,
-  refreshNow,
   showExpandToDetails,
+  showAlertStatusWithFlapping,
 }: AlertsTableStateProps) => {
   const { cases } = useKibana<{ cases: CaseUi }>().services;
 
@@ -117,6 +109,7 @@ const AlertsTableState = ({
 
   const storage = useRef(new Storage(window.localStorage));
   const localAlertsTableConfig = storage.current.get(id) as Partial<AlertsTableStorage>;
+  const persistentControls = alertsTableConfiguration?.usePersistentControls?.();
 
   const columnsLocal =
     localAlertsTableConfig &&
@@ -188,7 +181,7 @@ const AlertsTableState = ({
   }, []);
 
   const initialBulkActionsState = useReducer(bulkActionsReducer, {
-    rowSelection: new Set<number>(),
+    rowSelection: new Map<number, RowSelectionState>(),
     isAllSelected: false,
     areAllVisibleRowsSelected: false,
     rowCount: alerts.length,
@@ -255,6 +248,7 @@ const AlertsTableState = ({
       id,
       leadingControlColumns: [],
       showExpandToDetails,
+      showAlertStatusWithFlapping,
       trailingControlColumns: [],
       useFetchAlertsData,
       visibleColumns,
@@ -265,6 +259,7 @@ const AlertsTableState = ({
       onResetColumns,
       onColumnsChange,
       onChangeVisibleColumns,
+      controls: persistentControls,
     }),
     [
       alertsTableConfiguration,
@@ -273,6 +268,7 @@ const AlertsTableState = ({
       pagination.pageSize,
       id,
       showExpandToDetails,
+      showAlertStatusWithFlapping,
       useFetchAlertsData,
       visibleColumns,
       updatedAt,
@@ -281,22 +277,16 @@ const AlertsTableState = ({
       onResetColumns,
       onColumnsChange,
       onChangeVisibleColumns,
+      persistentControls,
     ]
   );
 
   const CasesContext = cases?.ui.getCasesContext();
   const userCasesPermissions = useGetUserCasesPermissions(alertsTableConfiguration.casesFeatureId);
 
-  useEffect(() => {
-    if (!isLoading && refreshNow) {
-      refresh();
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [refreshNow]);
-
   return hasAlertsTableConfiguration ? (
     <>
-      {!isLoading && alertsCount === 0 && <EmptyState />}
+      {!isLoading && alertsCount === 0 && <EmptyState controls={persistentControls} />}
       {(isLoading || isBrowserFieldDataLoading) && (
         <EuiProgress size="xs" color="accent" data-test-subj="internalAlertsPageLoading" />
       )}

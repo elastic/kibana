@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import React, { useCallback, useState, useContext } from 'react';
+import React, { useContext } from 'react';
 import { TimelineContext } from '../../../../timelines/components/timeline';
 import { HoverActions } from '../../hover_actions';
 import { useActionCellDataProvider } from './use_action_cell_data_provider';
 import type { EnrichedFieldInfo } from '../types';
 import type { ColumnHeaderOptions } from '../../../../../common/types/timeline';
+import { useTopNPopOver } from '../../hover_actions/utils';
 
 interface Props extends EnrichedFieldInfo {
   contextId: string;
@@ -51,22 +52,9 @@ export const ActionCell: React.FC<Props> = React.memo(
       values,
     });
 
+    const { closeTopN, toggleTopN, isShowingTopN } = useTopNPopOver(setIsPopoverVisible);
     const { aggregatable, type } = fieldFromBrowserField || { aggregatable: false, type: '' };
-
-    const [showTopN, setShowTopN] = useState<boolean>(false);
     const { timelineId: timelineIdFind } = useContext(TimelineContext);
-    const [hoverActionsOwnFocus] = useState<boolean>(false);
-    const toggleTopN = useCallback(() => {
-      setShowTopN((prevShowTopN) => {
-        const newShowTopN = !prevShowTopN;
-        if (setIsPopoverVisible) setIsPopoverVisible(newShowTopN);
-        return newShowTopN;
-      });
-    }, [setIsPopoverVisible]);
-
-    const closeTopN = useCallback(() => {
-      setShowTopN(false);
-    }, []);
 
     return (
       <HoverActions
@@ -81,8 +69,8 @@ export const ActionCell: React.FC<Props> = React.memo(
         hideAddToTimeline={hideAddToTimeline}
         isObjectArray={data.isObjectArray}
         onFilterAdded={onFilterAdded}
-        ownFocus={hoverActionsOwnFocus}
-        showTopN={showTopN}
+        ownFocus={false}
+        showTopN={isShowingTopN}
         scopeId={scopeId ?? timelineIdFind}
         toggleColumn={toggleColumn}
         toggleTopN={toggleTopN}

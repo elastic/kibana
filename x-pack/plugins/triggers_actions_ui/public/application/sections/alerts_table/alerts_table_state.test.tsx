@@ -340,6 +340,33 @@ describe('AlertsTableState', () => {
         ).toBe(AlertsField.uuid);
       });
     });
+
+    describe('when persistent controls are set', () => {
+      let props: AlertsTableStateProps;
+      beforeEach(() => {
+        const getMockWithUsePersistentControls = jest.fn().mockImplementation((plugin: string) => {
+          return {
+            columns,
+            sort: DefaultSort,
+            usePersistentControls: () => ({ right: <span>This is a persistent control</span> }),
+          };
+        });
+        const alertsTableConfigurationRegistryWithPersistentControlsMock = {
+          has: hasMock,
+          get: getMockWithUsePersistentControls,
+        } as unknown as TypeRegistry<AlertsTableConfigurationRegistry>;
+        props = {
+          ...tableProps,
+          alertsTableConfigurationRegistry:
+            alertsTableConfigurationRegistryWithPersistentControlsMock,
+        };
+      });
+
+      it('should show persistent controls if set', () => {
+        const result = render(<AlertsTableWithLocale {...props} />);
+        expect(result.getByText('This is a persistent control')).toBeInTheDocument();
+      });
+    });
   });
 
   describe('empty state', () => {
@@ -362,33 +389,32 @@ describe('AlertsTableState', () => {
       const result = render(<AlertsTableWithLocale {...tableProps} />);
       expect(result.getByTestId('alertsStateTableEmptyState')).toBeTruthy();
     });
-  });
 
-  describe('refresh alerts', () => {
-    beforeEach(() => {
-      refecthMock.mockClear();
-      hookUseFetchAlerts.mockClear();
-      hookUseFetchAlerts.mockImplementation(() => [
-        false,
-        {
-          alerts: [],
-          isInitializing: false,
-          getInspectQuery: jest.fn(),
-          refetch: refecthMock,
-          totalAlerts: 0,
-        },
-      ]);
-    });
+    describe('when persisten controls are set', () => {
+      let props: AlertsTableStateProps;
+      beforeEach(() => {
+        const getMockWithUsePersistentControls = jest.fn().mockImplementation((plugin: string) => {
+          return {
+            columns,
+            sort: DefaultSort,
+            usePersistentControls: () => ({ right: <span>This is a persistent control</span> }),
+          };
+        });
+        const alertsTableConfigurationRegistryWithPersistentControlsMock = {
+          has: hasMock,
+          get: getMockWithUsePersistentControls,
+        } as unknown as TypeRegistry<AlertsTableConfigurationRegistry>;
+        props = {
+          ...tableProps,
+          alertsTableConfigurationRegistry:
+            alertsTableConfigurationRegistryWithPersistentControlsMock,
+        };
+      });
 
-    it('should NOT refetch the alert at initialization', async () => {
-      render(<AlertsTableWithLocale {...tableProps} />);
-      expect(refecthMock).toBeCalledTimes(0);
-    });
-    it('should refetch the alert when refreshNow is updated', async () => {
-      const result = render(<AlertsTableWithLocale {...tableProps} />);
-      const props = { ...tableProps, refreshNow: 123456789 };
-      result.rerender(<AlertsTableWithLocale {...props} />);
-      expect(refecthMock).toBeCalledTimes(1);
+      it('should show persistent controls if set', () => {
+        const result = render(<AlertsTableWithLocale {...props} />);
+        expect(result.getByText('This is a persistent control')).toBeInTheDocument();
+      });
     });
   });
 });

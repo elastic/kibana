@@ -17,6 +17,8 @@ import {
   EuiPageBody,
   EuiPageContentBody_Deprecated as EuiPageContentBody,
 } from '@elastic/eui';
+import type { EuiStepProps } from '@elastic/eui/src/components/steps/step';
+
 import { i18n } from '@kbn/i18n';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -34,6 +36,7 @@ type OverviewStep = 'backup' | 'migrate_system_indices' | 'fix_issues' | 'logs';
 
 export const Overview = withRouter(({ history }: RouteComponentProps) => {
   const {
+    featureSet: { migrateSystemIndices },
     services: {
       breadcrumbs,
       core: { docLinks },
@@ -73,7 +76,7 @@ export const Overview = withRouter(({ history }: RouteComponentProps) => {
             defaultMessage: 'Upgrade Assistant',
           })}
           description={i18n.translate('xpack.upgradeAssistant.overview.pageDescription', {
-            defaultMessage: 'Get ready for the next version of Elastic!',
+            defaultMessage: 'Get ready for the next version of the Elastic Stack!',
           })}
           rightSideItems={[
             <EuiButtonEmpty
@@ -89,41 +92,48 @@ export const Overview = withRouter(({ history }: RouteComponentProps) => {
             </EuiButtonEmpty>,
           ]}
         >
+          <EuiText>
+            <FormattedMessage
+              id="xpack.upgradeAssistant.overview.checkUpcomingVersion"
+              defaultMessage="If you are not on the latest version of the Elastic Stack, use the Upgrade Assistant to prepare for the next upgrade."
+            />
+          </EuiText>
           <EuiText data-test-subj="whatsNewLink">
-            <EuiLink href={docLinks.links.elasticsearch.version8ReleaseHighlights} target="_blank">
+            <EuiLink href={docLinks.links.elasticsearch.latestReleaseHighlights} target="_blank">
               <FormattedMessage
                 id="xpack.upgradeAssistant.overview.whatsNewLink"
-                defaultMessage="What's new in 8.x?"
+                defaultMessage="Check the latest release highlights"
               />
             </EuiLink>
           </EuiText>
         </EuiPageHeader>
-
         <EuiSpacer size="l" />
-
         <EuiSteps
-          steps={[
-            getBackupStep({
-              cloud,
-              isComplete: isStepComplete('backup'),
-              setIsComplete: setCompletedStep.bind(null, 'backup'),
-            }),
-            getMigrateSystemIndicesStep({
-              docLinks,
-              isComplete: isStepComplete('migrate_system_indices'),
-              setIsComplete: setCompletedStep.bind(null, 'migrate_system_indices'),
-            }),
-            getFixIssuesStep({
-              isComplete: isStepComplete('fix_issues'),
-              setIsComplete: setCompletedStep.bind(null, 'fix_issues'),
-            }),
-            getLogsStep({
-              isComplete: isStepComplete('logs'),
-              setIsComplete: setCompletedStep.bind(null, 'logs'),
-              navigateToEsDeprecationLogs: () => history.push('/es_deprecation_logs'),
-            }),
-            getUpgradeStep(),
-          ]}
+          steps={
+            [
+              getBackupStep({
+                cloud,
+                isComplete: isStepComplete('backup'),
+                setIsComplete: setCompletedStep.bind(null, 'backup'),
+              }),
+              migrateSystemIndices &&
+                getMigrateSystemIndicesStep({
+                  docLinks,
+                  isComplete: isStepComplete('migrate_system_indices'),
+                  setIsComplete: setCompletedStep.bind(null, 'migrate_system_indices'),
+                }),
+              getFixIssuesStep({
+                isComplete: isStepComplete('fix_issues'),
+                setIsComplete: setCompletedStep.bind(null, 'fix_issues'),
+              }),
+              getLogsStep({
+                isComplete: isStepComplete('logs'),
+                setIsComplete: setCompletedStep.bind(null, 'logs'),
+                navigateToEsDeprecationLogs: () => history.push('/es_deprecation_logs'),
+              }),
+              getUpgradeStep(),
+            ].filter(Boolean) as EuiStepProps[]
+          }
         />
       </EuiPageContentBody>
     </EuiPageBody>

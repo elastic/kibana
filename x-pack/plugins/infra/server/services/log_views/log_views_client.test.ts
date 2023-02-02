@@ -239,7 +239,7 @@ describe('LogViewsClient class', () => {
       })
     );
 
-    const resolvedLogView = await logViewsClient.resolveLogView({
+    const resolvedLogView = await logViewsClient.resolveLogView('log-view-id', {
       name: 'LOG VIEW',
       description: 'LOG VIEW DESCRIPTION',
       logIndices: {
@@ -280,6 +280,64 @@ describe('LogViewsClient class', () => {
             },
           },
         ],
+        "dataViewReference": DataView {
+          "allowNoIndex": false,
+          "deleteFieldFormat": [Function],
+          "fieldAttrs": Object {},
+          "fieldFormatMap": Object {},
+          "fieldFormats": Object {
+            "deserialize": [MockFunction],
+            "getByFieldType": [MockFunction],
+            "getDefaultConfig": [MockFunction],
+            "getDefaultInstance": [MockFunction],
+            "getDefaultInstanceCacheResolver": [MockFunction],
+            "getDefaultInstancePlain": [MockFunction],
+            "getDefaultType": [MockFunction],
+            "getDefaultTypeName": [MockFunction],
+            "getInstance": [MockFunction],
+            "getType": [MockFunction],
+            "getTypeNameByEsTypes": [MockFunction],
+            "getTypeWithoutMetaParams": [MockFunction],
+            "has": [MockFunction],
+            "init": [MockFunction],
+            "parseDefaultTypeMap": [MockFunction],
+            "register": [MockFunction],
+          },
+          "fields": FldList [],
+          "flattenHit": [Function],
+          "getFieldAttrs": [Function],
+          "getIndexPattern": [Function],
+          "getName": [Function],
+          "getOriginalSavedObjectBody": [Function],
+          "id": "LOG_DATA_VIEW",
+          "matchedIndices": Array [],
+          "metaFields": Array [
+            "_id",
+            "_type",
+            "_source",
+          ],
+          "name": "",
+          "namespaces": Array [],
+          "originalSavedObjectBody": Object {},
+          "resetOriginalSavedObjectBody": [Function],
+          "runtimeFieldMap": Object {
+            "runtime_field": Object {
+              "script": Object {
+                "source": "emit(\\"runtime value\\")",
+              },
+              "type": "keyword",
+            },
+          },
+          "setFieldFormat": [Function],
+          "setIndexPattern": [Function],
+          "shortDotsEnable": false,
+          "sourceFilters": Array [],
+          "timeFieldName": "@timestamp",
+          "title": "log-indices-*",
+          "type": undefined,
+          "typeMeta": undefined,
+          "version": "1",
+        },
         "description": "LOG VIEW DESCRIPTION",
         "fields": FldList [],
         "indices": "log-indices-*",

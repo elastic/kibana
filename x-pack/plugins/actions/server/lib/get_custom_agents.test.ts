@@ -6,7 +6,7 @@
  */
 
 import { Agent as HttpsAgent } from 'https';
-import HttpProxyAgent from 'http-proxy-agent';
+import { HttpProxyAgent } from 'http-proxy-agent';
 import { HttpsProxyAgent } from 'https-proxy-agent';
 import { Logger } from '@kbn/core/server';
 import { getCustomAgents } from './get_custom_agents';

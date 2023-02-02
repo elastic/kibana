@@ -13,7 +13,7 @@ import sinon from 'sinon';
 import del from 'del';
 
 import { existingInstall, assertVersion } from './kibana';
-import { Logger } from '../lib/logger';
+import { Logger } from '../../cli/logger';
 
 jest.spyOn(fs, 'statSync');
 

@@ -9,7 +9,7 @@ import {
   EuiButton,
   EuiButtonEmpty,
   EuiCallOut,
-  EuiFlexGrid,
+  EuiFlexGroup,
   EuiFlexItem,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -167,7 +167,7 @@ export function MLCallout({
   const hasAnyActions = properties.primaryAction || dismissable;
 
   const actions = hasAnyActions ? (
-    <EuiFlexGrid gutterSize="s">
+    <EuiFlexGroup gutterSize="s" justifyContent="spaceBetween">
       {properties.primaryAction && (
         <EuiFlexItem grow={false}>{properties.primaryAction}</EuiFlexItem>
       )}
@@ -180,7 +180,7 @@ export function MLCallout({
           </EuiButtonEmpty>
         </EuiFlexItem>
       )}
-    </EuiFlexGrid>
+    </EuiFlexGroup>
   ) : null;
 
   return (

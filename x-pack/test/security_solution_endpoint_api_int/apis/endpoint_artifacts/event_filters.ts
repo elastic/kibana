@@ -17,11 +17,7 @@ import {
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { PolicyTestResourceInfo } from '../../../security_solution_endpoint/services/endpoint_policy';
 import { ArtifactTestData } from '../../../security_solution_endpoint/services/endpoint_artifacts';
-import {
-  createUserAndRole,
-  deleteUserAndRole,
-  ROLES,
-} from '../../../common/services/security_solution';
+import { ROLE } from '../../services/roles_users';
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
@@ -30,24 +26,17 @@ export default function ({ getService }: FtrProviderContext) {
   const endpointArtifactTestResources = getService('endpointArtifactTestResources');
 
   describe('Endpoint artifacts (via lists plugin): Event Filters', () => {
-    const USER = ROLES.detections_admin;
     let fleetEndpointPolicy: PolicyTestResourceInfo;
 
     before(async () => {
       // Create an endpoint policy in fleet we can work with
       fleetEndpointPolicy = await endpointPolicyTestResources.createPolicy();
-
-      // create role/user
-      await createUserAndRole(getService, USER);
     });
 
     after(async () => {
       if (fleetEndpointPolicy) {
         await fleetEndpointPolicy.cleanup();
       }
-
-      // delete role/user
-      await deleteUserAndRole(getService, USER);
     });
 
     const anEndpointArtifactError = (res: { body: { message: string } }) => {
@@ -88,6 +77,7 @@ export default function ({ getService }: FtrProviderContext) {
     const eventFilterCalls: EventFilterApiCallsInterface<PutPostBodyGetter> = [
       {
         method: 'post',
+        info: 'create single item',
         path: EXCEPTION_LIST_ITEM_URL,
         getBody: (overrides = {}) =>
           exceptionsGenerator.generateEventFilterForCreate({
@@ -97,6 +87,7 @@ export default function ({ getService }: FtrProviderContext) {
       },
       {
         method: 'put',
+        info: 'update single item',
         path: EXCEPTION_LIST_ITEM_URL,
         getBody: (overrides = {}) =>
           exceptionsGenerator.generateEventFilterForUpdate({
@@ -106,6 +97,52 @@ export default function ({ getService }: FtrProviderContext) {
             _version: eventFilterData.artifact._version,
             ...overrides,
           }),
+      },
+    ];
+
+    const needsWritePrivilege: EventFilterApiCallsInterface = [
+      {
+        method: 'delete',
+        info: 'delete single item',
+        get path() {
+          return `${EXCEPTION_LIST_ITEM_URL}?item_id=${eventFilterData.artifact.item_id}&namespace_type=${eventFilterData.artifact.namespace_type}`;
+        },
+        getBody: () => undefined,
+      },
+    ];
+
+    const needsReadPrivilege: EventFilterApiCallsInterface = [
+      {
+        method: 'get',
+        info: 'single item',
+        get path() {
+          return `${EXCEPTION_LIST_ITEM_URL}?item_id=${eventFilterData.artifact.item_id}&namespace_type=${eventFilterData.artifact.namespace_type}`;
+        },
+        getBody: () => undefined,
+      },
+      {
+        method: 'get',
+        info: 'list summary',
+        get path() {
+          return `${EXCEPTION_LIST_URL}/summary?list_id=${eventFilterData.artifact.list_id}&namespace_type=${eventFilterData.artifact.namespace_type}`;
+        },
+        getBody: () => undefined,
+      },
+      {
+        method: 'get',
+        info: 'find items',
+        get path() {
+          return `${EXCEPTION_LIST_ITEM_URL}/_find?list_id=${eventFilterData.artifact.list_id}&namespace_type=${eventFilterData.artifact.namespace_type}&page=1&per_page=1&sort_field=name&sort_order=asc`;
+        },
+        getBody: () => undefined,
+      },
+      {
+        method: 'post',
+        info: 'list export',
+        get path() {
+          return `${EXCEPTION_LIST_URL}/_export?list_id=${eventFilterData.artifact.list_id}&namespace_type=${eventFilterData.artifact.namespace_type}&id=${eventFilterData.artifact.id}`;
+        },
+        getBody: () => undefined,
       },
     ];
 
@@ -140,13 +177,14 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     describe('and has authorization to manage endpoint security', () => {
-      for (const eventFilterCall of eventFilterCalls) {
-        it(`should error on [${eventFilterCall.method}] if invalid field`, async () => {
-          const body = eventFilterCall.getBody({});
+      for (const eventFilterApiCall of eventFilterCalls) {
+        it(`should error on [${eventFilterApiCall.method}] if invalid field`, async () => {
+          const body = eventFilterApiCall.getBody({});
 
           body.entries[0].field = 'some.invalid.field';
 
-          await supertest[eventFilterCall.method](eventFilterCall.path)
+          await supertestWithoutAuth[eventFilterApiCall.method](eventFilterApiCall.path)
+            .auth(ROLE.analyst_hunter, 'changeme')
             .set('kbn-xsrf', 'true')
             .send(body)
             .expect(400)
@@ -154,10 +192,11 @@ export default function ({ getService }: FtrProviderContext) {
             .expect(anErrorMessageWith(/invalid field: some\.invalid\.field/));
         });
 
-        it(`should error on [${eventFilterCall.method}] if more than one OS is set`, async () => {
-          const body = eventFilterCall.getBody({ os_types: ['linux', 'windows'] });
+        it(`should error on [${eventFilterApiCall.method}] if more than one OS is set`, async () => {
+          const body = eventFilterApiCall.getBody({ os_types: ['linux', 'windows'] });
 
-          await supertest[eventFilterCall.method](eventFilterCall.path)
+          await supertestWithoutAuth[eventFilterApiCall.method](eventFilterApiCall.path)
+            .auth(ROLE.analyst_hunter, 'changeme')
             .set('kbn-xsrf', 'true')
             .send(body)
             .expect(400)
@@ -165,12 +204,14 @@ export default function ({ getService }: FtrProviderContext) {
             .expect(anErrorMessageWith(/\[osTypes\]: array size is \[2\]/));
         });
 
-        it(`should error on [${eventFilterCall.method}] if policy id is invalid`, async () => {
-          const body = eventFilterCall.getBody({
+        it(`should error on [${eventFilterApiCall.method}] if policy id is invalid`, async () => {
+          const body = eventFilterApiCall.getBody({
             tags: [`${BY_POLICY_ARTIFACT_TAG_PREFIX}123`],
           });
 
-          await supertest[eventFilterCall.method](eventFilterCall.path)
+          // Using superuser there as we need custom license for this action
+          await supertest[eventFilterApiCall.method](eventFilterApiCall.path)
+            .auth(ROLE.analyst_hunter, 'changeme')
             .set('kbn-xsrf', 'true')
             .send(body)
             .expect(400)
@@ -178,10 +219,12 @@ export default function ({ getService }: FtrProviderContext) {
             .expect(anErrorMessageWith(/invalid policy ids/));
         });
 
-        it(`should work on [${eventFilterCall.method}] with valid entry`, async () => {
-          const body = eventFilterCall.getBody({});
+        it(`should work on [${eventFilterApiCall.method}] with valid entry`, async () => {
+          const body = eventFilterApiCall.getBody({});
 
-          await supertest[eventFilterCall.method](eventFilterCall.path)
+          // Using superuser here as we need custom license for this action
+          await supertest[eventFilterApiCall.method](eventFilterApiCall.path)
+            .auth(ROLE.analyst_hunter, 'changeme')
             .set('kbn-xsrf', 'true')
             .send(body)
             .expect(200);
@@ -190,63 +233,53 @@ export default function ({ getService }: FtrProviderContext) {
           await supertest.delete(deleteUrl).set('kbn-xsrf', 'true');
         });
       }
+      for (const eventFilterApiCall of [...needsWritePrivilege, ...needsReadPrivilege]) {
+        it(`should not error on [${eventFilterApiCall.method}] - [${eventFilterApiCall.info}]`, async () => {
+          await supertestWithoutAuth[eventFilterApiCall.method](eventFilterApiCall.path)
+            .auth(ROLE.analyst_hunter, 'changeme')
+            .set('kbn-xsrf', 'true')
+            .send(eventFilterApiCall.getBody())
+            .expect(200);
+        });
+      }
     });
 
-    describe(`and user (${USER}) DOES NOT have authorization to manage endpoint security`, () => {
-      // Define a new array that includes the prior set from above, plus additional API calls that
-      // only have Authz validations setup
-      const allApiCalls: EventFilterApiCallsInterface<PutPostBodyGetter | UnknownBodyGetter> = [
-        ...eventFilterCalls,
-        {
-          method: 'get',
-          info: 'single item',
-          get path() {
-            return `${EXCEPTION_LIST_ITEM_URL}?item_id=${eventFilterData.artifact.item_id}&namespace_type=${eventFilterData.artifact.namespace_type}`;
-          },
-          getBody: () => undefined,
-        },
-        {
-          method: 'get',
-          info: 'list summary',
-          get path() {
-            return `${EXCEPTION_LIST_URL}/summary?list_id=${eventFilterData.artifact.list_id}&namespace_type=${eventFilterData.artifact.namespace_type}`;
-          },
-          getBody: () => undefined,
-        },
-        {
-          method: 'delete',
-          info: 'single item',
-          get path() {
-            return `${EXCEPTION_LIST_ITEM_URL}?item_id=${eventFilterData.artifact.item_id}&namespace_type=${eventFilterData.artifact.namespace_type}`;
-          },
-          getBody: () => undefined,
-        },
-        {
-          method: 'post',
-          info: 'list export',
-          get path() {
-            return `${EXCEPTION_LIST_URL}/_export?list_id=${eventFilterData.artifact.list_id}&namespace_type=${eventFilterData.artifact.namespace_type}&id=1`;
-          },
-          getBody: () => undefined,
-        },
-        {
-          method: 'get',
-          info: 'find items',
-          get path() {
-            return `${EXCEPTION_LIST_ITEM_URL}/_find?list_id=${eventFilterData.artifact.list_id}&namespace_type=${eventFilterData.artifact.namespace_type}&page=1&per_page=1&sort_field=name&sort_order=asc`;
-          },
-          getBody: () => undefined,
-        },
-      ];
-
-      for (const apiCall of allApiCalls) {
-        it(`should error on [${apiCall.method}]${
-          apiCall.info ? ` ${apiCall.info}` : ''
-        }`, async () => {
-          await supertestWithoutAuth[apiCall.method](apiCall.path)
-            .auth(ROLES.detections_admin, 'changeme')
+    describe('and user has authorization to read event filters', () => {
+      for (const eventFilterApiCall of [...eventFilterCalls, ...needsWritePrivilege]) {
+        it(`should error on [${eventFilterApiCall.method}] - [${eventFilterApiCall.info}]`, async () => {
+          await supertestWithoutAuth[eventFilterApiCall.method](eventFilterApiCall.path)
+            .auth(ROLE.t2_analyst, 'changeme')
             .set('kbn-xsrf', 'true')
-            .send(apiCall.getBody())
+            .send(eventFilterApiCall.getBody())
+            .expect(403, {
+              status_code: 403,
+              message: 'EndpointArtifactError: Endpoint authorization failure',
+            });
+        });
+      }
+
+      for (const eventFilterApiCall of needsReadPrivilege) {
+        it(`should not error on [${eventFilterApiCall.method}] - [${eventFilterApiCall.info}]`, async () => {
+          await supertestWithoutAuth[eventFilterApiCall.method](eventFilterApiCall.path)
+            .auth(ROLE.t2_analyst, 'changeme')
+            .set('kbn-xsrf', 'true')
+            .send(eventFilterApiCall.getBody())
+            .expect(200);
+        });
+      }
+    });
+
+    describe('and user has no authorization to event filters', () => {
+      for (const eventFilterApiCall of [
+        ...eventFilterCalls,
+        ...needsWritePrivilege,
+        ...needsReadPrivilege,
+      ]) {
+        it(`should error on [${eventFilterApiCall.method}] - [${eventFilterApiCall.info}]`, async () => {
+          await supertestWithoutAuth[eventFilterApiCall.method](eventFilterApiCall.path)
+            .auth(ROLE.t1_analyst, 'changeme')
+            .set('kbn-xsrf', 'true')
+            .send(eventFilterApiCall.getBody())
             .expect(403, {
               status_code: 403,
               message: 'EndpointArtifactError: Endpoint authorization failure',

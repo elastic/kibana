@@ -29,8 +29,7 @@ import {
   getFilter,
 } from './helpers';
 import { adjustTimeScaleLabelSuffix } from '../time_scale_utils';
-import { getDisallowedPreviousShiftMessage } from '../../time_shift_utils';
-import { isScriptedField } from './terms/helpers';
+import { isRuntimeField, isScriptedField } from './terms/helpers';
 import { FormRow } from './shared_components/form_row';
 import { getColumnReducedTimeRangeError } from '../../reduced_time_range_utils';
 import { getGroupByKey } from './get_group_by_key';
@@ -107,6 +106,17 @@ function getDateFields(indexPattern: IndexPattern): IndexPatternField[] {
   return dateFields;
 }
 
+function setDefaultShowArrayValues(
+  field: IndexPatternField,
+  oldParams: LastValueIndexPatternColumn['params']
+) {
+  return (
+    isScriptedField(field) ||
+    (isRuntimeField(field) && field.type !== 'number') ||
+    oldParams?.showArrayValues
+  );
+}
+
 export interface LastValueIndexPatternColumn extends FieldBasedIndexPatternColumn {
   operationType: 'last_value';
   params: {
@@ -122,6 +132,16 @@ function getExistsFilter(field: string) {
     query: `${field}: *`,
     language: 'kuery',
   };
+}
+
+function getScale(type: string) {
+  return type === 'string' ||
+    type === 'ip' ||
+    type === 'ip_range' ||
+    type === 'date_range' ||
+    type === 'number_range'
+    ? 'ordinal'
+    : 'ratio';
 }
 
 export const lastValueOperation: OperationDefinition<
@@ -144,7 +164,7 @@ export const lastValueOperation: OperationDefinition<
   onFieldChange: (oldColumn, field) => {
     const newParams = { ...oldColumn.params };
 
-    newParams.showArrayValues = isScriptedField(field) || oldColumn.params.showArrayValues;
+    newParams.showArrayValues = setDefaultShowArrayValues(field, oldColumn.params);
 
     if ('format' in newParams && field.type !== 'number') {
       delete newParams.format;
@@ -155,7 +175,7 @@ export const lastValueOperation: OperationDefinition<
       label: ofName(field.displayName, oldColumn.timeShift, oldColumn.reducedTimeRange),
       sourceField: field.name,
       params: newParams,
-      scale: field.type === 'string' ? 'ordinal' : 'ratio',
+      scale: getScale(field.type),
       filter:
         oldColumn.filter && isEqual(oldColumn.filter, getExistsFilter(oldColumn.sourceField))
           ? getExistsFilter(field.name)
@@ -167,7 +187,7 @@ export const lastValueOperation: OperationDefinition<
       return {
         dataType: type as DataType,
         isBucketed: false,
-        scale: type === 'string' ? 'ordinal' : 'ratio',
+        scale: getScale(type),
       };
     }
   },
@@ -193,7 +213,6 @@ export const lastValueOperation: OperationDefinition<
     if (invalidSortFieldMessage) {
       errorMessages = [invalidSortFieldMessage];
     }
-    errorMessages.push(...(getDisallowedPreviousShiftMessage(layer, columnId) || []));
     errorMessages.push(...(getColumnReducedTimeRangeError(layer, columnId, indexPattern) || []));
     return errorMessages.length ? errorMessages : undefined;
   },
@@ -211,14 +230,14 @@ export const lastValueOperation: OperationDefinition<
       );
     }
 
-    const showArrayValues = isScriptedField(field) || lastValueParams?.showArrayValues;
+    const showArrayValues = setDefaultShowArrayValues(field, lastValueParams);
 
     return {
       label: ofName(field.displayName, previousColumn?.timeShift, previousColumn?.reducedTimeRange),
       dataType: field.type as DataType,
       operationType: 'last_value',
       isBucketed: false,
-      scale: field.type === 'string' ? 'ordinal' : 'ratio',
+      scale: getScale(field.type),
       sourceField: field.name,
       filter: getFilter(previousColumn, columnParams) || getExistsFilter(field.name),
       timeShift: columnParams?.shift || previousColumn?.timeShift,

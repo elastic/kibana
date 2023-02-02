@@ -9,7 +9,7 @@
 import { dirname, extname, join, relative, resolve, sep, basename } from 'path';
 
 export class File {
-  private path: string;
+  public readonly path: string;
   private relativePath: string;
   private ext: string;
 

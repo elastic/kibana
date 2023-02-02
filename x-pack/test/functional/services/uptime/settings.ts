@@ -45,6 +45,7 @@ export function UptimeSettingsProvider({ getService }: FtrProviderContext) {
         certAgeThreshold: parseInt(age, 10),
         certExpirationThreshold: parseInt(expiration, 10),
         defaultConnectors: [],
+        defaultEmail: { to: [], cc: [], bcc: [] },
       };
     },
     applyButtonIsDisabled: async () => {

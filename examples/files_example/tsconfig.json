@@ -1,0 +1,28 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "target/types"
+  },
+  "include": [
+    "index.ts",
+    "common/**/*",
+    "public/**/*.ts",
+    "public/**/*.tsx",
+    "server/**/*.ts",
+    "../../typings/**/*"
+  ],
+  "exclude": [
+    "target/**/*",
+  ],
+  "kbn_references": [
+    "@kbn/core",
+    "@kbn/files-plugin",
+    "@kbn/shared-ux-file-types",
+    "@kbn/core-application-browser",
+    "@kbn/shared-ux-file-context",
+    "@kbn/shared-ux-file-image",
+    "@kbn/shared-ux-file-upload",
+    "@kbn/shared-ux-file-picker",
+    "@kbn/developer-examples-plugin",
+  ]
+}

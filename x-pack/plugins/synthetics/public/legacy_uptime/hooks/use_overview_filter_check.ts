@@ -42,12 +42,15 @@ export function useOverviewFilterCheck() {
    */
   const shouldRun = !!filters || !hasFilters(search);
 
-  return useCallback(
-    (fn: () => void) => {
-      if (shouldRun) {
-        fn();
-      }
-    },
-    [shouldRun]
-  );
+  return {
+    pending: !shouldRun,
+    filterCheck: useCallback(
+      (fn: () => void) => {
+        if (shouldRun) {
+          fn();
+        }
+      },
+      [shouldRun]
+    ),
+  };
 }

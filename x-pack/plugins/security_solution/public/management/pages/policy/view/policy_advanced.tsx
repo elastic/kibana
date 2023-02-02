@@ -22,7 +22,7 @@ import { cloneDeep } from 'lodash';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { policyConfig } from '../store/policy_details/selectors';
-import { usePolicyDetailsSelector } from './policy_hooks';
+import { useShowEditableFormFields, usePolicyDetailsSelector } from './policy_hooks';
 import { AdvancedPolicySchema } from '../models/advanced_policy_schema';
 
 function setValue(obj: Record<string, unknown>, value: string, path: string[]) {
@@ -145,6 +145,7 @@ const PolicyAdvanced = React.memo(
     lastSupportedVersion?: string;
     documentation: string;
   }) => {
+    const showEditableFormFields = useShowEditableFormFields();
     const dispatch = useDispatch();
     const policyDetailsConfig = usePolicyDetailsSelector(policyConfig);
     const onChange = useCallback(
@@ -196,6 +197,7 @@ const PolicyAdvanced = React.memo(
             fullWidth
             value={value as string}
             onChange={onChange}
+            disabled={!showEditableFormFields}
           />
         </EuiFormRow>
       </>

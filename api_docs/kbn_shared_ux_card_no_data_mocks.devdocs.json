@@ -36,7 +36,13 @@
             "text": "StorybookMock"
           },
           " extends ",
-          "AbstractStorybookMock",
+          {
+            "pluginId": "@kbn/shared-ux-storybook-mock",
+            "scope": "common",
+            "docId": "kibKbnSharedUxStorybookMockPluginApi",
+            "section": "def-common.AbstractStorybookMock",
+            "text": "AbstractStorybookMock"
+          },
           "<",
           "NoDataCardProps",
           ", ",
@@ -308,7 +314,13 @@
             "label": "dependencies",
             "description": [],
             "signature": [
-              "RedirectAppLinksStorybookMock",
+              {
+                "pluginId": "@kbn/shared-ux-link-redirect-app-mocks",
+                "scope": "common",
+                "docId": "kibKbnSharedUxLinkRedirectAppMocksPluginApi",
+                "section": "def-common.StorybookMock",
+                "text": "StorybookMock"
+              },
               "[]"
             ],
             "path": "packages/shared-ux/card/no_data/mocks/src/storybook.ts",

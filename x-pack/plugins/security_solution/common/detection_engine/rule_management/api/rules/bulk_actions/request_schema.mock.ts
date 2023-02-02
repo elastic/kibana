@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import { BulkAction, BulkActionEditType } from './request_schema';
+import { BulkActionType, BulkActionEditType } from './request_schema';
 import type { PerformBulkActionRequestBody } from './request_schema';
 
 export const getPerformBulkActionSchemaMock = (): PerformBulkActionRequestBody => ({
   query: '',
   ids: undefined,
-  action: BulkAction.disable,
+  action: BulkActionType.disable,
 });
 
 export const getPerformBulkActionEditSchemaMock = (): PerformBulkActionRequestBody => ({
   query: '',
   ids: undefined,
-  action: BulkAction.edit,
-  [BulkAction.edit]: [{ type: BulkActionEditType.add_tags, value: ['tag1'] }],
+  action: BulkActionType.edit,
+  [BulkActionType.edit]: [{ type: BulkActionEditType.add_tags, value: ['tag1'] }],
 });

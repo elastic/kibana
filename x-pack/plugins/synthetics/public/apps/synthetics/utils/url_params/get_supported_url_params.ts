@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { CLIENT_DEFAULTS_SYNTHETICS } from '../../../../../common/constants/synthetics/client_defaults';
 import { parseIsPaused } from './parse_is_paused';
 import { parseUrlInt } from './parse_url_int';
 import { CLIENT_DEFAULTS } from '../../../../../common/constants';
@@ -27,9 +28,11 @@ export interface SyntheticsUrlParams {
   query?: string;
   tags?: string[];
   locations?: string[];
-  monitorType?: string[];
+  monitorTypes?: string[];
   status?: string[];
   locationId?: string;
+  projects?: string[];
+  schedules?: string[];
 }
 
 const {
@@ -37,12 +40,12 @@ const {
   ABSOLUTE_DATE_RANGE_END,
   AUTOREFRESH_INTERVAL,
   AUTOREFRESH_IS_PAUSED,
-  DATE_RANGE_START,
-  DATE_RANGE_END,
   SEARCH,
   FILTERS,
   STATUS_FILTER,
 } = CLIENT_DEFAULTS;
+
+const { DATE_RANGE_START, DATE_RANGE_END } = CLIENT_DEFAULTS_SYNTHETICS;
 
 /**
  * Gets the current URL values for the application. If no item is present
@@ -86,9 +89,11 @@ export const getSupportedUrlParams = (params: {
     focusConnectorField,
     query,
     tags,
-    monitorType,
+    monitorTypes,
     locations,
     locationId,
+    projects,
+    schedules,
   } = filteredParams;
 
   return {
@@ -113,8 +118,10 @@ export const getSupportedUrlParams = (params: {
     focusConnectorField: !!focusConnectorField,
     query: query || '',
     tags: tags ? JSON.parse(tags) : [],
-    monitorType: monitorType ? JSON.parse(monitorType) : [],
+    monitorTypes: monitorTypes ? JSON.parse(monitorTypes) : [],
     locations: locations ? JSON.parse(locations) : [],
+    projects: projects ? JSON.parse(projects) : [],
+    schedules: schedules ? JSON.parse(schedules) : [],
     locationId: locationId || undefined,
   };
 };

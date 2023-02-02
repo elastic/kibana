@@ -10,10 +10,18 @@
   },
   "server": {
     "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
     "functions": [
       {
         "parentPluginId": "@kbn/datemath",
-        "id": "def-server.parse",
+        "id": "def-common.parse",
         "type": "Function",
         "tags": [],
         "label": "parse",
@@ -27,7 +35,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/datemath",
-            "id": "def-server.parse.$1",
+            "id": "def-common.parse.$1",
             "type": "string",
             "tags": [],
             "label": "input",
@@ -42,7 +50,7 @@
           },
           {
             "parentPluginId": "@kbn/datemath",
-            "id": "def-server.parse.$2",
+            "id": "def-common.parse.$2",
             "type": "Object",
             "tags": [],
             "label": "options",
@@ -53,7 +61,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/datemath",
-                "id": "def-server.parse.$2.roundUp",
+                "id": "def-common.parse.$2.roundUp",
                 "type": "CompoundType",
                 "tags": [],
                 "label": "roundUp",
@@ -67,7 +75,7 @@
               },
               {
                 "parentPluginId": "@kbn/datemath",
-                "id": "def-server.parse.$2.momentInstance",
+                "id": "def-common.parse.$2.momentInstance",
                 "type": "Function",
                 "tags": [],
                 "label": "momentInstance",
@@ -81,7 +89,7 @@
               },
               {
                 "parentPluginId": "@kbn/datemath",
-                "id": "def-server.parse.$2.forceNow",
+                "id": "def-common.parse.$2.forceNow",
                 "type": "Object",
                 "tags": [],
                 "label": "forceNow",
@@ -105,7 +113,7 @@
     "misc": [
       {
         "parentPluginId": "@kbn/datemath",
-        "id": "def-server.Unit",
+        "id": "def-common.Unit",
         "type": "Type",
         "tags": [],
         "label": "Unit",
@@ -120,7 +128,7 @@
       },
       {
         "parentPluginId": "@kbn/datemath",
-        "id": "def-server.units",
+        "id": "def-common.units",
         "type": "Array",
         "tags": [],
         "label": "units",
@@ -128,9 +136,9 @@
         "signature": [
           {
             "pluginId": "@kbn/datemath",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnDatemathPluginApi",
-            "section": "def-server.Unit",
+            "section": "def-common.Unit",
             "text": "Unit"
           },
           "[]"
@@ -142,7 +150,7 @@
       },
       {
         "parentPluginId": "@kbn/datemath",
-        "id": "def-server.unitsAsc",
+        "id": "def-common.unitsAsc",
         "type": "Array",
         "tags": [],
         "label": "unitsAsc",
@@ -150,9 +158,9 @@
         "signature": [
           {
             "pluginId": "@kbn/datemath",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnDatemathPluginApi",
-            "section": "def-server.Unit",
+            "section": "def-common.Unit",
             "text": "Unit"
           },
           "[]"
@@ -164,7 +172,7 @@
       },
       {
         "parentPluginId": "@kbn/datemath",
-        "id": "def-server.unitsDesc",
+        "id": "def-common.unitsDesc",
         "type": "Array",
         "tags": [],
         "label": "unitsDesc",
@@ -172,9 +180,9 @@
         "signature": [
           {
             "pluginId": "@kbn/datemath",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnDatemathPluginApi",
-            "section": "def-server.Unit",
+            "section": "def-common.Unit",
             "text": "Unit"
           },
           "[]"
@@ -186,7 +194,7 @@
       },
       {
         "parentPluginId": "@kbn/datemath",
-        "id": "def-server.UnitsMap",
+        "id": "def-common.UnitsMap",
         "type": "Type",
         "tags": [],
         "label": "UnitsMap",
@@ -203,7 +211,7 @@
     "objects": [
       {
         "parentPluginId": "@kbn/datemath",
-        "id": "def-server.unitsMap",
+        "id": "def-common.unitsMap",
         "type": "Object",
         "tags": [],
         "label": "unitsMap",
@@ -214,7 +222,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/datemath",
-            "id": "def-server.unitsMap.ms",
+            "id": "def-common.unitsMap.ms",
             "type": "Object",
             "tags": [],
             "label": "ms",
@@ -225,7 +233,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/datemath",
-                "id": "def-server.unitsMap.ms.weight",
+                "id": "def-common.unitsMap.ms.weight",
                 "type": "number",
                 "tags": [],
                 "label": "weight",
@@ -236,7 +244,7 @@
               },
               {
                 "parentPluginId": "@kbn/datemath",
-                "id": "def-server.unitsMap.ms.type",
+                "id": "def-common.unitsMap.ms.type",
                 "type": "string",
                 "tags": [],
                 "label": "type",
@@ -250,7 +258,7 @@
               },
               {
                 "parentPluginId": "@kbn/datemath",
-                "id": "def-server.unitsMap.ms.base",
+                "id": "def-common.unitsMap.ms.base",
                 "type": "number",
                 "tags": [],
                 "label": "base",
@@ -263,7 +271,7 @@
           },
           {
             "parentPluginId": "@kbn/datemath",
-            "id": "def-server.unitsMap.s",
+            "id": "def-common.unitsMap.s",
             "type": "Object",
             "tags": [],
             "label": "s",
@@ -274,7 +282,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/datemath",
-                "id": "def-server.unitsMap.s.weight",
+                "id": "def-common.unitsMap.s.weight",
                 "type": "number",
                 "tags": [],
                 "label": "weight",
@@ -285,7 +293,7 @@
               },
               {
                 "parentPluginId": "@kbn/datemath",
-                "id": "def-server.unitsMap.s.type",
+                "id": "def-common.unitsMap.s.type",
                 "type": "string",
                 "tags": [],
                 "label": "type",
@@ -299,7 +307,7 @@
               },
               {
                 "parentPluginId": "@kbn/datemath",
-                "id": "def-server.unitsMap.s.base",
+                "id": "def-common.unitsMap.s.base",
                 "type": "number",
                 "tags": [],
                 "label": "base",
@@ -312,7 +320,7 @@
           },
           {
             "parentPluginId": "@kbn/datemath",
-            "id": "def-server.unitsMap.m",
+            "id": "def-common.unitsMap.m",
             "type": "Object",
             "tags": [],
             "label": "m",
@@ -323,7 +331,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/datemath",
-                "id": "def-server.unitsMap.m.weight",
+                "id": "def-common.unitsMap.m.weight",
                 "type": "number",
                 "tags": [],
                 "label": "weight",
@@ -334,7 +342,7 @@
               },
               {
                 "parentPluginId": "@kbn/datemath",
-                "id": "def-server.unitsMap.m.type",
+                "id": "def-common.unitsMap.m.type",
                 "type": "string",
                 "tags": [],
                 "label": "type",
@@ -348,7 +356,7 @@
               },
               {
                 "parentPluginId": "@kbn/datemath",
-                "id": "def-server.unitsMap.m.base",
+                "id": "def-common.unitsMap.m.base",
                 "type": "number",
                 "tags": [],
                 "label": "base",
@@ -361,7 +369,7 @@
           },
           {
             "parentPluginId": "@kbn/datemath",
-            "id": "def-server.unitsMap.h",
+            "id": "def-common.unitsMap.h",
             "type": "Object",
             "tags": [],
             "label": "h",
@@ -372,7 +380,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/datemath",
-                "id": "def-server.unitsMap.h.weight",
+                "id": "def-common.unitsMap.h.weight",
                 "type": "number",
                 "tags": [],
                 "label": "weight",
@@ -383,7 +391,7 @@
               },
               {
                 "parentPluginId": "@kbn/datemath",
-                "id": "def-server.unitsMap.h.type",
+                "id": "def-common.unitsMap.h.type",
                 "type": "string",
                 "tags": [],
                 "label": "type",
@@ -397,7 +405,7 @@
               },
               {
                 "parentPluginId": "@kbn/datemath",
-                "id": "def-server.unitsMap.h.base",
+                "id": "def-common.unitsMap.h.base",
                 "type": "number",
                 "tags": [],
                 "label": "base",
@@ -410,7 +418,7 @@
           },
           {
             "parentPluginId": "@kbn/datemath",
-            "id": "def-server.unitsMap.d",
+            "id": "def-common.unitsMap.d",
             "type": "Object",
             "tags": [],
             "label": "d",
@@ -421,7 +429,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/datemath",
-                "id": "def-server.unitsMap.d.weight",
+                "id": "def-common.unitsMap.d.weight",
                 "type": "number",
                 "tags": [],
                 "label": "weight",
@@ -432,7 +440,7 @@
               },
               {
                 "parentPluginId": "@kbn/datemath",
-                "id": "def-server.unitsMap.d.type",
+                "id": "def-common.unitsMap.d.type",
                 "type": "string",
                 "tags": [],
                 "label": "type",
@@ -446,7 +454,7 @@
               },
               {
                 "parentPluginId": "@kbn/datemath",
-                "id": "def-server.unitsMap.d.base",
+                "id": "def-common.unitsMap.d.base",
                 "type": "number",
                 "tags": [],
                 "label": "base",
@@ -459,7 +467,7 @@
           },
           {
             "parentPluginId": "@kbn/datemath",
-            "id": "def-server.unitsMap.w",
+            "id": "def-common.unitsMap.w",
             "type": "Object",
             "tags": [],
             "label": "w",
@@ -470,7 +478,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/datemath",
-                "id": "def-server.unitsMap.w.weight",
+                "id": "def-common.unitsMap.w.weight",
                 "type": "number",
                 "tags": [],
                 "label": "weight",
@@ -481,7 +489,7 @@
               },
               {
                 "parentPluginId": "@kbn/datemath",
-                "id": "def-server.unitsMap.w.type",
+                "id": "def-common.unitsMap.w.type",
                 "type": "string",
                 "tags": [],
                 "label": "type",
@@ -495,7 +503,7 @@
               },
               {
                 "parentPluginId": "@kbn/datemath",
-                "id": "def-server.unitsMap.w.base",
+                "id": "def-common.unitsMap.w.base",
                 "type": "number",
                 "tags": [],
                 "label": "base",
@@ -508,7 +516,7 @@
           },
           {
             "parentPluginId": "@kbn/datemath",
-            "id": "def-server.unitsMap.M",
+            "id": "def-common.unitsMap.M",
             "type": "Object",
             "tags": [],
             "label": "M",
@@ -519,7 +527,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/datemath",
-                "id": "def-server.unitsMap.M.weight",
+                "id": "def-common.unitsMap.M.weight",
                 "type": "number",
                 "tags": [],
                 "label": "weight",
@@ -530,7 +538,7 @@
               },
               {
                 "parentPluginId": "@kbn/datemath",
-                "id": "def-server.unitsMap.M.type",
+                "id": "def-common.unitsMap.M.type",
                 "type": "string",
                 "tags": [],
                 "label": "type",
@@ -544,7 +552,7 @@
               },
               {
                 "parentPluginId": "@kbn/datemath",
-                "id": "def-server.unitsMap.M.base",
+                "id": "def-common.unitsMap.M.base",
                 "type": "number",
                 "tags": [],
                 "label": "base",
@@ -557,7 +565,7 @@
           },
           {
             "parentPluginId": "@kbn/datemath",
-            "id": "def-server.unitsMap.y",
+            "id": "def-common.unitsMap.y",
             "type": "Object",
             "tags": [],
             "label": "y",
@@ -570,7 +578,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/datemath",
-                "id": "def-server.unitsMap.y.weight",
+                "id": "def-common.unitsMap.y.weight",
                 "type": "number",
                 "tags": [],
                 "label": "weight",
@@ -581,7 +589,7 @@
               },
               {
                 "parentPluginId": "@kbn/datemath",
-                "id": "def-server.unitsMap.y.type",
+                "id": "def-common.unitsMap.y.type",
                 "type": "string",
                 "tags": [],
                 "label": "type",
@@ -595,7 +603,7 @@
               },
               {
                 "parentPluginId": "@kbn/datemath",
-                "id": "def-server.unitsMap.y.base",
+                "id": "def-common.unitsMap.y.base",
                 "type": "number",
                 "tags": [],
                 "label": "base",
@@ -610,13 +618,5 @@
         "initialIsOpen": false
       }
     ]
-  },
-  "common": {
-    "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
-    "objects": []
   }
 }

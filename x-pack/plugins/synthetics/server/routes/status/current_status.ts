@@ -5,17 +5,22 @@
  * 2.0.
  */
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/types';
-import { schema } from '@kbn/config-schema';
+import { intersection } from 'lodash';
 import datemath, { Unit } from '@kbn/datemath';
-import { IKibanaResponse, SavedObjectsClientContract } from '@kbn/core/server';
+import { SavedObjectsClientContract } from '@kbn/core/server';
+import {
+  getAllMonitors,
+  processMonitors,
+} from '../../saved_objects/synthetics_monitor/get_all_monitors';
+import { UptimeServerSetup } from '../../legacy_uptime/lib/adapters';
+import { queryMonitorStatus } from '../../queries/query_monitor_status';
 import { SYNTHETICS_API_URLS } from '../../../common/constants';
 import { UMServerLibs } from '../../legacy_uptime/uptime_server';
 import { SyntheticsRestApiRouteFactory } from '../../legacy_uptime/routes';
-import { getMonitors } from '../common';
 import { UptimeEsClient } from '../../legacy_uptime/lib/lib';
 import { SyntheticsMonitorClient } from '../../synthetics_service/synthetics_monitor/synthetics_monitor_client';
-import { ConfigKey, OverviewStatus } from '../../../common/runtime_types';
+import { ConfigKey } from '../../../common/runtime_types';
+import { QuerySchema, MonitorsQuery, getMonitorFilters } from '../common';
 
 /**
  * Helper function that converts a monitor's schedule to a value to use to generate
@@ -29,100 +34,6 @@ export function periodToMs(schedule: { number: string; unit: Unit }) {
   return parseInt(schedule.number, 10) * datemath.unitsMap[schedule.unit].base;
 }
 
-const DEFAULT_MAX_ES_BUCKET_SIZE = 10000;
-
-export async function queryMonitorStatus(
-  esClient: UptimeEsClient,
-  maxLocations: number,
-  maxPeriod: number,
-  ids: Array<string | undefined>
-): Promise<Pick<OverviewStatus, 'up' | 'down'>> {
-  const idSize = Math.trunc(DEFAULT_MAX_ES_BUCKET_SIZE / maxLocations);
-  const pageCount = Math.ceil(ids.length / idSize);
-  const promises: Array<Promise<any>> = [];
-  for (let i = 0; i < pageCount; i++) {
-    const params: estypes.SearchRequest = {
-      size: 0,
-      query: {
-        bool: {
-          filter: [
-            {
-              range: {
-                '@timestamp': {
-                  gte: maxPeriod,
-                  // @ts-expect-error can't mix number and string in client definition
-                  lte: 'now',
-                },
-              },
-            },
-            {
-              terms: {
-                'monitor.id': (ids as string[]).slice(i * idSize, i * idSize + idSize),
-              },
-            },
-            {
-              exists: {
-                field: 'summary',
-              },
-            },
-          ],
-        },
-      },
-      aggs: {
-        id: {
-          terms: {
-            field: 'monitor.id',
-            size: idSize,
-          },
-          aggs: {
-            location: {
-              terms: {
-                field: 'observer.geo.name',
-                size: maxLocations,
-              },
-              aggs: {
-                status: {
-                  top_hits: {
-                    size: 1,
-                    sort: [
-                      {
-                        '@timestamp': {
-                          order: 'desc',
-                        },
-                      },
-                    ],
-                    _source: {
-                      includes: ['@timestamp', 'summary'],
-                    },
-                  },
-                },
-              },
-            },
-          },
-        },
-      },
-    };
-
-    promises.push(esClient.baseESClient.search(params));
-  }
-  let up = 0;
-  let down = 0;
-  for await (const response of promises) {
-    response.aggregations?.id.buckets.forEach(({ location }: { key: string; location: any }) => {
-      location.buckets.forEach(({ status }: { key: string; status: any }) => {
-        const downCount = status.hits.hits[0]._source.summary.down;
-        const upCount = status.hits.hits[0]._source.summary.up;
-        if (upCount > 0) {
-          up += 1;
-        } else if (downCount > 0) {
-          down += 1;
-        }
-      });
-    });
-  }
-  return { up, down };
-}
-
 /**
  * Multi-stage function that first queries all the user's saved object monitor configs.
  *
@@ -130,56 +41,75 @@ export async function queryMonitorStatus(
  * @returns The counts of up/down/disabled monitor by location, and a map of each monitor:location status.
  */
 export async function getStatus(
+  server: UptimeServerSetup,
   uptimeEsClient: UptimeEsClient,
-  savedObjectsClient: SavedObjectsClientContract,
-  syntheticsMonitorClient: SyntheticsMonitorClient
+  soClient: SavedObjectsClientContract,
+  syntheticsMonitorClient: SyntheticsMonitorClient,
+  params: MonitorsQuery
 ) {
-  let monitors;
-  const enabledIds: Array<string | undefined> = [];
-  let disabledCount = 0;
-  let page = 1;
-  let maxPeriod = 0;
-  let maxLocations = 1;
+  const { query, locations: queryLocations } = params;
   /**
    * Walk through all monitor saved objects, bucket IDs by disabled/enabled status.
    *
    * Track max period to make sure the snapshot query should reach back far enough to catch
    * latest ping for all enabled monitors.
    */
-  do {
-    monitors = await getMonitors(
-      {
-        perPage: 500,
-        page,
-        sortField: 'name.keyword',
-        sortOrder: 'asc',
-      },
-      syntheticsMonitorClient.syntheticsService,
-      savedObjectsClient
-    );
-    page++;
-    monitors.saved_objects.forEach((monitor) => {
-      if (monitor.attributes[ConfigKey.ENABLED] === false) {
-        disabledCount += monitor.attributes[ConfigKey.LOCATIONS].length;
-      } else {
-        enabledIds.push(monitor.attributes[ConfigKey.CUSTOM_HEARTBEAT_ID] || monitor.id);
-        maxLocations = Math.max(maxLocations, monitor.attributes.locations.length);
-        maxPeriod = Math.max(maxPeriod, periodToMs(monitor.attributes.schedule));
-      }
-    });
-  } while (monitors.saved_objects.length === monitors.per_page);
 
-  const { up, down } = await queryMonitorStatus(
-    uptimeEsClient,
-    maxLocations,
+  const filtersStr = getMonitorFilters({
+    ...params,
+    serviceLocations: syntheticsMonitorClient.syntheticsService.locations,
+  });
+  const allMonitors = await getAllMonitors({
+    soClient,
+    search: query ? `${query}*` : undefined,
+    filter: filtersStr,
+    fields: [
+      ConfigKey.ENABLED,
+      ConfigKey.LOCATIONS,
+      ConfigKey.MONITOR_QUERY_ID,
+      ConfigKey.SCHEDULE,
+      ConfigKey.MONITOR_SOURCE_TYPE,
+    ],
+  });
+
+  const {
+    allIds,
+    enabledIds,
+    disabledCount,
     maxPeriod,
-    enabledIds
+    listOfLocations,
+    monitorLocationMap,
+    disabledMonitorsCount,
+    projectMonitorsCount,
+  } = await processMonitors(allMonitors, server, soClient, syntheticsMonitorClient);
+
+  // Account for locations filter
+  const queryLocationsArray =
+    queryLocations && !Array.isArray(queryLocations) ? [queryLocations] : queryLocations;
+  const listOfLocationAfterFilter = queryLocationsArray
+    ? intersection(listOfLocations, queryLocationsArray)
+    : listOfLocations;
+
+  const { up, down, pending, upConfigs, downConfigs } = await queryMonitorStatus(
+    uptimeEsClient,
+    listOfLocationAfterFilter,
+    { from: maxPeriod, to: 'now' },
+    enabledIds,
+    monitorLocationMap
   );
 
   return {
+    allIds,
+    allMonitorsCount: allMonitors.length,
+    disabledMonitorsCount,
+    projectMonitorsCount,
+    enabledIds,
     disabledCount,
     up,
     down,
+    pending,
+    upConfigs,
+    downConfigs,
   };
 }
 
@@ -187,16 +117,22 @@ export const createGetCurrentStatusRoute: SyntheticsRestApiRouteFactory = (libs:
   method: 'GET',
   path: SYNTHETICS_API_URLS.OVERVIEW_STATUS,
   validate: {
-    query: schema.object({}),
+    query: QuerySchema,
   },
   handler: async ({
+    server,
     uptimeEsClient,
     savedObjectsClient,
     syntheticsMonitorClient,
-    response,
-  }): Promise<IKibanaResponse<OverviewStatus>> => {
-    return response.ok({
-      body: await getStatus(uptimeEsClient, savedObjectsClient, syntheticsMonitorClient),
-    });
+    request,
+  }): Promise<any> => {
+    const params = request.query;
+    return await getStatus(
+      server,
+      uptimeEsClient,
+      savedObjectsClient,
+      syntheticsMonitorClient,
+      params
+    );
   },
 });

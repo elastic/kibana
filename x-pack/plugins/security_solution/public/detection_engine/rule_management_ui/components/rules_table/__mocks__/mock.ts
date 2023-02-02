@@ -13,7 +13,10 @@ import type {
   DefineStepRule,
   ScheduleStepRule,
 } from '../../../../../detections/pages/detection_engine/rules/types';
-import { DataSourceType } from '../../../../../detections/pages/detection_engine/rules/types';
+import {
+  DataSourceType,
+  GroupByOptions,
+} from '../../../../../detections/pages/detection_engine/rules/types';
 import type { FieldValueQueryBar } from '../../../../../detections/components/rules/query_bar';
 import { fillEmptySeverityMappings } from '../../../../../detections/pages/detection_engine/rules/helpers';
 import { getThreatMock } from '../../../../../../common/detection_engine/schemas/types/threat.mock';
@@ -167,6 +170,9 @@ export const mockRuleWithEverything = (id: string): Rule => ({
   timestamp_override_fallback_disabled: false,
   note: '# this is some markdown documentation',
   version: 1,
+  alert_suppression: {
+    group_by: ['host.name'],
+  },
   new_terms_fields: ['host.name'],
   history_window_start: 'now-7d',
 });
@@ -226,6 +232,12 @@ export const mockDefineStepRule = (): DefineStepRule => ({
   newTermsFields: ['host.ip'],
   historyWindowSize: '7d',
   shouldLoadQueryDynamically: false,
+  groupByFields: [],
+  groupByRadioSelection: GroupByOptions.PerRuleExecution,
+  groupByDuration: {
+    unit: 'm',
+    value: 5,
+  },
 });
 
 export const mockScheduleStepRule = (): ScheduleStepRule => ({

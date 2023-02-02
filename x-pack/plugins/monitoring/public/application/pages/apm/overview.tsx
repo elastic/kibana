@@ -14,7 +14,6 @@ import { ApmTemplate } from './apm_template';
 import { GlobalStateContext } from '../../contexts/global_state_context';
 import { useCharts } from '../../hooks/use_charts';
 import { useBreadcrumbContainerContext } from '../../hooks/use_breadcrumbs';
-// @ts-ignore
 import { ApmOverview } from '../../../components/apm/overview';
 
 export const ApmOverviewPage: React.FC<ComponentProps> = ({ clusters }) => {

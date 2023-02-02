@@ -69,19 +69,18 @@ export default function ({ getService }: FtrProviderContext) {
   const createTests = (spaceId: string) => {
     const { normalTypes, hiddenType, allTypes } = createTestCases(spaceId);
     return {
-      unauthorized: createTestDefinitions(allTypes, true, { spaceId }),
-      authorized: [
-        createTestDefinitions(normalTypes, false, { spaceId }),
-        createTestDefinitions(hiddenType, true, { spaceId }),
+      unauthorized: [
+        createTestDefinitions(normalTypes, true, { spaceId }),
+        createTestDefinitions(hiddenType, false, { spaceId }), // validation for hidden type returns 404 Not Found before authZ check
       ].flat(),
-      superuser: createTestDefinitions(allTypes, false, { spaceId }),
+      authorized: createTestDefinitions(allTypes, false, { spaceId }),
     };
   };
 
   describe('_delete', () => {
     getTestScenarios().securityAndSpaces.forEach(({ spaceId, users }) => {
       const suffix = ` within the ${spaceId} space`;
-      const { unauthorized, authorized, superuser } = createTests(spaceId);
+      const { unauthorized, authorized } = createTests(spaceId);
       const _addTests = (user: TestUser, tests: DeleteTestDefinition[]) => {
         addTests(`${user.description}${suffix}`, { user, spaceId, tests });
       };
@@ -96,10 +95,9 @@ export default function ({ getService }: FtrProviderContext) {
       ].forEach((user) => {
         _addTests(user, unauthorized);
       });
-      [users.dualAll, users.allGlobally, users.allAtSpace].forEach((user) => {
+      [users.dualAll, users.allGlobally, users.allAtSpace, users.superuser].forEach((user) => {
         _addTests(user, authorized);
       });
-      _addTests(users.superuser, superuser);
     });
   });
 }

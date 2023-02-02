@@ -12,7 +12,7 @@ import { htmlIdGenerator, EuiRadio } from '@elastic/eui';
 import type { ImmutableArray, UIPolicyConfig } from '../../../../../../../common/endpoint/types';
 import { ProtectionModes } from '../../../../../../../common/endpoint/types';
 import type { MacPolicyProtection, LinuxPolicyProtection, PolicyProtection } from '../../../types';
-import { usePolicyDetailsSelector } from '../../policy_hooks';
+import { useShowEditableFormFields, usePolicyDetailsSelector } from '../../policy_hooks';
 import { policyConfig } from '../../../store/policy_details/selectors';
 import type { AppAction } from '../../../../../../common/store/actions';
 import { useLicense } from '../../../../../../common/hooks/use_license';
@@ -34,6 +34,7 @@ export const ProtectionRadio = React.memo(
     const radioButtonId = useMemo(() => htmlIdGenerator()(), []);
     const selected = policyDetailsConfig && policyDetailsConfig.windows[protection].mode;
     const isPlatinumPlus = useLicense().isPlatinumPlus();
+    const showEditableFormFields = useShowEditableFormFields();
 
     const handleRadioChange = useCallback(() => {
       if (policyDetailsConfig) {
@@ -87,7 +88,7 @@ export const ProtectionRadio = React.memo(
         id={radioButtonId}
         checked={selected === protectionMode}
         onChange={handleRadioChange}
-        disabled={selected === ProtectionModes.off}
+        disabled={!showEditableFormFields || selected === ProtectionModes.off}
       />
     );
   }

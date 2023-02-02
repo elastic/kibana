@@ -21,17 +21,22 @@ import {
   SUB_PLUGINS_REDUCER,
   TestProviders,
 } from '../../../common/mock';
-import { TableId, TimelineId } from '../../../../common/types/timeline';
+import { TimelineId } from '../../../../common/types/timeline';
 import { GraphOverlay } from '.';
 import { createStore } from '../../../common/store';
 import { useStateSyncingActions } from '../../../resolver/view/use_state_syncing_actions';
 import { SourcererScopeName } from '../../../common/store/sourcerer/model';
-import { tGridReducer } from '@kbn/timelines-plugin/public';
+import { TableId } from '../../../../common/types';
 
 jest.mock('../../../common/containers/use_full_screen', () => ({
   useGlobalFullScreen: jest.fn(),
   useTimelineFullScreen: jest.fn(),
 }));
+
+jest.mock('react-router-dom', () => {
+  const actual = jest.requireActual('react-router-dom');
+  return { ...actual, useLocation: jest.fn().mockReturnValue({ pathname: '' }) };
+});
 
 jest.mock('../../../resolver/view/use_resolver_query_params_cleaner');
 jest.mock('../../../resolver/view/use_state_syncing_actions');
@@ -130,7 +135,6 @@ describe('GraphOverlay', () => {
               },
             },
             SUB_PLUGINS_REDUCER,
-            { dataTable: tGridReducer },
             kibanaObservable,
             storage
           )}
@@ -183,6 +187,7 @@ describe('GraphOverlay', () => {
     });
 
     test('it gets index pattern from Timeline data view', () => {
+      const mockedDefaultDataViewPattern = 'default-dataview-pattern';
       render(
         <TestProviders
           store={createStore(
@@ -199,6 +204,10 @@ describe('GraphOverlay', () => {
               },
               sourcerer: {
                 ...mockGlobalState.sourcerer,
+                defaultDataView: {
+                  ...mockGlobalState.sourcerer.defaultDataView,
+                  patternList: [mockedDefaultDataViewPattern],
+                },
                 sourcererScopes: {
                   ...mockGlobalState.sourcerer.sourcererScopes,
                   [SourcererScopeName.timeline]: {
@@ -209,7 +218,6 @@ describe('GraphOverlay', () => {
               },
             },
             SUB_PLUGINS_REDUCER,
-            { dataTable: tGridReducer },
             kibanaObservable,
             storage
           )}
@@ -218,7 +226,10 @@ describe('GraphOverlay', () => {
         </TestProviders>
       );
 
-      expect(useStateSyncingActionsMock.mock.calls[0][0].indices).toEqual(mockIndexNames.sort());
+      expect(useStateSyncingActionsMock.mock.calls[0][0].indices).toEqual([
+        ...mockIndexNames.sort(),
+        mockedDefaultDataViewPattern,
+      ]);
     });
 
     test('it renders session view controls', () => {
@@ -249,7 +260,6 @@ describe('GraphOverlay', () => {
               },
             },
             SUB_PLUGINS_REDUCER,
-            { dataTable: tGridReducer },
             kibanaObservable,
             storage
           )}
@@ -291,7 +301,6 @@ describe('GraphOverlay', () => {
               },
             },
             SUB_PLUGINS_REDUCER,
-            { dataTable: tGridReducer },
             kibanaObservable,
             storage
           )}

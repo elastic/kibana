@@ -8,6 +8,7 @@ import React from 'react';
 import { AppContextTestRender, createAppRootMockRenderer } from '../../test';
 import { ProcessEvent } from '../../../common/types/process_tree';
 import { TTYPlayerControls, TTYPlayerControlsDeps } from '.';
+import { TTYPlayerLineMarkerType } from './tty_player_controls_markers';
 
 const MOCK_PROCESS_EVENT_START: ProcessEvent = {
   process: {
@@ -100,11 +101,11 @@ describe('TTYPlayerControls component', () => {
     expect(props.onSeekLine).toHaveBeenCalledWith(9);
   });
 
-  it('render output markers', async () => {
+  it('render process_changed markers', async () => {
     renderResult = mockedContext.render(<TTYPlayerControls {...props} />);
     expect(
       renderResult.queryAllByRole('button', {
-        name: 'output',
+        name: TTYPlayerLineMarkerType.ProcessChanged,
       })
     ).toHaveLength(props.processStartMarkers.length);
   });
@@ -115,12 +116,10 @@ describe('TTYPlayerControls component', () => {
         event: {
           process: {
             ...MOCK_PROCESS_EVENT_MIDDLE,
-            io: {
-              max_bytes_per_process_exceeded: true,
-            },
           },
         },
         line: 2,
+        maxBytesExceeded: true,
       },
       { event: MOCK_PROCESS_EVENT_END, line: 4 },
     ];
@@ -129,12 +128,12 @@ describe('TTYPlayerControls component', () => {
     );
     expect(
       renderResult.queryAllByRole('button', {
-        name: 'output',
+        name: TTYPlayerLineMarkerType.ProcessChanged,
       })
     ).toHaveLength(2);
     expect(
       renderResult.queryAllByRole('button', {
-        name: 'data_limited',
+        name: TTYPlayerLineMarkerType.ProcessDataLimitReached,
       })
     ).toHaveLength(1);
   });

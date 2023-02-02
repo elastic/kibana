@@ -66,6 +66,7 @@ const alert = {
     end: '2020-01-01T03:00:00.000Z',
     duration: '2343252346',
   },
+  flapping: false,
 };
 
 const action = {
@@ -79,7 +80,7 @@ describe('AlertingEventLogger', () => {
   let alertingEventLogger: AlertingEventLogger;
 
   beforeAll(() => {
-    jest.useFakeTimers('modern');
+    jest.useFakeTimers();
     jest.setSystemTime(new Date(mockNow));
   });
 
@@ -858,6 +859,45 @@ describe('AlertingEventLogger', () => {
 
       expect(alertingEventLogger.getEvent()).toEqual(loggedEvent);
       expect(eventLogger.logEvent).toHaveBeenCalledWith(loggedEvent);
+    });
+
+    test('overwrites the message when the final status is error', () => {
+      alertingEventLogger.initialize(context);
+      alertingEventLogger.start();
+      alertingEventLogger.setExecutionSucceeded('success message');
+
+      expect(alertingEventLogger.getEvent()!.message).toBe('success message');
+
+      alertingEventLogger.done({
+        status: {
+          status: 'error',
+          lastExecutionDate: new Date(),
+          error: { reason: RuleExecutionStatusErrorReasons.Execute, message: 'failed execution' },
+        },
+      });
+
+      expect(alertingEventLogger.getEvent()!.message).toBe('test:123: execution failed');
+    });
+
+    test('does not overwrites the message when there is already a failure message', () => {
+      alertingEventLogger.initialize(context);
+      alertingEventLogger.start();
+      alertingEventLogger.setExecutionFailed('first failure message', 'failure error message');
+
+      expect(alertingEventLogger.getEvent()!.message).toBe('first failure message');
+
+      alertingEventLogger.done({
+        status: {
+          status: 'error',
+          lastExecutionDate: new Date(),
+          error: {
+            reason: RuleExecutionStatusErrorReasons.Execute,
+            message: 'second failure execution',
+          },
+        },
+      });
+
+      expect(alertingEventLogger.getEvent()!.message).toBe('first failure message');
     });
   });
 });

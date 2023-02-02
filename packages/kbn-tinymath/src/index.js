@@ -9,7 +9,7 @@
 const { get } = require('lodash');
 const memoizeOne = require('memoize-one');
 const { functions: includedFunctions } = require('./functions');
-const { parse: parseFn } = require('../grammar/built_grammar.js');
+const { parse: parseFn } = require('./grammar.peggy');
 
 function parse(input, options) {
   if (input == null) {

@@ -8,17 +8,33 @@
 import { mapValues } from 'lodash';
 import { createTestConfig, CreateTestConfig } from '../common/config';
 
+const apmDebugLogger = {
+  name: 'plugins.apm',
+  level: 'debug',
+  appenders: ['console'],
+};
+
 const apmFtrConfigs = {
   basic: {
     license: 'basic' as const,
+    kibanaConfig: {
+      'xpack.apm.forceSyntheticSource': 'true',
+      'logging.loggers': [apmDebugLogger],
+    },
   },
   trial: {
     license: 'trial' as const,
+    kibanaConfig: {
+      'xpack.apm.forceSyntheticSource': 'true',
+      'logging.loggers': [apmDebugLogger],
+    },
   },
   rules: {
     license: 'trial' as const,
     kibanaConfig: {
       'xpack.ruleRegistry.write.enabled': 'true',
+      'xpack.apm.forceSyntheticSource': 'true',
+      'logging.loggers': [apmDebugLogger],
     },
   },
 };

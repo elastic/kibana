@@ -8,7 +8,7 @@ Object {
         Object {
           "columnId": "metric-col-id",
           "palette": Array [],
-          "triggerIcon": "colorBy",
+          "triggerIconType": "colorBy",
         },
       ],
       "dataTestSubj": "lnsMetric_primaryMetricDimensionPanel",
@@ -20,6 +20,7 @@ Object {
       },
       "groupId": "metric",
       "groupLabel": "Primary metric",
+      "isMetricDimension": true,
       "paramEditorCustomProps": Object {
         "headingLabel": "Value",
       },
@@ -41,6 +42,7 @@ Object {
       },
       "groupId": "secondaryMetric",
       "groupLabel": "Secondary metric",
+      "isMetricDimension": true,
       "paramEditorCustomProps": Object {
         "headingLabel": "Value",
       },
@@ -73,7 +75,7 @@ Object {
       "accessors": Array [
         Object {
           "columnId": "breakdown-col-id",
-          "triggerIcon": "aggregate",
+          "triggerIconType": "aggregate",
         },
       ],
       "dataTestSubj": "lnsMetric_breakdownByDimensionPanel",

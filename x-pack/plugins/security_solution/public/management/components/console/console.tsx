@@ -105,7 +105,15 @@ const ConsoleWindow = styled.div`
 `;
 
 export const Console = memo<ConsoleProps>(
-  ({ prompt, commands, HelpComponent, TitleComponent, managedKey, ...commonProps }) => {
+  ({
+    prompt,
+    commands,
+    HelpComponent,
+    TitleComponent,
+    storagePrefix,
+    managedKey,
+    ...commonProps
+  }) => {
     const scrollingViewport = useRef<HTMLDivElement | null>(null);
     const inputFocusRef: CommandInputProps['focusRef'] = useRef(null);
     const getTestId = useTestIdGenerator(commonProps['data-test-subj']);
@@ -145,6 +153,7 @@ export const Console = memo<ConsoleProps>(
         managedKey={managedKey}
         HelpComponent={HelpComponent}
         dataTestSubj={commonProps['data-test-subj']}
+        storagePrefix={storagePrefix}
       >
         <ConsoleWindow {...commonProps}>
           <EuiFlexGroup className="layout" gutterSize="none" responsive={false}>

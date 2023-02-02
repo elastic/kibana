@@ -60,7 +60,7 @@ export const ChartPanel: React.FC<ChartPanelProps> = ({
 
   return (
     <EuiPanel hasBorder={hasBorder} hasShadow={false} data-test-subj="chart-panel">
-      <EuiFlexGroup direction="column" gutterSize="none" style={{ height: '100%' }}>
+      <EuiFlexGroup direction="column" gutterSize="m" style={{ height: '100%' }}>
         <EuiFlexItem grow={false}>
           {title && (
             <EuiTitle size="xs">

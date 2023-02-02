@@ -52,6 +52,7 @@ exports[`it renders without crashing 1`] = `
             "monitor",
           ]
         }
+        editable={true}
         onChange={[Function]}
         role={
           Object {
@@ -102,7 +103,6 @@ exports[`it renders without crashing 1`] = `
     <EuiFormRow
       describedByIds={Array []}
       display="row"
-      fullWidth={false}
       hasChildLabel={true}
       hasEmptyLabelSpace={true}
       labelType="label"
@@ -170,6 +170,7 @@ exports[`it renders without crashing 1`] = `
         "index",
       ]
     }
+    editable={true}
     indexPatterns={Array []}
     indicesAPIClient={
       Object {
@@ -207,8 +208,10 @@ exports[`it renders without crashing 1`] = `
   />
   <EuiHorizontalRule />
   <EuiButton
+    color="primary"
     iconType="plusInCircle"
     onClick={[Function]}
+    size="m"
   >
     <FormattedMessage
       defaultMessage="Add index privilege"

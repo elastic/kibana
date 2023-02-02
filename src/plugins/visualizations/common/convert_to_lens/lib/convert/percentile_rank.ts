@@ -50,6 +50,7 @@ const getPercent = (
 
 export const convertToPercentileRankColumn = (
   {
+    visType,
     agg,
     dataView,
   }: CommonColumnConverterArgs<METRIC_TYPES.SINGLE_PERCENTILE_RANK | METRIC_TYPES.PERCENTILE_RANKS>,
@@ -69,7 +70,7 @@ export const convertToPercentileRankColumn = (
   }
 
   const field = dataView.getFieldByName(fieldName);
-  if (!isFieldValid(field, SUPPORTED_METRICS[agg.aggType])) {
+  if (!isFieldValid(visType, field, SUPPORTED_METRICS[agg.aggType])) {
     return null;
   }
 

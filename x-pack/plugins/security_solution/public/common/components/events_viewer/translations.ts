@@ -24,3 +24,10 @@ export const UNIT = (totalCount: number) =>
 export const ACTIONS = i18n.translate('xpack.securitySolution.eventsViewer.actionsColumnLabel', {
   defaultMessage: 'Actions',
 });
+
+export const ERROR_TIMELINE_EVENTS = i18n.translate(
+  'xpack.securitySolution.eventsViewer.timelineEvents.errorSearchDescription',
+  {
+    defaultMessage: `An error has occurred on timeline events search`,
+  }
+);

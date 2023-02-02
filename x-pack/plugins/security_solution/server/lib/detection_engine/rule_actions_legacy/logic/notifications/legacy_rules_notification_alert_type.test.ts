@@ -8,6 +8,7 @@
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import type { RuleExecutorServicesMock } from '@kbn/alerting-plugin/server/mocks';
 import { alertsMock } from '@kbn/alerting-plugin/server/mocks';
+import { DEFAULT_FLAPPING_SETTINGS } from '@kbn/alerting-plugin/common';
 
 import { getRuleMock } from '../../../routes/__mocks__/request_responses';
 // eslint-disable-next-line no-restricted-imports
@@ -39,19 +40,15 @@ describe('legacyRules_notification_alert_type', () => {
     logger = loggingSystemMock.createLogger();
 
     payload = {
-      alertId: '1111',
       executionId: 'b33f65d7-b33f-4aae-8d20-c93613dec9f9',
       services: alertServices,
       params: { ruleAlertId: '2222' },
       state: {},
       spaceId: '',
-      name: 'name',
-      tags: [],
       startedAt: new Date('2019-12-14T16:40:33.400Z'),
       previousStartedAt: new Date('2019-12-13T16:40:33.400Z'),
-      createdBy: 'elastic',
-      updatedBy: 'elastic',
       rule: {
+        id: '1111',
         name: 'name',
         tags: [],
         consumer: 'foo',
@@ -71,6 +68,7 @@ describe('legacyRules_notification_alert_type', () => {
         notifyWhen: null,
       },
       logger,
+      flappingSettings: DEFAULT_FLAPPING_SETTINGS,
     };
 
     alert = legacyRulesNotificationAlertType({

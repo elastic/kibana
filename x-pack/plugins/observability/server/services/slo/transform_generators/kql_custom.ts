@@ -5,15 +5,11 @@
  * 2.0.
  */
 
-import {
-  AggregationsCalendarInterval,
-  MappingRuntimeFieldType,
-  TransformPutTransformRequest,
-} from '@elastic/elasticsearch/lib/api/types';
+import { TransformPutTransformRequest } from '@elastic/elasticsearch/lib/api/types';
 import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
+import { kqlCustomIndicatorSchema, timeslicesBudgetingMethodSchema } from '@kbn/slo-schema';
 
 import { InvalidTransformError } from '../../../errors';
-import { kqlCustomIndicatorSchema } from '../../../types/schema';
 import { getSLOTransformTemplate } from '../../../assets/transform_templates/slo_transform_template';
 import { TransformGenerator } from '.';
 import {
@@ -21,9 +17,9 @@ import {
   SLO_INGEST_PIPELINE_NAME,
   getSLOTransformId,
 } from '../../../assets/constants';
-import { KQLCustomIndicator, SLO } from '../../../types/models';
+import { KQLCustomIndicator, SLO } from '../../../domain/models';
 
-export class KQLCustomTransformGenerator implements TransformGenerator {
+export class KQLCustomTransformGenerator extends TransformGenerator {
   public getTransformParams(slo: SLO): TransformPutTransformRequest {
     if (!kqlCustomIndicatorSchema.is(slo.indicator)) {
       throw new InvalidTransformError(`Cannot handle SLO of indicator type: ${slo.indicator.type}`);
@@ -33,8 +29,9 @@ export class KQLCustomTransformGenerator implements TransformGenerator {
       this.buildTransformId(slo),
       this.buildSource(slo, slo.indicator),
       this.buildDestination(),
-      this.buildGroupBy(),
-      this.buildAggregations(slo, slo.indicator)
+      this.buildCommonGroupBy(slo),
+      this.buildAggregations(slo, slo.indicator),
+      this.buildSettings(slo)
     );
   }
 
@@ -43,23 +40,10 @@ export class KQLCustomTransformGenerator implements TransformGenerator {
   }
 
   private buildSource(slo: SLO, indicator: KQLCustomIndicator) {
-    const filter = getElastichsearchQueryOrThrow(indicator.params.query_filter);
+    const filter = getElastichsearchQueryOrThrow(indicator.params.filter);
     return {
       index: indicator.params.index,
-      runtime_mappings: {
-        'slo.id': {
-          type: 'keyword' as MappingRuntimeFieldType,
-          script: {
-            source: `emit('${slo.id}')`,
-          },
-        },
-        'slo.revision': {
-          type: 'long' as MappingRuntimeFieldType,
-          script: {
-            source: `emit(${slo.revision})`,
-          },
-        },
-      },
+      runtime_mappings: this.buildCommonRuntimeMappings(slo),
       query: filter,
     };
   }
@@ -71,30 +55,10 @@ export class KQLCustomTransformGenerator implements TransformGenerator {
     };
   }
 
-  private buildGroupBy() {
-    return {
-      'slo.id': {
-        terms: {
-          field: 'slo.id',
-        },
-      },
-      'slo.revision': {
-        terms: {
-          field: 'slo.revision',
-        },
-      },
-      '@timestamp': {
-        date_histogram: {
-          field: '@timestamp',
-          calendar_interval: '1m' as AggregationsCalendarInterval,
-        },
-      },
-    };
-  }
-
   private buildAggregations(slo: SLO, indicator: KQLCustomIndicator) {
-    const numerator = getElastichsearchQueryOrThrow(indicator.params.numerator);
-    const denominator = getElastichsearchQueryOrThrow(indicator.params.denominator);
+    const numerator = getElastichsearchQueryOrThrow(indicator.params.good);
+    const denominator = getElastichsearchQueryOrThrow(indicator.params.total);
+
     return {
       'slo.numerator': {
         filter: numerator,
@@ -102,6 +66,17 @@ export class KQLCustomTransformGenerator implements TransformGenerator {
       'slo.denominator': {
         filter: denominator,
       },
+      ...(timeslicesBudgetingMethodSchema.is(slo.budgetingMethod) && {
+        'slo.isGoodSlice': {
+          bucket_script: {
+            buckets_path: {
+              goodEvents: 'slo.numerator>_count',
+              totalEvents: 'slo.denominator>_count',
+            },
+            script: `params.goodEvents / params.totalEvents >= ${slo.objective.timesliceTarget} ? 1 : 0`,
+          },
+        },
+      }),
     };
   }
 }

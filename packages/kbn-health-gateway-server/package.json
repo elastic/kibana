@@ -1,0 +1,10 @@
+{
+  "name": "@kbn/health-gateway-server",
+  "private": true,
+  "version": "1.0.0",
+  "author": "Kibana Core",
+  "license": "SSPL-1.0 OR Elastic License 2.0",
+  "scripts": {
+    "start": "node -r '@kbn/babel-register/install' ./scripts/init"
+  }
+}

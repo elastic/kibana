@@ -58,7 +58,7 @@ describe('Last Event Time Stat', () => {
       </TestProviders>
     );
     expect(wrapper.find(LastEventTime).html()).toBe(
-      'Last event: <span class="euiToolTipAnchor">20 hours ago</span>'
+      'Last event: <span class="euiToolTipAnchor css-jcaat8-euiToolTipAnchor-inlineBlock">20 hours ago</span>'
     );
   });
   test('Bad date time string', async () => {

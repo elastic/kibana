@@ -161,7 +161,7 @@ export const ExplorationPageWrapper: FC<Props> = ({
 
   return (
     <>
-      {typeof jobConfig?.description !== 'undefined' && (
+      {typeof jobConfig?.description !== 'undefined' && jobConfig?.description !== '' && (
         <>
           <EuiText>{jobConfig?.description}</EuiText>
           <EuiSpacer size="m" />
@@ -225,6 +225,7 @@ export const ExplorationPageWrapper: FC<Props> = ({
           <ExpandableSectionSplom
             fields={scatterplotFieldOptions}
             index={jobConfig?.dest.index}
+            indexPattern={indexPattern}
             color={
               jobType === ANALYSIS_CONFIG_TYPE.REGRESSION ||
               jobType === ANALYSIS_CONFIG_TYPE.CLASSIFICATION

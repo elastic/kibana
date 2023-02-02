@@ -12,16 +12,16 @@ import {
   AGENT_NAME,
   SERVICE_ENVIRONMENT,
   SERVICE_NAME,
-} from '../../../../common/elasticsearch_fieldnames';
+} from '../../../../common/es_fields/apm';
 import { environmentQuery } from '../../../../common/utils/environment_query';
-import { Setup } from '../../../lib/helpers/setup_request';
 import { serviceGroupQuery } from '../../../lib/service_group_query';
 import { ServiceGroup } from '../../../../common/service_groups';
 import { RandomSampler } from '../../../lib/helpers/get_random_sampler';
+import { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
 
 export async function getServicesFromErrorAndMetricDocuments({
   environment,
-  setup,
+  apmEventClient,
   maxNumServices,
   kuery,
   start,
@@ -29,7 +29,7 @@ export async function getServicesFromErrorAndMetricDocuments({
   serviceGroup,
   randomSampler,
 }: {
-  setup: Setup;
+  apmEventClient: APMEventClient;
   environment: string;
   maxNumServices: number;
   kuery: string;
@@ -38,8 +38,6 @@ export async function getServicesFromErrorAndMetricDocuments({
   serviceGroup: ServiceGroup | null;
   randomSampler: RandomSampler;
 }) {
-  const { apmEventClient } = setup;
-
   const response = await apmEventClient.search(
     'get_services_from_error_and_metric_documents',
     {
@@ -89,15 +87,18 @@ export async function getServicesFromErrorAndMetricDocuments({
     }
   );
 
-  return (
-    response.aggregations?.sample.services.buckets.map((bucket) => {
-      return {
-        serviceName: bucket.key as string,
-        environments: bucket.environments.buckets.map(
-          (envBucket) => envBucket.key as string
-        ),
-        agentName: bucket.latest.top[0].metrics[AGENT_NAME] as AgentName,
-      };
-    }) ?? []
-  );
+  return {
+    services:
+      response.aggregations?.sample.services.buckets.map((bucket) => {
+        return {
+          serviceName: bucket.key as string,
+          environments: bucket.environments.buckets.map(
+            (envBucket) => envBucket.key as string
+          ),
+          agentName: bucket.latest.top[0].metrics[AGENT_NAME] as AgentName,
+        };
+      }) ?? [],
+    maxServiceCountExceeded:
+      (response.aggregations?.sample.services.sum_other_doc_count ?? 0) > 0,
+  };
 }

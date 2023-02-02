@@ -45,6 +45,7 @@ export { packagePolicyService } from './package_policy';
 export { outputService } from './output';
 export { downloadSourceService } from './download_source';
 export { settingsService };
+export { dataStreamService } from './data_streams';
 
 // Plugin services
 export { appContextService } from './app_context';
@@ -63,4 +64,6 @@ export type { PackageService, PackageClient } from './epm';
 // Fleet server policy config
 export { migrateSettingsToFleetServerHost } from './fleet_server_host';
 
-export { FleetUsageSender } from './fleet_usage_sender';
+export { FleetUsageSender } from './telemetry/fleet_usage_sender';
+
+export { checkAllowedPackages } from './check_allowed_packages';

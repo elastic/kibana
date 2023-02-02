@@ -27,6 +27,7 @@ describe('AnalyticsNoDataPageComponent', () => {
         <AnalyticsNoDataPage
           onDataViewCreated={onDataViewCreated}
           kibanaGuideDocLink={'http://www.test.com'}
+          showPlainSpinner={false}
         />
       </AnalyticsNoDataPageProvider>
     );
@@ -41,5 +42,23 @@ describe('AnalyticsNoDataPageComponent', () => {
     expect(noDataConfig.logo).toEqual('logoKibana');
     expect(noDataConfig.docsLink).toEqual('http://www.test.com');
     expect(noDataConfig.action.elasticAgent).not.toBeNull();
+  });
+
+  it('allows ad-hoc data view creation', async () => {
+    const component = mountWithIntl(
+      <AnalyticsNoDataPageProvider {...services}>
+        <AnalyticsNoDataPage
+          onDataViewCreated={onDataViewCreated}
+          kibanaGuideDocLink={'http://www.test.com'}
+          allowAdHocDataView={true}
+          showPlainSpinner={false}
+        />
+      </AnalyticsNoDataPageProvider>
+    );
+
+    await act(() => new Promise(setImmediate));
+
+    expect(component.find(KibanaNoDataPage).length).toBe(1);
+    expect(component.find(KibanaNoDataPage).props().allowAdHocDataView).toBe(true);
   });
 });

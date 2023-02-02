@@ -146,9 +146,9 @@ export abstract class SubActionConnector<Config, Secrets> {
           `Request to external service failed. Connector Id: ${this.connector.id}. Connector type: ${this.connector.type}. Method: ${error.config.method}. URL: ${error.config.url}`
         );
 
-        const errorMessage = `Status code: ${error.status}. Message: ${this.getResponseErrorMessage(
-          error
-        )}`;
+        const errorMessage = `Status code: ${
+          error.status ?? error.response?.status
+        }. Message: ${this.getResponseErrorMessage(error)}`;
         throw new Error(errorMessage);
       }
 

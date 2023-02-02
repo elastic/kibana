@@ -10,6 +10,7 @@ import type { DraggableLocation } from 'react-beautiful-dnd';
 import type { Dispatch } from 'redux';
 
 import { updateProviders } from '../../../store/timeline/actions';
+import { isStringOrNumberArray } from '../helpers';
 
 import type { DataProvider, DataProvidersAnd } from './data_provider';
 
@@ -341,4 +342,16 @@ export const addContentToTimeline = ({
       timelineId,
     });
   }
+};
+
+export const getDisplayValue = (
+  value: string | number | Array<string | number>
+): string | number => {
+  if (isStringOrNumberArray(value)) {
+    if (value.length) {
+      return `( ${value.join(' OR ')} )`;
+    }
+    return '';
+  }
+  return value;
 };

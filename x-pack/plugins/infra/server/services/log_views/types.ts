@@ -30,7 +30,7 @@ export interface LogViewsServiceStartDeps {
 }
 
 export interface LogViewsServiceSetup {
-  defineInternalLogView(logViewId: string, logViewAttributes: LogViewAttributes): void;
+  defineInternalLogView(logViewId: string, logViewAttributes: Partial<LogViewAttributes>): void;
 }
 
 export interface LogViewsServiceStart {
@@ -46,5 +46,5 @@ export interface ILogViewsClient {
   getLogView(logViewId: string): Promise<LogView>;
   getResolvedLogView(logViewId: string): Promise<ResolvedLogView>;
   putLogView(logViewId: string, logViewAttributes: Partial<LogViewAttributes>): Promise<LogView>;
-  resolveLogView(logViewAttributes: LogViewAttributes): Promise<ResolvedLogView>;
+  resolveLogView(logViewId: string, logViewAttributes: LogViewAttributes): Promise<ResolvedLogView>;
 }

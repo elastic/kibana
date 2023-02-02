@@ -43,7 +43,7 @@ export const useUserActionsHandler = (): UseUserActionsHandler => {
     useLensDraftComment();
   const handlerTimeoutId = useRef(0);
   const { isLoadingIds, patchComment } = useUpdateComment();
-  const { deleteComment } = useDeleteComment();
+  const { mutate: deleteComment } = useDeleteComment();
   const [selectedOutlineCommentId, setSelectedOutlineCommentId] = useState('');
   const [manageMarkdownEditIds, setManageMarkdownEditIds] = useState<string[]>([]);
   const refreshCaseViewPage = useRefreshCaseViewPage();

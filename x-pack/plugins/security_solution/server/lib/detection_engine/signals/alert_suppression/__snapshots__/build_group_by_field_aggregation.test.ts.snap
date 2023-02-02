@@ -1,0 +1,46 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`build_group_by_field_aggregation Build Group-by-field aggregation 1`] = `
+Object {
+  "eventGroups": Object {
+    "aggs": Object {
+      "max_timestamp": Object {
+        "max": Object {
+          "field": "kibana.combined_timestamp",
+        },
+      },
+      "min_timestamp": Object {
+        "min": Object {
+          "field": "kibana.combined_timestamp",
+        },
+      },
+      "topHits": Object {
+        "top_hits": Object {
+          "size": 1,
+          "sort": Array [
+            Object {
+              "kibana.combined_timestamp": Object {
+                "order": "asc",
+                "unmapped_type": "date",
+              },
+            },
+          ],
+        },
+      },
+    },
+    "composite": Object {
+      "size": 100,
+      "sources": Array [
+        Object {
+          "host.name": Object {
+            "terms": Object {
+              "field": "host.name",
+              "missing_bucket": true,
+            },
+          },
+        },
+      ],
+    },
+  },
+}
+`;

@@ -7,18 +7,21 @@
  */
 
 import type { DataView } from '@kbn/data-views-plugin/common';
-import { Series, Panel } from '../../../../common/types';
+import { Panel } from '../../../../common/types';
 import { getFieldsForTerms } from '../../../../common/fields_utils';
 import {
   Column,
   convertToFiltersColumn,
   convertToDateHistogramColumn,
   convertToTermsColumn,
+  TermsSeries,
+  FiltersSeries,
+  DateHistogramSeries,
 } from '../convert';
 import { getValidColumns } from './columns';
 
 export const isSplitWithDateHistogram = (
-  series: Series,
+  series: TermsSeries,
   splitFields: string[],
   dataView: DataView
 ) => {
@@ -39,27 +42,49 @@ export const isSplitWithDateHistogram = (
   return false;
 };
 
+const isFiltersSeries = (
+  series: DateHistogramSeries | TermsSeries | FiltersSeries
+): series is FiltersSeries => {
+  return series.split_mode === 'filters' || series.split_mode === 'filter';
+};
+
+const isTermsSeries = (
+  series: DateHistogramSeries | TermsSeries | FiltersSeries
+): series is TermsSeries => {
+  return series.split_mode === 'terms';
+};
+
+const isDateHistogramSeries = (
+  series: DateHistogramSeries | TermsSeries | FiltersSeries,
+  isDateHistogram: boolean
+): series is DateHistogramSeries => {
+  return isDateHistogram && series.split_mode === 'terms';
+};
+
 export const getBucketsColumns = (
-  model: Panel,
-  series: Series,
+  model: Panel | undefined,
+  series: DateHistogramSeries | TermsSeries | FiltersSeries,
   columns: Column[],
   dataView: DataView,
-  isSplit: boolean = false
+  isSplit: boolean = false,
+  label?: string,
+  includeEmptyRowsForDateHistogram: boolean = true
 ) => {
-  if (series.split_mode === 'filters' || series.split_mode === 'filter') {
+  if (isFiltersSeries(series)) {
     const filterColumn = convertToFiltersColumn(series, true);
     return getValidColumns([filterColumn]);
   }
-  if (series.split_mode === 'terms') {
+  if (isTermsSeries(series)) {
     const splitFields = getFieldsForTerms(series.terms_field);
     const isDateHistogram = isSplitWithDateHistogram(series, splitFields, dataView);
     if (isDateHistogram === null) {
       return null;
     }
-    if (isDateHistogram) {
+    if (isDateHistogramSeries(series, isDateHistogram)) {
       const dateHistogramColumn = convertToDateHistogramColumn(model, series, dataView, {
         fieldName: splitFields[0],
         isSplit: true,
+        includeEmptyRows: includeEmptyRowsForDateHistogram,
       });
       return getValidColumns(dateHistogramColumn);
     }
@@ -73,7 +98,8 @@ export const getBucketsColumns = (
       series,
       columns,
       dataView,
-      isSplit
+      isSplit,
+      label
     );
     return getValidColumns(termsColumn);
   }

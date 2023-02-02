@@ -6,4 +6,3 @@
  */
 
 export * from './alerts_page';
-export * from './state_container';

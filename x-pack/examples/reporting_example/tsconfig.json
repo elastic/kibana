@@ -1,7 +1,7 @@
 {
   "extends": "../../../tsconfig.base.json",
   "compilerOptions": {
-    "outDir": "./target/types"
+    "outDir": "target/types"
   },
   "include": [
     "index.ts",
@@ -11,13 +11,18 @@
     "common/**/*.ts",
     "../../../typings/**/*"
   ],
-  "exclude": [],
-  "references": [
-    { "path": "../../../src/core/tsconfig.json" },
-    { "path": "../../../src/plugins/kibana_react/tsconfig.json" },
-    { "path": "../../../src/plugins/navigation/tsconfig.json" },
-    { "path": "../../../src/plugins/screenshot_mode/tsconfig.json" },
-    { "path": "../../../examples/developer_examples/tsconfig.json" },
-    { "path": "../../plugins/reporting/tsconfig.json" }
+  "exclude": [
+    "target/**/*",
+  ],
+  "kbn_references": [
+    "@kbn/core",
+    "@kbn/kibana-react-plugin",
+    "@kbn/navigation-plugin",
+    "@kbn/screenshot-mode-plugin",
+    "@kbn/developer-examples-plugin",
+    "@kbn/reporting-plugin",
+    "@kbn/share-plugin",
+    "@kbn/i18n-react",
+    "@kbn/utility-types",
   ]
 }

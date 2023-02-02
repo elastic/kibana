@@ -59,6 +59,7 @@ export interface TaskInfo {
 
 export interface ExecuteOptions<Source = unknown> {
   actionId: string;
+  actionExecutionId: string;
   isEphemeral?: boolean;
   request: KibanaRequest;
   params: Record<string, unknown>;
@@ -100,15 +101,10 @@ export class ActionExecutor {
     executionId,
     consumer,
     relatedSavedObjects,
+    actionExecutionId,
   }: ExecuteOptions): Promise<ActionTypeExecutorResult<unknown>> {
     if (!this.isInitialized) {
       throw new Error('ActionExecutor not initialized');
-    }
-
-    if (!this.isESOCanEncrypt) {
-      throw new Error(
-        `Unable to execute action because the Encrypted Saved Objects plugin is missing encryption key. Please set xpack.encryptedSavedObjects.encryptionKey in the kibana.yml or use the bin/kibana-encryption-keys command.`
-      );
     }
 
     return withSpan(
@@ -135,11 +131,14 @@ export class ActionExecutor {
         const namespace = spaceId && spaceId !== 'default' ? { namespace: spaceId } : {};
 
         const actionInfo = await getActionInfoInternal(
-          await getActionsClientWithRequest(request, source),
+          getActionsClientWithRequest,
+          request,
+          this.isESOCanEncrypt,
           encryptedSavedObjectsClient,
           preconfiguredActions,
           actionId,
-          namespace.namespace
+          namespace.namespace,
+          source
         );
 
         const { actionTypeId, name, config, secrets } = actionInfo;
@@ -192,6 +191,9 @@ export class ActionExecutor {
             },
           ],
           relatedSavedObjects,
+          name,
+          actionExecutionId,
+          isPreconfigured: this.actionInfo.isPreconfigured,
         });
 
         eventLogger.startTiming(event);
@@ -300,8 +302,10 @@ export class ActionExecutor {
     executionId,
     taskInfo,
     consumer,
+    actionExecutionId,
   }: {
     actionId: string;
+    actionExecutionId: string;
     request: KibanaRequest;
     taskInfo?: TaskInfo;
     executionId?: string;
@@ -321,11 +325,14 @@ export class ActionExecutor {
     const namespace = spaceId && spaceId !== 'default' ? { namespace: spaceId } : {};
     if (!this.actionInfo || this.actionInfo.actionId !== actionId) {
       this.actionInfo = await getActionInfoInternal(
-        await getActionsClientWithRequest(request, source),
+        getActionsClientWithRequest,
+        request,
+        this.isESOCanEncrypt,
         encryptedSavedObjectsClient,
         preconfiguredActions,
         actionId,
-        namespace.namespace
+        namespace.namespace,
+        source
       );
     }
     const task = taskInfo
@@ -357,6 +364,8 @@ export class ActionExecutor {
         },
       ],
       relatedSavedObjects,
+      actionExecutionId,
+      isPreconfigured: this.actionInfo.isPreconfigured,
     });
 
     eventLogger.logEvent(event);
@@ -369,14 +378,21 @@ interface ActionInfo {
   config: unknown;
   secrets: unknown;
   actionId: string;
+  isPreconfigured?: boolean;
 }
 
-async function getActionInfoInternal(
-  actionsClient: PublicMethodsOf<ActionsClient>,
+async function getActionInfoInternal<Source = unknown>(
+  getActionsClientWithRequest: (
+    request: KibanaRequest,
+    authorizationContext?: ActionExecutionSource<unknown>
+  ) => Promise<PublicMethodsOf<ActionsClient>>,
+  request: KibanaRequest,
+  isESOCanEncrypt: boolean,
   encryptedSavedObjectsClient: EncryptedSavedObjectsClient,
   preconfiguredActions: PreConfiguredAction[],
   actionId: string,
-  namespace: string | undefined
+  namespace: string | undefined,
+  source?: ActionExecutionSource<Source>
 ): Promise<ActionInfo> {
   // check to see if it's a pre-configured action first
   const pcAction = preconfiguredActions.find(
@@ -389,8 +405,17 @@ async function getActionInfoInternal(
       config: pcAction.config,
       secrets: pcAction.secrets,
       actionId,
+      isPreconfigured: true,
     };
   }
+
+  if (!isESOCanEncrypt) {
+    throw new Error(
+      `Unable to execute action because the Encrypted Saved Objects plugin is missing encryption key. Please set xpack.encryptedSavedObjects.encryptionKey in the kibana.yml or use the bin/kibana-encryption-keys command.`
+    );
+  }
+
+  const actionsClient = await getActionsClientWithRequest(request, source);
 
   // if not pre-configured action, should be a saved object
   // ensure user can read the action before processing

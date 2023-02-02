@@ -1,18 +1,18 @@
 {
   "extends": "../../../tsconfig.base.json",
   "compilerOptions": {
-    "outDir": "./target/types",
-    "emitDeclarationOnly": true,
-    "declaration": true,
-    "declarationMap": true
+    "outDir": "target/types",
   },
   "include": [
     "public/**/*",
     "server/**/*",
     "../../../typings/**/*",
   ],
-  "references": [
-    { "path": "../../../src/core/tsconfig.json" },
-    { "path": "../global_search/tsconfig.json" }
+  "kbn_references": [
+    "@kbn/core",
+    "@kbn/global-search-plugin"
+  ],
+  "exclude": [
+    "target/**/*",
   ]
 }

@@ -1242,7 +1242,13 @@
             ],
             "signature": [
               "(state?: T | undefined) => ",
-              "Ast"
+              {
+                "pluginId": "@kbn/interpreter",
+                "scope": "common",
+                "docId": "kibKbnInterpreterPluginApi",
+                "section": "def-common.Ast",
+                "text": "Ast"
+              }
             ],
             "path": "packages/kbn-coloring/src/palettes/types.ts",
             "deprecated": false,

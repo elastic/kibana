@@ -10,7 +10,10 @@ import { ElasticsearchClient } from '@kbn/core/server';
 
 import { formatPipelineName } from '../../../../../../common/ml_inference_pipeline';
 import { ErrorCode } from '../../../../../../common/types/error_codes';
-import type { CreateMlInferencePipelineResponse } from '../../../../../../common/types/pipelines';
+import type {
+  CreateMlInferencePipelineResponse,
+  InferencePipelineInferenceConfig,
+} from '../../../../../../common/types/pipelines';
 import { addSubPipelineToIndexSpecificMlPipeline } from '../../../../../utils/create_ml_inference_pipeline';
 import { getPrefixedInferencePipelineProcessorName } from '../../../../../utils/ml_inference_pipeline_utils';
 import { formatMlPipelineBody } from '../../../../pipelines/create_pipeline_definitions';
@@ -23,6 +26,7 @@ import { formatMlPipelineBody } from '../../../../pipelines/create_pipeline_defi
  * @param modelId model ID selected by the user.
  * @param sourceField The document field that model will read.
  * @param destinationField The document field that the model will write to.
+ * @param inferenceConfig The configuration for the model.
  * @param esClient the Elasticsearch Client to use when retrieving pipeline and model details.
  */
 export const createAndReferenceMlInferencePipeline = async (
@@ -31,6 +35,7 @@ export const createAndReferenceMlInferencePipeline = async (
   modelId: string,
   sourceField: string,
   destinationField: string | null | undefined,
+  inferenceConfig: InferencePipelineInferenceConfig | undefined,
   esClient: ElasticsearchClient
 ): Promise<CreateMlInferencePipelineResponse> => {
   const createPipelineResult = await createMlInferencePipeline(
@@ -38,6 +43,7 @@ export const createAndReferenceMlInferencePipeline = async (
     modelId,
     sourceField,
     destinationField,
+    inferenceConfig,
     esClient
   );
 
@@ -59,6 +65,7 @@ export const createAndReferenceMlInferencePipeline = async (
  * @param modelId model ID selected by the user.
  * @param sourceField The document field that model will read.
  * @param destinationField The document field that the model will write to.
+ * @param inferenceConfig The configuration for the model.
  * @param esClient the Elasticsearch Client to use when retrieving pipeline and model details.
  */
 export const createMlInferencePipeline = async (
@@ -66,6 +73,7 @@ export const createMlInferencePipeline = async (
   modelId: string,
   sourceField: string,
   destinationField: string | null | undefined,
+  inferenceConfig: InferencePipelineInferenceConfig | undefined,
   esClient: ElasticsearchClient
 ): Promise<CreateMlInferencePipelineResponse> => {
   const inferencePipelineGeneratedName = getPrefixedInferencePipelineProcessorName(pipelineName);
@@ -89,6 +97,7 @@ export const createMlInferencePipeline = async (
     modelId,
     sourceField,
     destinationField || formatPipelineName(pipelineName),
+    inferenceConfig,
     esClient
   );
 

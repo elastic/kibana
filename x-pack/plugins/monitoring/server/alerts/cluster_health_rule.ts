@@ -61,7 +61,12 @@ export class ClusterHealthRule extends BaseRule {
     esClient: ElasticsearchClient,
     clusters: AlertCluster[]
   ): Promise<AlertData[]> {
-    const healths = await fetchClusterHealth(esClient, clusters, params.filterQuery);
+    const healths = await fetchClusterHealth(
+      esClient,
+      clusters,
+      params.filterQuery,
+      params.duration
+    );
     return healths.map((clusterHealth) => {
       const shouldFire = clusterHealth.health !== AlertClusterHealthType.Green;
       const severity =

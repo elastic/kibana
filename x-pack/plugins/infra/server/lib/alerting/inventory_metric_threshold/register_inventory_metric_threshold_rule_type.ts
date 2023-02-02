@@ -24,6 +24,7 @@ import {
 } from '../../../../common/inventory_models/types';
 import { InfraBackendLibs } from '../../infra_types';
 import {
+  alertDetailUrlActionVariableDescription,
   alertStateActionVariableDescription,
   cloudActionVariableDescription,
   containerActionVariableDescription,
@@ -32,6 +33,8 @@ import {
   labelsActionVariableDescription,
   metricActionVariableDescription,
   orchestratorActionVariableDescription,
+  originalAlertStateActionVariableDescription,
+  originalAlertStateWasActionVariableDescription,
   reasonActionVariableDescription,
   tagsActionVariableDescription,
   thresholdActionVariableDescription,
@@ -39,7 +42,11 @@ import {
   valueActionVariableDescription,
   viewInAppUrlActionVariableDescription,
 } from '../common/messages';
-import { oneOfLiterals, validateIsStringElasticsearchJSONFilter } from '../common/utils';
+import {
+  getAlertDetailsPageEnabledForApp,
+  oneOfLiterals,
+  validateIsStringElasticsearchJSONFilter,
+} from '../common/utils';
 import {
   createInventoryMetricThresholdExecutor,
   FIRED_ACTIONS,
@@ -72,6 +79,8 @@ export async function registerMetricInventoryThresholdRuleType(
   alertingPlugin: PluginSetupContract,
   libs: InfraBackendLibs
 ) {
+  const config = libs.getAlertDetailsConfig();
+
   alertingPlugin.registerType({
     id: METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID,
     name: i18n.translate('xpack.infra.metrics.inventory.alertName', {
@@ -102,6 +111,9 @@ export async function registerMetricInventoryThresholdRuleType(
       context: [
         { name: 'group', description: groupActionVariableDescription },
         { name: 'alertState', description: alertStateActionVariableDescription },
+        ...(getAlertDetailsPageEnabledForApp(config, 'metrics')
+          ? [{ name: 'alertDetailsUrl', description: alertDetailUrlActionVariableDescription }]
+          : []),
         { name: 'reason', description: reasonActionVariableDescription },
         { name: 'timestamp', description: timestampActionVariableDescription },
         { name: 'value', description: valueActionVariableDescription },
@@ -114,7 +126,17 @@ export async function registerMetricInventoryThresholdRuleType(
         { name: 'orchestrator', description: orchestratorActionVariableDescription },
         { name: 'labels', description: labelsActionVariableDescription },
         { name: 'tags', description: tagsActionVariableDescription },
+        { name: 'originalAlertState', description: originalAlertStateActionVariableDescription },
+        {
+          name: 'originalAlertStateWasALERT',
+          description: originalAlertStateWasActionVariableDescription,
+        },
+        {
+          name: 'originalAlertStateWasWARNING',
+          description: originalAlertStateWasActionVariableDescription,
+        },
       ],
     },
+    getSummarizedAlerts: libs.metricsRules.createGetSummarizedAlerts(),
   });
 }

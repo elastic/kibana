@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { RasterTileSource } from '@kbn/mapbox-gl';
+import type { RasterTileSource } from '@kbn/mapbox-gl';
+import { ReactElement } from 'react';
 import { DataRequest } from '../../util/data_request';
 import { ITMSSource } from '../tms_source';
 import { DataRequestMeta } from '../../../../common/descriptor_types';
@@ -15,4 +16,6 @@ export interface RasterTileSourceData {
 export interface IRasterSource extends ITMSSource {
   canSkipSourceUpdate(dataRequest: DataRequest, nextRequestMeta: DataRequestMeta): Promise<boolean>;
   isSourceStale(mbSource: RasterTileSource, sourceData: RasterTileSourceData): boolean;
+  hasLegendDetails(): Promise<boolean>;
+  renderLegendDetails(dataRequest: DataRequest | undefined): ReactElement<any> | null;
 }
