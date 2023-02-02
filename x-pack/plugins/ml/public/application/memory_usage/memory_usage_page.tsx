@@ -5,14 +5,15 @@
  * 2.0.
  */
 
-import React, { FC, useState } from 'react';
-import { useTimefilter } from '@kbn/ml-date-picker';
+import React, { FC, useCallback, useState } from 'react';
+import { mlTimefilterRefresh$, useTimefilter } from '@kbn/ml-date-picker';
 import { EuiFlexGroup, EuiFlexItem, EuiTabs, EuiTab } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { NodesList } from './nodes_overview';
 import { MlPageHeader } from '../components/page_header';
 import { JobMemoryTreeMap } from './memory_tree_map';
 import { useIsServerless } from '../contexts/kibana/use_is_serverless';
+import { SavedObjectsWarning } from '../components/saved_objects_warning';
 
 enum TAB {
   NODES,
@@ -23,6 +24,12 @@ export const MemoryUsagePage: FC = () => {
   const serverless = useIsServerless();
   const [selectedTab, setSelectedTab] = useState<TAB>(TAB.NODES);
   useTimefilter({ timeRangeSelector: false, autoRefreshSelector: true });
+
+  const refresh = useCallback(() => {
+    mlTimefilterRefresh$.next({
+      lastRefresh: Date.now(),
+    });
+  }, []);
 
   return (
     <>
@@ -36,6 +43,8 @@ export const MemoryUsagePage: FC = () => {
           </EuiFlexItem>
         </EuiFlexGroup>
       </MlPageHeader>
+
+      <SavedObjectsWarning onCloseFlyout={refresh} />
 
       {serverless ? (
         <JobMemoryTreeMap />
