@@ -87,6 +87,7 @@ function getInvalidSortFieldMessage(
       displayLocations: [
         { id: 'toolbar' },
         { id: 'dimensionButton', dimensionId: columnId },
+        { id: 'visualization' },
         { id: 'embeddableBadge' },
       ],
     };
