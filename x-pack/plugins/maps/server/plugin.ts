@@ -208,13 +208,31 @@ export class MapsPlugin implements Plugin {
       schemas: {
         content: {
           get: {
+            in: {
+              options: schema.maybe(
+                schema.object({
+                  references: schema.maybe(schema.arrayOf(schema.string())),
+                })
+              ),
+            },
             out: {
               result: schema.any(), // This will have to be a proper Maps Saved object schema
             },
           },
           create: {
             in: {
-              data: schema.any(), // This will be a proper schema to create a map
+              data: schema.object({
+                title: schema.string(),
+                description: schema.string(),
+                layerListJSON: schema.string(),
+                mapStateJSON: schema.string(),
+                uiStateJSON: schema.string(),
+              }),
+              options: schema.maybe(
+                schema.object({
+                  references: schema.maybe(schema.arrayOf(schema.string())),
+                })
+              ),
             },
             out: {
               result: schema.any(), // This will be a proper schema of a map created
