@@ -107,7 +107,7 @@ export async function fetchFrequentItemSets(
     field,
   }));
 
-  const FrequentItemSetsAgg: Record<string, estypes.AggregationsAggregationContainer> = {
+  const frequentItemSetsAgg: Record<string, estypes.AggregationsAggregationContainer> = {
     fi: {
       // @ts-expect-error `frequent_item_sets` is not yet part of `AggregationsAggregationContainer`
       frequent_item_sets: {
@@ -127,13 +127,13 @@ export async function fetchFrequentItemSets(
         probability: sampleProbability,
         seed: RANDOM_SAMPLER_SEED,
       },
-      aggs: FrequentItemSetsAgg,
+      aggs: frequentItemSetsAgg,
     },
   };
 
   const esBody = {
     query,
-    aggs: sampleProbability < 1 ? randomSamplerAgg : FrequentItemSetsAgg,
+    aggs: sampleProbability < 1 ? randomSamplerAgg : frequentItemSetsAgg,
     size: 0,
     track_total_hits: true,
   };
@@ -162,17 +162,17 @@ export async function fetchFrequentItemSets(
 
   const totalDocCountFi = (body.hits.total as estypes.SearchTotalHits).value;
 
-  const FrequentItemSets = isRandomSamplerAggregation(body.aggregations)
+  const frequentItemSets = isRandomSamplerAggregation(body.aggregations)
     ? body.aggregations.sample.fi
     : body.aggregations.fi;
 
-  const shape = FrequentItemSets.buckets.length;
+  const shape = frequentItemSets.buckets.length;
   let maximum = shape;
   if (maximum > 50000) {
     maximum = 50000;
   }
 
-  const fiss = FrequentItemSets.buckets;
+  const fiss = frequentItemSets.buckets;
   fiss.length = maximum;
 
   const results: ItemsetResult[] = [];
