@@ -15,17 +15,17 @@ set -x
 
 # sudo apt update
 
-echo "Installing snapd"
+# echo "Installing snapd"
 
-sudo apt install snapd
+# sudo apt install snapd
 
-echo "snap install snapd"
+# echo "snap install snapd"
 
-sudo snap install snapd
+# snap install snapd
 
 echo "Installing multipass"
 
-sudo snap install multipass
+snap install multipass
 
 echo "run tests"
 
