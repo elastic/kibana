@@ -15,16 +15,18 @@ const mapSchema = schema.object({
   uiStateJSON: schema.string(),
 });
 
-const savedObjectOptionsSchema = schema.maybe(
-  schema.object({
-    references: schema.maybe(schema.arrayOf(schema.string())),
-  })
-);
+const savedObjectOptions = {
+  references: schema.maybe(schema.arrayOf(schema.string())),
+};
 
 export const contentSchemas: ContentSchemas = {
   get: {
     in: {
-      options: savedObjectOptionsSchema,
+      options: schema.maybe(
+        schema.object({
+          ...savedObjectOptions,
+        })
+      ),
     },
     out: {
       result: schema.any(), // This will have to be a proper Maps Saved object schema
@@ -33,7 +35,11 @@ export const contentSchemas: ContentSchemas = {
   create: {
     in: {
       data: mapSchema,
-      options: savedObjectOptionsSchema,
+      options: schema.maybe(
+        schema.object({
+          ...savedObjectOptions,
+        })
+      ),
     },
     out: {
       result: schema.any(), // This will be a proper schema of a map created

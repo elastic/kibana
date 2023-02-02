@@ -9,8 +9,7 @@ import { SavedObjectReference } from '@kbn/core/types';
 import type { ResolvedSimpleSavedObject } from '@kbn/core/public';
 import { AttributeService } from '@kbn/embeddable-plugin/public';
 import { checkForDuplicateTitle, OnSaveProps } from '@kbn/saved-objects-plugin/public';
-import { SavedObjectsCreateOptions } from '@kbn/core-saved-objects-api-browser';
-import { CreateIn } from '@kbn/content-management-plugin/common';
+
 import { MapSavedObjectAttributes } from '../common/map_saved_object_type';
 import { MAP_SAVED_OBJECT_TYPE } from '../common/constants';
 import { getMapEmbeddableDisplayName } from '../common/i18n_getters';
@@ -22,6 +21,8 @@ import {
 } from './kibana_services';
 import { extractReferences, injectReferences } from '../common/migrations/references';
 import { MapByValueInput, MapByReferenceInput } from './embeddable/types';
+import type { MapCreateIn, MapGetIn } from '../common/poc_content_management';
+import { MapGetOut, postGet } from './poc_content_management';
 
 export interface SharingSavedObjectProps {
   outcome?: ResolvedSimpleSavedObject['outcome'];
@@ -43,12 +44,6 @@ export type MapAttributeService = AttributeService<
   MapByReferenceInput,
   MapUnwrapMetaInfo
 >;
-
-// --- POC Content management ---
-type MapContentType = 'map';
-
-type MapCreateIn = CreateIn<MapContentType, MapSavedObjectAttributes, SavedObjectsCreateOptions>;
-// --- End POC ---
 
 let mapAttributeService: MapAttributeService | null = null;
 
@@ -83,7 +78,7 @@ export function getMapAttributeService(): MapAttributeService {
             { references }
           )
         : getContentManagement().rpc.create<MapCreateIn>({
-            contentType: 'map',
+            contentType: MAP_SAVED_OBJECT_TYPE,
             data: updatedAttributes,
             options: {
               references,
@@ -102,9 +97,12 @@ export function getMapAttributeService(): MapAttributeService {
         outcome,
         alias_target_id: aliasTargetId,
         alias_purpose: aliasPurpose,
-      } = await getSavedObjectsClient().resolve<MapSavedObjectAttributes>(
-        MAP_SAVED_OBJECT_TYPE,
-        savedObjectId
+      } = await getContentManagement().rpc.get<MapGetIn, MapGetOut>(
+        {
+          contentType: MAP_SAVED_OBJECT_TYPE,
+          id: savedObjectId,
+        },
+        { post: postGet } // Temp hook config to parse the response from RPC
       );
 
       if (savedObject.error) {

@@ -4,37 +4,36 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { ContentStorage } from '@kbn/content-management-plugin/server';
-import type { RequestHandlerContext } from '@kbn/core-http-request-handler-context-server';
-import { SavedObjectsCreateOptions } from '@kbn/core-saved-objects-api-browser';
+import type { ContentStorage, StorageContext } from '@kbn/content-management-plugin/server';
 
 import type { MapSavedObjectAttributes } from '../../common/map_saved_object_type';
+import type { MapGetIn, MapCreateIn, MapContentType } from '../../common/poc_content_management';
 
-const SO_TYPE = 'map';
+const getSavedObjectClientFromRequest = async (ctx: StorageContext) => {
+  if (!ctx.requestHandlerContext) {
+    throw new Error('Storage context.requestHandlerContext missing.');
+  }
+
+  const { savedObjects } = await ctx.requestHandlerContext.core;
+  return savedObjects.client;
+};
+
+const SO_TYPE: MapContentType = 'map';
+
 export class MapsStorage implements ContentStorage {
   constructor() {}
 
-  async get(
-    id: string,
-    options: {
-      requestHandlerContext: RequestHandlerContext;
-    }
-  ): Promise<any> {
-    const { savedObjects } = await options.requestHandlerContext.core;
-    const object = await savedObjects.client.get(SO_TYPE, id);
-    return object;
+  async get(ctx: StorageContext, id: string, options: MapGetIn['options']): Promise<any> {
+    const soClient = await getSavedObjectClientFromRequest(ctx);
+    return soClient.resolve(SO_TYPE, id);
   }
 
   async create(
+    ctx: StorageContext,
     attributes: MapSavedObjectAttributes,
-    options: {
-      requestHandlerContext: RequestHandlerContext;
-    } & Pick<
-      SavedObjectsCreateOptions,
-      'migrationVersion' | 'coreMigrationVersion' | 'references' | 'overwrite'
-    >
+    options: MapCreateIn['options']
   ): Promise<any> {
-    const { migrationVersion, coreMigrationVersion, references, overwrite } = options;
+    const { migrationVersion, coreMigrationVersion, references, overwrite } = options!;
 
     const createOptions = {
       overwrite,
@@ -43,9 +42,7 @@ export class MapsStorage implements ContentStorage {
       references,
     };
 
-    const { savedObjects } = await options.requestHandlerContext.core;
-    const result = await savedObjects.client.create(SO_TYPE, attributes, createOptions);
-
-    return result;
+    const soClient = await getSavedObjectClientFromRequest(ctx);
+    return soClient.create(SO_TYPE, attributes, createOptions);
   }
 }
