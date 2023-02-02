@@ -24,9 +24,12 @@ const scenario: Scenario<ApmFields> = async ({ logger, scenarioOpts }) => {
 
       const BUCKET_SIZE = (MAX_DURATION - MIN_DURATION) / MAX_BUCKETS;
 
-      const instances = lodashRange(0, numServices).flatMap((serviceId) => {
-        const serviceName = `service-${serviceId}`;
+      const serviceRange = [
+        ...lodashRange(0, numServices).map((groupId) => `service-${groupId}`),
+        '_other',
+      ];
 
+      const instances = serviceRange.flatMap((serviceName) => {
         const services = ENVIRONMENTS.map((env) => apm.service(serviceName, env, 'go'));
 
         return lodashRange(0, 2).flatMap((serviceNodeId) =>
