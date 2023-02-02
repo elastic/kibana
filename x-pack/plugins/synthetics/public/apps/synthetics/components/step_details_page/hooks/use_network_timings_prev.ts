@@ -69,12 +69,7 @@ export const useNetworkTimingsPrevious24Hours = (
       index: SYNTHETICS_INDEX_PATTERN,
       body: {
         size: 0,
-        runtime_mappings: {
-          ...runTimeMappings,
-          'synthetics.payload.transfer_size': {
-            type: 'long',
-          },
-        },
+        runtime_mappings: runTimeMappings,
         query: {
           bool: {
             filter: [
@@ -158,11 +153,6 @@ export const useNetworkTimingsPrevious24Hours = (
                   field: SYNTHETICS_TOTAL_TIMINGS,
                 },
               },
-              transferSize: {
-                sum: {
-                  field: 'synthetics.payload.transfer_size',
-                },
-              },
             },
           },
         },
@@ -184,7 +174,6 @@ export const useNetworkTimingsPrevious24Hours = (
   const wait: number[] = [];
   const blocked: number[] = [];
   const ssl: number[] = [];
-  const transferSize: number[] = [];
 
   aggs?.testRuns.buckets.forEach((bucket) => {
     dns.push(bucket.dns.value ?? 0);
@@ -194,7 +183,6 @@ export const useNetworkTimingsPrevious24Hours = (
     wait.push(bucket.wait.value ?? 0);
     blocked.push(bucket.blocked.value ?? 0);
     ssl.push(bucket.ssl.value ?? 0);
-    transferSize.push(bucket.transferSize.value ?? 0);
   });
 
   const timings = {
@@ -205,21 +193,16 @@ export const useNetworkTimingsPrevious24Hours = (
     wait: median(wait),
     blocked: median(blocked),
     ssl: median(ssl),
-    transferSize: median(transferSize),
   };
 
   return {
     loading,
     timings,
-    transferSizePrev: {
-      value: timings.transferSize,
-      label: CONTENT_SIZE_LABEL,
-    },
     timingsWithLabels: getTimingWithLabels(timings),
   };
 };
 
-const median = (arr: number[]): number => {
+export const median = (arr: number[]): number => {
   if (!arr.length) return 0;
   const s = [...arr].sort((a, b) => a - b);
   const mid = Math.floor(s.length / 2);
