@@ -8,6 +8,7 @@
 import type { PackagePolicy, AgentPolicy } from '@kbn/fleet-plugin/common';
 import { CspFinding } from './schemas/csp_finding';
 import { SUPPORTED_CLOUDBEAT_INPUTS, SUPPORTED_POLICY_TEMPLATES } from './constants';
+import { CspRuleTemplateMetadata } from './schemas/csp_rule_template_metadata';
 
 export type Evaluation = 'passed' | 'failed' | 'NA';
 /** number between 1-100 */
