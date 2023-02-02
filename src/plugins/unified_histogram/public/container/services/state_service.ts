@@ -97,11 +97,57 @@ export interface UnifiedHistogramStateOptions {
   initialState: Partial<UnifiedHistogramState> & Pick<UnifiedHistogramState, 'dataView'>;
 }
 
-export type UnifiedHistogramStateService = Omit<ReturnType<typeof createStateService>, 'state$'> & {
+/**
+ * The service used to manage the state of the container
+ */
+export interface UnifiedHistogramStateService {
+  /**
+   * The current state of the container
+   */
   state$: Observable<UnifiedHistogramState>;
-};
+  /**
+   * Sets the current chart hidden state
+   */
+  setChartHidden: (chartHidden: boolean) => void;
+  /**
+   * Sets the current top panel height
+   */
+  setTopPanelHeight: (topPanelHeight: number | undefined) => void;
+  /**
+   * Sets the current breakdown field
+   */
+  setBreakdownField: (breakdownField: string | undefined) => void;
+  /**
+   * Sets the current time interval
+   */
+  setTimeInterval: (timeInterval: string) => void;
+  /**
+   * Sets the current request parameters
+   */
+  setRequestParams: (requestParams: {
+    dataView?: DataView;
+    filters?: Filter[];
+    query?: Query | AggregateQuery;
+    requestAdapter?: RequestAdapter | undefined;
+    searchSessionId?: string | undefined;
+    timeRange?: TimeRange;
+  }) => void;
+  /**
+   * Sets the current Lens request adapter
+   */
+  setLensRequestAdapter: (lensRequestAdapter: RequestAdapter | undefined) => void;
+  /**
+   * Sets the current total hits status and result
+   */
+  setTotalHits: (totalHits: {
+    totalHitsStatus: UnifiedHistogramFetchStatus;
+    totalHitsResult: number | Error | undefined;
+  }) => void;
+}
 
-export const createStateService = (options: UnifiedHistogramStateOptions) => {
+export const createStateService = (
+  options: UnifiedHistogramStateOptions
+): UnifiedHistogramStateService => {
   const { services, localStorageKeyPrefix, initialState } = options;
 
   let initialChartHidden = false;
@@ -138,14 +184,8 @@ export const createStateService = (options: UnifiedHistogramStateOptions) => {
   };
 
   return {
-    /**
-     * The current state of the container
-     */
     state$,
 
-    /**
-     * Sets the current chart hidden state
-     */
     setChartHidden: (chartHidden: boolean) => {
       if (localStorageKeyPrefix) {
         setChartHidden(services.storage, localStorageKeyPrefix, chartHidden);
@@ -154,9 +194,6 @@ export const createStateService = (options: UnifiedHistogramStateOptions) => {
       updateState({ chartHidden });
     },
 
-    /**
-     * Sets the current top panel height
-     */
     setTopPanelHeight: (topPanelHeight: number | undefined) => {
       if (localStorageKeyPrefix) {
         setTopPanelHeight(services.storage, localStorageKeyPrefix, topPanelHeight);
@@ -165,9 +202,6 @@ export const createStateService = (options: UnifiedHistogramStateOptions) => {
       updateState({ topPanelHeight });
     },
 
-    /**
-     * Sets the current breakdown field
-     */
     setBreakdownField: (breakdownField: string | undefined) => {
       if (localStorageKeyPrefix) {
         setBreakdownField(services.storage, localStorageKeyPrefix, breakdownField);
@@ -176,16 +210,10 @@ export const createStateService = (options: UnifiedHistogramStateOptions) => {
       updateState({ breakdownField });
     },
 
-    /**
-     * Sets the current time interval
-     */
     setTimeInterval: (timeInterval: string) => {
       updateState({ timeInterval });
     },
 
-    /**
-     * Sets the current request parameters
-     */
     setRequestParams: (requestParams: {
       dataView?: DataView;
       filters?: Filter[];
@@ -197,16 +225,10 @@ export const createStateService = (options: UnifiedHistogramStateOptions) => {
       updateState(requestParams);
     },
 
-    /**
-     * Sets the current Lens request adapter
-     */
     setLensRequestAdapter: (lensRequestAdapter: RequestAdapter | undefined) => {
       updateState({ lensRequestAdapter });
     },
 
-    /**
-     * Sets the current total hits status and result
-     */
     setTotalHits: (totalHits: {
       totalHitsStatus: UnifiedHistogramFetchStatus;
       totalHitsResult: number | Error | undefined;
