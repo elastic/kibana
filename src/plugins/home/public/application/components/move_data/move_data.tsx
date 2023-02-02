@@ -30,7 +30,7 @@ export const MoveData: FC<Props> = ({ addBasePath }) => {
   const buttonLabel = (
     <FormattedMessage
       id="home.addData.moveYourDataButtonLabel"
-      defaultMessage="Explore the benefits"
+      defaultMessage="Move to Elastic Cloud"
     />
   );
 
@@ -50,7 +50,7 @@ export const MoveData: FC<Props> = ({ addBasePath }) => {
             <h4>
               <FormattedMessage
                 id="home.addData.moveYourDataTitle"
-                defaultMessage="Considering Elastic Cloud?"
+                defaultMessage="Try managed Elastic"
               />
             </h4>
           </EuiTitle>
@@ -58,7 +58,7 @@ export const MoveData: FC<Props> = ({ addBasePath }) => {
           <EuiText size="s">
             <FormattedMessage
               id="home.addData.moveYourDataToElasticCloud"
-              defaultMessage="Moving your data to Elastic Cloud is easy and can save you time and money."
+              defaultMessage="Deploy, scale, and upgrade your stack faster with Elastic Cloud. We’ll help you quickly move your data."
             />
           </EuiText>
           <EuiSpacer size="m" />
