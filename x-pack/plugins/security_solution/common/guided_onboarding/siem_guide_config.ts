@@ -23,7 +23,7 @@ export const siemGuideConfig: GuideConfig = {
     defaultMessage: `There are many ways to get your SIEM data into Elastic. In this guide, we’ll help you get set up quickly using the Elastic Defend integration.`,
   }),
   docs: {
-    text: i18n.translate('xpack.observability.guideConfig.documentationLink', {
+    text: i18n.translate('xpack.securitySolution.guideConfig.documentationLink', {
       defaultMessage: 'Learn more',
     }),
     url: 'https://www.elastic.co/guide/en/security/current/ingest-data.html',
