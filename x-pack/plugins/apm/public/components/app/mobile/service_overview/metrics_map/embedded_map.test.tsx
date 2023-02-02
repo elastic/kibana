@@ -12,7 +12,7 @@ import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { embeddablePluginMock } from '@kbn/embeddable-plugin/public/mocks';
 import { MockApmPluginContextWrapper } from '../../../../../context/apm_plugin/mock_apm_plugin_context';
 import { MemoryRouter } from 'react-router-dom';
-import { MapTypes } from './';
+import { MapTypes } from '.';
 
 describe('Embedded Map', () => {
   it('it renders', async () => {

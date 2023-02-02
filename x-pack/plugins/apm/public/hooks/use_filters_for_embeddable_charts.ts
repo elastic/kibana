@@ -14,7 +14,7 @@ import { environmentQuery } from '../../common/utils/environment_query';
 export function useFiltersForEmbeddableCharts() {
   const {
     path: { serviceName },
-    query: { environment, transactionType },
+    query: { environment },
   } = useApmParams('/mobile-services/{serviceName}/overview');
 
   return useMemo(
@@ -26,6 +26,6 @@ export function useFiltersForEmbeddableCharts() {
         meta: {},
         query,
       })),
-    [environment, transactionType, serviceName]
+    [environment, serviceName]
   );
 }

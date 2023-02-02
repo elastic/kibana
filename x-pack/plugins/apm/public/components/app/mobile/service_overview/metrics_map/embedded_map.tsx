@@ -26,7 +26,7 @@ import type { Filter } from '@kbn/es-query';
 import { ApmPluginStartDeps } from '../../../../../plugin';
 import { getSessionMapLayerList } from './get_session_map_layer_list';
 import { getHttpRequestsLayerList } from './get_http_requests_map_layer_list';
-import { MapTypes } from './index';
+import { MapTypes } from '.';
 function EmbeddedMapComponent({
   selectedMap,
   start,
@@ -148,7 +148,7 @@ function EmbeddedMapComponent({
     if (embeddable && !isErrorEmbeddable(embeddable)) {
       setLayerList();
     }
-  }, [embeddable, selectedMap]);
+  }, [embeddable, selectedMap, maps]);
   useEffect(() => {
     if (embeddable) {
       embeddable.updateInput({
