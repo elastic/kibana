@@ -158,4 +158,108 @@ describe('extractMigrationInfo', () => {
       });
     });
   });
+
+  describe('modelVersions', () => {
+    it('returns the correct switchToModelVersionAfter', () => {
+      const type = createType({
+        switchToModelVersionAfter: '8.8.0',
+      });
+      const output = extractMigrationInfo(type);
+
+      expect(output.switchToModelVersionAfter).toEqual('8.8.0');
+    });
+
+    it('returns a proper summary of the model versions', () => {
+      const type = createType({
+        modelVersions: {
+          '1': {
+            modelChange: {
+              type: 'expansion',
+              migration: {
+                up: jest.fn(),
+                down: jest.fn(),
+              },
+            },
+          },
+          '2': {
+            modelChange: {
+              type: 'expansion',
+              addedMappings: {
+                foo: {
+                  type: 'boolean',
+                },
+              },
+            },
+          },
+        },
+      });
+      const output = extractMigrationInfo(type);
+
+      expect(output.modelVersions).toEqual([
+        {
+          version: '1',
+          changeType: 'expansion',
+          hasMigration: true,
+          newMappings: [],
+        },
+        {
+          version: '2',
+          changeType: 'expansion',
+          newMappings: ['foo.type'],
+          hasMigration: false,
+        },
+      ]);
+    });
+
+    it('supports provider functions', () => {
+      const type = createType({
+        modelVersions: () => ({
+          '1': {
+            modelChange: {
+              type: 'expansion',
+              migration: {
+                up: jest.fn(),
+                down: jest.fn(),
+              },
+            },
+          },
+          '2': {
+            modelChange: {
+              type: 'expansion',
+              addedMappings: {
+                foo: {
+                  type: 'boolean',
+                },
+              },
+            },
+          },
+        }),
+      });
+      const output = extractMigrationInfo(type);
+
+      expect(output.modelVersions).toEqual([
+        {
+          version: '1',
+          changeType: 'expansion',
+          hasMigration: true,
+          newMappings: [],
+        },
+        {
+          version: '2',
+          changeType: 'expansion',
+          newMappings: ['foo.type'],
+          hasMigration: false,
+        },
+      ]);
+    });
+
+    it('returns an empty list when model versions are not defined', () => {
+      const type = createType({
+        modelVersions: undefined,
+      });
+      const output = extractMigrationInfo(type);
+
+      expect(output.modelVersions).toEqual([]);
+    });
+  });
 });
