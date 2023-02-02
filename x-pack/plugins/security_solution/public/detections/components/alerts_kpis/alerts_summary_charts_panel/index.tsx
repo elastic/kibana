@@ -4,32 +4,28 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiTitle } from '@elastic/eui';
-import React, { useMemo, useCallback, useState, useEffect } from 'react';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import React, { useCallback, useState, useEffect } from 'react';
 import type { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/types';
 import type { Filter, Query } from '@kbn/es-query';
-import { v4 as uuidv4 } from 'uuid';
+import styled from 'styled-components';
 import * as i18n from './translations';
 import { KpiPanel } from '../common/components';
 import { HeaderSection } from '../../../../common/components/header_section';
+import { SeverityLevelPanel } from '../severity_level_panel';
+import { AlertsByTypePanel } from '../alerts_by_type_panel';
+import { AlertsProgressBarPanel } from '../alerts_progress_bar_panel';
 import { useQueryToggle } from '../../../../common/containers/query_toggle';
-import { useSeverityChartData } from './severity_donut/use_severity_chart_data';
-import { SeverityLevelChart } from './severity_donut/severity_level_chart';
+
+const StyledFlexGroup = styled(EuiFlexGroup)`
+  @media only screen and (min-width: ${({ theme }) => theme.eui.euiBreakpoints.l});
+`;
+
+const StyledFlexItem = styled(EuiFlexItem)`
+  min-width: 355px;
+`;
 
 const DETECTIONS_ALERTS_CHARTS_ID = 'detections-alerts-charts';
-
-const PlaceHolder = ({ title }: { title: string }) => {
-  return (
-    <EuiFlexItem>
-      <EuiPanel>
-        <EuiTitle size="xs">
-          <h4>{title}</h4>
-        </EuiTitle>
-      </EuiPanel>
-    </EuiFlexItem>
-  );
-};
 
 interface Props {
   alignHeader?: 'center' | 'baseline' | 'stretch' | 'flexStart' | 'flexEnd';
@@ -52,11 +48,9 @@ export const AlertsSummaryChartsPanel: React.FC<Props> = ({
   signalIndexName,
   title = i18n.CHARTS_TITLE,
 }: Props) => {
-  // create a unique, but stable (across re-renders) query id
-  const uniqueQueryId = useMemo(() => `${DETECTIONS_ALERTS_CHARTS_ID}-${uuidv4()}`, []);
-
   const { toggleStatus, setToggleStatus } = useQueryToggle(DETECTIONS_ALERTS_CHARTS_ID);
   const [querySkip, setQuerySkip] = useState(!toggleStatus);
+
   useEffect(() => {
     setQuerySkip(!toggleStatus);
   }, [toggleStatus]);
@@ -68,15 +62,6 @@ export const AlertsSummaryChartsPanel: React.FC<Props> = ({
     },
     [setQuerySkip, setToggleStatus]
   );
-
-  const { items: severityData, isLoading: isSeverityLoading } = useSeverityChartData({
-    filters,
-    query,
-    signalIndexName,
-    runtimeMappings,
-    skip: querySkip,
-    uniqueQueryId,
-  });
 
   return (
     <KpiPanel
@@ -96,16 +81,42 @@ export const AlertsSummaryChartsPanel: React.FC<Props> = ({
         toggleQuery={toggleQuery}
       />
       {toggleStatus && (
-        <EuiFlexGroup data-test-subj="alerts-charts-container">
-          <PlaceHolder title={i18n.DETECTIONS_TITLE} />
-          <SeverityLevelChart
-            data={severityData}
-            isLoading={isSeverityLoading}
-            uniqueQueryId={uniqueQueryId}
-            addFilter={addFilter}
-          />
-          <PlaceHolder title={i18n.ALERT_BY_HOST_TITLE} />
-        </EuiFlexGroup>
+        <StyledFlexGroup
+          data-test-subj="alerts-charts-container"
+          className="eui-yScroll"
+          wrap
+          gutterSize="m"
+        >
+          <StyledFlexItem>
+            <SeverityLevelPanel
+              filters={filters}
+              query={query}
+              signalIndexName={signalIndexName}
+              runtimeMappings={runtimeMappings}
+              skip={querySkip}
+              addFilter={addFilter}
+            />
+          </StyledFlexItem>
+          <StyledFlexItem>
+            <AlertsByTypePanel
+              filters={filters}
+              query={query}
+              signalIndexName={signalIndexName}
+              runtimeMappings={runtimeMappings}
+              skip={querySkip}
+            />
+          </StyledFlexItem>
+          <StyledFlexItem>
+            <AlertsProgressBarPanel
+              addFilter={addFilter}
+              filters={filters}
+              query={query}
+              signalIndexName={signalIndexName}
+              runtimeMappings={runtimeMappings}
+              skip={querySkip}
+            />
+          </StyledFlexItem>
+        </StyledFlexGroup>
       )}
     </KpiPanel>
   );

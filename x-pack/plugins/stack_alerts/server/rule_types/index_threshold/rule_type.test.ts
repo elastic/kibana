@@ -16,6 +16,7 @@ import { Params } from './rule_type_params';
 import { TIME_SERIES_BUCKET_SELECTOR_FIELD } from '@kbn/triggers-actions-ui-plugin/server';
 import { RuleExecutorServicesMock, alertsMock } from '@kbn/alerting-plugin/server/mocks';
 import { Comparator } from '../../../common/comparator_types';
+import { DEFAULT_FLAPPING_SETTINGS } from '@kbn/alerting-plugin/common/rules_settings';
 
 let fakeTimer: sinon.SinonFakeTimers;
 
@@ -219,6 +220,7 @@ describe('ruleType', () => {
         snoozeSchedule: [],
       },
       logger,
+      flappingSettings: DEFAULT_FLAPPING_SETTINGS,
     });
 
     expect(alertServices.alertFactory.create).toHaveBeenCalledWith('all documents');
@@ -284,6 +286,7 @@ describe('ruleType', () => {
         snoozeSchedule: [],
       },
       logger,
+      flappingSettings: DEFAULT_FLAPPING_SETTINGS,
     });
 
     expect(customAlertServices.alertFactory.create).not.toHaveBeenCalled();
@@ -349,6 +352,7 @@ describe('ruleType', () => {
         snoozeSchedule: [],
       },
       logger,
+      flappingSettings: DEFAULT_FLAPPING_SETTINGS,
     });
 
     expect(customAlertServices.alertFactory.create).not.toHaveBeenCalled();
@@ -413,6 +417,7 @@ describe('ruleType', () => {
         snoozeSchedule: [],
       },
       logger,
+      flappingSettings: DEFAULT_FLAPPING_SETTINGS,
     });
 
     expect(data.timeSeriesQuery).toHaveBeenCalledWith(

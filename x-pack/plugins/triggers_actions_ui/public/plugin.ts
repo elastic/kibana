@@ -83,6 +83,7 @@ import { AlertSummaryWidgetProps } from './application/sections/rule_details/com
 import { getAlertSummaryWidgetLazy } from './common/get_rule_alerts_summary';
 import { RuleSnoozeModalProps } from './application/sections/rules_list/components/rule_snooze_modal';
 import { getRuleSnoozeModalLazy } from './common/get_rule_snooze_modal';
+import { getRulesSettingsLinkLazy } from './common/get_rules_settings_link';
 
 export interface TriggersAndActionsUIPublicPluginSetup {
   actionTypeRegistry: TypeRegistry<ActionTypeModel>;
@@ -130,6 +131,7 @@ export interface TriggersAndActionsUIPublicPluginStart {
   getRuleStatusPanel: (props: RuleStatusPanelProps) => ReactElement<RuleStatusPanelProps>;
   getAlertSummaryWidget: (props: AlertSummaryWidgetProps) => ReactElement<AlertSummaryWidgetProps>;
   getRuleSnoozeModal: (props: RuleSnoozeModalProps) => ReactElement<RuleSnoozeModalProps>;
+  getRulesSettingsLink: () => ReactElement;
 }
 
 interface PluginsSetup {
@@ -432,6 +434,9 @@ export class Plugin
       },
       getRuleSnoozeModal: (props: RuleSnoozeModalProps) => {
         return getRuleSnoozeModalLazy(props);
+      },
+      getRulesSettingsLink: () => {
+        return getRulesSettingsLinkLazy();
       },
     };
   }
