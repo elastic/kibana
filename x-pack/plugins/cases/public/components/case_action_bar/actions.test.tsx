@@ -29,10 +29,6 @@ jest.mock('react-router-dom', () => {
 });
 
 const defaultProps = {
-  allCasesNavigation: {
-    href: 'all-cases-href',
-    onClick: () => {},
-  },
   caseData: basicCase,
   currentExternalIncident: null,
 };
@@ -123,10 +119,6 @@ describe('CaseView actions', () => {
           {...defaultProps}
           currentExternalIncident={{
             ...basicPush,
-            firstPushIndex: 5,
-            lastPushIndex: 5,
-            commentsToUpdate: [],
-            hasDataToPush: false,
           }}
         />
       </TestProviders>

@@ -75,7 +75,7 @@ export interface LifecycleAlertServices<
   alertWithLifecycle: LifecycleAlertService<InstanceState, InstanceContext, ActionGroupIds>;
   getAlertStartedDate: (alertInstanceId: string) => string | null;
   getAlertUuid: (alertInstanceId: string) => string;
-  getAlertByAlertUuid: (alertUuid: string) => { [x: string]: any } | null;
+  getAlertByAlertUuid: (alertUuid: string) => Promise<Array<{ [id: string]: any }> | null>;
 }
 
 export type LifecycleRuleExecutor<
