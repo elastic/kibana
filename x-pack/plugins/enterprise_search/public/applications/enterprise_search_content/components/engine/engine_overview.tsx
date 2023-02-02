@@ -48,7 +48,7 @@ export const EngineOverview: React.FC = () => {
                 <EuiIcon size="xxl" type="visTable" color="#98A2B3" />
                 <EuiStat
                   titleSize="l"
-                  isLoading={!engineData}
+                  isLoading={isLoadingEngine}
                   title={`${indicesCount}`}
                   description={i18n.translate(
                     'xpack.enterpriseSearch.content.engine.overview.indicesDescription',
@@ -63,7 +63,7 @@ export const EngineOverview: React.FC = () => {
                 <EuiIcon size="xxl" type="documents" color="#98A2B3" />
                 <EuiStat
                   titleSize="l"
-                  isLoading={!engineData}
+                  isLoading={isLoadingEngine}
                   title={`${documentsCount}`}
                   description={i18n.translate(
                     'xpack.enterpriseSearch.content.engine.overview.documentsDescription',
@@ -73,20 +73,6 @@ export const EngineOverview: React.FC = () => {
                 />
               </EuiFlexGroup>
             </EuiFlexItem>
-            {/* <EuiFlexItem>
-              <EuiFlexGroup alignItems="center">
-                <EuiIcon size="xxl" type="kqlField" color="#98A2B3" />
-                <EuiStat
-                  titleSize="l"
-                  isLoading
-                  description={i18n.translate(
-                    'xpack.enterpriseSearch.content.engine.overview.fieldsDescription',
-                    { defaultMessage: 'Fields' }
-                  )}
-                  titleColor="primary"
-                />
-              </EuiFlexGroup>
-            </EuiFlexItem> */}
           </EuiFlexGroup>
         </EuiPanel>
       </>
