@@ -7,9 +7,9 @@
  */
 import type { EventBus } from './event_bus';
 import type { ContentRegistry } from './registry';
-import type { ContentStorage } from './types';
+import type { ContentStorage, StorageContext } from './types';
 
-export class ContentCrud implements ContentStorage<{ id: string } & object> {
+export class ContentCrud implements ContentStorage {
   private storage: ContentStorage;
   private eventBus: EventBus;
   public contentType: string;
@@ -26,7 +26,7 @@ export class ContentCrud implements ContentStorage<{ id: string } & object> {
     this.eventBus = deps.eventBus;
   }
 
-  public get(contentId: string, options?: unknown) {
+  public async get(ctx: StorageContext, contentId: string, options?: unknown) {
     this.eventBus.emit({
       type: 'getItemStart',
       contentId,
@@ -34,7 +34,7 @@ export class ContentCrud implements ContentStorage<{ id: string } & object> {
     });
 
     return this.storage
-      .get(contentId, options)
+      .get(ctx, contentId, options)
       .then((res) => {
         this.eventBus.emit({
           type: 'getItemSuccess',
@@ -61,8 +61,8 @@ export class ContentCrud implements ContentStorage<{ id: string } & object> {
   //   return this.storage.mget(ids, options);
   // }
 
-  public async create(fields: object, options?: unknown) {
-    const result = await this.storage.create(fields, options);
+  public async create(ctx: StorageContext, fields: object, options?: unknown) {
+    const result = await this.storage.create(ctx, fields, options);
 
     this.eventBus.emit({
       type: 'createItemSuccess',

@@ -10,11 +10,6 @@ export { ContentCore } from './core';
 
 export type { ContentCoreApi } from './core';
 
-export type {
-  ContentStorage,
-  ContentConfig,
-  SearchContentSerializer,
-  ContentSchemas,
-} from './types';
+export type { ContentStorage, ContentConfig, StorageContext, ContentSchemas } from './types';
 
 export type { ContentRegistry } from './registry';

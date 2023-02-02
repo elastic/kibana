@@ -8,6 +8,7 @@
 
 import type { CreateIn, GetIn, ProcedureName } from '../../common';
 import { rpcSchemas } from '../../common';
+import { StorageContext } from '../core';
 import type { FunctionHandler, ProcedureConfig } from './function_handler';
 import { Context } from './types';
 
@@ -47,12 +48,12 @@ export function initRpcHandlers({
       }
 
       // Execute CRUD
-      const crudInstance = ctx.core.crud(input.contentType);
-      const options = {
-        ...(input?.options ?? {}),
+      const storageContext: StorageContext = {
         requestHandlerContext: ctx.requestHandlerContext,
       };
-      const result = await crudInstance.get(input.id, options);
+
+      const crudInstance = ctx.core.crud(input.contentType);
+      const result = await crudInstance.get(storageContext, input.id, input.options);
 
       // Validate result
       const validation = schemas.out.result.getSchema().validate(result);
@@ -106,13 +107,12 @@ export function initRpcHandlers({
         }
       }
 
-      const crudInstance = ctx.core.crud(input.contentType);
-      const options = {
-        ...(input.options ?? {}),
+      const storageContext: StorageContext = {
         requestHandlerContext: ctx.requestHandlerContext,
       };
 
-      const result = crudInstance.create(input.data, options);
+      const crudInstance = ctx.core.crud(input.contentType);
+      const result = crudInstance.create(storageContext, input.data, input.options);
 
       // Validate result
       const validation = schemas.out.result.getSchema().validate(result);

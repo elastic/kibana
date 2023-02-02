@@ -6,19 +6,23 @@
  * Side Public License, v 1.
  */
 
-import { Type } from '@kbn/config-schema';
-import type { Content } from '../../common';
+import type { Type } from '@kbn/config-schema';
+import type { RequestHandlerContext } from '@kbn/core-http-request-handler-context-server';
 
-export interface ContentStorage<T extends { id: string } = { id: string } & object> {
+export interface StorageContext {
+  requestHandlerContext?: RequestHandlerContext;
+}
+
+export interface ContentStorage {
   /** Get a single item */
-  get(id: string, options: unknown): Promise<T>;
+  get(ctx: StorageContext, id: string, options: unknown): Promise<any>;
 
   /** Get multiple items */
   // TODO
   // mget(ids: string[], options: unknown): Promise<object[]>;
 
   /** Create an item */
-  create(fields: object, options: unknown): Promise<T>;
+  create(ctx: StorageContext, fields: object, options: unknown): Promise<any>;
 
   /** Update an item */
   // TODO
@@ -28,10 +32,6 @@ export interface ContentStorage<T extends { id: string } = { id: string } & obje
   // TODO
   // delete(id: string, options: unknown): Promise<{ status: 'success' | 'error' }>;
 }
-
-// --- CONFIG
-
-export type SearchContentSerializer<T extends object = object> = (item: T) => Content;
 
 export interface ContentConfig<S extends ContentStorage = ContentStorage> {
   /** The storage layer for the content.*/

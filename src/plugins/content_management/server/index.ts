@@ -18,6 +18,7 @@ export type {
   ContentStorage,
   ContentConfig,
   ContentSchemas,
-  SearchContentSerializer,
+  StorageContext,
 } from './core';
+
 export type { ContentManagementSetup } from './types';
