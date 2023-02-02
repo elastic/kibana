@@ -7,7 +7,7 @@
 
 import type { ItemsetResult } from '../../types';
 
-export const FrequentItemSets: ItemsetResult[] = [
+export const frequentItemSets: ItemsetResult[] = [
   {
     set: { response_code: '500', url: 'home.php' },
     size: 2,
