@@ -28,6 +28,8 @@ jest.mock('@kbn/kibana-react-plugin/public/ui_settings/use_ui_setting', () => ({
   useUiSetting$: jest.fn((value: string) => ['0,0']),
 }));
 
+const refreshMockFn = jest.fn();
+
 const columns = [
   {
     id: AlertsField.name,
@@ -68,7 +70,7 @@ describe('AlertsTable.BulkActions', () => {
     getInspectQuery: () => ({ request: {}, response: {} }),
     onPageChange: () => {},
     onSortChange: () => {},
-    refresh: () => {},
+    refresh: refreshMockFn,
     sort: [],
   };
 
@@ -129,9 +131,18 @@ describe('AlertsTable.BulkActions', () => {
             key: 'fakeBulkActionLoadingClear',
             'data-test-subj': 'fake-bulk-action-loading-clear',
             disableOnQuery: false,
-            onClick: (ids, isSelectAll, setIsBulkActionLoading, clearSelection) => {
+            onClick: (ids, isSelectAll, setIsBulkActionLoading, clearSelection, refresh) => {
               setIsBulkActionLoading(true);
               setTimeout(() => clearSelection(), 150);
+            },
+          },
+          {
+            label: 'Fake Bulk Action with refresh Action',
+            key: 'fakeBulkActionRefresh',
+            'data-test-subj': 'fake-bulk-action-refresh',
+            disableOnQuery: false,
+            onClick: (ids, isSelectAll, setIsBulkActionLoading, clearSelection, refresh) => {
+              refresh();
             },
           },
         ] as BulkActionsConfig[],
@@ -441,7 +452,6 @@ describe('AlertsTable.BulkActions', () => {
               />
             );
 
-            screen.debug(undefined, 1000000);
             fireEvent.click(await screen.findByTestId('selectedShowBulkActionsButton'));
             await waitForEuiPopoverOpen();
 
@@ -670,14 +680,48 @@ describe('AlertsTable.BulkActions', () => {
             // initially rows are loading
             await waitFor(() => {
               expect(screen.queryAllByTestId('row-loader')).toHaveLength(2);
-              screen.debug(undefined, 100000);
             });
 
             // clear Selection happens after 150ms
             await waitFor(() => {
               expect(screen.queryAllByTestId('row-loader')).toHaveLength(0);
-              screen.debug(undefined, 100000);
             });
+          });
+
+          it('should call refresh function of use fetch alerts when bulk action 3 is clicked', async () => {
+            const props = {
+              ...tablePropsWithBulkActions,
+
+              initialBulkActionsState: {
+                ...defaultBulkActionsState,
+                areAllVisibleRowsSelected: true,
+                rowSelection: new Map(),
+              },
+            };
+            render(<AlertsTableWithBulkActionsContext {...props} />);
+
+            let bulkActionsCells = screen.getAllByTestId(
+              'bulk-actions-row-cell'
+            ) as HTMLInputElement[];
+
+            fireEvent.click(screen.getByTestId('bulk-actions-header'));
+
+            await waitFor(async () => {
+              bulkActionsCells = screen.getAllByTestId(
+                'bulk-actions-row-cell'
+              ) as HTMLInputElement[];
+              expect(bulkActionsCells[0].checked).toBeTruthy();
+              expect(bulkActionsCells[1].checked).toBeTruthy();
+              expect(screen.getByTestId('selectedShowBulkActionsButton')).toBeDefined();
+            });
+
+            fireEvent.click(screen.getByTestId('selectedShowBulkActionsButton'));
+            await waitForEuiPopoverOpen();
+
+            refreshMockFn.mockClear();
+            expect(refreshMockFn.mock.calls.length).toBe(0);
+            fireEvent.click(screen.getByTestId('fake-bulk-action-refresh'));
+            expect(refreshMockFn.mock.calls.length).toBeGreaterThan(0);
           });
         });
       });
