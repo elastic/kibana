@@ -23,7 +23,7 @@ export const OVERWRITE_EXCEPTIONS_LABEL = i18n.translate(
 export const OVERWRITE_ACTION_CONNECTORS_LABEL = i18n.translate(
   'xpack.securitySolution.detectionEngine.components.importRuleModal.overwriteActionConnectorsLabel',
   {
-    defaultMessage: 'Overwrite existing action connectors with conflicting action "id"',
+    defaultMessage: 'Overwrite existing connectors with conflicting action "id"',
   }
 );
 export const SUCCESSFULLY_IMPORTED_EXCEPTIONS = (totalExceptions: number) =>
@@ -87,5 +87,12 @@ export const ACTION_CONNECTORS_WARNING_LINK = i18n.translate(
   'xpack.securitySolution.detectionEngine.components.importRuleModal.actionConnectorsWarningLink',
   {
     defaultMessage: 'connectors',
+  }
+);
+
+export const ACTION_CONNECTORS_ADDITIONAL_PRIVILEGES = i18n.translate(
+  'xpack.securitySolution.detectionEngine.components.importRuleModal.actionConnectorsAdditionalPrivilegesError',
+  {
+    defaultMessage: 'You need additional privileges to import rules with actions.',
   }
 );

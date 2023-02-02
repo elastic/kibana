@@ -75,7 +75,6 @@ export const ImportDataModalComponent = ({
   const [overwriteExceptions, setOverwriteExceptions] = useState(false);
   const [overwriteActionConnectors, setOverwriteActionConnectors] = useState(false);
   const { addError, addSuccess } = useAppToasts();
-  // TODO Ask if we use schema on the FE
   const [actionConnectorsWarnings, setActionConnectorsWarnings] = useState<WarningSchema[] | []>(
     []
   );

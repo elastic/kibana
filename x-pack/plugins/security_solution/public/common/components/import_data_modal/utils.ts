@@ -30,6 +30,28 @@ export const formatError = (
   return error;
 };
 
+const mapErrorMessageToUserMessage = (
+  actionConnectorsErrors: Array<ImportRulesResponseError | ImportResponseError>
+) => {
+  return actionConnectorsErrors.map((connectorError) => {
+    const { error } = connectorError;
+    const { status_code: statusCode, message: originalMessage } = error || {};
+    let message;
+    switch (statusCode) {
+      case 403:
+        message = i18n.ACTION_CONNECTORS_ADDITIONAL_PRIVILEGES;
+        break;
+
+      default:
+        message = originalMessage;
+
+        break;
+    }
+
+    return { ...connectorError, error: { ...error, message } };
+  });
+};
+
 export const showToasterMessage = ({
   importResponse,
   exceptionsIncluded,
@@ -73,6 +95,20 @@ export const showToasterMessage = ({
   }
 
   if (importResponse.errors.length > 0) {
+    if (
+      actionConnectorsIncluded &&
+      importResponse.action_connectors_errors != null &&
+      importResponse.action_connectors_errors.length > 0
+    ) {
+      const userErrorMessages = mapErrorMessageToUserMessage(
+        importResponse.action_connectors_errors
+      );
+      const connectorError = formatError(errorMessageDetailed, importResponse, userErrorMessages);
+
+      return addError(connectorError, {
+        title: i18n.IMPORT_CONNECTORS_FAILED(userErrorMessages.length),
+      });
+    }
     const ruleError = formatError(errorMessageDetailed, importResponse, importResponse.errors);
     addError(ruleError, { title: errorMessage(importResponse.errors.length) });
 
@@ -89,21 +125,6 @@ export const showToasterMessage = ({
 
       addError(exceptionError, {
         title: i18n.IMPORT_FAILED(importResponse.exceptions_errors.length),
-      });
-    }
-    if (
-      actionConnectorsIncluded &&
-      importResponse.action_connectors_errors != null &&
-      importResponse.action_connectors_errors.length > 0
-    ) {
-      const error = formatError(
-        errorMessageDetailed,
-        importResponse,
-        importResponse.action_connectors_errors
-      );
-
-      addError(error, {
-        title: i18n.IMPORT_CONNECTORS_FAILED(importResponse.action_connectors_errors.length),
       });
     }
   }

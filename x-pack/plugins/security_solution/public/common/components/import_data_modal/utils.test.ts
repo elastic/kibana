@@ -9,7 +9,7 @@ import { showToasterMessage } from './utils';
 
 describe('showToasterMessage', () => {
   describe('exceptionsIncluded is false', () => {
-    it('displays main success message if import was successful', () => {
+    it('should display main success message if import was successful', () => {
       const addError = jest.fn();
       const addSuccess = jest.fn();
 
@@ -33,7 +33,7 @@ describe('showToasterMessage', () => {
       expect(addError).not.toHaveBeenCalled();
     });
 
-    it('displays main error message if import was not successful', () => {
+    it('should display main error message if import was not successful', () => {
       const addError = jest.fn();
       const addSuccess = jest.fn();
 
@@ -69,7 +69,7 @@ describe('showToasterMessage', () => {
   });
 
   describe('exceptionsIncluded is true', () => {
-    it('displays success message for rules and exceptions if both succeed', () => {
+    it('should display success message for rules and exceptions if both succeed', () => {
       const addError = jest.fn();
       const addSuccess = jest.fn();
 
@@ -98,7 +98,7 @@ describe('showToasterMessage', () => {
       expect(addError).not.toHaveBeenCalled();
     });
 
-    it('displays error message for rules and exceptions if both fail', () => {
+    it('should display error message for rules and exceptions if both fail', () => {
       const addError = jest.fn();
       const addSuccess = jest.fn();
 
@@ -158,7 +158,7 @@ describe('showToasterMessage', () => {
       expect(addSuccess).not.toHaveBeenCalled();
     });
 
-    it('displays only a rule toaster if no exceptions were imported', () => {
+    it('should display only a rule toaster if no exceptions were imported', () => {
       const addError = jest.fn();
       const addSuccess = jest.fn();
 
@@ -186,7 +186,7 @@ describe('showToasterMessage', () => {
       expect(addError).not.toHaveBeenCalled();
     });
 
-    it('displays only an exceptions toaster if no rules were imported', () => {
+    it('should display only an exceptions toaster if no rules were imported', () => {
       const addError = jest.fn();
       const addSuccess = jest.fn();
 
@@ -216,7 +216,7 @@ describe('showToasterMessage', () => {
   });
 
   describe('actionConnectorsIncluded is false', () => {
-    it('displays main success message if import was successful', () => {
+    it('should display main success message if import was successful', () => {
       const addError = jest.fn();
       const addSuccess = jest.fn();
 
@@ -240,7 +240,7 @@ describe('showToasterMessage', () => {
       expect(addError).not.toHaveBeenCalled();
     });
 
-    it('displays main error message if import was not successful', () => {
+    it('should display main error message if import was not successful', () => {
       const addError = jest.fn();
       const addSuccess = jest.fn();
 
@@ -275,7 +275,7 @@ describe('showToasterMessage', () => {
     });
   });
   describe('actionConnectorsIncluded is true', () => {
-    it('displays success message for rules and connectors if both succeed', () => {
+    it('should display success message for rules and connectors if both succeed', () => {
       const addError = jest.fn();
       const addSuccess = jest.fn();
 
@@ -307,7 +307,7 @@ describe('showToasterMessage', () => {
       expect(addError).not.toHaveBeenCalled();
     });
 
-    it('displays error message for rules and connectors if both fail', () => {
+    it('should display 1 error message for rules and connectors even when both fail', () => {
       const addError = jest.fn();
       const addSuccess = jest.fn();
 
@@ -354,12 +354,9 @@ describe('showToasterMessage', () => {
         addSuccess,
       });
 
-      expect(addError).toHaveBeenCalledTimes(2);
-      expect(addError).toHaveBeenNthCalledWith(1, new Error('errorDetailed: an error message'), {
-        title: 'error: 1',
-      });
-      expect(addError).toHaveBeenNthCalledWith(
-        2,
+      expect(addError).toHaveBeenCalledTimes(1);
+
+      expect(addError).toHaveBeenCalledWith(
         new Error('errorDetailed: an error message. errorDetailed: another error message'),
         {
           title: 'Failed to import 2 connectors',
@@ -368,7 +365,7 @@ describe('showToasterMessage', () => {
       expect(addSuccess).not.toHaveBeenCalled();
     });
 
-    it('displays only a rule toaster if no connectors were imported', () => {
+    it('should display only a rule toaster if no connectors were imported', () => {
       const addError = jest.fn();
       const addSuccess = jest.fn();
 
@@ -398,7 +395,7 @@ describe('showToasterMessage', () => {
       expect(addError).not.toHaveBeenCalled();
     });
 
-    it('displays only a connector toaster if no rules were imported', () => {
+    it('should display only a connector toaster if no rules were imported', () => {
       const addError = jest.fn();
       const addSuccess = jest.fn();
 
@@ -426,6 +423,68 @@ describe('showToasterMessage', () => {
       expect(addSuccess).toHaveBeenCalledTimes(1);
       expect(addSuccess).toHaveBeenNthCalledWith(1, 'Successfully imported 1 connector.');
       expect(addError).not.toHaveBeenCalled();
+    });
+    it('should display the user friendly message in case of additional privileges', () => {
+      const addError = jest.fn();
+      const addSuccess = jest.fn();
+
+      showToasterMessage({
+        importResponse: {
+          success: false,
+          success_count: 1,
+          rules_count: 2,
+          action_connectors_success: false,
+          errors: [
+            {
+              rule_id: 'unknown',
+              error: {
+                status_code: 403,
+                message:
+                  'You may not have actions privileges required to import rules with actions',
+              },
+            },
+          ],
+          action_connectors_errors: [
+            {
+              rule_id: 'unknown',
+              error: {
+                status_code: 403,
+                message:
+                  'You may not have actions privileges required to import rules with actions',
+              },
+            },
+            {
+              rule_id: 'unknown',
+              error: {
+                status_code: 403,
+                message:
+                  'You may not have actions privileges required to import rules with actions',
+              },
+            },
+          ],
+          exceptions_success: true,
+          exceptions_success_count: 0,
+        },
+        exceptionsIncluded: false,
+        actionConnectorsIncluded: true,
+        successMessage: (msg) => `success: ${msg}`,
+        errorMessage: (msg) => `error: ${msg}`,
+        errorMessageDetailed: (msg) => `errorDetailed: ${msg}`,
+        addError,
+        addSuccess,
+      });
+
+      expect(addError).toHaveBeenCalledTimes(1);
+
+      expect(addError).toHaveBeenCalledWith(
+        new Error(
+          'errorDetailed: You need additional privileges to import rules with actions.. errorDetailed: You need additional privileges to import rules with actions.'
+        ),
+        {
+          title: 'Failed to import 2 connectors',
+        }
+      );
+      expect(addSuccess).not.toHaveBeenCalled();
     });
   });
 });
