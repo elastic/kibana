@@ -7,9 +7,10 @@
 import { eachSeries } from 'async';
 import { RouteRegisterParameters } from '.';
 import { getRoutePaths } from '../../common';
+import { getSetupInstructions } from '../lib/setup/get_setup_instructions';
 import { getProfilingSetupSteps } from '../lib/setup/steps';
 import { handleRouteHandlerError } from '../utils/handle_route_error_handler';
-import { hasProfilingData } from '../utils/init/preconditions';
+import { hasProfilingData } from '../lib/setup/has_profiling_data';
 import { getClient } from './compat';
 
 export function registerSetupRoute({
@@ -43,12 +44,15 @@ export function registerSetupRoute({
         const hasDataPromise = hasProfilingData(esClient);
 
         const stepCompletionResultsPromises = Promise.all(
-          steps.map(async (step) => ({ name: step.name, completed: await step.hasCompleted() }))
+          steps.map(async (step) => {
+            try {
+              return { name: step.name, completed: await step.hasCompleted() };
+            } catch (error) {
+              logger.error(error);
+              return { name: step.name, completed: false, error: error.toString() };
+            }
+          })
         );
-
-        stepCompletionResultsPromises.catch((error) => {
-          logger.error(error);
-        });
 
         const hasData = await hasDataPromise;
 
@@ -119,14 +123,16 @@ export function registerSetupRoute({
       validate: false,
     },
     async (context, request, response) => {
-      return handleRouteHandlerError({
-        error: {
-          statusCode: 418,
-          message: 'not yet implemented',
-        },
-        logger,
-        response,
-      });
+      try {
+        const setupInstructions = await getSetupInstructions({
+          packagePolicyClient: dependencies.start.fleet.packagePolicyService,
+          soClient: (await context.core).savedObjects.client,
+        });
+
+        return response.ok({ body: setupInstructions });
+      } catch (error) {
+        return handleRouteHandlerError({ error, logger, response });
+      }
     }
   );
 }
