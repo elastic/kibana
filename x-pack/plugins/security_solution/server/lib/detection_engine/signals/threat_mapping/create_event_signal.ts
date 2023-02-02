@@ -82,13 +82,13 @@ export const createEventSignal = async ({
       exceptionFilter,
     };
 
-    const signalsMap = await getSignalsQueryMapFromThreatIndex({
+    const signalsQueryMap = await getSignalsQueryMapFromThreatIndex({
       threatSearchParams,
       eventsCount: currentEventList.length,
       signalValueMap: getSignalValueMap({ eventList: currentEventList, threatMatchedFields }),
     });
 
-    const ids = Array.from(signalsMap.keys());
+    const ids = Array.from(signalsQueryMap.keys());
     const indexFilter = {
       query: {
         bool: {
@@ -113,7 +113,7 @@ export const createEventSignal = async ({
     ruleExecutionLogger.debug(`${ids?.length} matched signals found`);
 
     const enrichment = threatEnrichmentFactory({
-      signalsMap,
+      signalsQueryMap,
       threatIndicatorPath,
       threatFilters,
       threatSearchParams,

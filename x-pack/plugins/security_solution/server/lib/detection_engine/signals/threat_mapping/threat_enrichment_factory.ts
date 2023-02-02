@@ -13,7 +13,7 @@ import { type SignalsQueryMap } from './get_signals_map_from_threat_index';
 
 interface ThreatEnrichmentFactoryOptions {
   threatIndicatorPath: CreateEventSignalOptions['threatIndicatorPath'];
-  signalsMap: SignalsQueryMap;
+  signalsQueryMap: SignalsQueryMap;
   threatFilters: CreateEventSignalOptions['threatFilters'];
   threatSearchParams: Omit<GetThreatListOptions, 'searchAfter'>;
 }
@@ -22,7 +22,7 @@ interface ThreatEnrichmentFactoryOptions {
  * returns threatEnrichment method used events-first search
  */
 export const threatEnrichmentFactory = ({
-  signalsMap,
+  signalsQueryMap,
   threatIndicatorPath,
   threatFilters,
   threatSearchParams,
@@ -35,7 +35,7 @@ export const threatEnrichmentFactory = ({
           return [
             ...new Set([
               ...acc,
-              ...(signalsMap.get(id) ?? []).map((threatQueryMatched) => threatQueryMatched.id),
+              ...(signalsQueryMap.get(id) ?? []).map((threatQueryMatched) => threatQueryMatched.id),
             ]),
           ];
         }, [])
@@ -68,7 +68,7 @@ export const threatEnrichmentFactory = ({
       signals,
       getThreats,
       threatIndicatorPath,
-      signalsMap
+      signalsQueryMap
     );
   };
 
