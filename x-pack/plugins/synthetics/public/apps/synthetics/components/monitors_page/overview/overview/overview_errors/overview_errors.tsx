@@ -25,7 +25,7 @@ import { selectOverviewStatus } from '../../../../../state';
 export function OverviewErrors() {
   const { status } = useSelector(selectOverviewStatus);
 
-  const loading = !status?.enabledIds || status?.enabledIds.length === 0;
+  const loading = !status?.allIds || status?.allIds.length === 0;
 
   const { from, to } = useAbsoluteDate({ from: 'now-6h', to: 'now' });
 
