@@ -48,13 +48,14 @@ const mockRule: RuleTableItem = {
 };
 
 export const RulesListNotifyBadgeSandbox = ({ triggersActionsUi }: SandboxProps) => {
+  const RulesListNotifyBadge = triggersActionsUi.getRulesListNotifyBadge;
   return (
     <div style={{ flex: 1 }}>
-      {triggersActionsUi.getRulesListNotifyBadge({
-        rule: mockRule,
-        isLoading: false,
-        onRuleChanged: () => Promise.resolve(),
-      })}
+      <RulesListNotifyBadge
+        rule={mockRule}
+        isLoading={false}
+        onRuleChanged={() => Promise.resolve()}
+      />
     </div>
   );
 };

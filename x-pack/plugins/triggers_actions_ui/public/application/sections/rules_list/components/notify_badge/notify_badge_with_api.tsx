@@ -41,7 +41,6 @@ export const RulesListNotifyBadgeWithApi: React.FunctionComponent<
   );
 
   const onRuleChangedCallback = useCallback(async () => {
-    onRuleChanged();
     const updatedRule = await loadRule({
       http,
       ruleId: ruleSnoozeInfo.id,
@@ -54,6 +53,7 @@ export const RulesListNotifyBadgeWithApi: React.FunctionComponent<
       muteAll: updatedRule.muteAll,
       snoozeSchedule: updatedRule.snoozeSchedule,
     }));
+    onRuleChanged();
   }, [http, ruleSnoozeInfo.id, onRuleChanged]);
 
   const openSnooze = useCallback(() => {
