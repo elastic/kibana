@@ -8,18 +8,12 @@
 
 import React, { Fragment } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import {
-  EuiButton,
-  EuiCallOut,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiSpacer,
-  EuiTitle,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { NoResultsSuggestions } from './no_results_suggestions';
 import './_no_results.scss';
 import { NoResultsIllustration } from './assets/no_results_illustration';
+import { DiscoverErrorCallout } from '../layout/discover_documents';
 
 export interface DiscoverNoResultsProps {
   isTimeBased?: boolean;
@@ -65,28 +59,17 @@ export function DiscoverNoResults({
     </EuiFlexItem>
   ) : (
     <EuiFlexItem grow={true} className="dscNoResults">
-      <EuiCallOut
+      <DiscoverErrorCallout
+        error={error}
         title={
           <FormattedMessage
             id="discover.noResults.searchExamples.noResultsBecauseOfError"
-            defaultMessage="We encountered an error retrieving search results"
+            defaultMessage="We encountered an error retrieving search results:"
           />
         }
-        color="danger"
-        iconType="alert"
         data-test-subj="discoverNoResultsError"
-      >
-        <EuiButton
-          size="s"
-          color="danger"
-          onClick={() => (data ? data.search.showError(error) : void 0)}
-        >
-          <FormattedMessage
-            id="discover.showErrorMessageAgain"
-            defaultMessage="Show error message"
-          />
-        </EuiButton>
-      </EuiCallOut>
+        large={true}
+      />
     </EuiFlexItem>
   );
 

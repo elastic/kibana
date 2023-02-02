@@ -16,6 +16,7 @@ import type { OverlayStart } from '@kbn/core-overlays-browser';
 import type { NotificationsSetup, NotificationsStart } from '@kbn/core-notifications-browser';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import { ToastsService } from './toasts';
+export { showErrorDialog } from './toasts';
 
 export interface SetupDeps {
   uiSettings: IUiSettingsClient;

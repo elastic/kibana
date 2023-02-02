@@ -120,7 +120,6 @@ export const sendErrorTo = (
       return;
     }
 
-    data.search.showError(error);
     errorSubjects.forEach((subject) => sendErrorMsg(subject, error));
   };
 };

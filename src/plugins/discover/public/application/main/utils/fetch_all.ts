@@ -66,7 +66,7 @@ export function fetchAll(
     if (reset) {
       sendResetMsg(dataSubjects, initialFetchStatus);
     }
-    const { sort, query } = appStateContainer.getState();
+    const { sort, query, interval } = appStateContainer.getState();
     const recordRawType = getRawRecordType(query);
     const useSql = recordRawType === RecordRawType.PLAIN;
 
@@ -112,6 +112,9 @@ export function fetchAll(
         });
 
         checkHitCount(dataSubjects.main$, docs.length);
+        if (interval === 'm') {
+          throw new Error('Evil error');
+        }
       })
       // Only the document query should send its errors to main$, to cause the full Discover app
       // to get into an error state. The other queries will not cause all of Discover to error out

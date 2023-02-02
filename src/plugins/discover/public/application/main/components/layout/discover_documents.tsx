@@ -5,13 +5,22 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import React, { memo, useCallback, useMemo } from 'react';
+import React, { memo, useCallback, useMemo, useState } from 'react';
 import {
+  EuiButton,
+  EuiCallOut,
+  EuiCodeBlock,
   EuiFlexItem,
+  EuiLink,
   EuiLoadingSpinner,
+  EuiModalBody,
+  EuiModalFooter,
+  EuiModalHeader,
+  EuiModalHeaderTitle,
   EuiScreenReaderOnly,
   EuiSpacer,
   EuiText,
+  EuiModal,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { DataView } from '@kbn/data-views-plugin/public';
@@ -57,6 +66,112 @@ export const onResize = (
   const newGrid = { ...grid, columns: newColumns };
   stateContainer.setAppState({ grid: newGrid });
 };
+
+interface RequestError extends Error {
+  body?: { attributes?: { error: { caused_by: { type: string; reason: string } } } };
+}
+
+const isRequestError = (e: Error | RequestError): e is RequestError => {
+  if ('body' in e) {
+    return e.body?.attributes?.error?.caused_by !== undefined;
+  }
+  return false;
+};
+function getErrorText(error: Error) {
+  let text = '';
+
+  if (isRequestError(error)) {
+    text += `${error?.body?.attributes?.error?.caused_by.type}\n`;
+    text += `${error?.body?.attributes?.error?.caused_by.reason}\n\n`;
+  }
+
+  if (error.stack) {
+    text += error.stack;
+  }
+  return text;
+}
+export function DiscoverErrorCallout({
+  title,
+  error,
+  large,
+}: {
+  error: Error;
+  title: string | JSX.Element;
+  large: boolean;
+}) {
+  const [showModal, setShowModal] = useState(false);
+
+  const text = getErrorText(error);
+
+  return (
+    <>
+      {large ? (
+        <EuiCallOut
+          title={
+            <FormattedMessage
+              id="discover.noResults.searchExamples.noResultsBecauseOfError"
+              defaultMessage="We encountered an error retrieving search results"
+            />
+          }
+          color="danger"
+          iconType="alert"
+          data-test-subj="discoverNoResultsError"
+        >
+          <p>{error.message}</p>
+          <EuiButton size="s" color="danger" onClick={() => setShowModal(true)}>
+            <FormattedMessage
+              id="discover.showErrorMessageAgain"
+              defaultMessage="Show error message"
+            />
+          </EuiButton>
+        </EuiCallOut>
+      ) : (
+        <EuiCallOut
+          color="danger"
+          title={
+            <>
+              {title}: {error?.message}{' '}
+              <EuiLink onClick={() => setShowModal(true)}>
+                <FormattedMessage
+                  id="discover.showErrorDetails"
+                  defaultMessage="Show error details"
+                />
+              </EuiLink>
+            </>
+          }
+          iconType="alert"
+          size="s"
+        />
+      )}
+      {showModal && (
+        <EuiModal onClose={() => setShowModal(false)}>
+          <EuiModalHeader>
+            <EuiModalHeaderTitle>{title}</EuiModalHeaderTitle>
+          </EuiModalHeader>
+          <EuiModalBody data-test-subj="errorModalBody">
+            <EuiCallOut size="s" color="danger" iconType="alert" title={error.message} />
+            {text && (
+              <React.Fragment>
+                <EuiSpacer size="s" />
+                <EuiCodeBlock isCopyable={true} paddingSize="s">
+                  {text}
+                </EuiCodeBlock>
+              </React.Fragment>
+            )}
+          </EuiModalBody>
+          <EuiModalFooter>
+            <EuiButton onClick={() => setShowModal(false)} fill>
+              <FormattedMessage
+                id="core.notifications.errorToast.closeModal"
+                defaultMessage="Close"
+              />
+            </EuiButton>
+          </EuiModalFooter>
+        </EuiModal>
+      )}
+    </>
+  );
+}
 
 function DiscoverDocumentsComponent({
   expandedDoc,
@@ -182,6 +297,13 @@ function DiscoverDocumentsComponent({
           <FormattedMessage id="discover.documentsAriaLabel" defaultMessage="Documents" />
         </h2>
       </EuiScreenReaderOnly>
+      {documentState.fetchStatus === FetchStatus.ERROR && documentState.error && (
+        <DiscoverErrorCallout
+          large={false}
+          error={documentState.error}
+          title={'Error fetching documents'}
+        />
+      )}
       {isLegacy && rows && rows.length && (
         <>
           {!hideAnnouncements && <DocumentExplorerCallout />}
