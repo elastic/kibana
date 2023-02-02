@@ -92,30 +92,22 @@ const StyledEuiInMemoryTable = styled(EuiInMemoryTable as any)`
     font: ${({ theme }) => theme.eui.euiFont};
   } */
 
+  .inlineActions {
+    opacity: 0;
+  }
+
   .eventFieldsTable__tableRow {
     font-size: ${({ theme }) => theme.eui.euiFontSizeXS};
     font-family: ${({ theme }) => theme.eui.euiCodeFontFamily};
 
-    .hoverActions-active {
-      .timelines__hoverActionButton,
-      .securitySolution__hoverActionButton {
-        opacity: 1;
-      }
+    .inlineActions-popoverOpen {
+      opacity: 1;
     }
 
     &:hover {
-      .timelines__hoverActionButton,
-      .securitySolution__hoverActionButton {
+      .inlineActions {
         opacity: 1;
       }
-    }
-    .timelines__hoverActionButton,
-    .securitySolution__hoverActionButton {
-      // TODO: Using this logic from discover
-      /* @include euiBreakpoint('m', 'l', 'xl') {
-        opacity: 0;
-      } */
-      opacity: 0;
     }
   }
 

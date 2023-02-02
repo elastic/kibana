@@ -10,6 +10,7 @@ import { get } from 'lodash';
 import memoizeOne from 'memoize-one';
 import React from 'react';
 import styled from 'styled-components';
+import { CellActions, CellActionsMode } from '@kbn/cell-actions';
 import type { BrowserFields } from '../../containers/source';
 import type { OnUpdateColumns } from '../../../timelines/components/timeline/events';
 import * as i18n from './translations';
@@ -18,7 +19,7 @@ import type { ColumnHeaderOptions } from '../../../../common/types';
 import type { BrowserField } from '../../../../common/search_strategy';
 import { FieldValueCell } from './table/field_value_cell';
 import { FieldNameCell } from './table/field_name_cell';
-import { ActionCell } from './table/action_cell';
+import { CELL_ACTIONS_DETAILS_FLYOUT_TRIGGER } from '../../../../common/constants';
 
 const HoverActionsContainer = styled(EuiPanel)`
   align-items: center;
@@ -35,7 +36,8 @@ const HoverActionsContainer = styled(EuiPanel)`
 HoverActionsContainer.displayName = 'HoverActionsContainer';
 
 export const getFieldFromBrowserField = memoizeOne(
-  (keys: string[], browserFields: BrowserFields): BrowserField => get(browserFields, keys),
+  (keys: string[], browserFields: BrowserFields): BrowserField | undefined =>
+    get(browserFields, keys),
   (newArgs, lastArgs) => newArgs[0].join() === lastArgs[0].join()
 );
 export const getColumns = ({
@@ -74,24 +76,23 @@ export const getColumns = ({
           truncateText: false,
           width: '132px',
           render: (values: string[] | null | undefined, data: EventFieldsData) => {
-            const label = data.isObjectArray
-              ? i18n.NESTED_COLUMN(data.field)
-              : i18n.VIEW_COLUMN(data.field);
             const fieldFromBrowserField = getFieldFromBrowserField(
               [data.category, 'fields', data.field],
               browserFields
             );
+
             return (
-              <ActionCell
-                aria-label={label}
-                contextId={contextId}
-                data={data}
-                eventId={eventId}
-                fieldFromBrowserField={fieldFromBrowserField}
-                getLinkValue={getLinkValue}
-                toggleColumn={toggleColumn}
-                scopeId={scopeId}
-                values={values}
+              <CellActions
+                field={{
+                  name: data.field,
+                  value: values,
+                  type: data.type,
+                  aggregatable: fieldFromBrowserField?.aggregatable,
+                }}
+                triggerId={CELL_ACTIONS_DETAILS_FLYOUT_TRIGGER}
+                mode={CellActionsMode.INLINE}
+                visibleCellActions={3}
+                metadata={{ scopeId, isObjectArray: data.isObjectArray }}
               />
             );
           },
