@@ -30,6 +30,7 @@ interface VectorLayerDescriptor extends BaseVectorLayerDescriptor {
   sourceDescriptor: EMSFileSourceDescriptor;
 }
 
+const COUNTRY_NAME = 'name';
 const PER_COUNTRY_LAYER_ID = 'per_country';
 const PER_REGION_LAYER_ID = 'per_region';
 const HTTP_REQUEST_PER_COUNTRY = `__kbnjoin__count__${PER_COUNTRY_LAYER_ID}`;
@@ -77,7 +78,7 @@ export async function getHttpRequestsLayerList(maps?: MapsStartApi) {
     sourceDescriptor: {
       type: SOURCE_TYPES.EMS_FILE,
       id: 'world_countries',
-      tooltipProperties: ['iso2'],
+      tooltipProperties: [COUNTRY_NAME],
     },
     style: getLayerStyle(HTTP_REQUEST_PER_COUNTRY, PalleteColors.BluetoRed),
     id: uuidv4(),

@@ -25,7 +25,7 @@ import { EuiText } from '@elastic/eui';
 import type { Filter } from '@kbn/es-query';
 import { ApmPluginStartDeps } from '../../../../../plugin';
 import { getSessionMapLayerList } from './get_session_map_layer_list';
-import { getHttpRequestsLayerList } from './get_http_requests_map_layer_list copy';
+import { getHttpRequestsLayerList } from './get_http_requests_map_layer_list';
 import { MapTypes } from './index';
 function EmbeddedMapComponent({
   selectedMap,
