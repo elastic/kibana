@@ -9,7 +9,6 @@ import React, { ReactElement } from 'react';
 import { EuiDescriptionList, EuiLoadingContent } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useJourneySteps } from '../../monitor_details/hooks/use_journey_steps';
-// import { useFormatTestRunAt } from '../../../utils/monitor_test_result/test_time_formats';
 import { useDateFormat } from '../../../../../hooks/use_date_format';
 
 export const TestRunDate = () => {
