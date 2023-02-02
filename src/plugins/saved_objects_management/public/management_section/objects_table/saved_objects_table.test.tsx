@@ -41,6 +41,7 @@ import {
 } from './saved_objects_table';
 import { Flyout, Relationships } from './components';
 import { SavedObjectWithMetadata } from '../../types';
+import { customBrandingServiceMock } from '@kbn/core-custom-branding-browser-mocks';
 
 const convertType = (type: string): SavedObjectManagementTypeInfo => ({
   name: type,
@@ -141,6 +142,7 @@ describe('SavedObjectsTable', () => {
       goInspectObject: () => {},
       canGoInApp: () => true,
       search,
+      customBranding: customBrandingServiceMock.createStartContract(),
     };
 
     findObjectsMock.mockImplementation(() => ({

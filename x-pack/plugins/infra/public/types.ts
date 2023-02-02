@@ -28,8 +28,9 @@ import type {
 } from '@kbn/observability-plugin/public';
 // import type { OsqueryPluginStart } from '../../osquery/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
-import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
-import { UnwrapPromise } from '../common/utility_types';
+import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
+import { type TypedLensByValueInput, LensPublicStart } from '@kbn/lens-plugin/public';
+import type { UnwrapPromise } from '../common/utility_types';
 import type {
   SourceProviderProps,
   UseNodeMetricsTableOptions,
@@ -62,6 +63,7 @@ export interface InfraClientSetupDeps {
   ml: MlPluginSetup;
   embeddable: EmbeddableSetup;
   share: SharePluginSetup;
+  lens: LensPublicStart;
 }
 
 export interface InfraClientStartDeps {
@@ -77,6 +79,7 @@ export interface InfraClientStartDeps {
   osquery?: unknown; // OsqueryPluginStart;
   share: SharePluginStart;
   storage: IStorageWrapper;
+  lens: LensPublicStart;
 }
 
 export type InfraClientCoreSetup = CoreSetup<InfraClientStartDeps, InfraClientStartExports>;
@@ -95,4 +98,10 @@ export interface InfraHttpError extends IHttpFetchError {
     statusCode: number;
     message?: string;
   };
+}
+
+export type LensAttributes = TypedLensByValueInput['attributes'];
+
+export interface LensOptions {
+  breakdownSize: number;
 }

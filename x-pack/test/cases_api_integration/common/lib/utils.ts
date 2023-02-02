@@ -33,7 +33,6 @@ import {
   CasesResponse,
   CasesFindResponse,
   CommentRequest,
-  CaseUserActionResponse,
   CommentResponse,
   CasesPatchRequest,
   AllCommentsResponse,
@@ -41,7 +40,6 @@ import {
   CasesConfigurePatch,
   CasesStatusResponse,
   CasesConfigurationsResponse,
-  CaseUserActionsResponse,
   AlertResponse,
   ConnectorMappings,
   CasesByAlertId,
@@ -52,7 +50,6 @@ import {
   CasesMetricsResponse,
   CasesBulkGetResponse,
 } from '@kbn/cases-plugin/common/api';
-import { getCaseUserActionUrl } from '@kbn/cases-plugin/common/api/helpers';
 import { SignalHit } from '@kbn/security-solution-plugin/server/lib/detection_engine/signals/types';
 import { ActionResult } from '@kbn/actions-plugin/server/types';
 import { ESCasesConfigureAttributes } from '@kbn/cases-plugin/server/services/configure/types';
@@ -231,7 +228,7 @@ interface CommonSavedObjectAttributes {
 
 const savedObjectCommonAttributes = ['created_at', 'updated_at', 'version', 'id'];
 
-const removeServerGeneratedPropertiesFromObject = <T extends object, K extends keyof T>(
+export const removeServerGeneratedPropertiesFromObject = <T extends object, K extends keyof T>(
   object: T,
   keys: K[]
 ): Omit<T, K> => {
@@ -247,16 +244,6 @@ export const removeServerGeneratedPropertiesFromSavedObject = <
     ...savedObjectCommonAttributes,
     ...keys,
   ]);
-};
-
-export const removeServerGeneratedPropertiesFromUserAction = (
-  attributes: CaseUserActionResponse
-) => {
-  const keysToRemove: Array<keyof CaseUserActionResponse> = ['action_id', 'created_at'];
-  return removeServerGeneratedPropertiesFromObject<
-    CaseUserActionResponse,
-    typeof keysToRemove[number]
-  >(attributes, keysToRemove);
 };
 
 export const removeServerGeneratedPropertiesFromCase = (
@@ -600,24 +587,6 @@ export const updateCase = async ({
     .expect(expectedHttpCode);
 
   return cases;
-};
-
-export const getCaseUserActions = async ({
-  supertest,
-  caseID,
-  expectedHttpCode = 200,
-  auth = { user: superUser, space: null },
-}: {
-  supertest: SuperTest.SuperTest<SuperTest.Test>;
-  caseID: string;
-  expectedHttpCode?: number;
-  auth?: { user: User; space: string | null };
-}): Promise<CaseUserActionsResponse> => {
-  const { body: userActions } = await supertest
-    .get(`${getSpaceUrlPrefix(auth.space)}${getCaseUserActionUrl(caseID)}`)
-    .auth(auth.user.username, auth.user.password)
-    .expect(expectedHttpCode);
-  return userActions;
 };
 
 export const deleteComment = async ({

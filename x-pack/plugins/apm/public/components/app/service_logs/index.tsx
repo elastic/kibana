@@ -12,11 +12,7 @@ import { useFetcher } from '../../../hooks/use_fetcher';
 import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
 import { APIReturnType } from '../../../services/rest/create_call_apm_api';
 
-import {
-  CONTAINER_ID,
-  HOST_NAME,
-  SERVICE_NAME,
-} from '../../../../common/es_fields/apm';
+import { CONTAINER_ID, SERVICE_NAME } from '../../../../common/es_fields/apm';
 import { useApmParams } from '../../../hooks/use_apm_params';
 import { useTimeRange } from '../../../hooks/use_time_range';
 
@@ -70,16 +66,12 @@ export const getInfrastructureKQLFilter = (
     | undefined,
   serviceName: string
 ) => {
-  const containerIds = data?.containerIds ?? [];
-  const hostNames = data?.hostNames ?? [];
+  const containerIds: string[] = data?.containerIds ?? [];
+  const containerIdKql = containerIds
+    .map((id) => `${CONTAINER_ID}: "${id}"`)
+    .join(' or ');
 
-  const infraAttributes = containerIds.length
-    ? containerIds.map((id) => `${CONTAINER_ID}: "${id}"`)
-    : hostNames.map((id) => `${HOST_NAME}: "${id}"`);
-
-  const infraAttributesJoined = infraAttributes.join(' or ');
-
-  return infraAttributes.length
-    ? `${SERVICE_NAME}: "${serviceName}" or (not ${SERVICE_NAME} and (${infraAttributesJoined}))`
+  return containerIds.length
+    ? `${SERVICE_NAME}: "${serviceName}" or (not ${SERVICE_NAME} and (${containerIdKql}))`
     : `${SERVICE_NAME}: "${serviceName}"`;
 };

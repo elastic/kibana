@@ -47,6 +47,8 @@ export const OptionsListControl = ({ typeaheadSubject }: { typeaheadSubject: Sub
   const exclude = select((state) => state.explicitInput.exclude);
   const id = select((state) => state.explicitInput.id);
 
+  const placeholder = select((state) => state.explicitInput.placeholder);
+
   const loading = select((state) => state.output.loading);
 
   // debounce loading state so loading doesn't flash when user types
@@ -128,7 +130,7 @@ export const OptionsListControl = ({ typeaheadSubject }: { typeaheadSubject: Sub
       >
         {hasSelections || existsSelected
           ? selectionDisplayNode
-          : OptionsListStrings.control.getPlaceholder()}
+          : placeholder ?? OptionsListStrings.control.getPlaceholder()}
       </EuiFilterButton>
     </div>
   );

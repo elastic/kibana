@@ -1,5 +1,4 @@
 {
-  "job_type": "anomaly_detector",
   "description": "Security: Windows - Unusual RDP (remote desktop protocol) user logins can indicate account takeover or credentialed access.",
   "groups": [
     "endpoint",

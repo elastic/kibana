@@ -55,6 +55,7 @@ describe('processAlerts', () => {
         previouslyRecoveredAlerts,
         hasReachedAlertLimit: false,
         alertLimit: 10,
+        autoRecoverAlerts: true,
         setFlapping: false,
       });
 
@@ -92,6 +93,7 @@ describe('processAlerts', () => {
         previouslyRecoveredAlerts: {},
         hasReachedAlertLimit: false,
         alertLimit: 10,
+        autoRecoverAlerts: true,
         setFlapping: false,
       });
 
@@ -137,6 +139,7 @@ describe('processAlerts', () => {
         previouslyRecoveredAlerts: {},
         hasReachedAlertLimit: false,
         alertLimit: 10,
+        autoRecoverAlerts: true,
         setFlapping: false,
       });
 
@@ -174,6 +177,7 @@ describe('processAlerts', () => {
         previouslyRecoveredAlerts: {},
         hasReachedAlertLimit: false,
         alertLimit: 10,
+        autoRecoverAlerts: true,
         setFlapping: false,
       });
 
@@ -221,6 +225,7 @@ describe('processAlerts', () => {
         previouslyRecoveredAlerts: {},
         hasReachedAlertLimit: false,
         alertLimit: 10,
+        autoRecoverAlerts: true,
         setFlapping: false,
       });
 
@@ -278,6 +283,7 @@ describe('processAlerts', () => {
         previouslyRecoveredAlerts: {},
         hasReachedAlertLimit: false,
         alertLimit: 10,
+        autoRecoverAlerts: true,
         setFlapping: false,
       });
 
@@ -338,6 +344,7 @@ describe('processAlerts', () => {
         previouslyRecoveredAlerts,
         hasReachedAlertLimit: false,
         alertLimit: 10,
+        autoRecoverAlerts: true,
         setFlapping: true,
       });
 
@@ -380,6 +387,7 @@ describe('processAlerts', () => {
         previouslyRecoveredAlerts: {},
         hasReachedAlertLimit: false,
         alertLimit: 10,
+        autoRecoverAlerts: true,
         setFlapping: false,
       });
 
@@ -407,6 +415,7 @@ describe('processAlerts', () => {
         previouslyRecoveredAlerts: {},
         hasReachedAlertLimit: false,
         alertLimit: 10,
+        autoRecoverAlerts: true,
         setFlapping: false,
       });
 
@@ -436,6 +445,7 @@ describe('processAlerts', () => {
         previouslyRecoveredAlerts: {},
         hasReachedAlertLimit: false,
         alertLimit: 10,
+        autoRecoverAlerts: true,
         setFlapping: false,
       });
 
@@ -474,6 +484,7 @@ describe('processAlerts', () => {
         previouslyRecoveredAlerts: {},
         hasReachedAlertLimit: false,
         alertLimit: 10,
+        autoRecoverAlerts: true,
         setFlapping: false,
       });
 
@@ -512,10 +523,41 @@ describe('processAlerts', () => {
         previouslyRecoveredAlerts,
         hasReachedAlertLimit: false,
         alertLimit: 10,
+        autoRecoverAlerts: true,
         setFlapping: true,
       });
 
       expect(recoveredAlerts).toEqual(updatedAlerts);
+    });
+
+    test('should skip recovery calculations if autoRecoverAlerts = false', () => {
+      const activeAlert = new Alert<AlertInstanceState, AlertInstanceContext>('1');
+      const recoveredAlert1 = new Alert<AlertInstanceState, AlertInstanceContext>('2');
+      const recoveredAlert2 = new Alert<AlertInstanceState, AlertInstanceContext>('3');
+
+      const existingAlerts = {
+        '1': activeAlert,
+        '2': recoveredAlert1,
+        '3': recoveredAlert2,
+      };
+      existingAlerts['2'].replaceState({ start: '1969-12-30T00:00:00.000Z', duration: 33000 });
+      existingAlerts['3'].replaceState({ start: '1969-12-31T07:34:00.000Z', duration: 23532 });
+
+      const updatedAlerts = cloneDeep(existingAlerts);
+
+      updatedAlerts['1'].scheduleActions('default' as never, { foo: '1' });
+
+      const { recoveredAlerts } = processAlerts({
+        alerts: updatedAlerts,
+        existingAlerts,
+        previouslyRecoveredAlerts: {},
+        hasReachedAlertLimit: false,
+        alertLimit: 10,
+        autoRecoverAlerts: false,
+        setFlapping: false,
+      });
+
+      expect(recoveredAlerts).toEqual({});
     });
   });
 
@@ -557,6 +599,7 @@ describe('processAlerts', () => {
         previouslyRecoveredAlerts: {},
         hasReachedAlertLimit: true,
         alertLimit: 7,
+        autoRecoverAlerts: true,
         setFlapping: false,
       });
 
@@ -592,6 +635,7 @@ describe('processAlerts', () => {
         previouslyRecoveredAlerts: {},
         hasReachedAlertLimit: true,
         alertLimit: 7,
+        autoRecoverAlerts: true,
         setFlapping: false,
       });
 
@@ -651,6 +695,7 @@ describe('processAlerts', () => {
         previouslyRecoveredAlerts: {},
         hasReachedAlertLimit: true,
         alertLimit: MAX_ALERTS,
+        autoRecoverAlerts: true,
         setFlapping: false,
       });
 
@@ -684,6 +729,7 @@ describe('processAlerts', () => {
         previouslyRecoveredAlerts: {},
         hasReachedAlertLimit: false,
         alertLimit: 10,
+        autoRecoverAlerts: true,
         setFlapping: true,
       });
 
@@ -734,6 +780,7 @@ describe('processAlerts', () => {
         previouslyRecoveredAlerts: {},
         hasReachedAlertLimit: false,
         alertLimit: 10,
+        autoRecoverAlerts: true,
         setFlapping: true,
       });
 
@@ -770,6 +817,7 @@ describe('processAlerts', () => {
         previouslyRecoveredAlerts: { '1': recoveredAlert },
         hasReachedAlertLimit: false,
         alertLimit: 10,
+        autoRecoverAlerts: true,
         setFlapping: true,
       });
 
@@ -825,6 +873,7 @@ describe('processAlerts', () => {
         previouslyRecoveredAlerts: {},
         hasReachedAlertLimit: false,
         alertLimit: 10,
+        autoRecoverAlerts: true,
         setFlapping: true,
       });
 
@@ -858,6 +907,7 @@ describe('processAlerts', () => {
         previouslyRecoveredAlerts: alerts,
         hasReachedAlertLimit: false,
         alertLimit: 10,
+        autoRecoverAlerts: true,
         setFlapping: true,
       });
 
@@ -899,6 +949,7 @@ describe('processAlerts', () => {
         previouslyRecoveredAlerts,
         hasReachedAlertLimit: false,
         alertLimit: 10,
+        autoRecoverAlerts: true,
         setFlapping: false,
       });
 
@@ -965,6 +1016,7 @@ describe('processAlerts', () => {
           previouslyRecoveredAlerts: {},
           hasReachedAlertLimit: true,
           alertLimit: 10,
+          autoRecoverAlerts: true,
           setFlapping: true,
         });
 
@@ -1001,6 +1053,7 @@ describe('processAlerts', () => {
           previouslyRecoveredAlerts: {},
           hasReachedAlertLimit: true,
           alertLimit: 10,
+          autoRecoverAlerts: true,
           setFlapping: true,
         });
 
@@ -1062,6 +1115,7 @@ describe('processAlerts', () => {
           previouslyRecoveredAlerts: { '1': activeAlert1 },
           hasReachedAlertLimit: true,
           alertLimit: 10,
+          autoRecoverAlerts: true,
           setFlapping: true,
         });
 
@@ -1138,6 +1192,7 @@ describe('processAlerts', () => {
           previouslyRecoveredAlerts: {},
           hasReachedAlertLimit: true,
           alertLimit: 10,
+          autoRecoverAlerts: true,
           setFlapping: false,
         });
 

@@ -123,9 +123,10 @@ const baseColumns = [
   },
   {
     field: 'rule.name',
-    name: i18n.translate('xpack.csp.findings.findingsTable.findingsTableColumn.ruleColumnLabel', {
-      defaultMessage: 'Rule',
-    }),
+    name: i18n.translate(
+      'xpack.csp.findings.findingsTable.findingsTableColumn.ruleNameColumnLabel',
+      { defaultMessage: 'Rule Name' }
+    ),
     sortable: true,
     render: (name: string) => (
       <EuiToolTip content={name} position="left" anchorClassName="eui-textTruncate">
@@ -134,12 +135,29 @@ const baseColumns = [
     ),
   },
   {
-    field: 'rule.benchmark.name',
+    field: 'rule.benchmark.rule_number',
     name: i18n.translate(
-      'xpack.csp.findings.findingsTable.findingsTableColumn.ruleBenchmarkColumnLabel',
-      { defaultMessage: 'Benchmark' }
+      'xpack.csp.findings.findingsTable.findingsTableColumn.ruleNumberColumnLabel',
+      {
+        defaultMessage: 'Rule Number',
+      }
     ),
-    width: '10%',
+    width: '120px',
+  },
+  {
+    field: 'rule.benchmark.name',
+    name: (
+      <ColumnNameWithTooltip
+        columnName={i18n.translate(
+          'xpack.csp.findings.findingsTable.findingsTableColumn.ruleBenchmarkColumnLabel',
+          { defaultMessage: 'Applicable Benchmark' }
+        )}
+        tooltipContent={i18n.translate(
+          'xpack.csp.findings.findingsTable.findingsTableColumn.ruleBenchmarkColumnTooltipLabel',
+          { defaultMessage: 'The benchmark(s) rules used to evaluate this resource came from' }
+        )}
+      />
+    ),
     sortable: true,
     truncateText: true,
   },
@@ -149,7 +167,6 @@ const baseColumns = [
       'xpack.csp.findings.findingsTable.findingsTableColumn.ruleSectionColumnLabel',
       { defaultMessage: 'CIS Section' }
     ),
-    width: '7%',
     sortable: true,
     truncateText: true,
     render: (section: string) => (
@@ -164,15 +181,14 @@ const baseColumns = [
       <ColumnNameWithTooltip
         columnName={i18n.translate(
           'xpack.csp.findings.findingsTable.findingsTableColumn.clusterIdColumnLabel',
-          { defaultMessage: 'Cluster ID' }
+          { defaultMessage: 'Belongs To' }
         )}
         tooltipContent={i18n.translate(
           'xpack.csp.findings.findingsTable.findingsTableColumn.clusterIdColumnTooltipLabel',
-          { defaultMessage: 'Kube-System Namespace ID' }
+          { defaultMessage: 'Kubernetes Cluster ID or Cloud Account Name' }
         )}
       />
     ),
-    width: '150px',
     sortable: true,
     truncateText: true,
     render: (section: string) => (
@@ -183,6 +199,7 @@ const baseColumns = [
   },
   {
     field: '@timestamp',
+    align: 'right',
     width: '10%',
     name: i18n.translate(
       'xpack.csp.findings.findingsTable.findingsTableColumn.lastCheckedColumnLabel',

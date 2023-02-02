@@ -434,6 +434,7 @@ export const useSourcererDataView = (
       indexPattern: {
         fields: sourcererDataView.indexFields,
         title: selectedPatterns.join(','),
+        getName: () => selectedPatterns.join(','),
       },
       indicesExist,
       loading: loading || sourcererDataView.loading,

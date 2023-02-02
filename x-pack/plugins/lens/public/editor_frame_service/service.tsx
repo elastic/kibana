@@ -118,7 +118,13 @@ export class EditorFrameService {
       const { EditorFrame } = await import('../async_services');
 
       return {
-        EditorFrameContainer: ({ showNoDataPopover, lensInspector, indexPatternService }) => {
+        EditorFrameContainer: ({
+          showNoDataPopover,
+          lensInspector,
+          indexPatternService,
+          getUserMessages,
+          addUserMessages,
+        }) => {
           return (
             <div className="lnsApp__frame">
               <EditorFrame
@@ -127,6 +133,8 @@ export class EditorFrameService {
                 plugins={plugins}
                 lensInspector={lensInspector}
                 showNoDataPopover={showNoDataPopover}
+                getUserMessages={getUserMessages}
+                addUserMessages={addUserMessages}
                 indexPatternService={indexPatternService}
                 datasourceMap={resolvedDatasources}
                 visualizationMap={resolvedVisualizations}

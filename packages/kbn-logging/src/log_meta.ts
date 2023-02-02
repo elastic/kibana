@@ -8,8 +8,7 @@
 
 import {
   EcsBase,
-  EcsAgent,
-  EcsAutonomousSystem,
+  EcsAs as EcsAutonomousSystem,
   EcsClient,
   EcsCloud,
   EcsContainer,
@@ -40,6 +39,7 @@ import {
   EcsUser,
   EcsUserAgent,
   EcsVulnerability,
+  EcsAgent,
 } from '@kbn/ecs';
 
 /**

@@ -18,9 +18,10 @@ import { Log } from './log';
 const packageMatcher = makeMatcher(['**/*', '!**/.*']);
 
 /**
- * Any non-package code must match this in order to trigger a restart
+ * Any code that is outside of a package must match this in order to trigger a restart
  */
 const nonPackageMatcher = makeMatcher([
+  'config/**/*.yml',
   'src/**',
   '!src/{dev,fixtures}/**',
   'x-pack/plugins/**',

@@ -104,6 +104,10 @@ class OptionsListService implements ControlsOptionsListService {
       return { rejected: true } as OptionsListResponse;
     }
   };
+
+  public clearOptionsListCache = () => {
+    this.cachedOptionsListRequest.cache = new memoize.Cache();
+  };
 }
 
 export interface OptionsListServiceRequiredServices {

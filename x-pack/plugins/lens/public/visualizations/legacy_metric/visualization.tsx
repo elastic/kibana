@@ -312,11 +312,6 @@ export const getLegacyMetricVisualization = ({
     );
   },
 
-  getErrorMessages(state) {
-    // Is it possible to break it?
-    return undefined;
-  },
-
   getVisualizationInfo(state: LegacyMetricState) {
     const dimensions = [];
     if (state.accessor) {

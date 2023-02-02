@@ -1941,7 +1941,7 @@
           "ActionTypeConfig",
           ">>; execute: ({ actionId, params, source, relatedSavedObjects, }: Omit<",
           "ExecuteOptions",
-          "<unknown>, \"request\">) => Promise<",
+          "<unknown>, \"request\" | \"actionExecutionId\">) => Promise<",
           {
             "pluginId": "actions",
             "scope": "common",
@@ -1991,7 +1991,31 @@
             "section": "def-common.ActionType",
             "text": "ActionType"
           },
-          "[]>; isActionTypeEnabled: (actionTypeId: string, options?: { notifyUsage: boolean; }) => boolean; isPreconfigured: (connectorId: string) => boolean; }"
+          "[]>; isActionTypeEnabled: (actionTypeId: string, options?: { notifyUsage: boolean; }) => boolean; isPreconfigured: (connectorId: string) => boolean; getGlobalExecutionLogWithAuth: ({ dateStart, dateEnd, filter, page, perPage, sort, namespaces, }: ",
+          {
+            "pluginId": "actions",
+            "scope": "common",
+            "docId": "kibActionsPluginApi",
+            "section": "def-common.GetGlobalExecutionLogParams",
+            "text": "GetGlobalExecutionLogParams"
+          },
+          ") => Promise<",
+          {
+            "pluginId": "actions",
+            "scope": "common",
+            "docId": "kibActionsPluginApi",
+            "section": "def-common.IExecutionLogResult",
+            "text": "IExecutionLogResult"
+          },
+          ">; getGlobalExecutionKpiWithAuth: ({ dateStart, dateEnd, filter, namespaces, }: ",
+          {
+            "pluginId": "actions",
+            "scope": "common",
+            "docId": "kibActionsPluginApi",
+            "section": "def-common.GetGlobalExecutionKPIParams",
+            "text": "GetGlobalExecutionKPIParams"
+          },
+          ") => Promise<{ success: number; unknown: number; failure: number; warning: number; }>; }"
         ],
         "path": "x-pack/plugins/actions/server/index.ts",
         "deprecated": false,
@@ -3261,6 +3285,363 @@
       },
       {
         "parentPluginId": "actions",
+        "id": "def-common.GetGlobalExecutionKPIParams",
+        "type": "Interface",
+        "tags": [],
+        "label": "GetGlobalExecutionKPIParams",
+        "description": [],
+        "path": "x-pack/plugins/actions/common/execution_log_types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "actions",
+            "id": "def-common.GetGlobalExecutionKPIParams.dateStart",
+            "type": "string",
+            "tags": [],
+            "label": "dateStart",
+            "description": [],
+            "path": "x-pack/plugins/actions/common/execution_log_types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "actions",
+            "id": "def-common.GetGlobalExecutionKPIParams.dateEnd",
+            "type": "string",
+            "tags": [],
+            "label": "dateEnd",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/plugins/actions/common/execution_log_types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "actions",
+            "id": "def-common.GetGlobalExecutionKPIParams.filter",
+            "type": "string",
+            "tags": [],
+            "label": "filter",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/plugins/actions/common/execution_log_types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "actions",
+            "id": "def-common.GetGlobalExecutionKPIParams.namespaces",
+            "type": "Array",
+            "tags": [],
+            "label": "namespaces",
+            "description": [],
+            "signature": [
+              "(string | undefined)[] | undefined"
+            ],
+            "path": "x-pack/plugins/actions/common/execution_log_types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "actions",
+        "id": "def-common.GetGlobalExecutionLogParams",
+        "type": "Interface",
+        "tags": [],
+        "label": "GetGlobalExecutionLogParams",
+        "description": [],
+        "path": "x-pack/plugins/actions/common/execution_log_types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "actions",
+            "id": "def-common.GetGlobalExecutionLogParams.dateStart",
+            "type": "string",
+            "tags": [],
+            "label": "dateStart",
+            "description": [],
+            "path": "x-pack/plugins/actions/common/execution_log_types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "actions",
+            "id": "def-common.GetGlobalExecutionLogParams.dateEnd",
+            "type": "string",
+            "tags": [],
+            "label": "dateEnd",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/plugins/actions/common/execution_log_types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "actions",
+            "id": "def-common.GetGlobalExecutionLogParams.filter",
+            "type": "string",
+            "tags": [],
+            "label": "filter",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/plugins/actions/common/execution_log_types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "actions",
+            "id": "def-common.GetGlobalExecutionLogParams.page",
+            "type": "number",
+            "tags": [],
+            "label": "page",
+            "description": [],
+            "path": "x-pack/plugins/actions/common/execution_log_types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "actions",
+            "id": "def-common.GetGlobalExecutionLogParams.perPage",
+            "type": "number",
+            "tags": [],
+            "label": "perPage",
+            "description": [],
+            "path": "x-pack/plugins/actions/common/execution_log_types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "actions",
+            "id": "def-common.GetGlobalExecutionLogParams.sort",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "sort",
+            "description": [],
+            "signature": [
+              "SortCombinations",
+              " | ",
+              "SortCombinations",
+              "[]"
+            ],
+            "path": "x-pack/plugins/actions/common/execution_log_types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "actions",
+            "id": "def-common.GetGlobalExecutionLogParams.namespaces",
+            "type": "Array",
+            "tags": [],
+            "label": "namespaces",
+            "description": [],
+            "signature": [
+              "(string | undefined)[] | undefined"
+            ],
+            "path": "x-pack/plugins/actions/common/execution_log_types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "actions",
+        "id": "def-common.IExecutionLog",
+        "type": "Interface",
+        "tags": [],
+        "label": "IExecutionLog",
+        "description": [],
+        "path": "x-pack/plugins/actions/common/execution_log_types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "actions",
+            "id": "def-common.IExecutionLog.id",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [],
+            "path": "x-pack/plugins/actions/common/execution_log_types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "actions",
+            "id": "def-common.IExecutionLog.timestamp",
+            "type": "string",
+            "tags": [],
+            "label": "timestamp",
+            "description": [],
+            "path": "x-pack/plugins/actions/common/execution_log_types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "actions",
+            "id": "def-common.IExecutionLog.duration_ms",
+            "type": "number",
+            "tags": [],
+            "label": "duration_ms",
+            "description": [],
+            "path": "x-pack/plugins/actions/common/execution_log_types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "actions",
+            "id": "def-common.IExecutionLog.status",
+            "type": "string",
+            "tags": [],
+            "label": "status",
+            "description": [],
+            "path": "x-pack/plugins/actions/common/execution_log_types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "actions",
+            "id": "def-common.IExecutionLog.message",
+            "type": "string",
+            "tags": [],
+            "label": "message",
+            "description": [],
+            "path": "x-pack/plugins/actions/common/execution_log_types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "actions",
+            "id": "def-common.IExecutionLog.version",
+            "type": "string",
+            "tags": [],
+            "label": "version",
+            "description": [],
+            "path": "x-pack/plugins/actions/common/execution_log_types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "actions",
+            "id": "def-common.IExecutionLog.schedule_delay_ms",
+            "type": "number",
+            "tags": [],
+            "label": "schedule_delay_ms",
+            "description": [],
+            "path": "x-pack/plugins/actions/common/execution_log_types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "actions",
+            "id": "def-common.IExecutionLog.space_ids",
+            "type": "Array",
+            "tags": [],
+            "label": "space_ids",
+            "description": [],
+            "signature": [
+              "string[]"
+            ],
+            "path": "x-pack/plugins/actions/common/execution_log_types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "actions",
+            "id": "def-common.IExecutionLog.connector_name",
+            "type": "string",
+            "tags": [],
+            "label": "connector_name",
+            "description": [],
+            "path": "x-pack/plugins/actions/common/execution_log_types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "actions",
+            "id": "def-common.IExecutionLog.connector_id",
+            "type": "string",
+            "tags": [],
+            "label": "connector_id",
+            "description": [],
+            "path": "x-pack/plugins/actions/common/execution_log_types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "actions",
+            "id": "def-common.IExecutionLog.timed_out",
+            "type": "boolean",
+            "tags": [],
+            "label": "timed_out",
+            "description": [],
+            "path": "x-pack/plugins/actions/common/execution_log_types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "actions",
+        "id": "def-common.IExecutionLogResult",
+        "type": "Interface",
+        "tags": [],
+        "label": "IExecutionLogResult",
+        "description": [],
+        "path": "x-pack/plugins/actions/common/execution_log_types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "actions",
+            "id": "def-common.IExecutionLogResult.total",
+            "type": "number",
+            "tags": [],
+            "label": "total",
+            "description": [],
+            "path": "x-pack/plugins/actions/common/execution_log_types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "actions",
+            "id": "def-common.IExecutionLogResult.data",
+            "type": "Array",
+            "tags": [],
+            "label": "data",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "actions",
+                "scope": "common",
+                "docId": "kibActionsPluginApi",
+                "section": "def-common.IExecutionLog",
+                "text": "IExecutionLog"
+              },
+              "[]"
+            ],
+            "path": "x-pack/plugins/actions/common/execution_log_types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "actions",
         "id": "def-common.ValidatedEmail",
         "type": "Interface",
         "tags": [],
@@ -3481,7 +3862,15 @@
         "label": "AsApiContract",
         "description": [],
         "signature": [
-          "{ [K in keyof T as CamelToSnake<RenameActionToConnector<Extract<K, string>>>]: T[K]; }"
+          "{ [K in keyof T as CamelToSnake<RenameActionToConnector<Extract<K, string>>>]: K extends \"frequency\" ? ",
+          {
+            "pluginId": "actions",
+            "scope": "common",
+            "docId": "kibActionsPluginApi",
+            "section": "def-common.AsApiContract",
+            "text": "AsApiContract"
+          },
+          "<T[K]> : T[K]; }"
         ],
         "path": "x-pack/plugins/actions/common/rewrite_request_case.ts",
         "deprecated": false,
@@ -3514,6 +3903,36 @@
           "\"cases\""
         ],
         "path": "x-pack/plugins/actions/common/connector_feature_config.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "actions",
+        "id": "def-common.ExecutionLogSortFields",
+        "type": "Type",
+        "tags": [],
+        "label": "ExecutionLogSortFields",
+        "description": [],
+        "signature": [
+          "\"timestamp\" | \"execution_duration\" | \"schedule_delay\""
+        ],
+        "path": "x-pack/plugins/actions/common/execution_log_types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "actions",
+        "id": "def-common.IExecutionKPIResult",
+        "type": "Type",
+        "tags": [],
+        "label": "IExecutionKPIResult",
+        "description": [],
+        "signature": [
+          "{ success: number; unknown: number; failure: number; warning: number; }"
+        ],
+        "path": "x-pack/plugins/actions/common/execution_log_types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3564,7 +3983,15 @@
             "label": "requested",
             "description": [],
             "signature": [
-              "{ [K in keyof T as CamelToSnake<RenameActionToConnector<Extract<K, string>>>]: T[K]; }"
+              "{ [K in keyof T as CamelToSnake<RenameActionToConnector<Extract<K, string>>>]: K extends \"frequency\" ? ",
+              {
+                "pluginId": "actions",
+                "scope": "common",
+                "docId": "kibActionsPluginApi",
+                "section": "def-common.AsApiContract",
+                "text": "AsApiContract"
+              },
+              "<T[K]> : T[K]; }"
             ],
             "path": "x-pack/plugins/actions/common/rewrite_request_case.ts",
             "deprecated": false,
@@ -3757,6 +4184,79 @@
             "trackAdoption": false
           }
         ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "actions",
+        "id": "def-common.EMPTY_EXECUTION_KPI_RESULT",
+        "type": "Object",
+        "tags": [],
+        "label": "EMPTY_EXECUTION_KPI_RESULT",
+        "description": [],
+        "path": "x-pack/plugins/actions/common/execution_log_types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "actions",
+            "id": "def-common.EMPTY_EXECUTION_KPI_RESULT.success",
+            "type": "number",
+            "tags": [],
+            "label": "success",
+            "description": [],
+            "path": "x-pack/plugins/actions/common/execution_log_types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "actions",
+            "id": "def-common.EMPTY_EXECUTION_KPI_RESULT.unknown",
+            "type": "number",
+            "tags": [],
+            "label": "unknown",
+            "description": [],
+            "path": "x-pack/plugins/actions/common/execution_log_types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "actions",
+            "id": "def-common.EMPTY_EXECUTION_KPI_RESULT.failure",
+            "type": "number",
+            "tags": [],
+            "label": "failure",
+            "description": [],
+            "path": "x-pack/plugins/actions/common/execution_log_types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "actions",
+            "id": "def-common.EMPTY_EXECUTION_KPI_RESULT.warning",
+            "type": "number",
+            "tags": [],
+            "label": "warning",
+            "description": [],
+            "path": "x-pack/plugins/actions/common/execution_log_types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "actions",
+        "id": "def-common.executionLogSortableColumns",
+        "type": "Object",
+        "tags": [],
+        "label": "executionLogSortableColumns",
+        "description": [],
+        "signature": [
+          "readonly [\"timestamp\", \"execution_duration\", \"schedule_delay\"]"
+        ],
+        "path": "x-pack/plugins/actions/common/execution_log_types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
