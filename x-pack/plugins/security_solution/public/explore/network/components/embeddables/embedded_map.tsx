@@ -26,7 +26,7 @@ import { IndexPatternsMissingPrompt } from './index_patterns_missing_prompt';
 import { MapToolTip } from './map_tool_tip/map_tool_tip';
 import * as i18n from './translations';
 import { useKibana } from '../../../../common/lib/kibana';
-import { getLayerList, getRequiredMapsFields } from './map_config';
+import { getLayerList } from './map_config';
 import { sourcererSelectors } from '../../../../common/store/sourcerer';
 import type { SourcererDataView } from '../../../../common/store/sourcerer/model';
 import { SourcererScopeName } from '../../../../common/store/sourcerer/model';
@@ -133,9 +133,7 @@ export const EmbeddedMapComponent = ({
     const fetchData = async () => {
       try {
         const apiResponse = await Promise.all(
-          availableDataViews.map(async ({ title }) =>
-            isFieldInIndexPattern(title, getRequiredMapsFields(title))
-          )
+          availableDataViews.map(async ({ title }) => isFieldInIndexPattern(title))
         );
         // ensures only index patterns with maps fields are passed
         const goodDataViews = availableDataViews.filter((_, i) => apiResponse[i] ?? false);
@@ -165,10 +163,8 @@ export const EmbeddedMapComponent = ({
     if (selectedPatterns.length > 0 && dataViews.length === 0) {
       setIsIndexError(true);
     }
-    if (!isEqual(availableDataViews, dataViews)) {
-      setAvailableDataViews(dataViews);
-    }
-  }, [availableDataViews, kibanaDataViews, selectedPatterns]);
+    setAvailableDataViews((prevViews) => (isEqual(prevViews, dataViews) ? prevViews : dataViews));
+  }, [kibanaDataViews, selectedPatterns]);
 
   // This portalNode provided by react-reverse-portal allows us re-parent the MapToolTip within our
   // own component tree instead of the embeddables (default). This is necessary to have access to

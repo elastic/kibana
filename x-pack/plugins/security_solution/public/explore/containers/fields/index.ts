@@ -7,16 +7,19 @@
 
 import { useMemo } from 'react';
 import memoizeOne from 'memoize-one';
+import { getRequiredMapsFields } from '../../network/components/embeddables/map_config';
 import { useKibana } from '../../../common/lib/kibana';
 
 type FieldValidationCheck = (pattern: string, fieldsList: string[]) => Promise<boolean>;
 
 export const useIsFieldInIndexPattern = (): FieldValidationCheck => {
   const { dataViews } = useKibana().services.data;
+
   return useMemo(
     () =>
       memoizeOne(
-        async (pattern: string, fieldsList: string[]) => {
+        async (pattern: string) => {
+          const fieldsList = getRequiredMapsFields(pattern);
           const fields = await dataViews.getFieldsForWildcard({
             pattern,
             fields: fieldsList,
