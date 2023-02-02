@@ -39,6 +39,7 @@ export const SurveyKubernetes = () => {
             target="_blank"
             color="warning"
             iconType="editorComment"
+            data-test-subj="infra-kubernetes-feedback-link"
           >
             <FormattedMessage
               id="xpack.infra.homePage.tellUsWhatYouThinkK8sLink"
@@ -74,6 +75,7 @@ export const SurveyKubernetes = () => {
                       <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
                         <EuiFlexItem grow={false}>
                           <EuiButton
+                            data-test-subj="infra-toast-kubernetes-survey-start"
                             onClick={() => {
                               openInNewTab(KUBERNETES_FEEDBACK_LINK);
                               setIsToastSeen(true);
