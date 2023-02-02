@@ -10,10 +10,7 @@ import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { SERVICE_ENVIRONMENT } from '../../../common/es_fields/apm';
 import { getProcessorEventForTransactions } from '../../lib/helpers/transactions';
 import { Environment } from '../../../common/environment_rt';
-import {
-  APMEventClient,
-  APMEventESTermsEnumRequest,
-} from '../../lib/helpers/create_es_client/create_apm_event_client';
+import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
 
 /**
  * This is used for getting the list of environments for the environment's selector,
@@ -22,7 +19,7 @@ import {
 
 export async function getEnvironments({
   searchAggregatedTransactions,
-  serviceName,
+  serviceName = '',
   apmEventClient,
   size,
   start,
@@ -39,7 +36,7 @@ export async function getEnvironments({
     ? 'get_environments_for_service'
     : 'get_environments';
 
-  const params: APMEventESTermsEnumRequest = {
+  const params = {
     apm: {
       events: [
         getProcessorEventForTransactions(searchAggregatedTransactions),
@@ -49,16 +46,13 @@ export async function getEnvironments({
     },
     size,
     field: SERVICE_ENVIRONMENT,
+    string: serviceName,
     index_filter: {
       bool: {
         filter: [...rangeQuery(start, end)],
       },
     },
   };
-
-  if (serviceName) {
-    params.string = serviceName;
-  }
 
   const resp = await apmEventClient.termsEnum(operationName, params);
   const environments = resp.terms || [];
