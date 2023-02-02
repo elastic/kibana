@@ -94,17 +94,21 @@ export function DimensionButtonIcon({
   children: React.ReactChild;
 }) {
   let indicatorIcon = null;
-  if (message || (accessorConfig.triggerIconType && accessorConfig.triggerIconType !== 'none')) {
+  if (message || accessorConfig.triggerIconType !== 'none') {
     indicatorIcon = (
-      <EuiFlexItem grow={false}>
-        {message && (
-          <EuiIcon
-            {...baseIconProps}
-            type={message.severity === 'error' ? IconError : IconWarning}
-          />
+      <>
+        {accessorConfig.triggerIconType !== 'none' && (
+          <EuiFlexItem grow={false}>{getIconFromAccessorConfig(accessorConfig)}</EuiFlexItem>
         )}
-        {!message && getIconFromAccessorConfig(accessorConfig)}
-      </EuiFlexItem>
+        {message && (
+          <EuiFlexItem grow={false}>
+            <EuiIcon
+              {...baseIconProps}
+              type={message.severity === 'error' ? IconError : IconWarning}
+            />
+          </EuiFlexItem>
+        )}
+      </>
     );
   }
 
