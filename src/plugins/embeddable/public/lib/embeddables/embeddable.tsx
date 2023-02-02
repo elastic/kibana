@@ -19,15 +19,14 @@ import { EmbeddableInput, ViewMode } from '../../../common/types';
 import { genericEmbeddableInputIsEqual, omitGenericEmbeddableInput } from './diff_embeddable_input';
 
 function getPanelTitle(input: EmbeddableInput, output: EmbeddableOutput) {
-  return input.hidePanelTitles ? '' : input.title === undefined ? output.defaultTitle : input.title;
+  if (input.hidePanelTitles) return '';
+  return input.title ?? output.defaultTitle;
 }
 function getPanelDescription(input: EmbeddableInput, output: EmbeddableOutput) {
-  return input.hidePanelTitles
-    ? ''
-    : input.description === undefined
-    ? output.defaultDescription
-    : input.description;
+  if (input.hidePanelTitles) return '';
+  return input.description ?? output.defaultDescription;
 }
+
 export abstract class Embeddable<
   TEmbeddableInput extends EmbeddableInput = EmbeddableInput,
   TEmbeddableOutput extends EmbeddableOutput = EmbeddableOutput,
@@ -192,11 +191,11 @@ export abstract class Embeddable<
   }
 
   public getTitle(): string {
-    return this.output.title || '';
+    return this.output.title ?? '';
   }
 
   public getDescription(): string {
-    return this.output.description || '';
+    return this.output.description ?? '';
   }
 
   /**

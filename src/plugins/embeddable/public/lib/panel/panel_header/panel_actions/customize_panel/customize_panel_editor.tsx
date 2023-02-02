@@ -107,7 +107,7 @@ export const CustomizePanelEditor = (props: CustomizePanelProps) => {
             id="hideTitle"
             label={
               <FormattedMessage
-                defaultMessage="Show panel title"
+                defaultMessage="Show title"
                 id="embeddableApi.customizePanel.flyout.optionsMenuForm.showTitle"
               />
             }
@@ -118,7 +118,7 @@ export const CustomizePanelEditor = (props: CustomizePanelProps) => {
           label={
             <FormattedMessage
               id="embeddableApi.customizePanel.flyout.optionsMenuForm.panelTitleFormRowLabel"
-              defaultMessage="Panel title"
+              defaultMessage="Title"
             />
           }
           labelAppend={
@@ -130,7 +130,7 @@ export const CustomizePanelEditor = (props: CustomizePanelProps) => {
               aria-label={i18n.translate(
                 'embeddableApi.customizePanel.flyout.optionsMenuForm.resetCustomTitleButtonAriaLabel',
                 {
-                  defaultMessage: 'Reset panel title',
+                  defaultMessage: 'Reset title',
                 }
               )}
             >
@@ -162,7 +162,7 @@ export const CustomizePanelEditor = (props: CustomizePanelProps) => {
           label={
             <FormattedMessage
               id="embeddableApi.customizePanel.flyout.optionsMenuForm.panelDescriptionFormRowLabel"
-              defaultMessage="Panel description"
+              defaultMessage="Description"
             />
           }
           labelAppend={
@@ -176,7 +176,7 @@ export const CustomizePanelEditor = (props: CustomizePanelProps) => {
               aria-label={i18n.translate(
                 'embeddableApi.customizePanel.flyout.optionsMenuForm.resetCustomDescriptionButtonAriaLabel',
                 {
-                  defaultMessage: 'Reset panel description',
+                  defaultMessage: 'Reset description',
                 }
               )}
             >
@@ -220,7 +220,7 @@ export const CustomizePanelEditor = (props: CustomizePanelProps) => {
               id="showCustomTimeRange"
               label={
                 <FormattedMessage
-                  defaultMessage="Apply custom time range to panel"
+                  defaultMessage="Apply custom time range"
                   id="embeddableApi.customizePanel.flyout.optionsMenuForm.showCustomTimeRangeSwitch"
                 />
               }
@@ -233,7 +233,7 @@ export const CustomizePanelEditor = (props: CustomizePanelProps) => {
             label={
               <FormattedMessage
                 id="embeddableApi.customizePanel.flyout.optionsMenuForm.panelTimeRangeFormRowLabel"
-                defaultMessage="Panel time range"
+                defaultMessage="Time range"
               />
             }
           >
@@ -259,7 +259,7 @@ export const CustomizePanelEditor = (props: CustomizePanelProps) => {
           <h2>
             <FormattedMessage
               id="embeddableApi.customizePanel.flyout.title"
-              defaultMessage="Edit panel settings"
+              defaultMessage="Panel settings"
             />
           </h2>
         </EuiTitle>
