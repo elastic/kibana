@@ -18,6 +18,7 @@ import {
   findAndClickButton,
   findFormFieldByRowsLabelAndType,
   inputQuery,
+  loadAlertsEvents,
   submitQuery,
   toggleRuleOffAndOn,
   typeInECSFieldInput,
@@ -231,18 +232,7 @@ describe('Alert Event Details', () => {
 
   it('should be able to run live query and add to timeline (-depending on the previous test)', () => {
     const TIMELINE_NAME = 'Untitled timeline';
-    cy.visit('/app/security/alerts');
-    cy.getBySel('header-page-title').contains('Alerts').should('exist');
-    cy.getBySel('expand-event')
-      .first()
-      .within(() => {
-        cy.get(`[data-is-loading="true"]`).should('exist');
-      });
-    cy.getBySel('expand-event')
-      .first()
-      .within(() => {
-        cy.get(`[data-is-loading="true"]`).should('not.exist');
-      });
+    loadAlertsEvents();
     cy.getBySel('timeline-context-menu-button').first().click({ force: true });
     cy.contains('Run Osquery');
     cy.getBySel('expand-event').first().click({ force: true });
@@ -271,18 +261,7 @@ describe('Alert Event Details', () => {
   });
 
   it('should substitute parameters in investigation guide', () => {
-    cy.visit('/app/security/alerts');
-    cy.getBySel('header-page-title').contains('Alerts').should('exist');
-    cy.getBySel('expand-event')
-      .first()
-      .within(() => {
-        cy.get(`[data-is-loading="true"]`).should('exist');
-      });
-    cy.getBySel('expand-event')
-      .first()
-      .within(() => {
-        cy.get(`[data-is-loading="true"]`).should('not.exist');
-      });
+    loadAlertsEvents();
     cy.getBySel('expand-event').first().click({ force: true });
     cy.contains('Get processes').click();
     cy.contains("SELECT * FROM os_version where name='Ubuntu';");
