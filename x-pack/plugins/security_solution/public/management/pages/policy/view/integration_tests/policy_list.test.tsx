@@ -64,12 +64,13 @@ describe('When on the policy list page', () => {
       expect(renderResult.getByTestId('emptyPolicyTable')).toBeTruthy();
     });
     it('should show instruction text and a button to add the Endpoint Security integration', async () => {
-      expect(
-        renderResult.findByText(
-          'From this page, you’ll be able to view and manage the Elastic Defend Integration policies in your environment running Elastic Defend.'
-        )
-      ).toBeTruthy();
       await waitFor(() => {
+        expect(
+          renderResult.getByText(
+            'From this page, you’ll be able to view and manage the Elastic Defend Integration policies in your environment running Elastic Defend.'
+          )
+        ).toBeTruthy();
+
         expect(renderResult.getByTestId('onboardingStartButton')).toBeTruthy();
       });
     });
