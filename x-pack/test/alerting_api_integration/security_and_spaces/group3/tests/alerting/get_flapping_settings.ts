@@ -8,7 +8,7 @@
 import expect from '@kbn/expect';
 import { DEFAULT_FLAPPING_SETTINGS } from '@kbn/alerting-plugin/common';
 import { UserAtSpaceScenarios } from '../../../scenarios';
-import { getUrlPrefix } from '../../../../common/lib';
+import { getUrlPrefix, resetRulesSettings } from '../../../../common/lib';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
@@ -16,6 +16,16 @@ export default function getFlappingSettingsTests({ getService }: FtrProviderCont
   const supertestWithoutAuth = getService('supertestWithoutAuth');
 
   describe('getFlappingSettings', () => {
+    beforeEach(async () => {
+      await resetRulesSettings(supertestWithoutAuth, 'space1');
+      await resetRulesSettings(supertestWithoutAuth, 'space2');
+    });
+
+    after(async () => {
+      await resetRulesSettings(supertestWithoutAuth, 'space1');
+      await resetRulesSettings(supertestWithoutAuth, 'space2');
+    });
+
     for (const scenario of UserAtSpaceScenarios) {
       const { user, space } = scenario;
       describe(scenario.id, () => {

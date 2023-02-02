@@ -464,6 +464,10 @@ export class AlertingPlugin {
       return alertingAuthorizationClientFactory!.create(request);
     };
 
+    const getRulesSettingsClientWithRequest = (request: KibanaRequest) => {
+      return rulesSettingsClientFactory!.create(request);
+    };
+
     taskRunnerFactory.initialize({
       logger,
       data: plugins.data,
@@ -488,6 +492,7 @@ export class AlertingPlugin {
       maxAlerts: this.config.rules.run.alerts.max,
       actionsConfigMap: getActionsConfigMap(this.config.rules.run.actions),
       usageCounter: this.usageCounter,
+      getRulesSettingsClientWithRequest,
     });
 
     this.eventLogService!.registerSavedObjectProvider('alert', (request) => {

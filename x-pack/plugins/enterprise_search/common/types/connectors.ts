@@ -27,6 +27,10 @@ export interface CustomScheduling {
 
 export type ConnectorCustomScheduling = Record<string, CustomScheduling | null>;
 
+export interface ConnectorPreferences extends Record<string, unknown> {
+  extract_full_html?: boolean | null;
+}
+
 export enum ConnectorStatus {
   CREATED = 'created',
   NEEDS_CONFIGURATION = 'needs_configuration',
@@ -150,6 +154,7 @@ export interface Connector {
   last_synced: string | null;
   name: string;
   pipeline?: IngestPipelineParams | null;
+  preferences: ConnectorPreferences;
   scheduling: {
     enabled: boolean;
     interval: string; // crontab syntax
