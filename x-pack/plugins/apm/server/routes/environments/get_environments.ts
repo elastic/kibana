@@ -5,21 +5,21 @@
  * 2.0.
  */
 
-import { rangeQuery, termQuery } from '@kbn/observability-plugin/server';
+import { rangeQuery } from '@kbn/observability-plugin/server';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
-import {
-  SERVICE_ENVIRONMENT,
-  SERVICE_NAME,
-} from '../../../common/es_fields/apm';
-import { ENVIRONMENT_NOT_DEFINED } from '../../../common/environment_filter_values';
+import { SERVICE_ENVIRONMENT } from '../../../common/es_fields/apm';
 import { getProcessorEventForTransactions } from '../../lib/helpers/transactions';
 import { Environment } from '../../../common/environment_rt';
-import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
+import {
+  APMEventClient,
+  APMEventESTermsEnumRequest,
+} from '../../lib/helpers/create_es_client/create_apm_event_client';
 
 /**
- * This is used for getting the list of environments for the environments selector,
+ * This is used for getting the list of environments for the environment's selector,
  * filtered by range.
  */
+
 export async function getEnvironments({
   searchAggregatedTransactions,
   serviceName,
@@ -39,7 +39,7 @@ export async function getEnvironments({
     ? 'get_environments_for_service'
     : 'get_environments';
 
-  const params = {
+  const params: APMEventESTermsEnumRequest = {
     apm: {
       events: [
         getProcessorEventForTransactions(searchAggregatedTransactions),
@@ -47,36 +47,21 @@ export async function getEnvironments({
         ProcessorEvent.error,
       ],
     },
-    body: {
-      track_total_hits: false,
-      size: 0,
-      query: {
-        bool: {
-          filter: [
-            ...rangeQuery(start, end),
-            ...termQuery(SERVICE_NAME, serviceName),
-          ],
-        },
-      },
-      aggs: {
-        environments: {
-          terms: {
-            field: SERVICE_ENVIRONMENT,
-            missing: ENVIRONMENT_NOT_DEFINED.value,
-            size,
-          },
-        },
+    size,
+    field: SERVICE_ENVIRONMENT,
+    index_filter: {
+      bool: {
+        filter: [...rangeQuery(start, end)],
       },
     },
   };
 
-  const resp = await apmEventClient.search(operationName, params);
-  const aggs = resp.aggregations;
-  const environmentsBuckets = aggs?.environments.buckets || [];
+  if (serviceName) {
+    params.string = serviceName;
+  }
 
-  const environments = environmentsBuckets.map(
-    (environmentBucket) => environmentBucket.key as string
-  );
+  const resp = await apmEventClient.termsEnum(operationName, params);
+  const environments = resp.terms || [];
 
   return environments as Environment[];
 }
