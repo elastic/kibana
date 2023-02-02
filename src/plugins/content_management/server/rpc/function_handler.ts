@@ -46,7 +46,8 @@ export class FunctionHandler<Context, Names extends string = string> {
     if (schemas?.in) {
       const validation = schemas.in.getSchema().validate(input);
       if (validation.error) {
-        throw validation.error;
+        const message = `${validation.error.message}. ${JSON.stringify(validation.error)}`;
+        throw new Error(message);
       }
     } else if (input !== undefined) {
       throw new Error(`Input schema missing for [${name}] procedure.`);
@@ -62,8 +63,9 @@ export class FunctionHandler<Context, Names extends string = string> {
         throw validation.error;
       }
     } else {
-      // TO DISCUSS: Here we could also enforce that a schema is provided when
-      // the result is not undefined.
+      if (result !== undefined) {
+        throw new Error(`Output schema missing for [${name}] procedure.`);
+      }
     }
 
     return { result };

@@ -31,7 +31,7 @@ const getSchemas: ProcedureSchemas = {
     { unknowns: 'forbid' }
   ),
   // --> "out" will be specified by each storage layer
-  out: false,
+  out: schema.maybe(schema.object({}, { unknowns: 'allow' })),
 };
 
 export interface GetIn<Options extends object | undefined = undefined> {
@@ -45,14 +45,13 @@ const createSchemas: ProcedureSchemas = {
   in: schema.object(
     {
       contentType: schema.string(),
-      // Each content type must provide a schema to validate the data. Here we make it generic
-      // to allow any object when validating the HTTP body payload.
       data: schema.object({}, { unknowns: 'allow' }),
       options: schema.maybe(schema.object({}, { unknowns: 'allow' })),
     },
     { unknowns: 'forbid' }
   ),
-  out: false,
+  // Here we could enforce that an "id" field is returned
+  out: schema.maybe(schema.object({}, { unknowns: 'allow' })),
 };
 
 export interface CreateIn<

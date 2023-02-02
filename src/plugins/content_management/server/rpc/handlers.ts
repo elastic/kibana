@@ -83,14 +83,26 @@ export function initRpcHandlers({
 
       const { create: schemas } = contentConfig.schemas.content;
 
+      // Validate data to be stored
+      if (schemas.in.data) {
+        const validation = schemas.in.data.getSchema().validate(input.data);
+        if (validation.error) {
+          const message = `${validation.error.message}. ${JSON.stringify(validation.error)}`;
+          throw new Error(message);
+        }
+      } else {
+        throw new Error('Schema missing for rpc call [create.in.data].');
+      }
+
+      // Validate the possible options
       if (input.options) {
-        // Validate the options provided
         if (!schemas.in?.options) {
-          throw new Error(`Schema missing for rpc call [get.in.options].`);
+          throw new Error('Schema missing for rpc call [create.in.options].');
         }
         const validation = schemas.in.options.getSchema().validate(input.options);
         if (validation.error) {
-          throw validation.error;
+          const message = `${validation.error.message}. ${JSON.stringify(validation.error)}`;
+          throw new Error(message);
         }
       }
 
