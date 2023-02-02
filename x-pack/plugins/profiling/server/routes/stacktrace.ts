@@ -285,6 +285,36 @@ export function clearStackFrameCache(): number {
   return numDeleted;
 }
 
+export function updateStackFrameMap(
+  stackFrames: any,
+  stackFrameMap: Map<StackFrameID, StackFrame>,
+  stackFrameCache: LRUCache<StackFrameID, StackFrame>
+): number {
+  let found = 0;
+  for (const frame of stackFrames) {
+    if ('error' in frame) {
+      continue;
+    }
+    if (frame.found) {
+      found++;
+      const stackFrame = {
+        FileName: frame._source![ProfilingESField.StackframeFileName],
+        FunctionName: frame._source![ProfilingESField.StackframeFunctionName],
+        FunctionOffset: frame._source![ProfilingESField.StackframeFunctionOffset],
+        LineNumber: frame._source![ProfilingESField.StackframeLineNumber],
+        SourceType: frame._source![ProfilingESField.StackframeSourceType],
+      };
+      stackFrameMap.set(frame._id, stackFrame);
+      stackFrameCache.set(frame._id, stackFrame);
+      continue;
+    }
+
+    stackFrameMap.set(frame._id, emptyStackFrame);
+    stackFrameCache.set(frame._id, emptyStackFrame);
+  }
+  return found;
+}
+
 export async function mgetStackFrames({
   logger,
   client,
@@ -319,32 +349,8 @@ export async function mgetStackFrames({
     realtime: true,
   });
 
-  // Create a lookup map StackFrameID -> StackFrame.
-  let queryHits = 0;
   const t0 = Date.now();
-  const docs = resStackFrames.docs;
-  for (const frame of docs) {
-    if ('error' in frame) {
-      continue;
-    }
-    if (frame.found) {
-      queryHits++;
-      const stackFrame = {
-        FileName: frame._source![ProfilingESField.StackframeFileName],
-        FunctionName: frame._source![ProfilingESField.StackframeFunctionName],
-        FunctionOffset: frame._source![ProfilingESField.StackframeFunctionOffset],
-        LineNumber: frame._source![ProfilingESField.StackframeLineNumber],
-        SourceType: frame._source![ProfilingESField.StackframeSourceType],
-      };
-      stackFrames.set(frame._id, stackFrame);
-      frameLRU.set(frame._id, stackFrame);
-      continue;
-    }
-
-    stackFrames.set(frame._id, emptyStackFrame);
-    frameLRU.set(frame._id, emptyStackFrame);
-  }
-
+  const queryHits = updateStackFrameMap(resStackFrames.docs, stackFrames, frameLRU);
   logger.info(`processing data took ${Date.now() - t0} ms`);
 
   summarizeCacheAndQuery(logger, 'frames', cacheHits, cacheTotal, queryHits, stackFrameIDs.size);
