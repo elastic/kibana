@@ -8,7 +8,6 @@
 import {
   ADD_EXCEPTION_BTN,
   ALERT_CHECKBOX,
-  CHART_SELECT,
   CLOSE_ALERT_BTN,
   CLOSE_SELECTED_ALERTS_BTN,
   EXPAND_ALERT_BTN,
@@ -257,8 +256,7 @@ export const openAlerts = () => {
 };
 
 export const selectCountTable = () => {
-  cy.get(CHART_SELECT).click({ force: true });
-  cy.get(SELECT_TABLE).click();
+  cy.get(SELECT_TABLE).click({ force: true });
 };
 
 export const clearGroupByTopInput = () => {
