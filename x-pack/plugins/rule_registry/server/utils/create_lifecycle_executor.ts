@@ -164,6 +164,7 @@ export const createLifecycleExecutor =
     const {
       services: { alertFactory, shouldWriteAlerts },
       state: previousState,
+      flappingSettings,
     } = options;
 
     const ruleDataClientWriter = await ruleDataClient.getWriter();
@@ -268,6 +269,7 @@ export const createLifecycleExecutor =
         const isActive = !isRecovered;
 
         const flappingHistory = getUpdatedFlappingHistory<State>(
+          flappingSettings,
           alertId,
           state,
           isNew,
@@ -292,7 +294,7 @@ export const createLifecycleExecutor =
               pendingRecoveredCount: 0,
             };
 
-        const flapping = isFlapping(flappingHistory, isCurrentlyFlapping);
+        const flapping = isFlapping(flappingSettings, flappingHistory, isCurrentlyFlapping);
 
         const event: ParsedTechnicalFields & ParsedExperimentalFields = {
           ...alertData?.fields,
@@ -331,7 +333,7 @@ export const createLifecycleExecutor =
     const newEventsToIndex = makeEventsDataMapFor(newAlertIds);
     const trackedRecoveredEventsToIndex = makeEventsDataMapFor(trackedAlertRecoveredIds);
     const allEventsToIndex = [
-      ...getAlertsForNotification(trackedEventsToIndex),
+      ...getAlertsForNotification(flappingSettings, trackedEventsToIndex),
       ...newEventsToIndex,
     ];
 
