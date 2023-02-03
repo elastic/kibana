@@ -29,10 +29,6 @@ export const getUsers = async (
   } = clientArgs;
 
   try {
-    const participantsResponse: User[] = [];
-    const assigneesResponse: User[] = [];
-    const unassignedUsersResponse: User[] = [];
-
     // ensure that we have authorization for reading the case
     const theCase = await casesClient.cases.resolve({ id: caseId, includeComments: false });
 
@@ -61,49 +57,35 @@ export const getUsers = async (
       ...participantsUids,
       ...assigneesUids,
     ]);
+
     const userProfiles = await getUserProfiles(securityStartPlugin, userProfileUids);
 
-    for (const participant of participants) {
-      const user = getUserInformation(userProfiles, participant.user.profile_uid, participant.user);
+    const participantsResponse = convertUserInfoToResponse(
+      userProfiles,
+      participants.map((participant) => ({
+        uid: participant.user.profile_uid,
+        user: participant.user,
+      }))
+    );
 
-      participantsResponse.push({
-        ...user,
-      });
+    const assigneesResponse = convertUserInfoToResponse(userProfiles, theCase.case.assignees);
 
-      /**
-       * To avoid duplicates, a user that is
-       * a participant should not be also added
-       * as unassignedUsers. For that reason, we remove
-       * its profile_uid from the assignedAndUnassignedUsers Set
-       */
-      if (participant.user.profile_uid) {
-        assignedAndUnassignedUsers.delete(participant.user.profile_uid);
-      }
-    }
+    /**
+     * To avoid duplicates, a user that is
+     * a participant or an assignee should not be
+     *  part of the assignedAndUnassignedUsers Set
+     */
+    const unassignedUsers = removeAllFromSet(assignedAndUnassignedUsers, [
+      ...participantsUids,
+      ...assigneesUids,
+    ]);
 
-    for (const uid of assigneesUids) {
-      const user = getUserInformation(userProfiles, uid);
-
-      assigneesResponse.push({
-        ...user,
-      });
-
-      /**
-       * To avoid duplicates, a user that is
-       * an assignee should not be also added
-       * as a unassignedUsers. For that reason, we remove
-       * its uid from the assignedAndUnassignedUsers Set
-       */
-      assignedAndUnassignedUsers.delete(uid);
-    }
-
-    for (const uid of assignedAndUnassignedUsers.values()) {
-      const user = getUserInformation(userProfiles, uid);
-
-      unassignedUsersResponse.push({
-        ...user,
-      });
-    }
+    const unassignedUsersResponse = convertUserInfoToResponse(
+      userProfiles,
+      [...unassignedUsers.values()].map((uid) => ({
+        uid,
+      }))
+    );
 
     const results = {
       participants: participantsResponse,
@@ -121,6 +103,19 @@ export const getUsers = async (
   }
 };
 
+const convertUserInfoToResponse = (
+  userProfiles: Map<string, UserProfile>,
+  usersInfo: Array<{ uid: string | undefined; user?: User }>
+): User[] => {
+  const response = [];
+
+  for (const info of usersInfo) {
+    response.push(getUserInformation(userProfiles, info.uid, info.user));
+  }
+
+  return response;
+};
+
 const getUserInformation = (
   userProfiles: Map<string, UserProfile>,
   uid: string | undefined,
@@ -134,4 +129,11 @@ const getUserInformation = (
     username: userProfile?.user.username ?? userInfo?.username,
     profile_uid: userProfile?.uid ?? uid ?? userInfo?.profile_uid,
   };
+};
+
+const removeAllFromSet = (originalSet: Set<string>, values: string[]) => {
+  const newSet = new Set(originalSet);
+  values.forEach((value) => newSet.delete(value));
+
+  return newSet;
 };
