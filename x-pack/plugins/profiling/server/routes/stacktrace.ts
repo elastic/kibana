@@ -330,10 +330,11 @@ export async function mgetStackFrames({
     if (frame.found) {
       queryHits++;
       const stackFrame = {
-        FileName: frame._source!.Stackframe.file?.name,
-        FunctionName: frame._source!.Stackframe.function?.name,
-        FunctionOffset: frame._source!.Stackframe.function?.offset,
-        LineNumber: frame._source!.Stackframe.line?.number,
+        FileName: frame._source![ProfilingESField.StackframeFileName],
+        FunctionName: frame._source![ProfilingESField.StackframeFunctionName],
+        FunctionOffset: frame._source![ProfilingESField.StackframeFunctionOffset],
+        LineNumber: frame._source![ProfilingESField.StackframeLineNumber],
+        SourceType: frame._source![ProfilingESField.StackframeSourceType],
       };
       stackFrames.set(frame._id, stackFrame);
       frameLRU.set(frame._id, stackFrame);
