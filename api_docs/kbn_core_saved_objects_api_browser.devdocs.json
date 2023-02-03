@@ -4803,14 +4803,6 @@
             "path": "src/core/public/index.ts"
           },
           {
-            "plugin": "savedObjectsManagement",
-            "path": "src/plugins/saved_objects_management/public/lib/find_objects.ts"
-          },
-          {
-            "plugin": "savedObjectsManagement",
-            "path": "src/plugins/saved_objects_management/public/lib/find_objects.ts"
-          },
-          {
             "plugin": "visualizations",
             "path": "src/plugins/visualizations/public/utils/saved_visualize_utils.ts"
           },

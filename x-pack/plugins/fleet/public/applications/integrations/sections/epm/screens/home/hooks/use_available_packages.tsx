@@ -182,22 +182,23 @@ export const useAvailablePackages = () => {
   );
 
   const {
-    data: eprCategories,
+    data: eprCategoriesRes,
     isLoading: isLoadingCategories,
     error: eprCategoryLoadingError,
   } = useCategories(prereleaseIntegrationsEnabled);
 
+  const eprCategories = useMemo(() => eprCategoriesRes?.items || [], [eprCategoriesRes]);
   // Subcategories
   const subCategories = useMemo(() => {
-    return eprCategories?.items.filter((item) => item.parent_id !== undefined);
-  }, [eprCategories?.items]);
+    return eprCategories?.filter((item) => item.parent_id !== undefined);
+  }, [eprCategories]);
 
   const allCategories: CategoryFacet[] = useMemo(() => {
     const eprAndCustomCategories: CategoryFacet[] = isLoadingCategories
       ? []
       : mergeCategoriesAndCount(
           eprCategories
-            ? (eprCategories.items as Array<{ id: string; title: string; count: number }>)
+            ? (eprCategories as Array<{ id: string; title: string; count: number }>)
             : [],
           cards
         );
