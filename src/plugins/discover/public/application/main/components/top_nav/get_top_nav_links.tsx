@@ -7,11 +7,9 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { ISearchSource } from '@kbn/data-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { unhashUrl } from '@kbn/kibana-utils-plugin/public';
 import type { TopNavMenuData } from '@kbn/navigation-plugin/public';
-import { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { showOpenSearchPanel } from './show_open_search_panel';
 import { getSharingData, showPublicUrlSwitch } from '../../../../utils/get_sharing_data';
 import { DiscoverServices } from '../../../../build_services';
@@ -26,11 +24,9 @@ import { openAlertsPopover } from './open_alerts_popover';
 export const getTopNavLinks = ({
   dataView,
   navigateTo,
-  savedSearch,
   services,
   state,
   onOpenInspector,
-  searchSource,
   onOpenSavedSearch,
   isPlainRecord,
   persistDataView,
@@ -39,11 +35,9 @@ export const getTopNavLinks = ({
 }: {
   dataView: DataView;
   navigateTo: (url: string) => void;
-  savedSearch: SavedSearch;
   services: DiscoverServices;
   state: DiscoverStateContainer;
   onOpenInspector: () => void;
-  searchSource: ISearchSource;
   onOpenSavedSearch: (id: string) => void;
   isPlainRecord: boolean;
   adHocDataViews: DataView[];
@@ -81,7 +75,7 @@ export const getTopNavLinks = ({
         I18nContext: services.core.i18n.Context,
         theme$: services.core.theme.theme$,
         anchorElement,
-        searchSource: savedSearch.searchSource,
+        searchSource: state.savedSearchState.get().searchSource,
         services,
         adHocDataViews,
         updateDataViewList,
@@ -116,7 +110,7 @@ export const getTopNavLinks = ({
     emphasize: true,
     run: (anchorElement: HTMLElement) => {
       onSaveSearch({
-        savedSearch,
+        savedSearch: state.savedSearchState.get(),
         services,
         navigateTo,
         state,
@@ -159,7 +153,12 @@ export const getTopNavLinks = ({
       if (!services.share || !updatedDataView) {
         return;
       }
-      const sharingData = await getSharingData(searchSource, state.appState.getState(), services);
+      const savedSearch = state.savedSearchState.get();
+      const sharingData = await getSharingData(
+        savedSearch.searchSource,
+        state.appState.getState(),
+        services
+      );
 
       services.share.toggleShareContextMenu({
         anchorElement,

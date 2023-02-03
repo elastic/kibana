@@ -54,7 +54,6 @@ export function DiscoverMainApp(props: DiscoverMainProps) {
     onUpdateQuery,
     persistDataView,
     resetSavedSearch,
-    searchSource,
     stateContainer,
     searchSessionManager,
     updateDataViewList,
@@ -114,7 +113,6 @@ export function DiscoverMainApp(props: DiscoverMainProps) {
         setExpandedDoc={setExpandedDoc}
         navigateTo={navigateTo}
         savedSearch={savedSearch}
-        searchSource={searchSource}
         stateContainer={stateContainer}
         persistDataView={persistDataView}
         searchSessionManager={searchSessionManager}

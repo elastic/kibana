@@ -19,10 +19,7 @@ import { getHeaderActionMenuMounter } from '../../../../kibana_services';
 import { DiscoverStateContainer } from '../../services/discover_state';
 import { onSaveSearch } from './on_save_search';
 
-export type DiscoverTopNavProps = Pick<
-  DiscoverLayoutProps,
-  'navigateTo' | 'savedSearch' | 'searchSource'
-> & {
+export type DiscoverTopNavProps = Pick<DiscoverLayoutProps, 'navigateTo'> & {
   onOpenInspector: () => void;
   query?: Query | AggregateQuery;
   savedQuery?: string;
@@ -47,9 +44,7 @@ export const DiscoverTopNav = ({
   savedQuery,
   stateContainer,
   updateQuery,
-  searchSource,
   navigateTo,
-  savedSearch,
   resetSavedSearch,
   onChangeDataView,
   onDataViewCreated,
@@ -80,13 +75,14 @@ export const DiscoverTopNav = ({
 
   const onOpenSavedSearch = useCallback(
     (newSavedSearchId: string) => {
-      if (savedSearch.id && savedSearch.id === newSavedSearchId) {
+      const prevSavedSearchId = stateContainer.savedSearchState.get();
+      if (prevSavedSearchId.id && prevSavedSearchId.id === newSavedSearchId) {
         resetSavedSearch();
       } else {
         history.push(`/view/${encodeURIComponent(newSavedSearchId)}`);
       }
     },
-    [history, resetSavedSearch, savedSearch.id]
+    [history, resetSavedSearch, stateContainer.savedSearchState]
   );
 
   useEffect(() => {
@@ -154,11 +150,9 @@ export const DiscoverTopNav = ({
       getTopNavLinks({
         dataView,
         navigateTo,
-        savedSearch,
         services,
         state: stateContainer,
         onOpenInspector,
-        searchSource,
         onOpenSavedSearch,
         isPlainRecord,
         adHocDataViews,
@@ -168,11 +162,9 @@ export const DiscoverTopNav = ({
     [
       dataView,
       navigateTo,
-      savedSearch,
       services,
       stateContainer,
       onOpenInspector,
-      searchSource,
       onOpenSavedSearch,
       isPlainRecord,
       adHocDataViews,
@@ -183,7 +175,7 @@ export const DiscoverTopNav = ({
 
   const onEditDataView = async (editedDataView: DataView) => {
     if (!editedDataView.isPersisted()) {
-      await updateAdHocDataViewId(editedDataView);
+      await stateContainer.actions.updateAdHocDataViewId();
     } else {
       stateContainer.actions.setDataView(editedDataView);
     }
@@ -232,7 +224,7 @@ export const DiscoverTopNav = ({
   const onTextBasedSavedAndExit = useCallback(
     ({ onSave, onCancel }) => {
       onSaveSearch({
-        savedSearch,
+        savedSearch: stateContainer.savedSearchState.get(),
         services,
         navigateTo,
         state: stateContainer,
@@ -240,7 +232,7 @@ export const DiscoverTopNav = ({
         onSaveCb: onSave,
       });
     },
-    [navigateTo, savedSearch, services, stateContainer]
+    [navigateTo, services, stateContainer]
   );
 
   return (
@@ -253,7 +245,7 @@ export const DiscoverTopNav = ({
       query={query}
       setMenuMountPoint={setMenuMountPoint}
       savedQueryId={savedQuery}
-      screenTitle={savedSearch.title}
+      screenTitle={stateContainer.savedSearchState.get().title}
       showDatePicker={showDatePicker}
       showSaveQuery={!isPlainRecord && Boolean(services.capabilities.discover.saveQuery)}
       showSearchBar={true}

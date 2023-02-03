@@ -38,11 +38,6 @@ export function useDiscoverState({
 
   const dataView = savedSearch.searchSource.getField('index')!;
 
-  const searchSource = useMemo(() => {
-    savedSearch.searchSource.setField('index', dataView);
-    return savedSearch.searchSource.createChild();
-  }, [savedSearch, dataView]);
-
   const stateContainer = useMemo(() => {
     const container = getDiscoverStateContainer({
       history,
@@ -220,7 +215,6 @@ export function useDiscoverState({
     resetSavedSearch,
     onChangeDataView,
     onUpdateQuery,
-    searchSource,
     stateContainer,
     persistDataView,
     searchSessionManager,

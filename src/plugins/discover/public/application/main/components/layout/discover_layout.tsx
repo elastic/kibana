@@ -62,7 +62,6 @@ export function DiscoverLayout({
   setExpandedDoc,
   resetSavedSearch,
   savedSearch,
-  searchSource,
   stateContainer,
   persistDataView,
   searchSessionManager,
@@ -297,8 +296,6 @@ export function DiscoverLayout({
         query={query}
         navigateTo={navigateTo}
         savedQuery={savedQuery}
-        savedSearch={savedSearch}
-        searchSource={searchSource}
         stateContainer={stateContainer}
         updateQuery={onUpdateQuery}
         resetSavedSearch={resetSavedSearch}
