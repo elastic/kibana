@@ -80,7 +80,6 @@ export const FloatingActions: FC<FloatingActionsProps> = ({
       >
         {children}
       </span>
-
       <EuiPortal>
         <div
           ref={actionsRef}
