@@ -13,6 +13,7 @@ import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
 import { MockApmPluginContextWrapper } from '../../../context/apm_plugin/mock_apm_plugin_context';
 import { ApmServiceContextProvider } from '../../../context/apm_service/apm_service_context';
 import { UrlParamsProvider } from '../../../context/url_params_context/url_params_context';
+import { RouterProvider } from '@kbn/typed-react-router-config';
 import type { ApmUrlParams } from '../../../context/url_params_context/types';
 import * as useFetcherHook from '../../../hooks/use_fetcher';
 import * as useServiceTransactionTypesHook from '../../../context/apm_service/use_service_transaction_types_fetcher';
@@ -23,6 +24,8 @@ import {
 } from '../../../utils/test_helpers';
 import { fromQuery } from '../../shared/links/url_helpers';
 import { TransactionOverview } from '.';
+import { apmRouter } from '../../routing/apm_route_config';
+import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 
 const KibanaReactContext = createKibanaReactContext({
   uiSettings: { get: () => true },
@@ -68,7 +71,11 @@ function setup({
       <MockApmPluginContextWrapper history={history}>
         <UrlParamsProvider>
           <ApmServiceContextProvider>
-            <TransactionOverview />
+            <IntlProvider locale="en">
+              <RouterProvider history={history} router={apmRouter as any}>
+                <TransactionOverview />
+              </RouterProvider>
+            </IntlProvider>
           </ApmServiceContextProvider>
         </UrlParamsProvider>
       </MockApmPluginContextWrapper>

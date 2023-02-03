@@ -38,7 +38,7 @@ import { useTimeRange } from '../../../hooks/use_time_range';
 function PromptContainer({ children }: { children: ReactNode }) {
   return (
     <>
-      <SearchBar />
+      <SearchBar showKueryBar={false} />
       <EuiFlexGroup
         alignItems="center"
         justifyContent="spaceAround"
