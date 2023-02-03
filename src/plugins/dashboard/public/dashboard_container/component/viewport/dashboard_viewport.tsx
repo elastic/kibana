@@ -77,8 +77,9 @@ export const DashboardViewportComponent = () => {
   );
 };
 
-// Created this fullscreen button HOC to separate fullscreen button and dashboard content rerendering
-// because ExitFullScreenButton sets isFullscreenMode to false on unmount
+// This fullscreen button HOC separates fullscreen button and dashboard content to reduce rerenders
+// because ExitFullScreenButton sets isFullscreenMode to false on unmount while rerendering.
+// This specifically fixed maximizing/minimizing panels without exiting fullscreen mode.
 const WithFullScreenButton = ({ children }: { children: JSX.Element }) => {
   const {
     useEmbeddableDispatch,
