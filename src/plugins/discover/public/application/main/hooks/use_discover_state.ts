@@ -177,8 +177,8 @@ export function useDiscoverState({
           return;
         }
         savedSearch.searchSource.setField('index', nextDataView);
-        reset();
         stateContainer.actions.setDataView(nextDataView);
+        reset();
       }
 
       if (
@@ -231,7 +231,7 @@ export function useDiscoverState({
           state.query
         );
         setUrlTracking(nextDataView);
-        stateContainer.setAppState(nextAppState);
+        stateContainer.replaceUrlAppState(nextAppState);
       }
       setExpandedDoc(undefined);
     },

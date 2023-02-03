@@ -26,7 +26,10 @@ import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
 import {
   useExistingFieldsFetcher,
   useQuerySubscriber,
+  loadFieldExisting,
 } from '@kbn/unified-field-list-plugin/public';
+import type { AggregateQuery, EsQueryConfig, Filter, Query } from '@kbn/es-query';
+import { getEsQueryConfig } from '@kbn/data-plugin/public';
 import { VIEW_MODE } from '../../../../../common/constants';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { DiscoverSidebar } from './discover_sidebar';
@@ -46,9 +49,9 @@ import {
   DiscoverSidebarReducerActionType,
   DiscoverSidebarReducerStatus,
 } from './lib/sidebar_reducer';
-import { DiscoverStateContainer } from '../../services/discover_state';
 
 const EMPTY_FIELD_COUNTS = {};
+const getBuildEsQueryAsync = async () => (await import('@kbn/es-query')).buildEsQuery;
 
 export interface DiscoverSidebarResponsiveProps {
   /**
@@ -114,8 +117,6 @@ export interface DiscoverSidebarResponsiveProps {
    * list of available fields fetched from ES
    */
   availableFields$: AvailableFields$;
-
-  stateContainer: DiscoverStateContainer;
 }
 
 /**
@@ -129,7 +130,7 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
   const isPlainRecord = useAppStateSelector(
     (state) => getRawRecordType(state.query) === RecordRawType.PLAIN
   );
-  const { selectedDataView, onFieldEdited, onDataViewCreated, stateContainer } = props;
+  const { selectedDataView, onFieldEdited, onDataViewCreated } = props;
   const [isFlyoutVisible, setIsFlyoutVisible] = useState(false);
   const [sidebarState, dispatchSidebarStateAction] = useReducer(
     discoverSidebarReducer,
@@ -138,6 +139,71 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
   );
   const selectedDataViewRef = useRef<DataView | null | undefined>(selectedDataView);
   const showFieldList = sidebarState.status !== DiscoverSidebarReducerStatus.INITIAL;
+
+  const querySubscriberResult = useQuerySubscriber({ data });
+
+  const fetchFields = useCallback(
+    async (dataView: DataView) => {
+      console.log(
+        '*** fetchFields is firing',
+        dataView.getName(),
+        // stateContainer.internalState.get().dataView?.title,
+        querySubscriberResult.fromDate,
+        querySubscriberResult.toDate
+      );
+      const existingFieldList = await loadFieldExisting({
+        data,
+        dataView,
+        fromDate: querySubscriberResult.fromDate || '',
+        toDate: querySubscriberResult.toDate || '',
+        // dslQuery: querySubscriberResult.query || {},
+        dslQuery: await buildSafeEsQuery(
+          dataView,
+          querySubscriberResult.query!,
+          querySubscriberResult.filters || [],
+          getEsQueryConfig(core.uiSettings)
+        ),
+        timeFieldName: dataView.timeFieldName,
+        dataViewsService: dataViews,
+        uiSettingsClient: core.uiSettings,
+      });
+
+      console.log(
+        '***** existingFieldList',
+        // selectedDataViewRef.current!.title,
+        dataView.title,
+        // stateContainer.internalState.get().dataView?.title,
+        JSON.stringify(existingFieldList)
+      );
+      /*
+      if (dataView.id !== stateContainer.internalState.get().dataView?.id) {
+        return;
+      }
+      */
+
+      dispatchSidebarStateAction({
+        type: DiscoverSidebarReducerActionType.DOCUMENTS_LOADED,
+        payload: {
+          // dataView: selectedDataViewRef.current,
+          dataView,
+          fieldCounts: existingFieldList.existingFieldNames.reduce((collector, fieldName) => {
+            collector[fieldName] = 1;
+            return collector;
+          }, {} as Record<string, number>),
+          isPlainRecord: false,
+        },
+      });
+    },
+    [
+      core.uiSettings,
+      data,
+      dataViews,
+      querySubscriberResult.fromDate,
+      querySubscriberResult.query,
+      querySubscriberResult.toDate,
+      querySubscriberResult.filters,
+    ]
+  );
 
   useEffect(() => {
     const subscription = props.documents$.subscribe((documentState) => {
@@ -154,34 +220,35 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
           break;
         case FetchStatus.LOADING:
           console.log('*** LOADING - dataViewRef', selectedDataViewRef.current?.title);
-          console.log(
-            '*** LOADING - stateContainer dataView',
-            stateContainer.internalState.get().dataView?.title
-          );
-          dispatchSidebarStateAction({
-            type: DiscoverSidebarReducerActionType.DOCUMENTS_LOADING,
-            payload: {
-              isPlainRecord: isPlainRecordType,
-            },
-          });
+          if (isPlainRecordType) {
+            dispatchSidebarStateAction({
+              type: DiscoverSidebarReducerActionType.DOCUMENTS_LOADING,
+              payload: {
+                isPlainRecord: isPlainRecordType,
+              },
+            });
+          } else {
+            console.log('*** 3 - fetchFields');
+            fetchFields(selectedDataViewRef.current!);
+            // fetchFields(selectedDataViewR!);
+          }
+
           break;
         case FetchStatus.COMPLETE:
           console.log('*** COMPLETE', selectedDataViewRef.current?.title);
-          console.log(
-            '*** COMPLETE - stateContainer dataView',
-            stateContainer.internalState.get().dataView?.title
-          );
-          dispatchSidebarStateAction({
-            type: DiscoverSidebarReducerActionType.DOCUMENTS_LOADED,
-            payload: {
-              dataView: selectedDataViewRef.current,
-              fieldCounts: isPlainRecordType
-                ? EMPTY_FIELD_COUNTS
-                : calcFieldCounts(documentState.result),
-              textBasedQueryColumns: documentState.textBasedQueryColumns,
-              isPlainRecord: isPlainRecordType,
-            },
-          });
+          if (isPlainRecordType) {
+            dispatchSidebarStateAction({
+              type: DiscoverSidebarReducerActionType.DOCUMENTS_LOADED,
+              payload: {
+                dataView: selectedDataViewRef.current,
+                fieldCounts: isPlainRecordType
+                  ? EMPTY_FIELD_COUNTS
+                  : calcFieldCounts(documentState.result),
+                textBasedQueryColumns: documentState.textBasedQueryColumns,
+                isPlainRecord: isPlainRecordType,
+              },
+            });
+          }
           break;
         case FetchStatus.ERROR:
           dispatchSidebarStateAction({
@@ -198,7 +265,7 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
       }
     });
     return () => subscription.unsubscribe();
-  }, [props.documents$, dispatchSidebarStateAction, selectedDataViewRef]);
+  }, [props.documents$, dispatchSidebarStateAction, selectedDataViewRef, fetchFields]);
 
   useEffect(() => {
     if (selectedDataView !== selectedDataViewRef.current) {
@@ -212,7 +279,6 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
     }
   }, [selectedDataView, dispatchSidebarStateAction, selectedDataViewRef]);
 
-  const querySubscriberResult = useQuerySubscriber({ data });
   const isAffectedByGlobalFilter = Boolean(querySubscriberResult.filters?.length);
   const { isProcessing, refetchFieldsExistenceInfo } = useExistingFieldsFetcher({
     disableAutoFetching: true,
@@ -421,4 +487,27 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
       </EuiShowFor>
     </>
   );
+}
+
+// copied from use_existing_fields.ts
+// Wrapper around buildEsQuery, handling errors (e.g. because a query can't be parsed) by
+// returning a query dsl object not matching anything
+async function buildSafeEsQuery(
+  dataView: DataView,
+  query: Query | AggregateQuery,
+  filters: Filter[],
+  queryConfig: EsQueryConfig
+) {
+  const buildEsQuery = await getBuildEsQueryAsync();
+  try {
+    return buildEsQuery(dataView, query, filters, queryConfig);
+  } catch (e) {
+    return {
+      bool: {
+        must_not: {
+          match_all: {},
+        },
+      },
+    };
+  }
 }
