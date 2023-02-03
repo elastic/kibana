@@ -187,6 +187,7 @@ export class Plugin
     const category = DEFAULT_APP_CATEGORIES.observability;
     const euiIconType = 'logoObservability';
     const config = this.initContext.config.get();
+    const kibanaVersion = this.initContext.env.packageInfo.version;
 
     createCallObservabilityApi(coreSetup.http);
 
@@ -211,6 +212,7 @@ export class Plugin
         ObservabilityPageTemplate: navigation.PageTemplate,
         usageCollection: pluginsSetup.usageCollection,
         isDev: this.initContext.env.mode.dev,
+        kibanaVersion,
       });
     };
 
