@@ -5,14 +5,29 @@
  * 2.0.
  */
 
-import { ComplianceDashboardData } from '../../../common/types';
+import { Cluster, ComplianceDashboardData } from '../../../common/types';
 
-export const getClusterMockData = () => ({
+export const getClusterMockData = (): Cluster => ({
   meta: {
-    clusterId: '8f9c5b98-cc02-4827-8c82-316e2cc25870',
-    benchmarkName: 'CIS Kubernetes V1.20',
+    assetIdentifierId: '8f9c5b98-cc02-4827-8c82-316e2cc25870',
     lastUpdate: '2022-11-07T13:14:34.990Z',
-    benchmarkId: 'cis_k8s',
+    cloud: {
+      provider: 'aws',
+      account: {
+        name: 'build-security-dev',
+        id: '704479110758',
+      },
+    },
+    benchmark: {
+      name: 'CIS Amazon Web Services Foundations',
+      rule_number: '1.4',
+      id: 'cis_aws',
+      posture_type: 'cspm',
+      version: 'v1.5.0',
+    },
+    cluster: {
+      name: '8f9c5b98-cc02-4827-8c82-316e2cc25870',
+    },
   },
   stats: {
     totalFailed: 17,

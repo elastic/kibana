@@ -8,10 +8,11 @@
 import { PayloadAction } from '@reduxjs/toolkit';
 import { call, put, takeEvery, select, debounce } from 'redux-saga/effects';
 import { SavedObject } from '@kbn/core-saved-objects-common';
+import { quietFetchOverviewStatusAction } from '../overview_status';
 import { enableDefaultAlertingAction } from '../alert_rules';
 import { ConfigKey, SyntheticsMonitor } from '../../../../../common/runtime_types';
 import { kibanaService } from '../../../../utils/kibana_service';
-import { MonitorOverviewPageState, quietFetchOverviewStatusAction } from '../overview';
+import { MonitorOverviewPageState } from '../overview';
 import { quietFetchOverviewAction } from '../overview/actions';
 import { selectOverviewState } from '../overview/selectors';
 import { fetchEffectFactory, sendErrorToast, sendSuccessToast } from '../utils/fetch_effect';
