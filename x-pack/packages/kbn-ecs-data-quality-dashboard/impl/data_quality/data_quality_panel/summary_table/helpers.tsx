@@ -122,7 +122,7 @@ export const getSummaryTableColumns = ({
           <span>{EMPTY_STAT}</span>
         </EuiToolTip>
       ),
-    sortable: false,
+    sortable: true,
     truncateText: false,
     width: '50px',
   },
@@ -134,7 +134,7 @@ export const getSummaryTableColumns = ({
         <span aria-roledescription={i18n.INDEX_NAME_LABEL}>{indexName}</span>
       </EuiToolTip>
     ),
-    sortable: false,
+    sortable: true,
     truncateText: false,
     width: '300px',
   },
@@ -152,7 +152,7 @@ export const getSummaryTableColumns = ({
         />
       </ProgressContainer>
     ),
-    sortable: false,
+    sortable: true,
     truncateText: false,
   },
   {

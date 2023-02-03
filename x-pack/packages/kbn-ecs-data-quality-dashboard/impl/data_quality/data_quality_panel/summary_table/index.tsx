@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-import type { EuiBasicTableColumn, Pagination } from '@elastic/eui';
+import type {
+  CriteriaWithPagination,
+  Direction,
+  EuiBasicTableColumn,
+  Pagination,
+} from '@elastic/eui';
 import { EuiInMemoryTable } from '@elastic/eui';
 import numeral from '@elastic/numeral';
 import React, { useCallback, useMemo, useState } from 'react';
@@ -15,6 +20,20 @@ import type { IndexSummaryTableItem } from './helpers';
 import { getShowPagination } from './helpers';
 
 const MIN_PAGE_SIZE = 10;
+
+interface SortConfig {
+  sort: {
+    direction: Direction;
+    field: string;
+  };
+}
+
+const defaultSort: SortConfig = {
+  sort: {
+    direction: 'desc',
+    field: 'docsCount',
+  },
+};
 
 interface Props {
   defaultNumberFormat: string;
@@ -39,6 +58,7 @@ const SummaryTableComponent: React.FC<Props> = ({
   items,
   toggleExpanded,
 }) => {
+  const [sorting, setSorting] = useState<SortConfig>(defaultSort);
   const formatNumber = useCallback(
     (value: number | undefined): string =>
       value != null ? numeral(value).format(defaultNumberFormat) : EMPTY_STAT,
@@ -52,7 +72,9 @@ const SummaryTableComponent: React.FC<Props> = ({
   );
   const getItemId = useCallback((item: IndexSummaryTableItem) => item.indexName, []);
 
-  const onChange = useCallback(({ page }: { page: { index: number; size: number } }) => {
+  const onChange = useCallback(({ page, sort }: CriteriaWithPagination<IndexSummaryTableItem>) => {
+    setSorting({ sort: sort ?? defaultSort.sort });
+
     setPageIndex(page.index);
     setPageSize(page.size);
   }, []);
@@ -69,6 +91,7 @@ const SummaryTableComponent: React.FC<Props> = ({
 
   return (
     <EuiInMemoryTable
+      allowNeutralSort={false}
       compressed={true}
       columns={columns}
       isExpandable={true}
@@ -81,6 +104,7 @@ const SummaryTableComponent: React.FC<Props> = ({
           ? pagination
           : undefined
       }
+      sorting={sorting}
     />
   );
 };
