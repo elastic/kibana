@@ -227,6 +227,53 @@ describe('Lens createAddToTimelineAction', () => {
       expect(mockWarningToast).not.toHaveBeenCalled();
     });
 
+    it('should add exclusive provider for count', async () => {
+      await addToTimelineAction.execute({
+        ...context,
+        data: [
+          {
+            columnMeta: {
+              ...columnMeta,
+              type: 'number',
+              sourceParams: {
+                type: 'value_count',
+              },
+            },
+          },
+        ],
+      });
+      expect(mockDispatch).toHaveBeenCalledTimes(2);
+      expect(mockDispatch).toHaveBeenCalledWith({
+        type: addProvider.type,
+        payload: {
+          id: TimelineId.active,
+          providers: [
+            {
+              and: [],
+              enabled: true,
+              excluded: false,
+              id: 'value-count-data-provider-timeline-1-user_name',
+              kqlQuery: '',
+              name: 'user.name',
+              queryMatch: {
+                field: 'user.name',
+                operator: ':*',
+                value: '',
+              },
+            },
+          ],
+        },
+      });
+      expect(mockDispatch).toHaveBeenCalledWith({
+        type: showTimeline.type,
+        payload: {
+          id: TimelineId.active,
+          show: true,
+        },
+      });
+      expect(mockWarningToast).not.toHaveBeenCalled();
+    });
+
     it('should show warning if no provider added', async () => {
       await addToTimelineAction.execute({
         ...context,
