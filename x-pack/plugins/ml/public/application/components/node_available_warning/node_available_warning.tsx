@@ -18,19 +18,19 @@ import { isTrialLicense } from '../../license/check_license';
 import { useMlNodeCheck } from './use_ml_node_check';
 
 interface Props {
-  callback?: (mlAvailable: boolean) => void;
+  nodeAvailableCallback?: (mlAvailable: boolean) => void;
 }
 
-export const NodeAvailableWarning: FC<Props> = ({ callback }) => {
+export const NodeAvailableWarning: FC<Props> = ({ nodeAvailableCallback }) => {
   const { mlNodesAvailable } = useMlNodeCheck();
 
   useEffect(
     function callCallback() {
-      if (typeof callback === 'function') {
-        callback(mlNodesAvailable);
+      if (typeof nodeAvailableCallback === 'function') {
+        nodeAvailableCallback(mlNodesAvailable);
       }
     },
-    [callback, mlNodesAvailable]
+    [mlNodesAvailable, nodeAvailableCallback]
   );
 
   if (mlNodesAvailable) {
