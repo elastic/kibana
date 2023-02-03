@@ -12,6 +12,7 @@ import { ViewMode } from '@kbn/embeddable-plugin/public';
 import { ExitFullScreenButton } from '@kbn/shared-ux-button-exit-full-screen';
 
 import { css } from '@emotion/react';
+import { EuiPortal } from '@elastic/eui';
 import { DashboardGrid } from '../grid';
 import { pluginServices } from '../../../services/plugin_services';
 import { DashboardEmptyScreen } from '../empty_screen/dashboard_empty_screen';
@@ -93,10 +94,12 @@ const WithFullScreenButton = ({ children }: { children: JSX.Element }) => {
     <>
       {children}
       {isFullScreenMode && (
-        <ExitFullScreenButton
-          onExit={() => dispatch(setFullScreenMode(false))}
-          toggleChrome={!isEmbeddedExternally}
-        />
+        <EuiPortal>
+          <ExitFullScreenButton
+            onExit={() => dispatch(setFullScreenMode(false))}
+            toggleChrome={!isEmbeddedExternally}
+          />
+        </EuiPortal>
       )}
     </>
   );
