@@ -140,7 +140,8 @@ const DataQualityComponent: React.FC = () => {
   const { signalIndexName } = useSignalIndex();
 
   const alertsAndSelectedPatterns = useMemo(
-    () => [`${signalIndexName}`, ...selectedPatterns],
+    () =>
+      signalIndexName != null ? [signalIndexName, ...selectedPatterns] : [...selectedPatterns],
     [selectedPatterns, signalIndexName]
   );
 
