@@ -228,6 +228,7 @@ export function DiscoverSidebarComponent({
     }, []);
   // console.log('#### allFields', allFields);
   // todo
+  console.log('#### before useGroupedFields', selectedDataView?.title);
   const { fieldListFiltersProps, fieldListGroupedProps } = useGroupedFields({
     dataViewId: (!isPlainRecord && selectedDataView?.id) || null, // passing `null` for text-based queries
     allFields,

@@ -17,6 +17,7 @@ export function getDataViewFieldList(
   dataView: DataView | undefined | null,
   fieldCounts: Record<string, number> | undefined | null
 ): DataViewField[] | null {
+  // Can this be removed?
   if (!fieldCounts) {
     // still loading data
     return null;
@@ -37,6 +38,8 @@ export function getDataViewFieldList(
   const fieldNamesInDocs = Object.keys(fieldCounts);
   const fieldNamesInDataView = dataViewFields.map((fld) => fld.name);
   const unknownFields: DataViewField[] = [];
+
+  console.log('**** getDataViewFieldList', dataView, fieldNamesInDataView, fieldNamesInDocs);
 
   difference(fieldNamesInDocs, fieldNamesInDataView).forEach((unknownFieldName) => {
     if (dataView && isNestedFieldParent(unknownFieldName, dataView)) {

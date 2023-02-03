@@ -94,11 +94,13 @@ export function sendResetMsg(data: SavedSearchData, initialFetchStatus: FetchSta
     foundDocuments: undefined,
     recordRawType,
   });
-  data.documents$.next({
-    fetchStatus: initialFetchStatus,
-    result: [],
-    recordRawType,
-  });
+  if (data.main$.getValue().fetchStatus !== initialFetchStatus) {
+    data.documents$.next({
+      fetchStatus: initialFetchStatus,
+      result: [],
+      recordRawType,
+    });
+  }
   data.totalHits$.next({
     fetchStatus: initialFetchStatus,
     result: undefined,

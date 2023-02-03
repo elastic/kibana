@@ -43,6 +43,7 @@ export interface FieldListGroupedProps<T extends FieldListItem> {
   'data-test-subj'?: string;
 }
 
+// displays field list summary
 function InnerFieldListGrouped<T extends FieldListItem = DataViewField>({
   fieldGroups,
   fieldsExistenceStatus,

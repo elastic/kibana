@@ -49,6 +49,7 @@ import {
   DiscoverSidebarReducerActionType,
   DiscoverSidebarReducerStatus,
 } from './lib/sidebar_reducer';
+import { DiscoverStateContainer } from '../../services/discover_state';
 
 const getBuildEsQueryAsync = async () => (await import('@kbn/es-query')).buildEsQuery;
 const EMPTY_FIELD_COUNTS = {};
@@ -88,10 +89,6 @@ export interface DiscoverSidebarResponsiveProps {
    */
   onRemoveField: (fieldName: string) => void;
   /**
-   * Currently selected data view
-   */
-  selectedDataView?: DataView;
-  /**
    * Metric tracking function
    * @param metricType
    * @param eventName
@@ -117,6 +114,8 @@ export interface DiscoverSidebarResponsiveProps {
    * list of available fields fetched from ES
    */
   availableFields$: AvailableFields$;
+
+  stateContainer: DiscoverStateContainer;
 }
 
 /**
@@ -130,56 +129,55 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
   const isPlainRecord = useAppStateSelector(
     (state) => getRawRecordType(state.query) === RecordRawType.PLAIN
   );
-  const { selectedDataView, onFieldEdited, onDataViewCreated } = props;
+  const { onFieldEdited, onDataViewCreated, stateContainer } = props;
+  // todo - simplify data view references in this doc
+  const selectedDataView = stateContainer.internalState.get().dataView;
   const [isFlyoutVisible, setIsFlyoutVisible] = useState(false);
   const [sidebarState, dispatchSidebarStateAction] = useReducer(
     discoverSidebarReducer,
     selectedDataView,
     getInitialState
   );
-  const selectedDataViewRef = useRef<DataView | null | undefined>(selectedDataView);
   const showFieldList = sidebarState.status !== DiscoverSidebarReducerStatus.INITIAL;
 
   const querySubscriberResult = useQuerySubscriber({ data });
 
-  console.log(
-    '*** DiscoverSidebarResponsive 2 - param:',
-    selectedDataView?.getName(),
-    'ref:',
-    selectedDataViewRef.current?.getName()
-  );
-
   const fetchFields = useCallback(
     async (dataView: DataView) => {
-      console.log('*** fetchFields is firing', dataView.getName());
+      console.log(
+        '*** fetchFields is firing',
+        dataView.getName(),
+        stateContainer.internalState.get().dataView?.title,
+        querySubscriberResult.fromDate,
+        querySubscriberResult.toDate
+      );
       const existingFieldList = await loadFieldExisting({
         data,
-        // dataView: selectedDataViewRef.current!,
         dataView,
         fromDate: querySubscriberResult.fromDate || '',
         toDate: querySubscriberResult.toDate || '',
         // dslQuery: querySubscriberResult.query || {},
         dslQuery: await buildSafeEsQuery(
-          // selectedDataViewRef.current!,
           dataView,
           querySubscriberResult.query!,
           querySubscriberResult.filters || [],
           getEsQueryConfig(core.uiSettings)
         ),
-        // timeFieldName: selectedDataViewRef.current?.timeFieldName,
         timeFieldName: dataView.timeFieldName,
         dataViewsService: dataViews,
         uiSettingsClient: core.uiSettings,
       });
 
-      /*
       console.log(
         '***** existingFieldList',
         // selectedDataViewRef.current!.title,
         dataView.title,
+        stateContainer.internalState.get().dataView?.title,
         JSON.stringify(existingFieldList)
       );
-      */
+      if (dataView.id !== stateContainer.internalState.get().dataView?.id) {
+        return;
+      }
 
       dispatchSidebarStateAction({
         type: DiscoverSidebarReducerActionType.DOCUMENTS_LOADED,
@@ -202,18 +200,24 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
       querySubscriberResult.query,
       querySubscriberResult.toDate,
       querySubscriberResult.filters,
+      stateContainer.internalState,
     ]
   );
 
+  // TODO
   useEffect(() => {
-    selectedDataViewRef.current = selectedDataView;
-    dispatchSidebarStateAction({
-      type: DiscoverSidebarReducerActionType.DATA_VIEW_SWITCHED,
-      payload: {
-        dataView: selectedDataView,
-      },
+    const sub = stateContainer.internalState.subscribe((update) => {
+      console.log('*** internalState.subscribe', update.dataView?.title);
+      dispatchSidebarStateAction({
+        type: DiscoverSidebarReducerActionType.DATA_VIEW_SWITCHED,
+        payload: {
+          dataView: update.dataView,
+        },
+      });
     });
-  }, [selectedDataView, dispatchSidebarStateAction]);
+
+    return sub;
+  }, [dispatchSidebarStateAction, stateContainer.internalState]);
 
   useEffect(() => {
     const subscription = props.documents$.subscribe((documentState) => {
@@ -225,7 +229,7 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
           dispatchSidebarStateAction({
             type: DiscoverSidebarReducerActionType.RESET,
             payload: {
-              dataView: selectedDataViewRef.current,
+              dataView: stateContainer.internalState.get().dataView,
             },
           });
           break;
@@ -238,8 +242,8 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
               },
             });
           } else {
-            console.log('*** 3 - fetchFields', selectedDataViewRef.current);
-            fetchFields(selectedDataViewRef.current!);
+            console.log('*** 3 - fetchFields');
+            fetchFields(stateContainer.internalState.get().dataView!);
             // fetchFields(selectedDataViewR!);
           }
           break;
@@ -248,7 +252,7 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
             dispatchSidebarStateAction({
               type: DiscoverSidebarReducerActionType.DOCUMENTS_LOADED,
               payload: {
-                dataView: selectedDataViewRef.current,
+                dataView: stateContainer.internalState.get().dataView,
                 fieldCounts: isPlainRecordType
                   ? EMPTY_FIELD_COUNTS
                   : calcFieldCounts(documentState.result),
@@ -263,7 +267,7 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
           dispatchSidebarStateAction({
             type: DiscoverSidebarReducerActionType.DOCUMENTS_LOADED,
             payload: {
-              dataView: selectedDataViewRef.current,
+              dataView: stateContainer.internalState.get().dataView,
               fieldCounts: EMPTY_FIELD_COUNTS,
               isPlainRecord: isPlainRecordType,
             },
@@ -277,28 +281,19 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
   }, [
     props.documents$,
     dispatchSidebarStateAction,
-    // selectedDataViewRef,
     fetchFields,
     props.useNewFieldsApi,
+    stateContainer.internalState,
   ]);
-
-  useEffect(() => {
-    if (selectedDataView !== selectedDataViewRef.current) {
-      dispatchSidebarStateAction({
-        type: DiscoverSidebarReducerActionType.DATA_VIEW_SWITCHED,
-        payload: {
-          dataView: selectedDataView,
-        },
-      });
-      selectedDataViewRef.current = selectedDataView;
-    }
-  }, [selectedDataView, dispatchSidebarStateAction, selectedDataViewRef]);
 
   const isAffectedByGlobalFilter = Boolean(querySubscriberResult.filters?.length);
   // this is doing the work
   const { isProcessing, refetchFieldsExistenceInfo } = useExistingFieldsFetcher({
     disableAutoFetching: true,
-    dataViews: !isPlainRecord && selectedDataViewRef.current ? [selectedDataViewRef.current] : [],
+    dataViews:
+      !isPlainRecord && stateContainer.internalState.get().dataView
+        ? [stateContainer.internalState.get().dataView]
+        : [],
     query: querySubscriberResult.query,
     filters: querySubscriberResult.filters,
     fromDate: querySubscriberResult.fromDate,

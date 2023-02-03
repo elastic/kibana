@@ -52,7 +52,7 @@ import { DiscoverHistogramLayout } from './discover_histogram_layout';
  */
 export const SIDEBAR_CLOSED_KEY = 'discover:sidebarClosed';
 
-const SidebarMemoized = DiscoverSidebarResponsive;
+const SidebarMemoized = React.memo(DiscoverSidebarResponsive);
 const TopNavMemoized = React.memo(DiscoverTopNav);
 
 export function DiscoverLayout({
@@ -329,7 +329,6 @@ export function DiscoverLayout({
               onAddFilter={!isPlainRecord ? onAddFilter : undefined}
               onRemoveField={onRemoveColumn}
               onChangeDataView={onChangeDataView}
-              selectedDataView={dataView}
               isClosed={isSidebarClosed}
               trackUiMetric={trackUiMetric}
               useNewFieldsApi={useNewFieldsApi}
@@ -337,6 +336,7 @@ export function DiscoverLayout({
               viewMode={viewMode}
               onDataViewCreated={onDataViewCreated}
               availableFields$={stateContainer.dataState.data$.availableFields$}
+              stateContainer={stateContainer}
             />
           </EuiFlexItem>
           <EuiHideFor sizes={['xs', 's']}>

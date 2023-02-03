@@ -104,7 +104,7 @@ export function discoverSidebarReducer(
       const mappedAndUnmappedFields = action.payload.isPlainRecord
         ? getTextBasedQueryFieldList(action.payload.textBasedQueryColumns)
         : getDataViewFieldList(action.payload.dataView, action.payload.fieldCounts);
-      // console.log('*** mappedAndUnmappedFields', mappedAndUnmappedFields);
+      console.log('*** mappedAndUnmappedFields', mappedAndUnmappedFields);
       return {
         ...state,
         dataView: action.payload.dataView,
