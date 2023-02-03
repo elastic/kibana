@@ -167,7 +167,7 @@ describe('updateGlobalNavigation', () => {
       it('shows the slos deep link', () => {
         const capabilities = {
           [casesFeatureId]: { read_cases: true },
-          [sloFeatureId]: { show: true },
+          [sloFeatureId]: { read: true },
           navLinks: { apm: true, logs: false, metrics: false, uptime: false },
         } as unknown as ApplicationStart['capabilities'];
 

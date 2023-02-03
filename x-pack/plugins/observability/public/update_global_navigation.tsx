@@ -51,7 +51,7 @@ export function updateGlobalNavigation({
         return {
           ...link,
           navLinkStatus:
-            someVisible && capabilities[sloFeatureId].show
+            someVisible && capabilities[sloFeatureId].read
               ? AppNavLinkStatus.visible
               : AppNavLinkStatus.hidden,
         };
