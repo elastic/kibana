@@ -7,14 +7,14 @@
 
 import * as t from 'io-ts';
 
-export const AllowedValues = t.array(
-  t.partial({
-    description: t.string,
-    name: t.string,
-  })
-);
+const AllowedValue = t.partial({
+  description: t.string,
+  name: t.string,
+});
 
-export type AllowedValuesInputs = t.TypeOf<typeof AllowedValues>;
+export const AllowedValues = t.array(AllowedValue);
+
+export type AllowedValues = t.TypeOf<typeof AllowedValues>;
 
 export const GetUnallowedFieldValuesBody = t.array(
   t.type({
@@ -27,3 +27,5 @@ export const GetUnallowedFieldValuesBody = t.array(
 );
 
 export type GetUnallowedFieldValuesInputs = t.TypeOf<typeof GetUnallowedFieldValuesBody>;
+
+export type EcsFlatLike = Partial<Record<string, { type: string; [key: string]: unknown }>>;

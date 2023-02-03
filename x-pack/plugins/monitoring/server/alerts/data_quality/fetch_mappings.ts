@@ -8,10 +8,12 @@
 import type { IndicesGetMappingIndexMappingRecord } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient } from '@kbn/core/server';
 
+export type Mappings = Record<string, IndicesGetMappingIndexMappingRecord>;
+
 export const fetchMappings = async (
   client: ElasticsearchClient,
   indexPatterns: string[]
-): Promise<Record<string, IndicesGetMappingIndexMappingRecord>> =>
+): Promise<Mappings> =>
   client.indices.getMapping({
     expand_wildcards: ['open'],
     index: indexPatterns,

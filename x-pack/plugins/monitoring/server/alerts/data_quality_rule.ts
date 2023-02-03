@@ -43,7 +43,7 @@ export const fetchMappings = async (
     index: indexName,
   });
 
-async function fetchDataQuality(
+export async function fetchDataQuality(
   esClient: ElasticsearchClient,
   clusters: AlertCluster[],
   startMs: number,
@@ -51,9 +51,10 @@ async function fetchDataQuality(
   maxBucketSize: number,
   filterQuery: string | undefined
 ): Promise<AlertDataQualityStats[]> {
+  // This requires remote clusters to be configured
+  // If remote clusters are configured, we should use them. Here we only have a local one.
+  const { cluster_uuid: clusterUuid } = await esClient.cluster.state();
   const { indices = {} } = await esClient.indices.stats();
-
-  const cluster = clusters[0];
 
   const checkResults = await runDataQualityCheck(
     esClient,
@@ -62,13 +63,18 @@ async function fetchDataQuality(
     `${endMs}`
   );
 
-  const results: AlertDataQualityStats[] = checkResults.map(([indexName, fieldCheckSummary]) => {
-    return {
-      indexName,
-      unallowedValues: fieldCheckSummary.length,
-      clusterUuid: cluster.clusterUuid,
-    };
-  });
+  // TODO combine both results somehow
+
+  const results: AlertDataQualityStats[] = checkResults.unallowedValuesCheckResults.map(
+    ([indexName, fieldCheckSummary]) => {
+      return {
+        indexName,
+        unallowedValues: fieldCheckSummary.length,
+        incorrectMappings: 0,
+        clusterUuid,
+      };
+    }
+  );
 
   return results;
 }
@@ -143,10 +149,11 @@ export class DataQualityRule extends BaseRule {
     const stat = item.meta as AlertDataQualityStats;
     return {
       text: i18n.translate('xpack.monitoring.alerts.dataQuality.ui.firingMessage', {
-        defaultMessage: `Cluster {clusterUuid} is reporting {unallowedValues} unallowed values at #absolute`,
+        defaultMessage: `Cluster {clusterUuid} is reporting {unallowedValues} unallowed values and {incorrectMappings} at #absolute`,
         values: {
           clusterUuid: stat.clusterUuid,
           unallowedValues: numeral(stat.unallowedValues).format(ROUNDED_FLOAT),
+          incorrectMappings: numeral(stat.incorrectMappings).format(ROUNDED_FLOAT),
         },
       }),
       nextSteps: [

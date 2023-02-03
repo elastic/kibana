@@ -6,7 +6,7 @@
  */
 
 import type { MsearchMultisearchBody } from '@elastic/elasticsearch/lib/api/types';
-import type { AllowedValuesInputs } from './types';
+import type { AllowedValues } from './types';
 
 export const getMSearchRequestBody = ({
   indexFieldName,
@@ -15,7 +15,7 @@ export const getMSearchRequestBody = ({
   to,
 }: {
   indexFieldName: string;
-  allowedValues: AllowedValuesInputs;
+  allowedValues: AllowedValues;
   from: string;
   to: string;
 }): MsearchMultisearchBody => ({

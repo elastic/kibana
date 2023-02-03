@@ -135,6 +135,7 @@ export interface AlertDataQualityState extends AlertNodeState {
 
 export interface AlertDataQualityStats {
   unallowedValues: number;
+  incorrectMappings: number;
   indexName: string;
   clusterUuid: string;
 }

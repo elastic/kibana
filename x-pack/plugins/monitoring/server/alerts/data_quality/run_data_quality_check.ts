@@ -12,13 +12,12 @@ import { fetchMappings } from './fetch_mappings';
 import { getFieldsWithTypes as mappingToFieldTypes } from './field_types';
 import { getUnallowedFieldValues } from './get_unallowed';
 import { extendFieldsWithAllowedValues } from './extend_fields_with_allowed_values';
+import { checkMappings, FieldWithInvalidType } from './check_mappings';
 
 interface InvalidFieldsSummary {
   key: string;
   doc_count: number;
 }
-
-export type UnallowedFieldCheckResults = Array<[string, InvalidFieldsSummary[]]>;
 
 export const runDataQualityCheck = async (
   es: ElasticsearchClient,
@@ -26,14 +25,14 @@ export const runDataQualityCheck = async (
   from: string,
   to: string
 ) => {
-  /*
-  TODO check schema types types like that
-    isEcsCompliant: type === ecsMetadata[field].type && indexInvalidValues.length === 0
-  */
-
   const mappingRequestResult = await fetchMappings(es, indexPatterns);
 
   const inputs: GetUnallowedFieldValuesInputs = [];
+
+  const unallowedValuesCheckResults: Array<[index: string, invalidFields: InvalidFieldsSummary[]]> =
+    [];
+
+  const mappingsCheckResults: FieldWithInvalidType[] = [];
 
   for (const indexName in mappingRequestResult) {
     if (has(mappingRequestResult, indexName)) {
@@ -42,6 +41,8 @@ export const runDataQualityCheck = async (
           mappings: { properties },
         },
       } = mappingRequestResult;
+
+      mappingsCheckResults.push(...checkMappings(mappingRequestResult, indexName));
 
       const fieldsTypes = mappingToFieldTypes(properties as Record<string, unknown>);
 
@@ -61,8 +62,6 @@ export const runDataQualityCheck = async (
 
   const { responses } = await getUnallowedFieldValues(es, inputs);
 
-  const results: UnallowedFieldCheckResults = [];
-
   (responses as any[]).forEach(({ aggregations: { unallowedValues }, indexName }) => {
     if (!unallowedValues) {
       return;
@@ -74,8 +73,8 @@ export const runDataQualityCheck = async (
       return;
     }
 
-    results.push([indexName, values as InvalidFieldsSummary[]]);
+    unallowedValuesCheckResults.push([indexName, values as InvalidFieldsSummary[]]);
   });
 
-  return results;
+  return { unallowedValuesCheckResults, mappingsCheckResults };
 };
