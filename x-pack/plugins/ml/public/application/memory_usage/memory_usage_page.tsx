@@ -11,7 +11,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiTabs, EuiTab } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { NodesList } from './nodes_overview';
 import { MlPageHeader } from '../components/page_header';
-import { JobMemoryTreeMap } from './memory_tree_map';
+import { MemoryPage, JobMemoryTreeMap } from './memory_tree_map';
 import { useIsServerless } from '../contexts/kibana/use_is_serverless';
 import { SavedObjectsWarning } from '../components/saved_objects_warning';
 
@@ -64,7 +64,7 @@ export const MemoryUsagePage: FC = () => {
               <FormattedMessage id="xpack.ml.memoryUsage.memoryTab" defaultMessage="Memory usage" />
             </EuiTab>
           </EuiTabs>
-          {selectedTab === TAB.NODES ? <NodesList /> : <JobMemoryTreeMap />}
+          {selectedTab === TAB.NODES ? <NodesList /> : <MemoryPage />}
         </>
       )}
     </>

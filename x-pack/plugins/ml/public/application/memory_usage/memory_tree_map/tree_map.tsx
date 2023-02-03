@@ -11,11 +11,13 @@ import { FIELD_FORMAT_IDS } from '@kbn/field-formats-plugin/common';
 import {
   EuiComboBox,
   EuiComboBoxOptionOption,
+  EuiEmptyPrompt,
   EuiFlexGroup,
   EuiFlexItem,
   EuiSpacer,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { MemoryUsageInfo } from '../../../../common/types/trained_models';
 import { JobType, MlSavedObjectType } from '../../../../common/types/saved_objects';
 import { useTrainedModelsApiService } from '../../services/ml_api_service/trained_models';
@@ -122,48 +124,64 @@ export const JobMemoryTreeMap: FC<Props> = ({ node, type, height }) => {
             />
           </EuiFlexItem>
         </EuiFlexGroup>
-        <Chart>
-          <Settings
-            theme={{
-              scales: { histogramPadding: 0.2 },
-            }}
-          />
-          <Partition
-            id="memoryUsageTreeMap"
-            data={data}
-            layout={PartitionLayout.treemap}
-            valueAccessor={(d: MemoryUsageInfo) => d.size}
-            valueFormatter={(size: number) => bytesFormatter(size)}
-            layers={[
-              {
-                groupByRollup: (d: MemoryUsageInfo) => d.type,
-                nodeLabel: (d) => `${d}`,
-                fillLabel: {
-                  valueFormatter: (size: number) => bytesFormatter(size),
-                },
-                shape: {
-                  fillColor: (d: ShapeTreeNode) => getMemoryItemColor(d.dataName as JobType),
-                },
-              },
-              {
-                groupByRollup: (d: MemoryUsageInfo) => d.id,
-                nodeLabel: (d) => `${d}`,
-                fillLabel: {
-                  valueFont: {
-                    fontWeight: 100,
+        {data.length ? (
+          <Chart>
+            <Settings
+              theme={{
+                scales: { histogramPadding: 0.2 },
+              }}
+            />
+            <Partition
+              id="memoryUsageTreeMap"
+              data={data}
+              layout={PartitionLayout.treemap}
+              valueAccessor={(d: MemoryUsageInfo) => d.size}
+              valueFormatter={(size: number) => bytesFormatter(size)}
+              layers={[
+                {
+                  groupByRollup: (d: MemoryUsageInfo) => d.type,
+                  nodeLabel: (d) => `${d}`,
+                  fillLabel: {
+                    valueFormatter: (size: number) => bytesFormatter(size),
+                  },
+                  shape: {
+                    fillColor: (d: ShapeTreeNode) => getMemoryItemColor(d.dataName as JobType),
                   },
                 },
-                shape: {
-                  fillColor: (d: ShapeTreeNode) => {
-                    // color the shape the same as its parent.
-                    const parentId = d.parent.path[d.parent.path.length - 1].value as JobType;
-                    return getMemoryItemColor(parentId);
+                {
+                  groupByRollup: (d: MemoryUsageInfo) => d.id,
+                  nodeLabel: (d) => `${d}`,
+                  fillLabel: {
+                    valueFont: {
+                      fontWeight: 100,
+                    },
+                  },
+                  shape: {
+                    fillColor: (d: ShapeTreeNode) => {
+                      // color the shape the same as its parent.
+                      const parentId = d.parent.path[d.parent.path.length - 1].value as JobType;
+                      return getMemoryItemColor(parentId);
+                    },
                   },
                 },
-              },
-            ]}
+              ]}
+            />
+          </Chart>
+        ) : (
+          <EuiEmptyPrompt
+            titleSize="xs"
+            iconType="alert"
+            data-test-subj="mlEmptyMemoryUsageTreeMap"
+            title={
+              <h2>
+                <FormattedMessage
+                  id="xpack.ml.memoryUsage.treeMap.emptyPrompt"
+                  defaultMessage="No open jobs or trained models could be found with the current selection"
+                />
+              </h2>
+            }
           />
-        </Chart>
+        )}
       </LoadingWrapper>
     </div>
   );

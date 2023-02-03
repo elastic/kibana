@@ -5,4 +5,5 @@
  * 2.0.
  */
 
-export { JobMemoryTreeMap } from './job_memory_tree_map';
+export { JobMemoryTreeMap } from './tree_map';
+export { MemoryPage } from './memory_page';
