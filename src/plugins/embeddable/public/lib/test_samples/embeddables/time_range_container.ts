@@ -6,20 +6,15 @@
  * Side Public License, v 1.
  */
 
-import {
-  ContainerInput,
-  Container,
-  ContainerOutput,
-  EmbeddableStart,
-} from '@kbn/embeddable-plugin/public';
 import type { TimeRange } from '@kbn/es-query';
+import { ContainerInput, Container, ContainerOutput, EmbeddableStart } from '../../..';
 
 /**
  * interfaces are not allowed to specify a sub-set of the required types until
  * https://github.com/microsoft/TypeScript/issues/15300 is fixed so we use a type
  * here instead
  */
-export type InheritedChildrenInput = {
+type InheritedChildrenInput = {
   timeRange: TimeRange;
   id?: string;
 };
