@@ -97,7 +97,7 @@ export default function (providerContext: FtrProviderContext) {
         expect(policy2.is_managed).to.equal(false);
       });
 
-      it.only('sets given agent_features value', async () => {
+      it('sets given agent_features value', async () => {
         const {
           body: { item: createdPolicy },
         } = await supertest
