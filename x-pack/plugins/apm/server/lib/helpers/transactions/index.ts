@@ -28,7 +28,7 @@ export async function getHasTransactionsEvents({
   start?: number;
   end?: number;
   apmEventClient: APMEventClient;
-  kuery: string;
+  kuery?: string;
 }) {
   const response = await apmEventClient.search(
     'get_has_aggregated_transactions',
@@ -67,7 +67,7 @@ export async function getSearchTransactionsEvents({
   start?: number;
   end?: number;
   apmEventClient: APMEventClient;
-  kuery: string;
+  kuery?: string;
 }): Promise<boolean> {
   switch (config.searchAggregatedTransactions) {
     case SearchAggregatedTransactionSetting.always:

@@ -29,10 +29,10 @@ const serviceMapRoute = createApmServerRoute({
       t.partial({
         serviceName: t.string,
         serviceGroup: t.string,
+        kuery: kueryRt.props.kuery,
       }),
       environmentRt,
       rangeRt,
-      kueryRt,
     ]),
   }),
   options: { tags: ['access:apm'] },
@@ -193,7 +193,6 @@ const serviceMapServiceNodeRoute = createApmServerRoute({
       config,
       start,
       end,
-      kuery: '',
     });
 
     const commonProps = {
