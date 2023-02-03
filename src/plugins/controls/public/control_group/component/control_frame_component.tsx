@@ -152,7 +152,6 @@ export const ControlFrame = ({
           }
           iconType="cross"
           color="danger"
-          tabIndex={0}
         />
       </EuiToolTip>
     </>
