@@ -21091,14 +21091,6 @@
             "path": "src/plugins/saved_objects_tagging_oss/public/api.ts"
           },
           {
-            "plugin": "savedObjectsManagement",
-            "path": "src/plugins/saved_objects_management/common/types.ts"
-          },
-          {
-            "plugin": "savedObjectsManagement",
-            "path": "src/plugins/saved_objects_management/common/types.ts"
-          },
-          {
             "plugin": "savedObjectsTagging",
             "path": "x-pack/plugins/saved_objects_tagging/common/types.ts"
           },
@@ -23013,14 +23005,6 @@
           {
             "plugin": "@kbn/core-saved-objects-browser-internal",
             "path": "packages/core/saved-objects/core-saved-objects-browser-internal/src/saved_objects_client.ts"
-          },
-          {
-            "plugin": "savedObjectsManagement",
-            "path": "src/plugins/saved_objects_management/public/lib/find_objects.ts"
-          },
-          {
-            "plugin": "savedObjectsManagement",
-            "path": "src/plugins/saved_objects_management/public/lib/find_objects.ts"
           },
           {
             "plugin": "visualizations",
