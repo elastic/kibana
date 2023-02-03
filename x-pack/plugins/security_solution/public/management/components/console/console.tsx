@@ -79,8 +79,13 @@ const ConsoleWindow = styled.div`
       overflow-x: hidden;
     }
 
-    // FIXME:PT this does not scale well. need better solution
-    .euiFlexItem:not(.noMinWidth) {
+    // min-width setting is needed for flex items to ensure that overflow works as expected
+    // in the Input area and not cause the entire UI to expand beyond the overall width of
+    // the console. @see https://css-tricks.com/flexbox-truncated-text
+    // To prevent this from being applied to an individual flex item, use the classname of
+    // 'noMinWidth'. For areas of the Console that render components external to the Console,
+    // use className 'noThemeOverrides' to prevent this from impacting those components/
+    .euiFlexItem:not(.noMinWidth):not(.noThemeOverrides .euiFlexItem) {
       min-width: 0;
     }
   }

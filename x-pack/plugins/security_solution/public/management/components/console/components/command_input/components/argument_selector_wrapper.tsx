@@ -92,7 +92,7 @@ export const ArgumentSelectorWrapper = memo<ArgumentSelectorWrapperProps>(
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             {/* `div` below ensures that the `SelectorComponent` does NOT inherit the styles of a `flex` container */}
-            <div className="selectorContainer eui-textTruncate">
+            <div className="selectorContainer noThemeOverrides eui-textTruncate">
               <SelectorComponent
                 value={value}
                 valueText={valueText ?? ''}
