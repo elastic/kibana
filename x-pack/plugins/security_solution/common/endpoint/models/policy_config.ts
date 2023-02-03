@@ -145,6 +145,9 @@ export const policyFactory = (): PolicyConfig => {
       logging: {
         file: 'info',
       },
+      advanced: {
+        capture_env_vars: 'LD_PRELOAD,LD_LIBRARY_PATH',
+      },
     },
   };
 };
