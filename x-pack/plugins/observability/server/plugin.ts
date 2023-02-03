@@ -186,7 +186,7 @@ export class ObservabilityPlugin implements Plugin<ObservabilityPluginSetup> {
                 all: [SLO_BURN_RATE_RULE_ID],
               },
             },
-            ui: ['show', 'save', 'delete'],
+            ui: ['read', 'write'],
           },
           read: {
             app: [sloFeatureId, 'kibana'],
@@ -204,7 +204,7 @@ export class ObservabilityPlugin implements Plugin<ObservabilityPluginSetup> {
                 read: [SLO_BURN_RATE_RULE_ID],
               },
             },
-            ui: ['show'],
+            ui: ['read'],
           },
         },
       });
