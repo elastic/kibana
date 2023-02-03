@@ -15,6 +15,7 @@ export const policyFactory = (): PolicyConfig => {
   return {
     windows: {
       events: {
+        credential_access: true,
         dll_and_driver_load: true,
         dns: true,
         file: true,
