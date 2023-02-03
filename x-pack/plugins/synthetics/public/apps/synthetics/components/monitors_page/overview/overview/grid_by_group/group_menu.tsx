@@ -6,33 +6,34 @@
  */
 
 import React, { useState } from 'react';
-import { i18n } from '@kbn/i18n';
 import {
   EuiButtonEmpty,
   EuiContextMenuPanel,
   EuiContextMenuItem,
   EuiPopover,
   useGeneratedHtmlId,
-  EuiText,
   EuiPanel,
+  EuiText,
   EuiHorizontalRule,
 } from '@elastic/eui';
+import { GROUP_TITLE } from './group_fields';
+import { ORDER_BY_TITLE } from '../sort_menu';
 
 interface Option {
   label: string;
   value: string;
   checked: boolean;
-  defaultSortOrder?: string;
+  defaultGroupOrder?: string;
   onClick: () => void;
 }
 
 interface Props {
-  sortOptions: Option[];
-  orderOptions: Option[];
-  sortField: string;
+  groupOptions: Option[];
+  orderByOptions: Option[];
+  groupField: string;
 }
 
-export const SortMenu = ({ sortOptions, orderOptions, sortField }: Props) => {
+export const GroupMenu = ({ groupOptions, orderByOptions, groupField }: Props) => {
   const [isPopoverOpen, setPopover] = useState(false);
 
   const singleContextMenuPopoverId = useGeneratedHtmlId({
@@ -49,19 +50,21 @@ export const SortMenu = ({ sortOptions, orderOptions, sortField }: Props) => {
 
   const button = (
     <EuiButtonEmpty size="xs" iconType="arrowDown" iconSide="right" onClick={onButtonClick}>
-      {sortField}
+      {groupField}
     </EuiButtonEmpty>
   );
 
   const items = [
     <EuiPanel paddingSize="s" hasShadow={false}>
       <EuiText size="xs">
-        <h4>{SORT_BY_TITLE}</h4>
+        <h4>{GROUP_TITLE}</h4>
       </EuiText>
     </EuiPanel>,
-    ...sortOptions.map((option) => (
+
+    ...groupOptions.map((option) => (
       <ContextMenuItem option={option} onClosePopover={closePopover} />
     )),
+
     <EuiHorizontalRule key="hr" margin="none" />,
 
     <EuiPanel paddingSize="s" hasShadow={false}>
@@ -70,7 +73,7 @@ export const SortMenu = ({ sortOptions, orderOptions, sortField }: Props) => {
       </EuiText>
     </EuiPanel>,
 
-    ...orderOptions.map((option) => (
+    ...orderByOptions.map((option) => (
       <ContextMenuItem option={option} onClosePopover={closePopover} />
     )),
   ];
@@ -109,22 +112,8 @@ const ContextMenuItem = ({
         onClosePopover();
         option.onClick();
       }}
-      // style={{
-      //   marginRight: 24,
-      // }}
     >
       {option.label}
     </EuiContextMenuItem>
   );
 };
-
-const SORT_BY_TITLE = i18n.translate('xpack.synthetics.overview.sortPopover.sortBy.title', {
-  defaultMessage: 'Sort by',
-});
-
-export const ORDER_BY_TITLE = i18n.translate(
-  'xpack.synthetics.overview.sortPopover.orderBy.title',
-  {
-    defaultMessage: 'Order',
-  }
-);
