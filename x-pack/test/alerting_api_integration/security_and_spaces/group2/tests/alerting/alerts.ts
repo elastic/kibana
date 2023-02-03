@@ -58,7 +58,7 @@ export default function alertTests({ getService }: FtrProviderContext) {
         let indexRecordActionId: string;
 
         const getAlertInfo = (alertId: string, actions: any) => ({
-          alertId,
+          id: alertId,
           consumer: 'alertsFixture',
           spaceId: space.id,
           namespace: space.id,
