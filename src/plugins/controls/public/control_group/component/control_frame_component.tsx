@@ -127,6 +127,37 @@ export const ControlFrame = ({
     };
   }, [embeddable, embeddableRoot]);
 
+  const floatingActions = (
+    <>
+      {!fatalError && embeddableType !== TIME_SLIDER_CONTROL && (
+        <EuiToolTip content={ControlGroupStrings.floatingActions.getEditButtonTitle()}>
+          <EditControlButton embeddableId={embeddableId} />
+        </EuiToolTip>
+      )}
+      <EuiToolTip content={ControlGroupStrings.floatingActions.getRemoveButtonTitle()}>
+        <EuiButtonIcon
+          data-test-subj={`control-action-${embeddableId}-delete`}
+          aria-label={ControlGroupStrings.floatingActions.getRemoveButtonTitle()}
+          onClick={() =>
+            openConfirm(ControlGroupStrings.management.deleteControls.getSubtitle(), {
+              confirmButtonText: ControlGroupStrings.management.deleteControls.getConfirm(),
+              cancelButtonText: ControlGroupStrings.management.deleteControls.getCancel(),
+              title: ControlGroupStrings.management.deleteControls.getDeleteTitle(),
+              buttonColor: 'danger',
+            }).then((confirmed) => {
+              if (confirmed) {
+                controlGroup.removeEmbeddable(embeddableId);
+              }
+            })
+          }
+          iconType="cross"
+          color="danger"
+          tabIndex={0}
+        />
+      </EuiToolTip>
+    </>
+  );
+
   const embeddableParentClassNames = classNames('controlFrame__control', {
     'controlFrame--twoLine': controlStyle === 'twoLine',
     'controlFrame--oneLine': controlStyle === 'oneLine',
@@ -182,37 +213,6 @@ export const ControlFrame = ({
         </div>
       )}
     </EuiFormControlLayout>
-  );
-
-  const floatingActions = (
-    <>
-      {!fatalError && embeddableType !== TIME_SLIDER_CONTROL && (
-        <EuiToolTip content={ControlGroupStrings.floatingActions.getEditButtonTitle()}>
-          <EditControlButton embeddableId={embeddableId} />
-        </EuiToolTip>
-      )}
-      <EuiToolTip content={ControlGroupStrings.floatingActions.getRemoveButtonTitle()}>
-        <EuiButtonIcon
-          data-test-subj={`control-action-${embeddableId}-delete`}
-          aria-label={ControlGroupStrings.floatingActions.getRemoveButtonTitle()}
-          onClick={() =>
-            openConfirm(ControlGroupStrings.management.deleteControls.getSubtitle(), {
-              confirmButtonText: ControlGroupStrings.management.deleteControls.getConfirm(),
-              cancelButtonText: ControlGroupStrings.management.deleteControls.getCancel(),
-              title: ControlGroupStrings.management.deleteControls.getDeleteTitle(),
-              buttonColor: 'danger',
-            }).then((confirmed) => {
-              if (confirmed) {
-                controlGroup.removeEmbeddable(embeddableId);
-              }
-            })
-          }
-          iconType="cross"
-          color="danger"
-          tabIndex={0}
-        />
-      </EuiToolTip>
-    </>
   );
 
   return (
