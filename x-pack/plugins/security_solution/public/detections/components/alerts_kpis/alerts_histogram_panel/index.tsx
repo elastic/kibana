@@ -6,6 +6,7 @@
  */
 
 import type { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/types';
+import type { Action } from '@kbn/ui-actions-plugin/public';
 import type { Position } from '@elastic/charts';
 import type { EuiComboBox, EuiTitleSize } from '@elastic/eui';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiToolTip } from '@elastic/eui';
@@ -50,6 +51,10 @@ import { KpiPanel, StackByComboBox } from '../common/components';
 import { useInspectButton } from '../common/hooks';
 import { useQueryToggle } from '../../../../common/containers/query_toggle';
 import { GROUP_BY_TOP_LABEL } from '../common/translations';
+import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
+import { getAlertsHistogramLensAttributes as getLensAttributes } from '../../../../common/components/visualization_actions/lens_attributes/common/alerts/alerts_histogram';
+import { SourcererScopeName } from '../../../../common/store/sourcerer/model';
+import { VisualizationEmbeddable } from '../../../../common/components/visualization_actions/visualization_embeddable';
 
 const defaultTotalAlertsObj: AlertsTotal = {
   value: 0,
@@ -68,6 +73,8 @@ const OptionsFlexItem = styled(EuiFlexItem)`
 
 export const LEGEND_WITH_COUNTS_WIDTH = 300; // px
 
+const ChartHeight = '170px';
+
 interface AlertsHistogramPanelProps {
   alignHeader?: 'center' | 'baseline' | 'stretch' | 'flexStart' | 'flexEnd';
   chartHeight?: number;
@@ -75,31 +82,32 @@ interface AlertsHistogramPanelProps {
   combinedQueries?: string;
   comboboxRef?: React.RefObject<EuiComboBox<string | number | string[] | undefined>>;
   defaultStackByOption?: string;
+  extraActions?: Action[];
   filters?: Filter[];
   headerChildren?: React.ReactNode;
   inspectTitle?: string;
+  legendPosition?: Position;
   onFieldSelected?: (field: string) => void;
   /** Override all defaults, and only display this field */
   onlyField?: AlertsStackByField;
   paddingSize?: 's' | 'm' | 'l' | 'none';
   panelHeight?: number;
-  titleSize?: EuiTitleSize;
   query?: Query;
-  legendPosition?: Position;
+  runtimeMappings?: MappingRuntimeFields;
   setComboboxInputRef?: (inputRef: HTMLInputElement | null) => void;
-  signalIndexName: string | null;
   showCountsInLegend?: boolean;
   showGroupByPlaceholder?: boolean;
   showLegend?: boolean;
   showLinkToAlerts?: boolean;
-  showTotalAlertsCount?: boolean;
   showStackBy?: boolean;
+  showTotalAlertsCount?: boolean;
+  signalIndexName: string | null;
   stackByLabel?: string;
   stackByWidth?: number;
   timelineId?: string;
   title?: React.ReactNode;
+  titleSize?: EuiTitleSize;
   updateDateRange: UpdateDateRange;
-  runtimeMappings?: MappingRuntimeFields;
   hideQueryToggle?: boolean;
 }
 
@@ -113,30 +121,31 @@ export const AlertsHistogramPanel = memo<AlertsHistogramPanelProps>(
     combinedQueries,
     comboboxRef,
     defaultStackByOption = DEFAULT_STACK_BY_FIELD,
+    extraActions,
     filters,
     headerChildren,
     inspectTitle,
+    legendPosition = 'right',
     onFieldSelected,
     onlyField,
     paddingSize = 'm',
     panelHeight = PANEL_HEIGHT,
     query,
-    legendPosition = 'right',
+    runtimeMappings,
     setComboboxInputRef,
-    signalIndexName,
     showCountsInLegend = false,
     showGroupByPlaceholder = false,
     showLegend = true,
     showLinkToAlerts = false,
-    showTotalAlertsCount = false,
     showStackBy = true,
+    showTotalAlertsCount = false,
+    signalIndexName,
     stackByLabel,
     stackByWidth,
     timelineId,
     title = i18n.HISTOGRAM_HEADER,
-    updateDateRange,
     titleSize = 'm',
-    runtimeMappings,
+    updateDateRange,
     hideQueryToggle = false,
   }) => {
     const { to, from, deleteQuery, setQuery } = useGlobalTime(false);
@@ -170,13 +179,17 @@ export const AlertsHistogramPanel = memo<AlertsHistogramPanelProps>(
       setQuerySkip(!toggleStatus);
     }, [toggleStatus]);
     const toggleQuery = useCallback(
-      (status: boolean) => {
-        setToggleStatus(status);
+      (newToggleStatus: boolean) => {
+        setToggleStatus(newToggleStatus);
         // toggle on = skipQuery false
-        setQuerySkip(!status);
+        setQuerySkip(!newToggleStatus);
       },
       [setQuerySkip, setToggleStatus]
     );
+
+    const isChartEmbeddablesEnabled = useIsExperimentalFeatureEnabled('chartEmbeddablesEnabled');
+    const timerange = useMemo(() => ({ from, to }), [from, to]);
+
     const {
       loading: isLoadingAlerts,
       data: alertsData,
@@ -193,7 +206,7 @@ export const AlertsHistogramPanel = memo<AlertsHistogramPanelProps>(
         runtimeMappings
       ),
       indexName: signalIndexName,
-      skip: querySkip,
+      skip: querySkip || isChartEmbeddablesEnabled,
       queryName: ALERTS_QUERY_NAMES.HISTOGRAM,
     });
 
@@ -260,13 +273,13 @@ export const AlertsHistogramPanel = memo<AlertsHistogramPanelProps>(
     }, [isInitialLoading, isLoadingAlerts, setIsInitialLoading]);
 
     useInspectButton({
-      setQuery,
-      response,
-      request,
-      refetch,
-      uniqueQueryId,
       deleteQuery,
       loading: isLoadingAlerts,
+      refetch,
+      request,
+      response,
+      setQuery,
+      uniqueQueryId,
     });
 
     useEffect(() => {
@@ -352,7 +365,7 @@ export const AlertsHistogramPanel = memo<AlertsHistogramPanelProps>(
             titleSize={titleSize}
             toggleStatus={toggleStatus}
             toggleQuery={hideQueryToggle ? undefined : toggleQuery}
-            showInspectButton={chartOptionsContextMenu == null}
+            showInspectButton={isChartEmbeddablesEnabled ? false : chartOptionsContextMenu == null}
             subtitle={!isInitialLoading && showTotalAlertsCount && totalAlerts}
             isInspectDisabled={isInspectDisabled}
             hideSubtitle
@@ -392,7 +405,7 @@ export const AlertsHistogramPanel = memo<AlertsHistogramPanelProps>(
                 )}
                 {headerChildren != null && headerChildren}
               </EuiFlexItem>
-              {chartOptionsContextMenu != null && (
+              {chartOptionsContextMenu != null && !isChartEmbeddablesEnabled && (
                 <OptionsFlexItem grow={false}>
                   {chartOptionsContextMenu(uniqueQueryId)}
                 </OptionsFlexItem>
@@ -403,7 +416,22 @@ export const AlertsHistogramPanel = memo<AlertsHistogramPanelProps>(
           </HeaderSection>
 
           {toggleStatus ? (
-            isInitialLoading ? (
+            isChartEmbeddablesEnabled ? (
+              <VisualizationEmbeddable
+                data-test-subj="embeddable-matrix-histogram"
+                extraActions={extraActions}
+                extraOptions={{
+                  filters,
+                }}
+                getLensAttributes={getLensAttributes}
+                height={ChartHeight}
+                id={`alerts-histogram-embeddable-${uniqueQueryId}`}
+                inspectTitle={inspectTitle}
+                scopeId={SourcererScopeName.detections}
+                stackByField={selectedStackByOption}
+                timerange={timerange}
+              />
+            ) : isInitialLoading ? (
               <MatrixLoader />
             ) : (
               <AlertsHistogram
