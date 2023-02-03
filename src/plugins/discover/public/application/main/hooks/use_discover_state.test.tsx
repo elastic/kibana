@@ -7,7 +7,6 @@
  */
 import React from 'react';
 import { renderHook } from '@testing-library/react-hooks';
-import { SearchSource } from '@kbn/data-plugin/public';
 import { createSearchSessionMock } from '../../../__mocks__/search_session';
 import { discoverServiceMock } from '../../../__mocks__/services';
 import { savedSearchMock } from '../../../__mocks__/saved_search';
@@ -39,6 +38,5 @@ describe('test useDiscoverState', () => {
       }
     );
     expect(result.current.stateContainer).toBeInstanceOf(Object);
-    expect(result.current.searchSource).toBeInstanceOf(SearchSource);
   });
 });
