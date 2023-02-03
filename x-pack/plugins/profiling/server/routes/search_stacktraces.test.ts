@@ -55,10 +55,11 @@ describe('Stack trace response operations', () => {
       },
       stack_frames: {
         abc: {
-          file_name: 'pthread.c',
-          function_name: 'pthread_create',
-          function_offset: 0,
-          line_number: 0,
+          file_name: ['pthread.c'],
+          function_name: ['pthread_create'],
+          function_offset: [0],
+          line_number: [0],
+          source_type: [5],
         },
       },
       executables: {
@@ -128,10 +129,11 @@ describe('Stack trace response operations', () => {
       },
       stack_frames: {
         abc: {
-          file_name: undefined,
-          function_name: 'pthread_create',
-          function_offset: undefined,
-          line_number: undefined,
+          file_name: [],
+          function_name: ['pthread_create'],
+          function_offset: [],
+          line_number: [],
+          source_type: [],
         },
       },
       executables: {
