@@ -23,6 +23,7 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
+import { DataViewMissingIndices } from '@kbn/data-views-plugin/common';
 import {
   useExistingFieldsFetcher,
   useQuerySubscriber,
@@ -151,22 +152,37 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
         querySubscriberResult.fromDate,
         querySubscriberResult.toDate
       );
-      const existingFieldList = await loadFieldExisting({
-        data,
-        dataView,
-        fromDate: querySubscriberResult.fromDate || '',
-        toDate: querySubscriberResult.toDate || '',
-        // dslQuery: querySubscriberResult.query || {},
-        dslQuery: await buildSafeEsQuery(
+      // todo share type with loadFieldExisting
+      let existingFieldList: {
+        existingFieldNames: string[];
+        indexPatternTitle: string;
+      } = {
+        existingFieldNames: [],
+        indexPatternTitle: dataView.getIndexPattern(),
+      };
+      try {
+        existingFieldList = await loadFieldExisting({
+          data,
           dataView,
-          querySubscriberResult.query!,
-          querySubscriberResult.filters || [],
-          getEsQueryConfig(core.uiSettings)
-        ),
-        timeFieldName: dataView.timeFieldName,
-        dataViewsService: dataViews,
-        uiSettingsClient: core.uiSettings,
-      });
+          fromDate: querySubscriberResult.fromDate || '',
+          toDate: querySubscriberResult.toDate || '',
+          // dslQuery: querySubscriberResult.query || {},
+          dslQuery: await buildSafeEsQuery(
+            dataView,
+            querySubscriberResult.query!,
+            querySubscriberResult.filters || [],
+            getEsQueryConfig(core.uiSettings)
+          ),
+          timeFieldName: dataView.timeFieldName,
+          dataViewsService: dataViews,
+          uiSettingsClient: core.uiSettings,
+        });
+      } catch (e) {
+        const isMissingIndices = e instanceof DataViewMissingIndices;
+        if (!isMissingIndices) {
+          throw e;
+        }
+      }
 
       console.log(
         '***** existingFieldList',
