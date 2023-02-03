@@ -165,7 +165,7 @@ const AlertsTreemapComponent: React.FC<Props> = ({
   }
 
   return (
-    <div data-test-subj="treemap">
+    <div data-test-subj="alerts-treemap">
       <EuiFlexGroup gutterSize="none">
         <ChartFlexItem grow={true} $minChartHeight={minChartHeight}>
           {stackByField1 != null && !isEmpty(stackByField1) && normalizedData.length === 0 ? (
