@@ -13,10 +13,10 @@ import userEvent from '@testing-library/user-event';
 import { act } from '@testing-library/react';
 import { Console } from './console';
 import type {
-  ConsoleProps,
+  CommandArgumentValueSelectorProps,
   CommandDefinition,
   CommandExecutionComponent,
-  CommandArgumentValueSelectorProps,
+  ConsoleProps,
 } from './types';
 import type { AppContextTestRender } from '../../../common/mock/endpoint';
 import { createAppRootMockRenderer } from '../../../common/mock/endpoint';
@@ -86,18 +86,6 @@ export const getConsoleTestSetup = (): ConsoleTestSetup => {
     'data-test-subj': dataTestSubj = 'test',
     ...others
   } = {}) => {
-    if (!window.IntersectionObserver) {
-      // IntersectionObserver isn't available in Jest environment
-      // @ts-expect-error
-      window.IntersectionObserver = jest.fn(() => {
-        return {
-          observe: jest.fn(),
-          unobserve: jest.fn(),
-          disconnect: jest.fn(),
-        };
-      }) as unknown as jest.Mocked<IntersectionObserver>;
-    }
-
     return (renderResult = mockedContext.render(
       <Console prompt={prompt} commands={commands} data-test-subj={dataTestSubj} {...others} />
     ));
