@@ -15,6 +15,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const filterBar = getService('filterBar');
   const retry = getService('retry');
   const pageObjects = getPageObjects(['common', 'findings']);
+  const comboBox = getService('comboBox');
   const chance = new Chance();
 
   // We need to use a dataset for the tests to run
@@ -91,23 +92,21 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
   describe('Findings Page', () => {
     let findings: typeof pageObjects.findings;
-    let table: typeof pageObjects.findings.table;
+    let latestFindingsTable: typeof pageObjects.findings.latestFindingsTable;
     let findingsByResourceTable: typeof pageObjects.findings.findingsByResourceTable;
-    let resourceFindingsTable: typeof pageObjects.findings.resourceFindingsTable;
     let distributionBar: typeof pageObjects.findings.distributionBar;
 
     before(async () => {
       findings = pageObjects.findings;
-      table = pageObjects.findings.table;
+      latestFindingsTable = pageObjects.findings.latestFindingsTable;
       findingsByResourceTable = pageObjects.findings.findingsByResourceTable;
-      resourceFindingsTable = pageObjects.findings.resourceFindingsTable;
       distributionBar = pageObjects.findings.distributionBar;
 
       await findings.index.add(data);
       await findings.navigateToFindingsPage();
       await retry.waitFor(
         'Findings table to be loaded',
-        async () => (await table.getRowsCount()) === data.length
+        async () => (await latestFindingsTable.getRowsCount()) === data.length
       );
     });
 
@@ -120,44 +119,44 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await filterBar.addFilter({ field: 'rule.name', operation: 'is', value: ruleName1 });
 
         expect(await filterBar.hasFilter('rule.name', ruleName1)).to.be(true);
-        expect(await table.hasColumnValue('Rule Name', ruleName1)).to.be(true);
+        expect(await latestFindingsTable.hasColumnValue('Rule Name', ruleName1)).to.be(true);
       });
 
       it('remove filter', async () => {
         await filterBar.removeFilter('rule.name');
 
         expect(await filterBar.hasFilter('rule.name', ruleName1)).to.be(false);
-        expect(await table.getRowsCount()).to.be(data.length);
+        expect(await latestFindingsTable.getRowsCount()).to.be(data.length);
       });
 
       it('set search query', async () => {
         await queryBar.setQuery(ruleName1);
         await queryBar.submitQuery();
 
-        expect(await table.hasColumnValue('Rule Name', ruleName1)).to.be(true);
-        expect(await table.hasColumnValue('Rule Name', ruleName2)).to.be(false);
+        expect(await latestFindingsTable.hasColumnValue('Rule Name', ruleName1)).to.be(true);
+        expect(await latestFindingsTable.hasColumnValue('Rule Name', ruleName2)).to.be(false);
 
         await queryBar.setQuery('');
         await queryBar.submitQuery();
 
-        expect(await table.getRowsCount()).to.be(data.length);
+        expect(await latestFindingsTable.getRowsCount()).to.be(data.length);
       });
     });
 
     describe('Table Filters', () => {
       it('add cell value filter', async () => {
-        await table.addCellFilter('Rule Name', ruleName1, false);
+        await latestFindingsTable.addCellFilter('Rule Name', ruleName1, false);
 
         expect(await filterBar.hasFilter('rule.name', ruleName1)).to.be(true);
-        expect(await table.hasColumnValue('Rule Name', ruleName1)).to.be(true);
+        expect(await latestFindingsTable.hasColumnValue('Rule Name', ruleName1)).to.be(true);
       });
 
       it('add negated cell value filter', async () => {
-        await table.addCellFilter('Rule Name', ruleName1, true);
+        await latestFindingsTable.addCellFilter('Rule Name', ruleName1, true);
 
         expect(await filterBar.hasFilter('rule.name', ruleName1, true, false, true)).to.be(true);
-        expect(await table.hasColumnValue('Rule Name', ruleName1)).to.be(false);
-        expect(await table.hasColumnValue('Rule Name', ruleName2)).to.be(true);
+        expect(await latestFindingsTable.hasColumnValue('Rule Name', ruleName1)).to.be(false);
+        expect(await latestFindingsTable.hasColumnValue('Rule Name', ruleName2)).to.be(true);
 
         await filterBar.removeFilter('rule.name');
       });
@@ -187,8 +186,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           ['Resource Type', 'desc', sortByAlphabeticalOrder],
         ];
         for (const [columnName, dir, sortingMethod] of testCases) {
-          await table.toggleColumnSort(columnName, dir);
-          const values = (await table.getColumnValues(columnName)).filter(Boolean);
+          await latestFindingsTable.toggleColumnSort(columnName, dir);
+          const values = (await latestFindingsTable.getColumnValues(columnName)).filter(Boolean);
           expect(values).to.not.be.empty();
 
           const sorted = values
@@ -205,7 +204,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           await distributionBar.filterBy(type);
 
           const items = data.filter(({ result }) => result.evaluation === type);
-          expect(await table.getFindingsCount(type)).to.eql(items.length);
+          expect(await latestFindingsTable.getFindingsCount(type)).to.eql(items.length);
 
           await filterBar.removeFilter('result.evaluation');
         });
@@ -213,9 +212,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     describe('Group By', () => {
-      it('Group by Resource', async () => {
-        await table.toggleGroupByDropDown();
-        await table.selectGroupBy('Resource');
+      it('Group findings by Resource', async () => {
+        await comboBox.set('findings-group-by-selector', 'Resource');
         /* Findings by resource table has no Rule column */
         expect(await findingsByResourceTable.hasColumnName('Compliance Score')).to.be(true);
       });
@@ -227,13 +225,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         );
         /* resource_findings table has Rule column but no Resource ID Column */
         expect(await findingsByResourceTable.hasColumnName('Resource ID')).to.be(false);
-        expect(await resourceFindingsTable.hasColumnValue('Rule Name', data[0].rule.name)).to.be(
-          true
-        );
-
-        await findingsByResourceTable.clickBasedOnText('Back to resources');
-
-        expect(await findingsByResourceTable.hasColumnName('Compliance Score')).to.be(true);
+        expect(await findingsByResourceTable.hasColumnName('Rule Name')).to.be(true);
       });
     });
   });

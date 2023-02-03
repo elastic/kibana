@@ -56,6 +56,7 @@ export const FindingsGroupBySelector = ({ type }: Props) => {
   return (
     <div>
       <EuiComboBox
+        data-test-subj="findings-group-by-selector"
         prepend={<GroupByLabel />}
         singleSelection={{ asPlainText: true }}
         options={groupByOptions}

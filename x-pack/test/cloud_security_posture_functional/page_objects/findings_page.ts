@@ -52,25 +52,18 @@ export function FindingsPageProvider({ getService, getPageObjects }: FtrProvider
       testSubjects.click(type === 'failed' ? 'distribution_bar_failed' : 'distribution_bar_passed'),
   };
 
-  const table = {
-    getElement: () => testSubjects.find('findings_table'),
+  const latestFindingsTable = {
+    getElement: (selector: string) => testSubjects.find(selector),
 
     getFindingsContainer: () => testSubjects.find('findings_container'),
 
-    getDropDownGroupBy: async () => {
-      const dropDownGroupBy = await table.getFindingsContainer();
-      return dropDownGroupBy.findByTestSubject('comboBoxInput');
-    },
-
-    getGroupByDropDownList: () => testSubjects.find('comboBoxOptionsList '),
-
-    getHeaders: async () => {
-      const element = await table.getElement();
+    getHeaders: async (selector: string) => {
+      const element = await latestFindingsTable.getElement(selector);
       return await element.findAllByCssSelector('thead tr :is(th,td)');
     },
 
     getColumnIndex: async (columnName: string) => {
-      const headers = await table.getHeaders();
+      const headers = await latestFindingsTable.getHeaders('findings_table');
       const texts = await Promise.all(headers.map((header) => header.getVisibleText()));
       const columnIndex = texts.findIndex((i) => i === columnName);
       expect(columnIndex).to.be.greaterThan(-1);
@@ -78,33 +71,33 @@ export function FindingsPageProvider({ getService, getPageObjects }: FtrProvider
     },
 
     getColumnHeaderCell: async (columnName: string) => {
-      const headers = await table.getHeaders();
+      const headers = await latestFindingsTable.getHeaders('findings_table');
       const headerIndexes = await Promise.all(headers.map((header) => header.getVisibleText()));
       const columnIndex = headerIndexes.findIndex((i) => i === columnName);
       return headers[columnIndex];
     },
 
     getRowsCount: async () => {
-      const element = await table.getElement();
+      const element = await latestFindingsTable.getElement('findings_table');
       const rows = await element.findAllByCssSelector('tbody tr');
       return rows.length;
     },
 
     getFindingsCount: async (type: 'passed' | 'failed') => {
-      const element = await table.getElement();
+      const element = await latestFindingsTable.getElement('findings_table');
       const items = await element.findAllByCssSelector(`span[data-test-subj="${type}_finding"]`);
       return items.length;
     },
 
     getRowIndexForValue: async (columnName: string, value: string) => {
-      const values = await table.getColumnValues(columnName);
+      const values = await latestFindingsTable.getColumnValues(columnName);
       const rowIndex = values.indexOf(value);
       expect(rowIndex).to.be.greaterThan(-1);
       return rowIndex + 1;
     },
 
     getFilterElementButton: async (rowIndex: number, columnIndex: number, negated = false) => {
-      const tableElement = await table.getElement();
+      const tableElement = await latestFindingsTable.getElement('findings_table');
       const button = negated
         ? 'findings_table_cell_add_negated_filter'
         : 'findings_table_cell_add_filter';
@@ -113,16 +106,20 @@ export function FindingsPageProvider({ getService, getPageObjects }: FtrProvider
     },
 
     addCellFilter: async (columnName: string, cellValue: string, negated = false) => {
-      const columnIndex = await table.getColumnIndex(columnName);
-      const rowIndex = await table.getRowIndexForValue(columnName, cellValue);
-      const filterElement = await table.getFilterElementButton(rowIndex, columnIndex, negated);
+      const columnIndex = await latestFindingsTable.getColumnIndex(columnName);
+      const rowIndex = await latestFindingsTable.getRowIndexForValue(columnName, cellValue);
+      const filterElement = await latestFindingsTable.getFilterElementButton(
+        rowIndex,
+        columnIndex,
+        negated
+      );
       await filterElement.click();
     },
 
     getColumnValues: async (columnName: string) => {
       const elementsWithNoFilterCell = ['CIS Section', '@timestamp'];
-      const tableElement = await table.getElement();
-      const columnIndex = await table.getColumnIndex(columnName);
+      const tableElement = await latestFindingsTable.getElement('findings_table');
+      const columnIndex = await latestFindingsTable.getColumnIndex(columnName);
       const selector = elementsWithNoFilterCell.includes(columnName)
         ? `tbody tr td:nth-child(${columnIndex})`
         : `tbody tr td:nth-child(${columnIndex}) div[data-test-subj="filter_cell_value"]`;
@@ -132,12 +129,12 @@ export function FindingsPageProvider({ getService, getPageObjects }: FtrProvider
     },
 
     hasColumnValue: async (columnName: string, value: string) => {
-      const values = await table.getColumnValues(columnName);
+      const values = await latestFindingsTable.getColumnValues(columnName);
       return values.includes(value);
     },
 
     toggleColumnSort: async (columnName: string, direction: 'asc' | 'desc') => {
-      const element = await table.getColumnHeaderCell(columnName);
+      const element = await latestFindingsTable.getColumnHeaderCell(columnName);
       const currentSort = await element.getAttribute('aria-sort');
       if (currentSort === 'none') {
         // a click is needed to focus on Eui column header
@@ -145,7 +142,7 @@ export function FindingsPageProvider({ getService, getPageObjects }: FtrProvider
 
         // default is ascending
         if (direction === 'desc') {
-          const nonStaleElement = await table.getColumnHeaderCell(columnName);
+          const nonStaleElement = await latestFindingsTable.getColumnHeaderCell(columnName);
           await nonStaleElement.click();
         }
       }
@@ -154,57 +151,18 @@ export function FindingsPageProvider({ getService, getPageObjects }: FtrProvider
         (currentSort === 'descending' && direction === 'asc')
       ) {
         // Without getting the element again, the click throws an error (stale element reference)
-        const nonStaleElement = await table.getColumnHeaderCell(columnName);
+        const nonStaleElement = await latestFindingsTable.getColumnHeaderCell(columnName);
         await nonStaleElement.click();
       }
-    },
-
-    toggleGroupByDropDown: async () => {
-      const dropDown = await table.getDropDownGroupBy();
-      await dropDown.click();
-    },
-
-    selectGroupBy: async (groupName: string) => {
-      const dropDownPopUpBox = await table.getGroupByDropDownList();
-      const selector = `button[title="${groupName}"]`;
-      const dropDownSelect = await dropDownPopUpBox.findByCssSelector(selector);
-      await dropDownSelect.click();
     },
   };
 
   const findingsByResourceTable = {
-    getElementGroupedBy: () => testSubjects.find('pageContainer'),
-
     getElementRow: (id: string, section: string) =>
       testSubjects.find(`findings_resource_table_row_${id}/${section}`),
 
-    getHeaders: async () => {
-      const element = await findingsByResourceTable.getElementGroupedBy();
-      return await element.findAllByCssSelector('thead tr :is(th,td)');
-    },
-
-    getColumnIndex: async (columnName: string) => {
-      const headers = await findingsByResourceTable.getHeaders();
-      const texts = await Promise.all(headers.map((header) => header.getVisibleText()));
-      const columnIndex = texts.findIndex((i) => i === columnName);
-      expect(columnIndex).to.be.greaterThan(-1);
-      return columnIndex + 1;
-    },
-
-    getColumnValues: async (columnName: string) => {
-      const elementsWithNoFilterCell = ['CIS Section', '@timestamp'];
-      const tableElement = await findingsByResourceTable.getElementGroupedBy();
-      const columnIndex = await findingsByResourceTable.getColumnIndex(columnName);
-      const selector = elementsWithNoFilterCell.includes(columnName)
-        ? `tbody tr td:nth-child(${columnIndex})`
-        : `tbody tr td:nth-child(${columnIndex}) div[data-test-subj="filter_cell_value"]`;
-      const columnCells = await tableElement.findAllByCssSelector(selector);
-
-      return await Promise.all(columnCells.map((cell) => cell.getVisibleText()));
-    },
-
     hasColumnName: async (columnName: string) => {
-      const headers = await findingsByResourceTable.getHeaders();
+      const headers = await latestFindingsTable.getHeaders('findings_container');
       const texts = await Promise.all(headers.map((header) => header.getVisibleText()));
       const columnIndex = texts.findIndex((i) => i === columnName);
       return columnIndex >= 0 ? true : false;
@@ -215,27 +173,6 @@ export function FindingsPageProvider({ getService, getPageObjects }: FtrProvider
       const selector = `a[title="${value}"]`;
       const rowValueSelect = await findingsTable.findByCssSelector(selector);
       await rowValueSelect.click();
-    },
-
-    clickBasedOnText: async (value: string) => {
-      const pageContainer = await findingsByResourceTable.getElementGroupedBy();
-      const selector = `//*[contains(text(),'${value}')]`;
-      const clickTarget = await pageContainer.findByXpath(selector);
-      await clickTarget.click();
-    },
-
-    hasText: async (value: string) => {
-      const pageContainer = await findingsByResourceTable.getElementGroupedBy();
-      const selector = `//*[contains(text(),'${value}')]`;
-      const clickTarget = await pageContainer.findAllByXpath(selector);
-      return clickTarget.length > 0;
-    },
-  };
-
-  const resourceFindingsTable = {
-    hasColumnValue: async (columnName: string, value: string) => {
-      const values = await findingsByResourceTable.getColumnValues(columnName);
-      return values.includes(value);
     },
   };
 
@@ -249,10 +186,9 @@ export function FindingsPageProvider({ getService, getPageObjects }: FtrProvider
 
   return {
     navigateToFindingsPage,
-    table,
+    latestFindingsTable,
     findingsByResourceTable,
     index,
     distributionBar,
-    resourceFindingsTable,
   };
 }
