@@ -8,10 +8,10 @@
 
 import { apm, ApmFields, Instance } from '@kbn/apm-synthtrace-client';
 import { Transaction } from '@kbn/apm-synthtrace-client/src/lib/apm/transaction';
+import { AgentName } from '@kbn/apm-plugin/typings/es_schemas/ui/fields/agent';
 import { Scenario } from '../cli/scenario';
 import { RunOptions } from '../cli/utils/parse_run_cli_flags';
 import { getSynthtraceEnvironment } from '../lib/utils/get_synthtrace_environment';
-import { AgentName } from '../../../../x-pack/plugins/apm/typings/es_schemas/ui/fields/agent';
 
 const ENVIRONMENT = getSynthtraceEnvironment(__filename);
 
