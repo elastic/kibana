@@ -59,7 +59,7 @@ export function PrimaryAndComparisonSearchBar() {
       <EuiFlexItem>
         <EuiTitle size="xxs">
           <h3>
-            {i18n.translate('xpack.apm.comparisonSearch.baselineTitle', {
+            {i18n.translate('xpack.profiling.comparisonSearch.baselineTitle', {
               defaultMessage: 'Baseline',
             })}
           </h3>
@@ -98,7 +98,7 @@ export function PrimaryAndComparisonSearchBar() {
       <EuiFlexItem>
         <EuiTitle size="xxs">
           <h3>
-            {i18n.translate('xpack.apm.comparisonSearch.comparisonTitle', {
+            {i18n.translate('xpack.profiling.comparisonSearch.comparisonTitle', {
               defaultMessage: 'Comparison',
             })}
           </h3>
