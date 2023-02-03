@@ -15,9 +15,9 @@ set -x
 
 # sudo apt update
 
-# echo "Installing snapd"
+echo "Installing snapd"
 
-# sudo apt install snapd
+apt install snapd
 
 # echo "snap install snapd"
 
