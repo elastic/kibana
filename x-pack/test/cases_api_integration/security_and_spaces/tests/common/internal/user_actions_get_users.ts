@@ -10,7 +10,7 @@ import { Cookie } from 'tough-cookie';
 import { UserProfile } from '@kbn/security-plugin/common';
 import { securitySolutionOnlyAllSpacesRole } from '../../../../common/lib/authentication/roles';
 import { getPostCaseRequest } from '../../../../common/lib/mock';
-import { createCase, deleteAllCaseItems, updateCase } from '../../../../common/lib/utils';
+import { createCase, deleteAllCaseItems, getCase, updateCase } from '../../../../common/lib/utils';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import { getCaseUsers } from '../../../../common/lib/user_actions';
 import { loginUsers, bulkGetUserProfiles } from '../../../../common/lib/user_profiles';
@@ -33,6 +33,7 @@ export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const es = getService('es');
+  const kibanaServer = getService('kibanaServer');
 
   describe('user_actions_get_users', () => {
     afterEach(async () => {
@@ -49,10 +50,49 @@ export default ({ getService }: FtrProviderContext): void => {
           title: 'new title',
         });
 
-        const { users } = await getCaseUsers({ caseId: postedCase.id, supertest });
-        expect(users).to.eql([
-          { user: { username: 'elastic', full_name: null, email: null }, type: 'participant' },
-        ]);
+        const { participants, assignees, unassignedUsers } = await getCaseUsers({
+          caseId: postedCase.id,
+          supertest,
+        });
+
+        expect(participants).to.eql([{ username: 'elastic', full_name: null, email: null }]);
+        expect(assignees).to.eql([]);
+        expect(unassignedUsers).to.eql([]);
+      });
+    });
+
+    describe('no users', () => {
+      before(async () => {
+        /** The following dataset contains:
+         *  a) A case without all properties of the created_by set to null
+         *  and an assignee with no valid uid
+         *  b) A user action that removes an assignee that does not exists
+         */
+        await kibanaServer.importExport.load(
+          'x-pack/test/functional/fixtures/kbn_archiver/cases/8.5.0/cases_no_users.json'
+        );
+      });
+
+      after(async () => {
+        await kibanaServer.importExport.unload(
+          'x-pack/test/functional/fixtures/kbn_archiver/cases/8.5.0/cases_no_users.json'
+        );
+      });
+
+      it('returns users without information', async () => {
+        const theCase = await getCase({
+          supertest,
+          caseId: '163d5820-1284-21ed-81af-63a2bdfb2bf9',
+        });
+
+        const { participants, assignees, unassignedUsers } = await getCaseUsers({
+          caseId: theCase.id,
+          supertest,
+        });
+
+        expect(participants).to.eql([{ username: null, full_name: null, email: null }]);
+        expect(assignees).to.eql([{ profile_uid: 'abc' }]);
+        expect(unassignedUsers).to.eql([{ profile_uid: 'dfg' }]);
       });
     });
 
@@ -122,19 +162,22 @@ export default ({ getService }: FtrProviderContext): void => {
           superUserHeaders
         );
 
-        const { users } = await getCaseUsers({ caseId: postedCase.id, supertest });
+        const { participants, assignees, unassignedUsers } = await getCaseUsers({
+          caseId: postedCase.id,
+          supertest,
+        });
 
-        expect(users).to.eql([
+        expect(participants).to.eql([
           {
-            user: {
-              username: superUserProfile.user.username,
-              full_name: superUserProfile.user.full_name,
-              email: superUserProfile.user.email,
-              profile_uid: superUserProfile.uid,
-            },
-            type: 'participant',
+            username: superUserProfile.user.username,
+            full_name: superUserProfile.user.full_name,
+            email: superUserProfile.user.email,
+            profile_uid: superUserProfile.uid,
           },
         ]);
+
+        expect(assignees).to.eql([]);
+        expect(unassignedUsers).to.eql([]);
       });
 
       it('returns one participant if it is the only one that participates to the case', async () => {
@@ -154,19 +197,22 @@ export default ({ getService }: FtrProviderContext): void => {
           headers: superUserHeaders,
         });
 
-        const { users } = await getCaseUsers({ caseId: postedCase.id, supertest });
+        const { participants, assignees, unassignedUsers } = await getCaseUsers({
+          caseId: postedCase.id,
+          supertest,
+        });
 
-        expect(users).to.eql([
+        expect(participants).to.eql([
           {
-            user: {
-              username: superUserProfile.user.username,
-              full_name: superUserProfile.user.full_name,
-              email: superUserProfile.user.email,
-              profile_uid: superUserProfile.uid,
-            },
-            type: 'participant',
+            username: superUserProfile.user.username,
+            full_name: superUserProfile.user.full_name,
+            email: superUserProfile.user.email,
+            profile_uid: superUserProfile.uid,
           },
         ]);
+
+        expect(assignees).to.eql([]);
+        expect(unassignedUsers).to.eql([]);
       });
 
       it('returns all participants of the case', async () => {
@@ -186,28 +232,28 @@ export default ({ getService }: FtrProviderContext): void => {
           headers: secOnlyHeaders,
         });
 
-        const { users } = await getCaseUsers({ caseId: postedCase.id, supertest });
+        const { participants, assignees, unassignedUsers } = await getCaseUsers({
+          caseId: postedCase.id,
+          supertest,
+        });
 
-        expect(users).to.eql([
+        expect(participants).to.eql([
           {
-            user: {
-              username: secUserProfile.user.username,
-              full_name: secUserProfile.user.full_name,
-              email: secUserProfile.user.email,
-              profile_uid: secUserProfile.uid,
-            },
-            type: 'participant',
+            username: secUserProfile.user.username,
+            full_name: secUserProfile.user.full_name,
+            email: secUserProfile.user.email,
+            profile_uid: secUserProfile.uid,
           },
           {
-            user: {
-              username: superUserProfile.user.username,
-              full_name: superUserProfile.user.full_name,
-              email: superUserProfile.user.email,
-              profile_uid: superUserProfile.uid,
-            },
-            type: 'participant',
+            username: superUserProfile.user.username,
+            full_name: superUserProfile.user.full_name,
+            email: superUserProfile.user.email,
+            profile_uid: superUserProfile.uid,
           },
         ]);
+
+        expect(assignees).to.eql([]);
+        expect(unassignedUsers).to.eql([]);
       });
 
       it('does not return duplicate participants', async () => {
@@ -235,28 +281,28 @@ export default ({ getService }: FtrProviderContext): void => {
           headers: secOnlyHeaders,
         });
 
-        const { users } = await getCaseUsers({ caseId: postedCase.id, supertest });
+        const { participants, assignees, unassignedUsers } = await getCaseUsers({
+          caseId: postedCase.id,
+          supertest,
+        });
 
-        expect(users).to.eql([
+        expect(participants).to.eql([
           {
-            user: {
-              username: secUserProfile.user.username,
-              full_name: secUserProfile.user.full_name,
-              email: secUserProfile.user.email,
-              profile_uid: secUserProfile.uid,
-            },
-            type: 'participant',
+            username: secUserProfile.user.username,
+            full_name: secUserProfile.user.full_name,
+            email: secUserProfile.user.email,
+            profile_uid: secUserProfile.uid,
           },
           {
-            user: {
-              username: superUserProfile.user.username,
-              full_name: superUserProfile.user.full_name,
-              email: superUserProfile.user.email,
-              profile_uid: superUserProfile.uid,
-            },
-            type: 'participant',
+            username: superUserProfile.user.username,
+            full_name: superUserProfile.user.full_name,
+            email: superUserProfile.user.email,
+            profile_uid: superUserProfile.uid,
           },
         ]);
+
+        expect(assignees).to.eql([]);
+        expect(unassignedUsers).to.eql([]);
       });
     });
 

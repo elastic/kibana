@@ -21,12 +21,9 @@ export const UsersRt = rt.array(UserRt);
 export type User = rt.TypeOf<typeof UserRt>;
 
 export const GetCaseUsersResponseRt = rt.type({
-  users: rt.array(
-    rt.type({
-      user: UserRt,
-      type: rt.union([rt.literal('participant'), rt.literal('user')]),
-    })
-  ),
+  assignees: rt.array(UserRt),
+  unassignedUsers: rt.array(UserRt),
+  participants: rt.array(UserRt),
 });
 
 export type GetCaseUsersResponse = rt.TypeOf<typeof GetCaseUsersResponseRt>;

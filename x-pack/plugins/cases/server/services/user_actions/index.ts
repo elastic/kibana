@@ -119,7 +119,7 @@ interface ParticipantsAggsResult {
 
 interface GetUsersResponse {
   participants: Array<{ id: string; owner: string; user: User }>;
-  users: Set<string>;
+  assignedAndUnassignedUsers: Set<string>;
 }
 
 export class CaseUserActionService {
@@ -753,7 +753,8 @@ export class CaseUserActionService {
       aggs: CaseUserActionService.buildParticipantsAgg(),
     });
 
-    const users: GetUsersResponse['users'] = new Set<string>();
+    const assignedAndUnassignedUsers: GetUsersResponse['assignedAndUnassignedUsers'] =
+      new Set<string>();
     const participants: GetUsersResponse['participants'] = [];
     const participantsBuckets = response.aggregations?.participants.buckets ?? [];
     const assigneesBuckets = response.aggregations?.assignees.buckets ?? [];
@@ -785,10 +786,10 @@ export class CaseUserActionService {
      * assignee at some point in time.
      */
     for (const bucket of assigneesBuckets) {
-      users.add(bucket.key);
+      assignedAndUnassignedUsers.add(bucket.key);
     }
 
-    return { participants, users };
+    return { participants, assignedAndUnassignedUsers };
   }
 
   private static buildParticipantsAgg(): Record<string, estypes.AggregationsAggregationContainer> {
@@ -798,6 +799,7 @@ export class CaseUserActionService {
           field: `${CASE_USER_ACTION_SAVED_OBJECT}.attributes.created_by.username`,
           size: MAX_DOCS_PER_PAGE,
           order: { _key: 'asc' },
+          missing: 'Unknown',
         },
         aggregations: {
           docs: {

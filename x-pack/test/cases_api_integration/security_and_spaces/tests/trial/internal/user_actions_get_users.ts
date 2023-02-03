@@ -85,7 +85,7 @@ export default ({ getService }: FtrProviderContext): void => {
         );
       });
 
-      it('returns participants and users correctly when assigning users to a case', async () => {
+      it('returns users correctly when assigning users to a case', async () => {
         const postedCase = await createCase(
           supertestWithoutAuth,
           getPostCaseRequest(),
@@ -103,31 +103,39 @@ export default ({ getService }: FtrProviderContext): void => {
           headers: superUserHeaders,
         });
 
-        const { users } = await getCaseUsers({ caseId: postedCase.id, supertest });
+        const { participants, assignees, unassignedUsers } = await getCaseUsers({
+          caseId: postedCase.id,
+          supertest,
+        });
 
-        expect(users).to.eql([
+        expect(participants).to.eql([
           {
-            user: {
-              username: superUserProfile.user.username,
-              full_name: superUserProfile.user.full_name,
-              email: superUserProfile.user.email,
-              profile_uid: superUserProfile.uid,
-            },
-            type: 'participant',
-          },
-          {
-            user: {
-              username: secUserProfile.user.username,
-              full_name: secUserProfile.user.full_name,
-              email: secUserProfile.user.email,
-              profile_uid: secUserProfile.uid,
-            },
-            type: 'participant',
+            username: superUserProfile.user.username,
+            full_name: superUserProfile.user.full_name,
+            email: superUserProfile.user.email,
+            profile_uid: superUserProfile.uid,
           },
         ]);
+
+        expect(assignees).to.eql([
+          {
+            username: superUserProfile.user.username,
+            full_name: superUserProfile.user.full_name,
+            email: superUserProfile.user.email,
+            profile_uid: superUserProfile.uid,
+          },
+          {
+            username: secUserProfile.user.username,
+            full_name: secUserProfile.user.full_name,
+            email: secUserProfile.user.email,
+            profile_uid: secUserProfile.uid,
+          },
+        ]);
+
+        expect(unassignedUsers).to.eql([]);
       });
 
-      it('returns participants and users correctly when de-assigning users to a case', async () => {
+      it('returns users correctly when de-assigning users to a case', async () => {
         const postedCase = await createCase(
           supertestWithoutAuth,
           getPostCaseRequest(),
@@ -154,26 +162,35 @@ export default ({ getService }: FtrProviderContext): void => {
           headers: superUserHeaders,
         });
 
-        const { users } = await getCaseUsers({ caseId: postedCase.id, supertest });
+        const { participants, assignees, unassignedUsers } = await getCaseUsers({
+          caseId: postedCase.id,
+          supertest,
+        });
 
-        expect(users).to.eql([
+        expect(participants).to.eql([
           {
-            user: {
-              username: superUserProfile.user.username,
-              full_name: superUserProfile.user.full_name,
-              email: superUserProfile.user.email,
-              profile_uid: superUserProfile.uid,
-            },
-            type: 'participant',
+            username: superUserProfile.user.username,
+            full_name: superUserProfile.user.full_name,
+            email: superUserProfile.user.email,
+            profile_uid: superUserProfile.uid,
           },
+        ]);
+
+        expect(assignees).to.eql([
           {
-            user: {
-              username: secUserProfile.user.username,
-              full_name: secUserProfile.user.full_name,
-              email: secUserProfile.user.email,
-              profile_uid: secUserProfile.uid,
-            },
-            type: 'user',
+            username: superUserProfile.user.username,
+            full_name: superUserProfile.user.full_name,
+            email: superUserProfile.user.email,
+            profile_uid: superUserProfile.uid,
+          },
+        ]);
+
+        expect(unassignedUsers).to.eql([
+          {
+            username: secUserProfile.user.username,
+            full_name: secUserProfile.user.full_name,
+            email: secUserProfile.user.email,
+            profile_uid: secUserProfile.uid,
           },
         ]);
       });
@@ -214,28 +231,36 @@ export default ({ getService }: FtrProviderContext): void => {
           headers: superUserHeaders,
         });
 
-        const { users } = await getCaseUsers({ caseId: postedCase.id, supertest });
+        const { participants, assignees, unassignedUsers } = await getCaseUsers({
+          caseId: postedCase.id,
+          supertest,
+        });
 
-        expect(users).to.eql([
+        expect(participants).to.eql([
           {
-            user: {
-              username: superUserProfile.user.username,
-              full_name: superUserProfile.user.full_name,
-              email: superUserProfile.user.email,
-              profile_uid: superUserProfile.uid,
-            },
-            type: 'participant',
-          },
-          {
-            user: {
-              username: secUserProfile.user.username,
-              full_name: secUserProfile.user.full_name,
-              email: secUserProfile.user.email,
-              profile_uid: secUserProfile.uid,
-            },
-            type: 'participant',
+            username: superUserProfile.user.username,
+            full_name: superUserProfile.user.full_name,
+            email: superUserProfile.user.email,
+            profile_uid: superUserProfile.uid,
           },
         ]);
+
+        expect(assignees).to.eql([
+          {
+            username: superUserProfile.user.username,
+            full_name: superUserProfile.user.full_name,
+            email: superUserProfile.user.email,
+            profile_uid: superUserProfile.uid,
+          },
+          {
+            username: secUserProfile.user.username,
+            full_name: secUserProfile.user.full_name,
+            email: secUserProfile.user.email,
+            profile_uid: secUserProfile.uid,
+          },
+        ]);
+
+        expect(unassignedUsers).to.eql([]);
       });
     });
   });

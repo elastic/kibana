@@ -6,7 +6,7 @@
  */
 
 import type { UserProfile } from '@kbn/security-plugin/common';
-import type { GetCaseUsersResponse } from '../../../common/api';
+import type { GetCaseUsersResponse, User } from '../../../common/api';
 import { GetCaseUsersResponseRt } from '../../../common/api';
 import type { OwnerEntity } from '../../authorization';
 import { Operations } from '../../authorization';
@@ -15,8 +15,6 @@ import type { CasesClient } from '../client';
 import type { CasesClientArgs } from '../types';
 import type { GetUsersRequest } from './types';
 import { getUserProfiles } from '../cases/utils';
-
-type User = GetCaseUsersResponse['users'][number];
 
 export const getUsers = async (
   { caseId }: GetUsersRequest,
@@ -31,12 +29,14 @@ export const getUsers = async (
   } = clientArgs;
 
   try {
-    const usersResponse: User[] = [];
+    const participantsResponse: User[] = [];
+    const assigneesResponse: User[] = [];
+    const unassignedUsersResponse: User[] = [];
 
     // ensure that we have authorization for reading the case
     const theCase = await casesClient.cases.resolve({ id: caseId, includeComments: false });
 
-    const { participants, users } = await userActionService.getUsers({
+    const { participants, assignedAndUnassignedUsers } = await userActionService.getUsers({
       caseId,
     });
 
@@ -54,60 +54,62 @@ export const getUsers = async (
       .filter((participant) => participant.user.profile_uid != null)
       .map((participant) => participant.user.profile_uid) as string[];
 
-    /**
-     * To avoid duplicates, a user that is already participant
-     * should be removed from the assignees returned by the case.
-     */
+    const assigneesUids = theCase.case.assignees.map((assignee) => assignee.uid);
 
-    const assigneesUids = theCase.case.assignees
-      .map((assignee) => assignee.uid)
-      .filter((uid) => !participantsUids.includes(uid));
-
-    const userProfileUids = new Set([...users, ...participantsUids, ...assigneesUids]);
+    const userProfileUids = new Set([
+      ...assignedAndUnassignedUsers,
+      ...participantsUids,
+      ...assigneesUids,
+    ]);
     const userProfiles = await getUserProfiles(securityStartPlugin, userProfileUids);
 
     for (const participant of participants) {
       const user = getUserInformation(userProfiles, participant.user.profile_uid, participant.user);
 
-      usersResponse.push({
-        user,
-        type: 'participant',
+      participantsResponse.push({
+        ...user,
       });
 
       /**
        * To avoid duplicates, a user that is
        * a participant should not be also added
-       * as a user. For that reason, we remove
-       * its profile_uid from the usersUids Set
+       * as unassignedUsers. For that reason, we remove
+       * its profile_uid from the assignedAndUnassignedUsers Set
        */
       if (participant.user.profile_uid) {
-        users.delete(participant.user.profile_uid);
+        assignedAndUnassignedUsers.delete(participant.user.profile_uid);
       }
     }
 
     for (const uid of assigneesUids) {
-      usersResponse.push({
-        user: getUserInformation(userProfiles, uid),
-        type: 'participant',
+      const user = getUserInformation(userProfiles, uid);
+
+      assigneesResponse.push({
+        ...user,
       });
 
       /**
        * To avoid duplicates, a user that is
-       * an assignee and thus a participant should not be also added
-       * as a user. For that reason, we remove
-       * its uid from the usersUids Set
+       * an assignee should not be also added
+       * as a unassignedUsers. For that reason, we remove
+       * its uid from the assignedAndUnassignedUsers Set
        */
-      users.delete(uid);
+      assignedAndUnassignedUsers.delete(uid);
     }
 
-    for (const uid of users.values()) {
-      usersResponse.push({
-        user: getUserInformation(userProfiles, uid),
-        type: 'user',
+    for (const uid of assignedAndUnassignedUsers.values()) {
+      const user = getUserInformation(userProfiles, uid);
+
+      unassignedUsersResponse.push({
+        ...user,
       });
     }
 
-    const results = { users: usersResponse };
+    const results = {
+      participants: participantsResponse,
+      assignees: assigneesResponse,
+      unassignedUsers: unassignedUsersResponse,
+    };
 
     return GetCaseUsersResponseRt.encode(results);
   } catch (error) {
@@ -122,8 +124,8 @@ export const getUsers = async (
 const getUserInformation = (
   userProfiles: Map<string, UserProfile>,
   uid: string | undefined,
-  userInfo?: User['user']
-): User['user'] => {
+  userInfo?: User
+): User => {
   const userProfile = uid != null ? userProfiles.get(uid) : undefined;
 
   return {
