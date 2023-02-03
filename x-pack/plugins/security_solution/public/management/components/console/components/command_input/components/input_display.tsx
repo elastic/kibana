@@ -14,6 +14,8 @@ import { useWithInputTextEntered } from '../../../hooks/state_selectors/use_with
 import { useTestIdGenerator } from '../../../../../hooks/use_test_id_generator';
 import { useDataTestSubj } from '../../../hooks/state_selectors/use_data_test_subj';
 
+const SCROLLING_PADDING = 20;
+
 const InputDisplayContainer = styled.div`
   overflow: hidden !important;
 
@@ -43,6 +45,7 @@ export const InputDisplay = memo<InputDisplayProps>(({ leftOfCursor, rightOfCurs
   const dispatch = useConsoleStateDispatch();
   const { leftOfCursorText, fullTextEntered } = useWithInputTextEntered();
 
+  const observer = useRef<IntersectionObserver | null>(null);
   const containerRef = useRef<HTMLDivElement | null>(null);
   const cursorRef = useRef<HTMLSpanElement | null>(null);
 
@@ -76,9 +79,9 @@ export const InputDisplay = memo<InputDisplayProps>(({ leftOfCursor, rightOfCurs
     [dispatch, fullTextEntered]
   );
 
+  // Setup the Intersection observer
   useEffect(() => {
-    if (containerRef.current && cursorRef.current) {
-      const scrollPadding = 20;
+    if (containerRef.current) {
       const handleIntersection: IntersectionObserverCallback = (entries) => {
         if (containerRef.current) {
           const intersection = entries[0];
@@ -89,20 +92,22 @@ export const InputDisplay = memo<InputDisplayProps>(({ leftOfCursor, rightOfCurs
             const viewportLeftEdge = intersection.rootBounds.left;
             const cursorPosition = intersection.boundingClientRect.right;
 
-            if (cursorPosition > viewportRightEdge - scrollPadding) {
+            if (cursorPosition > viewportRightEdge - SCROLLING_PADDING) {
               // cursor is close to the Right Edge of the display input area.
               // scroll right so that cursor remains visible.
               const newScrollLeftValue =
                 currentScrollLeftValue +
                 (cursorPosition - intersection.rootBounds.width) +
-                scrollPadding;
+                SCROLLING_PADDING;
 
               containerRef.current.scrollLeft = newScrollLeftValue;
-            } else if (cursorPosition < viewportLeftEdge + scrollPadding) {
+            } else if (cursorPosition < viewportLeftEdge + SCROLLING_PADDING) {
               // cursor is close to the Left edge of the display input area.
               // scroll left so that cursor remains visible;
               const newScrollLeftValue =
-                cursorPosition - scrollPadding < 0 ? 0 : currentScrollLeftValue - scrollPadding;
+                cursorPosition - SCROLLING_PADDING < 0
+                  ? 0
+                  : currentScrollLeftValue - SCROLLING_PADDING;
 
               containerRef.current.scrollLeft = newScrollLeftValue;
             }
@@ -110,7 +115,7 @@ export const InputDisplay = memo<InputDisplayProps>(({ leftOfCursor, rightOfCurs
         }
       };
 
-      const observer = new IntersectionObserver(handleIntersection, {
+      observer.current = new IntersectionObserver(handleIntersection, {
         root: containerRef.current,
         // The `-10px` ensure that the observer is triggered when the cursor is within
         // 10px of the edge of the viewport (the scrolling container).
@@ -118,10 +123,23 @@ export const InputDisplay = memo<InputDisplayProps>(({ leftOfCursor, rightOfCurs
         threshold: 0,
       });
 
-      observer.observe(cursorRef.current);
+      return () => {
+        observer.current?.disconnect();
+        observer.current = null;
+      };
+    }
+  }, []);
+
+  // Anytime the cursor position changes, re-observe the movement of the cursor.
+  useEffect(() => {
+    if (observer.current && cursorRef.current) {
+      const intersectionObserver = observer.current;
+      const cursorEle = cursorRef.current;
+
+      intersectionObserver.observe(cursorEle);
 
       return () => {
-        observer.disconnect();
+        intersectionObserver.unobserve(cursorEle);
       };
     }
   }, [currentCursorPosition]);
