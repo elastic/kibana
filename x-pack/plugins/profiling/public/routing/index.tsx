@@ -11,7 +11,7 @@ import * as t from 'io-ts';
 import React from 'react';
 import { TopNFunctionSortField, topNFunctionSortFieldRt } from '../../common/functions';
 import { StackTracesDisplayOption, TopNType } from '../../common/stack_traces';
-import { FlameGraphComparisonMode } from '../../common/flamegraph';
+import { FlameGraphComparisonMode, FlameGraphNormalizationMode } from '../../common/flamegraph';
 import { FlameGraphsView } from '../components/flame_graphs_view';
 import { FunctionsView } from '../components/functions_view';
 import { RedirectTo } from '../components/redirect_to';
@@ -101,19 +101,30 @@ const routes = {
                   </RouteBreadcrumb>
                 ),
                 params: t.type({
-                  query: t.type({
-                    comparisonRangeFrom: t.string,
-                    comparisonRangeTo: t.string,
-                    comparisonKuery: t.string,
-                    comparisonMode: t.union([
-                      t.literal(FlameGraphComparisonMode.Absolute),
-                      t.literal(FlameGraphComparisonMode.Relative),
-                    ]),
-                  }),
+                  query: t.intersection([
+                    t.type({
+                      comparisonRangeFrom: t.string,
+                      comparisonRangeTo: t.string,
+                      comparisonKuery: t.string,
+                      comparisonMode: t.union([
+                        t.literal(FlameGraphComparisonMode.Absolute),
+                        t.literal(FlameGraphComparisonMode.Relative),
+                      ]),
+                    }),
+                    t.partial({
+                      normalizationMode: t.union([
+                        t.literal(FlameGraphNormalizationMode.Scale),
+                        t.literal(FlameGraphNormalizationMode.Time),
+                      ]),
+                      baseline: toNumberRt,
+                      comparison: toNumberRt,
+                    }),
+                  ]),
                 }),
                 defaults: {
                   query: {
                     comparisonMode: FlameGraphComparisonMode.Absolute,
+                    normalizationMode: FlameGraphNormalizationMode.Time,
                   },
                 },
               },

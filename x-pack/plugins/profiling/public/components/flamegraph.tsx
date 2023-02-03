@@ -179,6 +179,8 @@ export interface FlameGraphProps {
   comparisonMode: FlameGraphComparisonMode;
   primaryFlamegraph?: ElasticFlameGraph;
   comparisonFlamegraph?: ElasticFlameGraph;
+  baseline?: number;
+  comparison?: number;
 }
 
 export const FlameGraph: React.FC<FlameGraphProps> = ({
@@ -186,6 +188,8 @@ export const FlameGraph: React.FC<FlameGraphProps> = ({
   comparisonMode,
   primaryFlamegraph,
   comparisonFlamegraph,
+  baseline,
+  comparison,
 }) => {
   const theme = useEuiTheme();
 
@@ -197,6 +201,8 @@ export const FlameGraph: React.FC<FlameGraphProps> = ({
       colorDanger: theme.euiTheme.colors.danger,
       colorNeutral: theme.euiTheme.colors.lightShade,
       comparisonMode,
+      baseline,
+      comparison,
     });
   }, [
     primaryFlamegraph,
@@ -205,6 +211,8 @@ export const FlameGraph: React.FC<FlameGraphProps> = ({
     theme.euiTheme.colors.danger,
     theme.euiTheme.colors.lightShade,
     comparisonMode,
+    baseline,
+    comparison,
   ]);
 
   const chartTheme: PartialTheme = {
