@@ -19,6 +19,7 @@ import { fieldFormatsMock } from '@kbn/field-formats-plugin/common/mocks';
 import { uiSettingsServiceMock } from '@kbn/core/public/mocks';
 import { createSearchSourceMock } from '@kbn/data-plugin/public/mocks';
 import { Query } from '@kbn/es-query';
+import { FilterMetaParams } from '@kbn/es-query/src/filters/build_filters';
 
 // helper function to create data views
 function createMockDataView(id: string) {
@@ -99,7 +100,7 @@ const luceneSavedSearch: SavedSearch = {
                 },
               },
             },
-          ],
+          ] as FilterMetaParams,
           // @ts-expect-error SavedSearch needs to be updated with CombinedFilterMeta
           relation: 'OR',
           type: 'combined',
