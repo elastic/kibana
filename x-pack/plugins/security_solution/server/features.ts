@@ -117,6 +117,12 @@ const responseActionSubFeatures: SubFeatureConfig[] = [
         defaultMessage: 'Response Actions History',
       }
     ),
+    description: i18n.translate(
+      'xpack.securitySolution.featureRegistry.subFeatures.responseActionsHistory.description',
+      {
+        defaultMessage: 'Access the history of response actions performed on endpoints.',
+      }
+    ),
     privilegeGroups: [
       {
         groupType: 'mutually_exclusive',
@@ -158,6 +164,10 @@ const responseActionSubFeatures: SubFeatureConfig[] = [
     name: i18n.translate('xpack.securitySolution.featureRegistry.subFeatures.hostIsolation', {
       defaultMessage: 'Host Isolation',
     }),
+    description: i18n.translate(
+      'xpack.securitySolution.featureRegistry.subFeatures.hostIsolation.description',
+      { defaultMessage: 'Perform the "isolate" and "release" response actions.' }
+    ),
     privilegeGroups: [
       {
         groupType: 'mutually_exclusive',
@@ -188,6 +198,12 @@ const responseActionSubFeatures: SubFeatureConfig[] = [
     name: i18n.translate('xpack.securitySolution.featureRegistry.subFeatures.processOperations', {
       defaultMessage: 'Process Operations',
     }),
+    description: i18n.translate(
+      'xpack.securitySolution.featureRegistry.subFeatures.processOperations.description',
+      {
+        defaultMessage: 'Perform process-related response actions in the response console.',
+      }
+    ),
     privilegeGroups: [
       {
         groupType: 'mutually_exclusive',
@@ -288,6 +304,13 @@ const subFeatures: SubFeatureConfig[] = [
     name: i18n.translate('xpack.securitySolution.featureRegistry.subFeatures.endpointList', {
       defaultMessage: 'Endpoint List',
     }),
+    description: i18n.translate(
+      'xpack.securitySolution.featureRegistry.subFeatures.endpointList.description',
+      {
+        defaultMessage:
+          'Displays all hosts running Elastic Defend and their relevant integration details.',
+      }
+    ),
     privilegeGroups: [
       {
         groupType: 'mutually_exclusive',
@@ -329,6 +352,13 @@ const subFeatures: SubFeatureConfig[] = [
     name: i18n.translate('xpack.securitySolution.featureRegistry.subFeatures.trustedApplications', {
       defaultMessage: 'Trusted Applications',
     }),
+    description: i18n.translate(
+      'xpack.securitySolution.featureRegistry.subFeatures.trustedApplications.description',
+      {
+        defaultMessage:
+          'Helps mitigate conflicts with other software, usually other antivirus or endpoint security applications.',
+      }
+    ),
     privilegeGroups: [
       {
         groupType: 'mutually_exclusive',
@@ -379,6 +409,13 @@ const subFeatures: SubFeatureConfig[] = [
         defaultMessage: 'Host Isolation Exceptions',
       }
     ),
+    description: i18n.translate(
+      'xpack.securitySolution.featureRegistry.subFeatures.hostIsolationExceptions.description',
+      {
+        defaultMessage:
+          'Add specific IP addresses that isolated hosts are still allowed to communicate with, even when isolated from the rest of the network.',
+      }
+    ),
     privilegeGroups: [
       {
         groupType: 'mutually_exclusive',
@@ -426,6 +463,13 @@ const subFeatures: SubFeatureConfig[] = [
     name: i18n.translate('xpack.securitySolution.featureRegistry.subFeatures.blockList', {
       defaultMessage: 'Blocklist',
     }),
+    description: i18n.translate(
+      'xpack.securitySolution.featureRegistry.subFeatures.blockList.description',
+      {
+        defaultMessage:
+          'Extend Elastic Defend’s protection against malicious processes and protect against potentially harmful applications.',
+      }
+    ),
     privilegeGroups: [
       {
         groupType: 'mutually_exclusive',
@@ -473,6 +517,13 @@ const subFeatures: SubFeatureConfig[] = [
     name: i18n.translate('xpack.securitySolution.featureRegistry.subFeatures.eventFilters', {
       defaultMessage: 'Event Filters',
     }),
+    description: i18n.translate(
+      'xpack.securitySolution.featureRegistry.subFeatures.eventFilters.description',
+      {
+        defaultMessage:
+          'Filter out endpoint events that you do not need or want stored in Elasticsearch.',
+      }
+    ),
     privilegeGroups: [
       {
         groupType: 'mutually_exclusive',
@@ -518,8 +569,15 @@ const subFeatures: SubFeatureConfig[] = [
       }
     ),
     name: i18n.translate('xpack.securitySolution.featureRegistry.subFeatures.policyManagement', {
-      defaultMessage: 'Policy Management',
+      defaultMessage: 'Elastic Defend Policy Management',
     }),
+    description: i18n.translate(
+      'xpack.securitySolution.featureRegistry.subFeatures.policyManagement.description',
+      {
+        defaultMessage:
+          'Access the Elastic Defend integration policy to configure protections, event collection, and advanced policy features.',
+      }
+    ),
     privilegeGroups: [
       {
         groupType: 'mutually_exclusive',
