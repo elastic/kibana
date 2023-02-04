@@ -15,7 +15,6 @@ import { ProfilingAppPageTemplate } from './profiling_app_page_template';
 
 export function CheckSetup({ children }: { children: React.ReactElement }) {
   const {
-    start: { core },
     services: { fetchHasSetup, postSetupResources },
   } = useProfilingDependencies();
 
@@ -59,7 +58,9 @@ export function CheckSetup({ children }: { children: React.ReactElement }) {
   }
 
   if (displayNoDataScreen) {
-    return <NoDataPage />;
+    return (
+      <NoDataPage subTitle="You're almost there! Follow the instructions below to add data." />
+    );
   }
 
   if (displaySetupScreen) {

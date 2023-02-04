@@ -45,6 +45,13 @@ export class ProfilingPlugin implements Plugin {
         }),
         path: '/functions',
       },
+      {
+        id: 'adddata',
+        title: i18n.translate('xpack.profiling.navigation.functionsLinkLabel', {
+          defaultMessage: 'Add data',
+        }),
+        path: '/adddata',
+      },
     ];
 
     const kuerySubject = new BehaviorSubject<string>('');
@@ -53,7 +60,6 @@ export class ProfilingPlugin implements Plugin {
       map(([_, kuery]) => {
         const sections: NavigationSection[] = [
           {
-            // TODO: add beta badge to section label, needs support in Observability plugin
             label: i18n.translate('xpack.profiling.navigation.sectionLabel', {
               defaultMessage: 'Universal Profiling',
             }),
