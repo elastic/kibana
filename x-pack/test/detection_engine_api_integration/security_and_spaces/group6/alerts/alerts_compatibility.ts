@@ -38,6 +38,7 @@ import {
   waitForSignalsToBePresent,
 } from '../../../utils';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
+import { removeRandomValuedProperties } from '../../rule_execution_logic/utils';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext) => {
@@ -230,22 +231,13 @@ export default ({ getService }: FtrProviderContext) => {
         expect(signalsOpen.hits.hits.length).greaterThan(0);
         const hit = signalsOpen.hits.hits[0];
         expect(hit._source?.kibana).to.eql(undefined);
-        const {
-          '@timestamp': timestamp,
-          'kibana.version': kibanaVersion,
-          'kibana.alert.rule.created_at': createdAt,
-          'kibana.alert.rule.updated_at': updatedAt,
-          'kibana.alert.rule.execution.uuid': executionUuid,
-          'kibana.alert.uuid': alertId,
-          ...source
-        } = hit._source!;
+        const source = removeRandomValuedProperties(hit._source);
         expect(source).to.eql({
           'kibana.alert.rule.category': 'Custom Query Rule',
           'kibana.alert.rule.consumer': 'siem',
           'kibana.alert.rule.name': 'Signal Testing Query',
           'kibana.alert.rule.producer': 'siem',
           'kibana.alert.rule.rule_type_id': 'siem.queryRule',
-          'kibana.alert.rule.uuid': id,
           'kibana.space_ids': ['default'],
           'kibana.alert.rule.tags': [],
           agent: {
@@ -399,22 +391,13 @@ export default ({ getService }: FtrProviderContext) => {
         expect(signalsOpen.hits.hits.length).greaterThan(0);
         const hit = signalsOpen.hits.hits[0];
         expect(hit._source?.kibana).to.eql(undefined);
-        const {
-          '@timestamp': timestamp,
-          'kibana.version': kibanaVersion,
-          'kibana.alert.rule.created_at': createdAt,
-          'kibana.alert.rule.updated_at': updatedAt,
-          'kibana.alert.rule.execution.uuid': executionUuid,
-          'kibana.alert.uuid': alertId,
-          ...source
-        } = hit._source!;
+        const source = removeRandomValuedProperties(hit._source);
         expect(source).to.eql({
           'kibana.alert.rule.category': 'Custom Query Rule',
           'kibana.alert.rule.consumer': 'siem',
           'kibana.alert.rule.name': 'Signal Testing Query',
           'kibana.alert.rule.producer': 'siem',
           'kibana.alert.rule.rule_type_id': 'siem.queryRule',
-          'kibana.alert.rule.uuid': id,
           'kibana.space_ids': ['default'],
           'kibana.alert.rule.tags': [],
           agent: {

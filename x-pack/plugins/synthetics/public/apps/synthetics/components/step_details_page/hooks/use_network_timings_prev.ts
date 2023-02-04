@@ -18,8 +18,11 @@ import {
   SYNTHETICS_TOTAL_TIMINGS,
   SYNTHETICS_WAIT_TIMINGS,
 } from '@kbn/observability-plugin/common';
+import moment from 'moment';
+import { useJourneySteps } from '../../monitor_details/hooks/use_journey_steps';
 import { SYNTHETICS_INDEX_PATTERN } from '../../../../../../common/constants';
 import { useReduxEsSearch } from '../../../hooks/use_redux_es_search';
+import { getTimingWithLabels } from './use_network_timings';
 
 export const useStepFilters = (checkGroupId: string, stepIndex: number) => {
   return [
@@ -36,12 +39,20 @@ export const useStepFilters = (checkGroupId: string, stepIndex: number) => {
   ];
 };
 
-export const useNetworkTimingsPrevious24Hours = (stepIndexArg?: number) => {
+export const useNetworkTimingsPrevious24Hours = (
+  stepIndexArg?: number,
+  timestampArg?: string,
+  checkGroupIdArg?: string
+) => {
   const params = useParams<{ checkGroupId: string; stepIndex: string; monitorId: string }>();
 
   const configId = params.monitorId;
-  const checkGroupId = params.checkGroupId;
+  const checkGroupId = checkGroupIdArg ?? params.checkGroupId;
   const stepIndex = stepIndexArg ?? Number(params.stepIndex);
+
+  const { currentStep } = useJourneySteps();
+
+  const timestamp = timestampArg ?? currentStep?.['@timestamp'];
 
   const runTimeMappings = NETWORK_TIMINGS_FIELDS.reduce(
     (acc, field) => ({
@@ -58,29 +69,16 @@ export const useNetworkTimingsPrevious24Hours = (stepIndexArg?: number) => {
       index: SYNTHETICS_INDEX_PATTERN,
       body: {
         size: 0,
-        runtime_mappings: {
-          ...runTimeMappings,
-          'synthetics.payload.is_navigation_request': {
-            type: 'boolean',
-          },
-          'synthetics.payload.transfer_size': {
-            type: 'long',
-          },
-        },
+        runtime_mappings: runTimeMappings,
         query: {
           bool: {
             filter: [
               {
                 range: {
                   '@timestamp': {
-                    lte: 'now',
-                    gte: 'now-24h/h',
+                    lte: moment(timestamp).toISOString(),
+                    gte: moment(timestamp).subtract(24, 'hours').toISOString(),
                   },
-                },
-              },
-              {
-                term: {
-                  'synthetics.payload.is_navigation_request': true,
                 },
               },
               {
@@ -109,142 +107,107 @@ export const useNetworkTimingsPrevious24Hours = (stepIndexArg?: number) => {
           },
         },
         aggs: {
-          dns: {
-            percentiles: {
-              field: SYNTHETICS_DNS_TIMINGS,
-              percents: [50],
+          testRuns: {
+            terms: {
+              field: 'monitor.check_group',
+              size: 10000,
             },
-          },
-          ssl: {
-            percentiles: {
-              field: SYNTHETICS_SSL_TIMINGS,
-              percents: [50],
-            },
-          },
-          blocked: {
-            percentiles: {
-              field: SYNTHETICS_BLOCKED_TIMINGS,
-              percents: [50],
-            },
-          },
-          connect: {
-            percentiles: {
-              field: SYNTHETICS_CONNECT_TIMINGS,
-              percents: [50],
-            },
-          },
-          receive: {
-            percentiles: {
-              field: SYNTHETICS_RECEIVE_TIMINGS,
-              percents: [50],
-            },
-          },
-          send: {
-            percentiles: {
-              field: SYNTHETICS_SEND_TIMINGS,
-              percents: [50],
-            },
-          },
-          wait: {
-            percentiles: {
-              field: SYNTHETICS_WAIT_TIMINGS,
-              percents: [50],
-            },
-          },
-          total: {
-            percentiles: {
-              field: SYNTHETICS_TOTAL_TIMINGS,
-              percents: [50],
-            },
-          },
-          transferSize: {
-            percentiles: {
-              field: 'synthetics.payload.transfer_size',
-              percents: [50],
+            aggs: {
+              dns: {
+                sum: {
+                  field: SYNTHETICS_DNS_TIMINGS,
+                },
+              },
+              ssl: {
+                sum: {
+                  field: SYNTHETICS_SSL_TIMINGS,
+                },
+              },
+              blocked: {
+                sum: {
+                  field: SYNTHETICS_BLOCKED_TIMINGS,
+                },
+              },
+              connect: {
+                sum: {
+                  field: SYNTHETICS_CONNECT_TIMINGS,
+                },
+              },
+              receive: {
+                sum: {
+                  field: SYNTHETICS_RECEIVE_TIMINGS,
+                },
+              },
+              send: {
+                sum: {
+                  field: SYNTHETICS_SEND_TIMINGS,
+                },
+              },
+              wait: {
+                sum: {
+                  field: SYNTHETICS_WAIT_TIMINGS,
+                },
+              },
+              total: {
+                sum: {
+                  field: SYNTHETICS_TOTAL_TIMINGS,
+                },
+              },
             },
           },
         },
       },
     },
     [configId, stepIndex, checkGroupId],
-    { name: `stepNetworkPreviousTimings/${configId}/${stepIndex}` }
+    {
+      name: `stepNetworkPreviousTimings/${configId}/${stepIndex}`,
+      isRequestReady: Boolean(timestamp),
+    }
   );
 
   const aggs = data?.aggregations;
 
+  const dns: number[] = [];
+  const connect: number[] = [];
+  const receive: number[] = [];
+  const send: number[] = [];
+  const wait: number[] = [];
+  const blocked: number[] = [];
+  const ssl: number[] = [];
+
+  aggs?.testRuns.buckets.forEach((bucket) => {
+    dns.push(bucket.dns.value ?? 0);
+    connect.push(bucket.connect.value ?? 0);
+    receive.push(bucket.receive.value ?? 0);
+    send.push(bucket.send.value ?? 0);
+    wait.push(bucket.wait.value ?? 0);
+    blocked.push(bucket.blocked.value ?? 0);
+    ssl.push(bucket.ssl.value ?? 0);
+  });
+
   const timings = {
-    dns: aggs?.dns.values['50.0'] ?? 0,
-    connect: aggs?.connect.values['50.0'] ?? 0,
-    receive: aggs?.receive.values['50.0'] ?? 0,
-    send: aggs?.send.values['50.0'] ?? 0,
-    wait: aggs?.wait.values['50.0'] ?? 0,
-    blocked: aggs?.blocked.values['50.0'] ?? 0,
-    ssl: aggs?.ssl.values['50.0'] ?? 0,
-    transferSize: aggs?.transferSize.values['50.0'] ?? 0,
+    dns: median(dns),
+    connect: median(connect),
+    receive: median(receive),
+    send: median(send),
+    wait: median(wait),
+    blocked: median(blocked),
+    ssl: median(ssl),
   };
 
   return {
     loading,
     timings,
-    transferSizePrev: {
-      value: timings.transferSize,
-      label: CONTENT_SIZE_LABEL,
-    },
-    timingsWithLabels: [
-      {
-        value: timings.dns,
-        label: SYNTHETICS_DNS_TIMINGS_LABEL,
-      },
-      {
-        value: timings.ssl,
-        label: SYNTHETICS_SSL_TIMINGS_LABEL,
-      },
-      {
-        value: timings.blocked,
-        label: SYNTHETICS_BLOCKED_TIMINGS_LABEL,
-      },
-      {
-        value: timings.connect,
-        label: SYNTHETICS_CONNECT_TIMINGS_LABEL,
-      },
-      {
-        value: timings.receive,
-        label: SYNTHETICS_RECEIVE_TIMINGS_LABEL,
-      },
-      {
-        value: timings.send,
-        label: SYNTHETICS_SEND_TIMINGS_LABEL,
-      },
-      {
-        value: timings.wait,
-        label: SYNTHETICS_WAIT_TIMINGS_LABEL,
-      },
-    ].sort((a, b) => b.value - a.value),
+    timingsWithLabels: getTimingWithLabels(timings),
   };
 };
 
-const SYNTHETICS_CONNECT_TIMINGS_LABEL = i18n.translate('xpack.synthetics.connect.label', {
-  defaultMessage: 'Connect',
-});
-const SYNTHETICS_DNS_TIMINGS_LABEL = i18n.translate('xpack.synthetics.dns', {
-  defaultMessage: 'DNS',
-});
-const SYNTHETICS_WAIT_TIMINGS_LABEL = i18n.translate('xpack.synthetics.wait', {
-  defaultMessage: 'Wait',
-});
-
-const SYNTHETICS_SSL_TIMINGS_LABEL = i18n.translate('xpack.synthetics.ssl', {
-  defaultMessage: 'SSL',
-});
-const SYNTHETICS_BLOCKED_TIMINGS_LABEL = i18n.translate('xpack.synthetics.blocked', {
-  defaultMessage: 'Blocked',
-});
-const SYNTHETICS_SEND_TIMINGS_LABEL = i18n.translate('xpack.synthetics.send', {
-  defaultMessage: 'Send',
-});
-const SYNTHETICS_RECEIVE_TIMINGS_LABEL = i18n.translate('xpack.synthetics.receive', {
-  defaultMessage: 'Receive',
-});
+export const median = (arr: number[]): number => {
+  if (!arr.length) return 0;
+  const s = [...arr].sort((a, b) => a - b);
+  const mid = Math.floor(s.length / 2);
+  return s.length % 2 === 0 ? (s[mid - 1] + s[mid]) / 2 : s[mid];
+};
 
 export const CONTENT_SIZE_LABEL = i18n.translate('xpack.synthetics.contentSize', {
   defaultMessage: 'Content Size',
