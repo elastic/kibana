@@ -17,6 +17,7 @@ import { FunctionsView } from '../components/functions_view';
 import { RedirectTo } from '../components/redirect_to';
 import { RouteBreadcrumb } from '../components/route_breadcrumb';
 import { StackTracesView } from '../components/stack_traces_view';
+import { NoDataPage } from '../components/no_data_page';
 
 const routes = {
   '/': {
@@ -177,6 +178,9 @@ const routes = {
                 }),
               },
             },
+          },
+          '/adddata': {
+            element: <NoDataPage subTitle="Select an option below to deploy the host-agent." />,
           },
           '/': {
             element: <RedirectTo pathname="/stacktraces/threads" />,

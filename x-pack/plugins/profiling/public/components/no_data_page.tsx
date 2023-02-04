@@ -25,7 +25,7 @@ import { AsyncStatus, useAsync } from '../hooks/use_async';
 import { useProfilingDependencies } from './contexts/profiling_dependencies/use_profiling_dependencies';
 import { ProfilingAppPageTemplate } from './profiling_app_page_template';
 
-export function NoDataPage() {
+export function NoDataPage({ subTitle }: { subTitle: string }) {
   const {
     services: { setupDataCollectionInstructions },
   } = useProfilingDependencies();
@@ -289,7 +289,7 @@ docker.elastic.co/observability/profiling-agent:stable /root/pf-host-agent \\
         <>
           <EuiText>
             {i18n.translate('xpack.profiling.noDataPage.introduction', {
-              defaultMessage: `You're almost there! Follow the instructions below to add data.`,
+              defaultMessage: subTitle,
             })}
           </EuiText>
           <EuiSpacer />
