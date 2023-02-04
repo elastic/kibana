@@ -91,7 +91,11 @@ export async function getSearchTransactionsEvents({
 }
 
 export function getDurationFieldForTransactions(
-  typeOrSearchAgggregatedTransactions: ApmDocumentType | boolean
+  typeOrSearchAgggregatedTransactions:
+    | ApmDocumentType.ServiceTransactionMetric
+    | ApmDocumentType.TransactionMetric
+    | ApmDocumentType.TransactionEvent
+    | boolean
 ) {
   let type: ApmDocumentType;
   if (typeOrSearchAgggregatedTransactions === true) {

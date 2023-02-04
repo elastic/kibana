@@ -32,7 +32,7 @@ describe('getRequestBase', () => {
   });
 
   it('adds terms filter for apm events', () => {
-    expect(res.body.query.bool.filter).toContainEqual({
+    expect(res.filters).toContainEqual({
       terms: { 'processor.event': ['transaction', 'error'] },
     });
   });

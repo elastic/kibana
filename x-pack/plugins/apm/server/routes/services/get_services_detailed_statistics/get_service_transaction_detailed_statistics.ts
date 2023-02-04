@@ -7,7 +7,7 @@
 
 import { kqlQuery, rangeQuery } from '@kbn/observability-plugin/server';
 import { keyBy } from 'lodash';
-import { ApmDocumentType } from '../../../../common/document_type';
+import { ApmServiceTransactionDocumentType } from '../../../../common/document_type';
 import {
   SERVICE_NAME,
   TRANSACTION_TYPE,
@@ -46,7 +46,7 @@ export async function getServiceTransactionDetailedStats({
   environment: string;
   kuery: string;
   apmEventClient: APMEventClient;
-  documentType: ApmDocumentType;
+  documentType: ApmServiceTransactionDocumentType;
   rollupInterval: RollupInterval;
   bucketSizeInSeconds: number;
   offset?: string;
@@ -189,7 +189,7 @@ export async function getServiceDetailedStatsPeriods({
   environment: string;
   kuery: string;
   apmEventClient: APMEventClient;
-  documentType: ApmDocumentType;
+  documentType: ApmServiceTransactionDocumentType;
   rollupInterval: RollupInterval;
   bucketSizeInSeconds: number;
   offset?: string;
