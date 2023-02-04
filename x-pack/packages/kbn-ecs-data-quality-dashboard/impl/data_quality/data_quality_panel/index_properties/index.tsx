@@ -202,8 +202,10 @@ const IndexPropertiesComponent: React.FC<Props> = ({
   useEffect(() => {
     if (hasAllDataFetchingCompleted({ loadingMappings, loadingUnallowedValues })) {
       const error: string | null = mappingsError ?? unallowedValuesError;
-      const indexIncompatible: number =
-        partitionedFieldMetadata != null ? partitionedFieldMetadata.incompatible.length : 0;
+      const indexIncompatible: number | undefined =
+        error == null && partitionedFieldMetadata != null
+          ? partitionedFieldMetadata.incompatible.length
+          : undefined;
 
       if (patternRollup != null) {
         const markdownComments =

@@ -214,14 +214,14 @@ export const getSummaryMarkdownComment = ({
 }: {
   ecsFieldReferenceUrl: string;
   ecsReferenceUrl: string;
-  incompatible: number;
+  incompatible: number | undefined;
   indexName: string;
   mappingUrl: string;
 }): string =>
   `### ${escape(indexName)}
 
 ${
-  incompatible > 0
+  incompatible != null && incompatible > 0
     ? i18n.SUMMARY_MARKDOWN_DESCRIPTION({
         ecsFieldReferenceUrl: `${escape(ecsFieldReferenceUrl)}`,
         ecsReferenceUrl: `${escape(ecsReferenceUrl)}`,
