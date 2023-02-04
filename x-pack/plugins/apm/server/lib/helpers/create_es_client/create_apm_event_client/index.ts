@@ -197,8 +197,8 @@ export class APMEventClient {
     const index = processorEventsToIndex(params.apm.events, this.indices);
 
     const requestParams = {
-      index,
       ...omit(params, 'apm'),
+      index,
     };
 
     return this.callAsyncWithDebug({
@@ -216,8 +216,8 @@ export class APMEventClient {
     const index = processorEventsToIndex(params.apm.events, this.indices);
 
     const requestParams = {
-      index,
       ...omit(params, 'apm'),
+      index,
     };
 
     return this.callAsyncWithDebug({
@@ -235,8 +235,8 @@ export class APMEventClient {
     const index = processorEventsToIndex(params.apm.events, this.indices);
 
     const requestParams = {
-      index: Array.isArray(index) ? index.join(',') : index,
       ...omit(params, 'apm'),
+      index: Array.isArray(index) ? index.join(',') : index,
     };
 
     return this.callAsyncWithDebug({

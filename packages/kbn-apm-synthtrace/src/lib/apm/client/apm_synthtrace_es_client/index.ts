@@ -112,6 +112,7 @@ export class ApmSynthtraceEsClient {
       index: dataStreams,
       allow_no_indices: true,
       ignore_unavailable: true,
+      expand_wildcards: ['open', 'hidden'],
     });
   }
 
