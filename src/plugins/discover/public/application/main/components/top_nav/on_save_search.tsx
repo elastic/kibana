@@ -49,7 +49,7 @@ async function saveDataSource({
           navigateTo(`/view/${encodeURIComponent(id)}`);
         } else {
           // Update defaults so that "reload saved query" functions correctly
-          state.resetAppState(savedSearch);
+          state.appState.resetWithSavedSearch(savedSearch);
           services.chrome.docTitle.change(savedSearch.title!);
 
           setBreadcrumbsTitle(
@@ -161,6 +161,7 @@ export async function onSaveSearch({
       if (savedObjectsTagging) {
         savedSearch.tags = currentTags;
       }
+      state.appState.resetInitialState();
     }
   };
 

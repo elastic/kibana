@@ -11,7 +11,14 @@ import {
   createStateContainerReactHelpers,
   ReduxLikeStateContainer,
 } from '@kbn/kibana-utils-plugin/common';
-import { AggregateQuery, Filter, FilterStateStore, Query } from '@kbn/es-query';
+import {
+  AggregateQuery,
+  COMPARE_ALL_OPTIONS,
+  compareFilters,
+  Filter,
+  FilterStateStore,
+  Query,
+} from '@kbn/es-query';
 import { SavedSearch, VIEW_MODE } from '@kbn/saved-search-plugin/public';
 import { IKbnUrlStateStorage, ISyncStateRef, syncState } from '@kbn/kibana-utils-plugin/public';
 import { cloneDeep, isEqual } from 'lodash';
@@ -22,7 +29,7 @@ import { getValidFilters } from '../../../utils/get_valid_filters';
 import { cleanupUrlState } from '../utils/cleanup_url_state';
 import { getStateDefaults } from '../utils/get_state_defaults';
 import { handleSourceColumnState } from '../../../utils/state_helpers';
-import { APP_STATE_URL_KEY, AppStateUrl, isEqualState, setState } from './discover_state';
+import { APP_STATE_URL_KEY, AppStateUrl } from './discover_state';
 import { DiscoverGridSettings } from '../../../components/discover_grid/types';
 
 export interface DiscoverAppStateContainer extends ReduxLikeStateContainer<AppState> {
@@ -40,19 +47,20 @@ export interface DiscoverAppStateContainer extends ReduxLikeStateContainer<AppSt
    */
   initAndSync: (currentSavedSearch: SavedSearch) => () => void;
   /**
+   * Replaces the current state in URL with the given state
+   * @param newState
+   * @param merge if true, the given state is merged with the current state
+   */
+  replaceUrlState: (newPartial: AppState, merge?: boolean) => void;
+  /**
    * Resets the state by the given saved search
    * @param savedSearch
    */
-  resetBySavedSearch: (savedSearch: SavedSearch) => void;
+  resetWithSavedSearch: (savedSearch: SavedSearch) => void;
   /**
    * Resets the current state to the initial state
    */
   resetInitialState: () => void;
-  /**
-   * Replaces the given state in the URL, instead of pushing a new history entry
-   * @param newState
-   */
-  replaceUrlState: (newState: AppState) => void;
   /**
    * Start syncing the state with the URL
    */
@@ -133,11 +141,15 @@ export const { Provider: DiscoverAppStateProvider, useSelector: useAppStateSelec
  * @param savedSearch
  * @param services
  */
-export const getDiscoverAppStateContainer = (
-  stateStorage: IKbnUrlStateStorage,
-  savedSearch: SavedSearch,
-  services: DiscoverServices
-): DiscoverAppStateContainer => {
+export const getDiscoverAppStateContainer = ({
+  stateStorage,
+  savedSearch,
+  services,
+}: {
+  stateStorage: IKbnUrlStateStorage;
+  savedSearch: SavedSearch;
+  services: DiscoverServices;
+}): DiscoverAppStateContainer => {
   let previousState: AppState = {};
   let initialState = getInitialState(stateStorage, savedSearch, services);
   const appStateContainer = createStateContainer<AppState>(initialState);
@@ -157,18 +169,18 @@ export const getDiscoverAppStateContainer = (
   };
 
   const resetInitialState = () => {
-    addLog('🔗 [appState] reset initial state to the current state');
+    addLog('[appState] reset initial state to the current state');
     initialState = appStateContainer.getState();
   };
 
   const replaceUrlState = async (newPartial: AppState = {}, merge = true) => {
-    addLog('🔗 [appState] replaceUrlState', { newPartial, merge });
+    addLog('[appState] replaceUrlState', { newPartial, merge });
     const state = merge ? { ...appStateContainer.getState(), ...newPartial } : newPartial;
     await stateStorage.set(APP_STATE_URL_KEY, state, { replace: true });
   };
 
   const startAppStateUrlSync = () => {
-    addLog('🔗 [appState] startUrlSync');
+    addLog('[appState] startAppStateUrlSync');
     return syncState({
       storageKey: APP_STATE_URL_KEY,
       stateContainer: enhancedAppContainer,
@@ -177,7 +189,7 @@ export const getDiscoverAppStateContainer = (
   };
 
   const initializeAndSync = (currentSavedSearch: SavedSearch) => {
-    addLog('🔗 [appState] initializeAndSync', currentSavedSearch);
+    addLog('[appState] initializeAndSync', currentSavedSearch);
     const dataView = currentSavedSearch.searchSource.getField('index')!;
     if (appStateContainer.getState().index !== dataView.id) {
       // used data view is different from the given by url/state which is invalid
@@ -229,14 +241,14 @@ export const getDiscoverAppStateContainer = (
     };
   };
 
-  const resetBySavedSearch = (nextSavedSearch: SavedSearch) => {
-    addLog('🔗 [appState] reset to saved search', { nextSavedSearch });
+  const resetWithSavedSearch = (nextSavedSearch: SavedSearch) => {
+    addLog('[appState] reset to saved search', { nextSavedSearch });
     const nextAppState = getInitialState(stateStorage, nextSavedSearch, services);
     appStateContainer.set(nextAppState);
   };
 
   const update = (newPartial: AppState, replace = false) => {
-    addLog('🔗 [appState] update', { new: newPartial, replace });
+    addLog('[appState] update', { newPartial, replace });
     if (replace) {
       return replaceUrlState(newPartial);
     } else {
@@ -252,7 +264,7 @@ export const getDiscoverAppStateContainer = (
     getPrevious,
     hasChanged,
     initAndSync: initializeAndSync,
-    resetBySavedSearch,
+    resetWithSavedSearch,
     resetInitialState,
     replaceUrlState,
     syncState: startAppStateUrlSync,
@@ -277,4 +289,44 @@ function getInitialState(
     },
     services.uiSettings
   );
+}
+
+/**
+ * Helper function to merge a given new state with the existing state and to set the given state
+ * container
+ */
+export function setState(stateContainer: ReduxLikeStateContainer<AppState>, newState: AppState) {
+  addLog('[appstate] setState', { newState });
+  const oldState = stateContainer.getState();
+  const mergedState = { ...oldState, ...newState };
+  if (!isEqualState(oldState, mergedState)) {
+    stateContainer.set(mergedState);
+  }
+}
+
+/**
+ * Helper function to compare 2 different filter states
+ */
+export function isEqualFilters(filtersA?: Filter[] | Filter, filtersB?: Filter[] | Filter) {
+  if (!filtersA && !filtersB) {
+    return true;
+  } else if (!filtersA || !filtersB) {
+    return false;
+  }
+  return compareFilters(filtersA, filtersB, COMPARE_ALL_OPTIONS);
+}
+
+/**
+ * Helper function to compare 2 different state, is needed since comparing filters
+ * works differently
+ */
+export function isEqualState(stateA: AppState, stateB: AppState) {
+  if (!stateA && !stateB) {
+    return true;
+  } else if (!stateA || !stateB) {
+    return false;
+  }
+  const { filters: stateAFilters = [], ...stateAPartial } = stateA;
+  const { filters: stateBFilters = [], ...stateBPartial } = stateB;
+  return isEqual(stateAPartial, stateBPartial) && isEqualFilters(stateAFilters, stateBFilters);
 }

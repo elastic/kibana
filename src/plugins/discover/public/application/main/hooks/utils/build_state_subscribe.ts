@@ -5,10 +5,10 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { isEqual } from 'lodash';
 import { SavedSearch } from '@kbn/saved-search-plugin/public';
+import { isEqual } from 'lodash';
 import { DiscoverStateContainer } from '../../services/discover_state';
-import { AppState } from '../../services/discover_app_state_container';
+import { AppState, isEqualState } from '../../services/discover_app_state_container';
 import { addLog } from '../../../../utils/add_log';
 import { FetchStatus } from '../../../types';
 
@@ -30,7 +30,12 @@ export const buildStateSubscribe =
     setState: (state: AppState) => void;
   }) =>
   async (nextState: AppState) => {
-    addLog('📦 AppStateContainer.subscribe update', nextState);
+    const prevState = stateContainer.appState.getPrevious();
+    if (isEqualState(prevState, nextState)) {
+      addLog('[appstate] subscribe update ignored due to no changes');
+      return;
+    }
+    addLog('[appstate] subscribe triggered', nextState);
     const { hideChart, interval, breakdownField, sort, index } =
       stateContainer.appState.getPrevious();
     // Cast to boolean to avoid false positives when comparing
@@ -49,12 +54,12 @@ export const buildStateSubscribe =
       // If the requested data view is not found, don't try to load it,
       // and instead reset the app state to the fallback data view
       if (fallback) {
-        stateContainer.appState.replaceUrlState({ index: nextDataView.id });
+        stateContainer.appState.update({ index: nextDataView.id }, true);
         return;
       }
       savedSearch.searchSource.setField('index', nextDataView);
-      stateContainer.dataState.reset();
       stateContainer.actions.setDataView(nextDataView);
+      stateContainer.dataState.reset();
       savedSearchDataView = nextDataView;
     }
 
@@ -74,7 +79,7 @@ export const buildStateSubscribe =
       breakdownFieldChanged ||
       docTableSortChanged
     ) {
-      addLog('📦 AppStateContainer update triggers data fetching');
+      addLog('[appstate] subscribe triggers data fetching');
       stateContainer.dataState.refetch$.next(undefined);
     }
 

@@ -34,7 +34,7 @@ describe('Test discover state', () => {
       services: discoverServiceMock,
       history,
     });
-    await state.replaceUrlAppState({});
+    await state.appState.update({}, true);
     stopSync = state.startSync();
   });
   afterEach(() => {
@@ -67,16 +67,16 @@ describe('Test discover state', () => {
 
   test('isAppStateDirty returns  whether the current state has changed', async () => {
     state.setAppState({ index: 'modified' });
-    expect(state.isAppStateDirty()).toBeTruthy();
-    state.resetInitialAppState();
-    expect(state.isAppStateDirty()).toBeFalsy();
+    expect(state.appState.hasChanged()).toBeTruthy();
+    state.appState.resetInitialState();
+    expect(state.appState.hasChanged()).toBeFalsy();
   });
 
   test('getPreviousAppState returns the state before the current', async () => {
     state.setAppState({ index: 'first' });
     const stateA = state.appState.getState();
     state.setAppState({ index: 'second' });
-    expect(state.getPreviousAppState()).toEqual(stateA);
+    expect(state.appState.getPrevious()).toEqual(stateA);
   });
 
   test('pauseAutoRefreshInterval sets refreshInterval.pause to true', async () => {
@@ -96,7 +96,7 @@ describe('Test discover initial state sort handling', () => {
       services: discoverServiceMock,
       history,
     });
-    await state.replaceUrlAppState({});
+    await state.appState.update({}, true);
     const stopSync = state.startSync();
     expect(state.appState.getState().sort).toEqual([['order_date', 'desc']]);
     stopSync();
@@ -110,7 +110,7 @@ describe('Test discover initial state sort handling', () => {
       services: discoverServiceMock,
       history,
     });
-    await state.replaceUrlAppState({});
+    await state.appState.update({}, true);
     const stopSync = state.startSync();
     expect(state.appState.getState().sort).toEqual([['bytes', 'desc']]);
     stopSync();
@@ -123,7 +123,7 @@ describe('Test discover initial state sort handling', () => {
       services: discoverServiceMock,
       history,
     });
-    await state.replaceUrlAppState({});
+    await state.appState.update({}, true);
     const stopSync = state.startSync();
     expect(state.appState.getState().sort).toEqual([['timestamp', 'desc']]);
     stopSync();

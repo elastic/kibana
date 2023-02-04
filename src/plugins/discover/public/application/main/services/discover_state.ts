@@ -6,14 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { isEqual } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { History } from 'history';
-import { COMPARE_ALL_OPTIONS, compareFilters, Filter } from '@kbn/es-query';
 import {
   createKbnUrlStateStorage,
   IKbnUrlStateStorage,
-  ReduxLikeStateContainer,
   StateContainer,
   withNotifyOnErrors,
 } from '@kbn/kibana-utils-plugin/public';
@@ -108,29 +105,9 @@ export interface DiscoverStateContainer {
    */
   setAppState: (newState: Partial<AppState>) => void;
   /**
-   * Set state in Url using history.replace
-   */
-  replaceUrlAppState: (newState: Partial<AppState>) => Promise<void>;
-  /**
    * Sync state to URL, used for testing
    */
   flushToUrl: () => void;
-  /**
-   * Reset initial state to the current app state
-   */
-  resetInitialAppState: () => void;
-  /**
-   * Return the Appstate before the current app state, useful for diffing changes
-   */
-  getPreviousAppState: () => AppState;
-  /**
-   * Returns whether the current app state is different to the initial state
-   */
-  isAppStateDirty: () => boolean;
-  /**
-   * Reset AppState by the given savedSearch discarding all changes
-   */
-  resetAppState: (nextSavedSearch: SavedSearch) => void;
   /**
    * Pause the auto refresh interval without pushing an entry to history
    */
@@ -221,10 +198,6 @@ export function getDiscoverStateContainer({
     services,
   });
 
-  const replaceUrlAppState = async (newPartial: AppState = {}) => {
-    await appStateContainer.replaceUrlState(newPartial);
-  };
-
   const internalStateContainer = getInternalStateContainer();
 
   const pauseAutoRefreshInterval = async () => {
@@ -308,14 +281,8 @@ export function getDiscoverStateContainer({
       start();
       return stop;
     },
-    setAppState: (newPartial: AppState) => setState(appStateContainer, newPartial),
-    replaceUrlAppState,
-    resetInitialAppState: () => appStateContainer.resetInitialState(),
-    resetAppState: (nextSavedSearch: SavedSearch) =>
-      appStateContainer.resetBySavedSearch(nextSavedSearch),
-    getPreviousAppState: () => appStateContainer.getPrevious(),
+    setAppState: (newPartial: AppState) => appStateContainer.update(newPartial),
     flushToUrl: () => stateStorage.kbnUrlControls.flush(),
-    isAppStateDirty: () => appStateContainer.hasChanged(),
     pauseAutoRefreshInterval,
     initializeAndSync: () => appStateContainer.initAndSync(savedSearch),
     actions: {
@@ -329,54 +296,6 @@ export function getDiscoverStateContainer({
       updateAdHocDataViewId,
     },
   };
-}
-
-/**
- * Helper function to merge a given new state with the existing state and to set the given state
- * container
- */
-export function setState(stateContainer: ReduxLikeStateContainer<AppState>, newState: AppState) {
-  const oldState = stateContainer.getState();
-  const mergedState = { ...oldState, ...newState };
-  if (!isEqualState(oldState, mergedState)) {
-    stateContainer.set(mergedState);
-  }
-}
-
-/**
- * Helper function to compare 2 different filter states
- */
-export function isEqualFilters(filtersA?: Filter[] | Filter, filtersB?: Filter[] | Filter) {
-  if (!filtersA && !filtersB) {
-    return true;
-  } else if (!filtersA || !filtersB) {
-    return false;
-  }
-  return compareFilters(filtersA, filtersB, COMPARE_ALL_OPTIONS);
-}
-
-/**
- * helper function to extract filters of the given state
- * returns a state object without filters and an array of filters
- */
-export function splitState(state: AppState = {}) {
-  const { filters = [], ...statePartial } = state;
-  return { filters, state: statePartial };
-}
-
-/**
- * Helper function to compare 2 different state, is needed since comparing filters
- * works differently
- */
-export function isEqualState(stateA: AppState, stateB: AppState) {
-  if (!stateA && !stateB) {
-    return true;
-  } else if (!stateA || !stateB) {
-    return false;
-  }
-  const { filters: stateAFilters = [], ...stateAPartial } = stateA;
-  const { filters: stateBFilters = [], ...stateBPartial } = stateB;
-  return isEqual(stateAPartial, stateBPartial) && isEqualFilters(stateAFilters, stateBFilters);
 }
 
 export function createSearchSessionRestorationDataProvider(deps: {

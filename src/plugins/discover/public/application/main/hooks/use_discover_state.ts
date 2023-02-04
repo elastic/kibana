@@ -172,7 +172,7 @@ export function useDiscoverState({
         timefilter: services.timefilter,
       });
 
-      await stateContainer.replaceUrlAppState(newAppState);
+      await stateContainer.appState.update(newAppState, true);
       setState(newAppState);
     },
     [services, dataView, stateContainer]
