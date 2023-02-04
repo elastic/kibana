@@ -19,7 +19,7 @@ import {
 } from '../../../../common/transaction_types';
 import { environmentQuery } from '../../../../common/utils/environment_query';
 import { getOffsetInMs } from '../../../../common/utils/get_offset_in_ms';
-import { calculateThroughputWithRange } from '../../../lib/helpers/calculate_throughput';
+import { calculateThroughputWithInterval } from '../../../lib/helpers/calculate_throughput';
 import { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
 import { RandomSampler } from '../../../lib/helpers/get_random_sampler';
 import { getDurationFieldForTransactions } from '../../../lib/helpers/transactions';
@@ -159,9 +159,8 @@ export async function getServiceTransactionDetailedStats({
         throughput: topTransactionTypeBucket.timeseries.buckets.map(
           (dateBucket) => ({
             x: dateBucket.key + offsetInMs,
-            y: calculateThroughputWithRange({
-              start,
-              end,
+            y: calculateThroughputWithInterval({
+              bucketSize: bucketSizeInSeconds,
               value: dateBucket.doc_count,
             }),
           })
