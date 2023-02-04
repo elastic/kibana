@@ -251,19 +251,9 @@ const IndexPropertiesComponent: React.FC<Props> = ({
   ]);
 
   if (mappingsError != null) {
-    return (
-      <ErrorEmptyPrompt
-        error={i18n.ERROR_LOADING_MAPPINGS_BODY(mappingsError)}
-        title={i18n.ERROR_LOADING_MAPPINGS_TITLE}
-      />
-    );
+    return <ErrorEmptyPrompt title={i18n.ERROR_LOADING_MAPPINGS_TITLE} />;
   } else if (unallowedValuesError != null) {
-    return (
-      <ErrorEmptyPrompt
-        error={i18n.ERROR_LOADING_UNALLOWED_VALUES_BODY(unallowedValuesError)}
-        title={i18n.ERROR_LOADING_UNALLOWED_VALUES_TITLE}
-      />
-    );
+    return <ErrorEmptyPrompt title={i18n.ERROR_LOADING_UNALLOWED_VALUES_TITLE} />;
   }
 
   if (loadingMappings) {

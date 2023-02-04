@@ -32,11 +32,41 @@ export const ERRORS_CALLOUT_SUMMARY = i18n.translate(
   }
 );
 
-export const ERRORS_CALLOUT_DETAILS = i18n.translate(
-  'ecsDataQualityDashboard.errorsPopover.errorsCalloutDetails',
+export const ERRORS_MAY_OCCUR = i18n.translate(
+  'ecsDataQualityDashboard.errors.errorMayOccurLabel',
   {
     defaultMessage:
-      "Errors may occur when pattern or index metadata is temporarily unavailable, or because you don't have permission to access them.",
+      "Errors may occur when pattern or index metadata is temporarily unavailable, or because you don't have the roles required for access",
+  }
+);
+
+export const MANAGE = i18n.translate('ecsDataQualityDashboard.errors.manage', {
+  defaultMessage: 'manage',
+});
+
+export const MONITOR = i18n.translate('ecsDataQualityDashboard.errors.monitor', {
+  defaultMessage: 'monitor',
+});
+
+export const OR = i18n.translate('ecsDataQualityDashboard.errors.or', {
+  defaultMessage: 'or',
+});
+
+export const READ = i18n.translate('ecsDataQualityDashboard.errors.read', {
+  defaultMessage: 'read',
+});
+
+export const READ_CROSS_CLUSTER = i18n.translate(
+  'ecsDataQualityDashboard.errors.readCrossCluster',
+  {
+    defaultMessage: 'read_cross_cluster',
+  }
+);
+
+export const THE_FOLLOWING_ROLES_ARE_REQUIRED = i18n.translate(
+  'ecsDataQualityDashboard.errors.theFollowingRolesLabel',
+  {
+    defaultMessage: 'The following roles are required to check an index:',
   }
 );
 
@@ -44,5 +74,12 @@ export const VIEW_ERRORS = i18n.translate(
   'ecsDataQualityDashboard.errorsPopover.viewErrorsButton',
   {
     defaultMessage: 'View errors',
+  }
+);
+
+export const VIEW_INDEX_METADATA = i18n.translate(
+  'ecsDataQualityDashboard.errors.viewIndexMetadata',
+  {
+    defaultMessage: 'view_index_metadata',
   }
 );

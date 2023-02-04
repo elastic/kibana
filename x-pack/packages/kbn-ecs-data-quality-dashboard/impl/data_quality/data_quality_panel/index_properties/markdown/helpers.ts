@@ -9,8 +9,15 @@ import { EcsVersion } from '@kbn/ecs';
 import { repeat } from 'lodash/fp';
 
 import {
-  ERRORS_CALLOUT_DETAILS,
+  ERRORS_MAY_OCCUR,
   ERRORS_CALLOUT_SUMMARY,
+  MANAGE,
+  MONITOR,
+  OR,
+  READ,
+  READ_CROSS_CLUSTER,
+  THE_FOLLOWING_ROLES_ARE_REQUIRED,
+  VIEW_INDEX_METADATA,
 } from '../../data_quality_summary/errors_popover/translations';
 import {
   EMPTY_STAT,
@@ -167,7 +174,12 @@ export const getErrorsMarkdownTable = ({
 
 ${ERRORS_CALLOUT_SUMMARY}
 
-${ERRORS_CALLOUT_DETAILS}
+${ERRORS_MAY_OCCUR}
+
+${THE_FOLLOWING_ROLES_ARE_REQUIRED}
+- \`${MONITOR}\` ${OR} \`${MANAGE}\`
+- \`${VIEW_INDEX_METADATA}\`
+- \`${READ}\` ${OR} \`${READ_CROSS_CLUSTER}\`
 
 ${getMarkdownTableHeader(headerNames)}
 ${getMarkdownTableRows(errorSummary)}

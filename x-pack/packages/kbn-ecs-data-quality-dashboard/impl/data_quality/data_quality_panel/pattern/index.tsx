@@ -228,10 +228,7 @@ const PatternComponent: React.FC<Props> = ({
         </EuiFlexItem>
 
         {!loading && error != null && (
-          <ErrorEmptyPrompt
-            error={i18n.ERROR_LOADING_METADATA_BODY({ error, pattern })}
-            title={i18n.ERROR_LOADING_METADATA_TITLE(pattern)}
-          />
+          <ErrorEmptyPrompt title={i18n.ERROR_LOADING_METADATA_TITLE(pattern)} />
         )}
 
         {loading && <LoadingEmptyPrompt loading={i18n.LOADING_STATS} />}

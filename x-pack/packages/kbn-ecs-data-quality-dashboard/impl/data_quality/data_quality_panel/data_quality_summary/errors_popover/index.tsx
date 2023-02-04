@@ -5,7 +5,14 @@
  * 2.0.
  */
 
-import { copyToClipboard, EuiButtonEmpty, EuiCallOut, EuiPopover, EuiSpacer } from '@elastic/eui';
+import {
+  copyToClipboard,
+  EuiButtonEmpty,
+  EuiCallOut,
+  EuiCode,
+  EuiPopover,
+  EuiSpacer,
+} from '@elastic/eui';
 import React, { useCallback, useMemo, useState } from 'react';
 import styled from 'styled-components';
 
@@ -74,7 +81,21 @@ const ErrorsPopoverComponent: React.FC<Props> = ({ addSuccessToast, errorSummary
       <CallOut color="danger" size="s" title={i18n.ERRORS}>
         <p>{i18n.ERRORS_CALLOUT_SUMMARY}</p>
 
-        <p>{i18n.ERRORS_CALLOUT_DETAILS}</p>
+        <p>{i18n.ERRORS_MAY_OCCUR}</p>
+
+        <span>{i18n.THE_FOLLOWING_ROLES_ARE_REQUIRED}</span>
+        <ul>
+          <li>
+            <EuiCode>{i18n.MONITOR}</EuiCode> {i18n.OR} <EuiCode>{i18n.MANAGE}</EuiCode>
+          </li>
+          <li>
+            <EuiCode>{i18n.VIEW_INDEX_METADATA}</EuiCode>
+          </li>
+          <li>
+            <EuiCode>{i18n.READ}</EuiCode> {i18n.OR} <EuiCode>{i18n.READ_CROSS_CLUSTER}</EuiCode>
+          </li>
+        </ul>
+
         <EuiButtonEmpty aria-label={i18n.COPY_TO_CLIPBOARD} flush="both" onClick={onCopy} size="xs">
           {i18n.COPY_TO_CLIPBOARD}
         </EuiButtonEmpty>

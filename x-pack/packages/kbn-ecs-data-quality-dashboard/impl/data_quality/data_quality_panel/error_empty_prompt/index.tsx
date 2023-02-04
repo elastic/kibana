@@ -5,29 +5,32 @@
  * 2.0.
  */
 
-import { EuiEmptyPrompt, EuiText } from '@elastic/eui';
-import React, { useMemo } from 'react';
+import { EuiCallOut, EuiCode } from '@elastic/eui';
+import React from 'react';
+
+import * as i18n from '../data_quality_summary/errors_popover/translations';
 
 interface Props {
-  error: string;
   title: string;
 }
 
-const ErrorEmptyPromptComponent: React.FC<Props> = ({ error, title }) => {
-  const body = useMemo(() => <EuiText size="xs">{error}</EuiText>, [error]);
-  const errorTitle = useMemo(() => <h2>{title}</h2>, [title]);
+const ErrorEmptyPromptComponent: React.FC<Props> = ({ title }) => (
+  <EuiCallOut color="danger" size="s" title={title}>
+    <p>{i18n.ERRORS_MAY_OCCUR}</p>
 
-  return (
-    <EuiEmptyPrompt
-      body={body}
-      color="danger"
-      layout="vertical"
-      paddingSize="s"
-      title={errorTitle}
-      titleSize="xxs"
-    />
-  );
-};
-ErrorEmptyPromptComponent.displayName = 'ErrorEmptyPromptComponent';
+    <span>{i18n.THE_FOLLOWING_ROLES_ARE_REQUIRED}</span>
+    <ul>
+      <li>
+        <EuiCode>{i18n.MONITOR}</EuiCode> {i18n.OR} <EuiCode>{i18n.MANAGE}</EuiCode>
+      </li>
+      <li>
+        <EuiCode>{i18n.VIEW_INDEX_METADATA}</EuiCode>
+      </li>
+      <li>
+        <EuiCode>{i18n.READ}</EuiCode> {i18n.OR} <EuiCode>{i18n.READ_CROSS_CLUSTER}</EuiCode>
+      </li>
+    </ul>
+  </EuiCallOut>
+);
 
 export const ErrorEmptyPrompt = React.memo(ErrorEmptyPromptComponent);
