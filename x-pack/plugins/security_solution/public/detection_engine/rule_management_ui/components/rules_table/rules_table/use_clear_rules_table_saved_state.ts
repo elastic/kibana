@@ -31,6 +31,7 @@ export function useClearRulesTableSavedState(): () => void {
       showElasticRules: DEFAULT_FILTER_OPTIONS.showElasticRules,
       showCustomRules: DEFAULT_FILTER_OPTIONS.showCustomRules,
       tags: DEFAULT_FILTER_OPTIONS.tags,
+      enabled: undefined,
     });
     actions.setSortingOptions({
       field: DEFAULT_SORTING_OPTIONS.field,

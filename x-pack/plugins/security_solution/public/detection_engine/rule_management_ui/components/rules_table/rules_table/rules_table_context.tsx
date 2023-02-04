@@ -187,6 +187,7 @@ export const RulesTableContextProvider = ({ children }: RulesTableContextProvide
       savedFilter?.source === RuleSource.Custom ?? DEFAULT_FILTER_OPTIONS.showCustomRules,
     showElasticRules:
       savedFilter?.source === RuleSource.Elastic ?? DEFAULT_FILTER_OPTIONS.showElasticRules,
+    enabled: savedFilter?.enabled,
   });
   const [sortingOptions, setSortingOptions] = useState<SortingOptions>({
     field: savedSorting?.field ?? DEFAULT_SORTING_OPTIONS.field,
