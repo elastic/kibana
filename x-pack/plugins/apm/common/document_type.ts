@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { ApmDataSource } from './data_source';
-
-export interface TimeRangeMetadata {
-  isUsingServiceDestinationMetrics: boolean;
-  sources: Array<ApmDataSource & { hasDocs: boolean }>;
+export enum ApmDocumentType {
+  TransactionMetric = 'transactionMetric',
+  ServiceTransactionMetric = 'serviceTransactionMetric',
+  TransactionEvent = 'transactionEvent',
+  ServiceDestinationMetric = 'serviceDestinationMetric',
 }
