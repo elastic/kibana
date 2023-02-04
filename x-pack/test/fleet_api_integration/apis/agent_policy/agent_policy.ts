@@ -104,7 +104,7 @@ export default function (providerContext: FtrProviderContext) {
           .post(`/api/fleet/agent_policies`)
           .set('kbn-xsrf', 'xxxx')
           .send({
-            name: 'TEST2',
+            name: 'test-agent-features',
             namespace: 'default',
             agent_features: [
               {
