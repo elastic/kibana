@@ -11,7 +11,14 @@ import {
   createStateContainerReactHelpers,
   ReduxLikeStateContainer,
 } from '@kbn/kibana-utils-plugin/common';
-import { AggregateQuery, Filter, FilterStateStore, Query } from '@kbn/es-query';
+import {
+  AggregateQuery,
+  COMPARE_ALL_OPTIONS,
+  compareFilters,
+  Filter,
+  FilterStateStore,
+  Query,
+} from '@kbn/es-query';
 import { SavedSearch, VIEW_MODE } from '@kbn/saved-search-plugin/public';
 import { IKbnUrlStateStorage, ISyncStateRef, syncState } from '@kbn/kibana-utils-plugin/public';
 import { cloneDeep, isEqual } from 'lodash';
@@ -22,7 +29,7 @@ import { getValidFilters } from '../../../utils/get_valid_filters';
 import { cleanupUrlState } from '../utils/cleanup_url_state';
 import { getStateDefaults } from '../utils/get_state_defaults';
 import { handleSourceColumnState } from '../../../utils/state_helpers';
-import { APP_STATE_URL_KEY, AppStateUrl, isEqualState, setState } from './discover_state';
+import { APP_STATE_URL_KEY, AppStateUrl } from './discover_state';
 import { DiscoverGridSettings } from '../../../components/discover_grid/types';
 
 export interface DiscoverAppStateContainer extends ReduxLikeStateContainer<AppState> {
@@ -39,6 +46,12 @@ export interface DiscoverAppStateContainer extends ReduxLikeStateContainer<AppSt
    * @param currentSavedSearch
    */
   initAndSync: (currentSavedSearch: SavedSearch) => () => void;
+  /**
+   * Replaces the current state in URL with the given state
+   * @param newState
+   * @param merge if true, the given state is merged with the current state
+   */
+  replaceUrlState: (newPartial: AppState, merge?: boolean) => void;
   /**
    * Resets the state by the given saved search
    * @param savedSearch
@@ -253,6 +266,7 @@ export const getDiscoverAppStateContainer = ({
     initAndSync: initializeAndSync,
     resetWithSavedSearch,
     resetInitialState,
+    replaceUrlState,
     syncState: startAppStateUrlSync,
     update,
   };
@@ -275,4 +289,44 @@ function getInitialState(
     },
     services.uiSettings
   );
+}
+
+/**
+ * Helper function to merge a given new state with the existing state and to set the given state
+ * container
+ */
+export function setState(stateContainer: ReduxLikeStateContainer<AppState>, newState: AppState) {
+  addLog('[appstate] setState', { newState });
+  const oldState = stateContainer.getState();
+  const mergedState = { ...oldState, ...newState };
+  if (!isEqualState(oldState, mergedState)) {
+    stateContainer.set(mergedState);
+  }
+}
+
+/**
+ * Helper function to compare 2 different filter states
+ */
+export function isEqualFilters(filtersA?: Filter[] | Filter, filtersB?: Filter[] | Filter) {
+  if (!filtersA && !filtersB) {
+    return true;
+  } else if (!filtersA || !filtersB) {
+    return false;
+  }
+  return compareFilters(filtersA, filtersB, COMPARE_ALL_OPTIONS);
+}
+
+/**
+ * Helper function to compare 2 different state, is needed since comparing filters
+ * works differently
+ */
+export function isEqualState(stateA: AppState, stateB: AppState) {
+  if (!stateA && !stateB) {
+    return true;
+  } else if (!stateA || !stateB) {
+    return false;
+  }
+  const { filters: stateAFilters = [], ...stateAPartial } = stateA;
+  const { filters: stateBFilters = [], ...stateBPartial } = stateB;
+  return isEqual(stateAPartial, stateBPartial) && isEqualFilters(stateAFilters, stateBFilters);
 }

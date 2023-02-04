@@ -6,14 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { isEqual } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { History } from 'history';
-import { COMPARE_ALL_OPTIONS, compareFilters, Filter } from '@kbn/es-query';
 import {
   createKbnUrlStateStorage,
   IKbnUrlStateStorage,
-  ReduxLikeStateContainer,
   StateContainer,
   withNotifyOnErrors,
 } from '@kbn/kibana-utils-plugin/public';
@@ -25,7 +22,6 @@ import {
 } from '@kbn/data-plugin/public';
 import { DataView } from '@kbn/data-views-plugin/public';
 import { SavedSearch } from '@kbn/saved-search-plugin/public';
-import { addLog } from '../../../utils/add_log';
 import { loadDataView, resolveDataView } from '../utils/resolve_data_view';
 import { DataStateContainer, getDataStateContainer } from './discover_data_state_container';
 import { DiscoverSearchSessionManager } from './discover_search_session';
@@ -101,29 +97,9 @@ export interface DiscoverStateContainer {
    */
   setAppState: (newState: Partial<AppState>) => void;
   /**
-   * Set state in Url using history.replace
-   */
-  replaceUrlAppState: (newState: Partial<AppState>) => Promise<void>;
-  /**
    * Sync state to URL, used for testing
    */
   flushToUrl: () => void;
-  /**
-   * Reset initial state to the current app state
-   */
-  resetInitialAppState: () => void;
-  /**
-   * Return the Appstate before the current app state, useful for diffing changes
-   */
-  getPreviousAppState: () => AppState;
-  /**
-   * Returns whether the current app state is different to the initial state
-   */
-  isAppStateDirty: () => boolean;
-  /**
-   * Reset AppState by the given savedSearch discarding all changes
-   */
-  resetAppState: (nextSavedSearch: SavedSearch) => void;
   /**
    * Pause the auto refresh interval without pushing an entry to history
    */
@@ -206,10 +182,6 @@ export function getDiscoverStateContainer({
    */
   const appStateContainer = getDiscoverAppStateContainer({ stateStorage, savedSearch, services });
 
-  const replaceUrlAppState = async (newPartial: AppState = {}) => {
-    await appStateContainer.update(newPartial, true);
-  };
-
   const internalStateContainer = getInternalStateContainer();
 
   const pauseAutoRefreshInterval = async () => {
@@ -272,14 +244,8 @@ export function getDiscoverStateContainer({
       start();
       return stop;
     },
-    setAppState: (newPartial: AppState) => setState(appStateContainer, newPartial),
-    replaceUrlAppState,
-    resetInitialAppState: () => appStateContainer.resetInitialState(),
-    resetAppState: (nextSavedSearch: SavedSearch) =>
-      appStateContainer.resetWithSavedSearch(nextSavedSearch),
-    getPreviousAppState: () => appStateContainer.getPrevious(),
+    setAppState: (newPartial: AppState) => appStateContainer.update(newPartial),
     flushToUrl: () => stateStorage.kbnUrlControls.flush(),
-    isAppStateDirty: () => appStateContainer.hasChanged(),
     pauseAutoRefreshInterval,
     initializeAndSync: () => appStateContainer.initAndSync(savedSearch),
     actions: {
@@ -292,46 +258,6 @@ export function getDiscoverStateContainer({
       removeAdHocDataViewById,
     },
   };
-}
-
-/**
- * Helper function to merge a given new state with the existing state and to set the given state
- * container
- */
-export function setState(stateContainer: ReduxLikeStateContainer<AppState>, newState: AppState) {
-  addLog('[appstate] setState', { newState });
-  const oldState = stateContainer.getState();
-  const mergedState = { ...oldState, ...newState };
-  if (!isEqualState(oldState, mergedState)) {
-    stateContainer.set(mergedState);
-  }
-}
-
-/**
- * Helper function to compare 2 different filter states
- */
-export function isEqualFilters(filtersA?: Filter[] | Filter, filtersB?: Filter[] | Filter) {
-  if (!filtersA && !filtersB) {
-    return true;
-  } else if (!filtersA || !filtersB) {
-    return false;
-  }
-  return compareFilters(filtersA, filtersB, COMPARE_ALL_OPTIONS);
-}
-
-/**
- * Helper function to compare 2 different state, is needed since comparing filters
- * works differently
- */
-export function isEqualState(stateA: AppState, stateB: AppState) {
-  if (!stateA && !stateB) {
-    return true;
-  } else if (!stateA || !stateB) {
-    return false;
-  }
-  const { filters: stateAFilters = [], ...stateAPartial } = stateA;
-  const { filters: stateBFilters = [], ...stateBPartial } = stateB;
-  return isEqual(stateAPartial, stateBPartial) && isEqualFilters(stateAFilters, stateBFilters);
 }
 
 export function createSearchSessionRestorationDataProvider(deps: {

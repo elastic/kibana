@@ -103,15 +103,32 @@ describe('buildStateSubscribe', () => {
   });
 
   it('should not execute setState function if initialFetchStatus is UNINITIALIZED', async () => {
-    const stateSubcribeFn = await buildStateSubscribe({
+    const stateSubscribeFn = await buildStateSubscribe({
       stateContainer,
       savedSearch,
       setState,
     });
     stateContainer.dataState.initialFetchStatus = FetchStatus.UNINITIALIZED;
-    await stateSubcribeFn({ index: dataViewComplexMock.id });
+    await stateSubscribeFn({ index: dataViewComplexMock.id });
 
     expect(stateContainer.dataState.reset).toHaveBeenCalled();
     expect(setState).not.toHaveBeenCalled();
+  });
+  it('should not execute setState twice if the identical data view change is propagated twice', async () => {
+    const stateSubscribeFn = await buildStateSubscribe({
+      stateContainer,
+      savedSearch,
+      setState,
+    });
+    await stateSubscribeFn({ index: dataViewComplexMock.id });
+
+    expect(setState).toBeCalledTimes(0);
+    expect(stateContainer.dataState.reset).toBeCalledTimes(1);
+
+    stateContainer.appState.getPrevious = jest.fn(() => ({ index: dataViewComplexMock.id }));
+
+    await stateSubscribeFn({ index: dataViewComplexMock.id });
+    expect(setState).toBeCalledTimes(0);
+    expect(stateContainer.dataState.reset).toBeCalledTimes(1);
   });
 });

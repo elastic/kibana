@@ -5,10 +5,10 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { isEqual } from 'lodash';
 import { SavedSearch } from '@kbn/saved-search-plugin/public';
+import { isEqual } from 'lodash';
 import { DiscoverStateContainer } from '../../services/discover_state';
-import { AppState } from '../../services/discover_app_state_container';
+import { AppState, isEqualState } from '../../services/discover_app_state_container';
 import { addLog } from '../../../../utils/add_log';
 import { FetchStatus } from '../../../types';
 
@@ -30,6 +30,11 @@ export const buildStateSubscribe =
     setState: (state: AppState) => void;
   }) =>
   async (nextState: AppState) => {
+    const prevState = stateContainer.appState.getPrevious();
+    if (isEqualState(prevState, nextState)) {
+      addLog('[appstate] subscribe update ignored due to no changes');
+      return;
+    }
     addLog('[appstate] subscribe triggered', nextState);
     const { hideChart, interval, breakdownField, sort, index } =
       stateContainer.appState.getPrevious();
