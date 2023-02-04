@@ -189,9 +189,9 @@
             "label": "getUserMessages",
             "description": [],
             "signature": [
-              "(locationId: \"banner\" | \"toolbar\" | \"visualization\" | \"embeddableBadge\" | \"visualizationOnEmbeddable\" | \"visualizationInEditor\" | \"textBasedLanguagesQueryInput\" | \"dimensionTrigger\" | (\"banner\" | \"toolbar\" | \"visualization\" | \"embeddableBadge\" | \"visualizationOnEmbeddable\" | \"visualizationInEditor\" | \"textBasedLanguagesQueryInput\" | \"dimensionTrigger\")[] | undefined, filters: ",
+              "(locationId: \"banner\" | \"toolbar\" | \"visualization\" | \"embeddableBadge\" | \"visualizationOnEmbeddable\" | \"visualizationInEditor\" | \"textBasedLanguagesQueryInput\" | \"dimensionButton\" | (\"banner\" | \"toolbar\" | \"visualization\" | \"embeddableBadge\" | \"visualizationOnEmbeddable\" | \"visualizationInEditor\" | \"textBasedLanguagesQueryInput\" | \"dimensionButton\")[] | undefined, filters: ",
               "UserMessageFilters",
-              ") => ",
+              " | undefined) => ",
               "UserMessage",
               "[]"
             ],
@@ -207,7 +207,7 @@
                 "label": "locationId",
                 "description": [],
                 "signature": [
-                  "\"banner\" | \"toolbar\" | \"visualization\" | \"embeddableBadge\" | \"visualizationOnEmbeddable\" | \"visualizationInEditor\" | \"textBasedLanguagesQueryInput\" | \"dimensionTrigger\" | (\"banner\" | \"toolbar\" | \"visualization\" | \"embeddableBadge\" | \"visualizationOnEmbeddable\" | \"visualizationInEditor\" | \"textBasedLanguagesQueryInput\" | \"dimensionTrigger\")[] | undefined"
+                  "\"banner\" | \"toolbar\" | \"visualization\" | \"embeddableBadge\" | \"visualizationOnEmbeddable\" | \"visualizationInEditor\" | \"textBasedLanguagesQueryInput\" | \"dimensionButton\" | (\"banner\" | \"toolbar\" | \"visualization\" | \"embeddableBadge\" | \"visualizationOnEmbeddable\" | \"visualizationInEditor\" | \"textBasedLanguagesQueryInput\" | \"dimensionButton\")[] | undefined"
                 ],
                 "path": "x-pack/plugins/lens/public/embeddable/embeddable.tsx",
                 "deprecated": false,
@@ -222,12 +222,13 @@
                 "label": "filters",
                 "description": [],
                 "signature": [
-                  "UserMessageFilters"
+                  "UserMessageFilters",
+                  " | undefined"
                 ],
                 "path": "x-pack/plugins/lens/public/embeddable/embeddable.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
-                "isRequired": true
+                "isRequired": false
               }
             ],
             "returnComment": []
@@ -665,22 +666,6 @@
               "() => Promise<",
               "LensByValueInput",
               ">"
-            ],
-            "path": "x-pack/plugins/lens/public/embeddable/embeddable.tsx",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "lens",
-            "id": "def-public.Embeddable.getDescription",
-            "type": "Function",
-            "tags": [],
-            "label": "getDescription",
-            "description": [],
-            "signature": [
-              "() => string | undefined"
             ],
             "path": "x-pack/plugins/lens/public/embeddable/embeddable.tsx",
             "deprecated": false,
@@ -6459,7 +6444,7 @@
               "\nRenders dimension trigger. Used only for noDatasource layers"
             ],
             "signature": [
-              "((props: { columnId: string; label: string; hideTooltip?: boolean | undefined; invalid?: boolean | undefined; invalidMessage?: React.ReactNode; }) => JSX.Element | null) | undefined"
+              "((props: { columnId: string; label: string; hideTooltip?: boolean | undefined; }) => JSX.Element | null) | undefined"
             ],
             "path": "x-pack/plugins/lens/public/types.ts",
             "deprecated": false,
@@ -6507,34 +6492,6 @@
                     "description": [],
                     "signature": [
                       "boolean | undefined"
-                    ],
-                    "path": "x-pack/plugins/lens/public/types.ts",
-                    "deprecated": false,
-                    "trackAdoption": false
-                  },
-                  {
-                    "parentPluginId": "lens",
-                    "id": "def-public.Visualization.renderDimensionTrigger.$1.invalid",
-                    "type": "CompoundType",
-                    "tags": [],
-                    "label": "invalid",
-                    "description": [],
-                    "signature": [
-                      "boolean | undefined"
-                    ],
-                    "path": "x-pack/plugins/lens/public/types.ts",
-                    "deprecated": false,
-                    "trackAdoption": false
-                  },
-                  {
-                    "parentPluginId": "lens",
-                    "id": "def-public.Visualization.renderDimensionTrigger.$1.invalidMessage",
-                    "type": "CompoundType",
-                    "tags": [],
-                    "label": "invalidMessage",
-                    "description": [],
-                    "signature": [
-                      "boolean | React.ReactChild | React.ReactFragment | React.ReactPortal | null | undefined"
                     ],
                     "path": "x-pack/plugins/lens/public/types.ts",
                     "deprecated": false,
