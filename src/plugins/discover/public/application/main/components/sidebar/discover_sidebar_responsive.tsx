@@ -191,11 +191,6 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
         // stateContainer.internalState.get().dataView?.title,
         JSON.stringify(existingFieldList)
       );
-      /*
-      if (dataView.id !== stateContainer.internalState.get().dataView?.id) {
-        return;
-      }
-      */
 
       dispatchSidebarStateAction({
         type: DiscoverSidebarReducerActionType.DOCUMENTS_LOADED,
@@ -221,6 +216,20 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
     ]
   );
 
+  const { isProcessing, refetchFieldsExistenceInfo } = useExistingFieldsFetcher({
+    disableAutoFetching: true,
+    dataViews: !isPlainRecord && sidebarState.dataView ? [sidebarState.dataView] : [],
+    query: querySubscriberResult.query,
+    filters: querySubscriberResult.filters,
+    fromDate: querySubscriberResult.fromDate,
+    toDate: querySubscriberResult.toDate,
+    services: {
+      data,
+      dataViews,
+      core,
+    },
+  });
+
   useEffect(() => {
     const subscription = props.documents$.subscribe((documentState) => {
       const isPlainRecordType = documentState.recordRawType === RecordRawType.PLAIN;
@@ -235,7 +244,6 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
           });
           break;
         case FetchStatus.LOADING:
-          console.log('*** LOADING - dataViewRef', selectedDataViewRef.current?.title);
           if (isPlainRecordType) {
             dispatchSidebarStateAction({
               type: DiscoverSidebarReducerActionType.DOCUMENTS_LOADING,
@@ -246,12 +254,13 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
           } else {
             console.log('*** 3 - fetchFields');
             fetchFields(selectedDataViewRef.current!);
+            refetchFieldsExistenceInfo();
             // fetchFields(selectedDataViewR!);
           }
 
           break;
         case FetchStatus.COMPLETE:
-          console.log('*** COMPLETE', selectedDataViewRef.current?.title);
+          console.log('*** COMPLETE', querySubscriberResult.fromDate, querySubscriberResult.toDate);
           if (isPlainRecordType) {
             dispatchSidebarStateAction({
               type: DiscoverSidebarReducerActionType.DOCUMENTS_LOADED,
@@ -281,7 +290,15 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
       }
     });
     return () => subscription.unsubscribe();
-  }, [props.documents$, dispatchSidebarStateAction, selectedDataViewRef, fetchFields]);
+  }, [
+    props.documents$,
+    dispatchSidebarStateAction,
+    selectedDataViewRef,
+    fetchFields,
+    querySubscriberResult.fromDate,
+    querySubscriberResult.toDate,
+    refetchFieldsExistenceInfo,
+  ]);
 
   useEffect(() => {
     if (selectedDataView !== selectedDataViewRef.current) {
@@ -296,19 +313,6 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
   }, [selectedDataView, dispatchSidebarStateAction, selectedDataViewRef]);
 
   const isAffectedByGlobalFilter = Boolean(querySubscriberResult.filters?.length);
-  const { isProcessing, refetchFieldsExistenceInfo } = useExistingFieldsFetcher({
-    disableAutoFetching: true,
-    dataViews: !isPlainRecord && sidebarState.dataView ? [sidebarState.dataView] : [],
-    query: querySubscriberResult.query,
-    filters: querySubscriberResult.filters,
-    fromDate: querySubscriberResult.fromDate,
-    toDate: querySubscriberResult.toDate,
-    services: {
-      data,
-      dataViews,
-      core,
-    },
-  });
 
   useEffect(() => {
     if (sidebarState.status === DiscoverSidebarReducerStatus.COMPLETED) {
