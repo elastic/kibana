@@ -31,6 +31,7 @@ describe('useInitializeRulesTableSavedState', () => {
     order: 'asc',
     page: 2,
     perPage: 10,
+    enabled: true,
   };
   const storageSavedState: RulesTableStorageSavedState = {
     searchTerm: 'test',
@@ -39,6 +40,7 @@ describe('useInitializeRulesTableSavedState', () => {
     field: 'name',
     order: 'asc',
     perPage: 20,
+    enabled: false,
   };
   const rulesTableContext = useRulesTableContextMock.create();
   const actions = rulesTableContext.actions;
@@ -76,6 +78,7 @@ describe('useInitializeRulesTableSavedState', () => {
         showCustomRules: urlSavedState.source === RuleSource.Custom,
         showElasticRules: urlSavedState.source === RuleSource.Prebuilt,
         tags: urlSavedState.tags,
+        enabled: urlSavedState.enabled,
       });
       expect(actions.setSortingOptions).toHaveBeenCalledWith({
         field: urlSavedState.field,
@@ -168,6 +171,20 @@ describe('useInitializeRulesTableSavedState', () => {
       expect(actions.setPerPage).not.toHaveBeenCalled();
     });
 
+    it('restores only enabled state filter', () => {
+      mockRulesTablePersistedState({ urlState: { enabled: true }, storageState: null });
+
+      renderHook(() => useInitializeRulesTableSavedState());
+
+      expect(actions.setFilterOptions).toHaveBeenCalledWith({
+        ...DEFAULT_FILTER_OPTIONS,
+        enabled: true,
+      });
+      expect(actions.setSortingOptions).not.toHaveBeenCalled();
+      expect(actions.setPage).not.toHaveBeenCalled();
+      expect(actions.setPerPage).not.toHaveBeenCalled();
+    });
+
     it('restores only sorting field', () => {
       mockRulesTablePersistedState({ urlState: { field: 'name' }, storageState: null });
 
@@ -232,6 +249,7 @@ describe('useInitializeRulesTableSavedState', () => {
         showCustomRules: storageSavedState.source === RuleSource.Custom,
         showElasticRules: storageSavedState.source === RuleSource.Prebuilt,
         tags: storageSavedState.tags,
+        enabled: storageSavedState.enabled,
       });
       expect(actions.setSortingOptions).toHaveBeenCalledWith({
         field: storageSavedState.field,
@@ -324,6 +342,20 @@ describe('useInitializeRulesTableSavedState', () => {
       expect(actions.setPerPage).not.toHaveBeenCalled();
     });
 
+    it('restores only enabled state filter', () => {
+      mockRulesTablePersistedState({ urlState: null, storageState: { enabled: true } });
+
+      renderHook(() => useInitializeRulesTableSavedState());
+
+      expect(actions.setFilterOptions).toHaveBeenCalledWith({
+        ...DEFAULT_FILTER_OPTIONS,
+        enabled: true,
+      });
+      expect(actions.setSortingOptions).not.toHaveBeenCalled();
+      expect(actions.setPage).not.toHaveBeenCalled();
+      expect(actions.setPerPage).not.toHaveBeenCalled();
+    });
+
     it('restores only sorting field', () => {
       mockRulesTablePersistedState({ urlState: null, storageState: { field: 'name' } });
 
@@ -392,6 +424,7 @@ describe('useInitializeRulesTableSavedState', () => {
         showCustomRules: urlSavedState.source === RuleSource.Custom,
         showElasticRules: urlSavedState.source === RuleSource.Prebuilt,
         tags: urlSavedState.tags,
+        enabled: urlSavedState.enabled,
       });
       expect(actions.setSortingOptions).toHaveBeenCalledWith({
         field: urlSavedState.field,
