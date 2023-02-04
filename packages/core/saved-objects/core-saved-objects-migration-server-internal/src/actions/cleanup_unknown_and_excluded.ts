@@ -55,6 +55,8 @@ const deleteByQuery = (
       .deleteByQuery({
         index,
         query: deleteQuery,
+        wait_for_completion: true,
+        refresh: true,
       })
       .then((response: DeleteByQueryResponse) => {
         if (!response.failures || !response.failures.length) {
@@ -83,41 +85,48 @@ export const cleanupUnknownAndExcluded = ({
   knownTypes,
 }: CleanupUnknownAndExcludedParams): TaskEither.TaskEither<
   RetryableEsClientError | UnknownDocsFound | DeleteByQueryErrorResponse,
-  'no_documents_found' | 'cleanup_successful'
+  'cleanup_successful'
 > => {
   return pipe(
-    { client, indexName, knownTypes, excludeOnUpgradeQuery },
-    checkForUnknownDocs,
-    (unknownDocsRes) => {
-      let unknownDocTypes: string[] = [];
-      if (isTypeof(unknownDocsRes, 'unknown_docs_found') && !discardUnknownDocs) {
-        unknownDocTypes = [...new Set(unknownDocsRes.unknownDocs.map(({ type }) => type))];
-        return TaskEither.left({
-          type: 'unknown_docs_found' as const,
-          unknownDocs: unknownDocsRes.unknownDocs,
-        });
-      }
-      return pipe(
-        { client, excludeFromUpgradeFilterHooks, hookTimeoutMs },
-        calculateExcludeFilters,
-        TaskEither.chain((excludeFiltersRes) => {
-          // we must delete everything that matches:
-          // - any of the plugin-defined exclude filters
-          // - OR any of the unknown types
-          const deleteQuery: QueryDslQueryContainer = {
-            bool: {
-              should: [
-                ...excludeFiltersRes.filterClauses,
-                ...REMOVED_TYPES.map((type) => ({ term: { type } })),
-                ...unknownDocTypes.map((type) => ({ term: { type } })),
-                unpersistedSearchSessionsQuery,
-              ],
-            },
-          };
+    checkForUnknownDocs({ client, indexName, knownTypes, excludeOnUpgradeQuery }),
+    TaskEither.chain(
+      (
+        unknownDocsRes: {} | UnknownDocsFound
+      ): TaskEither.TaskEither<
+        RetryableEsClientError | UnknownDocsFound | DeleteByQueryErrorResponse,
+        'cleanup_successful'
+      > => {
+        let unknownDocTypes: string[] = [];
+        if (isTypeof(unknownDocsRes, 'unknown_docs_found')) {
+          unknownDocTypes = [...new Set(unknownDocsRes.unknownDocs.map(({ type }) => type))];
+          if (!discardUnknownDocs) {
+            return TaskEither.left({
+              type: 'unknown_docs_found' as const,
+              unknownDocs: unknownDocsRes.unknownDocs,
+            });
+          }
+        }
 
-          return deleteByQuery(client, indexName, deleteQuery);
-        })
-      );
-    }
+        return pipe(
+          calculateExcludeFilters({ client, excludeFromUpgradeFilterHooks, hookTimeoutMs }),
+          TaskEither.chain((excludeFiltersRes) => {
+            // we must delete everything that matches:
+            // - any of the plugin-defined exclude filters
+            // - OR any of the unknown types
+            const deleteQuery: QueryDslQueryContainer = {
+              bool: {
+                should: [
+                  ...excludeFiltersRes.filterClauses,
+                  ...REMOVED_TYPES.map((type) => ({ term: { type } })),
+                  ...unknownDocTypes.map((type) => ({ term: { type } })),
+                  unpersistedSearchSessionsQuery,
+                ],
+              },
+            };
+            return deleteByQuery(client, indexName, deleteQuery);
+          })
+        );
+      }
+    )
   );
 };

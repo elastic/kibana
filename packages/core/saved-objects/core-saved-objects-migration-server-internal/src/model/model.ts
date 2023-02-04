@@ -304,7 +304,18 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
         ],
       };
     } else if (Either.isLeft(res)) {
-      return throwBadResponse(stateP, res.left as never);
+      if (isTypeof(res.left, 'unknown_docs_found')) {
+        return {
+          ...stateP,
+          controlState: 'FATAL',
+          reason: extractUnknownDocFailureReason(
+            stateP.migrationDocLinks.resolveMigrationFailures,
+            res.left.unknownDocs
+          ),
+        };
+      } else {
+        return throwBadResponse(stateP, res.left as never);
+      }
     } else {
       return throwBadResponse(stateP, res);
     }
