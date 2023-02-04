@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import React, { useMemo, FC } from 'react';
-
-import { i18n } from '@kbn/i18n';
+import React, { useEffect, useMemo, FC } from 'react';
+import { merge } from 'rxjs';
 
 import {
   EuiButton,
@@ -17,20 +16,25 @@ import {
   EuiFlexItem,
   EuiForm,
   EuiFormRow,
-  EuiHorizontalRule,
+  EuiIconTip,
   EuiLink,
   EuiSpacer,
   EuiText,
+  EuiTitle,
 } from '@elastic/eui';
+
+import { i18n } from '@kbn/i18n';
+import { mlTimefilterRefresh$, useTimefilter, DatePickerWrapper } from '@kbn/ml-date-picker';
+import { useUrlState } from '@kbn/ml-url-state';
 
 import { PivotAggDict } from '../../../../../../common/types/pivot_aggs';
 import { PivotGroupByDict } from '../../../../../../common/types/pivot_group_by';
+import { TRANSFORM_FUNCTION } from '../../../../../../common/constants';
 
 import {
   getIndexDevConsoleStatement,
-  getPivotPreviewDevConsoleStatement,
+  getTransformPreviewDevConsoleStatement,
 } from '../../../../common/data_grid';
-
 import {
   getPreviewTransformRequestBody,
   PivotAggsConfigDict,
@@ -40,24 +44,36 @@ import {
 } from '../../../../common';
 import { useDocumentationLinks } from '../../../../hooks/use_documentation_links';
 import { useIndexData } from '../../../../hooks/use_index_data';
-import { usePivotData } from '../../../../hooks/use_pivot_data';
+import { useTransformConfigData } from '../../../../hooks/use_transform_config_data';
 import { useAppDependencies, useToastNotifications } from '../../../../app_dependencies';
 import { SearchItems } from '../../../../hooks/use_search_items';
+import { getAggConfigFromEsAgg } from '../../../../common/pivot_aggs';
 
-import { AdvancedPivotEditor } from '../advanced_pivot_editor';
-import { AdvancedPivotEditorSwitch } from '../advanced_pivot_editor_switch';
 import { AdvancedQueryEditorSwitch } from '../advanced_query_editor_switch';
 import { AdvancedSourceEditor } from '../advanced_source_editor';
-import { PivotConfiguration } from '../pivot_configuration';
+import { DatePickerApplySwitch } from '../date_picker_apply_switch';
 import { SourceSearchBar } from '../source_search_bar';
+import { AdvancedRuntimeMappingsSettings } from '../advanced_runtime_mappings_settings';
 
 import { StepDefineExposedState } from './common';
 import { useStepDefineForm } from './hooks/use_step_define_form';
-import { getAggConfigFromEsAgg } from '../../../../common/pivot_aggs';
 import { TransformFunctionSelector } from './transform_function_selector';
-import { TRANSFORM_FUNCTION } from '../../../../../../common/constants';
 import { LatestFunctionForm } from './latest_function_form';
-import { AdvancedRuntimeMappingsSettings } from '../advanced_runtime_mappings_settings';
+import { PivotFunctionForm } from './pivot_function_form';
+
+const ALLOW_TIME_RANGE_ON_TRANSFORM_CONFIG = false;
+
+const advancedEditorsSidebarWidth = '220px';
+
+export const ConfigSectionTitle: FC<{ title: string }> = ({ title }) => (
+  <>
+    <EuiSpacer size="m" />
+    <EuiTitle size="xs">
+      <span>{title}</span>
+    </EuiTitle>
+    <EuiSpacer size="s" />
+  </>
+);
 
 export interface StepDefineFormProps {
   overrides?: StepDefineExposedState;
@@ -66,6 +82,7 @@ export interface StepDefineFormProps {
 }
 
 export const StepDefineForm: FC<StepDefineFormProps> = React.memo((props) => {
+  const [globalState, setGlobalState] = useUrlState('_g');
   const { searchItems } = props;
   const { dataView } = searchItems;
   const indexPattern = useMemo(() => dataView.getIndexPattern(), [dataView]);
@@ -75,24 +92,18 @@ export const StepDefineForm: FC<StepDefineFormProps> = React.memo((props) => {
   const toastNotifications = useToastNotifications();
   const stepDefineForm = useStepDefineForm(props);
 
-  const {
-    advancedEditorConfig,
-    isAdvancedPivotEditorEnabled,
-    isAdvancedPivotEditorApplyButtonEnabled,
-  } = stepDefineForm.advancedPivotEditor.state;
+  const { advancedEditorConfig } = stepDefineForm.advancedPivotEditor.state;
   const {
     advancedEditorSourceConfig,
     isAdvancedSourceEditorEnabled,
     isAdvancedSourceEditorApplyButtonEnabled,
   } = stepDefineForm.advancedSourceEditor.state;
-  const pivotQuery = stepDefineForm.searchBar.state.pivotQuery;
+  const { isDatePickerApplyEnabled, timeRangeMs } = stepDefineForm.datePicker.state;
+  const { transformConfigQuery } = stepDefineForm.searchBar.state;
+  const { runtimeMappings } = stepDefineForm.runtimeMappingsEditor.state;
 
   const indexPreviewProps = {
-    ...useIndexData(
-      dataView,
-      stepDefineForm.searchBar.state.pivotQuery,
-      stepDefineForm.runtimeMappingsEditor.state.runtimeMappings
-    ),
+    ...useIndexData(dataView, transformConfigQuery, runtimeMappings, timeRangeMs),
     dataTestSubj: 'transformIndexPreview',
     toastNotifications,
   };
@@ -101,16 +112,7 @@ export const StepDefineForm: FC<StepDefineFormProps> = React.memo((props) => {
       ? stepDefineForm.pivotConfig.state
       : stepDefineForm.latestFunctionConfig;
 
-  const previewRequest = getPreviewTransformRequestBody(
-    indexPattern,
-    pivotQuery,
-    stepDefineForm.transformFunction === TRANSFORM_FUNCTION.PIVOT
-      ? stepDefineForm.pivotConfig.state.requestPayload
-      : stepDefineForm.latestFunctionConfig.requestPayload,
-    stepDefineForm.runtimeMappingsEditor.state.runtimeMappings
-  );
-
-  const copyToClipboardSource = getIndexDevConsoleStatement(pivotQuery, indexPattern);
+  const copyToClipboardSource = getIndexDevConsoleStatement(transformConfigQuery, indexPattern);
   const copyToClipboardSourceDescription = i18n.translate(
     'xpack.transform.indexPreview.copyClipboardTooltip',
     {
@@ -118,7 +120,17 @@ export const StepDefineForm: FC<StepDefineFormProps> = React.memo((props) => {
     }
   );
 
-  const copyToClipboardPivot = getPivotPreviewDevConsoleStatement(previewRequest);
+  const copyToClipboardPreviewRequest = getPreviewTransformRequestBody(
+    dataView,
+    transformConfigQuery,
+    requestPayload,
+    runtimeMappings,
+    isDatePickerApplyEnabled ? timeRangeMs : undefined
+  );
+
+  const copyToClipboardPivot = getTransformPreviewDevConsoleStatement(
+    copyToClipboardPreviewRequest
+  );
   const copyToClipboardPivotDescription = i18n.translate(
     'xpack.transform.pivotPreview.copyClipboardTooltip',
     {
@@ -126,18 +138,16 @@ export const StepDefineForm: FC<StepDefineFormProps> = React.memo((props) => {
     }
   );
 
-  const pivotPreviewProps = {
-    ...usePivotData(
-      indexPattern,
-      pivotQuery,
+  const previewProps = {
+    ...useTransformConfigData(
+      dataView,
+      transformConfigQuery,
       validationStatus,
       requestPayload,
-      stepDefineForm.runtimeMappingsEditor.state.runtimeMappings
+      runtimeMappings,
+      timeRangeMs
     ),
     dataTestSubj: 'transformPivotPreview',
-    title: i18n.translate('xpack.transform.pivotPreview.transformPreviewTitle', {
-      defaultMessage: 'Transform preview',
-    }),
     toastNotifications,
     ...(stepDefineForm.transformFunction === TRANSFORM_FUNCTION.LATEST
       ? {
@@ -192,9 +202,52 @@ export const StepDefineForm: FC<StepDefineFormProps> = React.memo((props) => {
     stepDefineForm.advancedPivotEditor.actions.setAdvancedPivotEditorApplyButtonEnabled(false);
   };
 
-  const { esQueryDsl, esTransformPivot } = useDocumentationLinks();
+  const { esQueryDsl } = useDocumentationLinks();
 
-  const advancedEditorsSidebarWidth = '220px';
+  const hasValidTimeField = useMemo(
+    () => dataView.timeFieldName !== undefined && dataView.timeFieldName !== '',
+    [dataView.timeFieldName]
+  );
+
+  const timefilter = useTimefilter({
+    timeRangeSelector: dataView?.timeFieldName !== undefined,
+    autoRefreshSelector: false,
+  });
+
+  useEffect(() => {
+    if (globalState?.time !== undefined) {
+      timefilter.setTime({
+        from: globalState.time.from,
+        to: globalState.time.to,
+      });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [JSON.stringify(globalState?.time), timefilter]);
+
+  useEffect(() => {
+    if (globalState?.refreshInterval !== undefined) {
+      timefilter.setRefreshInterval(globalState.refreshInterval);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [JSON.stringify(globalState?.refreshInterval), timefilter]);
+
+  useEffect(() => {
+    const timeUpdateSubscription = merge(
+      timefilter.getAutoRefreshFetch$(),
+      timefilter.getTimeUpdate$(),
+      mlTimefilterRefresh$
+    ).subscribe(() => {
+      if (setGlobalState) {
+        setGlobalState({
+          time: timefilter.getTime(),
+          refreshInterval: timefilter.getRefreshInterval(),
+        });
+      }
+    });
+    return () => {
+      timeUpdateSubscription.unsubscribe();
+    };
+  });
 
   return (
     <div data-test-subj="transformStepDefineForm">
@@ -206,6 +259,8 @@ export const StepDefineForm: FC<StepDefineFormProps> = React.memo((props) => {
           />
         </EuiFormRow>
 
+        <ConfigSectionTitle title="Source data" />
+
         {searchItems.savedSearch === undefined && (
           <EuiFormRow
             label={i18n.translate('xpack.transform.stepDefineForm.dataViewLabel', {
@@ -216,15 +271,61 @@ export const StepDefineForm: FC<StepDefineFormProps> = React.memo((props) => {
           </EuiFormRow>
         )}
 
+        {hasValidTimeField && (
+          <EuiFormRow
+            fullWidth
+            label={
+              <>
+                {i18n.translate('xpack.transform.stepDefineForm.datePickerLabel', {
+                  defaultMessage: 'Time range',
+                })}{' '}
+                <EuiIconTip
+                  content={i18n.translate(
+                    'xpack.transform.stepDefineForm.datePickerIconTipContent',
+                    {
+                      defaultMessage:
+                        'The time range will be applied to previews only and will not be part of the final transform configuration.',
+                    }
+                  )}
+                />
+              </>
+            }
+          >
+            <EuiFlexGroup alignItems="flexStart" justifyContent="spaceBetween">
+              {/* Flex Column #1: Date Picker */}
+              <EuiFlexItem>
+                <DatePickerWrapper
+                  isAutoRefreshOnly={!hasValidTimeField}
+                  showRefresh={!hasValidTimeField}
+                  width="full"
+                />
+              </EuiFlexItem>
+              {/* Flex Column #2: Apply-To-Config option */}
+              <EuiFlexItem grow={false} style={{ width: advancedEditorsSidebarWidth }}>
+                {ALLOW_TIME_RANGE_ON_TRANSFORM_CONFIG && (
+                  <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
+                    <EuiFlexItem grow={false}>
+                      {searchItems.savedSearch === undefined && (
+                        <DatePickerApplySwitch {...stepDefineForm} />
+                      )}
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
+                )}
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFormRow>
+        )}
+
         <EuiFormRow
           fullWidth
-          hasEmptyLabelSpace={searchItems?.savedSearch?.id === undefined}
           label={
             searchItems?.savedSearch?.id !== undefined
               ? i18n.translate('xpack.transform.stepDefineForm.savedSearchLabel', {
                   defaultMessage: 'Saved search',
                 })
-              : ''
+              : i18n.translate('xpack.transform.stepDefineForm.searchFilterLabel', {
+                  defaultMessage: 'Search filter',
+                })
           }
         >
           <>
@@ -314,87 +415,30 @@ export const StepDefineForm: FC<StepDefineFormProps> = React.memo((props) => {
             <AdvancedRuntimeMappingsSettings {...stepDefineForm} />
             <EuiSpacer size="s" />
 
-            <DataGrid {...indexPreviewProps} />
+            <EuiFormRow
+              fullWidth={true}
+              label={i18n.translate('xpack.transform.stepDefineForm.dataGridLabel', {
+                defaultMessage: 'Source documents',
+              })}
+            >
+              <DataGrid {...indexPreviewProps} />
+            </EuiFormRow>
           </>
         </EuiFormRow>
       </EuiForm>
-      <EuiHorizontalRule margin="m" />
+
+      <ConfigSectionTitle title="Transform configuration" />
+
       <EuiForm>
         {stepDefineForm.transformFunction === TRANSFORM_FUNCTION.PIVOT ? (
-          <EuiFlexGroup justifyContent="spaceBetween">
-            {/* Flex Column #1: Pivot Config Form / Advanced Pivot Config Editor */}
-            <EuiFlexItem>
-              {!isAdvancedPivotEditorEnabled && (
-                <PivotConfiguration {...stepDefineForm.pivotConfig} />
-              )}
-              {isAdvancedPivotEditorEnabled && (
-                <AdvancedPivotEditor {...stepDefineForm.advancedPivotEditor} />
-              )}
-            </EuiFlexItem>
-            <EuiFlexItem grow={false} style={{ width: advancedEditorsSidebarWidth }}>
-              <EuiFlexGroup gutterSize="xs" direction="column" justifyContent="spaceBetween">
-                <EuiFlexItem grow={false}>
-                  <EuiFormRow hasEmptyLabelSpace>
-                    <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
-                      <EuiFlexItem grow={false}>
-                        <AdvancedPivotEditorSwitch {...stepDefineForm} />
-                      </EuiFlexItem>
-                      <EuiFlexItem grow={false}>
-                        <EuiCopy
-                          beforeMessage={copyToClipboardPivotDescription}
-                          textToCopy={copyToClipboardPivot}
-                        >
-                          {(copy: () => void) => (
-                            <EuiButtonIcon
-                              onClick={copy}
-                              iconType="copyClipboard"
-                              aria-label={copyToClipboardPivotDescription}
-                            />
-                          )}
-                        </EuiCopy>
-                      </EuiFlexItem>
-                    </EuiFlexGroup>
-                  </EuiFormRow>
-                </EuiFlexItem>
-                {isAdvancedPivotEditorEnabled && (
-                  <EuiFlexItem style={{ width: advancedEditorsSidebarWidth }}>
-                    <EuiSpacer size="s" />
-                    <EuiText size="xs">
-                      <>
-                        {i18n.translate('xpack.transform.stepDefineForm.advancedEditorHelpText', {
-                          defaultMessage:
-                            'The advanced editor allows you to edit the pivot configuration of the transform.',
-                        })}{' '}
-                        <EuiLink href={esTransformPivot} target="_blank">
-                          {i18n.translate(
-                            'xpack.transform.stepDefineForm.advancedEditorHelpTextLink',
-                            {
-                              defaultMessage: 'Learn more about available options.',
-                            }
-                          )}
-                        </EuiLink>
-                      </>
-                    </EuiText>
-                    <EuiSpacer size="s" />
-                    <EuiButton
-                      style={{ width: 'fit-content' }}
-                      size="s"
-                      fill
-                      onClick={applyPivotChangesHandler}
-                      disabled={!isAdvancedPivotEditorApplyButtonEnabled}
-                    >
-                      {i18n.translate(
-                        'xpack.transform.stepDefineForm.advancedEditorApplyButtonText',
-                        {
-                          defaultMessage: 'Apply changes',
-                        }
-                      )}
-                    </EuiButton>
-                  </EuiFlexItem>
-                )}
-              </EuiFlexGroup>
-            </EuiFlexItem>
-          </EuiFlexGroup>
+          <PivotFunctionForm
+            {...{
+              applyPivotChangesHandler,
+              copyToClipboardPivot,
+              copyToClipboardPivotDescription,
+              stepDefineForm,
+            }}
+          />
         ) : null}
         {stepDefineForm.transformFunction === TRANSFORM_FUNCTION.LATEST ? (
           <LatestFunctionForm
@@ -407,10 +451,17 @@ export const StepDefineForm: FC<StepDefineFormProps> = React.memo((props) => {
       <EuiSpacer size="m" />
       {(stepDefineForm.transformFunction !== TRANSFORM_FUNCTION.LATEST ||
         stepDefineForm.latestFunctionConfig.sortFieldOptions.length > 0) && (
-        <>
-          <DataGrid {...pivotPreviewProps} />
-          <EuiSpacer size="m" />
-        </>
+        <EuiFormRow
+          fullWidth
+          label={i18n.translate('xpack.transform.stepDefineForm.previewLabel', {
+            defaultMessage: 'Preview',
+          })}
+        >
+          <>
+            <DataGrid {...previewProps} />
+            <EuiSpacer size="m" />
+          </>
+        </EuiFormRow>
       )}
     </div>
   );

@@ -84,6 +84,8 @@ exports[`Error EVENT_NAME 1`] = `undefined`;
 
 exports[`Error EVENT_OUTCOME 1`] = `undefined`;
 
+exports[`Error EVENT_SUCCESS_COUNT 1`] = `undefined`;
+
 exports[`Error FAAS_BILLED_DURATION 1`] = `undefined`;
 
 exports[`Error FAAS_COLDSTART 1`] = `undefined`;
@@ -172,6 +174,8 @@ exports[`Error METRIC_SYSTEM_FREE_MEMORY 1`] = `undefined`;
 
 exports[`Error METRIC_SYSTEM_TOTAL_MEMORY 1`] = `undefined`;
 
+exports[`Error METRICSET_INTERVAL 1`] = `undefined`;
+
 exports[`Error METRICSET_NAME 1`] = `undefined`;
 
 exports[`Error NETWORK_CONNECTION_TYPE 1`] = `undefined`;
@@ -207,6 +211,8 @@ exports[`Error SERVICE_LANGUAGE_VERSION 1`] = `"v1337"`;
 exports[`Error SERVICE_NAME 1`] = `"service name"`;
 
 exports[`Error SERVICE_NODE_NAME 1`] = `undefined`;
+
+exports[`Error SERVICE_OVERFLOW_COUNT 1`] = `undefined`;
 
 exports[`Error SERVICE_RUNTIME_NAME 1`] = `undefined`;
 
@@ -269,6 +275,8 @@ exports[`Error TRANSACTION_FAILURE_COUNT 1`] = `undefined`;
 exports[`Error TRANSACTION_ID 1`] = `"transaction id"`;
 
 exports[`Error TRANSACTION_NAME 1`] = `undefined`;
+
+exports[`Error TRANSACTION_OVERFLOW_COUNT 1`] = `undefined`;
 
 exports[`Error TRANSACTION_PAGE_URL 1`] = `undefined`;
 
@@ -365,6 +373,8 @@ exports[`Span EVENT_NAME 1`] = `undefined`;
 
 exports[`Span EVENT_OUTCOME 1`] = `"unknown"`;
 
+exports[`Span EVENT_SUCCESS_COUNT 1`] = `undefined`;
+
 exports[`Span FAAS_BILLED_DURATION 1`] = `undefined`;
 
 exports[`Span FAAS_COLDSTART 1`] = `undefined`;
@@ -449,6 +459,8 @@ exports[`Span METRIC_SYSTEM_FREE_MEMORY 1`] = `undefined`;
 
 exports[`Span METRIC_SYSTEM_TOTAL_MEMORY 1`] = `undefined`;
 
+exports[`Span METRICSET_INTERVAL 1`] = `undefined`;
+
 exports[`Span METRICSET_NAME 1`] = `undefined`;
 
 exports[`Span NETWORK_CONNECTION_TYPE 1`] = `undefined`;
@@ -480,6 +492,8 @@ exports[`Span SERVICE_LANGUAGE_VERSION 1`] = `undefined`;
 exports[`Span SERVICE_NAME 1`] = `"service name"`;
 
 exports[`Span SERVICE_NODE_NAME 1`] = `undefined`;
+
+exports[`Span SERVICE_OVERFLOW_COUNT 1`] = `undefined`;
 
 exports[`Span SERVICE_RUNTIME_NAME 1`] = `undefined`;
 
@@ -542,6 +556,8 @@ exports[`Span TRANSACTION_FAILURE_COUNT 1`] = `undefined`;
 exports[`Span TRANSACTION_ID 1`] = `"transaction id"`;
 
 exports[`Span TRANSACTION_NAME 1`] = `undefined`;
+
+exports[`Span TRANSACTION_OVERFLOW_COUNT 1`] = `undefined`;
 
 exports[`Span TRANSACTION_PAGE_URL 1`] = `undefined`;
 
@@ -642,6 +658,8 @@ exports[`Transaction EVENT_NAME 1`] = `undefined`;
 
 exports[`Transaction EVENT_OUTCOME 1`] = `"unknown"`;
 
+exports[`Transaction EVENT_SUCCESS_COUNT 1`] = `undefined`;
+
 exports[`Transaction FAAS_BILLED_DURATION 1`] = `undefined`;
 
 exports[`Transaction FAAS_COLDSTART 1`] = `undefined`;
@@ -736,6 +754,8 @@ exports[`Transaction METRIC_SYSTEM_FREE_MEMORY 1`] = `undefined`;
 
 exports[`Transaction METRIC_SYSTEM_TOTAL_MEMORY 1`] = `undefined`;
 
+exports[`Transaction METRICSET_INTERVAL 1`] = `undefined`;
+
 exports[`Transaction METRICSET_NAME 1`] = `undefined`;
 
 exports[`Transaction NETWORK_CONNECTION_TYPE 1`] = `undefined`;
@@ -771,6 +791,8 @@ exports[`Transaction SERVICE_LANGUAGE_VERSION 1`] = `"v1337"`;
 exports[`Transaction SERVICE_NAME 1`] = `"service name"`;
 
 exports[`Transaction SERVICE_NODE_NAME 1`] = `undefined`;
+
+exports[`Transaction SERVICE_OVERFLOW_COUNT 1`] = `undefined`;
 
 exports[`Transaction SERVICE_RUNTIME_NAME 1`] = `undefined`;
 
@@ -833,6 +855,8 @@ exports[`Transaction TRANSACTION_FAILURE_COUNT 1`] = `undefined`;
 exports[`Transaction TRANSACTION_ID 1`] = `"transaction id"`;
 
 exports[`Transaction TRANSACTION_NAME 1`] = `"transaction name"`;
+
+exports[`Transaction TRANSACTION_OVERFLOW_COUNT 1`] = `undefined`;
 
 exports[`Transaction TRANSACTION_PAGE_URL 1`] = `undefined`;
 

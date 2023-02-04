@@ -7,6 +7,7 @@
 
 import { useMemo, useRef } from 'react';
 import { useSelector } from 'react-redux';
+import { selectOverviewStatus } from '../state/overview_status';
 import { MonitorOverviewItem } from '../../../../common/runtime_types';
 import { selectOverviewState } from '../state/overview';
 import { useLocationNames } from './use_location_names';
@@ -14,10 +15,11 @@ import { useGetUrlParams } from './use_url_params';
 
 export function useMonitorsSortedByStatus() {
   const { statusFilter } = useGetUrlParams();
+  const { status } = useSelector(selectOverviewStatus);
+
   const {
     pageState: { sortOrder },
     data: { monitors },
-    status,
   } = useSelector(selectOverviewState);
 
   const downMonitors = useRef<Record<string, string[]> | null>(null);

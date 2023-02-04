@@ -13,6 +13,7 @@ export interface EnterpriseSearchEnginesResponse {
     size: number;
     total: number;
   };
+  params: { q?: string; from: number; size: number };
   results: EnterpriseSearchEngine[];
 }
 
