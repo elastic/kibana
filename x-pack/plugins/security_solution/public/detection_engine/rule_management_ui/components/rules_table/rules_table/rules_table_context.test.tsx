@@ -59,6 +59,7 @@ describe('RulesTableContextProvider', () => {
         searchTerm: 'test',
         source: RuleSource.Custom,
         tags: ['test'],
+        enabled: true,
       },
       sorting: {
         field: 'name',
@@ -75,6 +76,7 @@ describe('RulesTableContextProvider', () => {
       tags: ['test'],
       showCustomRules: true,
       showElasticRules: false,
+      enabled: true,
     });
     expect(state.sortingOptions).toEqual({
       field: 'name',

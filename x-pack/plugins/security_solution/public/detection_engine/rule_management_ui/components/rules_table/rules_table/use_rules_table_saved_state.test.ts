@@ -24,6 +24,7 @@ describe('useRulesTableSavedState', () => {
     searchTerm: 'test',
     source: RuleSource.Custom,
     tags: ['test'],
+    enabled: true,
     field: 'name',
     order: 'asc',
     page: 2,
@@ -33,6 +34,7 @@ describe('useRulesTableSavedState', () => {
     searchTerm: 'test',
     source: RuleSource.Custom,
     tags: ['test'],
+    enabled: false,
     field: 'name',
     order: 'asc',
     perPage: 20,
@@ -71,6 +73,7 @@ describe('useRulesTableSavedState', () => {
       expect(filter?.searchTerm).toBe(urlSavedState.searchTerm);
       expect(filter?.source).toBe(urlSavedState.source);
       expect(filter?.tags).toBe(urlSavedState.tags);
+      expect(filter?.enabled).toBe(urlSavedState.enabled);
       expect(sorting?.field).toBe(urlSavedState.field);
       expect(sorting?.order).toBe(urlSavedState.order);
       expect(pagination?.page).toBe(urlSavedState.page);
@@ -92,6 +95,7 @@ describe('useRulesTableSavedState', () => {
       expect(filter?.searchTerm).toBe(urlSavedState.searchTerm);
       expect(filter?.source).toBe(urlSavedState.source);
       expect(filter?.tags).toBe(urlSavedState.tags);
+      expect(filter?.enabled).toBe(urlSavedState.enabled);
       expect(sorting?.field).toBe(urlSavedState.field);
       expect(sorting?.order).toBe(urlSavedState.order);
       expect(pagination?.page).toBeUndefined();
@@ -113,6 +117,7 @@ describe('useRulesTableSavedState', () => {
       expect(filter?.searchTerm).toBe(urlSavedState.searchTerm);
       expect(filter?.source).toBe(urlSavedState.source);
       expect(filter?.tags).toBe(urlSavedState.tags);
+      expect(filter?.enabled).toBe(urlSavedState.enabled);
       expect(sorting?.field).toBe(urlSavedState.field);
       expect(sorting?.order).toBe(urlSavedState.order);
       expect(pagination?.page).toBe(urlSavedState.page);
@@ -133,6 +138,7 @@ describe('useRulesTableSavedState', () => {
       expect(filter?.searchTerm).toBe(urlSavedState.searchTerm);
       expect(filter?.source).toBeUndefined();
       expect(filter?.tags).toBeUndefined();
+      expect(filter?.enabled).toBeUndefined();
       expect(sorting?.field).toBeUndefined();
       expect(sorting?.order).toBeUndefined();
       expect(pagination?.page).toBeUndefined();
@@ -154,6 +160,7 @@ describe('useRulesTableSavedState', () => {
       expect(filter?.searchTerm).toBeUndefined();
       expect(filter?.source).toBe(RuleSource.Elastic);
       expect(filter?.tags).toBeUndefined();
+      expect(filter?.enabled).toBeUndefined();
       expect(sorting?.field).toBeUndefined();
       expect(sorting?.order).toBeUndefined();
       expect(pagination?.page).toBeUndefined();
@@ -172,6 +179,7 @@ describe('useRulesTableSavedState', () => {
       expect(filter?.searchTerm).toBeUndefined();
       expect(filter?.source).toBe(RuleSource.Custom);
       expect(filter?.tags).toBeUndefined();
+      expect(filter?.enabled).toBeUndefined();
       expect(sorting?.field).toBeUndefined();
       expect(sorting?.order).toBeUndefined();
       expect(pagination?.page).toBeUndefined();
@@ -190,6 +198,26 @@ describe('useRulesTableSavedState', () => {
       expect(filter?.searchTerm).toBeUndefined();
       expect(filter?.source).toBeUndefined();
       expect(filter?.tags).toEqual(['test']);
+      expect(filter?.enabled).toBeUndefined();
+      expect(sorting?.field).toBeUndefined();
+      expect(sorting?.order).toBeUndefined();
+      expect(pagination?.page).toBeUndefined();
+      expect(pagination?.perPage).toBeUndefined();
+    });
+
+    it('returns only enabled state', () => {
+      mockRulesTablePersistedState({ urlState: { enabled: true }, storageState: null });
+
+      const {
+        result: {
+          current: { filter, sorting, pagination },
+        },
+      } = renderHook(() => useRulesTableSavedState());
+
+      expect(filter?.searchTerm).toBeUndefined();
+      expect(filter?.source).toBeUndefined();
+      expect(filter?.tags).toBeUndefined();
+      expect(filter?.enabled).toBeTruthy();
       expect(sorting?.field).toBeUndefined();
       expect(sorting?.order).toBeUndefined();
       expect(pagination?.page).toBeUndefined();
@@ -208,6 +236,7 @@ describe('useRulesTableSavedState', () => {
       expect(filter?.searchTerm).toBeUndefined();
       expect(filter?.source).toBeUndefined();
       expect(filter?.tags).toBeUndefined();
+      expect(filter?.enabled).toBeUndefined();
       expect(sorting?.field).toBe('name');
       expect(sorting?.order).toBeUndefined();
       expect(pagination?.page).toBeUndefined();
@@ -226,6 +255,7 @@ describe('useRulesTableSavedState', () => {
       expect(filter?.searchTerm).toBeUndefined();
       expect(filter?.source).toBeUndefined();
       expect(filter?.tags).toBeUndefined();
+      expect(filter?.enabled).toBeUndefined();
       expect(sorting?.field).toBeUndefined();
       expect(sorting?.order).toBe('asc');
       expect(pagination?.page).toBeUndefined();
@@ -244,6 +274,7 @@ describe('useRulesTableSavedState', () => {
       expect(filter?.searchTerm).toBeUndefined();
       expect(filter?.source).toBeUndefined();
       expect(filter?.tags).toBeUndefined();
+      expect(filter?.enabled).toBeUndefined();
       expect(sorting?.field).toBeUndefined();
       expect(sorting?.order).toBeUndefined();
       expect(pagination?.page).toBe(10);
@@ -262,6 +293,7 @@ describe('useRulesTableSavedState', () => {
       expect(filter?.searchTerm).toBeUndefined();
       expect(filter?.source).toBeUndefined();
       expect(filter?.tags).toBeUndefined();
+      expect(filter?.enabled).toBeUndefined();
       expect(sorting?.field).toBeUndefined();
       expect(sorting?.order).toBeUndefined();
       expect(pagination?.page).toBeUndefined();
@@ -284,6 +316,7 @@ describe('useRulesTableSavedState', () => {
       expect(filter?.searchTerm).toBe(storageSavedState.searchTerm);
       expect(filter?.source).toBe(storageSavedState.source);
       expect(filter?.tags).toBe(storageSavedState.tags);
+      expect(filter?.enabled).toBe(storageSavedState.enabled);
       expect(sorting?.field).toBe(storageSavedState.field);
       expect(sorting?.order).toBe(storageSavedState.order);
       expect(pagination?.page).toBeUndefined();
@@ -305,6 +338,7 @@ describe('useRulesTableSavedState', () => {
       expect(filter?.searchTerm).toBe(storageSavedState.searchTerm);
       expect(filter?.source).toBe(storageSavedState.source);
       expect(filter?.tags).toBe(storageSavedState.tags);
+      expect(filter?.enabled).toBe(storageSavedState.enabled);
       expect(sorting?.field).toBe(storageSavedState.field);
       expect(sorting?.order).toBe(storageSavedState.order);
       expect(pagination?.page).toBeUndefined();
@@ -326,6 +360,7 @@ describe('useRulesTableSavedState', () => {
       expect(filter?.searchTerm).toBe(storageSavedState.searchTerm);
       expect(filter?.source).toBe(storageSavedState.source);
       expect(filter?.tags).toBe(storageSavedState.tags);
+      expect(filter?.enabled).toBe(storageSavedState.enabled);
       expect(sorting?.field).toBe(storageSavedState.field);
       expect(sorting?.order).toBe(storageSavedState.order);
       expect(pagination?.page).toBeUndefined();
@@ -346,6 +381,7 @@ describe('useRulesTableSavedState', () => {
       expect(filter?.searchTerm).toBe('test');
       expect(filter?.source).toBeUndefined();
       expect(filter?.tags).toBeUndefined();
+      expect(filter?.enabled).toBeUndefined();
       expect(sorting?.field).toBeUndefined();
       expect(sorting?.order).toBeUndefined();
       expect(pagination?.page).toBeUndefined();
@@ -367,6 +403,7 @@ describe('useRulesTableSavedState', () => {
       expect(filter?.searchTerm).toBeUndefined();
       expect(filter?.source).toBe(RuleSource.Elastic);
       expect(filter?.tags).toBeUndefined();
+      expect(filter?.enabled).toBeUndefined();
       expect(sorting?.field).toBeUndefined();
       expect(sorting?.order).toBeUndefined();
       expect(pagination?.page).toBeUndefined();
@@ -385,6 +422,7 @@ describe('useRulesTableSavedState', () => {
       expect(filter?.searchTerm).toBeUndefined();
       expect(filter?.source).toBe(RuleSource.Custom);
       expect(filter?.tags).toBeUndefined();
+      expect(filter?.enabled).toBeUndefined();
       expect(sorting?.field).toBeUndefined();
       expect(sorting?.order).toBeUndefined();
       expect(pagination?.page).toBeUndefined();
@@ -403,6 +441,26 @@ describe('useRulesTableSavedState', () => {
       expect(filter?.searchTerm).toBeUndefined();
       expect(filter?.source).toBeUndefined();
       expect(filter?.tags).toEqual(['test']);
+      expect(filter?.enabled).toBeUndefined();
+      expect(sorting?.field).toBeUndefined();
+      expect(sorting?.order).toBeUndefined();
+      expect(pagination?.page).toBeUndefined();
+      expect(pagination?.perPage).toBeUndefined();
+    });
+
+    it('returns only enabled state', () => {
+      mockRulesTablePersistedState({ urlState: null, storageState: { enabled: true } });
+
+      const {
+        result: {
+          current: { filter, sorting, pagination },
+        },
+      } = renderHook(() => useRulesTableSavedState());
+
+      expect(filter?.searchTerm).toBeUndefined();
+      expect(filter?.source).toBeUndefined();
+      expect(filter?.tags).toBeUndefined();
+      expect(filter?.enabled).toBeTruthy();
       expect(sorting?.field).toBeUndefined();
       expect(sorting?.order).toBeUndefined();
       expect(pagination?.page).toBeUndefined();
@@ -421,6 +479,7 @@ describe('useRulesTableSavedState', () => {
       expect(filter?.searchTerm).toBeUndefined();
       expect(filter?.source).toBeUndefined();
       expect(filter?.tags).toBeUndefined();
+      expect(filter?.enabled).toBeUndefined();
       expect(sorting?.field).toBe('name');
       expect(sorting?.order).toBeUndefined();
       expect(pagination?.page).toBeUndefined();
@@ -439,6 +498,7 @@ describe('useRulesTableSavedState', () => {
       expect(filter?.searchTerm).toBeUndefined();
       expect(filter?.source).toBeUndefined();
       expect(filter?.tags).toBeUndefined();
+      expect(filter?.enabled).toBeUndefined();
       expect(sorting?.field).toBeUndefined();
       expect(sorting?.order).toBe('asc');
       expect(pagination?.page).toBeUndefined();
@@ -461,6 +521,7 @@ describe('useRulesTableSavedState', () => {
       expect(filter?.searchTerm).toBeUndefined();
       expect(filter?.source).toBeUndefined();
       expect(filter?.tags).toBeUndefined();
+      expect(filter?.enabled).toBeUndefined();
       expect(sorting?.field).toBeUndefined();
       expect(sorting?.order).toBeUndefined();
       expect(pagination?.page).toBeUndefined();
@@ -479,6 +540,7 @@ describe('useRulesTableSavedState', () => {
       expect(filter?.searchTerm).toBeUndefined();
       expect(filter?.source).toBeUndefined();
       expect(filter?.tags).toBeUndefined();
+      expect(filter?.enabled).toBeUndefined();
       expect(sorting?.field).toBeUndefined();
       expect(sorting?.order).toBeUndefined();
       expect(pagination?.page).toBeUndefined();
@@ -501,6 +563,7 @@ describe('useRulesTableSavedState', () => {
       expect(filter?.searchTerm).toBe(urlSavedState.searchTerm);
       expect(filter?.source).toBe(urlSavedState.source);
       expect(filter?.tags).toBe(urlSavedState.tags);
+      expect(filter?.enabled).toBe(urlSavedState.enabled);
       expect(sorting?.field).toBe(urlSavedState.field);
       expect(sorting?.order).toBe(urlSavedState.order);
       expect(pagination?.page).toBe(urlSavedState.page);
@@ -524,6 +587,7 @@ describe('useRulesTableSavedState', () => {
       expect(filter?.searchTerm).toBe('test');
       expect(filter?.source).toBeUndefined();
       expect(filter?.tags).toBeUndefined();
+      expect(filter?.enabled).toBeUndefined();
       expect(sorting?.field).toBe('name');
       expect(sorting?.order).toBeUndefined();
       expect(pagination?.page).toBeUndefined();
@@ -539,6 +603,7 @@ describe('useRulesTableSavedState', () => {
           source: RuleSource.Custom,
           // @ts-expect-error Passing an invalid value for the test
           tags: [1, 2, 3],
+          enabled: true,
           field: 'name',
           order: 'asc',
           page: 2,
@@ -556,6 +621,7 @@ describe('useRulesTableSavedState', () => {
       expect(filter?.searchTerm).toBeUndefined();
       expect(filter?.source).toBeUndefined();
       expect(filter?.tags).toBeUndefined();
+      expect(filter?.enabled).toBeUndefined();
       expect(sorting?.field).toBe('name');
       expect(sorting?.order).toBe('asc');
       expect(pagination?.page).toBe(2);
@@ -568,6 +634,7 @@ describe('useRulesTableSavedState', () => {
           searchTerm: 'test',
           source: RuleSource.Custom,
           tags: ['test'],
+          enabled: true,
           field: 'name',
           // @ts-expect-error Passing an invalid value for the test
           order: 'abc',
@@ -586,6 +653,7 @@ describe('useRulesTableSavedState', () => {
       expect(filter?.searchTerm).toBe('test');
       expect(filter?.source).toBe(RuleSource.Custom);
       expect(filter?.tags).toEqual(['test']);
+      expect(filter?.enabled).toBeTruthy();
       expect(sorting?.field).toBeUndefined();
       expect(sorting?.order).toBeUndefined();
       expect(pagination?.page).toBe(2);
@@ -598,6 +666,7 @@ describe('useRulesTableSavedState', () => {
           searchTerm: 'test',
           source: RuleSource.Custom,
           tags: ['test'],
+          enabled: true,
           field: 'name',
           order: 'asc',
           // @ts-expect-error Passing an invalid value for the test
@@ -616,6 +685,7 @@ describe('useRulesTableSavedState', () => {
       expect(filter?.searchTerm).toBe('test');
       expect(filter?.source).toBe(RuleSource.Custom);
       expect(filter?.tags).toEqual(['test']);
+      expect(filter?.enabled).toBeTruthy();
       expect(sorting?.field).toBe('name');
       expect(sorting?.order).toBe('asc');
       expect(pagination?.page).toBeUndefined();
@@ -632,6 +702,7 @@ describe('useRulesTableSavedState', () => {
           source: RuleSource.Custom,
           // @ts-expect-error Passing an invalid value for the test
           tags: [1, 2, 3],
+          enabled: true,
           field: 'name',
           order: 'asc',
           perPage: 10,
@@ -647,6 +718,7 @@ describe('useRulesTableSavedState', () => {
       expect(filter?.searchTerm).toBeUndefined();
       expect(filter?.source).toBeUndefined();
       expect(filter?.tags).toBeUndefined();
+      expect(filter?.enabled).toBeUndefined();
       expect(sorting?.field).toBe('name');
       expect(sorting?.order).toBe('asc');
       expect(pagination?.page).toBeUndefined();
@@ -660,6 +732,7 @@ describe('useRulesTableSavedState', () => {
           searchTerm: 'test',
           source: RuleSource.Custom,
           tags: ['test'],
+          enabled: true,
           field: 'name',
           // @ts-expect-error Passing an invalid value for the test
           order: 'abc',
@@ -676,6 +749,7 @@ describe('useRulesTableSavedState', () => {
       expect(filter?.searchTerm).toBe('test');
       expect(filter?.source).toBe(RuleSource.Custom);
       expect(filter?.tags).toEqual(['test']);
+      expect(filter?.enabled).toBeTruthy();
       expect(sorting?.field).toBeUndefined();
       expect(sorting?.order).toBeUndefined();
       expect(pagination?.page).toBeUndefined();
@@ -689,6 +763,7 @@ describe('useRulesTableSavedState', () => {
           searchTerm: 'test',
           source: RuleSource.Custom,
           tags: ['test'],
+          enabled: true,
           field: 'name',
           order: 'asc',
           // @ts-expect-error Passing an invalid value for the test
@@ -705,6 +780,7 @@ describe('useRulesTableSavedState', () => {
       expect(filter?.searchTerm).toBe('test');
       expect(filter?.source).toBe(RuleSource.Custom);
       expect(filter?.tags).toEqual(['test']);
+      expect(filter?.enabled).toBeTruthy();
       expect(sorting?.field).toBe('name');
       expect(sorting?.order).toBe('asc');
       expect(pagination?.page).toBeUndefined();
