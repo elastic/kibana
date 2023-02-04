@@ -24,7 +24,7 @@ export const kueryRt = t.type({ kuery: t.string });
 
 export const dataSourceRt = t.type({
   documentType: t.union([
-    t.literal(ApmDocumentType.ServiceMetric),
+    t.literal(ApmDocumentType.ServiceTransactionMetric),
     t.literal(ApmDocumentType.TransactionMetric),
     t.literal(ApmDocumentType.TransactionEvent),
   ]),

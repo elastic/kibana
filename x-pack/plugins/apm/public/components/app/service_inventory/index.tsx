@@ -20,7 +20,7 @@ import { ApmDocumentType } from '../../../../common/document_type';
 import { ServiceInventoryFieldName } from '../../../../common/service_inventory';
 import { useAnomalyDetectionJobsContext } from '../../../context/anomaly_detection_jobs/use_anomaly_detection_jobs_context';
 import { useApmParams } from '../../../hooks/use_apm_params';
-import { FETCH_STATUS } from '../../../hooks/use_fetcher';
+import { FETCH_STATUS, isPending } from '../../../hooks/use_fetcher';
 import { useLocalStorage } from '../../../hooks/use_local_storage';
 import { usePreferredDataSourceAndBucketSize } from '../../../hooks/use_preferred_data_source_and_bucket_size';
 import { useProgressiveFetcher } from '../../../hooks/use_progressive_fetcher';
@@ -61,7 +61,7 @@ function useServicesMainStatisticsFetcher() {
     rangeFrom,
     rangeTo,
     kuery,
-    type: ApmDocumentType.ServiceMetric,
+    type: ApmDocumentType.ServiceTransactionMetric,
     numBuckets: 20,
   });
 
@@ -95,14 +95,13 @@ function useServicesMainStatisticsFetcher() {
       start,
       end,
       serviceGroup,
+      dataSourceOptions?.source.documentType,
+      dataSourceOptions?.source.rollupInterval,
       // not used, but needed to update the requestId to call the details statistics API when table is options are updated
       page,
       pageSize,
       sortField,
       sortDirection,
-      dataSourceOptions?.bucketSizeInSeconds,
-      dataSourceOptions?.source.documentType,
-      dataSourceOptions?.source.rollupInterval,
     ]
   );
 
@@ -145,7 +144,7 @@ function useServicesDetailedStatisticsFetcher({
     rangeFrom,
     rangeTo,
     kuery,
-    type: ApmDocumentType.ServiceMetric,
+    type: ApmDocumentType.ServiceTransactionMetric,
     numBuckets: 20,
   });
 
@@ -248,9 +247,7 @@ export function ServiceInventory() {
     !userHasDismissedCallout &&
     shouldDisplayMlCallout(anomalyDetectionSetupState);
 
-  const isLoading =
-    mainStatisticsFetch.status === FETCH_STATUS.LOADING ||
-    mainStatisticsFetch.status === FETCH_STATUS.NOT_INITIATED;
+  const isLoading = isPending(mainStatisticsFetch.status);
 
   const isFailure = mainStatisticsFetch.status === FETCH_STATUS.FAILURE;
   const noItemsMessage = (

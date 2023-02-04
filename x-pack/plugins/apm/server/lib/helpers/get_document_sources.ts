@@ -26,7 +26,7 @@ export async function getDocumentSources({
   const sources: Array<ApmDataSource & { hasDocs: boolean }> = flatten(
     await Promise.all(
       [
-        ApmDocumentType.ServiceMetric as const,
+        ApmDocumentType.ServiceTransactionMetric as const,
         ApmDocumentType.TransactionMetric as const,
       ].map(async (documentType) => {
         const docTypeConfig = getConfigForDocumentType(documentType);

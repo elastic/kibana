@@ -14,7 +14,7 @@ import { useTimeRange } from './use_time_range';
 
 export function usePreferredDataSourceAndBucketSize<
   TDocumentType extends
-    | ApmDocumentType.ServiceMetric
+    | ApmDocumentType.ServiceTransactionMetric
     | ApmDocumentType.TransactionMetric
 >({
   rangeFrom,
@@ -31,9 +31,9 @@ export function usePreferredDataSourceAndBucketSize<
 }): {
   bucketSizeInSeconds: number;
   source: ApmDataSource<
-    TDocumentType extends ApmDocumentType.ServiceMetric
+    TDocumentType extends ApmDocumentType.ServiceTransactionMetric
       ?
-          | ApmDocumentType.ServiceMetric
+          | ApmDocumentType.ServiceTransactionMetric
           | ApmDocumentType.TransactionMetric
           | ApmDocumentType.TransactionMetric
       : ApmDocumentType.TransactionMetric | ApmDocumentType.TransactionEvent
@@ -55,9 +55,9 @@ export function usePreferredDataSourceAndBucketSize<
 
   let suitableTypes: ApmDocumentType[];
 
-  if (type === ApmDocumentType.ServiceMetric) {
+  if (type === ApmDocumentType.ServiceTransactionMetric) {
     suitableTypes = [
-      ApmDocumentType.ServiceMetric,
+      ApmDocumentType.ServiceTransactionMetric,
       ApmDocumentType.TransactionMetric,
       ApmDocumentType.TransactionEvent,
     ];

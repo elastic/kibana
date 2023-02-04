@@ -9,7 +9,7 @@ import { ApmDocumentType } from './document_type';
 import { RollupInterval } from './rollup';
 
 type AnyApmDocumentType =
-  | ApmDocumentType.ServiceMetric
+  | ApmDocumentType.ServiceTransactionMetric
   | ApmDocumentType.TransactionMetric
   | ApmDocumentType.TransactionEvent
   | ApmDocumentType.ServiceDestinationMetric;

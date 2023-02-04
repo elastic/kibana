@@ -154,8 +154,8 @@ export class APMEventClient {
     operationName: string,
     params: TParams
   ): Promise<TypedSearchResponse<TParams>> {
-    const { events, index, body } = getRequestBase({
-      ...params,
+    const { events, index, filters } = getRequestBase({
+      apm: params.apm,
       indices: this.indices,
     });
 
@@ -163,13 +163,13 @@ export class APMEventClient {
       this.forceSyntheticSource && events.includes(ProcessorEvent.metric);
 
     const searchParams = {
+      ...omit(params, 'apm'),
       index,
       body: {
         ...params.body,
-        ...body,
         query: {
           bool: {
-            filter: compact([params.body.query, body.query]),
+            filter: compact([params.body.query, ...filters]),
           },
         },
       },

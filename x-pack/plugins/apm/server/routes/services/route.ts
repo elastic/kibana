@@ -40,7 +40,7 @@ import {
 } from '../default_api_types';
 import { getServiceGroup } from '../service_groups/get_service_group';
 import { getServiceAnnotations } from './annotations';
-import { getServices } from './get_services';
+import { getServicesItems } from './get_services/get_services_items';
 import { getServicesAlerts } from './get_services/get_service_alerts';
 import { getServicesDetailedStatistics } from './get_services_detailed_statistics';
 import { getServiceAgent } from './get_service_agent';
@@ -155,7 +155,7 @@ const servicesRoute = createApmServerRoute({
       getRandomSampler({ security, request, probability }),
     ]);
 
-    return getServices({
+    return getServicesItems({
       environment,
       kuery,
       mlClient,

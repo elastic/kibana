@@ -77,7 +77,7 @@ async function getHttpRequestsTimeseries({
         bool: {
           filter: [
             { exists: { field: SERVICE_TARGET_TYPE } },
-            ...getDocumentTypeFilterForServiceDestinationStatistics(false),
+            ...getDocumentTypeFilterForServiceDestinationStatistics(true),
             ...termQuery(SERVICE_NAME, serviceName),
             ...termQuery(TRANSACTION_NAME, transactionName),
             ...rangeQuery(startWithOffset, endWithOffset),

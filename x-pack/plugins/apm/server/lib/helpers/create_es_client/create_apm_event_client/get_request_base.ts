@@ -64,12 +64,6 @@ export function getRequestBase(options: {
   return {
     index,
     events,
-    body: {
-      query: {
-        bool: {
-          filter: filters,
-        },
-      },
-    },
+    filters,
   };
 }

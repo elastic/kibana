@@ -41,7 +41,7 @@ const documentTypeConfigMap: Record<
     rollupIntervals: RollupInterval[];
   }
 > = {
-  [ApmDocumentType.ServiceMetric]: {
+  [ApmDocumentType.ServiceTransactionMetric]: {
     processorEvent: ProcessorEvent.metric,
 
     getQuery: (rollupInterval) => ({

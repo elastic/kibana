@@ -12,17 +12,17 @@ import {
   intervalToSeconds,
 } from './get_preferred_bucket_size_and_data_source';
 
-const serviceMetricSources: ApmDataSource[] = [
+const serviceTransactionMetricSources: ApmDataSource[] = [
   {
-    documentType: ApmDocumentType.ServiceMetric,
+    documentType: ApmDocumentType.ServiceTransactionMetric,
     rollupInterval: RollupInterval.OneMinute,
   },
   {
-    documentType: ApmDocumentType.ServiceMetric,
+    documentType: ApmDocumentType.ServiceTransactionMetric,
     rollupInterval: RollupInterval.TenMinutes,
   },
   {
-    documentType: ApmDocumentType.ServiceMetric,
+    documentType: ApmDocumentType.ServiceTransactionMetric,
     rollupInterval: RollupInterval.SixtyMinutes,
   },
 ];
@@ -64,14 +64,16 @@ describe('getPreferredBucketSizeAndDataSource', () => {
       const { source, bucketSizeInSeconds } =
         getPreferredBucketSizeAndDataSource({
           sources: [
-            ...serviceMetricSources,
+            ...serviceTransactionMetricSources,
             ...txMetricSources,
             ...txEventSources,
           ],
           bucketSizeInSeconds: intervalToSeconds(test.in),
         });
 
-      expect(source.documentType).toBe(ApmDocumentType.ServiceMetric);
+      expect(source.documentType).toBe(
+        ApmDocumentType.ServiceTransactionMetric
+      );
 
       expect(intervalToSeconds(source.rollupInterval)).toBe(
         intervalToSeconds(test.out)

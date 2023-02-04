@@ -11,7 +11,7 @@ import { ApmDocumentType } from '../document_type';
 import { RollupInterval } from '../rollup';
 
 const EVENT_PREFERENCE = [
-  ApmDocumentType.ServiceMetric,
+  ApmDocumentType.ServiceTransactionMetric,
   ApmDocumentType.TransactionMetric,
   ApmDocumentType.TransactionEvent,
 ];

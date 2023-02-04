@@ -32,7 +32,7 @@ export const getOutcomeAggregation = (
     | { sum: AggregationsSumAggregation }
     | { filter: QueryDslQueryContainer };
 } => {
-  if (documentType === ApmDocumentType.ServiceMetric) {
+  if (documentType === ApmDocumentType.ServiceTransactionMetric) {
     return {
       successful_or_failed: {
         value_count: {

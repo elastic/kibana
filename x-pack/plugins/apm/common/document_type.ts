@@ -7,7 +7,7 @@
 
 export enum ApmDocumentType {
   TransactionMetric = 'transactionMetric',
-  ServiceMetric = 'serviceMetric',
+  ServiceTransactionMetric = 'serviceTransactionMetric',
   TransactionEvent = 'transactionEvent',
   ServiceDestinationMetric = 'serviceDestinationMetric',
 }

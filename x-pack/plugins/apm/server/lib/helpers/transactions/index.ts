@@ -102,7 +102,7 @@ export function getDurationFieldForTransactions(
     type = typeOrSearchAgggregatedTransactions;
   }
 
-  if (type === ApmDocumentType.ServiceMetric) {
+  if (type === ApmDocumentType.ServiceTransactionMetric) {
     return TRANSACTION_DURATION_SUMMARY;
   }
 
