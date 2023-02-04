@@ -18,7 +18,7 @@ const ErrorEmptyPromptComponent: React.FC<Props> = ({ title }) => (
   <EuiCallOut color="danger" size="s" title={title}>
     <p>{i18n.ERRORS_MAY_OCCUR}</p>
 
-    <span>{i18n.THE_FOLLOWING_ROLES_ARE_REQUIRED}</span>
+    <span>{i18n.THE_FOLLOWING_PRIVILEGES_ARE_REQUIRED}</span>
     <ul>
       <li>
         <EuiCode>{i18n.MONITOR}</EuiCode> {i18n.OR} <EuiCode>{i18n.MANAGE}</EuiCode>

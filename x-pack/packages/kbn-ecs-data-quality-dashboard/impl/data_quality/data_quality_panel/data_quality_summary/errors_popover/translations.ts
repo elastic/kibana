@@ -36,7 +36,7 @@ export const ERRORS_MAY_OCCUR = i18n.translate(
   'ecsDataQualityDashboard.errors.errorMayOccurLabel',
   {
     defaultMessage:
-      "Errors may occur when pattern or index metadata is temporarily unavailable, or because you don't have the roles required for access",
+      "Errors may occur when pattern or index metadata is temporarily unavailable, or because you don't have the privileges required for access",
   }
 );
 
@@ -63,10 +63,10 @@ export const READ_CROSS_CLUSTER = i18n.translate(
   }
 );
 
-export const THE_FOLLOWING_ROLES_ARE_REQUIRED = i18n.translate(
-  'ecsDataQualityDashboard.errors.theFollowingRolesLabel',
+export const THE_FOLLOWING_PRIVILEGES_ARE_REQUIRED = i18n.translate(
+  'ecsDataQualityDashboard.errors.theFollowingPrivilegesLabel',
   {
-    defaultMessage: 'The following roles are required to check an index:',
+    defaultMessage: 'The following privileges are required to check an index:',
   }
 );
 
