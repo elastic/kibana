@@ -4,7 +4,7 @@
 <titleabbrev>Find objects</titleabbrev>
 ++++
 
-deprecated::[8.7.0, to be removed in an uncomming version]
+deprecated::[8.7.0, To be removed in an upcoming version]
 
 Retrieve a paginated set of {kib} saved objects by various conditions.
 
