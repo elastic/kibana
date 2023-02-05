@@ -182,7 +182,6 @@ describe('current status route', () => {
         pending: 0,
         down: 1,
         enabledMonitorQueryIds: ['id1', 'id2'],
-        allIds: ['id1', 'id2'],
         up: 2,
         upConfigs: {
           'id1-Asia/Pacific - Japan': {
@@ -348,7 +347,6 @@ describe('current status route', () => {
         pending: 0,
         down: 1,
         enabledMonitorQueryIds: ['id1', 'id2'],
-        allIds: ['id1', 'id2'],
         up: 2,
         upConfigs: {
           'id1-Asia/Pacific - Japan': {
@@ -519,7 +517,6 @@ describe('current status route', () => {
         pending: 0,
         down: 1,
         enabledMonitorQueryIds: ['id1', 'id2', 'project-monitor-id', 'id4'],
-        allIds: ['id1', 'id2', 'project-monitor-id', 'id4'],
         up: 2,
         upConfigs: {
           'id1-Asia/Pacific - Japan': {
