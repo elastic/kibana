@@ -14,6 +14,7 @@ import type {
   FetchCasesProps,
   ResolvedCase,
   FindCaseUserActions,
+  CaseUsers,
 } from '../../common/ui/types';
 import { SeverityAll, SortFieldCase, StatusAll } from '../../common/ui/types';
 import type {
@@ -29,6 +30,7 @@ import type {
   SingleCaseMetricsResponse,
   CasesFindResponse,
   GetCaseConnectorsResponse,
+  GetCaseUsersResponse,
 } from '../../common/api';
 import {
   CommentType,
@@ -39,6 +41,7 @@ import {
   getCaseFindUserActionsUrl,
   getCaseCommentDeleteUrl,
   getCaseConnectorsUrl,
+  getCaseUsersUrl,
 } from '../../common/api';
 import {
   CASE_REPORTERS_URL,
@@ -405,4 +408,13 @@ export const getCaseConnectors = async (
     }),
     {}
   );
+};
+
+export const getCaseUsers = async (caseId: string, signal: AbortSignal): Promise<CaseUsers> => {
+  const res = await KibanaServices.get().http.fetch<GetCaseUsersResponse>(getCaseUsersUrl(caseId), {
+    method: 'GET',
+    signal,
+  });
+
+  return convertToCamelCase<GetCaseUsersResponse, CaseUsers>(res);
 };
