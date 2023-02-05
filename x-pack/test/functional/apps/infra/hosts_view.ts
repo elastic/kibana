@@ -147,7 +147,11 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
     });
 
-    describe('enables hosts view page and checks content', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/150143
+    // FLAKY: https://github.com/elastic/kibana/issues/150144
+    // FLAKY: https://github.com/elastic/kibana/issues/150145
+    // FLAKY: https://github.com/elastic/kibana/issues/150146
+    describe.skip('enables hosts view page and checks content', () => {
       before(async () => {
         await navigateAndEnableHostView();
         await pageObjects.timePicker.setAbsoluteRange(

@@ -100,6 +100,7 @@ import { isColumnOfType } from './operations/definitions/helpers';
 import { LayerSettingsPanel } from './layer_settings';
 import { FormBasedLayer } from '../..';
 import { DimensionTrigger } from '../../shared_components/dimension_trigger';
+import { filterAndSortUserMessages } from '../../app_plugin/get_application_user_messages';
 export type { OperationType, GenericIndexPatternColumn } from './operations';
 export { deleteColumn } from './operations';
 
@@ -521,12 +522,6 @@ export function getFormBasedDatasource({
       return columnLabelMap;
     },
 
-    isValidColumn: (state, indexPatterns, layerId, columnId, dateRange) => {
-      const layer = state.layers[layerId];
-
-      return !isColumnInvalid(layer, columnId, indexPatterns[layer.indexPatternId], dateRange);
-    },
-
     renderDimensionTrigger: (
       domElement: Element,
       props: DatasourceDimensionTriggerProps<FormBasedPrivateState>
@@ -550,13 +545,7 @@ export function getFormBasedDatasource({
                 unifiedSearch,
               }}
             >
-              <DimensionTrigger
-                id={props.columnId}
-                label={formattedLabel}
-                isInvalid={props.invalid}
-                hideTooltip={props.hideTooltip}
-                invalidMessage={props.invalidMessage}
-              />
+              <DimensionTrigger id={props.columnId} label={formattedLabel} />
             </KibanaContextProvider>
           </I18nProvider>
         </KibanaThemeProvider>,
@@ -842,8 +831,18 @@ export function getFormBasedDatasource({
         data
       );
 
-      const dimensionErrorMessages = getDimensionErrorMessages(state, (layerId, columnId) =>
-        this.isValidColumn(state, frameDatasourceAPI.dataViews.indexPatterns, layerId, columnId)
+      const dimensionErrorMessages = getInvalidDimensionErrorMessages(
+        state,
+        layerErrorMessages,
+        (layerId, columnId) => {
+          const layer = state.layers[layerId];
+          return !isColumnInvalid(
+            layer,
+            columnId,
+            frameDatasourceAPI.dataViews.indexPatterns[layer.indexPatternId],
+            frameDatasourceAPI.dateRange
+          );
+        }
       );
 
       const warningMessages = [
@@ -853,13 +852,6 @@ export function getFormBasedDatasource({
             state,
             frameDatasourceAPI
           ) || []),
-          ...getPrecisionErrorWarningMessages(
-            data.datatableUtilities,
-            state,
-            frameDatasourceAPI,
-            core.docLinks,
-            setState
-          ),
         ].map((longMessage) => {
           const message: UserMessage = {
             severity: 'warning',
@@ -871,6 +863,13 @@ export function getFormBasedDatasource({
 
           return message;
         }),
+        ...getPrecisionErrorWarningMessages(
+          data.datatableUtilities,
+          state,
+          frameDatasourceAPI,
+          core.docLinks,
+          setState
+        ),
       ];
 
       return [...layerErrorMessages, ...dimensionErrorMessages, ...warningMessages];
@@ -996,7 +995,10 @@ function getLayerErrorMessages(
         const message: UserMessage = {
           severity: 'error',
           fixableInEditor: true,
-          displayLocations: [{ id: 'visualization' }],
+          displayLocations:
+            typeof error !== 'string' && error.displayLocations
+              ? error.displayLocations
+              : [{ id: 'visualization' }],
           shortMessage: '',
           longMessage:
             typeof error === 'string' ? (
@@ -1030,31 +1032,35 @@ function getLayerErrorMessages(
     // Single layer case, no need to explain more
     errorMessages = layerErrors[0]?.length ? layerErrors[0] : [];
   } else {
-    // For multiple layers we will prepend each error with the layer number
     errorMessages = layerErrors.flatMap((errors, index) => {
       return errors.map((error) => {
-        const message: UserMessage = {
-          ...error,
-          shortMessage: i18n.translate('xpack.lens.indexPattern.layerErrorWrapper', {
-            defaultMessage: 'Layer {position} error: {wrappedMessage}',
-            values: {
-              position: index + 1,
-              wrappedMessage: error.shortMessage,
-            },
-          }),
-          longMessage: (
-            <FormattedMessage
-              id="xpack.lens.indexPattern.layerErrorWrapper"
-              defaultMessage="Layer {position} error: {wrappedMessage}"
-              values={{
+        // we will prepend each error with the layer number
+        if (error.displayLocations.find((location) => location.id === 'visualization')) {
+          const message: UserMessage = {
+            ...error,
+            shortMessage: i18n.translate('xpack.lens.indexPattern.layerErrorWrapper', {
+              defaultMessage: 'Layer {position} error: {wrappedMessage}',
+              values: {
                 position: index + 1,
-                wrappedMessage: <>{error.longMessage}</>,
-              }}
-            />
-          ),
-        };
+                wrappedMessage: error.shortMessage,
+              },
+            }),
+            longMessage: (
+              <FormattedMessage
+                id="xpack.lens.indexPattern.layerErrorWrapper"
+                defaultMessage="Layer {position} error: {wrappedMessage}"
+                values={{
+                  position: index + 1,
+                  wrappedMessage: <>{error.longMessage}</>,
+                }}
+              />
+            ),
+          };
 
-        return message;
+          return message;
+        }
+
+        return error;
       });
     });
   }
@@ -1062,8 +1068,9 @@ function getLayerErrorMessages(
   return errorMessages;
 }
 
-function getDimensionErrorMessages(
+function getInvalidDimensionErrorMessages(
   state: FormBasedPrivateState,
+  currentErrorMessages: UserMessage[],
   isValidColumn: (layerId: string, columnId: string) => boolean
 ) {
   // generate messages for invalid columns
@@ -1071,10 +1078,20 @@ function getDimensionErrorMessages(
     .map((layerId) => {
       const messages: UserMessage[] = [];
       for (const columnId of Object.keys(state.layers[layerId].columns)) {
+        if (
+          filterAndSortUserMessages(currentErrorMessages, 'dimensionButton', {
+            dimensionId: columnId,
+          }).length > 0
+        ) {
+          // there is already a more specific user message assigned to this column, so no need
+          // to add the default "is invalid" messaging
+          continue;
+        }
+
         if (!isValidColumn(layerId, columnId)) {
           messages.push({
             severity: 'error',
-            displayLocations: [{ id: 'dimensionTrigger', dimensionId: columnId }],
+            displayLocations: [{ id: 'dimensionButton', dimensionId: columnId }],
             fixableInEditor: true,
             shortMessage: '',
             longMessage: (
