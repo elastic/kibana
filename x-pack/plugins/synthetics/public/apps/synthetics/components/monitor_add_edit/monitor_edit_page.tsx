@@ -7,11 +7,11 @@
 
 import React, { useEffect } from 'react';
 import { useParams } from 'react-router-dom';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { useTrackPageview, useFetcher } from '@kbn/observability-plugin/public';
 import { LoadingState } from '../monitors_page/overview/overview/monitor_detail_flyout';
 import { ConfigKey, SourceType } from '../../../../../common/runtime_types';
-import { getServiceLocations } from '../../state';
+import { getServiceLocations, selectServiceLocationsState } from '../../state';
 import { ServiceAllowedWrapper } from '../common/wrappers/service_allowed_wrapper';
 import { MonitorSteps } from './steps';
 import { MonitorForm } from './form';
@@ -26,10 +26,13 @@ const MonitorEditPage: React.FC = () => {
   const { monitorId } = useParams<{ monitorId: string }>();
   useMonitorAddEditBreadcrumbs(true);
   const dispatch = useDispatch();
+  const { locationsLoaded, error: locationsError } = useSelector(selectServiceLocationsState);
 
   useEffect(() => {
-    dispatch(getServiceLocations());
-  }, [dispatch]);
+    if (!locationsLoaded) {
+      dispatch(getServiceLocations());
+    }
+  }, [locationsLoaded, dispatch]);
 
   const { data, loading, error } = useFetcher(() => {
     return getMonitorAPI({ id: monitorId });
@@ -38,7 +41,7 @@ const MonitorEditPage: React.FC = () => {
   const isReadOnly = data?.attributes[ConfigKey.MONITOR_SOURCE_TYPE] === SourceType.PROJECT;
   const projectId = data?.attributes[ConfigKey.PROJECT_ID];
 
-  return data && !loading && !error ? (
+  return data && locationsLoaded && !loading && !error && !locationsError ? (
     <MonitorForm defaultValues={data?.attributes} readOnly={isReadOnly}>
       <MonitorSteps
         stepMap={EDIT_MONITOR_STEPS(isReadOnly)}

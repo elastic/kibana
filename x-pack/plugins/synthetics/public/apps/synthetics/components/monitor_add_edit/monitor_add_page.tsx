@@ -6,10 +6,11 @@
  */
 
 import React, { useEffect } from 'react';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
+import { EuiEmptyPrompt, EuiLoadingLogo } from '@elastic/eui';
 import { useTrackPageview } from '@kbn/observability-plugin/public';
 
-import { getServiceLocations } from '../../state';
+import { getServiceLocations, selectServiceLocationsState } from '../../state';
 import { ServiceAllowedWrapper } from '../common/wrappers/service_allowed_wrapper';
 
 import { useKibanaSpace } from './hooks';
@@ -24,15 +25,34 @@ const MonitorAddPage = () => {
   useTrackPageview({ app: 'synthetics', path: 'add-monitor', delay: 15000 });
   useMonitorAddEditBreadcrumbs();
   const dispatch = useDispatch();
+  const { locationsLoaded, error: locationsError } = useSelector(selectServiceLocationsState);
 
   useEffect(() => {
-    dispatch(getServiceLocations());
-  }, [dispatch]);
+    if (!locationsLoaded) {
+      dispatch(getServiceLocations());
+    }
+  }, [dispatch, locationsLoaded]);
 
-  return (
+  if (locationsError) {
+    return (
+      <EuiEmptyPrompt
+        iconType="alert"
+        color="danger"
+        title={<h3>Unable to testing locations</h3>}
+        body={<p>There was an error loading testing locations. Please try again later.</p>}
+      />
+    );
+  }
+
+  return !locationsLoaded ? (
     <MonitorForm space={space?.id}>
       <MonitorSteps stepMap={ADD_MONITOR_STEPS} />
     </MonitorForm>
+  ) : (
+    <EuiEmptyPrompt
+      icon={<EuiLoadingLogo logo="logoKibana" size="xl" />}
+      title={<h3>Loading</h3>}
+    />
   );
 };
 
