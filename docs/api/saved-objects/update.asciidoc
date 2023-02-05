@@ -4,7 +4,8 @@
 <titleabbrev>Update object</titleabbrev>
 ++++
 
-experimental[] Update the attributes for existing {kib} saved objects.
+deprecated::[8.7.0, to be removed in an uncomming version]
+Update the attributes for existing {kib} saved objects.
 
 [[saved-objects-api-update-request]]
 ==== Request
