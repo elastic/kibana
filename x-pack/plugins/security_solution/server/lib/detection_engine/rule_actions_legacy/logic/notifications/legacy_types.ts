@@ -57,7 +57,7 @@ export interface LegacyClients {
  * @deprecated Once we are confident all rules relying on side-car actions SO's have been migrated to SO references we should remove this function
  */
 export interface LegacyNotificationAlertParams {
-  actions: RuleAction[];
+  actions: Array<Omit<RuleAction, 'uuid'>>;
   enabled: boolean;
   ruleAlertId: string;
   interval: string;

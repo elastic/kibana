@@ -109,10 +109,7 @@ async function updateWithOCC<Params extends RuleTypeParams>(
     context,
     {
       id,
-      data: {
-        ...data,
-        actions: addUuid(data.actions),
-      },
+      data,
     },
     alertSavedObject
   );
@@ -154,9 +151,11 @@ async function updateWithOCC<Params extends RuleTypeParams>(
 
 async function updateAlert<Params extends RuleTypeParams>(
   context: RulesClientContext,
-  { id, data }: UpdateOptions<Params>,
+  { id, data: initialData }: UpdateOptions<Params>,
   { attributes, version }: SavedObject<RawRule>
 ): Promise<PartialRule<Params>> {
+  const data = { ...initialData, actions: addUuid(initialData.actions) };
+
   const ruleType = context.ruleTypeRegistry.get(attributes.alertTypeId);
 
   // TODO https://github.com/elastic/kibana/issues/148414

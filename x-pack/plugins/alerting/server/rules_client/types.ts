@@ -75,6 +75,8 @@ export type NormalizedAlertAction = Omit<RuleAction, 'actionTypeId' | 'uuid'> & 
   uuid?: string;
 };
 
+export type NormalizedAlertActionWithUuid = Omit<RuleAction, 'actionTypeId'>;
+
 export interface RegistryAlertTypeWithAuth extends RegistryRuleType {
   authorizedConsumers: string[];
 }

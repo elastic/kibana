@@ -26,7 +26,7 @@ import {
 interface LegacyCreateRuleActionsSavedObject {
   ruleAlertId: string;
   savedObjectsClient: RuleExecutorServices['savedObjectsClient'];
-  actions: RuleAction[] | undefined;
+  actions: Array<Omit<RuleAction, 'uuid'>> | undefined;
   throttle: string | null | undefined;
 }
 
