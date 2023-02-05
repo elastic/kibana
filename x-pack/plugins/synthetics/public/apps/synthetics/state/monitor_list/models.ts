@@ -12,8 +12,16 @@ import {
 
 export type MonitorListSortField = `${keyof EncryptedSyntheticsSavedMonitor}.keyword` | 'enabled';
 
-export interface MonitorListPageState {
+export interface MonitorFilterState {
   query?: string;
+  tags?: string[];
+  monitorTypes?: string[];
+  projects?: string[];
+  schedules?: string[];
+  locations?: string[];
+}
+
+export interface MonitorListPageState extends MonitorFilterState {
   pageIndex: number;
   pageSize: number;
   sortField: MonitorListSortField;

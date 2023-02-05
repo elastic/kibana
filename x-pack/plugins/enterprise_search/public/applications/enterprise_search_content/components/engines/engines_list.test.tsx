@@ -62,7 +62,7 @@ describe('EnginesList', () => {
     expect(pageTemplate.prop('isLoading')).toEqual(true);
   });
   it('renders empty prompt when no data is available', () => {
-    setMockValues(DEFAULT_VALUES);
+    setMockValues({ ...DEFAULT_VALUES, hasNoEngines: true, isFirstRequest: false });
     setMockActions(mockActions);
     const wrapper = shallow(<EnginesList />);
 

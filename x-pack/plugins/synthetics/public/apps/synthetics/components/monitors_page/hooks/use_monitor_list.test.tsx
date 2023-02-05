@@ -38,7 +38,6 @@ describe('useMonitorList', () => {
       error: state.monitorList.error,
       absoluteTotal: state.monitorList.data.absoluteTotal ?? 0,
       pageState: state.monitorList.pageState,
-      isDataQueried: false,
       syntheticsMonitors: selectEncryptedSyntheticsSavedMonitors.resultFunc(state.monitorList),
     };
 

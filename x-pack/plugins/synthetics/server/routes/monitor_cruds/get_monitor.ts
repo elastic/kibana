@@ -136,3 +136,37 @@ export const getSyntheticsMonitorOverviewRoute: SyntheticsRestApiRouteFactory = 
     };
   },
 });
+
+function getOverviewConfigsPerLocation(
+  attributes: EncryptedSyntheticsMonitor,
+  queriedLocations: string | string[] | undefined
+) {
+  const id = attributes[ConfigKey.MONITOR_QUERY_ID];
+  const configId = attributes[ConfigKey.CONFIG_ID];
+
+  /* for each location, add a config item */
+  const locations = attributes[ConfigKey.LOCATIONS];
+  const queriedLocationsArray =
+    queriedLocations && !Array.isArray(queriedLocations) ? [queriedLocations] : queriedLocations;
+
+  /* exclude nob matching locations if location filter is present */
+  const filteredLocations = queriedLocationsArray?.length
+    ? locations.filter(
+        (loc) =>
+          (loc.label && queriedLocationsArray.includes(loc.label)) ||
+          queriedLocationsArray.includes(loc.id)
+      )
+    : locations;
+
+  return filteredLocations.map((location) => ({
+    id,
+    configId,
+    location,
+    name: attributes[ConfigKey.NAME],
+    tags: attributes[ConfigKey.TAGS],
+    isEnabled: attributes[ConfigKey.ENABLED],
+    type: attributes[ConfigKey.MONITOR_TYPE],
+    projectId: attributes[ConfigKey.PROJECT_ID],
+    isStatusAlertEnabled: isStatusEnabled(attributes[ConfigKey.ALERT_CONFIG]),
+  }));
+}

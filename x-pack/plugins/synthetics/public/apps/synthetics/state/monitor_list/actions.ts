@@ -62,3 +62,9 @@ export const enableMonitorAlertAction = createAsyncAction<
 >('enableMonitorAlertAction');
 
 export const clearMonitorUpsertStatus = createAction<string>('clearMonitorUpsertStatus');
+
+export const updateManagementPageStateAction = createAction<Partial<MonitorListPageState>>(
+  'updateManagementPageState'
+);
+
+export const cleanMonitorListState = createAction('cleanMonitorListState');

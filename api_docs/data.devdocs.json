@@ -11030,14 +11030,6 @@
             "path": "src/plugins/saved_objects_tagging_oss/public/api.ts"
           },
           {
-            "plugin": "savedObjectsManagement",
-            "path": "src/plugins/saved_objects_management/common/types.ts"
-          },
-          {
-            "plugin": "savedObjectsManagement",
-            "path": "src/plugins/saved_objects_management/common/types.ts"
-          },
-          {
             "plugin": "savedObjectsTagging",
             "path": "x-pack/plugins/saved_objects_tagging/common/types.ts"
           },
@@ -11119,19 +11111,19 @@
           },
           {
             "plugin": "synthetics",
-            "path": "x-pack/plugins/synthetics/public/apps/synthetics/state/monitor_details/api.ts"
-          },
-          {
-            "plugin": "synthetics",
-            "path": "x-pack/plugins/synthetics/public/apps/synthetics/state/monitor_details/api.ts"
-          },
-          {
-            "plugin": "synthetics",
             "path": "x-pack/plugins/synthetics/public/apps/synthetics/state/overview/api.ts"
           },
           {
             "plugin": "synthetics",
             "path": "x-pack/plugins/synthetics/public/apps/synthetics/state/overview/api.ts"
+          },
+          {
+            "plugin": "synthetics",
+            "path": "x-pack/plugins/synthetics/public/apps/synthetics/state/monitor_details/api.ts"
+          },
+          {
+            "plugin": "synthetics",
+            "path": "x-pack/plugins/synthetics/public/apps/synthetics/state/monitor_details/api.ts"
           },
           {
             "plugin": "upgradeAssistant",
@@ -28883,14 +28875,6 @@
             "path": "src/plugins/saved_objects_tagging_oss/public/api.ts"
           },
           {
-            "plugin": "savedObjectsManagement",
-            "path": "src/plugins/saved_objects_management/common/types.ts"
-          },
-          {
-            "plugin": "savedObjectsManagement",
-            "path": "src/plugins/saved_objects_management/common/types.ts"
-          },
-          {
             "plugin": "savedObjectsTagging",
             "path": "x-pack/plugins/saved_objects_tagging/common/types.ts"
           },
@@ -28972,19 +28956,19 @@
           },
           {
             "plugin": "synthetics",
-            "path": "x-pack/plugins/synthetics/public/apps/synthetics/state/monitor_details/api.ts"
-          },
-          {
-            "plugin": "synthetics",
-            "path": "x-pack/plugins/synthetics/public/apps/synthetics/state/monitor_details/api.ts"
-          },
-          {
-            "plugin": "synthetics",
             "path": "x-pack/plugins/synthetics/public/apps/synthetics/state/overview/api.ts"
           },
           {
             "plugin": "synthetics",
             "path": "x-pack/plugins/synthetics/public/apps/synthetics/state/overview/api.ts"
+          },
+          {
+            "plugin": "synthetics",
+            "path": "x-pack/plugins/synthetics/public/apps/synthetics/state/monitor_details/api.ts"
+          },
+          {
+            "plugin": "synthetics",
+            "path": "x-pack/plugins/synthetics/public/apps/synthetics/state/monitor_details/api.ts"
           },
           {
             "plugin": "upgradeAssistant",
