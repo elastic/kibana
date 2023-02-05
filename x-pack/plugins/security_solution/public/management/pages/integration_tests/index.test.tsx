@@ -96,7 +96,8 @@ describe('when in the Administration tab', () => {
     });
   });
 
-  describe('when the user has permissions', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/145204
+  describe.skip('when the user has permissions', () => {
     it('should display the Management view if user has privileges', async () => {
       useUserPrivilegesMock.mockReturnValue({
         endpointPrivileges: { loading: false, canReadEndpointList: true, canAccessFleet: true },
