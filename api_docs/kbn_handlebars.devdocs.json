@@ -146,6 +146,34 @@
           }
         ],
         "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/handlebars",
+        "id": "def-common.PartialsHash",
+        "type": "Interface",
+        "tags": [],
+        "label": "PartialsHash",
+        "description": [],
+        "path": "packages/kbn-handlebars/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/handlebars",
+            "id": "def-common.PartialsHash.Unnamed",
+            "type": "IndexSignature",
+            "tags": [],
+            "label": "[name: string]: HandlebarsTemplateDelegate<any>",
+            "description": [],
+            "signature": [
+              "[name: string]:  HandlebarsTemplateDelegate<any>"
+            ],
+            "path": "packages/kbn-handlebars/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
       }
     ],
     "enums": [],
@@ -279,7 +307,7 @@
           "\nSupported Handlebars compile options.\n\nThis is a subset of all the compile options supported by the upstream\nHandlebars module."
         ],
         "signature": [
-          "{ data?: boolean | undefined; strict?: boolean | undefined; knownHelpers?: KnownHelpers | undefined; knownHelpersOnly?: boolean | undefined; noEscape?: boolean | undefined; assumeObjects?: boolean | undefined; }"
+          "{ data?: boolean | undefined; strict?: boolean | undefined; knownHelpers?: KnownHelpers | undefined; knownHelpersOnly?: boolean | undefined; noEscape?: boolean | undefined; assumeObjects?: boolean | undefined; preventIndent?: boolean | undefined; explicitPartialContext?: boolean | undefined; }"
         ],
         "path": "packages/kbn-handlebars/index.ts",
         "deprecated": false,
@@ -296,7 +324,7 @@
           "\nSupported Handlebars runtime options\n\nThis is a subset of all the runtime options supported by the upstream\nHandlebars module."
         ],
         "signature": [
-          "{ data?: any; helpers?: { [name: string]: Function; } | undefined; decorators?: { [name: string]: Function; } | undefined; blockParams?: any[] | undefined; }"
+          "{ data?: any; helpers?: { [name: string]: Function; } | undefined; partials?: { [name: string]: HandlebarsTemplateDelegate<any>; } | undefined; decorators?: { [name: string]: Function; } | undefined; blockParams?: any[] | undefined; }"
         ],
         "path": "packages/kbn-handlebars/index.ts",
         "deprecated": false,
