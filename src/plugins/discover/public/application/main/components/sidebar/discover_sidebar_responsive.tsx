@@ -161,6 +161,7 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
         indexPatternTitle: dataView.getIndexPattern(),
       };
       try {
+        // making request
         existingFieldList = await loadFieldExisting({
           data,
           dataView,
@@ -191,6 +192,8 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
         // stateContainer.internalState.get().dataView?.title,
         JSON.stringify(existingFieldList)
       );
+
+      console.log('***** POST FETCH');
 
       dispatchSidebarStateAction({
         type: DiscoverSidebarReducerActionType.DOCUMENTS_LOADED,
@@ -244,6 +247,7 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
           });
           break;
         case FetchStatus.LOADING:
+          console.log('*** 2 - FetchStatus.LOADING', sidebarState.status);
           if (isPlainRecordType) {
             dispatchSidebarStateAction({
               type: DiscoverSidebarReducerActionType.DOCUMENTS_LOADING,
@@ -254,13 +258,17 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
           } else {
             console.log('*** 3 - fetchFields');
             fetchFields(selectedDataViewRef.current!);
-            refetchFieldsExistenceInfo();
+            // refetchFieldsExistenceInfo();
             // fetchFields(selectedDataViewR!);
           }
 
           break;
         case FetchStatus.COMPLETE:
-          console.log('*** COMPLETE', querySubscriberResult.fromDate, querySubscriberResult.toDate);
+          console.log(
+            '*** FetchStatus.COMPLETE',
+            querySubscriberResult.fromDate,
+            querySubscriberResult.toDate
+          );
           if (isPlainRecordType) {
             dispatchSidebarStateAction({
               type: DiscoverSidebarReducerActionType.DOCUMENTS_LOADED,
@@ -298,6 +306,7 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
     querySubscriberResult.fromDate,
     querySubscriberResult.toDate,
     refetchFieldsExistenceInfo,
+    sidebarState.status,
   ]);
 
   useEffect(() => {
@@ -315,12 +324,14 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
   const isAffectedByGlobalFilter = Boolean(querySubscriberResult.filters?.length);
 
   useEffect(() => {
+    console.log('*** sidebarState.status', sidebarState.status);
     if (sidebarState.status === DiscoverSidebarReducerStatus.COMPLETED) {
+      console.log('*** 4 - refetchFieldsExistenceInfo');
       refetchFieldsExistenceInfo();
     }
     // refetching only if status changes
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [sidebarState.status]);
+    // // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [sidebarState.status, refetchFieldsExistenceInfo]);
 
   const closeFieldEditor = useRef<() => void | undefined>();
   const closeDataViewEditor = useRef<() => void | undefined>();
