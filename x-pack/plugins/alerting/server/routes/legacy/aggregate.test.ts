@@ -31,12 +31,12 @@ jest.mock('../lib/track_legacy_terminology', () => ({
   trackLegacyTerminology: jest.fn(),
 }));
 
-jest.mock('../../lib/default_rule_aggregation', () => ({
-  ...jest.requireActual('../../lib/default_rule_aggregation'),
+jest.mock('../../../common', () => ({
+  ...jest.requireActual('../../../common'),
   formatDefaultAggregationResult: jest.fn(),
 }));
 
-const { formatDefaultAggregationResult } = jest.requireMock('../../lib/default_rule_aggregation');
+const { formatDefaultAggregationResult } = jest.requireMock('../../../common');
 
 beforeEach(() => {
   jest.resetAllMocks();
@@ -54,7 +54,7 @@ describe('aggregateAlertRoute', () => {
     expect(config.path).toMatchInlineSnapshot(`"/api/alerts/_aggregate"`);
 
     const aggregateResult = {
-      alertExecutionStatus: {
+      ruleExecutionStatus: {
         ok: 15,
         error: 2,
         active: 23,
@@ -155,7 +155,10 @@ describe('aggregateAlertRoute', () => {
     `);
 
     expect(res.ok).toHaveBeenCalledWith({
-      body: aggregateResult,
+      body: {
+        ruleLastRunOutcome: aggregateResult.ruleLastRunOutcome,
+        alertExecutionStatus: aggregateResult.ruleExecutionStatus,
+      },
     });
   });
 
@@ -168,7 +171,7 @@ describe('aggregateAlertRoute', () => {
     const [, handler] = router.get.mock.calls[0];
 
     formatDefaultAggregationResult.mockReturnValueOnce({
-      alertExecutionStatus: {
+      ruleExecutionStatus: {
         ok: 15,
         error: 2,
         active: 23,
@@ -225,6 +228,22 @@ describe('aggregateAlertRoute', () => {
     const router = httpServiceMock.createRouter();
 
     aggregateAlertRoute(router, licenseState, mockUsageCounter);
+
+    formatDefaultAggregationResult.mockReturnValueOnce({
+      ruleExecutionStatus: {
+        ok: 15,
+        error: 2,
+        active: 23,
+        pending: 1,
+        unknown: 0,
+      },
+      ruleLastRunOutcome: {
+        succeeded: 1,
+        failed: 2,
+        warning: 3,
+      },
+    });
+
     const [, handler] = router.get.mock.calls[0];
     const [context, req, res] = mockHandlerArguments(
       { rulesClient },
@@ -244,6 +263,22 @@ describe('aggregateAlertRoute', () => {
     const router = httpServiceMock.createRouter();
 
     aggregateAlertRoute(router, licenseState, mockUsageCounter);
+
+    formatDefaultAggregationResult.mockReturnValueOnce({
+      ruleExecutionStatus: {
+        ok: 15,
+        error: 2,
+        active: 23,
+        pending: 1,
+        unknown: 0,
+      },
+      ruleLastRunOutcome: {
+        succeeded: 1,
+        failed: 2,
+        warning: 3,
+      },
+    });
+
     const [, handler] = router.get.mock.calls[0];
     const [context, req, res] = mockHandlerArguments(
       { rulesClient },

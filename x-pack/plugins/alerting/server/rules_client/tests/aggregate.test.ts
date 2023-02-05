@@ -16,13 +16,12 @@ import { AlertingAuthorization } from '../../authorization/alerting_authorizatio
 import { ActionsAuthorization } from '@kbn/actions-plugin/server';
 import { auditLoggerMock } from '@kbn/security-plugin/server/audit/mocks';
 import { getBeforeSetup, setGlobalDate } from './lib';
-import { RecoveredActionGroup } from '../../../common';
-import { RegistryRuleType } from '../../rule_type_registry';
 import {
+  RecoveredActionGroup,
   getDefaultRuleAggregation,
-  formatDefaultAggregationResult,
-  RuleAggregation,
-} from '../../lib';
+  RuleAggregationResult,
+} from '../../../common';
+import { RegistryRuleType } from '../../rule_type_registry';
 import { fromKueryExpression, nodeTypes } from '@kbn/es-query';
 
 const taskManager = taskManagerMock.createStart();
@@ -162,41 +161,107 @@ describe('aggregate()', () => {
 
   test('calls saved objects client with given params to perform aggregation', async () => {
     const rulesClient = new RulesClient(rulesClientParams);
-    const result = await rulesClient.aggregate<RuleAggregation>({
+    const result = await rulesClient.aggregate<RuleAggregationResult>({
       options: {},
       aggs: getDefaultRuleAggregation(),
     });
-    expect(formatDefaultAggregationResult(result)).toMatchInlineSnapshot(`
+
+    expect(result).toMatchInlineSnapshot(`
       Object {
-        "alertExecutionStatus": Object {
-          "active": 8,
-          "error": 6,
-          "ok": 10,
-          "pending": 4,
-          "unknown": 2,
-          "warning": 1,
+        "enabled": Object {
+          "buckets": Array [
+            Object {
+              "doc_count": 2,
+              "key": 0,
+              "key_as_string": "0",
+            },
+            Object {
+              "doc_count": 28,
+              "key": 1,
+              "key_as_string": "1",
+            },
+          ],
         },
-        "ruleEnabledStatus": Object {
-          "disabled": 2,
-          "enabled": 28,
+        "muted": Object {
+          "buckets": Array [
+            Object {
+              "doc_count": 27,
+              "key": 0,
+              "key_as_string": "0",
+            },
+            Object {
+              "doc_count": 3,
+              "key": 1,
+              "key_as_string": "1",
+            },
+          ],
         },
-        "ruleLastRunOutcome": Object {
-          "failed": 4,
-          "succeeded": 2,
-          "warning": 6,
+        "outcome": Object {
+          "buckets": Array [
+            Object {
+              "doc_count": 2,
+              "key": "succeeded",
+            },
+            Object {
+              "doc_count": 4,
+              "key": "failed",
+            },
+            Object {
+              "doc_count": 6,
+              "key": "warning",
+            },
+          ],
         },
-        "ruleMutedStatus": Object {
-          "muted": 3,
-          "unmuted": 27,
+        "snoozed": Object {
+          "count": Object {
+            "doc_count": 0,
+          },
+          "doc_count": 0,
         },
-        "ruleSnoozedStatus": Object {
-          "snoozed": 0,
+        "status": Object {
+          "buckets": Array [
+            Object {
+              "doc_count": 8,
+              "key": "active",
+            },
+            Object {
+              "doc_count": 6,
+              "key": "error",
+            },
+            Object {
+              "doc_count": 10,
+              "key": "ok",
+            },
+            Object {
+              "doc_count": 4,
+              "key": "pending",
+            },
+            Object {
+              "doc_count": 2,
+              "key": "unknown",
+            },
+            Object {
+              "doc_count": 1,
+              "key": "warning",
+            },
+          ],
         },
-        "ruleTags": Array [
-          "a",
-          "b",
-          "c",
-        ],
+        "tags": Object {
+          "buckets": Array [
+            Object {
+              "doc_count": 10,
+              "key": "a",
+            },
+            Object {
+              "doc_count": 20,
+              "key": "b",
+            },
+            Object {
+              "doc_count": 30,
+              "key": "c",
+            },
+          ],
+        },
       }
     `);
     expect(unsecuredSavedObjectsClient.find).toHaveBeenCalledTimes(1);
@@ -241,7 +306,6 @@ describe('aggregate()', () => {
       },
     ]);
   });
-  getDefaultRuleAggregation();
 
   test('supports filters when aggregating', async () => {
     const authFilter = fromKueryExpression(
@@ -345,7 +409,7 @@ describe('aggregate()', () => {
 
       await rulesClient.aggregate({
         options: { maxTags: 1000 },
-        aggs: getDefaultRuleAggregation(1000),
+        aggs: getDefaultRuleAggregation({ maxTags: 1000 }),
       });
 
       expect(unsecuredSavedObjectsClient.find.mock.calls[0]).toMatchObject([

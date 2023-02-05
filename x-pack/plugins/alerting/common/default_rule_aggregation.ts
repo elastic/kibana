@@ -5,18 +5,13 @@
  * 2.0.
  */
 import type { AggregationsAggregationContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { RuleExecutionStatusValues, RuleLastRunOutcomeValues } from '../types';
+import {
+  RuleExecutionStatusValues,
+  RuleLastRunOutcomeValues,
+  RuleAggregationFormattedResult,
+} from './rule';
 
-export interface AggregateResult {
-  alertExecutionStatus: { [status: string]: number };
-  ruleLastRunOutcome: { [status: string]: number };
-  ruleEnabledStatus?: { enabled: number; disabled: number };
-  ruleMutedStatus?: { muted: number; unmuted: number };
-  ruleSnoozedStatus?: { snoozed: number };
-  ruleTags?: string[];
-}
-
-export interface RuleAggregation extends Record<string, unknown> {
+export interface RuleAggregationResult extends Record<string, unknown> {
   status: {
     buckets: Array<{
       key: string;
@@ -56,9 +51,14 @@ export interface RuleAggregation extends Record<string, unknown> {
   };
 }
 
+interface GetDefaultRuleAggregationParams {
+  maxTags?: number;
+}
+
 export const getDefaultRuleAggregation = (
-  maxTags: number = 50
+  params?: GetDefaultRuleAggregationParams
 ): Record<string, AggregationsAggregationContainer> => {
+  const { maxTags = 50 } = params || {};
   return {
     status: {
       terms: { field: 'alert.attributes.executionStatus.status' },
@@ -92,11 +92,13 @@ export const getDefaultRuleAggregation = (
   };
 };
 
-export const formatDefaultAggregationResult = (aggregations?: RuleAggregation): AggregateResult => {
+export const formatDefaultAggregationResult = (
+  aggregations?: RuleAggregationResult
+): RuleAggregationFormattedResult => {
   if (!aggregations) {
     // Return a placeholder with all zeroes
-    const placeholder: AggregateResult = {
-      alertExecutionStatus: {},
+    const placeholder: RuleAggregationFormattedResult = {
+      ruleExecutionStatus: {},
       ruleLastRunOutcome: {},
       ruleEnabledStatus: {
         enabled: 0,
@@ -107,16 +109,17 @@ export const formatDefaultAggregationResult = (aggregations?: RuleAggregation): 
         unmuted: 0,
       },
       ruleSnoozedStatus: { snoozed: 0 },
+      ruleTags: [],
     };
 
     for (const key of RuleExecutionStatusValues) {
-      placeholder.alertExecutionStatus[key] = 0;
+      placeholder.ruleExecutionStatus[key] = 0;
     }
 
     return placeholder;
   }
 
-  const alertExecutionStatus = aggregations.status.buckets.map(({ key, doc_count: docCount }) => ({
+  const ruleExecutionStatus = aggregations.status.buckets.map(({ key, doc_count: docCount }) => ({
     [key]: docCount,
   }));
 
@@ -124,8 +127,8 @@ export const formatDefaultAggregationResult = (aggregations?: RuleAggregation): 
     [key]: docCount,
   }));
 
-  const ret: AggregateResult = {
-    alertExecutionStatus: alertExecutionStatus.reduce(
+  const ret: RuleAggregationFormattedResult = {
+    ruleExecutionStatus: ruleExecutionStatus.reduce(
       (acc, curr: { [status: string]: number }) => Object.assign(acc, curr),
       {}
     ),
@@ -133,12 +136,22 @@ export const formatDefaultAggregationResult = (aggregations?: RuleAggregation): 
       (acc, curr: { [status: string]: number }) => Object.assign(acc, curr),
       {}
     ),
+    ruleEnabledStatus: {
+      enabled: 0,
+      disabled: 0,
+    },
+    ruleMutedStatus: {
+      muted: 0,
+      unmuted: 0,
+    },
+    ruleSnoozedStatus: { snoozed: 0 },
+    ruleTags: [],
   };
 
   // Fill missing keys with zeroes
   for (const key of RuleExecutionStatusValues) {
-    if (!ret.alertExecutionStatus.hasOwnProperty(key)) {
-      ret.alertExecutionStatus[key] = 0;
+    if (!ret.ruleExecutionStatus.hasOwnProperty(key)) {
+      ret.ruleExecutionStatus[key] = 0;
     }
   }
   for (const key of RuleLastRunOutcomeValues) {

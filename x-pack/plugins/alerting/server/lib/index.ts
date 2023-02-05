@@ -43,5 +43,3 @@ export { determineAlertsToReturn } from './determine_alerts_to_return';
 export { updateFlappingHistory, isFlapping } from './flapping_utils';
 export { getAlertsForNotification } from './get_alerts_for_notification';
 export { trimRecoveredAlerts } from './trim_recovered_alerts';
-export * from './default_rule_aggregation';
-export * from './rule_tags_aggregation';

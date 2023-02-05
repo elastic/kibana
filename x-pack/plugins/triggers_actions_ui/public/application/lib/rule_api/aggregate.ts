@@ -4,24 +4,42 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { HttpSetup } from '@kbn/core/public';
-import { AsApiContract } from '@kbn/actions-plugin/common';
-import { RuleAggregations } from '../../../types';
-import { INTERNAL_BASE_ALERTING_API_PATH } from '../../constants';
-import { mapFiltersToKql } from './map_filters_to_kql';
 import {
-  LoadRuleAggregationsProps,
-  rewriteBodyRes,
-  rewriteTagsBodyRes,
-  RuleTagsAggregations,
-} from './aggregate_helpers';
+  RuleAggregationFormattedResult,
+  getDefaultRuleAggregation,
+  getRuleTagsAggregation,
+  formatDefaultAggregationResult,
+  formatRuleTagsAggregationResult,
+  RuleAggregationResult,
+  RuleTagsAggregationResult,
+  RuleTagsAggregationFormattedResult,
+} from '@kbn/alerting-plugin/common';
+import { INTERNAL_BASE_ALERTING_API_PATH } from '../../constants';
+import { LoadRuleAggregationsProps, LoadRuleTagsProps } from './aggregate_helpers';
+import { mapFiltersToKueryNode } from './map_filters_to_kuery_node';
 
-// TODO: https://github.com/elastic/kibana/issues/131682
-export async function loadRuleTags({ http }: { http: HttpSetup }): Promise<RuleTagsAggregations> {
-  const res = await http.get<AsApiContract<RuleAggregations>>(
-    `${INTERNAL_BASE_ALERTING_API_PATH}/rules/_aggregate`
+export async function loadRuleTags({
+  http,
+  searchText,
+  after,
+  filter,
+}: LoadRuleTagsProps): Promise<RuleTagsAggregationFormattedResult> {
+  const filtersKueryNode = mapFiltersToKueryNode({
+    tagsFilter: filter,
+  });
+
+  const res = await http.post<RuleTagsAggregationResult>(
+    `${INTERNAL_BASE_ALERTING_API_PATH}/rules/_aggregate`,
+    {
+      body: JSON.stringify({
+        aggs: JSON.stringify(getRuleTagsAggregation({ after })),
+        search_fields: searchText ? JSON.stringify(['tags']) : undefined,
+        search: searchText,
+        ...(filtersKueryNode ? { filter: JSON.stringify(filtersKueryNode) } : {}),
+      }),
+    }
   );
-  return rewriteTagsBodyRes(res);
+  return formatRuleTagsAggregationResult(res);
 }
 
 export async function loadRuleAggregations({
@@ -32,24 +50,25 @@ export async function loadRuleAggregations({
   ruleExecutionStatusesFilter,
   ruleStatusesFilter,
   tagsFilter,
-}: LoadRuleAggregationsProps): Promise<RuleAggregations> {
-  const filters = mapFiltersToKql({
+}: LoadRuleAggregationsProps): Promise<RuleAggregationFormattedResult> {
+  const filtersKueryNode = mapFiltersToKueryNode({
     typesFilter,
     actionTypesFilter,
     ruleExecutionStatusesFilter,
     ruleStatusesFilter,
     tagsFilter,
   });
-  const res = await http.post<AsApiContract<RuleAggregations>>(
+  const res = await http.post<RuleAggregationResult>(
     `${INTERNAL_BASE_ALERTING_API_PATH}/rules/_aggregate`,
     {
       body: JSON.stringify({
+        aggs: JSON.stringify(getDefaultRuleAggregation()),
         search_fields: searchText ? JSON.stringify(['name', 'tags']) : undefined,
         search: searchText,
-        filter: filters.length ? filters.join(' and ') : undefined,
         default_search_operator: 'AND',
+        ...(filtersKueryNode ? { filter: JSON.stringify(filtersKueryNode) } : {}),
       }),
     }
   );
-  return rewriteBodyRes(res);
+  return formatDefaultAggregationResult(res);
 }

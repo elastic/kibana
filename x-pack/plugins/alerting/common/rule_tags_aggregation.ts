@@ -10,7 +10,7 @@ import type {
   AggregationsCompositeAggregation,
   AggregationsAggregateOrder,
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import type { AggregateOptions } from '../rules_client/types';
+import type { AggregateOptions } from './rule';
 
 export type RuleTagsAggregationOptions = Pick<
   AggregateOptions,
@@ -19,11 +19,11 @@ export type RuleTagsAggregationOptions = Pick<
   after?: AggregationsCompositeAggregation['after'];
 };
 
-export interface RuleTagsAggregateResult {
+export interface RuleTagsAggregationFormattedResult {
   ruleTags: string[];
 }
 
-export interface RuleTagsAggregation extends Record<string, unknown> {
+export interface RuleTagsAggregationResult extends Record<string, unknown> {
   tags: {
     buckets: Array<{
       key: {
@@ -39,10 +39,10 @@ interface GetRuleTagsAggregationParams {
   after?: AggregationsCompositeAggregation['after'];
 }
 
-export const getRuleTagsAggregation = ({
-  maxTags = 50,
-  after,
-}: GetRuleTagsAggregationParams): Record<string, AggregationsAggregationContainer> => {
+export const getRuleTagsAggregation = (
+  params?: GetRuleTagsAggregationParams
+): Record<string, AggregationsAggregationContainer> => {
+  const { maxTags = 50, after } = params || {};
   return {
     tags: {
       composite: {
@@ -64,8 +64,8 @@ export const getRuleTagsAggregation = ({
 };
 
 export const formatRuleTagsAggregationResult = (
-  aggregations?: RuleTagsAggregation
-): RuleTagsAggregateResult => {
+  aggregations?: RuleTagsAggregationResult
+): RuleTagsAggregationFormattedResult => {
   if (!aggregations) {
     return {
       ruleTags: [],

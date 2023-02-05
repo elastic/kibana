@@ -10,14 +10,14 @@ import { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import type { AlertingRouter } from '../../types';
 import { ILicenseState } from '../../lib/license_state';
 import { verifyApiAccess } from '../../lib/license_api_access';
-import { LEGACY_BASE_ALERT_API_PATH } from '../../../common';
-import { renameKeys } from '../lib/rename_keys';
-import { FindOptions } from '../../rules_client';
 import {
-  RuleAggregation,
+  LEGACY_BASE_ALERT_API_PATH,
+  RuleAggregationResult,
   getDefaultRuleAggregation,
   formatDefaultAggregationResult,
-} from '../../lib';
+} from '../../../common';
+import { renameKeys } from '../lib/rename_keys';
+import { FindOptions } from '../../rules_client';
 import { trackLegacyRouteUsage } from '../../lib/track_legacy_route_usage';
 import { trackLegacyTerminology } from '../lib/track_legacy_terminology';
 
@@ -82,12 +82,16 @@ export const aggregateAlertRoute = (
           : [query.search_fields];
       }
 
-      const aggregateResult = await rulesClient.aggregate<RuleAggregation>({
+      const aggregateResult = await rulesClient.aggregate<RuleAggregationResult>({
         options,
         aggs: getDefaultRuleAggregation(),
       });
+      const { ruleExecutionStatus, ...rest } = formatDefaultAggregationResult(aggregateResult);
       return res.ok({
-        body: formatDefaultAggregationResult(aggregateResult),
+        body: {
+          ...rest,
+          alertExecutionStatus: ruleExecutionStatus,
+        },
       });
     })
   );

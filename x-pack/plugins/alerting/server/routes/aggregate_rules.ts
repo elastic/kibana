@@ -8,20 +8,19 @@
 import { IRouter } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
 import { UsageCounter } from '@kbn/usage-collection-plugin/server';
+import type { AggregationsAggregationContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { ILicenseState } from '../lib';
-import { AggregateOptions } from '../rules_client';
+import { RewriteRequestCase, verifyAccessAndContext } from './lib';
 import {
-  AggregateResult,
-  RuleAggregation,
-  getDefaultRuleAggregation,
-  formatDefaultAggregationResult,
-} from '../lib';
-import { RewriteResponseCase, RewriteRequestCase, verifyAccessAndContext } from './lib';
-import { AlertingRequestHandlerContext, INTERNAL_BASE_ALERTING_API_PATH } from '../types';
+  AlertingRequestHandlerContext,
+  INTERNAL_BASE_ALERTING_API_PATH,
+  AggregateOptions,
+} from '../types';
 import { trackLegacyTerminology } from './lib/track_legacy_terminology';
 
 // config definition
 const querySchema = schema.object({
+  aggs: schema.recordOf(schema.string(), schema.any()),
   search: schema.maybe(schema.string()),
   default_search_operator: schema.oneOf([schema.literal('OR'), schema.literal('AND')], {
     defaultValue: 'OR',
@@ -40,7 +39,7 @@ const querySchema = schema.object({
   filter: schema.maybe(schema.string()),
 });
 
-const rewriteQueryReq: RewriteRequestCase<AggregateOptions> = ({
+const rewriteQueryReq: RewriteRequestCase<AggregateOptions & { aggs: Record<string, unknown> }> = ({
   default_search_operator: defaultSearchOperator,
   has_reference: hasReference,
   search_fields: searchFields,
@@ -50,23 +49,6 @@ const rewriteQueryReq: RewriteRequestCase<AggregateOptions> = ({
   defaultSearchOperator,
   ...(hasReference ? { hasReference } : {}),
   ...(searchFields ? { searchFields } : {}),
-});
-const rewriteBodyRes: RewriteResponseCase<AggregateResult> = ({
-  alertExecutionStatus,
-  ruleLastRunOutcome,
-  ruleEnabledStatus,
-  ruleMutedStatus,
-  ruleSnoozedStatus,
-  ruleTags,
-  ...rest
-}) => ({
-  ...rest,
-  rule_execution_status: alertExecutionStatus,
-  rule_last_run_outcome: ruleLastRunOutcome,
-  rule_enabled_status: ruleEnabledStatus,
-  rule_muted_status: ruleMutedStatus,
-  rule_snoozed_status: ruleSnoozedStatus,
-  rule_tags: ruleTags,
 });
 
 export const aggregateRulesRoute = (
@@ -84,7 +66,7 @@ export const aggregateRulesRoute = (
     router.handleLegacyErrors(
       verifyAccessAndContext(licenseState, async function (context, req, res) {
         const rulesClient = (await context.alerting).getRulesClient();
-        const options = rewriteQueryReq({
+        const { aggs, ...options } = rewriteQueryReq({
           ...req.query,
           has_reference: req.query.has_reference || undefined,
         });
@@ -92,12 +74,12 @@ export const aggregateRulesRoute = (
           [req.query.search, req.query.search_fields].filter(Boolean) as string[],
           usageCounter
         );
-        const aggregateResult = await rulesClient.aggregate<RuleAggregation>({
+        const aggregateResult = await rulesClient.aggregate({
           options,
-          aggs: getDefaultRuleAggregation(options.maxTags),
+          aggs: aggs as Record<string, AggregationsAggregationContainer>,
         });
         return res.ok({
-          body: rewriteBodyRes(formatDefaultAggregationResult(aggregateResult)),
+          body: aggregateResult,
         });
       })
     )
@@ -112,7 +94,7 @@ export const aggregateRulesRoute = (
     router.handleLegacyErrors(
       verifyAccessAndContext(licenseState, async function (context, req, res) {
         const rulesClient = (await context.alerting).getRulesClient();
-        const options = rewriteQueryReq({
+        const { aggs, ...options } = rewriteQueryReq({
           ...req.body,
           has_reference: req.body.has_reference || undefined,
         });
@@ -120,12 +102,12 @@ export const aggregateRulesRoute = (
           [req.body.search, req.body.search_fields].filter(Boolean) as string[],
           usageCounter
         );
-        const aggregateResult = await rulesClient.aggregate<RuleAggregation>({
+        const aggregateResult = await rulesClient.aggregate({
           options,
-          aggs: getDefaultRuleAggregation(options.maxTags),
+          aggs: aggs as Record<string, AggregationsAggregationContainer>,
         });
         return res.ok({
-          body: rewriteBodyRes(formatDefaultAggregationResult(aggregateResult)),
+          body: aggregateResult,
         });
       })
     )

@@ -12,35 +12,17 @@ import { ruleAuditEvent, RuleAuditAction } from '../common/audit_events';
 import { buildKueryNodeFilter } from '../common';
 import { alertingAuthorizationFilterOpts } from '../common/constants';
 import { RulesClientContext } from '../types';
-import { RawRule } from '../../types';
+import { RawRule, AggregateOptions } from '../../types';
 import { validateRuleAggregationFields } from '../lib/validate_rule_aggregation_fields';
 
-interface IndexType {
-  [key: string]: unknown;
-}
-
-export interface AggregateOptions extends IndexType {
-  search?: string;
-  defaultSearchOperator?: 'AND' | 'OR';
-  searchFields?: string[];
-  hasReference?: {
-    type: string;
-    id: string;
-  };
-  filter?: string | KueryNode;
-  maxTags?: number;
-  page?: number;
-  perPage?: number;
-}
-
-export interface AggregateParams<T> {
+export interface AggregateParams {
   options?: AggregateOptions;
-  aggs: Record<keyof T, AggregationsAggregationContainer>;
+  aggs: Record<string, AggregationsAggregationContainer>;
 }
 
 export async function aggregate<T extends Record<string, unknown>>(
   context: RulesClientContext,
-  params: AggregateParams<T>
+  params: AggregateParams
 ): Promise<T | undefined> {
   const { options = {}, aggs } = params;
   const { filter, maxTags, page = 1, perPage = 0, ...restOptions } = options;
