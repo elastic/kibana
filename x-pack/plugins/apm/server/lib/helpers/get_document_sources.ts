@@ -17,21 +17,30 @@ export async function getDocumentSources({
   start,
   end,
   kuery,
+  enableServiceTransactionMetrics,
+  enableContinuousRollups,
 }: {
   apmEventClient: APMEventClient;
   start: number;
   end: number;
   kuery: string;
+  enableServiceTransactionMetrics: boolean;
+  enableContinuousRollups: boolean;
 }) {
   const sources: Array<ApmDataSource & { hasDocs: boolean }> = flatten(
     await Promise.all(
       [
-        ApmDocumentType.ServiceTransactionMetric as const,
+        ...(enableServiceTransactionMetrics
+          ? [ApmDocumentType.ServiceTransactionMetric as const]
+          : []),
         ApmDocumentType.TransactionMetric as const,
       ].map(async (documentType) => {
         const docTypeConfig = getConfigForDocumentType(documentType);
         const allHasDocs = await Promise.all(
-          docTypeConfig.rollupIntervals.map(async (rollupInterval) => {
+          (enableContinuousRollups
+            ? docTypeConfig.rollupIntervals
+            : [RollupInterval.OneMinute]
+          ).map(async (rollupInterval) => {
             const response = await apmEventClient.search(
               'check_document_type_availability',
               {
