@@ -20,9 +20,7 @@ import { License } from '@kbn/license-api-guard-plugin/server';
 import { CustomBranding } from '@kbn/core-custom-branding-common';
 import { Subscription } from 'rxjs';
 import { PLUGIN } from '../common/constants';
-import type { CustomBrandingRequestHandlerContext } from './types';
 import { Dependencies } from './types';
-import { registerRoutes } from './routes';
 import { registerUiSettings } from './ui_settings';
 
 const settingsKeys: Array<keyof CustomBranding> = [
@@ -50,8 +48,6 @@ export class CustomBrandingPlugin implements Plugin {
       pluginName: PLUGIN.getI18nName(i18n),
       logger: this.logger,
     });
-    const router = core.http.createRouter<CustomBrandingRequestHandlerContext>();
-    registerRoutes(router);
 
     registerUiSettings(core);
 

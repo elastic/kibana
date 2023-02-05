@@ -8,7 +8,7 @@
   },
   "description": " Enables customization of Kibana",
   "server": true,
-  "ui": true,
+  "ui": false,
   "requiredPlugins": ["licensing", "licenseApiGuard"],
   "optionalPlugins": []
 }
