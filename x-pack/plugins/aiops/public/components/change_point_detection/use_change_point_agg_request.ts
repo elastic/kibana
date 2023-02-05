@@ -16,7 +16,6 @@ import {
 } from './change_point_detection_context';
 import { useDataSource } from '../../hooks/use_data_source';
 import { useCancellableSearch } from '../../hooks/use_cancellable_search';
-import { useSplitFieldCardinality } from './use_split_field_cardinality';
 
 interface RequestOptions {
   index: string;
@@ -97,7 +96,8 @@ const CHARTS_PER_PAGE = 6;
 
 export function useChangePointResults(
   requestParams: ChangePointDetectionRequestParams,
-  query: QueryDslQueryContainer
+  query: QueryDslQueryContainer,
+  splitFieldCardinality: number | null
 ) {
   const {
     notifications: { toasts },
@@ -108,8 +108,6 @@ export function useChangePointResults(
   const [results, setResults] = useState<ChangePointAnnotation[]>([]);
   const [activePage, setActivePage] = useState<number>(0);
   const [progress, setProgress] = useState<number>(0);
-
-  const splitFieldCardinality = useSplitFieldCardinality(requestParams.splitField, query);
 
   const { runRequest, cancelRequest, isLoading } = useCancellableSearch();
 

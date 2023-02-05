@@ -20,7 +20,7 @@ import { useDataSource } from '../../hooks/use_data_source';
  * @param query
  */
 export function useSplitFieldCardinality(splitField: string, query: QueryDslQueryContainer) {
-  const [cardinality, setCardinality] = useState<number>();
+  const [cardinality, setCardinality] = useState<number | null>(null);
   const { dataView } = useDataSource();
 
   const requestPayload = useMemo(() => {

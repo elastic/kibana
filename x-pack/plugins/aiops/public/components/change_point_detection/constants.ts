@@ -11,3 +11,5 @@ export const fnOperationTypeMapping: Record<string, string> = {
   sum: 'sum',
   avg: 'average',
 } as const;
+
+export const DEFAULT_AGG_FUNCTION = 'avg';
