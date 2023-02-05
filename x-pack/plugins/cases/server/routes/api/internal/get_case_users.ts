@@ -10,7 +10,7 @@ import { INTERNAL_CASE_USERS_URL } from '../../../../common/constants';
 import { createCaseError } from '../../../common/error';
 import { createCasesRoute } from '../create_cases_route';
 
-export const getUsersRoute = createCasesRoute({
+export const getCaseUsersRoute = createCasesRoute({
   method: 'get',
   path: INTERNAL_CASE_USERS_URL,
   params: {
