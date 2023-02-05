@@ -107,8 +107,8 @@ describe('action_type_form', () => {
             group: 'group',
             class: 'test class',
           },
+          uuid: '123-456',
         },
-        uuid: '123-456',
       })
     );
 
@@ -162,8 +162,8 @@ describe('action_type_form', () => {
               group: 'group',
               class: 'test class',
             },
+            uuid: '123-456',
           },
-          uuid: '123-456',
         })}
       </I18nProvider>
     );
@@ -211,8 +211,8 @@ describe('action_type_form', () => {
             group: 'group',
             class: 'test class',
           },
+          uuid: '123-456',
         },
-        uuid: '123-456',
       })
     );
 
@@ -264,8 +264,8 @@ describe('action_type_form', () => {
             group: 'group',
             class: 'test class',
           },
+          uuid: '123-456',
         },
-        uuid: '123-456',
       })
     );
 
@@ -317,6 +317,7 @@ describe('action_type_form', () => {
       group: 'default',
       params: {},
       frequency: DEFAULT_FREQUENCY_WITHOUT_SUMMARY,
+      uuid: '123',
     };
     const wrapper = render(
       <IntlProvider locale="en">

@@ -19,7 +19,6 @@ import {
   getSimpleRule,
   getSimpleRuleOutput,
   getWebHookAction,
-  LegacyRuleWithoutServerGeneratedProperties,
   removeServerGeneratedProperties,
 } from '../../utils';
 
@@ -273,7 +272,7 @@ export default ({ getService }: FtrProviderContext): void => {
           const firstRuleParsed = JSON.parse(body.toString().split(/\n/)[0]);
           const firstRule = removeServerGeneratedProperties(firstRuleParsed);
 
-          const outputRule1: LegacyRuleWithoutServerGeneratedProperties = {
+          const outputRule1: ReturnType<typeof getSimpleRuleOutput> = {
             ...getSimpleRuleOutput('rule-1'),
             actions: [
               {

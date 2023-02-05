@@ -19,7 +19,6 @@ import {
   getSimpleRuleOutputWithoutRuleId,
   getSimpleRuleWithoutRuleId,
   getWebHookAction,
-  LegacyRuleWithoutServerGeneratedProperties,
   removeServerGeneratedProperties,
   removeServerGeneratedPropertiesIncludingRuleId,
 } from '../../utils';
@@ -226,7 +225,7 @@ export default ({ getService }: FtrProviderContext) => {
             .expect(200);
 
           const bodyToCompare = removeServerGeneratedProperties(body);
-          const ruleWithActions: LegacyRuleWithoutServerGeneratedProperties = {
+          const ruleWithActions: ReturnType<typeof getSimpleRuleOutput> = {
             ...getSimpleRuleOutput(),
             actions: [
               {
