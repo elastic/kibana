@@ -28,10 +28,6 @@ export const useStats = (pattern: string): UseStats => {
 
     async function fetchData() {
       try {
-        // if (pattern === 'auditbeat-*') {
-        //   throw new Error('simulated error loading stats for just auditbeat');
-        // }
-
         const encodedIndexName = encodeURIComponent(`${pattern}`);
 
         const response = await fetch(`${STATS_ENDPOINT}/${encodedIndexName}`, {

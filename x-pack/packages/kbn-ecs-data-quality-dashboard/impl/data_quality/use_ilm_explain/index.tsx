@@ -31,10 +31,6 @@ export const useIlmExplain = (pattern: string): UseIlmExplain => {
 
     async function fetchData() {
       try {
-        // if (pattern === 'packetbeat-*') {
-        //   throw new Error('simulated error loading ilm explain for just for packetbeat');
-        // }
-
         const encodedIndexName = encodeURIComponent(`${pattern}`);
 
         const response = await fetch(`${ILM_EXPLAIN_ENDPOINT}/${encodedIndexName}`, {

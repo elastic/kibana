@@ -137,7 +137,7 @@ const DataQualityComponent: React.FC = () => {
   const labelInputId = useGeneratedHtmlId({ prefix: 'labelInput' });
   const [selectedOptions, setSelectedOptions] = useState<EuiComboBoxOptionOption[]>(defaultOptions);
   const { indicesExist, loading: isSourcererLoading, selectedPatterns } = useSourcererDataView();
-  const { signalIndexName } = useSignalIndex();
+  const { signalIndexName, loading: isSignalIndexNameLoading } = useSignalIndex();
 
   const alertsAndSelectedPatterns = useMemo(
     () =>
@@ -222,7 +222,7 @@ const DataQualityComponent: React.FC = () => {
               </EuiToolTip>
             </HeaderPage>
 
-            {isSourcererLoading ? (
+            {isSourcererLoading || isSignalIndexNameLoading ? (
               <EuiLoadingSpinner size="l" data-test-subj="ecsDataQualityDashboardLoader" />
             ) : (
               <DataQualityPanel
