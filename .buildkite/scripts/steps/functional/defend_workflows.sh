@@ -17,7 +17,7 @@ set -x
 
 echo "Installing snapd"
 
-apt install snapd
+sudo apt install snapd
 
 # echo "snap install snapd"
 
