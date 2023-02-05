@@ -644,10 +644,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         await PageObjects.discover.waitUntilSidebarHasLoaded();
 
-        // fieldcaps counts a little differently
         // check that the sidebar is rendered
         expect(await PageObjects.discover.getSidebarAriaDescription()).to.be(
-          '53 available fields. 1 empty field. 3 meta fields.'
+          '54 available fields. 0 empty fields. 3 meta fields.'
         );
         let allFields = await PageObjects.discover.getAllFieldNames();
         expect(allFields.includes('_invalid-runtimefield')).to.be(true);

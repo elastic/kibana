@@ -162,6 +162,7 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
       };
       try {
         // making request
+        // todo - I suspect we need to make sure the exlcusion list is applied here
         existingFieldList = await loadFieldExisting({
           data,
           dataView,
