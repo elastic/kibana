@@ -8,7 +8,6 @@ import React from 'react';
 import { Redirect, Switch, Route, useLocation } from 'react-router-dom';
 import { TrackApplicationView } from '@kbn/usage-collection-plugin/public';
 import { useCspSetupStatusApi } from '../../common/api/use_setup_status_api';
-import { NoFindingsStates } from '../../components/no_findings_states';
 import { CloudPosturePage } from '../../components/cloud_posture_page';
 import { useLatestFindingsDataView } from '../../common/api/use_latest_findings_data_view';
 import { cloudPosturePages, findingsNavigation } from '../../common/navigation/constants';

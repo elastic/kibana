@@ -5,7 +5,6 @@
  * 2.0.
  */
 import { useQuery } from '@tanstack/react-query';
-import { number } from 'io-ts';
 import { lastValueFrom } from 'rxjs';
 import type { IKibanaSearchRequest, IKibanaSearchResponse } from '@kbn/data-plugin/common';
 import type { CoreStart } from '@kbn/core/public';
@@ -17,8 +16,6 @@ import { extractErrorMessage } from '../../../../common/utils/helpers';
 import type { Sort } from '../types';
 import { useKibana } from '../../../common/hooks/use_kibana';
 import type { FindingsBaseEsQuery } from '../types';
-import { getAggregationCount, getFindingsCountAggQuery } from '../utils/utils';
-import { CSP_LATEST_FINDINGS_DATA_VIEW } from '../../../../common/constants';
 import { MAX_FINDINGS_TO_LOAD } from '../../../common/constants';
 
 interface UseFindingsOptions extends FindingsBaseEsQuery {

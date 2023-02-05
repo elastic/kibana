@@ -10,7 +10,6 @@ import React, { Fragment, useMemo, useState } from 'react';
 import { upperCase } from 'lodash';
 import {
   EuiEmptyPrompt,
-  EuiBasicTable,
   EuiText,
   EuiBadge,
   useEuiTheme,
@@ -28,7 +27,6 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 import { CspFinding } from '../../../../common/schemas/csp_finding';
 import * as TEST_SUBJECTS from '../test_subjects';
-import { FindingsRuleFlyout } from '../findings_flyout/findings_flyout';
 import {
   baseFindingsColumns,
   createColumnWithFilters,

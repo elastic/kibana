@@ -15,7 +15,6 @@ import { useSyntheticsRefreshContext } from '../../../contexts/synthetics_refres
 import {
   fetchMonitorOverviewAction,
   quietFetchOverviewAction,
-  setOverviewPageStateAction,
   selectOverviewPageState,
   selectServiceLocationsState,
 } from '../../../state';

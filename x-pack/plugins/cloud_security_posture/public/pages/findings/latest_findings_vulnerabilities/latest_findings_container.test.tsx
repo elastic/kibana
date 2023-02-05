@@ -6,7 +6,10 @@
  */
 import React from 'react';
 import { render } from '@testing-library/react';
-import { LatestFindingsContainer, getDefaultQuery } from './latest_findings_vulnerabilities_container';
+import {
+  LatestFindingsContainer,
+  getDefaultQuery,
+} from './latest_findings_vulnerabilities_container';
 import { createStubDataView } from '@kbn/data-views-plugin/common/mocks';
 import { CSP_LATEST_FINDINGS_DATA_VIEW } from '../../../../common/constants';
 import { DEFAULT_VISIBLE_ROWS_PER_PAGE } from '../../../common/constants';

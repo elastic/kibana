@@ -15,7 +15,6 @@ import {
   MonitorListPageState,
   selectEncryptedSyntheticsSavedMonitors,
   selectMonitorListState,
-  updateManagementPageStateAction,
 } from '../../../state';
 
 export function useMonitorList() {

@@ -141,7 +141,8 @@ export function getFieldTypeDescription(type?: string) {
       });
     case KNOWN_FIELD_TYPES.VERSION_RANGE:
       return i18n.translate('unifiedFieldList.fieldNameDescription.versionField', {
-        defaultMessage: 'Range of Software versions. Supports "Semantic Versioning" precedence rules.',
+        defaultMessage:
+          'Range of Software versions. Supports "Semantic Versioning" precedence rules.',
       });
     default:
       // If you see a typescript error here, that's a sign that there are missing switch cases ^^
