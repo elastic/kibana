@@ -110,7 +110,7 @@ const StatsRollupComponent: React.FC<Props> = ({
           >
             <EuiStat
               description={indicesDescription}
-              title={indices != null ? numeral(indices).format(defaultNumberFormat) : EMPTY_STAT}
+              title={indices != null ? numeral(indices).format(defaultNumberFormat) : 0}
               titleSize={STAT_TITLE_SIZE}
             />
           </EuiToolTip>
