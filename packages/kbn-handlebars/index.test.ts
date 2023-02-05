@@ -432,6 +432,7 @@ describe('blocks', () => {
                   "decorator": [Function],
                 },
                 "helpers": Object {},
+                "partials": Object {},
               }
             `);
                 return `hello ${context.me} ${fn()}!`;
