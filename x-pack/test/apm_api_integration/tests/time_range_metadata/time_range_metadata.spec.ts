@@ -60,7 +60,13 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       });
 
       expect(response.isUsingServiceDestinationMetrics).to.eql(false);
-      expect(response.sources.filter((source) => source.hasDocs)).empty();
+      expect(response.sources.filter((source) => source.hasDocs)).to.eql([
+        {
+          documentType: ApmDocumentType.TransactionEvent,
+          rollupInterval: RollupInterval.None,
+          hasDocs: true,
+        },
+      ]);
     });
   });
 
