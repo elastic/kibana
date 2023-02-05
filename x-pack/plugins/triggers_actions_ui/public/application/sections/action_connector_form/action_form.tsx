@@ -69,6 +69,7 @@ export interface ActionAccordionFormProps {
   isActionGroupDisabledForActionType?: (actionGroupId: string, actionTypeId: string) => boolean;
   hideActionHeader?: boolean;
   hideNotifyWhen?: boolean;
+  defaultSummaryMessage?: string;
   hasSummary?: boolean;
   minimumThrottleInterval?: [number | undefined, string];
 }
@@ -97,6 +98,7 @@ export const ActionForm = ({
   isActionGroupDisabledForActionType,
   hideActionHeader,
   hideNotifyWhen,
+  defaultSummaryMessage,
   hasSummary,
   minimumThrottleInterval,
 }: ActionAccordionFormProps) => {
@@ -401,6 +403,7 @@ export const ActionForm = ({
                 setActiveActionItem(undefined);
               }}
               hideNotifyWhen={hideNotifyWhen}
+              defaultSummaryMessage={defaultSummaryMessage}
               hasSummary={hasSummary}
               minimumThrottleInterval={minimumThrottleInterval}
             />
