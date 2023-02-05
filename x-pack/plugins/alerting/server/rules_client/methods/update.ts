@@ -23,11 +23,7 @@ import { retryIfConflicts } from '../../lib/retry_if_conflicts';
 import { bulkMarkApiKeysForInvalidation } from '../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation';
 import { ruleAuditEvent, RuleAuditAction } from '../common/audit_events';
 import { getMappedParams } from '../common/mapped_params_utils';
-import {
-  NormalizedAlertActionOptionalUuid,
-  NormalizedAlertAction,
-  RulesClientContext,
-} from '../types';
+import { NormalizedAlertAction, RulesClientContext } from '../types';
 import {
   validateActions,
   extractReferences,
@@ -37,16 +33,13 @@ import {
 } from '../lib';
 import { generateAPIKeyName, apiKeyAsAlertAttributes } from '../common';
 
-export interface UpdateOptions<
-  Params extends RuleTypeParams,
-  Actions = NormalizedAlertActionOptionalUuid[]
-> {
+export interface UpdateOptions<Params extends RuleTypeParams> {
   id: string;
   data: {
     name: string;
     tags: string[];
     schedule: IntervalSchedule;
-    actions: Actions;
+    actions: NormalizedAlertAction[];
     params: Params;
     throttle?: string | null;
     notifyWhen?: RuleNotifyWhenType | null;
@@ -161,7 +154,7 @@ async function updateWithOCC<Params extends RuleTypeParams>(
 
 async function updateAlert<Params extends RuleTypeParams>(
   context: RulesClientContext,
-  { id, data }: UpdateOptions<Params, NormalizedAlertAction[]>,
+  { id, data }: UpdateOptions<Params>,
   { attributes, version }: SavedObject<RawRule>
 ): Promise<PartialRule<Params>> {
   const ruleType = context.ruleTypeRegistry.get(attributes.alertTypeId);

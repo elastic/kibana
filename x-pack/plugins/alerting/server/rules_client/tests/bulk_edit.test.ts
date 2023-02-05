@@ -20,7 +20,7 @@ import { ActionsAuthorization, ActionsClient } from '@kbn/actions-plugin/server'
 import { auditLoggerMock } from '@kbn/security-plugin/server/audit/mocks';
 import { getBeforeSetup, setGlobalDate } from './lib';
 import { bulkMarkApiKeysForInvalidation } from '../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation';
-import { NormalizedAlertActionOptionalUuid } from '..';
+import { NormalizedAlertAction } from '../types';
 
 jest.mock('../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation', () => ({
   bulkMarkApiKeysForInvalidation: jest.fn(),
@@ -534,7 +534,7 @@ describe('bulkEdit()', () => {
           {
             field: 'actions',
             operation: 'add',
-            value: [existingAction, newAction, newAction2] as NormalizedAlertActionOptionalUuid[],
+            value: [existingAction, newAction, newAction2] as NormalizedAlertAction[],
           },
         ],
       });

@@ -5,6 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+import { NonEmptyString } from '@kbn/securitysolution-io-ts-types';
 
 import * as t from 'io-ts';
 import { saved_object_attributes } from '../saved_object_attributes';
@@ -19,10 +20,7 @@ export type RuleActionTypeId = t.TypeOf<typeof RuleActionTypeId>;
 export const RuleActionTypeId = t.string;
 
 export type RuleActionUuid = t.TypeOf<typeof RuleActionUuid>;
-export const RuleActionUuid = t.string;
-
-export type RuleActionOptionalUuid = t.TypeOf<typeof RuleActionOptionalUuid>;
-export const RuleActionOptionalUuid = t.union([RuleActionUuid, t.undefined]);
+export const RuleActionUuid = NonEmptyString;
 
 /**
  * Params is an "object", since it is a type of RuleActionParams which is action templates.
@@ -31,56 +29,34 @@ export const RuleActionOptionalUuid = t.union([RuleActionUuid, t.undefined]);
 export type RuleActionParams = t.TypeOf<typeof RuleActionParams>;
 export const RuleActionParams = saved_object_attributes;
 
-// RuleAction
-
-const BaseRuleAction = t.type({
-  group: RuleActionGroup,
-  id: RuleActionId,
-  action_type_id: RuleActionTypeId,
-  params: RuleActionParams,
-});
-
 export type RuleAction = t.TypeOf<typeof RuleAction>;
 export const RuleAction = t.exact(
-  t.intersection([BaseRuleAction, t.type({ uuid: RuleActionUuid })])
+  t.intersection([
+    t.type({
+      group: RuleActionGroup,
+      id: RuleActionId,
+      action_type_id: RuleActionTypeId,
+      params: RuleActionParams,
+    }),
+    t.partial({ uuid: RuleActionUuid }),
+  ])
 );
-
-const RuleActionWithOptionalUuid = t.exact(
-  t.intersection([BaseRuleAction, t.partial({ uuid: RuleActionOptionalUuid })])
-);
-
-export type RuleActionWithoutUuid = t.TypeOf<typeof BaseRuleAction>;
-
-// RuleActionCamel
-
-const BaseRuleActionCamel = t.type({
-  group: RuleActionGroup,
-  id: RuleActionId,
-  actionTypeId: RuleActionTypeId,
-  params: RuleActionParams,
-});
-
-export type RuleActionCamel = t.TypeOf<typeof RuleActionCamel>;
-export const RuleActionCamel = t.exact(
-  t.intersection([BaseRuleActionCamel, t.type({ uuid: RuleActionUuid })])
-);
-
-export type RuleActionWithOptionalUuidCamel = t.TypeOf<typeof RuleActionWithOptionalUuidCamel>;
-const RuleActionWithOptionalUuidCamel = t.exact(
-  t.intersection([BaseRuleActionCamel, t.partial({ uuid: RuleActionOptionalUuid })])
-);
-
-// Arrays
 
 export type RuleActionArray = t.TypeOf<typeof RuleActionArray>;
 export const RuleActionArray = t.array(RuleAction);
 
+export type RuleActionCamel = t.TypeOf<typeof RuleActionCamel>;
+export const RuleActionCamel = t.exact(
+  t.intersection([
+    t.type({
+      group: RuleActionGroup,
+      id: RuleActionId,
+      actionTypeId: RuleActionTypeId,
+      params: RuleActionParams,
+    }),
+    t.partial({ uuid: RuleActionUuid }),
+  ])
+);
+
 export type RuleActionArrayCamel = t.TypeOf<typeof RuleActionArrayCamel>;
 export const RuleActionArrayCamel = t.array(RuleActionCamel);
-
-export const RuleActionWithOptionalUuidArray = t.array(RuleActionWithOptionalUuid);
-export const RuleActionWithOptionalUuidArrayCamel = t.array(RuleActionWithOptionalUuidCamel);
-
-export type RuleActionWithoutUuidArray = t.TypeOf<typeof RuleActionWithoutUuidArray>;
-export const RuleActionWithoutUuidArray = t.array(t.exact(BaseRuleAction));
-export const RuleActionWithoutUuidArrayCamel = t.array(t.exact(BaseRuleActionCamel));

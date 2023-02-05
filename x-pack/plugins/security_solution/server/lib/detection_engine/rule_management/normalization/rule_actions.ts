@@ -12,10 +12,7 @@ import {
   NOTIFICATION_THROTTLE_RULE,
 } from '../../../../../common/constants';
 
-import type {
-  LegacyRuleResponse,
-  RuleResponse,
-} from '../../../../../common/detection_engine/rule_schema';
+import type { RuleResponse } from '../../../../../common/detection_engine/rule_schema';
 import { transformAlertToRuleAction } from '../../../../../common/detection_engine/transform_actions';
 // eslint-disable-next-line no-restricted-imports
 import type { LegacyRuleActions } from '../../rule_actions_legacy';
@@ -106,7 +103,7 @@ function transformFromFirstActionThrottle(rule: RuleAlertType) {
 export const transformActions = (
   alertAction: RuleAction[] | undefined,
   legacyRuleActions: LegacyRuleActions | null | undefined
-): RuleResponse['actions'] | LegacyRuleResponse['actions'] => {
+): RuleResponse['actions'] => {
   if (alertAction != null && alertAction.length !== 0) {
     return alertAction.map((action) => transformAlertToRuleAction(action));
   } else if (legacyRuleActions != null) {

@@ -5,17 +5,21 @@
  * 2.0.
  */
 
+import { validate } from '@kbn/securitysolution-io-ts-utils';
 import type { Logger } from '@kbn/core/server';
 
 import { DETECTION_ENGINE_RULES_BULK_UPDATE } from '../../../../../../../common/constants';
-import { BulkPatchRulesRequestBody } from '../../../../../../../common/detection_engine/rule_management';
+import {
+  BulkPatchRulesRequestBody,
+  BulkCrudRulesResponse,
+} from '../../../../../../../common/detection_engine/rule_management';
 
 import { buildRouteValidationNonExact } from '../../../../../../utils/build_validation/route_validation';
 import type { SecuritySolutionPluginRouter } from '../../../../../../types';
 import type { SetupPlugins } from '../../../../../../plugin';
 import { buildMlAuthz } from '../../../../../machine_learning/authz';
 import { throwAuthzError } from '../../../../../machine_learning/validation';
-import { transformBulkError } from '../../../../routes/utils';
+import { transformBulkError, buildSiemResponse } from '../../../../routes/utils';
 import { getIdBulkError } from '../../../utils/utils';
 import { transformValidateBulkError } from '../../../utils/validate';
 import { patchRules } from '../../../logic/crud/patch_rules';
@@ -46,6 +50,8 @@ export const bulkPatchRulesRoute = (
     },
     async (context, request, response) => {
       logDeprecatedBulkEndpoint(logger, DETECTION_ENGINE_RULES_BULK_UPDATE);
+
+      const siemResponse = buildSiemResponse(response);
 
       const ctx = await context.resolve(['core', 'securitySolution', 'alerting', 'licensing']);
 
@@ -114,10 +120,19 @@ export const bulkPatchRulesRoute = (
         })
       );
 
-      return response.ok({
-        body: rules ?? {},
-        headers: getDeprecatedBulkEndpointHeader(DETECTION_ENGINE_RULES_BULK_UPDATE),
-      });
+      const [validated, errors] = validate(rules, BulkCrudRulesResponse);
+      if (errors != null) {
+        return siemResponse.error({
+          statusCode: 500,
+          body: errors,
+          headers: getDeprecatedBulkEndpointHeader(DETECTION_ENGINE_RULES_BULK_UPDATE),
+        });
+      } else {
+        return response.ok({
+          body: validated ?? {},
+          headers: getDeprecatedBulkEndpointHeader(DETECTION_ENGINE_RULES_BULK_UPDATE),
+        });
+      }
     }
   );
 };

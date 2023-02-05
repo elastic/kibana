@@ -6,11 +6,13 @@
  */
 
 import type { RouteConfig, RequestHandler, Logger } from '@kbn/core/server';
+import { validate } from '@kbn/securitysolution-io-ts-utils';
 
 import { DETECTION_ENGINE_RULES_BULK_DELETE } from '../../../../../../../common/constants';
 import {
   BulkDeleteRulesRequestBody,
   validateQueryRuleByIds,
+  BulkCrudRulesResponse,
 } from '../../../../../../../common/detection_engine/rule_management';
 
 import { buildRouteValidation } from '../../../../../../utils/build_validation/route_validation';
@@ -21,7 +23,11 @@ import type {
 
 import { getIdBulkError } from '../../../utils/utils';
 import { transformValidateBulkError } from '../../../utils/validate';
-import { transformBulkError, createBulkErrorObject } from '../../../../routes/utils';
+import {
+  transformBulkError,
+  buildSiemResponse,
+  createBulkErrorObject,
+} from '../../../../routes/utils';
 import { deleteRules } from '../../../logic/crud/delete_rules';
 import { readRules } from '../../../logic/crud/read_rules';
 // eslint-disable-next-line no-restricted-imports
@@ -52,6 +58,8 @@ export const bulkDeleteRulesRoute = (router: SecuritySolutionPluginRouter, logge
   };
   const handler: Handler = async (context, request, response) => {
     logDeprecatedBulkEndpoint(logger, DETECTION_ENGINE_RULES_BULK_DELETE);
+
+    const siemResponse = buildSiemResponse(response);
 
     const ctx = await context.resolve(['core', 'securitySolution', 'alerting']);
 
@@ -93,11 +101,19 @@ export const bulkDeleteRulesRoute = (router: SecuritySolutionPluginRouter, logge
         }
       })
     );
-
-    return response.ok({
-      body: rules ?? {},
-      headers: getDeprecatedBulkEndpointHeader(DETECTION_ENGINE_RULES_BULK_DELETE),
-    });
+    const [validated, errors] = validate(rules, BulkCrudRulesResponse);
+    if (errors != null) {
+      return siemResponse.error({
+        statusCode: 500,
+        body: errors,
+        headers: getDeprecatedBulkEndpointHeader(DETECTION_ENGINE_RULES_BULK_DELETE),
+      });
+    } else {
+      return response.ok({
+        body: validated ?? {},
+        headers: getDeprecatedBulkEndpointHeader(DETECTION_ENGINE_RULES_BULK_DELETE),
+      });
+    }
   };
 
   router.delete(config, handler);

@@ -13,8 +13,8 @@ import {
   machine_learning_job_id_normalized,
   RiskScore,
   RiskScoreMapping,
+  RuleActionArrayCamel,
   RuleActionThrottle,
-  RuleActionWithOptionalUuidArrayCamel,
   RuleIntervalFrom,
   RuleIntervalTo,
   Severity,
@@ -286,7 +286,7 @@ const internalRuleCreateRequired = t.type({
     interval: t.string,
   }),
   enabled: IsRuleEnabled,
-  actions: RuleActionWithOptionalUuidArrayCamel,
+  actions: RuleActionArrayCamel,
   params: ruleParams,
 });
 const internalRuleCreateOptional = t.partial({
@@ -305,7 +305,7 @@ const internalRuleUpdateRequired = t.type({
   schedule: t.type({
     interval: t.string,
   }),
-  actions: RuleActionWithOptionalUuidArrayCamel,
+  actions: RuleActionArrayCamel,
   params: ruleParams,
 });
 const internalRuleUpdateOptional = t.partial({

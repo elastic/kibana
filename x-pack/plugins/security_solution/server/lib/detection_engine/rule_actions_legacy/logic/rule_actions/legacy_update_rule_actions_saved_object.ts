@@ -29,7 +29,7 @@ import type { LegacyIRuleActionsAttributesSavedObjectAttributes } from './legacy
 interface LegacyUpdateRuleActionsSavedObject {
   ruleAlertId: string;
   savedObjectsClient: RuleExecutorServices['savedObjectsClient'];
-  actions: Array<Omit<RuleAction, 'uuid'>> | undefined;
+  actions: RuleAction[] | undefined;
   throttle: string | null | undefined;
   ruleActions: LegacyRulesActionsSavedObject;
 }

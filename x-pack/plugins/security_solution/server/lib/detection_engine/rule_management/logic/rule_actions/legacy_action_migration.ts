@@ -120,7 +120,10 @@ export const legacyMigrate = async ({
         data: migratedRule,
       });
 
-      return { id: rule.id, ...migratedRule };
+      return {
+        id: rule.id,
+        ...migratedRule,
+      };
     }
   });
 

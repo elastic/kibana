@@ -20,7 +20,7 @@ import type {
 } from '@kbn/securitysolution-io-ts-alerting-types';
 import { ENDPOINT_LIST_ID } from '@kbn/securitysolution-list-constants';
 import type { Filter } from '@kbn/es-query';
-import type { ActionVariables } from '@kbn/triggers-actions-ui-plugin/public';
+import type { ActionVariables, RuleAction } from '@kbn/triggers-actions-ui-plugin/public';
 import type { ResponseAction } from '../../../../../common/detection_engine/rule_response_actions/schemas';
 import { normalizeThresholdField } from '../../../../../common/detection_engine/utils';
 import type { RuleAlertAction } from '../../../../../common/detection_engine/types';
@@ -79,7 +79,7 @@ export const getActionsStepsData = (
   const { enabled, throttle, meta, actions = [], response_actions: responseActions } = rule;
 
   return {
-    actions: actions?.map(transformRuleToAlertAction),
+    actions: actions?.map(transformRuleToAlertAction) as RuleAction[],
     responseActions: responseActions?.map(transformRuleToAlertResponseAction),
     throttle,
     kibanaSiemAppUrl: meta?.kibana_siem_app_url,

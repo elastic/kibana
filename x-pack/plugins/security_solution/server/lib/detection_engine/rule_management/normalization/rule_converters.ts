@@ -27,7 +27,6 @@ import type {
   RuleResponse,
   TypeSpecificCreateProps,
   TypeSpecificResponse,
-  LegacyRuleResponse,
 } from '../../../../../common/detection_engine/rule_schema';
 import {
   EqlPatchParams,
@@ -672,7 +671,7 @@ export const commonParamsCamelToSnake = (params: BaseRuleParams) => {
 export const internalRuleToAPIResponse = (
   rule: SanitizedRule<RuleParams> | ResolvedSanitizedRule<RuleParams>,
   legacyRuleActions?: LegacyRuleActions | null
-): RuleResponse | LegacyRuleResponse => {
+): RuleResponse => {
   const executionSummary = createRuleExecutionSummary(rule);
 
   const isResolvedRule = (obj: unknown): obj is ResolvedSanitizedRule<RuleParams> =>

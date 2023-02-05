@@ -19,6 +19,11 @@ import type { RuleAlertType } from '../../../rule_schema';
 // eslint-disable-next-line no-restricted-imports
 import { legacyMigrate, getUpdatedActionsParams } from './legacy_action_migration';
 
+jest.mock('uuid', () => {
+  let uuid = 100;
+  return { v4: () => `${uuid++}` };
+});
+
 const getRuleLegacyActions = (): RuleAlertType =>
   ({
     id: '123',
@@ -241,7 +246,7 @@ describe('Legacy rule action migration logic', () => {
             to: ['test@test.com'],
             subject: 'Test Actions',
           },
-          uuid: expect.any(String),
+          uuid: '100',
         },
       ]);
       expect(migratedRule?.throttle).toEqual('1d');
@@ -289,7 +294,7 @@ describe('Legacy rule action migration logic', () => {
             to: ['test@test.com'],
             subject: 'Test Actions',
           },
-          uuid: expect.any(String),
+          uuid: '101',
         },
       ]);
       expect(migratedRule?.throttle).toEqual('1h');
@@ -337,7 +342,7 @@ describe('Legacy rule action migration logic', () => {
             to: ['test@test.com'],
             subject: 'Test Actions',
           },
-          uuid: expect.any(String),
+          uuid: '102',
         },
       ]);
       expect(migratedRule?.throttle).toEqual('7d');
@@ -400,7 +405,7 @@ describe('Legacy rule action migration logic', () => {
               subject: 'Test Actions',
               to: ['a@a.com'],
             },
-            uuid: expect.any(String),
+            uuid: '103',
           },
         ],
         throttle: '1h',
@@ -474,7 +479,7 @@ describe('Legacy rule action migration logic', () => {
               subject: 'Rule email',
               to: ['test@test.com'],
             },
-            uuid: expect.any(String),
+            uuid: '104',
           },
           {
             actionTypeId: '.slack',
@@ -483,7 +488,7 @@ describe('Legacy rule action migration logic', () => {
             params: {
               message: 'Rule {{context.rule.name}} generated {{state.signals_count}} alerts',
             },
-            uuid: expect.any(String),
+            uuid: '105',
           },
         ],
         throttle: '1h',

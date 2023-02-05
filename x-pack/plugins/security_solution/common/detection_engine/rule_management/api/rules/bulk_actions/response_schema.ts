@@ -6,7 +6,7 @@
  */
 
 import type { BulkActionSkipResult } from '@kbn/alerting-plugin/common';
-import type { RuleResponse, LegacyRuleResponse } from '../../../../rule_schema';
+import type { RuleResponse } from '../../../../rule_schema';
 import type { BulkActionsDryRunErrCode } from '../../../../../constants';
 
 export interface RuleDetailsInError {
@@ -20,9 +20,9 @@ export interface NormalizedRuleError {
   rules: RuleDetailsInError[];
 }
 export interface BulkEditActionResults {
-  updated: RuleResponse[] | LegacyRuleResponse[];
-  created: RuleResponse[] | LegacyRuleResponse[];
-  deleted: RuleResponse[] | LegacyRuleResponse[];
+  updated: RuleResponse[];
+  created: RuleResponse[];
+  deleted: RuleResponse[];
   skipped: BulkActionSkipResult[];
 }
 

@@ -13,6 +13,7 @@ import {
   machine_learning_job_id,
   RiskScore,
   RiskScoreMapping,
+  RuleActionArray,
   RuleActionThrottle,
   RuleInterval,
   RuleIntervalFrom,
@@ -24,9 +25,6 @@ import {
   threat_indicator_path,
   threat_mapping,
   threat_query,
-  RuleActionWithOptionalUuidArray,
-  RuleActionWithoutUuidArray,
-  RuleActionArray,
 } from '@kbn/securitysolution-io-ts-alerting-types';
 
 import { RuleExecutionSummary } from '../../rule_monitoring';
@@ -133,6 +131,8 @@ const baseSchema = buildRuleSchemas({
     interval: RuleInterval,
     from: RuleIntervalFrom,
     to: RuleIntervalTo,
+    // Rule actions
+    actions: RuleActionArray,
     throttle: RuleActionThrottle,
     // Rule exceptions
     exceptions_list: ExceptionListArray,
@@ -169,10 +169,7 @@ const responseOptionalFields = {
 };
 
 export type BaseCreateProps = t.TypeOf<typeof BaseCreateProps>;
-export const BaseCreateProps = t.intersection([
-  baseSchema.create,
-  t.exact(t.partial({ actions: RuleActionWithOptionalUuidArray })),
-]);
+export const BaseCreateProps = baseSchema.create;
 
 // -------------------------------------------------------------------------------------------------
 // Shared schemas
@@ -185,7 +182,6 @@ type SharedCreateProps = t.TypeOf<typeof SharedCreateProps>;
 const SharedCreateProps = t.intersection([
   baseSchema.create,
   t.exact(t.partial({ rule_id: RuleSignatureId })),
-  t.exact(t.partial({ actions: RuleActionWithOptionalUuidArray })),
 ]);
 
 type SharedUpdateProps = t.TypeOf<typeof SharedUpdateProps>;
@@ -193,14 +189,12 @@ const SharedUpdateProps = t.intersection([
   baseSchema.create,
   t.exact(t.partial({ rule_id: RuleSignatureId })),
   t.exact(t.partial({ id: RuleObjectId })),
-  t.exact(t.partial({ actions: RuleActionWithOptionalUuidArray })),
 ]);
 
 type SharedPatchProps = t.TypeOf<typeof SharedPatchProps>;
 const SharedPatchProps = t.intersection([
   baseSchema.patch,
   t.exact(t.partial({ rule_id: RuleSignatureId, id: RuleObjectId })),
-  t.exact(t.partial({ actions: RuleActionWithOptionalUuidArray })),
 ]);
 
 export type SharedResponseProps = t.TypeOf<typeof SharedResponseProps>;
@@ -208,14 +202,6 @@ export const SharedResponseProps = t.intersection([
   baseSchema.response,
   t.exact(t.type(responseRequiredFields)),
   t.exact(t.partial(responseOptionalFields)),
-  t.exact(t.type({ actions: RuleActionArray })),
-]);
-
-export const LegacySharedResponseProps = t.intersection([
-  baseSchema.response,
-  t.exact(t.type(responseRequiredFields)),
-  t.exact(t.partial(responseOptionalFields)),
-  t.exact(t.type({ actions: RuleActionWithoutUuidArray })),
 ]);
 
 // -------------------------------------------------------------------------------------------------
@@ -544,9 +530,6 @@ export const RulePatchProps = t.intersection([TypeSpecificPatchProps, SharedPatc
 
 export type RuleResponse = t.TypeOf<typeof RuleResponse>;
 export const RuleResponse = t.intersection([SharedResponseProps, TypeSpecificResponse]);
-
-export type LegacyRuleResponse = t.TypeOf<typeof LegacyRuleResponse>;
-export const LegacyRuleResponse = t.intersection([LegacySharedResponseProps, TypeSpecificResponse]);
 
 // -------------------------------------------------------------------------------------------------
 // Rule preview schemas

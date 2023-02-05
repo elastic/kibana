@@ -18,11 +18,7 @@ import { getRuleExecutionStatusPending } from '../../lib/rule_execution_status';
 import { createRuleSavedObject, extractReferences, validateActions, addUuid } from '../lib';
 import { generateAPIKeyName, getMappedParams, apiKeyAsAlertAttributes } from '../common';
 import { ruleAuditEvent, RuleAuditAction } from '../common/audit_events';
-import {
-  NormalizedAlertAction,
-  NormalizedAlertActionOptionalUuid,
-  RulesClientContext,
-} from '../types';
+import { NormalizedAlertAction, RulesClientContext } from '../types';
 
 interface SavedObjectOptions {
   id?: string;
@@ -47,7 +43,7 @@ export interface CreateOptions<Params extends RuleTypeParams> {
     | 'isSnoozedUntil'
     | 'lastRun'
     | 'nextRun'
-  > & { actions: NormalizedAlertActionOptionalUuid[] };
+  > & { actions: NormalizedAlertAction[] };
   options?: SavedObjectOptions;
 }
 

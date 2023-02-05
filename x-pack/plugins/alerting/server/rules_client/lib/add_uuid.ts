@@ -6,11 +6,9 @@
  */
 
 import { v4 } from 'uuid';
-import { NormalizedAlertActionOptionalUuid, NormalizedAlertAction } from '..';
+import { NormalizedAlertAction } from '..';
 
-export function addUuid(
-  actions: NormalizedAlertActionOptionalUuid[] = []
-): NormalizedAlertAction[] {
+export function addUuid(actions: NormalizedAlertAction[] = []): NormalizedAlertAction[] {
   return actions.map((action) => ({
     ...action,
     uuid: action.uuid || v4(),

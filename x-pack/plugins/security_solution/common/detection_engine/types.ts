@@ -6,6 +6,9 @@
  */
 
 import type { RuleAction } from '@kbn/alerting-plugin/common';
+import type { NormalizedAlertAction } from '@kbn/alerting-plugin/server/rules_client';
+
+export type RuleAlertNormalisedAction = NormalizedAlertAction;
 
 export type RuleAlertAction = Omit<RuleAction, 'actionTypeId' | 'uuid'> & {
   action_type_id: string;

@@ -105,6 +105,21 @@ describe('validate', () => {
       expect(validatedOrError).toEqual(ruleOutput());
     });
 
+    test('it should do an in-validation correctly of a rule id', () => {
+      const ruleAlert = getRuleMock(getQueryRuleParams());
+      // @ts-expect-error
+      delete ruleAlert.name;
+      const validatedOrError = transformValidateBulkError('rule-1', ruleAlert);
+      const expected: BulkError = {
+        error: {
+          message: 'Invalid value "undefined" supplied to "name"',
+          status_code: 500,
+        },
+        rule_id: 'rule-1',
+      };
+      expect(validatedOrError).toEqual(expected);
+    });
+
     test('it should return error object if "alert" is not expected alert type', () => {
       const ruleAlert = getRuleMock(getQueryRuleParams());
       // @ts-expect-error

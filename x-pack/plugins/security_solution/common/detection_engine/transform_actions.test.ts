@@ -20,7 +20,6 @@ describe('transform_actions', () => {
       group: 'group',
       action_type_id: 'action_type_id',
       params: {},
-      uuid: '123-456',
     };
     const alertAction = transformRuleToAlertAction(ruleAction);
     expect(alertAction).toEqual({
@@ -28,7 +27,6 @@ describe('transform_actions', () => {
       group: ruleAction.group,
       actionTypeId: ruleAction.action_type_id,
       params: ruleAction.params,
-      uuid: '123-456',
     });
   });
 
@@ -38,7 +36,6 @@ describe('transform_actions', () => {
       group: 'group',
       actionTypeId: 'actionTypeId',
       params: {},
-      uuid: '123-456',
     };
     const ruleAction = transformAlertToRuleAction(alertAction);
     expect(ruleAction).toEqual({
@@ -46,7 +43,6 @@ describe('transform_actions', () => {
       group: alertAction.group,
       action_type_id: alertAction.actionTypeId,
       params: alertAction.params,
-      uuid: '123-456',
     });
   });
   test('it should transform ResponseAction[] to RuleResponseAction[]', () => {

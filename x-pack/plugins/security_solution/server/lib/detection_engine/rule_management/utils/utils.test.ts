@@ -612,7 +612,6 @@ describe('utils', () => {
       id: 'some-7.x-id',
       action_type_id: '.slack',
       params: {},
-      uuid: '123-456',
     };
     const soClient = clients.core.savedObjects.getClient();
     beforeEach(() => {
@@ -669,7 +668,7 @@ describe('utils', () => {
   });
 
   describe('migrateLegacyActionsIds', () => {
-    const mockAction = {
+    const mockAction: RuleAction = {
       group: 'group string',
       id: 'some-7.x-id',
       action_type_id: '.slack',

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { RuleActionWithOptionalUuidCamel } from '@kbn/securitysolution-io-ts-alerting-types';
+import type { RuleAction } from '@kbn/alerting-plugin/common';
 import type { ResponseAction, RuleResponseAction } from './rule_response_actions/schemas';
 import type { RuleAlertAction } from './types';
 
@@ -15,7 +15,7 @@ export const transformRuleToAlertAction = ({
   action_type_id: actionTypeId,
   params,
   uuid,
-}: RuleAlertAction): RuleActionWithOptionalUuidCamel => ({
+}: RuleAlertAction): Omit<RuleAction, 'uuid'> & { uuid?: string } => ({
   group,
   id,
   params,
@@ -29,12 +29,12 @@ export const transformAlertToRuleAction = ({
   actionTypeId,
   params,
   uuid,
-}: RuleActionWithOptionalUuidCamel): RuleAlertAction => ({
+}: RuleAction): RuleAlertAction => ({
   group,
   id,
   params,
   action_type_id: actionTypeId,
-  ...(uuid && { uuid }),
+  uuid,
 });
 
 export const transformRuleToAlertResponseAction = ({

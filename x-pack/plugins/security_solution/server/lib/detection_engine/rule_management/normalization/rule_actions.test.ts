@@ -12,10 +12,7 @@ import {
   NOTIFICATION_THROTTLE_RULE,
 } from '../../../../../common/constants';
 
-import type {
-  RuleResponse,
-  LegacyRuleResponse,
-} from '../../../../../common/detection_engine/rule_schema';
+import type { RuleResponse } from '../../../../../common/detection_engine/rule_schema';
 // eslint-disable-next-line no-restricted-imports
 import type { LegacyRuleActions } from '../../rule_actions_legacy';
 import type { RuleAlertType } from '../../rule_schema';
@@ -272,14 +269,14 @@ describe('Rule actions normalization', () => {
           group: 'group',
           actionTypeId: 'actionTypeId',
           params: {},
-          uuid: '123-456',
+          uuid: '111',
         },
         {
           id: 'id_2',
           group: 'group',
           actionTypeId: 'actionTypeId',
           params: {},
-          uuid: '123-456',
+          uuid: '222',
         },
       ];
 
@@ -290,14 +287,14 @@ describe('Rule actions normalization', () => {
           group: 'group',
           action_type_id: 'actionTypeId',
           params: {},
-          uuid: '123-456',
+          uuid: '111',
         },
         {
           id: 'id_2',
           group: 'group',
           action_type_id: 'actionTypeId',
           params: {},
-          uuid: '123-456',
+          uuid: '222',
         },
       ]);
     });
@@ -309,14 +306,14 @@ describe('Rule actions normalization', () => {
           group: 'group',
           actionTypeId: 'actionTypeId',
           params: {},
-          uuid: '111-111',
+          uuid: '111',
         },
         {
           id: 'id_2',
           group: 'group',
           actionTypeId: 'actionTypeId',
           params: {},
-          uuid: '222-222',
+          uuid: '222',
         },
       ];
       const legacyRuleActions: LegacyRuleActions = {
@@ -339,14 +336,14 @@ describe('Rule actions normalization', () => {
           group: 'group',
           action_type_id: 'actionTypeId',
           params: {},
-          uuid: '111-111',
+          uuid: '111',
         },
         {
           id: 'id_2',
           group: 'group',
           action_type_id: 'actionTypeId',
           params: {},
-          uuid: '222-222',
+          uuid: '222',
         },
       ]);
     });
@@ -367,7 +364,7 @@ describe('Rule actions normalization', () => {
         ],
       };
       const transformed = transformActions(alertAction, legacyRuleActions);
-      expect(transformed).toEqual<LegacyRuleResponse['actions']>([
+      expect(transformed).toEqual<RuleResponse['actions']>([
         {
           id: 'id_2',
           group: 'group',
@@ -392,7 +389,7 @@ describe('Rule actions normalization', () => {
         ],
       };
       const transformed = transformActions(undefined, legacyRuleActions);
-      expect(transformed).toEqual<LegacyRuleResponse['actions']>([
+      expect(transformed).toEqual<RuleResponse['actions']>([
         {
           id: 'id_2',
           group: 'group',

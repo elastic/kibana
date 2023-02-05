@@ -61,7 +61,6 @@ import {
   RuleBulkOperationAggregation,
   RulesClientContext,
   CreateAPIKeyResult,
-  NormalizedAlertActionOptionalUuid,
   NormalizedAlertAction,
 } from '../types';
 
@@ -79,7 +78,7 @@ export type BulkEditOperation =
   | {
       operation: 'add' | 'set';
       field: Extract<BulkEditFields, 'actions'>;
-      value: NormalizedAlertActionOptionalUuid[];
+      value: NormalizedAlertAction[];
     }
   | {
       operation: 'set';

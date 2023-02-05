@@ -71,8 +71,7 @@ export interface RulesClientContext {
   readonly fieldsToExcludeFromPublicApi: Array<keyof SanitizedRule>;
 }
 
-export type NormalizedAlertAction = Omit<RuleAction, 'actionTypeId'>;
-export type NormalizedAlertActionOptionalUuid = Omit<RuleAction, 'actionTypeId' | 'uuid'> & {
+export type NormalizedAlertAction = Omit<RuleAction, 'actionTypeId' | 'uuid'> & {
   uuid?: string;
 };
 

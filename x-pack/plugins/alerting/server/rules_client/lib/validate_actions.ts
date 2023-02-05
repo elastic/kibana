@@ -34,7 +34,7 @@ export async function validateActions(
   if (uniqueActions.size < actions.length) {
     errors.push(
       i18n.translate('xpack.alerting.rulesClient.validateActions.hasDuplicatedUuid', {
-        defaultMessage: 'Connectors has duplicated UUIDs',
+        defaultMessage: 'Actions have duplicated UUIDs',
       })
     );
   }

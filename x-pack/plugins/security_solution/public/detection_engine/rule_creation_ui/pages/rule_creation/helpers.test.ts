@@ -41,6 +41,7 @@ import {
 } from '../../../rule_management_ui/components/rules_table/__mocks__/mock';
 import { getThreatMock } from '../../../../../common/detection_engine/schemas/types/threat.mock';
 import type { Threat, Threats } from '@kbn/securitysolution-io-ts-alerting-types';
+import type { RuleAction } from '@kbn/alerting-plugin/common';
 
 describe('helpers', () => {
   describe('getTimeTypeValue', () => {
@@ -831,9 +832,8 @@ describe('helpers', () => {
             id: 'id',
             actionTypeId: 'actionTypeId',
             params: {},
-            uuid: '123-456',
           },
-        ],
+        ] as RuleAction[],
       };
       const result = formatActionsStepData(mockStepData);
       const expected: ActionsStepRuleJson = {
@@ -843,7 +843,6 @@ describe('helpers', () => {
             id: mockStepData.actions[0].id,
             action_type_id: mockStepData.actions[0].actionTypeId,
             params: mockStepData.actions[0].params,
-            uuid: mockStepData.actions[0].uuid,
           },
         ],
         enabled: false,
@@ -866,9 +865,8 @@ describe('helpers', () => {
             id: 'id',
             actionTypeId: 'actionTypeId',
             params: {},
-            uuid: '123-456',
           },
-        ],
+        ] as RuleAction[],
       };
       const result = formatActionsStepData(mockStepData);
       const expected: ActionsStepRuleJson = {
@@ -878,7 +876,6 @@ describe('helpers', () => {
             id: mockStepData.actions[0].id,
             action_type_id: mockStepData.actions[0].actionTypeId,
             params: mockStepData.actions[0].params,
-            uuid: mockStepData.actions[0].uuid,
           },
         ],
         enabled: false,
@@ -897,12 +894,11 @@ describe('helpers', () => {
         id: '99403909-ca9b-49ba-9d7a-7e5320e68d05',
         params: { message: 'ML Rule generated {{state.signals_count}} alerts' },
         actionTypeId: '.slack',
-        uuid: '123-456',
       };
 
       const mockStepData: ActionsStepRule = {
         ...mockData,
-        actions: [mockAction],
+        actions: [mockAction] as unknown as RuleAction[],
       };
       const result = formatActionsStepData(mockStepData);
       const expected: ActionsStepRuleJson = {
@@ -912,7 +908,6 @@ describe('helpers', () => {
             id: mockAction.id,
             params: mockAction.params,
             action_type_id: mockAction.actionTypeId,
-            uuid: mockAction.uuid,
           },
         ],
         enabled: false,

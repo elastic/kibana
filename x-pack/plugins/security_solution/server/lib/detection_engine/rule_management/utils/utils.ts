@@ -10,7 +10,7 @@ import pMap from 'p-map';
 import { v4 as uuidv4 } from 'uuid';
 
 import type { SavedObjectsClientContract } from '@kbn/core/server';
-import type { RuleAction, RuleActionWithoutUuid } from '@kbn/securitysolution-io-ts-alerting-types';
+import type { RuleAction } from '@kbn/securitysolution-io-ts-alerting-types';
 import type { PartialRule, FindResult } from '@kbn/alerting-plugin/server';
 import type { ActionsClient, FindActionResult } from '@kbn/actions-plugin/server';
 
@@ -19,7 +19,6 @@ import type {
   AlertSuppression,
   RuleResponse,
   AlertSuppressionCamel,
-  LegacyRuleResponse,
 } from '../../../../../common/detection_engine/rule_schema';
 
 // eslint-disable-next-line no-restricted-imports
@@ -95,7 +94,7 @@ export const getIdBulkError = ({
 export const transformAlertsToRules = (
   rules: RuleAlertType[],
   legacyRuleActions: Record<string, LegacyRulesActionsSavedObject>
-): RuleResponse[] | LegacyRuleResponse[] => {
+): RuleResponse[] => {
   return rules.map((rule) => internalRuleToAPIResponse(rule, legacyRuleActions[rule.id]));
 };
 
@@ -106,7 +105,7 @@ export const transformFindAlerts = (
   page: number;
   perPage: number;
   total: number;
-  data: Array<Partial<RuleResponse>> | Array<Partial<LegacyRuleResponse>>;
+  data: Array<Partial<RuleResponse>>;
 } | null => {
   return {
     page: ruleFindResults.page,
@@ -121,7 +120,7 @@ export const transformFindAlerts = (
 export const transform = (
   rule: PartialRule<RuleParams>,
   legacyRuleActions?: LegacyRulesActionsSavedObject | null
-): RuleResponse | LegacyRuleResponse | null => {
+): RuleResponse | null => {
   if (isAlertType(rule)) {
     return internalRuleToAPIResponse(rule, legacyRuleActions);
   }
@@ -177,9 +176,9 @@ const createQuery = (type: string, id: string) =>
  * @returns
  */
 export const swapActionIds = async (
-  action: RuleActionWithoutUuid,
+  action: RuleAction,
   savedObjectsClient: SavedObjectsClientContract
-): Promise<RuleActionWithoutUuid | Error> => {
+): Promise<RuleAction | Error> => {
   try {
     const search = createQuery('action', action.id);
     const foundAction = await savedObjectsClient.find<RuleAction>({
@@ -241,19 +240,18 @@ export const migrateLegacyActionsIds = async (
     rules,
     async (rule) => {
       if (isImportRule(rule)) {
-        const newActions: Array<RuleActionWithoutUuid | Error> = await pMap(
-          // can we swap the pre 8.0 action connector(s) id with the new,
-          // post-8.0 action id (swap the originId for the new _id?)
+        // can we swap the pre 8.0 action connector(s) id with the new,
+        // post-8.0 action id (swap the originId for the new _id?)
+        const newActions: Array<RuleAction | Error> = await pMap(
           rule.actions ?? [],
-          (action: RuleActionWithoutUuid) => swapActionIds(action, savedObjectsClient),
+          (action: RuleAction) => swapActionIds(action, savedObjectsClient),
           { concurrency: MAX_CONCURRENT_SEARCHES }
         );
 
         // were there any errors discovered while trying to migrate and swap the action connector ids?
-        const [actionMigrationErrors, newlyMigratedActions] = partition<
-          RuleActionWithoutUuid | Error,
-          Error
-        >((item): item is Error => item instanceof Error)(newActions);
+        const [actionMigrationErrors, newlyMigratedActions] = partition<RuleAction | Error, Error>(
+          (item): item is Error => item instanceof Error
+        )(newActions);
 
         if (actionMigrationErrors == null || actionMigrationErrors.length === 0) {
           return { ...rule, actions: newlyMigratedActions };

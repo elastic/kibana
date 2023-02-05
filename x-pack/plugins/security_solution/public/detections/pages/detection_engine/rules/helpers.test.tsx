@@ -418,7 +418,6 @@ describe('rule helpers', () => {
             group: 'group',
             params: {},
             action_type_id: 'action_type_id',
-            uuid: 'uuid',
           },
         ],
       };
@@ -430,7 +429,6 @@ describe('rule helpers', () => {
             group: 'group',
             params: {},
             actionTypeId: 'action_type_id',
-            uuid: 'uuid',
           },
         ],
         responseActions: undefined,
