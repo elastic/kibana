@@ -85,8 +85,7 @@ describe('attach timeline to case', () => {
     it('modal can be re-opened once closed', function () {
       visitTimeline(this.timelineId);
       attachTimelineToExistingCase();
-      cy.get('[data-test-subj="all-cases-modal"] .euiButton')
-        .contains('Cancel')
+      cy.get('[data-test-subj="all-cases-modal-cancel-button"]')
         .click({ force: true });
 
       cy.get('[data-test-subj="all-cases-modal"]').should('not.exist');
