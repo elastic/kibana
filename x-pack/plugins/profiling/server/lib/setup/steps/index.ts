@@ -15,11 +15,13 @@ import { getSecurityStep } from './get_security_step';
 import { getApmPackageStep } from './get_apm_package_step';
 import { getCreateEventsDataStreamsStep } from './get_create_events_data_streams';
 import { getCreateIndicesStep } from './get_create_indices_step';
+import { getIsCloudEnabledStep } from './get_is_cloud_enabled_step';
 
 export function getProfilingSetupSteps(
   options: ProfilingSetupStepFactoryOptions
 ): ProfilingSetupStep[] {
   return [
+    getIsCloudEnabledStep(options),
     getApmPackageStep(options),
     getClusterSettingsStep(options),
     getIlmStep(options),
