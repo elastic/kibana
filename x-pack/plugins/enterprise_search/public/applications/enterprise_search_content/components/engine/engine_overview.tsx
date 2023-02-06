@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React from 'react';
 
 import { useValues } from 'kea';
 
@@ -15,17 +15,12 @@ import { i18n } from '@kbn/i18n';
 import { EngineViewTabs } from '../../routes';
 import { EnterpriseSearchEnginesPageTemplate } from '../layout/engines_page_template';
 
+import { EngineOverviewLogic } from './engine_overview_logic';
 import { EngineViewHeaderActions } from './engine_view_header_actions';
-import { EngineViewLogic } from './engine_view_logic';
 
 export const EngineOverview: React.FC = () => {
-  const { engineName, engineData, isLoadingEngine } = useValues(EngineViewLogic);
-
-  const indicesCount = engineData?.indices?.length ?? 0;
-  const documentsCount = useMemo(
-    () => engineData?.indices?.reduce((sum, { count }) => sum + count, 0) ?? 0,
-    [engineData]
-  );
+  const { engineName, indicesCount, documentsCount, fieldsCount, isLoadingEngine } =
+    useValues(EngineOverviewLogic);
 
   return (
     <EnterpriseSearchEnginesPageTemplate
@@ -68,6 +63,21 @@ export const EngineOverview: React.FC = () => {
                   description={i18n.translate(
                     'xpack.enterpriseSearch.content.engine.overview.documentsDescription',
                     { defaultMessage: 'Documents' }
+                  )}
+                  titleColor="primary"
+                />
+              </EuiFlexGroup>
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <EuiFlexGroup alignItems="center">
+                <EuiIcon size="xxl" type="documents" color="#98A2B3" />
+                <EuiStat
+                  titleSize="l"
+                  isLoading={false}
+                  title={fieldsCount.toLocaleString()}
+                  description={i18n.translate(
+                    'xpack.enterpriseSearch.content.engine.overview.fieldsDescription',
+                    { defaultMessage: 'Fields' }
                   )}
                   titleColor="primary"
                 />
