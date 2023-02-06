@@ -44,7 +44,7 @@ export class CustomFieldPanel extends React.PureComponent<Props, State> {
           f.type === 'string' &&
           !(currentOptions && currentOptions.some((o) => o.field === f.name))
       )
-      .map((f) => ({ label: f.name }));
+      .map<EuiComboBoxOptionOption>((f) => ({ label: f.name }));
     const isSubmitDisabled = !this.state.selectedOptions.length;
     return (
       <div data-test-subj="custom-field-panel" style={{ padding: 16 }}>
