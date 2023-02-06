@@ -669,7 +669,7 @@
     "@babel/core": "^7.20.12",
     "@babel/eslint-parser": "^7.19.1",
     "@babel/eslint-plugin": "^7.19.1",
-    "@babel/generator": "^7.20.7",
+    "@babel/generator": "^7.20.14",
     "@babel/helper-plugin-utils": "^7.20.2",
     "@babel/parser": "^7.20.13",
     "@babel/plugin-proposal-class-properties": "^7.18.6",
