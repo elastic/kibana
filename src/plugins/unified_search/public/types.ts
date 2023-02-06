@@ -18,7 +18,7 @@ import { CoreStart, DocLinksStart } from '@kbn/core/public';
 import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import { AutocompleteSetup, AutocompleteStart } from './autocomplete';
 import type { IndexPatternSelectProps, StatefulSearchBarProps } from '.';
-import type { FiltersBuilderProps } from './filters_builder/types';
+import type { FiltersBuilderProps } from './filters_builder/filters_builder';
 
 export interface UnifiedSearchSetupDependencies {
   uiActions: UiActionsSetup;

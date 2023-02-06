@@ -8,7 +8,17 @@
 import { each } from 'lodash';
 import type { TimelineEventsDetailsItem } from '../../../../../../common/search_strategy';
 
-export const replaceParamsQuery = (query: string, data?: TimelineEventsDetailsItem[] | null) => {
+export const replaceParamsQuery = (
+  query: string | number | boolean,
+  data?: TimelineEventsDetailsItem[] | null
+) => {
+  if (typeof query === 'number' || typeof query === 'boolean') {
+    return {
+      result: query,
+      skipped: true,
+      matchedBrackets: null,
+    };
+  }
   const regex = /\{{([^}]+)\}}/g;
   const matchedBrackets = query.match(regex);
   let resultQuery = query;

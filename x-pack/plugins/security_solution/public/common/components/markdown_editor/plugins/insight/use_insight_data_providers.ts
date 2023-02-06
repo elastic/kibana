@@ -7,7 +7,7 @@
 
 import { useMemo } from 'react';
 import type { Filter } from '@kbn/es-query';
-import { FILTERS, BooleanRelation, updateFilter, FilterStateStore } from '@kbn/es-query';
+import { FILTERS, BooleanRelation, FilterStateStore } from '@kbn/es-query';
 import type { QueryOperator, DataProvider } from '@kbn/timelines-plugin/common';
 import { DataProviderType } from '@kbn/timelines-plugin/common';
 import { replaceParamsQuery } from './replace_params_query';
@@ -20,16 +20,22 @@ import {
 
 export interface Provider {
   field: string;
-  value: string | number | boolean;
-  queryType: string;
   excluded: boolean;
+  queryType: string;
+  value: string | number | boolean;
+  valueType?: string;
 }
 export interface UseInsightDataProvidersProps {
   providers: Provider[][];
   alertData?: TimelineEventsDetailsItem[] | null;
 }
 
-const dataProviderQueryType = (type: string) => {
+export interface UseInsightDataProvidersResult {
+  dataProviders: DataProvider[];
+  filters: Filter[];
+}
+
+const dataProviderQueryType = (type: string): QueryOperator => {
   if (type === FILTERS.EXISTS) {
     return EXISTS_OPERATOR;
   } else if (type === FILTERS.PHRASES) {
@@ -60,7 +66,7 @@ const buildDataProviders = (
           queryMatch: {
             field,
             value: result,
-            operator: dataProviderQueryType(queryType) as QueryOperator,
+            operator: dataProviderQueryType(queryType),
           },
         };
       } else {
@@ -75,7 +81,7 @@ const buildDataProviders = (
           queryMatch: {
             field,
             value: result,
-            operator: dataProviderQueryType(queryType) as QueryOperator,
+            operator: dataProviderQueryType(queryType),
           },
         };
         prev.and.push(newProvider);
@@ -115,7 +121,12 @@ const buildPrimitiveFilter = (provider: Provider): Filter => {
       query: { exists: { field: provider.field } },
     };
   } else if (provider.queryType === FILTERS.PHRASES) {
-    const values = String(provider.value).split(',');
+    let values = JSON.parse(String(provider.value));
+    if (provider.valueType === 'number') {
+      values = values.map(Number);
+    } else if (provider.valueType === 'boolean') {
+      values = values.map(Boolean);
+    }
     return {
       ...baseFilter,
       meta: {
@@ -124,7 +135,9 @@ const buildPrimitiveFilter = (provider: Provider): Filter => {
       query: {
         bool: {
           minimum_should_match: 1,
-          should: values?.map((param) => ({ match_phrase: { [provider.field]: param } })),
+          should: values?.map((param: string | number | boolean) => ({
+            match_phrase: { [provider.field]: param },
+          })),
         },
       },
     };
@@ -178,13 +191,9 @@ const buildFiltersFromInsightProviders = (
   for (let index = 0; index < providers.length; index++) {
     const provider = providers[index];
     if (provider.length > 1) {
+      // Only support 1 level of nesting currently
       const innerProviders = provider.map((innerProvider) => {
-        const operator = {
-          message: 'is',
-          type: innerProvider.queryType,
-          negate: innerProvider.excluded,
-        };
-        return updateFilter(filterStub, innerProvider.field, operator);
+        return buildPrimitiveFilter(innerProvider);
       });
       const combinedFilter = {
         $state: {
@@ -213,7 +222,7 @@ const buildFiltersFromInsightProviders = (
 export const useInsightDataProviders = ({
   providers,
   alertData,
-}: UseInsightDataProvidersProps): { dataProviders: DataProvider[]; filters: Filter[] } => {
+}: UseInsightDataProvidersProps): UseInsightDataProvidersResult => {
   const providersContainRangeQuery = useMemo(() => {
     return providers.some((innerProvider) => {
       return innerProvider.some((provider) => provider.queryType === 'range');

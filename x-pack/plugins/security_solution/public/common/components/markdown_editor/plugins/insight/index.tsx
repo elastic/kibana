@@ -25,8 +25,10 @@ import {
   EuiFieldText,
   EuiSelect,
 } from '@elastic/eui';
+import numeral from '@elastic/numeral';
 import { css } from '@emotion/react';
 import type { EuiMarkdownEditorUiPluginEditorProps } from '@elastic/eui/src/components/markdown_editor/markdown_types';
+import type { DataView } from '@kbn/data-views-plugin/common';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { Filter } from '@kbn/es-query';
@@ -38,7 +40,9 @@ import {
   isPhrasesFilter,
   isExistsFilter,
   BooleanRelation,
+  FilterStateStore,
 } from '@kbn/es-query';
+import type { PhraseFilterValue } from '@kbn/es-query/src/filters/build_filters';
 import { useForm, FormProvider, useController } from 'react-hook-form';
 import { useAppToasts } from '../../../../hooks/use_app_toasts';
 import { useKibana } from '../../../../lib/kibana';
@@ -136,7 +140,7 @@ export const parser: Plugin = function () {
   methods.splice(methods.indexOf('text'), 0, 'insight');
 };
 
-const buildPrimitiveFilter = (filter: Filter): Provider => {
+const buildPrimitiveProvider = (filter: Filter): Provider => {
   const field = filter.meta?.key ?? '';
   const excluded = filter.meta?.negate ?? false;
   const queryType = filter.meta?.type ?? FILTERS.PHRASE;
@@ -155,9 +159,11 @@ const buildPrimitiveFilter = (filter: Filter): Provider => {
       queryType: filter.meta.type ?? FILTERS.RANGE,
     };
   } else if (isPhrasesFilter(filter)) {
+    const typeOfParams: PhraseFilterValue = typeof filter.meta?.params[0];
     return {
       ...baseFilter,
-      value: filter.meta?.params.join(',') ?? [],
+      value: JSON.stringify(filter.meta?.params ?? []),
+      valueType: typeOfParams,
       queryType: filter.meta.type ?? FILTERS.PHRASES,
     };
   } else if (isExistsFilter(filter)) {
@@ -167,9 +173,11 @@ const buildPrimitiveFilter = (filter: Filter): Provider => {
       queryType: filter.meta.type ?? FILTERS.EXISTS,
     };
   } else if (isPhraseFilter(filter)) {
+    const valueType: PhraseFilterValue = typeof filter.meta?.params?.query;
     return {
       ...baseFilter,
       value: filter.meta?.params?.query ?? '',
+      valueType,
       queryType: filter.meta.type ?? FILTERS.PHRASE,
     };
   } else {
@@ -193,16 +201,18 @@ const filtersToInsightProviders = (filters: Filter[]): Provider[][] => {
           if (isCombinedFilter(innerFilter)) {
             return filtersToInsightProviders([innerFilter]).map(([provider]) => provider);
           } else {
-            return [buildPrimitiveFilter(innerFilter)];
+            return [buildPrimitiveProvider(innerFilter)];
           }
         });
       }
     } else {
-      providers.push([buildPrimitiveFilter(filter)]);
+      providers.push([buildPrimitiveProvider(filter)]);
     }
   }
   return providers;
 };
+
+const resultFormat = '0,0.[000]a';
 
 // receives the configuration from the parser and renders
 const InsightComponent = ({
@@ -268,17 +278,21 @@ const InsightComponent = ({
     return <EuiLoadingSpinner size="l" />;
   } else {
     return (
-      <InvestigateInTimelineButton
-        asEmptyButton={false}
-        isDisabled={hasError}
-        dataProviders={dataProviders}
-        timeRange={timerange}
-        keepDataView={true}
-        data-test-subj="insight-investigate-in-timeline-button"
-      >
-        <EuiIcon type="timeline" />
-        {` ${label} (${totalCount}) - ${description}`}
-      </InvestigateInTimelineButton>
+      <>
+        <InvestigateInTimelineButton
+          asEmptyButton={false}
+          isDisabled={hasError}
+          dataProviders={dataProviders}
+          filters={filters}
+          timeRange={timerange}
+          keepDataView={true}
+          data-test-subj="insight-investigate-in-timeline-button"
+        >
+          <EuiIcon type="timeline" />
+          {` ${label} (${numeral(totalCount).format(resultFormat)})`}
+        </InvestigateInTimelineButton>
+        <p>{description}</p>
+      </>
     );
   }
 };
@@ -308,7 +322,7 @@ const InsightEditorComponent = ({
       emptyValue,
       ...settings.map(({ display }, index) => {
         return {
-          value: String(index + 1),
+          value: String(index),
           text: display,
         };
       }),
@@ -318,7 +332,7 @@ const InsightEditorComponent = ({
     return {
       ...sourcererDataView,
       fields: sourcererDataView?.indexFields,
-    };
+    } as DataView;
   }, [sourcererDataView]);
   const formMethods = useForm<{
     label: string;
@@ -402,11 +416,11 @@ const InsightEditorComponent = ({
     [relativeTimerangeController.field]
   );
   const filtersStub = useMemo(() => {
-    const index = indexPattern !== undefined ? indexPattern.getName() : '*';
+    const index = indexPattern && indexPattern.getName ? indexPattern.getName() : '*';
     return [
       {
         $state: {
-          store: 'appState',
+          store: FilterStateStore.APP_STATE,
         },
         meta: {
           disabled: false,
@@ -441,7 +455,7 @@ const InsightEditorComponent = ({
 
       <EuiModalBody>
         <FormProvider {...formMethods}>
-          <EuiForm>
+          <EuiForm fullWidth>
             <EuiFormRow
               label="Description"
               helpText="Description of the relevance of the query"
@@ -516,11 +530,11 @@ const exampleInsight = `!{insight{
   "description": "Click to investigate",
   "providers": [
     [     
-      {"field": "event.id", "value": "kibana.alert.original_event.id", "queryType": "parameter"}
+      {"field": "event.id", "value": "{{kibana.alert.original_event.id}}", "queryType": "phrase"}
     ],
     [  
-      {"field": "event.action", "value": "rename", "type": "literal"},
-      {"field": "process.pid", "value": "process.pid", "type": "parameter"}
+      {"field": "event.action", "value": "", "type": "exists"},
+      {"field": "process.pid", "value": "{{process.pid}}", "type": "phrase"}
     ]
   ]
 }}`;
