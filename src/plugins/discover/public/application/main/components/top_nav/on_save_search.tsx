@@ -75,11 +75,15 @@ async function saveDataSource({
       text: error.message,
     });
   }
-  return state.savedSearchState.persist(savedSearch, {
-    onError,
-    onSuccess,
-    saveOptions,
-  });
+  return state.savedSearchState.persist(
+    savedSearch,
+    {
+      onError,
+      onSuccess,
+      saveOptions,
+    },
+    state.internalState.getState().dataView
+  );
 }
 
 export async function onSaveSearch({
@@ -136,7 +140,7 @@ export async function onSaveSearch({
     };
 
     if (newCopyOnSave) {
-      state.actions.updateAdHocDataViewId();
+      await state.actions.updateAdHocDataViewId();
     }
 
     const navigateOrReloadSavedSearch = !Boolean(onSaveCb);

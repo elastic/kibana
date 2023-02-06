@@ -30,7 +30,7 @@ export async function persistSavedSearch(
     state: AppState;
   }
 ) {
-  addLog('💾 [savedSearch] persistSavedSearch', savedSearch, state);
+  addLog('[savedSearch] persistSavedSearch');
   updateSavedSearch({ savedSearch, dataView, state, services });
 
   return await saveSavedSearch(

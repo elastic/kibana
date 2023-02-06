@@ -39,7 +39,7 @@ describe('onSaveSearch', () => {
     await onSaveSearch({
       navigateTo: jest.fn(),
       savedSearch: savedSearchMock,
-      services: serviceMock,
+      services: discoverServiceMock,
       state: getStateContainer(),
     });
 
@@ -57,7 +57,7 @@ describe('onSaveSearch', () => {
         ...savedSearchMock,
         tags: ['tag1', 'tag2'],
       },
-      services: serviceMock,
+      services: discoverServiceMock,
       state: getStateContainer(),
     });
     expect(saveModal?.props.tags).toEqual(['tag1', 'tag2']);

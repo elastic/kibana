@@ -60,7 +60,6 @@ describe('DiscoverMainApp', () => {
       await component.update();
 
       expect(component.find(DiscoverTopNav).exists()).toBe(true);
-      expect(component.find(DiscoverTopNav).prop('savedSearch')).toEqual(savedSearchMock);
     });
   });
 });

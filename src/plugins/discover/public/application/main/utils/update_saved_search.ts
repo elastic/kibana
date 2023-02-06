@@ -53,6 +53,12 @@ export function updateSavedSearch(
     savedSearch.viewMode = state.viewMode;
   }
 
+  if (typeof state.breakdownField !== 'undefined') {
+    savedSearch.breakdownField = state.breakdownField;
+  } else if (savedSearch.breakdownField) {
+    savedSearch.breakdownField = '';
+  }
+
   if (state.hideAggregatedPreview) {
     savedSearch.hideAggregatedPreview = state.hideAggregatedPreview;
   }
@@ -63,6 +69,8 @@ export function updateSavedSearch(
   if (savedSearch.isTextBasedQuery || isTextBasedQuery) {
     savedSearch.isTextBasedQuery = isTextBasedQuery;
   }
+
+  savedSearch.usesAdHocDataView = !dataView.isPersisted();
 
   const { from, to } = services.timefilter.getTime();
   const refreshInterval = services.timefilter.getRefreshInterval();

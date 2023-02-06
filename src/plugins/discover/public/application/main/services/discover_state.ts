@@ -190,7 +190,7 @@ export function getDiscoverStateContainer({
   /**
    * App State Container, synced with URL
    */
-  const appStateContainer = getDiscoverAppStateContainer(stateStorage, savedSearch, services);
+  const appStateContainer = getDiscoverAppStateContainer({ stateStorage, savedSearch, services });
 
   const savedSearchContainer = getSavedSearchContainer({
     savedSearch: initialSavedSearch,
@@ -262,7 +262,7 @@ export function getDiscoverStateContainer({
     updateFiltersReferences(prevDataView, newDataView);
 
     replaceAdHocDataViewWithId(prevDataView.id!, newDataView);
-    await replaceUrlAppState({ index: newDataView.id });
+    await appStateContainer.replaceUrlState({ index: newDataView.id });
     const trackingEnabled = Boolean(newDataView.isPersisted() || savedSearch.id);
     getUrlTracker().setTrackingEnabled(trackingEnabled);
 
