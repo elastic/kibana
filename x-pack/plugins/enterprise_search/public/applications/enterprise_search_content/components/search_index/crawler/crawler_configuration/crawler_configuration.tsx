@@ -74,6 +74,7 @@ export const CrawlerConfiguration: React.FC = () => {
           <EuiFlexGroup>
             <EuiFlexItem grow={false}>
               <EuiSwitch
+                data-telemetry-id="entSearchContent-crawler-configuration-extractHtml"
                 label={i18n.translate(
                   'xpack.enterpriseSearch.content.crawler.crawlerConfiguration.extractHTML.extractionSwitchLabel',
                   {
