@@ -9,12 +9,14 @@ import {
   KibanaNoDataPageServices,
   KibanaNoDataPageKibanaDependencies,
 } from '@kbn/shared-ux-page-kibana-no-data-types';
+import { Observable } from 'rxjs';
 
 /**
  * A list of services that are consumed by this component.
  */
 export interface Services {
   kibanaGuideDocLink: string;
+  customBranding: { hasCustomBranding$: Observable<boolean> };
 }
 
 /**
@@ -30,6 +32,9 @@ export interface KibanaDependencies {
           guide: string;
         };
       };
+    };
+    customBranding: {
+      hasCustomBranding$: Observable<boolean>;
     };
   };
 }

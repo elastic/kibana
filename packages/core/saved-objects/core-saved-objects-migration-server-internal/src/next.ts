@@ -14,6 +14,7 @@ import type {
   CheckCompatibleMappingsState,
   CheckTargetMappingsState,
   CheckUnknownDocumentsState,
+  CleanupUnknownAndExcluded,
   CloneTempToSource,
   CreateNewTargetState,
   CreateReindexTempState,
@@ -65,8 +66,6 @@ export const nextActionMap = (client: ElasticsearchClient, transformRawDocs: Tra
   return {
     INIT: (state: InitState) =>
       Actions.initAction({ client, indices: [state.currentAlias, state.versionAlias] }),
-    PREPARE_COMPATIBLE_MIGRATION: (state: PrepareCompatibleMigration) =>
-      Actions.updateAliases({ client, aliasActions: state.preTransformDocsActions }),
     WAIT_FOR_MIGRATION_COMPLETION: (state: WaitForMigrationCompletionState) =>
       Actions.fetchIndices({ client, indices: [state.currentAlias, state.versionAlias] }),
     WAIT_FOR_YELLOW_SOURCE: (state: WaitForYellowSourceState) =>
@@ -77,6 +76,17 @@ export const nextActionMap = (client: ElasticsearchClient, transformRawDocs: Tra
         index: state.sourceIndex.value, // attempt to update source mappings in-place
         mappings: omit(state.targetIndexMappings, ['_meta']), // ._meta property will be updated on a later step
       }),
+    CLEANUP_UNKNOWN_AND_EXCLUDED: (state: CleanupUnknownAndExcluded) =>
+      Actions.cleanupUnknownAndExcluded({
+        client,
+        indexName: state.sourceIndex.value,
+        discardUnknownDocs: state.discardUnknownObjects,
+        excludeOnUpgradeQuery: state.excludeOnUpgradeQuery,
+        excludeFromUpgradeFilterHooks: state.excludeFromUpgradeFilterHooks,
+        knownTypes: state.knownTypes,
+      }),
+    PREPARE_COMPATIBLE_MIGRATION: (state: PrepareCompatibleMigration) =>
+      Actions.updateAliases({ client, aliasActions: state.preTransformDocsActions }),
     CHECK_UNKNOWN_DOCUMENTS: (state: CheckUnknownDocumentsState) =>
       Actions.checkForUnknownDocs({
         client,

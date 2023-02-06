@@ -1576,7 +1576,10 @@ describe('update()', () => {
       ruleTypeRegistry.get.mockReturnValueOnce({
         id: '123',
         name: 'Test',
-        actionGroups: [{ id: 'default', name: 'Default' }],
+        actionGroups: [
+          { id: 'default', name: 'Default' },
+          { id: 'group2', name: 'Action Group 2' },
+        ],
         defaultActionGroupId: 'default',
         minimumLicenseRequired: 'basic',
         isExportable: true,
@@ -1749,7 +1752,7 @@ describe('update()', () => {
                 },
               },
               {
-                group: 'default',
+                group: 'group2',
                 id: '2',
                 params: {
                   foo: true,
@@ -1764,7 +1767,7 @@ describe('update()', () => {
           },
         })
       ).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"Cannot specify per-action frequency params when notify_when or throttle are defined at the rule level: default, default"`
+        `"Failed to validate actions due to the following error: Cannot specify per-action frequency params when notify_when or throttle are defined at the rule level: default, group2"`
       );
       expect(unsecuredSavedObjectsClient.create).not.toHaveBeenCalled();
       expect(taskManager.schedule).not.toHaveBeenCalled();
@@ -1805,7 +1808,7 @@ describe('update()', () => {
           },
         })
       ).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"Cannot specify per-action frequency params when notify_when or throttle are defined at the rule level: default"`
+        `"Failed to validate actions due to the following error: Cannot specify per-action frequency params when notify_when or throttle are defined at the rule level: default"`
       );
       expect(unsecuredSavedObjectsClient.create).not.toHaveBeenCalled();
       expect(taskManager.schedule).not.toHaveBeenCalled();
@@ -1841,7 +1844,7 @@ describe('update()', () => {
           },
         })
       ).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"Actions missing frequency parameters: default"`
+        `"Failed to validate actions due to the following error: Actions missing frequency parameters: default"`
       );
       expect(unsecuredSavedObjectsClient.create).not.toHaveBeenCalled();
       expect(taskManager.schedule).not.toHaveBeenCalled();
@@ -1889,7 +1892,7 @@ describe('update()', () => {
           },
         })
       ).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"Actions missing frequency parameters: default"`
+        `"Failed to validate actions due to the following error: Actions missing frequency parameters: default"`
       );
       expect(unsecuredSavedObjectsClient.create).not.toHaveBeenCalled();
       expect(taskManager.schedule).not.toHaveBeenCalled();
@@ -2013,7 +2016,9 @@ describe('update()', () => {
           ],
         },
       })
-    ).rejects.toThrowErrorMatchingInlineSnapshot(`"Invalid connectors: another connector"`);
+    ).rejects.toThrowErrorMatchingInlineSnapshot(
+      `"Failed to validate actions due to the following error: Invalid connectors: another connector"`
+    );
     expect(unsecuredSavedObjectsClient.create).not.toHaveBeenCalled();
     expect(taskManager.schedule).not.toHaveBeenCalled();
   });

@@ -24,8 +24,5 @@ const FieldIcon = React.memo(InnerFieldIcon) as GenericFieldIcon;
 export default FieldIcon;
 
 function normalizeFieldType(type: string) {
-  if (type === 'histogram') {
-    return 'number';
-  }
   return type === 'document' ? 'number' : type;
 }

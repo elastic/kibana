@@ -67,14 +67,20 @@ import type {
   ThemeServiceStart,
 } from '@kbn/core/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
-import { BrushTriggerEvent, ClickTriggerEvent, Warnings } from '@kbn/charts-plugin/public';
+import {
+  BrushTriggerEvent,
+  ClickTriggerEvent,
+  MultiClickTriggerEvent,
+} from '@kbn/charts-plugin/public';
 import { DataViewSpec } from '@kbn/data-views-plugin/common';
+import { useEuiFontSize, useEuiTheme } from '@elastic/eui';
 import { getExecutionContextEvents, trackUiCounterEvents } from '../lens_ui_telemetry';
 import { Document } from '../persistence';
 import { ExpressionWrapper, ExpressionWrapperProps } from './expression_wrapper';
 import {
   isLensBrushEvent,
   isLensFilterEvent,
+  isLensMultiFilterEvent,
   isLensEditEvent,
   isLensTableRowContextMenuClickEvent,
   LensTableRowContextMenuEvent,
@@ -106,9 +112,10 @@ import {
 } from '../utils';
 import { getLayerMetaInfo, combineQueryAndFilters } from '../app_plugin/show_underlying_data';
 import {
-  filterUserMessages,
+  filterAndSortUserMessages,
   getApplicationUserMessages,
 } from '../app_plugin/get_application_user_messages';
+import { MessageList } from '../editor_frame_service/editor_frame/workspace_panel/message_list';
 
 export type LensSavedObjectAttributes = Omit<Document, 'savedObjectId' | 'type'>;
 
@@ -133,7 +140,7 @@ interface LensBaseEmbeddableInput extends EmbeddableInput {
   noPadding?: boolean;
   onBrushEnd?: (data: BrushTriggerEvent['data']) => void;
   onLoad?: (isLoading: boolean, adapters?: Partial<DefaultInspectorAdapters>) => void;
-  onFilter?: (data: ClickTriggerEvent['data']) => void;
+  onFilter?: (data: ClickTriggerEvent['data'] | MultiClickTriggerEvent['data']) => void;
   onTableRowClick?: (data: LensTableRowContextMenuEvent['data']) => void;
 }
 
@@ -268,6 +275,26 @@ function getViewUnderlyingDataArgs({
   };
 }
 
+const EmbeddableMessagesPopover = ({ messages }: { messages: UserMessage[] }) => {
+  const { euiTheme } = useEuiTheme();
+  const xsFontSize = useEuiFontSize('xs').fontSize;
+
+  return (
+    <MessageList
+      messages={messages}
+      customButtonStyles={css`
+        block-size: ${euiTheme.size.l};
+        border-radius: 0 ${euiTheme.border.radius.medium} 0 ${euiTheme.border.radius.small};
+        font-size: ${xsFontSize};
+        padding: 0 ${euiTheme.size.xs};
+        & > * {
+          gap: ${euiTheme.size.xs};
+        }
+      `}
+    />
+  );
+};
+
 export class Embeddable
   extends AbstractEmbeddable<LensEmbeddableInput, LensEmbeddableOutput>
   implements
@@ -283,7 +310,7 @@ export class Embeddable
   private savedVis: Document | undefined;
   private expression: string | undefined | null;
   private domNode: HTMLElement | Element | undefined;
-  private warningDomNode: HTMLElement | Element | undefined;
+  private badgeDomNode: HTMLElement | Element | undefined;
   private subscription: Subscription;
   private isInitialized = false;
   private inputReloadSubscriptions: Subscription[];
@@ -441,7 +468,12 @@ export class Embeddable
 
   private get activeVisualizationState() {
     if (!this.activeVisualization) return;
-    return this.activeVisualization.initialize(() => '', this.savedVis?.state.visualization);
+    return (
+      this.activeVisualization.fromPersistableState?.(
+        this.savedVis?.state.visualization,
+        this.savedVis?.references
+      ) || this.activeVisualization.initialize(() => '', this.savedVis?.state.visualization)
+    );
   }
 
   private indexPatterns: IndexPatternMap = {};
@@ -463,10 +495,10 @@ export class Embeddable
   }
 
   public getUserMessages: UserMessagesGetter = (locationId, filters) => {
-    return filterUserMessages(
+    return filterAndSortUserMessages(
       [...this._userMessages, ...Object.values(this.additionalUserMessages)],
       locationId,
-      filters
+      filters ?? {}
     );
   };
 
@@ -552,9 +584,8 @@ export class Embeddable
 
     if (addedMessageIds.length) {
       this.additionalUserMessages = newMessageMap;
+      this.renderBadgeMessages();
     }
-
-    this.reload();
 
     return () => {
       const withMessagesRemoved = {
@@ -712,15 +743,11 @@ export class Embeddable
 
     const newActiveData = adapters?.tables?.tables;
 
-    if (!fastIsEqual(this.activeData, newActiveData)) {
-      // we check equality because this.addUserMessage triggers a render, so we get an infinite loop
-      // if we just execute without checking if the data has changed
-      this.removeActiveDataWarningMessages();
-      const searchWarningMessages = this.getSearchWarningMessages(adapters);
-      this.removeActiveDataWarningMessages = this.addUserMessages(
-        searchWarningMessages.filter(isMessageRemovable)
-      );
-    }
+    this.removeActiveDataWarningMessages();
+    const searchWarningMessages = this.getSearchWarningMessages(adapters);
+    this.removeActiveDataWarningMessages = this.addUserMessages(
+      searchWarningMessages.filter(isMessageRemovable)
+    );
 
     this.activeData = newActiveData;
   };
@@ -872,24 +899,25 @@ export class Embeddable
           })}
           ref={(el) => {
             if (el) {
-              this.warningDomNode = el;
+              this.badgeDomNode = el;
+              this.renderBadgeMessages();
             }
           }}
         />
       </KibanaThemeProvider>,
       domNode
     );
+  }
 
-    const warningsToDisplay = this.getUserMessages('embeddableBadge', {
-      severity: 'warning',
-    });
+  private renderBadgeMessages() {
+    const messages = this.getUserMessages('embeddableBadge');
 
-    if (warningsToDisplay.length && this.warningDomNode) {
+    if (messages.length && this.badgeDomNode) {
       render(
         <KibanaThemeProvider theme$={this.deps.theme.theme$}>
-          <Warnings warnings={warningsToDisplay.map((message) => message.longMessage)} compressed />
+          <EmbeddableMessagesPopover messages={messages} />
         </KibanaThemeProvider>,
-        this.warningDomNode
+        this.badgeDomNode
       );
     }
   }
@@ -897,7 +925,11 @@ export class Embeddable
   private readonly hasCompatibleActions = async (
     event: ExpressionRendererEvent
   ): Promise<boolean> => {
-    if (isLensTableRowContextMenuClickEvent(event) || isLensFilterEvent(event)) {
+    if (
+      isLensTableRowContextMenuClickEvent(event) ||
+      isLensMultiFilterEvent(event) ||
+      isLensFilterEvent(event)
+    ) {
       const { getTriggerCompatibleActions } = this.deps;
       if (!getTriggerCompatibleActions) {
         return false;
@@ -993,7 +1025,7 @@ export class Embeddable
         this.input.onBrushEnd(event.data);
       }
     }
-    if (isLensFilterEvent(event)) {
+    if (isLensFilterEvent(event) || isLensMultiFilterEvent(event)) {
       this.deps.getTrigger(VIS_EVENT_TO_TRIGGER[event.name]).exec({
         data: {
           ...event.data,
@@ -1156,11 +1188,14 @@ export class Embeddable
     }
 
     const title = input.hidePanelTitles ? '' : input.title ?? this.savedVis.title;
+    const description = input.hidePanelTitles ? '' : input.description ?? this.savedVis.description;
     const savedObjectId = (input as LensByReferenceInput).savedObjectId;
     this.updateOutput({
       defaultTitle: this.savedVis.title,
+      defaultDescription: this.savedVis.description,
       editable: this.getIsEditable(),
       title,
+      description,
       editPath: getEditPath(savedObjectId),
       editUrl: this.deps.basePath.prepend(`/app/lens${getEditPath(savedObjectId)}`),
       indexPatterns: this.dataViews,
@@ -1190,12 +1225,6 @@ export class Embeddable
   public getInputAsValueType = async (): Promise<LensByValueInput> => {
     return this.deps.attributeService.getInputAsValueType(this.getExplicitInput());
   };
-
-  // same API as Visualize
-  public getDescription() {
-    // mind that savedViz is loaded in async way here
-    return this.savedVis && this.savedVis.description;
-  }
 
   /**
    * Gets the Lens embeddable's local filters

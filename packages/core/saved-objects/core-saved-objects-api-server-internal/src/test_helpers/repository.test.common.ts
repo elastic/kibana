@@ -20,7 +20,7 @@ import {
   SavedObjectsType,
   SavedObjectsTypeMappingDefinition,
 } from '@kbn/core-saved-objects-server';
-import { SavedObject, SavedObjectReference } from '@kbn/core-saved-objects-common';
+import { SavedObject, SavedObjectReference } from '@kbn/core-saved-objects-server';
 import {
   SavedObjectsBaseOptions,
   SavedObjectsBulkCreateObject,

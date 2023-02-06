@@ -20,9 +20,9 @@ import { SyntheticsDatePicker } from '../../common/date_picker/synthetics_date_p
 import { ErrorsTabContent } from './errors_tab_content';
 
 export const MonitorErrors = () => {
-  const { errorStates, loading } = useMonitorErrors();
+  const { errorStates, loading, data } = useMonitorErrors();
 
-  const initialLoading = loading && errorStates.length === 0;
+  const initialLoading = loading && !data;
 
   const emptyState = !loading && errorStates.length === 0;
 

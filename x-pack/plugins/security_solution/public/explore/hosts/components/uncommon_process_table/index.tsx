@@ -15,9 +15,8 @@ import { defaultToEmptyTag, getEmptyValue } from '../../../../common/components/
 import { HostDetailsLink } from '../../../../common/components/links';
 import type { Columns, ItemsPerRow } from '../../../components/paginated_table';
 import { PaginatedTable } from '../../../components/paginated_table';
-
 import * as i18n from './translations';
-import { getRowItemDraggables } from '../../../../common/components/tables/helpers';
+import { getRowItemsWithActions } from '../../../../common/components/tables/helpers';
 import { HostsType } from '../../store/model';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 
@@ -147,15 +146,14 @@ const getUncommonColumns = (): UncommonProcessTableColumns => [
     name: i18n.NAME,
     truncateText: false,
     mobileOptions: { show: true },
-    render: ({ node }) =>
-      getRowItemDraggables({
-        rowItems: node.process.name,
-        attrName: 'process.name',
-        idPrefix: `uncommon-process-table-${node._id}-processName`,
-        isAggregatable: true,
-        fieldType: 'keyword',
-      }),
     width: '20%',
+    render: ({ node }) =>
+      getRowItemsWithActions({
+        values: node.process.name,
+        fieldName: 'process.name',
+        fieldType: 'keyword',
+        idPrefix: `uncommon-process-table-${node._id}-processName`,
+      }),
   },
   {
     align: 'right',
@@ -177,43 +175,41 @@ const getUncommonColumns = (): UncommonProcessTableColumns => [
     name: i18n.HOSTS,
     truncateText: false,
     mobileOptions: { show: true },
+    width: '25%',
     render: ({ node }) =>
-      getRowItemDraggables({
-        rowItems: getHostNames(node.hosts),
-        attrName: 'host.name',
+      getRowItemsWithActions({
+        values: getHostNames(node.hosts),
+        fieldName: 'host.name',
+        fieldType: 'keyword',
         idPrefix: `uncommon-process-table-${node._id}-processHost`,
         render: (item) => <HostDetailsLink hostName={item} />,
-        isAggregatable: true,
-        fieldType: 'keyword',
       }),
-    width: '25%',
   },
   {
     name: i18n.LAST_COMMAND,
     truncateText: false,
     mobileOptions: { show: true },
-    render: ({ node }) =>
-      getRowItemDraggables({
-        rowItems: node.process != null ? node.process.args : null,
-        attrName: 'process.args',
-        idPrefix: `uncommon-process-table-${node._id}-processArgs`,
-        displayCount: 1, // TODO: Change this back once we have improved the UI
-        isAggregatable: true,
-        fieldType: 'keyword',
-      }),
     width: '25%',
+    render: ({ node }) =>
+      getRowItemsWithActions({
+        values: node.process != null ? node.process.args : null,
+        fieldName: 'process.args',
+        fieldType: 'keyword',
+        idPrefix: `uncommon-process-table-${node._id}-processArgs`,
+        render: (item) => <HostDetailsLink hostName={item} />,
+        displayCount: 1,
+      }),
   },
   {
     name: i18n.LAST_USER,
     truncateText: false,
     mobileOptions: { show: true },
     render: ({ node }) =>
-      getRowItemDraggables({
-        rowItems: node.user != null ? node.user.name : null,
-        attrName: 'user.name',
-        idPrefix: `uncommon-process-table-${node._id}-processUser`,
-        isAggregatable: true,
+      getRowItemsWithActions({
+        values: node.user != null ? node.user.name : null,
+        fieldName: 'user.name',
         fieldType: 'keyword',
+        idPrefix: `uncommon-process-table-${node._id}-processUser`,
       }),
   },
 ];

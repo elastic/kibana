@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { CaseUserActionsResponse } from '../../../common/api';
-import { CaseUserActionsResponseRt } from '../../../common/api';
+import type { CaseUserActionsDeprecatedResponse } from '../../../common/api';
+import { CaseUserActionsDeprecatedResponseRt } from '../../../common/api';
 import { createCaseError } from '../../common/error';
 import type { CasesClientArgs } from '..';
 import { Operations } from '../../authorization';
@@ -16,7 +16,7 @@ import { extractAttributes } from './utils';
 export const get = async (
   { caseId }: UserActionGet,
   clientArgs: CasesClientArgs
-): Promise<CaseUserActionsResponse> => {
+): Promise<CaseUserActionsDeprecatedResponse> => {
   const {
     services: { userActionService },
     logger,
@@ -36,7 +36,7 @@ export const get = async (
 
     const resultsToEncode = extractAttributes(userActions);
 
-    return CaseUserActionsResponseRt.encode(resultsToEncode);
+    return CaseUserActionsDeprecatedResponseRt.encode(resultsToEncode);
   } catch (error) {
     throw createCaseError({
       message: `Failed to retrieve user actions case id: ${caseId}: ${error}`,

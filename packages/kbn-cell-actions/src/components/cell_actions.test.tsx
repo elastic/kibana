@@ -32,7 +32,7 @@ describe('CellActions', () => {
       await getActionsPromise;
     });
 
-    expect(queryByTestId('cellActions')).toBeInTheDocument();
+    expect(queryByTestId(`cellActions-renderContent-${FIELD.name}`)).toBeInTheDocument();
   });
 
   it('renders InlineActions when mode is INLINE', async () => {

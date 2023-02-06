@@ -132,11 +132,11 @@ export function addMustClausesToBoolQuery(
 /**
  * Add the given clauses to the 'must_not' of the given query
  * @param boolQuery the bool query to be enriched
- * @param mustNotClauses the clauses to be added to a 'must_not'
+ * @param filterClauses the clauses to be added to a 'must_not'
  * @returns a new query container with the enriched query
  */
 export function addMustNotClausesToBoolQuery(
-  mustNotClauses: QueryDslQueryContainer[],
+  filterClauses: QueryDslQueryContainer[],
   boolQuery?: QueryDslBoolQuery
 ): QueryDslQueryContainer {
   let mustNot: QueryDslQueryContainer[] = [];
@@ -145,7 +145,7 @@ export function addMustNotClausesToBoolQuery(
     mustNot = mustNot.concat(boolQuery.must_not);
   }
 
-  mustNot.push(...mustNotClauses);
+  mustNot.push(...filterClauses);
 
   return {
     bool: {

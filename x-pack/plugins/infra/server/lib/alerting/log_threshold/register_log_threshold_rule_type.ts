@@ -8,6 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import { PluginSetupContract } from '@kbn/alerting-plugin/server';
 import { createLogThresholdExecutor, FIRED_ACTIONS } from './log_threshold_executor';
+import { extractReferences, injectReferences } from './log_threshold_references_manager';
 import {
   LOG_DOCUMENT_COUNT_RULE_TYPE_ID,
   ruleParamsRT,
@@ -18,6 +19,12 @@ import { getAlertDetailsPageEnabledForApp } from '../common/utils';
 import {
   alertDetailUrlActionVariableDescription,
   groupByKeysActionVariableDescription,
+  cloudActionVariableDescription,
+  containerActionVariableDescription,
+  hostActionVariableDescription,
+  labelsActionVariableDescription,
+  orchestratorActionVariableDescription,
+  tagsActionVariableDescription,
 } from '../common/messages';
 
 const timestampActionVariableDescription = i18n.translate(
@@ -142,9 +149,19 @@ export async function registerLogThresholdRuleType(
           name: 'viewInAppUrl',
           description: viewInAppUrlActionVariableDescription,
         },
+        { name: 'cloud', description: cloudActionVariableDescription },
+        { name: 'host', description: hostActionVariableDescription },
+        { name: 'container', description: containerActionVariableDescription },
+        { name: 'orchestrator', description: orchestratorActionVariableDescription },
+        { name: 'labels', description: labelsActionVariableDescription },
+        { name: 'tags', description: tagsActionVariableDescription },
       ],
     },
     producer: 'logs',
     getSummarizedAlerts: libs.logsRules.createGetSummarizedAlerts(),
+    useSavedObjectReferences: {
+      extractReferences,
+      injectReferences,
+    },
   });
 }

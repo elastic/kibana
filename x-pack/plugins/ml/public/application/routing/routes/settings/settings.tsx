@@ -8,8 +8,9 @@
 import React, { FC } from 'react';
 import { i18n } from '@kbn/i18n';
 import { useTimefilter } from '@kbn/ml-date-picker';
+import { ML_PAGES } from '../../../../locator';
 import { NavigateToPath } from '../../../contexts/kibana';
-import { MlRoute, PageLoader, PageProps } from '../../router';
+import { createPath, MlRoute, PageLoader, PageProps } from '../../router';
 import { useResolver } from '../../use_resolver';
 import { checkFullLicense } from '../../../license';
 import {
@@ -25,7 +26,7 @@ export const settingsRouteFactory = (
   basePath: string
 ): MlRoute => ({
   id: 'settings',
-  path: '/settings',
+  path: createPath(ML_PAGES.SETTINGS),
   title: i18n.translate('xpack.ml.settings.docTitle', {
     defaultMessage: 'Settings',
   }),

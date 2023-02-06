@@ -10,7 +10,7 @@ import { isEqual } from 'lodash';
 import { Reducer } from 'react';
 import { RuleActionParam, IntervalSchedule } from '@kbn/alerting-plugin/common';
 import { Rule, RuleAction } from '../../../types';
-import { DEFAULT_FREQUENCY } from '../../../common/constants';
+import { DEFAULT_FREQUENCY_WITHOUT_SUMMARY } from '../../../common/constants';
 
 export type InitialRule = Partial<Rule> &
   Pick<Rule, 'params' | 'consumer' | 'schedule' | 'actions' | 'tags'>;
@@ -201,7 +201,7 @@ export const ruleReducer = <RulePhase extends InitialRule | Rule>(
         const updatedAction = {
           ...oldAction,
           frequency: {
-            ...(oldAction.frequency ?? DEFAULT_FREQUENCY),
+            ...(oldAction.frequency ?? DEFAULT_FREQUENCY_WITHOUT_SUMMARY),
             [key]: value,
           },
         };

@@ -81,9 +81,7 @@ export const AddToDashboardControl: FC<AddToDashboardControlProps> = ({
   return (
     <EuiModal onClose={onClose.bind(null, undefined)} data-test-subj="mlAddToDashboardModal">
       <EuiModalHeader>
-        <EuiModalHeaderTitle>
-          <h1>{title}</h1>
-        </EuiModalHeaderTitle>
+        <EuiModalHeaderTitle>{title}</EuiModalHeaderTitle>
       </EuiModalHeader>
       <EuiModalBody>
         {children}

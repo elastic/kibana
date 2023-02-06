@@ -7,7 +7,7 @@
 
 import { KibanaServices } from '../../../common/lib/kibana';
 import { createCopyToClipboardAction } from './copy_to_clipboard';
-import type { CellActionExecutionContext } from '@kbn/ui-actions-plugin/public';
+import type { CellActionExecutionContext } from '@kbn/cell-actions';
 
 jest.mock('../../../common/lib/kibana');
 const mockSuccessToast = jest.fn();

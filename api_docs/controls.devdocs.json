@@ -4379,6 +4379,20 @@
           },
           {
             "parentPluginId": "controls",
+            "id": "def-public.OptionsListEmbeddableInput.hideActionBar",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "hideActionBar",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/plugins/controls/common/options_list/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "controls",
             "id": "def-public.OptionsListEmbeddableInput.exclude",
             "type": "CompoundType",
             "tags": [],
@@ -4386,6 +4400,20 @@
             "description": [],
             "signature": [
               "boolean | undefined"
+            ],
+            "path": "src/plugins/controls/common/options_list/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "controls",
+            "id": "def-public.OptionsListEmbeddableInput.placeholder",
+            "type": "string",
+            "tags": [],
+            "label": "placeholder",
+            "description": [],
+            "signature": [
+              "string | undefined"
             ],
             "path": "src/plugins/controls/common/options_list/types.ts",
             "deprecated": false,
@@ -5961,6 +5989,20 @@
           },
           {
             "parentPluginId": "controls",
+            "id": "def-common.OptionsListEmbeddableInput.hideActionBar",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "hideActionBar",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/plugins/controls/common/options_list/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "controls",
             "id": "def-common.OptionsListEmbeddableInput.exclude",
             "type": "CompoundType",
             "tags": [],
@@ -5968,6 +6010,20 @@
             "description": [],
             "signature": [
               "boolean | undefined"
+            ],
+            "path": "src/plugins/controls/common/options_list/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "controls",
+            "id": "def-common.OptionsListEmbeddableInput.placeholder",
+            "type": "string",
+            "tags": [],
+            "label": "placeholder",
+            "description": [],
+            "signature": [
+              "string | undefined"
             ],
             "path": "src/plugins/controls/common/options_list/types.ts",
             "deprecated": false,

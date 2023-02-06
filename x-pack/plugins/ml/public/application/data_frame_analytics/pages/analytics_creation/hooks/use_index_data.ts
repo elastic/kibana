@@ -152,8 +152,7 @@ export const useIndexData = (
     pagination,
     resetPagination,
     setErrorMessage,
-    setRowCount,
-    setRowCountRelation,
+    setRowCountInfo,
     setStatus,
     setTableItems,
     sortingColumns,
@@ -199,12 +198,13 @@ export const useIndexData = (
         const resp: IndexSearchResponse = await ml.esSearch(esSearchRequest);
         const docs = resp.hits.hits.map((d) => getProcessedFields(d.fields ?? {}));
 
-        setRowCount(typeof resp.hits.total === 'number' ? resp.hits.total : resp.hits.total!.value);
-        setRowCountRelation(
-          typeof resp.hits.total === 'number'
-            ? ('eq' as estypes.SearchTotalHitsRelation)
-            : resp.hits.total!.relation
-        );
+        setRowCountInfo({
+          rowCount: typeof resp.hits.total === 'number' ? resp.hits.total : resp.hits.total!.value,
+          rowCountRelation:
+            typeof resp.hits.total === 'number'
+              ? ('eq' as estypes.SearchTotalHitsRelation)
+              : resp.hits.total!.relation,
+        });
         setTableItems(docs);
         setStatus(INDEX_STATUS.LOADED);
       } catch (e) {

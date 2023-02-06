@@ -14,7 +14,7 @@ import { LinkIcon } from '../link_icon';
 import type { SubtitleProps } from '../subtitle';
 import { Subtitle } from '../subtitle';
 import { Title } from './title';
-import type { DraggableArguments, BadgeOptions, TitleProp } from './types';
+import type { BadgeOptions, TitleProp } from './types';
 import { useFormatUrl } from '../link_to';
 import type { SecurityPageName } from '../../../app/types';
 import { useKibana } from '../../lib/kibana';
@@ -64,7 +64,6 @@ export interface HeaderPageProps extends HeaderProps {
   backComponent?: React.ReactNode;
   badgeOptions?: BadgeOptions;
   children?: React.ReactNode;
-  draggableArguments?: DraggableArguments;
   rightSideItems?: React.ReactNode[];
   subtitle?: SubtitleProps['items'];
   subtitle2?: SubtitleProps['items'];
@@ -103,7 +102,6 @@ const HeaderPageComponent: React.FC<HeaderPageProps> = ({
   badgeOptions,
   border,
   children,
-  draggableArguments,
   isLoading,
   rightSideItems,
   subtitle,
@@ -117,13 +115,7 @@ const HeaderPageComponent: React.FC<HeaderPageProps> = ({
         {backOptions && <HeaderLinkBack backOptions={backOptions} />}
         {!backOptions && backComponent && <>{backComponent}</>}
 
-        {titleNode || (
-          <Title
-            draggableArguments={draggableArguments}
-            title={title}
-            badgeOptions={badgeOptions}
-          />
-        )}
+        {titleNode || <Title title={title} badgeOptions={badgeOptions} />}
 
         {subtitle && <Subtitle data-test-subj="header-page-subtitle" items={subtitle} />}
         {subtitle2 && <Subtitle data-test-subj="header-page-subtitle-2" items={subtitle2} />}

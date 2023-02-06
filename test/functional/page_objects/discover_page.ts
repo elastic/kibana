@@ -46,12 +46,12 @@ export class DiscoverPageObject extends FtrService {
   }
 
   public async findFieldByName(name: string) {
-    const fieldSearch = await this.testSubjects.find('fieldFilterSearchInput');
+    const fieldSearch = await this.testSubjects.find('fieldListFiltersFieldSearch');
     await fieldSearch.type(name);
   }
 
   public async clearFieldSearchInput() {
-    const fieldSearch = await this.testSubjects.find('fieldFilterSearchInput');
+    const fieldSearch = await this.testSubjects.find('fieldListFiltersFieldSearch');
     await fieldSearch.clearValue();
   }
 
@@ -441,6 +441,9 @@ export class DiscoverPageObject extends FtrService {
   async createAdHocDataView(name: string, hasTimeField = false) {
     await this.testSubjects.click('discover-dataView-switch-link');
     await this.unifiedSearch.createNewDataView(name, true, hasTimeField);
+    await this.retry.waitFor('flyout to get closed', async () => {
+      return !(await this.testSubjects.exists('indexPatternEditor__form'));
+    });
   }
 
   async clickAddField() {
@@ -455,6 +458,13 @@ export class DiscoverPageObject extends FtrService {
 
   public async hasNoResultsTimepicker() {
     return await this.testSubjects.exists('discoverNoResultsTimefilter');
+  }
+
+  public async expandTimeRangeAsSuggestedInNoResultsMessage() {
+    await this.retry.waitFor('the button before pressing it', async () => {
+      return await this.testSubjects.exists('discoverNoResultsViewAllMatches');
+    });
+    return await this.testSubjects.click('discoverNoResultsViewAllMatches');
   }
 
   public async getSidebarAriaDescription(): Promise<string> {
@@ -598,7 +608,13 @@ export class DiscoverPageObject extends FtrService {
     }
 
     await this.waitUntilFieldPopoverIsOpen();
-    await this.testSubjects.click(`fieldVisualize-${fieldName}`);
+    const visualizeButtonTestSubject = `fieldVisualize-${fieldName}`;
+    // wrap visualize button click in retry to ensure button is clicked and retry if button click is not registered
+    await this.retry.try(async () => {
+      await this.testSubjects.click(visualizeButtonTestSubject);
+      await this.testSubjects.waitForDeleted(visualizeButtonTestSubject);
+      await this.testSubjects.missingOrFail(visualizeButtonTestSubject);
+    });
     await this.header.waitUntilLoadingHasFinished();
   }
 
@@ -665,15 +681,15 @@ export class DiscoverPageObject extends FtrService {
   }
 
   public async openSidebarFieldFilter() {
-    await this.testSubjects.click('toggleFieldFilterButton');
-    await this.testSubjects.existOrFail('filterSelectionPanel');
+    await this.testSubjects.click('fieldListFiltersFieldTypeFilterToggle');
+    await this.testSubjects.existOrFail('fieldListFiltersFieldTypeFilterOptions');
   }
 
   public async closeSidebarFieldFilter() {
-    await this.testSubjects.click('toggleFieldFilterButton');
+    await this.testSubjects.click('fieldListFiltersFieldTypeFilterToggle');
 
     await this.retry.waitFor('sidebar filter closed', async () => {
-      return !(await this.testSubjects.exists('filterSelectionPanel'));
+      return !(await this.testSubjects.exists('fieldListFiltersFieldTypeFilterOptions'));
     });
   }
 
