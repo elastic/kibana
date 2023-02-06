@@ -42,7 +42,9 @@ import {
   appSearchGuideId,
   websiteSearchGuideId,
   databaseSearchGuideId,
-  searchGuideConfig,
+  appSearchGuideConfig,
+  websiteSearchGuideConfig,
+  databaseSearchGuideConfig,
 } from '../common/guided_onboarding/search_guide_config';
 
 import { registerTelemetryUsageCollector as registerASTelemetryUsageCollector } from './collectors/app_search/telemetry';
@@ -269,9 +271,9 @@ export class EnterpriseSearchPlugin implements Plugin {
     /**
      * Register a config for the search guide
      */
-    guidedOnboarding.registerGuideConfig(appSearchGuideId, searchGuideConfig);
-    guidedOnboarding.registerGuideConfig(websiteSearchGuideId, searchGuideConfig);
-    guidedOnboarding.registerGuideConfig(databaseSearchGuideId, searchGuideConfig);
+    guidedOnboarding.registerGuideConfig(appSearchGuideId, appSearchGuideConfig);
+    guidedOnboarding.registerGuideConfig(websiteSearchGuideId, websiteSearchGuideConfig);
+    guidedOnboarding.registerGuideConfig(databaseSearchGuideId, databaseSearchGuideConfig);
   }
 
   public start() {}
