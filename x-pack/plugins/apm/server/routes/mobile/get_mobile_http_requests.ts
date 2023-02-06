@@ -24,7 +24,6 @@ import { offsetPreviousPeriodCoordinates } from '../../../common/utils/offset_pr
 import { Maybe } from '../../../typings/common';
 import { Coordinate } from '../../../typings/timeseries';
 import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
-import { getDocumentTypeFilterForServiceDestinationStatistics } from '../../lib/helpers/spans/get_is_using_service_destination_metrics';
 
 export interface HttpRequestsTimeseries {
   currentPeriod: { timeseries: Coordinate[]; value: Maybe<number> };
@@ -78,7 +77,6 @@ async function getHttpRequestsTimeseries({
         bool: {
           filter: [
             { exists: { field: SPAN_SUBTYPE } },
-            ...getDocumentTypeFilterForServiceDestinationStatistics(true),
             ...termQuery(SERVICE_NAME, serviceName),
             ...termQuery(SPAN_TYPE, 'external'),
             ...termQuery(TRANSACTION_NAME, transactionName),
