@@ -48,68 +48,50 @@ export function getServices(): Services {
 
   return {
     fetchTopN: async ({ http, type, timeFrom, timeTo, kuery }) => {
-      try {
-        const query: HttpFetchQuery = {
-          timeFrom,
-          timeTo,
-          kuery,
-        };
-        return await http.get(`${paths.TopN}/${type}`, { query });
-      } catch (e) {
-        return e;
-      }
+      const query: HttpFetchQuery = {
+        timeFrom,
+        timeTo,
+        kuery,
+      };
+      return (await http.get(`${paths.TopN}/${type}`, { query })) as Promise<TopNResponse>;
     },
 
     fetchTopNFunctions: async ({ http, timeFrom, timeTo, startIndex, endIndex, kuery }) => {
-      try {
-        const query: HttpFetchQuery = {
-          timeFrom,
-          timeTo,
-          startIndex,
-          endIndex,
-          kuery,
-        };
-        return await http.get(paths.TopNFunctions, { query });
-      } catch (e) {
-        return e;
-      }
+      const query: HttpFetchQuery = {
+        timeFrom,
+        timeTo,
+        startIndex,
+        endIndex,
+        kuery,
+      };
+      return (await http.get(paths.TopNFunctions, { query })) as Promise<TopNFunctions>;
     },
 
     fetchElasticFlamechart: async ({ http, timeFrom, timeTo, kuery }) => {
-      try {
-        const query: HttpFetchQuery = {
-          timeFrom,
-          timeTo,
-          kuery,
-        };
-        const baseFlamegraph = (await http.get(paths.Flamechart, { query })) as BaseFlameGraph;
-        return createFlameGraph(baseFlamegraph);
-      } catch (e) {
-        return e;
-      }
+      const query: HttpFetchQuery = {
+        timeFrom,
+        timeTo,
+        kuery,
+      };
+      const baseFlamegraph = (await http.get(paths.Flamechart, { query })) as BaseFlameGraph;
+      return createFlameGraph(baseFlamegraph);
     },
     fetchHasSetup: async ({ http }) => {
-      try {
-        const hasSetup = (await http.get(paths.HasSetupESResources, {})) as boolean;
-        return hasSetup;
-      } catch (e) {
-        return e;
-      }
+      const hasSetup = (await http.get(paths.HasSetupESResources, {})) as {
+        has_setup: boolean;
+        has_data: boolean;
+      };
+      return hasSetup;
     },
     postSetupResources: async ({ http }) => {
-      try {
-        await http.post(paths.HasSetupESResources, {});
-      } catch (e) {
-        return e;
-      }
+      await http.post(paths.HasSetupESResources, {});
     },
     setupDataCollectionInstructions: async ({ http }) => {
-      try {
-        const instructions = await http.get(paths.SetupDataCollectionInstructions, {});
-        return instructions;
-      } catch (e) {
-        return e;
-      }
+      const instructions = (await http.get(
+        paths.SetupDataCollectionInstructions,
+        {}
+      )) as SetupDataCollectionInstructions;
+      return instructions;
     },
   };
 }

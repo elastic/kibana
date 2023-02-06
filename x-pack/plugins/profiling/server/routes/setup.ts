@@ -5,6 +5,7 @@
  * 2.0.
  */
 import { eachSeries } from 'async';
+import { Logger } from '@kbn/logging';
 import { RouteRegisterParameters } from '.';
 import { getRoutePaths } from '../../common';
 import { getSetupInstructions } from '../lib/setup/get_setup_instructions';
@@ -12,6 +13,20 @@ import { getProfilingSetupSteps } from '../lib/setup/steps';
 import { handleRouteHandlerError } from '../utils/handle_route_error_handler';
 import { hasProfilingData } from '../lib/setup/has_profiling_data';
 import { getClient } from './compat';
+import { ProfilingSetupStep } from '../lib/setup/types';
+
+function checkSteps({ steps, logger }: { steps: ProfilingSetupStep[]; logger: Logger }) {
+  return Promise.all(
+    steps.map(async (step) => {
+      try {
+        return { name: step.name, completed: await step.hasCompleted() };
+      } catch (error) {
+        logger.error(error);
+        return { name: step.name, completed: false, error: error.toString() };
+      }
+    })
+  );
+}
 
 export function registerSetupRoute({
   router,
@@ -43,16 +58,7 @@ export function registerSetupRoute({
 
         const hasDataPromise = hasProfilingData(esClient);
 
-        const stepCompletionResultsPromises = Promise.all(
-          steps.map(async (step) => {
-            try {
-              return { name: step.name, completed: await step.hasCompleted() };
-            } catch (error) {
-              logger.error(error);
-              return { name: step.name, completed: false, error: error.toString() };
-            }
-          })
-        );
+        const stepCompletionResultsPromises = checkSteps({ steps, logger });
 
         const hasData = await hasDataPromise;
 
@@ -110,7 +116,19 @@ export function registerSetupRoute({
             .catch(cb);
         });
 
-        return response.ok();
+        const checkedSteps = await checkSteps({ steps, logger });
+
+        if (checkedSteps.every((step) => step.completed)) {
+          return response.ok();
+        }
+
+        return response.custom({
+          statusCode: 500,
+          body: {
+            message: `Failed to complete all steps`,
+            steps: checkedSteps,
+          },
+        });
       } catch (error) {
         return handleRouteHandlerError({ error, logger, response });
       }

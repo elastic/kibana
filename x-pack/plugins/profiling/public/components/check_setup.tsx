@@ -15,6 +15,7 @@ import { ProfilingAppPageTemplate } from './profiling_app_page_template';
 
 export function CheckSetup({ children }: { children: React.ReactElement }) {
   const {
+    start: { core },
     services: { fetchHasSetup, postSetupResources },
   } = useProfilingDependencies();
 
@@ -94,6 +95,17 @@ export function CheckSetup({ children }: { children: React.ReactElement }) {
 
                     postSetupResources({ http })
                       .then(() => refresh())
+                      .catch((err) => {
+                        const message = err?.body?.message ?? err.message ?? String(err);
+
+                        core.notifications.toasts.addError(err, {
+                          title: i18n.translate(
+                            'xpack.profiling.checkSetup.setupFailureToastTitle',
+                            { defaultMessage: 'Failed to complete setup' }
+                          ),
+                          toastMessage: message,
+                        });
+                      })
                       .finally(() => {
                         setPostSetupLoading(false);
                       });
