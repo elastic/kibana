@@ -8,7 +8,7 @@
 import { EuiFlexGroup, EuiFlexItem, EuiButtonEmpty } from '@elastic/eui';
 import React, { ReactNode } from 'react';
 import { withTheme, EuiTheme } from '@kbn/kibana-react-plugin/common';
-import { ShowKubernetesTour } from './show_kubernetes_tour';
+import { KubernetesTour } from './kubernetes_tour';
 
 interface Props {
   'data-test-subj'?: string;
@@ -19,7 +19,7 @@ interface Props {
   showKubernetesInfo?: boolean;
 }
 
-const ButtonLabel = (label: string, theme?: EuiTheme) => (
+const ButtonLabel = ({ label, theme }: { label: string; theme?: EuiTheme }) => (
   <EuiFlexItem
     grow={false}
     style={{
@@ -46,9 +46,11 @@ export const DropdownButton = withTheme((props: Props) => {
       }}
     >
       {showKubernetesInfo ? (
-        <ShowKubernetesTour>{ButtonLabel(label, theme)}</ShowKubernetesTour>
+        <KubernetesTour>
+          <ButtonLabel label={label} theme={theme} />
+        </KubernetesTour>
       ) : (
-        ButtonLabel(label, theme)
+        <ButtonLabel label={label} theme={theme} />
       )}
       <EuiFlexItem grow={false}>
         <EuiButtonEmpty

@@ -14,9 +14,9 @@ interface Props {
   children: ReactElement;
 }
 
-const KUBERNETES_TOUR_STORAGE_KEY = 'isKubernetesTourSeen';
+export const KUBERNETES_TOUR_STORAGE_KEY = 'isKubernetesTourSeen';
 
-export const ShowKubernetesTour = ({ children }: Props) => {
+export const KubernetesTour = ({ children }: Props) => {
   const [isTourSeen, setIsTourSeen] = useLocalStorage(KUBERNETES_TOUR_STORAGE_KEY, false);
   const markTourAsSeen = () => setIsTourSeen(true);
 
@@ -33,7 +33,7 @@ export const ShowKubernetesTour = ({ children }: Props) => {
         }
         isStepOpen={!isTourSeen}
         maxWidth={350}
-        onFinish={() => markTourAsSeen()}
+        onFinish={markTourAsSeen}
         step={1}
         stepsTotal={1}
         title={i18n.translate('xpack.infra.homePage.kubernetesTour.title', {
@@ -45,7 +45,7 @@ export const ShowKubernetesTour = ({ children }: Props) => {
             data-test-subj="infra-kubernetesTour-dismiss"
             size="s"
             color="text"
-            onClick={() => markTourAsSeen()}
+            onClick={markTourAsSeen}
           >
             {i18n.translate('xpack.infra.homePage.kubernetesTour.dismiss', {
               defaultMessage: 'Dismiss',

@@ -6,8 +6,9 @@
  */
 
 import expect from '@kbn/expect';
+import { KUBERNETES_TOUR_STORAGE_KEY } from '@kbn/infra-plugin/public/pages/metrics/inventory_view/components/kubernetes_tour';
 import { FtrProviderContext } from '../../ftr_provider_context';
-import { DATES, KUBERNETES_TOUR_STORAGE_KEY } from './constants';
+import { DATES } from './constants';
 
 const DATE_WITH_DATA = DATES.metricsAndLogs.hosts.withData;
 const DATE_WITHOUT_DATA = DATES.metricsAndLogs.hosts.withoutData;
