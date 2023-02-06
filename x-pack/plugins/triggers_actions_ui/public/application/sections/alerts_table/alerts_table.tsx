@@ -29,6 +29,7 @@ import { AlertLifecycleStatusBadge } from '../../components/alert_lifecycle_stat
 
 import './alerts_table.scss';
 import { getToolbarVisibility } from './toolbar';
+import { InspectButtonContainer } from './toolbar/components/inspect';
 
 export const ACTIVE_ROW_CLASS = 'alertsTableActiveRow';
 
@@ -89,6 +90,7 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
     onSortChange,
     sort: sortingFields,
     refresh: alertsRefresh,
+    getInspectQuery,
   } = alertsData;
   const { sortingColumns, onSort } = useSorting(onSortChange, sortingFields);
 
@@ -136,6 +138,7 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
     browserFields,
     onChangeVisibleColumns,
     showAlertStatusWithFlapping = false,
+    showInspectButton = false,
   } = props;
 
   // TODO when every solution is using this table, we will be able to simplify it by just passing the alert index
@@ -173,6 +176,8 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
       clearSelection,
       refresh,
       fieldBrowserOptions,
+      getInspectQuery,
+      showInspectButton,
     });
   }, [
     bulkActionsState,
@@ -190,6 +195,8 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
     clearSelection,
     refresh,
     fieldBrowserOptions,
+    getInspectQuery,
+    showInspectButton,
   ])();
 
   const leadingControlColumns = useMemo(() => {
@@ -365,45 +372,47 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
   }, [getCellActions, disabledCellActions, props.columns, visibleCellActions]);
 
   return (
-    <section style={{ width: '100%' }} data-test-subj={props['data-test-subj']}>
-      <Suspense fallback={null}>
-        {flyoutAlertIndex > -1 && (
-          <AlertsFlyout
-            alert={alerts[flyoutAlertIndex]}
-            alertsCount={alertsCount}
-            onClose={handleFlyoutClose}
-            alertsTableConfiguration={props.alertsTableConfiguration}
-            flyoutIndex={flyoutAlertIndex + pagination.pageIndex * pagination.pageSize}
-            onPaginate={onPaginateFlyout}
-            isLoading={isLoading}
-            id={props.id}
+    <InspectButtonContainer>
+      <section style={{ width: '100%' }} data-test-subj={props['data-test-subj']}>
+        <Suspense fallback={null}>
+          {flyoutAlertIndex > -1 && (
+            <AlertsFlyout
+              alert={alerts[flyoutAlertIndex]}
+              alertsCount={alertsCount}
+              onClose={handleFlyoutClose}
+              alertsTableConfiguration={props.alertsTableConfiguration}
+              flyoutIndex={flyoutAlertIndex + pagination.pageIndex * pagination.pageSize}
+              onPaginate={onPaginateFlyout}
+              isLoading={isLoading}
+              id={props.id}
+            />
+          )}
+        </Suspense>
+        {alertsCount > 0 && (
+          <EuiDataGrid
+            aria-label="Alerts table"
+            data-test-subj="alertsTable"
+            columns={columnsWithCellActions}
+            columnVisibility={{ visibleColumns, setVisibleColumns: onChangeVisibleColumns }}
+            trailingControlColumns={props.trailingControlColumns}
+            leadingControlColumns={leadingControlColumns}
+            rowCount={alertsCount}
+            renderCellValue={handleRenderCellValue}
+            gridStyle={{ ...GridStyles, ...(props.gridStyle ?? {}) }}
+            sorting={{ columns: sortingColumns, onSort }}
+            toolbarVisibility={toolbarVisibility}
+            pagination={{
+              ...pagination,
+              pageSizeOptions: props.pageSizeOptions,
+              onChangeItemsPerPage: onChangePageSize,
+              onChangePage: onChangePageIndex,
+            }}
+            rowHeightsOptions={props.rowHeightsOptions}
+            ref={dataGridRef}
           />
         )}
-      </Suspense>
-      {alertsCount > 0 && (
-        <EuiDataGrid
-          aria-label="Alerts table"
-          data-test-subj="alertsTable"
-          columns={columnsWithCellActions}
-          columnVisibility={{ visibleColumns, setVisibleColumns: onChangeVisibleColumns }}
-          trailingControlColumns={props.trailingControlColumns}
-          leadingControlColumns={leadingControlColumns}
-          rowCount={alertsCount}
-          renderCellValue={handleRenderCellValue}
-          gridStyle={{ ...GridStyles, ...(props.gridStyle ?? {}) }}
-          sorting={{ columns: sortingColumns, onSort }}
-          toolbarVisibility={toolbarVisibility}
-          pagination={{
-            ...pagination,
-            pageSizeOptions: props.pageSizeOptions,
-            onChangeItemsPerPage: onChangePageSize,
-            onChangePage: onChangePageIndex,
-          }}
-          rowHeightsOptions={props.rowHeightsOptions}
-          ref={dataGridRef}
-        />
-      )}
-    </section>
+      </section>
+    </InspectButtonContainer>
   );
 };
 

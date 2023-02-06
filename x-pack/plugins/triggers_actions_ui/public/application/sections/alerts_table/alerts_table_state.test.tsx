@@ -7,7 +7,7 @@
 import React from 'react';
 import userEvent from '@testing-library/user-event';
 import { get } from 'lodash';
-import { fireEvent, render, waitFor } from '@testing-library/react';
+import { fireEvent, render, waitFor, screen } from '@testing-library/react';
 import { AlertConsumers } from '@kbn/rule-data-utils';
 import { EcsFieldsResponse } from '@kbn/rule-registry-plugin/common/search_strategy';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
@@ -225,6 +225,26 @@ describe('AlertsTableState', () => {
     showExpandToDetails: true,
   };
 
+  const mockCustomProps = (customProps: Partial<AlertsTableConfigurationRegistry>) => {
+    const getMockWithUsePersistentControls = jest.fn().mockImplementation((plugin: string) => {
+      return {
+        ...{
+          columns,
+          sort: DefaultSort,
+        },
+        ...customProps,
+      };
+    });
+    const alertsTableConfigurationRegistryWithPersistentControlsMock = {
+      has: hasMock,
+      get: getMockWithUsePersistentControls,
+    } as unknown as TypeRegistry<AlertsTableConfigurationRegistry>;
+    return {
+      ...tableProps,
+      alertsTableConfigurationRegistry: alertsTableConfigurationRegistryWithPersistentControlsMock,
+    };
+  };
+
   beforeEach(() => {
     hasMock.mockClear();
     getMock.mockClear();
@@ -400,32 +420,28 @@ describe('AlertsTableState', () => {
         ).toBe(AlertsField.uuid);
       });
     });
+  });
 
-    describe('when persistent controls are set', () => {
-      let props: AlertsTableStateProps;
-      beforeEach(() => {
-        const getMockWithUsePersistentControls = jest.fn().mockImplementation((plugin: string) => {
-          return {
-            columns,
-            sort: DefaultSort,
-            usePersistentControls: () => ({ right: <span>This is a persistent control</span> }),
-          };
-        });
-        const alertsTableConfigurationRegistryWithPersistentControlsMock = {
-          has: hasMock,
-          get: getMockWithUsePersistentControls,
-        } as unknown as TypeRegistry<AlertsTableConfigurationRegistry>;
-        props = {
-          ...tableProps,
-          alertsTableConfigurationRegistry:
-            alertsTableConfigurationRegistryWithPersistentControlsMock,
-        };
+  describe('persistent controls', () => {
+    it('should show persistent controls if set', () => {
+      const props = mockCustomProps({
+        usePersistentControls: () => ({ right: <span>This is a persistent control</span> }),
       });
+      const result = render(<AlertsTableWithLocale {...props} />);
+      expect(result.getByText('This is a persistent control')).toBeInTheDocument();
+    });
+  });
 
-      it('should show persistent controls if set', () => {
-        const result = render(<AlertsTableWithLocale {...props} />);
-        expect(result.getByText('This is a persistent control')).toBeInTheDocument();
-      });
+  describe('inspect button', () => {
+    it('should hide the inspect button by default', () => {
+      render(<AlertsTableWithLocale {...tableProps} />);
+      expect(screen.queryByTestId('inspect-icon-button')).not.toBeInTheDocument();
+    });
+
+    it('should show the inspect button if the right prop is set', async () => {
+      const props = mockCustomProps({ showInspectButton: true });
+      render(<AlertsTableWithLocale {...props} />);
+      expect(await screen.findByTestId('inspect-icon-button')).toBeInTheDocument();
     });
   });
 
@@ -450,25 +466,22 @@ describe('AlertsTableState', () => {
       expect(result.getByTestId('alertsStateTableEmptyState')).toBeTruthy();
     });
 
+    describe('inspect button', () => {
+      it('should hide the inspect button by default', () => {
+        render(<AlertsTableWithLocale {...tableProps} />);
+        expect(screen.queryByTestId('inspect-icon-button')).not.toBeInTheDocument();
+      });
+
+      it('should show the inspect button if the right prop is set', async () => {
+        const props = mockCustomProps({ showInspectButton: true });
+        render(<AlertsTableWithLocale {...props} />);
+        expect(await screen.findByTestId('inspect-icon-button')).toBeInTheDocument();
+      });
+    });
+
     describe('when persisten controls are set', () => {
-      let props: AlertsTableStateProps;
-      beforeEach(() => {
-        const getMockWithUsePersistentControls = jest.fn().mockImplementation((plugin: string) => {
-          return {
-            columns,
-            sort: DefaultSort,
-            usePersistentControls: () => ({ right: <span>This is a persistent control</span> }),
-          };
-        });
-        const alertsTableConfigurationRegistryWithPersistentControlsMock = {
-          has: hasMock,
-          get: getMockWithUsePersistentControls,
-        } as unknown as TypeRegistry<AlertsTableConfigurationRegistry>;
-        props = {
-          ...tableProps,
-          alertsTableConfigurationRegistry:
-            alertsTableConfigurationRegistryWithPersistentControlsMock,
-        };
+      const props = mockCustomProps({
+        usePersistentControls: () => ({ right: <span>This is a persistent control</span> }),
       });
 
       it('should show persistent controls if set', () => {

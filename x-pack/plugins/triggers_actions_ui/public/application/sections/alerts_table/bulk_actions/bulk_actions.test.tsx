@@ -18,6 +18,7 @@ import {
   BulkActionsConfig,
   BulkActionsState,
   FetchAlertData,
+  InspectQuery,
   RowSelectionState,
 } from '../../../../types';
 import { bulkActionsReducer } from './reducer';
@@ -67,7 +68,7 @@ describe('AlertsTable.BulkActions', () => {
     alertsCount: alerts.length,
     isInitializing: false,
     isLoading: false,
-    getInspectQuery: () => ({ request: {}, response: {} }),
+    getInspectQuery: () => ({ request: {}, response: {} } as InspectQuery),
     onPageChange: () => {},
     onSortChange: () => {},
     refresh: refreshMockFn,
