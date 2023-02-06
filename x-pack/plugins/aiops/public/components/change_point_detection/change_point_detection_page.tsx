@@ -102,12 +102,6 @@ export const ChangePointDetectionPage: FC = () => {
         <EuiFlexItem grow={false} css={selectControlCss}>
           <SplitFieldSelector value={requestParams.splitField} onChange={setSplitField} />
         </EuiFlexItem>
-        <EuiFlexItem grow={false} css={selectControlCss}>
-          <ChangePointTypeFilter
-            value={requestParams.changePointType}
-            onChange={setChangePointType}
-          />
-        </EuiFlexItem>
 
         <EuiFlexItem css={{ visibility: progress === 100 ? 'hidden' : 'visible' }} grow={false}>
           <EuiProgress
@@ -128,14 +122,25 @@ export const ChangePointDetectionPage: FC = () => {
 
       <EuiSpacer size="m" />
 
-      <EuiText size={'s'}>
-        <FormattedMessage
-          id="xpack.aiops.changePointDetection.aggregationIntervalTitle"
-          defaultMessage="Aggregation interval: "
-        />
-        {requestParams.interval}
-      </EuiText>
-      <EuiSpacer size="xs" />
+      <EuiFlexGroup alignItems={'center'} justifyContent={'spaceBetween'}>
+        <EuiFlexItem grow={false}>
+          <EuiText size={'s'}>
+            <FormattedMessage
+              id="xpack.aiops.changePointDetection.aggregationIntervalTitle"
+              defaultMessage="Aggregation interval: "
+            />
+            {requestParams.interval}
+          </EuiText>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false} css={{ minWidth: '400px' }}>
+          <ChangePointTypeFilter
+            value={requestParams.changePointType}
+            onChange={setChangePointType}
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+
+      <EuiSpacer size="s" />
 
       {annotations.length === 0 && progress === 100 ? (
         <>
