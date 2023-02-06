@@ -19,11 +19,10 @@ import {
   SUPPORTED_POLICY_TEMPLATES,
   SUPPORTED_CLOUDBEAT_INPUTS,
 } from '../../../common/constants';
+import { DEFAULT_AWS_VARS_GROUP } from './aws_credentials_form';
 import type { PostureInput, PosturePolicyTemplate } from '../../../common/types';
 import { assert } from '../../../common/utils/helpers';
 import { cloudPostureIntegrations } from '../../common/constants';
-
-export const INPUTS_WITH_AWS_VARS = [CLOUDBEAT_EKS, CLOUDBEAT_AWS];
 
 type PosturePolicyInput =
   | { type: typeof CLOUDBEAT_AZURE; policy_template: 'cspm' }
@@ -60,7 +59,9 @@ const getPostureInput = (
       // Merge new vars with existing vars
       ...(isInputEnabled &&
         stream.vars &&
-        inputVars && { vars: merge({}, stream.vars, inputVars) }),
+        inputVars && {
+          vars: merge({}, stream.vars, inputVars),
+        }),
     })),
   };
 };
@@ -82,6 +83,19 @@ export const getPosturePolicy = (
     posture: { value: getInputPolicyTemplate(newPolicy.inputs, inputType) },
   }),
 });
+
+/**
+ * Input vars that are hidden from the user
+ */
+export const getPostureInputHiddenVars = (inputType: PostureInput) => {
+  switch (inputType) {
+    case 'cloudbeat/cis_aws':
+    case 'cloudbeat/cis_eks':
+      return { 'aws.credentials.type': { value: DEFAULT_AWS_VARS_GROUP } };
+    default:
+      return undefined;
+  }
+};
 
 export const getPolicyTemplateInputOptions = (policyTemplate: PosturePolicyTemplate) =>
   cloudPostureIntegrations[policyTemplate].options.map((o) => ({

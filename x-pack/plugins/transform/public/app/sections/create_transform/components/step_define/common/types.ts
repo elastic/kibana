@@ -24,8 +24,8 @@ import {
   PivotConfigDefinition,
 } from '../../../../../../../common/types/transform';
 import { LatestFunctionConfig } from '../../../../../../../common/api_schemas/transforms';
-
 import { RUNTIME_FIELD_TYPES } from '../../../../../../../common/shared_imports';
+import type { TimeRangeMs } from '../../../../../../../common/types/date_picker';
 
 export interface ErrorMessage {
   query: string;
@@ -62,13 +62,15 @@ export interface StepDefineExposedState {
   sourceConfigUpdated: boolean;
   valid: boolean;
   validationStatus: { isValid: boolean; errorMessage?: string };
+  runtimeMappings?: RuntimeMappings;
+  runtimeMappingsUpdated: boolean;
+  isRuntimeMappingsEditorEnabled: boolean;
+  timeRangeMs?: TimeRangeMs;
+  isDatePickerApplyEnabled: boolean;
   /**
    * Undefined when the form is incomplete or invalid
    */
   previewRequest: { latest: LatestFunctionConfig } | { pivot: PivotConfigDefinition } | undefined;
-  runtimeMappings?: RuntimeMappings;
-  runtimeMappingsUpdated: boolean;
-  isRuntimeMappingsEditorEnabled: boolean;
 }
 
 export function isPivotPartialRequest(arg: unknown): arg is { pivot: PivotConfigDefinition } {

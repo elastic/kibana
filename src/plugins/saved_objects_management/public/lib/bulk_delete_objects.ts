@@ -6,24 +6,14 @@
  * Side Public License, v 1.
  */
 
-import { HttpStart } from '@kbn/core/public';
-import { SavedObjectError, SavedObjectTypeIdTuple } from '@kbn/core-saved-objects-common';
-
-interface SavedObjectDeleteStatus {
-  id: string;
-  success: boolean;
-  type: string;
-  error?: SavedObjectError;
-}
+import type { HttpStart } from '@kbn/core/public';
+import type { v1 } from '../../common';
 
 export function bulkDeleteObjects(
   http: HttpStart,
-  objects: SavedObjectTypeIdTuple[]
-): Promise<SavedObjectDeleteStatus[]> {
-  return http.post<SavedObjectDeleteStatus[]>(
-    '/internal/kibana/management/saved_objects/_bulk_delete',
-    {
-      body: JSON.stringify(objects),
-    }
-  );
+  objects: v1.BulkDeleteBodyHTTP
+): Promise<v1.BulkDeleteResponseHTTP> {
+  return http.post('/internal/kibana/management/saved_objects/_bulk_delete', {
+    body: JSON.stringify(objects),
+  });
 }
