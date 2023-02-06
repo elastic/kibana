@@ -338,7 +338,7 @@ export const RulesTableContextProvider = ({ children }: RulesTableContextProvide
         pagination: {
           page,
           perPage,
-          total: isInMemorySorting ? rules.length : total,
+          total,
         },
         filterOptions,
         isPreflightInProgress,
