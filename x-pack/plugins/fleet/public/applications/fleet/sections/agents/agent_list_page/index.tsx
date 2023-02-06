@@ -13,6 +13,8 @@ import { i18n } from '@kbn/i18n';
 
 import { FormattedMessage } from '@kbn/i18n-react';
 
+import { agentStatusesToSummary } from '../../../../../../common/services';
+
 import type { Agent, AgentPolicy, SimplifiedAgentStatus } from '../../../types';
 import {
   usePagination,
@@ -274,33 +276,27 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
         isLoadingVar.current = true;
         try {
           setIsLoading(true);
-          const [
-            agentsResponse,
-            agentsStatusResponse,
-            totalInactiveAgentsResponse,
-            agentTagsResponse,
-          ] = await Promise.all([
-            sendGetAgents({
-              page: pagination.currentPage,
-              perPage: pagination.pageSize,
-              kuery: kuery && kuery !== '' ? kuery : undefined,
-              sortField: getSortFieldForAPI(sortField),
-              sortOrder,
-              showInactive,
-              showUpgradeable,
-              withMetrics: displayAgentMetrics,
-            }),
-            sendGetAgentStatus({
-              kuery: kuery && kuery !== '' ? kuery : undefined,
-            }),
-            sendGetAgentStatus({
-              kuery: AgentStatusKueryHelper.buildKueryForInactiveAgents(),
-            }),
-            sendGetAgentTags({
-              kuery: kuery && kuery !== '' ? kuery : undefined,
-              showInactive,
-            }),
-          ]);
+          const [agentsResponse, totalInactiveAgentsResponse, agentTagsResponse] =
+            await Promise.all([
+              sendGetAgents({
+                page: pagination.currentPage,
+                perPage: pagination.pageSize,
+                kuery: kuery && kuery !== '' ? kuery : undefined,
+                sortField: getSortFieldForAPI(sortField),
+                sortOrder,
+                showInactive,
+                showUpgradeable,
+                getStatusSummary: true,
+                withMetrics: displayAgentMetrics,
+              }),
+              sendGetAgentStatus({
+                kuery: AgentStatusKueryHelper.buildKueryForInactiveAgents(),
+              }),
+              sendGetAgentTags({
+                kuery: kuery && kuery !== '' ? kuery : undefined,
+                showInactive,
+              }),
+            ]);
           isLoadingVar.current = false;
           // Return if a newer request has been triggered
           if (currentRequestRef.current !== currentRequest) {
@@ -312,27 +308,22 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
           if (!agentsResponse.data) {
             throw new Error('Invalid GET /agents response');
           }
-          if (agentsStatusResponse.error) {
-            throw agentsStatusResponse.error;
-          }
-          if (!agentsStatusResponse.data || !totalInactiveAgentsResponse.data) {
+          if (!totalInactiveAgentsResponse.data) {
             throw new Error('Invalid GET /agents_status response');
           }
           if (agentTagsResponse.error) {
-            throw agentsStatusResponse.error;
+            throw agentTagsResponse.error;
           }
           if (!agentTagsResponse.data) {
             throw new Error('Invalid GET /agent/tags response');
           }
 
-          setAgentsStatus({
-            healthy: agentsStatusResponse.data.results.online,
-            unhealthy: agentsStatusResponse.data.results.error,
-            offline: agentsStatusResponse.data.results.offline,
-            updating: agentsStatusResponse.data.results.updating,
-            inactive: agentsStatusResponse.data.results.inactive,
-            unenrolled: agentsStatusResponse.data.results.unenrolled,
-          });
+          const statusSummary = agentsResponse.data.statusSummary;
+
+          if (!statusSummary) {
+            throw new Error('Invalid GET /agents response - no status summary');
+          }
+          setAgentsStatus(agentStatusesToSummary(statusSummary));
 
           const newAllTags = agentTagsResponse.data.items;
 

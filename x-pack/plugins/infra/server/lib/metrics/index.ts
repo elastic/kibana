@@ -63,42 +63,46 @@ export const query = async (
     },
   };
 
-  const response = await search<{}, MetricsESResponse>(params);
+  try {
+    const response = await search<{}, MetricsESResponse>(params);
 
-  if (response.hits.total.value === 0) {
-    return EMPTY_RESPONSE;
-  }
+    if (response.hits.total.value === 0) {
+      return EMPTY_RESPONSE;
+    }
 
-  if (!response.aggregations) {
-    throw new Error('Aggregations should be present.');
-  }
+    if (!response.aggregations) {
+      throw new Error('Aggregations should be present.');
+    }
 
-  const { bucketSize } = calculateBucketSize({ ...options.timerange, interval });
+    const { bucketSize } = calculateBucketSize({ ...options.timerange, interval });
 
-  if (hasGroupBy) {
-    const aggregations = decodeOrThrow(CompositeResponseRT)(response.aggregations);
-    const { groupings } = aggregations;
-    const limit = options.limit ?? DEFAULT_LIMIT;
-    const returnAfterKey = !!groupings.after_key && groupings.buckets.length === limit;
-    const afterKey = returnAfterKey ? groupings.after_key : null;
+    if (hasGroupBy) {
+      const aggregations = decodeOrThrow(CompositeResponseRT)(response.aggregations);
+      const { groupings } = aggregations;
+      const limit = options.limit ?? DEFAULT_LIMIT;
+      const returnAfterKey = !!groupings.after_key && groupings.buckets.length === limit;
+      const afterKey = returnAfterKey ? groupings.after_key : null;
 
+      return {
+        series: getSeriesFromCompositeAggregations(groupings, options, bucketSize * 1000),
+        info: {
+          afterKey,
+          interval: rawOptions.includeTimeseries ? bucketSize : undefined,
+        },
+      };
+    }
+
+    const aggregations = decodeOrThrow(AggregationResponseRT)(response.aggregations);
     return {
-      series: getSeriesFromCompositeAggregations(groupings, options, bucketSize * 1000),
+      series: getSeriesFromHistogram(aggregations, options, bucketSize * 1000),
       info: {
-        afterKey,
-        interval: rawOptions.includeTimeseries ? bucketSize : undefined,
+        afterKey: null,
+        interval: bucketSize,
       },
     };
+  } catch (e) {
+    throw e;
   }
-
-  const aggregations = decodeOrThrow(AggregationResponseRT)(response.aggregations);
-  return {
-    series: getSeriesFromHistogram(aggregations, options, bucketSize * 1000),
-    info: {
-      afterKey: null,
-      interval: bucketSize,
-    },
-  };
 };
 
 const getSeriesFromHistogram = (
