@@ -7,7 +7,7 @@
 
 import { pickBy, isEmpty } from 'lodash';
 import type { Plugin } from 'unified';
-import React, { useContext, useMemo, useCallback } from 'react';
+import React, { useContext, useMemo, useCallback, useState } from 'react';
 import type { RemarkTokenizer } from '@elastic/eui';
 import {
   EuiLoadingSpinner,
@@ -20,20 +20,40 @@ import {
   EuiModalFooter,
   EuiButton,
   EuiButtonEmpty,
+  EuiForm,
+  EuiFormRow,
+  EuiFieldText,
+  EuiSelect,
 } from '@elastic/eui';
+import { css } from '@emotion/react';
 import type { EuiMarkdownEditorUiPluginEditorProps } from '@elastic/eui/src/components/markdown_editor/markdown_types';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { useForm, FormProvider } from 'react-hook-form';
+import type { Filter } from '@kbn/es-query';
+import {
+  FILTERS,
+  isCombinedFilter,
+  isRangeFilter,
+  isPhraseFilter,
+  isPhrasesFilter,
+  isExistsFilter,
+  BooleanRelation,
+} from '@kbn/es-query';
+import { useForm, FormProvider, useController } from 'react-hook-form';
 import { useAppToasts } from '../../../../hooks/use_app_toasts';
 import { useKibana } from '../../../../lib/kibana';
 import { useInsightQuery } from './use_insight_query';
-import { useInsightDataProviders } from './use_insight_data_providers';
+import { useInsightDataProviders, type Provider } from './use_insight_data_providers';
 import { BasicAlertDataContext } from '../../../event_details/investigation_guide_view';
 import { InvestigateInTimelineButton } from '../../../event_details/table/investigate_in_timeline_button';
-import { getTimeRangeSettings } from '../../../../utils/default_date_settings';
+import {
+  getTimeRangeSettings,
+  parseDateWithDefault,
+  DEFAULT_FROM_MOMENT,
+  DEFAULT_TO_MOMENT,
+} from '../../../../utils/default_date_settings';
 import type { TimeRange } from '../../../../store/inputs/model';
-import { InsightBuilderForm } from './builder_form';
+import { DEFAULT_TIMEPICKER_QUICK_RANGES } from '../../../../../../common/constants';
 import { useSourcererDataView } from '../../../../containers/sourcerer';
 import { SourcererScopeName } from '../../../../store/sourcerer/model';
 
@@ -41,6 +61,8 @@ interface InsightComponentProps {
   label?: string;
   description?: string;
   providers?: string;
+  relativeFrom?: string;
+  relativeTo?: string;
 }
 
 export const parser: Plugin = function () {
@@ -114,8 +136,82 @@ export const parser: Plugin = function () {
   methods.splice(methods.indexOf('text'), 0, 'insight');
 };
 
+const buildPrimitiveFilter = (filter: Filter): Provider => {
+  const field = filter.meta?.key ?? '';
+  const excluded = filter.meta?.negate ?? false;
+  const queryType = filter.meta?.type ?? FILTERS.PHRASE;
+  const baseFilter = {
+    field,
+    excluded,
+    queryType,
+  };
+  if (isRangeFilter(filter)) {
+    const gte = filter.query.range[field].gte;
+    const lt = filter.query.range[field].lt;
+    const value = JSON.stringify({ gte, lt });
+    return {
+      ...baseFilter,
+      value,
+      queryType: filter.meta.type ?? FILTERS.RANGE,
+    };
+  } else if (isPhrasesFilter(filter)) {
+    return {
+      ...baseFilter,
+      value: filter.meta?.params.join(',') ?? [],
+      queryType: filter.meta.type ?? FILTERS.PHRASES,
+    };
+  } else if (isExistsFilter(filter)) {
+    return {
+      ...baseFilter,
+      value: '',
+      queryType: filter.meta.type ?? FILTERS.EXISTS,
+    };
+  } else if (isPhraseFilter(filter)) {
+    return {
+      ...baseFilter,
+      value: filter.meta?.params?.query ?? '',
+      queryType: filter.meta.type ?? FILTERS.PHRASE,
+    };
+  } else {
+    return {
+      ...baseFilter,
+      value: '',
+      queryType: FILTERS.PHRASE,
+    };
+  }
+};
+
+const filtersToInsightProviders = (filters: Filter[]): Provider[][] => {
+  const providers = [];
+  for (let index = 0; index < filters.length; index++) {
+    const filter = filters[index];
+    if (isCombinedFilter(filter)) {
+      if (filter.meta.relation === BooleanRelation.AND) {
+        return filtersToInsightProviders(filter.meta?.params);
+      } else {
+        return filter.meta?.params.map((innerFilter) => {
+          if (isCombinedFilter(innerFilter)) {
+            return filtersToInsightProviders([innerFilter]).map(([provider]) => provider);
+          } else {
+            return [buildPrimitiveFilter(innerFilter)];
+          }
+        });
+      }
+    } else {
+      providers.push([buildPrimitiveFilter(filter)]);
+    }
+  }
+  return providers;
+};
+
 // receives the configuration from the parser and renders
-const InsightComponent = ({ label, description, providers }: InsightComponentProps) => {
+const InsightComponent = ({
+  label,
+  description,
+  providers,
+  relativeFrom,
+  relativeTo,
+}: InsightComponentProps) => {
   const { addError } = useAppToasts();
   let parsedProviders = [];
   try {
@@ -130,15 +226,28 @@ const InsightComponent = ({ label, description, providers }: InsightComponentPro
     });
   }
   const { data: alertData } = useContext(BasicAlertDataContext);
-  const dataProviders = useInsightDataProviders({
+  const { dataProviders, filters } = useInsightDataProviders({
     providers: parsedProviders,
     alertData,
   });
   const { totalCount, isQueryLoading, oldestTimestamp, hasError } = useInsightQuery({
     dataProviders,
+    filters,
   });
   const timerange: TimeRange = useMemo(() => {
-    if (oldestTimestamp != null) {
+    if (relativeFrom && relativeTo) {
+      const fromStr = relativeFrom;
+      const toStr = relativeTo;
+      const from = parseDateWithDefault(fromStr, DEFAULT_FROM_MOMENT).toISOString();
+      const to = parseDateWithDefault(toStr, DEFAULT_TO_MOMENT, true).toISOString();
+      return {
+        kind: 'relative',
+        from,
+        to,
+        fromStr,
+        toStr,
+      };
+    } else if (oldestTimestamp != null) {
       return {
         kind: 'absolute',
         from: oldestTimestamp,
@@ -154,7 +263,7 @@ const InsightComponent = ({ label, description, providers }: InsightComponentPro
         toStr,
       };
     }
-  }, [oldestTimestamp]);
+  }, [oldestTimestamp, relativeFrom, relativeTo]);
   if (isQueryLoading) {
     return <EuiLoadingSpinner size="l" />;
   } else {
@@ -180,21 +289,32 @@ const InsightEditorComponent = ({
   node,
   onSave,
   onCancel,
-}: EuiMarkdownEditorUiPluginEditorProps<{
-  configuration: {
-    label?: string;
-    query: string;
-    ecs_mapping: { [key: string]: {} };
-  };
-}>) => {
+}: EuiMarkdownEditorUiPluginEditorProps<InsightComponentProps & { relativeTimerange: string }>) => {
   const isEditMode = node != null;
   const { sourcererDataView, indexPattern } = useSourcererDataView(SourcererScopeName.default);
   const {
     unifiedSearch: {
       ui: { FiltersBuilderLazy },
     },
+    uiSettings,
   } = useKibana().services;
-  const why = useMemo(() => {
+  const [providers, setProviders] = useState<Provider[][]>([[]]);
+  const dateRangeChoices = useMemo(() => {
+    const settings: Array<{ from: string; to: string; display: string }> = uiSettings.get(
+      DEFAULT_TIMEPICKER_QUICK_RANGES
+    );
+    const emptyValue = { value: '0', text: '' };
+    return [
+      emptyValue,
+      ...settings.map(({ display }, index) => {
+        return {
+          value: String(index + 1),
+          text: display,
+        };
+      }),
+    ];
+  }, [uiSettings]);
+  const kibanaDataProvider = useMemo(() => {
     return {
       ...sourcererDataView,
       fields: sourcererDataView?.indexFields,
@@ -202,15 +322,46 @@ const InsightEditorComponent = ({
   }, [sourcererDataView]);
   const formMethods = useForm<{
     label: string;
-    query: string;
-    ecs_mapping: Record<string, unknown>;
+    description: string;
+    relativeTimerange?: string;
   }>({
     defaultValues: {
-      label: node?.configuration?.label,
-      query: node?.configuration?.query,
-      ecs_mapping: node?.configuration?.ecs_mapping,
+      label: node?.label,
+      description: node?.description,
+      relativeTimerange: node?.relativeTimerange || '0',
     },
   });
+
+  const labelController = useController({ name: 'label', control: formMethods.control });
+  const descriptionController = useController({
+    name: 'description',
+    control: formMethods.control,
+  });
+  const relativeTimerangeController = useController({
+    name: 'relativeTimerange',
+    control: formMethods.control,
+  });
+
+  const getTimeRangeSelection = useCallback(
+    (selection?: string) => {
+      const selectedOption = dateRangeChoices.find((option) => {
+        return option.value === selection;
+      });
+      if (selectedOption && selectedOption.value !== '0') {
+        const settingsIndex = Number(selectedOption.value);
+        const settings: Array<{ from: string; to: string; display: string }> = uiSettings.get(
+          DEFAULT_TIMEPICKER_QUICK_RANGES
+        );
+        return {
+          relativeFrom: settings[settingsIndex].from,
+          relativeTo: settings[settingsIndex].to,
+        };
+      } else {
+        return {};
+      }
+    },
+    [dateRangeChoices, uiSettings]
+  );
 
   const onSubmit = useCallback(
     (data) => {
@@ -218,9 +369,10 @@ const InsightEditorComponent = ({
         `!{insight${JSON.stringify(
           pickBy(
             {
-              query: data.query,
-              label: data.label,
-              ecs_mapping: data.ecs_mapping,
+              label: labelController.field.value,
+              description: descriptionController.field.value,
+              providers,
+              ...getTimeRangeSelection(relativeTimerangeController.field.value),
             },
             (value) => !isEmpty(value)
           )
@@ -230,15 +382,27 @@ const InsightEditorComponent = ({
         }
       );
     },
-    [onSave]
+    [
+      onSave,
+      providers,
+      labelController.field.value,
+      descriptionController.field.value,
+      relativeTimerangeController.field.value,
+      getTimeRangeSelection,
+    ]
   );
 
-  const onChange = useCallback((...args) => {
-    console.log(args);
+  const onChange = useCallback((filters: Filter[]) => {
+    setProviders(filtersToInsightProviders(filters));
   }, []);
+  const selectOnChange = useCallback(
+    (event) => {
+      relativeTimerangeController.field.onChange(event.target.value);
+    },
+    [relativeTimerangeController.field]
+  );
   const filtersStub = useMemo(() => {
     const index = indexPattern !== undefined ? indexPattern.getName() : '*';
-    console.log({ index });
     return [
       {
         $state: {
@@ -255,41 +419,88 @@ const InsightEditorComponent = ({
   }, [indexPattern]);
   return (
     <>
-      <EuiModalHeader>
+      <EuiModalHeader
+        css={css`
+          min-width: 700px;
+        `}
+      >
         <EuiModalHeaderTitle>
           {isEditMode ? (
             <FormattedMessage
-              id="xpack.securitySolution.markdown.osquery.editModalTitle"
-              defaultMessage="Edit query"
+              id="xpack.securitySolution.markdown.insight.editModalTitle"
+              defaultMessage="Edit insight query"
             />
           ) : (
             <FormattedMessage
-              id="xpack.securitySolution.markdown.osquery.addModalTitle"
-              defaultMessage="Add query"
+              id="xpack.securitySolution.markdown.insight.addModalTitle"
+              defaultMessage="Add insight query"
             />
           )}
         </EuiModalHeaderTitle>
       </EuiModalHeader>
 
       <EuiModalBody>
-        <FiltersBuilderLazy filters={filtersStub} onChange={onChange} dataView={why} maxDepth={2} />
+        <FormProvider {...formMethods}>
+          <EuiForm>
+            <EuiFormRow
+              label="Description"
+              helpText="Description of the relevance of the query"
+              fullWidth
+            >
+              <EuiFieldText
+                {...{ ...formMethods.register('description'), ref: null }}
+                name="description"
+                onChange={descriptionController.field.onChange}
+              />
+            </EuiFormRow>
+            <EuiFormRow
+              label="Label"
+              helpText="Label for the filter button rendered in the guide"
+              fullWidth
+            >
+              <EuiFieldText
+                {...{ ...formMethods.register('label'), ref: null }}
+                name="label"
+                onChange={labelController.field.onChange}
+              />
+            </EuiFormRow>
+            <EuiFormRow fullWidth>
+              <FiltersBuilderLazy
+                filters={filtersStub}
+                onChange={onChange}
+                dataView={kibanaDataProvider}
+                maxDepth={2}
+              />
+            </EuiFormRow>
+            <EuiFormRow
+              label="Relative time range to use when building the query (optional)"
+              fullWidth
+            >
+              <EuiSelect
+                {...formMethods.register('relativeTimerange')}
+                onChange={selectOnChange}
+                options={dateRangeChoices}
+              />
+            </EuiFormRow>
+          </EuiForm>
+        </FormProvider>
       </EuiModalBody>
 
       <EuiModalFooter>
         <EuiButtonEmpty onClick={onCancel}>
-          {i18n.translate('xpack.securitySolution.markdown.osquery.modalCancelButtonLabel', {
+          {i18n.translate('xpack.securitySolution.markdown.insight.modalCancelButtonLabel', {
             defaultMessage: 'Cancel',
           })}
         </EuiButtonEmpty>
         <EuiButton onClick={formMethods.handleSubmit(onSubmit)} fill>
           {isEditMode ? (
             <FormattedMessage
-              id="xpack.securitySolution.markdown.osquery.addModalConfirmButtonLabel"
+              id="xpack.securitySolution.markdown.insight.addModalConfirmButtonLabel"
               defaultMessage="Add query"
             />
           ) : (
             <FormattedMessage
-              id="xpack.securitySolution.markdown.osquery.editModalConfirmButtonLabel"
+              id="xpack.securitySolution.markdown.insight.editModalConfirmButtonLabel"
               defaultMessage="Save changes"
             />
           )}
@@ -300,6 +511,19 @@ const InsightEditorComponent = ({
 };
 
 const InsightEditor = React.memo(InsightEditorComponent);
+const exampleInsight = `!{insight{
+  "label": "Test action",
+  "description": "Click to investigate",
+  "providers": [
+    [     
+      {"field": "event.id", "value": "kibana.alert.original_event.id", "queryType": "parameter"}
+    ],
+    [  
+      {"field": "event.action", "value": "rename", "type": "literal"},
+      {"field": "process.pid", "value": "process.pid", "type": "parameter"}
+    ]
+  ]
+}}`;
 
 export const plugin = {
   name: 'insights',
@@ -310,7 +534,7 @@ export const plugin = {
   helpText: (
     <div>
       <EuiCodeBlock language="md" fontSize="l" paddingSize="s" isCopyable>
-        {'!{insight{#TODO}}'}
+        {exampleInsight}
       </EuiCodeBlock>
       <EuiSpacer size="s" />
     </div>
