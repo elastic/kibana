@@ -12,7 +12,9 @@ import { useValues } from 'kea';
 import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiPanel, EuiStat } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { EngineViewTabs } from '../../routes';
+import { generateEncodedPath } from '../../../shared/encode_path_params';
+import { EuiLinkTo } from '../../../shared/react_router_helpers';
+import { EngineViewTabs, ENGINE_TAB_PATH } from '../../routes';
 import { EnterpriseSearchEnginesPageTemplate } from '../layout/engines_page_template';
 
 import { EngineOverviewLogic } from './engine_overview_logic';
@@ -39,49 +41,73 @@ export const EngineOverview: React.FC = () => {
         <EuiPanel hasShadow={false} hasBorder paddingSize="l">
           <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
             <EuiFlexItem>
-              <EuiFlexGroup alignItems="center">
-                <EuiIcon size="xxl" type="visTable" color="#98A2B3" />
-                <EuiStat
-                  titleSize="l"
-                  isLoading={isLoadingEngine}
-                  title={indicesCount.toLocaleString()}
-                  description={i18n.translate(
-                    'xpack.enterpriseSearch.content.engine.overview.indicesDescription',
-                    { defaultMessage: 'Indices' }
-                  )}
-                  titleColor="primary"
-                />
-              </EuiFlexGroup>
+              <EuiLinkTo
+                to={generateEncodedPath(ENGINE_TAB_PATH, {
+                  engineName,
+                  tabId: EngineViewTabs.INDICES,
+                })}
+                color="text"
+              >
+                <EuiFlexGroup alignItems="center">
+                  <EuiIcon size="xxl" type="visTable" color="#98A2B3" />
+                  <EuiStat
+                    titleSize="l"
+                    isLoading={isLoadingEngine}
+                    title={indicesCount.toLocaleString()}
+                    description={i18n.translate(
+                      'xpack.enterpriseSearch.content.engine.overview.indicesDescription',
+                      { defaultMessage: 'Indices' }
+                    )}
+                    titleColor="primary"
+                  />
+                </EuiFlexGroup>
+              </EuiLinkTo>
             </EuiFlexItem>
             <EuiFlexItem>
-              <EuiFlexGroup alignItems="center">
-                <EuiIcon size="xxl" type="documents" color="#98A2B3" />
-                <EuiStat
-                  titleSize="l"
-                  isLoading={isLoadingEngine}
-                  title={documentsCount.toLocaleString()}
-                  description={i18n.translate(
-                    'xpack.enterpriseSearch.content.engine.overview.documentsDescription',
-                    { defaultMessage: 'Documents' }
-                  )}
-                  titleColor="primary"
-                />
-              </EuiFlexGroup>
+              <EuiLinkTo
+                to={generateEncodedPath(ENGINE_TAB_PATH, {
+                  engineName,
+                  tabId: EngineViewTabs.PREVIEW,
+                })}
+                color="text"
+              >
+                <EuiFlexGroup alignItems="center">
+                  <EuiIcon size="xxl" type="documents" color="#98A2B3" />
+                  <EuiStat
+                    titleSize="l"
+                    isLoading={isLoadingEngine}
+                    title={documentsCount.toLocaleString()}
+                    description={i18n.translate(
+                      'xpack.enterpriseSearch.content.engine.overview.documentsDescription',
+                      { defaultMessage: 'Documents' }
+                    )}
+                    titleColor="primary"
+                  />
+                </EuiFlexGroup>
+              </EuiLinkTo>
             </EuiFlexItem>
             <EuiFlexItem>
-              <EuiFlexGroup alignItems="center">
-                <EuiIcon size="xxl" type="documents" color="#98A2B3" />
-                <EuiStat
-                  titleSize="l"
-                  isLoading={false}
-                  title={fieldsCount.toLocaleString()}
-                  description={i18n.translate(
-                    'xpack.enterpriseSearch.content.engine.overview.fieldsDescription',
-                    { defaultMessage: 'Fields' }
-                  )}
-                  titleColor="primary"
-                />
-              </EuiFlexGroup>
+              <EuiLinkTo
+                to={generateEncodedPath(ENGINE_TAB_PATH, {
+                  engineName,
+                  tabId: EngineViewTabs.SCHEMA,
+                })}
+                color="text"
+              >
+                <EuiFlexGroup alignItems="center">
+                  <EuiIcon size="xxl" type="documents" color="#98A2B3" />
+                  <EuiStat
+                    titleSize="l"
+                    isLoading={false}
+                    title={fieldsCount.toLocaleString()}
+                    description={i18n.translate(
+                      'xpack.enterpriseSearch.content.engine.overview.fieldsDescription',
+                      { defaultMessage: 'Fields' }
+                    )}
+                    titleColor="primary"
+                  />
+                </EuiFlexGroup>
+              </EuiLinkTo>
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiPanel>
