@@ -59,6 +59,9 @@ function validateState(
 ): [RulesTableSavedFilter, RulesTableSavedSorting, RulesTableUrlSavedPagination] {
   const [filterFromUrl] = validateNonExact(urlState, RulesTableSavedFilter);
   const [filterFromStorage] = validateNonExact(storageState, RulesTableSavedFilter);
+  // We have to expose filter, sorting and pagination objects by explicitly specifying each field
+  // since urlState and/or storageState may contain unnecessary fields (e.g. outdated or explicitly added by user)
+  // and validateNonExact doesn't truncate fields not included in the type RulesTableSavedFilter and etc.
   const filter: RulesTableSavedFilter = {
     searchTerm: filterFromUrl?.searchTerm ?? filterFromStorage?.searchTerm,
     source: filterFromUrl?.source ?? filterFromStorage?.source,
@@ -76,7 +79,7 @@ function validateState(
   const [paginationFromUrl] = validateNonExact(urlState, RulesTableUrlSavedPagination);
   const [paginationFromStorage] = validateNonExact(storageState, RulesTableStorageSavedPagination);
   const pagination = {
-    page: paginationFromUrl?.page,
+    page: paginationFromUrl?.page, // We don't persist page number in the session storage since it may be outdated when restored
     perPage: paginationFromUrl?.perPage ?? paginationFromStorage?.perPage,
   };
 
