@@ -14,7 +14,6 @@ import { ViewMode } from '@kbn/embeddable-plugin/public';
 import { useExecutionContext } from '@kbn/kibana-react-plugin/public';
 import { createKbnUrlStateStorage, withNotifyOnErrors } from '@kbn/kibana-utils-plugin/public';
 
-import useObservable from 'react-use/lib/useObservable';
 import {
   DashboardAppNoDataPage,
   isDashboardAppInNoDataState,
@@ -174,11 +173,6 @@ export function DashboardApp({
   );
 
   /**
-   * If custom branding is set, replace `EuiLoadingElastic` with `EuiLoadingSpinner`
-   */
-  const showPlainSpinner = useObservable(customBranding.hasCustomBranding$, false);
-
-  /**
    * When the dashboard container is created, or re-created, start syncing dashboard state with the URL
    */
   useEffect(() => {
@@ -208,7 +202,7 @@ export function DashboardApp({
             savedObjectId={savedDashboardId}
             getCreationOptions={getCreationOptions}
             onDashboardContainerLoaded={(container) => setDashboardContainer(container)}
-            showPlainSpinner={showPlainSpinner}
+            hasCustomBranding$={customBranding.hasCustomBranding$}
           />
         </>
       )}
