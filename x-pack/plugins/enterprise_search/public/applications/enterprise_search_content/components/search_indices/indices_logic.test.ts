@@ -101,7 +101,10 @@ describe('IndicesLogic', () => {
         IndicesLogic.actions.openDeleteModal(connectorIndex);
         IndicesLogic.actions.fetchIndexDetails = jest.fn();
         IndicesLogic.actions.closeDeleteModal();
-        expect(IndicesLogic.values).toEqual(DEFAULT_VALUES);
+        expect(IndicesLogic.values).toEqual({
+          ...DEFAULT_VALUES,
+          indexDetailsStatus: Status.LOADING,
+        });
       });
     });
   });
