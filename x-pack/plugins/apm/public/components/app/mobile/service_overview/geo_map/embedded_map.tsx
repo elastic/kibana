@@ -24,9 +24,8 @@ import { i18n } from '@kbn/i18n';
 import { EuiText } from '@elastic/eui';
 import type { Filter } from '@kbn/es-query';
 import { ApmPluginStartDeps } from '../../../../../plugin';
-import { getSessionMapLayerList } from './get_session_map_layer_list';
-import { getHttpRequestsLayerList } from './get_http_requests_map_layer_list';
-import { MapTypes } from '.';
+import { getLayerList } from './map_layers/get_layer_list';
+import { MapTypes } from '../../typings/common';
 function EmbeddedMapComponent({
   selectedMap,
   start,
@@ -127,28 +126,18 @@ function EmbeddedMapComponent({
 
   useEffect(() => {
     const setLayerList = async () => {
-      if (embeddable) {
-        let layerList;
-        switch (selectedMap) {
-          case MapTypes.HTTP:
-            layerList = await getHttpRequestsLayerList(maps);
-
-            break;
-          case MapTypes.SESSIONS:
-            layerList = await getSessionMapLayerList(maps);
-            break;
-          default:
-            layerList = await getHttpRequestsLayerList(maps);
-        }
-        // @ts-expect-error
-        await embeddable.setLayerList(layerList);
-        await embeddable.reload();
+      if (embeddable && !isErrorEmbeddable(embeddable)) {
+        const layerList = await getLayerList({ selectedMap, maps });
+        await Promise.all([
+          embeddable.setLayerList(layerList),
+          embeddable.reload(),
+        ]);
       }
     };
-    if (embeddable && !isErrorEmbeddable(embeddable)) {
-      setLayerList();
-    }
+
+    setLayerList();
   }, [embeddable, selectedMap, maps]);
+
   useEffect(() => {
     if (embeddable) {
       embeddable.updateInput({

@@ -12,7 +12,7 @@ import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { embeddablePluginMock } from '@kbn/embeddable-plugin/public/mocks';
 import { MockApmPluginContextWrapper } from '../../../../../context/apm_plugin/mock_apm_plugin_context';
 import { MemoryRouter } from 'react-router-dom';
-import { MapTypes } from '.';
+import { MapTypes } from '../../typings/common';
 
 describe('Embedded Map', () => {
   it('it renders', async () => {
@@ -38,7 +38,7 @@ describe('Embedded Map', () => {
         <MockApmPluginContextWrapper>
           <KibanaContextProvider services={{ embeddable: mockEmbeddable }}>
             <EmbeddedMap
-              selectedMap={MapTypes.HTTP}
+              selectedMap={MapTypes.Http}
               filters={[]}
               start="2022-12-20T10:00:00.000Z"
               end="2022-12-20T10:15:00.000Z"

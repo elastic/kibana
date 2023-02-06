@@ -13,52 +13,38 @@ import {
   LAYER_TYPE,
   SOURCE_TYPES,
 } from '@kbn/maps-plugin/common';
-import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { v4 as uuidv4 } from 'uuid';
 import type { MapsStartApi } from '@kbn/maps-plugin/public';
 import { i18n } from '@kbn/i18n';
 import {
   CLIENT_GEO_COUNTRY_ISO_CODE,
   CLIENT_GEO_REGION_ISO_CODE,
-  PROCESSOR_EVENT,
-  SPAN_SUBTYPE,
-  SPAN_TYPE,
-} from '../../../../../../common/es_fields/apm';
-import { APM_STATIC_DATA_VIEW_ID } from '../../../../../../common/data_view_constants';
+  SESSION_ID,
+} from '../../../../../../../common/es_fields/apm';
+import { APM_STATIC_DATA_VIEW_ID } from '../../../../../../../common/data_view_constants';
 import { getLayerStyle, PalleteColors } from './get_map_layer_style';
-import {
-  MobileSpanSubtype,
-  MobileSpanType,
-} from '../../../../../../server/routes/mobile/get_mobile_http_requests';
 
 interface VectorLayerDescriptor extends BaseVectorLayerDescriptor {
   sourceDescriptor: EMSFileSourceDescriptor;
 }
 
-const COUNTRY_NAME = 'name';
 const PER_COUNTRY_LAYER_ID = 'per_country';
 const PER_REGION_LAYER_ID = 'per_region';
-const HTTP_REQUEST_PER_COUNTRY = `__kbnjoin__count__${PER_COUNTRY_LAYER_ID}`;
-const HTTP_REQUESTS_PER_REGION = `__kbnjoin__count__${PER_REGION_LAYER_ID}`;
+const COUNTRY_NAME = 'name';
+const SESSION_PER_COUNTRY = `__kbnjoin__cardinality_of_session.id__${PER_COUNTRY_LAYER_ID}`;
+const SESSION_PER_REGION = `__kbnjoin__cardinality_of_session.id__${PER_REGION_LAYER_ID}`;
 
 const label = i18n.translate(
-  'xpack.apm.serviceOverview.embeddedMap.httpRequests.metric.label',
+  'xpack.apm.serviceOverview.embeddedMap.session.metric.label',
   {
-    defaultMessage: 'HTTP requests',
+    defaultMessage: 'Sessions',
   }
 );
+export async function getSessionMapLayerList(maps?: MapsStartApi) {
+  const basemapLayerDescriptor =
+    await maps?.createLayerDescriptors?.createBasemapLayerDescriptor();
 
-export async function getHttpRequestsLayerList(maps?: MapsStartApi) {
-  const whereQuery = {
-    language: 'kuery',
-    query: `${PROCESSOR_EVENT}:${ProcessorEvent.span} and ${SPAN_SUBTYPE}:${MobileSpanSubtype} and ${SPAN_TYPE}:${MobileSpanType}}`,
-  };
-
-  const basemapLayerDescriptor = maps
-    ? await maps.createLayerDescriptors.createBasemapLayerDescriptor()
-    : null;
-
-  const httpRequestsByCountryLayer: VectorLayerDescriptor = {
+  const sessionsByCountryLayer: VectorLayerDescriptor = {
     joins: [
       {
         leftField: 'iso2',
@@ -68,11 +54,11 @@ export async function getHttpRequestsLayerList(maps?: MapsStartApi) {
           term: CLIENT_GEO_COUNTRY_ISO_CODE,
           metrics: [
             {
-              type: AGG_TYPE.COUNT,
+              type: AGG_TYPE.UNIQUE_COUNT,
+              field: SESSION_ID,
               label,
             },
           ],
-          whereQuery,
           indexPatternId: APM_STATIC_DATA_VIEW_ID,
           applyGlobalQuery: true,
           applyGlobalTime: true,
@@ -85,12 +71,12 @@ export async function getHttpRequestsLayerList(maps?: MapsStartApi) {
       id: 'world_countries',
       tooltipProperties: [COUNTRY_NAME],
     },
-    style: getLayerStyle(HTTP_REQUEST_PER_COUNTRY, PalleteColors.BluetoRed),
+    style: getLayerStyle(SESSION_PER_COUNTRY, PalleteColors.BluetoRed),
     id: uuidv4(),
     label: i18n.translate(
-      'xpack.apm.serviceOverview.embeddedMap.httpRequests.country.label',
+      'xpack.apm.serviceOverview.embeddedMap.sessionCountry.metric.label',
       {
-        defaultMessage: 'HTTP requests per country',
+        defaultMessage: 'Sessions per country',
       }
     ),
     minZoom: 0,
@@ -100,7 +86,7 @@ export async function getHttpRequestsLayerList(maps?: MapsStartApi) {
     type: LAYER_TYPE.GEOJSON_VECTOR,
   };
 
-  const httpRequestsByRegionLayer: VectorLayerDescriptor = {
+  const sessionsByRegionLayer: VectorLayerDescriptor = {
     joins: [
       {
         leftField: 'region_iso_code',
@@ -110,11 +96,11 @@ export async function getHttpRequestsLayerList(maps?: MapsStartApi) {
           term: CLIENT_GEO_REGION_ISO_CODE,
           metrics: [
             {
-              type: AGG_TYPE.COUNT,
+              type: AGG_TYPE.UNIQUE_COUNT,
+              field: SESSION_ID,
               label,
             },
           ],
-          whereQuery,
           indexPatternId: APM_STATIC_DATA_VIEW_ID,
           applyGlobalQuery: true,
           applyGlobalTime: true,
@@ -127,12 +113,12 @@ export async function getHttpRequestsLayerList(maps?: MapsStartApi) {
       id: 'administrative_regions_lvl2',
       tooltipProperties: ['region_iso_code'],
     },
-    style: getLayerStyle(HTTP_REQUESTS_PER_REGION, PalleteColors.YellowtoRed),
+    style: getLayerStyle(SESSION_PER_REGION, PalleteColors.YellowtoRed),
     id: uuidv4(),
     label: i18n.translate(
-      'xpack.apm.serviceOverview.embeddedMap.httpRequests.region.label',
+      'xpack.apm.serviceOverview.embeddedMap.sessionRegion.metric.label',
       {
-        defaultMessage: 'HTTP requests per region',
+        defaultMessage: 'Sessions per region',
       }
     ),
     minZoom: 1,
@@ -144,7 +130,7 @@ export async function getHttpRequestsLayerList(maps?: MapsStartApi) {
 
   return [
     ...(basemapLayerDescriptor ? [basemapLayerDescriptor] : []),
-    httpRequestsByRegionLayer,
-    httpRequestsByCountryLayer,
+    sessionsByRegionLayer,
+    sessionsByCountryLayer,
   ] as BaseLayerDescriptor[];
 }

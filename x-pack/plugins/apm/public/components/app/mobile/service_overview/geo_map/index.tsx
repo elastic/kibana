@@ -12,11 +12,46 @@ import type { Filter } from '@kbn/es-query';
 import { EuiSuperSelect, EuiText } from '@elastic/eui';
 
 import { EmbeddedMap } from './embedded_map';
+import { MapTypes } from '../../typings/common';
 
-export enum MapTypes {
-  HTTP = 'http_requests',
-  SESSIONS = 'unique_sessions',
-}
+const availableMaps: Array<{
+  id: MapTypes;
+  label: string;
+  description: string;
+}> = [
+  {
+    id: MapTypes.Http,
+    label: i18n.translate(
+      'xpack.apm.serviceOverview.embeddedMap.dropdown.http.requests',
+      {
+        defaultMessage: 'HTTP requests',
+      }
+    ),
+    description: i18n.translate(
+      'xpack.apm.serviceOverview.embeddedMap.dropdown.http.requests.subtitle',
+      {
+        defaultMessage:
+          'HTTP defines a set of request methods to indicate the desired action to be performed for a given resource',
+      }
+    ),
+  },
+  {
+    id: MapTypes.Session,
+    label: i18n.translate(
+      'xpack.apm.serviceOverview.embeddedMap.dropdown.sessions',
+      {
+        defaultMessage: 'Sessions',
+      }
+    ),
+    description: i18n.translate(
+      'xpack.apm.serviceOverview.embeddedMap.dropdown.sessions.subtitle',
+      {
+        defaultMessage:
+          'An application session begins when a user starts an application and ends when the application exits.',
+      }
+    ),
+  },
+];
 
 export function GeoMap({
   start,
@@ -29,42 +64,7 @@ export function GeoMap({
   kuery?: string;
   filters: Filter[];
 }) {
-  const [selectedMap, setMap] = useState(MapTypes.HTTP);
-
-  const availableMaps = [
-    {
-      id: MapTypes.HTTP,
-      label: i18n.translate(
-        'xpack.apm.serviceOverview.embeddedMap.dropdown.http.requests',
-        {
-          defaultMessage: 'HTTP requests',
-        }
-      ),
-      description: i18n.translate(
-        'xpack.apm.serviceOverview.embeddedMap.dropdown.http.requests.subtitle',
-        {
-          defaultMessage:
-            'HTTP defines a set of request methods to indicate the desired action to be performed for a given resource',
-        }
-      ),
-    },
-    {
-      id: MapTypes.SESSIONS,
-      label: i18n.translate(
-        'xpack.apm.serviceOverview.embeddedMap.dropdown.sessions',
-        {
-          defaultMessage: 'Sessions',
-        }
-      ),
-      description: i18n.translate(
-        'xpack.apm.serviceOverview.embeddedMap.dropdown.sessions.subtitle',
-        {
-          defaultMessage:
-            'An application session begins when a user starts an application and ends when the application exits.',
-        }
-      ),
-    },
-  ];
+  const [selectedMap, setMap] = useState(MapTypes.Http);
 
   const currentMap =
     availableMaps.find(({ id }) => id === selectedMap) ?? availableMaps[0];

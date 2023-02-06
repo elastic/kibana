@@ -24,9 +24,11 @@ import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_ev
 import { getBucketSize } from '../../lib/helpers/get_bucket_size';
 import { Coordinate } from '../../../typings/timeseries';
 import { Maybe } from '../../../typings/common';
+import {
+  MobileSpanSubtype,
+  MobileSpanType,
+} from '../../../public/components/app/mobile/typings/common';
 
-export const MobileSpanType = 'external';
-export const MobileSpanSubtype = 'http';
 export interface HttpRequestsTimeseries {
   currentPeriod: { timeseries: Coordinate[]; value: Maybe<number> };
   previousPeriod: { timeseries: Coordinate[]; value: Maybe<number> };
@@ -66,7 +68,7 @@ async function getHttpRequestsTimeseries({
 
   const aggs = {
     requests: {
-      filter: { term: { [SPAN_SUBTYPE]: MobileSpanSubtype } },
+      filter: { term: { [SPAN_SUBTYPE]: MobileSpanSubtype.Http } },
     },
   };
 
@@ -78,7 +80,7 @@ async function getHttpRequestsTimeseries({
       query: {
         bool: {
           filter: [
-            ...termQuery(SPAN_TYPE, MobileSpanType),
+            ...termQuery(SPAN_TYPE, MobileSpanType.External),
             ...termQuery(SERVICE_NAME, serviceName),
             ...termQuery(TRANSACTION_NAME, transactionName),
             ...rangeQuery(startWithOffset, endWithOffset),
