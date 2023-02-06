@@ -20,7 +20,7 @@ import { SyntheticsRestApiRouteFactory } from '../../legacy_uptime/routes';
 import { UptimeEsClient } from '../../legacy_uptime/lib/lib';
 import { SyntheticsMonitorClient } from '../../synthetics_service/synthetics_monitor/synthetics_monitor_client';
 import { ConfigKey } from '../../../common/runtime_types';
-import { QuerySchema, MonitorsQuery, getMonitorFilters } from '../common';
+import { getMonitorFilters, OverviewStatusSchema, OverviewStatusQuery } from '../common';
 
 /**
  * Helper function that converts a monitor's schedule to a value to use to generate
@@ -45,7 +45,7 @@ export async function getStatus(
   uptimeEsClient: UptimeEsClient,
   soClient: SavedObjectsClientContract,
   syntheticsMonitorClient: SyntheticsMonitorClient,
-  params: MonitorsQuery
+  params: OverviewStatusQuery
 ) {
   const { query, locations: queryLocations } = params;
   /**
@@ -117,7 +117,7 @@ export const createGetCurrentStatusRoute: SyntheticsRestApiRouteFactory = (libs:
   method: 'GET',
   path: SYNTHETICS_API_URLS.OVERVIEW_STATUS,
   validate: {
-    query: QuerySchema,
+    query: OverviewStatusSchema,
   },
   handler: async ({
     server,
@@ -126,7 +126,7 @@ export const createGetCurrentStatusRoute: SyntheticsRestApiRouteFactory = (libs:
     syntheticsMonitorClient,
     request,
   }): Promise<any> => {
-    const params = request.query;
+    const params = request.query as OverviewStatusQuery;
     return await getStatus(
       server,
       uptimeEsClient,
