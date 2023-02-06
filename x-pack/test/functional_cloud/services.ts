@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-export interface TimeRangeMs {
-  from: number;
-  to: number;
-}
+import { services as functionalServices } from '../functional/services';
+
+export const services = functionalServices;
