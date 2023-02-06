@@ -21,7 +21,6 @@ import { APP_ID, DEFAULT_DETECTION_PAGE_FILTERS } from '../../../common/constant
 import { formatPageFilterSearchParam } from '../../../common/utils/format_page_filter_search_param';
 import {
   markAcknowledgedFirstAlert,
-  refreshAlertPageFilter,
   resetFilters,
   selectCountTable,
   waitForAlerts,
@@ -152,7 +151,7 @@ describe.skip('Detections : Page Filters', () => {
       .then((noOfAlerts) => {
         const originalAlertCount = noOfAlerts.split(' ')[0];
         markAcknowledgedFirstAlert();
-        refreshAlertPageFilter();
+        waitForAlerts();
         cy.get(OPTION_LIST_VALUES).eq(0).click();
         cy.get(OPTION_SELECTABLE(0, 'acknowledged')).should('be.visible');
         cy.get(ALERTS_COUNT)

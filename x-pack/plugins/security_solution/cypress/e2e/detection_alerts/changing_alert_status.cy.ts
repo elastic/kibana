@@ -28,7 +28,6 @@ import {
   openAlerts,
   openFirstAlert,
   selectCountTable,
-  refreshAlertPageFilter,
 } from '../../tasks/alerts';
 import { createCustomRuleEnabled } from '../../tasks/api_calls/rules';
 import { cleanKibana, deleteAlertsAndRules } from '../../tasks/common';
@@ -361,7 +360,6 @@ describe('Changing alert status', () => {
           );
 
           closeAlerts();
-          refreshAlertPageFilter();
           waitForAlerts();
 
           const expectedNumberOfAlertsAfterClosing = +numberOfAlerts - numberOfAlertsToBeClosed;
