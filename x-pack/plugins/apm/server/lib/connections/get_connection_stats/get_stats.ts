@@ -25,7 +25,7 @@ import {
   SPAN_SUBTYPE,
   SPAN_TYPE,
 } from '../../../../common/es_fields/apm';
-import { getBucketSize } from '../../helpers/get_bucket_size';
+import { getBucketSize } from '../../../../common/utils/get_bucket_size';
 import { EventOutcome } from '../../../../common/event_outcome';
 import { NodeType } from '../../../../common/connections';
 import { excludeRumExitSpansQuery } from '../exclude_rum_exit_spans_query';
