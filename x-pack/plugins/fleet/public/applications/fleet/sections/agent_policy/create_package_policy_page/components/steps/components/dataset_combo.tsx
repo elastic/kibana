@@ -9,27 +9,52 @@ import React, { useEffect, useState } from 'react';
 import { EuiComboBox } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
+import type { DataStream } from '../../../../../../../../../common/types';
+
+interface SelectedDataset {
+  dataset: string;
+  package: string;
+}
+
+const GENERIC_DATASET_NAME = 'generic';
+
 export const DatasetComboBox: React.FC<{
-  value: any;
-  onChange: (newValue: any) => void;
-  datasets: string[];
+  value?: SelectedDataset | string;
+  onChange: (newValue: SelectedDataset) => void;
+  datastreams: DataStream[];
+  pkgName?: string;
   isDisabled?: boolean;
-}> = ({ value, onChange, datasets, isDisabled }) => {
-  const datasetOptions = datasets.map((dataset: string) => ({ label: dataset })) ?? [];
-  const defaultOption = 'generic';
-  const [selectedOptions, setSelectedOptions] = useState<Array<{ label: string }>>([
-    {
-      label: value ?? defaultOption,
-    },
-  ]);
+}> = ({ value, onChange, datastreams, isDisabled, pkgName = '' }) => {
+  const datasetOptions =
+    datastreams.map((datastream: DataStream) => ({
+      label: datastream.dataset,
+      value: datastream,
+    })) ?? [];
+  const existingGenericStream = datasetOptions.find((ds) => ds.label === GENERIC_DATASET_NAME);
+  const valueAsOption = value
+    ? typeof value === 'string'
+      ? { label: value, value: { dataset: value, package: pkgName } }
+      : { label: value.dataset, value: { dataset: value.dataset, package: value.package } }
+    : undefined;
+  const defaultOption = valueAsOption ||
+    existingGenericStream || {
+      label: GENERIC_DATASET_NAME,
+      value: { dataset: GENERIC_DATASET_NAME, package: pkgName },
+    };
+
+  const [selectedOptions, setSelectedOptions] = useState<Array<{ label: string }>>([defaultOption]);
 
   useEffect(() => {
-    if (!value) onChange(defaultOption);
-  }, [value, defaultOption, onChange]);
+    if (!value || typeof value === 'string') onChange(defaultOption.value as SelectedDataset);
+  }, [value, defaultOption.value, onChange, pkgName]);
 
-  const onDatasetChange = (newSelectedOptions: Array<{ label: string }>) => {
+  const onDatasetChange = (newSelectedOptions: Array<{ label: string; value?: DataStream }>) => {
     setSelectedOptions(newSelectedOptions);
-    onChange(newSelectedOptions[0]?.label);
+    const dataStream = newSelectedOptions[0].value;
+    onChange({
+      dataset: newSelectedOptions[0].label,
+      package: !dataStream || typeof dataStream === 'string' ? pkgName : dataStream.package,
+    });
   };
 
   const onCreateOption = (searchValue: string = '') => {
@@ -39,9 +64,13 @@ export const DatasetComboBox: React.FC<{
     }
     const newOption = {
       label: searchValue,
+      value: { dataset: searchValue, package: pkgName },
     };
     setSelectedOptions([newOption]);
-    onChange(searchValue);
+    onChange({
+      dataset: searchValue,
+      package: pkgName,
+    });
   };
   return (
     <EuiComboBox

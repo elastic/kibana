@@ -97,6 +97,7 @@ import {
   MULTIPLE_RULE_TITLE,
 } from '../translations';
 import { useBulkOperationToast } from '../../../hooks/use_bulk_operation_toast';
+import { RulesSettingsLink } from '../../../components/rules_setting/rules_settings_link';
 import { useRulesListUiState as useUiState } from '../../../hooks/use_rules_list_ui_state';
 
 // Directly lazy import the flyouts because the suspendedComponentWithProps component
@@ -113,7 +114,6 @@ export interface RulesListProps {
   filteredRuleTypes?: string[];
   showActionFilter?: boolean;
   ruleDetailsRoute?: string;
-  showCreateRuleButton?: boolean;
   showCreateRuleButtonInPrompt?: boolean;
   setHeaderActions?: (components?: React.ReactNode[]) => void;
   statusFilter?: RuleStatus[];
@@ -145,7 +145,6 @@ export const RulesList = ({
   filteredRuleTypes = EMPTY_ARRAY,
   showActionFilter = true,
   ruleDetailsRoute,
-  showCreateRuleButton = true,
   showCreateRuleButtonInPrompt = false,
   statusFilter,
   onStatusFilterChange,
@@ -270,14 +269,7 @@ export const RulesList = ({
     refresh,
   });
 
-  const {
-    showSpinner,
-    showRulesList,
-    showNoAuthPrompt,
-    showCreateFirstRulePrompt,
-    showHeaderWithCreateButton,
-    showHeaderWithoutCreateButton,
-  } = useUiState({
+  const { showSpinner, showRulesList, showNoAuthPrompt, showCreateFirstRulePrompt } = useUiState({
     authorizedToCreateAnyRules,
     filters,
     hasDefaultRuleTypesFiltersOn,
@@ -611,18 +603,12 @@ export const RulesList = ({
   }, []);
 
   useEffect(() => {
-    if (!setHeaderActions) return;
-
-    if (showHeaderWithoutCreateButton) {
-      setHeaderActions([<RulesListDocLink />]);
-      return;
-    }
-    if (showHeaderWithCreateButton) {
-      setHeaderActions([<CreateRuleButton openFlyout={openFlyout} />, <RulesListDocLink />]);
-      return;
-    }
-    setHeaderActions();
-  }, [showHeaderWithCreateButton, showHeaderWithoutCreateButton]);
+    setHeaderActions?.([
+      ...(authorizedToCreateAnyRules ? [<CreateRuleButton openFlyout={openFlyout} />] : []),
+      <RulesSettingsLink />,
+      <RulesListDocLink />,
+    ]);
+  }, [authorizedToCreateAnyRules]);
 
   useEffect(() => {
     return () => setHeaderActions?.();
@@ -784,11 +770,8 @@ export const RulesList = ({
               tags={tags}
               filterOptions={filterOptions}
               actionTypes={actionTypes}
-              authorizedToCreateAnyRules={authorizedToCreateAnyRules}
-              showCreateRuleButton={showCreateRuleButton}
               lastUpdate={lastUpdate}
               showErrors={showErrors}
-              openFlyout={openFlyout}
               updateFilters={updateFilters}
               setInputText={setInputText}
               onClearSelection={onClearSelection}

@@ -111,11 +111,13 @@ export function FindingsPageProvider({ getService, getPageObjects }: FtrProvider
     },
 
     getColumnValues: async (columnName: string) => {
+      const elementsWithNoFilterCell = ['CIS Section', '@timestamp'];
       const tableElement = await table.getElement();
       const columnIndex = await table.getColumnIndex(columnName);
-      const columnCells = await tableElement.findAllByCssSelector(
-        `tbody tr td:nth-child(${columnIndex}) div[data-test-subj="filter_cell_value"]`
-      );
+      const selector = elementsWithNoFilterCell.includes(columnName)
+        ? `tbody tr td:nth-child(${columnIndex})`
+        : `tbody tr td:nth-child(${columnIndex}) div[data-test-subj="filter_cell_value"]`;
+      const columnCells = await tableElement.findAllByCssSelector(selector);
 
       return await Promise.all(columnCells.map((cell) => cell.getVisibleText()));
     },
@@ -125,16 +127,7 @@ export function FindingsPageProvider({ getService, getPageObjects }: FtrProvider
       return values.includes(value);
     },
 
-    assertColumnSort: async (columnName: string, direction: 'asc' | 'desc') => {
-      const values = (await table.getColumnValues(columnName)).filter(Boolean);
-      expect(values).to.not.be.empty();
-      const sorted = values
-        .slice()
-        .sort((a, b) => (direction === 'asc' ? a.localeCompare(b) : b.localeCompare(a)));
-      values.forEach((value, i) => expect(value).to.be(sorted[i]));
-    },
-
-    toggleColumnSortOrFail: async (columnName: string, direction: 'asc' | 'desc') => {
+    toggleColumnSort: async (columnName: string, direction: 'asc' | 'desc') => {
       const element = await table.getColumnHeaderCell(columnName);
       const currentSort = await element.getAttribute('aria-sort');
       if (currentSort === 'none') {
@@ -155,7 +148,6 @@ export function FindingsPageProvider({ getService, getPageObjects }: FtrProvider
         const nonStaleElement = await table.getColumnHeaderCell(columnName);
         await nonStaleElement.click();
       }
-      await table.assertColumnSort(columnName, direction);
     },
   };
 

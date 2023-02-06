@@ -13,12 +13,9 @@ import {
   EuiFlexItem,
   EuiInMemoryTable,
   EuiLink,
-  EuiText,
-  EuiToolTip,
-  useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { statusColors } from '../../../common/constants';
+import { ComplianceScoreBar } from '../../../components/compliance_score_bar';
 import { ComplianceDashboardData, GroupedFindingsEvaluation } from '../../../../common/types';
 
 export interface RisksTableProps {
@@ -49,8 +46,6 @@ export const RisksTable = ({
   viewAllButtonTitle,
   compact,
 }: RisksTableProps) => {
-  const { euiTheme } = useEuiTheme();
-
   const columns: Array<EuiBasicTableColumn<GroupedFindingsEvaluation>> = useMemo(
     () => [
       {
@@ -76,63 +71,11 @@ export const RisksTable = ({
               defaultMessage: 'Compliance',
             }),
         render: (postureScore: GroupedFindingsEvaluation['postureScore'], data) => (
-          <EuiFlexGroup
-            gutterSize="none"
-            alignItems="center"
-            justifyContent="flexEnd"
-            style={{ gap: euiTheme.size.s }}
-          >
-            <EuiFlexItem>
-              <EuiToolTip
-                content={i18n.translate(
-                  'xpack.csp.complianceDashboard.complianceByCisSection.complianceColumnTooltip',
-                  {
-                    defaultMessage: '{passed}/{total}',
-                    values: { passed: data.totalPassed, total: data.totalFindings },
-                  }
-                )}
-              >
-                <EuiFlexGroup
-                  gutterSize="none"
-                  style={{
-                    height: euiTheme.size.xs,
-                    borderRadius: euiTheme.border.radius.medium,
-                    overflow: 'hidden',
-                    gap: 1,
-                  }}
-                >
-                  <EuiFlexItem
-                    style={{
-                      flex: data.totalFailed,
-                      background: statusColors.failed,
-                    }}
-                  />
-                  <EuiFlexItem
-                    style={{
-                      flex: data.totalPassed,
-                      background: statusColors.passed,
-                    }}
-                  />
-                </EuiFlexGroup>
-              </EuiToolTip>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiText size="xs" style={{ fontWeight: euiTheme.font.weight.bold }}>{`${
-                postureScore?.toFixed(0) || 0
-              }%`}</EuiText>
-            </EuiFlexItem>
-          </EuiFlexGroup>
+          <ComplianceScoreBar totalPassed={data.totalPassed} totalFailed={data.totalFailed} />
         ),
       },
     ],
-    [
-      compact,
-      euiTheme.border.radius.medium,
-      euiTheme.font.weight.bold,
-      euiTheme.size.s,
-      euiTheme.size.xs,
-      onCellClick,
-    ]
+    [compact, onCellClick]
   );
 
   const sortedByComplianceScore = getTopRisks(cisSectionsEvaluations, maxItems);

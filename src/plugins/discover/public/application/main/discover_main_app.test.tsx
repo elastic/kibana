@@ -25,6 +25,10 @@ import { DiscoverMainProvider } from './services/discover_state_provider';
 setHeaderActionMenuMounter(jest.fn());
 setUrlTracker(urlTrackerMock);
 
+discoverServiceMock.data.query.timefilter.timefilter.getTime = () => {
+  return { from: '2020-05-14T11:05:13.590', to: '2020-05-14T11:20:13.590' };
+};
+
 describe('DiscoverMainApp', () => {
   test('renders', async () => {
     const dataViewList = [dataViewMock].map((ip) => {

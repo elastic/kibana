@@ -24,7 +24,10 @@ import { Criteria } from '@elastic/eui/src/components/basic_table/basic_table';
 import { EuiTableSortingType } from '@elastic/eui/src/components/basic_table/table_types';
 
 import { MONITOR_HISTORY_ROUTE, MONITOR_TYPES } from '../../../../../../common/constants';
-import { getTestRunDetailLink, TestDetailsLink } from '../../common/links/test_details_link';
+import {
+  getTestRunDetailRelativeLink,
+  TestDetailsLink,
+} from '../../common/links/test_details_link';
 import { ConfigKey, DataStream, Ping } from '../../../../../../common/runtime_types';
 import { formatTestDuration } from '../../../utils/monitor_test_result/test_time_formats';
 import { useGetUrlParams } from '../../../hooks';
@@ -166,7 +169,7 @@ export const TestRunsTable = ({
           !targetElem.parentElement?.classList.contains('euiLink')
         ) {
           history.push(
-            getTestRunDetailLink({
+            getTestRunDetailRelativeLink({
               monitorId,
               checkGroup: item.monitor.check_group,
               locationId: selectedLocation?.id,

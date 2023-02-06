@@ -66,9 +66,6 @@ export function createMockGraphStore({
         return { id: '123', title: 'test-pattern' } as unknown as DataView;
       }),
     },
-    I18nContext: jest
-      .fn()
-      .mockImplementation(({ children }: { children: React.ReactNode }) => children),
     notifications: {
       toasts: {
         addDanger: jest.fn(),
@@ -78,7 +75,6 @@ export function createMockGraphStore({
     http: {} as HttpStart,
     notifyReact: jest.fn(),
     savePolicy: 'configAndData',
-    showSaveModal: jest.fn(),
     overlays: {
       openModal: jest.fn(),
     } as unknown as OverlayStart,

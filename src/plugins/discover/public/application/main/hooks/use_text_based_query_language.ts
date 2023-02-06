@@ -16,7 +16,7 @@ import { useCallback, useEffect, useRef } from 'react';
 import type { DataViewsContract } from '@kbn/data-views-plugin/public';
 import { SavedSearch } from '@kbn/saved-search-plugin/public';
 import type { DiscoverStateContainer } from '../services/discover_state';
-import type { DataDocuments$ } from './use_saved_search';
+import type { DataDocuments$ } from '../services/discover_data_state_container';
 import { FetchStatus } from '../../types';
 
 const MAX_NUM_OF_COLUMNS = 50;

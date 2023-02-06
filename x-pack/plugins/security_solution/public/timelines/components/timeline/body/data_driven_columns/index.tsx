@@ -10,6 +10,7 @@ import React, { useMemo } from 'react';
 import { getOr } from 'lodash/fp';
 import { DRAGGABLE_KEYBOARD_WRAPPER_CLASS_NAME } from '@kbn/securitysolution-t-grid';
 
+import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import type {
   SetEventsDeleted,
   SetEventsLoading,
@@ -22,7 +23,6 @@ import type {
   ColumnHeaderOptions,
   TimelineTabs,
 } from '../../../../../../common/types/timeline';
-import type { Ecs } from '../../../../../../common/ecs';
 import type { TimelineNonEcsData } from '../../../../../../common/search_strategy/timeline';
 import { ARIA_COLUMN_INDEX_OFFSET } from '../../helpers';
 import type { OnRowSelected } from '../../events';

@@ -24,9 +24,9 @@ export type RuleSavedObject = Omit<
 export type RulesQuery = Required<
   Pick<SavedObjectsFindOptions, 'search' | 'page' | 'perPage' | 'filter'>
 >;
-export type RulesQueryResult = ReturnType<typeof useFindCspRules>;
+export type RulesQueryResult = ReturnType<typeof useFindCspRuleTemplates>;
 
-export const useFindCspRules = (
+export const useFindCspRuleTemplates = (
   { search, page, perPage, filter }: RulesQuery,
   packagePolicyId: string
 ) => {

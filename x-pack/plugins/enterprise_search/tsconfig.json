@@ -46,5 +46,6 @@
     "@kbn/data-views-plugin",
     "@kbn/cypress-config",
     "@kbn/discover-plugin",
+    "@kbn/guided-onboarding",
   ]
 }

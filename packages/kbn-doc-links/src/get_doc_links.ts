@@ -124,6 +124,7 @@ export const getDocLinks = ({ kibanaBranch }: GetDocLinkOptions): DocLinks => {
     },
     enterpriseSearch: {
       apiKeys: `${KIBANA_DOCS}api-keys.html`,
+      behavioralAnalyticsEvents: `${ENTERPRISE_SEARCH_DOCS}analytics-events.html`,
       bulkApi: `${ELASTICSEARCH_DOCS}docs-bulk.html`,
       configuration: `${ENTERPRISE_SEARCH_DOCS}configuration.html`,
       connectors: `${ENTERPRISE_SEARCH_DOCS}connectors.html`,
@@ -414,6 +415,7 @@ export const getDocLinks = ({ kibanaBranch }: GetDocLinkOptions): DocLinks => {
       anomalyDetection: `${MACHINE_LEARNING_DOCS}ml-ad-overview.html`,
       anomalyDetectionJobs: `${MACHINE_LEARNING_DOCS}ml-ad-finding-anomalies.html`,
       anomalyDetectionConfiguringCategories: `${MACHINE_LEARNING_DOCS}ml-configuring-categories.html`,
+      anomalyDetectionScoreExplanation: `${MACHINE_LEARNING_DOCS}ml-ad-explain.html`,
       anomalyDetectionBucketSpan: `${MACHINE_LEARNING_DOCS}ml-ad-run-jobs.html#ml-ad-bucket-span`,
       anomalyDetectionCardinality: `${MACHINE_LEARNING_DOCS}ml-ad-run-jobs.html#ml-ad-cardinality`,
       anomalyDetectionCreateJobs: `${MACHINE_LEARNING_DOCS}ml-ad-run-jobs.html#ml-ad-create-job`,
@@ -659,6 +661,7 @@ export const getDocLinks = ({ kibanaBranch }: GetDocLinkOptions): DocLinks => {
       datastreams: `${FLEET_DOCS}data-streams.html`,
       datastreamsILM: `${FLEET_DOCS}data-streams.html#data-streams-ilm`,
       datastreamsNamingScheme: `${FLEET_DOCS}data-streams.html#data-streams-naming-scheme`,
+      datastreamsManualRollover: `${ELASTICSEARCH_DOCS}use-a-data-stream.html#manually-roll-over-a-data-stream`,
       installElasticAgent: `${FLEET_DOCS}install-fleet-managed-elastic-agent.html`,
       installElasticAgentStandalone: `${FLEET_DOCS}install-standalone-elastic-agent.html`,
       upgradeElasticAgent: `${FLEET_DOCS}upgrade-elastic-agent.html`,

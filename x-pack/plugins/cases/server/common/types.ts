@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { SavedObject } from '@kbn/core-saved-objects-common';
+import type { SavedObject } from '@kbn/core-saved-objects-server';
 import type { KueryNode } from '@kbn/es-query';
 import type { CaseAttributes, SavedObjectFindOptions } from '../../common/api';
 

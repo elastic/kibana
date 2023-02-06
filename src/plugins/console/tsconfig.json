@@ -27,9 +27,9 @@
     "@kbn/ace",
     "@kbn/test-jest-helpers",
     "@kbn/config-schema",
-    "@kbn/core-http-server",
     "@kbn/core-http-router-server-internal",
     "@kbn/web-worker-stub",
+    "@kbn/core-elasticsearch-server",
   ],
   "exclude": [
     "target/**/*",

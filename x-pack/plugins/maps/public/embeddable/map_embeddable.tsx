@@ -218,15 +218,15 @@ export class MapEmbeddable
   }
 
   private async _initializeOutput() {
-    const savedMapTitle = this._savedMap.getAttributes()?.title
-      ? this._savedMap.getAttributes().title
-      : '';
+    const { title: savedMapTitle, description: savedMapDescription } =
+      this._savedMap.getAttributes();
     const input = this.getInput();
     const title = input.hidePanelTitles ? '' : input.title ?? savedMapTitle;
     const savedObjectId = 'savedObjectId' in input ? input.savedObjectId : undefined;
     this.updateOutput({
       ...this.getOutput(),
       defaultTitle: savedMapTitle,
+      defaultDescription: savedMapDescription,
       title,
       editPath: getEditPath(savedObjectId),
       editUrl: getHttp().basePath.prepend(getFullPath(savedObjectId)),
@@ -263,8 +263,8 @@ export class MapEmbeddable
     return getMapAttributeService().getInputAsValueType(this.getExplicitInput());
   }
 
-  public getDescription() {
-    return this._isInitialized ? this._savedMap.getAttributes().description : '';
+  public getLayerList() {
+    return getLayerList(this._savedMap.getStore().getState());
   }
 
   public async getFilters() {

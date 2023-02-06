@@ -18,10 +18,7 @@ import { NetworkDetailsLink } from '../../../../common/components/links';
 import type { Columns } from '../../../components/paginated_table';
 
 import * as i18n from './translations';
-import {
-  getRowItemDraggable,
-  getRowItemDraggables,
-} from '../../../../common/components/tables/helpers';
+import { getRowItemsWithActions } from '../../../../common/components/tables/helpers';
 export type NetworkHttpColumns = [
   Columns<NetworkHttpEdges>,
   Columns<NetworkHttpEdges>,
@@ -37,13 +34,12 @@ export const getNetworkHttpColumns = (tableId: string): NetworkHttpColumns => [
     name: i18n.METHOD,
     render: ({ node: { methods, path } }) => {
       return Array.isArray(methods) && methods.length > 0
-        ? getRowItemDraggables({
-            attrName: 'http.request.method',
-            displayCount: 3,
+        ? getRowItemsWithActions({
+            fieldName: 'http.request.method',
+            values: methods,
             idPrefix: escapeDataProviderId(`${tableId}-table-methods-${path}`),
-            rowItems: methods,
-            isAggregatable: true,
             fieldType: 'keyword',
+            displayCount: 3,
           })
         : getEmptyTagValue();
     },
@@ -52,12 +48,10 @@ export const getNetworkHttpColumns = (tableId: string): NetworkHttpColumns => [
     name: i18n.DOMAIN,
     render: ({ node: { domains, path } }) =>
       Array.isArray(domains) && domains.length > 0
-        ? getRowItemDraggables({
-            attrName: 'url.domain',
-            displayCount: 3,
+        ? getRowItemsWithActions({
+            values: domains,
+            fieldName: 'url.domain',
             idPrefix: escapeDataProviderId(`${tableId}-table-domains-${path}`),
-            rowItems: domains,
-            isAggregatable: true,
             fieldType: 'keyword',
           })
         : getEmptyTagValue(),
@@ -67,11 +61,10 @@ export const getNetworkHttpColumns = (tableId: string): NetworkHttpColumns => [
     name: i18n.PATH,
     render: (path) =>
       path != null
-        ? getRowItemDraggable({
-            attrName: 'url.path',
+        ? getRowItemsWithActions({
+            values: [path],
+            fieldName: 'url.path',
             idPrefix: escapeDataProviderId(`${tableId}-table-path-${path}`),
-            rowItem: path,
-            isAggregatable: true,
             fieldType: 'keyword',
           })
         : getEmptyTagValue(),
@@ -80,13 +73,12 @@ export const getNetworkHttpColumns = (tableId: string): NetworkHttpColumns => [
     name: i18n.STATUS,
     render: ({ node: { statuses, path } }) =>
       Array.isArray(statuses) && statuses.length > 0
-        ? getRowItemDraggables({
-            attrName: 'http.response.status_code',
-            displayCount: 3,
+        ? getRowItemsWithActions({
+            values: statuses,
+            fieldName: 'http.response.status_code',
             idPrefix: escapeDataProviderId(`${tableId}-table-statuses-${path}`),
-            rowItems: statuses,
-            isAggregatable: true,
             fieldType: 'keyword',
+            displayCount: 3,
           })
         : getEmptyTagValue(),
   },
@@ -94,11 +86,10 @@ export const getNetworkHttpColumns = (tableId: string): NetworkHttpColumns => [
     name: i18n.LAST_HOST,
     render: ({ node: { lastHost, path } }) =>
       lastHost != null
-        ? getRowItemDraggable({
-            attrName: 'host.name',
+        ? getRowItemsWithActions({
+            values: [lastHost],
+            fieldName: 'host.name',
             idPrefix: escapeDataProviderId(`${tableId}-table-lastHost-${path}`),
-            rowItem: lastHost,
-            isAggregatable: true,
             fieldType: 'keyword',
           })
         : getEmptyTagValue(),
@@ -107,13 +98,12 @@ export const getNetworkHttpColumns = (tableId: string): NetworkHttpColumns => [
     name: i18n.LAST_SOURCE_IP,
     render: ({ node: { lastSourceIp, path } }) =>
       lastSourceIp != null
-        ? getRowItemDraggable({
-            attrName: 'source.ip',
+        ? getRowItemsWithActions({
+            values: [lastSourceIp],
+            fieldName: 'source.ip',
             idPrefix: escapeDataProviderId(`${tableId}-table-lastSourceIp-${path}`),
-            rowItem: lastSourceIp,
-            render: () => <NetworkDetailsLink ip={lastSourceIp} />,
-            isAggregatable: true,
             fieldType: 'keyword',
+            render: () => <NetworkDetailsLink ip={lastSourceIp} />,
           })
         : getEmptyTagValue(),
   },

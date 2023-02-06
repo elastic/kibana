@@ -10,12 +10,12 @@ import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiSpacer, EuiTitle } from '@elast
 import moment from 'moment';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useParams } from 'react-router-dom';
+import { MonitorDetailsPanelContainer } from '../monitor_details/monitor_summary/monitor_details_panel';
 import { useSelectedLocation } from '../monitor_details/hooks/use_selected_location';
 import { MonitorDetailsLinkPortal } from '../monitor_add_edit/monitor_details_portal';
 import { StepNumberNav } from './components/step_number_nav';
 import { StepScreenshotDetails } from './step_screenshot_details';
 import { StepTabs } from './step_tabs';
-import { MonitorDetailsPanel } from '../monitor_details/monitor_summary/monitor_details_panel';
 import { useJourneySteps } from '../monitor_details/hooks/use_journey_steps';
 import { StepDurationPanel } from '../monitor_details/monitor_summary/step_duration_panel';
 import { TestRunSteps } from './test_run_steps';
@@ -38,10 +38,12 @@ export const TestRunDetails = () => {
   const { monitorId } = useParams<{ monitorId: string }>();
   const selectedLocation = useSelectedLocation();
 
+  const stateId = stepsData?.details?.summary?.state?.id;
+
   return (
     <>
       <EuiFlexGroup gutterSize="m">
-        <EuiFlexItem grow={2}>
+        <EuiFlexItem grow={2} style={{ minWidth: 0 }}>
           <EuiPanel hasShadow={false} hasBorder>
             <EuiFlexGroup alignItems="center">
               <EuiFlexItem grow={true}>
@@ -72,7 +74,7 @@ export const TestRunDetails = () => {
               </EuiFlexItem>
             </EuiFlexGroup>
             <EuiSpacer size="m" />
-            <StepScreenshotDetails stepIndex={stepIndex} step={step} />
+            <StepScreenshotDetails stepIndex={stepIndex} step={step} stateId={stateId} />
             <EuiSpacer size="m" />
             <StepTabs stepsData={stepsData} step={step} loading={stepsLoading} />
           </EuiPanel>
@@ -82,7 +84,7 @@ export const TestRunDetails = () => {
         <EuiFlexItem grow={1}>
           <StepDurationPanel legendPosition="bottom" />
           <EuiSpacer size="m" />
-          <MonitorDetailsPanel />
+          <MonitorDetailsPanelContainer />
         </EuiFlexItem>
       </EuiFlexGroup>
       {/* needed to render the monitor details link in breadcrumb*/}

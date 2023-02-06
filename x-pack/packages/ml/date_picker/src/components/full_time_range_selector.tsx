@@ -191,7 +191,7 @@ export const FullTimeRangeSelector: FC<FullTimeRangeSelectorProps> = (props) => 
   );
 
   return (
-    <EuiFlexGroup responsive={false} gutterSize="xs" alignItems="center">
+    <EuiFlexGroup responsive={false} gutterSize="xs">
       <EuiToolTip content={buttonTooltip}>
         <EuiButton
           isDisabled={disabled}

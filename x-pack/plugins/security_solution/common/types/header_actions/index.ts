@@ -14,8 +14,8 @@ import type {
 import type { IFieldSubType } from '@kbn/es-query';
 import type { FieldBrowserOptions } from '@kbn/triggers-actions-ui-plugin/public';
 import type { ComponentType, JSXElementConstructor, ReactNode } from 'react';
+import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import type { OnRowSelected, SetEventsDeleted, SetEventsLoading } from '..';
-import type { Ecs } from '../../ecs';
 import type { BrowserFields, TimelineNonEcsData } from '../../search_strategy';
 import type { SortColumnTable } from '../data_table';
 

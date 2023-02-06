@@ -20,7 +20,9 @@ export const GetAgentsRequestSchema = {
       perPage: schema.number({ defaultValue: 20 }),
       kuery: schema.maybe(schema.string()),
       showInactive: schema.boolean({ defaultValue: false }),
+      withMetrics: schema.boolean({ defaultValue: false }),
       showUpgradeable: schema.boolean({ defaultValue: false }),
+      getStatusSummary: schema.boolean({ defaultValue: false }),
       sortField: schema.maybe(schema.string()),
       sortOrder: schema.maybe(schema.oneOf([schema.literal('asc'), schema.literal('desc')])),
     },
@@ -37,6 +39,9 @@ export const GetAgentsRequestSchema = {
 export const GetOneAgentRequestSchema = {
   params: schema.object({
     agentId: schema.string(),
+  }),
+  query: schema.object({
+    withMetrics: schema.boolean({ defaultValue: false }),
   }),
 };
 

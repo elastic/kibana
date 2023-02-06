@@ -7,6 +7,7 @@
 
 import { journey, step, expect, before, after } from '@elastic/synthetics';
 import { recordVideo } from '@kbn/observability-plugin/e2e/record_video';
+import { byTestId } from '@kbn/ux-plugin/e2e/journeys/utils';
 import {
   addTestMonitor,
   cleanTestMonitors,
@@ -22,6 +23,11 @@ journey(`MonitorManagementList`, async ({ page, params }) => {
   const testMonitor2 = 'Test monitor 2';
   const testMonitor3 = 'Test monitor 3';
 
+  const pageBaseUrl = 'http://localhost:5620/app/synthetics/monitors';
+  const searchBarInput = page.locator(
+    '[placeholder="Search by name, url, host, tag, project or location"]'
+  );
+
   page.setDefaultTimeout(60 * 1000);
 
   before(async () => {
@@ -30,7 +36,10 @@ journey(`MonitorManagementList`, async ({ page, params }) => {
 
     await addTestMonitor(params.kibanaUrl, testMonitor1);
     await addTestMonitor(params.kibanaUrl, testMonitor2);
-    await addTestMonitor(params.kibanaUrl, testMonitor3);
+    await addTestMonitor(params.kibanaUrl, testMonitor3, {
+      type: 'browser',
+      schedule: { unit: 'm', number: '5' },
+    });
   });
 
   after(async () => {
@@ -48,48 +57,67 @@ journey(`MonitorManagementList`, async ({ page, params }) => {
   });
 
   step('shows the count', async () => {
-    await page.locator('text=Monitors');
-    await page.click('text=1-3');
+    await page.waitForSelector('text=Monitors');
+    await page.waitForSelector('text=1-3');
+  });
+
+  step('Click text=Showing 1-3 of 3 Configurations; Page 1', async () => {
+    await page.waitForSelector('text=Showing 1-3 of 3 Configurations');
+    await page.click('[aria-label="expands filter group for Type filter"]');
   });
 
   step(
-    'Click text=Showing 1-3 of 3 ConfigurationsSortingThis table contains 3 rows out of 3 rows; Page 1',
+    'Click [aria-label="Use up and down arrows to move focus over options. Enter to select. Escape to collapse options."] >> text="Journey / Page"',
     async () => {
       await page.click(
-        'text=Showing 1-3 of 3 ConfigurationsSortingThis table contains 3 rows out of 3 rows; Page 1'
-      );
-      await page.click('[aria-label="expands filter group for Type filter"]');
-    }
-  );
-
-  step(
-    'Click [aria-label="Use up and down arrows to move focus over options. Enter to select. Escape to collapse options."] >> text=browser',
-    async () => {
-      await page.click(
-        '[aria-label="Use up and down arrows to move focus over options. Enter to select. Escape to collapse options."] >> text=browser'
+        '[aria-label="Use up and down arrows to move focus over options. Enter to select. Escape to collapse options."] >> text="Journey / Page"'
       );
       await page.click('[aria-label="Apply the selected filters for Type"]');
-      expect(page.url()).toBe(
-        'http://localhost:5620/app/synthetics/monitors?monitorType=%5B%22browser%22%5D'
-      );
+      expect(page.url()).toBe(`${pageBaseUrl}?monitorTypes=%5B%22browser%22%5D`);
       await page.click('[placeholder="Search by name, url, host, tag, project or location"]');
       await Promise.all([
         page.waitForNavigation({
-          url: 'http://localhost:5620/app/synthetics/monitors?monitorType=%5B%22browser%22%5D&query=3',
+          url: `${pageBaseUrl}?monitorTypes=%5B%22browser%22%5D&query=3`,
         }),
         page.fill('[placeholder="Search by name, url, host, tag, project or location"]', '3'),
       ]);
       await page.click('text=1-1');
-      await page.click(
-        'text=Showing 1-1 of 1 ConfigurationSortingThis table contains 1 rows out of 1 rows; Page 1 '
-      );
+      await page.waitForSelector('text=Showing 1-1 of 1 Configuration');
     }
   );
 
   step('when no results appears', async () => {
-    await page.click('[placeholder="Search by name, url, host, tag, project or location"]');
-    await page.fill('[placeholder="Search by name, url, host, tag, project or location"]', '5553');
+    await searchBarInput.click();
+    await searchBarInput.fill('5553');
 
-    await page.click('text=0-0');
+    await page.waitForSelector('text=0-0');
+
+    // Clear search
+    await searchBarInput.press('Escape');
+    await page.waitForSelector('text=1-3');
+  });
+
+  step('Shows monitor summary', async () => {
+    const statSummaryPanel = page.locator(byTestId('syntheticsManagementSummaryStats')); // Summary stat elements
+    await expect(statSummaryPanel.locator('text=3').count()).resolves.toEqual(1); // Configurations
+    await expect(statSummaryPanel.locator('text=0').count()).resolves.toEqual(1); // Disabled
+  });
+
+  step('Filter by Frequency', async () => {
+    const frequencyFilter = page.locator('.euiFilterButton__textShift', { hasText: 'Frequency' });
+    const fiveMinuteScheduleOption = page.getByText('Every 5 minutes').first();
+
+    await frequencyFilter.click();
+    await fiveMinuteScheduleOption.click();
+    await page.getByText('Apply').click();
+
+    // There should be only 1 monitor with schedule 5 minutes
+    await page.waitForSelector('text=1-1');
+
+    // Clear the filter
+    await frequencyFilter.click();
+    await fiveMinuteScheduleOption.click();
+    await page.getByText('Apply').click();
+    await page.waitForSelector('text=1-3');
   });
 });

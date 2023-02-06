@@ -11,6 +11,7 @@ import { PersistenceServices } from './persistence_types';
 export const createPersistenceServicesMock = (): jest.Mocked<PersistenceServices> => {
   return {
     alertWithPersistence: jest.fn(),
+    alertWithSuppression: jest.fn(),
   };
 };
 
