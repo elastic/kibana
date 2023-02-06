@@ -19,6 +19,7 @@ import {
   EuiFlexItem,
   EuiPopover,
   Direction,
+  EuiToolTip,
 } from '@elastic/eui';
 import { useReduxEmbeddableContext } from '@kbn/presentation-util-plugin/public';
 
@@ -90,19 +91,32 @@ export const OptionsListPopoverSortingButton = ({
     }
   };
 
+  const SortButton = () => (
+    <EuiButtonEmpty
+      size="s"
+      color="text"
+      iconSide="right"
+      iconType="arrowDown"
+      disabled={showOnlySelected}
+      data-test-subj="optionsListControl__sortingOptionsButton"
+      onClick={() => setIsSortingPopoverOpen(!isSortingPopoverOpen)}
+      className="euiFilterGroup" // this gives the button a nice border
+      aria-label={OptionsListStrings.popover.getSortPopoverDescription()}
+    >
+      {OptionsListStrings.popover.getSortPopoverTitle()}
+    </EuiButtonEmpty>
+  );
+
   return (
     <EuiPopover
       button={
-        <EuiButtonEmpty
-          size="s"
-          color="text"
-          iconSide="right"
-          iconType="arrowDown"
-          className="euiFilterGroup" // this gives the button a nice border
-          onClick={() => setIsSortingPopoverOpen(!isSortingPopoverOpen)}
-        >
-          {OptionsListStrings.popover.getSortPopoverTitle()}
-        </EuiButtonEmpty>
+        showOnlySelected ? (
+          <EuiToolTip position="top" content={OptionsListStrings.popover.getSortDisabledTooltip()}>
+            <SortButton />
+          </EuiToolTip>
+        ) : (
+          <SortButton />
+        )
       }
       panelPaddingSize="none"
       isOpen={isSortingPopoverOpen}
