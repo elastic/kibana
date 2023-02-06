@@ -36,4 +36,11 @@ describe('<NotFoundPrompt />', () => {
     const component = render(<NotFoundPrompt actions={actions} />);
     expect(component.text()).toContain('I am a button');
   });
+
+  it('Renders custom actions with an array with multiple buttons', () => {
+    const actions = [<button>I am a button</button>, <button>I am a second button</button>];
+    const component = render(<NotFoundPrompt actions={actions} />);
+    expect(component.text()).toContain('I am a button');
+    expect(component.text()).toContain('I am a second button');
+  });
 });

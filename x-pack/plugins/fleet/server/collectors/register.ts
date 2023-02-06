@@ -62,7 +62,7 @@ export const fetchFleetUsage = async (
     packages: await getPackageUsage(soClient),
     ...(await getAgentData(esClient, abortController)),
     fleet_server_config: await getFleetServerConfig(soClient),
-    agent_policies: await getAgentPoliciesUsage(esClient, abortController),
+    agent_policies: await getAgentPoliciesUsage(soClient),
     ...(await getPanicLogsLastHour(esClient)),
     // TODO removed top errors telemetry as it causes this issue: https://github.com/elastic/kibana/issues/148976
     // ...(await getAgentLogsTopErrors(esClient)),
