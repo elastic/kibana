@@ -87,6 +87,7 @@ export const callEnterpriseSearchConfigAPI = async ({
       kibanaVersion: kibanaPackageJson.version,
       access: {
         hasAppSearchAccess: !!data?.current_user?.access?.app_search,
+        hasSearchEnginesAccess: !!data?.current_user?.access?.search_engines,
         hasWorkplaceSearchAccess: !!data?.current_user?.access?.workplace_search,
       },
       publicUrl: stripTrailingSlash(data?.settings?.external_url),

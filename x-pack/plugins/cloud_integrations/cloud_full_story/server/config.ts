@@ -18,7 +18,11 @@ const configSchema = schema.object({
     schema.maybe(schema.string())
   ),
   eventTypesAllowlist: schema.arrayOf(schema.string(), {
-    defaultValue: ['Loaded Kibana'],
+    defaultValue: [
+      'Loaded Kibana', // Sent once per page refresh (potentially, once per session)
+      'Hosts View Query Submitted', // Worst-case scenario 1 every 2 seconds
+      'Host Entry Clicked', // Worst-case scenario once per second - AT RISK,
+    ],
   }),
 });
 

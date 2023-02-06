@@ -295,6 +295,8 @@ export class TaskRunner<
       ...wrappedClientOptions,
       searchSourceClient,
     });
+    const rulesSettingsClient = this.context.getRulesSettingsClientWithRequest(fakeRequest);
+    const flappingSettings = await rulesSettingsClient.flapping().get();
 
     const { updatedRuleTypeState } = await this.timer.runWithTimer(
       TaskRunnerTimerSpan.RuleTypeRun,
@@ -373,6 +375,7 @@ export class TaskRunner<
                 notifyWhen,
               },
               logger: this.logger,
+              flappingSettings,
             })
           );
 
@@ -418,6 +421,7 @@ export class TaskRunner<
         ruleLabel,
         ruleRunMetricsStore,
         shouldLogAndScheduleActionsForAlerts: this.shouldLogAndScheduleActionsForAlerts(),
+        flappingSettings,
       });
     });
 
