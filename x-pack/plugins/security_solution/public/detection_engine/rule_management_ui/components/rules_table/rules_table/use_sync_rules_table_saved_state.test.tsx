@@ -153,7 +153,7 @@ describe('useSyncRulesTableSavedState', () => {
           ...defaultState,
           filterOptions: { ...defaultState.filterOptions, showElasticRules: true },
         },
-        { source: RuleSource.Elastic }
+        { source: RuleSource.Prebuilt }
       );
     });
 
@@ -248,7 +248,7 @@ describe('useSyncRulesTableSavedState', () => {
           ...defaultState,
           filterOptions: { ...defaultState.filterOptions, showElasticRules: true },
         },
-        { source: RuleSource.Elastic }
+        { source: RuleSource.Prebuilt }
       );
     });
 
