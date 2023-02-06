@@ -239,7 +239,7 @@ export async function cancelAgentAction(esClient: ElasticsearchClient, actionId:
       index: AGENT_ACTIONS_INDEX,
       query: {
         bool: {
-          must: [
+          filter: [
             {
               term: {
                 action_id: actionId,
@@ -255,14 +255,12 @@ export async function cancelAgentAction(esClient: ElasticsearchClient, actionId:
       throw new AgentActionNotFoundError('Action not found');
     }
 
-    const upgradeActions = res.hits.hits
-      .map((hit) => hit._source)
-      .reduce((acc: FleetServerAgentAction[], action: FleetServerAgentAction | undefined) => {
-        if (action && action.agents && action.action_id && action.type === 'UPGRADE') {
-          acc.push(action);
-        }
-        return acc;
-      }, []);
+    const upgradeActions: FleetServerAgentAction[] = res.hits.hits
+      .map((hit) => hit._source as FleetServerAgentAction)
+      .filter(
+        (action: FleetServerAgentAction | undefined): boolean =>
+          !!action && !!action.agents && !!action.action_id && action.type === 'UPGRADE'
+      );
     return upgradeActions;
   };
 
@@ -323,7 +321,8 @@ export async function cancelAgentAction(esClient: ElasticsearchClient, actionId:
     await updateAgentsToHealthy(action);
   }
 
-  // find missing batch
+  // At the end of cancel, doing one more query on upgrade action to find those docs that were possibly created by a concurrent upgrade action.
+  // This is to make sure we cancel all upgrade batches.
   upgradeActions = await getUpgradeActions();
   if (cancelledActions.length < upgradeActions.length) {
     const missingBatches = upgradeActions.filter(
@@ -332,7 +331,7 @@ export async function cancelAgentAction(esClient: ElasticsearchClient, actionId:
           (cancelled) => upgradeAction.agents && cancelled.agents[0] === upgradeAction.agents[0]
         )
     );
-    appContextService.getLogger().info(`missing batches to cancel: ${missingBatches.length}`);
+    appContextService.getLogger().debug(`missing batches to cancel: ${missingBatches.length}`);
     if (missingBatches.length > 0) {
       for (const missingBatch of missingBatches) {
         await createAction(missingBatch);
