@@ -17,7 +17,8 @@ export default function ({ getService }: FtrProviderContext) {
   const usageAPI = getService('usageAPI');
   const reportingAPI = getService('reportingAPI');
 
-  describe(`Usage Counters`, () => {
+  // Failing: See https://github.com/elastic/kibana/issues/134517
+  describe.skip(`Usage Counters`, () => {
     before(async () => {
       await esArchiver.emptyKibanaIndex();
       await reportingAPI.initEcommerce();
