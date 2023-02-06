@@ -35,6 +35,7 @@ declare module 'handlebars' {
   export interface TemplateDelegate<T = any> {
     (context?: T, options?: RuntimeOptions): string; // Override to ensure `context` is optional
     blockParams?: number; // TODO: Can this really be optional?
+    partials?: any; // TODO: Narrow type to something better than any?
   }
 
   export interface HelperOptions {
@@ -47,6 +48,8 @@ declare module 'handlebars' {
     // eslint-disable-next-line @typescript-eslint/prefer-function-type
     (...params: any[]): any;
   }
+
+  export function registerPartial(spec: { [name: string]: Handlebars.Template }): void; // Ensure `spec` object values can be strings
 }
 
 const kHelper = Symbol('helper');
@@ -56,7 +59,10 @@ type NodeType = typeof kHelper | typeof kAmbiguous | typeof kSimple;
 
 type LookupProperty = <T = any>(parent: { [name: string]: any }, propertyName: string) => T;
 
-type ProcessableStatementNode = hbs.AST.MustacheStatement | hbs.AST.SubExpression;
+type ProcessableStatementNode =
+  | hbs.AST.MustacheStatement
+  | hbs.AST.PartialStatement
+  | hbs.AST.SubExpression;
 type ProcessableBlockStatementNode = hbs.AST.BlockStatement | hbs.AST.PartialBlockStatement;
 type ProcessableNode = ProcessableStatementNode | ProcessableBlockStatementNode;
 type ProcessableNodeWithPathParts = ProcessableNode & { path: hbs.AST.PathExpression };
@@ -96,7 +102,14 @@ export const compileFnName: 'compile' | 'compileAST' = allowUnsafeEval() ? 'comp
  */
 export type ExtendedCompileOptions = Pick<
   CompileOptions,
-  'data' | 'knownHelpers' | 'knownHelpersOnly' | 'noEscape' | 'strict' | 'assumeObjects'
+  | 'data'
+  | 'knownHelpers'
+  | 'knownHelpersOnly'
+  | 'noEscape'
+  | 'strict'
+  | 'assumeObjects'
+  | 'preventIndent'
+  | 'explicitPartialContext'
 >;
 
 /**
@@ -107,7 +120,7 @@ export type ExtendedCompileOptions = Pick<
  */
 export type ExtendedRuntimeOptions = Pick<
   RuntimeOptions,
-  'data' | 'helpers' | 'decorators' | 'blockParams'
+  'data' | 'helpers' | 'partials' | 'decorators' | 'blockParams'
 >;
 
 /**
@@ -125,6 +138,10 @@ export type DecoratorFunction = (
 
 export interface HelpersHash {
   [name: string]: Handlebars.HelperDelegate;
+}
+
+export interface PartialsHash {
+  [name: string]: HandlebarsTemplateDelegate;
 }
 
 export interface DecoratorsHash {
@@ -173,15 +190,17 @@ Handlebars.compileAST = function (
 
   // If `Handlebars.compileAST` is reassigned, `this` will be undefined.
   const helpers = (this ?? Handlebars).helpers;
+  const partials = (this ?? Handlebars).partials;
   const decorators = (this ?? Handlebars).decorators as DecoratorsHash;
 
-  const visitor = new ElasticHandlebarsVisitor(input, options, helpers, decorators);
+  const visitor = new ElasticHandlebarsVisitor(this, input, options, helpers, partials, decorators);
   return (context: any, runtimeOptions?: ExtendedRuntimeOptions) =>
     visitor.render(context, runtimeOptions);
 };
 
 interface Container {
   helpers: HelpersHash;
+  partials: PartialsHash;
   decorators: DecoratorsHash;
   strict: (obj: { [name: string]: any }, name: string, loc: hbs.AST.SourceLocation) => any;
   lookupProperty: LookupProperty;
@@ -194,12 +213,14 @@ interface Container {
 }
 
 class ElasticHandlebarsVisitor extends Handlebars.Visitor {
+  private env: typeof Handlebars;
   private contexts: any[] = [];
   private output: any[] = [];
   private template?: string;
   private compileOptions: ExtendedCompileOptions;
   private runtimeOptions?: ExtendedRuntimeOptions;
   private initialHelpers: HelpersHash;
+  private initialPartials: PartialsHash;
   private initialDecorators: DecoratorsHash;
   private blockParamNames: any[][] = [];
   private blockParamValues: any[][] = [];
@@ -210,12 +231,16 @@ class ElasticHandlebarsVisitor extends Handlebars.Visitor {
   private processedDecoratorsForProgram = new Set(); // It's important that a given program node only has its decorators run once, we use this Map to keep track of them
 
   constructor(
+    env: typeof Handlebars,
     input: string | hbs.AST.Program,
     options: ExtendedCompileOptions = {},
     helpers: HelpersHash,
+    partials: PartialsHash,
     decorators: DecoratorsHash
   ) {
     super();
+
+    this.env = env;
 
     if (typeof input !== 'string' && input.type === 'Program') {
       this.ast = input;
@@ -246,12 +271,14 @@ class ElasticHandlebarsVisitor extends Handlebars.Visitor {
     );
 
     this.initialHelpers = Object.assign({}, helpers);
+    this.initialPartials = Object.assign({}, partials);
     this.initialDecorators = Object.assign({}, decorators);
 
     const protoAccessControl = createProtoAccessControl({});
 
     const container: Container = (this.container = {
       helpers: {},
+      partials: {},
       decorators: {},
       strict(obj, name, loc) {
         if (!obj || !(name in obj)) {
@@ -299,6 +326,7 @@ class ElasticHandlebarsVisitor extends Handlebars.Visitor {
     this.output = [];
     this.runtimeOptions = Object.assign({}, options);
     this.container.helpers = Object.assign(this.initialHelpers, options.helpers);
+    this.container.partials = Object.assign(this.initialPartials, options.partials);
     this.container.decorators = Object.assign(
       this.initialDecorators,
       options.decorators as DecoratorsHash
@@ -377,6 +405,14 @@ class ElasticHandlebarsVisitor extends Handlebars.Visitor {
 
   BlockStatement(block: hbs.AST.BlockStatement) {
     this.processStatementOrExpression(block);
+  }
+
+  PartialStatement(partial: hbs.AST.PartialStatement) {
+    this.invokePartial(partial);
+  }
+
+  PartialBlockStatement(partial: hbs.AST.PartialBlockStatement) {
+    this.invokePartial(partial);
   }
 
   // This space is intentionally left blank: We want to override the Visitor
@@ -631,6 +667,95 @@ class ElasticHandlebarsVisitor extends Handlebars.Visitor {
     this.output.push(result);
   }
 
+  private invokePartial(partial: hbs.AST.PartialStatement | hbs.AST.PartialBlockStatement) {
+    const { params } = partial;
+    if (params.length > 1) {
+      throw new Handlebars.Exception(
+        `Unsupported number of partial arguments: ${params.length}`,
+        partial
+      );
+    }
+
+    const isDynamic = partial.name.type === 'SubExpression';
+    const name = isDynamic
+      ? this.resolveNodes(partial.name).join('')
+      : (partial.name as hbs.AST.PathExpression).original;
+
+    const options: AmbiguousHelperOptions & Handlebars.ResolvePartialOptions = this.setupParams(
+      partial,
+      name
+    );
+    options.helpers = this.container.helpers;
+    options.partials = this.container.partials;
+    options.decorators = this.container.decorators;
+
+    let partialBlock;
+    if ('fn' in options && options.fn !== noop) {
+      const { fn } = options;
+      const currentPartialBlock = options.data?.['partial-block'];
+      options.data = createFrame(options.data);
+
+      // Wrapper function to get access to currentPartialBlock from the closure
+      partialBlock = options.data['partial-block'] = function partialBlockWrapper(
+        context: any,
+        wrapperOptions: { data?: Handlebars.HelperOptions['data'] } = {}
+      ) {
+        // Restore the partial-block from the closure for the execution of the block
+        // i.e. the part inside the block of the partial call.
+        wrapperOptions.data = createFrame(wrapperOptions.data);
+        wrapperOptions.data['partial-block'] = currentPartialBlock;
+        return fn(context, wrapperOptions);
+      };
+
+      if (fn.partials) {
+        options.partials = Object.assign({}, options.partials, fn.partials);
+      }
+    }
+
+    let context = {};
+    if (params.length === 0 && !this.compileOptions.explicitPartialContext) {
+      context = this.context;
+    } else if (params.length === 1) {
+      context = this.resolveNodes(params[0])[0];
+    }
+
+    if (Object.keys(options.hash).length > 0) {
+      // TODO: context can be an array, but maybe never when we have a hash???
+      context = Object.assign({}, context, options.hash);
+    }
+
+    const partialTemplate: Handlebars.Template | undefined =
+      this.container.partials[name] ??
+      partialBlock ??
+      Handlebars.VM.resolvePartial(undefined, undefined, options);
+
+    if (partialTemplate === undefined) {
+      throw new Handlebars.Exception(`The partial ${name} could not be found`);
+    }
+
+    let render;
+    if (typeof partialTemplate === 'string') {
+      render = this.env.compileAST(partialTemplate, this.compileOptions);
+      if (name in this.container.partials) {
+        this.container.partials[name] = render;
+      }
+    } else {
+      render = partialTemplate;
+    }
+
+    let result = render(context, options);
+
+    if ('indent' in partial) {
+      result =
+        partial.indent +
+        (this.compileOptions.preventIndent
+          ? result
+          : result.replace(/\n(?!$)/g, `\n${(partial as hbs.AST.PartialStatement).indent}`)); // indent each line, ignoring any trailing linebreak
+    }
+
+    this.output.push(result);
+  }
+
   private processAmbiguousNode(node: ProcessableNodeWithPathParts) {
     const name = node.path.parts[0];
     const helper = this.setupHelper(node, name);
@@ -746,6 +871,9 @@ class ElasticHandlebarsVisitor extends Handlebars.Visitor {
           this.runtimeOptions!.blockParams
         );
       }
+
+      // inherit partials from parent program
+      runtimeOptions.partials = runtimeOptions.partials || this.runtimeOptions!.partials;
 
       // stash parent program data
       const tmpRuntimeOptions = this.runtimeOptions;

@@ -334,7 +334,6 @@ export async function mgetStackFrames({
         FunctionName: frame._source!.Stackframe.function?.name,
         FunctionOffset: frame._source!.Stackframe.function?.offset,
         LineNumber: frame._source!.Stackframe.line?.number,
-        SourceType: frame._source!.Stackframe.source?.type,
       };
       stackFrames.set(frame._id, stackFrame);
       frameLRU.set(frame._id, stackFrame);
