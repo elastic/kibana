@@ -96,7 +96,7 @@ export const SlackWebApiParamsFields: React.FunctionComponent<
   );
 
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
-  const [selectedChannels, setSelectedChannels] = useState<string[]>([]);
+  const [selectedChannels, setSelectedChannels] = useState<string[]>(channels ?? []);
 
   const button = (
     <EuiFilterButton
