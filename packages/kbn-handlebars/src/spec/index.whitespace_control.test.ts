@@ -72,6 +72,14 @@ describe('whitespace control', () => {
     });
   });
 
+  it('should strip whitespace around partials', () => {
+    expectTemplate('foo {{~> dude~}} ').withPartials({ dude: 'bar' }).toCompileTo('foobar');
+    expectTemplate('foo {{> dude~}} ').withPartials({ dude: 'bar' }).toCompileTo('foo bar');
+    expectTemplate('foo {{> dude}} ').withPartials({ dude: 'bar' }).toCompileTo('foo bar ');
+    expectTemplate('foo\n {{~> dude}} ').withPartials({ dude: 'bar' }).toCompileTo('foobar');
+    expectTemplate('foo\n {{> dude}} ').withPartials({ dude: 'bar' }).toCompileTo('foo\n bar');
+  });
+
   it('should only strip whitespace once', () => {
     expectTemplate(' {{~foo~}} {{foo}} {{foo}} ')
       .withInput({ foo: 'bar' })
