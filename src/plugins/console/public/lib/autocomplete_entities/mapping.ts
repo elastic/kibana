@@ -156,7 +156,7 @@ export class Mapping implements BaseMapping {
     if (typeof indices === 'string') {
       const typeDict = this.perIndexTypes[indices] as Record<string, unknown>;
 
-      if (!typeDict) {
+      if (!typeDict || Object.keys(typeDict).length === 0) {
         if (!autoCompleteContext) return ret;
 
         // Mappings fetching for the index is already in progress
