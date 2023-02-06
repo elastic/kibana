@@ -35,15 +35,16 @@ const isPolicyTemplate = (input: any): input is PosturePolicyTemplate =>
   SUPPORTED_POLICY_TEMPLATES.includes(input);
 
 const getPackageNameQuery = (
-  benchMarkPostureType: 'kspm',
+  postureType: string,
   packageName: string,
   benchmarkFilter?: string
 ): string => {
   const integrationNameQuery = `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name:${packageName}`;
+  const integrationPostureType = `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.vars.posture.value:${postureType}`;
 
   const kquery = benchmarkFilter
-    ? `${integrationNameQuery} AND ${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.name: *${benchmarkFilter}*`
-    : integrationNameQuery;
+    ? `${integrationNameQuery} AND ${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.name: *${benchmarkFilter}* AND ${integrationPostureType}`
+    : `${integrationNameQuery} AND ${integrationPostureType}`;
 
   // const kquery = benchmarkFilter
   //   ? `${integrationNameQuery} AND ${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.name: *${benchmarkFilter}* AND ${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.posture_type: ${benchMarkPostureType}`
@@ -95,12 +96,13 @@ export const getCspPackagePolicies = (
   soClient: SavedObjectsClientContract,
   packagePolicyService: PackagePolicyClient,
   packageName: string,
-  queryParams: Partial<BenchmarksQueryParams>
+  queryParams: Partial<BenchmarksQueryParams>,
+  postureType: string
 ): Promise<ListResult<PackagePolicy>> => {
   const sortField = queryParams.sort_field?.replaceAll(BENCHMARK_PACKAGE_POLICY_PREFIX, '');
 
   return packagePolicyService.list(soClient, {
-    kuery: getPackageNameQuery(packageName, queryParams.benchmark_name),
+    kuery: getPackageNameQuery(postureType, packageName, queryParams.benchmark_name),
     page: queryParams.page,
     perPage: queryParams.per_page,
     sortField,

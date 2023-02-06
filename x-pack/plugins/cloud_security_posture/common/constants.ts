@@ -33,6 +33,9 @@ export const CSP_LATEST_FINDINGS_INGEST_TIMESTAMP_PIPELINE =
 export const RULE_PASSED = `passed`;
 export const RULE_FAILED = `failed`;
 
+export const POSTURE_TYPE_KSPM = 'kspm';
+export const POSTURE_TYPE_CSPM = 'cspm';
+
 // A mapping of in-development features to their status. These features should be hidden from users but can be easily
 // activated via a simple code change in a single location.
 export const INTERNAL_FEATURE_FLAGS = {
