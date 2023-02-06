@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-// TODO: share this
 import { each } from 'lodash';
 import type { TimelineEventsDetailsItem } from '../../../../../../common/search_strategy';
 
