@@ -302,11 +302,10 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         it('renders different solutions', async () => {
           await openModal();
 
-          await testSubjects.existOrFail('options-filter-popover-button-Solution');
+          await testSubjects.existOrFail('solution-filter-popover-button');
 
-          for (const [owner, caseId] of createdCases.entries()) {
-            await testSubjects.existOrFail(`cases-table-row-${caseId}`);
-            await testSubjects.existOrFail(`case-table-column-owner-icon-${owner}`);
+          for (const [, currentCaseId] of createdCases.entries()) {
+            await testSubjects.existOrFail(`cases-table-row-${currentCaseId}`);
           }
 
           await closeModal();

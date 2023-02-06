@@ -10,7 +10,7 @@ import { joinByKey } from '../../../../common/utils/join_by_key';
 import { getServicesAlerts } from './get_service_alerts';
 import { getHealthStatuses } from './get_health_statuses';
 import { getServicesFromErrorAndMetricDocuments } from './get_services_from_error_and_metric_documents';
-import { getServiceStats } from './get_service_stats';
+import { getServiceTransactionStats } from './get_service_transaction_stats';
 
 export function mergeServiceStats({
   serviceStats,
@@ -18,7 +18,9 @@ export function mergeServiceStats({
   healthStatuses,
   alertCounts,
 }: {
-  serviceStats: Awaited<ReturnType<typeof getServiceStats>>['serviceStats'];
+  serviceStats: Awaited<
+    ReturnType<typeof getServiceTransactionStats>
+  >['serviceStats'];
   servicesFromErrorAndMetricDocuments: Awaited<
     ReturnType<typeof getServicesFromErrorAndMetricDocuments>
   >['services'];

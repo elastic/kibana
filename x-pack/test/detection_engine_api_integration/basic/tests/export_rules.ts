@@ -87,6 +87,11 @@ export default ({ getService }: FtrProviderContext): void => {
           missing_exception_lists_count: 0,
           missing_rules: [],
           missing_rules_count: 0,
+          excluded_action_connection_count: 0,
+          excluded_action_connections: [],
+          exported_action_connector_count: 0,
+          missing_action_connection_count: 0,
+          missing_action_connections: [],
         });
       });
 
