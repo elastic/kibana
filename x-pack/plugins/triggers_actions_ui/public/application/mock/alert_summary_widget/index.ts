@@ -7,10 +7,7 @@
 
 import { LIGHT_THEME } from '@elastic/charts';
 import { EUI_CHARTS_THEME_LIGHT } from '@elastic/eui/dist/eui_charts_theme';
-import {
-  AlertSummaryTimeRange,
-  ChartThemes,
-} from '../../sections/rule_details/components/alert_summary/types';
+import { AlertSummaryTimeRange, ChartThemes } from '../../sections/alert_summary_widget/types';
 
 export const mockedAlertSummaryResponse = {
   activeAlertCount: 2,
