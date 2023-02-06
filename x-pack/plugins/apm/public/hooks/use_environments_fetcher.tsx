@@ -6,6 +6,8 @@
  */
 
 import { useFetcher } from './use_fetcher';
+import { SERVICE_ENVIRONMENT } from '@kbn/apm-plugin/common/es_fields/apm';
+import { Environment } from '../../common/environment_rt';
 
 const INITIAL_DATA = { environments: [] };
 
@@ -18,6 +20,18 @@ export function useEnvironmentsFetcher({
   start?: string;
   end?: string;
 }) {
+  if (serviceName) {
+    return getEnvironmentsForGivenService(start, end, serviceName);
+  }
+
+  return getEnvironmentsUsingSuggestionsApi(start, end);
+}
+
+const getEnvironmentsForGivenService = (
+  start?: string,
+  end?: string,
+  serviceName?: string
+) => {
   const { data = INITIAL_DATA, status } = useFetcher(
     (callApmApi) => {
       if (start && end) {
@@ -36,4 +50,26 @@ export function useEnvironmentsFetcher({
   );
 
   return { environments: data.environments, status };
-}
+};
+
+const getEnvironmentsUsingSuggestionsApi = (start?: string, end?: string) => {
+  const { data = { terms: [] }, status } = useFetcher(
+    (callApmApi) => {
+      if (start && end) {
+        return callApmApi('GET /internal/apm/suggestions', {
+          params: {
+            query: {
+              start,
+              end,
+              fieldName: SERVICE_ENVIRONMENT,
+              fieldValue: '',
+            },
+          },
+        });
+      }
+    },
+    [start, end]
+  );
+
+  return { environments: data.terms as Environment[], status };
+};
