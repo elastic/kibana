@@ -8,8 +8,10 @@
 import type { GuideConfig } from '@kbn/guided-onboarding';
 import { i18n } from '@kbn/i18n';
 
-export const searchGuideId = 'search';
-export const searchGuideConfig: GuideConfig = {
+export const appSearchGuideId = 'appSearch';
+export const websiteSearchGuideId = 'websiteSearch';
+export const databaseSearchGuideId = 'databaseSearch';
+const guideConfig: Omit<GuideConfig, 'telemetryId'> = {
   title: i18n.translate('xpack.enterpriseSearch.guideConfig.title', {
     defaultMessage: 'Build search experiences with Elasticsearch',
   }),
@@ -17,7 +19,6 @@ export const searchGuideConfig: GuideConfig = {
     defaultMessage: `We'll help you build a search experience with your data using Elastic's web crawler, connectors, and APIs.`,
   }),
   guideName: 'Enterprise Search',
-  telemetryId: 'search',
   steps: [
     {
       id: 'add_data',
@@ -65,4 +66,16 @@ export const searchGuideConfig: GuideConfig = {
       },
     },
   ],
+};
+export const appSearchGuideConfig: GuideConfig = {
+  ...guideConfig,
+  telemetryId: 'appSearch',
+};
+export const websiteSearchGuideConfig: GuideConfig = {
+  ...guideConfig,
+  telemetryId: 'websiteSearch',
+};
+export const databaseSearchGuideConfig: GuideConfig = {
+  ...guideConfig,
+  telemetryId: 'databaseSearch',
 };
