@@ -159,7 +159,7 @@ export function registerConnectorRoutes({ router, log }: RouteDependencies) {
           connectorId: schema.string(),
         }),
         query: schema.object({
-          page: schema.number({ defaultValue: 0, min: 0 }),
+          from: schema.number({ defaultValue: 0, min: 0 }),
           size: schema.number({ defaultValue: 10, min: 0 }),
         }),
       },
@@ -169,7 +169,7 @@ export function registerConnectorRoutes({ router, log }: RouteDependencies) {
       const result = await fetchSyncJobsByConnectorId(
         client,
         request.params.connectorId,
-        request.query.page,
+        request.query.from,
         request.query.size
       );
       return response.ok({ body: result });
