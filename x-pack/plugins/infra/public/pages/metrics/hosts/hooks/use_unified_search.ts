@@ -15,9 +15,16 @@ import { telemetryTimeRangeFormatter } from '../../../../../common/formatters/te
 import type { InfraClientStartDeps } from '../../../../types';
 import { useMetricsDataViewContext } from './use_data_view';
 import { useSyncKibanaTimeFilterTime } from '../../../../hooks/use_kibana_timefilter_time';
-import { useHostsUrlState, INITIAL_DATE_RANGE, HostsState } from './use_unified_search_url_state';
+import {
+  useHostsUrlState,
+  INITIAL_DATE_RANGE,
+  HostsState,
+  StringDateRangeTimestamp,
+} from './use_unified_search_url_state';
 
-const buildQuerySubmittedPayload = (hostState: HostsState) => {
+const buildQuerySubmittedPayload = (
+  hostState: HostsState & { dateRangeTimestamp: StringDateRangeTimestamp }
+) => {
   const { panelFilters, filters, dateRangeTimestamp, query: queryObj } = hostState;
 
   return {
@@ -77,8 +84,11 @@ export const useUnifiedSearch = () => {
 
   // Track telemetry event on query/filter/date changes
   useEffect(() => {
-    telemetry.reportHostsViewQuerySubmitted(buildQuerySubmittedPayload(state));
-  }, [state, telemetry]);
+    const dateRangeTimestamp = getDateRangeAsTimestamp();
+    telemetry.reportHostsViewQuerySubmitted(
+      buildQuerySubmittedPayload({ ...state, dateRangeTimestamp })
+    );
+  }, [getDateRangeAsTimestamp, state, telemetry]);
 
   const onSubmit = useCallback(
     (data?: {
