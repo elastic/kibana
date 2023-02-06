@@ -7,7 +7,8 @@
 
 import { useMemo } from 'react';
 import { useSelector } from 'react-redux';
-import { useEsSearch, createEsParams } from '@kbn/observability-plugin/public';
+import { createEsParams } from '@kbn/observability-plugin/public';
+import { useReduxEsSearch } from './use_redux_es_search';
 import { Ping } from '../../../../common/runtime_types';
 
 import {
@@ -34,7 +35,7 @@ export function useLastXChecks<Fields>({
   const { locationsLoaded, locations } = useSelector(selectServiceLocationsState);
 
   const params = createEsParams({
-    index: locationsLoaded ? SYNTHETICS_INDEX_PATTERN : '', // don't run query until locations are loaded
+    index: SYNTHETICS_INDEX_PATTERN,
     body: {
       size,
       query: {
@@ -60,8 +61,9 @@ export function useLastXChecks<Fields>({
     },
   });
 
-  const { data } = useEsSearch<Ping, typeof params>(params, [lastRefresh], {
-    name: 'getLastXMonitorRunsByLocation',
+  const { data } = useReduxEsSearch<Ping, typeof params>(params, [lastRefresh], {
+    name: `zGetLastXMonitorRunsByLocation/${monitorId}/${locationId}`,
+    isRequestReady: locationsLoaded, // don't run query until locations are loaded
   });
 
   const dataAsJSON = JSON.stringify(data?.hits?.hits);

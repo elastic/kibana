@@ -68,7 +68,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       await PageObjects.discover.createAdHocDataView(initialPattern, true);
-      expect(await PageObjects.discover.getCurrentlySelectedDataView()).to.be(`${initialPattern}*`);
+
+      await retry.waitFor('current data view to get updated', async () => {
+        return (await PageObjects.discover.getCurrentlySelectedDataView()) === `${initialPattern}*`;
+      });
       await PageObjects.discover.waitUntilSidebarHasLoaded();
 
       expect(await PageObjects.discover.getHitCountInt()).to.be(2);
@@ -83,6 +86,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await retry.try(async () => {
         expect(await PageObjects.discover.getHitCountInt()).to.be(1);
       });
+
+      await PageObjects.discover.waitUntilSidebarHasLoaded();
       expect((await PageObjects.discover.getAllFieldNames()).length).to.be(2);
     });
   });
