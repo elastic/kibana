@@ -70,6 +70,7 @@ export interface IndexViewValues {
   hasAdvancedFilteringFeature: boolean;
   hasBasicFilteringFeature: boolean;
   hasFilteringFeature: boolean;
+  htmlExtraction: boolean | undefined;
   index: ElasticsearchViewIndex | undefined;
   indexData: typeof CachedFetchIndexApiLogic.values.indexData;
   indexName: string;
@@ -213,6 +214,11 @@ export const IndexViewLogic = kea<MakeLogicType<IndexViewValues, IndexViewAction
     hasFilteringFeature: [
       () => [selectors.hasAdvancedFilteringFeature, selectors.hasBasicFilteringFeature],
       (advancedFeature: boolean, basicFeature: boolean) => advancedFeature || basicFeature,
+    ],
+    htmlExtraction: [
+      () => [selectors.connector],
+      (connector: Connector | undefined) =>
+        connector?.configuration.extract_full_html?.value ?? undefined,
     ],
     index: [
       () => [selectors.indexData],

@@ -556,17 +556,6 @@ paths:
                   - items
       operationId: update-package
       description: ''
-      parameters:
-        - schema:
-            type: string
-          name: pkgName
-          in: path
-          required: true
-        - schema:
-            type: string
-          name: pkgVersion
-          in: path
-          required: true
       requestBody:
         content:
           application/json:
@@ -2248,11 +2237,6 @@ paths:
                   - id
       parameters:
         - schema:
-            type: string
-          name: packagePolicyId
-          in: path
-          required: true
-        - schema:
             type: boolean
           name: force
           in: query
@@ -2652,11 +2636,6 @@ paths:
                 required:
                   - id
       parameters:
-        - schema:
-            type: string
-          name: itemId
-          in: path
-          required: true
         - $ref: '#/components/parameters/kbn_xsrf'
     put:
       summary: Fleet Server Hosts - Update
@@ -2688,11 +2667,6 @@ paths:
                 required:
                   - item
       parameters:
-        - schema:
-            type: string
-          name: itemId
-          in: path
-          required: true
         - $ref: '#/components/parameters/kbn_xsrf'
   /proxies:
     get:
@@ -2795,11 +2769,6 @@ paths:
                 required:
                   - id
       parameters:
-        - schema:
-            type: string
-          name: itemId
-          in: path
-          required: true
         - $ref: '#/components/parameters/kbn_xsrf'
     put:
       summary: Fleet Proxies - Update
@@ -2835,11 +2804,6 @@ paths:
                 required:
                   - item
       parameters:
-        - schema:
-            type: string
-          name: itemId
-          in: path
-          required: true
         - $ref: '#/components/parameters/kbn_xsrf'
   /kubernetes:
     get:
