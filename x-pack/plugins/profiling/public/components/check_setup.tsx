@@ -60,7 +60,11 @@ export function CheckSetup({ children }: { children: React.ReactElement }) {
 
   if (displayNoDataScreen) {
     return (
-      <NoDataPage subTitle="You're almost there! Follow the instructions below to add data." />
+      <NoDataPage
+        subTitle={i18n.translate('xpack.profiling.noDataPage.introduction', {
+          defaultMessage: `You're almost there! Follow the instructions below to add data.`,
+        })}
+      />
     );
   }
 

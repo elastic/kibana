@@ -272,7 +272,7 @@ docker.elastic.co/observability/profiling-agent:stable /root/pf-host-agent \\
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             {i18n.translate('xpack.profiling.noDataPage.pageTitle', {
-              defaultMessage: 'Add profiling data ',
+              defaultMessage: 'Add profiling data',
             })}
           </EuiFlexItem>
           {isLoading ? (
@@ -287,11 +287,7 @@ docker.elastic.co/observability/profiling-agent:stable /root/pf-host-agent \\
         <></>
       ) : (
         <>
-          <EuiText>
-            {i18n.translate('xpack.profiling.noDataPage.introduction', {
-              defaultMessage: subTitle,
-            })}
-          </EuiText>
+          <EuiText>{subTitle}</EuiText>
           <EuiSpacer />
           <EuiSplitPanel.Outer>
             <EuiPanel hasBorder={false} hasShadow={false} grow={false} paddingSize="none">

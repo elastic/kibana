@@ -47,10 +47,10 @@ export class ProfilingPlugin implements Plugin {
       },
       {
         id: 'adddata',
-        title: i18n.translate('xpack.profiling.navigation.functionsLinkLabel', {
+        title: i18n.translate('xpack.profiling.navigation.noInstructionsLinlLabel', {
           defaultMessage: 'Add data',
         }),
-        path: '/adddata',
+        path: '/add-data-instructions',
       },
     ];
 

@@ -48,7 +48,11 @@ export function registerSetupRoute({
         const core = await context.core;
 
         const steps = getProfilingSetupSteps({
-          client: createProfilingEsClient({ esClient, request, useDefaultAuth: true }),
+          client: createProfilingEsClient({
+            esClient,
+            request,
+            useDefaultAuth: true,
+          }),
           logger,
           packagePolicyClient: dependencies.start.fleet.packagePolicyService,
           soClient: core.savedObjects.client,
@@ -56,7 +60,12 @@ export function registerSetupRoute({
           isCloudEnabled: dependencies.setup.cloud.isCloudEnabled,
         });
 
-        const hasDataPromise = hasProfilingData(esClient);
+        const hasDataPromise = hasProfilingData({
+          client: createProfilingEsClient({
+            esClient,
+            request,
+          }),
+        });
 
         const stepCompletionResultsPromises = checkSteps({ steps, logger });
 
