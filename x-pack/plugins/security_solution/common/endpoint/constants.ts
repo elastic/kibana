@@ -69,6 +69,7 @@ export const ISOLATE_HOST_ROUTE = `${BASE_ENDPOINT_ROUTE}/isolate`;
 /** @deprecated use `ISOLATE_HOST_ROUTE_V2` instead */
 export const UNISOLATE_HOST_ROUTE = `${BASE_ENDPOINT_ROUTE}/unisolate`;
 
+/** Base Actions route. Used to get a list of all actions and is root to other action related routes */
 export const BASE_ENDPOINT_ACTION_ROUTE = `${BASE_ENDPOINT_ROUTE}/action`;
 
 export const ISOLATE_HOST_ROUTE_V2 = `${BASE_ENDPOINT_ACTION_ROUTE}/isolate`;
