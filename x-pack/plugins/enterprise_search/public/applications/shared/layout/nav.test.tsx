@@ -468,16 +468,16 @@ describe('useEnterpriseSearchEngineNav', () => {
           id: 'enterpriseSearchEngineIndices',
           name: 'Indices',
         },
-        {
-          href: `/app/enterprise_search/content/engines/${engineName}/schema`,
-          id: 'enterpriseSearchEngineSchema',
-          name: 'Schema',
-        },
-        {
-          href: `/app/enterprise_search/content/engines/${engineName}/preview`,
-          id: 'enterpriseSearchEnginePreview',
-          name: 'Preview',
-        },
+        // {
+        //   href: `/app/enterprise_search/content/engines/${engineName}/schema`,
+        //   id: 'enterpriseSearchEngineSchema',
+        //   name: 'Schema',
+        // },
+        // {
+        //   href: `/app/enterprise_search/content/engines/${engineName}/preview`,
+        //   id: 'enterpriseSearchEnginePreview',
+        //   name: 'Preview',
+        // },
         {
           href: `/app/enterprise_search/content/engines/${engineName}/api`,
           id: 'enterpriseSearchEngineAPI',
