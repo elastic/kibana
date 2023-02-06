@@ -5,20 +5,19 @@
  * 2.0.
  */
 
-import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import { ProfilingESClient } from '../../utils/create_profiling_es_client';
 
-export async function hasProfilingData(client: ElasticsearchClient): Promise<boolean> {
-  const hasProfilingDataResponse = await client.search({
-    index: 'profiling-events-all*',
+export async function hasProfilingData({
+  client,
+}: {
+  client: ProfilingESClient;
+}): Promise<boolean> {
+  const hasProfilingDataResponse = await client.search('has_any_profiling_data', {
+    index: 'profiling*',
     size: 0,
     track_total_hits: 1,
     terminate_after: 1,
   });
 
-  const hitCount =
-    typeof hasProfilingDataResponse.hits.total === 'number'
-      ? hasProfilingDataResponse.hits.total
-      : hasProfilingDataResponse.hits.total!.value > 0;
-
-  return hitCount > 0;
+  return hasProfilingDataResponse.hits.total.value > 0;
 }
