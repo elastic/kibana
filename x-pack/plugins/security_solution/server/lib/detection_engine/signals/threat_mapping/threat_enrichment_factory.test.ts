@@ -42,7 +42,7 @@ enrichSignalThreatMatchesFromSignalsMapMock.mockImplementation((_, getThreats) =
 describe('threatEnrichmentFactory', () => {
   it('enrichment should call enrichSignalThreatMatchesFromSignalsMap with correct params', async () => {
     const enrichment = threatEnrichmentFactory({
-      signalsMap: signalsMapMock,
+      signalsQueryMap: signalsMapMock,
       threatIndicatorPath: 'indicator.mock',
       threatFilters: ['mock-threat-filters'],
       threatSearchParams: threatSearchParamsMock,
@@ -60,7 +60,7 @@ describe('threatEnrichmentFactory', () => {
 
   it('enrichment should call getThreatList with matched threat ids filters in signalsMap', async () => {
     const enrichment = threatEnrichmentFactory({
-      signalsMap: signalsMapMock,
+      signalsQueryMap: signalsMapMock,
       threatIndicatorPath: 'indicator.mock',
       threatFilters: ['mock-threat-filters'],
       threatSearchParams: threatSearchParamsMock,
@@ -88,7 +88,7 @@ describe('threatEnrichmentFactory', () => {
 
   it('enrichment should call getThreatList with correct threatListConfig', async () => {
     const enrichment = threatEnrichmentFactory({
-      signalsMap: new Map(),
+      signalsQueryMap: new Map(),
       threatIndicatorPath: 'indicator.mock',
       threatFilters: ['mock-threat-filters'],
       threatSearchParams: threatSearchParamsMock,

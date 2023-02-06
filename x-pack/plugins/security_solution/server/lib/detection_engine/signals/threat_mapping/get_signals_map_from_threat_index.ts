@@ -98,9 +98,9 @@ export const getSignalsQueryMapFromThreatIndex = async ({
             if (value && signalValueMap) {
               const ids = signalValueMap[decodedQuery.field][value?.toString()];
 
-              ids?.forEach((signalId: string) => {
+              ids?.forEach((id: string) => {
                 addSignalValueToMap({
-                  signalId,
+                  signalId: id,
                   threatHit,
                   decodedQuery,
                 });
