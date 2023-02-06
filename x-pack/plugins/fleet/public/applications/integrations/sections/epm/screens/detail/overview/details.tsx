@@ -61,7 +61,7 @@ const Replacements = euiStyled(EuiFlexItem)`
 export const Details: React.FC<Props> = memo(({ packageInfo }) => {
   const { data: categoriesData, isLoading: isLoadingCategories } = useGetCategoriesQuery();
   const packageCategories: string[] = useMemo(() => {
-    if (!isLoadingCategories && categoriesData?.data?.items) {
+    if (!isLoadingCategories && categoriesData?.items) {
       return categoriesData.items
         .filter((category) => packageInfo.categories?.includes(category.id as PackageSpecCategory))
         .map((category) => category.title);
