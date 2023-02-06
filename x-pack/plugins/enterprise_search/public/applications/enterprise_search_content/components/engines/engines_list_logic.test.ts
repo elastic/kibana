@@ -23,8 +23,10 @@ const DEFAULT_VALUES = {
   deleteModalEngine: null,
   deleteModalEngineName: '',
   deleteStatus: Status.IDLE,
+  hasNoEngines: false,
   isDeleteLoading: false,
   isDeleteModalVisible: false,
+  isFirstRequest: true,
   isLoading: true,
   meta: DEFAULT_META,
   parameters: { meta: DEFAULT_META },
@@ -33,7 +35,7 @@ const DEFAULT_VALUES = {
   status: Status.IDLE,
 };
 
-// may need to call  mock engines response when ready
+// may need to call mock engines response when ready
 
 const results: EnterpriseSearchEngine[] = [
   {
@@ -126,34 +128,68 @@ describe('EnginesListLogic', () => {
         });
       });
     });
+    describe('openEngineCreate', () => {
+      it('set createEngineFlyoutOpen to true', () => {
+        EnginesListLogic.actions.openEngineCreate();
+        expect(EnginesListLogic.values).toEqual({
+          ...DEFAULT_VALUES,
+          createEngineFlyoutOpen: true,
+        });
+      });
+    });
+    describe('closeEngineCreate', () => {
+      it('set createEngineFlyoutOpen to false', () => {
+        EnginesListLogic.actions.closeEngineCreate();
+        expect(EnginesListLogic.values).toEqual({
+          ...DEFAULT_VALUES,
+          createEngineFlyoutOpen: false,
+        });
+      });
+    });
+    describe('setSearchQuery', () => {
+      it('set setSearchQuery to search value', () => {
+        EnginesListLogic.actions.setSearchQuery('my-search-query');
+        expect(EnginesListLogic.values).toEqual({
+          ...DEFAULT_VALUES,
+          parameters: {
+            meta: {
+              ...DEFAULT_META,
+            },
+            searchQuery: 'my-search-query',
+          },
+          searchQuery: 'my-search-query',
+        });
+      });
+    });
   });
 
   describe('reducers', () => {
     describe('meta', () => {
       it('updates when apiSuccess', () => {
         const newPageMeta = {
-          from: 2,
-          size: 3,
-          total: 6,
+          from: 10,
+          size: 20,
+          total: 20,
         };
         expect(EnginesListLogic.values).toEqual(DEFAULT_VALUES);
         EnginesListLogic.actions.apiSuccess({
           meta: newPageMeta,
           results,
-          // searchQuery: 'k',
+          params: { from: newPageMeta.from, size: newPageMeta.size },
         });
         expect(EnginesListLogic.values).toEqual({
           ...DEFAULT_VALUES,
           data: {
-            results,
             meta: newPageMeta,
-            // searchQuery: 'k',
+            results,
+            params: { from: newPageMeta.from, size: newPageMeta.size },
           },
+          hasNoEngines: false,
+          isFirstRequest: false,
           isLoading: false,
           meta: newPageMeta,
           parameters: {
             meta: newPageMeta,
-            // searchQuery: 'k',
           },
           results,
           status: Status.SUCCESS,
@@ -191,6 +227,54 @@ describe('EnginesListLogic', () => {
         });
       });
     });
+    describe('isFirstRequest', () => {
+      it('should update to true on setIsFirstRequest', () => {
+        EnginesListLogic.actions.setIsFirstRequest();
+        expect(EnginesListLogic.values).toEqual({ ...DEFAULT_VALUES, isFirstRequest: true });
+      });
+    });
+    it('should update to false on apiError', () => {
+      EnginesListLogic.actions.setIsFirstRequest();
+      EnginesListLogic.actions.apiError({} as HttpError);
+
+      expect(EnginesListLogic.values).toEqual({
+        ...DEFAULT_VALUES,
+        isFirstRequest: false,
+        isLoading: false,
+        status: Status.ERROR,
+      });
+    });
+    it('should update to false on apiSuccess', () => {
+      EnginesListLogic.actions.setIsFirstRequest();
+      EnginesListLogic.actions.apiSuccess({
+        meta: DEFAULT_VALUES.meta,
+        results: [],
+        params: {
+          q: undefined,
+          from: DEFAULT_VALUES.meta.from,
+          size: DEFAULT_VALUES.meta.size,
+        },
+      });
+
+      expect(EnginesListLogic.values).toEqual({
+        ...DEFAULT_VALUES,
+
+        meta: DEFAULT_VALUES.meta,
+        data: {
+          results: [],
+          meta: DEFAULT_VALUES.meta,
+          params: {
+            q: undefined,
+            from: DEFAULT_VALUES.meta.from,
+            size: DEFAULT_VALUES.meta.size,
+          },
+        },
+        hasNoEngines: true,
+        isFirstRequest: false,
+        isLoading: false,
+        status: Status.SUCCESS,
+      });
+    });
   });
   describe('listeners', () => {
     it('calls flashSuccessToast, closeDeleteEngineModal and fetchEngines on deleteSuccess', () => {
@@ -214,18 +298,30 @@ describe('EnginesListLogic', () => {
   });
   describe('selectors', () => {
     describe('enginesList', () => {
-      it('updates when apiSuccess', () => {
+      // response without search query parameter
+      it('updates when apiSuccess with no search query', () => {
         expect(EnginesListLogic.values).toEqual(DEFAULT_VALUES);
         EnginesListLogic.actions.apiSuccess({
           results,
           meta: DEFAULT_META,
+          params: {
+            q: undefined,
+            from: DEFAULT_META.from,
+            size: DEFAULT_META.size,
+          },
         });
         expect(EnginesListLogic.values).toEqual({
           ...DEFAULT_VALUES,
           data: {
             results,
             meta: DEFAULT_META,
+            params: {
+              q: undefined,
+              from: DEFAULT_META.from,
+              size: DEFAULT_META.size,
+            },
           },
+          isFirstRequest: false,
           isLoading: false,
           meta: DEFAULT_META,
           parameters: {
@@ -233,6 +329,244 @@ describe('EnginesListLogic', () => {
           },
           results,
           status: Status.SUCCESS,
+        });
+      });
+      // response with search query parameter and matching result
+      it('updates when apiSuccess with search query', () => {
+        expect(EnginesListLogic.values).toEqual(DEFAULT_VALUES);
+        EnginesListLogic.actions.apiSuccess({
+          results,
+          meta: DEFAULT_META,
+          params: {
+            q: 'engine',
+            from: DEFAULT_META.from,
+            size: DEFAULT_META.size,
+          },
+        });
+        expect(EnginesListLogic.values).toEqual({
+          ...DEFAULT_VALUES,
+          data: {
+            results,
+            meta: DEFAULT_META,
+            params: {
+              q: 'engine',
+              from: DEFAULT_META.from,
+              size: DEFAULT_META.size,
+            },
+          },
+          isFirstRequest: false,
+          isLoading: false,
+          meta: DEFAULT_META,
+          parameters: {
+            meta: DEFAULT_META,
+          },
+          results,
+          status: Status.SUCCESS,
+        });
+      });
+      // response with search query parameter and no matching result
+      it('updates when apiSuccess with search query with no matching results ', () => {
+        expect(EnginesListLogic.values).toEqual(DEFAULT_VALUES);
+        EnginesListLogic.actions.apiSuccess({
+          results: [],
+          meta: DEFAULT_META,
+          params: {
+            q: 'zzz',
+            from: DEFAULT_META.from,
+            size: DEFAULT_META.size,
+          },
+        });
+        expect(EnginesListLogic.values).toEqual({
+          ...DEFAULT_VALUES,
+          data: {
+            results: [],
+            meta: DEFAULT_META,
+            params: {
+              q: 'zzz',
+              from: DEFAULT_META.from,
+              size: DEFAULT_META.size,
+            },
+          },
+          isFirstRequest: false,
+          isLoading: false,
+          meta: DEFAULT_META,
+          parameters: {
+            meta: DEFAULT_META,
+          },
+          results: [],
+          status: Status.SUCCESS,
+        });
+      });
+    });
+    describe('hasNoEngines', () => {
+      describe('no engines to list ', () => {
+        // when all engines are deleted from list page, redirect to empty engine prompt
+        it('updates to true when all engines are deleted  ', () => {
+          expect(EnginesListLogic.values).toEqual(DEFAULT_VALUES);
+          EnginesListLogic.actions.apiSuccess({
+            results: [],
+            meta: DEFAULT_META,
+            params: {
+              from: DEFAULT_META.from,
+              size: DEFAULT_META.size,
+            },
+          });
+          expect(EnginesListLogic.values).toEqual({
+            ...DEFAULT_VALUES,
+            data: {
+              results: [],
+              meta: DEFAULT_META,
+              params: {
+                from: DEFAULT_META.from,
+                size: DEFAULT_META.size,
+              },
+            },
+            isFirstRequest: false,
+            isLoading: false,
+            meta: DEFAULT_META,
+            parameters: {
+              meta: DEFAULT_META,
+            },
+            hasNoEngines: true,
+            results: [],
+            status: Status.SUCCESS,
+          });
+        });
+        // when no engines to list, redirect to empty engine prompt
+        it('updates to true when isFirstRequest is true  ', () => {
+          EnginesListLogic.actions.apiSuccess({
+            results: [],
+            meta: DEFAULT_META,
+            params: {
+              from: DEFAULT_META.from,
+              size: DEFAULT_META.size,
+            },
+          });
+          EnginesListLogic.actions.setIsFirstRequest();
+          expect(EnginesListLogic.values).toEqual({
+            ...DEFAULT_VALUES,
+            data: {
+              results: [],
+              meta: DEFAULT_META,
+              params: {
+                from: DEFAULT_META.from,
+                size: DEFAULT_META.size,
+              },
+            },
+            isFirstRequest: true,
+            isLoading: false,
+            meta: DEFAULT_META,
+            parameters: {
+              meta: DEFAULT_META,
+            },
+            hasNoEngines: true,
+            results: [],
+            status: Status.SUCCESS,
+          });
+        });
+
+        // when search query returns no engines, show engine list table
+        it('updates to false for a search query ', () => {
+          expect(EnginesListLogic.values).toEqual(DEFAULT_VALUES);
+          EnginesListLogic.actions.apiSuccess({
+            results: [],
+            meta: DEFAULT_META,
+            params: {
+              q: 'zzz',
+              from: DEFAULT_META.from,
+              size: DEFAULT_META.size,
+            },
+          });
+          expect(EnginesListLogic.values).toEqual({
+            ...DEFAULT_VALUES,
+            data: {
+              results: [],
+              meta: DEFAULT_META,
+              params: {
+                q: 'zzz',
+                from: DEFAULT_META.from,
+                size: DEFAULT_META.size,
+              },
+            },
+            isFirstRequest: false,
+            isLoading: false,
+            meta: DEFAULT_META,
+            parameters: {
+              meta: DEFAULT_META,
+            },
+            results: [],
+            status: Status.SUCCESS,
+          });
+        });
+      });
+      describe('with engines to list', () => {
+        // when no search query, show table with list of engines
+        it('updates to false without search query ', () => {
+          expect(EnginesListLogic.values).toEqual(DEFAULT_VALUES);
+          EnginesListLogic.actions.apiSuccess({
+            results,
+            meta: DEFAULT_META,
+            params: {
+              q: undefined,
+              from: DEFAULT_META.from,
+              size: DEFAULT_META.size,
+            },
+          });
+          expect(EnginesListLogic.values).toEqual({
+            ...DEFAULT_VALUES,
+            data: {
+              results,
+              meta: DEFAULT_META,
+              params: {
+                q: undefined,
+                from: DEFAULT_META.from,
+                size: DEFAULT_META.size,
+              },
+            },
+            isFirstRequest: false,
+            isLoading: false,
+            meta: DEFAULT_META,
+            parameters: {
+              meta: DEFAULT_META,
+            },
+            hasNoEngines: false,
+            results,
+            status: Status.SUCCESS,
+          });
+        });
+        // with search query, show table with list of engines
+        it('updates to false with search query ', () => {
+          expect(EnginesListLogic.values).toEqual(DEFAULT_VALUES);
+          EnginesListLogic.actions.apiSuccess({
+            results,
+            meta: DEFAULT_META,
+            params: {
+              q: 'en',
+              from: DEFAULT_META.from,
+              size: DEFAULT_META.size,
+            },
+          });
+          expect(EnginesListLogic.values).toEqual({
+            ...DEFAULT_VALUES,
+            data: {
+              results,
+              meta: DEFAULT_META,
+              params: {
+                q: 'en',
+                from: DEFAULT_META.from,
+                size: DEFAULT_META.size,
+              },
+            },
+            isFirstRequest: false,
+            isLoading: false,
+            meta: DEFAULT_META,
+            parameters: {
+              meta: DEFAULT_META,
+            },
+            hasNoEngines: false,
+            results,
+            status: Status.SUCCESS,
+          });
         });
       });
     });

@@ -4,14 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { MonitorOverviewResult, OverviewStatusState } from '../../../../../common/runtime_types';
+import { ConfigKey, MonitorOverviewResult } from '../../../../../common/runtime_types';
 
 import { IHttpSerializedFetchError } from '../utils/http_error';
 import { MonitorFilterState } from '../monitor_list';
 
 export interface MonitorOverviewPageState extends MonitorFilterState {
   perPage: number;
-  query?: string;
   sortOrder: 'asc' | 'desc';
   sortField: string;
 }
@@ -31,6 +30,10 @@ export interface MonitorOverviewState {
   loaded: boolean;
   isErrorPopoverOpen?: string | null;
   error: IHttpSerializedFetchError | null;
-  status: OverviewStatusState | null;
-  statusError: IHttpSerializedFetchError | null;
+  groupBy: GroupByState;
+}
+
+export interface GroupByState {
+  field: ConfigKey.TAGS | ConfigKey.PROJECT_ID | ConfigKey.MONITOR_TYPE | 'locationId' | 'none';
+  order: 'asc' | 'desc';
 }
