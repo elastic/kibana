@@ -7,17 +7,16 @@
 
 import { APMEventESSearchRequest } from '.';
 import { ApmIndicesConfig } from '../../../../routes/settings/apm_indices/get_apm_indices';
-import { unpackProcessorEvents } from './unpack_processor_events';
+import { getRequestBase } from './get_request_base';
 
-describe('unpackProcessorEvents', () => {
-  let res: ReturnType<typeof unpackProcessorEvents>;
+describe('getRequestBase', () => {
+  let res: ReturnType<typeof getRequestBase>;
   beforeEach(() => {
     const request = {
       apm: { events: ['transaction', 'error'] },
       body: {
         track_total_hits: false,
         size: 0,
-        query: { bool: { filter: [{ terms: { foo: 'bar' } }] } },
       },
     } as APMEventESSearchRequest;
 
@@ -29,20 +28,13 @@ describe('unpackProcessorEvents', () => {
       onboarding: 'my-apm-*-onboarding-*',
     } as ApmIndicesConfig;
 
-    res = unpackProcessorEvents(request, indices);
+    res = getRequestBase({ ...request, indices });
   });
 
   it('adds terms filter for apm events', () => {
-    expect(res.body.query.bool.filter).toContainEqual({
+    expect(res.filters).toContainEqual({
       terms: { 'processor.event': ['transaction', 'error'] },
     });
-  });
-
-  it('merges queries', () => {
-    expect(res.body.query.bool.filter).toEqual([
-      { terms: { foo: 'bar' } },
-      { terms: { 'processor.event': ['transaction', 'error'] } },
-    ]);
   });
 
   it('searches the specified indices', () => {
