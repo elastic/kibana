@@ -78,7 +78,7 @@ const parse = function <T>(str: string): T {
   try {
     return JSON.parse(str);
   } catch {
-    return {} as T;
+    return i18n.SOMETHING_WENT_WRONG;
   }
 };
 

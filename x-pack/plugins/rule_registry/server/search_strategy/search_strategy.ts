@@ -159,7 +159,12 @@ export const ruleRegistrySearchStrategyProvider = (
             });
           }
 
-          response.inspect = { dsl: [JSON.stringify(params)] };
+          try {
+            response.inspect = { dsl: [JSON.stringify(params)] };
+          } catch (error) {
+            logger.error(`Failed to stringify rule registry search strategy params: ${error}`);
+            response.inspect = { dsl: [] };
+          }
 
           return response;
         }),
