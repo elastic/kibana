@@ -30,9 +30,6 @@ const registerAlertsTableConfiguration = (
   registry: AlertsTableConfigurationRegistryContract,
   storage: Storage
 ) => {
-  if (registry.has(APP_ID)) {
-    return;
-  }
   const dataTableStorage = getDataTablesInStorageByIds(storage, [TableId.alertsOnAlertsPage]);
   const columnsFormStorage = dataTableStorage?.[TableId.alertsOnAlertsPage]?.columns ?? [];
   const alertColumns = columnsFormStorage.length ? columnsFormStorage : getColumns();
@@ -61,6 +58,7 @@ const registerAlertsTableConfiguration = (
   // register Alert Table on Alert Page
   registry.register({
     id: ALERTS_TABLE_REGISTRY_CONFIG_IDS.ALERTS_PAGE,
+    app_id: APP_ID,
     casesFeatureId: CASES_FEATURE_ID,
     columns: alertColumns,
     getRenderCellValue: renderCellValueHookAlertPage,
@@ -76,6 +74,7 @@ const registerAlertsTableConfiguration = (
   // register Alert Table on RuleDetails Page
   registry.register({
     id: ALERTS_TABLE_REGISTRY_CONFIG_IDS.RULE_DETAILS,
+    app_id: APP_ID,
     casesFeatureId: CASES_FEATURE_ID,
     columns: alertColumns,
     getRenderCellValue: renderCellValueHookAlertPage,
@@ -90,6 +89,7 @@ const registerAlertsTableConfiguration = (
 
   registry.register({
     id: ALERTS_TABLE_REGISTRY_CONFIG_IDS.CASE,
+    app_id: APP_ID,
     casesFeatureId: CASES_FEATURE_ID,
     columns: alertColumns,
     getRenderCellValue: renderCellValueHookCasePage,

@@ -26,7 +26,6 @@ import { isTab } from '@kbn/timelines-plugin/public';
 import type { Filter } from '@kbn/es-query';
 import type { DocLinks } from '@kbn/doc-links';
 import { useDataTableFilters } from '../../../common/hooks/use_data_table_filters';
-import { ALERT_TABLE_REGISTRY_CONFIG_IDS } from '../../../../common/constants';
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import { FILTER_OPEN, TableId } from '../../../../common/types';
 import { tableDefaults } from '../../../common/store/data_table/defaults';
@@ -79,6 +78,7 @@ import { AlertsTableComponent } from '../../components/alerts_table';
 import type { FilterGroupHandler } from '../../../common/components/filter_group/types';
 import type { Status } from '../../../../common/detection_engine/schemas/common/schemas';
 import { AlertsTableFilterGroup } from '../../components/alerts_table/alerts_filter_group';
+import { ALERTS_TABLE_REGISTRY_CONFIG_IDS } from '../../../../common/constants';
 /**
  * Need a 100% height here to account for the graph/analyze tool, which sets no explicit height parameters, but fills the available space.
  */
@@ -437,7 +437,7 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ({
               <EuiSpacer size="l" />
             </Display>
             <AlertsTableComponent
-              configId={ALERT_TABLE_REGISTRY_CONFIG_IDS.ALERTS_PAGE}
+              configId={ALERTS_TABLE_REGISTRY_CONFIG_IDS.ALERTS_PAGE}
               flyoutSize="m"
               inputFilters={alertsTableDefaultFilters}
               tableId={TableId.alertsOnAlertsPage}

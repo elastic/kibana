@@ -41,7 +41,6 @@ export const useBulkAddToCaseActions = ({ onClose, onSuccess }: UseAddToCaseActi
             disabledLabel: ADD_TO_CASE_DISABLED,
             onClick: (items?: TimelineItem[]) => {
               const caseAttachments = items ? casesUi.helpers.groupAlertsByRule(items) : [];
-
               addToNewCase.open({ attachments: caseAttachments });
             },
           },

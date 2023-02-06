@@ -350,7 +350,7 @@ const AlertsTableState = ({
       )}
       {alertsCount !== 0 && CasesContext && cases && (
         <CasesContext
-          owner={[configurationId]}
+          owner={[alertsTableConfiguration.app_id ?? configurationId]}
           permissions={userCasesPermissions}
           features={{ alerts: { sync: false } }}
         >
