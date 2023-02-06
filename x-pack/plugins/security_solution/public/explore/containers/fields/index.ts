@@ -10,7 +10,7 @@ import memoizeOne from 'memoize-one';
 import { getRequiredMapsFields } from '../../network/components/embeddables/map_config';
 import { useKibana } from '../../../common/lib/kibana';
 
-type FieldValidationCheck = (pattern: string, fieldsList: string[]) => Promise<boolean>;
+type FieldValidationCheck = (pattern: string) => Promise<boolean>;
 
 export const useIsFieldInIndexPattern = (): FieldValidationCheck => {
   const { dataViews } = useKibana().services.data;
