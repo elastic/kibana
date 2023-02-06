@@ -25,6 +25,8 @@ import { getBucketSize } from '../../lib/helpers/get_bucket_size';
 import { Coordinate } from '../../../typings/timeseries';
 import { Maybe } from '../../../typings/common';
 
+export const MobileSpanType = 'external';
+export const MobileSpanSubtype = 'http';
 export interface HttpRequestsTimeseries {
   currentPeriod: { timeseries: Coordinate[]; value: Maybe<number> };
   previousPeriod: { timeseries: Coordinate[]; value: Maybe<number> };
@@ -64,7 +66,7 @@ async function getHttpRequestsTimeseries({
 
   const aggs = {
     requests: {
-      filter: { term: { [SPAN_SUBTYPE]: 'http' } },
+      filter: { term: { [SPAN_SUBTYPE]: MobileSpanSubtype } },
     },
   };
 
@@ -76,7 +78,7 @@ async function getHttpRequestsTimeseries({
       query: {
         bool: {
           filter: [
-            ...termQuery(SPAN_TYPE, 'external'),
+            ...termQuery(SPAN_TYPE, MobileSpanType),
             ...termQuery(SERVICE_NAME, serviceName),
             ...termQuery(TRANSACTION_NAME, transactionName),
             ...rangeQuery(startWithOffset, endWithOffset),

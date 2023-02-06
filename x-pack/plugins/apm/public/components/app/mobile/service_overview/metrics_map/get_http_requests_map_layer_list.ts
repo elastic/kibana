@@ -13,6 +13,7 @@ import {
   LAYER_TYPE,
   SOURCE_TYPES,
 } from '@kbn/maps-plugin/common';
+import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { v4 as uuidv4 } from 'uuid';
 import type { MapsStartApi } from '@kbn/maps-plugin/public';
 import { i18n } from '@kbn/i18n';
@@ -25,6 +26,10 @@ import {
 } from '../../../../../../common/es_fields/apm';
 import { APM_STATIC_DATA_VIEW_ID } from '../../../../../../common/data_view_constants';
 import { getLayerStyle, PalleteColors } from './get_map_layer_style';
+import {
+  MobileSpanSubtype,
+  MobileSpanType,
+} from '../../../../../../server/routes/mobile/get_mobile_http_requests';
 
 interface VectorLayerDescriptor extends BaseVectorLayerDescriptor {
   sourceDescriptor: EMSFileSourceDescriptor;
@@ -46,7 +51,7 @@ const label = i18n.translate(
 export async function getHttpRequestsLayerList(maps?: MapsStartApi) {
   const whereQuery = {
     language: 'kuery',
-    query: `${PROCESSOR_EVENT}:span and ${SPAN_SUBTYPE}:http and ${SPAN_TYPE}:external`,
+    query: `${PROCESSOR_EVENT}:${ProcessorEvent.span} and ${SPAN_SUBTYPE}:${MobileSpanSubtype} and ${SPAN_TYPE}:${MobileSpanType}}`,
   };
 
   const basemapLayerDescriptor = maps
