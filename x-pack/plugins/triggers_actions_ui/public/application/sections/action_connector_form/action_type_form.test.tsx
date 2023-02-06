@@ -47,6 +47,10 @@ jest.mock('../../lib/action_variables', () => {
 });
 
 describe('action_type_form', () => {
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+
   const mockedActionParamsFields = React.lazy(async () => ({
     default() {
       return (
@@ -387,15 +391,6 @@ describe('action_type_form', () => {
     });
 
     expect(mockTransformActionVariables.mock.calls).toEqual([
-      [
-        {
-          context: [],
-          params: [],
-          state: [],
-        },
-        undefined,
-        undefined,
-      ],
       [
         {
           context: [],
