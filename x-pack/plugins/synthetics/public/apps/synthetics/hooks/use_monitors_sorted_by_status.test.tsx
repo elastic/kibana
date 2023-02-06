@@ -55,42 +55,6 @@ describe('useMonitorsSortedByStatus', () => {
               sortOrder,
               sortField: 'name.keyword',
             },
-            status: {
-              upConfigs: {
-                [`test-monitor-1-${location2.label}`]: {
-                  configId: 'test-monitor-1',
-                  monitorQueryId: 'test-monitor-1',
-                  location: location2.label,
-                },
-                [`test-monitor-2-${location2.label}`]: {
-                  configId: 'test-monitor-2',
-                  monitorQueryId: 'test-monitor-2',
-                  location: location2.label,
-                },
-                [`test-monitor-3-${location2.label}`]: {
-                  configId: 'test-monitor-3',
-                  monitorQueryId: 'test-monitor-3',
-                  location: location2.label,
-                },
-              },
-              downConfigs: {
-                [`test-monitor-1-${location1.label}`]: {
-                  configId: 'test-monitor-1',
-                  monitorQueryId: 'test-monitor-1',
-                  location: location1.label,
-                },
-                [`test-monitor-2-${location1.label}`]: {
-                  configId: 'test-monitor-2',
-                  monitorQueryId: 'test-monitor-2',
-                  location: location1.label,
-                },
-                [`test-monitor-3${location1.label}`]: {
-                  configId: 'test-monitor-3',
-                  monitorQueryId: 'test-monitor-3',
-                  location: location1.label,
-                },
-              },
-            },
             data: {
               total: 0,
               allMonitorIds: [],
@@ -142,6 +106,44 @@ describe('useMonitorsSortedByStatus', () => {
             error: null,
             loaded: false,
             loading: false,
+          },
+          overviewStatus: {
+            status: {
+              upConfigs: {
+                [`test-monitor-1-${location2.label}`]: {
+                  configId: 'test-monitor-1',
+                  monitorQueryId: 'test-monitor-1',
+                  location: location2.label,
+                },
+                [`test-monitor-2-${location2.label}`]: {
+                  configId: 'test-monitor-2',
+                  monitorQueryId: 'test-monitor-2',
+                  location: location2.label,
+                },
+                [`test-monitor-3-${location2.label}`]: {
+                  configId: 'test-monitor-3',
+                  monitorQueryId: 'test-monitor-3',
+                  location: location2.label,
+                },
+              },
+              downConfigs: {
+                [`test-monitor-1-${location1.label}`]: {
+                  configId: 'test-monitor-1',
+                  monitorQueryId: 'test-monitor-1',
+                  location: location1.label,
+                },
+                [`test-monitor-2-${location1.label}`]: {
+                  configId: 'test-monitor-2',
+                  monitorQueryId: 'test-monitor-2',
+                  location: location1.label,
+                },
+                [`test-monitor-3${location1.label}`]: {
+                  configId: 'test-monitor-3',
+                  monitorQueryId: 'test-monitor-3',
+                  location: location1.label,
+                },
+              },
+            },
           },
         }}
       >

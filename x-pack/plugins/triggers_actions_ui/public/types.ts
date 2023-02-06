@@ -68,7 +68,7 @@ import type {
   RuleEventLogListProps,
   RuleEventLogListOptions,
 } from './application/sections/rule_details/components/rule_event_log_list';
-import { AlertSummaryTimeRange } from './application/sections/rule_details/components/alert_summary/types';
+import type { AlertSummaryTimeRange } from './application/sections/alert_summary_widget/types';
 import type { CreateConnectorFlyoutProps } from './application/sections/action_connector_form/create_connector_flyout';
 import type { EditConnectorFlyoutProps } from './application/sections/action_connector_form/edit_connector_flyout';
 import type { RulesListNotifyBadgeProps } from './application/sections/rules_list/components/rules_list_notify_badge';
@@ -380,6 +380,7 @@ export interface RuleTypeModel<Params extends RuleTypeParams = RuleTypeParams> {
   requiresAppContext: boolean;
   defaultActionMessage?: string;
   defaultRecoveryMessage?: string;
+  defaultSummaryMessage?: string;
   alertDetailsAppSection?:
     | React.FunctionComponent<any>
     | React.LazyExoticComponent<ComponentType<any>>;
@@ -450,13 +451,19 @@ export enum AlertsField {
   uuid = 'kibana.alert.rule.uuid',
 }
 
+export interface InspectQuery {
+  request: string[];
+  response: string[];
+}
+export type GetInspectQuery = () => InspectQuery;
+
 export interface FetchAlertData {
   activePage: number;
   alerts: EcsFieldsResponse[];
   alertsCount: number;
   isInitializing: boolean;
   isLoading: boolean;
-  getInspectQuery: () => { request: {}; response: {} };
+  getInspectQuery: GetInspectQuery;
   onPageChange: (pagination: RuleRegistrySearchRequestPagination) => void;
   onSortChange: (sort: EuiDataGridSorting['columns']) => void;
   refresh: () => void;
@@ -487,6 +494,7 @@ export interface AlertsTableProps {
   onColumnsChange: (columns: EuiDataGridColumn[], visibleColumns: string[]) => void;
   onChangeVisibleColumns: (newColumns: string[]) => void;
   controls?: EuiDataGridToolBarAdditionalControlsOptions;
+  showInspectButton?: boolean;
 }
 
 // TODO We need to create generic type between our plugin, right now we have different one because of the old alerts table
@@ -550,6 +558,7 @@ export interface AlertsTableConfigurationRegistry {
   usePersistentControls?: () => {
     right?: ReactNode;
   };
+  showInspectButton?: boolean;
 }
 
 export enum BulkActionsVerbs {

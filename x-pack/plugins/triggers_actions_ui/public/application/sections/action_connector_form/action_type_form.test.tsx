@@ -14,11 +14,17 @@ import {
   RuleAction,
   GenericValidationResult,
   ActionConnectorMode,
+  ActionVariables,
 } from '../../../types';
 import { act } from 'react-dom/test-utils';
 import { EuiFieldText } from '@elastic/eui';
-import { I18nProvider } from '@kbn/i18n-react';
+import { I18nProvider, __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { render, waitFor, screen } from '@testing-library/react';
+import {
+  DEFAULT_FREQUENCY_WITHOUT_SUMMARY,
+  DEFAULT_FREQUENCY_WITH_SUMMARY,
+} from '../../../common/constants';
+import { transformActionVariables } from '../../lib/action_variables';
 
 jest.mock('../../../common/lib/kibana');
 jest.mock('../../lib/validate_params_for_warnings', () => {
@@ -31,6 +37,14 @@ jest.mock('../../lib/validate_params_for_warnings', () => {
   };
 });
 const actionTypeRegistry = actionTypeRegistryMock.create();
+
+jest.mock('../../lib/action_variables', () => {
+  const original = jest.requireActual('../../lib/action_variables');
+  return {
+    ...original,
+    transformActionVariables: jest.fn(),
+  };
+});
 
 describe('action_type_form', () => {
   const mockedActionParamsFields = React.lazy(async () => ({
@@ -85,20 +99,23 @@ describe('action_type_form', () => {
     actionTypeRegistry.get.mockReturnValue(actionType);
 
     const wrapper = mountWithIntl(
-      getActionTypeForm(1, undefined, {
-        id: '123',
-        actionTypeId: '.pagerduty',
-        group: 'recovered',
-        params: {
-          eventAction: 'recovered',
-          dedupKey: undefined,
-          summary: '2323',
-          source: 'source',
-          severity: '1',
-          timestamp: new Date().toISOString(),
-          component: 'test',
-          group: 'group',
-          class: 'test class',
+      getActionTypeForm({
+        index: 1,
+        actionItem: {
+          id: '123',
+          actionTypeId: '.pagerduty',
+          group: 'recovered',
+          params: {
+            eventAction: 'recovered',
+            dedupKey: undefined,
+            summary: '2323',
+            source: 'source',
+            severity: '1',
+            timestamp: new Date().toISOString(),
+            component: 'test',
+            group: 'group',
+            class: 'test class',
+          },
         },
       })
     );
@@ -136,20 +153,23 @@ describe('action_type_form', () => {
 
     render(
       <I18nProvider>
-        {getActionTypeForm(1, undefined, {
-          id: '123',
-          actionTypeId: '.pagerduty',
-          group: 'recovered',
-          params: {
-            eventAction: 'recovered',
-            dedupKey: undefined,
-            summary: '2323',
-            source: 'source',
-            severity: '1',
-            timestamp: new Date().toISOString(),
-            component: 'test',
-            group: 'group',
-            class: 'test class',
+        {getActionTypeForm({
+          index: 1,
+          actionItem: {
+            id: '123',
+            actionTypeId: '.pagerduty',
+            group: 'recovered',
+            params: {
+              eventAction: 'recovered',
+              dedupKey: undefined,
+              summary: '2323',
+              source: 'source',
+              severity: '1',
+              timestamp: new Date().toISOString(),
+              component: 'test',
+              group: 'group',
+              class: 'test class',
+            },
           },
         })}
       </I18nProvider>
@@ -181,20 +201,23 @@ describe('action_type_form', () => {
     actionTypeRegistry.get.mockReturnValue(actionType);
 
     const wrapper = mountWithIntl(
-      getActionTypeForm(1, undefined, {
-        id: '123',
-        actionTypeId: '.pagerduty',
-        group: 'recovered',
-        params: {
-          eventAction: 'recovered',
-          dedupKey: '232323',
-          summary: '2323',
-          source: 'source',
-          severity: '1',
-          timestamp: new Date().toISOString(),
-          component: 'test',
-          group: 'group',
-          class: 'test class',
+      getActionTypeForm({
+        index: 1,
+        actionItem: {
+          id: '123',
+          actionTypeId: '.pagerduty',
+          group: 'recovered',
+          params: {
+            eventAction: 'recovered',
+            dedupKey: '232323',
+            summary: '2323',
+            source: 'source',
+            severity: '1',
+            timestamp: new Date().toISOString(),
+            component: 'test',
+            group: 'group',
+            class: 'test class',
+          },
         },
       })
     );
@@ -230,20 +253,23 @@ describe('action_type_form', () => {
     actionTypeRegistry.get.mockReturnValue(actionType);
 
     const wrapper = mountWithIntl(
-      getActionTypeForm(1, undefined, {
-        id: '123',
-        actionTypeId: '.pagerduty',
-        group: 'recovered',
-        params: {
-          eventAction: 'recovered',
-          dedupKey: '232323',
-          summary: '2323',
-          source: 'source',
-          severity: '1',
-          timestamp: new Date().toISOString(),
-          component: 'test',
-          group: 'group',
-          class: 'test class',
+      getActionTypeForm({
+        index: 1,
+        actionItem: {
+          id: '123',
+          actionTypeId: '.pagerduty',
+          group: 'recovered',
+          params: {
+            eventAction: 'recovered',
+            dedupKey: '232323',
+            summary: '2323',
+            source: 'source',
+            severity: '1',
+            timestamp: new Date().toISOString(),
+            component: 'test',
+            group: 'group',
+            class: 'test class',
+          },
         },
       })
     );
@@ -286,12 +312,15 @@ describe('action_type_form', () => {
     actionTypeRegistry.get.mockReturnValue(actionType);
 
     const wrapper = mountWithIntl(
-      getActionTypeForm(1, undefined, {
-        id: '123',
-        actionTypeId: '.test-action-type',
-        group: 'recovered',
-        params: {
-          message: `{{rule.url}}`,
+      getActionTypeForm({
+        index: 1,
+        actionItem: {
+          id: '123',
+          actionTypeId: '.test-action-type',
+          group: 'recovered',
+          params: {
+            message: `{{rule.url}}`,
+          },
         },
       })
     );
@@ -310,19 +339,112 @@ describe('action_type_form', () => {
       'Action has 1 warning'
     );
   });
+
+  it('resets action variables when the actionItem.frequency.summary changes', async () => {
+    const mockTransformActionVariables = transformActionVariables as jest.Mock;
+    const actionType = actionTypeRegistryMock.createMockActionTypeModel({
+      id: '.pagerduty',
+      iconClass: 'test',
+      selectMessage: 'test',
+      validateParams: (): Promise<GenericValidationResult<unknown>> => {
+        const validationResult = { errors: {} };
+        return Promise.resolve(validationResult);
+      },
+      actionConnectorFields: null,
+      actionParamsFields: mockedActionParamsFields,
+      defaultActionParams: {
+        dedupKey: 'test',
+        eventAction: 'resolve',
+      },
+    });
+    actionTypeRegistry.get.mockReturnValue(actionType);
+    const actionItem = {
+      id: '123',
+      actionTypeId: '.pagerduty',
+      group: 'default',
+      params: {},
+      frequency: DEFAULT_FREQUENCY_WITHOUT_SUMMARY,
+    };
+    const wrapper = render(
+      <IntlProvider locale="en">
+        {getActionTypeForm({
+          index: 1,
+          actionItem,
+          setActionFrequencyProperty: () => {
+            actionItem.frequency = DEFAULT_FREQUENCY_WITH_SUMMARY;
+          },
+        })}
+      </IntlProvider>
+    );
+
+    const summaryOrPerRuleSelect = wrapper.getByTestId('summaryOrPerRuleSelect');
+    expect(summaryOrPerRuleSelect).toBeTruthy();
+
+    const button = wrapper.getByText('For each alert');
+    button.click();
+    await act(async () => {
+      wrapper.getByText('Summary of alerts').click();
+    });
+
+    expect(mockTransformActionVariables.mock.calls).toEqual([
+      [
+        {
+          context: [],
+          params: [],
+          state: [],
+        },
+        undefined,
+        undefined,
+      ],
+      [
+        {
+          context: [],
+          params: [],
+          state: [],
+        },
+        undefined,
+        false,
+      ],
+      [
+        {
+          context: [],
+          params: [],
+          state: [],
+        },
+        undefined,
+        true,
+      ],
+    ]);
+  });
 });
 
-function getActionTypeForm(
-  index?: number,
-  actionConnector?: ActionConnector<Record<string, unknown>, Record<string, unknown>>,
-  actionItem?: RuleAction,
-  defaultActionGroupId?: string,
-  connectors?: Array<ActionConnector<Record<string, unknown>, Record<string, unknown>>>,
-  actionTypeIndex?: Record<string, ActionType>,
-  onAddConnector?: () => void,
-  onDeleteAction?: () => void,
-  onConnectorSelected?: (id: string) => void
-) {
+function getActionTypeForm({
+  index,
+  actionConnector,
+  actionItem,
+  defaultActionGroupId,
+  connectors,
+  actionTypeIndex,
+  onAddConnector,
+  onDeleteAction,
+  onConnectorSelected,
+  setActionFrequencyProperty,
+  hasSummary = true,
+  messageVariables = { context: [], state: [], params: [] },
+}: {
+  index?: number;
+  actionConnector?: ActionConnector<Record<string, unknown>, Record<string, unknown>>;
+  actionItem?: RuleAction;
+  defaultActionGroupId?: string;
+  connectors?: Array<ActionConnector<Record<string, unknown>, Record<string, unknown>>>;
+  actionTypeIndex?: Record<string, ActionType>;
+  onAddConnector?: () => void;
+  onDeleteAction?: () => void;
+  onConnectorSelected?: (id: string) => void;
+  setActionFrequencyProperty?: () => void;
+  hasSummary?: boolean;
+  messageVariables?: ActionVariables;
+}) {
   const actionConnectorDefault = {
     actionTypeId: '.pagerduty',
     config: {
@@ -335,7 +457,7 @@ function getActionTypeForm(
     secrets: {},
   };
 
-  const actionItemDefault = {
+  const actionItemDefault: RuleAction = {
     id: '123',
     actionTypeId: '.pagerduty',
     group: 'trigger',
@@ -399,10 +521,12 @@ function getActionTypeForm(
       onConnectorSelected={onConnectorSelected ?? jest.fn()}
       defaultActionGroupId={defaultActionGroupId ?? 'default'}
       setActionParamsProperty={jest.fn()}
-      setActionFrequencyProperty={jest.fn()}
+      setActionFrequencyProperty={setActionFrequencyProperty ?? jest.fn()}
       index={index ?? 1}
       actionTypesIndex={actionTypeIndex ?? actionTypeIndexDefault}
       actionTypeRegistry={actionTypeRegistry}
+      hasSummary={hasSummary}
+      messageVariables={messageVariables}
     />
   );
 }

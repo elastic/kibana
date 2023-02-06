@@ -79,6 +79,7 @@ export type ActionTypeFormProps = {
   | 'setActionParamsProperty'
   | 'messageVariables'
   | 'defaultActionMessage'
+  | 'defaultSummaryMessage'
 >;
 
 const preconfiguredMessage = i18n.translate(
@@ -108,6 +109,7 @@ export const ActionTypeForm = ({
   isActionGroupDisabledForActionType,
   recoveryActionGroup,
   hideNotifyWhen = false,
+  defaultSummaryMessage,
   hasSummary,
   minimumThrottleInterval,
 }: ActionTypeFormProps) => {
@@ -142,6 +144,7 @@ export const ActionTypeForm = ({
     -1,
     's',
   ];
+  const isSummaryAction = actionItem.frequency?.summary;
 
   const getDefaultParams = async () => {
     const connectorType = await actionTypeRegistry.get(actionItem.actionTypeId);
@@ -179,7 +182,9 @@ export const ActionTypeForm = ({
   useEffect(() => {
     (async () => {
       setAvailableActionVariables(
-        messageVariables ? getAvailableActionVariables(messageVariables, selectedActionGroup) : []
+        messageVariables
+          ? getAvailableActionVariables(messageVariables, selectedActionGroup, isSummaryAction)
+          : []
       );
 
       const defaultParams = await getDefaultParams();
@@ -192,7 +197,7 @@ export const ActionTypeForm = ({
       }
     })();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [actionItem.group]);
+  }, [actionItem.group, actionItem.frequency?.summary]);
 
   useEffect(() => {
     (async () => {
@@ -391,7 +396,12 @@ export const ActionTypeForm = ({
                 warnings={actionParamsWarnings.warnings}
                 editAction={setActionParamsProperty}
                 messageVariables={availableActionVariables}
-                defaultMessage={selectedActionGroup?.defaultActionMessage ?? defaultActionMessage}
+                defaultMessage={
+                  // if action is a summary action, show the default summary message
+                  isSummaryAction
+                    ? defaultSummaryMessage
+                    : selectedActionGroup?.defaultActionMessage ?? defaultActionMessage
+                }
                 actionConnector={actionConnector}
                 executionMode={ActionConnectorMode.ActionForm}
               />
@@ -553,11 +563,13 @@ export const ActionTypeForm = ({
 
 function getAvailableActionVariables(
   actionVariables: ActionVariables,
-  actionGroup?: ActionGroupWithMessageVariables
+  actionGroup?: ActionGroupWithMessageVariables,
+  isSummaryAction?: boolean
 ) {
   const transformedActionVariables: ActionVariable[] = transformActionVariables(
     actionVariables,
-    actionGroup?.omitMessageVariables
+    actionGroup?.omitMessageVariables,
+    isSummaryAction
   );
 
   // partition deprecated items so they show up last
