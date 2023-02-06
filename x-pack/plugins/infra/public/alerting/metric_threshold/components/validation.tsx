@@ -7,12 +7,23 @@
 
 import { i18n } from '@kbn/i18n';
 import { ValidationResult } from '@kbn/triggers-actions-ui-plugin/public';
+import { isEmpty } from 'lodash';
 import {
+  Aggregators,
   Comparator,
+  CustomMetricExpressionParams,
   FilterQuery,
   MetricExpressionParams,
   QUERY_INVALID,
 } from '../../../../common/alerting/metrics';
+
+export const EQUATION_REGEX = /[^A-Z|+|\-|\s|\d+|\.|\(|\)|\/|\*|>|<|=|\?|\:|&|\!|\|]+/g;
+
+const isCustomMetricExpressionParams = (
+  subject: MetricExpressionParams
+): subject is CustomMetricExpressionParams => {
+  return subject.aggType === Aggregators.CUSTOM;
+};
 
 export function validateMetricThreshold({
   criteria,
@@ -36,6 +47,9 @@ export function validateMetricThreshold({
         threshold1: string[];
       };
       metric: string[];
+      customMetricsError?: string;
+      customMetrics: Record<string, { aggType?: string; field?: string }>;
+      equation?: string;
     };
   } & { filterQuery?: string[] } = {};
   validationResult.errors = errors;
@@ -70,6 +84,7 @@ export function validateMetricThreshold({
       },
       metric: [],
       filterQuery: [],
+      customMetrics: {},
     };
     if (!c.aggType) {
       errors[id].aggField.push(
@@ -136,16 +151,59 @@ export function validateMetricThreshold({
       );
     }
 
-    if (!c.metric && c.aggType !== 'count') {
+    if (!c.metric && c.aggType !== 'count' && c.aggType !== 'custom') {
       errors[id].metric.push(
         i18n.translate('xpack.infra.metrics.alertFlyout.error.metricRequired', {
           defaultMessage: 'Metric is required.',
         })
       );
     }
+
+    if (isCustomMetricExpressionParams(c)) {
+      if (!c.customMetrics || (c.customMetrics && c.customMetrics.length < 1)) {
+        errors[id].customMetricsError = i18n.translate(
+          'xpack.infra.metrics.alertFlyout.error.customMetricsError',
+          {
+            defaultMessage: 'You must define at least 1 custom metric',
+          }
+        );
+      } else {
+        c.customMetrics.forEach((metric) => {
+          const customMetricErrors: { aggType?: string; field?: string } = {};
+          if (!metric.aggType) {
+            customMetricErrors.aggType = i18n.translate(
+              'xpack.infra.metrics.alertFlyout.error.customMetrics.aggTypeRequired',
+              {
+                defaultMessage: 'Aggregation is required',
+              }
+            );
+          }
+          if (metric.aggType !== 'count' && !metric.field) {
+            customMetricErrors.field = i18n.translate(
+              'xpack.infra.metrics.alertFlyout.error.customMetrics.fieldRequired',
+              {
+                defaultMessage: 'Field is required',
+              }
+            );
+          }
+          if (!isEmpty(customMetricErrors)) {
+            errors[id].customMetrics[metric.name] = customMetricErrors;
+          }
+        });
+      }
+
+      if (c.equation && c.equation.match(EQUATION_REGEX)) {
+        errors[id].equation = i18n.translate(
+          'xpack.infra.metrics.alertFlyout.error.equation.invalidCharacters',
+          {
+            defaultMessage:
+              'The equation field only supports the following characters: A-Z, +, -, /, *, (, ), ?, !, &, :, |, >, <, =',
+          }
+        );
+      }
+    }
   });
 
   return validationResult;
 }
-
 const isNumber = (value: unknown): value is number => typeof value === 'number';

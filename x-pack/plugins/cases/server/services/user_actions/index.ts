@@ -16,8 +16,8 @@ import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { KueryNode } from '@kbn/es-query';
 import type {
   CaseUserActionAttributesWithoutConnectorId,
-  CaseUserActionInjectedAttributesWithoutActionId,
-  CaseUserActionResponse,
+  CaseUserActionDeprecatedResponse,
+  CaseUserActionInjectedAttributes,
 } from '../../../common/api';
 import { ActionTypes } from '../../../common/api';
 import {
@@ -85,6 +85,16 @@ interface ConnectorFieldsBeforePushAggsResult {
         };
       };
     };
+  };
+}
+
+interface UserActionsStatsAggsResult {
+  total: number;
+  totals: {
+    buckets: Array<{
+      key: string;
+      doc_count: number;
+    }>;
   };
 }
 
@@ -270,7 +280,7 @@ export class CaseUserActionService {
 
   public async getMostRecentUserAction(
     caseId: string
-  ): Promise<SavedObject<CaseUserActionInjectedAttributesWithoutActionId> | undefined> {
+  ): Promise<SavedObject<CaseUserActionInjectedAttributes> | undefined> {
     try {
       this.context.log.debug(
         `Attempting to retrieve the most recent user action for case id: ${caseId}`
@@ -377,7 +387,7 @@ export class CaseUserActionService {
         rawFieldsDoc = createCase.mostRecent.hits.hits[0];
       }
 
-      let fieldsDoc: SavedObject<CaseUserActionInjectedAttributesWithoutActionId> | undefined;
+      let fieldsDoc: SavedObject<CaseUserActionInjectedAttributes> | undefined;
       if (rawFieldsDoc != null) {
         const doc =
           this.context.savedObjectsSerializer.rawToSavedObject<CaseUserActionAttributesWithoutConnectorId>(
@@ -420,7 +430,7 @@ export class CaseUserActionService {
 
   private getTopHitsDoc(
     topHits: TopHits
-  ): SavedObject<CaseUserActionInjectedAttributesWithoutActionId> | undefined {
+  ): SavedObject<CaseUserActionInjectedAttributes> | undefined {
     if (topHits.hits.hits.length > 0) {
       const rawPushDoc = topHits.hits.hits[0];
 
@@ -526,7 +536,9 @@ export class CaseUserActionService {
     };
   }
 
-  public async getAll(caseId: string): Promise<SavedObjectsFindResponse<CaseUserActionResponse>> {
+  public async getAll(
+    caseId: string
+  ): Promise<SavedObjectsFindResponse<CaseUserActionDeprecatedResponse>> {
     try {
       const id = caseId;
       const type = CASE_SAVED_OBJECT;
@@ -655,6 +667,50 @@ export class CaseUserActionService {
               },
             },
           },
+        },
+      },
+    };
+  }
+
+  public async getCaseUserActionStats({ caseId }: { caseId: string }) {
+    const response = await this.context.unsecuredSavedObjectsClient.find<
+      CaseUserActionAttributesWithoutConnectorId,
+      UserActionsStatsAggsResult
+    >({
+      type: CASE_USER_ACTION_SAVED_OBJECT,
+      hasReference: { type: CASE_SAVED_OBJECT, id: caseId },
+      page: 1,
+      perPage: 1,
+      sortField: defaultSortField,
+      aggs: CaseUserActionService.buildUserActionStatsAgg(),
+    });
+
+    const result = {
+      total: response.total,
+      total_comments: 0,
+      total_other_actions: 0,
+    };
+
+    response.aggregations?.totals.buckets.forEach(({ key, doc_count: docCount }) => {
+      if (key === 'user') {
+        result.total_comments = docCount;
+      }
+    });
+
+    result.total_other_actions = result.total - result.total_comments;
+
+    return result;
+  }
+
+  private static buildUserActionStatsAgg(): Record<
+    string,
+    estypes.AggregationsAggregationContainer
+  > {
+    return {
+      totals: {
+        terms: {
+          field: `${CASE_USER_ACTION_SAVED_OBJECT}.attributes.payload.comment.type`,
+          size: 100,
         },
       },
     };

@@ -15,11 +15,36 @@ import {
 
 const BaseActionRequestSchema = {
   /** A list of endpoint IDs whose hosts will be isolated (Fleet Agent IDs will be retrieved for these) */
-  endpoint_ids: schema.arrayOf(schema.string(), { minSize: 1 }),
+  endpoint_ids: schema.arrayOf(schema.string({ minLength: 1 }), {
+    minSize: 1,
+    validate: (endpointIds) => {
+      if (endpointIds.map((v) => v.trim()).some((v) => !v.length)) {
+        return 'endpoint_ids cannot contain empty strings';
+      }
+    },
+  }),
   /** If defined, any case associated with the given IDs will be updated */
-  alert_ids: schema.maybe(schema.arrayOf(schema.string())),
+  alert_ids: schema.maybe(
+    schema.arrayOf(schema.string({ minLength: 1 }), {
+      minSize: 1,
+      validate: (alertIds) => {
+        if (alertIds.map((v) => v.trim()).some((v) => !v.length)) {
+          return 'alert_ids cannot contain empty strings';
+        }
+      },
+    })
+  ),
   /** Case IDs to be updated */
-  case_ids: schema.maybe(schema.arrayOf(schema.string())),
+  case_ids: schema.maybe(
+    schema.arrayOf(schema.string({ minLength: 1 }), {
+      minSize: 1,
+      validate: (caseIds) => {
+        if (caseIds.map((v) => v.trim()).some((v) => !v.length)) {
+          return 'case_ids cannot contain empty strings';
+        }
+      },
+    })
+  ),
   comment: schema.maybe(schema.string()),
   parameters: schema.maybe(schema.object({})),
 };
@@ -149,3 +174,20 @@ export const EndpointActionFileInfoSchema = {
 };
 
 export type EndpointActionFileInfoParams = TypeOf<typeof EndpointActionFileInfoSchema.params>;
+
+export const ExecuteActionRequestSchema = {
+  body: schema.object({
+    ...BaseActionRequestSchema,
+    parameters: schema.object({
+      command: schema.string({
+        minLength: 1,
+        validate: (value) => {
+          if (!value.trim().length) {
+            return 'command cannot be an empty string';
+          }
+        },
+      }),
+      timeout: schema.maybe(schema.number({ min: 1 })),
+    }),
+  }),
+};

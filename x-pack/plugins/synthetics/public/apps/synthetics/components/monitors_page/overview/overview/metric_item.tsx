@@ -17,7 +17,6 @@ import { useLocationName, useStatusByLocationOverview } from '../../../../hooks'
 import { formatDuration } from '../../../../utils/formatting';
 import { MonitorOverviewItem } from '../../../../../../../common/runtime_types';
 import { ActionsPopover } from './actions_popover';
-import { OverviewGridItemLoader } from './overview_grid_item_loader';
 import {
   hideTestNowFlyoutAction,
   manualTestRunInProgressSelector,
@@ -49,18 +48,17 @@ export const MetricItem = ({
   monitor,
   averageDuration,
   data,
-  loaded,
   onClick,
 }: {
   monitor: MonitorOverviewItem;
   data: Array<{ x: number; y: number }>;
   averageDuration: number;
-  loaded: boolean;
   onClick: (params: { id: string; configId: string; location: string; locationId: string }) => void;
 }) => {
   const [isMouseOver, setIsMouseOver] = useState(false);
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
-  const locationName = useLocationName({ locationId: monitor.location?.id });
+  const locationName =
+    useLocationName({ locationId: monitor.location?.id })?.label || monitor.location?.id;
   const { status, timestamp, ping, configIdByLocation } = useStatusByLocationOverview(
     monitor.configId,
     locationName
@@ -73,93 +71,89 @@ export const MetricItem = ({
 
   return (
     <div data-test-subj={`${monitor.name}-metric-item`} style={{ height: '160px' }}>
-      {loaded ? (
-        <EuiPanel
-          data-test-subj={`${monitor.name}-metric-item-${locationName}-${status}`}
-          paddingSize="none"
-          onMouseOver={() => {
-            if (!isMouseOver) {
-              setIsMouseOver(true);
-            }
-          }}
-          onMouseLeave={() => {
-            if (isMouseOver) {
-              setIsMouseOver(false);
-            }
-          }}
-          style={{
-            height: '100%',
-            overflow: 'hidden',
-            position: 'relative',
-          }}
-          title={moment(timestamp).format('LLL')}
-        >
-          <Chart>
-            <Settings
-              onElementClick={() => {
-                if (testInProgress) {
-                  dispatch(toggleTestNowFlyoutAction(monitor.configId));
-                  dispatch(toggleErrorPopoverOpen(null));
-                } else {
-                  dispatch(hideTestNowFlyoutAction());
-                  dispatch(toggleErrorPopoverOpen(null));
-                }
-                if (!testInProgress && locationName) {
-                  onClick({
-                    configId: monitor.configId,
-                    id: monitor.id,
-                    location: locationName,
-                    locationId: monitor.location?.id,
-                  });
-                }
-              }}
-              baseTheme={DARK_THEME}
-            />
-            <Metric
-              id={`${monitor.configId}-${monitor.location?.id}`}
-              data={[
-                [
-                  {
-                    title: monitor.name,
-                    subtitle: locationName,
-                    value: averageDuration,
-                    trendShape: MetricTrendShape.Area,
-                    trend: data,
-                    extra: (
-                      <span>
-                        {i18n.translate('xpack.synthetics.overview.duration.label', {
-                          defaultMessage: 'Duration Avg.',
-                        })}
-                      </span>
-                    ),
-                    valueFormatter: (d: number) => formatDuration(d),
-                    color: getColor(theme, monitor.isEnabled, status),
-                  },
-                ],
-              ]}
-            />
-          </Chart>
-          {(isMouseOver || isPopoverOpen) && (
-            <ActionsPopover
-              monitor={monitor}
-              isPopoverOpen={isPopoverOpen}
-              setIsPopoverOpen={setIsPopoverOpen}
-              position="relative"
-            />
-          )}
-          {configIdByLocation && (
-            <MetricItemIcon
-              monitor={monitor}
-              status={status}
-              ping={ping}
-              timestamp={timestamp}
-              configIdByLocation={configIdByLocation}
-            />
-          )}
-        </EuiPanel>
-      ) : (
-        <OverviewGridItemLoader />
-      )}
+      <EuiPanel
+        data-test-subj={`${monitor.name}-metric-item-${locationName}-${status}`}
+        paddingSize="none"
+        onMouseOver={() => {
+          if (!isMouseOver) {
+            setIsMouseOver(true);
+          }
+        }}
+        onMouseLeave={() => {
+          if (isMouseOver) {
+            setIsMouseOver(false);
+          }
+        }}
+        style={{
+          height: '100%',
+          overflow: 'hidden',
+          position: 'relative',
+        }}
+        title={moment(timestamp).format('LLL')}
+      >
+        <Chart>
+          <Settings
+            onElementClick={() => {
+              if (testInProgress) {
+                dispatch(toggleTestNowFlyoutAction(monitor.configId));
+                dispatch(toggleErrorPopoverOpen(null));
+              } else {
+                dispatch(hideTestNowFlyoutAction());
+                dispatch(toggleErrorPopoverOpen(null));
+              }
+              if (!testInProgress && locationName) {
+                onClick({
+                  configId: monitor.configId,
+                  id: monitor.id,
+                  location: locationName,
+                  locationId: monitor.location?.id,
+                });
+              }
+            }}
+            baseTheme={DARK_THEME}
+          />
+          <Metric
+            id={`${monitor.configId}-${monitor.location?.id}`}
+            data={[
+              [
+                {
+                  title: monitor.name,
+                  subtitle: locationName,
+                  value: averageDuration,
+                  trendShape: MetricTrendShape.Area,
+                  trend: data,
+                  extra: (
+                    <span>
+                      {i18n.translate('xpack.synthetics.overview.duration.label', {
+                        defaultMessage: 'Duration Avg.',
+                      })}
+                    </span>
+                  ),
+                  valueFormatter: (d: number) => formatDuration(d),
+                  color: getColor(theme, monitor.isEnabled, status),
+                },
+              ],
+            ]}
+          />
+        </Chart>
+        {(isMouseOver || isPopoverOpen) && (
+          <ActionsPopover
+            monitor={monitor}
+            isPopoverOpen={isPopoverOpen}
+            setIsPopoverOpen={setIsPopoverOpen}
+            position="relative"
+          />
+        )}
+        {configIdByLocation && (
+          <MetricItemIcon
+            monitor={monitor}
+            status={status}
+            ping={ping}
+            timestamp={timestamp}
+            configIdByLocation={configIdByLocation}
+          />
+        )}
+      </EuiPanel>
     </div>
   );
 };

@@ -1,0 +1,14 @@
+{
+  "id": "contentManagement",
+  "version": "kibana",
+  "server": true,
+  "ui": true,
+  "requiredPlugins": [],
+  "requiredBundles": [],
+  "optionalPlugins": [],
+  "owner": {
+    "name": "@elastic/kibana-global-experience",
+    "githubTeam": "@elastic/kibana-global-experience"
+  },
+  "description": "Content management app"
+}
