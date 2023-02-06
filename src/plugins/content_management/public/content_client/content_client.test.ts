@@ -13,45 +13,50 @@ import type { GetIn, CreateIn } from '../../common';
 import { lastValueFrom } from 'rxjs';
 import { takeWhile, toArray } from 'rxjs/operators';
 
-describe('ContentClient', () => {
-  let contentClient: ContentClient;
-  let rpcClient: jest.Mocked<RpcClient>;
-  beforeEach(() => {
-    rpcClient = createRpcClientMock();
-    contentClient = new ContentClient(rpcClient);
+let contentClient: ContentClient;
+let rpcClient: jest.Mocked<RpcClient>;
+beforeEach(() => {
+  rpcClient = createRpcClientMock();
+  contentClient = new ContentClient(rpcClient);
+});
+
+describe('#get', () => {
+  it('calls rpcClient.get with input and returns output', async () => {
+    const input: GetIn = { id: 'test', contentType: 'testType' };
+    const output = { test: 'test' };
+    rpcClient.get.mockImplementation(() => Promise.resolve(output));
+    expect(await contentClient.get(input)).toEqual(output);
+    expect(rpcClient.get).toBeCalledWith(input);
   });
 
-  describe('#get', () => {
-    it('calls rpcClient.get with input', async () => {
-      const input: GetIn = { id: 'test', contentType: 'testType' };
-      await contentClient.get(input);
-      expect(rpcClient.get).toBeCalledWith(input);
-    });
+  it('calls rpcClient.get$ with input and returns output', async () => {
+    const input: GetIn = { id: 'test', contentType: 'testType' };
+    const output = { test: 'test' };
+    rpcClient.get.mockImplementation(() => Promise.resolve(output));
+    const get$ = contentClient.get$(input).pipe(
+      takeWhile((result) => {
+        return result.data == null;
+      }, true),
+      toArray()
+    );
 
-    it('calls rpcClient.get$ with input', async () => {
-      const input: GetIn = { id: 'test', contentType: 'testType' };
-      const get$ = contentClient.get$(input).pipe(
-        takeWhile((result) => {
-          return result.data == null;
-        }, true),
-        toArray()
-      );
+    const [loadingState, loadedState] = await lastValueFrom(get$);
 
-      const [loadingState, loadedState] = await lastValueFrom(get$);
+    expect(loadingState.isLoading).toBe(true);
+    expect(loadingState.data).toBeUndefined();
 
-      expect(loadingState.isLoading).toBe(true);
-      expect(loadingState.data).toBeUndefined();
-
-      expect(loadedState.isLoading).toBe(false);
-      expect(loadedState.data).toEqual({});
-    });
+    expect(loadedState.isLoading).toBe(false);
+    expect(loadedState.data).toEqual(output);
   });
+});
 
-  describe('#create', () => {
-    it('calls rpcClient.create with input', async () => {
-      const input: CreateIn = { contentType: 'testType', data: { foo: 'bar' } };
-      await contentClient.create(input);
-      expect(rpcClient.create).toBeCalledWith(input);
-    });
+describe('#create', () => {
+  it('calls rpcClient.create with input and returns output', async () => {
+    const input: CreateIn = { contentType: 'testType', data: { foo: 'bar' } };
+    const output = { test: 'test' };
+    rpcClient.create.mockImplementation(() => Promise.resolve(output));
+
+    expect(await contentClient.create(input)).toEqual(output);
+    expect(rpcClient.create).toBeCalledWith(input);
   });
 });
