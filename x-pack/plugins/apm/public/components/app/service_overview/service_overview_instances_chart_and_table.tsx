@@ -226,7 +226,7 @@ export function ServiceOverviewInstancesChartAndTable({
         <InstancesLatencyDistributionChart
           height={chartHeight}
           items={currentPeriodItems}
-          status={mainStatsStatus}
+          status={transactionType ? mainStatsStatus : FETCH_STATUS.SUCCESS}
           comparisonItems={previousPeriodItems}
         />
       </EuiFlexItem>
@@ -241,7 +241,10 @@ export function ServiceOverviewInstancesChartAndTable({
             serviceName={serviceName}
             tableOptions={tableOptions}
             isLoading={mainStatsStatus === FETCH_STATUS.LOADING}
-            isNotInitiated={mainStatsStatus === FETCH_STATUS.NOT_INITIATED}
+            isNotInitiated={
+              mainStatsStatus === FETCH_STATUS.NOT_INITIATED &&
+              !!transactionType
+            }
             onChangeTableOptions={(newTableOptions) => {
               setTableOptions({
                 pageIndex: newTableOptions.page?.index ?? 0,

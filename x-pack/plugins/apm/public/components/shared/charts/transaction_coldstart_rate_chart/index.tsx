@@ -18,7 +18,7 @@ import { usePreviousPeriodLabel } from '../../../../hooks/use_previous_period_te
 import { isTimeComparison } from '../../time_comparison/get_comparison_options';
 import { APIReturnType } from '../../../../services/rest/create_call_apm_api';
 import { asPercent } from '../../../../../common/utils/formatters';
-import { useFetcher } from '../../../../hooks/use_fetcher';
+import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
 import { useTheme } from '../../../../hooks/use_theme';
 import { TimeseriesChartWithContext } from '../timeseries_chart_with_context';
 import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
@@ -165,7 +165,7 @@ export function TransactionColdstartRateChart({
         id="coldstartRate"
         height={height}
         showAnnotations={showAnnotations}
-        fetchStatus={status}
+        fetchStatus={transactionType ? status : FETCH_STATUS.SUCCESS}
         timeseries={timeseries}
         yLabelFormat={yLabelFormat}
         yDomain={{ min: 0, max: 1 }}
