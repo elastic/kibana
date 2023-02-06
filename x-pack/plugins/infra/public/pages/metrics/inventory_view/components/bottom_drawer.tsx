@@ -30,7 +30,7 @@ interface Props {
   view: string;
 }
 
-const LOCAL_STORAGE_KEY = 'infraUI:k8sDashboardClicked';
+const LOCAL_STORAGE_KEY = 'inventoryUI:k8sDashboardClicked';
 const KubernetesButton = () => {
   const [clicked, setClicked] = useLocalStorage<boolean>(LOCAL_STORAGE_KEY, false);
   const clickedRef = useRef<boolean | undefined>(clicked);
