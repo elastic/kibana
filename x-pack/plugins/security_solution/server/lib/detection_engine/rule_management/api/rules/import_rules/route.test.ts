@@ -115,6 +115,37 @@ describe('Import rules route', () => {
         action_connectors_errors: [],
       });
     });
+    test('returns a 403 error object if importing actions connectors  fails', async () => {
+      (buildMlAuthz as jest.Mock).mockReturnValueOnce({
+        validateRuleType: jest
+          .fn()
+          .mockResolvedValue({ valid: false, message: 'mocked validation message' }),
+      });
+
+      const response = await server.inject(request, requestContextMock.convertContext(context));
+      expect(response.status).toEqual(200);
+      expect(response.body).toEqual({
+        errors: [
+          {
+            error: {
+              message: 'mocked validation message',
+              status_code: 403,
+            },
+            rule_id: 'rule-1',
+          },
+        ],
+        success: false,
+        success_count: 0,
+        rules_count: 1,
+        exceptions_errors: [],
+        exceptions_success: true,
+        exceptions_success_count: 0,
+        action_connectors_success: true,
+        action_connectors_success_count: 0,
+        action_connectors_warnings: [],
+        action_connectors_errors: [],
+      });
+    });
 
     test('returns error if createRulesAndExceptionsStreamFromNdJson throws error', async () => {
       const transformMock = jest

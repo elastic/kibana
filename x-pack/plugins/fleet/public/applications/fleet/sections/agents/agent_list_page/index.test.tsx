@@ -100,14 +100,18 @@ describe('agent_list_page', () => {
         data: {
           items: mapAgents(['agent1', 'agent2', 'agent3', 'agent4', 'agent5']),
           total: 6,
-          totalInactive: 0,
+          statusSummary: {
+            online: 6,
+          },
         },
       })
       .mockResolvedValueOnce({
         data: {
           items: mapAgents(['agent1', 'agent2', 'agent3', 'agent4', 'agent6']),
           total: 6,
-          totalInactive: 0,
+          statusSummary: {
+            online: 6,
+          },
         },
       });
     jest.useFakeTimers({ legacyFakeTimers: true });
@@ -128,12 +132,8 @@ describe('agent_list_page', () => {
       return {
         data: {
           results: {
-            online: 6,
-            error: 0,
-            offline: 0,
-            updating: 0,
+            inactive: 0,
           },
-          totalInactive: 0,
         },
       };
     });
@@ -143,9 +143,7 @@ describe('agent_list_page', () => {
       jest.advanceTimersByTime(65000);
     });
 
-    // we call the status endpoint twice on page load,
-    // once for all inactive agents and one for the current kuery
-    expect(mockedSendGetAgentStatus).toHaveBeenCalledTimes(2);
+    expect(mockedSendGetAgentStatus).toHaveBeenCalledTimes(1);
   });
 
   describe('selection change', () => {
@@ -153,10 +151,7 @@ describe('agent_list_page', () => {
       mockedSendGetAgentStatus.mockResolvedValue({
         data: {
           results: {
-            online: 6,
-            error: 0,
-            offline: 0,
-            updating: 0,
+            inactive: 0,
           },
           totalInactive: 0,
         },

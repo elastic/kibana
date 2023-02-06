@@ -133,9 +133,14 @@ export const getRulesFromObjects = async (
       isAlertType(matchingRule) &&
       matchingRule.params.immutable !== true
     ) {
+      const rule = internalRuleToAPIResponse(matchingRule, legacyActions[matchingRule.id]);
+
+      // Fields containing runtime information shouldn't be exported. It causes import failures.
+      delete rule.execution_summary;
+
       return {
         statusCode: 200,
-        rule: internalRuleToAPIResponse(matchingRule, legacyActions[matchingRule.id]),
+        rule,
       };
     } else {
       return {
