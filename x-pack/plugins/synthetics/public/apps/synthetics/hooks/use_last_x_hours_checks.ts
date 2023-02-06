@@ -20,16 +20,18 @@ import { selectServiceLocationsState } from '../state';
 import { useSyntheticsRefreshContext } from '../contexts/synthetics_refresh_context';
 import { SYNTHETICS_INDEX_PATTERN, UNNAMED_LOCATION } from '../../../../common/constants';
 
-export function useLastXChecks<Fields>({
+const LOWEST_SCHEDULE = 1;
+
+export function useLastXHoursChecks<Fields>({
   monitorId,
   locationId,
   fields = ['*'],
-  size = 50,
+  hours = 12,
 }: {
   monitorId: string;
   locationId: string;
   fields?: string[];
-  size?: number;
+  hours?: number;
 }) {
   const { lastRefresh } = useSyntheticsRefreshContext();
   const { locationsLoaded, locations } = useSelector(selectServiceLocationsState);
@@ -37,7 +39,9 @@ export function useLastXChecks<Fields>({
   const params = createEsParams({
     index: SYNTHETICS_INDEX_PATTERN,
     body: {
-      size,
+      // 1 minute schedule times # of hours plus padding it by 100 to account for
+      // extra runs, such as test now
+      size: LOWEST_SCHEDULE * 60 * hours + 100,
       query: {
         bool: {
           filter: [
@@ -46,6 +50,14 @@ export function useLastXChecks<Fields>({
             {
               term: {
                 'monitor.id': monitorId,
+              },
+            },
+            {
+              range: {
+                'monitor.timespan': {
+                  gte: `now-${hours}h`,
+                  lte: 'now',
+                },
               },
             },
           ],

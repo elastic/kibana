@@ -6,24 +6,24 @@
  */
 
 import { useMemo } from 'react';
-import { useLastXChecks } from './use_last_x_checks';
+import { useLastXHoursChecks } from './use_last_x_hours_checks';
 
 const fields = ['monitor.duration.us'];
 
-export function useLast50DurationChart({
+export function useLast12HoursDurationChart({
   monitorId,
   locationId,
 }: {
   monitorId: string;
   locationId: string;
 }) {
-  const { hits, loading } = useLastXChecks<{
+  const { hits, loading } = useLastXHoursChecks<{
     'monitor.duration.us': number[] | undefined;
   }>({
     monitorId,
     locationId,
     fields,
-    size: 50,
+    hours: 12,
   });
   const { data, averageDuration } = useMemo(() => {
     if (loading) {

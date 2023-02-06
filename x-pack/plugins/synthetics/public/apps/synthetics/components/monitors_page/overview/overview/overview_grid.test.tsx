@@ -10,7 +10,7 @@ import { render } from '../../../../utils/testing/rtl_helpers';
 import { waitFor } from '@testing-library/react';
 import { MonitorOverviewItem } from '../types';
 import { OverviewGrid } from './overview_grid';
-import * as hooks from '../../../../hooks/use_last_50_duration_chart';
+import * as hooks from '../../../../hooks/use_last_12_hours_duration_chart';
 
 describe('Overview Grid', () => {
   const locationIdToName: Record<string, string> = {
@@ -65,7 +65,7 @@ describe('Overview Grid', () => {
 
   it('renders correctly', async () => {
     jest
-      .spyOn(hooks, 'useLast50DurationChart')
+      .spyOn(hooks, 'useLast12HoursDurationChart')
       .mockReturnValue({ data: getMockChart(), averageDuration: 30000, loading: false });
 
     const { getByText, getAllByTestId, queryByText } = render(<OverviewGrid />, {
@@ -125,7 +125,7 @@ describe('Overview Grid', () => {
 
   it('displays showing all monitors label when reaching the end of the list', async () => {
     jest
-      .spyOn(hooks, 'useLast50DurationChart')
+      .spyOn(hooks, 'useLast12HoursDurationChart')
       .mockReturnValue({ data: getMockChart(), averageDuration: 30000, loading: false });
 
     const { getByText } = render(<OverviewGrid />, {

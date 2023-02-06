@@ -6,7 +6,7 @@
  */
 import React from 'react';
 import { renderHook } from '@testing-library/react-hooks';
-import { useLastXChecks } from './use_last_x_checks';
+import { useLastXHoursChecks } from './use_last_x_hours_checks';
 import { WrappedHelper } from '../utils/testing';
 import * as searchHooks from './use_redux_es_search';
 import { SYNTHETICS_INDEX_PATTERN } from '../../../../common/constants';
@@ -35,10 +35,10 @@ describe('useLastXChecks', () => {
 
     const { result } = renderHook(
       () =>
-        useLastXChecks({
+        useLastXHoursChecks({
           monitorId: 'mock-id',
           locationId: 'loc',
-          size: 30,
+          hours: 6,
           fields: ['monitor.duration.us'],
         }),
       { wrapper: WrappedHelper }
@@ -86,21 +86,42 @@ describe('useLastXChecks', () => {
     } as any);
 
     const fields = ['monitor.summary'];
-    const size = 30;
 
     renderHook(
       () =>
-        useLastXChecks({
+        useLastXHoursChecks({
           monitorId: 'mock-id',
           locationId: 'loc',
-          size,
+          hours: 6,
           fields,
         }),
       { wrapper: WrappedHelper }
     );
     expect(spy).toBeCalledTimes(1);
     expect(spy).toBeCalledWith(
-      expect.objectContaining({ body: expect.objectContaining({ fields, size }) }),
+      {
+        body: {
+          fields: ['monitor.summary'],
+          query: {
+            bool: {
+              filter: [
+                { exists: { field: 'summary' } },
+                { bool: { must_not: { exists: { field: 'run_once' } } } },
+                { term: { 'monitor.id': 'mock-id' } },
+                { range: { 'monitor.timespan': { gte: 'now-6h', lte: 'now' } } },
+              ],
+              minimum_should_match: 1,
+              should: [
+                { term: { 'observer.name': 'loc' } },
+                { term: { 'observer.geo.name': 'Unnamed-location' } },
+              ],
+            },
+          },
+          size: 460,
+          sort: [{ '@timestamp': 'desc' }],
+        },
+        index: 'synthetics-*',
+      },
       expect.anything(),
       expect.anything()
     );
@@ -113,10 +134,10 @@ describe('useLastXChecks', () => {
 
     const { result } = renderHook(
       () =>
-        useLastXChecks({
+        useLastXHoursChecks({
           monitorId: 'mock-id',
           locationId: 'loc',
-          size: 30,
+          hours: 6,
           fields: ['monitor.duration.us'],
         }),
       { wrapper: WrappedHelper }
@@ -131,10 +152,10 @@ describe('useLastXChecks', () => {
 
     const { result } = renderHook(
       () =>
-        useLastXChecks({
+        useLastXHoursChecks({
           monitorId: 'mock-id',
           locationId: 'loc',
-          size: 30,
+          hours: 6,
           fields: ['monitor.duration.us'],
         }),
       { wrapper: WrappedHelper }
@@ -159,10 +180,10 @@ describe('useLastXChecks', () => {
 
     renderHook(
       () =>
-        useLastXChecks({
+        useLastXHoursChecks({
           monitorId: 'mock-id',
           locationId: 'loc',
-          size: 30,
+          hours: 6,
           fields: ['monitor.duration.us'],
         }),
       { wrapper: WrapperWithState }

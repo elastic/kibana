@@ -6,11 +6,11 @@
  */
 
 import { renderHook } from '@testing-library/react-hooks';
-import * as hooks from './use_last_x_checks';
-import { useLast50DurationChart } from './use_last_50_duration_chart';
+import * as hooks from './use_last_x_hours_checks';
+import { useLast12HoursDurationChart } from './use_last_12_hours_duration_chart';
 import { WrappedHelper } from '../utils/testing';
 
-describe('useLast50DurationChart', () => {
+describe('useLast12HoursDurationChart', () => {
   const getMockHits = (): Array<{ 'monitor.duration.us': number[] | undefined }> => {
     const hits = [];
     for (let i = 0; i < 10; i++) {
@@ -26,10 +26,12 @@ describe('useLast50DurationChart', () => {
   });
 
   it('returns expected results', () => {
-    jest.spyOn(hooks, 'useLastXChecks').mockReturnValue({ hits: getMockHits(), loading: false });
+    jest
+      .spyOn(hooks, 'useLastXHoursChecks')
+      .mockReturnValue({ hits: getMockHits(), loading: false });
 
     const { result } = renderHook(
-      () => useLast50DurationChart({ monitorId: 'mock-id', locationId: 'loc' }),
+      () => useLast12HoursDurationChart({ monitorId: 'mock-id', locationId: 'loc' }),
       { wrapper: WrappedHelper }
     );
     expect(result.current).toEqual({
@@ -85,10 +87,10 @@ describe('useLast50DurationChart', () => {
     hitsWithAnUndefinedDuration[1] = { 'monitor.duration.us': undefined };
 
     jest
-      .spyOn(hooks, 'useLastXChecks')
+      .spyOn(hooks, 'useLastXHoursChecks')
       .mockReturnValue({ hits: hitsWithAnUndefinedDuration, loading: false });
     const { result } = renderHook(
-      () => useLast50DurationChart({ monitorId: 'mock-id', locationId: 'loc' }),
+      () => useLast12HoursDurationChart({ monitorId: 'mock-id', locationId: 'loc' }),
       { wrapper: WrappedHelper }
     );
 
@@ -145,9 +147,9 @@ describe('useLast50DurationChart', () => {
     const locationId = 'loc';
 
     const spy = jest
-      .spyOn(hooks, 'useLastXChecks')
+      .spyOn(hooks, 'useLastXHoursChecks')
       .mockReturnValue({ hits: hitsWithAnUndefinedDuration, loading: false });
-    renderHook(() => useLast50DurationChart({ monitorId, locationId }), {
+    renderHook(() => useLast12HoursDurationChart({ monitorId, locationId }), {
       wrapper: WrappedHelper,
     });
 
@@ -156,19 +158,19 @@ describe('useLast50DurationChart', () => {
       monitorId,
       locationId,
       fields: ['monitor.duration.us'],
-      size: 50,
+      hours: 12,
     });
   });
 
   it('returns loading properly', () => {
     const loading = true;
 
-    jest.spyOn(hooks, 'useLastXChecks').mockReturnValue({ hits: getMockHits(), loading });
+    jest.spyOn(hooks, 'useLastXHoursChecks').mockReturnValue({ hits: getMockHits(), loading });
     const { result } = renderHook(
-      () => useLast50DurationChart({ monitorId: 'mock-id', locationId: 'loc' }),
+      () => useLast12HoursDurationChart({ monitorId: 'mock-id', locationId: 'loc' }),
       { wrapper: WrappedHelper }
     );
-    renderHook(() => useLast50DurationChart({ monitorId: 'test-id', locationId: 'loc' }), {
+    renderHook(() => useLast12HoursDurationChart({ monitorId: 'test-id', locationId: 'loc' }), {
       wrapper: WrappedHelper,
     });
     expect(result.current.loading).toEqual(loading);
