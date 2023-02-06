@@ -26,8 +26,8 @@ export const setupOptionsListClusterSettingsRoute = ({ http }: CoreSetup) => {
 
         // priority: transient -> persistent -> default
         const allowExpensiveQueries: string =
-          settings.transient.search?.allow_expensive_queries ??
-          settings.persistent.search?.allow_expensive_queries ??
+          settings.transient?.search?.allow_expensive_queries ??
+          settings.persistent?.search?.allow_expensive_queries ??
           settings.defaults?.search?.allow_expensive_queries ??
           // by default, the allowExpensiveQueries cluster setting is undefined; so, we need to treat this the same
           // as `true` since that's the way other applications (such as the dashboard listing page) handle this.

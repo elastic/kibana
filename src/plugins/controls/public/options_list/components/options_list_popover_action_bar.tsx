@@ -83,7 +83,7 @@ export const OptionsListPopoverActionBar = ({
         >
           {allowExpensiveQueries && (
             <EuiFlexItem grow={false}>
-              <EuiText size="xs" color="subdued">
+              <EuiText size="xs" color="subdued" data-test-subj="optionsList-cardinality-label">
                 {OptionsListStrings.popover.getCardinalityLabel(totalCardinality)}
               </EuiText>
             </EuiFlexItem>
