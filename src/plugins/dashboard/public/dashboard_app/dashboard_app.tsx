@@ -71,7 +71,6 @@ export function DashboardApp({
     notifications: { toasts },
     settings: { uiSettings },
     data: { search },
-    customBranding,
   } = pluginServices.getServices();
 
   const incomingEmbeddable = getStateTransfer().getIncomingEmbeddablePackage(
@@ -202,7 +201,6 @@ export function DashboardApp({
             savedObjectId={savedDashboardId}
             getCreationOptions={getCreationOptions}
             onDashboardContainerLoaded={(container) => setDashboardContainer(container)}
-            hasCustomBranding$={customBranding.hasCustomBranding$}
           />
         </>
       )}

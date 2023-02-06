@@ -12,7 +12,6 @@ import { v4 as uuidv4 } from 'uuid';
 import classNames from 'classnames';
 import { EuiLoadingElastic, EuiLoadingSpinner } from '@elastic/eui';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { Observable } from 'rxjs';
 
 import useObservable from 'react-use/lib/useObservable';
 import { useReduxEmbeddableContext } from '@kbn/presentation-util-plugin/public';
@@ -33,25 +32,24 @@ export interface DashboardContainerRendererProps {
   savedObjectId?: string;
   getCreationOptions?: () => DashboardCreationOptions;
   onDashboardContainerLoaded?: (dashboardContainer: DashboardContainer) => void;
-  hasCustomBranding$: Observable<boolean>;
 }
 
 export const DashboardContainerRenderer = ({
   savedObjectId,
   getCreationOptions,
   onDashboardContainerLoaded,
-  hasCustomBranding$,
 }: DashboardContainerRendererProps) => {
   const {
     embeddable,
     screenshotMode: { isScreenshotMode },
+    customBranding,
   } = pluginServices.getServices();
 
   const dashboardRoot = useRef(null);
   const [dashboardIdToBuild, setDashboardIdToBuild] = useState<string | undefined>(savedObjectId);
   const [dashboardContainer, setDashboardContainer] = useState<DashboardContainer>();
   const [loading, setLoading] = useState(true);
-  const showPlainSpinner = useObservable(hasCustomBranding$, false);
+  const showPlainSpinner = useObservable(customBranding.hasCustomBranding$, false);
 
   useEffect(() => {
     // check if dashboard container is expecting id change... if not, update dashboardIdToBuild to force it to rebuild the container.
