@@ -19,7 +19,7 @@ import { format } from './formatter';
 
 import { MONITORS_ROUTE } from '../../../../../../common/constants';
 
-export const ActionBar = () => {
+export const ActionBar = ({ readOnly = false }: { readOnly: boolean }) => {
   const { monitorId } = useParams<{ monitorId: string }>();
   const history = useHistory();
   const {
@@ -37,7 +37,7 @@ export const ActionBar = () => {
 
   const formSubmitter = (formData: Record<string, any>) => {
     if (!Object.keys(errors).length) {
-      setMonitorData(format(formData));
+      setMonitorData(format(formData, readOnly));
     }
   };
 

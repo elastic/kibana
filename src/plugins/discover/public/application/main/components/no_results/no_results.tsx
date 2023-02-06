@@ -8,60 +8,41 @@
 
 import React, { Fragment } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import {
-  EuiButton,
-  EuiCallOut,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiSpacer,
-  EuiTitle,
-} from '@elastic/eui';
-import { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import { EuiButton, EuiCallOut, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import type { DataView } from '@kbn/data-views-plugin/common';
+import type { AggregateQuery, Filter, Query } from '@kbn/es-query';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { NoResultsSuggestions } from './no_results_suggestions';
 import './_no_results.scss';
-import { NoResultsIllustration } from './assets/no_results_illustration';
 
 export interface DiscoverNoResultsProps {
   isTimeBased?: boolean;
+  query: Query | AggregateQuery | undefined;
+  filters: Filter[] | undefined;
   error?: Error;
-  data?: DataPublicPluginStart;
-  hasQuery?: boolean;
-  hasFilters?: boolean;
+  data: DataPublicPluginStart;
+  dataView: DataView;
   onDisableFilters: () => void;
 }
 
 export function DiscoverNoResults({
   isTimeBased,
+  query,
+  filters,
   error,
   data,
-  hasFilters,
-  hasQuery,
+  dataView,
   onDisableFilters,
 }: DiscoverNoResultsProps) {
   const callOut = !error ? (
-    <EuiFlexItem grow={false} className="dscNoResults">
-      <EuiTitle className="dscNoResults__title">
-        <h2 data-test-subj="discoverNoResults">
-          <FormattedMessage
-            id="discover.noResults.searchExamples.noResultsMatchSearchCriteriaTitle"
-            defaultMessage="No results match your search criteria"
-          />
-        </h2>
-      </EuiTitle>
-      <EuiSpacer size="m" />
-      <EuiFlexGroup gutterSize="xl" alignItems="center" direction="rowReverse" wrap>
-        <EuiFlexItem className="dscNoResults__illustration" grow={1}>
-          <NoResultsIllustration />
-        </EuiFlexItem>
-        <EuiFlexItem grow={2}>
-          <NoResultsSuggestions
-            isTimeBased={isTimeBased}
-            hasFilters={hasFilters}
-            hasQuery={hasQuery}
-            onDisableFilters={onDisableFilters}
-          />
-        </EuiFlexItem>
-      </EuiFlexGroup>
+    <EuiFlexItem grow={false}>
+      <NoResultsSuggestions
+        isTimeBased={isTimeBased}
+        query={query}
+        filters={filters}
+        dataView={dataView}
+        onDisableFilters={onDisableFilters}
+      />
     </EuiFlexItem>
   ) : (
     <EuiFlexItem grow={true} className="dscNoResults">
