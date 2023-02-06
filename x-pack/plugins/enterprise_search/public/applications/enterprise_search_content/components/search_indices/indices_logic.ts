@@ -192,7 +192,7 @@ export const IndicesLogic = kea<MakeLogicType<IndicesValues, IndicesActions>>({
       (index: FetchIndexApiResponse | null) => (index ? index.has_in_progress_syncs : false),
     ],
     deleteModalIngestionMethod: [
-      () => [selectors.deleteModalIndex],
+      () => [selectors.indexDetails],
       (index: FetchIndexApiResponse | null) =>
         index ? getIngestionMethod(index) : IngestionMethod.API,
     ],
