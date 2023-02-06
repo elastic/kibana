@@ -28,8 +28,8 @@ export const getAllMonitors = async ({
   search,
   fields,
   filter,
-  sortField,
-  sortOrder,
+  sortField = 'name.keyword',
+  sortOrder = 'asc',
   searchFields,
 }: {
   soClient: SavedObjectsClientContract;

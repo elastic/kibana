@@ -6,7 +6,23 @@
  */
 
 import * as t from 'io-ts';
-import { PingType } from '..';
+import { ErrorStateCodec } from '../ping/error_state';
+import { AgentType, MonitorType, ObserverType, PingErrorType, UrlType } from '..';
+
+export const OverviewPingCode = t.interface({
+  '@timestamp': t.string,
+  summary: t.partial({
+    down: t.number,
+    up: t.number,
+  }),
+  monitor: MonitorType,
+  observer: ObserverType,
+  config_id: t.string,
+  error: PingErrorType,
+  agent: AgentType,
+  url: UrlType,
+  state: ErrorStateCodec,
+});
 
 export const OverviewStatusMetaDataCodec = t.interface({
   monitorQueryId: t.string,
@@ -14,7 +30,7 @@ export const OverviewStatusMetaDataCodec = t.interface({
   location: t.string,
   timestamp: t.string,
   status: t.string,
-  ping: PingType,
+  ping: OverviewPingCode,
 });
 
 export const OverviewStatusCodec = t.interface({
@@ -38,6 +54,7 @@ export const OverviewStatusStateCodec = t.intersection([
   }),
 ]);
 
+export type OverviewPing = t.TypeOf<typeof OverviewPingCode>;
 export type OverviewStatus = t.TypeOf<typeof OverviewStatusCodec>;
 export type OverviewStatusState = t.TypeOf<typeof OverviewStatusStateCodec>;
 export type OverviewStatusMetaData = t.TypeOf<typeof OverviewStatusMetaDataCodec>;

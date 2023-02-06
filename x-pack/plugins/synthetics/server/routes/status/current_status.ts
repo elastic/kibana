@@ -4,10 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { intersection } from 'lodash';
 import datemath, { Unit } from '@kbn/datemath';
 import { SavedObjectsClientContract } from '@kbn/core/server';
+import moment from 'moment';
+import { ConfigKey } from '../../../common/runtime_types';
 import {
   getAllMonitors,
   processMonitors,
@@ -19,7 +20,6 @@ import { UMServerLibs } from '../../legacy_uptime/uptime_server';
 import { SyntheticsRestApiRouteFactory } from '../../legacy_uptime/routes';
 import { UptimeEsClient } from '../../legacy_uptime/lib/lib';
 import { SyntheticsMonitorClient } from '../../synthetics_service/synthetics_monitor/synthetics_monitor_client';
-import { ConfigKey } from '../../../common/runtime_types';
 import { getMonitorFilters, OverviewStatusSchema, OverviewStatusQuery } from '../common';
 
 /**
@@ -93,7 +93,10 @@ export async function getStatus(
   const { up, down, pending, upConfigs, downConfigs } = await queryMonitorStatus(
     uptimeEsClient,
     listOfLocationAfterFilter,
-    { from: maxPeriod, to: 'now' },
+    {
+      from: moment().subtract(maxPeriod, 'milliseconds').subtract(20, 'minutes').toISOString(),
+      to: 'now',
+    },
     enabledIds,
     monitorLocationMap
   );
