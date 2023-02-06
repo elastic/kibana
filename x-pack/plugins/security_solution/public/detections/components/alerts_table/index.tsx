@@ -17,7 +17,11 @@ import { getEsQueryConfig } from '@kbn/data-plugin/common';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { InspectButton } from '../../../common/components/inspect';
 import { defaultUnit } from '../../../common/components/toolbar/unit';
-import type { GroupingTableAggregation, RawBucket } from '../../../common/components/grouping';
+import type {
+  GroupingFieldTotalAggregation,
+  GroupingTableAggregation,
+  RawBucket,
+} from '../../../common/components/grouping';
 import { GroupingContainer, GroupsSelector } from '../../../common/components/grouping';
 import { useGlobalTime } from '../../../common/containers/use_global_time';
 import { combineQueries } from '../../../common/lib/kuery';
@@ -111,7 +115,7 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
   signalIndexName,
 }) => {
   const dispatch = useDispatch();
-  const [selectedGroup, setSelectedGroup] = useState<string | undefined>(
+  const [selectedGroup, setSelectedGroup] = useState<string>(
     storage.get(`${ALERTS_TABLE_GROUPS_SELECTION_KEY}-${tableId}`)
   );
 
@@ -305,19 +309,15 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
     request,
     response,
     setQuery: setAlertsQuery,
-  } = useQueryAlerts<
-    {},
-    GroupingTableAggregation &
-      Record<string, { value?: number | null; buckets?: Array<{ doc_count?: number | null }> }>
-  >({
+  } = useQueryAlerts<{}, GroupingTableAggregation & GroupingFieldTotalAggregation>({
     query: queryGroups,
     indexName: signalIndexName,
     queryName: ALERTS_QUERY_NAMES.ALERTS_GROUPING,
-    skip: !selectedGroup || selectedGroup === 'none',
+    skip: selectedGroup === 'none',
   });
 
   useEffect(() => {
-    if (selectedGroup) {
+    if (selectedGroup !== 'none') {
       setAlertsQuery(queryGroups);
     }
   }, [queryGroups, selectedGroup, setAlertsQuery]);
@@ -333,7 +333,9 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
   });
 
   const inspect = useMemo(
-    () => <InspectButton queryId={uniqueQueryId} inspectIndex={0} title={''} />,
+    () => (
+      <InspectButton queryId={uniqueQueryId} inspectIndex={0} title={i18n.INSPECT_GROUPING_TITLE} />
+    ),
     [uniqueQueryId]
   );
 
@@ -359,15 +361,11 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
       <GroupsSelector
         groupSelected={selectedGroup}
         data-test-subj="alerts-table-group-selector"
-        onGroupChange={(groupSelection?: string) => {
+        onGroupChange={(groupSelection: string) => {
           storage.set(`${ALERTS_TABLE_GROUPS_SELECTION_KEY}-${tableId}`, groupSelection);
           setGroupsActivePage(0);
           setSelectedGroup(groupSelection);
-          if (
-            groupSelection &&
-            groupSelection !== 'none' &&
-            !options.find((o) => o.key === groupSelection)
-          ) {
+          if (groupSelection !== 'none' && !options.find((o) => o.key === groupSelection)) {
             setOptions([
               ...defaultGroupingOptions,
               {
@@ -381,9 +379,9 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
         }}
         onClearSelected={() => {
           setGroupsActivePage(0);
-          setSelectedGroup(undefined);
+          setSelectedGroup('none');
           setOptions(defaultGroupingOptions);
-          storage.set(`${ALERTS_TABLE_GROUPS_SELECTION_KEY}-${tableId}`, undefined);
+          storage.set(`${ALERTS_TABLE_GROUPS_SELECTION_KEY}-${tableId}`, 'none');
         }}
         fields={indexPatterns.fields}
         options={options}
@@ -398,6 +396,14 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
     currentStatus: filterGroup as AlertWorkflowStatus,
     showAlertStatusActions: hasIndexWrite && hasIndexMaintenance,
   });
+
+  const getTakeActionItems = useCallback(
+    (groupFilters: Filter[]) =>
+      takeActionItems(
+        getGlobalQuery([...(defaultFiltersMemo ?? []), ...groupFilters])?.filterQuery
+      ),
+    [defaultFiltersMemo, getGlobalQuery, takeActionItems]
+  );
 
   if (loading || isLoadingGroups || isEmpty(selectedPatterns)) {
     return null;
@@ -420,13 +426,13 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
       rowRenderers={defaultRowRenderers}
       sourcererScope={SourcererScopeName.detections}
       start={from}
-      additionalRightMenuOptions={!selectedGroup ? [groupsSelector] : []}
+      additionalRightMenuOptions={selectedGroup === 'none' ? [groupsSelector] : []}
     />
   );
 
   return (
     <>
-      {!selectedGroup ? (
+      {selectedGroup === 'none' ? (
         dataTable
       ) : (
         <>
@@ -434,11 +440,7 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
             selectedGroup={selectedGroup}
             groupsSelector={groupsSelector}
             inspectButton={inspect}
-            takeActionItems={(groupFilters: Filter[]) =>
-              takeActionItems(
-                getGlobalQuery([...(defaultFiltersMemo ?? []), ...groupFilters])?.filterQuery
-              )
-            }
+            takeActionItems={getTakeActionItems}
             data={alertsGroupsData?.aggregations ?? {}}
             renderChildComponent={(groupFilter) => (
               <StatefulEventsViewer
@@ -457,7 +459,7 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
                 rowRenderers={defaultRowRenderers}
                 sourcererScope={SourcererScopeName.detections}
                 start={from}
-                additionalRightMenuOptions={!selectedGroup ? [groupsSelector] : []}
+                additionalRightMenuOptions={selectedGroup === 'none' ? [groupsSelector] : []}
               />
             )}
             unit={defaultUnit}

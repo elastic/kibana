@@ -35,20 +35,20 @@ export const StatsContainer = styled.span`
 
 export const GroupingStyledContainer = styled.div`
   .euiAccordion__childWrapper {
-    border-bottom: 1px solid #d3dae6;
+    border-bottom: ${({ theme }) => theme.eui.euiBorderThin};
     border-radius: 5px;
   }
   .euiAccordion__triggerWrapper {
-    border-bottom: 1px solid #d3dae6;
+    border-bottom: ${({ theme }) => theme.eui.euiBorderThin};
     border-radius: 5px;
     min-height: 78px;
     padding-left: 10px;
     padding-right: 10px;
   }
   .groupingAccordionForm {
-    border-top: 1px solid #d3dae6;
-    border-left: 1px solid #d3dae6;
-    border-right: 1px solid #d3dae6;
+    border-top: ${({ theme }) => theme.eui.euiBorderThin};
+    border-left: ${({ theme }) => theme.eui.euiBorderThin};
+    border-right: ${({ theme }) => theme.eui.euiBorderThin};
     border-bottom: none;
     border-radius: 5px;
   }
@@ -64,8 +64,7 @@ export const StyledContextMenu = euiStyled(EuiContextMenu)`
     text-overflow: ellipsis;
   }
   .euiContextMenuItem {
-    border-bottom: 1px solid;
-    border-color: #D4DAE5;
+    border-bottom: ${({ theme }) => theme.eui.euiBorderThin};
   }
   .euiContextMenuItem:last-child {
     border: none;

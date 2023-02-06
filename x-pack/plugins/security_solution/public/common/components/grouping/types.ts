@@ -50,6 +50,11 @@ export interface GroupingTableAggregation {
   };
 }
 
+export type GroupingFieldTotalAggregation = Record<
+  string,
+  { value?: number | null; buckets?: Array<{ doc_count?: number | null }> }
+>;
+
 export type FlattenedBucket = Pick<
   RawBucket,
   'doc_count' | 'key' | 'key_as_string' | 'alertsCount'

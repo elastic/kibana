@@ -72,7 +72,7 @@ describe('grouping accordion panel', () => {
         {...testProps}
         groupBucket={{
           ...testProps.groupBucket,
-          // @ts-ignore
+          // @ts-expect-error
           key: null,
         }}
       />

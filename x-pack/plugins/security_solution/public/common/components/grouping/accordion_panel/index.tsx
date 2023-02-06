@@ -7,8 +7,8 @@
 
 import { EuiAccordion, EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
 import type { Filter } from '@kbn/es-query';
-import { isArray } from 'lodash/fp';
 import React, { useCallback, useMemo } from 'react';
+import { firstNonNullValue } from '../../../../../common/endpoint/models/ecs_safety_helpers';
 import type { RawBucket } from '../types';
 import { createGroupFilter } from './helpers';
 
@@ -61,10 +61,7 @@ const GroupPanelComponent = ({
   renderChildComponent,
   selectedGroup,
 }: GroupPanelProps) => {
-  const groupFieldValue = useMemo(
-    () => (groupBucket.key && isArray(groupBucket.key) ? groupBucket.key[0] : groupBucket.key),
-    [groupBucket.key]
-  );
+  const groupFieldValue = useMemo(() => firstNonNullValue(groupBucket.key), [groupBucket.key]);
 
   const groupFilters = useMemo(
     () => createGroupFilter(selectedGroup, groupFieldValue),

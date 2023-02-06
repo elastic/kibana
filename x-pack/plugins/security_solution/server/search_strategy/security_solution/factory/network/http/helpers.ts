@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import { get, getOr, isArray } from 'lodash/fp';
+import { get, getOr } from 'lodash/fp';
 
 import type { IEsSearchResponse } from '@kbn/data-plugin/common';
+import { firstNonNullValue } from '../../../../../../common/endpoint/models/ecs_safety_helpers';
 import type {
   NetworkHttpBuckets,
   NetworkHttpEdges,
@@ -18,13 +19,15 @@ export const getHttpEdges = (response: IEsSearchResponse<unknown>): NetworkHttpE
 
 const formatHttpEdges = (buckets: NetworkHttpBuckets[]): NetworkHttpEdges[] =>
   buckets.map((bucket: NetworkHttpBuckets) => {
-    const bucketKey = isArray(bucket.key) ? bucket.key[0] : bucket.key;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const getKey = ({ key }: any) => firstNonNullValue(key);
+    const bucketKey = firstNonNullValue(bucket.key);
     return {
       node: {
         _id: bucketKey,
-        domains: bucket.domains.buckets.map(({ key }) => (isArray(key) ? key[0] : key)),
-        methods: bucket.methods.buckets.map(({ key }) => (isArray(key) ? key[0] : key)),
-        statuses: bucket.status.buckets.map(({ key }) => `${isArray(key) ? key[0] : key}`),
+        domains: bucket.domains.buckets.map(getKey),
+        methods: bucket.methods.buckets.map(getKey),
+        statuses: bucket.status.buckets.map(getKey),
         lastHost: get('source.hits.hits[0].fields["host.name"]', bucket),
         lastSourceIp: get('source.hits.hits[0].fields["source.ip"]', bucket),
         path: bucketKey,

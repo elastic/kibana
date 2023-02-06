@@ -27,7 +27,7 @@ interface AlertsGroupingQueryParams {
   additionalFilters: Array<{
     bool: BoolQuery;
   }>;
-  selectedGroup?: string;
+  selectedGroup: string;
   runtimeMappings: MappingRuntimeFields;
   pageSize: number;
   pageIndex: number;
@@ -53,7 +53,7 @@ export const getAlertsGroupingQuery = ({
           },
         },
       },
-      ...(selectedGroup
+      ...(selectedGroup !== 'none'
         ? [
             {
               groupsNumber: {
@@ -67,11 +67,10 @@ export const getAlertsGroupingQuery = ({
     ],
     from,
     runtimeMappings,
-    stackByMultipleFields0: selectedGroup ? getGroupFields(selectedGroup) : [],
+    stackByMultipleFields0: selectedGroup !== 'none' ? getGroupFields(selectedGroup) : [],
     to,
-    additionalStatsAggregationsFields0: selectedGroup
-      ? getAggregationsByGroupField(selectedGroup)
-      : [],
+    additionalStatsAggregationsFields0:
+      selectedGroup !== 'none' ? getAggregationsByGroupField(selectedGroup) : [],
     stackByMultipleFields0Size: pageSize,
     stackByMultipleFields0From: pageIndex * pageSize,
     additionalStatsAggregationsFields1: [],

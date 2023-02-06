@@ -137,7 +137,7 @@ describe('StatefulEventsViewer', () => {
     expect(getByTestId('right-option')).toBeInTheDocument();
   });
 
-  test('does not render the RightTopMenu additional menu options when given additionalRightMenuOptions props', () => {
+  test('does not render the RightTopMenu additional menu options when additionalRightMenuOptions props are not given', () => {
     const { queryByTestId } = render(
       <TestProviders>
         <StatefulEventsViewer {...testProps} />

@@ -7,7 +7,7 @@
 
 import { v4 as uuidv4 } from 'uuid';
 
-import { isArray } from 'lodash/fp';
+import { firstNonNullValue } from '../../../../../../common/endpoint/models/ecs_safety_helpers';
 import type { LegendItem } from '../../../charts/draggable_legend_item';
 import { getFillColor } from '../chart_palette';
 import { escapeDataProviderId } from '../../../drag_and_drop/helpers';
@@ -29,7 +29,7 @@ export const getLegendItemFromRawBucket = ({
 }): LegendItem => ({
   color: showColor
     ? getFillColor({
-        riskScore: maxRiskSubAggregations[isArray(bucket.key) ? bucket.key[0] : bucket.key] ?? 0,
+        riskScore: maxRiskSubAggregations[firstNonNullValue(bucket.key) ?? ''] ?? 0,
         colorPalette,
       })
     : undefined,
@@ -39,11 +39,11 @@ export const getLegendItemFromRawBucket = ({
   ),
   render: () =>
     getLabel({
-      baseLabel: bucket.key_as_string ?? (isArray(bucket.key) ? bucket.key[0] : bucket.key), // prefer key_as_string when available, because it contains a formatted date
+      baseLabel: bucket.key_as_string ?? firstNonNullValue(bucket.key) ?? '', // prefer key_as_string when available, because it contains a formatted date
       riskScore: bucket.maxRiskSubAggregation?.value,
     }),
   field: stackByField0,
-  value: bucket.key_as_string ?? (isArray(bucket.key) ? bucket.key[0] : bucket.key),
+  value: bucket.key_as_string ?? firstNonNullValue(bucket.key) ?? 0,
 });
 
 export const getLegendItemFromFlattenedBucket = ({
@@ -60,7 +60,7 @@ export const getLegendItemFromFlattenedBucket = ({
   stackByField1: string | undefined;
 }): LegendItem => ({
   color: getFillColor({
-    riskScore: maxRiskSubAggregations[isArray(key) ? key[0] : key] ?? 0,
+    riskScore: maxRiskSubAggregations[firstNonNullValue(key) ?? ''] ?? 0,
     colorPalette,
   }),
   count: stackByField1DocCount,
@@ -107,7 +107,7 @@ export const getLegendMap = ({
   buckets.reduce<Record<string, LegendItem[]>>(
     (acc, bucket) => ({
       ...acc,
-      [isArray(bucket.key) ? bucket.key[0] : bucket.key]: [
+      [firstNonNullValue(bucket.key) ?? '']: [
         getLegendItemFromRawBucket({
           bucket,
           colorPalette,

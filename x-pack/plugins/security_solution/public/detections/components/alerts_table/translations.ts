@@ -411,3 +411,10 @@ export const destinationAddress = i18n.translate(
     defaultMessage: 'Destination address',
   }
 );
+
+export const INSPECT_GROUPING_TITLE = i18n.translate(
+  'xpack.securitySolution.detectionsEngine.grouping.inspectTitle',
+  {
+    defaultMessage: 'Grouping query',
+  }
+);

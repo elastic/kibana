@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-export const createGroupFilter = (selectedGroup: string, query: string) =>
+export const createGroupFilter = (selectedGroup: string, query?: string) =>
   query && selectedGroup
     ? [
         {

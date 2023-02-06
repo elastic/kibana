@@ -7,8 +7,8 @@
 
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTablePagination } from '@elastic/eui';
 import type { Filter } from '@kbn/es-query';
-import { isArray } from 'lodash/fp';
 import React, { useMemo, useState } from 'react';
+import { firstNonNullValue } from '../../../../../common/endpoint/models/ecs_safety_helpers';
 import { createGroupFilter } from '../accordion_panel/helpers';
 import { tableDefaults } from '../../../store/data_table/defaults';
 import { defaultUnit } from '../../toolbar/unit';
@@ -27,12 +27,10 @@ interface GroupingContainerProps {
     Record<
       string,
       {
-        value?: number | null | undefined;
-        buckets?:
-          | Array<{
-              doc_count?: number | null | undefined;
-            }>
-          | undefined;
+        value?: number | null;
+        buckets?: Array<{
+          doc_count?: number | null;
+        }>;
       }
     >;
   groupPanelRenderer?: (fieldBucket: RawBucket) => JSX.Element | undefined;
@@ -84,10 +82,8 @@ const GroupingContainerComponent = ({
   const groupPanels = useMemo(
     () =>
       data.stackByMultipleFields0?.buckets?.map((groupBucket) => {
-        const group = isArray(groupBucket.key) ? groupBucket.key[0] : groupBucket.key;
-        const groupKey = `group0-${
-          isArray(groupBucket.key) ? groupBucket.key[0] : groupBucket.key
-        }`;
+        const group = firstNonNullValue(groupBucket.key);
+        const groupKey = `group0-${group}`;
 
         return (
           <span key={groupKey}>

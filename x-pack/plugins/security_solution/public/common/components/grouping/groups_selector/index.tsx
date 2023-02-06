@@ -23,9 +23,9 @@ const none = i18n.translate('xpack.securitySolution.groupsSelector.noneGroupByOp
 
 interface GroupSelectorProps {
   fields: FieldSpec[];
-  groupSelected?: string;
+  groupSelected: string;
   onClearSelected: () => void;
-  onGroupChange: (groupSelection?: string) => void;
+  onGroupChange: (groupSelection: string) => void;
   options: Array<{ key: string; label: string }>;
   title?: string;
 }
@@ -47,7 +47,7 @@ const GroupsSelectorComponent = ({
           {
             'data-test-subj': 'panel-none',
             name: none,
-            icon: groupSelected === 'none' || !groupSelected ? 'check' : 'empty',
+            icon: groupSelected === 'none' ? 'check' : 'empty',
             onClick: onClearSelected,
           },
           ...options.map(
@@ -105,11 +105,13 @@ const GroupsSelectorComponent = ({
         iconSize="s"
         iconType="arrowDown"
         onClick={onButtonClick}
-        title={groupSelected && selectedOption.length > 0 ? selectedOption[0].label : none}
+        title={
+          groupSelected !== 'none' && selectedOption.length > 0 ? selectedOption[0].label : none
+        }
         size="xs"
       >
         {`${title ?? GROUP_BY}: ${
-          groupSelected && selectedOption.length > 0 ? selectedOption[0].label : none
+          groupSelected !== 'none' && selectedOption.length > 0 ? selectedOption[0].label : none
         }`}
       </StyledEuiButtonEmpty>
     ),

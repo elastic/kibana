@@ -18,6 +18,7 @@ import {
 import { euiThemeVars } from '@kbn/ui-theme';
 import { isArray } from 'lodash/fp';
 import React from 'react';
+import { firstNonNullValue } from '../../../../../common/endpoint/models/ecs_safety_helpers';
 import type { GenericBuckets } from '../../../../../common/search_strategy';
 import type { RawBucket } from '../../../../common/components/grouping';
 import { PopoverItems } from '../../../../common/components/popover_items';
@@ -112,7 +113,7 @@ const HostNameGroupContent = React.memo<{ hostName: string | string[] }>(({ host
 HostNameGroupContent.displayName = 'HostNameGroupContent';
 
 const UserNameGroupContent = React.memo<{ userName: string | string[] }>(({ userName }) => {
-  const userNameValue = isArray(userName) ? userName[0] : userName;
+  const userNameValue = firstNonNullValue(userName) ?? '-';
   return (
     <div>
       <EuiFlexGroup
