@@ -93,6 +93,7 @@ export const addConnector = async (
   const document: ConnectorDocument = {
     api_key_id: null,
     configuration: {},
+    custom_scheduling: {},
     description: null,
     error: null,
     features: null,
@@ -163,6 +164,7 @@ export const addConnector = async (
           run_ml_inference: connectorsPipelineMeta.default_run_ml_inference,
         }
       : null,
+    preferences: {},
     scheduling: { enabled: false, interval: '0 0 0 * * ?' },
     service_type: input.service_type || null,
     status: ConnectorStatus.CREATED,
