@@ -18,7 +18,7 @@ export default function createAlertsAsDataTest({ getService }: FtrProviderContex
   describe('alerts as data', () => {
     it('should install common alerts as data resources on startup', async () => {
       const ilmPolicyName = 'alerts-default-ilm-policy';
-      const componentTemplateName = 'alerts-common-component-template';
+      const componentTemplateName = '.alerts-framework-mappings';
 
       const commonIlmPolicy = await es.ilm.getLifecycle({
         name: ilmPolicyName,
@@ -65,7 +65,7 @@ export default function createAlertsAsDataTest({ getService }: FtrProviderContex
     });
 
     it('should install context specific alerts as data resources on startup', async () => {
-      const componentTemplateName = 'alerts-test.always-firing-component-template';
+      const componentTemplateName = 'alerts-test.always-firing-mappings';
       const indexTemplateName = '.alerts-test.always-firing-default-template';
       const indexName = '.alerts-test.always-firing-default-000001';
       const contextSpecificMappings = {
@@ -114,8 +114,8 @@ export default function createAlertsAsDataTest({ getService }: FtrProviderContex
         '.alerts-test.always-firing-default-*',
       ]);
       expect(contextIndexTemplate.index_template.composed_of).to.eql([
-        'alerts-common-component-template',
-        'alerts-test.always-firing-component-template',
+        '.alerts-framework-mappings',
+        'alerts-test.always-firing-mappings',
       ]);
       expect(contextIndexTemplate.index_template.template!.mappings).to.eql({
         dynamic: false,

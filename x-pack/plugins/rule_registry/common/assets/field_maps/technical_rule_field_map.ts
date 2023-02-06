@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { alertFieldMap } from '@kbn/alerting-plugin/common';
 import { pickWithPatterns } from '../../pick_with_patterns';
 import * as Fields from '../../technical_rule_data_field_names';
 import { ecsFieldMap } from './ecs_field_map';
@@ -17,23 +18,33 @@ export const technicalRuleFieldMap = {
     Fields.EVENT_ACTION,
     Fields.TAGS
   ),
+  [Fields.ALERT_ACTION_GROUP]: alertFieldMap[Fields.ALERT_ACTION_GROUP],
+  [Fields.ALERT_CASE_IDS]: alertFieldMap[Fields.ALERT_CASE_IDS],
+  [Fields.ALERT_DURATION]: alertFieldMap[Fields.ALERT_DURATION],
+  [Fields.ALERT_END]: alertFieldMap[Fields.ALERT_END],
+  [Fields.ALERT_FLAPPING]: alertFieldMap[Fields.ALERT_FLAPPING],
+  [Fields.ALERT_INSTANCE_ID]: alertFieldMap[Fields.ALERT_INSTANCE_ID],
+  [Fields.ALERT_REASON]: alertFieldMap[Fields.ALERT_REASON],
+  [Fields.ALERT_RULE_CATEGORY]: alertFieldMap[Fields.ALERT_RULE_CATEGORY],
+  [Fields.ALERT_RULE_CONSUMER]: alertFieldMap[Fields.ALERT_RULE_CONSUMER],
+  [Fields.ALERT_RULE_EXECUTION_UUID]: alertFieldMap[Fields.ALERT_RULE_EXECUTION_UUID],
+  [Fields.ALERT_RULE_NAME]: alertFieldMap[Fields.ALERT_RULE_NAME],
+  // want to change to 'object', is that ok?
   [Fields.ALERT_RULE_PARAMETERS]: { type: 'flattened', ignore_above: 4096 },
-  [Fields.ALERT_RULE_TYPE_ID]: { type: 'keyword', required: true },
-  [Fields.ALERT_RULE_CONSUMER]: { type: 'keyword', required: true },
-  [Fields.ALERT_RULE_PRODUCER]: { type: 'keyword', required: true },
-  [Fields.SPACE_IDS]: { type: 'keyword', array: true, required: true },
-  [Fields.ALERT_UUID]: { type: 'keyword', required: true },
-  [Fields.ALERT_INSTANCE_ID]: { type: 'keyword', required: true },
-  [Fields.ALERT_START]: { type: 'date' },
-  [Fields.ALERT_TIME_RANGE]: {
-    type: 'date_range',
-    format: 'epoch_millis||strict_date_optional_time',
-  },
-  [Fields.ALERT_END]: { type: 'date' },
-  [Fields.ALERT_DURATION]: { type: 'long' },
+  // ---------------------------------------
+  [Fields.ALERT_RULE_PRODUCER]: alertFieldMap[Fields.ALERT_RULE_PRODUCER],
+  [Fields.ALERT_RULE_TAGS]: alertFieldMap[Fields.ALERT_RULE_TAGS],
+  [Fields.ALERT_RULE_TYPE_ID]: alertFieldMap[Fields.ALERT_RULE_TYPE_ID],
+  [Fields.ALERT_RULE_UUID]: alertFieldMap[Fields.ALERT_RULE_UUID],
+  [Fields.ALERT_START]: alertFieldMap[Fields.ALERT_START],
+  [Fields.ALERT_STATUS]: alertFieldMap[Fields.ALERT_STATUS],
+  [Fields.ALERT_TIME_RANGE]: alertFieldMap[Fields.ALERT_TIME_RANGE],
+  [Fields.ALERT_UUID]: alertFieldMap[Fields.ALERT_UUID],
+  [Fields.ALERT_WORKFLOW_STATUS]: alertFieldMap[Fields.ALERT_WORKFLOW_STATUS],
+  [Fields.SPACE_IDS]: alertFieldMap[Fields.SPACE_IDS],
+  [Fields.VERSION]: alertFieldMap[Fields.VERSION],
+
   [Fields.ALERT_SEVERITY]: { type: 'keyword' },
-  [Fields.ALERT_STATUS]: { type: 'keyword', required: true },
-  [Fields.ALERT_FLAPPING]: { type: 'boolean' },
   [Fields.VERSION]: {
     type: 'version',
     array: false,
@@ -46,11 +57,6 @@ export const technicalRuleFieldMap = {
   },
   [Fields.ALERT_RISK_SCORE]: {
     type: 'float',
-    array: false,
-    required: false,
-  },
-  [Fields.ALERT_WORKFLOW_STATUS]: {
-    type: 'keyword',
     array: false,
     required: false,
   },
@@ -69,35 +75,10 @@ export const technicalRuleFieldMap = {
     array: false,
     required: false,
   },
-  [Fields.ALERT_ACTION_GROUP]: {
-    type: 'keyword',
-    array: false,
-    required: false,
-  },
-  [Fields.ALERT_REASON]: {
-    type: 'keyword',
-    array: false,
-    required: false,
-  },
-  [Fields.ALERT_CASE_IDS]: {
-    type: 'keyword',
-    array: true,
-    required: false,
-  },
   [Fields.ALERT_RULE_AUTHOR]: {
     type: 'keyword',
     array: false,
     required: false,
-  },
-  [Fields.ALERT_RULE_CATEGORY]: {
-    type: 'keyword',
-    array: false,
-    required: true,
-  },
-  [Fields.ALERT_RULE_UUID]: {
-    type: 'keyword',
-    array: false,
-    required: true,
   },
   [Fields.ALERT_RULE_CREATED_AT]: {
     type: 'date',
@@ -119,11 +100,6 @@ export const technicalRuleFieldMap = {
     array: false,
     required: false,
   },
-  [Fields.ALERT_RULE_EXECUTION_UUID]: {
-    type: 'keyword',
-    array: false,
-    required: false,
-  },
   [Fields.ALERT_RULE_FROM]: {
     type: 'keyword',
     array: false,
@@ -138,11 +114,6 @@ export const technicalRuleFieldMap = {
     type: 'keyword',
     array: false,
     required: false,
-  },
-  [Fields.ALERT_RULE_NAME]: {
-    type: 'keyword',
-    array: false,
-    required: true,
   },
   [Fields.ALERT_RULE_NOTE]: {
     type: 'keyword',
@@ -162,11 +133,6 @@ export const technicalRuleFieldMap = {
   [Fields.ALERT_RULE_RULE_NAME_OVERRIDE]: {
     type: 'keyword',
     array: false,
-    required: false,
-  },
-  [Fields.ALERT_RULE_TAGS]: {
-    type: 'keyword',
-    array: true,
     required: false,
   },
   [Fields.ALERT_RULE_TO]: {

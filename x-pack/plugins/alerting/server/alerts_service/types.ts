@@ -10,7 +10,7 @@ import { getComponentTemplateFromFieldMap } from '../../common/alert_schema';
 import { FieldMap } from '../../common/alert_schema/field_maps/types';
 
 export const getComponentTemplateName = (context?: string) =>
-  `alerts-${context ? context : 'common'}-component-template`;
+  `.alerts-${context ? `${context}` : 'framework'}-mappings`;
 
 export interface IIndexPatternString {
   template: string;

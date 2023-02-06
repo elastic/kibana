@@ -79,10 +79,7 @@ const getIndexTemplatePutBody = (context?: string) => ({
   name: `.alerts-${context ? context : 'test'}-default-template`,
   body: {
     index_patterns: [`.alerts-${context ? context : 'test'}-default-*`],
-    composed_of: [
-      'alerts-common-component-template',
-      `alerts-${context ? context : 'test'}-component-template`,
-    ],
+    composed_of: ['.alerts-framework-mappings', `.alerts-${context ? context : 'test'}-mappings`],
     template: {
       settings: {
         auto_expand_replicas: '0-1',
@@ -148,7 +145,7 @@ describe('Alerts Service', () => {
       expect(clusterClient.cluster.putComponentTemplate).toHaveBeenCalledTimes(1);
 
       const componentTemplate1 = clusterClient.cluster.putComponentTemplate.mock.calls[0][0];
-      expect(componentTemplate1.name).toEqual('alerts-common-component-template');
+      expect(componentTemplate1.name).toEqual('.alerts-framework-mappings');
     });
 
     test('should log error and set initialized to false if adding ILM policy throws error', async () => {
@@ -185,7 +182,7 @@ describe('Alerts Service', () => {
 
       expect(alertsService.isInitialized()).toEqual(false);
       expect(logger.error).toHaveBeenCalledWith(
-        `Error installing component template alerts-common-component-template - fail`
+        `Error installing component template .alerts-framework-mappings - fail`
       );
 
       expect(clusterClient.ilm.putLifecycle).toHaveBeenCalled();
@@ -218,11 +215,11 @@ describe('Alerts Service', () => {
       expect(clusterClient.cluster.putComponentTemplate).toHaveBeenCalledTimes(3);
 
       const componentTemplate1 = clusterClient.cluster.putComponentTemplate.mock.calls[0][0];
-      expect(componentTemplate1.name).toEqual('alerts-common-component-template');
+      expect(componentTemplate1.name).toEqual('.alerts-framework-mappings');
       const componentTemplate2 = clusterClient.cluster.putComponentTemplate.mock.calls[1][0];
-      expect(componentTemplate2.name).toEqual('alerts-another-component-template');
+      expect(componentTemplate2.name).toEqual('.alerts-another-mappings');
       const componentTemplate3 = clusterClient.cluster.putComponentTemplate.mock.calls[2][0];
-      expect(componentTemplate3.name).toEqual('alerts-test-component-template');
+      expect(componentTemplate3.name).toEqual('.alerts-test-mappings');
 
       expect(clusterClient.indices.putIndexTemplate).toHaveBeenCalledTimes(2);
       expect(clusterClient.indices.putIndexTemplate).toHaveBeenNthCalledWith(
@@ -293,9 +290,9 @@ describe('Alerts Service', () => {
 
       expect(clusterClient.cluster.putComponentTemplate).toHaveBeenCalledTimes(2);
       const componentTemplate1 = clusterClient.cluster.putComponentTemplate.mock.calls[0][0];
-      expect(componentTemplate1.name).toEqual('alerts-common-component-template');
+      expect(componentTemplate1.name).toEqual('.alerts-framework-mappings');
       const componentTemplate2 = clusterClient.cluster.putComponentTemplate.mock.calls[1][0];
-      expect(componentTemplate2.name).toEqual('alerts-test-component-template');
+      expect(componentTemplate2.name).toEqual('.alerts-test-mappings');
 
       expect(clusterClient.indices.putIndexTemplate).toHaveBeenCalledWith(
         getIndexTemplatePutBody()
@@ -330,13 +327,13 @@ describe('Alerts Service', () => {
 
       expect(clusterClient.cluster.putComponentTemplate).toHaveBeenCalledTimes(1);
       const componentTemplate1 = clusterClient.cluster.putComponentTemplate.mock.calls[0][0];
-      expect(componentTemplate1.name).toEqual('alerts-common-component-template');
+      expect(componentTemplate1.name).toEqual('.alerts-framework-mappings');
 
       expect(clusterClient.indices.putIndexTemplate).toHaveBeenCalledWith({
         name: `.alerts-empty-default-template`,
         body: {
           index_patterns: [`.alerts-empty-default-*`],
-          composed_of: ['alerts-common-component-template'],
+          composed_of: ['.alerts-framework-mappings'],
           template: {
             settings: {
               auto_expand_replicas: '0-1',
