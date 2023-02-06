@@ -6,8 +6,16 @@
  */
 
 import React from 'react';
-import { mountWithIntl } from '@kbn/test-jest-helpers';
+import { mountWithIntl, shallowWithIntl } from '@kbn/test-jest-helpers';
 import { TextFieldWithMessageVariables } from './text_field_with_message_variables';
+
+jest.mock('../../common/lib/kibana');
+
+jest.mock('../lib/validate_params_for_warnings', () => {
+  return {
+    validateParamsForWarnings: jest.fn().mockReturnValue('This is a test warning.'),
+  };
+});
 
 describe('TextFieldWithMessageVariables', () => {
   const editAction = jest.fn();
@@ -24,7 +32,7 @@ describe('TextFieldWithMessageVariables', () => {
     label: 'label',
   };
 
-  beforeEach(() => jest.resetAllMocks());
+  beforeEach(() => jest.clearAllMocks());
 
   test('renders variables with double braces by default', () => {
     const wrapper = mountWithIntl(<TextFieldWithMessageVariables {...props} />);
@@ -55,5 +63,13 @@ describe('TextFieldWithMessageVariables', () => {
 
     expect(editAction).toHaveBeenCalledTimes(1);
     expect(editAction).toHaveBeenCalledWith(props.paramsProperty, '{{{myVar}}}', props.index);
+  });
+
+  test('renders warnings if they are passed in', () => {
+    const wrapper = shallowWithIntl(<TextFieldWithMessageVariables {...props} />);
+    wrapper.find('EuiFieldText').simulate('change', { target: { value: 'dolor sit amet' } });
+
+    const callOut = wrapper.find('EuiCallOut');
+    expect(callOut.prop('title')).toMatchInlineSnapshot(`"This is a test warning."`);
   });
 });

@@ -26,17 +26,9 @@ import {
 } from '../../../common/constants';
 import { transformActionVariables } from '../../lib/action_variables';
 
-jest.mock('../../../common/lib/kibana');
-jest.mock('../../lib/validate_params_for_warnings', () => {
-  return {
-    validateParamsForWarnings: jest.fn().mockReturnValue({
-      warnings: {
-        message: 'This is a warning',
-      },
-    }),
-  };
-});
 const actionTypeRegistry = actionTypeRegistryMock.create();
+
+jest.mock('../../../common/lib/kibana');
 
 jest.mock('../../lib/action_variables', () => {
   const original = jest.requireActual('../../lib/action_variables');
@@ -300,48 +292,6 @@ describe('action_type_form', () => {
     expect(wrapper.find('.euiToolTipPopover').last().text()).toBe('Action contains errors.');
     // Clearing all mocks will also reset fake timers.
     jest.clearAllMocks();
-  });
-
-  it('shows an warning badge when there is a form warning and the action accordion is closed', async () => {
-    const actionType = actionTypeRegistryMock.createMockActionTypeModel({
-      id: 'test-action-type',
-      iconClass: 'test',
-      selectMessage: 'test',
-      validateParams: (): Promise<GenericValidationResult<unknown>> => {
-        const validationResult = { errors: {} };
-        return Promise.resolve(validationResult);
-      },
-      actionConnectorFields: null,
-    });
-    actionTypeRegistry.get.mockReturnValue(actionType);
-
-    const wrapper = mountWithIntl(
-      getActionTypeForm({
-        index: 1,
-        actionItem: {
-          id: '123',
-          actionTypeId: '.test-action-type',
-          group: 'recovered',
-          params: {
-            message: `{{rule.url}}`,
-          },
-        },
-      })
-    );
-
-    await act(async () => {
-      await nextTick();
-      wrapper.update();
-    });
-
-    expect(wrapper.exists('[data-test-subj="action-group-warning-badge"]')).toBeFalsy();
-    wrapper.find('.euiAccordion__button').last().simulate('click');
-    // Make sure that the accordion is collapsed
-    expect(wrapper.find('.euiAccordion-isOpen').exists()).toBeFalsy();
-    expect(wrapper.exists('[data-test-subj="action-group-warning-badge"]')).toBeTruthy();
-    expect(wrapper.find('[data-test-subj="action-group-warning-badge"]').first().text()).toEqual(
-      'Action has 1 warning'
-    );
   });
 
   it('resets action variables when the actionItem.frequency.summary changes', async () => {

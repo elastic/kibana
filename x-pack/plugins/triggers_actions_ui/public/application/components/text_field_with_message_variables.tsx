@@ -6,11 +6,13 @@
  */
 
 import React, { useCallback, useMemo, useState } from 'react';
-import { EuiFieldText, EuiFormRow } from '@elastic/eui';
+import { EuiCallOut, EuiFieldText, EuiFlexGroup, EuiFormRow } from '@elastic/eui';
 import './add_message_variables.scss';
 import { ActionVariable } from '@kbn/alerting-plugin/common';
 import { AddMessageVariables } from './add_message_variables';
 import { templateActionVariable } from '../lib';
+import { validateParamsForWarnings } from '../lib/validate_params_for_warnings';
+import { useKibana } from '../../common/lib/kibana';
 
 interface Props {
   buttonTitle?: string;
@@ -72,7 +74,12 @@ export const TextFieldWithMessageVariables: React.FunctionComponent<Props> = ({
   wrapField = false,
   showButtonTitle,
 }) => {
+  const {
+    http: { basePath },
+  } = useKibana().services;
+
   const [currentTextElement, setCurrentTextElement] = useState<HTMLInputElement | null>(null);
+  const [warning, setWarning] = useState<string | null>(null);
 
   const onSelectMessageVariable = useCallback(
     (variable: ActionVariable) => {
@@ -90,6 +97,7 @@ export const TextFieldWithMessageVariables: React.FunctionComponent<Props> = ({
 
   const onChangeWithMessageVariable = (e: React.ChangeEvent<HTMLInputElement>) => {
     editAction(paramsProperty, e.target.value, index);
+    setWarning(validateParamsForWarnings(e.target.value, basePath.publicBaseUrl, messageVariables));
   };
   const VariableButton = useMemo(
     () => (
@@ -105,26 +113,33 @@ export const TextFieldWithMessageVariables: React.FunctionComponent<Props> = ({
   );
 
   return (
-    <Wrapper wrapField={wrapField} formRowProps={formRowProps} button={VariableButton}>
-      <EuiFieldText
-        fullWidth
-        name={paramsProperty}
-        id={`${paramsProperty}Id`}
-        isInvalid={errors && errors.length > 0 && inputTargetValue !== undefined}
-        data-test-subj={`${paramsProperty}Input`}
-        value={inputTargetValue || ''}
-        defaultValue={defaultValue}
-        onChange={(e: React.ChangeEvent<HTMLInputElement>) => onChangeWithMessageVariable(e)}
-        onFocus={(e: React.FocusEvent<HTMLInputElement>) => {
-          setCurrentTextElement(e.target);
-        }}
-        onBlur={(e: React.FocusEvent<HTMLInputElement>) => {
-          if (!inputTargetValue) {
-            editAction(paramsProperty, '', index);
-          }
-        }}
-        append={wrapField ? undefined : VariableButton}
-      />
-    </Wrapper>
+    <EuiFlexGroup direction="column">
+      <Wrapper wrapField={wrapField} formRowProps={formRowProps} button={VariableButton}>
+        <EuiFieldText
+          fullWidth
+          name={paramsProperty}
+          id={`${paramsProperty}Id`}
+          isInvalid={errors && errors.length > 0 && inputTargetValue !== undefined}
+          data-test-subj={`${paramsProperty}Input`}
+          value={inputTargetValue || ''}
+          defaultValue={defaultValue}
+          onChange={(e: React.ChangeEvent<HTMLInputElement>) => onChangeWithMessageVariable(e)}
+          onFocus={(e: React.FocusEvent<HTMLInputElement>) => {
+            setCurrentTextElement(e.target);
+          }}
+          onBlur={(e: React.FocusEvent<HTMLInputElement>) => {
+            if (!inputTargetValue) {
+              editAction(paramsProperty, '', index);
+            }
+          }}
+          append={wrapField ? undefined : VariableButton}
+        />
+      </Wrapper>
+      {warning ? (
+        <>
+          <EuiCallOut size="s" color="warning" title={warning} />
+        </>
+      ) : null}
+    </EuiFlexGroup>
   );
 };

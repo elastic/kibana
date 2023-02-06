@@ -173,6 +173,7 @@ const expectedSummaryTransformResult = [
     description:
       'The URL to the Stack Management rule page that generated the alert. This will be an empty string if the server.publicBaseUrl is not configured.',
     name: 'rule.url',
+    usesPublicBaseUrl: true,
   },
   {
     description: 'The tags of the rule.',

@@ -51,7 +51,7 @@ const additionalInformation = JSON.stringify({
 
 const ServiceNowITOMParamsFields: React.FunctionComponent<
   ActionParamsProps<ServiceNowITOMActionParams>
-> = ({ actionConnector, actionParams, editAction, index, messageVariables, errors, warnings }) => {
+> = ({ actionConnector, actionParams, editAction, index, messageVariables, errors }) => {
   const params = useMemo(
     () => (actionParams.subActionParams ?? {}) as ServiceNowITOMActionParams['subActionParams'],
     [actionParams.subActionParams]
@@ -153,7 +153,6 @@ const ServiceNowITOMParamsFields: React.FunctionComponent<
         paramsProperty={'description'}
         inputTargetValue={description ?? undefined}
         label={i18n.DESCRIPTION_LABEL}
-        warning={warnings?.description}
       />
     </>
   );

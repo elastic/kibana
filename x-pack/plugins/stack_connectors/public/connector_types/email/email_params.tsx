@@ -29,7 +29,6 @@ export const EmailParamsFields = ({
   isDisabled,
   onBlur = noop,
   showEmailSubjectAndMessage = true,
-  warnings,
 }: ActionParamsProps<EmailActionParams>) => {
   const { to, cc, bcc, subject, message } = actionParams;
   const toOptions = to ? to.map((label: string) => ({ label })) : [];
@@ -243,7 +242,6 @@ export const EmailParamsFields = ({
             }
           )}
           errors={(errors.message ?? []) as string[]}
-          warning={warnings?.message}
         />
       )}
     </>

@@ -45,7 +45,6 @@ const FormView: React.FC<FormViewProps> = ({
   subActionParams,
   showSaveError,
   executionMode,
-  warnings,
 }) => {
   const isMessageInvalid =
     (errors['subActionParams.message'] !== undefined &&
@@ -92,7 +91,6 @@ const FormView: React.FC<FormViewProps> = ({
         paramsProperty={'description'}
         inputTargetValue={subActionParams?.description}
         label={i18n.DESCRIPTION_FIELD_LABEL}
-        warning={warnings?.description}
       />
       <EuiFormRow
         data-test-subj="opsgenie-alias-row"
@@ -116,7 +114,7 @@ FormView.displayName = 'FormView';
 
 export type CreateAlertProps = Pick<
   ActionParamsProps<OpsgenieActionParams>,
-  'errors' | 'index' | 'messageVariables' | 'editAction' | 'executionMode' | 'warnings'
+  'errors' | 'index' | 'messageVariables' | 'editAction' | 'executionMode'
 > & {
   subActionParams?: Partial<OpsgenieCreateAlertParams>;
   editSubAction: EditActionCallback;
@@ -134,7 +132,6 @@ const CreateAlertComponent: React.FC<CreateAlertProps> = ({
   subActionParams,
   showSaveError,
   executionMode,
-  warnings,
 }) => {
   const [showingMoreOptions, setShowingMoreOptions] = useState<boolean>(false);
   const [showJsonEditor, setShowJsonEditor] = useState<boolean>(false);
@@ -187,7 +184,6 @@ const CreateAlertComponent: React.FC<CreateAlertProps> = ({
             messageVariables={messageVariables}
             subActionParams={subActionParams}
             showSaveError={showSaveError}
-            warnings={warnings}
           />
           {showingMoreOptions ? (
             <AdditionalOptions
@@ -195,7 +191,6 @@ const CreateAlertComponent: React.FC<CreateAlertProps> = ({
               editOptionalSubAction={editOptionalSubAction}
               messageVariables={messageVariables}
               index={index}
-              warnings={warnings}
             />
           ) : null}
           <EuiSpacer size={'m'} />

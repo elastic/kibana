@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { intersection, get } from 'lodash';
+import { intersection } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { ActionVariable } from '@kbn/alerting-plugin/common';
 
@@ -17,30 +17,20 @@ const publicUrlWarning = i18n.translate(
 );
 
 export function validateParamsForWarnings(
-  actionParams: Record<string, unknown>,
+  value: string,
   publicBaseUrl: string | undefined,
-  actionVariables: ActionVariable[]
-): {
-  warnings: Record<string, any>;
-} {
-  const publicUrlFields = actionVariables.filter((v) => v.usesPublicBaseUrl).map((v) => v.name);
-  const warningFields = ['message', 'comments', 'description', 'note'];
+  actionVariables: ActionVariable[] | undefined
+): string | null {
   const mustacheRegex = /[^{\}]+(?=}})/g;
-  const warnings: Record<string, any> = {};
-  const validationResult = { warnings };
+  if (!publicBaseUrl) {
+    const publicUrlFields = (actionVariables || [])
+      .filter((v) => v.usesPublicBaseUrl)
+      .map((v) => v.name);
 
-  if (!publicBaseUrl && actionParams) {
-    for (const field of warningFields) {
-      const value = actionParams.subActionParams
-        ? get(actionParams, `subActionParams.${field}`)
-        : get(actionParams, field);
-      if (value) {
-        const contextVariables = (value as string).match(mustacheRegex);
-        if (intersection(contextVariables, publicUrlFields).length > 0) {
-          warnings[field] = publicUrlWarning;
-        }
-      }
+    const contextVariables = value.match(mustacheRegex);
+    if (intersection(contextVariables, publicUrlFields).length > 0) {
+      return publicUrlWarning;
     }
   }
-  return validationResult;
+  return null;
 }

@@ -52,7 +52,6 @@ import { transformActionVariables } from '../../lib/action_variables';
 import { useKibana } from '../../../common/lib/kibana';
 import { ConnectorsSelection } from './connectors_selection';
 import { ActionNotifyWhen } from './action_notify_when';
-import { validateParamsForWarnings } from '../../lib/validate_params_for_warnings';
 
 export type ActionTypeFormProps = {
   actionItem: RuleAction;
@@ -115,7 +114,6 @@ export const ActionTypeForm = ({
 }: ActionTypeFormProps) => {
   const {
     application: { capabilities },
-    http: { basePath },
   } = useKibana().services;
   const { euiTheme } = useEuiTheme();
   const [isOpen, setIsOpen] = useState(true);
@@ -126,11 +124,6 @@ export const ActionTypeForm = ({
   const [actionGroup, setActionGroup] = useState<string>();
   const [actionParamsErrors, setActionParamsErrors] = useState<{ errors: IErrorObject }>({
     errors: {},
-  });
-  const [actionParamsWarnings, setActionParamsWarnings] = useState<{
-    warnings: Record<string, string>;
-  }>({
-    warnings: {},
   });
   const [actionThrottle, setActionThrottle] = useState<number | null>(
     actionItem.frequency?.throttle
@@ -217,13 +210,6 @@ export const ActionTypeForm = ({
         .get(actionItem.actionTypeId)
         ?.validateParams(actionItem.params);
       setActionParamsErrors(res);
-      setActionParamsWarnings(
-        validateParamsForWarnings(
-          actionItem.params,
-          basePath.publicBaseUrl,
-          availableActionVariables
-        )
-      );
     })();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [actionItem]);
@@ -393,7 +379,6 @@ export const ActionTypeForm = ({
                 actionParams={actionItem.params as any}
                 index={index}
                 errors={actionParamsErrors.errors}
-                warnings={actionParamsWarnings.warnings}
                 editAction={setActionParamsProperty}
                 messageVariables={availableActionVariables}
                 defaultMessage={
@@ -483,26 +468,6 @@ export const ActionTypeForm = ({
                                     },
                                   }
                                 )}
-                          </EuiBadge>
-                        </EuiFlexItem>
-                      )}
-                      {Object.keys(actionParamsWarnings.warnings).length > 0 && !isOpen && (
-                        <EuiFlexItem grow={false}>
-                          <EuiBadge
-                            data-test-subj="action-group-warning-badge"
-                            iconType="alert"
-                            color="warning"
-                          >
-                            {i18n.translate(
-                              'xpack.triggersActionsUI.sections.actionTypeForm.actionWarningsTitle',
-                              {
-                                defaultMessage:
-                                  'Action has {warningsToShow} {warningsToShow, plural, one {warning} other {warnings}}',
-                                values: {
-                                  warningsToShow: Object.keys(actionParamsWarnings.warnings).length,
-                                },
-                              }
-                            )}
                           </EuiBadge>
                         </EuiFlexItem>
                       )}

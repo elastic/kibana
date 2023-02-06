@@ -14,7 +14,7 @@ import { ServerLogActionParams } from '../types';
 
 export const ServerLogParamsFields: React.FunctionComponent<
   ActionParamsProps<ServerLogActionParams>
-> = ({ actionParams, editAction, index, errors, messageVariables, defaultMessage, warnings }) => {
+> = ({ actionParams, editAction, index, errors, messageVariables, defaultMessage }) => {
   const { message, level } = actionParams;
   const levelOptions = [
     { value: 'trace', text: 'Trace' },
@@ -78,7 +78,6 @@ export const ServerLogParamsFields: React.FunctionComponent<
           defaultMessage: 'Message',
         })}
         errors={errors.message as string[]}
-        warning={warnings?.message}
       />
     </>
   );
