@@ -52,6 +52,7 @@
     "@kbn/rison",
     "@kbn/config-schema",
     "@kbn/storybook",
+    "@kbn/shared-ux-router",
   ],
   "exclude": [
     "target/**/*",

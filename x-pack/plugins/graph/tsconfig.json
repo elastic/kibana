@@ -37,6 +37,7 @@
     "@kbn/std",
     "@kbn/utility-types",
     "@kbn/react-field",
+    "@kbn/shared-ux-router",
   ],
   "exclude": [
     "target/**/*",

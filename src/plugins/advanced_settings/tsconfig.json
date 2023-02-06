@@ -20,6 +20,7 @@
     "@kbn/i18n-react",
     "@kbn/expect",
     "@kbn/monaco",
+    "@kbn/shared-ux-router",
   ],
   "exclude": [
     "target/**/*",
