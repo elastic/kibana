@@ -120,6 +120,7 @@ import { EUI_FILTER_SELECT_ITEM, COMBO_BOX_INPUT } from '../screens/common/contr
 import { ruleFields } from '../data/detection_engine';
 import { BACK_TO_RULES_TABLE } from '../screens/rule_details';
 import { waitForAlerts } from './alerts';
+import { refreshPage } from './security_header';
 
 export const createAndEnableRule = () => {
   cy.get(CREATE_AND_ENABLE_BTN).click({ force: true });
@@ -668,24 +669,20 @@ export const selectNewTermsRuleType = () => {
 };
 
 export const waitForAlertsToPopulate = async (alertCountThreshold = 1) => {
-  /*
-   *
-   * Some times alert table can take a few second to show up with updated results.
-   * This change retries refresh till either alertCount >= threshold or timeout
-   * is reached
-   * */
-  cy.get('body')
-    .pipe(
-      ($el) => {
-        $el.find(REFRESH_BUTTON).trigger('click');
-        return $el.find(ALERTS_TABLE_COUNT);
-      },
-      { timeout: 5000 }
-    )
-    .should(($el) => {
-      const alertCount = parseInt($el.text(), 10) || 0;
-      expect(alertCount).to.not.be.lessThan(alertCountThreshold);
-    });
+  cy.waitUntil(
+    () => {
+      cy.log('Waiting for alerts to appear');
+      refreshPage();
+      return cy
+        .get(ALERTS_TABLE_COUNT)
+        .invoke('text')
+        .then((countText) => {
+          const alertCount = parseInt(countText, 10) || 0;
+          return alertCount >= alertCountThreshold;
+        });
+    },
+    { interval: 500, timeout: 12000 }
+  );
   waitForAlerts();
 };
 
