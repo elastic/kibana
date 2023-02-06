@@ -43,13 +43,13 @@ export const parseAlertsGroupingData = (
   return topAlerts;
 };
 
-export const isAlertsProgressBarData = (
+export const getIsAlertsProgressBarData = (
   data: SummaryChartsData[]
 ): data is AlertsProgressBarData[] => {
   return data?.every((x) => has(x, 'percentage'));
 };
 
-export const isAlertsByGroupingAgg = (
+export const getIsAlertsByGroupingAgg = (
   data: AlertSearchResponse<{}, SummaryChartsAgg>
 ): data is AlertSearchResponse<{}, AlertsByGroupingAgg> => {
   return has(data, 'aggregations.alertsByGrouping');

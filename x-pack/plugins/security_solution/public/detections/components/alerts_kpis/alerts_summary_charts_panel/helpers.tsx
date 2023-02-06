@@ -6,28 +6,28 @@
  */
 import type { SummaryChartsAgg } from './types';
 import type { AlertSearchResponse } from '../../../containers/detection_engine/alerts/types';
-import { parseSeverityData, isAlertsBySeverityAgg } from '../severity_level_panel/helpers';
-import { parseAlertsTypeData, isAlertsByTypeAgg } from '../alerts_by_type_panel/helpers';
+import { parseSeverityData, getIsAlertsBySeverityAgg } from '../severity_level_panel/helpers';
+import { parseAlertsTypeData, getIsAlertsByTypeAgg } from '../alerts_by_type_panel/helpers';
 import {
   parseAlertsGroupingData,
-  isAlertsByGroupingAgg,
+  getIsAlertsByGroupingAgg,
 } from '../alerts_progress_bar_panel/helpers';
 import {
   parseChartCollapseData,
-  isChartCollapseAgg,
+  getIsChartCollapseAgg,
 } from '../../../pages/detection_engine/chart_panels/chart_collapse/helpers';
 
 export const parseData = (data: AlertSearchResponse<{}, SummaryChartsAgg>) => {
-  if (isAlertsBySeverityAgg(data)) {
+  if (getIsAlertsBySeverityAgg(data)) {
     return parseSeverityData(data);
   }
-  if (isAlertsByTypeAgg(data)) {
+  if (getIsAlertsByTypeAgg(data)) {
     return parseAlertsTypeData(data);
   }
-  if (isAlertsByGroupingAgg(data)) {
+  if (getIsAlertsByGroupingAgg(data)) {
     return parseAlertsGroupingData(data);
   }
-  if (isChartCollapseAgg(data)) {
+  if (getIsChartCollapseAgg(data)) {
     return parseChartCollapseData(data);
   }
   return [];

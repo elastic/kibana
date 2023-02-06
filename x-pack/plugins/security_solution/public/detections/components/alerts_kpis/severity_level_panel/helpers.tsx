@@ -35,11 +35,11 @@ export const parseSeverityData = (
       });
 };
 
-export const isAlertsBySeverityData = (data: SummaryChartsData[]): data is SeverityData[] => {
+export const getIsAlertsBySeverityData = (data: SummaryChartsData[]): data is SeverityData[] => {
   return data?.every((x) => has(x, 'key'));
 };
 
-export const isAlertsBySeverityAgg = (
+export const getIsAlertsBySeverityAgg = (
   data: AlertSearchResponse<{}, SummaryChartsAgg>
 ): data is AlertSearchResponse<{}, AlertsBySeverityAgg> => {
   return has(data, 'aggregations.statusBySeverity');

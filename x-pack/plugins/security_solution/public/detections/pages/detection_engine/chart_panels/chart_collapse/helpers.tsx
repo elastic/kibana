@@ -36,11 +36,11 @@ export const parseChartCollapseData = (
   return [];
 };
 
-export const isChartCollapseData = (data: SummaryChartsData[]): data is ChartCollapseData[] => {
+export const getIsChartCollapseData = (data: SummaryChartsData[]): data is ChartCollapseData[] => {
   return data?.every((x) => has(x, 'rule') && has(x, 'group') && has(x, 'severities'));
 };
 
-export const isChartCollapseAgg = (
+export const getIsChartCollapseAgg = (
   data: AlertSearchResponse<{}, SummaryChartsAgg>
 ): data is AlertSearchResponse<{}, ChartCollapseAgg> => {
   return (

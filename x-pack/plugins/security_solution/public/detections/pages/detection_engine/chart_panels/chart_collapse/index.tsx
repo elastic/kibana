@@ -18,7 +18,7 @@ import { InspectButton, InspectButtonContainer } from '../../../../../common/com
 import { useSummaryChartData } from '../../../../components/alerts_kpis/alerts_summary_charts_panel/use_summary_chart_data';
 import { getSeverityColor } from '../../../../components/alerts_kpis/severity_level_panel/helpers';
 import { FormattedCount } from '../../../../../common/components/formatted_number';
-import { isChartCollapseData } from './helpers';
+import { getIsChartCollapseData } from './helpers';
 import * as i18n from './translations';
 
 import { SEVERITY_COLOR } from '../../../../../overview/components/detection_response/utils';
@@ -88,7 +88,7 @@ export const ChartCollapse: React.FC<Props> = ({
     runtimeMappings,
     uniqueQueryId,
   });
-  const data = useMemo(() => (isChartCollapseData(items) ? items : []), [items]);
+  const data = useMemo(() => (getIsChartCollapseData(items) ? items : []), [items]);
 
   const topRule = useMemo(() => data.at(0)?.rule ?? i18n.NO_RESULT_MESSAGE, [data]);
   const topGroup = useMemo(() => data.at(0)?.group ?? i18n.NO_RESULT_MESSAGE, [data]);

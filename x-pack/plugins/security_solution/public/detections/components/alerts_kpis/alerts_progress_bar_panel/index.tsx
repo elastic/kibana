@@ -16,7 +16,7 @@ import { AlertsProgressBar } from './alerts_progress_bar';
 import { useSummaryChartData } from '../alerts_summary_charts_panel/use_summary_chart_data';
 import { alertsGroupingAggregations } from '../alerts_summary_charts_panel/aggregations';
 import { showInitialLoadingSpinner } from '../alerts_histogram_panel/helpers';
-import { isAlertsProgressBarData } from './helpers';
+import { getIsAlertsProgressBarData } from './helpers';
 import * as i18n from './translations';
 import type { GroupBySelection } from './types';
 
@@ -67,7 +67,7 @@ export const AlertsProgressBarPanel: React.FC<Props> = ({
     skip,
     uniqueQueryId,
   });
-  const data = useMemo(() => (isAlertsProgressBarData(items) ? items : []), [items]);
+  const data = useMemo(() => (getIsAlertsProgressBarData(items) ? items : []), [items]);
   useEffect(() => {
     if (!showInitialLoadingSpinner({ isInitialLoading, isLoadingAlerts: isLoading })) {
       setIsInitialLoading(false);

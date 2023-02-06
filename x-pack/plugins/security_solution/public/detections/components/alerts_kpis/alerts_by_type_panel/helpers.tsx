@@ -59,11 +59,11 @@ const getAggregateAlerts = (
   return ret;
 };
 
-export const isAlertsTypeData = (data: SummaryChartsData[]): data is AlertsTypeData[] => {
+export const getIsAlertsTypeData = (data: SummaryChartsData[]): data is AlertsTypeData[] => {
   return data?.every((x) => has(x, 'type'));
 };
 
-export const isAlertsByTypeAgg = (
+export const getIsAlertsByTypeAgg = (
   data: AlertSearchResponse<{}, SummaryChartsAgg>
 ): data is AlertSearchResponse<{}, AlertsByTypeAgg> => {
   return has(data, 'aggregations.alertsByRule');

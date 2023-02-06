@@ -90,7 +90,7 @@ export const RULE_NAME = '[data-test-subj^=formatted-field][data-test-subj$=rule
 
 export const SELECTED_ALERTS = '[data-test-subj="selectedShowBulkActionsButton"]';
 
-export const SELECT_TABLE = '[data-test-subj="chart-select-table"]';
+export const SELECT_AGGREGATION_CHART = '[data-test-subj="chart-select-table"]';
 
 export const SEND_ALERT_TO_TIMELINE_BTN = '[data-test-subj="send-alert-to-timeline-button"]';
 
