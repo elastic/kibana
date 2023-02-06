@@ -13,16 +13,16 @@ export const GroupsUnitCount = styled.span`
   font-size: ${({ theme }) => theme.eui.euiFontSizeXS};
   font-weight: ${({ theme }) => theme.eui.euiFontWeightSemiBold};
   border-right: ${({ theme }) => theme.eui.euiBorderThin};
-  margin-right: ${({ theme }) => theme.eui.euiSizeS};
-  padding-right: ${({ theme }) => theme.eui.euiSizeM};
+  margin-right: 16px;
+  padding-right: 16px;
 `;
 
 export const StatsContainer = styled.span`
   font-size: ${({ theme }) => theme.eui.euiFontSizeXS};
   font-weight: ${({ theme }) => theme.eui.euiFontWeightSemiBold};
   border-right: ${({ theme }) => theme.eui.euiBorderThin};
-  margin-right: ${({ theme }) => theme.eui.euiSizeS};
-  padding-right: ${({ theme }) => theme.eui.euiSizeM};
+  margin-right: 16px;
+  padding-right: 16px;
   .smallDot {
     width: 3px !important;
     display: inline-block;
@@ -34,26 +34,37 @@ export const StatsContainer = styled.span`
 `;
 
 export const GroupingStyledContainer = styled.div`
-  .euiAccordion__childWrapper {
+  .euiAccordion__childWrapper .euiAccordion__padding--m {
+    margin-left: 8px;
+    margin-right: 8px;
+    border-left: ${({ theme }) => theme.eui.euiBorderThin};
+    border-right: ${({ theme }) => theme.eui.euiBorderThin};
     border-bottom: ${({ theme }) => theme.eui.euiBorderThin};
-    border-radius: 5px;
+    border-radius: 0 0 6px 6px;
   }
   .euiAccordion__triggerWrapper {
     border-bottom: ${({ theme }) => theme.eui.euiBorderThin};
-    border-radius: 5px;
+    border-left: ${({ theme }) => theme.eui.euiBorderThin};
+    border-right: ${({ theme }) => theme.eui.euiBorderThin};
+    border-radius: 6px;
     min-height: 78px;
-    padding-left: 10px;
-    padding-right: 10px;
+    padding-left: 16px;
+    padding-right: 16px;
   }
   .groupingAccordionForm {
     border-top: ${({ theme }) => theme.eui.euiBorderThin};
-    border-left: ${({ theme }) => theme.eui.euiBorderThin};
-    border-right: ${({ theme }) => theme.eui.euiBorderThin};
     border-bottom: none;
-    border-radius: 5px;
+    border-radius: 6px;
+    min-width: 1090px;
   }
   .groupingAccordionForm__button {
     text-decoration: none !important;
+  }
+  .groupingPanelRenderer {
+    display: table;
+    table-layout: fixed;
+    width: 100%;
+    padding-right: 32px;
   }
 `;
 

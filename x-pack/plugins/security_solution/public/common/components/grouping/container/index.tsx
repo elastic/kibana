@@ -162,7 +162,7 @@ const GroupingContainerComponent = ({
           </EuiFlexGroup>
         </EuiFlexItem>
       </EuiFlexGroup>
-      <GroupingStyledContainer>
+      <GroupingStyledContainer className="eui-xScroll">
         {groupsNumber > 0 ? (
           <>
             {groupPanels}

@@ -42,7 +42,7 @@ const DefaultGroupPanelRenderer = ({ title }: { title: string }) => (
     <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
       <EuiFlexItem>
         <EuiTitle size="xs" className="euiAccordionForm__title">
-          <h4>{title}</h4>
+          <h4 className="eui-textTruncate">{title}</h4>
         </EuiTitle>
       </EuiFlexItem>
     </EuiFlexGroup>
@@ -80,14 +80,18 @@ const GroupPanelComponent = ({
   return !groupFieldValue ? null : (
     <EuiAccordion
       buttonClassName={customAccordionButtonClassName}
-      buttonContent={groupPanelRenderer ?? <DefaultGroupPanelRenderer title={groupFieldValue} />}
+      buttonContent={
+        <div className="groupingPanelRenderer">
+          {groupPanelRenderer ?? <DefaultGroupPanelRenderer title={groupFieldValue} />}
+        </div>
+      }
       className={customAccordionClassName}
       data-test-subj="grouping-accordion"
       extraAction={extraAction}
       forceState={forceState}
       id={`group${level}-${groupFieldValue}`}
       onToggle={onToggle}
-      paddingSize="l"
+      paddingSize="m"
     >
       {renderChildComponent(groupFilters)}
     </EuiAccordion>

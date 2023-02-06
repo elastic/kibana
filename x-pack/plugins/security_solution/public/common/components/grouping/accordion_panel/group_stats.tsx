@@ -54,7 +54,7 @@ const GroupStatsComponent = ({
                   style={{ marginLeft: 10, width: metric.width ?? 35 }}
                   color={metric.color ?? 'hollow'}
                 >
-                  {metric.value > 99 ? '99+' : metric.value}
+                  {metric.value > 99 ? '99+' : metric.value.toString()}
                 </EuiBadge>
               </EuiToolTip>
             </>
@@ -107,7 +107,7 @@ const GroupStatsComponent = ({
     <EuiFlexGroup
       data-test-subj="group-stats"
       key={`stats-${bucket.key[0]}`}
-      gutterSize="s"
+      gutterSize="none"
       alignItems="center"
     >
       {customComponents}

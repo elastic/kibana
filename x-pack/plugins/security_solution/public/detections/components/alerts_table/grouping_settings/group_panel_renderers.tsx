@@ -54,16 +54,11 @@ const RuleNameGroupContent = React.memo<{
     </EuiBadge>
   );
   return (
-    <div>
-      <EuiFlexGroup
-        data-test-subj="rule-name-group-renderer"
-        gutterSize="s"
-        alignItems="center"
-        responsive={false}
-      >
-        <EuiFlexItem grow={false}>
+    <>
+      <EuiFlexGroup data-test-subj="rule-name-group-renderer" gutterSize="m" alignItems="center">
+        <EuiFlexItem grow={false} style={{ display: 'table', tableLayout: 'fixed', width: '100%' }}>
           <EuiTitle size="xs">
-            <h4>{ruleName.trim()}</h4>
+            <h5 className="eui-textTruncate">{ruleName.trim()}</h5>
           </EuiTitle>
         </EuiFlexItem>
         {tags && tags.length > 0 ? (
@@ -81,79 +76,75 @@ const RuleNameGroupContent = React.memo<{
       </EuiFlexGroup>
 
       <EuiText size="s">
-        <p>
+        <p className="eui-textTruncate">
           <EuiTextColor color="subdued">{ruleDescription}</EuiTextColor>
         </p>
       </EuiText>
-    </div>
+    </>
   );
 });
 RuleNameGroupContent.displayName = 'RuleNameGroup';
 
 const HostNameGroupContent = React.memo<{ hostName: string | string[] }>(({ hostName }) => (
-  <div>
-    <EuiFlexGroup
-      data-test-subj="host-name-group-renderer"
-      gutterSize="s"
-      alignItems="center"
-      responsive={false}
+  <EuiFlexGroup
+    data-test-subj="host-name-group-renderer"
+    gutterSize="s"
+    alignItems="center"
+    justifyContent="center"
+  >
+    <EuiFlexItem
+      grow={false}
+      style={{
+        backgroundColor: euiThemeVars.euiColorVis1_behindText,
+        borderRadius: '50%',
+      }}
     >
-      <EuiFlexItem grow={false}>
-        <EuiIcon color="primary" type="database" size="l" />
-      </EuiFlexItem>
+      <EuiIcon type="database" size="l" style={{ padding: 4 }} />
+    </EuiFlexItem>
 
-      <EuiFlexItem>
-        <EuiTitle size="xs">
-          <h4>{hostName}</h4>
-        </EuiTitle>
-      </EuiFlexItem>
-    </EuiFlexGroup>
-  </div>
+    <EuiFlexItem>
+      <EuiTitle size="xs">
+        <h5>{hostName}</h5>
+      </EuiTitle>
+    </EuiFlexItem>
+  </EuiFlexGroup>
 ));
 HostNameGroupContent.displayName = 'HostNameGroupContent';
 
 const UserNameGroupContent = React.memo<{ userName: string | string[] }>(({ userName }) => {
   const userNameValue = firstNonNullValue(userName) ?? '-';
   return (
-    <div>
-      <EuiFlexGroup
-        data-test-subj="user-name-group-renderer"
-        gutterSize="s"
-        alignItems="center"
-        responsive={false}
-      >
-        <EuiFlexItem grow={false}>
-          <EuiAvatar name={userNameValue} color={euiThemeVars.euiColorVis0} />
-        </EuiFlexItem>
+    <EuiFlexGroup data-test-subj="user-name-group-renderer" gutterSize="s" alignItems="center">
+      <EuiFlexItem grow={false}>
+        <EuiAvatar name={userNameValue} color={euiThemeVars.euiColorVis0} />
+      </EuiFlexItem>
 
-        <EuiFlexItem>
-          <EuiTitle size="xs">
-            <h4>{userName}</h4>
-          </EuiTitle>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </div>
+      <EuiFlexItem>
+        <EuiTitle size="xs">
+          <h5>{userName}</h5>
+        </EuiTitle>
+      </EuiFlexItem>
+    </EuiFlexGroup>
   );
 });
 UserNameGroupContent.displayName = 'UserNameGroupContent';
 
 const SourceIpGroupContent = React.memo<{ sourceIp: string | string[] }>(({ sourceIp }) => (
-  <div>
-    <EuiFlexGroup
-      data-test-subj="source-ip-group-renderer"
-      gutterSize="s"
-      alignItems="center"
-      responsive={false}
+  <EuiFlexGroup data-test-subj="source-ip-group-renderer" gutterSize="s" alignItems="center">
+    <EuiFlexItem
+      grow={false}
+      style={{
+        backgroundColor: euiThemeVars.euiColorVis3_behindText,
+        borderRadius: '50%',
+      }}
     >
-      <EuiFlexItem grow={false}>
-        <EuiIcon color="primary" type="ip" size="l" />
-      </EuiFlexItem>
-      <EuiFlexItem>
-        <EuiTitle size="xs">
-          <h4>{sourceIp}</h4>
-        </EuiTitle>
-      </EuiFlexItem>
-    </EuiFlexGroup>
-  </div>
+      <EuiIcon style={{ padding: 4 }} type="ip" size="l" />
+    </EuiFlexItem>
+    <EuiFlexItem>
+      <EuiTitle size="xs">
+        <h5>{sourceIp}</h5>
+      </EuiTitle>
+    </EuiFlexItem>
+  </EuiFlexGroup>
 ));
 SourceIpGroupContent.displayName = 'SourceIpGroupContent';
