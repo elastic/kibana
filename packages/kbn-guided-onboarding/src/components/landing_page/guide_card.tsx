@@ -77,6 +77,8 @@ export const GuideCard = ({
   const progress = getProgressLabel(guideState);
   return (
     <EuiCard
+      // data-test-subj used for FS tracking
+      data-test-subj={card.telemetryId}
       isDisabled={isLoading}
       onClick={onClick}
       css={cardCss}
