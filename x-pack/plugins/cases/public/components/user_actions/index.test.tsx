@@ -95,7 +95,7 @@ describe(`UserActions`, () => {
   });
 
   it('Renders service now update line with top and bottom when push is required', async () => {
-    const caseConnectors = getCaseConnectorsMockResponse({ needsToBePushed: true });
+    const caseConnectors = getCaseConnectorsMockResponse({ 'push.needsToBePushed': true });
 
     const ourActions = [
       getUserAction('pushed', 'push_to_service', {

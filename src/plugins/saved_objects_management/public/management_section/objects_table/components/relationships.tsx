@@ -28,17 +28,17 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { IBasePath } from '@kbn/core/public';
 import type { SavedObjectManagementTypeInfo } from '../../../../common/types';
 import { getDefaultTitle, getSavedObjectLabel } from '../../../lib';
+import type { v1 } from '../../../../common';
 import {
   SavedObjectWithMetadata,
   SavedObjectRelationKind,
   SavedObjectRelation,
   SavedObjectInvalidRelation,
-  SavedObjectGetRelationshipsResponse,
 } from '../../../types';
 
 export interface RelationshipsProps {
   basePath: IBasePath;
-  getRelationships: (type: string, id: string) => Promise<SavedObjectGetRelationshipsResponse>;
+  getRelationships: (type: string, id: string) => Promise<v1.RelationshipsResponseHTTP>;
   savedObject: SavedObjectWithMetadata;
   close: () => void;
   goInspectObject: (obj: SavedObjectWithMetadata) => void;

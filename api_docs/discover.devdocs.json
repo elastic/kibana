@@ -478,7 +478,7 @@
                 "section": "def-common.SearchSourceFields",
                 "text": "SearchSourceFields"
               },
-              "[K]; getActiveIndexFilter: () => string[]; getOwnField: <K extends keyof ",
+              "[K]; getActiveIndexFilter: () => any[]; getOwnField: <K extends keyof ",
               {
                 "pluginId": "data",
                 "scope": "common",
