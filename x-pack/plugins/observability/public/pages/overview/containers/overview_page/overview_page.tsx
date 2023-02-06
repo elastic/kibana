@@ -73,7 +73,7 @@ export function OverviewPage() {
     http,
     application: { capabilities },
     triggersActionsUi: { alertsTableConfigurationRegistry, getAlertsStateTable: AlertsStateTable },
-    kibanaVersion
+    kibanaVersion,
   } = useKibana<ObservabilityAppServices>().services;
 
   const { ObservabilityPageTemplate } = usePluginContext();
@@ -85,7 +85,10 @@ export function OverviewPage() {
     })
   );
 
-  const { data: newsFeed } = useFetcher(() => getNewsFeed({ http, kibanaVersion }), [http, kibanaVersion]);
+  const { data: newsFeed } = useFetcher(
+    () => getNewsFeed({ http, kibanaVersion }),
+    [http, kibanaVersion]
+  );
 
   const { hasAnyData, isAllRequestsComplete } = useHasData();
   const refetch = useRef<() => void>();
