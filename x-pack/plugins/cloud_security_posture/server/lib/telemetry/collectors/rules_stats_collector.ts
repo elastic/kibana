@@ -25,19 +25,40 @@ interface BenchmarkId {
 interface BenchmarkVersion {
   metrics: { 'rule.benchmark.version': string };
 }
+interface RuleName {
+  metrics: { 'rule.name': string };
+}
+interface RuleSection {
+  metrics: { 'rule.section': string };
+}
+interface RuleVersion {
+  metrics: { 'rule.version': string };
+}
+interface RuleNumber {
+  metrics: { 'rule.benchmark.rule_number': string };
+}
+interface PostureType {
+  metrics: { 'rule.benchmark.posture_type': string };
+}
 
 interface RulesStats {
   rules: {
     buckets: RuleEntity[];
   };
 }
+
 interface RuleEntity {
   key: string; // rule_id
-  passed_findings_count: DocCount;
-  failed_findings_count: DocCount;
+  rule_name: { top: RuleName[] };
+  rule_section: { top: RuleSection[] };
+  rule_version: { top: RuleVersion[] };
+  rule_number: { top: RuleNumber[] };
+  posture_type: { top: PostureType[] };
   benchmark_name: { top: BenchmarkName[] };
   benchmark_id: { top: BenchmarkId[] };
   benchmark_version: { top: BenchmarkVersion[] };
+  passed_findings_count: DocCount;
+  failed_findings_count: DocCount;
 }
 
 const getRulesStatsQuery = (index: string): SearchRequest => ({
@@ -55,6 +76,61 @@ const getRulesStatsQuery = (index: string): SearchRequest => ({
         size: 100,
       },
       aggs: {
+        rule_name: {
+          top_metrics: {
+            metrics: {
+              field: 'rule.name',
+            },
+            size: 1,
+            sort: {
+              '@timestamp': 'desc',
+            },
+          },
+        },
+        rule_section: {
+          top_metrics: {
+            metrics: {
+              field: 'rule.section',
+            },
+            size: 1,
+            sort: {
+              '@timestamp': 'desc',
+            },
+          },
+        },
+        rule_version: {
+          top_metrics: {
+            metrics: {
+              field: 'rule.version',
+            },
+            size: 1,
+            sort: {
+              '@timestamp': 'desc',
+            },
+          },
+        },
+        posture_type: {
+          top_metrics: {
+            metrics: {
+              field: 'rule.benchmark.posture_type',
+            },
+            size: 1,
+            sort: {
+              '@timestamp': 'desc',
+            },
+          },
+        },
+        rule_number: {
+          top_metrics: {
+            metrics: {
+              field: 'rule.benchmark.rule_number',
+            },
+            size: 1,
+            sort: {
+              '@timestamp': 'desc',
+            },
+          },
+        },
         benchmark_id: {
           top_metrics: {
             metrics: {
@@ -141,15 +217,17 @@ const getCspmRulesStats = (aggregatedRulesStats: RulesStats, logger: Logger): Cs
 
   const cspmRulesStats = rules.map((rule) => ({
     rule_id: rule.key,
+    rule_name: rule.rule_name.top[0].metrics['rule.name'],
+    rule_section: rule.rule_section.top[0].metrics['rule.section'],
+    rule_version: rule.rule_version.top[0].metrics['rule.version'],
+    rule_number: rule.rule_number.top[0].metrics['rule.benchmark.rule_number'],
+    posture_type: rule.posture_type.top[0].metrics['rule.benchmark.posture_type'],
     benchmark_name: rule.benchmark_name.top[0].metrics['rule.benchmark.name'],
     benchmark_id: rule.benchmark_id.top[0].metrics['rule.benchmark.id'],
     passed_findings_count: rule.passed_findings_count.doc_count,
     benchmark_version: rule.benchmark_version.top[0].metrics['rule.benchmark.version'],
     failed_findings_count: rule.failed_findings_count.doc_count,
   }));
-
-  console.log({ cspmRulesStats });
-  logger.info('CSPM telemetry: rules stats was sent');
 
   return cspmRulesStats;
 };
@@ -167,8 +245,6 @@ export const getRulesStats = async (
       const rulesStatsResponse = await esClient.search<unknown, RulesStats>(
         getRulesStatsQuery(LATEST_FINDINGS_INDEX_DEFAULT_NS)
       );
-
-      console.log({ rulesStatsResponse });
 
       const cspmRulesStats = rulesStatsResponse.aggregations
         ? getCspmRulesStats(rulesStatsResponse.aggregations, logger)
