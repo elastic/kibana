@@ -88,7 +88,7 @@ export const AlertsSummaryWidgetCompact = ({
             <EuiFlexItem style={{ minWidth: '200px' }}>
               <Chart size={{ height: 50 }}>
                 <Settings theme={chartTheme} baseTheme={baseTheme} tooltip={{ type: 'none' }} />
-                <Axis hide id={'activeAlertsAxis'} position={Position.Left} showGridLines={false} />
+                <Axis hide id="activeAlertsAxis" position={Position.Left} showGridLines={false} />
                 <LineSeries
                   id={'activeAlertsChart'}
                   xScaleType={ScaleType.Time}
