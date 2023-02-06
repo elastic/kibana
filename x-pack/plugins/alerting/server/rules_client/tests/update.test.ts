@@ -2132,6 +2132,7 @@ describe('update()', () => {
             params: {
               foo: true,
             },
+            uuid: '144',
           },
         ],
         alertTypeId: 'myType',
@@ -2676,7 +2677,7 @@ describe('update()', () => {
             frequency: { notifyWhen: 'onActiveAlert', summary: false, throttle: null },
             group: 'default',
             params: { foo: true },
-            uuid: '150',
+            uuid: '151',
           },
         ],
         alertTypeId: 'myType',

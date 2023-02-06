@@ -173,6 +173,7 @@ export default ({ getService }: FtrProviderContext): void => {
             params: {
               body: '{"test":"a default action"}',
             },
+            uuid: rule.actions[0].uuid,
           },
         ],
       });

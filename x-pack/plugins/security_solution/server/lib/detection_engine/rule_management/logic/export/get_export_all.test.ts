@@ -168,6 +168,7 @@ describe('getExportAll', () => {
             message: 'Rule {{context.rule.name}} generated {{state.signals_count}} alerts',
           },
           actionTypeId: '.slack',
+          uuid: '111',
         },
       ],
     };
@@ -246,6 +247,7 @@ describe('getExportAll', () => {
             message: 'Rule {{context.rule.name}} generated {{state.signals_count}} alerts',
           },
           action_type_id: '.slack',
+          uuid: '111',
         },
       ],
       building_block_type: 'default',
