@@ -18,16 +18,16 @@ import {
   SPAN_SUBTYPE,
 } from '../../../common/es_fields/apm';
 import { environmentQuery } from '../../../common/utils/environment_query';
+import { getBucketSize } from '../../../common/utils/get_bucket_size';
 import { getOffsetInMs } from '../../../common/utils/get_offset_in_ms';
 import { offsetPreviousPeriodCoordinates } from '../../../common/utils/offset_previous_period_coordinate';
-import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
-import { getBucketSize } from '../../lib/helpers/get_bucket_size';
-import { Coordinate } from '../../../typings/timeseries';
 import { Maybe } from '../../../typings/common';
 import {
   MobileSpanSubtype,
   MobileSpanType,
 } from '../../../public/components/app/mobile/typings/common';
+import { Coordinate } from '../../../typings/timeseries';
+import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
 
 export interface HttpRequestsTimeseries {
   currentPeriod: { timeseries: Coordinate[]; value: Maybe<number> };
