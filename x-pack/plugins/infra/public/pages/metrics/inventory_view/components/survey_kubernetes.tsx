@@ -40,9 +40,7 @@ export const SurveyKubernetes = () => {
           {!isToastSeen && (
             <EuiGlobalToastList
               toastLifeTimeMs={Infinity}
-              dismissToast={() => {
-                markToastAsSeen();
-              }}
+              dismissToast={markToastAsSeen}
               toasts={[
                 {
                   id: 'k8s-toast',
@@ -69,9 +67,7 @@ export const SurveyKubernetes = () => {
                             data-test-subj="infra-toast-kubernetes-survey-start"
                             href={KUBERNETES_FEEDBACK_LINK}
                             target="_blank"
-                            onClickCapture={() => {
-                              markToastAsSeen();
-                            }}
+                            onClickCapture={markToastAsSeen}
                             size="s"
                           >
                             <FormattedMessage
