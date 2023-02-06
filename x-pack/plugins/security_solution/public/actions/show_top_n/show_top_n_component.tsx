@@ -14,7 +14,7 @@ import { StatefulTopN } from '../../common/components/top_n';
 import { useGetUserCasesPermissions } from '../../common/lib/kibana';
 import { APP_ID } from '../../../common/constants';
 import { getScopeFromPath, useSourcererDataView } from '../../common/containers/sourcerer';
-import type { ShowTopNActionContext } from './default/show_top_n';
+import type { SecurityCellActionExecutionContext } from '../types';
 
 export const TopNAction = ({
   onClose,
@@ -22,7 +22,7 @@ export const TopNAction = ({
   casesService,
 }: {
   onClose: () => void;
-  context: ShowTopNActionContext;
+  context: SecurityCellActionExecutionContext;
   casesService: CasesUiStart;
 }) => {
   const { pathname } = useLocation();
