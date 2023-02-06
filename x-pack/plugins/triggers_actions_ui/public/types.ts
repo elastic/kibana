@@ -6,7 +6,7 @@
  */
 
 import type { Moment } from 'moment';
-import type { ComponentType, ReactNode } from 'react';
+import type { ComponentType, ReactNode, RefObject } from 'react';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import type { DocLinksStart } from '@kbn/core/public';
 import type { ChartsPluginSetup } from '@kbn/charts-plugin/public';
@@ -547,7 +547,7 @@ export type UseBulkActionsRegistry = (
 export type UseCellActions = (props: {
   columns: EuiDataGridColumn[];
   data: unknown[][];
-  dataGridRef?: EuiDataGridRefProps | null;
+  dataGridRef?: RefObject<EuiDataGridRefProps>;
   ecsData: unknown[];
   pageSize: number;
 }) => {

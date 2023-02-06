@@ -26,7 +26,7 @@ import { isTab } from '@kbn/timelines-plugin/public';
 import type { Filter } from '@kbn/es-query';
 import type { DocLinks } from '@kbn/doc-links';
 import { useDataTableFilters } from '../../../common/hooks/use_data_table_filters';
-import { APP_ID } from '../../../../common/constants';
+import { ALERT_TABLE_REGISTRY_CONFIG_IDS } from '../../../../common/constants';
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import { FILTER_OPEN, TableId } from '../../../../common/types';
 import { tableDefaults } from '../../../common/store/data_table/defaults';
@@ -437,7 +437,7 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ({
               <EuiSpacer size="l" />
             </Display>
             <AlertsTableComponent
-              configId={`${APP_ID}`}
+              configId={ALERT_TABLE_REGISTRY_CONFIG_IDS.ALERTS_PAGE}
               flyoutSize="m"
               inputFilters={alertsTableDefaultFilters}
               tableId={TableId.alertsOnAlertsPage}

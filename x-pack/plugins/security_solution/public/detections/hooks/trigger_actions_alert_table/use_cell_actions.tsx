@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { EuiDataGridColumn, EuiDataGridRefProps } from '@elastic/eui';
 import type { TimelineNonEcsData } from '@kbn/timelines-plugin/common';
 import { get } from 'lodash';
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
@@ -21,22 +20,13 @@ import { SourcererScopeName } from '../../../common/store/sourcerer/model';
 import { useShallowEqualSelector } from '../../../common/hooks/use_selector';
 import { dataTableSelectors } from '../../../common/store/data_table';
 
-export const getUseCellActionsHook = (
-  tableId: TableId
-): AlertsTableConfigurationRegistry['useCellActions'] => {
-  const useCellActions = ({
+export const getUseCellActionsHook = (tableId: TableId) => {
+  const useCellActions: AlertsTableConfigurationRegistry['useCellActions'] = ({
     columns,
     data,
     ecsData,
     dataGridRef,
     pageSize,
-  }: {
-    // Hover Actions
-    columns: EuiDataGridColumn[];
-    data: unknown[][];
-    ecsData: unknown[];
-    dataGridRef?: EuiDataGridRefProps | null;
-    pageSize: number;
   }) => {
     const { browserFields } = useSourcererDataView(SourcererScopeName.detections);
     /**
@@ -48,18 +38,22 @@ export const getUseCellActionsHook = (
      *
      *
      */
-    const finalData = (data as TimelineNonEcsData[][]).map((row) =>
-      row.map((field) => {
-        let localField = field;
-        if (['_id', '_index'].includes(field.field)) {
-          const newValue = field.value ?? '';
-          localField = {
-            field: field.field,
-            value: Array.isArray(newValue) ? newValue : [newValue],
-          };
-        }
-        return localField;
-      })
+    const finalData = useMemo(
+      () =>
+        (data as TimelineNonEcsData[][]).map((row) =>
+          row.map((field) => {
+            let localField = field;
+            if (['_id', '_index'].includes(field.field)) {
+              const newValue = field.value ?? '';
+              localField = {
+                field: field.field,
+                value: Array.isArray(newValue) ? newValue : [newValue],
+              };
+            }
+            return localField;
+          })
+        ),
+      [data]
     );
 
     const getTable = useMemo(() => dataTableSelectors.getTableByIdSelector(), []);
@@ -99,7 +93,7 @@ export const getUseCellActionsHook = (
               })[0],
             scopeId: SourcererScopeName.default,
             pageSize,
-            closeCellPopover: dataGridRef?.closeCellPopover,
+            closeCellPopover: dataGridRef?.current?.closeCellPopover,
           });
         });
       },

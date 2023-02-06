@@ -12,7 +12,6 @@
  * https://mariusschulz.com/blog/literal-type-widening-in-typescript
  * Please follow this convention when adding to this file
  */
-
 export const APP_ID = 'securitySolution' as const;
 export const APP_UI_ID = 'securitySolutionUI' as const;
 export const CASES_FEATURE_ID = 'securitySolutionCases' as const;
@@ -504,4 +503,10 @@ export const ALERTS_TABLE_VIEW_SELECTION_KEY = 'securitySolution.alerts.table.vi
 export const VIEW_SELECTION = {
   gridView: 'gridView',
   eventRenderedView: 'eventRenderedView',
+} as const;
+
+export const ALERTS_TABLE_REGISTRY_CONFIG_IDS = {
+  ALERTS_PAGE: `${APP_ID}-alerts-page`,
+  RULE_DETAILS: `${APP_ID}-rule-details`,
+  CASE: `${APP_ID}-case`,
 } as const;

@@ -344,7 +344,7 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
         columns: props.columns,
         data: oldAlertsData,
         ecsData: ecsAlertsData,
-        dataGridRef: dataGridRef.current,
+        dataGridRef,
         pageSize: pagination.pageSize,
       })
     : { getCellActions: () => null, visibleCellActions: undefined, disabledCellActions: [] };

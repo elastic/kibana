@@ -82,7 +82,7 @@ import { hasMlAdminPermissions } from '../../../../../common/machine_learning/ha
 import { hasMlLicense } from '../../../../../common/machine_learning/has_ml_license';
 import { SecurityPageName } from '../../../../app/types';
 import {
-  APP_ID,
+  ALERTS_TABLE_REGISTRY_CONFIG_IDS,
   APP_UI_ID,
   DEFAULT_INDEX_KEY,
   DEFAULT_THREAT_INDEX_KEY,
@@ -818,7 +818,7 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
                     </Display>
                     {ruleId != null && (
                       <AlertsTableComponent
-                        configId={`${APP_ID}-rule-details`}
+                        configId={ALERTS_TABLE_REGISTRY_CONFIG_IDS.RULE_DETAILS}
                         flyoutSize="m"
                         inputFilters={alertMergedFilters}
                         tableId={TableId.alertsOnRuleDetailsPage}

@@ -14,7 +14,11 @@ import { getUseCellActionsHook } from '../../../detections/hooks/trigger_actions
 import { getBulkActionHook } from '../../../detections/hooks/trigger_actions_alert_table/use_bulk_actions';
 import { getUseActionColumnHook } from '../../../detections/hooks/trigger_actions_alert_table/use_actions_column';
 import { getPersistentControlsHook } from '../../../detections/hooks/trigger_actions_alert_table/use_persistent_controls';
-import { APP_ID, CASES_FEATURE_ID } from '../../../../common/constants';
+import {
+  ALERTS_TABLE_REGISTRY_CONFIG_IDS,
+  APP_ID,
+  CASES_FEATURE_ID,
+} from '../../../../common/constants';
 import { getDataTablesInStorageByIds } from '../../../timelines/containers/local_storage';
 import { TableId } from '../../../../common/types';
 import { getColumns } from '../../../detections/configurations/security_solution_detections';
@@ -56,7 +60,7 @@ const registerAlertsTableConfiguration = (
 
   // register Alert Table on Alert Page
   registry.register({
-    id: `${APP_ID}`,
+    id: ALERTS_TABLE_REGISTRY_CONFIG_IDS.ALERTS_PAGE,
     casesFeatureId: CASES_FEATURE_ID,
     columns: alertColumns,
     getRenderCellValue: renderCellValueHookAlertPage,
@@ -71,7 +75,7 @@ const registerAlertsTableConfiguration = (
 
   // register Alert Table on RuleDetails Page
   registry.register({
-    id: `${APP_ID}-rule-details`,
+    id: ALERTS_TABLE_REGISTRY_CONFIG_IDS.RULE_DETAILS,
     casesFeatureId: CASES_FEATURE_ID,
     columns: alertColumns,
     getRenderCellValue: renderCellValueHookAlertPage,
@@ -85,7 +89,7 @@ const registerAlertsTableConfiguration = (
   });
 
   registry.register({
-    id: `${APP_ID}-case`,
+    id: ALERTS_TABLE_REGISTRY_CONFIG_IDS.CASE,
     casesFeatureId: CASES_FEATURE_ID,
     columns: alertColumns,
     getRenderCellValue: renderCellValueHookCasePage,
