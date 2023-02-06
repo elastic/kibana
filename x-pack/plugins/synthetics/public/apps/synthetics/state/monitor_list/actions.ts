@@ -40,3 +40,5 @@ export const clearMonitorUpsertStatus = createAction<string>('clearMonitorUpsert
 export const updateManagementPageStateAction = createAction<Partial<MonitorListPageState>>(
   'updateManagementPageState'
 );
+
+export const cleanMonitorListState = createAction('cleanMonitorListState');

@@ -53,6 +53,7 @@ import {
   migrateInstallationToV860,
   migratePackagePolicyToV860,
 } from './migrations/to_v8_6_0';
+import { migratePackagePolicyToV870 } from './migrations/security_solution';
 
 /*
  * Saved object types and mappings
@@ -240,6 +241,7 @@ const getSavedObjectTypes = (
       '8.4.0': migratePackagePolicyToV840,
       '8.5.0': migratePackagePolicyToV850,
       '8.6.0': migratePackagePolicyToV860,
+      '8.7.0': migratePackagePolicyToV870,
     },
   },
   [PACKAGES_SAVED_OBJECT_TYPE]: {
