@@ -121,7 +121,7 @@ describe('When using execute action from response actions console', () => {
     enterConsoleCommand(renderResult, 'execute --command="ls -al" --timeout="23d"');
 
     expect(renderResult.getByTestId('test-badArgument-message').textContent).toEqual(
-      'Invalid argument value: --timeout. Argument must be a string with a positive integer value followed by a unit of time (h for hours, m for minutes, s for seconds)'
+      'Invalid argument value: --timeout. Argument must be a string with a positive integer value followed by a unit of time (h for hours, m for minutes, s for seconds). Example: 37m.'
     );
   });
 

@@ -29,7 +29,7 @@ import {
 } from '../../../../common/translations';
 import { getCommandAboutInfo } from './get_command_about_info';
 
-import { EXECUTE_TIMEOUT_REGEX } from './utils';
+import { validateUnitOfTime } from './utils';
 
 const emptyArgumentValidator = (argData: ParsedArgData): true | string => {
   if (argData?.length > 0 && typeof argData[0] === 'string' && argData[0]?.trim().length > 0) {
@@ -59,12 +59,12 @@ const executeTimeoutValidator = (argData: ParsedArgData): true | string => {
 
   if (emptyResult !== true) {
     return emptyResult;
-  } else if (String(argData).trim().length && EXECUTE_TIMEOUT_REGEX.test(String(argData).trim())) {
+  } else if (String(argData).trim().length && validateUnitOfTime(String(argData).trim())) {
     return true;
   } else {
     return i18n.translate('xpack.securitySolution.endpointConsoleCommands.invalidExecuteTimeout', {
       defaultMessage:
-        'Argument must be a string with a positive integer value followed by a unit of time (h for hours, m for minutes, s for seconds)',
+        'Argument must be a string with a positive integer value followed by a unit of time (h for hours, m for minutes, s for seconds). Example: 37m.',
     });
   }
 };
@@ -458,7 +458,7 @@ export const getEndpointConsoleCommands = ({
       name: 'execute',
       about: getCommandAboutInfo({
         aboutInfo: i18n.translate('xpack.securitySolution.endpointConsoleCommands.execute.about', {
-          defaultMessage: 'Execute a script on the host',
+          defaultMessage: 'Execute a command on the host',
         }),
         isSupported: doesEndpointSupportCommand('execute'),
       }),
@@ -479,7 +479,7 @@ export const getEndpointConsoleCommands = ({
           about: i18n.translate(
             'xpack.securitySolution.endpointConsoleCommands.execute.args.command.about',
             {
-              defaultMessage: 'The script to execute',
+              defaultMessage: 'The command to execute',
             }
           ),
           validate: (argData) => {
@@ -493,7 +493,7 @@ export const getEndpointConsoleCommands = ({
             'xpack.securitySolution.endpointConsoleCommands.execute.args.timeout.about',
             {
               defaultMessage:
-                'The timeout in units of time (h, m or s) for the endpoint to wait for the script to complete',
+                'The timeout in units of time (h, m or s) for the endpoint to wait for the script to complete. Example: 37m.',
             }
           ),
           validate: executeTimeoutValidator,
