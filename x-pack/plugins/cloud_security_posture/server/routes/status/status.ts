@@ -219,7 +219,7 @@ const getCspStatus = async ({
       indicesDetails,
       latestPackageVersion: latestCspPackageVersion,
       isPluginInitialized: isPluginInitialized(),
-      installedPolicyTemplates, //need to remove this
+      installedPolicyTemplates, // need to remove this
     };
 
   const response = {
@@ -237,7 +237,7 @@ const getCspStatus = async ({
     latestPackageVersion: latestCspPackageVersion,
     installedPackageVersion: installation?.install_version,
     isPluginInitialized: isPluginInitialized(),
-    installedPolicyTemplates, //need to remove this
+    installedPolicyTemplates, // need to remove this
   };
 
   assertResponse(response, logger);

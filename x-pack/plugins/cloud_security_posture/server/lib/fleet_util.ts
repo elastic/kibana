@@ -48,7 +48,7 @@ const getPackageNameQuery = (
 
   // const kquery = benchmarkFilter
   //   ? `${integrationNameQuery} AND ${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.name: *${benchmarkFilter}* AND ${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.posture_type: ${benchMarkPostureType}`
-  //   : `${integrationNameQuery} AND ${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.posture_type: ${benchMarkPostureType}`;   
+  //   : `${integrationNameQuery} AND ${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.posture_type: ${benchMarkPostureType}`;
 
   return kquery;
 };
