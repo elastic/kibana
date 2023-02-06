@@ -33,6 +33,15 @@ export const indices: ElasticsearchIndexWithIngestion[] = [
     connector: {
       api_key_id: null,
       configuration: { foo: { label: 'bar', value: 'barbar' } },
+      custom_scheduling: {
+        foo: {
+          configuration_overrides: {},
+          enabled: false,
+          interval: '',
+          last_synced: null,
+          name: '',
+        },
+      },
       description: null,
       error: null,
       features: null,
@@ -119,6 +128,15 @@ export const indices: ElasticsearchIndexWithIngestion[] = [
     connector: {
       api_key_id: null,
       configuration: { foo: { label: 'bar', value: 'barbar' } },
+      custom_scheduling: {
+        foo: {
+          configuration_overrides: {},
+          enabled: false,
+          interval: '',
+          last_synced: null,
+          name: '',
+        },
+      },
       description: null,
       error: null,
       features: null,
