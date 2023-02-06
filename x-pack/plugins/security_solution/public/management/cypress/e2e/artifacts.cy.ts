@@ -5,27 +5,12 @@
  * 2.0.
  */
 
-import { isEmpty } from 'lodash';
-import {
-  ENDPOINT_ARTIFACT_LIST_IDS,
-  EXCEPTION_LIST_URL,
-} from '@kbn/securitysolution-list-constants';
-import { BASE_ENDPOINT_ROUTE } from '../../../../common/endpoint/constants';
 import { login, loginWithRole, ROLE } from '../tasks/login';
 
-import { type FormAction, getArtifactsListTestsData } from '../fixtures/artifacts_page';
-import { runEndpointLoaderScript } from '../tasks/run_endpoint_loader';
-
-const removeAllArtifacts = () => {
-  for (const listId of ENDPOINT_ARTIFACT_LIST_IDS) {
-    cy.request({
-      method: 'DELETE',
-      url: `${EXCEPTION_LIST_URL}?list_id=${listId}&namespace_type=agnostic`,
-      headers: { 'kbn-xsrf': 'kibana' },
-      failOnStatusCode: false,
-    });
-  }
-};
+import { getArtifactsListTestsData } from '../fixtures/artifacts_page';
+import { removeAllArtifacts } from '../tasks/artifacts';
+import { performUserActions } from '../tasks/perform_user_actions';
+import { loadEndpointDataForEventFiltersIfNeeded } from '../tasks/load_endpoint_data';
 
 const loginWithWriteAccess = (url: string) => {
   loginWithRole(ROLE.analyst_hunter);
@@ -40,41 +25,6 @@ const loginWithReadAccess = (url: string) => {
 const loginWithoutAccess = (url: string) => {
   loginWithRole(ROLE.t1_analyst);
   cy.visit(url);
-};
-
-// Checks for Endpoint data and creates it if needed
-const loadEndpointDataForEventFiltersIfNeeded = () => {
-  cy.request({
-    method: 'POST',
-    url: `${BASE_ENDPOINT_ROUTE}/suggestions/eventFilters`,
-    body: {
-      field: 'agent.type',
-      query: '',
-    },
-    headers: { 'kbn-xsrf': 'kibana' },
-    failOnStatusCode: false,
-  }).then(({ body }) => {
-    if (isEmpty(body)) {
-      runEndpointLoaderScript();
-    }
-  });
-};
-
-const runAction = (action: FormAction) => {
-  let element;
-  if (action.customSelector) {
-    element = cy.get(action.customSelector);
-  } else {
-    element = cy.getBySel(action.selector || '');
-  }
-
-  if (action.type === 'click') {
-    element.click();
-  } else if (action.type === 'input') {
-    element.type(action.value || '');
-  } else if (action.type === 'clear') {
-    element.clear();
-  }
 };
 
 describe('Artifacts pages', () => {
@@ -117,9 +67,7 @@ describe('Artifacts pages', () => {
         // Opens add flyout
         cy.getBySel(`${testData.pagePrefix}-emptyState-addButton`).click();
 
-        for (const formAction of testData.create.formActions) {
-          runAction(formAction);
-        }
+        performUserActions(testData.create.formActions);
 
         // Submit create artifact form
         cy.getBySel(`${testData.pagePrefix}-flyout-submitButton`).click();
@@ -153,9 +101,7 @@ describe('Artifacts pages', () => {
         cy.getBySel(`${testData.pagePrefix}-card-header-actions-button`).click();
         cy.getBySel(`${testData.pagePrefix}-card-cardEditAction`).click();
 
-        for (const formAction of testData.update.formActions) {
-          runAction(formAction);
-        }
+        performUserActions(testData.update.formActions);
 
         // Submit edit artifact form
         cy.getBySel(`${testData.pagePrefix}-flyout-submitButton`).click();

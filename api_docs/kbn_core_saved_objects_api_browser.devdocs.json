@@ -2297,6 +2297,10 @@
               },
               {
                 "plugin": "synthetics",
+                "path": "x-pack/plugins/synthetics/public/apps/synthetics/components/monitors_page/common/monitor_filters/use_filters.ts"
+              },
+              {
+                "plugin": "synthetics",
                 "path": "x-pack/plugins/synthetics/public/legacy_uptime/components/monitor_management/monitor_config/use_monitor_name.ts"
               },
               {
@@ -2310,10 +2314,6 @@
               {
                 "plugin": "synthetics",
                 "path": "x-pack/plugins/synthetics/public/apps/synthetics/components/monitor_add_edit/hooks/use_monitor_name.ts"
-              },
-              {
-                "plugin": "synthetics",
-                "path": "x-pack/plugins/synthetics/public/apps/synthetics/components/monitors_page/management/list_filters/use_filters.ts"
               },
               {
                 "plugin": "graph",
@@ -2333,11 +2333,11 @@
               },
               {
                 "plugin": "synthetics",
-                "path": "x-pack/plugins/synthetics/public/apps/synthetics/components/monitors_page/management/list_filters/use_filters.test.ts"
+                "path": "x-pack/plugins/synthetics/public/apps/synthetics/components/monitors_page/common/monitor_filters/use_filters.test.ts"
               },
               {
                 "plugin": "synthetics",
-                "path": "x-pack/plugins/synthetics/public/apps/synthetics/components/monitors_page/management/list_filters/use_filters.test.ts"
+                "path": "x-pack/plugins/synthetics/public/apps/synthetics/components/monitors_page/common/monitor_filters/use_filters.test.ts"
               },
               {
                 "plugin": "savedObjects",
@@ -2514,6 +2514,10 @@
               {
                 "plugin": "dashboardEnhanced",
                 "path": "x-pack/plugins/dashboard_enhanced/public/services/drilldowns/abstract_dashboard_drilldown/components/collect_config_container.tsx"
+              },
+              {
+                "plugin": "monitoring",
+                "path": "x-pack/plugins/monitoring/public/application/pages/elasticsearch/ingest_pipeline_modal.tsx"
               },
               {
                 "plugin": "synthetics",
@@ -4801,14 +4805,6 @@
           {
             "plugin": "core",
             "path": "src/core/public/index.ts"
-          },
-          {
-            "plugin": "savedObjectsManagement",
-            "path": "src/plugins/saved_objects_management/public/lib/find_objects.ts"
-          },
-          {
-            "plugin": "savedObjectsManagement",
-            "path": "src/plugins/saved_objects_management/public/lib/find_objects.ts"
           },
           {
             "plugin": "visualizations",
