@@ -19,7 +19,6 @@ import {
   SEARCH_EXPERIENCES_PLUGIN,
   WORKPLACE_SEARCH_PLUGIN,
 } from '../../../../common/constants';
-import { enableEnginesSection } from '../../../../common/ui_settings_keys';
 import {
   ENGINES_PATH,
   SEARCH_INDICES_PATH,
@@ -31,9 +30,9 @@ import { KibanaLogic } from '../kibana';
 import { generateNavLink } from './nav_link_helpers';
 
 export const useEnterpriseSearchNav = () => {
-  const { productAccess, uiSettings } = useValues(KibanaLogic);
+  const { productAccess } = useValues(KibanaLogic);
 
-  const enginesSectionEnabled = uiSettings?.get<boolean>(enableEnginesSection, false);
+  const enginesSectionEnabled = productAccess.hasSearchEnginesAccess;
 
   const navItems: Array<EuiSideNavItemType<unknown>> = [
     {

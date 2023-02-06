@@ -43,6 +43,15 @@ export const connectorIndex: ConnectorViewIndex = {
   connector: {
     api_key_id: null,
     configuration: { foo: { label: 'bar', value: 'barbar' } },
+    custom_scheduling: {
+      foo: {
+        configuration_overrides: {},
+        enabled: false,
+        interval: '',
+        last_synced: null,
+        name: '',
+      },
+    },
     description: null,
     error: null,
     features: null,
@@ -106,6 +115,7 @@ export const connectorIndex: ConnectorViewIndex = {
     last_sync_status: SyncStatus.COMPLETED,
     last_synced: null,
     name: 'connector',
+    preferences: { extract_full_html: false },
     scheduling: {
       enabled: false,
       interval: '',
@@ -133,6 +143,15 @@ export const crawlerIndex: CrawlerViewIndex = {
   connector: {
     api_key_id: null,
     configuration: { foo: { label: 'bar', value: 'barbar' } },
+    custom_scheduling: {
+      foo: {
+        configuration_overrides: {},
+        enabled: false,
+        interval: '',
+        last_synced: null,
+        name: '',
+      },
+    },
     description: null,
     error: null,
     features: null,
@@ -196,6 +215,7 @@ export const crawlerIndex: CrawlerViewIndex = {
     last_sync_status: SyncStatus.COMPLETED,
     last_synced: null,
     name: 'crawler',
+    preferences: { extract_full_html: false },
     scheduling: {
       enabled: false,
       interval: '',

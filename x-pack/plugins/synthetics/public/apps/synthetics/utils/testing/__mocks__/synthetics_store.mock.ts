@@ -67,7 +67,8 @@ export const mockState: SyntheticsAppState = {
       sortField: `${ConfigKey.NAME}.keyword`,
       sortOrder: 'asc',
       tags: undefined,
-      monitorType: undefined,
+      monitorTypes: undefined,
+      projects: undefined,
       locations: undefined,
     },
     monitorUpsertStatuses: {},
@@ -98,8 +99,10 @@ export const mockState: SyntheticsAppState = {
     loaded: false,
     loading: false,
     flyoutConfig: null,
-    status: null,
-    statusError: null,
+    groupBy: {
+      field: 'none',
+      order: 'asc',
+    },
   },
   syntheticsEnablement: { loading: false, error: null, enablement: null },
   monitorDetails: getMonitorDetailsMockSlice(),
@@ -130,6 +133,12 @@ export const mockState: SyntheticsAppState = {
     error: {},
   },
   manualTestRuns: {},
+  overviewStatus: {
+    loaded: false,
+    loading: false,
+    status: null,
+    error: null,
+  },
 };
 
 function getBrowserJourneyMockSlice() {
