@@ -304,8 +304,8 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
           await testSubjects.existOrFail('solution-filter-popover-button');
 
-          for (const [caseId] of createdCases.entries()) {
-            await testSubjects.existOrFail(`cases-table-row-${caseId}`);
+          for (const [owner, currentCaseId] of createdCases.entries()) {
+            await testSubjects.existOrFail(`cases-table-row-${currentCaseId}`);
           }
 
           await closeModal();
