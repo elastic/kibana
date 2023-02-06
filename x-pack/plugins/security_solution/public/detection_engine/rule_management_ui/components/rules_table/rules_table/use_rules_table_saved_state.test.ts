@@ -70,14 +70,20 @@ describe('useRulesTableSavedState', () => {
         },
       } = renderHook(() => useRulesTableSavedState());
 
-      expect(filter?.searchTerm).toBe(urlSavedState.searchTerm);
-      expect(filter?.source).toBe(urlSavedState.source);
-      expect(filter?.tags).toBe(urlSavedState.tags);
-      expect(filter?.enabled).toBe(urlSavedState.enabled);
-      expect(sorting?.field).toBe(urlSavedState.field);
-      expect(sorting?.order).toBe(urlSavedState.order);
-      expect(pagination?.page).toBe(urlSavedState.page);
-      expect(pagination?.perPage).toBe(urlSavedState.perPage);
+      expect(filter).toEqual({
+        searchTerm: urlSavedState.searchTerm,
+        source: urlSavedState.source,
+        tags: urlSavedState.tags,
+        enabled: urlSavedState.enabled,
+      });
+      expect(sorting).toEqual({
+        field: urlSavedState.field,
+        order: urlSavedState.order,
+      });
+      expect(pagination).toEqual({
+        page: urlSavedState.page,
+        perPage: urlSavedState.perPage,
+      });
     });
 
     it('returns the state ignoring negative page size', () => {
@@ -92,14 +98,17 @@ describe('useRulesTableSavedState', () => {
         },
       } = renderHook(() => useRulesTableSavedState());
 
-      expect(filter?.searchTerm).toBe(urlSavedState.searchTerm);
-      expect(filter?.source).toBe(urlSavedState.source);
-      expect(filter?.tags).toBe(urlSavedState.tags);
-      expect(filter?.enabled).toBe(urlSavedState.enabled);
-      expect(sorting?.field).toBe(urlSavedState.field);
-      expect(sorting?.order).toBe(urlSavedState.order);
-      expect(pagination?.page).toBeUndefined();
-      expect(pagination?.perPage).toBeUndefined();
+      expect(filter).toEqual({
+        searchTerm: urlSavedState.searchTerm,
+        source: urlSavedState.source,
+        tags: urlSavedState.tags,
+        enabled: urlSavedState.enabled,
+      });
+      expect(sorting).toEqual({
+        field: urlSavedState.field,
+        order: urlSavedState.order,
+      });
+      expect(pagination).toEqual({});
     });
 
     it('returns the state ignoring the page size larger than max allowed', () => {
@@ -114,14 +123,19 @@ describe('useRulesTableSavedState', () => {
         },
       } = renderHook(() => useRulesTableSavedState());
 
-      expect(filter?.searchTerm).toBe(urlSavedState.searchTerm);
-      expect(filter?.source).toBe(urlSavedState.source);
-      expect(filter?.tags).toBe(urlSavedState.tags);
-      expect(filter?.enabled).toBe(urlSavedState.enabled);
-      expect(sorting?.field).toBe(urlSavedState.field);
-      expect(sorting?.order).toBe(urlSavedState.order);
-      expect(pagination?.page).toBe(urlSavedState.page);
-      expect(pagination?.perPage).toBeUndefined();
+      expect(filter).toEqual({
+        searchTerm: urlSavedState.searchTerm,
+        source: urlSavedState.source,
+        tags: urlSavedState.tags,
+        enabled: urlSavedState.enabled,
+      });
+      expect(sorting).toEqual({
+        field: urlSavedState.field,
+        order: urlSavedState.order,
+      });
+      expect(pagination).toEqual({
+        page: urlSavedState.page,
+      });
     });
   });
 
@@ -135,14 +149,11 @@ describe('useRulesTableSavedState', () => {
         },
       } = renderHook(() => useRulesTableSavedState());
 
-      expect(filter?.searchTerm).toBe(urlSavedState.searchTerm);
-      expect(filter?.source).toBeUndefined();
-      expect(filter?.tags).toBeUndefined();
-      expect(filter?.enabled).toBeUndefined();
-      expect(sorting?.field).toBeUndefined();
-      expect(sorting?.order).toBeUndefined();
-      expect(pagination?.page).toBeUndefined();
-      expect(pagination?.perPage).toBeUndefined();
+      expect(filter).toEqual({
+        searchTerm: 'test',
+      });
+      expect(sorting).toEqual({});
+      expect(pagination).toEqual({});
     });
 
     it('returns only show prebuilt rules filter', () => {
@@ -157,14 +168,11 @@ describe('useRulesTableSavedState', () => {
         },
       } = renderHook(() => useRulesTableSavedState());
 
-      expect(filter?.searchTerm).toBeUndefined();
-      expect(filter?.source).toBe(RuleSource.Elastic);
-      expect(filter?.tags).toBeUndefined();
-      expect(filter?.enabled).toBeUndefined();
-      expect(sorting?.field).toBeUndefined();
-      expect(sorting?.order).toBeUndefined();
-      expect(pagination?.page).toBeUndefined();
-      expect(pagination?.perPage).toBeUndefined();
+      expect(filter).toEqual({
+        source: RuleSource.Elastic,
+      });
+      expect(sorting).toEqual({});
+      expect(pagination).toEqual({});
     });
 
     it('returns only show custom rules filter', () => {
@@ -176,14 +184,11 @@ describe('useRulesTableSavedState', () => {
         },
       } = renderHook(() => useRulesTableSavedState());
 
-      expect(filter?.searchTerm).toBeUndefined();
-      expect(filter?.source).toBe(RuleSource.Custom);
-      expect(filter?.tags).toBeUndefined();
-      expect(filter?.enabled).toBeUndefined();
-      expect(sorting?.field).toBeUndefined();
-      expect(sorting?.order).toBeUndefined();
-      expect(pagination?.page).toBeUndefined();
-      expect(pagination?.perPage).toBeUndefined();
+      expect(filter).toEqual({
+        source: RuleSource.Custom,
+      });
+      expect(sorting).toEqual({});
+      expect(pagination).toEqual({});
     });
 
     it('returns only tags', () => {
@@ -195,14 +200,11 @@ describe('useRulesTableSavedState', () => {
         },
       } = renderHook(() => useRulesTableSavedState());
 
-      expect(filter?.searchTerm).toBeUndefined();
-      expect(filter?.source).toBeUndefined();
-      expect(filter?.tags).toEqual(['test']);
-      expect(filter?.enabled).toBeUndefined();
-      expect(sorting?.field).toBeUndefined();
-      expect(sorting?.order).toBeUndefined();
-      expect(pagination?.page).toBeUndefined();
-      expect(pagination?.perPage).toBeUndefined();
+      expect(filter).toEqual({
+        tags: ['test'],
+      });
+      expect(sorting).toEqual({});
+      expect(pagination).toEqual({});
     });
 
     it('returns only enabled state', () => {
@@ -214,14 +216,11 @@ describe('useRulesTableSavedState', () => {
         },
       } = renderHook(() => useRulesTableSavedState());
 
-      expect(filter?.searchTerm).toBeUndefined();
-      expect(filter?.source).toBeUndefined();
-      expect(filter?.tags).toBeUndefined();
-      expect(filter?.enabled).toBeTruthy();
-      expect(sorting?.field).toBeUndefined();
-      expect(sorting?.order).toBeUndefined();
-      expect(pagination?.page).toBeUndefined();
-      expect(pagination?.perPage).toBeUndefined();
+      expect(filter).toEqual({
+        enabled: true,
+      });
+      expect(sorting).toEqual({});
+      expect(pagination).toEqual({});
     });
 
     it('returns only sorting field', () => {
@@ -233,14 +232,9 @@ describe('useRulesTableSavedState', () => {
         },
       } = renderHook(() => useRulesTableSavedState());
 
-      expect(filter?.searchTerm).toBeUndefined();
-      expect(filter?.source).toBeUndefined();
-      expect(filter?.tags).toBeUndefined();
-      expect(filter?.enabled).toBeUndefined();
-      expect(sorting?.field).toBe('name');
-      expect(sorting?.order).toBeUndefined();
-      expect(pagination?.page).toBeUndefined();
-      expect(pagination?.perPage).toBeUndefined();
+      expect(filter).toEqual({});
+      expect(sorting).toEqual({ field: 'name' });
+      expect(pagination).toEqual({});
     });
 
     it('returns only sorting order', () => {
@@ -252,14 +246,9 @@ describe('useRulesTableSavedState', () => {
         },
       } = renderHook(() => useRulesTableSavedState());
 
-      expect(filter?.searchTerm).toBeUndefined();
-      expect(filter?.source).toBeUndefined();
-      expect(filter?.tags).toBeUndefined();
-      expect(filter?.enabled).toBeUndefined();
-      expect(sorting?.field).toBeUndefined();
-      expect(sorting?.order).toBe('asc');
-      expect(pagination?.page).toBeUndefined();
-      expect(pagination?.perPage).toBeUndefined();
+      expect(filter).toEqual({});
+      expect(sorting).toEqual({ order: 'asc' });
+      expect(pagination).toEqual({});
     });
 
     it('returns only page number', () => {
@@ -271,14 +260,9 @@ describe('useRulesTableSavedState', () => {
         },
       } = renderHook(() => useRulesTableSavedState());
 
-      expect(filter?.searchTerm).toBeUndefined();
-      expect(filter?.source).toBeUndefined();
-      expect(filter?.tags).toBeUndefined();
-      expect(filter?.enabled).toBeUndefined();
-      expect(sorting?.field).toBeUndefined();
-      expect(sorting?.order).toBeUndefined();
-      expect(pagination?.page).toBe(10);
-      expect(pagination?.perPage).toBeUndefined();
+      expect(filter).toEqual({});
+      expect(sorting).toEqual({});
+      expect(pagination).toEqual({ page: 10 });
     });
 
     it('returns only page size', () => {
@@ -290,14 +274,9 @@ describe('useRulesTableSavedState', () => {
         },
       } = renderHook(() => useRulesTableSavedState());
 
-      expect(filter?.searchTerm).toBeUndefined();
-      expect(filter?.source).toBeUndefined();
-      expect(filter?.tags).toBeUndefined();
-      expect(filter?.enabled).toBeUndefined();
-      expect(sorting?.field).toBeUndefined();
-      expect(sorting?.order).toBeUndefined();
-      expect(pagination?.page).toBeUndefined();
-      expect(pagination?.perPage).toBe(10);
+      expect(filter).toEqual({});
+      expect(sorting).toEqual({});
+      expect(pagination).toEqual({ perPage: 10 });
     });
   });
 
@@ -313,14 +292,19 @@ describe('useRulesTableSavedState', () => {
         },
       } = renderHook(() => useRulesTableSavedState());
 
-      expect(filter?.searchTerm).toBe(storageSavedState.searchTerm);
-      expect(filter?.source).toBe(storageSavedState.source);
-      expect(filter?.tags).toBe(storageSavedState.tags);
-      expect(filter?.enabled).toBe(storageSavedState.enabled);
-      expect(sorting?.field).toBe(storageSavedState.field);
-      expect(sorting?.order).toBe(storageSavedState.order);
-      expect(pagination?.page).toBeUndefined();
-      expect(pagination?.perPage).toBe(storageSavedState.perPage);
+      expect(filter).toEqual({
+        searchTerm: storageSavedState.searchTerm,
+        source: storageSavedState.source,
+        tags: storageSavedState.tags,
+        enabled: storageSavedState.enabled,
+      });
+      expect(sorting).toEqual({
+        field: storageSavedState.field,
+        order: storageSavedState.order,
+      });
+      expect(pagination).toEqual({
+        perPage: storageSavedState.perPage,
+      });
     });
 
     it('returns the state ignoring negative page size', () => {
@@ -335,14 +319,17 @@ describe('useRulesTableSavedState', () => {
         },
       } = renderHook(() => useRulesTableSavedState());
 
-      expect(filter?.searchTerm).toBe(storageSavedState.searchTerm);
-      expect(filter?.source).toBe(storageSavedState.source);
-      expect(filter?.tags).toBe(storageSavedState.tags);
-      expect(filter?.enabled).toBe(storageSavedState.enabled);
-      expect(sorting?.field).toBe(storageSavedState.field);
-      expect(sorting?.order).toBe(storageSavedState.order);
-      expect(pagination?.page).toBeUndefined();
-      expect(pagination?.perPage).toBeUndefined();
+      expect(filter).toEqual({
+        searchTerm: storageSavedState.searchTerm,
+        source: storageSavedState.source,
+        tags: storageSavedState.tags,
+        enabled: storageSavedState.enabled,
+      });
+      expect(sorting).toEqual({
+        field: storageSavedState.field,
+        order: storageSavedState.order,
+      });
+      expect(pagination).toEqual({});
     });
 
     it('returns the state ignoring the page size larger than max allowed', () => {
@@ -357,14 +344,17 @@ describe('useRulesTableSavedState', () => {
         },
       } = renderHook(() => useRulesTableSavedState());
 
-      expect(filter?.searchTerm).toBe(storageSavedState.searchTerm);
-      expect(filter?.source).toBe(storageSavedState.source);
-      expect(filter?.tags).toBe(storageSavedState.tags);
-      expect(filter?.enabled).toBe(storageSavedState.enabled);
-      expect(sorting?.field).toBe(storageSavedState.field);
-      expect(sorting?.order).toBe(storageSavedState.order);
-      expect(pagination?.page).toBeUndefined();
-      expect(pagination?.perPage).toBeUndefined();
+      expect(filter).toEqual({
+        searchTerm: storageSavedState.searchTerm,
+        source: storageSavedState.source,
+        tags: storageSavedState.tags,
+        enabled: storageSavedState.enabled,
+      });
+      expect(sorting).toEqual({
+        field: storageSavedState.field,
+        order: storageSavedState.order,
+      });
+      expect(pagination).toEqual({});
     });
   });
 
@@ -378,14 +368,11 @@ describe('useRulesTableSavedState', () => {
         },
       } = renderHook(() => useRulesTableSavedState());
 
-      expect(filter?.searchTerm).toBe('test');
-      expect(filter?.source).toBeUndefined();
-      expect(filter?.tags).toBeUndefined();
-      expect(filter?.enabled).toBeUndefined();
-      expect(sorting?.field).toBeUndefined();
-      expect(sorting?.order).toBeUndefined();
-      expect(pagination?.page).toBeUndefined();
-      expect(pagination?.perPage).toBeUndefined();
+      expect(filter).toEqual({
+        searchTerm: 'test',
+      });
+      expect(sorting).toEqual({});
+      expect(pagination).toEqual({});
     });
 
     it('returns only show prebuilt rules filter', () => {
@@ -400,14 +387,11 @@ describe('useRulesTableSavedState', () => {
         },
       } = renderHook(() => useRulesTableSavedState());
 
-      expect(filter?.searchTerm).toBeUndefined();
-      expect(filter?.source).toBe(RuleSource.Elastic);
-      expect(filter?.tags).toBeUndefined();
-      expect(filter?.enabled).toBeUndefined();
-      expect(sorting?.field).toBeUndefined();
-      expect(sorting?.order).toBeUndefined();
-      expect(pagination?.page).toBeUndefined();
-      expect(pagination?.perPage).toBeUndefined();
+      expect(filter).toEqual({
+        source: RuleSource.Elastic,
+      });
+      expect(sorting).toEqual({});
+      expect(pagination).toEqual({});
     });
 
     it('returns only show custom rules filter', () => {
@@ -419,14 +403,11 @@ describe('useRulesTableSavedState', () => {
         },
       } = renderHook(() => useRulesTableSavedState());
 
-      expect(filter?.searchTerm).toBeUndefined();
-      expect(filter?.source).toBe(RuleSource.Custom);
-      expect(filter?.tags).toBeUndefined();
-      expect(filter?.enabled).toBeUndefined();
-      expect(sorting?.field).toBeUndefined();
-      expect(sorting?.order).toBeUndefined();
-      expect(pagination?.page).toBeUndefined();
-      expect(pagination?.perPage).toBeUndefined();
+      expect(filter).toEqual({
+        source: RuleSource.Custom,
+      });
+      expect(sorting).toEqual({});
+      expect(pagination).toEqual({});
     });
 
     it('returns only tags', () => {
@@ -438,14 +419,11 @@ describe('useRulesTableSavedState', () => {
         },
       } = renderHook(() => useRulesTableSavedState());
 
-      expect(filter?.searchTerm).toBeUndefined();
-      expect(filter?.source).toBeUndefined();
-      expect(filter?.tags).toEqual(['test']);
-      expect(filter?.enabled).toBeUndefined();
-      expect(sorting?.field).toBeUndefined();
-      expect(sorting?.order).toBeUndefined();
-      expect(pagination?.page).toBeUndefined();
-      expect(pagination?.perPage).toBeUndefined();
+      expect(filter).toEqual({
+        tags: ['test'],
+      });
+      expect(sorting).toEqual({});
+      expect(pagination).toEqual({});
     });
 
     it('returns only enabled state', () => {
@@ -457,14 +435,11 @@ describe('useRulesTableSavedState', () => {
         },
       } = renderHook(() => useRulesTableSavedState());
 
-      expect(filter?.searchTerm).toBeUndefined();
-      expect(filter?.source).toBeUndefined();
-      expect(filter?.tags).toBeUndefined();
-      expect(filter?.enabled).toBeTruthy();
-      expect(sorting?.field).toBeUndefined();
-      expect(sorting?.order).toBeUndefined();
-      expect(pagination?.page).toBeUndefined();
-      expect(pagination?.perPage).toBeUndefined();
+      expect(filter).toEqual({
+        enabled: true,
+      });
+      expect(sorting).toEqual({});
+      expect(pagination).toEqual({});
     });
 
     it('returns only sorting field', () => {
@@ -476,14 +451,9 @@ describe('useRulesTableSavedState', () => {
         },
       } = renderHook(() => useRulesTableSavedState());
 
-      expect(filter?.searchTerm).toBeUndefined();
-      expect(filter?.source).toBeUndefined();
-      expect(filter?.tags).toBeUndefined();
-      expect(filter?.enabled).toBeUndefined();
-      expect(sorting?.field).toBe('name');
-      expect(sorting?.order).toBeUndefined();
-      expect(pagination?.page).toBeUndefined();
-      expect(pagination?.perPage).toBeUndefined();
+      expect(filter).toEqual({});
+      expect(sorting).toEqual({ field: 'name' });
+      expect(pagination).toEqual({});
     });
 
     it('returns only sorting order', () => {
@@ -495,14 +465,9 @@ describe('useRulesTableSavedState', () => {
         },
       } = renderHook(() => useRulesTableSavedState());
 
-      expect(filter?.searchTerm).toBeUndefined();
-      expect(filter?.source).toBeUndefined();
-      expect(filter?.tags).toBeUndefined();
-      expect(filter?.enabled).toBeUndefined();
-      expect(sorting?.field).toBeUndefined();
-      expect(sorting?.order).toBe('asc');
-      expect(pagination?.page).toBeUndefined();
-      expect(pagination?.perPage).toBeUndefined();
+      expect(filter).toEqual({});
+      expect(sorting).toEqual({ order: 'asc' });
+      expect(pagination).toEqual({});
     });
 
     it('does not return the page number', () => {
@@ -518,14 +483,9 @@ describe('useRulesTableSavedState', () => {
         },
       } = renderHook(() => useRulesTableSavedState());
 
-      expect(filter?.searchTerm).toBeUndefined();
-      expect(filter?.source).toBeUndefined();
-      expect(filter?.tags).toBeUndefined();
-      expect(filter?.enabled).toBeUndefined();
-      expect(sorting?.field).toBeUndefined();
-      expect(sorting?.order).toBeUndefined();
-      expect(pagination?.page).toBeUndefined();
-      expect(pagination?.perPage).toBeUndefined();
+      expect(filter).toEqual({});
+      expect(sorting).toEqual({});
+      expect(pagination).toEqual({});
     });
 
     it('returns only page size', () => {
@@ -537,14 +497,9 @@ describe('useRulesTableSavedState', () => {
         },
       } = renderHook(() => useRulesTableSavedState());
 
-      expect(filter?.searchTerm).toBeUndefined();
-      expect(filter?.source).toBeUndefined();
-      expect(filter?.tags).toBeUndefined();
-      expect(filter?.enabled).toBeUndefined();
-      expect(sorting?.field).toBeUndefined();
-      expect(sorting?.order).toBeUndefined();
-      expect(pagination?.page).toBeUndefined();
-      expect(pagination?.perPage).toBe(10);
+      expect(filter).toEqual({});
+      expect(sorting).toEqual({});
+      expect(pagination).toEqual({ perPage: 10 });
     });
   });
 
@@ -560,14 +515,20 @@ describe('useRulesTableSavedState', () => {
         },
       } = renderHook(() => useRulesTableSavedState());
 
-      expect(filter?.searchTerm).toBe(urlSavedState.searchTerm);
-      expect(filter?.source).toBe(urlSavedState.source);
-      expect(filter?.tags).toBe(urlSavedState.tags);
-      expect(filter?.enabled).toBe(urlSavedState.enabled);
-      expect(sorting?.field).toBe(urlSavedState.field);
-      expect(sorting?.order).toBe(urlSavedState.order);
-      expect(pagination?.page).toBe(urlSavedState.page);
-      expect(pagination?.perPage).toBe(urlSavedState.perPage);
+      expect(filter).toEqual({
+        searchTerm: urlSavedState.searchTerm,
+        source: urlSavedState.source,
+        tags: urlSavedState.tags,
+        enabled: urlSavedState.enabled,
+      });
+      expect(sorting).toEqual({
+        field: urlSavedState.field,
+        order: urlSavedState.order,
+      });
+      expect(pagination).toEqual({
+        page: urlSavedState.page,
+        perPage: urlSavedState.perPage,
+      });
     });
   });
 
@@ -584,14 +545,13 @@ describe('useRulesTableSavedState', () => {
         },
       } = renderHook(() => useRulesTableSavedState());
 
-      expect(filter?.searchTerm).toBe('test');
-      expect(filter?.source).toBeUndefined();
-      expect(filter?.tags).toBeUndefined();
-      expect(filter?.enabled).toBeUndefined();
-      expect(sorting?.field).toBe('name');
-      expect(sorting?.order).toBeUndefined();
-      expect(pagination?.page).toBeUndefined();
-      expect(pagination?.perPage).toBeUndefined();
+      expect(filter).toEqual({
+        searchTerm: 'test',
+      });
+      expect(sorting).toEqual({
+        field: 'name',
+      });
+      expect(pagination).toEqual({});
     });
   });
 
@@ -618,14 +578,15 @@ describe('useRulesTableSavedState', () => {
         },
       } = renderHook(() => useRulesTableSavedState());
 
-      expect(filter?.searchTerm).toBeUndefined();
-      expect(filter?.source).toBeUndefined();
-      expect(filter?.tags).toBeUndefined();
-      expect(filter?.enabled).toBeUndefined();
-      expect(sorting?.field).toBe('name');
-      expect(sorting?.order).toBe('asc');
-      expect(pagination?.page).toBe(2);
-      expect(pagination?.perPage).toBe(10);
+      expect(filter).toEqual({});
+      expect(sorting).toEqual({
+        field: 'name',
+        order: 'asc',
+      });
+      expect(pagination).toEqual({
+        page: 2,
+        perPage: 10,
+      });
     });
 
     it('does not return the sorting', () => {
@@ -650,14 +611,17 @@ describe('useRulesTableSavedState', () => {
         },
       } = renderHook(() => useRulesTableSavedState());
 
-      expect(filter?.searchTerm).toBe('test');
-      expect(filter?.source).toBe(RuleSource.Custom);
-      expect(filter?.tags).toEqual(['test']);
-      expect(filter?.enabled).toBeTruthy();
-      expect(sorting?.field).toBeUndefined();
-      expect(sorting?.order).toBeUndefined();
-      expect(pagination?.page).toBe(2);
-      expect(pagination?.perPage).toBe(10);
+      expect(filter).toEqual({
+        searchTerm: 'test',
+        source: RuleSource.Custom,
+        tags: ['test'],
+        enabled: true,
+      });
+      expect(sorting).toEqual({});
+      expect(pagination).toEqual({
+        page: 2,
+        perPage: 10,
+      });
     });
 
     it('does not return the pagination', () => {
@@ -682,14 +646,17 @@ describe('useRulesTableSavedState', () => {
         },
       } = renderHook(() => useRulesTableSavedState());
 
-      expect(filter?.searchTerm).toBe('test');
-      expect(filter?.source).toBe(RuleSource.Custom);
-      expect(filter?.tags).toEqual(['test']);
-      expect(filter?.enabled).toBeTruthy();
-      expect(sorting?.field).toBe('name');
-      expect(sorting?.order).toBe('asc');
-      expect(pagination?.page).toBeUndefined();
-      expect(pagination?.perPage).toBeUndefined();
+      expect(filter).toEqual({
+        searchTerm: 'test',
+        source: RuleSource.Custom,
+        tags: ['test'],
+        enabled: true,
+      });
+      expect(sorting).toEqual({
+        field: 'name',
+        order: 'asc',
+      });
+      expect(pagination).toEqual({});
     });
   });
 
@@ -715,14 +682,14 @@ describe('useRulesTableSavedState', () => {
         },
       } = renderHook(() => useRulesTableSavedState());
 
-      expect(filter?.searchTerm).toBeUndefined();
-      expect(filter?.source).toBeUndefined();
-      expect(filter?.tags).toBeUndefined();
-      expect(filter?.enabled).toBeUndefined();
-      expect(sorting?.field).toBe('name');
-      expect(sorting?.order).toBe('asc');
-      expect(pagination?.page).toBeUndefined();
-      expect(pagination?.perPage).toBe(10);
+      expect(filter).toEqual({});
+      expect(sorting).toEqual({
+        field: 'name',
+        order: 'asc',
+      });
+      expect(pagination).toEqual({
+        perPage: 10,
+      });
     });
 
     it('does not return the sorting', () => {
@@ -746,14 +713,16 @@ describe('useRulesTableSavedState', () => {
         },
       } = renderHook(() => useRulesTableSavedState());
 
-      expect(filter?.searchTerm).toBe('test');
-      expect(filter?.source).toBe(RuleSource.Custom);
-      expect(filter?.tags).toEqual(['test']);
-      expect(filter?.enabled).toBeTruthy();
-      expect(sorting?.field).toBeUndefined();
-      expect(sorting?.order).toBeUndefined();
-      expect(pagination?.page).toBeUndefined();
-      expect(pagination?.perPage).toBe(10);
+      expect(filter).toEqual({
+        searchTerm: 'test',
+        source: RuleSource.Custom,
+        tags: ['test'],
+        enabled: true,
+      });
+      expect(sorting).toEqual({});
+      expect(pagination).toEqual({
+        perPage: 10,
+      });
     });
 
     it('does not return the pagination', () => {
@@ -777,14 +746,17 @@ describe('useRulesTableSavedState', () => {
         },
       } = renderHook(() => useRulesTableSavedState());
 
-      expect(filter?.searchTerm).toBe('test');
-      expect(filter?.source).toBe(RuleSource.Custom);
-      expect(filter?.tags).toEqual(['test']);
-      expect(filter?.enabled).toBeTruthy();
-      expect(sorting?.field).toBe('name');
-      expect(sorting?.order).toBe('asc');
-      expect(pagination?.page).toBeUndefined();
-      expect(pagination?.perPage).toBeUndefined();
+      expect(filter).toEqual({
+        searchTerm: 'test',
+        source: RuleSource.Custom,
+        tags: ['test'],
+        enabled: true,
+      });
+      expect(sorting).toEqual({
+        field: 'name',
+        order: 'asc',
+      });
+      expect(pagination).toEqual({});
     });
   });
 });

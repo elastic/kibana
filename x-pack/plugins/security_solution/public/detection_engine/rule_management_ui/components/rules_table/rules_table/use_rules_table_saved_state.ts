@@ -37,15 +37,26 @@ function validateState(
 ): [RulesTableSavedFilter, RulesTableSavedSorting, RulesTableUrlSavedPagination] {
   const [filterFromUrl] = validateNonExact(urlState, RulesTableSavedFilter);
   const [filterFromStorage] = validateNonExact(storageState, RulesTableSavedFilter);
-  const filter = { ...filterFromStorage, ...filterFromUrl };
+  const filter: RulesTableSavedFilter = {
+    searchTerm: filterFromUrl?.searchTerm ?? filterFromStorage?.searchTerm,
+    source: filterFromUrl?.source ?? filterFromStorage?.source,
+    tags: filterFromUrl?.tags ?? filterFromStorage?.tags,
+    enabled: filterFromUrl?.enabled ?? filterFromStorage?.enabled,
+  };
 
   const [sortingFromUrl] = validateNonExact(urlState, RulesTableSavedSorting);
   const [sortingFromStorage] = validateNonExact(storageState, RulesTableSavedSorting);
-  const sorting = { ...sortingFromStorage, ...sortingFromUrl };
+  const sorting = {
+    field: sortingFromUrl?.field ?? sortingFromStorage?.field,
+    order: sortingFromUrl?.order ?? sortingFromStorage?.order,
+  };
 
   const [paginationFromUrl] = validateNonExact(urlState, RulesTableUrlSavedPagination);
   const [paginationFromStorage] = validateNonExact(storageState, RulesTableStorageSavedPagination);
-  const pagination = { perPage: paginationFromStorage?.perPage, ...paginationFromUrl };
+  const pagination = {
+    page: paginationFromUrl?.page,
+    perPage: paginationFromUrl?.perPage ?? paginationFromStorage?.perPage,
+  };
 
   if (
     pagination.perPage &&
