@@ -6,7 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { Redirect, Route, Router, Switch } from 'react-router-dom';
+import { Redirect, Router, Switch } from 'react-router-dom';
+import { Route } from '@kbn/shared-ux-router';
 import React from 'react';
 import { History } from 'history';
 import { EuiErrorBoundary } from '@elastic/eui';

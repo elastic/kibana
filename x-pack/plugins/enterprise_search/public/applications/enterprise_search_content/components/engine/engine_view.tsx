@@ -6,9 +6,11 @@
  */
 
 import React, { useEffect } from 'react';
-import { useParams, Route, Switch } from 'react-router-dom';
+import { useParams, Switch } from 'react-router-dom';
 
 import { useValues, useActions } from 'kea';
+
+import { Route } from '@kbn/shared-ux-router';
 
 import { Status } from '../../../../../common/types/api';
 

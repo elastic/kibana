@@ -13,7 +13,9 @@ import {
   MatcherFunction,
   RenderOptions,
 } from '@testing-library/react';
-import { Router, Route } from 'react-router-dom';
+import { Router } from 'react-router-dom';
+import { Route } from '@kbn/shared-ux-router';
+
 import { merge } from 'lodash';
 import { createMemoryHistory, History } from 'history';
 import { CoreStart } from '@kbn/core/public';

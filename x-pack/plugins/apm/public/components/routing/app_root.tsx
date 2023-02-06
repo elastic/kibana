@@ -19,7 +19,7 @@ import {
 import { RouteRenderer, RouterProvider } from '@kbn/typed-react-router-config';
 import { euiDarkVars, euiLightVars } from '@kbn/ui-theme';
 import React from 'react';
-import { Route } from 'react-router-dom';
+import { Route } from '@kbn/shared-ux-router';
 import { DefaultTheme, ThemeProvider } from 'styled-components';
 import { AnomalyDetectionJobsContextProvider } from '../../context/anomaly_detection_jobs/anomaly_detection_jobs_context';
 import {

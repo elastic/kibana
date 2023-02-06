@@ -6,7 +6,9 @@
  */
 
 import React, { useState, useEffect } from 'react';
-import { Router, Switch, Route, Redirect } from 'react-router-dom';
+import { Router, Switch, Redirect } from 'react-router-dom';
+import { Route } from '@kbn/shared-ux-router';
+
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiEmptyPrompt,

@@ -7,7 +7,9 @@
 
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { Router, Route, Switch, useHistory } from 'react-router-dom';
+import { Router, Switch, useHistory } from 'react-router-dom';
+import { Route } from '@kbn/shared-ux-router';
+
 import { EuiButton, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
 import { FLEET_ROUTING_PATHS } from '../../constants';

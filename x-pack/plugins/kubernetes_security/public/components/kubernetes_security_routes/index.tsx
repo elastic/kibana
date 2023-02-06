@@ -6,7 +6,8 @@
  */
 
 import React, { useCallback, useMemo } from 'react';
-import { Route, Switch } from 'react-router-dom';
+import { Switch } from 'react-router-dom';
+import { Route } from '@kbn/shared-ux-router';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 import {
   EuiBetaBadge,

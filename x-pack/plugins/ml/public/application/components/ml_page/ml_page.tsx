@@ -7,7 +7,9 @@
 
 import React, { createContext, FC, useEffect, useMemo, useState } from 'react';
 import { createHtmlPortalNode, HtmlPortalNode } from 'react-reverse-portal';
-import { Redirect, Route, Switch } from 'react-router-dom';
+import { Redirect, Switch } from 'react-router-dom';
+import { Route } from '@kbn/shared-ux-router';
+
 import { Subscription } from 'rxjs';
 
 import { EuiPageSection } from '@elastic/eui';

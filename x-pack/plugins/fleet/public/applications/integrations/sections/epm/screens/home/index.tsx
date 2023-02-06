@@ -6,7 +6,9 @@
  */
 
 import React, { useMemo, useState } from 'react';
-import { Switch, Route } from 'react-router-dom';
+import { Switch } from 'react-router-dom';
+
+import { Route } from '@kbn/shared-ux-router';
 
 import type { CustomIntegration } from '@kbn/custom-integrations-plugin/common';
 

@@ -7,7 +7,8 @@
  */
 
 import React, { FunctionComponent, useMemo } from 'react';
-import { Route, RouteComponentProps, Router, Switch } from 'react-router-dom';
+import { RouteComponentProps, Router, Switch } from 'react-router-dom';
+import { Route } from '@kbn/shared-ux-router';
 import { History } from 'history';
 import { EMPTY, Observable } from 'rxjs';
 import useObservable from 'react-use/lib/useObservable';

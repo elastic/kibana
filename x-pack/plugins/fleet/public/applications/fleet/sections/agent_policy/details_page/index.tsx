@@ -6,7 +6,9 @@
  */
 
 import React, { useMemo, useState, useCallback } from 'react';
-import { Redirect, useRouteMatch, Switch, Route, useLocation } from 'react-router-dom';
+import { Redirect, useRouteMatch, Switch, useLocation } from 'react-router-dom';
+import { Route } from '@kbn/shared-ux-router';
+
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiPortal } from '@elastic/eui';

@@ -6,9 +6,11 @@
  */
 
 import React, { useEffect } from 'react';
-import { Redirect, Route, Switch, useParams } from 'react-router-dom';
+import { Redirect, Switch, useParams } from 'react-router-dom';
 
 import { useActions } from 'kea';
+
+import { Route } from '@kbn/shared-ux-router';
 
 import {
   OLD_SEARCH_INDEX_CRAWLER_DOMAIN_DETAIL_PATH,

@@ -6,7 +6,8 @@
  */
 
 import React, { useMemo, useCallback } from 'react';
-import { useRouteMatch, Switch, Route, useLocation } from 'react-router-dom';
+import { useRouteMatch, Switch, useLocation } from 'react-router-dom';
+import { Route } from '@kbn/shared-ux-router';
 import { EuiFlexGroup, EuiFlexItem, EuiButtonEmpty, EuiText, EuiSpacer } from '@elastic/eui';
 import type { Props as EuiTabProps } from '@elastic/eui/src/components/tabs/tab';
 import { FormattedMessage } from '@kbn/i18n-react';
