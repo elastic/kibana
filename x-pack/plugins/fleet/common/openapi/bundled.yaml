@@ -857,6 +857,11 @@ paths:
         - $ref: '#/components/parameters/sort_field'
         - $ref: '#/components/parameters/sort_order'
         - $ref: '#/components/parameters/with_metrics'
+        - name: getStatusSummary
+          in: query
+          required: false
+          schema:
+            type: boolean
       security:
         - basicAuth: []
   /agents/bulk_upgrade:
@@ -3421,11 +3426,11 @@ components:
             cpu_avg:
               type: number
               description: >-
-                Average agent CPU usage during the last 5 minute, number between
-                0-1
+                Average agent CPU usage during the last 5 minutes, number
+                between 0-1
             memory_size_byte_avg:
               type: number
-              description: Average agent memory consumption during the last 5 minute
+              description: Average agent memory consumption during the last 5 minutes
       required:
         - type
         - active
@@ -3451,6 +3456,27 @@ components:
           type: number
         perPage:
           type: number
+        statusSummary:
+          type: object
+          properties:
+            offline:
+              type: number
+            error:
+              type: number
+            online:
+              type: number
+            inactive:
+              type: number
+            enrolling:
+              type: number
+            unenrolling:
+              type: number
+            unenrolled:
+              type: number
+            updating:
+              type: number
+            degraded':
+              type: number
       required:
         - items
         - total

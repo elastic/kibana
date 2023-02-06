@@ -49,5 +49,8 @@ export const renderApp = ({
     </SecurityApp>,
     element
   );
-  return () => unmountComponentAtNode(element);
+  return () => {
+    services.data.search.session.clear();
+    unmountComponentAtNode(element);
+  };
 };

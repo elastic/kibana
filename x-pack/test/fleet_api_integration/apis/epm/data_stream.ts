@@ -6,6 +6,7 @@
  */
 
 import expect from '@kbn/expect';
+import { v4 as uuidv4 } from 'uuid';
 import { asyncForEach } from '@kbn/std';
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { skipIfNoDockerRegistry } from '../../helpers';
@@ -166,6 +167,95 @@ export default function (providerContext: FtrProviderContext) {
         expect(resLogsDatastream.body.data_streams[0].indices.length).equal(2);
       });
       await installPackage(pkgName, pkgUpdateVersion);
+    });
+
+    describe('When enabling experimental data stream features', () => {
+      let agentPolicyId: string;
+      let packagePolicyId: string;
+
+      let packagePolicyData: any;
+
+      beforeEach(async () => {
+        const { body: agentPolicyResponse } = await supertest
+          .post(`/api/fleet/agent_policies`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: `Test policy ${uuidv4()}`,
+            namespace: 'default',
+          })
+          .expect(200);
+        agentPolicyId = agentPolicyResponse.item.id;
+        packagePolicyData = {
+          force: true,
+          name: `test-package-experimental-feature-${uuidv4()}`,
+          description: '',
+          namespace: 'default',
+          policy_id: agentPolicyId,
+          enabled: true,
+          inputs: [],
+          package: {
+            name: pkgName,
+            version: pkgVersion,
+          },
+        };
+        const { body: responseWithForce } = await supertest
+          .post(`/api/fleet/package_policies`)
+          .set('kbn-xsrf', 'xxxx')
+          .send(packagePolicyData)
+          .expect(200);
+
+        packagePolicyId = responseWithForce.item.id;
+      });
+      afterEach(async () => {
+        await supertest
+          .post(`/api/fleet/agent_policies/delete`)
+          .send({
+            agentPolicyId,
+          })
+          .set('kbn-xsrf', 'xxxx')
+          .expect(200);
+      });
+
+      async function getLogsDefaultBackingIndicesLength() {
+        const resLogsDatastream = await es.transport.request<any>(
+          {
+            method: 'GET',
+            path: `/_data_stream/${logsTemplateName}-${namespaces[0]}`,
+          },
+          { meta: true }
+        );
+
+        return resLogsDatastream.body.data_streams[0].indices.length;
+      }
+
+      it('should rollover datstream after enabling a expiremental datastream feature that need a rollover', async () => {
+        expect(await getLogsDefaultBackingIndicesLength()).to.be(1);
+
+        await supertest
+          .put(`/api/fleet/package_policies/${packagePolicyId}`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            ...packagePolicyData,
+            package: {
+              ...packagePolicyData.package,
+              experimental_data_stream_features: [
+                {
+                  data_stream: logsTemplateName,
+                  features: {
+                    synthetic_source: false,
+                    tsdb: false,
+                    doc_value_only_numeric: true,
+                    doc_value_only_other: true,
+                  },
+                },
+              ],
+            },
+          })
+          .expect(200);
+
+        // Datastream should have been rolled over
+        expect(await getLogsDefaultBackingIndicesLength()).to.be(2);
+      });
     });
   });
 }
