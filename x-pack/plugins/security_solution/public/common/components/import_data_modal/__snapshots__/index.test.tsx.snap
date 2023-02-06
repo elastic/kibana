@@ -335,7 +335,7 @@ Object {
                   class="euiText emotion-euiText-s-euiTextColor-default-euiCallOut__description"
                 >
                   <div
-                    class="euiFlexGroup emotion-euiFlexGroup-responsive-l-flexStart-center-row"
+                    class="euiFlexGroup emotion-euiFlexGroup-none-flexStart-stretch-column"
                   >
                     <div
                       class="euiFlexItem emotion-euiFlexItem-grow-1"
@@ -344,12 +344,29 @@ Object {
                       <div
                         class="euiText emotion-euiText-xs"
                       >
-                        1 connector has sensitive information that requires updates. review in 
+                        1 connector has sensitive information that requires updates.
+                      </div>
+                    </div>
+                    <div
+                      class="euiFlexItem emotion-euiFlexItem-grow-1"
+                    >
+                      <div
+                        class="euiFlexGroup emotion-euiFlexGroup-none-flexStart-flexEnd-columnReverse"
+                      >
                         <button
-                          class="euiLink emotion-euiLink-primary"
+                          class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-m-base-warning"
+                          data-test-subj="actionConnectorsWarningsCallOutButton"
                           type="button"
                         >
-                          connectors
+                          <span
+                            class="emotion-euiButtonDisplayContent"
+                          >
+                            <span
+                              class="eui-textTruncate"
+                            >
+                              buttonLabel
+                            </span>
+                          </span>
                         </button>
                       </div>
                     </div>

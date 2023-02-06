@@ -74,19 +74,10 @@ export const ACTION_CONNECTORS_WARNING_TITLE = (totalConnectors: number) =>
     }
   );
 
-export const ACTION_CONNECTORS_WARNING_MESSAGE = (message: string) =>
-  i18n.translate(
-    'xpack.securitySolution.detectionEngine.components.importRuleModal.actionConnectorsWarningMessage',
-    {
-      values: { message },
-      defaultMessage: '{message} review in ',
-    }
-  );
-
-export const ACTION_CONNECTORS_WARNING_LINK = i18n.translate(
-  'xpack.securitySolution.detectionEngine.components.importRuleModal.actionConnectorsWarningLink',
+export const ACTION_CONNECTORS_WARNING_BUTTON = i18n.translate(
+  'xpack.securitySolution.detectionEngine.components.importRuleModal.actionConnectorsWarningButton',
   {
-    defaultMessage: 'connectors',
+    defaultMessage: 'Go to connectors',
   }
 );
 

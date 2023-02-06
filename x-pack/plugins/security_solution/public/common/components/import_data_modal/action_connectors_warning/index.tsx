@@ -7,7 +7,7 @@
 import React from 'react';
 import type { FC } from 'react';
 
-import { EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiLink, EuiText } from '@elastic/eui';
+import { EuiButton, EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import type { WarningSchema } from '../../../../../common/detection_engine/schemas/response';
 import { useKibana } from '../../../lib/kibana/kibana_react';
 import * as i18n from '../translations';
@@ -23,7 +23,7 @@ const ActionConnectorWarningsComponent: FC<ActionConnectorWarningsComponentProps
   const { http } = useKibana().services;
 
   if (!importedActionConnectorsCount || !actionConnectorsWarnings.length) return null;
-  const { actionPath, message } = actionConnectorsWarnings[0];
+  const { actionPath, message, buttonLabel } = actionConnectorsWarnings[0];
 
   return (
     <EuiCallOut
@@ -38,14 +38,20 @@ const ActionConnectorWarningsComponent: FC<ActionConnectorWarningsComponentProps
       }
       color="warning"
     >
-      <EuiFlexGroup alignItems="center">
+      <EuiFlexGroup direction="column" gutterSize="none">
         <EuiFlexItem data-test-subj="actionConnectorsWarningsCallOutMessage">
-          <EuiText size="xs">
-            {i18n.ACTION_CONNECTORS_WARNING_MESSAGE(message)}
-            <EuiLink href={http.basePath.prepend(actionPath)}>
-              {i18n.ACTION_CONNECTORS_WARNING_LINK}
-            </EuiLink>
-          </EuiText>
+          <EuiText size="xs">{message}</EuiText>
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiFlexGroup gutterSize="none" direction="columnReverse" alignItems="flexEnd">
+            <EuiButton
+              data-test-subj="actionConnectorsWarningsCallOutButton"
+              color="warning"
+              href={http.basePath.prepend(actionPath)}
+            >
+              {buttonLabel || i18n.ACTION_CONNECTORS_WARNING_BUTTON}
+            </EuiButton>
+          </EuiFlexGroup>
         </EuiFlexItem>
       </EuiFlexGroup>
     </EuiCallOut>

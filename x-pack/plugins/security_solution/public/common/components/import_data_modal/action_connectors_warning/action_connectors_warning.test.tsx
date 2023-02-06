@@ -48,7 +48,7 @@ describe('ActionConnectorWarnings', () => {
       '1 connector imported'
     );
     expect(getByTestId('actionConnectorsWarningsCallOutMessage').textContent).toBe(
-      '1 connector has sensitive information that requires updates. review in connectors'
+      '1 connector has sensitive information that requires updates.'
     );
   });
   test('should render if 2 connectors were imported and use the warning message with the correct imported number', () => {
@@ -71,7 +71,34 @@ describe('ActionConnectorWarnings', () => {
       '2 connectors imported'
     );
     expect(getByTestId('actionConnectorsWarningsCallOutMessage').textContent).toBe(
-      '2 connectors have sensitive information that requires updates. review in connectors'
+      '2 connectors have sensitive information that requires updates.'
     );
+    expect(getByTestId('actionConnectorsWarningsCallOutButton').textContent).toBe(
+      'Go to connectors'
+    );
+  });
+  test('should render if 2 connectors were imported and use the button label when is set', () => {
+    const wrapper = render(
+      <ActionConnectorWarnings
+        actionConnectorsWarnings={[
+          {
+            actionPath: '/',
+            buttonLabel: 'Connectors',
+            message: '2 connectors have sensitive information that requires updates.',
+            type: '',
+          },
+        ]}
+        importedActionConnectorsCount={2}
+      />
+    );
+    const { getByTestId } = wrapper;
+    expect(wrapper).toMatchSnapshot();
+    expect(getByTestId('actionConnectorsWarningsCallOutTitle').textContent).toBe(
+      '2 connectors imported'
+    );
+    expect(getByTestId('actionConnectorsWarningsCallOutMessage').textContent).toBe(
+      '2 connectors have sensitive information that requires updates.'
+    );
+    expect(getByTestId('actionConnectorsWarningsCallOutButton').textContent).toBe('Connectors');
   });
 });
