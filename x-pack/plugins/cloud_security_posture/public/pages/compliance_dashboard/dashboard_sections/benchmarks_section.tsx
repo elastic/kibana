@@ -12,6 +12,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiTitle, useEuiTheme } from '@elas
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
+import { ChartPanel } from '../../../components/chart_panel';
 import { CloudPostureScoreChart } from '../compliance_charts/cloud_posture_score_chart';
 import type {
   Cluster,
@@ -136,7 +137,12 @@ export const BenchmarksSection = ({
             data-test-subj={DASHBOARD_TABLE_HEADER_SCORE_TEST_ID}
             onClick={toggleClustersSortingDirection}
           >
-            <EuiTitle size="xxs">
+            <EuiTitle
+              size="xxs"
+              css={css`
+                padding-left: 16px;
+              `}
+            >
               <div>
                 <FormattedMessage
                   id="xpack.csp.dashboard.benchmarkSection.columnsHeader.complianceScoreTitle"
@@ -148,7 +154,12 @@ export const BenchmarksSection = ({
           </button>
         </EuiFlexItem>
         <EuiFlexItem grow={dashboardColumnsGrow.third}>
-          <EuiTitle size="xxs">
+          <EuiTitle
+            size="xxs"
+            css={css`
+              padding-left: 16px;
+            `}
+          >
             <div>
               <FormattedMessage
                 id="xpack.csp.dashboard.benchmarkSection.columnsHeader.complianceByCisSectionTitle"
@@ -175,18 +186,28 @@ export const BenchmarksSection = ({
             grow={dashboardColumnsGrow.second}
             data-test-subj={DASHBOARD_TABLE_COLUMN_SCORE_TEST_ID}
           >
-            <CloudPostureScoreChart
-              compact
-              id={`${cluster.meta.assetIdentifierId}_score_chart`}
-              data={cluster.stats}
-              trend={cluster.trend}
-              onEvalCounterClick={(evaluation) =>
-                navToFindingsByClusterAndEvaluation(cluster, evaluation)
-              }
-            />
+            <ChartPanel
+              hasBorder={false}
+              panelStyles={css`
+                padding: 0 16px;
+              `}
+            >
+              <CloudPostureScoreChart
+                compact
+                id={`${cluster.meta.assetIdentifierId}_score_chart`}
+                data={cluster.stats}
+                trend={cluster.trend}
+                onEvalCounterClick={(evaluation) =>
+                  navToFindingsByClusterAndEvaluation(cluster, evaluation)
+                }
+              />
+            </ChartPanel>
           </EuiFlexItem>
           <EuiFlexItem grow={dashboardColumnsGrow.third}>
             <RisksTable
+              containerStyles={css`
+                padding: 0 16px;
+              `}
               compact
               data={cluster.groupedFindingsEvaluation}
               maxItems={3}

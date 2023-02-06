@@ -14,6 +14,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
 } from '@elastic/eui';
+import { SerializedStyles } from '@emotion/serialize';
 import { CHART_PANEL_TEST_SUBJECTS } from './test_subjects';
 
 interface ChartPanelProps {
@@ -21,6 +22,7 @@ interface ChartPanelProps {
   hasBorder?: boolean;
   isLoading?: boolean;
   isError?: boolean;
+  panelStyles?: SerializedStyles;
 }
 
 const Loading = () => (
@@ -51,6 +53,7 @@ export const ChartPanel: React.FC<ChartPanelProps> = ({
   isLoading,
   isError,
   children,
+  panelStyles,
 }) => {
   const renderChart = () => {
     if (isLoading) return <Loading />;
@@ -59,7 +62,12 @@ export const ChartPanel: React.FC<ChartPanelProps> = ({
   };
 
   return (
-    <EuiPanel hasBorder={hasBorder} hasShadow={false} data-test-subj="chart-panel">
+    <EuiPanel
+      hasBorder={hasBorder}
+      hasShadow={false}
+      data-test-subj="chart-panel"
+      css={panelStyles}
+    >
       <EuiFlexGroup direction="column" gutterSize="m" style={{ height: '100%' }}>
         <EuiFlexItem grow={false}>
           {title && (

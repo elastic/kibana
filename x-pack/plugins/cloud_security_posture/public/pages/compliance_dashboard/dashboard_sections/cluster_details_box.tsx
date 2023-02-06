@@ -71,7 +71,7 @@ export const ClusterDetailsBox = ({ cluster }: { cluster: Cluster }) => {
           }
         >
           <EuiLink onClick={handleClusterTitleClick} color="text">
-            <EuiTitle css={{ fontSize: 20 }}>
+            <EuiTitle css={{ fontSize: 20, marginTop: '8px' }}>
               <h5>
                 <FormattedMessage
                   id="xpack.csp.dashboard.benchmarkSection.clusterTitle"
