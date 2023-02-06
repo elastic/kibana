@@ -6,8 +6,6 @@
  * Side Public License, v 1.
  */
 
-import { get } from 'lodash';
-
 import { getKbnServerError, reportServerError } from '@kbn/kibana-utils-plugin/server';
 import { CoreSetup } from '@kbn/core/server';
 
@@ -21,19 +19,23 @@ export const setupOptionsListClusterSettingsRoute = ({ http }: CoreSetup) => {
     async (context, _, response) => {
       try {
         const esClient = (await context.core).elasticsearch.client.asCurrentUser;
-        const allowExpensiveQueries = get(
-          await esClient.cluster.getSettings({
-            include_defaults: true,
-            filter_path: '**.allow_expensive_queries',
-          }),
-          'transient.search.allow_expensive_queries'
-        );
+        const settings = await esClient.cluster.getSettings({
+          include_defaults: true,
+          filter_path: '**.allow_expensive_queries',
+        });
+
+        // priority: transient -> persistent -> default
+        const allowExpensiveQueries: string =
+          settings.transient.search?.allow_expensive_queries ??
+          settings.persistent.search?.allow_expensive_queries ??
+          settings.defaults?.search?.allow_expensive_queries ??
+          // by default, the allowExpensiveQueries cluster setting is undefined; so, we need to treat this the same
+          // as `true` since that's the way other applications (such as the dashboard listing page) handle this.
+          'true';
+
         return response.ok({
           body: {
-            // by default, the allowExpensiveQueries cluster setting is undefined; so, we need to assume
-            // it's true in that case, since that's the way other applications (such as the dashboard listing
-            // page) handle this.
-            allowExpensiveQueries: allowExpensiveQueries ? allowExpensiveQueries === 'true' : true,
+            allowExpensiveQueries: allowExpensiveQueries === 'true',
           },
         });
       } catch (e) {
