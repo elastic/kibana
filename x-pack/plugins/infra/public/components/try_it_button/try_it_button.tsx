@@ -37,24 +37,24 @@ export const TryItButton = ({
   const linkProps = useLinkProps({ ...link });
 
   return (
-    <EuiFlexGroup
-      responsive={false}
-      alignItems="center"
-      gutterSize="m"
-      css={css`
-        position: relative;
-      `}
-    >
+    <EuiFlexGroup responsive={false} alignItems="center" gutterSize="m">
       {showBadge && (
         <EuiFlexItem grow={false}>
-          <EuiBetaBadge
-            color={'accent'}
-            href={linkProps.href ?? ''}
+          <EuiLink
             data-test-subj={`${props['data-test-subj']}-badge`}
-            label={i18n.translate('xpack.infra.layout.tryIt', {
-              defaultMessage: 'Try it',
-            })}
-          />
+            {...linkProps}
+            onClick={onClick}
+          >
+            <EuiBetaBadge
+              css={css`
+                cursor: pointer;
+              `}
+              color={'accent'}
+              label={i18n.translate('xpack.infra.layout.tryIt', {
+                defaultMessage: 'Try it',
+              })}
+            />
+          </EuiLink>
         </EuiFlexItem>
       )}
 

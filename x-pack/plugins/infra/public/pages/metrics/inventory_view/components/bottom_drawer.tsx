@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useState, useEffect } from 'react';
+import React, { useCallback, useState, useEffect, useRef } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiFlexGroup, EuiFlexItem, EuiButtonEmpty } from '@elastic/eui';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
@@ -32,16 +32,14 @@ interface Props {
 
 const LOCAL_STORAGE_KEY = 'infraUI:k8sDashboardClicked';
 const KubernetesButton = () => {
-  const [clickedOnLocalStorage, setClickedOnLocalStorage] = useLocalStorage<boolean>(
-    LOCAL_STORAGE_KEY,
-    false
-  );
-  const [clicked, _] = useState<boolean>(clickedOnLocalStorage ?? false);
-
+  const [clicked, setClicked] = useLocalStorage<boolean>(LOCAL_STORAGE_KEY, false);
+  const clickedRef = useRef<boolean | undefined>(clicked);
   return (
     <TryItButton
-      color={clicked ? 'primary' : 'accent'}
-      label="Kubernetes dashboards"
+      color={clickedRef.current ? 'primary' : 'accent'}
+      label={i18n.translate('xpack.infra.bottomDrawer.kubernetesDashboardsLink', {
+        defaultMessage: 'Kubernetes dashboards',
+      })}
       data-test-subj="inventory-kubernetesDashboard-link"
       link={{
         app: 'dashboards',
@@ -52,11 +50,11 @@ const KubernetesButton = () => {
         },
       }}
       onClick={() => {
-        if (!clicked) {
-          setClickedOnLocalStorage(true);
+        if (!clickedRef.current) {
+          setClicked(true);
         }
       }}
-      showBadge={!clicked}
+      showBadge={!clickedRef.current}
     />
   );
 };
@@ -113,7 +111,7 @@ const TimelineContainer = euiStyled(EuiFlexGroup)<{ isOpen: boolean }>`
 const BottomActionContainer = euiStyled.div`
   position: sticky;
   bottom: 0;
-  right: 0;
+  left: 0;
   background: ${(props) => props.theme.eui.euiColorGhost};
   width: calc(100% + ${(props) => props.theme.eui.euiSizeL} * 2);
   margin-left: -${(props) => props.theme.eui.euiSizeL};
