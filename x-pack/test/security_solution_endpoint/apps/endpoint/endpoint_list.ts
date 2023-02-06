@@ -169,6 +169,11 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         it('for the kql query: na, table shows an empty list', async () => {
           await pageObjects.endpoint.navigateToEndpointList();
           await browser.refresh();
+          await pageObjects.endpoint.waitForTableToHaveNumberOfEntries(
+            'endpointListTable',
+            3,
+            90000
+          );
           const adminSearchBar = await testSubjects.find('adminSearchBar');
           await adminSearchBar.clearValueWithKeyboard();
           await adminSearchBar.type('na');
