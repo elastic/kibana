@@ -49,6 +49,11 @@ export interface CspmAccountsStats {
 }
 export interface CspmRulesStats {
   rule_id: string;
+  rule_name: string;
+  rule_section: string;
+  rule_version: string;
+  rule_number: string;
+  posture_type: string;
   benchmark_id: string;
   benchmark_name: string;
   benchmark_version: string;

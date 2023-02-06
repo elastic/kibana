@@ -277,7 +277,7 @@ export const getAccountsStats = async (
 
     return [];
   } catch (e) {
-    logger.error(`Failed to get resources stats ${e}`);
+    logger.error(`Failed to get account stats ${e}`);
     return [];
   }
 };

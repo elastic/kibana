@@ -54,8 +54,8 @@ interface RuleEntity {
   rule_version: { top: RuleVersion[] };
   rule_number: { top: RuleNumber[] };
   posture_type: { top: PostureType[] };
-  benchmark_name: { top: BenchmarkName[] };
   benchmark_id: { top: BenchmarkId[] };
+  benchmark_name: { top: BenchmarkName[] };
   benchmark_version: { top: BenchmarkVersion[] };
   passed_findings_count: DocCount;
   failed_findings_count: DocCount;
@@ -255,7 +255,7 @@ export const getRulesStats = async (
 
     return [];
   } catch (e) {
-    logger.error(`Failed to get resources stats ${e}`);
+    logger.error(`Failed to get rules stats ${e}`);
     return [];
   }
 };
