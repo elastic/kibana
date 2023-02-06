@@ -23,6 +23,7 @@ import { ReactNode } from 'react';
 import React from 'react';
 
 import { euiStyled, EuiTheme } from '@kbn/kibana-react-plugin/common';
+import { isEmpty } from 'lodash';
 import { GetInspectQuery } from '../../../../../../types';
 import * as i18n from './translations';
 
@@ -78,7 +79,7 @@ const parse = function <T>(str: string): T {
   try {
     return JSON.parse(str);
   } catch {
-    return i18n.SOMETHING_WENT_WRONG;
+    return {} as T;
   }
 };
 
@@ -170,7 +171,7 @@ const ModalInspectQueryComponent = ({ closeModal, getInspectQuery }: ModalInspec
             overflowHeight={300}
             isCopyable
           >
-            {formattedRequest}
+            {isEmpty(parsedRequest) ? i18n.SOMETHING_WENT_WRONG : formattedRequest}
           </EuiCodeBlock>
         </>
       ),
@@ -189,7 +190,7 @@ const ModalInspectQueryComponent = ({ closeModal, getInspectQuery }: ModalInspec
             overflowHeight={300}
             isCopyable
           >
-            {formattedResponse}
+            {isEmpty(parsedResponse) ? i18n.SOMETHING_WENT_WRONG : formattedResponse}
           </EuiCodeBlock>
         </>
       ),
