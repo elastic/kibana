@@ -9,8 +9,6 @@ import { useFetcher } from './use_fetcher';
 import { SERVICE_ENVIRONMENT } from '@kbn/apm-plugin/common/es_fields/apm';
 import { Environment } from '../../common/environment_rt';
 
-const INITIAL_DATA = { environments: [] };
-
 export function useEnvironmentsFetcher({
   serviceName,
   start,
@@ -20,21 +18,13 @@ export function useEnvironmentsFetcher({
   start?: string;
   end?: string;
 }) {
-  if (serviceName) {
-    return getEnvironmentsForGivenService(start, end, serviceName);
-  }
-
-  return getEnvironmentsUsingSuggestionsApi(start, end);
-}
-
-const getEnvironmentsForGivenService = (
-  start?: string,
-  end?: string,
-  serviceName?: string
-) => {
-  const { data = INITIAL_DATA, status } = useFetcher(
+  const { data, status } = useFetcher(
     (callApmApi) => {
-      if (start && end) {
+      if (!start || !end) {
+        return;
+      }
+
+      if (serviceName) {
         return callApmApi('GET /internal/apm/environments', {
           params: {
             query: {
@@ -45,31 +35,24 @@ const getEnvironmentsForGivenService = (
           },
         });
       }
+      return callApmApi('GET /internal/apm/suggestions', {
+        params: {
+          query: {
+            start,
+            end,
+            fieldName: SERVICE_ENVIRONMENT,
+            fieldValue: '',
+          },
+        },
+      });
     },
     [start, end, serviceName]
   );
 
-  return { environments: data.environments, status };
-};
-
-const getEnvironmentsUsingSuggestionsApi = (start?: string, end?: string) => {
-  const { data = { terms: [] }, status } = useFetcher(
-    (callApmApi) => {
-      if (start && end) {
-        return callApmApi('GET /internal/apm/suggestions', {
-          params: {
-            query: {
-              start,
-              end,
-              fieldName: SERVICE_ENVIRONMENT,
-              fieldValue: '',
-            },
-          },
-        });
-      }
-    },
-    [start, end]
-  );
-
-  return { environments: data.terms as Environment[], status };
-};
+  return {
+    environments: ((data as any)?.environments ||
+      (data as any)?.terms ||
+      []) as Environment[],
+    status,
+  };
+}
