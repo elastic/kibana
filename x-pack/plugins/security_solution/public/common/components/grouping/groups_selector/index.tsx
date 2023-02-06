@@ -24,7 +24,6 @@ const none = i18n.translate('xpack.securitySolution.groupsSelector.noneGroupByOp
 interface GroupSelectorProps {
   fields: FieldSpec[];
   groupSelected: string;
-  onClearSelected: () => void;
   onGroupChange: (groupSelection: string) => void;
   options: Array<{ key: string; label: string }>;
   title?: string;
@@ -33,7 +32,6 @@ interface GroupSelectorProps {
 const GroupsSelectorComponent = ({
   fields,
   groupSelected = 'none',
-  onClearSelected,
   onGroupChange,
   options,
   title = '',
@@ -48,17 +46,14 @@ const GroupsSelectorComponent = ({
             'data-test-subj': 'panel-none',
             name: none,
             icon: groupSelected === 'none' ? 'check' : 'empty',
-            onClick: onClearSelected,
+            onClick: () => onGroupChange('none'),
           },
-          ...options.map<EuiContextMenuPanelItemDescriptor>(
-            (o) =>
-              ({
-                'data-test-subj': `panel-${o.key}`,
-                name: o.label,
-                onClick: () => onGroupChange(o.key),
-                icon: groupSelected === o.key ? 'check' : 'empty',
-              } as EuiContextMenuPanelItemDescriptor)
-          ),
+          ...options.map<EuiContextMenuPanelItemDescriptor>((o) => ({
+            'data-test-subj': `panel-${o.key}`,
+            name: o.label,
+            onClick: () => onGroupChange(o.key),
+            icon: groupSelected === o.key ? 'check' : 'empty',
+          })),
           {
             'data-test-subj': `panel-custom`,
             name: i18n.translate('xpack.securitySolution.groupsSelector.customGroupByOptionName', {
@@ -86,7 +81,7 @@ const GroupsSelectorComponent = ({
         ),
       },
     ],
-    [fields, groupSelected, onClearSelected, onGroupChange, options]
+    [fields, groupSelected, onGroupChange, options]
   );
   const selectedOption = useMemo(
     () => options.filter((groupOption) => groupOption.key === groupSelected),

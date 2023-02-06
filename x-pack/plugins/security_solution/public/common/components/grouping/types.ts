@@ -9,6 +9,8 @@ import type { GenericBuckets } from '../../../../common/search_strategy/common';
 
 export const DEFAULT_GROUPING_QUERY_ID = 'defaultGroupingQuery';
 
+export const NONE_GROUP_KEY = 'none';
+
 export type RawBucket = GenericBuckets & {
   alertsCount?: {
     value?: number | null; // Elasticsearch returns `null` when a sub-aggregation cannot be computed

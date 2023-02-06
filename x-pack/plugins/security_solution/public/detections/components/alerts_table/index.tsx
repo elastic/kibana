@@ -22,7 +22,11 @@ import type {
   GroupingTableAggregation,
   RawBucket,
 } from '../../../common/components/grouping';
-import { GroupingContainer, GroupsSelector } from '../../../common/components/grouping';
+import {
+  GroupingContainer,
+  GroupsSelector,
+  isNoneGroup,
+} from '../../../common/components/grouping';
 import { useGlobalTime } from '../../../common/containers/use_global_time';
 import { combineQueries } from '../../../common/lib/kuery';
 import type { AlertWorkflowStatus } from '../../../common/types';
@@ -313,11 +317,11 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
     query: queryGroups,
     indexName: signalIndexName,
     queryName: ALERTS_QUERY_NAMES.ALERTS_GROUPING,
-    skip: selectedGroup === 'none',
+    skip: isNoneGroup(selectedGroup),
   });
 
   useEffect(() => {
-    if (selectedGroup !== 'none') {
+    if (!isNoneGroup(selectedGroup)) {
       setAlertsQuery(queryGroups);
     }
   }, [queryGroups, selectedGroup, setAlertsQuery]);
@@ -345,7 +349,7 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
       ? defaultGroupingOptions
       : [
           ...defaultGroupingOptions,
-          ...(selectedGroup
+          ...(!isNoneGroup(selectedGroup)
             ? [
                 {
                   key: selectedGroup,
@@ -362,10 +366,14 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
         groupSelected={selectedGroup}
         data-test-subj="alerts-table-group-selector"
         onGroupChange={(groupSelection: string) => {
+          if (groupSelection === selectedGroup) {
+            return;
+          }
           storage.set(`${ALERTS_TABLE_GROUPS_SELECTION_KEY}-${tableId}`, groupSelection);
           setGroupsActivePage(0);
           setSelectedGroup(groupSelection);
-          if (groupSelection !== 'none' && !options.find((o) => o.key === groupSelection)) {
+
+          if (!isNoneGroup(groupSelection) && !options.find((o) => o.key === groupSelection)) {
             setOptions([
               ...defaultGroupingOptions,
               {
@@ -376,12 +384,6 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
           } else {
             setOptions(defaultGroupingOptions);
           }
-        }}
-        onClearSelected={() => {
-          setGroupsActivePage(0);
-          setSelectedGroup('none');
-          setOptions(defaultGroupingOptions);
-          storage.set(`${ALERTS_TABLE_GROUPS_SELECTION_KEY}-${tableId}`, 'none');
         }}
         fields={indexPatterns.fields}
         options={options}
@@ -426,13 +428,13 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
       rowRenderers={defaultRowRenderers}
       sourcererScope={SourcererScopeName.detections}
       start={from}
-      additionalRightMenuOptions={selectedGroup === 'none' ? [groupsSelector] : []}
+      additionalRightMenuOptions={isNoneGroup(selectedGroup) ? [groupsSelector] : []}
     />
   );
 
   return (
     <>
-      {selectedGroup === 'none' ? (
+      {isNoneGroup(selectedGroup) ? (
         dataTable
       ) : (
         <>
@@ -459,7 +461,7 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
                 rowRenderers={defaultRowRenderers}
                 sourcererScope={SourcererScopeName.detections}
                 start={from}
-                additionalRightMenuOptions={selectedGroup === 'none' ? [groupsSelector] : []}
+                additionalRightMenuOptions={isNoneGroup(selectedGroup) ? [groupsSelector] : []}
               />
             )}
             unit={defaultUnit}

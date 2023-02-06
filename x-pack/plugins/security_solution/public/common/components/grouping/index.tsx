@@ -5,7 +5,11 @@
  * 2.0.
  */
 
+import { NONE_GROUP_KEY } from './types';
+
 export * from './container';
 export * from './query';
 export * from './groups_selector';
 export * from './types';
+
+export const isNoneGroup = (groupKey: string) => groupKey === NONE_GROUP_KEY;
