@@ -27,7 +27,6 @@ interface ProfilingStackFrame {
   ['function_name']: string;
   ['function_offset']: number | undefined;
   ['line_number']: number | undefined;
-  ['source_type']: number | undefined;
 }
 
 interface ProfilingStackFrames {

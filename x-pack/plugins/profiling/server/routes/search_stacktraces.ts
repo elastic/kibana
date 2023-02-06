@@ -36,11 +36,10 @@ export function decodeStackTraceResponse(response: StackTraceResponse) {
   const stackFrames: Map<StackFrameID, StackFrame> = new Map();
   for (const [key, value] of Object.entries(response.stack_frames ?? {})) {
     stackFrames.set(key, {
-      FileName: value.file_name,
-      FunctionName: value.function_name,
+      FileName: value.file_name ? value.file_name[0] : [],
+      FunctionName: value.function_name ? value.function_name[0] : [],
       FunctionOffset: value.function_offset,
       LineNumber: value.line_number,
-      SourceType: value.source_type,
     } as StackFrame);
   }
 

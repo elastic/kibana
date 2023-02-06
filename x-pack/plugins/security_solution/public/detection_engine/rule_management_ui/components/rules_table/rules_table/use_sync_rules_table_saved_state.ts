@@ -50,6 +50,11 @@ export function useSyncRulesTableSavedState(): void {
       storageStateToSave.tags = state.filterOptions.tags;
     }
 
+    if (state.filterOptions.enabled !== undefined) {
+      urlStateToSave.enabled = state.filterOptions.enabled;
+      storageStateToSave.enabled = state.filterOptions.enabled;
+    }
+
     if (state.sortingOptions.field !== DEFAULT_SORTING_OPTIONS.field) {
       urlStateToSave.field = state.sortingOptions.field;
       storageStateToSave.field = state.sortingOptions.field;
