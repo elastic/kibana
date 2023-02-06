@@ -19,8 +19,9 @@ exports[`Error CLIENT_GEO_CITY_NAME 1`] = `undefined`;
 
 exports[`Error CLIENT_GEO_COUNTRY_ISO_CODE 1`] = `undefined`;
 
-exports[`Error CLIENT_GEO_REGION_ISO_CODE 1`] = `undefined`;
 exports[`Error CLIENT_GEO_COUNTRY_NAME 1`] = `undefined`;
+
+exports[`Error CLIENT_GEO_REGION_ISO_CODE 1`] = `undefined`;
 
 exports[`Error CLIENT_GEO_REGION_NAME 1`] = `undefined`;
 
@@ -324,9 +325,11 @@ exports[`Span CLIENT_GEO_CITY_NAME 1`] = `undefined`;
 
 exports[`Span CLIENT_GEO_COUNTRY_ISO_CODE 1`] = `undefined`;
 
-exports[`Span CLIENT_GEO_REGION_ISO_CODE 1`] = `undefined`;
 exports[`Span CLIENT_GEO_COUNTRY_NAME 1`] = `undefined`;
 
+exports[`Span CLIENT_GEO_REGION_ISO_CODE 1`] = `undefined`;
+
+exports[`Span CLIENT_GEO_REGION_NAME 1`] = `undefined`;
 
 exports[`Span CLOUD 1`] = `
 Object {
@@ -611,9 +614,11 @@ exports[`Transaction CLIENT_GEO_CITY_NAME 1`] = `undefined`;
 
 exports[`Transaction CLIENT_GEO_COUNTRY_ISO_CODE 1`] = `undefined`;
 
-exports[`Transaction CLIENT_GEO_REGION_ISO_CODE 1`] = `undefined`;
 exports[`Transaction CLIENT_GEO_COUNTRY_NAME 1`] = `undefined`;
 
+exports[`Transaction CLIENT_GEO_REGION_ISO_CODE 1`] = `undefined`;
+
+exports[`Transaction CLIENT_GEO_REGION_NAME 1`] = `undefined`;
 
 exports[`Transaction CLOUD 1`] = `
 Object {
