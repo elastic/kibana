@@ -6,11 +6,10 @@
  */
 
 import React from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiBetaBadge, EuiLink, EuiIcon } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiBetaBadge, EuiLink } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { LinkDescriptor, useLinkProps } from '@kbn/observability-plugin/public';
 import { css } from '@emotion/react';
-import { EuiIconType } from '@elastic/eui/src/components/icon/icon';
 import { EuiLinkColor } from '@elastic/eui';
 import { ExperimentalBadge } from './experimental_badge';
 
@@ -18,19 +17,17 @@ interface Props {
   color?: EuiLinkColor;
   'data-test-subj'?: string;
   experimental?: boolean;
-  icon?: EuiIconType;
   label: string;
   link: LinkDescriptor;
-  showBadge?: boolean;
+  hideBadge?: boolean;
   onClick?: () => void;
 }
 export const TryItButton = ({
-  icon,
   label,
   link,
   color = 'primary',
   experimental = false,
-  showBadge = false,
+  hideBadge = false,
   onClick,
   ...props
 }: Props) => {
@@ -38,7 +35,7 @@ export const TryItButton = ({
 
   return (
     <EuiFlexGroup responsive={false} alignItems="center" gutterSize="m">
-      {showBadge && (
+      {!hideBadge && (
         <EuiFlexItem grow={false}>
           <EuiLink
             data-test-subj={`${props['data-test-subj']}-badge`}
@@ -66,13 +63,9 @@ export const TryItButton = ({
           onClick={onClick}
         >
           <EuiFlexGroup wrap={false} responsive={false} gutterSize="m" alignItems="center">
-            {icon && (
+            {experimental && (
               <EuiFlexItem grow={false}>
-                {experimental ? (
-                  <ExperimentalBadge iconType={icon} tooltipPosition="top" />
-                ) : (
-                  <EuiIcon type={icon} color={color} />
-                )}
+                <ExperimentalBadge iconType="beaker" tooltipPosition="top" />
               </EuiFlexItem>
             )}
             <EuiFlexItem>{label}</EuiFlexItem>

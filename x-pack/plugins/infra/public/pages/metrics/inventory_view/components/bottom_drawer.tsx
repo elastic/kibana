@@ -54,7 +54,7 @@ const KubernetesButton = () => {
           setClicked(true);
         }
       }}
-      showBadge={!clickedRef.current}
+      hideBadge={clickedRef.current}
     />
   );
 };

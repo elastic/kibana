@@ -167,7 +167,6 @@ export const Layout = React.memo(
             </TopActionContainer>
             <EuiFlexItem grow={false}>
               <TryItButton
-                icon="beaker"
                 data-test-subj="inventory-hostsView-link"
                 label={i18n.translate('xpack.infra.layout.hostsLandingPageLink', {
                   defaultMessage: 'Introducing a new Hosts analysis experience',
@@ -177,7 +176,6 @@ export const Layout = React.memo(
                   pathname: '/hosts',
                 }}
                 experimental
-                showBadge
               />
             </EuiFlexItem>
             <EuiFlexItem
