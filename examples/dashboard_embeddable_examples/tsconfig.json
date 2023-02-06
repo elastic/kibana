@@ -19,5 +19,6 @@
     "@kbn/kibana-react-plugin",
     "@kbn/embeddable-examples-plugin",
     "@kbn/developer-examples-plugin",
+    "@kbn/shared-ux-router",
   ]
 }
