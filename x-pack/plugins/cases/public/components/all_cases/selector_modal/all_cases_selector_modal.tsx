@@ -7,7 +7,7 @@
 
 import React, { useState, useCallback } from 'react';
 import {
-  EuiButton,
+  EuiButtonEmpty,
   EuiModal,
   EuiModalBody,
   EuiModalFooter,
@@ -68,13 +68,13 @@ export const AllCasesSelectorModal = React.memo<AllCasesSelectorModalProps>(
             />
           </EuiModalBody>
           <EuiModalFooter>
-            <EuiButton
-              color="text"
+            <EuiButtonEmpty
+              color="primary"
               onClick={closeModal}
               data-test-subj="all-cases-modal-cancel-button"
             >
               {i18n.CANCEL}
-            </EuiButton>
+            </EuiButtonEmpty>
           </EuiModalFooter>
         </Modal>
       </QueryClientProvider>
