@@ -39,7 +39,7 @@ export function useSyncRulesTableSavedState(): void {
     }
 
     if (state.filterOptions.showElasticRules || state.filterOptions.showCustomRules) {
-      const source = state.filterOptions.showCustomRules ? RuleSource.Custom : RuleSource.Elastic;
+      const source = state.filterOptions.showCustomRules ? RuleSource.Custom : RuleSource.Prebuilt;
 
       urlStateToSave.source = source;
       storageStateToSave.source = source;

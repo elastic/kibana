@@ -10,7 +10,7 @@ import { enumeration } from '@kbn/securitysolution-io-ts-types';
 import { SortingOptions, PaginationOptions } from '../../../../rule_management/logic';
 
 export enum RuleSource {
-  Elastic = 'elastic',
+  Prebuilt = 'prebuilt',
   Custom = 'custom',
 }
 

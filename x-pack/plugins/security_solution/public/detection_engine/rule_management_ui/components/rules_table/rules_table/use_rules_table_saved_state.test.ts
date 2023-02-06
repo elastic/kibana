@@ -158,7 +158,7 @@ describe('useRulesTableSavedState', () => {
 
     it('returns only show prebuilt rules filter', () => {
       mockRulesTablePersistedState({
-        urlState: { source: RuleSource.Elastic },
+        urlState: { source: RuleSource.Prebuilt },
         storageState: null,
       });
 
@@ -169,7 +169,7 @@ describe('useRulesTableSavedState', () => {
       } = renderHook(() => useRulesTableSavedState());
 
       expect(filter).toEqual({
-        source: RuleSource.Elastic,
+        source: RuleSource.Prebuilt,
       });
       expect(sorting).toEqual({});
       expect(pagination).toEqual({});
@@ -378,7 +378,7 @@ describe('useRulesTableSavedState', () => {
     it('returns only show prebuilt rules filter', () => {
       mockRulesTablePersistedState({
         urlState: null,
-        storageState: { source: RuleSource.Elastic },
+        storageState: { source: RuleSource.Prebuilt },
       });
 
       const {
@@ -388,7 +388,7 @@ describe('useRulesTableSavedState', () => {
       } = renderHook(() => useRulesTableSavedState());
 
       expect(filter).toEqual({
-        source: RuleSource.Elastic,
+        source: RuleSource.Prebuilt,
       });
       expect(sorting).toEqual({});
       expect(pagination).toEqual({});
