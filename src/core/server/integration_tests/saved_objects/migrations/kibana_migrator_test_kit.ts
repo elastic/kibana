@@ -7,6 +7,9 @@
  */
 
 import Path from 'path';
+import fs from 'fs/promises';
+import { SemVer } from 'semver';
+
 import { ConfigService, Env } from '@kbn/config';
 import { getEnvOptions } from '@kbn/config-mocks';
 import { getPackages } from '@kbn/repo-packages';
@@ -53,13 +56,17 @@ import { elasticApmConfig } from '@kbn/core-root-server-internal/src/root/elasti
 import { ISavedObjectTypeRegistry, SavedObjectsType } from '@kbn/core-saved-objects-server';
 import { esTestConfig, kibanaServerTestUser } from '@kbn/test';
 import { LoggerFactory } from '@kbn/logging';
+import { createTestServers } from '@kbn/core-test-helpers-kbn-server';
 import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import { baselineDocuments, baselineTypes } from './kibana_migrator_test_kit.fixtures';
 
 const rootConfigPath = '';
 export const defaultLogFilePath = Path.join(__dirname, 'kibana_migrator_test_kit.log');
 
 // Extract current stack version from Env, to use as a default
-const currentVersion = Env.createDefault(REPO_ROOT, getEnvOptions()).packageInfo.version;
+export const defaultKibanaIndex = '.kibana_migrator_tests';
+export const currentVersion = Env.createDefault(REPO_ROOT, getEnvOptions()).packageInfo.version;
+export const nextMinor = new SemVer(currentVersion).inc('minor').format();
 
 interface KibanaMigratorTestKitParams {
   kibanaIndex?: string;
@@ -69,9 +76,57 @@ interface KibanaMigratorTestKitParams {
   logFilePath?: string;
 }
 
+export const startElasticsearch = async () => {
+  const { startES } = createTestServers({
+    adjustTimeout: (t: number) => jest.setTimeout(t),
+    settings: {
+      es: {
+        license: 'basic',
+      },
+    },
+  });
+  return await startES();
+};
+
+export const createBaseline = async () => {
+  const { client, migrator, savedObjectsRepository } = await getKibanaMigratorTestKit({
+    kibanaIndex: defaultKibanaIndex,
+    types: baselineTypes,
+  });
+
+  migrator.prepareMigrations();
+  await migrator.runMigrations();
+
+  await savedObjectsRepository.bulkCreate(baselineDocuments, {
+    refresh: 'wait_for',
+  });
+
+  return client;
+};
+
+export const checkLogContains = async (
+  entries: string[],
+  logFilePath: string = defaultLogFilePath
+): Promise<void> => {
+  const logs = await fs.readFile(logFilePath, 'utf-8');
+  entries.forEach((entry) => expect(logs).toMatch(entry));
+};
+
+export const checkLogDoesNotContain = async (
+  entries: string[],
+  logFilePath: string = defaultLogFilePath
+): Promise<void> => {
+  const logs = await fs.readFile(logFilePath, 'utf-8');
+  entries.forEach((entry) => expect(logs).not.toMatch(entry));
+};
+
+export const clearLog = async (logFilePath: string = defaultLogFilePath): Promise<void> => {
+  await fs.truncate(logFilePath).catch(() => {});
+};
+
 export const getKibanaMigratorTestKit = async ({
   settings = {},
-  kibanaIndex = '.kibana',
+  kibanaIndex = defaultKibanaIndex,
   kibanaVersion = currentVersion,
   types = [],
   logFilePath = defaultLogFilePath,
@@ -280,4 +335,90 @@ const registerTypes = (
       ...type,
     })
   );
+};
+
+interface GetMutatedMigratorParams {
+  kibanaVersion?: string;
+  settings?: Record<string, any>;
+}
+
+export const getIdenticalMappingsMigrator = async ({
+  kibanaVersion = nextMinor,
+  settings = {},
+}: GetMutatedMigratorParams = {}) => {
+  return await getKibanaMigratorTestKit({
+    types: baselineTypes,
+    kibanaVersion,
+    settings,
+  });
+};
+
+export const getNonDeprecatedMappingsMigrator = async ({
+  kibanaVersion = nextMinor,
+  settings = {},
+}: GetMutatedMigratorParams = {}) => {
+  return await getKibanaMigratorTestKit({
+    types: baselineTypes.filter((type) => type.name !== 'deprecated'),
+    kibanaVersion,
+    settings,
+  });
+};
+
+export const getCompatibleMappingsMigrator = async ({
+  filterDeprecated = false,
+  kibanaVersion = nextMinor,
+  settings = {},
+}: GetMutatedMigratorParams & { filterDeprecated?: boolean } = {}) => {
+  const types = baselineTypes
+    .filter((type) => !filterDeprecated || type.name !== 'deprecated')
+    .map<Partial<SavedObjectsType>>((type) => {
+      if (type.name === 'complex') {
+        return {
+          ...type,
+          mappings: {
+            properties: {
+              name: { type: 'text' },
+              value: { type: 'integer' },
+              createdAt: { type: 'date' },
+            },
+          },
+        };
+      } else {
+        return type;
+      }
+    });
+
+  return await getKibanaMigratorTestKit({
+    types,
+    kibanaVersion,
+    settings,
+  });
+};
+
+export const getIncompatibleMappingsMigrator = async ({
+  kibanaVersion = nextMinor,
+  settings = {},
+}: GetMutatedMigratorParams = {}) => {
+  const types = baselineTypes.map<Partial<SavedObjectsType>>((type) => {
+    if (type.name === 'complex') {
+      return {
+        ...type,
+        mappings: {
+          properties: {
+            name: { type: 'keyword' },
+            value: { type: 'long' },
+            createdAt: { type: 'date' },
+          },
+        },
+      };
+    } else {
+      return type;
+    }
+  });
+
+  return await getKibanaMigratorTestKit({
+    types,
+    kibanaVersion,
+    settings,
+  });
 };

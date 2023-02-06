@@ -1321,26 +1321,15 @@ describe('migrations v2 model', () => {
       };
 
       describe('if action succeeds', () => {
-        test('CHECK_COMPATIBLE_MAPPINGS -> PREPARE_COMPATIBLE_MIGRATION', () => {
+        test('CHECK_COMPATIBLE_MAPPINGS -> CLEANUP_UNKNOWN_AND_EXCLUDED', () => {
           const res: ResponseType<'CHECK_COMPATIBLE_MAPPINGS'> = Either.right(
             'update_mappings_succeeded' as const
           );
           const newState = model(checkCompatibleMappingsState, res);
 
           expect(newState).toMatchObject({
-            controlState: 'PREPARE_COMPATIBLE_MIGRATION',
-            sourceIndex: Option.none,
+            controlState: 'CLEANUP_UNKNOWN_AND_EXCLUDED',
             targetIndex: '.kibana_7.11.0_001',
-            targetIndexRawMappings: indexMapping,
-            targetIndexMappings: baseState.targetIndexMappings,
-            preTransformDocsActions: [
-              {
-                add: {
-                  alias: '.kibana_7.11.0',
-                  index: '.kibana_7.11.0_001',
-                },
-              },
-            ],
             versionIndexReadyActions: Option.none,
           });
         });
