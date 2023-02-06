@@ -50,7 +50,7 @@ const GroupsSelectorComponent = ({
             icon: groupSelected === 'none' ? 'check' : 'empty',
             onClick: onClearSelected,
           },
-          ...options.map(
+          ...options.map<EuiContextMenuPanelItemDescriptor>(
             (o) =>
               ({
                 'data-test-subj': `panel-${o.key}`,
