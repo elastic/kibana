@@ -6,8 +6,9 @@
  */
 
 import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiGlobalToastList } from '@elastic/eui';
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
+import useLocalStorage from 'react-use/lib/useLocalStorage';
 import { useWaffleOptionsContext } from '../hooks/use_waffle_options';
 
 const KUBERNETES_TOAST_STORAGE_KEY = 'kubernetesToastKey';
@@ -21,14 +22,8 @@ export const SurveyKubernetes = () => {
   const { nodeType } = useWaffleOptionsContext();
   const podNodeType: typeof nodeType = 'pod';
 
-  const [isToastSeen, setIsToastSeen] = useState(() => {
-    const initialState = localStorage.getItem(KUBERNETES_TOAST_STORAGE_KEY);
-    return initialState === 'true';
-  });
-
-  useEffect(() => {
-    localStorage.setItem(KUBERNETES_TOAST_STORAGE_KEY, isToastSeen ? 'true' : 'false');
-  }, [isToastSeen]);
+  const [isToastSeen, setIsToastSeen] = useLocalStorage(KUBERNETES_TOAST_STORAGE_KEY, false);
+  const markToastAsSeen = () => setIsToastSeen(true);
 
   return (
     <>
@@ -50,7 +45,7 @@ export const SurveyKubernetes = () => {
             <EuiGlobalToastList
               toastLifeTimeMs={Infinity}
               dismissToast={() => {
-                setIsToastSeen(true);
+                markToastAsSeen();
               }}
               toasts={[
                 {
@@ -78,7 +73,7 @@ export const SurveyKubernetes = () => {
                             data-test-subj="infra-toast-kubernetes-survey-start"
                             onClick={() => {
                               openInNewTab(KUBERNETES_FEEDBACK_LINK);
-                              setIsToastSeen(true);
+                              markToastAsSeen();
                             }}
                             size="s"
                           >
