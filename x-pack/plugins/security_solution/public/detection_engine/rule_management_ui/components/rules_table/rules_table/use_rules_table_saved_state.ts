@@ -31,6 +31,28 @@ function readStorageState(storage: Storage): RulesTableStorageSavedState | null 
   }
 }
 
+export function useRulesTableSavedState(): {
+  filter?: RulesTableSavedFilter;
+  sorting?: RulesTableSavedSorting;
+  pagination?: RulesTableUrlSavedPagination;
+} {
+  const getUrlParam = useGetInitialUrlParamValue<RulesTableUrlSavedState>(URL_PARAM_KEY.rulesTable);
+  const {
+    services: { sessionStorage },
+  } = useKibana();
+
+  const urlState = getUrlParam();
+  const storageState = readStorageState(sessionStorage);
+
+  if (!urlState && !storageState) {
+    return {};
+  }
+
+  const [filter, sorting, pagination] = validateState(urlState, storageState);
+
+  return { filter, sorting, pagination };
+}
+
 function validateState(
   urlState: RulesTableUrlSavedState | null,
   storageState: RulesTableStorageSavedState | null
@@ -66,26 +88,4 @@ function validateState(
   }
 
   return [filter, sorting, pagination];
-}
-
-export function useRulesTableSavedState(): {
-  filter?: RulesTableSavedFilter;
-  sorting?: RulesTableSavedSorting;
-  pagination?: RulesTableUrlSavedPagination;
-} {
-  const getUrlParam = useGetInitialUrlParamValue<RulesTableUrlSavedState>(URL_PARAM_KEY.rulesTable);
-  const {
-    services: { sessionStorage },
-  } = useKibana();
-
-  const urlState = getUrlParam();
-  const storageState = readStorageState(sessionStorage);
-
-  if (!urlState && !storageState) {
-    return {};
-  }
-
-  const [filter, sorting, pagination] = validateState(urlState, storageState);
-
-  return { filter, sorting, pagination };
 }
