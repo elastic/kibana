@@ -55,6 +55,8 @@ const PageWrapper: FC<PageProps> = ({ location, deps }) => {
     savedSearchId,
     deps.config,
     deps.dataViewsContract,
+    deps.getSavedSearchDeps,
+
     {
       ...basicResolvers(deps),
       existingJobsAndGroups: mlJobService.getJobAndGroupIds,
@@ -77,7 +79,7 @@ const CheckViewOrCreateWrapper: FC<PageProps> = ({ location, deps }) => {
   const navigateToPath = useNavigateToPath();
 
   // the single resolver checkViewOrCreateJobs redirects only. so will always reject
-  useResolver(undefined, undefined, deps.config, deps.dataViewsContract, {
+  useResolver(undefined, undefined, deps.config, deps.dataViewsContract, deps.getSavedSearchDeps, {
     checkViewOrCreateJobs: () =>
       checkViewOrCreateJobs(moduleId, dataViewId, createLinkWithUserDefaults, navigateToPath),
   });
