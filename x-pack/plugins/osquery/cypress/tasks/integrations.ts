@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { DEFAULT_POLICY } from '../screens/fleet';
 import {
   ADD_POLICY_BTN,
   CONFIRM_MODAL_BTN,
@@ -13,7 +14,7 @@ import {
   DATA_COLLECTION_SETUP_STEP,
 } from '../screens/integrations';
 
-export const addIntegration = (agentPolicy = 'Default Fleet Server policy') => {
+export const addIntegration = (agentPolicy = DEFAULT_POLICY) => {
   cy.getBySel(ADD_POLICY_BTN).click();
   cy.getBySel(DATA_COLLECTION_SETUP_STEP).find('.euiLoadingSpinner').should('not.exist');
   cy.contains('Existing hosts').click();

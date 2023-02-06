@@ -52,12 +52,18 @@ export const LogCategorizationPage: FC = () => {
   const [selectedField, setSelectedField] = useState<string | undefined>();
   const [selectedCategory, setSelectedCategory] = useState<Category | null>(null);
   const [categories, setCategories] = useState<Category[] | null>(null);
-  const [currentSavedSearch, setCurrentSavedSearch] = useState(savedSearch);
+  const [selectedSavedSearch, setSelectedDataView] = useState(savedSearch);
   const [loading, setLoading] = useState(false);
   const [totalCount, setTotalCount] = useState(0);
   const [eventRate, setEventRate] = useState<EventRate>([]);
   const [pinnedCategory, setPinnedCategory] = useState<Category | null>(null);
   const [sparkLines, setSparkLines] = useState<SparkLinesPerCategory>({});
+
+  useEffect(() => {
+    if (savedSearch) {
+      setSelectedDataView(savedSearch);
+    }
+  }, [savedSearch]);
 
   useEffect(
     function cancelRequestOnLeave() {
@@ -77,8 +83,8 @@ export const LogCategorizationPage: FC = () => {
     }) => {
       // When the user loads saved search and then clear or modify the query
       // we should remove the saved search and replace it with the index pattern id
-      if (currentSavedSearch !== null) {
-        setCurrentSavedSearch(null);
+      if (selectedSavedSearch !== null) {
+        setSelectedDataView(null);
       }
 
       setAiopsListState({
@@ -89,7 +95,7 @@ export const LogCategorizationPage: FC = () => {
         filters: searchParams.filters,
       });
     },
-    [currentSavedSearch, aiopsListState, setAiopsListState]
+    [selectedSavedSearch, aiopsListState, setAiopsListState]
   );
 
   const {
@@ -102,7 +108,7 @@ export const LogCategorizationPage: FC = () => {
     searchQuery,
     intervalMs,
   } = useData(
-    { currentDataView: dataView, currentSavedSearch },
+    { selectedDataView: dataView, selectedSavedSearch },
     aiopsListState,
     setGlobalState,
     undefined,

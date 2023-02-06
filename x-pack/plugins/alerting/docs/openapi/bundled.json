@@ -1243,6 +1243,1207 @@
           "url": "https://localhost:5601"
         }
       ]
+    },
+    "/s/{spaceId}/api/alerts/alert/{alertId}": {
+      "delete": {
+        "summary": "Permanently removes an alert.",
+        "operationId": "legaryDeleteAlert",
+        "deprecated": true,
+        "description": "Deprecated in 7.13.0. Use the delete rule API instead. WARNING: After you delete an alert, you cannot recover it.\n",
+        "tags": [
+          "alerting"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/kbn_xsrf"
+          },
+          {
+            "$ref": "#/components/parameters/space_id"
+          },
+          {
+            "in": "path",
+            "name": "alertId",
+            "description": "The identifier for the alert.",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "example": "41893910-6bca-11eb-9e0d-85d233e3ee35"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Indicates a successful call."
+          },
+          "401": {
+            "description": "Authorization information is missing or invalid.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/401_response"
+                }
+              }
+            }
+          }
+        },
+        "servers": [
+          {
+            "url": "https://localhost:5601"
+          }
+        ]
+      },
+      "get": {
+        "summary": "Retrieves an alert by its identifier.",
+        "operationId": "legacyGetAlert",
+        "deprecated": true,
+        "description": "Deprecated in 7.13.0. Use the get rule API instead.",
+        "tags": [
+          "alerting"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/space_id"
+          },
+          {
+            "in": "path",
+            "name": "alertId",
+            "description": "The identifier for the alert.",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "example": "41893910-6bca-11eb-9e0d-85d233e3ee35"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Indicates a successful call.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/alert_response_properties"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authorization information is missing or invalid.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/401_response"
+                }
+              }
+            }
+          }
+        },
+        "servers": [
+          {
+            "url": "https://localhost:5601"
+          }
+        ]
+      },
+      "post": {
+        "summary": "Create an alert.",
+        "operationId": "legacyCreateAlert",
+        "deprecated": true,
+        "description": "Deprecated in 7.13.0. Use the create rule API instead.",
+        "tags": [
+          "alerting"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/kbn_xsrf"
+          },
+          {
+            "in": "path",
+            "name": "alertId",
+            "description": "An UUID v1 or v4 identifier for the alert. If this parameter is omitted, the identifier is randomly generated.",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "example": "41893910-6bca-11eb-9e0d-85d233e3ee35"
+            }
+          },
+          {
+            "$ref": "#/components/parameters/space_id"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "title": "Legacy create alert request properties",
+                "type": "object",
+                "required": [
+                  "alertTypeId",
+                  "consumer",
+                  "name",
+                  "notifyWhen",
+                  "params",
+                  "schedule"
+                ],
+                "properties": {
+                  "actions": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "required": [
+                        "actionTypeId",
+                        "group",
+                        "id",
+                        "params"
+                      ],
+                      "properties": {
+                        "actionTypeId": {
+                          "type": "string",
+                          "description": "The identifier for the action type."
+                        },
+                        "group": {
+                          "type": "string",
+                          "description": "Grouping actions is recommended for escalations for different types of alert instances. If you don't need this functionality, set it to `default`.\n"
+                        },
+                        "id": {
+                          "type": "string",
+                          "description": "The ID of the action saved object to execute."
+                        },
+                        "params": {
+                          "type": "object",
+                          "description": "The map to the `params` that the action type will receive. `params` are handled as Mustache templates and passed a default set of context.\n"
+                        }
+                      }
+                    }
+                  },
+                  "alertTypeId": {
+                    "type": "string",
+                    "description": "The ID of the alert type that you want to call when the alert is scheduled to run."
+                  },
+                  "consumer": {
+                    "type": "string",
+                    "description": "The name of the application that owns the alert. This name has to match the Kibana feature name, as that dictates the required role-based access control privileges."
+                  },
+                  "enabled": {
+                    "type": "boolean",
+                    "description": "Indicates if you want to run the alert on an interval basis after it is created."
+                  },
+                  "name": {
+                    "type": "string",
+                    "description": "A name to reference and search."
+                  },
+                  "notifyWhen": {
+                    "type": "string",
+                    "description": "The condition for throttling the notification.",
+                    "enum": [
+                      "onActionGroupChange",
+                      "onActiveAlert",
+                      "onThrottleInterval"
+                    ]
+                  },
+                  "params": {
+                    "type": "object",
+                    "description": "The parameters to pass to the alert type executor `params` value. This will also validate against the alert type params validator, if defined."
+                  },
+                  "schedule": {
+                    "type": "object",
+                    "description": "The schedule specifying when this alert should be run. A schedule is structured such that the key specifies the format you wish to use and its value specifies the schedule.\n",
+                    "properties": {
+                      "interval": {
+                        "type": "string",
+                        "description": "The interval format specifies the interval in seconds, minutes, hours or days at which the alert should execute.",
+                        "example": "10s"
+                      }
+                    }
+                  },
+                  "tags": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    },
+                    "description": "A list of keywords to reference and search."
+                  },
+                  "throttle": {
+                    "type": "string",
+                    "description": "How often this alert should fire the same actions. This will prevent the alert from sending out the same notification over and over. For example, if an alert with a schedule of 1 minute stays in a triggered state for 90 minutes, setting a throttle of `10m` or `1h` will prevent it from sending 90 notifications during this period.\n"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Indicates a successful call.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/alert_response_properties"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authorization information is missing or invalid.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/401_response"
+                }
+              }
+            }
+          }
+        },
+        "servers": [
+          {
+            "url": "https://localhost:5601"
+          }
+        ]
+      },
+      "put": {
+        "summary": "Updates the attributes for an alert.",
+        "operationId": "legacyUpdateAlert",
+        "deprecated": true,
+        "description": "Deprecated in 7.13.0. Use the update rule API instead.",
+        "tags": [
+          "alerting"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/kbn_xsrf"
+          },
+          {
+            "$ref": "#/components/parameters/space_id"
+          },
+          {
+            "in": "path",
+            "name": "alertId",
+            "description": "The identifier for the alert.",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "example": "41893910-6bca-11eb-9e0d-85d233e3ee35"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "title": "Legacy update alert request properties",
+                "type": "object",
+                "required": [
+                  "name",
+                  "notifyWhen",
+                  "params",
+                  "schedule"
+                ],
+                "properties": {
+                  "actions": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "required": [
+                        "actionTypeId",
+                        "group",
+                        "id",
+                        "params"
+                      ],
+                      "properties": {
+                        "actionTypeId": {
+                          "type": "string",
+                          "description": "The identifier for the action type."
+                        },
+                        "group": {
+                          "type": "string",
+                          "description": "Grouping actions is recommended for escalations for different types of alert instances. If you don't need this functionality, set it to `default`.\n"
+                        },
+                        "id": {
+                          "type": "string",
+                          "description": "The ID of the action saved object to execute."
+                        },
+                        "params": {
+                          "type": "object",
+                          "description": "The map to the `params` that the action type will receive. `params` are handled as Mustache templates and passed a default set of context.\n"
+                        }
+                      }
+                    }
+                  },
+                  "name": {
+                    "type": "string",
+                    "description": "A name to reference and search."
+                  },
+                  "notifyWhen": {
+                    "type": "string",
+                    "description": "The condition for throttling the notification.",
+                    "enum": [
+                      "onActionGroupChange",
+                      "onActiveAlert",
+                      "onThrottleInterval"
+                    ]
+                  },
+                  "params": {
+                    "type": "object",
+                    "description": "The parameters to pass to the alert type executor `params` value. This will also validate against the alert type params validator, if defined."
+                  },
+                  "schedule": {
+                    "type": "object",
+                    "description": "The schedule specifying when this alert should be run. A schedule is structured such that the key specifies the format you wish to use and its value specifies the schedule.\n",
+                    "properties": {
+                      "interval": {
+                        "type": "string",
+                        "description": "The interval format specifies the interval in seconds, minutes, hours or days at which the alert should execute.",
+                        "example": "1d"
+                      }
+                    }
+                  },
+                  "tags": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    },
+                    "description": "A list of keywords to reference and search."
+                  },
+                  "throttle": {
+                    "type": "string",
+                    "description": "How often this alert should fire the same actions. This will prevent the alert from sending out the same notification over and over. For example, if an alert with a schedule of 1 minute stays in a triggered state for 90 minutes, setting a throttle of `10m` or `1h` will prevent it from sending 90 notifications during this period.\n"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Indicates a successful call.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/alert_response_properties"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authorization information is missing or invalid.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/401_response"
+                }
+              }
+            }
+          }
+        },
+        "servers": [
+          {
+            "url": "https://localhost:5601"
+          }
+        ]
+      },
+      "servers": [
+        {
+          "url": "https://localhost:5601"
+        }
+      ]
+    },
+    "/s/{spaceId}/api/alerts/alert/{alertId}/_disable": {
+      "post": {
+        "summary": "Disables an alert.",
+        "operationId": "legacyDisableAlert",
+        "deprecated": true,
+        "description": "Deprecated in 7.13.0. Use the disable rule API instead.",
+        "tags": [
+          "alerting"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/kbn_xsrf"
+          },
+          {
+            "$ref": "#/components/parameters/space_id"
+          },
+          {
+            "in": "path",
+            "name": "alertId",
+            "description": "The identifier for the alert.",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "example": "41893910-6bca-11eb-9e0d-85d233e3ee35"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Indicates a successful call."
+          },
+          "401": {
+            "description": "Authorization information is missing or invalid.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/401_response"
+                }
+              }
+            }
+          }
+        },
+        "servers": [
+          {
+            "url": "https://localhost:5601"
+          }
+        ]
+      },
+      "servers": [
+        {
+          "url": "https://localhost:5601"
+        }
+      ]
+    },
+    "/s/{spaceId}/api/alerts/alert/{alertId}/_enable": {
+      "post": {
+        "summary": "Enables an alert.",
+        "operationId": "legacyEnableAlert",
+        "deprecated": true,
+        "description": "Deprecated in 7.13.0. Use the enable rule API instead.",
+        "tags": [
+          "alerting"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/kbn_xsrf"
+          },
+          {
+            "$ref": "#/components/parameters/space_id"
+          },
+          {
+            "in": "path",
+            "name": "alertId",
+            "description": "The identifier for the alert.",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "example": "41893910-6bca-11eb-9e0d-85d233e3ee35"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Indicates a successful call."
+          },
+          "401": {
+            "description": "Authorization information is missing or invalid.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/401_response"
+                }
+              }
+            }
+          }
+        },
+        "servers": [
+          {
+            "url": "https://localhost:5601"
+          }
+        ]
+      },
+      "servers": [
+        {
+          "url": "https://localhost:5601"
+        }
+      ]
+    },
+    "/s/{spaceId}/api/alerts/alert/{alertId}/_mute_all": {
+      "post": {
+        "summary": "Mutes all alert instances.",
+        "operationId": "legacyMuteAllAlertInstances",
+        "deprecated": true,
+        "description": "Deprecated in 7.13.0. Use the mute all alerts API instead.",
+        "tags": [
+          "alerting"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/kbn_xsrf"
+          },
+          {
+            "$ref": "#/components/parameters/space_id"
+          },
+          {
+            "in": "path",
+            "name": "alertId",
+            "description": "The identifier for the alert.",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "example": "41893910-6bca-11eb-9e0d-85d233e3ee35"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Indicates a successful call."
+          },
+          "401": {
+            "description": "Authorization information is missing or invalid.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/401_response"
+                }
+              }
+            }
+          }
+        },
+        "servers": [
+          {
+            "url": "https://localhost:5601"
+          }
+        ]
+      },
+      "servers": [
+        {
+          "url": "https://localhost:5601"
+        }
+      ]
+    },
+    "/s/{spaceId}/api/alerts/alert/{alertId}/_unmute_all": {
+      "post": {
+        "summary": "Unmutes all alert instances.",
+        "operationId": "legacyUnmuteAllAlertInstances",
+        "deprecated": true,
+        "description": "Deprecated in 7.13.0. Use the unmute all alerts API instead.",
+        "tags": [
+          "alerting"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/kbn_xsrf"
+          },
+          {
+            "$ref": "#/components/parameters/space_id"
+          },
+          {
+            "in": "path",
+            "name": "alertId",
+            "description": "The identifier for the alert.",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "example": "41893910-6bca-11eb-9e0d-85d233e3ee35"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Indicates a successful call."
+          },
+          "401": {
+            "description": "Authorization information is missing or invalid.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/401_response"
+                }
+              }
+            }
+          }
+        },
+        "servers": [
+          {
+            "url": "https://localhost:5601"
+          }
+        ]
+      },
+      "servers": [
+        {
+          "url": "https://localhost:5601"
+        }
+      ]
+    },
+    "/s/{spaceId}/api/alerts/alerts/_find": {
+      "get": {
+        "summary": "Retrieves a paginated set of alerts.",
+        "operationId": "legacyFindAlerts",
+        "deprecated": true,
+        "description": "Deprecated in 7.13.0. Use the find rules API instead. NOTE: Alert `params` are stored as a flattened field type and analyzed as keywords. As alerts change in Kibana, the results on each page of the response also change. Use the find API for traditional paginated results, but avoid using it to export large amounts of data.\n",
+        "tags": [
+          "alerting"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/space_id"
+          },
+          {
+            "name": "default_search_operator",
+            "in": "query",
+            "description": "The default operator to use for the `simple_query_string`.",
+            "schema": {
+              "type": "string",
+              "default": "OR"
+            },
+            "example": "OR"
+          },
+          {
+            "name": "fields",
+            "in": "query",
+            "description": "The fields to return in the `attributes` key of the response.",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          },
+          {
+            "name": "filter",
+            "in": "query",
+            "description": "A KQL string that you filter with an attribute from your saved object. It should look like `savedObjectType.attributes.title: \"myTitle\"`. However, if you used a direct attribute of a saved object, such as `updatedAt`, you must define your filter, for example, `savedObjectType.updatedAt > 2018-12-22`.\n",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "has_reference",
+            "in": "query",
+            "description": "Filters the rules that have a relation with the reference objects with a specific type and identifier.",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "type": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "description": "The page number to return.",
+            "schema": {
+              "type": "integer",
+              "default": 1
+            },
+            "example": 1
+          },
+          {
+            "name": "per_page",
+            "in": "query",
+            "description": "The number of alerts to return per page.",
+            "schema": {
+              "type": "integer",
+              "default": 20
+            },
+            "example": 20
+          },
+          {
+            "name": "search",
+            "in": "query",
+            "description": "An Elasticsearch `simple_query_string` query that filters the alerts in the response.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "search_fields",
+            "in": "query",
+            "description": "The fields to perform the `simple_query_string` parsed query against.",
+            "schema": {
+              "oneOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "name": "sort_field",
+            "in": "query",
+            "description": "Determines which field is used to sort the results. The field must exist in the `attributes` key of the response.\n",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "sort_order",
+            "in": "query",
+            "description": "Determines the sort order.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "asc",
+                "desc"
+              ],
+              "default": "desc"
+            },
+            "example": "asc"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Indicates a successful call.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/alert_response_properties"
+                      }
+                    },
+                    "page": {
+                      "type": "integer"
+                    },
+                    "perPage": {
+                      "type": "integer"
+                    },
+                    "total": {
+                      "type": "integer"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authorization information is missing or invalid.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/401_response"
+                }
+              }
+            }
+          }
+        },
+        "servers": [
+          {
+            "url": "https://localhost:5601"
+          }
+        ]
+      },
+      "servers": [
+        {
+          "url": "https://localhost:5601"
+        }
+      ]
+    },
+    "/s/{spaceId}/api/alerts/alerts/_health": {
+      "get": {
+        "summary": "Retrieves the health status of the alerting framework.",
+        "operationId": "legacyGetAlertingHealth",
+        "deprecated": true,
+        "description": "Deprecated in 7.13.0. Use the get alerting framework health API instead.",
+        "tags": [
+          "alerting"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/space_id"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Indicates a successful call.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "alertingFrameworkHealth": {
+                      "type": "object",
+                      "description": "Three substates identify the health of the alerting framework: `decryptionHealth`, `executionHealth`, and `readHealth`.\n",
+                      "properties": {
+                        "decryptionHealth": {
+                          "type": "object",
+                          "description": "The timestamp and status of the alert decryption.",
+                          "properties": {
+                            "status": {
+                              "type": "string",
+                              "example": "ok",
+                              "enum": [
+                                "error",
+                                "ok",
+                                "warn"
+                              ]
+                            },
+                            "timestamp": {
+                              "type": "string",
+                              "format": "date-time",
+                              "example": "2023-01-13T01:28:00.280Z"
+                            }
+                          }
+                        },
+                        "executionHealth": {
+                          "type": "object",
+                          "description": "The timestamp and status of the alert execution.",
+                          "properties": {
+                            "status": {
+                              "type": "string",
+                              "example": "ok",
+                              "enum": [
+                                "error",
+                                "ok",
+                                "warn"
+                              ]
+                            },
+                            "timestamp": {
+                              "type": "string",
+                              "format": "date-time",
+                              "example": "2023-01-13T01:28:00.280Z"
+                            }
+                          }
+                        },
+                        "readHealth": {
+                          "type": "object",
+                          "description": "The timestamp and status of the alert reading events.",
+                          "properties": {
+                            "status": {
+                              "type": "string",
+                              "example": "ok",
+                              "enum": [
+                                "error",
+                                "ok",
+                                "warn"
+                              ]
+                            },
+                            "timestamp": {
+                              "type": "string",
+                              "format": "date-time",
+                              "example": "2023-01-13T01:28:00.280Z"
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "hasPermanentEncryptionKey": {
+                      "type": "boolean",
+                      "description": "If `false`, the encrypted saved object plugin does not have a permanent encryption key.",
+                      "example": true
+                    },
+                    "isSufficientlySecure": {
+                      "type": "boolean",
+                      "description": "If `false`, security is enabled but TLS is not.",
+                      "example": true
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authorization information is missing or invalid.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/401_response"
+                }
+              }
+            }
+          }
+        }
+      },
+      "servers": [
+        {
+          "url": "https://localhost:5601"
+        }
+      ]
+    },
+    "/s/{spaceId}/api/alerts/alerts/list_alert_types": {
+      "get": {
+        "summary": "Retrieves a list of alert types.",
+        "operationId": "legacyGetAlertTypes",
+        "deprecated": true,
+        "description": "Deprecated in 7.13.0. Use the get rule types API instead.",
+        "tags": [
+          "alerting"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/space_id"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Indicates a successful call.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "actionGroups": {
+                        "description": "An explicit list of groups for which the alert type can schedule actions, each with the action group's unique ID and human readable name. Alert actions validation uses this configuration to ensure that groups are valid.\n",
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "properties": {
+                            "id": {
+                              "type": "string"
+                            },
+                            "name": {
+                              "type": "string"
+                            }
+                          }
+                        }
+                      },
+                      "actionVariables": {
+                        "description": "A list of action variables that the alert type makes available via context and state in action parameter templates, and a short human readable description. The Alert UI will use this information to prompt users for these variables in action parameter editors.\n",
+                        "type": "object",
+                        "properties": {
+                          "context": {
+                            "type": "array",
+                            "items": {
+                              "type": "object",
+                              "properties": {
+                                "name": {
+                                  "type": "string"
+                                },
+                                "description": {
+                                  "type": "string"
+                                }
+                              }
+                            }
+                          },
+                          "params": {
+                            "type": "array",
+                            "items": {
+                              "type": "object",
+                              "properties": {
+                                "description": {
+                                  "type": "string"
+                                },
+                                "name": {
+                                  "type": "string"
+                                }
+                              }
+                            }
+                          },
+                          "state": {
+                            "type": "array",
+                            "items": {
+                              "type": "object",
+                              "properties": {
+                                "description": {
+                                  "type": "string"
+                                },
+                                "name": {
+                                  "type": "string"
+                                }
+                              }
+                            }
+                          }
+                        }
+                      },
+                      "authorizedConsumers": {
+                        "description": "The list of the plugins IDs that have access to the alert type.",
+                        "type": "object"
+                      },
+                      "defaultActionGroupId": {
+                        "description": "The default identifier for the alert type group.",
+                        "type": "string"
+                      },
+                      "enabledInLicense": {
+                        "description": "Indicates whether the rule type is enabled based on the subscription.",
+                        "type": "boolean"
+                      },
+                      "id": {
+                        "description": "The unique identifier for the alert type.",
+                        "type": "string"
+                      },
+                      "isExportable": {
+                        "description": "Indicates whether the alert type is exportable in Saved Objects Management UI.",
+                        "type": "boolean"
+                      },
+                      "minimumLicenseRequired": {
+                        "description": "The subscriptions required to use the alert type.",
+                        "type": "string"
+                      },
+                      "name": {
+                        "description": "The descriptive name of the alert type.",
+                        "type": "string"
+                      },
+                      "producer": {
+                        "description": "An identifier for the application that produces this alert type.",
+                        "type": "string"
+                      },
+                      "recoveryActionGroup": {
+                        "description": "An action group to use when an alert instance goes from an active state to an inactive one. If it is not specified, the default recovered action group is used.\n",
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string"
+                          },
+                          "name": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authorization information is missing or invalid.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/401_response"
+                }
+              }
+            }
+          }
+        }
+      },
+      "servers": [
+        {
+          "url": "https://localhost:5601"
+        }
+      ]
+    },
+    "/s/{spaceId}/api/alerts/alert/{alertId}/alert_instance/{alertInstanceId}/_mute": {
+      "post": {
+        "summary": "Mutes an alert instance.",
+        "operationId": "legacyMuteAlertInstance",
+        "deprecated": true,
+        "description": "Deprecated in 7.13.0. Use the mute alert API instead.",
+        "tags": [
+          "alerting"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/kbn_xsrf"
+          },
+          {
+            "$ref": "#/components/parameters/space_id"
+          },
+          {
+            "in": "path",
+            "name": "alertId",
+            "description": "An identifier for the alert.",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "example": "41893910-6bca-11eb-9e0d-85d233e3ee35"
+            }
+          },
+          {
+            "in": "path",
+            "name": "alertInstanceId",
+            "description": "An identifier for the alert instance.",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "example": "dceeb5d0-6b41-11eb-802b-85b0c1bc8ba2"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Indicates a successful call."
+          },
+          "401": {
+            "description": "Authorization information is missing or invalid.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/401_response"
+                }
+              }
+            }
+          }
+        },
+        "servers": [
+          {
+            "url": "https://localhost:5601"
+          }
+        ]
+      },
+      "servers": [
+        {
+          "url": "https://localhost:5601"
+        }
+      ]
+    },
+    "/s/{spaceId}/api/alerts/alert/{alertId}/alert_instance/{alertInstanceId}/_unmute": {
+      "post": {
+        "summary": "Unmutes an alert instance.",
+        "operationId": "legacyUnmuteAlertInstance",
+        "deprecated": true,
+        "description": "Deprecated in 7.13.0. Use the unmute alert API instead.",
+        "tags": [
+          "alerting"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/kbn_xsrf"
+          },
+          {
+            "$ref": "#/components/parameters/space_id"
+          },
+          {
+            "in": "path",
+            "name": "alertId",
+            "description": "An identifier for the alert.",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "example": "41893910-6bca-11eb-9e0d-85d233e3ee35"
+            }
+          },
+          {
+            "in": "path",
+            "name": "alertInstanceId",
+            "description": "An identifier for the alert instance.",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "example": "dceeb5d0-6b41-11eb-802b-85b0c1bc8ba2"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Indicates a successful call."
+          },
+          "401": {
+            "description": "Authorization information is missing or invalid.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/401_response"
+                }
+              }
+            }
+          }
+        },
+        "servers": [
+          {
+            "url": "https://localhost:5601"
+          }
+        ]
+      },
+      "servers": [
+        {
+          "url": "https://localhost:5601"
+        }
+      ]
     }
   },
   "components": {
@@ -1672,6 +2873,118 @@
           },
           "throttle": {
             "$ref": "#/components/schemas/throttle"
+          }
+        }
+      },
+      "alert_response_properties": {
+        "title": "Legacy alert response properties",
+        "type": "object",
+        "properties": {
+          "actions": {
+            "type": "array",
+            "items": {
+              "type": "object"
+            }
+          },
+          "alertTypeId": {
+            "type": "string",
+            "example": ".index-threshold"
+          },
+          "apiKeyOwner": {
+            "type": "string",
+            "nullable": true,
+            "example": "elastic"
+          },
+          "createdAt": {
+            "type": "string",
+            "description": "The date and time that the alert was created.",
+            "format": "date-time",
+            "example": "2022-12-05T23:36:58.284Z"
+          },
+          "createdBy": {
+            "type": "string",
+            "description": "The identifier for the user that created the alert.",
+            "example": "elastic"
+          },
+          "enabled": {
+            "type": "boolean",
+            "description": "Indicates whether the alert is currently enabled.",
+            "example": true
+          },
+          "executionStatus": {
+            "type": "object",
+            "properties": {
+              "lastExecutionDate": {
+                "type": "string",
+                "format": "date-time",
+                "example": "2022-12-06T00:13:43.890Z"
+              },
+              "status": {
+                "type": "string",
+                "example": "ok"
+              }
+            }
+          },
+          "id": {
+            "type": "string",
+            "description": "The identifier for the alert.",
+            "example": "b530fed0-74f5-11ed-9801-35303b735aef"
+          },
+          "muteAll": {
+            "type": "boolean",
+            "example": false
+          },
+          "mutedInstanceIds": {
+            "type": "array",
+            "nullable": true,
+            "items": {
+              "type": "string"
+            }
+          },
+          "name": {
+            "type": "string",
+            "description": "The name of the alert.",
+            "example": "my alert"
+          },
+          "notifyWhen": {
+            "type": "string",
+            "example": "onActionGroupChange"
+          },
+          "params": {
+            "type": "object",
+            "additionalProperties": true
+          },
+          "schedule": {
+            "type": "object",
+            "properties": {
+              "interval": {
+                "type": "string"
+              }
+            }
+          },
+          "scheduledTaskId": {
+            "type": "string",
+            "example": "b530fed0-74f5-11ed-9801-35303b735aef"
+          },
+          "tags": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "throttle": {
+            "type": "string",
+            "nullable": true
+          },
+          "updatedAt": {
+            "type": "string",
+            "example": "2022-12-05T23:36:58.284Z"
+          },
+          "updatedBy": {
+            "type": "string",
+            "description": "The identifier for the user that updated this alert most recently.",
+            "nullable": true,
+            "example": "elastic"
           }
         }
       }

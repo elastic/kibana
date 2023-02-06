@@ -7,9 +7,20 @@
 
 import moment from 'moment';
 
+import type { ThreatMapping } from '@kbn/securitysolution-io-ts-alerting-types';
+import { get } from 'lodash';
 import type { SearchAfterAndBulkCreateReturnType, SignalSourceHit } from '../types';
 import { parseInterval } from '../utils';
-import type { ThreatMatchNamedQuery, ThreatListItem } from './types';
+import { ThreatMatchQueryType } from './types';
+import type {
+  ThreatListItem,
+  ThreatMatchedFields,
+  ThreatTermNamedQuery,
+  DecodedThreatNamedQuery,
+  SignalValuesMap,
+  GetSignalValuesMap,
+  ThreatMatchNamedQuery,
+} from './types';
 
 /**
  * Given two timers this will take the max of each and add them to each other and return that addition.
@@ -129,21 +140,32 @@ export const combineConcurrentResults = (
 };
 
 const separator = '__SEP__';
-export const encodeThreatMatchNamedQuery = ({
-  id,
-  index,
-  field,
-  value,
-}: ThreatMatchNamedQuery): string => {
-  return [id, index, field, value].join(separator);
+export const encodeThreatMatchNamedQuery = (
+  query: ThreatMatchNamedQuery | ThreatTermNamedQuery
+): string => {
+  const { field, value, queryType } = query;
+  let id;
+  let index;
+  if ('id' in query) {
+    id = query.id;
+    index = query.index;
+  }
+
+  return [id, index, field, value, queryType].join(separator);
 };
 
-export const decodeThreatMatchNamedQuery = (encoded: string): ThreatMatchNamedQuery => {
+export const decodeThreatMatchNamedQuery = (encoded: string): DecodedThreatNamedQuery => {
   const queryValues = encoded.split(separator);
-  const [id, index, field, value] = queryValues;
-  const query = { id, index, field, value };
-
-  if (queryValues.length !== 4 || !queryValues.every(Boolean)) {
+  const [id, index, field, value, queryType] = queryValues;
+  const query = { id, index, field, value, queryType };
+  let isValidQuery = false;
+  if (queryType === ThreatMatchQueryType.match) {
+    isValidQuery = queryValues.length === 5 && queryValues.every(Boolean);
+  }
+  if (queryType === ThreatMatchQueryType.term) {
+    isValidQuery = Boolean(field && value);
+  }
+  if (!isValidQuery) {
     const queryString = JSON.stringify(query);
     throw new Error(`Decoded query is invalid. Decoded value: ${queryString}`);
   }
@@ -153,7 +175,7 @@ export const decodeThreatMatchNamedQuery = (encoded: string): ThreatMatchNamedQu
 
 export const extractNamedQueries = (
   hit: SignalSourceHit | ThreatListItem
-): ThreatMatchNamedQuery[] =>
+): DecodedThreatNamedQuery[] =>
   hit.matched_queries?.map((match) => decodeThreatMatchNamedQuery(match)) ?? [];
 
 export const buildExecutionIntervalValidator: (interval: string) => () => void = (interval) => {
@@ -173,3 +195,42 @@ export const buildExecutionIntervalValidator: (interval: string) => () => void =
     }
   };
 };
+
+/*
+ * Return list of fields by type used for matching in IM rule
+ */
+export const getMatchedFields = (threatMapping: ThreatMapping): ThreatMatchedFields =>
+  threatMapping.reduce(
+    (acc: ThreatMatchedFields, val) => {
+      val.entries.forEach((mapping) => {
+        if (!acc.source.includes(mapping.field)) {
+          acc.source.push(mapping.field);
+        }
+        if (!acc.threat.includes(mapping.value)) {
+          acc.threat.push(mapping.value);
+        }
+      });
+      return acc;
+    },
+    { source: [], threat: [] }
+  );
+
+export const getSignalValueMap = ({
+  eventList,
+  threatMatchedFields,
+}: GetSignalValuesMap): SignalValuesMap =>
+  eventList.reduce<SignalValuesMap>((acc, event) => {
+    threatMatchedFields.source.forEach((field) => {
+      const fieldValue = get(event.fields, field)?.[0];
+      if (!fieldValue) return;
+
+      if (!acc[field]) {
+        acc[field] = {};
+      }
+      if (!acc[field][fieldValue]) {
+        acc[field][fieldValue] = [];
+      }
+      acc[field][fieldValue].push(event._id);
+    });
+    return acc;
+  }, {});
