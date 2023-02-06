@@ -15,6 +15,7 @@ import {
   LIGHT_THEME,
   DARK_THEME,
 } from '@elastic/charts';
+import { EUI_CHARTS_THEME_DARK, EUI_CHARTS_THEME_LIGHT } from '@elastic/eui/dist/eui_charts_theme';
 import { FIELD_FORMAT_IDS } from '@kbn/field-formats-plugin/common';
 import { EuiComboBox, EuiComboBoxOptionOption, EuiEmptyPrompt, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -66,7 +67,13 @@ const TYPE_OPTIONS: EuiComboBoxOptionOption[] = Object.entries(TYPE_LABELS).map(
 
 export const JobMemoryTreeMap: FC<Props> = ({ node, type, height }) => {
   const isDarkTheme = useUiSettings().get('theme:darkMode');
-  const baseTheme = useMemo(() => (isDarkTheme ? DARK_THEME : LIGHT_THEME), [isDarkTheme]);
+  const { theme, baseTheme } = useMemo(
+    () =>
+      isDarkTheme
+        ? { theme: EUI_CHARTS_THEME_DARK, baseTheme: DARK_THEME }
+        : { theme: EUI_CHARTS_THEME_LIGHT, baseTheme: LIGHT_THEME },
+    [isDarkTheme]
+  );
 
   const bytesFormatter = useFieldFormatter(FIELD_FORMAT_IDS.BYTES);
   const { displayErrorToast } = useToastNotificationService();
@@ -136,12 +143,7 @@ export const JobMemoryTreeMap: FC<Props> = ({ node, type, height }) => {
 
         {data.length ? (
           <Chart>
-            <Settings
-              baseTheme={baseTheme}
-              theme={{
-                chartMargins: { top: 0, left: 0, bottom: 0, right: 0 },
-              }}
-            />
+            <Settings baseTheme={baseTheme} theme={theme.theme} />
             <Partition<MemoryUsageInfo>
               id="memoryUsageTreeMap"
               data={data}
