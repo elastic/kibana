@@ -6,6 +6,7 @@
  */
 
 import React, { useCallback, useMemo, useState } from 'react';
+import { get } from 'lodash';
 import { EuiCallOut, EuiFieldText, EuiFlexGroup, EuiFormRow } from '@elastic/eui';
 import './add_message_variables.scss';
 import { ActionVariable } from '@kbn/alerting-plugin/common';
@@ -74,9 +75,7 @@ export const TextFieldWithMessageVariables: React.FunctionComponent<Props> = ({
   wrapField = false,
   showButtonTitle,
 }) => {
-  const {
-    http: { basePath },
-  } = useKibana().services;
+  const publicBaseUrl = get(useKibana(), 'services.http.basePath.publicBaseUrl');
 
   const [currentTextElement, setCurrentTextElement] = useState<HTMLInputElement | null>(null);
   const [warning, setWarning] = useState<string | null>(null);
@@ -97,7 +96,7 @@ export const TextFieldWithMessageVariables: React.FunctionComponent<Props> = ({
 
   const onChangeWithMessageVariable = (e: React.ChangeEvent<HTMLInputElement>) => {
     editAction(paramsProperty, e.target.value, index);
-    setWarning(validateParamsForWarnings(e.target.value, basePath.publicBaseUrl, messageVariables));
+    setWarning(validateParamsForWarnings(e.target.value, publicBaseUrl, messageVariables));
   };
   const VariableButton = useMemo(
     () => (

@@ -6,6 +6,7 @@
  */
 
 import React, { useState } from 'react';
+import { get } from 'lodash';
 import { EuiTextArea, EuiFormRow, EuiFlexGroup, EuiCallOut } from '@elastic/eui';
 import './add_message_variables.scss';
 import { ActionVariable } from '@kbn/alerting-plugin/common';
@@ -35,9 +36,7 @@ export const TextAreaWithMessageVariables: React.FunctionComponent<Props> = ({
   label,
   errors,
 }) => {
-  const {
-    http: { basePath },
-  } = useKibana().services;
+  const publicBaseUrl = get(useKibana(), 'services.http.basePath.publicBaseUrl');
 
   const [currentTextElement, setCurrentTextElement] = useState<HTMLTextAreaElement | null>(null);
   const [warning, setWarning] = useState<string | null>(null);
@@ -55,7 +54,7 @@ export const TextAreaWithMessageVariables: React.FunctionComponent<Props> = ({
 
   const onChangeWithMessageVariable = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     editAction(paramsProperty, e.target.value, index);
-    setWarning(validateParamsForWarnings(e.target.value, basePath.publicBaseUrl, messageVariables));
+    setWarning(validateParamsForWarnings(e.target.value, publicBaseUrl, messageVariables));
   };
 
   return (
