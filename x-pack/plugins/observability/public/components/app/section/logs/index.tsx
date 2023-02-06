@@ -21,6 +21,7 @@ import { isEmpty } from 'lodash';
 import moment from 'moment';
 import React, { Fragment } from 'react';
 import { useHistory } from 'react-router-dom';
+import { INFRA_LOGS_APP } from '../../../../context/constants';
 import { SectionContainer } from '..';
 import { getDataHandler } from '../../../../data_handler';
 import { useChartTheme } from '../../../../hooks/use_chart_theme';
@@ -63,7 +64,7 @@ export function LogsSection({ bucketSize }: Props) {
   const { data, status } = useFetcher(
     () => {
       if (bucketSize && absoluteStart && absoluteEnd) {
-        return getDataHandler('infra_logs')?.fetchData({
+        return getDataHandler(INFRA_LOGS_APP)?.fetchData({
           absoluteTime: { start: absoluteStart, end: absoluteEnd },
           relativeTime: { start: relativeStart, end: relativeEnd },
           ...bucketSize,

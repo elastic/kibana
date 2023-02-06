@@ -10,11 +10,13 @@ import {
   Direction,
   EuiBasicTable,
   EuiBasicTableColumn,
+  EuiLoadingChart,
   EuiTableSortingType,
 } from '@elastic/eui';
 import numeral from '@elastic/numeral';
 import { i18n } from '@kbn/i18n';
 import React, { useState, useCallback } from 'react';
+import { INFRA_METRICS_APP } from '../../../../context/constants';
 import {
   MetricsFetchDataResponse,
   MetricsFetchDataSeries,
@@ -59,7 +61,7 @@ export function MetricsSection({ bucketSize }: Props) {
 
   const { data, status } = useFetcher(() => {
     if (bucketSize && absoluteStart && absoluteEnd) {
-      return getDataHandler('infra_metrics')?.fetchData({
+      return getDataHandler(INFRA_METRICS_APP)?.fetchData({
         absoluteTime: { start: absoluteStart, end: absoluteEnd },
         relativeTime: { start: relativeStart, end: relativeEnd },
         ...bucketSize,
@@ -99,14 +101,7 @@ export function MetricsSection({ bucketSize }: Props) {
   }
 
   const isLoading = status === FETCH_STATUS.LOADING;
-  const isPending = status === FETCH_STATUS.LOADING;
-  if (isLoading || isPending) {
-    return <pre>Loading</pre>;
-  }
-
-  if (!data) {
-    return <pre>No Data</pre>;
-  }
+  const isInitialLoad = isLoading && !data;
 
   const columns: Array<EuiBasicTableColumn<MetricsFetchDataSeries>> = [
     {
@@ -218,12 +213,27 @@ export function MetricsSection({ bucketSize }: Props) {
       }}
       hasError={status === FETCH_STATUS.FAILURE}
     >
-      <EuiBasicTable
-        onChange={handleTableChange}
-        sorting={sorting}
-        items={viewData?.series ?? []}
-        columns={columns}
-      />
+      {isInitialLoad ? (
+        <div
+          data-test-subj="loading"
+          style={{
+            height: 240,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}
+        >
+          <EuiLoadingChart size="l" />
+        </div>
+      ) : (
+        <EuiBasicTable
+          onChange={handleTableChange}
+          sorting={sorting}
+          items={viewData?.series ?? []}
+          columns={columns}
+          loading={isLoading}
+        />
+      )}
     </SectionContainer>
   );
 }

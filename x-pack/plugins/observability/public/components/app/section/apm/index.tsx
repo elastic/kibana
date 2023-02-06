@@ -21,6 +21,7 @@ import moment from 'moment';
 import React, { useContext } from 'react';
 import { useHistory } from 'react-router-dom';
 import { ThemeContext } from 'styled-components';
+import { APM_APP } from '../../../../context/constants';
 import { useDatePickerContext } from '../../../../hooks/use_date_picker_context';
 import { SectionContainer } from '..';
 import { getDataHandler } from '../../../../data_handler';
@@ -64,7 +65,7 @@ export function APMSection({ bucketSize }: Props) {
   const { data, status } = useFetcher(
     () => {
       if (bucketSize && absoluteStart && absoluteEnd) {
-        return getDataHandler('apm')?.fetchData({
+        return getDataHandler(APM_APP)?.fetchData({
           absoluteTime: { start: absoluteStart, end: absoluteEnd },
           relativeTime: { start: relativeStart, end: relativeEnd },
           ...bucketSize,
