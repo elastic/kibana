@@ -10,7 +10,7 @@ import { isErrorEmbeddable } from '@kbn/embeddable-plugin/public';
 import { createAction } from '@kbn/ui-actions-plugin/public';
 import copy from 'copy-to-clipboard';
 import { KibanaServices } from '../../../common/lib/kibana';
-import { fieldHasCellActions, isInSecurityApp, isLensEmbeddable } from '../../utils';
+import { fieldHasCellActions, isCountField, isInSecurityApp, isLensEmbeddable } from '../../utils';
 import { COPY_TO_CLIPBOARD, COPY_TO_CLIPBOARD_ICON, COPY_TO_CLIPBOARD_SUCCESS } from '../constants';
 
 export const ACTION_ID = 'embeddable_copyToClipboard';
@@ -47,9 +47,12 @@ export const createCopyToClipboardAction = ({ order }: { order?: number }) => {
       } = KibanaServices.get();
 
       const text = data
-        .map(
-          ({ columnMeta, value }) => `${columnMeta?.field}${value != null ? `: "${value}"` : ''}`
-        )
+        .map(({ columnMeta, value }) => {
+          if (isCountField(columnMeta?.type, columnMeta?.sourceParams?.type)) {
+            return `${columnMeta?.field}: *`;
+          }
+          return `${columnMeta?.field}${value != null ? `: "${value}"` : ''}`;
+        })
         .join(' | ');
 
       const isSuccess = copy(text, { debug: true });
