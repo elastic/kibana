@@ -73,7 +73,7 @@ export const handleActionConnectorsErrors = (error: ErrorType, id?: string): Bul
         statusCode: 500,
         message:
           (error as ConflictError)?.type === 'conflict'
-            ? 'There is a conflict' // TODO : choose a message when conflict happen
+            ? 'There is a conflict'
             : (error as Error).message
             ? (error as Error).message
             : '',
