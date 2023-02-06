@@ -76,7 +76,7 @@ export interface ResponseActionExecuteOutputContent {
   shell: string;
   /* The current working directory used when the command was executed */
   cwd: string;
-  outputFieldId: string;
+  outputFileId: string;
 }
 
 export const ActivityLogItemTypes = {

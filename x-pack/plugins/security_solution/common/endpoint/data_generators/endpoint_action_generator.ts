@@ -306,7 +306,7 @@ export class EndpointActionGenerator extends BaseDataGenerator {
           shell_code: 0,
           shell: 'bash',
           cwd: '/some/path',
-          outputFieldId: 'some-output-field-id',
+          outputFileId: 'some-output-file-id',
         },
       },
       overrides
