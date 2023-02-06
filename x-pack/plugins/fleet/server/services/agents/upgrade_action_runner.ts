@@ -42,8 +42,8 @@ export class UpgradeActionRunner extends ActionRunner {
 }
 
 const isActionIdCancelled = async (esClient: ElasticsearchClient, actionId: string) => {
-  const cancelledActions = await getCancelledActions(esClient, actionId);
-  return cancelledActions.length > 0;
+  const cancelledActions = await getCancelledActions(esClient);
+  return cancelledActions.filter((action) => action.actionId === actionId).length > 0;
 };
 
 export async function upgradeBatch(
