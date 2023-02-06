@@ -7,10 +7,9 @@
 
 import React, { useCallback, useState, useEffect, useRef } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiFlexGroup, EuiFlexItem, EuiButtonEmpty } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiButtonEmpty, EuiPanel } from '@elastic/eui';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { useUiTracker } from '@kbn/observability-plugin/public';
-import { EuiPanel } from '@elastic/eui';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 import { TryItButton } from '../../../../components/try_it_button/try_it_button';
 import { useWaffleOptionsContext } from '../hooks/use_waffle_options';
@@ -97,17 +96,19 @@ export const BottomDrawer = ({ interval, formatter, view }: Props) => {
           </EuiFlexItem>
         </EuiFlexGroup>
       </StickyPanel>
-      <TimelineContainer isOpen={isOpen} style={{ marginTop: 0 }}>
+      <EuiFlexGroup
+        style={{
+          maxHeight: isOpen ? '224px' : 0,
+          transition: 'max-height 0.15s ease',
+          overflow: 'hidden',
+        }}
+      >
         <Timeline isVisible={isOpen} interval={interval} yAxisFormatter={formatter} />
-      </TimelineContainer>
+      </EuiFlexGroup>
     </BottomActionContainer>
   );
 };
-const TimelineContainer = euiStyled(EuiFlexGroup)<{ isOpen: boolean }>`
-  max-height: ${(props) => (props.isOpen ? '224px' : 0)};
-  transition: ${(props) => `max-height 0.15s ${props.isOpen ? 'ease-out' : 'ease-in'}`};
-  overflow: hidden;
-`;
+
 const BottomActionContainer = euiStyled.div`
   position: sticky;
   bottom: 0;
