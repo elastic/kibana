@@ -6,7 +6,14 @@
  */
 
 import React, { FC, useEffect, useState, useCallback } from 'react';
-import { Chart, Settings, Partition, PartitionLayout, ShapeTreeNode } from '@elastic/charts';
+import {
+  Chart,
+  Settings,
+  Partition,
+  PartitionLayout,
+  ShapeTreeNode,
+  LIGHT_THEME,
+} from '@elastic/charts';
 import { FIELD_FORMAT_IDS } from '@kbn/field-formats-plugin/common';
 import { EuiComboBox, EuiComboBoxOptionOption, EuiEmptyPrompt, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -40,6 +47,14 @@ const TYPE_LABELS: Record<string, MlSavedObjectType> = {
     defaultMessage: 'Trained models',
   })]: 'trained-model',
 } as const;
+
+const TYPE_LABELS_INVERTED = Object.entries(TYPE_LABELS).reduce<Record<MlSavedObjectType, string>>(
+  (acc, [label, type]) => {
+    acc[type] = label;
+    return acc;
+  },
+  {} as Record<MlSavedObjectType, string>
+);
 
 const TYPE_OPTIONS: EuiComboBoxOptionOption[] = Object.entries(TYPE_LABELS).map(
   ([label, type]) => ({
@@ -116,8 +131,13 @@ export const JobMemoryTreeMap: FC<Props> = ({ node, type, height }) => {
         {data.length ? (
           <Chart>
             <Settings
+              baseTheme={LIGHT_THEME}
               theme={{
+                partition: {
+                  emptySizeRatio: 0.4,
+                },
                 scales: { histogramPadding: 0.2 },
+                chartMargins: { top: 0, left: 0, bottom: 0, right: 0 },
               }}
             />
             <Partition<MemoryUsageInfo>
@@ -129,7 +149,7 @@ export const JobMemoryTreeMap: FC<Props> = ({ node, type, height }) => {
               layers={[
                 {
                   groupByRollup: (d: MemoryUsageInfo) => d.type,
-                  nodeLabel: (d) => TYPE_LABELS[d as MlSavedObjectType],
+                  nodeLabel: (d) => TYPE_LABELS_INVERTED[d as MlSavedObjectType],
                   fillLabel: {
                     valueFormatter: (size: number) => bytesFormatter(size),
                   },
