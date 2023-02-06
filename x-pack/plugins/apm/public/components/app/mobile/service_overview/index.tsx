@@ -36,7 +36,7 @@ import {
   SERVICE_VERSION,
 } from '../../../../../common/es_fields/apm';
 import { MostUsedChart } from './most_used_chart';
-import { MetricsMap } from './metrics_map';
+import { GeoMap } from './geo_map';
 import { FailedTransactionRateChart } from '../../../shared/charts/failed_transaction_rate_chart';
 import { ServiceOverviewDependenciesTable } from '../../service_overview/service_overview_dependencies_table';
 import { LatencyChart } from '../../../shared/charts/latency_chart';
@@ -154,12 +154,11 @@ export function MobileServiceOverview() {
             <EuiFlexGroup gutterSize="s">
               <EuiFlexItem grow={5}>
                 <EuiPanel hasBorder={true}>
-                  <MetricsMap
+                  <GeoMap
                     start={start}
                     end={end}
                     kuery={kueryWithMobileFilters}
                     filters={embeddableFilters}
-                    comparisonEnabled={comparisonEnabled}
                   />
                 </EuiPanel>
               </EuiFlexItem>

@@ -18,18 +18,16 @@ export enum MapTypes {
   SESSIONS = 'unique_sessions',
 }
 
-export function MetricsMap({
+export function GeoMap({
   start,
   end,
   kuery,
   filters,
-  comparisonEnabled,
 }: {
   start: string;
   end: string;
   kuery?: string;
   filters: Filter[];
-  comparisonEnabled: boolean;
 }) {
   const [selectedMap, setMap] = useState(MapTypes.HTTP);
 
