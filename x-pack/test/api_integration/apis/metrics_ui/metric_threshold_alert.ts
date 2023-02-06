@@ -780,7 +780,7 @@ export default function ({ getService }: FtrProviderContext) {
                 comparator: '>=',
                 aggType: 'count',
                 metric: 'Document count',
-                currentValue: 4,
+                currentValue: 5,
                 timestamp: '2021-01-01T01:00:00.000Z',
                 shouldFire: true,
                 shouldWarn: false,
@@ -871,7 +871,7 @@ export default function ({ getService }: FtrProviderContext) {
                 comparator: '>=',
                 aggType: 'sum',
                 metric: 'value',
-                currentValue: 1,
+                currentValue: 151,
                 timestamp: '2021-01-01T01:00:00.000Z',
                 shouldFire: true,
                 shouldWarn: false,
@@ -925,7 +925,7 @@ export default function ({ getService }: FtrProviderContext) {
                 comparator: '>=',
                 aggType: 'count',
                 metric: 'Document count',
-                currentValue: 2,
+                currentValue: 3,
                 timestamp: '2021-01-01T01:00:00.000Z',
                 shouldFire: true,
                 shouldWarn: false,
@@ -983,6 +983,30 @@ export default function ({ getService }: FtrProviderContext) {
           );
           expect(results).to.eql([
             {
+              dev: {
+                aggType: 'sum',
+                bucketKey: {
+                  groupBy0: 'dev',
+                },
+                comparator: '>=',
+                context: {
+                  cloud: undefined,
+                  container: undefined,
+                  host: undefined,
+                  labels: undefined,
+                  orchestrator: undefined,
+                  tags: undefined,
+                },
+                currentValue: 150,
+                isNoData: false,
+                metric: 'value',
+                shouldFire: true,
+                shouldWarn: false,
+                threshold: [1],
+                timeSize: 5,
+                timeUnit: 'm',
+                timestamp: '2021-01-01T01:00:00.000Z',
+              },
               prod: {
                 timeSize: 5,
                 timeUnit: 'm',
