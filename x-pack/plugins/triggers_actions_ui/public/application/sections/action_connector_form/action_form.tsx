@@ -36,7 +36,6 @@ import { AddConnectorInline } from './connector_add_inline';
 import { actionTypeCompare } from '../../lib/action_type_compare';
 import { checkActionFormActionTypeEnabled } from '../../lib/check_action_type_enabled';
 import {
-  DEFAULT_FREQUENCY_WITH_SUMMARY,
   DEFAULT_FREQUENCY_WITHOUT_SUMMARY,
   VIEW_LICENSE_OPTIONS_LINK,
 } from '../../../common/constants';
@@ -224,7 +223,7 @@ export const ActionForm = ({
         actionTypeId: actionTypeModel.id,
         group: defaultActionGroupId,
         params: {},
-        frequency: hasSummary ? DEFAULT_FREQUENCY_WITH_SUMMARY : DEFAULT_FREQUENCY_WITHOUT_SUMMARY,
+        frequency: DEFAULT_FREQUENCY_WITHOUT_SUMMARY,
       });
       setActionIdByIndex(actionTypeConnectors[0].id, actions.length - 1);
     }
@@ -236,7 +235,7 @@ export const ActionForm = ({
         actionTypeId: actionTypeModel.id,
         group: defaultActionGroupId,
         params: {},
-        frequency: hasSummary ? DEFAULT_FREQUENCY_WITH_SUMMARY : DEFAULT_FREQUENCY_WITHOUT_SUMMARY,
+        frequency: DEFAULT_FREQUENCY_WITHOUT_SUMMARY,
       });
       setActionIdByIndex(actions.length.toString(), actions.length - 1);
       setEmptyActionsIds([...emptyActionsIds, actions.length.toString()]);
