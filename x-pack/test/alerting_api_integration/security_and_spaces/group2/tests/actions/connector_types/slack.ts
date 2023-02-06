@@ -11,17 +11,48 @@ import http from 'http';
 import getPort from 'get-port';
 import { getHttpProxyServer } from '@kbn/alerting-api-integration-helpers';
 import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
-
 import { getSlackServer } from '../../../../../common/plugins/actions_simulators/server/plugin';
 
 // eslint-disable-next-line import/no-default-export
-export default function slackTest({ getService }: FtrProviderContext) {
+export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
   const configService = getService('config');
 
+  const mockedSlackActionIdForWebhook = async (slackSimulatorURL: string) => {
+    const { body: createdSimulatedAction } = await supertest
+      .post('/api/actions/connector')
+      .set('kbn-xsrf', 'foo')
+      .send({
+        name: 'A slack simulator',
+        connector_type_id: '.slack',
+        secrets: {
+          webhookUrl: slackSimulatorURL,
+        },
+      })
+      .expect(200);
+
+    return createdSimulatedAction.id;
+  };
+
+  const mockedSlackActionIdForWebApi = async () => {
+    const { body: createdSimulatedAction } = await supertest
+      .post('/api/actions/connector')
+      .set('kbn-xsrf', 'foo')
+      .send({
+        name: 'A slack simulator',
+        connector_type_id: '.slack',
+        secrets: {
+          token: 'some token',
+        },
+        config: { type: 'web_api' },
+      })
+      .expect(200);
+
+    return createdSimulatedAction.id;
+  };
+
   describe('slack action', () => {
-    let simulatedActionId = '';
-    let slackSimulatorURL: string = '';
+    let slackSimulatorURL = '';
     let slackServer: http.Server;
     let proxyServer: httpProxy | undefined;
     let proxyHaveBeenCalled = false;
@@ -43,7 +74,14 @@ export default function slackTest({ getService }: FtrProviderContext) {
       );
     });
 
-    it('should return 200 when creating a slack action successfully', async () => {
+    after(() => {
+      slackServer.close();
+      if (proxyServer) {
+        proxyServer.close();
+      }
+    });
+
+    it('should return 200 when creating a slack action with webhook type successfully', async () => {
       const { body: createdAction } = await supertest
         .post('/api/actions/connector')
         .set('kbn-xsrf', 'foo')
@@ -83,6 +121,46 @@ export default function slackTest({ getService }: FtrProviderContext) {
       });
     });
 
+    it('should return 200 when creating a slack action with web api type successfully', async () => {
+      const { body: createdAction } = await supertest
+        .post('/api/actions/connector')
+        .set('kbn-xsrf', 'foo')
+        .send({
+          name: 'A slack web api action',
+          connector_type_id: '.slack',
+          secrets: {
+            token: 'some token',
+          },
+        })
+        .expect(200);
+
+      expect(createdAction).to.eql({
+        id: createdAction.id,
+        is_preconfigured: false,
+        is_deprecated: false,
+        is_missing_secrets: false,
+        name: 'A slack web api action',
+        connector_type_id: '.slack',
+        config: {},
+      });
+
+      expect(typeof createdAction.id).to.be('string');
+
+      const { body: fetchedAction } = await supertest
+        .get(`/api/actions/connector/${createdAction.id}`)
+        .expect(200);
+
+      expect(fetchedAction).to.eql({
+        id: fetchedAction.id,
+        is_preconfigured: false,
+        is_deprecated: false,
+        is_missing_secrets: false,
+        name: 'A slack web api action',
+        connector_type_id: '.slack',
+        config: {},
+      });
+    });
+
     it('should respond with a 400 Bad Request when creating a slack action with no webhookUrl', async () => {
       await supertest
         .post('/api/actions/connector')
@@ -98,7 +176,7 @@ export default function slackTest({ getService }: FtrProviderContext) {
             statusCode: 400,
             error: 'Bad Request',
             message:
-              'error validating action type secrets: [webhookUrl]: expected value of type [string] but got [undefined]',
+              'error validating action type secrets: types that failed validation:\n- [0.webhookUrl]: expected value of type [string] but got [undefined]\n- [1.token]: expected value of type [string] but got [undefined]',
           });
         });
     });
@@ -146,23 +224,9 @@ export default function slackTest({ getService }: FtrProviderContext) {
         });
     });
 
-    it('should create our slack simulator action successfully', async () => {
-      const { body: createdSimulatedAction } = await supertest
-        .post('/api/actions/connector')
-        .set('kbn-xsrf', 'foo')
-        .send({
-          name: 'A slack simulator',
-          connector_type_id: '.slack',
-          secrets: {
-            webhookUrl: slackSimulatorURL,
-          },
-        })
-        .expect(200);
-
-      simulatedActionId = createdSimulatedAction.id;
-    });
-
     it('should handle firing with a simulated success', async () => {
+      const simulatedActionId = await mockedSlackActionIdForWebhook(slackSimulatorURL);
+
       const { body: result } = await supertest
         .post(`/api/actions/connector/${simulatedActionId}/_execute`)
         .set('kbn-xsrf', 'foo')
@@ -176,7 +240,26 @@ export default function slackTest({ getService }: FtrProviderContext) {
       expect(proxyHaveBeenCalled).to.equal(true);
     });
 
+    it('should handle firing with a simulated success', async () => {
+      const simulatedActionId = await mockedSlackActionIdForWebApi();
+      const { body: result } = await supertest
+        .post(`/api/actions/connector/${simulatedActionId}/_execute`)
+        .set('kbn-xsrf', 'foo')
+        .send({
+          params: {
+            subAction: 'postMessage',
+            subActionParams: { channels: ['general'], text: 'really important text' },
+          },
+        })
+        .expect(200);
+
+      expect(result.status).to.eql('ok');
+      expect(proxyHaveBeenCalled).to.equal(true);
+    });
+
     it('should handle an empty message error', async () => {
+      const simulatedActionId = await mockedSlackActionIdForWebhook(slackSimulatorURL);
+
       const { body: result } = await supertest
         .post(`/api/actions/connector/${simulatedActionId}/_execute`)
         .set('kbn-xsrf', 'foo')
@@ -187,10 +270,14 @@ export default function slackTest({ getService }: FtrProviderContext) {
         })
         .expect(200);
       expect(result.status).to.eql('error');
-      expect(result.message).to.match(/error validating action params: \[message\]: /);
+      expect(result.message).to.equal(
+        "error validating action params: Cannot destructure property 'Symbol(Symbol.iterator)' of 'undefined' as it is undefined."
+      );
     });
 
     it('should handle a 40x slack error', async () => {
+      const simulatedActionId = await mockedSlackActionIdForWebhook(slackSimulatorURL);
+
       const { body: result } = await supertest
         .post(`/api/actions/connector/${simulatedActionId}/_execute`)
         .set('kbn-xsrf', 'foo')
@@ -205,6 +292,8 @@ export default function slackTest({ getService }: FtrProviderContext) {
     });
 
     it('should handle a 429 slack error', async () => {
+      const simulatedActionId = await mockedSlackActionIdForWebhook(slackSimulatorURL);
+
       const dateStart = new Date().getTime();
       const { body: result } = await supertest
         .post(`/api/actions/connector/${simulatedActionId}/_execute`)
@@ -224,6 +313,8 @@ export default function slackTest({ getService }: FtrProviderContext) {
     });
 
     it('should handle a 500 slack error', async () => {
+      const simulatedActionId = await mockedSlackActionIdForWebhook(slackSimulatorURL);
+
       const { body: result } = await supertest
         .post(`/api/actions/connector/${simulatedActionId}/_execute`)
         .set('kbn-xsrf', 'foo')
@@ -238,12 +329,5 @@ export default function slackTest({ getService }: FtrProviderContext) {
       expect(result.message).to.match(/error posting a slack message, retry later/);
       expect(result.retry).to.equal(true);
     });
-
-    after(() => {
-      slackServer.close();
-      if (proxyServer) {
-        proxyServer.close();
-      }
-    });
   });
-}
+};
