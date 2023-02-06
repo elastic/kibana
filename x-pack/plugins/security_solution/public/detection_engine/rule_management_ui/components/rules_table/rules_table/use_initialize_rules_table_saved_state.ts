@@ -76,6 +76,7 @@ export function useInitializeRulesTableSavedState(): void {
       showElasticRules: filter.source === RuleSource.Prebuilt,
       showCustomRules: filter.source === RuleSource.Custom,
       tags: Array.isArray(filter.tags) ? filter.tags : DEFAULT_FILTER_OPTIONS.tags,
+      enabled: filter.enabled,
     });
 
     if (sorting.field || sorting.order) {
