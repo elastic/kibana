@@ -272,12 +272,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.header.waitUntilLoadingHasFinished();
 
       const [firstToast, secondToast] = await toasts.getAllToastElements();
-      expect(await firstToast.getVisibleText()).to.equal(
-        `"${first}" is not a configured data view ID\nShowing the saved data view: "logstas*" (${second})`
-      );
 
-      expect(await secondToast.getVisibleText()).to.equal(
-        `Different index references\nData view id references in some of the applied filters differ from the current data view.`
+      expect([await firstToast.getVisibleText(), await secondToast.getVisibleText()].sort()).to.eql(
+        [
+          `"${first}" is not a configured data view ID\nShowing the saved data view: "logstas*" (${second})`,
+          `Different index references\nData view id references in some of the applied filters differ from the current data view.`,
+        ].sort()
       );
     });
   });

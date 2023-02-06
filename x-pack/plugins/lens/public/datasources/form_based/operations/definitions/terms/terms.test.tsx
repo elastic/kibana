@@ -2636,9 +2636,41 @@ describe('terms', () => {
           } as TermsIndexPatternColumn,
         },
       };
-      expect(termsOperation.getErrorMessage!(layer, 'col1', indexPattern)).toEqual([
-        'Field notExisting was not found',
-      ]);
+      expect(termsOperation.getErrorMessage!(layer, 'col1', indexPattern)).toMatchInlineSnapshot(`
+        Array [
+          Object {
+            "displayLocations": Array [
+              Object {
+                "id": "toolbar",
+              },
+              Object {
+                "dimensionId": "col1",
+                "id": "dimensionButton",
+              },
+              Object {
+                "id": "embeddableBadge",
+              },
+            ],
+            "message": <FormattedMessage
+              defaultMessage="{count, plural, one {Field} other {Fields}} {missingFields} {count, plural, one {was} other {were}} not found."
+              id="xpack.lens.indexPattern.fieldsNotFound"
+              values={
+                Object {
+                  "count": 1,
+                  "missingFields": <React.Fragment>
+                    <React.Fragment>
+                      <strong>
+                        notExisting
+                      </strong>
+                      
+                    </React.Fragment>
+                  </React.Fragment>,
+                }
+              }
+            />,
+          },
+        ]
+      `);
     });
 
     it('return no error for scripted field when in single mode', () => {
