@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+import { SERVICE_ENVIRONMENT } from '../../common/es_fields/apm';
 import { useFetcher } from './use_fetcher';
-import { SERVICE_ENVIRONMENT } from '@kbn/apm-plugin/common/es_fields/apm';
 import { Environment } from '../../common/environment_rt';
 
 const INITIAL_DATA = { environments: [] };
