@@ -7,6 +7,7 @@
 import React, { FC, useCallback } from 'react';
 import {
   EuiBadge,
+  EuiCallOut,
   EuiDescriptionList,
   EuiEmptyPrompt,
   EuiFlexGrid,
@@ -24,6 +25,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { Query } from '@kbn/es-query';
+import { SPLIT_FIELD_CARDINALITY_LIMIT } from './constants';
 import { ChangePointTypeFilter } from './change_point_type_filter';
 import { SearchBarWrapper } from './search_bar';
 import { ChangePointType, useChangePointDetectionContext } from './change_point_detection_context';
@@ -42,6 +44,7 @@ export const ChangePointDetectionPage: FC = () => {
     resultQuery,
     progress,
     pagination,
+    splitFieldCardinality,
   } = useChangePointDetectionContext();
 
   const setFn = useCallback(
@@ -80,6 +83,9 @@ export const ChangePointDetectionPage: FC = () => {
   );
 
   const selectControlCss = { width: '300px' };
+
+  const cardinalityExceeded =
+    splitFieldCardinality && splitFieldCardinality > SPLIT_FIELD_CARDINALITY_LIMIT;
 
   return (
     <div data-test-subj="aiopsChangePointDetectionPage">
@@ -121,6 +127,31 @@ export const ChangePointDetectionPage: FC = () => {
       </EuiFlexGroup>
 
       <EuiSpacer size="m" />
+
+      {cardinalityExceeded ? (
+        <>
+          <EuiCallOut
+            title={i18n.translate('xpack.aiops.changePointDetection.cardinalityWarningTitle', {
+              defaultMessage: 'Analysis has been limited',
+            })}
+            color="warning"
+            iconType="alert"
+          >
+            <p>
+              {i18n.translate('xpack.aiops.changePointDetection.cardinalityWarningMessage', {
+                defaultMessage:
+                  'Cardinality of {cardinality} of the "{splitField}" field exceeded a limit of {cardinalityLimit}. Only first {cardinalityLimit} partitions are analyzed.',
+                values: {
+                  cardinality: splitFieldCardinality,
+                  cardinalityLimit: SPLIT_FIELD_CARDINALITY_LIMIT,
+                  splitField: requestParams.splitField,
+                },
+              })}
+            </p>
+          </EuiCallOut>
+          <EuiSpacer size="m" />
+        </>
+      ) : null}
 
       <EuiFlexGroup alignItems={'center'} justifyContent={'spaceBetween'}>
         <EuiFlexItem grow={false}>

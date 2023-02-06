@@ -13,3 +13,5 @@ export const fnOperationTypeMapping: Record<string, string> = {
 } as const;
 
 export const DEFAULT_AGG_FUNCTION = 'avg';
+
+export const SPLIT_FIELD_CARDINALITY_LIMIT = 10000;
