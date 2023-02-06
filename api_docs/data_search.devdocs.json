@@ -7307,7 +7307,7 @@
                     "section": "def-common.SearchSourceFields",
                     "text": "SearchSourceFields"
                   },
-                  "[K]; getActiveIndexFilter: () => string[]; getOwnField: <K extends keyof ",
+                  "[K]; getActiveIndexFilter: () => any[]; getOwnField: <K extends keyof ",
                   {
                     "pluginId": "data",
                     "scope": "common",
@@ -10227,7 +10227,7 @@
             "label": "getActiveIndexFilter",
             "description": [],
             "signature": [
-              "() => string[]"
+              "() => any[]"
             ],
             "path": "src/plugins/data/common/search/search_source/search_source.ts",
             "deprecated": false,
@@ -35050,7 +35050,7 @@
             "section": "def-common.SearchSourceFields",
             "text": "SearchSourceFields"
           },
-          "[K]; getActiveIndexFilter: () => string[]; getOwnField: <K extends keyof ",
+          "[K]; getActiveIndexFilter: () => any[]; getOwnField: <K extends keyof ",
           {
             "pluginId": "data",
             "scope": "common",
