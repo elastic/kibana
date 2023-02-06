@@ -325,6 +325,7 @@ export const DataTableComponent = React.memo<DataTableProps>(
     }, [disableCellActions, columnHeaders, data, id]);
 
     const columnsCellActions = useDataGridColumnsCellActions(columnsCellActionsProps);
+
     const columnsWithCellActions: EuiDataGridColumn[] = useMemo(
       () =>
         columnHeaders.map((header, columnIndex) => {
@@ -380,6 +381,7 @@ export const DataTableComponent = React.memo<DataTableProps>(
         }
 
         return renderCellValue({
+          asPlainText: false,
           browserFields,
           columnId: header.id,
           data: rowData,

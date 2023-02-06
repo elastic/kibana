@@ -107,10 +107,14 @@ describe('DataTable', () => {
   };
 
   beforeEach(() => {
-    mockDispatch.mockReset();
+    mockDispatch.mockClear();
   });
 
   describe('rendering', () => {
+    beforeEach(() => {
+      mockDispatch.mockClear();
+    });
+
     test('it renders the body data grid', () => {
       const wrapper = mount(
         <TestProviders>
@@ -173,6 +177,10 @@ describe('DataTable', () => {
   });
 
   describe('cellActions', () => {
+    beforeEach(() => {
+      mockDispatch.mockClear();
+    });
+
     test('calls useDataGridColumnsCellActions properly', () => {
       const data = mockTimelineData.slice(0, 1);
       const wrapper = mount(
@@ -185,6 +193,9 @@ describe('DataTable', () => {
       expect(mockUseDataGridColumnsCellActions).toHaveBeenCalledWith({
         triggerId: CELL_ACTIONS_DEFAULT_TRIGGER,
         fields: [{ name: '@timestamp', values: [data[0]?.data[0]?.value], type: 'date' }],
+        metadata: {
+          scopeId: 'table-test',
+        },
       });
     });
 
@@ -196,10 +207,11 @@ describe('DataTable', () => {
       );
       wrapper.update();
 
-      expect(mockUseDataGridColumnsCellActions).toHaveBeenCalledWith({
-        triggerId: CELL_ACTIONS_DEFAULT_TRIGGER,
-        fields: [],
-      });
+      expect(mockUseDataGridColumnsCellActions).toHaveBeenCalledWith(
+        expect.objectContaining({
+          fields: [],
+        })
+      );
     });
 
     test('does not render cell actions if empty actions returned', () => {
