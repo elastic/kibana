@@ -36,7 +36,8 @@ export const getCheapSuggestionAggregationBuilder = ({ fieldSpec }: OptionsListR
 
 const cheapSuggestionAggSubtypes: { [key: string]: OptionsListSuggestionAggregationBuilder } = {
   /**
-   * the "Keyword only" query / parser should be used when the options list is built on a field which has only keyword mappings.
+   * The "textOrKeyword" query / parser should be used whenever the field is built on some type non-nested string field
+   * (such as a keyword field or a keyword+text multi-field)
    */
   keywordOrText: {
     buildAggregation: ({ fieldName, searchString, sort }: OptionsListRequestBody) => ({

@@ -9,7 +9,7 @@
 import { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 import {
   OptionsListRequestBody,
-  OptionsListSuggestionResult,
+  OptionsListParsedSuggestions,
 } from '../../common/options_list/types';
 
 export interface EsBucket {
@@ -24,5 +24,5 @@ export interface OptionsListValidationAggregationBuilder {
 
 export interface OptionsListSuggestionAggregationBuilder {
   buildAggregation: (req: OptionsListRequestBody) => unknown;
-  parse: (response: SearchResponse, req: OptionsListRequestBody) => OptionsListSuggestionResult;
+  parse: (response: SearchResponse, req: OptionsListRequestBody) => OptionsListParsedSuggestions;
 }

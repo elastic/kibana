@@ -32,19 +32,23 @@ export interface OptionsListSuggestions {
   [key: string]: { doc_count: number };
 }
 
-export interface OptionsListSuggestionResult {
-  suggestions: OptionsListSuggestions;
-  totalCardinality?: number; // total cardinality will be undefined when `useExpensiveQueries` is `false`
-}
-
 /**
  * The Options list response is returned from the serverside Options List route.
  */
 export interface OptionsListSuccessResponse {
   suggestions: OptionsListSuggestions;
-  totalCardinality?: number;
+  totalCardinality?: number; // total cardinality will be undefined when `useExpensiveQueries` is `false`
   invalidSelections?: string[];
 }
+
+/**
+ * The invalid selections are parsed **after** the server returns with the result from the ES client; so, the
+ * suggestion aggregation parser only returns the suggestions list + the cardinality of the result
+ */
+export type OptionsListParsedSuggestions = Pick<
+  OptionsListSuccessResponse,
+  'suggestions' | 'totalCardinality'
+>;
 
 export interface OptionsListFailureResponse {
   error: 'aborted' | Error;

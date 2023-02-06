@@ -144,7 +144,7 @@ export const OptionsListPopoverSuggestions = ({
   useEffect(() => {
     const container = listRef.current;
     if (!isLoading && canLoadMoreSuggestions) {
-      container?.addEventListener('scroll', loadMoreOptions, true);
+s      container?.addEventListener('scroll', loadMoreOptions, true);
       return () => {
         container?.removeEventListener('scroll', loadMoreOptions, true);
       };
