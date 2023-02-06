@@ -10,7 +10,6 @@ import React, { useState } from 'react';
 import { useActions, useValues } from 'kea';
 
 import {
-  EuiButton,
   EuiCallOut,
   EuiConfirmModal,
   EuiFieldText,
@@ -21,17 +20,13 @@ import {
 
 import { i18n } from '@kbn/i18n';
 
-import { Status } from '../../../../../common/types/api';
-
-import { CancelSyncsApiLogic } from '../../api/connector/cancel_syncs_api_logic';
-import { ingestionMethodToText, isConnectorIndex } from '../../utils/indices';
+import { ingestionMethodToText } from '../../utils/indices';
 
 import { IndicesLogic } from './indices_logic';
 
 export const DeleteIndexModal: React.FC = () => {
   const { closeDeleteModal, deleteIndex } = useActions(IndicesLogic);
   const {
-    deleteModalIndex,
     deleteModalIndexName: indexName,
     deleteModalIndexHasInProgressSyncs,
     deleteModalIngestionMethod: ingestionMethod,
@@ -39,9 +34,6 @@ export const DeleteIndexModal: React.FC = () => {
     isDeleteLoading,
     isFetchIndexDetailsLoading,
   } = useValues(IndicesLogic);
-
-  const { makeRequest } = useActions(CancelSyncsApiLogic);
-  const { status: cancelStatus } = useValues(CancelSyncsApiLogic);
 
   const [inputIndexName, setInputIndexName] = useState('');
 
@@ -116,21 +108,6 @@ export const DeleteIndexModal: React.FC = () => {
                 }
               )}
             </p>
-            <EuiButton
-              onClick={() => {
-                if (isConnectorIndex(deleteModalIndex)) {
-                  makeRequest({ connectorId: deleteModalIndex.connector.id });
-                }
-              }}
-              isLoading={cancelStatus === Status.LOADING}
-            >
-              {i18n.translate(
-                'xpack.enterpriseSearch.content.searchIndices.deleteModal.cancelSyncsButton.label',
-                {
-                  defaultMessage: 'Cancel syncs',
-                }
-              )}
-            </EuiButton>
           </EuiCallOut>
           <EuiSpacer />
         </>
