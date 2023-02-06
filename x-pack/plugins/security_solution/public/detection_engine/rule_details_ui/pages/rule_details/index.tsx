@@ -803,7 +803,7 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
                 </EuiFlexItem>
               </EuiFlexGroup>
               <EuiSpacer />
-              <TabNavigationWithBreadcrumbs navTabs={pageTabs} />
+              <TabNavigationWithBreadcrumbs navTabs={pageTabs} isExistingRule={isExistingRule} />
               <EuiSpacer />
             </Display>
             <StyledMinHeightTabContainer>

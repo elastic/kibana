@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { last, omit } from 'lodash/fp';
+import { isBoolean, last, omit } from 'lodash/fp';
 
 import { useDispatch } from 'react-redux';
 import type { ChromeBreadcrumb } from '@kbn/core/public';
@@ -27,6 +27,7 @@ import { getLeadingBreadcrumbsForSecurityPage } from './get_breadcrumbs_for_page
 import type { GetSecuritySolutionUrl } from '../../link_to';
 import { useGetSecuritySolutionUrl } from '../../link_to';
 import { useIsGroupedNavigationEnabled } from '../helpers';
+import * as i18n from '../../../../detection_engine/rule_details_ui/pages/rule_details/translations';
 
 export interface ObjectWithNavTabs {
   navTabs: GenericNavRecord;
@@ -40,12 +41,14 @@ export const useSetBreadcrumbs = () => {
   return (
     spyState: RouteSpyState & ObjectWithNavTabs,
     chrome: StartServices['chrome'],
-    navigateToUrl: NavigateToUrl
+    navigateToUrl: NavigateToUrl,
+    isExistingRule?: boolean
   ) => {
     const breadcrumbs = getBreadcrumbsForRoute(
       spyState,
       getSecuritySolutionUrl,
-      isGroupedNavigationEnabled
+      isGroupedNavigationEnabled,
+      isExistingRule
     );
 
     if (!breadcrumbs) {
@@ -75,7 +78,8 @@ export const useSetBreadcrumbs = () => {
 export const getBreadcrumbsForRoute = (
   object: RouteSpyState & ObjectWithNavTabs,
   getSecuritySolutionUrl: GetSecuritySolutionUrl,
-  isGroupedNavigationEnabled: boolean
+  isGroupedNavigationEnabled: boolean,
+  isExistingRule?: boolean
 ): ChromeBreadcrumb[] | null => {
   const spyState = omit('navTabs', object) as RouteSpyState;
 
@@ -103,10 +107,10 @@ export const getBreadcrumbsForRoute = (
     ? newMenuLeadingBreadcrumbs
     : [siemRootBreadcrumb, pageBreadcrumb];
 
-  return emptyLastBreadcrumbUrl([
-    ...leadingBreadcrumbs,
-    ...getTrailingBreadcrumbsForRoutes(spyState, getSecuritySolutionUrl),
-  ]);
+  return emptyLastBreadcrumbUrl(
+    [...leadingBreadcrumbs, ...getTrailingBreadcrumbsForRoutes(spyState, getSecuritySolutionUrl)],
+    isExistingRule
+  );
 };
 
 const getTrailingBreadcrumbsForRoutes = (
@@ -136,7 +140,11 @@ const getTrailingBreadcrumbsForRoutes = (
   return [];
 };
 
-const emptyLastBreadcrumbUrl = (breadcrumbs: ChromeBreadcrumb[]) => {
+const emptyLastBreadcrumbUrl = (breadcrumbs: ChromeBreadcrumb[], isExistingRule?: boolean) => {
+  if (!isExistingRule && isBoolean(isExistingRule)) {
+    breadcrumbs.push({ text: i18n.DELETED_RULE, href: '/' });
+  }
+
   const leadingBreadCrumbs = breadcrumbs.slice(0, -1);
   const lastBreadcrumb = last(breadcrumbs);
 
