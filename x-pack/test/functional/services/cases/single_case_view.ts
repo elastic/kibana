@@ -22,11 +22,12 @@ export function CasesSingleViewServiceProvider({ getService, getPageObject }: Ft
     async deleteCase() {
       await retry.try(async () => {
         await testSubjects.click('property-actions-case-ellipses');
-        await testSubjects.existOrFail('property-actions-case-trash');
-        await common.clickAndValidate('property-actions-case-trash', 'confirmModalConfirmButton');
-        await testSubjects.click('confirmModalConfirmButton');
-        await header.waitUntilLoadingHasFinished();
+        await testSubjects.existOrFail('property-actions-case-trash', { timeout: 100 });
       });
+
+      await common.clickAndValidate('property-actions-case-trash', 'confirmModalConfirmButton');
+      await testSubjects.click('confirmModalConfirmButton');
+      await header.waitUntilLoadingHasFinished();
     },
 
     async verifyUserAction(dataTestSubj: string, contentToMatch: string) {
