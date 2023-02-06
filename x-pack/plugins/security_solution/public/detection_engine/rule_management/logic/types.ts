@@ -244,6 +244,7 @@ export interface FilterOptions {
   showElasticRules: boolean;
   tags: string[];
   excludeRuleTypes?: Type[];
+  enabled?: boolean; // undefined is to display all the rules
 }
 
 export interface FetchRulesResponse {
