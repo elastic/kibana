@@ -20,7 +20,7 @@ import {
 import styled, { css } from 'styled-components';
 
 import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
-import type { ElasticUser } from '../../../containers/types';
+import type { CaseUser } from '../../../containers/types';
 import * as i18n from '../translations';
 import type { UserInfoWithAvatar } from '../../user_profiles/types';
 import { HoverableUserWithAvatar } from '../../user_profiles/hoverable_user_with_avatar';
@@ -33,7 +33,7 @@ interface UserListProps {
   };
   headline: string;
   loading?: boolean;
-  users: ElasticUser[];
+  users: CaseUser[];
   userProfiles?: Map<string, UserProfileWithAvatar>;
   dataTestSubj?: string;
 }
@@ -109,7 +109,7 @@ export const UserList: React.FC<UserListProps> = React.memo(
 UserList.displayName = 'UserList';
 
 const getValidUsers = (
-  users: ElasticUser[],
+  users: CaseUser[],
   userProfiles: Map<string, UserProfileWithAvatar>
 ): UserInfoWithAvatar[] => {
   const validUsers = users.reduce<Map<string, UserInfoWithAvatar>>((acc, user) => {
