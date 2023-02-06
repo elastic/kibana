@@ -38,15 +38,22 @@ export function forEachCompileFunctionName(
 class HandlebarsTestBench {
   private template: string;
   private options: TestOptions;
+  private beforeRenderFn: Function = () => {};
   private compileOptions?: ExtendedCompileOptions;
   private runtimeOptions?: ExtendedRuntimeOptions;
   private helpers: { [name: string]: Handlebars.HelperDelegate | undefined } = {};
+  private partials: { [name: string]: Handlebars.Template } = {};
   private decorators: DecoratorsHash = {};
   private input: any = {};
 
   constructor(template: string, options: TestOptions = {}) {
     this.template = template;
     this.options = options;
+  }
+
+  beforeRender(fn: Function) {
+    this.beforeRenderFn = fn;
+    return this;
   }
 
   withCompileOptions(compileOptions?: ExtendedCompileOptions) {
@@ -72,6 +79,18 @@ class HandlebarsTestBench {
   withHelpers<F extends Handlebars.HelperDelegate>(helperFunctions: { [name: string]: F }) {
     for (const [name, helper] of Object.entries(helperFunctions)) {
       this.withHelper(name, helper);
+    }
+    return this;
+  }
+
+  withPartial(name: string | number, partial: Handlebars.Template) {
+    this.partials[name] = partial;
+    return this;
+  }
+
+  withPartials(partials: { [name: string]: Handlebars.Template }) {
+    for (const [name, partial] of Object.entries(partials)) {
+      this.withPartial(name, partial);
     }
     return this;
   }
@@ -142,10 +161,13 @@ class HandlebarsTestBench {
     const runtimeOptions: ExtendedRuntimeOptions = Object.assign(
       {
         helpers: this.helpers,
+        partials: this.partials,
         decorators: this.decorators,
       },
       this.runtimeOptions
     );
+
+    this.beforeRenderFn();
 
     return renderEval(this.input, runtimeOptions);
   }
@@ -156,10 +178,13 @@ class HandlebarsTestBench {
     const runtimeOptions: ExtendedRuntimeOptions = Object.assign(
       {
         helpers: this.helpers,
+        partials: this.partials,
         decorators: this.decorators,
       },
       this.runtimeOptions
     );
+
+    this.beforeRenderFn();
 
     return renderAST(this.input, runtimeOptions);
   }

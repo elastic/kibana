@@ -270,10 +270,24 @@ const chartPreviewHistogramBucket = rt.type({
   doc_count: rt.number,
 });
 
+const AdditionalContext = rt.type({
+  hits: rt.type({
+    hits: rt.array(
+      rt.type({
+        fields: rt.record(rt.string, rt.array(rt.unknown)),
+      })
+    ),
+  }),
+});
+
 const ChartPreviewBucketsRT = rt.partial({
   histogramBuckets: rt.type({
     buckets: rt.array(chartPreviewHistogramBucket),
   }),
+});
+
+const additionalContextRT = rt.partial({
+  additionalContext: AdditionalContext,
 });
 
 // ES query responses //
@@ -299,7 +313,7 @@ export const UngroupedSearchQueryResponseRT = rt.intersection([
       hits: hitsRT,
     }),
     rt.partial({
-      aggregations: ChartPreviewBucketsRT,
+      aggregations: rt.intersection([ChartPreviewBucketsRT, additionalContextRT]),
     }),
   ]),
 ]);
@@ -320,6 +334,7 @@ export const UnoptimizedGroupedSearchQueryResponseRT = rt.intersection([
                   doc_count: rt.number,
                 }),
                 ChartPreviewBucketsRT,
+                additionalContextRT,
               ]),
             })
           ),
@@ -341,7 +356,9 @@ export const OptimizedGroupedSearchQueryResponseRT = rt.intersection([
     aggregations: rt.type({
       groups: rt.intersection([
         rt.type({
-          buckets: rt.array(rt.intersection([bucketFieldsRT, ChartPreviewBucketsRT])),
+          buckets: rt.array(
+            rt.intersection([bucketFieldsRT, ChartPreviewBucketsRT, additionalContextRT])
+          ),
         }),
         afterKeyRT,
       ]),

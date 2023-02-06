@@ -17,6 +17,20 @@ export interface ConnectorScheduling {
   interval: string;
 }
 
+export interface CustomScheduling {
+  configuration_overrides: Record<string, unknown>;
+  enabled: boolean;
+  interval: string;
+  last_synced: string | null;
+  name: string;
+}
+
+export type ConnectorCustomScheduling = Record<string, CustomScheduling | null>;
+
+export interface ConnectorPreferences extends Record<string, unknown> {
+  extract_full_html?: boolean | null;
+}
+
 export enum ConnectorStatus {
   CREATED = 'created',
   NEEDS_CONFIGURATION = 'needs_configuration',
@@ -125,6 +139,7 @@ export type ConnectorFeatures = Partial<{
 export interface Connector {
   api_key_id: string | null;
   configuration: ConnectorConfiguration;
+  custom_scheduling: ConnectorCustomScheduling;
   description: string | null;
   error: string | null;
   features: ConnectorFeatures;
@@ -139,6 +154,7 @@ export interface Connector {
   last_synced: string | null;
   name: string;
   pipeline?: IngestPipelineParams | null;
+  preferences: ConnectorPreferences;
   scheduling: {
     enabled: boolean;
     interval: string; // crontab syntax
