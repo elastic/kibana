@@ -44,22 +44,23 @@ export interface UpdateOptions<Params extends RuleTypeParams> {
     throttle?: string | null;
     notifyWhen?: RuleNotifyWhenType | null;
   };
+  allowMissingConnectorSecrets?: boolean;
 }
 
 export async function update<Params extends RuleTypeParams = never>(
   context: RulesClientContext,
-  { id, data }: UpdateOptions<Params>
+  { id, data, allowMissingConnectorSecrets }: UpdateOptions<Params>
 ): Promise<PartialRule<Params>> {
   return await retryIfConflicts(
     context.logger,
     `rulesClient.update('${id}')`,
-    async () => await updateWithOCC<Params>(context, { id, data })
+    async () => await updateWithOCC<Params>(context, { id, data, allowMissingConnectorSecrets })
   );
 }
 
 async function updateWithOCC<Params extends RuleTypeParams>(
   context: RulesClientContext,
-  { id, data }: UpdateOptions<Params>
+  { id, data, allowMissingConnectorSecrets }: UpdateOptions<Params>
 ): Promise<PartialRule<Params>> {
   let alertSavedObject: SavedObject<RawRule>;
 
@@ -107,10 +108,7 @@ async function updateWithOCC<Params extends RuleTypeParams>(
 
   const updateResult = await updateAlert<Params>(
     context,
-    {
-      id,
-      data,
-    },
+    { id, data, allowMissingConnectorSecrets },
     alertSavedObject
   );
 
@@ -151,7 +149,7 @@ async function updateWithOCC<Params extends RuleTypeParams>(
 
 async function updateAlert<Params extends RuleTypeParams>(
   context: RulesClientContext,
-  { id, data: initialData }: UpdateOptions<Params>,
+  { id, data: initialData, allowMissingConnectorSecrets }: UpdateOptions<Params>,
   { attributes, version }: SavedObject<RawRule>
 ): Promise<PartialRule<Params>> {
   const data = { ...initialData, actions: addUuid(initialData.actions) };
@@ -171,7 +169,7 @@ async function updateAlert<Params extends RuleTypeParams>(
 
   // Validate
   const validatedAlertTypeParams = validateRuleTypeParams(data.params, ruleType.validate?.params);
-  await validateActions(context, ruleType, data);
+  await validateActions(context, ruleType, data, allowMissingConnectorSecrets);
 
   // Throw error if schedule interval is less than the minimum and we are enforcing it
   const intervalInMs = parseDuration(data.schedule.interval);

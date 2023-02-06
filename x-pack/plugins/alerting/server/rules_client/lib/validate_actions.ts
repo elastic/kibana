@@ -19,7 +19,8 @@ export async function validateActions(
   alertType: UntypedNormalizedRuleType,
   data: Pick<RawRule, 'notifyWhen' | 'throttle' | 'schedule'> & {
     actions: NormalizedAlertAction[];
-  }
+  },
+  allowMissingConnectorSecrets?: boolean
 ): Promise<void> {
   const { actions, notifyWhen, throttle } = data;
   const hasRuleLevelNotifyWhen = typeof notifyWhen !== 'undefined';
@@ -46,20 +47,26 @@ export async function validateActions(
   const actionsUsingConnectorsWithMissingSecrets = actionResults.filter(
     (result) => result.isMissingSecrets
   );
-
   if (actionsUsingConnectorsWithMissingSecrets.length) {
-    errors.push(
-      i18n.translate('xpack.alerting.rulesClient.validateActions.misconfiguredConnector', {
-        defaultMessage: 'Invalid connectors: {groups}',
-        values: {
-          groups: actionsUsingConnectorsWithMissingSecrets
-            .map((connector) => connector.name)
-            .join(', '),
-        },
-      })
-    );
+    if (allowMissingConnectorSecrets) {
+      context.logger.error(
+        `Invalid connectors with "allowMissingConnectorSecrets": ${actionsUsingConnectorsWithMissingSecrets
+          .map((connector) => connector.name)
+          .join(', ')}`
+      );
+    } else {
+      errors.push(
+        i18n.translate('xpack.alerting.rulesClient.validateActions.misconfiguredConnector', {
+          defaultMessage: 'Invalid connectors: {groups}',
+          values: {
+            groups: actionsUsingConnectorsWithMissingSecrets
+              .map((connector) => connector.name)
+              .join(', '),
+          },
+        })
+      );
+    }
   }
-
   // check for actions with invalid action groups
   const { actionGroups: alertTypeActionGroups } = alertType;
   const usedAlertActionGroups = actions.map((action) => action.group);

@@ -106,6 +106,100 @@ export default ({ getService }: FtrProviderContext): void => {
         missing_exception_lists_count: 0,
         missing_rules: [],
         missing_rules_count: 0,
+        excluded_action_connection_count: 0,
+        excluded_action_connections: [],
+        exported_action_connector_count: 0,
+        missing_action_connection_count: 0,
+        missing_action_connections: [],
+      });
+    });
+    it('should export rules with actions connectors', async () => {
+      // create new actions
+      const webHookAction = await createWebHookConnector();
+
+      const defaultRuleAction = {
+        id: webHookAction.id,
+        action_type_id: '.webhook',
+        group: 'default',
+        params: {
+          body: '{"test":"a default action"}',
+        },
+      };
+
+      const ruleId = 'rule-1';
+      await createRule(supertest, log, {
+        ...getSimpleRule(ruleId),
+        actions: [defaultRuleAction],
+      });
+      const exportedConnectors = {
+        attributes: {
+          actionTypeId: '.webhook',
+          config: {
+            hasAuth: true,
+            method: 'post',
+            url: 'http://localhost',
+          },
+          isMissingSecrets: true,
+          name: 'Some connector',
+          secrets: {},
+        },
+        coreMigrationVersion: '8.7.0',
+        id: webHookAction.id,
+        migrationVersion: {
+          action: '8.3.0',
+        },
+        references: [],
+        type: 'action',
+      };
+
+      const { body } = await postBulkAction()
+        .send({ query: '', action: BulkActionType.export })
+        .expect(200)
+        .expect('Content-Type', 'application/ndjson')
+        .expect('Content-Disposition', 'attachment; filename="rules_export.ndjson"')
+        .parse(binaryToString);
+
+      const [ruleJson, connectorsJson, exportDetailsJson] = body.toString().split(/\n/);
+
+      const rule = removeServerGeneratedProperties(JSON.parse(ruleJson));
+      expect(rule).to.eql({
+        ...getSimpleRuleOutput(),
+        throttle: 'rule',
+        actions: [
+          {
+            action_type_id: '.webhook',
+            group: 'default',
+            id: webHookAction.id,
+            params: {
+              body: '{"test":"a default action"}',
+            },
+          },
+        ],
+      });
+      const { attributes, id, type } = JSON.parse(connectorsJson);
+      expect(attributes.actionTypeId).to.eql(exportedConnectors.attributes.actionTypeId);
+      expect(id).to.eql(exportedConnectors.id);
+      expect(type).to.eql(exportedConnectors.type);
+      expect(attributes.name).to.eql(exportedConnectors.attributes.name);
+      expect(attributes.secrets).to.eql(exportedConnectors.attributes.secrets);
+      expect(attributes.isMissingSecrets).to.eql(exportedConnectors.attributes.isMissingSecrets);
+      const exportDetails = JSON.parse(exportDetailsJson);
+      expect(exportDetails).to.eql({
+        exported_exception_list_count: 0,
+        exported_exception_list_item_count: 0,
+        exported_count: 2,
+        exported_rules_count: 1,
+        missing_exception_list_item_count: 0,
+        missing_exception_list_items: [],
+        missing_exception_lists: [],
+        missing_exception_lists_count: 0,
+        missing_rules: [],
+        missing_rules_count: 0,
+        excluded_action_connection_count: 0,
+        excluded_action_connections: [],
+        exported_action_connector_count: 1,
+        missing_action_connection_count: 0,
+        missing_action_connections: [],
       });
     });
 

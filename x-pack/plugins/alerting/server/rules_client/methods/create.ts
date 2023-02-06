@@ -45,11 +45,12 @@ export interface CreateOptions<Params extends RuleTypeParams> {
     | 'nextRun'
   > & { actions: NormalizedAlertAction[] };
   options?: SavedObjectOptions;
+  allowMissingConnectorSecrets?: boolean;
 }
 
 export async function create<Params extends RuleTypeParams = never>(
   context: RulesClientContext,
-  { data: initialData, options }: CreateOptions<Params>
+  { data: initialData, options, allowMissingConnectorSecrets }: CreateOptions<Params>
 ): Promise<SanitizedRule<Params>> {
   const data = { ...initialData, actions: addUuid(initialData.actions) };
 
@@ -106,8 +107,9 @@ export async function create<Params extends RuleTypeParams = never>(
   }
 
   await withSpan({ name: 'validateActions', type: 'rules' }, () =>
-    validateActions(context, ruleType, data)
+    validateActions(context, ruleType, data, allowMissingConnectorSecrets)
   );
+
   // Throw error if schedule interval is less than the minimum and we are enforcing it
   const intervalInMs = parseDuration(data.schedule.interval);
   if (
