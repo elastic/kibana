@@ -18,7 +18,7 @@ export const AlertSummaryWidgetError = () => {
       title={
         <h5>
           <FormattedMessage
-            id="xpack.triggersActionsUI.sections.ruleDetails.alertsSummary.errorLoadingTitle"
+            id="xpack.triggersActionsUI.sections.alertsSummaryWidget.errorTitle"
             defaultMessage="Unable to load the alerts summary"
           />
         </h5>
@@ -27,7 +27,7 @@ export const AlertSummaryWidgetError = () => {
         <p>
           {
             <FormattedMessage
-              id="xpack.triggersActionsUI.sections.ruleDetails.alertsSummary.errorLoadingBody"
+              id="xpack.triggersActionsUI.sections.alertsSummaryWidget.errorBody"
               defaultMessage="There was an error loading the alerts summary. Contact your
                 administrator for help."
             />
