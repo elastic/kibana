@@ -152,7 +152,7 @@ test('pluginSearchPaths only includes kibana-extra, regardless of plugin filters
     })
   );
 
-  expect(env.pluginSearchPaths).toEqual(['/some/home/kibana-extra']);
+  expect(env.pluginSearchPaths).toEqual(['/some/home/kibana-extra', '/some/home/dir/plugins']);
 
   const env2 = new Env(
     '/some/home/dir',
@@ -165,7 +165,7 @@ test('pluginSearchPaths only includes kibana-extra, regardless of plugin filters
     })
   );
 
-  expect(env2.pluginSearchPaths).toEqual(['/some/home/kibana-extra']);
+  expect(env2.pluginSearchPaths).toEqual(['/some/home/kibana-extra', '/some/home/dir/plugins']);
 
   const env3 = new Env(
     '/some/home/dir',
@@ -178,7 +178,7 @@ test('pluginSearchPaths only includes kibana-extra, regardless of plugin filters
     })
   );
 
-  expect(env3.pluginSearchPaths).toEqual(['/some/home/kibana-extra']);
+  expect(env3.pluginSearchPaths).toEqual(['/some/home/kibana-extra', '/some/home/dir/plugins']);
 
   const env4 = new Env(
     '/some/home/dir',
@@ -191,5 +191,5 @@ test('pluginSearchPaths only includes kibana-extra, regardless of plugin filters
     })
   );
 
-  expect(env4.pluginSearchPaths).toEqual(['/some/home/kibana-extra']);
+  expect(env4.pluginSearchPaths).toEqual(['/some/home/kibana-extra', '/some/home/dir/plugins']);
 });

@@ -13,7 +13,7 @@ const Path = require('path');
  * @returns {string[]}
  */
 function getPluginSearchPaths({ rootDir }) {
-  return [Path.resolve(rootDir, '../kibana-extra')];
+  return [Path.resolve(rootDir, '../kibana-extra'), Path.resolve(rootDir, 'plugins')];
 }
 
 /**
