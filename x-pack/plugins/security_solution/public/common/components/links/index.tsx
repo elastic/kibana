@@ -151,7 +151,6 @@ const HostDetailsLinkComponent: React.FC<{
       ),
     [formatUrl, encodedHostName, hostTab]
   );
-
   return isButton ? (
     <GenericLinkButton
       Component={Component}
