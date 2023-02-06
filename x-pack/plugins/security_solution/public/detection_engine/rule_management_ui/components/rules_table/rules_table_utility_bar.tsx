@@ -29,7 +29,6 @@ import { useRulesTableContext } from './rules_table/rules_table_context';
 import type { PaginationOptions } from '../../../rule_management/logic/types';
 import { useStartTransaction } from '../../../../common/lib/apm/use_start_transaction';
 import { RULES_TABLE_ACTIONS } from '../../../../common/lib/apm/user_actions';
-import { useClearRulesTableSavedState } from './rules_table/use_clear_rules_table_saved_state';
 
 export const getShowingRulesParams = ({ page, perPage, total: totalRules }: PaginationOptions) => {
   const firstInPage = totalRules === 0 ? 0 : (page - 1) * perPage + 1;
@@ -50,7 +49,6 @@ export const RulesTableUtilityBar = React.memo<RulesTableUtilityBarProps>(
     const { timelines } = useKibana().services;
     const { startTransaction } = useStartTransaction();
     const rulesTableContext = useRulesTableContext();
-    const clearTableState = useClearRulesTableSavedState();
     const { pagination, selectedRuleIds, isRefreshOn, isAllSelected, loadingRulesAction } =
       rulesTableContext.state;
     const { reFetchRules, setIsRefreshOn } = rulesTableContext.actions;
@@ -186,7 +184,7 @@ export const RulesTableUtilityBar = React.memo<RulesTableUtilityBarProps>(
                   dataTestSubj="clearTableFilters"
                   iconSide="left"
                   iconType="cross"
-                  onClick={clearTableState}
+                  onClick={rulesTableContext.actions.clearFilters}
                 >
                   {i18n.CLEAR_RULES_TABLE_FILTERS}
                 </UtilityBarAction>

@@ -16,7 +16,9 @@ import React, {
 } from 'react';
 import { DEFAULT_RULES_TABLE_REFRESH_SETTING } from '../../../../../../common/constants';
 import { invariant } from '../../../../../../common/utils/invariant';
+import { useReplaceUrlParams } from '../../../../../common/utils/global_query_string/helpers';
 import { useKibana, useUiSetting$ } from '../../../../../common/lib/kibana';
+import { URL_PARAM_KEY } from '../../../../../common/hooks/use_url_state';
 import type {
   FilterOptions,
   PaginationOptions,
@@ -33,6 +35,7 @@ import { RuleSource } from './rules_table_saved_state';
 import { useFindRulesInMemory } from './use_find_rules_in_memory';
 import { useRulesTableSavedState } from './use_rules_table_saved_state';
 import { getRulesComparator } from './utils';
+import { RULES_TABLE_STATE_STORAGE_KEY } from '../constants';
 
 export interface RulesTableState {
   /**
@@ -149,6 +152,10 @@ export interface RulesTableActions {
    * clears rules selection on a page
    */
   clearRulesSelection: () => void;
+  /**
+   * Clears rules table filters
+   */
+  clearFilters: () => void;
 }
 
 export interface RulesTableContextType {
@@ -170,7 +177,7 @@ export const RulesTableContextProvider = ({ children }: RulesTableContextProvide
     value: number;
     idleTimeout: number;
   }>(DEFAULT_RULES_TABLE_REFRESH_SETTING);
-  const { storage } = useKibana().services;
+  const { storage, sessionStorage } = useKibana().services;
   const {
     filter: savedFilter,
     sorting: savedSorting,
@@ -234,6 +241,26 @@ export const RulesTableContextProvider = ({ children }: RulesTableContextProvide
     setIsAllSelected(false);
   }, []);
 
+  const replaceUrlParams = useReplaceUrlParams();
+  const clearFilters = useCallback(() => {
+    setFilterOptions({
+      filter: DEFAULT_FILTER_OPTIONS.filter,
+      showElasticRules: DEFAULT_FILTER_OPTIONS.showElasticRules,
+      showCustomRules: DEFAULT_FILTER_OPTIONS.showCustomRules,
+      tags: DEFAULT_FILTER_OPTIONS.tags,
+      enabled: undefined,
+    });
+    setSortingOptions({
+      field: DEFAULT_SORTING_OPTIONS.field,
+      order: DEFAULT_SORTING_OPTIONS.order,
+    });
+    setPage(DEFAULT_PAGE);
+    setPerPage(DEFAULT_RULES_PER_PAGE);
+
+    replaceUrlParams({ [URL_PARAM_KEY.rulesTable]: null });
+    sessionStorage.remove(RULES_TABLE_STATE_STORAGE_KEY);
+  }, [setFilterOptions, setSortingOptions, setPage, setPerPage, replaceUrlParams, sessionStorage]);
+
   useEffect(() => {
     // pause table auto refresh when any of rule selected
     // store current auto refresh value, to use it later, when all rules selection will be cleared
@@ -285,6 +312,7 @@ export const RulesTableContextProvider = ({ children }: RulesTableContextProvide
       setSortingOptions,
       clearRulesSelection,
       setIsPreflightInProgress,
+      clearFilters,
     }),
     [
       refetch,
@@ -299,6 +327,7 @@ export const RulesTableContextProvider = ({ children }: RulesTableContextProvide
       setSortingOptions,
       clearRulesSelection,
       setIsPreflightInProgress,
+      clearFilters,
     ]
   );
 
