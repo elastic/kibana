@@ -33,8 +33,8 @@ export const guideCards: GuideCardConstants[] = [
     title: i18n.translate('guidedOnboardingPackage.gettingStarted.cards.appSearch.title', {
       defaultMessage: 'Build an application on top of Elasticsearch',
     }),
-    guideId: 'search',
-    telemetryId: 'guided-onboarding--search--application',
+    guideId: 'appSearch',
+    telemetryId: 'onboarding--search--application',
     order: 1,
   },
   {
@@ -42,8 +42,8 @@ export const guideCards: GuideCardConstants[] = [
     title: i18n.translate('guidedOnboardingPackage.gettingStarted.cards.websiteSearch.title', {
       defaultMessage: 'Add search to my website',
     }),
-    guideId: 'search',
-    telemetryId: 'guided-onboarding--search--website',
+    guideId: 'websiteSearch',
+    telemetryId: 'onboarding--search--website',
     order: 4,
   },
   {
@@ -51,8 +51,8 @@ export const guideCards: GuideCardConstants[] = [
     title: i18n.translate('guidedOnboardingPackage.gettingStarted.cards.databaseSearch.title', {
       defaultMessage: 'Search across databases and business systems',
     }),
-    guideId: 'search',
-    telemetryId: 'guided-onboarding--search--database',
+    guideId: 'databaseSearch',
+    telemetryId: 'onboarding--search--database',
     order: 7,
   },
   {
@@ -64,7 +64,7 @@ export const guideCards: GuideCardConstants[] = [
       appId: 'integrations',
       path: '/browse?q=log',
     },
-    telemetryId: 'guided-onboarding--observability--logs',
+    telemetryId: 'onboarding--observability--logs',
     order: 2,
   },
   {
@@ -76,7 +76,7 @@ export const guideCards: GuideCardConstants[] = [
       appId: 'home',
       path: '#/tutorial/apm',
     },
-    telemetryId: 'guided-onboarding--observability--apm',
+    telemetryId: 'onboarding--observability--apm',
     order: 5,
   },
   {
@@ -88,7 +88,7 @@ export const guideCards: GuideCardConstants[] = [
       appId: 'integrations',
       path: '/browse/os_system',
     },
-    telemetryId: 'guided-onboarding--observability--hosts',
+    telemetryId: 'onboarding--observability--hosts',
     order: 8,
   },
   {
@@ -100,7 +100,7 @@ export const guideCards: GuideCardConstants[] = [
       }
     ),
     guideId: 'kubernetes',
-    telemetryId: 'guided-onboarding--observability--kubernetes',
+    telemetryId: 'onboarding--observability--kubernetes',
     order: 11,
   },
   {
@@ -109,7 +109,7 @@ export const guideCards: GuideCardConstants[] = [
       defaultMessage: 'Detect threats in my data with SIEM',
     }),
     guideId: 'siem',
-    telemetryId: 'guided-onboarding--security--siem',
+    telemetryId: 'onboarding--security--siem',
     order: 3,
   },
   {
@@ -121,7 +121,7 @@ export const guideCards: GuideCardConstants[] = [
       appId: 'integrations',
       path: '/detail/endpoint/overview',
     },
-    telemetryId: 'guided-onboarding--security--hosts',
+    telemetryId: 'onboarding--security--hosts',
     order: 6,
   },
   {
@@ -133,7 +133,7 @@ export const guideCards: GuideCardConstants[] = [
       appId: 'integrations',
       path: '/detail/cloud_security_posture/overview',
     },
-    telemetryId: 'guided-onboarding--security--cloud',
+    telemetryId: 'onboarding--security--cloud',
     order: 9,
   },
 ].sort((cardA, cardB) => cardA.order - cardB.order) as GuideCardConstants[];
