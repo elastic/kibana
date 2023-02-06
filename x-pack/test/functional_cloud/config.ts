@@ -11,12 +11,14 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const functionalConfig = await readConfigFile(require.resolve('../functional/config.base.js'));
 
   const kibanaPort = functionalConfig.get('servers.kibana.port');
-  // const idpPath = resolve(__dirname, '../security_api_integration/fixtures/saml/idp_metadata.xml');
   const idpPath = resolve(
     __dirname,
-    '../cloud_integration/fixtures/saml/saml_provider/metadata.xml'
+    '../security_api_integration/fixtures/saml/saml_provider/metadata.xml'
   );
-  const samlIdPPlugin = resolve(__dirname, '../cloud_integration/fixtures/saml/saml_provider');
+  const samlIdPPlugin = resolve(
+    __dirname,
+    '../security_api_integration/fixtures/saml/saml_provider'
+  );
 
   return {
     ...functionalConfig.getAll(),
@@ -31,15 +33,13 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
       serverArgs: [
         ...functionalConfig.get('esTestCluster.serverArgs'),
         'xpack.security.authc.token.enabled=true',
-        'xpack.security.authc.token.timeout=15s',
         'xpack.security.authc.realms.saml.cloud-saml-kibana.order=0',
         `xpack.security.authc.realms.saml.cloud-saml-kibana.idp.metadata.path=${idpPath}`,
         'xpack.security.authc.realms.saml.cloud-saml-kibana.idp.entity_id=http://www.elastic.co/saml1',
         `xpack.security.authc.realms.saml.cloud-saml-kibana.sp.entity_id=http://localhost:${kibanaPort}`,
         `xpack.security.authc.realms.saml.cloud-saml-kibana.sp.logout=http://localhost:${kibanaPort}/logout`,
         `xpack.security.authc.realms.saml.cloud-saml-kibana.sp.acs=http://localhost:${kibanaPort}/api/security/saml/callback`,
-        'xpack.security.authc.realms.saml.cloud-saml-kibana.attributes.principal=http://saml.elastic-cloud.com/attributes/principal',
-        'xpack.security.authc.realms.saml.cloud-saml-kibana.attributes.groups=http://saml.elastic-cloud.com/attributes/roles',
+        'xpack.security.authc.realms.saml.cloud-saml-kibana.attributes.principal=urn:oid:0.0.7',
       ],
     },
     kbnTestServer: {
