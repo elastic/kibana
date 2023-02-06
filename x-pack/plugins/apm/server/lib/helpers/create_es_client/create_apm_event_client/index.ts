@@ -15,31 +15,29 @@ import type {
 import { ValuesType } from 'utility-types';
 import { ElasticsearchClient, KibanaRequest } from '@kbn/core/server';
 import type { ESSearchRequest, InferSearchResponseOf } from '@kbn/es-types';
-import { unwrapEsResponse } from '@kbn/observability-plugin/server';
-import { omit } from 'lodash';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
-import { withApmSpan } from '../../../../utils/with_apm_span';
+import { unwrapEsResponse } from '@kbn/observability-plugin/server';
+import { compact, omit } from 'lodash';
+import { ApmDataSource } from '../../../../../common/data_source';
 import { APMError } from '../../../../../typings/es_schemas/ui/apm_error';
 import { Metric } from '../../../../../typings/es_schemas/ui/metric';
 import { Span } from '../../../../../typings/es_schemas/ui/span';
 import { Transaction } from '../../../../../typings/es_schemas/ui/transaction';
 import { ApmIndicesConfig } from '../../../../routes/settings/apm_indices/get_apm_indices';
+import { withApmSpan } from '../../../../utils/with_apm_span';
 import {
   callAsyncWithDebug,
   getDebugBody,
   getDebugTitle,
 } from '../call_async_with_debug';
 import { cancelEsRequestOnAbort } from '../cancel_es_request_on_abort';
-import {
-  unpackProcessorEvents,
-  processorEventsToIndex,
-} from './unpack_processor_events';
+import { processorEventsToIndex, getRequestBase } from './get_request_base';
+import { ProcessorEventOfDocumentType } from '../document_type';
 
 export type APMEventESSearchRequest = Omit<ESSearchRequest, 'index'> & {
   apm: {
-    events: ProcessorEvent[];
     includeLegacyData?: boolean;
-  };
+  } & ({ events: ProcessorEvent[] } | { sources: ApmDataSource[] });
   body: {
     size: number;
     track_total_hits: boolean | number;
@@ -69,7 +67,17 @@ type TypeOfProcessorEvent<T extends ProcessorEvent> = {
 
 type TypedSearchResponse<TParams extends APMEventESSearchRequest> =
   InferSearchResponseOf<
-    TypeOfProcessorEvent<ValuesType<TParams['apm']['events']>>,
+    TypeOfProcessorEvent<
+      ValuesType<
+        TParams['apm'] extends { events: ProcessorEvent[] }
+          ? TParams['apm']['events']
+          : TParams['apm'] extends { sources: ApmDataSource[] }
+          ? ProcessorEventOfDocumentType<
+              ValuesType<TParams['apm']['sources']>['documentType']
+            >
+          : never
+      >
+    >,
     TParams
   >;
 
@@ -146,17 +154,25 @@ export class APMEventClient {
     operationName: string,
     params: TParams
   ): Promise<TypedSearchResponse<TParams>> {
-    const withProcessorEventFilter = unpackProcessorEvents(
-      params,
-      this.indices
-    );
+    const { events, index, filters } = getRequestBase({
+      apm: params.apm,
+      indices: this.indices,
+    });
 
     const forceSyntheticSourceForThisRequest =
-      this.forceSyntheticSource &&
-      params.apm.events.includes(ProcessorEvent.metric);
+      this.forceSyntheticSource && events.includes(ProcessorEvent.metric);
 
     const searchParams = {
-      ...withProcessorEventFilter,
+      ...omit(params, 'apm'),
+      index,
+      body: {
+        ...params.body,
+        query: {
+          bool: {
+            filter: compact([params.body.query, ...filters]),
+          },
+        },
+      },
       ...(this.includeFrozen ? { ignore_throttled: false } : {}),
       ignore_unavailable: true,
       preference: 'any',

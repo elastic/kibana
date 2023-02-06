@@ -10,7 +10,7 @@ import { invert } from 'lodash';
 import { DataStream, ServiceLocations } from '../../../../../../../common/runtime_types';
 import { MonitorFilterState } from '../../../../state';
 
-export type SyntheticsMonitorFilterField = keyof MonitorFilterState;
+export type SyntheticsMonitorFilterField = keyof Omit<MonitorFilterState, 'query'>;
 
 export interface LabelWithCountValue {
   label: string;
@@ -83,7 +83,7 @@ export const valueToLabelWithEmptyCount = (value: string): LabelWithCountValue =
   count: 0,
 });
 
-const monitorTypeKeyLabelMap: Record<DataStream, string> = {
+export const monitorTypeKeyLabelMap: Record<DataStream, string> = {
   [DataStream.BROWSER]: 'Journey / Page',
   [DataStream.HTTP]: 'HTTP',
   [DataStream.TCP]: 'TCP',
