@@ -82,33 +82,41 @@ const OptionLabel = styled.span`
 
 const options: EuiComboBoxOptionOption[] = [
   {
-    label: 'hot',
+    label: i18n.HOT,
+    value: 'hot',
   },
   {
-    label: 'warm',
+    label: i18n.WARM,
+    value: 'warm',
   },
   {
-    label: 'cold',
     disabled: true,
+    label: i18n.COLD,
+    value: 'cold',
   },
   {
-    label: 'frozen',
     disabled: true,
+    label: i18n.FROZEN,
+    value: 'frozen',
   },
   {
-    label: 'unmanaged',
+    label: i18n.UNMANAGED,
+    value: 'unmanaged',
   },
 ];
 
 const defaultOptions: EuiComboBoxOptionOption[] = [
   {
-    label: 'hot',
+    label: i18n.HOT,
+    value: 'hot',
   },
   {
-    label: 'warm',
+    label: i18n.WARM,
+    value: 'warm',
   },
   {
-    label: 'unmanaged',
+    label: i18n.UNMANAGED,
+    value: 'unmanaged',
   },
 ];
 
