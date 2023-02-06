@@ -4,7 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTitle } from '@elastic/eui';
+import {
+  EuiButtonIcon,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiSpacer,
+  EuiTitle,
+  EuiToolTip,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { TypeOf } from '@kbn/typed-react-router-config';
 import React from 'react';
@@ -60,7 +67,7 @@ export function PrimaryAndComparisonSearchBar() {
         <EuiTitle size="xxs">
           <h3>
             {i18n.translate('xpack.profiling.comparisonSearch.baselineTitle', {
-              defaultMessage: 'Baseline',
+              defaultMessage: 'Baseline flamegraph',
             })}
           </h3>
         </EuiTitle>
@@ -68,38 +75,41 @@ export function PrimaryAndComparisonSearchBar() {
         <PrimaryProfilingSearchBar showSubmitButton={false} />
       </EuiFlexItem>
       <EuiFlexItem grow={false} style={{ padding: '0 8px' }}>
-        <EuiButtonEmpty
-          iconType="merge"
-          onClick={() => {
-            const next = {
-              ...query,
-              rangeFrom: comparisonRangeFrom,
-              rangeTo: comparisonRangeTo,
-              kuery: comparisonKuery,
-              comparisonRangeFrom: query.rangeFrom,
-              comparisonRangeTo: query.rangeTo,
-              comparisonKuery: query.kuery,
-            };
+        <EuiToolTip position="top" content="Swap sides">
+          <EuiButtonIcon
+            iconType="merge"
+            size="m"
+            onClick={() => {
+              const next = {
+                ...query,
+                rangeFrom: comparisonRangeFrom,
+                rangeTo: comparisonRangeTo,
+                kuery: comparisonKuery,
+                comparisonRangeFrom: query.rangeFrom,
+                comparisonRangeTo: query.rangeTo,
+                comparisonKuery: query.kuery,
+              };
 
-            if (routePath === '/flamegraphs/differential') {
-              profilingRouter.push(routePath, {
-                path,
-                query: next as TypeOf<ProfilingRoutes, '/flamegraphs/differential'>['query'],
-              });
-            } else {
-              profilingRouter.push(routePath, {
-                path,
-                query: next as TypeOf<ProfilingRoutes, '/functions/differential'>['query'],
-              });
-            }
-          }}
-        />
+              if (routePath === '/flamegraphs/differential') {
+                profilingRouter.push(routePath, {
+                  path,
+                  query: next as TypeOf<ProfilingRoutes, '/flamegraphs/differential'>['query'],
+                });
+              } else {
+                profilingRouter.push(routePath, {
+                  path,
+                  query: next as TypeOf<ProfilingRoutes, '/functions/differential'>['query'],
+                });
+              }
+            }}
+          />
+        </EuiToolTip>
       </EuiFlexItem>
       <EuiFlexItem>
         <EuiTitle size="xxs">
           <h3>
             {i18n.translate('xpack.profiling.comparisonSearch.comparisonTitle', {
-              defaultMessage: 'Comparison',
+              defaultMessage: 'Comparison flamegraph',
             })}
           </h3>
         </EuiTitle>
