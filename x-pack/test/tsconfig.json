@@ -112,6 +112,7 @@
     "@kbn/stdio-dev-helpers",
     "@kbn/alerting-api-integration-helpers",
     "@kbn/securitysolution-ecs",
+    "@kbn/cloud-security-posture-plugin",
     "@kbn/securitysolution-io-ts-alerting-types",
   ]
 }
