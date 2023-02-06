@@ -21,6 +21,7 @@ import * as helpers from './helpers';
 import { mockAlertSearchResponse } from './mock_data';
 import { ChartContextMenu } from '../../../pages/detection_engine/chart_panels/chart_context_menu';
 import { AlertsHistogramPanel, LEGEND_WITH_COUNTS_WIDTH } from '.';
+import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 
 jest.mock('../../../../common/containers/query_toggle');
 
@@ -95,11 +96,25 @@ jest.mock('../../../containers/detection_engine/alerts/use_query', () => {
     useQueryAlerts: (...props: unknown[]) => mockUseQueryAlerts(...props),
   };
 });
+jest.mock('../../../../common/hooks/use_experimental_features');
+jest.mock('../../../../common/components/page/use_refetch_by_session');
+jest.mock('../../../../common/components/visualization_actions/lens_embeddable');
+
+jest.mock('../../../../common/components/page/use_refetch_by_session');
+jest.mock('../common/hooks', () => {
+  const actual = jest.requireActual('../common/hooks');
+  return {
+    ...actual,
+    useInspectButton: jest.fn(),
+  };
+});
 
 describe('AlertsHistogramPanel', () => {
   const defaultProps = {
-    signalIndexName: 'signalIndexName',
     setQuery: jest.fn(),
+    showBuildingBlockAlerts: false,
+    showOnlyThreatIndicatorAlerts: false,
+    signalIndexName: 'signalIndexName',
     updateDateRange: jest.fn(),
   };
 
@@ -695,6 +710,38 @@ describe('AlertsHistogramPanel', () => {
           </TestProviders>
         );
         expect(wrapper.find(MatrixLoader).exists()).toEqual(false);
+      });
+    });
+  });
+
+  describe('when isChartEmbeddablesEnabled = true', () => {
+    beforeEach(() => {
+      jest.clearAllMocks();
+
+      mockUseQueryToggle.mockReturnValue({ toggleStatus: true, setToggleStatus: mockSetToggle });
+
+      (useIsExperimentalFeatureEnabled as jest.Mock).mockReturnValue(true);
+    });
+
+    it('renders LensEmbeddable', async () => {
+      await act(async () => {
+        const wrapper = mount(
+          <TestProviders>
+            <AlertsHistogramPanel {...defaultProps} />
+          </TestProviders>
+        );
+        expect(wrapper.find('[data-test-subj="lens-embeddable"]').exists()).toBeTruthy();
+      });
+    });
+
+    it('should skip calling getAlertsRiskQuery', async () => {
+      await act(async () => {
+        mount(
+          <TestProviders>
+            <AlertsHistogramPanel {...defaultProps} />
+          </TestProviders>
+        );
+        expect(mockUseQueryAlerts.mock.calls[0][0].skip).toBeTruthy();
       });
     });
   });

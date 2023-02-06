@@ -115,6 +115,7 @@ export const connectorIndex: ConnectorViewIndex = {
     last_sync_status: SyncStatus.COMPLETED,
     last_synced: null,
     name: 'connector',
+    preferences: { extract_full_html: false },
     scheduling: {
       enabled: false,
       interval: '',
@@ -214,6 +215,7 @@ export const crawlerIndex: CrawlerViewIndex = {
     last_sync_status: SyncStatus.COMPLETED,
     last_synced: null,
     name: 'crawler',
+    preferences: { extract_full_html: false },
     scheduling: {
       enabled: false,
       interval: '',
