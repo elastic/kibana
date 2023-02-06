@@ -156,6 +156,7 @@ describe('pattern rule type', () => {
 
     expect(result.state).toMatchInlineSnapshot(`
       Object {
+        "patternParamJSON": "{\\"instA\\":\\" a - a \\",\\"instB\\":\\" - a \\"}",
         "patterns": Array [
           Object {
             "instance": "instA",

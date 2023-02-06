@@ -29,14 +29,15 @@ const Params = schema.object(
 );
 
 type Action = 'a' | '-'; // active, error, not active
-interface Pattern {
+interface InstancePattern {
   instance: string;
   patternIndex: number;
   pattern: Action[];
 }
 
 interface State extends RuleTypeState {
-  patterns?: Pattern[];
+  patternParamJSON?: string;
+  patterns?: InstancePattern[];
   runs?: number;
 }
 
@@ -69,7 +70,14 @@ async function executor(options: RuleExecutorOptions): Promise<{ state: State }>
   }
   state.runs++;
 
+  // rebuild our patterns in state if the params change
+  const patternParamJSON = JSON.stringify(params.patterns);
+  if (state.patternParamJSON !== patternParamJSON) {
+    state.patterns = undefined;
+  }
+
   if (state.patterns == null) {
+    state.patternParamJSON = patternParamJSON;
     state.patterns = buildPatterns(params.patterns);
   }
 
@@ -99,13 +107,14 @@ async function executor(options: RuleExecutorOptions): Promise<{ state: State }>
   return {
     state: {
       patterns,
+      patternParamJSON,
       runs,
     },
   };
 }
 
-function buildPatterns(stringPatterns: Record<string, string>): Pattern[] {
-  const result: Pattern[] = [];
+function buildPatterns(stringPatterns: Record<string, string>): InstancePattern[] {
+  const result: InstancePattern[] = [];
   const errors: string[] = [];
 
   for (const [instance, stringPattern] of Object.entries(stringPatterns)) {
