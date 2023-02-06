@@ -6,18 +6,19 @@
  */
 
 import { Logger } from '@kbn/logging';
-import { withApmSpan } from '../../../utils/with_apm_span';
+import { ApmDocumentType } from '../../../../common/document_type';
+import { RollupInterval } from '../../../../common/rollup';
+import { ServiceGroup } from '../../../../common/service_groups';
+import { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
+import { ApmAlertsClient } from '../../../lib/helpers/get_apm_alerts_client';
 import { MlClient } from '../../../lib/helpers/get_ml_client';
+import { RandomSampler } from '../../../lib/helpers/get_random_sampler';
+import { withApmSpan } from '../../../utils/with_apm_span';
 import { getHealthStatuses } from './get_health_statuses';
 import { getServicesFromErrorAndMetricDocuments } from './get_services_from_error_and_metric_documents';
-import { getServiceStats } from './get_service_stats';
-import { getServiceStatsForServiceMetrics } from './get_service_stats_for_service_metric';
-import { mergeServiceStats } from './merge_service_stats';
-import { ServiceGroup } from '../../../../common/service_groups';
-import { RandomSampler } from '../../../lib/helpers/get_random_sampler';
-import { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
 import { getServicesAlerts } from './get_service_alerts';
-import { ApmAlertsClient } from '../../../lib/helpers/get_apm_alerts_client';
+import { getServiceTransactionStats } from './get_service_transaction_stats';
+import { mergeServiceStats } from './merge_service_stats';
 
 export const MAX_NUMBER_OF_SERVICES = 1_000;
 
@@ -27,38 +28,38 @@ export async function getServicesItems({
   mlClient,
   apmEventClient,
   apmAlertsClient,
-  searchAggregatedTransactions,
-  searchAggregatedServiceMetrics,
   logger,
   start,
   end,
   serviceGroup,
   randomSampler,
+  documentType,
+  rollupInterval,
 }: {
   environment: string;
   kuery: string;
   mlClient?: MlClient;
   apmEventClient: APMEventClient;
   apmAlertsClient: ApmAlertsClient;
-  searchAggregatedTransactions: boolean;
-  searchAggregatedServiceMetrics: boolean;
   logger: Logger;
   start: number;
   end: number;
   serviceGroup: ServiceGroup | null;
   randomSampler: RandomSampler;
+  documentType: ApmDocumentType;
+  rollupInterval: RollupInterval;
 }) {
   return withApmSpan('get_services_items', async () => {
     const commonParams = {
       environment,
       kuery,
-      searchAggregatedTransactions,
-      searchAggregatedServiceMetrics,
       maxNumServices: MAX_NUMBER_OF_SERVICES,
       start,
       end,
       serviceGroup,
       randomSampler,
+      documentType,
+      rollupInterval,
     };
 
     const [
@@ -67,15 +68,10 @@ export async function getServicesItems({
       healthStatuses,
       alertCounts,
     ] = await Promise.all([
-      searchAggregatedServiceMetrics
-        ? getServiceStatsForServiceMetrics({
-            ...commonParams,
-            apmEventClient,
-          })
-        : getServiceStats({
-            ...commonParams,
-            apmEventClient,
-          }),
+      getServiceTransactionStats({
+        ...commonParams,
+        apmEventClient,
+      }),
       getServicesFromErrorAndMetricDocuments({
         ...commonParams,
         apmEventClient,

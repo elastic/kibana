@@ -146,6 +146,7 @@ export class VisualizeEmbeddable
       initialInput,
       {
         defaultTitle: vis.title,
+        defaultDescription: vis.description,
         editPath,
         editApp: 'visualize',
         editUrl,
@@ -194,10 +195,6 @@ export class VisualizeEmbeddable
 
   public reportsEmbeddableLoad() {
     return true;
-  }
-
-  public getDescription() {
-    return this.vis.description;
   }
 
   public getVis() {
