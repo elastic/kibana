@@ -17,6 +17,8 @@ exports[`Error CHILD_ID 1`] = `undefined`;
 
 exports[`Error CLIENT_GEO_COUNTRY_ISO_CODE 1`] = `undefined`;
 
+exports[`Error CLIENT_GEO_REGION_ISO_CODE 1`] = `undefined`;
+
 exports[`Error CLOUD 1`] = `
 Object {
   "availability_zone": "europe-west1-c",
@@ -315,6 +317,8 @@ exports[`Span CHILD_ID 1`] = `undefined`;
 
 exports[`Span CLIENT_GEO_COUNTRY_ISO_CODE 1`] = `undefined`;
 
+exports[`Span CLIENT_GEO_REGION_ISO_CODE 1`] = `undefined`;
+
 exports[`Span CLOUD 1`] = `
 Object {
   "availability_zone": "europe-west1-c",
@@ -595,6 +599,8 @@ exports[`Transaction APP_LAUNCH_TIME 1`] = `undefined`;
 exports[`Transaction CHILD_ID 1`] = `undefined`;
 
 exports[`Transaction CLIENT_GEO_COUNTRY_ISO_CODE 1`] = `undefined`;
+
+exports[`Transaction CLIENT_GEO_REGION_ISO_CODE 1`] = `undefined`;
 
 exports[`Transaction CLOUD 1`] = `
 Object {

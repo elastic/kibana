@@ -19,6 +19,7 @@ describe('Embedded Map', () => {
     const mockSetLayerList = jest.fn();
     const mockUpdateInput = jest.fn();
     const mockRender = jest.fn();
+    const mockReload = jest.fn();
 
     const mockEmbeddable = embeddablePluginMock.createStartContract();
     mockEmbeddable.getEmbeddableFactory = jest.fn().mockImplementation(() => ({
@@ -26,6 +27,7 @@ describe('Embedded Map', () => {
         setLayerList: mockSetLayerList,
         updateInput: mockUpdateInput,
         render: mockRender,
+        reload: mockReload,
       }),
     }));
 
