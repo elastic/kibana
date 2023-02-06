@@ -15,7 +15,6 @@ import { ProfilingAppPageTemplate } from './profiling_app_page_template';
 
 export function CheckSetup({ children }: { children: React.ReactElement }) {
   const {
-    start: { core },
     services: { fetchHasSetup, postSetupResources },
   } = useProfilingDependencies();
 

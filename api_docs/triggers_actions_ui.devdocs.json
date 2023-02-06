@@ -5468,6 +5468,20 @@
           },
           {
             "parentPluginId": "triggersActionsUi",
+            "id": "def-public.RuleTypeModel.defaultSummaryMessage",
+            "type": "string",
+            "tags": [],
+            "label": "defaultSummaryMessage",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "triggersActionsUi",
             "id": "def-public.RuleTypeModel.alertDetailsAppSection",
             "type": "CompoundType",
             "tags": [],
