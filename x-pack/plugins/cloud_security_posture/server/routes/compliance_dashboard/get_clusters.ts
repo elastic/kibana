@@ -64,6 +64,39 @@ export const getClustersQuery = (query: QueryDslQueryContainer, pitId: string): 
   },
 });
 
+export const getClustersQuery2 = (query: QueryDslQueryContainer, pitId: string): SearchRequest => ({
+  size: 0,
+  query,
+  aggs: {
+    latest_findings: {
+      multi_terms: {
+        terms: [{ field: 'resource.id' }, { field: 'rule.id' }],
+        size: 10000,
+      },
+      aggs: {
+        aggs_by_cluster_id: {
+          terms: {
+            field: 'cluster_id',
+          },
+          aggs: {
+            latestFindingTopHit: {
+              top_hits: {
+                size: 1,
+                sort: [{ '@timestamp': { order: 'desc' } }],
+              },
+            },
+            ...failedFindingsAggQuery,
+            ...findingsEvaluationAggsQuery,
+          },
+        },
+      },
+    },
+  },
+  pit: {
+    id: pitId,
+  },
+});
+
 export const getClustersFromAggs = (clusters: ClusterBucket[]): ClusterWithoutTrend[] =>
   clusters.map((cluster) => {
     const latestFindingHit: SearchHit<CspFinding> = cluster.latestFindingTopHit.hits.hits[0];
@@ -103,6 +136,15 @@ export const getClusters = async (
   const queryResult = await esClient.search<unknown, ClustersQueryResult>(
     getClustersQuery(query, pitId)
   );
+
+  const queryResult2 = await esClient.search<unknown, ClustersQueryResult>(
+    getClustersQuery2(query, pitId)
+  );
+
+  // console.log(JSON.stringify(queryResult2.aggregations, null, 2));
+  // console.log(queryResult2.aggregations.latest_findings);
+  console.log(queryResult2.aggregations.latest_findings.buckets[0]);
+  console.log(queryResult2.aggregations.latest_findings.buckets[0].aggs_by_cluster_id.buckets[0]);
 
   const clusters = queryResult.aggregations?.aggs_by_cluster_id.buckets;
   if (!Array.isArray(clusters)) throw new Error('missing aggs by cluster id');
