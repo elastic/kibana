@@ -8,6 +8,10 @@
 import React from 'react';
 import { ALERT_REASON } from '@kbn/rule-data-utils';
 import { ObservabilityRuleTypeModel } from '@kbn/observability-plugin/public';
+import { RuleTypeParamsExpressionProps } from '@kbn/triggers-actions-ui-plugin/public';
+import { isRight } from 'fp-ts/Either';
+import { PathReporter } from 'io-ts/lib/PathReporter';
+import { TLSParams, TLSParamsType } from '../../../../common/runtime_types/alerts/tls';
 import { CLIENT_ALERT_TYPES } from '../../../../common/constants/uptime_alerts';
 import { TlsTranslations } from '../../../../common/translations';
 import { AlertTypeInitializer } from '.';
@@ -25,9 +29,30 @@ export const initTlsAlertType: AlertTypeInitializer = ({
   documentationUrl(docLinks) {
     return `${docLinks.links.observability.tlsCertificate}`;
   },
-  ruleParamsExpression: (params: any) => <TLSAlert core={core} plugins={plugins} params={params} />,
+  ruleParamsExpression: (params: RuleTypeParamsExpressionProps<TLSParams>) => (
+    <TLSAlert
+      core={core}
+      plugins={plugins}
+      ruleParams={params.ruleParams}
+      setRuleParams={params.setRuleParams}
+    />
+  ),
   description,
-  validate: () => ({ errors: {} }),
+  validate: (ruleParams) => {
+    const errors: Record<string, any> = {};
+    const decoded = TLSParamsType.decode(ruleParams);
+
+    if (!isRight(decoded)) {
+      return {
+        errors: {
+          typeCheckFailure: 'Provided parameters do not conform to the expected type.',
+          typeCheckParsingMessage: PathReporter.report(decoded),
+        },
+      };
+    }
+
+    return { errors };
+  },
   defaultActionMessage,
   defaultRecoveryMessage,
   requiresAppContext: false,

@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-export const combineFiltersAndUserSearch = (filters: string, search?: string) => {
-  if (!filters && !search) {
-    return '';
-  }
-  if (!filters) return search;
-  if (!search) return filters;
-  return `(${filters}) AND (${search})`;
-};
+import * as t from 'io-ts';
+
+export const TLSParamsType = t.partial({
+  search: t.string,
+  certAgeThreshold: t.number,
+  certExpirationThreshold: t.number,
+});
+
+export type TLSParams = t.TypeOf<typeof TLSParamsType>;

@@ -26,5 +26,5 @@ export const initTlsLegacyAlertType: AlertTypeInitializer<RuleTypeModel> = ({
   description,
   validate: () => ({ errors: {} }),
   defaultActionMessage,
-  requiresAppContext: false,
+  requiresAppContext: true,
 });
