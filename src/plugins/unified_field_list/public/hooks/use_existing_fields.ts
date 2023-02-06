@@ -106,7 +106,13 @@ export const useExistingFieldsFetcher = (
       }
 
       const numberOfFetches = (currentInfo?.numberOfFetches ?? 0) + 1;
-      const dataView = await dataViews.get(dataViewId, false);
+      let dataView: DataView | null = null;
+
+      try {
+        dataView = await dataViews.get(dataViewId, false);
+      } catch (e) {
+        //
+      }
 
       if (!dataView?.title) {
         return;

@@ -88,7 +88,15 @@ export function useGroupedFields<T extends FieldListItem = DataViewField>({
   useEffect(() => {
     const getDataView = async () => {
       if (dataViewId) {
-        setDataView(await services.dataViews.get(dataViewId, false));
+        let nextDataView: DataView | null = null;
+        try {
+          nextDataView = await services.dataViews.get(dataViewId, false);
+        } catch (e) {
+          //
+        }
+        if (nextDataView) {
+          setDataView(nextDataView);
+        }
       }
     };
     getDataView();
