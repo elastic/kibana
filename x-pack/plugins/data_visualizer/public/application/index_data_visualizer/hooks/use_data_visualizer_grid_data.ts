@@ -202,7 +202,7 @@ export const useDataVisualizerGridData = (
       const fields = currentDataView.fields;
 
       fields?.forEach((field) => {
-        // Skip unsupported new field bytes_counter#148518 for kibana_sample_data_logs data view
+        // Skip unsupported new field bytes_counter (#148518) for kibana_sample_data_logs data view
         // which is technically a long/numeric field but is not supported for certain aggs
         if (
           currentDataView.getIndexPattern() === 'kibana_sample_data_logs' &&

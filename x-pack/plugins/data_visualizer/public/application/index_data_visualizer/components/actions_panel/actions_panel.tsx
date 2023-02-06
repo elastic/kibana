@@ -5,17 +5,17 @@
  * 2.0.
  */
 
+import { css } from '@emotion/react';
 import { flatten } from 'lodash';
-import React, { FC, useState, useEffect, Fragment } from 'react';
+import React, { FC, Fragment, useState, useEffect } from 'react';
 
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import { EuiSpacer, EuiTitle, useEuiBreakpoint } from '@elastic/eui';
+import { useEuiBreakpoint, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { DataView } from '@kbn/data-views-plugin/public';
 import { useUrlState } from '@kbn/ml-url-state';
 import { isDefined } from '@kbn/ml-is-defined';
 
-import { css } from '@emotion/react';
 import { LinkCardProps } from '../../../common/components/link_card/link_card';
 import { useDataVisualizerKibana } from '../../../kibana_context';
 import { LinkCard } from '../../../common/components/link_card';

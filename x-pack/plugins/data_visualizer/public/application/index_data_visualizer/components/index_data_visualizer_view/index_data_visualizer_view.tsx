@@ -5,10 +5,13 @@
  * 2.0.
  */
 
+import { css } from '@emotion/react';
 import React, { FC, useEffect, useMemo, useState, useCallback, useRef } from 'react';
 import type { Required } from 'utility-types';
 
 import {
+  useEuiBreakpoint,
+  useIsWithinMaxBreakpoint,
   EuiFlexGroup,
   EuiFlexItem,
   EuiPageBody,
@@ -19,8 +22,6 @@ import {
   EuiProgress,
   EuiSpacer,
   EuiTitle,
-  useIsWithinMaxBreakpoint,
-  useEuiBreakpoint,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
@@ -35,7 +36,6 @@ import {
 } from '@kbn/ml-date-picker';
 import { useStorage } from '@kbn/ml-local-storage';
 
-import { css } from '@emotion/react';
 import type { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { useCurrentEuiTheme } from '../../../common/hooks/use_current_eui_theme';
 import {
