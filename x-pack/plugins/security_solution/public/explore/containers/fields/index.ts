@@ -27,8 +27,7 @@ export const useIsFieldInIndexPattern = (): FieldValidationCheck => {
           const fieldNames = fields.map((f) => f.name);
           return fieldsList.every((field) => fieldNames.includes(field));
         },
-        (newArgs, lastArgs) =>
-          newArgs[0] === lastArgs[0] && newArgs[1].join() === lastArgs[1].join()
+        (newArgs, lastArgs) => newArgs[0] === lastArgs[0]
       ),
     [dataViews]
   );
