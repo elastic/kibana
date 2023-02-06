@@ -10,6 +10,7 @@ import {
   EuiHorizontalRule,
   EuiPanel,
   EuiSpacer,
+  EuiFlexGroup,
 } from '@elastic/eui';
 import React from 'react';
 import { useHistory } from 'react-router-dom';
@@ -20,6 +21,9 @@ import { TransactionsTable } from '../../../shared/transactions_table';
 import { replace } from '../../../shared/links/url_helpers';
 import { getKueryWithMobileFilters } from '../../../../../common/utils/get_kuery_with_mobile_filters';
 import { MobileTransactionCharts } from './transaction_charts';
+import { LatencyMap } from '../service_overview/latency_map';
+import { MobileLocationStats } from '../service_overview/stats/location_stats';
+import { useFiltersForEmbeddableCharts } from '../../../../hooks/use_filters_for_embeddable_charts';
 
 export function MobileTransactionOverview() {
   const {
@@ -38,6 +42,8 @@ export function MobileTransactionOverview() {
       comparisonEnabled,
     },
   } = useApmParams('/mobile-services/{serviceName}/transactions');
+
+  const embeddableFilters = useFiltersForEmbeddableCharts();
 
   const kueryWithMobileFilters = getKueryWithMobileFilters({
     device,
@@ -63,6 +69,29 @@ export function MobileTransactionOverview() {
       <EuiFlexItem>
         <EuiHorizontalRule />
       </EuiFlexItem>
+      <EuiFlexItem>
+        <EuiFlexGroup>
+          <EuiFlexItem grow={8}>
+            <EuiPanel hasBorder={true}>
+              <LatencyMap
+                start={start}
+                end={end}
+                kuery={kueryWithMobileFilters}
+                filters={embeddableFilters}
+                comparisonEnabled={comparisonEnabled}
+              />
+            </EuiPanel>
+          </EuiFlexItem>
+          <EuiFlexItem grow={4}>
+            <MobileLocationStats
+              start={start}
+              end={end}
+              kuery={kueryWithMobileFilters}
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiFlexItem>
+      <EuiSpacer size="s" />
       <MobileTransactionCharts
         transactionType={transactionType}
         serviceName={serviceName}

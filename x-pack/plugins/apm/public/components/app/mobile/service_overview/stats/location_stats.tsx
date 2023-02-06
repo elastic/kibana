@@ -60,7 +60,10 @@ export function MobileLocationStats({
   const {
     path: { serviceName },
     query: { environment, offset, comparisonEnabled },
-  } = useAnyOfApmParams('/mobile-services/{serviceName}/overview');
+  } = useAnyOfApmParams(
+    '/mobile-services/{serviceName}/overview',
+    '/mobile-services/{serviceName}/transactions'
+  );
 
   const previousPeriodLabel = usePreviousPeriodLabel();
 
