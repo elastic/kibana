@@ -14,7 +14,6 @@ import { Dataset } from './index_options';
 import { IndexInfo } from './index_info';
 import { elasticsearchServiceMock, ElasticsearchClientMock } from '@kbn/core/server/mocks';
 import {
-  DEFAULT_ILM_POLICY_ID,
   ECS_COMPONENT_TEMPLATE_NAME,
   TECHNICAL_COMPONENT_TEMPLATE_NAME,
 } from '../../common/assets';
@@ -83,7 +82,6 @@ describe('resourceInstaller', () => {
       const getClusterClient = jest.fn(() => Promise.resolve(mockClusterClient));
       const getResourceNameMock = jest
         .fn()
-        .mockReturnValueOnce(DEFAULT_ILM_POLICY_ID)
         .mockReturnValueOnce(TECHNICAL_COMPONENT_TEMPLATE_NAME)
         .mockReturnValueOnce(ECS_COMPONENT_TEMPLATE_NAME);
       const installer = new ResourceInstaller({
