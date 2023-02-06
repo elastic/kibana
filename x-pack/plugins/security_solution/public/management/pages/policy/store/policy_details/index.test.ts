@@ -271,6 +271,7 @@ describe('policy details: ', () => {
                 value: {
                   windows: {
                     events: {
+                      credential_access: true,
                       dll_and_driver_load: true,
                       dns: false,
                       file: true,

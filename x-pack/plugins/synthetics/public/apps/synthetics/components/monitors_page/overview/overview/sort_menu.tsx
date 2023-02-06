@@ -122,6 +122,9 @@ const SORT_BY_TITLE = i18n.translate('xpack.synthetics.overview.sortPopover.sort
   defaultMessage: 'Sort by',
 });
 
-const ORDER_BY_TITLE = i18n.translate('xpack.synthetics.overview.sortPopover.orderBy.title', {
-  defaultMessage: 'Order',
-});
+export const ORDER_BY_TITLE = i18n.translate(
+  'xpack.synthetics.overview.sortPopover.orderBy.title',
+  {
+    defaultMessage: 'Order',
+  }
+);
