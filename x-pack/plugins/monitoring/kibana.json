@@ -16,7 +16,9 @@
     "triggersActionsUi",
     "alerting",
     "actions",
-    "encryptedSavedObjects"
+    "encryptedSavedObjects",
+    "dashboard",
+    "fleet"
   ],
   "server": true,
   "ui": true,
