@@ -53,61 +53,63 @@ function renderUseRulesTableContext(
 }
 
 describe('RulesTableContextProvider', () => {
-  it('restores persisted rules table state', () => {
-    const state = renderUseRulesTableContext({
-      filter: {
-        searchTerm: 'test',
-        source: RuleSource.Custom,
+  describe('persisted state', () => {
+    it('restores persisted rules table state', () => {
+      const state = renderUseRulesTableContext({
+        filter: {
+          searchTerm: 'test',
+          source: RuleSource.Custom,
+          tags: ['test'],
+          enabled: true,
+        },
+        sorting: {
+          field: 'name',
+          order: 'asc',
+        },
+        pagination: {
+          page: 2,
+          perPage: 10,
+        },
+      });
+
+      expect(state.filterOptions).toEqual({
+        filter: 'test',
         tags: ['test'],
+        showCustomRules: true,
+        showElasticRules: false,
         enabled: true,
-      },
-      sorting: {
+      });
+      expect(state.sortingOptions).toEqual({
         field: 'name',
         order: 'asc',
-      },
-      pagination: {
+      });
+      expect(state.pagination).toEqual({
         page: 2,
         perPage: 10,
-      },
+        total: 0,
+      });
+      expect(state.isDefault).toBeFalsy();
     });
 
-    expect(state.filterOptions).toEqual({
-      filter: 'test',
-      tags: ['test'],
-      showCustomRules: true,
-      showElasticRules: false,
-      enabled: true,
-    });
-    expect(state.sortingOptions).toEqual({
-      field: 'name',
-      order: 'asc',
-    });
-    expect(state.pagination).toEqual({
-      page: 2,
-      perPage: 10,
-      total: 0,
-    });
-    expect(state.hasSavedState).toBeTruthy();
-  });
+    it('restores default rules table state', () => {
+      const state = renderUseRulesTableContext({});
 
-  it('restores default rules table state', () => {
-    const state = renderUseRulesTableContext({});
-
-    expect(state.filterOptions).toEqual({
-      filter: DEFAULT_FILTER_OPTIONS.filter,
-      tags: DEFAULT_FILTER_OPTIONS.tags,
-      showCustomRules: DEFAULT_FILTER_OPTIONS.showCustomRules,
-      showElasticRules: DEFAULT_FILTER_OPTIONS.showElasticRules,
+      expect(state.filterOptions).toEqual({
+        filter: DEFAULT_FILTER_OPTIONS.filter,
+        tags: DEFAULT_FILTER_OPTIONS.tags,
+        showCustomRules: DEFAULT_FILTER_OPTIONS.showCustomRules,
+        showElasticRules: DEFAULT_FILTER_OPTIONS.showElasticRules,
+      });
+      expect(state.sortingOptions).toEqual({
+        field: DEFAULT_SORTING_OPTIONS.field,
+        order: DEFAULT_SORTING_OPTIONS.order,
+      });
+      expect(state.pagination).toEqual({
+        page: DEFAULT_PAGE,
+        perPage: DEFAULT_RULES_PER_PAGE,
+        total: 0,
+      });
+      expect(state.isDefault).toBeTruthy();
     });
-    expect(state.sortingOptions).toEqual({
-      field: DEFAULT_SORTING_OPTIONS.field,
-      order: DEFAULT_SORTING_OPTIONS.order,
-    });
-    expect(state.pagination).toEqual({
-      page: DEFAULT_PAGE,
-      perPage: DEFAULT_RULES_PER_PAGE,
-      total: 0,
-    });
-    expect(state.hasSavedState).toBeFalsy();
   });
 });

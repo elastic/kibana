@@ -14,6 +14,7 @@ import React, {
   useState,
   useRef,
 } from 'react';
+import { isEqual } from 'lodash';
 import { DEFAULT_RULES_TABLE_REFRESH_SETTING } from '../../../../../../common/constants';
 import { invariant } from '../../../../../../common/utils/invariant';
 import { useReplaceUrlParams } from '../../../../../common/utils/global_query_string/helpers';
@@ -107,10 +108,9 @@ export interface RulesTableState {
    */
   sortingOptions: SortingOptions;
   /**
-   * Indicates whether the table's state is saved. With persistence rules table state functionality filters, sorting and pagination
-   * information is persisted in the url and session storage. This field says if persisted state was detected in either url or sessions storage or both
+   * Whether the state has its default value
    */
-  hasSavedState: boolean;
+  isDefault: boolean;
 }
 
 export type LoadingRuleAction =
@@ -355,7 +355,11 @@ export const RulesTableContextProvider = ({ children }: RulesTableContextProvide
         loadingRulesAction: loadingRules.action,
         selectedRuleIds,
         sortingOptions,
-        hasSavedState: !!savedFilter || !!savedSorting || !!savedPagination,
+        isDefault: isDefaultState(filterOptions, sortingOptions, {
+          page,
+          perPage,
+          total: isInMemorySorting ? rules.length : total,
+        }),
       },
       actions,
     }),
@@ -380,9 +384,6 @@ export const RulesTableContextProvider = ({ children }: RulesTableContextProvide
       loadingRules.action,
       selectedRuleIds,
       sortingOptions,
-      savedFilter,
-      savedSorting,
-      savedPagination,
       actions,
     ]
   );
@@ -402,3 +403,16 @@ export const useRulesTableContext = (): RulesTableContextType => {
 
 export const useRulesTableContextOptional = (): RulesTableContextType | null =>
   useContext(RulesTableContext);
+
+function isDefaultState(
+  filter: FilterOptions,
+  sorting: SortingOptions,
+  pagination: PaginationOptions
+): boolean {
+  return (
+    isEqual(filter, DEFAULT_FILTER_OPTIONS) &&
+    isEqual(sorting, DEFAULT_SORTING_OPTIONS) &&
+    pagination.page === DEFAULT_PAGE &&
+    pagination.perPage === DEFAULT_RULES_PER_PAGE
+  );
+}

@@ -179,7 +179,7 @@ export const RulesTableUtilityBar = React.memo<RulesTableUtilityBarProps>(
               >
                 {i18n.REFRESH_RULE_POPOVER_LABEL}
               </UtilityBarAction>
-              {rulesTableContext.state.hasSavedState && (
+              {!rulesTableContext.state.isDefault && (
                 <UtilityBarAction
                   dataTestSubj="clearTableFilters"
                   iconSide="left"
