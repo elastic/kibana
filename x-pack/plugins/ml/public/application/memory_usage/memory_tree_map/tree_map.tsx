@@ -13,6 +13,7 @@ import {
   PartitionLayout,
   ShapeTreeNode,
   LIGHT_THEME,
+  DARK_THEME,
 } from '@elastic/charts';
 import { FIELD_FORMAT_IDS } from '@kbn/field-formats-plugin/common';
 import { EuiComboBox, EuiComboBoxOptionOption, EuiEmptyPrompt, EuiSpacer } from '@elastic/eui';
@@ -22,7 +23,7 @@ import { MemoryUsageInfo } from '../../../../common/types/trained_models';
 import { JobType, MlSavedObjectType } from '../../../../common/types/saved_objects';
 import { useTrainedModelsApiService } from '../../services/ml_api_service/trained_models';
 import { LoadingWrapper } from '../../jobs/new_job/pages/components/charts/loading_wrapper';
-import { useFieldFormatter } from '../../contexts/kibana';
+import { useFieldFormatter, useUiSettings } from '../../contexts/kibana';
 
 import { useRefresh } from '../../routing/use_refresh';
 import { getMemoryItemColor } from '../memory_item_colors';
@@ -64,6 +65,9 @@ const TYPE_OPTIONS: EuiComboBoxOptionOption[] = Object.entries(TYPE_LABELS).map(
 );
 
 export const JobMemoryTreeMap: FC<Props> = ({ node, type, height }) => {
+  const isDarkTheme = useUiSettings().get('theme:darkMode');
+  const baseTheme = isDarkTheme ? DARK_THEME : LIGHT_THEME;
+
   const bytesFormatter = useFieldFormatter(FIELD_FORMAT_IDS.BYTES);
   const { displayErrorToast } = useToastNotificationService();
   const refresh = useRefresh();
@@ -128,15 +132,13 @@ export const JobMemoryTreeMap: FC<Props> = ({ node, type, height }) => {
           isClearable={false}
         />
 
+        <EuiSpacer size="s" />
+
         {data.length ? (
           <Chart>
             <Settings
-              baseTheme={LIGHT_THEME}
+              baseTheme={baseTheme}
               theme={{
-                partition: {
-                  emptySizeRatio: 0.4,
-                },
-                scales: { histogramPadding: 0.2 },
                 chartMargins: { top: 0, left: 0, bottom: 0, right: 0 },
               }}
             />
