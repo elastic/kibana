@@ -14,7 +14,7 @@ import {
   createUsersAndRoles,
   deleteUsersAndRoles,
 } from '../../../cases_api_integration/common/lib/authentication';
-import { users, roles, casesAllUser } from './common';
+import { users, roles, casesAllUser, casesAllUser2 } from './common';
 
 export default ({ getPageObject, getService }: FtrProviderContext) => {
   const header = getPageObject('header');
@@ -213,7 +213,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
     describe('Assignees field', () => {
       before(async () => {
         await createUsersAndRoles(getService, users, roles);
-        await cases.api.activateUserProfiles([casesAllUser]);
+        await cases.api.activateUserProfiles([casesAllUser, casesAllUser2]);
       });
 
       after(async () => {
