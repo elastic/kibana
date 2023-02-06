@@ -91,14 +91,22 @@ exports[`services queries fetches the service items 1`] = `
 Array [
   Object {
     "apm": Object {
-      "events": Array [
-        "transaction",
+      "sources": Array [
+        Object {
+          "documentType": "transactionEvent",
+          "rollupInterval": "none",
+        },
       ],
     },
     "body": Object {
       "aggs": Object {
         "sample": Object {
           "aggs": Object {
+            "overflowCount": Object {
+              "sum": Object {
+                "field": "service_transaction.aggregation.overflow_count",
+              },
+            },
             "services": Object {
               "aggs": Object {
                 "transactionType": Object {
@@ -113,15 +121,6 @@ Array [
                         "field": "service.environment",
                       },
                     },
-                    "outcomes": Object {
-                      "terms": Object {
-                        "field": "event.outcome",
-                        "include": Array [
-                          "failure",
-                          "success",
-                        ],
-                      },
-                    },
                     "sample": Object {
                       "top_metrics": Object {
                         "metrics": Array [
@@ -134,6 +133,37 @@ Array [
                         },
                       },
                     },
+                    "successful": Object {
+                      "filter": Object {
+                        "bool": Object {
+                          "filter": Array [
+                            Object {
+                              "terms": Object {
+                                "event.outcome": Array [
+                                  "success",
+                                ],
+                              },
+                            },
+                          ],
+                        },
+                      },
+                    },
+                    "successful_or_failed": Object {
+                      "filter": Object {
+                        "bool": Object {
+                          "filter": Array [
+                            Object {
+                              "terms": Object {
+                                "event.outcome": Array [
+                                  "failure",
+                                  "success",
+                                ],
+                              },
+                            },
+                          ],
+                        },
+                      },
+                    },
                   },
                   "terms": Object {
                     "field": "transaction.type",
@@ -142,7 +172,7 @@ Array [
               },
               "terms": Object {
                 "field": "service.name",
-                "size": 500,
+                "size": 1000,
               },
             },
           },
@@ -204,7 +234,7 @@ Array [
               },
               "terms": Object {
                 "field": "service.name",
-                "size": 500,
+                "size": 1000,
               },
             },
           },

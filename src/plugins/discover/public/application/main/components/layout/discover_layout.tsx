@@ -19,7 +19,6 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { METRIC_TYPE } from '@kbn/analytics';
-import { isOfQueryType } from '@kbn/es-query';
 import classNames from 'classnames';
 import { generateFilters } from '@kbn/data-plugin/public';
 import { DataView, DataViewField, DataViewType } from '@kbn/data-views-plugin/public';
@@ -42,7 +41,6 @@ import { DataMainMsg, RecordRawType } from '../../services/discover_data_state_c
 import { useColumns } from '../../../../hooks/use_data_grid_columns';
 import { FetchStatus } from '../../../types';
 import { useDataState } from '../../hooks/use_data_state';
-import { hasActiveFilter } from './utils';
 import { getRawRecordType } from '../../utils/get_raw_record_type';
 import { SavedSearchURLConflictCallout } from '../../../../components/saved_search_url_conflict_callout/saved_search_url_conflict_callout';
 import { DiscoverHistogramLayout } from './discover_histogram_layout';
@@ -84,10 +82,9 @@ export function DiscoverLayout({
     inspector,
   } = useDiscoverServices();
   const { main$ } = stateContainer.dataState.data$;
-  const [query, savedQuery, filters, columns, sort] = useAppStateSelector((state) => [
+  const [query, savedQuery, columns, sort] = useAppStateSelector((state) => [
     state.query,
     state.savedQuery,
-    state.filters,
     state.columns,
     state.sort,
   ]);
@@ -208,13 +205,16 @@ export function DiscoverLayout({
 
   const mainDisplay = useMemo(() => {
     if (resultState === 'none') {
+      const globalQueryState = data.query.getState();
+
       return (
         <DiscoverNoResults
           isTimeBased={isTimeBased}
+          query={globalQueryState.query}
+          filters={globalQueryState.filters}
           data={data}
           error={dataState.error}
-          hasQuery={isOfQueryType(query) && !!query?.query}
-          hasFilters={hasActiveFilter(filters)}
+          dataView={dataView}
           onDisableFilters={onDisableFilters}
         />
       );
@@ -257,7 +257,6 @@ export function DiscoverLayout({
     dataState.error,
     dataView,
     expandedDoc,
-    filters,
     inspectorAdapters,
     isPlainRecord,
     isTimeBased,
@@ -265,7 +264,6 @@ export function DiscoverLayout({
     onAddFilter,
     onDisableFilters,
     onFieldEdited,
-    query,
     resetSavedSearch,
     resultState,
     savedSearch,

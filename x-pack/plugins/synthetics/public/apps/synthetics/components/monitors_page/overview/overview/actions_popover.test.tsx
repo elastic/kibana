@@ -29,6 +29,8 @@ describe('ActionsPopover', () => {
       name: 'Monitor 1',
       id: 'somelongstring',
       configId: '1lkjelre',
+      type: 'browser',
+      tags: [],
     };
   });
 
