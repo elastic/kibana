@@ -21,6 +21,8 @@ export const CLOUD_INSTANCE_ID = 'cloud.instance.id';
 export const CLOUD_INSTANCE_NAME = 'cloud.instance.name';
 export const CLOUD_SERVICE_NAME = 'cloud.service.name';
 
+export const EVENT_SUCCESS_COUNT = 'event.success_count';
+
 export const SERVICE = 'service';
 export const SERVICE_NAME = 'service.name';
 export const SERVICE_ENVIRONMENT = 'service.environment';

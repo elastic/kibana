@@ -9,13 +9,13 @@ import { EuiFlexGroup, EuiSpacer, EuiFlexItem } from '@elastic/eui';
 import { useDispatch, useSelector } from 'react-redux';
 import { useTrackPageview } from '@kbn/observability-plugin/public';
 import { Redirect, useLocation } from 'react-router-dom';
+import { FilterGroup } from '../common/monitor_filters/filter_group';
 import { OverviewAlerts } from './overview/overview_alerts';
-import { useEnablement, useGetUrlParams } from '../../../hooks';
+import { useEnablement } from '../../../hooks';
 import { useSyntheticsRefreshContext } from '../../../contexts/synthetics_refresh_context';
 import {
   fetchMonitorOverviewAction,
   quietFetchOverviewAction,
-  setOverviewPageStateAction,
   selectOverviewPageState,
   selectServiceLocationsState,
 } from '../../../state';
@@ -40,7 +40,6 @@ export const OverviewPage: React.FC = () => {
   const dispatch = useDispatch();
 
   const { lastRefresh } = useSyntheticsRefreshContext();
-  const { query } = useGetUrlParams();
   const { search } = useLocation();
 
   const pageState = useSelector(selectOverviewPageState);
@@ -52,59 +51,57 @@ export const OverviewPage: React.FC = () => {
     }
   }, [dispatch, locationsLoaded, locationsLoading]);
 
-  // fetch overview for query state changes
-  useEffect(() => {
-    if (pageState.query !== query) {
-      dispatch(fetchMonitorOverviewAction.get({ ...pageState, query }));
-      dispatch(setOverviewPageStateAction({ query }));
-    }
-  }, [dispatch, pageState, query]);
-
-  // fetch overview for all other page state changes
-  useEffect(() => {
-    dispatch(fetchMonitorOverviewAction.get(pageState));
-  }, [dispatch, pageState]);
-
-  // fetch overview for refresh
-  useEffect(() => {
-    dispatch(quietFetchOverviewAction.get(pageState));
-  }, [dispatch, pageState, lastRefresh]);
-
   const {
     enablement: { isEnabled },
     loading: enablementLoading,
   } = useEnablement();
 
-  const { syntheticsMonitors, loading: monitorsLoading, loaded: monitorsLoaded } = useMonitorList();
+  const {
+    syntheticsMonitors,
+    loading: monitorsLoading,
+    loaded: monitorsLoaded,
+    handleFilterChange,
+  } = useMonitorList();
 
-  if (
-    !search &&
-    !enablementLoading &&
-    isEnabled &&
-    !monitorsLoading &&
-    syntheticsMonitors.length === 0
-  ) {
+  // fetch overview for all other page state changes
+  useEffect(() => {
+    if (!monitorsLoaded) {
+      dispatch(fetchMonitorOverviewAction.get(pageState));
+    }
+    // change only needs to be triggered on pageState change
+  }, [dispatch, pageState, monitorsLoaded]);
+
+  // fetch overview for refresh
+  useEffect(() => {
+    if (monitorsLoaded) {
+      dispatch(quietFetchOverviewAction.get(pageState));
+    }
+    // for page state change we don't want quite fetch, see above fetch ^^
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [dispatch, lastRefresh]);
+
+  const hasNoMonitors =
+    !search && !enablementLoading && monitorsLoaded && syntheticsMonitors.length === 0;
+
+  if (hasNoMonitors && !monitorsLoading && isEnabled) {
     return <Redirect to={GETTING_STARTED_ROUTE} />;
   }
 
-  if (
-    !search &&
-    !enablementLoading &&
-    !isEnabled &&
-    monitorsLoaded &&
-    syntheticsMonitors.length === 0
-  ) {
+  if (!isEnabled && hasNoMonitors) {
     return <Redirect to={MONITORS_ROUTE} />;
   }
 
   return (
     <>
-      <EuiFlexGroup>
+      <EuiFlexGroup gutterSize="s" wrap={true}>
         <EuiFlexItem>
           <SearchField />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <QuickFilters />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <FilterGroup handleFilterChange={handleFilterChange} />
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer />

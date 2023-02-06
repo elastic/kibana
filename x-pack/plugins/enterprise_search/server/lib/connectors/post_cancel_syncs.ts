@@ -35,12 +35,10 @@ export const cancelSyncs = async (
     refresh: true,
     script: {
       lang: 'painless',
-      source: `
-      ctx._source['status'] = '${SyncStatus.CANCELED}';
-      ctx._source['cancelation_requested_at'] = '${new Date(Date.now()).toISOString()}';
-      ctx._source['canceled_at'] = '${new Date(Date.now()).toISOString()}';
-      ctx._source['completed_at'] = '${new Date(Date.now()).toISOString()}';
-`,
+      source: `ctx._source['status'] = '${SyncStatus.CANCELED}';
+ctx._source['cancelation_requested_at'] = '${new Date(Date.now()).toISOString()}';
+ctx._source['canceled_at'] = '${new Date(Date.now()).toISOString()}';
+ctx._source['completed_at'] = '${new Date(Date.now()).toISOString()}';`,
     },
   });
   await client.asCurrentUser.updateByQuery({
@@ -64,10 +62,8 @@ export const cancelSyncs = async (
     refresh: true,
     script: {
       lang: 'painless',
-      source: `
-        ctx._source['status'] = '${SyncStatus.CANCELING}'
-        ctx._source['cancelation_requested_at'] = '${new Date(Date.now()).toISOString()}';
-`,
+      source: `ctx._source['status'] = '${SyncStatus.CANCELING}';
+ctx._source['cancelation_requested_at'] = '${new Date(Date.now()).toISOString()}';`,
     },
   });
   await client.asCurrentUser.update({

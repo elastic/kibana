@@ -30,7 +30,7 @@ const getIcon =
     <EuiIcon type={type} width={width} height={height} fill={color} />;
 
 const formatDifference = (value: number) => {
-  return value > 0 ? '+' + value.toFixed(2) : value.toFixed(2);
+  return value > 0 ? '+' + value.toFixed(0) + '%' : value.toFixed(0) + '%';
 };
 
 const calculateDiffPercentageAndFormat = (
@@ -99,13 +99,14 @@ export function MobileLocationStats({
         currentPeriodValue,
         previousPeriodValue
       );
-      return (
-        <span>
-          {comparisonEnabled
-            ? `${currentPeriodValue} (${comparisonDiffValue}% ${previousPeriodLabel})`
-            : `${currentPeriodValue}`}
-        </span>
-      );
+      if (comparisonDiffValue && comparisonEnabled) {
+        return (
+          <span>
+            {currentPeriodValue} ({comparisonDiffValue} {previousPeriodLabel})
+          </span>
+        );
+      }
+      return <span>{currentPeriodValue ? `${currentPeriodValue}` : null}</span>;
     },
     [comparisonEnabled, previousPeriodLabel]
   );

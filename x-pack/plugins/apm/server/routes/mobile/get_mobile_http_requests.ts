@@ -18,12 +18,13 @@ import {
   SPAN_SUBTYPE,
 } from '../../../common/es_fields/apm';
 import { environmentQuery } from '../../../common/utils/environment_query';
+import { getBucketSize } from '../../../common/utils/get_bucket_size';
 import { getOffsetInMs } from '../../../common/utils/get_offset_in_ms';
 import { offsetPreviousPeriodCoordinates } from '../../../common/utils/offset_previous_period_coordinate';
-import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
-import { getBucketSize } from '../../lib/helpers/get_bucket_size';
-import { Coordinate } from '../../../typings/timeseries';
 import { Maybe } from '../../../typings/common';
+import { Coordinate } from '../../../typings/timeseries';
+import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
+import { getDocumentTypeFilterForServiceDestinationStatistics } from '../../lib/helpers/spans/get_is_using_service_destination_metrics';
 
 export interface HttpRequestsTimeseries {
   currentPeriod: { timeseries: Coordinate[]; value: Maybe<number> };
@@ -76,6 +77,8 @@ async function getHttpRequestsTimeseries({
       query: {
         bool: {
           filter: [
+            { exists: { field: SPAN_SUBTYPE } },
+            ...getDocumentTypeFilterForServiceDestinationStatistics(true),
             ...termQuery(SERVICE_NAME, serviceName),
             ...termQuery(SPAN_TYPE, 'external'),
             ...termQuery(TRANSACTION_NAME, transactionName),
