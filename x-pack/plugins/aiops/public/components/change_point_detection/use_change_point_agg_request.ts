@@ -16,6 +16,7 @@ import {
 } from './change_point_detection_context';
 import { useDataSource } from '../../hooks/use_data_source';
 import { useCancellableSearch } from '../../hooks/use_cancellable_search';
+import { SPLIT_FIELD_CARDINALITY_LIMIT, COMPOSITE_AGG_SIZE } from './constants';
 
 interface RequestOptions {
   index: string;
@@ -26,8 +27,6 @@ interface RequestOptions {
   timeInterval: string;
   afterKey?: string;
 }
-
-export const COMPOSITE_AGG_SIZE = 500;
 
 function getChangePointDetectionRequestBody(
   { index, fn, metricField, splitField, timeInterval, timeField, afterKey }: RequestOptions,
@@ -109,6 +108,12 @@ export function useChangePointResults(
   const [activePage, setActivePage] = useState<number>(0);
   const [progress, setProgress] = useState<number>(0);
 
+  const totalAggPages = useMemo<number>(() => {
+    return Math.ceil(
+      Math.min(splitFieldCardinality ?? 0, SPLIT_FIELD_CARDINALITY_LIMIT) / COMPOSITE_AGG_SIZE
+    );
+  }, [splitFieldCardinality]);
+
   const { runRequest, cancelRequest, isLoading } = useCancellableSearch();
 
   const reset = useCallback(() => {
@@ -119,9 +124,9 @@ export function useChangePointResults(
   }, [cancelRequest]);
 
   const fetchResults = useCallback(
-    async (afterKey?: string, prevBucketsCount?: number) => {
+    async (pageNumber: number = 1, afterKey?: string) => {
       try {
-        if (!splitFieldCardinality) {
+        if (!totalAggPages) {
           setProgress(100);
           return;
         }
@@ -150,12 +155,7 @@ export function useChangePointResults(
 
         const buckets = result.rawResponse.aggregations.groupings.buckets;
 
-        setProgress(
-          Math.min(
-            Math.round(((buckets.length + (prevBucketsCount ?? 0)) / splitFieldCardinality) * 100),
-            100
-          )
-        );
+        setProgress(Math.min(Math.round((pageNumber / totalAggPages) * 100), 100));
 
         let groups = buckets.map((v) => {
           const changePointType = Object.keys(v.change_point_request.type)[0] as ChangePointType;
@@ -188,10 +188,13 @@ export function useChangePointResults(
           );
         });
 
-        if (result.rawResponse.aggregations.groupings.after_key?.splitFieldTerm) {
+        if (
+          result.rawResponse.aggregations.groupings.after_key?.splitFieldTerm &&
+          pageNumber < totalAggPages
+        ) {
           await fetchResults(
-            result.rawResponse.aggregations.groupings.after_key.splitFieldTerm,
-            buckets.length + (prevBucketsCount ?? 0)
+            pageNumber + 1,
+            result.rawResponse.aggregations.groupings.after_key.splitFieldTerm
           );
         } else {
           setProgress(100);
@@ -204,7 +207,7 @@ export function useChangePointResults(
         });
       }
     },
-    [runRequest, requestParams, query, dataView, splitFieldCardinality, toasts]
+    [runRequest, requestParams, query, dataView, totalAggPages, toasts]
   );
 
   useEffect(
