@@ -75,7 +75,7 @@ export const kubernetesGuideConfig: GuideConfig = {
         description: i18n.translate(
           'xpack.observability.guideConfig.viewDashboardStep.manualCompletionPopoverDescription',
           {
-            defaultMessage: `Take your time to explore these pre-built dashboards included with the Kubernetes integration. When you’re ready, click the Setup guide button to continue.`,
+            defaultMessage: `Take your time to explore these pre-built dashboards included with the Kubernetes integration. When you're ready, click the Setup guide button to continue.`,
           }
         ),
         readyToCompleteOnNavigation: true,

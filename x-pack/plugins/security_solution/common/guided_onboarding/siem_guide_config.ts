@@ -20,7 +20,7 @@ export const siemGuideConfig: GuideConfig = {
     path: '/dashboards',
   },
   description: i18n.translate('xpack.securitySolution.guideConfig.description', {
-    defaultMessage: `There are many ways to get your SIEM data into Elastic. In this guide, we’ll help you get set up quickly using the Elastic Defend integration.`,
+    defaultMessage: `There are many ways to get your SIEM data into Elastic. In this guide, we'll help you get set up quickly using the Elastic Defend integration.`,
   }),
   docs: {
     text: i18n.translate('xpack.securitySolution.guideConfig.documentationLink', {
@@ -76,7 +76,7 @@ export const siemGuideConfig: GuideConfig = {
         description: i18n.translate(
           'xpack.securitySolution.guideConfig.rulesStep.manualCompletion.description',
           {
-            defaultMessage: 'After you’ve enabled the rules you need, continue.',
+            defaultMessage: `After you've enabled the rules you need, continue.`,
           }
         ),
       },

@@ -14,8 +14,7 @@ export const searchGuideConfig: GuideConfig = {
     defaultMessage: 'Build search experiences with Elasticsearch',
   }),
   description: i18n.translate('xpack.enterpriseSearch.guideConfig.description', {
-    defaultMessage:
-      'We’ll help you build a search experience with your data using Elastic’s web crawler, connectors, and APIs.',
+    defaultMessage: `We'll help you build a search experience with your data using Elastic's web crawler, connectors, and APIs.`,
   }),
   guideName: 'Enterprise Search',
   telemetryId: 'search',
@@ -42,8 +41,7 @@ export const searchGuideConfig: GuideConfig = {
       description: i18n.translate(
         'xpack.enterpriseSearch.guideConfig.searchExperienceStep.description',
         {
-          defaultMessage:
-            'Learn more about Elastic’s Search UI, try our Search UI tutorial for Elasticsearch, and build a search experience.',
+          defaultMessage: `Learn more about Elastic's Search UI, try our Search UI tutorial for Elasticsearch, and build a search experience.`,
         }
       ),
       location: {
@@ -60,8 +58,7 @@ export const searchGuideConfig: GuideConfig = {
         description: i18n.translate(
           'xpack.enterpriseSearch.guideConfig.searchExperienceStep.manualCompletionPopoverDescription',
           {
-            defaultMessage:
-              'Take your time to explore how to use Search UI to build world-class search experiences. When you’re ready, click the Setup guide button to continue.',
+            defaultMessage: `Take your time to explore how to use Search UI to build world-class search experiences. When you're ready, click the Setup guide button to continue.`,
           }
         ),
         readyToCompleteOnNavigation: true,
