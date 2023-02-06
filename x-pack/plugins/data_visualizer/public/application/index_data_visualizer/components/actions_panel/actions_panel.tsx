@@ -10,11 +10,12 @@ import React, { FC, useState, useEffect } from 'react';
 
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import { EuiSpacer, EuiTitle, useIsWithinMaxBreakpoint } from '@elastic/eui';
+import { EuiSpacer, EuiTitle, useEuiBreakpoint } from '@elastic/eui';
 import { DataView } from '@kbn/data-views-plugin/public';
 import { useUrlState } from '@kbn/ml-url-state';
 import { isDefined } from '@kbn/ml-is-defined';
 
+import { css } from '@emotion/react';
 import { LinkCardProps } from '../../../common/components/link_card/link_card';
 import { useDataVisualizerKibana } from '../../../kibana_context';
 import { LinkCard } from '../../../common/components/link_card';
@@ -118,16 +119,17 @@ export const ActionsPanel: FC<Props> = ({
   const showActionsPanel =
     discoverLink || (Array.isArray(asyncHrefCards) && asyncHrefCards.length > 0);
 
-  const isWithinLargeBreakpoint = useIsWithinMaxBreakpoint('l');
-
+  const dvActionsPanel = css({
+    [useEuiBreakpoint(['xl', 'xxl'])]: {
+      width: ACTIONS_PANEL_WIDTH,
+    },
+    width: '100%',
+  });
   // Note we use display:none for the DataRecognizer section as it needs to be
   // passed the recognizerResults object, and then run the recognizer check which
   // controls whether the recognizer section is ultimately displayed.
   return showActionsPanel ? (
-    <div
-      data-test-subj="dataVisualizerActionsPanel"
-      css={{ width: isWithinLargeBreakpoint ? '100%' : ACTIONS_PANEL_WIDTH }}
-    >
+    <div data-test-subj="dataVisualizerActionsPanel" css={dvActionsPanel}>
       <EuiTitle size="s">
         <h2>
           <FormattedMessage

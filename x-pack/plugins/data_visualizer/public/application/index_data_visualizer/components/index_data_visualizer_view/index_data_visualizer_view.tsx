@@ -20,6 +20,7 @@ import {
   EuiSpacer,
   EuiTitle,
   useIsWithinMaxBreakpoint,
+  useEuiBreakpoint,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
@@ -34,6 +35,7 @@ import {
 } from '@kbn/ml-date-picker';
 import { useStorage } from '@kbn/ml-local-storage';
 
+import { css } from '@emotion/react';
 import { useCurrentEuiTheme } from '../../../common/hooks/use_current_eui_theme';
 import {
   DV_FROZEN_TIER_PREFERENCE,
@@ -473,16 +475,18 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
   );
 
   const isWithinLargeBreakpoint = useIsWithinMaxBreakpoint('l');
+  const dvPageHeader = css({
+    [useEuiBreakpoint(['xs', 's', 'm', 'l'])]: {
+      flexDirection: 'column',
+      alignItems: 'flex-start',
+    },
+  });
+
   return (
     <EuiPageBody data-test-subj="dataVisualizerIndexPage" paddingSize="none" panelled={false}>
       <EuiFlexGroup gutterSize="m">
         <EuiFlexItem>
-          <EuiPageContentHeader
-            data-test-subj="dataVisualizerPageHeader"
-            css={
-              isWithinLargeBreakpoint ? { flexDirection: 'column', alignItems: 'flex-start' } : null
-            }
-          >
+          <EuiPageContentHeader data-test-subj="dataVisualizerPageHeader" css={dvPageHeader}>
             <EuiPageContentHeaderSection>
               <EuiFlexGroup
                 data-test-subj="dataViewTitleHeader"
