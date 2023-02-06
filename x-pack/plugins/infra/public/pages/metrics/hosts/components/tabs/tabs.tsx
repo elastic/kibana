@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React from 'react';
 import {
   EuiTabbedContent,
   EuiSpacer,
@@ -18,7 +18,6 @@ import { useAlertsCount } from '../../../../../hooks/use_alerts_count';
 import { MetricsGrid } from './metrics/metrics_grid';
 import { AlertsTabContent } from './alerts';
 import { infraAlertFeatureIds } from './alerts/config';
-import { useUnifiedSearchContext } from '../../hooks/use_unified_search';
 import { useHostsViewContext } from '../../hooks/use_hosts_view';
 
 interface WrapperProps {
