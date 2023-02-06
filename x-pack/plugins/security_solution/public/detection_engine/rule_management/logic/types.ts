@@ -29,6 +29,7 @@ import {
 import type { NamespaceType } from '@kbn/securitysolution-io-ts-list-types';
 
 import { PositiveInteger } from '@kbn/securitysolution-io-ts-types';
+import type { WarningSchema } from '../../../../common/detection_engine/schemas/response';
 import { RuleExecutionSummary } from '../../../../common/detection_engine/rule_monitoring';
 import {
   AlertSuppression,
@@ -267,6 +268,7 @@ export interface ImportDataProps {
   fileToImport: File;
   overwrite?: boolean;
   overwriteExceptions?: boolean;
+  overwriteActionConnectors?: boolean;
   signal: AbortSignal;
 }
 
@@ -304,6 +306,10 @@ export interface ImportDataResponse {
   exceptions_success?: boolean;
   exceptions_success_count?: number;
   exceptions_errors?: ExceptionsImportError[];
+  action_connectors_success?: boolean;
+  action_connectors_success_count?: number;
+  action_connectors_errors?: Array<ImportRulesResponseError | ImportResponseError>;
+  action_connectors_warnings?: WarningSchema[];
 }
 
 export interface ExportDocumentsProps {
