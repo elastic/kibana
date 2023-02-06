@@ -334,7 +334,7 @@ export class ResourceInstaller {
     const ownComponentNames = componentTemplates.map((template) =>
       indexInfo.getComponentTemplateName(template.name)
     );
-    const ilmPolicyName = ilmPolicy ? indexInfo.getIlmPolicyName() : DEFAULT_ALERTS_ILM_POLICY;
+    const ilmPolicyName = ilmPolicy ? indexInfo.getIlmPolicyName() : DEFAULT_ALERTS_ILM_POLICY_NAME;
 
     const indexMetadata: estypes.Metadata = {
       ...indexTemplate._meta,
