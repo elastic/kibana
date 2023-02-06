@@ -71,6 +71,7 @@ export interface IndexDetails {
 }
 
 interface BaseCspSetupBothPolicy {
+  status: CspStatusCode;
   installedPackagePolicies: number;
   healthyAgents: number;
 }
@@ -105,7 +106,9 @@ interface CspSetupInstalledStatus extends BaseCspSetupStatus {
   installedPackageVersion: string | undefined;
 }
 
-export type CspSetupStatus = CspSetupInstalledStatus | CspSetupNotInstalledStatus;
+//export type CspSetupStatus = CspSetupInstalledStatus | CspSetupNotInstalledStatus;
+
+export type CspSetupStatus = BaseCspSetupStatus;
 
 export type AgentPolicyStatus = Pick<AgentPolicy, 'id' | 'name'> & { agents: number };
 

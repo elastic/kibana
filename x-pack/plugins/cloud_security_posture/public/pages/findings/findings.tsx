@@ -20,7 +20,9 @@ export const Findings = () => {
   const dataViewQuery = useLatestFindingsDataView();
   const getSetupStatus = useCspSetupStatusApi();
 
-  const hasFindings = getSetupStatus.data?.status === 'indexed';
+  const hasFindings =
+    getSetupStatus.data?.cspm.status === 'indexed' ||
+    getSetupStatus.data?.kspm.status === 'indexed';
   if (!hasFindings) return <NoFindingsStates />;
 
   return (
