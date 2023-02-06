@@ -137,7 +137,7 @@ export const DeleteIndexModal: React.FC = () => {
       )}
       <p>
         {i18n.translate(
-          'xpack.enterpriseSearch.content.searchIndices.deleteModal.syncsWarning.description',
+          'xpack.enterpriseSearch.content.searchIndices.deleteModal.syncsWarning.indexNameDescription',
           {
             defaultMessage: 'This action cannot be undone. Please type {indexName} to confirm.',
             values: { indexName },
