@@ -29,10 +29,7 @@ import { some, filter, map } from 'fp-ts/lib/Option';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { getTimeOptions } from '../../../common/lib/get_time_options';
 import { RuleNotifyWhenType, RuleAction } from '../../../types';
-import {
-  DEFAULT_FREQUENCY_WITH_SUMMARY,
-  DEFAULT_FREQUENCY_WITHOUT_SUMMARY,
-} from '../../../common/constants';
+import { DEFAULT_FREQUENCY } from '../../../common/constants';
 
 export const NOTIFY_WHEN_OPTIONS: Array<EuiSuperSelectOption<RuleNotifyWhenType>> = [
   {
@@ -135,7 +132,7 @@ interface ActionNotifyWhenProps {
 
 export const ActionNotifyWhen = ({
   hasSummary,
-  frequency = DEFAULT_FREQUENCY_WITHOUT_SUMMARY,
+  frequency = DEFAULT_FREQUENCY,
   throttle,
   throttleUnit,
   onNotifyWhenChange,
@@ -146,9 +143,7 @@ export const ActionNotifyWhen = ({
 }: ActionNotifyWhenProps) => {
   const [showCustomThrottleOpts, setShowCustomThrottleOpts] = useState<boolean>(false);
   const [notifyWhenValue, setNotifyWhenValue] = useState<RuleNotifyWhenType>(
-    frequency.summary
-      ? DEFAULT_FREQUENCY_WITH_SUMMARY.notifyWhen
-      : DEFAULT_FREQUENCY_WITHOUT_SUMMARY.notifyWhen
+    DEFAULT_FREQUENCY.notifyWhen
   );
 
   const [summaryMenuOpen, setSummaryMenuOpen] = useState(false);
