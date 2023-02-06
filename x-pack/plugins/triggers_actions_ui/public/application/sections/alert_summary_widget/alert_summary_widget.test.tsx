@@ -10,11 +10,8 @@ import { render } from '@testing-library/react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { AlertSummaryWidget } from './alert_summary_widget';
 import { AlertSummaryWidgetProps } from './types';
-import {
-  mockedAlertSummaryTimeRange,
-  mockedChartThemes,
-} from '../../../../mock/alert_summary_widget';
-import { useLoadAlertSummary } from '../../../../hooks/use_load_alert_summary';
+import { mockedAlertSummaryTimeRange, mockedChartThemes } from '../../mock/alert_summary_widget';
+import { useLoadAlertSummary } from '../../hooks/use_load_alert_summary';
 
 jest.mock('@kbn/kibana-react-plugin/public/ui_settings/use_ui_setting', () => ({
   useUiSetting: jest.fn().mockImplementation(() => true),
@@ -22,7 +19,7 @@ jest.mock('@kbn/kibana-react-plugin/public/ui_settings/use_ui_setting', () => ({
 
 const TITLE_DATA_TEST_SUBJ = 'mockedTimeRangeTitle';
 
-jest.mock('../../../../hooks/use_load_alert_summary', () => ({
+jest.mock('../../hooks/use_load_alert_summary', () => ({
   useLoadAlertSummary: jest.fn().mockReturnValue({
     alertSummary: {
       activeAlertCount: 1,
