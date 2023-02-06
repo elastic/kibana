@@ -13,16 +13,21 @@ import React, { useEffect, useRef } from 'react';
 import { OverlayRef } from '@kbn/core/public';
 import { toMountPoint } from '@kbn/kibana-react-plugin/public';
 import { EmbeddableFactoryNotFoundError } from '@kbn/embeddable-plugin/public';
-import { ControlEditor } from './control_editor';
-import { pluginServices } from '../../services';
-import { ControlGroupStrings } from '../control_group_strings';
+
 import {
   IEditableControlFactory,
   ControlInput,
   DataControlInput,
   ControlEmbeddable,
 } from '../../types';
-import { setFlyoutRef, useControlGroupContainer } from '../embeddable/control_group_container';
+import {
+  controlGroupSelector,
+  setFlyoutRef,
+  useControlGroupContainer,
+} from '../embeddable/control_group_container';
+import { pluginServices } from '../../services';
+import { ControlEditor } from './control_editor';
+import { ControlGroupStrings } from '../control_group_strings';
 
 interface EditControlResult {
   type: string;
@@ -39,7 +44,7 @@ export const EditControlButton = ({ embeddableId }: { embeddableId: string }) =>
   const controlGroup = useControlGroupContainer();
 
   // current state
-  const panels = controlGroup.select((state) => state.explicitInput.panels);
+  const panels = controlGroupSelector((state) => state.explicitInput.panels);
 
   // keep up to date ref of latest panel state for comparison when closing editor.
   const latestPanelState = useRef(panels[embeddableId]);

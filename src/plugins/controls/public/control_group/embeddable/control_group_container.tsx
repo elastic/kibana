@@ -5,18 +5,19 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { skip, debounceTime, distinctUntilChanged } from 'rxjs/operators';
-import React, { createContext, useContext } from 'react';
+import { isEqual } from 'lodash';
 import ReactDOM from 'react-dom';
-import { compareFilters, COMPARE_ALL_OPTIONS, Filter, uniqFilters } from '@kbn/es-query';
+import { Provider, TypedUseSelectorHook, useSelector } from 'react-redux';
+import React, { createContext, useContext } from 'react';
 import { BehaviorSubject, merge, Subject, Subscription } from 'rxjs';
-import _ from 'lodash';
+import { skip, debounceTime, distinctUntilChanged } from 'rxjs/operators';
+import { compareFilters, COMPARE_ALL_OPTIONS, Filter, uniqFilters } from '@kbn/es-query';
 
-import { ReduxEmbeddablePackage, ReduxEmbeddableTools } from '@kbn/presentation-util-plugin/public';
 import { OverlayRef } from '@kbn/core/public';
 import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { Container, EmbeddableFactory } from '@kbn/embeddable-plugin/public';
+import { ReduxEmbeddablePackage, ReduxEmbeddableTools } from '@kbn/presentation-util-plugin/public';
+
 import {
   ControlGroupInput,
   ControlGroupOutput,
@@ -30,13 +31,6 @@ import {
   ControlGroupChainingSystems,
   controlOrdersAreEqual,
 } from './control_group_chaining_system';
-import { pluginServices } from '../../services';
-import { openAddDataControlFlyout } from '../editor/open_add_data_control_flyout';
-import { EditControlGroup } from '../editor/edit_control_group';
-import { ControlGroup } from '../component/control_group_component';
-import { controlGroupReducers } from '../state/control_group_reducers';
-import { ControlEmbeddable, ControlInput, ControlOutput } from '../../types';
-import { getNextPanelOrder } from './control_group_helpers';
 import {
   type AddDataControlProps,
   type AddOptionsListControlProps,
@@ -46,6 +40,13 @@ import {
   getRangeSliderPanelState,
   getTimeSliderPanelState,
 } from '../external_api/control_group_input_builder';
+import { pluginServices } from '../../services';
+import { getNextPanelOrder } from './control_group_helpers';
+import { EditControlGroup } from '../editor/edit_control_group';
+import { ControlGroup } from '../component/control_group_component';
+import { controlGroupReducers } from '../state/control_group_reducers';
+import { ControlEmbeddable, ControlInput, ControlOutput } from '../../types';
+import { openAddDataControlFlyout } from '../editor/open_add_data_control_flyout';
 
 let flyoutRef: OverlayRef | undefined;
 export const setFlyoutRef = (newRef: OverlayRef | undefined) => {
@@ -53,6 +54,7 @@ export const setFlyoutRef = (newRef: OverlayRef | undefined) => {
 };
 
 export const ControlGroupContainerContext = createContext<ControlGroupContainer | null>(null);
+export const controlGroupSelector = useSelector as TypedUseSelectorHook<ControlGroupReduxState>;
 export const useControlGroupContainer = (): ControlGroupContainer => {
   const controlGroup = useContext<ControlGroupContainer | null>(ControlGroupContainerContext);
   if (controlGroup == null) {
@@ -87,6 +89,8 @@ export class ControlGroupContainer extends Container<
   public getState: ControlGroupReduxEmbeddableTools['getState'];
   public dispatch: ControlGroupReduxEmbeddableTools['dispatch'];
   public onStateChange: ControlGroupReduxEmbeddableTools['onStateChange'];
+
+  private store: ControlGroupReduxEmbeddableTools['store'];
 
   private cleanupStateTools: () => void;
 
@@ -124,6 +128,8 @@ export class ControlGroupContainer extends Container<
     this.dispatch = reduxEmbeddableTools.dispatch;
     this.cleanupStateTools = reduxEmbeddableTools.cleanup;
     this.onStateChange = reduxEmbeddableTools.onStateChange;
+
+    this.store = reduxEmbeddableTools.store;
 
     // when all children are ready setup subscriptions
     this.untilAllChildrenReady().then(() => {
@@ -245,7 +251,7 @@ export class ControlGroupContainer extends Container<
     // if filters are different, publish them
     if (
       !compareFilters(this.output.filters ?? [], allFilters ?? [], COMPARE_ALL_OPTIONS) ||
-      !_.isEqual(this.output.timeslice, timeslice)
+      !isEqual(this.output.timeslice, timeslice)
     ) {
       this.updateOutput({ filters: uniqFilters(allFilters), timeslice });
       this.onFiltersPublished$.next(allFilters);
@@ -357,14 +363,13 @@ export class ControlGroupContainer extends Container<
       ReactDOM.unmountComponentAtNode(this.domNode);
     }
     this.domNode = dom;
-    const ControlsServicesProvider = pluginServices.getContextProvider();
     ReactDOM.render(
       <KibanaThemeProvider theme$={pluginServices.getServices().theme.theme$}>
-        <ControlsServicesProvider>
+        <Provider store={this.store}>
           <ControlGroupContainerContext.Provider value={this}>
             <ControlGroup />
           </ControlGroupContainerContext.Provider>
-        </ControlsServicesProvider>
+        </Provider>
       </KibanaThemeProvider>,
       dom
     );

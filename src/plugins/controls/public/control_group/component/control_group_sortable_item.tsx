@@ -6,15 +6,15 @@
  * Side Public License, v 1.
  */
 
-import { EuiFlexItem, EuiFormLabel, EuiIcon, EuiFlexGroup } from '@elastic/eui';
-import React, { forwardRef, HTMLAttributes } from 'react';
-import { useSortable } from '@dnd-kit/sortable';
-import { CSS } from '@dnd-kit/utilities';
 import classNames from 'classnames';
+import { CSS } from '@dnd-kit/utilities';
+import { useSortable } from '@dnd-kit/sortable';
+import React, { forwardRef, HTMLAttributes } from 'react';
+import { EuiFlexItem, EuiFormLabel, EuiIcon, EuiFlexGroup } from '@elastic/eui';
 
 import { ControlGroupStrings } from '../control_group_strings';
 import { ControlFrame, ControlFrameProps } from './control_frame_component';
-import { useControlGroupContainer } from '../embeddable/control_group_container';
+import { controlGroupSelector } from '../embeddable/control_group_container';
 
 interface DragInfo {
   isOver?: boolean;
@@ -69,8 +69,7 @@ const SortableControlInner = forwardRef<
     dragHandleRef
   ) => {
     const { isOver, isDragging, draggingIndex, index } = dragInfo;
-    const controlGroup = useControlGroupContainer();
-    const panels = controlGroup.select((state) => state.explicitInput.panels);
+    const panels = controlGroupSelector((state) => state.explicitInput.panels);
 
     const grow = panels[embeddableId].grow;
     const width = panels[embeddableId].width;
@@ -121,9 +120,8 @@ const SortableControlInner = forwardRef<
  * can be quite cumbersome.
  */
 export const ControlClone = ({ draggingId }: { draggingId: string }) => {
-  const controlGroup = useControlGroupContainer();
-  const panels = controlGroup.select((state) => state.explicitInput.panels);
-  const controlStyle = controlGroup.select((state) => state.explicitInput.controlStyle);
+  const panels = controlGroupSelector((state) => state.explicitInput.panels);
+  const controlStyle = controlGroupSelector((state) => state.explicitInput.controlStyle);
 
   const width = panels[draggingId].width;
   const title = panels[draggingId].explicitInput.title;

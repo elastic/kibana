@@ -134,6 +134,7 @@ export const createReduxEmbeddableTools = <
   });
 
   return {
+    store,
     select,
     dispatch,
     getState: store.getState,

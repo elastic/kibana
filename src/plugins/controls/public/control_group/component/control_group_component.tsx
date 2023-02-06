@@ -8,9 +8,6 @@
 
 import '../control_group.scss';
 
-import { EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
-import React, { useMemo, useState } from 'react';
-import classNames from 'classnames';
 import {
   arrayMove,
   SortableContext,
@@ -28,19 +25,26 @@ import {
   useSensors,
   LayoutMeasuringStrategy,
 } from '@dnd-kit/core';
+import classNames from 'classnames';
+import React, { useMemo, useState } from 'react';
+import { TypedUseSelectorHook, useSelector } from 'react-redux';
+import { EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
 
 import { ViewMode } from '@kbn/embeddable-plugin/public';
 
+import { ControlGroupReduxState } from '../types';
 import { ControlClone, SortableControl } from './control_group_sortable_item';
 import { useControlGroupContainer } from '../embeddable/control_group_container';
+
+const contextSelect = useSelector as TypedUseSelectorHook<ControlGroupReduxState>;
 
 export const ControlGroup = () => {
   const controlGroup = useControlGroupContainer();
 
   // current state
-  const panels = controlGroup.select((state) => state.explicitInput.panels);
-  const viewMode = controlGroup.select((state) => state.explicitInput.viewMode);
-  const controlStyle = controlGroup.select((state) => state.explicitInput.controlStyle);
+  const panels = contextSelect((state) => state.explicitInput.panels);
+  const viewMode = contextSelect((state) => state.explicitInput.viewMode);
+  const controlStyle = contextSelect((state) => state.explicitInput.controlStyle);
 
   const isEditable = viewMode === ViewMode.EDIT;
 

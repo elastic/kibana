@@ -62,6 +62,7 @@ export interface ReduxEmbeddableTools<
   ReducerType extends EmbeddableReducers<ReduxEmbeddableStateType> = EmbeddableReducers<ReduxEmbeddableStateType>
 > {
   cleanup: () => void;
+  store: EnhancedStore<ReduxEmbeddableStateType>;
   select: ReduxEmbeddableSelect<ReduxEmbeddableStateType>;
   getState: EnhancedStore<ReduxEmbeddableStateType>['getState'];
   onStateChange: EnhancedStore<ReduxEmbeddableStateType>['subscribe'];

@@ -24,12 +24,15 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 import { Markdown } from '@kbn/kibana-react-plugin/public';
 
+import {
+  controlGroupSelector,
+  useControlGroupContainer,
+} from '../embeddable/control_group_container';
 import { pluginServices } from '../../services';
 import { TIME_SLIDER_CONTROL } from '../../../common';
 import { EditControlButton } from '../editor/edit_control';
 import { ControlGroupStrings } from '../control_group_strings';
 import { useChildEmbeddable } from '../../hooks/use_child_embeddable';
-import { useControlGroupContainer } from '../embeddable/control_group_container';
 
 interface ControlFrameErrorProps {
   error: Error;
@@ -87,7 +90,7 @@ export const ControlFrame = ({
 
   const controlGroup = useControlGroupContainer();
 
-  const controlStyle = controlGroup.select((state) => state.explicitInput.controlStyle);
+  const controlStyle = controlGroupSelector((state) => state.explicitInput.controlStyle);
 
   // Controls Services Context
   const {
