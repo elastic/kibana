@@ -10,7 +10,7 @@ import { TestProviders } from '../../../mock';
 import { GroupsSelector } from '..';
 import React from 'react';
 
-const onClearSelected = jest.fn();
+const onGroupChange = jest.fn();
 const testProps = {
   fields: [
     {
@@ -43,8 +43,7 @@ const testProps = {
     },
   ],
   groupSelected: 'kibana.alert.rule.name',
-  onClearSelected,
-  onGroupChange: jest.fn(),
+  onGroupChange,
   options: [
     {
       label: 'Rule name',
@@ -100,6 +99,6 @@ describe('group selector', () => {
     );
     fireEvent.click(getByTestId('group-selector-dropdown'));
     fireEvent.click(getByTestId('panel-none'));
-    expect(onClearSelected).toHaveBeenCalled();
+    expect(onGroupChange).toHaveBeenCalled();
   });
 });
