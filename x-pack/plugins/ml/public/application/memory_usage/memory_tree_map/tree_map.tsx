@@ -8,14 +8,7 @@
 import React, { FC, useEffect, useState, useCallback } from 'react';
 import { Chart, Settings, Partition, PartitionLayout, ShapeTreeNode } from '@elastic/charts';
 import { FIELD_FORMAT_IDS } from '@kbn/field-formats-plugin/common';
-import {
-  EuiComboBox,
-  EuiComboBoxOptionOption,
-  EuiEmptyPrompt,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiSpacer,
-} from '@elastic/eui';
+import { EuiComboBox, EuiComboBoxOptionOption, EuiEmptyPrompt, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { MemoryUsageInfo } from '../../../../common/types/trained_models';
@@ -26,6 +19,7 @@ import { useFieldFormatter } from '../../contexts/kibana';
 
 import { useRefresh } from '../../routing/use_refresh';
 import { getMemoryItemColor } from '../memory_item_colors';
+import { useToastNotificationService } from '../../services/toast_notification_service';
 
 interface Props {
   node?: string;
@@ -35,34 +29,28 @@ interface Props {
 
 const DEFAULT_CHART_HEIGHT = '400px';
 
-const TYPE_OPTIONS: TreeMapOptions[] = [
-  {
-    label: i18n.translate('xpack.ml.memoryUsage.treeMap.adLabel', {
-      defaultMessage: 'Anomaly detection jobs',
-    }),
-    objectType: 'anomaly-detector',
-    color: getMemoryItemColor('anomaly-detector'),
-  },
-  {
-    label: i18n.translate('xpack.ml.memoryUsage.treeMap.dfaLabel', {
-      defaultMessage: 'Data frame analytics jobs',
-    }),
-    objectType: 'data-frame-analytics',
-    color: getMemoryItemColor('data-frame-analytics'),
-  },
-  {
-    label: i18n.translate('xpack.ml.memoryUsage.treeMap.modelsLabel', {
-      defaultMessage: 'Trained models',
-    }),
-    objectType: 'trained-model',
-    color: getMemoryItemColor('trained-model'),
-  },
-];
+const TYPE_LABELS: Record<string, MlSavedObjectType> = {
+  [i18n.translate('xpack.ml.memoryUsage.treeMap.adLabel', {
+    defaultMessage: 'Anomaly detection jobs',
+  })]: 'anomaly-detector',
+  [i18n.translate('xpack.ml.memoryUsage.treeMap.dfaLabel', {
+    defaultMessage: 'Data frame analytics jobs',
+  })]: 'data-frame-analytics',
+  [i18n.translate('xpack.ml.memoryUsage.treeMap.modelsLabel', {
+    defaultMessage: 'Trained models',
+  })]: 'trained-model',
+} as const;
 
-type TreeMapOptions = EuiComboBoxOptionOption & { objectType: MlSavedObjectType };
+const TYPE_OPTIONS: EuiComboBoxOptionOption[] = Object.entries(TYPE_LABELS).map(
+  ([label, type]) => ({
+    label,
+    color: getMemoryItemColor(type),
+  })
+);
 
 export const JobMemoryTreeMap: FC<Props> = ({ node, type, height }) => {
   const bytesFormatter = useFieldFormatter(FIELD_FORMAT_IDS.BYTES);
+  const { displayErrorToast } = useToastNotificationService();
   const refresh = useRefresh();
   const chartHeight = height ?? DEFAULT_CHART_HEIGHT;
 
@@ -70,26 +58,31 @@ export const JobMemoryTreeMap: FC<Props> = ({ node, type, height }) => {
   const [allData, setAllData] = useState<MemoryUsageInfo[]>([]);
   const [data, setData] = useState<MemoryUsageInfo[]>([]);
   const [loading, setLoading] = useState(false);
-  const [selectedOptions, setSelectedOptions] = useState<TreeMapOptions[]>(TYPE_OPTIONS);
+  const [selectedOptions, setSelectedOptions] = useState(TYPE_OPTIONS);
 
   const filterData = useCallback(
     (dataIn: MemoryUsageInfo[]) => {
-      const labels = selectedOptions.map((o) => o.objectType);
-      return dataIn.filter((d) => labels.includes(d.type));
+      const types = selectedOptions.map((o) => TYPE_LABELS[o.label]);
+      return dataIn.filter((d) => types.includes(d.type));
     },
     [selectedOptions]
   );
 
-  const onTypeChange = useCallback((types: EuiComboBoxOptionOption[]) => {
-    setSelectedOptions(types as TreeMapOptions[]);
-  }, []);
-
   const loadJobMemorySize = useCallback(async () => {
     setLoading(true);
-    const resp = await trainedModelsApiService.memoryUsage(type, node);
-    setAllData(resp);
+    try {
+      const resp = await trainedModelsApiService.memoryUsage(type, node);
+      setAllData(resp);
+    } catch (error) {
+      displayErrorToast(
+        error,
+        i18n.translate('xpack.ml.memoryUsage.treeMap.fetchFailedErrorMessage', {
+          defaultMessage: 'Models memory usage fetch failed',
+        })
+      );
+    }
     setLoading(false);
-  }, [trainedModelsApiService, type, node]);
+  }, [trainedModelsApiService, type, node, displayErrorToast]);
 
   useEffect(
     function redrawOnFilterChange() {
@@ -112,18 +105,14 @@ export const JobMemoryTreeMap: FC<Props> = ({ node, type, height }) => {
     >
       <EuiSpacer size="s" />
       <LoadingWrapper height={chartHeight} hasData={data.length > 0} loading={loading}>
-        <EuiFlexGroup>
-          <EuiFlexItem />
-          <EuiFlexItem>
-            <EuiComboBox
-              fullWidth
-              options={TYPE_OPTIONS as EuiComboBoxOptionOption[]}
-              selectedOptions={selectedOptions}
-              onChange={onTypeChange}
-              isClearable={false}
-            />
-          </EuiFlexItem>
-        </EuiFlexGroup>
+        <EuiComboBox
+          fullWidth
+          options={TYPE_OPTIONS}
+          selectedOptions={selectedOptions}
+          onChange={setSelectedOptions}
+          isClearable={false}
+        />
+
         {data.length ? (
           <Chart>
             <Settings
@@ -131,16 +120,16 @@ export const JobMemoryTreeMap: FC<Props> = ({ node, type, height }) => {
                 scales: { histogramPadding: 0.2 },
               }}
             />
-            <Partition
+            <Partition<MemoryUsageInfo>
               id="memoryUsageTreeMap"
               data={data}
               layout={PartitionLayout.treemap}
-              valueAccessor={(d: MemoryUsageInfo) => d.size}
+              valueAccessor={(d) => d.size}
               valueFormatter={(size: number) => bytesFormatter(size)}
               layers={[
                 {
                   groupByRollup: (d: MemoryUsageInfo) => d.type,
-                  nodeLabel: (d) => `${d}`,
+                  nodeLabel: (d) => TYPE_LABELS[d as MlSavedObjectType],
                   fillLabel: {
                     valueFormatter: (size: number) => bytesFormatter(size),
                   },

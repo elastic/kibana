@@ -45,7 +45,9 @@ const useBadgeFormatter = () => {
       <div>
         {items.map((item) => (
           <span css={{ marginRight: xs! }} key={item}>
-            <EuiBadge color="hollow">{item}</EuiBadge>
+            <EuiBadge color="hollow" css={{ marginRight: xs! }}>
+              {item}
+            </EuiBadge>
           </span>
         ))}
       </div>

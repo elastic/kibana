@@ -242,7 +242,6 @@ export interface MemoryUsageInfo {
   id: string;
   type: MlSavedObjectType;
   size: number;
-  text: string;
   nodeNames: string[];
 }
 

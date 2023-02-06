@@ -112,13 +112,11 @@ export class MemoryUsageService {
     }
 
     const size = memory + AD_EXTRA_MEMORY;
-    const text = numeral(size).format('0.000 b');
     const nodeName = jobStats.node?.name;
     return {
       id: jobStats.job_id,
       type: 'anomaly-detector',
       size,
-      text,
       nodeNames: nodeName ? [nodeName] : [],
     };
   }
@@ -131,13 +129,11 @@ export class MemoryUsageService {
     // @ts-expect-error numeral missing value
     const memory = numeral(mml.toUpperCase()).value();
     const size = memory + DFA_EXTRA_MEMORY;
-    const text = numeral(size).format('0.000 b');
     const nodeName = jobStats.node?.name;
     return {
       id: jobStats.id,
       type: 'data-frame-analytics',
       size,
-      text,
       nodeNames: nodeName ? [nodeName] : [],
     };
   }
@@ -149,14 +145,12 @@ export class MemoryUsageService {
     const memory = trainedModelStats.model_size_stats.required_native_memory_bytes;
 
     const size = memory + AD_EXTRA_MEMORY;
-    const text = numeral(size).format('0.000 b');
     const nodes = (trainedModelStats.deployment_stats?.nodes ??
       []) as estypes.MlTrainedModelDeploymentNodesStats[];
     return {
       id: trainedModelStats.model_id,
       type: 'trained-model',
       size,
-      text,
       nodeNames: nodes.map((n) => Object.values(n.node)[0].name),
     };
   }
