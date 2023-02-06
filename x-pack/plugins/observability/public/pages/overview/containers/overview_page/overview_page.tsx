@@ -54,6 +54,7 @@ export function OverviewPage() {
       getAlertsStateTable: AlertsStateTable,
       getAlertSummaryWidget: AlertSummaryWidget,
     },
+    kibanaVersion,
   } = useKibana<ObservabilityAppServices>().services;
 
   const { ObservabilityPageTemplate } = usePluginContext();
@@ -66,7 +67,10 @@ export function OverviewPage() {
     },
   ]);
 
-  const { data: newsFeed } = useFetcher(() => getNewsFeed({ http }), [http]);
+  const { data: newsFeed } = useFetcher(
+    () => getNewsFeed({ http, kibanaVersion }),
+    [http, kibanaVersion]
+  );
   const { hasAnyData, isAllRequestsComplete } = useHasData();
 
   const { trackMetric } = useOverviewMetrics({ hasAnyData });
@@ -88,12 +92,16 @@ export function OverviewPage() {
     })
   );
   const timeBuckets = useTimeBuckets();
-  const alertSummaryTimeRange = getAlertSummaryTimeRange(
-    {
-      from: relativeStart,
-      to: relativeEnd,
-    },
-    timeBuckets
+  const alertSummaryTimeRange = useMemo(
+    () =>
+      getAlertSummaryTimeRange(
+        {
+          from: relativeStart,
+          to: relativeEnd,
+        },
+        timeBuckets
+      ),
+    [relativeEnd, relativeStart, timeBuckets]
   );
 
   const chartThemes = {
@@ -209,6 +217,7 @@ export function OverviewPage() {
                 pageSize={ALERTS_PER_PAGE}
                 query={esQuery}
                 showExpandToDetails={false}
+                showAlertStatusWithFlapping
               />
             </CasesContext>
           </SectionContainer>

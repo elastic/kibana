@@ -19,6 +19,7 @@ pageLoadAssetSize:
   cloudLinks: 17629
   cloudSecurityPosture: 19109
   console: 46091
+  contentManagement: 16254
   controls: 40000
   core: 435325
   crossClusterReplication: 65408
@@ -124,7 +125,7 @@ pageLoadAssetSize:
   threatIntelligence: 44299
   timelines: 327300
   transform: 41007
-  triggersActionsUi: 120000
+  triggersActionsUi: 135613
   uiActions: 35121
   uiActionsEnhanced: 38494
   unifiedFieldList: 65500

@@ -16,7 +16,6 @@ import {
   defaultApmServiceEnvironment,
   apmProgressiveLoading,
   apmServiceInventoryOptimizedSorting,
-  enableNewSyntheticsView,
   apmServiceGroupMaxNumberOfServices,
   apmTraceExplorerTab,
   apmLabsButton,
@@ -47,23 +46,6 @@ type UiSettings = UiSettingsParams<boolean | number | string | object> & { showI
  * uiSettings definitions for Observability.
  */
 export const uiSettings: Record<string, UiSettings> = {
-  [enableNewSyntheticsView]: {
-    category: [observabilityFeatureId],
-    name: i18n.translate('xpack.observability.enableNewSyntheticsViewExperimentName', {
-      defaultMessage: 'Enable new synthetic monitoring application',
-    }),
-    value: false,
-    description: i18n.translate(
-      'xpack.observability.enableNewSyntheticsViewExperimentDescriptionBeta',
-      {
-        defaultMessage:
-          '{technicalPreviewLabel} Enable new synthetic monitoring application in observability. Refresh the page to apply the setting.',
-        values: { technicalPreviewLabel: `<em>[${technicalPreviewLabel}]</em>` },
-      }
-    ),
-    schema: schema.boolean(),
-    requiresPageReload: true,
-  },
   [enableInspectEsQueries]: {
     category: [observabilityFeatureId],
     name: i18n.translate('xpack.observability.enableInspectEsQueriesExperimentName', {
