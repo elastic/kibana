@@ -23,6 +23,7 @@ import { inventoryTitle } from '../../../translations';
 import { SavedViews } from './components/saved_views';
 import { SnapshotContainer } from './components/snapshot_container';
 import { fullHeightContentStyles } from '../../../page_template.styles';
+import { SurveyKubernetes } from './components/survey_kubernetes';
 
 export const SnapshotPage = () => {
   const {
@@ -59,7 +60,7 @@ export const SnapshotPage = () => {
                 hasData={metricIndicesExist}
                 pageHeader={{
                   pageTitle: inventoryTitle,
-                  rightSideItems: [<SavedViews />],
+                  rightSideItems: [<SavedViews />, <SurveyKubernetes />],
                 }}
                 pageSectionProps={{
                   contentProps: {

@@ -7518,7 +7518,6 @@
     "xpack.apm.serviceOverview.embeddedMap.error": "无法加载地图",
     "xpack.apm.serviceOverview.embeddedMap.error.toastTitle": "加载地图可嵌入对象时出错",
     "xpack.apm.serviceOverview.embeddedMap.input.title": "延迟（按国家/地区）",
-    "xpack.apm.serviceOverview.embeddedMap.metric.label": "页面加载持续时间",
     "xpack.apm.serviceOverview.embeddedMap.title": "每个国家/地区的平均延迟",
     "xpack.apm.serviceOverview.errorsTable.errorMessage": "无法提取",
     "xpack.apm.serviceOverview.errorsTable.loading": "正在加载……",
