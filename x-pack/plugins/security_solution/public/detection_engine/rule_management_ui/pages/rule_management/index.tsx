@@ -108,6 +108,7 @@ const RulesPageComponent: React.FC = () => {
         title={i18n.IMPORT_RULE}
         showExceptionsCheckBox
         showCheckBox
+        showActionConnectorsCheckBox
       />
 
       <RulesTableContextProvider>
