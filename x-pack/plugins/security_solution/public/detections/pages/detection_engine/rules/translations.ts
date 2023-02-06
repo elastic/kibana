@@ -638,6 +638,20 @@ export const MONITORING_TAB = i18n.translate(
   }
 );
 
+export const ENABLED_RULES = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.allRules.filters.enabledRulesTitle',
+  {
+    defaultMessage: 'Enabled rules',
+  }
+);
+
+export const DISABLED_RULES = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.allRules.filters.disabledRulesTitle',
+  {
+    defaultMessage: 'Disabled rules',
+  }
+);
+
 export const CUSTOM_RULES = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.allRules.filters.customRulesTitle',
   {
