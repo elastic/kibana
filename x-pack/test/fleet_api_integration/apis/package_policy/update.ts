@@ -18,6 +18,7 @@ export default function (providerContext: FtrProviderContext) {
   const dockerServers = getService('dockerServers');
   const kibanaServer = getService('kibanaServer');
   const esArchiver = getService('esArchiver');
+  const es = getService('es');
 
   const expectIdArraysEqual = (arr1: any[], arr2: any[]) => {
     expect(sortBy(arr1, 'id')).to.eql(sortBy(arr2, 'id'));
@@ -240,10 +241,6 @@ export default function (providerContext: FtrProviderContext) {
     after(async () => {
       await esArchiver.unload('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
       await kibanaServer.savedObjects.cleanStandardList();
-      await supertest
-        .delete(`/api/fleet/epm/packages/integration_to_input-2.0.0`)
-        .set('kbn-xsrf', 'xxxx')
-        .expect(200);
     });
 
     it('should work with valid values on "regular" policies', async function () {
