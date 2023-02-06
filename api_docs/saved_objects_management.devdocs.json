@@ -716,7 +716,7 @@
         "tags": [],
         "label": "SavedObjectManagementTypeInfo",
         "description": [],
-        "path": "src/plugins/saved_objects_management/common/types.ts",
+        "path": "src/plugins/saved_objects_management/common/types/v1.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -727,7 +727,7 @@
             "tags": [],
             "label": "name",
             "description": [],
-            "path": "src/plugins/saved_objects_management/common/types.ts",
+            "path": "src/plugins/saved_objects_management/common/types/v1.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -741,7 +741,7 @@
             "signature": [
               "\"single\" | \"multiple\" | \"multiple-isolated\" | \"agnostic\""
             ],
-            "path": "src/plugins/saved_objects_management/common/types.ts",
+            "path": "src/plugins/saved_objects_management/common/types/v1.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -752,7 +752,7 @@
             "tags": [],
             "label": "hidden",
             "description": [],
-            "path": "src/plugins/saved_objects_management/common/types.ts",
+            "path": "src/plugins/saved_objects_management/common/types/v1.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -763,7 +763,7 @@
             "tags": [],
             "label": "displayName",
             "description": [],
-            "path": "src/plugins/saved_objects_management/common/types.ts",
+            "path": "src/plugins/saved_objects_management/common/types/v1.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -777,9 +777,9 @@
         "tags": [],
         "label": "SavedObjectMetadata",
         "description": [
-          "\nThe metadata injected into a {@link SavedObject | saved object} when returning\n{@link SavedObjectWithMetadata | enhanced objects} from the plugin API endpoints."
+          "Domain interfaces\n\nSaved Object Management metadata associated with a saved object. See\n{@link SavedObjectWithMetadata}."
         ],
-        "path": "src/plugins/saved_objects_management/common/types.ts",
+        "path": "src/plugins/saved_objects_management/common/types/v1.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -793,7 +793,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "src/plugins/saved_objects_management/common/types.ts",
+            "path": "src/plugins/saved_objects_management/common/types/v1.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -807,7 +807,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "src/plugins/saved_objects_management/common/types.ts",
+            "path": "src/plugins/saved_objects_management/common/types/v1.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -821,7 +821,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "src/plugins/saved_objects_management/common/types.ts",
+            "path": "src/plugins/saved_objects_management/common/types/v1.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -835,7 +835,7 @@
             "signature": [
               "{ path: string; uiCapabilitiesPath: string; } | undefined"
             ],
-            "path": "src/plugins/saved_objects_management/common/types.ts",
+            "path": "src/plugins/saved_objects_management/common/types/v1.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -856,7 +856,7 @@
               },
               " | undefined"
             ],
-            "path": "src/plugins/saved_objects_management/common/types.ts",
+            "path": "src/plugins/saved_objects_management/common/types/v1.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -870,7 +870,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "src/plugins/saved_objects_management/common/types.ts",
+            "path": "src/plugins/saved_objects_management/common/types/v1.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -884,9 +884,9 @@
         "tags": [],
         "label": "SavedObjectRelation",
         "description": [
-          "\nRepresents a relation between two {@link SavedObject | saved object}"
+          "\nRepresents a relation between two {@link SavedObjectWithMetadata | saved objects}."
         ],
-        "path": "src/plugins/saved_objects_management/common/types.ts",
+        "path": "src/plugins/saved_objects_management/common/types/v1.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -897,7 +897,7 @@
             "tags": [],
             "label": "id",
             "description": [],
-            "path": "src/plugins/saved_objects_management/common/types.ts",
+            "path": "src/plugins/saved_objects_management/common/types/v1.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -908,7 +908,7 @@
             "tags": [],
             "label": "type",
             "description": [],
-            "path": "src/plugins/saved_objects_management/common/types.ts",
+            "path": "src/plugins/saved_objects_management/common/types/v1.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -922,7 +922,7 @@
             "signature": [
               "\"parent\" | \"child\""
             ],
-            "path": "src/plugins/saved_objects_management/common/types.ts",
+            "path": "src/plugins/saved_objects_management/common/types/v1.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -942,7 +942,7 @@
                 "text": "SavedObjectMetadata"
               }
             ],
-            "path": "src/plugins/saved_objects_management/common/types.ts",
+            "path": "src/plugins/saved_objects_management/common/types/v1.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1279,43 +1279,172 @@
           }
         ],
         "initialIsOpen": false
-      }
-    ],
-    "enums": [],
-    "misc": [
+      },
       {
         "parentPluginId": "savedObjectsManagement",
         "id": "def-public.SavedObjectWithMetadata",
-        "type": "Type",
-        "tags": [],
+        "type": "Interface",
+        "tags": [
+          "note"
+        ],
         "label": "SavedObjectWithMetadata",
         "description": [
-          "\nA {@link SavedObject | saved object} enhanced with meta properties used by the client-side plugin."
+          "\nA saved object.\n"
         ],
         "signature": [
-          {
-            "pluginId": "@kbn/core-saved-objects-common",
-            "scope": "common",
-            "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
-            "section": "def-common.SavedObject",
-            "text": "SavedObject"
-          },
-          "<T> & { meta: ",
           {
             "pluginId": "savedObjectsManagement",
             "scope": "common",
             "docId": "kibSavedObjectsManagementPluginApi",
-            "section": "def-common.SavedObjectMetadata",
-            "text": "SavedObjectMetadata"
+            "section": "def-common.SavedObjectWithMetadata",
+            "text": "SavedObjectWithMetadata"
           },
-          "; }"
+          "<T>"
         ],
-        "path": "src/plugins/saved_objects_management/common/types.ts",
+        "path": "src/plugins/saved_objects_management/common/types/v1.ts",
         "deprecated": false,
         "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "savedObjectsManagement",
+            "id": "def-public.SavedObjectWithMetadata.id",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [],
+            "path": "src/plugins/saved_objects_management/common/types/v1.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "savedObjectsManagement",
+            "id": "def-public.SavedObjectWithMetadata.type",
+            "type": "string",
+            "tags": [],
+            "label": "type",
+            "description": [],
+            "path": "src/plugins/saved_objects_management/common/types/v1.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "savedObjectsManagement",
+            "id": "def-public.SavedObjectWithMetadata.meta",
+            "type": "Object",
+            "tags": [],
+            "label": "meta",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "savedObjectsManagement",
+                "scope": "common",
+                "docId": "kibSavedObjectsManagementPluginApi",
+                "section": "def-common.SavedObjectMetadata",
+                "text": "SavedObjectMetadata"
+              }
+            ],
+            "path": "src/plugins/saved_objects_management/common/types/v1.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "savedObjectsManagement",
+            "id": "def-public.SavedObjectWithMetadata.error",
+            "type": "Object",
+            "tags": [],
+            "label": "error",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-saved-objects-common",
+                "scope": "common",
+                "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
+                "section": "def-common.SavedObjectError",
+                "text": "SavedObjectError"
+              },
+              " | undefined"
+            ],
+            "path": "src/plugins/saved_objects_management/common/types/v1.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "savedObjectsManagement",
+            "id": "def-public.SavedObjectWithMetadata.created_at",
+            "type": "string",
+            "tags": [],
+            "label": "created_at",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/plugins/saved_objects_management/common/types/v1.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "savedObjectsManagement",
+            "id": "def-public.SavedObjectWithMetadata.updated_at",
+            "type": "string",
+            "tags": [],
+            "label": "updated_at",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/plugins/saved_objects_management/common/types/v1.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "savedObjectsManagement",
+            "id": "def-public.SavedObjectWithMetadata.attributes",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "attributes",
+            "description": [],
+            "signature": [
+              "T"
+            ],
+            "path": "src/plugins/saved_objects_management/common/types/v1.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "savedObjectsManagement",
+            "id": "def-public.SavedObjectWithMetadata.namespaces",
+            "type": "Array",
+            "tags": [],
+            "label": "namespaces",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "src/plugins/saved_objects_management/common/types/v1.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "savedObjectsManagement",
+            "id": "def-public.SavedObjectWithMetadata.references",
+            "type": "Array",
+            "tags": [],
+            "label": "references",
+            "description": [],
+            "signature": [
+              "SavedObjectReference",
+              "[]"
+            ],
+            "path": "src/plugins/saved_objects_management/common/types/v1.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
         "initialIsOpen": false
       }
     ],
+    "enums": [],
+    "misc": [],
     "objects": [],
     "setup": {
       "parentPluginId": "savedObjectsManagement",
@@ -1456,13 +1585,7 @@
           "description": [],
           "signature": [
             "(type: string, id: string, savedObjectTypes: string[]) => Promise<",
-            {
-              "pluginId": "savedObjectsManagement",
-              "scope": "common",
-              "docId": "kibSavedObjectsManagementPluginApi",
-              "section": "def-common.SavedObjectGetRelationshipsResponse",
-              "text": "SavedObjectGetRelationshipsResponse"
-            },
+            "RelationshipsResponseHTTP",
             ">"
           ],
           "path": "src/plugins/saved_objects_management/public/plugin.ts",
@@ -1738,9 +1861,9 @@
         "tags": [],
         "label": "SavedObjectMetadata",
         "description": [
-          "\nThe metadata injected into a {@link SavedObject | saved object} when returning\n{@link SavedObjectWithMetadata | enhanced objects} from the plugin API endpoints."
+          "Domain interfaces\n\nSaved Object Management metadata associated with a saved object. See\n{@link SavedObjectWithMetadata}."
         ],
-        "path": "src/plugins/saved_objects_management/common/types.ts",
+        "path": "src/plugins/saved_objects_management/common/types/v1.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1754,7 +1877,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "src/plugins/saved_objects_management/common/types.ts",
+            "path": "src/plugins/saved_objects_management/common/types/v1.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1768,7 +1891,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "src/plugins/saved_objects_management/common/types.ts",
+            "path": "src/plugins/saved_objects_management/common/types/v1.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1782,7 +1905,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "src/plugins/saved_objects_management/common/types.ts",
+            "path": "src/plugins/saved_objects_management/common/types/v1.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1796,7 +1919,7 @@
             "signature": [
               "{ path: string; uiCapabilitiesPath: string; } | undefined"
             ],
-            "path": "src/plugins/saved_objects_management/common/types.ts",
+            "path": "src/plugins/saved_objects_management/common/types/v1.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1817,7 +1940,7 @@
               },
               " | undefined"
             ],
-            "path": "src/plugins/saved_objects_management/common/types.ts",
+            "path": "src/plugins/saved_objects_management/common/types/v1.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1831,7 +1954,169 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "src/plugins/saved_objects_management/common/types.ts",
+            "path": "src/plugins/saved_objects_management/common/types/v1.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "savedObjectsManagement",
+        "id": "def-server.SavedObjectWithMetadata",
+        "type": "Interface",
+        "tags": [
+          "note"
+        ],
+        "label": "SavedObjectWithMetadata",
+        "description": [
+          "\nA saved object.\n"
+        ],
+        "signature": [
+          {
+            "pluginId": "savedObjectsManagement",
+            "scope": "common",
+            "docId": "kibSavedObjectsManagementPluginApi",
+            "section": "def-common.SavedObjectWithMetadata",
+            "text": "SavedObjectWithMetadata"
+          },
+          "<T>"
+        ],
+        "path": "src/plugins/saved_objects_management/common/types/v1.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "savedObjectsManagement",
+            "id": "def-server.SavedObjectWithMetadata.id",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [],
+            "path": "src/plugins/saved_objects_management/common/types/v1.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "savedObjectsManagement",
+            "id": "def-server.SavedObjectWithMetadata.type",
+            "type": "string",
+            "tags": [],
+            "label": "type",
+            "description": [],
+            "path": "src/plugins/saved_objects_management/common/types/v1.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "savedObjectsManagement",
+            "id": "def-server.SavedObjectWithMetadata.meta",
+            "type": "Object",
+            "tags": [],
+            "label": "meta",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "savedObjectsManagement",
+                "scope": "common",
+                "docId": "kibSavedObjectsManagementPluginApi",
+                "section": "def-common.SavedObjectMetadata",
+                "text": "SavedObjectMetadata"
+              }
+            ],
+            "path": "src/plugins/saved_objects_management/common/types/v1.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "savedObjectsManagement",
+            "id": "def-server.SavedObjectWithMetadata.error",
+            "type": "Object",
+            "tags": [],
+            "label": "error",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-saved-objects-common",
+                "scope": "common",
+                "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
+                "section": "def-common.SavedObjectError",
+                "text": "SavedObjectError"
+              },
+              " | undefined"
+            ],
+            "path": "src/plugins/saved_objects_management/common/types/v1.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "savedObjectsManagement",
+            "id": "def-server.SavedObjectWithMetadata.created_at",
+            "type": "string",
+            "tags": [],
+            "label": "created_at",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/plugins/saved_objects_management/common/types/v1.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "savedObjectsManagement",
+            "id": "def-server.SavedObjectWithMetadata.updated_at",
+            "type": "string",
+            "tags": [],
+            "label": "updated_at",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/plugins/saved_objects_management/common/types/v1.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "savedObjectsManagement",
+            "id": "def-server.SavedObjectWithMetadata.attributes",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "attributes",
+            "description": [],
+            "signature": [
+              "T"
+            ],
+            "path": "src/plugins/saved_objects_management/common/types/v1.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "savedObjectsManagement",
+            "id": "def-server.SavedObjectWithMetadata.namespaces",
+            "type": "Array",
+            "tags": [],
+            "label": "namespaces",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "src/plugins/saved_objects_management/common/types/v1.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "savedObjectsManagement",
+            "id": "def-server.SavedObjectWithMetadata.references",
+            "type": "Array",
+            "tags": [],
+            "label": "references",
+            "description": [],
+            "signature": [
+              "SavedObjectReference",
+              "[]"
+            ],
+            "path": "src/plugins/saved_objects_management/common/types/v1.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1840,40 +2125,7 @@
       }
     ],
     "enums": [],
-    "misc": [
-      {
-        "parentPluginId": "savedObjectsManagement",
-        "id": "def-server.SavedObjectWithMetadata",
-        "type": "Type",
-        "tags": [],
-        "label": "SavedObjectWithMetadata",
-        "description": [
-          "\nA {@link SavedObject | saved object} enhanced with meta properties used by the client-side plugin."
-        ],
-        "signature": [
-          {
-            "pluginId": "@kbn/core-saved-objects-common",
-            "scope": "common",
-            "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
-            "section": "def-common.SavedObject",
-            "text": "SavedObject"
-          },
-          "<T> & { meta: ",
-          {
-            "pluginId": "savedObjectsManagement",
-            "scope": "common",
-            "docId": "kibSavedObjectsManagementPluginApi",
-            "section": "def-common.SavedObjectMetadata",
-            "text": "SavedObjectMetadata"
-          },
-          "; }"
-        ],
-        "path": "src/plugins/saved_objects_management/common/types.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      }
-    ],
+    "misc": [],
     "objects": [],
     "setup": {
       "parentPluginId": "savedObjectsManagement",
@@ -1910,68 +2162,14 @@
     "interfaces": [
       {
         "parentPluginId": "savedObjectsManagement",
-        "id": "def-common.SavedObjectGetRelationshipsResponse",
-        "type": "Interface",
-        "tags": [],
-        "label": "SavedObjectGetRelationshipsResponse",
-        "description": [],
-        "path": "src/plugins/saved_objects_management/common/types.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "savedObjectsManagement",
-            "id": "def-common.SavedObjectGetRelationshipsResponse.relations",
-            "type": "Array",
-            "tags": [],
-            "label": "relations",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "savedObjectsManagement",
-                "scope": "common",
-                "docId": "kibSavedObjectsManagementPluginApi",
-                "section": "def-common.SavedObjectRelation",
-                "text": "SavedObjectRelation"
-              },
-              "[]"
-            ],
-            "path": "src/plugins/saved_objects_management/common/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "savedObjectsManagement",
-            "id": "def-common.SavedObjectGetRelationshipsResponse.invalidRelations",
-            "type": "Array",
-            "tags": [],
-            "label": "invalidRelations",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "savedObjectsManagement",
-                "scope": "common",
-                "docId": "kibSavedObjectsManagementPluginApi",
-                "section": "def-common.SavedObjectInvalidRelation",
-                "text": "SavedObjectInvalidRelation"
-              },
-              "[]"
-            ],
-            "path": "src/plugins/saved_objects_management/common/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "savedObjectsManagement",
         "id": "def-common.SavedObjectInvalidRelation",
         "type": "Interface",
         "tags": [],
         "label": "SavedObjectInvalidRelation",
-        "description": [],
-        "path": "src/plugins/saved_objects_management/common/types.ts",
+        "description": [
+          "\nRepresents a relation between two {@link SavedObjectWithMetadata | saved objects}."
+        ],
+        "path": "src/plugins/saved_objects_management/common/types/v1.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1982,7 +2180,7 @@
             "tags": [],
             "label": "id",
             "description": [],
-            "path": "src/plugins/saved_objects_management/common/types.ts",
+            "path": "src/plugins/saved_objects_management/common/types/v1.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1993,7 +2191,7 @@
             "tags": [],
             "label": "type",
             "description": [],
-            "path": "src/plugins/saved_objects_management/common/types.ts",
+            "path": "src/plugins/saved_objects_management/common/types/v1.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2007,7 +2205,7 @@
             "signature": [
               "\"parent\" | \"child\""
             ],
-            "path": "src/plugins/saved_objects_management/common/types.ts",
+            "path": "src/plugins/saved_objects_management/common/types/v1.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2018,7 +2216,7 @@
             "tags": [],
             "label": "error",
             "description": [],
-            "path": "src/plugins/saved_objects_management/common/types.ts",
+            "path": "src/plugins/saved_objects_management/common/types/v1.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2032,7 +2230,7 @@
         "tags": [],
         "label": "SavedObjectManagementTypeInfo",
         "description": [],
-        "path": "src/plugins/saved_objects_management/common/types.ts",
+        "path": "src/plugins/saved_objects_management/common/types/v1.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2043,7 +2241,7 @@
             "tags": [],
             "label": "name",
             "description": [],
-            "path": "src/plugins/saved_objects_management/common/types.ts",
+            "path": "src/plugins/saved_objects_management/common/types/v1.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2057,7 +2255,7 @@
             "signature": [
               "\"single\" | \"multiple\" | \"multiple-isolated\" | \"agnostic\""
             ],
-            "path": "src/plugins/saved_objects_management/common/types.ts",
+            "path": "src/plugins/saved_objects_management/common/types/v1.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2068,7 +2266,7 @@
             "tags": [],
             "label": "hidden",
             "description": [],
-            "path": "src/plugins/saved_objects_management/common/types.ts",
+            "path": "src/plugins/saved_objects_management/common/types/v1.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2079,7 +2277,7 @@
             "tags": [],
             "label": "displayName",
             "description": [],
-            "path": "src/plugins/saved_objects_management/common/types.ts",
+            "path": "src/plugins/saved_objects_management/common/types/v1.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2093,9 +2291,9 @@
         "tags": [],
         "label": "SavedObjectMetadata",
         "description": [
-          "\nThe metadata injected into a {@link SavedObject | saved object} when returning\n{@link SavedObjectWithMetadata | enhanced objects} from the plugin API endpoints."
+          "Domain interfaces\n\nSaved Object Management metadata associated with a saved object. See\n{@link SavedObjectWithMetadata}."
         ],
-        "path": "src/plugins/saved_objects_management/common/types.ts",
+        "path": "src/plugins/saved_objects_management/common/types/v1.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2109,7 +2307,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "src/plugins/saved_objects_management/common/types.ts",
+            "path": "src/plugins/saved_objects_management/common/types/v1.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2123,7 +2321,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "src/plugins/saved_objects_management/common/types.ts",
+            "path": "src/plugins/saved_objects_management/common/types/v1.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2137,7 +2335,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "src/plugins/saved_objects_management/common/types.ts",
+            "path": "src/plugins/saved_objects_management/common/types/v1.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2151,7 +2349,7 @@
             "signature": [
               "{ path: string; uiCapabilitiesPath: string; } | undefined"
             ],
-            "path": "src/plugins/saved_objects_management/common/types.ts",
+            "path": "src/plugins/saved_objects_management/common/types/v1.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2172,7 +2370,7 @@
               },
               " | undefined"
             ],
-            "path": "src/plugins/saved_objects_management/common/types.ts",
+            "path": "src/plugins/saved_objects_management/common/types/v1.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2186,7 +2384,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "src/plugins/saved_objects_management/common/types.ts",
+            "path": "src/plugins/saved_objects_management/common/types/v1.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2200,9 +2398,9 @@
         "tags": [],
         "label": "SavedObjectRelation",
         "description": [
-          "\nRepresents a relation between two {@link SavedObject | saved object}"
+          "\nRepresents a relation between two {@link SavedObjectWithMetadata | saved objects}."
         ],
-        "path": "src/plugins/saved_objects_management/common/types.ts",
+        "path": "src/plugins/saved_objects_management/common/types/v1.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2213,7 +2411,7 @@
             "tags": [],
             "label": "id",
             "description": [],
-            "path": "src/plugins/saved_objects_management/common/types.ts",
+            "path": "src/plugins/saved_objects_management/common/types/v1.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2224,7 +2422,7 @@
             "tags": [],
             "label": "type",
             "description": [],
-            "path": "src/plugins/saved_objects_management/common/types.ts",
+            "path": "src/plugins/saved_objects_management/common/types/v1.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2238,7 +2436,7 @@
             "signature": [
               "\"parent\" | \"child\""
             ],
-            "path": "src/plugins/saved_objects_management/common/types.ts",
+            "path": "src/plugins/saved_objects_management/common/types/v1.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2258,7 +2456,169 @@
                 "text": "SavedObjectMetadata"
               }
             ],
-            "path": "src/plugins/saved_objects_management/common/types.ts",
+            "path": "src/plugins/saved_objects_management/common/types/v1.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "savedObjectsManagement",
+        "id": "def-common.SavedObjectWithMetadata",
+        "type": "Interface",
+        "tags": [
+          "note"
+        ],
+        "label": "SavedObjectWithMetadata",
+        "description": [
+          "\nA saved object.\n"
+        ],
+        "signature": [
+          {
+            "pluginId": "savedObjectsManagement",
+            "scope": "common",
+            "docId": "kibSavedObjectsManagementPluginApi",
+            "section": "def-common.SavedObjectWithMetadata",
+            "text": "SavedObjectWithMetadata"
+          },
+          "<T>"
+        ],
+        "path": "src/plugins/saved_objects_management/common/types/v1.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "savedObjectsManagement",
+            "id": "def-common.SavedObjectWithMetadata.id",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [],
+            "path": "src/plugins/saved_objects_management/common/types/v1.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "savedObjectsManagement",
+            "id": "def-common.SavedObjectWithMetadata.type",
+            "type": "string",
+            "tags": [],
+            "label": "type",
+            "description": [],
+            "path": "src/plugins/saved_objects_management/common/types/v1.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "savedObjectsManagement",
+            "id": "def-common.SavedObjectWithMetadata.meta",
+            "type": "Object",
+            "tags": [],
+            "label": "meta",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "savedObjectsManagement",
+                "scope": "common",
+                "docId": "kibSavedObjectsManagementPluginApi",
+                "section": "def-common.SavedObjectMetadata",
+                "text": "SavedObjectMetadata"
+              }
+            ],
+            "path": "src/plugins/saved_objects_management/common/types/v1.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "savedObjectsManagement",
+            "id": "def-common.SavedObjectWithMetadata.error",
+            "type": "Object",
+            "tags": [],
+            "label": "error",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-saved-objects-common",
+                "scope": "common",
+                "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
+                "section": "def-common.SavedObjectError",
+                "text": "SavedObjectError"
+              },
+              " | undefined"
+            ],
+            "path": "src/plugins/saved_objects_management/common/types/v1.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "savedObjectsManagement",
+            "id": "def-common.SavedObjectWithMetadata.created_at",
+            "type": "string",
+            "tags": [],
+            "label": "created_at",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/plugins/saved_objects_management/common/types/v1.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "savedObjectsManagement",
+            "id": "def-common.SavedObjectWithMetadata.updated_at",
+            "type": "string",
+            "tags": [],
+            "label": "updated_at",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/plugins/saved_objects_management/common/types/v1.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "savedObjectsManagement",
+            "id": "def-common.SavedObjectWithMetadata.attributes",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "attributes",
+            "description": [],
+            "signature": [
+              "T"
+            ],
+            "path": "src/plugins/saved_objects_management/common/types/v1.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "savedObjectsManagement",
+            "id": "def-common.SavedObjectWithMetadata.namespaces",
+            "type": "Array",
+            "tags": [],
+            "label": "namespaces",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "src/plugins/saved_objects_management/common/types/v1.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "savedObjectsManagement",
+            "id": "def-common.SavedObjectWithMetadata.references",
+            "type": "Array",
+            "tags": [],
+            "label": "references",
+            "description": [],
+            "signature": [
+              "SavedObjectReference",
+              "[]"
+            ],
+            "path": "src/plugins/saved_objects_management/common/types/v1.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2278,39 +2638,7 @@
         "signature": [
           "\"parent\" | \"child\""
         ],
-        "path": "src/plugins/saved_objects_management/common/types.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "savedObjectsManagement",
-        "id": "def-common.SavedObjectWithMetadata",
-        "type": "Type",
-        "tags": [],
-        "label": "SavedObjectWithMetadata",
-        "description": [
-          "\nA {@link SavedObject | saved object} enhanced with meta properties used by the client-side plugin."
-        ],
-        "signature": [
-          {
-            "pluginId": "@kbn/core-saved-objects-common",
-            "scope": "common",
-            "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
-            "section": "def-common.SavedObject",
-            "text": "SavedObject"
-          },
-          "<T> & { meta: ",
-          {
-            "pluginId": "savedObjectsManagement",
-            "scope": "common",
-            "docId": "kibSavedObjectsManagementPluginApi",
-            "section": "def-common.SavedObjectMetadata",
-            "text": "SavedObjectMetadata"
-          },
-          "; }"
-        ],
-        "path": "src/plugins/saved_objects_management/common/types.ts",
+        "path": "src/plugins/saved_objects_management/common/types/v1.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
