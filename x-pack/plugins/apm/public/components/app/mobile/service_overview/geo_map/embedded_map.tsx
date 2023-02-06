@@ -25,7 +25,7 @@ import { EuiText } from '@elastic/eui';
 import type { Filter } from '@kbn/es-query';
 import { ApmPluginStartDeps } from '../../../../../plugin';
 import { getLayerList } from './map_layers/get_layer_list';
-import { MapTypes } from '../../typings/common';
+import { MapTypes } from '../../../../../../common/mobile/constants';
 function EmbeddedMapComponent({
   selectedMap,
   start,

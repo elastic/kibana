@@ -10,9 +10,8 @@ import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { Filter } from '@kbn/es-query';
 import { EuiSuperSelect, EuiText } from '@elastic/eui';
-
 import { EmbeddedMap } from './embedded_map';
-import { MapTypes } from '../../typings/common';
+import { MapTypes } from '../../../../../../common/mobile/constants';
 
 const availableMaps: Array<{
   id: MapTypes;

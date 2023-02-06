@@ -26,7 +26,10 @@ import {
 } from '../../../../../../../common/es_fields/apm';
 import { APM_STATIC_DATA_VIEW_ID } from '../../../../../../../common/data_view_constants';
 import { getLayerStyle, PalleteColors } from './get_map_layer_style';
-import { MobileSpanSubtype, MobileSpanType } from '../../../typings/common';
+import {
+  MobileSpanSubtype,
+  MobileSpanType,
+} from '../../../../../../../common/mobile/constants';
 
 interface VectorLayerDescriptor extends BaseVectorLayerDescriptor {
   sourceDescriptor: EMSFileSourceDescriptor;

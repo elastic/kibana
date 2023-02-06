@@ -65,7 +65,6 @@ export function MobileServiceOverview() {
       osVersion,
       appVersion,
       netConnectionType,
-      comparisonEnabled,
     },
   } = useApmParams('/mobile-services/{serviceName}/overview');
 
