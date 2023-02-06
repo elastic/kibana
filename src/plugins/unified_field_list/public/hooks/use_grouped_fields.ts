@@ -94,9 +94,9 @@ export function useGroupedFields<T extends FieldListItem = DataViewField>({
         } catch (e) {
           //
         }
-        if (nextDataView) {
-          setDataView(nextDataView);
-        }
+        setDataView(nextDataView || null);
+      } else {
+        setDataView(null);
       }
     };
     getDataView();

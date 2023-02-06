@@ -82,9 +82,10 @@ export async function loadDataView(
     // eslint-disable-next-line no-empty
   } catch (e) {}
 
+  let defaultDataView: DataView | null = null;
   if (!fetchedDataView) {
     try {
-      fetchedDataView = await dataViews.getDefaultDataView(undefined, false);
+      defaultDataView = await dataViews.getDefaultDataView(undefined, false);
     } catch (e) {
       //
     }
@@ -94,7 +95,7 @@ export async function loadDataView(
   return {
     list: dataViewList || [],
     // we can be certain that the data view exists due to an earlier hasData check
-    loaded: fetchedDataView!,
+    loaded: fetchedDataView || defaultDataView!,
     stateVal: fetchId,
     stateValFound: !!fetchId && !!fetchedDataView,
   };
