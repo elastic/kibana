@@ -71,7 +71,7 @@ import { DataVisualizerDataViewManagement } from '../data_view_management';
 import { GetAdditionalLinks } from '../../../common/components/results_links';
 import { useDataVisualizerGridData } from '../../hooks/use_data_visualizer_grid_data';
 import { DataVisualizerGridInput } from '../../embeddables/grid_embeddable/grid_embeddable';
-import { RANDOM_SAMPLER_OPTION } from '../../constants/random_sampler';
+import { RANDOM_SAMPLER_OPTION, RandomSamplerOption } from '../../constants/random_sampler';
 
 interface DataVisualizerPageState {
   overallStats: OverallStats;
@@ -316,9 +316,25 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
     ]
   );
 
-  const setSamplingProbability = (value: number | null) => {
-    setDataVisualizerListState({ ...dataVisualizerListState, probability: value });
-  };
+  const setSamplingProbability = useCallback(
+    (value: number | null) => {
+      setDataVisualizerListState({ ...dataVisualizerListState, probability: value });
+    },
+    [dataVisualizerListState, setDataVisualizerListState]
+  );
+
+  const setRandomSamplerPreference = useCallback(
+    (pref: RandomSamplerOption) => {
+      if (
+        savedRandomSamplerPreference === RANDOM_SAMPLER_OPTION.ON_AUTOMATIC &&
+        pref === RANDOM_SAMPLER_OPTION.ON_MANUAL
+      ) {
+        setSamplingProbability(0.5);
+      }
+      saveRandomSamplerPreference(pref);
+    },
+    [setSamplingProbability, savedRandomSamplerPreference, saveRandomSamplerPreference]
+  );
 
   useEffect(
     function clearFiltersOnLeave() {
@@ -566,7 +582,7 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
                       }
                       loading={overallStatsProgress.loaded < 100}
                       randomSamplerPreference={savedRandomSamplerPreference}
-                      setRandomSamplerPreference={saveRandomSamplerPreference}
+                      setRandomSamplerPreference={setRandomSamplerPreference}
                     />
                   </EuiFlexGroup>
                 </>

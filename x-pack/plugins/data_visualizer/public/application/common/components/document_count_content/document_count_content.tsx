@@ -211,7 +211,7 @@ export const DocumentCountContent: FC<Props> = ({
                       showTicks
                       showRange={false}
                       min={RANDOM_SAMPLER_STEP}
-                      max={0.5 * 100}
+                      max={50}
                       value={(samplingProbability ?? 1) * 100}
                       ticks={RANDOM_SAMPLER_PROBABILITIES.map((d) => ({
                         value: d,
