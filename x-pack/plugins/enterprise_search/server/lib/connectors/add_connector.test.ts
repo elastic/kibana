@@ -85,6 +85,7 @@ describe('addConnector lib function', () => {
       document: {
         api_key_id: null,
         configuration: {},
+        custom_scheduling: {},
         description: null,
         error: null,
         features: null,
@@ -153,6 +154,7 @@ describe('addConnector lib function', () => {
           reduce_whitespace: true,
           run_ml_inference: false,
         },
+        preferences: {},
         scheduling: { enabled: false, interval: '0 0 0 * * ?' },
         service_type: null,
         status: ConnectorStatus.CREATED,
@@ -269,6 +271,7 @@ describe('addConnector lib function', () => {
       document: {
         api_key_id: null,
         configuration: {},
+        custom_scheduling: {},
         description: null,
         error: null,
         features: null,
@@ -337,6 +340,7 @@ describe('addConnector lib function', () => {
           reduce_whitespace: true,
           run_ml_inference: false,
         },
+        preferences: {},
         scheduling: { enabled: false, interval: '0 0 0 * * ?' },
         service_type: null,
         status: ConnectorStatus.CREATED,
@@ -375,6 +379,7 @@ describe('addConnector lib function', () => {
       document: {
         api_key_id: null,
         configuration: {},
+        custom_scheduling: {},
         description: null,
         error: null,
         features: null,
@@ -443,6 +448,7 @@ describe('addConnector lib function', () => {
           reduce_whitespace: true,
           run_ml_inference: false,
         },
+        preferences: {},
         scheduling: { enabled: false, interval: '0 0 0 * * ?' },
         service_type: null,
         status: ConnectorStatus.CREATED,
