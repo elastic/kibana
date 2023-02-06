@@ -19,6 +19,7 @@ import { MetricsGrid } from './metrics/metrics_grid';
 import { AlertsTabContent } from './alerts';
 import { infraAlertFeatureIds } from './alerts/config';
 import { useUnifiedSearchContext } from '../../hooks/use_unified_search';
+import { useHostsViewContext } from '../../hooks/use_hosts_view';
 
 interface WrapperProps {
   children: React.ReactElement;
@@ -34,32 +35,11 @@ const Wrapper = ({ children }: WrapperProps) => {
 };
 
 const AlertsTabBadge = () => {
-  const { unifiedSearchDateRange } = useUnifiedSearchContext();
-
-  const filter = useMemo(
-    () => ({
-      bool: {
-        must: [],
-        filter: [
-          {
-            range: {
-              '@timestamp': {
-                gte: unifiedSearchDateRange.from,
-                lte: unifiedSearchDateRange.to,
-              },
-            },
-          },
-        ],
-        should: [],
-        must_not: [],
-      },
-    }),
-    [unifiedSearchDateRange]
-  );
+  const { alertsEsQueryFilter } = useHostsViewContext();
 
   const { alertsCount, loading } = useAlertsCount({
     featureIds: infraAlertFeatureIds,
-    filter,
+    filter: alertsEsQueryFilter,
   });
 
   if (loading) {

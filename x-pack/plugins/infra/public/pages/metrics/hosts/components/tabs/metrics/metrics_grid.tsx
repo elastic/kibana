@@ -79,7 +79,7 @@ export const MetricsGrid = () => {
       <EuiFlexItem>
         <EuiFlexGrid columns={2} gutterSize="s">
           {CHARTS_IN_ORDER.map(({ fullRow, ...chartProp }) => (
-            <EuiFlexItem style={fullRow ? { gridColumn: '1/-1' } : {}}>
+            <EuiFlexItem key={chartProp.type} style={fullRow ? { gridColumn: '1/-1' } : {}}>
               <MetricChart breakdownSize={DEFAULT_BREAKDOWN_SIZE} {...chartProp} />
             </EuiFlexItem>
           ))}

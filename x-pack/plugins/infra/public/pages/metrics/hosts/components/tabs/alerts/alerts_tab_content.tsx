@@ -7,9 +7,11 @@
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { AlertConsumers } from '@kbn/rule-data-utils';
-import React from 'react';
+import React, { useMemo } from 'react';
 import { InfraClientCoreStart, InfraClientStartDeps } from '../../../../../../types';
+import { useHostsViewContext } from '../../../hooks/use_hosts_view';
 import { useUnifiedSearchContext } from '../../../hooks/use_unified_search';
+import { StringDateRangeTimestamp } from '../../../hooks/use_unified_search_url_state';
 
 import {
   ALERTS_PER_PAGE,
@@ -28,41 +30,22 @@ export const AlertsTabContent = () => {
     getAlertsStateTable: AlertsStateTable,
   } = triggersActionsUi;
 
-  const uiCapabilities = application?.capabilities;
-
-  const casesCapabilities = cases.helpers.getUICapabilities(uiCapabilities.observabilityCases);
-
-  const CasesContext = cases.ui.getCasesContext();
+  const { alertsEsQueryFilter } = useHostsViewContext();
 
   const { getDateRangeAsTimestamp } = useUnifiedSearchContext();
 
-  const dateRange = getDateRangeAsTimestamp();
+  const uiCapabilities = application?.capabilities;
+  const CasesContext = cases.ui.getCasesContext();
+  const casesCapabilities = cases.helpers.getUICapabilities(uiCapabilities.observabilityCases);
 
-  const from = new Date(dateRange.from).toISOString();
-  const to = new Date(dateRange.to).toISOString();
+  const summaryTimeRange = useMemo(() => {
+    const dateRangeTimestamp = getDateRangeAsTimestamp();
+    return createAlertSummaryTimeRange(dateRangeTimestamp);
+  }, [getDateRangeAsTimestamp]);
 
   const chartThemes = {
     theme: charts.theme.useChartsTheme(),
     baseTheme: charts.theme.useChartsBaseTheme(),
-  };
-
-  const esQuery = {
-    bool: {
-      must: [],
-      filter: [
-        {
-          range: {
-            '@timestamp': {
-              format: 'strict_date_optional_time',
-              gte: from,
-              lte: to,
-            },
-          },
-        },
-      ],
-      should: [],
-      must_not: [],
-    },
   };
 
   return (
@@ -70,18 +53,13 @@ export const AlertsTabContent = () => {
       <EuiFlexItem>
         <AlertSummaryWidget
           featureIds={infraAlertFeatureIds}
-          filter={esQuery}
+          filter={alertsEsQueryFilter}
           fullSize
-          timeRange={{
-            utcFrom: from,
-            utcTo: to,
-            fixedInterval: '10800s',
-            dateFormat: 'YYYY-MM-DD HH:mm',
-          }}
+          timeRange={summaryTimeRange}
           chartThemes={chartThemes}
         />
       </EuiFlexItem>
-      {esQuery && (
+      {alertsEsQueryFilter && (
         <EuiFlexItem>
           <CasesContext
             owner={[infraAlertFeatureId]}
@@ -95,7 +73,8 @@ export const AlertsTabContent = () => {
               flyoutSize="s"
               id={ALERTS_TABLE_ID}
               pageSize={ALERTS_PER_PAGE}
-              query={esQuery}
+              query={alertsEsQueryFilter}
+              showAlertStatusWithFlapping
               showExpandToDetails={false}
             />
           </CasesContext>
@@ -105,34 +84,12 @@ export const AlertsTabContent = () => {
   );
 };
 
-// {
-//   "bool": {
-//     "should": [
-//       {
-//         "bool": {
-//           "should": [
-//             {
-//               "match_phrase": {
-//                 "host.name": "gke-edge-lite-oblt-edge-lite-oblt-poo-ac0838be-dvt6"
-//               }
-//             }
-//           ],
-//           "minimum_should_match": 1
-//         }
-//       },
-//       {
-//         "bool": {
-//           "should": [
-//             {
-//               "match_phrase": {
-//                 "host.name": "gke-edge-lite-oblt-edge-lite-oblt-poo-ac0838be-md8s"
-//               }
-//             }
-//           ],
-//           "minimum_should_match": 1
-//         }
-//       }
-//     ],
-//       "minimum_should_match": 1
-//   }
-// }
+/**
+ * Helpers
+ */
+const createAlertSummaryTimeRange = (dateRange: StringDateRangeTimestamp) => ({
+  utcFrom: new Date(dateRange.from).toISOString(),
+  utcTo: new Date(dateRange.to).toISOString(),
+  fixedInterval: '10800s',
+  dateFormat: 'YYYY-MM-DD HH:mm',
+});

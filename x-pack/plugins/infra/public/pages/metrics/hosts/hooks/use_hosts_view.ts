@@ -12,28 +12,27 @@
  * 2.0.
  */
 
-import { useMemo, useState } from 'react';
+import { useMemo } from 'react';
 import createContainer from 'constate';
+import { SnapshotNode } from '../../../../../common/http_api';
+import { SnapshotMetricType } from '../../../../../common/inventory_models/types';
 import { useSourceContext } from '../../../../containers/metrics_source';
-import type { UseSnapshotRequest } from '../../inventory_view/hooks/use_snaphot';
+import { useSnapshot, UseSnapshotRequest } from '../../inventory_view/hooks/use_snaphot';
 import { useUnifiedSearchContext } from './use_unified_search';
+import { HostsState } from './use_unified_search_url_state';
 
-export interface HostViewState {
-  totalHits: number;
-  loading: boolean;
-  error: string | null;
-}
-
-export const INITAL_VALUE = {
-  error: null,
-  loading: true,
-  totalHits: 0,
-};
+const HOST_TABLE_METRICS: Array<{ type: SnapshotMetricType }> = [
+  { type: 'rx' },
+  { type: 'tx' },
+  { type: 'memory' },
+  { type: 'cpuCores' },
+  { type: 'diskLatency' },
+  { type: 'memoryTotal' },
+];
 
 export const useHostsView = () => {
   const { sourceId } = useSourceContext();
-  const { buildQuery, getDateRangeAsTimestamp } = useUnifiedSearchContext();
-  const [hostViewState, setHostViewState] = useState<HostViewState>(INITAL_VALUE);
+  const { buildQuery, getDateRangeAsTimestamp, unifiedSearchDateRange } = useUnifiedSearchContext();
 
   const baseRequest = useMemo(() => {
     const esQuery = buildQuery();
@@ -61,12 +60,71 @@ export const useHostsView = () => {
     return snapshotRequest;
   }, [buildQuery, getDateRangeAsTimestamp, sourceId]);
 
+  // Snapshot endpoint internally uses the indices stored in source.configuration.metricAlias.
+  // For the Unified Search, we create a data view, which for now will be built off of source.configuration.metricAlias too
+  // if we introduce data view selection, we'll have to change this hook and the endpoint to accept a new parameter for the indices
+  const {
+    loading,
+    error,
+    nodes: hostNodes,
+  } = useSnapshot({ ...baseRequest, metrics: HOST_TABLE_METRICS });
+
+  const alertsEsQueryFilter = useMemo(
+    () => createAlertsQueryFilter({ hostNodes, dateRange: unifiedSearchDateRange }),
+    [hostNodes, unifiedSearchDateRange]
+  );
+
   return {
+    alertsEsQueryFilter,
     baseRequest,
-    hostViewState,
-    setHostViewState,
+    loading,
+    error,
+    hostNodes,
   };
 };
 
 export const HostsView = createContainer(useHostsView);
 export const [HostsViewProvider, useHostsViewContext] = HostsView;
+
+interface AlertsQueryParams {
+  hostNodes: SnapshotNode[];
+  dateRange: HostsState['dateRange'];
+}
+
+const createAlertsQueryFilter = ({ hostNodes, dateRange }: AlertsQueryParams) => ({
+  bool: {
+    must: [],
+    filter: [createTimestampFilter(dateRange), createHostsFilter(hostNodes)],
+    should: [],
+    must_not: [],
+  },
+});
+
+const createTimestampFilter = (date: AlertsQueryParams['dateRange']) => ({
+  range: {
+    '@timestamp': {
+      gte: date.from,
+      lte: date.to,
+    },
+  },
+});
+
+const createHostsFilter = (hosts: AlertsQueryParams['hostNodes']) => ({
+  bool: {
+    should: hosts.map(createHostCondition),
+    minimum_should_match: 1,
+  },
+});
+
+const createHostCondition = (host: SnapshotNode) => ({
+  bool: {
+    should: [
+      {
+        match_phrase: {
+          'host.name': host.name,
+        },
+      },
+    ],
+    minimum_should_match: 1,
+  },
+});
