@@ -80,5 +80,6 @@
     "@kbn/react-field",
     "@kbn/unified-field-list-plugin",
     "@kbn/shared-ux-router",
+    "@kbn/saved-search-plugin",
   ],
 }
