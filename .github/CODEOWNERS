@@ -1085,6 +1085,7 @@ packages/shared-ux/router/types @elastic/appex-sharedux
 packages/shared-ux/storybook/config @elastic/appex-sharedux
 packages/shared-ux/storybook/mock @elastic/appex-sharedux
 src/plugins/chart_expressions/common @elastic/kibana-visualizations
+x-pack/packages/kbn-ecs-data-quality-dashboard @elastic/security-threat-hunting-investigations
 x-pack/packages/ml/agg_utils @elastic/ml-ui
 x-pack/packages/ml/aiops_components @elastic/ml-ui
 x-pack/packages/ml/aiops_utils @elastic/ml-ui
