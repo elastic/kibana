@@ -5,19 +5,13 @@
  * 2.0.
  */
 
-import { alertFieldMap } from '@kbn/alerting-plugin/common';
-import { pickWithPatterns } from '../../pick_with_patterns';
+import { alertFieldMap, legacyAlertFieldMap } from '@kbn/alerting-plugin/common';
 import * as Fields from '../../technical_rule_data_field_names';
-import { ecsFieldMap } from './ecs_field_map';
 
 export const technicalRuleFieldMap = {
-  ...pickWithPatterns(
-    ecsFieldMap,
-    Fields.TIMESTAMP,
-    Fields.EVENT_KIND,
-    Fields.EVENT_ACTION,
-    Fields.TAGS
-  ),
+  // These fields are defined in the framework alerts as data field map and will
+  // be used for FAAD
+  [Fields.TIMESTAMP]: alertFieldMap[Fields.TIMESTAMP],
   [Fields.ALERT_ACTION_GROUP]: alertFieldMap[Fields.ALERT_ACTION_GROUP],
   [Fields.ALERT_CASE_IDS]: alertFieldMap[Fields.ALERT_CASE_IDS],
   [Fields.ALERT_DURATION]: alertFieldMap[Fields.ALERT_DURATION],
@@ -44,147 +38,39 @@ export const technicalRuleFieldMap = {
   [Fields.SPACE_IDS]: alertFieldMap[Fields.SPACE_IDS],
   [Fields.VERSION]: alertFieldMap[Fields.VERSION],
 
-  [Fields.ALERT_SEVERITY]: { type: 'keyword' },
-  [Fields.VERSION]: {
-    type: 'version',
-    array: false,
-    required: false,
-  },
-  [Fields.ECS_VERSION]: {
-    type: 'keyword',
-    array: false,
-    required: false,
-  },
-  [Fields.ALERT_RISK_SCORE]: {
-    type: 'float',
-    array: false,
-    required: false,
-  },
-  [Fields.ALERT_WORKFLOW_USER]: {
-    type: 'keyword',
-    array: false,
-    required: false,
-  },
-  [Fields.ALERT_WORKFLOW_REASON]: {
-    type: 'keyword',
-    array: false,
-    required: false,
-  },
-  [Fields.ALERT_SYSTEM_STATUS]: {
-    type: 'keyword',
-    array: false,
-    required: false,
-  },
-  [Fields.ALERT_RULE_AUTHOR]: {
-    type: 'keyword',
-    array: false,
-    required: false,
-  },
-  [Fields.ALERT_RULE_CREATED_AT]: {
-    type: 'date',
-    array: false,
-    required: false,
-  },
-  [Fields.ALERT_RULE_CREATED_BY]: {
-    type: 'keyword',
-    array: false,
-    required: false,
-  },
-  [Fields.ALERT_RULE_DESCRIPTION]: {
-    type: 'keyword',
-    array: false,
-    required: false,
-  },
-  [Fields.ALERT_RULE_ENABLED]: {
-    type: 'keyword',
-    array: false,
-    required: false,
-  },
-  [Fields.ALERT_RULE_FROM]: {
-    type: 'keyword',
-    array: false,
-    required: false,
-  },
-  [Fields.ALERT_RULE_INTERVAL]: {
-    type: 'keyword',
-    array: false,
-    required: false,
-  },
-  [Fields.ALERT_RULE_LICENSE]: {
-    type: 'keyword',
-    array: false,
-    required: false,
-  },
-  [Fields.ALERT_RULE_NOTE]: {
-    type: 'keyword',
-    array: false,
-    required: false,
-  },
-  [Fields.ALERT_RULE_REFERENCES]: {
-    type: 'keyword',
-    array: true,
-    required: false,
-  },
-  [Fields.ALERT_RULE_RULE_ID]: {
-    type: 'keyword',
-    array: false,
-    required: false,
-  },
-  [Fields.ALERT_RULE_RULE_NAME_OVERRIDE]: {
-    type: 'keyword',
-    array: false,
-    required: false,
-  },
-  [Fields.ALERT_RULE_TO]: {
-    type: 'keyword',
-    array: false,
-    required: false,
-  },
-  [Fields.ALERT_RULE_TYPE]: {
-    type: 'keyword',
-    array: false,
-    required: false,
-  },
-  [Fields.ALERT_RULE_UPDATED_AT]: {
-    type: 'date',
-    array: false,
-    required: false,
-  },
-  [Fields.ALERT_RULE_UPDATED_BY]: {
-    type: 'keyword',
-    array: false,
-    required: false,
-  },
-  [Fields.ALERT_RULE_VERSION]: {
-    type: 'keyword',
-    array: false,
-    required: false,
-  },
-  [Fields.ALERT_SUPPRESSION_FIELD]: {
-    type: 'keyword',
-    array: true,
-    required: false,
-  },
-  [Fields.ALERT_SUPPRESSION_VALUE]: {
-    type: 'keyword',
-    array: true,
-    required: false,
-  },
-  [Fields.ALERT_SUPPRESSION_START]: {
-    type: 'date',
-    array: false,
-    required: false,
-  },
-  [Fields.ALERT_SUPPRESSION_END]: {
-    type: 'date',
-    array: false,
-    required: false,
-  },
-  [Fields.ALERT_SUPPRESSION_DOCS_COUNT]: {
-    type: 'long',
-    array: false,
-    required: false,
-  },
+  // These fields are defined in the legacy alerts as data field map to maintain
+  // backwards compatibility with rule registry alerts as data
+  [Fields.ALERT_RISK_SCORE]: legacyAlertFieldMap[Fields.ALERT_RISK_SCORE],
+  [Fields.ALERT_RULE_AUTHOR]: legacyAlertFieldMap[Fields.ALERT_RULE_AUTHOR],
+  [Fields.ALERT_RULE_CREATED_AT]: legacyAlertFieldMap[Fields.ALERT_RULE_CREATED_AT],
+  [Fields.ALERT_RULE_CREATED_BY]: legacyAlertFieldMap[Fields.ALERT_RULE_CREATED_BY],
+  [Fields.ALERT_RULE_DESCRIPTION]: legacyAlertFieldMap[Fields.ALERT_RULE_DESCRIPTION],
+  [Fields.ALERT_RULE_ENABLED]: legacyAlertFieldMap[Fields.ALERT_RULE_ENABLED],
+  [Fields.ALERT_RULE_FROM]: legacyAlertFieldMap[Fields.ALERT_RULE_FROM],
+  [Fields.ALERT_RULE_INTERVAL]: legacyAlertFieldMap[Fields.ALERT_RULE_INTERVAL],
+  [Fields.ALERT_RULE_LICENSE]: legacyAlertFieldMap[Fields.ALERT_RULE_LICENSE],
+  [Fields.ALERT_RULE_NOTE]: legacyAlertFieldMap[Fields.ALERT_RULE_NOTE],
+  [Fields.ALERT_RULE_REFERENCES]: legacyAlertFieldMap[Fields.ALERT_RULE_REFERENCES],
+  [Fields.ALERT_RULE_RULE_ID]: legacyAlertFieldMap[Fields.ALERT_RULE_RULE_ID],
+  [Fields.ALERT_RULE_RULE_NAME_OVERRIDE]: legacyAlertFieldMap[Fields.ALERT_RULE_RULE_NAME_OVERRIDE],
+  [Fields.ALERT_RULE_TO]: legacyAlertFieldMap[Fields.ALERT_RULE_TO],
+  [Fields.ALERT_RULE_TYPE]: legacyAlertFieldMap[Fields.ALERT_RULE_TYPE],
+  [Fields.ALERT_RULE_UPDATED_AT]: legacyAlertFieldMap[Fields.ALERT_RULE_UPDATED_AT],
+  [Fields.ALERT_RULE_UPDATED_BY]: legacyAlertFieldMap[Fields.ALERT_RULE_UPDATED_BY],
+  [Fields.ALERT_RULE_VERSION]: legacyAlertFieldMap[Fields.ALERT_RULE_VERSION],
+  [Fields.ALERT_SEVERITY]: legacyAlertFieldMap[Fields.ALERT_SEVERITY],
+  [Fields.ALERT_SUPPRESSION_DOCS_COUNT]: legacyAlertFieldMap[Fields.ALERT_SUPPRESSION_DOCS_COUNT],
+  [Fields.ALERT_SUPPRESSION_END]: legacyAlertFieldMap[Fields.ALERT_SUPPRESSION_END],
+  [Fields.ALERT_SUPPRESSION_FIELD]: legacyAlertFieldMap[Fields.ALERT_SUPPRESSION_FIELD],
+  [Fields.ALERT_SUPPRESSION_START]: legacyAlertFieldMap[Fields.ALERT_SUPPRESSION_START],
+  [Fields.ALERT_SUPPRESSION_VALUE]: legacyAlertFieldMap[Fields.ALERT_SUPPRESSION_VALUE],
+  [Fields.ALERT_SYSTEM_STATUS]: legacyAlertFieldMap[Fields.ALERT_SYSTEM_STATUS],
+  [Fields.ALERT_WORKFLOW_REASON]: legacyAlertFieldMap[Fields.ALERT_WORKFLOW_REASON],
+  [Fields.ALERT_WORKFLOW_USER]: legacyAlertFieldMap[Fields.ALERT_WORKFLOW_USER],
+  [Fields.ECS_VERSION]: legacyAlertFieldMap[Fields.ECS_VERSION],
+  [Fields.EVENT_ACTION]: legacyAlertFieldMap[Fields.EVENT_ACTION],
+  [Fields.EVENT_KIND]: legacyAlertFieldMap[Fields.EVENT_KIND],
+  [Fields.TAGS]: legacyAlertFieldMap[Fields.TAGS],
 } as const;
 
 export type TechnicalRuleFieldMap = typeof technicalRuleFieldMap;
