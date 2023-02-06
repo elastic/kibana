@@ -206,7 +206,7 @@ Object {
       ],
       "legend": Object {
         "isVisible": true,
-        "position": "right",
+        "position": "left",
       },
       "preferredSeriesType": "bar_stacked",
       "title": "Empty XY chart",
