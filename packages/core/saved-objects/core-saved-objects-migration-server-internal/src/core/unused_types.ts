@@ -45,27 +45,6 @@ export const REMOVED_TYPES: string[] = [
   'csp_rule',
 ].sort();
 
-// When migrating from the outdated index we use a read query which excludes
-// saved objects which are no longer used. These saved objects will still be
-// kept in the outdated index for backup purposes, but won't be available in
-// the upgraded index.
-export const unpersistedSearchSessionsQuery = {
-  bool: {
-    must: [
-      {
-        match: {
-          type: 'search-session',
-        },
-      },
-      {
-        match: {
-          'search-session.persisted': false,
-        },
-      },
-    ],
-  },
-};
-
 export const excludeUnusedTypesQuery: QueryDslQueryContainer = {
   bool: {
     must_not: [
@@ -74,8 +53,6 @@ export const excludeUnusedTypesQuery: QueryDslQueryContainer = {
           type: typeName,
         },
       })),
-      // https://github.com/elastic/kibana/issues/96131
-      unpersistedSearchSessionsQuery,
     ],
   },
 };

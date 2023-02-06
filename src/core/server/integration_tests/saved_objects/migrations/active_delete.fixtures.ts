@@ -27,6 +27,13 @@ export const baselineTypes: Array<Partial<SavedObjectsType>> = [
         value: { type: 'integer' },
       },
     },
+    excludeOnUpgrade: () => {
+      return {
+        bool: {
+          must: [{ term: { type: 'complex' } }, { range: { 'complex.value': { lte: 1 } } }],
+        },
+      };
+    },
   },
 ];
 
@@ -47,6 +54,13 @@ export const baselineDocuments: SavedObjectsBulkCreateObject[] = [
     type: 'deprecated',
     attributes: {
       name,
+    },
+  })),
+  ...['complex-foo', 'complex-bar', 'complex-baz', 'complex-lipsum'].map((name, index) => ({
+    type: 'complex',
+    attributes: {
+      name,
+      value: index,
     },
   })),
 ];

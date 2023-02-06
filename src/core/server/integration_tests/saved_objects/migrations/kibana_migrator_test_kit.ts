@@ -138,9 +138,6 @@ const getConfigService = (
       password: kibanaServerTestUser.password,
     },
     logging: {
-      root: {
-        level: 'off',
-      },
       appenders: {
         file: {
           type: 'file',

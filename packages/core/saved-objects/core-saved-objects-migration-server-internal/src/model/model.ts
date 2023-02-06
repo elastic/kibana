@@ -25,6 +25,7 @@ import {
   fatalReasonDocumentExceedsMaxBatchSizeBytes,
   extractDiscardedUnknownDocs,
   extractDiscardedCorruptDocs,
+  extractDeleteQueryFailureReason,
 } from './extract_errors';
 import type { ExcludeRetryableEsError } from './types';
 import {
@@ -278,71 +279,6 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
         ],
       };
     }
-  } else if (stateP.controlState === 'CLEANUP_UNKNOWN_AND_EXCLUDED') {
-    const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;
-    if (Either.isRight(res)) {
-      // we didn't need to cleanup, or the cleanup went well
-      // The source index .kibana is pointing to. E.g: ".xx8.7.0_001"
-      const source = stateP.sourceIndex.value;
-      return {
-        ...stateP,
-        controlState: 'PREPARE_COMPATIBLE_MIGRATION',
-        targetIndexRawMappings: stateP.sourceIndexMappings,
-        targetIndexMappings: mergeMigrationMappingPropertyHashes(
-          stateP.targetIndexMappings,
-          stateP.sourceIndexMappings
-        ),
-        preTransformDocsActions: [
-          // Point the version alias to the source index. This let's other Kibana
-          // instances know that a migration for the current version is "done"
-          // even though we may be waiting for document transformations to finish.
-          { add: { index: source!, alias: stateP.versionAlias } },
-          ...buildRemoveAliasActions(source!, Object.keys(stateP.aliases), [
-            stateP.currentAlias,
-            stateP.versionAlias,
-          ]),
-        ],
-      };
-    } else if (Either.isLeft(res)) {
-      if (isTypeof(res.left, 'unknown_docs_found')) {
-        return {
-          ...stateP,
-          controlState: 'FATAL',
-          reason: extractUnknownDocFailureReason(
-            stateP.migrationDocLinks.resolveMigrationFailures,
-            res.left.unknownDocs
-          ),
-        };
-      } else {
-        return throwBadResponse(stateP, res.left as never);
-      }
-    } else {
-      return throwBadResponse(stateP, res);
-    }
-  } else if (stateP.controlState === 'PREPARE_COMPATIBLE_MIGRATION') {
-    const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;
-    if (Either.isRight(res)) {
-      return {
-        ...stateP,
-        controlState: 'OUTDATED_DOCUMENTS_SEARCH_OPEN_PIT',
-      };
-    } else if (Either.isLeft(res)) {
-      // Note: if multiple newer Kibana versions are competing with each other to perform a migration,
-      // it might happen that another Kibana instance has deleted this instance's version index.
-      // NIT to handle this in properly, we'd have to add a PREPARE_COMPATIBLE_MIGRATION_CONFLICT step,
-      // similar to MARK_VERSION_INDEX_READY_CONFLICT.
-      if (isTypeof(res.left, 'alias_not_found_exception')) {
-        // We assume that the alias was already deleted by another Kibana instance
-        return {
-          ...stateP,
-          controlState: 'OUTDATED_DOCUMENTS_SEARCH_OPEN_PIT',
-        };
-      } else {
-        throwBadResponse(stateP, res.left as never);
-      }
-    } else {
-      throwBadResponse(stateP, res);
-    }
   } else if (stateP.controlState === 'LEGACY_SET_WRITE_BLOCK') {
     const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;
     // If the write block is successfully in place
@@ -528,6 +464,84 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
       }
     } else {
       return throwBadResponse(stateP, res);
+    }
+  } else if (stateP.controlState === 'CLEANUP_UNKNOWN_AND_EXCLUDED') {
+    const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;
+    if (Either.isRight(res)) {
+      // we didn't need to cleanup, or the cleanup went well
+      if (res.right.unknownDocs?.length) {
+        logs = [
+          ...stateP.logs,
+          { level: 'warning', message: extractDiscardedUnknownDocs(res.right.unknownDocs) },
+        ];
+      }
+      const source = stateP.sourceIndex.value;
+      return {
+        ...stateP,
+        logs,
+        controlState: 'PREPARE_COMPATIBLE_MIGRATION',
+        targetIndexRawMappings: stateP.sourceIndexMappings,
+        targetIndexMappings: mergeMigrationMappingPropertyHashes(
+          stateP.targetIndexMappings,
+          stateP.sourceIndexMappings
+        ),
+        preTransformDocsActions: [
+          // Point the version alias to the source index. This let's other Kibana
+          // instances know that a migration for the current version is "done"
+          // even though we may be waiting for document transformations to finish.
+          { add: { index: source!, alias: stateP.versionAlias } },
+          ...buildRemoveAliasActions(source!, Object.keys(stateP.aliases), [
+            stateP.currentAlias,
+            stateP.versionAlias,
+          ]),
+        ],
+      };
+    } else if (Either.isLeft(res)) {
+      if (isTypeof(res.left, 'unknown_docs_found')) {
+        return {
+          ...stateP,
+          controlState: 'FATAL',
+          reason: extractUnknownDocFailureReason(
+            stateP.migrationDocLinks.resolveMigrationFailures,
+            res.left.unknownDocs
+          ),
+        };
+      } else {
+        return {
+          ...stateP,
+          controlState: 'FATAL',
+          reason: extractDeleteQueryFailureReason(
+            stateP.sourceIndex.value,
+            res.left.conflictingDocuments
+          ),
+        };
+      }
+    } else {
+      return throwBadResponse(stateP, res);
+    }
+  } else if (stateP.controlState === 'PREPARE_COMPATIBLE_MIGRATION') {
+    const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;
+    if (Either.isRight(res)) {
+      return {
+        ...stateP,
+        controlState: 'OUTDATED_DOCUMENTS_SEARCH_OPEN_PIT',
+      };
+    } else if (Either.isLeft(res)) {
+      // Note: if multiple newer Kibana versions are competing with each other to perform a migration,
+      // it might happen that another Kibana instance has deleted this instance's version index.
+      // NIT to handle this in properly, we'd have to add a PREPARE_COMPATIBLE_MIGRATION_CONFLICT step,
+      // similar to MARK_VERSION_INDEX_READY_CONFLICT.
+      if (isTypeof(res.left, 'alias_not_found_exception')) {
+        // We assume that the alias was already deleted by another Kibana instance
+        return {
+          ...stateP,
+          controlState: 'OUTDATED_DOCUMENTS_SEARCH_OPEN_PIT',
+        };
+      } else {
+        throwBadResponse(stateP, res.left as never);
+      }
+    } else {
+      throwBadResponse(stateP, res);
     }
   } else if (stateP.controlState === 'CHECK_UNKNOWN_DOCUMENTS') {
     const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;

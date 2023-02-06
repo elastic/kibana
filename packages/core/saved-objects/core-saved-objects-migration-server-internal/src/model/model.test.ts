@@ -11,42 +11,43 @@ import * as Option from 'fp-ts/lib/Option';
 import type { SavedObjectsRawDoc } from '@kbn/core-saved-objects-server';
 import type { IndexMapping } from '@kbn/core-saved-objects-base-server-internal';
 import type {
+  BaseState,
+  CalculateExcludeFiltersState,
+  CheckTargetMappingsState,
+  CheckUnknownDocumentsState,
+  CheckVersionIndexReadyActions,
+  CleanupUnknownAndExcluded,
+  CloneTempToSource,
+  CreateNewTargetState,
+  CreateReindexTempState,
   FatalState,
-  State,
-  LegacySetWriteBlockState,
-  SetSourceWriteBlockState,
   LegacyCreateReindexTargetState,
+  LegacyDeleteState,
   LegacyReindexState,
   LegacyReindexWaitForTaskState,
-  LegacyDeleteState,
-  ReindexSourceToTempOpenPit,
-  ReindexSourceToTempRead,
-  ReindexSourceToTempClosePit,
-  ReindexSourceToTempTransform,
-  RefreshTarget,
-  UpdateTargetMappingsState,
-  UpdateTargetMappingsWaitForTaskState,
+  LegacySetWriteBlockState,
+  MarkVersionIndexReady,
+  MarkVersionIndexReadyConflict,
+  OutdatedDocumentsSearchClosePit,
   OutdatedDocumentsSearchOpenPit,
   OutdatedDocumentsSearchRead,
-  OutdatedDocumentsSearchClosePit,
   OutdatedDocumentsTransform,
-  MarkVersionIndexReady,
-  BaseState,
-  CreateReindexTempState,
-  MarkVersionIndexReadyConflict,
-  CreateNewTargetState,
-  CloneTempToSource,
-  SetTempWriteBlock,
-  WaitForYellowSourceState,
-  TransformedDocumentsBulkIndex,
-  ReindexSourceToTempIndexBulk,
-  CheckUnknownDocumentsState,
-  CalculateExcludeFiltersState,
   PostInitState,
-  CheckVersionIndexReadyActions,
-  UpdateTargetMappingsMeta,
-  CheckTargetMappingsState,
   PrepareCompatibleMigration,
+  RefreshTarget,
+  ReindexSourceToTempClosePit,
+  ReindexSourceToTempIndexBulk,
+  ReindexSourceToTempOpenPit,
+  ReindexSourceToTempRead,
+  ReindexSourceToTempTransform,
+  SetSourceWriteBlockState,
+  SetTempWriteBlock,
+  State,
+  TransformedDocumentsBulkIndex,
+  UpdateTargetMappingsMeta,
+  UpdateTargetMappingsState,
+  UpdateTargetMappingsWaitForTaskState,
+  WaitForYellowSourceState,
 } from '../state';
 import { type TransformErrorObjects, TransformSavedObjectDocumentError } from '../core';
 import type { AliasAction, RetryableEsClientError } from '../actions';
@@ -1235,16 +1236,7 @@ describe('migrations v2 model', () => {
         });
 
         describe('and mappings match (diffMappings == false)', () => {
-          const unchangedMappingsState: State = {
-            ...waitForYellowSourceState,
-            controlState: 'WAIT_FOR_YELLOW_SOURCE',
-            kibanaVersion: '7.12.0', // new version!
-            currentAlias: '.kibana',
-            versionAlias: '.kibana_7.12.0',
-            versionIndex: '.kibana_7.11.0_001',
-          };
-
-          test('WAIT_FOR_YELLOW_SOURCE -> PREPARE_COMPATIBLE_MIGRATION', () => {
+          test('WAIT_FOR_YELLOW_SOURCE -> CLEANUP_UNKNOWN_AND_EXCLUDED', () => {
             const res: ResponseType<'WAIT_FOR_YELLOW_SOURCE'> = Either.right({
               '.kibana_7.11.0_001': {
                 aliases: {
@@ -1255,44 +1247,11 @@ describe('migrations v2 model', () => {
                 settings: {},
               },
             });
-            const newState = model(unchangedMappingsState, res) as PrepareCompatibleMigration;
+            const newState = model(waitForYellowSourceState, res) as CleanupUnknownAndExcluded;
 
-            expect(newState.controlState).toEqual('PREPARE_COMPATIBLE_MIGRATION');
-            expect(newState.targetIndexRawMappings).toEqual({
-              _meta: {
-                migrationMappingPropertyHashes: {
-                  new_saved_object_type: '4a11183eee21e6fbad864f7a30b39ad0',
-                },
-              },
-              properties: {
-                new_saved_object_type: {
-                  properties: {
-                    value: {
-                      type: 'text',
-                    },
-                  },
-                },
-              },
-            });
-            expect(newState.versionAlias).toEqual('.kibana_7.12.0');
-            expect(newState.currentAlias).toEqual('.kibana');
-            // will point to
-            expect(newState.targetIndex).toEqual('.kibana_7.11.0_001');
-            expect(newState.preTransformDocsActions).toEqual([
-              {
-                add: {
-                  alias: '.kibana_7.12.0',
-                  index: '.kibana_7.11.0_001',
-                },
-              },
-              {
-                remove: {
-                  alias: '.kibana_7.11.0',
-                  index: '.kibana_7.11.0_001',
-                  must_exist: true,
-                },
-              },
-            ]);
+            expect(newState.controlState).toEqual('CLEANUP_UNKNOWN_AND_EXCLUDED');
+            expect(newState.targetIndex).toEqual(baseState.versionIndex);
+            expect(newState.versionIndexReadyActions).toEqual(Option.none);
           });
         });
 
@@ -1312,13 +1271,8 @@ describe('migrations v2 model', () => {
             },
           };
 
-          const changedMappingsState: State = {
+          const changedMappingsState: WaitForYellowSourceState = {
             ...waitForYellowSourceState,
-            controlState: 'WAIT_FOR_YELLOW_SOURCE',
-            kibanaVersion: '7.12.0', // new version!
-            currentAlias: '.kibana',
-            versionAlias: '.kibana_7.12.0',
-            versionIndex: '.kibana_7.11.0_001',
             sourceIndexMappings: actualMappings,
           };
 
@@ -1351,6 +1305,122 @@ describe('migrations v2 model', () => {
             "message": "Action failed with '[index_not_yellow_timeout] Timeout waiting for ... Refer to repeatedTimeoutRequests for information on how to resolve the issue.'. Retrying attempt 1 in 2 seconds.",
           }
         `);
+      });
+    });
+
+    describe('CLEANUP_UNKNOWN_AND_EXCLUDED', () => {
+      const cleanupUnknownAndExcluded: CleanupUnknownAndExcluded = {
+        ...baseState,
+        controlState: 'CLEANUP_UNKNOWN_AND_EXCLUDED',
+        sourceIndex: Option.some('.kibana_7.11.0_001') as Option.Some<string>,
+        sourceIndexMappings: baseState.targetIndexMappings,
+        targetIndex: baseState.versionIndex,
+        kibanaVersion: '7.12.0', // new version!
+        currentAlias: '.kibana',
+        versionAlias: '.kibana_7.12.0',
+        aliases: {
+          '.kibana': '.kibana_7.11.0_001',
+          '.kibana_7.11.0': '.kibana_7.11.0_001',
+        },
+        versionIndexReadyActions: Option.none,
+      };
+
+      describe('if action succeeds', () => {
+        const res: ResponseType<'CLEANUP_UNKNOWN_AND_EXCLUDED'> = Either.right({
+          type: 'cleanup_successful' as const,
+          unknownDocs: [],
+        });
+
+        test('it resets retry count and delay', () => {
+          const testState = {
+            ...cleanupUnknownAndExcluded,
+            retryCount: 1,
+            retryDelay: 2000,
+          };
+          const newState = model(testState, res);
+          expect(newState.retryCount).toEqual(0);
+          expect(newState.retryDelay).toEqual(0);
+        });
+
+        test('CLEANUP_UNKNOWN_AND_EXCLUDED -> PREPARE_COMPATIBLE_MIGRATION', () => {
+          const newState = model(cleanupUnknownAndExcluded, res) as PrepareCompatibleMigration;
+
+          expect(newState.controlState).toEqual('PREPARE_COMPATIBLE_MIGRATION');
+          expect(newState.targetIndexRawMappings).toEqual(indexMapping);
+          expect(newState.targetIndexMappings).toEqual(indexMapping);
+          expect(newState.targetIndex).toEqual('.kibana_7.11.0_001');
+          expect(newState.preTransformDocsActions).toEqual([
+            {
+              add: {
+                alias: '.kibana_7.12.0',
+                index: '.kibana_7.11.0_001',
+              },
+            },
+            {
+              remove: {
+                alias: '.kibana_7.11.0',
+                index: '.kibana_7.11.0_001',
+                must_exist: true,
+              },
+            },
+          ]);
+        });
+      });
+
+      test('CLEANUP_UNKNOWN_AND_EXCLUDED -> FATAL if discardUnknownObjects=false', () => {
+        const res: ResponseType<'CLEANUP_UNKNOWN_AND_EXCLUDED'> = Either.left({
+          type: 'unknown_docs_found' as const,
+          unknownDocs: [
+            { id: 'dashboard:12', type: 'dashboard' },
+            { id: 'foo:17', type: 'foo' },
+          ],
+        });
+
+        const newState = model(cleanupUnknownAndExcluded, res);
+        expect(newState.controlState).toEqual('FATAL');
+
+        expect(newState).toMatchObject({
+          controlState: 'FATAL',
+          reason: expect.stringContaining(
+            'Migration failed because some documents were found which use unknown saved object types'
+          ),
+        });
+      });
+
+      test('CLEANUP_UNKNOWN_AND_EXCLUDED -> FATAL if the deleteQuery fails', () => {
+        const res: ResponseType<'CLEANUP_UNKNOWN_AND_EXCLUDED'> = Either.left({
+          type: 'delete_failed' as const,
+          conflictingDocuments: [
+            {
+              index: 'kibana_7.11.0_001',
+              id: 'dashboard:12',
+              type: 'dashboard',
+              cause: {
+                type: 'DocumentVersionChanged',
+              },
+              status: 5,
+            },
+            {
+              index: 'kibana_7.11.0_001',
+              id: 'foo:17',
+              type: 'foo',
+              cause: {
+                type: 'DocumentVersionChanged',
+              },
+              status: 5,
+            },
+          ],
+        });
+
+        const newState = model(cleanupUnknownAndExcluded, res);
+        expect(newState.controlState).toEqual('FATAL');
+
+        expect(newState).toMatchObject({
+          controlState: 'FATAL',
+          reason: expect.stringContaining(
+            'Migration failed because it was unable to delete unwanted documents from the .kibana_7.11.0_001 system index'
+          ),
+        });
       });
     });
 

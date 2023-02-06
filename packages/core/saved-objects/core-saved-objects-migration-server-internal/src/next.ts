@@ -64,8 +64,10 @@ export const nextActionMap = (client: ElasticsearchClient, transformRawDocs: Tra
   return {
     INIT: (state: InitState) =>
       Actions.initAction({ client, indices: [state.currentAlias, state.versionAlias] }),
-    PREPARE_COMPATIBLE_MIGRATION: (state: PrepareCompatibleMigration) =>
-      Actions.updateAliases({ client, aliasActions: state.preTransformDocsActions }),
+    WAIT_FOR_MIGRATION_COMPLETION: (state: WaitForMigrationCompletionState) =>
+      Actions.fetchIndices({ client, indices: [state.currentAlias, state.versionAlias] }),
+    WAIT_FOR_YELLOW_SOURCE: (state: WaitForYellowSourceState) =>
+      Actions.waitForIndexStatus({ client, index: state.sourceIndex.value, status: 'yellow' }),
     CLEANUP_UNKNOWN_AND_EXCLUDED: (state: CleanupUnknownAndExcluded) =>
       Actions.cleanupUnknownAndExcluded({
         client,
@@ -75,10 +77,8 @@ export const nextActionMap = (client: ElasticsearchClient, transformRawDocs: Tra
         excludeFromUpgradeFilterHooks: state.excludeFromUpgradeFilterHooks,
         knownTypes: state.knownTypes,
       }),
-    WAIT_FOR_MIGRATION_COMPLETION: (state: WaitForMigrationCompletionState) =>
-      Actions.fetchIndices({ client, indices: [state.currentAlias, state.versionAlias] }),
-    WAIT_FOR_YELLOW_SOURCE: (state: WaitForYellowSourceState) =>
-      Actions.waitForIndexStatus({ client, index: state.sourceIndex.value, status: 'yellow' }),
+    PREPARE_COMPATIBLE_MIGRATION: (state: PrepareCompatibleMigration) =>
+      Actions.updateAliases({ client, aliasActions: state.preTransformDocsActions }),
     CHECK_UNKNOWN_DOCUMENTS: (state: CheckUnknownDocumentsState) =>
       Actions.checkForUnknownDocs({
         client,

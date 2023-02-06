@@ -20,10 +20,10 @@ import {
   catchRetryableEsClientErrors,
   type RetryableEsClientError,
 } from './catch_retryable_es_client_errors';
-import { checkForUnknownDocs, UnknownDocsFound } from './check_for_unknown_docs';
+import { checkForUnknownDocs, DocumentIdAndType, UnknownDocsFound } from './check_for_unknown_docs';
 import { isTypeof } from '.';
 import { calculateExcludeFilters } from './calculate_exclude_filters';
-import { REMOVED_TYPES, unpersistedSearchSessionsQuery } from '../core/unused_types';
+import { REMOVED_TYPES } from '../core/unused_types';
 
 /** @internal */
 export interface CleanupUnknownAndExcludedParams {
@@ -42,13 +42,19 @@ export interface DeleteByQueryErrorResponse {
   conflictingDocuments: BulkIndexByScrollFailure[];
 }
 
+export interface CleanupSuccessful {
+  type: 'cleanup_successful';
+  unknownDocs?: DocumentIdAndType[];
+}
+
 const deleteByQuery = (
   client: ElasticsearchClient,
   index: string,
-  deleteQuery: QueryDslQueryContainer
+  deleteQuery: QueryDslQueryContainer,
+  unknownDocs?: DocumentIdAndType[]
 ): TaskEither.TaskEither<
   RetryableEsClientError | DeleteByQueryErrorResponse,
-  'cleanup_successful'
+  CleanupSuccessful
 > => {
   return () => {
     return client
@@ -60,7 +66,10 @@ const deleteByQuery = (
       })
       .then((response: DeleteByQueryResponse) => {
         if (!response.failures || !response.failures.length) {
-          return Either.right('cleanup_successful' as const);
+          return Either.right({
+            type: 'cleanup_successful' as const,
+            unknownDocs,
+          });
         } else {
           return Either.left({
             type: 'delete_failed' as const,
@@ -85,7 +94,7 @@ export const cleanupUnknownAndExcluded = ({
   knownTypes,
 }: CleanupUnknownAndExcludedParams): TaskEither.TaskEither<
   RetryableEsClientError | UnknownDocsFound | DeleteByQueryErrorResponse,
-  'cleanup_successful'
+  CleanupSuccessful
 > => {
   return pipe(
     checkForUnknownDocs({ client, indexName, knownTypes, excludeOnUpgradeQuery }),
@@ -94,11 +103,13 @@ export const cleanupUnknownAndExcluded = ({
         unknownDocsRes: {} | UnknownDocsFound
       ): TaskEither.TaskEither<
         RetryableEsClientError | UnknownDocsFound | DeleteByQueryErrorResponse,
-        'cleanup_successful'
+        CleanupSuccessful
       > => {
+        let unknownDocs: DocumentIdAndType[];
         let unknownDocTypes: string[] = [];
         if (isTypeof(unknownDocsRes, 'unknown_docs_found')) {
-          unknownDocTypes = [...new Set(unknownDocsRes.unknownDocs.map(({ type }) => type))];
+          unknownDocs = unknownDocsRes.unknownDocs;
+          unknownDocTypes = [...new Set(unknownDocs.map(({ type }) => type))];
           if (!discardUnknownDocs) {
             return TaskEither.left({
               type: 'unknown_docs_found' as const,
@@ -119,11 +130,10 @@ export const cleanupUnknownAndExcluded = ({
                   ...excludeFiltersRes.filterClauses,
                   ...REMOVED_TYPES.map((type) => ({ term: { type } })),
                   ...unknownDocTypes.map((type) => ({ term: { type } })),
-                  unpersistedSearchSessionsQuery,
                 ],
               },
             };
-            return deleteByQuery(client, indexName, deleteQuery);
+            return deleteByQuery(client, indexName, deleteQuery, unknownDocs);
           })
         );
       }
