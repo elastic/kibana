@@ -308,19 +308,19 @@ export default ({ getService }: FtrProviderContext): void => {
           const latestPush = pushes[pushes.length - 1];
 
           expect(Object.keys(connectors).length).to.be(2);
-          expect(connectors[serviceNow2.id].push.latestUserActionPushDate).to.eql(
+          expect(connectors[serviceNow2.id].push.details?.latestUserActionPushDate).to.eql(
             latestPush.created_at
           );
-          expect(connectors[serviceNow2.id].push.externalService?.connector_id).to.eql(
+          expect(connectors[serviceNow2.id].push.details?.externalService?.connector_id).to.eql(
             serviceNow2.id
           );
-          expect(connectors[serviceNow2.id].push.externalService?.connector_name).to.eql(
+          expect(connectors[serviceNow2.id].push.details?.externalService?.connector_name).to.eql(
             serviceNow2.name
           );
-          expect(connectors[serviceNow2.id].push.externalService?.connector_name).to.not.eql(
-            connector.name
-          );
-          expect(connectors[serviceNow2.id].push.externalService?.connector_id).to.not.eql(
+          expect(
+            connectors[serviceNow2.id].push.details?.externalService?.connector_name
+          ).to.not.eql(connector.name);
+          expect(connectors[serviceNow2.id].push.details?.externalService?.connector_id).to.not.eql(
             connector.id
           );
         });
@@ -338,8 +338,8 @@ export default ({ getService }: FtrProviderContext): void => {
 
           expect(Object.keys(connectors).length).to.be(1);
           expect(connectors).to.have.property(connector.id);
-          expect(connectors[connector.id].push.latestUserActionPushDate).to.be(undefined);
-          expect(connectors[connector.id].push.oldestUserActionPushDate).to.be(undefined);
+          expect(connectors[connector.id].push.details?.latestUserActionPushDate).to.be(undefined);
+          expect(connectors[connector.id].push.details?.oldestUserActionPushDate).to.be(undefined);
         });
 
         it('sets latestUserActionPushDate to the most recent push date and oldestPushDate to the first push date', async () => {
@@ -377,10 +377,10 @@ export default ({ getService }: FtrProviderContext): void => {
           const latestPush = pushes[pushes.length - 1];
 
           expect(Object.keys(connectors).length).to.be(1);
-          expect(connectors[connector.id].push.latestUserActionPushDate).to.eql(
+          expect(connectors[connector.id].push.details?.latestUserActionPushDate).to.eql(
             latestPush.created_at
           );
-          expect(connectors[connector.id].push.oldestUserActionPushDate).to.eql(
+          expect(connectors[connector.id].push.details?.oldestUserActionPushDate).to.eql(
             oldestPush.created_at
           );
         });
