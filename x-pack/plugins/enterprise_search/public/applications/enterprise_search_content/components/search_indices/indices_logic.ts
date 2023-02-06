@@ -126,8 +126,7 @@ export const IndicesLogic = kea<MakeLogicType<IndicesValues, IndicesActions>>({
     ],
   },
   listeners: ({ actions, values }) => ({
-    cancelSuccess: async (_, breakpoint) => {
-      await breakpoint(500); // give connectors a chance to stop before checking again
+    cancelSuccess: async () => {
       actions.fetchIndexDetails({ indexName: values.deleteModalIndexName });
     },
     deleteSuccess: () => {
