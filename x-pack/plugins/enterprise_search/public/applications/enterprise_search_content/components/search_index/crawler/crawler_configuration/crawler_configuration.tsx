@@ -87,7 +87,10 @@ export const CrawlerConfiguration: React.FC = () => {
               />
             </EuiFlexItem>
             <EuiFlexItem>
-              <EuiLink>
+              <EuiLink
+                href="TODO"
+                data-telemetry-id="entSearchContent-crawler-configuration-learnMoreExtraction"
+              >
                 {i18n.translate(
                   'xpack.enterpriseSearch.content.crawler.crawlerConfiguration.extractHTML.learnMoreLink',
                   {
