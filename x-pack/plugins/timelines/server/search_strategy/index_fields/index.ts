@@ -154,14 +154,15 @@ export const requestIndexFieldSearch = async (
       const fieldDescriptor = (
         await Promise.all(
           indicesExist.map(async (index, n) => {
-            if (index.startsWith('.alerts-observability') || useInternalUser) {
-              return indexPatternsFetcherAsInternalUser.getFieldsForWildcard({
-                pattern: index,
-              });
-            }
             const fieldCapsOptions = request.includeUnmapped
               ? { includeUnmapped: true, allow_no_indices: true }
               : undefined;
+            if (index.startsWith('.alerts-observability') || useInternalUser) {
+              return indexPatternsFetcherAsInternalUser.getFieldsForWildcard({
+                pattern: index,
+                fieldCapsOptions,
+              });
+            }
             return indexPatternsFetcherAsCurrentUser.getFieldsForWildcard({
               pattern: index,
               fieldCapsOptions,
