@@ -69,6 +69,7 @@ const registerAlertsTableConfiguration = (
     usePersistentControls: getPersistentControlsHook(TableId.alertsOnAlertsPage),
     sort,
     useFieldBrowserOptions: getUseTriggersActionsFieldBrowserOptions(SourcererScopeName.detections),
+    showInspectButton: true,
   });
 
   // register Alert Table on RuleDetails Page
@@ -85,6 +86,7 @@ const registerAlertsTableConfiguration = (
     usePersistentControls: getPersistentControlsHook(TableId.alertsOnRuleDetailsPage),
     sort,
     useFieldBrowserOptions: getUseTriggersActionsFieldBrowserOptions(SourcererScopeName.detections),
+    showInspectButton: true,
   });
 
   registry.register({
@@ -97,6 +99,7 @@ const registerAlertsTableConfiguration = (
     useBulkActions: getBulkActionHook(TableId.alertsOnCasePage),
     useCellActions: getUseCellActionsHook(TableId.alertsOnCasePage),
     sort,
+    showInspectButton: true,
   });
 };
 
