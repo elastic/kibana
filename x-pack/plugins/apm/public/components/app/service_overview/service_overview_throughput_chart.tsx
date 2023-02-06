@@ -21,7 +21,7 @@ import { asExactTransactionRate } from '../../../../common/utils/formatters';
 import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
 import { useEnvironmentsContext } from '../../../context/environments_context/use_environments_context';
 import { useAnyOfApmParams } from '../../../hooks/use_apm_params';
-import { useFetcher } from '../../../hooks/use_fetcher';
+import { FETCH_STATUS, useFetcher } from '../../../hooks/use_fetcher';
 import { usePreferredServiceAnomalyTimeseries } from '../../../hooks/use_preferred_service_anomaly_timeseries';
 import { useTimeRange } from '../../../hooks/use_time_range';
 import { TimeseriesChartWithContext } from '../../shared/charts/timeseries_chart_with_context';
@@ -159,7 +159,7 @@ export function ServiceOverviewThroughputChart({
         id="throughput"
         height={height}
         showAnnotations={false}
-        fetchStatus={status}
+        fetchStatus={transactionType ? status : FETCH_STATUS.SUCCESS}
         timeseries={timeseries}
         yLabelFormat={asExactTransactionRate}
         customTheme={comparisonChartTheme}
