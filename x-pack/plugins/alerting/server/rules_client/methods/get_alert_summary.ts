@@ -56,8 +56,8 @@ export async function getAlertSummary(
           start: parsedDateStart.toISOString(),
           sort: [{ sort_field: '@timestamp', sort_order: 'desc' }],
           end: dateNow.toISOString(),
-          // filter out event logs where the alertId is 'summary'
-          filter: 'NOT kibana.alerting.instance_id: summary',
+          // filter out execute-action event logs
+          filter: 'NOT event.action: execute-action',
         },
         rule.legacyId !== null ? [rule.legacyId] : undefined
       ),
