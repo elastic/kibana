@@ -16,6 +16,7 @@ import {
   EuiText,
 } from '@elastic/eui';
 import styled from 'styled-components';
+
 interface FilterPopoverProps {
   buttonLabel: string;
   onSelectedOptionsChanged: (value: string[]) => void;

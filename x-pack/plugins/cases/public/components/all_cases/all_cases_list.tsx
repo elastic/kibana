@@ -50,6 +50,17 @@ const getSortField = (field: string): SortFieldCase =>
   // @ts-ignore
   SortFieldCase[field] ?? SortFieldCase.title;
 
+const isValidSolution = (solution: string): solution is CasesOwners =>
+  Object.keys(OWNER_INFO).includes(solution);
+
+const mapToReadableSolutionName = (solution: string): Solution => {
+  if (isValidSolution(solution)) {
+    return OWNER_INFO[solution];
+  }
+
+  return { id: solution, label: solution, iconType: '' };
+};
+
 export interface AllCasesListProps {
   hiddenStatuses?: CaseStatusWithAllStatus[];
   isSelectorView?: boolean;
@@ -229,18 +240,6 @@ export const AllCasesList = React.memo<AllCasesListProps>(
       }),
       []
     );
-
-    const mapToReadableSolutionName = (solution: string): Solution => {
-      if (Object.keys(OWNER_INFO).includes(solution)) {
-        return {
-          id: solution,
-          label: OWNER_INFO[solution as CasesOwners].label,
-          iconType: OWNER_INFO[solution as CasesOwners].iconType,
-        };
-      }
-
-      return { id: solution, label: solution, iconType: '' };
-    };
 
     const availableSolutionsLabels = availableSolutions.map((solution) =>
       mapToReadableSolutionName(solution)

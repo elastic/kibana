@@ -299,6 +299,18 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
           await deleteAllCaseItems(es);
         });
 
+        it('renders different solutions', async () => {
+          await openModal();
+
+          await testSubjects.existOrFail('solution-filter-popover-button');
+
+          for (const [caseId] of createdCases.entries()) {
+            await testSubjects.existOrFail(`cases-table-row-${caseId}`);
+          }
+
+          await closeModal();
+        });
+
         it('filters correctly', async () => {
           for (const [owner, currentCaseId] of createdCases.entries()) {
             await openModal();

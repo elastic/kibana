@@ -33,10 +33,6 @@ const ScrollableDiv = styled.div`
   overflow: auto;
 `;
 
-const Icon = styled(EuiIcon)`
-  padding-right: 4px;
-`;
-
 const toggleSelectedGroup = (group: string, selectedGroups: string[]): string[] => {
   const selectedGroupIndex = selectedGroups.indexOf(group);
   if (selectedGroupIndex >= 0) {
@@ -101,10 +97,12 @@ export const SolutionFilterComponent = ({
             key={`${index}-${option.id}`}
             onClick={toggleSelectedGroupCb.bind(null, option.id)}
           >
-            <span>
-              <Icon size="m" type={option.iconType} title={option.label} />
-              {option.label}
-            </span>
+            <EuiFlexGroup alignItems="center" justifyContent="flexStart" gutterSize="s">
+              <EuiFlexItem grow={false}>
+                <EuiIcon size="m" type={option.iconType} title={option.label} />
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>{option.label}</EuiFlexItem>
+            </EuiFlexGroup>
           </EuiFilterSelectItem>
         ))}
       </ScrollableDiv>

@@ -41,7 +41,7 @@ describe('SolutionFilter ', () => {
     jest.clearAllMocks();
   });
 
-  it('renders button label correctly', () => {
+  it('renders button correctly', () => {
     const { getByTestId } = appMockRender.render(
       <SolutionFilter
         onSelectedOptionsChanged={onSelectedOptionsChanged}
