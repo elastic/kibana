@@ -185,6 +185,16 @@ describe('LightweightParamFormatter', () => {
     const result = replaceVarsWithParams(formatter, params);
     expect(result).toEqual('default');
   });
+
+  it('exp with default which has value', () => {
+    const expected: ParsedVars = [{ content: { default: 'default', name: 'splice' }, type: 'var' }];
+
+    const formatter = variableParser.parse('${splice:default}', params);
+    expect(formatter).toEqual(expected);
+
+    const result = replaceVarsWithParams(formatter, params);
+    expect(result).toEqual('value');
+  });
   it('exp with default exp', () => {
     const formatter = variableParser.parse('${test:the ${default} value}', params);
     expect(formatter).toEqual([

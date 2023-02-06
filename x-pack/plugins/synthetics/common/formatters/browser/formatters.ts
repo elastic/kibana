@@ -51,7 +51,7 @@ export const browserFormatters: BrowserFormatMap = {
   [ConfigKey.LATENCY]: null,
   [ConfigKey.IGNORE_HTTPS_ERRORS]: null,
   [ConfigKey.PLAYWRIGHT_OPTIONS]: null,
-  [ConfigKey.TEXT_ASSERTION]: null,
+  [ConfigKey.TEXT_ASSERTION]: paramReplaceFormatter,
   [ConfigKey.PORT]: paramReplaceFormatter,
   [ConfigKey.URLS]: paramReplaceFormatter,
   [ConfigKey.METADATA]: objectToJsonFormatter,
