@@ -6,7 +6,7 @@
  */
 
 import { flatten } from 'lodash';
-import React, { FC, useState, useEffect } from 'react';
+import React, { FC, useState, useEffect, Fragment } from 'react';
 
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
@@ -164,16 +164,17 @@ export const ActionsPanel: FC<Props> = ({
 
       {Array.isArray(asyncHrefCards) &&
         asyncHrefCards.map((link) => (
-          <>
+          <Fragment key={`dv-action-card-${link.title}`}>
             <LinkCard
               href={link.href}
               icon={link.icon}
               description={link.description}
               title={link.title}
               data-test-subj={link['data-test-subj']}
+              key={link.href}
             />
             <EuiSpacer size="m" />
-          </>
+          </Fragment>
         ))}
     </div>
   ) : null;
