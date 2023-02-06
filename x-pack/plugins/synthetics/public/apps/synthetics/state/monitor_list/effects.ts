@@ -6,11 +6,10 @@
  */
 
 import { PayloadAction } from '@reduxjs/toolkit';
-import { call, put, takeEvery, select, debounce } from 'redux-saga/effects';
+import { call, put, takeEvery, takeLeading, select } from 'redux-saga/effects';
 import { SavedObject } from '@kbn/core-saved-objects-common';
 import { quietFetchOverviewStatusAction } from '../overview_status';
 import { enableDefaultAlertingAction } from '../alert_rules';
-import { ConfigKey, SyntheticsMonitor } from '../../../../../common/runtime_types';
 import { kibanaService } from '../../../../utils/kibana_service';
 import { MonitorOverviewPageState } from '../overview';
 import { quietFetchOverviewAction } from '../overview/actions';
@@ -24,16 +23,15 @@ import {
   fetchUpsertFailureAction,
   fetchUpsertMonitorAction,
   fetchUpsertSuccessAction,
-  quietFetchMonitorListAction,
+  UpsertMonitorRequest,
 } from './actions';
 import { fetchMonitorManagementList, fetchUpsertMonitor } from './api';
 import { toastTitle } from './toast_title';
-import { UpsertMonitorRequest } from './models';
+import { ConfigKey, SyntheticsMonitor } from '../../../../../common/runtime_types';
 
 export function* fetchMonitorListEffect() {
-  yield debounce(
-    300, // Only take the latest while ignoring any intermediate triggers
-    [fetchMonitorListAction.get, quietFetchMonitorListAction],
+  yield takeLeading(
+    fetchMonitorListAction.get,
     fetchEffectFactory(
       fetchMonitorManagementList,
       fetchMonitorListAction.success,

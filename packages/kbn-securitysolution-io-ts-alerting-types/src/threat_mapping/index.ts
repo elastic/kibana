@@ -34,7 +34,7 @@ export type ThreatFiltersOrUndefined = t.TypeOf<typeof threatFiltersOrUndefined>
 export const threatMapEntry = t.exact(
   t.type({
     field: NonEmptyString,
-    type: t.keyof({ mapping: null }),
+    type: t.keyof({ mapping: null, range: null }),
     value: NonEmptyString,
   })
 );

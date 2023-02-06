@@ -114,10 +114,6 @@ export class CspPlugin
                 'To use this feature you must upgrade your subscription or start a trial'
               );
             }
-
-            if (!isSingleEnabledInput(packagePolicy.inputs)) {
-              throw new Error('Only one enabled input is allowed per policy');
-            }
           }
 
           return packagePolicy;
@@ -191,6 +187,3 @@ export class CspPlugin
     setupFindingsStatsTask(taskManager, coreStartServices, logger);
   }
 }
-
-const isSingleEnabledInput = (inputs: NewPackagePolicy['inputs']): boolean =>
-  inputs.filter((i) => i.enabled).length === 1;

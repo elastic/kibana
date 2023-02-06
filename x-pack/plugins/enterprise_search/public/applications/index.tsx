@@ -45,7 +45,6 @@ export const renderApp = (
 
   const noProductAccess: ProductAccess = {
     hasAppSearchAccess: false,
-    hasSearchEnginesAccess: false,
     hasWorkplaceSearchAccess: false,
   };
   const productAccess = data.access || noProductAccess;

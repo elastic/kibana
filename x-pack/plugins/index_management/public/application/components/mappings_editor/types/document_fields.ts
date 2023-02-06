@@ -93,6 +93,7 @@ export type RangeType =
   | 'float_range'
   | 'long_range'
   | 'ip_range'
+  | 'version_range'
   | 'double_range'
   | 'date_range';
 

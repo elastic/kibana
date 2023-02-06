@@ -25,14 +25,9 @@ export class DashboardAddPanelService extends FtrService {
 
   async clickCreateNewLink() {
     this.log.debug('DashboardAddPanel.clickAddNewPanelButton');
-    await this.retry.try(async () => {
-      await this.testSubjects.click('dashboardAddNewPanelButton');
-      await this.testSubjects.waitForDeleted('dashboardAddNewPanelButton');
-      await this.header.waitUntilLoadingHasFinished();
-      await this.testSubjects.existOrFail('lnsApp', {
-        timeout: 5000,
-      });
-    });
+    await this.testSubjects.click('dashboardAddNewPanelButton');
+    // Give some time for the animation to complete
+    await this.common.sleep(500);
   }
 
   async clickQuickButton(visType: string) {

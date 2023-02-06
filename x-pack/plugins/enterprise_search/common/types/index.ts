@@ -32,7 +32,6 @@ export interface ConfiguredLimits {
 
 export interface ProductAccess {
   hasAppSearchAccess: boolean;
-  hasSearchEnginesAccess: boolean;
   hasWorkplaceSearchAccess: boolean;
 }
 

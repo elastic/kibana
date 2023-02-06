@@ -14,11 +14,7 @@ import { NewsLoadingPrompt } from './loading_news';
 describe('news_loading', () => {
   describe('rendering', () => {
     it('renders the default News Loading', () => {
-      const wrapper = shallow(<NewsLoadingPrompt showPlainSpinner={false} />);
-      expect(toJson(wrapper)).toMatchSnapshot();
-    });
-    it('renders the News Loading with EuiLoadingSpinner', () => {
-      const wrapper = shallow(<NewsLoadingPrompt showPlainSpinner={true} />);
+      const wrapper = shallow(<NewsLoadingPrompt />);
       expect(toJson(wrapper)).toMatchSnapshot();
     });
   });

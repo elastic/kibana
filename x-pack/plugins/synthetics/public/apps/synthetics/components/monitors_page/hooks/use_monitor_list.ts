@@ -15,10 +15,7 @@ import {
   MonitorListPageState,
   selectEncryptedSyntheticsSavedMonitors,
   selectMonitorListState,
-  updateManagementPageStateAction,
 } from '../../../state';
-import { useSyntheticsRefreshContext } from '../../../contexts';
-import { useMonitorFiltersState } from '../common/monitor_filters/use_filters';
 
 export function useMonitorList() {
   const dispatch = useDispatch();
@@ -33,11 +30,19 @@ export function useMonitorList() {
   const { lastRefresh } = useSyntheticsRefreshContext();
 
   const loadPage = useCallback(
-    (state: MonitorListPageState) => {
-      dispatch(updateManagementPageStateAction(state));
-    },
-    [dispatch]
+    (state: MonitorListPageState) =>
+      dispatch(
+        fetchMonitorListAction.get({
+          ...state,
+          query,
+          tags,
+          monitorType,
+          locations: locationFilters,
+        })
+      ),
+    [dispatch, locationFilters, monitorType, query, tags]
   );
+
   const reloadPage = useCallback(() => loadPage(pageState), [pageState, loadPage]);
 
   // Periodically refresh
@@ -86,7 +91,5 @@ export function useMonitorList() {
     loadPage,
     reloadPage,
     absoluteTotal: data.absoluteTotal ?? 0,
-    overviewStatus,
-    handleFilterChange,
   };
 }

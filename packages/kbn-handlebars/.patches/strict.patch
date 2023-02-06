@@ -1,0 +1,180 @@
+1c1,6
+< var Exception = Handlebars.Exception;
+---
+> /*
+>  * This file is forked from the handlebars project (https://github.com/handlebars-lang/handlebars.js),
+>  * and may include modifications made by Elasticsearch B.V.
+>  * Elasticsearch B.V. licenses this file to you under the MIT License.
+>  * See `packages/kbn-handlebars/LICENSE` for more information.
+>  */
+3,5c8,12
+< describe('strict', function() {
+<   describe('strict mode', function() {
+<     it('should error on missing property lookup', function() {
+---
+> import { expectTemplate } from '../__jest__/test_bench';
+> 
+> describe('strict', () => {
+>   describe('strict mode', () => {
+>     it('should error on missing property lookup', () => {
+8c15
+<         .toThrow(Exception, /"hello" not defined in/);
+---
+>         .toThrow(/"hello" not defined in/);
+11c18
+<     it('should error on missing child', function() {
+---
+>     it('should error on missing child', () => {
+20c27
+<         .toThrow(Exception, /"bar" not defined in/);
+---
+>         .toThrow(/"bar" not defined in/);
+23c30
+<     it('should handle explicit undefined', function() {
+---
+>     it('should handle explicit undefined', () => {
+30c37
+<     it('should error on missing property lookup in known helpers mode', function() {
+---
+>     it('should error on missing property lookup in known helpers mode', () => {
+34c41
+<           knownHelpersOnly: true
+---
+>           knownHelpersOnly: true,
+36c43
+<         .toThrow(Exception, /"hello" not defined in/);
+---
+>         .toThrow(/"hello" not defined in/);
+39,42c46,47
+<     it('should error on missing context', function() {
+<       expectTemplate('{{hello}}')
+<         .withCompileOptions({ strict: true })
+<         .toThrow(Error);
+---
+>     it('should error on missing context', () => {
+>       expectTemplate('{{hello}}').withCompileOptions({ strict: true }).toThrow(Error);
+45,47c50,52
+<     it('should error on missing data lookup', function() {
+<       var xt = expectTemplate('{{@hello}}').withCompileOptions({
+<         strict: true
+---
+>     it('should error on missing data lookup', () => {
+>       const xt = expectTemplate('{{@hello}}').withCompileOptions({
+>         strict: true,
+55c60
+<     it('should not run helperMissing for helper calls', function() {
+---
+>     it('should not run helperMissing for helper calls', () => {
+59c64
+<         .toThrow(Exception, /"hello" not defined in/);
+---
+>         .toThrow(/"hello" not defined in/);
+64c69
+<         .toThrow(Exception, /"hello" not defined in/);
+---
+>         .toThrow(/"hello" not defined in/);
+67c72
+<     it('should throw on ambiguous blocks', function() {
+---
+>     it('should throw on ambiguous blocks', () => {
+70c75
+<         .toThrow(Exception, /"hello" not defined in/);
+---
+>         .toThrow(/"hello" not defined in/);
+74c79
+<         .toThrow(Exception, /"hello" not defined in/);
+---
+>         .toThrow(/"hello" not defined in/);
+79c84
+<         .toThrow(Exception, /"bar" not defined in/);
+---
+>         .toThrow(/"bar" not defined in/);
+82c87
+<     it('should allow undefined parameters when passed to helpers', function() {
+---
+>     it('should allow undefined parameters when passed to helpers', () => {
+88c93
+<     it('should allow undefined hash when passed to helpers', function() {
+---
+>     it('should allow undefined hash when passed to helpers', () => {
+91c96
+<           strict: true
+---
+>           strict: true,
+94,96c99,101
+<           helper: function(options) {
+<             equals('value' in options.hash, true);
+<             equals(options.hash.value, undefined);
+---
+>           helper(options) {
+>             expect('value' in options.hash).toEqual(true);
+>             expect(options.hash.value).toBeUndefined();
+98c103
+<           }
+---
+>           },
+103c108
+<     it('should show error location on missing property lookup', function() {
+---
+>     it('should show error location on missing property lookup', () => {
+106c111
+<         .toThrow(Exception, '"hello" not defined in [object Object] - 4:5');
+---
+>         .toThrow('"hello" not defined in [object Object] - 4:5');
+109c114
+<     it('should error contains correct location properties on missing property lookup', function() {
+---
+>     it('should error contains correct location properties on missing property lookup', () => {
+111,114c116,118
+<         var template = CompilerContext.compile('\n\n\n   {{hello}}', {
+<           strict: true
+<         });
+<         template({});
+---
+>         expectTemplate('\n\n\n   {{hello}}')
+>           .withCompileOptions({ strict: true })
+>           .toCompileTo('throw before asserting this');
+116,119c120,123
+<         equals(error.lineNumber, 4);
+<         equals(error.endLineNumber, 4);
+<         equals(error.column, 5);
+<         equals(error.endColumn, 10);
+---
+>         expect(error.lineNumber).toEqual(4);
+>         expect(error.endLineNumber).toEqual(4);
+>         expect(error.column).toEqual(5);
+>         expect(error.endColumn).toEqual(10);
+124,128c128,130
+<   describe('assume objects', function() {
+<     it('should ignore missing property', function() {
+<       expectTemplate('{{hello}}')
+<         .withCompileOptions({ assumeObjects: true })
+<         .toCompileTo('');
+---
+>   describe('assume objects', () => {
+>     it('should ignore missing property', () => {
+>       expectTemplate('{{hello}}').withCompileOptions({ assumeObjects: true }).toCompileTo('');
+131c133
+<     it('should ignore missing child', function() {
+---
+>     it('should ignore missing child', () => {
+138,141c140,141
+<     it('should error on missing object', function() {
+<       expectTemplate('{{hello.bar}}')
+<         .withCompileOptions({ assumeObjects: true })
+<         .toThrow(Error);
+---
+>     it('should error on missing object', () => {
+>       expectTemplate('{{hello.bar}}').withCompileOptions({ assumeObjects: true }).toThrow(Error);
+144c144
+<     it('should error on missing context', function() {
+---
+>     it('should error on missing context', () => {
+151c151
+<     it('should error on missing data lookup', function() {
+---
+>     it('should error on missing data lookup', () => {
+158c158
+<     it('should execute blockHelperMissing', function() {
+---
+>     it('should execute blockHelperMissing', () => {

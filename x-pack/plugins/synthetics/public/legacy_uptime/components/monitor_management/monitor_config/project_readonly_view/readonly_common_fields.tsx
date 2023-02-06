@@ -39,7 +39,7 @@ export const ProjectReadonlyCommonFields = ({
         title={
           <FormattedMessage
             id="xpack.synthetics.browser.project.readOnly.callout.title"
-            defaultMessage="This configuration is read-only"
+            defaultMessage="Read only"
           />
         }
         iconType="document"

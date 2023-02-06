@@ -54,6 +54,8 @@ export const getThreatList = async ({
     `Querying the indicator items from the index: "${index}" with searchAfter: "${searchAfter}" for up to ${calculatedPerPage} indicator items`
   );
 
+  // console.log('queryFilter2', JSON.stringify(queryFilter, null, 2));
+
   const response = await esClient.search<
     ThreatListDoc,
     Record<string, estypes.AggregationsAggregate>
@@ -68,10 +70,14 @@ export const getThreatList = async ({
         listItemIndex: listClient.getListItemIndex(),
       }),
     },
+    // Because version_range stores the version as hash
+    _source: true,
     track_total_hits: false,
     size: calculatedPerPage,
     pit: { id: pitId },
   });
+
+  // console.log('response', response);
 
   ruleExecutionLogger.debug(`Retrieved indicator items of size: ${response.hits.hits.length}`);
 
@@ -107,6 +113,7 @@ export const getThreatListCount = async ({
     index,
     exceptionFilter,
   });
+  // console.log('queryFilter', JSON.stringify(queryFilter, null, 2));
   const response = await esClient.count({
     body: {
       query: queryFilter,

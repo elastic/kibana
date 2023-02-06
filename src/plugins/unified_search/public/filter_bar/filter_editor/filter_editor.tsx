@@ -32,7 +32,6 @@ import {
   buildEmptyFilter,
   filterToQueryDsl,
   getFilterParams,
-  isCombinedFilter,
 } from '@kbn/es-query';
 import { merge } from 'lodash';
 import React, { Component } from 'react';
@@ -391,10 +390,9 @@ class FilterEditorComponent extends Component<FilterEditorProps, State> {
   };
 
   private isUnknownFilterType() {
-    const { type } = this.props.filter.meta;
-    if (isCombinedFilter(this.props.filter)) {
-      const { params } = this.props.filter.meta;
-      return params && this.hasCombinedFilterCustomType(params);
+    const { type, params } = this.props.filter.meta;
+    if (params && type === 'combined') {
+      return this.hasCombinedFilterCustomType(params);
     }
     return !!type && !['phrase', 'phrases', 'range', 'exists', 'combined'].includes(type);
   }

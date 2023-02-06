@@ -179,7 +179,6 @@ const PackFormComponent: React.FC<PackFormProps> = ({
     },
     [createAsync, defaultValue?.id, editMode, getShards, shards, updateAsync]
   );
-
   const handleSubmitForm = useMemo(() => handleSubmit(onSubmit), [handleSubmit, onSubmit]);
 
   const agentCount = useMemo(

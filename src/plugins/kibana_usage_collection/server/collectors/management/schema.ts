@@ -570,4 +570,8 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },
+  'enterpriseSearch:enableEnginesSection': {
+    type: 'boolean',
+    _meta: { description: 'Non-default value of setting.' },
+  },
 };

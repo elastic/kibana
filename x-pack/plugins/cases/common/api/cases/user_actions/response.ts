@@ -8,7 +8,6 @@
 import * as rt from 'io-ts';
 
 import type { ActionsRt, ActionTypeValues } from './common';
-
 import {
   CaseUserActionInjectedIdsRt,
   CaseUserActionInjectedDeprecatedIdsRt,
@@ -26,7 +25,6 @@ import { StatusUserActionRt } from './status';
 import { DeleteCaseUserActionRt } from './delete_case';
 import { SeverityUserActionRt } from './severity';
 import { AssigneesUserActionRt } from './assignees';
-import { CaseUserActionStatsRt } from './stats';
 
 const CommonUserActionsRt = rt.union([
   DescriptionUserActionRt,
@@ -85,13 +83,11 @@ const CaseUserActionResponseRt = rt.intersection([
 const CaseUserActionAttributesRt = CaseUserActionBasicRt;
 export const CaseUserActionsResponseRt = rt.array(CaseUserActionResponseRt);
 export const CaseUserActionsDeprecatedResponseRt = rt.array(CaseUserActionDeprecatedResponseRt);
-export const CaseUserActionStatsResponseRt = CaseUserActionStatsRt;
 
 export type CaseUserActionAttributes = rt.TypeOf<typeof CaseUserActionAttributesRt>;
 export type CaseUserActionAttributesWithoutConnectorId = rt.TypeOf<
   typeof CaseUserActionBasicWithoutConnectorIdRt
 >;
-export type CaseUserActionStatsResponse = rt.TypeOf<typeof CaseUserActionStatsRt>;
 export type CaseUserActionsResponse = rt.TypeOf<typeof CaseUserActionsResponseRt>;
 export type CaseUserActionResponse = rt.TypeOf<typeof CaseUserActionResponseRt>;
 export type CaseUserActionsDeprecatedResponse = rt.TypeOf<

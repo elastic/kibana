@@ -5,16 +5,10 @@
  * 2.0.
  */
 
-import { ErrorToastOptions } from '@kbn/core-notifications-browser';
-
 import {
-  EncryptedSyntheticsMonitor,
   EncryptedSyntheticsSavedMonitor,
   FetchMonitorManagementListQueryArgs,
-  SyntheticsMonitor,
 } from '../../../../../common/runtime_types';
-
-import { IHttpSerializedFetchError } from '../utils/http_error';
 
 export type MonitorListSortField = `${keyof EncryptedSyntheticsSavedMonitor}.keyword` | 'enabled';
 
@@ -32,27 +26,7 @@ export interface MonitorListPageState extends MonitorFilterState {
   pageSize: number;
   sortField: MonitorListSortField;
   sortOrder: NonNullable<FetchMonitorManagementListQueryArgs['sortOrder']>;
-}
-
-interface ToastParams<MessageType> {
-  message: MessageType;
-  lifetimeMs: number;
-  testAttribute?: string;
-}
-
-export interface UpsertMonitorRequest {
-  configId: string;
-  monitor: Partial<SyntheticsMonitor> | Partial<EncryptedSyntheticsMonitor>;
-  success: ToastParams<string>;
-  error: ToastParams<ErrorToastOptions>;
-  /**
-   * The effect will perform a quiet refresh of the overview state
-   * after a successful upsert. The default behavior is to perform the fetch.
-   */
-  shouldQuietFetchAfterSuccess?: boolean;
-}
-
-export interface UpsertMonitorError {
-  configId: string;
-  error: IHttpSerializedFetchError;
+  tags?: string[];
+  monitorType?: string[];
+  locations?: string[];
 }

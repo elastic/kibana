@@ -9,25 +9,17 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { isValidNamespace } from '@kbn/fleet-plugin/common';
+import { UseFormReturn, ControllerRenderProps, FormState } from 'react-hook-form';
 import {
   EuiCode,
   EuiComboBoxOptionOption,
+  EuiComboBoxProps,
   EuiFlexGroup,
   EuiFlexItem,
   EuiSuperSelect,
   EuiText,
   EuiLink,
   EuiTextArea,
-  EuiSelectProps,
-  EuiFieldTextProps,
-  EuiSwitchProps,
-  EuiComboBoxProps,
-  EuiFieldNumberProps,
-  EuiFieldPasswordProps,
-  EuiCheckboxProps,
-  EuiTextAreaProps,
-  EuiButtonGroupProps,
-  EuiSuperSelectProps,
 } from '@elastic/eui';
 import {
   FieldText,
@@ -40,18 +32,13 @@ import {
   Source,
   ButtonGroup,
   FormattedComboBox,
-  FormattedComboBoxProps,
   JSONEditor,
-  JSONCodeEditorProps,
   MonitorTypeRadioGroup,
   HeaderField,
-  HeaderFieldProps,
   RequestBodyField,
-  RequestBodyFieldProps,
   ResponseBodyIndexField,
-  ResponseBodyIndexFieldProps,
-  ControlledFieldProp,
 } from './field_wrappers';
+import { formatLocation } from '../../../../../../common/utils/location_formatter';
 import { getDocLinks } from '../../../../../kibana_services';
 import { useMonitorName } from '../hooks/use_monitor_name';
 import {
@@ -59,12 +46,14 @@ import {
   DataStream,
   FormMonitorType,
   HTTPMethod,
-  ScreenshotOption,
   MonitorFields,
+  MonitorServiceLocations,
+  ScreenshotOption,
+  ServiceLocations,
+  SyntheticsMonitor,
   TLSVersion,
   VerificationMode,
-  FieldMap,
-  FormLocation,
+  FieldMeta,
 } from '../types';
 import { AlertConfigKey, DEFAULT_BROWSER_ADVANCED_FIELDS } from '../constants';
 import { getDefaultFormFields } from './defaults';
@@ -201,7 +190,7 @@ export const MONITOR_TYPE_CONFIG = {
   },
 };
 
-export const FIELD = (readOnly?: boolean): FieldMap => ({
+export const FIELD: Record<string, FieldMeta> = {
   [ConfigKey.FORM_MONITOR_TYPE]: {
     fieldKey: ConfigKey.FORM_MONITOR_TYPE,
     required: true,
@@ -222,7 +211,7 @@ export const FIELD = (readOnly?: boolean): FieldMap => ({
       required: true,
     }),
   },
-  [`urls__single`]: {
+  [`${ConfigKey.URLS}__single`]: {
     fieldKey: ConfigKey.URLS,
     required: true,
     component: FieldText,
@@ -234,7 +223,7 @@ export const FIELD = (readOnly?: boolean): FieldMap => ({
     }),
     controlled: true,
     dependencies: [ConfigKey.NAME],
-    props: ({ setValue, dependenciesFieldMeta, isEdit, formState }): EuiFieldTextProps => {
+    props: ({ setValue, dependenciesFieldMeta, isEdit, formState }) => {
       return {
         'data-test-subj': 'syntheticsMonitorConfigURL',
         onChange: (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -247,11 +236,10 @@ export const FIELD = (readOnly?: boolean): FieldMap => ({
             });
           }
         },
-        readOnly,
       };
     },
   },
-  [`urls__http`]: {
+  [`${ConfigKey.URLS}__http`]: {
     fieldKey: ConfigKey.URLS,
     required: true,
     component: FieldText,
@@ -263,7 +251,7 @@ export const FIELD = (readOnly?: boolean): FieldMap => ({
     }),
     controlled: true,
     dependencies: [ConfigKey.NAME],
-    props: ({ setValue, dependenciesFieldMeta, isEdit, formState }): EuiFieldTextProps => {
+    props: ({ setValue, dependenciesFieldMeta, isEdit, formState }) => {
       return {
         onChange: (event: React.ChangeEvent<HTMLInputElement>) => {
           setValue(ConfigKey.URLS, event.target.value, {
@@ -276,11 +264,10 @@ export const FIELD = (readOnly?: boolean): FieldMap => ({
           }
         },
         'data-test-subj': 'syntheticsMonitorConfigURL',
-        readOnly,
       };
     },
   },
-  [`hosts__tcp`]: {
+  [`${ConfigKey.HOSTS}__tcp`]: {
     fieldKey: ConfigKey.HOSTS,
     required: true,
     component: FieldText,
@@ -289,7 +276,7 @@ export const FIELD = (readOnly?: boolean): FieldMap => ({
     }),
     controlled: true,
     dependencies: [ConfigKey.NAME],
-    props: ({ setValue, dependenciesFieldMeta, isEdit, formState }): EuiFieldTextProps => {
+    props: ({ setValue, dependenciesFieldMeta, isEdit, formState }) => {
       return {
         onChange: (event: React.ChangeEvent<HTMLInputElement>) => {
           setValue(ConfigKey.HOSTS, event.target.value, {
@@ -302,11 +289,10 @@ export const FIELD = (readOnly?: boolean): FieldMap => ({
           }
         },
         'data-test-subj': 'syntheticsMonitorConfigHost',
-        readOnly,
       };
     },
   },
-  [`hosts__icmp`]: {
+  [`${ConfigKey.HOSTS}__icmp`]: {
     fieldKey: ConfigKey.HOSTS,
     required: true,
     component: FieldText,
@@ -315,7 +301,7 @@ export const FIELD = (readOnly?: boolean): FieldMap => ({
     }),
     controlled: true,
     dependencies: [ConfigKey.NAME],
-    props: ({ setValue, dependenciesFieldMeta, isEdit, formState }): EuiFieldTextProps => {
+    props: ({ setValue, dependenciesFieldMeta, isEdit, formState }) => {
       return {
         onChange: (event: React.ChangeEvent<HTMLInputElement>) => {
           setValue(ConfigKey.HOSTS, event.target.value, {
@@ -328,7 +314,6 @@ export const FIELD = (readOnly?: boolean): FieldMap => ({
           }
         },
         'data-test-subj': 'syntheticsMonitorConfigHost',
-        readOnly,
       };
     },
   },
@@ -360,12 +345,11 @@ export const FIELD = (readOnly?: boolean): FieldMap => ({
     error: i18n.translate('xpack.synthetics.monitorConfig.name.error', {
       defaultMessage: 'Monitor name is required',
     }),
-    props: (): EuiFieldTextProps => ({
+    props: () => ({
       'data-test-subj': 'syntheticsMonitorConfigName',
-      readOnly,
     }),
   },
-  ['schedule.number']: {
+  [ConfigKey.SCHEDULE]: {
     fieldKey: `${ConfigKey.SCHEDULE}.number`,
     required: true,
     component: Select,
@@ -377,12 +361,11 @@ export const FIELD = (readOnly?: boolean): FieldMap => ({
         'How often do you want to run this test? Higher frequencies will increase your total cost.',
     }),
     dependencies: [ConfigKey.MONITOR_TYPE],
-    props: ({ dependencies }): EuiSelectProps => {
+    props: ({ dependencies }) => {
       const [monitorType] = dependencies;
       return {
         'data-test-subj': 'syntheticsMonitorConfigSchedule',
         options: monitorType === DataStream.BROWSER ? BROWSER_SCHEDULES : LIGHTWEIGHT_SCHEDULES,
-        disabled: readOnly,
       };
     },
   },
@@ -390,7 +373,7 @@ export const FIELD = (readOnly?: boolean): FieldMap => ({
     fieldKey: ConfigKey.LOCATIONS,
     required: true,
     controlled: true,
-    component: ComboBox,
+    component: ComboBox as React.ComponentType<EuiComboBoxProps<string>>,
     label: i18n.translate('xpack.synthetics.monitorConfig.locations.label', {
       defaultMessage: 'Locations',
     }),
@@ -398,26 +381,39 @@ export const FIELD = (readOnly?: boolean): FieldMap => ({
       defaultMessage:
         'Where do you want to run this test from? Additional locations will increase your total cost.',
     }),
-    props: ({ field, setValue, locations, formState }) => {
+    props: ({
+      field,
+      setValue,
+      locations,
+      formState,
+    }: {
+      field?: ControllerRenderProps;
+      setValue: UseFormReturn['setValue'];
+      locations: ServiceLocations;
+      formState: FormState<SyntheticsMonitor>;
+    }) => {
       return {
         options: Object.values(locations).map((location) => ({
-          label: locations?.find((loc) => location.id === loc.id)?.label || '',
-          id: location.id || '',
-          isServiceManaged: location.isServiceManaged || false,
+          label: locations?.find((loc) => location.id === loc.id)?.label,
+          id: location.id,
+          key: location.id,
+          isServiceManaged: location.isServiceManaged,
         })),
-        selectedOptions: Object.values(field?.value || {}).map((location) => ({
+        selectedOptions: Object.values(field?.value as ServiceLocations).map((location) => ({
           color: locations.some((s) => s.id === location.id) ? 'default' : 'danger',
           label: locations?.find((loc) => location.id === loc.id)?.label ?? location.id,
-          id: location.id || '',
-          isServiceManaged: location.isServiceManaged || false,
+          id: location.id,
+          key: location.id,
+          isServiceManaged: location.isServiceManaged,
         })),
         'data-test-subj': 'syntheticsMonitorConfigLocations',
-        onChange: (updatedValues: FormLocation[]) => {
-          setValue(ConfigKey.LOCATIONS, updatedValues, {
-            shouldValidate: Boolean(formState.submitCount > 0),
-          });
+        onChange: (updatedValues: ServiceLocations) => {
+          setValue(
+            ConfigKey.LOCATIONS,
+            updatedValues.map((location) => formatLocation(location)) as MonitorServiceLocations,
+            { shouldValidate: Boolean(formState.submitCount > 0) }
+          );
         },
-        isDisabled: readOnly,
       };
     },
   },
@@ -428,7 +424,7 @@ export const FIELD = (readOnly?: boolean): FieldMap => ({
       defaultMessage: 'Enable Monitor',
     }),
     controlled: true,
-    props: ({ isEdit, setValue, field }): EuiSwitchProps => ({
+    props: ({ isEdit, setValue }) => ({
       id: 'syntheticsMontiorConfigIsEnabled',
       label: isEdit
         ? i18n.translate('xpack.synthetics.monitorConfig.edit.enabled.label', {
@@ -438,21 +434,19 @@ export const FIELD = (readOnly?: boolean): FieldMap => ({
             defaultMessage:
               'Disabled monitors do not run tests. You can create a disabled monitor and enable it later.',
           }),
-      checked: field?.value || false,
-      onChange: (event) => {
+      onChange: (event: React.ChangeEvent<HTMLInputElement>) => {
         setValue(ConfigKey.ENABLED, !!event.target.checked);
       },
-      'data-test-subj': 'syntheticsEnableSwitch',
     }),
   },
-  [AlertConfigKey.STATUS_ENABLED]: {
+  [ConfigKey.ALERT_CONFIG]: {
     fieldKey: AlertConfigKey.STATUS_ENABLED,
     component: Switch,
     label: i18n.translate('xpack.synthetics.monitorConfig.enabledAlerting.label', {
       defaultMessage: 'Enable status alerts',
     }),
     controlled: true,
-    props: ({ isEdit, setValue, field }): EuiSwitchProps => ({
+    props: ({ isEdit, setValue, field }) => ({
       id: 'syntheticsMonitorConfigIsAlertEnabled',
       label: isEdit
         ? i18n.translate('xpack.synthetics.monitorConfig.edit.alertEnabled.label', {
@@ -461,11 +455,9 @@ export const FIELD = (readOnly?: boolean): FieldMap => ({
         : i18n.translate('xpack.synthetics.monitorConfig.create.alertEnabled.label', {
             defaultMessage: 'Enable status alerts on this monitor.',
           }),
-      checked: field?.value || false,
-      onChange: (event) => {
+      onChange: (event: React.ChangeEvent<HTMLInputElement>) => {
         setValue(AlertConfigKey.STATUS_ENABLED, !!event.target.checked);
       },
-      disabled: readOnly,
     }),
   },
   [ConfigKey.TAGS]: {
@@ -479,11 +471,8 @@ export const FIELD = (readOnly?: boolean): FieldMap => ({
         'A list of tags that will be sent with each monitor event. Useful for searching and segmenting data.',
     }),
     controlled: true,
-    props: ({
-      field,
-    }): Omit<EuiComboBoxProps<string>, 'selectedOptions'> & FormattedComboBoxProps => ({
-      selectedOptions: field?.value || [],
-      isDisabled: readOnly,
+    props: ({ field }) => ({
+      selectedOptions: field?.value,
     }),
   },
   [ConfigKey.TIMEOUT]: {
@@ -495,10 +484,9 @@ export const FIELD = (readOnly?: boolean): FieldMap => ({
     helpText: i18n.translate('xpack.synthetics.monitorConfig.timeout.helpText', {
       defaultMessage: 'The total time allowed for testing the connection and exchanging data.',
     }),
-    props: (): EuiFieldNumberProps => ({
+    props: () => ({
       min: 1,
       step: 'any',
-      readOnly,
     }),
     dependencies: [ConfigKey.SCHEDULE],
     validation: ([schedule]) => {
@@ -535,9 +523,9 @@ export const FIELD = (readOnly?: boolean): FieldMap => ({
         'Corresponds to the service.name ECS field from APM. Set this to enable integrations between APM and Synthetics data.',
     }),
     controlled: true,
-    props: (): EuiFieldTextProps => ({
+    props: ({ field }) => ({
+      selectedOptions: field?.value,
       'data-test-subj': 'syntheticsMonitorConfigAPMServiceName',
-      readOnly,
     }),
   },
   [ConfigKey.NAMESPACE]: {
@@ -560,8 +548,8 @@ export const FIELD = (readOnly?: boolean): FieldMap => ({
       </span>
     ),
     controlled: true,
-    props: (): EuiFieldTextProps => ({
-      readOnly,
+    props: ({ field }) => ({
+      selectedOptions: field,
     }),
     validation: () => ({
       validate: (namespace) => isValidNamespace(namespace).error,
@@ -576,11 +564,10 @@ export const FIELD = (readOnly?: boolean): FieldMap => ({
     helpText: i18n.translate('xpack.synthetics.monitorConfig.maxRedirects.helpText', {
       defaultMessage: 'The total number of redirects to follow.',
     }),
-    props: (): EuiFieldNumberProps => ({
+    props: () => ({
       min: 0,
       max: 10,
       step: 1,
-      readOnly,
     }),
     validation: () => ({
       min: 0,
@@ -600,10 +587,9 @@ export const FIELD = (readOnly?: boolean): FieldMap => ({
       defaultMessage:
         'The duration to wait before emitting another ICMP Echo Request if no response is received.',
     }),
-    props: (): EuiFieldNumberProps => ({
+    props: () => ({
       min: 1,
       step: 1,
-      readOnly,
     }),
     validation: () => ({
       min: 1,
@@ -622,9 +608,6 @@ export const FIELD = (readOnly?: boolean): FieldMap => ({
     helpText: i18n.translate('xpack.synthetics.monitorConfig.username.helpText', {
       defaultMessage: 'Username for authenticating with the server.',
     }),
-    props: (): EuiFieldTextProps => ({
-      readOnly,
-    }),
   },
   [ConfigKey.PASSWORD]: {
     fieldKey: ConfigKey.PASSWORD,
@@ -634,9 +617,6 @@ export const FIELD = (readOnly?: boolean): FieldMap => ({
     }),
     helpText: i18n.translate('xpack.synthetics.monitorConfig.password.helpText', {
       defaultMessage: 'Password for authenticating with the server.',
-    }),
-    props: (): EuiFieldPasswordProps => ({
-      readOnly,
     }),
   },
   [ConfigKey.PROXY_URL]: {
@@ -648,9 +628,6 @@ export const FIELD = (readOnly?: boolean): FieldMap => ({
     helpText: i18n.translate('xpack.synthetics.monitorConfig.proxyUrl.helpText', {
       defaultMessage: 'HTTP proxy URL',
     }),
-    props: (): EuiFieldTextProps => ({
-      readOnly,
-    }),
   },
   [ConfigKey.REQUEST_METHOD_CHECK]: {
     fieldKey: ConfigKey.REQUEST_METHOD_CHECK,
@@ -661,12 +638,11 @@ export const FIELD = (readOnly?: boolean): FieldMap => ({
     helpText: i18n.translate('xpack.synthetics.monitorConfig.requestMethod.helpText', {
       defaultMessage: 'The HTTP method to use.',
     }),
-    props: (): EuiSelectProps => ({
+    props: () => ({
       options: Object.keys(HTTPMethod).map((method) => ({
         value: method,
         text: method,
       })),
-      disabled: readOnly,
     }),
   },
   [ConfigKey.REQUEST_HEADERS_CHECK]: {
@@ -686,9 +662,6 @@ export const FIELD = (readOnly?: boolean): FieldMap => ({
     error: i18n.translate('xpack.synthetics.monitorConfig.requestHeaders.error', {
       defaultMessage: 'Header key must be a valid HTTP token.',
     }),
-    props: (): HeaderFieldProps => ({
-      readOnly,
-    }),
   },
   [ConfigKey.REQUEST_BODY_CHECK]: {
     fieldKey: ConfigKey.REQUEST_BODY_CHECK,
@@ -700,9 +673,6 @@ export const FIELD = (readOnly?: boolean): FieldMap => ({
       defaultMessage: 'Request body content.',
     }),
     controlled: true,
-    props: (): RequestBodyFieldProps => ({
-      readOnly,
-    }),
   },
   [ConfigKey.RESPONSE_HEADERS_INDEX]: {
     fieldKey: ConfigKey.RESPONSE_HEADERS_INDEX,
@@ -716,12 +686,11 @@ export const FIELD = (readOnly?: boolean): FieldMap => ({
         <EuiCode>http.response.body.headers</EuiCode>
       </>
     ),
-    props: (): Omit<EuiCheckboxProps, ControlledFieldProp> => ({
+    props: () => ({
       label: i18n.translate('xpack.synthetics.monitorConfig.indexResponseHeaders.label', {
         defaultMessage: 'Index response headers',
       }),
-      id: 'syntheticsMonitorConfigResponseHeadersIndex', // checkbox needs an id or it won't work,
-      disabled: readOnly,
+      id: 'syntheticsMonitorConfigResponseHeadersIndex', // checkbox needs an id or it won't work
     }),
     controlled: true,
   },
@@ -737,8 +706,10 @@ export const FIELD = (readOnly?: boolean): FieldMap => ({
         <EuiCode>http.response.body.contents</EuiCode>
       </>
     ),
-    props: (): ResponseBodyIndexFieldProps => ({
-      readOnly,
+    props: () => ({
+      label: i18n.translate('xpack.synthetics.monitorConfig.indexResponseBody.label', {
+        defaultMessage: 'Index response body',
+      }),
     }),
     controlled: true,
   },
@@ -753,9 +724,8 @@ export const FIELD = (readOnly?: boolean): FieldMap => ({
         'A list of expected status codes. Press enter to add a new code. 4xx and 5xx codes are considered down by default. Other codes are considered up.',
     }),
     controlled: true,
-    props: ({ field }): EuiComboBoxProps<string> => ({
+    props: ({ field }) => ({
       selectedOptions: field?.value,
-      isDisabled: readOnly,
     }),
     validation: () => ({
       validate: (value) => {
@@ -787,9 +757,6 @@ export const FIELD = (readOnly?: boolean): FieldMap => ({
     error: i18n.translate('xpack.synthetics.monitorConfig.responseHeadersCheck.error', {
       defaultMessage: 'Header key must be a valid HTTP token.',
     }),
-    props: (): HeaderFieldProps => ({
-      readOnly,
-    }),
   },
   [ConfigKey.RESPONSE_BODY_CHECK_POSITIVE]: {
     fieldKey: ConfigKey.RESPONSE_BODY_CHECK_POSITIVE,
@@ -802,9 +769,8 @@ export const FIELD = (readOnly?: boolean): FieldMap => ({
         'A list of regular expressions to match the body output. Press enter to add a new expression. Only a single expression needs to match.',
     }),
     controlled: true,
-    props: ({ field }): EuiComboBoxProps<string> => ({
+    props: ({ field }) => ({
       selectedOptions: field?.value,
-      isDisabled: readOnly,
     }),
   },
   [ConfigKey.RESPONSE_BODY_CHECK_NEGATIVE]: {
@@ -818,9 +784,8 @@ export const FIELD = (readOnly?: boolean): FieldMap => ({
         'A list of regular expressions to match the the body output negatively. Press enter to add a new expression. Return match failed if single expression matches.',
     }),
     controlled: true,
-    props: ({ field }): EuiComboBoxProps<string> => ({
+    props: ({ field }) => ({
       selectedOptions: field?.value,
-      isDisabled: readOnly,
     }),
   },
   [ConfigKey.RESPONSE_RECEIVE_CHECK]: {
@@ -832,11 +797,8 @@ export const FIELD = (readOnly?: boolean): FieldMap => ({
     helpText: i18n.translate('xpack.synthetics.monitorConfig.responseReceiveCheck.helpText', {
       defaultMessage: 'The expected remote host response.',
     }),
-    props: (): EuiFieldTextProps => ({
-      readOnly,
-    }),
   },
-  ['proxy_url__tcp']: {
+  [`${ConfigKey.PROXY_URL}__tcp`]: {
     fieldKey: ConfigKey.PROXY_URL,
     component: FieldText,
     label: i18n.translate('xpack.synthetics.monitorConfig.proxyURLTCP.label', {
@@ -845,9 +807,6 @@ export const FIELD = (readOnly?: boolean): FieldMap => ({
     helpText: i18n.translate('xpack.synthetics.monitorConfig.proxyURLTCP.helpText', {
       defaultMessage:
         'The URL of the SOCKS5 proxy to use when connecting to the server. The value must be a URL with a scheme of socks5://.',
-    }),
-    props: (): EuiFieldTextProps => ({
-      readOnly,
     }),
   },
   [ConfigKey.REQUEST_SEND_CHECK]: {
@@ -859,11 +818,8 @@ export const FIELD = (readOnly?: boolean): FieldMap => ({
     helpText: i18n.translate('xpack.synthetics.monitorConfig.requestSendCheck.helpText', {
       defaultMessage: 'A payload string to send to the remote host.',
     }),
-    props: (): EuiFieldTextProps => ({
-      readOnly,
-    }),
   },
-  ['source.inline']: {
+  [ConfigKey.SOURCE_INLINE]: {
     fieldKey: 'source.inline',
     required: true,
     component: Source,
@@ -887,13 +843,12 @@ export const FIELD = (readOnly?: boolean): FieldMap => ({
       defaultMessage: 'Parameters',
     }),
     component: JSONEditor,
-    props: ({ setValue }): JSONCodeEditorProps => ({
+    props: ({ setValue }) => ({
       id: 'syntheticsMonitorConfigParams',
       height: '100px',
-      ariaLabel: i18n.translate('xpack.synthetics.monitorConfig.paramsAria.label', {
-        defaultMessage: 'Monitor params code editor',
-      }),
-      readOnly,
+      onChange: (json: string) => {
+        setValue(ConfigKey.PARAMS, json);
+      },
     }),
     error: i18n.translate('xpack.synthetics.monitorConfig.params.error', {
       defaultMessage: 'Invalid JSON format',
@@ -922,17 +877,15 @@ export const FIELD = (readOnly?: boolean): FieldMap => ({
     fieldKey: 'isTLSEnabled',
     component: Switch,
     controlled: true,
-    props: ({ setValue, field }): EuiSwitchProps => {
+    props: ({ setValue }) => {
       return {
         id: 'syntheticsMontiorConfigIsTLSEnabledSwitch',
         label: i18n.translate('xpack.synthetics.monitorConfig.customTLS.label', {
           defaultMessage: 'Use custom TLS configuration',
         }),
-        checked: field?.value || false,
-        onChange: (event) => {
+        onChange: (event: React.ChangeEvent<HTMLInputElement>) => {
           setValue('isTLSEnabled', event.target.checked);
         },
-        disabled: readOnly,
       };
     },
   },
@@ -947,29 +900,34 @@ export const FIELD = (readOnly?: boolean): FieldMap => ({
         'Verifies that the provided certificate is signed by a trusted authority (CA) and also verifies that the server’s hostname (or IP address) matches the names identified within the certificate. If the Subject Alternative Name is empty, it returns an error.',
     }),
     showWhen: ['isTLSEnabled', true],
-    props: (): EuiSelectProps => ({
+    props: () => ({
       options: Object.values(VerificationMode).map((method) => ({
         value: method,
         text: method.toUpperCase(),
       })),
-      disabled: readOnly,
     }),
   },
   [ConfigKey.TLS_VERSION]: {
     fieldKey: ConfigKey.TLS_VERSION,
-    component: ComboBox,
+    component: ComboBox as React.ComponentType<EuiComboBoxProps<string>>,
     label: i18n.translate('xpack.synthetics.monitorConfig.tlsVersion.label', {
       defaultMessage: 'Supported TLS protocols',
     }),
     controlled: true,
     showWhen: ['isTLSEnabled', true],
-    props: ({ field, setValue }): EuiComboBoxProps<TLSVersion> => {
+    props: ({
+      field,
+      setValue,
+    }: {
+      field?: ControllerRenderProps;
+      setValue: UseFormReturn['setValue'];
+    }) => {
       return {
         options: Object.values(TLSVersion).map((version) => ({
           label: version,
         })),
-        selectedOptions: Object.values(field?.value || []).map((version) => ({
-          label: version as TLSVersion,
+        selectedOptions: Object.values(field?.value).map((version) => ({
+          label: version,
         })),
         onChange: (updatedValues: Array<EuiComboBoxOptionOption<TLSVersion>>) => {
           setValue(
@@ -977,7 +935,6 @@ export const FIELD = (readOnly?: boolean): FieldMap => ({
             updatedValues.map((option) => option.label as TLSVersion)
           );
         },
-        isDisabled: readOnly,
       };
     },
   },
@@ -991,9 +948,6 @@ export const FIELD = (readOnly?: boolean): FieldMap => ({
       defaultMessage: 'PEM-formatted custom certificate authorities.',
     }),
     showWhen: ['isTLSEnabled', true],
-    props: (): EuiTextAreaProps => ({
-      readOnly,
-    }),
   },
   [ConfigKey.TLS_CERTIFICATE]: {
     fieldKey: ConfigKey.TLS_CERTIFICATE,
@@ -1005,9 +959,6 @@ export const FIELD = (readOnly?: boolean): FieldMap => ({
       defaultMessage: 'PEM-formatted certificate for TLS client authentication.',
     }),
     showWhen: ['isTLSEnabled', true],
-    props: (): EuiTextAreaProps => ({
-      readOnly,
-    }),
   },
   [ConfigKey.TLS_KEY]: {
     fieldKey: ConfigKey.TLS_KEY,
@@ -1019,9 +970,6 @@ export const FIELD = (readOnly?: boolean): FieldMap => ({
       defaultMessage: 'PEM-formatted certificate key for TLS client authentication.',
     }),
     showWhen: ['isTLSEnabled', true],
-    props: (): EuiTextAreaProps => ({
-      readOnly,
-    }),
   },
   [ConfigKey.TLS_KEY_PASSPHRASE]: {
     fieldKey: ConfigKey.TLS_KEY_PASSPHRASE,
@@ -1033,9 +981,6 @@ export const FIELD = (readOnly?: boolean): FieldMap => ({
       defaultMessage: 'Certificate key passphrase for TLS client authentication.',
     }),
     showWhen: ['isTLSEnabled', true],
-    props: (): EuiFieldPasswordProps => ({
-      readOnly,
-    }),
   },
   [ConfigKey.SCREENSHOTS]: {
     fieldKey: ConfigKey.SCREENSHOTS,
@@ -1047,20 +992,23 @@ export const FIELD = (readOnly?: boolean): FieldMap => ({
       defaultMessage: 'Set this option to manage the screenshots captured by the synthetics agent.',
     }),
     controlled: true,
-    props: ({ field, setValue }): Omit<EuiButtonGroupProps, 'type'> => ({
+    props: ({
+      field,
+      setValue,
+    }: {
+      field?: ControllerRenderProps;
+      setValue: UseFormReturn['setValue'];
+    }) => ({
+      type: 'single',
       idSelected: field?.value,
-      onChange: (option: string) => setValue(ConfigKey.SCREENSHOTS, option),
+      onChange: (option: ScreenshotOption) => setValue(ConfigKey.SCREENSHOTS, option),
       options: Object.values(ScreenshotOption).map((option) => ({
         id: option,
         label: option.replace(/-/g, ' '),
       })),
-      legend: i18n.translate('xpack.synthetics.monitorConfig.screenshotOptions.label', {
-        defaultMessage: 'Screenshot options',
-      }),
       css: {
         textTransform: 'capitalize',
       },
-      isDisabled: readOnly,
     }),
   },
   [ConfigKey.TEXT_ASSERTION]: {
@@ -1076,9 +1024,6 @@ export const FIELD = (readOnly?: boolean): FieldMap => ({
     validation: () => ({
       required: true,
     }),
-    props: (): EuiFieldTextProps => ({
-      readOnly,
-    }),
   },
   [ConfigKey.THROTTLING_CONFIG]: {
     fieldKey: ConfigKey.THROTTLING_CONFIG,
@@ -1092,7 +1037,7 @@ export const FIELD = (readOnly?: boolean): FieldMap => ({
       defaultMessage:
         'Simulate network throttling (download, upload, latency). More options will be added in a future version.',
     }),
-    props: (): EuiSuperSelectProps<string> => ({
+    props: () => ({
       options: [
         {
           value: DEFAULT_BROWSER_ADVANCED_FIELDS[ConfigKey.THROTTLING_CONFIG],
@@ -1114,7 +1059,6 @@ export const FIELD = (readOnly?: boolean): FieldMap => ({
           ),
         },
       ],
-      readOnly,
       disabled: true, // currently disabled through 1.0 until we define connection profiles
     }),
     validation: () => ({
@@ -1153,15 +1097,14 @@ export const FIELD = (readOnly?: boolean): FieldMap => ({
     ),
     controlled: true,
     required: false,
-    props: (): JSONCodeEditorProps => ({
-      ariaLabel: i18n.translate(
-        'xpack.synthetics.monitorConfig.playwrightOptions.codeEditor.json.ariaLabel',
-        {
-          defaultMessage: 'Playwright options JSON code editor',
-        }
-      ),
-      readOnly,
-      id: 'syntheticsPlaywrightOptionsJSONCodeEditor',
+    props: ({
+      field,
+      setValue,
+    }: {
+      field?: ControllerRenderProps;
+      setValue: UseFormReturn['setValue'];
+    }) => ({
+      onChange: (json: string) => setValue(ConfigKey.PLAYWRIGHT_OPTIONS, json),
     }),
     validation: () => ({
       validate: (value) => {
@@ -1194,12 +1137,11 @@ export const FIELD = (readOnly?: boolean): FieldMap => ({
       onChange: (event: React.ChangeEvent<HTMLInputElement>) => {
         setValue(ConfigKey.IGNORE_HTTPS_ERRORS, !!event.target.checked);
       },
-      disabled: readOnly,
     }),
   },
   [ConfigKey.SYNTHETICS_ARGS]: {
     fieldKey: ConfigKey.SYNTHETICS_ARGS,
-    component: ComboBox as React.ComponentType<EuiComboBoxProps<string>>,
+    component: FieldText,
     controlled: true,
     label: i18n.translate('xpack.synthetics.monitorConfig.syntheticsArgs.label', {
       defaultMessage: 'Synthetics args',
@@ -1212,21 +1154,11 @@ export const FIELD = (readOnly?: boolean): FieldMap => ({
         })}
       </span>
     ),
-    props: ({ setValue, field }): EuiComboBoxProps<string> => ({
+    props: ({ setValue }) => ({
       id: 'syntheticsMontiorConfigSyntheticsArgs',
-      selectedOptions: Object.values(field?.value || []).map((arg) => ({
-        label: arg,
-      })),
-      onChange: (updatedValues: Array<EuiComboBoxOptionOption<string>>) => {
-        setValue(
-          ConfigKey.SYNTHETICS_ARGS,
-          updatedValues.map((option) => option.label)
-        );
+      onChange: (event: React.ChangeEvent<HTMLInputElement>) => {
+        setValue(ConfigKey.SYNTHETICS_ARGS, event.target.value);
       },
-      onCreateOption: (newValue: string) => {
-        setValue(ConfigKey.SYNTHETICS_ARGS, [...(field?.value || []), newValue]);
-      },
-      isDisabled: readOnly,
     }),
   },
-});
+};

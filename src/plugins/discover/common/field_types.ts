@@ -23,4 +23,5 @@ export enum KNOWN_FIELD_TYPES {
   STRING = 'string',
   TEXT = 'text',
   VERSION = 'version',
+  VERSION_RANGE = 'version_range',
 }

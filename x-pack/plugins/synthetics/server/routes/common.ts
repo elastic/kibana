@@ -20,10 +20,8 @@ export const QuerySchema = schema.object({
   query: schema.maybe(schema.string()),
   filter: schema.maybe(schema.string()),
   tags: schema.maybe(schema.oneOf([schema.string(), schema.arrayOf(schema.string())])),
-  monitorTypes: schema.maybe(schema.oneOf([schema.string(), schema.arrayOf(schema.string())])),
+  monitorType: schema.maybe(schema.oneOf([schema.string(), schema.arrayOf(schema.string())])),
   locations: schema.maybe(schema.oneOf([schema.string(), schema.arrayOf(schema.string())])),
-  projects: schema.maybe(schema.oneOf([schema.string(), schema.arrayOf(schema.string())])),
-  schedules: schema.maybe(schema.oneOf([schema.string(), schema.arrayOf(schema.string())])),
   status: schema.maybe(schema.oneOf([schema.string(), schema.arrayOf(schema.string())])),
   fields: schema.maybe(schema.arrayOf(schema.string())),
   searchAfter: schema.maybe(schema.arrayOf(schema.string())),
@@ -66,23 +64,19 @@ export const getMonitors = (
     sortOrder,
     query,
     tags,
-    monitorTypes,
+    monitorType,
     locations,
     filter = '',
     fields,
     searchAfter,
-    projects,
-    schedules,
   } = request as MonitorsQuery;
 
   const filterStr = getMonitorFilters({
     filter,
-    monitorTypes,
+    monitorTypes: monitorType,
     tags,
     locations,
     serviceLocations: syntheticsService.locations,
-    projects,
-    schedules,
   });
 
   return savedObjectsClient.find({
@@ -104,17 +98,13 @@ export const getMonitorFilters = ({
   ports,
   filter,
   locations,
-  projects,
   monitorTypes,
-  schedules,
   serviceLocations,
 }: {
   filter?: string;
   tags?: string | string[];
   monitorTypes?: string | string[];
   locations?: string | string[];
-  projects?: string | string[];
-  schedules?: string | string[];
   ports?: string | string[];
   serviceLocations: ServiceLocations;
 }) => {
@@ -123,10 +113,8 @@ export const getMonitorFilters = ({
   return [
     filter,
     getKqlFilter({ field: 'tags', values: tags }),
-    getKqlFilter({ field: 'project_id', values: projects }),
     getKqlFilter({ field: 'type', values: monitorTypes }),
     getKqlFilter({ field: 'locations.id', values: locationFilter }),
-    getKqlFilter({ field: 'schedule.number', values: schedules }),
   ]
     .filter((f) => !!f)
     .join(' AND ');
@@ -154,7 +142,7 @@ export const getKqlFilter = ({
   }
 
   if (Array.isArray(values)) {
-    return ` (${fieldKey}:"${values.join(`" ${operator} ${fieldKey}:"`)}" )`;
+    return `${fieldKey}:"${values.join(`" ${operator} ${fieldKey}:"`)}"`;
   }
 
   return `${fieldKey}:"${values}"`;
@@ -168,7 +156,7 @@ const parseLocationFilter = (serviceLocations: ServiceLocations, locations?: str
   if (Array.isArray(locations)) {
     return locations
       .map((loc) => findLocationItem(loc, serviceLocations)?.id ?? '')
-      .filter((val) => !!val);
+      .filter((val) => !val);
   }
 
   return findLocationItem(locations, serviceLocations)?.id ?? '';
@@ -184,18 +172,15 @@ export const findLocationItem = (query: string, locations: ServiceLocations) => 
  * @param monitorQuery { MonitorsQuery }
  */
 export const isMonitorsQueryFiltered = (monitorQuery: MonitorsQuery) => {
-  const { query, tags, monitorTypes, locations, status, filter, projects, schedules } =
-    monitorQuery;
+  const { query, tags, monitorType, locations, status, filter } = monitorQuery;
 
   return (
     !!query ||
     !!filter ||
     !!locations?.length ||
-    !!monitorTypes?.length ||
+    !!monitorType?.length ||
     !!tags?.length ||
-    !!status?.length ||
-    !!projects?.length ||
-    !!schedules?.length
+    !!status?.length
   );
 };
 

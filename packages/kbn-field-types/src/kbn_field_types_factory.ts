@@ -82,6 +82,12 @@ export const createKbnFieldTypes = (): KbnFieldType[] => [
     esTypes: [ES_FIELD_TYPES.IP_RANGE],
   }),
   new KbnFieldType({
+    name: KBN_FIELD_TYPES.VERSION_RANGE,
+    sortable: true,
+    filterable: true,
+    esTypes: [ES_FIELD_TYPES.VERSION_RANGE],
+  }),
+  new KbnFieldType({
     name: KBN_FIELD_TYPES.BOOLEAN,
     sortable: true,
     filterable: true,

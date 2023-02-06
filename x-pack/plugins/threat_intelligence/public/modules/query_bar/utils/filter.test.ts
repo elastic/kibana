@@ -5,25 +5,20 @@
  * 2.0.
  */
 
-import { Filter, PhraseFilter } from '@kbn/es-query';
+import { Filter } from '@kbn/es-query';
 import { FilterIn, FilterOut, updateFiltersArray } from '.';
 
 describe('updateFiltersArray', () => {
   it('should add new filter', () => {
-    const existingFilters: PhraseFilter[] = [];
+    const existingFilters: Filter[] = [];
     const key: string = 'key';
     const value: string = 'value';
     const filterType: boolean = FilterIn;
 
-    const newFilters = updateFiltersArray(
-      existingFilters,
-      key,
-      value,
-      filterType
-    ) as PhraseFilter[];
+    const newFilters = updateFiltersArray(existingFilters, key, value, filterType);
     expect(newFilters).toHaveLength(1);
     expect(newFilters[0].meta.key).toEqual(key);
-    expect(newFilters[0].meta.params?.query).toEqual(value);
+    expect(newFilters[0].meta.params.query).toEqual(value);
     expect(newFilters[0].meta.negate).toEqual(!filterType);
   });
 
@@ -45,15 +40,10 @@ describe('updateFiltersArray', () => {
     ];
     const filterType: boolean = FilterOut;
 
-    const newFilters = updateFiltersArray(
-      existingFilters,
-      key,
-      value,
-      filterType
-    ) as PhraseFilter[];
+    const newFilters = updateFiltersArray(existingFilters, key, value, filterType);
     expect(newFilters).toHaveLength(1);
     expect(newFilters[0].meta.key).toEqual(key);
-    expect(newFilters[0].meta.params?.query).toEqual(value);
+    expect(newFilters[0].meta.params.query).toEqual(value);
     expect(newFilters[0].meta.negate).toEqual(!filterType);
   });
 
@@ -74,15 +64,11 @@ describe('updateFiltersArray', () => {
       },
     ];
     const filterType: boolean = FilterIn;
-    const newFilters = updateFiltersArray(
-      existingFilters,
-      key,
-      value,
-      filterType
-    ) as PhraseFilter[];
+
+    const newFilters = updateFiltersArray(existingFilters, key, value, filterType);
     expect(newFilters).toHaveLength(1);
     expect(newFilters[0].meta.key).toEqual(key);
-    expect(newFilters[0].meta.params?.query).toEqual(value);
+    expect(newFilters[0].meta.params.query).toEqual(value);
     expect(newFilters[0].meta.negate).toEqual(!filterType);
   });
 });

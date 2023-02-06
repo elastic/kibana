@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { set } from 'lodash';
 import type { ActionConnector, ActionTypeConnector } from '../../../common/api';
 import { basicPush } from '../../containers/mock';
 import type { CaseConnectors } from '../../containers/types';
@@ -122,23 +121,11 @@ export const actionTypesMock: ActionTypeConnector[] = [
   },
 ];
 
-/**
- * Construct a mock getConnectors response object
- *
- * @param overrides is an object where the key is the path for setting a field in the returned object. For example to set
- *  the externalService.connectorId pass the following overrides object:
- *
- * ```
- *    {
- *      'push.details.externalService.connectorId': '123'
- *    }
- * ```
- */
 export const getCaseConnectorsMockResponse = (
-  overrides?: Record<string, unknown>
+  overrides: Partial<CaseConnectors[string]['push']> = {}
 ): CaseConnectors => {
-  return connectorsMock.reduce((acc, connector) => {
-    const newConnectors: CaseConnectors = {
+  return connectorsMock.reduce(
+    (acc, connector) => ({
       ...acc,
       [connector.id]: {
         id: connector.id,
@@ -147,26 +134,18 @@ export const getCaseConnectorsMockResponse = (
         fields: null,
         push: {
           needsToBePushed: false,
+          oldestUserActionPushDate: '2023-01-17T09:46:29.813Z',
+          latestUserActionPushDate: '2023-01-17T09:46:29.813Z',
           hasBeenPushed: true,
-          details: {
-            oldestUserActionPushDate: '2023-01-17T09:46:29.813Z',
-            latestUserActionPushDate: '2023-01-17T09:46:29.813Z',
-            externalService: {
-              ...basicPush,
-              connectorId: connector.id,
-              connectorName: connector.name,
-            },
+          externalService: {
+            ...basicPush,
+            connectorId: connector.id,
+            connectorName: connector.name,
           },
+          ...overrides,
         },
       },
-    };
-
-    if (overrides != null) {
-      for (const path of Object.keys(overrides)) {
-        set(newConnectors[connector.id], path, overrides[path]);
-      }
-    }
-
-    return newConnectors;
-  }, {});
+    }),
+    {}
+  );
 };

@@ -113,7 +113,7 @@ describe('<MonitorFields />', () => {
     expect(queryByText('URL is required')).not.toBeNull();
   });
 
-  it('is readonly when source type is project', async () => {
+  it('is reradonly when source type is project', async () => {
     const name = 'monitor name';
     const browserFields = {
       ...defaultBrowserConfig,
@@ -127,6 +127,6 @@ describe('<MonitorFields />', () => {
       />
     );
 
-    expect(getByText(/read-only/)).toBeInTheDocument();
+    expect(getByText('Read only')).toBeInTheDocument();
   });
 });

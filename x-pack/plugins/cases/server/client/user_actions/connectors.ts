@@ -15,7 +15,6 @@ import type {
   CaseConnector,
   CaseUserActionInjectedAttributes,
   CaseExternalServiceBasic,
-  GetCaseConnectorsPushDetails,
 } from '../../../common/api';
 import { GetCaseConnectorsResponseRt } from '../../../common/api';
 import {
@@ -289,15 +288,15 @@ const createConnectorInfoResult = ({
         latestUserActionDate: latestUserActionCreatedAt,
       });
 
-      const pushDetails = convertEnrichedPushInfoToDetails(enrichedPushInfo);
-
       results[connector.id] = {
         ...connector,
         name: connectorDetails?.name ?? connector.name,
         push: {
           needsToBePushed,
           hasBeenPushed: hasBeenPushed(enrichedPushInfo),
-          ...(pushDetails && { details: pushDetails }),
+          externalService: enrichedPushInfo?.externalService,
+          latestUserActionPushDate: enrichedPushInfo?.latestPushDate.toISOString(),
+          oldestUserActionPushDate: enrichedPushInfo?.oldestPushDate.toISOString(),
         },
       };
     }
@@ -338,18 +337,4 @@ const hasDataToPush = ({
 
 const hasBeenPushed = (pushInfo: EnrichedPushInfo | undefined): boolean => {
   return pushInfo != null;
-};
-
-const convertEnrichedPushInfoToDetails = (
-  info: EnrichedPushInfo | undefined
-): GetCaseConnectorsPushDetails | undefined => {
-  if (info == null) {
-    return;
-  }
-
-  return {
-    latestUserActionPushDate: info.latestPushDate.toISOString(),
-    oldestUserActionPushDate: info.oldestPushDate.toISOString(),
-    externalService: info.externalService,
-  };
 };

@@ -34,12 +34,12 @@ type ResourceFindingsResponse = IKibanaSearchResponse<
   estypes.SearchResponse<CspFinding, ResourceFindingsResponseAggs>
 >;
 
-export type ResourceFindingsResponseAggs = Record<
-  'count' | 'clusterId' | 'resourceSubType' | 'resourceName',
-  estypes.AggregationsMultiBucketAggregateBase<
-    estypes.AggregationsStringRareTermsBucketKeys | undefined
-  >
->;
+export interface ResourceFindingsResponseAggs {
+  count?: estypes.AggregationsMultiBucketAggregateBase<estypes.AggregationsStringRareTermsBucketKeys>;
+  clusterId?: estypes.AggregationsMultiBucketAggregateBase<estypes.AggregationsStringRareTermsBucketKeys>;
+  resourceSubType?: estypes.AggregationsMultiBucketAggregateBase<estypes.AggregationsStringRareTermsBucketKeys>;
+  resourceName?: estypes.AggregationsMultiBucketAggregateBase<estypes.AggregationsStringRareTermsBucketKeys>;
+}
 
 const getResourceFindingsQuery = ({
   query,
@@ -119,6 +119,5 @@ function assertNonBucketsArray<T>(arr: unknown): asserts arr is T[] {
   }
 }
 
-const getFirstBucketKey = (
-  buckets: Array<estypes.AggregationsStringRareTermsBucketKeys | undefined>
-): string | undefined => buckets[0]?.key;
+const getFirstBucketKey = (buckets: estypes.AggregationsStringRareTermsBucketKeys[]): string =>
+  buckets[0]?.key;

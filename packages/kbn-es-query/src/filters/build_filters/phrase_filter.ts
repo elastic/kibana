@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import type { SerializableRecord } from '@kbn/utility-types';
 import { get, has, isPlainObject } from 'lodash';
 import type { Filter, FilterMeta } from './types';
 import type { DataViewFieldBase, DataViewBase } from '../../es_query';
@@ -15,12 +14,10 @@ import { hasRangeKeys } from './range_filter';
 
 export type PhraseFilterValue = string | number | boolean;
 
-export interface PhraseFilterMetaParams extends SerializableRecord {
-  query: PhraseFilterValue; // The unformatted value
-}
-
 export type PhraseFilterMeta = FilterMeta & {
-  params?: PhraseFilterMetaParams;
+  params?: {
+    query: PhraseFilterValue; // The unformatted value
+  };
   field?: string;
   index?: string;
 };

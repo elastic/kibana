@@ -59,17 +59,7 @@
  */
 
 import { setWith } from '@kbn/safer-lodash-set';
-import {
-  difference,
-  isEqual,
-  isFunction,
-  isObject,
-  keyBy,
-  pick,
-  uniqueId,
-  uniqWith,
-  concat,
-} from 'lodash';
+import { difference, isEqual, isFunction, isObject, keyBy, pick, uniqueId, uniqWith } from 'lodash';
 import {
   catchError,
   finalize,
@@ -82,7 +72,7 @@ import {
 } from 'rxjs/operators';
 import { defer, EMPTY, from, lastValueFrom, Observable } from 'rxjs';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { buildEsQuery, Filter, isOfQueryType, isPhraseFilter } from '@kbn/es-query';
+import { buildEsQuery, Filter, isOfQueryType } from '@kbn/es-query';
 import { fieldWildcardFilter } from '@kbn/kibana-utils-plugin/common';
 import { getHighlightRequest } from '@kbn/field-formats-plugin/common';
 import type { DataView } from '@kbn/data-views-plugin/common';
@@ -91,6 +81,7 @@ import {
   buildExpression,
   buildExpressionFunction,
 } from '@kbn/expressions-plugin/common';
+import _ from 'lodash';
 import { normalizeSortRequest } from './normalize_sort_request';
 
 import { AggConfigSerialized, DataViewField, SerializedSearchSourceFields } from '../..';
@@ -260,6 +251,7 @@ export class SearchSource {
 
   getActiveIndexFilter() {
     const { filter: originalFilters, query } = this.getFields();
+
     let filters: Filter[] = [];
     if (originalFilters) {
       filters = this.getFilters(originalFilters);
@@ -278,16 +270,16 @@ export class SearchSource {
             return acc.concat(this.parseActiveIndexPatternFromQueryString(currStr));
           }, []) ?? [];
 
-    const activeIndexPattern = filters?.reduce((acc, f) => {
-      if (isPhraseFilter(f)) {
-        if (f.meta.key === '_index' && f.meta.disabled === false) {
-          if (f.meta.negate === false) {
-            return concat(acc, f.meta.params?.query ?? f.meta.params);
-          } else {
-            return difference(acc, [f.meta.params?.query]);
-          }
+    const activeIndexPattern: string[] = filters?.reduce<string[]>((acc, f) => {
+      if (f.meta.key === '_index' && f.meta.disabled === false) {
+        if (f.meta.negate === false) {
+          return _.concat(acc, f.meta.params.query ?? f.meta.params);
         } else {
-          return acc;
+          if (Array.isArray(f.meta.params)) {
+            return _.difference(acc, f.meta.params);
+          } else {
+            return _.difference(acc, [f.meta.params.query]);
+          }
         }
       } else {
         return acc;

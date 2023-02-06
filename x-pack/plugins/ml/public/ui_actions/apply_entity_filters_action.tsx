@@ -78,11 +78,7 @@ export function createApplyEntityFieldFiltersAction(
           const filter = filterManager
             .getFilters()
             .find(
-              (f) =>
-                f.meta.key === field.fieldName &&
-                typeof f.meta.params === 'object' &&
-                'query' in f.meta.params &&
-                f.meta.params.query === field.fieldValue
+              (f) => f.meta.key === field.fieldName && f.meta.params.query === field.fieldValue
             );
           if (filter) {
             filterManager.removeFilter(filter);

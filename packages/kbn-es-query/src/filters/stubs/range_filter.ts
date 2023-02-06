@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { FilterStateStore } from '..';
+import { RangeFilter, FilterStateStore } from '..';
 
-export const rangeFilter = {
+export const rangeFilter: RangeFilter = {
   meta: {
     index: 'logstash-*',
     negate: false,

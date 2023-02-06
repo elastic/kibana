@@ -143,11 +143,6 @@ const HostsStateRT = rt.type({
 
 export type HostsState = rt.TypeOf<typeof HostsStateRT>;
 
-export interface StringDateRangeTimestamp {
-  from: number;
-  to: number;
-}
-
 const SetQueryType = rt.partial(HostsStateRT.props);
 
 const encodeUrlState = HostsStateRT.encode;

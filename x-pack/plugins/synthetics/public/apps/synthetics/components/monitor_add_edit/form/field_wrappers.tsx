@@ -7,7 +7,6 @@
 
 import React, { Ref } from 'react';
 import { omit } from 'lodash';
-import { ControllerRenderProps } from 'react-hook-form';
 import {
   EuiFieldText,
   EuiFieldTextProps,
@@ -29,43 +28,22 @@ import {
 import { SourceField, SourceFieldProps } from '../fields/source_field';
 import {
   FormattedComboBox as DefaultFormattedComboBox,
-  FormattedComboBoxProps as DefaultFormattedComboBoxProps,
+  FormattedComboBoxProps,
 } from '../fields/combo_box';
-import {
-  JSONEditor as DefaultJSONEditor,
-  CodeEditorProps as DefaultCodeEditorProps,
-} from '../fields/code_editor';
+import { JSONEditor as DefaultJSONEditor, CodeEditorProps } from '../fields/code_editor';
 import {
   MonitorTypeRadioGroup as DefaultMonitorTypeRadioGroup,
   MonitorTypeRadioGroupProps,
 } from '../fields/monitor_type_radio_group';
-import {
-  HeaderField as DefaultHeaderField,
-  HeaderFieldProps as DefaultHeaderFieldProps,
-} from '../fields/header_field';
+import { HeaderField as DefaultHeaderField, HeaderFieldProps } from '../fields/header_field';
 import {
   RequestBodyField as DefaultRequestBodyField,
-  RequestBodyFieldProps as DefaultRequestBodyFieldProps,
+  RequestBodyFieldProps,
 } from '../fields/request_body_field';
 import {
   ResponseBodyIndexField as DefaultResponseBodyIndexField,
-  ResponseBodyIndexFieldProps as DefaultResponseBodyIndexFieldProps,
+  ResponseBodyIndexFieldProps,
 } from '../fields/index_response_body_field';
-
-// these props are automatically passed through to our controlled components
-// they do not have to be defined specifically on the 'props' field in the
-// `field_config` file
-export type ControlledFieldProp = keyof ControllerRenderProps | 'defaultValue';
-
-export type HeaderFieldProps = Omit<DefaultHeaderFieldProps, ControlledFieldProp>;
-export type ResponseBodyIndexFieldProps = Omit<
-  DefaultResponseBodyIndexFieldProps,
-  ControlledFieldProp
->;
-export type RequestBodyFieldProps = Omit<DefaultRequestBodyFieldProps, ControlledFieldProp>;
-export type CodeEditorProps = Omit<DefaultCodeEditorProps, ControlledFieldProp>;
-export type JSONCodeEditorProps = Omit<DefaultCodeEditorProps, ControlledFieldProp | 'languageId'>;
-export type FormattedComboBoxProps = Omit<DefaultFormattedComboBoxProps, ControlledFieldProp>;
 
 export const FieldText = React.forwardRef<HTMLInputElement, EuiFieldTextProps>(
   (props, ref: Ref<HTMLInputElement>) => (
@@ -104,7 +82,7 @@ export const ButtonGroup = React.forwardRef<unknown, EuiButtonGroupProps>((props
   <EuiButtonGroup {...(omit(props, ['isInvalid', 'fullWidth']) as EuiButtonGroupProps)} />
 ));
 
-export const FormattedComboBox = React.forwardRef<unknown, DefaultFormattedComboBoxProps>(
+export const FormattedComboBox = React.forwardRef<unknown, FormattedComboBoxProps>(
   (props, _ref) => <DefaultFormattedComboBox {...props} />
 );
 
@@ -112,7 +90,7 @@ export const ComboBox = React.forwardRef<unknown, EuiComboBoxProps<unknown>>((pr
   <EuiComboBox {...omit(props, ['isServiceManaged'])} />
 ));
 
-export const JSONEditor = React.forwardRef<unknown, DefaultCodeEditorProps>((props, _ref) => (
+export const JSONEditor = React.forwardRef<unknown, CodeEditorProps>((props, _ref) => (
   <DefaultJSONEditor {...props} />
 ));
 
@@ -120,14 +98,14 @@ export const MonitorTypeRadioGroup = React.forwardRef<unknown, MonitorTypeRadioG
   (props, _ref) => <DefaultMonitorTypeRadioGroup {...props} />
 );
 
-export const HeaderField = React.forwardRef<unknown, DefaultHeaderFieldProps>((props, _ref) => (
+export const HeaderField = React.forwardRef<unknown, HeaderFieldProps>((props, _ref) => (
   <DefaultHeaderField {...props} />
 ));
 
-export const RequestBodyField = React.forwardRef<unknown, DefaultRequestBodyFieldProps>(
-  (props, _ref) => <DefaultRequestBodyField {...props} />
-);
+export const RequestBodyField = React.forwardRef<unknown, RequestBodyFieldProps>((props, _ref) => (
+  <DefaultRequestBodyField {...props} />
+));
 
-export const ResponseBodyIndexField = React.forwardRef<unknown, DefaultResponseBodyIndexFieldProps>(
+export const ResponseBodyIndexField = React.forwardRef<unknown, ResponseBodyIndexFieldProps>(
   (props, _ref) => <DefaultResponseBodyIndexField {...props} />
 );

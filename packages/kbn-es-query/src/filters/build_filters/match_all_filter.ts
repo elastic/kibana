@@ -7,11 +7,10 @@
  */
 
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import type { SerializableRecord } from '@kbn/utility-types';
 import { has } from 'lodash';
 import type { Filter, FilterMeta } from './types';
 
-export interface MatchAllFilterMeta extends FilterMeta, SerializableRecord {
+export interface MatchAllFilterMeta extends FilterMeta {
   field: string;
   formattedValue: string;
 }

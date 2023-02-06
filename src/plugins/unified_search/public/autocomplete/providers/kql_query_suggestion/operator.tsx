@@ -79,6 +79,7 @@ const operators = {
       'geo_point',
       'geo_shape',
       'boolean',
+      'version_range',
     ],
   },
   '<=': {
@@ -95,7 +96,7 @@ const operators = {
         'unifiedSearch.kueryAutocomplete.lessThanOrEqualOperatorDescription.lessThanOrEqualToText' for 'less than or equal to' part."
       />
     ),
-    fieldTypes: ['number', 'number_range', 'date', 'date_range', 'ip', 'ip_range'],
+    fieldTypes: ['number', 'number_range', 'date', 'date_range', 'ip', 'ip_range', 'version_range'],
   },
   '>=': {
     description: (
@@ -111,7 +112,7 @@ const operators = {
         'unifiedSearch.kueryAutocomplete.greaterThanOrEqualOperatorDescription.greaterThanOrEqualToText' for 'greater than or equal to' part."
       />
     ),
-    fieldTypes: ['number', 'number_range', 'date', 'date_range', 'ip', 'ip_range'],
+    fieldTypes: ['number', 'number_range', 'date', 'date_range', 'ip', 'ip_range', 'version_range'],
   },
   '<': {
     description: (
@@ -123,7 +124,7 @@ const operators = {
         'unifiedSearch.kueryAutocomplete.lessThanOperatorDescription.lessThanText' for 'less than' part."
       />
     ),
-    fieldTypes: ['number', 'number_range', 'date', 'date_range', 'ip', 'ip_range'],
+    fieldTypes: ['number', 'number_range', 'date', 'date_range', 'ip', 'ip_range', 'version_range'],
   },
   '>': {
     description: (
@@ -137,7 +138,7 @@ const operators = {
         'unifiedSearch.kueryAutocomplete.greaterThanOperatorDescription.greaterThanText' for 'greater than' part."
       />
     ),
-    fieldTypes: ['number', 'number_range', 'date', 'date_range', 'ip', 'ip_range'],
+    fieldTypes: ['number', 'number_range', 'date', 'date_range', 'ip', 'ip_range', 'version_range'],
   },
   ': *': {
     description: (

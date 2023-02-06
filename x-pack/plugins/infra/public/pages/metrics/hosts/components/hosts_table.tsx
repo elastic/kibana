@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect } from 'react';
+import React, { useCallback, useEffect, useMemo } from 'react';
 import { EuiInMemoryTable } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { isEqual } from 'lodash';
+import { buildHostsTableColumns } from './hosts_table_columns';
 import { NoData } from '../../../../components/empty_states';
 import { InfraLoadingPanel } from '../../../../components/loading';
 import { useHostsTable } from '../hooks/use_hosts_table';
@@ -40,8 +41,6 @@ export const HostsTable = () => {
     metrics: HOST_TABLE_METRICS,
   });
 
-  const { columns, items } = useHostsTable(nodes, { time: unifiedSearchDateRange });
-
   useEffect(() => {
     if (hostViewState.loading !== loading || nodes.length !== hostViewState.totalHits) {
       setHostViewState({
@@ -59,6 +58,7 @@ export const HostsTable = () => {
     setHostViewState,
   ]);
 
+  const items = useHostsTable(nodes);
   const noData = items.length === 0;
 
   const onTableChange = useCallback(
@@ -77,6 +77,11 @@ export const HostsTable = () => {
       }
     },
     [setProperties, properties.pagination, properties.sorting]
+  );
+
+  const hostsTableColumns = useMemo(
+    () => buildHostsTableColumns({ time: unifiedSearchDateRange }),
+    [unifiedSearchDateRange]
   );
 
   if (loading) {
@@ -120,7 +125,7 @@ export const HostsTable = () => {
         'data-test-subj': 'hostsView-tableRow',
       }}
       items={items}
-      columns={columns}
+      columns={hostsTableColumns}
       onTableChange={onTableChange}
     />
   );

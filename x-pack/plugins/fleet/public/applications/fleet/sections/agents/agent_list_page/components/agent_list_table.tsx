@@ -128,7 +128,6 @@ export const AgentListTable: React.FC<Props> = (props: Props) => {
     {
       field: 'policy_id',
       sortable: true,
-      truncateText: true,
       name: i18n.translate('xpack.fleet.agentList.policyColumnTitle', {
         defaultMessage: 'Agent policy',
       }),

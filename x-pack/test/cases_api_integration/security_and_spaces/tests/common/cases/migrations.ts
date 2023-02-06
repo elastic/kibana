@@ -29,16 +29,11 @@ export default function createGetTests({ getService }: FtrProviderContext) {
     // tests upgrading a 7.10.0 saved object to the latest version
     describe('7.10.0 -> latest stack version', () => {
       before(async () => {
-        await kibanaServer.importExport.load(
-          'x-pack/test/functional/fixtures/kbn_archiver/cases/7.10.0/data.json'
-        );
+        await esArchiver.load('x-pack/test/functional/es_archives/cases/migrations/7.10.0');
       });
 
       after(async () => {
-        await kibanaServer.importExport.unload(
-          'x-pack/test/functional/fixtures/kbn_archiver/cases/7.10.0/data.json'
-        );
-        await deleteAllCaseItems(es);
+        await esArchiver.unload('x-pack/test/functional/es_archives/cases/migrations/7.10.0');
       });
 
       it('migrates cases connector', async () => {

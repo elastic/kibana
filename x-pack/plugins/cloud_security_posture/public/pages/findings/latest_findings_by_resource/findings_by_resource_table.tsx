@@ -57,28 +57,13 @@ const FindingsByResourceTableComponent = ({
     'data-test-subj': TEST_SUBJECTS.getFindingsByResourceTableRowTestId(getResourceId(row)),
   });
 
-  const getNonSortableColumn = (column: EuiTableFieldDataColumnType<FindingsByResourcePage>) => ({
-    ...column,
-    sortable: false,
-  });
-
   const columns = useMemo(
     () => [
-      getNonSortableColumn(findingsByResourceColumns.resource_id),
-      createColumnWithFilters(
-        getNonSortableColumn(findingsByResourceColumns['resource.sub_type']),
-        { onAddFilter }
-      ),
-      createColumnWithFilters(getNonSortableColumn(findingsByResourceColumns['resource.name']), {
-        onAddFilter,
-      }),
-      createColumnWithFilters(
-        getNonSortableColumn(findingsByResourceColumns['rule.benchmark.name']),
-        { onAddFilter }
-      ),
-      createColumnWithFilters(getNonSortableColumn(findingsByResourceColumns.cluster_id), {
-        onAddFilter,
-      }),
+      findingsByResourceColumns.resource_id,
+      createColumnWithFilters(findingsByResourceColumns['resource.sub_type'], { onAddFilter }),
+      createColumnWithFilters(findingsByResourceColumns['resource.name'], { onAddFilter }),
+      createColumnWithFilters(findingsByResourceColumns['rule.benchmark.name'], { onAddFilter }),
+      createColumnWithFilters(findingsByResourceColumns.cluster_id, { onAddFilter }),
       findingsByResourceColumns.compliance_score,
     ],
     [onAddFilter]

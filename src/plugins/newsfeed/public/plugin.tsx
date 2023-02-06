@@ -55,8 +55,7 @@ export class NewsfeedPublicPlugin
     const api = this.createNewsfeedApi(this.config, NewsfeedApiEndpoint.KIBANA, isScreenshotMode);
     core.chrome.navControls.registerRight({
       order: 1000,
-      mount: (target) =>
-        this.mount(api, target, core.theme.theme$, core.customBranding.hasCustomBranding$),
+      mount: (target) => this.mount(api, target, core.theme.theme$),
     });
 
     return {
@@ -92,16 +91,11 @@ export class NewsfeedPublicPlugin
     };
   }
 
-  private mount(
-    api: NewsfeedApi,
-    targetDomElement: HTMLElement,
-    theme$: Rx.Observable<CoreTheme>,
-    hasCustomBranding$: Rx.Observable<boolean>
-  ) {
+  private mount(api: NewsfeedApi, targetDomElement: HTMLElement, theme$: Rx.Observable<CoreTheme>) {
     ReactDOM.render(
       <KibanaThemeProvider theme$={theme$}>
         <I18nProvider>
-          <NewsfeedNavButton newsfeedApi={api} hasCustomBranding$={hasCustomBranding$} />
+          <NewsfeedNavButton newsfeedApi={api} />
         </I18nProvider>
       </KibanaThemeProvider>,
       targetDomElement

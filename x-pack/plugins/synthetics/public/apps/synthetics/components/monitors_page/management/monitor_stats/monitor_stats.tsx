@@ -23,11 +23,7 @@ import * as labels from '../labels';
 import { MonitorTestRunsCount } from './monitor_test_runs';
 import { MonitorTestRunsSparkline } from './monitor_test_runs_sparkline';
 
-export const MonitorStats = ({
-  overviewStatus,
-}: {
-  overviewStatus: OverviewStatusState | null;
-}) => {
+export const MonitorStats = ({ status }: { status: OverviewStatusState | null }) => {
   const { euiTheme } = useEuiTheme();
 
   return (
@@ -46,11 +42,11 @@ export const MonitorStats = ({
           <EuiFlexItem css={{ display: 'flex', flexDirection: 'row', gap: euiTheme.size.l }}>
             <MonitorStat
               description={labels.CONFIGURATIONS_LABEL}
-              value={overviewStatus?.allMonitorsCount}
+              value={status?.allMonitorsCount}
             />
             <MonitorStat
               description={labels.DISABLED_LABEL}
-              value={overviewStatus?.disabledMonitorsCount}
+              value={status?.disabledMonitorsCount}
             />
           </EuiFlexItem>
         </EuiPanel>
@@ -67,9 +63,9 @@ export const MonitorStats = ({
           <EuiFlexItem
             css={{ display: 'flex', flexDirection: 'row', gap: euiTheme.size.l, height: '200px' }}
           >
-            <MonitorTestRunsCount monitorIds={overviewStatus?.allIds ?? []} />
+            <MonitorTestRunsCount />
             <EuiFlexItem grow={true}>
-              <MonitorTestRunsSparkline monitorIds={overviewStatus?.allIds ?? []} />
+              <MonitorTestRunsSparkline />
             </EuiFlexItem>
           </EuiFlexItem>
         </EuiPanel>

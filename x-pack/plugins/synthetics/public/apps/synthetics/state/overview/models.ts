@@ -7,9 +7,8 @@
 import { ConfigKey, MonitorOverviewResult } from '../../../../../common/runtime_types';
 
 import { IHttpSerializedFetchError } from '../utils/http_error';
-import { MonitorFilterState } from '../monitor_list';
 
-export interface MonitorOverviewPageState extends MonitorFilterState {
+export interface MonitorOverviewPageState {
   perPage: number;
   sortOrder: 'asc' | 'desc';
   sortField: string;

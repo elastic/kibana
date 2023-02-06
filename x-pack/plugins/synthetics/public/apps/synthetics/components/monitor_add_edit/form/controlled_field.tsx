@@ -15,11 +15,11 @@ import {
 } from 'react-hook-form';
 import { useKibanaSpace, useIsEditFlow } from '../hooks';
 import { selectServiceLocationsState } from '../../../state';
-import { FieldMeta, FormConfig } from '../types';
+import { FieldMeta } from '../types';
 
-type Props<TFieldKey extends keyof FormConfig = any> = FieldMeta<TFieldKey> & {
+type Props = FieldMeta & {
   component: React.ComponentType<any>;
-  field: ControllerRenderProps<FormConfig, TFieldKey>;
+  field: ControllerRenderProps;
   fieldState: ControllerFieldState;
   formRowProps: Partial<EuiFormRowProps>;
   error: React.ReactNode;
@@ -27,12 +27,11 @@ type Props<TFieldKey extends keyof FormConfig = any> = FieldMeta<TFieldKey> & {
   dependenciesFieldMeta: Record<string, ControllerFieldState>;
 };
 
-const setFieldValue =
-  (key: keyof FormConfig, setValue: UseFormReturn<FormConfig>['setValue']) => (value: any) => {
-    setValue(key, value);
-  };
+const setFieldValue = (key: string, setValue: UseFormReturn['setValue']) => (value: any) => {
+  setValue(key, value);
+};
 
-export const ControlledField = <TFieldKey extends keyof FormConfig>({
+export const ControlledField = ({
   component: FieldComponent,
   props,
   fieldKey,
@@ -44,8 +43,8 @@ export const ControlledField = <TFieldKey extends keyof FormConfig>({
   error,
   dependenciesValues,
   dependenciesFieldMeta,
-}: Props<TFieldKey>) => {
-  const { setValue, reset, formState, setError, clearErrors } = useFormContext<FormConfig>();
+}: Props) => {
+  const { setValue, reset, formState, setError, clearErrors } = useFormContext();
   const noop = () => {};
   let hook: Function = noop;
   let hookProps;
@@ -63,7 +62,7 @@ export const ControlledField = <TFieldKey extends keyof FormConfig>({
         field,
         setValue,
         reset,
-        locations: locations.map((location) => ({ ...location, key: location.id })),
+        locations,
         dependencies: dependenciesValues,
         dependenciesFieldMeta,
         space: space?.id,

@@ -11,7 +11,7 @@ import { FieldFormat } from '@kbn/field-formats-plugin/common';
 
 export function getPhrasesDisplayValue(filter: PhrasesFilter, formatter?: FieldFormat) {
   return filter.meta.params
-    .map((v) => {
+    .map((v: string) => {
       return formatter?.convert(v) ?? v;
     })
     .join(', ');

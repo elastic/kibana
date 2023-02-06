@@ -3540,7 +3540,7 @@
             "label": "getActiveIndexFilter",
             "description": [],
             "signature": [
-              "() => any[]"
+              "() => string[]"
             ],
             "path": "src/plugins/data/common/search/search_source/search_source.ts",
             "deprecated": false,
@@ -10174,7 +10174,7 @@
             "section": "def-common.SearchSourceFields",
             "text": "SearchSourceFields"
           },
-          "[K]; getActiveIndexFilter: () => any[]; getOwnField: <K extends keyof ",
+          "[K]; getActiveIndexFilter: () => string[]; getOwnField: <K extends keyof ",
           {
             "pluginId": "data",
             "scope": "common",
@@ -13864,10 +13864,6 @@
               {
                 "plugin": "lens",
                 "path": "x-pack/plugins/lens/public/app_plugin/lens_top_nav.tsx"
-              },
-              {
-                "plugin": "discover",
-                "path": "src/plugins/discover/public/application/main/components/no_results/no_results_suggestions/use_fetch_occurances_range.ts"
               },
               {
                 "plugin": "aiops",
@@ -21487,10 +21483,6 @@
               {
                 "plugin": "lens",
                 "path": "x-pack/plugins/lens/public/app_plugin/lens_top_nav.tsx"
-              },
-              {
-                "plugin": "discover",
-                "path": "src/plugins/discover/public/application/main/components/no_results/no_results_suggestions/use_fetch_occurances_range.ts"
               },
               {
                 "plugin": "aiops",

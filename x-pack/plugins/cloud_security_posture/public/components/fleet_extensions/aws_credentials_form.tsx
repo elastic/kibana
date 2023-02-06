@@ -12,7 +12,6 @@ import {
   EuiLink,
   EuiSpacer,
   EuiText,
-  EuiTitle,
 } from '@elastic/eui';
 import type { NewPackagePolicy } from '@kbn/fleet-plugin/public';
 import { NewPackagePolicyInput } from '@kbn/fleet-plugin/common';
@@ -20,29 +19,6 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { RadioGroup } from './csp_boxed_radio_group';
 import { getPosturePolicy, NewPackagePolicyPostureInput } from './utils';
-
-const AWSSetupInfoContent = () => (
-  <>
-    <EuiSpacer size="l" />
-    <EuiTitle size="s">
-      <h2>
-        <FormattedMessage
-          id="xpack.csp.awsIntegration.setupInfoContentTitle"
-          defaultMessage="Setup Access"
-        />
-      </h2>
-    </EuiTitle>
-    <EuiSpacer size="l" />
-    <EuiText color={'subdued'} size="s">
-      <FormattedMessage
-        id="xpack.csp.awsIntegration.setupInfoContent"
-        defaultMessage="The integration will need elevated access to run some CIS benchmark rules. Select your preferred
-    method of providing the AWS credentials this integration will use. You can follow these
-    step-by-step instructions to generate the necessary credentials."
-      />
-    </EuiText>
-  </>
-);
 
 const DocsLink = (
   <EuiText color={'subdued'} size="s">
@@ -73,6 +49,7 @@ const AssumeRoleDescription = (
       standard long-term credentials such as passwords or access keys."
       />
     </EuiText>
+    <EuiSpacer />
   </div>
 );
 
@@ -84,6 +61,7 @@ const DirectAccessKeysDescription = (
         defaultMessage="Access keys are long-term credentials for an IAM user or the AWS account root user."
       />
     </EuiText>
+    <EuiSpacer />
   </div>
 );
 
@@ -97,6 +75,7 @@ const TemporaryKeysDescription = (
       found using GetSessionToken."
       />
     </EuiText>
+    <EuiSpacer />
   </div>
 );
 
@@ -109,6 +88,7 @@ const SharedCredentialsDescription = (
       to define multiple access keys in the same configuration file."
       />
     </EuiText>
+    <EuiSpacer />
   </div>
 );
 
@@ -190,7 +170,6 @@ const options: AwsOptions = {
 };
 
 export type AwsCredentialsType = keyof typeof options;
-export const DEFAULT_AWS_VARS_GROUP: AwsCredentialsType = 'assume_role';
 const AWS_CREDENTIALS_OPTIONS = Object.keys(options).map((value) => ({
   id: value as AwsCredentialsType,
   label: options[value as keyof typeof options].label,
@@ -230,7 +209,6 @@ export const AwsCredentialsForm = ({ input, newPolicy, updatePolicy }: Props) =>
 
   return (
     <>
-      <AWSSetupInfoContent />
       <EuiSpacer size="l" />
       <AwsCredentialTypeSelector
         type={awsCredentialsType}
@@ -244,7 +222,6 @@ export const AwsCredentialsForm = ({ input, newPolicy, updatePolicy }: Props) =>
       />
       <EuiSpacer size="m" />
       {group.info}
-      <EuiSpacer size="s" />
       {DocsLink}
       <EuiSpacer />
       <AwsInputVarFields
@@ -272,7 +249,6 @@ const AwsCredentialTypeSelector = ({
     onChange={(id) => onChange(id as AwsCredentialsType)}
   />
 );
-
 const AwsInputVarFields = ({
   fields,
   onChange,

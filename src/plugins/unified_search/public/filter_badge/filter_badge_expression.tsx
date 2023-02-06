@@ -9,7 +9,6 @@
 import React from 'react';
 import { getDisplayValueFromFilter, getFieldDisplayValueFromFilter } from '@kbn/data-plugin/public';
 import type { Filter, DataViewBase } from '@kbn/es-query';
-import { isCombinedFilter } from '@kbn/es-query';
 import { EuiTextColor } from '@elastic/eui';
 import { FilterBadgeGroup } from './filter_badge_group';
 import { FilterContent } from './filter_content';
@@ -55,10 +54,9 @@ export function FilterExpressionBadge({
   dataViews,
   filterLabelStatus,
 }: FilterBadgeExpressionProps) {
-  const isCombined = isCombinedFilter(filter);
   const conditionalOperationType = getBooleanRelationType(filter);
 
-  return conditionalOperationType && isCombined ? (
+  return conditionalOperationType ? (
     <>
       {shouldShowBrackets && (
         <span>

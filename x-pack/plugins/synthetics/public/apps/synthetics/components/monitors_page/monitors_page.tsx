@@ -30,15 +30,15 @@ const MonitorPage: React.FC = () => {
 
   useMonitorListBreadcrumbs();
 
+  const monitorListProps = useMonitorList();
+  const { syntheticsMonitors, loading: monitorsLoading, absoluteTotal, loaded } = monitorListProps;
+
   const {
     error: enablementError,
     enablement: { isEnabled, canEnable },
     loading: enablementLoading,
     enableSynthetics,
   } = useEnablement();
-
-  const monitorListProps = useMonitorList();
-  const { syntheticsMonitors, loading: monitorsLoading, absoluteTotal, loaded } = monitorListProps;
 
   const { loading: locationsLoading } = useLocations();
   const showEmptyState = isEnabled !== undefined && syntheticsMonitors.length === 0;

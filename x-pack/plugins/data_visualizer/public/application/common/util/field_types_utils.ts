@@ -64,6 +64,12 @@ export const jobTypeLabels: Record<SupportedFieldType, string> = {
       defaultMessage: 'IP range',
     }
   ),
+  [SUPPORTED_FIELD_TYPES.VERSION_RANGE]: i18n.translate(
+    'xpack.dataVisualizer.fieldTypeIcon.versionRangeTypeLabel',
+    {
+      defaultMessage: 'Version range',
+    }
+  ),
   [SUPPORTED_FIELD_TYPES.MURMUR3]: i18n.translate(
     'xpack.dataVisualizer.fieldTypeIcon.murmur3TypeLabel',
     {

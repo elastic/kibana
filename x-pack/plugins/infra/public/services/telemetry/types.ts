@@ -33,12 +33,12 @@ export interface HostsViewQuerySubmittedSchema {
 
 export interface HostEntryClickedParams {
   hostname: string;
-  cloud_provider?: string | null;
+  cloud_provider?: string;
 }
 
 export interface HostEntryClickedSchema {
   hostname: SchemaValue<string>;
-  cloud_provider: SchemaValue<string | undefined | null>;
+  cloud_provider: SchemaValue<string | undefined>;
 }
 
 export interface ITelemetryClient {

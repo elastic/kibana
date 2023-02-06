@@ -29,7 +29,7 @@ export interface SyntheticsUrlParams {
   query?: string;
   tags?: string[];
   locations?: string[];
-  monitorTypes?: string[];
+  monitorType?: string[];
   status?: string[];
   locationId?: string;
   projects?: string[];
@@ -92,7 +92,7 @@ export const getSupportedUrlParams = (params: {
     focusConnectorField,
     query,
     tags,
-    monitorTypes,
+    monitorType,
     locations,
     locationId,
     projects,
@@ -125,10 +125,8 @@ export const getSupportedUrlParams = (params: {
     focusConnectorField: !!focusConnectorField,
     query: query || '',
     tags: tags ? JSON.parse(tags) : [],
-    monitorTypes: monitorTypes ? JSON.parse(monitorTypes) : [],
+    monitorType: monitorType ? JSON.parse(monitorType) : [],
     locations: locations ? JSON.parse(locations) : [],
-    projects: projects ? JSON.parse(projects) : [],
-    schedules: schedules ? JSON.parse(schedules) : [],
     locationId: locationId || undefined,
   };
 };

@@ -75,6 +75,8 @@ export const buildBulkBody = (
     );
   }
 
+  console.log('mergedDoc', applyOverrides, JSON.stringify(mergedDoc, null, 2));
+
   const overrides = applyOverrides
     ? {
         nameOverride: buildRuleNameFromMapping({

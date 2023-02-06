@@ -14,8 +14,8 @@ import { WrappedHelper } from '../../../utils/testing';
 import { SyntheticsAppState } from '../../../state/root_reducer';
 import {
   selectEncryptedSyntheticsSavedMonitors,
-  updateManagementPageStateAction,
-  MonitorFilterState,
+  fetchMonitorListAction,
+  MonitorListPageState,
 } from '../../../state';
 
 import { useMonitorList } from './use_monitor_list';
@@ -23,8 +23,7 @@ import { useMonitorList } from './use_monitor_list';
 describe('useMonitorList', () => {
   let state: SyntheticsAppState;
   let initialState: Omit<ReturnType<typeof useMonitorList>, 'loadPage' | 'reloadPage'>;
-  let filterState: MonitorFilterState;
-  let filterStateWithQuery: MonitorFilterState & { query?: string | undefined };
+  let defaultPageState: MonitorListPageState;
   const dispatchMockFn = jest.fn();
 
   beforeEach(() => {
@@ -40,12 +39,15 @@ describe('useMonitorList', () => {
       absoluteTotal: state.monitorList.data.absoluteTotal ?? 0,
       pageState: state.monitorList.pageState,
       syntheticsMonitors: selectEncryptedSyntheticsSavedMonitors.resultFunc(state.monitorList),
-      overviewStatus: null,
-      handleFilterChange: jest.fn(),
     };
 
-    filterState = { locations: [], monitorTypes: [], projects: [], schedules: [], tags: [] };
-    filterStateWithQuery = { ...filterState, query: 'xyz' };
+    defaultPageState = {
+      ...state.monitorList.pageState,
+      query: '',
+      locations: [],
+      monitorType: [],
+      tags: [],
+    };
   });
 
   afterEach(() => {
@@ -57,7 +59,7 @@ describe('useMonitorList', () => {
       result: { current: hookResult },
     } = renderHook(() => useMonitorList(), { wrapper: WrappedHelper });
 
-    expect(hookResult).toMatchObject({ ...initialState, handleFilterChange: expect.any(Function) });
+    expect(hookResult).toMatchObject(initialState);
   });
 
   it('dispatches correct action for query url param', async () => {
@@ -76,26 +78,18 @@ describe('useMonitorList', () => {
     renderHook(() => useMonitorList(), { wrapper: WrapperWithState });
 
     expect(dispatchMockFn).toHaveBeenCalledWith(
-      updateManagementPageStateAction(filterStateWithQuery)
+      fetchMonitorListAction.get({ ...defaultPageState, query })
     );
   });
 
   it('dispatches correct action for filter url param', async () => {
-    const exp = {
-      ...filterStateWithQuery,
-      tags: ['abc', 'xyz'],
-      locations: ['loc1', 'loc1'],
-      monitorTypes: ['browser'],
-      schedules: ['browser'],
-      projects: ['proj-1'],
-      query: '',
-    };
+    const tags = ['abc', 'xyz'];
+    const locations = ['loc1', 'loc1'];
+    const monitorType = ['browser'];
 
-    const url = `/monitor/1?tags=${JSON.stringify(exp.tags)}&locations=${JSON.stringify(
-      exp.locations
-    )}&monitorTypes=${JSON.stringify(exp.monitorTypes)}&schedules=${JSON.stringify(
-      exp.schedules
-    )}&projects=${JSON.stringify(exp.projects)}`;
+    const url = `/monitor/1?tags=${JSON.stringify(tags)}&locations=${JSON.stringify(
+      locations
+    )}&monitorType=${JSON.stringify(monitorType)}`;
 
     jest.useFakeTimers().setSystemTime(Date.now());
     const WrapperWithState = ({ children }: { children: React.ReactElement }) => {
@@ -108,6 +102,8 @@ describe('useMonitorList', () => {
 
     renderHook(() => useMonitorList(), { wrapper: WrapperWithState });
 
-    expect(dispatchMockFn).toHaveBeenCalledWith(updateManagementPageStateAction(exp));
+    expect(dispatchMockFn).toHaveBeenCalledWith(
+      fetchMonitorListAction.get({ ...defaultPageState, tags, locations, monitorType })
+    );
   });
 });

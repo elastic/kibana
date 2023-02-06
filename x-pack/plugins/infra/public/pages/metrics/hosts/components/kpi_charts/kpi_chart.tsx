@@ -120,6 +120,6 @@ export const KPIChart = ({
 
 const KPIChartStyled = styled(Chart)`
   .echMetric {
-    border-radius: ${(p) => p.theme.eui.euiBorderRadius};
+    border-radius: 5px;
   }
 `;

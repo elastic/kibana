@@ -62,7 +62,6 @@ import {
 import { DEFAULT_FILTER_OPTIONS, DEFAULT_QUERY_PARAMS } from './use_get_cases';
 import { getCasesStatus } from '../api';
 import { getCaseConnectorsMockResponse } from '../common/mock/connectors';
-import { cloneDeep, set } from 'lodash';
 
 const abortCtrl = new AbortController();
 const mockKibanaServices = KibanaServices.get as jest.Mock;
@@ -856,8 +855,10 @@ describe('Cases API', () => {
     const caseConnectors = getCaseConnectorsMockResponse();
     const connectorCamelCase = caseConnectors['servicenow-1'];
 
-    const snakeCaseConnector = cloneDeep(connectorCamelCase);
-    set(snakeCaseConnector, 'push.details.externalService', basicPushSnake);
+    const snakeCaseConnector = {
+      ...connectorCamelCase,
+      push: { ...connectorCamelCase.push, externalService: basicPushSnake },
+    };
 
     beforeEach(() => {
       fetchMock.mockClear();

@@ -76,6 +76,7 @@ const extendedSupportedDataTypes: readonly string[] = [
   'date',
   'date_range',
   'murmur3',
+  'version_range',
 ];
 
 export const SUPPORTED_METRICS: SupportedMetrics = {

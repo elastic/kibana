@@ -35,6 +35,12 @@ export const buildRiskScoreFromMapping = ({
   riskScore,
   riskScoreMapping,
 }: BuildRiskScoreFromMappingProps): BuildRiskScoreFromMappingReturn => {
+  if (get('threat.enrichments.[0].indicator.epss.epss.score', eventSource)) {
+    return overriddenScore(
+      Math.round(get('threat.enrichments.[0].indicator.epss.epss.score', eventSource) * 100)
+    );
+  }
+
   if (!riskScoreMapping || !riskScoreMapping.length) {
     return defaultScore(riskScore);
   }

@@ -29,7 +29,7 @@ import { NewsfeedItem } from '../types';
 import { NewsEmptyPrompt } from './empty_news';
 import { NewsLoadingPrompt } from './loading_news';
 
-export const NewsfeedFlyout = (props: Partial<EuiFlyoutProps> & { showPlainSpinner: boolean }) => {
+export const NewsfeedFlyout = (props: Partial<EuiFlyoutProps>) => {
   const { newsFetchResult, setFlyoutVisible } = useContext(NewsfeedContext);
   const closeFlyout = useCallback(() => setFlyoutVisible(false), [setFlyoutVisible]);
 
@@ -55,7 +55,7 @@ export const NewsfeedFlyout = (props: Partial<EuiFlyoutProps> & { showPlainSpinn
         </EuiFlyoutHeader>
         <EuiFlyoutBody className={'kbnNews__flyoutAlerts'}>
           {!newsFetchResult ? (
-            <NewsLoadingPrompt showPlainSpinner={props.showPlainSpinner} />
+            <NewsLoadingPrompt />
           ) : newsFetchResult.feedItems.length > 0 ? (
             newsFetchResult.feedItems.map((item: NewsfeedItem) => {
               return (

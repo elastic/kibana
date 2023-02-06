@@ -37,7 +37,7 @@ interface Props {
   loading: boolean;
   loadPage: (state: MonitorListPageState) => void;
   reloadPage: () => void;
-  overviewStatus: OverviewStatusState | null;
+  status: OverviewStatusState | null;
 }
 
 export const MonitorList = ({
@@ -46,7 +46,7 @@ export const MonitorList = ({
   total,
   error,
   loading,
-  overviewStatus,
+  status,
   loadPage,
   reloadPage,
 }: Props) => {
@@ -98,7 +98,8 @@ export const MonitorList = ({
   const columns = useMonitorListColumns({
     canEditSynthetics,
     loading,
-    overviewStatus,
+    reloadPage,
+    status,
     setMonitorPendingDeletion,
   });
 

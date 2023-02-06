@@ -21,16 +21,11 @@ export default function createGetTests({ getService }: FtrProviderContext) {
   describe('migrations', () => {
     describe('7.11.0', () => {
       before(async () => {
-        await kibanaServer.importExport.load(
-          'x-pack/test/functional/fixtures/kbn_archiver/cases/7.10.0/data.json'
-        );
+        await esArchiver.load('x-pack/test/functional/es_archives/cases/migrations/7.10.0');
       });
 
       after(async () => {
-        await kibanaServer.importExport.unload(
-          'x-pack/test/functional/fixtures/kbn_archiver/cases/7.10.0/data.json'
-        );
-        await deleteAllCaseItems(es);
+        await esArchiver.unload('x-pack/test/functional/es_archives/cases/migrations/7.10.0');
       });
 
       it('7.11.0 migrates cases comments', async () => {

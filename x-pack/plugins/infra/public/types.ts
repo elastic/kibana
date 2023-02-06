@@ -80,7 +80,6 @@ export interface InfraClientStartDeps {
   share: SharePluginStart;
   storage: IStorageWrapper;
   lens: LensPublicStart;
-  telemetry: ITelemetryClient;
 }
 
 export type InfraClientCoreSetup = CoreSetup<InfraClientStartDeps, InfraClientStartExports>;

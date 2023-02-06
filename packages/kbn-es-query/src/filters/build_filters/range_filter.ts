@@ -7,9 +7,7 @@
  */
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { map, reduce, mapValues, has, get, keys, pickBy } from 'lodash';
-import type { SerializableRecord } from '@kbn/utility-types';
-import type { Filter, FilterMeta, FilterMetaParams } from './types';
-import { FILTERS } from './types';
+import type { Filter, FilterMeta } from './types';
 import type { DataViewBase, DataViewFieldBase } from '../../es_query';
 
 const OPERANDS_IN_RANGE = 2;
@@ -39,7 +37,7 @@ const dateComparators = {
  * It is similar, but not identical to estypes.QueryDslRangeQuery
  * @public
  */
-export interface RangeFilterParams extends SerializableRecord {
+export interface RangeFilterParams {
   from?: number | string;
   to?: number | string;
   gt?: number | string;
@@ -55,10 +53,9 @@ export const hasRangeKeys = (params: RangeFilterParams) =>
   );
 
 export type RangeFilterMeta = FilterMeta & {
-  params?: RangeFilterParams;
+  params: RangeFilterParams;
   field?: string;
   formattedValue?: string;
-  type: 'range';
 };
 
 export type ScriptedRangeFilter = Filter & {
@@ -93,16 +90,7 @@ export type RangeFilter = Filter & {
  *
  * @public
  */
-export function isRangeFilter(filter?: Filter): filter is RangeFilter {
-  if (filter?.meta?.type) return filter.meta.type === FILTERS.RANGE;
-  return has(filter, 'query.range');
-}
-
-export function isRangeFilterParams(
-  params: FilterMetaParams | undefined
-): params is RangeFilterParams {
-  return typeof params === 'object' && get(params, 'type', '') === 'range';
-}
+export const isRangeFilter = (filter?: Filter): filter is RangeFilter => has(filter, 'query.range');
 
 /**
  *
@@ -152,9 +140,7 @@ export const buildRangeFilter = (
 
   const totalInfinite = ['gt', 'lt'].reduce((acc, op) => {
     const key = op in params ? op : `${op}e`;
-    const value = get(params, key);
-    const numericValue = typeof value === 'number' ? value : 0;
-    const isInfinite = Math.abs(numericValue) === Infinity;
+    const isInfinite = Math.abs(get(params, key)) === Infinity;
 
     if (isInfinite) {
       acc++;
@@ -166,7 +152,7 @@ export const buildRangeFilter = (
     return acc;
   }, 0);
 
-  const meta = {
+  const meta: RangeFilterMeta = {
     index: indexPattern?.id,
     params: {},
     field: field.name,

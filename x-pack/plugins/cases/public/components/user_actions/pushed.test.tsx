@@ -49,9 +49,7 @@ describe('createPushedUserActionBuilder ', () => {
 
   it('renders correctly if oldestUserActionPushDate is not defined', async () => {
     const userAction = getUserAction('pushed', Actions.push_to_service);
-    const caseConnectors = getCaseConnectorsMockResponse({
-      'push.details.oldestUserActionPushDate': undefined,
-    });
+    const caseConnectors = getCaseConnectorsMockResponse({ oldestUserActionPushDate: undefined });
     const builder = createPushedUserActionBuilder({
       ...builderArgs,
       caseConnectors,
@@ -71,7 +69,7 @@ describe('createPushedUserActionBuilder ', () => {
   it('renders correctly when updating an external service', async () => {
     const userAction = getUserAction('pushed', Actions.push_to_service);
     const caseConnectors = getCaseConnectorsMockResponse({
-      'push.details.oldestUserActionPushDate': '2023-01-16T09:46:29.813Z',
+      oldestUserActionPushDate: '2023-01-16T09:46:29.813Z',
     });
 
     const builder = createPushedUserActionBuilder({
@@ -115,7 +113,7 @@ describe('createPushedUserActionBuilder ', () => {
 
   it('shows both footers if the connectors needs to be pushed and is the latest push', async () => {
     const caseConnectors = getCaseConnectorsMockResponse({
-      'push.needsToBePushed': true,
+      needsToBePushed: true,
     });
 
     const userAction = getUserAction('pushed', Actions.push_to_service, {
@@ -166,8 +164,8 @@ describe('createPushedUserActionBuilder ', () => {
 
   it('does not show the footers if latestUserActionPushDate is not defined', async () => {
     const caseConnectors = getCaseConnectorsMockResponse({
-      'push.needsToBePushed': true,
-      'push.details.latestUserActionPushDate': undefined,
+      needsToBePushed: true,
+      latestUserActionPushDate: undefined,
     });
 
     const userAction = getUserAction('pushed', Actions.push_to_service, {
@@ -197,7 +195,7 @@ describe('createPushedUserActionBuilder ', () => {
   });
 
   it('does not show the push information if the connector is none', async () => {
-    const caseConnectors = getCaseConnectorsMockResponse({ 'push.needsToBePushed': true });
+    const caseConnectors = getCaseConnectorsMockResponse({ needsToBePushed: true });
     const userAction = getUserAction('pushed', Actions.push_to_service, {
       createdAt: '2023-01-17T09:46:29.813Z',
       payload: {

@@ -27,7 +27,6 @@ export const OverviewStatusCodec = t.interface({
   disabledCount: t.number,
   upConfigs: t.record(t.string, OverviewStatusMetaDataCodec),
   downConfigs: t.record(t.string, OverviewStatusMetaDataCodec),
-  allIds: t.array(t.string),
   enabledIds: t.array(t.string),
 });
 

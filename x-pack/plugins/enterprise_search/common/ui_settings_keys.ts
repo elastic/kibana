@@ -6,3 +6,4 @@
  */
 
 export const enterpriseSearchFeatureId = 'enterpriseSearch';
+export const enableEnginesSection = 'enterpriseSearch:enableEnginesSection';

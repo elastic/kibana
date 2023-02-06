@@ -52,7 +52,6 @@ interface Props {
   onChange: (pairs: Pair[]) => void;
   onBlur?: () => void;
   'data-test-subj'?: string;
-  readOnly?: boolean;
 }
 
 export const KeyValuePairsField = ({
@@ -61,7 +60,6 @@ export const KeyValuePairsField = ({
   onChange,
   onBlur,
   'data-test-subj': dataTestSubj,
-  readOnly,
 }: Props) => {
   const [pairs, setPairs] = useState<Pair[]>(defaultPairs);
 
@@ -107,7 +105,6 @@ export const KeyValuePairsField = ({
             iconType="plus"
             onClick={handleAddPair}
             data-test-subj={`${dataTestSubj}__button`}
-            isDisabled={readOnly}
           >
             {addPairControlLabel}
           </EuiButton>
@@ -161,7 +158,6 @@ export const KeyValuePairsField = ({
                         }
                       )}
                       onClick={() => handleDeletePair(index)}
-                      isDisabled={readOnly}
                     />
                   </EuiFormLabel>
                 }
@@ -177,7 +173,6 @@ export const KeyValuePairsField = ({
                     value={key}
                     onChange={(event) => handleOnChange(event, index, true)}
                     onBlur={() => onBlur?.()}
-                    readOnly={readOnly}
                   />
                 }
                 endControl={
@@ -192,7 +187,6 @@ export const KeyValuePairsField = ({
                     value={value}
                     onChange={(event) => handleOnChange(event, index, false)}
                     onBlur={() => onBlur?.()}
-                    readOnly={readOnly}
                   />
                 }
                 delimiter=":"

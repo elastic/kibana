@@ -6,14 +6,16 @@
  * Side Public License, v 1.
  */
 
-import { get } from 'lodash';
-import { isRangeFilterParams } from '../build_filters/range_filter';
-import type { Filter, FilterMeta } from '..';
+import { identity, pickBy } from 'lodash';
+
+import type { Filter, FilterMeta, RangeFilterParams } from '..';
+
+type FilterOperator = Pick<FilterMeta, 'type' | 'negate'>;
 
 export const updateFilter = (
   filter: Filter,
   field?: string,
-  operator?: FilterMeta,
+  operator?: FilterOperator,
   params?: Filter['meta']['params'],
   fieldType?: string
 ) => {
@@ -50,7 +52,7 @@ function updateField(filter: Filter, field?: string) {
   };
 }
 
-function updateWithExistsOperator(filter: Filter, operator?: FilterMeta) {
+function updateWithExistsOperator(filter: Filter, operator?: FilterOperator) {
   return {
     ...filter,
     meta: {
@@ -66,114 +68,76 @@ function updateWithExistsOperator(filter: Filter, operator?: FilterMeta) {
 
 function updateWithIsOperator(
   filter: Filter,
-  operator?: FilterMeta,
+  operator?: FilterOperator,
   params?: Filter['meta']['params'],
   fieldType?: string
 ) {
   const safeParams = fieldType === 'number' && !params ? 0 : params;
-  if (typeof filter.meta.params === 'object') {
-    return {
-      ...filter,
-      meta: {
-        ...filter.meta,
-        negate: operator?.negate,
-        type: operator?.type,
-        params: { ...filter.meta.params, query: params },
-        value: undefined,
-      },
-      query: { match_phrase: { [filter.meta.key!]: safeParams ?? '' } },
-    };
-  } else {
-    return {
-      ...filter,
-      meta: {
-        ...filter.meta,
-        negate: operator?.negate,
-        type: operator?.type,
-        params: { query: params },
-        value: undefined,
-      },
-      query: { match_phrase: { [filter.meta.key!]: safeParams ?? '' } },
-    };
-  }
+  return {
+    ...filter,
+    meta: {
+      ...filter.meta,
+      negate: operator?.negate,
+      type: operator?.type,
+      params: { ...filter.meta.params, query: params },
+      value: undefined,
+    },
+    query: { match_phrase: { [filter.meta.key!]: safeParams ?? '' } },
+  };
 }
 
 function updateWithRangeOperator(
   filter: Filter,
-  operator: FilterMeta,
-  rawParams: Filter['meta']['params'] | undefined,
+  operator: FilterOperator,
+  rawParams: RangeFilterParams,
   field: string
 ) {
-  if (isRangeFilterParams(rawParams)) {
-    const { from, to } = rawParams;
-    const params = {
-      gte: from,
-      lt: to,
-    };
-    const updatedFilter = {
-      ...filter,
-      meta: {
-        ...filter.meta,
-        negate: operator?.negate,
-        type: operator?.type,
-        params,
-      },
-      query: {
-        range: {
-          [field]: params,
-        },
-      },
-    };
+  const rangeParams = {
+    ...pickBy(rawParams, identity),
+  };
 
-    return updatedFilter;
-  } else {
-    const from = get(rawParams, 'from', undefined);
-    const to = get(rawParams, 'to', undefined);
-    const params = {
-      gte: from,
-      lt: to,
-    };
-    const updatedFilter = {
-      ...filter,
-      meta: {
-        ...filter.meta,
-        negate: operator?.negate,
-        type: operator?.type,
-        params,
+  const params = {
+    gte: rangeParams?.from,
+    lt: rangeParams?.to,
+  };
+
+  const updatedFilter = {
+    ...filter,
+    meta: {
+      ...filter.meta,
+      negate: operator?.negate,
+      type: operator?.type,
+      params,
+    },
+    query: {
+      range: {
+        [field]: params,
       },
-      query: {
-        range: {
-          [field]: params,
-        },
-      },
-    };
-    return updatedFilter;
-  }
+    },
+  };
+
+  return updatedFilter;
 }
 
 function updateWithIsOneOfOperator(
   filter: Filter,
-  operator?: FilterMeta,
-  params?: Filter['meta']['params']
+  operator?: FilterOperator,
+  params?: Array<Filter['meta']['params']>
 ) {
-  if (Array.isArray(params)) {
-    return {
-      ...filter,
-      meta: {
-        ...filter.meta,
-        negate: operator?.negate,
-        type: operator?.type,
-        params,
+  return {
+    ...filter,
+    meta: {
+      ...filter.meta,
+      negate: operator?.negate,
+      type: operator?.type,
+      params,
+    },
+    query: {
+      bool: {
+        minimum_should_match: 1,
+        ...filter!.query?.should,
+        should: params?.map((param) => ({ match_phrase: { [filter.meta.key!]: param } })),
       },
-      query: {
-        bool: {
-          minimum_should_match: 1,
-          ...filter!.query?.should,
-          should: params?.map((param) => ({ match_phrase: { [filter.meta.key!]: param } })),
-        },
-      },
-    };
-  } else {
-    return filter;
-  }
+    },
+  };
 }

@@ -73,7 +73,7 @@ const CaseActionBarComponent: React.FC<CaseActionBarProps> = ({
   );
 
   const currentExternalIncident =
-    caseConnectors?.[caseData.connector.id]?.push.details?.externalService ?? null;
+    caseConnectors?.[caseData.connector.id]?.push.externalService ?? null;
 
   const onSyncAlertsChanged = useCallback(
     (syncAlerts: boolean) =>

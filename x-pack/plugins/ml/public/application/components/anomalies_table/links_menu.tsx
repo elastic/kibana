@@ -7,7 +7,7 @@
 
 import { cloneDeep } from 'lodash';
 import moment from 'moment';
-import rison from '@kbn/rison';
+import rison, { RisonValue } from '@kbn/rison';
 import React, { FC, useEffect, useMemo, useState } from 'react';
 import { APP_ID as MAPS_APP_ID } from '@kbn/maps-plugin/common';
 import {
@@ -561,15 +561,13 @@ export const LinksMenuUI = (props: LinksMenuProps) => {
             },
           });
 
-          const appStateProps = {
+          const appStateProps: RisonValue = {
             index: dataViewId,
             filters: getFiltersForDSLQuery(job.datafeed_config.query, dataViewId, job.job_id),
-            ...(query !== null
-              ? {
-                  query,
-                }
-              : {}),
           };
+          if (query !== null) {
+            appStateProps.query = query;
+          }
           const _a = rison.encode(appStateProps);
 
           // Need to encode the _a parameter as it will contain characters such as '+' if using the regex.

@@ -35,7 +35,6 @@ export const useFetchRuleByIdQuery = (id: string, options?: UseQueryOptions<Rule
     {
       ...DEFAULT_QUERY_OPTIONS,
       ...options,
-      enabled: !!id,
     }
   );
 };

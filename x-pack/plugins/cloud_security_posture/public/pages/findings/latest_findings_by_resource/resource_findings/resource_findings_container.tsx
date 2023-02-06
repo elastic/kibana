@@ -135,6 +135,16 @@ export const ResourceFindings = ({ dataView }: FindingsBaseProps) => {
       }),
     });
   };
+  function resourceFindingsPageTitleTranslation(resourceName: string | undefined) {
+    return i18n.translate('xpack.csp.findings.resourceFindings.resourceFindingsPageTitle', {
+      defaultMessage: '{resourceName} {hyphen} Findings',
+      values: {
+        resourceName,
+        hyphen: resourceFindings.data?.resourceName ? '-' : '',
+      },
+    });
+  }
+
   return (
     <div data-test-subj={TEST_SUBJECTS.FINDINGS_CONTAINER}>
       <FindingsSearchBar
@@ -149,16 +159,7 @@ export const ResourceFindings = ({ dataView }: FindingsBaseProps) => {
         <PageTitleText
           title={
             <CloudPosturePageTitle
-              title={i18n.translate(
-                'xpack.csp.findings.resourceFindings.resourceFindingsPageTitle',
-                {
-                  defaultMessage: '{resourceName} {hyphen} Findings',
-                  values: {
-                    resourceName: resourceFindings.data?.resourceName,
-                    hyphen: resourceFindings.data?.resourceName ? '-' : '',
-                  },
-                }
-              )}
+              title={resourceFindingsPageTitleTranslation(resourceFindings.data?.resourceName)}
             />
           }
         />
@@ -169,9 +170,9 @@ export const ResourceFindings = ({ dataView }: FindingsBaseProps) => {
             <CspInlineDescriptionList
               listItems={getResourceFindingSharedValues({
                 resourceId: params.resourceId,
-                resourceName: resourceFindings.data?.resourceName || '',
-                resourceSubType: resourceFindings.data?.resourceSubType || '',
-                clusterId: resourceFindings.data?.clusterId || '',
+                resourceName: resourceFindings.data.resourceName,
+                resourceSubType: resourceFindings.data.resourceSubType,
+                clusterId: resourceFindings.data.clusterId,
               })}
             />
           )

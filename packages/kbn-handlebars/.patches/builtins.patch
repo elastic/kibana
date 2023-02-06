@@ -1,0 +1,937 @@
+1,4c1,16
+< describe('builtin helpers', function() {
+<   describe('#if', function() {
+<     it('if', function() {
+<       var string = '{{#if goodbye}}GOODBYE {{/if}}cruel {{world}}!';
+---
+> /*
+>  * This file is forked from the handlebars project (https://github.com/handlebars-lang/handlebars.js),
+>  * and may include modifications made by Elasticsearch B.V.
+>  * Elasticsearch B.V. licenses this file to you under the MIT License.
+>  * See `packages/kbn-handlebars/LICENSE` for more information.
+>  */
+> 
+> /* eslint-disable max-classes-per-file */
+> 
+> import Handlebars from '../..';
+> import { expectTemplate } from '../__jest__/test_bench';
+> 
+> describe('builtin helpers', () => {
+>   describe('#if', () => {
+>     it('if', () => {
+>       const string = '{{#if goodbye}}GOODBYE {{/if}}cruel {{world}}!';
+9c21
+<           world: 'world'
+---
+>           world: 'world',
+11d22
+<         .withMessage('if with boolean argument shows the contents when true')
+17c28
+<           world: 'world'
+---
+>           world: 'world',
+19d29
+<         .withMessage('if with string argument shows the contents')
+25c35
+<           world: 'world'
+---
+>           world: 'world',
+27,29d36
+<         .withMessage(
+<           'if with boolean argument does not show the contents when false'
+<         )
+32,35c39
+<       expectTemplate(string)
+<         .withInput({ world: 'world' })
+<         .withMessage('if with undefined does not show the contents')
+<         .toCompileTo('cruel world!');
+---
+>       expectTemplate(string).withInput({ world: 'world' }).toCompileTo('cruel world!');
+40c44
+<           world: 'world'
+---
+>           world: 'world',
+42d45
+<         .withMessage('if with non-empty array shows the contents')
+48c51
+<           world: 'world'
+---
+>           world: 'world',
+50d52
+<         .withMessage('if with empty array does not show the contents')
+56c58
+<           world: 'world'
+---
+>           world: 'world',
+58d59
+<         .withMessage('if with zero does not show the contents')
+61,63c62
+<       expectTemplate(
+<         '{{#if goodbye includeZero=true}}GOODBYE {{/if}}cruel {{world}}!'
+<       )
+---
+>       expectTemplate('{{#if goodbye includeZero=true}}GOODBYE {{/if}}cruel {{world}}!')
+66c65
+<           world: 'world'
+---
+>           world: 'world',
+68d66
+<         .withMessage('if with zero does not show the contents')
+72,73c70,71
+<     it('if with function argument', function() {
+<       var string = '{{#if goodbye}}GOODBYE {{/if}}cruel {{world}}!';
+---
+>     it('if with function argument', () => {
+>       const string = '{{#if goodbye}}GOODBYE {{/if}}cruel {{world}}!';
+77c75
+<           goodbye: function() {
+---
+>           goodbye() {
+80c78
+<           world: 'world'
+---
+>           world: 'world',
+82,84d79
+<         .withMessage(
+<           'if with function shows the contents when function returns true'
+<         )
+89c84
+<           goodbye: function() {
+---
+>           goodbye() {
+92c87
+<           world: 'world'
+---
+>           world: 'world',
+94,96d88
+<         .withMessage(
+<           'if with function shows the contents when function returns string'
+<         )
+101c93
+<           goodbye: function() {
+---
+>           goodbye() {
+104c96
+<           world: 'world'
+---
+>           world: 'world',
+106,108d97
+<         .withMessage(
+<           'if with function does not show the contents when returns false'
+<         )
+113c102
+<           goodbye: function() {
+---
+>           goodbye() {
+116c105
+<           world: 'world'
+---
+>           world: 'world',
+118,120d106
+<         .withMessage(
+<           'if with function does not show the contents when returns undefined'
+<         )
+124,127c110,111
+<     it('should not change the depth list', function() {
+<       expectTemplate(
+<         '{{#with foo}}{{#if goodbye}}GOODBYE cruel {{../world}}!{{/if}}{{/with}}'
+<       )
+---
+>     it('should not change the depth list', () => {
+>       expectTemplate('{{#with foo}}{{#if goodbye}}GOODBYE cruel {{../world}}!{{/if}}{{/with}}')
+130c114
+<           world: 'world'
+---
+>           world: 'world',
+136,137c120,121
+<   describe('#with', function() {
+<     it('with', function() {
+---
+>   describe('#with', () => {
+>     it('with', () => {
+142,143c126,127
+<             last: 'Johnson'
+<           }
+---
+>             last: 'Johnson',
+>           },
+148c132
+<     it('with with function argument', function() {
+---
+>     it('with with function argument', () => {
+151c135
+<           person: function() {
+---
+>           person() {
+154c138
+<               last: 'Johnson'
+---
+>               last: 'Johnson',
+156c140
+<           }
+---
+>           },
+161c145
+<     it('with with else', function() {
+---
+>     it('with with else', () => {
+167c151
+<     it('with provides block parameter', function() {
+---
+>     it('with provides block parameter', () => {
+172,173c156,157
+<             last: 'Johnson'
+<           }
+---
+>             last: 'Johnson',
+>           },
+178c162
+<     it('works when data is disabled', function() {
+---
+>     it('works when data is disabled', () => {
+186,194c170,172
+<   describe('#each', function() {
+<     beforeEach(function() {
+<       handlebarsEnv.registerHelper('detectDataInsideEach', function(options) {
+<         return options.data && options.data.exclaim;
+<       });
+<     });
+< 
+<     it('each', function() {
+<       var string = '{{#each goodbyes}}{{text}}! {{/each}}cruel {{world}}!';
+---
+>   describe('#each', () => {
+>     it('each', () => {
+>       const string = '{{#each goodbyes}}{{text}}! {{/each}}cruel {{world}}!';
+198,203c176,177
+<           goodbyes: [
+<             { text: 'goodbye' },
+<             { text: 'Goodbye' },
+<             { text: 'GOODBYE' }
+<           ],
+<           world: 'world'
+---
+>           goodbyes: [{ text: 'goodbye' }, { text: 'Goodbye' }, { text: 'GOODBYE' }],
+>           world: 'world',
+205,207d178
+<         .withMessage(
+<           'each with array argument iterates over the contents when not empty'
+<         )
+213c184
+<           world: 'world'
+---
+>           world: 'world',
+215d185
+<         .withMessage('each with array argument ignores the contents when empty')
+219c189
+<     it('each without data', function() {
+---
+>     it('each without data', () => {
+222,227c192,193
+<           goodbyes: [
+<             { text: 'goodbye' },
+<             { text: 'Goodbye' },
+<             { text: 'GOODBYE' }
+<           ],
+<           world: 'world'
+---
+>           goodbyes: [{ text: 'goodbye' }, { text: 'Goodbye' }, { text: 'GOODBYE' }],
+>           world: 'world',
+240c206
+<     it('each without context', function() {
+---
+>     it('each without context', () => {
+246,248c212,213
+<     it('each with an object and @key', function() {
+<       var string =
+<         '{{#each goodbyes}}{{@key}}. {{text}}! {{/each}}cruel {{world}}!';
+---
+>     it('each with an object and @key', () => {
+>       const string = '{{#each goodbyes}}{{@key}}. {{text}}! {{/each}}cruel {{world}}!';
+250c215
+<       function Clazz() {
+---
+>       function Clazz(this: any) {
+255c220
+<       var hash = { goodbyes: new Clazz(), world: 'world' };
+---
+>       const hash = { goodbyes: new (Clazz as any)(), world: 'world' };
+260,270c225,233
+<       var actual = compileWithPartials(string, hash);
+<       var expected1 =
+<         '&lt;b&gt;#1&lt;/b&gt;. goodbye! 2. GOODBYE! cruel world!';
+<       var expected2 =
+<         '2. GOODBYE! &lt;b&gt;#1&lt;/b&gt;. goodbye! cruel world!';
+< 
+<       equals(
+<         actual === expected1 || actual === expected2,
+<         true,
+<         'each with object argument iterates over the contents when not empty'
+<       );
+---
+>       try {
+>         expectTemplate(string)
+>           .withInput(hash)
+>           .toCompileTo('&lt;b&gt;#1&lt;/b&gt;. goodbye! 2. GOODBYE! cruel world!');
+>       } catch (e) {
+>         expectTemplate(string)
+>           .withInput(hash)
+>           .toCompileTo('2. GOODBYE! &lt;b&gt;#1&lt;/b&gt;. goodbye! cruel world!');
+>       }
+275c238
+<           world: 'world'
+---
+>           world: 'world',
+280,283c243,244
+<     it('each with @index', function() {
+<       expectTemplate(
+<         '{{#each goodbyes}}{{@index}}. {{text}}! {{/each}}cruel {{world}}!'
+<       )
+---
+>     it('each with @index', () => {
+>       expectTemplate('{{#each goodbyes}}{{@index}}. {{text}}! {{/each}}cruel {{world}}!')
+285,290c246,247
+<           goodbyes: [
+<             { text: 'goodbye' },
+<             { text: 'Goodbye' },
+<             { text: 'GOODBYE' }
+<           ],
+<           world: 'world'
+---
+>           goodbyes: [{ text: 'goodbye' }, { text: 'Goodbye' }, { text: 'GOODBYE' }],
+>           world: 'world',
+292d248
+<         .withMessage('The @index variable is used')
+296c252
+<     it('each with nested @index', function() {
+---
+>     it('each with nested @index', () => {
+301,306c257,258
+<           goodbyes: [
+<             { text: 'goodbye' },
+<             { text: 'Goodbye' },
+<             { text: 'GOODBYE' }
+<           ],
+<           world: 'world'
+---
+>           goodbyes: [{ text: 'goodbye' }, { text: 'Goodbye' }, { text: 'GOODBYE' }],
+>           world: 'world',
+308d259
+<         .withMessage('The @index variable is used')
+314c265
+<     it('each with block params', function() {
+---
+>     it('each with block params', () => {
+320c271
+<           world: 'world'
+---
+>           world: 'world',
+322,324c273
+<         .toCompileTo(
+<           '0. goodbye!  0 0 0 1 After 0 1. Goodbye!  1 0 1 1 After 1 cruel world!'
+<         );
+---
+>         .toCompileTo('0. goodbye!  0 0 0 1 After 0 1. Goodbye!  1 0 1 1 After 1 cruel world!');
+327,330c276,284
+<     it('each with block params and strict compilation', function() {
+<       expectTemplate(
+<         '{{#each goodbyes as |value index|}}{{index}}. {{value.text}}!{{/each}}'
+<       )
+---
+>     // TODO: This test has been added to the `4.x` branch of the handlebars.js repo along with a code-fix,
+>     // but a new version of the handlebars package containing this fix has not yet been published to npm.
+>     //
+>     // Before enabling this code, a new version of handlebars needs to be released and the corresponding
+>     // updates needs to be applied to this implementation.
+>     //
+>     // See: https://github.com/handlebars-lang/handlebars.js/commit/30dbf0478109ded8f12bb29832135d480c17e367
+>     it.skip('each with block params and strict compilation', () => {
+>       expectTemplate('{{#each goodbyes as |value index|}}{{index}}. {{value.text}}!{{/each}}')
+336,339c290,291
+<     it('each object with @index', function() {
+<       expectTemplate(
+<         '{{#each goodbyes}}{{@index}}. {{text}}! {{/each}}cruel {{world}}!'
+<       )
+---
+>     it('each object with @index', () => {
+>       expectTemplate('{{#each goodbyes}}{{@index}}. {{text}}! {{/each}}cruel {{world}}!')
+344c296
+<             c: { text: 'GOODBYE' }
+---
+>             c: { text: 'GOODBYE' },
+346c298
+<           world: 'world'
+---
+>           world: 'world',
+348d299
+<         .withMessage('The @index variable is used')
+352,355c303,304
+<     it('each with @first', function() {
+<       expectTemplate(
+<         '{{#each goodbyes}}{{#if @first}}{{text}}! {{/if}}{{/each}}cruel {{world}}!'
+<       )
+---
+>     it('each with @first', () => {
+>       expectTemplate('{{#each goodbyes}}{{#if @first}}{{text}}! {{/if}}{{/each}}cruel {{world}}!')
+357,362c306,307
+<           goodbyes: [
+<             { text: 'goodbye' },
+<             { text: 'Goodbye' },
+<             { text: 'GOODBYE' }
+<           ],
+<           world: 'world'
+---
+>           goodbyes: [{ text: 'goodbye' }, { text: 'Goodbye' }, { text: 'GOODBYE' }],
+>           world: 'world',
+364d308
+<         .withMessage('The @first variable is used')
+368c312
+<     it('each with nested @first', function() {
+---
+>     it('each with nested @first', () => {
+373,378c317,318
+<           goodbyes: [
+<             { text: 'goodbye' },
+<             { text: 'Goodbye' },
+<             { text: 'GOODBYE' }
+<           ],
+<           world: 'world'
+---
+>           goodbyes: [{ text: 'goodbye' }, { text: 'Goodbye' }, { text: 'GOODBYE' }],
+>           world: 'world',
+380,383c320
+<         .withMessage('The @first variable is used')
+<         .toCompileTo(
+<           '(goodbye! goodbye! goodbye!) (goodbye!) (goodbye!) cruel world!'
+<         );
+---
+>         .toCompileTo('(goodbye! goodbye! goodbye!) (goodbye!) (goodbye!) cruel world!');
+386,389c323,324
+<     it('each object with @first', function() {
+<       expectTemplate(
+<         '{{#each goodbyes}}{{#if @first}}{{text}}! {{/if}}{{/each}}cruel {{world}}!'
+<       )
+---
+>     it('each object with @first', () => {
+>       expectTemplate('{{#each goodbyes}}{{#if @first}}{{text}}! {{/if}}{{/each}}cruel {{world}}!')
+392c327
+<           world: 'world'
+---
+>           world: 'world',
+394d328
+<         .withMessage('The @first variable is used')
+398,401c332,333
+<     it('each with @last', function() {
+<       expectTemplate(
+<         '{{#each goodbyes}}{{#if @last}}{{text}}! {{/if}}{{/each}}cruel {{world}}!'
+<       )
+---
+>     it('each with @last', () => {
+>       expectTemplate('{{#each goodbyes}}{{#if @last}}{{text}}! {{/if}}{{/each}}cruel {{world}}!')
+403,408c335,336
+<           goodbyes: [
+<             { text: 'goodbye' },
+<             { text: 'Goodbye' },
+<             { text: 'GOODBYE' }
+<           ],
+<           world: 'world'
+---
+>           goodbyes: [{ text: 'goodbye' }, { text: 'Goodbye' }, { text: 'GOODBYE' }],
+>           world: 'world',
+410d337
+<         .withMessage('The @last variable is used')
+414,417c341,342
+<     it('each object with @last', function() {
+<       expectTemplate(
+<         '{{#each goodbyes}}{{#if @last}}{{text}}! {{/if}}{{/each}}cruel {{world}}!'
+<       )
+---
+>     it('each object with @last', () => {
+>       expectTemplate('{{#each goodbyes}}{{#if @last}}{{text}}! {{/if}}{{/each}}cruel {{world}}!')
+420c345
+<           world: 'world'
+---
+>           world: 'world',
+422d346
+<         .withMessage('The @last variable is used')
+426c350
+<     it('each with nested @last', function() {
+---
+>     it('each with nested @last', () => {
+431,436c355,356
+<           goodbyes: [
+<             { text: 'goodbye' },
+<             { text: 'Goodbye' },
+<             { text: 'GOODBYE' }
+<           ],
+<           world: 'world'
+---
+>           goodbyes: [{ text: 'goodbye' }, { text: 'Goodbye' }, { text: 'GOODBYE' }],
+>           world: 'world',
+438,441c358
+<         .withMessage('The @last variable is used')
+<         .toCompileTo(
+<           '(GOODBYE!) (GOODBYE!) (GOODBYE! GOODBYE! GOODBYE!) cruel world!'
+<         );
+---
+>         .toCompileTo('(GOODBYE!) (GOODBYE!) (GOODBYE! GOODBYE! GOODBYE!) cruel world!');
+444,445c361,362
+<     it('each with function argument', function() {
+<       var string = '{{#each goodbyes}}{{text}}! {{/each}}cruel {{world}}!';
+---
+>     it('each with function argument', () => {
+>       const string = '{{#each goodbyes}}{{text}}! {{/each}}cruel {{world}}!';
+449,454c366,367
+<           goodbyes: function() {
+<             return [
+<               { text: 'goodbye' },
+<               { text: 'Goodbye' },
+<               { text: 'GOODBYE' }
+<             ];
+---
+>           goodbyes() {
+>             return [{ text: 'goodbye' }, { text: 'Goodbye' }, { text: 'GOODBYE' }];
+456c369
+<           world: 'world'
+---
+>           world: 'world',
+458,460d370
+<         .withMessage(
+<           'each with array function argument iterates over the contents when not empty'
+<         )
+466c376
+<           world: 'world'
+---
+>           world: 'world',
+468,470d377
+<         .withMessage(
+<           'each with array function argument ignores the contents when empty'
+<         )
+474,477c381,382
+<     it('each object when last key is an empty string', function() {
+<       expectTemplate(
+<         '{{#each goodbyes}}{{@index}}. {{text}}! {{/each}}cruel {{world}}!'
+<       )
+---
+>     it('each object when last key is an empty string', () => {
+>       expectTemplate('{{#each goodbyes}}{{@index}}. {{text}}! {{/each}}cruel {{world}}!')
+482c387
+<             '': { text: 'GOODBYE' }
+---
+>             '': { text: 'GOODBYE' },
+484c389
+<           world: 'world'
+---
+>           world: 'world',
+486d390
+<         .withMessage('Empty string key is not skipped')
+490,493c394,395
+<     it('data passed to helpers', function() {
+<       expectTemplate(
+<         '{{#each letters}}{{this}}{{detectDataInsideEach}}{{/each}}'
+<       )
+---
+>     it('data passed to helpers', () => {
+>       expectTemplate('{{#each letters}}{{this}}{{detectDataInsideEach}}{{/each}}')
+495c397,399
+<         .withMessage('should output data')
+---
+>         .withHelper('detectDataInsideEach', function (options) {
+>           return options.data && options.data.exclaim;
+>         })
+498,499c402,403
+<             exclaim: '!'
+<           }
+---
+>             exclaim: '!',
+>           },
+504,508c408,409
+<     it('each on implicit context', function() {
+<       expectTemplate('{{#each}}{{text}}! {{/each}}cruel world!').toThrow(
+<         handlebarsEnv.Exception,
+<         'Must pass iterator to #each'
+<       );
+---
+>     it('each on implicit context', () => {
+>       expectTemplate('{{#each}}{{text}}! {{/each}}cruel world!').toThrow(Handlebars.Exception);
+511,513c412,417
+<     if (global.Symbol && global.Symbol.iterator) {
+<       it('each on iterable', function() {
+<         function Iterator(arr) {
+---
+>     it('each on iterable', () => {
+>       class Iterator {
+>         private arr: any[];
+>         private index: number = 0;
+> 
+>         constructor(arr: any[]) {
+515d418
+<           this.index = 0;
+517,519c420,423
+<         Iterator.prototype.next = function() {
+<           var value = this.arr[this.index];
+<           var done = this.index === this.arr.length;
+---
+> 
+>         next() {
+>           const value = this.arr[this.index];
+>           const done = this.index === this.arr.length;
+523,525c427,434
+<           return { value: value, done: done };
+<         };
+<         function Iterable(arr) {
+---
+>           return { value, done };
+>         }
+>       }
+> 
+>       class Iterable {
+>         private arr: any[];
+> 
+>         constructor(arr: any[]) {
+528c437,438
+<         Iterable.prototype[global.Symbol.iterator] = function() {
+---
+> 
+>         [Symbol.iterator]() {
+530,531c440,441
+<         };
+<         var string = '{{#each goodbyes}}{{text}}! {{/each}}cruel {{world}}!';
+---
+>         }
+>       }
+533,545c443
+<         expectTemplate(string)
+<           .withInput({
+<             goodbyes: new Iterable([
+<               { text: 'goodbye' },
+<               { text: 'Goodbye' },
+<               { text: 'GOODBYE' }
+<             ]),
+<             world: 'world'
+<           })
+<           .withMessage(
+<             'each with array argument iterates over the contents when not empty'
+<           )
+<           .toCompileTo('goodbye! Goodbye! GOODBYE! cruel world!');
+---
+>       const string = '{{#each goodbyes}}{{text}}! {{/each}}cruel {{world}}!';
+547,557c445,458
+<         expectTemplate(string)
+<           .withInput({
+<             goodbyes: new Iterable([]),
+<             world: 'world'
+<           })
+<           .withMessage(
+<             'each with array argument ignores the contents when empty'
+<           )
+<           .toCompileTo('cruel world!');
+<       });
+<     }
+---
+>       expectTemplate(string)
+>         .withInput({
+>           goodbyes: new Iterable([{ text: 'goodbye' }, { text: 'Goodbye' }, { text: 'GOODBYE' }]),
+>           world: 'world',
+>         })
+>         .toCompileTo('goodbye! Goodbye! GOODBYE! cruel world!');
+> 
+>       expectTemplate(string)
+>         .withInput({
+>           goodbyes: new Iterable([]),
+>           world: 'world',
+>         })
+>         .toCompileTo('cruel world!');
+>     });
+560c461
+<   describe('#log', function() {
+---
+>   describe('#log', function () {
+562,564c463,465
+<     if (typeof console === 'undefined') {
+<       return;
+<     }
+---
+>     let $log: typeof console.log;
+>     let $info: typeof console.info;
+>     let $error: typeof console.error;
+566,567c467
+<     var $log, $info, $error;
+<     beforeEach(function() {
+---
+>     beforeEach(function () {
+570a471,472
+> 
+>       global.kbnHandlebarsEnv = Handlebars.create();
+572c474,475
+<     afterEach(function() {
+---
+> 
+>     afterEach(function () {
+575a479,480
+> 
+>       global.kbnHandlebarsEnv = null;
+578,580c483,486
+<     it('should call logger at default level', function() {
+<       var levelArg, logArg;
+<       handlebarsEnv.log = function(level, arg) {
+---
+>     it('should call logger at default level', function () {
+>       let levelArg;
+>       let logArg;
+>       kbnHandlebarsEnv!.log = function (level, arg) {
+585,590c491,493
+<       expectTemplate('{{log blah}}')
+<         .withInput({ blah: 'whee' })
+<         .withMessage('log should not display')
+<         .toCompileTo('');
+<       equals(1, levelArg, 'should call log with 1');
+<       equals('whee', logArg, "should call log with 'whee'");
+---
+>       expectTemplate('{{log blah}}').withInput({ blah: 'whee' }).toCompileTo('');
+>       expect(1).toEqual(levelArg);
+>       expect('whee').toEqual(logArg);
+593,595c496,499
+<     it('should call logger at data level', function() {
+<       var levelArg, logArg;
+<       handlebarsEnv.log = function(level, arg) {
+---
+>     it('should call logger at data level', function () {
+>       let levelArg;
+>       let logArg;
+>       kbnHandlebarsEnv!.log = function (level, arg) {
+605,606c509,510
+<       equals('03', levelArg);
+<       equals('whee', logArg);
+---
+>       expect('03').toEqual(levelArg);
+>       expect('whee').toEqual(logArg);
+609,610c513,515
+<     it('should output to info', function() {
+<       var called;
+---
+>     it('should output to info', function () {
+>       let calls = 0;
+>       const callsExpected = process.env.AST || process.env.EVAL ? 1 : 2;
+612,616c517,523
+<       console.info = function(info) {
+<         equals('whee', info);
+<         called = true;
+<         console.info = $info;
+<         console.log = $log;
+---
+>       console.info = function (info) {
+>         expect('whee').toEqual(info);
+>         calls++;
+>         if (calls === callsExpected) {
+>           console.info = $info;
+>           console.log = $log;
+>         }
+618,622c525,531
+<       console.log = function(log) {
+<         equals('whee', log);
+<         called = true;
+<         console.info = $info;
+<         console.log = $log;
+---
+>       console.log = function (log) {
+>         expect('whee').toEqual(log);
+>         calls++;
+>         if (calls === callsExpected) {
+>           console.info = $info;
+>           console.log = $log;
+>         }
+625,628c534,535
+<       expectTemplate('{{log blah}}')
+<         .withInput({ blah: 'whee' })
+<         .toCompileTo('');
+<       equals(true, called);
+---
+>       expectTemplate('{{log blah}}').withInput({ blah: 'whee' }).toCompileTo('');
+>       expect(calls).toEqual(callsExpected);
+631,632c538,540
+<     it('should log at data level', function() {
+<       var called;
+---
+>     it('should log at data level', function () {
+>       let calls = 0;
+>       const callsExpected = process.env.AST || process.env.EVAL ? 1 : 2;
+634,637c542,545
+<       console.error = function(log) {
+<         equals('whee', log);
+<         called = true;
+<         console.error = $error;
+---
+>       console.error = function (log) {
+>         expect('whee').toEqual(log);
+>         calls++;
+>         if (calls === callsExpected) console.error = $error;
+645c553
+<       equals(true, called);
+---
+>       expect(calls).toEqual(callsExpected);
+648,649c556,558
+<     it('should handle missing logger', function() {
+<       var called = false;
+---
+>     it('should handle missing logger', function () {
+>       let calls = 0;
+>       const callsExpected = process.env.AST || process.env.EVAL ? 1 : 2;
+650a560
+>       // @ts-expect-error
+652,655c562,565
+<       console.log = function(log) {
+<         equals('whee', log);
+<         called = true;
+<         console.log = $log;
+---
+>       console.log = function (log) {
+>         expect('whee').toEqual(log);
+>         calls++;
+>         if (calls === callsExpected) console.log = $log;
+663c573
+<       equals(true, called);
+---
+>       expect(calls).toEqual(callsExpected);
+666,667c576,578
+<     it('should handle string log levels', function() {
+<       var called;
+---
+>     it('should handle string log levels', function () {
+>       let calls = 0;
+>       const callsExpected = process.env.AST || process.env.EVAL ? 1 : 2;
+669,671c580,582
+<       console.error = function(log) {
+<         equals('whee', log);
+<         called = true;
+---
+>       console.error = function (log) {
+>         expect('whee').toEqual(log);
+>         calls++;
+679c590
+<       equals(true, called);
+---
+>       expect(calls).toEqual(callsExpected);
+681c592
+<       called = false;
+---
+>       calls = 0;
+688c599
+<       equals(true, called);
+---
+>       expect(calls).toEqual(callsExpected);
+691,692c602,604
+<     it('should handle hash log levels', function() {
+<       var called;
+---
+>     it('should handle hash log levels [1]', function () {
+>       let calls = 0;
+>       const callsExpected = process.env.AST || process.env.EVAL ? 1 : 2;
+694,696c606,608
+<       console.error = function(log) {
+<         equals('whee', log);
+<         called = true;
+---
+>       console.error = function (log) {
+>         expect('whee').toEqual(log);
+>         calls++;
+699,702c611,612
+<       expectTemplate('{{log blah level="error"}}')
+<         .withInput({ blah: 'whee' })
+<         .toCompileTo('');
+<       equals(true, called);
+---
+>       expectTemplate('{{log blah level="error"}}').withInput({ blah: 'whee' }).toCompileTo('');
+>       expect(calls).toEqual(callsExpected);
+705,706c615,616
+<     it('should handle hash log levels', function() {
+<       var called = false;
+---
+>     it('should handle hash log levels [2]', function () {
+>       let called = false;
+708,711c618,625
+<       console.info = console.log = console.error = console.debug = function() {
+<         called = true;
+<         console.info = console.log = console.error = console.debug = $log;
+<       };
+---
+>       console.info =
+>         console.log =
+>         console.error =
+>         console.debug =
+>           function () {
+>             called = true;
+>             console.info = console.log = console.error = console.debug = $log;
+>           };
+713,716c627,628
+<       expectTemplate('{{log blah level="debug"}}')
+<         .withInput({ blah: 'whee' })
+<         .toCompileTo('');
+<       equals(false, called);
+---
+>       expectTemplate('{{log blah level="debug"}}').withInput({ blah: 'whee' }).toCompileTo('');
+>       expect(false).toEqual(called);
+719,720c631,633
+<     it('should pass multiple log arguments', function() {
+<       var called;
+---
+>     it('should pass multiple log arguments', function () {
+>       let calls = 0;
+>       const callsExpected = process.env.AST || process.env.EVAL ? 1 : 2;
+722,727c635,640
+<       console.info = console.log = function(log1, log2, log3) {
+<         equals('whee', log1);
+<         equals('foo', log2);
+<         equals(1, log3);
+<         called = true;
+<         console.log = $log;
+---
+>       console.info = console.log = function (log1, log2, log3) {
+>         expect('whee').toEqual(log1);
+>         expect('foo').toEqual(log2);
+>         expect(1).toEqual(log3);
+>         calls++;
+>         if (calls === callsExpected) console.log = $log;
+730,733c643,644
+<       expectTemplate('{{log blah "foo" 1}}')
+<         .withInput({ blah: 'whee' })
+<         .toCompileTo('');
+<       equals(true, called);
+---
+>       expectTemplate('{{log blah "foo" 1}}').withInput({ blah: 'whee' }).toCompileTo('');
+>       expect(calls).toEqual(callsExpected);
+736,737c647,649
+<     it('should pass zero log arguments', function() {
+<       var called;
+---
+>     it('should pass zero log arguments', function () {
+>       let calls = 0;
+>       const callsExpected = process.env.AST || process.env.EVAL ? 1 : 2;
+739,742c651,654
+<       console.info = console.log = function() {
+<         expect(arguments.length).to.equal(0);
+<         called = true;
+<         console.log = $log;
+---
+>       console.info = console.log = function () {
+>         expect(arguments.length).toEqual(0);
+>         calls++;
+>         if (calls === callsExpected) console.log = $log;
+745,748c657,658
+<       expectTemplate('{{log}}')
+<         .withInput({ blah: 'whee' })
+<         .toCompileTo('');
+<       expect(called).to.be.true();
+---
+>       expectTemplate('{{log}}').withInput({ blah: 'whee' }).toCompileTo('');
+>       expect(calls).toEqual(callsExpected);
+753,754c663,664
+<   describe('#lookup', function() {
+<     it('should lookup arbitrary content', function() {
+---
+>   describe('#lookup', () => {
+>     it('should lookup arbitrary content', () => {
+760c670
+<     it('should not fail on undefined value', function() {
+---
+>     it('should not fail on undefined value', () => {

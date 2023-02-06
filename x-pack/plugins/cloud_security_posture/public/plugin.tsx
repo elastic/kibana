@@ -19,10 +19,10 @@ import type {
 import { CLOUD_SECURITY_POSTURE_PACKAGE_NAME } from '../common/constants';
 import { SetupContext } from './application/setup_context';
 
-const LazyCspPolicyTemplateForm = lazy(
-  () => import('./components/fleet_extensions/policy_template_form')
+const LazyCspEditPolicy = lazy(() => import('./components/fleet_extensions/policy_extension_edit'));
+const LazyCspCreatePolicy = lazy(
+  () => import('./components/fleet_extensions/policy_extension_create')
 );
-
 const LazyCspCustomAssets = lazy(
   () => import('./components/fleet_extensions/custom_assets_extension')
 );
@@ -57,8 +57,14 @@ export class CspPlugin
   public start(core: CoreStart, plugins: CspClientPluginStartDeps): CspClientPluginStart {
     plugins.fleet.registerExtension({
       package: CLOUD_SECURITY_POSTURE_PACKAGE_NAME,
-      view: 'package-policy-replace-define-step',
-      Component: LazyCspPolicyTemplateForm,
+      view: 'package-policy-create',
+      Component: LazyCspCreatePolicy,
+    });
+
+    plugins.fleet.registerExtension({
+      package: CLOUD_SECURITY_POSTURE_PACKAGE_NAME,
+      view: 'package-policy-edit',
+      Component: LazyCspEditPolicy,
     });
 
     plugins.fleet.registerExtension({

@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { intersection } from 'lodash';
 import { SearchRequest } from '@elastic/elasticsearch/lib/api/types';
 import { SUMMARY_FILTER } from '../../common/constants/client_defaults';
 import { UptimeEsClient } from '../legacy_uptime/lib/lib';
@@ -118,6 +117,7 @@ export async function queryMonitorStatus(
   for await (const response of promises) {
     response.body.aggregations?.id.buckets.forEach(
       ({ location, key: queryId }: { location: any; key: string }) => {
+        const monLocations = monitorLocationsMap?.[queryId];
         const locationSummaries = location.buckets.map(
           ({ status, key: locationName }: { key: string; status: any }) => {
             const ping = status.hits.hits[0]._source as Ping & { '@timestamp': string };
@@ -125,11 +125,8 @@ export async function queryMonitorStatus(
           }
         ) as Array<{ location: string; ping: Ping & { '@timestamp': string } }>;
 
-        // discard any locations that are not in the monitorLocationsMap for the given monitor as well as those which are
-        // in monitorLocationsMap but not in listOfLocations
-        const monLocations = monitorLocationsMap?.[queryId];
-        const monQueriedLocations = intersection(monLocations, listOfLocations);
-        monQueriedLocations?.forEach((monLocation) => {
+        // discard any locations that are not in the monitorLocationsMap for the given monitor
+        monLocations?.forEach((monLocation) => {
           const locationSummary = locationSummaries.find(
             (summary) => summary.location === monLocation
           );
@@ -169,5 +166,5 @@ export async function queryMonitorStatus(
       }
     );
   }
-  return { up, down, pending, upConfigs, downConfigs, enabledIds: ids, allIds: ids };
+  return { up, down, pending, upConfigs, downConfigs, enabledIds: ids };
 }

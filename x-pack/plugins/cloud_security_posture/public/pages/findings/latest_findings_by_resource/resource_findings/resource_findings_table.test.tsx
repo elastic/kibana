@@ -12,7 +12,7 @@ import { TestProvider } from '../../../../test/test_provider';
 
 import { capitalize } from 'lodash';
 import moment from 'moment';
-import { getFindingsFixture } from '../../../../test/fixtures/findings_fixture';
+import { getResourceFindingsTableFixture } from '../../../../test/fixtures/resource_findings_fixture';
 
 describe('<ResourceFindingsTable />', () => {
   it('should render no findings empty state when status success and data has a length of zero ', async () => {
@@ -38,8 +38,8 @@ describe('<ResourceFindingsTable />', () => {
     ).toBeInTheDocument();
   });
 
-  it('should render resource finding table content when data has a non zero length', () => {
-    const data = Array.from({ length: 10 }, getFindingsFixture);
+  it('should render resource finding table content when data items exists', () => {
+    const data = Array.from({ length: 10 }, getResourceFindingsTableFixture);
 
     const props: ResourceFindingsTableProps = {
       loading: false,

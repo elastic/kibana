@@ -27,15 +27,12 @@ export const getAllMonitors = async ({
   soClient,
   search,
   fields,
-  filter,
   sortField,
   sortOrder,
-  searchFields,
 }: {
   soClient: SavedObjectsClientContract;
   search?: string;
-  filter?: string;
-} & Pick<SavedObjectsFindOptions, 'sortField' | 'sortOrder' | 'fields' | 'searchFields'>) => {
+} & Pick<SavedObjectsFindOptions, 'sortField' | 'sortOrder' | 'fields'>) => {
   const finder = soClient.createPointInTimeFinder({
     type: syntheticsMonitorType,
     perPage: 1000,
@@ -43,8 +40,6 @@ export const getAllMonitors = async ({
     sortField,
     sortOrder,
     fields,
-    filter,
-    searchFields,
   });
 
   const hits: Array<SavedObjectsFindResult<EncryptedSyntheticsMonitor>> = [];

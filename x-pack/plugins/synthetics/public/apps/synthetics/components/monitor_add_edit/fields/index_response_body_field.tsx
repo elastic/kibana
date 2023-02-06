@@ -16,14 +16,12 @@ export interface ResponseBodyIndexFieldProps {
   defaultValue: ResponseBodyIndexPolicy;
   onChange: (responseBodyIndexPolicy: ResponseBodyIndexPolicy) => void;
   onBlur?: () => void;
-  readOnly?: boolean;
 }
 
 export const ResponseBodyIndexField = ({
   defaultValue,
   onChange,
   onBlur,
-  readOnly,
 }: ResponseBodyIndexFieldProps) => {
   const [policy, setPolicy] = useState<ResponseBodyIndexPolicy>(
     defaultValue !== ResponseBodyIndexPolicy.NEVER ? defaultValue : ResponseBodyIndexPolicy.ON_ERROR
@@ -51,7 +49,7 @@ export const ResponseBodyIndexField = ({
           checked={checked}
           label={
             <FormattedMessage
-              id="xpack.synthetics.monitorConfig.indexResponseBody.label"
+              id="xpack.synthetics.createPackagePolicy.stepConfigure.httpAdvancedOptions.responseConfig.indexResponseBody"
               defaultMessage="Index response body"
             />
           }
@@ -60,14 +58,13 @@ export const ResponseBodyIndexField = ({
             setChecked(checkedEvent);
           }}
           onBlur={() => onBlur?.()}
-          disabled={readOnly}
         />
       </EuiFlexItem>
       {checked && (
         <EuiFlexItem>
           <EuiSelect
             aria-label={i18n.translate(
-              'xpack.synthetics.monitorConfig.indexResponseBodyPolicy.label',
+              'xpack.synthetics.createPackagePolicy.stepConfigure.httpAdvancedOptions.responseConfig.responseBodyIndexPolicy',
               {
                 defaultMessage: 'Response body index policy',
               }
@@ -79,7 +76,6 @@ export const ResponseBodyIndexField = ({
               setPolicy(event.target.value as ResponseBodyIndexPolicy);
             }}
             onBlur={() => onBlur?.()}
-            disabled={readOnly}
           />
         </EuiFlexItem>
       )}
