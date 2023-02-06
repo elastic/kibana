@@ -48,7 +48,7 @@ const ControlFrameError = ({ error }: ControlFrameErrorProps) => {
     >
       <FormattedMessage
         id="controls.frame.error.message"
-        defaultMessage="An error has occurred. Read more"
+        defaultMessage="An error occurred. View more"
       />
     </EuiButtonEmpty>
   );
