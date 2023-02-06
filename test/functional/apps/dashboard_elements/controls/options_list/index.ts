@@ -34,7 +34,7 @@ export default function ({ loadTestFile, getService, getPageObjects }: FtrProvid
     await security.testUser.restoreDefaults();
   };
 
-  describe.only('Options list control', async () => {
+  describe('Options list control', async () => {
     before(setup);
     after(teardown);
 
