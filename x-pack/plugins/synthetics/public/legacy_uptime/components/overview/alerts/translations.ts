@@ -270,8 +270,8 @@ export const TlsTranslations = {
         'The context of this `when` is in the conditional sense, like "when there are three cookies, eat them all".',
     }
   ),
-  criteriaValue: i18n.translate('xpack.synthetics.alerts.tls.criteriaExpression.value', {
-    defaultMessage: 'any monitor',
+  criteriaValue: i18n.translate('xpack.synthetics.tls.criteriaExpression.value', {
+    defaultMessage: 'matching monitor',
   }),
   expirationDescription: i18n.translate('xpack.synthetics.tls.expirationExpression.description', {
     defaultMessage: 'has a certificate expiring within days: ',

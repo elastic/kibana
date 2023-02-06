@@ -33019,7 +33019,6 @@
     "xpack.synthetics.alerts.tls.clientName": "Uptime TLS",
     "xpack.synthetics.alerts.tls.criteriaExpression.ariaLabel": "显示此告警监视的监测条件的表达式",
     "xpack.synthetics.alerts.tls.criteriaExpression.description": "当",
-    "xpack.synthetics.alerts.tls.criteriaExpression.value": "任意监测",
     "xpack.synthetics.alerts.tls.description": "运行时间监测的 TLS 证书即将过期时告警。",
     "xpack.synthetics.alerts.tls.expiredLabel": "已过期",
     "xpack.synthetics.alerts.tls.expiringLabel": "将到期",
