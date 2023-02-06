@@ -13,6 +13,7 @@ import {
   EuiLoadingSpinner,
   EuiIcon,
   EuiSpacer,
+  EuiBetaBadge,
   EuiCodeBlock,
   EuiModalHeader,
   EuiModalHeaderTitle,
@@ -24,6 +25,8 @@ import {
   EuiFormRow,
   EuiFieldText,
   EuiSelect,
+  EuiFlexGroup,
+  EuiFlexItem,
 } from '@elastic/eui';
 import numeral from '@elastic/numeral';
 import { css } from '@emotion/react';
@@ -291,7 +294,7 @@ const InsightComponent = ({
           <EuiIcon type="timeline" />
           {` ${label} (${numeral(totalCount).format(resultFormat)})`}
         </InvestigateInTimelineButton>
-        <p>{description}</p>
+        <div>{description}</div>
       </>
     );
   }
@@ -344,6 +347,7 @@ const InsightEditorComponent = ({
       description: node?.description,
       relativeTimerange: node?.relativeTimerange || '0',
     },
+    shouldUnregister: true,
   });
 
   const labelController = useController({ name: 'label', control: formMethods.control });
@@ -377,34 +381,31 @@ const InsightEditorComponent = ({
     [dateRangeChoices, uiSettings]
   );
 
-  const onSubmit = useCallback(
-    (data) => {
-      onSave(
-        `!{insight${JSON.stringify(
-          pickBy(
-            {
-              label: labelController.field.value,
-              description: descriptionController.field.value,
-              providers,
-              ...getTimeRangeSelection(relativeTimerangeController.field.value),
-            },
-            (value) => !isEmpty(value)
-          )
-        )}}`,
-        {
-          block: true,
-        }
-      );
-    },
-    [
-      onSave,
-      providers,
-      labelController.field.value,
-      descriptionController.field.value,
-      relativeTimerangeController.field.value,
-      getTimeRangeSelection,
-    ]
-  );
+  const onSubmit = useCallback(() => {
+    onSave(
+      `!{insight${JSON.stringify(
+        pickBy(
+          {
+            label: labelController.field.value,
+            description: descriptionController.field.value,
+            providers,
+            ...getTimeRangeSelection(relativeTimerangeController.field.value),
+          },
+          (value) => !isEmpty(value)
+        )
+      )}}`,
+      {
+        block: true,
+      }
+    );
+  }, [
+    onSave,
+    providers,
+    labelController.field.value,
+    descriptionController.field.value,
+    relativeTimerangeController.field.value,
+    getTimeRangeSelection,
+  ]);
 
   const onChange = useCallback((filters: Filter[]) => {
     setProviders(filtersToInsightProviders(filters));
@@ -439,23 +440,50 @@ const InsightEditorComponent = ({
         `}
       >
         <EuiModalHeaderTitle>
-          {isEditMode ? (
-            <FormattedMessage
-              id="xpack.securitySolution.markdown.insight.editModalTitle"
-              defaultMessage="Edit insight query"
-            />
-          ) : (
-            <FormattedMessage
-              id="xpack.securitySolution.markdown.insight.addModalTitle"
-              defaultMessage="Add insight query"
-            />
-          )}
+          <EuiFlexGroup gutterSize={'s'}>
+            <EuiFlexItem>
+              {isEditMode ? (
+                <FormattedMessage
+                  id="xpack.securitySolution.markdown.insight.editModalTitle"
+                  defaultMessage="Edit investigation query"
+                />
+              ) : (
+                <FormattedMessage
+                  id="xpack.securitySolution.markdown.insight.addModalTitle"
+                  defaultMessage="Add investigation query"
+                />
+              )}
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiBetaBadge
+                color={'hollow'}
+                label={i18n.translate('xpack.securitySolution.markdown.insight.technicalPreview', {
+                  defaultMessage: 'Technical Preview',
+                })}
+                size="s"
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
         </EuiModalHeaderTitle>
       </EuiModalHeader>
 
       <EuiModalBody>
         <FormProvider {...formMethods}>
           <EuiForm fullWidth>
+            <EuiFormRow
+              label="Label"
+              helpText="Label for the filter button rendered in the guide"
+              fullWidth
+            >
+              <EuiFieldText
+                {...{
+                  ...formMethods.register('label'),
+                  ref: null,
+                }}
+                name="label"
+                onChange={labelController.field.onChange}
+              />
+            </EuiFormRow>
             <EuiFormRow
               label="Description"
               helpText="Description of the relevance of the query"
@@ -467,17 +495,6 @@ const InsightEditorComponent = ({
                 onChange={descriptionController.field.onChange}
               />
             </EuiFormRow>
-            <EuiFormRow
-              label="Label"
-              helpText="Label for the filter button rendered in the guide"
-              fullWidth
-            >
-              <EuiFieldText
-                {...{ ...formMethods.register('label'), ref: null }}
-                name="label"
-                onChange={labelController.field.onChange}
-              />
-            </EuiFormRow>
             <EuiFormRow fullWidth>
               <FiltersBuilderLazy
                 filters={filtersStub}
@@ -487,11 +504,12 @@ const InsightEditorComponent = ({
               />
             </EuiFormRow>
             <EuiFormRow
-              label="Relative time range to use when building the query (optional)"
+              label="Relative time range"
+              helpText="Select a time range relative to the time of the alert (optional)"
               fullWidth
             >
               <EuiSelect
-                {...formMethods.register('relativeTimerange')}
+                {...{ ...formMethods.register('relativeTimerange'), ref: null }}
                 onChange={selectOnChange}
                 options={dateRangeChoices}
               />
@@ -530,11 +548,11 @@ const exampleInsight = `!{insight{
   "description": "Click to investigate",
   "providers": [
     [     
-      {"field": "event.id", "value": "{{kibana.alert.original_event.id}}", "queryType": "phrase"}
+      {"field": "event.id", "value": "{{kibana.alert.original_event.id}}", "queryType": "phrase", "excluded": "false"}
     ],
     [  
-      {"field": "event.action", "value": "", "type": "exists"},
-      {"field": "process.pid", "value": "{{process.pid}}", "type": "phrase"}
+      {"field": "event.action", "value": "", "queryType": "exists", "excluded": "false"},
+      {"field": "process.pid", "value": "{{process.pid}}", "queryType": "phrase", "excluded":"false"}
     ]
   ]
 }}`;
