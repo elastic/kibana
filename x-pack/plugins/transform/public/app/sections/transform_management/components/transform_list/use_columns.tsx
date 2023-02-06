@@ -16,6 +16,7 @@ import {
   EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiHealth,
   EuiProgress,
   EuiScreenReaderOnly,
   EuiText,
@@ -30,7 +31,11 @@ import {
   TransformId,
 } from '../../../../../../common/types/transform';
 import { TransformStats } from '../../../../../../common/types/transform_stats';
-import { TRANSFORM_STATE } from '../../../../../../common/constants';
+import {
+  TRANSFORM_HEALTH_COLOR,
+  TRANSFORM_HEALTH_DESCRIPTION,
+  TRANSFORM_STATE,
+} from '../../../../../../common/constants';
 
 import { getTransformProgress, TransformListRow, TRANSFORM_LIST_COLUMN } from '../../../../common';
 import { useActions } from './use_actions';
@@ -99,6 +104,7 @@ export const useColumns = (
     EuiTableFieldDataColumnType<TransformListRow>,
     EuiTableComputedColumnType<TransformListRow>,
     EuiTableFieldDataColumnType<TransformListRow>,
+    EuiTableComputedColumnType<TransformListRow>,
     EuiTableComputedColumnType<TransformListRow>,
     EuiTableComputedColumnType<TransformListRow>,
     EuiTableComputedColumnType<TransformListRow>,
@@ -308,6 +314,20 @@ export const useColumns = (
         );
       },
       width: '100px',
+    },
+    {
+      name: i18n.translate('xpack.transform.health', { defaultMessage: 'Health' }),
+      'data-test-subj': 'transformListColumnHealth',
+      sortable: (item: TransformListRow) => item.stats.health.status,
+      truncateText: true,
+      render(item: TransformListRow) {
+        return (
+          <EuiToolTip content={TRANSFORM_HEALTH_DESCRIPTION[item.stats.health.status]}>
+            <EuiHealth color={TRANSFORM_HEALTH_COLOR[item.stats.health.status]} />
+          </EuiToolTip>
+        );
+      },
+      width: '60px',
     },
     {
       name: i18n.translate('xpack.transform.tableActionLabel', { defaultMessage: 'Actions' }),

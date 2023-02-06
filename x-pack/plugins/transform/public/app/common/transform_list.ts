@@ -19,6 +19,7 @@ export enum TRANSFORM_LIST_COLUMN {
 export interface TransformListRow {
   id: TransformId;
   config: TransformConfigUnion;
+  health?: string; // added property on client side to allow filtering by this field
   mode?: string; // added property on client side to allow filtering by this field
   stats: TransformStats;
   alerting_rules?: TransformHealthAlertRule[];

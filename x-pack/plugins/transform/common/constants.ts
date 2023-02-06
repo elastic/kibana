@@ -98,6 +98,39 @@ export const TRANSFORM_STATE = {
 const transformStates = Object.values(TRANSFORM_STATE);
 export type TransformState = typeof transformStates[number];
 
+export const TRANSFORM_HEALTH = {
+  GREEN: 'green',
+  UNKNOWN: 'unknown',
+  YELLOW: 'yellow',
+  RED: 'red',
+} as const;
+
+const transformHealth = Object.values(TRANSFORM_HEALTH);
+export type TransformHealth = typeof transformHealth[number];
+
+export const TRANSFORM_HEALTH_COLOR = {
+  green: 'success',
+  unknown: 'subdued',
+  yellow: 'warning',
+  red: 'danger',
+} as const;
+
+export const TRANSFORM_HEALTH_DESCRIPTION = {
+  green: i18n.translate('xpack.transform.transformHealth.greenDescription', {
+    defaultMessage: 'The transform is healthy.',
+  }),
+  unknown: i18n.translate('xpack.transform.transformHealth.unknownDescription', {
+    defaultMessage: 'The health of the transform could not be determined.',
+  }),
+  yellow: i18n.translate('xpack.transform.transformHealth.yellowDescription', {
+    defaultMessage:
+      'The functionality of the transform is in a degraded state and may need remediation to avoid the health becoming red.',
+  }),
+  red: i18n.translate('xpack.transform.transformHealth.redDescription', {
+    defaultMessage: 'The transform is experiencing an outage or is unavailable for use.',
+  }),
+} as const;
+
 export const TRANSFORM_MODE = {
   BATCH: 'batch',
   CONTINUOUS: 'continuous',
