@@ -18,7 +18,10 @@ const ProgressWrapper = styled.div`
 const StyledEuiText = styled(EuiText)`
   margin-top: -${({ theme }) => theme.eui.euiSizeM};
 `;
-
+const StyledEuiProgress = styled(EuiProgress)`
+  margin-top: ${({ theme }) => theme.eui.euiSizeS};
+  margin-bottom: ${({ theme }) => theme.eui.euiSizeS};
+`;
 export interface AlertsProcessBarProps {
   data: AlertsProgressBarData[];
   isLoading: boolean;
@@ -36,7 +39,11 @@ export const AlertsProgressBar: React.FC<AlertsProcessBarProps> = ({
       <StyledEuiText size="s" data-test-subj="alerts-progress-bar-title">
         <h5>{groupBySelection}</h5>
       </StyledEuiText>
-      <EuiHorizontalRule margin="xs" />
+      {isLoading ? (
+        <StyledEuiProgress size="xs" color="primary" />
+      ) : (
+        <EuiHorizontalRule margin="xs" />
+      )}
       {!isLoading && data.length === 0 ? (
         <>
           <EuiText size="s" textAlign="center" data-test-subj="empty-proress-bar">

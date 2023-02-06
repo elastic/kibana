@@ -33,10 +33,8 @@ import { GROUP_BY_LABEL } from '../../../components/alerts_kpis/common/translati
 import { RESET_GROUP_BY_FIELDS } from '../../../../common/components/chart_settings_popover/configurations/default/translations';
 import { useQueryToggle } from '../../../../common/containers/query_toggle';
 
-const TABLE_PANEL_HEIGHT = 330; // px
-const TRENT_CHART_HEIGHT = 127; // px
-const TREND_CHART_PANEL_HEIGHT = 256; // px
-const ALERTS_CHARTS_PANEL_HEIGHT = 375; // px
+const TREND_CHART_HEIGHT = 280; // px
+const CHART_PANEL_HEIGHT = 375; // px
 
 const DETECTIONS_ALERTS_CHARTS_PANEL_ID = 'detection-alerts-charts-panel';
 
@@ -217,7 +215,7 @@ const ChartPanelsComponent: React.FC<Props> = ({
           ) : (
             <AlertsHistogramPanel
               alignHeader="flexStart"
-              chartHeight={TRENT_CHART_HEIGHT}
+              chartHeight={TREND_CHART_HEIGHT}
               chartOptionsContextMenu={chartOptionsContextMenu}
               comboboxRef={stackByField0ComboboxRef}
               defaultStackByOption={trendChartStackBy}
@@ -225,7 +223,7 @@ const ChartPanelsComponent: React.FC<Props> = ({
               filters={alertsDefaultFilters}
               inspectTitle={i18n.TREND}
               onFieldSelected={updateCommonStackBy0}
-              panelHeight={TREND_CHART_PANEL_HEIGHT}
+              panelHeight={CHART_PANEL_HEIGHT}
               query={query}
               runtimeMappings={runtimeMappings}
               setComboboxInputRef={setStackByField0ComboboxInputRef}
@@ -255,7 +253,7 @@ const ChartPanelsComponent: React.FC<Props> = ({
               extraActions={resetGroupByFieldAction}
               filters={alertsDefaultFilters}
               inspectTitle={i18n.TABLE}
-              panelHeight={TABLE_PANEL_HEIGHT}
+              panelHeight={CHART_PANEL_HEIGHT}
               query={query}
               runtimeMappings={runtimeMappings}
               setStackByField0={updateCommonStackBy0}
@@ -284,6 +282,7 @@ const ChartPanelsComponent: React.FC<Props> = ({
               addFilter={addFilter}
               alignHeader="flexStart"
               chartOptionsContextMenu={chartOptionsContextMenu}
+              height={CHART_PANEL_HEIGHT}
               inspectTitle={i18n.TREEMAP}
               isPanelExpanded={isAlertsPageChartsEnabled ? isExpanded : isTreemapPanelExpanded}
               filters={alertsDefaultFilters}
@@ -317,7 +316,7 @@ const ChartPanelsComponent: React.FC<Props> = ({
               addFilter={addFilter}
               filters={alertsDefaultFilters}
               query={query}
-              panelHeight={ALERTS_CHARTS_PANEL_HEIGHT}
+              panelHeight={CHART_PANEL_HEIGHT}
               signalIndexName={signalIndexName}
               title={title}
               runtimeMappings={runtimeMappings}

@@ -31,7 +31,7 @@ import { NoData } from './no_data';
 import { NO_DATA_REASON_LABEL } from './translations';
 import type { AlertsTreeMapAggregation, FlattenedBucket, RawBucket } from './types';
 
-export const DEFAULT_MIN_CHART_HEIGHT = 370; // px
+export const DEFAULT_MIN_CHART_HEIGHT = 240; // px
 const DEFAULT_LEGEND_WIDTH = 300; // px
 
 export interface Props {

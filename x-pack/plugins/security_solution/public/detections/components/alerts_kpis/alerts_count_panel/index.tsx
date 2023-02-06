@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { EuiProgress } from '@elastic/eui';
 import type { EuiComboBox } from '@elastic/eui';
 import type { Action } from '@kbn/ui-actions-plugin/public';
 import type { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/types';
@@ -191,6 +192,12 @@ export const AlertsCountPanel = memo<AlertsCountPanelProps>(
       setQuery,
       uniqueQueryId,
     });
+    const showCount = useMemo(() => {
+      if (isAlertsPageChartsEnabled) {
+        return isExpanded;
+      }
+      return toggleStatus;
+    }, [isAlertsPageChartsEnabled, toggleStatus, isExpanded]);
 
     return (
       <InspectButtonContainer show={isAlertsPageChartsEnabled ? isExpanded : toggleStatus}>
@@ -230,26 +237,28 @@ export const AlertsCountPanel = memo<AlertsCountPanelProps>(
               uniqueQueryId={uniqueQueryId}
             />
           </HeaderSection>
-          {(isAlertsPageChartsEnabled && isExpanded) ||
-          (!isAlertsPageChartsEnabled && toggleStatus) ? (
-            <ChartContent
-              alertsData={alertsData}
-              data-test-subj="embeddable-count-table"
-              extraActions={extraActions}
-              extraOptions={extraVisualizationOptions}
-              getLensAttributes={getLensAttributes}
-              height={CHART_HEIGHT}
-              id={`${uniqueQueryId}-embeddable`}
-              inspectTitle={inspectTitle}
-              isChartEmbeddablesEnabled={isChartEmbeddablesEnabled}
-              isLoadingAlerts={isLoadingAlerts}
-              scopeId={SourcererScopeName.detections}
-              stackByField0={stackByField0}
-              stackByField1={stackByField1}
-              stackByField={stackByField0}
-              timerange={timerange}
-            />
-          ) : null}
+          {showCount &&
+            (isLoadingAlerts ? (
+              <EuiProgress color="accent" data-test-subj="progress" position="absolute" size="xs" />
+            ) : (
+              <ChartContent
+                alertsData={alertsData}
+                data-test-subj="embeddable-count-table"
+                extraActions={extraActions}
+                extraOptions={extraVisualizationOptions}
+                getLensAttributes={getLensAttributes}
+                height={CHART_HEIGHT}
+                id={`${uniqueQueryId}-embeddable`}
+                inspectTitle={inspectTitle}
+                isChartEmbeddablesEnabled={isChartEmbeddablesEnabled}
+                isLoadingAlerts={isLoadingAlerts}
+                scopeId={SourcererScopeName.detections}
+                stackByField0={stackByField0}
+                stackByField1={stackByField1}
+                stackByField={stackByField0}
+                timerange={timerange}
+              />
+            ))}
         </KpiPanel>
       </InspectButtonContainer>
     );

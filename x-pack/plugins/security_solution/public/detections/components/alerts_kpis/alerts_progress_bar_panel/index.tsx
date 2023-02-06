@@ -4,8 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiPanel, EuiLoadingSpinner } from '@elastic/eui';
-import React, { useEffect, useState, useCallback, useMemo } from 'react';
+import { EuiPanel } from '@elastic/eui';
+import React, { useCallback, useMemo } from 'react';
 import { v4 as uuid } from 'uuid';
 import type { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/types';
 import type { Filter, Query } from '@kbn/es-query';
@@ -15,7 +15,6 @@ import { StackByComboBox } from '../common/components';
 import { AlertsProgressBar } from './alerts_progress_bar';
 import { useSummaryChartData } from '../alerts_summary_charts_panel/use_summary_chart_data';
 import { alertsGroupingAggregations } from '../alerts_summary_charts_panel/aggregations';
-import { showInitialLoadingSpinner } from '../alerts_histogram_panel/helpers';
 import { getIsAlertsProgressBarData } from './helpers';
 import * as i18n from './translations';
 import type { GroupBySelection } from './types';
@@ -42,7 +41,6 @@ export const AlertsProgressBarPanel: React.FC<Props> = ({
   groupBySelection,
   setGroupBySelection,
 }) => {
-  const [isInitialLoading, setIsInitialLoading] = useState(true);
   const uniqueQueryId = useMemo(() => `${TOP_ALERTS_CHART_ID}-${uuid()}`, []);
   const dropDownOptions = DEFAULT_OPTIONS.map((field) => {
     return { value: field, label: field };
@@ -68,11 +66,6 @@ export const AlertsProgressBarPanel: React.FC<Props> = ({
     uniqueQueryId,
   });
   const data = useMemo(() => (getIsAlertsProgressBarData(items) ? items : []), [items]);
-  useEffect(() => {
-    if (!showInitialLoadingSpinner({ isInitialLoading, isLoadingAlerts: isLoading })) {
-      setIsInitialLoading(false);
-    }
-  }, [isInitialLoading, isLoading, setIsInitialLoading]);
 
   return (
     <InspectButtonContainer>
@@ -94,15 +87,7 @@ export const AlertsProgressBarPanel: React.FC<Props> = ({
             dropDownoptions={dropDownOptions}
           />
         </HeaderSection>
-        {isInitialLoading ? (
-          <EuiLoadingSpinner size="l" />
-        ) : (
-          <AlertsProgressBar
-            data={data}
-            isLoading={isLoading}
-            groupBySelection={groupBySelection}
-          />
-        )}
+        <AlertsProgressBar data={data} isLoading={isLoading} groupBySelection={groupBySelection} />
       </EuiPanel>
     </InspectButtonContainer>
   );
