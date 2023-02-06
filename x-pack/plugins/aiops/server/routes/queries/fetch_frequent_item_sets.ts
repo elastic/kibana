@@ -16,16 +16,16 @@ import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 
 import type { ChangePointDuplicateGroup, ItemsetResult } from '../../../common/types';
 
-const FREQUENT_ITEMS_FIELDS_LIMIT = 15;
+const FREQUENT_ITEM_SETS_FIELDS_LIMIT = 15;
 
-interface FrequentItemsAggregation extends estypes.AggregationsSamplerAggregation {
+interface FrequentItemSetsAggregation extends estypes.AggregationsSamplerAggregation {
   fi: {
     buckets: Array<{ key: Record<string, string[]>; doc_count: number; support: number }>;
   };
 }
 
 interface RandomSamplerAggregation {
-  sample: FrequentItemsAggregation;
+  sample: FrequentItemSetsAggregation;
 }
 
 function isRandomSamplerAggregation(arg: unknown): arg is RandomSamplerAggregation {
@@ -56,7 +56,7 @@ export function groupDuplicates(cps: ChangePoint[], uniqueFields: Array<keyof Ch
   return groups;
 }
 
-export async function fetchFrequentItems(
+export async function fetchFrequentItemSets(
   client: ElasticsearchClient,
   index: string,
   searchQuery: estypes.QueryDslQueryContainer,
@@ -77,7 +77,7 @@ export async function fetchFrequentItems(
 
   // Get up to 15 unique fields from change points with retained order
   const fields = sortedChangePoints.reduce<string[]>((p, c) => {
-    if (p.length < FREQUENT_ITEMS_FIELDS_LIMIT && !p.some((d) => d === c.fieldName)) {
+    if (p.length < FREQUENT_ITEM_SETS_FIELDS_LIMIT && !p.some((d) => d === c.fieldName)) {
       p.push(c.fieldName);
     }
     return p;
@@ -107,10 +107,10 @@ export async function fetchFrequentItems(
     field,
   }));
 
-  const frequentItemsAgg: Record<string, estypes.AggregationsAggregationContainer> = {
+  const frequentItemSetsAgg: Record<string, estypes.AggregationsAggregationContainer> = {
     fi: {
-      // @ts-expect-error `frequent_items` is not yet part of `AggregationsAggregationContainer`
-      frequent_items: {
+      // @ts-expect-error `frequent_item_sets` is not yet part of `AggregationsAggregationContainer`
+      frequent_item_sets: {
         minimum_set_size: 2,
         size: 200,
         minimum_support: 0.1,
@@ -127,20 +127,20 @@ export async function fetchFrequentItems(
         probability: sampleProbability,
         seed: RANDOM_SAMPLER_SEED,
       },
-      aggs: frequentItemsAgg,
+      aggs: frequentItemSetsAgg,
     },
   };
 
   const esBody = {
     query,
-    aggs: sampleProbability < 1 ? randomSamplerAgg : frequentItemsAgg,
+    aggs: sampleProbability < 1 ? randomSamplerAgg : frequentItemSetsAgg,
     size: 0,
     track_total_hits: true,
   };
 
   const body = await client.search<
     unknown,
-    { sample: FrequentItemsAggregation } | FrequentItemsAggregation
+    { sample: FrequentItemSetsAggregation } | FrequentItemSetsAggregation
   >(
     {
       index,
@@ -151,8 +151,8 @@ export async function fetchFrequentItems(
   );
 
   if (body.aggregations === undefined) {
-    logger.error(`Failed to fetch frequent_items, got: \n${JSON.stringify(body, null, 2)}`);
-    emitError(`Failed to fetch frequent_items.`);
+    logger.error(`Failed to fetch frequent_item_sets, got: \n${JSON.stringify(body, null, 2)}`);
+    emitError(`Failed to fetch frequent_item_sets.`);
     return {
       fields: [],
       df: [],
@@ -162,17 +162,17 @@ export async function fetchFrequentItems(
 
   const totalDocCountFi = (body.hits.total as estypes.SearchTotalHits).value;
 
-  const frequentItems = isRandomSamplerAggregation(body.aggregations)
+  const frequentItemSets = isRandomSamplerAggregation(body.aggregations)
     ? body.aggregations.sample.fi
     : body.aggregations.fi;
 
-  const shape = frequentItems.buckets.length;
+  const shape = frequentItemSets.buckets.length;
   let maximum = shape;
   if (maximum > 50000) {
     maximum = 50000;
   }
 
-  const fiss = frequentItems.buckets;
+  const fiss = frequentItemSets.buckets;
   fiss.length = maximum;
 
   const results: ItemsetResult[] = [];

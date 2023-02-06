@@ -11,10 +11,10 @@ import type { ChangePoint } from '@kbn/ml-agg-utils';
 
 import type { ItemsetResult } from '../../../common/types';
 
-// The way the `frequent_items` aggregation works could return item sets that include
+// The way the `frequent_item_sets` aggregation works could return item sets that include
 // field/value pairs that are not part of the original list of significant change points.
 // This cleans up groups and removes those unrelated field/value pairs.
-export function getFilteredFrequentItems(
+export function getFilteredFrequentItemSets(
   itemsets: ItemsetResult[],
   changePoints: ChangePoint[]
 ): ItemsetResult[] {
