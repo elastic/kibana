@@ -12,6 +12,8 @@ export { getInspectResponse } from './utils/get_inspect_response';
 
 export { ProcessorEvent } from './processor_event';
 
+export type { AlertStatus } from './typings';
+
 export {
   enableNewSyntheticsView,
   enableInspectEsQueries,

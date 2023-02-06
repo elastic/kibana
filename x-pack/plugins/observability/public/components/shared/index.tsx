@@ -8,7 +8,7 @@
 import React, { lazy, Suspense } from 'react';
 import { EuiLoadingSpinner } from '@elastic/eui';
 import { LoadWhenInViewProps } from './load_when_in_view/load_when_in_view';
-import { ObservabilityAlertSearchBarProps } from './alert_search_bar/types';
+import { AlertStatusFilterProps, ObservabilityAlertSearchBarProps } from './alert_search_bar/types';
 import type { CoreVitalProps, HeaderMenuPortalProps } from './types';
 import type {
   FieldValueSuggestionsProps,
@@ -121,6 +121,18 @@ export function ObservabilityAlertSearchBar(props: ObservabilityAlertSearchBarPr
   return (
     <Suspense fallback={<EuiLoadingSpinner />}>
       <ObservabilityAlertSearchBarLazy {...props} />
+    </Suspense>
+  );
+}
+
+const ObservabilityAlertStatusFilterLazy = lazy(
+  () => import('./alert_search_bar/components/alerts_status_filter')
+);
+
+export function ObservabilityAlertStatusFilter(props: AlertStatusFilterProps) {
+  return (
+    <Suspense fallback={<EuiLoadingSpinner />}>
+      <ObservabilityAlertStatusFilterLazy {...props} />
     </Suspense>
   );
 }
