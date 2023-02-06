@@ -28,6 +28,7 @@ import {
   RuleDataService,
 } from '@kbn/rule-registry-plugin/server';
 import { RuleExecutorOptions } from '@kbn/alerting-plugin/server';
+import { DEFAULT_FLAPPING_SETTINGS } from '@kbn/alerting-plugin/common/rules_settings';
 import { get } from 'lodash';
 import type { FtrProviderContext } from '../../../common/ftr_provider_context';
 import {
@@ -171,6 +172,7 @@ export default function createGetSummarizedAlertsTest({ getService }: FtrProvide
           alertFactory: { create: sinon.stub() },
           shouldWriteAlerts: sinon.stub().returns(true),
         },
+        flappingSettings: DEFAULT_FLAPPING_SETTINGS,
       } as unknown as RuleExecutorOptions<
         MockRuleParams,
         WrappedLifecycleRuleState<{ shouldTriggerAlert: boolean }>,
@@ -329,6 +331,7 @@ export default function createGetSummarizedAlertsTest({ getService }: FtrProvide
           alertFactory: { create: sinon.stub() },
           shouldWriteAlerts: sinon.stub().returns(true),
         },
+        flappingSettings: DEFAULT_FLAPPING_SETTINGS,
       } as unknown as RuleExecutorOptions<
         MockRuleParams,
         WrappedLifecycleRuleState<{ shouldTriggerAlert: boolean }>,
