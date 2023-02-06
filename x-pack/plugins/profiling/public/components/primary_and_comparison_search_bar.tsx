@@ -12,6 +12,7 @@ import {
   EuiTitle,
   EuiToolTip,
 } from '@elastic/eui';
+import { icon } from '@elastic/eui/src/components/icon/assets/empty';
 import { i18n } from '@kbn/i18n';
 import { TypeOf } from '@kbn/typed-react-router-config';
 import React from 'react';
@@ -118,6 +119,7 @@ export function PrimaryAndComparisonSearchBar() {
           kuery={comparisonKuery}
           rangeFrom={comparisonRangeFrom}
           rangeTo={comparisonRangeTo}
+          showSubmitButton={false}
           onQuerySubmit={(next) => {
             navigate({
               kuery: String(next.query?.query || ''),
