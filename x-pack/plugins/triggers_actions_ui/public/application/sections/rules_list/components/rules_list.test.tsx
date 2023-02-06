@@ -332,15 +332,14 @@ describe('rules_list ', () => {
     renderWithProviders(
       <RulesList statusFilter={['disabled']} onStatusFilterChange={onStatusFilterChangeMock} />
     );
-    await waitFor(() => screen.getByText('Rule state'));
+    await waitForElementToBeRemoved(() => screen.queryByTestId('centerJustifiedSpinner'));
     expect(loadRulesWithKueryFilter).toHaveBeenLastCalledWith(
       expect.objectContaining({
         ruleStatusesFilter: ['disabled'],
       })
     );
-
-    fireEvent.click(screen.getAllByTestId('ruleStatusFilterButton')[0]);
-    fireEvent.click(screen.getAllByTestId('ruleStatusFilterOption-enabled')[0]);
+    fireEvent.click((await screen.findAllByTestId('ruleStatusFilterButton'))[0]);
+    fireEvent.click((await screen.findAllByTestId('ruleStatusFilterOption-enabled'))[0]);
     expect(loadRulesWithKueryFilter).toHaveBeenLastCalledWith(
       expect.objectContaining({
         ruleStatusesFilter: ['disabled', 'enabled'],
