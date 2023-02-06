@@ -7,22 +7,15 @@
 
 import { EcsVersion } from '@kbn/ecs';
 
-import { EuiButton, EuiCallOut, EuiEmptyPrompt, EuiSpacer } from '@elastic/eui';
-import React, { useCallback, useMemo } from 'react';
+import { EuiCallOut, EuiEmptyPrompt, EuiSpacer } from '@elastic/eui';
+import React, { useMemo } from 'react';
 import styled from 'styled-components';
 
-import { MissingTimestampCallout } from '../callouts/missing_timestamp_callout';
 import { CompareFieldsTable } from '../../../compare_fields_table';
 import { getEcsCompliantTableColumns } from '../../../compare_fields_table/helpers';
 import { EmptyPromptBody } from '../../index_properties/empty_prompt_body';
 import { EmptyPromptTitle } from '../../index_properties/empty_prompt_title';
-import { getMissingTimestampComment, showMissingTimestampCallout } from '../helpers';
-import {
-  getSummaryMarkdownComment,
-  ECS_FIELD_REFERENCE_URL,
-  ECS_REFERENCE_URL,
-  MAPPING_URL,
-} from '../../index_properties/markdown/helpers';
+import { showMissingTimestampCallout } from '../helpers';
 import { CalloutItem } from '../styles';
 import * as i18n from '../../index_properties/translations';
 import type { PartitionedFieldMetadata } from '../../../types';
@@ -32,30 +25,16 @@ const EmptyPromptContainer = styled.div`
 `;
 
 interface Props {
-  addToNewCaseDisabled: boolean;
   indexName: string;
   onAddToNewCase: (markdownComments: string[]) => void;
   partitionedFieldMetadata: PartitionedFieldMetadata;
 }
 
 const EcsCompliantTabComponent: React.FC<Props> = ({
-  addToNewCaseDisabled,
   indexName,
   onAddToNewCase,
   partitionedFieldMetadata,
 }) => {
-  const onClick = useCallback(() => {
-    onAddToNewCase([
-      getSummaryMarkdownComment({
-        ecsFieldReferenceUrl: ECS_FIELD_REFERENCE_URL,
-        ecsReferenceUrl: ECS_REFERENCE_URL,
-        incompatible: partitionedFieldMetadata.incompatible.length,
-        indexName,
-        mappingUrl: MAPPING_URL,
-      }),
-      getMissingTimestampComment(),
-    ]);
-  }, [indexName, onAddToNewCase, partitionedFieldMetadata.incompatible.length]);
   const emptyPromptBody = useMemo(() => <EmptyPromptBody body={i18n.ECS_COMPLIANT_EMPTY} />, []);
   const title = useMemo(() => <EmptyPromptTitle title={i18n.ECS_COMPLIANT_EMPTY_TITLE} />, []);
 
@@ -88,15 +67,6 @@ const EcsCompliantTabComponent: React.FC<Props> = ({
         </>
       ) : (
         <EmptyPromptContainer>
-          <MissingTimestampCallout>
-            <EuiButton
-              aria-label={i18n.ADD_TO_NEW_CASE}
-              disabled={addToNewCaseDisabled}
-              onClick={onClick}
-            >
-              {i18n.ADD_TO_NEW_CASE}
-            </EuiButton>
-          </MissingTimestampCallout>
           <EuiEmptyPrompt
             body={emptyPromptBody}
             iconType="cross"

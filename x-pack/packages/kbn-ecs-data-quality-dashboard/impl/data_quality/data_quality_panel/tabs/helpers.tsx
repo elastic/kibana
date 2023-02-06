@@ -167,7 +167,6 @@ export const getTabs = ({
     ),
     content: (
       <EcsCompliantTab
-        addToNewCaseDisabled={addToNewCaseDisabled}
         indexName={indexName}
         onAddToNewCase={onAddToNewCase}
         partitionedFieldMetadata={partitionedFieldMetadata}

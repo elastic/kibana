@@ -6,9 +6,10 @@
  */
 
 import { IRouter } from '@kbn/core/server';
-import { transformError, buildResponse } from '@kbn/securitysolution-es-utils';
+import { transformError } from '@kbn/securitysolution-es-utils';
 
 import { fetchMappings } from '../lib';
+import { buildResponse } from '../lib/build_response';
 import { GET_INDEX_MAPPINGS } from '../../common/constants';
 import { GetIndexMappingsParams } from '../schemas/get_index_mappings';
 import { buildRouteValidation } from '../schemas/common';

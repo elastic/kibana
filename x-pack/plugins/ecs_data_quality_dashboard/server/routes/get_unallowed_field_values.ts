@@ -6,9 +6,10 @@
  */
 
 import { IRouter } from '@kbn/core/server';
-import { transformError, buildResponse } from '@kbn/securitysolution-es-utils';
+import { transformError } from '@kbn/securitysolution-es-utils';
 
 import { getUnallowedFieldValues } from '../lib';
+import { buildResponse } from '../lib/build_response';
 import { GET_UNALLOWED_FIELD_VALUES } from '../../common/constants';
 import { buildRouteValidation } from '../schemas/common';
 import { GetUnallowedFieldValuesBody } from '../schemas/get_unallowed_field_values';

@@ -6,10 +6,11 @@
  */
 
 import { IRouter } from '@kbn/core/server';
-import { transformError, buildResponse } from '@kbn/securitysolution-es-utils';
+import { transformError } from '@kbn/securitysolution-es-utils';
 
 import { GET_ILM_EXPLAIN } from '../../common/constants';
 import { fetchILMExplain } from '../lib';
+import { buildResponse } from '../lib/build_response';
 import { buildRouteValidation } from '../schemas/common';
 import { GetILMExplainParams } from '../schemas/get_ilm_explain';
 

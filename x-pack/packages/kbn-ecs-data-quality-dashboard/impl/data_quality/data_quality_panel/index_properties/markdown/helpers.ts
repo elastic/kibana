@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { EcsVersion } from '@kbn/ecs';
 import { repeat } from 'lodash/fp';
 
 import {
@@ -219,18 +218,6 @@ export const getSummaryMarkdownComment = ({
   mappingUrl: string;
 }): string =>
   `### ${escape(indexName)}
-
-${
-  incompatible != null && incompatible > 0
-    ? i18n.SUMMARY_MARKDOWN_DESCRIPTION({
-        ecsFieldReferenceUrl: `${escape(ecsFieldReferenceUrl)}`,
-        ecsReferenceUrl: `${escape(ecsReferenceUrl)}`,
-        indexName: `${escape(indexName)}`,
-        mappingUrl: `${escape(mappingUrl)}`,
-        version: `${escape(EcsVersion)}`,
-      })
-    : ''
-}
 `;
 
 export const getTabCountsMarkdownComment = (

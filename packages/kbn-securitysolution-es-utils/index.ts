@@ -27,4 +27,3 @@ export * from './src/set_index_template';
 export * from './src/set_policy';
 export * from './src/set_template';
 export * from './src/transform_error';
-export * from './src/build_response';
