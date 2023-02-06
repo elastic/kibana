@@ -13,7 +13,7 @@ import { getCaseUsers } from './api';
 import * as i18n from './translations';
 import type { CaseUsers } from './types';
 
-export const useGetCaseUsers = ({ caseId }: { caseId: string }) => {
+export const useGetCaseUsers = (caseId: string) => {
   const { showErrorToast } = useCasesToast();
 
   return useQuery<CaseUsers, ServerError>(

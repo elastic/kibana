@@ -194,6 +194,12 @@ export const getCaseUsersMockResponse = (): CaseUsers => {
         profileUid: 'u_62h24XVQzG4-MuH1-DqPmookrJY23aRa9h4fyULR6I8_0',
       },
       {
+        email: null,
+        fullName: null,
+        username: 'elastic',
+        profileUid: 'u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0',
+      },
+      {
         email: 'fuzzy_marten@profiles.elastic.co',
         fullName: 'Fuzzy Marten',
         username: 'fuzzy_marten',
