@@ -140,11 +140,6 @@ describe('Setup Indices', () => {
           run_ml_inference: { type: 'boolean' },
         },
       },
-      preferences: {
-        properties: {
-          extract_full_html: { type: 'boolean' },
-        },
-      },
       scheduling: {
         properties: {
           enabled: { type: 'boolean' },
