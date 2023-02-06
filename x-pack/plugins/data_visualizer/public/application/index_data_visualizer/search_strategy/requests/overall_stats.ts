@@ -102,7 +102,7 @@ export function isAggregatableFieldOverallStats(
 export function isNonAggregatableFieldOverallStats(
   arg: unknown
 ): arg is NonAggregatableFieldOverallStats {
-  return isPopulatedObject(arg, ['rawResponse']);
+  return isPopulatedObject(arg, ['rawResponse']) && !isPopulatedObject(arg, ['aggregatableFields']);
 }
 
 export const processAggregatableFieldsExistResponse = (
