@@ -433,12 +433,8 @@ describe.skip('AllCasesListGeneric', () => {
       </TestProviders>
     );
     await waitFor(() => {
-      expect(wrapper.find('[data-test-subj="tableHeaderCell_title_0"]').exists()).toBe(
-        true
-      );
-      expect(wrapper.find('[data-test-subj="tableHeaderCell_createdAt_1"]').exists()).toBe(
-        true
-      );
+      expect(wrapper.find('[data-test-subj="tableHeaderCell_title_0"]').exists()).toBe(true);
+      expect(wrapper.find('[data-test-subj="tableHeaderCell_createdAt_1"]').exists()).toBe(true);
       expect(wrapper.find('[data-test-subj="tableHeaderCell_severity_2"]').exists()).toBe(true);
       expect(wrapper.find('[data-test-subj="tableHeaderCell_assignees_1"]').exists()).toBe(false);
     });
