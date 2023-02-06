@@ -8,15 +8,16 @@
 import React from 'react';
 import { ALERT_REASON } from '@kbn/rule-data-utils';
 import { ObservabilityRuleTypeModel } from '@kbn/observability-plugin/public';
-import { RuleTypeParamsExpressionProps } from '@kbn/triggers-actions-ui-plugin/public';
-import { isRight } from 'fp-ts/Either';
-import { PathReporter } from 'io-ts/lib/PathReporter';
-import { TLSParams, TLSParamsType } from '../../../../common/runtime_types/alerts/tls';
+import type { RuleTypeParamsExpressionProps } from '@kbn/triggers-actions-ui-plugin/public';
+import { ValidationResult } from '@kbn/triggers-actions-ui-plugin/public';
+import { TLSParams } from '../../../../common/runtime_types/alerts/tls';
 import { CLIENT_ALERT_TYPES } from '../../../../common/constants/uptime_alerts';
 import { TlsTranslations } from '../../../../common/translations';
 import { AlertTypeInitializer } from '.';
 
 import { CERTIFICATES_ROUTE } from '../../../../common/constants/ui';
+
+let validateFunc: (ruleParams: any) => ValidationResult;
 
 const { defaultActionMessage, defaultRecoveryMessage, description } = TlsTranslations;
 const TLSAlert = React.lazy(() => import('./lazy_wrapper/tls_alert'));
@@ -38,20 +39,14 @@ export const initTlsAlertType: AlertTypeInitializer = ({
     />
   ),
   description,
-  validate: (ruleParams) => {
-    const errors: Record<string, any> = {};
-    const decoded = TLSParamsType.decode(ruleParams);
-
-    if (!isRight(decoded)) {
-      return {
-        errors: {
-          typeCheckFailure: 'Provided parameters do not conform to the expected type.',
-          typeCheckParsingMessage: PathReporter.report(decoded),
-        },
-      };
+  validate: (ruleParams: any) => {
+    if (!validateFunc) {
+      (async function loadValidate() {
+        const { validateTLSAlertParams } = await import('./lazy_wrapper/validate_tls_alert');
+        validateFunc = validateTLSAlertParams;
+      })();
     }
-
-    return { errors };
+    return validateFunc ? validateFunc(ruleParams) : ({} as ValidationResult);
   },
   defaultActionMessage,
   defaultRecoveryMessage,
