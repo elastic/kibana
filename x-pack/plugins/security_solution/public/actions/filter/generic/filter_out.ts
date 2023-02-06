@@ -52,7 +52,7 @@ export const addFilterOut = (
 };
 
 const createFilterOut = (key: string, value: string[] | string | null | undefined): Filter => {
-  const negate = value == null || value?.length === 0;
+  const negate = value != null && value?.length > 0;
   const queryValue =
     value != null && value.length > 0 ? (Array.isArray(value) ? value[0] : value) : null;
   if (queryValue == null) {
