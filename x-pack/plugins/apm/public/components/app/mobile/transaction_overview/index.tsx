@@ -21,9 +21,9 @@ import { TransactionsTable } from '../../../shared/transactions_table';
 import { replace } from '../../../shared/links/url_helpers';
 import { getKueryWithMobileFilters } from '../../../../../common/utils/get_kuery_with_mobile_filters';
 import { MobileTransactionCharts } from './transaction_charts';
-import { LatencyMap } from '../service_overview/latency_map';
 import { MobileLocationStats } from '../service_overview/stats/location_stats';
 import { useFiltersForEmbeddableCharts } from '../../../../hooks/use_filters_for_embeddable_charts';
+import { GeoMap } from '../service_overview/geo_map';
 
 export function MobileTransactionOverview() {
   const {
@@ -73,12 +73,11 @@ export function MobileTransactionOverview() {
         <EuiFlexGroup>
           <EuiFlexItem grow={8}>
             <EuiPanel hasBorder={true}>
-              <LatencyMap
+              <GeoMap
                 start={start}
                 end={end}
                 kuery={kueryWithMobileFilters}
                 filters={embeddableFilters}
-                comparisonEnabled={comparisonEnabled}
               />
             </EuiPanel>
           </EuiFlexItem>

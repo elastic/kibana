@@ -6,7 +6,7 @@
  */
 
 import { useMemo } from 'react';
-import { SERVICE_NAME, TRANSACTION_TYPE } from '../../common/es_fields/apm';
+import { SERVICE_NAME } from '../../common/es_fields/apm';
 import { termQuery } from '../../common/utils/term_query';
 import { useAnyOfApmParams } from './use_apm_params';
 import { environmentQuery } from '../../common/utils/environment_query';
@@ -14,7 +14,7 @@ import { environmentQuery } from '../../common/utils/environment_query';
 export function useFiltersForEmbeddableCharts() {
   const {
     path: { serviceName },
-    query: { environment, transactionType },
+    query: { environment },
   } = useAnyOfApmParams(
     '/mobile-services/{serviceName}/overview',
     '/mobile-services/{serviceName}/transactions'
@@ -24,12 +24,11 @@ export function useFiltersForEmbeddableCharts() {
     () =>
       [
         ...termQuery(SERVICE_NAME, serviceName),
-        ...termQuery(TRANSACTION_TYPE, transactionType),
         ...environmentQuery(environment),
       ].map((query) => ({
         meta: {},
         query,
       })),
-    [environment, transactionType, serviceName]
+    [environment, serviceName]
   );
 }

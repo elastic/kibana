@@ -5,7 +5,15 @@
  * 2.0.
  */
 
-export interface TimeRangeMs {
-  from: number;
-  to: number;
+export enum MapTypes {
+  Http = 'http_requests',
+  Session = 'unique_sessions',
+}
+
+export enum MobileSpanSubtype {
+  Http = 'http',
+}
+
+export enum MobileSpanType {
+  External = 'external',
 }

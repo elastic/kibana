@@ -7,30 +7,21 @@
 
 import React, { ReactNode, useCallback } from 'react';
 import { EuiComboBoxOptionOption } from '@elastic/eui';
-import { css } from '@emotion/react';
-import { useFieldStatsFlyoutContext } from '../../../components/field_stats_flyout';
-import { FieldStatsInfoButton } from '../common/components/field_stats_info_button';
-import { Field } from '../../../../../common/types/fields';
+import { optionCss } from './eui_combo_box_with_field_stats';
+import { useFieldStatsFlyoutContext } from '.';
+import { FieldForStats, FieldStatsInfoButton } from './field_stats_info_button';
+import { Field } from '../../../../common/types/fields';
 
 interface Option extends EuiComboBoxOptionOption<string> {
   field: Field;
 }
-const optionCss = css`
-  .euiComboBoxOption__enterBadge {
-    display: none;
-  }
-  .euiFlexGroup {
-    gap: 0px;
-  }
-  .euiComboBoxOption__content {
-    margin-left: 2px;
-  }
-`;
-
 export const useFieldStatsTrigger = () => {
   const { setIsFlyoutVisible, setFieldName } = useFieldStatsFlyoutContext();
+
+  const closeFlyout = useCallback(() => setIsFlyoutVisible(false), [setIsFlyoutVisible]);
+
   const handleFieldStatsButtonClick = useCallback(
-    (field: Field) => {
+    (field: FieldForStats) => {
       if (typeof field.id === 'string') {
         setFieldName(field.id);
         setIsFlyoutVisible(true);
@@ -38,7 +29,6 @@ export const useFieldStatsTrigger = () => {
     },
     [setFieldName, setIsFlyoutVisible]
   );
-
   const renderOption = useCallback(
     (option: EuiComboBoxOptionOption, searchValue: string): ReactNode => {
       const field = (option as Option).field;
@@ -54,5 +44,12 @@ export const useFieldStatsTrigger = () => {
     },
     [handleFieldStatsButtonClick]
   );
-  return { renderOption, setIsFlyoutVisible, setFieldName, handleFieldStatsButtonClick, optionCss };
+  return {
+    renderOption,
+    setIsFlyoutVisible,
+    setFieldName,
+    handleFieldStatsButtonClick,
+    closeFlyout,
+    optionCss,
+  };
 };

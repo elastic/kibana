@@ -24,13 +24,16 @@ import { i18n } from '@kbn/i18n';
 import { EuiText } from '@elastic/eui';
 import type { Filter } from '@kbn/es-query';
 import { ApmPluginStartDeps } from '../../../../../plugin';
-import { getLayerList } from './get_layer_list';
+import { getLayerList } from './map_layers/get_layer_list';
+import { MapTypes } from '../../../../../../common/mobile/constants';
 function EmbeddedMapComponent({
+  selectedMap,
   start,
   end,
   kuery = '',
   filters,
 }: {
+  selectedMap: MapTypes;
   start: string;
   end: string;
   kuery?: string;
@@ -106,10 +109,6 @@ function EmbeddedMapComponent({
       };
 
       const embeddableObject = await factory.create(input);
-      if (embeddableObject && !isErrorEmbeddable(embeddableObject)) {
-        const layerList = await getLayerList(maps);
-        await embeddableObject.setLayerList(layerList);
-      }
 
       setEmbeddable(embeddableObject);
     }
@@ -127,6 +126,20 @@ function EmbeddedMapComponent({
   }, [embeddable, embeddableRoot]);
 
   useEffect(() => {
+    const setLayerList = async () => {
+      if (embeddable && !isErrorEmbeddable(embeddable)) {
+        const layerList = await getLayerList({ selectedMap, maps });
+        await Promise.all([
+          embeddable.setLayerList(layerList),
+          embeddable.reload(),
+        ]);
+      }
+    };
+
+    setLayerList();
+  }, [embeddable, selectedMap, maps]);
+
+  useEffect(() => {
     if (embeddable) {
       embeddable.updateInput({
         filters,
@@ -140,7 +153,7 @@ function EmbeddedMapComponent({
         },
       });
     }
-  }, [start, end, kuery, filters, embeddable]);
+  }, [start, end, kuery, filters, embeddable, selectedMap]);
 
   return (
     <>
