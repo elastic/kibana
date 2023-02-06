@@ -14,10 +14,6 @@ import { useWaffleOptionsContext } from '../hooks/use_waffle_options';
 const KUBERNETES_TOAST_STORAGE_KEY = 'kubernetesToastKey';
 const KUBERNETES_FEEDBACK_LINK = 'https://ela.st/k8s-feedback';
 
-const openInNewTab = (url: string) => {
-  window.open(url, '_blank', 'noreferrer');
-};
-
 export const SurveyKubernetes = () => {
   const { nodeType } = useWaffleOptionsContext();
   const podNodeType: typeof nodeType = 'pod';
@@ -71,8 +67,9 @@ export const SurveyKubernetes = () => {
                         <EuiFlexItem grow={false}>
                           <EuiButton
                             data-test-subj="infra-toast-kubernetes-survey-start"
-                            onClick={() => {
-                              openInNewTab(KUBERNETES_FEEDBACK_LINK);
+                            href={KUBERNETES_FEEDBACK_LINK}
+                            target="_blank"
+                            onClickCapture={() => {
                               markToastAsSeen();
                             }}
                             size="s"
