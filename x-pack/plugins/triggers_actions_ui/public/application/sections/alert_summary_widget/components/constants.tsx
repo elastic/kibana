@@ -17,21 +17,21 @@ export const ALL_ALERT_COLOR = visColors[1];
 
 export const WIDGET_TITLE = (
   <FormattedMessage
-    id="xpack.triggersActionsUI.sections.ruleDetails.alertsSummary.title"
+    id="xpack.triggersActionsUI.sections.alertsSummaryWidget.title"
     defaultMessage="Alert activity"
   />
 );
 
 export const ALERTS_LABEL = (
   <FormattedMessage
-    id="xpack.triggersActionsUI.sections.ruleDetails.alertsSummary.alerts"
+    id="xpack.triggersActionsUI.sections.alertsSummaryWidget.alerts"
     defaultMessage="Alerts"
   />
 );
 
-export const ACTIVE_ALERT_LABEL = (
+export const ACTIVE_NOW_LABEL = (
   <FormattedMessage
-    id="xpack.triggersActionsUI.sections.ruleDetails.alertsSummary.activeNow"
+    id="xpack.triggersActionsUI.sections.alertsSummaryWidget.activeNow"
     defaultMessage="Active now"
   />
 );
