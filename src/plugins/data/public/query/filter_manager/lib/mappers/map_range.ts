@@ -21,8 +21,8 @@ export function getRangeDisplayValue(
   { meta: { params } }: RangeFilter | ScriptedRangeFilter,
   formatter?: FieldFormat
 ) {
-  const left = params.gte ?? params.gt ?? -Infinity;
-  const right = params.lte ?? params.lt ?? Infinity;
+  const left = params?.gte ?? params?.gt ?? -Infinity;
+  const right = params?.lte ?? params?.lt ?? Infinity;
   if (!formatter) return `${left} to ${right}`;
   const convert = formatter.getConverterFor('text');
   return `${convert(left)} to ${convert(right)}`;

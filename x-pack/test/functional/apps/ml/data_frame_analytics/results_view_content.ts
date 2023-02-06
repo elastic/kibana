@@ -322,6 +322,10 @@ export default function ({ getService }: FtrProviderContext) {
           await ml.dataFrameAnalyticsResults.showAllResultsTableColumns();
           await ml.dataFrameAnalyticsResults.hideAllResultsTableColumns();
         });
+
+        it('should link to custom visualization UI from scatterplot charts', async () => {
+          await ml.dataFrameAnalyticsResults.assertOpensExploreInCustomVisualization();
+        });
       });
     }
   });
