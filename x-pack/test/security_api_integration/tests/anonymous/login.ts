@@ -8,12 +8,15 @@
 import expect from '@kbn/expect';
 import { parse as parseCookie, Cookie } from 'tough-cookie';
 import { adminTestUser } from '@kbn/test';
+import { resolve } from 'path';
 import { FtrProviderContext } from '../../ftr_provider_context';
+import { FileWrapper } from '../audit/file_wrapper';
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertestWithoutAuth');
   const config = getService('config');
   const security = getService('security');
+  const retry = getService('retry');
 
   function checkCookieIsSet(cookie: Cookie) {
     expect(cookie.value).to.not.be.empty();
@@ -118,7 +121,7 @@ export default function ({ getService }: FtrProviderContext) {
 
         expect(unauthenticatedResponse.headers['set-cookie']).to.be(undefined);
         expect(unauthenticatedResponse.headers['content-security-policy']).to.be.a('string');
-        expect(unauthenticatedResponse.text).to.contain('We couldn&#x27;t log you in');
+        expect(unauthenticatedResponse.text).to.contain('error');
       });
     });
 
@@ -165,9 +168,8 @@ export default function ({ getService }: FtrProviderContext) {
         expect(apiResponse.body.statusCode).to.be(401);
         expect(apiResponse.body.error).to.be('Unauthorized');
         expect(apiResponse.body.message).to.include.string(
-          '[security_exception] Reason: unable to authenticate user [dummy_hacker] for REST request [/_security/_authenticate]'
+          'unable to authenticate user [dummy_hacker] for REST request [/_security/_authenticate]'
         );
-
         expect(apiResponse.headers['set-cookie']).to.be(undefined);
       });
     });
@@ -212,6 +214,55 @@ export default function ({ getService }: FtrProviderContext) {
 
         expect(logoutResponse.headers['set-cookie']).to.be(undefined);
         expect(logoutResponse.headers.location).to.be('/security/logged_out?msg=LOGGED_OUT');
+      });
+    });
+
+    describe('Audit Log', function () {
+      const logFilePath = resolve(__dirname, '../../fixtures/audit/anonymous.log');
+      const logFile = new FileWrapper(logFilePath, retry);
+
+      beforeEach(async () => {
+        await logFile.reset();
+      });
+
+      it('should log a single `user_login` and `user_logout` event per session', async () => {
+        // Accessing Kibana without an existing session should create a `user_login` event.
+        const response = await supertest.get('/security/account').expect(200);
+
+        const cookies = response.headers['set-cookie'];
+        expect(cookies).to.have.length(1);
+        const sessionCookie = parseCookie(cookies[0])!;
+
+        // Accessing Kibana again using the same session should not create another `user_login` event.
+        await supertest
+          .get('/security/account')
+          .set('Cookie', sessionCookie.cookieString())
+          .expect(200);
+
+        // Clearing the session should create a `user_logout` event.
+        await supertest
+          .get('/api/security/logout')
+          .set('Cookie', sessionCookie.cookieString())
+          .expect(302);
+
+        await retry.waitFor('audit events in dest file', () => logFile.isNotEmpty());
+        const auditEvents = await logFile.readJSON();
+
+        expect(auditEvents).to.have.length(2);
+
+        expect(auditEvents[0]).to.be.ok();
+        expect(auditEvents[0].event.action).to.be('user_login');
+        expect(auditEvents[0].event.outcome).to.be('success');
+        expect(auditEvents[0].trace.id).to.be.ok();
+        expect(auditEvents[0].user.name).to.be('anonymous_user');
+        expect(auditEvents[0].kibana.authentication_provider).to.be('anonymous1');
+
+        expect(auditEvents[1]).to.be.ok();
+        expect(auditEvents[1].event.action).to.be('user_logout');
+        expect(auditEvents[1].event.outcome).to.be('unknown');
+        expect(auditEvents[1].trace.id).to.be.ok();
+        expect(auditEvents[1].user.name).to.be('anonymous_user');
+        expect(auditEvents[1].kibana.authentication_provider).to.be('anonymous1');
       });
     });
   });

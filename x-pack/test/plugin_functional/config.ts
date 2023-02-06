@@ -7,7 +7,8 @@
 
 import { resolve } from 'path';
 import fs from 'fs';
-import { REPO_ROOT as KIBANA_ROOT } from '@kbn/utils';
+// @ts-expect-error we have to check types with "allowJs: false" for now, causing this import to fail
+import { REPO_ROOT as KIBANA_ROOT } from '@kbn/repo-info';
 import { FtrConfigProviderContext } from '@kbn/test';
 import { services } from './services';
 import { pageObjects } from './page_objects';
@@ -31,7 +32,6 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
     testFiles: [
       resolve(__dirname, './test_suites/resolver'),
       resolve(__dirname, './test_suites/global_search'),
-      resolve(__dirname, './test_suites/timelines'),
     ],
 
     services,
@@ -61,9 +61,6 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
       ...xpackFunctionalConfig.get('apps'),
       resolverTest: {
         pathname: '/app/resolverTest',
-      },
-      timelineTest: {
-        pathname: '/app/timelinesTest',
       },
     },
 

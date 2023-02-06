@@ -5,11 +5,8 @@
  * 2.0.
  */
 
-import {
-  ArtifactSourceMap,
-  getPackagePolicyWithSourceMap,
-  getCleanedBundleFilePath,
-} from './source_maps';
+import { getPackagePolicyWithSourceMap } from './get_package_policy_decorators';
+import { ArtifactSourceMap, getCleanedBundleFilePath } from './source_maps';
 
 const packagePolicy = {
   id: '123',
@@ -19,7 +16,6 @@ const packagePolicy = {
   namespace: 'default',
   policy_id: '7a87c160-c961-11eb-81e2-f7327d61c92a',
   enabled: true,
-  output_id: '',
   inputs: [
     {
       policy_template: 'apmserver',

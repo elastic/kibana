@@ -9,14 +9,14 @@ import { ValuesType } from 'utility-types';
 import { merge } from 'lodash';
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { joinByKey } from '../../../../common/utils/join_by_key';
-import { Setup } from '../../helpers/setup_request';
 import { getStats } from './get_stats';
 import { getDestinationMap } from './get_destination_map';
-import { calculateThroughput } from '../../helpers/calculate_throughput';
+import { calculateThroughputWithRange } from '../../helpers/calculate_throughput';
 import { withApmSpan } from '../../../utils/with_apm_span';
+import { APMEventClient } from '../../helpers/create_es_client/create_apm_event_client';
 
 export function getConnectionStats({
-  setup,
+  apmEventClient,
   start,
   end,
   numBuckets,
@@ -24,7 +24,7 @@ export function getConnectionStats({
   collapseBy,
   offset,
 }: {
-  setup: Setup;
+  apmEventClient: APMEventClient;
   start: number;
   end: number;
   numBuckets: number;
@@ -35,7 +35,7 @@ export function getConnectionStats({
   return withApmSpan('get_connection_stats_and_map', async () => {
     const [allMetrics, destinationMap] = await Promise.all([
       getStats({
-        setup,
+        apmEventClient,
         start,
         end,
         filter,
@@ -43,7 +43,7 @@ export function getConnectionStats({
         offset,
       }),
       getDestinationMap({
-        setup,
+        apmEventClient,
         start,
         end,
         filter,
@@ -124,7 +124,7 @@ export function getConnectionStats({
         throughput: {
           value:
             mergedStats.value.count > 0
-              ? calculateThroughput({
+              ? calculateThroughputWithRange({
                   start,
                   end,
                   value: mergedStats.value.count,
@@ -134,7 +134,11 @@ export function getConnectionStats({
             x: point.x,
             y:
               point.count > 0
-                ? calculateThroughput({ start, end, value: point.count })
+                ? calculateThroughputWithRange({
+                    start,
+                    end,
+                    value: point.count,
+                  })
                 : null,
           })),
         },

@@ -23,17 +23,26 @@ import React, {
 import { EuiButton, EuiIcon, EuiToolTip, formatDate } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { Process } from '../../../common/types/process_tree';
+import { chain } from 'lodash';
+import {
+  AlertTypeCount,
+  Process,
+  ProcessEventAlertCategory,
+} from '../../../common/types/process_tree';
 import { dataOrDash } from '../../utils/data_or_dash';
 import { useVisible } from '../../hooks/use_visible';
 import { ProcessTreeAlerts } from '../process_tree_alerts';
-import { AlertButton, ChildrenProcessesButton } from './buttons';
+import { AlertButton, ChildrenProcessesButton, OutputButton } from './buttons';
 import { useButtonStyles } from './use_button_styles';
 import { useStyles } from './styles';
 import { SplitText } from './split_text';
 import { Nbsp } from './nbsp';
 import { useDateFormat } from '../../hooks';
 import { TextHighlight } from './text_highlight';
+
+export const EXEC_USER_CHANGE = i18n.translate('xpack.sessionView.execUserChange', {
+  defaultMessage: 'Exec user change',
+});
 
 export interface ProcessDeps {
   process: Process;
@@ -49,6 +58,7 @@ export interface ProcessDeps {
   scrollerRef: RefObject<HTMLDivElement>;
   onChangeJumpToEventVisibility: (isVisible: boolean, isAbove: boolean) => void;
   onShowAlertDetails: (alertUuid: string) => void;
+  onJumpToOutput: (entityId: string) => void;
   loadNextButton?: ReactElement | null;
   loadPreviousButton?: ReactElement | null;
 }
@@ -70,6 +80,7 @@ export function ProcessTreeNode({
   scrollerRef,
   onChangeJumpToEventVisibility,
   onShowAlertDetails,
+  onJumpToOutput,
   loadPreviousButton,
   loadNextButton,
 }: ProcessDeps) {
@@ -93,7 +104,8 @@ export function ProcessTreeNode({
   }, [selectedProcess, process, childrenExpanded]);
 
   const alerts = process.getAlerts();
-  const hasAlerts = useMemo(() => !!alerts.length, [alerts]);
+  const hasAlerts = !!alerts.length;
+  const hasOutputs = process.hasOutput();
   const hasInvestigatedAlert = useMemo(
     () =>
       !!(
@@ -118,6 +130,18 @@ export function ProcessTreeNode({
     ),
     shouldAddListener: hasInvestigatedAlert,
   });
+
+  const alertTypeCounts = useMemo(() => {
+    const alertCounts: AlertTypeCount[] = chain(alerts)
+      .groupBy((alert) => alert.event?.category?.[0])
+      .map((processAlerts, alertCategory) => ({
+        category: alertCategory as ProcessEventAlertCategory,
+        count: processAlerts.length,
+      }))
+      .value();
+
+    return alertCounts;
+  }, [alerts]);
 
   useEffect(() => {
     if (process.id === selectedProcess?.id && nodeRef.current?.scrollIntoView) {
@@ -158,6 +182,14 @@ export function ProcessTreeNode({
 
   const processDetails = process.getDetails();
   const hasExec = process.hasExec();
+
+  const onOutputClicked = useCallback(() => {
+    const entityId = processDetails.process?.entity_id;
+
+    if (entityId) {
+      onJumpToOutput(entityId);
+    }
+  }, [onJumpToOutput, processDetails.process?.entity_id]);
 
   const processIcon = useMemo(() => {
     if (!process.parent) {
@@ -275,30 +307,30 @@ export function ProcessTreeNode({
             <EuiButton
               data-test-subj="sessionView:processTreeNodeRootEscalationFlag"
               css={buttonStyles.userChangedButton}
+              aria-label={EXEC_USER_CHANGE}
             >
-              <FormattedMessage
-                id="xpack.sessionView.execUserChange"
-                defaultMessage="Exec user change: "
-              />
-              <span>{user.name}</span>
+              {EXEC_USER_CHANGE} :<span>{user.name}</span>
             </EuiButton>
           )}
           {!isSessionLeader && children.length > 0 && (
             <ChildrenProcessesButton isExpanded={childrenExpanded} onToggle={onChildrenToggle} />
           )}
-          {alerts.length > 0 && (
+          {hasAlerts && (
             <AlertButton
               onToggle={onAlertsToggle}
+              alertTypeCounts={alertTypeCounts}
               isExpanded={alertsExpanded}
               alertsCount={alerts.length}
             />
           )}
+          {hasOutputs && <OutputButton onClick={onOutputClicked} />}
         </div>
       </div>
 
       {alertsExpanded && (
         <ProcessTreeAlerts
           alerts={alerts}
+          alertTypeCounts={alertTypeCounts}
           investigatedAlertId={investigatedAlertId}
           isProcessSelected={isSelected}
           onAlertSelected={onProcessClicked}
@@ -316,6 +348,7 @@ export function ProcessTreeNode({
                 process={child}
                 depth={childrenTreeDepth}
                 onProcessSelected={onProcessSelected}
+                onJumpToOutput={onJumpToOutput}
                 jumpToEntityId={jumpToEntityId}
                 investigatedAlertId={investigatedAlertId}
                 selectedProcess={selectedProcess}

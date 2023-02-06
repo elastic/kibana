@@ -15,10 +15,10 @@ exports[`Field Renderers #autonomousSystemRenderer it renders correctly against 
 }
 
 <div
-    class="euiFlexGroup euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
+    class="euiFlexGroup emotion-euiFlexGroup-responsive-none-flexStart-center-row"
   >
     <div
-      class="euiFlexItem euiFlexItem--flexGrowZero"
+      class="euiFlexItem emotion-euiFlexItem-growZero"
     >
       <div
         class=""
@@ -41,7 +41,7 @@ exports[`Field Renderers #autonomousSystemRenderer it renders correctly against 
                   data-test-subj="render-content-source.as.organization.name"
                 >
                   <span
-                    class="euiToolTipAnchor"
+                    class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
                   >
                     Test Org
                   </span>
@@ -53,12 +53,12 @@ exports[`Field Renderers #autonomousSystemRenderer it renders correctly against 
       </div>
     </div>
     <div
-      class="euiFlexItem euiFlexItem--flexGrowZero"
+      class="euiFlexItem emotion-euiFlexItem-growZero"
     >
       /
     </div>
     <div
-      class="euiFlexItem euiFlexItem--flexGrowZero"
+      class="euiFlexItem emotion-euiFlexItem-growZero"
     >
       <div
         class=""
@@ -81,7 +81,7 @@ exports[`Field Renderers #autonomousSystemRenderer it renders correctly against 
                   data-test-subj="render-content-source.as.number"
                 >
                   <span
-                    class="euiToolTipAnchor"
+                    class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
                   >
                     12345
                   </span>
@@ -99,7 +99,7 @@ exports[`Field Renderers #autonomousSystemRenderer it renders correctly against 
 exports[`Field Renderers #dateRenderer it renders correctly against snapshot 1`] = `
 <DocumentFragment>
   <span
-    class="euiToolTipAnchor"
+    class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
   >
     Feb 7, 2019 @ 17:19:41.636
   </span>
@@ -141,7 +141,7 @@ exports[`Field Renderers #hostIdRenderer it renders correctly against snapshot 1
               data-test-subj="render-content-host.name"
             >
               <span
-                class="euiToolTipAnchor"
+                class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
               >
                 <a
                   class="euiLink emotion-euiLink-primary"
@@ -196,7 +196,7 @@ exports[`Field Renderers #hostNameRenderer it renders correctly against snapshot
               data-test-subj="render-content-host.name"
             >
               <span
-                class="euiToolTipAnchor"
+                class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
               >
                 <a
                   class="euiLink emotion-euiLink-primary"
@@ -231,10 +231,10 @@ exports[`Field Renderers #locationRenderer it renders correctly against snapshot
 }
 
 <div
-    class="euiFlexGroup euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
+    class="euiFlexGroup emotion-euiFlexGroup-responsive-none-flexStart-center-row"
   >
     <div
-      class="euiFlexItem euiFlexItem--flexGrowZero"
+      class="euiFlexItem emotion-euiFlexItem-growZero"
     >
       <div
         class=""
@@ -257,7 +257,7 @@ exports[`Field Renderers #locationRenderer it renders correctly against snapshot
                   data-test-subj="render-content-source.geo.city_name"
                 >
                   <span
-                    class="euiToolTipAnchor"
+                    class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
                   >
                     New York
                   </span>
@@ -270,7 +270,7 @@ exports[`Field Renderers #locationRenderer it renders correctly against snapshot
     </div>
     , 
     <div
-      class="euiFlexItem euiFlexItem--flexGrowZero"
+      class="euiFlexItem emotion-euiFlexItem-growZero"
     >
       <div
         class=""
@@ -293,7 +293,7 @@ exports[`Field Renderers #locationRenderer it renders correctly against snapshot
                   data-test-subj="render-content-source.geo.region_name"
                 >
                   <span
-                    class="euiToolTipAnchor"
+                    class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
                   >
                     New York
                   </span>
@@ -313,7 +313,7 @@ exports[`Field Renderers #reputationRenderer it renders correctly against snapsh
 exports[`Field Renderers #whoisRenderer it renders correctly against snapshot 1`] = `
 <DocumentFragment>
   <span
-    class="euiToolTipAnchor"
+    class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
   >
     <a
       class="euiLink emotion-euiLink-primary"

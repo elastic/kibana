@@ -11,7 +11,7 @@ export const kpiHostMetricLensAttributes: LensAttributes = {
   description: '',
   state: {
     datasourceStates: {
-      indexpattern: {
+      formBased: {
         layers: {
           '416b6fad-1923-4f6a-a2df-b223bb287e30': {
             columnOrder: ['b00c65ea-32be-4163-bfc8-f795b1ef9d06'],
@@ -40,7 +40,7 @@ export const kpiHostMetricLensAttributes: LensAttributes = {
     },
   },
   title: '[Host] Hosts - metric',
-  visualizationType: 'lnsMetric',
+  visualizationType: 'lnsLegacyMetric',
   references: [
     {
       id: '{dataViewId}',

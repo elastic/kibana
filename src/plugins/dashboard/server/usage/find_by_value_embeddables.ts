@@ -7,7 +7,7 @@
  */
 
 import { ISavedObjectsRepository, SavedObjectAttributes } from '@kbn/core/server';
-import { SavedDashboardPanel730ToLatest } from '../../common';
+import type { SavedDashboardPanel } from '../../common';
 
 export const findByValueEmbeddables = async (
   savedObjectClient: Pick<ISavedObjectsRepository, 'find'>,
@@ -22,7 +22,7 @@ export const findByValueEmbeddables = async (
       try {
         return JSON.parse(
           dashboard.attributes.panelsJSON as string
-        ) as unknown as SavedDashboardPanel730ToLatest[];
+        ) as unknown as SavedDashboardPanel[];
       } catch (exception) {
         return [];
       }

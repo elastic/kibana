@@ -17,6 +17,7 @@ import {
   EuiFieldNumber,
   EuiText,
 } from '@elastic/eui';
+import { isNil } from 'lodash';
 import { builtInComparators } from '../constants';
 import { Comparator } from '../types';
 import { IErrorObject } from '../../types';
@@ -145,14 +146,14 @@ export const ThresholdExpression = ({
                 ) : null}
                 <EuiFlexItem grow={false}>
                   <EuiFormRow
-                    isInvalid={errors[`threshold${i}`]?.length > 0 || !threshold[i]}
+                    isInvalid={errors[`threshold${i}`]?.length > 0 || isNil(threshold[i])}
                     error={errors[`threshold${i}`]}
                   >
                     <EuiFieldNumber
                       data-test-subj="alertThresholdInput"
                       min={0}
                       value={!threshold || threshold[i] === undefined ? '' : threshold[i]}
-                      isInvalid={errors[`threshold${i}`]?.length > 0 || !threshold[i]}
+                      isInvalid={errors[`threshold${i}`]?.length > 0 || isNil(threshold[i])}
                       onChange={(e) => {
                         const { value } = e.target;
                         const thresholdVal = value !== '' ? parseFloat(value) : undefined;

@@ -277,7 +277,7 @@ describe('check metadata transforms task', () => {
     });
 
     describe('transforms reinstall', () => {
-      let getRegistryPackageSpy: jest.SpyInstance;
+      let getPackageSpy: jest.SpyInstance;
       let reinstallEsAssetsSpy: jest.SpyInstance;
       let mockPackageClient: jest.Mocked<PackageClient>;
 
@@ -291,7 +291,7 @@ describe('check metadata transforms task', () => {
 
         mockPackageClient = mockEndpointAppContext.service.getInternalFleetServices()
           .packages as jest.Mocked<PackageClient>;
-        getRegistryPackageSpy = jest.spyOn(mockPackageClient, 'getRegistryPackage');
+        getPackageSpy = jest.spyOn(mockPackageClient, 'getPackage');
         reinstallEsAssetsSpy = jest.spyOn(mockPackageClient, 'reinstallEsAssets');
 
         const transformStatsResponseMock = {
@@ -313,7 +313,7 @@ describe('check metadata transforms task', () => {
           packageInfo: { name: 'package name' },
           paths: ['some/test/transform/path'],
         };
-        getRegistryPackageSpy.mockResolvedValue(expectedArgs);
+        getPackageSpy.mockResolvedValue(expectedArgs);
         reinstallEsAssetsSpy.mockResolvedValue([{}]);
         await runTask();
 
@@ -338,7 +338,7 @@ describe('check metadata transforms task', () => {
       });
 
       it('should return correct runAt', async () => {
-        getRegistryPackageSpy.mockResolvedValue({
+        getPackageSpy.mockResolvedValue({
           packageInfo: { name: 'package name' },
           paths: ['some/test/transform/path'],
         });

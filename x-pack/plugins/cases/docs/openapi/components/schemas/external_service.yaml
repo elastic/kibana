@@ -1,4 +1,5 @@
 type: object
+nullable: true
 properties:
   connector_id:
     type: string

@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import { CasesConfigureResponse, CasesConfigureRequest, ConnectorTypes } from '../../../common/api';
+import type { CasesConfigureResponse, CasesConfigureRequest } from '../../../common/api';
+import { ConnectorTypes } from '../../../common/api';
 import { SECURITY_SOLUTION_OWNER } from '../../../common/constants';
-import { CaseConfigure, CaseConnectorMapping } from './types';
+import type { CaseConfigure, CaseConnectorMapping } from './types';
 
 export const mappings: CaseConnectorMapping[] = [
   {

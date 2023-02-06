@@ -22,7 +22,7 @@ import { useUpgradeSecurityPackages } from '../../common/hooks/use_upgrade_secur
 import { GlobalHeader } from './global_header';
 import { ConsoleManager } from '../../management/components/console/components/console_manager';
 
-import { TourContextProvider } from '../../common/components/guided_onboarding';
+import { TourContextProvider } from '../../common/components/guided_onboarding_tour';
 
 import { useUrlState } from '../../common/hooks/use_url_state';
 import { useUpdateBrowserTitle } from '../../common/hooks/use_update_browser_title';
@@ -47,7 +47,7 @@ const HomePageComponent: React.FC<HomePageProps> = ({ children, setHeaderActionM
   useUpgradeSecurityPackages();
 
   return (
-    <SecuritySolutionAppWrapper className="kbnAppWrapper">
+    <SecuritySolutionAppWrapper id="security-solution-app" className="kbnAppWrapper">
       <ConsoleManager>
         <TourContextProvider>
           <>

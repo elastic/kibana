@@ -5,18 +5,23 @@
  * 2.0.
  */
 
-export interface AggregatedFindings {
-  passed_findings: { doc_count: number };
-  failed_findings: { doc_count: number };
-  total_findings: { value: number };
-}
-
-export interface AggregatedFindingsByCluster extends AggregatedFindings {
-  key: string;
-}
-export interface ScoreBucket extends AggregatedFindings {
-  score_by_cluster_id: {
-    buckets: AggregatedFindingsByCluster[];
+export interface ScoreByPolicyTemplateBucket {
+  score_by_policy_template: {
+    buckets: Array<{
+      key: string; // policy template
+      doc_count: number;
+      passed_findings: { doc_count: number };
+      failed_findings: { doc_count: number };
+      total_findings: { value: number };
+      score_by_cluster_id: {
+        buckets: Array<{
+          key: string; // cluster id
+          passed_findings: { doc_count: number };
+          failed_findings: { doc_count: number };
+          total_findings: { value: number };
+        }>;
+      };
+    }>;
   };
 }
 

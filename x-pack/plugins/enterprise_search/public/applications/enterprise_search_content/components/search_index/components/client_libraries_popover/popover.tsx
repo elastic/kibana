@@ -24,6 +24,7 @@ import { i18n } from '@kbn/i18n';
 import { icons } from '../../../../../../assets/client_libraries';
 import { docLinks } from '../../../../../shared/doc_links';
 
+import { IndexViewLogic } from '../../index_view_logic';
 import { OverviewLogic } from '../../overview.logic';
 
 const libraries = [
@@ -112,6 +113,7 @@ const libraries = [
 
 export const ClientLibrariesPopover: React.FC = () => {
   const { isClientsPopoverOpen } = useValues(OverviewLogic);
+  const { ingestionMethod } = useValues(IndexViewLogic);
   const { toggleClientsPopover } = useActions(OverviewLogic);
 
   return (
@@ -119,7 +121,12 @@ export const ClientLibrariesPopover: React.FC = () => {
       isOpen={isClientsPopoverOpen}
       closePopover={toggleClientsPopover}
       button={
-        <EuiButton iconType="arrowDown" iconSide="right" onClick={toggleClientsPopover}>
+        <EuiButton
+          data-telemetry-id={`entSearchContent-${ingestionMethod}-overview-clientLibraries-openClientLibraries`}
+          iconType="arrowDown"
+          iconSide="right"
+          onClick={toggleClientsPopover}
+        >
           {i18n.translate(
             'xpack.enterpriseSearch.content,overview.documentExample.clientLibraries.label',
             { defaultMessage: 'Client Libraries' }

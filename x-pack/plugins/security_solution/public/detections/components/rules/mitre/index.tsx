@@ -7,18 +7,29 @@
 
 import { EuiButtonIcon, EuiFormRow, EuiSuperSelect, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { isEmpty, camelCase } from 'lodash/fp';
-import React, { memo, useCallback, useMemo } from 'react';
+import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
 import styled from 'styled-components';
 
 import { isEqual } from 'lodash';
 import type { Threat, Threats } from '@kbn/securitysolution-io-ts-alerting-types';
-import { tacticsOptions } from '../../../mitre/mitre_tactics_techniques';
 import * as Rulei18n from '../../../pages/detection_engine/rules/translations';
 import type { FieldHook } from '../../../../shared_imports';
 import { threatDefault } from '../step_about_rule/default_value';
 import { MyAddItemButton } from '../add_item_form';
 import * as i18n from './translations';
 import { MitreAttackTechniqueFields } from './technique_fields';
+import type { MitreTacticsOptions } from '../../../mitre/types';
+
+const lazyMitreConfiguration = () => {
+  /**
+   * The specially formatted comment in the `import` expression causes the corresponding webpack chunk to be named. This aids us in debugging chunk size issues.
+   * See https://webpack.js.org/api/module-methods/#magic-comments
+   */
+  return import(
+    /* webpackChunkName: "lazy_mitre_configuration" */
+    '../../../mitre/mitre_tactics_techniques'
+  );
+};
 
 const MitreAttackContainer = styled.div`
   margin-top: 16px;
@@ -65,6 +76,16 @@ export const AddMitreAttackThreat = memo(({ field, idAria, isDisabled }: AddItem
     }
   }, [field]);
 
+  const [tacticsOptions, setTacticsOptions] = useState<MitreTacticsOptions[]>([]);
+
+  useEffect(() => {
+    async function getMitre() {
+      const mitreConfig = await lazyMitreConfiguration();
+      setTacticsOptions(mitreConfig.tacticsOptions);
+    }
+    getMitre();
+  }, []);
+
   const updateTactic = useCallback(
     (index: number, value: string) => {
       const values = [...(field.value as Threats)];
@@ -80,7 +101,7 @@ export const AddMitreAttackThreat = memo(({ field, idAria, isDisabled }: AddItem
       });
       field.setValue([...values]);
     },
-    [field]
+    [field, tacticsOptions]
   );
 
   const values = useMemo(() => {
@@ -132,7 +153,7 @@ export const AddMitreAttackThreat = memo(({ field, idAria, isDisabled }: AddItem
         </EuiFlexGroup>
       );
     },
-    [field, isDisabled, removeTactic, updateTactic, values]
+    [field.label, isDisabled, removeTactic, tacticsOptions, updateTactic, values]
   );
 
   /**

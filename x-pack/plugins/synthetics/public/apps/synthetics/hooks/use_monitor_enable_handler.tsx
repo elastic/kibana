@@ -5,20 +5,11 @@
  * 2.0.
  */
 
-import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { FETCH_STATUS } from '@kbn/observability-plugin/public';
-import React, { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import {
-  ConfigKey,
-  EncryptedSyntheticsMonitor,
-  MonitorOverviewItem,
-} from '../components/monitors_page/overview/types';
-import {
-  clearMonitorUpsertStatus,
-  fetchUpsertMonitorAction,
-  selectMonitorUpsertStatuses,
-} from '../state';
+import { ConfigKey } from '../components/monitors_page/overview/types';
+import { fetchUpsertMonitorAction, selectMonitorUpsertStatuses } from '../state';
 
 export interface EnableStateMonitorLabels {
   failureLabel: string;
@@ -27,64 +18,59 @@ export interface EnableStateMonitorLabels {
 }
 
 export function useMonitorEnableHandler({
-  id,
+  configId,
   reloadPage,
   labels,
 }: {
-  id: string;
-  reloadPage: () => void;
-  labels?: EnableStateMonitorLabels;
+  configId: string;
+  isEnabled: boolean;
+  reloadPage?: () => void;
+  labels: EnableStateMonitorLabels;
 }) {
   const dispatch = useDispatch();
   const upsertStatuses = useSelector(selectMonitorUpsertStatuses);
-  const status = upsertStatuses[id]?.status;
-  const savedObjEnabledState = upsertStatuses[id]?.enabled;
-  const [isEnabled, setIsEnabled] = useState<boolean | null>(null);
-  const updateMonitorEnabledState = useCallback(
-    (monitor: EncryptedSyntheticsMonitor | MonitorOverviewItem, enabled: boolean) => {
-      dispatch(
-        fetchUpsertMonitorAction({
-          id,
-          monitor: { ...monitor, [ConfigKey.ENABLED]: enabled },
-        })
-      );
-    },
-    [dispatch, id]
-  );
-
-  const { notifications } = useKibana();
+  const status: FETCH_STATUS | undefined = upsertStatuses[configId]?.status;
+  const [nextEnabled, setNextEnabled] = useState<boolean | null>(null);
 
   useEffect(() => {
-    if (status === FETCH_STATUS.SUCCESS && labels) {
-      notifications.toasts.success({
-        title: (
-          <p data-test-subj="uptimeMonitorEnabledUpdateSuccess">
-            {savedObjEnabledState ? labels.enabledSuccessLabel : labels.disabledSuccessLabel}
-          </p>
-        ),
-        toastLifeTimeMs: 3000,
-      });
-      setIsEnabled(!!savedObjEnabledState);
-      dispatch(clearMonitorUpsertStatus(id));
-      reloadPage();
-    } else if (status === FETCH_STATUS.FAILURE && labels) {
-      notifications.toasts.danger({
-        title: <p data-test-subj="uptimeMonitorEnabledUpdateFailure">{labels.failureLabel}</p>,
-        toastLifeTimeMs: 3000,
-      });
-      setIsEnabled(null);
-      dispatch(clearMonitorUpsertStatus(id));
+    if (status === FETCH_STATUS.FAILURE) {
+      setNextEnabled(null);
     }
-  }, [
-    status,
-    labels,
-    notifications.toasts,
-    isEnabled,
-    dispatch,
-    id,
-    reloadPage,
-    savedObjEnabledState,
-  ]);
+  }, [setNextEnabled, status]);
 
-  return { isEnabled, updateMonitorEnabledState, status };
+  const updateMonitorEnabledState = useCallback(
+    (enabled: boolean) => {
+      dispatch(
+        fetchUpsertMonitorAction({
+          configId,
+          monitor: { [ConfigKey.ENABLED]: enabled },
+          success: {
+            message: enabled ? labels.enabledSuccessLabel : labels.disabledSuccessLabel,
+            lifetimeMs: 3000,
+            testAttribute: 'uptimeMonitorEnabledUpdateSuccess',
+          },
+          error: {
+            message: {
+              title: labels.failureLabel,
+            },
+            lifetimeMs: 10000,
+            testAttribute: 'uptimeMonitorEnabledUpdateFailure',
+          },
+        })
+      );
+      setNextEnabled(enabled);
+      if (reloadPage) reloadPage();
+    },
+    [
+      dispatch,
+      configId,
+      labels.disabledSuccessLabel,
+      labels.enabledSuccessLabel,
+      labels.failureLabel,
+      setNextEnabled,
+      reloadPage,
+    ]
+  );
+
+  return { isEnabled: nextEnabled, updateMonitorEnabledState, status };
 }

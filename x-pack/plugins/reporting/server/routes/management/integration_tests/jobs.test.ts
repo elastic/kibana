@@ -10,7 +10,7 @@ jest.mock('../../../lib/content_stream', () => ({
 }));
 import type { ElasticsearchClientMock } from '@kbn/core/server/mocks';
 import { BehaviorSubject } from 'rxjs';
-import { setupServer } from '@kbn/core/server/test_utils';
+import { setupServer } from '@kbn/core-test-helpers-test-utils';
 import { Readable } from 'stream';
 import supertest from 'supertest';
 import { ReportingCore } from '../../..';
@@ -161,7 +161,7 @@ describe('GET /api/reporting/jobs/download', () => {
     await supertest(httpSetup.server.listener).get('/api/reporting/jobs/download/poo').expect(404);
   });
 
-  it('returns a 401 if not a valid job type', async () => {
+  it('returns a 403 if not a valid job type', async () => {
     mockEsClient.search.mockResponseOnce(
       getHits({
         jobtype: 'invalidJobType',
@@ -172,7 +172,7 @@ describe('GET /api/reporting/jobs/download', () => {
 
     await server.start();
 
-    await supertest(httpSetup.server.listener).get('/api/reporting/jobs/download/poo').expect(401);
+    await supertest(httpSetup.server.listener).get('/api/reporting/jobs/download/poo').expect(403);
   });
 
   it(`returns job's info`, async () => {
@@ -268,7 +268,7 @@ describe('GET /api/reporting/jobs/download', () => {
         .get('/api/reporting/jobs/download/dank')
         .expect(200)
         .expect('Content-Type', 'text/plain; charset=utf-8')
-        .expect('content-disposition', 'inline; filename="report.csv"');
+        .expect('content-disposition', 'attachment; filename="report.csv"');
     });
 
     it('succeeds when security is not there or disabled', async () => {
@@ -285,7 +285,7 @@ describe('GET /api/reporting/jobs/download', () => {
         .get('/api/reporting/jobs/download/dope')
         .expect(200)
         .expect('Content-Type', 'text/plain; charset=utf-8')
-        .expect('content-disposition', 'inline; filename="report.csv"');
+        .expect('content-disposition', 'attachment; filename="report.csv"');
     });
 
     it('forwards job content stream', async () => {

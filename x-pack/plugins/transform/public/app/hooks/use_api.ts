@@ -11,7 +11,7 @@ import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import type { IHttpFetchError } from '@kbn/core-http-browser';
 
-import { KBN_FIELD_TYPES } from '@kbn/data-plugin/public';
+import { KBN_FIELD_TYPES } from '@kbn/field-types';
 
 import type { GetTransformsAuditMessagesResponseSchema } from '../../../common/api_schemas/audit_messages';
 import type {

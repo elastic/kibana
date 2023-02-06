@@ -42,6 +42,7 @@ export function getSearchParamsFromRequest(
   return {
     index: searchRequest.index.title || searchRequest.index,
     body,
+    // @ts-expect-error `track_total_hits` not allowed at top level for `typesWithBodyKey`
     track_total_hits,
     ...searchParams,
   };

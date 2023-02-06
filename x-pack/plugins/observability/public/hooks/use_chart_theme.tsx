@@ -7,6 +7,7 @@
 
 import { PartialTheme } from '@elastic/charts';
 import { EUI_CHARTS_THEME_DARK, EUI_CHARTS_THEME_LIGHT } from '@elastic/eui/dist/eui_charts_theme';
+import { useMemo } from 'react';
 import { useTheme } from './use_theme';
 
 export function useChartTheme(): PartialTheme[] {
@@ -15,24 +16,27 @@ export function useChartTheme(): PartialTheme[] {
     ? EUI_CHARTS_THEME_DARK.theme
     : EUI_CHARTS_THEME_LIGHT.theme;
 
-  return [
-    {
-      chartMargins: {
-        left: 10,
-        right: 10,
-        top: 10,
-        bottom: 10,
+  return useMemo(
+    () => [
+      {
+        chartMargins: {
+          left: 10,
+          right: 10,
+          top: 35,
+          bottom: 10,
+        },
+        background: {
+          color: 'transparent',
+        },
+        lineSeriesStyle: {
+          point: { visible: false },
+        },
+        areaSeriesStyle: {
+          point: { visible: false },
+        },
       },
-      background: {
-        color: 'transparent',
-      },
-      lineSeriesStyle: {
-        point: { visible: false },
-      },
-      areaSeriesStyle: {
-        point: { visible: false },
-      },
-    },
-    baseChartTheme,
-  ];
+      baseChartTheme,
+    ],
+    [baseChartTheme]
+  );
 }

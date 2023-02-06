@@ -31,9 +31,10 @@ Object {
         ],
       },
     },
-    "size": 1,
+    "size": 0,
+    "terminate_after": 1,
+    "track_total_hits": 1,
   },
-  "terminate_after": 1,
 }
 `;
 
@@ -56,9 +57,10 @@ Object {
         ],
       },
     },
-    "size": 1,
+    "size": 0,
+    "terminate_after": 1,
+    "track_total_hits": 1,
   },
-  "terminate_after": 1,
 }
 `;
 
@@ -84,9 +86,10 @@ Array [
             ],
           },
         },
-        "size": 1,
+        "size": 0,
+        "terminate_after": 1,
+        "track_total_hits": 1,
       },
-      "terminate_after": 1,
     },
   ],
   Array [
@@ -104,6 +107,7 @@ Array [
           },
         },
         "size": 0,
+        "track_total_hits": 1,
       },
       "terminate_after": 1,
     },

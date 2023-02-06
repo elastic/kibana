@@ -85,6 +85,7 @@ export function getSummaryRowOptions(): Array<{
   ];
 }
 
+/** @internal **/
 export function computeSummaryRowForColumn(
   columnArgs: ColumnConfigArg,
   table: Datatable,

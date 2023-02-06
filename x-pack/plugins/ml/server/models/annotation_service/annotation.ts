@@ -82,8 +82,8 @@ export function annotationProvider({ asInternalUser }: IScopedClusterClient) {
   async function fetchAnnotationIndex(id: string) {
     const searchParams: estypes.SearchRequest = {
       index: ML_ANNOTATIONS_INDEX_ALIAS_READ,
-      size: 1,
       body: {
+        size: 1,
         query: {
           ids: {
             values: [id],
@@ -366,8 +366,8 @@ export function annotationProvider({ asInternalUser }: IScopedClusterClient) {
   }): Promise<Annotation[]> {
     const params: estypes.SearchRequest = {
       index: ML_ANNOTATIONS_INDEX_ALIAS_READ,
-      size: 0,
       body: {
+        size: 0,
         query: {
           bool: {
             filter: [

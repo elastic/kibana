@@ -41,7 +41,7 @@ describe('<ExitFullScreenButton />', () => {
   describe('with manual services', () => {
     test('is rendered', () => {
       const component = componentMount(<ExitFullScreenButton onExit={jest.fn()} />);
-      expect(component).toMatchSnapshot();
+      expect(component.render()).toMatchSnapshot();
     });
 
     test('passing `false` to toggleChrome does not toggle chrome', () => {
@@ -90,7 +90,7 @@ describe('<ExitFullScreenButton />', () => {
   describe('with kibana services', () => {
     test('is rendered', () => {
       const component = kibanaMount(<ExitFullScreenButton onExit={jest.fn()} />);
-      expect(component).toMatchSnapshot();
+      expect(component.render()).toMatchSnapshot();
     });
 
     test('passing `false` to toggleChrome does not toggle chrome', () => {

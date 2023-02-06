@@ -17,8 +17,13 @@ import type {
 import { createThreatSignal } from './create_threat_signal';
 import { createEventSignal } from './create_event_signal';
 import type { SearchAfterAndBulkCreateReturnType } from '../types';
-import { buildExecutionIntervalValidator, combineConcurrentResults } from './utils';
-import { buildThreatEnrichment } from './build_threat_enrichment';
+import {
+  buildExecutionIntervalValidator,
+  combineConcurrentResults,
+  getMatchedFields,
+} from './utils';
+import { getAllowedFieldsForTermQuery } from './get_allowed_fields_for_terms_query';
+
 import { getEventCount, getEventList } from './get_event_count';
 import { getMappingFilters } from './get_mapping_filters';
 import { THREAT_PIT_KEEP_ALIVE } from '../../../../../common/cti/constants';
@@ -29,7 +34,6 @@ export const createThreatSignals = async ({
   completeRule,
   concurrentSearches,
   eventsTelemetry,
-  exceptionItems,
   filters,
   inputIndex,
   itemsPerSearch,
@@ -53,7 +57,18 @@ export const createThreatSignals = async ({
   runtimeMappings,
   primaryTimestamp,
   secondaryTimestamp,
+  exceptionFilter,
+  unprocessedExceptions,
 }: CreateThreatSignalsOptions): Promise<SearchAfterAndBulkCreateReturnType> => {
+  const threatMatchedFields = getMatchedFields(threatMapping);
+  const allowedFieldsForTermsQuery = await getAllowedFieldsForTermQuery({
+    services,
+    threatMatchedFields,
+    inputIndex,
+    threatIndex,
+    ruleExecutionLogger,
+  });
+
   const params = completeRule.ruleParams;
   ruleExecutionLogger.debug('Indicator matching rule starting');
   const perPage = concurrentSearches * itemsPerSearch;
@@ -64,6 +79,7 @@ export const createThreatSignals = async ({
   let results: SearchAfterAndBulkCreateReturnType = {
     success: true,
     warning: false,
+    enrichmentTimes: [],
     bulkCreateTimes: [],
     searchAfterTimes: [],
     lastLookBackDate: null,
@@ -80,13 +96,13 @@ export const createThreatSignals = async ({
   const eventCount = await getEventCount({
     esClient: services.scopedClusterClient.asCurrentUser,
     index: inputIndex,
-    exceptionItems,
     tuple,
     query,
     language,
     filters: allEventFilters,
     primaryTimestamp,
     secondaryTimestamp,
+    exceptionFilter,
   });
 
   ruleExecutionLogger.debug(`Total event count: ${eventCount}`);
@@ -108,11 +124,11 @@ export const createThreatSignals = async ({
 
   const threatListCount = await getThreatListCount({
     esClient: services.scopedClusterClient.asCurrentUser,
-    exceptionItems,
     threatFilters: allThreatFilters,
     query: threatQuery,
     language: threatLanguage,
     index: threatIndex,
+    exceptionFilter,
   });
 
   ruleExecutionLogger.debug(`Total indicator items: ${threatListCount}`);
@@ -122,19 +138,10 @@ export const createThreatSignals = async ({
     _source: false,
   };
 
-  const threatEnrichment = buildThreatEnrichment({
-    exceptionItems,
-    ruleExecutionLogger,
-    services,
-    threatFilters: allThreatFilters,
-    threatIndex,
-    threatIndicatorPath,
-    threatLanguage,
-    threatQuery,
-    pitId: threatPitId,
-    reassignPitId: reassignThreatPitId,
-    listClient,
-  });
+  const eventListConfig = {
+    fields: threatMapping.map((mapping) => mapping.entries.map((item) => item.field)).flat(),
+    _source: false,
+  };
 
   const createSignals = async ({
     getDocumentList,
@@ -184,7 +191,6 @@ export const createThreatSignals = async ({
         getEventList({
           services,
           ruleExecutionLogger,
-          exceptionItems,
           filters: allEventFilters,
           query,
           language,
@@ -195,6 +201,8 @@ export const createThreatSignals = async ({
           runtimeMappings,
           primaryTimestamp,
           secondaryTimestamp,
+          exceptionFilter,
+          eventListConfig,
         }),
 
       createSignal: (slicedChunk) =>
@@ -205,7 +213,6 @@ export const createThreatSignals = async ({
           currentEventList: slicedChunk,
           currentResult: results,
           eventsTelemetry,
-          exceptionItems,
           filters: allEventFilters,
           inputIndex,
           language,
@@ -217,7 +224,6 @@ export const createThreatSignals = async ({
           savedId,
           searchAfterSize,
           services,
-          threatEnrichment,
           threatFilters: allThreatFilters,
           threatIndex,
           threatIndicatorPath,
@@ -231,6 +237,10 @@ export const createThreatSignals = async ({
           runtimeMappings,
           primaryTimestamp,
           secondaryTimestamp,
+          exceptionFilter,
+          unprocessedExceptions,
+          allowedFieldsForTermsQuery,
+          threatMatchedFields,
         }),
     });
   } else {
@@ -239,7 +249,6 @@ export const createThreatSignals = async ({
       getDocumentList: async ({ searchAfter }) =>
         getThreatList({
           esClient: services.scopedClusterClient.asCurrentUser,
-          exceptionItems,
           threatFilters: allThreatFilters,
           query: threatQuery,
           language: threatLanguage,
@@ -252,6 +261,7 @@ export const createThreatSignals = async ({
           reassignPitId: reassignThreatPitId,
           runtimeMappings,
           listClient,
+          exceptionFilter,
         }),
 
       createSignal: (slicedChunk) =>
@@ -262,7 +272,6 @@ export const createThreatSignals = async ({
           currentResult: results,
           currentThreatList: slicedChunk,
           eventsTelemetry,
-          exceptionItems,
           filters: allEventFilters,
           inputIndex,
           language,
@@ -273,7 +282,6 @@ export const createThreatSignals = async ({
           savedId,
           searchAfterSize,
           services,
-          threatEnrichment,
           threatMapping,
           tuple,
           type,
@@ -281,6 +289,16 @@ export const createThreatSignals = async ({
           runtimeMappings,
           primaryTimestamp,
           secondaryTimestamp,
+          exceptionFilter,
+          unprocessedExceptions,
+          threatFilters: allThreatFilters,
+          threatIndex,
+          threatIndicatorPath,
+          threatLanguage,
+          threatPitId,
+          threatQuery,
+          reassignThreatPitId,
+          allowedFieldsForTermsQuery,
         }),
     });
   }

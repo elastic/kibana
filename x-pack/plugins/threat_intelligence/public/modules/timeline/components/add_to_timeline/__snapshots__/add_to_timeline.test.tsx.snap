@@ -249,8 +249,27 @@ Object {
   "asFragment": [Function],
   "baseElement": <body>
     <div>
+      <span
+        class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+      >
+        <div
+          class="euiFlexItem emotion-euiFlexItem-grow-1"
+        >
+          <span
+            data-test-subj="test-add-to-timeline"
+          >
+            Add To Timeline
+          </span>
+        </div>
+      </span>
+    </div>
+  </body>,
+  "container": <div>
+    <span
+      class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+    >
       <div
-        css="[object Object]"
+        class="euiFlexItem emotion-euiFlexItem-grow-1"
       >
         <span
           data-test-subj="test-add-to-timeline"
@@ -258,18 +277,7 @@ Object {
           Add To Timeline
         </span>
       </div>
-    </div>
-  </body>,
-  "container": <div>
-    <div
-      css="[object Object]"
-    >
-      <span
-        data-test-subj="test-add-to-timeline"
-      >
-        Add To Timeline
-      </span>
-    </div>
+    </span>
   </div>,
   "debug": [Function],
   "findAllByAltText": [Function],
@@ -330,8 +338,27 @@ Object {
   "asFragment": [Function],
   "baseElement": <body>
     <div>
+      <span
+        class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+      >
+        <div
+          class="euiFlexItem emotion-euiFlexItem-grow-1"
+        >
+          <span
+            data-test-subj="test-add-to-timeline"
+          >
+            Add To Timeline
+          </span>
+        </div>
+      </span>
+    </div>
+  </body>,
+  "container": <div>
+    <span
+      class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+    >
       <div
-        css="[object Object]"
+        class="euiFlexItem emotion-euiFlexItem-grow-1"
       >
         <span
           data-test-subj="test-add-to-timeline"
@@ -339,18 +366,7 @@ Object {
           Add To Timeline
         </span>
       </div>
-    </div>
-  </body>,
-  "container": <div>
-    <div
-      css="[object Object]"
-    >
-      <span
-        data-test-subj="test-add-to-timeline"
-      >
-        Add To Timeline
-      </span>
-    </div>
+    </span>
   </div>,
   "debug": [Function],
   "findAllByAltText": [Function],

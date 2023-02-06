@@ -43,7 +43,13 @@ export const DomainsPanel: React.FC = () => {
           </EuiTitle>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiButton onClick={openFlyout} size="s" color="success" iconType="plusInCircle">
+          <EuiButton
+            data-telemetry-id="entSearchContent-crawler-domainManagement-addDomain-addDomain"
+            onClick={openFlyout}
+            size="s"
+            color="success"
+            iconType="plusInCircle"
+          >
             {i18n.translate('xpack.enterpriseSearch.crawler.addDomainFlyout.openButtonLabel', {
               defaultMessage: 'Add domain',
             })}

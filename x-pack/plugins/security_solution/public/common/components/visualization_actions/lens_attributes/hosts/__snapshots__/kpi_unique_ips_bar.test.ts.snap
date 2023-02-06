@@ -1,0 +1,259 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`kpiUniqueIpsBarLensAttributes should render 1`] = `
+Object {
+  "description": "",
+  "references": Array [
+    Object {
+      "id": "security-solution-my-test",
+      "name": "indexpattern-datasource-current-indexpattern",
+      "type": "index-pattern",
+    },
+    Object {
+      "id": "security-solution-my-test",
+      "name": "indexpattern-datasource-layer-8be0156b-d423-4a39-adf1-f54d4c9f2e69",
+      "type": "index-pattern",
+    },
+    Object {
+      "id": "security-solution-my-test",
+      "name": "indexpattern-datasource-layer-ec84ba70-2adb-4647-8ef0-8ad91a0e6d4e",
+      "type": "index-pattern",
+    },
+  ],
+  "state": Object {
+    "datasourceStates": Object {
+      "formBased": Object {
+        "layers": Object {
+          "8be0156b-d423-4a39-adf1-f54d4c9f2e69": Object {
+            "columnOrder": Array [
+              "f8bfa719-5c1c-4bf2-896e-c318d77fc08e",
+              "32f66676-f4e1-48fd-b7f8-d4de38318601",
+            ],
+            "columns": Object {
+              "32f66676-f4e1-48fd-b7f8-d4de38318601": Object {
+                "dataType": "number",
+                "isBucketed": false,
+                "label": "Unique count of source.ip",
+                "operationType": "unique_count",
+                "scale": "ratio",
+                "sourceField": "source.ip",
+              },
+              "f8bfa719-5c1c-4bf2-896e-c318d77fc08e": Object {
+                "dataType": "string",
+                "isBucketed": true,
+                "label": "Filters",
+                "operationType": "filters",
+                "params": Object {
+                  "filters": Array [
+                    Object {
+                      "input": Object {
+                        "language": "kuery",
+                        "query": "",
+                      },
+                      "label": "Src.",
+                    },
+                  ],
+                },
+                "scale": "ordinal",
+              },
+            },
+            "incompleteColumns": Object {},
+          },
+          "ec84ba70-2adb-4647-8ef0-8ad91a0e6d4e": Object {
+            "columnOrder": Array [
+              "c72aad6a-fc9c-43dc-9194-e13ca3ee8aff",
+              "b7e59b08-96e6-40d1-84fd-e97b977d1c47",
+            ],
+            "columns": Object {
+              "b7e59b08-96e6-40d1-84fd-e97b977d1c47": Object {
+                "dataType": "number",
+                "isBucketed": false,
+                "label": "Unique count of destination.ip",
+                "operationType": "unique_count",
+                "scale": "ratio",
+                "sourceField": "destination.ip",
+              },
+              "c72aad6a-fc9c-43dc-9194-e13ca3ee8aff": Object {
+                "customLabel": true,
+                "dataType": "string",
+                "isBucketed": true,
+                "label": "Dest.",
+                "operationType": "filters",
+                "params": Object {
+                  "filters": Array [
+                    Object {
+                      "input": Object {
+                        "language": "kuery",
+                        "query": "",
+                      },
+                      "label": "Dest.",
+                    },
+                  ],
+                },
+                "scale": "ordinal",
+              },
+            },
+            "incompleteColumns": Object {},
+          },
+        },
+      },
+    },
+    "filters": Array [
+      Object {
+        "meta": Object {
+          "alias": null,
+          "disabled": false,
+          "key": "host.id",
+          "negate": false,
+          "params": Object {
+            "query": "123",
+          },
+          "type": "phrase",
+        },
+        "query": Object {
+          "match_phrase": Object {
+            "host.id": "123",
+          },
+        },
+      },
+      Object {
+        "meta": Object {
+          "alias": null,
+          "disabled": false,
+          "key": "host.name",
+          "negate": false,
+          "params": Object {
+            "query": "mockHost",
+          },
+          "type": "phrase",
+        },
+        "query": Object {
+          "match_phrase": Object {
+            "host.name": "mockHost",
+          },
+        },
+      },
+      Object {
+        "meta": Object {
+          "alias": "",
+          "disabled": false,
+          "key": "bool",
+          "negate": false,
+          "type": "custom",
+          "value": "{\\"query\\": {\\"bool\\": {\\"filter\\": [{\\"bool\\": {\\"should\\": [{\\"exists\\": {\\"field\\": \\"host.name\\"}}],\\"minimum_should_match\\": 1}}]}}}",
+        },
+        "query": Object {
+          "bool": Object {
+            "minimum_should_match": 1,
+            "should": Array [
+              Object {
+                "exists": Object {
+                  "field": "host.name",
+                },
+              },
+            ],
+          },
+        },
+      },
+      Object {
+        "meta": Object {
+          "alias": null,
+          "disabled": false,
+          "key": "_index",
+          "negate": false,
+          "params": Array [
+            "auditbeat-mytest-*",
+          ],
+          "type": "phrases",
+        },
+        "query": Object {
+          "bool": Object {
+            "minimum_should_match": 1,
+            "should": Array [
+              Object {
+                "match_phrase": Object {
+                  "_index": "auditbeat-mytest-*",
+                },
+              },
+            ],
+          },
+        },
+      },
+    ],
+    "query": Object {
+      "language": "kql",
+      "query": "host.name: *",
+    },
+    "visualization": Object {
+      "axisTitlesVisibilitySettings": Object {
+        "x": false,
+        "yLeft": false,
+        "yRight": true,
+      },
+      "fittingFunction": "None",
+      "gridlinesVisibilitySettings": Object {
+        "x": true,
+        "yLeft": true,
+        "yRight": true,
+      },
+      "labelsOrientation": Object {
+        "x": 0,
+        "yLeft": 0,
+        "yRight": 0,
+      },
+      "layers": Array [
+        Object {
+          "accessors": Array [
+            "32f66676-f4e1-48fd-b7f8-d4de38318601",
+          ],
+          "layerId": "8be0156b-d423-4a39-adf1-f54d4c9f2e69",
+          "layerType": "data",
+          "seriesType": "bar_horizontal_stacked",
+          "xAccessor": "f8bfa719-5c1c-4bf2-896e-c318d77fc08e",
+          "yConfig": Array [
+            Object {
+              "color": "#d36186",
+              "forAccessor": "32f66676-f4e1-48fd-b7f8-d4de38318601",
+            },
+          ],
+        },
+        Object {
+          "accessors": Array [
+            "b7e59b08-96e6-40d1-84fd-e97b977d1c47",
+          ],
+          "layerId": "ec84ba70-2adb-4647-8ef0-8ad91a0e6d4e",
+          "layerType": "data",
+          "seriesType": "bar_horizontal_stacked",
+          "xAccessor": "c72aad6a-fc9c-43dc-9194-e13ca3ee8aff",
+          "yConfig": Array [
+            Object {
+              "color": "#9170b8",
+              "forAccessor": "b7e59b08-96e6-40d1-84fd-e97b977d1c47",
+            },
+          ],
+        },
+      ],
+      "legend": Object {
+        "isVisible": false,
+        "position": "right",
+        "showSingleSeries": false,
+      },
+      "preferredSeriesType": "bar_horizontal_stacked",
+      "tickLabelsVisibilitySettings": Object {
+        "x": true,
+        "yLeft": true,
+        "yRight": true,
+      },
+      "valueLabels": "hide",
+      "yLeftExtent": Object {
+        "mode": "full",
+      },
+      "yRightExtent": Object {
+        "mode": "full",
+      },
+    },
+  },
+  "title": "[Host] Unique IPs - bar",
+  "visualizationType": "lnsXY",
+}
+`;

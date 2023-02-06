@@ -41,6 +41,9 @@ import type {
   SavedObjectsRemoveReferencesToResponse,
   SavedObjectsCollectMultiNamespaceReferencesOptions,
   SavedObjectsBulkResponse,
+  SavedObjectsBulkDeleteObject,
+  SavedObjectsBulkDeleteOptions,
+  SavedObjectsBulkDeleteResponse,
 } from './apis';
 
 /**
@@ -109,9 +112,10 @@ export interface SavedObjectsClientContract {
   /**
    * Persists a SavedObject
    *
-   * @param type
-   * @param attributes
-   * @param options
+   * @param type - the type of saved object to create
+   * @param attributes - attributes for the saved object
+   * @param options {@link SavedObjectsCreateOptions} - options for the create operation
+   * @returns the created saved object
    */
   create<T = unknown>(
     type: string,
@@ -122,8 +126,9 @@ export interface SavedObjectsClientContract {
   /**
    * Persists multiple documents batched together as a single request
    *
-   * @param objects
-   * @param options
+   * @param objects - array of objects to create (contains type, attributes, and optional fields )
+   * @param options {@link SavedObjectsCreateOptions} - options for the bulk create operation
+   * @returns the {@link SavedObjectsBulkResponse}
    */
   bulkCreate<T = unknown>(
     objects: Array<SavedObjectsBulkCreateObject<T>>,
@@ -134,8 +139,9 @@ export interface SavedObjectsClientContract {
    * Check what conflicts will result when creating a given array of saved objects. This includes "unresolvable conflicts", which are
    * multi-namespace objects that exist in a different namespace; such conflicts cannot be resolved/overwritten.
    *
-   * @param objects
-   * @param options
+   * @param objects - array of objects to check (contains ID and type)
+   * @param options {@link SavedObjectsBaseOptions} - options for the check conflicts operation
+   * @returns the {@link SavedObjectsCheckConflictsResponse}
    */
   checkConflicts(
     objects: SavedObjectsCheckConflictsObject[],
@@ -145,16 +151,28 @@ export interface SavedObjectsClientContract {
   /**
    * Deletes a SavedObject
    *
-   * @param type
-   * @param id
-   * @param options
+   * @param type - the type of saved object to delete
+   * @param id - the ID of the saved object to delete
+   * @param options {@link SavedObjectsDeleteOptions} - options for the delete operation
    */
   delete(type: string, id: string, options?: SavedObjectsDeleteOptions): Promise<{}>;
 
   /**
+   * Deletes multiple SavedObjects batched together as a single request
+   *
+   * @param objects - array of objects to delete (contains ID and type)
+   * @param options {@link SavedObjectsBulkDeleteOptions} - options for the bulk delete operation
+   * @returns the {@link SavedObjectsBulkDeleteResponse}
+   */
+  bulkDelete(
+    objects: SavedObjectsBulkDeleteObject[],
+    options?: SavedObjectsBulkDeleteOptions
+  ): Promise<SavedObjectsBulkDeleteResponse>;
+  /**
    * Find all SavedObjects matching the search query
    *
-   * @param options
+   * @param options {@link SavedObjectsFindOptions} - options for the find operation
+   * @returns the {@link SavedObjectsFindResponse}
    */
   find<T = unknown, A = unknown>(
     options: SavedObjectsFindOptions
@@ -163,7 +181,9 @@ export interface SavedObjectsClientContract {
   /**
    * Returns an array of objects by id
    *
-   * @param objects - an array of ids, or an array of objects containing id, type and optionally fields
+   * @param objects - array of objects to get (contains id, type, and optional fields)
+   * @param options {@link SavedObjectsBaseOptions} - options for the bulk get operation
+   * @returns the {@link SavedObjectsBulkResponse}
    * @example
    *
    * bulkGet([
@@ -179,9 +199,9 @@ export interface SavedObjectsClientContract {
   /**
    * Retrieves a single object
    *
-   * @param type - The type of SavedObject to retrieve
-   * @param id - The ID of the SavedObject to retrieve
-   * @param options
+   * @param type - The type of the object to retrieve
+   * @param id - The ID of the object to retrieve
+   * @param options {@link SavedObjectsBaseOptions} - options for the get operation
    */
   get<T = unknown>(
     type: string,
@@ -192,7 +212,9 @@ export interface SavedObjectsClientContract {
   /**
    * Resolves an array of objects by id, using any legacy URL aliases if they exist
    *
-   * @param objects - an array of objects containing id, type
+   * @param objects - an array of objects to resolve (contains id and type)
+   * @param options {@link SavedObjectsBaseOptions} - options for the bulk resolve operation
+   * @returns the {@link SavedObjectsBulkResolveResponse}
    * @example
    *
    * bulkResolve([
@@ -214,7 +236,8 @@ export interface SavedObjectsClientContract {
    *
    * @param type - The type of SavedObject to retrieve
    * @param id - The ID of the SavedObject to retrieve
-   * @param options
+   * @param options {@link SavedObjectsBaseOptions} - options for the resolve operation
+   * @returns the {@link SavedObjectsResolveResponse}
    */
   resolve<T = unknown>(
     type: string,
@@ -225,9 +248,11 @@ export interface SavedObjectsClientContract {
   /**
    * Updates an SavedObject
    *
-   * @param type
-   * @param id
-   * @param options
+   * @param type - The type of SavedObject to update
+   * @param id - The ID of the SavedObject to update
+   * @param attributes - Attributes to update
+   * @param options {@link SavedObjectsUpdateOptions} - options for the update operation
+   * @returns the {@link SavedObjectsUpdateResponse}
    */
   update<T = unknown>(
     type: string,
@@ -239,7 +264,9 @@ export interface SavedObjectsClientContract {
   /**
    * Bulk Updates multiple SavedObject at once
    *
-   * @param objects
+   * @param objects - array of objects to update (contains ID, type, attributes, and optional namespace)
+   * @param options {@link SavedObjectsBulkUpdateOptions} - options for the bulkUpdate operation
+   * @returns the {@link SavedObjectsBulkUpdateResponse}
    */
   bulkUpdate<T = unknown>(
     objects: Array<SavedObjectsBulkUpdateObject<T>>,
@@ -248,6 +275,11 @@ export interface SavedObjectsClientContract {
 
   /**
    * Updates all objects containing a reference to the given {type, id} tuple to remove the said reference.
+   *
+   * @param type - the type of the object to remove references to
+   * @param id - the ID of the object to remove references to
+   * @param options {@link SavedObjectsRemoveReferencesToOptions} - options for the remove references opertion
+   * @returns the {@link SavedObjectsRemoveReferencesToResponse}
    */
   removeReferencesTo(
     type: string,
@@ -262,6 +294,10 @@ export interface SavedObjectsClientContract {
    *
    * Only use this API if you have an advanced use case that's not solved by the
    * {@link SavedObjectsClient.createPointInTimeFinder} method.
+   *
+   * @param type - the type or array of types
+   * @param options {@link SavedObjectsOpenPointInTimeOptions} - options for the open PIT for type operation
+   * @returns the {@link SavedObjectsOpenPointInTimeResponse}
    */
   openPointInTimeForType(
     type: string | string[],
@@ -275,6 +311,10 @@ export interface SavedObjectsClientContract {
    *
    * Only use this API if you have an advanced use case that's not solved by the
    * {@link SavedObjectsClient.createPointInTimeFinder} method.
+   *
+   * @param id - the ID of the PIT to close
+   * @param options {@link SavedObjectsClosePointInTimeOptions} - options for the close PIT operation
+   * @returns the {@link SavedObjectsClosePointInTimeResponse}
    */
   closePointInTime(
     id: string,
@@ -325,6 +365,10 @@ export interface SavedObjectsClientContract {
    *   }
    * }
    * ```
+   *
+   * @param findOptions {@link SavedObjectsCreatePointInTimeFinderOptions} - options for the create PIT finder operation
+   * @param dependencies {@link SavedObjectsCreatePointInTimeFinderDependencies} - dependencies for the create PIT fimder operation
+   * @returns the created PIT finder
    */
   createPointInTimeFinder<T = unknown, A = unknown>(
     findOptions: SavedObjectsCreatePointInTimeFinderOptions,
@@ -334,8 +378,9 @@ export interface SavedObjectsClientContract {
   /**
    * Gets all references and transitive references of the listed objects. Ignores any object that is not a multi-namespace type.
    *
-   * @param objects
-   * @param options
+   * @param objects - array of objects to collect references for (contains ID and type)
+   * @param options {@link SavedObjectsCollectMultiNamespaceReferencesOptions} - options for the collect multi namespace references operation
+   * @returns the {@link SavedObjectsCollectMultiNamespaceReferencesResponse}
    */
   collectMultiNamespaceReferences(
     objects: SavedObjectsCollectMultiNamespaceReferencesObject[],
@@ -345,10 +390,11 @@ export interface SavedObjectsClientContract {
   /**
    * Updates one or more objects to add and/or remove them from specified spaces.
    *
-   * @param objects
-   * @param spacesToAdd
-   * @param spacesToRemove
-   * @param options
+   * @param objects - array of objects to update (contains ID, type, and optional internal-only parameters)
+   * @param spacesToAdd - array of spaces each object should be included in
+   * @param spacesToRemove - array of spaces each object should not be included in
+   * @param options {@link SavedObjectsUpdateObjectsSpacesOptions} - options for the update spaces operation
+   * @returns the {@link SavedObjectsUpdateObjectsSpacesResponse}
    */
   updateObjectsSpaces(
     objects: SavedObjectsUpdateObjectsSpacesObject[],

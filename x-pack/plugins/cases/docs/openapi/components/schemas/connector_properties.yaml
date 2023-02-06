@@ -10,8 +10,9 @@ fields:
       description: The category of the incident for ServiceNow ITSM and ServiceNow SecOps connectors. 
       type: string
     destIp:
-      description: A comma-separated list of destination IPs for ServiceNow SecOps connectors.
-      type: string
+      description: Indicates whether cases will send a comma-separated list of destination IPs for ServiceNow SecOps connectors.
+      type: boolean
+      nullable: true
     impact:
       description: The effect an incident had on business for ServiceNow ITSM connectors.
       type: string
@@ -22,13 +23,15 @@ fields:
       description: The type of incident for IBM Resilient connectors.
       type: array
       items:
-        type: number
+        type: string
     malwareHash:
-      description: A comma-separated list of malware hashes for ServiceNow SecOps connectors. 
-      type: string
+      description: Indicates whether cases will send a comma-separated list of malware hashes for ServiceNow SecOps connectors. 
+      type: boolean
+      nullable: true
     malwareUrl:
-      description: A comma-separated list of malware URLs for ServiceNow SecOps connectors. 
-      type: string
+      description: Indicates whether cases will send a comma-separated list of malware URLs for ServiceNow SecOps connectors. 
+      type: boolean
+      nullable: true
     parent:
       description: The key of the parent issue, when the issue type is sub-task for Jira connectors.
       type: string
@@ -40,10 +43,11 @@ fields:
       type: string
     severityCode:
       description: The severity code of the incident for IBM Resilient connectors.
-      type: number
-    sourceIp:
-      description: A comma-separated list of source IPs for ServiceNow SecOps connectors.
       type: string
+    sourceIp:
+      description: Indicates whether cases will send a comma-separated list of source IPs for ServiceNow SecOps connectors.
+      type: boolean
+      nullable: true
     subcategory:
       description: The subcategory of the incident for ServiceNow ITSM connectors.
       type: string

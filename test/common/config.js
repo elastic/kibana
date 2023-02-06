@@ -50,15 +50,11 @@ export default function () {
         '--telemetry.sendUsageTo=staging',
         `--server.maxPayload=1679958`,
         // newsfeed mock service
-        `--plugin-path=${path.join(__dirname, 'fixtures', 'plugins', 'newsfeed')}`,
+        `--plugin-path=${path.join(__dirname, 'plugins', 'newsfeed')}`,
         // otel mock service
-        `--plugin-path=${path.join(__dirname, 'fixtures', 'plugins', 'otel_metrics')}`,
+        `--plugin-path=${path.join(__dirname, 'plugins', 'otel_metrics')}`,
         `--newsfeed.service.urlRoot=${servers.kibana.protocol}://${servers.kibana.hostname}:${servers.kibana.port}`,
         `--newsfeed.service.pathTemplate=/api/_newsfeed-FTS-external-service-simulators/kibana/v{VERSION}.json`,
-        // code coverage reporting plugin
-        ...(!!process.env.CODE_COVERAGE
-          ? [`--plugin-path=${path.join(__dirname, 'fixtures', 'plugins', 'coverage')}`]
-          : []),
         `--logging.appenders.deprecation=${JSON.stringify({
           type: 'console',
           layout: {

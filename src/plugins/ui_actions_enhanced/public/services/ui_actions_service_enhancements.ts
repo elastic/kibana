@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { createElement } from 'react';
 import { SerializableRecord } from '@kbn/utility-types';
 import { ILicense } from '@kbn/licensing-plugin/common/types';
 import { LicensingPluginSetup, LicensingPluginStart } from '@kbn/licensing-plugin/public';
@@ -67,7 +68,7 @@ export class UiActionsServiceEnhancements
       actionFactory.id,
       actionFactory as unknown as ActionFactory<
         SerializableRecord,
-        ExecutionContext,
+        object,
         BaseActionFactoryContext
       >
     );
@@ -110,6 +111,7 @@ export class UiActionsServiceEnhancements
     createConfig,
     isConfigValid,
     getDisplayName,
+    actionMenuItem,
     euiIcon,
     execute,
     getHref,
@@ -143,6 +145,9 @@ export class UiActionsServiceEnhancements
         type: factoryId,
         getIconType: () => euiIcon,
         getDisplayName: () => serializedAction.name,
+        MenuItem: actionMenuItem
+          ? ({ context }) => createElement(actionMenuItem, { context, config: serializedAction })
+          : undefined,
         execute: async (context) => await execute(serializedAction.config, context),
         getHref: getHref ? async (context) => getHref(serializedAction.config, context) : undefined,
         isCompatible: isCompatible

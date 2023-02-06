@@ -29,5 +29,6 @@ if [ -d .beats ]; then
   cd .beats
   buildkite-agent artifact upload 'metricbeat-*'
   buildkite-agent artifact upload 'filebeat-*'
+  buildkite-agent artifact upload 'beats_manifest.json'
   cd -
 fi

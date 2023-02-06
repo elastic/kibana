@@ -113,12 +113,14 @@ const createActions = (testBed: TestBed<TestSubjects>) => {
   const addField = async (name: string, type: string, subType?: string) => {
     await act(async () => {
       form.setInputValue('nameParameterInput', name);
+      jest.advanceTimersByTime(0); // advance timers to allow the form to validate
       find('createFieldForm.fieldType').simulate('change', [
         {
           label: type,
           value: type,
         },
       ]);
+      jest.advanceTimersByTime(0); // advance timers to allow the form to validate
     });
 
     component.update();
@@ -127,11 +129,13 @@ const createActions = (testBed: TestBed<TestSubjects>) => {
       await act(async () => {
         // subType is a text input
         form.setInputValue('createFieldForm.fieldSubType', subType);
+        jest.advanceTimersByTime(0); // advance timers to allow the form to validate
       });
     }
 
     await act(async () => {
       find('createFieldForm.addButton').simulate('click');
+      jest.advanceTimersByTime(0); // advance timers to allow the form to validate
     });
 
     component.update();
@@ -141,6 +145,7 @@ const createActions = (testBed: TestBed<TestSubjects>) => {
     const { testSubject } = getFieldAt(path);
     await act(async () => {
       find(`${testSubject}.editFieldButton` as TestSubjects).simulate('click');
+      jest.advanceTimersByTime(0); // advance timers to allow the form to validate
     });
     component.update();
   };
@@ -148,6 +153,7 @@ const createActions = (testBed: TestBed<TestSubjects>) => {
   const updateFieldAndCloseFlyout = async () => {
     await act(async () => {
       find('mappingsEditorFieldEdit.editFieldUpdateButton').simulate('click');
+      jest.advanceTimersByTime(0); // advance timers to allow the form to validate
     });
     component.update();
   };
@@ -187,7 +193,9 @@ const createActions = (testBed: TestBed<TestSubjects>) => {
 
     await act(async () => {
       form.setInputValue('runtimeFieldEditor.nameField.input', field.name);
+      jest.advanceTimersByTime(0); // advance timers to allow the form to validate
       form.setInputValue('runtimeFieldEditor.scriptField', field.script.source);
+      jest.advanceTimersByTime(0); // advance timers to allow the form to validate
       find('typeField').simulate('change', [
         {
           label: valueToLabelMap[field.type],
@@ -219,6 +227,7 @@ const createActions = (testBed: TestBed<TestSubjects>) => {
 
     await act(async () => {
       find('runtimeFieldEditor.saveFieldButton').simulate('click');
+      jest.advanceTimersByTime(0); // advance timers to allow the form to validate
     });
     component.update();
   };
@@ -269,12 +278,14 @@ const createActions = (testBed: TestBed<TestSubjects>) => {
 
     await act(async () => {
       tabElement.simulate('click');
+      jest.advanceTimersByTime(0); // advance timers to allow the form to validate
     });
     component.update();
   };
 
   const updateJsonEditor = (testSubject: TestSubjects, value: object) => {
     find(testSubject).simulate('change', { jsonString: JSON.stringify(value) });
+    jest.advanceTimersByTime(0); // advance timers to allow the form to validate
   };
 
   const getJsonEditorValue = (testSubject: TestSubjects) => {
@@ -367,7 +378,9 @@ export const getMappingsEditorDataFactory = (onChangeHandler: jest.MockedFunctio
 
     if (isMappingsValid === undefined) {
       await act(async () => {
-        isMappingsValid = await validate();
+        const validatePromise = validate();
+        jest.advanceTimersByTime(0); // advance timers to allow the form to validate
+        isMappingsValid = await validatePromise;
       });
       component.update();
     }

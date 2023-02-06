@@ -10,7 +10,7 @@ import React, { useRef, useState, useEffect, useCallback } from 'react';
 import { useResizeObserver } from '@elastic/eui';
 import { IInterpreterRenderHandlers } from '@kbn/expressions-plugin/common';
 import { css, CSSObject } from '@emotion/react';
-import { isValidUrl } from '@kbn/presentation-util-plugin/public';
+import { isValidUrl } from '@kbn/presentation-util-plugin/common';
 import { NodeDimensions, RevealImageRendererConfig, OriginString } from '../../common/types';
 
 const revealImageParentStyle = css`
@@ -46,7 +46,7 @@ interface AlignerStyles {
   backgroundImage?: string;
 }
 
-function RevealImageComponent({
+export function RevealImageComponent({
   onLoaded,
   parentNode,
   percent,
@@ -152,7 +152,3 @@ function RevealImageComponent({
     </div>
   );
 }
-
-// default export required for React.Lazy
-// eslint-disable-next-line import/no-default-export
-export { RevealImageComponent as default };

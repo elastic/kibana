@@ -8,9 +8,9 @@
 import { useLayoutEffect, ReactNode } from 'react';
 
 interface RenderCounterProps {
-  initialRender: Function;
   postponeExecution?: boolean;
   children?: ReactNode;
+  initialRender: Function | undefined;
 }
 
 /** HOC component to call "initialRender" method after finishing all DOM mutations. **/
@@ -21,7 +21,7 @@ export const RenderCounter = ({
 }: RenderCounterProps) => {
   useLayoutEffect(() => {
     if (!postponeExecution) {
-      initialRender();
+      initialRender?.();
     }
   }, [initialRender, postponeExecution]);
 

@@ -39,7 +39,7 @@ jest.mock('./color_ranges/color_ranges_validation', () => {
 
   return {
     ...original,
-    isAllColorRangesValid: () => true,
+    allRangesValid: () => true,
   };
 });
 
@@ -61,7 +61,7 @@ describe('palette panel', () => {
         dataBounds: { min: 0, max: 100 },
       };
 
-      jest.useFakeTimers();
+      jest.useFakeTimers({ legacyFakeTimers: true });
     });
 
     function changePaletteIn(instance: ReactWrapper, newPaletteName: string) {

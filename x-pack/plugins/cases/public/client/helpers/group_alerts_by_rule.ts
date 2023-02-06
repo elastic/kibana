@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import { CommentRequestAlertType } from '../../../common/api';
-import { CommentType, Ecs } from '../../../common';
+import type { CommentRequestAlertType } from '../../../common/api';
+import type { Ecs } from '../../../common';
+import { CommentType } from '../../../common';
 import { getRuleIdFromEvent } from './get_rule_id_from_event';
-import { CaseAttachmentsWithoutOwner } from '../../types';
+import type { CaseAttachmentsWithoutOwner } from '../../types';
 
 type Maybe<T> = T | null;
 interface Event {

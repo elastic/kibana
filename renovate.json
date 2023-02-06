@@ -25,9 +25,9 @@
     {
       "groupName": "@elastic/charts",
       "matchPackageNames": ["@elastic/charts"],
-      "reviewers": ["team:datavis", "markov00", "nickofthyme"],
+      "reviewers": ["team:visualizations", "markov00", "nickofthyme"],
       "matchBaseBranches": ["main"],
-      "labels": ["release_note:skip", "auto-backport", "Team:DataVis"],
+      "labels": ["release_note:skip", "backport:skip", "Team:Visualizations"],
       "draftPR": true,
       "enabled": true,
       "assignAutomerge": true,
@@ -97,9 +97,9 @@
     {
       "groupName": "vega related modules",
       "matchPackageNames": ["vega", "vega-lite", "vega-schema-url-parser", "vega-tooltip"],
-      "reviewers": ["team:kibana-vis-editors"],
+      "reviewers": ["team:kibana-visualizations"],
       "matchBaseBranches": ["main"],
-      "labels": ["Feature:Vega", "Team:VisEditors"],
+      "labels": ["Feature:Vega", "Team:Visualizations"],
       "enabled": true
     },
     {
@@ -125,7 +125,7 @@
       ],
       "reviewers": ["team:kibana-security"],
       "matchBaseBranches": ["main"],
-      "labels": ["Team:Security", "release_note:skip", "auto-backport"],
+      "labels": ["Team:Security", "release_note:skip", "backport:all-open"],
       "enabled": true
     },
     {
@@ -144,6 +144,16 @@
       "enabled": true
     },
     {
+      "groupName": "scss",
+      "packageNames": [
+        "node-sass"
+      ],
+      "reviewers": ["team:kibana-operations"],
+      "matchBaseBranches": ["main"],
+      "labels": ["Team:Operations", "release_note:skip", "backport:all-open"],
+      "enabled": true
+    },
+    {
       "groupName": "@testing-library",
       "packageNames": [
         "@testing-library/dom",
@@ -152,6 +162,29 @@
         "@testing-library/react-hooks",
         "@testing-library/user-event",
         "@types/testing-library__jest-dom"
+      ],
+      "reviewers": ["team:kibana-operations"],
+      "matchBaseBranches": ["main"],
+      "labels": ["Team:Operations", "release_note:skip"],
+      "enabled": true
+    },
+    {
+      "groupName": "jest",
+      "packageNames": [
+        "@jest/console",
+        "@jest/reporters",
+        "@jest/types",
+        "babel-jest",
+        "expect",
+        "jest",
+        "jest-cli",
+        "jest-config",
+        "jest-diff",
+        "jest-environment-jsdom",
+        "jest-matcher-utils",
+        "jest-mock",
+        "jest-runtime",
+        "jest-snapshot"
       ],
       "reviewers": ["team:kibana-operations"],
       "matchBaseBranches": ["main"],
@@ -207,6 +240,54 @@
       "matchBaseBranches": ["main"],
       "labels": ["release_note:skip", "backport:skip", "ci:all-cypress-suites"],
       "enabled": true
+    },
+    {
+      "groupName": "Profiling",
+      "matchPackageNames": ["peggy", "@types/dagre"],
+      "reviewers": ["team:profiling-ui"],
+      "matchBaseBranches": ["main"],
+      "labels": ["release_note:skip", "backport:skip"],
+      "enabled": true,
+      "prCreation": "immediate"
+    },
+    {
+      "groupName": "TTY Output",
+      "matchPackageNames": ["xterm", "byte-size", "@types/byte-size"],
+      "reviewers": ["team:awp-viz"],
+      "matchBaseBranches": ["main"],
+      "labels": ["Team: AWP: Visualization", "release_note:skip", "backport:skip"],
+      "enabled": true,
+      "prCreation": "immediate"
+    },
+    {
+      "groupName": "Cloud Defend",
+      "matchPackageNames": ["monaco-yaml"],
+      "reviewers": ["team:sec-cloudnative-integrations"],
+      "matchBaseBranches": ["main"],
+      "labels": ["Team: Cloud Native Integrations", "release_note:skip", "backport:skip"],
+      "enabled": true,
+      "prCreation": "immediate"
+    },
+    {
+      "groupName": "JSON Web Token",
+      "matchPackageNames": ["jsonwebtoken"],
+      "reviewers": [
+        "team:response-ops",
+        "team:kibana-core"
+      ],
+      "matchBaseBranches": ["main"],
+      "labels": ["release_note:skip", "backport:all-open"],
+      "enabled": true
+    },
+    {
+      "groupName": "XState",
+      "matchPackageNames": ["xstate"],
+      "matchPackagePrefixes": ["@xstate/"],
+      "reviewers": ["team:infra-monitoring-ui"],
+      "matchBaseBranches": ["main"],
+      "labels": ["Team:Infra Monitoring UI", "release_note:skip"],
+      "enabled": true,
+      "prCreation": "immediate"
     }
   ]
 }

@@ -9,9 +9,11 @@ import React, { useEffect, useState } from 'react';
 import { EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { QueryStringInput } from '@kbn/unified-search-plugin/public';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { isValidKuery } from '../../query_bar/query_bar';
 import * as labels from '../translations';
 import { useUptimeDataView } from '../../../../hooks';
+import { ClientPluginsStart } from '../../../../../plugin';
 
 interface Props {
   query: string;
@@ -20,6 +22,20 @@ interface Props {
 
 export const AlertQueryBar = ({ query = '', onChange }: Props) => {
   const dataView = useUptimeDataView();
+  const { services } = useKibana<ClientPluginsStart>();
+
+  const {
+    appName,
+    notifications,
+    http,
+    docLinks,
+    uiSettings,
+    data,
+    dataViews,
+    unifiedSearch,
+    storage,
+    usageCollection,
+  } = services;
 
   const [inputVal, setInputVal] = useState<string>(query);
 
@@ -53,6 +69,18 @@ export const AlertQueryBar = ({ query = '', onChange }: Props) => {
         placeholder={i18n.translate('xpack.synthetics.alerts.searchPlaceholder.kql', {
           defaultMessage: 'Filter using kql syntax',
         })}
+        appName={appName}
+        deps={{
+          unifiedSearch,
+          data,
+          dataViews,
+          storage,
+          notifications,
+          http,
+          docLinks,
+          uiSettings,
+          usageCollection,
+        }}
       />
     </EuiFlexItem>
   );

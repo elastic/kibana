@@ -24,13 +24,15 @@
      "embeddable",
      "esUiShared",
      "lens",
+     "licensing",
      "features",
      "kibanaReact",
      "kibanaUtils",
      "triggersActionsUi",
      "management",
      "spaces",
-     "security"
+     "security",
+     "notifications"
   ],
   "requiredBundles": [
     "savedObjects"

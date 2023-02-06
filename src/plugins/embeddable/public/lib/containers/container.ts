@@ -6,10 +6,20 @@
  * Side Public License, v 1.
  */
 
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import { isEqual, xor } from 'lodash';
-import { merge, Subscription } from 'rxjs';
-import { combineLatestWith, mergeMap, pairwise, take } from 'rxjs/operators';
+import { EMPTY, merge, Subscription } from 'rxjs';
+import {
+  catchError,
+  combineLatestWith,
+  distinctUntilChanged,
+  map,
+  mergeMap,
+  pairwise,
+  switchMap,
+  take,
+} from 'rxjs/operators';
+import deepEqual from 'fast-deep-equal';
 
 import {
   Embeddable,
@@ -47,13 +57,14 @@ export abstract class Container<
   } = {};
 
   private subscription: Subscription | undefined;
+  private readonly anyChildOutputChange$;
 
   constructor(
     input: TContainerInput,
     output: TContainerOutput,
     protected readonly getFactory: EmbeddableStart['getEmbeddableFactory'],
     parent?: IContainer,
-    settings?: EmbeddableContainerSettings
+    settings?: EmbeddableContainerSettings<TContainerInput>
   ) {
     super(input, output, parent);
     this.getFactory = getFactory; // Currently required for using in storybook due to https://github.com/storybookjs/storybook/issues/13834
@@ -63,11 +74,14 @@ export abstract class Container<
       settings?.initializeSequentially || settings?.childIdInitializeOrder
     );
 
-    // initialize all children on the first input change.
-    const init$ = this.getInput$().pipe(
+    const initSource = settings?.readyToInitializeChildren$
+      ? settings?.readyToInitializeChildren$
+      : this.getInput$();
+
+    const init$ = initSource.pipe(
       take(1),
-      mergeMap(async () => {
-        const initPromise = this.initializeChildEmbeddables(input, settings);
+      mergeMap(async (currentInput) => {
+        const initPromise = this.initializeChildEmbeddables(currentInput, settings);
         if (awaitingInitialize) await initPromise;
       })
     );
@@ -82,6 +96,26 @@ export abstract class Container<
       .subscribe(([_, [{ panels: prevPanels }, { panels: currentPanels }]]) => {
         this.maybeUpdateChildren(currentPanels, prevPanels);
       });
+
+    this.anyChildOutputChange$ = this.getOutput$().pipe(
+      map(() => this.getChildIds()),
+      distinctUntilChanged(deepEqual),
+
+      // children may change, so make sure we subscribe/unsubscribe with switchMap
+      switchMap((newChildIds: string[]) =>
+        merge(
+          ...newChildIds.map((childId) =>
+            this.getChild(childId)
+              .getOutput$()
+              .pipe(
+                // Embeddables often throw errors into their output streams.
+                catchError(() => EMPTY),
+                map(() => childId)
+              )
+          )
+        )
+      )
+    );
   }
 
   public setChildLoaded(embeddable: IEmbeddable) {
@@ -231,6 +265,10 @@ export abstract class Container<
     } as unknown as TEmbeddableInput;
   }
 
+  public getAnyChildOutputChange$() {
+    return this.anyChildOutputChange$;
+  }
+
   public destroy() {
     super.destroy();
     Object.values(this.children).forEach((child) => child.destroy());
@@ -298,7 +336,7 @@ export abstract class Container<
     factory: EmbeddableFactory<TEmbeddableInput, any, TEmbeddable>,
     partial: Partial<TEmbeddableInput> = {}
   ): PanelState<TEmbeddableInput> {
-    const embeddableId = partial.id || uuid.v4();
+    const embeddableId = partial.id || uuidv4();
 
     const explicitInput = this.createNewExplicitEmbeddableInput<TEmbeddableInput>(
       embeddableId,
@@ -334,7 +372,7 @@ export abstract class Container<
 
   private async initializeChildEmbeddables(
     initialInput: TContainerInput,
-    initializeSettings?: EmbeddableContainerSettings
+    initializeSettings?: EmbeddableContainerSettings<TContainerInput>
   ) {
     let initializeOrder = Object.keys(initialInput.panels);
 
@@ -363,7 +401,7 @@ export abstract class Container<
     }
   }
 
-  private async createAndSaveEmbeddable<
+  protected async createAndSaveEmbeddable<
     TEmbeddableInput extends EmbeddableInput = EmbeddableInput,
     TEmbeddable extends IEmbeddable<TEmbeddableInput> = IEmbeddable<TEmbeddableInput>
   >(type: string, panelState: PanelState) {

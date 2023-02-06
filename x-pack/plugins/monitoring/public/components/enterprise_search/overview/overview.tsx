@@ -9,7 +9,7 @@ import React from 'react';
 import {
   EuiPage,
   EuiPageBody,
-  EuiPageContent,
+  EuiPageContent_Deprecated as EuiPageContent,
   EuiScreenReaderOnly,
   EuiPanel,
   EuiSpacer,
@@ -17,7 +17,6 @@ import {
   EuiFlexItem,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-// @ts-ignore
 import { MonitoringTimeseriesContainer } from '../../chart';
 import { Status } from './status';
 

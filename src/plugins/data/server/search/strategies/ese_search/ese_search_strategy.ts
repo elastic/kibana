@@ -33,9 +33,11 @@ import {
   getTotalLoaded,
   shimHitsTotal,
 } from '../es_search';
+import { SearchConfigSchema } from '../../../../config';
 
 export const enhancedEsSearchStrategyProvider = (
   legacyConfig$: Observable<SharedGlobalConfig>,
+  searchConfig: SearchConfigSchema,
   logger: Logger,
   usage?: SearchUsage,
   useInternalUser: boolean = false
@@ -52,38 +54,31 @@ export const enhancedEsSearchStrategyProvider = (
   function asyncSearch(
     { id, ...request }: IEsSearchRequest,
     options: IAsyncSearchOptions,
-    { esClient, uiSettingsClient, searchSessionsClient }: SearchStrategyDependencies
+    { esClient, uiSettingsClient }: SearchStrategyDependencies
   ) {
     const client = useInternalUser ? esClient.asInternalUser : esClient.asCurrentUser;
 
     const search = async () => {
       const params = id
-        ? getDefaultAsyncGetParams(searchSessionsClient.getConfig(), options)
+        ? getDefaultAsyncGetParams(searchConfig, options)
         : {
-            ...(await getDefaultAsyncSubmitParams(
-              uiSettingsClient,
-              searchSessionsClient.getConfig(),
-              options
-            )),
+            ...(await getDefaultAsyncSubmitParams(uiSettingsClient, searchConfig, options)),
             ...request.params,
           };
       const { body, headers } = id
         ? await client.asyncSearch.get(
             { ...params, id },
-            { signal: options.abortSignal, meta: true }
+            { ...options.transport, signal: options.abortSignal, meta: true }
           )
         : await client.asyncSearch.submit(params, {
+            ...options.transport,
             signal: options.abortSignal,
             meta: true,
           });
 
       const response = shimHitsTotal(body.response, options);
 
-      return toAsyncKibanaSearchResponse(
-        // @ts-expect-error @elastic/elasticsearch start_time_in_millis expected to be number
-        { ...body, response },
-        headers?.warning
-      );
+      return toAsyncKibanaSearchResponse({ ...body, response }, headers?.warning);
     };
 
     const cancel = async () => {
@@ -92,7 +87,10 @@ export const enhancedEsSearchStrategyProvider = (
       }
     };
 
-    return pollSearch(search, cancel, options).pipe(
+    return pollSearch(search, cancel, {
+      pollInterval: searchConfig.asyncSearch.pollInterval,
+      ...options,
+    }).pipe(
       tap((response) => (id = response.id)),
       tap(searchUsageObserver(logger, usage)),
       catchError((e) => {

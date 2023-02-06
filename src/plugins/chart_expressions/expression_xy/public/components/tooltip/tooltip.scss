@@ -6,12 +6,14 @@
   padding: $euiSizeS;
 
   table {
+    table-layout: fixed;
+    width: 100%;
+
     td,
     th {
       text-align: left;
       padding: $euiSizeXS;
       overflow-wrap: break-word;
-      word-wrap: break-word;
     }
   }
 }
@@ -22,10 +24,13 @@
   }
 }
 
+.detailedTooltip__labelContainer {
+  max-width: $euiSizeXL * 5;
+}
+
 .detailedTooltip__labelContainer,
 .detailedTooltip__valueContainer {
   overflow-wrap: break-word;
-  word-wrap: break-word;
 }
 
 .detailedTooltip__label {

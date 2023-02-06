@@ -8,22 +8,20 @@
 import { rangeQuery } from '@kbn/observability-plugin/server';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { maybe } from '../../../common/utils/maybe';
-import { SPAN_DESTINATION_SERVICE_RESOURCE } from '../../../common/elasticsearch_fieldnames';
-import { Setup } from '../../lib/helpers/setup_request';
+import { SPAN_DESTINATION_SERVICE_RESOURCE } from '../../../common/es_fields/apm';
+import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
 
 export async function getMetadataForDependency({
-  setup,
+  apmEventClient,
   dependencyName,
   start,
   end,
 }: {
-  setup: Setup;
+  apmEventClient: APMEventClient;
   dependencyName: string;
   start: number;
   end: number;
 }) {
-  const { apmEventClient } = setup;
-
   const sampleResponse = await apmEventClient.search(
     'get_metadata_for_dependency',
     {
@@ -31,6 +29,7 @@ export async function getMetadataForDependency({
         events: [ProcessorEvent.span],
       },
       body: {
+        track_total_hits: false,
         size: 1,
         query: {
           bool: {

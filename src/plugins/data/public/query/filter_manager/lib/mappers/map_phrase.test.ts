@@ -6,12 +6,13 @@
  * Side Public License, v 1.
  */
 
-import { mapPhrase } from './map_phrase';
+import { getPhraseDisplayValue, mapPhrase } from './map_phrase';
 import type { PhraseFilter, Filter } from '@kbn/es-query';
+import { FieldFormat } from '@kbn/field-formats-plugin/common';
 
 describe('filter manager utilities', () => {
   describe('mapPhrase()', () => {
-    test('should return the key and value for matching filters', async () => {
+    test('should return the key for matching filters', async () => {
       const filter = {
         meta: { index: 'logstash-*' },
         query: { match: { _type: { query: 'apache', type: 'phrase' } } },
@@ -19,16 +20,10 @@ describe('filter manager utilities', () => {
 
       const result = mapPhrase(filter);
 
-      expect(result).toHaveProperty('value');
       expect(result).toHaveProperty('key', '_type');
-
-      if (result.value) {
-        const displayName = result.value();
-        expect(displayName).toBe('apache');
-      }
     });
 
-    test('should return undefined for none matching', async (done) => {
+    test('should return undefined for none matching', async () => {
       const filter = {
         meta: { index: 'logstash-*' },
         query: { query_string: { query: 'foo:bar' } },
@@ -38,8 +33,34 @@ describe('filter manager utilities', () => {
         mapPhrase(filter);
       } catch (e) {
         expect(e).toBe(filter);
-        done();
       }
+    });
+  });
+
+  describe('getPhraseDisplayValue()', () => {
+    test('without formatter with value', () => {
+      const filter = { meta: { value: 'hello' } } as PhraseFilter;
+      const result = getPhraseDisplayValue(filter);
+      expect(result).toMatchInlineSnapshot(`"hello"`);
+    });
+
+    test('without formatter empty value', () => {
+      const filter = { meta: { value: '' } } as PhraseFilter;
+      const result = getPhraseDisplayValue(filter);
+      expect(result).toMatchInlineSnapshot(`""`);
+    });
+
+    test('without formatter with undefined value', () => {
+      const filter = { meta: { params: {} } } as PhraseFilter;
+      const result = getPhraseDisplayValue(filter);
+      expect(result).toMatchInlineSnapshot(`""`);
+    });
+
+    test('with formatter', () => {
+      const filter = { meta: { value: 'hello' } } as PhraseFilter;
+      const formatter = { convert: (val) => `formatted ${val}` } as FieldFormat;
+      const result = getPhraseDisplayValue(filter, formatter);
+      expect(result).toMatchInlineSnapshot(`"formatted hello"`);
     });
   });
 });

@@ -49,7 +49,7 @@ const DeleteConfirm = (props: DeleteButtonProps & { onActionDismiss: OnActionDis
       onCancel={onActionDismiss}
       onConfirm={async () => {
         setIsLoading(true);
-        await api.sendCancel(id);
+        await api.sendDelete(id);
         onActionDismiss();
       }}
       confirmButtonText={confirm}

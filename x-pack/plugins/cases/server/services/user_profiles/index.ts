@@ -10,26 +10,30 @@ import { pipe } from 'fp-ts/lib/pipeable';
 import { fold } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
 
-import { KibanaRequest, Logger } from '@kbn/core/server';
-import { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/server';
+import type { KibanaRequest, Logger } from '@kbn/core/server';
+import type { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/server';
 import type { UserProfile } from '@kbn/security-plugin/common';
-import { SpacesPluginStart } from '@kbn/spaces-plugin/server';
+import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 
+import type { LicensingPluginStart } from '@kbn/licensing-plugin/server';
 import { excess, SuggestUserProfilesRequestRt, throwErrors } from '../../../common/api';
 import { Operations } from '../../authorization';
 import { createCaseError } from '../../common/error';
+import { LicensingService } from '../licensing';
+import { LICENSING_CASE_ASSIGNMENT_FEATURE } from '../../common/constants';
 
-const MAX_SUGGESTION_SIZE = 100;
-const MIN_SUGGESTION_SIZE = 0;
+const MAX_PROFILES_SIZE = 100;
+const MIN_PROFILES_SIZE = 0;
 
 interface UserProfileOptions {
-  securityPluginSetup?: SecurityPluginSetup;
-  securityPluginStart?: SecurityPluginStart;
+  securityPluginSetup: SecurityPluginSetup;
+  securityPluginStart: SecurityPluginStart;
   spaces: SpacesPluginStart;
+  licensingPluginStart: LicensingPluginStart;
 }
 
 export class UserProfileService {
-  private options?: UserProfileOptions;
+  protected options?: UserProfileOptions;
 
   constructor(private readonly logger: Logger) {}
 
@@ -41,6 +45,32 @@ export class UserProfileService {
     this.options = options;
   }
 
+  private static suggestUsers({
+    securityPluginStart,
+    spaceId,
+    searchTerm,
+    size,
+    owners,
+  }: {
+    securityPluginStart: SecurityPluginStart;
+    spaceId: string;
+    searchTerm: string;
+    size?: number;
+    owners: string[];
+  }) {
+    return securityPluginStart.userProfiles.suggest({
+      name: searchTerm,
+      size,
+      dataPath: 'avatar',
+      requiredPrivileges: {
+        spaceId,
+        privileges: {
+          kibana: UserProfileService.buildRequiredPrivileges(owners, securityPluginStart),
+        },
+      },
+    });
+  }
+
   public async suggest(request: KibanaRequest): Promise<UserProfile[]> {
     const params = pipe(
       excess(SuggestUserProfilesRequestRt).decode(request.body),
@@ -50,40 +80,37 @@ export class UserProfileService {
     const { name, size, owners } = params;
 
     try {
-      if (this.options === undefined) {
-        throw new Error('UserProfileService must be initialized before calling suggest');
+      this.validateInitialization();
+
+      const licensingService = new LicensingService(
+        this.options.licensingPluginStart.license$,
+        this.options.licensingPluginStart.featureUsage.notifyUsage
+      );
+
+      const hasPlatinumLicenseOrGreater = await licensingService.isAtLeastPlatinum();
+
+      if (!hasPlatinumLicenseOrGreater) {
+        throw Boom.forbidden(
+          'In order to retrieve suggested user profiles, you must be subscribed to an Elastic Platinum license'
+        );
       }
+
+      licensingService.notifyUsage(LICENSING_CASE_ASSIGNMENT_FEATURE);
 
       const { spaces } = this.options;
 
-      const securityPluginFields = {
-        securityPluginSetup: this.options.securityPluginSetup,
-        securityPluginStart: this.options.securityPluginStart,
-      };
+      UserProfileService.validateSizeParam(size);
 
-      /**
-       * The limit of 100 helps prevent DDoS attacks and is also enforced by the security plugin.
-       */
-      if (size !== undefined && (size > MAX_SUGGESTION_SIZE || size < MIN_SUGGESTION_SIZE)) {
-        throw Boom.badRequest('size must be between 0 and 100');
-      }
-
-      if (!UserProfileService.isSecurityEnabled(securityPluginFields)) {
+      if (!this.isSecurityEnabled() || owners.length <= 0) {
         return [];
       }
 
-      const { securityPluginStart } = securityPluginFields;
-
-      return securityPluginStart.userProfiles.suggest({
-        name,
+      return UserProfileService.suggestUsers({
+        searchTerm: name,
         size,
-        dataPath: 'avatar',
-        requiredPrivileges: {
-          spaceId: spaces.spacesService.getSpaceId(request),
-          privileges: {
-            kibana: UserProfileService.buildRequiredPrivileges(owners, securityPluginStart),
-          },
-        },
+        owners,
+        securityPluginStart: this.options.securityPluginStart,
+        spaceId: spaces.spacesService.getSpaceId(request),
       });
     } catch (error) {
       throw createCaseError({
@@ -94,20 +121,25 @@ export class UserProfileService {
     }
   }
 
-  private static isSecurityEnabled(fields: {
-    securityPluginSetup?: SecurityPluginSetup;
-    securityPluginStart?: SecurityPluginStart;
-  }): fields is {
-    securityPluginSetup: SecurityPluginSetup;
-    securityPluginStart: SecurityPluginStart;
-  } {
-    const { securityPluginSetup, securityPluginStart } = fields;
+  private validateInitialization(): asserts this is this & { options: UserProfileOptions } {
+    if (this.options == null) {
+      throw new Error('UserProfileService must be initialized before calling suggest');
+    }
+  }
 
-    return (
-      securityPluginStart !== undefined &&
-      securityPluginSetup !== undefined &&
-      securityPluginSetup.license.isEnabled()
-    );
+  private static validateSizeParam(size?: number) {
+    /**
+     * The limit of 100 helps prevent DDoS attacks and is also enforced by the security plugin.
+     */
+    if (size !== undefined && (size > MAX_PROFILES_SIZE || size < MIN_PROFILES_SIZE)) {
+      throw Boom.badRequest('size must be between 0 and 100');
+    }
+  }
+
+  private isSecurityEnabled() {
+    this.validateInitialization();
+
+    return this.options.securityPluginSetup.license.isEnabled();
   }
 
   /**

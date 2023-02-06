@@ -21,6 +21,10 @@ import { AnalyticsOverview } from './components/analytics_overview/analytics_ove
 import { Analytics } from '.';
 
 describe('EnterpriseSearchAnalytics', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
   it('always renders the overview', () => {
     const wrapper = shallow(<Analytics />);
 

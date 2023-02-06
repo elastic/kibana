@@ -13,6 +13,7 @@ import { LensState, LensStoreDeps } from './types';
 import { initMiddleware } from './init_middleware';
 import { optimizingMiddleware } from './optimizing_middleware';
 import { contextMiddleware } from './context_middleware';
+import { fullscreenMiddleware } from './fullscreen_middleware';
 export * from './types';
 export * from './selectors';
 
@@ -33,14 +34,17 @@ export const {
   rollbackSuggestion,
   submitSuggestion,
   switchDatasource,
+  switchAndCleanDatasource,
   updateIndexPatterns,
   setToggleFullscreen,
   initEmpty,
   editVisualizationAction,
   removeLayers,
   removeOrClearLayer,
+  cloneLayer,
   addLayer,
   setLayerDefaultDimension,
+  removeDimension,
 } = lensActions;
 
 export const makeConfigureStore = (
@@ -54,6 +58,7 @@ export const makeConfigureStore = (
     initMiddleware(storeDeps),
     optimizingMiddleware(),
     contextMiddleware(storeDeps),
+    fullscreenMiddleware(storeDeps),
   ];
   if (process.env.NODE_ENV === 'development') {
     middleware.push(

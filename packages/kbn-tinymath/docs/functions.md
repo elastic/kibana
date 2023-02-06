@@ -96,6 +96,143 @@ clamp(35, 10, [20, 30, 40, 50]) // returns [20, 30, 35, 35]
 clamp([1, 9], 3, [4, 5]) // returns [clamp([1, 3, 4]), clamp([9, 3, 5])] = [3, 5]
 ```
 ***
+## _eq(_ _a_,  _b_ _)_
+Performs an equality comparison between two values.
+
+
+| Param | Type | Description |
+| --- | --- | --- |
+| a | <code>number</code> \| <code>Array.&lt;number&gt;</code> | a number or an array of numbers |
+| b | <code>number</code> \| <code>Array.&lt;number&gt;</code> | a number or an array of numbers |
+
+**Returns**: <code>boolean</code> - Returns true if `a` and `b` are equal, false otherwise.  Returns an array with the equality comparison of each element if `a` is an array.  
+**Throws**:
+
+- `'Missing b value'` if `b` is not provided
+- `'Array length mismatch'` if `args` contains arrays of different lengths
+
+**Example**  
+```js
+eq(1, 1) // returns true
+eq(1, 2) // returns false
+eq([1, 2], 1) // returns [true, false]
+eq([1, 2], [1, 2]) // returns [true, true]
+```
+***
+## _gt(_ _a_,  _b_ _)_
+Performs a greater than comparison between two values.
+
+
+| Param | Type | Description |
+| --- | --- | --- |
+| a | <code>number</code> \| <code>Array.&lt;number&gt;</code> | a number or an array of numbers |
+| b | <code>number</code> \| <code>Array.&lt;number&gt;</code> | a number or an array of numbers |
+
+**Returns**: <code>boolean</code> - Returns true if `a` is greater than `b`, false otherwise.  Returns an array with the greater than comparison of each element if `a` is an array.  
+**Throws**:
+
+- `'Missing b value'` if `b` is not provided
+- `'Array length mismatch'` if `args` contains arrays of different lengths
+
+**Example**  
+```js
+gt(1, 1) // returns false
+gt(2, 1) // returns true
+gt([1, 2], 1) // returns [true, false]
+gt([1, 2], [2, 1]) // returns [false, true]
+```
+***
+## _gte(_ _a_,  _b_ _)_
+Performs a greater than or equal comparison between two values.
+
+
+| Param | Type | Description |
+| --- | --- | --- |
+| a | <code>number</code> \| <code>Array.&lt;number&gt;</code> | a number or an array of numbers |
+| b | <code>number</code> \| <code>Array.&lt;number&gt;</code> | a number or an array of numbers |
+
+**Returns**: <code>boolean</code> - Returns true if `a` is greater than or equal to `b`, false otherwise.  Returns an array with the greater than or equal comparison of each element if `a` is an array.  
+**Throws**:
+
+- `'Array length mismatch'` if `args` contains arrays of different lengths
+
+**Example**  
+```js
+gte(1, 1) // returns true
+gte(1, 2) // returns false
+gte([1, 2], 2) // returns [false, true]
+gte([1, 2], [1, 1]) // returns [true, true]
+```
+***
+## _ifelse(_ _cond_,  _a_,  _b_ _)_
+Evaluates the a conditional argument and returns one of the two values based on that.
+
+
+| Param | Type | Description |
+| --- | --- | --- |
+| cond | <code>boolean</code> | a boolean value |
+| a | <code>any</code> \| <code>Array.&lt;any&gt;</code> | a value or an array of any values |
+| b | <code>any</code> \| <code>Array.&lt;any&gt;</code> | a value or an array of any values |
+
+**Returns**: <code>any</code> \| <code>Array.&lt;any&gt;</code> - if the value of cond is truthy, return `a`, otherwise return `b`.  
+**Throws**:
+
+- `'Condition clause is of the wrong type'` if the `cond` provided is not of boolean type
+- `'Missing a value'` if `a` is not provided
+- `'Missing b value'` if `b` is not provided
+
+**Example**  
+```js
+ifelse(5 > 6, 1, 0) // returns 0
+ifelse(1 == 1, [1, 2, 3], 5) // returns [1, 2, 3]
+ifelse(1 < 2, [1, 2, 3], [2, 3, 4]) // returns [1, 2, 3]
+```
+***
+## _lt(_ _a_,  _b_ _)_
+Performs a lower than comparison between two values.
+
+
+| Param | Type | Description |
+| --- | --- | --- |
+| a | <code>number</code> \| <code>Array.&lt;number&gt;</code> | a number or an array of numbers |
+| b | <code>number</code> \| <code>Array.&lt;number&gt;</code> | a number or an array of numbers |
+
+**Returns**: <code>boolean</code> - Returns true if `a` is lower than `b`, false otherwise.  Returns an array with the lower than comparison of each element if `a` is an array.  
+**Throws**:
+
+- `'Missing b value'` if `b` is not provided
+- `'Array length mismatch'` if `args` contains arrays of different lengths
+
+**Example**  
+```js
+lt(1, 1) // returns false
+lt(1, 2) // returns true
+lt([1, 2], 2) // returns [true, false]
+lt([1, 2], [1, 2]) // returns [false, false]
+```
+***
+## _lte(_ _a_,  _b_ _)_
+Performs a lower than or equal comparison between two values.
+
+
+| Param | Type | Description |
+| --- | --- | --- |
+| a | <code>number</code> \| <code>Array.&lt;number&gt;</code> | a number or an array of numbers |
+| b | <code>number</code> \| <code>Array.&lt;number&gt;</code> | a number or an array of numbers |
+
+**Returns**: <code>boolean</code> - Returns true if `a` is lower than or equal to `b`, false otherwise.  Returns an array with the lower than or equal comparison of each element if `a` is an array.  
+**Throws**:
+
+- `'Array length mismatch'` if `args` contains arrays of different lengths
+
+**Example**  
+```js
+lte(1, 1) // returns true
+lte(1, 2) // returns true
+lte([1, 2], 2) // returns [true, true]
+lte([1, 2], [1, 1]) // returns [true, false]
+```
+***
 ## _cos(_ _a_ _)_
 Calculates the the cosine of a number. For arrays, the function will be applied index-wise to each element.
 

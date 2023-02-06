@@ -21,7 +21,7 @@ const SpacedContainer = styled.div`
   margin: ${({ theme }) => theme.eui.euiSizeS} 0;
 `;
 
-export const ThreatMatchRows: RowRenderer['renderRow'] = ({ data, isDraggable, timelineId }) => {
+export const ThreatMatchRows: RowRenderer['renderRow'] = ({ data, isDraggable, scopeId }) => {
   const indicators = get(data, ENRICHMENT_DESTINATION_PATH) as Fields[];
   const eventId = get(data, ID_FIELD_NAME);
 
@@ -29,7 +29,7 @@ export const ThreatMatchRows: RowRenderer['renderRow'] = ({ data, isDraggable, t
     <RowRendererContainer data-test-subj="threat-match-row-renderer">
       <SpacedContainer>
         {indicators.map((indicator, index) => {
-          const contextId = `threat-match-row-${timelineId}-${eventId}-${index}`;
+          const contextId = `threat-match-row-${scopeId}-${eventId}-${index}`;
           return (
             <Fragment key={contextId}>
               <ThreatMatchRow

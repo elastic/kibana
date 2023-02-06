@@ -1,10 +1,7 @@
 {
   "extends": "../../../tsconfig.base.json",
   "compilerOptions": {
-    "outDir": "./target/types",
-    "emitDeclarationOnly": true,
-    "declaration": true,
-    "declarationMap": true
+    "outDir": "target/types",
   },
   "include": [
     "../../../typings/**/*",
@@ -16,14 +13,31 @@
     "public/**/*.json",
     "server/**/*.json"
   ],
-  "references": [
-    { "path": "../../../src/core/tsconfig.json" },
-    { "path": "../../../src/plugins/management/tsconfig.json" },
-    { "path": "../../../src/plugins/usage_collection/tsconfig.json" },
-    { "path": "../features/tsconfig.json" },
-    { "path": "../licensing/tsconfig.json" },
-    { "path": "../../../src/plugins/es_ui_shared/tsconfig.json" },
-    { "path": "../infra/tsconfig.json" },
-    { "path": "../cloud/tsconfig.json" },
+  "kbn_references": [
+    "@kbn/core",
+    "@kbn/management-plugin",
+    "@kbn/usage-collection-plugin",
+    "@kbn/features-plugin",
+    "@kbn/licensing-plugin",
+    "@kbn/es-ui-shared-plugin",
+    "@kbn/infra-plugin",
+    "@kbn/cloud-plugin",
+    "@kbn/test-jest-helpers",
+    "@kbn/share-plugin",
+    "@kbn/data-plugin",
+    "@kbn/i18n",
+    "@kbn/kibana-utils-plugin",
+    "@kbn/kibana-react-plugin",
+    "@kbn/i18n-react",
+    "@kbn/analytics",
+    "@kbn/rison",
+    "@kbn/es-query",
+    "@kbn/config-schema",
+    "@kbn/security-plugin",
+    "@kbn/core-elasticsearch-client-server-mocks",
+    "@kbn/utility-types",
+  ],
+  "exclude": [
+    "target/**/*",
   ]
 }

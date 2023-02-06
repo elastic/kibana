@@ -37,6 +37,9 @@ Panels display your data in charts, tables, maps, and more, which allow you to c
 | <<add-text,Text>>
 | Add context to your panels with *Text*.
 
+| <<add-image,Image>>
+| Personalize your dashboard with a custom image.
+
 |===
 
 [float]
@@ -155,9 +158,9 @@ If you created the panel from the dashboard:
 
 .. In the panel header, click *No Title*.
 
-.. On the *Customize panel* window, select *Show panel title*.
+.. On the *Panel settings* window, select *Show title*.
 
-.. Enter the *Panel title*, then click *Save*.
+.. Enter the *Title*, then click *Save*.
 
 If you created the panel from the *Visualize Library*:
 
@@ -233,9 +236,30 @@ To save the panel to the dashboard:
 
 .. In the panel header, click *No Title*.
 
-.. On the *Customize panel* window, select *Show panel title*.
+.. On the *Panel settings* window, select *Show title*.
 
-.. Enter the *Panel title*, then click *Save*.
+.. Enter the *Title*, then click *Save*.
+
+[float]
+[[add-image]]
+== Add image panels
+
+To personalize your dashboards, add your own logos and graphics with the *Image* panel. You can upload images from your computer, select previously uploaded images, or add images from an external link.
+
+. On the dashboard, click image:images/dashboard_createNewImageButton_8.7.0.png[Create New Image button in dashboard toolbar].
+. Use the editor to add an image.
+
+[role="screenshot"]
+image::images/dashboard_addImageEditor_8.7.0.png[Add image editor]
+
+To manage your uploaded image files, open the main menu, then click *Stack Management > Kibana > Files*. 
+
+
+[WARNING]
+============================================================================
+When you export a dashboard, the uploaded image files are not exported. 
+When importing a dashboard with an image panel, and the image file is unavailable, the image panel displays a `not found` warning. Such panels have to be fixed manually by re-uploading the image using the panel's image editor.
+============================================================================
 
 [float]
 [[arrange-panels]]
@@ -269,7 +293,7 @@ To make changes to the panel, use the panel menu options.
 +
 To make changes without changing the original version, open the panel menu, then click *More > Unlink from library*.
 
-* *Edit panel title* &mdash; Opens the *Customize panel* window to change the *Panel title*.
+* *Edit panel settings* &mdash; Opens the *Panel settings* window to change the *title*, *description*, and *time range*.
 
 * *More > Replace panel* &mdash; Opens the *Visualize Library* so you can select a new panel to replace the existing panel.
 
@@ -317,9 +341,11 @@ For more information about {kib} and {es} filters, refer to <<kibana-concepts-an
 
 To apply a panel-level time filter:
 
-. Open the panel menu, then select *More > Customize time range*.
+. Open the panel menu, then select *More > Edit panel settings*.
 
-. Enter the time range you want to view, then click *Add to panel*.
+. Toggle the switch labelled *Apply a custom time range*.
+
+. Enter the time range you want to view, then click *Save*.
 
 [float]
 [[apply-design-options]]
@@ -336,6 +362,8 @@ Apply a set of design options to the entire dashboard.
 * *Show panel titles* &mdash; Displays the titles in the panels headers.
 
 * *Sync color pallettes across panels* &mdash; Applies the same color palette to all panels on the dashboard.
+
+* *Sync cursor across panels* &mdash; When you hover your cursor over a *Lens*, *TSVB*, aggregation-based, or *Timelion* XY chart and a heatmap chart, the cursor on all other related dashboard charts automatically appear.
 
 * *Sync tooltips across panels* &mdash; When you hover your cursor over a *Lens*, *TSVB*, aggregation-based, or *Timelion* XY chart, the tooltips on all other related dashboard charts automatically appear.
 

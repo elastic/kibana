@@ -16,11 +16,10 @@
  * degtorad([0, 90, 180, 360]) // returns [0, 1.5707963267948966, 3.141592653589793, 6.283185307179586]
  */
 
-module.exports = { degtorad };
-
 function degtorad(a) {
   if (Array.isArray(a)) {
     return a.map((a) => (a * Math.PI) / 180);
   }
   return (a * Math.PI) / 180;
 }
+module.exports = { degtorad };

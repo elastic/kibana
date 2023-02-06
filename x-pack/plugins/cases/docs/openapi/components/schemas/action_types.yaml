@@ -1,6 +1,7 @@
 type: string
 description: The type of action.
 enum:
+  - assignees
   - create_case
   - comment
   - connector

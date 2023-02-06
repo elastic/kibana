@@ -18,7 +18,7 @@ import { merge } from 'lodash';
 import { createMemoryHistory, History } from 'history';
 import { CoreStart } from '@kbn/core/public';
 import { I18nProvider } from '@kbn/i18n-react';
-import { EuiPageTemplate } from '@elastic/eui';
+import { EuiPageTemplate_Deprecated as EuiPageTemplate } from '@elastic/eui';
 import { coreMock } from '@kbn/core/public/mocks';
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { configure } from '@testing-library/dom';
@@ -95,6 +95,7 @@ const createMockStore = () => {
 
 const mockAppUrls: Record<string, string> = {
   uptime: '/app/uptime',
+  synthetics: '/app/synthetics',
   observability: '/app/observability',
   '/home#/tutorial/uptimeMonitors': '/home#/tutorial/uptimeMonitors',
 };
@@ -226,6 +227,10 @@ export function WrappedHelper<ExtraCore>({
 }: RenderRouterOptions<ExtraCore> & { children: ReactElement; useRealStore?: boolean }) {
   const testState: AppState = merge({}, mockState, state);
 
+  if (url) {
+    history = getHistoryFromUrl(url);
+  }
+
   return (
     <MountWithReduxProvider state={testState} useRealStore={useRealStore}>
       <MockRouter path={path} history={history} kibanaProps={kibanaProps} core={core}>
@@ -248,7 +253,7 @@ export function render<ExtraCore>(
     path,
     useRealStore,
   }: RenderRouterOptions<ExtraCore> & { useRealStore?: boolean } = {}
-) {
+): any {
   if (url) {
     history = getHistoryFromUrl(url);
   }
@@ -361,3 +366,26 @@ const wrappedInClass = (element: HTMLElement | Element, classWrapper: string): b
 
 export const forMobileOnly = finderWithClassWrapper('hideForDesktop');
 export const forDesktopOnly = finderWithClassWrapper('hideForMobile');
+
+export const makeUptimePermissionsCore = (
+  permissions: Partial<{
+    'alerting:save': boolean;
+    configureSettings: boolean;
+    save: boolean;
+    show: boolean;
+  }>
+) => {
+  return {
+    application: {
+      capabilities: {
+        uptime: {
+          'alerting:save': true,
+          configureSettings: true,
+          save: true,
+          show: true,
+          ...permissions,
+        },
+      },
+    },
+  };
+};

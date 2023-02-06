@@ -9,7 +9,7 @@ import expect from '@kbn/expect';
 import { DETECTION_ENGINE_RULES_URL } from '@kbn/security-solution-plugin/common/constants';
 import { ROLES } from '@kbn/security-solution-plugin/common/test';
 import { RuleExecutionStatus } from '@kbn/security-solution-plugin/common/detection_engine/rule_monitoring';
-import { ThresholdCreateSchema } from '@kbn/security-solution-plugin/common/detection_engine/schemas/request';
+import { ThresholdRuleCreateProps } from '@kbn/security-solution-plugin/common/detection_engine/rule_schema';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import {
   createSignalsIndex,
@@ -84,9 +84,15 @@ export default ({ getService }: FtrProviderContext) => {
 
           await deleteUserAndRole(getService, ROLES.detections_admin);
         });
+      });
 
+      const thresholdIndexTestCases = [
+        ['host_alias', 'auditbeat-8.0.0'],
+        ['host_alias*', 'auditbeat-*'],
+      ];
+      thresholdIndexTestCases.forEach((index) => {
         it(`for threshold rule with index param: ${index}`, async () => {
-          const rule: ThresholdCreateSchema = {
+          const rule: ThresholdRuleCreateProps = {
             ...getThresholdRuleForSignalTesting(index),
             threshold: {
               field: [],

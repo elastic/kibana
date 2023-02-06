@@ -1,0 +1,15 @@
+{
+  "id": "unifiedHistogram",
+  "version": "1.0.0",
+  "kibanaVersion": "kibana",
+  "owner": {
+    "name": "Data Discovery",
+    "githubTeam": "kibana-data-discovery"
+  },
+  "description": "The `unifiedHistogram` plugin provides UI components to create a layout including a resizable histogram and a main display.",
+  "server": false,
+  "ui": true,
+  "requiredPlugins": [],
+  "optionalPlugins": [],
+  "requiredBundles": ["data", "dataViews", "embeddable", "inspector"]
+}

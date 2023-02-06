@@ -41,14 +41,12 @@ export default function TextBasedLanguagesTransitionModal({
     <EuiModal onClose={() => setIsTextLangTransitionModalVisible(false)} style={{ width: 700 }}>
       <EuiModalHeader>
         <EuiModalHeaderTitle>
-          <h1>
-            {i18n.translate(
-              'unifiedSearch.query.queryBar.indexPattern.textBasedLanguagesTransitionModalTitle',
-              {
-                defaultMessage: 'Your query will be removed',
-              }
-            )}
-          </h1>
+          {i18n.translate(
+            'unifiedSearch.query.queryBar.indexPattern.textBasedLanguagesTransitionModalTitle',
+            {
+              defaultMessage: 'Your query will be removed',
+            }
+          )}
         </EuiModalHeaderTitle>
       </EuiModalHeader>
 
@@ -86,6 +84,7 @@ export default function TextBasedLanguagesTransitionModal({
                   onClick={() => closeModal(dismissModalChecked)}
                   color="warning"
                   iconType="merge"
+                  data-test-subj="unifiedSearch_switch_noSave"
                 >
                   {i18n.translate(
                     'unifiedSearch.query.queryBar.indexPattern.textBasedLanguagesTransitionModalCloseButton',
@@ -101,6 +100,7 @@ export default function TextBasedLanguagesTransitionModal({
                   fill
                   color="success"
                   iconType="save"
+                  data-test-subj="unifiedSearch_switch_andSave"
                 >
                   {i18n.translate(
                     'unifiedSearch.query.queryBar.indexPattern.textBasedLanguagesTransitionModalSaveButton',

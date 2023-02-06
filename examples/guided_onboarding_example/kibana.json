@@ -1,0 +1,14 @@
+{
+  "id": "guidedOnboardingExample",
+  "version": "1.0.0",
+  "kibanaVersion": "kibana",
+  "owner": {
+    "name": "platform-onboarding",
+    "githubTeam": "platform-onboarding"
+  },
+  "description": "Example plugin to consume guidedOnboarding",
+  "server": true,
+  "ui": true,
+  "requiredPlugins": ["navigation", "guidedOnboarding"],
+  "optionalPlugins": []
+}

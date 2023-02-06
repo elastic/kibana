@@ -108,11 +108,11 @@ export const tourStepsConfig: TourStep[] = [
   },
   {
     title: i18n.translate('xpack.observability.tour.guidedSetupStep.tourTitle', {
-      defaultMessage: 'Now add your data!',
+      defaultMessage: 'Do more with Elastic Observability',
     }),
     content: i18n.translate('xpack.observability.tour.guidedSetupStep.tourContent', {
       defaultMessage:
-        'The easiest way to get going with Elastic Observability is to follow the Guided setup.',
+        'The easiest way to continue with Elastic Observability is to follow recommended next steps in the data assistant.',
     }),
     anchor: '#guidedSetupButton',
     anchorPosition: 'rightUp',

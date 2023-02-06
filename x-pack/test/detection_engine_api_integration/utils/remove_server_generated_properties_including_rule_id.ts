@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { FullResponseSchema } from '@kbn/security-solution-plugin/common/detection_engine/schemas/request';
+import type { RuleResponse } from '@kbn/security-solution-plugin/common/detection_engine/rule_schema';
 
 import { removeServerGeneratedProperties } from './remove_server_generated_properties';
 
@@ -14,8 +14,8 @@ import { removeServerGeneratedProperties } from './remove_server_generated_prope
  * @param rule Rule to pass in to remove typical server generated properties
  */
 export const removeServerGeneratedPropertiesIncludingRuleId = (
-  rule: FullResponseSchema
-): Partial<FullResponseSchema> => {
+  rule: RuleResponse
+): Partial<RuleResponse> => {
   const ruleWithRemovedProperties = removeServerGeneratedProperties(rule);
   // eslint-disable-next-line @typescript-eslint/naming-convention
   const { rule_id, ...additionalRuledIdRemoved } = ruleWithRemovedProperties;

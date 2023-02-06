@@ -35,14 +35,14 @@ export const createGenericAuditRowRenderer = ({
       action.toLowerCase() === actionName
     );
   },
-  renderRow: ({ data, isDraggable, timelineId }) => (
+  renderRow: ({ data, isDraggable, scopeId }) => (
     <RowRendererContainer>
       <AuditdGenericDetails
         data={data}
         isDraggable={isDraggable}
-        contextId={`${actionName}-${timelineId}`}
+        contextId={`${actionName}-${scopeId}`}
         text={text}
-        timelineId={timelineId}
+        timelineId={scopeId}
       />
     </RowRendererContainer>
   ),
@@ -68,15 +68,15 @@ export const createGenericFileRowRenderer = ({
       action.toLowerCase() === actionName
     );
   },
-  renderRow: ({ data, isDraggable, timelineId }) => (
+  renderRow: ({ data, isDraggable, scopeId }) => (
     <RowRendererContainer>
       <AuditdGenericFileDetails
-        contextId={`${actionName}-${timelineId}`}
+        contextId={`${actionName}-${scopeId}`}
         data={data}
         fileIcon={fileIcon}
         isDraggable={isDraggable}
         text={text}
-        timelineId={timelineId}
+        timelineId={scopeId}
       />
     </RowRendererContainer>
   ),

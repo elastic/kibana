@@ -44,6 +44,8 @@ import {
   timeFormatter,
   RectAnnotationEvent,
   LineAnnotationEvent,
+  Tooltip,
+  TooltipType,
 } from '@elastic/charts';
 
 import { DATAFEED_STATE } from '../../../../../../common/constants/states';
@@ -63,6 +65,7 @@ import { EditQueryDelay } from './edit_query_delay';
 import { CHART_DIRECTION, ChartDirectionType, CHART_SIZE } from './constants';
 import { loadFullJob } from '../utils';
 import { checkPermission } from '../../../../capabilities/check_capabilities';
+import { fillMissingChartData, type ChartDataWithNullValues } from './fill_missing_chart_data';
 
 const dateFormatter = timeFormatter('MM-DD HH:mm:ss');
 const MAX_CHART_POINTS = 480;
@@ -72,6 +75,9 @@ const revertSnapshotMessage = i18n.translate(
     defaultMessage: 'Click to revert to this model snapshot.',
   }
 );
+const notAvailableMessage = i18n.translate('xpack.ml.jobsList.datafeedChart.notAvailableMessage', {
+  defaultMessage: 'N/A',
+});
 
 interface DatafeedChartFlyoutProps {
   jobId: string;
@@ -114,7 +120,7 @@ export const DatafeedChartFlyout: FC<DatafeedChartFlyoutProps> = ({
   });
   const [endDate, setEndDate] = useState<any>(moment(end));
   const [isLoadingChartData, setIsLoadingChartData] = useState<boolean>(false);
-  const [bucketData, setBucketData] = useState<number[][]>([]);
+  const [bucketData, setBucketData] = useState<ChartDataWithNullValues>([]);
   const [annotationData, setAnnotationData] = useState<{
     rect: RectAnnotationDatum[];
     line: LineAnnotationDatum[];
@@ -123,9 +129,9 @@ export const DatafeedChartFlyout: FC<DatafeedChartFlyoutProps> = ({
     LineAnnotationDatumWithModelSnapshot[]
   >([]);
   const [messageData, setMessageData] = useState<LineAnnotationDatum[]>([]);
-  const [sourceData, setSourceData] = useState<number[][]>([]);
+  const [sourceData, setSourceData] = useState<ChartDataWithNullValues>([]);
   const [showAnnotations, setShowAnnotations] = useState<boolean>(true);
-  const [showModelSnapshots, setShowModelSnapshots] = useState<boolean>(true);
+  const [showModelSnapshots, setShowModelSnapshots] = useState<boolean>(false);
   const [range, setRange] = useState<{ start: string; end: string } | undefined>();
   const canUpdateDatafeed = useMemo(() => checkPermission('canUpdateDatafeed'), []);
   const canCreateJob = useMemo(() => checkPermission('canCreateJob'), []);
@@ -170,9 +176,21 @@ export const DatafeedChartFlyout: FC<DatafeedChartFlyoutProps> = ({
 
     try {
       const chartData = await getDatafeedResultChartData(jobId, startTimestamp, endTimestamp);
+      let chartSourceData: ChartDataWithNullValues =
+        chartData.datafeedResults as ChartDataWithNullValues;
+      let chartBucketData: ChartDataWithNullValues =
+        chartData.bucketResults as ChartDataWithNullValues;
 
-      setSourceData(chartData.datafeedResults);
-      setBucketData(chartData.bucketResults);
+      if (chartSourceData.length !== chartBucketData.length) {
+        if (chartSourceData.length > chartBucketData.length) {
+          chartBucketData = fillMissingChartData(chartBucketData, chartSourceData);
+        } else {
+          chartSourceData = fillMissingChartData(chartSourceData, chartBucketData);
+        }
+      }
+
+      setSourceData(chartSourceData);
+      setBucketData(chartBucketData);
       setAnnotationData({
         rect: chartData.annotationResultsRect,
         line: chartData.annotationResultsLine.map(setLineAnnotationHeader),
@@ -189,6 +207,7 @@ export const DatafeedChartFlyout: FC<DatafeedChartFlyoutProps> = ({
       displayErrorToast(error, title);
     }
     setIsLoadingChartData(false);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [endDate, data.bucketSpan]);
 
   const getJobAndSnapshotData = useCallback(async () => {
@@ -211,6 +230,7 @@ export const DatafeedChartFlyout: FC<DatafeedChartFlyoutProps> = ({
 
       setData({
         datafeedConfig: job.datafeed_config,
+        // @ts-expect-error bucket_span is of type estypes.Duration
         bucketSpan: job.analysis_config.bucket_span,
         isInitialized: true,
         modelSnapshotData: modelSnapshotResultsLine.map(setLineAnnotationHeader),
@@ -218,10 +238,12 @@ export const DatafeedChartFlyout: FC<DatafeedChartFlyoutProps> = ({
     } catch (error) {
       displayErrorToast(error);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [jobId]);
 
   useEffect(function loadInitialData() {
     getJobAndSnapshotData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(
@@ -231,6 +253,7 @@ export const DatafeedChartFlyout: FC<DatafeedChartFlyoutProps> = ({
         getChartData();
       }
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [endDate, data.bucketSpan]
   );
 
@@ -373,6 +396,7 @@ export const DatafeedChartFlyout: FC<DatafeedChartFlyoutProps> = ({
                   <EuiFlexItem>
                     <div data-test-subj="mlAnnotationsViewDatafeedFlyoutChart">
                       <Chart size={CHART_SIZE}>
+                        <Tooltip type={TooltipType.VerticalCursor} showNullValues />
                         <Settings
                           showLegend
                           legendPosition={Position.Bottom}
@@ -419,6 +443,7 @@ export const DatafeedChartFlyout: FC<DatafeedChartFlyoutProps> = ({
                             defaultMessage: 'Count',
                           })}
                           position={Position.Left}
+                          tickFormat={(d) => (d === null ? notAvailableMessage : String(d))}
                         />
                         {showAnnotations ? (
                           <>
@@ -506,7 +531,7 @@ export const DatafeedChartFlyout: FC<DatafeedChartFlyoutProps> = ({
                           key={'source-results'}
                           color={euiTheme.euiColorPrimary}
                           id={i18n.translate('xpack.ml.jobsList.datafeedChart.sourceSeriesId', {
-                            defaultMessage: 'Source indices',
+                            defaultMessage: 'Source indices document count',
                           })}
                           xScaleType={ScaleType.Time}
                           yScaleType={ScaleType.Linear}
@@ -519,7 +544,7 @@ export const DatafeedChartFlyout: FC<DatafeedChartFlyoutProps> = ({
                           key={'job-results'}
                           color={euiTheme.euiColorAccentText}
                           id={i18n.translate('xpack.ml.jobsList.datafeedChart.bucketSeriesId', {
-                            defaultMessage: 'Job results',
+                            defaultMessage: 'Datafeed document count',
                           })}
                           xScaleType={ScaleType.Time}
                           yScaleType={ScaleType.Linear}
@@ -644,6 +669,7 @@ export const JobListDatafeedChartFlyout: FC<JobListDatafeedChartFlyoutProps> = (
     return () => {
       unsetShowFunction();
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   if (isVisible === true && job !== undefined) {

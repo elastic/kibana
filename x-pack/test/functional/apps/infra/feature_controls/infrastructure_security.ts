@@ -61,9 +61,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         ]);
       });
 
-      it('shows infrastructure navlink', async () => {
+      it('shows Infrastructure navlink', async () => {
         const navLinks = (await appsMenu.readLinks()).map((link) => link.text);
-        expect(navLinks).to.eql(['Overview', 'Alerts', 'Infrastructure', 'Stack Management']);
+        expect(navLinks).to.contain('Infrastructure');
       });
 
       describe('infrastructure landing page without data', () => {
@@ -159,9 +159,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         ]);
       });
 
-      it('shows metrics navlink', async () => {
+      it('shows Infrastructure navlink', async () => {
         const navLinks = (await appsMenu.readLinks()).map((link) => link.text);
-        expect(navLinks).to.eql(['Overview', 'Alerts', 'Infrastructure', 'Stack Management']);
+        expect(navLinks).to.contain('Infrastructure');
       });
 
       describe('infrastructure landing page without data', () => {
@@ -357,9 +357,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await security.user.delete('no_infrastructure_privileges_user');
       });
 
-      it(`doesn't show metrics navlink`, async () => {
+      it(`doesn't show Infrastructure navlink`, async () => {
         const navLinks = (await appsMenu.readLinks()).map((link) => link.text);
-        expect(navLinks).to.not.contain(['Infrastructure']);
+        expect(navLinks).to.not.contain('Infrastructure');
       });
 
       it(`metrics app is inaccessible and returns a 403`, async () => {

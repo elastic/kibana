@@ -1,0 +1,1184 @@
+{
+  "id": "@kbn/journeys",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [
+      {
+        "parentPluginId": "@kbn/journeys",
+        "id": "def-common.Journey",
+        "type": "Class",
+        "tags": [],
+        "label": "Journey",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/journeys",
+            "scope": "common",
+            "docId": "kibKbnJourneysPluginApi",
+            "section": "def-common.Journey",
+            "text": "Journey"
+          },
+          "<CtxExt>"
+        ],
+        "path": "packages/kbn-journeys/journey/journey.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/journeys",
+            "id": "def-common.Journey.convertToFtrConfigProvider",
+            "type": "Function",
+            "tags": [],
+            "label": "convertToFtrConfigProvider",
+            "description": [],
+            "signature": [
+              "(journey: ",
+              {
+                "pluginId": "@kbn/journeys",
+                "scope": "common",
+                "docId": "kibKbnJourneysPluginApi",
+                "section": "def-common.Journey",
+                "text": "Journey"
+              },
+              "<any>) => ",
+              {
+                "pluginId": "@kbn/test",
+                "scope": "common",
+                "docId": "kibKbnTestPluginApi",
+                "section": "def-common.FtrConfigProvider",
+                "text": "FtrConfigProvider"
+              }
+            ],
+            "path": "packages/kbn-journeys/journey/journey.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/journeys",
+                "id": "def-common.Journey.convertToFtrConfigProvider.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "journey",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/journeys",
+                    "scope": "common",
+                    "docId": "kibKbnJourneysPluginApi",
+                    "section": "def-common.Journey",
+                    "text": "Journey"
+                  },
+                  "<any>"
+                ],
+                "path": "packages/kbn-journeys/journey/journey.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/journeys",
+            "id": "def-common.Journey.load",
+            "type": "Function",
+            "tags": [],
+            "label": "load",
+            "description": [
+              "\nLoad a journey from a file path"
+            ],
+            "signature": [
+              "(path: string) => Promise<",
+              {
+                "pluginId": "@kbn/journeys",
+                "scope": "common",
+                "docId": "kibKbnJourneysPluginApi",
+                "section": "def-common.Journey",
+                "text": "Journey"
+              },
+              "<any>>"
+            ],
+            "path": "packages/kbn-journeys/journey/journey.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/journeys",
+                "id": "def-common.Journey.load.$1",
+                "type": "string",
+                "tags": [],
+                "label": "path",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/kbn-journeys/journey/journey.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/journeys",
+            "id": "def-common.Journey.steps",
+            "type": "Array",
+            "tags": [],
+            "label": "#steps",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/journeys",
+                "scope": "common",
+                "docId": "kibKbnJourneysPluginApi",
+                "section": "def-common.Step",
+                "text": "Step"
+              },
+              "<CtxExt>[]"
+            ],
+            "path": "packages/kbn-journeys/journey/journey.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/journeys",
+            "id": "def-common.Journey.config",
+            "type": "Object",
+            "tags": [],
+            "label": "config",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/journeys",
+                "scope": "common",
+                "docId": "kibKbnJourneysPluginApi",
+                "section": "def-common.JourneyConfig",
+                "text": "JourneyConfig"
+              },
+              "<CtxExt>"
+            ],
+            "path": "packages/kbn-journeys/journey/journey.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/journeys",
+            "id": "def-common.Journey.Unnamed",
+            "type": "Function",
+            "tags": [],
+            "label": "Constructor",
+            "description": [
+              "\nCreate a Journey which should be exported from a file in the\nx-pack/performance/journeys directory."
+            ],
+            "signature": [
+              "any"
+            ],
+            "path": "packages/kbn-journeys/journey/journey.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/journeys",
+                "id": "def-common.Journey.Unnamed.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "opts",
+                "description": [],
+                "signature": [
+                  "JourneyConfigOptions",
+                  "<CtxExt> | undefined"
+                ],
+                "path": "packages/kbn-journeys/journey/journey.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/journeys",
+            "id": "def-common.Journey.step",
+            "type": "Function",
+            "tags": [],
+            "label": "step",
+            "description": [
+              "\nDefine a step of this Journey. Steps are only separated from each other\nto aid in reading/debuging the journey and reading it's logging output.\n\nIf a journey fails, a failure report will be created with a screenshot\nat the point of failure as well as a screenshot at the end of every\nstep."
+            ],
+            "signature": [
+              "(name: string, fn: (ctx: ",
+              "BaseStepCtx",
+              " & CtxExt) => Promise<void>) => this"
+            ],
+            "path": "packages/kbn-journeys/journey/journey.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/journeys",
+                "id": "def-common.Journey.step.$1",
+                "type": "string",
+                "tags": [],
+                "label": "name",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/kbn-journeys/journey/journey.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/journeys",
+                "id": "def-common.Journey.step.$2",
+                "type": "Function",
+                "tags": [],
+                "label": "fn",
+                "description": [],
+                "signature": [
+                  "(ctx: ",
+                  "BaseStepCtx",
+                  " & CtxExt) => Promise<void>"
+                ],
+                "path": "packages/kbn-journeys/journey/journey.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/journeys",
+            "id": "def-common.Journey.testProvider",
+            "type": "Function",
+            "tags": [],
+            "label": "testProvider",
+            "description": [
+              "called by FTR to setup tests"
+            ],
+            "signature": [
+              "({ getService }: ",
+              {
+                "pluginId": "@kbn/ftr-common-functional-services",
+                "scope": "common",
+                "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                "section": "def-common.FtrProviderContext",
+                "text": "FtrProviderContext"
+              },
+              ") => void"
+            ],
+            "path": "packages/kbn-journeys/journey/journey.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/journeys",
+                "id": "def-common.Journey.testProvider.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "{ getService }",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.FtrProviderContext",
+                    "text": "FtrProviderContext"
+                  }
+                ],
+                "path": "packages/kbn-journeys/journey/journey.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/journeys",
+        "id": "def-common.JourneyConfig",
+        "type": "Class",
+        "tags": [],
+        "label": "JourneyConfig",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/journeys",
+            "scope": "common",
+            "docId": "kibKbnJourneysPluginApi",
+            "section": "def-common.JourneyConfig",
+            "text": "JourneyConfig"
+          },
+          "<CtxExt>"
+        ],
+        "path": "packages/kbn-journeys/journey/journey_config.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/journeys",
+            "id": "def-common.JourneyConfig.opts",
+            "type": "Object",
+            "tags": [],
+            "label": "#opts",
+            "description": [],
+            "signature": [
+              "JourneyConfigOptions",
+              "<CtxExt>"
+            ],
+            "path": "packages/kbn-journeys/journey/journey_config.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/journeys",
+            "id": "def-common.JourneyConfig.path",
+            "type": "string",
+            "tags": [],
+            "label": "#path",
+            "description": [],
+            "path": "packages/kbn-journeys/journey/journey_config.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/journeys",
+            "id": "def-common.JourneyConfig.name",
+            "type": "string",
+            "tags": [],
+            "label": "#name",
+            "description": [],
+            "path": "packages/kbn-journeys/journey/journey_config.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/journeys",
+            "id": "def-common.JourneyConfig.Unnamed",
+            "type": "Function",
+            "tags": [],
+            "label": "Constructor",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "packages/kbn-journeys/journey/journey_config.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/journeys",
+                "id": "def-common.JourneyConfig.Unnamed.$1",
+                "type": "string",
+                "tags": [],
+                "label": "path",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/kbn-journeys/journey/journey_config.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/journeys",
+                "id": "def-common.JourneyConfig.Unnamed.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "opts",
+                "description": [],
+                "signature": [
+                  "JourneyConfigOptions",
+                  "<CtxExt>"
+                ],
+                "path": "packages/kbn-journeys/journey/journey_config.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/journeys",
+            "id": "def-common.JourneyConfig.getEsArchives",
+            "type": "Function",
+            "tags": [],
+            "label": "getEsArchives",
+            "description": [],
+            "signature": [
+              "() => string[]"
+            ],
+            "path": "packages/kbn-journeys/journey/journey_config.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/journeys",
+            "id": "def-common.JourneyConfig.getKbnArchives",
+            "type": "Function",
+            "tags": [],
+            "label": "getKbnArchives",
+            "description": [],
+            "signature": [
+              "() => string[]"
+            ],
+            "path": "packages/kbn-journeys/journey/journey_config.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/journeys",
+            "id": "def-common.JourneyConfig.isXpack",
+            "type": "Function",
+            "tags": [],
+            "label": "isXpack",
+            "description": [],
+            "signature": [
+              "() => boolean"
+            ],
+            "path": "packages/kbn-journeys/journey/journey_config.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/journeys",
+            "id": "def-common.JourneyConfig.getExtraApmLabels",
+            "type": "Function",
+            "tags": [],
+            "label": "getExtraApmLabels",
+            "description": [],
+            "signature": [
+              "() => { [x: string]: string; }"
+            ],
+            "path": "packages/kbn-journeys/journey/journey_config.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/journeys",
+            "id": "def-common.JourneyConfig.getRepoRelPath",
+            "type": "Function",
+            "tags": [],
+            "label": "getRepoRelPath",
+            "description": [],
+            "signature": [
+              "() => string"
+            ],
+            "path": "packages/kbn-journeys/journey/journey_config.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/journeys",
+            "id": "def-common.JourneyConfig.getPath",
+            "type": "Function",
+            "tags": [],
+            "label": "getPath",
+            "description": [],
+            "signature": [
+              "() => string"
+            ],
+            "path": "packages/kbn-journeys/journey/journey_config.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/journeys",
+            "id": "def-common.JourneyConfig.getName",
+            "type": "Function",
+            "tags": [],
+            "label": "getName",
+            "description": [],
+            "signature": [
+              "() => string"
+            ],
+            "path": "packages/kbn-journeys/journey/journey_config.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/journeys",
+            "id": "def-common.JourneyConfig.shouldAutoLogin",
+            "type": "Function",
+            "tags": [],
+            "label": "shouldAutoLogin",
+            "description": [],
+            "signature": [
+              "() => boolean"
+            ],
+            "path": "packages/kbn-journeys/journey/journey_config.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/journeys",
+            "id": "def-common.JourneyConfig.isSkipped",
+            "type": "Function",
+            "tags": [],
+            "label": "isSkipped",
+            "description": [],
+            "signature": [
+              "() => boolean"
+            ],
+            "path": "packages/kbn-journeys/journey/journey_config.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/journeys",
+            "id": "def-common.JourneyConfig.getScalabilityConfig",
+            "type": "Function",
+            "tags": [],
+            "label": "getScalabilityConfig",
+            "description": [],
+            "signature": [
+              "() => ",
+              {
+                "pluginId": "@kbn/journeys",
+                "scope": "common",
+                "docId": "kibKbnJourneysPluginApi",
+                "section": "def-common.ScalabilitySetup",
+                "text": "ScalabilitySetup"
+              },
+              " | undefined"
+            ],
+            "path": "packages/kbn-journeys/journey/journey_config.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/journeys",
+            "id": "def-common.JourneyConfig.getExtendedStepCtx",
+            "type": "Function",
+            "tags": [],
+            "label": "getExtendedStepCtx",
+            "description": [],
+            "signature": [
+              "(ctx: ",
+              "BaseStepCtx",
+              ") => ",
+              "BaseStepCtx",
+              " & CtxExt"
+            ],
+            "path": "packages/kbn-journeys/journey/journey_config.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/journeys",
+                "id": "def-common.JourneyConfig.getExtendedStepCtx.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "ctx",
+                "description": [],
+                "signature": [
+                  "BaseStepCtx"
+                ],
+                "path": "packages/kbn-journeys/journey/journey_config.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/journeys",
+        "id": "def-common.JourneyScreenshots",
+        "type": "Class",
+        "tags": [],
+        "label": "JourneyScreenshots",
+        "description": [],
+        "path": "packages/kbn-journeys/journey/journey_screenshots.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/journeys",
+            "id": "def-common.JourneyScreenshots.load",
+            "type": "Function",
+            "tags": [],
+            "label": "load",
+            "description": [],
+            "signature": [
+              "(journeyName: string) => Promise<",
+              {
+                "pluginId": "@kbn/journeys",
+                "scope": "common",
+                "docId": "kibKbnJourneysPluginApi",
+                "section": "def-common.JourneyScreenshots",
+                "text": "JourneyScreenshots"
+              },
+              ">"
+            ],
+            "path": "packages/kbn-journeys/journey/journey_screenshots.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/journeys",
+                "id": "def-common.JourneyScreenshots.load.$1",
+                "type": "string",
+                "tags": [],
+                "label": "journeyName",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/kbn-journeys/journey/journey_screenshots.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/journeys",
+            "id": "def-common.JourneyScreenshots.dir",
+            "type": "string",
+            "tags": [],
+            "label": "#dir",
+            "description": [],
+            "path": "packages/kbn-journeys/journey/journey_screenshots.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/journeys",
+            "id": "def-common.JourneyScreenshots.manifestPath",
+            "type": "string",
+            "tags": [],
+            "label": "#manifestPath",
+            "description": [],
+            "path": "packages/kbn-journeys/journey/journey_screenshots.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/journeys",
+            "id": "def-common.JourneyScreenshots.manifest",
+            "type": "Object",
+            "tags": [],
+            "label": "#manifest",
+            "description": [],
+            "path": "packages/kbn-journeys/journey/journey_screenshots.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/journeys",
+                "id": "def-common.JourneyScreenshots.manifest.steps",
+                "type": "Array",
+                "tags": [],
+                "label": "steps",
+                "description": [],
+                "signature": [
+                  "never[]"
+                ],
+                "path": "packages/kbn-journeys/journey/journey_screenshots.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "@kbn/journeys",
+            "id": "def-common.JourneyScreenshots.Unnamed",
+            "type": "Function",
+            "tags": [],
+            "label": "Constructor",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "packages/kbn-journeys/journey/journey_screenshots.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/journeys",
+                "id": "def-common.JourneyScreenshots.Unnamed.$1",
+                "type": "string",
+                "tags": [],
+                "label": "journeyName",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/kbn-journeys/journey/journey_screenshots.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/journeys",
+            "id": "def-common.JourneyScreenshots.isLocked",
+            "type": "Object",
+            "tags": [],
+            "label": "#isLocked",
+            "description": [],
+            "signature": [
+              "BehaviorSubject",
+              "<boolean>"
+            ],
+            "path": "packages/kbn-journeys/journey/journey_screenshots.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/journeys",
+            "id": "def-common.JourneyScreenshots.lock",
+            "type": "Function",
+            "tags": [],
+            "label": "lock",
+            "description": [],
+            "signature": [
+              "(fn: () => Promise<void>) => Promise<void>"
+            ],
+            "path": "packages/kbn-journeys/journey/journey_screenshots.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/journeys",
+                "id": "def-common.JourneyScreenshots.lock.$1",
+                "type": "Function",
+                "tags": [],
+                "label": "fn",
+                "description": [],
+                "signature": [
+                  "() => Promise<void>"
+                ],
+                "path": "packages/kbn-journeys/journey/journey_screenshots.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/journeys",
+            "id": "def-common.JourneyScreenshots.addError",
+            "type": "Function",
+            "tags": [],
+            "label": "addError",
+            "description": [],
+            "signature": [
+              "(step: ",
+              "AnyStep",
+              ", screenshot: Buffer, fullscreenScreenshot: Buffer) => Promise<void>"
+            ],
+            "path": "packages/kbn-journeys/journey/journey_screenshots.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/journeys",
+                "id": "def-common.JourneyScreenshots.addError.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "step",
+                "description": [],
+                "signature": [
+                  "AnyStep"
+                ],
+                "path": "packages/kbn-journeys/journey/journey_screenshots.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/journeys",
+                "id": "def-common.JourneyScreenshots.addError.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "screenshot",
+                "description": [],
+                "signature": [
+                  "Buffer"
+                ],
+                "path": "packages/kbn-journeys/journey/journey_screenshots.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/journeys",
+                "id": "def-common.JourneyScreenshots.addError.$3",
+                "type": "Object",
+                "tags": [],
+                "label": "fullscreenScreenshot",
+                "description": [],
+                "signature": [
+                  "Buffer"
+                ],
+                "path": "packages/kbn-journeys/journey/journey_screenshots.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/journeys",
+            "id": "def-common.JourneyScreenshots.addSuccess",
+            "type": "Function",
+            "tags": [],
+            "label": "addSuccess",
+            "description": [],
+            "signature": [
+              "(step: ",
+              "AnyStep",
+              ", screenshot: Buffer, fullscreenScreenshot: Buffer) => Promise<void>"
+            ],
+            "path": "packages/kbn-journeys/journey/journey_screenshots.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/journeys",
+                "id": "def-common.JourneyScreenshots.addSuccess.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "step",
+                "description": [],
+                "signature": [
+                  "AnyStep"
+                ],
+                "path": "packages/kbn-journeys/journey/journey_screenshots.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/journeys",
+                "id": "def-common.JourneyScreenshots.addSuccess.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "screenshot",
+                "description": [],
+                "signature": [
+                  "Buffer"
+                ],
+                "path": "packages/kbn-journeys/journey/journey_screenshots.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/journeys",
+                "id": "def-common.JourneyScreenshots.addSuccess.$3",
+                "type": "Object",
+                "tags": [],
+                "label": "fullscreenScreenshot",
+                "description": [],
+                "signature": [
+                  "Buffer"
+                ],
+                "path": "packages/kbn-journeys/journey/journey_screenshots.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/journeys",
+            "id": "def-common.JourneyScreenshots.get",
+            "type": "Function",
+            "tags": [],
+            "label": "get",
+            "description": [],
+            "signature": [
+              "() => { path: string; fullscreenPath: string; type: \"success\" | \"failure\"; title: string; filename: string; fullscreenFilename: string; }[]"
+            ],
+            "path": "packages/kbn-journeys/journey/journey_screenshots.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "functions": [],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/journeys",
+        "id": "def-common.ScalabilitySetup",
+        "type": "Interface",
+        "tags": [],
+        "label": "ScalabilitySetup",
+        "description": [],
+        "path": "packages/kbn-journeys/journey/journey_config.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/journeys",
+            "id": "def-common.ScalabilitySetup.maxDuration",
+            "type": "string",
+            "tags": [],
+            "label": "maxDuration",
+            "description": [
+              "\nDuration strings must be formatted as string that starts with an integer and\nends with either \"m\" or \"s\" for minutes and seconds, respectively\n\neg: \"1m\" or \"30s\""
+            ],
+            "path": "packages/kbn-journeys/journey/journey_config.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/journeys",
+            "id": "def-common.ScalabilitySetup.responseTimeMetric",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "responseTimeMetric",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/journeys",
+                "scope": "common",
+                "docId": "kibKbnJourneysPluginApi",
+                "section": "def-common.ResponseTimeMetric",
+                "text": "ResponseTimeMetric"
+              },
+              " | undefined"
+            ],
+            "path": "packages/kbn-journeys/journey/journey_config.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/journeys",
+            "id": "def-common.ScalabilitySetup.responseTimeThreshold",
+            "type": "Object",
+            "tags": [],
+            "label": "responseTimeThreshold",
+            "description": [],
+            "signature": [
+              "{ threshold1: number; threshold2: number; threshold3: number; } | undefined"
+            ],
+            "path": "packages/kbn-journeys/journey/journey_config.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/journeys",
+            "id": "def-common.ScalabilitySetup.warmup",
+            "type": "Array",
+            "tags": [],
+            "label": "warmup",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/journeys",
+                "scope": "common",
+                "docId": "kibKbnJourneysPluginApi",
+                "section": "def-common.ScalabilityAction",
+                "text": "ScalabilityAction"
+              },
+              "[]"
+            ],
+            "path": "packages/kbn-journeys/journey/journey_config.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/journeys",
+            "id": "def-common.ScalabilitySetup.test",
+            "type": "Array",
+            "tags": [],
+            "label": "test",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/journeys",
+                "scope": "common",
+                "docId": "kibKbnJourneysPluginApi",
+                "section": "def-common.ScalabilityAction",
+                "text": "ScalabilityAction"
+              },
+              "[]"
+            ],
+            "path": "packages/kbn-journeys/journey/journey_config.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/journeys",
+        "id": "def-common.Step",
+        "type": "Interface",
+        "tags": [],
+        "label": "Step",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/journeys",
+            "scope": "common",
+            "docId": "kibKbnJourneysPluginApi",
+            "section": "def-common.Step",
+            "text": "Step"
+          },
+          "<CtxExt>"
+        ],
+        "path": "packages/kbn-journeys/journey/journey.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/journeys",
+            "id": "def-common.Step.name",
+            "type": "string",
+            "tags": [],
+            "label": "name",
+            "description": [],
+            "path": "packages/kbn-journeys/journey/journey.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/journeys",
+            "id": "def-common.Step.index",
+            "type": "number",
+            "tags": [],
+            "label": "index",
+            "description": [],
+            "path": "packages/kbn-journeys/journey/journey.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/journeys",
+            "id": "def-common.Step.fn",
+            "type": "Function",
+            "tags": [],
+            "label": "fn",
+            "description": [],
+            "signature": [
+              "(ctx: ",
+              "BaseStepCtx",
+              " & CtxExt) => Promise<void>"
+            ],
+            "path": "packages/kbn-journeys/journey/journey.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/journeys",
+                "id": "def-common.Step.fn.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "ctx",
+                "description": [],
+                "signature": [
+                  "BaseStepCtx",
+                  " & CtxExt"
+                ],
+                "path": "packages/kbn-journeys/journey/journey.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/journeys",
+        "id": "def-common.ResponseTimeMetric",
+        "type": "Type",
+        "tags": [],
+        "label": "ResponseTimeMetric",
+        "description": [],
+        "signature": [
+          "\"min\" | \"max\" | \"25%\" | \"50%\" | \"75%\" | \"80%\" | \"85%\" | \"90%\" | \"95%\" | \"99%\""
+        ],
+        "path": "packages/kbn-journeys/journey/journey_config.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/journeys",
+        "id": "def-common.ScalabilityAction",
+        "type": "Type",
+        "tags": [],
+        "label": "ScalabilityAction",
+        "description": [],
+        "signature": [
+          "RampConcurrentUsersAction",
+          " | ",
+          "ConstantConcurrentUsersAction"
+        ],
+        "path": "packages/kbn-journeys/journey/journey_config.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": []
+  }
+}

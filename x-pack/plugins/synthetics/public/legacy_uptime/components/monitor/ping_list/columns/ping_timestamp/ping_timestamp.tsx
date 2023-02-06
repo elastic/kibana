@@ -41,7 +41,7 @@ export const PingTimestamp = ({
   label,
   checkGroup,
   stepStatus,
-  allStepsLoaded,
+  allStepsLoaded = true,
   initialStepNo = 1,
 }: Props) => {
   const [stepNumber, setStepNumber] = useState(initialStepNo);
@@ -63,8 +63,11 @@ export const PingTimestamp = ({
 
   const [screenshotRef, setScreenshotRef] = useState<ScreenshotRefImageData | undefined>(undefined);
 
+  const isScreenshotRefValid = Boolean(
+    screenshotRef && screenshotRef?.ref?.screenshotRef?.synthetics?.step?.index === stepNumber
+  );
   const { data, loading } = useInProgressImage({
-    hasImage: Boolean(stepImages[stepNumber - 1]) || Boolean(screenshotRef),
+    hasImage: Boolean(stepImages[stepNumber - 1]) || isScreenshotRefValid,
     hasIntersected: Boolean(intersection && intersection.intersectionRatio === 1),
     stepStatus,
     imgPath,

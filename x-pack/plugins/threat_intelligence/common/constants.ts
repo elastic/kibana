@@ -5,10 +5,14 @@
  * 2.0.
  */
 
-export const EMPTY_VALUE = '-';
+export const THREAT_INTELLIGENCE_SEARCH_STRATEGY_NAME = 'threatIntelligenceSearchStrategy';
 
-export const DEFAULT_DATE_FORMAT = 'dateFormat' as const;
+export const BARCHART_AGGREGATION_NAME = 'barchartAggregation';
 
-export const DEFAULT_DATE_FORMAT_TZ = 'dateFormat:tz' as const;
-
-export const THREAT_QUERY_BASE = 'event.type: indicator and event.category : threat';
+/**
+ * Used inside custom search strategy
+ */
+export enum FactoryQueryType {
+  IndicatorGrid = 'indicatorGrid',
+  Barchart = 'barchart',
+}

@@ -6,7 +6,8 @@
  */
 
 import { renderHook, act } from '@testing-library/react-hooks';
-import { usePostCase, UsePostCase } from './use_post_case';
+import type { UsePostCase } from './use_post_case';
+import { usePostCase } from './use_post_case';
 import * as api from './api';
 import { ConnectorTypes } from '../../common/api';
 import { SECURITY_SOLUTION_OWNER } from '../../common/constants';

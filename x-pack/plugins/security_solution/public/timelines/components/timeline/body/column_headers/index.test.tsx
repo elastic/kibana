@@ -9,7 +9,6 @@ import { shallow } from 'enzyme';
 import React from 'react';
 
 import '../../../../../common/mock/match_media';
-import { getActionsColumnWidth } from '@kbn/timelines-plugin/public';
 import { defaultHeaders } from './default_headers';
 import { mockBrowserFields } from '../../../../../common/containers/source/mock';
 import type { Sort } from '../sort';
@@ -20,14 +19,15 @@ import type { ColumnHeadersComponentProps } from '.';
 import { ColumnHeadersComponent } from '.';
 import { cloneDeep } from 'lodash/fp';
 import { timelineActions } from '../../../../store/timeline';
-import { TimelineTabs } from '../../../../../../common/types/timeline';
+import { TimelineId, TimelineTabs } from '../../../../../../common/types/timeline';
 import { Direction } from '../../../../../../common/search_strategy';
 import { getDefaultControlColumn } from '../control_columns';
 import { testTrailingControlColumns } from '../../../../../common/mock/mock_timeline_control_columns';
-import { HeaderActions } from '../actions/header_actions';
 import type { UseFieldBrowserOptionsProps } from '../../../fields_browser';
 import { mockTriggersActionsUi } from '../../../../../common/mock/mock_triggers_actions_ui_plugin';
 import { mockTimelines } from '../../../../../common/mock/mock_timelines_plugin';
+import { HeaderActions } from '../../../../../common/components/header_actions/header_actions';
+import { getActionsColumnWidth } from '../../../../../common/components/header_actions';
 
 jest.mock('../../../../../common/lib/kibana', () => ({
   useKibana: () => ({
@@ -52,7 +52,7 @@ jest.mock('react-redux', () => {
     useDispatch: () => mockDispatch,
   };
 });
-const timelineId = 'test';
+const timelineId = TimelineId.test;
 
 describe('ColumnHeaders', () => {
   const mount = useMountAppended();

@@ -201,6 +201,58 @@ describe('resolve()', () => {
                                                                             `);
   });
 
+  test('calls saved objects client with id and includeSnoozeData params', async () => {
+    const rulesClient = new RulesClient(rulesClientParams);
+    unsecuredSavedObjectsClient.resolve.mockResolvedValueOnce({
+      saved_object: {
+        id: '1',
+        type: 'alert',
+        attributes: {
+          legacyId: 'some-legacy-id',
+          alertTypeId: '123',
+          schedule: { interval: '10s' },
+          params: {
+            bar: true,
+          },
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+          snoozeSchedule: [
+            {
+              duration: 10000,
+              rRule: {
+                dtstart: new Date().toISOString(),
+                tzid: 'UTC',
+                count: 1,
+              },
+            },
+          ],
+          muteAll: false,
+          actions: [
+            {
+              group: 'default',
+              actionRef: 'action_0',
+              params: {
+                foo: true,
+              },
+            },
+          ],
+          notifyWhen: 'onActiveAlert',
+        },
+        references: [
+          {
+            name: 'action_0',
+            type: 'action',
+            id: '1',
+          },
+        ],
+      },
+      outcome: 'aliasMatch',
+      alias_target_id: '2',
+    });
+    const result = await rulesClient.resolve({ id: '1', includeSnoozeData: true });
+    expect(result.isSnoozedUntil).toBeTruthy();
+  });
+
   test('should call useSavedObjectReferences.injectReferences if defined for rule type', async () => {
     const injectReferencesFn = jest.fn().mockReturnValue({
       bar: true,
@@ -214,7 +266,9 @@ describe('resolve()', () => {
       defaultActionGroupId: 'default',
       minimumLicenseRequired: 'basic',
       isExportable: true,
-      async executor() {},
+      async executor() {
+        return { state: {} };
+      },
       producer: 'alerts',
       useSavedObjectReferences: {
         extractReferences: jest.fn(),
@@ -345,7 +399,9 @@ describe('resolve()', () => {
       defaultActionGroupId: 'default',
       minimumLicenseRequired: 'basic',
       isExportable: true,
-      async executor() {},
+      async executor() {
+        return { state: {} };
+      },
       producer: 'alerts',
       useSavedObjectReferences: {
         extractReferences: jest.fn(),

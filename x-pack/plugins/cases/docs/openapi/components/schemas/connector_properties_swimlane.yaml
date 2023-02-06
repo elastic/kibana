@@ -1,0 +1,31 @@
+title: Create case request properties for a Swimlane connector
+required:
+  - fields
+  - id
+  - name
+  - type
+description: Defines properties for connectors when type is `.swimlane`.
+type: object
+properties:
+  fields:
+    description: An object containing the connector fields. If you want to omit any individual field, specify null as its value.
+    type: object
+    required:
+      - caseId
+    properties:
+      caseId:
+        description: The case identifier for Swimlane connectors.
+        type: string
+        nullable: true
+  id:
+    description: The identifier for the connector. To retrieve connector IDs, use the find connectors API.
+    type: string
+  name:
+    description: The name of the connector.
+    type: string
+  type:
+    description: The type of connector.
+    type: string
+    example: .swimlane
+    enum:
+      - .swimlane

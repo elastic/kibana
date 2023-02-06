@@ -56,8 +56,10 @@ export class OptionsListEmbeddableFactory
 
   public isFieldCompatible = (dataControlField: DataControlField) => {
     if (
-      (dataControlField.field.aggregatable && dataControlField.field.type === 'string') ||
-      dataControlField.field.type === 'boolean'
+      !dataControlField.field.spec.scripted &&
+      ((dataControlField.field.aggregatable && dataControlField.field.type === 'string') ||
+        dataControlField.field.type === 'boolean' ||
+        dataControlField.field.type === 'ip')
     ) {
       dataControlField.compatibleControlTypes.push(this.type);
     }

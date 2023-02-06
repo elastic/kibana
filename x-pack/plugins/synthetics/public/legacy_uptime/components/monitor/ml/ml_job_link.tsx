@@ -8,7 +8,7 @@
 import React from 'react';
 import url from 'url';
 import { EuiButtonEmpty } from '@elastic/eui';
-import rison, { RisonValue } from 'rison-node';
+import rison from '@kbn/rison';
 import { getMLJobId } from '../../../../../common/lib';
 
 interface Props {
@@ -42,8 +42,7 @@ export const getMLJobLinkHref = ({ basePath, monitorId, dateRange }: Props) => {
   return url.format({
     pathname: basePath + '/app/ml',
     hash:
-      `${path}?_g=${rison.encode(query as RisonValue)}` +
-      (monitorId ? `&_a=${rison.encode(queryParams as RisonValue)}` : ''),
+      `${path}?_g=${rison.encode(query)}` + (monitorId ? `&_a=${rison.encode(queryParams)}` : ''),
   });
 };
 

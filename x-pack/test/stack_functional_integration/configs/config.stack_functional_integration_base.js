@@ -8,11 +8,13 @@
 import { resolve } from 'path';
 import consumeState from './consume_state';
 import { ToolingLog } from '@kbn/tooling-log';
-import { REPO_ROOT } from '@kbn/utils';
+import { REPO_ROOT } from '@kbn/repo-info';
 import chalk from 'chalk';
 import { esTestConfig, kbnTestConfig } from '@kbn/test';
 import { TriggersActionsPageProvider } from '../../functional_with_es_ssl/page_objects/triggers_actions_ui_page';
-import { services } from '../services';
+import { ReportingAPIProvider } from '../../upgrade/services/reporting_upgrade_services';
+import { MapsHelper } from '../../upgrade/services/maps_upgrade_services';
+import { RulesHelper } from '../../upgrade/services/rules_upgrade_services';
 
 const log = new ToolingLog({
   level: 'info',
@@ -25,19 +27,25 @@ const testsFolder = '../apps';
 const prepend = (testFile) => require.resolve(`${testsFolder}/${testFile}`);
 
 export default async ({ readConfigFile }) => {
+  const apiConfig = await readConfigFile(require.resolve('../../api_integration/config'));
+  const externalConf = consumeState(resolve(__dirname, stateFilePath)) ?? {
+    TESTS_LIST: 'alerts',
+  };
   const xpackFunctionalConfig = await readConfigFile(
-    require.resolve('../../functional/config.base.js')
+    require.resolve('../../functional/config.ccs.ts')
   );
-  const externalConf = consumeState(resolve(__dirname, stateFilePath));
+  const fleetFunctionalConfig = await readConfigFile(
+    require.resolve('../../fleet_functional/config.ts')
+  );
   process.env.stack_functional_integration = true;
   logAll(log);
 
   const settings = {
     ...xpackFunctionalConfig.getAll(),
-    services,
     pageObjects: {
       triggersActionsUI: TriggersActionsPageProvider,
       ...xpackFunctionalConfig.get('pageObjects'),
+      ...fleetFunctionalConfig.get('pageObjects'),
     },
     apps: {
       ...xpackFunctionalConfig.get('apps'),
@@ -53,6 +61,9 @@ export default async ({ readConfigFile }) => {
       ...xpackFunctionalConfig.get('kbnTestServer'),
       serverArgs: [...xpackFunctionalConfig.get('kbnTestServer.serverArgs')],
     },
+    esArchiver: {
+      baseDirectory: INTEGRATION_TEST_ROOT,
+    },
     testFiles: tests(externalConf.TESTS_LIST).map(prepend).map(logTest),
     // testFiles: ['alerts'].map(prepend).map(logTest),
     // If we need to do things like disable animations, we can do it in configure_start_kibana.sh, in the provisioner...which lives in the integration-test private repo
@@ -61,6 +72,13 @@ export default async ({ readConfigFile }) => {
     // choose where screenshots should be saved
     screenshots: {
       directory: resolve(INTEGRATION_TEST_ROOT, 'test/screenshots'),
+    },
+    services: {
+      ...apiConfig.get('services'),
+      ...xpackFunctionalConfig.get('services'),
+      reportingAPI: ReportingAPIProvider,
+      mapsHelper: MapsHelper,
+      rulesHelper: RulesHelper,
     },
   };
   return settings;

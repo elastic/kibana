@@ -12,7 +12,8 @@ import { EuiFlyout } from '@elastic/eui';
 
 import type { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { EntityType } from '@kbn/timelines-plugin/common';
-import { timelineActions, timelineSelectors } from '../../store/timeline';
+import { getScopedActions, isInTableScope, isTimelineScope } from '../../../helpers';
+import { timelineSelectors } from '../../store/timeline';
 import { timelineDefaults } from '../../store/timeline/defaults';
 import type { BrowserFields } from '../../../common/containers/source';
 import { TimelineId, TimelineTabs } from '../../../../common/types/timeline';
@@ -21,6 +22,7 @@ import { EventDetailsPanel } from './event_details';
 import { HostDetailsPanel } from './host_details';
 import { NetworkDetailsPanel } from './network_details';
 import { UserDetailsPanel } from './user_details';
+import { dataTableSelectors } from '../../../common/store/data_table';
 
 interface DetailsPanelProps {
   browserFields: BrowserFields;
@@ -29,7 +31,7 @@ interface DetailsPanelProps {
   isFlyoutView?: boolean;
   runtimeMappings: MappingRuntimeFields;
   tabType?: TimelineTabs;
-  timelineId: string;
+  scopeId: string;
   isReadOnly?: boolean;
 }
 
@@ -46,19 +48,29 @@ export const DetailsPanel = React.memo(
     isFlyoutView,
     runtimeMappings,
     tabType,
-    timelineId,
+    scopeId,
     isReadOnly,
   }: DetailsPanelProps) => {
     const dispatch = useDispatch();
-    const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
-    const expandedDetail = useDeepEqualSelector((state) => {
-      return (getTimeline(state, timelineId) ?? timelineDefaults).expandedDetail;
-    });
+    const getScope = useMemo(() => {
+      if (isTimelineScope(scopeId)) {
+        return timelineSelectors.getTimelineByIdSelector();
+      } else if (isInTableScope(scopeId)) {
+        return dataTableSelectors.getTableByIdSelector();
+      }
+    }, [scopeId]);
+
+    const expandedDetail = useDeepEqualSelector(
+      (state) => ((getScope && getScope(state, scopeId)) ?? timelineDefaults)?.expandedDetail
+    );
 
     // To be used primarily in the flyout scenario where we don't want to maintain the tabType
     const defaultOnPanelClose = useCallback(() => {
-      dispatch(timelineActions.toggleDetailPanel({ timelineId }));
-    }, [dispatch, timelineId]);
+      const scopedActions = getScopedActions(scopeId);
+      if (scopedActions) {
+        dispatch(scopedActions.toggleDetailPanel({ id: scopeId }));
+      }
+    }, [dispatch, scopeId]);
 
     const activeTab = tabType ?? TimelineTabs.query;
     const closePanel = useCallback(() => {
@@ -74,9 +86,9 @@ export const DetailsPanel = React.memo(
 
     let visiblePanel = null; // store in variable to make return statement more readable
     let panelSize: EuiFlyoutProps['size'] = 's';
-    let flyoutUniqueKey = timelineId;
-    const contextID = `${timelineId}-${activeTab}`;
-    const isDraggable = timelineId === TimelineId.active && activeTab === TimelineTabs.query;
+    let flyoutUniqueKey = scopeId;
+    const contextID = `${scopeId}-${activeTab}`;
+    const isDraggable = scopeId === TimelineId.active && activeTab === TimelineTabs.query;
 
     if (currentTabDetail?.panelView === 'eventDetail' && currentTabDetail?.params?.eventId) {
       panelSize = 'm';
@@ -91,7 +103,7 @@ export const DetailsPanel = React.memo(
           isFlyoutView={isFlyoutView}
           runtimeMappings={runtimeMappings}
           tabType={activeTab}
-          timelineId={timelineId}
+          scopeId={scopeId}
           isReadOnly={isReadOnly}
         />
       );

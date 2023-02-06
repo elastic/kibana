@@ -8,7 +8,8 @@
 import React from 'react';
 import { mount } from 'enzyme';
 
-import { CallOut, CallOutProps } from './callout';
+import type { CallOutProps } from './callout';
+import { CallOut } from './callout';
 import { CLOSED_CASE_PUSH_ERROR_ID } from './types';
 import { TestProviders } from '../../../common/mock';
 
@@ -49,7 +50,7 @@ describe('Callout', () => {
     const className =
       wrapper.find(`button[data-test-subj="callout-onclick-md5-hex"]`).first().prop('className') ??
       '';
-    expect(className.includes('euiButton--primary')).toBeTruthy();
+    expect(className.includes('primary')).toBeTruthy();
   });
 
   it('transform the button color correctly - success', () => {
@@ -57,7 +58,7 @@ describe('Callout', () => {
     const className =
       wrapper.find(`button[data-test-subj="callout-onclick-md5-hex"]`).first().prop('className') ??
       '';
-    expect(className.includes('euiButton--success')).toBeTruthy();
+    expect(className.includes('success')).toBeTruthy();
   });
 
   it('transform the button color correctly - warning', () => {
@@ -65,7 +66,7 @@ describe('Callout', () => {
     const className =
       wrapper.find(`button[data-test-subj="callout-onclick-md5-hex"]`).first().prop('className') ??
       '';
-    expect(className.includes('euiButton--warning')).toBeTruthy();
+    expect(className.includes('warning')).toBeTruthy();
   });
 
   it('transform the button color correctly - danger', () => {
@@ -73,7 +74,7 @@ describe('Callout', () => {
     const className =
       wrapper.find(`button[data-test-subj="callout-onclick-md5-hex"]`).first().prop('className') ??
       '';
-    expect(className.includes('euiButton--danger')).toBeTruthy();
+    expect(className.includes('danger')).toBeTruthy();
   });
 
   it('does not show the button when case is closed error is present', () => {

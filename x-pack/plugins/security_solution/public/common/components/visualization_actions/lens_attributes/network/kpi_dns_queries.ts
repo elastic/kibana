@@ -10,13 +10,14 @@ import type { LensAttributes } from '../../types';
 export const kpiDnsQueriesLensAttributes: LensAttributes = {
   title: '[Network] DNS metric',
   description: '',
-  visualizationType: 'lnsMetric',
+  visualizationType: 'lnsLegacyMetric',
   state: {
     visualization: {
       layerId: 'cea37c70-8f91-43bf-b9fe-72d8c049f6a3',
       accessor: '0374e520-eae0-4ac1-bcfe-37565e7fc9e3',
       layerType: 'data',
       colorMode: 'None',
+      autoScaleMetricAlignment: 'left',
     },
     query: {
       query: '',
@@ -64,7 +65,7 @@ export const kpiDnsQueriesLensAttributes: LensAttributes = {
       },
     ],
     datasourceStates: {
-      indexpattern: {
+      formBased: {
         layers: {
           'cea37c70-8f91-43bf-b9fe-72d8c049f6a3': {
             columns: {

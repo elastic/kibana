@@ -7,16 +7,9 @@
 
 import { Logger } from '@kbn/core/server';
 import { chunk } from 'lodash';
-import { rangeQuery, termsQuery } from '@kbn/observability-plugin/server';
-import { ProcessorEvent } from '@kbn/observability-plugin/common';
-import {
-  AGENT_NAME,
-  SERVICE_ENVIRONMENT,
-  SERVICE_NAME,
-} from '../../../common/elasticsearch_fieldnames';
-import { environmentQuery } from '../../../common/utils/environment_query';
+
 import { withApmSpan } from '../../utils/with_apm_span';
-import { Setup } from '../../lib/helpers/setup_request';
+import { MlClient } from '../../lib/helpers/get_ml_client';
 import {
   DEFAULT_ANOMALIES,
   getServiceAnomalies,
@@ -24,36 +17,44 @@ import {
 import { getServiceMapFromTraceIds } from './get_service_map_from_trace_ids';
 import { getTraceSampleIds } from './get_trace_sample_ids';
 import { transformServiceMapResponses } from './transform_service_map_responses';
-import { ENVIRONMENT_ALL } from '../../../common/environment_filter_values';
-import { getProcessorEventForTransactions } from '../../lib/helpers/transactions';
+import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
+import { APMConfig } from '../..';
+import { getServiceStats } from './get_service_stats';
 
 export interface IEnvOptions {
-  setup: Setup;
-  serviceNames?: string[];
+  mlClient?: MlClient;
+  config: APMConfig;
+  apmEventClient: APMEventClient;
+  serviceName?: string;
   environment: string;
   searchAggregatedTransactions: boolean;
   logger: Logger;
   start: number;
   end: number;
+  serviceGroupKuery?: string;
 }
 
 async function getConnectionData({
-  setup,
-  serviceNames,
+  config,
+  apmEventClient,
+  serviceName,
   environment,
   start,
   end,
+  serviceGroupKuery,
 }: IEnvOptions) {
   return withApmSpan('get_service_map_connections', async () => {
     const { traceIds } = await getTraceSampleIds({
-      setup,
-      serviceNames,
+      config,
+      apmEventClient,
+      serviceName,
       environment,
       start,
       end,
+      serviceGroupKuery,
     });
 
-    const chunks = chunk(traceIds, setup.config.serviceMapMaxTracesPerRequest);
+    const chunks = chunk(traceIds, config.serviceMapMaxTracesPerRequest);
 
     const init = {
       connections: [],
@@ -70,7 +71,7 @@ async function getConnectionData({
         Promise.all(
           chunks.map((traceIdsChunk) =>
             getServiceMapFromTraceIds({
-              setup,
+              apmEventClient,
               traceIds: traceIdsChunk,
               start,
               end,
@@ -90,78 +91,8 @@ async function getConnectionData({
   });
 }
 
-async function getServicesData(
-  options: IEnvOptions & { maxNumberOfServices: number }
-) {
-  const {
-    environment,
-    setup,
-    searchAggregatedTransactions,
-    start,
-    end,
-    maxNumberOfServices,
-  } = options;
-  const params = {
-    apm: {
-      events: [
-        getProcessorEventForTransactions(searchAggregatedTransactions),
-        ProcessorEvent.metric as const,
-        ProcessorEvent.error as const,
-      ],
-    },
-    body: {
-      size: 0,
-      query: {
-        bool: {
-          filter: [
-            ...rangeQuery(start, end),
-            ...environmentQuery(environment),
-            ...termsQuery(SERVICE_NAME, ...(options.serviceNames ?? [])),
-          ],
-        },
-      },
-      aggs: {
-        services: {
-          terms: {
-            field: SERVICE_NAME,
-            size: maxNumberOfServices,
-          },
-          aggs: {
-            agent_name: {
-              terms: {
-                field: AGENT_NAME,
-              },
-            },
-          },
-        },
-      },
-    },
-  };
-
-  const { apmEventClient } = setup;
-
-  const response = await apmEventClient.search(
-    'get_service_stats_for_service_map',
-    params
-  );
-
-  return (
-    response.aggregations?.services.buckets.map((bucket) => {
-      return {
-        [SERVICE_NAME]: bucket.key as string,
-        [AGENT_NAME]:
-          (bucket.agent_name.buckets[0]?.key as string | undefined) || '',
-        [SERVICE_ENVIRONMENT]:
-          options.environment === ENVIRONMENT_ALL.value
-            ? null
-            : options.environment,
-      };
-    }) || []
-  );
-}
-
 export type ConnectionsResponse = Awaited<ReturnType<typeof getConnectionData>>;
-export type ServicesResponse = Awaited<ReturnType<typeof getServicesData>>;
+export type ServicesResponse = Awaited<ReturnType<typeof getServiceStats>>;
 
 export function getServiceMap(
   options: IEnvOptions & { maxNumberOfServices: number }
@@ -180,7 +111,7 @@ export function getServiceMap(
 
     const [connectionData, servicesData, anomalies] = await Promise.all([
       getConnectionData(options),
-      getServicesData(options),
+      getServiceStats(options),
       anomaliesPromise,
     ]);
 

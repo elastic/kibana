@@ -12,14 +12,25 @@ import { i18n } from '@kbn/i18n';
 import { aggTopMetricsFnName } from './top_metrics_fn';
 import { IMetricAggConfig, MetricAggType } from './metric_agg_type';
 import { METRIC_TYPES } from './metric_agg_types';
-import { KBN_FIELD_TYPES } from '../../..';
+import { DataViewField, KBN_FIELD_TYPES } from '../../..';
 import { BaseAggParams } from '../types';
 
-export interface AggParamsTopMetrics extends BaseAggParams {
+export interface BaseAggParamsTopMetrics extends BaseAggParams {
   field: string;
-  sortField?: string;
-  sortOrder?: 'desc' | 'asc';
   size?: number;
+}
+
+export interface AggParamsTopMetricsSerialized extends BaseAggParamsTopMetrics {
+  sortOrder?: 'desc' | 'asc';
+  sortField?: string;
+}
+
+export interface AggParamsTopMetrics extends BaseAggParamsTopMetrics {
+  sortOrder?: {
+    value: 'desc' | 'asc';
+    text: string;
+  };
+  sortField?: DataViewField;
 }
 
 export const getTopMetricsMetricAgg = () => {

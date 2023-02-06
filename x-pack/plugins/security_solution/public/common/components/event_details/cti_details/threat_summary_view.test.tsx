@@ -27,9 +27,17 @@ jest.mock('../../../lib/kibana', () => ({
 jest.mock('../table/action_cell', () => ({ ActionCell: () => <></> }));
 jest.mock('../table/field_name_cell');
 
+const RISK_SCORE_DATA_ROWS = 2;
+
+const EMPTY_RISK_SCORE = {
+  loading: false,
+  isModuleEnabled: true,
+  result: [],
+};
+
 describe('ThreatSummaryView', () => {
   const eventId = '5d1d53da502f56aacc14c3cb5c669363d102b31f99822e5d369d4804ed370a31';
-  const timelineId = 'detections-page';
+  const scopeId = 'alerts-page';
   const data = mockAlertDetailsData as TimelineEventsDetailsItem[];
   const browserFields = mockBrowserFields;
 
@@ -38,6 +46,7 @@ describe('ThreatSummaryView', () => {
       buildEventEnrichmentMock({ 'matched.id': ['test.id'], 'matched.field': ['test.field'] }),
       buildEventEnrichmentMock({ 'matched.id': ['other.id'], 'matched.field': ['other.field'] }),
     ];
+
     const { getByText, getAllByTestId } = render(
       <TestProviders>
         <ThreatSummaryView
@@ -45,14 +54,17 @@ describe('ThreatSummaryView', () => {
           browserFields={browserFields}
           enrichments={enrichments}
           eventId={eventId}
-          timelineId={timelineId}
-          hostRisk={null}
+          scopeId={scopeId}
+          hostRisk={EMPTY_RISK_SCORE}
+          userRisk={EMPTY_RISK_SCORE}
         />
       </TestProviders>
     );
 
     expect(getByText('Enriched with Threat Intelligence')).toBeInTheDocument();
 
-    expect(getAllByTestId('EnrichedDataRow')).toHaveLength(enrichments.length);
+    expect(getAllByTestId('EnrichedDataRow')).toHaveLength(
+      enrichments.length + RISK_SCORE_DATA_ROWS
+    );
   });
 });

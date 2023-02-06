@@ -42,7 +42,7 @@ module.exports = {
   },
   resolve: {
     alias: {
-      core_app_image_assets: path.resolve(KIBANA_ROOT, 'src/core/public/core_app/images'),
+      core_app_image_assets: path.resolve(KIBANA_ROOT, 'src/core/public/styles/core_app/images'),
     },
     extensions: ['.js', '.json', '.ts', '.tsx', '.scss'],
     symlinks: false,
@@ -112,7 +112,7 @@ module.exports = {
             loader: 'postcss-loader',
             options: {
               postcssOptions: {
-                config: require.resolve('@kbn/optimizer/postcss.config.js'),
+                config: require.resolve('@kbn/optimizer/postcss.config'),
               },
             },
           },
@@ -153,7 +153,7 @@ module.exports = {
               additionalData(content, loaderContext) {
                 return `@import ${stringifyRequest(
                   loaderContext,
-                  path.resolve(KIBANA_ROOT, 'src/core/public/core_app/styles/_globals_v8light.scss')
+                  path.resolve(KIBANA_ROOT, 'src/core/public/styles/core_app/_globals_v8light.scss')
                 )};\n${content}`;
               },
               implementation: require('node-sass'),
@@ -186,6 +186,10 @@ module.exports = {
           require.resolve('highlight.js'),
         ],
         use: require.resolve('null-loader'),
+      },
+      {
+        test: /\.peggy$/,
+        use: require.resolve('@kbn/peggy-loader'),
       },
     ],
   },

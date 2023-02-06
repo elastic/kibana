@@ -6,7 +6,6 @@
  */
 import React from 'react';
 import styled from 'styled-components';
-import useWindowSize from 'react-use/lib/useWindowSize';
 
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { EuiImageProps } from '@elastic/eui';
@@ -22,7 +21,7 @@ import {
   EuiLink,
   EuiHideFor,
   EuiShowFor,
-  isWithinMaxBreakpoint,
+  useIsWithinMaxBreakpoint,
 } from '@elastic/eui';
 
 import type { RegistryPolicyTemplate, PackageInfo } from '../../../../../types';
@@ -66,8 +65,7 @@ const CenteredEuiImage = (props: EuiImageProps) => (
 );
 
 const ResponsiveStepGroup: React.FC = ({ children }) => {
-  const { width } = useWindowSize();
-  const isScreenSmall = isWithinMaxBreakpoint(width, 's');
+  const isScreenSmall = useIsWithinMaxBreakpoint('s');
 
   return (
     <EuiFlexGroup
@@ -232,7 +230,7 @@ export const AddFirstIntegrationSplashScreen: React.FC<{
   error?: RequestError | null;
   packageInfo?: PackageInfo;
   isLoading: boolean;
-  cancelClickHandler: React.ReactEventHandler;
+  cancelClickHandler?: React.ReactEventHandler;
   cancelUrl: string;
   onNext: () => void;
 }> = ({
@@ -278,6 +276,12 @@ export const AddFirstIntegrationSplashScreen: React.FC<{
         </NotObscuredByBottomBar>
         <CreatePackagePolicyBottomBar
           cancelUrl={cancelUrl}
+          cancelMessage={
+            <FormattedMessage
+              id="xpack.fleet.createPackagePolicyBottomBar.skipAddAgentButton"
+              defaultMessage="Add integration only (skip agent installation)"
+            />
+          }
           cancelClickHandler={cancelClickHandler}
           isLoading={isLoading}
           onNext={onNext}

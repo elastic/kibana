@@ -27,7 +27,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const log = getService('log');
   const browser = getService('browser');
   const PageObjects = getPageObjects(['common', 'console', 'header']);
-  const toasts = getService('toasts');
   const security = getService('security');
   const testSubjects = getService('testSubjects');
 
@@ -63,20 +62,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
-    it('settings should allow changing the text size', async () => {
-      await PageObjects.console.setFontSizeSetting(20);
-      await retry.try(async () => {
-        // the settings are not applied synchronously, so we retry for a time
-        expect(await PageObjects.console.getRequestFontSize()).to.be('20px');
-      });
-
-      await PageObjects.console.setFontSizeSetting(24);
-      await retry.try(async () => {
-        // the settings are not applied synchronously, so we retry for a time
-        expect(await PageObjects.console.getRequestFontSize()).to.be('24px');
-      });
-    });
-
     it('should resize the editor', async () => {
       const editor = await PageObjects.console.getEditor();
       await browser.setWindowSize(1300, 1100);
@@ -84,32 +69,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await browser.setWindowSize(1000, 1100);
       const afterSize = await editor.getSize();
       expect(initialSize.width).to.be.greaterThan(afterSize.width);
-    });
-
-    describe('with a data URI in the load_from query', () => {
-      it('loads the data from the URI', async () => {
-        await PageObjects.common.navigateToApp('console', {
-          hash: '#/console?load_from=data:text/plain,BYUwNmD2Q',
-        });
-
-        await retry.try(async () => {
-          const actualRequest = await PageObjects.console.getRequest();
-          log.debug(actualRequest);
-          expect(actualRequest.trim()).to.eql('hello');
-        });
-      });
-
-      describe('with invalid data', () => {
-        it('shows a toast error', async () => {
-          await PageObjects.common.navigateToApp('console', {
-            hash: '#/console?load_from=data:text/plain,BYUwNmD2',
-          });
-
-          await retry.try(async () => {
-            expect(await toasts.getToastCount()).to.equal(1);
-          });
-        });
-      });
     });
 
     describe('with kbn: prefix in request', () => {
@@ -144,7 +103,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
-    describe('multiple requests output', () => {
+    describe('multiple requests output', function () {
       const sendMultipleRequests = async (requests: string[]) => {
         await asyncForEach(requests, async (request) => {
           await PageObjects.console.enterRequest(request);

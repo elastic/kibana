@@ -125,6 +125,7 @@ export const useIndexData = (
     }
 
     fetchDataGridSampleDocuments();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // To be used for data grid column selection
@@ -151,8 +152,7 @@ export const useIndexData = (
     pagination,
     resetPagination,
     setErrorMessage,
-    setRowCount,
-    setRowCountRelation,
+    setRowCountInfo,
     setStatus,
     setTableItems,
     sortingColumns,
@@ -162,6 +162,7 @@ export const useIndexData = (
   useEffect(() => {
     resetPagination();
     // custom comparison
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [JSON.stringify(query)]);
 
   useEffect(() => {
@@ -197,12 +198,13 @@ export const useIndexData = (
         const resp: IndexSearchResponse = await ml.esSearch(esSearchRequest);
         const docs = resp.hits.hits.map((d) => getProcessedFields(d.fields ?? {}));
 
-        setRowCount(typeof resp.hits.total === 'number' ? resp.hits.total : resp.hits.total!.value);
-        setRowCountRelation(
-          typeof resp.hits.total === 'number'
-            ? ('eq' as estypes.SearchTotalHitsRelation)
-            : resp.hits.total!.relation
-        );
+        setRowCountInfo({
+          rowCount: typeof resp.hits.total === 'number' ? resp.hits.total : resp.hits.total!.value,
+          rowCountRelation:
+            typeof resp.hits.total === 'number'
+              ? ('eq' as estypes.SearchTotalHitsRelation)
+              : resp.hits.total!.relation,
+        });
         setTableItems(docs);
         setStatus(INDEX_STATUS.LOADED);
       } catch (e) {
@@ -215,14 +217,17 @@ export const useIndexData = (
       fetchIndexData();
     }
     // custom comparison
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     indexPattern.title,
     indexPatternFields,
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     JSON.stringify([query, pagination, sortingColumns, combinedRuntimeMappings]),
   ]);
 
   const dataLoader = useMemo(
     () => new DataLoader(indexPattern, toastNotifications),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [indexPattern]
   );
 
@@ -250,9 +255,11 @@ export const useIndexData = (
       fetchColumnChartsData(query);
     }
     // custom comparison
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     dataGrid.chartsVisible,
     indexPattern.title,
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     JSON.stringify([query, dataGrid.visibleColumns, runtimeMappings]),
   ]);
 

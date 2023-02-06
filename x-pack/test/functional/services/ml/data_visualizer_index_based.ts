@@ -17,6 +17,12 @@ export function MachineLearningDataVisualizerIndexBasedProvider({
   const PageObjects = getPageObjects(['discover']);
   const queryBar = getService('queryBar');
   const filterBar = getService('filterBar');
+  const browser = getService('browser');
+
+  type RandomSamplerOption =
+    | 'dvRandomSamplerOptionOnAutomatic'
+    | 'dvRandomSamplerOptionOnManual'
+    | 'dvRandomSamplerOptionOff';
 
   return {
     async assertTimeRangeSelectorSectionExists() {
@@ -33,11 +39,15 @@ export function MachineLearningDataVisualizerIndexBasedProvider({
       });
     },
 
-    async clickUseFullDataButton(expectedFormattedTotalDocCount: string) {
+    async clickUseFullDataButton(
+      expectedFormattedTotalDocCount: string,
+      randomSamplerOption: RandomSamplerOption = 'dvRandomSamplerOptionOff'
+    ) {
       await retry.tryForTime(30 * 1000, async () => {
-        await testSubjects.clickWhenNotDisabled('dataVisualizerButtonUseFullData');
-        await testSubjects.clickWhenNotDisabled('superDatePickerApplyTimeButton');
-        await this.assertTotalDocumentCount(expectedFormattedTotalDocCount);
+        await testSubjects.clickWhenNotDisabledWithoutRetry('mlDatePickerButtonUseFullData');
+        await testSubjects.clickWhenNotDisabledWithoutRetry('superDatePickerApplyTimeButton');
+        await this.setRandomSamplingOption(randomSamplerOption);
+        await await this.assertTotalDocumentCount(expectedFormattedTotalDocCount);
       });
     },
 
@@ -154,7 +164,7 @@ export function MachineLearningDataVisualizerIndexBasedProvider({
     },
 
     async clickCreateAdvancedJobButton() {
-      await testSubjects.clickWhenNotDisabled('dataVisualizerCreateAdvancedJobCard');
+      await testSubjects.clickWhenNotDisabledWithoutRetry('dataVisualizerCreateAdvancedJobCard');
     },
 
     async assertCreateDataFrameAnalyticsCardExists() {
@@ -183,7 +193,7 @@ export function MachineLearningDataVisualizerIndexBasedProvider({
 
     async clickViewInDiscoverButton() {
       await retry.tryForTime(5000, async () => {
-        await testSubjects.clickWhenNotDisabled('dataVisualizerViewInDiscoverCard');
+        await testSubjects.clickWhenNotDisabledWithoutRetry('dataVisualizerViewInDiscoverCard');
         await PageObjects.discover.waitForDiscoverAppOnScreen();
       });
     },
@@ -230,6 +240,81 @@ export function MachineLearningDataVisualizerIndexBasedProvider({
           );
         }
       );
+    },
+
+    async assertRandomSamplingOptionsButtonExists() {
+      await testSubjects.existOrFail('dvRandomSamplerOptionsButton');
+    },
+
+    async assertRandomSamplingOption(
+      expectedOption: RandomSamplerOption,
+      expectedProbability?: number
+    ) {
+      await retry.tryForTime(20000, async () => {
+        await browser.pressKeys(browser.keys.ESCAPE);
+        await testSubjects.clickWhenNotDisabled('dvRandomSamplerOptionsButton');
+        await testSubjects.existOrFail('dvRandomSamplerOptionsPopover');
+
+        if (expectedOption === 'dvRandomSamplerOptionOff') {
+          await testSubjects.existOrFail('dvRandomSamplerOptionOff', { timeout: 1000 });
+          await testSubjects.missingOrFail('dvRandomSamplerProbabilityRange', { timeout: 1000 });
+          await testSubjects.missingOrFail('dvRandomSamplerAutomaticProbabilityMsg', {
+            timeout: 1000,
+          });
+        }
+
+        if (expectedOption === 'dvRandomSamplerOptionOnManual') {
+          await testSubjects.existOrFail('dvRandomSamplerOptionOnManual', { timeout: 1000 });
+          await testSubjects.existOrFail('dvRandomSamplerProbabilityRange', { timeout: 1000 });
+          if (expectedProbability !== undefined) {
+            const probability = await testSubjects.getAttribute(
+              'dvRandomSamplerProbabilityRange',
+              'value'
+            );
+            expect(probability).to.eql(
+              `${expectedProbability}`,
+              `Expected probability to be ${expectedProbability}, got ${probability}`
+            );
+          }
+        }
+
+        if (expectedOption === 'dvRandomSamplerOptionOnAutomatic') {
+          await testSubjects.existOrFail('dvRandomSamplerOptionOnAutomatic', { timeout: 1000 });
+          await testSubjects.existOrFail('dvRandomSamplerAutomaticProbabilityMsg', {
+            timeout: 1000,
+          });
+
+          if (expectedProbability !== undefined) {
+            const probabilityText = await testSubjects.getVisibleText(
+              'dvRandomSamplerAutomaticProbabilityMsg'
+            );
+            expect(probabilityText).to.contain(
+              `${expectedProbability}`,
+              `Expected probability text to contain ${expectedProbability}, got ${probabilityText}`
+            );
+          }
+        }
+      });
+    },
+
+    async setRandomSamplingOption(option: RandomSamplerOption) {
+      await retry.tryForTime(20000, async () => {
+        // escape popover
+        await browser.pressKeys(browser.keys.ESCAPE);
+        await this.assertRandomSamplingOptionsButtonExists();
+        await testSubjects.clickWhenNotDisabled('dvRandomSamplerOptionsButton');
+        await testSubjects.existOrFail('dvRandomSamplerOptionsPopover', { timeout: 1000 });
+
+        await testSubjects.clickWhenNotDisabled('dvRandomSamplerOptionsSelect');
+
+        await testSubjects.existOrFail('dvRandomSamplerOptionOff', { timeout: 1000 });
+        await testSubjects.existOrFail('dvRandomSamplerOptionOnManual', { timeout: 1000 });
+        await testSubjects.existOrFail('dvRandomSamplerOptionOnAutomatic', { timeout: 1000 });
+
+        await testSubjects.click(option);
+
+        await this.assertRandomSamplingOption(option);
+      });
     },
   };
 }

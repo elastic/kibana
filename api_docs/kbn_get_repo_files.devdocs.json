@@ -10,10 +10,18 @@
   },
   "server": {
     "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
     "functions": [
       {
         "parentPluginId": "@kbn/get-repo-files",
-        "id": "def-server.getRepoFiles",
+        "id": "def-common.getRepoFiles",
         "type": "Function",
         "tags": [],
         "label": "getRepoFiles",
@@ -21,14 +29,23 @@
           "\nList the files in the repo, only including files which are manged by version\ncontrol or \"untracked\" (new, not committed, and not ignored)."
         ],
         "signature": [
-          "(include: string[] | undefined, exclude: string[] | undefined) => Promise<Set<RepoPath>>"
+          "(include: string[] | undefined, exclude: string[] | undefined) => Promise<Set<",
+          {
+            "pluginId": "@kbn/repo-path",
+            "scope": "common",
+            "docId": "kibKbnRepoPathPluginApi",
+            "section": "def-common.RepoPath",
+            "text": "RepoPath"
+          },
+          ">>"
         ],
         "path": "packages/kbn-get-repo-files/src/get_repo_files.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/get-repo-files",
-            "id": "def-server.getRepoFiles.$1",
+            "id": "def-common.getRepoFiles.$1",
             "type": "Array",
             "tags": [],
             "label": "include",
@@ -40,11 +57,12 @@
             ],
             "path": "packages/kbn-get-repo-files/src/get_repo_files.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": false
           },
           {
             "parentPluginId": "@kbn/get-repo-files",
-            "id": "def-server.getRepoFiles.$2",
+            "id": "def-common.getRepoFiles.$2",
             "type": "Array",
             "tags": [],
             "label": "exclude",
@@ -56,6 +74,69 @@
             ],
             "path": "packages/kbn-get-repo-files/src/get_repo_files.ts",
             "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/get-repo-files",
+        "id": "def-common.getRepoFilesSync",
+        "type": "Function",
+        "tags": [],
+        "label": "getRepoFilesSync",
+        "description": [
+          "\nSynchronously list the files in the repo, only including files which are manged by version\ncontrol or \"untracked\" (new, not committed, and not ignored)."
+        ],
+        "signature": [
+          "(include: string[] | undefined, exclude: string[] | undefined) => Set<",
+          {
+            "pluginId": "@kbn/repo-path",
+            "scope": "common",
+            "docId": "kibKbnRepoPathPluginApi",
+            "section": "def-common.RepoPath",
+            "text": "RepoPath"
+          },
+          ">"
+        ],
+        "path": "packages/kbn-get-repo-files/src/get_repo_files.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/get-repo-files",
+            "id": "def-common.getRepoFilesSync.$1",
+            "type": "Array",
+            "tags": [],
+            "label": "include",
+            "description": [
+              "limit the list to specfic absolute paths"
+            ],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "packages/kbn-get-repo-files/src/get_repo_files.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          },
+          {
+            "parentPluginId": "@kbn/get-repo-files",
+            "id": "def-common.getRepoFilesSync.$2",
+            "type": "Array",
+            "tags": [],
+            "label": "exclude",
+            "description": [
+              "exclude specific absolute paths"
+            ],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "packages/kbn-get-repo-files/src/get_repo_files.ts",
+            "deprecated": false,
+            "trackAdoption": false,
             "isRequired": false
           }
         ],
@@ -63,14 +144,6 @@
         "initialIsOpen": false
       }
     ],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
-    "objects": []
-  },
-  "common": {
-    "classes": [],
-    "functions": [],
     "interfaces": [],
     "enums": [],
     "misc": [],

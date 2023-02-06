@@ -1,0 +1,5 @@
+{
+  "type": "shared-common",
+  "id": "@kbn/shared-svg",
+  "owner": "@elastic/apm-ui"
+}

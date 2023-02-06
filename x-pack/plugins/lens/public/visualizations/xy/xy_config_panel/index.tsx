@@ -11,6 +11,7 @@ import { Position, ScaleType } from '@elastic/charts';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { AxisExtentConfig } from '@kbn/expression-xy-plugin/common';
 import { LegendSize } from '@kbn/visualizations-plugin/public';
+import type { LegendSettingsPopoverProps } from '../../../shared_components/legend/legend_settings_popover';
 import type { VisualizationToolbarProps, FramePublicAPI } from '../../../types';
 import { State, XYState, AxesSettingsConfig } from '../types';
 import { isHorizontalChart } from '../state_helpers';
@@ -22,7 +23,6 @@ import { getScaleType } from '../to_expression';
 import { TooltipWrapper } from '../../../shared_components';
 import { getDefaultVisualValuesForLayer } from '../../../shared_components/datasource_default_values';
 import { getDataLayers } from '../visualization_helpers';
-import { LegendSettingsPopoverProps } from '../../../shared_components/legend_settings_popover';
 
 type UnwrapArray<T> = T extends Array<infer P> ? P : T;
 type AxesSettingsConfigKeys = keyof AxesSettingsConfig;
@@ -219,20 +219,31 @@ export const XyToolbar = memo(function XyToolbar(
       ) !== 'ordinal'
   );
 
-  // only allow changing endzone visibility if it could show up theoretically (if it's a time viz)
-  const onChangeEndzoneVisiblity = dataLayers.every(
+  const isTimeVis = dataLayers.every(
     (layer) =>
       layer.xAccessor &&
       getScaleType(
         props.frame.datasourceLayers[layer.layerId]?.getOperationForColumnId(layer.xAccessor) ??
           null,
         ScaleType.Linear
-      ) === 'time'
-  )
+      ) === ScaleType.Time
+  );
+
+  // only allow changing endzone visibility if it could show up theoretically (if it's a time viz)
+  const onChangeEndzoneVisiblity = isTimeVis
     ? (checked: boolean): void => {
         setState({
           ...state,
           hideEndzones: !checked,
+        });
+      }
+    : undefined;
+
+  const onChangeCurrentTimeMarkerVisibility = isTimeVis
+    ? (checked: boolean): void => {
+        setState({
+          ...state,
+          showCurrentTimeMarker: checked,
         });
       }
     : undefined;
@@ -503,6 +514,8 @@ export const XyToolbar = memo(function XyToolbar(
             isAxisTitleVisible={axisTitlesVisibilitySettings.x}
             endzonesVisible={!state?.hideEndzones}
             setEndzoneVisibility={onChangeEndzoneVisiblity}
+            currentTimeMarkerVisible={state?.showCurrentTimeMarker}
+            setCurrentTimeMarkerVisibility={onChangeCurrentTimeMarkerVisibility}
             hasBarOrAreaOnAxis={false}
             hasPercentageAxis={false}
             useMultilayerTimeAxis={

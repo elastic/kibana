@@ -5,7 +5,6 @@
  * 2.0.
  */
 import React, { useState } from 'react';
-import useWindowSize from 'react-use/lib/useWindowSize';
 import useDebounce from 'react-use/lib/useDebounce';
 import {
   EuiButtonIcon,
@@ -15,7 +14,7 @@ import {
   EuiLink,
   EuiPanel,
   EuiSpacer,
-  getBreakpoint,
+  useCurrentEuiBreakpoint,
 } from '@elastic/eui';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { X509Expiry } from '../../../../../common/runtime_types';
@@ -31,7 +30,7 @@ import { MonitorListProps } from './monitor_list_container';
 import { MonitorList } from '../../../state/reducers/monitor_list';
 import { CertStatusColumn } from './columns/cert_status_column';
 import { MonitorListHeader } from './monitor_list_header';
-import { TAGS_LABEL, URL_LABEL } from '../../common/translations';
+import { TAGS_LABEL, URL_LABEL } from '../../../../../common/translations/translations';
 import { EnableMonitorAlert } from './columns/enable_alert';
 import { STATUS_ALERT_COLUMN, TEST_NOW_COLUMN } from './translations';
 import { MonitorNameColumn } from './columns/monitor_name_col';
@@ -45,6 +44,7 @@ interface Props extends MonitorListProps {
   setPageSize: (val: number) => void;
   monitorList: MonitorList;
   refreshedMonitorIds: string[];
+  isPending?: boolean;
 }
 
 export const MonitorListComponent: ({
@@ -53,23 +53,27 @@ export const MonitorListComponent: ({
   pageSize,
   refreshedMonitorIds,
   setPageSize,
+  isPending,
 }: Props) => any = ({
   filters,
   refreshedMonitorIds = [],
   monitorList: { list, error, loading },
   pageSize,
   setPageSize,
+  isPending,
 }) => {
   const [expandedDrawerIds, updateExpandedDrawerIds] = useState<string[]>([]);
-  const { width } = useWindowSize();
+  const currentBreakpoint = useCurrentEuiBreakpoint();
   const [hideExtraColumns, setHideExtraColumns] = useState(false);
 
   useDebounce(
     () => {
-      setHideExtraColumns(['m', 'l'].includes(getBreakpoint(width) ?? ''));
+      if (currentBreakpoint) {
+        setHideExtraColumns(['m', 'l'].includes(currentBreakpoint));
+      }
     },
     50,
-    [width]
+    [currentBreakpoint]
   );
 
   const items = list.summaries ?? [];
@@ -211,7 +215,7 @@ export const MonitorListComponent: ({
         <TestNowColumn
           monitorId={item.monitor_id}
           configId={item.configId}
-          selectedMonitor={item.state.summaryPings[0]}
+          summaryPings={item.state.summaryPings}
         />
       ),
     },
@@ -246,13 +250,15 @@ export const MonitorListComponent: ({
       <EuiBasicTable
         aria-label={labels.getDescriptionLabel(items.length)}
         error={error?.body?.message || error?.message}
-        loading={loading}
+        loading={loading || isPending}
         isExpandable={true}
         hasActions={true}
         itemId="monitor_id"
         itemIdToExpandedRowMap={getExpandedRowMap()}
         items={items}
-        noItemsMessage={<NoItemsMessage loading={loading} filters={filters} />}
+        noItemsMessage={
+          <NoItemsMessage loading={Boolean(loading || isPending)} filters={filters} />
+        }
         columns={columns}
         tableLayout={'auto'}
         rowProps={

@@ -7,9 +7,10 @@
 
 import type { ToolingLog } from '@kbn/tooling-log';
 import type SuperTest from 'supertest';
-import type { PrePackagedRulesAndTimelinesStatusSchema } from '@kbn/security-solution-plugin/common/detection_engine/schemas/response';
-
-import { DETECTION_ENGINE_PREPACKAGED_URL } from '@kbn/security-solution-plugin/common/constants';
+import {
+  PREBUILT_RULES_STATUS_URL,
+  GetPrebuiltRulesAndTimelinesStatusResponse,
+} from '@kbn/security-solution-plugin/common/detection_engine/prebuilt_rules';
 
 /**
  * Helper to cut down on the noise in some of the tests. This
@@ -19,11 +20,8 @@ import { DETECTION_ENGINE_PREPACKAGED_URL } from '@kbn/security-solution-plugin/
 export const getPrePackagedRulesStatus = async (
   supertest: SuperTest.SuperTest<SuperTest.Test>,
   log: ToolingLog
-): Promise<PrePackagedRulesAndTimelinesStatusSchema> => {
-  const response = await supertest
-    .get(`${DETECTION_ENGINE_PREPACKAGED_URL}/_status`)
-    .set('kbn-xsrf', 'true')
-    .send();
+): Promise<GetPrebuiltRulesAndTimelinesStatusResponse> => {
+  const response = await supertest.get(PREBUILT_RULES_STATUS_URL).set('kbn-xsrf', 'true').send();
 
   if (response.status !== 200) {
     log.error(

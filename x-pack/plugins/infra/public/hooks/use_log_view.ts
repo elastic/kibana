@@ -5,123 +5,133 @@
  * 2.0.
  */
 
+import { useInterpret, useSelector } from '@xstate/react';
 import createContainer from 'constate';
-import { useCallback, useEffect, useMemo, useState } from 'react';
-import type { HttpHandler } from '@kbn/core/public';
-import { LogView, LogViewAttributes, LogViewStatus, ResolvedLogView } from '../../common/log_views';
+import { useCallback, useEffect, useState } from 'react';
+import { waitFor } from 'xstate/lib/waitFor';
+import { LogViewAttributes } from '../../common/log_views';
+import {
+  createLogViewNotificationChannel,
+  createLogViewStateMachine,
+} from '../observability_logs/log_view_state';
 import type { ILogViewsClient } from '../services/log_views';
-import { isRejectedPromiseState, useTrackedPromise } from '../utils/use_tracked_promise';
+import { isDevMode } from '../utils/dev_mode';
 
 export const useLogView = ({
   logViewId,
   logViews,
-  fetch,
+  useDevTools = isDevMode(),
 }: {
   logViewId: string;
   logViews: ILogViewsClient;
-  fetch: HttpHandler;
+  useDevTools?: boolean;
 }) => {
-  const [logView, setLogView] = useState<LogView | undefined>(undefined);
+  const [logViewStateNotifications] = useState(() => createLogViewNotificationChannel());
 
-  const [resolvedLogView, setResolvedLogView] = useState<ResolvedLogView | undefined>(undefined);
-
-  const [logViewStatus, setLogViewStatus] = useState<LogViewStatus | undefined>(undefined);
-
-  const [loadLogViewRequest, loadLogView] = useTrackedPromise(
+  const logViewStateService = useInterpret(
+    () =>
+      createLogViewStateMachine({
+        initialContext: {
+          logViewId,
+        },
+        logViews,
+        notificationChannel: logViewStateNotifications,
+      }),
     {
-      cancelPreviousOn: 'resolution',
-      createPromise: logViews.getLogView.bind(logViews),
-      onResolve: setLogView,
-    },
-    [logViews]
+      devTools: useDevTools,
+    }
   );
 
-  const [resolveLogViewRequest, resolveLogView] = useTrackedPromise(
-    {
-      cancelPreviousOn: 'resolution',
-      createPromise: logViews.resolveLogView.bind(logViews),
-      onResolve: setResolvedLogView,
-    },
-    [logViews]
+  useEffect(() => {
+    logViewStateService.send({
+      type: 'LOG_VIEW_ID_CHANGED',
+      logViewId,
+    });
+  }, [logViewId, logViewStateService]);
+
+  const logView = useSelector(logViewStateService, (state) =>
+    state.matches('resolving') || state.matches('checkingStatus') || state.matches('resolved')
+      ? state.context.logView
+      : undefined
   );
 
-  const [updateLogViewRequest, updateLogView] = useTrackedPromise(
-    {
-      cancelPreviousOn: 'resolution',
-      createPromise: logViews.putLogView.bind(logViews),
-      onResolve: setLogView,
-    },
-    [logViews]
+  const resolvedLogView = useSelector(logViewStateService, (state) =>
+    state.matches('checkingStatus') || state.matches('resolved')
+      ? state.context.resolvedLogView
+      : undefined
   );
 
-  const [loadLogViewStatusRequest, loadLogViewStatus] = useTrackedPromise(
-    {
-      cancelPreviousOn: 'resolution',
-      createPromise: logViews.getResolvedLogViewStatus.bind(logViews),
-      onResolve: setLogViewStatus,
-    },
-    [logViews]
+  const logViewStatus = useSelector(logViewStateService, (state) =>
+    state.matches('resolved') ? state.context.status : undefined
   );
 
-  const derivedDataView = useMemo(
-    () => ({
-      fields: resolvedLogView?.fields ?? [],
-      title: resolvedLogView?.indices ?? 'unknown',
-    }),
-    [resolvedLogView]
+  const isLoadingLogView = useSelector(logViewStateService, (state) => state.matches('loading'));
+  const isResolvingLogView = useSelector(logViewStateService, (state) =>
+    state.matches('resolving')
   );
-
-  const isLoadingLogView = loadLogViewRequest.state === 'pending';
-  const isResolvingLogView = resolveLogViewRequest.state === 'pending';
-  const isLoadingLogViewStatus = loadLogViewStatusRequest.state === 'pending';
-  const isUpdatingLogView = updateLogViewRequest.state === 'pending';
+  const isLoadingLogViewStatus = useSelector(logViewStateService, (state) =>
+    state.matches('checkingStatus')
+  );
+  const isUpdatingLogView = useSelector(logViewStateService, (state) => state.matches('updating'));
 
   const isLoading =
     isLoadingLogView || isResolvingLogView || isLoadingLogViewStatus || isUpdatingLogView;
 
-  const isUninitialized = loadLogViewRequest.state === 'uninitialized';
+  const isUninitialized = useSelector(logViewStateService, (state) =>
+    state.matches('uninitialized')
+  );
 
-  const hasFailedLoadingLogView = loadLogViewRequest.state === 'rejected';
-  const hasFailedResolvingLogView = resolveLogViewRequest.state === 'rejected';
-  const hasFailedLoadingLogViewStatus = loadLogViewStatusRequest.state === 'rejected';
+  const hasFailedLoadingLogView = useSelector(logViewStateService, (state) =>
+    state.matches('loadingFailed')
+  );
+  const hasFailedResolvingLogView = useSelector(logViewStateService, (state) =>
+    state.matches('resolutionFailed')
+  );
+  const hasFailedLoadingLogViewStatus = useSelector(logViewStateService, (state) =>
+    state.matches('checkingStatusFailed')
+  );
 
-  const latestLoadLogViewFailures = [
-    loadLogViewRequest,
-    resolveLogViewRequest,
-    loadLogViewStatusRequest,
-  ]
-    .filter(isRejectedPromiseState)
-    .map(({ value }) => (value instanceof Error ? value : new Error(`${value}`)));
+  const latestLoadLogViewFailures = useSelector(logViewStateService, (state) =>
+    state.matches('loadingFailed') ||
+    state.matches('resolutionFailed') ||
+    state.matches('checkingStatusFailed')
+      ? [state.context.error]
+      : []
+  );
 
   const hasFailedLoading = latestLoadLogViewFailures.length > 0;
 
-  const load = useCallback(async () => {
-    const loadedLogView = await loadLogView(logViewId);
-    const resolvedLoadedLogView = await resolveLogView(loadedLogView.attributes);
-    const resolvedLogViewStatus = await loadLogViewStatus(resolvedLoadedLogView);
-
-    return [loadedLogView, resolvedLoadedLogView, resolvedLogViewStatus];
-  }, [logViewId, loadLogView, loadLogViewStatus, resolveLogView]);
+  const retry = useCallback(
+    () =>
+      logViewStateService.send({
+        type: 'RETRY',
+      }),
+    [logViewStateService]
+  );
 
   const update = useCallback(
     async (logViewAttributes: Partial<LogViewAttributes>) => {
-      const updatedLogView = await updateLogView(logViewId, logViewAttributes);
-      const resolvedUpdatedLogView = await resolveLogView(updatedLogView.attributes);
-      const resolvedLogViewStatus = await loadLogViewStatus(resolvedUpdatedLogView);
+      logViewStateService.send({
+        type: 'UPDATE',
+        attributes: logViewAttributes,
+      });
 
-      return [updatedLogView, resolvedUpdatedLogView, resolvedLogViewStatus];
+      const doneState = await waitFor(
+        logViewStateService,
+        (state) => state.matches('updatingFailed') || state.matches('resolved')
+      );
+
+      if (doneState.matches('updatingFailed')) {
+        throw doneState.context.error;
+      }
     },
-    [logViewId, loadLogViewStatus, resolveLogView, updateLogView]
+    [logViewStateService]
   );
 
-  useEffect(() => {
-    load();
-  }, [load]);
-
   return {
-    logViewId,
-    isUninitialized,
-    derivedDataView,
+    // underlying state machine
+    logViewStateService,
+    logViewStateNotifications,
 
     // Failure states
     hasFailedLoading,
@@ -131,18 +141,22 @@ export const useLogView = ({
     latestLoadLogViewFailures,
 
     // Loading states
+    isUninitialized,
     isLoading,
     isLoadingLogView,
     isLoadingLogViewStatus,
     isResolvingLogView,
 
     // data
+    logViewId,
     logView,
     resolvedLogView,
     logViewStatus,
+    derivedDataView: resolvedLogView?.dataViewReference,
 
     // actions
-    load,
+    load: retry,
+    retry,
     update,
   };
 };

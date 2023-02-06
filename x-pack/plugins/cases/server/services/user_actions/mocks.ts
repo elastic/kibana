@@ -7,13 +7,8 @@
 
 import { CASE_SAVED_OBJECT } from '../../../common/constants';
 import { SECURITY_SOLUTION_OWNER } from '../../../common';
-import {
-  CasePostRequest,
-  CaseSeverity,
-  CaseStatuses,
-  CommentType,
-  ConnectorTypes,
-} from '../../../common/api';
+import type { CasePostRequest } from '../../../common/api';
+import { CaseSeverity, CaseStatuses, CommentType, ConnectorTypes } from '../../../common/api';
 import { createCaseSavedObjectResponse } from '../test_utils';
 import { transformSavedObjectToExternalModel } from '../cases/transform';
 

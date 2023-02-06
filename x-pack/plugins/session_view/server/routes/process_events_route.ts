@@ -22,6 +22,7 @@ import {
 } from '../../common/constants';
 import { ProcessEvent } from '../../common/types/process_tree';
 import { searchAlerts } from './alerts_route';
+import { searchProcessWithIOEvents } from './io_events_route';
 
 export const registerProcessEventsRoute = (
   router: IRouter,
@@ -35,13 +36,14 @@ export const registerProcessEventsRoute = (
           sessionEntityId: schema.string(),
           cursor: schema.maybe(schema.string()),
           forward: schema.maybe(schema.boolean()),
+          pageSize: schema.maybe(schema.number()),
         }),
       },
     },
     async (context, request, response) => {
       const client = (await context.core).elasticsearch.client.asCurrentUser;
       const alertsClient = await ruleRegistry.getRacClientWithRequest(request);
-      const { sessionEntityId, cursor, forward } = request.query;
+      const { sessionEntityId, cursor, forward, pageSize } = request.query;
 
       try {
         const body = await fetchEventsAndScopedAlerts(
@@ -49,7 +51,8 @@ export const registerProcessEventsRoute = (
           alertsClient,
           sessionEntityId,
           cursor,
-          forward
+          forward,
+          pageSize
         );
 
         return response.ok({ body });
@@ -70,7 +73,8 @@ export const fetchEventsAndScopedAlerts = async (
   alertsClient: AlertsClient,
   sessionEntityId: string,
   cursor?: string,
-  forward = true
+  forward = true,
+  pageSize = PROCESS_EVENTS_PER_PAGE
 ) => {
   const cursorMillis = cursor && new Date(cursor).getTime() + (forward ? -1 : 1);
 
@@ -93,7 +97,7 @@ export const fetchEventsAndScopedAlerts = async (
           ],
         },
       },
-      size: PROCESS_EVENTS_PER_PAGE,
+      size: Math.min(pageSize, PROCESS_EVENTS_PER_PAGE),
       sort: [{ '@timestamp': forward ? 'asc' : 'desc' }],
       search_after: cursorMillis ? [cursorMillis] : undefined,
     },
@@ -127,7 +131,9 @@ export const fetchEventsAndScopedAlerts = async (
       range
     );
 
-    events = [...events, ...alertsBody.events];
+    const processesWithIOEvents = await searchProcessWithIOEvents(client, sessionEntityId, range);
+
+    events = [...events, ...alertsBody.events, ...processesWithIOEvents];
   }
 
   return {

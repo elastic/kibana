@@ -60,6 +60,13 @@ export const ALERTS = (totalAlerts: number) =>
 export const ALERTS_TEXT = i18n.translate('xpack.securitySolution.detectionResponse.alerts', {
   defaultMessage: 'Alerts',
 });
+export const ALERTS_BY_SEVERITY_TEXT = i18n.translate(
+  'xpack.securitySolution.detectionResponse.alertsBySeverity',
+  {
+    defaultMessage: 'Alerts by Severity',
+  }
+);
+
 export const UPDATING = i18n.translate('xpack.securitySolution.detectionResponse.updating', {
   defaultMessage: 'Updating...',
 });
@@ -246,5 +253,11 @@ export const USER_TOOLTIP = i18n.translate(
   'xpack.securitySolution.detectionResponse.userSectionTooltip',
   {
     defaultMessage: 'Maximum of 100 users. Please consult Alerts page for further information.',
+  }
+);
+export const INVESTIGATE_IN_TIMELINE = i18n.translate(
+  'xpack.securitySolution.detectionResponse.investigateInTimeline',
+  {
+    defaultMessage: 'Investigate in Timeline',
   }
 );

@@ -8,12 +8,8 @@
 import pMap from 'p-map';
 import semver from 'semver';
 import type LRU from 'lru-cache';
-import { isEqual, isEmpty } from 'lodash';
-import {
-  type Logger,
-  type SavedObjectsClientContract,
-  SavedObjectsErrorHelpers,
-} from '@kbn/core/server';
+import { isEqual, isEmpty, keyBy } from 'lodash';
+import { type Logger, type SavedObjectsClientContract } from '@kbn/core/server';
 import {
   ENDPOINT_EVENT_FILTERS_LIST_ID,
   ENDPOINT_TRUSTED_APPS_LIST_ID,
@@ -21,7 +17,7 @@ import {
   ENDPOINT_HOST_ISOLATION_EXCEPTIONS_LIST_ID,
 } from '@kbn/securitysolution-list-constants';
 import type { ListResult } from '@kbn/fleet-plugin/common';
-import type { PackagePolicyServiceInterface } from '@kbn/fleet-plugin/server';
+import type { PackagePolicyClient } from '@kbn/fleet-plugin/server';
 import type { ExceptionListClient } from '@kbn/lists-plugin/server';
 import type { ManifestSchemaVersion } from '../../../../../common/endpoint/schema/common';
 import type { ManifestSchema } from '../../../../../common/endpoint/schema/manifest';
@@ -92,7 +88,7 @@ export interface ManifestManagerContext {
   savedObjectsClient: SavedObjectsClientContract;
   artifactClient: EndpointArtifactClientInterface;
   exceptionListClient: ExceptionListClient;
-  packagePolicyService: PackagePolicyServiceInterface;
+  packagePolicyService: PackagePolicyClient;
   logger: Logger;
   cache: LRU<string, Buffer>;
   experimentalFeatures: ExperimentalFeatures;
@@ -109,7 +105,7 @@ const manifestsEqual = (manifest1: ManifestSchema, manifest2: ManifestSchema) =>
 export class ManifestManager {
   protected artifactClient: EndpointArtifactClientInterface;
   protected exceptionListClient: ExceptionListClient;
-  protected packagePolicyService: PackagePolicyServiceInterface;
+  protected packagePolicyService: PackagePolicyClient;
   protected savedObjectsClient: SavedObjectsClientContract;
   protected logger: Logger;
   protected cache: LRU<string, Buffer>;
@@ -335,34 +331,6 @@ export class ManifestManager {
   }
 
   /**
-   * Writes new artifact SO.
-   *
-   * @param artifact An InternalArtifactCompleteSchema representing the artifact.
-   * @returns {Promise<[Error | null, InternalArtifactCompleteSchema | undefined]>} An array with the error if encountered or null and the generated artifact or null.
-   */
-  protected async pushArtifact(
-    artifact: InternalArtifactCompleteSchema
-  ): Promise<[Error | null, InternalArtifactCompleteSchema | undefined]> {
-    const artifactId = getArtifactId(artifact);
-    let fleetArtifact;
-    try {
-      // Write the artifact SO
-      fleetArtifact = await this.artifactClient.createArtifact(artifact);
-
-      // Cache the compressed body of the artifact
-      this.cache.set(artifactId, Buffer.from(artifact.body, 'base64'));
-    } catch (err) {
-      if (SavedObjectsErrorHelpers.isConflictError(err)) {
-        this.logger.debug(`Tried to create artifact ${artifactId}, but it already exists.`);
-      } else {
-        return [err, undefined];
-      }
-    }
-
-    return [null, fleetArtifact];
-  }
-
-  /**
    * Writes new artifact SOs.
    *
    * @param artifacts An InternalArtifactCompleteSchema array representing the artifacts.
@@ -374,18 +342,40 @@ export class ManifestManager {
     newManifest: Manifest
   ): Promise<Error[]> {
     const errors: Error[] = [];
+
+    const artifactsToCreate: InternalArtifactCompleteSchema[] = [];
+
     for (const artifact of artifacts) {
       if (internalArtifactCompleteSchema.is(artifact)) {
-        const [err, fleetArtifact] = await this.pushArtifact(artifact);
-        if (err) {
-          errors.push(err);
-        } else if (fleetArtifact) {
-          newManifest.replaceArtifact(fleetArtifact);
-        }
+        artifactsToCreate.push(artifact);
       } else {
         errors.push(new EndpointError(`Incomplete artifact: ${getArtifactId(artifact)}`, artifact));
       }
     }
+
+    if (artifactsToCreate.length === 0) {
+      return errors;
+    }
+
+    const { artifacts: fleetArtifacts, errors: createErrors } =
+      await this.artifactClient.bulkCreateArtifacts(artifactsToCreate);
+
+    if (createErrors) {
+      errors.push(...createErrors);
+    }
+
+    if (fleetArtifacts) {
+      const fleetArtfactsByIdentifier = keyBy(fleetArtifacts, 'identifier');
+      artifactsToCreate.forEach((artifact) => {
+        const fleetArtifact = fleetArtfactsByIdentifier[artifact.identifier];
+        if (!fleetArtifact) return;
+        const artifactId = getArtifactId(artifact);
+        // Cache the compressed body of the artifact
+        this.cache.set(artifactId, Buffer.from(artifact.body, 'base64'));
+        newManifest.replaceArtifact(fleetArtifact);
+      });
+    }
+
     return errors;
   }
 

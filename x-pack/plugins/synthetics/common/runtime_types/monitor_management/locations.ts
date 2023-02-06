@@ -11,6 +11,7 @@ import { tEnum } from '../../utils/t_enum';
 
 export enum LocationStatus {
   GA = 'ga',
+  BETA = 'beta',
   EXPERIMENTAL = 'experimental',
 }
 
@@ -37,8 +38,8 @@ export const BandwidthLimitKeyCodec = tEnum<BandwidthLimitKey>(
 export type BandwidthLimitKeyType = t.TypeOf<typeof BandwidthLimitKeyCodec>;
 
 export const LocationGeoCodec = t.interface({
-  lat: t.number,
-  lon: t.number,
+  lat: t.union([t.string, t.number]),
+  lon: t.union([t.string, t.number]),
 });
 
 export const LocationStatusCodec = tEnum<LocationStatus>('LocationStatus', LocationStatus);
@@ -77,13 +78,13 @@ export const PublicLocationsCodec = t.array(PublicLocationCodec);
 export const MonitorServiceLocationCodec = t.intersection([
   t.interface({
     id: t.string,
-    isServiceManaged: t.boolean,
   }),
   t.partial({
     label: t.string,
     geo: LocationGeoCodec,
     url: t.string,
-    isInvalid: t.boolean,
+    isServiceManaged: t.boolean,
+    status: t.string,
   }),
 ]);
 

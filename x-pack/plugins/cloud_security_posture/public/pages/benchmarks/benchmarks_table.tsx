@@ -11,17 +11,19 @@ import {
   type EuiBasicTableProps,
   type Pagination,
   type CriteriaWithPagination,
+  EuiLink,
 } from '@elastic/eui';
 import React from 'react';
-import { Link, useHistory, generatePath } from 'react-router-dom';
+import { generatePath } from 'react-router-dom';
 import { pagePathGetters } from '@kbn/fleet-plugin/public';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
+import type { PackagePolicy } from '@kbn/fleet-plugin/common';
 import { TimestampTableCell } from '../../components/timestamp_table_cell';
 import type { Benchmark } from '../../../common/types';
 import { useKibana } from '../../common/hooks/use_kibana';
-import { cloudPosturePages } from '../../common/navigation/constants';
+import { benchmarksNavigation } from '../../common/navigation/constants';
 import * as TEST_SUBJ from './test_subjects';
+import { getEnabledCspIntegrationDetails } from '../../common/utils/get_enabled_csp_integration_details';
 
 interface BenchmarksTableProps
   extends Pick<EuiBasicTableProps<Benchmark>, 'loading' | 'error' | 'noItemsMessage' | 'sorting'>,
@@ -32,71 +34,87 @@ interface BenchmarksTableProps
 }
 
 const AgentPolicyButtonLink = ({ name, id: policyId }: { name: string; id: string }) => {
-  const { http, application } = useKibana().services;
+  const { http } = useKibana().services;
   const [fleetBase, path] = pagePathGetters.policy_details({ policyId });
+
+  return <EuiLink href={http.basePath.prepend([fleetBase, path].join(''))}>{name}</EuiLink>;
+};
+
+const IntegrationButtonLink = ({
+  packageName,
+  policyId,
+  packagePolicyId,
+}: {
+  packageName: string;
+  packagePolicyId: string;
+  policyId: string;
+}) => {
+  const { application } = useKibana().services;
+
   return (
-    <a
-      href={http.basePath.prepend([fleetBase, path].join(''))}
-      title={name}
-      onClick={(e) => {
-        e.stopPropagation();
-        e.preventDefault();
-        application.navigateToApp('fleet', { path });
-      }}
+    <EuiLink
+      href={application.getUrlForApp('security', {
+        path: generatePath(benchmarksNavigation.rules.path, {
+          packagePolicyId,
+          policyId,
+        }),
+      })}
     >
-      {name}
-    </a>
+      {packageName}
+    </EuiLink>
   );
 };
 
 const BENCHMARKS_TABLE_COLUMNS: Array<EuiBasicTableColumn<Benchmark>> = [
   {
     field: 'package_policy.name',
+    name: i18n.translate('xpack.csp.benchmarks.benchmarksTable.integrationNameColumnTitle', {
+      defaultMessage: 'Integration Name',
+    }),
+    render: (packageName, benchmark) => (
+      <IntegrationButtonLink
+        packageName={packageName}
+        packagePolicyId={benchmark.package_policy.id}
+        policyId={benchmark.package_policy.policy_id}
+      />
+    ),
+    truncateText: true,
+    sortable: true,
+    'data-test-subj': TEST_SUBJ.BENCHMARKS_TABLE_COLUMNS.INTEGRATION_NAME,
+  },
+  {
+    field: 'rules_count',
+    name: i18n.translate('xpack.csp.benchmarks.benchmarksTable.rulesColumnTitle', {
+      defaultMessage: 'Rules',
+    }),
+    truncateText: true,
+    'data-test-subj': TEST_SUBJ.BENCHMARKS_TABLE_COLUMNS.RULES,
+  },
+  {
+    field: 'package_policy',
     name: i18n.translate('xpack.csp.benchmarks.benchmarksTable.integrationColumnTitle', {
       defaultMessage: 'Integration',
     }),
-    render: (packageName, benchmark) => (
-      <Link
-        to={generatePath(cloudPosturePages.rules.path, {
-          packagePolicyId: benchmark.package_policy.id,
-          policyId: benchmark.package_policy.policy_id,
-        })}
-        title={packageName}
-        onClick={(e) => {
-          e.stopPropagation();
-        }}
-      >
-        {packageName}
-      </Link>
-    ),
+    dataType: 'string',
     truncateText: true,
-    sortable: true,
     'data-test-subj': TEST_SUBJ.BENCHMARKS_TABLE_COLUMNS.INTEGRATION,
+    render: (field: PackagePolicy) => {
+      const enabledIntegration = getEnabledCspIntegrationDetails(field);
+      return enabledIntegration?.integration?.shortName || ' ';
+    },
   },
   {
-    field: 'rules',
-    name: i18n.translate('xpack.csp.benchmarks.benchmarksTable.activeRulesColumnTitle', {
-      defaultMessage: 'Active Rules',
-    }),
-    truncateText: true,
-    render: ({ enabled, all }: Benchmark['rules']) => (
-      <FormattedMessage
-        id="xpack.csp.benchmark.benchmarkTable.activeRulesColumnRenderTitle"
-        defaultMessage="{enabled} of {all}"
-        values={{ enabled, all }}
-      />
-    ),
-    'data-test-subj': TEST_SUBJ.BENCHMARKS_TABLE_COLUMNS.ACTIVE_RULES,
-  },
-  {
-    field: 'package_policy.package.title',
-    name: i18n.translate('xpack.csp.benchmarks.benchmarksTable.integrationTypeColumnTitle', {
-      defaultMessage: 'Integration Type',
+    field: 'package_policy',
+    name: i18n.translate('xpack.csp.benchmarks.benchmarksTable.monitoringColumnTitle', {
+      defaultMessage: 'Monitoring',
     }),
     dataType: 'string',
     truncateText: true,
-    sortable: true,
-    'data-test-subj': TEST_SUBJ.BENCHMARKS_TABLE_COLUMNS.INTEGRATION_TYPE,
+    'data-test-subj': TEST_SUBJ.BENCHMARKS_TABLE_COLUMNS.MONITORING,
+    render: (field: PackagePolicy) => {
+      const enabledIntegration = getEnabledCspIntegrationDetails(field);
+      return enabledIntegration?.enabledIntegrationOption?.name || ' ';
+    },
   },
   {
     field: 'agent_policy.name',
@@ -154,18 +172,6 @@ export const BenchmarksTable = ({
   sorting,
   ...rest
 }: BenchmarksTableProps) => {
-  const history = useHistory();
-
-  const getRowProps: EuiBasicTableProps<Benchmark>['rowProps'] = (benchmark) => ({
-    onClick: () =>
-      history.push(
-        generatePath(cloudPosturePages.rules.path, {
-          packagePolicyId: benchmark.package_policy.id,
-          policyId: benchmark.package_policy.policy_id,
-        })
-      ),
-  });
-
   const pagination: Pagination = {
     pageIndex: Math.max(pageIndex - 1, 0),
     pageSize,
@@ -181,7 +187,6 @@ export const BenchmarksTable = ({
       data-test-subj={rest['data-test-subj']}
       items={benchmarks}
       columns={BENCHMARKS_TABLE_COLUMNS}
-      rowProps={getRowProps}
       itemId={(item) => [item.agent_policy.id, item.package_policy.id].join('/')}
       pagination={pagination}
       onChange={onChange}

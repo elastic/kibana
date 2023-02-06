@@ -10,10 +10,18 @@
   },
   "server": {
     "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
     "functions": [
       {
         "parentPluginId": "@kbn/performance-testing-dataset-extractor",
-        "id": "def-server.extractor",
+        "id": "def-common.extractor",
         "type": "Function",
         "tags": [],
         "label": "extractor",
@@ -25,10 +33,11 @@
         ],
         "path": "packages/kbn-performance-testing-dataset-extractor/src/extractor.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/performance-testing-dataset-extractor",
-            "id": "def-server.extractor.$1",
+            "id": "def-common.extractor.$1",
             "type": "Object",
             "tags": [],
             "label": "{ param, client, log }",
@@ -38,6 +47,7 @@
             ],
             "path": "packages/kbn-performance-testing-dataset-extractor/src/extractor.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -46,7 +56,7 @@
       },
       {
         "parentPluginId": "@kbn/performance-testing-dataset-extractor",
-        "id": "def-server.runExtractor",
+        "id": "def-common.runExtractor",
         "type": "Function",
         "tags": [],
         "label": "runExtractor",
@@ -56,19 +66,12 @@
         ],
         "path": "packages/kbn-performance-testing-dataset-extractor/src/cli.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [],
         "returnComment": [],
         "initialIsOpen": false
       }
     ],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
-    "objects": []
-  },
-  "common": {
-    "classes": [],
-    "functions": [],
     "interfaces": [],
     "enums": [],
     "misc": [],

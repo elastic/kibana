@@ -7,10 +7,7 @@
 
 import { createSelector } from 'reselect';
 
-import {
-  getManageTimelineById,
-  getTimelineByIdSelector,
-} from '../../../../store/timeline/selectors';
+import { getTimelineByIdSelector } from '../../../../store/timeline/selectors';
 
 /**
  * This selector combines all the selectors used by the Timeline `StatefulBody`,
@@ -23,11 +20,7 @@ import {
  * Example:
  *  `useSelector((state: State) => timelineBodySelector(state, id))`
  */
-export const timelineBodySelector = createSelector(
-  getManageTimelineById(),
-  getTimelineByIdSelector(),
-  (manageTimelineById, timeline) => ({
-    manageTimelineById,
-    timeline,
-  })
-);
+
+export const timelineBodySelector = createSelector(getTimelineByIdSelector(), (timeline) => ({
+  timeline,
+}));

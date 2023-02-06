@@ -6,9 +6,17 @@
  * Side Public License, v 1.
  */
 
-import React, { FC } from 'react';
+import React, { useState, FC } from 'react';
 
-import { EuiButton, EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiCallOut,
+  EuiCheckbox,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiSpacer,
+  EuiText,
+} from '@elastic/eui';
 
 import { useFetchStream } from '@kbn/aiops-utils';
 
@@ -21,10 +29,15 @@ export const PageSimpleStringStream: FC = () => {
   const { core } = useDeps();
   const basePath = core.http?.basePath.get() ?? '';
 
+  const [compressResponse, setCompressResponse] = useState(true);
+
   const { dispatch, errors, start, cancel, data, isRunning } = useFetchStream<
     ApiSimpleStringStream,
     typeof basePath
-  >(`${basePath}/internal/response_stream/simple_string_stream`, { timeout: 500 });
+  >(`${basePath}/internal/response_stream/simple_string_stream`, {
+    compressResponse,
+    timeout: 500,
+  });
 
   const onClickHandler = async () => {
     if (isRunning) {
@@ -57,6 +70,14 @@ export const PageSimpleStringStream: FC = () => {
           </EuiButton>
         </EuiFlexItem>
       </EuiFlexGroup>
+      <EuiSpacer />
+      <EuiCheckbox
+        id="responseStreamCompressionCheckbox"
+        label="Toggle compression setting for response stream."
+        checked={compressResponse}
+        onChange={(e) => setCompressResponse(!compressResponse)}
+        compressed
+      />
       <EuiSpacer />
       <EuiText>
         <p>{data}</p>

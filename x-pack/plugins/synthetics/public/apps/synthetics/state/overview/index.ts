@@ -6,44 +6,41 @@
  */
 
 import { createReducer } from '@reduxjs/toolkit';
+import { isStatusEnabled } from '../../../../../common/runtime_types/monitor_management/alert_config';
+import { MonitorOverviewState } from './models';
 
-import { MonitorOverviewResult } from '../../../../../common/runtime_types';
-
-import { IHttpSerializedFetchError, serializeHttpFetchError } from '../utils/http_error';
-
-import { MonitorOverviewPageState } from './models';
 import {
   fetchMonitorOverviewAction,
-  quietFetchOverviewAction,
-  setOverviewPerPageAction,
+  setFlyoutConfig,
+  setOverviewGroupByAction,
+  setOverviewPageStateAction,
+  toggleErrorPopoverOpen,
 } from './actions';
-
-export interface MonitorOverviewState {
-  data: MonitorOverviewResult;
-  pageState: MonitorOverviewPageState;
-  loading: boolean;
-  loaded: boolean;
-  error: IHttpSerializedFetchError | null;
-}
+import { enableMonitorAlertAction } from '../monitor_list/actions';
+import { ConfigKey } from '../../components/monitor_add_edit/types';
 
 const initialState: MonitorOverviewState = {
   data: {
     total: 0,
     allMonitorIds: [],
-    pages: {},
+    monitors: [],
   },
   pageState: {
-    perPage: 20,
+    perPage: 16,
+    sortOrder: 'asc',
+    sortField: 'status',
   },
+  groupBy: { field: 'none', order: 'asc' },
+  flyoutConfig: null,
   loading: false,
   loaded: false,
   error: null,
+  isErrorPopoverOpen: null,
 };
 
 export const monitorOverviewReducer = createReducer(initialState, (builder) => {
   builder
     .addCase(fetchMonitorOverviewAction.get, (state, action) => {
-      state.pageState = action.payload;
       state.loading = true;
       state.loaded = false;
     })
@@ -54,20 +51,44 @@ export const monitorOverviewReducer = createReducer(initialState, (builder) => {
     })
     .addCase(fetchMonitorOverviewAction.fail, (state, action) => {
       state.loading = false;
-      state.error = serializeHttpFetchError(action.payload);
+      state.error = action.payload;
     })
-    .addCase(quietFetchOverviewAction.success, (state, action) => {
-      state.data = action.payload;
-    })
-    .addCase(quietFetchOverviewAction.fail, (state, action) => {
-      state.error = serializeHttpFetchError(action.payload);
-    })
-    .addCase(setOverviewPerPageAction, (state, action) => {
+    .addCase(setOverviewPageStateAction, (state, action) => {
       state.pageState = {
         ...state.pageState,
-        perPage: action.payload,
+        ...action.payload,
       };
       state.loaded = false;
+    })
+    .addCase(setOverviewGroupByAction, (state, action) => {
+      state.groupBy = {
+        ...state.groupBy,
+        ...action.payload,
+      };
+    })
+    .addCase(setFlyoutConfig, (state, action) => {
+      state.flyoutConfig = action.payload;
+    })
+    .addCase(enableMonitorAlertAction.success, (state, action) => {
+      const attrs = action.payload.attributes;
+      if (!('errors' in attrs)) {
+        const isStatusAlertEnabled = isStatusEnabled(attrs[ConfigKey.ALERT_CONFIG]);
+        state.data.monitors = state.data.monitors.map((monitor) => {
+          if (
+            monitor.id === action.payload.id ||
+            attrs[ConfigKey.MONITOR_QUERY_ID] === monitor.id
+          ) {
+            return {
+              ...monitor,
+              isStatusAlertEnabled,
+            };
+          }
+          return monitor;
+        });
+      }
+    })
+    .addCase(toggleErrorPopoverOpen, (state, action) => {
+      state.isErrorPopoverOpen = action.payload;
     });
 });
 

@@ -5,21 +5,24 @@
  * 2.0.
  */
 
-import { EuiAccordion, EuiEmptyPrompt, EuiErrorBoundary, EuiSpacer, EuiText } from '@elastic/eui';
+import { EuiAccordion, EuiErrorBoundary, EuiSpacer, EuiText } from '@elastic/eui';
 import type { FunctionComponent } from 'react';
 import React from 'react';
 
 import { FormattedMessage } from '@kbn/i18n-react';
+import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 
 import { DocLink } from '../../../components/doc_link';
 import { useHtmlId } from '../../../components/use_html_id';
 
 export interface ApiKeysEmptyPromptProps {
   error?: Error;
+  readOnly?: boolean;
 }
 
 export const ApiKeysEmptyPrompt: FunctionComponent<ApiKeysEmptyPromptProps> = ({
   error,
+  readOnly,
   children,
 }) => {
   const accordionId = useHtmlId('apiKeysEmptyPrompt', 'accordion');
@@ -27,7 +30,7 @@ export const ApiKeysEmptyPrompt: FunctionComponent<ApiKeysEmptyPromptProps> = ({
   if (error) {
     if (doesErrorIndicateAPIKeysAreDisabled(error)) {
       return (
-        <EuiEmptyPrompt
+        <KibanaPageTemplate.EmptyPrompt
           iconType="alert"
           body={
             <>
@@ -53,7 +56,7 @@ export const ApiKeysEmptyPrompt: FunctionComponent<ApiKeysEmptyPromptProps> = ({
 
     if (doesErrorIndicateUserHasNoPermissionsToManageAPIKeys(error)) {
       return (
-        <EuiEmptyPrompt
+        <KibanaPageTemplate.EmptyPrompt
           iconType="lock"
           body={
             <p>
@@ -72,7 +75,7 @@ export const ApiKeysEmptyPrompt: FunctionComponent<ApiKeysEmptyPromptProps> = ({
     };
 
     return (
-      <EuiEmptyPrompt
+      <KibanaPageTemplate.EmptyPrompt
         iconType="alert"
         body={
           <p>
@@ -114,8 +117,32 @@ export const ApiKeysEmptyPrompt: FunctionComponent<ApiKeysEmptyPromptProps> = ({
     );
   }
 
+  if (readOnly) {
+    return (
+      <KibanaPageTemplate.EmptyPrompt
+        iconType="crossInACircleFilled"
+        title={
+          <h1>
+            <FormattedMessage
+              id="xpack.security.management.apiKeysEmptyPrompt.readOnlyEmptyTitle"
+              defaultMessage="You do not have permission to create API keys"
+            />
+          </h1>
+        }
+        body={
+          <p>
+            <FormattedMessage
+              id="xpack.security.management.apiKeysEmptyPrompt.readOnlyEmptyMessage"
+              defaultMessage="Please contact your administrator for more information"
+            />
+          </p>
+        }
+      />
+    );
+  }
+
   return (
-    <EuiEmptyPrompt
+    <KibanaPageTemplate.EmptyPrompt
       iconType="gear"
       title={
         <h1>

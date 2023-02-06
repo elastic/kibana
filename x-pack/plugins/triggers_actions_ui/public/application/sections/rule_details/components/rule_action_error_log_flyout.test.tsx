@@ -6,12 +6,11 @@
  */
 
 import React from 'react';
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import { act } from 'react-dom/test-utils';
 import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
 import { RuleActionErrorLogFlyout } from './rule_action_error_log_flyout';
 import { loadActionErrorLog } from '../../../lib/rule_api/load_action_error_log';
-import { Rule } from '../../../../types';
 
 jest.mock('../../../lib/rule_api/load_action_error_log', () => ({
   loadActionErrorLog: jest.fn(),
@@ -43,33 +42,9 @@ const mockErrorLogResponse = {
   ],
 };
 
-const mockRule: Rule = {
-  id: uuid.v4(),
-  enabled: true,
-  name: `rule-${uuid.v4()}`,
-  tags: [],
-  ruleTypeId: '.noop',
-  consumer: 'consumer',
-  schedule: { interval: '1m' },
-  actions: [],
-  params: {},
-  createdBy: null,
-  updatedBy: null,
-  createdAt: new Date(),
-  updatedAt: new Date(),
-  apiKeyOwner: null,
-  throttle: null,
-  notifyWhen: null,
-  muteAll: false,
-  mutedInstanceIds: [],
-  executionStatus: {
-    status: 'unknown',
-    lastExecutionDate: new Date('2020-08-20T19:23:38Z'),
-  },
-};
-
 const mockExecution: any = {
-  id: uuid.v4(),
+  id: uuidv4(),
+  rule_id: uuidv4(),
   timestamp: '2022-03-20T07:40:44-07:00',
   duration: 5000000,
   status: 'success',
@@ -98,7 +73,7 @@ describe('rule_action_error_log_flyout', () => {
 
   it('renders correctly', async () => {
     const wrapper = mountWithIntl(
-      <RuleActionErrorLogFlyout rule={mockRule} runLog={mockExecution} onClose={mockClose} />
+      <RuleActionErrorLogFlyout runLog={mockExecution} onClose={mockClose} />
     );
 
     await act(async () => {
@@ -115,7 +90,7 @@ describe('rule_action_error_log_flyout', () => {
 
   it('can close the flyout', async () => {
     const wrapper = mountWithIntl(
-      <RuleActionErrorLogFlyout rule={mockRule} runLog={mockExecution} onClose={mockClose} />
+      <RuleActionErrorLogFlyout runLog={mockExecution} onClose={mockClose} />
     );
 
     await act(async () => {
@@ -130,7 +105,7 @@ describe('rule_action_error_log_flyout', () => {
 
   it('switches between push and overlay flyout depending on the size of the screen', async () => {
     const wrapper = mountWithIntl(
-      <RuleActionErrorLogFlyout rule={mockRule} runLog={mockExecution} onClose={mockClose} />
+      <RuleActionErrorLogFlyout runLog={mockExecution} onClose={mockClose} />
     );
 
     await act(async () => {

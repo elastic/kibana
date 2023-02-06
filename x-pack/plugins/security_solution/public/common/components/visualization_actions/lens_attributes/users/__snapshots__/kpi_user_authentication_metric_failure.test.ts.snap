@@ -1,0 +1,143 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`kpiUserAuthenticationsMetricFailureLensAttributes should render 1`] = `
+Object {
+  "description": "",
+  "references": Array [
+    Object {
+      "id": "security-solution-my-test",
+      "name": "indexpattern-datasource-current-indexpattern",
+      "type": "index-pattern",
+    },
+    Object {
+      "id": "security-solution-my-test",
+      "name": "indexpattern-datasource-layer-4590dafb-4ac7-45aa-8641-47a3ff0b817c",
+      "type": "index-pattern",
+    },
+  ],
+  "state": Object {
+    "datasourceStates": Object {
+      "formBased": Object {
+        "layers": Object {
+          "4590dafb-4ac7-45aa-8641-47a3ff0b817c": Object {
+            "columnOrder": Array [
+              "0eb97c09-a351-4280-97da-944e4bd30dd7",
+            ],
+            "columns": Object {
+              "0eb97c09-a351-4280-97da-944e4bd30dd7": Object {
+                "dataType": "number",
+                "filter": Object {
+                  "language": "kuery",
+                  "query": "event.outcome : \\"failure\\" ",
+                },
+                "isBucketed": false,
+                "label": "",
+                "operationType": "count",
+                "scale": "ratio",
+                "sourceField": "___records___",
+              },
+            },
+            "incompleteColumns": Object {},
+          },
+        },
+      },
+    },
+    "filters": Array [
+      Object {
+        "$state": Object {
+          "store": "appState",
+        },
+        "meta": Object {
+          "alias": null,
+          "disabled": false,
+          "indexRefName": "filter-index-pattern-0",
+          "key": "query",
+          "negate": false,
+          "type": "custom",
+          "value": "{\\"bool\\":{\\"filter\\":[{\\"term\\":{\\"event.category\\":\\"authentication\\"}}]}}",
+        },
+        "query": Object {
+          "bool": Object {
+            "filter": Array [
+              Object {
+                "term": Object {
+                  "event.category": "authentication",
+                },
+              },
+            ],
+          },
+        },
+      },
+      Object {
+        "meta": Object {
+          "alias": null,
+          "disabled": false,
+          "key": "host.id",
+          "negate": false,
+          "params": Object {
+            "query": "123",
+          },
+          "type": "phrase",
+        },
+        "query": Object {
+          "match_phrase": Object {
+            "host.id": "123",
+          },
+        },
+      },
+      Object {
+        "meta": Object {
+          "alias": null,
+          "disabled": false,
+          "key": "user.name",
+          "negate": false,
+          "params": Object {
+            "query": "elastic",
+          },
+          "type": "phrase",
+        },
+        "query": Object {
+          "match_phrase": Object {
+            "user.name": "elastic",
+          },
+        },
+      },
+      Object {
+        "meta": Object {
+          "alias": null,
+          "disabled": false,
+          "key": "_index",
+          "negate": false,
+          "params": Array [
+            "auditbeat-mytest-*",
+          ],
+          "type": "phrases",
+        },
+        "query": Object {
+          "bool": Object {
+            "minimum_should_match": 1,
+            "should": Array [
+              Object {
+                "match_phrase": Object {
+                  "_index": "auditbeat-mytest-*",
+                },
+              },
+            ],
+          },
+        },
+      },
+    ],
+    "query": Object {
+      "language": "kql",
+      "query": "host.name: *",
+    },
+    "visualization": Object {
+      "accessor": "0eb97c09-a351-4280-97da-944e4bd30dd7",
+      "layerId": "4590dafb-4ac7-45aa-8641-47a3ff0b817c",
+      "layerType": "data",
+    },
+  },
+  "title": "[Host] User authentications - metric failure ",
+  "visualizationType": "lnsLegacyMetric",
+}
+`;

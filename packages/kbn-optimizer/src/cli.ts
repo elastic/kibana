@@ -8,7 +8,7 @@
 
 import Path from 'path';
 
-import { REPO_ROOT } from '@kbn/utils';
+import { REPO_ROOT } from '@kbn/repo-info';
 import { lastValueFrom } from 'rxjs';
 import { run, Flags } from '@kbn/dev-cli-runner';
 import { createFlagError } from '@kbn/dev-cli-errors';
@@ -168,7 +168,7 @@ export function runKbnOptimizerCli(options: { defaultLimitsPath: string }) {
         updateBundleLimits({
           log,
           config,
-          dropMissing: !(focus || filter),
+          dropMissing: !(focus.length || filter.length),
           limitsPath,
         });
       }

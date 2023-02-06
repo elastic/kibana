@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
 import {
   CountIndexPatternColumn,
@@ -16,6 +16,8 @@ import {
 } from '@kbn/lens-plugin/public';
 import { EuiText } from '@elastic/eui';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
+import { DataView } from '@kbn/data-views-plugin/public';
+import { v4 as uuidv4 } from 'uuid';
 import { TRANSACTION_PAGE_LOAD } from '../../../../../common/transaction_types';
 import {
   PROCESSOR_EVENT,
@@ -36,7 +38,7 @@ interface LensAttributes {
   metric: VisitorBreakdownMetric;
   uiFilters: UxUIFilters;
   urlQuery?: string;
-  dataView: string;
+  dataView: DataView;
 }
 
 type Props = {
@@ -56,6 +58,7 @@ export function VisitorBreakdownChart({
 }: Props) {
   const kibana = useKibanaServices();
   const LensEmbeddableComponent = kibana.lens.EmbeddableComponent;
+  const [localDataViewId] = useState<string>(uuidv4());
 
   const lensAttributes = useMemo(
     () =>
@@ -64,8 +67,9 @@ export function VisitorBreakdownChart({
         urlQuery,
         metric,
         dataView,
+        localDataViewId,
       }),
-    [uiFilters, urlQuery, metric, dataView]
+    [uiFilters, urlQuery, metric, dataView, localDataViewId]
   );
 
   const filterHandler = useCallback(
@@ -100,8 +104,8 @@ const visConfig: PieVisualizationState = {
   layers: [
     {
       layerId: 'layer1',
-      groups: ['col1'],
-      metric: 'col2',
+      primaryGroups: ['col1'],
+      metrics: ['col2'],
       categoryDisplay: 'default',
       legendDisplay: 'hide',
       numberDisplay: 'percent',
@@ -118,7 +122,13 @@ export function getVisitorBreakdownLensAttributes({
   urlQuery,
   metric,
   dataView,
-}: LensAttributes): TypedLensByValueInput['attributes'] {
+  localDataViewId,
+}: LensAttributes & {
+  localDataViewId: string;
+}): TypedLensByValueInput['attributes'] {
+  const localDataView = dataView.toSpec(false);
+  localDataView.id = localDataViewId;
+
   const dataLayer: PersistedIndexPatternLayer = {
     incompleteColumns: {},
     columnOrder: ['col1', 'col2'],
@@ -160,21 +170,25 @@ export function getVisitorBreakdownLensAttributes({
   return {
     visualizationType: 'lnsPie',
     title: `ux-visitor-breakdown-${metric}`,
-    references: [
-      {
-        id: dataView,
-        name: 'indexpattern-datasource-current-indexpattern',
-        type: 'index-pattern',
-      },
-      {
-        id: dataView,
-        name: 'indexpattern-datasource-layer-layer1',
-        type: 'index-pattern',
-      },
-    ],
+    references: [],
     state: {
+      internalReferences: [
+        {
+          id: localDataView.id,
+          name: 'indexpattern-datasource-current-indexpattern',
+          type: 'index-pattern',
+        },
+        {
+          id: localDataView.id,
+          name: 'indexpattern-datasource-layer-layer1',
+          type: 'index-pattern',
+        },
+      ],
+      adHocDataViews: {
+        [localDataView.id]: localDataView,
+      },
       datasourceStates: {
-        indexpattern: {
+        formBased: {
           layers: {
             layer1: dataLayer,
           },

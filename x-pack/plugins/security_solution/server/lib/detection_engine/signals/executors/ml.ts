@@ -13,8 +13,9 @@ import type {
   RuleExecutorServices,
 } from '@kbn/alerting-plugin/server';
 import type { ListClient } from '@kbn/lists-plugin/server';
+import type { Filter } from '@kbn/es-query';
 import { isJobStarted } from '../../../../../common/machine_learning/helpers';
-import type { CompleteRule, MachineLearningRuleParams } from '../../schemas/rule_schemas';
+import type { CompleteRule, MachineLearningRuleParams } from '../../rule_schema';
 import { bulkCreateMlSignals } from '../bulk_create_ml_signals';
 import { filterEventsAgainstList } from '../filters/filter_events_against_list';
 import { findMlSignals } from '../find_ml_signals';
@@ -34,21 +35,23 @@ export const mlExecutor = async ({
   tuple,
   ml,
   listClient,
-  exceptionItems,
   services,
   ruleExecutionLogger,
   bulkCreate,
   wrapHits,
+  exceptionFilter,
+  unprocessedExceptions,
 }: {
   completeRule: CompleteRule<MachineLearningRuleParams>;
   tuple: RuleRangeTuple;
   ml: SetupPlugins['ml'];
   listClient: ListClient;
-  exceptionItems: ExceptionListItemSchema[];
   services: RuleExecutorServices<AlertInstanceState, AlertInstanceContext, 'default'>;
   ruleExecutionLogger: IRuleExecutionLogForExecutors;
   bulkCreate: BulkCreate;
   wrapHits: WrapHits;
+  exceptionFilter: Filter | undefined;
+  unprocessedExceptions: ExceptionListItemSchema[];
 }) => {
   const result = createSearchAfterReturnType();
   const ruleParams = completeRule.ruleParams;
@@ -77,6 +80,7 @@ export const mlExecutor = async ({
         ...jobSummaries.map((job) =>
           [
             `job id: "${job.id}"`,
+            `job name: "${job?.customSettings?.security_app_display_name ?? job.id}"`,
             `job status: "${job.jobState}"`,
             `datafeed status: "${job.datafeedState}"`,
           ].join(', ')
@@ -98,13 +102,13 @@ export const mlExecutor = async ({
       anomalyThreshold: ruleParams.anomalyThreshold,
       from: tuple.from.toISOString(),
       to: tuple.to.toISOString(),
-      exceptionItems,
+      exceptionFilter,
     });
 
     const [filteredAnomalyHits, _] = await filterEventsAgainstList({
       listClient,
-      exceptionsList: exceptionItems,
       ruleExecutionLogger,
+      exceptionsList: unprocessedExceptions,
       events: anomalyResults.hits.hits,
     });
 

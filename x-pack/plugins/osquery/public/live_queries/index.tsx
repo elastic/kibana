@@ -7,10 +7,12 @@
 
 import { castArray, isEmpty, pickBy } from 'lodash';
 import { EuiCode, EuiLoadingContent, EuiEmptyPrompt } from '@elastic/eui';
-import React, { useMemo } from 'react';
+import React, { useContext, useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import type { EcsMappingSerialized } from '../packs/queries/ecs_mapping_editor_field';
+import type { ECSMapping } from '@kbn/osquery-io-ts-types';
+import { replaceParamsQuery } from '../../common/utils/replace_params_query';
+import { AlertAttachmentContext } from '../common/contexts';
 import { LiveQueryForm } from './form';
 import { useActionResultsPrivileges } from '../action_results/use_action_privileges';
 import { OSQUERY_INTEGRATION_NAME } from '../../common';
@@ -20,11 +22,12 @@ import type { AgentSelection } from '../agents/types';
 interface LiveQueryProps {
   agentId?: string;
   agentIds?: string[];
+  alertIds?: string[];
   agentPolicyIds?: string[];
   onSuccess?: () => void;
   query?: string;
   savedQueryId?: string;
-  ecs_mapping?: EcsMappingSerialized;
+  ecs_mapping?: ECSMapping;
   agentsField?: boolean;
   queryField?: boolean;
   ecsMappingField?: boolean;
@@ -33,12 +36,12 @@ interface LiveQueryProps {
   hideAgentsField?: boolean;
   packId?: string;
   agentSelection?: AgentSelection;
-  addToTimeline?: (payload: { query: [string, string]; isIcon?: true }) => React.ReactElement;
 }
 
 const LiveQueryComponent: React.FC<LiveQueryProps> = ({
   agentId,
   agentIds,
+  alertIds,
   agentPolicyIds,
   onSuccess,
   query,
@@ -52,7 +55,6 @@ const LiveQueryComponent: React.FC<LiveQueryProps> = ({
   hideAgentsField,
   packId,
   agentSelection,
-  addToTimeline,
 }) => {
   const { data: hasActionResultsPrivileges, isLoading } = useActionResultsPrivileges();
 
@@ -72,18 +74,30 @@ const LiveQueryComponent: React.FC<LiveQueryProps> = ({
 
     return null;
   }, [agentId, agentIds, agentPolicyIds, agentSelection]);
+  const ecsData = useContext(AlertAttachmentContext);
+
+  const initialQuery = useMemo(() => {
+    if (ecsData && query) {
+      const { result } = replaceParamsQuery(query, ecsData);
+
+      return result;
+    }
+
+    return query;
+  }, [ecsData, query]);
 
   const defaultValue = useMemo(() => {
     const initialValue = {
       ...(initialAgentSelection ? { agentSelection: initialAgentSelection } : {}),
-      query,
+      alertIds,
+      query: initialQuery,
       savedQueryId,
       ecs_mapping,
       packId,
     };
 
     return !isEmpty(pickBy(initialValue, (value) => !isEmpty(value))) ? initialValue : undefined;
-  }, [ecs_mapping, initialAgentSelection, packId, query, savedQueryId]);
+  }, [alertIds, ecs_mapping, initialAgentSelection, initialQuery, packId, savedQueryId]);
 
   if (isLoading) {
     return <EuiLoadingContent lines={10} />;
@@ -128,7 +142,6 @@ const LiveQueryComponent: React.FC<LiveQueryProps> = ({
       formType={formType}
       enabled={enabled}
       hideAgentsField={hideAgentsField}
-      addToTimeline={addToTimeline}
     />
   );
 };

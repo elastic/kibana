@@ -6,7 +6,9 @@
  * Side Public License, v 1.
  */
 
+import { range } from 'lodash';
 import { sortObjects } from './sort_objects';
+import type { SavedObject } from '@kbn/core-saved-objects-server';
 
 describe('sortObjects()', () => {
   test('should return on empty array', () => {
@@ -309,6 +311,7 @@ describe('sortObjects()', () => {
       ]
     `);
   });
+
   test('should not fail on complex circular dependencies', () => {
     const docs = [
       {
@@ -423,5 +426,39 @@ describe('sortObjects()', () => {
         },
       ]
     `);
+  });
+
+  test('should not fail on large graph of objects', () => {
+    // create an object that references all objects with a higher `index` up to `depth`.
+    const createComplexNode = (index: number, depth: number): SavedObject => {
+      return {
+        type: 'test',
+        id: `${index}`,
+        attributes: {},
+        references: range(index + 1, depth).map((refIndex) => ({
+          type: 'test',
+          id: `${refIndex}`,
+          name: `test-${refIndex}`,
+        })),
+      };
+    };
+
+    const createComplexGraph = (depth: number): SavedObject[] => {
+      const nodes: SavedObject[] = [];
+      for (let i = 0; i < depth; i++) {
+        nodes.push(createComplexNode(i, depth));
+      }
+      return nodes;
+    };
+
+    const depth = 100;
+    const graph = createComplexGraph(depth);
+    const sorted = sortObjects(graph);
+
+    expect(sorted.map(({ type, id }) => `${type}:${id}`)).toEqual(
+      range(depth)
+        .reverse()
+        .map((index) => `test:${index}`)
+    );
   });
 });

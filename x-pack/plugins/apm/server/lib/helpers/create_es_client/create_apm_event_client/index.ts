@@ -11,42 +11,36 @@ import type {
   FieldCapsResponse,
   TermsEnumRequest,
   TermsEnumResponse,
-} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+} from '@elastic/elasticsearch/lib/api/types';
 import { ValuesType } from 'utility-types';
 import { ElasticsearchClient, KibanaRequest } from '@kbn/core/server';
-import {
-  ESSearchRequest,
-  InferSearchResponseOf,
-} from '@kbn/core/types/elasticsearch';
-import { unwrapEsResponse } from '@kbn/observability-plugin/server';
-import { omit } from 'lodash';
+import type { ESSearchRequest, InferSearchResponseOf } from '@kbn/es-types';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
-import { Profile } from '../../../../../typings/es_schemas/ui/profile';
-import { withApmSpan } from '../../../../utils/with_apm_span';
+import { unwrapEsResponse } from '@kbn/observability-plugin/server';
+import { compact, omit } from 'lodash';
+import { ApmDataSource } from '../../../../../common/data_source';
 import { APMError } from '../../../../../typings/es_schemas/ui/apm_error';
 import { Metric } from '../../../../../typings/es_schemas/ui/metric';
 import { Span } from '../../../../../typings/es_schemas/ui/span';
 import { Transaction } from '../../../../../typings/es_schemas/ui/transaction';
 import { ApmIndicesConfig } from '../../../../routes/settings/apm_indices/get_apm_indices';
+import { withApmSpan } from '../../../../utils/with_apm_span';
 import {
   callAsyncWithDebug,
   getDebugBody,
   getDebugTitle,
 } from '../call_async_with_debug';
 import { cancelEsRequestOnAbort } from '../cancel_es_request_on_abort';
-import {
-  unpackProcessorEvents,
-  processorEventsToIndex,
-} from './unpack_processor_events';
-import { fakeSyntheticSource } from './fake_synthetic_source';
+import { processorEventsToIndex, getRequestBase } from './get_request_base';
+import { ProcessorEventOfDocumentType } from '../document_type';
 
 export type APMEventESSearchRequest = Omit<ESSearchRequest, 'index'> & {
   apm: {
-    events: ProcessorEvent[];
     includeLegacyData?: boolean;
-  };
+  } & ({ events: ProcessorEvent[] } | { sources: ApmDataSource[] });
   body: {
     size: number;
+    track_total_hits: boolean | number;
   };
 };
 
@@ -69,12 +63,21 @@ type TypeOfProcessorEvent<T extends ProcessorEvent> = {
   transaction: Transaction;
   span: Span;
   metric: Metric;
-  profile: Profile;
 }[T];
 
 type TypedSearchResponse<TParams extends APMEventESSearchRequest> =
   InferSearchResponseOf<
-    TypeOfProcessorEvent<ValuesType<TParams['apm']['events']>>,
+    TypeOfProcessorEvent<
+      ValuesType<
+        TParams['apm'] extends { events: ProcessorEvent[] }
+          ? TParams['apm']['events']
+          : TParams['apm'] extends { sources: ApmDataSource[] }
+          ? ProcessorEventOfDocumentType<
+              ValuesType<TParams['apm']['sources']>['documentType']
+            >
+          : never
+      >
+    >,
     TParams
   >;
 
@@ -85,6 +88,7 @@ export interface APMEventClientConfig {
   indices: ApmIndicesConfig;
   options: {
     includeFrozen: boolean;
+    forceSyntheticSource: boolean;
   };
 }
 
@@ -92,8 +96,9 @@ export class APMEventClient {
   private readonly esClient: ElasticsearchClient;
   private readonly debug: boolean;
   private readonly request: KibanaRequest;
-  private readonly indices: ApmIndicesConfig;
+  public readonly indices: ApmIndicesConfig;
   private readonly includeFrozen: boolean;
+  private readonly forceSyntheticSource: boolean;
 
   constructor(config: APMEventClientConfig) {
     this.esClient = config.esClient;
@@ -101,6 +106,7 @@ export class APMEventClient {
     this.request = config.request;
     this.indices = config.indices;
     this.includeFrozen = config.options.includeFrozen;
+    this.forceSyntheticSource = config.options.forceSyntheticSource;
   }
 
   private callAsyncWithDebug<T extends { body: any }>({
@@ -126,7 +132,6 @@ export class APMEventClient {
       isCalledWithInternalUser: false,
       debug: this.debug,
       request: this.request,
-      requestType,
       operationName,
       requestParams: params,
       cb: () => {
@@ -149,62 +154,39 @@ export class APMEventClient {
     operationName: string,
     params: TParams
   ): Promise<TypedSearchResponse<TParams>> {
-    const withProcessorEventFilter = unpackProcessorEvents(
-      params,
-      this.indices
-    );
+    const { events, index, filters } = getRequestBase({
+      apm: params.apm,
+      indices: this.indices,
+    });
+
+    const forceSyntheticSourceForThisRequest =
+      this.forceSyntheticSource && events.includes(ProcessorEvent.metric);
 
     const searchParams = {
-      ...withProcessorEventFilter,
+      ...omit(params, 'apm'),
+      index,
+      body: {
+        ...params.body,
+        query: {
+          bool: {
+            filter: compact([params.body.query, ...filters]),
+          },
+        },
+      },
       ...(this.includeFrozen ? { ignore_throttled: false } : {}),
       ignore_unavailable: true,
       preference: 'any',
+      expand_wildcards: ['open' as const, 'hidden' as const],
+      ...(forceSyntheticSourceForThisRequest
+        ? { force_synthetic_source: true }
+        : {}),
     };
 
     return this.callAsyncWithDebug({
       cb: (opts) =>
-        (
-          this.esClient.search(searchParams, opts) as unknown as Promise<{
-            body: TypedSearchResponse<TParams>;
-          }>
-        ).then((response) => {
-          // ensure metric data is compatible with synthetic source
-          // enabled
-          const metricEventsOnly = params.apm.events.every(
-            (event) => event === ProcessorEvent.metric
-          );
-
-          if (!response.body?.hits?.hits) {
-            return response;
-          }
-
-          const hits = response.body.hits.hits.map((hit) => {
-            if (
-              metricEventsOnly ||
-              // take filter_path etc into account
-              (hit._source &&
-                'processor' in hit._source &&
-                hit._source.processor?.event === ProcessorEvent.metric)
-            ) {
-              return {
-                ...hit,
-                _source: fakeSyntheticSource(hit._source),
-              };
-            }
-            return hit;
-          });
-
-          return {
-            ...response,
-            body: {
-              ...response.body,
-              hits: {
-                ...response.body.hits,
-                hits,
-              },
-            },
-          };
-        }),
+        this.esClient.search(searchParams, opts) as unknown as Promise<{
+          body: TypedSearchResponse<TParams>;
+        }>,
       operationName,
       params: searchParams,
       requestType: 'search',

@@ -6,27 +6,59 @@
  */
 
 import fetch from 'node-fetch';
-import { kibanaPackageJson } from '@kbn/utils';
+import { kibanaPackageJson } from '@kbn/repo-info';
 import { ToolingLog } from '@kbn/tooling-log';
+import yargs from 'yargs';
 
-const REGISTRY_URL = 'https://epr-snapshot.elastic.co';
-const KIBANA_URL = 'http://localhost:5601';
-const KIBANA_USERNAME = 'elastic';
-const KIBANA_PASSWORD = 'changeme';
-
+const DEFAULT_REGISTRY_URL = 'https://epr.elastic.co';
+const DEFAULT_KIBANA_URL = 'http://localhost:5601';
+const DEFAULT_KIBANA_USERNAME = 'elastic';
+const DEFAULT_KIBANA_PASSWORD = 'changeme';
 const KIBANA_VERSION = kibanaPackageJson.version;
 
-const SKIP_PACKAGES: string[] = [];
+const logger = new ToolingLog({
+  level: 'info',
+  writeTo: process.stdout,
+});
+
+const {
+  registryUrl = DEFAULT_REGISTRY_URL,
+  kibanaUrl = DEFAULT_KIBANA_URL,
+  kibanaUsername = DEFAULT_KIBANA_USERNAME,
+  kibanaPassword = DEFAULT_KIBANA_PASSWORD,
+  skip: skipPackagesArg,
+  delete: deletePackages = false,
+  // ignore yargs positional args
+  _,
+  $0,
+  ...otherArgs
+} = yargs(process.argv.slice(2)).argv;
+
+const skipPackages = typeof skipPackagesArg === 'string' ? skipPackagesArg.split(',') : [];
+const printUsage = () =>
+  logger.info(`
+    Install all packages from the specified package registry
+
+    Usage: node install_all_packages [--registryUrl=${DEFAULT_REGISTRY_URL}] [--kibanaUrl=${DEFAULT_KIBANA_URL}] [--kibanaUsername=${DEFAULT_KIBANA_USERNAME}] [--kibanaPassword=${DEFAULT_KIBANA_PASSWORD}] [--delete]
+  `);
+
+if (Object.keys(otherArgs).length > 0) {
+  logger.error('Unknown arguments: ' + Object.keys(otherArgs).join(', '));
+  printUsage();
+  process.exit(1);
+}
+
+const Authorization =
+  'Basic ' + Buffer.from(`${kibanaUsername}:${kibanaPassword}`).toString('base64');
 
 async function installPackage(name: string, version: string) {
   const start = Date.now();
-  const res = await fetch(`${KIBANA_URL}/api/fleet/epm/packages/${name}/${version}`, {
+  const res = await fetch(`${kibanaUrl}/api/fleet/epm/packages/${name}/${version}`, {
     headers: {
       accept: '*/*',
       'content-type': 'application/json',
       'kbn-xsrf': 'xyz',
-      Authorization:
-        'Basic ' + Buffer.from(`${KIBANA_USERNAME}:${KIBANA_PASSWORD}`).toString('base64'),
+      Authorization,
     },
     body: JSON.stringify({ force: true }),
     method: 'POST',
@@ -35,29 +67,28 @@ async function installPackage(name: string, version: string) {
 
   const body = await res.json();
 
-  return { body, status: res.status, took: (end - start) / 1000 };
+  return { body, status: res.status, took: (end - start) / 1000, didError: res.status !== 200 };
 }
 
 async function deletePackage(name: string, version: string) {
-  const res = await fetch(`${KIBANA_URL}/api/fleet/epm/packages/${name}-${version}`, {
+  const res = await fetch(`${kibanaUrl}/api/fleet/epm/packages/${name}-${version}`, {
     headers: {
       accept: '*/*',
       'content-type': 'application/json',
       'kbn-xsrf': 'xyz',
-      Authorization:
-        'Basic ' + Buffer.from(`${KIBANA_USERNAME}:${KIBANA_PASSWORD}`).toString('base64'),
+      Authorization,
     },
     method: 'DELETE',
   });
 
   const body = await res.json();
 
-  return { body, status: res.status };
+  return { body, status: res.status, didError: res.status !== 200 };
 }
 
 async function getAllPackages() {
   const res = await fetch(
-    `${REGISTRY_URL}/search?experimental=true&kibana.version=${KIBANA_VERSION}`,
+    `${registryUrl}/search?prerelease=true&kibana.version=${KIBANA_VERSION}`,
     {
       headers: {
         accept: '*/*',
@@ -70,7 +101,6 @@ async function getAllPackages() {
 }
 
 function logResult(
-  logger: ToolingLog,
   pkg: { name: string; version: string },
   result: { took?: number; status?: number }
 ) {
@@ -83,36 +113,45 @@ function logResult(
 }
 
 export async function run() {
-  const logger = new ToolingLog({
-    level: 'info',
-    writeTo: process.stdout,
-  });
   const allPackages = await getAllPackages();
+
+  let errorCount = 0;
+
+  const updateErrorCount = (result: { didError: boolean }) => {
+    if (result.didError) {
+      errorCount++;
+    }
+  };
 
   logger.info('INSTALLING packages');
 
   for (const pkg of allPackages) {
-    if (SKIP_PACKAGES.includes(pkg.name)) {
+    if (skipPackages.includes(pkg.name)) {
       logger.info(`Skipping ${pkg.name}`);
       continue;
     }
     const result = await installPackage(pkg.name, pkg.version);
+    updateErrorCount(result);
 
-    logResult(logger, pkg, result);
+    logResult(pkg, result);
   }
 
-  const deletePackages = process.argv.includes('--delete');
+  if (deletePackages) {
+    logger.info('DELETING packages');
+    for (const pkg of allPackages) {
+      if (skipPackages.includes(pkg.name)) {
+        logger.info(`Skipping ${pkg.name}`);
+        continue;
+      }
+      const result = await deletePackage(pkg.name, pkg.version);
+      updateErrorCount(result);
 
-  if (!deletePackages) return;
-
-  logger.info('DELETING packages');
-  for (const pkg of allPackages) {
-    if (SKIP_PACKAGES.includes(pkg.name)) {
-      logger.info(`Skipping ${pkg.name}`);
-      continue;
+      logResult(pkg, result);
     }
-    const result = await deletePackage(pkg.name, pkg.version);
+  }
 
-    logResult(logger, pkg, result);
+  if (errorCount > 0) {
+    logger.error(`There were ${errorCount} errors, exiting with code`);
+    process.exit(1);
   }
 }

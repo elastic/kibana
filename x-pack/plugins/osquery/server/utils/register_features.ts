@@ -34,7 +34,7 @@ export const registerFeatures = (features: SetupPlugins['features']) => {
           all: [],
           read: [],
         },
-        ui: ['write'],
+        ui: ['read', 'write'],
       },
       read: {
         api: [`${PLUGIN_ID}-read`],
@@ -115,7 +115,7 @@ export const registerFeatures = (features: SetupPlugins['features']) => {
                 name: 'All',
                 savedObject: {
                   all: [savedQuerySavedObjectType],
-                  read: [],
+                  read: ['tag'],
                 },
                 ui: ['writeSavedQueries', 'readSavedQueries'],
               },
@@ -126,7 +126,7 @@ export const registerFeatures = (features: SetupPlugins['features']) => {
                 name: 'Read',
                 savedObject: {
                   all: [],
-                  read: [savedQuerySavedObjectType],
+                  read: [savedQuerySavedObjectType, 'tag'],
                 },
                 ui: ['readSavedQueries'],
               },
@@ -149,7 +149,7 @@ export const registerFeatures = (features: SetupPlugins['features']) => {
                 name: 'All',
                 savedObject: {
                   all: [packSavedObjectType, packAssetSavedObjectType],
-                  read: [],
+                  read: ['tag'],
                 },
                 ui: ['writePacks', 'readPacks'],
               },
@@ -160,7 +160,7 @@ export const registerFeatures = (features: SetupPlugins['features']) => {
                 name: 'Read',
                 savedObject: {
                   all: [],
-                  read: [packSavedObjectType],
+                  read: [packSavedObjectType, 'tag'],
                 },
                 ui: ['readPacks'],
               },

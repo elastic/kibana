@@ -8,6 +8,7 @@
 import { i18n } from '@kbn/i18n';
 
 export * from '../../common/translations';
+export * from '../user_profiles/translations';
 
 export const ADDED_FIELD = i18n.translate('xpack.cases.caseView.actionLabel.addedField', {
   defaultMessage: 'added',
@@ -170,3 +171,38 @@ export const ALERTS_EMPTY_DESCRIPTION = i18n.translate(
     defaultMessage: 'No alerts have been added to this case.',
   }
 );
+
+export const SEND_EMAIL_ARIA = (user: string) =>
+  i18n.translate('xpack.cases.caseView.sendEmalLinkAria', {
+    values: { user },
+    defaultMessage: 'click to send an email to {user}',
+  });
+
+export const EDIT_ASSIGNEES_ARIA_LABEL = i18n.translate(
+  'xpack.cases.caseView.editAssigneesAriaLabel',
+  {
+    defaultMessage: 'click to edit assignees',
+  }
+);
+
+export const NO_ASSIGNEES = i18n.translate('xpack.cases.caseView.noAssignees', {
+  defaultMessage: 'No users are assigned',
+});
+
+export const ASSIGN_A_USER = i18n.translate('xpack.cases.caseView.assignUser', {
+  defaultMessage: 'Assign a user',
+});
+
+export const SPACED_OR = i18n.translate('xpack.cases.caseView.spacedOrText', {
+  defaultMessage: ' or ',
+});
+
+export const ASSIGN_YOURSELF = i18n.translate('xpack.cases.caseView.assignYourself', {
+  defaultMessage: 'assign yourself',
+});
+
+export const TOTAL_USERS_ASSIGNED = (total: number) =>
+  i18n.translate('xpack.cases.caseView.totalUsersAssigned', {
+    defaultMessage: '{total} assigned',
+    values: { total },
+  });

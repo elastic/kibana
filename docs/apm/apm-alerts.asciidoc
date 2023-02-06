@@ -100,7 +100,8 @@ Click **Save**. The alert has been created and is now active!
 [[apm-alert-manage]]
 === Manage alerts and rules
 
-From the APM app, select **Alerts and rules** > **Manage rules** to be taken to the Kibana **Rules and Connectors** page.
+From the APM app, select **Alerts and rules** > **Manage rules** to be taken to
+the {kib} *{rules-ui}* page.
 From this page, you can disable, mute, and delete APM alerts.
 
 [float]

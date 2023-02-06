@@ -9,7 +9,8 @@
 import Path from 'path';
 
 import { REPO_ROOT } from '../lib/paths.mjs';
-import { spawnSync, spawnStreaming } from '../lib/spawn.mjs';
+import { run, spawnStreaming } from '../lib/spawn.mjs';
+import External from '../lib/external_packages.js';
 
 /** @type {import('../lib/command').Command} */
 export const command = {
@@ -39,13 +40,13 @@ export const command = {
     const exclude = args.getStringValues('exclude') ?? [];
     const include = args.getStringValues('include') ?? [];
 
-    const { discoverBazelPackages } = await import('@kbn/bazel-packages');
-    const packages = await discoverBazelPackages(REPO_ROOT);
-    for (const { pkg, normalizedRepoRelativeDir } of packages) {
+    const { getPackages } = External['@kbn/repo-packages']();
+    const packages = getPackages(REPO_ROOT);
+    for (const { manifest, pkg, normalizedRepoRelativeDir } of packages) {
       if (
-        exclude.includes(pkg.name) ||
-        (include.length && !include.includes(pkg.name)) ||
-        !pkg.scripts ||
+        exclude.includes(manifest.id) ||
+        (include.length && !include.includes(manifest.id)) ||
+        !pkg?.scripts ||
         !Object.hasOwn(pkg.scripts, scriptName)
       ) {
         continue;
@@ -59,7 +60,7 @@ export const command = {
       const cwd = Path.resolve(REPO_ROOT, normalizedRepoRelativeDir);
 
       if (args.getBooleanValue('quiet')) {
-        spawnSync('yarn', ['run', scriptName, ...scriptArgs], {
+        await run('yarn', ['run', scriptName, ...scriptArgs], {
           cwd,
           description: `${scriptName} in ${pkg.name}`,
         });

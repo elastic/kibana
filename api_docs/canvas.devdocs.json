@@ -13,6 +13,7 @@
         "description": [],
         "path": "x-pack/plugins/canvas/public/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "canvas",
@@ -24,10 +25,10 @@
             "signature": [
               "{ services: ",
               {
-                "pluginId": "core",
-                "scope": "public",
-                "docId": "kibCorePluginApi",
-                "section": "def-public.CoreStart",
+                "pluginId": "@kbn/core-lifecycle-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreLifecycleBrowserPluginApi",
+                "section": "def-common.CoreStart",
                 "text": "CoreStart"
               },
               " & ",
@@ -37,7 +38,8 @@
               "; }; }"
             ],
             "path": "x-pack/plugins/canvas/public/index.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -60,6 +62,7 @@
       ],
       "path": "x-pack/plugins/canvas/public/plugin.tsx",
       "deprecated": false,
+      "trackAdoption": false,
       "lifecycle": "setup",
       "initialIsOpen": true
     },
@@ -75,6 +78,7 @@
       ],
       "path": "x-pack/plugins/canvas/public/plugin.tsx",
       "deprecated": false,
+      "trackAdoption": false,
       "lifecycle": "start",
       "initialIsOpen": true
     }
@@ -105,6 +109,7 @@
         ],
         "path": "x-pack/plugins/canvas/common/locator.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -134,6 +139,7 @@
         ],
         "path": "x-pack/plugins/canvas/common/locator.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -148,6 +154,7 @@
         ],
         "path": "x-pack/plugins/canvas/common/locator.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       }
     ],
@@ -161,6 +168,7 @@
         "description": [],
         "path": "x-pack/plugins/canvas/common/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "canvas",
@@ -170,7 +178,8 @@
             "label": "ENABLE_LABS_UI",
             "description": [],
             "path": "x-pack/plugins/canvas/common/index.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false

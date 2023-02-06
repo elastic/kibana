@@ -4,12 +4,15 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import { apm, timerange } from '@kbn/apm-synthtrace-client';
 import expect from '@kbn/expect';
 import { first, last } from 'lodash';
 import moment from 'moment';
-import { APIReturnType } from '@kbn/apm-plugin/public/services/rest/create_call_apm_api';
-import archives_metadata from '../../common/fixtures/es_archiver/archives_metadata';
+import {
+  APIClientRequestParamsOf,
+  APIReturnType,
+} from '@kbn/apm-plugin/public/services/rest/create_call_apm_api';
+import { RecursivePartial } from '@kbn/apm-plugin/typings/common';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 
 type ErrorRate =
@@ -18,48 +21,36 @@ type ErrorRate =
 export default function ApiTest({ getService }: FtrProviderContext) {
   const registry = getService('registry');
   const apmApiClient = getService('apmApiClient');
-
-  const archiveName = 'apm_8.0.0';
+  const synthtraceEsClient = getService('synthtraceEsClient');
 
   // url parameters
-  const { start, end } = archives_metadata[archiveName];
-  const transactionType = 'request';
+  const start = new Date('2021-01-01T00:00:00.000Z').getTime();
+  const end = new Date('2021-01-01T00:15:00.000Z').getTime() - 1;
 
-  async function fetchErrorCharts({
-    serviceName,
-    query,
-  }: {
-    serviceName: string;
-    query: {
-      start: string;
-      end: string;
-      transactionType: string;
-      environment: string;
-      kuery: string;
-      offset?: string;
-    };
-  }) {
+  async function fetchErrorCharts(
+    overrides?: RecursivePartial<
+      APIClientRequestParamsOf<'GET /internal/apm/services/{serviceName}/transactions/charts/error_rate'>['params']
+    >
+  ) {
     return await apmApiClient.readUser({
       endpoint: `GET /internal/apm/services/{serviceName}/transactions/charts/error_rate`,
       params: {
-        path: { serviceName },
-        query,
+        path: { serviceName: overrides?.path?.serviceName || 'opbeans-go' },
+        query: {
+          start: new Date(start).toISOString(),
+          end: new Date(end).toISOString(),
+          transactionType: 'request',
+          environment: 'ENVIRONMENT_ALL',
+          kuery: '',
+          ...overrides?.query,
+        },
       },
     });
   }
 
   registry.when('Error rate when data is not loaded', { config: 'basic', archives: [] }, () => {
     it('handles the empty state', async () => {
-      const response = await fetchErrorCharts({
-        serviceName: 'opbeans-java',
-        query: {
-          start,
-          end,
-          transactionType,
-          environment: 'ENVIRONMENT_ALL',
-          kuery: '',
-        },
-      });
+      const response = await fetchErrorCharts();
       expect(response.status).to.be(200);
 
       const body = response.body as ErrorRate;
@@ -71,14 +62,9 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
     it('handles the empty state with comparison data', async () => {
       const response = await fetchErrorCharts({
-        serviceName: 'opbeans-java',
         query: {
-          transactionType,
-          start: moment(end).subtract(15, 'minutes').toISOString(),
-          end,
-          offset: '15m',
-          environment: 'ENVIRONMENT_ALL',
-          kuery: '',
+          start: moment(end).subtract(7, 'minutes').toISOString(),
+          offset: '7m',
         },
       });
       expect(response.status).to.be(200);
@@ -91,149 +77,174 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     });
   });
 
-  registry.when(
-    'Error rate when data is loaded',
-    { config: 'basic', archives: [archiveName] },
-    () => {
-      describe('returns the transaction error rate', () => {
-        let errorRateResponse: ErrorRate;
+  registry.when('Error rate when data is loaded', { config: 'basic', archives: [] }, () => {
+    const config = {
+      firstTransaction: {
+        name: 'GET /apple 🍎 ',
+        successRate: 50,
+        failureRate: 50,
+      },
+    };
+    before(async () => {
+      const serviceGoProdInstance = apm
+        .service({ name: 'opbeans-go', environment: 'production', agentName: 'go' })
+        .instance('instance-a');
 
-        before(async () => {
-          const response = await fetchErrorCharts({
-            serviceName: 'opbeans-java',
-            query: {
-              start,
-              end,
-              transactionType,
-              environment: 'ENVIRONMENT_ALL',
-              kuery: '',
-            },
-          });
+      const { firstTransaction } = config;
 
-          errorRateResponse = response.body;
+      const documents = [
+        timerange(start, end)
+          .ratePerMinute(firstTransaction.successRate)
+          .generator((timestamp) =>
+            serviceGoProdInstance
+              .transaction({ transactionName: firstTransaction.name })
+              .timestamp(timestamp)
+              .duration(1000)
+              .success()
+          ),
+
+        timerange(start, end)
+          .ratePerMinute(firstTransaction.failureRate)
+          .generator((timestamp) =>
+            serviceGoProdInstance
+              .transaction({ transactionName: firstTransaction.name })
+              .errors(
+                serviceGoProdInstance
+                  .error({
+                    message: 'Error 1',
+                    type: firstTransaction.name,
+                    groupingName: 'Error test',
+                  })
+                  .timestamp(timestamp)
+              )
+              .duration(1000)
+              .timestamp(timestamp)
+              .failure()
+          ),
+      ];
+      await synthtraceEsClient.index(documents);
+    });
+
+    after(() => synthtraceEsClient.clean());
+
+    describe('returns the transaction error rate', () => {
+      let errorRateResponse: ErrorRate;
+
+      before(async () => {
+        const response = await fetchErrorCharts({
+          query: { transactionName: config.firstTransaction.name },
         });
-
-        it('returns some data', () => {
-          expect(errorRateResponse.currentPeriod.average).to.be.greaterThan(0);
-          expect(errorRateResponse.previousPeriod.average).to.be(null);
-
-          expect(errorRateResponse.currentPeriod.timeseries.length).to.be.greaterThan(0);
-          expect(errorRateResponse.previousPeriod.timeseries).to.empty();
-
-          const nonNullDataPoints = errorRateResponse.currentPeriod.timeseries.filter(
-            ({ y }) => y !== null
-          );
-
-          expect(nonNullDataPoints.length).to.be.greaterThan(0);
-        });
-
-        it('has the correct start date', () => {
-          expectSnapshot(
-            new Date(first(errorRateResponse.currentPeriod.timeseries)?.x ?? NaN).toISOString()
-          ).toMatchInline(`"2021-08-03T06:50:00.000Z"`);
-        });
-
-        it('has the correct end date', () => {
-          expectSnapshot(
-            new Date(last(errorRateResponse.currentPeriod.timeseries)?.x ?? NaN).toISOString()
-          ).toMatchInline(`"2021-08-03T07:20:00.000Z"`);
-        });
-
-        it('has the correct number of buckets', () => {
-          expectSnapshot(errorRateResponse.currentPeriod.timeseries.length).toMatchInline(`31`);
-        });
-
-        it('has the correct calculation for average', () => {
-          expectSnapshot(errorRateResponse.currentPeriod.average).toMatchInline(
-            `0.0848214285714286`
-          );
-        });
-
-        it('has the correct error rate', () => {
-          expectSnapshot(errorRateResponse.currentPeriod.timeseries).toMatch();
-        });
+        errorRateResponse = response.body;
       });
 
-      describe('returns the transaction error rate with comparison data', () => {
-        let errorRateResponse: ErrorRate;
+      it('returns some data', () => {
+        expect(errorRateResponse.currentPeriod.average).to.be.greaterThan(0);
+        expect(errorRateResponse.previousPeriod.average).to.be(null);
 
-        before(async () => {
-          const response = await fetchErrorCharts({
-            serviceName: 'opbeans-java',
-            query: {
-              transactionType,
-              start: moment(end).subtract(15, 'minutes').toISOString(),
-              end,
-              offset: '15m',
-              environment: 'ENVIRONMENT_ALL',
-              kuery: '',
-            },
-          });
+        expect(errorRateResponse.currentPeriod.timeseries).not.to.be.empty();
+        expect(errorRateResponse.previousPeriod.timeseries).to.empty();
 
-          errorRateResponse = response.body;
-        });
+        const nonNullDataPoints = errorRateResponse.currentPeriod.timeseries.filter(
+          ({ y }) => y !== null
+        );
 
-        it('returns some data', () => {
-          expect(errorRateResponse.currentPeriod.average).to.be.greaterThan(0);
-          expect(errorRateResponse.previousPeriod.average).to.be.greaterThan(0);
-
-          expect(errorRateResponse.currentPeriod.timeseries.length).to.be.greaterThan(0);
-          expect(errorRateResponse.previousPeriod.timeseries.length).to.be.greaterThan(0);
-
-          const currentPeriodNonNullDataPoints = errorRateResponse.currentPeriod.timeseries.filter(
-            ({ y }) => y !== null
-          );
-
-          const previousPeriodNonNullDataPoints =
-            errorRateResponse.previousPeriod.timeseries.filter(({ y }) => y !== null);
-
-          expect(currentPeriodNonNullDataPoints.length).to.be.greaterThan(0);
-          expect(previousPeriodNonNullDataPoints.length).to.be.greaterThan(0);
-        });
-
-        it('has the correct start date', () => {
-          expectSnapshot(
-            new Date(first(errorRateResponse.currentPeriod.timeseries)?.x ?? NaN).toISOString()
-          ).toMatchInline(`"2021-08-03T07:05:00.000Z"`);
-          expectSnapshot(
-            new Date(first(errorRateResponse.previousPeriod.timeseries)?.x ?? NaN).toISOString()
-          ).toMatchInline(`"2021-08-03T07:05:00.000Z"`);
-        });
-
-        it('has the correct end date', () => {
-          expectSnapshot(
-            new Date(last(errorRateResponse.currentPeriod.timeseries)?.x ?? NaN).toISOString()
-          ).toMatchInline(`"2021-08-03T07:20:00.000Z"`);
-          expectSnapshot(
-            new Date(last(errorRateResponse.previousPeriod.timeseries)?.x ?? NaN).toISOString()
-          ).toMatchInline(`"2021-08-03T07:20:00.000Z"`);
-        });
-
-        it('has the correct number of buckets', () => {
-          expectSnapshot(errorRateResponse.currentPeriod.timeseries.length).toMatchInline(`16`);
-          expectSnapshot(errorRateResponse.previousPeriod.timeseries.length).toMatchInline(`16`);
-        });
-
-        it('has the correct calculation for average', () => {
-          expectSnapshot(errorRateResponse.currentPeriod.average).toMatchInline(
-            `0.0792079207920792`
-          );
-          expectSnapshot(errorRateResponse.previousPeriod.average).toMatchInline(
-            `0.0894308943089431`
-          );
-        });
-
-        it('has the correct error rate', () => {
-          expectSnapshot(errorRateResponse.currentPeriod.timeseries).toMatch();
-          expectSnapshot(errorRateResponse.previousPeriod.timeseries).toMatch();
-        });
-
-        it('matches x-axis on current period and previous period', () => {
-          expect(errorRateResponse.currentPeriod.timeseries.map(({ x }) => x)).to.be.eql(
-            errorRateResponse.previousPeriod.timeseries.map(({ x }) => x)
-          );
-        });
+        expect(nonNullDataPoints).not.to.be.empty();
       });
-    }
-  );
+
+      it('has the correct start date', () => {
+        expect(
+          new Date(first(errorRateResponse.currentPeriod.timeseries)?.x ?? NaN).toISOString()
+        ).to.eql('2021-01-01T00:00:00.000Z');
+      });
+
+      it('has the correct end date', () => {
+        expect(
+          new Date(last(errorRateResponse.currentPeriod.timeseries)?.x ?? NaN).toISOString()
+        ).to.eql('2021-01-01T00:14:00.000Z');
+      });
+
+      it('has the correct number of buckets', () => {
+        expect(errorRateResponse.currentPeriod.timeseries.length).to.be.eql(15);
+      });
+
+      it('has the correct calculation for average', () => {
+        expect(errorRateResponse.currentPeriod.average).to.eql(
+          config.firstTransaction.failureRate / 100
+        );
+      });
+    });
+
+    describe('returns the transaction error rate with comparison data', () => {
+      let errorRateResponse: ErrorRate;
+
+      before(async () => {
+        const response = await fetchErrorCharts({
+          query: {
+            transactionName: config.firstTransaction.name,
+            start: moment(end).subtract(7, 'minutes').toISOString(),
+            offset: '7m',
+          },
+        });
+
+        errorRateResponse = response.body;
+      });
+
+      it('returns some data', () => {
+        expect(errorRateResponse.currentPeriod.average).to.be.greaterThan(0);
+        expect(errorRateResponse.previousPeriod.average).to.be.greaterThan(0);
+
+        expect(errorRateResponse.currentPeriod.timeseries).not.to.be.empty();
+        expect(errorRateResponse.previousPeriod.timeseries).not.to.be.empty();
+
+        const currentPeriodNonNullDataPoints = errorRateResponse.currentPeriod.timeseries.filter(
+          ({ y }) => y !== null
+        );
+
+        const previousPeriodNonNullDataPoints = errorRateResponse.previousPeriod.timeseries.filter(
+          ({ y }) => y !== null
+        );
+
+        expect(currentPeriodNonNullDataPoints).not.to.be.empty();
+        expect(previousPeriodNonNullDataPoints).not.to.be.empty();
+      });
+
+      it('has the correct start date', () => {
+        expect(
+          new Date(first(errorRateResponse.currentPeriod.timeseries)?.x ?? NaN).toISOString()
+        ).to.eql('2021-01-01T00:07:00.000Z');
+        expect(
+          new Date(first(errorRateResponse.previousPeriod.timeseries)?.x ?? NaN).toISOString()
+        ).to.eql('2021-01-01T00:07:00.000Z');
+      });
+
+      it('has the correct end date', () => {
+        expect(
+          new Date(last(errorRateResponse.currentPeriod.timeseries)?.x ?? NaN).toISOString()
+        ).to.eql('2021-01-01T00:14:00.000Z');
+        expect(
+          new Date(last(errorRateResponse.previousPeriod.timeseries)?.x ?? NaN).toISOString()
+        ).to.eql('2021-01-01T00:14:00.000Z');
+      });
+
+      it('has the correct number of buckets', () => {
+        expect(errorRateResponse.currentPeriod.timeseries.length).to.eql(8);
+        expect(errorRateResponse.previousPeriod.timeseries.length).to.eql(8);
+      });
+
+      it('has the correct calculation for average', () => {
+        expect(errorRateResponse.currentPeriod.average).to.eql(
+          config.firstTransaction.failureRate / 100
+        );
+        expect(errorRateResponse.previousPeriod.average).to.eql(
+          config.firstTransaction.failureRate / 100
+        );
+      });
+
+      it('matches x-axis on current period and previous period', () => {
+        expect(errorRateResponse.currentPeriod.timeseries.map(({ x }) => x)).to.be.eql(
+          errorRateResponse.previousPeriod.timeseries.map(({ x }) => x)
+        );
+      });
+    });
+  });
 }

@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import { SavedObjectsType } from '@kbn/core/server';
+import type { SavedObjectsType } from '@kbn/core/server';
 import { CASE_COMMENT_SAVED_OBJECT } from '../../common/constants';
-import { createCommentsMigrations, CreateCommentsMigrationsDeps } from './migrations';
+import type { CreateCommentsMigrationsDeps } from './migrations';
+import { createCommentsMigrations } from './migrations';
 
 export const createCaseCommentSavedObjectType = ({
   migrationDeps,
@@ -61,6 +62,9 @@ export const createCaseCommentSavedObjectType = ({
           email: {
             type: 'keyword',
           },
+          profile_uid: {
+            type: 'keyword',
+          },
         },
       },
       externalReferenceId: {
@@ -105,6 +109,9 @@ export const createCaseCommentSavedObjectType = ({
           email: {
             type: 'keyword',
           },
+          profile_uid: {
+            type: 'keyword',
+          },
         },
       },
       rule: {
@@ -129,6 +136,9 @@ export const createCaseCommentSavedObjectType = ({
             type: 'keyword',
           },
           email: {
+            type: 'keyword',
+          },
+          profile_uid: {
             type: 'keyword',
           },
         },

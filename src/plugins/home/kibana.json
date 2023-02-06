@@ -8,6 +8,6 @@
   "server": true,
   "ui": true,
   "requiredPlugins": ["dataViews", "share", "urlForwarding"],
-  "optionalPlugins": ["usageCollection", "customIntegrations"],
+  "optionalPlugins": ["usageCollection", "customIntegrations", "cloud", "guidedOnboarding"],
   "requiredBundles": ["kibanaReact"]
 }

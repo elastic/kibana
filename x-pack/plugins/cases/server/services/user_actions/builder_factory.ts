@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { UserActionTypes } from '../../../common/api';
+import type { UserActionTypes } from '../../../common/api';
 import { CreateCaseUserActionBuilder } from './builders/create_case';
 import { TitleUserActionBuilder } from './builders/title';
 import { CommentUserActionBuilder } from './builders/comment';
@@ -15,12 +15,12 @@ import { PushedUserActionBuilder } from './builders/pushed';
 import { StatusUserActionBuilder } from './builders/status';
 import { TagsUserActionBuilder } from './builders/tags';
 import { SettingsUserActionBuilder } from './builders/settings';
-import { DeleteCaseUserActionBuilder } from './builders/delete_case';
-import { UserActionBuilder } from './abstract_builder';
+import type { UserActionBuilder } from './abstract_builder';
 import { SeverityUserActionBuilder } from './builders/severity';
-import { PersistableStateAttachmentTypeRegistry } from '../../attachment_framework/persistable_state_registry';
-import { BuilderDeps } from './types';
+import type { PersistableStateAttachmentTypeRegistry } from '../../attachment_framework/persistable_state_registry';
+import type { BuilderDeps } from './types';
 import { AssigneesUserActionBuilder } from './builders/assignees';
+import { NoopUserActionBuilder } from './builders/noop';
 
 const builderMap = {
   assignees: AssigneesUserActionBuilder,
@@ -34,7 +34,7 @@ const builderMap = {
   status: StatusUserActionBuilder,
   severity: SeverityUserActionBuilder,
   settings: SettingsUserActionBuilder,
-  delete_case: DeleteCaseUserActionBuilder,
+  delete_case: NoopUserActionBuilder,
 };
 
 export class BuilderFactory {

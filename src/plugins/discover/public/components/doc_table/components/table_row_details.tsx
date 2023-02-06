@@ -7,29 +7,45 @@
  */
 
 import React from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiLink, EuiTitle } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiButtonEmpty, EuiTitle } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { DiscoverNavigationProps } from '../../../hooks/use_navigation_props';
+import type { DataView } from '@kbn/data-views-plugin/public';
+import type { Filter } from '@kbn/es-query';
+import { useNavigationProps } from '../../../hooks/use_navigation_props';
+
 interface TableRowDetailsProps {
-  open: boolean;
-  colLength: number;
-  isTimeBased: boolean;
-  singleDocProps: DiscoverNavigationProps;
-  surrDocsProps: DiscoverNavigationProps;
   children: JSX.Element;
+  colLength: number;
+  rowIndex: string;
+  rowId: string;
+  columns: string[];
+  isTimeBased: boolean;
+  dataView: DataView;
+  filters?: Filter[];
+  savedSearchId?: string;
 }
 
 export const TableRowDetails = ({
-  open,
   colLength,
   isTimeBased,
-  singleDocProps,
-  surrDocsProps,
   children,
+  dataView,
+  rowIndex,
+  rowId,
+  columns,
+  filters,
+  savedSearchId,
 }: TableRowDetailsProps) => {
-  if (!open) {
-    return null;
-  }
+  const { singleDocHref, contextViewHref, onOpenSingleDoc, onOpenContextView } = useNavigationProps(
+    {
+      dataView,
+      rowIndex,
+      rowId,
+      columns,
+      filters,
+      savedSearchId,
+    }
+  );
 
   return (
     <td colSpan={(colLength || 1) + 2}>
@@ -55,21 +71,39 @@ export const TableRowDetails = ({
           <EuiFlexGroup gutterSize="l" alignItems="center" responsive={false}>
             <EuiFlexItem grow={false}>
               {isTimeBased && (
-                <EuiLink data-test-subj="docTableRowAction" {...surrDocsProps}>
+                /* eslint-disable-next-line @elastic/eui/href-or-on-click */
+                <EuiButtonEmpty
+                  size="s"
+                  iconSize="s"
+                  iconType="document"
+                  flush="left"
+                  data-test-subj="docTableRowAction"
+                  href={contextViewHref}
+                  onClick={onOpenContextView}
+                >
                   <FormattedMessage
                     id="discover.docTable.tableRow.viewSurroundingDocumentsLinkText"
                     defaultMessage="View surrounding documents"
                   />
-                </EuiLink>
+                </EuiButtonEmpty>
               )}
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiLink data-test-subj="docTableRowAction" {...singleDocProps}>
+              {/* eslint-disable-next-line @elastic/eui/href-or-on-click */}
+              <EuiButtonEmpty
+                size="s"
+                iconSize="s"
+                iconType="document"
+                flush="left"
+                data-test-subj="docTableRowAction"
+                href={singleDocHref}
+                onClick={onOpenSingleDoc}
+              >
                 <FormattedMessage
                   id="discover.docTable.tableRow.viewSingleDocumentLinkText"
                   defaultMessage="View single document"
                 />
-              </EuiLink>
+              </EuiButtonEmpty>
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>

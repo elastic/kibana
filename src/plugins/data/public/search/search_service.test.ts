@@ -27,6 +27,7 @@ describe('Search service', () => {
   let mockCoreSetup: MockedKeys<CoreSetup>;
   let mockCoreStart: MockedKeys<CoreStart>;
   const initializerContext = coreMock.createPluginInitializerContext();
+  jest.useFakeTimers();
   initializerContext.config.get = jest.fn().mockReturnValue({
     search: { aggs: { shardDelay: { enabled: false } }, sessions: { enabled: true } },
   });
@@ -35,6 +36,7 @@ describe('Search service', () => {
     mockCoreSetup = coreMock.createSetup();
     mockCoreStart = coreMock.createStart();
     searchService = new SearchService(initializerContext);
+    jest.advanceTimersByTime(30000);
   });
 
   describe('setup()', () => {
@@ -217,7 +219,13 @@ describe('Search service', () => {
         const responder1 = inspector.adapter.start('request1');
         const responder2 = inspector.adapter.start('request2');
         responder1.ok(getMockResponseWithShards(shards));
-        responder2.ok(getMockResponseWithShards(shards));
+        responder2.ok({
+          json: {
+            rawResponse: {
+              timed_out: true,
+            },
+          },
+        });
 
         data.showWarnings(inspector.adapter, callback);
 
@@ -227,8 +235,7 @@ describe('Search service', () => {
           text: expect.any(Function),
         });
         expect(notifications.toasts.addWarning).nthCalledWith(2, {
-          title: '2 of 4 shards failed',
-          text: expect.any(Function),
+          title: 'Data might be incomplete because your request timed out',
         });
       });
     });

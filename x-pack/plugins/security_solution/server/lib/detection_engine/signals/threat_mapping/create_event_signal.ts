@@ -16,6 +16,7 @@ import {
   enrichSignalThreatMatches,
   getSignalMatchesFromThreatList,
 } from './enrich_signal_threat_matches';
+import { getSignalValueMap } from './utils';
 
 export const createEventSignal = async ({
   alertId,
@@ -24,7 +25,6 @@ export const createEventSignal = async ({
   currentResult,
   currentEventList,
   eventsTelemetry,
-  exceptionItems,
   filters,
   inputIndex,
   language,
@@ -49,14 +49,19 @@ export const createEventSignal = async ({
   runtimeMappings,
   primaryTimestamp,
   secondaryTimestamp,
+  exceptionFilter,
+  unprocessedExceptions,
+  allowedFieldsForTermsQuery,
+  threatMatchedFields,
 }: CreateEventSignalOptions): Promise<SearchAfterAndBulkCreateReturnType> => {
-  const threatFilter = buildThreatMappingFilter({
+  const threatFiltersFromEvents = buildThreatMappingFilter({
     threatMapping,
     threatList: currentEventList,
     entryKey: 'field',
+    allowedFieldsForTermsQuery,
   });
 
-  if (!threatFilter.query || threatFilter.query?.bool.should.length === 0) {
+  if (!threatFiltersFromEvents.query || threatFiltersFromEvents.query?.bool.should.length === 0) {
     // empty event list and we do not want to return everything as being
     // a hit so opt to return the existing result.
     ruleExecutionLogger.debug(
@@ -66,23 +71,26 @@ export const createEventSignal = async ({
   } else {
     const threatListHits = await getAllThreatListHits({
       esClient: services.scopedClusterClient.asCurrentUser,
-      exceptionItems,
-      threatFilters: [...threatFilters, threatFilter],
+      threatFilters: [...threatFilters, threatFiltersFromEvents],
       query: threatQuery,
       language: threatLanguage,
       index: threatIndex,
       ruleExecutionLogger,
       threatListConfig: {
-        _source: [`${threatIndicatorPath}.*`, 'threat.feed.*'],
+        _source: [`${threatIndicatorPath}.*`, 'threat.feed.*', ...threatMatchedFields.threat],
         fields: undefined,
       },
       pitId: threatPitId,
       reassignPitId: reassignThreatPitId,
       runtimeMappings,
       listClient,
+      exceptionFilter,
     });
 
-    const signalMatches = getSignalMatchesFromThreatList(threatListHits);
+    const signalMatches = getSignalMatchesFromThreatList(
+      threatListHits,
+      getSignalValueMap({ eventList: currentEventList, threatMatchedFields })
+    );
 
     const ids = signalMatches.map((item) => item.signalId);
 
@@ -104,7 +112,7 @@ export const createEventSignal = async ({
       savedId,
       services,
       index: inputIndex,
-      lists: exceptionItems,
+      exceptionFilter,
     });
 
     ruleExecutionLogger.debug(
@@ -122,10 +130,9 @@ export const createEventSignal = async ({
     const result = await searchAfterAndBulkCreate({
       buildReasonMessage: buildReasonMessageForThreatMatchAlert,
       bulkCreate,
-      completeRule,
       enrichment: threatEnrichment,
       eventsTelemetry,
-      exceptionsList: exceptionItems,
+      exceptionsList: unprocessedExceptions,
       filter: esFilter,
       inputIndexPattern: inputIndex,
       listClient,
@@ -143,7 +150,7 @@ export const createEventSignal = async ({
 
     ruleExecutionLogger.debug(
       `${
-        threatFilter.query?.bool.should.length
+        threatFiltersFromEvents.query?.bool.should.length
       } items have completed match checks and the total times to search were ${
         result.searchAfterTimes.length !== 0 ? result.searchAfterTimes : '(unknown) '
       }ms`

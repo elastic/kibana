@@ -39,6 +39,7 @@
         ],
         "path": "packages/analytics/shippers/elastic_v3/common/src/error_with_code.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/analytics-shippers-elastic-v3-common",
@@ -54,6 +55,7 @@
             ],
             "path": "packages/analytics/shippers/elastic_v3/common/src/error_with_code.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/analytics-shippers-elastic-v3-common",
@@ -69,6 +71,7 @@
                 ],
                 "path": "packages/analytics/shippers/elastic_v3/common/src/error_with_code.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -85,6 +88,7 @@
                 ],
                 "path": "packages/analytics/shippers/elastic_v3/common/src/error_with_code.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -109,6 +113,7 @@
         ],
         "path": "packages/analytics/shippers/elastic_v3/common/src/build_headers.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/analytics-shippers-elastic-v3-common",
@@ -124,6 +129,7 @@
             ],
             "path": "packages/analytics/shippers/elastic_v3/common/src/build_headers.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           },
           {
@@ -140,6 +146,7 @@
             ],
             "path": "packages/analytics/shippers/elastic_v3/common/src/build_headers.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           },
           {
@@ -156,6 +163,7 @@
             ],
             "path": "packages/analytics/shippers/elastic_v3/common/src/build_headers.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": false
           }
         ],
@@ -184,6 +192,7 @@
         ],
         "path": "packages/analytics/shippers/elastic_v3/common/src/build_url.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/analytics-shippers-elastic-v3-common",
@@ -205,6 +214,7 @@
             ],
             "path": "packages/analytics/shippers/elastic_v3/common/src/build_url.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -224,15 +234,34 @@
           "(telemetryCounter$: ",
           "Subject",
           "<",
-          "TelemetryCounter",
+          {
+            "pluginId": "@kbn/analytics-client",
+            "scope": "common",
+            "docId": "kibKbnAnalyticsClientPluginApi",
+            "section": "def-common.TelemetryCounter",
+            "text": "TelemetryCounter"
+          },
           ">, source: string) => (events: ",
-          "Event",
+          {
+            "pluginId": "@kbn/analytics-client",
+            "scope": "common",
+            "docId": "kibKbnAnalyticsClientPluginApi",
+            "section": "def-common.Event",
+            "text": "Event"
+          },
           "<Record<string, unknown>>[], { type, code, error, }?: { type?: ",
-          "TelemetryCounterType",
+          {
+            "pluginId": "@kbn/analytics-client",
+            "scope": "common",
+            "docId": "kibKbnAnalyticsClientPluginApi",
+            "section": "def-common.TelemetryCounterType",
+            "text": "TelemetryCounterType"
+          },
           " | undefined; code?: string | undefined; error?: Error | undefined; }) => void"
         ],
         "path": "packages/analytics/shippers/elastic_v3/common/src/report_telemetry_counters.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/analytics-shippers-elastic-v3-common",
@@ -246,11 +275,18 @@
             "signature": [
               "Subject",
               "<",
-              "TelemetryCounter",
+              {
+                "pluginId": "@kbn/analytics-client",
+                "scope": "common",
+                "docId": "kibKbnAnalyticsClientPluginApi",
+                "section": "def-common.TelemetryCounter",
+                "text": "TelemetryCounter"
+              },
               ">"
             ],
             "path": "packages/analytics/shippers/elastic_v3/common/src/report_telemetry_counters.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           },
           {
@@ -267,6 +303,7 @@
             ],
             "path": "packages/analytics/shippers/elastic_v3/common/src/report_telemetry_counters.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -284,11 +321,18 @@
         ],
         "signature": [
           "(events: ",
-          "Event",
+          {
+            "pluginId": "@kbn/analytics-client",
+            "scope": "common",
+            "docId": "kibKbnAnalyticsClientPluginApi",
+            "section": "def-common.Event",
+            "text": "Event"
+          },
           "<Record<string, unknown>>[]) => string"
         ],
         "path": "packages/analytics/shippers/elastic_v3/common/src/events_to_ndjson.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/analytics-shippers-elastic-v3-common",
@@ -300,11 +344,18 @@
               "An array of events {@link Event }"
             ],
             "signature": [
-              "Event",
+              {
+                "pluginId": "@kbn/analytics-client",
+                "scope": "common",
+                "docId": "kibKbnAnalyticsClientPluginApi",
+                "section": "def-common.Event",
+                "text": "Event"
+              },
               "<Record<string, unknown>>[]"
             ],
             "path": "packages/analytics/shippers/elastic_v3/common/src/events_to_ndjson.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -324,6 +375,7 @@
         ],
         "path": "packages/analytics/shippers/elastic_v3/common/src/build_url.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/analytics-shippers-elastic-v3-common",
@@ -338,7 +390,8 @@
               "\"staging\" | \"production\""
             ],
             "path": "packages/analytics/shippers/elastic_v3/common/src/build_url.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/analytics-shippers-elastic-v3-common",
@@ -350,7 +403,8 @@
               "The name of the channel to send the data to."
             ],
             "path": "packages/analytics/shippers/elastic_v3/common/src/build_url.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -366,6 +420,7 @@
         ],
         "path": "packages/analytics/shippers/elastic_v3/common/src/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/analytics-shippers-elastic-v3-common",
@@ -377,7 +432,8 @@
               "\nThe name of the channel to stream all the events to."
             ],
             "path": "packages/analytics/shippers/elastic_v3/common/src/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/analytics-shippers-elastic-v3-common",
@@ -389,7 +445,8 @@
               "\nThe product's version."
             ],
             "path": "packages/analytics/shippers/elastic_v3/common/src/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/analytics-shippers-elastic-v3-common",
@@ -404,7 +461,8 @@
               "\"staging\" | \"production\" | undefined"
             ],
             "path": "packages/analytics/shippers/elastic_v3/common/src/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/analytics-shippers-elastic-v3-common",
@@ -419,7 +477,8 @@
               "boolean | undefined"
             ],
             "path": "packages/analytics/shippers/elastic_v3/common/src/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false

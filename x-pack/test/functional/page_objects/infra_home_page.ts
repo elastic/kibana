@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import testSubjSelector from '@kbn/test-subj-selector';
+import { subj as testSubjSelector } from '@kbn/test-subj-selector';
 
 import { FtrProviderContext } from '../ftr_provider_context';
 
@@ -211,6 +211,15 @@ export function InfraHomePageProvider({ getService, getPageObjects }: FtrProvide
       await pageObjects.common.navigateToUrlWithBrowserHistory(
         'infraOps',
         `/explorer`,
+        undefined,
+        { ensureCurrentUrl: false } // Test runner struggles with `rison-node` escaped values
+      );
+    },
+
+    async goToHostsView() {
+      await pageObjects.common.navigateToUrlWithBrowserHistory(
+        'infraOps',
+        `/hosts`,
         undefined,
         { ensureCurrentUrl: false } // Test runner struggles with `rison-node` escaped values
       );

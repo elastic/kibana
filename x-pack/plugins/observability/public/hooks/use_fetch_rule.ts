@@ -16,8 +16,10 @@ export function useFetchRule({ ruleId, http }: FetchRuleProps) {
     rule: undefined,
     errorRule: undefined,
   });
+
   const fetchRuleSummary = useCallback(async () => {
     try {
+      if (!ruleId) return;
       const rule = await loadRule({
         http,
         ruleId,

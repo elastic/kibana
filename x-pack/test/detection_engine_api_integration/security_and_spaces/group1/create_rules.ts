@@ -9,9 +9,10 @@ import expect from '@kbn/expect';
 
 import { DETECTION_ENGINE_RULES_URL } from '@kbn/security-solution-plugin/common/constants';
 import { RuleExecutionStatus } from '@kbn/security-solution-plugin/common/detection_engine/rule_monitoring';
-import { CreateRulesSchema } from '@kbn/security-solution-plugin/common/detection_engine/schemas/request';
-
+import { RuleCreateProps } from '@kbn/security-solution-plugin/common/detection_engine/rule_schema';
+import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 import { ROLES } from '@kbn/security-solution-plugin/common/test';
+
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import {
   createSignalsIndex,
@@ -160,7 +161,7 @@ export default ({ getService }: FtrProviderContext) => {
         });
 
         it('should create a single rule without an input index', async () => {
-          const rule: CreateRulesSchema = {
+          const rule: RuleCreateProps = {
             name: 'Simple Rule Query',
             description: 'Simple Rule Query',
             enabled: true,
@@ -268,6 +269,117 @@ export default ({ getService }: FtrProviderContext) => {
             message: 'rule_id: "rule-1" already exists',
             status_code: 409,
           });
+        });
+      });
+
+      describe('exception', () => {
+        it('should not create a rule if trying to add more than one default rule exception list', async () => {
+          const rule: RuleCreateProps = {
+            name: 'Simple Rule Query',
+            description: 'Simple Rule Query',
+            enabled: true,
+            risk_score: 1,
+            rule_id: 'rule-1',
+            severity: 'high',
+            type: 'query',
+            query: 'user.name: root or user.name: admin',
+            exceptions_list: [
+              {
+                id: '2',
+                list_id: '123',
+                namespace_type: 'single',
+                type: ExceptionListTypeEnum.RULE_DEFAULT,
+              },
+              {
+                id: '1',
+                list_id: '456',
+                namespace_type: 'single',
+                type: ExceptionListTypeEnum.RULE_DEFAULT,
+              },
+            ],
+          };
+
+          const { body } = await supertest
+            .post(DETECTION_ENGINE_RULES_URL)
+            .set('kbn-xsrf', 'true')
+            .send(rule)
+            .expect(500);
+
+          expect(body).to.eql({
+            message: 'More than one default exception list found on rule',
+            status_code: 500,
+          });
+        });
+
+        it('should not create a rule if trying to add default rule exception list which attached to another', async () => {
+          const rule: RuleCreateProps = {
+            name: 'Simple Rule Query',
+            description: 'Simple Rule Query',
+            enabled: true,
+            risk_score: 1,
+            rule_id: 'rule-1',
+            severity: 'high',
+            type: 'query',
+            query: 'user.name: root or user.name: admin',
+            exceptions_list: [
+              {
+                id: '2',
+                list_id: '123',
+                namespace_type: 'single',
+                type: ExceptionListTypeEnum.RULE_DEFAULT,
+              },
+            ],
+          };
+
+          const { body: ruleWithException } = await supertest
+            .post(DETECTION_ENGINE_RULES_URL)
+            .set('kbn-xsrf', 'true')
+            .send(rule)
+            .expect(200);
+
+          const { body } = await supertest
+            .post(DETECTION_ENGINE_RULES_URL)
+            .set('kbn-xsrf', 'true')
+            .send({ ...rule, rule_id: 'rule-2' })
+            .expect(409);
+
+          expect(body).to.eql({
+            message: `default exception list already exists in rule(s): ${ruleWithException.id}`,
+            status_code: 409,
+          });
+        });
+
+        it('allow to create a rule if trying to add shared rule exception list which attached to another', async () => {
+          const rule: RuleCreateProps = {
+            name: 'Simple Rule Query',
+            description: 'Simple Rule Query',
+            enabled: true,
+            risk_score: 1,
+            rule_id: 'rule-1',
+            severity: 'high',
+            type: 'query',
+            query: 'user.name: root or user.name: admin',
+            exceptions_list: [
+              {
+                id: '2',
+                list_id: '123',
+                namespace_type: 'single',
+                type: ExceptionListTypeEnum.DETECTION,
+              },
+            ],
+          };
+
+          await supertest
+            .post(DETECTION_ENGINE_RULES_URL)
+            .set('kbn-xsrf', 'true')
+            .send(rule)
+            .expect(200);
+
+          await supertest
+            .post(DETECTION_ENGINE_RULES_URL)
+            .set('kbn-xsrf', 'true')
+            .send({ ...rule, rule_id: 'rule-2' })
+            .expect(200);
         });
       });
 

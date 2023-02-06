@@ -5,15 +5,12 @@
  * 2.0.
  */
 
-import { CasePostRequest, ConnectorTypeFields } from '../../../common/api';
+import type { FormSchema } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import { FIELD_TYPES, VALIDATION_TYPES } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import { fieldValidators } from '@kbn/es-ui-shared-plugin/static/forms/helpers';
+import type { CasePostRequest, ConnectorTypeFields } from '../../../common/api';
 import { isInvalidTag } from '../../../common/utils/validators';
 import { MAX_TITLE_LENGTH } from '../../../common/constants';
-import {
-  FIELD_TYPES,
-  fieldValidators,
-  FormSchema,
-  VALIDATION_TYPES,
-} from '../../common/shared_imports';
 import * as i18n from './translations';
 
 import { OptionalFieldLabel } from './optional_field_label';
@@ -61,7 +58,7 @@ export const schema: FormSchema<FormProps> = {
       {
         validator: maxLengthField({
           length: MAX_TITLE_LENGTH,
-          message: i18n.MAX_LENGTH_ERROR('title', MAX_TITLE_LENGTH),
+          message: i18n.MAX_LENGTH_ERROR('name', MAX_TITLE_LENGTH),
         }),
       },
     ],
@@ -100,4 +97,5 @@ export const schema: FormSchema<FormProps> = {
     type: FIELD_TYPES.TOGGLE,
     defaultValue: true,
   },
+  assignees: {},
 };

@@ -26,6 +26,7 @@ import { AggTypesDependencies, GetConfigFn, getUserTimeZone } from '../..';
 import { getTime, calculateBounds } from '../..';
 import type { IBucketAggConfig } from './buckets';
 import { insertTimeShiftSplit, mergeTimeShifts } from './utils/time_splits';
+import { createSamplerAgg, isSamplingEnabled } from './utils/sampler';
 
 function removeParentAggs(obj: any) {
   for (const prop in obj) {
@@ -55,6 +56,8 @@ export interface AggConfigsOptions {
   hierarchical?: boolean;
   aggExecutionContext?: AggTypesDependencies['aggExecutionContext'];
   partialRows?: boolean;
+  probability?: number;
+  samplerSeed?: number;
 }
 
 export type CreateAggConfigParams = Assign<AggConfigSerialized, { type: string | IAggType }>;
@@ -105,6 +108,17 @@ export class AggConfigs {
 
   public get partialRows() {
     return this.opts.partialRows ?? false;
+  }
+
+  public get samplerConfig() {
+    return { probability: this.opts.probability ?? 1, seed: this.opts.samplerSeed };
+  }
+
+  isSamplingEnabled() {
+    return (
+      isSamplingEnabled(this.opts.probability) &&
+      this.getRequestAggs().filter((agg) => !agg.type.hasNoDsl).length > 0
+    );
   }
 
   setTimeFields(timeFields: string[] | undefined) {
@@ -225,7 +239,7 @@ export class AggConfigs {
   }
 
   toDsl(): Record<string, any> {
-    const dslTopLvl = {};
+    const dslTopLvl: Record<string, any> = {};
     let dslLvlCursor: Record<string, any>;
     let nestedMetrics: Array<{ config: AggConfig; dsl: Record<string, any> }> | [];
 
@@ -254,10 +268,21 @@ export class AggConfigs {
       (config) => 'splitForTimeShift' in config.type && config.type.splitForTimeShift(config, this)
     );
 
+    if (this.isSamplingEnabled()) {
+      dslTopLvl.sampling = createSamplerAgg({
+        probability: this.opts.probability ?? 1,
+        seed: this.opts.samplerSeed,
+      });
+    }
+
     requestAggs.forEach((config: AggConfig, i: number, list) => {
       if (!dslLvlCursor) {
         // start at the top level
         dslLvlCursor = dslTopLvl;
+        // when sampling jump directly to the aggs
+        if (this.isSamplingEnabled()) {
+          dslLvlCursor = dslLvlCursor.sampling.aggs;
+        }
       } else {
         const prevConfig: AggConfig = list[i - 1];
         const prevDsl = dslLvlCursor[prevConfig.id];
@@ -452,7 +477,12 @@ export class AggConfigs {
         doc_count: response.rawResponse.hits?.total as estypes.AggregationsAggregate,
       };
     }
-    const aggCursor = transformedRawResponse.aggregations!;
+    const aggCursor = this.isSamplingEnabled()
+      ? (transformedRawResponse.aggregations!.sampling! as Record<
+          string,
+          estypes.AggregationsAggregate
+        >)
+      : transformedRawResponse.aggregations!;
 
     mergeTimeShifts(this, aggCursor);
     return {
@@ -531,6 +561,8 @@ export class AggConfigs {
         metricsAtAllLevels: this.hierarchical,
         partialRows: this.partialRows,
         aggs: this.aggs.map((agg) => buildExpression(agg.toExpressionAst())),
+        probability: this.opts.probability,
+        samplerSeed: this.opts.samplerSeed,
       }),
     ]).toAst();
   }

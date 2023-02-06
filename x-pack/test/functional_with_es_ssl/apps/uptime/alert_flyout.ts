@@ -49,10 +49,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await alerts.setAlertInterval('11');
       });
 
-      it('can set alert throttle interval', async () => {
-        await alerts.setAlertThrottleInterval('30');
-      });
-
       it('can set alert status number of time', async () => {
         await alerts.setAlertStatusNumTimes('3');
       });
@@ -142,8 +138,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/g
-    describe.skip('tls alert', function () {
+    describe('tls alert', function () {
       const DEFAULT_DATE_START = 'Sep 10, 2019 @ 12:40:08.078';
       const DEFAULT_DATE_END = 'Sep 11, 2019 @ 19:40:08.078';
       let alerts: any;
@@ -173,10 +168,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await alerts.setAlertInterval('11');
       });
 
-      it('can set alert throttle interval', async () => {
-        await alerts.setAlertThrottleInterval('30');
-      });
-
       it('can save alert', async () => {
         await alerts.clickSaveRuleButton(alertId);
         await alerts.clickSaveAlertsConfirmButton();
@@ -185,7 +176,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       it('has created a valid alert with expected parameters', async () => {
         let alert: any;
-        await retry.tryForTime(15000, async () => {
+        await retry.tryForTime(60 * 1000, async () => {
           const apiResponse = await supertest.get(`/api/alerts/_find?search=${alertId}`);
           const alertsFromThisTest = apiResponse.body.data.filter(
             ({ name }: { name: string }) => name === alertId

@@ -1,0 +1,197 @@
+{
+  "id": "@kbn/core-usage-data-server-internal",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [
+      {
+        "parentPluginId": "@kbn/core-usage-data-server-internal",
+        "id": "def-common.CoreUsageDataService",
+        "type": "Class",
+        "tags": [],
+        "label": "CoreUsageDataService",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/core-usage-data-server-internal",
+            "scope": "common",
+            "docId": "kibKbnCoreUsageDataServerInternalPluginApi",
+            "section": "def-common.CoreUsageDataService",
+            "text": "CoreUsageDataService"
+          },
+          " implements ",
+          "CoreService",
+          "<",
+          "InternalCoreUsageDataSetup",
+          ", ",
+          {
+            "pluginId": "@kbn/core-usage-data-server",
+            "scope": "common",
+            "docId": "kibKbnCoreUsageDataServerPluginApi",
+            "section": "def-common.CoreUsageDataStart",
+            "text": "CoreUsageDataStart"
+          },
+          ">"
+        ],
+        "path": "packages/core/usage-data/core-usage-data-server-internal/src/core_usage_data_service.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-usage-data-server-internal",
+            "id": "def-common.CoreUsageDataService.Unnamed",
+            "type": "Function",
+            "tags": [],
+            "label": "Constructor",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "packages/core/usage-data/core-usage-data-server-internal/src/core_usage_data_service.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-usage-data-server-internal",
+                "id": "def-common.CoreUsageDataService.Unnamed.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "core",
+                "description": [],
+                "signature": [
+                  "CoreContext"
+                ],
+                "path": "packages/core/usage-data/core-usage-data-server-internal/src/core_usage_data_service.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-usage-data-server-internal",
+            "id": "def-common.CoreUsageDataService.setup",
+            "type": "Function",
+            "tags": [],
+            "label": "setup",
+            "description": [],
+            "signature": [
+              "({ http, metrics, savedObjectsStartPromise, changedDeprecatedConfigPath$ }: ",
+              "SetupDeps",
+              ") => ",
+              "InternalCoreUsageDataSetup"
+            ],
+            "path": "packages/core/usage-data/core-usage-data-server-internal/src/core_usage_data_service.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-usage-data-server-internal",
+                "id": "def-common.CoreUsageDataService.setup.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "{ http, metrics, savedObjectsStartPromise, changedDeprecatedConfigPath$ }",
+                "description": [],
+                "signature": [
+                  "SetupDeps"
+                ],
+                "path": "packages/core/usage-data/core-usage-data-server-internal/src/core_usage_data_service.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-usage-data-server-internal",
+            "id": "def-common.CoreUsageDataService.start",
+            "type": "Function",
+            "tags": [],
+            "label": "start",
+            "description": [],
+            "signature": [
+              "({ savedObjects, elasticsearch, exposedConfigsToUsage }: ",
+              "StartDeps",
+              ") => { getCoreUsageData: () => Promise<",
+              {
+                "pluginId": "@kbn/core-usage-data-server",
+                "scope": "common",
+                "docId": "kibKbnCoreUsageDataServerPluginApi",
+                "section": "def-common.CoreUsageData",
+                "text": "CoreUsageData"
+              },
+              ">; getConfigsUsageData: () => Promise<",
+              {
+                "pluginId": "@kbn/core-usage-data-server",
+                "scope": "common",
+                "docId": "kibKbnCoreUsageDataServerPluginApi",
+                "section": "def-common.ConfigUsageData",
+                "text": "ConfigUsageData"
+              },
+              ">; }"
+            ],
+            "path": "packages/core/usage-data/core-usage-data-server-internal/src/core_usage_data_service.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-usage-data-server-internal",
+                "id": "def-common.CoreUsageDataService.start.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "{ savedObjects, elasticsearch, exposedConfigsToUsage }",
+                "description": [],
+                "signature": [
+                  "StartDeps"
+                ],
+                "path": "packages/core/usage-data/core-usage-data-server-internal/src/core_usage_data_service.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-usage-data-server-internal",
+            "id": "def-common.CoreUsageDataService.stop",
+            "type": "Function",
+            "tags": [],
+            "label": "stop",
+            "description": [],
+            "signature": [
+              "() => void"
+            ],
+            "path": "packages/core/usage-data/core-usage-data-server-internal/src/core_usage_data_service.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

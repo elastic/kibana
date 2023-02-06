@@ -48,6 +48,7 @@
         ],
         "path": "packages/analytics/client/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/analytics-client",
@@ -69,6 +70,7 @@
             ],
             "path": "packages/analytics/client/index.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -88,6 +90,7 @@
         ],
         "path": "packages/analytics/client/src/analytics_client/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/analytics-client",
@@ -99,7 +102,8 @@
               "\nBoolean indicating if it's running in developer mode."
             ],
             "path": "packages/analytics/client/src/analytics_client/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/analytics-client",
@@ -114,7 +118,8 @@
               "\"staging\" | \"production\""
             ],
             "path": "packages/analytics/client/src/analytics_client/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/analytics-client",
@@ -126,10 +131,17 @@
               "\nApplication-provided logger."
             ],
             "signature": [
-              "Logger"
+              {
+                "pluginId": "@kbn/logging",
+                "scope": "common",
+                "docId": "kibKbnLoggingPluginApi",
+                "section": "def-common.Logger",
+                "text": "Logger"
+              }
             ],
             "path": "packages/analytics/client/src/analytics_client/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -155,6 +167,7 @@
         ],
         "path": "packages/analytics/client/src/analytics_client/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/analytics-client",
@@ -166,7 +179,8 @@
               "\nThe name of the provider."
             ],
             "path": "packages/analytics/client/src/analytics_client/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/analytics-client",
@@ -182,7 +196,8 @@
               "<Context>"
             ],
             "path": "packages/analytics/client/src/analytics_client/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/analytics-client",
@@ -205,7 +220,8 @@
               "<Context[Key]>; }"
             ],
             "path": "packages/analytics/client/src/analytics_client/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -231,6 +247,7 @@
         ],
         "path": "packages/analytics/client/src/events/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/analytics-client",
@@ -242,7 +259,8 @@
               "\nThe time the event was generated in ISO format."
             ],
             "path": "packages/analytics/client/src/events/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/analytics-client",
@@ -254,7 +272,8 @@
               "\nThe event type."
             ],
             "path": "packages/analytics/client/src/events/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/analytics-client",
@@ -269,7 +288,8 @@
               "Properties"
             ],
             "path": "packages/analytics/client/src/events/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/analytics-client",
@@ -290,7 +310,8 @@
               }
             ],
             "path": "packages/analytics/client/src/events/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -306,6 +327,7 @@
         ],
         "path": "packages/analytics/client/src/events/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/analytics-client",
@@ -320,7 +342,8 @@
               "string | undefined"
             ],
             "path": "packages/analytics/client/src/events/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/analytics-client",
@@ -335,7 +358,8 @@
               "string | undefined"
             ],
             "path": "packages/analytics/client/src/events/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/analytics-client",
@@ -350,7 +374,8 @@
               "string | undefined"
             ],
             "path": "packages/analytics/client/src/events/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/analytics-client",
@@ -365,7 +390,8 @@
               "string | undefined"
             ],
             "path": "packages/analytics/client/src/events/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/analytics-client",
@@ -380,7 +406,8 @@
               "string | undefined"
             ],
             "path": "packages/analytics/client/src/events/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/analytics-client",
@@ -395,7 +422,8 @@
               "boolean | undefined"
             ],
             "path": "packages/analytics/client/src/events/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/analytics-client",
@@ -410,7 +438,8 @@
               "string | undefined"
             ],
             "path": "packages/analytics/client/src/events/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/analytics-client",
@@ -425,7 +454,8 @@
               "string | undefined"
             ],
             "path": "packages/analytics/client/src/events/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/analytics-client",
@@ -440,7 +470,8 @@
               "string | undefined"
             ],
             "path": "packages/analytics/client/src/events/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/analytics-client",
@@ -455,7 +486,8 @@
               "string | undefined"
             ],
             "path": "packages/analytics/client/src/events/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/analytics-client",
@@ -470,7 +502,8 @@
               "[key: string]:  unknown"
             ],
             "path": "packages/analytics/client/src/events/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -496,6 +529,7 @@
         ],
         "path": "packages/analytics/client/src/analytics_client/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/analytics-client",
@@ -507,7 +541,8 @@
               "\nThe event type's unique name."
             ],
             "path": "packages/analytics/client/src/analytics_client/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/analytics-client",
@@ -530,7 +565,8 @@
               "<EventTypeData[Key]>; }"
             ],
             "path": "packages/analytics/client/src/analytics_client/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -546,12 +582,15 @@
         ],
         "path": "packages/analytics/client/src/analytics_client/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/analytics-client",
             "id": "def-common.IAnalyticsClient.reportEvent",
             "type": "Function",
-            "tags": [],
+            "tags": [
+              "track-adoption"
+            ],
             "label": "reportEvent",
             "description": [
               "\nReports a telemetry event."
@@ -561,6 +600,265 @@
             ],
             "path": "packages/analytics/client/src/analytics_client/types.ts",
             "deprecated": false,
+            "trackAdoption": true,
+            "references": [
+              {
+                "plugin": "@kbn/ebt-tools",
+                "path": "packages/kbn-ebt-tools/src/performance_metric_events/helpers.ts"
+              },
+              {
+                "plugin": "@kbn/core-analytics-browser-internal",
+                "path": "packages/core/analytics/core-analytics-browser-internal/src/track_clicks.ts"
+              },
+              {
+                "plugin": "@kbn/core-analytics-browser-internal",
+                "path": "packages/core/analytics/core-analytics-browser-internal/src/track_viewport_size.ts"
+              },
+              {
+                "plugin": "@kbn/core-analytics-browser-internal",
+                "path": "packages/core/analytics/core-analytics-browser-internal/src/analytics_service.ts"
+              },
+              {
+                "plugin": "@kbn/core-analytics-browser-internal",
+                "path": "packages/core/analytics/core-analytics-browser-internal/src/analytics_service.ts"
+              },
+              {
+                "plugin": "@kbn/core-analytics-browser-internal",
+                "path": "packages/core/analytics/core-analytics-browser-internal/src/analytics_service.ts"
+              },
+              {
+                "plugin": "@kbn/core-analytics-browser-internal",
+                "path": "packages/core/analytics/core-analytics-browser-internal/src/analytics_service.ts"
+              },
+              {
+                "plugin": "@kbn/core-root-browser-internal",
+                "path": "packages/core/root/core-root-browser-internal/src/core_system.ts"
+              },
+              {
+                "plugin": "@kbn/core-status-server-internal",
+                "path": "packages/core/status/core-status-server-internal/src/status_service.ts"
+              },
+              {
+                "plugin": "@kbn/core-plugins-server-internal",
+                "path": "packages/core/plugins/core-plugins-server-internal/src/plugin_context.ts"
+              },
+              {
+                "plugin": "@kbn/core-plugins-server-internal",
+                "path": "packages/core/plugins/core-plugins-server-internal/src/plugin_context.ts"
+              },
+              {
+                "plugin": "@kbn/core-plugins-server-internal",
+                "path": "packages/core/plugins/core-plugins-server-internal/src/plugin_context.ts"
+              },
+              {
+                "plugin": "@kbn/core-plugins-server-internal",
+                "path": "packages/core/plugins/core-plugins-server-internal/src/plugin_context.ts"
+              },
+              {
+                "plugin": "@kbn/core-plugins-server-internal",
+                "path": "packages/core/plugins/core-plugins-server-internal/src/plugin_context.ts"
+              },
+              {
+                "plugin": "@kbn/core-plugins-server-internal",
+                "path": "packages/core/plugins/core-plugins-server-internal/src/plugin_context.ts"
+              },
+              {
+                "plugin": "@kbn/core-analytics-server-internal",
+                "path": "packages/core/analytics/core-analytics-server-internal/src/analytics_service.ts"
+              },
+              {
+                "plugin": "@kbn/core-analytics-server-internal",
+                "path": "packages/core/analytics/core-analytics-server-internal/src/analytics_service.ts"
+              },
+              {
+                "plugin": "@kbn/core-analytics-server-internal",
+                "path": "packages/core/analytics/core-analytics-server-internal/src/analytics_service.ts"
+              },
+              {
+                "plugin": "@kbn/core-analytics-server-internal",
+                "path": "packages/core/analytics/core-analytics-server-internal/src/analytics_service.ts"
+              },
+              {
+                "plugin": "@kbn/core-analytics-server-internal",
+                "path": "packages/core/analytics/core-analytics-server-internal/src/analytics_service.ts"
+              },
+              {
+                "plugin": "@kbn/core-analytics-server-internal",
+                "path": "packages/core/analytics/core-analytics-server-internal/src/analytics_service.ts"
+              },
+              {
+                "plugin": "@kbn/core-root-server-internal",
+                "path": "packages/core/root/core-root-server-internal/src/server.ts"
+              },
+              {
+                "plugin": "security",
+                "path": "x-pack/plugins/security/server/analytics/analytics_service.ts"
+              },
+              {
+                "plugin": "dashboard",
+                "path": "src/plugins/dashboard/public/services/analytics/types.ts"
+              },
+              {
+                "plugin": "dashboard",
+                "path": "src/plugins/dashboard/public/services/analytics/analytics_service.ts"
+              },
+              {
+                "plugin": "fleet",
+                "path": "x-pack/plugins/fleet/server/services/telemetry/fleet_usage_sender.ts"
+              },
+              {
+                "plugin": "fleet",
+                "path": "x-pack/plugins/fleet/server/services/telemetry/fleet_usage_sender.ts"
+              },
+              {
+                "plugin": "infra",
+                "path": "x-pack/plugins/infra/public/services/telemetry/telemetry_client.ts"
+              },
+              {
+                "plugin": "infra",
+                "path": "x-pack/plugins/infra/public/services/telemetry/telemetry_client.ts"
+              },
+              {
+                "plugin": "osquery",
+                "path": "x-pack/plugins/osquery/server/lib/telemetry/sender.ts"
+              },
+              {
+                "plugin": "osquery",
+                "path": "x-pack/plugins/osquery/server/lib/telemetry/sender.ts"
+              },
+              {
+                "plugin": "osquery",
+                "path": "x-pack/plugins/osquery/server/lib/telemetry/sender.ts"
+              },
+              {
+                "plugin": "osquery",
+                "path": "x-pack/plugins/osquery/server/lib/telemetry/sender.ts"
+              },
+              {
+                "plugin": "@kbn/core-analytics-browser-mocks",
+                "path": "packages/core/analytics/core-analytics-browser-mocks/src/analytics_service.mock.ts"
+              },
+              {
+                "plugin": "@kbn/core-analytics-browser-mocks",
+                "path": "packages/core/analytics/core-analytics-browser-mocks/src/analytics_service.mock.ts"
+              },
+              {
+                "plugin": "dashboard",
+                "path": "src/plugins/dashboard/public/services/analytics/analytics.stub.ts"
+              },
+              {
+                "plugin": "@kbn/core-root-browser-internal",
+                "path": "packages/core/root/core-root-browser-internal/src/core_system.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-root-browser-internal",
+                "path": "packages/core/root/core-root-browser-internal/src/core_system.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-root-browser-internal",
+                "path": "packages/core/root/core-root-browser-internal/src/core_system.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-root-browser-internal",
+                "path": "packages/core/root/core-root-browser-internal/src/core_system.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-root-browser-internal",
+                "path": "packages/core/root/core-root-browser-internal/src/core_system.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-root-browser-internal",
+                "path": "packages/core/root/core-root-browser-internal/src/core_system.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-analytics-server-mocks",
+                "path": "packages/core/analytics/core-analytics-server-mocks/src/analytics_service.mock.ts"
+              },
+              {
+                "plugin": "@kbn/core-analytics-server-mocks",
+                "path": "packages/core/analytics/core-analytics-server-mocks/src/analytics_service.mock.ts"
+              },
+              {
+                "plugin": "security",
+                "path": "x-pack/plugins/security/server/analytics/analytics_service.test.ts"
+              },
+              {
+                "plugin": "security",
+                "path": "x-pack/plugins/security/server/analytics/analytics_service.test.ts"
+              },
+              {
+                "plugin": "infra",
+                "path": "x-pack/plugins/infra/public/services/telemetry/telemetry_service.test.ts"
+              },
+              {
+                "plugin": "infra",
+                "path": "x-pack/plugins/infra/public/services/telemetry/telemetry_service.test.ts"
+              },
+              {
+                "plugin": "infra",
+                "path": "x-pack/plugins/infra/public/services/telemetry/telemetry_service.test.ts"
+              },
+              {
+                "plugin": "infra",
+                "path": "x-pack/plugins/infra/public/services/telemetry/telemetry_service.test.ts"
+              },
+              {
+                "plugin": "infra",
+                "path": "x-pack/plugins/infra/public/services/telemetry/telemetry_service.test.ts"
+              },
+              {
+                "plugin": "infra",
+                "path": "x-pack/plugins/infra/public/services/telemetry/telemetry_service.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-status-server-internal",
+                "path": "packages/core/status/core-status-server-internal/src/status_service.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-status-server-internal",
+                "path": "packages/core/status/core-status-server-internal/src/status_service.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-status-server-internal",
+                "path": "packages/core/status/core-status-server-internal/src/status_service.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-analytics-server-mocks",
+                "path": "packages/core/analytics/core-analytics-server-mocks/src/analytics_service.mock.ts"
+              },
+              {
+                "plugin": "@kbn/core-analytics-browser-internal",
+                "path": "packages/core/analytics/core-analytics-browser-internal/src/analytics_service.test.mocks.ts"
+              },
+              {
+                "plugin": "@kbn/core-analytics-browser-internal",
+                "path": "packages/core/analytics/core-analytics-browser-internal/src/track_clicks.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-analytics-browser-internal",
+                "path": "packages/core/analytics/core-analytics-browser-internal/src/track_clicks.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-analytics-browser-internal",
+                "path": "packages/core/analytics/core-analytics-browser-internal/src/track_clicks.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-analytics-browser-internal",
+                "path": "packages/core/analytics/core-analytics-browser-internal/src/track_clicks.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-analytics-browser-internal",
+                "path": "packages/core/analytics/core-analytics-browser-internal/src/track_viewport_size.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-analytics-browser-internal",
+                "path": "packages/core/analytics/core-analytics-browser-internal/src/track_viewport_size.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-analytics-server-internal",
+                "path": "packages/core/analytics/core-analytics-server-internal/src/analytics_service.test.mocks.ts"
+              }
+            ],
             "children": [
               {
                 "parentPluginId": "@kbn/analytics-client",
@@ -576,6 +874,7 @@
                 ],
                 "path": "packages/analytics/client/src/analytics_client/types.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -592,6 +891,7 @@
                 ],
                 "path": "packages/analytics/client/src/analytics_client/types.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -619,6 +919,7 @@
             ],
             "path": "packages/analytics/client/src/analytics_client/types.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/analytics-client",
@@ -641,6 +942,7 @@
                 ],
                 "path": "packages/analytics/client/src/analytics_client/types.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -684,6 +986,7 @@
             ],
             "path": "packages/analytics/client/src/analytics_client/types.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/analytics-client",
@@ -706,6 +1009,7 @@
                 ],
                 "path": "packages/analytics/client/src/analytics_client/types.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -722,6 +1026,7 @@
                 ],
                 "path": "packages/analytics/client/src/analytics_client/types.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -745,6 +1050,7 @@
                 ],
                 "path": "packages/analytics/client/src/analytics_client/types.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": false
               }
             ],
@@ -772,6 +1078,7 @@
             ],
             "path": "packages/analytics/client/src/analytics_client/types.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/analytics-client",
@@ -793,6 +1100,7 @@
                 ],
                 "path": "packages/analytics/client/src/analytics_client/types.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -802,10 +1110,12 @@
             "parentPluginId": "@kbn/analytics-client",
             "id": "def-common.IAnalyticsClient.registerContextProvider",
             "type": "Function",
-            "tags": [],
+            "tags": [
+              "track-adoption"
+            ],
             "label": "registerContextProvider",
             "description": [
-              "\nRegisters the context provider to enrich the any reported events."
+              "\nRegisters the context provider to enrich any reported events."
             ],
             "signature": [
               "<Context>(contextProviderOpts: ",
@@ -820,6 +1130,229 @@
             ],
             "path": "packages/analytics/client/src/analytics_client/types.ts",
             "deprecated": false,
+            "trackAdoption": true,
+            "references": [
+              {
+                "plugin": "@kbn/core-analytics-browser-internal",
+                "path": "packages/core/analytics/core-analytics-browser-internal/src/track_viewport_size.ts"
+              },
+              {
+                "plugin": "@kbn/core-analytics-browser-internal",
+                "path": "packages/core/analytics/core-analytics-browser-internal/src/analytics_service.ts"
+              },
+              {
+                "plugin": "@kbn/core-analytics-browser-internal",
+                "path": "packages/core/analytics/core-analytics-browser-internal/src/analytics_service.ts"
+              },
+              {
+                "plugin": "@kbn/core-analytics-browser-internal",
+                "path": "packages/core/analytics/core-analytics-browser-internal/src/analytics_service.ts"
+              },
+              {
+                "plugin": "@kbn/core-analytics-browser-internal",
+                "path": "packages/core/analytics/core-analytics-browser-internal/src/analytics_service.ts"
+              },
+              {
+                "plugin": "@kbn/core-analytics-browser-internal",
+                "path": "packages/core/analytics/core-analytics-browser-internal/src/analytics_service.ts"
+              },
+              {
+                "plugin": "@kbn/core-analytics-browser-internal",
+                "path": "packages/core/analytics/core-analytics-browser-internal/src/analytics_service.ts"
+              },
+              {
+                "plugin": "@kbn/core-execution-context-browser-internal",
+                "path": "packages/core/execution-context/core-execution-context-browser-internal/src/execution_context_service.ts"
+              },
+              {
+                "plugin": "@kbn/core-elasticsearch-server-internal",
+                "path": "packages/core/elasticsearch/core-elasticsearch-server-internal/src/register_analytics_context_provider.ts"
+              },
+              {
+                "plugin": "@kbn/core-environment-server-internal",
+                "path": "packages/core/environment/core-environment-server-internal/src/environment_service.ts"
+              },
+              {
+                "plugin": "@kbn/core-status-server-internal",
+                "path": "packages/core/status/core-status-server-internal/src/status_service.ts"
+              },
+              {
+                "plugin": "@kbn/core-plugins-server-internal",
+                "path": "packages/core/plugins/core-plugins-server-internal/src/plugin_context.ts"
+              },
+              {
+                "plugin": "@kbn/core-plugins-server-internal",
+                "path": "packages/core/plugins/core-plugins-server-internal/src/plugin_context.ts"
+              },
+              {
+                "plugin": "@kbn/core-plugins-server-internal",
+                "path": "packages/core/plugins/core-plugins-server-internal/src/plugin_context.ts"
+              },
+              {
+                "plugin": "@kbn/core-plugins-server-internal",
+                "path": "packages/core/plugins/core-plugins-server-internal/src/plugin_context.ts"
+              },
+              {
+                "plugin": "@kbn/core-analytics-server-internal",
+                "path": "packages/core/analytics/core-analytics-server-internal/src/analytics_service.ts"
+              },
+              {
+                "plugin": "@kbn/core-analytics-server-internal",
+                "path": "packages/core/analytics/core-analytics-server-internal/src/analytics_service.ts"
+              },
+              {
+                "plugin": "@kbn/core-analytics-server-internal",
+                "path": "packages/core/analytics/core-analytics-server-internal/src/analytics_service.ts"
+              },
+              {
+                "plugin": "@kbn/core-analytics-server-internal",
+                "path": "packages/core/analytics/core-analytics-server-internal/src/analytics_service.ts"
+              },
+              {
+                "plugin": "@kbn/core-analytics-server-internal",
+                "path": "packages/core/analytics/core-analytics-server-internal/src/analytics_service.ts"
+              },
+              {
+                "plugin": "licensing",
+                "path": "x-pack/plugins/licensing/common/register_analytics_context_provider.ts"
+              },
+              {
+                "plugin": "cloud",
+                "path": "x-pack/plugins/cloud/common/register_cloud_deployment_id_analytics_context.ts"
+              },
+              {
+                "plugin": "telemetry",
+                "path": "src/plugins/telemetry/server/plugin.ts"
+              },
+              {
+                "plugin": "security",
+                "path": "x-pack/plugins/security/public/analytics/register_user_context.ts"
+              },
+              {
+                "plugin": "telemetry",
+                "path": "src/plugins/telemetry/public/plugin.ts"
+              },
+              {
+                "plugin": "@kbn/core-analytics-browser-mocks",
+                "path": "packages/core/analytics/core-analytics-browser-mocks/src/analytics_service.mock.ts"
+              },
+              {
+                "plugin": "security",
+                "path": "x-pack/plugins/security/public/analytics/analytics_service.test.ts"
+              },
+              {
+                "plugin": "security",
+                "path": "x-pack/plugins/security/public/analytics/analytics_service.test.ts"
+              },
+              {
+                "plugin": "security",
+                "path": "x-pack/plugins/security/public/analytics/register_user_context.test.ts"
+              },
+              {
+                "plugin": "security",
+                "path": "x-pack/plugins/security/public/analytics/register_user_context.test.ts"
+              },
+              {
+                "plugin": "security",
+                "path": "x-pack/plugins/security/public/analytics/register_user_context.test.ts"
+              },
+              {
+                "plugin": "security",
+                "path": "x-pack/plugins/security/public/analytics/register_user_context.test.ts"
+              },
+              {
+                "plugin": "security",
+                "path": "x-pack/plugins/security/public/analytics/register_user_context.test.ts"
+              },
+              {
+                "plugin": "security",
+                "path": "x-pack/plugins/security/public/analytics/register_user_context.test.ts"
+              },
+              {
+                "plugin": "security",
+                "path": "x-pack/plugins/security/public/analytics/register_user_context.test.ts"
+              },
+              {
+                "plugin": "security",
+                "path": "x-pack/plugins/security/public/analytics/register_user_context.test.ts"
+              },
+              {
+                "plugin": "security",
+                "path": "x-pack/plugins/security/public/analytics/register_user_context.test.ts"
+              },
+              {
+                "plugin": "security",
+                "path": "x-pack/plugins/security/public/analytics/register_user_context.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-execution-context-browser-internal",
+                "path": "packages/core/execution-context/core-execution-context-browser-internal/src/execution_context_service.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-execution-context-browser-internal",
+                "path": "packages/core/execution-context/core-execution-context-browser-internal/src/execution_context_service.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-analytics-server-mocks",
+                "path": "packages/core/analytics/core-analytics-server-mocks/src/analytics_service.mock.ts"
+              },
+              {
+                "plugin": "@kbn/core-analytics-server-mocks",
+                "path": "packages/core/analytics/core-analytics-server-mocks/src/analytics_service.mock.ts"
+              },
+              {
+                "plugin": "@kbn/core-elasticsearch-server-internal",
+                "path": "packages/core/elasticsearch/core-elasticsearch-server-internal/src/register_analytics_context_provider.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-status-server-internal",
+                "path": "packages/core/status/core-status-server-internal/src/status_service.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-status-server-internal",
+                "path": "packages/core/status/core-status-server-internal/src/status_service.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-analytics-browser-internal",
+                "path": "packages/core/analytics/core-analytics-browser-internal/src/analytics_service.test.mocks.ts"
+              },
+              {
+                "plugin": "@kbn/core-analytics-browser-internal",
+                "path": "packages/core/analytics/core-analytics-browser-internal/src/analytics_service.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-analytics-browser-internal",
+                "path": "packages/core/analytics/core-analytics-browser-internal/src/analytics_service.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-analytics-browser-internal",
+                "path": "packages/core/analytics/core-analytics-browser-internal/src/track_viewport_size.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-analytics-browser-internal",
+                "path": "packages/core/analytics/core-analytics-browser-internal/src/track_viewport_size.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-analytics-browser-internal",
+                "path": "packages/core/analytics/core-analytics-browser-internal/src/track_viewport_size.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-analytics-browser-internal",
+                "path": "packages/core/analytics/core-analytics-browser-internal/src/track_viewport_size.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-analytics-server-internal",
+                "path": "packages/core/analytics/core-analytics-server-internal/src/analytics_service.test.mocks.ts"
+              },
+              {
+                "plugin": "@kbn/core-analytics-server-internal",
+                "path": "packages/core/analytics/core-analytics-server-internal/src/analytics_service.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-analytics-server-internal",
+                "path": "packages/core/analytics/core-analytics-server-internal/src/analytics_service.test.ts"
+              }
+            ],
             "children": [
               {
                 "parentPluginId": "@kbn/analytics-client",
@@ -842,6 +1375,7 @@
                 ],
                 "path": "packages/analytics/client/src/analytics_client/types.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -861,6 +1395,7 @@
             ],
             "path": "packages/analytics/client/src/analytics_client/types.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/analytics-client",
@@ -876,6 +1411,7 @@
                 ],
                 "path": "packages/analytics/client/src/analytics_client/types.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -903,7 +1439,26 @@
               ">"
             ],
             "path": "packages/analytics/client/src/analytics_client/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/analytics-client",
+            "id": "def-common.IAnalyticsClient.flush",
+            "type": "Function",
+            "tags": [],
+            "label": "flush",
+            "description": [
+              "\nForces all shippers to send all their enqueued events and fulfills the returned promise."
+            ],
+            "signature": [
+              "() => Promise<void>"
+            ],
+            "path": "packages/analytics/client/src/analytics_client/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
           },
           {
             "parentPluginId": "@kbn/analytics-client",
@@ -912,13 +1467,14 @@
             "tags": [],
             "label": "shutdown",
             "description": [
-              "\nStops the client."
+              "\nStops the client. Flushing any pending events in the process."
             ],
             "signature": [
-              "() => void"
+              "() => Promise<void>"
             ],
             "path": "packages/analytics/client/src/analytics_client/types.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           }
@@ -936,6 +1492,7 @@
         ],
         "path": "packages/analytics/client/src/shippers/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/analytics-client",
@@ -959,6 +1516,7 @@
             ],
             "path": "packages/analytics/client/src/shippers/types.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/analytics-client",
@@ -981,6 +1539,7 @@
                 ],
                 "path": "packages/analytics/client/src/shippers/types.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -1000,6 +1559,7 @@
             ],
             "path": "packages/analytics/client/src/shippers/types.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/analytics-client",
@@ -1015,6 +1575,7 @@
                 ],
                 "path": "packages/analytics/client/src/shippers/types.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -1042,6 +1603,7 @@
             ],
             "path": "packages/analytics/client/src/shippers/types.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/analytics-client",
@@ -1063,6 +1625,7 @@
                 ],
                 "path": "packages/analytics/client/src/shippers/types.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -1090,7 +1653,26 @@
               "> | undefined"
             ],
             "path": "packages/analytics/client/src/shippers/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/analytics-client",
+            "id": "def-common.IShipper.flush",
+            "type": "Function",
+            "tags": [],
+            "label": "flush",
+            "description": [
+              "\nSends all the enqueued events and fulfills the returned promise."
+            ],
+            "signature": [
+              "() => Promise<void>"
+            ],
+            "path": "packages/analytics/client/src/shippers/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
           },
           {
             "parentPluginId": "@kbn/analytics-client",
@@ -1106,6 +1688,7 @@
             ],
             "path": "packages/analytics/client/src/shippers/types.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           }
@@ -1123,6 +1706,7 @@
         ],
         "path": "packages/analytics/client/src/analytics_client/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/analytics-client",
@@ -1143,7 +1727,8 @@
               }
             ],
             "path": "packages/analytics/client/src/analytics_client/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/analytics-client",
@@ -1166,7 +1751,8 @@
               " | undefined> | undefined"
             ],
             "path": "packages/analytics/client/src/analytics_client/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -1182,6 +1768,7 @@
         ],
         "path": "packages/analytics/client/src/analytics_client/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/analytics-client",
@@ -1193,7 +1780,8 @@
               "\nThe event type is globally enabled."
             ],
             "path": "packages/analytics/client/src/analytics_client/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/analytics-client",
@@ -1208,7 +1796,8 @@
               "Record<string, boolean | undefined> | undefined"
             ],
             "path": "packages/analytics/client/src/analytics_client/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -1224,6 +1813,7 @@
         ],
         "path": "packages/analytics/client/src/analytics_client/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [],
         "initialIsOpen": false
       },
@@ -1256,6 +1846,7 @@
         ],
         "path": "packages/analytics/client/src/schema/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/analytics-client",
@@ -1270,7 +1861,8 @@
               "\"array\""
             ],
             "path": "packages/analytics/client/src/schema/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/analytics-client",
@@ -1349,7 +1941,8 @@
               "<Value>)"
             ],
             "path": "packages/analytics/client/src/schema/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -1375,6 +1968,7 @@
         ],
         "path": "packages/analytics/client/src/schema/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/analytics-client",
@@ -1412,7 +2006,8 @@
               }
             ],
             "path": "packages/analytics/client/src/schema/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/analytics-client",
@@ -1435,7 +2030,8 @@
               "<Value>"
             ],
             "path": "packages/analytics/client/src/schema/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -1461,6 +2057,7 @@
         ],
         "path": "packages/analytics/client/src/schema/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/analytics-client",
@@ -1483,7 +2080,8 @@
               "<Value>) | undefined"
             ],
             "path": "packages/analytics/client/src/schema/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -1517,6 +2115,7 @@
         ],
         "path": "packages/analytics/client/src/schema/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/analytics-client",
@@ -1539,7 +2138,8 @@
               "<Value[Key]>; }"
             ],
             "path": "packages/analytics/client/src/schema/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -1565,6 +2165,7 @@
         ],
         "path": "packages/analytics/client/src/analytics_client/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/analytics-client",
@@ -1576,7 +2177,8 @@
               "\nThe shipper's unique name"
             ],
             "path": "packages/analytics/client/src/analytics_client/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/analytics-client",
@@ -1592,6 +2194,7 @@
             ],
             "path": "packages/analytics/client/src/analytics_client/types.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/analytics-client",
@@ -1607,6 +2210,7 @@
                 ],
                 "path": "packages/analytics/client/src/analytics_client/types.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -1629,6 +2233,7 @@
                 ],
                 "path": "packages/analytics/client/src/analytics_client/types.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -1648,6 +2253,7 @@
         ],
         "path": "packages/analytics/client/src/events/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/analytics-client",
@@ -1659,10 +2265,11 @@
               "\n{@link TelemetryCounterType}"
             ],
             "signature": [
-              "\"failed\" | \"enqueued\" | \"sent_to_shipper\" | \"succeeded\" | \"dropped\""
+              "\"succeeded\" | \"failed\" | \"enqueued\" | \"sent_to_shipper\" | \"dropped\""
             ],
             "path": "packages/analytics/client/src/events/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/analytics-client",
@@ -1674,7 +2281,8 @@
               "\nWho emitted the event? It can be \"client\" or the name of the shipper."
             ],
             "path": "packages/analytics/client/src/events/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/analytics-client",
@@ -1686,7 +2294,8 @@
               "\nThe event type the success/failure/drop event refers to."
             ],
             "path": "packages/analytics/client/src/events/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/analytics-client",
@@ -1698,7 +2307,8 @@
               "\nCode to provide additional information about the success or failure. Examples are 200/400/504/ValidationError/UnknownError"
             ],
             "path": "packages/analytics/client/src/events/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/analytics-client",
@@ -1710,7 +2320,8 @@
               "\nThe number of events that this counter refers to."
             ],
             "path": "packages/analytics/client/src/events/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -1732,6 +2343,7 @@
         ],
         "path": "packages/analytics/client/src/schema/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -1744,10 +2356,11 @@
           "Types matching number values"
         ],
         "signature": [
-          "\"date\" | \"long\" | \"double\" | \"short\" | \"float\" | \"integer\" | \"byte\""
+          "\"date\" | \"long\" | \"double\" | \"short\" | \"byte\" | \"float\" | \"integer\""
         ],
         "path": "packages/analytics/client/src/schema/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -1764,6 +2377,7 @@
         ],
         "path": "packages/analytics/client/src/schema/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -1776,10 +2390,11 @@
           "\nPossible type values in the schema"
         ],
         "signature": [
-          "\"boolean\" | \"date\" | \"keyword\" | \"text\" | \"long\" | \"double\" | \"short\" | \"float\" | \"integer\" | \"byte\""
+          "\"boolean\" | \"date\" | \"keyword\" | \"text\" | \"long\" | \"double\" | \"short\" | \"byte\" | \"float\" | \"integer\""
         ],
         "path": "packages/analytics/client/src/schema/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -1796,6 +2411,7 @@
         ],
         "path": "packages/analytics/client/src/events/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -1835,6 +2451,7 @@
         ],
         "path": "packages/analytics/client/src/schema/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -1859,6 +2476,7 @@
         ],
         "path": "packages/analytics/client/src/schema/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -1875,6 +2493,7 @@
         ],
         "path": "packages/analytics/client/src/schema/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -1955,6 +2574,7 @@
         ],
         "path": "packages/analytics/client/src/schema/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -1971,6 +2591,7 @@
         ],
         "path": "packages/analytics/client/src/analytics_client/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -1983,10 +2604,11 @@
           "\nIndicates if the event contains data about succeeded, failed or dropped events:\n- enqueued: The event was accepted and will be sent to the shippers when they become available (and opt-in === true).\n- sent_to_shipper: The event was sent to at least one shipper.\n- succeeded: The event was successfully sent by the shipper.\n- failed: There was an error when processing/shipping the event. Refer to the Telemetry Counter's code for the reason.\n- dropped: The event was dropped from the queue. Refer to the Telemetry Counter's code for the reason."
         ],
         "signature": [
-          "\"failed\" | \"enqueued\" | \"sent_to_shipper\" | \"succeeded\" | \"dropped\""
+          "\"succeeded\" | \"failed\" | \"enqueued\" | \"sent_to_shipper\" | \"dropped\""
         ],
         "path": "packages/analytics/client/src/events/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       }
     ],

@@ -9,7 +9,7 @@
 import React from 'react';
 import { CoreStart, OverlayRef } from '@kbn/core/public';
 import { I18nProvider } from '@kbn/i18n-react';
-import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import type { DataViewsServicePublic } from '@kbn/data-views-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
 
 import { createKibanaReactContext, toMountPoint, DataPublicPluginStart } from './shared_imports';
@@ -20,7 +20,7 @@ import { DataViewEditorLazy } from './components/data_view_editor_lazy';
 interface Dependencies {
   core: CoreStart;
   searchClient: DataPublicPluginStart['search']['search'];
-  dataViews: DataViewsPublicPluginStart;
+  dataViews: DataViewsServicePublic;
 }
 
 export const getEditorOpener =
@@ -35,6 +35,7 @@ export const getEditorOpener =
         notifications,
         application,
         dataViews,
+        overlays,
         searchClient,
       });
 
@@ -46,6 +47,7 @@ export const getEditorOpener =
       defaultTypeIsRollup = false,
       requireTimestampField = false,
       allowAdHocDataView = false,
+      editData,
     }: DataViewEditorProps): CloseEditor => {
       const closeEditor = () => {
         if (overlayRef) {
@@ -72,9 +74,11 @@ export const getEditorOpener =
                   closeEditor();
                   onCancel();
                 }}
+                editData={editData}
                 defaultTypeIsRollup={defaultTypeIsRollup}
                 requireTimestampField={requireTimestampField}
                 allowAdHocDataView={allowAdHocDataView}
+                showManagementLink={Boolean(editData && editData.isPersisted())}
               />
             </I18nProvider>
           </KibanaReactContextProvider>,

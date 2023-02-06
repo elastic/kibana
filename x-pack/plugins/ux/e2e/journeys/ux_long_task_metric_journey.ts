@@ -6,6 +6,7 @@
  */
 
 import { journey, step, before, expect } from '@elastic/synthetics';
+import { recordVideo } from '@kbn/observability-plugin/e2e/record_video';
 import { UXDashboardDatePicker } from '../page_objects/date_picker';
 import { byTestId, loginToKibana, waitForLoadingToFinish } from './utils';
 
@@ -24,6 +25,8 @@ const sumMetricValue = `Total long tasks duration
 428 ms`;
 
 journey('UX LongTaskMetrics', async ({ page, params }) => {
+  recordVideo(page);
+
   before(async () => {
     await waitForLoadingToFinish({ page });
   });
@@ -54,9 +57,9 @@ journey('UX LongTaskMetrics', async ({ page, params }) => {
 
   step('Confirm metrics values', async () => {
     // Wait until chart data is loaded
-    page.waitForLoadState('networkidle');
+    await page.waitForLoadState('networkidle');
     // wait for first metric to be shown
-    page.waitForSelector(`text="237 ms"`);
+    await page.waitForSelector(`text="237 ms"`);
 
     let metric = await (
       await page.waitForSelector(byTestId(longestMetric))

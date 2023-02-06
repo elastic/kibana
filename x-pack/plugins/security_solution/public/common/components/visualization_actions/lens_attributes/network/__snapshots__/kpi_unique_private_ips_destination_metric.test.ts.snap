@@ -1,0 +1,158 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`kpiUniquePrivateIpsDestinationMetricLensAttributes should render 1`] = `
+Object {
+  "description": "",
+  "references": Array [
+    Object {
+      "id": "security-solution-my-test",
+      "name": "indexpattern-datasource-current-indexpattern",
+      "type": "index-pattern",
+    },
+    Object {
+      "id": "security-solution-my-test",
+      "name": "indexpattern-datasource-layer-cea37c70-8f91-43bf-b9fe-72d8c049f6a3",
+      "type": "index-pattern",
+    },
+  ],
+  "state": Object {
+    "datasourceStates": Object {
+      "formBased": Object {
+        "layers": Object {
+          "cea37c70-8f91-43bf-b9fe-72d8c049f6a3": Object {
+            "columnOrder": Array [
+              "bd17c23e-4f83-4108-8005-2669170d064b",
+            ],
+            "columns": Object {
+              "bd17c23e-4f83-4108-8005-2669170d064b": Object {
+                "customLabel": true,
+                "dataType": "number",
+                "filter": Object {
+                  "language": "kuery",
+                  "query": "\\"destination.ip\\": \\"10.0.0.0/8\\" or \\"destination.ip\\": \\"192.168.0.0/16\\" or \\"destination.ip\\": \\"172.16.0.0/12\\" or \\"destination.ip\\": \\"fd00::/8\\"",
+                },
+                "isBucketed": false,
+                "label": "",
+                "operationType": "unique_count",
+                "scale": "ratio",
+                "sourceField": "destination.ip",
+              },
+            },
+            "incompleteColumns": Object {},
+          },
+        },
+      },
+    },
+    "filters": Array [
+      Object {
+        "meta": Object {
+          "alias": null,
+          "disabled": false,
+          "key": "host.id",
+          "negate": false,
+          "params": Object {
+            "query": "123",
+          },
+          "type": "phrase",
+        },
+        "query": Object {
+          "match_phrase": Object {
+            "host.id": "123",
+          },
+        },
+      },
+      Object {
+        "meta": Object {
+          "alias": null,
+          "disabled": false,
+          "key": "source.ip",
+          "negate": false,
+          "params": Object {
+            "query": "192.168.1.1",
+          },
+          "type": "phrase",
+        },
+        "query": Object {
+          "bool": Object {
+            "minimum_should_match": 1,
+            "should": Array [
+              Object {
+                "match_phrase": Object {
+                  "source.ip": "192.168.1.1",
+                },
+              },
+              Object {
+                "match_phrase": Object {
+                  "destination.ip": "192.168.1.1",
+                },
+              },
+            ],
+          },
+        },
+      },
+      Object {
+        "meta": Object {
+          "alias": "",
+          "disabled": false,
+          "key": "bool",
+          "negate": false,
+          "type": "custom",
+          "value": "{\\"bool\\":{\\"filter\\":[{\\"bool\\":{\\"should\\":[{\\"bool\\":{\\"should\\":[{\\"exists\\":{\\"field\\": \\"source.ip\\"}}],\\"minimum_should_match\\":1}},{\\"bool\\":{\\"should\\":[{\\"exists\\":{\\"field\\": \\"destination.ip\\"}}],\\"minimum_should_match\\":1}}],\\"minimum_should_match\\":1}}]}}",
+        },
+        "query": Object {
+          "bool": Object {
+            "minimum_should_match": 1,
+            "should": Array [
+              Object {
+                "exists": Object {
+                  "field": "source.ip",
+                },
+              },
+              Object {
+                "exists": Object {
+                  "field": "destination.ip",
+                },
+              },
+            ],
+          },
+        },
+      },
+      Object {
+        "meta": Object {
+          "alias": null,
+          "disabled": false,
+          "key": "_index",
+          "negate": false,
+          "params": Array [
+            "auditbeat-mytest-*",
+          ],
+          "type": "phrases",
+        },
+        "query": Object {
+          "bool": Object {
+            "minimum_should_match": 1,
+            "should": Array [
+              Object {
+                "match_phrase": Object {
+                  "_index": "auditbeat-mytest-*",
+                },
+              },
+            ],
+          },
+        },
+      },
+    ],
+    "query": Object {
+      "language": "kql",
+      "query": "host.name: *",
+    },
+    "visualization": Object {
+      "accessor": "bd17c23e-4f83-4108-8005-2669170d064b",
+      "layerId": "cea37c70-8f91-43bf-b9fe-72d8c049f6a3",
+      "layerType": "data",
+    },
+  },
+  "title": "[Network] Unique private IPs - destination metric",
+  "visualizationType": "lnsLegacyMetric",
+}
+`;

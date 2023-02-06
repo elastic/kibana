@@ -230,6 +230,18 @@ describe('#rawToSavedObject', () => {
     expect(actual).toHaveProperty('updated_at', now);
   });
 
+  test('if specified it copies the _source.created_at property to created_at', () => {
+    const now = Date();
+    const actual = singleNamespaceSerializer.rawToSavedObject({
+      _id: 'foo:bar',
+      _source: {
+        type: 'foo',
+        created_at: now,
+      },
+    });
+    expect(actual).toHaveProperty('created_at', now);
+  });
+
   test(`if _source.updated_at is unspecified it doesn't set updated_at`, () => {
     const actual = singleNamespaceSerializer.rawToSavedObject({
       _id: 'foo:bar',
@@ -238,6 +250,16 @@ describe('#rawToSavedObject', () => {
       },
     });
     expect(actual).not.toHaveProperty('updated_at');
+  });
+
+  test(`if _source.created_at is unspecified it doesn't set created_at`, () => {
+    const actual = singleNamespaceSerializer.rawToSavedObject({
+      _id: 'foo:bar',
+      _source: {
+        type: 'foo',
+      },
+    });
+    expect(actual).not.toHaveProperty('created_at');
   });
 
   test('if specified it copies the _source.originId property to originId', () => {
@@ -582,6 +604,26 @@ describe('#savedObjectToRaw', () => {
         id: 'pattern*',
       },
     ]);
+  });
+
+  test('if specified it copies the created_at property to _source.created_at', () => {
+    const now = new Date();
+    const actual = singleNamespaceSerializer.savedObjectToRaw({
+      type: '',
+      attributes: {},
+      created_at: now,
+    } as any);
+
+    expect(actual._source).toHaveProperty('created_at', now);
+  });
+
+  test(`if unspecified it doesn't add created_at property to _source`, () => {
+    const actual = singleNamespaceSerializer.savedObjectToRaw({
+      type: '',
+      attributes: {},
+    } as any);
+
+    expect(actual._source).not.toHaveProperty('created_at');
   });
 
   test('if specified it copies the updated_at property to _source.updated_at', () => {

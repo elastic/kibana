@@ -25,10 +25,15 @@ export const treemapVisFunction = (): TreemapVisExpressionFunctionDefinition => 
   inputTypes: ['datatable'],
   help: strings.getPieVisFunctionName(),
   args: {
-    metric: {
+    metrics: {
       types: ['vis_dimension'],
       help: strings.getMetricArgHelp(),
       required: true,
+      multi: true,
+    },
+    metricsToLabels: {
+      types: ['string'],
+      help: strings.getMetricToLabelHelp(),
     },
     buckets: {
       types: ['vis_dimension'],
@@ -117,7 +122,8 @@ export const treemapVisFunction = (): TreemapVisExpressionFunctionDefinition => 
       throw new Error(errors.splitRowAndSplitColumnAreSpecifiedError());
     }
 
-    validateAccessor(args.metric, context.columns);
+    args.metrics.forEach((accessor) => validateAccessor(accessor, context.columns));
+
     if (args.buckets) {
       args.buckets.forEach((bucket) => validateAccessor(bucket, context.columns));
     }
@@ -130,13 +136,14 @@ export const treemapVisFunction = (): TreemapVisExpressionFunctionDefinition => 
 
     const visConfig: PartitionVisParams = {
       ...args,
+      metricsToLabels: args.metricsToLabels ? JSON.parse(args.metricsToLabels) : {},
       ariaLabel:
         args.ariaLabel ??
         (handlers.variables?.embeddableTitle as string) ??
         handlers.getExecutionContext?.()?.description,
       palette: args.palette,
       dimensions: {
-        metric: args.metric,
+        metrics: args.metrics,
         buckets: args.buckets,
         splitColumn: args.splitColumn,
         splitRow: args.splitRow,
@@ -150,7 +157,7 @@ export const treemapVisFunction = (): TreemapVisExpressionFunctionDefinition => 
       const logTable = prepareLogTable(
         context,
         [
-          [[args.metric], strings.getSliceSizeHelp()],
+          [args.metrics, strings.getSliceSizeHelp()],
           [args.buckets, strings.getSliceHelp()],
           [args.splitColumn, strings.getColumnSplitHelp()],
           [args.splitRow, strings.getRowSplitHelp()],

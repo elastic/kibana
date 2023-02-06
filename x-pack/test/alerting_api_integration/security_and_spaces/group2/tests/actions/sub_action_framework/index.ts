@@ -12,13 +12,13 @@ import { getUrlPrefix, ObjectRemover } from '../../../../../common/lib';
 
 /**
  * The sub action connector is defined here
- * x-pack/test/alerting_api_integration/common/fixtures/plugins/alerts/server/sub_action_connector.ts
+ * x-pack/test/alerting_api_integration/common/plugins/alerts/server/sub_action_connector.ts
  */
 const createSubActionConnector = async ({
   supertest,
   config,
   secrets,
-  connectorTypeId = '.test-sub-action-connector',
+  connectorTypeId = 'test.sub-action-connector',
   expectedHttpCode = 200,
 }: {
   supertest: SuperTest.SuperTest<SuperTest.Test>;
@@ -94,7 +94,7 @@ export default function createActionTests({ getService }: FtrProviderContext) {
           is_deprecated: false,
           is_missing_secrets: false,
           name: 'My sub connector',
-          connector_type_id: '.test-sub-action-connector',
+          connector_type_id: 'test.sub-action-connector',
           config: {
             url: 'https://example.com',
           },
@@ -166,7 +166,7 @@ export default function createActionTests({ getService }: FtrProviderContext) {
         expect(execRes.body).to.eql({
           status: 'error',
           message: 'an error occurred while running the action',
-          retry: false,
+          retry: true,
           connector_id: res.body.id,
           service_message:
             'Request validation failed (Error: [id]: expected value of type [string] but got [undefined])',
@@ -245,9 +245,9 @@ export default function createActionTests({ getService }: FtrProviderContext) {
         expect(execRes.body).to.eql({
           status: 'error',
           message: 'an error occurred while running the action',
-          retry: false,
+          retry: true,
           connector_id: res.body.id,
-          service_message: `Sub action \"notRegistered\" is not registered. Connector id: ${res.body.id}. Connector name: Test: Sub action connector. Connector type: .test-sub-action-connector`,
+          service_message: `Sub action \"notRegistered\" is not registered. Connector id: ${res.body.id}. Connector name: Test: Sub action connector. Connector type: test.sub-action-connector`,
         });
       });
 
@@ -265,9 +265,9 @@ export default function createActionTests({ getService }: FtrProviderContext) {
         expect(execRes.body).to.eql({
           status: 'error',
           message: 'an error occurred while running the action',
-          retry: false,
+          retry: true,
           connector_id: res.body.id,
-          service_message: `Method \"notAFunction\" does not exists in service. Sub action: \"notAFunction\". Connector id: ${res.body.id}. Connector name: Test: Sub action connector. Connector type: .test-sub-action-connector`,
+          service_message: `Method \"notAFunction\" does not exists in service. Sub action: \"notAFunction\". Connector id: ${res.body.id}. Connector name: Test: Sub action connector. Connector type: test.sub-action-connector`,
         });
       });
 
@@ -285,16 +285,16 @@ export default function createActionTests({ getService }: FtrProviderContext) {
         expect(execRes.body).to.eql({
           status: 'error',
           message: 'an error occurred while running the action',
-          retry: false,
+          retry: true,
           connector_id: res.body.id,
-          service_message: `Method \"notExist\" does not exists in service. Sub action: \"notExist\". Connector id: ${res.body.id}. Connector name: Test: Sub action connector. Connector type: .test-sub-action-connector`,
+          service_message: `Method \"notExist\" does not exists in service. Sub action: \"notExist\". Connector id: ${res.body.id}. Connector name: Test: Sub action connector. Connector type: test.sub-action-connector`,
         });
       });
 
       it('should return an error if there are no sub actions registered', async () => {
         const res = await createSubActionConnector({
           supertest,
-          connectorTypeId: '.test-sub-action-connector-without-sub-actions',
+          connectorTypeId: 'test.sub-action-connector-without-sub-actions',
         });
         objectRemover.add('default', res.body.id, 'action', 'actions');
 
@@ -308,7 +308,7 @@ export default function createActionTests({ getService }: FtrProviderContext) {
         expect(execRes.body).to.eql({
           status: 'error',
           message: 'an error occurred while running the action',
-          retry: false,
+          retry: true,
           connector_id: res.body.id,
           service_message: 'You should register at least one subAction for your connector type',
         });

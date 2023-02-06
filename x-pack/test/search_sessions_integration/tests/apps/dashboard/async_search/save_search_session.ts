@@ -12,12 +12,19 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const es = getService('es');
   const testSubjects = getService('testSubjects');
   const log = getService('log');
-  const PageObjects = getPageObjects(['common', 'header', 'dashboard', 'visChart']);
+  const PageObjects = getPageObjects([
+    'common',
+    'header',
+    'dashboard',
+    'visChart',
+    'searchSessionsManagement',
+  ]);
   const dashboardPanelActions = getService('dashboardPanelActions');
   const browser = getService('browser');
   const searchSessions = getService('searchSessions');
   const queryBar = getService('queryBar');
   const elasticChart = getService('elasticChart');
+  const toasts = getService('toasts');
 
   const enableNewChartLibraryDebug = async () => {
     await elasticChart.setNewChartUiDebugFlag();
@@ -112,6 +119,34 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       // navigating to a listing page clears the session
       await PageObjects.dashboard.gotoDashboardLandingPage();
       await searchSessions.missingOrFail();
+    });
+
+    describe('TSVB & Timelion', () => {
+      it('Restore session with TSVB & Timelion', async () => {
+        await PageObjects.dashboard.loadSavedDashboard('TSVBwithTimelion');
+        await PageObjects.dashboard.waitForRenderComplete();
+        await searchSessions.expectState('completed');
+        await searchSessions.save();
+        await searchSessions.expectState('backgroundCompleted');
+
+        const savedSessionId = await dashboardPanelActions.getSearchSessionIdByTitle('TSVB');
+
+        // check that searches saved into the session
+        await searchSessions.openPopover();
+        await searchSessions.viewSearchSessions();
+
+        const searchSessionList = await PageObjects.searchSessionsManagement.getList();
+        const searchSessionItem = searchSessionList.find(
+          (session) => session.id === savedSessionId
+        )!;
+        expect(searchSessionItem.searchesCount).to.be(2);
+
+        await searchSessionItem.view();
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        await PageObjects.dashboard.waitForRenderComplete();
+        await searchSessions.expectState('restored');
+        expect(await toasts.getToastCount()).to.be(0); // no session restoration related warnings
+      });
     });
   });
 }

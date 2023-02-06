@@ -16,7 +16,7 @@ import { showOpenSearchPanel } from './show_open_search_panel';
 import { getSharingData, showPublicUrlSwitch } from '../../../../utils/get_sharing_data';
 import { DiscoverServices } from '../../../../build_services';
 import { onSaveSearch } from './on_save_search';
-import { GetStateReturn } from '../../services/discover_state';
+import { DiscoverStateContainer } from '../../services/discover_state';
 import { openOptionsPopover } from './open_options_popover';
 import { openAlertsPopover } from './open_alerts_popover';
 
@@ -33,16 +33,24 @@ export const getTopNavLinks = ({
   searchSource,
   onOpenSavedSearch,
   isPlainRecord,
+  persistDataView,
+  adHocDataViews,
+  updateDataViewList,
+  updateAdHocDataViewId,
 }: {
   dataView: DataView;
   navigateTo: (url: string) => void;
   savedSearch: SavedSearch;
   services: DiscoverServices;
-  state: GetStateReturn;
+  state: DiscoverStateContainer;
   onOpenInspector: () => void;
   searchSource: ISearchSource;
   onOpenSavedSearch: (id: string) => void;
   isPlainRecord: boolean;
+  adHocDataViews: DataView[];
+  updateDataViewList: (dataView: DataView[]) => void;
+  persistDataView: (dataView: DataView) => Promise<DataView | undefined>;
+  updateAdHocDataViewId: (dataView: DataView) => Promise<DataView>;
 }): TopNavMenuData[] => {
   const options = {
     id: 'options',
@@ -70,13 +78,16 @@ export const getTopNavLinks = ({
     description: i18n.translate('discover.localMenu.alertsDescription', {
       defaultMessage: 'Alerts',
     }),
-    run: (anchorElement: HTMLElement) => {
+    run: async (anchorElement: HTMLElement) => {
       openAlertsPopover({
         I18nContext: services.core.i18n.Context,
+        theme$: services.core.theme.theme$,
         anchorElement,
         searchSource: savedSearch.searchSource,
         services,
-        savedQueryId: state.appStateContainer.getState().savedQuery,
+        adHocDataViews,
+        updateDataViewList,
+        savedQueryId: state.appState.getState().savedQuery,
       });
     },
     testId: 'discoverAlertsButton',
@@ -105,17 +116,19 @@ export const getTopNavLinks = ({
     testId: 'discoverSaveButton',
     iconType: 'save',
     emphasize: true,
-    run: (anchorElement: HTMLElement) =>
+    run: (anchorElement: HTMLElement) => {
       onSaveSearch({
         savedSearch,
         services,
         dataView,
         navigateTo,
         state,
+        updateAdHocDataViewId,
         onClose: () => {
           anchorElement?.focus();
         },
-      }),
+      });
+    },
   };
 
   const openSearch = {
@@ -146,14 +159,11 @@ export const getTopNavLinks = ({
     }),
     testId: 'shareTopNavButton',
     run: async (anchorElement: HTMLElement) => {
-      if (!services.share) {
+      const updatedDataView = await persistDataView(dataView);
+      if (!services.share || !updatedDataView) {
         return;
       }
-      const sharingData = await getSharingData(
-        searchSource,
-        state.appStateContainer.getState(),
-        services
-      );
+      const sharingData = await getSharingData(searchSource, state.appState.getState(), services);
 
       services.share.toggleShareContextMenu({
         anchorElement,

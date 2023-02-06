@@ -1,0 +1,22 @@
+{
+  "extends": "../../../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "target/types",
+  },
+  "include": [
+    ".storybook/**/*",
+    "common/**/*",
+    "public/**/*",
+    "server/**/*",
+    "../../../typings/**/*"
+  ],
+  "kbn_references": [
+    "@kbn/core",
+    "@kbn/cloud-plugin",
+    "@kbn/config-schema",
+    "@kbn/analytics-shippers-fullstory",
+  ],
+  "exclude": [
+    "target/**/*",
+  ]
+}

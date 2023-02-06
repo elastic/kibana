@@ -7,15 +7,16 @@
 
 import type { ActionType, AsApiContract, Rule } from '@kbn/triggers-actions-ui-plugin/public';
 import { RuleTypeParams } from '@kbn/alerting-plugin/common';
-import { CLIENT_ALERT_TYPES } from '../../../../common/constants/alerts';
+import { MonitorStatusTranslations } from '../../../../common/translations';
+import { ActionConnector } from '../../../../common/rules/types';
+import { CLIENT_ALERT_TYPES, MONITOR_STATUS } from '../../../../common/constants/uptime_alerts';
 import { apiService } from './utils';
-import { ActionConnector } from '../alerts/alerts';
 
 import { AlertsResult, MonitorIdParam } from '../actions/types';
 import { API_URLS } from '../../../../common/constants';
 import { AtomicStatusCheckParams } from '../../../../common/runtime_types/alerts';
 
-import { populateAlertActions, RuleAction } from './alert_actions';
+import { populateAlertActions, RuleAction } from '../../../../common/rules/alert_actions';
 import { Ping } from '../../../../common/runtime_types/ping';
 import { DefaultEmail } from '../../../../common/runtime_types';
 
@@ -79,8 +80,13 @@ export const createAlert = async ({
 }: NewAlertParams): Promise<Rule> => {
   const actions: RuleAction[] = populateAlertActions({
     defaultActions,
-    selectedMonitor,
     defaultEmail,
+    groupId: MONITOR_STATUS.id,
+    translations: {
+      defaultActionMessage: MonitorStatusTranslations.defaultActionMessage,
+      defaultRecoveryMessage: MonitorStatusTranslations.defaultRecoveryMessage,
+      defaultSubjectMessage: MonitorStatusTranslations.defaultSubjectMessage,
+    },
   });
 
   const data: NewMonitorStatusAlert = {

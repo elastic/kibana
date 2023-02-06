@@ -1,7 +1,7 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`home change home route should render a link to change the default route in advanced settings if advanced settings is enabled 1`] = `
-<mockConstructor
+<_KibanaPageTemplate
   data-test-subj="homeApp"
   pageHeader={
     Object {
@@ -13,7 +13,7 @@ exports[`home change home route should render a link to change the default route
       />,
     }
   }
-  template="empty"
+  panelled={false}
 >
   <SolutionsSection
     addBasePath={[Function]}
@@ -28,8 +28,10 @@ exports[`home change home route should render a link to change the default route
             "integrations": true,
           },
         },
+        "navigateToUrl": [MockFunction],
       }
     }
+    isCloudEnabled={false}
     isDarkMode={false}
   />
   <ManageData
@@ -41,6 +43,7 @@ exports[`home change home route should render a link to change the default route
             "integrations": true,
           },
         },
+        "navigateToUrl": [MockFunction],
       }
     }
     features={Array []}
@@ -51,11 +54,11 @@ exports[`home change home route should render a link to change the default route
     onSetDefaultRoute={[Function]}
     path="/app/home"
   />
-</mockConstructor>
+</_KibanaPageTemplate>
 `;
 
 exports[`home directories should not render directory entry when showOnHomePage is false 1`] = `
-<mockConstructor
+<_KibanaPageTemplate
   data-test-subj="homeApp"
   pageHeader={
     Object {
@@ -67,7 +70,7 @@ exports[`home directories should not render directory entry when showOnHomePage 
       />,
     }
   }
-  template="empty"
+  panelled={false}
 >
   <SolutionsSection
     addBasePath={[Function]}
@@ -82,8 +85,10 @@ exports[`home directories should not render directory entry when showOnHomePage 
             "integrations": true,
           },
         },
+        "navigateToUrl": [MockFunction],
       }
     }
+    isCloudEnabled={false}
     isDarkMode={false}
   />
   <ManageData
@@ -95,6 +100,7 @@ exports[`home directories should not render directory entry when showOnHomePage 
             "integrations": true,
           },
         },
+        "navigateToUrl": [MockFunction],
       }
     }
     features={Array []}
@@ -105,11 +111,11 @@ exports[`home directories should not render directory entry when showOnHomePage 
     onSetDefaultRoute={[Function]}
     path="/app/home"
   />
-</mockConstructor>
+</_KibanaPageTemplate>
 `;
 
 exports[`home directories should render ADMIN directory entry in "Manage your data" panel 1`] = `
-<mockConstructor
+<_KibanaPageTemplate
   data-test-subj="homeApp"
   pageHeader={
     Object {
@@ -121,7 +127,7 @@ exports[`home directories should render ADMIN directory entry in "Manage your da
       />,
     }
   }
-  template="empty"
+  panelled={false}
 >
   <SolutionsSection
     addBasePath={[Function]}
@@ -136,8 +142,10 @@ exports[`home directories should render ADMIN directory entry in "Manage your da
             "integrations": true,
           },
         },
+        "navigateToUrl": [MockFunction],
       }
     }
+    isCloudEnabled={false}
     isDarkMode={false}
   />
   <ManageData
@@ -149,6 +157,7 @@ exports[`home directories should render ADMIN directory entry in "Manage your da
             "integrations": true,
           },
         },
+        "navigateToUrl": [MockFunction],
       }
     }
     features={
@@ -171,11 +180,11 @@ exports[`home directories should render ADMIN directory entry in "Manage your da
     onSetDefaultRoute={[Function]}
     path="/app/home"
   />
-</mockConstructor>
+</_KibanaPageTemplate>
 `;
 
 exports[`home directories should render solutions in the "solution section" 1`] = `
-<mockConstructor
+<_KibanaPageTemplate
   data-test-subj="homeApp"
   pageHeader={
     Object {
@@ -187,7 +196,7 @@ exports[`home directories should render solutions in the "solution section" 1`] 
       />,
     }
   }
-  template="empty"
+  panelled={false}
 >
   <SolutionsSection
     addBasePath={[Function]}
@@ -237,8 +246,10 @@ exports[`home directories should render solutions in the "solution section" 1`] 
             "integrations": true,
           },
         },
+        "navigateToUrl": [MockFunction],
       }
     }
+    isCloudEnabled={false}
     isDarkMode={false}
   />
   <ManageData
@@ -250,6 +261,7 @@ exports[`home directories should render solutions in the "solution section" 1`] 
             "integrations": true,
           },
         },
+        "navigateToUrl": [MockFunction],
       }
     }
     features={Array []}
@@ -260,11 +272,11 @@ exports[`home directories should render solutions in the "solution section" 1`] 
     onSetDefaultRoute={[Function]}
     path="/app/home"
   />
-</mockConstructor>
+</_KibanaPageTemplate>
 `;
 
 exports[`home isNewKibanaInstance should safely handle exceptions 1`] = `
-<mockConstructor
+<_KibanaPageTemplate
   data-test-subj="homeApp"
   pageHeader={
     Object {
@@ -276,7 +288,7 @@ exports[`home isNewKibanaInstance should safely handle exceptions 1`] = `
       />,
     }
   }
-  template="empty"
+  panelled={false}
 >
   <SolutionsSection
     addBasePath={[Function]}
@@ -291,8 +303,22 @@ exports[`home isNewKibanaInstance should safely handle exceptions 1`] = `
             "integrations": true,
           },
         },
+        "navigateToUrl": [MockFunction] {
+          "calls": Array [
+            Array [
+              "./home#/getting_started",
+            ],
+          ],
+          "results": Array [
+            Object {
+              "type": "return",
+              "value": undefined,
+            },
+          ],
+        },
       }
     }
+    isCloudEnabled={false}
     isDarkMode={false}
   />
   <ManageData
@@ -304,6 +330,19 @@ exports[`home isNewKibanaInstance should safely handle exceptions 1`] = `
             "integrations": true,
           },
         },
+        "navigateToUrl": [MockFunction] {
+          "calls": Array [
+            Array [
+              "./home#/getting_started",
+            ],
+          ],
+          "results": Array [
+            Object {
+              "type": "return",
+              "value": undefined,
+            },
+          ],
+        },
       }
     }
     features={Array []}
@@ -314,11 +353,11 @@ exports[`home isNewKibanaInstance should safely handle exceptions 1`] = `
     onSetDefaultRoute={[Function]}
     path="/app/home"
   />
-</mockConstructor>
+</_KibanaPageTemplate>
 `;
 
 exports[`home isNewKibanaInstance should set isNewKibanaInstance to false when there are index patterns 1`] = `
-<mockConstructor
+<_KibanaPageTemplate
   data-test-subj="homeApp"
   pageHeader={
     Object {
@@ -330,7 +369,7 @@ exports[`home isNewKibanaInstance should set isNewKibanaInstance to false when t
       />,
     }
   }
-  template="empty"
+  panelled={false}
 >
   <SolutionsSection
     addBasePath={[Function]}
@@ -345,8 +384,22 @@ exports[`home isNewKibanaInstance should set isNewKibanaInstance to false when t
             "integrations": true,
           },
         },
+        "navigateToUrl": [MockFunction] {
+          "calls": Array [
+            Array [
+              "./home#/getting_started",
+            ],
+          ],
+          "results": Array [
+            Object {
+              "type": "return",
+              "value": undefined,
+            },
+          ],
+        },
       }
     }
+    isCloudEnabled={false}
     isDarkMode={false}
   />
   <ManageData
@@ -358,6 +411,19 @@ exports[`home isNewKibanaInstance should set isNewKibanaInstance to false when t
             "integrations": true,
           },
         },
+        "navigateToUrl": [MockFunction] {
+          "calls": Array [
+            Array [
+              "./home#/getting_started",
+            ],
+          ],
+          "results": Array [
+            Object {
+              "type": "return",
+              "value": undefined,
+            },
+          ],
+        },
       }
     }
     features={Array []}
@@ -368,7 +434,7 @@ exports[`home isNewKibanaInstance should set isNewKibanaInstance to false when t
     onSetDefaultRoute={[Function]}
     path="/app/home"
   />
-</mockConstructor>
+</_KibanaPageTemplate>
 `;
 
 exports[`home isNewKibanaInstance should set isNewKibanaInstance to true when there are no index patterns 1`] = `
@@ -379,7 +445,7 @@ exports[`home isNewKibanaInstance should set isNewKibanaInstance to true when th
 `;
 
 exports[`home should render home component 1`] = `
-<mockConstructor
+<_KibanaPageTemplate
   data-test-subj="homeApp"
   pageHeader={
     Object {
@@ -391,7 +457,7 @@ exports[`home should render home component 1`] = `
       />,
     }
   }
-  template="empty"
+  panelled={false}
 >
   <SolutionsSection
     addBasePath={[Function]}
@@ -406,8 +472,10 @@ exports[`home should render home component 1`] = `
             "integrations": true,
           },
         },
+        "navigateToUrl": [MockFunction],
       }
     }
+    isCloudEnabled={false}
     isDarkMode={false}
   />
   <ManageData
@@ -419,6 +487,7 @@ exports[`home should render home component 1`] = `
             "integrations": true,
           },
         },
+        "navigateToUrl": [MockFunction],
       }
     }
     features={Array []}
@@ -429,5 +498,5 @@ exports[`home should render home component 1`] = `
     onSetDefaultRoute={[Function]}
     path="/app/home"
   />
-</mockConstructor>
+</_KibanaPageTemplate>
 `;

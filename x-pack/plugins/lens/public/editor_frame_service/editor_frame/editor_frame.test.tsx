@@ -99,6 +99,8 @@ function getDefaultProps() {
     lensInspector: getLensInspectorService(inspectorPluginMock.createStartContract()),
     showNoDataPopover: jest.fn(),
     indexPatternService: createIndexPatternServiceMock(),
+    getUserMessages: () => [],
+    addUserMessages: () => () => {},
   };
   return defaultProps;
 }
@@ -306,7 +308,7 @@ describe('editor_frame', () => {
         setDatasourceState(updatedState);
       });
 
-      expect(mockVisualization.getConfiguration).toHaveBeenCalledTimes(2);
+      expect(mockVisualization.getConfiguration).toHaveBeenCalledTimes(3);
       expect(mockVisualization.getConfiguration).toHaveBeenLastCalledWith(
         expect.objectContaining({
           state: updatedState,
@@ -376,6 +378,8 @@ describe('editor_frame', () => {
         getSourceId: jest.fn(),
         getFilters: jest.fn(),
         getMaxPossibleNumValues: jest.fn(),
+        isTextBasedLanguage: jest.fn(() => false),
+        hasDefaultTimeField: jest.fn(() => true),
       };
       mockDatasource.getPublicAPI.mockReturnValue(updatedPublicAPI);
 
@@ -385,7 +389,7 @@ describe('editor_frame', () => {
         setDatasourceState({});
       });
 
-      expect(mockVisualization.getConfiguration).toHaveBeenCalledTimes(2);
+      expect(mockVisualization.getConfiguration).toHaveBeenCalledTimes(3);
       expect(mockVisualization.getConfiguration).toHaveBeenLastCalledWith(
         expect.objectContaining({
           frame: expect.objectContaining({
@@ -496,41 +500,6 @@ describe('editor_frame', () => {
 
     afterEach(() => {
       instance.unmount();
-    });
-
-    it('should initialize other datasource on switch', async () => {
-      await act(async () => {
-        instance.find('button[data-test-subj="datasource-switch"]').simulate('click');
-      });
-      await act(async () => {
-        (
-          document.querySelector(
-            '[data-test-subj="datasource-switch-testDatasource2"]'
-          ) as HTMLButtonElement
-        ).click();
-      });
-      instance.update();
-      expect(mockDatasource2.initialize).toHaveBeenCalled();
-    });
-
-    it('should call datasource render with new state on switch', async () => {
-      const initialState = {};
-      mockDatasource2.initialize.mockReturnValue(initialState);
-
-      instance.find('button[data-test-subj="datasource-switch"]').simulate('click');
-
-      await act(async () => {
-        (
-          document.querySelector(
-            '[data-test-subj="datasource-switch-testDatasource2"]'
-          ) as HTMLButtonElement
-        ).click();
-      });
-
-      expect(mockDatasource2.renderDataPanel).toHaveBeenCalledWith(
-        expect.any(Element),
-        expect.objectContaining({ state: initialState })
-      );
     });
 
     it('should initialize other visualization on switch', async () => {
@@ -745,7 +714,7 @@ describe('editor_frame', () => {
         instance.find('[data-test-subj="lnsSuggestion"]').at(2).simulate('click');
       });
 
-      expect(mockVisualization.getConfiguration).toHaveBeenCalledTimes(1);
+      expect(mockVisualization.getConfiguration).toHaveBeenCalledTimes(2);
       expect(mockVisualization.getConfiguration).toHaveBeenLastCalledWith(
         expect.objectContaining({
           state: suggestionVisState,

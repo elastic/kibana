@@ -10,7 +10,7 @@ import { isString } from 'lodash';
 import { EuiBetaBadge, EuiTitle, EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
 
 import { TruncatedText } from '../truncated_text';
-import { ReleasePhase } from '../types';
+import type { ReleasePhase } from '../types';
 import * as i18n from './translations';
 
 interface Props {

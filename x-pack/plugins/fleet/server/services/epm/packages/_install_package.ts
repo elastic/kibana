@@ -16,6 +16,8 @@ import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 
 import type { IAssignmentService, ITagsClient } from '@kbn/saved-objects-tagging-plugin/server';
 
+import { getNormalizedDataStreams } from '../../../../common/services';
+
 import {
   MAX_TIME_COMPLETE_INSTALL,
   ASSETS_SAVED_OBJECT_TYPE,
@@ -31,25 +33,26 @@ import type {
   InstallSource,
   PackageAssetReference,
   PackageVerificationResult,
+  IndexTemplateEntry,
 } from '../../../types';
-import { prepareToInstallTemplates } from '../elasticsearch/template/install';
+import { ensureFileUploadWriteIndices } from '../elasticsearch/template/install';
 import { removeLegacyTemplates } from '../elasticsearch/template/remove_legacy';
-import {
-  prepareToInstallPipelines,
-  isTopLevelPipeline,
-  deletePreviousPipelines,
-} from '../elasticsearch/ingest_pipeline';
+import { isTopLevelPipeline, deletePreviousPipelines } from '../elasticsearch/ingest_pipeline';
 import { installILMPolicy } from '../elasticsearch/ilm/install';
 import { installKibanaAssetsAndReferences } from '../kibana/assets/install';
 import { updateCurrentWriteIndices } from '../elasticsearch/template/template';
-import { installTransform } from '../elasticsearch/transform/install';
+import { installTransforms } from '../elasticsearch/transform/install';
 import { installMlModel } from '../elasticsearch/ml_model';
 import { installIlmForDataStream } from '../elasticsearch/datastream_ilm/install';
 import { saveArchiveEntries } from '../archive/storage';
 import { ConcurrentInstallOperationError } from '../../../errors';
-import { packagePolicyService } from '../..';
+import { appContextService, packagePolicyService } from '../..';
 
-import { createInstallation, updateEsAssetReferences, restartInstallation } from './install';
+import {
+  createInstallation,
+  restartInstallation,
+  installIndexTemplatesAndPipelines,
+} from './install';
 import { withPackageSpan } from './utils';
 
 // this is only exported for testing
@@ -133,6 +136,7 @@ export async function _installPackage({
         paths,
         installedPkg,
         logger,
+        spaceId,
       })
     );
     // Necessary to avoid async promise rejection warning
@@ -167,45 +171,52 @@ export async function _installPackage({
       installMlModel(packageInfo, paths, esClient, savedObjectsClient, logger, esReferences)
     );
 
-    /**
-     * In order to install assets in parallel, we need to split the preparation step from the installation step. This
-     * allows us to know which asset references are going to be installed so that we can save them on the packages
-     * SO before installation begins. In the case of a failure during installing any individual asset, we'll have the
-     * references necessary to remove any assets in that were successfully installed during the rollback phase.
-     *
-     * This split of prepare/install could be extended to all asset types. Besides performance, it also allows us to
-     * more easily write unit tests against the asset generation code without needing to mock ES responses.
-     */
-    const preparedIngestPipelines = prepareToInstallPipelines(packageInfo, paths);
-    const preparedIndexTemplates = prepareToInstallTemplates(packageInfo, paths, esReferences);
+    let indexTemplates: IndexTemplateEntry[] = [];
 
-    // Update the references for the templates and ingest pipelines together. Need to be done togther to avoid race
-    // conditions on updating the installed_es field at the same time
-    // These must be saved before we actually attempt to install the templates or pipelines so that we know what to
-    // cleanup in the case that a single asset fails to install.
-    esReferences = await updateEsAssetReferences(
-      savedObjectsClient,
-      packageInfo.name,
-      esReferences,
-      {
-        assetsToRemove: preparedIndexTemplates.assetsToRemove,
-        assetsToAdd: [
-          ...preparedIngestPipelines.assetsToAdd,
-          ...preparedIndexTemplates.assetsToAdd,
-        ],
+    if (packageInfo.type === 'integration') {
+      const { installedTemplates, esReferences: templateEsReferences } =
+        await installIndexTemplatesAndPipelines({
+          installedPkg: installedPkg ? installedPkg.attributes : undefined,
+          packageInfo,
+          paths,
+          esClient,
+          savedObjectsClient,
+          logger,
+          esReferences,
+        });
+      esReferences = templateEsReferences;
+      indexTemplates = installedTemplates;
+    }
+
+    if (packageInfo.type === 'input' && installedPkg) {
+      // input packages create their data streams during package policy creation
+      // we must use installed_es to infer which streams exist first then
+      // we can install the new index templates
+      const dataStreamNames = installedPkg.attributes.installed_es
+        .filter((ref) => ref.type === 'index_template')
+        // index templates are named {type}-{dataset}, remove everything before first hyphen
+        .map((ref) => ref.id.replace(/^[^-]+-/, ''));
+
+      const dataStreams = dataStreamNames.flatMap((dataStreamName) =>
+        getNormalizedDataStreams(packageInfo, dataStreamName)
+      );
+
+      if (dataStreams.length) {
+        const { installedTemplates, esReferences: templateEsReferences } =
+          await installIndexTemplatesAndPipelines({
+            installedPkg: installedPkg ? installedPkg.attributes : undefined,
+            packageInfo,
+            paths,
+            esClient,
+            savedObjectsClient,
+            logger,
+            esReferences,
+            onlyForDataStreams: dataStreams,
+          });
+        esReferences = templateEsReferences;
+        indexTemplates = installedTemplates;
       }
-    );
-
-    // Install index templates and ingest pipelines in parallel since they typically take the longest
-    const [installedTemplates] = await Promise.all([
-      withPackageSpan('Install index templates', () =>
-        preparedIndexTemplates.install(esClient, logger)
-      ),
-      // installs versionized pipelines without removing currently installed ones
-      withPackageSpan('Install ingest pipelines', () =>
-        preparedIngestPipelines.install(esClient, logger)
-      ),
-    ]);
+    }
 
     try {
       await removeLegacyTemplates({ packageInfo, esClient, logger });
@@ -213,13 +224,22 @@ export async function _installPackage({
       logger.warn(`Error removing legacy templates: ${e.message}`);
     }
 
+    const { diagnosticFileUploadEnabled } = appContextService.getExperimentalFeatures();
+    if (diagnosticFileUploadEnabled) {
+      await ensureFileUploadWriteIndices({
+        integrationNames: [packageInfo.name],
+        esClient,
+        logger,
+      });
+    }
+
     // update current backing indices of each data stream
     await withPackageSpan('Update write indices', () =>
-      updateCurrentWriteIndices(esClient, logger, installedTemplates)
+      updateCurrentWriteIndices(esClient, logger, indexTemplates)
     );
 
     ({ esReferences } = await withPackageSpan('Install transforms', () =>
-      installTransform(packageInfo, paths, esClient, savedObjectsClient, logger, esReferences)
+      installTransforms(packageInfo, paths, esClient, savedObjectsClient, logger, esReferences)
     ));
 
     // If this is an update or retrying an update, delete the previous version's pipelines

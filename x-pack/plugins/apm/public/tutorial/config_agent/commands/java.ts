@@ -5,10 +5,17 @@
  * 2.0.
  */
 
+export const javaVariables = {
+  apmServiceName: 'Delastic.apm.service_name',
+  secretToken: 'Delastic.apm.secret_token',
+  apmServerUrl: 'Delastic.apm.server_url',
+  apmEnvironment: 'Delastic.apm.environment',
+};
+
 export const java = `java -javaagent:/path/to/elastic-apm-agent-<version>.jar \\
--Delastic.apm.service_name=my-application \\
--Delastic.apm.server_urls={{{apmServerUrl}}} \\
--Delastic.apm.secret_token={{{secretToken}}} \\
--Delastic.apm.environment=production \\
+-${javaVariables.apmServiceName}={{{apmServiceName}}} \\
+-${javaVariables.secretToken}={{{secretToken}}} \\
+-${javaVariables.apmServerUrl}={{{apmServerUrl}}} \\
+-${javaVariables.apmEnvironment}={{{apmEnvironment}}} \\
 -Delastic.apm.application_packages=org.example \\
--jar my-application.jar`;
+-jar {{{apmServiceName}}}.jar`;

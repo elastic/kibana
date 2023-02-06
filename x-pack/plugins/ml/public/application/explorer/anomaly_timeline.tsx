@@ -26,8 +26,11 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import useDebounce from 'react-use/lib/useDebounce';
 import useObservable from 'react-use/lib/useObservable';
+import type { Query } from '@kbn/es-query';
+import { isDefined } from '@kbn/ml-is-defined';
+import { useTimeRangeUpdates } from '@kbn/ml-date-picker';
+import { SEARCH_QUERY_LANGUAGE } from '../../../common/constants/search';
 import { useCasesModal } from '../contexts/kibana/use_cases_modal';
-import { useTimeRangeUpdates } from '../contexts/kibana/use_timefilter';
 import { ANOMALY_SWIMLANE_EMBEDDABLE_TYPE } from '../..';
 import {
   OVERALL_LABEL,
@@ -44,7 +47,6 @@ import { AppStateSelectedCells, OverallSwimlaneData, ViewBySwimLaneData } from '
 import { NoOverallData } from './components/no_overall_data';
 import { SeverityControl } from '../components/severity_control';
 import { AnomalyTimelineHelpPopover } from './anomaly_timeline_help_popover';
-import { isDefined } from '../../../common/types/guards';
 import { MlTooltipComponent } from '../components/chart_tooltip';
 import { SwimlaneAnnotationContainer, Y_AXIS_LABEL_WIDTH } from './swimlane_annotation_container';
 import { AnomalyTimelineService } from '../services/anomaly_timeline_service';
@@ -94,7 +96,7 @@ export const AnomalyTimeline: FC<AnomalyTimelineProps> = React.memo(
 
     const { overallAnnotations } = explorerState;
 
-    const { filterActive } = useObservable(
+    const { filterActive, queryString } = useObservable(
       anomalyExplorerCommonStateService.getFilterSettings$(),
       anomalyExplorerCommonStateService.getFilterSettings()
     );
@@ -171,9 +173,17 @@ export const AnomalyTimeline: FC<AnomalyTimelineProps> = React.memo(
           ...(swimLaneType === SWIMLANE_TYPE.VIEW_BY ? { viewBy: viewBySwimlaneFieldName } : {}),
           jobIds: selectedJobs?.map((v) => v.id),
           timeRange: globalTimeRange,
+          ...(isDefined(queryString) && queryString !== ''
+            ? {
+                query: {
+                  query: queryString,
+                  language: SEARCH_QUERY_LANGUAGE.KUERY,
+                } as Query,
+              }
+            : {}),
         });
       },
-      [openCasesModalCallback, selectedJobs, globalTimeRange, viewBySwimlaneFieldName]
+      [openCasesModalCallback, selectedJobs, globalTimeRange, viewBySwimlaneFieldName, queryString]
     );
 
     const annotations = useMemo(() => overallAnnotations.annotationsData, [overallAnnotations]);
@@ -213,7 +223,7 @@ export const AnomalyTimeline: FC<AnomalyTimelineProps> = React.memo(
           name: (
             <FormattedMessage
               id="xpack.ml.explorer.attachToCaseLabel"
-              defaultMessage="Attach to case"
+              defaultMessage="Add to case"
             />
           ),
           'data-test-subj': 'mlAnomalyTimelinePanelAttachToCaseButton',
@@ -225,7 +235,7 @@ export const AnomalyTimeline: FC<AnomalyTimelineProps> = React.memo(
           title: (
             <FormattedMessage
               id="xpack.ml.explorer.attachToCaseLabel"
-              defaultMessage="Attach to case"
+              defaultMessage="Add to case"
             />
           ),
           items: [
@@ -255,6 +265,7 @@ export const AnomalyTimeline: FC<AnomalyTimelineProps> = React.memo(
       }
 
       return panels;
+      // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [canEditDashboards, openCasesModal, viewBySwimlaneFieldName]);
 
     // If selecting a cell in the 'view by' swimlane, indicate the corresponding time in the Overall swimlane.
@@ -284,6 +295,7 @@ export const AnomalyTimeline: FC<AnomalyTimelineProps> = React.memo(
 
     const onResize = useCallback((value: number) => {
       anomalyTimelineStateService.setContainerWidth(value);
+      // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     return (
@@ -511,6 +523,7 @@ export const AnomalyTimeline: FC<AnomalyTimelineProps> = React.memo(
             }}
             jobIds={selectedJobs.map(({ id }) => id)}
             viewBy={viewBySwimlaneFieldName!}
+            queryString={queryString}
           />
         )}
       </>

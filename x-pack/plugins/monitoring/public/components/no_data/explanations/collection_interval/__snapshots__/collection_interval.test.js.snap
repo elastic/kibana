@@ -74,30 +74,27 @@ Array [
     class="euiSpacer euiSpacer--l emotion-euiSpacer-l"
   />,
   <div
-    class="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--justifyContentSpaceAround euiFlexGroup--directionRow euiFlexGroup--responsive"
+    class="euiFlexGroup emotion-euiFlexGroup-responsive-s-spaceAround-center-row"
   >
     <div
-      class="euiFlexItem euiFlexItem--flexGrowZero"
+      class="euiFlexItem emotion-euiFlexItem-growZero"
     >
       <button
-        class="euiButton euiButton--primary euiButton--fill euiButton-isDisabled"
+        class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-isDisabled-m-fill-disabled"
         data-test-subj="enableCollectionInterval"
         disabled=""
         type="button"
       >
         <span
-          class="euiButtonContent euiButton__content"
+          class="emotion-euiButtonDisplayContent"
         >
           <span
             aria-label="Loading"
-            class="euiLoadingSpinner euiButtonContent__spinner emotion-euiLoadingSpinner-m"
+            class="euiLoadingSpinner emotion-euiLoadingSpinner-m"
             role="progressbar"
+            style="border-color: #07c currentcolor currentcolor currentcolor;"
           />
-          <span
-            class="euiButton__text"
-          >
-            Turn on monitoring
-          </span>
+          Turn on monitoring
         </span>
       </button>
     </div>
@@ -151,24 +148,20 @@ Array [
     class="euiSpacer euiSpacer--l emotion-euiSpacer-l"
   />,
   <div
-    class="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--justifyContentSpaceAround euiFlexGroup--directionRow euiFlexGroup--responsive"
+    class="euiFlexGroup emotion-euiFlexGroup-responsive-s-spaceAround-center-row"
   >
     <div
-      class="euiFlexItem euiFlexItem--flexGrowZero"
+      class="euiFlexItem emotion-euiFlexItem-growZero"
     >
       <button
-        class="euiButton euiButton--primary euiButton--fill"
+        class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-m-fill-primary"
         data-test-subj="enableCollectionInterval"
         type="button"
       >
         <span
-          class="euiButtonContent euiButton__content"
+          class="emotion-euiButtonDisplayContent"
         >
-          <span
-            class="euiButton__text"
-          >
-            Turn on monitoring
-          </span>
+          Turn on monitoring
         </span>
       </button>
     </div>

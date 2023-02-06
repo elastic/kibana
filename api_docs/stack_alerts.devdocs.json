@@ -16,6 +16,21 @@
     "misc": [
       {
         "parentPluginId": "stackAlerts",
+        "id": "def-server.Config",
+        "type": "Type",
+        "tags": [],
+        "label": "Config",
+        "description": [],
+        "signature": [
+          "{}"
+        ],
+        "path": "x-pack/plugins/stack_alerts/server/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "stackAlerts",
         "id": "def-server.ID",
         "type": "string",
         "tags": [],
@@ -24,33 +39,144 @@
         "signature": [
           "\".index-threshold\""
         ],
-        "path": "x-pack/plugins/stack_alerts/server/alert_types/index_threshold/alert_type.ts",
+        "path": "x-pack/plugins/stack_alerts/server/rule_types/index_threshold/rule_type.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       }
     ],
-    "objects": []
+    "objects": [
+      {
+        "parentPluginId": "stackAlerts",
+        "id": "def-server.configSchema",
+        "type": "Object",
+        "tags": [],
+        "label": "configSchema",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "common",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-common.ObjectType",
+            "text": "ObjectType"
+          },
+          "<{}>"
+        ],
+        "path": "x-pack/plugins/stack_alerts/server/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ]
   },
   "common": {
     "classes": [],
-    "functions": [],
+    "functions": [
+      {
+        "parentPluginId": "stackAlerts",
+        "id": "def-common.getComparatorScript",
+        "type": "Function",
+        "tags": [],
+        "label": "getComparatorScript",
+        "description": [],
+        "signature": [
+          "(comparator: ",
+          "Comparator",
+          ", threshold: number[], fieldName: string) => string"
+        ],
+        "path": "x-pack/plugins/stack_alerts/common/comparator.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "stackAlerts",
+            "id": "def-common.getComparatorScript.$1",
+            "type": "Enum",
+            "tags": [],
+            "label": "comparator",
+            "description": [],
+            "signature": [
+              "Comparator"
+            ],
+            "path": "x-pack/plugins/stack_alerts/common/comparator.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "stackAlerts",
+            "id": "def-common.getComparatorScript.$2",
+            "type": "Array",
+            "tags": [],
+            "label": "threshold",
+            "description": [],
+            "signature": [
+              "number[]"
+            ],
+            "path": "x-pack/plugins/stack_alerts/common/comparator.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "stackAlerts",
+            "id": "def-common.getComparatorScript.$3",
+            "type": "string",
+            "tags": [],
+            "label": "fieldName",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "x-pack/plugins/stack_alerts/common/comparator.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "stackAlerts",
+        "id": "def-common.getHumanReadableComparator",
+        "type": "Function",
+        "tags": [],
+        "label": "getHumanReadableComparator",
+        "description": [],
+        "signature": [
+          "(comparator: ",
+          "Comparator",
+          ") => string | undefined"
+        ],
+        "path": "x-pack/plugins/stack_alerts/common/comparator.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "stackAlerts",
+            "id": "def-common.getHumanReadableComparator.$1",
+            "type": "Enum",
+            "tags": [],
+            "label": "comparator",
+            "description": [],
+            "signature": [
+              "Comparator"
+            ],
+            "path": "x-pack/plugins/stack_alerts/common/comparator.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
     "interfaces": [],
     "enums": [],
     "misc": [
-      {
-        "parentPluginId": "stackAlerts",
-        "id": "def-common.Config",
-        "type": "Type",
-        "tags": [],
-        "label": "Config",
-        "description": [],
-        "signature": [
-          "{}"
-        ],
-        "path": "x-pack/plugins/stack_alerts/common/config.ts",
-        "deprecated": false,
-        "initialIsOpen": false
-      },
       {
         "parentPluginId": "stackAlerts",
         "id": "def-common.STACK_ALERTS_FEATURE_ID",
@@ -61,25 +187,47 @@
         "signature": [
           "\"stackAlerts\""
         ],
-        "path": "x-pack/plugins/stack_alerts/common/index.ts",
+        "path": "x-pack/plugins/stack_alerts/common/constants.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       }
     ],
     "objects": [
       {
         "parentPluginId": "stackAlerts",
-        "id": "def-common.configSchema",
+        "id": "def-common.ComparatorFnNames",
         "type": "Object",
         "tags": [],
-        "label": "configSchema",
+        "label": "ComparatorFnNames",
         "description": [],
         "signature": [
-          "ObjectType",
-          "<{}>"
+          "Set<",
+          "Comparator",
+          ">"
         ],
-        "path": "x-pack/plugins/stack_alerts/common/config.ts",
+        "path": "x-pack/plugins/stack_alerts/common/comparator.ts",
         "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "stackAlerts",
+        "id": "def-common.ComparatorFns",
+        "type": "Object",
+        "tags": [],
+        "label": "ComparatorFns",
+        "description": [],
+        "signature": [
+          "Map<",
+          "Comparator",
+          ", ",
+          "ComparatorFn",
+          ">"
+        ],
+        "path": "x-pack/plugins/stack_alerts/common/comparator.ts",
+        "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       }
     ]

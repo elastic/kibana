@@ -44,6 +44,20 @@ export function MachineLearningAnomalyExplorerProvider(
       return influencerFieldLabels;
     },
 
+    async getQueryBarText() {
+      const queryBarElement = await testSubjects.find('explorerQueryInput');
+      const queryBarText = await queryBarElement.getVisibleText();
+      return queryBarText;
+    },
+
+    async assertQueryBarContent(contentString: string) {
+      const queryBarText = await this.getQueryBarText();
+      expect(queryBarText).to.eql(
+        contentString,
+        `Expected influencer filter to be '${contentString}' (got '${queryBarText}')`
+      );
+    },
+
     async assertInfluencerListContainsLabel(influencerField: string, label: string) {
       const influencerFieldLabels = await this.getInfluencerFieldLabels(influencerField);
       expect(influencerFieldLabels).to.contain(
@@ -84,6 +98,20 @@ export function MachineLearningAnomalyExplorerProvider(
       });
     },
 
+    async addFilterForInfluencer(influencerField: string, influencerValue: string) {
+      await testSubjects.existOrFail(
+        `mlAnomaliesTableEntityCellAddFilterButton-${influencerValue}`
+      );
+      await testSubjects.click(`mlAnomaliesTableEntityCellAddFilterButton-${influencerValue}`);
+    },
+
+    async removeFilterForInfluencer(influencerField: string, influencerValue: string) {
+      await testSubjects.existOrFail(
+        `mlAnomaliesTableEntityCellRemoveFilterButton-${influencerValue}`
+      );
+      await testSubjects.click(`mlAnomaliesTableEntityCellRemoveFilterButton-${influencerValue}`);
+    },
+
     async openAddToDashboardControl() {
       await testSubjects.click('mlAnomalyTimelinePanelMenu');
       await testSubjects.click('mlAnomalyTimelinePanelAddToDashboardButton');
@@ -105,7 +133,7 @@ export function MachineLearningAnomalyExplorerProvider(
     async addAndEditSwimlaneInDashboard(dashboardTitle: string) {
       await retry.tryForTime(30 * 1000, async () => {
         await this.filterDashboardSearchWithSearchString(dashboardTitle);
-        await testSubjects.clickWhenNotDisabled('~mlEmbeddableAddAndEditDashboard');
+        await testSubjects.clickWhenNotDisabledWithoutRetry('~mlEmbeddableAddAndEditDashboard');
 
         // make sure the dashboard page actually loaded
         const dashboardItemCount = await dashboardPage.getSharedItemsCount();

@@ -6,9 +6,11 @@
  */
 
 import React from 'react';
-import { mount, ReactWrapper } from 'enzyme';
+import type { ReactWrapper } from 'enzyme';
+import { mount } from 'enzyme';
 
-import { ClosureOptions, ClosureOptionsProps } from './closure_options';
+import type { ClosureOptionsProps } from './closure_options';
+import { ClosureOptions } from './closure_options';
 import { TestProviders } from '../../common/mock';
 import { ClosureOptionsRadio } from './closure_options_radio';
 

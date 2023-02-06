@@ -52,7 +52,8 @@ import {
   createGridSortingConfig,
   createTransposeColumnFilterHandler,
 } from './table_actions';
-import { getOriginalId, getFinalSummaryConfiguration } from '../../../../common/expressions';
+import { getFinalSummaryConfiguration } from '../../../../common/expressions/datatable/summary';
+import { getOriginalId } from '../../../../common/expressions/datatable/transpose_helpers';
 
 export const DataContext = React.createContext<DataContextType>({});
 
@@ -116,7 +117,9 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
 
   useEffect(() => {
     if (!pagination?.pageIndex && !pagination?.pageSize) return;
-    const lastPageIndex = Math.ceil(firstLocalTable.rows.length / pagination.pageSize) - 1;
+    const lastPageIndex = firstLocalTable.rows.length
+      ? Math.ceil(firstLocalTable.rows.length / pagination.pageSize) - 1
+      : 0;
     /**
      * When the underlying data changes, there might be a case when actual pagination page
      * doesn't exist anymore - if the number of rows has decreased.
@@ -199,6 +202,11 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
   const handleFilterClick = useMemo(
     () => (isInteractive ? createGridFilterHandler(firstTableRef, onClickValue) : undefined),
     [firstTableRef, onClickValue, isInteractive]
+  );
+
+  const columnCellValueActions = useMemo(
+    () => (isInteractive ? props.columnCellValueActions : undefined),
+    [props.columnCellValueActions, isInteractive]
   );
 
   const handleTransposedColumnClick = useMemo(
@@ -309,7 +317,9 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
         alignments,
         headerRowHeight,
         headerRowLines,
-        dataGridRef.current?.closeCellPopover
+        columnCellValueActions,
+        dataGridRef.current?.closeCellPopover,
+        props.columnFilterable
       ),
     [
       bucketColumns,
@@ -325,6 +335,8 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
       alignments,
       headerRowHeight,
       headerRowLines,
+      columnCellValueActions,
+      props.columnFilterable,
     ]
   );
 
@@ -452,6 +464,7 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
           alignments,
           minMaxByColumnId,
           getColorForValue: props.paletteService.get(CUSTOM_PALETTE).getColorForValue!,
+          handleFilterClick,
         }}
       >
         <EuiDataGrid

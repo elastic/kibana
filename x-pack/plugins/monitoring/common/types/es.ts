@@ -17,6 +17,7 @@ export interface ElasticsearchResponse {
 }
 
 export interface ElasticsearchResponseHit {
+  _id: string;
   _index: string;
   _source: ElasticsearchSource;
   inner_hits?: {

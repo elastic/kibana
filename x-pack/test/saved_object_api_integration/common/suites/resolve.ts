@@ -71,7 +71,7 @@ export const TEST_CASES = Object.freeze({
 });
 
 export function resolveTestSuiteFactory(esArchiver: any, supertest: SuperTest<any>) {
-  const expectSavedObjectForbidden = expectResponses.forbiddenTypes('get');
+  const expectSavedObjectForbidden = expectResponses.forbiddenTypes('bulk_get');
   const expectResponseBody =
     (testCase: ResolveTestCase): ExpectResponseBody =>
     async (response: Record<string, any>) => {

@@ -1,9 +1,0 @@
-{
-  "id": "casesFixture",
-  "owner": { "name": "Response Ops", "githubTeam": "response-ops" },
-  "version": "1.0.0",
-  "kibanaVersion": "kibana",
-  "requiredPlugins": ["cases", "embeddable", "lens", "kibanaReact", "esUiShared"],
-  "server": true,
-  "ui": true
-}

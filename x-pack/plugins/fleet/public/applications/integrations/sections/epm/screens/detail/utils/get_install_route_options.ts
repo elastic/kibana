@@ -13,9 +13,7 @@ const EXCLUDED_PACKAGES = [
   'apm',
   'cloud_security_posture',
   'dga',
-  'endpoint',
   'fleet_server',
-  'kubernetes',
   'osquery_manager',
   'problemchild',
   'security_detection_engine',
@@ -30,6 +28,7 @@ interface GetInstallPkgRouteOptionsParams {
   isCloud: boolean;
   isExperimentalAddIntegrationPageEnabled: boolean;
   isFirstTimeAgentUser: boolean;
+  isGuidedOnboardingActive: boolean;
 }
 
 const isPackageExemptFromStepsLayout = (pkgkey: string) =>
@@ -46,13 +45,14 @@ export const getInstallPkgRouteOptions = ({
   isFirstTimeAgentUser,
   isCloud,
   isExperimentalAddIntegrationPageEnabled,
+  isGuidedOnboardingActive,
 }: GetInstallPkgRouteOptionsParams): [string, { path: string; state: unknown }] => {
   const integrationOpts: { integration?: string } = integration ? { integration } : {};
   const packageExemptFromStepsLayout = isPackageExemptFromStepsLayout(pkgkey);
   const useMultiPageLayout =
     isExperimentalAddIntegrationPageEnabled &&
     isCloud &&
-    isFirstTimeAgentUser &&
+    (isFirstTimeAgentUser || isGuidedOnboardingActive) &&
     !packageExemptFromStepsLayout;
   const path = pagePathGetters.add_integration_to_policy({
     pkgkey,

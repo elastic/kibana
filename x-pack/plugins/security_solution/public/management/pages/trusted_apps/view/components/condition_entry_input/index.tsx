@@ -93,6 +93,14 @@ export const ConditionEntryInput = memo<ConditionEntryInputProps>(
     const getTestId = useTestIdGenerator(dataTestSubj);
     const [isVisited, setIsVisited] = useState(false);
 
+    const handleVisited = useCallback(() => {
+      onVisited?.(entry);
+
+      if (!isVisited) {
+        setIsVisited(true);
+      }
+    }, [entry, isVisited, onVisited]);
+
     const fieldOptions = useMemo<Array<EuiSuperSelectOption<string>>>(() => {
       const getDropdownDisplay = (field: ConditionEntryField) => (
         <>
@@ -108,11 +116,17 @@ export const ConditionEntryInput = memo<ConditionEntryInputProps>(
           dropdownDisplay: getDropdownDisplay(ConditionEntryField.HASH),
           inputDisplay: CONDITION_FIELD_TITLE[ConditionEntryField.HASH],
           value: ConditionEntryField.HASH,
+          'data-test-subj': getTestId(
+            `field-type-${CONDITION_FIELD_TITLE[ConditionEntryField.HASH]}`
+          ),
         },
         {
           dropdownDisplay: getDropdownDisplay(ConditionEntryField.PATH),
           inputDisplay: CONDITION_FIELD_TITLE[ConditionEntryField.PATH],
           value: ConditionEntryField.PATH,
+          'data-test-subj': getTestId(
+            `field-type-${CONDITION_FIELD_TITLE[ConditionEntryField.PATH]}`
+          ),
         },
         ...(os === OperatingSystem.WINDOWS
           ? [
@@ -120,11 +134,14 @@ export const ConditionEntryInput = memo<ConditionEntryInputProps>(
                 dropdownDisplay: getDropdownDisplay(ConditionEntryField.SIGNER),
                 inputDisplay: CONDITION_FIELD_TITLE[ConditionEntryField.SIGNER],
                 value: ConditionEntryField.SIGNER,
+                'data-test-subj': getTestId(
+                  `field-type-${CONDITION_FIELD_TITLE[ConditionEntryField.SIGNER]}`
+                ),
               },
             ]
           : []),
       ];
-    }, [os]);
+    }, [getTestId, os]);
 
     const handleValueUpdate = useCallback<ChangeEventHandler<HTMLInputElement>>(
       (ev) => onChange({ ...entry, value: ev.target.value }, entry),
@@ -132,8 +149,14 @@ export const ConditionEntryInput = memo<ConditionEntryInputProps>(
     );
 
     const handleFieldUpdate = useCallback(
-      (newField) => onChange({ ...entry, field: newField }, entry),
-      [entry, onChange]
+      (newField) => {
+        onChange({ ...entry, field: newField }, entry);
+
+        if (entry.value) {
+          handleVisited();
+        }
+      },
+      [handleVisited, entry, onChange]
     );
 
     const handleOperatorUpdate = useCallback(
@@ -144,13 +167,8 @@ export const ConditionEntryInput = memo<ConditionEntryInputProps>(
     const handleRemoveClick = useCallback(() => onRemove(entry), [entry, onRemove]);
 
     const handleValueOnBlur = useCallback(() => {
-      if (onVisited) {
-        onVisited(entry);
-      }
-      if (!isVisited) {
-        setIsVisited(true);
-      }
-    }, [entry, onVisited, isVisited]);
+      handleVisited();
+    }, [handleVisited]);
 
     return (
       <InputGroup data-test-subj={dataTestSubj}>

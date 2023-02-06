@@ -128,6 +128,12 @@ export interface KibanaRequest<
   readonly isSystemRequest: boolean;
 
   /**
+   * Allows identifying requests that were created using a {@link FakeRawRequest}
+   * Even if the API facade is the same, fake requests have some stubbed functionalities.
+   */
+  readonly isFakeRequest: boolean;
+
+  /**
    * The socket associated with this request.
    * See {@link IKibanaSocket}.
    */

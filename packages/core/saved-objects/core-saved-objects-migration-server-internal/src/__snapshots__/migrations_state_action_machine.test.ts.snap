@@ -48,6 +48,11 @@ Object {
                     },
                     Object {
                       "term": Object {
+                        "type": "csp_rule",
+                      },
+                    },
+                    Object {
+                      "term": Object {
                         "type": "file-upload-telemetry",
                       },
                     },
@@ -73,6 +78,11 @@ Object {
                     },
                     Object {
                       "term": Object {
+                        "type": "guided-setup-state",
+                      },
+                    },
+                    Object {
+                      "term": Object {
                         "type": "ml-telemetry",
                       },
                     },
@@ -84,6 +94,11 @@ Object {
                     Object {
                       "term": Object {
                         "type": "server",
+                      },
+                    },
+                    Object {
+                      "term": Object {
+                        "type": "siem-detection-engine-rule-execution-info",
                       },
                     },
                     Object {
@@ -173,6 +188,7 @@ Object {
               "transformedDocBatches": Array [],
               "versionAlias": ".my-so-index_7.11.0",
               "versionIndex": ".my-so-index_7.11.0_001",
+              "waitForMigrationCompletion": false,
             },
           },
         },
@@ -223,6 +239,11 @@ Object {
                     },
                     Object {
                       "term": Object {
+                        "type": "csp_rule",
+                      },
+                    },
+                    Object {
+                      "term": Object {
                         "type": "file-upload-telemetry",
                       },
                     },
@@ -248,6 +269,11 @@ Object {
                     },
                     Object {
                       "term": Object {
+                        "type": "guided-setup-state",
+                      },
+                    },
+                    Object {
+                      "term": Object {
                         "type": "ml-telemetry",
                       },
                     },
@@ -259,6 +285,11 @@ Object {
                     Object {
                       "term": Object {
                         "type": "server",
+                      },
+                    },
+                    Object {
+                      "term": Object {
+                        "type": "siem-detection-engine-rule-execution-info",
                       },
                     },
                     Object {
@@ -352,6 +383,7 @@ Object {
               "transformedDocBatches": Array [],
               "versionAlias": ".my-so-index_7.11.0",
               "versionIndex": ".my-so-index_7.11.0_001",
+              "waitForMigrationCompletion": false,
             },
           },
         },
@@ -402,6 +434,11 @@ Object {
                     },
                     Object {
                       "term": Object {
+                        "type": "csp_rule",
+                      },
+                    },
+                    Object {
+                      "term": Object {
                         "type": "file-upload-telemetry",
                       },
                     },
@@ -427,6 +464,11 @@ Object {
                     },
                     Object {
                       "term": Object {
+                        "type": "guided-setup-state",
+                      },
+                    },
+                    Object {
+                      "term": Object {
                         "type": "ml-telemetry",
                       },
                     },
@@ -438,6 +480,11 @@ Object {
                     Object {
                       "term": Object {
                         "type": "server",
+                      },
+                    },
+                    Object {
+                      "term": Object {
+                        "type": "siem-detection-engine-rule-execution-info",
                       },
                     },
                     Object {
@@ -535,6 +582,7 @@ Object {
               "transformedDocBatches": Array [],
               "versionAlias": ".my-so-index_7.11.0",
               "versionIndex": ".my-so-index_7.11.0_001",
+              "waitForMigrationCompletion": false,
             },
           },
         },
@@ -585,6 +633,11 @@ Object {
                     },
                     Object {
                       "term": Object {
+                        "type": "csp_rule",
+                      },
+                    },
+                    Object {
+                      "term": Object {
                         "type": "file-upload-telemetry",
                       },
                     },
@@ -610,6 +663,11 @@ Object {
                     },
                     Object {
                       "term": Object {
+                        "type": "guided-setup-state",
+                      },
+                    },
+                    Object {
+                      "term": Object {
                         "type": "ml-telemetry",
                       },
                     },
@@ -621,6 +679,11 @@ Object {
                     Object {
                       "term": Object {
                         "type": "server",
+                      },
+                    },
+                    Object {
+                      "term": Object {
+                        "type": "siem-detection-engine-rule-execution-info",
                       },
                     },
                     Object {
@@ -722,6 +785,7 @@ Object {
               "transformedDocBatches": Array [],
               "versionAlias": ".my-so-index_7.11.0",
               "versionIndex": ".my-so-index_7.11.0_001",
+              "waitForMigrationCompletion": false,
             },
           },
         },
@@ -810,6 +874,11 @@ Object {
                     },
                     Object {
                       "term": Object {
+                        "type": "csp_rule",
+                      },
+                    },
+                    Object {
+                      "term": Object {
                         "type": "file-upload-telemetry",
                       },
                     },
@@ -835,6 +904,11 @@ Object {
                     },
                     Object {
                       "term": Object {
+                        "type": "guided-setup-state",
+                      },
+                    },
+                    Object {
+                      "term": Object {
                         "type": "ml-telemetry",
                       },
                     },
@@ -846,6 +920,11 @@ Object {
                     Object {
                       "term": Object {
                         "type": "server",
+                      },
+                    },
+                    Object {
+                      "term": Object {
+                        "type": "siem-detection-engine-rule-execution-info",
                       },
                     },
                     Object {
@@ -946,6 +1025,7 @@ Object {
               ],
               "versionAlias": ".my-so-index_7.11.0",
               "versionIndex": ".my-so-index_7.11.0_001",
+              "waitForMigrationCompletion": false,
             },
           },
         },
@@ -996,6 +1076,11 @@ Object {
                     },
                     Object {
                       "term": Object {
+                        "type": "csp_rule",
+                      },
+                    },
+                    Object {
+                      "term": Object {
                         "type": "file-upload-telemetry",
                       },
                     },
@@ -1021,6 +1106,11 @@ Object {
                     },
                     Object {
                       "term": Object {
+                        "type": "guided-setup-state",
+                      },
+                    },
+                    Object {
+                      "term": Object {
                         "type": "ml-telemetry",
                       },
                     },
@@ -1032,6 +1122,11 @@ Object {
                     Object {
                       "term": Object {
                         "type": "server",
+                      },
+                    },
+                    Object {
+                      "term": Object {
+                        "type": "siem-detection-engine-rule-execution-info",
                       },
                     },
                     Object {
@@ -1136,6 +1231,7 @@ Object {
               ],
               "versionAlias": ".my-so-index_7.11.0",
               "versionIndex": ".my-so-index_7.11.0_001",
+              "waitForMigrationCompletion": false,
             },
           },
         },

@@ -59,7 +59,8 @@ const StatefulCellComponent = ({
         rowIndex,
         colIndex,
         setCellProps,
-        timelineId: tabType != null ? `${timelineId}-${tabType}` : timelineId,
+        scopeId: timelineId,
+        key: tabType != null ? `${timelineId}-${tabType}` : timelineId,
       })}
     </div>
   );

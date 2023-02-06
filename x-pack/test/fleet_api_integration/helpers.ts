@@ -5,11 +5,10 @@
  * 2.0.
  */
 
-import { Context } from 'mocha';
 import { ToolingLog } from '@kbn/tooling-log';
 import { FtrProviderContext } from '../api_integration/ftr_provider_context';
 
-export function warnAndSkipTest(mochaContext: Context, log: ToolingLog) {
+export function warnAndSkipTest(mochaContext: Mocha.Context, log: ToolingLog) {
   log.warning(
     'disabling tests because DockerServers service is not enabled, set FLEET_PACKAGE_REGISTRY_PORT to run them'
   );
@@ -53,7 +52,17 @@ export async function generateAgent(
       data = { policy_revision_idx: 1, last_checkin_status: 'degraded' };
       break;
     case 'offline':
-      data = { policy_revision_idx: 1, last_checkin: '2017-06-07T18:59:04.498Z' };
+      // default inactivity timeout is 2 weeks
+      // anything less + above offline timeout will be offline
+      const oneWeekAgoTimestamp = new Date().getTime() - 7 * 24 * 60 * 60 * 1000;
+      data = { policy_revision_idx: 1, last_checkin: new Date(oneWeekAgoTimestamp).toISOString() };
+      break;
+    case 'inactive':
+      const threeWeeksAgoTimestamp = new Date().getTime() - 21 * 24 * 60 * 60 * 1000;
+      data = {
+        policy_revision_idx: 1,
+        last_checkin: new Date(threeWeeksAgoTimestamp).toISOString(),
+      };
       break;
     // Agent with last checkin status as error and currently unenrolling => should displayd updating status
     case 'error-unenrolling':
@@ -69,6 +78,7 @@ export async function generateAgent(
 
   await es.index({
     index: '.fleet-agents',
+    id,
     body: {
       id,
       active: true,
@@ -79,11 +89,28 @@ export async function generateAgent(
         elastic: {
           agent: {
             version,
+            upgradeable: true,
           },
         },
       },
       ...data,
     },
     refresh: 'wait_for',
+  });
+}
+
+export function setPrereleaseSetting(supertest: any) {
+  before(async () => {
+    await supertest
+      .put('/api/fleet/settings')
+      .set('kbn-xsrf', 'xxxx')
+      .send({ prerelease_integrations_enabled: true });
+  });
+
+  after(async () => {
+    await supertest
+      .put('/api/fleet/settings')
+      .set('kbn-xsrf', 'xxxx')
+      .send({ prerelease_integrations_enabled: false });
   });
 }

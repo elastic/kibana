@@ -39,26 +39,12 @@ export const MODULE_NOT_COMPATIBLE_TITLE = (incompatibleJobCount: number) =>
   i18n.translate('xpack.securitySolution.components.mlPopup.moduleNotCompatibleTitle', {
     values: { incompatibleJobCount },
     defaultMessage:
-      '{incompatibleJobCount} {incompatibleJobCount, plural, =1 {job} other {jobs}} are currently unavailable',
+      '{incompatibleJobCount} {incompatibleJobCount, plural, =1 {job is} other {jobs are}} currently unavailable',
   });
 
-export const START_JOB_FAILURE = i18n.translate(
-  'xpack.securitySolution.components.mlPopup.errors.startJobFailureTitle',
+export const ANOMALY_DETECTION_DOCS = i18n.translate(
+  'xpack.securitySolution.entityAnalytics.anomalies.AnomalyDetectionDocsTitle',
   {
-    defaultMessage: 'Start job failure',
-  }
-);
-
-export const STOP_JOB_FAILURE = i18n.translate(
-  'xpack.securitySolution.containers.errors.stopJobFailureTitle',
-  {
-    defaultMessage: 'Stop job failure',
-  }
-);
-
-export const CREATE_JOB_FAILURE = i18n.translate(
-  'xpack.securitySolution.components.mlPopup.errors.createJobFailureTitle',
-  {
-    defaultMessage: 'Create job failure',
+    defaultMessage: 'Anomaly Detection with Machine Learning',
   }
 );

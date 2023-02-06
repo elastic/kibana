@@ -6,7 +6,7 @@
  */
 
 import type { PersistableState, PersistableStateDefinition } from '@kbn/kibana-utils-plugin/common';
-import { CommentRequestPersistableStateType } from '../../common/api';
+import type { CommentRequestPersistableStateType } from '../../common/api';
 
 export type PersistableStateAttachmentState = Pick<
   CommentRequestPersistableStateType,

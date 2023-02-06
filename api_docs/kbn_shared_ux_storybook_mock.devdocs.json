@@ -39,6 +39,7 @@
         ],
         "path": "packages/shared-ux/storybook/mock/src/mocks.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/shared-ux-storybook-mock",
@@ -55,7 +56,8 @@
               "; }"
             ],
             "path": "packages/shared-ux/storybook/mock/src/mocks.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/shared-ux-storybook-mock",
@@ -72,7 +74,8 @@
               "; }"
             ],
             "path": "packages/shared-ux/storybook/mock/src/mocks.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/shared-ux-storybook-mock",
@@ -96,7 +99,8 @@
               ", Partial<Services>, {}, {}>[]"
             ],
             "path": "packages/shared-ux/storybook/mock/src/mocks.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/shared-ux-storybook-mock",
@@ -114,6 +118,7 @@
             ],
             "path": "packages/shared-ux/storybook/mock/src/mocks.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -137,6 +142,7 @@
             ],
             "path": "packages/shared-ux/storybook/mock/src/mocks.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -162,6 +168,7 @@
             ],
             "path": "packages/shared-ux/storybook/mock/src/mocks.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -176,11 +183,18 @@
             ],
             "signature": [
               "(arg: keyof PropArguments | keyof ServiceArguments, params?: ",
-              "ArgumentParams",
+              {
+                "pluginId": "@kbn/shared-ux-storybook-mock",
+                "scope": "common",
+                "docId": "kibKbnSharedUxStorybookMockPluginApi",
+                "section": "def-common.ArgumentParams",
+                "text": "ArgumentParams"
+              },
               "<PropArguments, ServiceArguments> | undefined) => any"
             ],
             "path": "packages/shared-ux/storybook/mock/src/mocks.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/shared-ux-storybook-mock",
@@ -194,6 +208,7 @@
                 ],
                 "path": "packages/shared-ux/storybook/mock/src/mocks.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -204,11 +219,18 @@
                 "label": "params",
                 "description": [],
                 "signature": [
-                  "ArgumentParams",
+                  {
+                    "pluginId": "@kbn/shared-ux-storybook-mock",
+                    "scope": "common",
+                    "docId": "kibKbnSharedUxStorybookMockPluginApi",
+                    "section": "def-common.ArgumentParams",
+                    "text": "ArgumentParams"
+                  },
                   "<PropArguments, ServiceArguments> | undefined"
                 ],
                 "path": "packages/shared-ux/storybook/mock/src/mocks.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": false
               }
             ],
@@ -225,11 +247,18 @@
             ],
             "signature": [
               "(params?: ",
-              "ArgumentParams",
+              {
+                "pluginId": "@kbn/shared-ux-storybook-mock",
+                "scope": "common",
+                "docId": "kibKbnSharedUxStorybookMockPluginApi",
+                "section": "def-common.ArgumentParams",
+                "text": "ArgumentParams"
+              },
               "<PropArguments, {}> | undefined) => Props"
             ],
             "path": "packages/shared-ux/storybook/mock/src/mocks.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/shared-ux-storybook-mock",
@@ -239,11 +268,18 @@
                 "label": "params",
                 "description": [],
                 "signature": [
-                  "ArgumentParams",
+                  {
+                    "pluginId": "@kbn/shared-ux-storybook-mock",
+                    "scope": "common",
+                    "docId": "kibKbnSharedUxStorybookMockPluginApi",
+                    "section": "def-common.ArgumentParams",
+                    "text": "ArgumentParams"
+                  },
                   "<PropArguments, {}> | undefined"
                 ],
                 "path": "packages/shared-ux/storybook/mock/src/mocks.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": false
               }
             ],
@@ -260,11 +296,18 @@
             ],
             "signature": [
               "(params?: ",
-              "ArgumentParams",
+              {
+                "pluginId": "@kbn/shared-ux-storybook-mock",
+                "scope": "common",
+                "docId": "kibKbnSharedUxStorybookMockPluginApi",
+                "section": "def-common.ArgumentParams",
+                "text": "ArgumentParams"
+              },
               "<PropArguments, ServiceArguments> | undefined) => Services"
             ],
             "path": "packages/shared-ux/storybook/mock/src/mocks.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/shared-ux-storybook-mock",
@@ -274,11 +317,18 @@
                 "label": "params",
                 "description": [],
                 "signature": [
-                  "ArgumentParams",
+                  {
+                    "pluginId": "@kbn/shared-ux-storybook-mock",
+                    "scope": "common",
+                    "docId": "kibKbnSharedUxStorybookMockPluginApi",
+                    "section": "def-common.ArgumentParams",
+                    "text": "ArgumentParams"
+                  },
                   "<PropArguments, ServiceArguments> | undefined"
                 ],
                 "path": "packages/shared-ux/storybook/mock/src/mocks.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": false
               }
             ],
@@ -291,7 +341,25 @@
     "functions": [],
     "interfaces": [],
     "enums": [],
-    "misc": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/shared-ux-storybook-mock",
+        "id": "def-common.ArgumentParams",
+        "type": "Type",
+        "tags": [],
+        "label": "ArgumentParams",
+        "description": [
+          "\nType that expresses the arguments available to a story based on the\nprops and services the component consumes."
+        ],
+        "signature": [
+          "{ [P in keyof PropArguments | keyof ServiceArguments]: any; }"
+        ],
+        "path": "packages/shared-ux/storybook/mock/src/mocks.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
     "objects": []
   }
 }

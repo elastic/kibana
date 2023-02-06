@@ -6,43 +6,44 @@
  * Side Public License, v 1.
  */
 
-import React, { ComponentType, useState } from 'react';
+import React, { ComponentType, ReactNode, useState } from 'react';
 import classNames from 'classnames';
-import { useIsWithinBreakpoints, EuiPageTemplateProps } from '@elastic/eui';
+import {
+  useIsWithinBreakpoints,
+  useEuiTheme,
+  useIsWithinMinBreakpoint,
+  EuiPageSidebarProps,
+} from '@elastic/eui';
 import { SolutionNav, SolutionNavProps } from './solution_nav';
-
-import './with_solution_nav.scss';
+import { WithSolutionNavStyles } from './with_solution_nav.styles';
 
 // https://reactjs.org/docs/higher-order-components.html#convention-wrap-the-display-name-for-easy-debugging
 function getDisplayName(Component: ComponentType<any>) {
   return Component.displayName || Component.name || 'UnnamedComponent';
 }
 
-type TemplateProps = Pick<
-  EuiPageTemplateProps,
-  'pageSideBar' | 'pageSideBarProps' | 'template' | 'children'
->;
-
-type ComponentProps = TemplateProps & {
-  isEmptyState?: boolean;
-};
+export interface TemplateProps {
+  children?: ReactNode;
+  pageSideBar?: ReactNode;
+  pageSideBarProps?: EuiPageSidebarProps;
+}
 
 type Props<P> = P &
-  ComponentProps & {
+  TemplateProps & {
     solutionNav: SolutionNavProps;
   };
 
 const SOLUTION_NAV_COLLAPSED_KEY = 'solutionNavIsCollapsed';
 
-export const withSolutionNav = <P extends ComponentProps>(WrappedComponent: ComponentType<P>) => {
+export const withSolutionNav = <P extends TemplateProps>(WrappedComponent: ComponentType<P>) => {
   const WithSolutionNav = (props: Props<P>) => {
     const isMediumBreakpoint = useIsWithinBreakpoints(['m']);
-    const isLargerBreakpoint = useIsWithinBreakpoints(['l', 'xl']);
+    const isLargerBreakpoint = useIsWithinMinBreakpoint('l');
     const [isSideNavOpenOnDesktop, setisSideNavOpenOnDesktop] = useState(
       !JSON.parse(String(localStorage.getItem(SOLUTION_NAV_COLLAPSED_KEY)))
     );
-    const { solutionNav, ...propagatedProps } = props;
-    const { children, isEmptyState, template } = propagatedProps;
+    const { solutionNav, children, ...propagatedProps } = props;
+    const { euiTheme } = useEuiTheme();
 
     const toggleOpenOnDesktop = () => {
       setisSideNavOpenOnDesktop(!isSideNavOpenOnDesktop);
@@ -52,16 +53,16 @@ export const withSolutionNav = <P extends ComponentProps>(WrappedComponent: Comp
 
     // Default navigation to allow collapsing
     const { canBeCollapsed = true } = solutionNav;
+    const isSidebarShrunk =
+      isMediumBreakpoint || (canBeCollapsed && isLargerBreakpoint && !isSideNavOpenOnDesktop);
+    const withSolutionNavStyles = WithSolutionNavStyles(euiTheme);
     const sideBarClasses = classNames(
-      'kbnSolutionNav__sidebar',
       {
-        'kbnSolutionNav__sidebar--shrink':
-          isMediumBreakpoint || (canBeCollapsed && isLargerBreakpoint && !isSideNavOpenOnDesktop),
+        'kbnSolutionNav__sidebar--shrink': isSidebarShrunk,
       },
-      props.pageSideBarProps?.className
+      props.pageSideBarProps?.className,
+      withSolutionNavStyles
     );
-
-    const templateToUse = isEmptyState && !template ? 'centeredContent' : template;
 
     const pageSideBar = (
       <SolutionNav
@@ -71,9 +72,10 @@ export const withSolutionNav = <P extends ComponentProps>(WrappedComponent: Comp
       />
     );
 
-    const pageSideBarProps = {
+    const pageSideBarProps: TemplateProps['pageSideBarProps'] = {
       paddingSize: 'none' as 'none',
       ...props.pageSideBarProps,
+      minWidth: isSidebarShrunk ? euiTheme.size.xxl : undefined,
       className: sideBarClasses,
     };
 
@@ -83,7 +85,6 @@ export const withSolutionNav = <P extends ComponentProps>(WrappedComponent: Comp
           ...(propagatedProps as P),
           pageSideBar,
           pageSideBarProps,
-          template: templateToUse,
         }}
       >
         {children}

@@ -41,10 +41,10 @@ export async function fetchClusterUuids(
 
   const params: estypes.SearchRequest = {
     index: INDEX_PATTERN_ELASTICSEARCH,
-    size: 0,
     ignore_unavailable: true,
     filter_path: 'aggregations.cluster_uuids.buckets.key',
     body: {
+      size: 0,
       query: createQuery({ type: 'cluster_stats', start, end }) as estypes.QueryDslQueryContainer,
       aggs: {
         cluster_uuids: {

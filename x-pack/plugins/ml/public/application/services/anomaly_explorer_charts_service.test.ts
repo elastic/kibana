@@ -37,7 +37,7 @@ describe('AnomalyExplorerChartsService', () => {
   };
 
   beforeEach(() => {
-    jest.useFakeTimers();
+    jest.useFakeTimers({ legacyFakeTimers: true });
 
     mlApiServicesMock.jobs.jobForCloning.mockImplementation(() => Promise.resolve({}));
 

@@ -1,0 +1,5 @@
+{
+  "type": "shared-common",
+  "id": "@kbn/shared-ux-button-exit-full-screen-mocks",
+  "owner": "@elastic/appex-sharedux"
+}

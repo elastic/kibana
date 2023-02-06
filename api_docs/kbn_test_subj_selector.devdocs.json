@@ -1,0 +1,63 @@
+{
+  "id": "@kbn/test-subj-selector",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/test-subj-selector",
+        "id": "def-common.subj",
+        "type": "Function",
+        "tags": [],
+        "label": "subj",
+        "description": [
+          "\nConverts a testSubject selector into a CSS selector.\n\ntestSubject selector syntax rules:\n\n  - `data-test-subj` values can include spaces\n\n  - prefixing a value with `~` will allow matching a single word in a `data-test-subj` that uses several space delimited list words\n    - example: `~foo`\n    - css equivalent: `[data-test-subj~=\"foo\"]`\n\n  - the `>` character is used between two values to indicate that the value on the right must match an element inside an element matched by the value on the left\n    - example: `foo > bar`\n    - css equivalent: `[data-test-subj=foo] [data-test-subj=bar]`\n\n  - the `&` character is used between two values to indicate that the value on both sides must both match the element\n    - example: `foo & bar`\n    - css equivalent: `[data-test-subj=foo][data-test-subj=bar]`"
+        ],
+        "signature": [
+          "(selector: string) => string"
+        ],
+        "path": "packages/kbn-test-subj-selector/test_subj_selector.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/test-subj-selector",
+            "id": "def-common.subj.$1",
+            "type": "string",
+            "tags": [],
+            "label": "selector",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "packages/kbn-test-subj-selector/test_subj_selector.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

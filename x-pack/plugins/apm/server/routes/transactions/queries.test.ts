@@ -11,8 +11,8 @@ import {
   SearchParamsMock,
 } from '../../utils/test_helpers';
 import { getTransactionBreakdown } from './breakdown';
-import { getTransactionTraceSamples } from './trace_samples';
 import { getTransaction } from './get_transaction';
+import { getTraceSamples } from './trace_samples';
 
 describe('transaction queries', () => {
   let mock: SearchParamsMock;
@@ -22,11 +22,12 @@ describe('transaction queries', () => {
   });
 
   it('fetches breakdown data for transactions', async () => {
-    mock = await inspectSearchParams((setup) =>
+    mock = await inspectSearchParams(({ mockApmEventClient, mockConfig }) =>
       getTransactionBreakdown({
         serviceName: 'foo',
         transactionType: 'bar',
-        setup,
+        config: mockConfig,
+        apmEventClient: mockApmEventClient,
         environment: ENVIRONMENT_ALL.value,
         kuery: '',
         start: 0,
@@ -38,12 +39,13 @@ describe('transaction queries', () => {
   });
 
   it('fetches breakdown data for transactions for a transaction name', async () => {
-    mock = await inspectSearchParams((setup) =>
+    mock = await inspectSearchParams(({ mockApmEventClient, mockConfig }) =>
       getTransactionBreakdown({
         serviceName: 'foo',
         transactionType: 'bar',
         transactionName: 'baz',
-        setup,
+        config: mockConfig,
+        apmEventClient: mockApmEventClient,
         environment: ENVIRONMENT_ALL.value,
         kuery: '',
         start: 0,
@@ -55,14 +57,14 @@ describe('transaction queries', () => {
   });
 
   it('fetches transaction trace samples', async () => {
-    mock = await inspectSearchParams((setup) =>
-      getTransactionTraceSamples({
+    mock = await inspectSearchParams(({ mockApmEventClient }) =>
+      getTraceSamples({
         serviceName: 'foo',
         transactionName: 'bar',
         transactionType: 'baz',
         traceId: 'qux',
         transactionId: 'quz',
-        setup,
+        apmEventClient: mockApmEventClient,
         environment: ENVIRONMENT_ALL.value,
         kuery: '',
         start: 0,
@@ -74,11 +76,11 @@ describe('transaction queries', () => {
   });
 
   it('fetches a transaction', async () => {
-    mock = await inspectSearchParams((setup) =>
+    mock = await inspectSearchParams(({ mockApmEventClient }) =>
       getTransaction({
         transactionId: 'foo',
         traceId: 'bar',
-        setup,
+        apmEventClient: mockApmEventClient,
         start: 0,
         end: 50000,
       })

@@ -26,7 +26,7 @@ describe('CronEditor', () => {
         />
       );
 
-      expect(component).toMatchSnapshot();
+      expect(component.render()).toMatchSnapshot();
     });
   });
 

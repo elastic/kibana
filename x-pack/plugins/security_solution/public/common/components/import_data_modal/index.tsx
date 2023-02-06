@@ -23,7 +23,7 @@ import React, { useCallback, useState } from 'react';
 import type {
   ImportDataResponse,
   ImportDataProps,
-} from '../../../detections/containers/detection_engine/rules';
+} from '../../../detection_engine/rule_management/logic';
 import { useAppToasts } from '../../hooks/use_app_toasts';
 import * as i18n from './translations';
 import { showToasterMessage } from './utils';
@@ -48,6 +48,7 @@ interface ImportDataModalProps {
 /**
  * Modal component for importing Rules from a json file
  */
+// TODO split into two: timelines and rules
 export const ImportDataModalComponent = ({
   checkBoxLabel,
   closeModal,

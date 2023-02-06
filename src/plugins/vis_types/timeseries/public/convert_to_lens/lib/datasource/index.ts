@@ -6,5 +6,4 @@
  * Side Public License, v 1.
  */
 
-export * from './get_datasource_info';
-export * from './get_field_type';
+export * from './datasource_info';

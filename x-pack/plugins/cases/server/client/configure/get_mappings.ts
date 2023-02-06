@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { SavedObjectsFindResponse } from '@kbn/core/server';
+import type { SavedObjectsFindResponse } from '@kbn/core/server';
 import { ACTION_SAVED_OBJECT_TYPE } from '@kbn/actions-plugin/server';
-import { ConnectorMappings } from '../../../common/api';
+import type { ConnectorMappings } from '../../../common/api';
 import { createCaseError } from '../../common/error';
-import { CasesClientArgs } from '..';
-import { MappingsArgs } from './types';
+import type { CasesClientArgs } from '..';
+import type { MappingsArgs } from './types';
 
 export const getMappings = async (
   { connector }: MappingsArgs,

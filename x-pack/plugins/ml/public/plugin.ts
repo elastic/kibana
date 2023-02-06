@@ -29,8 +29,8 @@ import { AppStatus, AppUpdater, DEFAULT_APP_CATEGORIES } from '@kbn/core/public'
 import type { UiActionsSetup, UiActionsStart } from '@kbn/ui-actions-plugin/public';
 
 import type { LicenseManagementUIPluginSetup } from '@kbn/license-management-plugin/public';
-import type { LicensingPluginSetup } from '@kbn/licensing-plugin/public';
-import type { SecurityPluginSetup } from '@kbn/security-plugin/public';
+import type { LicensingPluginSetup, LicensingPluginStart } from '@kbn/licensing-plugin/public';
+import type { SecurityPluginStart } from '@kbn/security-plugin/public';
 
 import type { MapsStartApi, MapsSetupApi } from '@kbn/maps-plugin/public';
 import {
@@ -38,7 +38,6 @@ import {
   TriggersAndActionsUIPublicPluginStart,
 } from '@kbn/triggers-actions-ui-plugin/public';
 import type { DataVisualizerPluginStart } from '@kbn/data-visualizer-plugin/public';
-import type { AiopsPluginStart } from '@kbn/aiops-plugin/public';
 import type { PluginSetupContract as AlertingSetup } from '@kbn/alerting-plugin/public';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import type { FieldFormatsSetup, FieldFormatsStart } from '@kbn/field-formats-plugin/public';
@@ -55,6 +54,7 @@ import { PLUGIN_ICON_SOLUTION, PLUGIN_ID } from '../common/constants/app';
 export interface MlStartDependencies {
   data: DataPublicPluginStart;
   unifiedSearch: UnifiedSearchPublicPluginStart;
+  licensing: LicensingPluginStart;
   share: SharePluginStart;
   uiActions: UiActionsStart;
   spaces?: SpacesPluginStart;
@@ -62,16 +62,15 @@ export interface MlStartDependencies {
   maps?: MapsStartApi;
   triggersActionsUi?: TriggersAndActionsUIPublicPluginStart;
   dataVisualizer: DataVisualizerPluginStart;
-  aiops: AiopsPluginStart;
   fieldFormats: FieldFormatsStart;
   dashboard: DashboardStart;
   charts: ChartsPluginStart;
   lens?: LensPublicStart;
   cases?: CasesUiStart;
+  security: SecurityPluginStart;
 }
 
 export interface MlSetupDependencies {
-  security?: SecurityPluginSetup;
   maps?: MapsSetupApi;
   licensing: LicensingPluginSetup;
   management?: ManagementSetup;
@@ -121,8 +120,8 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
             unifiedSearch: pluginsStart.unifiedSearch,
             dashboard: pluginsStart.dashboard,
             share: pluginsStart.share,
-            security: pluginsSetup.security,
-            licensing: pluginsSetup.licensing,
+            security: pluginsStart.security,
+            licensing: pluginsStart.licensing,
             management: pluginsSetup.management,
             licenseManagement: pluginsSetup.licenseManagement,
             home: pluginsSetup.home,
@@ -132,7 +131,6 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
             kibanaVersion,
             triggersActionsUi: pluginsStart.triggersActionsUi,
             dataVisualizer: pluginsStart.dataVisualizer,
-            aiops: pluginsStart.aiops,
             usageCollection: pluginsSetup.usageCollection,
             fieldFormats: pluginsStart.fieldFormats,
             lens: pluginsStart.lens,
@@ -155,10 +153,12 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
 
     const licensing = pluginsSetup.licensing.license$.pipe(take(1));
     licensing.subscribe(async (license) => {
+      const mlEnabled = isMlEnabled(license);
+      const fullLicense = isFullLicense(license);
       const [coreStart, pluginStart] = await core.getStartServices();
       const { capabilities } = coreStart.application;
 
-      if (isMlEnabled(license)) {
+      if (mlEnabled) {
         // add ML to home page
         if (pluginsSetup.home) {
           registerFeature(pluginsSetup.home);
@@ -180,9 +180,6 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
         registerMapExtension,
         registerCasesAttachments,
       } = await import('./register_helper');
-
-      const mlEnabled = isMlEnabled(license);
-      const fullLicense = isFullLicense(license);
 
       if (pluginsSetup.maps) {
         // Pass capabilites.ml.canGetJobs as minimum permission to show anomalies card in maps layers
@@ -221,6 +218,7 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
       basePath: core.http.basePath,
       http: core.http,
       i18n: core.i18n,
+      lens: deps.lens,
     });
 
     return {

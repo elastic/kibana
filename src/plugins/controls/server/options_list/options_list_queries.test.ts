@@ -102,59 +102,69 @@ describe('options list queries', () => {
     });
   });
 
-  describe('suggestion aggregation and parsing', () => {
-    test('creates case insensitive aggregation for a text / keyword field with a search string', () => {
-      const optionsListRequestBodyMock: OptionsListRequestBody = {
-        fieldName: 'coolTestField.keyword',
-        textFieldName: 'coolTestField',
-        searchString: 'cooool',
-        fieldSpec: { aggregatable: true } as unknown as FieldSpec,
-      };
-      const suggestionAggBuilder = getSuggestionAggregationBuilder(optionsListRequestBodyMock);
-      expect(suggestionAggBuilder.buildAggregation(optionsListRequestBodyMock))
-        .toMatchInlineSnapshot(`
-        Object {
-          "aggs": Object {
-            "keywordSuggestions": Object {
-              "terms": Object {
-                "field": "coolTestField.keyword",
-                "shard_size": 10,
+  describe('suggestion aggregation', () => {
+    describe('text / keyword field', () => {
+      test('with a search string, creates case insensitive aggregation', () => {
+        const optionsListRequestBodyMock: OptionsListRequestBody = {
+          fieldName: 'coolTestField.keyword',
+          textFieldName: 'coolTestField',
+          searchString: 'cooool',
+          fieldSpec: { aggregatable: true } as unknown as FieldSpec,
+        };
+        const suggestionAggBuilder = getSuggestionAggregationBuilder(optionsListRequestBodyMock);
+        expect(suggestionAggBuilder.buildAggregation(optionsListRequestBodyMock))
+          .toMatchInlineSnapshot(`
+          Object {
+            "aggs": Object {
+              "keywordSuggestions": Object {
+                "terms": Object {
+                  "field": "coolTestField.keyword",
+                  "order": Object {
+                    "_count": "desc",
+                  },
+                  "shard_size": 10,
+                },
               },
             },
-          },
-          "filter": Object {
-            "match_phrase_prefix": Object {
-              "coolTestField": "cooool",
+            "filter": Object {
+              "match_phrase_prefix": Object {
+                "coolTestField": "cooool",
+              },
             },
-          },
-        }
-      `);
-    });
+          }
+        `);
+      });
 
-    test('creates keyword aggregation for a text / keyword field without a search string', () => {
-      const optionsListRequestBodyMock: OptionsListRequestBody = {
-        fieldName: 'coolTestField.keyword',
-        textFieldName: 'coolTestField',
-        fieldSpec: { aggregatable: true } as unknown as FieldSpec,
-      };
-      const suggestionAggBuilder = getSuggestionAggregationBuilder(optionsListRequestBodyMock);
-      expect(suggestionAggBuilder.buildAggregation(optionsListRequestBodyMock))
-        .toMatchInlineSnapshot(`
-        Object {
-          "terms": Object {
-            "execution_hint": "map",
-            "field": "coolTestField.keyword",
-            "include": ".*",
-            "shard_size": 10,
-          },
-        }
-      `);
+      test('without a search string, creates keyword aggregation', () => {
+        const optionsListRequestBodyMock: OptionsListRequestBody = {
+          fieldName: 'coolTestField.keyword',
+          textFieldName: 'coolTestField',
+          fieldSpec: { aggregatable: true } as unknown as FieldSpec,
+          sort: { by: '_count', direction: 'asc' },
+        };
+        const suggestionAggBuilder = getSuggestionAggregationBuilder(optionsListRequestBodyMock);
+        expect(suggestionAggBuilder.buildAggregation(optionsListRequestBodyMock))
+          .toMatchInlineSnapshot(`
+          Object {
+            "terms": Object {
+              "execution_hint": "map",
+              "field": "coolTestField.keyword",
+              "include": ".*",
+              "order": Object {
+                "_count": "asc",
+              },
+              "shard_size": 10,
+            },
+          }
+        `);
+      });
     });
 
     test('creates boolean aggregation for boolean field', () => {
       const optionsListRequestBodyMock: OptionsListRequestBody = {
         fieldName: 'coolean',
         fieldSpec: { type: 'boolean' } as unknown as FieldSpec,
+        sort: { by: '_key', direction: 'desc' },
       };
       const suggestionAggBuilder = getSuggestionAggregationBuilder(optionsListRequestBodyMock);
       expect(suggestionAggBuilder.buildAggregation(optionsListRequestBodyMock))
@@ -163,6 +173,9 @@ describe('options list queries', () => {
           "terms": Object {
             "execution_hint": "map",
             "field": "coolean",
+            "order": Object {
+              "_key": "desc",
+            },
             "shard_size": 10,
           },
         }
@@ -174,6 +187,7 @@ describe('options list queries', () => {
         fieldName: 'coolNestedField',
         searchString: 'cooool',
         fieldSpec: { subType: { nested: { path: 'path.to.nested' } } } as unknown as FieldSpec,
+        sort: { by: '_key', direction: 'asc' },
       };
       const suggestionAggBuilder = getSuggestionAggregationBuilder(optionsListRequestBodyMock);
       expect(suggestionAggBuilder.buildAggregation(optionsListRequestBodyMock))
@@ -185,6 +199,9 @@ describe('options list queries', () => {
                 "execution_hint": "map",
                 "field": "coolNestedField",
                 "include": "cooool.*",
+                "order": Object {
+                  "_key": "asc",
+                },
                 "shard_size": 10,
               },
             },
@@ -210,12 +227,205 @@ describe('options list queries', () => {
             "execution_hint": "map",
             "field": "coolTestField.keyword",
             "include": "cooool.*",
+            "order": Object {
+              "_count": "desc",
+            },
             "shard_size": 10,
           },
         }
       `);
     });
 
+    describe('IP field', () => {
+      test('without a search string, creates IP range aggregation with default range', () => {
+        const optionsListRequestBodyMock: OptionsListRequestBody = {
+          fieldName: 'clientip',
+          fieldSpec: { type: 'ip' } as unknown as FieldSpec,
+          sort: { by: '_count', direction: 'asc' },
+        };
+        const suggestionAggBuilder = getSuggestionAggregationBuilder(optionsListRequestBodyMock);
+        expect(suggestionAggBuilder.buildAggregation(optionsListRequestBodyMock))
+          .toMatchInlineSnapshot(`
+          Object {
+            "aggs": Object {
+              "filteredSuggestions": Object {
+                "terms": Object {
+                  "execution_hint": "map",
+                  "field": "clientip",
+                  "order": Object {
+                    "_count": "asc",
+                  },
+                  "shard_size": 10,
+                },
+              },
+            },
+            "ip_range": Object {
+              "field": "clientip",
+              "keyed": true,
+              "ranges": Array [
+                Object {
+                  "from": "::",
+                  "key": "ipv6",
+                  "to": "ffff:ffff:ffff:ffff:ffff:ffff:ffff:ffff",
+                },
+              ],
+            },
+          }
+        `);
+      });
+
+      test('full IPv4 in the search string, creates IP range aggregation with CIDR mask', () => {
+        const optionsListRequestBodyMock: OptionsListRequestBody = {
+          fieldName: 'clientip',
+          fieldSpec: { type: 'ip' } as unknown as FieldSpec,
+          searchString: '41.77.243.255',
+          sort: { by: '_key', direction: 'desc' },
+        };
+        const suggestionAggBuilder = getSuggestionAggregationBuilder(optionsListRequestBodyMock);
+        expect(suggestionAggBuilder.buildAggregation(optionsListRequestBodyMock))
+          .toMatchInlineSnapshot(`
+          Object {
+            "aggs": Object {
+              "filteredSuggestions": Object {
+                "terms": Object {
+                  "execution_hint": "map",
+                  "field": "clientip",
+                  "order": Object {
+                    "_key": "desc",
+                  },
+                  "shard_size": 10,
+                },
+              },
+            },
+            "ip_range": Object {
+              "field": "clientip",
+              "keyed": true,
+              "ranges": Array [
+                Object {
+                  "key": "ipv4",
+                  "mask": "41.77.243.255/32",
+                },
+              ],
+            },
+          }
+        `);
+      });
+
+      test('full IPv6 in the search string, creates IP range aggregation with CIDR mask', () => {
+        const optionsListRequestBodyMock: OptionsListRequestBody = {
+          fieldName: 'clientip',
+          fieldSpec: { type: 'ip' } as unknown as FieldSpec,
+          searchString: 'f688:fb50:6433:bba2:604:f2c:194a:d3c5',
+          sort: { by: '_key', direction: 'asc' },
+        };
+        const suggestionAggBuilder = getSuggestionAggregationBuilder(optionsListRequestBodyMock);
+        expect(suggestionAggBuilder.buildAggregation(optionsListRequestBodyMock))
+          .toMatchInlineSnapshot(`
+          Object {
+            "aggs": Object {
+              "filteredSuggestions": Object {
+                "terms": Object {
+                  "execution_hint": "map",
+                  "field": "clientip",
+                  "order": Object {
+                    "_key": "asc",
+                  },
+                  "shard_size": 10,
+                },
+              },
+            },
+            "ip_range": Object {
+              "field": "clientip",
+              "keyed": true,
+              "ranges": Array [
+                Object {
+                  "key": "ipv6",
+                  "mask": "f688:fb50:6433:bba2:604:f2c:194a:d3c5/128",
+                },
+              ],
+            },
+          }
+        `);
+      });
+
+      test('partial IPv4 in the search string, creates IP range aggregation with min and max', () => {
+        const optionsListRequestBodyMock: OptionsListRequestBody = {
+          fieldName: 'clientip',
+          fieldSpec: { type: 'ip' } as unknown as FieldSpec,
+          searchString: '41.77',
+        };
+        const suggestionAggBuilder = getSuggestionAggregationBuilder(optionsListRequestBodyMock);
+        expect(suggestionAggBuilder.buildAggregation(optionsListRequestBodyMock))
+          .toMatchInlineSnapshot(`
+          Object {
+            "aggs": Object {
+              "filteredSuggestions": Object {
+                "terms": Object {
+                  "execution_hint": "map",
+                  "field": "clientip",
+                  "order": Object {
+                    "_count": "desc",
+                  },
+                  "shard_size": 10,
+                },
+              },
+            },
+            "ip_range": Object {
+              "field": "clientip",
+              "keyed": true,
+              "ranges": Array [
+                Object {
+                  "from": "41.77.0.0",
+                  "key": "ipv4",
+                  "to": "41.77.255.255",
+                },
+              ],
+            },
+          }
+        `);
+      });
+
+      test('partial IPv46 in the search string, creates IP range aggregation with min and max', () => {
+        const optionsListRequestBodyMock: OptionsListRequestBody = {
+          fieldName: 'clientip',
+          fieldSpec: { type: 'ip' } as unknown as FieldSpec,
+          searchString: 'cdb6:',
+          sort: { by: '_count', direction: 'desc' },
+        };
+        const suggestionAggBuilder = getSuggestionAggregationBuilder(optionsListRequestBodyMock);
+        expect(suggestionAggBuilder.buildAggregation(optionsListRequestBodyMock))
+          .toMatchInlineSnapshot(`
+          Object {
+            "aggs": Object {
+              "filteredSuggestions": Object {
+                "terms": Object {
+                  "execution_hint": "map",
+                  "field": "clientip",
+                  "order": Object {
+                    "_count": "desc",
+                  },
+                  "shard_size": 10,
+                },
+              },
+            },
+            "ip_range": Object {
+              "field": "clientip",
+              "keyed": true,
+              "ranges": Array [
+                Object {
+                  "from": "cdb6::",
+                  "key": "ipv6",
+                  "to": "cdb6:ffff:ffff:ffff:ffff:ffff:ffff:ffff",
+                },
+              ],
+            },
+          }
+        `);
+      });
+    });
+  });
+
+  describe('suggestion parsing', () => {
     test('parses keyword / text result', () => {
       const optionsListRequestBodyMock: OptionsListRequestBody = {
         fieldName: 'coolTestField.keyword',
@@ -236,11 +446,17 @@ describe('options list queries', () => {
         },
       };
       expect(suggestionAggBuilder.parse(rawSearchResponseMock)).toMatchInlineSnapshot(`
-        Array [
-          "cool1",
-          "cool2",
-          "cool3",
-        ]
+        Object {
+          "cool1": Object {
+            "doc_count": 5,
+          },
+          "cool2": Object {
+            "doc_count": 15,
+          },
+          "cool3": Object {
+            "doc_count": 10,
+          },
+        }
       `);
     });
 
@@ -259,10 +475,14 @@ describe('options list queries', () => {
         },
       };
       expect(suggestionAggBuilder.parse(rawSearchResponseMock)).toMatchInlineSnapshot(`
-        Array [
-          "false",
-          "true",
-        ]
+        Object {
+          "false": Object {
+            "doc_count": 55,
+          },
+          "true": Object {
+            "doc_count": 155,
+          },
+        }
       `);
     });
 
@@ -285,11 +505,17 @@ describe('options list queries', () => {
         },
       };
       expect(suggestionAggBuilder.parse(rawSearchResponseMock)).toMatchInlineSnapshot(`
-        Array [
-          "cool1",
-          "cool2",
-          "cool3",
-        ]
+        Object {
+          "cool1": Object {
+            "doc_count": 5,
+          },
+          "cool2": Object {
+            "doc_count": 15,
+          },
+          "cool3": Object {
+            "doc_count": 10,
+          },
+        }
       `);
     });
 
@@ -310,12 +536,112 @@ describe('options list queries', () => {
         },
       };
       expect(suggestionAggBuilder.parse(rawSearchResponseMock)).toMatchInlineSnapshot(`
-        Array [
-          "cool1",
-          "cool2",
-          "cool3",
-        ]
+        Object {
+          "cool1": Object {
+            "doc_count": 5,
+          },
+          "cool2": Object {
+            "doc_count": 15,
+          },
+          "cool3": Object {
+            "doc_count": 10,
+          },
+        }
       `);
     });
+  });
+
+  test('parses mixed IPv4 and IPv6 result', () => {
+    const optionsListRequestBodyMock: OptionsListRequestBody = {
+      fieldName: 'clientip',
+      fieldSpec: { type: 'ip' } as unknown as FieldSpec,
+    };
+    const suggestionAggBuilder = getSuggestionAggregationBuilder(optionsListRequestBodyMock);
+    rawSearchResponseMock.aggregations = {
+      suggestions: {
+        buckets: {
+          ipv4: {
+            from: '0.0.0.0',
+            to: '255.255.255.255',
+            filteredSuggestions: {
+              buckets: [
+                { doc_count: 8, key: '21.35.91.62' },
+                { doc_count: 8, key: '21.35.91.61' },
+                { doc_count: 11, key: '111.52.174.2' },
+                { doc_count: 1, key: '56.73.58.63' },
+                { doc_count: 9, key: '23.216.241.120' },
+                { doc_count: 10, key: '196.162.13.39' },
+                { doc_count: 7, key: '203.88.33.151' },
+              ],
+            },
+          },
+          ipv6: {
+            from: '::',
+            to: 'ffff:ffff:ffff:ffff:ffff:ffff:ffff:ffff',
+            filteredSuggestions: {
+              buckets: [
+                { doc_count: 12, key: '52:ae76:5947:5e2a:551:fe6a:712a:c72' },
+                { doc_count: 1, key: 'fd:4aa0:c27c:b04:997f:2de1:51b4:8418' },
+                { doc_count: 9, key: '28c7:c9a4:42fd:16b0:4de5:e41e:28d9:9172' },
+                { doc_count: 6, key: '1ec:aa98:b0a6:d07c:590:18a0:8a33:2eb8' },
+                { doc_count: 10, key: 'f7a9:640b:b5a0:1219:8d75:ed94:3c3e:2e63' },
+              ],
+            },
+          },
+        },
+      },
+    };
+
+    const parsed = suggestionAggBuilder.parse(rawSearchResponseMock);
+    /** first, verify that the sorting worked as expected */
+    expect(Object.keys(parsed)).toMatchInlineSnapshot(`
+      Array [
+        "52:ae76:5947:5e2a:551:fe6a:712a:c72",
+        "111.52.174.2",
+        "196.162.13.39",
+        "f7a9:640b:b5a0:1219:8d75:ed94:3c3e:2e63",
+        "23.216.241.120",
+        "28c7:c9a4:42fd:16b0:4de5:e41e:28d9:9172",
+        "21.35.91.62",
+        "21.35.91.61",
+        "203.88.33.151",
+        "1ec:aa98:b0a6:d07c:590:18a0:8a33:2eb8",
+      ]
+    `);
+    /** then, make sure the object is structured properly */
+    expect(parsed).toMatchInlineSnapshot(`
+      Object {
+        "111.52.174.2": Object {
+          "doc_count": 11,
+        },
+        "196.162.13.39": Object {
+          "doc_count": 10,
+        },
+        "1ec:aa98:b0a6:d07c:590:18a0:8a33:2eb8": Object {
+          "doc_count": 6,
+        },
+        "203.88.33.151": Object {
+          "doc_count": 7,
+        },
+        "21.35.91.61": Object {
+          "doc_count": 8,
+        },
+        "21.35.91.62": Object {
+          "doc_count": 8,
+        },
+        "23.216.241.120": Object {
+          "doc_count": 9,
+        },
+        "28c7:c9a4:42fd:16b0:4de5:e41e:28d9:9172": Object {
+          "doc_count": 9,
+        },
+        "52:ae76:5947:5e2a:551:fe6a:712a:c72": Object {
+          "doc_count": 12,
+        },
+        "f7a9:640b:b5a0:1219:8d75:ed94:3c3e:2e63": Object {
+          "doc_count": 10,
+        },
+      }
+    `);
   });
 });

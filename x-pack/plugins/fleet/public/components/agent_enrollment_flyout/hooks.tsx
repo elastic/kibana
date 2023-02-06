@@ -9,12 +9,16 @@ import { i18n } from '@kbn/i18n';
 
 import type { PackagePolicy, AgentPolicy } from '../../types';
 import { sendGetOneAgentPolicy, useStartServices } from '../../hooks';
-import { FLEET_KUBERNETES_PACKAGE, FLEET_CLOUD_SECURITY_POSTURE_PACKAGE } from '../../../common';
+import {
+  FLEET_KUBERNETES_PACKAGE,
+  FLEET_CLOUD_SECURITY_POSTURE_PACKAGE,
+  FLEET_CLOUD_SECURITY_POSTURE_KSPM_POLICY_TEMPLATE,
+} from '../../../common';
 
 import type { K8sMode } from './types';
 
 // Packages that requires custom elastic-agent manifest
-const K8S_PACKAGES = new Set([FLEET_KUBERNETES_PACKAGE, FLEET_CLOUD_SECURITY_POSTURE_PACKAGE]);
+const K8S_PACKAGES = new Set([FLEET_KUBERNETES_PACKAGE]);
 
 export function useAgentPolicyWithPackagePolicies(policyId?: string) {
   const [agentPolicyWithPackagePolicies, setAgentPolicy] = useState<AgentPolicy | null>(null);
@@ -66,4 +70,14 @@ export function useIsK8sPolicy(agentPolicy?: AgentPolicy) {
   return { isK8s };
 }
 
-const isK8sPackage = (pkg: PackagePolicy) => K8S_PACKAGES.has(pkg.package?.name as string);
+const isK8sPackage = (pkg: PackagePolicy) => {
+  const name = pkg.package?.name as string;
+  if (name === FLEET_CLOUD_SECURITY_POSTURE_PACKAGE) {
+    return pkg.inputs.some(
+      (input) =>
+        input.enabled && input.policy_template === FLEET_CLOUD_SECURITY_POSTURE_KSPM_POLICY_TEMPLATE
+    );
+  }
+
+  return K8S_PACKAGES.has(name);
+};

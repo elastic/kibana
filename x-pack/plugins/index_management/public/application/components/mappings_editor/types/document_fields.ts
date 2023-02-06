@@ -39,6 +39,7 @@ export interface ParameterDefinition {
 
 export type MainType =
   | 'text'
+  | 'match_only_text'
   | 'keyword'
   | 'numeric'
   | 'binary'
@@ -156,7 +157,9 @@ export type ParameterName =
   | 'relations'
   | 'max_shingle_size'
   | 'value'
-  | 'meta';
+  | 'meta'
+  | 'time_series_metric'
+  | 'time_series_dimension';
 
 export interface Parameter {
   fieldConfig: FieldConfig;

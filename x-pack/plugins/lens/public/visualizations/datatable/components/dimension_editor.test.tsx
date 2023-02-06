@@ -21,7 +21,7 @@ import { TableDimensionEditor } from './dimension_editor';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { act } from 'react-dom/test-utils';
 import { PalettePanelContainer } from '../../../shared_components';
-import { layerTypes } from '../../../../common';
+import { LayerTypes } from '@kbn/expression-xy-plugin/public';
 
 describe('data table dimension editor', () => {
   let frame: FramePublicAPI;
@@ -34,7 +34,7 @@ describe('data table dimension editor', () => {
   function testState(): DatatableVisualizationState {
     return {
       layerId: 'first',
-      layerType: layerTypes.DATA,
+      layerType: LayerTypes.DATA,
       columns: [
         {
           columnId: 'foo',
@@ -74,6 +74,9 @@ describe('data table dimension editor', () => {
       setState,
       paletteService: chartPluginMock.createPaletteRegistry(),
       panelRef: React.createRef(),
+      addLayer: jest.fn(),
+      removeLayer: jest.fn(),
+      datasource: {} as DatasourcePublicAPI,
     };
   });
 

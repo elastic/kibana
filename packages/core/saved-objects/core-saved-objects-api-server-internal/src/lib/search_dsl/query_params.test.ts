@@ -195,17 +195,18 @@ describe('#getQueryParams', () => {
     });
   });
 
-  describe('reference filter clause', () => {
-    describe('`hasReference` parameter', () => {
-      it('does not call `getReferencesFilter` when `hasReference` is not specified', () => {
-        getQueryParams({
-          registry,
-          hasReference: undefined,
-        });
-
-        expect(getReferencesFilterMock).not.toHaveBeenCalled();
+  describe('reference/noreference filter clause', () => {
+    it('does not call `getReferencesFilter` when neither `hasReference` nor `hasNoReference` are specified', () => {
+      getQueryParams({
+        registry,
+        hasReference: undefined,
+        hasNoReference: undefined,
       });
 
+      expect(getReferencesFilterMock).not.toHaveBeenCalled();
+    });
+
+    describe('`hasReference` parameter', () => {
       it('calls `getReferencesFilter` with the correct parameters', () => {
         const hasReference = { id: 'foo', type: 'bar' };
         getQueryParams({
@@ -228,6 +229,38 @@ describe('#getQueryParams', () => {
         const result = getQueryParams({
           registry,
           hasReference,
+          hasReferenceOperator: 'AND',
+        });
+
+        const filters: any[] = result.query.bool.filter;
+        expect(filters.some((filter) => filter.references_filter === true)).toBeDefined();
+      });
+    });
+
+    describe('`hasNoReference` parameter', () => {
+      it('calls `getReferencesFilter` with the correct parameters', () => {
+        const hasNoReference = { id: 'noFoo', type: 'bar' };
+        getQueryParams({
+          registry,
+          hasNoReference,
+          hasNoReferenceOperator: 'AND',
+        });
+
+        expect(getReferencesFilterMock).toHaveBeenCalledTimes(1);
+        expect(getReferencesFilterMock).toHaveBeenCalledWith({
+          must: false,
+          references: [hasNoReference],
+          operator: 'AND',
+        });
+      });
+
+      it('includes the return of `getReferencesFilter` in the `filter` clause', () => {
+        getReferencesFilterMock.mockReturnValue({ references_filter: true });
+
+        const hasNoReference = { id: 'noFoo', type: 'bar' };
+        const result = getQueryParams({
+          registry,
+          hasNoReference,
           hasReferenceOperator: 'AND',
         });
 

@@ -14,7 +14,8 @@ import type {
   GetAdditionalLinks,
   GetAdditionalLinksParams,
 } from '@kbn/data-visualizer-plugin/public';
-import { useMlKibana, useTimefilter, useMlLocator } from '../../contexts/kibana';
+import { useTimefilter } from '@kbn/ml-date-picker';
+import { useMlKibana, useMlLocator } from '../../contexts/kibana';
 import { HelpMenu } from '../../components/help_menu';
 import { ML_PAGES } from '../../../../common/constants/locator';
 import { isFullLicense } from '../../license';
@@ -45,6 +46,7 @@ export const IndexDataVisualizerPage: FC = () => {
     },
   } = useMlKibana();
   const mlLocator = useMlLocator()!;
+  const mlFeaturesDisabled = !isFullLicense();
   getMlNodeCount();
 
   const [IndexDataVisualizer, setIndexDataVisualizer] = useState<IndexDataVisualizerSpec | null>(
@@ -56,6 +58,7 @@ export const IndexDataVisualizerPage: FC = () => {
       const { getIndexDataVisualizerComponent } = dataVisualizer;
       getIndexDataVisualizerComponent().then(setIndexDataVisualizer);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const getAsyncMLCards = async ({
@@ -136,49 +139,56 @@ export const IndexDataVisualizerPage: FC = () => {
 
   const getAsyncRecognizedModuleCards = async (params: GetAdditionalLinksParams) => {
     const { dataViewId, dataViewTitle } = params;
-    const modules = await http.fetch<RecognizerModule[]>(
-      `/api/ml/modules/recognize/${dataViewTitle}`,
-      {
-        method: 'GET',
-      }
-    );
-    return modules?.map(
-      (m): ResultLink => ({
-        id: m.id,
-        title: m.title,
-        description: m.description,
-        icon: m.logo.icon,
-        type: 'index',
-        getUrl: async () => {
-          return await mlLocator.getUrl({
-            page: ML_PAGES.ANOMALY_DETECTION_CREATE_JOB_RECOGNIZER,
-            pageState: {
-              id: m.id,
-              index: dataViewId,
-            },
-          });
-        },
-        canDisplay: async () => {
-          try {
-            const { timeFieldName } = await getDataView(dataViewId);
-            return (
-              isFullLicense() &&
-              timeFieldName !== undefined &&
-              checkPermission('canCreateJob') &&
-              mlNodesAvailable()
-            );
-          } catch (error) {
-            return false;
-          }
-        },
-        'data-test-subj': m.id,
-      })
-    );
+    try {
+      const modules = await http.fetch<RecognizerModule[]>(
+        `/api/ml/modules/recognize/${dataViewTitle}`,
+        {
+          method: 'GET',
+        }
+      );
+      return modules?.map(
+        (m): ResultLink => ({
+          id: m.id,
+          title: m.title,
+          description: m.description,
+          icon: m.logo.icon,
+          type: 'index',
+          getUrl: async () => {
+            return await mlLocator.getUrl({
+              page: ML_PAGES.ANOMALY_DETECTION_CREATE_JOB_RECOGNIZER,
+              pageState: {
+                id: m.id,
+                index: dataViewId,
+              },
+            });
+          },
+          canDisplay: async () => {
+            try {
+              const { timeFieldName } = await getDataView(dataViewId);
+              return (
+                isFullLicense() &&
+                timeFieldName !== undefined &&
+                checkPermission('canCreateJob') &&
+                mlNodesAvailable()
+              );
+            } catch (error) {
+              return false;
+            }
+          },
+          'data-test-subj': m.id,
+        })
+      );
+    } catch (error) {
+      // eslint-disable-next-line no-console
+      console.error('Platinum, Enterprise or trial license needed');
+      return [];
+    }
   };
 
   const getAdditionalLinks: GetAdditionalLinks = useMemo(
-    () => [getAsyncRecognizedModuleCards, getAsyncMLCards],
-    [mlLocator]
+    () => (mlFeaturesDisabled ? [] : [getAsyncRecognizedModuleCards, getAsyncMLCards]),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [mlLocator, mlFeaturesDisabled]
   );
   return IndexDataVisualizer ? (
     <Fragment>

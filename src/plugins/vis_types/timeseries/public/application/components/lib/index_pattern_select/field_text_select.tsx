@@ -6,12 +6,15 @@
  * Side Public License, v 1.
  */
 import React, { useCallback, useState, useEffect } from 'react';
-import useDebounce from 'react-use/lib/useDebounce';
+import { i18n } from '@kbn/i18n';
 
-import { EuiFieldText, EuiFieldTextProps } from '@elastic/eui';
+import { EuiFieldText, EuiFieldTextProps, EuiButtonIcon } from '@elastic/eui';
 import { SwitchModePopover } from './switch_mode_popover';
-
 import type { SelectIndexComponentProps } from './types';
+
+const updateIndexText = i18n.translate('visTypeTimeseries.indexPatternSelect.updateIndex', {
+  defaultMessage: 'Update visualization with entered data view',
+});
 
 export const FieldTextSelect = ({
   fetchedIndex,
@@ -35,15 +38,30 @@ export const FieldTextSelect = ({
     }
   }, [indexPatternString, inputValue]);
 
-  useDebounce(
-    () => {
-      if ((inputValue ?? '') !== (indexPatternString ?? '')) {
-        onIndexChange(inputValue);
-      }
-    },
-    150,
-    [inputValue, onIndexChange]
-  );
+  const updateIndex = useCallback(() => {
+    if ((inputValue ?? '') !== (indexPatternString ?? '')) {
+      onIndexChange(inputValue);
+    }
+  }, [onIndexChange, inputValue, indexPatternString]);
+
+  const appends = [
+    <EuiButtonIcon
+      aria-label={updateIndexText}
+      iconType="play"
+      onClick={updateIndex}
+      disabled={inputValue === indexPatternString}
+    />,
+  ];
+
+  if (allowSwitchMode) {
+    appends.push(
+      <SwitchModePopover
+        onModeChange={onModeChange}
+        fetchedIndex={fetchedIndex}
+        useKibanaIndices={false}
+      />
+    );
+  }
 
   return (
     <EuiFieldText
@@ -52,15 +70,7 @@ export const FieldTextSelect = ({
       value={inputValue ?? ''}
       placeholder={placeholder}
       data-test-subj={dataTestSubj}
-      {...(allowSwitchMode && {
-        append: (
-          <SwitchModePopover
-            onModeChange={onModeChange}
-            fetchedIndex={fetchedIndex}
-            useKibanaIndices={false}
-          />
-        ),
-      })}
+      append={appends}
     />
   );
 };

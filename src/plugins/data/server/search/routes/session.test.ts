@@ -65,6 +65,21 @@ describe('registerSessionRoutes', () => {
     expect(mockContext.search!.getSession).toHaveBeenCalledWith(id);
   });
 
+  it('status calls getSessionStatus with sessionId', async () => {
+    const id = 'd7170a35-7e2c-48d6-8dec-9a056721b489';
+    const params = { id };
+
+    const mockRequest = httpServerMock.createKibanaRequest({ params });
+    const mockResponse = httpServerMock.createResponseFactory();
+
+    const mockRouter = mockCoreSetup.http.createRouter.mock.results[0].value;
+    const [[], [, statusHandler]] = mockRouter.get.mock.calls;
+
+    await statusHandler(mockContext, mockRequest, mockResponse);
+
+    expect(mockContext.search!.getSessionStatus).toHaveBeenCalledWith(id);
+  });
+
   it('find calls findSession with options', async () => {
     const page = 1;
     const perPage = 5;

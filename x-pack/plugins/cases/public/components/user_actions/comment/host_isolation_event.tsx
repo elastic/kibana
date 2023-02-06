@@ -8,7 +8,7 @@
 import React, { memo, useCallback } from 'react';
 import * as i18n from '../translations';
 import { LinkAnchor } from '../../links';
-import { ActionsNavigation } from '../types';
+import type { ActionsNavigation } from '../types';
 
 interface EndpointInfo {
   endpointId: string;

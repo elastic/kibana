@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { FIELD_BROWSER, TIME_RANGE_PICKER } from '../screens/indicators';
+import { EMPTY_STATE, TIME_RANGE_PICKER } from '../screens/indicators';
 
 export const selectRange = () => {
-  cy.get(FIELD_BROWSER);
+  cy.get(EMPTY_STATE);
 
   cy.get(TIME_RANGE_PICKER).first().click({ force: true });
   cy.get('[aria-label="Time unit"]').select('y');

@@ -11,7 +11,13 @@ import {
   UiActionsEnhancedAbstractActionStorage as AbstractActionStorage,
   UiActionsEnhancedSerializedEvent as SerializedEvent,
 } from '@kbn/ui-actions-enhanced-plugin/public';
-import { EmbeddableInput, EmbeddableOutput, IEmbeddable } from '@kbn/embeddable-plugin/public';
+import {
+  EmbeddableInput,
+  EmbeddableOutput,
+  IEmbeddable,
+  VALUE_CLICK_TRIGGER,
+  SELECT_RANGE_TRIGGER,
+} from '@kbn/embeddable-plugin/public';
 
 export interface EmbeddableWithDynamicActionsInput extends EmbeddableInput {
   enhancements?: {
@@ -114,16 +120,26 @@ export class EmbeddableActionStorage extends AbstractActionStorage {
     return this.migrate(events);
   }
 
-  // TODO: https://github.com/elastic/kibana/issues/71431
+  // TODO: https://github.com/elastic/kibana/issues/148005
   // Migration implementation should use registry
   // Action factories implementations should register own migrations
   private migrate(events: SerializedEvent[]): SerializedEvent[] {
     return events.map((event) => {
       // Initially dashboard drilldown relied on VALUE_CLICK & RANGE_SELECT
       if (event.action.factoryId === 'DASHBOARD_TO_DASHBOARD_DRILLDOWN') {
+        const migratedTriggers = event.triggers.filter(
+          (t) => t !== VALUE_CLICK_TRIGGER && t !== SELECT_RANGE_TRIGGER
+        );
+        if (
+          migratedTriggers.length !== event.triggers.length &&
+          !migratedTriggers.includes(`FILTER_TRIGGER`)
+        ) {
+          migratedTriggers.push(`FILTER_TRIGGER`);
+        }
+
         return {
           ...event,
-          triggers: ['FILTER_TRIGGER'],
+          triggers: migratedTriggers,
         };
       }
       return event;

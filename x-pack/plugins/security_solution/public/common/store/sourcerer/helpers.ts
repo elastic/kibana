@@ -58,7 +58,12 @@ export const validateSelectedPatterns = (
   const selectedPatterns =
     // shouldValidateSelectedPatterns is false when upgrading from
     // legacy pre-8.0 timeline index patterns to data view.
-    shouldValidateSelectedPatterns && dataView != null && missingPatterns.length === 0
+    shouldValidateSelectedPatterns &&
+    dataView != null &&
+    missingPatterns.length === 0 &&
+    // don't validate when the data view has not been initialized (default is initialized already always)
+    dataView.id !== state.defaultDataView.id &&
+    dataView.patternList.length > 0
       ? dedupePatterns.filter(
           (pattern) =>
             (dataView != null && dataView.patternList.includes(pattern)) ||

@@ -12,6 +12,8 @@ import { configSchema, ActionsConfig, CustomHostSettings } from './config';
 import { ActionsClient as ActionsClientClass } from './actions_client';
 import { ActionsAuthorization as ActionsAuthorizationClass } from './authorization/actions_authorization';
 
+export type { IUnsecuredActionsClient } from './unsecured_actions_client/unsecured_actions_client';
+export { UnsecuredActionsClient } from './unsecured_actions_client/unsecured_actions_client';
 export type ActionsClient = PublicMethodsOf<ActionsClientClass>;
 export type ActionsAuthorization = PublicMethodsOf<ActionsAuthorizationClass>;
 
@@ -25,31 +27,6 @@ export type {
   FindActionResult,
 } from './types';
 
-export type {
-  CasesWebhookActionTypeId,
-  CasesWebhookActionParams,
-  EmailActionTypeId,
-  EmailActionParams,
-  IndexActionTypeId,
-  IndexActionParams,
-  PagerDutyActionTypeId,
-  PagerDutyActionParams,
-  ServerLogActionTypeId,
-  ServerLogActionParams,
-  SlackActionTypeId,
-  SlackActionParams,
-  WebhookActionTypeId,
-  WebhookActionParams,
-  ServiceNowITSMActionTypeId,
-  ServiceNowSIRActionTypeId,
-  ServiceNowActionParams,
-  JiraActionTypeId,
-  JiraActionParams,
-  ResilientActionTypeId,
-  ResilientActionParams,
-  TeamsActionTypeId,
-  TeamsActionParams,
-} from './builtin_action_types';
 export type { PluginSetupContract, PluginStartContract } from './plugin';
 
 export { asSavedObjectExecutionSource, asHttpRequestExecutionSource } from './lib';
@@ -164,3 +141,5 @@ export const config: PluginConfigDescriptor<ActionsConfig> = {
     },
   ],
 };
+
+export { urlAllowListValidator } from './sub_action_framework/helpers';

@@ -19,7 +19,10 @@ import type { TimelineEventsDetailsItem } from '../../../../common/search_strate
 import type { EnrichedFieldInfo, EventSummaryField } from './types';
 
 import * as i18n from './translations';
-import { AGENT_STATUS_FIELD_NAME } from '../../../timelines/components/timeline/body/renderers/constants';
+import {
+  AGENT_STATUS_FIELD_NAME,
+  QUARANTINED_PATH_FIELD_NAME,
+} from '../../../timelines/components/timeline/body/renderers/constants';
 
 /**
  * Defines the behavior of the search input that appears above the table of data
@@ -134,14 +137,14 @@ export function getEnrichedFieldInfo({
   field,
   item,
   linkValueField,
-  timelineId,
+  scopeId,
 }: {
   browserFields: BrowserFields;
   contextId: string;
   item: TimelineEventsDetailsItem;
   eventId: string;
   field?: EventSummaryField;
-  timelineId: string;
+  scopeId: string;
   linkValueField?: TimelineEventsDetailsItem;
 }): EnrichedFieldInfo {
   const fieldInfo = {
@@ -149,7 +152,7 @@ export function getEnrichedFieldInfo({
     eventId,
     fieldType: 'string',
     linkValue: undefined,
-    timelineId,
+    scopeId,
   };
   const linkValue = getOr(null, 'originalValue.0', linkValueField);
   const category = item.category ?? '';
@@ -176,6 +179,7 @@ export function getEnrichedFieldInfo({
  */
 export const FIELDS_WITHOUT_ACTIONS: { [field: string]: boolean } = {
   [AGENT_STATUS_FIELD_NAME]: true,
+  [QUARANTINED_PATH_FIELD_NAME]: true,
 };
 
 /**

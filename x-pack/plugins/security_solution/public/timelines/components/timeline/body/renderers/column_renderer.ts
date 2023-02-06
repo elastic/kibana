@@ -8,8 +8,8 @@
 import type React from 'react';
 import type { Filter } from '@kbn/es-query';
 
+import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import type { ColumnHeaderOptions, RowRenderer } from '../../../../../../common/types';
-import type { Ecs } from '../../../../../../common/ecs';
 import type { TimelineNonEcsData } from '../../../../../../common/search_strategy/timeline';
 
 export interface ColumnRenderer {
@@ -24,9 +24,10 @@ export interface ColumnRenderer {
     isDraggable,
     linkValues,
     rowRenderers,
-    timelineId,
+    scopeId,
     truncate,
     values,
+    key,
   }: {
     asPlainText?: boolean;
     className?: string;
@@ -39,8 +40,9 @@ export interface ColumnRenderer {
     isDraggable?: boolean;
     linkValues?: string[] | null | undefined;
     rowRenderers?: RowRenderer[];
-    timelineId: string;
+    scopeId: string;
     truncate?: boolean;
     values: string[] | null | undefined;
+    key?: string;
   }) => React.ReactNode;
 }

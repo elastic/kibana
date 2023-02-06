@@ -8,19 +8,24 @@
 
 import React from 'react';
 import { EuiSpacer } from '@elastic/eui';
+import useObservable from 'react-use/lib/useObservable';
+import { Observable } from 'rxjs';
+import { INDEX_PATTERN_TYPE } from '@kbn/data-views-plugin/public';
 import { StatusMessage } from './status_message';
 import { IndicesList } from './indices_list';
+import { matchedIndiciesDefault } from '../../data_view_editor_service';
 
-import { INDEX_PATTERN_TYPE, MatchedIndicesSet } from '../../types';
+import { MatchedIndicesSet } from '../../types';
 
 interface Props {
   type: INDEX_PATTERN_TYPE;
   allowHidden: boolean;
   title: string;
-  matched: MatchedIndicesSet;
+  matchedIndices$: Observable<MatchedIndicesSet>;
 }
 
-export const PreviewPanel = ({ type, allowHidden, title = '', matched }: Props) => {
+export const PreviewPanel = ({ type, allowHidden, title = '', matchedIndices$ }: Props) => {
+  const matched = useObservable(matchedIndices$, matchedIndiciesDefault);
   const indicesListContent =
     matched.visibleIndices.length || matched.allIndices.length ? (
       <>

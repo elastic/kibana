@@ -8,16 +8,29 @@
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import DateMath from '@kbn/datemath';
-import { ESSearchResponse } from '@kbn/core/types/elasticsearch';
-import type { DataViewFieldBase } from '@kbn/es-query';
+import type { DataView, DataViewField } from '@kbn/data-views-plugin/common';
+import type { ESSearchResponse } from '@kbn/es-types';
+import { FieldFormat } from '@kbn/field-formats-plugin/common';
 import type { FieldStatsResponse } from '../types';
+import {
+  getFieldExampleBuckets,
+  canProvideExamplesForField,
+  showExamplesForField,
+} from './field_examples_calculator';
 
-export type SearchHandler = (
-  aggs: Record<string, estypes.AggregationsAggregationContainer>
-) => Promise<estypes.SearchResponse<unknown>>;
+export type SearchHandler = ({
+  aggs,
+  fields,
+  size,
+}: {
+  aggs?: Record<string, estypes.AggregationsAggregationContainer>;
+  fields?: object[];
+  size?: number;
+}) => Promise<estypes.SearchResponse<unknown>>;
 
 const SHARD_SIZE = 5000;
 const DEFAULT_TOP_VALUES_SIZE = 10;
+const SIMPLE_EXAMPLES_SIZE = 100;
 
 export function buildSearchParams({
   dataViewPattern,
@@ -27,6 +40,8 @@ export function buildSearchParams({
   dslQuery,
   runtimeMappings,
   aggs,
+  fields,
+  size,
 }: {
   dataViewPattern: string;
   timeFieldName?: string;
@@ -34,7 +49,9 @@ export function buildSearchParams({
   toDate: string;
   dslQuery: object;
   runtimeMappings: estypes.MappingRuntimeFields;
-  aggs: Record<string, estypes.AggregationsAggregationContainer>;
+  aggs?: Record<string, estypes.AggregationsAggregationContainer>; // is used for aggregatable fields
+  fields?: object[]; // is used for non-aggregatable fields
+  size?: number; // is used for non-aggregatable fields
 }) {
   const filter = timeFieldName
     ? [
@@ -43,12 +60,19 @@ export function buildSearchParams({
             [timeFieldName]: {
               gte: fromDate,
               lte: toDate,
+              format: 'strict_date_optional_time',
             },
           },
         },
         dslQuery,
       ]
     : [dslQuery];
+
+  if (fields?.length === 1) {
+    filter.push({
+      exists: fields[0],
+    });
+  }
 
   const query = {
     bool: {
@@ -61,27 +85,41 @@ export function buildSearchParams({
     body: {
       query,
       aggs,
+      fields,
       runtime_mappings: runtimeMappings,
+      _source: fields?.length ? false : undefined,
     },
     track_total_hits: true,
-    size: 0,
+    size: size ?? 0,
   };
 }
 
 export async function fetchAndCalculateFieldStats({
   searchHandler,
+  dataView,
   field,
   fromDate,
   toDate,
   size,
 }: {
   searchHandler: SearchHandler;
-  field: DataViewFieldBase;
+  dataView: DataView;
+  field: DataViewField;
   fromDate: string;
   toDate: string;
   size?: number;
 }) {
-  if (!canProvideStatsForField(field)) {
+  if (!field.aggregatable) {
+    return canProvideExamplesForField(field)
+      ? await getSimpleExamples(searchHandler, field, dataView)
+      : {};
+  }
+
+  if (field.type === 'geo_point' || field.type === 'geo_shape') {
+    return await getGeoExamples(searchHandler, field, dataView);
+  }
+
+  if (!canProvideAggregatedStatsForField(field)) {
     return {};
   }
 
@@ -100,18 +138,26 @@ export async function fetchAndCalculateFieldStats({
   return await getStringSamples(searchHandler, field, size);
 }
 
-export function canProvideStatsForField(field: DataViewFieldBase): boolean {
+function canProvideAggregatedStatsForField(field: DataViewField): boolean {
   return !(
     field.type === 'document' ||
     field.type.includes('range') ||
     field.type === 'geo_point' ||
-    field.type === 'geo_shape'
+    field.type === 'geo_shape' ||
+    field.type === 'murmur3' ||
+    field.type === 'attachment'
+  );
+}
+
+export function canProvideStatsForField(field: DataViewField): boolean {
+  return (
+    (field.aggregatable && canProvideAggregatedStatsForField(field)) || showExamplesForField(field)
   );
 }
 
 export async function getNumberHistogram(
   aggSearchWithBody: SearchHandler,
-  field: DataViewFieldBase,
+  field: DataViewField,
   useTopHits = true
 ): Promise<FieldStatsResponse<string | number>> {
   const fieldRef = getFieldRef(field);
@@ -143,9 +189,9 @@ export async function getNumberHistogram(
     },
   };
 
-  const minMaxResult = (await aggSearchWithBody(
-    useTopHits ? searchWithHits : searchWithoutHits
-  )) as
+  const minMaxResult = (await aggSearchWithBody({
+    aggs: useTopHits ? searchWithHits : searchWithoutHits,
+  })) as
     | ESSearchResponse<unknown, { body: { aggs: typeof searchWithHits } }>
     | ESSearchResponse<unknown, { body: { aggs: typeof searchWithoutHits } }>;
 
@@ -156,9 +202,10 @@ export async function getNumberHistogram(
       ? minMaxResult.aggregations!.sample.top_values
       : {
           buckets: [] as Array<{ doc_count: number; key: string | number }>,
+          sum_other_doc_count: 0,
         };
 
-  const topValuesBuckets = {
+  const topValues = {
     buckets: terms.buckets.map((bucket) => ({
       count: bucket.doc_count,
       key: bucket.key,
@@ -174,9 +221,11 @@ export async function getNumberHistogram(
   if (histogramInterval === 0) {
     return {
       totalDocuments: getHitsTotal(minMaxResult),
-      sampledValues: minMaxResult.aggregations!.sample.sample_count.value!,
+      sampledValues:
+        sumSampledValues(topValues, terms.sum_other_doc_count) ||
+        minMaxResult.aggregations!.sample.sample_count.value!,
       sampledDocuments: minMaxResult.aggregations!.sample.doc_count,
-      topValues: topValuesBuckets,
+      topValues,
       histogram: useTopHits
         ? { buckets: [] }
         : {
@@ -199,7 +248,7 @@ export async function getNumberHistogram(
       },
     },
   };
-  const histogramResult = (await aggSearchWithBody(histogramBody)) as ESSearchResponse<
+  const histogramResult = (await aggSearchWithBody({ aggs: histogramBody })) as ESSearchResponse<
     unknown,
     { body: { aggs: typeof histogramBody } }
   >;
@@ -207,20 +256,22 @@ export async function getNumberHistogram(
   return {
     totalDocuments: getHitsTotal(minMaxResult),
     sampledDocuments: minMaxResult.aggregations!.sample.doc_count,
-    sampledValues: minMaxResult.aggregations!.sample.sample_count.value!,
+    sampledValues:
+      sumSampledValues(topValues, terms.sum_other_doc_count) ||
+      minMaxResult.aggregations!.sample.sample_count.value!,
     histogram: {
       buckets: histogramResult.aggregations!.sample.histo.buckets.map((bucket) => ({
         count: bucket.doc_count,
         key: bucket.key,
       })),
     },
-    topValues: topValuesBuckets,
+    topValues,
   };
 }
 
 export async function getStringSamples(
   aggSearchWithBody: SearchHandler,
-  field: DataViewFieldBase,
+  field: DataViewField,
   size = DEFAULT_TOP_VALUES_SIZE
 ): Promise<FieldStatsResponse<string | number>> {
   const fieldRef = getFieldRef(field);
@@ -234,33 +285,42 @@ export async function getStringSamples(
           terms: {
             ...fieldRef,
             size,
+            // 25 is the default shard size set for size:10 by Elasticsearch.
+            // Setting it to 25 for every size below 10 makes sure the shard size doesn't change for sizes 1-10, keeping the top terms stable.
+            shard_size: size <= 10 ? 25 : undefined,
           },
         },
       },
     },
   };
-  const topValuesResult = (await aggSearchWithBody(topValuesBody)) as ESSearchResponse<
+  const topValuesResult = (await aggSearchWithBody({ aggs: topValuesBody })) as ESSearchResponse<
     unknown,
     { body: { aggs: typeof topValuesBody } }
   >;
 
+  const topValues = {
+    buckets: topValuesResult.aggregations!.sample.top_values.buckets.map((bucket) => ({
+      count: bucket.doc_count,
+      key: bucket.key,
+    })),
+  };
+
   return {
     totalDocuments: getHitsTotal(topValuesResult),
     sampledDocuments: topValuesResult.aggregations!.sample.doc_count,
-    sampledValues: topValuesResult.aggregations!.sample.sample_count.value!,
-    topValues: {
-      buckets: topValuesResult.aggregations!.sample.top_values.buckets.map((bucket) => ({
-        count: bucket.doc_count,
-        key: bucket.key,
-      })),
-    },
+    sampledValues:
+      sumSampledValues(
+        topValues,
+        topValuesResult.aggregations!.sample.top_values.sum_other_doc_count
+      ) || topValuesResult.aggregations!.sample.sample_count.value!,
+    topValues,
   };
 }
 
 // This one is not sampled so that it returns the full date range
 export async function getDateHistogram(
   aggSearchWithBody: SearchHandler,
-  field: DataViewFieldBase,
+  field: DataViewField,
   range: { fromDate: string; toDate: string }
 ): Promise<FieldStatsResponse<string | number>> {
   const fromDate = DateMath.parse(range.fromDate);
@@ -286,7 +346,7 @@ export async function getDateHistogram(
   const histogramBody = {
     histo: { date_histogram: { ...getFieldRef(field), fixed_interval: fixedInterval } },
   };
-  const results = (await aggSearchWithBody(histogramBody)) as ESSearchResponse<
+  const results = (await aggSearchWithBody({ aggs: histogramBody })) as ESSearchResponse<
     unknown,
     { body: { aggs: typeof histogramBody } }
   >;
@@ -302,7 +362,59 @@ export async function getDateHistogram(
   };
 }
 
-function getFieldRef(field: DataViewFieldBase) {
+export async function getSimpleExamples(
+  search: SearchHandler,
+  field: DataViewField,
+  dataView: DataView,
+  formatter?: FieldFormat
+): Promise<FieldStatsResponse<string | number>> {
+  try {
+    const fieldRef = getFieldRef(field);
+
+    const simpleExamplesBody = {
+      size: SIMPLE_EXAMPLES_SIZE,
+      fields: [fieldRef],
+    };
+
+    const simpleExamplesResult = await search(simpleExamplesBody);
+    const fieldExampleBuckets = getFieldExampleBuckets(
+      {
+        hits: simpleExamplesResult.hits.hits,
+        field,
+        dataView,
+        count: DEFAULT_TOP_VALUES_SIZE,
+      },
+      formatter
+    );
+
+    return {
+      totalDocuments: getHitsTotal(simpleExamplesResult),
+      sampledDocuments: fieldExampleBuckets.sampledDocuments,
+      sampledValues: fieldExampleBuckets.sampledValues,
+      topValues: {
+        buckets: fieldExampleBuckets.buckets,
+      },
+    };
+  } catch (error) {
+    console.error(error); // eslint-disable-line  no-console
+    return {};
+  }
+}
+
+export async function getGeoExamples(
+  search: SearchHandler,
+  field: DataViewField,
+  dataView: DataView
+): Promise<FieldStatsResponse<string | number>> {
+  try {
+    const formatter = dataView.getFormatterForField(field);
+    return await getSimpleExamples(search, field, dataView, formatter);
+  } catch (e) {
+    console.error(e); // eslint-disable-line  no-console
+    return {};
+  }
+}
+function getFieldRef(field: DataViewField) {
   return field.scripted
     ? {
         script: {
@@ -316,3 +428,14 @@ function getFieldRef(field: DataViewFieldBase) {
 const getHitsTotal = (body: estypes.SearchResponse): number => {
   return (body.hits.total as estypes.SearchTotalHits).value ?? body.hits.total ?? 0;
 };
+
+// We could use `aggregations.sample.sample_count.value` instead, but it does not always give a correct sum
+// See Github issue #144625
+export function sumSampledValues(
+  topValues: FieldStatsResponse<string | number>['topValues'],
+  sumOtherDocCount: number
+): number {
+  const valuesInTopBuckets =
+    topValues?.buckets?.reduce((prev, bucket) => bucket.count + prev, 0) || 0;
+  return valuesInTopBuckets + (sumOtherDocCount || 0);
+}

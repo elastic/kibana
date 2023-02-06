@@ -6,33 +6,41 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
+import React, { useCallback } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiButton, EuiTextAlign } from '@elastic/eui';
+import { EuiLink, EuiButton, EuiButtonProps } from '@elastic/eui';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { ThemeServiceStart } from '@kbn/core/public';
+import type { ThemeServiceStart } from '@kbn/core/public';
 import { toMountPoint } from '@kbn/kibana-react-plugin/public';
 import { getOverlays } from '../services';
 import { ShardFailureModal } from './shard_failure_modal';
-import { ShardFailureRequest } from './shard_failure_types';
+import type { ShardFailureRequest } from './shard_failure_types';
 
 // @internal
 export interface ShardFailureOpenModalButtonProps {
-  request: ShardFailureRequest;
-  response: estypes.SearchResponse<any>;
   theme: ThemeServiceStart;
   title: string;
+  size?: EuiButtonProps['size'];
+  color?: EuiButtonProps['color'];
+  getRequestMeta: () => {
+    request: ShardFailureRequest;
+    response: estypes.SearchResponse<any>;
+  };
+  isButtonEmpty?: boolean;
 }
 
 // Needed for React.lazy
 // eslint-disable-next-line import/no-default-export
 export default function ShardFailureOpenModalButton({
-  request,
-  response,
+  getRequestMeta,
   theme,
   title,
+  size = 's',
+  color = 'warning',
+  isButtonEmpty = false,
 }: ShardFailureOpenModalButtonProps) {
-  function onClick() {
+  const onClick = useCallback(() => {
+    const { request, response } = getRequestMeta();
     const modal = getOverlays().openModal(
       toMountPoint(
         <ShardFailureModal
@@ -47,21 +55,22 @@ export default function ShardFailureOpenModalButton({
         className: 'shardFailureModal',
       }
     );
-  }
+  }, [getRequestMeta, theme.theme$, title]);
+
+  const Component = isButtonEmpty ? EuiLink : EuiButton;
+
   return (
-    <EuiTextAlign textAlign="right">
-      <EuiButton
-        color="warning"
-        size="s"
-        onClick={onClick}
-        data-test-subj="openShardFailureModalBtn"
-      >
-        <FormattedMessage
-          id="data.search.searchSource.fetch.shardsFailedModal.showDetails"
-          defaultMessage="Show details"
-          description="Open the modal to show details"
-        />
-      </EuiButton>
-    </EuiTextAlign>
+    <Component
+      color={color}
+      size={size}
+      onClick={onClick}
+      data-test-subj="openShardFailureModalBtn"
+    >
+      <FormattedMessage
+        id="data.search.searchSource.fetch.shardsFailedModal.showDetails"
+        defaultMessage="Show details"
+        description="Open the modal to show details"
+      />
+    </Component>
   );
 }

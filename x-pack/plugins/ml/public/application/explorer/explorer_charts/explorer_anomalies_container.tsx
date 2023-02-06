@@ -11,7 +11,6 @@ import React, { FC } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { TimefilterContract } from '@kbn/data-plugin/public';
 import { ChartsPluginStart } from '@kbn/charts-plugin/public';
-// @ts-expect-error
 import { ExplorerChartsContainer } from './explorer_charts_container';
 import {
   SelectSeverityUI,
@@ -34,6 +33,7 @@ interface ExplorerAnomaliesContainerProps {
   onSelectEntity: (fieldName: string, fieldValue: string, operation: EntityFieldOperation) => void;
   showSelectedInterval?: boolean;
   chartsService: ChartsPluginStart;
+  timeRange: { from: string; to: string } | undefined;
 }
 
 const tooManyBucketsCalloutMsg = i18n.translate(
@@ -56,6 +56,7 @@ export const ExplorerAnomaliesContainer: FC<ExplorerAnomaliesContainerProps> = (
   onSelectEntity,
   showSelectedInterval,
   chartsService,
+  timeRange,
 }) => {
   return (
     <>
@@ -87,6 +88,7 @@ export const ExplorerAnomaliesContainer: FC<ExplorerAnomaliesContainerProps> = (
             mlLocator,
             timeBuckets,
             timefilter,
+            timeRange,
             onSelectEntity,
             tooManyBucketsCalloutMsg,
             showSelectedInterval,

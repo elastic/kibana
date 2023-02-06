@@ -27,7 +27,7 @@ import {
 import { auditLoggerMock } from '@kbn/security-plugin/server/audit/mocks';
 import { usageCountersServiceMock } from '@kbn/usage-collection-plugin/server/usage_counters/usage_counters_service.mock';
 import { actionExecutorMock } from './lib/action_executor.mock';
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import { ActionsAuthorization } from './authorization/actions_authorization';
 import {
   getAuthorizationModeBySource,
@@ -36,14 +36,16 @@ import {
 } from './authorization/get_authorization_mode_by_source';
 import { actionsAuthorizationMock } from './authorization/actions_authorization.mock';
 import { trackLegacyRBACExemption } from './lib/track_legacy_rbac_exemption';
-import { ConnectorTokenClient } from './builtin_action_types/lib/connector_token_client';
+import { ConnectorTokenClient } from './lib/connector_token_client';
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
 import { Logger } from '@kbn/core/server';
-import { connectorTokenClientMock } from './builtin_action_types/lib/connector_token_client.mock';
+import { connectorTokenClientMock } from './lib/connector_token_client.mock';
 import { inMemoryMetricsMock } from './monitoring/in_memory_metrics.mock';
-import { getOAuthJwtAccessToken } from './builtin_action_types/lib/get_oauth_jwt_access_token';
-import { getOAuthClientCredentialsAccessToken } from './builtin_action_types/lib/get_oauth_client_credentials_access_token';
+import { getOAuthJwtAccessToken } from './lib/get_oauth_jwt_access_token';
+import { getOAuthClientCredentialsAccessToken } from './lib/get_oauth_client_credentials_access_token';
 import { OAuthParams } from './routes/get_oauth_access_token';
+import { eventLogClientMock } from '@kbn/event-log-plugin/server/event_log_client.mock';
+import { GetGlobalExecutionKPIParams, GetGlobalExecutionLogParams } from '../common';
 
 jest.mock('@kbn/core-saved-objects-utils-server', () => {
   const actual = jest.requireActual('@kbn/core-saved-objects-utils-server');
@@ -74,11 +76,15 @@ jest.mock('./authorization/get_authorization_mode_by_source', () => {
   };
 });
 
-jest.mock('./builtin_action_types/lib/get_oauth_jwt_access_token', () => ({
+jest.mock('./lib/get_oauth_jwt_access_token', () => ({
   getOAuthJwtAccessToken: jest.fn(),
 }));
-jest.mock('./builtin_action_types/lib/get_oauth_client_credentials_access_token', () => ({
+jest.mock('./lib/get_oauth_client_credentials_access_token', () => ({
   getOAuthClientCredentialsAccessToken: jest.fn(),
+}));
+
+jest.mock('uuid', () => ({
+  v4: () => 'uuidv4',
 }));
 
 const defaultKibanaIndex = '.kibana';
@@ -96,6 +102,8 @@ const mockUsageCounter = mockUsageCountersSetup.createUsageCounter('test');
 const logger = loggingSystemMock.create().get() as jest.Mocked<Logger>;
 const mockTaskManager = taskManagerMock.createSetup();
 const configurationUtilities = actionsConfigMock.create();
+const eventLogClient = eventLogClientMock.create();
+const getEventLogClient = jest.fn();
 
 let actionsClient: ActionsClient;
 let mockedLicenseState: jest.Mocked<ILicenseState>;
@@ -139,11 +147,13 @@ beforeEach(() => {
     auditLogger,
     usageCounter: mockUsageCounter,
     connectorTokenClient,
+    getEventLogClient,
   });
   (getOAuthJwtAccessToken as jest.Mock).mockResolvedValue(`Bearer jwttokentokentoken`);
   (getOAuthClientCredentialsAccessToken as jest.Mock).mockResolvedValue(
     `Bearer clienttokentokentoken`
   );
+  getEventLogClient.mockResolvedValue(eventLogClient);
 });
 
 describe('create()', () => {
@@ -566,6 +576,7 @@ describe('create()', () => {
       request,
       authorization: authorization as unknown as ActionsAuthorization,
       connectorTokenClient: connectorTokenClientMock.create(),
+      getEventLogClient,
     });
 
     const savedObjectCreateResult = {
@@ -687,6 +698,7 @@ describe('get()', () => {
           },
         ],
         connectorTokenClient: connectorTokenClientMock.create(),
+        getEventLogClient,
       });
 
       await actionsClient.get({ id: 'testPreconfigured' });
@@ -747,6 +759,7 @@ describe('get()', () => {
           },
         ],
         connectorTokenClient: connectorTokenClientMock.create(),
+        getEventLogClient,
       });
 
       authorization.ensureAuthorized.mockRejectedValue(
@@ -869,6 +882,7 @@ describe('get()', () => {
         },
       ],
       connectorTokenClient: connectorTokenClientMock.create(),
+      getEventLogClient,
     });
 
     const result = await actionsClient.get({ id: 'testPreconfigured' });
@@ -942,6 +956,7 @@ describe('getAll()', () => {
           },
         ],
         connectorTokenClient: connectorTokenClientMock.create(),
+        getEventLogClient,
       });
       return actionsClient.getAll();
     }
@@ -1084,6 +1099,7 @@ describe('getAll()', () => {
         },
       ],
       connectorTokenClient: connectorTokenClientMock.create(),
+      getEventLogClient,
     });
     const result = await actionsClient.getAll();
     expect(result).toEqual([
@@ -1166,6 +1182,7 @@ describe('getBulk()', () => {
           },
         ],
         connectorTokenClient: connectorTokenClientMock.create(),
+        getEventLogClient,
       });
       return actionsClient.getBulk(['1', 'testPreconfigured']);
     }
@@ -1302,6 +1319,7 @@ describe('getBulk()', () => {
         },
       ],
       connectorTokenClient: connectorTokenClientMock.create(),
+      getEventLogClient,
     });
     const result = await actionsClient.getBulk(['1', 'testPreconfigured']);
     expect(result).toEqual([
@@ -1361,6 +1379,7 @@ describe('getOAuthAccessToken()', () => {
         },
       ],
       connectorTokenClient: connectorTokenClientMock.create(),
+      getEventLogClient,
     });
     return actionsClient.getOAuthAccessToken(requestBody, configurationUtilities);
   }
@@ -2193,7 +2212,8 @@ describe('execute()', () => {
   });
 
   test('calls the actionExecutor with the appropriate parameters', async () => {
-    const actionId = uuid.v4();
+    const actionId = uuidv4();
+    const actionExecutionId = uuidv4();
     actionExecutor.execute.mockResolvedValue({ status: 'ok', actionId });
     await expect(
       actionsClient.execute({
@@ -2210,6 +2230,7 @@ describe('execute()', () => {
       params: {
         name: 'my name',
       },
+      actionExecutionId,
     });
 
     await expect(
@@ -2241,6 +2262,7 @@ describe('execute()', () => {
           type: 'some-type',
         },
       ],
+      actionExecutionId,
     });
 
     await expect(
@@ -2274,6 +2296,7 @@ describe('execute()', () => {
           namespace: 'some-namespace',
         },
       ],
+      actionExecutionId,
     });
   });
 });
@@ -2285,7 +2308,7 @@ describe('enqueueExecution()', () => {
         return AuthorizationMode.RBAC;
       });
       await actionsClient.enqueueExecution({
-        id: uuid.v4(),
+        id: uuidv4(),
         params: {},
         spaceId: 'default',
         executionId: '123abc',
@@ -2304,7 +2327,7 @@ describe('enqueueExecution()', () => {
 
       await expect(
         actionsClient.enqueueExecution({
-          id: uuid.v4(),
+          id: uuidv4(),
           params: {},
           spaceId: 'default',
           executionId: '123abc',
@@ -2321,7 +2344,7 @@ describe('enqueueExecution()', () => {
       });
 
       await actionsClient.enqueueExecution({
-        id: uuid.v4(),
+        id: uuidv4(),
         params: {},
         spaceId: 'default',
         executionId: '123abc',
@@ -2337,7 +2360,7 @@ describe('enqueueExecution()', () => {
 
   test('calls the executionEnqueuer with the appropriate parameters', async () => {
     const opts = {
-      id: uuid.v4(),
+      id: uuidv4(),
       params: { baz: false },
       spaceId: 'default',
       executionId: '123abc',
@@ -2357,14 +2380,14 @@ describe('bulkEnqueueExecution()', () => {
       });
       await actionsClient.bulkEnqueueExecution([
         {
-          id: uuid.v4(),
+          id: uuidv4(),
           params: {},
           spaceId: 'default',
           executionId: '123abc',
           apiKey: null,
         },
         {
-          id: uuid.v4(),
+          id: uuidv4(),
           params: {},
           spaceId: 'default',
           executionId: '456def',
@@ -2385,14 +2408,14 @@ describe('bulkEnqueueExecution()', () => {
       await expect(
         actionsClient.bulkEnqueueExecution([
           {
-            id: uuid.v4(),
+            id: uuidv4(),
             params: {},
             spaceId: 'default',
             executionId: '123abc',
             apiKey: null,
           },
           {
-            id: uuid.v4(),
+            id: uuidv4(),
             params: {},
             spaceId: 'default',
             executionId: '456def',
@@ -2411,14 +2434,14 @@ describe('bulkEnqueueExecution()', () => {
 
       await actionsClient.bulkEnqueueExecution([
         {
-          id: uuid.v4(),
+          id: uuidv4(),
           params: {},
           spaceId: 'default',
           executionId: '123abc',
           apiKey: null,
         },
         {
-          id: uuid.v4(),
+          id: uuidv4(),
           params: {},
           spaceId: 'default',
           executionId: '456def',
@@ -2440,14 +2463,14 @@ describe('bulkEnqueueExecution()', () => {
     });
     const opts = [
       {
-        id: uuid.v4(),
+        id: uuidv4(),
         params: {},
         spaceId: 'default',
         executionId: '123abc',
         apiKey: null,
       },
       {
-        id: uuid.v4(),
+        id: uuidv4(),
         params: {},
         spaceId: 'default',
         executionId: '456def',
@@ -2525,6 +2548,7 @@ describe('isPreconfigured()', () => {
         encryptedSavedObjectsClient: encryptedSavedObjectsMock.createClient(),
         logger,
       }),
+      getEventLogClient,
     });
 
     expect(actionsClient.isPreconfigured('testPreconfigured')).toEqual(true);
@@ -2563,8 +2587,125 @@ describe('isPreconfigured()', () => {
         encryptedSavedObjectsClient: encryptedSavedObjectsMock.createClient(),
         logger,
       }),
+      getEventLogClient,
     });
 
-    expect(actionsClient.isPreconfigured(uuid.v4())).toEqual(false);
+    expect(actionsClient.isPreconfigured(uuidv4())).toEqual(false);
+  });
+});
+
+describe('getGlobalExecutionLogWithAuth()', () => {
+  const opts: GetGlobalExecutionLogParams = {
+    dateStart: '2023-01-09T08:55:56-08:00',
+    dateEnd: '2023-01-10T08:55:56-08:00',
+    page: 1,
+    perPage: 50,
+    sort: [{ timestamp: { order: 'desc' } }],
+  };
+  const results = {
+    aggregations: {
+      executionLogAgg: {
+        doc_count: 5,
+        executionUuid: {
+          doc_count_error_upper_bound: 0,
+          sum_other_doc_count: 0,
+          buckets: [],
+        },
+        executionUuidCardinality: { doc_count: 5, executionUuidCardinality: { value: 5 } },
+      },
+    },
+  };
+  describe('authorization', () => {
+    test('ensures user is authorised to access logs', async () => {
+      eventLogClient.aggregateEventsWithAuthFilter.mockResolvedValue(results);
+
+      (getAuthorizationModeBySource as jest.Mock).mockImplementationOnce(() => {
+        return AuthorizationMode.RBAC;
+      });
+      await actionsClient.getGlobalExecutionLogWithAuth(opts);
+      expect(authorization.ensureAuthorized).toHaveBeenCalledWith('get');
+    });
+
+    test('throws when user is not authorised to access logs', async () => {
+      (getAuthorizationModeBySource as jest.Mock).mockImplementationOnce(() => {
+        return AuthorizationMode.RBAC;
+      });
+      authorization.ensureAuthorized.mockRejectedValue(new Error(`Unauthorized to access logs`));
+
+      await expect(actionsClient.getGlobalExecutionLogWithAuth(opts)).rejects.toMatchInlineSnapshot(
+        `[Error: Unauthorized to access logs]`
+      );
+
+      expect(authorization.ensureAuthorized).toHaveBeenCalledWith('get');
+    });
+  });
+
+  test('calls the eventLogClient with the appropriate parameters', async () => {
+    eventLogClient.aggregateEventsWithAuthFilter.mockResolvedValue(results);
+
+    await expect(actionsClient.getGlobalExecutionLogWithAuth(opts)).resolves.toMatchInlineSnapshot(`
+      Object {
+        "data": Array [],
+        "total": 5,
+      }
+    `);
+    expect(eventLogClient.aggregateEventsWithAuthFilter).toHaveBeenCalled();
+  });
+});
+
+describe('getGlobalExecutionKpiWithAuth()', () => {
+  const opts: GetGlobalExecutionKPIParams = {
+    dateStart: '2023-01-09T08:55:56-08:00',
+    dateEnd: '2023-01-10T08:55:56-08:00',
+  };
+  const results = {
+    aggregations: {
+      executionKpiAgg: {
+        doc_count: 5,
+        executionUuid: {
+          doc_count_error_upper_bound: 0,
+          sum_other_doc_count: 0,
+          buckets: [],
+        },
+      },
+    },
+  };
+  describe('authorization', () => {
+    test('ensures user is authorised to access kpi', async () => {
+      eventLogClient.aggregateEventsWithAuthFilter.mockResolvedValue(results);
+
+      (getAuthorizationModeBySource as jest.Mock).mockImplementationOnce(() => {
+        return AuthorizationMode.RBAC;
+      });
+      await actionsClient.getGlobalExecutionKpiWithAuth(opts);
+      expect(authorization.ensureAuthorized).toHaveBeenCalledWith('get');
+    });
+
+    test('throws when user is not authorised to access kpi', async () => {
+      (getAuthorizationModeBySource as jest.Mock).mockImplementationOnce(() => {
+        return AuthorizationMode.RBAC;
+      });
+      authorization.ensureAuthorized.mockRejectedValue(new Error(`Unauthorized to access kpi`));
+
+      await expect(actionsClient.getGlobalExecutionKpiWithAuth(opts)).rejects.toMatchInlineSnapshot(
+        `[Error: Unauthorized to access kpi]`
+      );
+
+      expect(authorization.ensureAuthorized).toHaveBeenCalledWith('get');
+    });
+  });
+
+  test('calls the eventLogClient with the appropriate parameters', async () => {
+    eventLogClient.aggregateEventsWithAuthFilter.mockResolvedValue(results);
+
+    await expect(actionsClient.getGlobalExecutionKpiWithAuth(opts)).resolves.toMatchInlineSnapshot(`
+      Object {
+        "failure": 0,
+        "success": 0,
+        "unknown": 0,
+        "warning": 0,
+      }
+    `);
+    expect(eventLogClient.aggregateEventsWithAuthFilter).toHaveBeenCalled();
   });
 });

@@ -17,6 +17,7 @@ const Fallback = () => (
   </EuiDelayRender>
 );
 
+/** @deprecated use `Markdown` from `@kbn/shared-ux-markdown` */
 const LazyMarkdownSimple = React.lazy(() => import('./markdown_simple'));
 export const MarkdownSimple = (props: MarkdownSimpleProps) => (
   <React.Suspense fallback={<Fallback />}>
@@ -24,6 +25,7 @@ export const MarkdownSimple = (props: MarkdownSimpleProps) => (
   </React.Suspense>
 );
 
+/** @deprecated use `Markdown` from `@kbn/shared-ux-markdown` */
 const LazyMarkdown = React.lazy(() => import('./markdown'));
 export const Markdown = (props: MarkdownProps) => (
   <React.Suspense fallback={<Fallback />}>

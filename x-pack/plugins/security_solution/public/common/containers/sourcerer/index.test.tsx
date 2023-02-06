@@ -33,9 +33,10 @@ import {
 } from '../../mock';
 import type { SelectedDataView } from '../../store/sourcerer/model';
 import { SourcererScopeName } from '../../store/sourcerer/model';
-import { postSourcererDataView } from './api';
+import * as source from '../source/use_data_view';
 import { sourcererActions } from '../../store/sourcerer';
 import { useInitializeUrlParam, useUpdateUrlParam } from '../../utils/global_query_string';
+import { createSourcererDataView } from './create_sourcerer_data_view';
 
 const mockRouteSpy: RouteSpyState = {
   pageName: SecurityPageName.overview,
@@ -46,8 +47,9 @@ const mockRouteSpy: RouteSpyState = {
 };
 const mockDispatch = jest.fn();
 const mockUseUserInfo = useUserInfo as jest.Mock;
+jest.mock('../../lib/apm/use_track_http_request');
 jest.mock('../../../detections/components/user_info');
-jest.mock('./api');
+jest.mock('./create_sourcerer_data_view');
 jest.mock('../../utils/global_query_string');
 jest.mock('react-redux', () => {
   const original = jest.requireActual('react-redux');
@@ -139,7 +141,7 @@ describe('Sourcerer Hooks', () => {
       defaultDataView: mockSourcererState.defaultDataView,
       kibanaDataViews: [mockSourcererState.defaultDataView],
     };
-    (postSourcererDataView as jest.Mock).mockResolvedValue(mockNewDataViews);
+    (createSourcererDataView as jest.Mock).mockResolvedValue(mockNewDataViews);
 
     store = createStore(
       {
@@ -199,7 +201,7 @@ describe('Sourcerer Hooks', () => {
     });
   });
 
-  it('initilizes dataview with data from query string', async () => {
+  it('initializes dataview with data from query string', async () => {
     const selectedPatterns = ['testPattern-*'];
     const selectedDataViewId = 'security-solution-default';
     (useInitializeUrlParam as jest.Mock).mockImplementation((_, onInitialize) =>
@@ -341,6 +343,198 @@ describe('Sourcerer Hooks', () => {
       });
     });
   });
+  describe('initialization settings', () => {
+    const mockIndexFieldsSearch = jest.fn();
+    beforeAll(() => {
+      // 👇️ not using dot-notation + the ignore clears up a ts error
+      // @ts-ignore
+      // eslint-disable-next-line dot-notation
+      source['useDataView'] = jest.fn(() => ({
+        indexFieldsSearch: mockIndexFieldsSearch,
+      }));
+    });
+    it('does not needToBeInit if scope is default and selectedPatterns/missingPatterns have values', async () => {
+      await act(async () => {
+        const { rerender, waitForNextUpdate } = renderHook<string, void>(() => useInitSourcerer(), {
+          wrapper: ({ children }) => <Provider store={store}>{children}</Provider>,
+        });
+        await waitForNextUpdate();
+        rerender();
+        await waitFor(() => {
+          expect(mockIndexFieldsSearch).toHaveBeenCalledWith({
+            dataViewId: mockSourcererState.defaultDataView.id,
+            needToBeInit: false,
+            scopeId: SourcererScopeName.default,
+          });
+        });
+      });
+    });
+
+    it('does needToBeInit if scope is default and selectedPatterns/missingPatterns are empty', async () => {
+      store = createStore(
+        {
+          ...mockGlobalState,
+          sourcerer: {
+            ...mockGlobalState.sourcerer,
+            sourcererScopes: {
+              ...mockGlobalState.sourcerer.sourcererScopes,
+              [SourcererScopeName.default]: {
+                ...mockGlobalState.sourcerer.sourcererScopes[SourcererScopeName.default],
+                selectedPatterns: [],
+                missingPatterns: [],
+              },
+            },
+          },
+        },
+        SUB_PLUGINS_REDUCER,
+        kibanaObservable,
+        storage
+      );
+      await act(async () => {
+        const { rerender, waitForNextUpdate } = renderHook<string, void>(() => useInitSourcerer(), {
+          wrapper: ({ children }) => <Provider store={store}>{children}</Provider>,
+        });
+        await waitForNextUpdate();
+        rerender();
+        await waitFor(() => {
+          expect(mockIndexFieldsSearch).toHaveBeenCalledWith({
+            dataViewId: mockSourcererState.defaultDataView.id,
+            needToBeInit: true,
+            scopeId: SourcererScopeName.default,
+          });
+        });
+      });
+    });
+
+    it('does needToBeInit and skipScopeUpdate=false if scope is timeline and selectedPatterns/missingPatterns are empty', async () => {
+      store = createStore(
+        {
+          ...mockGlobalState,
+          sourcerer: {
+            ...mockGlobalState.sourcerer,
+            kibanaDataViews: [
+              ...mockGlobalState.sourcerer.kibanaDataViews,
+              { ...mockSourcererState.defaultDataView, id: 'something-weird', patternList: [] },
+            ],
+            sourcererScopes: {
+              ...mockGlobalState.sourcerer.sourcererScopes,
+              [SourcererScopeName.timeline]: {
+                ...mockGlobalState.sourcerer.sourcererScopes[SourcererScopeName.timeline],
+                selectedDataViewId: 'something-weird',
+                selectedPatterns: [],
+                missingPatterns: [],
+              },
+            },
+          },
+        },
+        SUB_PLUGINS_REDUCER,
+        kibanaObservable,
+        storage
+      );
+      await act(async () => {
+        const { rerender, waitForNextUpdate } = renderHook<string, void>(() => useInitSourcerer(), {
+          wrapper: ({ children }) => <Provider store={store}>{children}</Provider>,
+        });
+        await waitForNextUpdate();
+        rerender();
+        await waitFor(() => {
+          expect(mockIndexFieldsSearch).toHaveBeenNthCalledWith(2, {
+            dataViewId: 'something-weird',
+            needToBeInit: true,
+            scopeId: SourcererScopeName.timeline,
+            skipScopeUpdate: false,
+          });
+        });
+      });
+    });
+
+    it('does needToBeInit and skipScopeUpdate=true if scope is timeline and selectedPatterns have value', async () => {
+      store = createStore(
+        {
+          ...mockGlobalState,
+          sourcerer: {
+            ...mockGlobalState.sourcerer,
+            kibanaDataViews: [
+              ...mockGlobalState.sourcerer.kibanaDataViews,
+              { ...mockSourcererState.defaultDataView, id: 'something-weird', patternList: [] },
+            ],
+            sourcererScopes: {
+              ...mockGlobalState.sourcerer.sourcererScopes,
+              [SourcererScopeName.timeline]: {
+                ...mockGlobalState.sourcerer.sourcererScopes[SourcererScopeName.timeline],
+                selectedDataViewId: 'something-weird',
+                selectedPatterns: ['ohboy'],
+                missingPatterns: [],
+              },
+            },
+          },
+        },
+        SUB_PLUGINS_REDUCER,
+        kibanaObservable,
+        storage
+      );
+      await act(async () => {
+        const { rerender, waitForNextUpdate } = renderHook<string, void>(() => useInitSourcerer(), {
+          wrapper: ({ children }) => <Provider store={store}>{children}</Provider>,
+        });
+        await waitForNextUpdate();
+        rerender();
+        await waitFor(() => {
+          expect(mockIndexFieldsSearch).toHaveBeenNthCalledWith(2, {
+            dataViewId: 'something-weird',
+            needToBeInit: true,
+            scopeId: SourcererScopeName.timeline,
+            skipScopeUpdate: true,
+          });
+        });
+      });
+    });
+
+    it('does not needToBeInit if scope is timeline and data view has patternList', async () => {
+      store = createStore(
+        {
+          ...mockGlobalState,
+          sourcerer: {
+            ...mockGlobalState.sourcerer,
+            kibanaDataViews: [
+              ...mockGlobalState.sourcerer.kibanaDataViews,
+              {
+                ...mockSourcererState.defaultDataView,
+                id: 'something-weird',
+                patternList: ['ohboy'],
+              },
+            ],
+            sourcererScopes: {
+              ...mockGlobalState.sourcerer.sourcererScopes,
+              [SourcererScopeName.timeline]: {
+                ...mockGlobalState.sourcerer.sourcererScopes[SourcererScopeName.timeline],
+                selectedDataViewId: 'something-weird',
+                selectedPatterns: [],
+                missingPatterns: [],
+              },
+            },
+          },
+        },
+        SUB_PLUGINS_REDUCER,
+        kibanaObservable,
+        storage
+      );
+      await act(async () => {
+        const { rerender, waitForNextUpdate } = renderHook<string, void>(() => useInitSourcerer(), {
+          wrapper: ({ children }) => <Provider store={store}>{children}</Provider>,
+        });
+        await waitForNextUpdate();
+        rerender();
+        await waitFor(() => {
+          expect(mockIndexFieldsSearch).toHaveBeenNthCalledWith(2, {
+            dataViewId: 'something-weird',
+            needToBeInit: false,
+            scopeId: SourcererScopeName.timeline,
+          });
+        });
+      });
+    });
+  });
 
   describe('useSourcererDataView', () => {
     it('Should put any excludes in the index pattern at the end of the pattern list, and sort both the includes and excludes', async () => {
@@ -392,6 +586,7 @@ describe('Sourcerer Hooks', () => {
           '-filebeat-*',
           '-packetbeat-*',
         ]);
+        expect(result.current.indexPattern).toHaveProperty('getName');
       });
     });
   });

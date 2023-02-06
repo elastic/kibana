@@ -18,11 +18,14 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import numeral from '@elastic/numeral';
+import { RULE_FAILED, RULE_PASSED } from '../../../../common/constants';
+import type { Evaluation } from '../../../../common/types';
 
 interface Props {
   total: number;
   passed: number;
   failed: number;
+  distributionOnClick: (evaluation: Evaluation) => void;
   pageStart: number;
   pageEnd: number;
   type: string;
@@ -102,7 +105,11 @@ const CurrentPageOfTotal = ({
   </EuiTextColor>
 );
 
-const DistributionBar: React.FC<Omit<Props, 'pageEnd' | 'pageStart'>> = ({ passed, failed }) => {
+const DistributionBar: React.FC<Omit<Props, 'pageEnd' | 'pageStart'>> = ({
+  passed,
+  failed,
+  distributionOnClick,
+}) => {
   const { euiTheme } = useEuiTheme();
 
   return (
@@ -113,14 +120,40 @@ const DistributionBar: React.FC<Omit<Props, 'pageEnd' | 'pageStart'>> = ({ passe
         background: ${euiTheme.colors.subduedText};
       `}
     >
-      <DistributionBarPart value={passed} color={euiTheme.colors.success} />
-      <DistributionBarPart value={failed} color={euiTheme.colors.danger} />
+      <DistributionBarPart
+        value={passed}
+        color={euiTheme.colors.success}
+        distributionOnClick={() => {
+          distributionOnClick(RULE_PASSED);
+        }}
+        data-test-subj="distribution_bar_passed"
+      />
+      <DistributionBarPart
+        value={failed}
+        color={euiTheme.colors.danger}
+        distributionOnClick={() => {
+          distributionOnClick(RULE_FAILED);
+        }}
+        data-test-subj="distribution_bar_failed"
+      />
     </EuiFlexGroup>
   );
 };
 
-const DistributionBarPart = ({ value, color }: { value: number; color: string }) => (
-  <div
+const DistributionBarPart = ({
+  value,
+  color,
+  distributionOnClick,
+  ...rest
+}: {
+  value: number;
+  color: string;
+  distributionOnClick: () => void;
+  ['data-test-subj']: string;
+}) => (
+  <button
+    data-test-subj={rest['data-test-subj']}
+    onClick={distributionOnClick}
     css={css`
       flex: ${value};
       background: ${color};

@@ -18,31 +18,42 @@ const prDeployments = deployments.filter((deployment: any) =>
 const deploymentsToPurge = [];
 
 const NOW = new Date().getTime() / 1000;
+const DAY_IN_SECONDS = 60 * 60 * 24;
 
 for (const deployment of prDeployments) {
   try {
     const prNumber = deployment.name.match(/^kibana-pr-([0-9]+)$/)[1];
     const prJson = execSync(`gh pr view '${prNumber}' --json state,labels,commits`).toString();
     const pullRequest = JSON.parse(prJson);
+    const prOpen = pullRequest.state === 'OPEN';
 
     const lastCommit = pullRequest.commits.slice(-1)[0];
     const lastCommitTimestamp = new Date(lastCommit.committedDate).getTime() / 1000;
 
-    if (pullRequest.state !== 'OPEN') {
+    const persistDeployment = Boolean(
+      pullRequest.labels.filter((label: any) => label.name === 'ci:cloud-persist-deployment').length
+    );
+    if (prOpen && persistDeployment) {
+      continue;
+    }
+
+    if (!prOpen) {
       console.log(`Pull Request #${prNumber} is no longer open, will delete associated deployment`);
       deploymentsToPurge.push(deployment);
     } else if (
-      !pullRequest.labels.filter((label: any) =>
-        /^ci:(deploy-cloud|cloud-deploy|cloud-redeploy)$/.test(label.name)
+      !Boolean(
+        pullRequest.labels.filter((label: any) =>
+          /^ci:(cloud-deploy|cloud-redeploy)$/.test(label.name)
+        ).length
       )
     ) {
       console.log(
-        `Pull Request #${prNumber} no longer has the a cloud deployment label, will delete associated deployment`
+        `Pull Request #${prNumber} no longer has a cloud deployment label, will delete associated deployment`
       );
       deploymentsToPurge.push(deployment);
-    } else if (lastCommitTimestamp < NOW - 60 * 60 * 24 * 7) {
+    } else if (lastCommitTimestamp < NOW - DAY_IN_SECONDS * 2) {
       console.log(
-        `Pull Request #${prNumber} has not been updated in more than 7 days, will delete associated deployment`
+        `Pull Request #${prNumber} has not been updated in more than 2 days, will delete associated deployment`
       );
       deploymentsToPurge.push(deployment);
     }

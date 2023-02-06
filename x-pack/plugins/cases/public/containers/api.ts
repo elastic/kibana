@@ -7,39 +7,45 @@
 
 import type { ValidFeatureId } from '@kbn/rule-data-utils';
 import { BASE_RAC_ALERTS_API_PATH } from '@kbn/rule-registry-plugin/common/constants';
-import {
+import type {
+  CaseConnectors,
   Cases,
+  CaseUpdateRequest,
   FetchCasesProps,
   ResolvedCase,
-  SeverityAll,
-  SortFieldCase,
-  StatusAll,
+  FindCaseUserActions,
 } from '../../common/ui/types';
-import {
+import { SeverityAll, SortFieldCase, StatusAll } from '../../common/ui/types';
+import type {
   BulkCreateCommentRequest,
   CasePatchRequest,
   CasePostRequest,
   CaseResponse,
   CaseResolveResponse,
   CasesResponse,
-  CaseUserActionsResponse,
+  UserActionFindResponse,
   CommentRequest,
+  User,
+  SingleCaseMetricsResponse,
+  CasesFindResponse,
+  GetCaseConnectorsResponse,
+} from '../../common/api';
+import {
   CommentType,
   getCaseCommentsUrl,
   getCaseDetailsUrl,
   getCaseDetailsMetricsUrl,
   getCasePushUrl,
-  getCaseUserActionUrl,
-  User,
+  getCaseFindUserActionsUrl,
   getCaseCommentDeleteUrl,
-  SingleCaseMetricsResponse,
-  CasesFindResponse,
+  getCaseConnectorsUrl,
 } from '../../common/api';
 import {
   CASE_REPORTERS_URL,
   CASE_TAGS_URL,
   CASES_URL,
   INTERNAL_BULK_CREATE_ATTACHMENTS_URL,
+  MAX_DOCS_PER_PAGE,
 } from '../../common/constants';
 import { getAllConnectorTypesUrl } from '../../common/utils/connectors_api';
 
@@ -55,9 +61,8 @@ import {
   convertCaseResolveToCamelCase,
 } from '../api/utils';
 
-import {
+import type {
   ActionLicense,
-  BulkUpdateStatus,
   Case,
   SingleCaseMetrics,
   SingleCaseMetricsFeature,
@@ -70,6 +75,8 @@ import {
   decodeCaseUserActionsResponse,
   decodeCaseResolveResponse,
   decodeSingleCaseMetricsResponse,
+  constructAssigneesFilter,
+  constructReportersFilter,
 } from './utils';
 import { decodeCasesFindResponse } from '../api/decoders';
 
@@ -142,21 +149,27 @@ export const getSingleCaseMetrics = async (
   );
 };
 
-export const getCaseUserActions = async (
+export const findCaseUserActions = async (
   caseId: string,
   signal: AbortSignal
-): Promise<CaseUserActions[]> => {
-  const response = await KibanaServices.get().http.fetch<CaseUserActionsResponse>(
-    getCaseUserActionUrl(caseId),
+): Promise<FindCaseUserActions> => {
+  const response = await KibanaServices.get().http.fetch<UserActionFindResponse>(
+    getCaseFindUserActionsUrl(caseId),
     {
       method: 'GET',
       signal,
+      query: {
+        perPage: MAX_DOCS_PER_PAGE,
+      },
     }
   );
 
-  return convertUserActionsToCamelCase(
-    decodeCaseUserActionsResponse(response)
-  ) as CaseUserActions[];
+  return {
+    ...response,
+    userActions: convertUserActionsToCamelCase(
+      decodeCaseUserActionsResponse(response.userActions)
+    ) as CaseUserActions[],
+  };
 };
 
 export const getCases = async ({
@@ -164,6 +177,7 @@ export const getCases = async ({
     search: '',
     searchFields: [],
     severity: SeverityAll,
+    assignees: [],
     reporters: [],
     status: StatusAll,
     tags: [],
@@ -180,8 +194,9 @@ export const getCases = async ({
   const query = {
     ...(filterOptions.status !== StatusAll ? { status: filterOptions.status } : {}),
     ...(filterOptions.severity !== SeverityAll ? { severity: filterOptions.severity } : {}),
-    reporters: filterOptions.reporters.map((r) => r.username ?? '').filter((r) => r !== ''),
-    tags: filterOptions.tags,
+    ...constructAssigneesFilter(filterOptions.assignees),
+    ...constructReportersFilter(filterOptions.reporters),
+    ...(filterOptions.tags.length > 0 ? { tags: filterOptions.tags } : {}),
     ...(filterOptions.search.length > 0 ? { search: filterOptions.search } : {}),
     ...(filterOptions.searchFields.length > 0 ? { searchFields: filterOptions.searchFields } : {}),
     ...(filterOptions.owner.length > 0 ? { owner: filterOptions.owner } : {}),
@@ -223,10 +238,14 @@ export const patchCase = async (
   return convertCasesToCamelCase(decodeCasesResponse(response));
 };
 
-export const patchCasesStatus = async (
-  cases: BulkUpdateStatus[],
+export const updateCases = async (
+  cases: CaseUpdateRequest[],
   signal: AbortSignal
 ): Promise<Case[]> => {
+  if (cases.length === 0) {
+    return [];
+  }
+
   const response = await KibanaServices.get().http.fetch<CasesResponse>(CASES_URL, {
     method: 'PATCH',
     body: JSON.stringify({ cases }),
@@ -360,5 +379,30 @@ export const getFeatureIds = async (
       signal,
       query,
     }
+  );
+};
+
+export const getCaseConnectors = async (
+  caseId: string,
+  signal: AbortSignal
+): Promise<CaseConnectors> => {
+  const res = await KibanaServices.get().http.fetch<GetCaseConnectorsResponse>(
+    getCaseConnectorsUrl(caseId),
+    {
+      method: 'GET',
+      signal,
+    }
+  );
+
+  return Object.keys(res).reduce(
+    (acc, connectorId) => ({
+      ...acc,
+      [connectorId]: {
+        ...convertToCamelCase<GetCaseConnectorsResponse[string], CaseConnectors[string]>(
+          res[connectorId]
+        ),
+      },
+    }),
+    {}
   );
 };

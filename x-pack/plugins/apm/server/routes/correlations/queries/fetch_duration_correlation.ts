@@ -10,14 +10,13 @@ import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import {
   SPAN_DURATION,
   TRANSACTION_DURATION,
-} from '../../../../common/elasticsearch_fieldnames';
+} from '../../../../common/es_fields/apm';
 import type { CommonCorrelationsQueryParams } from '../../../../common/correlations/types';
-
-import { Setup } from '../../../lib/helpers/setup_request';
 import { getCommonCorrelationsQuery } from './get_common_correlations_query';
+import { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
 
 export const fetchDurationCorrelation = async ({
-  setup,
+  apmEventClient,
   eventType,
   start,
   end,
@@ -29,7 +28,7 @@ export const fetchDurationCorrelation = async ({
   fractions,
   totalDocCount,
 }: CommonCorrelationsQueryParams & {
-  setup: Setup;
+  apmEventClient: APMEventClient;
   eventType: ProcessorEvent;
   expectations: number[];
   ranges: estypes.AggregationsAggregationRange[];
@@ -40,13 +39,12 @@ export const fetchDurationCorrelation = async ({
   correlation: number | null;
   ksTest: number | null;
 }> => {
-  const { apmEventClient } = setup;
-
   const resp = await apmEventClient.search('get_duration_correlation', {
     apm: {
       events: [eventType],
     },
     body: {
+      track_total_hits: false,
       size: 0,
       query: getCommonCorrelationsQuery({
         start,

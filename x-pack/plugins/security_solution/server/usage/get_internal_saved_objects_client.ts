@@ -9,7 +9,7 @@ import type { CoreSetup, SavedObjectsClientContract } from '@kbn/core/server';
 
 import { SAVED_OBJECT_TYPES } from '@kbn/cases-plugin/common/constants';
 // eslint-disable-next-line no-restricted-imports
-import { legacyRuleActionsSavedObjectType } from '../lib/detection_engine/rule_actions/legacy_saved_object_mappings';
+import { legacyRuleActionsSavedObjectType } from '../lib/detection_engine/rule_actions_legacy';
 
 export async function getInternalSavedObjectsClient(
   core: CoreSetup

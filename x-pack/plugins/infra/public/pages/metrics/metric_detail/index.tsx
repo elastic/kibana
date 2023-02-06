@@ -9,7 +9,6 @@ import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
 import { EuiTheme, withTheme } from '@kbn/kibana-react-plugin/common';
 import { useLinkProps } from '@kbn/observability-plugin/public';
-import { DocumentTitle } from '../../../components/document_title';
 import { withMetricPageProviders } from './page_providers';
 import { useMetadata } from './hooks/use_metadata';
 import { useMetricsBreadcrumbs } from '../../../hooks/use_metrics_breadcrumbs';
@@ -100,14 +99,6 @@ export const MetricDetail = withMetricPageProviders(
 
     return (
       <>
-        <DocumentTitle
-          title={i18n.translate('xpack.infra.metricDetailPage.documentTitle', {
-            defaultMessage: 'Infrastructure | Metrics | {name}',
-            values: {
-              name,
-            },
-          })}
-        />
         {metadata ? (
           <NodeDetailsPage
             name={name}

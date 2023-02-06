@@ -6,14 +6,14 @@
  */
 
 import type { IRouter, CustomRequestHandlerContext, KibanaRequest } from '@kbn/core/server';
-import {
+import type {
   ActionTypeConfig,
   ActionTypeSecrets,
   ActionTypeParams,
   ActionType,
 } from '@kbn/actions-plugin/server/types';
-import { CasesClient } from './client';
-import { AttachmentFramework } from './attachment_framework/types';
+import type { CasesClient } from './client';
+import type { AttachmentFramework } from './attachment_framework/types';
 
 export interface CaseRequestContext {
   getCasesClient: () => Promise<CasesClient>;
@@ -56,3 +56,5 @@ export interface PluginStartContract {
 export interface PluginSetupContract {
   attachmentFramework: AttachmentFramework;
 }
+
+export type PartialField<T, K extends keyof T> = Omit<T, K> & Partial<Pick<T, K>>;

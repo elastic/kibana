@@ -17,6 +17,7 @@ export default function (providerContext: FtrProviderContext) {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
+
   describe('fleet_agent_policies', () => {
     skipIfNoDockerRegistry(providerContext);
     describe('POST /api/fleet/agent_policies', () => {
@@ -57,6 +58,7 @@ export default function (providerContext: FtrProviderContext) {
 
         const { body } = await supertest.get(`/api/fleet/agent_policies/${createdPolicy.id}`);
         expect(body.item.is_managed).to.equal(false);
+        expect(body.item.inactivity_timeout).to.equal(1209600);
         expect(body.item.status).to.be('active');
       });
 
@@ -287,8 +289,20 @@ export default function (providerContext: FtrProviderContext) {
       setupFleetAndAgents(providerContext);
       after(async () => {
         await esArchiver.unload('x-pack/test/functional/es_archives/fleet/agents');
+        if (systemPkgVersion) {
+          await supertest.delete(`/api/fleet/epm/packages/system-${systemPkgVersion}`);
+        }
+        if (packagePoliciesToDeleteIds.length > 0) {
+          await kibanaServer.savedObjects.bulkDelete({
+            objects: packagePoliciesToDeleteIds.map((id) => ({
+              id,
+              type: PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+            })),
+          });
+        }
       });
-
+      let systemPkgVersion: string;
+      const packagePoliciesToDeleteIds: string[] = [];
       const TEST_POLICY_ID = 'policy1';
 
       it('should work with valid values', async () => {
@@ -327,13 +341,43 @@ export default function (providerContext: FtrProviderContext) {
             },
           } = await supertest.get(`/api/fleet/agent_policies/${policyId}`).expect(200);
 
-          const matches = packagePolicies[0].name.match(/^(.*)\s\(copy\s?([0-9]*)\)$/);
+          const matches = packagePolicies[0]?.name.match(/^(.*)\s\(copy\s?([0-9]*)\)$/);
+
           if (matches) {
             return parseInt(matches[2], 10) || 1;
           }
-
           return 0;
         }
+
+        const policyId = 'package-policy-test-';
+        packagePoliciesToDeleteIds.push(policyId);
+        const getPkRes = await supertest
+          .get(`/api/fleet/epm/packages/system`)
+          .set('kbn-xsrf', 'xxxx')
+          .expect(200);
+        systemPkgVersion = getPkRes.body.item.version;
+        // we must first force install the system package to override package verification error on policy create
+        const installPromise = supertest
+          .post(`/api/fleet/epm/packages/system-${systemPkgVersion}`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({ force: true })
+          .expect(200);
+
+        await Promise.all([
+          installPromise,
+          kibanaServer.savedObjects.create({
+            id: policyId,
+            type: PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+            overwrite: true,
+            attributes: {
+              name: `system-1`,
+              package: {
+                name: 'system',
+              },
+            },
+          }),
+        ]);
+
         const {
           body: {
             item: { id: originalPolicyId },
@@ -349,7 +393,6 @@ export default function (providerContext: FtrProviderContext) {
             namespace: 'default',
           })
           .expect(200);
-
         expect(await getSystemPackagePolicyCopyVersion(originalPolicyId)).to.be(0);
 
         const {
@@ -394,6 +437,92 @@ export default function (providerContext: FtrProviderContext) {
           })
           .expect(200);
         expect(await getSystemPackagePolicyCopyVersion(copy3Id)).to.be(3);
+      });
+
+      it('should work with package policy with space in name', async () => {
+        const policyId = 'package-policy-test-1';
+        packagePoliciesToDeleteIds.push(policyId);
+        const getPkRes = await supertest
+          .get(`/api/fleet/epm/packages/system`)
+          .set('kbn-xsrf', 'xxxx')
+          .expect(200);
+        systemPkgVersion = getPkRes.body.item.version;
+        // we must first force install the system package to override package verification error on policy create
+        const installPromise = supertest
+          .post(`/api/fleet/epm/packages/system-${systemPkgVersion}`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({ force: true })
+          .expect(200);
+
+        await Promise.all([
+          installPromise,
+          kibanaServer.savedObjects.create({
+            id: policyId,
+            type: PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+            overwrite: true,
+            attributes: {
+              name: `system-1`,
+              package: {
+                name: 'system',
+              },
+            },
+          }),
+        ]);
+
+        const {
+          body: {
+            item: { id: originalPolicyId },
+          },
+        } = await supertest
+          .post(`/api/fleet/agent_policies`)
+          .set('kbn-xsrf', 'xxxx')
+          .query({
+            sys_monitoring: false,
+          })
+          .send({
+            name: 'original policy with package policy with space in name',
+            namespace: 'default',
+          })
+          .expect(200);
+
+        await supertest
+          .post(`/api/fleet/package_policies`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: 'Filetest with space in name',
+            description: '',
+            namespace: 'default',
+            policy_id: originalPolicyId,
+            enabled: true,
+            inputs: [],
+            package: {
+              name: 'filetest',
+              title: 'For File Tests',
+              version: '0.1.0',
+            },
+          })
+          .expect(200);
+
+        const {
+          body: {
+            item: { id: copy1Id },
+          },
+        } = await supertest
+          .post(`/api/fleet/agent_policies/${originalPolicyId}/copy`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: 'copy 123',
+            description: 'Test',
+          })
+          .expect(200);
+
+        const {
+          body: {
+            item: { package_policies: packagePolicies },
+          },
+        } = await supertest.get(`/api/fleet/agent_policies/${copy1Id}`).expect(200);
+
+        expect(packagePolicies[0].name).to.eql('Filetest with space in name (copy)');
       });
 
       it('should return a 404 with invalid source policy', async () => {
@@ -496,6 +625,7 @@ export default function (providerContext: FtrProviderContext) {
           revision: 2,
           schema_version: FLEET_AGENT_POLICIES_SCHEMA_VERSION,
           updated_by: 'elastic',
+          inactivity_timeout: 1209600,
           package_policies: [],
         });
       });
@@ -659,6 +789,7 @@ export default function (providerContext: FtrProviderContext) {
           updated_by: 'elastic',
           package_policies: [],
           monitoring_enabled: ['logs', 'metrics'],
+          inactivity_timeout: 1209600,
         });
 
         const listResponseAfterUpdate = await fetchPackageList();

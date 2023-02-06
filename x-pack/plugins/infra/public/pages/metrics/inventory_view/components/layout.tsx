@@ -31,6 +31,7 @@ import { createLegend } from '../lib/create_legend';
 import { useWaffleViewState } from '../hooks/use_waffle_view_state';
 import { BottomDrawer } from './bottom_drawer';
 import { LegendControls } from './waffle/legend_controls';
+import { HostViewIntroPanel } from './hosts_view_intro_panel';
 
 interface Props {
   shouldLoadDefault: boolean;
@@ -178,6 +179,7 @@ export const Layout = React.memo(
                           </EuiFlexGroup>
                         </EuiFlexGroup>
                       </TopActionContainer>
+                      <HostViewIntroPanel />
                       <AutoSizer bounds>
                         {({ measureRef, bounds: { height = 0 } }) => (
                           <>

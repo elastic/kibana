@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-import { SavedObjectAttributes } from '@kbn/core/public';
 import { SavedObjectMetaData } from '@kbn/saved-objects-plugin/public';
 import { PersistableState } from '@kbn/kibana-utils-plugin/common';
 import { UiActionsPresentableGrouping } from '@kbn/ui-actions-plugin/public';
@@ -35,7 +34,7 @@ export interface EmbeddableFactory<
     TEmbeddableInput,
     TEmbeddableOutput
   >,
-  TSavedObjectAttributes extends SavedObjectAttributes = SavedObjectAttributes
+  TSavedObjectAttributes = unknown
 > extends PersistableState<EmbeddableStateWithType> {
   // A unique identified for this factory, which will be used to map an embeddable spec to
   // a factory that can generate an instance of it.
@@ -97,8 +96,10 @@ export interface EmbeddableFactory<
    * Can be used to request explicit input from the user, to be passed in to `EmbeddableFactory:create`.
    * Explicit input is stored on the parent container for this embeddable. It overrides all inherited
    * input passed down from the parent container.
+   *
+   * Can be used to edit an embeddable by re-requesting explicit input. Initial input can be provided to allow the editor to show the current state.
    */
-  getExplicitInput(): Promise<Partial<TEmbeddableInput>>;
+  getExplicitInput(initialInput?: Partial<TEmbeddableInput>): Promise<Partial<TEmbeddableInput>>;
 
   /**
    * Creates a new embeddable instance based off the saved object id.

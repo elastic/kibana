@@ -10,6 +10,19 @@ import { Position } from '@elastic/charts';
 import type { PaletteOutput, PaletteRegistry } from '@kbn/coloring';
 
 import { buildExpression, buildExpressionFunction } from '@kbn/expressions-plugin/public';
+import type {
+  LabelPositions,
+  MosaicVisExpressionFunctionDefinition,
+  PartitionLabelsExpressionFunctionDefinition,
+  PieVisExpressionFunctionDefinition,
+  TreemapVisExpressionFunctionDefinition,
+  ValueFormats,
+  LegendDisplay as PartitionVisLegendDisplay,
+  WaffleVisExpressionFunctionDefinition,
+} from '@kbn/expression-partition-vis-plugin/common';
+import { ExpressionFunctionTheme } from '@kbn/expressions-plugin/common';
+import { ExpressionFunctionVisDimension } from '@kbn/visualizations-plugin/common';
+import type { CollapseExpressionFunction } from '../../../common/expressions';
 import type { Operation, DatasourcePublicAPI, DatasourceLayers } from '../../types';
 import { DEFAULT_PERCENT_DECIMALS } from './constants';
 import { shouldShowValuesInLegend } from './render_helpers';
@@ -23,6 +36,7 @@ import {
   LegendDisplay,
 } from '../../../common';
 import { getDefaultVisualValuesForLayer } from '../../shared_components/datasource_default_values';
+import { isCollapsed } from './visualization';
 
 interface Attributes {
   isPreview: boolean;
@@ -44,57 +58,86 @@ type GenerateExpressionAstFunction = (
   paletteService: PaletteRegistry
 ) => Ast | null;
 
-type GenerateExpressionAstArguments = (
-  state: PieVisualizationState,
-  attributes: Attributes,
-  operations: OperationColumnId[],
-  layer: PieLayerState,
-  datasourceLayers: DatasourceLayers,
-  paletteService: PaletteRegistry
-) => Ast['chain'][number]['arguments'];
-
 type GenerateLabelsAstArguments = (
   state: PieVisualizationState,
   attributes: Attributes,
-  layer: PieLayerState
+  layer: PieLayerState,
+  columnToLabelMap: Record<string, string>
 ) => [Ast];
+
+export const getColumnToLabelMap = (
+  columnIds: string[],
+  datasource: DatasourcePublicAPI | undefined
+) => {
+  const columnToLabel: Record<string, string> = {};
+  columnIds.forEach((accessor) => {
+    const operation = datasource?.getOperationForColumnId(accessor);
+    if (operation?.label) {
+      columnToLabel[accessor] = operation.label;
+    }
+  });
+  return columnToLabel;
+};
 
 export const getSortedGroups = (
   datasource: DatasourcePublicAPI | undefined,
-  layer: PieLayerState
+  layer: PieLayerState,
+  accessor: 'primaryGroups' | 'secondaryGroups' = 'primaryGroups'
 ) => {
   const originalOrder = datasource
     ?.getTableSpec()
     .map(({ columnId }: { columnId: string }) => columnId)
-    .filter((columnId: string) => layer.groups.includes(columnId));
+    .filter((columnId: string) => layer[accessor]?.includes(columnId));
+
   // When we add a column it could be empty, and therefore have no order
-  return Array.from(new Set(originalOrder?.concat(layer.groups)));
+  return Array.from(new Set(originalOrder?.concat(layer[accessor] ?? [])));
 };
 
-const prepareDimension = (accessor: string) => {
-  const visdimension = buildExpressionFunction('visdimension', { accessor });
-  return buildExpression([visdimension]).toAst();
-};
+const prepareDimension = (accessor: string) =>
+  buildExpression([
+    buildExpressionFunction<ExpressionFunctionVisDimension>('visdimension', { accessor }),
+  ]).toAst();
 
-const generateCommonLabelsAstArgs: GenerateLabelsAstArguments = (state, attributes, layer) => {
-  const show = [!attributes.isPreview && layer.categoryDisplay !== CategoryDisplay.HIDE];
-  const position = layer.categoryDisplay !== CategoryDisplay.HIDE ? [layer.categoryDisplay] : [];
-  const values = [layer.numberDisplay !== NumberDisplay.HIDDEN];
-  const valuesFormat = layer.numberDisplay !== NumberDisplay.HIDDEN ? [layer.numberDisplay] : [];
-  const percentDecimals = [layer.percentDecimals ?? DEFAULT_PERCENT_DECIMALS];
+const generateCommonLabelsAstArgs: GenerateLabelsAstArguments = (
+  state,
+  attributes,
+  layer,
+  columnToLabelMap
+) => {
+  const show = !attributes.isPreview && layer.categoryDisplay !== CategoryDisplay.HIDE;
+  const position =
+    layer.categoryDisplay !== CategoryDisplay.HIDE ? (layer.categoryDisplay as LabelPositions) : [];
+  const values = layer.numberDisplay !== NumberDisplay.HIDDEN;
+  const valuesFormat =
+    layer.numberDisplay !== NumberDisplay.HIDDEN ? (layer.numberDisplay as ValueFormats) : [];
+  const percentDecimals = layer.percentDecimals ?? DEFAULT_PERCENT_DECIMALS;
+  const colorOverrides =
+    layer.allowMultipleMetrics && !layer.primaryGroups.length
+      ? Object.entries(columnToLabelMap).reduce<Record<string, string>>(
+          (acc, [columnId, label]) => {
+            const color = layer.colorsByDimension?.[columnId];
+            if (color) {
+              acc[label] = color;
+            }
+            return acc;
+          },
+          {}
+        )
+      : {};
 
-  return [
+  const partitionLabelsFn = buildExpressionFunction<PartitionLabelsExpressionFunctionDefinition>(
+    'partitionLabels',
     {
-      type: 'expression',
-      chain: [
-        {
-          type: 'function',
-          function: 'partitionLabels',
-          arguments: { show, position, values, valuesFormat, percentDecimals },
-        },
-      ],
-    },
-  ];
+      show,
+      position,
+      values,
+      valuesFormat,
+      percentDecimals,
+      colorOverrides: JSON.stringify(colorOverrides),
+    }
+  );
+
+  return [buildExpression([partitionLabelsFn]).toAst()];
 };
 
 const generateWaffleLabelsAstArguments: GenerateLabelsAstArguments = (...args) => {
@@ -114,134 +157,118 @@ const generatePaletteAstArguments = (
 ): [Ast] =>
   palette
     ? [
-        {
-          type: 'expression',
-          chain: [
-            {
-              type: 'function',
-              function: 'theme',
-              arguments: {
-                variable: ['palette'],
-                default: [paletteService.get(palette.name).toExpression(palette.params)],
-              },
-            },
-          ],
-        },
+        buildExpression([
+          buildExpressionFunction<ExpressionFunctionTheme>('theme', {
+            variable: 'palette',
+            default: paletteService.get(palette.name).toExpression(palette.params),
+          }),
+        ]).toAst(),
       ]
     : [paletteService.get('default').toExpression()];
 
-const generateCommonArguments: GenerateExpressionAstArguments = (
-  state,
-  attributes,
-  operations,
-  layer,
-  datasourceLayers,
-  paletteService
+const generateCommonArguments = (
+  state: PieVisualizationState,
+  attributes: Attributes,
+  operations: OperationColumnId[],
+  layer: PieLayerState,
+  datasourceLayers: DatasourceLayers,
+  paletteService: PaletteRegistry
 ) => {
+  const columnToLabelMap = getColumnToLabelMap(layer.metrics, datasourceLayers[layer.layerId]);
+
   return {
-    labels: generateCommonLabelsAstArgs(state, attributes, layer),
-    buckets: operations.map((o) => o.columnId).map(prepareDimension),
-    metric: layer.metric ? [prepareDimension(layer.metric)] : [],
-    legendDisplay: [attributes.isPreview ? LegendDisplay.HIDE : layer.legendDisplay],
-    legendPosition: [layer.legendPosition || Position.Right],
-    maxLegendLines: [layer.legendMaxLines ?? 1],
-    legendSize: layer.legendSize ? [layer.legendSize] : [],
-    nestedLegend: [!!layer.nestedLegend],
-    truncateLegend: [
+    labels: generateCommonLabelsAstArgs(state, attributes, layer, columnToLabelMap),
+    buckets: operations
+      .filter(({ columnId }) => !isCollapsed(columnId, layer))
+      .map(({ columnId }) => columnId)
+      .map(prepareDimension),
+    metrics: (layer.allowMultipleMetrics ? layer.metrics : [layer.metrics[0]]).map(
+      prepareDimension
+    ),
+    metricsToLabels: JSON.stringify(columnToLabelMap),
+    legendDisplay: (attributes.isPreview
+      ? LegendDisplay.HIDE
+      : layer.legendDisplay) as PartitionVisLegendDisplay,
+    legendPosition: layer.legendPosition || Position.Right,
+    maxLegendLines: layer.legendMaxLines ?? 1,
+    legendSize: layer.legendSize,
+    nestedLegend: !!layer.nestedLegend,
+    truncateLegend:
       layer.truncateLegend ?? getDefaultVisualValuesForLayer(state, datasourceLayers).truncateText,
-    ],
     palette: generatePaletteAstArguments(paletteService, state.palette),
+    addTooltip: true,
   };
 };
 
-const generatePieVisAst: GenerateExpressionAstFunction = (...rest) => ({
-  type: 'expression',
-  chain: [
-    {
-      type: 'function',
-      function: 'pieVis',
-      arguments: {
-        ...generateCommonArguments(...rest),
-        respectSourceOrder: [false],
-        startFromSecondLargestSlice: [true],
-      },
-    },
-  ],
-});
+const generatePieVisAst: GenerateExpressionAstFunction = (...rest) =>
+  buildExpression([
+    buildExpressionFunction<PieVisExpressionFunctionDefinition>('pieVis', {
+      ...generateCommonArguments(...rest),
+      respectSourceOrder: false,
+      startFromSecondLargestSlice: true,
+      isDonut: false,
+    }),
+  ]).toAst();
 
 const generateDonutVisAst: GenerateExpressionAstFunction = (...rest) => {
   const [, , , layer] = rest;
-  return {
-    type: 'expression',
-    chain: [
-      {
-        type: 'function',
-        function: 'pieVis',
-        arguments: {
-          ...generateCommonArguments(...rest),
-          respectSourceOrder: [false],
-          isDonut: [true],
-          startFromSecondLargestSlice: [true],
-          emptySizeRatio: [layer.emptySizeRatio ?? EmptySizeRatios.SMALL],
-        },
-      },
-    ],
-  };
+
+  return buildExpression([
+    buildExpressionFunction<PieVisExpressionFunctionDefinition>('pieVis', {
+      ...generateCommonArguments(...rest),
+      respectSourceOrder: false,
+      isDonut: true,
+      startFromSecondLargestSlice: true,
+      emptySizeRatio: layer.emptySizeRatio ?? EmptySizeRatios.SMALL,
+    }),
+  ]).toAst();
 };
 
 const generateTreemapVisAst: GenerateExpressionAstFunction = (...rest) => {
   const [, , , layer] = rest;
-  return {
-    type: 'expression',
-    chain: [
-      {
-        type: 'function',
-        function: 'treemapVis',
-        arguments: {
-          ...generateCommonArguments(...rest),
-          nestedLegend: [!!layer.nestedLegend],
-        },
-      },
-    ],
-  };
+
+  return buildExpression([
+    buildExpressionFunction<TreemapVisExpressionFunctionDefinition>('treemapVis', {
+      ...generateCommonArguments(...rest),
+      nestedLegend: !!layer.nestedLegend,
+    }),
+  ]).toAst();
 };
 
-const generateMosaicVisAst: GenerateExpressionAstFunction = (...rest) => ({
-  type: 'expression',
-  chain: [
-    {
-      type: 'function',
-      function: 'mosaicVis',
-      arguments: {
-        ...generateCommonArguments(...rest),
-        // flip order of bucket dimensions so the rows are fetched before the columns to keep them stable
-        buckets: rest[2]
-          .reverse()
-          .map((o) => o.columnId)
-          .map(prepareDimension),
-      },
-    },
-  ],
-});
+const generateMosaicVisAst: GenerateExpressionAstFunction = (...rest) => {
+  const { metrics, ...args } = generateCommonArguments(...rest);
+
+  return buildExpression([
+    buildExpressionFunction<MosaicVisExpressionFunctionDefinition>('mosaicVis', {
+      ...{ ...args, metricsToLabels: undefined },
+      metric: metrics,
+      // flip order of bucket dimensions so the rows are fetched before the columns to keep them stable
+      buckets: rest[2]
+        .filter(({ columnId }) => !isCollapsed(columnId, rest[3]))
+        .reverse()
+        .map((o) => o.columnId)
+        .map(prepareDimension),
+    }),
+  ]).toAst();
+};
 
 const generateWaffleVisAst: GenerateExpressionAstFunction = (...rest) => {
   const { buckets, nestedLegend, ...args } = generateCommonArguments(...rest);
-  const [state, attributes, , layer] = rest;
-  return {
-    type: 'expression',
-    chain: [
-      {
-        type: 'function',
-        function: 'waffleVis',
-        arguments: {
-          ...args,
-          bucket: buckets,
-          labels: generateWaffleLabelsAstArguments(state, attributes, layer),
-          showValuesInLegend: [shouldShowValuesInLegend(layer, state.shape)],
-        },
-      },
-    ],
-  };
+  const [state, attributes, , layer, datasourceLayers] = rest;
+
+  return buildExpression([
+    buildExpressionFunction<WaffleVisExpressionFunctionDefinition>('waffleVis', {
+      ...args,
+      bucket: buckets,
+      labels: generateWaffleLabelsAstArguments(
+        state,
+        attributes,
+        layer,
+        getColumnToLabelMap(layer.metrics, datasourceLayers[layer.layerId])
+      ),
+      showValuesInLegend: shouldShowValuesInLegend(layer, state.shape),
+    }),
+  ]).toAst();
 };
 
 const generateExprAst: GenerateExpressionAstFunction = (state, ...restArgs) =>
@@ -262,7 +289,15 @@ function expressionHelper(
 ): Ast | null {
   const layer = state.layers[0];
   const datasource = datasourceLayers[layer.layerId];
-  const groups = getSortedGroups(datasource, layer);
+
+  const groups = Array.from(
+    new Set(
+      [
+        getSortedGroups(datasource, layer, 'primaryGroups'),
+        layer.secondaryGroups ? getSortedGroups(datasource, layer, 'secondaryGroups') : [],
+      ].flat()
+    )
+  );
 
   const operations = groups
     .map((columnId) => ({
@@ -271,7 +306,7 @@ function expressionHelper(
     }))
     .filter((o): o is { columnId: string; operation: Operation } => !!o.operation);
 
-  if (!layer.metric || !operations.length) {
+  if (!layer.metrics.length) {
     return null;
   }
   const visualizationAst = generateExprAst(
@@ -288,6 +323,15 @@ function expressionHelper(
     type: 'expression',
     chain: [
       ...(datasourceAst ? datasourceAst.chain : []),
+      ...groups
+        .filter((columnId) => layer.collapseFns?.[columnId])
+        .map((columnId) => {
+          return buildExpressionFunction<CollapseExpressionFunction>('lens_collapse', {
+            by: groups.filter((chk) => chk !== columnId),
+            metric: layer.metrics,
+            fn: [layer.collapseFns![columnId]!],
+          }).toAst();
+        }),
       ...(visualizationAst ? visualizationAst.chain : []),
     ],
   };

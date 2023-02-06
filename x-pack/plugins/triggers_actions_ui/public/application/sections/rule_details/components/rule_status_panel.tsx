@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import datemath from '@kbn/datemath';
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import moment from 'moment';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
@@ -32,19 +32,23 @@ export interface RuleStatusPanelProps {
   isEditable: boolean;
   requestRefresh: () => void;
   healthColor: string;
-  statusMessage: string;
+  statusMessage?: string | null;
 }
 
 type ComponentOpts = Pick<
   RuleApis,
-  'disableRule' | 'enableRule' | 'snoozeRule' | 'unsnoozeRule' | 'loadExecutionLogAggregations'
+  | 'bulkDisableRules'
+  | 'bulkEnableRules'
+  | 'snoozeRule'
+  | 'unsnoozeRule'
+  | 'loadExecutionLogAggregations'
 > &
   RuleStatusPanelProps;
 
 export const RuleStatusPanel: React.FC<ComponentOpts> = ({
   rule,
-  disableRule,
-  enableRule,
+  bulkEnableRules,
+  bulkDisableRules,
   snoozeRule,
   unsnoozeRule,
   requestRefresh,
@@ -67,6 +71,20 @@ export const RuleStatusPanel: React.FC<ComponentOpts> = ({
     (scheduleIds) => unsnoozeRule(rule, scheduleIds),
     [rule, unsnoozeRule]
   );
+
+  const statusMessageDisplay = useMemo(() => {
+    if (!statusMessage) {
+      return (
+        <EuiStat
+          titleSize="xs"
+          title="--"
+          description=""
+          isLoading={!rule.lastRun?.outcome && !rule.nextRun}
+        />
+      );
+    }
+    return statusMessage;
+  }, [rule, statusMessage]);
 
   const getLastNumberOfExecutions = useCallback(async () => {
     try {
@@ -103,8 +121,12 @@ export const RuleStatusPanel: React.FC<ComponentOpts> = ({
           </EuiFlexItem>
           <EuiFlexItem>
             <RuleStatusDropdown
-              disableRule={async () => await disableRule(rule)}
-              enableRule={async () => await enableRule(rule)}
+              disableRule={async () => {
+                await bulkDisableRules({ ids: [rule.id] });
+              }}
+              enableRule={async () => {
+                await bulkEnableRules({ ids: [rule.id] });
+              }}
               snoozeRule={async () => {}}
               unsnoozeRule={async () => {}}
               rule={rule}
@@ -142,7 +164,7 @@ export const RuleStatusPanel: React.FC<ComponentOpts> = ({
                   color={healthColor}
                   style={{ fontWeight: 400 }}
                 >
-                  {statusMessage}
+                  {statusMessageDisplay}
                 </EuiHealth>
               }
               description={i18n.translate(

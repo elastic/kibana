@@ -6,9 +6,10 @@
  * Side Public License, v 1.
  */
 
-import testSubjSelector from '@kbn/test-subj-selector';
+import { subj as testSubjSelector } from '@kbn/test-subj-selector';
 import { WebElementWrapper } from '../lib/web_element_wrapper';
 import { FtrService } from '../../ftr_provider_context';
+import { TimeoutOpt } from './types';
 
 interface ExistsOptions {
   timeout?: number;
@@ -30,6 +31,21 @@ export class TestSubjects extends FtrService {
   public readonly TRY_TIME = this.config.get('timeouts.try');
   public readonly WAIT_FOR_EXISTS_TIME = this.config.get('timeouts.waitForExists');
 
+  /**
+   * Get a promise that resolves with `true` when an element exists, if the element doesn't exist
+   * yet it will wait until the element does exist. If we wait until the timeout and the element
+   * still doesn't exist the promise will resolve with `false`.
+   *
+   * This method is intended to quickly answer the question "does this testSubject exist". Its
+   * 2.5 second timeout responds quickly, making it a good candidate for putting inside
+   * `retry.waitFor()` loops.
+   *
+   * When `options.timeout` is not passed the `timeouts.waitForExists` config is used as
+   * the timeout. The default value for that config is currently 2.5 seconds.
+   *
+   * If the element is hidden it is not treated as "existing", unless `options.allowHidden`
+   * is set to `true`.
+   */
   public async exists(selector: string, options: ExistsOptions = {}): Promise<boolean> {
     const { timeout = this.WAIT_FOR_EXISTS_TIME, allowHidden = false } = options;
 
@@ -39,12 +55,37 @@ export class TestSubjects extends FtrService {
       : this.findService.existsByDisplayedByCssSelector(testSubjSelector(selector), timeout));
   }
 
+  /**
+   * Get a promise that resolves when an element exists, if the element doesn't exist
+   * before the timeout is reached the promise will reject with an error.
+   *
+   * This method is intended to be used as success critieria when something is expected
+   * to exist. The default 2 minute timeout is not appropriate for all conditions, but
+   * hard-coding timeouts all over tests is also bad, so please use your best judgement.
+   *
+   * The options are equal to the options accepted by the {@link #exists} method except
+   * that `options.timeout` defaults to the `timeouts.try` config, or 2 minutes.
+   */
   public async existOrFail(selector: string, existsOptions?: ExistsOptions): Promise<void | never> {
     if (!(await this.exists(selector, { timeout: this.TRY_TIME, ...existsOptions }))) {
       throw new Error(`expected testSubject(${selector}) to exist`);
     }
   }
 
+  /**
+   * Get a promise that resolves when an element no longer exists, if the element does exist
+   * it will wait until the element does not exist. If we wait until the timeout and the element
+   * still exists the promise will reject.
+   *
+   * This method is intended to quickly assert that an element does not exist. Its
+   * 2.5 second timeout responds quickly.
+   *
+   * When `options.timeout` is not passed the `timeouts.waitForExists` config is used as
+   * the timeout. The default value for that config is currently 2.5 seconds.
+   *
+   * If the element is hidden but still in the DOM it is treated as "existing", unless `options.allowHidden`
+   * is set to `true`.
+   */
   public async missingOrFail(selector: string, options: ExistsOptions = {}): Promise<void | never> {
     const { timeout = this.WAIT_FOR_EXISTS_TIME, allowHidden = false } = options;
 
@@ -85,14 +126,33 @@ export class TestSubjects extends FtrService {
     await input.type(text);
   }
 
-  public async clickWhenNotDisabled(
-    selector: string,
-    { timeout = this.FIND_TIME }: { timeout?: number } = {}
-  ): Promise<void> {
+  /**
+   * Clicks on the element identified by the testSubject selector. If the retries
+   * automatically on "stale element" errors unlike clickWhenNotDisabledWithoutRetry.
+   * `opts.timeout` defaults to the 'timeouts.find' config, which defaults to 10 seconds
+   */
+  public async clickWhenNotDisabled(selector: string, opts?: TimeoutOpt) {
     this.log.debug(`TestSubjects.clickWhenNotDisabled(${selector})`);
-    await this.findService.clickByCssSelectorWhenNotDisabled(testSubjSelector(selector), {
-      timeout,
-    });
+    await this.findService.clickByCssSelectorWhenNotDisabled(testSubjSelector(selector), opts);
+  }
+
+  /**
+   * Clicks on the element identified by the testSubject selector. Somewhat surprisingly,
+   * this method allows `stale element` errors to propogate, which is why it was renamed
+   * from `clickWhenNotDisabled()` and that method was re-implemented to be more consistent
+   * with the rest of the functions in this service.
+   *
+   * `opts.timeout` defaults to the 'timeouts.find' config, which defaults to 10 seconds
+   */
+  public async clickWhenNotDisabledWithoutRetry(
+    selector: string,
+    opts?: TimeoutOpt
+  ): Promise<void> {
+    this.log.debug(`TestSubjects.clickWhenNotDisabledWithoutRetry(${selector})`);
+    await this.findService.clickByCssSelectorWhenNotDisabledWithoutRetry(
+      testSubjSelector(selector),
+      opts
+    );
   }
 
   public async click(

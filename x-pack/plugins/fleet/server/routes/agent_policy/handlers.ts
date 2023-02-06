@@ -6,7 +6,12 @@
  */
 
 import type { TypeOf } from '@kbn/config-schema';
-import type { RequestHandler, ResponseHeaders, ElasticsearchClient } from '@kbn/core/server';
+import type {
+  RequestHandler,
+  ResponseHeaders,
+  ElasticsearchClient,
+  SavedObjectsClientContract,
+} from '@kbn/core/server';
 import pMap from 'p-map';
 import { safeDump } from 'js-yaml';
 
@@ -41,17 +46,18 @@ import type {
   GetFullAgentManifestResponse,
   BulkGetAgentPoliciesResponse,
 } from '../../../common/types';
-import { defaultIngestErrorHandler, AgentPolicyNotFoundError } from '../../errors';
+import { defaultFleetErrorHandler, AgentPolicyNotFoundError } from '../../errors';
 import { createAgentPolicyWithPackages } from '../../services/agent_policy_create';
 
 async function populateAssignedAgentsCount(
   esClient: ElasticsearchClient,
+  soClient: SavedObjectsClientContract,
   agentPolicies: AgentPolicy[]
 ) {
   await pMap(
     agentPolicies,
     (agentPolicy: GetAgentPoliciesResponseItem) =>
-      getAgentsByKuery(esClient, {
+      getAgentsByKuery(esClient, soClient, {
         showInactive: false,
         perPage: 0,
         page: 1,
@@ -67,7 +73,7 @@ export const getAgentPoliciesHandler: FleetRequestHandler<
 > = async (context, request, response) => {
   const coreContext = await context.core;
   const fleetContext = await context.fleet;
-  const soClient = fleetContext.epm.internalSoClient;
+  const soClient = fleetContext.internalSoClient;
   const esClient = coreContext.elasticsearch.client.asInternalUser;
   const { full: withPackagePolicies = false, ...restOfQuery } = request.query;
   try {
@@ -83,11 +89,11 @@ export const getAgentPoliciesHandler: FleetRequestHandler<
       perPage,
     };
 
-    await populateAssignedAgentsCount(esClient, items);
+    await populateAssignedAgentsCount(esClient, soClient, items);
 
     return response.ok({ body });
   } catch (error) {
-    return defaultIngestErrorHandler({ error, response });
+    return defaultFleetErrorHandler({ error, response });
   }
 };
 
@@ -98,7 +104,7 @@ export const bulkGetAgentPoliciesHandler: FleetRequestHandler<
 > = async (context, request, response) => {
   const coreContext = await context.core;
   const fleetContext = await context.fleet;
-  const soClient = fleetContext.epm.internalSoClient;
+  const soClient = fleetContext.internalSoClient;
   const esClient = coreContext.elasticsearch.client.asInternalUser;
   const { full: withPackagePolicies = false, ignoreMissing = false, ids } = request.body;
   try {
@@ -110,7 +116,7 @@ export const bulkGetAgentPoliciesHandler: FleetRequestHandler<
       items,
     };
 
-    await populateAssignedAgentsCount(esClient, items);
+    await populateAssignedAgentsCount(esClient, soClient, items);
 
     return response.ok({ body });
   } catch (error) {
@@ -122,7 +128,7 @@ export const bulkGetAgentPoliciesHandler: FleetRequestHandler<
       });
     }
 
-    return defaultIngestErrorHandler({ error, response });
+    return defaultFleetErrorHandler({ error, response });
   }
 };
 
@@ -147,7 +153,7 @@ export const getOneAgentPolicyHandler: RequestHandler<
       });
     }
   } catch (error) {
-    return defaultIngestErrorHandler({ error, response });
+    return defaultFleetErrorHandler({ error, response });
   }
 };
 
@@ -158,7 +164,7 @@ export const createAgentPolicyHandler: FleetRequestHandler<
 > = async (context, request, response) => {
   const coreContext = await context.core;
   const fleetContext = await context.fleet;
-  const soClient = fleetContext.epm.internalSoClient;
+  const soClient = fleetContext.internalSoClient;
   const esClient = coreContext.elasticsearch.client.asInternalUser;
   const user = (await appContextService.getSecurity()?.authc.getCurrentUser(request)) || undefined;
   const withSysMonitoring = request.query.sys_monitoring ?? false;
@@ -183,7 +189,7 @@ export const createAgentPolicyHandler: FleetRequestHandler<
       body,
     });
   } catch (error) {
-    return defaultIngestErrorHandler({ error, response });
+    return defaultFleetErrorHandler({ error, response });
   }
 };
 
@@ -216,7 +222,7 @@ export const updateAgentPolicyHandler: FleetRequestHandler<
       body,
     });
   } catch (error) {
-    return defaultIngestErrorHandler({ error, response });
+    return defaultFleetErrorHandler({ error, response });
   }
 };
 
@@ -245,7 +251,7 @@ export const copyAgentPolicyHandler: RequestHandler<
       body,
     });
   } catch (error) {
-    return defaultIngestErrorHandler({ error, response });
+    return defaultFleetErrorHandler({ error, response });
   }
 };
 
@@ -267,7 +273,7 @@ export const deleteAgentPoliciesHandler: RequestHandler<
       body,
     });
   } catch (error) {
-    return defaultIngestErrorHandler({ error, response });
+    return defaultFleetErrorHandler({ error, response });
   }
 };
 
@@ -276,7 +282,7 @@ export const getFullAgentPolicy: FleetRequestHandler<
   TypeOf<typeof GetFullAgentPolicyRequestSchema.query>
 > = async (context, request, response) => {
   const fleetContext = await context.fleet;
-  const soClient = fleetContext.epm.internalSoClient;
+  const soClient = fleetContext.internalSoClient;
 
   if (request.query.kubernetes === true) {
     try {
@@ -299,7 +305,7 @@ export const getFullAgentPolicy: FleetRequestHandler<
         });
       }
     } catch (error) {
-      return defaultIngestErrorHandler({ error, response });
+      return defaultFleetErrorHandler({ error, response });
     }
   } else {
     try {
@@ -322,7 +328,7 @@ export const getFullAgentPolicy: FleetRequestHandler<
         });
       }
     } catch (error) {
-      return defaultIngestErrorHandler({ error, response });
+      return defaultFleetErrorHandler({ error, response });
     }
   }
 };
@@ -332,7 +338,7 @@ export const downloadFullAgentPolicy: FleetRequestHandler<
   TypeOf<typeof GetFullAgentPolicyRequestSchema.query>
 > = async (context, request, response) => {
   const fleetContext = await context.fleet;
-  const soClient = fleetContext.epm.internalSoClient;
+  const soClient = fleetContext.internalSoClient;
   const {
     params: { agentPolicyId },
   } = request;
@@ -361,7 +367,7 @@ export const downloadFullAgentPolicy: FleetRequestHandler<
         });
       }
     } catch (error) {
-      return defaultIngestErrorHandler({ error, response });
+      return defaultFleetErrorHandler({ error, response });
     }
   } else {
     try {
@@ -385,7 +391,7 @@ export const downloadFullAgentPolicy: FleetRequestHandler<
         });
       }
     } catch (error) {
-      return defaultIngestErrorHandler({ error, response });
+      return defaultFleetErrorHandler({ error, response });
     }
   }
 };
@@ -412,7 +418,7 @@ export const getK8sManifest: FleetRequestHandler<
       });
     }
   } catch (error) {
-    return defaultIngestErrorHandler({ error, response });
+    return defaultFleetErrorHandler({ error, response });
   }
 };
 
@@ -441,6 +447,6 @@ export const downloadK8sManifest: FleetRequestHandler<
       });
     }
   } catch (error) {
-    return defaultIngestErrorHandler({ error, response });
+    return defaultFleetErrorHandler({ error, response });
   }
 };

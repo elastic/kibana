@@ -115,7 +115,9 @@ function EditorUI({ initialTextValue, setEditorInstance }: EditorProps) {
 
     const loadBufferFromRemote = (url: string) => {
       const coreEditor = editor.getCoreEditor();
-      if (/^https?:\/\//.test(url)) {
+      // Normalize and encode the URL to avoid issues with spaces and other special characters.
+      const encodedUrl = new URL(url).toString();
+      if (/^https?:\/\//.test(encodedUrl)) {
         const loadFrom: Record<string, any> = {
           url,
           // Having dataType here is required as it doesn't allow jQuery to `eval` content
@@ -259,8 +261,8 @@ function EditorUI({ initialTextValue, setEditorInstance }: EditorProps) {
   }, [settings]);
 
   useEffect(() => {
-    const { isKeyboardShortcutsDisabled } = settings;
-    if (!isKeyboardShortcutsDisabled) {
+    const { isKeyboardShortcutsEnabled } = settings;
+    if (isKeyboardShortcutsEnabled) {
       registerCommands({
         senseEditor: editorInstanceRef.current!,
         sendCurrentRequest,

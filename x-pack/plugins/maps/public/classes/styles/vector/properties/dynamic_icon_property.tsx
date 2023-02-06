@@ -10,11 +10,7 @@ import { EuiTextColor } from '@elastic/eui';
 import type { Map as MbMap } from '@kbn/mapbox-gl';
 import { DynamicStyleProperty } from './dynamic_style_property';
 import { IVectorStyle } from '../vector_style';
-import {
-  getIconPalette,
-  getMakiSymbolAnchor,
-  // @ts-expect-error
-} from '../symbol_utils';
+import { getIconPalette, getMakiSymbolAnchor } from '../symbol_utils';
 import { BreakedLegend } from '../components/legend/breaked_legend';
 import { OTHER_CATEGORY_LABEL, assignCategoriesToPalette } from '../style_util';
 import { LegendProps } from './style_property';

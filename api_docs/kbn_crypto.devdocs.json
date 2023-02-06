@@ -10,10 +10,18 @@
   },
   "server": {
     "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
     "functions": [
       {
         "parentPluginId": "@kbn/crypto",
-        "id": "def-server.createSHA256Hash",
+        "id": "def-common.createSHA256Hash",
         "type": "Function",
         "tags": [],
         "label": "createSHA256Hash",
@@ -25,10 +33,11 @@
         ],
         "path": "packages/kbn-crypto/src/sha256.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/crypto",
-            "id": "def-server.createSHA256Hash.$1",
+            "id": "def-common.createSHA256Hash.$1",
             "type": "CompoundType",
             "tags": [],
             "label": "input",
@@ -38,11 +47,12 @@
             ],
             "path": "packages/kbn-crypto/src/sha256.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           },
           {
             "parentPluginId": "@kbn/crypto",
-            "id": "def-server.createSHA256Hash.$2",
+            "id": "def-common.createSHA256Hash.$2",
             "type": "CompoundType",
             "tags": [],
             "label": "outputEncoding",
@@ -52,6 +62,7 @@
             ],
             "path": "packages/kbn-crypto/src/sha256.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -60,7 +71,7 @@
       },
       {
         "parentPluginId": "@kbn/crypto",
-        "id": "def-server.readPkcs12Keystore",
+        "id": "def-common.readPkcs12Keystore",
         "type": "Function",
         "tags": [
           "privateRemarks"
@@ -73,18 +84,19 @@
           "(path: string, password?: string | undefined) => ",
           {
             "pluginId": "@kbn/crypto",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnCryptoPluginApi",
-            "section": "def-server.Pkcs12ReadResult",
+            "section": "def-common.Pkcs12ReadResult",
             "text": "Pkcs12ReadResult"
           }
         ],
         "path": "packages/kbn-crypto/src/pkcs12.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/crypto",
-            "id": "def-server.readPkcs12Keystore.$1",
+            "id": "def-common.readPkcs12Keystore.$1",
             "type": "string",
             "tags": [],
             "label": "path",
@@ -96,11 +108,12 @@
             ],
             "path": "packages/kbn-crypto/src/pkcs12.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           },
           {
             "parentPluginId": "@kbn/crypto",
-            "id": "def-server.readPkcs12Keystore.$2",
+            "id": "def-common.readPkcs12Keystore.$2",
             "type": "string",
             "tags": [],
             "label": "password",
@@ -112,6 +125,7 @@
             ],
             "path": "packages/kbn-crypto/src/pkcs12.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": false
           }
         ],
@@ -122,7 +136,7 @@
       },
       {
         "parentPluginId": "@kbn/crypto",
-        "id": "def-server.readPkcs12Truststore",
+        "id": "def-common.readPkcs12Truststore",
         "type": "Function",
         "tags": [],
         "label": "readPkcs12Truststore",
@@ -134,10 +148,11 @@
         ],
         "path": "packages/kbn-crypto/src/pkcs12.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/crypto",
-            "id": "def-server.readPkcs12Truststore.$1",
+            "id": "def-common.readPkcs12Truststore.$1",
             "type": "string",
             "tags": [],
             "label": "path",
@@ -149,11 +164,12 @@
             ],
             "path": "packages/kbn-crypto/src/pkcs12.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           },
           {
             "parentPluginId": "@kbn/crypto",
-            "id": "def-server.readPkcs12Truststore.$2",
+            "id": "def-common.readPkcs12Truststore.$2",
             "type": "string",
             "tags": [],
             "label": "password",
@@ -165,6 +181,7 @@
             ],
             "path": "packages/kbn-crypto/src/pkcs12.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": false
           }
         ],
@@ -177,17 +194,18 @@
     "interfaces": [
       {
         "parentPluginId": "@kbn/crypto",
-        "id": "def-server.Pkcs12ReadResult",
+        "id": "def-common.Pkcs12ReadResult",
         "type": "Interface",
         "tags": [],
         "label": "Pkcs12ReadResult",
         "description": [],
         "path": "packages/kbn-crypto/src/pkcs12.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/crypto",
-            "id": "def-server.Pkcs12ReadResult.ca",
+            "id": "def-common.Pkcs12ReadResult.ca",
             "type": "Array",
             "tags": [],
             "label": "ca",
@@ -196,11 +214,12 @@
               "string[] | undefined"
             ],
             "path": "packages/kbn-crypto/src/pkcs12.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/crypto",
-            "id": "def-server.Pkcs12ReadResult.cert",
+            "id": "def-common.Pkcs12ReadResult.cert",
             "type": "string",
             "tags": [],
             "label": "cert",
@@ -209,11 +228,12 @@
               "string | undefined"
             ],
             "path": "packages/kbn-crypto/src/pkcs12.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/crypto",
-            "id": "def-server.Pkcs12ReadResult.key",
+            "id": "def-common.Pkcs12ReadResult.key",
             "type": "string",
             "tags": [],
             "label": "key",
@@ -222,20 +242,13 @@
               "string | undefined"
             ],
             "path": "packages/kbn-crypto/src/pkcs12.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
       }
     ],
-    "enums": [],
-    "misc": [],
-    "objects": []
-  },
-  "common": {
-    "classes": [],
-    "functions": [],
-    "interfaces": [],
     "enums": [],
     "misc": [],
     "objects": []

@@ -8,7 +8,6 @@
 import { kea, MakeLogicType } from 'kea';
 
 import { HttpError, Status } from '../../../../../../../../common/types/api';
-import { clearFlashMessages, flashAPIErrors } from '../../../../../../shared/flash_messages';
 import { CustomSource } from '../../../../../types';
 
 import { AddCustomSourceApiLogic } from './add_custom_source_api_logic';
@@ -92,8 +91,6 @@ export const AddCustomSourceLogic = kea<
       const { baseServiceType } = props;
       actions.makeRequest({ name: customSourceNameValue, baseServiceType });
     },
-    makeRequest: () => clearFlashMessages(),
-    apiError: (error) => flashAPIErrors(error),
     apiSuccess: ({ source }) => {
       actions.setNewCustomSource(source);
     },

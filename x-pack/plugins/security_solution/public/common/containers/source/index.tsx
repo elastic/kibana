@@ -47,7 +47,18 @@ export const getIndexFields = memoizeOne(
     fields && fields.length > 0
       ? {
           fields: fields.map((field) =>
-            pick(['name', 'searchable', 'type', 'aggregatable', 'esTypes', 'subType'], field)
+            pick(
+              [
+                'name',
+                'searchable',
+                'type',
+                'aggregatable',
+                'esTypes',
+                'subType',
+                'conflictDescriptions',
+              ],
+              field
+            )
           ),
           title,
         }
@@ -98,7 +109,9 @@ interface FetchIndexReturn {
  */
 export const useFetchIndex = (
   indexNames: string[],
-  onlyCheckIfIndicesExist: boolean = false
+  onlyCheckIfIndicesExist: boolean = false,
+  strategy: string = 'indexFields',
+  includeUnmapped: boolean = false
 ): [boolean, FetchIndexReturn] => {
   const { data } = useKibana().services;
   const abortCtrl = useRef(new AbortController());
@@ -121,10 +134,10 @@ export const useFetchIndex = (
         setLoading(true);
         searchSubscription$.current = data.search
           .search<IndexFieldsStrategyRequest<'indices'>, IndexFieldsStrategyResponse>(
-            { indices: iNames, onlyCheckIfIndicesExist },
+            { indices: iNames, onlyCheckIfIndicesExist, includeUnmapped },
             {
               abortSignal: abortCtrl.current.signal,
-              strategy: 'indexFields',
+              strategy,
             }
           )
           .subscribe({
@@ -132,7 +145,9 @@ export const useFetchIndex = (
               if (isCompleteResponse(response)) {
                 Promise.resolve().then(() => {
                   ReactDOM.unstable_batchedUpdates(() => {
-                    const stringifyIndices = response.indicesExist.sort().join();
+                    const stringifyIndices = `${response.indicesExist
+                      .sort()
+                      .join()} (includeUnmapped: ${includeUnmapped})`;
 
                     previousIndexesName.current = response.indicesExist;
                     const { browserFields } = getDataViewStateFromIndexFields(
@@ -169,7 +184,16 @@ export const useFetchIndex = (
       abortCtrl.current.abort();
       asyncSearch();
     },
-    [data.search, addError, addWarning, onlyCheckIfIndicesExist, setLoading, setState]
+    [
+      data.search,
+      addError,
+      addWarning,
+      onlyCheckIfIndicesExist,
+      includeUnmapped,
+      setLoading,
+      setState,
+      strategy,
+    ]
   );
 
   useEffect(() => {

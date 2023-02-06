@@ -1,0 +1,186 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`kpiUniqueFlowIdsLensAttributes should render 1`] = `
+Object {
+  "description": "",
+  "references": Array [
+    Object {
+      "id": "security-solution-my-test",
+      "name": "indexpattern-datasource-current-indexpattern",
+      "type": "index-pattern",
+    },
+    Object {
+      "id": "security-solution-my-test",
+      "name": "indexpattern-datasource-layer-5d46d48f-6ce8-46be-a797-17ad50642564",
+      "type": "index-pattern",
+    },
+  ],
+  "state": Object {
+    "datasourceStates": Object {
+      "formBased": Object {
+        "layers": Object {
+          "5d46d48f-6ce8-46be-a797-17ad50642564": Object {
+            "columnOrder": Array [
+              "a27f3503-9c73-4fc1-86bb-12461dae4b70",
+            ],
+            "columns": Object {
+              "a27f3503-9c73-4fc1-86bb-12461dae4b70": Object {
+                "customLabel": true,
+                "dataType": "number",
+                "isBucketed": false,
+                "label": " ",
+                "operationType": "unique_count",
+                "scale": "ratio",
+                "sourceField": "network.community_id",
+              },
+            },
+            "incompleteColumns": Object {},
+          },
+        },
+      },
+    },
+    "filters": Array [
+      Object {
+        "$state": Object {
+          "store": "appState",
+        },
+        "meta": Object {
+          "alias": null,
+          "disabled": false,
+          "index": "c01edc8a-90ce-4d49-95f0-76954a034eb2",
+          "key": "query",
+          "negate": false,
+          "type": "custom",
+          "value": "{\\"bool\\":{\\"should\\":[{\\"exists\\":{\\"field\\":\\"source.ip\\"}},{\\"exists\\":{\\"field\\":\\"destination.ip\\"}}],\\"minimum_should_match\\":1}}",
+        },
+        "query": Object {
+          "bool": Object {
+            "minimum_should_match": 1,
+            "should": Array [
+              Object {
+                "exists": Object {
+                  "field": "source.ip",
+                },
+              },
+              Object {
+                "exists": Object {
+                  "field": "destination.ip",
+                },
+              },
+            ],
+          },
+        },
+      },
+      Object {
+        "meta": Object {
+          "alias": null,
+          "disabled": false,
+          "key": "host.id",
+          "negate": false,
+          "params": Object {
+            "query": "123",
+          },
+          "type": "phrase",
+        },
+        "query": Object {
+          "match_phrase": Object {
+            "host.id": "123",
+          },
+        },
+      },
+      Object {
+        "meta": Object {
+          "alias": null,
+          "disabled": false,
+          "key": "source.ip",
+          "negate": false,
+          "params": Object {
+            "query": "192.168.1.1",
+          },
+          "type": "phrase",
+        },
+        "query": Object {
+          "bool": Object {
+            "minimum_should_match": 1,
+            "should": Array [
+              Object {
+                "match_phrase": Object {
+                  "source.ip": "192.168.1.1",
+                },
+              },
+              Object {
+                "match_phrase": Object {
+                  "destination.ip": "192.168.1.1",
+                },
+              },
+            ],
+          },
+        },
+      },
+      Object {
+        "meta": Object {
+          "alias": "",
+          "disabled": false,
+          "key": "bool",
+          "negate": false,
+          "type": "custom",
+          "value": "{\\"bool\\":{\\"filter\\":[{\\"bool\\":{\\"should\\":[{\\"bool\\":{\\"should\\":[{\\"exists\\":{\\"field\\": \\"source.ip\\"}}],\\"minimum_should_match\\":1}},{\\"bool\\":{\\"should\\":[{\\"exists\\":{\\"field\\": \\"destination.ip\\"}}],\\"minimum_should_match\\":1}}],\\"minimum_should_match\\":1}}]}}",
+        },
+        "query": Object {
+          "bool": Object {
+            "minimum_should_match": 1,
+            "should": Array [
+              Object {
+                "exists": Object {
+                  "field": "source.ip",
+                },
+              },
+              Object {
+                "exists": Object {
+                  "field": "destination.ip",
+                },
+              },
+            ],
+          },
+        },
+      },
+      Object {
+        "meta": Object {
+          "alias": null,
+          "disabled": false,
+          "key": "_index",
+          "negate": false,
+          "params": Array [
+            "auditbeat-mytest-*",
+          ],
+          "type": "phrases",
+        },
+        "query": Object {
+          "bool": Object {
+            "minimum_should_match": 1,
+            "should": Array [
+              Object {
+                "match_phrase": Object {
+                  "_index": "auditbeat-mytest-*",
+                },
+              },
+            ],
+          },
+        },
+      },
+    ],
+    "query": Object {
+      "language": "kql",
+      "query": "host.name: *",
+    },
+    "visualization": Object {
+      "accessor": "a27f3503-9c73-4fc1-86bb-12461dae4b70",
+      "autoScaleMetricAlignment": "left",
+      "layerId": "5d46d48f-6ce8-46be-a797-17ad50642564",
+      "layerType": "data",
+    },
+  },
+  "title": "[Network] Unique flow IDs",
+  "visualizationType": "lnsLegacyMetric",
+}
+`;

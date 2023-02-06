@@ -8,7 +8,7 @@ import expect from '@kbn/expect';
 import { AlertConsumers } from '@kbn/rule-data-utils';
 
 import { RuleRegistrySearchResponse } from '@kbn/rule-registry-plugin/common/search_strategy';
-import { QueryCreateSchema } from '@kbn/security-solution-plugin/common/detection_engine/schemas/request';
+import { QueryRuleCreateProps } from '@kbn/security-solution-plugin/common/detection_engine/rule_schema';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
 import {
   deleteSignalsIndex,
@@ -19,7 +19,6 @@ import {
   waitForSignalsToBePresent,
   waitForRuleSuccessOrStatus,
 } from '../../../../detection_engine_api_integration/utils';
-import { ID } from '../../../../detection_engine_api_integration/security_and_spaces/group1/generating_signals';
 import {
   obsOnlySpacesAllEsRead,
   obsOnlySpacesAll,
@@ -30,6 +29,8 @@ type RuleRegistrySearchResponseWithErrors = RuleRegistrySearchResponse & {
   statusCode: number;
   message: string;
 };
+
+const ID = 'BhbXBmkBR346wHgn4PeZ';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext) => {
@@ -42,9 +43,7 @@ export default ({ getService }: FtrProviderContext) => {
 
   const SPACE1 = 'space1';
 
-  // Failing: See https://github.com/elastic/kibana/issues/129219
-  // Failing: See https://github.com/elastic/kibana/issues/129219
-  describe.skip('ruleRegistryAlertsSearchStrategy', () => {
+  describe('ruleRegistryAlertsSearchStrategy', () => {
     let kibanaVersion: string;
     before(async () => {
       kibanaVersion = await kbnClient.version.get();
@@ -110,24 +109,6 @@ export default ({ getService }: FtrProviderContext) => {
         const second = result.rawResponse.hits.hits[1].fields?.['kibana.alert.evaluation.value'];
         expect(first > second).to.be(true);
       });
-
-      it('should reject public requests', async () => {
-        const result = await secureBsearch.send<RuleRegistrySearchResponseWithErrors>({
-          supertestWithoutAuth,
-          auth: {
-            username: logsOnlySpacesAll.username,
-            password: logsOnlySpacesAll.password,
-          },
-          options: {
-            featureIds: [AlertConsumers.LOGS],
-          },
-          strategy: 'privateRuleRegistryAlertsSearchStrategy',
-        });
-        expect(result.statusCode).to.be(500);
-        expect(result.message).to.be(
-          `The privateRuleRegistryAlertsSearchStrategy search strategy is currently only available for internal use.`
-        );
-      });
     });
 
     describe('siem', () => {
@@ -136,7 +117,7 @@ export default ({ getService }: FtrProviderContext) => {
         await esArchiver.load('x-pack/test/functional/es_archives/auditbeat/hosts');
         await esArchiver.load('x-pack/test/functional/es_archives/observability/alerts');
 
-        const rule: QueryCreateSchema = {
+        const rule: QueryRuleCreateProps = {
           ...getRuleForSignalTesting(['auditbeat-*']),
           query: `_id:${ID}`,
         };

@@ -4,20 +4,21 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { isEqual } from 'lodash';
-import { DEFAULT_FIELDS, DEFAULT_TLS_FIELDS } from '../constants';
+import { formatKibanaNamespace } from '../../../../../../common/formatters';
+import { DEFAULT_FIELDS } from '../constants';
 import {
   ConfigKey,
   DataStream,
   FormMonitorType,
   SyntheticsMonitor,
   BrowserFields,
-  TLSFields,
+  HTTPFields,
 } from '../types';
 
 export const getDefaultFormFields = (
   spaceId: string = 'default'
 ): Record<FormMonitorType, Record<string, any>> => {
+  const kibanaNamespace = formatKibanaNamespace(spaceId);
   return {
     [FormMonitorType.MULTISTEP]: {
       ...DEFAULT_FIELDS[DataStream.BROWSER],
@@ -27,29 +28,29 @@ export const getDefaultFormFields = (
         fileName: '',
       },
       [ConfigKey.FORM_MONITOR_TYPE]: FormMonitorType.MULTISTEP,
-      [ConfigKey.NAMESPACE]: spaceId,
+      [ConfigKey.NAMESPACE]: kibanaNamespace,
     },
     [FormMonitorType.SINGLE]: {
       ...DEFAULT_FIELDS[DataStream.BROWSER],
       [ConfigKey.FORM_MONITOR_TYPE]: FormMonitorType.SINGLE,
-      [ConfigKey.NAMESPACE]: spaceId,
+      [ConfigKey.NAMESPACE]: kibanaNamespace,
     },
     [FormMonitorType.HTTP]: {
       ...DEFAULT_FIELDS[DataStream.HTTP],
       isTLSEnabled: false,
       [ConfigKey.FORM_MONITOR_TYPE]: FormMonitorType.HTTP,
-      [ConfigKey.NAMESPACE]: spaceId,
+      [ConfigKey.NAMESPACE]: kibanaNamespace,
     },
     [FormMonitorType.TCP]: {
       ...DEFAULT_FIELDS[DataStream.TCP],
       isTLSEnabled: false,
       [ConfigKey.FORM_MONITOR_TYPE]: FormMonitorType.TCP,
-      [ConfigKey.NAMESPACE]: spaceId,
+      [ConfigKey.NAMESPACE]: kibanaNamespace,
     },
     [FormMonitorType.ICMP]: {
       ...DEFAULT_FIELDS[DataStream.ICMP],
       [ConfigKey.FORM_MONITOR_TYPE]: FormMonitorType.ICMP,
-      [ConfigKey.NAMESPACE]: spaceId,
+      [ConfigKey.NAMESPACE]: kibanaNamespace,
     },
   };
 };
@@ -94,16 +95,7 @@ export const formatDefaultFormValues = (monitor?: SyntheticsMonitor) => {
     case FormMonitorType.TCP:
       return {
         ...monitorWithFormMonitorType,
-        isTLSEnabled: isCustomTLSEnabled(monitor),
+        isTLSEnabled: (monitor as HTTPFields)[ConfigKey.METADATA].is_tls_enabled,
       };
   }
-};
-
-const isCustomTLSEnabled = (monitor: SyntheticsMonitor) => {
-  const sslKeys = Object.keys(monitor).filter((key) => key.includes('ssl')) as unknown as Array<
-    keyof TLSFields
-  >;
-  const sslValues: Record<string, unknown> = {};
-  sslKeys.map((key) => (sslValues[key] = (monitor as TLSFields)[key]));
-  return !isEqual(sslValues, DEFAULT_TLS_FIELDS);
 };

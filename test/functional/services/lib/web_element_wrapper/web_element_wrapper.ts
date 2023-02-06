@@ -10,7 +10,7 @@ import { setTimeout as setTimeoutAsync } from 'timers/promises';
 import { WebElement, WebDriver, By, Key } from 'selenium-webdriver';
 import { PNG } from 'pngjs';
 import cheerio from 'cheerio';
-import testSubjSelector from '@kbn/test-subj-selector';
+import { subj as testSubjSelector } from '@kbn/test-subj-selector';
 import { ToolingLog } from '@kbn/tooling-log';
 import { CustomCheerio, CustomCheerioStatic } from './custom_cheerio_api';
 // @ts-ignore not supported yet
@@ -466,6 +466,7 @@ export class WebElementWrapper {
    * @return {Promise<WebElementWrapper>}
    */
   public async findByCssSelector(selector: string) {
+    this.logger.debug(`WebElementWrapper.findByCssSelector(${selector})`);
     return await this.retryCall(async function findByCssSelector(wrapper) {
       return wrapper._wrap(
         await wrapper._webElement.findElement(wrapper.By.css(selector)),

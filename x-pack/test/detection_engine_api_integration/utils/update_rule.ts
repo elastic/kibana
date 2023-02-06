@@ -10,9 +10,9 @@ import type SuperTest from 'supertest';
 
 import { DETECTION_ENGINE_RULES_URL } from '@kbn/security-solution-plugin/common/constants';
 import {
-  UpdateRulesSchema,
-  FullResponseSchema,
-} from '@kbn/security-solution-plugin/common/detection_engine/schemas/request';
+  RuleUpdateProps,
+  RuleResponse,
+} from '@kbn/security-solution-plugin/common/detection_engine/rule_schema';
 
 /**
  * Helper to cut down on the noise in some of the tests. This checks for
@@ -23,8 +23,8 @@ import {
 export const updateRule = async (
   supertest: SuperTest.SuperTest<SuperTest.Test>,
   log: ToolingLog,
-  updatedRule: UpdateRulesSchema
-): Promise<FullResponseSchema> => {
+  updatedRule: RuleUpdateProps
+): Promise<RuleResponse> => {
   const response = await supertest
     .put(DETECTION_ENGINE_RULES_URL)
     .set('kbn-xsrf', 'true')

@@ -172,7 +172,7 @@ export class ReportingPublicPlugin
     management.sections.section.insightsAndAlerting.registerApp({
       id: 'reporting',
       title: this.title,
-      order: 1,
+      order: 3,
       mount: async (params) => {
         params.setBreadcrumbs([{ text: this.breadcrumbText }]);
         const [[start, startDeps], { mountManagementSection }] = await Promise.all([

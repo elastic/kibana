@@ -12,7 +12,7 @@ import { find } from 'lodash';
 import {
   EuiPage,
   EuiPageBody,
-  EuiPageContent,
+  EuiPageContent_Deprecated as EuiPageContent,
   EuiSpacer,
   EuiFlexGrid,
   EuiFlexItem,
@@ -22,11 +22,8 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { ComponentProps } from '../../route_init';
 import { GlobalStateContext } from '../../contexts/global_state_context';
 import { useCharts } from '../../hooks/use_charts';
-// @ts-ignore
 import { useBreadcrumbContainerContext } from '../../hooks/use_breadcrumbs';
-// @ts-ignore
 import { MonitoringTimeseriesContainer } from '../../../components/chart';
-// @ts-ignore
 import { DetailStatus } from '../../../components/kibana/detail_status';
 import { PageTemplate } from '../page_template';
 import { AlertsCallout } from '../../../alerts/callout';

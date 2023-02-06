@@ -6,69 +6,89 @@
  * Side Public License, v 1.
  */
 
-import { apm } from '../../lib/apm';
-import { timerange } from '../../lib/timerange';
-import { getSpanDestinationMetrics } from '../../lib/apm/processors/get_span_destination_metrics';
-import { StreamProcessor } from '../../lib/stream_processor';
-import { ApmFields } from '../../lib/apm/apm_fields';
+import { apm, timerange, ApmFields } from '@kbn/apm-synthtrace-client';
+import { sortBy } from 'lodash';
+import { Readable } from 'stream';
+import { createSpanMetricsAggregator } from '../../lib/apm/aggregators/create_span_metrics_aggregator';
+import { awaitStream } from '../../lib/utils/wait_until_stream_finished';
 
 describe('span destination metrics', () => {
   let events: Array<Record<string, any>>;
 
-  beforeEach(() => {
-    const javaService = apm.service('opbeans-java', 'production', 'java');
+  beforeEach(async () => {
+    const javaService = apm.service({
+      name: 'opbeans-java',
+      environment: 'production',
+      agentName: 'java',
+    });
     const javaInstance = javaService.instance('instance-1');
 
     const range = timerange(
       new Date('2021-01-01T00:00:00.000Z'),
       new Date('2021-01-01T00:15:00.000Z')
     );
-    const processor = new StreamProcessor<ApmFields>({ processors: [getSpanDestinationMetrics] });
-    events = processor
-      .streamToArray(
+
+    const serialized = [
+      ...Array.from(
         range
           .interval('1m')
           .rate(25)
           .generator((timestamp) =>
             javaInstance
-              .transaction('GET /api/product/list')
+              .transaction({ transactionName: 'GET /api/product/list' })
               .duration(1000)
               .success()
               .timestamp(timestamp)
               .children(
                 javaInstance
-                  .span('GET apm-*/_search', 'db', 'elasticsearch')
+                  .span({
+                    spanName: 'GET apm-*/_search',
+                    spanType: 'db',
+                    spanSubtype: 'elasticsearch',
+                  })
                   .timestamp(timestamp)
                   .duration(1000)
                   .destination('elasticsearch')
                   .success()
               )
-          ),
+          )
+      ),
+      ...Array.from(
         range
           .interval('1m')
           .rate(50)
           .generator((timestamp) =>
             javaInstance
-              .transaction('GET /api/product/list')
+              .transaction({ transactionName: 'GET /api/product/list' })
               .duration(1000)
               .failure()
               .timestamp(timestamp)
               .children(
                 javaInstance
-                  .span('GET apm-*/_search', 'db', 'elasticsearch')
+                  .span({
+                    spanName: 'GET apm-*/_search',
+                    spanType: 'db',
+                    spanSubtype: 'elasticsearch',
+                  })
                   .timestamp(timestamp)
                   .duration(1000)
                   .destination('elasticsearch')
                   .failure(),
                 javaInstance
-                  .span('custom_operation', 'app')
+                  .span({ spanName: 'custom_operation', spanType: 'app' })
                   .timestamp(timestamp)
                   .duration(500)
                   .success()
               )
           )
+      ),
+    ].flatMap((event) => event.serialize());
+
+    events = (
+      await awaitStream<ApmFields>(
+        Readable.from(sortBy(serialized, '@timestamp')).pipe(createSpanMetricsAggregator('1m'))
       )
-      .filter((fields) => fields['metricset.name'] === 'service_destination');
+    ).filter((fields) => fields['metricset.name'] === 'service_destination');
   });
 
   it('generates the right amount of span metrics', () => {

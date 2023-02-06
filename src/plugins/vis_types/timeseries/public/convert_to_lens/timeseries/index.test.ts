@@ -5,336 +5,161 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { DataView } from '@kbn/data-plugin/common';
-import type { Panel, Series } from '../../../common/types';
+
+import { Vis } from '@kbn/visualizations-plugin/public';
+import { METRIC_TYPES } from '@kbn/data-plugin/public';
+import { stubLogstashDataView } from '@kbn/data-views-plugin/common/data_view.stub';
 import { convertToLens } from '.';
+import { createPanel, createSeries } from '../lib/__mocks__';
+import { Panel } from '../../../common/types';
 
-const dataViewsMap: Record<string, DataView> = {
-  test1: { id: 'test1', title: 'test1', timeFieldName: 'timeField1' } as DataView,
-  test2: {
-    id: 'test2',
-    title: 'test2',
-    timeFieldName: 'timeField2',
-  } as DataView,
-  test3: { id: 'test3', title: 'test3', timeFieldName: 'timeField3' } as DataView,
-};
+const mockConvertToDateHistogramColumn = jest.fn();
+const mockGetMetricsColumns = jest.fn();
+const mockGetBucketsColumns = jest.fn();
+const mockGetConfigurationForTimeseries = jest.fn();
+const mockIsValidMetrics = jest.fn();
+const mockGetDatasourceValue = jest
+  .fn()
+  .mockImplementation(() => Promise.resolve(stubLogstashDataView));
+const mockExtractOrGenerateDatasourceInfo = jest.fn();
 
-const getDataview = (id: string): DataView | undefined => dataViewsMap[id];
-jest.mock('../../services', () => {
-  return {
-    getDataViewsStart: jest.fn(() => {
-      return {
-        getDefault: jest.fn(() => {
-          return { id: '12345', title: 'default', timeFieldName: '@timestamp' };
-        }),
-        get: getDataview,
-      };
-    }),
-  };
-});
+jest.mock('../../services', () => ({
+  getDataViewsStart: jest.fn(() => mockGetDatasourceValue),
+}));
 
-const model = {
-  axis_position: 'left',
-  type: 'timeseries',
-  index_pattern: { id: 'test2' },
-  use_kibana_indexes: true,
-  series: [
-    {
-      color: '#000000',
-      chart_type: 'line',
-      fill: '0',
-      id: '85147356-c185-4636-9182-d55f3ab2b6fa',
-      palette: {
-        name: 'default',
-        type: 'palette',
-      },
-      split_mode: 'everything',
-      metrics: [
-        {
-          id: '3fa8b32f-5c38-4813-9361-1f2817ae5b18',
-          type: 'count',
-        },
-      ],
-      override_index_pattern: 0,
-    },
-  ],
-} as Panel;
+jest.mock('../lib/convert', () => ({
+  convertToDateHistogramColumn: jest.fn(() => mockConvertToDateHistogramColumn()),
+  excludeMetaFromColumn: jest.fn().mockReturnValue({}),
+}));
 
-describe('convertToLens for TimeSeries', () => {
-  test('should return null for a non supported aggregation', async () => {
-    const nonSupportedAggModel = {
-      ...model,
-      series: [
-        {
-          ...model.series[0],
-          metrics: [
-            {
-              type: 'sum_of_squares_bucket',
-            },
-          ] as Series['metrics'],
-        },
-      ],
-    };
-    const triggerOptions = await convertToLens(nonSupportedAggModel);
-    expect(triggerOptions).toBeNull();
+jest.mock('../lib/series', () => ({
+  getMetricsColumns: jest.fn(() => mockGetMetricsColumns()),
+  getBucketsColumns: jest.fn(() => mockGetBucketsColumns()),
+}));
+
+jest.mock('../lib/configurations/xy', () => ({
+  getConfigurationForTimeseries: jest.fn(() => mockGetConfigurationForTimeseries()),
+  getLayers: jest.fn().mockReturnValue([]),
+}));
+
+jest.mock('../lib/metrics', () => ({
+  isValidMetrics: jest.fn(() => mockIsValidMetrics()),
+}));
+
+jest.mock('../lib/datasource', () => ({
+  extractOrGenerateDatasourceInfo: jest.fn(() => mockExtractOrGenerateDatasourceInfo()),
+}));
+
+describe('convertToLens', () => {
+  const model = createPanel({
+    series: [
+      createSeries({
+        metrics: [
+          { id: 'some-id', type: METRIC_TYPES.AVG, field: 'test-field' },
+          { id: 'some-id-1', type: METRIC_TYPES.COUNT },
+        ],
+      }),
+    ],
   });
 
-  test('should return options for a supported aggregation', async () => {
-    const triggerOptions = await convertToLens(model);
-    expect(triggerOptions).toStrictEqual({
-      configuration: {
-        extents: { yLeftExtent: { mode: 'full' }, yRightExtent: { mode: 'full' } },
-        fill: '0',
-        gridLinesVisibility: { x: false, yLeft: false, yRight: false },
-        legend: {
-          isVisible: false,
-          maxLines: 1,
-          position: 'right',
-          shouldTruncate: false,
-          showSingleSeries: false,
-        },
-      },
-      type: 'lnsXY',
-      layers: {
-        '0': {
-          axisPosition: 'left',
-          chartType: 'line',
-          collapseFn: undefined,
-          indexPatternId: 'test2',
-          metrics: [
-            {
-              agg: 'count',
-              color: '#000000',
-              fieldName: 'document',
-              isFullReference: false,
-              params: {},
-            },
-          ],
-          palette: {
-            name: 'default',
-            type: 'palette',
-          },
-          splitWithDateHistogram: false,
-          xFieldName: 'timeField2',
-          xMode: 'date_histogram',
-          timeInterval: 'auto',
-          dropPartialBuckets: false,
-        },
-      },
+  const vis = {
+    params: model,
+  } as Vis<Panel>;
+
+  beforeEach(() => {
+    mockIsValidMetrics.mockReturnValue(true);
+    mockExtractOrGenerateDatasourceInfo.mockReturnValue({
+      indexPatternId: 'test-index-pattern',
+      timeField: 'timeField',
+      indexPattern: { id: 'test-index-pattern' },
     });
+    mockConvertToDateHistogramColumn.mockReturnValue({});
+    mockGetMetricsColumns.mockReturnValue([{}]);
+    mockGetBucketsColumns.mockReturnValue([{}]);
+    mockGetConfigurationForTimeseries.mockReturnValue({ layers: [] });
   });
 
-  test('should return area for timeseries line chart with fill > 0', async () => {
-    const modelWithFill = {
-      ...model,
-      series: [
-        {
-          ...model.series[0],
-          fill: '0.3',
-          stacked: 'none',
-        },
-      ],
-    };
-    const triggerOptions = await convertToLens(modelWithFill);
-    expect(triggerOptions?.layers[0].chartType).toBe('area');
+  afterEach(() => {
+    jest.clearAllMocks();
   });
 
-  test('should return timeShift in the params if it is provided', async () => {
-    const modelWithFill = {
-      ...model,
-      series: [
-        {
-          ...model.series[0],
-          offset_time: '1h',
-        },
-      ],
-    };
-    const triggerOptions = await convertToLens(modelWithFill);
-    expect(triggerOptions?.layers[0]?.metrics?.[0]?.params?.shift).toBe('1h');
+  test('should return null for invalid metrics', async () => {
+    mockIsValidMetrics.mockReturnValue(null);
+    const result = await convertToLens(vis);
+    expect(result).toBeNull();
+    expect(mockIsValidMetrics).toBeCalledTimes(1);
   });
 
-  test('should return filter in the params if it is provided', async () => {
-    const modelWithFill = {
-      ...model,
-      series: [
-        {
-          ...model.series[0],
-          filter: {
-            language: 'kuery',
-            query: 'test',
-          },
-        },
-      ],
-    };
-    const triggerOptions = await convertToLens(modelWithFill);
-    expect(triggerOptions?.layers[0]?.metrics?.[0]?.params?.kql).toBe('test');
+  test('should return null for empty time field', async () => {
+    mockExtractOrGenerateDatasourceInfo.mockReturnValue({ timeField: null });
+    const result = await convertToLens(vis);
+    expect(result).toBeNull();
+    expect(mockExtractOrGenerateDatasourceInfo).toBeCalledTimes(1);
   });
 
-  test('should return splitFilters information if the chart is broken down by filters', async () => {
-    const modelWithSplitFilters = {
-      ...model,
-      series: [
-        {
-          ...model.series[0],
-          split_mode: 'filters',
-          split_filters: [
-            {
-              color: 'rgba(188,0,85,1)',
-              filter: {
-                language: 'kuery',
-                query: '',
-              },
-              id: '89afac60-7d2b-11ec-917c-c18cd38d60b5',
-            },
-          ],
-        },
-      ],
-    };
-    const triggerOptions = await convertToLens(modelWithSplitFilters);
-    expect(triggerOptions?.layers[0]?.splitFilters).toStrictEqual([
+  test('should return null for invalid date histogram', async () => {
+    mockConvertToDateHistogramColumn.mockReturnValue(null);
+    const result = await convertToLens(vis);
+    expect(result).toBeNull();
+    expect(mockConvertToDateHistogramColumn).toBeCalledTimes(1);
+  });
+
+  test('should return null for invalid or unsupported metrics', async () => {
+    mockGetMetricsColumns.mockReturnValue(null);
+    const result = await convertToLens(vis);
+    expect(result).toBeNull();
+    expect(mockGetMetricsColumns).toBeCalledTimes(1);
+  });
+
+  test('should return null for invalid or unsupported buckets', async () => {
+    mockGetBucketsColumns.mockReturnValue(null);
+    const result = await convertToLens(vis);
+    expect(result).toBeNull();
+    expect(mockGetBucketsColumns).toBeCalledTimes(1);
+  });
+
+  test('should return null for static value with buckets', async () => {
+    mockGetBucketsColumns.mockReturnValue([{}]);
+    mockGetMetricsColumns.mockReturnValue([
       {
-        color: 'rgba(188,0,85,1)',
-        filter: {
-          language: 'kuery',
-          query: '',
-        },
-        id: '89afac60-7d2b-11ec-917c-c18cd38d60b5',
+        operationType: 'static_value',
       },
     ]);
+    const result = await convertToLens(vis);
+    expect(result).toBeNull();
+    expect(mockGetMetricsColumns).toBeCalledTimes(1);
+    expect(mockGetBucketsColumns).toBeCalledTimes(1);
   });
 
-  test('should return termsParams information if the chart is broken down by terms including series agg collapse fn', async () => {
-    const modelWithTerms = {
-      ...model,
-      series: [
-        {
-          ...model.series[0],
-          metrics: [
-            ...model.series[0].metrics,
-            {
-              type: 'series_agg',
-              function: 'sum',
-            },
-          ],
-          split_mode: 'terms',
-          terms_size: 6,
-          terms_direction: 'desc',
-          terms_order_by: '_key',
-        },
-      ] as unknown as Series[],
-    };
-    const triggerOptions = await convertToLens(modelWithTerms);
-    expect(triggerOptions?.layers[0]?.collapseFn).toStrictEqual('sum');
-    expect(triggerOptions?.layers[0]?.termsParams).toStrictEqual({
-      size: 6,
-      otherBucket: false,
-      orderDirection: 'desc',
-      orderBy: { type: 'alphabetical' },
-      includeIsRegex: false,
-      excludeIsRegex: false,
-      parentFormat: {
-        id: 'terms',
-      },
-    });
+  test('should return state for valid model', async () => {
+    const result = await convertToLens(vis);
+    expect(result).toBeDefined();
+    expect(result?.type).toBe('lnsXY');
+    expect(mockGetBucketsColumns).toBeCalledTimes(model.series.length);
+    expect(mockGetConfigurationForTimeseries).toBeCalledTimes(1);
   });
 
-  test('should return include exclude information if the chart is broken down by terms', async () => {
-    const modelWithTerms = {
-      ...model,
-      series: [
-        {
-          ...model.series[0],
-          split_mode: 'terms',
-          terms_size: 6,
-          terms_direction: 'desc',
-          terms_order_by: '_key',
-          terms_include: 't.*',
-        },
-      ] as unknown as Series[],
-    };
-    const triggerOptions = await convertToLens(modelWithTerms);
-    expect(triggerOptions?.layers[0]?.termsParams).toStrictEqual({
-      size: 6,
-      otherBucket: false,
-      orderDirection: 'desc',
-      orderBy: { type: 'alphabetical' },
-      includeIsRegex: true,
-      include: ['t.*'],
-      excludeIsRegex: false,
-      parentFormat: {
-        id: 'terms',
-      },
-    });
+  test('should drop adhoc dataviews if action is required', async () => {
+    const result = await convertToLens(vis, undefined, true);
+    expect(result).toBeDefined();
+    expect(result?.type).toBe('lnsXY');
+    expect(mockGetBucketsColumns).toBeCalledTimes(model.series.length);
+    expect(mockGetConfigurationForTimeseries).toBeCalledTimes(1);
   });
 
-  test('should return custom time interval if it is given', async () => {
-    const modelWithTerms = {
-      ...model,
-      interval: '1h',
-    };
-    const triggerOptions = await convertToLens(modelWithTerms);
-    expect(triggerOptions?.layers[0]?.timeInterval).toBe('1h');
-  });
-
-  test('should return dropPartialbuckets if enabled', async () => {
-    const modelWithDropBuckets = {
-      ...model,
-      drop_last_bucket: 1,
-    };
-    const triggerOptions = await convertToLens(modelWithDropBuckets);
-    expect(triggerOptions?.layers[0]?.dropPartialBuckets).toBe(true);
-  });
-
-  test('should return the correct chart configuration', async () => {
-    const modelWithConfig = {
-      ...model,
-      show_legend: 1,
-      legend_position: 'bottom',
-      truncate_legend: 0,
-      show_grid: 1,
-      series: [{ ...model.series[0], fill: '0.3', separate_axis: 1, axis_position: 'right' }],
-    };
-    const triggerOptions = await convertToLens(modelWithConfig);
-    expect(triggerOptions).toStrictEqual({
-      configuration: {
-        extents: { yLeftExtent: { mode: 'full' }, yRightExtent: { mode: 'full' } },
-        fill: '0.3',
-        gridLinesVisibility: { x: true, yLeft: true, yRight: true },
-        legend: {
-          isVisible: true,
-          maxLines: 1,
-          position: 'bottom',
-          shouldTruncate: false,
-          showSingleSeries: true,
-        },
-      },
-      type: 'lnsXY',
-      layers: {
-        '0': {
-          axisPosition: 'right',
-          chartType: 'area_stacked',
-          collapseFn: undefined,
-          indexPatternId: 'test2',
-          metrics: [
-            {
-              agg: 'count',
-              color: '#000000',
-              fieldName: 'document',
-              isFullReference: false,
-              params: {},
-            },
-          ],
-          palette: {
-            name: 'default',
-            type: 'palette',
-          },
-          splitWithDateHistogram: false,
-          xFieldName: 'timeField2',
-          xMode: 'date_histogram',
-          timeInterval: 'auto',
-          dropPartialBuckets: false,
-        },
-      },
-    });
+  test('should skip hidden series', async () => {
+    const result = await convertToLens({
+      params: createPanel({
+        series: [
+          createSeries({
+            metrics: [{ id: 'some-id', type: METRIC_TYPES.AVG, field: 'test-field' }],
+            hidden: true,
+          }),
+        ],
+      }),
+    } as Vis<Panel>);
+    expect(result).toBeDefined();
+    expect(result?.type).toBe('lnsXY');
+    expect(mockIsValidMetrics).toBeCalledTimes(0);
   });
 });

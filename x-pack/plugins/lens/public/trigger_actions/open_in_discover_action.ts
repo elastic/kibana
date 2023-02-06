@@ -7,10 +7,9 @@
 
 import { i18n } from '@kbn/i18n';
 import { createAction } from '@kbn/ui-actions-plugin/public';
-import type { DiscoverStart } from '@kbn/discover-plugin/public';
-import { IEmbeddable } from '@kbn/embeddable-plugin/public';
-import { DataViewsService } from '@kbn/data-views-plugin/public';
-import { execute, isCompatible, getHref } from './open_in_discover_helpers';
+import type { IEmbeddable } from '@kbn/embeddable-plugin/public';
+import type { DataViewsService } from '@kbn/data-views-plugin/public';
+import type { DiscoverAppLocator } from './open_in_discover_helpers';
 
 const ACTION_OPEN_IN_DISCOVER = 'ACTION_OPEN_IN_DISCOVER';
 
@@ -18,8 +17,10 @@ interface Context {
   embeddable: IEmbeddable;
 }
 
+export const getDiscoverHelpersAsync = async () => await import('../async_services');
+
 export const createOpenInDiscoverAction = (
-  discover: Pick<DiscoverStart, 'locator'>,
+  locator: DiscoverAppLocator,
   dataViews: Pick<DataViewsService, 'get'>,
   hasDiscoverAccess: boolean
 ) =>
@@ -33,22 +34,25 @@ export const createOpenInDiscoverAction = (
         defaultMessage: 'Explore data in Discover',
       }),
     getHref: async (context: Context) => {
+      const { getHref } = await getDiscoverHelpersAsync();
       return getHref({
-        discover,
+        locator,
         dataViews,
         hasDiscoverAccess,
         ...context,
       });
     },
     isCompatible: async (context: Context) => {
+      const { isCompatible } = await getDiscoverHelpersAsync();
       return isCompatible({
         hasDiscoverAccess,
-        discover,
+        locator,
         dataViews,
         embeddable: context.embeddable,
       });
     },
     execute: async (context: Context) => {
-      return execute({ ...context, discover, dataViews, hasDiscoverAccess });
+      const { execute } = await getDiscoverHelpersAsync();
+      return execute({ ...context, locator, dataViews, hasDiscoverAccess });
     },
   });

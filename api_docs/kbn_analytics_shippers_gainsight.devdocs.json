@@ -1,0 +1,386 @@
+{
+  "id": "@kbn/analytics-shippers-gainsight",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [
+      {
+        "parentPluginId": "@kbn/analytics-shippers-gainsight",
+        "id": "def-common.GainsightShipper",
+        "type": "Class",
+        "tags": [],
+        "label": "GainsightShipper",
+        "description": [
+          "\ngainsight shipper."
+        ],
+        "signature": [
+          {
+            "pluginId": "@kbn/analytics-shippers-gainsight",
+            "scope": "common",
+            "docId": "kibKbnAnalyticsShippersGainsightPluginApi",
+            "section": "def-common.GainsightShipper",
+            "text": "GainsightShipper"
+          },
+          " implements ",
+          {
+            "pluginId": "@kbn/analytics-client",
+            "scope": "common",
+            "docId": "kibKbnAnalyticsClientPluginApi",
+            "section": "def-common.IShipper",
+            "text": "IShipper"
+          }
+        ],
+        "path": "packages/analytics/shippers/gainsight/src/gainsight_shipper.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/analytics-shippers-gainsight",
+            "id": "def-common.GainsightShipper.shipperName",
+            "type": "string",
+            "tags": [],
+            "label": "shipperName",
+            "description": [
+              "Shipper's unique name"
+            ],
+            "path": "packages/analytics/shippers/gainsight/src/gainsight_shipper.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/analytics-shippers-gainsight",
+            "id": "def-common.GainsightShipper.Unnamed",
+            "type": "Function",
+            "tags": [],
+            "label": "Constructor",
+            "description": [
+              "\nCreates a new instance of the gainsightShipper."
+            ],
+            "signature": [
+              "any"
+            ],
+            "path": "packages/analytics/shippers/gainsight/src/gainsight_shipper.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/analytics-shippers-gainsight",
+                "id": "def-common.GainsightShipper.Unnamed.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "config",
+                "description": [
+                  "{@link GainsightSnippetConfig }"
+                ],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/analytics-shippers-gainsight",
+                    "scope": "common",
+                    "docId": "kibKbnAnalyticsShippersGainsightPluginApi",
+                    "section": "def-common.GainsightSnippetConfig",
+                    "text": "GainsightSnippetConfig"
+                  }
+                ],
+                "path": "packages/analytics/shippers/gainsight/src/gainsight_shipper.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/analytics-shippers-gainsight",
+                "id": "def-common.GainsightShipper.Unnamed.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "initContext",
+                "description": [
+                  "{@link AnalyticsClientInitContext }"
+                ],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/analytics-client",
+                    "scope": "common",
+                    "docId": "kibKbnAnalyticsClientPluginApi",
+                    "section": "def-common.AnalyticsClientInitContext",
+                    "text": "AnalyticsClientInitContext"
+                  }
+                ],
+                "path": "packages/analytics/shippers/gainsight/src/gainsight_shipper.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/analytics-shippers-gainsight",
+            "id": "def-common.GainsightShipper.extendContext",
+            "type": "Function",
+            "tags": [],
+            "label": "extendContext",
+            "description": [
+              "\nCalls track or set on the fields provided in the newContext."
+            ],
+            "signature": [
+              "(newContext: ",
+              {
+                "pluginId": "@kbn/analytics-client",
+                "scope": "common",
+                "docId": "kibKbnAnalyticsClientPluginApi",
+                "section": "def-common.EventContext",
+                "text": "EventContext"
+              },
+              ") => void"
+            ],
+            "path": "packages/analytics/shippers/gainsight/src/gainsight_shipper.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/analytics-shippers-gainsight",
+                "id": "def-common.GainsightShipper.extendContext.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "newContext",
+                "description": [
+                  "The full new context to set {@link EventContext }"
+                ],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/analytics-client",
+                    "scope": "common",
+                    "docId": "kibKbnAnalyticsClientPluginApi",
+                    "section": "def-common.EventContext",
+                    "text": "EventContext"
+                  }
+                ],
+                "path": "packages/analytics/shippers/gainsight/src/gainsight_shipper.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/analytics-shippers-gainsight",
+            "id": "def-common.GainsightShipper.optIn",
+            "type": "Function",
+            "tags": [],
+            "label": "optIn",
+            "description": [
+              "\nStops/restarts the shipping mechanism based on the value of isOptedIn"
+            ],
+            "signature": [
+              "(isOptedIn: boolean) => void"
+            ],
+            "path": "packages/analytics/shippers/gainsight/src/gainsight_shipper.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/analytics-shippers-gainsight",
+                "id": "def-common.GainsightShipper.optIn.$1",
+                "type": "boolean",
+                "tags": [],
+                "label": "isOptedIn",
+                "description": [
+                  "`true` for resume sending events. `false` to stop."
+                ],
+                "signature": [
+                  "boolean"
+                ],
+                "path": "packages/analytics/shippers/gainsight/src/gainsight_shipper.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/analytics-shippers-gainsight",
+            "id": "def-common.GainsightShipper.reportEvents",
+            "type": "Function",
+            "tags": [],
+            "label": "reportEvents",
+            "description": [
+              "\nTransforms the event into a valid format and calls `track`."
+            ],
+            "signature": [
+              "(events: ",
+              {
+                "pluginId": "@kbn/analytics-client",
+                "scope": "common",
+                "docId": "kibKbnAnalyticsClientPluginApi",
+                "section": "def-common.Event",
+                "text": "Event"
+              },
+              "<Record<string, unknown>>[]) => void"
+            ],
+            "path": "packages/analytics/shippers/gainsight/src/gainsight_shipper.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/analytics-shippers-gainsight",
+                "id": "def-common.GainsightShipper.reportEvents.$1",
+                "type": "Array",
+                "tags": [],
+                "label": "events",
+                "description": [
+                  "batched events {@link Event }"
+                ],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/analytics-client",
+                    "scope": "common",
+                    "docId": "kibKbnAnalyticsClientPluginApi",
+                    "section": "def-common.Event",
+                    "text": "Event"
+                  },
+                  "<Record<string, unknown>>[]"
+                ],
+                "path": "packages/analytics/shippers/gainsight/src/gainsight_shipper.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/analytics-shippers-gainsight",
+            "id": "def-common.GainsightShipper.flush",
+            "type": "Function",
+            "tags": [],
+            "label": "flush",
+            "description": [
+              "\nFlushes all internal queues of the shipper.\nIt doesn't really do anything inside because this shipper doesn't hold any internal queues."
+            ],
+            "signature": [
+              "() => Promise<void>"
+            ],
+            "path": "packages/analytics/shippers/gainsight/src/gainsight_shipper.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/analytics-shippers-gainsight",
+            "id": "def-common.GainsightShipper.shutdown",
+            "type": "Function",
+            "tags": [],
+            "label": "shutdown",
+            "description": [
+              "\nShuts down the shipper.\nIt doesn't really do anything inside because this shipper doesn't hold any internal queues."
+            ],
+            "signature": [
+              "() => void"
+            ],
+            "path": "packages/analytics/shippers/gainsight/src/gainsight_shipper.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "functions": [],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/analytics-shippers-gainsight",
+        "id": "def-common.GainsightSnippetConfig",
+        "type": "Interface",
+        "tags": [],
+        "label": "GainsightSnippetConfig",
+        "description": [
+          "\ngainsight basic configuration."
+        ],
+        "path": "packages/analytics/shippers/gainsight/src/load_snippet.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/analytics-shippers-gainsight",
+            "id": "def-common.GainsightSnippetConfig.gainsightOrgId",
+            "type": "string",
+            "tags": [],
+            "label": "gainsightOrgId",
+            "description": [
+              "\nThe gainsight account id."
+            ],
+            "path": "packages/analytics/shippers/gainsight/src/load_snippet.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/analytics-shippers-gainsight",
+            "id": "def-common.GainsightSnippetConfig.scriptUrl",
+            "type": "string",
+            "tags": [],
+            "label": "scriptUrl",
+            "description": [
+              "\nThe URL to load the gainsight client from. Falls back to `web-sdk.aptrinsic.com` if not specified."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/analytics/shippers/gainsight/src/load_snippet.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/analytics-shippers-gainsight",
+            "id": "def-common.GainsightSnippetConfig.cssFileEndpoint",
+            "type": "string",
+            "tags": [],
+            "label": "cssFileEndpoint",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/analytics/shippers/gainsight/src/load_snippet.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/analytics-shippers-gainsight",
+            "id": "def-common.GainsightSnippetConfig.widgetFileEndpoint",
+            "type": "string",
+            "tags": [],
+            "label": "widgetFileEndpoint",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/analytics/shippers/gainsight/src/load_snippet.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

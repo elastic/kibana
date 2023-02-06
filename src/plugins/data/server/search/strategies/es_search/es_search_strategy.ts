@@ -28,26 +28,31 @@ export const esSearchStrategyProvider = (
    * @throws `KbnServerError`
    * @returns `Observable<IEsSearchResponse<any>>`
    */
-  search: (request, { abortSignal, ...options }, { esClient, uiSettingsClient }) => {
+  search: (request, { abortSignal, transport, ...options }, { esClient, uiSettingsClient }) => {
     // Only default index pattern type is supported here.
     // See ese for other type support.
     if (request.indexType) {
       throw new KbnServerError(`Unsupported index pattern type ${request.indexType}`, 400);
     }
 
+    const isPit = request.params?.body?.pit != null;
+
     const search = async () => {
       try {
         const config = await firstValueFrom(config$);
         // @ts-expect-error params fall back to any, but should be valid SearchRequest params
         const { terminateAfter, ...requestParams } = request.params ?? {};
+        const defaults = await getDefaultSearchParams(uiSettingsClient, { isPit });
+
         const params = {
-          ...(await getDefaultSearchParams(uiSettingsClient)),
+          ...defaults,
           ...getShardTimeout(config),
           ...(terminateAfter ? { terminate_after: terminateAfter } : {}),
           ...requestParams,
         };
         const body = await esClient.asCurrentUser.search(params, {
           signal: abortSignal,
+          ...transport,
         });
         const response = shimHitsTotal(body, options);
         return toKibanaSearchResponse(response);

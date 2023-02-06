@@ -5,70 +5,69 @@
  * 2.0.
  */
 
-import { buildEsQuery, TimeRange } from '@kbn/es-query';
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Subscription } from 'rxjs';
-import {
-  IEsSearchRequest,
-  IKibanaSearchResponse,
-  isCompleteResponse,
-  isErrorResponse,
-  TimeRangeBounds,
-} from '@kbn/data-plugin/common';
-import { useFilters } from './use_filters';
-import { convertAggregationToChartSeries } from '../../../common/utils/barchart';
+import { useQuery } from '@tanstack/react-query';
+import { Filter, Query, TimeRange } from '@kbn/es-query';
+import { useMemo, useState } from 'react';
+import { TimeRangeBounds } from '@kbn/data-plugin/common';
+import { useInspector, useKibana } from '../../../hooks';
 import { RawIndicatorFieldId } from '../../../../common/types/indicator';
-import { THREAT_QUERY_BASE } from '../../../../common/constants';
-import { calculateBarchartColumnTimeInterval } from '../../../common/utils/dates';
-import { useKibana } from '../../../hooks/use_kibana';
-import { DEFAULT_TIME_RANGE } from './use_filters/utils';
-import { useSourcererDataView } from './use_sourcerer_data_view';
+import { useSourcererDataView } from '.';
+import {
+  ChartSeries,
+  createFetchAggregatedIndicators,
+  FetchAggregatedIndicatorsParams,
+} from '../services/fetch_aggregated_indicators';
 
 export interface UseAggregatedIndicatorsParam {
-  timeRange?: TimeRange;
+  /**
+   * From and To values passed to the {@link useAggregatedIndicators} hook
+   * to query indicators for the Indicators barchart.
+   */
+  timeRange: TimeRange;
+  filters: Filter[];
+  /**
+   * Query data passed to the {@link useAggregatedIndicators} hook to query indicators.
+   */
+  filterQuery: Query;
 }
 
 export interface UseAggregatedIndicatorsValue {
-  indicators: ChartSeries[];
+  /**
+   * Array of {@link ChartSeries}, ready to be used in the Indicators barchart.
+   */
+  series: ChartSeries[];
+  /**
+   * Callback used by the IndicatorsFieldSelector component to query a new set of
+   * aggregated indicators.
+   * @param field the selected Indicator field
+   */
   onFieldChange: (field: string) => void;
+  /**
+   * The min and max times returned by the aggregated Indicators query.
+   */
   dateRange: TimeRangeBounds;
+  /**
+   * Indicator field used to query the aggregated Indicators.
+   */
   selectedField: string;
+
+  /** Is initial load in progress? */
+  isLoading?: boolean;
+
+  /** Is data update in progress? */
+  isFetching?: boolean;
+
+  query: { refetch: VoidFunction; id: string; loading: boolean };
 }
 
-export interface Aggregation {
-  doc_count: number;
-  key: string;
-  events: {
-    buckets: AggregationValue[];
-  };
-}
-
-export interface AggregationValue {
-  doc_count: number;
-  key: number;
-  key_as_string: string;
-}
-
-export interface ChartSeries {
-  x: string;
-  y: number;
-  g: string;
-}
-
-const TIMESTAMP_FIELD = RawIndicatorFieldId.TimeStamp;
 const DEFAULT_FIELD = RawIndicatorFieldId.Feed;
-export const AGGREGATION_NAME = 'barchartAggregation';
 
-export interface RawAggregatedIndicatorsResponse {
-  aggregations: {
-    [AGGREGATION_NAME]: {
-      buckets: Aggregation[];
-    };
-  };
-}
+const QUERY_ID = 'indicatorsBarchart';
 
 export const useAggregatedIndicators = ({
-  timeRange = DEFAULT_TIME_RANGE,
+  timeRange,
+  filters,
+  filterQuery,
 }: UseAggregatedIndicatorsParam): UseAggregatedIndicatorsValue => {
   const {
     services: {
@@ -78,138 +77,58 @@ export const useAggregatedIndicators = ({
 
   const { selectedPatterns } = useSourcererDataView();
 
-  const searchSubscription$ = useRef(new Subscription());
-  const abortController = useRef(new AbortController());
+  const { inspectorAdapters } = useInspector();
 
-  const [indicators, setIndicators] = useState<ChartSeries[]>([]);
   const [field, setField] = useState<string>(DEFAULT_FIELD);
 
-  const dateRange: TimeRangeBounds = useMemo(
+  const aggregatedIndicatorsQuery = useMemo(
+    () =>
+      createFetchAggregatedIndicators({
+        queryService,
+        searchService,
+        inspectorAdapter: inspectorAdapters.requests,
+      }),
+    [inspectorAdapters, queryService, searchService]
+  );
+
+  const { data, isLoading, isFetching, refetch } = useQuery(
+    [
+      QUERY_ID,
+      {
+        filters,
+        field,
+        filterQuery,
+        selectedPatterns,
+        timeRange,
+      },
+    ],
+    ({
+      signal,
+      queryKey: [_key, queryParams],
+    }: {
+      signal?: AbortSignal;
+      queryKey: [string, FetchAggregatedIndicatorsParams];
+    }) => aggregatedIndicatorsQuery(queryParams, signal),
+    { keepPreviousData: true }
+  );
+
+  const dateRange = useMemo(
     () => queryService.timefilter.timefilter.calculateBounds(timeRange),
-    [queryService, timeRange]
+    [queryService.timefilter.timefilter, timeRange]
   );
 
-  const { filters, filterQuery } = useFilters();
-
-  const loadData = useCallback(async () => {
-    const dateFrom: number = (dateRange.min as moment.Moment).toDate().getTime();
-    const dateTo: number = (dateRange.max as moment.Moment).toDate().getTime();
-    const interval = calculateBarchartColumnTimeInterval(dateFrom, dateTo);
-
-    abortController.current = new AbortController();
-
-    const queryToExecute = buildEsQuery(
-      undefined,
-      [
-        {
-          query: THREAT_QUERY_BASE,
-          language: 'kuery',
-        },
-        {
-          query: filterQuery.query as string,
-          language: 'kuery',
-        },
-      ],
-      [
-        ...filters,
-        {
-          query: {
-            range: {
-              [TIMESTAMP_FIELD]: {
-                gte: timeRange.from,
-                lte: timeRange.to,
-              },
-            },
-          },
-          meta: {},
-        },
-      ]
-    );
-
-    searchSubscription$.current = searchService
-      .search<IEsSearchRequest, IKibanaSearchResponse<RawAggregatedIndicatorsResponse>>(
-        {
-          params: {
-            index: selectedPatterns,
-            body: {
-              aggregations: {
-                [AGGREGATION_NAME]: {
-                  terms: {
-                    field,
-                  },
-                  aggs: {
-                    events: {
-                      date_histogram: {
-                        field: TIMESTAMP_FIELD,
-                        fixed_interval: interval,
-                        min_doc_count: 0,
-                        extended_bounds: {
-                          min: dateFrom,
-                          max: dateTo,
-                        },
-                      },
-                    },
-                  },
-                },
-              },
-              fields: [TIMESTAMP_FIELD, field], // limit the response to only the fields we need
-              size: 0, // we don't need hits, just aggregations
-              query: queryToExecute,
-            },
-          },
-        },
-        {
-          abortSignal: abortController.current.signal,
-        }
-      )
-      .subscribe({
-        next: (response) => {
-          const aggregations: Aggregation[] =
-            response.rawResponse.aggregations[AGGREGATION_NAME]?.buckets;
-          const chartSeries: ChartSeries[] = convertAggregationToChartSeries(aggregations);
-          setIndicators(chartSeries);
-
-          if (isCompleteResponse(response)) {
-            searchSubscription$.current.unsubscribe();
-          } else if (isErrorResponse(response)) {
-            searchSubscription$.current.unsubscribe();
-          }
-        },
-        error: (msg) => {
-          searchService.showError(msg);
-          searchSubscription$.current.unsubscribe();
-        },
-      });
-  }, [
-    dateRange.max,
-    dateRange.min,
-    field,
-    filterQuery,
-    filters,
-    searchService,
-    selectedPatterns,
-    timeRange.from,
-    timeRange.to,
-  ]);
-
-  const onFieldChange = useCallback(
-    async (f: string) => {
-      setField(f);
-      loadData();
-    },
-    [loadData, setField]
+  const query = useMemo(
+    () => ({ refetch, id: QUERY_ID, loading: isLoading }),
+    [isLoading, refetch]
   );
-
-  useEffect(() => {
-    loadData();
-
-    return () => abortController.current.abort();
-  }, [loadData]);
 
   return {
     dateRange,
-    indicators,
-    onFieldChange,
+    series: data || [],
+    onFieldChange: setField,
     selectedField: field,
+    isLoading,
+    isFetching,
+    query,
   };
 };

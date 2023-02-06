@@ -34,7 +34,7 @@ linear-gradient(
 center,
 ${theme.euiColorLightShade}`,
   backgroundSize: `${theme.euiSizeL} ${theme.euiSizeL}`,
-  margin: `-${theme.gutterTypes.gutterLarge}`,
+  margin: `-${theme.euiSizeL}`,
   marginTop: 0,
 });
 
@@ -110,18 +110,21 @@ export const JobMap: FC<Props> = ({ analyticsId, modelId, forceRefresh }) => {
 
   useEffect(() => {
     fetchAndSetElementsWrapper({ analyticsId, modelId });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [analyticsId, modelId]);
 
   useEffect(() => {
     if (forceRefresh === true) {
       fetchAndSetElementsWrapper({ analyticsId, modelId });
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [forceRefresh]);
 
   useEffect(() => {
     if (message !== undefined) {
       notifications.toasts.add(message);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [message]);
 
   useEffect(
@@ -129,6 +132,7 @@ export const JobMap: FC<Props> = ({ analyticsId, modelId, forceRefresh }) => {
       if (!refresh) return;
       fetchAndSetElementsWrapper({ analyticsId, modelId });
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [refresh]
   );
 
@@ -167,10 +171,7 @@ export const JobMap: FC<Props> = ({ analyticsId, modelId, forceRefresh }) => {
           </EuiButtonEmpty>
         </EuiFlexItem>
       </EuiFlexGroup>
-      <div
-        style={{ height: height - parseInt(euiTheme.gutterTypes.gutterLarge, 10) - 20 }}
-        ref={ref}
-      >
+      <div style={{ height: height - parseInt(euiTheme.euiSizeL, 10) - 20 }} ref={ref}>
         <Cytoscape
           theme={euiTheme}
           height={height - 20}

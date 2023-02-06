@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SavedObjectsType } from '@kbn/core/server';
+import type { SavedObjectsType } from '@kbn/core/server';
 import { CASE_CONFIGURE_SAVED_OBJECT } from '../../common/constants';
 import { configureMigrations } from './migrations';
 
@@ -28,6 +28,9 @@ export const caseConfigureSavedObjectType: SavedObjectsType = {
             type: 'keyword',
           },
           full_name: {
+            type: 'keyword',
+          },
+          profile_uid: {
             type: 'keyword',
           },
         },
@@ -70,6 +73,9 @@ export const caseConfigureSavedObjectType: SavedObjectsType = {
             type: 'keyword',
           },
           full_name: {
+            type: 'keyword',
+          },
+          profile_uid: {
             type: 'keyword',
           },
         },

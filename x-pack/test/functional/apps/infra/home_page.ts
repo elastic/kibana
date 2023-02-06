@@ -14,8 +14,9 @@ const DATE_WITHOUT_DATA = DATES.metricsAndLogs.hosts.withoutData;
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
+  const browser = getService('browser');
   const retry = getService('retry');
-  const pageObjects = getPageObjects(['common', 'infraHome', 'infraSavedViews']);
+  const pageObjects = getPageObjects(['common', 'header', 'infraHome', 'infraSavedViews']);
   const kibanaServer = getService('kibanaServer');
 
   describe('Home page', function () {
@@ -34,6 +35,22 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await pageObjects.common.navigateToApp('infraOps');
         await pageObjects.infraHome.getNoMetricsIndicesPrompt();
       });
+
+      it('renders the correct error page title', async () => {
+        await pageObjects.common.navigateToUrlWithBrowserHistory(
+          'infraOps',
+          '/detail/host/test',
+          '',
+          {
+            ensureCurrentUrl: false,
+          }
+        );
+        await pageObjects.infraHome.waitForLoading();
+        await pageObjects.header.waitUntilLoadingHasFinished();
+
+        const documentTitle = await browser.getTitle();
+        expect(documentTitle).to.contain('Uh oh - Observability - Elastic');
+      });
     });
 
     describe('with metrics present', () => {
@@ -46,6 +63,13 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         async () =>
           await esArchiver.unload('x-pack/test/functional/es_archives/infra/metrics_and_logs')
       );
+
+      it('renders the correct page title', async () => {
+        await pageObjects.header.waitUntilLoadingHasFinished();
+
+        const documentTitle = await browser.getTitle();
+        expect(documentTitle).to.contain('Inventory - Infrastructure - Observability - Elastic');
+      });
 
       it('renders an empty data prompt for dates with no data', async () => {
         await pageObjects.infraHome.goToTime(DATE_WITHOUT_DATA);

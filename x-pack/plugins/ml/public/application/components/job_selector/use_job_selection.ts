@@ -9,10 +9,9 @@ import { difference } from 'lodash';
 import { useEffect, useMemo } from 'react';
 
 import { i18n } from '@kbn/i18n';
+import { useUrlState } from '@kbn/ml-url-state';
 
 import { MlJobWithTimeRange } from '../../../../common/types/anomaly_detection_jobs';
-
-import { useUrlState } from '../../util/url_state';
 
 import { useNotifications } from '../../contexts/kibana';
 import { useJobSelectionFlyout } from '../../contexts/ml/use_job_selection_flyout';
@@ -44,6 +43,7 @@ export const useJobSelection = (jobs: MlJobWithTimeRange[]) => {
 
   const invalidIds = useMemo(() => {
     return getInvalidJobIds(jobs, tmpIds);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [tmpIds]);
 
   const validIds = useMemo(() => {
@@ -70,6 +70,7 @@ export const useJobSelection = (jobs: MlJobWithTimeRange[]) => {
         })
       );
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [invalidIds]);
 
   useEffect(() => {
@@ -89,6 +90,7 @@ export const useJobSelection = (jobs: MlJobWithTimeRange[]) => {
           // flyout closed without selection
         });
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [jobs, validIds, setGlobalState, globalState?.ml]);
 
   return jobSelection;

@@ -9,15 +9,15 @@ import type { EuiDataGridColumnCellActionProps } from '@elastic/eui';
 import { head, getOr, get, isEmpty } from 'lodash/fp';
 import React, { useMemo } from 'react';
 
-import type { TimelineNonEcsData } from '@kbn/timelines-plugin/common/search_strategy';
-import type { ColumnHeaderOptions } from '@kbn/timelines-plugin/common/types';
-import { getPageRowIndex } from '@kbn/timelines-plugin/public';
-import type { Ecs } from '../../../../common/ecs';
+import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
+import type { ColumnHeaderOptions } from '../../../../common/types';
+import type { TimelineNonEcsData } from '../../../../common/search_strategy';
 import { useGetMappedNonEcsValue } from '../../../timelines/components/timeline/body/data_driven_columns';
 import { FormattedFieldValue } from '../../../timelines/components/timeline/body/renderers/formatted_field';
 import { parseValue } from '../../../timelines/components/timeline/body/renderers/parse_value';
 import { EmptyComponent, getLinkColumnDefinition } from './helpers';
 import { getField, getFieldKey } from '../../../helpers';
+import { getPageRowIndex } from '../../components/data_table/pagination';
 
 const useFormattedFieldProps = ({
   rowIndex,
@@ -92,14 +92,14 @@ export const FieldValueCell = ({
   data,
   ecsData,
   header,
-  timelineId,
+  scopeId,
   pageSize,
   closeCellPopover,
 }: {
   data: TimelineNonEcsData[][];
   ecsData: Ecs[];
   header?: ColumnHeaderOptions;
-  timelineId: string;
+  scopeId: string;
   pageSize: number;
   closeCellPopover?: () => void;
 }) => {
@@ -134,7 +134,7 @@ export const FieldValueCell = ({
       return showEmpty === false ? (
         <FormattedFieldValue
           Component={Component}
-          contextId={`expanded-value-${columnId}-row-${pageRowIndex}-${timelineId}`}
+          contextId={`expanded-value-${columnId}-row-${pageRowIndex}-${scopeId}`}
           eventId={eventId}
           fieldFormat={fieldFormat}
           isAggregatable={header.aggregatable ?? false}

@@ -85,7 +85,7 @@ export const AgentReassignAgentPolicyModal: React.FunctionComponent<Props> = ({
       const successMessage = i18n.translate(
         'xpack.fleet.agentReassignPolicy.successSingleNotificationTitle',
         {
-          defaultMessage: 'Agent policy reassigned',
+          defaultMessage: 'Reassigning agent policy',
         }
       );
       notifications.toasts.addSuccess(successMessage);

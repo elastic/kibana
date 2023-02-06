@@ -11,5 +11,7 @@ export * from './contact_card_embeddable';
 export * from './contact_card_embeddable_factory';
 export * from './contact_card_exportable_embeddable';
 export * from './contact_card_exportable_embeddable_factory';
+export * from './contact_card_embeddable_react';
+export * from './contact_card_embeddable_react_factory';
 export * from './contact_card_initializer';
 export * from './slow_contact_card_embeddable_factory';

@@ -33,6 +33,7 @@ import {
   DatatablesWithFormatInfo,
   LayersAccessorsTitles,
   LayersFieldFormats,
+  hasMultipleLayersWithSplits,
 } from '../helpers';
 
 interface Props {
@@ -41,6 +42,7 @@ interface Props {
   formatFactory: FormatFactory;
   chartHasMoreThanOneBarSeries?: boolean;
   yAxesConfiguration: GroupsConfiguration;
+  xAxisConfiguration?: GroupsConfiguration[number];
   fittingFunction?: FittingFunction;
   endValue?: EndValue | undefined;
   paletteService: PaletteRegistry;
@@ -70,6 +72,7 @@ export const DataLayers: FC<Props> = ({
   fittingFunction,
   emphasizeFitting,
   yAxesConfiguration,
+  xAxisConfiguration,
   shouldShowValueLabels,
   formattedDatatables,
   chartHasMoreThanOneBarSeries,
@@ -108,6 +111,7 @@ export const DataLayers: FC<Props> = ({
         { commonLayerId: formattedDatatables[layers[0].layerId] }
       )
     : getColorAssignments(layers, titles, fieldFormats, formattedDatatables);
+  const multipleLayersWithSplits = hasMultipleLayersWithSplits(layers);
   return (
     <>
       {layers.flatMap((layer) => {
@@ -155,6 +159,7 @@ export const DataLayers: FC<Props> = ({
             formattedDatatableInfo,
             syncColors,
             yAxis,
+            xAxis: xAxisConfiguration,
             timeZone,
             emphasizeFitting,
             fillOpacity,
@@ -163,6 +168,7 @@ export const DataLayers: FC<Props> = ({
             uiState,
             allYAccessors,
             singleTable,
+            multipleLayersWithSplits,
           });
 
           const index = `${layer.layerId}-${accessorIndex}`;

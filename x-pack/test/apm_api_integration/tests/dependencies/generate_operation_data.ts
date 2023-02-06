@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { apm, timerange } from '@kbn/apm-synthtrace';
+import { apm, timerange } from '@kbn/apm-synthtrace-client';
 import { ApmSynthtraceEsClient } from '@kbn/apm-synthtrace';
 
 export const generateOperationDataConfig = {
@@ -27,8 +27,12 @@ export async function generateOperationData({
   end: number;
   synthtraceEsClient: ApmSynthtraceEsClient;
 }) {
-  const synthGoInstance = apm.service('synth-go', 'production', 'go').instance('instance-a');
-  const synthJavaInstance = apm.service('synth-java', 'development', 'java').instance('instance-a');
+  const synthGoInstance = apm
+    .service({ name: 'synth-go', environment: 'production', agentName: 'go' })
+    .instance('instance-a');
+  const synthJavaInstance = apm
+    .service({ name: 'synth-java', environment: 'development', agentName: 'java' })
+    .instance('instance-a');
 
   const interval = timerange(start, end).interval('1m');
 
@@ -37,7 +41,7 @@ export async function generateOperationData({
       .rate(generateOperationDataConfig.ES_SEARCH_UNKNOWN_RATE)
       .generator((timestamp) =>
         synthGoInstance
-          .span('/_search', 'db', 'elasticsearch')
+          .span({ spanName: '/_search', spanType: 'db', spanSubtype: 'elasticsearch' })
           .destination('elasticsearch')
           .timestamp(timestamp)
           .duration(generateOperationDataConfig.ES_SEARCH_DURATION)
@@ -46,7 +50,7 @@ export async function generateOperationData({
       .rate(generateOperationDataConfig.ES_SEARCH_SUCCESS_RATE)
       .generator((timestamp) =>
         synthGoInstance
-          .span('/_search', 'db', 'elasticsearch')
+          .span({ spanName: '/_search', spanType: 'db', spanSubtype: 'elasticsearch' })
           .destination('elasticsearch')
           .timestamp(timestamp)
           .success()
@@ -56,7 +60,7 @@ export async function generateOperationData({
       .rate(generateOperationDataConfig.ES_SEARCH_FAILURE_RATE)
       .generator((timestamp) =>
         synthGoInstance
-          .span('/_search', 'db', 'elasticsearch')
+          .span({ spanName: '/_search', spanType: 'db', spanSubtype: 'elasticsearch' })
           .destination('elasticsearch')
           .timestamp(timestamp)
           .failure()
@@ -66,7 +70,7 @@ export async function generateOperationData({
       .rate(generateOperationDataConfig.ES_BULK_RATE)
       .generator((timestamp) =>
         synthJavaInstance
-          .span('/_bulk', 'db', 'elasticsearch')
+          .span({ spanName: '/_bulk', spanType: 'db', spanSubtype: 'elasticsearch' })
           .destination('elasticsearch')
           .timestamp(timestamp)
           .duration(generateOperationDataConfig.ES_BULK_DURATION)
@@ -75,7 +79,7 @@ export async function generateOperationData({
       .rate(generateOperationDataConfig.REDIS_SET_RATE)
       .generator((timestamp) =>
         synthJavaInstance
-          .span('SET', 'db', 'redis')
+          .span({ spanName: 'SET', spanType: 'db', spanSubtype: 'redis' })
           .destination('redis')
           .timestamp(timestamp)
           .duration(generateOperationDataConfig.REDIS_SET_DURATION)

@@ -396,11 +396,6 @@ This content has moved. Refer to <<saved-object-migrations>>.
 
 This content has moved. Refer to {stack-ref}/upgrading-kibana.html[Upgrade Kibana].
 
-[role="exclude",id="upgrade-assistant"]
-== Upgrade Assistant
-
-This content has moved. Refer to {kibana-ref-all}/7.17/upgrade-assistant.html[Upgrade Assistant].
-
 [role="exclude",id="brew"]
 == Install {kib} on macOS with Homebrew
 
@@ -416,12 +411,12 @@ This page has been deleted. Refer to <<document-explorer>>.
 
 This page has been deleted. Refer to <<osquery>>.
 
-[role="exclude",id="machine-learning-api-sync"]
-== Sync machine learning saved objects API
+[role="exclude",id="ml-sync"]
+== Sync machine learning objects API
 
-This page has been deleted. Refer to <<ml-sync>>.
+This page has been deleted. Refer to <<machine-learning-api-sync>>.
 
-[role="exclude",id="machine-learning-api"]
-== Machine learning APIs
+[role="exclude",id="managing-alerts-and-actions"]
+== Alerts and Actions
 
-This page has been deleted. Refer to <<Machine_learning_APIs>>.
+This page has been deleted. Refer to <<alerting-getting-started>>.

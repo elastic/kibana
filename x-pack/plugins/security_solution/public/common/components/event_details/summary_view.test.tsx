@@ -48,7 +48,7 @@ const enrichedHostIpData: AlertSummaryRow['description'] = {
   eventId,
   fieldFromBrowserField: { ...hostIpFieldFromBrowserField },
   isDraggable: false,
-  timelineId: TimelineId.test,
+  scopeId: TimelineId.test,
   values: [...hostIpValues],
 };
 

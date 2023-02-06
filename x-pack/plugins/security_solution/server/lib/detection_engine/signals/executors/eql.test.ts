@@ -9,12 +9,11 @@ import dateMath from '@kbn/datemath';
 import type { RuleExecutorServicesMock } from '@kbn/alerting-plugin/server/mocks';
 import { alertsMock } from '@kbn/alerting-plugin/server/mocks';
 import { getExceptionListItemSchemaMock } from '@kbn/lists-plugin/common/schemas/response/exception_list_item_schema.mock';
-import { getEntryListMock } from '@kbn/lists-plugin/common/schemas/types/entry_list.mock';
 import { DEFAULT_INDEX_PATTERN } from '../../../../../common/constants';
 import { getIndexVersion } from '../../routes/index/get_index_version';
 import { SIGNALS_TEMPLATE_VERSION } from '../../routes/index/get_signals_template';
-import type { EqlRuleParams } from '../../schemas/rule_schemas';
-import { getCompleteRuleMock, getEqlRuleParams } from '../../schemas/rule_schemas.mock';
+import type { EqlRuleParams } from '../../rule_schema';
+import { getCompleteRuleMock, getEqlRuleParams } from '../../rule_schema/mocks';
 import { ruleExecutionLogMock } from '../../rule_monitoring/mocks';
 import { eqlExecutor } from './eql';
 
@@ -46,13 +45,11 @@ describe('eql_executor', () => {
 
   describe('eqlExecutor', () => {
     it('should set a warning when exception list for eql rule contains value list exceptions', async () => {
-      const exceptionItems = [getExceptionListItemSchemaMock({ entries: [getEntryListMock()] })];
-      const response = await eqlExecutor({
+      const result = await eqlExecutor({
         inputIndex: DEFAULT_INDEX_PATTERN,
         runtimeMappings: {},
         completeRule: eqlCompleteRule,
         tuple,
-        exceptionItems,
         ruleExecutionLogger,
         services: alertServices,
         version,
@@ -60,8 +57,14 @@ describe('eql_executor', () => {
         wrapHits: jest.fn(),
         wrapSequences: jest.fn(),
         primaryTimestamp: '@timestamp',
+        exceptionFilter: undefined,
+        unprocessedExceptions: [getExceptionListItemSchemaMock()],
       });
-      expect(response.warningMessages.length).toEqual(1);
+      expect(result.warningMessages).toEqual([
+        `The following exceptions won't be applied to rule execution: ${
+          getExceptionListItemSchemaMock().name
+        }`,
+      ]);
     });
   });
 });

@@ -9,5 +9,6 @@
 export const getThemeService = () => {
   return {
     useChartsTheme: () => ({}),
+    useChartsBaseTheme: () => ({ metric: { minHeight: 64 } }),
   };
 };

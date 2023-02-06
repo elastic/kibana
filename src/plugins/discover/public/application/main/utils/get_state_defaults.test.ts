@@ -7,26 +7,22 @@
  */
 
 import { getStateDefaults } from './get_state_defaults';
-import { createSearchSourceMock, dataPluginMock } from '@kbn/data-plugin/public/mocks';
-import { uiSettingsMock } from '../../../__mocks__/ui_settings';
+import { createSearchSourceMock } from '@kbn/data-plugin/public/mocks';
 import { dataViewWithTimefieldMock } from '../../../__mocks__/data_view_with_timefield';
 import { savedSearchMock } from '../../../__mocks__/saved_search';
 import { dataViewMock } from '../../../__mocks__/data_view';
 import { discoverServiceMock } from '../../../__mocks__/services';
 
 describe('getStateDefaults', () => {
-  const storage = discoverServiceMock.storage;
-
   test('data view with timefield', () => {
     savedSearchMock.searchSource = createSearchSourceMock({ index: dataViewWithTimefieldMock });
     const actual = getStateDefaults({
-      config: uiSettingsMock,
-      data: dataPluginMock.createStartContract(),
+      services: discoverServiceMock,
       savedSearch: savedSearchMock,
-      storage,
     });
     expect(actual).toMatchInlineSnapshot(`
       Object {
+        "breakdownField": undefined,
         "columns": Array [
           "default_column",
         ],
@@ -55,13 +51,12 @@ describe('getStateDefaults', () => {
     savedSearchMock.searchSource = createSearchSourceMock({ index: dataViewMock });
 
     const actual = getStateDefaults({
-      config: uiSettingsMock,
-      data: dataPluginMock.createStartContract(),
+      services: discoverServiceMock,
       savedSearch: savedSearchMock,
-      storage,
     });
     expect(actual).toMatchInlineSnapshot(`
       Object {
+        "breakdownField": undefined,
         "columns": Array [
           "default_column",
         ],

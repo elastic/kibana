@@ -22,6 +22,7 @@
         ],
         "path": "src/plugins/management/public/utils/management_app.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "management",
@@ -47,6 +48,7 @@
             ],
             "path": "src/plugins/management/public/utils/management_app.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "returnComment": [],
             "children": [
               {
@@ -66,7 +68,8 @@
                   }
                 ],
                 "path": "src/plugins/management/public/types.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               }
             ]
           },
@@ -78,7 +81,8 @@
             "label": "basePath",
             "description": [],
             "path": "src/plugins/management/public/utils/management_app.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "management",
@@ -91,7 +95,8 @@
               "string[]"
             ],
             "path": "src/plugins/management/public/utils/management_app.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "management",
@@ -105,6 +110,7 @@
             ],
             "path": "src/plugins/management/public/utils/management_app.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "management",
@@ -124,6 +130,7 @@
                 ],
                 "path": "src/plugins/management/public/utils/management_app.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -152,6 +159,7 @@
         ],
         "path": "src/plugins/management/public/utils/management_section.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "management",
@@ -171,7 +179,8 @@
               "[]"
             ],
             "path": "src/plugins/management/public/utils/management_section.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "management",
@@ -185,6 +194,7 @@
             ],
             "path": "src/plugins/management/public/utils/management_section.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "management",
@@ -198,6 +208,7 @@
                 ],
                 "path": "src/plugins/management/public/utils/management_section.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -230,6 +241,7 @@
             ],
             "path": "src/plugins/management/public/utils/management_section.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "management",
@@ -251,6 +263,7 @@
                 ],
                 "path": "src/plugins/management/public/utils/management_section.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -276,6 +289,7 @@
             ],
             "path": "src/plugins/management/public/utils/management_section.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "management",
@@ -289,6 +303,7 @@
                 ],
                 "path": "src/plugins/management/public/utils/management_section.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -314,6 +329,7 @@
             ],
             "path": "src/plugins/management/public/utils/management_section.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           }
@@ -332,6 +348,7 @@
         "description": [],
         "path": "src/plugins/management/public/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "management",
@@ -350,7 +367,8 @@
               }
             ],
             "path": "src/plugins/management/public/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "management",
@@ -369,7 +387,8 @@
               }
             ],
             "path": "src/plugins/management/public/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "management",
@@ -388,7 +407,8 @@
               }
             ],
             "path": "src/plugins/management/public/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "management",
@@ -407,7 +427,8 @@
               }
             ],
             "path": "src/plugins/management/public/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "management",
@@ -426,7 +447,8 @@
               }
             ],
             "path": "src/plugins/management/public/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "management",
@@ -445,7 +467,8 @@
               }
             ],
             "path": "src/plugins/management/public/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -459,6 +482,7 @@
         "description": [],
         "path": "src/plugins/management/public/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "management",
@@ -468,7 +492,8 @@
             "label": "basePath",
             "description": [],
             "path": "src/plugins/management/public/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "management",
@@ -481,7 +506,8 @@
               "HTMLElement"
             ],
             "path": "src/plugins/management/public/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "management",
@@ -497,6 +523,7 @@
             ],
             "path": "src/plugins/management/public/types.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "management",
@@ -511,6 +538,7 @@
                 ],
                 "path": "src/plugins/management/public/types.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -524,11 +552,18 @@
             "label": "history",
             "description": [],
             "signature": [
-              "ScopedHistory",
+              {
+                "pluginId": "@kbn/core-application-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreApplicationBrowserPluginApi",
+                "section": "def-common.ScopedHistory",
+                "text": "ScopedHistory"
+              },
               "<unknown>"
             ],
             "path": "src/plugins/management/public/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "management",
@@ -540,11 +575,18 @@
             "signature": [
               "Observable",
               "<",
-              "CoreTheme",
+              {
+                "pluginId": "@kbn/core-theme-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreThemeBrowserPluginApi",
+                "section": "def-common.CoreTheme",
+                "text": "CoreTheme"
+              },
               ">"
             ],
             "path": "src/plugins/management/public/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -569,6 +611,7 @@
         ],
         "path": "src/plugins/management/public/utils/management_app.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "management",
@@ -594,6 +637,7 @@
             ],
             "path": "src/plugins/management/public/utils/management_app.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "returnComment": [],
             "children": [
               {
@@ -613,7 +657,8 @@
                   }
                 ],
                 "path": "src/plugins/management/public/types.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               }
             ]
           },
@@ -625,7 +670,8 @@
             "label": "basePath",
             "description": [],
             "path": "src/plugins/management/public/utils/management_app.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "management",
@@ -638,7 +684,8 @@
               "string[] | undefined"
             ],
             "path": "src/plugins/management/public/utils/management_app.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -658,6 +705,7 @@
         ],
         "path": "src/plugins/management/common/contants.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       }
     ],
@@ -671,6 +719,7 @@
       "description": [],
       "path": "src/plugins/management/public/types.ts",
       "deprecated": false,
+      "trackAdoption": false,
       "children": [
         {
           "parentPluginId": "management",
@@ -683,7 +732,8 @@
             "SectionsServiceSetup"
           ],
           "path": "src/plugins/management/public/types.ts",
-          "deprecated": false
+          "deprecated": false,
+          "trackAdoption": false
         },
         {
           "parentPluginId": "management",
@@ -705,7 +755,8 @@
             ">"
           ],
           "path": "src/plugins/management/public/types.ts",
-          "deprecated": false
+          "deprecated": false,
+          "trackAdoption": false
         }
       ],
       "lifecycle": "setup",
@@ -720,6 +771,7 @@
       "description": [],
       "path": "src/plugins/management/public/types.ts",
       "deprecated": false,
+      "trackAdoption": false,
       "children": [],
       "lifecycle": "start",
       "initialIsOpen": true
@@ -760,6 +812,7 @@
         ],
         "path": "src/plugins/management/common/locator.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       }
     ],

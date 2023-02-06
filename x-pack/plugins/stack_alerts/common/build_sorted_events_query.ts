@@ -5,7 +5,7 @@
  * 2.0.
  */
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import type { ESSearchRequest } from '@kbn/core/types/elasticsearch';
+import type { ESSearchRequest } from '@kbn/es-types';
 
 interface BuildSortedEventsQueryOpts {
   aggs?: Record<string, estypes.AggregationsAggregationContainer>;
@@ -23,6 +23,7 @@ export interface BuildSortedEventsQuery extends BuildSortedEventsQueryOpts {
   timeField: string;
   fields?: string[];
   runtime_mappings?: unknown;
+  _source?: unknown;
 }
 
 export const buildSortedEventsQuery = ({
@@ -40,6 +41,7 @@ export const buildSortedEventsQuery = ({
   fields,
   // eslint-disable-next-line @typescript-eslint/naming-convention
   runtime_mappings,
+  _source,
 }: BuildSortedEventsQuery): ESSearchRequest => {
   const sortField = timeField;
   const docFields = [timeField].map((tstamp) => ({
@@ -70,12 +72,7 @@ export const buildSortedEventsQuery = ({
       docvalue_fields: docFields,
       query: {
         bool: {
-          filter: [
-            ...filterWithTime,
-            {
-              match_all: {},
-            },
-          ],
+          filter: [...filterWithTime],
         },
       },
       ...(aggs ? { aggs } : {}),
@@ -89,6 +86,7 @@ export const buildSortedEventsQuery = ({
     },
     ...(runtime_mappings ? { runtime_mappings } : {}),
     ...(fields ? { fields } : {}),
+    ...(_source != null ? { _source } : {}),
   };
 
   if (searchAfterSortId) {

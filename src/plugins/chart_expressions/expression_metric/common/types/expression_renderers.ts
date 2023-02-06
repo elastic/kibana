@@ -9,6 +9,7 @@
 import { ExpressionValueVisDimension } from '@kbn/visualizations-plugin/common';
 import { CustomPaletteState } from '@kbn/charts-plugin/common';
 import { LayoutDirection } from '@elastic/charts';
+import { TrendlineResult } from './expression_functions';
 
 export const visType = 'metric';
 
@@ -27,6 +28,7 @@ export interface MetricVisParam {
   progressDirection: LayoutDirection;
   maxCols: number;
   minTiles?: number;
+  trends?: TrendlineResult['trends'];
 }
 
 export interface VisParams {

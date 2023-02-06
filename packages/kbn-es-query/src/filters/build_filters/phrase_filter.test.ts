@@ -134,7 +134,7 @@ describe('buildInlineScriptForPhraseFilter', () => {
     };
 
     const expected =
-      `boolean compare(Supplier s, def v) {return s.get() == v;}` +
+      `boolean compare(Supplier s, def v) {if(s.get() instanceof List){List list = s.get(); for(def k : list){if(k==v){return true;}}return false;}else{return s.get() == v;}}` +
       `compare(() -> { return foo; }, params.value);`;
 
     expect(buildInlineScriptForPhraseFilter(field)).toBe(expected);
@@ -185,5 +185,15 @@ describe('isScriptedPhraseFilter', () => {
 
     expect(isScriptedPhraseFilter(filter)).toBe(true);
     expect(isPhraseFilter(unknownFilter)).toBe(false);
+  });
+
+  it('should return false if the filter is a range filter', () => {
+    const filter: Filter = set({ meta: {} }, 'query.script.script.params', {
+      gt: 0,
+      lt: 100,
+      value: 100,
+    }) as Filter;
+
+    expect(isScriptedPhraseFilter(filter)).toBe(false);
   });
 });

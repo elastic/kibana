@@ -8,12 +8,12 @@
 
 import { Readable } from 'stream';
 import type {
-  SavedObject,
   SavedObjectsImportRetry,
   SavedObjectsImportFailure,
   SavedObjectsImportResponse,
   SavedObjectsImportSuccess,
 } from '@kbn/core-saved-objects-common';
+import { SavedObject } from '@kbn/core-saved-objects-server';
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import type {
   ISavedObjectTypeRegistry,
@@ -32,7 +32,7 @@ import {
   checkConflicts,
   executeImportHooks,
   checkOriginConflicts,
-  ImportStateMap,
+  type ImportStateMap,
 } from './lib';
 
 /**

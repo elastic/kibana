@@ -1,7 +1,7 @@
 {
   "extends": "../../../../tsconfig.base.json",
   "compilerOptions": {
-    "outDir": "./target/types"
+    "outDir": "target/types"
   },
   "include": [
     "index.ts",
@@ -9,11 +9,13 @@
     "public/**/*.tsx",
     "../../../../typings/**/*"
   ],
-  "exclude": [],
-  "references": [
-    { "path": "../../../../src/core/tsconfig.json" },
-    { "path": "../../../../src/plugins/data/tsconfig.json" },
-    { "path": "../../../../src/plugins/visualizations/tsconfig.json" },
-    { "path": "../../../../src/plugins/expressions/tsconfig.json" },
+  "exclude": [
+    "target/**/*",
+  ],
+  "kbn_references": [
+    "@kbn/core",
+    "@kbn/data-plugin",
+    "@kbn/visualizations-plugin",
+    "@kbn/expressions-plugin",
   ]
 }

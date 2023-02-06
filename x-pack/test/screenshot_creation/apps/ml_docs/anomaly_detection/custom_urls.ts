@@ -94,7 +94,7 @@ export default function ({ getService }: FtrProviderContext) {
       await ml.anomaliesTable.scrollTableIntoView();
       await ml.anomaliesTable.ensureAnomalyActionsMenuOpen(0);
 
-      await commonScreenshots.takeScreenshot('ml-population-results', screenshotDirectories);
+      await commonScreenshots.takeScreenshot('ml-customurl', screenshotDirectories);
     });
   });
 }

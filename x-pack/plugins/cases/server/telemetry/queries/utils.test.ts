@@ -6,6 +6,7 @@
  */
 
 import { savedObjectsRepositoryMock } from '@kbn/core/server/mocks';
+import type { CaseAggregationResult } from '../types';
 import {
   findValueInBuckets,
   getAggregationsBuckets,
@@ -18,9 +19,127 @@ import {
   getOnlyAlertsCommentsFilter,
   getOnlyConnectorsFilter,
   getReferencesAggregationQuery,
+  getSolutionValues,
 } from './utils';
 
 describe('utils', () => {
+  describe('getSolutionValues', () => {
+    const counts = {
+      buckets: [
+        { doc_count: 1, key: 1 },
+        { doc_count: 2, key: 2 },
+        { doc_count: 3, key: 3 },
+      ],
+    };
+
+    const assignees = {
+      assigneeFilters: {
+        buckets: {
+          atLeastOne: {
+            doc_count: 0,
+          },
+          zero: {
+            doc_count: 100,
+          },
+        },
+      },
+      totalAssignees: { value: 5 },
+    };
+
+    const solutionValues = {
+      counts,
+      ...assignees,
+    };
+
+    const aggsResult: CaseAggregationResult = {
+      users: { value: 1 },
+      tags: { value: 2 },
+      ...assignees,
+      counts,
+      securitySolution: { ...solutionValues },
+      observability: { ...solutionValues },
+      cases: { ...solutionValues },
+      syncAlerts: {
+        buckets: [
+          {
+            key: 0,
+            doc_count: 1,
+          },
+          {
+            key: 1,
+            doc_count: 1,
+          },
+        ],
+      },
+      status: {
+        buckets: [
+          {
+            key: 'open',
+            doc_count: 2,
+          },
+        ],
+      },
+      totalsByOwner: {
+        buckets: [
+          {
+            key: 'observability',
+            doc_count: 1,
+          },
+          {
+            key: 'securitySolution',
+            doc_count: 1,
+          },
+          {
+            key: 'cases',
+            doc_count: 1,
+          },
+        ],
+      },
+    };
+
+    it('constructs the solution values correctly', () => {
+      expect(getSolutionValues(aggsResult, 'securitySolution')).toMatchInlineSnapshot(`
+        Object {
+          "assignees": Object {
+            "total": 5,
+            "totalWithAtLeastOne": 0,
+            "totalWithZero": 100,
+          },
+          "daily": 3,
+          "monthly": 1,
+          "total": 1,
+          "weekly": 2,
+        }
+      `);
+      expect(getSolutionValues(aggsResult, 'cases')).toMatchInlineSnapshot(`
+        Object {
+          "assignees": Object {
+            "total": 5,
+            "totalWithAtLeastOne": 0,
+            "totalWithZero": 100,
+          },
+          "daily": 3,
+          "monthly": 1,
+          "total": 1,
+          "weekly": 2,
+        }
+      `);
+      expect(getSolutionValues(aggsResult, 'observability')).toMatchInlineSnapshot(`
+        Object {
+          "assignees": Object {
+            "total": 5,
+            "totalWithAtLeastOne": 0,
+            "totalWithZero": 100,
+          },
+          "daily": 3,
+          "monthly": 1,
+          "total": 1,
+          "weekly": 2,
+        }
+      `);
+    });
+  });
+
   describe('getCountsAggregationQuery', () => {
     it('returns the correct query', () => {
       expect(getCountsAggregationQuery('test')).toEqual({

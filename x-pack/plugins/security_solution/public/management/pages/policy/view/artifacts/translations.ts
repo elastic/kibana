@@ -67,6 +67,7 @@ export type PolicyArtifactsPageRequiredLabels = Pick<
   | 'emptyUnassignedMessage'
   | 'emptyUnassignedPrimaryActionButtonTitle'
   | 'emptyUnassignedSecondaryActionButtonTitle'
+  | 'emptyUnassignedNoPrivilegesMessage'
   | 'emptyUnexistingTitle'
   | 'emptyUnexistingMessage'
   | 'emptyUnexistingPrimaryActionButtonTitle'

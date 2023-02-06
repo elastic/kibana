@@ -12,4 +12,7 @@ export const mlApiServicesMock = {
   results: {
     getAnomalyCharts$: jest.fn(),
   },
+  notifications: {
+    findMessages: jest.fn(),
+  },
 };

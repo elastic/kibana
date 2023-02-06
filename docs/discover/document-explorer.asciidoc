@@ -1,31 +1,40 @@
 [[document-explorer]]
 == Explore your documents
 
+Fine tune your explorations by customizing *Discover* to bring out the the best view of your documents.
+Adjust the chart height, modify the document table, and look inside a document.
 
-*Discover* displays your documents in table format, so you can
-best explore your data.
-Use the document table to resize columns, set row height,
-perform multi-column sorting, compare data, and more.
+[role="screenshot"]
+image:images/discover.png[A view of the Discover app]
 
-++++
-<script type="text/javascript" async src="https://play.vidyard.com/embed/v4.js">
-</script>
-<img
-style="width: 100%; margin: auto; display: block;"
-class="vidyard-player-embed"
-src="https://play.vidyard.com/KbZQP6Y7msjevAm1JGbKeG.jpg"
-data-uuid="KbZQP6Y7msjevAm1JGbKeG"
-data-v="4"
-data-type="inline"
-/>
-</br>
-++++
+
+[float]
+[[document-explorer-c]]
+=== Hide or resize the chart
+
+Hide or resize the chart for a better fit.
+
+* To turn off the display of the chart, click
+image:images/chart-icon.png[icon button for opening Show/Hide chart menu, width=24px]
+to open the *Chart options* menu, and then click *Hide*.
+
+* To change the chart height, drag the resize handle
+image:images/resize-icon.png[two-line icon for increasing or decreasing the height of the chart, width=24px]
+to the size you want.
+The chart size is saved in your browser.
+
+* To reset the height, open the *Chart options* menu, and then select *Reset to default height*.
+
+[float]
+[[document-explorer-customize]]
+=== Modify the document table
+
+Customize the appearance of the document table and its contents by resizing the columns and rows,
+sorting and modifying the fields, and filtering the documents.
 
 [float]
 [[document-explorer-columns]]
-=== Reorder and resize columns
-
-Use drag and drop to organize the columns and improve the view of the data.
+==== Reorder and resize the columns
 
 * To move a single column, click its header. In the dropdown menu,
 click *Move left* or *Move right*.
@@ -34,26 +43,26 @@ click *Move left* or *Move right*.
 In the pop-up, drag the column names to their new order.
 
 * To resize a column, drag the right edge of the column header until the column is the width that you want.
-
++
 Column widths are stored with a saved search.  When you visualize saved searches on dashboards, the saved search appears the same as in **Discover**.
+
 
 [float]
 [[document-explorer-row-height]]
-=== Adjust row height
+==== Adjust the row height
 
-To set the row height to 1 or more lines, or automatically
+To set the row height to one or more lines, or automatically
 adjust the height to fit the contents, click the row height icon
 image:images/row-height-icon.png[icon to open the Row height pop-up].
 
 [role="screenshot"]
-image::images/document-explorer-row-height.png[Row height settings for the document table, width="75%"]
-
+image::images/document-explorer-row-height.png[Row height settings for the document table, width="50%"]
 
 [float]
 [[document-explorer-sort-data]]
-=== Sort data
+==== Sort the fields
 
-Sort your data by one or more fields, in ascending or descending order.
+Sort the data by one or more fields, in ascending or descending order.
 The default sort is based on the time field, from new to old.
 
 To add or remove a sort on a single field, click the
@@ -61,38 +70,69 @@ column header, and then select the sort order.
 
 To sort by multiple fields:
 
-. In the document table, click the *field sorted* option.
+. Click the *field sorted* option.
 +
 [role="screenshot"]
-image::images/document-explorer-sort-data.png[Pop-up in document table for sorting columns, width="75%"]
+image::images/document-explorer-sort-data.png[Pop-up in document table for sorting columns, width="50%"]
 
-. To add more fields to the sort, select from the dropdown menu.
+. To add fields to the sort, select their names from the dropdown menu.
 +
 By default, columns are sorted in the order they are added.
 +
 [role="screenshot"]
-image::images/document-explorer-multi-field.png[Multi field sort in the document table, width="75%"]
+image::images/document-explorer-multi-field.png[Multi field sort in the document table, width="50%"]
 
 . To change the sort order, select a field in the pop-up, and then drag it to the new location.
+
+[float]
+[[document-explorer-edit-field]]
+==== Edit a field
+
+Change how {kib} displays a field.
+
+. Click the column header for the field, and then select *Edit data view field.*
+
+. In the *Edit field* form, change the field name and format.
++
+For detailed information on formatting options, refer to <<managing-fields, Format data fields>>.
 
 
 [float]
 [[document-explorer-compare-data]]
-=== Compare data
+==== Filter the documents
 
-Narrow your results to a subset of documents to easily
-compare the data of interest.
+Narrow your results to a subset of documents so you're comparing just the data of interest.
 
 . Select the documents you want to compare.
 
 . Click the *documents selected* option, and then select *Show selected documents only*.
 +
 [role="screenshot"]
-image::images/document-explorer-compare-data.png[Compare data in the document table, width="75%"]
+image::images/document-explorer-compare-data.png[Compare data in the document table, width="50%"]
+
+[float]
+[[document-explorer-configure-table]]
+==== Set the number of rows per page
+
+To change the numbers of rows you want to display on each page, use the *Rows per page* menu. By default, the document table displays 100 rows per page.
+
+[role="screenshot"]
+image::images/document-table-rows-per-page.png["Menu with options for setting the number of rows in the document table"]
+
+To customize the default number of rows per page, go to *Stack Managaement > Advanced Settings*
+and search for *rows per page*.
+
+[float]
+[[document-explorer-full-screen]]
+==== View in fullscreen
+
+To toggle the table in and out of fullscreen mode, click the fullscreen icon
+image:images/fullscreen-icon.png[icon to display the document table in fullscreen mode].
 
 [float]
 [[document-explorer-expand-documents]]
-=== Expand documents
+
+=== Go inside a document
 
 Dive into an individual document to inspect its fields, set filters, and view
 the documents that occurred before and after it.
@@ -109,8 +149,7 @@ image::images/document-table-expanded.png[Expanded view of the document table]
 . In the *Table* view, scan through the fields and their values, or search for a field by name.
 
 . When you find a field of interest,
-click
-image:images/actions-icon.png[three dots icon in table column] in the *Actions* column
+hover your mouse over the *Actions* column
 to:
 .. Filter the results to include or exclude specific fields or values.
 .. Toggle the field in or out the document table.
@@ -134,22 +173,3 @@ filters remain active, while other filters are copied in a disabled state.
 +
 [role="screenshot"]
 image::images/discover-context.png[Image showing context view feature, with anchor documents highlighted in blue]
-
-
-[float]
-[[document-explorer-full-screen]]
-=== View documents in fullscreen
-
-To view as much data as possible and eliminate distractions, click the fullscreen icon
-image:images/fullscreen-icon.png[icon to display the document table in fullscreen mode]
-in the document table.
-
-[float]
-[[document-explorer-configure-table]]
-=== Configure the number of documents displayed
-
-By default, the document table displays 100 rows per page. To change this number,
-click *Rows per page*.
-
-[role="screenshot"]
-image::images/document-table-rows-per-page.png["Menu with options for setting the number of rows in the document table"]

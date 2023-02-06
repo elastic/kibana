@@ -32,7 +32,7 @@ export function MachineLearningJobWizardCommonProvider(
   return {
     async clickNextButton() {
       await testSubjects.existOrFail('mlJobWizardNavButtonNext');
-      await testSubjects.clickWhenNotDisabled('mlJobWizardNavButtonNext');
+      await testSubjects.clickWhenNotDisabledWithoutRetry('mlJobWizardNavButtonNext');
     },
 
     async assertTimeRangeSectionExists() {
@@ -329,7 +329,7 @@ export function MachineLearningJobWizardCommonProvider(
         })) === false
       ) {
         await retry.tryForTime(5 * 1000, async () => {
-          await testSubjects.clickWhenNotDisabled(subj);
+          await testSubjects.clickWhenNotDisabledWithoutRetry(subj);
           await this.assertDedicatedIndexSwitchCheckedState(true, {
             withAdvancedSection: sectionOptions.withAdvancedSection,
           });
@@ -362,7 +362,7 @@ export function MachineLearningJobWizardCommonProvider(
       const subj = 'mlJobWizardStartDatafeedCheckbox';
       if ((await this.getStartDatafeedSwitchCheckedState()) !== toggle) {
         await retry.tryForTime(5 * 1000, async () => {
-          await testSubjects.clickWhenNotDisabled(subj);
+          await testSubjects.clickWhenNotDisabledWithoutRetry(subj);
           await this.assertStartDatafeedSwitchCheckedState(toggle);
         });
       }
@@ -492,7 +492,7 @@ export function MachineLearningJobWizardCommonProvider(
     },
 
     async clickUseFullDataButton(expectedStartDate: string, expectedEndDate: string) {
-      await testSubjects.clickWhenNotDisabled('mlButtonUseFullData');
+      await testSubjects.clickWhenNotDisabledWithoutRetry('mlDatePickerButtonUseFullData');
       await this.assertDateRangeSelection(expectedStartDate, expectedEndDate);
     },
 
@@ -540,12 +540,12 @@ export function MachineLearningJobWizardCommonProvider(
     },
 
     async createJobAndWaitForCompletion() {
-      await testSubjects.clickWhenNotDisabled('mlJobWizardButtonCreateJob');
+      await testSubjects.clickWhenNotDisabledWithoutRetry('mlJobWizardButtonCreateJob');
       await testSubjects.existOrFail('mlJobWizardButtonRunInRealTime', { timeout: 2 * 60 * 1000 });
     },
 
     async createJobWithoutDatafeedStart() {
-      await testSubjects.clickWhenNotDisabled('mlJobWizardButtonCreateJob');
+      await testSubjects.clickWhenNotDisabledWithoutRetry('mlJobWizardButtonCreateJob');
       await testSubjects.existOrFail('mlPageJobManagement');
     },
   };

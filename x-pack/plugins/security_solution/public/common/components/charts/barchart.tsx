@@ -10,7 +10,7 @@ import React, { useMemo } from 'react';
 import { Chart, BarSeries, Axis, Position, ScaleType, Settings } from '@elastic/charts';
 import { getOr, get, isNumber } from 'lodash/fp';
 import deepmerge from 'deepmerge';
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import styled from 'styled-components';
 import deepEqual from 'fast-deep-equal';
 
@@ -30,14 +30,15 @@ import {
   WrappedByAutoSizer,
   useTheme,
   Wrapper,
-  ChartWrapper,
+  BarChartWrapper,
 } from './common';
 import { DraggableLegend } from './draggable_legend';
 import type { LegendItem } from './draggable_legend_item';
 import type { ChartData, ChartSeriesConfigs, ChartSeriesData } from './common';
-import { VisualizationActions, HISTOGRAM_ACTIONS_BUTTON_CLASS } from '../visualization_actions';
+import { VisualizationActions } from '../visualization_actions';
 import type { VisualizationActionsProps } from '../visualization_actions/types';
 import { HoverVisibilityContainer } from '../hover_visibility_container';
+import { VISUALIZATION_ACTIONS_BUTTON_CLASS } from '../visualization_actions/utils';
 
 const LegendFlexItem = styled(EuiFlexItem)`
   overview: hidden;
@@ -168,7 +169,7 @@ export interface BarChartComponentProps {
   barChart: ChartSeriesData[] | null | undefined;
   configs?: ChartSeriesConfigs | undefined;
   stackByField?: string;
-  timelineId?: string;
+  scopeId?: string;
   visualizationActionsOptions?: VisualizationActionsProps;
 }
 
@@ -178,7 +179,7 @@ export const BarChartComponent: React.FC<BarChartComponentProps> = ({
   barChart,
   configs,
   stackByField,
-  timelineId,
+  scopeId,
   visualizationActionsOptions,
 }) => {
   const { ref: measureRef, width, height } = useThrottledResizeObserver();
@@ -188,14 +189,14 @@ export const BarChartComponent: React.FC<BarChartComponentProps> = ({
         ? barChart.map((d, i) => ({
             color: d.color ?? (i < defaultLegendColors.length ? defaultLegendColors[i] : undefined),
             dataProviderId: escapeDataProviderId(
-              `draggable-legend-item-${uuid.v4()}-${stackByField}-${d.key}`
+              `draggable-legend-item-${uuidv4()}-${stackByField}-${d.key}`
             ),
-            timelineId,
+            scopeId,
             field: stackByField,
             value: d.key,
           }))
         : NO_LEGEND_DATA,
-    [barChart, stackByField, timelineId]
+    [barChart, stackByField, scopeId]
   );
 
   const yAxisTitle = get('yAxisTitle', configs);
@@ -207,9 +208,9 @@ export const BarChartComponent: React.FC<BarChartComponentProps> = ({
 
   return (
     <Wrapper>
-      <HoverVisibilityContainer targetClassNames={[HISTOGRAM_ACTIONS_BUTTON_CLASS]}>
+      <HoverVisibilityContainer targetClassNames={[VISUALIZATION_ACTIONS_BUTTON_CLASS]}>
         {isValidSeriesExist && barChart && (
-          <ChartWrapper gutterSize="none">
+          <BarChartWrapper gutterSize="none">
             <EuiFlexItem grow={true}>
               <WrappedByAutoSizer ref={measureRef} height={chartHeight}>
                 <BarChartBase
@@ -226,7 +227,7 @@ export const BarChartComponent: React.FC<BarChartComponentProps> = ({
             <LegendFlexItem grow={false}>
               <DraggableLegend legendItems={legendItems} height={height} />
             </LegendFlexItem>
-          </ChartWrapper>
+          </BarChartWrapper>
         )}
         {!isValidSeriesExist && (
           <ChartPlaceHolder height={chartHeight} width={chartWidth} data={barChart} />
@@ -243,7 +244,7 @@ export const BarChart = React.memo(
   BarChartComponent,
   (prevProps, nextProps) =>
     prevProps.stackByField === nextProps.stackByField &&
-    prevProps.timelineId === nextProps.timelineId &&
+    prevProps.scopeId === nextProps.scopeId &&
     deepEqual(prevProps.configs, nextProps.configs) &&
     deepEqual(prevProps.barChart, nextProps.barChart)
 );

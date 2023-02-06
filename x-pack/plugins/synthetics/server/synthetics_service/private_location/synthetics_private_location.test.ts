@@ -14,15 +14,17 @@ import {
   ScheduleUnit,
   SourceType,
   HeartbeatConfig,
+  PrivateLocation,
 } from '../../../common/runtime_types';
 import { SyntheticsPrivateLocation } from './synthetics_private_location';
 import { testMonitorPolicy } from './test_policy';
 
 describe('SyntheticsPrivateLocation', () => {
-  const mockPrivateLocation = {
+  const mockPrivateLocation: PrivateLocation = {
     id: 'policyId',
     label: 'Test Location',
-    isServiceManaged: false,
+    concurrentMonitors: 1,
+    agentPolicyId: 'policyId',
   };
   const testConfig = {
     id: 'testId',
@@ -77,6 +79,7 @@ describe('SyntheticsPrivateLocation', () => {
       },
       packagePolicyService: {
         get: jest.fn().mockReturnValue({}),
+        buildPackagePolicyFromPackage: jest.fn(),
       },
     },
     spaces: {
@@ -87,13 +90,10 @@ describe('SyntheticsPrivateLocation', () => {
   } as unknown as UptimeServerSetup;
 
   it.each([
-    [
-      true,
-      'Unable to create Synthetics package policy for monitor Test Monitor with private location Test Location',
-    ],
+    [true, 'Unable to create Synthetics package policy for private location'],
     [
       false,
-      'Unable to create Synthetics package policy for monitor Test Monitor. Fleet write permissions are needed to use Synthetics private locations.',
+      'Unable to create Synthetics package policy for monitor. Fleet write permissions are needed to use Synthetics private locations.',
     ],
   ])('throws errors for create monitor', async (writeIntegrationPolicies, error) => {
     const syntheticsPrivateLocation = new SyntheticsPrivateLocation({
@@ -107,10 +107,12 @@ describe('SyntheticsPrivateLocation', () => {
     });
 
     try {
-      await syntheticsPrivateLocation.createMonitor(
-        testConfig,
+      await syntheticsPrivateLocation.createMonitors(
+        [testConfig],
         {} as unknown as KibanaRequest,
-        savedObjectsClientMock
+        savedObjectsClientMock,
+        [mockPrivateLocation],
+        'test-space'
       );
     } catch (e) {
       expect(e).toEqual(new Error(error));
@@ -118,13 +120,10 @@ describe('SyntheticsPrivateLocation', () => {
   });
 
   it.each([
-    [
-      true,
-      'Unable to update Synthetics package policy for monitor Test Monitor with private location Test Location',
-    ],
+    [true, 'Unable to create Synthetics package policy for private location'],
     [
       false,
-      'Unable to update Synthetics package policy for monitor Test Monitor. Fleet write permissions are needed to use Synthetics private locations.',
+      'Unable to update Synthetics package policy for monitor. Fleet write permissions are needed to use Synthetics private locations.',
     ],
   ])('throws errors for edit monitor', async (writeIntegrationPolicies, error) => {
     const syntheticsPrivateLocation = new SyntheticsPrivateLocation({
@@ -138,10 +137,12 @@ describe('SyntheticsPrivateLocation', () => {
     });
 
     try {
-      await syntheticsPrivateLocation.editMonitor(
-        testConfig,
+      await syntheticsPrivateLocation.editMonitors(
+        [testConfig],
         {} as unknown as KibanaRequest,
-        savedObjectsClientMock
+        savedObjectsClientMock,
+        [mockPrivateLocation],
+        'test-space'
       );
     } catch (e) {
       expect(e).toEqual(new Error(error));
@@ -168,13 +169,14 @@ describe('SyntheticsPrivateLocation', () => {
       },
     });
     try {
-      await syntheticsPrivateLocation.deleteMonitor(
-        testConfig,
+      await syntheticsPrivateLocation.deleteMonitors(
+        [testConfig],
         {} as unknown as KibanaRequest,
-        savedObjectsClientMock
+        savedObjectsClientMock,
+        'test-space'
       );
     } catch (e) {
-      expect(e).toEqual(new Error(e));
+      expect(e).toEqual(new Error(error));
     }
   });
 

@@ -1,0 +1,5 @@
+{
+  "type": "shared-common",
+  "id": "@kbn/securitysolution-list-api",
+  "owner": "@elastic/security-solution-platform"
+}

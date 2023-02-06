@@ -7,7 +7,7 @@
 
 import { getMapping } from './mapping';
 import { format } from './format';
-import { SwimlaneCaseConnector } from './types';
+import type { SwimlaneCaseConnector } from './types';
 
 export const getCaseConnector = (): SwimlaneCaseConnector => ({
   getMapping,

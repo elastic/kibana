@@ -21,7 +21,7 @@ describe('AnalyticsClient', () => {
   let logger: MockedLogger;
 
   beforeEach(() => {
-    jest.useFakeTimers();
+    jest.useFakeTimers({ legacyFakeTimers: true });
     logger = loggerMock.create();
     analyticsClient = new AnalyticsClient({
       logger,
@@ -30,8 +30,8 @@ describe('AnalyticsClient', () => {
     });
   });
 
-  afterEach(() => {
-    analyticsClient.shutdown();
+  afterEach(async () => {
+    await analyticsClient.shutdown();
     jest.useRealTimers();
   });
 
@@ -381,7 +381,7 @@ describe('AnalyticsClient', () => {
 
     test(
       'Handles errors in the shipper',
-      fakeSchedulers((advance) => {
+      fakeSchedulers(async (advance) => {
         const optInMock = jest.fn().mockImplementation(() => {
           throw new Error('Something went terribly wrong');
         });
@@ -404,7 +404,7 @@ describe('AnalyticsClient', () => {
           `Shipper "${MockedShipper.shipperName}" failed to extend the context`,
           expect.any(Error)
         );
-        expect(() => analyticsClient.shutdown()).not.toThrow();
+        await expect(analyticsClient.shutdown()).resolves.toBeUndefined();
         expect(shutdownMock).toHaveBeenCalled();
       })
     );

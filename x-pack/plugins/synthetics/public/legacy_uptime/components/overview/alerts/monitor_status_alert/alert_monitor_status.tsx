@@ -69,7 +69,7 @@ export const AlertMonitorStatusComponent: React.FC<AlertMonitorStatusProps> = (p
       <EuiCallOut
         size="s"
         title={
-          <span>
+          <span data-test-subj="alertSnapShotCount">
             <FormattedMessage
               id="xpack.synthetics.alerts.monitorStatus.monitorCallOut.title"
               defaultMessage="This alert will apply to approximately {snapshotCount} monitors."

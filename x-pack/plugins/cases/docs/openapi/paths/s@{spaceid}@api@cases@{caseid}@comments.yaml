@@ -5,20 +5,19 @@ post:
     You must have `all` privileges for the **Cases** feature in the
     **Management**, **Observability**, or **Security** section of the Kibana
     feature privileges, depending on the owner of the case you're creating.
+    NOTE: Each case can have a maximum of 1,000 alerts.
   tags:
     - cases
-    - kibana
   parameters:
     - $ref: '../components/headers/kbn_xsrf.yaml'
     - $ref: '../components/parameters/case_id.yaml'
     - $ref: '../components/parameters/space_id.yaml'
   requestBody:
+    required: true
     content:
       application/json:
         schema:
-          oneOf: 
-            - $ref: '../components/schemas/add_alert_comment_request_properties.yaml'
-            - $ref: '../components/schemas/add_user_comment_request_properties.yaml'
+          $ref: '../components/schemas/add_case_comment_request.yaml'
         examples:
           createCaseCommentRequest:
             $ref: '../components/examples/add_comment_request.yaml'
@@ -26,14 +25,18 @@ post:
     '200':
       description: Indicates a successful call.
       content:
-         application/json; charset=utf-8:
+         application/json:
           schema:
-            type: object
-            properties:
-              $ref: '../components/schemas/case_response_properties.yaml'
+            $ref: '../components/schemas/case_response_properties.yaml'
           examples:
             createCaseCommentResponse:
               $ref: '../components/examples/add_comment_response.yaml'
+    '401':
+      description: Authorization information is missing or invalid.
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/4xx_response.yaml'
   servers:
      - url: https://localhost:5601
 
@@ -46,7 +49,6 @@ delete:
     feature privileges, depending on the owner of the cases you're deleting.
   tags:
     - cases
-    - kibana
   parameters:
     - $ref: '../components/headers/kbn_xsrf.yaml'
     - $ref: '../components/parameters/case_id.yaml'
@@ -54,6 +56,12 @@ delete:
   responses:
     '204':
       description: Indicates a successful call.
+    '401':
+      description: Authorization information is missing or invalid.
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/4xx_response.yaml'
   servers:
     - url: https://localhost:5601
 
@@ -67,18 +75,16 @@ patch:
     NOTE: You cannot change the comment type or the owner of a comment.
   tags:
     - cases
-    - kibana
   parameters:
     - $ref: '../components/headers/kbn_xsrf.yaml'
     - $ref: '../components/parameters/case_id.yaml'
     - $ref: '../components/parameters/space_id.yaml'
   requestBody:
+    required: true
     content:
       application/json:
         schema:
-          oneOf: 
-            - $ref: '../components/schemas/update_alert_comment_request_properties.yaml'
-            - $ref: '../components/schemas/update_user_comment_request_properties.yaml'
+          $ref: '../components/schemas/update_case_comment_request.yaml'
         examples:
           updateCaseCommentRequest:
             $ref: '../components/examples/update_comment_request.yaml'
@@ -86,14 +92,18 @@ patch:
     '200':
       description: Indicates a successful call.
       content:
-        application/json; charset=utf-8:
+        application/json:
           schema:
-            type: object
-            properties:
-              $ref: '../components/schemas/case_response_properties.yaml'
+           $ref: '../components/schemas/case_response_properties.yaml'
           examples:
             updateCaseCommentResponse:
               $ref: '../components/examples/update_comment_response.yaml'
+    '401':
+      description: Authorization information is missing or invalid.
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/4xx_response.yaml'
   servers:
         - url: https://localhost:5601
 
@@ -107,7 +117,6 @@ get:
   deprecated: true
   tags:
     - cases
-    - kibana
   parameters:
     - $ref: '../components/parameters/case_id.yaml'
     - $ref: '../components/parameters/space_id.yaml'
@@ -115,16 +124,16 @@ get:
     '200':
       description: Indicates a successful call.
       content:
-        application/json; charset=utf-8:
+        application/json:
           schema:
-            type: array
-            items:
-              anyOf:
-                - $ref: '../components/schemas/alert_comment_response_properties.yaml'
-                - $ref: '../components/schemas/user_comment_response_properties.yaml'
-        examples: {}
+            $ref: '../components/schemas/case_response_properties.yaml'
+    '401':
+      description: Authorization information is missing or invalid.
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/4xx_response.yaml'
   servers:
     - url: https://localhost:5601
-
 servers:
       - url: https://localhost:5601

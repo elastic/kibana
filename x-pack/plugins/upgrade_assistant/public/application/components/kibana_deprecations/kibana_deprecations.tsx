@@ -6,9 +6,14 @@
  */
 
 import React, { useEffect, useState, useCallback, useMemo } from 'react';
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import { withRouter, RouteComponentProps } from 'react-router-dom';
-import { EuiPageContent, EuiPageHeader, EuiSpacer, EuiCallOut } from '@elastic/eui';
+import {
+  EuiPageContent_Deprecated as EuiPageContent,
+  EuiPageHeader,
+  EuiSpacer,
+  EuiCallOut,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { METRIC_TYPE } from '@kbn/analytics';
 
@@ -135,7 +140,7 @@ export const KibanaDeprecations = withRouter(({ history }: RouteComponentProps) 
         // Only show deprecations in the table that fetched successfully
         filteredDeprecations.push({
           ...deprecation,
-          id: uuid.v4(), // Associate an unique ID with each deprecation to track resolution state
+          id: uuidv4(), // Associate an unique ID with each deprecation to track resolution state
           filterType: deprecation.deprecationType ?? 'uncategorized', // deprecationType is currently optional, in order to correctly handle sort/filter, we default any undefined types to "uncategorized"
         });
       });

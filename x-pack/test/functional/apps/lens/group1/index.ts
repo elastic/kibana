@@ -39,6 +39,7 @@ export default ({ getService, loadTestFile, getPageObjects }: FtrProviderContext
     before(async () => {
       await log.debug('Starting lens before method');
       await browser.setWindowSize(1280, 1200);
+      await kibanaServer.savedObjects.cleanStandardList();
       try {
         config.get('esTestCluster.ccs');
         remoteEsArchiver = getService('remoteEsArchiver' as 'esArchiver');
@@ -63,10 +64,11 @@ export default ({ getService, loadTestFile, getPageObjects }: FtrProviderContext
     });
 
     after(async () => {
-      await esArchiver.unload(esArchive);
+      await esNode.unload(esArchive);
       await PageObjects.timePicker.resetDefaultAbsoluteRangeViaUiSettings();
       await kibanaServer.importExport.unload(fixtureDirs.lensBasic);
       await kibanaServer.importExport.unload(fixtureDirs.lensDefault);
+      await kibanaServer.savedObjects.cleanStandardList();
     });
 
     if (config.get('esTestCluster.ccs')) {
@@ -74,9 +76,13 @@ export default ({ getService, loadTestFile, getPageObjects }: FtrProviderContext
     } else {
       loadTestFile(require.resolve('./smokescreen'));
       loadTestFile(require.resolve('./ad_hoc_data_view'));
+      loadTestFile(require.resolve('./partition'));
       loadTestFile(require.resolve('./persistent_context'));
       loadTestFile(require.resolve('./table_dashboard'));
       loadTestFile(require.resolve('./table'));
+      loadTestFile(require.resolve('./text_based_languages'));
+      loadTestFile(require.resolve('./fields_list'));
+      loadTestFile(require.resolve('./layer_actions'));
     }
   });
 };

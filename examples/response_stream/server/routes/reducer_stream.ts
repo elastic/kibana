@@ -31,17 +31,29 @@ export const defineReducerStreamRoute = (router: IRouter, logger: Logger) => {
       const maxTimeoutMs = request.body.timeout ?? 250;
       const simulateError = request.body.simulateErrors ?? false;
 
+      let logMessageCounter = 1;
+
+      function logDebugMessage(msg: string) {
+        logger.debug(`Response Stream Example #${logMessageCounter}: ${msg}`);
+        logMessageCounter++;
+      }
+
+      logDebugMessage('Starting stream.');
+
       let shouldStop = false;
       request.events.aborted$.subscribe(() => {
+        logDebugMessage('aborted$ subscription trigger.');
         shouldStop = true;
       });
       request.events.completed$.subscribe(() => {
+        logDebugMessage('completed$ subscription trigger.');
         shouldStop = true;
       });
 
       const { end, push, responseWithHeaders } = streamFactory<ReducerStreamApiAction>(
         request.headers,
-        logger
+        logger,
+        request.body.compressResponse
       );
 
       const entities = [

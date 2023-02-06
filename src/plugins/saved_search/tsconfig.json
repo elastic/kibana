@@ -1,10 +1,7 @@
 {
   "extends": "../../../tsconfig.base.json",
   "compilerOptions": {
-    "outDir": "./target/types",
-    "emitDeclarationOnly": true,
-    "declaration": true,
-    "declarationMap": true
+    "outDir": "target/types",
   },
   "include": [
     "common/**/*",
@@ -12,10 +9,15 @@
     "server/**/*",
     "../../../typings/**/*",
   ],
-  "references": [
-    { "path": "../../core/tsconfig.json" },
-    { "path": "../data/tsconfig.json" },
-    { "path": "../kibana_utils/tsconfig.json" },
-    { "path": "../../../x-pack/plugins/spaces/tsconfig.json" }
+  "kbn_references": [
+    "@kbn/core",
+    "@kbn/data-plugin",
+    "@kbn/kibana-utils-plugin",
+    "@kbn/spaces-plugin",
+    "@kbn/saved-objects-tagging-oss-plugin",
+    "@kbn/i18n",
+  ],
+  "exclude": [
+    "target/**/*",
   ]
 }

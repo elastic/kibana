@@ -85,6 +85,35 @@ export const PreconfiguredOutputsSchema = schema.arrayOf(
   }
 );
 
+export const PreconfiguredFleetServerHostsSchema = schema.arrayOf(
+  schema.object({
+    id: schema.string(),
+    name: schema.string(),
+    is_default: schema.boolean({ defaultValue: false }),
+    host_urls: schema.arrayOf(schema.string(), { minSize: 1 }),
+    proxy_id: schema.nullable(schema.string()),
+  }),
+  { defaultValue: [] }
+);
+
+export const PreconfiguredFleetProxiesSchema = schema.arrayOf(
+  schema.object({
+    id: schema.string(),
+    name: schema.string(),
+    url: schema.string(),
+    proxy_headers: schema.maybe(
+      schema.recordOf(
+        schema.string(),
+        schema.oneOf([schema.string(), schema.boolean(), schema.number()])
+      )
+    ),
+    certificate_authorities: schema.maybe(schema.string()),
+    certificate: schema.maybe(schema.string()),
+    certificate_key: schema.maybe(schema.string()),
+  }),
+  { defaultValue: [] }
+);
+
 export const PreconfiguredAgentPoliciesSchema = schema.arrayOf(
   schema.object({
     ...AgentPolicyBaseSchema,

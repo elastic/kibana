@@ -21,6 +21,41 @@
     "functions": [
       {
         "parentPluginId": "@kbn/io-ts-utils",
+        "id": "def-common.createLiteralValueFromUndefinedRT",
+        "type": "Function",
+        "tags": [],
+        "label": "createLiteralValueFromUndefinedRT",
+        "description": [],
+        "signature": [
+          "<LiteralValue extends string | number | boolean>(literalValue: LiteralValue) => ",
+          "Type",
+          "<LiteralValue, undefined, unknown>"
+        ],
+        "path": "packages/kbn-io-ts-utils/src/literal_value_from_undefined_rt/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/io-ts-utils",
+            "id": "def-common.createLiteralValueFromUndefinedRT.$1",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "literalValue",
+            "description": [],
+            "signature": [
+              "LiteralValue"
+            ],
+            "path": "packages/kbn-io-ts-utils/src/literal_value_from_undefined_rt/index.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/io-ts-utils",
         "id": "def-common.deepExactRt",
         "type": "Function",
         "tags": [],
@@ -31,6 +66,7 @@
         ],
         "path": "packages/kbn-io-ts-utils/src/deep_exact_rt/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/io-ts-utils",
@@ -44,6 +80,7 @@
             ],
             "path": "packages/kbn-io-ts-utils/src/deep_exact_rt/index.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -96,6 +133,7 @@
         ],
         "path": "packages/kbn-io-ts-utils/src/deep_exact_rt/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/io-ts-utils",
@@ -111,6 +149,7 @@
             ],
             "path": "packages/kbn-io-ts-utils/src/deep_exact_rt/index.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -131,6 +170,7 @@
         ],
         "path": "packages/kbn-io-ts-utils/src/merge_rt/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/io-ts-utils",
@@ -144,6 +184,7 @@
             ],
             "path": "packages/kbn-io-ts-utils/src/merge_rt/index.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           },
           {
@@ -158,6 +199,7 @@
             ],
             "path": "packages/kbn-io-ts-utils/src/merge_rt/index.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -186,6 +228,7 @@
         ],
         "path": "packages/kbn-io-ts-utils/src/merge_rt/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/io-ts-utils",
@@ -200,6 +243,7 @@
             ],
             "path": "packages/kbn-io-ts-utils/src/merge_rt/index.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -220,6 +264,7 @@
         ],
         "path": "packages/kbn-io-ts-utils/src/strict_keys_rt/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/io-ts-utils",
@@ -233,6 +278,7 @@
             ],
             "path": "packages/kbn-io-ts-utils/src/strict_keys_rt/index.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -253,6 +299,7 @@
         ],
         "path": "packages/kbn-io-ts-utils/src/to_json_schema/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/io-ts-utils",
@@ -266,6 +313,7 @@
             ],
             "path": "packages/kbn-io-ts-utils/src/to_json_schema/index.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -283,6 +331,7 @@
         "description": [],
         "path": "packages/kbn-io-ts-utils/src/non_empty_string_rt/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/io-ts-utils",
@@ -303,15 +352,56 @@
               "[\"NonEmptyString\"]"
             ],
             "path": "packages/kbn-io-ts-utils/src/non_empty_string_rt/index.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
       }
     ],
     "enums": [],
-    "misc": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/io-ts-utils",
+        "id": "def-common.IndexPatternType",
+        "type": "Type",
+        "tags": [],
+        "label": "IndexPatternType",
+        "description": [],
+        "signature": [
+          "string & ",
+          "Brand",
+          "<",
+          "IndexPatternBrand",
+          ">"
+        ],
+        "path": "packages/kbn-io-ts-utils/src/index_pattern_rt/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
     "objects": [
+      {
+        "parentPluginId": "@kbn/io-ts-utils",
+        "id": "def-common.indexPatternRt",
+        "type": "Object",
+        "tags": [],
+        "label": "indexPatternRt",
+        "description": [],
+        "signature": [
+          "BrandC",
+          "<",
+          "StringC",
+          ", ",
+          "IndexPatternBrand",
+          ">"
+        ],
+        "path": "packages/kbn-io-ts-utils/src/index_pattern_rt/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
       {
         "parentPluginId": "@kbn/io-ts-utils",
         "id": "def-common.isoToEpochRt",
@@ -325,6 +415,7 @@
         ],
         "path": "packages/kbn-io-ts-utils/src/iso_to_epoch_rt/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -340,6 +431,7 @@
         ],
         "path": "packages/kbn-io-ts-utils/src/json_rt/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -365,6 +457,7 @@
         ],
         "path": "packages/kbn-io-ts-utils/src/non_empty_string_rt/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -380,6 +473,7 @@
         ],
         "path": "packages/kbn-io-ts-utils/src/to_boolean_rt/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -395,6 +489,7 @@
         ],
         "path": "packages/kbn-io-ts-utils/src/to_number_rt/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       }
     ]

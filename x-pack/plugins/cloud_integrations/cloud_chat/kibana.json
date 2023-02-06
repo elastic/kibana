@@ -1,0 +1,15 @@
+{
+  "id": "cloudChat",
+  "version": "1.0.0",
+  "kibanaVersion": "kibana",
+  "owner": {
+    "name": "Kibana Core",
+    "githubTeam": "kibana-core"
+  },
+  "description": "Chat available on Elastic Cloud deployments for quicker assistance.",
+  "server": true,
+  "ui": true,
+  "configPath": ["xpack", "cloud_integrations", "chat"],
+  "requiredPlugins": ["cloud"],
+  "optionalPlugins": ["security"]
+}

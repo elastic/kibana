@@ -9,6 +9,7 @@ import { i18n } from '@kbn/i18n';
 import { keyBy } from 'lodash';
 import React from 'react';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
+import { useSearchServiceDestinationMetrics } from '../../../../context/time_range_metadata/use_search_service_destination_metrics';
 import { useApmParams } from '../../../../hooks/use_apm_params';
 import { useBreakpoints } from '../../../../hooks/use_breakpoints';
 import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
@@ -22,6 +23,7 @@ import { ITableColumn, ManagedTable } from '../../../shared/managed_table';
 import { getComparisonEnabled } from '../../../shared/time_comparison/get_comparison_enabled';
 import { TruncateWithTooltip } from '../../../shared/truncate_with_tooltip';
 import { DependencyOperationDetailLink } from '../../dependency_operation_detail_view/dependency_operation_detail_link';
+import { TransactionTab } from '../../transaction_details/waterfall_with_summary/transaction_tabs';
 
 interface OperationStatisticsItem extends SpanMetricGroup {
   spanName: string;
@@ -34,7 +36,14 @@ function OperationLink({ spanName }: { spanName: string }) {
     <TruncateWithTooltip
       data-test-subj="apmOperationsListAppLink"
       text={spanName}
-      content={<DependencyOperationDetailLink {...query} spanName={spanName} />}
+      content={
+        <DependencyOperationDetailLink
+          {...query}
+          spanName={spanName}
+          detailTab={TransactionTab.timeline}
+          showCriticalPath={false}
+        />
+      }
     />
   );
 }
@@ -66,6 +75,9 @@ export function DependencyDetailOperationsList() {
     urlComparisonEnabled,
   });
 
+  const { searchServiceDestinationMetrics } =
+    useSearchServiceDestinationMetrics({ rangeFrom, rangeTo, kuery });
+
   const primaryStatsFetch = useFetcher(
     (callApmApi) => {
       return callApmApi('GET /internal/apm/dependencies/operations', {
@@ -76,11 +88,19 @@ export function DependencyDetailOperationsList() {
             end,
             environment,
             kuery,
+            searchServiceDestinationMetrics,
           },
         },
       });
     },
-    [dependencyName, start, end, environment, kuery]
+    [
+      dependencyName,
+      start,
+      end,
+      environment,
+      kuery,
+      searchServiceDestinationMetrics,
+    ]
   );
 
   const comparisonStatsFetch = useFetcher(
@@ -99,11 +119,21 @@ export function DependencyDetailOperationsList() {
             offset,
             environment,
             kuery,
+            searchServiceDestinationMetrics,
           },
         },
       });
     },
-    [dependencyName, start, end, offset, environment, kuery, comparisonEnabled]
+    [
+      dependencyName,
+      start,
+      end,
+      offset,
+      environment,
+      kuery,
+      comparisonEnabled,
+      searchServiceDestinationMetrics,
+    ]
   );
 
   const columns: Array<ITableColumn<OperationStatisticsItem>> = [

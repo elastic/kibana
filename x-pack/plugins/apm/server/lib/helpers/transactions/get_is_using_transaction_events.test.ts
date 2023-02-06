@@ -63,7 +63,12 @@ describe('getIsUsingTransactionEvents', () => {
 
     it('should be false', async () => {
       mock = await inspectSearchParams(
-        (setup) => getIsUsingTransactionEvents({ setup, kuery: '' }),
+        ({ mockApmEventClient, mockConfig }) =>
+          getIsUsingTransactionEvents({
+            config: mockConfig,
+            apmEventClient: mockApmEventClient,
+            kuery: '',
+          }),
         { config }
       );
       expect(mock.response).toBe(false);
@@ -71,7 +76,12 @@ describe('getIsUsingTransactionEvents', () => {
 
     it('should not query for data', async () => {
       mock = await inspectSearchParams(
-        (setup) => getIsUsingTransactionEvents({ setup, kuery: '' }),
+        ({ mockApmEventClient, mockConfig }) =>
+          getIsUsingTransactionEvents({
+            config: mockConfig,
+            apmEventClient: mockApmEventClient,
+            kuery: '',
+          }),
         { config }
       );
       expect(mock.spy).toHaveBeenCalledTimes(0);
@@ -84,7 +94,12 @@ describe('getIsUsingTransactionEvents', () => {
     };
     it('should be false when kuery is empty', async () => {
       mock = await inspectSearchParams(
-        (setup) => getIsUsingTransactionEvents({ setup, kuery: '' }),
+        ({ mockApmEventClient, mockConfig }) =>
+          getIsUsingTransactionEvents({
+            config: mockConfig,
+            apmEventClient: mockApmEventClient,
+            kuery: '',
+          }),
         { config }
       );
       expect(mock.response).toBe(false);
@@ -92,9 +107,10 @@ describe('getIsUsingTransactionEvents', () => {
 
     it('should be false when kuery is set and metrics data found', async () => {
       mock = await inspectSearchParams(
-        (setup) =>
+        ({ mockApmEventClient, mockConfig }) =>
           getIsUsingTransactionEvents({
-            setup,
+            config: mockConfig,
+            apmEventClient: mockApmEventClient,
             kuery: 'proccessor.event: "transaction"',
           }),
         {
@@ -116,9 +132,10 @@ describe('getIsUsingTransactionEvents', () => {
 
     it('should be true when kuery is set and metrics data are not found', async () => {
       mock = await inspectSearchParams(
-        (setup) =>
+        ({ mockApmEventClient, mockConfig }) =>
           getIsUsingTransactionEvents({
-            setup,
+            config: mockConfig,
+            apmEventClient: mockApmEventClient,
             kuery: 'proccessor.event: "transaction"',
           }),
         {
@@ -140,7 +157,12 @@ describe('getIsUsingTransactionEvents', () => {
 
     it('should not query for data when kuery is empty', async () => {
       mock = await inspectSearchParams(
-        (setup) => getIsUsingTransactionEvents({ setup, kuery: '' }),
+        ({ mockApmEventClient, mockConfig }) =>
+          getIsUsingTransactionEvents({
+            config: mockConfig,
+            apmEventClient: mockApmEventClient,
+            kuery: '',
+          }),
         { config }
       );
       expect(mock.spy).toHaveBeenCalledTimes(0);
@@ -148,9 +170,10 @@ describe('getIsUsingTransactionEvents', () => {
 
     it('should query for data when kuery is set', async () => {
       mock = await inspectSearchParams(
-        (setup) =>
+        ({ mockApmEventClient, mockConfig }) =>
           getIsUsingTransactionEvents({
-            setup,
+            config: mockConfig,
+            apmEventClient: mockApmEventClient,
             kuery: 'proccessor.event: "transaction"',
           }),
         { config }
@@ -167,7 +190,12 @@ describe('getIsUsingTransactionEvents', () => {
 
     it('should query for data once if metrics data found', async () => {
       mock = await inspectSearchParams(
-        (setup) => getIsUsingTransactionEvents({ setup, kuery: '' }),
+        ({ mockApmEventClient, mockConfig }) =>
+          getIsUsingTransactionEvents({
+            config: mockConfig,
+            apmEventClient: mockApmEventClient,
+            kuery: '',
+          }),
         {
           config,
           mockResponse: (request) => {
@@ -187,7 +215,12 @@ describe('getIsUsingTransactionEvents', () => {
 
     it('should query for data twice if metrics data not found', async () => {
       mock = await inspectSearchParams(
-        (setup) => getIsUsingTransactionEvents({ setup, kuery: '' }),
+        ({ mockApmEventClient, mockConfig }) =>
+          getIsUsingTransactionEvents({
+            config: mockConfig,
+            apmEventClient: mockApmEventClient,
+            kuery: '',
+          }),
         {
           config,
           mockResponse: (request) => {
@@ -207,7 +240,12 @@ describe('getIsUsingTransactionEvents', () => {
 
     it('should be false if metrics data are found', async () => {
       mock = await inspectSearchParams(
-        (setup) => getIsUsingTransactionEvents({ setup, kuery: '' }),
+        ({ mockApmEventClient, mockConfig }) =>
+          getIsUsingTransactionEvents({
+            config: mockConfig,
+            apmEventClient: mockApmEventClient,
+            kuery: '',
+          }),
         {
           config,
           mockResponse: (request) => {
@@ -226,7 +264,12 @@ describe('getIsUsingTransactionEvents', () => {
 
     it('should be true if no metrics data are found', async () => {
       mock = await inspectSearchParams(
-        (setup) => getIsUsingTransactionEvents({ setup, kuery: '' }),
+        ({ mockApmEventClient, mockConfig }) =>
+          getIsUsingTransactionEvents({
+            config: mockConfig,
+            apmEventClient: mockApmEventClient,
+            kuery: '',
+          }),
         {
           config,
           mockResponse: (request) => {
@@ -245,7 +288,12 @@ describe('getIsUsingTransactionEvents', () => {
 
     it('should be false if no metrics or transactions data are found', async () => {
       mock = await inspectSearchParams(
-        (setup) => getIsUsingTransactionEvents({ setup, kuery: '' }),
+        ({ mockApmEventClient, mockConfig }) =>
+          getIsUsingTransactionEvents({
+            config: mockConfig,
+            apmEventClient: mockApmEventClient,
+            kuery: '',
+          }),
         { config, mockResponse: () => mockResponseNoHits }
       );
       expect(mock.response).toBe(false);

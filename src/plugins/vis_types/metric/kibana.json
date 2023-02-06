@@ -4,11 +4,20 @@
   "kibanaVersion": "kibana",
   "server": true,
   "ui": true,
-  "requiredPlugins": ["data", "visualizations", "charts", "expressions"],
-  "requiredBundles": ["visDefaultEditor"],
+  "requiredPlugins": [
+    "data",
+    "visualizations",
+    "charts",
+    "expressions",
+    "dataViews"
+  ],
+  "requiredBundles": [
+    "visDefaultEditor",
+    "kibanaUtils"
+  ],
   "owner": {
     "name": "Vis Editors",
-    "githubTeam": "kibana-vis-editors"
+    "githubTeam": "kibana-visualizations"
   },
   "description": "Registers the Metric aggregation-based visualization."
 }

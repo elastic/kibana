@@ -525,9 +525,9 @@ async function expectStatusCode(
   }>,
   statusCode: number
 ) {
-  let res;
+  let response;
   try {
-    res = await fn();
+    response = await fn();
   } catch (e) {
     if (e && e.res && e.res.status) {
       if (e.res.status === statusCode) {
@@ -538,10 +538,10 @@ async function expectStatusCode(
       );
     } else {
       throw new Error(
-        `Unexpected rejection value, expected error with .res response property: ${inspect(e)}`
+        `Unexpected rejection value, expected error with .response property: ${inspect(e)}`
       );
     }
   }
 
-  expect(res.status).to.be(statusCode);
+  expect(response.status).to.be(statusCode);
 }

@@ -6,18 +6,18 @@
  */
 
 import { useQuery } from '@tanstack/react-query';
-import { SingleCaseMetrics, SingleCaseMetricsFeature } from './types';
+import type { SingleCaseMetrics, SingleCaseMetricsFeature } from './types';
 import { useToasts } from '../common/lib/kibana';
 import { getSingleCaseMetrics } from './api';
-import { ServerError } from '../types';
+import type { ServerError } from '../types';
 import { ERROR_TITLE } from './translations';
-import { CASE_VIEW_CACHE_KEY, CASE_VIEW_METRICS_CACHE_KEY } from './constants';
+import { casesQueriesKeys } from './constants';
 
 export const useGetCaseMetrics = (caseId: string, features: SingleCaseMetricsFeature[]) => {
   const toasts = useToasts();
   const abortCtrlRef = new AbortController();
   return useQuery(
-    [CASE_VIEW_CACHE_KEY, CASE_VIEW_METRICS_CACHE_KEY, caseId, features],
+    casesQueriesKeys.caseMetrics(caseId, features),
     async () => {
       const response: SingleCaseMetrics = await getSingleCaseMetrics(
         caseId,

@@ -62,6 +62,7 @@ export default function (providerContext: FtrProviderContext) {
   describe('installs and uninstalls multiple packages side effects', async () => {
     skipIfNoDockerRegistry(providerContext);
     setupFleetAndAgents(providerContext);
+
     before(async () => {
       if (!server.enabled) return;
       await installPackages([
@@ -76,6 +77,7 @@ export default function (providerContext: FtrProviderContext) {
       await uninstallPackages([
         { name: pkgName, version: pkgVersion },
         { name: experimentalPkgName, version: pkgVersion },
+        { name: experimental2PkgName, version: pkgVersion },
       ]);
     });
     it('should create index patterns (without fields)', async () => {

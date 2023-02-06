@@ -10,10 +10,18 @@
   },
   "server": {
     "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
     "functions": [
       {
         "parentPluginId": "@kbn/dev-utils",
-        "id": "def-server.diffStrings",
+        "id": "def-common.diffStrings",
         "type": "Function",
         "tags": [],
         "label": "diffStrings",
@@ -25,10 +33,11 @@
         ],
         "path": "packages/kbn-dev-utils/src/diff_strings.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/dev-utils",
-            "id": "def-server.diffStrings.$1",
+            "id": "def-common.diffStrings.$1",
             "type": "string",
             "tags": [],
             "label": "expected",
@@ -38,11 +47,12 @@
             ],
             "path": "packages/kbn-dev-utils/src/diff_strings.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           },
           {
             "parentPluginId": "@kbn/dev-utils",
-            "id": "def-server.diffStrings.$2",
+            "id": "def-common.diffStrings.$2",
             "type": "string",
             "tags": [],
             "label": "received",
@@ -52,6 +62,7 @@
             ],
             "path": "packages/kbn-dev-utils/src/diff_strings.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -60,7 +71,7 @@
       },
       {
         "parentPluginId": "@kbn/dev-utils",
-        "id": "def-server.extract",
+        "id": "def-common.extract",
         "type": "Function",
         "tags": [],
         "label": "extract",
@@ -72,10 +83,11 @@
         ],
         "path": "packages/kbn-dev-utils/src/extract.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/dev-utils",
-            "id": "def-server.extract.$1",
+            "id": "def-common.extract.$1",
             "type": "Object",
             "tags": [],
             "label": "{\n  archivePath,\n  targetDir,\n  stripComponents = 0,\n  setModifiedTimes,\n}",
@@ -85,6 +97,7 @@
             ],
             "path": "packages/kbn-dev-utils/src/extract.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -93,7 +106,7 @@
       },
       {
         "parentPluginId": "@kbn/dev-utils",
-        "id": "def-server.isAxiosRequestError",
+        "id": "def-common.isAxiosRequestError",
         "type": "Function",
         "tags": [],
         "label": "isAxiosRequestError",
@@ -102,18 +115,19 @@
           "(error: any) => error is ",
           {
             "pluginId": "@kbn/dev-utils",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnDevUtilsPluginApi",
-            "section": "def-server.AxiosRequestError",
+            "section": "def-common.AxiosRequestError",
             "text": "AxiosRequestError"
           }
         ],
         "path": "packages/kbn-dev-utils/src/axios/errors.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/dev-utils",
-            "id": "def-server.isAxiosRequestError.$1",
+            "id": "def-common.isAxiosRequestError.$1",
             "type": "Any",
             "tags": [],
             "label": "error",
@@ -123,6 +137,7 @@
             ],
             "path": "packages/kbn-dev-utils/src/axios/errors.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -131,7 +146,7 @@
       },
       {
         "parentPluginId": "@kbn/dev-utils",
-        "id": "def-server.isAxiosResponseError",
+        "id": "def-common.isAxiosResponseError",
         "type": "Function",
         "tags": [],
         "label": "isAxiosResponseError",
@@ -140,19 +155,20 @@
           "<T = any>(error: any) => error is ",
           {
             "pluginId": "@kbn/dev-utils",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnDevUtilsPluginApi",
-            "section": "def-server.AxiosResponseError",
+            "section": "def-common.AxiosResponseError",
             "text": "AxiosResponseError"
           },
           "<T>"
         ],
         "path": "packages/kbn-dev-utils/src/axios/errors.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/dev-utils",
-            "id": "def-server.isAxiosResponseError.$1",
+            "id": "def-common.isAxiosResponseError.$1",
             "type": "Any",
             "tags": [],
             "label": "error",
@@ -162,6 +178,7 @@
             ],
             "path": "packages/kbn-dev-utils/src/axios/errors.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -170,7 +187,7 @@
       },
       {
         "parentPluginId": "@kbn/dev-utils",
-        "id": "def-server.runPluginListCli",
+        "id": "def-common.runPluginListCli",
         "type": "Function",
         "tags": [],
         "label": "runPluginListCli",
@@ -180,29 +197,14 @@
         ],
         "path": "packages/kbn-dev-utils/src/plugin_list/run_plugin_list_cli.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [],
         "returnComment": [],
         "initialIsOpen": false
       },
       {
         "parentPluginId": "@kbn/dev-utils",
-        "id": "def-server.shipCiStatsCli",
-        "type": "Function",
-        "tags": [],
-        "label": "shipCiStatsCli",
-        "description": [],
-        "signature": [
-          "() => void"
-        ],
-        "path": "packages/kbn-dev-utils/src/ship_ci_stats_cli.ts",
-        "deprecated": false,
-        "children": [],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/dev-utils",
-        "id": "def-server.transformFileStream",
+        "id": "def-common.transformFileStream",
         "type": "Function",
         "tags": [],
         "label": "transformFileStream",
@@ -219,10 +221,11 @@
         ],
         "path": "packages/kbn-dev-utils/src/streams.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/dev-utils",
-            "id": "def-server.transformFileStream.$1",
+            "id": "def-common.transformFileStream.$1",
             "type": "Function",
             "tags": [],
             "label": "fn",
@@ -236,41 +239,7 @@
             ],
             "path": "packages/kbn-dev-utils/src/streams.ts",
             "deprecated": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/dev-utils",
-        "id": "def-server.transformFileWithBabel",
-        "type": "Function",
-        "tags": [],
-        "label": "transformFileWithBabel",
-        "description": [
-          "\nReturns a promise that resolves when the file has been\nmutated so the contents of the file are tranformed with\nbabel, include inline sourcemaps, and the filename has\nbeen updated to use .js.\n\nIf the file was previously transformed with this function\nthe promise will just resolve immediately."
-        ],
-        "signature": [
-          "(file: ",
-          "node_modules/@types/vinyl/index",
-          ") => Promise<void>"
-        ],
-        "path": "packages/kbn-dev-utils/src/babel.ts",
-        "deprecated": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/dev-utils",
-            "id": "def-server.transformFileWithBabel.$1",
-            "type": "Object",
-            "tags": [],
-            "label": "file",
-            "description": [],
-            "signature": [
-              "node_modules/@types/vinyl/index"
-            ],
-            "path": "packages/kbn-dev-utils/src/babel.ts",
-            "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -281,7 +250,7 @@
     "interfaces": [
       {
         "parentPluginId": "@kbn/dev-utils",
-        "id": "def-server.AxiosRequestError",
+        "id": "def-common.AxiosRequestError",
         "type": "Interface",
         "tags": [],
         "label": "AxiosRequestError",
@@ -289,9 +258,9 @@
         "signature": [
           {
             "pluginId": "@kbn/dev-utils",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnDevUtilsPluginApi",
-            "section": "def-server.AxiosRequestError",
+            "section": "def-common.AxiosRequestError",
             "text": "AxiosRequestError"
           },
           " extends ",
@@ -300,10 +269,11 @@
         ],
         "path": "packages/kbn-dev-utils/src/axios/errors.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/dev-utils",
-            "id": "def-server.AxiosRequestError.response",
+            "id": "def-common.AxiosRequestError.response",
             "type": "Uncategorized",
             "tags": [],
             "label": "response",
@@ -312,14 +282,15 @@
               "undefined"
             ],
             "path": "packages/kbn-dev-utils/src/axios/errors.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
       },
       {
         "parentPluginId": "@kbn/dev-utils",
-        "id": "def-server.AxiosResponseError",
+        "id": "def-common.AxiosResponseError",
         "type": "Interface",
         "tags": [],
         "label": "AxiosResponseError",
@@ -327,9 +298,9 @@
         "signature": [
           {
             "pluginId": "@kbn/dev-utils",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnDevUtilsPluginApi",
-            "section": "def-server.AxiosResponseError",
+            "section": "def-common.AxiosResponseError",
             "text": "AxiosResponseError"
           },
           "<T> extends ",
@@ -338,10 +309,11 @@
         ],
         "path": "packages/kbn-dev-utils/src/axios/errors.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/dev-utils",
-            "id": "def-server.AxiosResponseError.response",
+            "id": "def-common.AxiosResponseError.response",
             "type": "Object",
             "tags": [],
             "label": "response",
@@ -351,7 +323,8 @@
               "<T, any>"
             ],
             "path": "packages/kbn-dev-utils/src/axios/errors.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -361,62 +334,67 @@
     "misc": [
       {
         "parentPluginId": "@kbn/dev-utils",
-        "id": "def-server.CA_CERT_PATH",
+        "id": "def-common.CA_CERT_PATH",
         "type": "string",
         "tags": [],
         "label": "CA_CERT_PATH",
         "description": [],
         "path": "packages/kbn-dev-utils/src/certs.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
         "parentPluginId": "@kbn/dev-utils",
-        "id": "def-server.ES_CERT_PATH",
+        "id": "def-common.ES_CERT_PATH",
         "type": "string",
         "tags": [],
         "label": "ES_CERT_PATH",
         "description": [],
         "path": "packages/kbn-dev-utils/src/certs.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
         "parentPluginId": "@kbn/dev-utils",
-        "id": "def-server.ES_EMPTYPASSWORD_P12_PATH",
+        "id": "def-common.ES_EMPTYPASSWORD_P12_PATH",
         "type": "string",
         "tags": [],
         "label": "ES_EMPTYPASSWORD_P12_PATH",
         "description": [],
         "path": "packages/kbn-dev-utils/src/certs.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
         "parentPluginId": "@kbn/dev-utils",
-        "id": "def-server.ES_KEY_PATH",
+        "id": "def-common.ES_KEY_PATH",
         "type": "string",
         "tags": [],
         "label": "ES_KEY_PATH",
         "description": [],
         "path": "packages/kbn-dev-utils/src/certs.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
         "parentPluginId": "@kbn/dev-utils",
-        "id": "def-server.ES_NOPASSWORD_P12_PATH",
+        "id": "def-common.ES_NOPASSWORD_P12_PATH",
         "type": "string",
         "tags": [],
         "label": "ES_NOPASSWORD_P12_PATH",
         "description": [],
         "path": "packages/kbn-dev-utils/src/certs.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
         "parentPluginId": "@kbn/dev-utils",
-        "id": "def-server.ES_P12_PASSWORD",
+        "id": "def-common.ES_P12_PASSWORD",
         "type": "string",
         "tags": [],
         "label": "ES_P12_PASSWORD",
@@ -426,44 +404,48 @@
         ],
         "path": "packages/kbn-dev-utils/src/certs.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
         "parentPluginId": "@kbn/dev-utils",
-        "id": "def-server.ES_P12_PATH",
+        "id": "def-common.ES_P12_PATH",
         "type": "string",
         "tags": [],
         "label": "ES_P12_PATH",
         "description": [],
         "path": "packages/kbn-dev-utils/src/certs.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
         "parentPluginId": "@kbn/dev-utils",
-        "id": "def-server.KBN_CERT_PATH",
+        "id": "def-common.KBN_CERT_PATH",
         "type": "string",
         "tags": [],
         "label": "KBN_CERT_PATH",
         "description": [],
         "path": "packages/kbn-dev-utils/src/certs.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
         "parentPluginId": "@kbn/dev-utils",
-        "id": "def-server.KBN_KEY_PATH",
+        "id": "def-common.KBN_KEY_PATH",
         "type": "string",
         "tags": [],
         "label": "KBN_KEY_PATH",
         "description": [],
         "path": "packages/kbn-dev-utils/src/certs.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
         "parentPluginId": "@kbn/dev-utils",
-        "id": "def-server.KBN_P12_PASSWORD",
+        "id": "def-common.KBN_P12_PASSWORD",
         "type": "string",
         "tags": [],
         "label": "KBN_P12_PASSWORD",
@@ -473,28 +455,22 @@
         ],
         "path": "packages/kbn-dev-utils/src/certs.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
         "parentPluginId": "@kbn/dev-utils",
-        "id": "def-server.KBN_P12_PATH",
+        "id": "def-common.KBN_P12_PATH",
         "type": "string",
         "tags": [],
         "label": "KBN_P12_PATH",
         "description": [],
         "path": "packages/kbn-dev-utils/src/certs.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       }
     ],
-    "objects": []
-  },
-  "common": {
-    "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
     "objects": []
   }
 }

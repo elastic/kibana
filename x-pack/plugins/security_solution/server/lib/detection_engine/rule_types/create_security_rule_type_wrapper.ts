@@ -13,6 +13,7 @@ import { TIMESTAMP } from '@kbn/rule-data-utils';
 import { createPersistenceRuleTypeWrapper } from '@kbn/rule-registry-plugin/server';
 import { parseScheduleDates } from '@kbn/securitysolution-io-ts-utils';
 
+import { buildExceptionFilter } from '@kbn/lists-plugin/server/services/exception_lists';
 import {
   checkPrivilegesFromEsClient,
   getExceptions,
@@ -24,14 +25,18 @@ import {
 import { DEFAULT_MAX_SIGNALS, DEFAULT_SEARCH_AFTER_PAGE_SIZE } from '../../../../common/constants';
 import type { CreateSecurityRuleTypeWrapper } from './types';
 import { getListClient } from './utils/get_list_client';
-import type { NotificationRuleTypeParams } from '../notifications/schedule_notification_actions';
-import { scheduleNotificationActions } from '../notifications/schedule_notification_actions';
-import { getNotificationResultsLink } from '../notifications/utils';
+// eslint-disable-next-line no-restricted-imports
+import type { NotificationRuleTypeParams } from '../rule_actions_legacy';
+// eslint-disable-next-line no-restricted-imports
+import {
+  scheduleNotificationActions,
+  scheduleThrottledNotificationActions,
+  getNotificationResultsLink,
+} from '../rule_actions_legacy';
 import { createResultObject } from './utils';
 import { bulkCreateFactory, wrapHitsFactory, wrapSequencesFactory } from './factories';
 import { RuleExecutionStatus } from '../../../../common/detection_engine/rule_monitoring';
 import { truncateList } from '../rule_monitoring';
-import { scheduleThrottledNotificationActions } from '../notifications/schedule_throttle_notification_actions';
 import aadFieldConversion from '../routes/index/signal_aad_mapping.json';
 import { extractReferences, injectReferences } from '../signals/saved_object_references';
 import { withSecuritySpan } from '../../../utils/with_security_span';
@@ -41,7 +46,7 @@ import { buildTimestampRuntimeMapping } from './utils/build_timestamp_runtime_ma
 
 /* eslint-disable complexity */
 export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
-  ({ lists, logger, config, ruleDataClient, ruleExecutionLoggerFactory, version }) =>
+  ({ lists, logger, config, ruleDataClient, ruleExecutionLoggerFactory, version, isPreview }) =>
   (type) => {
     const { alertIgnoreFields: ignoreFields, alertMergeStrategy: mergeStrategy } = config;
     const persistenceRuleType = createPersistenceRuleTypeWrapper({ ruleDataClient, logger });
@@ -57,7 +62,6 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
         agent.setTransactionName(`${options.rule.ruleTypeId} execution`);
         return withSecuritySpan('securityRuleTypeExecutor', async () => {
           const {
-            alertId,
             executionId,
             params,
             previousStartedAt,
@@ -65,7 +69,6 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
             services,
             spaceId,
             state,
-            updatedBy: updatedByUser,
             rule,
           } = options;
           let runState = state;
@@ -82,9 +85,12 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
           } = params;
           const {
             alertWithPersistence,
+            alertWithSuppression,
             savedObjectsClient,
             scopedClusterClient,
             uiSettingsClient,
+            ruleMonitoringService,
+            ruleResultService,
           } = services;
           const searchAfterSize = Math.min(maxSignals, DEFAULT_SEARCH_AFTER_PAGE_SIZE);
 
@@ -92,9 +98,11 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
 
           const ruleExecutionLogger = await ruleExecutionLoggerFactory({
             savedObjectsClient,
+            ruleMonitoringService,
+            ruleResultService,
             context: {
               executionId,
-              ruleId: alertId,
+              ruleId: rule.id,
               ruleUuid: params.ruleId,
               ruleName: rule.name,
               ruleType: rule.ruleTypeId,
@@ -105,7 +113,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
           const completeRule = {
             ruleConfig: rule,
             ruleParams: params,
-            alertId,
+            alertId: rule.id,
           };
 
           const {
@@ -130,7 +138,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
           const notificationRuleParams: NotificationRuleTypeParams = {
             ...params,
             name,
-            id: alertId,
+            id: rule.id,
           };
 
           const primaryTimestamp = timestampOverride ?? TIMESTAMP;
@@ -187,7 +195,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
                 message: errorMessage,
               });
 
-              return result.state;
+              return { state: result.state };
             }
           }
 
@@ -265,7 +273,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
           try {
             const { listClient, exceptionsClient } = getListClient({
               esClient: services.scopedClusterClient.asCurrentUser,
-              updatedByUser,
+              updatedByUser: rule.updatedBy,
               spaceId,
               lists,
               savedObjectClient: options.services.savedObjectsClient,
@@ -282,6 +290,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
               ruleExecutionLogger
             );
 
+            const alertTimestampOverride = isPreview ? startedAt : undefined;
             const legacySignalFields: string[] = Object.keys(aadFieldConversion);
             const wrapHits = wrapHitsFactory({
               ignoreFields: [...ignoreFields, ...legacySignalFields],
@@ -289,15 +298,26 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
               completeRule,
               spaceId,
               indicesToQuery: inputIndex,
+              alertTimestampOverride,
+              ruleExecutionLogger,
             });
 
             const wrapSequences = wrapSequencesFactory({
-              logger,
+              ruleExecutionLogger,
               ignoreFields: [...ignoreFields, ...legacySignalFields],
               mergeStrategy,
               completeRule,
               spaceId,
               indicesToQuery: inputIndex,
+              alertTimestampOverride,
+            });
+
+            const { filter: exceptionFilter, unprocessedExceptions } = await buildExceptionFilter({
+              alias: null,
+              excludeExceptions: true,
+              chunkSize: 10,
+              lists: exceptionItems,
+              listClient,
             });
 
             if (!skipExecution) {
@@ -309,7 +329,8 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
                   runOpts: {
                     completeRule,
                     inputIndex,
-                    exceptionItems,
+                    exceptionFilter,
+                    unprocessedExceptions,
                     runtimeMappings: {
                       ...runtimeMappings,
                       ...timestampRuntimeMappings,
@@ -326,6 +347,9 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
                     secondaryTimestamp,
                     ruleExecutionLogger,
                     aggregatableTimestampField,
+                    alertTimestampOverride,
+                    alertWithSuppression,
+                    refreshOnIndexingAlerts: refresh,
                   },
                 });
 
@@ -333,6 +357,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
                 const warningMessages = result.warningMessages.concat(runResult.warningMessages);
                 result = {
                   bulkCreateTimes: result.bulkCreateTimes.concat(runResult.bulkCreateTimes),
+                  enrichmentTimes: result.enrichmentTimes.concat(runResult.enrichmentTimes),
                   createdSignals,
                   createdSignalsCount: createdSignals.length,
                   errors: result.errors.concat(runResult.errors),
@@ -348,6 +373,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
             } else {
               result = {
                 bulkCreateTimes: [],
+                enrichmentTimes: [],
                 createdSignals: [],
                 createdSignalsCount: 0,
                 errors: [],
@@ -374,7 +400,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
               const resultsLink = getNotificationResultsLink({
                 from: fromInMs,
                 to: toInMs,
-                id: alertId,
+                id: rule.id,
                 kibanaSiemAppUrl: (meta as { kibana_siem_app_url?: string } | undefined)
                   ?.kibana_siem_app_url,
               });
@@ -384,10 +410,10 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
               if (completeRule.ruleConfig.throttle != null) {
                 // NOTE: Since this is throttled we have to call it even on an error condition, otherwise it will "reset" the throttle and fire early
                 await scheduleThrottledNotificationActions({
-                  alertInstance: services.alertFactory.create(alertId),
+                  alertInstance: services.alertFactory.create(rule.id),
                   throttle: completeRule.ruleConfig.throttle ?? '',
                   startedAt,
-                  id: alertId,
+                  id: rule.id,
                   kibanaSiemAppUrl: (meta as { kibana_siem_app_url?: string } | undefined)
                     ?.kibana_siem_app_url,
                   outputIndex: ruleDataClient.indexNameWithNamespace(spaceId),
@@ -398,7 +424,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
                   logger,
                 });
               } else if (createdSignalsCount) {
-                const alertInstance = services.alertFactory.create(alertId);
+                const alertInstance = services.alertFactory.create(rule.id);
                 scheduleNotificationActions({
                   alertInstance,
                   signalsCount: createdSignalsCount,
@@ -424,6 +450,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
                   metrics: {
                     searchDurations: result.searchAfterTimes,
                     indexingDurations: result.bulkCreateTimes,
+                    enrichmentDurations: result.enrichmentTimes,
                   },
                 });
               }
@@ -442,6 +469,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
                 metrics: {
                   searchDurations: result.searchAfterTimes,
                   indexingDurations: result.bulkCreateTimes,
+                  enrichmentDurations: result.enrichmentTimes,
                 },
               });
             }
@@ -454,13 +482,14 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
               metrics: {
                 searchDurations: result.searchAfterTimes,
                 indexingDurations: result.bulkCreateTimes,
+                enrichmentDurations: result.enrichmentTimes,
               },
             });
 
             // NOTE: Since this is throttled we have to call it even on an error condition, otherwise it will "reset" the throttle and fire early
             if (actions.length && completeRule.ruleConfig.throttle != null) {
               await scheduleThrottledNotificationActions({
-                alertInstance: services.alertFactory.create(alertId),
+                alertInstance: services.alertFactory.create(rule.id),
                 throttle: completeRule.ruleConfig.throttle ?? '',
                 startedAt,
                 id: completeRule.alertId,
@@ -476,7 +505,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
             }
           }
 
-          return result.state;
+          return { state: result.state };
         });
       },
     });

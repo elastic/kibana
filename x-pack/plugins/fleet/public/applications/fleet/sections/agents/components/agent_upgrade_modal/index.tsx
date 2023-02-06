@@ -162,15 +162,16 @@ export const AgentUpgradeAgentModal: React.FunctionComponent<AgentUpgradeAgentMo
 
     try {
       setIsSubmitting(true);
-      const { data, error } = isSingleAgent
-        ? await sendPostAgentUpgrade((agents[0] as Agent).id, {
-            version,
-          })
-        : await sendPostBulkAgentUpgrade({
-            version,
-            agents: Array.isArray(agents) ? agents.map((agent) => agent.id) : agents,
-            ...rolloutOptions,
-          });
+      const { error } =
+        isSingleAgent && !isScheduled
+          ? await sendPostAgentUpgrade((agents[0] as Agent).id, {
+              version,
+            })
+          : await sendPostBulkAgentUpgrade({
+              version,
+              agents: Array.isArray(agents) ? agents.map((agent) => agent.id) : agents,
+              ...rolloutOptions,
+            });
       if (error) {
         if (error?.statusCode === 400) {
           setErrors(error?.message);
@@ -178,44 +179,13 @@ export const AgentUpgradeAgentModal: React.FunctionComponent<AgentUpgradeAgentMo
         throw error;
       }
 
-      const counts = Object.entries(data || {}).reduce(
-        (acc, [agentId, result]) => {
-          ++acc.total;
-          ++acc[result.success ? 'success' : 'error'];
-          return acc;
-        },
-        {
-          total: 0,
-          success: 0,
-          error: 0,
-        }
-      );
       setIsSubmitting(false);
 
-      if (isSingleAgent && counts.success === counts.total) {
-        notifications.toasts.addSuccess(
-          i18n.translate('xpack.fleet.upgradeAgents.successSingleNotificationTitle', {
-            defaultMessage: 'Upgrading {count} agent',
-            values: { count: 1 },
-          })
-        );
-      } else if (counts.error === counts.total) {
-        notifications.toasts.addDanger(
-          i18n.translate('xpack.fleet.upgradeAgents.bulkResultAllErrorsNotificationTitle', {
-            defaultMessage:
-              'Error upgrading {count, plural, one {agent} other {{count} agents} =true {all selected agents}}',
-            values: { count: isAllAgents || agentCount },
-          })
-        );
-      } else {
-        notifications.toasts.addWarning({
-          text: i18n.translate('xpack.fleet.upgradeAgents.bulkResultErrorResultsSummary', {
-            defaultMessage:
-              '{count} {count, plural, one {agent was} other {agents were}} not successful',
-            values: { count: counts.error },
-          }),
-        });
-      }
+      notifications.toasts.addSuccess(
+        i18n.translate('xpack.fleet.upgradeAgents.successNotificationTitle', {
+          defaultMessage: 'Upgrading agent(s)',
+        })
+      );
       onClose();
     } catch (error) {
       setIsSubmitting(false);
@@ -398,20 +368,20 @@ export const AgentUpgradeAgentModal: React.FunctionComponent<AgentUpgradeAgentMo
           label={
             <EuiFlexGroup gutterSize="s">
               <EuiFlexItem grow={false}>
-                {i18n.translate('xpack.fleet.upgradeAgents.maintenanceAvailableLabel', {
-                  defaultMessage: 'Maintenance window available',
+                {i18n.translate('xpack.fleet.upgradeAgents.rolloutPeriodLabel', {
+                  defaultMessage: 'Rollout period',
                 })}
               </EuiFlexItem>
               <EuiSpacer size="xs" />
               <EuiFlexItem grow={false}>
                 <EuiToolTip
                   position="top"
-                  content={i18n.translate('xpack.fleet.upgradeAgents.maintenanceAvailableTooltip', {
+                  content={i18n.translate('xpack.fleet.upgradeAgents.rolloutPeriodTooltip', {
                     defaultMessage:
-                      'Defines the duration of time available to perform the upgrade. The agent upgrades are spread uniformly across this duration in order to avoid exhausting network resources.',
+                      'Define the rollout period for upgrades to your Elastic Agents. Any agents that are offline during this period will be upgraded when they come back online.',
                   })}
                 >
-                  <EuiIcon type="iInCircle" title="TooltipIcon" />
+                  <EuiIcon type="iInCircle" />
                 </EuiToolTip>
               </EuiFlexItem>
             </EuiFlexGroup>

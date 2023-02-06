@@ -9,7 +9,7 @@ import React, { FC, useState, useEffect, useCallback } from 'react';
 import { EuiEmptyPrompt } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n-react';
-import { useUrlState } from '../../../util/url_state';
+import { useUrlState } from '@kbn/ml-url-state';
 import { NodeAvailableWarning } from '../../../components/node_available_warning';
 import { SavedObjectsWarning } from '../../../components/saved_objects_warning';
 import { UpgradeWarning } from '../../../components/upgrade';
@@ -69,6 +69,7 @@ export const Page: FC = () => {
 
   useEffect(function checkJobs() {
     checkJobsExist();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const getEmptyState = () => {

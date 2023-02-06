@@ -28,13 +28,16 @@ export type {
   AlertInstanceContext,
   AlertingApiRequestHandlerContext,
   RuleParamsAndRefs,
+  GetSummarizedAlertsFnOpts,
+  ExecutorType,
 } from './types';
+export { RuleNotifyWhen } from '../common';
 export { DEFAULT_MAX_EPHEMERAL_ACTIONS_PER_ALERT } from './config';
 export type { PluginSetupContract, PluginStartContract } from './plugin';
 export type {
   FindResult,
   BulkEditOperation,
-  BulkEditError,
+  BulkOperationError,
   BulkEditOptions,
   BulkEditOptionsFilter,
   BulkEditOptionsIds,

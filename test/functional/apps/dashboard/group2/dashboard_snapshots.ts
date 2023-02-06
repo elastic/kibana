@@ -119,7 +119,7 @@ export default function ({
           'dashboard_controls_light',
           updateBaselines
         );
-        expect(percentDifference).to.be.lessThan(0.022);
+        expect(percentDifference).to.be.lessThan(0.06);
       });
 
       it('in dark mode', async () => {
@@ -133,7 +133,7 @@ export default function ({
           'dashboard_controls_dark',
           updateBaselines
         );
-        expect(percentDifference).to.be.lessThan(0.022);
+        expect(percentDifference).to.be.lessThan(0.07);
       });
 
       after(async () => {

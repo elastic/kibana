@@ -7,6 +7,10 @@
 
 type NumberOrNull = number | null;
 
+interface RuntimeField {
+  [key: string]: NodeMetric;
+}
+
 interface TopMetric {
   sort: string[];
   metrics: Record<string, string | null>;
@@ -22,8 +26,8 @@ interface NodeMetrics {
   cpu: NodeMetric;
   iowait: NodeMetric;
   load: NodeMetric;
-  rx: NodeMetric;
-  tx: NodeMetric;
+  rx: RuntimeField;
+  tx: RuntimeField;
 }
 
 interface TimeSeriesMetric extends NodeMetrics {

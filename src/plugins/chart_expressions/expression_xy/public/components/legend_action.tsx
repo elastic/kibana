@@ -9,12 +9,14 @@
 import React from 'react';
 import type { LegendAction, XYChartSeriesIdentifier } from '@elastic/charts';
 import { getAccessorByDimension } from '@kbn/visualizations-plugin/common/utils';
-import type { FilterEvent } from '../types';
+import { CellValueContext } from '@kbn/embeddable-plugin/public';
+import type { LayerCellValueActions, FilterEvent } from '../types';
 import type { CommonXYDataLayerConfig } from '../../common';
-import { LegendActionPopover } from './legend_action_popover';
+import { LegendActionPopover, LegendCellValueActions } from './legend_action_popover';
 import {
   DatatablesWithFormatInfo,
   getSeriesName,
+  hasMultipleLayersWithSplits,
   LayersAccessorsTitles,
   LayersFieldFormats,
 } from '../helpers';
@@ -22,6 +24,7 @@ import {
 export const getLegendAction = (
   dataLayers: CommonXYDataLayerConfig[],
   onFilter: (data: FilterEvent['data']) => void,
+  layerCellValueActions: LayerCellValueActions,
   fieldFormats: LayersFieldFormats,
   formattedDatatables: DatatablesWithFormatInfo,
   titles: LayersAccessorsTitles,
@@ -49,29 +52,43 @@ export const getLegendAction = (
 
     const { table } = layer;
 
-    const data: FilterEvent['data']['data'] = [];
+    const filterActionData: FilterEvent['data']['data'] = [];
+    const cellValueActionData: CellValueContext['data'] = [];
 
     series.splitAccessors.forEach((value, accessor) => {
       const rowIndex = formattedDatatables[layer.layerId].table.rows.findIndex((row) => {
         return row[accessor] === value;
       });
-      if (rowIndex !== -1) {
-        data.push({
+      const columnIndex = table.columns.findIndex((column) => column.id === accessor);
+
+      if (rowIndex >= 0 && columnIndex >= 0) {
+        filterActionData.push({
           row: rowIndex,
-          column: table.columns.findIndex((column) => column.id === accessor),
+          column: columnIndex,
           value: table.rows[rowIndex][accessor],
           table,
+        });
+
+        cellValueActionData.push({
+          value: table.rows[rowIndex][accessor],
+          columnMeta: table.columns[columnIndex].meta,
         });
       }
     });
 
-    if (data.length === 0) {
+    if (filterActionData.length === 0) {
       return null;
     }
 
-    const context: FilterEvent['data'] = {
-      data,
+    const filterHandler = ({ negate }: { negate?: boolean } = {}) => {
+      onFilter({ data: filterActionData, negate });
     };
+
+    const legendCellValueActions: LegendCellValueActions =
+      layerCellValueActions[layerIndex]?.map((action) => ({
+        ...action,
+        execute: () => action.execute(cellValueActionData),
+      })) ?? [];
 
     return (
       <LegendActionPopover
@@ -85,12 +102,13 @@ export const getLegendAction = (
               splitAccessorsFormats: fieldFormats[layer.layerId].splitSeriesAccessors,
               alreadyFormattedColumns: formattedDatatables[layer.layerId].formattedColumns,
               columnToLabelMap: layer.columnToLabel ? JSON.parse(layer.columnToLabel) : {},
+              multipleLayersWithSplits: hasMultipleLayersWithSplits(dataLayers),
             },
             titles
           )?.toString() || ''
         }
-        context={context}
-        onFilter={onFilter}
+        onFilter={filterHandler}
+        legendCellValueActions={legendCellValueActions}
       />
     );
   });

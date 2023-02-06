@@ -6,10 +6,10 @@
  */
 
 import { omit, merge } from 'lodash';
-import { CommentResponseAlertsType } from '../../../../common/api';
-import { SnakeToCamelCase } from '../../../../common/types';
+import type { CommentResponseAlertsType } from '../../../../common/api';
+import type { SnakeToCamelCase } from '../../../../common/types';
 import { getRuleId, getRuleInfo, getRuleName } from './alert';
-import { Ecs } from '../../../containers/types';
+import type { Ecs } from '../../../containers/types';
 
 describe('rule getters', () => {
   describe.each([

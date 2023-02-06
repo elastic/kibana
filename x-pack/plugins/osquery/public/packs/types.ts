@@ -5,12 +5,13 @@
  * 2.0.
  */
 import type { SavedObject } from '@kbn/core/public';
+import type { Shard } from '../../common/schemas/common/utils';
 import type { PackQueryFormData } from './queries/use_pack_query_form';
 
 export type PackSavedObject = SavedObject<{
   name: string;
   description: string | undefined;
-  queries: PackQueryFormData[];
+  queries: Record<string, Omit<PackQueryFormData, 'id'>>;
   version?: number;
   enabled: boolean | undefined;
   created_at: string;
@@ -23,4 +24,5 @@ export type PackItem = PackSavedObject['attributes'] & {
   id: string;
   policy_ids: string[];
   read_only?: boolean;
+  shards?: Shard;
 };

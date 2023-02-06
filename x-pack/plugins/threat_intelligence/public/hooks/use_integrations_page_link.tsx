@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useKibana } from './use_kibana';
+import { useKibana } from '.';
 
 const useKibanaBasePath = (): string => useKibana().services.http.basePath.get();
 

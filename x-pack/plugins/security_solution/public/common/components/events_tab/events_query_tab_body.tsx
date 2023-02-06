@@ -10,12 +10,10 @@ import { useDispatch } from 'react-redux';
 
 import { EuiCheckbox } from '@elastic/eui';
 import type { Filter } from '@kbn/es-query';
-import type { EntityType } from '@kbn/timelines-plugin/common';
-
-import type { TimelineId } from '../../../../common/types/timeline';
+import type { TableId } from '../../../../common/types';
+import { dataTableActions } from '../../store/data_table';
 import { RowRendererId } from '../../../../common/types/timeline';
 import { StatefulEventsViewer } from '../events_viewer';
-import { timelineActions } from '../../../timelines/store/timeline';
 import { eventsDefaultModel } from '../events_viewer/default_model';
 import { MatrixHistogram } from '../matrix_histogram';
 import { useGlobalFullScreen } from '../../containers/use_full_screen';
@@ -34,44 +32,63 @@ import { useIsExperimentalFeatureEnabled } from '../../hooks/use_experimental_fe
 import { DEFAULT_COLUMN_MIN_WIDTH } from '../../../timelines/components/timeline/body/constants';
 import { defaultCellActions } from '../../lib/cell_actions/default_cell_actions';
 import type { GlobalTimeArgs } from '../../containers/use_global_time';
-import type { QueryTabBodyProps as UserQueryTabBodyProps } from '../../../users/pages/navigation/types';
-import type { QueryTabBodyProps as HostQueryTabBodyProps } from '../../../hosts/pages/navigation/types';
-import type { QueryTabBodyProps as NetworkQueryTabBodyProps } from '../../../network/pages/navigation/types';
+import type { QueryTabBodyProps as UserQueryTabBodyProps } from '../../../explore/users/pages/navigation/types';
+import type { QueryTabBodyProps as HostQueryTabBodyProps } from '../../../explore/hosts/pages/navigation/types';
+import type { QueryTabBodyProps as NetworkQueryTabBodyProps } from '../../../explore/network/pages/navigation/types';
+import { useLicense } from '../../hooks/use_license';
 
 import { useUiSetting$ } from '../../lib/kibana';
 import { defaultAlertsFilters } from '../events_viewer/external_alerts_filter';
+import { useAddBulkToTimelineAction } from '../../../detections/components/alerts_table/timeline_actions/use_add_bulk_to_timeline';
 
-const ACTION_BUTTON_COUNT = 5;
+import {
+  useGetInitialUrlParamValue,
+  useReplaceUrlParams,
+} from '../../utils/global_query_string/helpers';
+import type { BulkActionsProp } from '../toolbar/bulk_actions/types';
+
 export const ALERTS_EVENTS_HISTOGRAM_ID = 'alertsOrEventsHistogramQuery';
 
 type QueryTabBodyProps = UserQueryTabBodyProps | HostQueryTabBodyProps | NetworkQueryTabBodyProps;
 
 export type EventsQueryTabBodyComponentProps = QueryTabBodyProps & {
+  additionalFilters: Filter[];
   deleteQuery?: GlobalTimeArgs['deleteQuery'];
   indexNames: string[];
-  pageFilters?: Filter[];
-  externalAlertPageFilters?: Filter[];
   setQuery: GlobalTimeArgs['setQuery'];
-  timelineId: TimelineId;
+  tableId: TableId;
 };
 
+const EXTERNAL_ALERTS_URL_PARAM = 'onlyExternalAlerts';
+
 const EventsQueryTabBodyComponent: React.FC<EventsQueryTabBodyComponentProps> = ({
+  additionalFilters,
   deleteQuery,
   endDate,
   filterQuery,
   indexNames,
-  externalAlertPageFilters = [],
-  pageFilters = [],
   setQuery,
   startDate,
-  timelineId,
+  tableId,
 }) => {
   const dispatch = useDispatch();
   const { globalFullScreen } = useGlobalFullScreen();
   const tGridEnabled = useIsExperimentalFeatureEnabled('tGridEnabled');
   const [defaultNumberFormat] = useUiSetting$<string>(DEFAULT_NUMBER_FORMAT);
-  const [showExternalAlerts, setShowExternalAlerts] = useState(false);
-  const leadingControlColumns = useMemo(() => getDefaultControlColumn(ACTION_BUTTON_COUNT), []);
+  const isEnterprisePlus = useLicense().isEnterprise();
+  const ACTION_BUTTON_COUNT = isEnterprisePlus ? 5 : 4;
+  const leadingControlColumns = useMemo(
+    () => getDefaultControlColumn(ACTION_BUTTON_COUNT),
+    [ACTION_BUTTON_COUNT]
+  );
+
+  const showExternalAlertsInitialUrlState = useExternalAlertsInitialUrlState();
+
+  const [showExternalAlerts, setShowExternalAlerts] = useState(
+    showExternalAlertsInitialUrlState ?? false
+  );
+
+  useSyncExternalAlertsUrlState(showExternalAlerts);
 
   const toggleExternalAlerts = useCallback(() => setShowExternalAlerts((s) => !s), []);
   const getHistogramSubtitle = useMemo(
@@ -81,8 +98,8 @@ const EventsQueryTabBodyComponent: React.FC<EventsQueryTabBodyComponentProps> = 
 
   useEffect(() => {
     dispatch(
-      timelineActions.initializeTGridSettings({
-        id: timelineId,
+      dataTableActions.initializeDataTableSettings({
+        id: tableId,
         defaultColumns: eventsDefaultModel.columns.map((c) =>
           !tGridEnabled && c.initialWidth == null
             ? {
@@ -91,10 +108,12 @@ const EventsQueryTabBodyComponent: React.FC<EventsQueryTabBodyComponentProps> = 
               }
             : c
         ),
-        excludedRowRendererIds: showExternalAlerts ? Object.values(RowRendererId) : undefined,
+        title: i18n.EVENTS_GRAPH_TITLE,
+        showCheckboxes: true,
+        selectAll: true,
       })
     );
-  }, [dispatch, showExternalAlerts, tGridEnabled, timelineId]);
+  }, [dispatch, showExternalAlerts, tGridEnabled, tableId]);
 
   useEffect(() => {
     return () => {
@@ -104,7 +123,7 @@ const EventsQueryTabBodyComponent: React.FC<EventsQueryTabBodyComponentProps> = 
     };
   }, [deleteQuery]);
 
-  const additionalFilters = useMemo(
+  const toggleExternalAlertsCheckbox = useMemo(
     () => (
       <EuiCheckbox
         id="showExternalAlertsCheckbox"
@@ -128,12 +147,24 @@ const EventsQueryTabBodyComponent: React.FC<EventsQueryTabBodyComponentProps> = 
   );
 
   const composedPageFilters = useMemo(
-    () => [
-      ...pageFilters,
-      ...(showExternalAlerts ? [defaultAlertsFilters, ...externalAlertPageFilters] : []),
-    ],
-    [showExternalAlerts, externalAlertPageFilters, pageFilters]
+    () => (showExternalAlerts ? [defaultAlertsFilters, ...additionalFilters] : additionalFilters),
+    [additionalFilters, showExternalAlerts]
   );
+
+  const addBulkToTimelineAction = useAddBulkToTimelineAction({
+    localFilters: composedPageFilters,
+    tableId,
+    from: startDate,
+    to: endDate,
+    scopeId: SourcererScopeName.default,
+  });
+
+  const bulkActions = useMemo<BulkActionsProp | boolean>(() => {
+    return {
+      alertStatusActions: false,
+      customBulkActions: [addBulkToTimelineAction],
+    };
+  }, [addBulkToTimelineAction]);
 
   return (
     <>
@@ -150,19 +181,19 @@ const EventsQueryTabBodyComponent: React.FC<EventsQueryTabBodyComponentProps> = 
         />
       )}
       <StatefulEventsViewer
-        additionalFilters={additionalFilters}
+        additionalFilters={toggleExternalAlertsCheckbox}
         defaultCellActions={defaultCellActions}
         start={startDate}
         end={endDate}
-        entityType={'events' as EntityType}
         leadingControlColumns={leadingControlColumns}
         renderCellValue={DefaultCellRenderer}
         rowRenderers={defaultRowRenderers}
-        scopeId={SourcererScopeName.default}
-        id={timelineId}
-        unit={showExternalAlerts ? i18n.ALERTS_UNIT : i18n.EVENTS_UNIT}
+        sourcererScope={SourcererScopeName.default}
+        tableId={tableId}
+        unit={showExternalAlerts ? i18n.EXTERNAL_ALERTS_UNIT : i18n.EVENTS_UNIT}
         defaultModel={defaultModel}
         pageFilters={composedPageFilters}
+        bulkActions={bulkActions}
       />
     </>
   );
@@ -173,3 +204,37 @@ EventsQueryTabBodyComponent.displayName = 'EventsQueryTabBodyComponent';
 export const EventsQueryTabBody = React.memo(EventsQueryTabBodyComponent);
 
 EventsQueryTabBody.displayName = 'EventsQueryTabBody';
+
+const useExternalAlertsInitialUrlState = () => {
+  const replaceUrlParams = useReplaceUrlParams();
+
+  const getInitialUrlParamValue = useGetInitialUrlParamValue<boolean>(EXTERNAL_ALERTS_URL_PARAM);
+
+  const showExternalAlertsInitialUrlState = useMemo(
+    () => getInitialUrlParamValue(),
+    [getInitialUrlParamValue]
+  );
+
+  useEffect(() => {
+    // Only called on component unmount
+    return () => {
+      replaceUrlParams({
+        [EXTERNAL_ALERTS_URL_PARAM]: null,
+      });
+    };
+  }, [replaceUrlParams]);
+
+  return showExternalAlertsInitialUrlState;
+};
+
+/**
+ * Update URL state when showExternalAlerts value changes
+ */
+const useSyncExternalAlertsUrlState = (showExternalAlerts: boolean) => {
+  const replaceUrlParams = useReplaceUrlParams();
+  useEffect(() => {
+    replaceUrlParams({
+      [EXTERNAL_ALERTS_URL_PARAM]: showExternalAlerts ? true : null,
+    });
+  }, [showExternalAlerts, replaceUrlParams]);
+};

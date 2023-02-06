@@ -45,8 +45,8 @@ export const renderApp = (
   );
 
   return () => {
+    core.chrome.docTitle.reset();
     ReactDOM.unmountComponentAtNode(element);
-    plugins.data.search.session.clear();
   };
 };
 

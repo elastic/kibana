@@ -8,15 +8,15 @@
 
 import fetch from 'node-fetch';
 
-import { IRouter } from '@kbn/core/server';
+import type { IRouter } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
-import {
+import type {
   TelemetryCollectionManagerPluginSetup,
   StatsGetterConfig,
 } from '@kbn/telemetry-collection-manager-plugin/server';
+import { EncryptedTelemetryPayload, UnencryptedTelemetryPayload } from '../../common/types';
 import { getTelemetryChannelEndpoint } from '../../common/telemetry_config';
 import { PAYLOAD_CONTENT_ENCODING } from '../../common/constants';
-import type { UnencryptedTelemetryPayload } from '../../common/types';
 
 interface SendTelemetryOptInStatusConfig {
   sendUsageTo: 'staging' | 'prod';
@@ -35,7 +35,7 @@ export async function sendTelemetryOptInStatus(
     channelName: 'optInStatus',
   });
 
-  const optInStatusPayload: UnencryptedTelemetryPayload =
+  const optInStatusPayload: UnencryptedTelemetryPayload | EncryptedTelemetryPayload =
     await telemetryCollectionManager.getOptInStats(newOptInStatus, statsGetterConfig);
 
   await Promise.all(

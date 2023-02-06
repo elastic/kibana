@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { CasePostRequest, CaseSeverity, ConnectorTypes } from '../../../common/api';
+import type { CasePostRequest } from '../../../common/api';
+import { CaseSeverity, ConnectorTypes } from '../../../common/api';
 import { SECURITY_SOLUTION_OWNER } from '../../../common/constants';
 import { choices } from '../connectors/mock';
 
@@ -25,6 +26,7 @@ export const sampleData: CasePostRequest = {
     syncAlerts: true,
   },
   owner: SECURITY_SOLUTION_OWNER,
+  assignees: [],
 };
 
 export const sampleConnectorData = { isLoading: false, data: [] };

@@ -14,13 +14,17 @@ import {
   CONTAINER_ID,
   KUBERNETES,
   SERVICE_NAME,
-  POD_NAME,
+  KUBERNETES_POD_NAME,
   HOST_OS_PLATFORM,
-} from '../../../common/elasticsearch_fieldnames';
+} from '../../../common/es_fields/apm';
 import { ContainerType } from '../../../common/service_metadata';
 import { TransactionRaw } from '../../../typings/es_schemas/raw/transaction_raw';
 import { getProcessorEventForTransactions } from '../../lib/helpers/transactions';
-import { Setup } from '../../lib/helpers/setup_request';
+import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
+import {
+  ServerlessType,
+  getServerlessTypeFromCloudData,
+} from '../../../common/serverless';
 
 type ServiceMetadataIconsRaw = Pick<
   TransactionRaw,
@@ -30,13 +34,13 @@ type ServiceMetadataIconsRaw = Pick<
 export interface ServiceMetadataIcons {
   agentName?: string;
   containerType?: ContainerType;
-  serverlessType?: string;
+  serverlessType?: ServerlessType;
   cloudProvider?: string;
 }
 
 export const should = [
   { exists: { field: CONTAINER_ID } },
-  { exists: { field: POD_NAME } },
+  { exists: { field: KUBERNETES_POD_NAME } },
   { exists: { field: CLOUD_PROVIDER } },
   { exists: { field: HOST_OS_PLATFORM } },
   { exists: { field: AGENT_NAME } },
@@ -44,19 +48,17 @@ export const should = [
 
 export async function getServiceMetadataIcons({
   serviceName,
-  setup,
+  apmEventClient,
   searchAggregatedTransactions,
   start,
   end,
 }: {
   serviceName: string;
-  setup: Setup;
+  apmEventClient: APMEventClient;
   searchAggregatedTransactions: boolean;
   start: number;
   end: number;
 }): Promise<ServiceMetadataIcons> {
-  const { apmEventClient } = setup;
-
   const filter = [
     { term: { [SERVICE_NAME]: serviceName } },
     ...rangeQuery(start, end),
@@ -71,6 +73,7 @@ export async function getServiceMetadataIcons({
       ],
     },
     body: {
+      track_total_hits: 1,
       size: 1,
       _source: [
         KUBERNETES,
@@ -107,10 +110,10 @@ export async function getServiceMetadataIcons({
     containerType = 'Docker';
   }
 
-  let serverlessType: string | undefined;
-  if (cloud?.provider === 'aws' && cloud?.service?.name === 'lambda') {
-    serverlessType = 'lambda';
-  }
+  const serverlessType = getServerlessTypeFromCloudData(
+    cloud?.provider,
+    cloud?.service?.name
+  );
 
   return {
     agentName: agent?.name,

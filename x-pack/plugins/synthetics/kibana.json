@@ -4,6 +4,7 @@
   "kibanaVersion": "kibana",
   "optionalPlugins": ["cloud", "data", "fleet", "home", "ml", "telemetry"],
   "requiredPlugins": [
+    "actions",
     "alerting",
     "cases",
     "embeddable",
@@ -27,7 +28,7 @@
   "server": true,
   "ui": true,
   "version": "8.0.0",
-  "requiredBundles": ["unifiedSearch", "fleet", "kibanaReact", "kibanaUtils", "ml", "observability"],
+  "requiredBundles": ["data","unifiedSearch", "fleet", "kibanaReact", "kibanaUtils", "ml", "observability", "indexLifecycleManagement"],
   "owner": {
     "name": "Uptime",
     "githubTeam": "uptime"

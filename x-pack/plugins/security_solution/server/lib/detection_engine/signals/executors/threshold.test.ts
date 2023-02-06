@@ -7,23 +7,21 @@
 
 import dateMath from '@kbn/datemath';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
+import { getExceptionListItemSchemaMock } from '@kbn/lists-plugin/common/schemas/response/exception_list_item_schema.mock';
 import type { RuleExecutorServicesMock } from '@kbn/alerting-plugin/server/mocks';
 import { alertsMock } from '@kbn/alerting-plugin/server/mocks';
 import { thresholdExecutor } from './threshold';
-import { getExceptionListItemSchemaMock } from '@kbn/lists-plugin/common/schemas/response/exception_list_item_schema.mock';
-import { getEntryListMock } from '@kbn/lists-plugin/common/schemas/types/entry_list.mock';
-import { getThresholdRuleParams, getCompleteRuleMock } from '../../schemas/rule_schemas.mock';
+import { getThresholdRuleParams, getCompleteRuleMock } from '../../rule_schema/mocks';
 import { sampleEmptyAggsSearchResults } from '../__mocks__/es_results';
 import { getThresholdTermsHash } from '../utils';
-import type { ThresholdRuleParams } from '../../schemas/rule_schemas';
+import type { ThresholdRuleParams } from '../../rule_schema';
 import { createRuleDataClientMock } from '@kbn/rule-registry-plugin/server/rule_data_client/rule_data_client.mock';
 import { TIMESTAMP } from '@kbn/rule-data-utils';
-import type { IRuleExecutionLogForExecutors } from '../../rule_monitoring';
 import { ruleExecutionLogMock } from '../../rule_monitoring/mocks';
 
 describe('threshold_executor', () => {
   let alertServices: RuleExecutorServicesMock;
-  let ruleExecutionLogger: IRuleExecutionLogForExecutors;
+  let ruleExecutionLogger: ReturnType<typeof ruleExecutionLogMock.forExecutors.create>;
 
   const version = '8.0.0';
   const params = getThresholdRuleParams();
@@ -53,35 +51,6 @@ describe('threshold_executor', () => {
   });
 
   describe('thresholdExecutor', () => {
-    it('should set a warning when exception list for threshold rule contains value list exceptions', async () => {
-      const ruleDataClientMock = createRuleDataClientMock();
-      const exceptionItems = [getExceptionListItemSchemaMock({ entries: [getEntryListMock()] })];
-      const response = await thresholdExecutor({
-        completeRule: thresholdCompleteRule,
-        tuple,
-        exceptionItems,
-        services: alertServices,
-        state: { initialized: true, signalHistory: {} },
-        version,
-        ruleExecutionLogger,
-        startedAt: new Date(),
-        bulkCreate: jest.fn().mockImplementation((hits) => ({
-          errors: [],
-          success: true,
-          bulkCreateDuration: '0',
-          createdItemsCount: 0,
-          createdItems: [],
-        })),
-        wrapHits: jest.fn(),
-        ruleDataReader: ruleDataClientMock.getReader({ namespace: 'default' }),
-        runtimeMappings: {},
-        inputIndex: ['auditbeat-*'],
-        primaryTimestamp: TIMESTAMP,
-        aggregatableTimestampField: TIMESTAMP,
-      });
-      expect(response.warningMessages.length).toEqual(1);
-    });
-
     it('should clean up any signal history that has fallen outside the window when state is initialized', async () => {
       const ruleDataClientMock = createRuleDataClientMock();
       const terms1 = [
@@ -114,7 +83,6 @@ describe('threshold_executor', () => {
       const response = await thresholdExecutor({
         completeRule: thresholdCompleteRule,
         tuple,
-        exceptionItems: [],
         services: alertServices,
         state,
         version,
@@ -133,6 +101,8 @@ describe('threshold_executor', () => {
         inputIndex: ['auditbeat-*'],
         primaryTimestamp: TIMESTAMP,
         aggregatableTimestampField: TIMESTAMP,
+        exceptionFilter: undefined,
+        unprocessedExceptions: [],
       });
       expect(response.state).toEqual({
         initialized: true,
@@ -140,6 +110,66 @@ describe('threshold_executor', () => {
           [`${getThresholdTermsHash(terms2)}`]: signalHistoryRecord2,
         },
       });
+    });
+
+    it('should log a warning if unprocessedExceptions is not empty', async () => {
+      const ruleDataClientMock = createRuleDataClientMock();
+      const terms1 = [
+        {
+          field: 'host.name',
+          value: 'elastic-pc-1',
+        },
+      ];
+      const signalHistoryRecord1 = {
+        terms: terms1,
+        lastSignalTimestamp: tuple.from.valueOf() - 60 * 1000,
+      };
+      const terms2 = [
+        {
+          field: 'host.name',
+          value: 'elastic-pc-2',
+        },
+      ];
+      const signalHistoryRecord2 = {
+        terms: terms2,
+        lastSignalTimestamp: tuple.from.valueOf() + 60 * 1000,
+      };
+      const state = {
+        initialized: true,
+        signalHistory: {
+          [`${getThresholdTermsHash(terms1)}`]: signalHistoryRecord1,
+          [`${getThresholdTermsHash(terms2)}`]: signalHistoryRecord2,
+        },
+      };
+      const result = await thresholdExecutor({
+        completeRule: thresholdCompleteRule,
+        tuple,
+        services: alertServices,
+        state,
+        version,
+        ruleExecutionLogger,
+        startedAt: new Date(),
+        bulkCreate: jest.fn().mockImplementation((hits) => ({
+          errors: [],
+          success: true,
+          bulkCreateDuration: '0',
+          createdItemsCount: 0,
+          createdItems: [],
+        })),
+        wrapHits: jest.fn(),
+        ruleDataReader: ruleDataClientMock.getReader({ namespace: 'default' }),
+        runtimeMappings: {},
+        inputIndex: ['auditbeat-*'],
+        primaryTimestamp: TIMESTAMP,
+        aggregatableTimestampField: TIMESTAMP,
+        exceptionFilter: undefined,
+        unprocessedExceptions: [getExceptionListItemSchemaMock()],
+      });
+      expect(result.warningMessages).toEqual([
+        `The following exceptions won't be applied to rule execution: ${
+          getExceptionListItemSchemaMock().name
+        }`,
+      ]);
     });
   });
 });

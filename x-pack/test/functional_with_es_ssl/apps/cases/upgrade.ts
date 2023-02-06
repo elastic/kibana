@@ -9,7 +9,7 @@ import expect from '@kbn/expect';
 import {
   getExternalServiceSimulatorPath,
   ExternalServiceSimulator,
-} from '../../../alerting_api_integration/common/fixtures/plugins/actions_simulators/server/plugin';
+} from '../../../alerting_api_integration/common/plugins/actions_simulators/server/plugin';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default ({ getPageObject, getService }: FtrProviderContext) => {
@@ -18,6 +18,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
   const testSubjects = getService('testSubjects');
   const find = getService('find');
+  const toasts = getService('toasts');
 
   const updateConnector = async (id: string, req: Record<string, unknown>) => {
     const { body: connector } = await supertest
@@ -74,6 +75,10 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
     });
 
     describe('Case view page', function () {
+      it('does not show any error toasters', async () => {
+        expect(await toasts.getToastCount()).to.be(0);
+      });
+
       it('shows the title correctly', async () => {
         const title = await testSubjects.find('header-page-title');
         expect(await title.getVisibleText()).equal('Upgrade test in Kibana');
@@ -235,13 +240,13 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         await testSubjects.exists('case-refresh');
       });
 
-      it('shows the refresh button', async () => {
+      it('shows the actions button', async () => {
         await testSubjects.exists('property-actions');
       });
 
       it('shows the reporter correctly', async () => {
         const reporter = await find.byCssSelector(
-          '[data-test-subj="case-view-user-list-reporter"] [data-test-subj="case-view-username"]'
+          '[data-test-subj="case-view-user-list-reporter"] [data-test-subj="user-profile-username"]'
         );
 
         expect(await reporter.getVisibleText()).equal('elastic');
@@ -249,7 +254,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
       it('shows the participants correctly', async () => {
         const participant = await find.byCssSelector(
-          '[data-test-subj="case-view-user-list-participants"] [data-test-subj="case-view-username"]'
+          '[data-test-subj="case-view-user-list-participants"] [data-test-subj="user-profile-username"]'
         );
 
         expect(await participant.getVisibleText()).equal('elastic');
@@ -274,6 +279,10 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
       it('shows the add comment button', async () => {
         await testSubjects.exists('submit-comment');
+      });
+
+      it('shows the assignees section', async () => {
+        await testSubjects.exists('case-view-assignees');
       });
     });
   });

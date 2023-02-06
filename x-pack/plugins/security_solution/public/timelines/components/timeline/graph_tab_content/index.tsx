@@ -36,11 +36,11 @@ const GraphTabContentComponent: React.FC<GraphTabContentProps> = ({ timelineId }
   );
 
   const { Navigation } = useSessionViewNavigation({
-    timelineId,
+    scopeId: timelineId,
   });
 
   const { shouldShowDetailsPanel, DetailsPanel, SessionView } = useSessionView({
-    timelineId,
+    scopeId: timelineId,
   });
 
   if (!graphEventId) {
@@ -49,7 +49,7 @@ const GraphTabContentComponent: React.FC<GraphTabContentProps> = ({ timelineId }
 
   return (
     <>
-      <GraphOverlay timelineId={timelineId} Navigation={Navigation} SessionView={SessionView} />
+      <GraphOverlay scopeId={timelineId} Navigation={Navigation} SessionView={SessionView} />
       {shouldShowDetailsPanel && (
         <>
           <VerticalRule />

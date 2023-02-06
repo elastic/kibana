@@ -11,13 +11,10 @@ import type {
   AlertInstanceState,
   RuleExecutorServices,
 } from '@kbn/alerting-plugin/server';
-import type { SignalSearchResponse, SignalSource } from './types';
+import type { SignalSearchResponse, SignalSource, OverrideBodyQuery } from './types';
 import { buildEventsSearchQuery } from './build_events_query';
 import { createErrorsFromShard, makeFloatString } from './utils';
-import type {
-  TimestampOverride,
-  TimestampOverrideOrUndefined,
-} from '../../../../common/detection_engine/schemas/common/schemas';
+import type { TimestampOverride } from '../../../../common/detection_engine/rule_schema';
 import { withSecuritySpan } from '../../../utils/with_security_span';
 import type { IRuleExecutionLogForExecutors } from '../rule_monitoring';
 
@@ -33,9 +30,11 @@ interface SingleSearchAfterParams {
   sortOrder?: estypes.SortOrder;
   filter: estypes.QueryDslQueryContainer;
   primaryTimestamp: TimestampOverride;
-  secondaryTimestamp: TimestampOverrideOrUndefined;
+  secondaryTimestamp: TimestampOverride | undefined;
   trackTotalHits?: boolean;
   runtimeMappings: estypes.MappingRuntimeFields | undefined;
+  additionalFilters?: estypes.QueryDslQueryContainer[];
+  overrideBody?: OverrideBodyQuery;
 }
 
 // utilize search_after for paging results into bulk.
@@ -56,6 +55,8 @@ export const singleSearchAfter = async <
   primaryTimestamp,
   secondaryTimestamp,
   trackTotalHits,
+  additionalFilters,
+  overrideBody,
 }: SingleSearchAfterParams): Promise<{
   searchResult: SignalSearchResponse<TAggregations>;
   searchDuration: string;
@@ -76,6 +77,12 @@ export const singleSearchAfter = async <
         primaryTimestamp,
         secondaryTimestamp,
         trackTotalHits,
+        additionalFilters,
+        /**
+         * overrideBody allows the search after to ignore the _source property of the result,
+         * thus reducing the size of the response and increasing the performance of the query.
+         */
+        overrideBody,
       });
 
       const start = performance.now();
@@ -84,6 +91,7 @@ export const singleSearchAfter = async <
           searchAfterQuery as estypes.SearchRequest,
           { meta: true }
         );
+
       const end = performance.now();
 
       const searchErrors = createErrorsFromShard({

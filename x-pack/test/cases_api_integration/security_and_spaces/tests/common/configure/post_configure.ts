@@ -95,6 +95,11 @@ export default ({ getService }: FtrProviderContext): void => {
           target: 'description',
         },
         {
+          action_type: 'overwrite',
+          source: 'tags',
+          target: 'labels',
+        },
+        {
           action_type: 'append',
           source: 'comments',
           target: 'comments',

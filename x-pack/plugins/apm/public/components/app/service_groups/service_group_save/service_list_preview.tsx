@@ -37,7 +37,7 @@ type SORT_FIELD = 'serviceName' | 'environments' | 'agentName';
 
 export function ServiceListPreview({ items, isLoading }: Props) {
   const [pageIndex, setPageIndex] = useState(0);
-  const [pageSize, setPageSize] = useState(5);
+  const [pageSize, setPageSize] = useState(10);
   const [sortField, setSortField] = useState<SORT_FIELD>(DEFAULT_SORT_FIELD);
   const [sortDirection, setSortDirection] = useState<DIRECTION>(
     DEFAULT_SORT_DIRECTION

@@ -17,7 +17,7 @@ jest.mock('../header/add_to_case_action', () => ({
 }));
 
 const mockLensAttrs = {
-  title: '[Host] KPI Hosts - metric 1',
+  hidePanelTitles: true,
   description: '',
   visualizationType: 'lnsMetric',
   state: {
@@ -32,7 +32,7 @@ const mockLensAttrs = {
     },
     filters: [],
     datasourceStates: {
-      indexpattern: {
+      formBased: {
         layers: {
           '416b6fad-1923-4f6a-a2df-b223bb287e30': {
             columnOrder: ['b00c65ea-32be-4163-bfc8-f795b1ef9d06'],
@@ -110,7 +110,7 @@ describe('Embeddable', () => {
         caseOwner={mockOwner}
         customLensAttrs={mockLensAttrs}
         customTimeRange={mockTimeRange}
-        indexPatterns={mockDataViews}
+        dataViewState={mockDataViews}
         lens={mockLens}
         reportType={mockReportType}
         title={mockTitle}
@@ -128,7 +128,7 @@ describe('Embeddable', () => {
         caseOwner={mockOwner}
         customLensAttrs={mockLensAttrs}
         customTimeRange={mockTimeRange}
-        indexPatterns={mockDataViews}
+        dataViewState={mockDataViews}
         lens={mockLens}
         reportType={mockReportType}
         withActions={mockActions}
@@ -146,7 +146,7 @@ describe('Embeddable', () => {
         caseOwner={mockOwner}
         customLensAttrs={mockLensAttrs}
         customTimeRange={mockTimeRange}
-        indexPatterns={mockDataViews}
+        dataViewState={mockDataViews}
         lens={mockLens}
         reportType={mockReportType}
         withActions={mockActions}
@@ -174,38 +174,6 @@ describe('Embeddable', () => {
     );
   });
 
-  it('renders single metric', () => {
-    const { container } = render(
-      <Embeddable
-        appId={mockAppId}
-        caseOwner={mockOwner}
-        customLensAttrs={mockLensAttrs}
-        customTimeRange={mockTimeRange}
-        indexPatterns={mockDataViews}
-        isSingleMetric={true}
-        lens={mockLens}
-        reportType={mockReportType}
-        withActions={mockActions}
-      />
-    );
-    expect(
-      container.querySelector(`[data-test-subj="exploratoryView-singleMetric"]`)
-    ).toBeInTheDocument();
-    expect(container.querySelector(`[data-test-subj="exploratoryView"]`)).not.toBeInTheDocument();
-    expect((mockLens.EmbeddableComponent as jest.Mock).mock.calls[0][0].id).toEqual(
-      'exploratoryView-singleMetric'
-    );
-    expect((mockLens.EmbeddableComponent as jest.Mock).mock.calls[0][0].attributes).toEqual(
-      mockLensAttrs
-    );
-    expect((mockLens.EmbeddableComponent as jest.Mock).mock.calls[0][0].timeRange).toEqual(
-      mockTimeRange
-    );
-    expect((mockLens.EmbeddableComponent as jest.Mock).mock.calls[0][0].withDefaultActions).toEqual(
-      true
-    );
-  });
-
   it('renders AddToCaseAction', () => {
     render(
       <Embeddable
@@ -213,7 +181,7 @@ describe('Embeddable', () => {
         caseOwner={mockOwner}
         customLensAttrs={mockLensAttrs}
         customTimeRange={mockTimeRange}
-        indexPatterns={mockDataViews}
+        dataViewState={mockDataViews}
         isSingleMetric={true}
         lens={mockLens}
         reportType={mockReportType}

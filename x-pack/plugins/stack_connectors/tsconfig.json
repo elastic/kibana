@@ -1,0 +1,33 @@
+{
+  "extends": "../../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "target/types",
+  },
+  "include": [
+    "server/**/*",
+    // have to declare *.json explicitly due to https://github.com/microsoft/TypeScript/issues/25636
+    "server/**/*.json",
+    "common/**/*",
+    "public/**/*"
+  ],
+  "kbn_references": [
+    "@kbn/core",
+    "@kbn/actions-plugin",
+    "@kbn/triggers-actions-ui-plugin",
+    "@kbn/config-schema",
+    "@kbn/i18n",
+    "@kbn/logging-mocks",
+    "@kbn/logging",
+    "@kbn/core-logging-server-mocks",
+    "@kbn/core-elasticsearch-client-server-mocks",
+    "@kbn/alerting-plugin",
+    "@kbn/i18n-react",
+    "@kbn/es-ui-shared-plugin",
+    "@kbn/kibana-react-plugin",
+    "@kbn/test-jest-helpers",
+    "@kbn/securitysolution-io-ts-utils",
+  ],
+  "exclude": [
+    "target/**/*",
+  ]
+}

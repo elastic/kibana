@@ -11,13 +11,13 @@ import styled, { css } from 'styled-components';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiCallOut, EuiLink } from '@elastic/eui';
 
-import { ActionConnectorTableItem } from '@kbn/triggers-actions-ui-plugin/public/types';
+import type { ActionConnectorTableItem } from '@kbn/triggers-actions-ui-plugin/public/types';
 import { CasesConnectorFeatureId } from '@kbn/actions-plugin/common';
 import { useKibana } from '../../common/lib/kibana';
 import { useGetActionTypes } from '../../containers/configure/use_action_types';
 import { useCaseConfigure } from '../../containers/configure/use_configure';
 
-import { ClosureType } from '../../containers/configure/types';
+import type { ClosureType } from '../../containers/configure/types';
 
 import { SectionWrapper, ContentWrapper, WhitePageWrapper } from '../wrappers';
 import { Connectors } from './connectors';
@@ -29,7 +29,7 @@ import { HeaderPage } from '../header_page';
 import { useCasesContext } from '../cases_context/use_cases_context';
 import { useCasesBreadcrumbs } from '../use_breadcrumbs';
 import { CasesDeepLinkId } from '../../common/navigation';
-import { useGetConnectors } from '../../containers/configure/use_connectors';
+import { useGetSupportedActionConnectors } from '../../containers/configure/use_get_supported_action_connectors';
 
 const FormWrapper = styled.div`
   ${({ theme }) => css`
@@ -77,7 +77,7 @@ export const ConfigureCases: React.FC = React.memo(() => {
     isLoading: isLoadingConnectors,
     data: connectors = [],
     refetch: refetchConnectors,
-  } = useGetConnectors();
+  } = useGetSupportedActionConnectors();
   const {
     isLoading: isLoadingActionTypes,
     data: actionTypes = [],

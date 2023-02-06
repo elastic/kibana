@@ -9,6 +9,7 @@
 import Path from 'path';
 import del from 'del';
 import Axios from 'axios';
+import Fsp from 'fs/promises';
 import { Task, downloadToDisk, downloadToString } from '../lib';
 
 export const DownloadCloudDependencies: Task = {
@@ -38,18 +39,41 @@ export const DownloadCloudDependencies: Task = {
       return Promise.all(downloads);
     };
 
+    const writeManifest = async (manifestUrl: string, manifestJSON: object) => {
+      const destination = config.resolveFromRepo('.beats', 'beats_manifest.json');
+      return Fsp.writeFile(
+        destination,
+        JSON.stringify(
+          {
+            manifest_url: manifestUrl,
+            ...manifestJSON,
+          },
+          null,
+          2
+        )
+      );
+    };
+
     let buildId = '';
+    let manifestUrl = '';
+    let manifestJSON = null;
     const buildUrl = `https://${subdomain}.elastic.co/beats/latest/${config.getBuildVersion()}.json`;
     try {
       const latest = await Axios.get(buildUrl);
       buildId = latest.data.build_id;
+      manifestUrl = latest.data.manifest_url;
+      manifestJSON = (await Axios.get(manifestUrl)).data;
+      if (!(manifestUrl && manifestJSON)) throw new Error('Missing manifest.');
     } catch (e) {
       log.error(`Unable to find Beats artifacts for ${config.getBuildVersion()} at ${buildUrl}.`);
       throw e;
     }
+
     await del([config.resolveFromRepo('.beats')]);
 
     await downloadBeat('metricbeat', buildId);
     await downloadBeat('filebeat', buildId);
+
+    await writeManifest(manifestUrl, manifestJSON);
   },
 };

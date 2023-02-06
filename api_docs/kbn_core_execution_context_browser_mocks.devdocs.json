@@ -32,6 +32,7 @@
         "description": [],
         "path": "packages/core/execution-context/core-execution-context-browser-mocks/src/execution_context_service.mock.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-execution-context-browser-mocks",
@@ -42,13 +43,20 @@
             "description": [],
             "signature": [
               "() => jest.Mocked<",
-              "PublicMethodsOf",
+              {
+                "pluginId": "@kbn/utility-types",
+                "scope": "common",
+                "docId": "kibKbnUtilityTypesPluginApi",
+                "section": "def-common.PublicMethodsOf",
+                "text": "PublicMethodsOf"
+              },
               "<",
               "ExecutionContextService",
               ">>"
             ],
             "path": "packages/core/execution-context/core-execution-context-browser-mocks/src/execution_context_service.mock.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "returnComment": [],
             "children": []
           },
@@ -61,11 +69,18 @@
             "description": [],
             "signature": [
               "() => jest.Mocked<",
-              "ExecutionContextSetup",
+              {
+                "pluginId": "@kbn/core-execution-context-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreExecutionContextBrowserPluginApi",
+                "section": "def-common.ExecutionContextSetup",
+                "text": "ExecutionContextSetup"
+              },
               ">"
             ],
             "path": "packages/core/execution-context/core-execution-context-browser-mocks/src/execution_context_service.mock.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "returnComment": [],
             "children": []
           },
@@ -78,11 +93,18 @@
             "description": [],
             "signature": [
               "() => jest.Mocked<",
-              "ExecutionContextSetup",
+              {
+                "pluginId": "@kbn/core-execution-context-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreExecutionContextBrowserPluginApi",
+                "section": "def-common.ExecutionContextSetup",
+                "text": "ExecutionContextSetup"
+              },
               ">"
             ],
             "path": "packages/core/execution-context/core-execution-context-browser-mocks/src/execution_context_service.mock.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "returnComment": [],
             "children": []
           },
@@ -95,11 +117,18 @@
             "description": [],
             "signature": [
               "() => jest.Mocked<",
-              "ExecutionContextSetup",
+              {
+                "pluginId": "@kbn/core-execution-context-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreExecutionContextBrowserPluginApi",
+                "section": "def-common.ExecutionContextSetup",
+                "text": "ExecutionContextSetup"
+              },
               ">"
             ],
             "path": "packages/core/execution-context/core-execution-context-browser-mocks/src/execution_context_service.mock.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "returnComment": [],
             "children": []
           },
@@ -112,11 +141,18 @@
             "description": [],
             "signature": [
               "() => jest.Mocked<",
-              "ExecutionContextSetup",
+              {
+                "pluginId": "@kbn/core-execution-context-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreExecutionContextBrowserPluginApi",
+                "section": "def-common.ExecutionContextSetup",
+                "text": "ExecutionContextSetup"
+              },
               ">"
             ],
             "path": "packages/core/execution-context/core-execution-context-browser-mocks/src/execution_context_service.mock.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "returnComment": [],
             "children": []
           }

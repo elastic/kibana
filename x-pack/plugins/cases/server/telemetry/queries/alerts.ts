@@ -6,7 +6,7 @@
  */
 
 import { CASE_COMMENT_SAVED_OBJECT } from '../../../common/constants';
-import { CasesTelemetry, CollectTelemetryDataParams } from '../types';
+import type { CasesTelemetry, CollectTelemetryDataParams } from '../types';
 import { getCountsAndMaxData, getOnlyAlertsCommentsFilter } from './utils';
 
 export const getAlertsTelemetryData = async ({

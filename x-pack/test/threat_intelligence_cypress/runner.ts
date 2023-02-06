@@ -7,7 +7,7 @@
 
 import { chunk } from 'lodash';
 import { resolve } from 'path';
-import glob from 'glob';
+import globby from 'globby';
 
 import Url from 'url';
 
@@ -22,14 +22,11 @@ import { tiAbusechMalwareBazaar } from './pipelines/ti_abusech_malware_bazaar';
 import { tiAbusechUrl } from './pipelines/ti_abusech_url';
 
 const retrieveIntegrations = (chunksTotal: number, chunkIndex: number) => {
-  const pattern = resolve(
-    __dirname,
-    '../../plugins/threat_intelligence/cypress/integration/**/*.spec.ts'
-  );
-  const integrationsPaths = glob.sync(pattern);
+  const pattern = resolve(__dirname, '../../plugins/threat_intelligence/cypress/e2e/**/*.cy.ts');
+  const integrationsPaths = globby.sync(pattern);
   const chunkSize = Math.ceil(integrationsPaths.length / chunksTotal);
 
-  return chunk(integrationsPaths, chunkSize)[chunkIndex - 1];
+  return chunk(integrationsPaths, chunkSize)[chunkIndex - 1] || [];
 };
 
 export async function ThreatIntelligenceConfigurableCypressTestRunner(

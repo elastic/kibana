@@ -10,8 +10,8 @@ import moment from 'moment-timezone';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 
-import { AuthenticatedUser } from '@kbn/security-plugin/common/model';
-import { NavigateToAppOptions } from '@kbn/core/public';
+import type { AuthenticatedUser } from '@kbn/security-plugin/common/model';
+import type { NavigateToAppOptions } from '@kbn/core/public';
 import { getUICapabilities } from '../../../client/helpers/capabilities';
 import { convertToCamelCase } from '../../../api/utils';
 import {
@@ -19,8 +19,8 @@ import {
   DEFAULT_DATE_FORMAT,
   DEFAULT_DATE_FORMAT_TZ,
 } from '../../../../common/constants';
-import { CasesPermissions } from '../../../../common';
-import { StartServices } from '../../../types';
+import type { CasesPermissions } from '../../../../common';
+import type { StartServices } from '../../../types';
 import { useUiSetting, useKibana } from './kibana_react';
 
 export const useDateFormat = (): string => useUiSetting<string>(DEFAULT_DATE_FORMAT);

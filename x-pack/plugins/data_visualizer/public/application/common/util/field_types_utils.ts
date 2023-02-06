@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { DataViewField } from '@kbn/data-views-plugin/public';
-import { KBN_FIELD_TYPES } from '@kbn/data-plugin/common';
+import { ES_FIELD_TYPES, KBN_FIELD_TYPES } from '@kbn/field-types';
 import { SupportedFieldType } from '../../../../common/types';
 import { SUPPORTED_FIELD_TYPES } from '../../../../common/constants';
 
@@ -127,6 +127,9 @@ export function kbnTypeToJobType(field: DataViewField) {
       }
       break;
     case KBN_FIELD_TYPES.NUMBER:
+      if (field.esTypes?.some((d) => d === ES_FIELD_TYPES.AGGREGATE_METRIC_DOUBLE)) {
+        break;
+      }
       type = SUPPORTED_FIELD_TYPES.NUMBER;
       break;
     case KBN_FIELD_TYPES.DATE:

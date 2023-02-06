@@ -17,9 +17,9 @@ import {
 } from '../../../../../../../common/agent_configuration/all_option';
 import { useFetcher, FETCH_STATUS } from '../../../../../../hooks/use_fetcher';
 import { FormRowSelect } from './form_row_select';
-import { APMLink } from '../../../../../shared/links/apm/apm_link';
+import { LegacyAPMLink } from '../../../../../shared/links/apm/apm_link';
 import { FormRowSuggestionsSelect } from './form_row_suggestions_select';
-import { SERVICE_NAME } from '../../../../../../../common/elasticsearch_fieldnames';
+import { SERVICE_NAME } from '../../../../../../../common/es_fields/apm';
 interface Props {
   newConfig: AgentConfigurationIntake;
   setNewConfig: React.Dispatch<React.SetStateAction<AgentConfigurationIntake>>;
@@ -142,14 +142,14 @@ export function ServicePage({ newConfig, setNewConfig, onClickNext }: Props) {
       <EuiFlexGroup justifyContent="flexEnd">
         {/* Cancel button */}
         <EuiFlexItem grow={false}>
-          <APMLink path="/settings/agent-configuration">
+          <LegacyAPMLink path="/settings/agent-configuration">
             <EuiButtonEmpty color="primary">
               {i18n.translate(
                 'xpack.apm.agentConfig.servicePage.cancelButton',
                 { defaultMessage: 'Cancel' }
               )}
             </EuiButtonEmpty>
-          </APMLink>
+          </LegacyAPMLink>
         </EuiFlexItem>
 
         {/* Next button */}

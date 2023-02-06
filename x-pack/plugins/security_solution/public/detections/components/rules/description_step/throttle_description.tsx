@@ -6,10 +6,13 @@
  */
 
 import { find } from 'lodash/fp';
-import { THROTTLE_OPTIONS, DEFAULT_THROTTLE_OPTION } from '../throttle_select_field';
+import {
+  THROTTLE_OPTIONS_FOR_RULE_CREATION_AND_EDITING,
+  DEFAULT_THROTTLE_OPTION,
+} from '../throttle_select_field';
 
 export const buildThrottleDescription = (value = DEFAULT_THROTTLE_OPTION.value, title: string) => {
-  const throttleOption = find(['value', value], THROTTLE_OPTIONS);
+  const throttleOption = find(['value', value], THROTTLE_OPTIONS_FOR_RULE_CREATION_AND_EDITING);
 
   return {
     title,

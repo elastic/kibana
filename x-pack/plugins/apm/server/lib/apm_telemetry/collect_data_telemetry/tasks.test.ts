@@ -5,12 +5,13 @@
  * 2.0.
  */
 
+import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 import { ApmIndicesConfig } from '../../../routes/settings/apm_indices/get_apm_indices';
 import { tasks } from './tasks';
 import {
   SERVICE_NAME,
   SERVICE_ENVIRONMENT,
-} from '../../../../common/elasticsearch_fieldnames';
+} from '../../../../common/es_fields/apm';
 
 describe('data telemetry collection tasks', () => {
   const indices = {
@@ -67,7 +68,9 @@ describe('data telemetry collection tasks', () => {
         },
       });
 
-      expect(await task?.executor({ search, indices } as any)).toEqual({
+      expect(
+        await task?.executor({ indices, telemetryClient: { search } } as any)
+      ).toEqual({
         environments: {
           services_with_multiple_environments: 1,
           services_without_environment: 2,
@@ -91,7 +94,9 @@ describe('data telemetry collection tasks', () => {
           },
         });
 
-        expect(await task?.executor({ indices, search } as any)).toEqual({});
+        expect(
+          await task?.executor({ indices, telemetryClient: { search } } as any)
+        ).toEqual({});
       });
     });
 
@@ -134,7 +139,9 @@ describe('data telemetry collection tasks', () => {
           });
         });
 
-      expect(await task?.executor({ indices, search } as any)).toEqual({
+      expect(
+        await task?.executor({ indices, telemetryClient: { search } } as any)
+      ).toEqual({
         aggregated_transactions: {
           current_implementation: {
             expected_metric_document_count: 1250,
@@ -183,7 +190,9 @@ describe('data telemetry collection tasks', () => {
         },
       });
 
-      expect(await task?.executor({ indices, search } as any)).toEqual({
+      expect(
+        await task?.executor({ indices, telemetryClient: { search } } as any)
+      ).toEqual({
         cloud: {
           availability_zone: ['us-west-1', 'europe-west1-c'],
           provider: ['aws', 'gcp'],
@@ -196,7 +205,9 @@ describe('data telemetry collection tasks', () => {
       it('returns an empty map', async () => {
         const search = jest.fn().mockResolvedValueOnce({});
 
-        expect(await task?.executor({ indices, search } as any)).toEqual({
+        expect(
+          await task?.executor({ indices, telemetryClient: { search } } as any)
+        ).toEqual({
           cloud: {
             availability_zone: [],
             provider: [],
@@ -223,7 +234,9 @@ describe('data telemetry collection tasks', () => {
         },
       });
 
-      expect(await task?.executor({ indices, search } as any)).toEqual({
+      expect(
+        await task?.executor({ indices, telemetryClient: { search } } as any)
+      ).toEqual({
         host: {
           os: { platform: ['linux', 'windows', 'macos'] },
         },
@@ -234,7 +247,9 @@ describe('data telemetry collection tasks', () => {
       it('returns an empty map', async () => {
         const search = jest.fn().mockResolvedValueOnce({});
 
-        expect(await task?.executor({ indices, search } as any)).toEqual({
+        expect(
+          await task?.executor({ indices, telemetryClient: { search } } as any)
+        ).toEqual({
           host: {
             os: {
               platform: [],
@@ -267,7 +282,9 @@ describe('data telemetry collection tasks', () => {
         );
       });
 
-      expect(await task?.executor({ indices, search } as any)).toEqual({
+      expect(
+        await task?.executor({ indices, telemetryClient: { search } } as any)
+      ).toEqual({
         counts: {
           error: {
             '1d': 1,
@@ -278,10 +295,6 @@ describe('data telemetry collection tasks', () => {
             all: 1,
           },
           onboarding: {
-            '1d': 1,
-            all: 1,
-          },
-          sourcemap: {
             '1d': 1,
             all: 1,
           },
@@ -302,9 +315,6 @@ describe('data telemetry collection tasks', () => {
             ms: 0,
           },
           onboarding: {
-            ms: 0,
-          },
-          sourcemap: {
             ms: 0,
           },
           span: {
@@ -329,7 +339,10 @@ describe('data telemetry collection tasks', () => {
         .mockResolvedValueOnce({ body: { count: 1 } });
 
       expect(
-        await task?.executor({ indices, transportRequest } as any)
+        await task?.executor({
+          indices,
+          telemetryClient: { transportRequest },
+        } as any)
       ).toEqual({
         integrations: {
           ml: {
@@ -344,7 +357,10 @@ describe('data telemetry collection tasks', () => {
         const transportRequest = jest.fn().mockResolvedValueOnce({});
 
         expect(
-          await task?.executor({ indices, transportRequest } as any)
+          await task?.executor({
+            indices,
+            telemetryClient: { transportRequest },
+          } as any)
         ).toEqual({
           integrations: {
             ml: {
@@ -360,49 +376,71 @@ describe('data telemetry collection tasks', () => {
     const task = tasks.find((t) => t.name === 'indices_stats');
 
     it('returns a map of index stats', async () => {
-      const indicesStats = jest.fn().mockResolvedValueOnce({
+      const indicesStats = jest.fn().mockResolvedValue({
         _all: { total: { docs: { count: 1 }, store: { size_in_bytes: 1 } } },
         _shards: { total: 1 },
       });
 
-      expect(await task?.executor({ indices, indicesStats } as any)).toEqual({
-        indices: {
-          shards: {
-            total: 1,
-          },
-          all: {
-            total: {
-              docs: {
-                count: 1,
-              },
-              store: {
-                size_in_bytes: 1,
-              },
+      const statsResponse = {
+        shards: {
+          total: 1,
+        },
+        all: {
+          total: {
+            docs: {
+              count: 1,
+            },
+            store: {
+              size_in_bytes: 1,
             },
           },
+        },
+      };
+
+      expect(
+        await task?.executor({
+          indices,
+          telemetryClient: { indicesStats },
+        } as any)
+      ).toEqual({
+        indices: {
+          ...statsResponse,
+          metric: statsResponse,
+          traces: statsResponse,
         },
       });
     });
 
     describe('with no results', () => {
       it('returns zero values', async () => {
-        const indicesStats = jest.fn().mockResolvedValueOnce({});
+        const indicesStats = jest.fn().mockResolvedValue({});
 
-        expect(await task?.executor({ indices, indicesStats } as any)).toEqual({
-          indices: {
-            shards: {
-              total: 0,
-            },
-            all: {
-              total: {
-                docs: {
-                  count: 0,
-                },
-                store: {
-                  size_in_bytes: 0,
-                },
+        const statsResponse = {
+          shards: {
+            total: 0,
+          },
+          all: {
+            total: {
+              docs: {
+                count: 0,
+              },
+              store: {
+                size_in_bytes: 0,
               },
             },
+          },
+        };
+
+        expect(
+          await task?.executor({
+            indices,
+            telemetryClient: { indicesStats },
+          } as any)
+        ).toEqual({
+          indices: {
+            ...statsResponse,
+            metric: statsResponse,
+            traces: statsResponse,
           },
         });
       });
@@ -433,13 +471,121 @@ describe('data telemetry collection tasks', () => {
         }
       });
 
-      expect(await task?.executor({ search } as any)).toEqual({
+      expect(
+        await task?.executor({ indices, telemetryClient: { search } } as any)
+      ).toEqual({
         cardinality: {
           client: { geo: { country_iso_code: { rum: { '1d': 5 } } } },
           transaction: { name: { all_agents: { '1d': 3 }, rum: { '1d': 1 } } },
           user_agent: {
             original: { all_agents: { '1d': 4 }, rum: { '1d': 2 } },
           },
+        },
+      });
+    });
+  });
+
+  describe('service groups', () => {
+    const task = tasks.find((t) => t.name === 'service_groups');
+    const savedObjectsClient = savedObjectsClientMock.create();
+
+    it('returns service group stats', async () => {
+      savedObjectsClient.find.mockResolvedValueOnce({
+        page: 1,
+        per_page: 500,
+        total: 2,
+        saved_objects: [
+          {
+            type: 'apm-service-group',
+            id: '0b6157f0-44bd-11ed-bdb7-bffab551cd4d',
+            namespaces: ['default'],
+            attributes: {
+              color: '#5094C4',
+              kuery: 'service.environment: production',
+              groupName: 'production',
+            },
+            references: [],
+            score: 1,
+          },
+          {
+            type: 'apm-service-group',
+            id: '0b6157f0-44bd-11ed-bdb7-bffab551cd4d',
+            namespaces: ['space-1'],
+            attributes: {
+              color: '#5094C4',
+              kuery: 'agent.name: go',
+              groupName: 'agent',
+            },
+            references: [],
+            score: 0,
+          },
+        ],
+      });
+
+      expect(
+        await task?.executor({
+          savedObjectsClient,
+        } as any)
+      ).toEqual({
+        service_groups: {
+          kuery_fields: ['service.environment', 'agent.name'],
+          total: 2,
+        },
+      });
+    });
+
+    it('should return stats from all spaces', () => {
+      expect(savedObjectsClient.find).toHaveBeenCalledWith({
+        type: 'apm-service-group',
+        page: 1,
+        perPage: 500,
+        sortField: 'updated_at',
+        sortOrder: 'desc',
+        namespaces: ['*'],
+      });
+    });
+
+    it('returns unique fields', async () => {
+      savedObjectsClient.find.mockResolvedValueOnce({
+        page: 1,
+        per_page: 500,
+        total: 2,
+        saved_objects: [
+          {
+            type: 'apm-service-group',
+            id: '0b6157f0-44bd-11ed-bdb7-bffab551cd4d',
+            namespaces: ['default'],
+            attributes: {
+              color: '#5094C4',
+              kuery: 'service.environment: production',
+              groupName: 'production',
+            },
+            references: [],
+            score: 1,
+          },
+          {
+            type: 'apm-service-group',
+            id: '0b6157f0-44bd-11ed-bdb7-bffab551cd4d',
+            namespaces: ['default'],
+            attributes: {
+              color: '#5094C4',
+              kuery: 'service.environment: production and agent.name: go',
+              groupName: 'agent',
+            },
+            references: [],
+            score: 0,
+          },
+        ],
+      });
+
+      expect(
+        await task?.executor({
+          savedObjectsClient,
+        } as any)
+      ).toEqual({
+        service_groups: {
+          kuery_fields: ['service.environment', 'agent.name'],
+          total: 2,
         },
       });
     });

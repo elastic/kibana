@@ -13,7 +13,7 @@ import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { SavedObjectsRawDoc, SavedObjectsRawDocSource } from '@kbn/core-saved-objects-server';
 import {
   catchRetryableEsClientErrors,
-  RetryableEsClientError,
+  type RetryableEsClientError,
 } from './catch_retryable_es_client_errors';
 
 /** @internal */

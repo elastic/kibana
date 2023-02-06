@@ -8,9 +8,10 @@
 
 import * as React from 'react';
 import useObservable from 'react-use/lib/useObservable';
-import { EuiPageTemplate } from '@elastic/eui';
+import { EuiPageTemplate_Deprecated as EuiPageTemplate } from '@elastic/eui';
 import { ThemeServiceSetup } from '@kbn/core/public';
 import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import { CustomBrandingStart } from '@kbn/core-custom-branding-browser';
 import { Error } from './error';
 import { RedirectManager } from '../redirect_manager';
 import { Spinner } from './spinner';
@@ -18,10 +19,12 @@ import { Spinner } from './spinner';
 export interface PageProps {
   manager: Pick<RedirectManager, 'error$'>;
   theme: ThemeServiceSetup;
+  customBranding: CustomBrandingStart;
 }
 
-export const Page: React.FC<PageProps> = ({ manager, theme }) => {
+export const Page: React.FC<PageProps> = ({ manager, theme, customBranding }) => {
   const error = useObservable(manager.error$);
+  const hasCustomBranding = useObservable(customBranding.hasCustomBranding$);
 
   if (error) {
     return (
@@ -46,7 +49,7 @@ export const Page: React.FC<PageProps> = ({ manager, theme }) => {
           color: 'primary',
         }}
       >
-        <Spinner />
+        <Spinner showPlainSpinner={Boolean(hasCustomBranding)} />
       </EuiPageTemplate>
     </KibanaThemeProvider>
   );

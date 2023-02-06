@@ -1,0 +1,40 @@
+title: Create case request
+description: >-
+  The create case API request body varies depending on the type of connector.
+type: object
+required:
+      - connector
+      - description
+      - owner
+      - settings
+      - tags
+      - title
+properties:
+  assignees:
+    $ref: 'assignees.yaml'
+  connector:
+    oneOf:
+      - $ref: 'connector_properties_none.yaml'
+      - $ref: 'connector_properties_cases_webhook.yaml'
+      - $ref: 'connector_properties_jira.yaml'
+      - $ref: 'connector_properties_resilient.yaml'
+      - $ref: 'connector_properties_servicenow.yaml'
+      - $ref: 'connector_properties_servicenow_sir.yaml'
+      - $ref: 'connector_properties_swimlane.yaml'
+  description:
+    description: The description for the case.
+    type: string
+  owner:
+    $ref: 'owners.yaml'
+  settings:
+    $ref: 'settings.yaml'
+  severity:
+    $ref: 'severity_property.yaml'
+  tags:
+    description: The words and phrases that help categorize cases. It can be an empty array.
+    type: array
+    items:
+      type: string
+  title:
+    description: A title for the case.
+    type: string

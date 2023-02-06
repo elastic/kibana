@@ -21,6 +21,7 @@ import {
   buildPhraseFilter,
   buildPhrasesFilter,
   COMPARE_ALL_OPTIONS,
+  buildExistsFilter,
 } from '@kbn/es-query';
 import { ReduxEmbeddableTools, ReduxEmbeddablePackage } from '@kbn/presentation-util-plugin/public';
 import { DataView } from '@kbn/data-views-plugin/public';
@@ -35,7 +36,7 @@ import {
   OptionsListEmbeddableInput,
   OPTIONS_LIST_CONTROL,
 } from '../..';
-import { optionsListReducers } from '../options_list_reducers';
+import { getDefaultComponentState, optionsListReducers } from '../options_list_reducers';
 import { OptionsListControl } from '../components/options_list_control';
 import { ControlsDataViewsService } from '../../services/data_views/types';
 import { ControlsOptionsListService } from '../../services/options_list/types';
@@ -105,6 +106,7 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
     >({
       embeddable: this,
       reducers: optionsListReducers,
+      initialComponentState: getDefaultComponentState(),
     });
 
     this.initialize();
@@ -127,11 +129,15 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
       map((newInput) => ({
         validate: !Boolean(newInput.ignoreParentSettings?.ignoreValidations),
         lastReloadRequestTime: newInput.lastReloadRequestTime,
+        existsSelected: newInput.existsSelected,
         dataViewId: newInput.dataViewId,
         fieldName: newInput.fieldName,
         timeRange: newInput.timeRange,
+        timeslice: newInput.timeslice,
+        exclude: newInput.exclude,
         filters: newInput.filters,
         query: newInput.query,
+        sort: newInput.sort,
       })),
       distinctUntilChanged(diffDataFetchProps)
     );
@@ -151,7 +157,14 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
      **/
     this.subscriptions.add(
       this.getInput$()
-        .pipe(distinctUntilChanged((a, b) => isEqual(a.selectedOptions, b.selectedOptions)))
+        .pipe(
+          distinctUntilChanged(
+            (a, b) =>
+              a.exclude === b.exclude &&
+              a.existsSelected === b.existsSelected &&
+              isEqual(a.selectedOptions, b.selectedOptions)
+          )
+        )
         .subscribe(async ({ selectedOptions: newSelectedOptions }) => {
           const {
             actions: {
@@ -259,7 +272,7 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
     const {
       dispatch,
       getState,
-      actions: { setLoading, updateQueryResults, publishFilters, setSearchString },
+      actions: { setLoading, publishFilters, setSearchString, updateQueryResults },
     } = this.reduxEmbeddableTools;
 
     const previousFieldName = this.field?.name;
@@ -272,87 +285,129 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
 
     const {
       componentState: { searchString },
-      explicitInput: { selectedOptions, runPastTimeout },
+      explicitInput: { selectedOptions, runPastTimeout, existsSelected, sort },
     } = getState();
-
     dispatch(setLoading(true));
-
-    // need to get filters, query, ignoreParentSettings, and timeRange from input for inheritance
-    const { ignoreParentSettings, filters, query, timeRange } = this.getInput();
-
-    if (this.abortController) this.abortController.abort();
-    this.abortController = new AbortController();
-    const { suggestions, invalidSelections, totalCardinality } =
-      await this.optionsListService.runOptionsListRequest(
-        {
-          field,
-          query,
-          filters,
-          dataView,
-          timeRange,
-          searchString,
-          runPastTimeout,
-          selectedOptions,
-        },
-        this.abortController.signal
-      );
-    if (!selectedOptions || isEmpty(invalidSelections) || ignoreParentSettings?.ignoreValidations) {
-      dispatch(
-        updateQueryResults({
-          availableOptions: suggestions,
-          invalidSelections: undefined,
-          validSelections: selectedOptions,
-          totalCardinality,
-        })
-      );
-    } else {
-      const valid: string[] = [];
-      const invalid: string[] = [];
-
-      for (const selectedOption of selectedOptions) {
-        if (invalidSelections?.includes(selectedOption)) invalid.push(selectedOption);
-        else valid.push(selectedOption);
+    if (searchString.valid) {
+      // need to get filters, query, ignoreParentSettings, and timeRange from input for inheritance
+      const {
+        ignoreParentSettings,
+        filters,
+        query,
+        timeRange: globalTimeRange,
+        timeslice,
+      } = this.getInput();
+      if (this.abortController) this.abortController.abort();
+      this.abortController = new AbortController();
+      const timeRange =
+        timeslice !== undefined
+          ? {
+              from: new Date(timeslice[0]).toISOString(),
+              to: new Date(timeslice[1]).toISOString(),
+              mode: 'absolute' as 'absolute',
+            }
+          : globalTimeRange;
+      const { suggestions, invalidSelections, totalCardinality, rejected } =
+        await this.optionsListService.runOptionsListRequest(
+          {
+            sort,
+            field,
+            query,
+            filters,
+            dataView,
+            timeRange,
+            searchString: searchString.value,
+            runPastTimeout,
+            selectedOptions,
+          },
+          this.abortController.signal
+        );
+      if (rejected) {
+        // This prevents a rejected request (which can happen, for example, when a user types a search string too quickly)
+        // from prematurely setting loading to `false` and updating the suggestions to show "No results"
+        return;
       }
-      dispatch(
-        updateQueryResults({
-          availableOptions: suggestions,
-          invalidSelections: invalid,
-          validSelections: valid,
-          totalCardinality,
-        })
-      );
-    }
 
-    // publish filter
-    const newFilters = await this.buildFilter();
-    batch(() => {
-      dispatch(setLoading(false));
-      dispatch(publishFilters(newFilters));
-    });
+      if (
+        (!selectedOptions && !existsSelected) ||
+        isEmpty(invalidSelections) ||
+        ignoreParentSettings?.ignoreValidations
+      ) {
+        dispatch(
+          updateQueryResults({
+            availableOptions: suggestions,
+            invalidSelections: undefined,
+            validSelections: selectedOptions,
+            totalCardinality,
+          })
+        );
+      } else {
+        const valid: string[] = [];
+        const invalid: string[] = [];
+        for (const selectedOption of selectedOptions ?? []) {
+          if (invalidSelections?.includes(selectedOption)) invalid.push(selectedOption);
+          else valid.push(selectedOption);
+        }
+        dispatch(
+          updateQueryResults({
+            availableOptions: suggestions,
+            invalidSelections: invalid,
+            validSelections: valid,
+            totalCardinality,
+          })
+        );
+      }
+
+      // publish filter
+      const newFilters = await this.buildFilter();
+      batch(() => {
+        dispatch(setLoading(false));
+        dispatch(publishFilters(newFilters));
+      });
+    } else {
+      batch(() => {
+        dispatch(
+          updateQueryResults({
+            availableOptions: {},
+          })
+        );
+        dispatch(setLoading(false));
+      });
+    }
   };
 
   private buildFilter = async () => {
     const { getState } = this.reduxEmbeddableTools;
     const { validSelections } = getState().componentState ?? {};
+    const { existsSelected } = getState().explicitInput ?? {};
+    const { exclude } = this.getInput();
 
-    if (!validSelections || isEmpty(validSelections)) {
+    if ((!validSelections || isEmpty(validSelections)) && !existsSelected) {
       return [];
     }
     const { dataView, field } = await this.getCurrentDataViewAndField();
     if (!dataView || !field) return;
 
-    let newFilter: Filter;
-    if (validSelections.length === 1) {
-      newFilter = buildPhraseFilter(field, validSelections[0], dataView);
-    } else {
-      newFilter = buildPhrasesFilter(field, validSelections, dataView);
+    let newFilter: Filter | undefined;
+    if (existsSelected) {
+      newFilter = buildExistsFilter(field, dataView);
+    } else if (validSelections) {
+      if (validSelections.length === 1) {
+        newFilter = buildPhraseFilter(field, validSelections[0], dataView);
+      } else {
+        newFilter = buildPhrasesFilter(field, validSelections, dataView);
+      }
     }
+    if (!newFilter) return [];
 
     newFilter.meta.key = field?.name;
+    if (exclude) newFilter.meta.negate = true;
     return [newFilter];
   };
 
   reload = () => {
+    // clear cache when reload is requested
+    this.optionsListService.clearOptionsListCache();
     this.runOptionsListQuery();
   };
 
@@ -378,4 +433,8 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
       node
     );
   };
+
+  public isChained() {
+    return true;
+  }
 }

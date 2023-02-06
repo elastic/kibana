@@ -30,7 +30,7 @@ import {
   createRouteHandlerContext,
 } from '../../mocks';
 import { registerActionStatusRoutes } from './status';
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import { ACTION_RESPONSE_INDICES } from '../../services/actions/constants';
 import type {
   LogsEndpointAction,
@@ -97,6 +97,7 @@ describe('Endpoint Pending Action Summary API', () => {
       endpointResponses: LogsEndpointActionResponse[]
     ) => {
       esClientMock.asInternalUser.search.mockResponseImplementation((req = {}) => {
+        // @ts-expect-error size not defined as top level property when using typesWithBodyKey
         const size = req.size ? req.size : 10;
         const items: any[] = [];
         let index = Array.isArray(req.index) ? req.index.join() : req.index;
@@ -141,17 +142,17 @@ describe('Endpoint Pending Action Summary API', () => {
 
     it('should accept a single agent ID', () => {
       expect(() => {
-        ActionStatusRequestSchema.query.validate({ agent_ids: uuid.v4() });
+        ActionStatusRequestSchema.query.validate({ agent_ids: uuidv4() });
       }).not.toThrow();
     });
 
     it('should accept multiple agent IDs', () => {
       expect(() => {
-        ActionStatusRequestSchema.query.validate({ agent_ids: [uuid.v4(), uuid.v4()] });
+        ActionStatusRequestSchema.query.validate({ agent_ids: [uuidv4(), uuidv4()] });
       }).not.toThrow();
     });
     it('should limit the maximum number of agent IDs', () => {
-      const tooManyCooks = new Array(200).fill(uuid.v4()); // all the same ID string
+      const tooManyCooks = new Array(200).fill(uuidv4()); // all the same ID string
       expect(() => {
         ActionStatusRequestSchema.query.validate({ agent_ids: tooManyCooks });
       }).toThrow();

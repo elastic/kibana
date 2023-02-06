@@ -16,6 +16,8 @@ import {
   UNISOLATE_HOST_ROUTE,
   KILL_PROCESS_ROUTE,
   SUSPEND_PROCESS_ROUTE,
+  GET_FILE_ROUTE,
+  ACTION_AGENT_FILE_INFO_ROUTE,
 } from '../../../common/endpoint/constants';
 import type { ResponseProvidersInterface } from '../../common/mock/endpoint/http_handler_mock_factory';
 import { httpHandlerMockFactory } from '../../common/mock/endpoint/http_handler_mock_factory';
@@ -26,6 +28,9 @@ import type {
   PendingActionsResponse,
   ActionDetails,
   GetProcessesActionOutputContent,
+  ResponseActionGetFileOutputContent,
+  ResponseActionGetFileParameters,
+  ActionFileInfoApiResponse,
 } from '../../../common/endpoint/types';
 
 export type ResponseActionsHttpMocksInterface = ResponseProvidersInterface<{
@@ -44,6 +49,10 @@ export type ResponseActionsHttpMocksInterface = ResponseProvidersInterface<{
   agentPendingActionsSummary: (options: HttpFetchOptionsWithPath) => PendingActionsResponse;
 
   processes: () => ActionDetailsApiResponse<GetProcessesActionOutputContent>;
+
+  getFile: () => ActionDetailsApiResponse<ResponseActionGetFileOutputContent>;
+
+  fileInfo: () => ActionFileInfoApiResponse;
 }>;
 
 export const responseActionsHttpMocks = httpHandlerMockFactory<ResponseActionsHttpMocksInterface>([
@@ -111,6 +120,7 @@ export const responseActionsHttpMocks = httpHandlerMockFactory<ResponseActionsHt
         startDate: 'now-10d',
         endDate: 'now',
         data: [response],
+        statuses: undefined,
         userIds: ['elastic'],
         total: 1,
       };
@@ -148,6 +158,44 @@ export const responseActionsHttpMocks = httpHandlerMockFactory<ResponseActionsHt
       }) as ActionDetails<GetProcessesActionOutputContent>;
 
       return { data: response };
+    },
+  },
+  {
+    id: 'getFile',
+    path: GET_FILE_ROUTE,
+    method: 'post',
+    handler: (): ActionDetailsApiResponse<
+      ResponseActionGetFileOutputContent,
+      ResponseActionGetFileParameters
+    > => {
+      const generator = new EndpointActionGenerator('seed');
+      const response = generator.generateActionDetails<
+        ResponseActionGetFileOutputContent,
+        ResponseActionGetFileParameters
+      >({
+        command: 'get-file',
+      });
+
+      return { data: response };
+    },
+  },
+  {
+    id: 'fileInfo',
+    path: ACTION_AGENT_FILE_INFO_ROUTE,
+    method: 'get',
+    handler: (): ActionFileInfoApiResponse => {
+      return {
+        data: {
+          created: '2022-10-10T14:57:30.682Z',
+          actionId: 'abc',
+          agentId: '123',
+          id: '123',
+          mimeType: 'text/plain',
+          name: 'test.txt',
+          size: 1234,
+          status: 'READY',
+        },
+      };
     },
   },
 ]);

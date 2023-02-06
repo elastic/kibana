@@ -9,7 +9,7 @@ import React, { useMemo } from 'react';
 import prettyMilliseconds from 'pretty-ms';
 import { EuiFlexGrid, EuiFlexGroup, EuiFlexItem, EuiIconTip, EuiSpacer } from '@elastic/eui';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
-import { SingleCaseMetrics, SingleCaseMetricsFeature } from '../../../../common/ui';
+import type { SingleCaseMetrics, SingleCaseMetricsFeature } from '../../../../common/ui';
 import {
   CASE_CREATED,
   CASE_IN_PROGRESS_DURATION,

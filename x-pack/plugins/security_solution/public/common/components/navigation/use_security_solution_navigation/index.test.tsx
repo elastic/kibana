@@ -15,14 +15,16 @@ import { useRouteSpy } from '../../../utils/route/use_route_spy';
 import { useIsExperimentalFeatureEnabled } from '../../../hooks/use_experimental_features';
 import { TestProviders } from '../../../mock';
 import { CASES_FEATURE_ID } from '../../../../../common/constants';
-import { useCanSeeHostIsolationExceptionsMenu } from '../../../../management/pages/host_isolation_exceptions/view/hooks';
-import { useTourContext } from '../../guided_onboarding';
+import { useTourContext } from '../../guided_onboarding_tour';
+import { useUserPrivileges } from '../../user_privileges';
 import {
   noCasesPermissions,
   readCasesCapabilities,
   readCasesPermissions,
 } from '../../../../cases_test_utils';
 import { mockCasesContract } from '@kbn/cases-plugin/public/mocks';
+import { getEndpointAuthzInitialStateMock } from '../../../../../common/endpoint/service/authz/mocks';
+import { getUserPrivilegesMockDefaultValue } from '../../user_privileges/__mocks__';
 
 jest.mock('../../../lib/kibana/kibana_react');
 jest.mock('../../../lib/kibana');
@@ -36,8 +38,10 @@ mockUseGetUserCasesPermissions.mockImplementation(originalKibanaLib.useGetUserCa
 jest.mock('../../../hooks/use_selector');
 jest.mock('../../../hooks/use_experimental_features');
 jest.mock('../../../utils/route/use_route_spy');
-jest.mock('../../../../management/pages/host_isolation_exceptions/view/hooks');
-jest.mock('../../guided_onboarding');
+jest.mock('../../guided_onboarding_tour');
+jest.mock('../../user_privileges');
+
+const mockUseUserPrivileges = useUserPrivileges as jest.Mock;
 
 describe('useSecuritySolutionNavigation', () => {
   const mockRouteSpy = [
@@ -55,7 +59,7 @@ describe('useSecuritySolutionNavigation', () => {
   beforeEach(() => {
     (useIsExperimentalFeatureEnabled as jest.Mock).mockReturnValue(false);
     (useRouteSpy as jest.Mock).mockReturnValue(mockRouteSpy);
-    (useCanSeeHostIsolationExceptionsMenu as jest.Mock).mockReturnValue(true);
+    mockUseUserPrivileges.mockImplementation(getUserPrivilegesMockDefaultValue);
     (useTourContext as jest.Mock).mockReturnValue({ isTourShown: false });
 
     const cases = mockCasesContract();
@@ -83,6 +87,10 @@ describe('useSecuritySolutionNavigation', () => {
     });
   });
 
+  afterEach(() => {
+    mockUseUserPrivileges.mockReset();
+  });
+
   it('should create navigation config', async () => {
     const { result } = renderHook<{}, KibanaPageTemplateProps['solutionNav']>(
       () => useSecuritySolutionNavigation(),
@@ -92,17 +100,6 @@ describe('useSecuritySolutionNavigation', () => {
     expect(result.current).toMatchSnapshot();
   });
 
-  // TODO: Steph/users remove when no longer experimental
-  it('should include users when feature flag is on', async () => {
-    (useIsExperimentalFeatureEnabled as jest.Mock).mockReturnValue(true);
-    const { result } = renderHook<{}, KibanaPageTemplateProps['solutionNav']>(
-      () => useSecuritySolutionNavigation(),
-      { wrapper: TestProviders }
-    );
-
-    expect(result?.current?.items?.[4].items?.[2].id).toEqual(SecurityPageName.users);
-  });
-
   // TODO: [kubernetes] remove when no longer experimental
   it('should include kubernetes when feature flag is on', async () => {
     (useIsExperimentalFeatureEnabled as jest.Mock).mockReturnValue(true);
@@ -110,11 +107,15 @@ describe('useSecuritySolutionNavigation', () => {
       () => useSecuritySolutionNavigation(),
       { wrapper: TestProviders }
     );
-    expect(result?.current?.items?.[1].items?.[3].id).toEqual(SecurityPageName.kubernetes);
+    expect(result?.current?.items?.[1].items?.[4].id).toEqual(SecurityPageName.kubernetes);
   });
 
-  it('should omit host isolation exceptions if hook reports false', () => {
-    (useCanSeeHostIsolationExceptionsMenu as jest.Mock).mockReturnValue(false);
+  it('should omit host isolation exceptions if no authz', () => {
+    mockUseUserPrivileges.mockImplementation(() => ({
+      endpointPrivileges: getEndpointAuthzInitialStateMock({
+        canReadHostIsolationExceptions: false,
+      }),
+    }));
     const { result } = renderHook<{}, KibanaPageTemplateProps['solutionNav']>(
       () => useSecuritySolutionNavigation(),
       { wrapper: TestProviders }
@@ -125,6 +126,23 @@ describe('useSecuritySolutionNavigation', () => {
       items!
         .find((item) => item.id === 'manage')
         ?.items?.find((item) => item.id === 'host_isolation_exceptions')
+    ).toBeUndefined();
+  });
+
+  it('should omit response actions history if hook reports false', () => {
+    mockUseUserPrivileges.mockImplementation(() => ({
+      endpointPrivileges: getEndpointAuthzInitialStateMock({ canReadActionsLogManagement: false }),
+    }));
+    const { result } = renderHook<{}, KibanaPageTemplateProps['solutionNav']>(
+      () => useSecuritySolutionNavigation(),
+      { wrapper: TestProviders }
+    );
+    const items = result.current?.items;
+    expect(items).toBeDefined();
+    expect(
+      items!
+        .find((item) => item.id === 'manage')
+        ?.items?.find((item) => item.id === 'response_actions_history')
     ).toBeUndefined();
   });
 
@@ -168,27 +186,6 @@ describe('useSecuritySolutionNavigation', () => {
         );
         expect(caseNavItem).toBeFalsy();
       });
-    });
-  });
-
-  describe('Guided onboarding tour', () => {
-    it('nav can be collapsed if tour is not shown', () => {
-      const { result } = renderHook<{}, KibanaPageTemplateProps['solutionNav']>(
-        () => useSecuritySolutionNavigation(),
-        { wrapper: TestProviders }
-      );
-
-      expect(result.current?.canBeCollapsed).toBe(true);
-    });
-    it(`nav can't be collapsed if tour is shown`, () => {
-      (useTourContext as jest.Mock).mockReturnValue({ isTourShown: true });
-
-      const { result } = renderHook<{}, KibanaPageTemplateProps['solutionNav']>(
-        () => useSecuritySolutionNavigation(),
-        { wrapper: TestProviders }
-      );
-
-      expect(result.current?.canBeCollapsed).toBe(false);
     });
   });
 });

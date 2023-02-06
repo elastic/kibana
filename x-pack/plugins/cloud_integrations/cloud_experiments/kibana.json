@@ -1,0 +1,15 @@
+{
+  "id": "cloudExperiments",
+  "version": "1.0.0",
+  "kibanaVersion": "kibana",
+  "owner": {
+    "name": "Kibana Core",
+    "githubTeam": "@elastic/kibana-core"
+  },
+  "description": "Provides the necessary APIs to implement A/B testing scenarios, fetching the variations in configuration and reporting back metrics to track conversion rates of the experiments.",
+  "server": true,
+  "ui": true,
+  "configPath": ["xpack", "cloud_integrations", "experiments"],
+  "requiredPlugins": ["cloud", "dataViews"],
+  "optionalPlugins": ["usageCollection"]
+}

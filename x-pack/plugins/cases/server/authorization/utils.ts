@@ -5,8 +5,10 @@
  * 2.0.
  */
 
-import { remove, uniq } from 'lodash';
-import { nodeBuilder, KueryNode } from '@kbn/es-query';
+import { partition, remove, uniq } from 'lodash';
+import type { KueryNode } from '@kbn/es-query';
+import { nodeBuilder } from '@kbn/es-query';
+import type { SavedObject } from '@kbn/core-saved-objects-server';
 import { OWNER_FIELD } from '../../common/api';
 
 export const getOwnersFilter = (
@@ -62,4 +64,15 @@ export const includeFieldsRequiredForAuthentication = (fields?: string[]): strin
     return;
   }
   return uniq([...fields, OWNER_FIELD]);
+};
+
+export const groupByAuthorization = <T extends { owner: string }>(
+  savedObjects: Array<SavedObject<T>>,
+  authorizedOwners: string[]
+): { authorized: Array<SavedObject<T>>; unauthorized: Array<SavedObject<T>> } => {
+  const [authorized, unauthorized] = partition(savedObjects, (so) =>
+    authorizedOwners.includes(so.attributes.owner)
+  );
+
+  return { authorized, unauthorized };
 };

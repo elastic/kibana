@@ -6,13 +6,13 @@
  */
 
 import { buildThreatMappingFilter } from './build_threat_mapping_filter';
-
 import { getFilter } from '../get_filter';
 import { searchAfterAndBulkCreate } from '../search_after_bulk_create';
 import { buildReasonMessageForThreatMatchAlert } from '../reason_formatters';
 import type { CreateThreatSignalOptions } from './types';
 import type { SearchAfterAndBulkCreateReturnType } from '../types';
 
+import { buildThreatEnrichment } from './build_threat_enrichment';
 export const createThreatSignal = async ({
   alertId,
   bulkCreate,
@@ -20,7 +20,6 @@ export const createThreatSignal = async ({
   currentResult,
   currentThreatList,
   eventsTelemetry,
-  exceptionItems,
   filters,
   inputIndex,
   language,
@@ -31,7 +30,6 @@ export const createThreatSignal = async ({
   savedId,
   searchAfterSize,
   services,
-  threatEnrichment,
   threatMapping,
   tuple,
   type,
@@ -39,11 +37,22 @@ export const createThreatSignal = async ({
   runtimeMappings,
   primaryTimestamp,
   secondaryTimestamp,
+  exceptionFilter,
+  unprocessedExceptions,
+  threatFilters,
+  threatIndex,
+  threatIndicatorPath,
+  threatLanguage,
+  threatPitId,
+  threatQuery,
+  reassignThreatPitId,
+  allowedFieldsForTermsQuery,
 }: CreateThreatSignalOptions): Promise<SearchAfterAndBulkCreateReturnType> => {
   const threatFilter = buildThreatMappingFilter({
     threatMapping,
     threatList: currentThreatList,
     entryKey: 'value',
+    allowedFieldsForTermsQuery,
   });
 
   if (!threatFilter.query || threatFilter.query?.bool.should.length === 0) {
@@ -62,20 +71,35 @@ export const createThreatSignal = async ({
       savedId,
       services,
       index: inputIndex,
-      lists: exceptionItems,
+      exceptionFilter,
     });
 
     ruleExecutionLogger.debug(
       `${threatFilter.query?.bool.should.length} indicator items are being checked for existence of matches`
     );
 
+    const threatEnrichment = buildThreatEnrichment({
+      ruleExecutionLogger,
+      services,
+      threatFilters,
+      threatIndex,
+      threatIndicatorPath,
+      threatLanguage,
+      threatQuery,
+      pitId: threatPitId,
+      reassignPitId: reassignThreatPitId,
+      listClient,
+      exceptionFilter,
+      threatMapping,
+      runtimeMappings,
+    });
+
     const result = await searchAfterAndBulkCreate({
       buildReasonMessage: buildReasonMessageForThreatMatchAlert,
       bulkCreate,
-      completeRule,
       enrichment: threatEnrichment,
       eventsTelemetry,
-      exceptionsList: exceptionItems,
+      exceptionsList: unprocessedExceptions,
       filter: esFilter,
       inputIndexPattern: inputIndex,
       listClient,

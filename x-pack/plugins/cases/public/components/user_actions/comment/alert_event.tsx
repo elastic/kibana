@@ -11,7 +11,7 @@ import { EuiLoadingSpinner } from '@elastic/eui';
 
 import * as i18n from '../translations';
 import { LinkAnchor } from '../../links';
-import { RuleDetailsNavigation } from '../types';
+import type { RuleDetailsNavigation } from '../types';
 
 interface SingleAlertProps {
   actionId: string;

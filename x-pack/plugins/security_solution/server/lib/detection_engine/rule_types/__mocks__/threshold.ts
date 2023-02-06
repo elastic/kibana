@@ -26,7 +26,7 @@ import { flattenWithPrefix } from '@kbn/securitysolution-rules';
 
 import type { TypeOfFieldMap } from '@kbn/rule-registry-plugin/common/field_map';
 import { SERVER_APP_ID } from '../../../../../common/constants';
-import { ANCHOR_DATE } from '../../../../../common/detection_engine/schemas/response/rules_schema.mocks';
+import { ANCHOR_DATE } from '../../../../../common/detection_engine/rule_schema/mocks';
 import { getListArrayMock } from '../../../../../common/detection_engine/schemas/types/lists.mock';
 import type { RulesFieldMap } from '../../../../../common/field_maps';
 import {

@@ -16,6 +16,7 @@ export interface DatePickerProps {
   rangeTo?: string;
   refreshPaused?: boolean;
   refreshInterval?: number;
+  width?: 'auto' | 'restricted' | 'full';
   onTimeRangeRefresh?: (range: { start: string; end: string }) => void;
 }
 
@@ -24,6 +25,7 @@ export function DatePicker({
   rangeTo,
   refreshPaused,
   refreshInterval,
+  width = 'restricted',
   onTimeRangeRefresh,
 }: DatePickerProps) {
   const { updateTimeRange, updateRefreshInterval } = useDatePickerContext();
@@ -68,6 +70,7 @@ export function DatePicker({
       refreshInterval={refreshInterval}
       onRefreshChange={onRefreshChange}
       commonlyUsedRanges={commonlyUsedRanges}
+      width={width}
     />
   );
 }

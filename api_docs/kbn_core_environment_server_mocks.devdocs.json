@@ -14,20 +14,29 @@
     "interfaces": [],
     "enums": [],
     "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
     "objects": [
       {
         "parentPluginId": "@kbn/core-environment-server-mocks",
-        "id": "def-server.environmentServiceMock",
+        "id": "def-common.environmentServiceMock",
         "type": "Object",
         "tags": [],
         "label": "environmentServiceMock",
         "description": [],
         "path": "packages/core/environment/core-environment-server-mocks/src/environment_service.mock.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-environment-server-mocks",
-            "id": "def-server.environmentServiceMock.create",
+            "id": "def-common.environmentServiceMock.create",
             "type": "Function",
             "tags": [],
             "label": "create",
@@ -37,12 +46,13 @@
             ],
             "path": "packages/core/environment/core-environment-server-mocks/src/environment_service.mock.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "returnComment": [],
             "children": []
           },
           {
             "parentPluginId": "@kbn/core-environment-server-mocks",
-            "id": "def-server.environmentServiceMock.createPrebootContract",
+            "id": "def-common.environmentServiceMock.createPrebootContract",
             "type": "Function",
             "tags": [],
             "label": "createPrebootContract",
@@ -54,12 +64,13 @@
             ],
             "path": "packages/core/environment/core-environment-server-mocks/src/environment_service.mock.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "returnComment": [],
             "children": []
           },
           {
             "parentPluginId": "@kbn/core-environment-server-mocks",
-            "id": "def-server.environmentServiceMock.createSetupContract",
+            "id": "def-common.environmentServiceMock.createSetupContract",
             "type": "Function",
             "tags": [],
             "label": "createSetupContract",
@@ -71,6 +82,7 @@
             ],
             "path": "packages/core/environment/core-environment-server-mocks/src/environment_service.mock.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "returnComment": [],
             "children": []
           }
@@ -78,13 +90,5 @@
         "initialIsOpen": false
       }
     ]
-  },
-  "common": {
-    "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
-    "objects": []
   }
 }

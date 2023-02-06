@@ -66,6 +66,10 @@ export const JSON_VIEW = i18n.translate('xpack.securitySolution.eventDetails.jso
   defaultMessage: 'JSON',
 });
 
+export const OSQUERY_VIEW = i18n.translate('xpack.securitySolution.eventDetails.osqueryView', {
+  defaultMessage: 'Osquery Results',
+});
+
 export const FIELD = i18n.translate('xpack.securitySolution.eventDetails.field', {
   defaultMessage: 'Field',
 });
@@ -102,6 +106,13 @@ export const AGENT_STATUS = i18n.translate('xpack.securitySolution.detections.al
   defaultMessage: 'Agent status',
 });
 
+export const QUARANTINED_FILE_PATH = i18n.translate(
+  'xpack.securitySolution.detections.alerts.quarantinedFilePath',
+  {
+    defaultMessage: 'Quarantined file path',
+  }
+);
+
 export const RULE_TYPE = i18n.translate('xpack.securitySolution.detections.alerts.ruleType', {
   defaultMessage: 'Rule type',
 });
@@ -124,8 +135,8 @@ export const ACTIONS = i18n.translate('xpack.securitySolution.eventDetails.table
   defaultMessage: 'Actions',
 });
 
-export const REASON = i18n.translate('xpack.securitySolution.eventDetails.reason', {
-  defaultMessage: 'Reason',
+export const ALERT_REASON = i18n.translate('xpack.securitySolution.eventDetails.alertReason', {
+  defaultMessage: 'Alert reason',
 });
 
 export const VIEW_ALL_FIELDS = i18n.translate('xpack.securitySolution.eventDetails.viewAllFields', {

@@ -6,6 +6,7 @@
  */
 import { OperationType } from '@kbn/lens-plugin/public';
 import { DOCUMENT_FIELD_NAME } from '@kbn/lens-plugin/common/constants';
+import { i18n } from '@kbn/i18n';
 import { ReportViewType } from '../../types';
 import {
   CLS_FIELD,
@@ -13,12 +14,13 @@ import {
   FID_FIELD,
   LCP_FIELD,
   TBT_FIELD,
-  TRANSACTION_TIME_TO_FIRST_BYTE,
   TRANSACTION_DURATION,
+  TRANSACTION_TIME_TO_FIRST_BYTE,
 } from './elasticsearch_fieldnames';
 import {
   AGENT_HOST_LABEL,
   AGENT_TYPE_LABEL,
+  BACKEND_TIME_LABEL,
   BROWSER_FAMILY_LABEL,
   BROWSER_VERSION_LABEL,
   CLS_LABEL,
@@ -27,47 +29,55 @@ import {
   DEVICE_DISTRIBUTION_LABEL,
   DEVICE_LABEL,
   ENVIRONMENT_LABEL,
+  EVENT_DATASET_LABEL,
   FCP_LABEL,
   FID_LABEL,
+  HEATMAP_LABEL,
   HOST_NAME_LABEL,
-  KPI_OVER_TIME_LABEL,
   KPI_LABEL,
+  KPI_OVER_TIME_LABEL,
+  LABELS_FIELD,
   LCP_LABEL,
   LOCATION_LABEL,
+  MESSAGE_LABEL,
   METRIC_LABEL,
   MONITOR_ID_LABEL,
   MONITOR_NAME_LABEL,
   MONITOR_STATUS_LABEL,
   MONITOR_TYPE_LABEL,
+  MONITORS_DURATION_LABEL,
   OBSERVER_LOCATION_LABEL,
   OS_LABEL,
+  PAGE_LOAD_TIME_LABEL,
   PERF_DIST_LABEL,
   PORT_LABEL,
   REQUEST_METHOD,
   SERVICE_NAME_LABEL,
   SERVICE_TYPE_LABEL,
+  SINGLE_METRIC_LABEL,
+  STEP_DURATION_LABEL,
+  STEP_NAME_LABEL,
   TAGS_LABEL,
   TBT_LABEL,
   URL_LABEL,
-  BACKEND_TIME_LABEL,
-  MONITORS_DURATION_LABEL,
-  PAGE_LOAD_TIME_LABEL,
-  LABELS_FIELD,
-  STEP_NAME_LABEL,
-  STEP_DURATION_LABEL,
-  EVENT_DATASET_LABEL,
-  MESSAGE_LABEL,
-  SINGLE_METRIC_LABEL,
 } from './labels';
 import {
   MONITOR_DURATION_US,
+  SYNTHETICS_BLOCKED_TIMINGS,
   SYNTHETICS_CLS,
+  SYNTHETICS_CONNECT_TIMINGS,
   SYNTHETICS_DCL,
+  SYNTHETICS_DNS_TIMINGS,
   SYNTHETICS_DOCUMENT_ONLOAD,
   SYNTHETICS_FCP,
   SYNTHETICS_LCP,
+  SYNTHETICS_RECEIVE_TIMINGS,
+  SYNTHETICS_SEND_TIMINGS,
+  SYNTHETICS_SSL_TIMINGS,
   SYNTHETICS_STEP_DURATION,
   SYNTHETICS_STEP_NAME,
+  SYNTHETICS_TOTAL_TIMINGS,
+  SYNTHETICS_WAIT_TIMINGS,
 } from './field_names/synthetics';
 
 export const DEFAULT_TIME = { from: 'now-1h', to: 'now' };
@@ -103,6 +113,40 @@ export const FieldLabels: Record<string, string> = {
   [SYNTHETICS_DOCUMENT_ONLOAD]: PAGE_LOAD_TIME_LABEL,
   [TRANSACTION_TIME_TO_FIRST_BYTE]: BACKEND_TIME_LABEL,
   [TRANSACTION_DURATION]: PAGE_LOAD_TIME_LABEL,
+  [SYNTHETICS_CONNECT_TIMINGS]: i18n.translate('xpack.observability.expView.synthetics.connect', {
+    defaultMessage: 'Connect',
+  }),
+  [SYNTHETICS_DNS_TIMINGS]: i18n.translate('xpack.observability.expView.synthetics.dns', {
+    defaultMessage: 'DNS',
+  }),
+  [SYNTHETICS_WAIT_TIMINGS]: i18n.translate('xpack.observability.expView.synthetics.wait', {
+    defaultMessage: 'Wait',
+  }),
+  [SYNTHETICS_SSL_TIMINGS]: i18n.translate('xpack.observability.expView.synthetics.ssl', {
+    defaultMessage: 'SSL',
+  }),
+  [SYNTHETICS_BLOCKED_TIMINGS]: i18n.translate('xpack.observability.expView.synthetics.blocked', {
+    defaultMessage: 'Blocked',
+  }),
+  [SYNTHETICS_SEND_TIMINGS]: i18n.translate('xpack.observability.expView.synthetics.send', {
+    defaultMessage: 'Send',
+  }),
+  [SYNTHETICS_RECEIVE_TIMINGS]: i18n.translate('xpack.observability.expView.synthetics.receive', {
+    defaultMessage: 'Receive',
+  }),
+  [SYNTHETICS_TOTAL_TIMINGS]: i18n.translate('xpack.observability.expView.synthetics.total', {
+    defaultMessage: 'Total',
+  }),
+
+  'kibana.alert.rule.category': i18n.translate('xpack.observability.expView.alerts.category', {
+    defaultMessage: 'Rule category',
+  }),
+  'kibana.alert.rule.name': i18n.translate('xpack.observability.expView.alerts.name', {
+    defaultMessage: 'Alert name',
+  }),
+  'kibana.alert.status': i18n.translate('xpack.observability.expView.alerts.status', {
+    defaultMessage: 'Alert status',
+  }),
 
   'monitor.id': MONITOR_ID_LABEL,
   'monitor.status': MONITOR_STATUS_LABEL,
@@ -134,6 +178,7 @@ export const DataViewLabels: Record<ReportViewType, string> = {
   'core-web-vitals': CORE_WEB_VITALS_LABEL,
   'device-data-distribution': DEVICE_DISTRIBUTION_LABEL,
   'single-metric': SINGLE_METRIC_LABEL,
+  heatmap: HEATMAP_LABEL,
 };
 
 export enum ReportTypes {
@@ -142,14 +187,7 @@ export enum ReportTypes {
   CORE_WEB_VITAL = 'core-web-vitals',
   DEVICE_DISTRIBUTION = 'device-data-distribution',
   SINGLE_METRIC = 'single-metric',
-}
-
-export enum DataTypes {
-  SYNTHETICS = 'synthetics',
-  UX = 'ux',
-  MOBILE = 'mobile',
-  METRICS = 'infra_metrics',
-  LOGS = 'infra_logs',
+  HEATMAP = 'heatmap',
 }
 
 export const USE_BREAK_DOWN_COLUMN = 'USE_BREAK_DOWN_COLUMN';
@@ -159,6 +197,7 @@ export const OPERATION_COLUMN = 'operation';
 export const PERCENTILE = 'percentile';
 
 export const REPORT_METRIC_FIELD = 'REPORT_METRIC_FIELD';
+export const REPORT_METRIC_TIMESTAMP = 'REPORT_METRIC_FIELD_TIMESTAMP';
 
 export const PERCENTILE_RANKS = [
   '99th' as OperationType,

@@ -15,16 +15,16 @@ describe('getEventCount', () => {
     jest.clearAllMocks();
   });
 
-  it('can respect tuple', () => {
-    getEventCount({
+  it('can respect tuple', async () => {
+    await getEventCount({
       esClient,
       query: '*:*',
       language: 'kuery',
       filters: [],
-      exceptionItems: [],
       index: ['test-index'],
       tuple: { to: moment('2022-01-14'), from: moment('2022-01-13'), maxSignals: 1337 },
       primaryTimestamp: '@timestamp',
+      exceptionFilter: undefined,
     });
 
     expect(esClient.count).toHaveBeenCalledWith({
@@ -42,7 +42,6 @@ describe('getEventCount', () => {
                   },
                 },
               },
-              { match_all: {} },
             ],
           },
         },
@@ -52,17 +51,17 @@ describe('getEventCount', () => {
     });
   });
 
-  it('can override timestamp', () => {
-    getEventCount({
+  it('can override timestamp', async () => {
+    await getEventCount({
       esClient,
       query: '*:*',
       language: 'kuery',
       filters: [],
-      exceptionItems: [],
       index: ['test-index'],
       tuple: { to: moment('2022-01-14'), from: moment('2022-01-13'), maxSignals: 1337 },
       primaryTimestamp: 'event.ingested',
       secondaryTimestamp: '@timestamp',
+      exceptionFilter: undefined,
     });
 
     expect(esClient.count).toHaveBeenCalledWith({
@@ -103,7 +102,6 @@ describe('getEventCount', () => {
                   minimum_should_match: 1,
                 },
               },
-              { match_all: {} },
             ],
           },
         },
@@ -113,16 +111,16 @@ describe('getEventCount', () => {
     });
   });
 
-  it('can override timestamp without fallback to @timestamp', () => {
-    getEventCount({
+  it('can override timestamp without fallback to @timestamp', async () => {
+    await getEventCount({
       esClient,
       query: '*:*',
       language: 'kuery',
       filters: [],
-      exceptionItems: [],
       index: ['test-index'],
       tuple: { to: moment('2022-01-14'), from: moment('2022-01-13'), maxSignals: 1337 },
       primaryTimestamp: 'event.ingested',
+      exceptionFilter: undefined,
     });
 
     expect(esClient.count).toHaveBeenCalledWith({
@@ -140,7 +138,6 @@ describe('getEventCount', () => {
                   },
                 },
               },
-              { match_all: {} },
             ],
           },
         },

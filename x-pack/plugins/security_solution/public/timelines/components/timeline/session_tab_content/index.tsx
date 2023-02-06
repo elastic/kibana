@@ -47,10 +47,10 @@ const SessionTabContent: React.FC<Props> = ({ timelineId }) => {
     }
   }, []);
   const { Navigation } = useSessionViewNavigation({
-    timelineId,
+    scopeId: timelineId,
   });
   const { SessionView, shouldShowDetailsPanel, DetailsPanel } = useSessionView({
-    timelineId,
+    scopeId: timelineId,
     height,
   });
 

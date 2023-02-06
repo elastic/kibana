@@ -30,8 +30,18 @@ export const submitQuery = () => {
   cy.contains('Submit').click();
 };
 
-export const checkResults = () =>
-  cy.getBySel('dataGridRowCell', { timeout: 120000 }).should('have.lengthOf.above', 0);
+// sometimes the results get stuck in the tests, this is a workaround
+export const checkResults = () => {
+  cy.getBySel('osqueryResultsTable').then(($table) => {
+    if ($table.find('div .euiDataGridRow').length > 0) {
+      cy.getBySel('dataGridRowCell', { timeout: 120000 }).should('have.lengthOf.above', 0);
+    } else {
+      cy.getBySel('osquery-status-tab').click();
+      cy.getBySel('osquery-results-tab').click();
+      cy.getBySel('dataGridRowCell', { timeout: 120000 }).should('have.lengthOf.above', 0);
+    }
+  });
+};
 
 export const typeInECSFieldInput = (text: string) => cy.getBySel('ECS-field-input').type(text);
 export const typeInOsqueryFieldInput = (text: string) =>
@@ -53,4 +63,30 @@ export const deleteAndConfirm = (type: string) => {
 
 export const findAndClickButton = (text: string) => {
   cy.react('EuiButton').contains(text).click();
+};
+
+export const toggleRuleOffAndOn = (ruleName: string) => {
+  cy.visit('/app/security/rules');
+  cy.contains(ruleName);
+  cy.wait(2000);
+  cy.getBySel('ruleSwitch').should('have.attr', 'aria-checked', 'true');
+  cy.getBySel('ruleSwitch').click();
+  cy.getBySel('ruleSwitch').should('have.attr', 'aria-checked', 'false');
+  cy.getBySel('ruleSwitch').click();
+  cy.getBySel('ruleSwitch').should('have.attr', 'aria-checked', 'true');
+};
+
+export const loadAlertsEvents = () => {
+  cy.visit('/app/security/alerts');
+  cy.getBySel('header-page-title').contains('Alerts').should('exist');
+  cy.getBySel('expand-event')
+    .first()
+    .within(() => {
+      cy.get(`[data-is-loading="true"]`).should('exist');
+    });
+  cy.getBySel('expand-event')
+    .first()
+    .within(() => {
+      cy.get(`[data-is-loading="true"]`).should('not.exist');
+    });
 };

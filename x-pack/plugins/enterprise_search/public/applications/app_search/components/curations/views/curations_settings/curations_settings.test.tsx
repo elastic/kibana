@@ -17,8 +17,6 @@ import { shallow, ShallowWrapper } from 'enzyme';
 
 import { EuiButtonEmpty, EuiCallOut, EuiSwitch } from '@elastic/eui';
 
-import { mountWithIntl } from '@kbn/test-jest-helpers';
-
 import { docLinks } from '../../../../../shared/doc_links';
 
 import { Loading } from '../../../../../shared/loading';
@@ -35,15 +33,12 @@ const MOCK_VALUES = {
     enabled: true,
     mode: 'automatic',
   },
-  // LogRetentionLogic
-  isLogRetentionUpdating: false,
-  logRetention: {
-    [LogRetentionOptions.Analytics]: {
-      enabled: true,
-    },
-  },
   // LicensingLogic
   hasPlatinumLicense: true,
+  // EngineLogic
+  engine: {
+    analytics_enabled: true,
+  },
 };
 
 const MOCK_ACTIONS = {
@@ -52,22 +47,12 @@ const MOCK_ACTIONS = {
   onSkipLoadingCurationsSettings: jest.fn(),
   toggleCurationsEnabled: jest.fn(),
   toggleCurationsMode: jest.fn(),
-  // LogRetentionLogic
-  fetchLogRetention: jest.fn(),
 };
 
 describe('CurationsSettings', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     setMockActions(MOCK_ACTIONS);
-  });
-
-  it('loads curations and log retention settings on load', () => {
-    setMockValues(MOCK_VALUES);
-    mountWithIntl(<CurationsSettings />);
-
-    expect(MOCK_ACTIONS.loadCurationsSettings).toHaveBeenCalled();
-    expect(MOCK_ACTIONS.fetchLogRetention).toHaveBeenCalled();
   });
 
   it('contains a switch to toggle curations settings', () => {
@@ -135,10 +120,8 @@ describe('CurationsSettings', () => {
   it('display a callout and disables form elements when analytics retention is disabled', () => {
     setMockValues({
       ...MOCK_VALUES,
-      logRetention: {
-        [LogRetentionOptions.Analytics]: {
-          enabled: false,
-        },
+      engine: {
+        analytics_enabled: false,
       },
     });
     const wrapper = shallow(<CurationsSettings />);
@@ -158,57 +141,25 @@ describe('CurationsSettings', () => {
     expect(wrapper.is(Loading)).toBe(true);
   });
 
-  it('returns a loading state when log retention data is loading', () => {
-    setMockValues({
-      ...MOCK_VALUES,
-      isLogRetentionUpdating: true,
-    });
-    const wrapper = shallow(<CurationsSettings />);
-
-    expect(wrapper.is(Loading)).toBe(true);
-  });
-
-  describe('loading curation settings based on log retention', () => {
-    it('loads curation settings when log retention is enabled', () => {
-      setMockValues({
-        ...MOCK_VALUES,
-        logRetention: {
-          [LogRetentionOptions.Analytics]: {
-            enabled: true,
-          },
-        },
-      });
-
+  describe('loading curation settings based on analytics logs availability', () => {
+    it('loads curation settings when analytics logs are enabled', () => {
       shallow(<CurationsSettings />);
 
       expect(MOCK_ACTIONS.loadCurationsSettings).toHaveBeenCalledTimes(1);
     });
 
-    it('skips loading curation settings when log retention is enabled', () => {
+    it('skips loading curation settings when analytics logs are disabled', () => {
       setMockValues({
         ...MOCK_VALUES,
-        logRetention: {
-          [LogRetentionOptions.Analytics]: {
-            enabled: false,
-          },
+        engine: {
+          analytics_enabled: false,
         },
       });
 
       shallow(<CurationsSettings />);
 
-      expect(MOCK_ACTIONS.onSkipLoadingCurationsSettings).toHaveBeenCalledTimes(1);
-    });
-
-    it('takes no action if log retention has not yet been loaded', () => {
-      setMockValues({
-        ...MOCK_VALUES,
-        logRetention: null,
-      });
-
-      shallow(<CurationsSettings />);
-
       expect(MOCK_ACTIONS.loadCurationsSettings).toHaveBeenCalledTimes(0);
-      expect(MOCK_ACTIONS.onSkipLoadingCurationsSettings).toHaveBeenCalledTimes(0);
+      expect(MOCK_ACTIONS.onSkipLoadingCurationsSettings).toHaveBeenCalledTimes(1);
     });
   });
 
@@ -218,11 +169,6 @@ describe('CurationsSettings', () => {
         ...MOCK_VALUES,
         hasPlatinumLicense: false,
       });
-    });
-
-    it('it does not fetch log retention', () => {
-      shallow(<CurationsSettings />);
-      expect(MOCK_ACTIONS.fetchLogRetention).toHaveBeenCalledTimes(0);
     });
 
     it('shows a CTA to upgrade your license when the user when the user', () => {

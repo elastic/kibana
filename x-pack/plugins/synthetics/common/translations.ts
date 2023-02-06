@@ -26,13 +26,24 @@ export const MonitorStatusTranslations = {
     'xpack.synthetics.alerts.monitorStatus.defaultActionMessage',
     {
       defaultMessage:
-        'Monitor {monitorName} with url {monitorUrl} from {observerLocation} {statusMessage} The latest error message is {latestErrorMessage}',
+        'Monitor {monitorName} with url {monitorUrl} from {observerLocation} {statusMessage} The latest error message is {latestErrorMessage}, checked at {checkedAt}',
       values: {
         monitorName: '{{context.monitorName}}',
         monitorUrl: '{{{context.monitorUrl}}}',
         statusMessage: '{{{context.statusMessage}}}',
         latestErrorMessage: '{{{context.latestErrorMessage}}}',
         observerLocation: '{{context.observerLocation}}',
+        checkedAt: '{{context.checkedAt}}',
+      },
+    }
+  ),
+  defaultSubjectMessage: i18n.translate(
+    'xpack.synthetics.alerts.monitorStatus.defaultSubjectMessage',
+    {
+      defaultMessage: 'Monitor {monitorName} with url {monitorUrl} is down',
+      values: {
+        monitorName: '{{context.monitorName}}',
+        monitorUrl: '{{{context.monitorUrl}}}',
       },
     }
   ),

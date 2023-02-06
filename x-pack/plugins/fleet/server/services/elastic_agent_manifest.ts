@@ -6,7 +6,7 @@
  */
 
 export const elasticAgentStandaloneManifest = `---
-# For more information refer to https://www.elastic.co/guide/en/fleet/current/running-on-kubernetes-standalone.html
+# For more information refer https://www.elastic.co/guide/en/fleet/current/running-on-kubernetes-standalone.html
 apiVersion: apps/v1
 kind: DaemonSet
 metadata:
@@ -33,11 +33,24 @@ spec:
       serviceAccountName: elastic-agent
       hostNetwork: true
       dnsPolicy: ClusterFirstWithHostNet
+      # Uncomment if using hints feature
+      #initContainers:
+      #  - name: k8s-templates-downloader
+      #    image: busybox:1.28
+      #    command: ['sh']
+      #    args:
+      #      - -c
+      #      - >-
+      #        mkdir -p /etc/elastic-agent/inputs.d &&
+      #        wget -O - https://github.com/elastic/elastic-agent/archive/main.tar.gz | tar xz -C /etc/elastic-agent/inputs.d --strip=5 "elastic-agent-main/deploy/kubernetes/elastic-agent/templates.d"
+      #    volumeMounts:
+      #      - name: external-inputs
+      #        mountPath: /etc/elastic-agent/inputs.d
       containers:
         - name: elastic-agent
           image: docker.elastic.co/beats/elastic-agent:VERSION
           args: [
-            "-c", "/etc/agent.yml",
+            "-c", "/etc/elastic-agent/agent.yml",
             "-e",
           ]
           env:
@@ -56,6 +69,8 @@ spec:
               valueFrom:
                 fieldRef:
                   fieldPath: metadata.name
+            - name: STATE_PATH
+              value: "/etc/elastic-agent"
           securityContext:
             runAsUser: 0
           resources:
@@ -66,9 +81,12 @@ spec:
               memory: 400Mi
           volumeMounts:
             - name: datastreams
-              mountPath: /etc/agent.yml
+              mountPath: /etc/elastic-agent/agent.yml
               readOnly: true
               subPath: agent.yml
+            # Uncomment if using hints feature
+            #- name: external-inputs
+            #  mountPath: /etc/elastic-agent/inputs.d
             - name: proc
               mountPath: /hostfs/proc
               readOnly: true
@@ -81,26 +99,20 @@ spec:
             - name: varlog
               mountPath: /var/log
               readOnly: true
-            - name: etc-kubernetes
-              mountPath: /hostfs/etc/kubernetes
+            - name: etc-full
+              mountPath: /hostfs/etc
               readOnly: true
             - name: var-lib
               mountPath: /hostfs/var/lib
-              readOnly: true
-            - name: passwd
-              mountPath: /hostfs/etc/passwd
-              readOnly: true
-            - name: group
-              mountPath: /hostfs/etc/group
-              readOnly: true
-            - name: etcsysmd
-              mountPath: /hostfs/etc/systemd
               readOnly: true
       volumes:
         - name: datastreams
           configMap:
             defaultMode: 0640
             name: agent-node-datastreams
+        # Uncomment if using hints feature
+        #- name: external-inputs
+        #  emptyDir: {}
         - name: proc
           hostPath:
             path: /proc
@@ -113,26 +125,15 @@ spec:
         - name: varlog
           hostPath:
             path: /var/log
-        # Needed for cloudbeat
-        - name: etc-kubernetes
+        # The following volumes are needed for Cloud Security Posture integration (cloudbeat)
+        # If you are not using this integration, then these volumes and the corresponding
+        # mounts can be removed.
+        - name: etc-full
           hostPath:
-            path: /etc/kubernetes
-        # Needed for cloudbeat
+            path: /etc
         - name: var-lib
           hostPath:
             path: /var/lib
-        # Needed for cloudbeat
-        - name: passwd
-          hostPath:
-            path: /etc/passwd
-        # Needed for cloudbeat
-        - name: group
-          hostPath:
-            path: /etc/group
-        # Needed for cloudbeat
-        - name: etcsysmd
-          hostPath:
-            path: /etc/systemd
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
@@ -240,6 +241,10 @@ rules:
     resources:
       - podsecuritypolicies
     verbs: ["get", "list", "watch"]
+  - apiGroups: [ "storage.k8s.io" ]
+    resources:
+      - storageclasses
+    verbs: [ "get", "list", "watch" ]
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
@@ -282,7 +287,7 @@ metadata:
 `;
 
 export const elasticAgentManagedManifest = `---
-# For more information refer to https://www.elastic.co/guide/en/fleet/current/running-on-kubernetes-managed-by-fleet.html
+# For more information https://www.elastic.co/guide/en/fleet/current/running-on-kubernetes-managed-by-fleet.html
 apiVersion: apps/v1
 kind: DaemonSet
 metadata:
@@ -367,20 +372,11 @@ spec:
             - name: varlog
               mountPath: /var/log
               readOnly: true
-            - name: etc-kubernetes
-              mountPath: /hostfs/etc/kubernetes
+            - name: etc-full
+              mountPath: /hostfs/etc
               readOnly: true
             - name: var-lib
               mountPath: /hostfs/var/lib
-              readOnly: true
-            - name: passwd
-              mountPath: /hostfs/etc/passwd
-              readOnly: true
-            - name: group
-              mountPath: /hostfs/etc/group
-              readOnly: true
-            - name: etcsysmd
-              mountPath: /hostfs/etc/systemd
               readOnly: true
             - name: etc-mid
               mountPath: /etc/machine-id
@@ -398,26 +394,15 @@ spec:
         - name: varlog
           hostPath:
             path: /var/log
-        # Needed for cloudbeat
-        - name: etc-kubernetes
+        # The following volumes are needed for Cloud Security Posture integration (cloudbeat)
+        # If you are not using this integration, then these volumes and the corresponding
+        # mounts can be removed.
+        - name: etc-full
           hostPath:
-            path: /etc/kubernetes
-        # Needed for cloudbeat
+            path: /etc
         - name: var-lib
           hostPath:
             path: /var/lib
-        # Needed for cloudbeat
-        - name: passwd
-          hostPath:
-            path: /etc/passwd
-        # Needed for cloudbeat
-        - name: group
-          hostPath:
-            path: /etc/group
-        # Needed for cloudbeat
-        - name: etcsysmd
-          hostPath:
-            path: /etc/systemd
         # Mount /etc/machine-id from the host to determine host ID
         # Needed for Elastic Security integration
         - name: etc-mid
@@ -531,6 +516,10 @@ rules:
     resources:
       - podsecuritypolicies
     verbs: ["get", "list", "watch"]
+  - apiGroups: [ "storage.k8s.io" ]
+    resources:
+      - storageclasses
+    verbs: [ "get", "list", "watch" ]
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: Role

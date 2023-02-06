@@ -21,9 +21,11 @@ import {
   EuiIcon,
   EuiLoadingSpinner,
   EuiLink,
+  EuiLoadingContent,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { useUserPrivileges } from '../../common/components/user_privileges';
 import onboardingLogo from '../images/security_administration_onboarding.svg';
 import { useKibana } from '../../common/lib/kibana';
 
@@ -41,13 +43,35 @@ interface ManagementStep {
   children: JSX.Element;
 }
 
+const MissingFleetAccessInfo = React.memo(() => {
+  const { services } = useKibana();
+
+  return (
+    <EuiText size="s" color="subdued" data-test-subj="noFleetAccess">
+      <FormattedMessage
+        id="xpack.securitySolution.endpoint.onboarding.enableFleetAccess"
+        defaultMessage="Deploying Agents for the first time requires Fleet access. For more information, "
+      />
+      <EuiLink external href={`${services.docLinks.links.securitySolution.privileges}`}>
+        <FormattedMessage
+          id="xpack.securitySolution.endpoint.onboarding.onboardingDocsLink"
+          defaultMessage="view the Elastic Security documentation"
+        />
+      </EuiLink>
+    </EuiText>
+  );
+});
+MissingFleetAccessInfo.displayName = 'MissingFleetAccessInfo';
+
 const PolicyEmptyState = React.memo<{
   loading: boolean;
-  onActionClick: (event: MouseEvent<HTMLAnchorElement | HTMLButtonElement>) => void;
+  onActionClick?: (event: MouseEvent<HTMLAnchorElement | HTMLButtonElement>) => void;
   actionDisabled?: boolean;
   policyEntryPoint?: boolean;
 }>(({ loading, onActionClick, actionDisabled, policyEntryPoint = false }) => {
   const docLinks = useKibana().services.docLinks;
+  const { canAccessFleet, loading: authzLoading } = useUserPrivileges().endpointPrivileges;
+
   return (
     <div data-test-subj="emptyPolicyTable">
       {loading ? (
@@ -63,7 +87,7 @@ const PolicyEmptyState = React.memo<{
               <h1>
                 <FormattedMessage
                   id="xpack.securitySolution.endpoint.policyList.onboardingTitle"
-                  defaultMessage="Get started with Endpoint and Cloud Security"
+                  defaultMessage="Get started with Elastic Defend"
                 />
               </h1>
             </EuiText>
@@ -79,12 +103,12 @@ const PolicyEmptyState = React.memo<{
               {policyEntryPoint ? (
                 <FormattedMessage
                   id="xpack.securitySolution.endpoint.policyList.onboardingSectionTwo.fromPolicyPage"
-                  defaultMessage="From this page, you’ll be able to view and manage the Endpoint and Cloud Security Integration policies in your environment running Endpoint and Cloud Security."
+                  defaultMessage="From this page, you’ll be able to view and manage the Elastic Defend Integration policies in your environment running Elastic Defend."
                 />
               ) : (
                 <FormattedMessage
                   id="xpack.securitySolution.endpoint.policyList.onboardingSectionTwo.fromEndpointPage"
-                  defaultMessage="From this page, you’ll be able to view and manage the hosts in your environment running Endpoint and Cloud Security."
+                  defaultMessage="From this page, you’ll be able to view and manage the hosts in your environment running Elastic Defend."
                 />
               )}
             </EuiText>
@@ -92,7 +116,7 @@ const PolicyEmptyState = React.memo<{
             <EuiText size="s" color="subdued">
               <FormattedMessage
                 id="xpack.securitySolution.endpoint.policyList.onboardingSectionThree"
-                defaultMessage="To get started, add the Endpoint and Cloud Security integration to your Agents. For more information, "
+                defaultMessage="To get started, add the Elastic Defend integration to your Agents. For more information, "
               />
               <EuiLink external href={`${docLinks.links.siem.guide}`}>
                 <FormattedMessage
@@ -101,24 +125,36 @@ const PolicyEmptyState = React.memo<{
                 />
               </EuiLink>
             </EuiText>
-            <EuiSpacer size="l" />
-            <EuiFlexGroup>
-              <EuiFlexItem grow={false}>
-                <EuiButton
-                  fill
-                  iconType="plusInCircle"
-                  onClick={onActionClick}
-                  isDisabled={actionDisabled}
-                  data-test-subj="onboardingStartButton"
-                >
-                  <FormattedMessage
-                    id="xpack.securitySolution.endpoint.policyList.actionButtonText"
-                    defaultMessage="Add Endpoint and Cloud Security"
-                  />
-                </EuiButton>
-              </EuiFlexItem>
-            </EuiFlexGroup>
+
+            <EuiSpacer size="m" />
+
+            {authzLoading && <EuiLoadingContent lines={1} />}
+
+            {!authzLoading && canAccessFleet && (
+              <>
+                <EuiSpacer size="s" />
+                <EuiFlexGroup>
+                  <EuiFlexItem grow={false}>
+                    <EuiButton
+                      fill
+                      iconType="plusInCircle"
+                      onClick={onActionClick}
+                      isDisabled={actionDisabled}
+                      data-test-subj="onboardingStartButton"
+                    >
+                      <FormattedMessage
+                        id="xpack.securitySolution.endpoint.policyList.actionButtonText"
+                        defaultMessage="Add Elastic Defend"
+                      />
+                    </EuiButton>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              </>
+            )}
+
+            {!authzLoading && !canAccessFleet && <MissingFleetAccessInfo />}
           </EuiFlexItem>
+
           <EuiFlexItem grow={2}>
             <EuiIcon type={onboardingLogo} size="original" style={MAX_SIZE_ONBOARDING_LOGO} />
           </EuiFlexItem>
@@ -182,8 +218,7 @@ const EndpointsEmptyState = React.memo<{
       },
       {
         title: i18n.translate('xpack.securitySolution.endpoint.list.stepTwoTitle', {
-          defaultMessage:
-            'Enroll your agents enabled with Endpoint and Cloud Security through Fleet',
+          defaultMessage: 'Enroll your agents enabled with Elastic Defend through Fleet',
         }),
         status: actionDisabled ? 'disabled' : '',
         children: (
@@ -224,13 +259,13 @@ const EndpointsEmptyState = React.memo<{
       headerComponent={
         <FormattedMessage
           id="xpack.securitySolution.endpoint.list.noEndpointsPrompt"
-          defaultMessage="Next step: Enroll an Agent with Endpoint and Cloud Security"
+          defaultMessage="Next step: Enroll an Agent with Elastic Defend"
         />
       }
       bodyComponent={
         <FormattedMessage
           id="xpack.securitySolution.endpoint.list.noEndpointsInstructions"
-          defaultMessage="You’ve added the Endpoint and Cloud Security integration. Now enroll your agents using the steps below."
+          defaultMessage="You’ve added the Elastic Defend integration. Now enroll your agents using the steps below."
         />
       }
     />

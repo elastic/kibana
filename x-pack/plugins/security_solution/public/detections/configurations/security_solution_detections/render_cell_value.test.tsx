@@ -26,7 +26,7 @@ describe('RenderCellValue', () => {
   const eventId = '_id-123';
   const linkValues = ['foo', 'bar', '@baz'];
   const rowIndex = 5;
-  const timelineId = 'test';
+  const scopeId = 'table-test';
 
   let data: TimelineNonEcsData[];
   let header: ColumnHeaderOptions;
@@ -48,7 +48,7 @@ describe('RenderCellValue', () => {
       rowIndex,
       colIndex: 0,
       setCellProps: jest.fn(),
-      timelineId,
+      scopeId,
     };
   });
 

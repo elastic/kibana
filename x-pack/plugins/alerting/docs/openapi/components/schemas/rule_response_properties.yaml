@@ -1,0 +1,135 @@
+title: Rule response properties
+type: object
+required:
+  - actions
+  - api_key_owner
+  - consumer
+  - created_at
+  - created_by
+  - enabled
+  - execution_status
+  - id
+  - mute_all
+  - muted_alert_ids
+  - name
+  - notify_when
+  - params
+  - rule_type_id
+  - schedule
+  - tags
+  - throttle
+  - updated_at
+  - updated_by
+properties:
+  actions:
+    $ref: 'actions.yaml'
+  api_key_owner:
+    type: string
+    nullable: true
+    example: elastic
+  consumer:
+    type: string
+    description: The application or feature that owns the rule. For example, `alerts`, `apm`, `discover`, `infrastructure`, `logs`, `metrics`, `ml`, `monitoring`, `securitySolution`, `siem`, `stackAlerts`, or `uptime`.
+    example: alerts
+  created_at:
+    type: string
+    description: The date and time that the rule was created.
+    format: date-time
+    example: '2022-12-05T23:36:58.284Z'
+  created_by:
+    type: string
+    description: The identifier for the user that created the rule.
+    nullable: true
+    example: elastic
+  enabled:
+    type: boolean
+    description: Indicates whether the rule is currently enabled.
+    example: true
+  execution_status:
+    type: object
+    properties:
+      last_duration:
+        type: integer
+        example: 55
+      last_execution_date:
+        type: string
+        format: date-time
+        example: '2022-12-06T00:13:43.890Z'
+      status:
+        type: string
+        example: ok
+  id:
+    type: string
+    description: The identifier for the rule.
+    example: b530fed0-74f5-11ed-9801-35303b735aef
+  last_run:
+    type: object
+    properties:
+      alerts_count:
+        type: object
+        properties:
+          active:
+            type: integer
+          ignored:
+            type: integer
+          new:
+            type: integer
+          recovered:
+            type: integer
+      outcome:
+        type: string
+        example: succeeded
+      outcome_msg:
+        type: string
+        nullable: true
+        example: null
+      warning:
+        type: string
+        nullable: true
+        example: null
+  muted_alert_ids:
+    type: array
+    nullable: true
+    items:
+      type: string
+  mute_all:
+    type: boolean
+    example: false
+  name:
+    type: string
+    description: The name of the rule.
+    example: cluster_health_rule
+  next_run:
+    type: string
+    format: date-time
+    nullable: true
+    example: '2022-12-06T00:14:43.818Z'
+  notify_when:
+    $ref: 'notify_when.yaml'
+  params:
+    type: object
+    description: The parameters for the rule.
+    additionalProperties: true
+  rule_type_id:
+    type: string
+    description: >
+      The identifier for the type of rule. For example, `.es-query`, `.index-threshold`, `logs.alert.document.count`, `monitoring_alert_cluster_health`, `siem.thresholdRule`, or `xpack.ml.anomaly_detection_alert`.
+    example: monitoring_alert_cluster_health
+  schedule:
+    $ref: 'schedule.yaml'
+  scheduled_task_id:
+    type: string
+    example: b530fed0-74f5-11ed-9801-35303b735aef
+  tags:
+    $ref: 'tags.yaml'
+  throttle:
+    $ref: 'throttle.yaml'
+  updated_at:
+    type: string
+    description: The date and time that the rule was updated most recently.
+    example: '2022-12-05T23:36:58.284Z'
+  updated_by:
+    type: string
+    description: The identifier for the user that updated this rule most recently.
+    nullable: true
+    example: elastic

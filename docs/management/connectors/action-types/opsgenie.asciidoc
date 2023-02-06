@@ -1,0 +1,173 @@
+[role="xpack"]
+[[opsgenie-action-type]]
+=== Opsgenie connector and action
+++++
+<titleabbrev>Opsgenie</titleabbrev>
+++++
+
+The Opsgenie connector uses the https://docs.opsgenie.com/docs/alert-api[Opsgenie alert API].
+
+[float]
+[[opsgenie-connector-configuration]]
+==== Connector configuration
+
+Opsgenie connectors have the following configuration properties.
+
+Name:: The name of the connector. The name is used to identify a connector in the management UI connector listing, or in the connector list when configuring an action.
+URL:: The Opsgenie URL. For example, https://api.opsgenie.com or https://api.eu.opsgenie.com.
++
+NOTE: If you are using the <<action-settings, `xpack.actions.allowedHosts`>> setting, make sure the hostname is added to the allowed hosts.
+API Key::   The Opsgenie API authentication key for HTTP Basic authentication. For more details about generating Opsgenie API keys, refer to https://support.atlassian.com/opsgenie/docs/create-a-default-api-integration/[Opsgenie documentation].
+
+[float]
+[[opgenie-connector-networking-configuration]]
+==== Connector networking configuration
+
+Use the <<action-settings, Action configuration settings>> to customize connector networking configurations, such as proxies, certificates, or TLS settings. You can set configurations that apply to all your connectors or use `xpack.actions.customHostSettings` to set per-host configurations.
+
+[float]
+[[Preconfigured-opsgenie-configuration]]
+==== Preconfigured connector type
+
+[source,text]
+--
+ my-opsgenie:
+   name: preconfigured-opsgenie-connector-type
+   actionTypeId: .opsgenie
+   config:
+    apiUrl: https://api.opsgenie.com
+   secrets:
+     apiKey: apikey
+--
+
+Config defines information for the connector type.
+
+`apiUrl`:: A string that corresponds to *URL*.
+
+Secrets defines sensitive information for the connector type.
+
+`apiKey`:: A string that corresponds to *API Key*.
+
+[float]
+[[define-opsgenie-ui]]
+==== Define connector in {stack-manage-app}
+
+Define Opsgenie connector properties.
+
+[role="screenshot"]
+image::management/connectors/images/opsgenie-connector.png[Opsgenie connector]
+
+Test Opsgenie action parameters.
+
+[role="screenshot"]
+image::management/connectors/images/opsgenie-params-test.png[Opsgenie params test]
+
+[float]
+[[opsgenie-action-configuration]]
+==== Action configuration
+
+The Opsgenie connector supports two types of actions: Create alert and Close alert. The properties supported for each action are different because Opsgenie defines different properties for each operation.
+
+When testing the Opsgenie connector, choose the appropriate action from the selector. Each action has different properties that can be configured.
+
+Action:: Select *Create alert* to configure the actions that occur when a rule's conditions are met. Select *Close alert* to define the recovery actions that occur when a rule's conditions are no longer met.
+
+[float]
+[[opsgenie-action-create-alert-configuration]]
+===== Configure the create alert action
+
+You can configure the create alert action through the form view or using a JSON editor.
+
+[float]
+[[opsgenie-action-create-alert-form-configuration]]
+====== Form view
+
+The create alert action form has the following configuration properties.
+
+Message::   The message for the alert (required).
+Opsgenie tags::   The tags for the alert (optional).
+Priority::  The priority level for the alert.
+Description::   A description that provides detailed information about the alert (optional).
+Alias::   The alert identifier, which is used for alert deduplication in Opsgenie. For more information, refer to the https://support.atlassian.com/opsgenie/docs/what-is-alert-de-duplication/[Opsgenie documentation] (optional).
+Entity::  The domain of the alert (optional).
+Source::  The source of the alert (optional).
+User::    The display name of the owner (optional).
+Note::    Additional information for the alert (optional).
+
+[float]
+[[opsgenie-action-create-alert-json-configuration]]
+====== JSON editor
+
+A JSON editor is provided as an alternative to the form view and supports additional fields not shown in the form view. The JSON editor supports all of the forms configuration properties but as lowercase keys as https://docs.opsgenie.com/docs/alert-api#create-alert[described in the Opsgenie API documentation]. The JSON editor supports the following additional properties:
+
+responders::  The entities to receive notifications about the alert (optional).
+visibleTo::   The teams and users that the alert will be visible to without sending a notification to them (optional).
+actions::   The custom actions available to the alert (optional).
+details::   The custom properties of the alert (optional).
+
+[float]
+[[opsgenie-action-create-alert-json-example-configuration]]
+Example JSON editor contents
+
+[source,json]
+--
+{
+  "message": "An example alert message",
+  "alias": "Life is too short for no alias",
+  "description":"Every alert needs a description",
+  "responders":[
+      {"id":"4513b7ea-3b91-438f-b7e4-e3e54af9147c", "type":"team"},
+      {"name":"NOC", "type":"team"},
+      {"id":"bb4d9938-c3c2-455d-aaab-727aa701c0d8", "type":"user"},
+      {"username":"trinity@opsgenie.com", "type":"user"},
+      {"id":"aee8a0de-c80f-4515-a232-501c0bc9d715", "type":"escalation"},
+      {"name":"Nightwatch Escalation", "type":"escalation"},
+      {"id":"80564037-1984-4f38-b98e-8a1f662df552", "type":"schedule"},
+      {"name":"First Responders Schedule", "type":"schedule"}
+  ],
+  "visibleTo":[
+      {"id":"4513b7ea-3b91-438f-b7e4-e3e54af9147c","type":"team"},
+      {"name":"rocket_team","type":"team"},
+      {"id":"bb4d9938-c3c2-455d-aaab-727aa701c0d8","type":"user"},
+      {"username":"trinity@opsgenie.com","type":"user"}
+  ],
+  "actions": ["Restart", "AnExampleAction"],
+  "tags": ["OverwriteQuietHours","Critical"],
+  "details":{"key1":"value1","key2":"value2"},
+  "entity":"An example entity",
+  "priority":"P1"
+}
+--
+
+[float]
+[[opsgenie-action-close-alert-configuration]]
+===== Close alert configuration
+
+The close alert action has the following configuration properties.
+
+Alias::   The alert identifier, which is used for alert deduplication in Opsgenie (required). The alias must match the value used when creating the alert. For more information, refer to the https://support.atlassian.com/opsgenie/docs/what-is-alert-de-duplication/[Opsgenie documentation].
+Note::    Additional information for the alert (optional).
+Source::  The display name of the source (optional).
+User::    The display name of the owner (optional).
+
+[float]
+[[configuring-opsgenie]]
+==== Configure an Opsgenie account
+
+After obtaining an Opsgenie instance, configure the API integration. For details, refer to the https://support.atlassian.com/opsgenie/docs/create-a-default-api-integration/[Opsgenie documentation].
+
+If you're using a free trial, go to the `Teams` dashboard and select the appropriate team.
+
+image::management/connectors/images/opsgenie-teams.png[Opsgenie teams dashboard]
+
+Select the `Integrations` menu item, then select `Add integration`.
+
+image::management/connectors/images/opsgenie-integrations.png[Opsgenie teams integrations]
+
+Search for `API` and select the `API` integration.
+
+image::management/connectors/images/opsgenie-add-api-integration.png[Opsgenie API integration]
+
+Configure the integration and ensure you record the `API Key`. This key will be used to populate the `API Key` field when creating the Kibana Opsgenie connector. Click `Save Integration` after you finish configuring the integration.
+
+image::management/connectors/images/opsgenie-save-integration.png[Opsgenie save integration]

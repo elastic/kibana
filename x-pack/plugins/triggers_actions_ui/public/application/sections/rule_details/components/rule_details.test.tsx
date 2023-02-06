@@ -6,13 +6,13 @@
  */
 
 import * as React from 'react';
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import { shallow } from 'enzyme';
 import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
 import { act } from '@testing-library/react';
 import { RuleDetails } from './rule_details';
 import { Rule, ActionType, RuleTypeModel, RuleType } from '../../../../types';
-import { EuiBadge, EuiFlexItem, EuiButtonEmpty, EuiPageHeaderProps } from '@elastic/eui';
+import { EuiBadge, EuiButtonEmpty, EuiPageHeaderProps } from '@elastic/eui';
 import {
   ActionGroup,
   RuleExecutionStatusErrorReasons,
@@ -45,10 +45,10 @@ jest.mock('../../../lib/action_connector_api', () => ({
 }));
 
 jest.mock('../../../lib/rule_api', () => ({
-  updateAPIKey: jest.fn(),
+  bulkUpdateAPIKey: jest.fn(),
   deleteRules: jest.fn(),
 }));
-const { updateAPIKey, deleteRules } = jest.requireMock('../../../lib/rule_api');
+const { bulkUpdateAPIKey } = jest.requireMock('../../../lib/rule_api');
 
 jest.mock('../../../lib/capabilities', () => ({
   hasAllPrivilege: jest.fn(() => true),
@@ -62,12 +62,13 @@ const ruleTypeRegistry = ruleTypeRegistryMock.create();
 const mockRuleApis = {
   muteRule: jest.fn(),
   unmuteRule: jest.fn(),
-  enableRule: jest.fn(),
-  disableRule: jest.fn(),
   requestRefresh: jest.fn(),
   refreshToken: Date.now(),
   snoozeRule: jest.fn(),
   unsnoozeRule: jest.fn(),
+  bulkEnableRules: jest.fn(),
+  bulkDisableRules: jest.fn(),
+  bulkDeleteRules: jest.fn(),
 };
 
 const authorizedConsumers = {
@@ -192,7 +193,7 @@ describe('rule_details', () => {
           actions: [
             {
               group: 'default',
-              id: uuid.v4(),
+              id: uuidv4(),
               params: {},
               actionTypeId: '.server-log',
             },
@@ -211,19 +212,17 @@ describe('rule_details', () => {
           },
         ];
 
+        const wrapper = mountWithIntl(
+          <RuleDetails
+            rule={rule}
+            ruleType={ruleType}
+            actionTypes={actionTypes}
+            {...mockRuleApis}
+          />
+        );
+
         expect(
-          mountWithIntl(
-            <RuleDetails
-              rule={rule}
-              ruleType={ruleType}
-              actionTypes={actionTypes}
-              {...mockRuleApis}
-            />
-          ).containsMatchingElement(
-            <EuiFlexItem grow={false}>
-              <EuiBadge color="hollow">{actionTypes[0].name}</EuiBadge>
-            </EuiFlexItem>
-          )
+          wrapper.find('[data-test-subj="actionConnectorName-0-Server log"]').exists
         ).toBeTruthy();
       });
 
@@ -232,13 +231,13 @@ describe('rule_details', () => {
           actions: [
             {
               group: 'default',
-              id: uuid.v4(),
+              id: uuidv4(),
               params: {},
               actionTypeId: '.server-log',
             },
             {
               group: 'default',
-              id: uuid.v4(),
+              id: uuidv4(),
               params: {},
               actionTypeId: '.email',
             },
@@ -275,19 +274,10 @@ describe('rule_details', () => {
         );
 
         expect(
-          details.containsMatchingElement(
-            <EuiFlexItem grow={false}>
-              <EuiBadge color="hollow">{actionTypes[0].name}</EuiBadge>
-            </EuiFlexItem>
-          )
+          details.find('[data-test-subj="actionConnectorName-0-Server log"]').exists
         ).toBeTruthy();
-
         expect(
-          details.containsMatchingElement(
-            <EuiFlexItem grow={false}>
-              <EuiBadge color="hollow">{actionTypes[1].name}</EuiBadge>
-            </EuiFlexItem>
-          )
+          details.find('[data-test-subj="actionConnectorName-0-Send email"]').exists
         ).toBeTruthy();
       });
     });
@@ -365,7 +355,7 @@ describe('rule_details', () => {
         actions: [
           {
             group: 'default',
-            id: uuid.v4(),
+            id: uuidv4(),
             params: {},
             actionTypeId: '.server-log',
           },
@@ -405,7 +395,7 @@ describe('rule_details', () => {
         actions: [
           {
             group: 'default',
-            id: uuid.v4(),
+            id: uuidv4(),
             params: {},
             actionTypeId: '.server-log',
           },
@@ -579,16 +569,12 @@ describe('rule_details', () => {
         await nextTick();
         wrapper.update();
       });
-      const brokenConnectorIndicator = wrapper
-        .find('[data-test-subj="actionWithBrokenConnector"]')
-        .first();
       const brokenConnectorWarningBanner = wrapper
         .find('[data-test-subj="actionWithBrokenConnectorWarningBanner"]')
         .first();
       const brokenConnectorWarningBannerAction = wrapper
         .find('[data-test-subj="actionWithBrokenConnectorWarningBannerEdit"]')
         .first();
-      expect(brokenConnectorIndicator.exists()).toBeTruthy();
       expect(brokenConnectorWarningBanner.exists()).toBeTruthy();
       expect(brokenConnectorWarningBannerAction.exists()).toBeTruthy();
     });
@@ -627,16 +613,12 @@ describe('rule_details', () => {
         await nextTick();
         wrapper.update();
       });
-      const brokenConnectorIndicator = wrapper
-        .find('[data-test-subj="actionWithBrokenConnector"]')
-        .first();
       const brokenConnectorWarningBanner = wrapper
         .find('[data-test-subj="actionWithBrokenConnectorWarningBanner"]')
         .first();
       const brokenConnectorWarningBannerAction = wrapper
         .find('[data-test-subj="actionWithBrokenConnectorWarningBannerEdit"]')
         .first();
-      expect(brokenConnectorIndicator.exists()).toBeTruthy();
       expect(brokenConnectorWarningBanner.exists()).toBeTruthy();
       expect(brokenConnectorWarningBannerAction.exists()).toBeFalsy();
     });
@@ -661,7 +643,7 @@ describe('rule_details', () => {
         wrapper.update();
       });
 
-      const refreshButton = wrapper.find('[data-test-subj="refreshRulesButton"]').first();
+      const refreshButton = wrapper.find('[data-test-subj="refreshRulesButton"]').last();
       expect(refreshButton.exists()).toBeTruthy();
 
       refreshButton.simulate('click');
@@ -687,10 +669,10 @@ describe('rule_details', () => {
         await nextTick();
         wrapper.update();
       });
-      const actionsButton = wrapper.find('[data-test-subj="ruleActionsButton"]').first();
+      const actionsButton = wrapper.find('[data-test-subj="ruleActionsButton"]').last();
       actionsButton.simulate('click');
 
-      const updateButton = wrapper.find('[data-test-subj="updateAPIKeyButton"]').first();
+      const updateButton = wrapper.find('[data-test-subj="updateAPIKeyButton"]').last();
       expect(updateButton.exists()).toBeTruthy();
 
       updateButton.simulate('click');
@@ -698,19 +680,23 @@ describe('rule_details', () => {
       const confirm = wrapper.find('[data-test-subj="updateApiKeyIdsConfirmation"]').first();
       expect(confirm.exists()).toBeTruthy();
 
-      const confirmButton = wrapper.find('[data-test-subj="confirmModalConfirmButton"]').first();
+      const confirmButton = wrapper.find('[data-test-subj="confirmModalConfirmButton"]').last();
       expect(confirmButton.exists()).toBeTruthy();
 
       confirmButton.simulate('click');
 
-      expect(updateAPIKey).toHaveBeenCalledTimes(1);
-      expect(updateAPIKey).toHaveBeenCalledWith(expect.objectContaining({ id: rule.id }));
+      expect(bulkUpdateAPIKey).toHaveBeenCalledTimes(1);
+      expect(bulkUpdateAPIKey).toHaveBeenCalledWith(expect.objectContaining({ ids: [rule.id] }));
     });
   });
 
   describe('delete rule button', () => {
     it('should delete the rule when clicked', async () => {
-      deleteRules.mockResolvedValueOnce({ successes: ['1'], errors: [] });
+      mockRuleApis.bulkDeleteRules.mockResolvedValueOnce({
+        rules: [{ id: 1 }],
+        errors: [],
+        total: 1,
+      });
       const rule = mockRule();
       const requestRefresh = jest.fn();
       const wrapper = mountWithIntl(
@@ -727,24 +713,24 @@ describe('rule_details', () => {
         await nextTick();
         wrapper.update();
       });
-      const actionsButton = wrapper.find('[data-test-subj="ruleActionsButton"]').first();
+      const actionsButton = wrapper.find('[data-test-subj="ruleActionsButton"]').last();
       actionsButton.simulate('click');
 
-      const updateButton = wrapper.find('[data-test-subj="deleteRuleButton"]').first();
+      const updateButton = wrapper.find('[data-test-subj="deleteRuleButton"]').last();
       expect(updateButton.exists()).toBeTruthy();
 
       updateButton.simulate('click');
 
-      const confirm = wrapper.find('[data-test-subj="deleteIdsConfirmation"]').first();
+      const confirm = wrapper.find('[data-test-subj="rulesDeleteConfirmation"]').first();
       expect(confirm.exists()).toBeTruthy();
 
-      const confirmButton = wrapper.find('[data-test-subj="confirmModalConfirmButton"]').first();
+      const confirmButton = wrapper.find('[data-test-subj="confirmModalConfirmButton"]').last();
       expect(confirmButton.exists()).toBeTruthy();
 
       confirmButton.simulate('click');
 
-      expect(deleteRules).toHaveBeenCalledTimes(1);
-      expect(deleteRules).toHaveBeenCalledWith(expect.objectContaining({ ids: [rule.id] }));
+      expect(mockRuleApis.bulkDeleteRules).toHaveBeenCalledTimes(1);
+      expect(mockRuleApis.bulkDeleteRules).toHaveBeenCalledWith({ ids: [rule.id] });
     });
   });
 
@@ -766,16 +752,16 @@ describe('rule_details', () => {
         await nextTick();
         wrapper.update();
       });
-      const actionsButton = wrapper.find('[data-test-subj="ruleActionsButton"]').first();
+      const actionsButton = wrapper.find('[data-test-subj="ruleActionsButton"]').last();
       actionsButton.simulate('click');
 
-      const disableButton = wrapper.find('[data-test-subj="disableButton"]').first();
+      const disableButton = wrapper.find('[data-test-subj="disableButton"]').last();
       expect(disableButton.exists()).toBeTruthy();
 
       disableButton.simulate('click');
 
-      expect(mockRuleApis.disableRule).toHaveBeenCalledTimes(1);
-      expect(mockRuleApis.disableRule).toHaveBeenCalledWith(rule);
+      expect(mockRuleApis.bulkDisableRules).toHaveBeenCalledTimes(1);
+      expect(mockRuleApis.bulkDisableRules).toHaveBeenCalledWith({ ids: [rule.id] });
     });
 
     it('should enable the rule when clicked', async () => {
@@ -795,24 +781,24 @@ describe('rule_details', () => {
         await nextTick();
         wrapper.update();
       });
-      const actionsButton = wrapper.find('[data-test-subj="ruleActionsButton"]').first();
+      const actionsButton = wrapper.find('[data-test-subj="ruleActionsButton"]').last();
       actionsButton.simulate('click');
 
-      const enableButton = wrapper.find('[data-test-subj="disableButton"]').first();
+      const enableButton = wrapper.find('[data-test-subj="disableButton"]').last();
       expect(enableButton.exists()).toBeTruthy();
 
       enableButton.simulate('click');
 
-      expect(mockRuleApis.enableRule).toHaveBeenCalledTimes(1);
-      expect(mockRuleApis.enableRule).toHaveBeenCalledWith(rule);
+      expect(mockRuleApis.bulkEnableRules).toHaveBeenCalledTimes(1);
+      expect(mockRuleApis.bulkEnableRules).toHaveBeenCalledWith({ ids: [rule.id] });
     });
   });
 
   function mockRule(overloads: Partial<Rule> = {}): Rule {
     return {
-      id: uuid.v4(),
+      id: uuidv4(),
       enabled: true,
-      name: `rule-${uuid.v4()}`,
+      name: `rule-${uuidv4()}`,
       tags: [],
       ruleTypeId: '.noop',
       consumer: ALERTS_FEATURE_ID,

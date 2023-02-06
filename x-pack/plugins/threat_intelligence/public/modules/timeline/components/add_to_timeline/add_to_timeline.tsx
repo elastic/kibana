@@ -5,17 +5,28 @@
  * 2.0.
  */
 
-import React, { VFC } from 'react';
-import { DataProvider, QueryOperator } from '@kbn/timelines-plugin/common';
+import React, { useRef, VFC } from 'react';
+import { DataProvider } from '@kbn/timelines-plugin/common';
 import { AddToTimelineButtonProps } from '@kbn/timelines-plugin/public';
-import { EuiButtonEmpty, EuiButtonIcon } from '@elastic/eui/src/components/button';
-import { EMPTY_VALUE } from '../../../../../common/constants';
-import { getDisplayName } from '../../../indicators/lib/display_name';
-import { ComputedIndicatorFieldId } from '../../../indicators/components/indicators_table/cell_renderer';
-import { useKibana } from '../../../../hooks/use_kibana';
-import { unwrapValue } from '../../../indicators/lib/unwrap_value';
-import { Indicator, RawIndicatorFieldId } from '../../../../../common/types/indicator';
+import {
+  EuiButtonEmpty,
+  EuiButtonIcon,
+  EuiContextMenuItem,
+  EuiFlexItem,
+  EuiToolTip,
+} from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { generateDataProvider } from '../../utils';
+import { fieldAndValueValid, getIndicatorFieldAndValue } from '../../../indicators';
+import { Indicator } from '../../../../../common/types/indicator';
+import { useKibana } from '../../../../hooks';
 import { useStyles } from './styles';
+import { useAddToTimeline } from '../../hooks';
+
+const ICON_TYPE = 'timeline';
+const TITLE = i18n.translate('xpack.threatIntelligence.timeline.addToTimeline', {
+  defaultMessage: 'Add to Timeline',
+});
 
 export interface AddToTimelineProps {
   /**
@@ -27,72 +38,191 @@ export interface AddToTimelineProps {
    */
   field: string;
   /**
+   * Used for unit and e2e tests.
+   */
+  ['data-test-subj']?: string;
+}
+
+export interface AddToTimelineCellActionProps extends AddToTimelineProps {
+  /**
    * Only used with `EuiDataGrid` (see {@link AddToTimelineButtonProps}).
    */
-  component?: typeof EuiButtonEmpty | typeof EuiButtonIcon;
-  /**
-   * Used as `data-test-subj` value for e2e tests.
-   */
-  testId?: string;
+  Component: typeof EuiButtonEmpty | typeof EuiButtonIcon;
 }
 
 /**
- * Add to timeline button, used in many places throughout the TI plugin.
- * Support being passed a {@link Indicator} or a string, can be used in a `EuiDataGrid` or as a normal button.
- * Leverages the built-in functionality retrieves from the timeLineService (see ThreatIntelligenceSecuritySolutionContext in x-pack/plugins/threat_intelligence/public/types.ts)
+ * Add to timeline feature, leverages the built-in functionality retrieves from the timeLineService (see ThreatIntelligenceSecuritySolutionContext in x-pack/plugins/threat_intelligence/public/types.ts)
  * Clicking on the button will add a key-value pair to an Untitled timeline.
  *
- * @returns add to timeline button or an empty component.
+ * This component is renders an {@link EuiButtonIcon}.
+ *
+ * @returns add to timeline button or an empty component
  */
-export const AddToTimeline: VFC<AddToTimelineProps> = ({ data, field, component, testId }) => {
+export const AddToTimelineButtonIcon: VFC<AddToTimelineProps> = ({
+  data,
+  field,
+  'data-test-subj': dataTestSubj,
+}) => {
+  const addToTimelineButton =
+    useKibana().services.timelines.getHoverActions().getAddToTimelineButton;
+
+  const { addToTimelineProps } = useAddToTimeline({ indicator: data, field });
+  if (!addToTimelineProps) {
+    return <></>;
+  }
+
+  return (
+    <EuiToolTip content={TITLE}>
+      <EuiFlexItem data-test-subj={dataTestSubj}>
+        {addToTimelineButton(addToTimelineProps)}
+      </EuiFlexItem>
+    </EuiToolTip>
+  );
+};
+
+/**
+ * Add to timeline feature, leverages the built-in functionality retrieves from the timeLineService (see ThreatIntelligenceSecuritySolutionContext in x-pack/plugins/threat_intelligence/public/types.ts)
+ * Clicking on the button will add a key-value pair to an Untitled timeline.
+ *
+ * This component is renders an {@link EuiButtonEmpty}.
+ *
+ * @returns add to timeline button or an empty component
+ */
+export const AddToTimelineButtonEmpty: VFC<AddToTimelineProps> = ({
+  data,
+  field,
+  'data-test-subj': dataTestSubj,
+}) => {
   const styles = useStyles();
+
+  const buttonRef = useRef<HTMLButtonElement>(null);
 
   const addToTimelineButton =
     useKibana().services.timelines.getHoverActions().getAddToTimelineButton;
 
-  let value: string | null;
-  if (typeof data === 'string') {
-    value = data;
-  } else if (field === ComputedIndicatorFieldId.DisplayName) {
-    const displayName = getDisplayName(data);
-    field = displayName.field;
-    value = displayName.value;
-  } else {
-    value = unwrapValue(data, field as RawIndicatorFieldId);
-  }
+  const { key, value } =
+    typeof data === 'string' ? { key: field, value: data } : getIndicatorFieldAndValue(data, field);
 
-  if (!value || value === EMPTY_VALUE || !field) {
+  if (!fieldAndValueValid(key, value)) {
     return <></>;
   }
 
-  const operator = ':' as QueryOperator;
-
-  const dataProvider: DataProvider[] = [
-    {
-      and: [],
-      enabled: true,
-      id: `timeline-indicator-${field}-${value}`,
-      name: value,
-      excluded: false,
-      kqlQuery: '',
-      queryMatch: {
-        field,
-        value,
-        operator,
-      },
-    },
-  ];
+  const dataProvider: DataProvider[] = [generateDataProvider(key, value as string)];
 
   const addToTimelineProps: AddToTimelineButtonProps = {
     dataProvider,
-    field,
+    field: key,
     ownFocus: false,
   };
-  if (component) addToTimelineProps.Component = component;
+
+  // Use case is for the barchart legend (for example).
+  // We can't use the addToTimelineButton directly because the UI doesn't work in a EuiContextMenu.
+  // We hide it and use the defaultFocusedButtonRef props to programmatically click it.
+  addToTimelineProps.defaultFocusedButtonRef = buttonRef;
 
   return (
-    <div data-test-subj={testId} css={styles.button}>
-      {addToTimelineButton(addToTimelineProps)}
-    </div>
+    <>
+      <div css={styles.displayNone}>{addToTimelineButton(addToTimelineProps)}</div>
+      <EuiToolTip content={TITLE}>
+        <EuiButtonEmpty
+          aria-label={TITLE}
+          iconType={ICON_TYPE}
+          iconSize="s"
+          color="primary"
+          onClick={() => buttonRef.current?.click()}
+          data-test-subj={dataTestSubj}
+        >
+          {TITLE}
+        </EuiButtonEmpty>
+      </EuiToolTip>
+    </>
+  );
+};
+
+/**
+ * Add to timeline feature, leverages the built-in functionality retrieves from the timeLineService (see ThreatIntelligenceSecuritySolutionContext in x-pack/plugins/threat_intelligence/public/types.ts)
+ * Clicking on the button will add a key-value pair to an Untitled timeline.
+ *
+ * This component is to be used in an EuiContextMenu.
+ *
+ * @returns add to timeline {@link EuiContextMenuItem} for a context menu
+ */
+export const AddToTimelineContextMenu: VFC<AddToTimelineProps> = ({
+  data,
+  field,
+  'data-test-subj': dataTestSubj,
+}) => {
+  const styles = useStyles();
+
+  const contextMenuRef = useRef<HTMLButtonElement>(null);
+
+  const addToTimelineButton =
+    useKibana().services.timelines.getHoverActions().getAddToTimelineButton;
+
+  const { key, value } =
+    typeof data === 'string' ? { key: field, value: data } : getIndicatorFieldAndValue(data, field);
+
+  if (!fieldAndValueValid(key, value)) {
+    return <></>;
+  }
+
+  const dataProvider: DataProvider[] = [generateDataProvider(key, value as string)];
+
+  const addToTimelineProps: AddToTimelineButtonProps = {
+    dataProvider,
+    field: key,
+    ownFocus: false,
+  };
+
+  // Use case is for the barchart legend (for example).
+  // We can't use the addToTimelineButton directly because the UI doesn't work in a EuiContextMenu.
+  // We hide it and use the defaultFocusedButtonRef props to programmatically click it.
+  addToTimelineProps.defaultFocusedButtonRef = contextMenuRef;
+
+  return (
+    <>
+      <div css={styles.displayNone}>{addToTimelineButton(addToTimelineProps)}</div>
+      <EuiContextMenuItem
+        key="addToTimeline"
+        icon={ICON_TYPE}
+        size="s"
+        onClick={() => contextMenuRef.current?.click()}
+        data-test-subj={dataTestSubj}
+      >
+        {TITLE}
+      </EuiContextMenuItem>
+    </>
+  );
+};
+
+/**
+ * Add to timeline feature, leverages the built-in functionality retrieves from the timeLineService (see ThreatIntelligenceSecuritySolutionContext in x-pack/plugins/threat_intelligence/public/types.ts)
+ * Clicking on the button will add a key-value pair to an Untitled timeline.
+ *
+ * This component is to be used as a cellAction in an {@link EuiDataGrid}.
+ *
+ * @returns add to timeline button or an empty component
+ */
+export const AddToTimelineCellAction: VFC<AddToTimelineCellActionProps> = ({
+  data,
+  field,
+  Component,
+  'data-test-subj': dataTestSubj,
+}) => {
+  const addToTimelineButton =
+    useKibana().services.timelines.getHoverActions().getAddToTimelineButton;
+
+  const { addToTimelineProps } = useAddToTimeline({ indicator: data, field });
+  if (!addToTimelineProps) {
+    return <></>;
+  }
+  addToTimelineProps.Component = Component;
+
+  return (
+    <EuiToolTip content={TITLE}>
+      <EuiFlexItem data-test-subj={dataTestSubj}>
+        {addToTimelineButton(addToTimelineProps)}
+      </EuiFlexItem>
+    </EuiToolTip>
   );
 };

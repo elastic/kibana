@@ -16,6 +16,7 @@ import {
 } from '@kbn/alerting-plugin/common';
 import { AsApiContract, RewriteRequestCase } from '@kbn/actions-plugin/common';
 import { INTERNAL_BASE_ALERTING_API_PATH } from '../../constants';
+import { getFilter } from './get_filter';
 
 const getRenamedLog = (data: IExecutionLog) => {
   const {
@@ -40,22 +41,6 @@ const rewriteBodyRes: RewriteRequestCase<IExecutionLogResult> = ({ data, ...rest
   ...rest,
 });
 
-// TODO (Jiawei): Use node builder instead of strings
-const getFilter = ({ outcomeFilter, message }: { outcomeFilter?: string[]; message?: string }) => {
-  const filter: string[] = [];
-
-  if (outcomeFilter && outcomeFilter.length) {
-    filter.push(`event.outcome: ${outcomeFilter.join(' or ')}`);
-  }
-
-  if (message) {
-    const escapedMessage = message.replace(/([\)\(\<\>\}\{\"\:\\])/gm, '\\$&');
-    filter.push(`message: "${escapedMessage}" OR error.message: "${escapedMessage}"`);
-  }
-
-  return filter;
-};
-
 export type SortField = Record<
   ExecutionLogSortFields,
   {
@@ -73,6 +58,11 @@ export interface LoadExecutionLogAggregationsProps {
   page?: number;
   sort?: SortField[];
 }
+
+export type LoadGlobalExecutionLogAggregationsProps = Omit<
+  LoadExecutionLogAggregationsProps,
+  'id'
+> & { namespaces?: Array<string | undefined> };
 
 export const loadExecutionLogAggregations = async ({
   id,
@@ -100,6 +90,40 @@ export const loadExecutionLogAggregations = async ({
         // whereas data grid sorts are 0 indexed.
         page: page + 1,
         sort: sortField.length ? JSON.stringify(sortField) : undefined,
+      },
+    }
+  );
+
+  return rewriteBodyRes(result);
+};
+
+export const loadGlobalExecutionLogAggregations = async ({
+  http,
+  dateStart,
+  dateEnd,
+  outcomeFilter,
+  message,
+  perPage = 10,
+  page = 0,
+  sort = [],
+  namespaces,
+}: LoadGlobalExecutionLogAggregationsProps & { http: HttpSetup }) => {
+  const sortField: any[] = sort;
+  const filter = getFilter({ outcomeFilter, message });
+
+  const result = await http.get<AsApiContract<IExecutionLogResult>>(
+    `${INTERNAL_BASE_ALERTING_API_PATH}/_global_execution_logs`,
+    {
+      query: {
+        date_start: dateStart,
+        date_end: dateEnd,
+        filter: filter.length ? filter.join(' and ') : undefined,
+        per_page: perPage,
+        // Need to add the + 1 for pages because APIs are 1 indexed,
+        // whereas data grid sorts are 0 indexed.
+        page: page + 1,
+        sort: sortField.length ? JSON.stringify(sortField) : undefined,
+        namespaces: namespaces ? JSON.stringify(namespaces) : undefined,
       },
     }
   );

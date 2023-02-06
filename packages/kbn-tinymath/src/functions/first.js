@@ -16,8 +16,6 @@
  * first([1, 2, 3]) // returns 1
  */
 
-module.exports = { first };
-
 function first(a) {
   if (Array.isArray(a)) {
     return a[0];
@@ -26,3 +24,5 @@ function first(a) {
 }
 
 first.skipNumberValidation = true;
+
+module.exports = { first };

@@ -18,13 +18,16 @@ import * as TEST_SUBJECTS from './test_subjects';
 import { createReactQueryResponse } from '../../test/fixtures/react_query';
 import { coreMock } from '@kbn/core/public/mocks';
 import { useCspSetupStatusApi } from '../../common/api/use_setup_status_api';
-import { useCISIntegrationLink } from '../../common/navigation/use_navigate_to_cis_integration';
+import { useSubscriptionStatus } from '../../common/hooks/use_subscription_status';
+import { useCspIntegrationLink } from '../../common/navigation/use_csp_integration_link';
 
 jest.mock('./use_csp_integration', () => ({
   useCspIntegrationInfo: jest.fn(),
 }));
 jest.mock('../../common/api/use_setup_status_api');
-jest.mock('../../common/navigation/use_navigate_to_cis_integration');
+jest.mock('../../common/hooks/use_subscription_status');
+jest.mock('../../common/navigation/use_csp_integration_link');
+
 const chance = new Chance();
 
 const queryClient = new QueryClient({
@@ -68,7 +71,15 @@ describe('<Rules />', () => {
         data: { status: 'indexed' },
       })
     );
-    (useCISIntegrationLink as jest.Mock).mockImplementation(() => chance.url());
+
+    (useSubscriptionStatus as jest.Mock).mockImplementation(() =>
+      createReactQueryResponse({
+        status: 'success',
+        data: true,
+      })
+    );
+
+    (useCspIntegrationLink as jest.Mock).mockImplementation(() => chance.url());
   });
 
   it('calls API with URL params', async () => {
@@ -95,6 +106,18 @@ describe('<Rules />', () => {
           package: {
             title: 'my package',
           },
+          inputs: [
+            {
+              enabled: true,
+              policy_template: 'kspm',
+              type: 'cloudbeat/cis_k8s',
+            },
+            {
+              enabled: false,
+              policy_template: 'kspm',
+              type: 'cloudbeat/cis_eks',
+            },
+          ],
         },
         { name: 'my agent' },
       ],
@@ -104,9 +127,7 @@ describe('<Rules />', () => {
 
     render(<Component />);
 
-    expect(
-      await screen.findByText(`${response.data?.[0]?.package?.title}, ${response.data?.[1].name}`)
-    ).toBeInTheDocument();
     expect(await screen.findByTestId(TEST_SUBJECTS.CSP_RULES_CONTAINER)).toBeInTheDocument();
+    expect(await screen.findByTestId(TEST_SUBJECTS.CSP_RULES_SHARED_VALUES)).toBeInTheDocument();
   });
 });

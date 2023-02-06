@@ -22,7 +22,6 @@ import {
   deleteAllCaseItems,
   createCase,
   updateCase,
-  getCaseUserActions,
   superUserSpace1Auth,
   deleteCases,
   createComment,
@@ -30,6 +29,7 @@ import {
   deleteComment,
   extractWarningValueFromWarningHeader,
 } from '../../../../common/lib/utils';
+import { getCaseUserActions } from '../../../../common/lib/user_actions';
 import {
   globalRead,
   noKibanaPrivileges,
@@ -51,6 +51,23 @@ export default ({ getService }: FtrProviderContext): void => {
       await deleteAllCaseItems(es);
     });
 
+    it('populates the action_id', async () => {
+      const theCase = await createCase(supertest, postCaseReq);
+      const userActions = await getCaseUserActions({ supertest, caseID: theCase.id });
+
+      expect(userActions.length).to.be(1);
+      expect(userActions[0].action_id).not.to.be(undefined);
+      expect(userActions[0]).not.to.have.property('id');
+    });
+
+    it('populates the case_id', async () => {
+      const theCase = await createCase(supertest, postCaseReq);
+      const userActions = await getCaseUserActions({ supertest, caseID: theCase.id });
+
+      expect(userActions.length).to.be(1);
+      expect(userActions[0].case_id).not.to.be(undefined);
+    });
+
     it('creates a create case user action when a case is created', async () => {
       const theCase = await createCase(supertest, postCaseReq);
       const userActions = await getCaseUserActions({ supertest, caseID: theCase.id });
@@ -68,19 +85,12 @@ export default ({ getService }: FtrProviderContext): void => {
       expect(createCaseUserAction.payload.connector).to.eql(postCaseReq.connector);
     });
 
-    it('creates a delete case user action when a case is deleted', async () => {
+    it('deletes all user actions when a case is deleted', async () => {
       const theCase = await createCase(supertest, postCaseReq);
       await deleteCases({ supertest, caseIDs: [theCase.id] });
       const userActions = await getCaseUserActions({ supertest, caseID: theCase.id });
 
-      const userAction = userActions[1];
-
-      // One for creation and one for deletion
-      expect(userActions.length).to.eql(2);
-
-      expect(userAction.action).to.eql('delete');
-      expect(userAction.type).to.eql('delete_case');
-      expect(userAction.payload).to.eql({});
+      expect(userActions.length).to.be(0);
     });
 
     it('creates a status update user action when changing the status', async () => {
@@ -195,37 +205,6 @@ export default ({ getService }: FtrProviderContext): void => {
       expect(deleteTagsUserAction.type).to.eql('tags');
       expect(deleteTagsUserAction.action).to.eql('delete');
       expect(deleteTagsUserAction.payload).to.eql({ tags: ['defacement'] });
-    });
-
-    it('creates an add and delete assignees user action', async () => {
-      const theCase = await createCase(
-        supertest,
-        getPostCaseRequest({ assignees: [{ uid: '1' }] })
-      );
-      await updateCase({
-        supertest,
-        params: {
-          cases: [
-            {
-              id: theCase.id,
-              version: theCase.version,
-              assignees: [{ uid: '2' }, { uid: '3' }],
-            },
-          ],
-        },
-      });
-
-      const userActions = await getCaseUserActions({ supertest, caseID: theCase.id });
-      const addAssigneesUserAction = userActions[1];
-      const deleteAssigneesUserAction = userActions[2];
-
-      expect(userActions.length).to.eql(3);
-      expect(addAssigneesUserAction.type).to.eql('assignees');
-      expect(addAssigneesUserAction.action).to.eql('add');
-      expect(addAssigneesUserAction.payload).to.eql({ assignees: [{ uid: '2' }, { uid: '3' }] });
-      expect(deleteAssigneesUserAction.type).to.eql('assignees');
-      expect(deleteAssigneesUserAction.action).to.eql('delete');
-      expect(deleteAssigneesUserAction.payload).to.eql({ assignees: [{ uid: '1' }] });
     });
 
     it('creates an update title user action', async () => {

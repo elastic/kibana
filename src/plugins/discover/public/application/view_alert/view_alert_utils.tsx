@@ -9,11 +9,14 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { CoreStart, ToastsStart } from '@kbn/core/public';
+import type { DataView } from '@kbn/data-views-plugin/public';
 import type { Rule } from '@kbn/alerting-plugin/common';
 import type { RuleTypeParams } from '@kbn/alerting-plugin/common';
-import { SerializedSearchSourceFields } from '@kbn/data-plugin/common';
+import { ISearchSource, SerializedSearchSourceFields, getTime } from '@kbn/data-plugin/common';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { MarkdownSimple, toMountPoint } from '@kbn/kibana-react-plugin/public';
+import { Filter } from '@kbn/es-query';
+import { DiscoverAppLocatorParams } from '../../../common/locator';
 
 export interface SearchThresholdAlertParams extends RuleTypeParams {
   searchConfiguration: SerializedSearchSourceFields;
@@ -22,12 +25,28 @@ export interface SearchThresholdAlertParams extends RuleTypeParams {
 export interface QueryParams {
   from: string | null;
   to: string | null;
-  checksum: string | null;
 }
 
 const LEGACY_BASE_ALERT_API_PATH = '/api/alerts';
 
+const buildTimeRangeFilter = (
+  dataView: DataView,
+  fetchedAlert: Rule<SearchThresholdAlertParams>,
+  timeFieldName: string
+) => {
+  const filter = getTime(dataView, {
+    from: `now-${fetchedAlert.params.timeWindowSize}${fetchedAlert.params.timeWindowUnit}`,
+    to: 'now',
+  });
+  return {
+    from: filter?.query.range[timeFieldName].gte,
+    to: filter?.query.range[timeFieldName].lte,
+  };
+};
+
 export const getAlertUtils = (
+  openActualAlert: boolean,
+  queryParams: QueryParams,
   toastNotifications: ToastsStart,
   core: CoreStart,
   data: DataPublicPluginStart
@@ -46,36 +65,6 @@ export const getAlertUtils = (
     });
   };
 
-  const displayRuleChangedWarn = () => {
-    const warnTitle = i18n.translate('discover.viewAlert.alertRuleChangedWarnTitle', {
-      defaultMessage: 'Alert rule has changed',
-    });
-    const warnDescription = i18n.translate('discover.viewAlert.alertRuleChangedWarnDescription', {
-      defaultMessage: `The displayed documents might not match the documents that triggered the alert
-       because the rule configuration changed.`,
-    });
-
-    toastNotifications.addWarning({
-      title: warnTitle,
-      text: toMountPoint(<MarkdownSimple>{warnDescription}</MarkdownSimple>),
-    });
-  };
-
-  const displayPossibleDocsDiffInfoAlert = () => {
-    const infoTitle = i18n.translate('discover.viewAlert.documentsMayVaryInfoTitle', {
-      defaultMessage: 'Displayed documents may vary',
-    });
-    const infoDescription = i18n.translate('discover.viewAlert.documentsMayVaryInfoDescription', {
-      defaultMessage: `The displayed documents might differ from the documents that triggered the alert.
-         Some documents might have been added or deleted.`,
-    });
-
-    toastNotifications.addInfo({
-      title: infoTitle,
-      text: toMountPoint(<MarkdownSimple>{infoDescription}</MarkdownSimple>),
-    });
-  };
-
   const fetchAlert = async (id: string) => {
     try {
       return await core.http.get<Rule<SearchThresholdAlertParams>>(
@@ -89,12 +78,18 @@ export const getAlertUtils = (
         title: errorTitle,
         text: toMountPoint(<MarkdownSimple>{error.message}</MarkdownSimple>),
       });
+      throw new Error(errorTitle);
     }
   };
 
   const fetchSearchSource = async (fetchedAlert: Rule<SearchThresholdAlertParams>) => {
     try {
-      return await data.search.searchSource.create(fetchedAlert.params.searchConfiguration);
+      return {
+        alert: fetchedAlert,
+        searchSource: await data.search.searchSource.create(
+          fetchedAlert.params.searchConfiguration
+        ),
+      };
     } catch (error) {
       const errorTitle = i18n.translate('discover.viewAlert.searchSourceErrorTitle', {
         defaultMessage: 'Error fetching search source',
@@ -103,29 +98,40 @@ export const getAlertUtils = (
         title: errorTitle,
         text: toMountPoint(<MarkdownSimple>{error.message}</MarkdownSimple>),
       });
+      throw new Error(errorTitle);
     }
   };
 
-  const showDataViewUpdatedWarning = async () => {
-    const warnTitle = i18n.translate('discover.viewAlert.dataViewChangedWarnTitle', {
-      defaultMessage: 'Data View has changed',
-    });
-    const warnDescription = i18n.translate('discover.viewAlert.dataViewChangedWarnDescription', {
-      defaultMessage: `Data view has been updated after the last update of the alert rule.`,
-    });
+  const buildLocatorParams = ({
+    alert,
+    searchSource,
+  }: {
+    alert: Rule<SearchThresholdAlertParams>;
+    searchSource: ISearchSource;
+  }): DiscoverAppLocatorParams => {
+    const dataView = searchSource.getField('index');
+    const timeFieldName = dataView?.timeFieldName;
+    // data view fetch error
+    if (!dataView || !timeFieldName) {
+      showDataViewFetchError(alert.id);
+      throw new Error('Data view fetch error');
+    }
 
-    toastNotifications.addWarning({
-      title: warnTitle,
-      text: toMountPoint(<MarkdownSimple>{warnDescription}</MarkdownSimple>),
-    });
+    const timeRange = openActualAlert
+      ? { from: queryParams.from, to: queryParams.to }
+      : buildTimeRangeFilter(dataView, alert, timeFieldName);
+
+    return {
+      query: searchSource.getField('query') || data.query.queryString.getDefaultQuery(),
+      dataViewSpec: dataView.toSpec(false),
+      timeRange,
+      filters: searchSource.getField('filter') as Filter[],
+    };
   };
 
   return {
     fetchAlert,
     fetchSearchSource,
-    displayRuleChangedWarn,
-    displayPossibleDocsDiffInfoAlert,
-    showDataViewFetchError,
-    showDataViewUpdatedWarning,
+    buildLocatorParams,
   };
 };

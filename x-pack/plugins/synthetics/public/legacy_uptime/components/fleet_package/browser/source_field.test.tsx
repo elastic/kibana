@@ -68,6 +68,9 @@ describe('<SourceField />', () => {
     render(<WrappedComponent />);
     const zipUrl = 'test.zip';
 
+    const zip = screen.getByTestId('syntheticsSourceTab__zipUrl');
+    fireEvent.click(zip);
+
     const zipUrlField = screen.getByTestId('syntheticsBrowserZipUrl');
     fireEvent.change(zipUrlField, { target: { value: zipUrl } });
 
@@ -79,6 +82,9 @@ describe('<SourceField />', () => {
   it('calls onBlur', () => {
     render(<WrappedComponent />);
 
+    const zip = screen.getByTestId('syntheticsSourceTab__zipUrl');
+    fireEvent.click(zip);
+
     const zipUrlField = screen.getByTestId('syntheticsBrowserZipUrl');
     fireEvent.click(zipUrlField);
     fireEvent.blur(zipUrlField);
@@ -86,7 +92,15 @@ describe('<SourceField />', () => {
     expect(onBlur).toBeCalledWith(ConfigKey.SOURCE_ZIP_URL);
   });
 
-  it('shows ZipUrl source type by default', async () => {
+  it('selects inline script by default', () => {
+    render(<WrappedComponent />);
+
+    expect(
+      screen.getByText('Runs Synthetic test scripts that are defined inline.')
+    ).toBeInTheDocument();
+  });
+
+  it('shows zip source type by default', async () => {
     render(<WrappedComponent />);
 
     expect(screen.getByTestId('syntheticsSourceTab__zipUrl')).toBeInTheDocument();
@@ -115,5 +129,14 @@ describe('<SourceField />', () => {
     fireEvent.click(zip);
 
     expect(getByText('Parameters')).toBeInTheDocument();
+  });
+
+  it('shows deprecated for zip url', () => {
+    const { getByText, getByTestId } = render(<WrappedComponent />);
+
+    const zip = getByTestId('syntheticsSourceTab__zipUrl');
+    fireEvent.click(zip);
+
+    expect(getByText('Zip URL is deprecated')).toBeInTheDocument();
   });
 });

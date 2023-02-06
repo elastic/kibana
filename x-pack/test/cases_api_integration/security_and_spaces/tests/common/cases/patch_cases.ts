@@ -30,14 +30,16 @@ import {
   createCase,
   createComment,
   updateCase,
-  getCaseUserActions,
   removeServerGeneratedPropertiesFromCase,
-  removeServerGeneratedPropertiesFromUserAction,
   findCases,
   superUserSpace1Auth,
   delay,
   calculateDuration,
 } from '../../../../common/lib/utils';
+import {
+  getCaseUserActions,
+  removeServerGeneratedPropertiesFromUserAction,
+} from '../../../../common/lib/user_actions';
 import {
   createSignalsIndex,
   deleteSignalsIndex,
@@ -506,8 +508,7 @@ export default ({ getService }: FtrProviderContext): void => {
       });
 
       it('400s if the title is too long', async () => {
-        const longTitle =
-          'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed nulla enim, rutrum sit amet euismod venenatis, blandit et massa. Nulla id consectetur enim.';
+        const longTitle = 'a'.repeat(161);
 
         const postedCase = await createCase(supertest, postCaseReq);
         await updateCase({

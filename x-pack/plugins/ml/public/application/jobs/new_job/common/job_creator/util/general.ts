@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 
-import { ES_FIELD_TYPES } from '@kbn/data-plugin/public';
+import { ES_FIELD_TYPES } from '@kbn/field-types';
 import { Job, Datafeed, Detector } from '../../../../../../../common/types/anomaly_detection_jobs';
 import { newJobCapsService } from '../../../../../services/new_job_capabilities/new_job_capabilities_service';
 import { NavigateToPath } from '../../../../../contexts/kibana';
@@ -20,6 +20,7 @@ import {
   DOC_COUNT,
   _DOC_COUNT,
 } from '../../../../../../../common/constants/field_types';
+import { ML_PAGES } from '../../../../../../../common/constants/locator';
 import {
   EVENT_RATE_FIELD_ID,
   Field,
@@ -92,11 +93,13 @@ export function createFieldOptions(fields: Field[], additionalFields: Field[]) {
       .filter((f) => f.id !== EVENT_RATE_FIELD_ID)
       .map((f) => ({
         label: f.name,
+        field: f,
       })),
     ...additionalFields
       .filter((f) => fields.some((f2) => f2.id === f.id) === false)
       .map((f) => ({
         label: f.id,
+        field: f,
       })),
   ].sort((a, b) => a.label.localeCompare(b.label));
 }
@@ -261,25 +264,25 @@ export function convertToMultiMetricJob(
   jobCreator.createdBy = CREATED_BY_LABEL.MULTI_METRIC;
   jobCreator.modelPlot = false;
   stashJobForCloning(jobCreator, true, true);
-  navigateToPath(`jobs/new_job/${JOB_TYPE.MULTI_METRIC}`, true);
+  navigateToPath(ML_PAGES.ANOMALY_DETECTION_CREATE_JOB_CONVERT_TO_MULTI_METRIC, true);
 }
 
 export function convertToAdvancedJob(jobCreator: JobCreatorType, navigateToPath: NavigateToPath) {
   jobCreator.createdBy = null;
   stashJobForCloning(jobCreator, true, true);
-  navigateToPath(`jobs/new_job/${JOB_TYPE.ADVANCED}`, true);
+  navigateToPath(ML_PAGES.ANOMALY_DETECTION_CREATE_JOB_CONVERT_TO_ADVANCED, true);
 }
 
 export function resetAdvancedJob(jobCreator: JobCreatorType, navigateToPath: NavigateToPath) {
   jobCreator.createdBy = null;
   stashJobForCloning(jobCreator, true, false);
-  navigateToPath('/jobs/new_job');
+  navigateToPath(ML_PAGES.ANOMALY_DETECTION_CREATE_JOB);
 }
 
 export function resetJob(jobCreator: JobCreatorType, navigateToPath: NavigateToPath) {
   jobCreator.jobId = '';
   stashJobForCloning(jobCreator, true, true);
-  navigateToPath('/jobs/new_job');
+  navigateToPath(ML_PAGES.ANOMALY_DETECTION_CREATE_JOB);
 }
 
 export function advancedStartDatafeed(
@@ -321,6 +324,10 @@ export function getJobCreatorTitle(jobCreator: JobCreatorType) {
     case JOB_TYPE.RARE:
       return i18n.translate('xpack.ml.newJob.wizard.jobCreatorTitle.rare', {
         defaultMessage: 'Rare',
+      });
+    case JOB_TYPE.GEO:
+      return i18n.translate('xpack.ml.newJob.wizard.jobCreatorTitle.geo', {
+        defaultMessage: 'Geo',
       });
     default:
       return '';

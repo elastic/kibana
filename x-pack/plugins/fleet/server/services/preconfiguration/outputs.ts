@@ -15,8 +15,9 @@ import type { FleetConfigType } from '../../config';
 import { DEFAULT_OUTPUT_ID, DEFAULT_OUTPUT } from '../../constants';
 import { outputService } from '../output';
 import { agentPolicyService } from '../agent_policy';
-
 import { appContextService } from '../app_context';
+
+import { isDifferent } from './utils';
 
 export function getPreconfiguredOutputFromConfig(config?: FleetConfigType) {
   const { outputs: outputsOrUndefined } = config;
@@ -78,7 +79,7 @@ export async function createOrUpdatePreconfiguredOutputs(
         config_yaml: configYaml ?? null,
         // Set value to null to update these fields on update
         ca_sha256: outputData.ca_sha256 ?? null,
-        ca_trusted_fingerprint: outputData.ca_sha256 ?? null,
+        ca_trusted_fingerprint: outputData.ca_trusted_fingerprint ?? null,
         ssl: outputData.ssl ?? null,
       };
 
@@ -151,17 +152,6 @@ export async function cleanPreconfiguredOutputs(
   }
 }
 
-function isDifferent(val1: any, val2: any) {
-  if (
-    (val1 === null || typeof val1 === 'undefined') &&
-    (val2 === null || typeof val2 === 'undefined')
-  ) {
-    return false;
-  }
-
-  return !isEqual(val1, val2);
-}
-
 function isPreconfiguredOutputDifferentFromCurrent(
   existingOutput: Output,
   preconfiguredOutput: Partial<Output>
@@ -187,6 +177,7 @@ function isPreconfiguredOutputDifferentFromCurrent(
       existingOutput.ca_trusted_fingerprint,
       preconfiguredOutput.ca_trusted_fingerprint
     ) ||
-    isDifferent(existingOutput.config_yaml, preconfiguredOutput.config_yaml)
+    isDifferent(existingOutput.config_yaml, preconfiguredOutput.config_yaml) ||
+    isDifferent(existingOutput.proxy_id, preconfiguredOutput.proxy_id)
   );
 }

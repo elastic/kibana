@@ -30,7 +30,7 @@ import {
   APP_USERS_PATH,
   APP_KUBERNETES_PATH,
   APP_LANDING_PATH,
-  APP_RESPONSE_ACTIONS_PATH,
+  APP_RESPONSE_ACTIONS_HISTORY_PATH,
   APP_ENTITY_ANALYTICS_PATH,
   APP_PATH,
 } from '../../../common/constants';
@@ -162,10 +162,10 @@ export const navTabs: SecurityNav = {
     disabled: false,
     urlKey: 'administration',
   },
-  [SecurityPageName.responseActions]: {
-    id: SecurityPageName.responseActions,
-    name: i18n.RESPONSE_ACTIONS,
-    href: APP_RESPONSE_ACTIONS_PATH,
+  [SecurityPageName.responseActionsHistory]: {
+    id: SecurityPageName.responseActionsHistory,
+    name: i18n.RESPONSE_ACTIONS_HISTORY,
+    href: APP_RESPONSE_ACTIONS_HISTORY_PATH,
     disabled: false,
     urlKey: 'administration',
   },
@@ -183,10 +183,6 @@ export const navTabs: SecurityNav = {
   },
   [SecurityPageName.cloudSecurityPostureBenchmarks]: {
     ...getSecuritySolutionCSPNavTab<SecurityPageName>('benchmarks', APP_PATH),
-    urlKey: 'administration',
-  },
-  [SecurityPageName.cloudSecurityPostureRules]: {
-    ...getSecuritySolutionCSPNavTab<SecurityPageName>('rules', APP_PATH),
     urlKey: 'administration',
   },
   [SecurityPageName.entityAnalytics]: {

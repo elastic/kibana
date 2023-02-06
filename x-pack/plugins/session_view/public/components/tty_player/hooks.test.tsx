@@ -10,7 +10,7 @@ import { useIOLines, useXtermPlayer, XtermPlayerDeps } from './hooks';
 import { ProcessEventsPage } from '../../../common/types/process_tree';
 import { DEFAULT_TTY_FONT_SIZE, DEFAULT_TTY_PLAYSPEED_MS } from '../../../common/constants';
 
-const VIM_LINE_START = 19;
+const VIM_LINE_START = 22;
 
 describe('TTYPlayer/hooks', () => {
   beforeAll(() => {
@@ -30,7 +30,7 @@ describe('TTYPlayer/hooks', () => {
       })),
     });
 
-    jest.useFakeTimers();
+    jest.useFakeTimers({ legacyFakeTimers: true });
   });
 
   describe('useIOLines', () => {
@@ -72,6 +72,7 @@ describe('TTYPlayer/hooks', () => {
         lines,
         hasNextPage: false,
         fetchNextPage: () => null,
+        isFetching: false,
         fontSize: DEFAULT_TTY_FONT_SIZE,
       };
     });
@@ -143,7 +144,7 @@ describe('TTYPlayer/hooks', () => {
       act(() => {
         jest.advanceTimersByTime(DEFAULT_TTY_PLAYSPEED_MS * 10);
       });
-      expect(result.current.currentLine).toBe(10); // should still be ten.
+      expect(result.current.currentLine).toBe(10); // should not have advanced
     });
 
     it('should stop when it reaches the end of the array of lines', async () => {
@@ -156,6 +157,54 @@ describe('TTYPlayer/hooks', () => {
         jest.advanceTimersByTime(DEFAULT_TTY_PLAYSPEED_MS * initialProps.lines.length + 100);
       });
       expect(result.current.currentLine).toBe(initialProps.lines.length - 1);
+    });
+
+    it('should not print the first line twice after playback starts', async () => {
+      const { result, rerender } = renderHook((props) => useXtermPlayer(props), {
+        initialProps,
+      });
+
+      rerender({ ...initialProps, isPlaying: true });
+      act(() => {
+        // advance render loop
+        jest.advanceTimersByTime(DEFAULT_TTY_PLAYSPEED_MS);
+      });
+      rerender({ ...initialProps, isPlaying: false });
+
+      expect(result.current.terminal.buffer.active.getLine(0)?.translateToString(true)).toBe('256');
+    });
+
+    it('ensure the first few render loops have printed the right lines', async () => {
+      const { result, rerender } = renderHook((props) => useXtermPlayer(props), {
+        initialProps,
+      });
+
+      const LOOPS = 6;
+
+      rerender({ ...initialProps, isPlaying: true });
+
+      act(() => {
+        // advance render loop
+        jest.advanceTimersByTime(DEFAULT_TTY_PLAYSPEED_MS * LOOPS);
+      });
+
+      rerender({ ...initialProps, isPlaying: false });
+
+      expect(result.current.terminal.buffer.active.getLine(0)?.translateToString(true)).toBe('256');
+      expect(result.current.terminal.buffer.active.getLine(1)?.translateToString(true)).toBe(',');
+      expect(result.current.terminal.buffer.active.getLine(2)?.translateToString(true)).toBe(
+        '                             Some Companies Puppet instance'
+      );
+      expect(result.current.terminal.buffer.active.getLine(3)?.translateToString(true)).toBe(
+        '             |  |    |       CentOS Stream release 8 on x86_64'
+      );
+      expect(result.current.terminal.buffer.active.getLine(4)?.translateToString(true)).toBe(
+        '  ***********************    Load average: 1.23, 1.01, 0.63'
+      );
+      expect(result.current.terminal.buffer.active.getLine(5)?.translateToString(true)).toBe(
+        '  ************************   '
+      );
+      expect(result.current.currentLine).toBe(LOOPS);
     });
 
     it('will allow a plain text search highlight on the last line printed', async () => {

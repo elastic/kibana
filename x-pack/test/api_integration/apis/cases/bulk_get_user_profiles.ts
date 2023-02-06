@@ -11,11 +11,11 @@ import { APP_ID as SECURITY_SOLUTION_APP_ID } from '@kbn/security-solution-plugi
 import { observabilityFeatureId as OBSERVABILITY_APP_ID } from '@kbn/observability-plugin/common';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
+import { deleteAllCaseItems } from '../../../cases_api_integration/common/lib/utils';
 import {
-  deleteAllCaseItems,
+  bulkGetUserProfiles,
   suggestUserProfiles,
-} from '../../../cases_api_integration/common/lib/utils';
-import { bulkGetUserProfiles } from '../../../cases_api_integration/common/lib/user_profiles';
+} from '../../../cases_api_integration/common/lib/user_profiles';
 import {
   casesAllUser,
   casesReadUser,

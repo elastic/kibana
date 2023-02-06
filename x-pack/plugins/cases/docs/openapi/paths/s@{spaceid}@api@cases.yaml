@@ -7,50 +7,15 @@ post:
     feature privileges, depending on the owner of the case you're creating.
   tags:
     - cases
-    - kibana
   parameters:
     - $ref: ../components/headers/kbn_xsrf.yaml
     - $ref: '../components/parameters/space_id.yaml'
   requestBody:
+    required: true
     content:
       application/json:
         schema:
-          type: object
-          properties:
-            connector:
-              description: An object that contains the connector configuration.
-              type: object
-              properties:
-                $ref: '../components/schemas/connector_properties.yaml'
-              required:
-                - fields
-                - id
-                - name
-                - type
-            description:
-              description: The description for the case.
-              type: string
-            owner:
-              $ref: '../components/schemas/owners.yaml'
-            settings:
-              $ref: '../components/schemas/settings.yaml'
-            severity:
-              $ref: '../components/schemas/severity_property.yaml'
-            tags:
-              description: The words and phrases that help categorize cases. It can be an empty array.
-              type: array
-              items:
-                type: string
-            title:
-              description: A title for the case.
-              type: string
-          required:
-            - connector
-            - description
-            - owner
-            - settings
-            - tags
-            - title
+          $ref: '../components/schemas/create_case_request.yaml'
         examples:
           createCaseRequest:
             $ref: '../components/examples/create_case_request.yaml'
@@ -58,14 +23,18 @@ post:
     '200':
       description: Indicates a successful call.
       content:
-         application/json; charset=utf-8:
+         application/json:
           schema:
-            type: object
-            properties:
-              $ref: '../components/schemas/case_response_properties.yaml'
+            $ref: '../components/schemas/case_response_properties.yaml'
           examples:
             createCaseResponse:
               $ref: '../components/examples/create_case_response.yaml'
+    '401':
+      description: Authorization information is missing or invalid.
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/4xx_response.yaml'
   servers:
      - url: https://localhost:5601
 
@@ -79,7 +48,6 @@ delete:
     depending on the owner of the cases you're deleting.
   tags:
     - cases
-    - kibana
   parameters:
     - $ref: ../components/headers/kbn_xsrf.yaml
     - $ref: '../components/parameters/space_id.yaml'
@@ -93,6 +61,12 @@ delete:
   responses:
     '204':
       description: Indicates a successful call.
+    '401':
+      description: Authorization information is missing or invalid.
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/4xx_response.yaml'
   servers:
     - url: https://localhost:5601
 
@@ -105,7 +79,6 @@ patch:
     feature privileges, depending on the owner of the case you're updating.
   tags:
     - cases
-    - kibana
   parameters:
     - $ref: ../components/headers/kbn_xsrf.yaml
     - $ref: '../components/parameters/space_id.yaml'
@@ -113,49 +86,7 @@ patch:
     content:
       application/json:
         schema:
-          type: object
-          properties:
-            cases:
-              type: array
-              items:
-                type: object
-                properties: 
-                  connector:
-                    description: An object that contains the connector configuration.
-                    type: object
-                    properties:
-                      $ref: '../components/schemas/connector_properties.yaml'
-                    required:
-                      - fields
-                      - id
-                      - name
-                      - type
-                  description:
-                    description: The description for the case.
-                    type: string
-                  id:
-                    description: The identifier for the case.
-                    type: string
-                  settings:
-                    $ref: '../components/schemas/settings.yaml'
-                  severity:
-                    $ref: '../components/schemas/severity_property.yaml' 
-                  status:
-                    $ref: '../components/schemas/status.yaml'
-                  tags:
-                    description: The words and phrases that help categorize cases.
-                    type: array
-                    items:
-                      type: string
-                  title:
-                    description: A title for the case.
-                    type: string
-                  version:
-                    description: The current version of the case.
-                    type: string
-                required:
-                  - id
-                  - version
+          $ref: '../components/schemas/update_case_request.yaml'
         examples:
           updateCaseRequest:
             $ref: '../components/examples/update_case_request.yaml'
@@ -163,14 +94,20 @@ patch:
     '200':
       description: Indicates a successful call.
       content:
-        application/json; charset=utf-8:
+        application/json:
           schema:
-            type: object
-            properties:
+            type: array
+            items:
               $ref: '../components/schemas/case_response_properties.yaml'
           examples:
             updateCaseResponse:
               $ref: '../components/examples/update_case_response.yaml'
+    '401':
+      description: Authorization information is missing or invalid.
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/4xx_response.yaml'
   servers:
         - url: https://localhost:5601
 

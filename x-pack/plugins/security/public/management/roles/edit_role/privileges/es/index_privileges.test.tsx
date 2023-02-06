@@ -100,3 +100,49 @@ test('it renders a IndexPrivilegeForm for each privilege on the role', async () 
   await flushPromises();
   expect(wrapper.find(IndexPrivilegeForm)).toHaveLength(1);
 });
+
+test('it renders fields as disabled when not editable', async () => {
+  const license = licenseMock.create();
+  license.getFeatures.mockReturnValue({
+    allowRoleFieldLevelSecurity: true,
+    allowRoleDocumentLevelSecurity: true,
+  } as any);
+
+  const indicesAPIClient = indicesAPIClientMock.create();
+  indicesAPIClient.getFields.mockResolvedValue(['foo']);
+
+  const props = {
+    role: {
+      name: '',
+      kibana: [],
+      elasticsearch: {
+        cluster: [],
+        indices: [
+          {
+            names: ['foo*'],
+            privileges: ['all'],
+            query: '*',
+            field_security: {
+              grant: ['some_field'],
+            },
+          },
+        ],
+        run_as: [],
+      },
+    },
+    onChange: jest.fn(),
+    indexPatterns: [],
+    editable: false,
+    validator: new RoleValidator(),
+    availableIndexPrivileges: ['all', 'read', 'write', 'index'],
+    indicesAPIClient,
+    license,
+  };
+  const wrapper = mountWithIntl(
+    <KibanaContextProvider services={coreMock.createStart()}>
+      <IndexPrivileges {...props} />
+    </KibanaContextProvider>
+  );
+  await flushPromises();
+  expect(wrapper.find('IndexPrivilegeForm').prop('isRoleReadOnly')).toBe(true);
+});

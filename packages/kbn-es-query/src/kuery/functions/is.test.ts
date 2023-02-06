@@ -206,6 +206,44 @@ describe('kuery functions', () => {
         expect(result).toEqual(expected);
       });
 
+      test('should create a wildcard query for keyword fields', () => {
+        const expected = {
+          bool: {
+            should: [
+              {
+                wildcard: {
+                  'machine.os.keyword': { value: 'win*' },
+                },
+              },
+            ],
+            minimum_should_match: 1,
+          },
+        };
+        const node = nodeTypes.function.buildNode('is', 'machine.os.keyword', 'win*');
+        const result = is.toElasticsearchQuery(node, indexPattern);
+
+        expect(result).toEqual(expected);
+      });
+
+      test('should create a case-insensitive wildcard query for keyword fields', () => {
+        const expected = {
+          bool: {
+            should: [
+              {
+                wildcard: {
+                  'machine.os.keyword': { value: 'win*', case_insensitive: true },
+                },
+              },
+            ],
+            minimum_should_match: 1,
+          },
+        };
+        const node = nodeTypes.function.buildNode('is', 'machine.os.keyword', 'win*');
+        const result = is.toElasticsearchQuery(node, indexPattern, { caseInsensitive: true });
+
+        expect(result).toEqual(expected);
+      });
+
       test('should support scripted fields', () => {
         const node = nodeTypes.function.buildNode('is', 'script string', 'foo');
         const result = is.toElasticsearchQuery(node, indexPattern);
@@ -341,6 +379,40 @@ describe('kuery functions', () => {
         const result = is.toElasticsearchQuery(node, indexPattern, { nestedIgnoreUnmapped: true });
 
         expect(result).toEqual(expected);
+      });
+
+      test('should use a term query for keyword fields', () => {
+        const node = nodeTypes.function.buildNode('is', 'machine.os.keyword', 'Win 7');
+        const result = is.toElasticsearchQuery(node, indexPattern);
+        expect(result).toEqual({
+          bool: {
+            should: [
+              {
+                term: {
+                  'machine.os.keyword': { value: 'Win 7' },
+                },
+              },
+            ],
+            minimum_should_match: 1,
+          },
+        });
+      });
+
+      test('should use a case-insensitive term query for keyword fields', () => {
+        const node = nodeTypes.function.buildNode('is', 'machine.os.keyword', 'Win 7');
+        const result = is.toElasticsearchQuery(node, indexPattern, { caseInsensitive: true });
+        expect(result).toEqual({
+          bool: {
+            should: [
+              {
+                term: {
+                  'machine.os.keyword': { value: 'Win 7', case_insensitive: true },
+                },
+              },
+            ],
+            minimum_should_match: 1,
+          },
+        });
       });
     });
   });

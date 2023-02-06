@@ -5,14 +5,40 @@
  * 2.0.
  */
 
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import { Rule, RuleSummary, RuleType } from '../../../../types';
+
+export const getMockLogResponse = () => {
+  return {
+    id: uuidv4(),
+    timestamp: '2022-03-20T07:40:44-07:00',
+    duration: 5000000,
+    status: 'success',
+    message: 'rule execution #1',
+    version: '8.2.0',
+    num_active_alerts: 2,
+    num_new_alerts: 4,
+    num_recovered_alerts: 3,
+    num_triggered_actions: 10,
+    num_succeeded_actions: 0,
+    num_errored_actions: 4,
+    total_search_duration: 1000000,
+    es_search_duration: 1400000,
+    schedule_delay: 2000000,
+    timed_out: false,
+  };
+};
+
+export const mockLogResponse: any = {
+  data: [getMockLogResponse(), getMockLogResponse(), getMockLogResponse(), getMockLogResponse()],
+  total: 4,
+};
 
 export function mockRule(overloads: Partial<Rule> = {}): Rule {
   return {
-    id: uuid.v4(),
+    id: uuidv4(),
     enabled: true,
-    name: `rule-${uuid.v4()}`,
+    name: `rule-${uuidv4()}`,
     tags: [],
     ruleTypeId: '.noop',
     consumer: 'consumer',
@@ -75,6 +101,7 @@ export function mockRuleSummary(overloads: Partial<RuleSummary> = {}): RuleSumma
         status: 'OK',
         muted: false,
         actionGroupId: 'testActionGroup',
+        flapping: false,
       },
     },
     executionDuration: {

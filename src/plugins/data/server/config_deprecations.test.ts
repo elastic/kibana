@@ -64,4 +64,87 @@ describe('Config Deprecations', () => {
       ]
     `);
   });
+
+  test('reports about old, no longer used configs', () => {
+    const config = {
+      data: {
+        search: {
+          sessions: {
+            enabled: false,
+            pageSize: 1000,
+            trackingInterval: '30s',
+            cleanupInterval: '30s',
+            expireInterval: '30s',
+            monitoringTaskTimeout: '30s',
+            notTouchedInProgressTimeout: '30s',
+          },
+        },
+      },
+    };
+    const { messages, migrated } = applyConfigDeprecations(cloneDeep(config));
+    expect(migrated).toMatchInlineSnapshot(`
+      Object {
+        "data": Object {
+          "search": Object {
+            "sessions": Object {
+              "enabled": false,
+            },
+          },
+        },
+      }
+    `);
+    expect(messages).toMatchInlineSnapshot(`
+      Array [
+        "You no longer need to configure \\"data.search.sessions.pageSize\\".",
+        "You no longer need to configure \\"data.search.sessions.trackingInterval\\".",
+        "You no longer need to configure \\"data.search.sessions.cleanupInterval\\".",
+        "You no longer need to configure \\"data.search.sessions.expireInterval\\".",
+        "You no longer need to configure \\"data.search.sessions.monitoringTaskTimeout\\".",
+        "You no longer need to configure \\"data.search.sessions.notTouchedInProgressTimeout\\".",
+      ]
+    `);
+  });
+
+  test('reports about old, no longer used configs from xpack.data_enhanced', () => {
+    const config = {
+      xpack: {
+        data_enhanced: {
+          search: {
+            sessions: {
+              enabled: false,
+              pageSize: 1000,
+              trackingInterval: '30s',
+              cleanupInterval: '30s',
+              expireInterval: '30s',
+              monitoringTaskTimeout: '30s',
+              notTouchedInProgressTimeout: '30s',
+            },
+          },
+        },
+      },
+    };
+    const { messages, migrated } = applyConfigDeprecations(cloneDeep(config));
+    expect(migrated).toMatchInlineSnapshot(`
+      Object {
+        "data": Object {
+          "search": Object {
+            "sessions": Object {
+              "enabled": false,
+            },
+          },
+        },
+      }
+    `);
+    expect(messages).toMatchInlineSnapshot(`
+      Array [
+        "Setting \\"xpack.data_enhanced.search.sessions\\" has been replaced by \\"data.search.sessions\\"",
+        "You no longer need to configure \\"data.search.sessions.pageSize\\".",
+        "You no longer need to configure \\"data.search.sessions.trackingInterval\\".",
+        "You no longer need to configure \\"data.search.sessions.cleanupInterval\\".",
+        "You no longer need to configure \\"data.search.sessions.expireInterval\\".",
+        "You no longer need to configure \\"data.search.sessions.monitoringTaskTimeout\\".",
+        "You no longer need to configure \\"data.search.sessions.notTouchedInProgressTimeout\\".",
+      ]
+    `);
+  });
 });

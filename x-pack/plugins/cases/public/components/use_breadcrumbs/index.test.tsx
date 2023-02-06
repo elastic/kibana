@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { ReactNode } from 'react';
+import type { ReactNode } from 'react';
+import React from 'react';
 import { renderHook } from '@testing-library/react-hooks';
 import { TestProviders } from '../../common/mock';
 import { useCasesBreadcrumbs, useCasesTitleBreadcrumbs } from '.';

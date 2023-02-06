@@ -20,10 +20,10 @@ import type { ConfigType } from '../../../../config';
 import type { AlertAttributes } from '../../signals/types';
 import { createRuleMock } from './rule';
 import { listMock } from '@kbn/lists-plugin/server/mocks';
-import type { QueryRuleParams, RuleParams } from '../../schemas/rule_schemas';
+import type { QueryRuleParams, RuleParams } from '../../rule_schema';
 // this is only used in tests
 import { createDefaultAlertExecutorOptions } from '@kbn/rule-registry-plugin/server/utils/rule_executor.test_helpers';
-import { getCompleteRuleMock } from '../../schemas/rule_schemas.mock';
+import { getCompleteRuleMock } from '../../rule_schema/mocks';
 
 export const createRuleTypeMocks = (
   ruleType: string = 'query',
@@ -76,7 +76,10 @@ export const createRuleTypeMocks = (
     scopedClusterClient: elasticsearchServiceMock.createScopedClusterClient(),
     alertFactory: {
       create: jest.fn(() => ({ scheduleActions })),
-      hasReachedAlertLimit: () => false,
+      alertLimit: {
+        getValue: jest.fn(() => 1000),
+        setLimitReached: jest.fn(() => {}),
+      },
       done: jest.fn().mockResolvedValue({}),
     },
     findAlerts: jest.fn(), // TODO: does this stay?
@@ -111,6 +114,7 @@ export const createRuleTypeMocks = (
           params,
           alertId: v4(),
           state: {},
+          logger: loggerMock,
         }),
         runOpts: {
           completeRule: getCompleteRuleMock(params as QueryRuleParams),

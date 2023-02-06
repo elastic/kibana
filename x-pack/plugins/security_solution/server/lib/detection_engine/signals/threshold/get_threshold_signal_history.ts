@@ -7,6 +7,7 @@
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { IRuleDataReader } from '@kbn/rule-registry-plugin/server';
+import { ALERT_RULE_UUID } from '@kbn/rule-data-utils';
 import type { ThresholdSignalHistory } from '../types';
 import { buildThresholdSignalHistory } from './build_signal_history';
 import { createErrorsFromShard } from '../utils';
@@ -14,7 +15,7 @@ import { createErrorsFromShard } from '../utils';
 interface GetThresholdSignalHistoryParams {
   from: string;
   to: string;
-  ruleId: string;
+  frameworkRuleId: string;
   bucketByFields: string[];
   ruleDataReader: IRuleDataReader;
 }
@@ -22,7 +23,7 @@ interface GetThresholdSignalHistoryParams {
 export const getThresholdSignalHistory = async ({
   from,
   to,
-  ruleId,
+  frameworkRuleId,
   bucketByFields,
   ruleDataReader,
 }: GetThresholdSignalHistoryParams): Promise<{
@@ -32,7 +33,7 @@ export const getThresholdSignalHistory = async ({
   const request = buildPreviousThresholdAlertRequest({
     from,
     to,
-    ruleId,
+    frameworkRuleId,
     bucketByFields,
   });
 
@@ -48,19 +49,19 @@ export const getThresholdSignalHistory = async ({
 export const buildPreviousThresholdAlertRequest = ({
   from,
   to,
-  ruleId,
+  frameworkRuleId,
   bucketByFields,
 }: {
   from: string;
   to: string;
-  ruleId: string;
+  frameworkRuleId: string;
   bucketByFields: string[];
 }): estypes.SearchRequest => {
   return {
-    size: 10000,
     // We should switch over to @elastic/elasticsearch/lib/api/types instead of typesWithBodyKey where possible,
     // but api/types doesn't have a complete type for `sort`
     body: {
+      size: 10000,
       sort: [
         {
           '@timestamp': 'desc',
@@ -80,7 +81,7 @@ export const buildPreviousThresholdAlertRequest = ({
             },
             {
               term: {
-                'signal.rule.rule_id': ruleId,
+                [ALERT_RULE_UUID]: frameworkRuleId,
               },
             },
             // We might find a signal that was generated on the interval for old data... make sure to exclude those.

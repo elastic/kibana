@@ -8,13 +8,13 @@
 
 import React from 'react';
 import moment from 'moment';
+import EventEmitter from 'events';
 import { i18n } from '@kbn/i18n';
 import { EuiBetaBadgeProps } from '@elastic/eui';
 import { parse } from 'query-string';
 
 import { Capabilities } from '@kbn/core/public';
 import { TopNavMenuData } from '@kbn/navigation-plugin/public';
-import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import {
   showSaveModal,
   SavedObjectSaveModalOrigin,
@@ -28,12 +28,7 @@ import {
 import { unhashUrl } from '@kbn/kibana-utils-plugin/public';
 import { EmbeddableStateTransfer } from '@kbn/embeddable-plugin/public';
 import { saveVisualization } from '../../utils/saved_visualize_utils';
-import {
-  VISUALIZE_EMBEDDABLE_TYPE,
-  VisualizeInput,
-  getFullPath,
-  NavigateToLensContext,
-} from '../..';
+import { VISUALIZE_EMBEDDABLE_TYPE, VisualizeInput, getFullPath } from '../..';
 
 import {
   VisualizeServices,
@@ -44,7 +39,7 @@ import { VisualizeConstants } from '../../../common/constants';
 import { getEditBreadcrumbs } from './breadcrumbs';
 import { VISUALIZE_APP_LOCATOR, VisualizeLocatorParams } from '../../../common/locator';
 import { getUiActions } from '../../services';
-import { VISUALIZE_EDITOR_TRIGGER } from '../../triggers';
+import { VISUALIZE_EDITOR_TRIGGER, AGG_BASED_VISUALIZATION_TRIGGER } from '../../triggers';
 import { getVizEditorOriginatingAppUrl } from './utils';
 
 import './visualize_navigation.scss';
@@ -70,11 +65,11 @@ export interface TopNavConfigParams {
   visualizationIdFromUrl?: string;
   stateTransfer: EmbeddableStateTransfer;
   embeddableId?: string;
-  editInLensConfig?: NavigateToLensContext | null;
   displayEditInLensItem: boolean;
   hideLensBadge: () => void;
   setNavigateToLens: (flag: boolean) => void;
   showBadge: boolean;
+  eventEmitter?: EventEmitter;
 }
 
 const SavedObjectSaveModalDashboard = withSuspense(LazySavedObjectSaveModalDashboard);
@@ -101,11 +96,11 @@ export const getTopNavConfig = (
     visualizationIdFromUrl,
     stateTransfer,
     embeddableId,
-    editInLensConfig,
     displayEditInLensItem,
     hideLensBadge,
     setNavigateToLens,
     showBadge,
+    eventEmitter,
   }: TopNavConfigParams,
   {
     data,
@@ -294,7 +289,6 @@ export const getTopNavConfig = (
               defaultMessage: 'Go to Lens with your current configuration',
             }),
             className: 'visNavItem__goToLens',
-            disableButton: !editInLensConfig,
             testId: 'visualizeEditInLensButton',
             ...(showBadge && {
               badge: {
@@ -305,17 +299,30 @@ export const getTopNavConfig = (
               },
             }),
             run: async () => {
+              // lens doesn't support saved searches, should unlink before transition
+              if (eventEmitter && visInstance.vis.data.savedSearchId) {
+                eventEmitter.emit('unlinkFromSavedSearch', false);
+              }
+              const navigateToLensConfig = await visInstance.vis.type.navigateToLens?.(
+                vis,
+                data.query.timefilter.timefilter
+              );
               const updatedWithMeta = {
-                ...editInLensConfig,
-                savedObjectId: visInstance.vis.id,
+                ...navigateToLensConfig,
                 embeddableId,
                 vizEditorOriginatingAppUrl: getVizEditorOriginatingAppUrl(history),
                 originatingApp,
               };
-              if (editInLensConfig) {
+              if (navigateToLensConfig) {
                 hideLensBadge();
                 setNavigateToLens(true);
-                getUiActions().getTrigger(VISUALIZE_EDITOR_TRIGGER).exec(updatedWithMeta);
+                getUiActions()
+                  .getTrigger(
+                    visInstance.vis.type.group === 'aggbased'
+                      ? AGG_BASED_VISUALIZATION_TRIGGER
+                      : VISUALIZE_EDITOR_TRIGGER
+                  )
+                  .exec(updatedWithMeta);
               }
             },
           },
@@ -590,18 +597,7 @@ export const getTopNavConfig = (
                 );
               }
 
-              const WrapperComponent = ({ children }: { children?: React.ReactNode }) => {
-                const ContextProvider = !originatingApp
-                  ? presentationUtil.ContextProvider
-                  : React.Fragment;
-                return (
-                  <KibanaThemeProvider theme$={theme.theme$}>
-                    <ContextProvider>{children}</ContextProvider>
-                  </KibanaThemeProvider>
-                );
-              };
-
-              showSaveModal(saveModal, I18nContext, WrapperComponent);
+              showSaveModal(saveModal, presentationUtil.ContextProvider);
             },
           },
         ]

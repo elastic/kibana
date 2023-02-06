@@ -1,19 +1,22 @@
 {
   "extends": "../../../tsconfig.base.json",
   "compilerOptions": {
-    "outDir": "./target/types",
-    "emitDeclarationOnly": true,
-    "declaration": true,
-    "declarationMap": true
+    "outDir": "target/types",
   },
   "include": [
     "public/**/*",
   ],
-  "references": [
-    { "path": "../../../src/core/tsconfig.json" },
-    { "path": "../../../src/plugins/embeddable/tsconfig.json" },
-    { "path": "../../../src/plugins/kibana_react/tsconfig.json" },
-    { "path": "../../../src/plugins/ui_actions/tsconfig.json" },
-    { "path": "../../../src/plugins/ui_actions_enhanced/tsconfig.json" },
+  "kbn_references": [
+    "@kbn/core",
+    "@kbn/embeddable-plugin",
+    "@kbn/ui-actions-plugin",
+    "@kbn/ui-actions-enhanced-plugin",
+    "@kbn/i18n",
+    "@kbn/kibana-utils-plugin",
+    "@kbn/data-plugin",
+    "@kbn/utility-types",
+  ],
+  "exclude": [
+    "target/**/*",
   ]
 }

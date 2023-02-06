@@ -9,9 +9,13 @@
 import Path from 'path';
 import fs from 'fs/promises';
 import JSON5 from 'json5';
-import * as kbnTestServer from '../../../../test_helpers/kbn_server';
+import {
+  createTestServers,
+  createRootWithCorePlugins,
+  type TestElasticsearchUtils,
+} from '@kbn/core-test-helpers-kbn-server';
 import { retryAsync } from '@kbn/core-saved-objects-migration-server-mocks';
-import { Root } from '../../../root';
+import { Root } from '@kbn/core-root-server-internal';
 
 const logFilePath = Path.join(__dirname, 'batch_size_bytes_exceeds_es_content_length.log');
 
@@ -21,16 +25,16 @@ async function removeLogFile() {
 }
 
 describe('migration v2', () => {
-  let esServer: kbnTestServer.TestElasticsearchUtils;
+  let esServer: TestElasticsearchUtils;
   let root: Root;
-  let startES: () => Promise<kbnTestServer.TestElasticsearchUtils>;
+  let startES: () => Promise<TestElasticsearchUtils>;
 
   beforeAll(async () => {
     await removeLogFile();
   });
 
   beforeEach(() => {
-    ({ startES } = kbnTestServer.createTestServers({
+    ({ startES } = createTestServers({
       adjustTimeout: (t: number) => jest.setTimeout(t),
       settings: {
         es: {
@@ -84,7 +88,7 @@ describe('migration v2', () => {
 });
 
 function createRoot(options: { maxBatchSizeBytes?: number }) {
-  return kbnTestServer.createRootWithCorePlugins(
+  return createRootWithCorePlugins(
     {
       migrations: {
         skip: false,

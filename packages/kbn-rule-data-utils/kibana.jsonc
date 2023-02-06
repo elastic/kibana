@@ -1,0 +1,9 @@
+{
+  "type": "shared-common",
+  "id": "@kbn/rule-data-utils",
+  "owner": [
+    "@elastic/security-detections-response",
+    "@elastic/actionable-observability",
+    "@elastic/response-ops"
+  ]
+}

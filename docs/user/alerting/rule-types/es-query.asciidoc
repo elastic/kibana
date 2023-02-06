@@ -1,6 +1,5 @@
 [[rule-type-es-query]]
-[role="xpack"]
-=== {es} query
+== {es} query
 
 The {es} query rule type runs a user-configured query, compares the number of 
 matches to a configured threshold, and schedules actions to run when the 
@@ -8,40 +7,40 @@ threshold condition is met.
 
 
 [float]
-==== Create the rule
+=== Create the rule
 
 Fill in the <<defining-rules-general-details, rule details>>, then select 
-*{es} query*.
-
+*{es} query*. {es} query rule can be defined using KQL/Lucene or Query DSL.
 
 [float]
-==== Define the conditions
+=== Define the conditions
 
 Define properties to detect the condition.
 
 [role="screenshot"]
-image::user/alerting/images/rule-types-es-query-conditions.png[Five clauses define the condition to detect]
+image::user/alerting/images/rule-types-es-query-conditions.png[Eight clauses define the condition to detect]
 
 Index:: Specifies an *index or data view* and a *time field* that is used for 
 the *time window*.
-Size:: Specifies the number of documents to pass to the configured actions when 
-the threshold condition is met.
-{es} query:: Specifies the ES DSL query. The number of documents that 
-match this query is evaluated against the threshold condition. Only the `query`, `fields` and `runtime_mappings`
-fields are used, other DSL fields are not considered. 
+{es} query:: Specifies the ES DSL query. Only the `query`, `fields`, `_source` and `runtime_mappings` fields are used, other DSL fields are not considered.
+When:: Specifies how the value to be compared to the threshold is calculated. The value is calculated by aggregating a numeric field within the *time window*. The aggregation options are: `count`, `average`, `sum`, `min`, and `max`. When using `count` the document count is used and an aggregation field is not necessary. 
+Over or Grouped Over:: Specifies whether the aggregation is applied over all documents or split into groups using a grouping field. If grouping is used, an <<alerting-concepts-alerts,alert>> will be created for each group when it meets the condition. To limit the number of alerts on high cardinality fields, you must specify the number of groups to check against the threshold. Only the *top* groups are checked.
 Threshold:: Defines a threshold value and a comparison operator  (`is above`, 
-`is above or equals`, `is below`, `is below or equals`, or `is between`). The 
-number of documents that match the specified query is compared to this 
-threshold.
+`is above or equals`, `is below`, `is below or equals`, or `is between`). The value
+calculated by the aggregation is compared to this threshold.
 Time window:: Defines how far back to search for documents, using the 
 *time field* set in the *index* clause. Generally this value should be set to a 
 value higher than the *check every* value in the 
 <<defining-rules-general-details, general rule details>>, to avoid gaps in 
-detection. 
-
+detection.
+Size:: Specifies the number of documents to pass to the configured actions when 
+the threshold condition is met.
+Exclude matches from previous run:: Turn on to avoid alert duplication by
+excluding documents that have already been detected by the previous rule run. This
+option is not available when a grouping field is specified.
 
 [float]
-==== Add action variables
+=== Add action variables
 
 <<defining-rules-actions-details, Add an action>> to run when the rule condition 
 is met. The following variables are specific to the {es} query rule. You can 
@@ -108,7 +107,7 @@ Labels:
 --
 
 [float]
-==== Test your query
+=== Test your query
 
 Use the *Test query* feature to verify that your query DSL is valid.
 
@@ -124,11 +123,12 @@ image::user/alerting/images/rule-types-es-query-valid.png[Test {es} query return
 image::user/alerting/images/rule-types-es-query-invalid.png[Test {es} query shows error when invalid]
 
 [float]
-==== Handling multiple matches of the same document
+=== Handling multiple matches of the same document
 
-This rule type checks for duplication of document matches across multiple runs.
-If you configure the rule with a schedule interval smaller than the time window,
-and a document matches a query in multiple runs, it is alerted on only once.
+By default, *Exclude matches from previous run* is turned on and the rule checks
+for duplication of document matches across multiple runs. If you configure the
+rule with a schedule interval smaller than the time window and a document
+matches a query in multiple runs, it is alerted on only once.
 
 The rule uses the timestamp of the matches to avoid alerting on the same match 
 multiple times. The timestamp of the latest match is used for evaluating the 

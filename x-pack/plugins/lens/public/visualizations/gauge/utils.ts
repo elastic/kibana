@@ -5,7 +5,7 @@
  * 2.0.
  */
 import type { Accessors } from '@kbn/expression-gauge-plugin/common';
-import { GaugeVisualizationState } from './constants';
+import type { GaugeVisualizationState } from './constants';
 
 export const getAccessorsFromState = (state?: GaugeVisualizationState): Accessors | undefined => {
   const { minAccessor, maxAccessor, goalAccessor, metricAccessor } = state ?? {};

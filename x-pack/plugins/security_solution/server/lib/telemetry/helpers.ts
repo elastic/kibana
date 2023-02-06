@@ -9,7 +9,8 @@ import moment from 'moment';
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import type { PackagePolicy } from '@kbn/fleet-plugin/common/types/models/package_policy';
 import { merge } from 'lodash';
-import { copyAllowlistedFields, exceptionListAllowlistFields } from './filterlists';
+import type { Logger } from '@kbn/core/server';
+import { copyAllowlistedFields, filterList } from './filterlists';
 import type { PolicyConfig, PolicyData } from '../../../common/endpoint/types';
 import type {
   ExceptionListItem,
@@ -21,6 +22,7 @@ import type {
   ValueListExceptionListResponseAggregation,
   ValueListItemsResponseAggregation,
   ValueListIndicatorMatchResponseAggregation,
+  TaskMetric,
 } from './types';
 import {
   LIST_DETECTION_RULE_EXCEPTION,
@@ -189,7 +191,7 @@ export const templateExceptionList = (
 
     // cast exception list type to a TelemetryEvent for allowlist filtering
     const filteredListItem = copyAllowlistedFields(
-      exceptionListAllowlistFields,
+      filterList.exceptionLists,
       item as unknown as TelemetryEvent
     );
 
@@ -266,3 +268,33 @@ export const metricsResponseToValueListMetaData = ({
   used_in_indicator_match_rule_count:
     indicatorMatchMetricsResponse?.aggregations?.vl_used_in_indicator_match_rule_count?.value ?? 0,
 });
+
+export let isElasticCloudDeployment = false;
+export const setIsElasticCloudDeployment = (value: boolean) => {
+  isElasticCloudDeployment = value;
+};
+
+export const tlog = (logger: Logger, message: string) => {
+  if (isElasticCloudDeployment) {
+    logger.info(message);
+  } else {
+    logger.debug(message);
+  }
+};
+
+export const createTaskMetric = (
+  name: string,
+  passed: boolean,
+  startTime: number,
+  errorMessage?: string
+): TaskMetric => {
+  const endTime = Date.now();
+  return {
+    name,
+    passed,
+    time_executed_in_ms: endTime - startTime,
+    start_time: startTime,
+    end_time: endTime,
+    error_message: errorMessage,
+  };
+};

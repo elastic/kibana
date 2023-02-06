@@ -100,6 +100,7 @@ export function toElasticsearchQuery(
   }
 
   const queries = fields!.reduce((accumulator: any, field: DataViewFieldBase) => {
+    const isKeywordField = field.esTypes?.length === 1 && field.esTypes.includes('keyword');
     const wrapWithNestedQuery = (query: any) => {
       // Wildcards can easily include nested and non-nested fields. There isn't a good way to let
       // users handle this themselves so we automatically add nested queries in this scenario.
@@ -142,15 +143,25 @@ export function toElasticsearchQuery(
         }),
       ];
     } else if (wildcard.isNode(valueArg)) {
-      return [
-        ...accumulator,
-        wrapWithNestedQuery({
-          query_string: {
-            fields: [field.name],
-            query: wildcard.toQueryStringQuery(valueArg),
-          },
-        }),
-      ];
+      const query = isKeywordField
+        ? {
+            wildcard: {
+              [field.name]: {
+                value,
+                ...(typeof config.caseInsensitive === 'boolean' && {
+                  case_insensitive: config.caseInsensitive,
+                }),
+              },
+            },
+          }
+        : {
+            query_string: {
+              fields: [field.name],
+              query: wildcard.toQueryStringQuery(valueArg),
+            },
+          };
+
+      return [...accumulator, wrapWithNestedQuery(query)];
     } else if (field.type === 'date') {
       /*
       If we detect that it's a date field and the user wants an exact date, we need to convert the query to both >= and <= the value provided to force a range query. This is because match and match_phrase queries do not accept a timezone parameter.
@@ -167,6 +178,20 @@ export function toElasticsearchQuery(
               gte: value,
               lte: value,
               ...timeZoneParam,
+            },
+          },
+        }),
+      ];
+    } else if (isKeywordField) {
+      return [
+        ...accumulator,
+        wrapWithNestedQuery({
+          term: {
+            [field.name]: {
+              value,
+              ...(typeof config.caseInsensitive === 'boolean' && {
+                case_insensitive: config.caseInsensitive,
+              }),
             },
           },
         }),

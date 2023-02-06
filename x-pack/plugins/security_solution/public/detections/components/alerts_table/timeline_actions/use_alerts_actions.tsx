@@ -8,16 +8,17 @@
 import { useCallback } from 'react';
 import { useDispatch } from 'react-redux';
 
-import { useBulkActionItems } from '@kbn/timelines-plugin/public';
+import type { AlertWorkflowStatus } from '../../../../common/types';
+import { useBulkActionItems } from '../../../../common/components/toolbar/bulk_actions/use_bulk_action_items';
+import { getScopedActions } from '../../../../helpers';
 import type { Status } from '../../../../../common/detection_engine/schemas/common/schemas';
-import { timelineActions } from '../../../../timelines/store/timeline';
 import { useAlertsPrivileges } from '../../../containers/detection_engine/alerts/use_alerts_privileges';
 import type { SetEventsDeletedProps, SetEventsLoadingProps } from '../types';
 interface Props {
   alertStatus?: Status;
   closePopover: () => void;
   eventId: string;
-  timelineId: string;
+  scopeId: string;
   indexName: string;
   refetch?: () => void;
 }
@@ -26,7 +27,7 @@ export const useAlertsActions = ({
   alertStatus,
   closePopover,
   eventId,
-  timelineId,
+  scopeId,
   indexName,
   refetch,
 }: Props) => {
@@ -40,29 +41,33 @@ export const useAlertsActions = ({
     }
   }, [closePopover, refetch]);
 
+  const scopedActions = getScopedActions(scopeId);
   const setEventsLoading = useCallback(
     ({ eventIds, isLoading }: SetEventsLoadingProps) => {
-      dispatch(timelineActions.setEventsLoading({ id: timelineId, eventIds, isLoading }));
+      if (scopedActions) {
+        dispatch(scopedActions.setEventsLoading({ id: scopeId, eventIds, isLoading }));
+      }
     },
-    [dispatch, timelineId]
+    [dispatch, scopeId, scopedActions]
   );
 
   const setEventsDeleted = useCallback(
     ({ eventIds, isDeleted }: SetEventsDeletedProps) => {
-      dispatch(timelineActions.setEventsDeleted({ id: timelineId, eventIds, isDeleted }));
+      if (scopedActions) {
+        dispatch(scopedActions.setEventsDeleted({ id: scopeId, eventIds, isDeleted }));
+      }
     },
-    [dispatch, timelineId]
+    [dispatch, scopeId, scopedActions]
   );
 
   const actionItems = useBulkActionItems({
     eventIds: [eventId],
-    currentStatus: alertStatus,
+    currentStatus: alertStatus as AlertWorkflowStatus,
     indexName,
     setEventsLoading,
     setEventsDeleted,
     onUpdateSuccess: onStatusUpdate,
     onUpdateFailure: onStatusUpdate,
-    timelineId,
   });
 
   return {

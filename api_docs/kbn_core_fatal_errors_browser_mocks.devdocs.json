@@ -32,6 +32,7 @@
         "description": [],
         "path": "packages/core/fatal-errors/core-fatal-errors-browser-mocks/src/fatal_errors_service.mock.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-fatal-errors-browser-mocks",
@@ -45,6 +46,7 @@
             ],
             "path": "packages/core/fatal-errors/core-fatal-errors-browser-mocks/src/fatal_errors_service.mock.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "returnComment": [],
             "children": []
           },
@@ -57,11 +59,18 @@
             "description": [],
             "signature": [
               "() => jest.Mocked<",
-              "FatalErrorsSetup",
+              {
+                "pluginId": "@kbn/core-fatal-errors-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreFatalErrorsBrowserPluginApi",
+                "section": "def-common.FatalErrorsSetup",
+                "text": "FatalErrorsSetup"
+              },
               ">"
             ],
             "path": "packages/core/fatal-errors/core-fatal-errors-browser-mocks/src/fatal_errors_service.mock.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "returnComment": [],
             "children": []
           },
@@ -74,11 +83,18 @@
             "description": [],
             "signature": [
               "() => jest.Mocked<",
-              "FatalErrorsSetup",
+              {
+                "pluginId": "@kbn/core-fatal-errors-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreFatalErrorsBrowserPluginApi",
+                "section": "def-common.FatalErrorsSetup",
+                "text": "FatalErrorsSetup"
+              },
               ">"
             ],
             "path": "packages/core/fatal-errors/core-fatal-errors-browser-mocks/src/fatal_errors_service.mock.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "returnComment": [],
             "children": []
           }

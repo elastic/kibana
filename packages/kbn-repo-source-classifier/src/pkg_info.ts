@@ -13,4 +13,6 @@ export interface PkgInfo {
   rel: string;
   /** Absolute path to the package directory */
   pkgDir: string;
+  /** Is the package a bazel package? If false, then the package is a "synthetic" plugin package */
+  isBazelPackage: boolean;
 }

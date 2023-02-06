@@ -24,8 +24,11 @@ export type {
   PackagePolicyPackage,
   Output,
   DownloadSource,
+  FleetServerHost,
+  FleetProxy,
   DataStream,
   Settings,
+  ActionStatus,
   CurrentUpgrade,
   GetFleetStatusResponse,
   GetAgentPoliciesRequest,
@@ -99,6 +102,7 @@ export type {
   RegistryVarsEntry,
   RegistryInput,
   RegistryStream,
+  RegistryStreamWithDataStream,
   RegistryPolicyTemplate,
   PackageList,
   PackageListItem,
@@ -126,6 +130,8 @@ export type {
   PostDownloadSourceRequest,
   PutDownloadSourceRequest,
   GetAvailableVersionsResponse,
+  PostHealthCheckRequest,
+  PostHealthCheckResponse,
 } from '../../common/types';
 export {
   entries,

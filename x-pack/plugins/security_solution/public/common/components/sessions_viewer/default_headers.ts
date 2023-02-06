@@ -5,12 +5,11 @@
  * 2.0.
  */
 
+import { tableDefaults } from '../../store/data_table/defaults';
+import type { SubsetDataTableModel } from '../../store/data_table/model';
 import type { ColumnHeaderOptions } from '../../../../common/types/timeline';
-import { RowRendererId } from '../../../../common/types/timeline';
 import { defaultColumnHeaderType } from '../../../timelines/components/timeline/body/column_headers/default_headers';
 import { DEFAULT_DATE_COLUMN_MIN_WIDTH } from '../../../timelines/components/timeline/body/constants';
-import type { SubsetTimelineModel } from '../../../timelines/store/timeline/model';
-import { timelineDefaults } from '../../../timelines/store/timeline/defaults';
 import {
   COLUMN_SESSION_START,
   COLUMN_EXECUTABLE,
@@ -63,11 +62,10 @@ export const sessionsHeaders: ColumnHeaderOptions[] = [
 export const getSessionsDefaultModel = (
   columns: ColumnHeaderOptions[],
   defaultColumns: ColumnHeaderOptions[]
-): SubsetTimelineModel => ({
-  ...timelineDefaults,
+): SubsetDataTableModel => ({
+  ...tableDefaults,
   columns,
   defaultColumns,
-  excludedRowRendererIds: Object.values(RowRendererId),
   sort: [
     {
       columnId: 'process.entry_leader.start',

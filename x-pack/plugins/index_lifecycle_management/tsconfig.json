@@ -1,31 +1,41 @@
 {
   "extends": "../../../tsconfig.base.json",
   "compilerOptions": {
-    "outDir": "./target/types",
-    "emitDeclarationOnly": true,
-    "declaration": true,
-    "declarationMap": true
+    "outDir": "target/types",
   },
   "include": [
     "__jest__/**/*",
+    "integration_tests/**/*",
     "common/**/*",
     "public/**/*",
     "server/**/*",
     "../../../typings/**/*",
   ],
-  "references": [
-    { "path": "../../../src/core/tsconfig.json" },
+  "kbn_references": [
+    "@kbn/core",
     // required plugins
-    { "path": "../licensing/tsconfig.json" },
-    { "path": "../../../src/plugins/management/tsconfig.json" },
-    { "path": "../features/tsconfig.json" },
-    { "path": "../../../src/plugins/share/tsconfig.json" },
+    "@kbn/licensing-plugin",
+    "@kbn/management-plugin",
+    "@kbn/features-plugin",
+    "@kbn/share-plugin",
     // optional plugins
-    { "path": "../cloud/tsconfig.json" },
-    { "path": "../../../src/plugins/usage_collection/tsconfig.json" },
-    { "path": "../index_management/tsconfig.json" },
-    { "path": "../../../src/plugins/home/tsconfig.json" },
+    "@kbn/cloud-plugin",
+    "@kbn/usage-collection-plugin",
+    "@kbn/index-management-plugin",
+    "@kbn/home-plugin",
     // required bundles
-    { "path": "../../../src/plugins/kibana_react/tsconfig.json" },
+    "@kbn/kibana-react-plugin",
+    "@kbn/test-jest-helpers",
+    "@kbn/core-http-browser-mocks",
+    "@kbn/i18n",
+    "@kbn/utility-types",
+    "@kbn/analytics",
+    "@kbn/es-ui-shared-plugin",
+    "@kbn/i18n-react",
+    "@kbn/core-http-browser",
+    "@kbn/config-schema",
+  ],
+  "exclude": [
+    "target/**/*",
   ]
 }

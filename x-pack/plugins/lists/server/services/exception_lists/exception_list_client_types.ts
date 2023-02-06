@@ -46,6 +46,7 @@ import type {
   PitId,
   PitOrUndefined,
   SearchAfterOrUndefined,
+  SearchOrUndefined,
   SortFieldOrUndefined,
   SortOrderOrUndefined,
   Tags,
@@ -287,6 +288,17 @@ export interface CreateEndpointListItemOptions {
 }
 
 /**
+ * ExceptionListClient.duplicateExceptionListAndItems
+ * {@link ExceptionListClient.duplicateExceptionListAndItems}
+ */
+export interface DuplicateExceptionListOptions {
+  /** The single list id to do the search against */
+  listId: ListId;
+  /** saved object namespace (single | agnostic) */
+  namespaceType: NamespaceType;
+}
+
+/**
  * ExceptionListClient.updateExceptionListItem
  * {@link ExceptionListClient.updateExceptionListItem}
  */
@@ -361,6 +373,8 @@ export interface FindExceptionListItemOptions {
   perPage: PerPageOrUndefined;
   /** The Point in Time (pit) id if there is one, otherwise "undefined" can be send in */
   pit?: PitOrUndefined;
+  /** The simple search parameter if there is one, otherwise "undefined" can be sent in */
+  search?: SearchOrUndefined;
   /** The search_after parameter if there is one, otherwise "undefined" can be sent in */
   searchAfter?: SearchAfterOrUndefined;
   /** The page number or "undefined" if there is no page number to continue from */
@@ -382,6 +396,8 @@ export interface FindEndpointListItemOptions {
   perPage: PerPageOrUndefined;
   /** The Point in Time (pit) id if there is one, otherwise "undefined" can be sent in */
   pit?: PitOrUndefined;
+  /** The simple search parameter if there is one, otherwise "undefined" can be sent in */
+  search?: SearchOrUndefined;
   /** The search_after parameter if there is one, otherwise "undefined" can be sent in */
   searchAfter?: SearchAfterOrUndefined;
   /** The page number or "undefined" if there is no page number to continue from */
@@ -407,6 +423,8 @@ export interface FindExceptionListsItemOptions {
   perPage: PerPageOrUndefined;
   /** The Point in Time (pit) id if there is one, otherwise "undefined" can be sent in */
   pit?: PitOrUndefined;
+  /** The simple search parameter if there is one, otherwise "undefined" can be sent in */
+  search?: SearchOrUndefined;
   /** The search_after parameter if there is one, otherwise "undefined" can be sent in */
   searchAfter?: SearchAfterOrUndefined;
   /** The page number or "undefined" if there is no page number to continue from */
@@ -495,6 +513,7 @@ export interface ImportExceptionListAndItemsOptions {
   maxExceptionsImportSize: number;
   /** whether or not to overwrite an exception list with imported list if a matching list_id found */
   overwrite: boolean;
+  generateNewListId: boolean;
 }
 
 /**

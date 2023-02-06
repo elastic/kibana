@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { BaseHandlerCommonOptions, MetricsHandler } from './types';
+import type { BaseHandlerCommonOptions, MetricsHandler } from './types';
 
 export abstract class BaseHandler<R> implements MetricsHandler<R> {
   constructor(

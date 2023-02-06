@@ -10,8 +10,11 @@ import type {
   AggregationsMultiBucketAggregateBase as Aggregation,
   QueryDslQueryContainer,
   SearchRequest,
+  AggregationsTopHitsAggregate,
+  SearchHit,
 } from '@elastic/elasticsearch/lib/api/types';
-import type { BenchmarkId, Cluster } from '../../../common/types';
+import { CspFinding } from '../../../common/schemas/csp_finding';
+import type { Cluster } from '../../../common/types';
 import {
   getFailedFindingsFromAggs,
   failedFindingsAggQuery,
@@ -19,8 +22,7 @@ import {
 import type { FailedFindingsQueryResult } from './get_grouped_findings_evaluation';
 import { findingsEvaluationAggsQuery, getStatsFromFindingsEvaluationsAggs } from './get_stats';
 import { KeyDocCount } from './compliance_dashboard';
-
-type UnixEpochTime = number;
+import { getIdentifierRuntimeMapping } from '../../lib/get_identifier_runtime_mapping';
 
 export interface ClusterBucket extends FailedFindingsQueryResult, KeyDocCount {
   failed_findings: {
@@ -29,43 +31,29 @@ export interface ClusterBucket extends FailedFindingsQueryResult, KeyDocCount {
   passed_findings: {
     doc_count: number;
   };
-  benchmarkName: Aggregation<KeyDocCount>;
-  benchmarkId: Aggregation<KeyDocCount<BenchmarkId>>;
-  timestamps: Aggregation<KeyDocCount<UnixEpochTime>>;
+  latestFindingTopHit: AggregationsTopHitsAggregate;
 }
 
 interface ClustersQueryResult {
-  aggs_by_cluster_id: Aggregation<ClusterBucket>;
+  aggs_by_asset_identifier: Aggregation<ClusterBucket>;
 }
 
 export type ClusterWithoutTrend = Omit<Cluster, 'trend'>;
 
 export const getClustersQuery = (query: QueryDslQueryContainer, pitId: string): SearchRequest => ({
   size: 0,
+  runtime_mappings: getIdentifierRuntimeMapping(),
   query,
   aggs: {
-    aggs_by_cluster_id: {
+    aggs_by_asset_identifier: {
       terms: {
-        field: 'cluster_id',
+        field: 'asset_identifier',
       },
       aggs: {
-        benchmarkName: {
-          terms: {
-            field: 'rule.benchmark.name',
-          },
-        },
-        benchmarkId: {
-          terms: {
-            field: 'rule.benchmark.id',
-          },
-        },
-        timestamps: {
-          terms: {
-            field: '@timestamp',
+        latestFindingTopHit: {
+          top_hits: {
             size: 1,
-            order: {
-              _key: 'desc',
-            },
+            sort: [{ '@timestamp': { order: 'desc' } }],
           },
         },
         ...failedFindingsAggQuery,
@@ -79,33 +67,26 @@ export const getClustersQuery = (query: QueryDslQueryContainer, pitId: string): 
 });
 
 export const getClustersFromAggs = (clusters: ClusterBucket[]): ClusterWithoutTrend[] =>
-  clusters.map((cluster) => {
-    // get cluster's meta data
-    const benchmarkNames = cluster.benchmarkName.buckets;
-    const benchmarkIds = cluster.benchmarkId.buckets;
-
-    if (!Array.isArray(benchmarkIds) || benchmarkIds.length === 0)
-      throw new Error('missing aggs by benchmarkIds per cluster');
-
-    if (!Array.isArray(benchmarkNames)) throw new Error('missing aggs by benchmarks per cluster');
-
-    const timestamps = cluster.timestamps.buckets;
-    if (!Array.isArray(timestamps)) throw new Error('missing aggs by timestamps per cluster');
+  clusters.map((clusterBucket) => {
+    const latestFindingHit: SearchHit<CspFinding> = clusterBucket.latestFindingTopHit.hits.hits[0];
+    if (!latestFindingHit._source) throw new Error('Missing findings top hits');
 
     const meta = {
-      clusterId: cluster.key,
-      benchmarkName: benchmarkNames[0].key,
-      benchmarkId: benchmarkIds[0].key,
-      lastUpdate: timestamps[0].key,
+      clusterId: clusterBucket.key,
+      assetIdentifierId: clusterBucket.key,
+      lastUpdate: latestFindingHit._source['@timestamp'],
+      benchmark: latestFindingHit._source.rule.benchmark,
+      cloud: latestFindingHit._source.cloud, // only available on CSPM findings
+      cluster: latestFindingHit._source.orchestrator?.cluster, // only available on KSPM findings
     };
 
     // get cluster's stats
-    if (!cluster.failed_findings || !cluster.passed_findings)
-      throw new Error('missing findings evaluations per cluster');
-    const stats = getStatsFromFindingsEvaluationsAggs(cluster);
+    if (!clusterBucket.failed_findings || !clusterBucket.passed_findings)
+      throw new Error('missing findings evaluations per cluster bucket');
+    const stats = getStatsFromFindingsEvaluationsAggs(clusterBucket);
 
     // get cluster's resource types aggs
-    const resourcesTypesAggs = cluster.aggs_by_resource_type.buckets;
+    const resourcesTypesAggs = clusterBucket.aggs_by_resource_type.buckets;
     if (!Array.isArray(resourcesTypesAggs))
       throw new Error('missing aggs by resource type per cluster');
     const groupedFindingsEvaluation = getFailedFindingsFromAggs(resourcesTypesAggs);
@@ -126,7 +107,7 @@ export const getClusters = async (
     getClustersQuery(query, pitId)
   );
 
-  const clusters = queryResult.aggregations?.aggs_by_cluster_id.buckets;
+  const clusters = queryResult.aggregations?.aggs_by_asset_identifier.buckets;
   if (!Array.isArray(clusters)) throw new Error('missing aggs by cluster id');
 
   return getClustersFromAggs(clusters);

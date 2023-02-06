@@ -32,7 +32,7 @@ export function TransactionOverview() {
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 
-  const { transactionType, serviceName, fallbackToTransactions, runtimeName } =
+  const { transactionType, fallbackToTransactions, serverlessType } =
     useApmServiceContext();
 
   const history = useHistory();
@@ -42,13 +42,7 @@ export function TransactionOverview() {
     replace(history, { query: { transactionType } });
   }
 
-  // TODO: improve urlParams typings.
-  // `serviceName` or `transactionType` will never be undefined here, and this check should not be needed
-  if (!serviceName) {
-    return null;
-  }
-
-  const isServerless = isServerlessAgent(runtimeName);
+  const isServerless = isServerlessAgent(serverlessType);
 
   return (
     <>
@@ -76,7 +70,7 @@ export function TransactionOverview() {
         <TransactionsTable
           hideViewTransactionsLink
           numberOfTransactionsPerPage={25}
-          showAggregationAccurateCallout
+          showMaxTransactionGroupsExceededWarning
           environment={environment}
           kuery={kuery}
           start={start}

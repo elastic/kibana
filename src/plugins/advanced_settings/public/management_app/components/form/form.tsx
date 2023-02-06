@@ -195,7 +195,11 @@ export class Form extends PureComponent<FormProps> {
         <KibanaThemeProvider theme$={this.props.theme}>
           <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
             <EuiFlexItem grow={false}>
-              <EuiButton size="s" onClick={() => window.location.reload()}>
+              <EuiButton
+                size="s"
+                onClick={() => window.location.reload()}
+                data-test-subj="windowReloadButton"
+              >
                 {i18n.translate('advancedSettings.form.requiresPageReloadToastButtonLabel', {
                   defaultMessage: 'Reload page',
                 })}

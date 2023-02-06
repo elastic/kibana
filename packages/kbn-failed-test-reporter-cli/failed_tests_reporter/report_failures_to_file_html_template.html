@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.1/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+      integrity="sha384-F3w7mX95PdgyTmZZMECAngseQB83DfGTowi0iMjiWaeVhAn4FJkqJByhZMI3AhiU"
+      crossorigin="anonymous"
+    />
+    <style type="text/css">
+      pre {
+        font-size: 0.75em !important;
+      }
+
+      img.screenshot {
+        cursor: pointer;
+        margin: 5px 0;
+      }
+      .screenshotContainer:not(.expanded) img.screenshot {
+        height: 200px;
+      }
+
+      .screenshotContainer:not(.fs) img.screenshot.fs,
+      .screenshotContainer:not(.fs) button.toggleFs.off,
+      .screenshotContainer.fs img.screenshot:not(.fs),
+      .screenshotContainer.fs button.toggleFs.on {
+        display: none;
+      }
+
+      .screenshotContainer .toggleFs {
+        background: none;
+        border: none;
+        margin: 0 0 0 5px;
+        vertical-align: top;
+      }
+    </style>
+    <title>$TITLE</title>
+  </head>
+  <body>
+    <div class="col-lg-10 mx-auto p-3 py-md-5">
+      <main>$MAIN</main>
+    </div>
+    <script type="text/javascript">
+      /**
+       * @param {HTMLElement} el
+       * @param {(el: HTMLElement) => boolean} className
+       */
+      function findParent(el, test) {
+        while (el) {
+          if (test(el)) {
+            return el
+          }
+
+          // stop if we iterate all the way up to the document body
+          if (el.parentElement === document.body) {
+            break
+          }
+
+          el = el.parentElement
+        }
+
+        return null
+      }
+
+      function isContainer(el) {
+        return el.classList.contains('screenshotContainer')
+      }
+
+      function isButtonOrImg(el) {
+        return el instanceof HTMLImageElement || el instanceof HTMLButtonElement
+      }
+
+      document.addEventListener('click', (event) => {
+        const el = findParent(event.target, isButtonOrImg)
+
+        if (el instanceof HTMLImageElement && el.classList.contains('screenshot')) {
+          findParent(el, isContainer)?.classList.toggle('expanded')
+        }
+
+        if (el instanceof HTMLButtonElement && el.classList.contains('toggleFs')) {
+          findParent(el, isContainer)?.classList.toggle('fs')
+        }
+      })
+    </script>
+  </body>
+</html>

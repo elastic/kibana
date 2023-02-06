@@ -7,7 +7,8 @@
 
 import React from 'react';
 import { renderHook, act } from '@testing-library/react-hooks';
-import { useUpdateComment, UseUpdateComment } from './use_update_comment';
+import type { UseUpdateComment } from './use_update_comment';
+import { useUpdateComment } from './use_update_comment';
 import { basicCase } from './mock';
 import * as api from './api';
 import { TestProviders } from '../common/mock';

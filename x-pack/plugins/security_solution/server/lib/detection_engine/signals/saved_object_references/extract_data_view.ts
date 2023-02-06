@@ -12,7 +12,7 @@ import type {
   QueryRuleParams,
   ThreatRuleParams,
   ThresholdRuleParams,
-} from '../../schemas/rule_schemas';
+} from '../../rule_schema';
 
 /**
  * This extracts the "dataViewId" and returns it as a saved object reference.

@@ -62,7 +62,6 @@ type NewSearchIndexActions = Pick<
   crawlerIndexCreated: Actions<CreateCrawlerIndexArgs, CreateCrawlerIndexResponse>['apiSuccess'];
   setLanguageSelectValue(language: string): { language: string };
   setRawName(rawName: string): { rawName: string };
-  showIndexCreatedCallout: () => void;
 };
 
 export const NewSearchIndexLogic = kea<MakeLogicType<NewSearchIndexValues, NewSearchIndexActions>>({

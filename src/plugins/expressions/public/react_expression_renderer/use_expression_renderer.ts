@@ -116,6 +116,7 @@ export function useExpressionRenderer(
     debouncedLoaderParams.renderMode,
     debouncedLoaderParams.syncColors,
     debouncedLoaderParams.syncTooltips,
+    debouncedLoaderParams.syncCursor,
   ]);
 
   useEffect(() => {

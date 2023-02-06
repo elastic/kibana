@@ -32,7 +32,7 @@ import {
   sendTelemetryEvents,
 } from './monitor_upgrade_sender';
 
-const kibanaVersion = '8.2.0';
+const stackVersion = '8.2.0';
 const id = '123456';
 const errors = [
   {
@@ -91,12 +91,12 @@ describe('monitor upgrade telemetry helpers', () => {
   it('formats telemetry events', () => {
     const actual = formatTelemetryEvent({
       monitor: testConfig,
-      kibanaVersion,
+      stackVersion,
       isInlineScript: false,
       errors,
     });
     expect(actual).toEqual({
-      stackVersion: kibanaVersion,
+      stackVersion,
       configId: sha256.create().update(testConfig.id).hex(),
       locations: ['us_central', 'other'],
       locationsCount: 2,
@@ -131,11 +131,11 @@ describe('monitor upgrade telemetry helpers', () => {
           },
         }),
         isInlineScript,
-        kibanaVersion,
+        stackVersion,
         errors,
       });
       expect(actual).toEqual({
-        stackVersion: kibanaVersion,
+        stackVersion,
         configId: sha256.create().update(testConfig.id).hex(),
         locations: ['us_central', 'other'],
         locationsCount: 2,
@@ -157,12 +157,12 @@ describe('monitor upgrade telemetry helpers', () => {
     const actual = formatTelemetryUpdateEvent(
       createTestConfig({}, '2011-10-05T16:48:00.000Z'),
       testConfig,
-      kibanaVersion,
+      stackVersion,
       false,
       errors
     );
     expect(actual).toEqual({
-      stackVersion: kibanaVersion,
+      stackVersion,
       configId: sha256.create().update(testConfig.id).hex(),
       locations: ['us_central', 'other'],
       locationsCount: 2,
@@ -182,13 +182,13 @@ describe('monitor upgrade telemetry helpers', () => {
   it('handles formatting delete events', () => {
     const actual = formatTelemetryDeleteEvent(
       testConfig,
-      kibanaVersion,
+      stackVersion,
       '2011-10-05T16:48:00.000Z',
       false,
       errors
     );
     expect(actual).toEqual({
-      stackVersion: kibanaVersion,
+      stackVersion,
       configId: sha256.create().update(testConfig.id).hex(),
       locations: ['us_central', 'other'],
       locationsCount: 2,
@@ -218,7 +218,7 @@ describe('sendTelemetryEvents', () => {
   it('should queue telemetry events with generic error', () => {
     const event = formatTelemetryEvent({
       monitor: testConfig,
-      kibanaVersion,
+      stackVersion,
       isInlineScript: true,
       errors,
     });

@@ -10,6 +10,7 @@ import type { ISearchStrategy, PluginStart } from '@kbn/data-plugin/server';
 import { shimHitsTotal } from '@kbn/data-plugin/server';
 import { ENHANCED_ES_SEARCH_STRATEGY } from '@kbn/data-plugin/common';
 import type { KibanaRequest } from '@kbn/core/server';
+import type { IRuleDataClient } from '@kbn/rule-registry-plugin/server';
 import type {
   FactoryQueryTypes,
   StrategyResponseType,
@@ -33,7 +34,8 @@ function assertValidRequestType<T extends FactoryQueryTypes>(
 export const securitySolutionSearchStrategyProvider = <T extends FactoryQueryTypes>(
   data: PluginStart,
   endpointContext: EndpointAppContext,
-  getSpaceId?: (request: KibanaRequest) => string
+  getSpaceId?: (request: KibanaRequest) => string,
+  ruleDataClient?: IRuleDataClient | null
 ): ISearchStrategy<StrategyRequestType<T>, StrategyResponseType<T>> => {
   const es = data.search.getSearchStrategy(ENHANCED_ES_SEARCH_STRATEGY);
 
@@ -60,6 +62,7 @@ export const securitySolutionSearchStrategyProvider = <T extends FactoryQueryTyp
             endpointContext,
             request: deps.request,
             spaceId: getSpaceId && getSpaceId(deps.request),
+            ruleDataClient,
           })
         )
       );

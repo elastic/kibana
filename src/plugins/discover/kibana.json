@@ -6,6 +6,7 @@
   "requiredPlugins": [
     "charts",
     "data",
+    "dataViews",
     "embeddable",
     "inspector",
     "fieldFormats",
@@ -13,12 +14,25 @@
     "navigation",
     "uiActions",
     "savedObjects",
+    "savedObjectsFinder",
+    "savedObjectsManagement",
     "dataViewFieldEditor",
     "dataViewEditor",
-    "expressions"
+    "expressions",
+    "unifiedFieldList",
+    "unifiedSearch",
+    "unifiedHistogram"
   ],
-  "optionalPlugins": ["home", "share", "usageCollection", "spaces", "triggersActionsUi"],
-  "requiredBundles": ["kibanaUtils", "kibanaReact", "dataViews", "unifiedSearch", "savedSearch"],
+  "optionalPlugins": [
+    "home",
+    "share",
+    "usageCollection",
+    "spaces",
+    "triggersActionsUi",
+    "savedObjectsTaggingOss",
+    "lens"
+  ],
+  "requiredBundles": ["kibanaUtils", "kibanaReact", "unifiedSearch", "savedSearch"],
   "extraPublicDirs": ["common"],
   "owner": {
     "name": "Data Discovery",

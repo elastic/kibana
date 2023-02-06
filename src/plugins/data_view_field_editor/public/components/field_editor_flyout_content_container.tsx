@@ -11,28 +11,30 @@ import { DocLinksStart, NotificationsStart, CoreStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { METRIC_TYPE } from '@kbn/analytics';
 
-import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
+import { BehaviorSubject } from 'rxjs';
 import {
   DataViewField,
   DataView,
   DataPublicPluginStart,
-  RuntimeType,
   UsageCollectionStart,
   DataViewsPublicPluginStart,
+  FieldFormatsStart,
+  RuntimeType,
 } from '../shared_imports';
 import type { Field, PluginStart, InternalFieldType } from '../types';
 import { pluginName } from '../constants';
-import { deserializeField, getLinks, ApiService } from '../lib';
+import { getLinks, ApiService } from '../lib';
 import {
   FieldEditorFlyoutContent,
   Props as FieldEditorFlyoutContentProps,
 } from './field_editor_flyout_content';
 import { FieldEditorProvider } from './field_editor_context';
 import { FieldPreviewProvider } from './preview';
+import { PreviewController } from './preview/preview_controller';
 
 export interface Props {
   /** Handler for the "save" footer button */
-  onSave: (field: DataViewField) => void;
+  onSave: (field: DataViewField[]) => void;
   /** Handler for the "cancel" footer button */
   onCancel: () => void;
   onMounted?: FieldEditorFlyoutContentProps['onMounted'];
@@ -43,7 +45,7 @@ export interface Props {
   /** The Kibana field type of the field to create or edit (default: "runtime") */
   fieldTypeToProcess: InternalFieldType;
   /** Optional field to edit */
-  fieldToEdit?: DataViewField;
+  fieldToEdit?: Field;
   /** Optional initial configuration for new field */
   fieldToCreate?: Field;
   /** Services */
@@ -83,11 +85,21 @@ export const FieldEditorFlyoutContentContainer = ({
   fieldFormats,
   uiSettings,
 }: Props) => {
+  const [controller] = useState(() => new PreviewController({ dataView, search }));
   const [isSaving, setIsSaving] = useState(false);
 
   const { fields } = dataView;
 
-  const namesNotAllowed = useMemo(() => fields.map((fld) => fld.name), [fields]);
+  const namesNotAllowed = useMemo(() => {
+    const fieldNames = dataView.fields.map((fld) => fld.name);
+    const runtimeCompositeNames = Object.entries(dataView.getAllRuntimeFields())
+      .filter(([, _runtimeField]) => _runtimeField.type === 'composite')
+      .map(([_runtimeFieldName]) => _runtimeFieldName);
+    return {
+      fields: fieldNames,
+      runtimeComposites: runtimeCompositeNames,
+    };
+  }, [dataView]);
 
   const existingConcreteFields = useMemo(() => {
     const existing: Array<{ name: string; type: string }> = [];
@@ -116,9 +128,12 @@ export const FieldEditorFlyoutContentContainer = ({
     [apiService, search, notifications]
   );
 
-  const saveField = useCallback(
-    async (updatedField: Field) => {
-      setIsSaving(true);
+  const updateRuntimeField = useCallback(
+    (updatedField: Field): DataViewField[] => {
+      const nameHasChanged = Boolean(fieldToEdit) && fieldToEdit!.name !== updatedField.name;
+      const typeHasChanged = Boolean(fieldToEdit) && fieldToEdit!.type !== updatedField.type;
+      const hasChangeToOrFromComposite =
+        typeHasChanged && (fieldToEdit!.type === 'composite' || updatedField.type === 'composite');
 
       const { script } = updatedField;
 
@@ -128,13 +143,14 @@ export const FieldEditorFlyoutContentContainer = ({
           // eslint-disable-next-line no-empty
         } catch {}
         // rename an existing runtime field
-        if (fieldToEdit?.name && fieldToEdit.name !== updatedField.name) {
-          dataView.removeRuntimeField(fieldToEdit.name);
+        if (nameHasChanged || hasChangeToOrFromComposite) {
+          dataView.removeRuntimeField(fieldToEdit!.name);
         }
 
         dataView.addRuntimeField(updatedField.name, {
           type: updatedField.type as RuntimeType,
           script,
+          fields: updatedField.fields,
         });
       } else {
         try {
@@ -143,22 +159,56 @@ export const FieldEditorFlyoutContentContainer = ({
         } catch {}
       }
 
+      return dataView.addRuntimeField(updatedField.name, updatedField);
+    },
+    [fieldToEdit, dataView, fieldTypeToProcess, usageCollection]
+  );
+
+  const updateConcreteField = useCallback(
+    (updatedField: Field): DataViewField[] => {
       const editedField = dataView.getFieldByName(updatedField.name);
 
-      try {
-        if (!editedField) {
-          throw new Error(
-            `Unable to find field named '${updatedField.name}' on index pattern '${dataView.title}'`
-          );
-        }
+      if (!editedField) {
+        throw new Error(
+          `Unable to find field named '${
+            updatedField.name
+          }' on index pattern '${dataView.getIndexPattern()}'`
+        );
+      }
 
-        dataView.setFieldCustomLabel(updatedField.name, updatedField.customLabel);
-        editedField.count = updatedField.popularity || 0;
-        if (updatedField.format) {
-          dataView.setFieldFormat(updatedField.name, updatedField.format);
-        } else {
-          dataView.deleteFieldFormat(updatedField.name);
-        }
+      // Update custom label, popularity and format
+      dataView.setFieldCustomLabel(updatedField.name, updatedField.customLabel);
+
+      editedField.count = updatedField.popularity || 0;
+      if (updatedField.format) {
+        dataView.setFieldFormat(updatedField.name, updatedField.format!);
+      } else {
+        dataView.deleteFieldFormat(updatedField.name);
+      }
+
+      return [editedField];
+    },
+    [dataView]
+  );
+
+  const saveField = useCallback(
+    async (updatedField: Field) => {
+      try {
+        usageCollection.reportUiCounter(
+          pluginName,
+          METRIC_TYPE.COUNT,
+          fieldTypeToProcess === 'runtime' ? 'save_runtime' : 'save_concrete'
+        );
+        // eslint-disable-next-line no-empty
+      } catch {}
+
+      setIsSaving(true);
+
+      try {
+        const editedFields: DataViewField[] =
+          fieldTypeToProcess === 'runtime'
+            ? updateRuntimeField(updatedField)
+            : updateConcreteField(updatedField as Field);
 
         const afterSave = () => {
           const message = i18n.translate('indexPatternFieldEditor.deleteField.savedHeader', {
@@ -167,17 +217,15 @@ export const FieldEditorFlyoutContentContainer = ({
           });
           notifications.toasts.addSuccess(message);
           setIsSaving(false);
-          onSave(editedField);
+          onSave(editedFields);
         };
 
-        if (!dataView.isPersisted()) {
-          afterSave();
-          return;
+        if (dataView.isPersisted()) {
+          await dataViews.updateSavedObject(dataView);
         }
+        afterSave();
 
-        await dataViews.updateSavedObject(dataView).then(() => {
-          afterSave();
-        });
+        setIsSaving(false);
       } catch (e) {
         const title = i18n.translate('indexPatternFieldEditor.save.errorTitle', {
           defaultMessage: 'Failed to save field changes',
@@ -192,7 +240,8 @@ export const FieldEditorFlyoutContentContainer = ({
       dataViews,
       notifications,
       fieldTypeToProcess,
-      fieldToEdit?.name,
+      updateConcreteField,
+      updateRuntimeField,
       usageCollection,
     ]
   );
@@ -208,14 +257,16 @@ export const FieldEditorFlyoutContentContainer = ({
       fieldFormats={fieldFormats}
       namesNotAllowed={namesNotAllowed}
       existingConcreteFields={existingConcreteFields}
+      fieldName$={new BehaviorSubject(fieldToEdit?.name || '')}
+      subfields$={new BehaviorSubject(fieldToEdit?.fields)}
     >
-      <FieldPreviewProvider>
+      <FieldPreviewProvider controller={controller}>
         <FieldEditorFlyoutContent
           onSave={saveField}
           onCancel={onCancel}
           onMounted={onMounted}
           fieldToCreate={fieldToCreate}
-          fieldToEdit={deserializeField(dataView, fieldToEdit)}
+          fieldToEdit={fieldToEdit}
           isSavingField={isSaving}
         />
       </FieldPreviewProvider>

@@ -1,0 +1,5 @@
+{
+  "type": "shared-common",
+  "id": "@kbn/ui-shared-deps-npm",
+  "owner": "@elastic/kibana-operations"
+}

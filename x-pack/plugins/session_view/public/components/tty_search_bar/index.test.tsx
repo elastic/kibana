@@ -7,7 +7,6 @@
 import React from 'react';
 import { renderHook } from '@testing-library/react-hooks';
 import userEvent from '@testing-library/user-event';
-import { fireEvent } from '@testing-library/dom';
 import { AppContextTestRender, createAppRootMockRenderer } from '../../test';
 import { sessionViewIOEventsMock } from '../../../common/mocks/responses/session_view_io_events.mock';
 import { useIOLines } from '../tty_player/hooks';
@@ -34,6 +33,9 @@ describe('TTYSearchBar component', () => {
       lines,
       seekToLine: jest.fn(),
       xTermSearchFn: jest.fn(),
+      setIsPlaying: jest.fn(),
+      searchQuery: '',
+      setSearchQuery: jest.fn(),
     };
   });
 
@@ -43,32 +45,20 @@ describe('TTYSearchBar component', () => {
   });
 
   it('does a search when a user enters text and hits enter', async () => {
-    renderResult = mockedContext.render(<TTYSearchBar {...props} />);
-
-    const searchInput = renderResult.queryByTestId('sessionView:searchBar')?.querySelector('input');
-    if (searchInput) {
-      userEvent.type(searchInput, '-h');
-      fireEvent.keyUp(searchInput, { key: 'Enter', code: 'Enter' });
-    }
+    renderResult = mockedContext.render(<TTYSearchBar {...props} searchQuery="-h" />);
 
     expect(props.seekToLine).toHaveBeenCalledTimes(1);
 
     // there is a slight delay in the seek in xtermjs, so we wait 100ms before trying to highlight a result.
     await new Promise((r) => setTimeout(r, 100));
 
-    expect(props.xTermSearchFn).toHaveBeenCalledTimes(2);
-    expect(props.xTermSearchFn).toHaveBeenNthCalledWith(1, '', 0);
-    expect(props.xTermSearchFn).toHaveBeenNthCalledWith(2, '-h', 6);
+    expect(props.xTermSearchFn).toHaveBeenCalledTimes(1);
+    expect(props.xTermSearchFn).toHaveBeenNthCalledWith(1, '-h', 6);
+    expect(props.setIsPlaying).toHaveBeenCalledWith(false);
   });
 
   it('calls seekToline and xTermSearchFn when currentMatch changes', async () => {
-    renderResult = mockedContext.render(<TTYSearchBar {...props} />);
-
-    const searchInput = renderResult.queryByTestId('sessionView:searchBar')?.querySelector('input');
-    if (searchInput) {
-      userEvent.type(searchInput, '-h');
-      fireEvent.keyUp(searchInput, { key: 'Enter', code: 'Enter' });
-    }
+    renderResult = mockedContext.render(<TTYSearchBar {...props} searchQuery="-h" />);
 
     await new Promise((r) => setTimeout(r, 100));
 
@@ -78,28 +68,26 @@ describe('TTYSearchBar component', () => {
 
     // two calls, first instance -h is at line 22, 2nd at line 42
     expect(props.seekToLine).toHaveBeenCalledTimes(2);
-    expect(props.seekToLine).toHaveBeenNthCalledWith(1, 24);
-    expect(props.seekToLine).toHaveBeenNthCalledWith(2, 94);
+    expect(props.seekToLine).toHaveBeenNthCalledWith(1, 26);
+    expect(props.seekToLine).toHaveBeenNthCalledWith(2, 100);
 
-    expect(props.xTermSearchFn).toHaveBeenCalledTimes(3);
-    expect(props.xTermSearchFn).toHaveBeenNthCalledWith(1, '', 0);
-    expect(props.xTermSearchFn).toHaveBeenNthCalledWith(2, '-h', 6);
-    expect(props.xTermSearchFn).toHaveBeenNthCalledWith(3, '-h', 13);
+    expect(props.xTermSearchFn).toHaveBeenCalledTimes(2);
+    expect(props.xTermSearchFn).toHaveBeenNthCalledWith(1, '-h', 6);
+    expect(props.xTermSearchFn).toHaveBeenNthCalledWith(2, '-h', 13);
+    expect(props.setIsPlaying).toHaveBeenCalledTimes(2);
   });
 
   it('calls xTermSearchFn with empty query when search is cleared', async () => {
-    renderResult = mockedContext.render(<TTYSearchBar {...props} />);
-
-    const searchInput = renderResult.queryByTestId('sessionView:searchBar')?.querySelector('input');
-    if (searchInput) {
-      userEvent.type(searchInput, '-h');
-      fireEvent.keyUp(searchInput, { key: 'Enter', code: 'Enter' });
-    }
+    renderResult = mockedContext.render(<TTYSearchBar {...props} searchQuery="-h" />);
 
     await new Promise((r) => setTimeout(r, 100));
     userEvent.click(renderResult.getByTestId('clearSearchButton'));
     await new Promise((r) => setTimeout(r, 100));
 
-    expect(props.xTermSearchFn).toHaveBeenNthCalledWith(3, '', 0);
+    renderResult.rerender(<TTYSearchBar {...props} />);
+
+    expect(props.setSearchQuery).toHaveBeenNthCalledWith(1, '');
+    expect(props.xTermSearchFn).toHaveBeenNthCalledWith(2, '', 0);
+    expect(props.setIsPlaying).toHaveBeenCalledWith(false);
   });
 });

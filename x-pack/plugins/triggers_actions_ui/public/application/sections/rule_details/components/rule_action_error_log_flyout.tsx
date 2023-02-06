@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiTitle,
@@ -21,25 +21,35 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { IExecutionLog } from '@kbn/alerting-plugin/common';
-import { Rule } from '../../../../types';
 import { RuleErrorLogWithApi } from './rule_error_log';
 import { RuleActionErrorBadge } from './rule_action_error_badge';
 
 export interface RuleActionErrorLogFlyoutProps {
-  rule: Rule;
   runLog: IExecutionLog;
   refreshToken?: number;
   onClose: () => void;
+  activeSpaceId?: string;
 }
 
 export const RuleActionErrorLogFlyout = (props: RuleActionErrorLogFlyoutProps) => {
-  const { rule, runLog, refreshToken, onClose } = props;
+  const { runLog, refreshToken, onClose, activeSpaceId } = props;
 
   const { euiTheme } = useEuiTheme();
 
-  const { id, message, num_errored_actions: totalErrors } = runLog;
+  const {
+    id,
+    rule_id: ruleId,
+    message,
+    num_errored_actions: totalErrors,
+    space_ids: spaceIds = [],
+  } = runLog;
 
   const isFlyoutPush = useIsWithinBreakpoints(['xl']);
+
+  const logFromDifferentSpace = useMemo(
+    () => Boolean(activeSpaceId && !spaceIds?.includes(activeSpaceId)),
+    [activeSpaceId, spaceIds]
+  );
 
   return (
     <EuiFlyout
@@ -84,7 +94,13 @@ export const RuleActionErrorLogFlyout = (props: RuleActionErrorLogFlyoutProps) =
             }}
           />
         </div>
-        <RuleErrorLogWithApi rule={rule} runId={id} refreshToken={refreshToken} />
+        <RuleErrorLogWithApi
+          ruleId={ruleId}
+          runId={id}
+          spaceId={spaceIds[0]}
+          logFromDifferentSpace={logFromDifferentSpace}
+          refreshToken={refreshToken}
+        />
         <EuiSpacer />
       </EuiFlyoutBody>
       <EuiFlyoutFooter>

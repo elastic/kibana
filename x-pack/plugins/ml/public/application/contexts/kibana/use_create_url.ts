@@ -7,10 +7,10 @@
 
 import { useCallback, useEffect, useState } from 'react';
 import { LocatorGetUrlParams } from '@kbn/share-plugin/common/url_service';
+import { useUrlState } from '@kbn/ml-url-state';
 import { useMlKibana } from './kibana_context';
 import { ML_APP_LOCATOR } from '../../../../common/constants/locator';
 import { MlLocatorParams } from '../../../../common/types/locator';
-import { useUrlState } from '../../util/url_state';
 
 export const useMlLocator = () => {
   const {
@@ -38,6 +38,7 @@ export const useMlLink = (params: MlLocatorParams, getUrlParams?: LocatorGetUrlP
     return () => {
       isCancelled = true;
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [params, getUrlParams]);
 
   return href;
@@ -71,6 +72,7 @@ export const useCreateAndNavigateToMlLink = (
       const url = await mlLocator.getUrl({ page: _page, pageState });
       await navigateToUrl(url);
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [mlLocator, navigateToUrl]
   );
 

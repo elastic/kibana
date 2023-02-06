@@ -1,0 +1,47 @@
+@import '../../../mixins';
+
+.lnsDimensionContainer {
+  // Use the EuiFlyout style
+  @include euiFlyout;
+  // But with custom positioning to keep it within the sidebar contents
+  animation: euiFlyoutAnimation $euiAnimSpeedNormal $euiAnimSlightResistance;
+  left: 0;
+  max-width: none !important;
+  z-index: $euiZContentMenu;
+
+  @include euiBreakpoint('l', 'xl') {
+    height: 100% !important;
+    position: absolute;
+    top: 0 !important;
+  }
+
+  .lnsFrameLayout__sidebar-isFullscreen & {
+    border-left: $euiBorderThin; // Force border regardless of theme in fullscreen
+    box-shadow: none;
+  }
+}
+
+.lnsDimensionContainer__header {
+  padding: $euiSize;
+
+  .lnsFrameLayout__sidebar-isFullscreen & {
+    display: none;
+  }
+}
+
+.lnsDimensionContainer__content {
+  @include euiYScroll;
+  flex: 1;
+}
+
+.lnsDimensionContainer__footer {
+  padding: $euiSize;
+
+  .lnsFrameLayout__sidebar-isFullscreen & {
+    display: none;
+  }
+}
+
+.lnsBody--overflowHidden {
+  overflow: hidden;
+}

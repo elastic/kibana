@@ -16,6 +16,7 @@ import {
   SPACE_IDS,
   ALERT_RULE_TAGS,
   TIMESTAMP,
+  ALERT_RULE_PARAMETERS,
 } from '@kbn/rule-data-utils';
 
 import { RuleExecutorOptions } from '@kbn/alerting-plugin/server';
@@ -25,15 +26,16 @@ export const getCommonAlertFields = (
   options: RuleExecutorOptions<any, any, any, any, any>
 ): CommonAlertFieldsLatest => {
   return {
+    [ALERT_RULE_PARAMETERS]: options.params,
     [ALERT_RULE_CATEGORY]: options.rule.ruleTypeName,
     [ALERT_RULE_CONSUMER]: options.rule.consumer,
     [ALERT_RULE_EXECUTION_UUID]: options.executionId,
     [ALERT_RULE_NAME]: options.rule.name,
     [ALERT_RULE_PRODUCER]: options.rule.producer,
     [ALERT_RULE_TYPE_ID]: options.rule.ruleTypeId,
-    [ALERT_RULE_UUID]: options.alertId,
+    [ALERT_RULE_UUID]: options.rule.id,
     [SPACE_IDS]: [options.spaceId],
-    [ALERT_RULE_TAGS]: options.tags,
+    [ALERT_RULE_TAGS]: options.rule.tags,
     [TIMESTAMP]: options.startedAt.toISOString(),
   };
 };

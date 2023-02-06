@@ -5,26 +5,16 @@
  * 2.0.
  */
 
-import { difference, uniq } from 'lodash';
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
 
-import type { Agent, BulkActionResult } from '../../types';
+import type { Agent } from '../../types';
 import { AgentReassignmentError } from '../../errors';
 
-import {
-  getAgentDocuments,
-  bulkUpdateAgents,
-  processAgentsInBatches,
-  errorsToResults,
-} from './crud';
-import type { GetAgentsOptions } from '.';
-import { searchHitToAgent } from './helpers';
-import { filterHostedPolicies } from './filter_hosted_agents';
+import { SO_SEARCH_LIMIT } from '../../constants';
 
-function isMgetDoc(doc?: estypes.MgetResponseItem<unknown>): doc is estypes.GetGetResult {
-  return Boolean(doc && 'found' in doc);
-}
+import { getAgentsById, getAgentsByKuery, openPointInTime } from './crud';
+import type { GetAgentsOptions } from '.';
+import { UpdateAgentTagsActionRunner, updateTagsBatch } from './update_agent_tags_action_runner';
 
 export async function updateAgentTags(
   soClient: SavedObjectsClientContract,
@@ -32,99 +22,62 @@ export async function updateAgentTags(
   options: ({ agents: Agent[] } | GetAgentsOptions) & { batchSize?: number },
   tagsToAdd: string[],
   tagsToRemove: string[]
-) {
+): Promise<{ actionId: string }> {
   const outgoingErrors: Record<Agent['id'], Error> = {};
   const givenAgents: Agent[] = [];
 
   if ('agentIds' in options) {
-    const givenAgentsResults = await getAgentDocuments(esClient, options.agentIds);
-    for (const agentResult of givenAgentsResults) {
-      if (isMgetDoc(agentResult) && agentResult.found === false) {
-        outgoingErrors[agentResult._id] = new AgentReassignmentError(
-          `Cannot find agent ${agentResult._id}`
+    const maybeAgents = await getAgentsById(esClient, soClient, options.agentIds);
+    for (const maybeAgent of maybeAgents) {
+      if ('notFound' in maybeAgent) {
+        outgoingErrors[maybeAgent.id] = new AgentReassignmentError(
+          `Cannot find agent ${maybeAgent.id}`
         );
       } else {
-        givenAgents.push(searchHitToAgent(agentResult));
+        givenAgents.push(maybeAgent);
       }
     }
   } else if ('kuery' in options) {
-    return await processAgentsInBatches(
+    const batchSize = options.batchSize ?? SO_SEARCH_LIMIT;
+
+    const filters = [];
+    if (options.kuery !== '') {
+      filters.push(options.kuery);
+    }
+    if (tagsToAdd.length === 1 && tagsToRemove.length === 0) {
+      filters.push(`NOT (tags:${tagsToAdd[0]})`);
+    } else if (tagsToRemove.length === 1 && tagsToAdd.length === 0) {
+      filters.push(`tags:${tagsToRemove[0]}`);
+    }
+
+    const kuery = filters.map((filter) => `(${filter})`).join(' AND ');
+    const pitId = await openPointInTime(esClient);
+
+    // calculate total count
+    const res = await getAgentsByKuery(esClient, soClient, {
+      kuery,
+      showInactive: options.showInactive ?? false,
+      perPage: 0,
+      pitId,
+    });
+
+    return await new UpdateAgentTagsActionRunner(
       esClient,
+      soClient,
       {
-        kuery: options.kuery,
-        showInactive: true,
-        batchSize: options.batchSize,
+        ...options,
+        kuery,
+        tagsToAdd,
+        tagsToRemove,
+        batchSize,
+        total: res.total,
       },
-      async (agents: Agent[], skipSuccess: boolean) =>
-        await updateTagsBatch(
-          soClient,
-          esClient,
-          agents,
-          outgoingErrors,
-          tagsToAdd,
-          tagsToRemove,
-          undefined,
-          skipSuccess
-        )
-    );
+      { pitId }
+    ).runActionAsyncWithRetry();
   }
 
-  return await updateTagsBatch(
-    soClient,
-    esClient,
-    givenAgents,
-    outgoingErrors,
+  return await updateTagsBatch(soClient, esClient, givenAgents, outgoingErrors, {
     tagsToAdd,
     tagsToRemove,
-    'agentIds' in options ? options.agentIds : undefined
-  );
-}
-
-async function updateTagsBatch(
-  soClient: SavedObjectsClientContract,
-  esClient: ElasticsearchClient,
-  givenAgents: Agent[],
-  outgoingErrors: Record<Agent['id'], Error>,
-  tagsToAdd: string[],
-  tagsToRemove: string[],
-  agentIds?: string[],
-  skipSuccess?: boolean
-): Promise<{ items: BulkActionResult[] }> {
-  const errors: Record<Agent['id'], Error> = { ...outgoingErrors };
-
-  const filteredAgents = await filterHostedPolicies(
-    soClient,
-    givenAgents,
-    errors,
-    `Cannot modify tags on a hosted agent`
-  );
-
-  const getNewTags = (agent: Agent): string[] => {
-    const existingTags = agent.tags ?? [];
-
-    if (tagsToAdd.length === 1 && tagsToRemove.length === 1) {
-      const removableTagIndex = existingTags.indexOf(tagsToRemove[0]);
-      if (removableTagIndex > -1) {
-        const newTags = uniq([
-          ...existingTags.slice(0, removableTagIndex),
-          tagsToAdd[0],
-          ...existingTags.slice(removableTagIndex + 1),
-        ]);
-        return newTags;
-      }
-    }
-    return uniq(difference(existingTags, tagsToRemove).concat(tagsToAdd));
-  };
-
-  await bulkUpdateAgents(
-    esClient,
-    filteredAgents.map((agent) => ({
-      agentId: agent.id,
-      data: {
-        tags: getNewTags(agent),
-      },
-    }))
-  );
-
-  return { items: errorsToResults(filteredAgents, errors, agentIds, skipSuccess) };
+  });
 }

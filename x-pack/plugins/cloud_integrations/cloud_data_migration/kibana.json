@@ -1,0 +1,15 @@
+{
+  "id": "cloudDataMigration",
+  "version": "1.0.0",
+  "kibanaVersion": "kibana",
+  "owner": {
+    "name": "Platform Onboarding",
+    "githubTeam": "platform-onboarding"
+  },
+  "description": "Static migration page where self-managed users can see text/copy about migrating to Elastic Cloud",
+  "server": true,
+  "ui": true,
+  "configPath": ["xpack", "cloud_integrations", "data_migration"],
+  "requiredPlugins": ["cloud", "management", "kibanaReact", "features"],
+  "requiredBundles": [ "kibanaReact" ]
+}

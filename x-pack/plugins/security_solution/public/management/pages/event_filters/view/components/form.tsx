@@ -27,15 +27,19 @@ import { OperatingSystem } from '@kbn/securitysolution-utils';
 
 import { getExceptionBuilderComponentLazy } from '@kbn/lists-plugin/public';
 import type { OnChangeProps } from '@kbn/lists-plugin/public';
+import type { ValueSuggestionsGetFn } from '@kbn/unified-search-plugin/public/autocomplete/providers/value_suggestion_provider';
+import {
+  ENDPOINT_FIELDS_SEARCH_STRATEGY,
+  eventsIndexPattern,
+} from '../../../../../../common/endpoint/constants';
+import { useSuggestions } from '../../../../hooks/use_suggestions';
 import { useTestIdGenerator } from '../../../../hooks/use_test_id_generator';
 import type { PolicyData } from '../../../../../../common/endpoint/types';
-import { AddExceptionComments } from '../../../../../common/components/exceptions/add_exception_comments';
 import { useFetchIndex } from '../../../../../common/containers/source';
 import { Loader } from '../../../../../common/components/loader';
 import { useLicense } from '../../../../../common/hooks/use_license';
 import { useKibana } from '../../../../../common/lib/kibana';
 import type { ArtifactFormComponentProps } from '../../../../components/artifact_list_page';
-import { filterIndexPatterns } from '../../../../../common/components/exceptions/helpers';
 import {
   isArtifactGlobal,
   getPolicyIdsFromArtifact,
@@ -57,6 +61,9 @@ import { ENDPOINT_EVENT_FILTERS_LIST_ID, EVENT_FILTER_LIST_TYPE } from '../../co
 import type { EffectedPolicySelection } from '../../../../components/effected_policy_select';
 import { EffectedPolicySelect } from '../../../../components/effected_policy_select';
 import { isGlobalPolicyEffected } from '../../../../components/effected_policy_select/utils';
+import { ExceptionItemComments } from '../../../../../detection_engine/rule_exceptions/components/item_comments';
+import { filterIndexPatterns } from '../../../../../detection_engine/rule_exceptions/utils/helpers';
+import { EventFiltersApiClient } from '../../service/api_client';
 
 const OPERATING_SYSTEMS: readonly OperatingSystem[] = [
   OperatingSystem.MAC,
@@ -113,8 +120,17 @@ type EventFilterItemEntries = Array<{
 export const EventFiltersForm: React.FC<ArtifactFormComponentProps & { allowSelectOs?: boolean }> =
   memo(({ allowSelectOs = true, item: exception, policies, policiesIsLoading, onChange, mode }) => {
     const getTestId = useTestIdGenerator('eventFilters-form');
-    const { http, unifiedSearch } = useKibana().services;
+    const { http } = useKibana().services;
 
+    const getSuggestionsFn = useCallback<ValueSuggestionsGetFn>(
+      ({ field, query }) => {
+        const eventFiltersAPIClient = new EventFiltersApiClient(http);
+        return eventFiltersAPIClient.getSuggestions({ field: field.name, query });
+      },
+      [http]
+    );
+
+    const autocompleteSuggestions = useSuggestions(getSuggestionsFn);
     const [hasFormChanged, setHasFormChanged] = useState(false);
     const [hasNameError, toggleHasNameError] = useState<boolean>(!exception.name);
     const [newComment, setNewComment] = useState('');
@@ -129,8 +145,13 @@ export const EventFiltersForm: React.FC<ArtifactFormComponentProps & { allowSele
 
     const [hasDuplicateFields, setHasDuplicateFields] = useState<boolean>(false);
     // This value has to be memoized to avoid infinite useEffect loop on useFetchIndex
-    const indexNames = useMemo(() => ['logs-endpoint.events.*'], []);
-    const [isIndexPatternLoading, { indexPatterns }] = useFetchIndex(indexNames);
+    const indexNames = useMemo(() => [eventsIndexPattern], []);
+    const [isIndexPatternLoading, { indexPatterns }] = useFetchIndex(
+      indexNames,
+      undefined,
+      ENDPOINT_FIELDS_SEARCH_STRATEGY
+    );
+
     const [areConditionsValid, setAreConditionsValid] = useState(
       !!exception.entries.length || false
     );
@@ -316,7 +337,7 @@ export const EventFiltersForm: React.FC<ArtifactFormComponentProps & { allowSele
     );
     const commentsInputMemo = useMemo(
       () => (
-        <AddExceptionComments
+        <ExceptionItemComments
           exceptionItemComments={existingComments}
           newCommentValue={newComment}
           newCommentOnChange={handleOnChangeComment}
@@ -416,7 +437,7 @@ export const EventFiltersForm: React.FC<ArtifactFormComponentProps & { allowSele
         getExceptionBuilderComponentLazy({
           allowLargeValueLists: false,
           httpService: http,
-          autocompleteService: unifiedSearch.autocomplete,
+          autocompleteService: autocompleteSuggestions,
           exceptionListItems: [eventFilterItem as ExceptionListItemSchema],
           listType: EVENT_FILTER_LIST_TYPE,
           listId: ENDPOINT_EVENT_FILTERS_LIST_ID,
@@ -434,7 +455,14 @@ export const EventFiltersForm: React.FC<ArtifactFormComponentProps & { allowSele
           operatorsList: EVENT_FILTERS_OPERATORS,
           osTypes: exception.os_types,
         }),
-      [unifiedSearch, handleOnBuilderChange, http, indexPatterns, exception, eventFilterItem]
+      [
+        autocompleteSuggestions,
+        handleOnBuilderChange,
+        http,
+        indexPatterns,
+        exception,
+        eventFilterItem,
+      ]
     );
 
     // conditions

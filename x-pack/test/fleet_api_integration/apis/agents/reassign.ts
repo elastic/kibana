@@ -107,7 +107,7 @@ export default function (providerContext: FtrProviderContext) {
       });
 
       it('should allow to reassign multiple agents by id -- mix valid & invalid', async () => {
-        const { body } = await supertest
+        await supertest
           .post(`/api/fleet/agents/bulk_reassign`)
           .set('kbn-xsrf', 'xxx')
           .send({
@@ -115,32 +115,24 @@ export default function (providerContext: FtrProviderContext) {
             policy_id: 'policy2',
           });
 
-        expect(body).to.eql({
-          agent2: { success: true },
-          INVALID_ID: {
-            success: false,
-            error: 'Cannot find agent INVALID_ID',
-          },
-          agent3: { success: true },
-          MISSING_ID: {
-            success: false,
-            error: 'Cannot find agent MISSING_ID',
-          },
-          etc: {
-            success: false,
-            error: 'Cannot find agent etc',
-          },
-        });
-
         const [agent2data, agent3data] = await Promise.all([
           supertest.get(`/api/fleet/agents/agent2`),
           supertest.get(`/api/fleet/agents/agent3`),
         ]);
         expect(agent2data.body.item.policy_id).to.eql('policy2');
         expect(agent3data.body.item.policy_id).to.eql('policy2');
+
+        const { body } = await supertest
+          .get(`/api/fleet/agents/action_status`)
+          .set('kbn-xsrf', 'xxx');
+        const actionStatus = body.items[0];
+
+        expect(actionStatus.status).to.eql('FAILED');
+        expect(actionStatus.nbAgentsActionCreated).to.eql(2);
+        expect(actionStatus.nbAgentsFailed).to.eql(3);
       });
 
-      it('should allow to reassign multiple agents by id -- mixed invalid, hosted, etc', async () => {
+      it('should return error when none of the agents can be reassigned -- mixed invalid, hosted, etc', async () => {
         // agent1 is enrolled in policy1. set policy1 to hosted
         await supertest
           .put(`/api/fleet/agent_policies/policy1`)
@@ -154,24 +146,9 @@ export default function (providerContext: FtrProviderContext) {
           .send({
             agents: ['agent2', 'INVALID_ID', 'agent3'],
             policy_id: 'policy2',
-          });
-
-        expect(body).to.eql({
-          agent2: {
-            success: false,
-            error:
-              'Cannot reassign an agent from hosted agent policy policy1 in Fleet because the agent policy is managed by an external orchestration solution, such as Elastic Cloud, Kubernetes, etc. Please make changes using your orchestration solution.',
-          },
-          INVALID_ID: {
-            success: false,
-            error: 'Cannot find agent INVALID_ID',
-          },
-          agent3: {
-            success: false,
-            error:
-              'Cannot reassign an agent from hosted agent policy policy1 in Fleet because the agent policy is managed by an external orchestration solution, such as Elastic Cloud, Kubernetes, etc. Please make changes using your orchestration solution.',
-          },
-        });
+          })
+          .expect(400);
+        expect(body.message).to.eql('No agents to reassign, already assigned or hosted agents');
 
         const [agent2data, agent3data] = await Promise.all([
           supertest.get(`/api/fleet/agents/agent2`),
@@ -199,7 +176,7 @@ export default function (providerContext: FtrProviderContext) {
       });
 
       it('should bulk reassign multiple agents by kuery in batches', async () => {
-        const { body: unenrolledBody } = await supertest
+        const { body } = await supertest
           .post(`/api/fleet/agents/bulk_reassign`)
           .set('kbn-xsrf', 'xxx')
           .send({
@@ -209,17 +186,37 @@ export default function (providerContext: FtrProviderContext) {
           })
           .expect(200);
 
-        expect(unenrolledBody).to.eql({
-          agent1: { success: true },
-          agent2: { success: true },
-          agent3: { success: true },
-          agent4: { success: true },
-        });
+        const actionId = body.actionId;
 
-        const { body } = await supertest.get(`/api/fleet/agents`).set('kbn-xsrf', 'xxx');
-        expect(body.total).to.eql(4);
-        body.items.forEach((agent: any) => {
-          expect(agent.policy_id).to.eql('policy2');
+        const verifyActionResult = async () => {
+          const { body: result } = await supertest.get(`/api/fleet/agents`).set('kbn-xsrf', 'xxx');
+          expect(result.total).to.eql(4);
+          result.items.forEach((agent: any) => {
+            expect(agent.policy_id).to.eql('policy2');
+          });
+        };
+
+        await new Promise((resolve, reject) => {
+          let attempts = 0;
+          const intervalId = setInterval(async () => {
+            if (attempts > 2) {
+              clearInterval(intervalId);
+              reject('action timed out');
+            }
+            ++attempts;
+            const {
+              body: { items: actionStatuses },
+            } = await supertest.get(`/api/fleet/agents/action_status`).set('kbn-xsrf', 'xxx');
+
+            const action = actionStatuses.find((a: any) => a.actionId === actionId);
+            if (action && action.nbAgentsActioned === action.nbAgentsActionCreated) {
+              clearInterval(intervalId);
+              await verifyActionResult();
+              resolve({});
+            }
+          }, 1000);
+        }).catch((e) => {
+          throw e;
         });
       });
 

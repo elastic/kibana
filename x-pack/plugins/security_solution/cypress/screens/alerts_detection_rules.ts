@@ -22,6 +22,7 @@ export const EDIT_RULE_ACTION_BTN = '[data-test-subj="editRuleAction"]';
 export const DUPLICATE_RULE_ACTION_BTN = '[data-test-subj="duplicateRuleAction"]';
 
 export const DUPLICATE_RULE_MENU_PANEL_BTN = '[data-test-subj="rules-details-duplicate-rule"]';
+export const CONFIRM_DUPLICATE_RULE = '[data-test-subj="confirmModalConfirmButton"]';
 
 export const ENABLE_RULE_BULK_BTN = '[data-test-subj="enableRuleBulk"]';
 
@@ -30,6 +31,8 @@ export const DISABLE_RULE_BULK_BTN = '[data-test-subj="disableRuleBulk"]';
 export const DELETE_RULE_BULK_BTN = '[data-test-subj="deleteRuleBulk"]';
 
 export const DUPLICATE_RULE_BULK_BTN = '[data-test-subj="duplicateRuleBulk"]';
+
+export const RULE_SEARCH_FIELD = '[data-test-subj="ruleSearchField"]';
 
 export const ELASTIC_RULES_BTN = '[data-test-subj="showElasticRulesFilterButton"]';
 
@@ -58,8 +61,6 @@ export const RULES_TABLE_AUTOREFRESH_INDICATOR = '[data-test-subj="loadingRulesI
 
 export const RISK_SCORE = '[data-test-subj="riskScore"]';
 
-export const RELOAD_PREBUILT_RULES_BTN = '[data-test-subj="reloadPrebuiltRulesBtn"]';
-
 export const SECOND_RULE = 1;
 
 export const RULE_CHECKBOX = '.euiTableRow .euiCheckbox__input';
@@ -74,11 +75,9 @@ export const RULES_TABLE = '[data-test-subj="rules-table"]';
 
 export const RULES_ROW = '.euiTableRow';
 
-export const RULES_MONITORING_TABLE = '[data-test-subj="allRulesTableTab-monitoring"]';
+export const RULES_MONITORING_TABLE = '[role="tablist"] > [data-test-subj="navigation-monitoring"]';
 
 export const SEVERITY = '[data-test-subj="severity"]';
-
-export const SHOWING_RULES_TEXT = '[data-test-subj="showingRules"]';
 
 export const SORT_RULES_BTN = '[data-test-subj="tableHeaderSortButton"]';
 
@@ -89,9 +88,6 @@ export const rowsPerPageSelector = (count: number) =>
 
 export const pageSelector = (pageNumber: number) =>
   `[data-test-subj="pagination-button-${pageNumber - 1}"]`;
-
-export const ruleCheckboxByIdSelector = (id: string) =>
-  `[data-test-subj="checkboxSelectRow-${id}"]`;
 
 export const SELECT_ALL_RULES_BTN = '[data-test-subj="selectAllRules"]';
 

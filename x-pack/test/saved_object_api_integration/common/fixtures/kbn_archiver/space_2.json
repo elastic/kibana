@@ -1,0 +1,58 @@
+{
+  "attributes": {
+    "title": "logstash-*"
+  },
+  "coreMigrationVersion": "8.4.0",
+  "id": "space2-index-pattern-id",
+  "migrationVersion": {
+    "index-pattern": "8.0.0"
+  },
+  "references": [],
+  "type": "index-pattern",
+  "updated_at": "2017-09-21T18:49:16.270Z",
+  "version": "WzUyOSwxXQ=="
+}
+
+{
+  "attributes": {
+    "description": "",
+    "kibanaSavedObjectMeta": {
+      "searchSourceJSON": "{\"index\":\"space2-index-pattern-id\",\"filter\":[],\"query\":{\"query\":\"\",\"language\":\"lucene\"}}"
+    },
+    "title": "Count of requests",
+    "version": 1
+  },
+  "id": "space2-isolatedtype-id",
+  "references": [],
+  "type": "isolatedtype",
+  "updated_at": "2017-09-21T18:49:16.270Z",
+  "version": "WzQ4NywxXQ=="
+}
+
+{
+  "attributes": {
+    "title": "Requests",
+    "kibanaSavedObjectMeta": {
+      "searchSourceJSON": "{\"query\":{\"query\":\"\",\"language\":\"lucene\"},\"filter\":[],\"highlightAll\":true,\"version\":true}"
+    },
+    "version": 1
+  },
+  "coreMigrationVersion": "8.4.0",
+  "id": "space2-dashboard-id",
+  "migrationVersion": {
+    "dashboard": "8.4.0"
+  },
+  "type": "dashboard",
+  "updated_at": "2017-09-21T18:49:16.270Z",
+  "version": "WzUyMCwxXQ=="
+}
+
+{
+  "attributes": {
+    "title": "A shared saved-object only in space_2"
+  },
+  "id": "only_space_2",
+  "type": "sharedtype",
+  "updated_at": "2017-09-21T18:59:16.270Z",
+  "version": "WzQ4OCwxXQ=="
+}

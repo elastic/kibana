@@ -23,18 +23,14 @@ export type { SavedObject };
 export type FieldFormatMap = Record<string, SerializedFieldFormat>;
 
 /**
- * Runtime field - type of value returned
- * @public
+ * Runtime field types
  */
-
 export type RuntimeType = typeof RUNTIME_FIELD_TYPES[number];
 
 /**
- * Primitive runtime field types
- * @public
+ * Runtime field primitive types - excluding composite
  */
-
-export type RuntimeTypeExceptComposite = Exclude<RuntimeType, 'composite'>;
+export type RuntimePrimitiveTypes = Exclude<RuntimeType, 'composite'>;
 
 /**
  * Runtime field definition
@@ -61,11 +57,14 @@ export type RuntimeFieldBase = {
  * The RuntimeField that will be sent in the ES Query "runtime_mappings" object
  */
 export type RuntimeFieldSpec = RuntimeFieldBase & {
+  /**
+   * Composite subfields
+   */
   fields?: Record<
     string,
     {
       // It is not recursive, we can't create a composite inside a composite.
-      type: RuntimeTypeExceptComposite;
+      type: RuntimePrimitiveTypes;
     }
   >;
 };
@@ -98,18 +97,18 @@ export interface RuntimeField extends RuntimeFieldBase, FieldConfiguration {
   /**
    * Subfields of composite field
    */
-  fields?: Record<string, RuntimeFieldSubField>;
+  fields?: RuntimeFieldSubFields;
 }
+
+export type RuntimeFieldSubFields = Record<string, RuntimeFieldSubField>;
 
 /**
  * Runtime field composite subfield
  * @public
  */
 export interface RuntimeFieldSubField extends FieldConfiguration {
-  /**
-   * Type of runtime field, can only be primitive type
-   */
-  type: RuntimeTypeExceptComposite;
+  // It is not recursive, we can't create a composite inside a composite.
+  type: RuntimePrimitiveTypes;
 }
 
 /**
@@ -314,7 +313,9 @@ export interface GetFieldsOptions {
   metaFields?: string[];
   rollupIndex?: string;
   allowNoIndex?: boolean;
-  filter?: QueryDslQueryContainer;
+  indexFilter?: QueryDslQueryContainer;
+  includeUnmapped?: boolean;
+  fields?: string[];
 }
 
 /**
@@ -448,6 +449,10 @@ export type FieldSpec = DataViewFieldBase & {
    * Is this field in the mapping? False if a scripted or runtime field defined on the data view.
    */
   isMapped?: boolean;
+  /**
+   * Name of parent field for composite runtime field subfields.
+   */
+  parentName?: string;
 };
 
 export type DataViewFieldMap = Record<string, FieldSpec>;

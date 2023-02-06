@@ -8,32 +8,28 @@
 /* eslint-disable max-classes-per-file */
 import type { ElasticsearchErrorDetails } from '@kbn/es-errors';
 
-import type { FleetErrorType } from '../../common/types';
+import { FleetError } from '../../common/errors';
 
 import { isESClientError } from './utils';
-
-export { defaultIngestErrorHandler, ingestErrorToResponseOptions } from './handlers';
+export {
+  defaultFleetErrorHandler as defaultFleetErrorHandler,
+  fleetErrorToResponseOptions,
+} from './handlers';
 
 export { isESClientError } from './utils';
-export class IngestManagerError extends Error {
-  attributes?: { type: FleetErrorType };
-  constructor(message?: string, public readonly meta?: unknown) {
-    super(message);
-    this.name = this.constructor.name; // for stack traces
-  }
-}
+export { FleetError as FleetError } from '../../common/errors';
 
-export class RegistryError extends IngestManagerError {}
+export class RegistryError extends FleetError {}
 export class RegistryConnectionError extends RegistryError {}
 export class RegistryResponseError extends RegistryError {
   constructor(message?: string, public readonly status?: number) {
     super(message);
   }
 }
-export class PackageNotFoundError extends IngestManagerError {}
-export class PackageKeyInvalidError extends IngestManagerError {}
-export class PackageOutdatedError extends IngestManagerError {}
-export class PackageFailedVerificationError extends IngestManagerError {
+export class PackageNotFoundError extends FleetError {}
+export class PackageKeyInvalidError extends FleetError {}
+export class PackageOutdatedError extends FleetError {}
+export class PackageFailedVerificationError extends FleetError {
   constructor(pkgName: string, pkgVersion: string) {
     super(`${pkgName}-${pkgVersion} failed signature verification.`);
     this.attributes = {
@@ -41,54 +37,57 @@ export class PackageFailedVerificationError extends IngestManagerError {
     };
   }
 }
-export class AgentPolicyError extends IngestManagerError {}
-export class AgentPolicyNotFoundError extends IngestManagerError {}
-export class AgentNotFoundError extends IngestManagerError {}
-export class AgentActionNotFoundError extends IngestManagerError {}
+export class AgentPolicyError extends FleetError {}
+export class AgentPolicyNotFoundError extends FleetError {}
+export class AgentNotFoundError extends FleetError {}
+export class AgentActionNotFoundError extends FleetError {}
 export class AgentPolicyNameExistsError extends AgentPolicyError {}
-export class PackageUnsupportedMediaTypeError extends IngestManagerError {}
-export class PackageInvalidArchiveError extends IngestManagerError {}
-export class PackageCacheError extends IngestManagerError {}
-export class PackageOperationNotSupportedError extends IngestManagerError {}
-export class ConcurrentInstallOperationError extends IngestManagerError {}
-export class AgentReassignmentError extends IngestManagerError {}
-export class PackagePolicyIneligibleForUpgradeError extends IngestManagerError {}
-export class PackagePolicyValidationError extends IngestManagerError {}
-export class PackagePolicyNotFoundError extends IngestManagerError {}
-export class BundledPackageNotFoundError extends IngestManagerError {}
-export class HostedAgentPolicyRestrictionRelatedError extends IngestManagerError {
+export class PackageUnsupportedMediaTypeError extends FleetError {}
+export class PackageInvalidArchiveError extends FleetError {}
+export class PackageCacheError extends FleetError {}
+export class PackageOperationNotSupportedError extends FleetError {}
+export class ConcurrentInstallOperationError extends FleetError {}
+export class AgentReassignmentError extends FleetError {}
+export class PackagePolicyIneligibleForUpgradeError extends FleetError {}
+export class PackagePolicyValidationError extends FleetError {}
+export class PackagePolicyNotFoundError extends FleetError {}
+export class BundledPackageNotFoundError extends FleetError {}
+export class HostedAgentPolicyRestrictionRelatedError extends FleetError {
   constructor(message = 'Cannot perform that action') {
     super(
       `${message} in Fleet because the agent policy is managed by an external orchestration solution, such as Elastic Cloud, Kubernetes, etc. Please make changes using your orchestration solution.`
     );
   }
 }
-export class PackagePolicyRestrictionRelatedError extends IngestManagerError {
+export class PackagePolicyRestrictionRelatedError extends FleetError {
   constructor(message = 'Cannot perform that action') {
     super(
       `${message} in Fleet because the package policy is managed by an external orchestration solution, such as Elastic Cloud, Kubernetes, etc. Please make changes using your orchestration solution.`
     );
   }
 }
-export class FleetEncryptedSavedObjectEncryptionKeyRequired extends IngestManagerError {}
-export class FleetSetupError extends IngestManagerError {}
-export class GenerateServiceTokenError extends IngestManagerError {}
-export class FleetUnauthorizedError extends IngestManagerError {}
+export class FleetEncryptedSavedObjectEncryptionKeyRequired extends FleetError {}
+export class FleetSetupError extends FleetError {}
+export class GenerateServiceTokenError extends FleetError {}
+export class FleetUnauthorizedError extends FleetError {}
 
-export class OutputUnauthorizedError extends IngestManagerError {}
-export class OutputInvalidError extends IngestManagerError {}
-export class OutputLicenceError extends IngestManagerError {}
-export class DownloadSourceError extends IngestManagerError {}
+export class OutputUnauthorizedError extends FleetError {}
+export class OutputInvalidError extends FleetError {}
+export class OutputLicenceError extends FleetError {}
+export class DownloadSourceError extends FleetError {}
 
-export class ArtifactsClientError extends IngestManagerError {}
-export class ArtifactsClientAccessDeniedError extends IngestManagerError {
+export class FleetServerHostUnauthorizedError extends FleetError {}
+export class FleetProxyUnauthorizedError extends FleetError {}
+
+export class ArtifactsClientError extends FleetError {}
+export class ArtifactsClientAccessDeniedError extends FleetError {
   constructor(deniedPackageName: string, allowedPackageName: string) {
     super(
       `Access denied. Artifact package name (${deniedPackageName}) does not match ${allowedPackageName}`
     );
   }
 }
-export class ArtifactsElasticsearchError extends IngestManagerError {
+export class ArtifactsElasticsearchError extends FleetError {
   readonly requestDetails: string;
 
   constructor(public readonly meta: Error) {

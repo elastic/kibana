@@ -2,24 +2,25 @@
 
 exports[`KibanaPageTemplate render basic template 1`] = `
 <div
-  class="euiPage euiPage--grow euiPageTemplate kbnPageTemplate"
+  class="euiPage euiPageTemplate kbnPageTemplate emotion-euiPage-row-grow"
   style="min-height:460px"
 >
   <div
-    class="euiPageBody euiPageBody--borderRadiusNone"
+    class="euiPageBody emotion-euiPageBody"
   >
     <header
-      class="euiPageHeader euiPageHeader--paddingLarge euiPageHeader--restrictWidth-default euiPageHeader--responsive euiPageHeader--center"
+      class="euiPageHeader emotion-euiPageHeader-l-border"
       title="test"
     >
       <div
-        class="euiPageHeaderContent"
+        class="euiPageHeaderContent emotion-euiPageHeaderContent-l"
+        style="max-width:1200px"
       >
         <div
-          class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsBaseline euiFlexGroup--directionRow euiFlexGroup--responsive euiPageHeaderContent__top"
+          class="euiFlexGroup euiPageHeaderContent__top emotion-euiFlexGroup-responsive-l-flexStart-stretch-row"
         >
           <div
-            class="euiFlexItem"
+            class="euiFlexItem emotion-euiFlexItem-grow-1"
           >
             <div
               class="euiText emotion-euiText-constrainedWidth-m"
@@ -30,13 +31,13 @@ exports[`KibanaPageTemplate render basic template 1`] = `
             </div>
           </div>
           <div
-            class="euiFlexItem euiFlexItem--flexGrowZero"
+            class="euiFlexItem emotion-euiFlexItem-growZero"
           >
             <div
-              class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--wrap euiPageHeaderContent__rightSideItems"
+              class="euiFlexGroup emotion-euiFlexGroup-wrap-l-flexStart-stretch-rowReverse"
             >
               <div
-                class="euiFlexItem euiFlexItem--flexGrowZero"
+                class="euiFlexItem emotion-euiFlexItem-growZero"
               >
                 test
               </div>
@@ -50,7 +51,7 @@ exports[`KibanaPageTemplate render basic template 1`] = `
       role="main"
     >
       <div
-        class="euiPageContentBody euiPage--paddingLarge euiPage--restrictWidth-default"
+        class="euiPageContentBody euiPageContentBody--paddingLarge euiPageContentBody--restrictWidth-default"
       />
     </div>
   </div>
@@ -187,7 +188,7 @@ exports[`KibanaPageTemplate render noDataContent 1`] = `
 
 exports[`KibanaPageTemplate render solutionNav 1`] = `
 <div
-  class="euiPage euiPage--grow euiPageTemplate kbnPageTemplate"
+  class="euiPage euiPageTemplate kbnPageTemplate emotion-euiPage-row-grow"
   style="min-height:460px"
 >
   <div
@@ -369,7 +370,7 @@ exports[`KibanaPageTemplate render solutionNav 1`] = `
     </nav>
     <button
       aria-label="Collapse side navigation"
-      class="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--small kbnPageTemplateSolutionNavCollapseButton"
+      class="euiButtonIcon euiButtonIcon--small kbnPageTemplateSolutionNavCollapseButton emotion-euiButtonIcon-empty-text-hoverStyles"
       title="Collapse side navigation"
       type="button"
     >
@@ -382,23 +383,24 @@ exports[`KibanaPageTemplate render solutionNav 1`] = `
     </button>
   </div>
   <div
-    class="euiPanel euiPanel--plain euiPageBody euiPageBody--borderRadiusNone emotion-euiPanel-grow-none-plain-hasShadow"
+    class="euiPanel euiPanel--plain euiPageBody emotion-euiPanel-grow-none-plain-hasShadow-euiPageBody"
   >
     <div
-      class="euiPageBody euiPageBody--borderRadiusNone euiPageBody--paddingLarge"
+      class="euiPageBody emotion-euiPageBody-l"
     >
       <header
-        class="euiPageHeader euiPageHeader--restrictWidth-default euiPageHeader--bottomBorder euiPageHeader--responsive euiPageHeader--center"
+        class="euiPageHeader emotion-euiPageHeader-headerMargin"
         title="test"
       >
         <div
-          class="euiPageHeaderContent"
+          class="euiPageHeaderContent emotion-euiPageHeaderContent-border-l"
+          style="max-width:1200px"
         >
           <div
-            class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsBaseline euiFlexGroup--directionRow euiFlexGroup--responsive euiPageHeaderContent__top"
+            class="euiFlexGroup euiPageHeaderContent__top emotion-euiFlexGroup-responsive-l-flexStart-stretch-row"
           >
             <div
-              class="euiFlexItem"
+              class="euiFlexItem emotion-euiFlexItem-grow-1"
             >
               <div
                 class="euiText emotion-euiText-constrainedWidth-m"
@@ -409,13 +411,13 @@ exports[`KibanaPageTemplate render solutionNav 1`] = `
               </div>
             </div>
             <div
-              class="euiFlexItem euiFlexItem--flexGrowZero"
+              class="euiFlexItem emotion-euiFlexItem-growZero"
             >
               <div
-                class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--wrap euiPageHeaderContent__rightSideItems"
+                class="euiFlexGroup emotion-euiFlexGroup-wrap-l-flexStart-stretch-rowReverse"
               >
                 <div
-                  class="euiFlexItem euiFlexItem--flexGrowZero"
+                  class="euiFlexItem emotion-euiFlexItem-growZero"
                 >
                   test
                 </div>
@@ -429,7 +431,7 @@ exports[`KibanaPageTemplate render solutionNav 1`] = `
         role="main"
       >
         <div
-          class="euiPageContentBody euiPage--restrictWidth-default"
+          class="euiPageContentBody euiPageContentBody--restrictWidth-default"
         />
       </div>
     </div>

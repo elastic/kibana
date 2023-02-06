@@ -23,6 +23,7 @@
         ],
         "path": "x-pack/plugins/runtime_fields/public/components/runtime_field_editor/runtime_field_editor.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "runtimeFields",
@@ -42,6 +43,7 @@
             ],
             "path": "x-pack/plugins/runtime_fields/public/components/runtime_field_editor/runtime_field_editor.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -68,6 +70,7 @@
         ],
         "path": "x-pack/plugins/runtime_fields/public/components/runtime_field_editor_flyout_content/runtime_field_editor_flyout_content.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "runtimeFields",
@@ -87,6 +90,7 @@
             ],
             "path": "x-pack/plugins/runtime_fields/public/components/runtime_field_editor_flyout_content/runtime_field_editor_flyout_content.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -104,6 +108,7 @@
         "description": [],
         "path": "x-pack/plugins/runtime_fields/public/components/runtime_field_form/runtime_field_form.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "runtimeFields",
@@ -116,7 +121,8 @@
               "boolean | undefined"
             ],
             "path": "x-pack/plugins/runtime_fields/public/components/runtime_field_form/runtime_field_form.tsx",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "runtimeFields",
@@ -126,7 +132,8 @@
             "label": "isSubmitted",
             "description": [],
             "path": "x-pack/plugins/runtime_fields/public/components/runtime_field_form/runtime_field_form.tsx",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "runtimeFields",
@@ -148,6 +155,7 @@
             ],
             "path": "x-pack/plugins/runtime_fields/public/components/runtime_field_form/runtime_field_form.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "returnComment": [],
             "children": [
               {
@@ -161,7 +169,8 @@
                   "React.MouseEvent<Element, MouseEvent> | React.FormEvent<HTMLFormElement> | undefined"
                 ],
                 "path": "src/plugins/es_ui_shared/static/forms/hook_form_lib/types.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               }
             ]
           }
@@ -177,6 +186,7 @@
         "description": [],
         "path": "x-pack/plugins/runtime_fields/public/components/runtime_field_editor_flyout_content/runtime_field_editor_flyout_content.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "runtimeFields",
@@ -200,6 +210,7 @@
             ],
             "path": "x-pack/plugins/runtime_fields/public/components/runtime_field_editor_flyout_content/runtime_field_editor_flyout_content.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "runtimeFields",
@@ -219,6 +230,7 @@
                 ],
                 "path": "x-pack/plugins/runtime_fields/public/components/runtime_field_editor_flyout_content/runtime_field_editor_flyout_content.tsx",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -238,6 +250,7 @@
             ],
             "path": "x-pack/plugins/runtime_fields/public/components/runtime_field_editor_flyout_content/runtime_field_editor_flyout_content.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -251,10 +264,17 @@
               "\nThe docLinks start service from core"
             ],
             "signature": [
-              "DocLinksStart"
+              {
+                "pluginId": "@kbn/core-doc-links-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreDocLinksBrowserPluginApi",
+                "section": "def-common.DocLinksStart",
+                "text": "DocLinksStart"
+              }
             ],
             "path": "x-pack/plugins/runtime_fields/public/components/runtime_field_editor_flyout_content/runtime_field_editor_flyout_content.tsx",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "runtimeFields",
@@ -276,7 +296,8 @@
               " | undefined"
             ],
             "path": "x-pack/plugins/runtime_fields/public/components/runtime_field_editor_flyout_content/runtime_field_editor_flyout_content.tsx",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "runtimeFields",
@@ -291,7 +312,8 @@
               "{ namesNotAllowed?: string[] | undefined; existingConcreteFields?: Field[] | undefined; } | undefined"
             ],
             "path": "x-pack/plugins/runtime_fields/public/components/runtime_field_editor_flyout_content/runtime_field_editor_flyout_content.tsx",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -305,6 +327,7 @@
         "description": [],
         "path": "x-pack/plugins/runtime_fields/public/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "runtimeFields",
@@ -314,7 +337,8 @@
             "label": "name",
             "description": [],
             "path": "x-pack/plugins/runtime_fields/public/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "runtimeFields",
@@ -327,7 +351,8 @@
               "\"boolean\" | \"date\" | \"keyword\" | \"ip\" | \"long\" | \"double\""
             ],
             "path": "x-pack/plugins/runtime_fields/public/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "runtimeFields",
@@ -340,7 +365,8 @@
               "{ source: string; }"
             ],
             "path": "x-pack/plugins/runtime_fields/public/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -361,6 +387,7 @@
         ],
         "path": "x-pack/plugins/runtime_fields/public/constants.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -375,6 +402,7 @@
         ],
         "path": "x-pack/plugins/runtime_fields/public/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       }
     ],
@@ -388,6 +416,7 @@
       "description": [],
       "path": "x-pack/plugins/runtime_fields/public/types.ts",
       "deprecated": false,
+      "trackAdoption": false,
       "children": [
         {
           "parentPluginId": "runtimeFields",
@@ -403,6 +432,7 @@
           ],
           "path": "x-pack/plugins/runtime_fields/public/types.ts",
           "deprecated": false,
+          "trackAdoption": false,
           "children": [],
           "returnComment": []
         }

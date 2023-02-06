@@ -18,12 +18,9 @@ import { useNavigation } from '../../../lib/kibana/hooks';
 import type { NavTab } from '../types';
 import { SecurityNavGroupKey } from '../types';
 import { SecurityPageName } from '../../../../../common/constants';
-import { useCanSeeHostIsolationExceptionsMenu } from '../../../../management/pages/host_isolation_exceptions/view/hooks';
 import { useIsExperimentalFeatureEnabled } from '../../../hooks/use_experimental_features';
 import { useGlobalQueryString } from '../../../utils/global_query_string';
-import { useMlCapabilities } from '../../ml/hooks/use_ml_capabilities';
-import { hasMlUserPermissions } from '../../../../../common/machine_learning/has_ml_user_permissions';
-import { hasMlLicense } from '../../../../../common/machine_learning/has_ml_license';
+import { useUserPrivileges } from '../../user_privileges';
 
 export const usePrimaryNavigationItems = ({
   navTabs,
@@ -73,13 +70,10 @@ export const usePrimaryNavigationItems = ({
 
 function usePrimaryNavigationItemsToDisplay(navTabs: Record<string, NavTab>) {
   const hasCasesReadPermissions = useGetUserCasesPermissions().read;
-  const canSeeHostIsolationExceptions = useCanSeeHostIsolationExceptionsMenu();
+  const { canReadActionsLogManagement, canReadHostIsolationExceptions } =
+    useUserPrivileges().endpointPrivileges;
   const isPolicyListEnabled = useIsExperimentalFeatureEnabled('policyListEnabled');
-  const mlCapabilities = useMlCapabilities();
-  const hasMlPermissions = hasMlLicense(mlCapabilities) && hasMlUserPermissions(mlCapabilities);
-  const isEntityAnalyticsDashboardEnabled = useIsExperimentalFeatureEnabled(
-    'entityAnalyticsDashboardEnabled'
-  );
+
   const uiCapabilities = useKibana().services.application.capabilities;
   return useMemo(
     () =>
@@ -96,11 +90,9 @@ function usePrimaryNavigationItemsToDisplay(navTabs: Record<string, NavTab>) {
                 navTabs[SecurityPageName.overview],
                 navTabs[SecurityPageName.detectionAndResponse],
                 navTabs[SecurityPageName.cloudSecurityPostureDashboard],
+                navTabs[SecurityPageName.entityAnalytics],
                 ...(navTabs[SecurityPageName.kubernetes] != null
                   ? [navTabs[SecurityPageName.kubernetes]]
-                  : []),
-                ...(isEntityAnalyticsDashboardEnabled && hasMlPermissions
-                  ? [navTabs[SecurityPageName.entityAnalytics]]
                   : []),
               ],
             },
@@ -139,14 +131,18 @@ function usePrimaryNavigationItemsToDisplay(navTabs: Record<string, NavTab>) {
             {
               ...securityNavGroup[SecurityNavGroupKey.manage],
               items: [
+                // TODO: also hide other management pages based on authz privileges
                 navTabs[SecurityPageName.endpoints],
                 ...(isPolicyListEnabled ? [navTabs[SecurityPageName.policies]] : []),
                 navTabs[SecurityPageName.trustedApps],
                 navTabs[SecurityPageName.eventFilters],
-                ...(canSeeHostIsolationExceptions
+                ...(canReadHostIsolationExceptions
                   ? [navTabs[SecurityPageName.hostIsolationExceptions]]
                   : []),
                 navTabs[SecurityPageName.blocklist],
+                ...(canReadActionsLogManagement
+                  ? [navTabs[SecurityPageName.responseActionsHistory]]
+                  : []),
                 navTabs[SecurityPageName.cloudSecurityPostureBenchmarks],
               ],
             },
@@ -162,11 +158,10 @@ function usePrimaryNavigationItemsToDisplay(navTabs: Record<string, NavTab>) {
     [
       uiCapabilities.siem.show,
       navTabs,
-      isEntityAnalyticsDashboardEnabled,
       hasCasesReadPermissions,
-      canSeeHostIsolationExceptions,
+      canReadHostIsolationExceptions,
+      canReadActionsLogManagement,
       isPolicyListEnabled,
-      hasMlPermissions,
     ]
   );
 }

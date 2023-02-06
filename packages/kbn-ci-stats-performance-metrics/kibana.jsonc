@@ -1,0 +1,6 @@
+{
+  "type": "shared-common",
+  "id": "@kbn/ci-stats-performance-metrics",
+  "devOnly": true,
+  "owner": "@elastic/kibana-operations"
+}

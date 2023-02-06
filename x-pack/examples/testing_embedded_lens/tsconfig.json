@@ -1,7 +1,7 @@
 {
   "extends": "../../../tsconfig.base.json",
   "compilerOptions": {
-    "outDir": "./target/types"
+    "outDir": "target/types"
   },
   "include": [
     "index.ts",
@@ -10,12 +10,17 @@
     "server/**/*.ts",
     "../../../typings/**/*"
   ],
-  "exclude": [],
-  "references": [
-    { "path": "../../../src/core/tsconfig.json" },
-    { "path": "../../../src/plugins/data/tsconfig.json" },
-    { "path": "../../../src/plugins/embeddable/tsconfig.json" },
-    { "path": "../../plugins/lens/tsconfig.json" },
-    { "path": "../../../examples/developer_examples/tsconfig.json" },
+  "exclude": [
+    "target/**/*",
+  ],
+  "kbn_references": [
+    "@kbn/core",
+    "@kbn/data-plugin",
+    "@kbn/embeddable-plugin",
+    "@kbn/lens-plugin",
+    "@kbn/developer-examples-plugin",
+    "@kbn/data-views-plugin",
+    "@kbn/ui-actions-plugin",
+    "@kbn/kibana-react-plugin",
   ]
 }

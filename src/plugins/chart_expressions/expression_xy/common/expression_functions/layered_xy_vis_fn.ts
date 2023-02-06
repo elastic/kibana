@@ -26,7 +26,13 @@ export const layeredXyVisFn: LayeredXyVisFn['fn'] = async (data, args, handlers)
   if (args.singleTable) {
     logDatatable(data, layers, handlers, args.splitColumnAccessor, args.splitRowAccessor);
   } else {
-    logDatatables(layers, handlers, args.splitColumnAccessor, args.splitRowAccessor);
+    logDatatables(
+      layers,
+      handlers,
+      args.splitColumnAccessor,
+      args.splitRowAccessor,
+      args.annotations
+    );
   }
 
   const hasBar = hasBarLayer(dataLayers);
@@ -55,6 +61,10 @@ export const layeredXyVisFn: LayeredXyVisFn['fn'] = async (data, args, handlers)
           (handlers.variables?.embeddableTitle as string) ??
           handlers.getExecutionContext?.()?.description,
       },
+      canNavigateToLens: Boolean(handlers.variables.canNavigateToLens),
+      syncColors: handlers?.isSyncColorsEnabled?.() ?? false,
+      syncTooltips: handlers?.isSyncTooltipsEnabled?.() ?? false,
+      syncCursor: handlers?.isSyncCursorEnabled?.() ?? true,
     },
   };
 };

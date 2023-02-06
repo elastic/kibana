@@ -7,7 +7,7 @@
  */
 
 import React from 'react';
-import { shallow } from 'enzyme';
+import { shallow, mount } from 'enzyme';
 import { Datatable } from '@kbn/expressions-plugin/common';
 import MetricVisComponent, { MetricVisComponentProps } from './metric_component';
 import { LabelPosition } from '../../common/constants';
@@ -76,15 +76,15 @@ describe('MetricVisComponent', function () {
       ...propOverrides,
     };
 
-    return shallow(<MetricVisComponent {...props} />);
+    return <MetricVisComponent {...props} />;
   };
 
   it('should render component', () => {
-    expect(getComponent().exists()).toBe(true);
+    expect(shallow(getComponent()).exists()).toBe(true);
   });
 
   it('should render correct structure for single metric', function () {
-    expect(getComponent()).toMatchSnapshot();
+    expect(shallow(getComponent())).toMatchSnapshot();
   });
 
   it('should render correct structure for multi-value metrics', function () {
@@ -110,6 +110,36 @@ describe('MetricVisComponent', function () {
       },
     });
 
-    expect(component).toMatchSnapshot();
+    expect(shallow(component)).toMatchSnapshot();
+  });
+
+  it('should call renderComplete once for multi-value metrics', function () {
+    const renderComplete = jest.fn();
+    const component = getComponent({
+      renderComplete,
+      filterable: [true, false],
+      visData: {
+        type: 'datatable',
+        columns: [
+          { id: 'col-0', name: '1st percentile of bytes', meta: { type: 'number' } },
+          { id: 'col-1', name: '99th percentile of bytes', meta: { type: 'number' } },
+        ],
+        rows: [{ 'col-0': 182, 'col-1': 445842.4634666484 }],
+      },
+      visParams: {
+        ...visParams,
+        dimensions: {
+          ...visParams.dimensions,
+          metrics: [
+            { accessor: 0, type: 'vis_dimension', format: { id: 'number', params: {} } },
+            { accessor: 1, type: 'vis_dimension', format: { id: 'number', params: {} } },
+          ],
+        },
+      },
+    });
+
+    mount(component);
+
+    expect(renderComplete).toHaveBeenCalledTimes(1);
   });
 });

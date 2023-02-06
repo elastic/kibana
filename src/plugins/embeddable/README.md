@@ -90,7 +90,6 @@ export class HelloWorldEmbeddableFactoryDefinition implements EmbeddableFactoryD
 The embeddable should implement the `IEmbeddable` interface, and usually, that just extends the base class `Embeddable`.
 ```tsx
 import React from 'react';
-import { render } from 'react-dom';
 import { Embeddable } from '@kbn/embeddable-plugin/public';
 
 export const HELLO_WORLD = 'HELLO_WORLD';
@@ -98,8 +97,8 @@ export const HELLO_WORLD = 'HELLO_WORLD';
 export class HelloWorld extends Embeddable {
   readonly type = HELLO_WORLD;
 
-  render(node: HTMLElement) {
-    render(<div>{this.getTitle()}</div>, node);
+  render() {
+    return <div>{this.getTitle()}</div>;
   }
 
   reload() {}
@@ -122,6 +121,21 @@ export class HelloWorld extends Embeddable {
 
   render(node: HTMLElement) {
     render(<div>{this.getTitle()}</div>, node);
+  }
+}
+```
+
+There is also an option to return a [React node](https://reactjs.org/docs/react-component.html#render) directly.
+In that case, the returned node will be automatically mounted and unmounted.
+```tsx
+import React from 'react';
+import { Embeddable } from '@kbn/embeddable-plugin/public';
+
+export class HelloWorld extends Embeddable {
+  // ...
+
+  render() {
+    return <div>{this.getTitle()}</div>;
   }
 }
 ```
@@ -150,13 +164,68 @@ export class HelloWorld extends Embeddable {
 }
 ```
 
-#### `renderError`
+In some cases, the `reload` hook can be called to force rerender of the embeddable widget.
+When the imperative rendering approach is used, the example above is good enough to achieve the goal.
+
+In the case of React rendering, it will no longer work as the returned node is mounted on the upper level.
+The recommended way is to use [Redux store](#redux) with a custom reducer.
+
+```tsx
+import React from 'react';
+import { createSlice } from '@reduxjs/toolkit';
+import { connect, Provider } from 'react-redux';
+import { Embeddable, IEmbeddable } from '@kbn/embeddable-plugin/public';
+import { createStore, State } from '@kbn/embeddable-plugin/public/store';
+
+interface ComponentState {
+  reloadedAt?: number;
+}
+
+export interface HelloWorldState extends State<HelloWorld> {
+  component: ComponentState;
+}
+
+const component = createSlice({
+  name: 'hello-world-component',
+  initialState: {} as ComponentState,
+  reducers: {
+    reload(state) {
+      state.reloadedAt = new Date().getTime();
+    },
+  },
+});
+
+export class HelloWorld extends Embeddable {
+  readonly store = createStore<HelloWorld, HelloWorldState>(this, {
+    preloadedState: {
+      component: {}
+    },
+    reducer: { component: component.reducer }
+  });
+
+  render() {
+    return (
+      <Provider store={this.store}>
+        <Component />
+      </Provider>
+    );
+  }
+
+  reload() {
+    this.store.dispatch(component.actions.reload());
+  }
+}
+```
+
+Alternatively, a [state modifier](https://reactjs.org/docs/hooks-faq.html#is-there-something-like-forceupdate) can be exposed via a reference object and later called from the `reload` hook.
+
+#### `catchError`
 This is an optional error handler to provide a custom UI for the error state.
 
 The embeddable may change its state in the future so that the error should be able to disappear.
 In that case, the method should return a callback performing cleanup actions for the error UI.
 
-If there is no implementation provided for the `renderError` hook, the embeddable will render a fallback error UI.
+If there is no implementation provided for the `catchError` hook, the embeddable will render a fallback error UI.
 
 In case of an error, the embeddable UI will not be destroyed or unmounted.
 The default behavior is to hide that visually and show the error message on top of that.
@@ -169,10 +238,25 @@ import { Embeddable } from '@kbn/embeddable-plugin/public';
 export class HelloWorld extends Embeddable {
   // ...
 
-  renderError(node: HTMLElement, error: Error) {
+  catchError(error: Error, node: HTMLElement) {
     render(<div>Something went wrong: {error.message}</div>, node);
 
     return () => unmountComponentAtNode(node);
+  }
+}
+```
+
+There is also an option to return a [React node](https://reactjs.org/docs/react-component.html#render) directly.
+In that case, the returned node will be automatically mounted and unmounted.
+```typescript
+import React from 'react';
+import { Embeddable } from '@kbn/embeddable-plugin/public';
+
+export class HelloWorld extends Embeddable {
+  // ...
+
+  catchError(error: Error) {
+    return <div>Something went wrong: {error.message}</div>;
   }
 }
 ```
@@ -366,7 +450,6 @@ To perform state mutations, the plugin also exposes a pre-defined state of the a
 Here is an example of initializing a Redux store:
 ```tsx
 import React from 'react';
-import { render } from 'react-dom';
 import { connect, Provider } from 'react-redux';
 import { Embeddable, IEmbeddable } from '@kbn/embeddable-plugin/public';
 import { createStore, State } from '@kbn/embeddable-plugin/public/store';
@@ -381,16 +464,15 @@ export class HelloWorld extends Embeddable {
 
   reload() {}
 
-  render(node: HTMLElement) {
+  render() {
     const Component = connect((state: State<HelloWorld>) => ({ title: state.input.title }))(
       HelloWorldComponent
     );
 
-    render(
+    return (
       <Provider store={this.store}>
         <Component />
-      </Provider>,
-      node
+      </Provider>
     );
   }
 }
@@ -434,7 +516,6 @@ That means there is no need to reimplement already existing actions.
 
 ```tsx
 import React from 'react';
-import { render } from 'react-dom';
 import { createSlice } from '@reduxjs/toolkit';
 import {
   Embeddable,
@@ -523,7 +604,6 @@ This can be achieved by passing a custom reducer.
 
 ```tsx
 import React from 'react';
-import { render } from 'react-dom';
 import { createSlice } from '@reduxjs/toolkit';
 import { Embeddable, IEmbeddable } from '@kbn/embeddable-plugin/public';
 import { createStore, State } from '@kbn/embeddable-plugin/public/store';

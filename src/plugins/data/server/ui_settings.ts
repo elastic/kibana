@@ -115,7 +115,6 @@ export function getUiSettings(
       description: i18n.translate('data.advancedSettings.query.allowWildcardsText', {
         defaultMessage:
           'When set, * is allowed as the first character in a query clause. ' +
-          'Currently only applies when experimental query features are enabled in the query bar. ' +
           'To disallow leading wildcards in basic lucene queries, use {queryStringOptionsPattern}.',
         values: {
           queryStringOptionsPattern: UI_SETTINGS.QUERY_STRING_OPTIONS,
@@ -166,12 +165,12 @@ export function getUiSettings(
     },
     defaultIndex: {
       name: i18n.translate('data.advancedSettings.defaultIndexTitle', {
-        defaultMessage: 'Default index',
+        defaultMessage: 'Default data view',
       }),
       value: null,
       type: 'string',
       description: i18n.translate('data.advancedSettings.defaultIndexText', {
-        defaultMessage: 'The index to access if no index is set',
+        defaultMessage: 'Used by discover and visualizations when a data view is not set.',
       }),
       schema: schema.nullable(schema.string()),
     },
@@ -295,7 +294,7 @@ export function getUiSettings(
       name: i18n.translate('data.advancedSettings.histogram.maxBarsTitle', {
         defaultMessage: 'Maximum buckets',
       }),
-      value: 100,
+      value: 1000,
       description: i18n.translate('data.advancedSettings.histogram.maxBarsText', {
         defaultMessage: `
           Limits the density of date and number histograms across Kibana
@@ -324,8 +323,8 @@ export function getUiSettings(
         defaultMessage: 'Time filter refresh interval',
       }),
       value: `{
-  "pause": false,
-  "value": 0
+  "pause": true,
+  "value": 60000
 }`,
       type: 'json',
       description: i18n.translate('data.advancedSettings.timepicker.refreshIntervalDefaultsText', {
@@ -346,8 +345,18 @@ export function getUiSettings(
   "to": "now"
 }`,
       type: 'json',
-      description: i18n.translate('data.advancedSettings.timepicker.timeDefaultsText', {
-        defaultMessage: 'The timefilter selection to use when Kibana is started without one',
+      description: i18n.translate('data.advancedSettings.timepicker.timeDefaultsDescription', {
+        defaultMessage:
+          'The timefilter selection to use when Kibana is started without one. Must be an object containing "from" and "to" (see {acceptedFormatsLink}).',
+        values: {
+          acceptedFormatsLink:
+            `<a href=${docLinks.links.date.dateMath}
+            target="_blank" rel="noopener">` +
+            i18n.translate('data.advancedSettings.timepicker.quickRanges.acceptedFormatsLinkText', {
+              defaultMessage: 'accepted formats',
+            }) +
+            '</a>',
+        },
       }),
       requiresPageReload: true,
       schema: schema.object({

@@ -6,9 +6,7 @@
  */
 
 import React from 'react';
-import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
-import { act } from 'react-dom/test-utils';
-import { ReactWrapper } from 'enzyme';
+import { render } from '@testing-library/react';
 import { CoreStart } from '@kbn/core/public';
 import { ObservabilityPublicPluginsStart } from '../../plugin';
 import { RulesPage } from '.';
@@ -36,6 +34,17 @@ jest.mock('@kbn/triggers-actions-ui-plugin/public', () => ({
 
 jest.spyOn(pluginContext, 'usePluginContext').mockImplementation(() => ({
   appMountParameters: {} as AppMountParameters,
+  config: {
+    unsafe: {
+      slo: { enabled: false },
+      alertDetails: {
+        apm: { enabled: false },
+        logs: { enabled: false },
+        metrics: { enabled: false },
+        uptime: { enabled: false },
+      },
+    },
+  },
   observabilityRuleTypeRegistry: createObservabilityRuleTypeRegistryMock(),
   ObservabilityPageTemplate: KibanaPageTemplate,
   kibanaFeatures: [],
@@ -46,9 +55,8 @@ jest.spyOn(pluginContext, 'usePluginContext').mockImplementation(() => ({
 const { useLoadRuleTypes } = jest.requireMock('@kbn/triggers-actions-ui-plugin/public');
 
 describe('RulesPage with all capabilities', () => {
-  let wrapper: ReactWrapper<any>;
   async function setup() {
-    const mockedRuleTypeIndex = new Map(
+    const ruleTypeIndex = new Map(
       Object.entries({
         '1': {
           enabledInLicense: true,
@@ -67,6 +75,7 @@ describe('RulesPage with all capabilities', () => {
         },
       })
     );
+
     const ruleTypes = [
       {
         id: 'test_rule_type',
@@ -84,49 +93,34 @@ describe('RulesPage with all capabilities', () => {
         ruleTaskTimeout: '1m',
       },
     ];
+
     useLoadRuleTypes.mockReturnValue({
       ruleTypes,
-      ruleTypeIndex: mockedRuleTypeIndex,
+      ruleTypeIndex,
     });
-    wrapper = mountWithIntl(<RulesPage />);
-    await act(async () => {
-      await nextTick();
-      wrapper.update();
-    });
+
+    return render(<RulesPage />);
   }
 
-  it('renders table of rules', async () => {
-    await setup();
-    const getRulesList = mockUseKibanaReturnValue.services.triggersActionsUi.getRulesList;
-    expect(getRulesList).toHaveBeenCalled();
-    expect(getRulesList).toHaveBeenCalledWith(
-      expect.objectContaining({
-        showActionFilter: false,
-        showCreateRuleButton: false,
-        ruleDetailsRoute: 'alerts/rules/:ruleId',
-        filteredRuleTypes: ['ruleType1', 'ruleType2'],
-        rulesListKey: 'observability_rulesListColumns',
-        visibleColumns: [
-          'ruleName',
-          'ruleExecutionStatusLastDate',
-          'ruleSnoozeNotify',
-          'ruleExecutionStatus',
-          'ruleExecutionState',
-        ],
-      })
-    );
+  it('should render a page template', async () => {
+    const wrapper = await setup();
+    expect(wrapper.getByTestId('rulesPage')).toBeInTheDocument();
   });
 
-  it('renders create rule button', async () => {
-    await setup();
-    expect(wrapper.find('[data-test-subj="createRuleButton"]').exists()).toBeTruthy();
+  it('should render a RuleList ', async () => {
+    const wrapper = await setup();
+    expect(wrapper.getByTestId('rules-list')).toBeInTheDocument();
+  });
+
+  it('renders a create rule button which is not disabled', async () => {
+    const wrapper = await setup();
+    expect(wrapper.getByTestId('createRuleButton')).not.toBeDisabled();
   });
 });
 
 describe('RulesPage with show only capability', () => {
-  let wrapper: ReactWrapper<any>;
   async function setup() {
-    const mockedRuleTypeIndex = new Map(
+    const ruleTypeIndex = new Map(
       Object.entries({
         '1': {
           enabledInLicense: true,
@@ -145,6 +139,7 @@ describe('RulesPage with show only capability', () => {
         },
       })
     );
+
     const ruleTypes = [
       {
         id: 'test_rule_type',
@@ -162,13 +157,13 @@ describe('RulesPage with show only capability', () => {
         ruleTaskTimeout: '1m',
       },
     ];
-    useLoadRuleTypes.mockReturnValue({ ruleTypes, ruleTypeIndex: mockedRuleTypeIndex });
+    useLoadRuleTypes.mockReturnValue({ ruleTypes, ruleTypeIndex });
 
-    wrapper = mountWithIntl(<RulesPage />);
+    return render(<RulesPage />);
   }
 
-  it('does not render create rule button', async () => {
-    await setup();
-    expect(wrapper.find('[data-test-subj="createRuleButton"]').exists()).toBeFalsy();
+  it('renders a create rule button which is not disabled', async () => {
+    const wrapper = await setup();
+    expect(wrapper.getByTestId('createRuleButton')).toBeDisabled();
   });
 });

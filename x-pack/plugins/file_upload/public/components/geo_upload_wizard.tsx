@@ -17,6 +17,7 @@ import { ImportResults } from '../importer';
 import { GeoFileImporter } from '../importer/geo';
 import type { Settings } from '../../common/types';
 import { hasImportPermission } from '../api';
+import { getPartialImportMessage } from './utils';
 
 enum PHASE {
   CONFIGURE = 'CONFIGURE',
@@ -40,6 +41,7 @@ interface State {
   indexNameError?: string;
   dataViewResp?: object;
   phase: PHASE;
+  smallChunks: boolean;
 }
 
 export class GeoUploadWizard extends Component<FileUploadComponentProps, State> {
@@ -52,6 +54,7 @@ export class GeoUploadWizard extends Component<FileUploadComponentProps, State> 
     importStatus: '',
     indexName: '',
     phase: PHASE.CONFIGURE,
+    smallChunks: false,
   };
 
   componentDidMount() {
@@ -146,6 +149,7 @@ export class GeoUploadWizard extends Component<FileUploadComponentProps, State> 
     this.setState({
       importStatus: getWritingToIndexMsg(0),
     });
+    this._geoFileImporter.setSmallChunks(this.state.smallChunks);
     const importResults = await this._geoFileImporter.import(
       initializeImportResp.id,
       this.state.indexName,
@@ -168,6 +172,25 @@ export class GeoUploadWizard extends Component<FileUploadComponentProps, State> 
         importStatus: i18n.translate('xpack.fileUpload.geoUploadWizard.dataIndexingError', {
           defaultMessage: 'Data indexing error',
         }),
+        phase: PHASE.COMPLETE,
+      });
+      this.props.onUploadError();
+      return;
+    } else if (importResults.docCount === importResults.failures?.length) {
+      this.setState({
+        // Force importResults into failure shape when no features are indexed
+        importResults: {
+          ...importResults,
+          success: false,
+          error: {
+            error: {
+              reason: getPartialImportMessage(
+                importResults.failures!.length,
+                importResults.docCount
+              ),
+            },
+          },
+        },
         phase: PHASE.COMPLETE,
       });
       this.props.onUploadError();
@@ -281,6 +304,10 @@ export class GeoUploadWizard extends Component<FileUploadComponentProps, State> 
     }
   };
 
+  _onSmallChunksChange = (smallChunks: boolean) => {
+    this.setState({ smallChunks });
+  };
+
   render() {
     if (this.state.phase === PHASE.IMPORT) {
       return (
@@ -311,10 +338,12 @@ export class GeoUploadWizard extends Component<FileUploadComponentProps, State> 
         indexNameError={this.state.indexNameError}
         onFileClear={this._onFileClear}
         onFileSelect={this._onFileSelect}
+        smallChunks={this.state.smallChunks}
         onGeoFieldTypeSelect={this._onGeoFieldTypeSelect}
         onIndexNameChange={this._onIndexNameChange}
         onIndexNameValidationStart={this.props.disableImportBtn}
         onIndexNameValidationEnd={this.props.enableImportBtn}
+        onSmallChunksChange={this._onSmallChunksChange}
       />
     );
   }

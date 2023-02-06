@@ -45,7 +45,7 @@ export function SampleDataCard({ urlBasePath, onDecline, onConfirm }: Props) {
       description={
         <FormattedMessage
           id="home.letsStartDescription"
-          defaultMessage="Add data to your cluster from any source, then analyze and visualize it in real time. Use our solutions to add search anywhere, observe your ecosystem, and protect against security threats."
+          defaultMessage="Add data to your cluster from any source, then analyze and visualize it in real time. Use our solutions to add search anywhere, observe your ecosystem, and defend against security threats."
         />
       }
       footer={

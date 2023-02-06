@@ -88,7 +88,7 @@ export class GroupList extends Component {
     const { selectedGroups, groups } = this.props;
 
     return (
-      <div className="group-list">
+      <EuiFlexGroup direction="column" gutterSize="m" className="group-list">
         {groups.map((g, index) => (
           <div
             tabIndex={'0'}
@@ -108,7 +108,7 @@ export class GroupList extends Component {
             </EuiFlexGroup>
           </div>
         ))}
-      </div>
+      </EuiFlexGroup>
     );
   }
 }

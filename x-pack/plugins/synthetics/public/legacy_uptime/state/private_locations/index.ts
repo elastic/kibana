@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { IHttpFetchError, ResponseErrorBody } from '@kbn/core/public';
 import { createReducer } from '@reduxjs/toolkit';
 import { AgentPolicy } from '@kbn/fleet-plugin/common';
+import { IHttpSerializedFetchError } from '../../../apps/synthetics/state';
 import {
   getAgentPoliciesAction,
   setAddingNewPrivateLocation,
@@ -24,7 +24,7 @@ export interface AgentPoliciesList {
 export interface AgentPoliciesState {
   data: AgentPoliciesList | null;
   loading: boolean;
-  error: IHttpFetchError<ResponseErrorBody> | null;
+  error: IHttpSerializedFetchError | null;
   isManageFlyoutOpen?: boolean;
   isAddingNewPrivateLocation?: boolean;
 }
@@ -47,7 +47,7 @@ export const agentPoliciesReducer = createReducer(initialState, (builder) => {
       state.loading = false;
     })
     .addCase(getAgentPoliciesAction.fail, (state, action) => {
-      state.error = action.payload as IHttpFetchError<ResponseErrorBody>;
+      state.error = action.payload;
       state.loading = false;
     })
     .addCase(setManageFlyoutOpen, (state, action) => {

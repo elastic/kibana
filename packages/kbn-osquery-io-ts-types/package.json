@@ -1,0 +1,7 @@
+{
+  "name": "@kbn/osquery-io-ts-types",
+  "private": true,
+  "version": "1.0.0",
+  "description": "io ts utilities and types to be shared with plugins from the osquery project",
+  "license": "SSPL-1.0 OR Elastic License 2.0"
+}

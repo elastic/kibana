@@ -14,27 +14,42 @@
     "interfaces": [],
     "enums": [],
     "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
     "objects": [
       {
         "parentPluginId": "@kbn/hapi-mocks",
-        "id": "def-server.hapiMocks",
+        "id": "def-common.hapiMocks",
         "type": "Object",
         "tags": [],
         "label": "hapiMocks",
         "description": [],
         "path": "packages/kbn-hapi-mocks/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/hapi-mocks",
-            "id": "def-server.hapiMocks.createRequest",
+            "id": "def-common.hapiMocks.createRequest",
             "type": "Function",
             "tags": [],
             "label": "createRequest",
             "description": [],
             "signature": [
               "(customization?: ",
-              "DeepPartialObject",
+              {
+                "pluginId": "@kbn/utility-types",
+                "scope": "common",
+                "docId": "kibKbnUtilityTypesPluginApi",
+                "section": "def-common.DeepPartialObject",
+                "text": "DeepPartialObject"
+              },
               "<",
               "Request",
               ">) => ",
@@ -42,108 +57,255 @@
             ],
             "path": "packages/kbn-hapi-mocks/index.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "returnComment": [],
             "children": [
               {
                 "parentPluginId": "@kbn/hapi-mocks",
-                "id": "def-server.hapiMocks.createRequest.$1",
+                "id": "def-common.hapiMocks.createRequest.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "customization",
                 "description": [],
                 "signature": [
                   "{ app?: ",
-                  "DeepPartialObject",
+                  {
+                    "pluginId": "@kbn/utility-types",
+                    "scope": "common",
+                    "docId": "kibKbnUtilityTypesPluginApi",
+                    "section": "def-common.DeepPartialObject",
+                    "text": "DeepPartialObject"
+                  },
                   "<",
                   "RequestApplicationState",
                   "> | undefined; readonly auth?: ",
-                  "DeepPartialObject",
+                  {
+                    "pluginId": "@kbn/utility-types",
+                    "scope": "common",
+                    "docId": "kibKbnUtilityTypesPluginApi",
+                    "section": "def-common.DeepPartialObject",
+                    "text": "DeepPartialObject"
+                  },
                   "<",
                   "RequestAuth",
                   "> | undefined; events?: ",
-                  "DeepPartialObject",
+                  {
+                    "pluginId": "@kbn/utility-types",
+                    "scope": "common",
+                    "docId": "kibKbnUtilityTypesPluginApi",
+                    "section": "def-common.DeepPartialObject",
+                    "text": "DeepPartialObject"
+                  },
                   "<",
                   "RequestEvents",
                   "> | undefined; readonly headers?: ",
-                  "DeepPartialObject",
+                  {
+                    "pluginId": "@kbn/utility-types",
+                    "scope": "common",
+                    "docId": "kibKbnUtilityTypesPluginApi",
+                    "section": "def-common.DeepPartialObject",
+                    "text": "DeepPartialObject"
+                  },
                   "<",
                   "Util",
                   ".Dictionary<string>> | undefined; readonly info?: ",
-                  "DeepPartialObject",
+                  {
+                    "pluginId": "@kbn/utility-types",
+                    "scope": "common",
+                    "docId": "kibKbnUtilityTypesPluginApi",
+                    "section": "def-common.DeepPartialObject",
+                    "text": "DeepPartialObject"
+                  },
                   "<",
                   "RequestInfo",
                   "> | undefined; readonly logs?: ",
-                  "DeepPartialArray",
+                  {
+                    "pluginId": "@kbn/utility-types",
+                    "scope": "common",
+                    "docId": "kibKbnUtilityTypesPluginApi",
+                    "section": "def-common.DeepPartialArray",
+                    "text": "DeepPartialArray"
+                  },
                   "<",
                   "RequestLog",
                   "> | undefined; readonly method?: ",
                   "Util",
                   ".HTTP_METHODS_PARTIAL_LOWERCASE | undefined; readonly mime?: string | undefined; readonly orig?: ",
-                  "DeepPartialObject",
+                  {
+                    "pluginId": "@kbn/utility-types",
+                    "scope": "common",
+                    "docId": "kibKbnUtilityTypesPluginApi",
+                    "section": "def-common.DeepPartialObject",
+                    "text": "DeepPartialObject"
+                  },
                   "<",
                   "RequestOrig",
                   "> | undefined; readonly params?: ",
-                  "DeepPartialObject",
+                  {
+                    "pluginId": "@kbn/utility-types",
+                    "scope": "common",
+                    "docId": "kibKbnUtilityTypesPluginApi",
+                    "section": "def-common.DeepPartialObject",
+                    "text": "DeepPartialObject"
+                  },
                   "<",
                   "Util",
                   ".Dictionary<any>> | undefined; readonly paramsArray?: ",
-                  "DeepPartialArray",
+                  {
+                    "pluginId": "@kbn/utility-types",
+                    "scope": "common",
+                    "docId": "kibKbnUtilityTypesPluginApi",
+                    "section": "def-common.DeepPartialArray",
+                    "text": "DeepPartialArray"
+                  },
                   "<string> | undefined; readonly path?: string | undefined; readonly payload?: string | object | ",
-                  "DeepPartialObject",
+                  {
+                    "pluginId": "@kbn/utility-types",
+                    "scope": "common",
+                    "docId": "kibKbnUtilityTypesPluginApi",
+                    "section": "def-common.DeepPartialObject",
+                    "text": "DeepPartialObject"
+                  },
                   "<",
                   "Readable",
                   "> | ",
-                  "DeepPartialObject",
+                  {
+                    "pluginId": "@kbn/utility-types",
+                    "scope": "common",
+                    "docId": "kibKbnUtilityTypesPluginApi",
+                    "section": "def-common.DeepPartialObject",
+                    "text": "DeepPartialObject"
+                  },
                   "<Buffer> | undefined; plugins?: ",
-                  "DeepPartialObject",
+                  {
+                    "pluginId": "@kbn/utility-types",
+                    "scope": "common",
+                    "docId": "kibKbnUtilityTypesPluginApi",
+                    "section": "def-common.DeepPartialObject",
+                    "text": "DeepPartialObject"
+                  },
                   "<",
                   "PluginsStates",
                   "> | undefined; readonly pre?: ",
-                  "DeepPartialObject",
+                  {
+                    "pluginId": "@kbn/utility-types",
+                    "scope": "common",
+                    "docId": "kibKbnUtilityTypesPluginApi",
+                    "section": "def-common.DeepPartialObject",
+                    "text": "DeepPartialObject"
+                  },
                   "<",
                   "Util",
                   ".Dictionary<any>> | undefined; response?: ",
-                  "DeepPartialObject",
+                  {
+                    "pluginId": "@kbn/utility-types",
+                    "scope": "common",
+                    "docId": "kibKbnUtilityTypesPluginApi",
+                    "section": "def-common.DeepPartialObject",
+                    "text": "DeepPartialObject"
+                  },
                   "<",
                   "Boom",
                   "<any>> | ",
-                  "DeepPartialObject",
+                  {
+                    "pluginId": "@kbn/utility-types",
+                    "scope": "common",
+                    "docId": "kibKbnUtilityTypesPluginApi",
+                    "section": "def-common.DeepPartialObject",
+                    "text": "DeepPartialObject"
+                  },
                   "<",
                   "ResponseObject",
                   "> | undefined; readonly preResponses?: ",
-                  "DeepPartialObject",
+                  {
+                    "pluginId": "@kbn/utility-types",
+                    "scope": "common",
+                    "docId": "kibKbnUtilityTypesPluginApi",
+                    "section": "def-common.DeepPartialObject",
+                    "text": "DeepPartialObject"
+                  },
                   "<",
                   "Util",
                   ".Dictionary<any>> | undefined; readonly query?: ",
-                  "DeepPartialObject",
+                  {
+                    "pluginId": "@kbn/utility-types",
+                    "scope": "common",
+                    "docId": "kibKbnUtilityTypesPluginApi",
+                    "section": "def-common.DeepPartialObject",
+                    "text": "DeepPartialObject"
+                  },
                   "<",
                   "RequestQuery",
                   "> | undefined; readonly raw?: ",
-                  "DeepPartialObject",
+                  {
+                    "pluginId": "@kbn/utility-types",
+                    "scope": "common",
+                    "docId": "kibKbnUtilityTypesPluginApi",
+                    "section": "def-common.DeepPartialObject",
+                    "text": "DeepPartialObject"
+                  },
                   "<{ req: ",
                   "IncomingMessage",
                   "; res: ",
                   "ServerResponse",
-                  "; }> | undefined; readonly route?: ",
-                  "DeepPartialObject",
+                  "<",
+                  "IncomingMessage",
+                  ">; }> | undefined; readonly route?: ",
+                  {
+                    "pluginId": "@kbn/utility-types",
+                    "scope": "common",
+                    "docId": "kibKbnUtilityTypesPluginApi",
+                    "section": "def-common.DeepPartialObject",
+                    "text": "DeepPartialObject"
+                  },
                   "<",
                   "RequestRoute",
                   "> | undefined; server?: ",
-                  "DeepPartialObject",
+                  {
+                    "pluginId": "@kbn/utility-types",
+                    "scope": "common",
+                    "docId": "kibKbnUtilityTypesPluginApi",
+                    "section": "def-common.DeepPartialObject",
+                    "text": "DeepPartialObject"
+                  },
                   "<",
                   "Server",
                   "> | undefined; readonly state?: ",
-                  "DeepPartialObject",
+                  {
+                    "pluginId": "@kbn/utility-types",
+                    "scope": "common",
+                    "docId": "kibKbnUtilityTypesPluginApi",
+                    "section": "def-common.DeepPartialObject",
+                    "text": "DeepPartialObject"
+                  },
                   "<",
                   "Util",
                   ".Dictionary<any>> | undefined; readonly url?: ",
-                  "DeepPartialObject",
+                  {
+                    "pluginId": "@kbn/utility-types",
+                    "scope": "common",
+                    "docId": "kibKbnUtilityTypesPluginApi",
+                    "section": "def-common.DeepPartialObject",
+                    "text": "DeepPartialObject"
+                  },
                   "<",
                   "URL",
                   "> | undefined; active?: ",
-                  "DeepPartialObject",
+                  {
+                    "pluginId": "@kbn/utility-types",
+                    "scope": "common",
+                    "docId": "kibKbnUtilityTypesPluginApi",
+                    "section": "def-common.DeepPartialObject",
+                    "text": "DeepPartialObject"
+                  },
                   "<() => boolean> | undefined; generateResponse?: ",
-                  "DeepPartialObject",
+                  {
+                    "pluginId": "@kbn/utility-types",
+                    "scope": "common",
+                    "docId": "kibKbnUtilityTypesPluginApi",
+                    "section": "def-common.DeepPartialObject",
+                    "text": "DeepPartialObject"
+                  },
                   "<(source: string | object | null, options?: { variety?: string | undefined; prepare?: ((response: ",
                   "ResponseObject",
                   ") => Promise<",
@@ -157,35 +319,83 @@
                   ") => void) | undefined; } | undefined) => ",
                   "ResponseObject",
                   "> | undefined; log?: ",
-                  "DeepPartialObject",
+                  {
+                    "pluginId": "@kbn/utility-types",
+                    "scope": "common",
+                    "docId": "kibKbnUtilityTypesPluginApi",
+                    "section": "def-common.DeepPartialObject",
+                    "text": "DeepPartialObject"
+                  },
                   "<(tags: string | string[], data?: string | object | (() => string | object) | undefined) => void> | undefined; setMethod?: ",
-                  "DeepPartialObject",
+                  {
+                    "pluginId": "@kbn/utility-types",
+                    "scope": "common",
+                    "docId": "kibKbnUtilityTypesPluginApi",
+                    "section": "def-common.DeepPartialObject",
+                    "text": "DeepPartialObject"
+                  },
                   "<(method: ",
                   "Util",
                   ".HTTP_METHODS_PARTIAL) => void> | undefined; setUrl?: ",
-                  "DeepPartialObject",
+                  {
+                    "pluginId": "@kbn/utility-types",
+                    "scope": "common",
+                    "docId": "kibKbnUtilityTypesPluginApi",
+                    "section": "def-common.DeepPartialObject",
+                    "text": "DeepPartialObject"
+                  },
                   "<(url: string | ",
                   "URL",
                   ", stripTrailingSlash?: boolean | undefined) => void> | undefined; cookieAuth?: ",
-                  "DeepPartialObject",
+                  {
+                    "pluginId": "@kbn/utility-types",
+                    "scope": "common",
+                    "docId": "kibKbnUtilityTypesPluginApi",
+                    "section": "def-common.DeepPartialObject",
+                    "text": "DeepPartialObject"
+                  },
                   "<{ set(session: object): void; set(key: string, value: string | object): void; clear(key?: string | undefined): void; ttl(milliseconds: number): void; }> | undefined; registerEvent?: ",
-                  "DeepPartialObject",
+                  {
+                    "pluginId": "@kbn/utility-types",
+                    "scope": "common",
+                    "docId": "kibKbnUtilityTypesPluginApi",
+                    "section": "def-common.DeepPartialObject",
+                    "text": "DeepPartialObject"
+                  },
                   "<(events: ",
                   "Event",
                   " | ",
                   "Event",
                   "[]) => void> | undefined; registerPodium?: ",
-                  "DeepPartialObject",
+                  {
+                    "pluginId": "@kbn/utility-types",
+                    "scope": "common",
+                    "docId": "kibKbnUtilityTypesPluginApi",
+                    "section": "def-common.DeepPartialObject",
+                    "text": "DeepPartialObject"
+                  },
                   "<(podiums: ",
                   "node_modules/@hapi/podium/lib/index",
                   " | ",
                   "node_modules/@hapi/podium/lib/index",
                   "[]) => void> | undefined; emit?: ",
-                  "DeepPartialObject",
+                  {
+                    "pluginId": "@kbn/utility-types",
+                    "scope": "common",
+                    "docId": "kibKbnUtilityTypesPluginApi",
+                    "section": "def-common.DeepPartialObject",
+                    "text": "DeepPartialObject"
+                  },
                   "<(criteria: string | ",
                   "EmitCriteria",
                   ", data?: any) => Promise<void>> | undefined; on?: ",
-                  "DeepPartialObject",
+                  {
+                    "pluginId": "@kbn/utility-types",
+                    "scope": "common",
+                    "docId": "kibKbnUtilityTypesPluginApi",
+                    "section": "def-common.DeepPartialObject",
+                    "text": "DeepPartialObject"
+                  },
                   "<{ <TArgs extends any[] = unknown[], Tcontext extends object = ",
                   "Request",
                   ">(criteria: string | ",
@@ -203,7 +413,13 @@
                   "<Tcontext, TArgs>, context?: Tcontext | undefined): ",
                   "Request",
                   "; }> | undefined; addListener?: ",
-                  "DeepPartialObject",
+                  {
+                    "pluginId": "@kbn/utility-types",
+                    "scope": "common",
+                    "docId": "kibKbnUtilityTypesPluginApi",
+                    "section": "def-common.DeepPartialObject",
+                    "text": "DeepPartialObject"
+                  },
                   "<{ <TArgs extends any[] = unknown[], Tcontext extends object = ",
                   "Request",
                   ">(criteria: string | ",
@@ -221,7 +437,13 @@
                   "<Tcontext, TArgs>, context?: Tcontext | undefined): ",
                   "Request",
                   "; }> | undefined; once?: ",
-                  "DeepPartialObject",
+                  {
+                    "pluginId": "@kbn/utility-types",
+                    "scope": "common",
+                    "docId": "kibKbnUtilityTypesPluginApi",
+                    "section": "def-common.DeepPartialObject",
+                    "text": "DeepPartialObject"
+                  },
                   "<{ <TArgs extends any[] = unknown[], Tcontext extends object = ",
                   "Request",
                   ">(criteria: string | Omit<",
@@ -243,21 +465,40 @@
                   ", \"count\">): Promise<TArgs>; <TArgs extends any[] = any[], Tcontext extends void = void>(criteria: string | Omit<",
                   "CriteriaObject",
                   ", \"count\">): Promise<TArgs>; }> | undefined; removeListener?: ",
-                  "DeepPartialObject",
+                  {
+                    "pluginId": "@kbn/utility-types",
+                    "scope": "common",
+                    "docId": "kibKbnUtilityTypesPluginApi",
+                    "section": "def-common.DeepPartialObject",
+                    "text": "DeepPartialObject"
+                  },
                   "<(name: string, listener: ",
                   "Listener",
                   "<any, any[]>) => ",
                   "Request",
                   "> | undefined; removeAllListeners?: ",
-                  "DeepPartialObject",
+                  {
+                    "pluginId": "@kbn/utility-types",
+                    "scope": "common",
+                    "docId": "kibKbnUtilityTypesPluginApi",
+                    "section": "def-common.DeepPartialObject",
+                    "text": "DeepPartialObject"
+                  },
                   "<(name: string) => ",
                   "Request",
                   "> | undefined; hasListeners?: ",
-                  "DeepPartialObject",
+                  {
+                    "pluginId": "@kbn/utility-types",
+                    "scope": "common",
+                    "docId": "kibKbnUtilityTypesPluginApi",
+                    "section": "def-common.DeepPartialObject",
+                    "text": "DeepPartialObject"
+                  },
                   "<(name: string) => boolean> | undefined; }"
                 ],
                 "path": "packages/kbn-hapi-mocks/src/request.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               }
             ]
           }
@@ -265,13 +506,5 @@
         "initialIsOpen": false
       }
     ]
-  },
-  "common": {
-    "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
-    "objects": []
   }
 }

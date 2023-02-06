@@ -4,26 +4,24 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { UseQueryResult } from '@tanstack/react-query';
-import { createReactQueryResponse } from '../../../test/fixtures/react_query';
 import React from 'react';
 import { render } from '@testing-library/react';
 import { LatestFindingsContainer, getDefaultQuery } from './latest_findings_container';
 import { createStubDataView } from '@kbn/data-views-plugin/common/mocks';
 import { CSP_LATEST_FINDINGS_DATA_VIEW } from '../../../../common/constants';
+import { DEFAULT_VISIBLE_ROWS_PER_PAGE } from '../../../common/constants';
 import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { TestProvider } from '../../../test/test_provider';
 import { getFindingsQuery } from './use_latest_findings';
 import { encodeQuery } from '../../../common/navigation/query_utils';
 import { useLocation } from 'react-router-dom';
-import { RisonObject } from 'rison-node';
 import { buildEsQuery } from '@kbn/es-query';
 import { getPaginationQuery } from '../utils/utils';
-import { FindingsEsPitContext } from '../es_pit/findings_es_pit_context';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { discoverPluginMock } from '@kbn/discover-plugin/public/mocks';
 import { fleetMock } from '@kbn/fleet-plugin/public/mocks';
+import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
 
 jest.mock('../../../common/api/use_latest_findings_data_view');
 jest.mock('../../../common/api/use_cis_kubernetes_integration');
@@ -44,6 +42,7 @@ describe('<LatestFindingsContainer />', () => {
       filters: [],
       query: { language: 'kuery', query: '' },
     });
+    const pageSize = DEFAULT_VISIBLE_ROWS_PER_PAGE;
     const dataMock = dataPluginMock.createStartContract();
     const dataView = createStubDataView({
       spec: {
@@ -52,15 +51,8 @@ describe('<LatestFindingsContainer />', () => {
     });
 
     (useLocation as jest.Mock).mockReturnValue({
-      search: encodeQuery(query as unknown as RisonObject),
+      search: encodeQuery(query),
     });
-
-    const setPitId = jest.fn();
-    const pitIdRef = { current: '' };
-    const pitQuery = createReactQueryResponse({
-      status: 'success',
-      data: '',
-    }) as UseQueryResult<string>;
 
     render(
       <TestProvider
@@ -70,23 +62,21 @@ describe('<LatestFindingsContainer />', () => {
           charts: chartPluginMock.createStartContract(),
           discover: discoverPluginMock.createStartContract(),
           fleet: fleetMock.createStartMock(),
+          licensing: licensingMock.createStart(),
         }}
       >
-        <FindingsEsPitContext.Provider value={{ setPitId, pitIdRef, pitQuery }}>
-          <LatestFindingsContainer dataView={dataView} />
-        </FindingsEsPitContext.Provider>
+        <LatestFindingsContainer dataView={dataView} />
       </TestProvider>
     );
 
     const baseQuery = {
       query: buildEsQuery(dataView, query.query, query.filters),
-      pitId: pitIdRef.current,
     };
 
     expect(dataMock.search.search).toHaveBeenNthCalledWith(1, {
       params: getFindingsQuery({
         ...baseQuery,
-        ...getPaginationQuery(query),
+        ...getPaginationQuery({ ...query, pageSize }),
         sort: query.sort,
         enabled: true,
       }),

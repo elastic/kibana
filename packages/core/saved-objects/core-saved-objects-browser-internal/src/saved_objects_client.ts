@@ -11,9 +11,11 @@ import type { HttpSetup, HttpFetchOptions } from '@kbn/core-http-browser';
 import type { SavedObject, SavedObjectTypeIdTuple } from '@kbn/core-saved-objects-common';
 import type {
   SavedObjectsBulkResolveResponse as SavedObjectsBulkResolveResponseServer,
+  SavedObjectsBulkDeleteResponse as SavedObjectsBulkDeleteResponseServer,
   SavedObjectsClientContract as SavedObjectsApi,
   SavedObjectsFindResponse as SavedObjectsFindResponseServer,
   SavedObjectsResolveResponse,
+  SavedObjectsBulkDeleteOptions,
 } from '@kbn/core-saved-objects-api-server';
 import type {
   SavedObjectsClientContract,
@@ -28,6 +30,7 @@ import type {
   SavedObjectsBulkCreateOptions,
   SavedObjectsBulkCreateObject,
   SimpleSavedObject,
+  SavedObjectsBulkDeleteResponse,
 } from '@kbn/core-saved-objects-api-browser';
 
 import { SimpleSavedObjectImpl } from './simple_saved_object';
@@ -101,6 +104,7 @@ const getObjectsToResolve = (queue: BatchResolveQueueEntry[]) => {
  * HTTP API for interacting with Saved Objects.
  *
  * @internal
+ * @deprecated See https://github.com/elastic/kibana/issues/149098
  */
 export class SavedObjectsClient implements SavedObjectsClientContract {
   private http: HttpSetup;
@@ -255,6 +259,31 @@ export class SavedObjectsClient implements SavedObjectsClientContract {
     return this.savedObjectsFetch(this.getPath([type, id]), { method: 'DELETE', query });
   };
 
+  public bulkDelete = async (
+    objects: SavedObjectTypeIdTuple[],
+    options?: SavedObjectsBulkDeleteOptions
+  ): Promise<SavedObjectsBulkDeleteResponse> => {
+    const filteredObjects = objects.map(({ type, id }) => ({ type, id }));
+    const queryOptions = { force: !!options?.force };
+    const response = await this.performBulkDelete(filteredObjects, queryOptions);
+    return {
+      statuses: response.statuses,
+    };
+  };
+
+  private async performBulkDelete(
+    objects: SavedObjectTypeIdTuple[],
+    queryOptions: { force: boolean }
+  ) {
+    const path = this.getPath(['_bulk_delete']);
+    const request: Promise<SavedObjectsBulkDeleteResponseServer> = this.savedObjectsFetch(path, {
+      method: 'POST',
+      body: JSON.stringify(objects),
+      query: queryOptions,
+    });
+    return request;
+  }
+
   public find = <T = unknown, A = unknown>(
     options: SavedObjectsFindOptions
   ): Promise<SavedObjectsFindResponse<T>> => {
@@ -264,6 +293,8 @@ export class SavedObjectsClient implements SavedObjectsClientContract {
       fields: 'fields',
       hasReference: 'has_reference',
       hasReferenceOperator: 'has_reference_operator',
+      hasNoReference: 'has_no_reference',
+      hasNoReferenceOperator: 'has_no_reference_operator',
       page: 'page',
       perPage: 'per_page',
       search: 'search',
@@ -286,6 +317,9 @@ export class SavedObjectsClient implements SavedObjectsClientContract {
     // is not doing it implicitly.
     if (query.has_reference) {
       query.has_reference = JSON.stringify(query.has_reference);
+    }
+    if (query.has_no_reference) {
+      query.has_no_reference = JSON.stringify(query.has_no_reference);
     }
 
     // `aggs` is a structured object. we need to stringify it before sending it, as `fetch`

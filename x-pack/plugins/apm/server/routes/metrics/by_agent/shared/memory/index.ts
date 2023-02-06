@@ -6,16 +6,19 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { termQuery } from '@kbn/observability-plugin/server';
 import { withApmSpan } from '../../../../../utils/with_apm_span';
 import {
+  FAAS_ID,
   METRIC_CGROUP_MEMORY_LIMIT_BYTES,
   METRIC_CGROUP_MEMORY_USAGE_BYTES,
   METRIC_SYSTEM_FREE_MEMORY,
   METRIC_SYSTEM_TOTAL_MEMORY,
-} from '../../../../../../common/elasticsearch_fieldnames';
-import { Setup } from '../../../../../lib/helpers/setup_request';
+} from '../../../../../../common/es_fields/apm';
 import { fetchAndTransformMetrics } from '../../../fetch_and_transform_metrics';
 import { ChartBase } from '../../../types';
+import { APMConfig } from '../../../../..';
+import { APMEventClient } from '../../../../../lib/helpers/create_es_client/create_apm_event_client';
 
 const series = {
   memoryUsedMax: {
@@ -81,17 +84,21 @@ export const percentCgroupMemoryUsedScript = {
 export async function getMemoryChartData({
   environment,
   kuery,
-  setup,
+  config,
+  apmEventClient,
   serviceName,
   serviceNodeName,
+  serverlessId,
   start,
   end,
 }: {
   environment: string;
   kuery: string;
-  setup: Setup;
+  config: APMConfig;
+  apmEventClient: APMEventClient;
   serviceName: string;
   serviceNodeName?: string;
+  serverlessId?: string;
   start: number;
   end: number;
 }) {
@@ -99,7 +106,8 @@ export async function getMemoryChartData({
     const cgroupResponse = await fetchAndTransformMetrics({
       environment,
       kuery,
-      setup,
+      config,
+      apmEventClient,
       serviceName,
       serviceNodeName,
       start,
@@ -111,6 +119,7 @@ export async function getMemoryChartData({
       },
       additionalFilters: [
         { exists: { field: METRIC_CGROUP_MEMORY_USAGE_BYTES } },
+        ...termQuery(FAAS_ID, serverlessId),
       ],
       operationName: 'get_cgroup_memory_metrics_charts',
     });
@@ -119,7 +128,8 @@ export async function getMemoryChartData({
       return await fetchAndTransformMetrics({
         environment,
         kuery,
-        setup,
+        config,
+        apmEventClient,
         serviceName,
         serviceNodeName,
         start,
@@ -132,6 +142,7 @@ export async function getMemoryChartData({
         additionalFilters: [
           { exists: { field: METRIC_SYSTEM_FREE_MEMORY } },
           { exists: { field: METRIC_SYSTEM_TOTAL_MEMORY } },
+          ...termQuery(FAAS_ID, serverlessId),
         ],
         operationName: 'get_system_memory_metrics_charts',
       });

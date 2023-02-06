@@ -5,8 +5,15 @@
  * 2.0.
  */
 
+import { DistributiveOmit } from '@elastic/eui';
 import { EuiIconType } from '@elastic/eui/src/components/icon/icon';
-import type { FramePublicAPI, DatasourcePublicAPI } from '../../types';
+import type { SavedObjectReference } from '@kbn/core/public';
+import { isQueryAnnotationConfig } from '@kbn/event-annotation-plugin/public';
+import { i18n } from '@kbn/i18n';
+import { VisualizeFieldContext } from '@kbn/ui-actions-plugin/public';
+import { validateQuery } from '../../shared_components';
+import { DataViewsState } from '../../state_management';
+import type { FramePublicAPI, DatasourcePublicAPI, VisualizeEditorContext } from '../../types';
 import {
   visualizationTypes,
   XYLayerConfig,
@@ -14,6 +21,9 @@ import {
   XYReferenceLineLayerConfig,
   SeriesType,
   YConfig,
+  XYState,
+  XYPersistedState,
+  XYAnnotationLayerConfig,
 } from './types';
 import { getDataLayers, isAnnotationsLayer, isDataLayer } from './visualization_helpers';
 
@@ -101,4 +111,133 @@ export function hasHistogramSeries(
       xAxisOperation.scale !== 'ordinal'
     );
   });
+}
+
+function getLayerReferenceName(layerId: string) {
+  return `xy-visualization-layer-${layerId}`;
+}
+
+export function extractReferences(state: XYState) {
+  const savedObjectReferences: SavedObjectReference[] = [];
+  const persistableLayers: Array<DistributiveOmit<XYLayerConfig, 'indexPatternId'>> = [];
+  state.layers.forEach((layer) => {
+    if (isAnnotationsLayer(layer)) {
+      const { indexPatternId, ...persistableLayer } = layer;
+      savedObjectReferences.push({
+        type: 'index-pattern',
+        id: indexPatternId,
+        name: getLayerReferenceName(layer.layerId),
+      });
+      persistableLayers.push(persistableLayer);
+    } else {
+      persistableLayers.push(layer);
+    }
+  });
+  return { savedObjectReferences, state: { ...state, layers: persistableLayers } };
+}
+
+export function injectReferences(
+  state: XYPersistedState,
+  references?: SavedObjectReference[],
+  initialContext?: VisualizeFieldContext | VisualizeEditorContext
+): XYState {
+  if (!references || !references.length) {
+    return state as XYState;
+  }
+
+  const fallbackIndexPatternId = references.find(({ type }) => type === 'index-pattern')!.id;
+  return {
+    ...state,
+    layers: state.layers.map((layer) => {
+      if (!isAnnotationsLayer(layer)) {
+        return layer as XYLayerConfig;
+      }
+      return {
+        ...layer,
+        indexPatternId:
+          getIndexPatternIdFromInitialContext(layer, initialContext) ||
+          references.find(({ name }) => name === getLayerReferenceName(layer.layerId))?.id ||
+          fallbackIndexPatternId,
+      };
+    }),
+  };
+}
+
+function getIndexPatternIdFromInitialContext(
+  layer: XYAnnotationLayerConfig,
+  initialContext?: VisualizeFieldContext | VisualizeEditorContext
+) {
+  if (initialContext && 'isVisualizeAction' in initialContext) {
+    return layer && 'indexPatternId' in layer ? layer.indexPatternId : undefined;
+  }
+}
+
+export function getAnnotationLayerErrors(
+  layer: XYAnnotationLayerConfig,
+  columnId: string,
+  dataViews: DataViewsState
+): string[] {
+  if (!layer) {
+    return [];
+  }
+  const annotation = layer.annotations.find(({ id }) => id === columnId);
+  if (!annotation || !isQueryAnnotationConfig(annotation)) {
+    return [];
+  }
+  const layerDataView = dataViews.indexPatterns[layer.indexPatternId];
+
+  const invalidMessages: string[] = [];
+
+  if (annotation.timeField == null || annotation.timeField === '') {
+    invalidMessages.push(
+      i18n.translate('xpack.lens.xyChart.annotationError.timeFieldEmpty', {
+        defaultMessage: 'Time field is missing',
+      })
+    );
+  }
+
+  if (annotation.timeField && !Boolean(layerDataView.getFieldByName(annotation.timeField))) {
+    invalidMessages.push(
+      i18n.translate('xpack.lens.xyChart.annotationError.timeFieldNotFound', {
+        defaultMessage: 'Time field {timeField} not found in data view {dataView}',
+        values: { timeField: annotation.timeField, dataView: layerDataView.title },
+      })
+    );
+  }
+
+  const { isValid, error } = validateQuery(annotation?.filter, layerDataView);
+  if (!isValid && error) {
+    invalidMessages.push(error);
+  }
+  if (annotation.textField && !Boolean(layerDataView.getFieldByName(annotation.textField))) {
+    invalidMessages.push(
+      i18n.translate('xpack.lens.xyChart.annotationError.textFieldNotFound', {
+        defaultMessage: 'Text field {textField} not found in data view {dataView}',
+        values: { textField: annotation.textField, dataView: layerDataView.title },
+      })
+    );
+  }
+  if (annotation.extraFields?.length) {
+    const missingTooltipFields = [];
+    for (const field of annotation.extraFields) {
+      if (!Boolean(layerDataView.getFieldByName(field))) {
+        missingTooltipFields.push(field);
+      }
+    }
+    if (missingTooltipFields.length) {
+      invalidMessages.push(
+        i18n.translate('xpack.lens.xyChart.annotationError.tooltipFieldNotFound', {
+          defaultMessage:
+            'Tooltip {missingFields, plural, one {field} other {fields}} {missingTooltipFields} not found in data view {dataView}',
+          values: {
+            missingTooltipFields: missingTooltipFields.join(', '),
+            missingFields: missingTooltipFields.length,
+            dataView: layerDataView.title,
+          },
+        })
+      );
+    }
+  }
+
+  return invalidMessages;
 }

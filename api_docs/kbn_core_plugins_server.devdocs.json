@@ -1,0 +1,1303 @@
+{
+  "id": "@kbn/core-plugins-server",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/core-plugins-server",
+        "id": "def-common.AsyncPlugin",
+        "type": "Interface",
+        "tags": [
+          "deprecated"
+        ],
+        "label": "AsyncPlugin",
+        "description": [
+          "\nA plugin with asynchronous lifecycle methods.\n"
+        ],
+        "signature": [
+          {
+            "pluginId": "@kbn/core-plugins-server",
+            "scope": "common",
+            "docId": "kibKbnCorePluginsServerPluginApi",
+            "section": "def-common.AsyncPlugin",
+            "text": "AsyncPlugin"
+          },
+          "<TSetup, TStart, TPluginsSetup, TPluginsStart>"
+        ],
+        "path": "packages/core/plugins/core-plugins-server/src/types.ts",
+        "deprecated": true,
+        "removeBy": "8.8.0",
+        "trackAdoption": false,
+        "references": [
+          {
+            "plugin": "@kbn/core-plugins-server-internal",
+            "path": "packages/core/plugins/core-plugins-server-internal/src/plugin.ts"
+          },
+          {
+            "plugin": "@kbn/core-plugins-server-internal",
+            "path": "packages/core/plugins/core-plugins-server-internal/src/plugin.ts"
+          },
+          {
+            "plugin": "core",
+            "path": "src/core/server/index.ts"
+          }
+        ],
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-plugins-server",
+            "id": "def-common.AsyncPlugin.setup",
+            "type": "Function",
+            "tags": [],
+            "label": "setup",
+            "description": [],
+            "signature": [
+              "(core: ",
+              {
+                "pluginId": "@kbn/core-lifecycle-server",
+                "scope": "common",
+                "docId": "kibKbnCoreLifecycleServerPluginApi",
+                "section": "def-common.CoreSetup",
+                "text": "CoreSetup"
+              },
+              "<object, unknown>, plugins: TPluginsSetup) => TSetup | Promise<TSetup>"
+            ],
+            "path": "packages/core/plugins/core-plugins-server/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-plugins-server",
+                "id": "def-common.AsyncPlugin.setup.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "core",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/core-lifecycle-server",
+                    "scope": "common",
+                    "docId": "kibKbnCoreLifecycleServerPluginApi",
+                    "section": "def-common.CoreSetup",
+                    "text": "CoreSetup"
+                  },
+                  "<object, unknown>"
+                ],
+                "path": "packages/core/plugins/core-plugins-server/src/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/core-plugins-server",
+                "id": "def-common.AsyncPlugin.setup.$2",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "plugins",
+                "description": [],
+                "signature": [
+                  "TPluginsSetup"
+                ],
+                "path": "packages/core/plugins/core-plugins-server/src/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-plugins-server",
+            "id": "def-common.AsyncPlugin.start",
+            "type": "Function",
+            "tags": [],
+            "label": "start",
+            "description": [],
+            "signature": [
+              "(core: ",
+              {
+                "pluginId": "@kbn/core-lifecycle-server",
+                "scope": "common",
+                "docId": "kibKbnCoreLifecycleServerPluginApi",
+                "section": "def-common.CoreStart",
+                "text": "CoreStart"
+              },
+              ", plugins: TPluginsStart) => TStart | Promise<TStart>"
+            ],
+            "path": "packages/core/plugins/core-plugins-server/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-plugins-server",
+                "id": "def-common.AsyncPlugin.start.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "core",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/core-lifecycle-server",
+                    "scope": "common",
+                    "docId": "kibKbnCoreLifecycleServerPluginApi",
+                    "section": "def-common.CoreStart",
+                    "text": "CoreStart"
+                  }
+                ],
+                "path": "packages/core/plugins/core-plugins-server/src/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/core-plugins-server",
+                "id": "def-common.AsyncPlugin.start.$2",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "plugins",
+                "description": [],
+                "signature": [
+                  "TPluginsStart"
+                ],
+                "path": "packages/core/plugins/core-plugins-server/src/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-plugins-server",
+            "id": "def-common.AsyncPlugin.stop",
+            "type": "Function",
+            "tags": [],
+            "label": "stop",
+            "description": [],
+            "signature": [
+              "(() => void) | undefined"
+            ],
+            "path": "packages/core/plugins/core-plugins-server/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-plugins-server",
+        "id": "def-common.Plugin",
+        "type": "Interface",
+        "tags": [],
+        "label": "Plugin",
+        "description": [
+          "\nThe interface that should be returned by a `PluginInitializer` for a `standard` plugin.\n"
+        ],
+        "signature": [
+          {
+            "pluginId": "@kbn/core-plugins-server",
+            "scope": "common",
+            "docId": "kibKbnCorePluginsServerPluginApi",
+            "section": "def-common.Plugin",
+            "text": "Plugin"
+          },
+          "<TSetup, TStart, TPluginsSetup, TPluginsStart>"
+        ],
+        "path": "packages/core/plugins/core-plugins-server/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-plugins-server",
+            "id": "def-common.Plugin.setup",
+            "type": "Function",
+            "tags": [],
+            "label": "setup",
+            "description": [],
+            "signature": [
+              "(core: ",
+              {
+                "pluginId": "@kbn/core-lifecycle-server",
+                "scope": "common",
+                "docId": "kibKbnCoreLifecycleServerPluginApi",
+                "section": "def-common.CoreSetup",
+                "text": "CoreSetup"
+              },
+              "<object, unknown>, plugins: TPluginsSetup) => TSetup"
+            ],
+            "path": "packages/core/plugins/core-plugins-server/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-plugins-server",
+                "id": "def-common.Plugin.setup.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "core",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/core-lifecycle-server",
+                    "scope": "common",
+                    "docId": "kibKbnCoreLifecycleServerPluginApi",
+                    "section": "def-common.CoreSetup",
+                    "text": "CoreSetup"
+                  },
+                  "<object, unknown>"
+                ],
+                "path": "packages/core/plugins/core-plugins-server/src/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/core-plugins-server",
+                "id": "def-common.Plugin.setup.$2",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "plugins",
+                "description": [],
+                "signature": [
+                  "TPluginsSetup"
+                ],
+                "path": "packages/core/plugins/core-plugins-server/src/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-plugins-server",
+            "id": "def-common.Plugin.start",
+            "type": "Function",
+            "tags": [],
+            "label": "start",
+            "description": [],
+            "signature": [
+              "(core: ",
+              {
+                "pluginId": "@kbn/core-lifecycle-server",
+                "scope": "common",
+                "docId": "kibKbnCoreLifecycleServerPluginApi",
+                "section": "def-common.CoreStart",
+                "text": "CoreStart"
+              },
+              ", plugins: TPluginsStart) => TStart"
+            ],
+            "path": "packages/core/plugins/core-plugins-server/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-plugins-server",
+                "id": "def-common.Plugin.start.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "core",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/core-lifecycle-server",
+                    "scope": "common",
+                    "docId": "kibKbnCoreLifecycleServerPluginApi",
+                    "section": "def-common.CoreStart",
+                    "text": "CoreStart"
+                  }
+                ],
+                "path": "packages/core/plugins/core-plugins-server/src/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/core-plugins-server",
+                "id": "def-common.Plugin.start.$2",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "plugins",
+                "description": [],
+                "signature": [
+                  "TPluginsStart"
+                ],
+                "path": "packages/core/plugins/core-plugins-server/src/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-plugins-server",
+            "id": "def-common.Plugin.stop",
+            "type": "Function",
+            "tags": [],
+            "label": "stop",
+            "description": [],
+            "signature": [
+              "(() => void) | undefined"
+            ],
+            "path": "packages/core/plugins/core-plugins-server/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-plugins-server",
+        "id": "def-common.PluginConfigDescriptor",
+        "type": "Interface",
+        "tags": [],
+        "label": "PluginConfigDescriptor",
+        "description": [
+          "\nDescribes a plugin configuration properties.\n"
+        ],
+        "signature": [
+          {
+            "pluginId": "@kbn/core-plugins-server",
+            "scope": "common",
+            "docId": "kibKbnCorePluginsServerPluginApi",
+            "section": "def-common.PluginConfigDescriptor",
+            "text": "PluginConfigDescriptor"
+          },
+          "<T>"
+        ],
+        "path": "packages/core/plugins/core-plugins-server/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-plugins-server",
+            "id": "def-common.PluginConfigDescriptor.deprecations",
+            "type": "Function",
+            "tags": [],
+            "label": "deprecations",
+            "description": [
+              "\nProvider for the {@link ConfigDeprecation} to apply to the plugin configuration."
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/config",
+                "scope": "common",
+                "docId": "kibKbnConfigPluginApi",
+                "section": "def-common.ConfigDeprecationProvider",
+                "text": "ConfigDeprecationProvider"
+              },
+              " | undefined"
+            ],
+            "path": "packages/core/plugins/core-plugins-server/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-plugins-server",
+            "id": "def-common.PluginConfigDescriptor.exposeToBrowser",
+            "type": "Object",
+            "tags": [],
+            "label": "exposeToBrowser",
+            "description": [
+              "\nList of configuration properties that will be available on the client-side plugin."
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-plugins-server",
+                "scope": "common",
+                "docId": "kibKbnCorePluginsServerPluginApi",
+                "section": "def-common.ExposedToBrowserDescriptor",
+                "text": "ExposedToBrowserDescriptor"
+              },
+              "<T> | undefined"
+            ],
+            "path": "packages/core/plugins/core-plugins-server/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-plugins-server",
+            "id": "def-common.PluginConfigDescriptor.schema",
+            "type": "Object",
+            "tags": [],
+            "label": "schema",
+            "description": [
+              "\nSchema to use to validate the plugin configuration.\n\n{@link PluginConfigSchema}"
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/config-schema",
+                "scope": "common",
+                "docId": "kibKbnConfigSchemaPluginApi",
+                "section": "def-common.Type",
+                "text": "Type"
+              },
+              "<T>"
+            ],
+            "path": "packages/core/plugins/core-plugins-server/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-plugins-server",
+            "id": "def-common.PluginConfigDescriptor.exposeToUsage",
+            "type": "Object",
+            "tags": [],
+            "label": "exposeToUsage",
+            "description": [
+              "\nExpose non-default configs to usage collection to be sent via telemetry.\nset a config to `true` to report the actual changed config value.\nset a config to `false` to report the changed config value as [redacted].\n\nAll changed configs except booleans and numbers will be reported\nas [redacted] unless otherwise specified.\n\n{@link MakeUsageFromSchema}"
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-plugins-server",
+                "scope": "common",
+                "docId": "kibKbnCorePluginsServerPluginApi",
+                "section": "def-common.MakeUsageFromSchema",
+                "text": "MakeUsageFromSchema"
+              },
+              "<T> | undefined"
+            ],
+            "path": "packages/core/plugins/core-plugins-server/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-plugins-server",
+        "id": "def-common.PluginInitializerContext",
+        "type": "Interface",
+        "tags": [],
+        "label": "PluginInitializerContext",
+        "description": [
+          "\nContext that's available to plugins during initialization stage.\n"
+        ],
+        "signature": [
+          {
+            "pluginId": "@kbn/core-plugins-server",
+            "scope": "common",
+            "docId": "kibKbnCorePluginsServerPluginApi",
+            "section": "def-common.PluginInitializerContext",
+            "text": "PluginInitializerContext"
+          },
+          "<ConfigSchema>"
+        ],
+        "path": "packages/core/plugins/core-plugins-server/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-plugins-server",
+            "id": "def-common.PluginInitializerContext.opaqueId",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "opaqueId",
+            "description": [],
+            "signature": [
+              "symbol"
+            ],
+            "path": "packages/core/plugins/core-plugins-server/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-plugins-server",
+            "id": "def-common.PluginInitializerContext.env",
+            "type": "Object",
+            "tags": [],
+            "label": "env",
+            "description": [],
+            "signature": [
+              "{ mode: ",
+              {
+                "pluginId": "@kbn/config",
+                "scope": "common",
+                "docId": "kibKbnConfigPluginApi",
+                "section": "def-common.EnvironmentMode",
+                "text": "EnvironmentMode"
+              },
+              "; packageInfo: Readonly<",
+              {
+                "pluginId": "@kbn/config",
+                "scope": "common",
+                "docId": "kibKbnConfigPluginApi",
+                "section": "def-common.PackageInfo",
+                "text": "PackageInfo"
+              },
+              ">; instanceUuid: string; configs: readonly string[]; }"
+            ],
+            "path": "packages/core/plugins/core-plugins-server/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-plugins-server",
+            "id": "def-common.PluginInitializerContext.node",
+            "type": "Object",
+            "tags": [],
+            "label": "node",
+            "description": [
+              "\nAccess the configuration for this particular Kibana node.\nCan be used to determine which `roles` the current process was started with.\n"
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-node-server",
+                "scope": "common",
+                "docId": "kibKbnCoreNodeServerPluginApi",
+                "section": "def-common.NodeInfo",
+                "text": "NodeInfo"
+              }
+            ],
+            "path": "packages/core/plugins/core-plugins-server/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-plugins-server",
+            "id": "def-common.PluginInitializerContext.logger",
+            "type": "Object",
+            "tags": [],
+            "label": "logger",
+            "description": [
+              "\n{@link LoggerFactory | logger factory} instance already bound to the plugin's logging context\n"
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/logging",
+                "scope": "common",
+                "docId": "kibKbnLoggingPluginApi",
+                "section": "def-common.LoggerFactory",
+                "text": "LoggerFactory"
+              }
+            ],
+            "path": "packages/core/plugins/core-plugins-server/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-plugins-server",
+            "id": "def-common.PluginInitializerContext.config",
+            "type": "Object",
+            "tags": [],
+            "label": "config",
+            "description": [
+              "\nAccessors for the plugin's configuration"
+            ],
+            "signature": [
+              "{ legacy: { globalConfig$: ",
+              "Observable",
+              "<Readonly<{ elasticsearch: Readonly<{ readonly requestTimeout: Readonly<{ clone: () => moment.Duration; humanize: { (argWithSuffix?: boolean | undefined, argThresholds?: moment.argThresholdOpts | undefined): string; (argThresholds?: moment.argThresholdOpts | undefined): string; }; abs: () => moment.Duration; as: (units: moment.unitOfTime.Base) => number; get: (units: moment.unitOfTime.Base) => number; milliseconds: () => number; asMilliseconds: () => number; seconds: () => number; asSeconds: () => number; minutes: () => number; asMinutes: () => number; hours: () => number; asHours: () => number; days: () => number; asDays: () => number; weeks: () => number; asWeeks: () => number; months: () => number; asMonths: () => number; years: () => number; asYears: () => number; add: (inp?: moment.DurationInputArg1, unit?: moment.unitOfTime.DurationConstructor | undefined) => moment.Duration; subtract: (inp?: moment.DurationInputArg1, unit?: moment.unitOfTime.DurationConstructor | undefined) => moment.Duration; locale: { (): string; (locale: moment.LocaleSpecifier): moment.Duration; }; localeData: () => moment.Locale; toISOString: () => string; toJSON: () => string; isValid: () => boolean; lang: { (locale: moment.LocaleSpecifier): moment.Moment; (): moment.Locale; }; toIsoString: () => string; format: moment.Format; }>; readonly shardTimeout: Readonly<{ clone: () => moment.Duration; humanize: { (argWithSuffix?: boolean | undefined, argThresholds?: moment.argThresholdOpts | undefined): string; (argThresholds?: moment.argThresholdOpts | undefined): string; }; abs: () => moment.Duration; as: (units: moment.unitOfTime.Base) => number; get: (units: moment.unitOfTime.Base) => number; milliseconds: () => number; asMilliseconds: () => number; seconds: () => number; asSeconds: () => number; minutes: () => number; asMinutes: () => number; hours: () => number; asHours: () => number; days: () => number; asDays: () => number; weeks: () => number; asWeeks: () => number; months: () => number; asMonths: () => number; years: () => number; asYears: () => number; add: (inp?: moment.DurationInputArg1, unit?: moment.unitOfTime.DurationConstructor | undefined) => moment.Duration; subtract: (inp?: moment.DurationInputArg1, unit?: moment.unitOfTime.DurationConstructor | undefined) => moment.Duration; locale: { (): string; (locale: moment.LocaleSpecifier): moment.Duration; }; localeData: () => moment.Locale; toISOString: () => string; toJSON: () => string; isValid: () => boolean; lang: { (locale: moment.LocaleSpecifier): moment.Moment; (): moment.Locale; }; toIsoString: () => string; format: moment.Format; }>; readonly pingTimeout: Readonly<{ clone: () => moment.Duration; humanize: { (argWithSuffix?: boolean | undefined, argThresholds?: moment.argThresholdOpts | undefined): string; (argThresholds?: moment.argThresholdOpts | undefined): string; }; abs: () => moment.Duration; as: (units: moment.unitOfTime.Base) => number; get: (units: moment.unitOfTime.Base) => number; milliseconds: () => number; asMilliseconds: () => number; seconds: () => number; asSeconds: () => number; minutes: () => number; asMinutes: () => number; hours: () => number; asHours: () => number; days: () => number; asDays: () => number; weeks: () => number; asWeeks: () => number; months: () => number; asMonths: () => number; years: () => number; asYears: () => number; add: (inp?: moment.DurationInputArg1, unit?: moment.unitOfTime.DurationConstructor | undefined) => moment.Duration; subtract: (inp?: moment.DurationInputArg1, unit?: moment.unitOfTime.DurationConstructor | undefined) => moment.Duration; locale: { (): string; (locale: moment.LocaleSpecifier): moment.Duration; }; localeData: () => moment.Locale; toISOString: () => string; toJSON: () => string; isValid: () => boolean; lang: { (locale: moment.LocaleSpecifier): moment.Moment; (): moment.Locale; }; toIsoString: () => string; format: moment.Format; }>; }>; path: Readonly<{ readonly data: string; }>; savedObjects: Readonly<{ readonly maxImportPayloadBytes: Readonly<{ isGreaterThan: (other: ",
+              {
+                "pluginId": "@kbn/config-schema",
+                "scope": "common",
+                "docId": "kibKbnConfigSchemaPluginApi",
+                "section": "def-common.ByteSizeValue",
+                "text": "ByteSizeValue"
+              },
+              ") => boolean; isLessThan: (other: ",
+              {
+                "pluginId": "@kbn/config-schema",
+                "scope": "common",
+                "docId": "kibKbnConfigSchemaPluginApi",
+                "section": "def-common.ByteSizeValue",
+                "text": "ByteSizeValue"
+              },
+              ") => boolean; isEqualTo: (other: ",
+              {
+                "pluginId": "@kbn/config-schema",
+                "scope": "common",
+                "docId": "kibKbnConfigSchemaPluginApi",
+                "section": "def-common.ByteSizeValue",
+                "text": "ByteSizeValue"
+              },
+              ") => boolean; getValueInBytes: () => number; toString: (returnUnit?: ",
+              "ByteSizeValueUnit",
+              " | undefined) => string; }>; }>; }>>; get: () => Readonly<{ elasticsearch: Readonly<{ readonly requestTimeout: Readonly<{ clone: () => moment.Duration; humanize: { (argWithSuffix?: boolean | undefined, argThresholds?: moment.argThresholdOpts | undefined): string; (argThresholds?: moment.argThresholdOpts | undefined): string; }; abs: () => moment.Duration; as: (units: moment.unitOfTime.Base) => number; get: (units: moment.unitOfTime.Base) => number; milliseconds: () => number; asMilliseconds: () => number; seconds: () => number; asSeconds: () => number; minutes: () => number; asMinutes: () => number; hours: () => number; asHours: () => number; days: () => number; asDays: () => number; weeks: () => number; asWeeks: () => number; months: () => number; asMonths: () => number; years: () => number; asYears: () => number; add: (inp?: moment.DurationInputArg1, unit?: moment.unitOfTime.DurationConstructor | undefined) => moment.Duration; subtract: (inp?: moment.DurationInputArg1, unit?: moment.unitOfTime.DurationConstructor | undefined) => moment.Duration; locale: { (): string; (locale: moment.LocaleSpecifier): moment.Duration; }; localeData: () => moment.Locale; toISOString: () => string; toJSON: () => string; isValid: () => boolean; lang: { (locale: moment.LocaleSpecifier): moment.Moment; (): moment.Locale; }; toIsoString: () => string; format: moment.Format; }>; readonly shardTimeout: Readonly<{ clone: () => moment.Duration; humanize: { (argWithSuffix?: boolean | undefined, argThresholds?: moment.argThresholdOpts | undefined): string; (argThresholds?: moment.argThresholdOpts | undefined): string; }; abs: () => moment.Duration; as: (units: moment.unitOfTime.Base) => number; get: (units: moment.unitOfTime.Base) => number; milliseconds: () => number; asMilliseconds: () => number; seconds: () => number; asSeconds: () => number; minutes: () => number; asMinutes: () => number; hours: () => number; asHours: () => number; days: () => number; asDays: () => number; weeks: () => number; asWeeks: () => number; months: () => number; asMonths: () => number; years: () => number; asYears: () => number; add: (inp?: moment.DurationInputArg1, unit?: moment.unitOfTime.DurationConstructor | undefined) => moment.Duration; subtract: (inp?: moment.DurationInputArg1, unit?: moment.unitOfTime.DurationConstructor | undefined) => moment.Duration; locale: { (): string; (locale: moment.LocaleSpecifier): moment.Duration; }; localeData: () => moment.Locale; toISOString: () => string; toJSON: () => string; isValid: () => boolean; lang: { (locale: moment.LocaleSpecifier): moment.Moment; (): moment.Locale; }; toIsoString: () => string; format: moment.Format; }>; readonly pingTimeout: Readonly<{ clone: () => moment.Duration; humanize: { (argWithSuffix?: boolean | undefined, argThresholds?: moment.argThresholdOpts | undefined): string; (argThresholds?: moment.argThresholdOpts | undefined): string; }; abs: () => moment.Duration; as: (units: moment.unitOfTime.Base) => number; get: (units: moment.unitOfTime.Base) => number; milliseconds: () => number; asMilliseconds: () => number; seconds: () => number; asSeconds: () => number; minutes: () => number; asMinutes: () => number; hours: () => number; asHours: () => number; days: () => number; asDays: () => number; weeks: () => number; asWeeks: () => number; months: () => number; asMonths: () => number; years: () => number; asYears: () => number; add: (inp?: moment.DurationInputArg1, unit?: moment.unitOfTime.DurationConstructor | undefined) => moment.Duration; subtract: (inp?: moment.DurationInputArg1, unit?: moment.unitOfTime.DurationConstructor | undefined) => moment.Duration; locale: { (): string; (locale: moment.LocaleSpecifier): moment.Duration; }; localeData: () => moment.Locale; toISOString: () => string; toJSON: () => string; isValid: () => boolean; lang: { (locale: moment.LocaleSpecifier): moment.Moment; (): moment.Locale; }; toIsoString: () => string; format: moment.Format; }>; }>; path: Readonly<{ readonly data: string; }>; savedObjects: Readonly<{ readonly maxImportPayloadBytes: Readonly<{ isGreaterThan: (other: ",
+              {
+                "pluginId": "@kbn/config-schema",
+                "scope": "common",
+                "docId": "kibKbnConfigSchemaPluginApi",
+                "section": "def-common.ByteSizeValue",
+                "text": "ByteSizeValue"
+              },
+              ") => boolean; isLessThan: (other: ",
+              {
+                "pluginId": "@kbn/config-schema",
+                "scope": "common",
+                "docId": "kibKbnConfigSchemaPluginApi",
+                "section": "def-common.ByteSizeValue",
+                "text": "ByteSizeValue"
+              },
+              ") => boolean; isEqualTo: (other: ",
+              {
+                "pluginId": "@kbn/config-schema",
+                "scope": "common",
+                "docId": "kibKbnConfigSchemaPluginApi",
+                "section": "def-common.ByteSizeValue",
+                "text": "ByteSizeValue"
+              },
+              ") => boolean; getValueInBytes: () => number; toString: (returnUnit?: ",
+              "ByteSizeValueUnit",
+              " | undefined) => string; }>; }>; }>; }; create: <T = ConfigSchema>() => ",
+              "Observable",
+              "<T>; get: <T = ConfigSchema>() => T; }"
+            ],
+            "path": "packages/core/plugins/core-plugins-server/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-plugins-server",
+        "id": "def-common.PluginManifest",
+        "type": "Interface",
+        "tags": [],
+        "label": "PluginManifest",
+        "description": [
+          "\nDescribes the set of required and optional properties plugin can define in its\nmandatory JSON manifest file.\n"
+        ],
+        "path": "packages/core/plugins/core-plugins-server/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-plugins-server",
+            "id": "def-common.PluginManifest.id",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [
+              "\nIdentifier of the plugin. Must be a string in camelCase. Part of a plugin public contract.\nOther plugins leverage it to access plugin API, navigate to the plugin, etc."
+            ],
+            "path": "packages/core/plugins/core-plugins-server/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-plugins-server",
+            "id": "def-common.PluginManifest.version",
+            "type": "string",
+            "tags": [],
+            "label": "version",
+            "description": [
+              "\nVersion of the plugin."
+            ],
+            "path": "packages/core/plugins/core-plugins-server/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-plugins-server",
+            "id": "def-common.PluginManifest.kibanaVersion",
+            "type": "string",
+            "tags": [],
+            "label": "kibanaVersion",
+            "description": [
+              "\nThe version of Kibana the plugin is compatible with, defaults to \"version\"."
+            ],
+            "path": "packages/core/plugins/core-plugins-server/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-plugins-server",
+            "id": "def-common.PluginManifest.type",
+            "type": "Enum",
+            "tags": [],
+            "label": "type",
+            "description": [
+              "\nType of the plugin, defaults to `standard`."
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-base-common",
+                "scope": "common",
+                "docId": "kibKbnCoreBaseCommonPluginApi",
+                "section": "def-common.PluginType",
+                "text": "PluginType"
+              }
+            ],
+            "path": "packages/core/plugins/core-plugins-server/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-plugins-server",
+            "id": "def-common.PluginManifest.configPath",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "configPath",
+            "description": [
+              "\nRoot {@link ConfigPath | configuration path} used by the plugin, defaults\nto \"id\" in snake_case format.\n"
+            ],
+            "signature": [
+              "string | string[]"
+            ],
+            "path": "packages/core/plugins/core-plugins-server/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-plugins-server",
+            "id": "def-common.PluginManifest.requiredPlugins",
+            "type": "Object",
+            "tags": [],
+            "label": "requiredPlugins",
+            "description": [
+              "\nAn optional list of the other plugins that **must be** installed and enabled\nfor this plugin to function properly."
+            ],
+            "signature": [
+              "readonly string[]"
+            ],
+            "path": "packages/core/plugins/core-plugins-server/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-plugins-server",
+            "id": "def-common.PluginManifest.requiredBundles",
+            "type": "Object",
+            "tags": [],
+            "label": "requiredBundles",
+            "description": [
+              "\nList of plugin ids that this plugin's UI code imports modules from that are\nnot in `requiredPlugins`.\n"
+            ],
+            "signature": [
+              "readonly string[]"
+            ],
+            "path": "packages/core/plugins/core-plugins-server/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-plugins-server",
+            "id": "def-common.PluginManifest.optionalPlugins",
+            "type": "Object",
+            "tags": [],
+            "label": "optionalPlugins",
+            "description": [
+              "\nAn optional list of the other plugins that if installed and enabled **may be**\nleveraged by this plugin for some additional functionality but otherwise are\nnot required for this plugin to work properly."
+            ],
+            "signature": [
+              "readonly string[]"
+            ],
+            "path": "packages/core/plugins/core-plugins-server/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-plugins-server",
+            "id": "def-common.PluginManifest.ui",
+            "type": "boolean",
+            "tags": [],
+            "label": "ui",
+            "description": [
+              "\nSpecifies whether plugin includes some client/browser specific functionality\nthat should be included into client bundle via `public/ui_plugin.js` file."
+            ],
+            "path": "packages/core/plugins/core-plugins-server/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-plugins-server",
+            "id": "def-common.PluginManifest.server",
+            "type": "boolean",
+            "tags": [],
+            "label": "server",
+            "description": [
+              "\nSpecifies whether plugin includes some server-side specific functionality."
+            ],
+            "path": "packages/core/plugins/core-plugins-server/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-plugins-server",
+            "id": "def-common.PluginManifest.extraPublicDirs",
+            "type": "Array",
+            "tags": [
+              "deprecated"
+            ],
+            "label": "extraPublicDirs",
+            "description": [
+              "\nSpecifies directory names that can be imported by other ui-plugins built\nusing the same instance of the @kbn/optimizer. A temporary measure we plan\nto replace with better mechanisms for sharing static code between plugins"
+            ],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "packages/core/plugins/core-plugins-server/src/types.ts",
+            "deprecated": true,
+            "trackAdoption": false,
+            "references": [
+              {
+                "plugin": "@kbn/core-plugins-server-internal",
+                "path": "packages/core/plugins/core-plugins-server-internal/src/discovery/plugin_manifest_parser.ts"
+              },
+              {
+                "plugin": "@kbn/core-plugins-server-internal",
+                "path": "packages/core/plugins/core-plugins-server-internal/src/discovery/plugin_manifest_parser.ts"
+              },
+              {
+                "plugin": "@kbn/core-plugins-server-internal",
+                "path": "packages/core/plugins/core-plugins-server-internal/src/discovery/plugin_manifest_parser.ts"
+              },
+              {
+                "plugin": "@kbn/core-plugins-server-internal",
+                "path": "packages/core/plugins/core-plugins-server-internal/src/discovery/plugin_manifest_parser.ts"
+              },
+              {
+                "plugin": "@kbn/core-plugins-server-internal",
+                "path": "packages/core/plugins/core-plugins-server-internal/src/discovery/plugin_manifest_parser.ts"
+              },
+              {
+                "plugin": "@kbn/core-plugins-server-internal",
+                "path": "packages/core/plugins/core-plugins-server-internal/src/discovery/plugin_manifest_parser.ts"
+              }
+            ]
+          },
+          {
+            "parentPluginId": "@kbn/core-plugins-server",
+            "id": "def-common.PluginManifest.serviceFolders",
+            "type": "Object",
+            "tags": [],
+            "label": "serviceFolders",
+            "description": [
+              "\nOnly used for the automatically generated API documentation. Specifying service\nfolders will cause your plugin API reference to be broken up into sub sections."
+            ],
+            "signature": [
+              "readonly string[] | undefined"
+            ],
+            "path": "packages/core/plugins/core-plugins-server/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-plugins-server",
+            "id": "def-common.PluginManifest.owner",
+            "type": "Object",
+            "tags": [],
+            "label": "owner",
+            "description": [],
+            "signature": [
+              "{ readonly name: string; readonly githubTeam?: string | undefined; }"
+            ],
+            "path": "packages/core/plugins/core-plugins-server/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-plugins-server",
+            "id": "def-common.PluginManifest.description",
+            "type": "string",
+            "tags": [],
+            "label": "description",
+            "description": [
+              "\nTODO: make required once all plugins specify this.\nA brief description of what this plugin does and any capabilities it provides."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/core/plugins/core-plugins-server/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-plugins-server",
+            "id": "def-common.PluginManifest.enabledOnAnonymousPages",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "enabledOnAnonymousPages",
+            "description": [
+              "\nSpecifies whether this plugin - and its required dependencies - will be enabled for anonymous pages (login page, status page when\nconfigured, etc.) Default is false."
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "packages/core/plugins/core-plugins-server/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-plugins-server",
+        "id": "def-common.PrebootPlugin",
+        "type": "Interface",
+        "tags": [],
+        "label": "PrebootPlugin",
+        "description": [
+          "\nThe interface that should be returned by a `PluginInitializer` for a `preboot` plugin.\n"
+        ],
+        "signature": [
+          {
+            "pluginId": "@kbn/core-plugins-server",
+            "scope": "common",
+            "docId": "kibKbnCorePluginsServerPluginApi",
+            "section": "def-common.PrebootPlugin",
+            "text": "PrebootPlugin"
+          },
+          "<TSetup, TPluginsSetup>"
+        ],
+        "path": "packages/core/plugins/core-plugins-server/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-plugins-server",
+            "id": "def-common.PrebootPlugin.setup",
+            "type": "Function",
+            "tags": [],
+            "label": "setup",
+            "description": [],
+            "signature": [
+              "(core: ",
+              {
+                "pluginId": "@kbn/core-lifecycle-server",
+                "scope": "common",
+                "docId": "kibKbnCoreLifecycleServerPluginApi",
+                "section": "def-common.CorePreboot",
+                "text": "CorePreboot"
+              },
+              ", plugins: TPluginsSetup) => TSetup"
+            ],
+            "path": "packages/core/plugins/core-plugins-server/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-plugins-server",
+                "id": "def-common.PrebootPlugin.setup.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "core",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/core-lifecycle-server",
+                    "scope": "common",
+                    "docId": "kibKbnCoreLifecycleServerPluginApi",
+                    "section": "def-common.CorePreboot",
+                    "text": "CorePreboot"
+                  }
+                ],
+                "path": "packages/core/plugins/core-plugins-server/src/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/core-plugins-server",
+                "id": "def-common.PrebootPlugin.setup.$2",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "plugins",
+                "description": [],
+                "signature": [
+                  "TPluginsSetup"
+                ],
+                "path": "packages/core/plugins/core-plugins-server/src/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-plugins-server",
+            "id": "def-common.PrebootPlugin.stop",
+            "type": "Function",
+            "tags": [],
+            "label": "stop",
+            "description": [],
+            "signature": [
+              "(() => void) | undefined"
+            ],
+            "path": "packages/core/plugins/core-plugins-server/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/core-plugins-server",
+        "id": "def-common.ExposedToBrowserDescriptor",
+        "type": "Type",
+        "tags": [],
+        "label": "ExposedToBrowserDescriptor",
+        "description": [
+          "\nType defining the list of configuration properties that will be exposed on the client-side\nObject properties can either be fully exposed\n"
+        ],
+        "signature": [
+          "{ [Key in keyof T]?: (T[Key] extends Maybe<any[]> ? boolean : T[Key] extends Maybe<object> ? boolean | ",
+          {
+            "pluginId": "@kbn/core-plugins-server",
+            "scope": "common",
+            "docId": "kibKbnCorePluginsServerPluginApi",
+            "section": "def-common.ExposedToBrowserDescriptor",
+            "text": "ExposedToBrowserDescriptor"
+          },
+          "<T[Key]> : boolean) | undefined; }"
+        ],
+        "path": "packages/core/plugins/core-plugins-server/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-plugins-server",
+        "id": "def-common.MakeUsageFromSchema",
+        "type": "Type",
+        "tags": [],
+        "label": "MakeUsageFromSchema",
+        "description": [
+          "\nList of configuration values that will be exposed to usage collection.\nIf parent node or actual config path is set to `true` then the actual value\nof these configs will be reoprted.\nIf parent node or actual config path is set to `false` then the config\nwill be reported as [redacted].\n"
+        ],
+        "signature": [
+          "{ [Key in keyof T]?: (T[Key] extends Maybe<object[]> ? false : T[Key] extends Maybe<any[]> ? boolean : T[Key] extends Maybe<object> ? boolean | ",
+          {
+            "pluginId": "@kbn/core-plugins-server",
+            "scope": "common",
+            "docId": "kibKbnCorePluginsServerPluginApi",
+            "section": "def-common.MakeUsageFromSchema",
+            "text": "MakeUsageFromSchema"
+          },
+          "<T[Key]> : boolean) | undefined; }"
+        ],
+        "path": "packages/core/plugins/core-plugins-server/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-plugins-server",
+        "id": "def-common.PluginConfigSchema",
+        "type": "Type",
+        "tags": [],
+        "label": "PluginConfigSchema",
+        "description": [
+          "\nDedicated type for plugin configuration schema.\n"
+        ],
+        "signature": [
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "common",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-common.Type",
+            "text": "Type"
+          },
+          "<T>"
+        ],
+        "path": "packages/core/plugins/core-plugins-server/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-plugins-server",
+        "id": "def-common.PluginInitializer",
+        "type": "Type",
+        "tags": [],
+        "label": "PluginInitializer",
+        "description": [
+          "\nThe `plugin` export at the root of a plugin's `server` directory should conform\nto this interface.\n"
+        ],
+        "signature": [
+          "(core: ",
+          {
+            "pluginId": "@kbn/core-plugins-server",
+            "scope": "common",
+            "docId": "kibKbnCorePluginsServerPluginApi",
+            "section": "def-common.PluginInitializerContext",
+            "text": "PluginInitializerContext"
+          },
+          "<unknown>) => ",
+          {
+            "pluginId": "@kbn/core-plugins-server",
+            "scope": "common",
+            "docId": "kibKbnCorePluginsServerPluginApi",
+            "section": "def-common.Plugin",
+            "text": "Plugin"
+          },
+          "<TSetup, TStart, TPluginsSetup, TPluginsStart> | ",
+          {
+            "pluginId": "@kbn/core-plugins-server",
+            "scope": "common",
+            "docId": "kibKbnCorePluginsServerPluginApi",
+            "section": "def-common.PrebootPlugin",
+            "text": "PrebootPlugin"
+          },
+          "<TSetup, TPluginsSetup> | ",
+          {
+            "pluginId": "@kbn/core-plugins-server",
+            "scope": "common",
+            "docId": "kibKbnCorePluginsServerPluginApi",
+            "section": "def-common.AsyncPlugin",
+            "text": "AsyncPlugin"
+          },
+          "<TSetup, TStart, TPluginsSetup, TPluginsStart>"
+        ],
+        "path": "packages/core/plugins/core-plugins-server/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-plugins-server",
+            "id": "def-common.PluginInitializer.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "core",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-plugins-server",
+                "scope": "common",
+                "docId": "kibKbnCorePluginsServerPluginApi",
+                "section": "def-common.PluginInitializerContext",
+                "text": "PluginInitializerContext"
+              },
+              "<unknown>"
+            ],
+            "path": "packages/core/plugins/core-plugins-server/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-plugins-server",
+        "id": "def-common.SharedGlobalConfig",
+        "type": "Type",
+        "tags": [],
+        "label": "SharedGlobalConfig",
+        "description": [],
+        "signature": [
+          "{ readonly elasticsearch: Readonly<{ readonly requestTimeout: Readonly<{ clone: () => moment.Duration; humanize: { (argWithSuffix?: boolean | undefined, argThresholds?: moment.argThresholdOpts | undefined): string; (argThresholds?: moment.argThresholdOpts | undefined): string; }; abs: () => moment.Duration; as: (units: moment.unitOfTime.Base) => number; get: (units: moment.unitOfTime.Base) => number; milliseconds: () => number; asMilliseconds: () => number; seconds: () => number; asSeconds: () => number; minutes: () => number; asMinutes: () => number; hours: () => number; asHours: () => number; days: () => number; asDays: () => number; weeks: () => number; asWeeks: () => number; months: () => number; asMonths: () => number; years: () => number; asYears: () => number; add: (inp?: moment.DurationInputArg1, unit?: moment.unitOfTime.DurationConstructor | undefined) => moment.Duration; subtract: (inp?: moment.DurationInputArg1, unit?: moment.unitOfTime.DurationConstructor | undefined) => moment.Duration; locale: { (): string; (locale: moment.LocaleSpecifier): moment.Duration; }; localeData: () => moment.Locale; toISOString: () => string; toJSON: () => string; isValid: () => boolean; lang: { (locale: moment.LocaleSpecifier): moment.Moment; (): moment.Locale; }; toIsoString: () => string; format: moment.Format; }>; readonly shardTimeout: Readonly<{ clone: () => moment.Duration; humanize: { (argWithSuffix?: boolean | undefined, argThresholds?: moment.argThresholdOpts | undefined): string; (argThresholds?: moment.argThresholdOpts | undefined): string; }; abs: () => moment.Duration; as: (units: moment.unitOfTime.Base) => number; get: (units: moment.unitOfTime.Base) => number; milliseconds: () => number; asMilliseconds: () => number; seconds: () => number; asSeconds: () => number; minutes: () => number; asMinutes: () => number; hours: () => number; asHours: () => number; days: () => number; asDays: () => number; weeks: () => number; asWeeks: () => number; months: () => number; asMonths: () => number; years: () => number; asYears: () => number; add: (inp?: moment.DurationInputArg1, unit?: moment.unitOfTime.DurationConstructor | undefined) => moment.Duration; subtract: (inp?: moment.DurationInputArg1, unit?: moment.unitOfTime.DurationConstructor | undefined) => moment.Duration; locale: { (): string; (locale: moment.LocaleSpecifier): moment.Duration; }; localeData: () => moment.Locale; toISOString: () => string; toJSON: () => string; isValid: () => boolean; lang: { (locale: moment.LocaleSpecifier): moment.Moment; (): moment.Locale; }; toIsoString: () => string; format: moment.Format; }>; readonly pingTimeout: Readonly<{ clone: () => moment.Duration; humanize: { (argWithSuffix?: boolean | undefined, argThresholds?: moment.argThresholdOpts | undefined): string; (argThresholds?: moment.argThresholdOpts | undefined): string; }; abs: () => moment.Duration; as: (units: moment.unitOfTime.Base) => number; get: (units: moment.unitOfTime.Base) => number; milliseconds: () => number; asMilliseconds: () => number; seconds: () => number; asSeconds: () => number; minutes: () => number; asMinutes: () => number; hours: () => number; asHours: () => number; days: () => number; asDays: () => number; weeks: () => number; asWeeks: () => number; months: () => number; asMonths: () => number; years: () => number; asYears: () => number; add: (inp?: moment.DurationInputArg1, unit?: moment.unitOfTime.DurationConstructor | undefined) => moment.Duration; subtract: (inp?: moment.DurationInputArg1, unit?: moment.unitOfTime.DurationConstructor | undefined) => moment.Duration; locale: { (): string; (locale: moment.LocaleSpecifier): moment.Duration; }; localeData: () => moment.Locale; toISOString: () => string; toJSON: () => string; isValid: () => boolean; lang: { (locale: moment.LocaleSpecifier): moment.Moment; (): moment.Locale; }; toIsoString: () => string; format: moment.Format; }>; }>; readonly path: Readonly<{ readonly data: string; }>; readonly savedObjects: Readonly<{ readonly maxImportPayloadBytes: Readonly<{ isGreaterThan: (other: ",
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "common",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-common.ByteSizeValue",
+            "text": "ByteSizeValue"
+          },
+          ") => boolean; isLessThan: (other: ",
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "common",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-common.ByteSizeValue",
+            "text": "ByteSizeValue"
+          },
+          ") => boolean; isEqualTo: (other: ",
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "common",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-common.ByteSizeValue",
+            "text": "ByteSizeValue"
+          },
+          ") => boolean; getValueInBytes: () => number; toString: (returnUnit?: ",
+          "ByteSizeValueUnit",
+          " | undefined) => string; }>; }>; }"
+        ],
+        "path": "packages/core/plugins/core-plugins-server/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": [
+      {
+        "parentPluginId": "@kbn/core-plugins-server",
+        "id": "def-common.SharedGlobalConfigKeys",
+        "type": "Object",
+        "tags": [],
+        "label": "SharedGlobalConfigKeys",
+        "description": [],
+        "path": "packages/core/plugins/core-plugins-server/src/shared_global_config.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-plugins-server",
+            "id": "def-common.SharedGlobalConfigKeys.elasticsearch",
+            "type": "Object",
+            "tags": [],
+            "label": "elasticsearch",
+            "description": [
+              "// We can add more if really needed"
+            ],
+            "signature": [
+              "readonly [\"shardTimeout\", \"requestTimeout\", \"pingTimeout\"]"
+            ],
+            "path": "packages/core/plugins/core-plugins-server/src/shared_global_config.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-plugins-server",
+            "id": "def-common.SharedGlobalConfigKeys.path",
+            "type": "Object",
+            "tags": [],
+            "label": "path",
+            "description": [],
+            "signature": [
+              "readonly [\"data\"]"
+            ],
+            "path": "packages/core/plugins/core-plugins-server/src/shared_global_config.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-plugins-server",
+            "id": "def-common.SharedGlobalConfigKeys.savedObjects",
+            "type": "Object",
+            "tags": [],
+            "label": "savedObjects",
+            "description": [],
+            "signature": [
+              "readonly [\"maxImportPayloadBytes\"]"
+            ],
+            "path": "packages/core/plugins/core-plugins-server/src/shared_global_config.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ]
+  }
+}

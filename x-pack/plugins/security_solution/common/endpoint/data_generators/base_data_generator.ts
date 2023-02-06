@@ -6,7 +6,7 @@
  */
 
 import seedrandom from 'seedrandom';
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 const OS_FAMILY = ['windows', 'macos', 'linux'];
@@ -68,6 +68,41 @@ const USERS = [
   'Genevieve',
 ];
 
+const toEsSearchHit = <T extends object = object>(
+  hitSource: T,
+  index: string = 'some-index'
+): estypes.SearchHit<T> => {
+  return {
+    _index: index,
+    _id: '123',
+    _score: 1.0,
+    _source: hitSource,
+  };
+};
+
+const toEsSearchResponse = <T extends object = object>(
+  hitsSource: Array<estypes.SearchHit<T>>
+): estypes.SearchResponse<T> => {
+  return {
+    took: 3,
+    timed_out: false,
+    _shards: {
+      total: 2,
+      successful: 2,
+      skipped: 0,
+      failed: 0,
+    },
+    hits: {
+      total: {
+        value: hitsSource.length,
+        relation: 'eq',
+      },
+      max_score: 0,
+      hits: hitsSource,
+    },
+  };
+};
+
 /**
  * A generic base class to assist in creating domain specific data generators. It includes
  * several general purpose random data generators for use within the class and exposes one
@@ -125,12 +160,12 @@ export class BaseDataGenerator<GeneratedDoc extends {} = {}> {
 
   /** generate a UUID (v4) */
   protected randomUUID(): string {
-    return uuid.v4();
+    return uuidv4();
   }
 
   /** generate a seeded random UUID v4 */
   protected seededUUIDv4(): string {
-    return uuid.v4({ random: [...this.randomNGenerator(255, 16)] });
+    return uuidv4({ random: [...this.randomNGenerator(255, 16)] });
   }
 
   /** Generate a random number up to the max provided */
@@ -167,7 +202,9 @@ export class BaseDataGenerator<GeneratedDoc extends {} = {}> {
   }
 
   protected randomVersion(): string {
-    return [7, ...this.randomNGenerator(20, 2)].map((x) => x.toString()).join('.');
+    // the `major` is sometimes (30%) 7 and most of the time (70%) 8
+    const major = this.randomBoolean(0.4) ? 7 : 8;
+    return [major, ...this.randomNGenerator(20, 2)].map((x) => x.toString()).join('.');
   }
 
   protected randomChoice<T>(choices: T[] | readonly T[]): T {
@@ -191,12 +228,17 @@ export class BaseDataGenerator<GeneratedDoc extends {} = {}> {
     hitSource: T,
     index: string = 'some-index'
   ): estypes.SearchHit<T> {
-    return {
-      _index: index,
-      _id: this.seededUUIDv4(),
-      _score: 1.0,
-      _source: hitSource,
-    };
+    const hit = toEsSearchHit<T>(hitSource, index);
+    hit._id = this.seededUUIDv4();
+
+    return hit;
+  }
+
+  static toEsSearchHit<T extends object = object>(
+    hitSource: T,
+    index: string = 'some-index'
+  ): estypes.SearchHit<T> {
+    return toEsSearchHit<T>(hitSource, index);
   }
 
   /**
@@ -207,23 +249,12 @@ export class BaseDataGenerator<GeneratedDoc extends {} = {}> {
   toEsSearchResponse<T extends object = object>(
     hitsSource: Array<estypes.SearchHit<T>>
   ): estypes.SearchResponse<T> {
-    return {
-      took: 3,
-      timed_out: false,
-      _shards: {
-        total: 2,
-        successful: 2,
-        skipped: 0,
-        failed: 0,
-      },
-      hits: {
-        total: {
-          value: hitsSource.length,
-          relation: 'eq',
-        },
-        max_score: 0,
-        hits: hitsSource,
-      },
-    };
+    return toEsSearchResponse<T>(hitsSource);
+  }
+
+  static toEsSearchResponse<T extends object = object>(
+    hitsSource: Array<estypes.SearchHit<T>>
+  ): estypes.SearchResponse<T> {
+    return toEsSearchResponse<T>(hitsSource);
   }
 }

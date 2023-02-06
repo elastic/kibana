@@ -9,7 +9,7 @@ import React, { useContext } from 'react';
 import { mount } from 'enzyme';
 import { RootDragDropProvider, DragContext } from '.';
 
-jest.useFakeTimers();
+jest.useFakeTimers({ legacyFakeTimers: true });
 
 describe('RootDragDropProvider', () => {
   test('reuses contexts for each render', () => {

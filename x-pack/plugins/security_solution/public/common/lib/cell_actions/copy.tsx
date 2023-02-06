@@ -7,18 +7,20 @@
 
 import type { EuiDataGridColumnCellActionProps } from '@elastic/eui';
 import React, { useMemo } from 'react';
+import type { TimelineNonEcsData } from '../../../../common/search_strategy';
 
-import type { TimelineNonEcsData } from '@kbn/timelines-plugin/common/search_strategy';
-import { getPageRowIndex } from '@kbn/timelines-plugin/public';
 import { useGetMappedNonEcsValue } from '../../../timelines/components/timeline/body/data_driven_columns';
+import { getPageRowIndex } from '../../components/data_table/pagination';
 import { EmptyComponent, useKibanaServices } from './helpers';
 
 export const getCopyCellAction = ({
   data,
   pageSize,
+  closeCellPopover,
 }: {
   data?: TimelineNonEcsData[][];
   pageSize: number;
+  closeCellPopover?: () => void;
 }) =>
   data && data.length > 0
     ? function CopyButton({ rowIndex, columnId, Component }: EuiDataGridColumnCellActionProps) {
@@ -45,6 +47,7 @@ export const getCopyCellAction = ({
             ownFocus: false,
             showTooltip: false,
             value,
+            onClick: closeCellPopover,
           };
         }, [Component, columnId, value]);
 

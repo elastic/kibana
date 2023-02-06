@@ -10,28 +10,35 @@ import {
   AsyncSearchSubmitRequest,
   AsyncSearchGetRequest,
 } from '@elastic/elasticsearch/lib/api/types';
-import { SearchSessionsConfigSchema } from '../../../../config';
 import { ISearchOptions } from '../../../../common';
+import { SearchConfigSchema } from '../../../../config';
 
 /**
  @internal
  */
 export function getCommonDefaultAsyncSubmitParams(
-  searchSessionsConfig: SearchSessionsConfigSchema | null,
-  options: ISearchOptions
+  config: SearchConfigSchema,
+  options: ISearchOptions,
+  /**
+   * Allows to override some of internal logic (e.g. eql / sql searches don't fully support search sessions yet)
+   */
+  overrides?: {
+    disableSearchSessions?: true;
+  }
 ): Pick<
   AsyncSearchSubmitRequest,
   'keep_alive' | 'wait_for_completion_timeout' | 'keep_on_completion'
 > {
-  const useSearchSessions = searchSessionsConfig?.enabled && !!options.sessionId;
-
-  const keepAlive = useSearchSessions
-    ? `${searchSessionsConfig!.defaultExpiration.asMilliseconds()}ms`
-    : '1m';
+  const useSearchSessions =
+    config.sessions.enabled && !!options.sessionId && !overrides?.disableSearchSessions;
+  const keepAlive =
+    useSearchSessions && options.isStored
+      ? `${config.sessions.defaultExpiration.asMilliseconds()}ms`
+      : `${config.asyncSearch.keepAlive.asMilliseconds()}ms`;
 
   return {
-    // Wait up to 100ms for the response to return
-    wait_for_completion_timeout: '100ms',
+    // Wait up to the timeout for the response to return
+    wait_for_completion_timeout: `${config.asyncSearch.waitForCompletion.asMilliseconds()}ms`,
     // If search sessions are used, store and get an async ID even for short running requests.
     keep_on_completion: useSearchSessions,
     // The initial keepalive is as defined in defaultExpiration if search sessions are used or 1m otherwise.
@@ -43,20 +50,31 @@ export function getCommonDefaultAsyncSubmitParams(
  @internal
  */
 export function getCommonDefaultAsyncGetParams(
-  searchSessionsConfig: SearchSessionsConfigSchema | null,
-  options: ISearchOptions
+  config: SearchConfigSchema,
+  options: ISearchOptions,
+  /**
+   * Allows to override some of internal logic (e.g. eql / sql searches don't fully support search sessions yet)
+   */
+  overrides?: {
+    disableSearchSessions?: true;
+  }
 ): Pick<AsyncSearchGetRequest, 'keep_alive' | 'wait_for_completion_timeout'> {
-  const useSearchSessions = searchSessionsConfig?.enabled && !!options.sessionId;
+  const useSearchSessions =
+    config.sessions.enabled && !!options.sessionId && !overrides?.disableSearchSessions;
 
   return {
-    // Wait up to 100ms for the response to return
-    wait_for_completion_timeout: '100ms',
-    ...(useSearchSessions
-      ? // Don't change the expiration of search requests that are tracked in a search session
-        undefined
+    // Wait up to the timeout for the response to return
+    wait_for_completion_timeout: `${config.asyncSearch.waitForCompletion.asMilliseconds()}ms`,
+    ...(useSearchSessions && options.isStored
+      ? // Use session's keep_alive if search belongs to a stored session
+        options.isSearchStored || options.isRestore // if search was already stored and extended, then no need to extend keepAlive
+        ? {}
+        : {
+            keep_alive: `${config.sessions.defaultExpiration.asMilliseconds()}ms`,
+          }
       : {
           // We still need to do polling for searches not within the context of a search session or when search session disabled
-          keep_alive: '1m',
+          keep_alive: `${config.asyncSearch.keepAlive.asMilliseconds()}ms`,
         }),
   };
 }

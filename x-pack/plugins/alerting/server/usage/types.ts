@@ -27,6 +27,22 @@ export interface AlertingUsage {
     string,
     Record<string, number>
   >;
+  count_rules_by_execution_status: {
+    success: number;
+    error: number;
+    warning: number;
+  };
+  count_rules_with_tags: number;
+  count_rules_by_notify_when: {
+    on_action_group_change: number;
+    on_active_alert: number;
+    on_throttle_interval: number;
+  };
+  count_connector_types_by_consumers: Record<string, Record<string, number>>;
+  count_rules_snoozed: number;
+  count_rules_muted: number;
+  count_rules_with_muted_alerts: number;
+  count_rules_by_execution_status_per_day: Record<string, number>;
   percentile_num_generated_actions_per_day: {
     p50: number;
     p90: number;

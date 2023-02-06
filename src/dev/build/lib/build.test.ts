@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { REPO_ROOT } from '@kbn/utils';
+import { REPO_ROOT } from '@kbn/repo-info';
 import { createAbsolutePathSerializer } from '@kbn/jest-serializers';
 
 import { Config } from './config';
@@ -24,7 +24,7 @@ const config = new Config(
     workspaces: {
       packages: [],
     },
-  },
+  } as any,
   '1.2.3',
   REPO_ROOT,
   {
@@ -34,6 +34,8 @@ const config = new Config(
   },
   false,
   false,
+  null,
+  '',
   '',
   false,
   true

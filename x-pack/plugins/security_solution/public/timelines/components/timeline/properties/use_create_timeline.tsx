@@ -20,11 +20,13 @@ import { inputsActions, inputsSelectors } from '../../../../common/store/inputs'
 import { sourcererActions, sourcererSelectors } from '../../../../common/store/sourcerer';
 import { SourcererScopeName } from '../../../../common/store/sourcerer/model';
 import { appActions } from '../../../../common/store/app';
+import type { TimeRange } from '../../../../common/store/inputs/model';
 
 interface Props {
   timelineId?: string;
   timelineType: TimelineTypeLiteral;
   closeGearMenu?: () => void;
+  timeRange?: TimeRange;
 }
 
 export const useCreateTimeline = ({ timelineId, timelineType, closeGearMenu }: Props) => {
@@ -35,8 +37,11 @@ export const useCreateTimeline = ({ timelineId, timelineType, closeGearMenu }: P
 
   const { timelineFullScreen, setTimelineFullScreen } = useTimelineFullScreen();
   const globalTimeRange = useDeepEqualSelector(inputsSelectors.globalTimeRangeSelector);
+
   const createTimeline = useCallback(
-    ({ id, show }) => {
+    ({ id, show, timeRange: timeRangeParam }) => {
+      const timerange = timeRangeParam ?? globalTimeRange;
+
       if (id === TimelineId.active && timelineFullScreen) {
         setTimelineFullScreen(false);
       }
@@ -57,19 +62,31 @@ export const useCreateTimeline = ({ timelineId, timelineType, closeGearMenu }: P
           timelineType,
         })
       );
+
+      dispatch(
+        timelineActions.setTimelineUpdatedAt({
+          id: TimelineId.active,
+          updated: undefined,
+        })
+      );
       dispatch(inputsActions.addLinkTo([InputsModelId.global, InputsModelId.timeline]));
       dispatch(appActions.addNotes({ notes: [] }));
-      if (globalTimeRange.kind === 'absolute') {
+
+      if (timeRangeParam) {
+        dispatch(inputsActions.removeLinkTo([InputsModelId.timeline, InputsModelId.global]));
+      }
+
+      if (timerange.kind === 'absolute') {
         dispatch(
           inputsActions.setAbsoluteRangeDatePicker({
-            ...globalTimeRange,
+            ...timerange,
             id: InputsModelId.timeline,
           })
         );
-      } else if (globalTimeRange.kind === 'relative') {
+      } else if (timerange.kind === 'relative') {
         dispatch(
           inputsActions.setRelativeRangeDatePicker({
-            ...globalTimeRange,
+            ...timerange,
             id: InputsModelId.timeline,
           })
         );
@@ -86,15 +103,22 @@ export const useCreateTimeline = ({ timelineId, timelineType, closeGearMenu }: P
     ]
   );
 
-  const handleCreateNewTimeline = useCallback(() => {
-    createTimeline({ id: timelineId, show: true, timelineType });
-    if (typeof closeGearMenu === 'function') {
-      closeGearMenu();
-    }
-  }, [createTimeline, timelineId, timelineType, closeGearMenu]);
+  const handleCreateNewTimeline = useCallback(
+    (options?: CreateNewTimelineOptions) => {
+      createTimeline({ id: timelineId, show: true, timelineType, timeRange: options?.timeRange });
+      if (typeof closeGearMenu === 'function') {
+        closeGearMenu();
+      }
+    },
+    [createTimeline, timelineId, timelineType, closeGearMenu]
+  );
 
   return handleCreateNewTimeline;
 };
+
+interface CreateNewTimelineOptions {
+  timeRange?: TimeRange;
+}
 
 export const useCreateTimelineButton = ({ timelineId, timelineType, closeGearMenu }: Props) => {
   const handleCreateNewTimeline = useCreateTimeline({
@@ -119,7 +143,7 @@ export const useCreateTimelineButton = ({ timelineId, timelineType, closeGearMen
     }) => {
       const buttonProps = {
         iconType,
-        onClick: handleCreateNewTimeline,
+        onClick: () => handleCreateNewTimeline(),
         fill,
       };
       const dataTestSubjPrefix =

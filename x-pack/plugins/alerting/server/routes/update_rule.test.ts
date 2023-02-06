@@ -14,7 +14,7 @@ import { mockHandlerArguments } from './_mock_handler_arguments';
 import { UpdateOptions } from '../rules_client';
 import { rulesClientMock } from '../rules_client.mock';
 import { RuleTypeDisabledError } from '../lib/errors/rule_type_disabled';
-import { RuleNotifyWhenType } from '../../common';
+import { RuleNotifyWhen } from '../../common';
 import { AsApiContract } from './lib';
 import { PartialRule } from '../types';
 
@@ -50,7 +50,7 @@ describe('updateRuleRoute', () => {
         },
       },
     ],
-    notifyWhen: 'onActionGroupChange' as RuleNotifyWhenType,
+    notifyWhen: RuleNotifyWhen.CHANGE,
   };
 
   const updateRequest: AsApiContract<UpdateOptions<{ otherField: boolean }>['data']> = {

@@ -10,6 +10,7 @@ echo "--- Build Kibana Distribution"
 
 BUILD_ARGS=""
 is_pr_with_label "ci:build-all-platforms" && BUILD_ARGS="--all-platforms"
+is_pr_with_label "ci:build-example-plugins" && BUILD_ARGS="$BUILD_ARGS --example-plugins"
 is_pr_with_label "ci:build-docker-cross-compile" && BUILD_ARG="$BUILD_ARGS --docker-cross-compile"
 is_pr_with_label "ci:build-os-packages" || BUILD_ARGS="$BUILD_ARGS --skip-os-packages"
 is_pr_with_label "ci:build-canvas-shareable-runtime" || BUILD_ARGS="$BUILD_ARGS --skip-canvas-shareable-runtime"

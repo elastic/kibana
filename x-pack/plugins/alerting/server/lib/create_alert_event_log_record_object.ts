@@ -23,7 +23,6 @@ interface CreateAlertEventLogRecordParams {
   message?: string;
   state?: AlertInstanceState;
   group?: string;
-  subgroup?: string;
   namespace?: string;
   timestamp?: string;
   task?: {
@@ -36,6 +35,7 @@ interface CreateAlertEventLogRecordParams {
     typeId: string;
     relation?: string;
   }>;
+  flapping?: boolean;
 }
 
 export function createAlertEventLogRecordObject(params: CreateAlertEventLogRecordParams): Event {
@@ -48,18 +48,17 @@ export function createAlertEventLogRecordObject(params: CreateAlertEventLogRecor
     task,
     ruleId,
     group,
-    subgroup,
     namespace,
     consumer,
     spaceId,
+    flapping,
   } = params;
   const alerting =
-    params.instanceId || group || subgroup
+    params.instanceId || group
       ? {
           alerting: {
             ...(params.instanceId ? { instance_id: params.instanceId } : {}),
             ...(group ? { action_group_id: group } : {}),
-            ...(subgroup ? { action_subgroup: subgroup } : {}),
           },
         }
       : undefined;
@@ -75,6 +74,7 @@ export function createAlertEventLogRecordObject(params: CreateAlertEventLogRecor
     },
     kibana: {
       alert: {
+        ...(flapping !== undefined ? { flapping } : {}),
         rule: {
           rule_type_id: ruleType.id,
           ...(consumer ? { consumer } : {}),

@@ -467,7 +467,7 @@ export class CommonPageObject extends FtrService {
   async waitForSaveModalToClose() {
     this.log.debug('Waiting for save modal to close');
     await this.retry.try(async () => {
-      if (await this.testSubjects.exists('savedObjectSaveModal')) {
+      if (await this.testSubjects.exists('savedObjectSaveModal', { timeout: 5000 })) {
         throw new Error('save modal still open');
       }
     });
@@ -549,7 +549,7 @@ export class CommonPageObject extends FtrService {
    * @param time
    */
   async setTime(time: TimeStrings) {
-    await this.kibanaServer.uiSettings.replace({
+    await this.kibanaServer.uiSettings.update({
       'timepicker:timeDefaults': JSON.stringify(this.formatTime(time)),
     });
   }

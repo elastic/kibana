@@ -15,19 +15,24 @@ import React, { Suspense } from 'react';
 import { memoize } from 'lodash';
 
 import { EuiCallOut, EuiCode, EuiLoadingSpinner } from '@elastic/eui';
-import { AttachmentType } from '../../../client/attachment_framework/types';
-import { AttachmentTypeRegistry } from '../../../../common/registry';
-import { CommentResponse } from '../../../../common/api';
-import { UserActionBuilder, UserActionBuilderArgs } from '../types';
+import type { AttachmentType } from '../../../client/attachment_framework/types';
+import type { AttachmentTypeRegistry } from '../../../../common/registry';
+import type { CommentResponse } from '../../../../common/api';
+import type { UserActionBuilder, UserActionBuilderArgs } from '../types';
 import { UserActionTimestamp } from '../timestamp';
-import { SnakeToCamelCase } from '../../../../common/types';
-import { UserActionUsernameWithAvatar } from '../avatar_username';
-import { UserActionCopyLink } from '../copy_link';
+import type { SnakeToCamelCase } from '../../../../common/types';
 import { ATTACHMENT_NOT_REGISTERED_ERROR, DEFAULT_EVENT_ATTACHMENT_TITLE } from './translations';
+import { UserActionContentToolbar } from '../content_toolbar';
+import { HoverableUserWithAvatarResolver } from '../../user_profiles/hoverable_user_with_avatar_resolver';
+import { RegisteredAttachmentsPropertyActions } from '../property_actions/registered_attachments_property_actions';
 
-type BuilderArgs<C, R> = Pick<UserActionBuilderArgs, 'userAction' | 'caseData'> & {
+type BuilderArgs<C, R> = Pick<
+  UserActionBuilderArgs,
+  'userAction' | 'caseData' | 'handleDeleteComment' | 'userProfiles'
+> & {
   comment: SnakeToCamelCase<C>;
   registry: R;
+  isLoading: boolean;
   getId: () => string;
   getAttachmentViewProps: () => object;
 };
@@ -61,11 +66,14 @@ export const createRegisteredAttachmentUserActionBuilder = <
   R extends AttachmentTypeRegistry<AttachmentType<any>>
 >({
   userAction,
+  userProfiles,
   comment,
   registry,
   caseData,
+  isLoading,
   getId,
   getAttachmentViewProps,
+  handleDeleteComment,
 }: BuilderArgs<C, R>): ReturnType<UserActionBuilder> => ({
   // TODO: Fix this manually. Issue #123375
   // eslint-disable-next-line react/display-name
@@ -77,10 +85,7 @@ export const createRegisteredAttachmentUserActionBuilder = <
       return [
         {
           username: (
-            <UserActionUsernameWithAvatar
-              username={comment.createdBy.username}
-              fullName={comment.createdBy.fullName}
-            />
+            <HoverableUserWithAvatarResolver user={comment.createdBy} userProfiles={userProfiles} />
           ),
           event: (
             <>
@@ -110,10 +115,7 @@ export const createRegisteredAttachmentUserActionBuilder = <
     return [
       {
         username: (
-          <UserActionUsernameWithAvatar
-            username={comment.createdBy.username}
-            fullName={comment.createdBy.fullName}
-          />
+          <HoverableUserWithAvatarResolver user={comment.createdBy} userProfiles={userProfiles} />
         ),
         className: `comment-${comment.type}-attachment-${attachmentTypeId}`,
         event: attachmentViewObject.event,
@@ -121,10 +123,13 @@ export const createRegisteredAttachmentUserActionBuilder = <
         timestamp: <UserActionTimestamp createdAt={userAction.createdAt} />,
         timelineAvatar: attachmentViewObject.timelineAvatar,
         actions: (
-          <>
-            <UserActionCopyLink id={comment.id} />
+          <UserActionContentToolbar id={comment.id}>
             {attachmentViewObject.actions}
-          </>
+            <RegisteredAttachmentsPropertyActions
+              isLoading={isLoading}
+              onDelete={() => handleDeleteComment(comment.id)}
+            />
+          </UserActionContentToolbar>
         ),
         children: renderer(props),
       },

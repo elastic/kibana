@@ -10,7 +10,7 @@ import { EventDetailsPanel } from '.';
 import '../../../../common/mock/match_media';
 import { TestProviders } from '../../../../common/mock';
 import { TimelineId, TimelineTabs } from '../../../../../common/types/timeline';
-import type { Ecs } from '../../../../../common/ecs';
+import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import {
   KibanaServices,
   useKibana,
@@ -94,10 +94,18 @@ jest.mock(
   }
 );
 jest.mock('../../../../detections/components/alerts_table/actions');
-const mockSearchStrategy = jest.fn();
+jest.mock('../../../../explore/containers/risk_score', () => {
+  return {
+    useRiskScore: jest.fn().mockReturnValue({
+      loading: true,
+      data: undefined,
+      isModuleEnabled: false,
+    }),
+  };
+});
 
 const defaultProps = {
-  timelineId: TimelineId.test,
+  scopeId: TimelineId.test,
   isHostIsolationPanelOpen: false,
   handleOnEventClosed: jest.fn(),
   onAddIsolationStatusClick: jest.fn(),
@@ -115,22 +123,12 @@ jest.mock('../../../containers/details', () => {
   };
 });
 
-describe('event details footer component', () => {
+describe('event details panel component', () => {
   beforeEach(() => {
     const coreStartMock = coreMock.createStart();
     (KibanaServices.get as jest.Mock).mockReturnValue(coreStartMock);
     (useKibana as jest.Mock).mockReturnValue({
       services: {
-        data: {
-          search: {
-            searchStrategyClient: jest.fn(),
-            search: mockSearchStrategy.mockReturnValue({
-              unsubscribe: jest.fn(),
-              subscribe: jest.fn(),
-            }),
-          },
-          query: jest.fn(),
-        },
         uiSettings: {
           get: jest.fn().mockReturnValue([]),
         },
@@ -138,6 +136,14 @@ describe('event details footer component', () => {
           ui: {
             getCasesContext: () => mockCasesContext,
           },
+        },
+        timelines: {
+          getHoverActions: jest.fn().mockReturnValue({
+            getAddToTimelineButton: jest.fn(),
+          }),
+        },
+        osquery: {
+          OsqueryResults: jest.fn().mockReturnValue(null),
         },
       },
     });

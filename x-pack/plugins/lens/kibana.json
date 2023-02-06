@@ -25,18 +25,19 @@
     "expressionGauge",
     "expressionMetricVis",
     "expressionHeatmap",
+    "expressionXY",
     "eventAnnotation",
     "unifiedSearch",
     "unifiedFieldList"
   ],
   "optionalPlugins": [
-    "expressionXY",
+    "expressionLegacyMetricVis",
+    "expressionPartitionVis",
     "usageCollection",
     "taskManager",
     "globalSearch",
     "savedObjectsTagging",
-    "spaces",
-    "discover"
+    "spaces"
   ],
   "configPath": ["xpack", "lens"],
   "extraPublicDirs": ["common/constants"],
@@ -46,11 +47,12 @@
     "kibanaUtils",
     "kibanaReact",
     "embeddable",
-    "fieldFormats"
+    "fieldFormats",
+    "charts"
   ],
   "owner": {
     "name": "Vis Editors",
-    "githubTeam": "kibana-vis-editors"
+    "githubTeam": "kibana-visualizations"
   },
   "description": "Visualization editor allowing to quickly and easily configure compelling visualizations to use on dashboards and canvas workpads. Exposes components to embed visualizations and link into the Lens editor from within other apps in Kibana."
 }

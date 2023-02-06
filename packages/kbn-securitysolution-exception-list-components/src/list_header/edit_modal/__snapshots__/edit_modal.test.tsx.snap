@@ -1,0 +1,216 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`EditModal should render the title and description from listDetails 1`] = `
+Object {
+  "asFragment": [Function],
+  "baseElement": <body>
+    <div />
+    <div
+      class="euiOverlayMask emotion-euiOverlayMask-aboveHeader"
+      data-euiportal="true"
+      data-relative-to-header="above"
+    >
+      <div
+        data-eui="EuiFocusTrap"
+      >
+        <div
+          class="euiModal emotion-euiModal-defaultMaxWidth"
+          data-test-subj="EditModal"
+          tabindex="0"
+        >
+          <button
+            aria-label="Closes this modal window"
+            class="euiButtonIcon euiButtonIcon--xSmall euiModal__closeIcon emotion-euiButtonIcon-empty-text-hoverStyles-euiModal__closeIcon"
+            type="button"
+          >
+            <span
+              aria-hidden="true"
+              class="euiButtonIcon__icon"
+              color="inherit"
+              data-euiicon-type="cross"
+            />
+          </button>
+          <div
+            class="euiModalHeader emotion-euiModalHeader"
+          >
+            <h1
+              class="euiTitle euiModalHeader__title emotion-euiTitle-m"
+              data-test-subj="editModalTitle"
+            >
+              Edit list name
+            </h1>
+          </div>
+          <div
+            class="euiModalBody emotion-euiModalBody"
+          >
+            <div
+              class="euiModalBody__overflow emotion-euiModalBody__overflow"
+            >
+              <form
+                class="euiForm"
+                data-test-subj="editModalForm"
+                id="modalForm_generated-id"
+              >
+                <div
+                  class="euiFormRow euiFormRow--fullWidth euiFormRow--hasLabel"
+                  id="generated-id-row"
+                >
+                  <div
+                    class="euiFormRow__labelWrapper"
+                  >
+                    <label
+                      aria-invalid="false"
+                      class="euiFormLabel euiFormRow__label"
+                      for="generated-id"
+                      id="generated-id-label"
+                    >
+                      Name
+                    </label>
+                  </div>
+                  <div
+                    class="euiFormRow__fieldWrapper"
+                  >
+                    <div
+                      class="euiFormControlLayout euiFormControlLayout--fullWidth"
+                    >
+                      <div
+                        class="euiFormControlLayout__childrenWrapper"
+                      >
+                        <input
+                          aria-invalid="false"
+                          class="euiFieldText euiFieldText--fullWidth"
+                          data-test-subj="editModalNameTextField"
+                          id="generated-id"
+                          name="name"
+                          type="text"
+                          value="list name"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div
+                  class="euiFormRow euiFormRow--fullWidth euiFormRow--hasLabel"
+                  id="generated-id-row"
+                >
+                  <div
+                    class="euiFormRow__labelWrapper"
+                  >
+                    <label
+                      class="euiFormLabel euiFormRow__label"
+                      for="generated-id"
+                      id="generated-id-label"
+                    >
+                      Description (optional)
+                    </label>
+                  </div>
+                  <div
+                    class="euiFormRow__fieldWrapper"
+                  >
+                    <textarea
+                      class="euiTextArea euiTextArea--resizeVertical euiTextArea--fullWidth"
+                      data-test-subj="editModalDescriptionTextField"
+                      id="generated-id"
+                      name="description"
+                      rows="6"
+                    >
+                      list description
+                    </textarea>
+                  </div>
+                </div>
+              </form>
+            </div>
+          </div>
+          <div
+            class="euiModalFooter emotion-euiModalFooter"
+          >
+            <button
+              class="euiButtonEmpty css-9t7nyf-empty-primary"
+              data-test-subj="editModalCancelBtn"
+              type="button"
+            >
+              <span
+                class="euiButtonContent euiButtonEmpty__content"
+              >
+                <span
+                  class="euiButtonEmpty__text"
+                >
+                  Cancel
+                </span>
+              </span>
+            </button>
+            <button
+              class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-m-fill-primary"
+              data-test-subj="editModalSaveBtn"
+              form="modalForm_generated-id"
+              type="submit"
+            >
+              <span
+                class="emotion-euiButtonDisplayContent"
+              >
+                <span
+                  class="eui-textTruncate"
+                >
+                  Save
+                </span>
+              </span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </body>,
+  "container": <div />,
+  "debug": [Function],
+  "findAllByAltText": [Function],
+  "findAllByDisplayValue": [Function],
+  "findAllByLabelText": [Function],
+  "findAllByPlaceholderText": [Function],
+  "findAllByRole": [Function],
+  "findAllByTestId": [Function],
+  "findAllByText": [Function],
+  "findAllByTitle": [Function],
+  "findByAltText": [Function],
+  "findByDisplayValue": [Function],
+  "findByLabelText": [Function],
+  "findByPlaceholderText": [Function],
+  "findByRole": [Function],
+  "findByTestId": [Function],
+  "findByText": [Function],
+  "findByTitle": [Function],
+  "getAllByAltText": [Function],
+  "getAllByDisplayValue": [Function],
+  "getAllByLabelText": [Function],
+  "getAllByPlaceholderText": [Function],
+  "getAllByRole": [Function],
+  "getAllByTestId": [Function],
+  "getAllByText": [Function],
+  "getAllByTitle": [Function],
+  "getByAltText": [Function],
+  "getByDisplayValue": [Function],
+  "getByLabelText": [Function],
+  "getByPlaceholderText": [Function],
+  "getByRole": [Function],
+  "getByTestId": [Function],
+  "getByText": [Function],
+  "getByTitle": [Function],
+  "queryAllByAltText": [Function],
+  "queryAllByDisplayValue": [Function],
+  "queryAllByLabelText": [Function],
+  "queryAllByPlaceholderText": [Function],
+  "queryAllByRole": [Function],
+  "queryAllByTestId": [Function],
+  "queryAllByText": [Function],
+  "queryAllByTitle": [Function],
+  "queryByAltText": [Function],
+  "queryByDisplayValue": [Function],
+  "queryByLabelText": [Function],
+  "queryByPlaceholderText": [Function],
+  "queryByRole": [Function],
+  "queryByTestId": [Function],
+  "queryByText": [Function],
+  "queryByTitle": [Function],
+  "rerender": [Function],
+  "unmount": [Function],
+}
+`;

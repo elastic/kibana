@@ -8,12 +8,14 @@
 
 import supertest from 'supertest';
 import { createListStream } from '@kbn/utils';
-import { CoreUsageStatsClient } from '../../../core_usage_data';
-import { coreUsageStatsClientMock } from '../../../core_usage_data/core_usage_stats_client.mock';
-import { coreUsageDataServiceMock } from '../../../core_usage_data/core_usage_data_service.mock';
+import type { ICoreUsageStatsClient } from '@kbn/core-usage-data-base-server-internal';
+import {
+  coreUsageStatsClientMock,
+  coreUsageDataServiceMock,
+} from '@kbn/core-usage-data-server-mocks';
 import { savedObjectsExporterMock } from '@kbn/core-saved-objects-import-export-server-mocks';
 import type { SavedObjectConfig } from '@kbn/core-saved-objects-base-server-internal';
-import { setupServer, createExportableType } from './test_utils';
+import { setupServer, createExportableType } from '@kbn/core-test-helpers-test-utils';
 import {
   registerExportRoute,
   type InternalSavedObjectsRequestHandlerContext,
@@ -25,7 +27,7 @@ const config = {
   maxImportPayloadBytes: 26214400,
   maxImportExportSize: 10000,
 } as SavedObjectConfig;
-let coreUsageStatsClient: jest.Mocked<CoreUsageStatsClient>;
+let coreUsageStatsClient: jest.Mocked<ICoreUsageStatsClient>;
 
 describe('POST /api/saved_objects/_export', () => {
   let server: SetupServerReturn['server'];
