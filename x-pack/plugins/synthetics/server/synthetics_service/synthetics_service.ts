@@ -454,13 +454,20 @@ export class SyntheticsService {
       subject.next(
         (monitors ?? []).map((monitor) => {
           const attributes = monitor.attributes as unknown as MonitorFields;
+
+          let params = monitor.namespaces
+            ? paramsBySpace[monitor.namespaces[0]]
+            : paramsBySpace.default;
+
+          if (paramsBySpace['*']) {
+            params = Object.assign(params, paramsBySpace['*']);
+          }
+
           return formatHeartbeatRequest({
+            params,
             monitor: normalizeSecrets(monitor).attributes,
             monitorId: monitor.id,
             heartbeatId: attributes[ConfigKey.MONITOR_QUERY_ID],
-            params: monitor.namespaces
-              ? paramsBySpace[monitor.namespaces[0]]
-              : paramsBySpace.default,
           });
         })
       );
