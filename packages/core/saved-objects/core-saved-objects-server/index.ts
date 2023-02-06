@@ -99,6 +99,7 @@ export type {
   SavedObjectModelMigrationContext,
   SavedObjectModelMigrationFn,
   SavedObjectModelBidirectionalMigration,
+  SavedObjectModelMigrationResult,
 } from './src/model_version';
 
 export type {

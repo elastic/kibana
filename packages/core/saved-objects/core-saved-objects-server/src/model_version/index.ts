@@ -11,6 +11,7 @@ export type {
   SavedObjectModelMigrationContext,
   SavedObjectModelMigrationFn,
   SavedObjectModelBidirectionalMigration,
+  SavedObjectModelMigrationResult,
 } from './migration';
 
 export type {
