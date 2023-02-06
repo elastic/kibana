@@ -94,5 +94,6 @@
     "@kbn/ml-is-populated-object",
     "@kbn/utils",
     "@kbn/core-http-request-handler-context-server",
+    "@kbn/shared-ux-router",
   ]
 }
