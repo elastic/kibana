@@ -8,6 +8,8 @@ import expect from '@kbn/expect';
 import moment from 'moment';
 import { APIReturnType } from '@kbn/apm-plugin/public/services/rest/create_call_apm_api';
 import { isFiniteNumber } from '@kbn/apm-plugin/common/utils/is_finite_number';
+import { ApmDocumentType } from '@kbn/apm-plugin/common/document_type';
+import { RollupInterval } from '@kbn/apm-plugin/common/rollup';
 import archives_metadata from '../../common/fixtures/es_archiver/archives_metadata';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { ApmApiError } from '../../common/apm_api_supertest';
@@ -40,6 +42,9 @@ export default function ApiTest({ getService }: FtrProviderContext) {
               kuery: '',
               offset: '1d',
               probability: 1,
+              documentType: ApmDocumentType.TransactionMetric,
+              rollupInterval: RollupInterval.OneMinute,
+              bucketSizeInSeconds: 60,
             },
             body: {
               serviceNames: JSON.stringify(serviceNames),
@@ -69,21 +74,29 @@ export default function ApiTest({ getService }: FtrProviderContext) {
               environment: 'ENVIRONMENT_ALL',
               kuery: '',
               probability: 1,
+              documentType: ApmDocumentType.TransactionMetric,
+              rollupInterval: RollupInterval.OneMinute,
+              bucketSizeInSeconds: 60,
+              _inspect: true,
             },
             body: {
               serviceNames: JSON.stringify(serviceNames),
             },
           },
         });
+
         expect(response.status).to.be(200);
         servicesDetailedStatistics = response.body;
       });
+
       it('returns current period data', async () => {
         expect(servicesDetailedStatistics.currentPeriod).not.to.be.empty();
       });
+
       it("doesn't returns previous period data", async () => {
         expect(servicesDetailedStatistics.previousPeriod).to.be.empty();
       });
+
       it('returns current data for requested service names', () => {
         serviceNames.forEach((serviceName) => {
           expect(servicesDetailedStatistics.currentPeriod[serviceName]).not.to.be.empty();
@@ -124,6 +137,9 @@ export default function ApiTest({ getService }: FtrProviderContext) {
                 environment: 'ENVIRONMENT_ALL',
                 kuery: '',
                 probability: 1,
+                documentType: ApmDocumentType.TransactionMetric,
+                rollupInterval: RollupInterval.OneMinute,
+                bucketSizeInSeconds: 60,
               },
               body: {
                 serviceNames: JSON.stringify([]),
@@ -149,6 +165,9 @@ export default function ApiTest({ getService }: FtrProviderContext) {
               environment: 'production',
               kuery: '',
               probability: 1,
+              documentType: ApmDocumentType.TransactionMetric,
+              rollupInterval: RollupInterval.OneMinute,
+              bucketSizeInSeconds: 60,
             },
             body: {
               serviceNames: JSON.stringify(serviceNames),
@@ -169,6 +188,9 @@ export default function ApiTest({ getService }: FtrProviderContext) {
               environment: 'ENVIRONMENT_ALL',
               kuery: 'transaction.type : "invalid_transaction_type"',
               probability: 1,
+              documentType: ApmDocumentType.TransactionMetric,
+              rollupInterval: RollupInterval.OneMinute,
+              bucketSizeInSeconds: 60,
             },
             body: {
               serviceNames: JSON.stringify(serviceNames),
@@ -197,6 +219,9 @@ export default function ApiTest({ getService }: FtrProviderContext) {
               environment: 'ENVIRONMENT_ALL',
               kuery: '',
               probability: 1,
+              documentType: ApmDocumentType.TransactionMetric,
+              rollupInterval: RollupInterval.OneMinute,
+              bucketSizeInSeconds: 60,
             },
             body: {
               serviceNames: JSON.stringify(serviceNames),

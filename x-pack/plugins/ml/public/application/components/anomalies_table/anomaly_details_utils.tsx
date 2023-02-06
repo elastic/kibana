@@ -488,6 +488,31 @@ export const AnomalyExplanationDetails: FC<{ anomaly: AnomaliesTableRecord }> = 
       description: explanation.high_variance_penalty ? yes : no,
     });
   }
+  if (explanation.multimodal_distribution !== undefined) {
+    impactDetails.push({
+      title: (
+        <EuiToolTip
+          position="left"
+          content={i18n.translate(
+            'xpack.ml.anomaliesTable.anomalyDetails.anomalyExplanationDetails.multimodalTooltip',
+            {
+              defaultMessage:
+                'Indicates whether the prior distribution of the time series is multi-modal or has a single mode.',
+            }
+          )}
+        >
+          <span>
+            <FormattedMessage
+              id="xpack.ml.anomaliesTable.anomalyDetails.anomalyExplanationDetails.multimodal"
+              defaultMessage="Multi-modal distribution"
+            />
+            <EuiIcon size="s" color="subdued" type="questionInCircle" className="eui-alignTop" />
+          </span>
+        </EuiToolTip>
+      ),
+      description: explanation.multimodal_distribution ? yes : no,
+    });
+  }
   if (explanation.incomplete_bucket_penalty !== undefined) {
     impactDetails.push({
       title: (

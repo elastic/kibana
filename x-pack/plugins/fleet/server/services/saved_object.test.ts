@@ -18,7 +18,7 @@ describe('Saved object service', () => {
     it('should escape quotes', () => {
       const res = escapeSearchQueryPhrase('test1"test2');
 
-      expect(res).toEqual(`"test1\"test2"`);
+      expect(res).toEqual(`"test1\\"test2"`);
     });
   });
 });
