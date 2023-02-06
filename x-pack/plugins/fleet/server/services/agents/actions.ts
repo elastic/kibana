@@ -234,7 +234,6 @@ export async function getUnenrollAgentActions(
 }
 
 export async function cancelAgentAction(esClient: ElasticsearchClient, actionId: string) {
-  // console.log(new Date().toISOString() + ' query agent upgrade actions');
   const getUpgradeActions = async () => {
     const res = await esClient.search<FleetServerAgentAction>({
       index: AGENT_ACTIONS_INDEX,
@@ -256,7 +255,6 @@ export async function cancelAgentAction(esClient: ElasticsearchClient, actionId:
       throw new AgentActionNotFoundError('Action not found');
     }
 
-    // console.log(new Date().toISOString() + ' create cancel actions for batches: ' + JSON.stringify(res.hits.total));
     const upgradeActions = res.hits.hits
       .map((hit) => hit._source)
       .reduce((acc: FleetServerAgentAction[], action: FleetServerAgentAction | undefined) => {
@@ -328,7 +326,6 @@ export async function cancelAgentAction(esClient: ElasticsearchClient, actionId:
   // find missing batch
   upgradeActions = await getUpgradeActions();
   if (cancelledActions.length < upgradeActions.length) {
-    // console.log(`cancelledActions.length < upgradeActions.length ${cancelledActions.length} < ${upgradeActions.length}`)
     const missingBatches = upgradeActions.filter(
       (upgradeAction) =>
         !cancelledActions.some(

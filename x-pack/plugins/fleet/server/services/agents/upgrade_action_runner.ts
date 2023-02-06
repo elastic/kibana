@@ -132,8 +132,6 @@ export async function upgradeBatch(
       );
   }
 
-  // console.log(new Date().toISOString() + ' updating agents, creating upgrade action doc')
-
   await bulkUpdateAgents(
     esClient,
     agentsToUpdate.map((agent) => ({
