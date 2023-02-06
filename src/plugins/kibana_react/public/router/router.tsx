@@ -21,6 +21,7 @@ import { useExecutionContext } from '../use_execution_context';
  * MatchPropagator in every application route. It helps track all route changes
  * and send them to the execution context, later used to enrich APM
  * 'route-change' transactions.
+ * @deprecated use @kbn/shared-ux-router
  */
 export const Route = ({ children, component: Component, render, ...rest }: RouteProps) => {
   const component = useMemo(() => {

@@ -6,4 +6,5 @@
  * Side Public License, v 1.
  */
 
+// @deprecated use @kbn/shared-ux-router instead
 export { Route } from './router';
