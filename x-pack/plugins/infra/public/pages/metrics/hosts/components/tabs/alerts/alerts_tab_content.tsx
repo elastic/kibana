@@ -6,12 +6,17 @@
  */
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { AlertStatus } from '@kbn/observability-plugin/common';
+import {
+  getAlertSummaryTimeRange,
+  ObservabilityAlertStatusFilter,
+  useTimeBuckets,
+} from '@kbn/observability-plugin/public';
 import { AlertConsumers } from '@kbn/rule-data-utils';
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import { InfraClientCoreStart, InfraClientStartDeps } from '../../../../../../types';
 import { useHostsViewContext } from '../../../hooks/use_hosts_view';
 import { useUnifiedSearchContext } from '../../../hooks/use_unified_search';
-import { StringDateRangeTimestamp } from '../../../hooks/use_unified_search_url_state';
 
 import {
   ALERTS_PER_PAGE,
@@ -22,6 +27,15 @@ import {
 
 export const AlertsTabContent = () => {
   const { services } = useKibana<InfraClientCoreStart & InfraClientStartDeps>();
+
+  const [status, setAlertStatus] = useState<AlertStatus>('all');
+
+  const { getAlertsEsQuery } = useHostsViewContext();
+
+  const { unifiedSearchDateRange } = useUnifiedSearchContext();
+
+  const timeBuckets = useTimeBuckets();
+
   const { application, cases, charts, triggersActionsUi } = services;
 
   const {
@@ -30,18 +44,15 @@ export const AlertsTabContent = () => {
     getAlertsStateTable: AlertsStateTable,
   } = triggersActionsUi;
 
-  const { alertsEsQueryFilter } = useHostsViewContext();
-
-  const { getDateRangeAsTimestamp } = useUnifiedSearchContext();
+  const alertsEsQueryFilter = getAlertsEsQuery({ status });
 
   const uiCapabilities = application?.capabilities;
   const CasesContext = cases.ui.getCasesContext();
   const casesCapabilities = cases.helpers.getUICapabilities(uiCapabilities.observabilityCases);
 
   const summaryTimeRange = useMemo(() => {
-    const dateRangeTimestamp = getDateRangeAsTimestamp();
-    return createAlertSummaryTimeRange(dateRangeTimestamp);
-  }, [getDateRangeAsTimestamp]);
+    return getAlertSummaryTimeRange(unifiedSearchDateRange, timeBuckets);
+  }, [unifiedSearchDateRange, timeBuckets]);
 
   const chartThemes = {
     theme: charts.theme.useChartsTheme(),
@@ -50,6 +61,9 @@ export const AlertsTabContent = () => {
 
   return (
     <EuiFlexGroup direction="column" gutterSize="m">
+      <EuiFlexItem>
+        <ObservabilityAlertStatusFilter status={status} onChange={setAlertStatus} />
+      </EuiFlexItem>
       <EuiFlexItem>
         <AlertSummaryWidget
           featureIds={infraAlertFeatureIds}
@@ -83,13 +97,3 @@ export const AlertsTabContent = () => {
     </EuiFlexGroup>
   );
 };
-
-/**
- * Helpers
- */
-const createAlertSummaryTimeRange = (dateRange: StringDateRangeTimestamp) => ({
-  utcFrom: new Date(dateRange.from).toISOString(),
-  utcTo: new Date(dateRange.to).toISOString(),
-  fixedInterval: '10800s',
-  dateFormat: 'YYYY-MM-DD HH:mm',
-});

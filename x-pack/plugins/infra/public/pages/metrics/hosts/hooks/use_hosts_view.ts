@@ -12,8 +12,13 @@
  * 2.0.
  */
 
-import { useMemo } from 'react';
+import { useCallback, useMemo } from 'react';
 import createContainer from 'constate';
+import { getTime } from '@kbn/data-plugin/common';
+import { TIMESTAMP } from '@kbn/rule-data-utils';
+import { buildEsQuery, Query } from '@kbn/es-query';
+import { ALERT_STATUS_QUERY } from '@kbn/observability-plugin/public';
+import { AlertStatus } from '@kbn/observability-plugin/common';
 import { SnapshotNode } from '../../../../../common/http_api';
 import { SnapshotMetricType } from '../../../../../common/inventory_models/types';
 import { useSourceContext } from '../../../../containers/metrics_source';
@@ -69,13 +74,26 @@ export const useHostsView = () => {
     nodes: hostNodes,
   } = useSnapshot({ ...baseRequest, metrics: HOST_TABLE_METRICS });
 
-  const alertsEsQueryFilter = useMemo(
-    () => createAlertsQueryFilter({ hostNodes, dateRange: unifiedSearchDateRange }),
+  const getAlertsEsQuery = useCallback(
+    ({ status }: { status?: AlertStatus } = {}) => {
+      const hostsQuery = createHostsQuery(hostNodes);
+      const alertStatusQuery = createAlertStatusQuery(status);
+
+      const dateFilter = createDateFilter(unifiedSearchDateRange);
+
+      const queries = [hostsQuery, alertStatusQuery].filter(Boolean) as Query[];
+      const filters = dateFilter ? [dateFilter] : [];
+
+      return buildEsQuery(undefined, queries, filters);
+    },
     [hostNodes, unifiedSearchDateRange]
   );
 
+  const alertsEsQueryFilter = useMemo(() => getAlertsEsQuery(), [getAlertsEsQuery]);
+
   return {
     alertsEsQueryFilter,
+    getAlertsEsQuery,
     baseRequest,
     loading,
     error,
@@ -86,45 +104,16 @@ export const useHostsView = () => {
 export const HostsView = createContainer(useHostsView);
 export const [HostsViewProvider, useHostsViewContext] = HostsView;
 
-interface AlertsQueryParams {
-  hostNodes: SnapshotNode[];
-  dateRange: HostsState['dateRange'];
-}
+/**
+ * Helpers
+ */
+const createDateFilter = (date: HostsState['dateRange']) =>
+  getTime(undefined, date, { fieldName: TIMESTAMP });
 
-const createAlertsQueryFilter = ({ hostNodes, dateRange }: AlertsQueryParams) => ({
-  bool: {
-    must: [],
-    filter: [createTimestampFilter(dateRange), createHostsFilter(hostNodes)],
-    should: [],
-    must_not: [],
-  },
-});
+const createAlertStatusQuery = (status: AlertStatus = 'all'): Query | null =>
+  ALERT_STATUS_QUERY[status] ? { query: ALERT_STATUS_QUERY[status], language: 'kuery' } : null;
 
-const createTimestampFilter = (date: AlertsQueryParams['dateRange']) => ({
-  range: {
-    '@timestamp': {
-      gte: date.from,
-      lte: date.to,
-    },
-  },
-});
-
-const createHostsFilter = (hosts: AlertsQueryParams['hostNodes']) => ({
-  bool: {
-    should: hosts.map(createHostCondition),
-    minimum_should_match: 1,
-  },
-});
-
-const createHostCondition = (host: SnapshotNode) => ({
-  bool: {
-    should: [
-      {
-        match_phrase: {
-          'host.name': host.name,
-        },
-      },
-    ],
-    minimum_should_match: 1,
-  },
+const createHostsQuery = (hosts: SnapshotNode[]): Query => ({
+  language: 'kuery',
+  query: hosts.map((host) => `host.name : "${host.name}"`).join(' or '),
 });
