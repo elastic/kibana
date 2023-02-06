@@ -61,7 +61,7 @@ export function UXSection({ bucketSize }: Props) {
   const { data, status } = useFetcher(
     () => {
       if (serviceName && bucketSize && absoluteStart && absoluteEnd) {
-        return getDataHandler(UX_APP)?.fetchData({
+        return getDataHandler('ux')?.fetchData({
           absoluteTime: { start: absoluteStart, end: absoluteEnd },
           relativeTime: { start: relativeStart, end: relativeEnd },
           serviceName,

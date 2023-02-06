@@ -16,7 +16,6 @@ import {
 import numeral from '@elastic/numeral';
 import { i18n } from '@kbn/i18n';
 import React, { useState, useCallback } from 'react';
-import { INFRA_METRICS_APP } from '../../../../context/constants';
 import {
   MetricsFetchDataResponse,
   MetricsFetchDataSeries,
@@ -61,7 +60,7 @@ export function MetricsSection({ bucketSize }: Props) {
 
   const { data, status } = useFetcher(() => {
     if (bucketSize && absoluteStart && absoluteEnd) {
-      return getDataHandler(INFRA_METRICS_APP)?.fetchData({
+      return getDataHandler('infra_metrics')?.fetchData({
         absoluteTime: { start: absoluteStart, end: absoluteEnd },
         relativeTime: { start: relativeStart, end: relativeEnd },
         ...bucketSize,
