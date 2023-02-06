@@ -15,6 +15,7 @@ const apiServiceMock: jest.Mocked<GuidedOnboardingPluginStart> = {
     fetchPluginState$: () => new BehaviorSubject(undefined),
     fetchAllGuidesState: jest.fn(),
     updatePluginState: jest.fn(),
+    activateGuideDefaultState: jest.fn(),
     activateGuide: jest.fn(),
     deactivateGuide: jest.fn(),
     completeGuide: jest.fn(),

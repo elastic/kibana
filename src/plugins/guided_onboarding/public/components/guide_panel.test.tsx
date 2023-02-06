@@ -95,7 +95,7 @@ describe('Guided setup', () => {
 
   describe('Button component', () => {
     describe('when a guide is in default state', () => {
-      it('button is enabled', async () => {
+      it('redirect button is enabled', async () => {
         const { exists, find } = await setupComponentWithPluginStateMock(
           httpClient,
           mockPluginStateInDefaultGuideState
