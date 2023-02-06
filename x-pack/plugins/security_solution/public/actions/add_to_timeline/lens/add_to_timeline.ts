@@ -74,6 +74,7 @@ export const createAddToTimelineAction = ({
           values: value,
           field: columnMeta?.field,
           eventId,
+          sourceParamType: columnMeta?.sourceParams?.type,
         });
         if (dataProvider) {
           acc.push(...dataProvider);

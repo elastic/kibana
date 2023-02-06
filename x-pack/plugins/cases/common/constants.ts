@@ -96,6 +96,7 @@ export const INTERNAL_CONNECTORS_URL = `${CASES_INTERNAL_URL}/{case_id}/_connect
 export const INTERNAL_BULK_GET_CASES_URL = `${CASES_INTERNAL_URL}/_bulk_get` as const;
 export const INTERNAL_GET_CASE_USER_ACTIONS_STATS_URL =
   `${CASES_INTERNAL_URL}/{case_id}/user_actions/_stats` as const;
+export const INTERNAL_CASE_USERS_URL = `${CASES_INTERNAL_URL}/{case_id}/_users` as const;
 
 /**
  * Action routes
