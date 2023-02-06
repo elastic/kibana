@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { FC, MouseEvent } from 'react';
+import React, { FC } from 'react';
 import {
   EuiButton,
   EuiFlexGroup,
@@ -19,14 +19,13 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import { createAppNavigationHandler } from '../app_navigation_handler';
 
 interface Props {
   addBasePath: (path: string) => string;
 }
 
 export const MoveData: FC<Props> = ({ addBasePath }) => {
-  const migrateDataUrl = '/app/management/data/migrate_data';
+  const migrateDataUrl = 'https://ela.st/cloud-migration';
   const buttonLabel = (
     <FormattedMessage
       id="home.addData.moveYourDataButtonLabel"
@@ -62,14 +61,11 @@ export const MoveData: FC<Props> = ({ addBasePath }) => {
             />
           </EuiText>
           <EuiSpacer size="m" />
-          {/* eslint-disable-next-line @elastic/eui/href-or-on-click */}
           <EuiButton
             data-test-subj="migrate_data_to_cloud__migrate_data_docs_link"
             color="primary"
-            href={addBasePath(migrateDataUrl)}
-            onClick={(event: MouseEvent) => {
-              createAppNavigationHandler(migrateDataUrl)(event);
-            }}
+            href={migrateDataUrl}
+            target="_blank"
           >
             {buttonLabel}
           </EuiButton>
