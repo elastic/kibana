@@ -10,12 +10,12 @@ import React from 'react';
 
 import {
   EuiFieldSearch,
+  EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
   EuiToolTip,
   EuiText,
-  EuiButtonIcon,
 } from '@elastic/eui';
 import { useReduxEmbeddableContext } from '@kbn/presentation-util-plugin/public';
 
@@ -44,6 +44,7 @@ export const OptionsListPopoverActionBar = ({
   const dispatch = useEmbeddableDispatch();
 
   // Select current state from Redux using multiple selectors to avoid rerenders.
+  const allowExpensiveQueries = select((state) => state.componentState.allowExpensiveQueries);
   const invalidSelections = select((state) => state.componentState.invalidSelections);
   const totalCardinality = select((state) => state.componentState.totalCardinality) ?? 0;
   const searchString = select((state) => state.componentState.searchString);
@@ -80,25 +81,34 @@ export const OptionsListPopoverActionBar = ({
           gutterSize="s"
           responsive={false}
         >
-          <EuiFlexItem grow={false}>
-            <EuiText size="xs" color="subdued">
-              {OptionsListStrings.popover.getCardinalityLabel(totalCardinality)}
-            </EuiText>
-          </EuiFlexItem>
+          {allowExpensiveQueries && (
+            <EuiFlexItem grow={false}>
+              <EuiText size="xs" color="subdued">
+                {OptionsListStrings.popover.getCardinalityLabel(totalCardinality)}
+              </EuiText>
+            </EuiFlexItem>
+          )}
           {invalidSelections && invalidSelections.length > 0 && (
             <>
+              {allowExpensiveQueries && (
+                <EuiFlexItem grow={false}>
+                  <div className="optionsList__actionBarDivider" />
+                </EuiFlexItem>
+              )}
               <EuiFlexItem grow={false}>
-                <div className="optionsList__actionBarDivider" />
-              </EuiFlexItem>
-              <EuiFlexItem grow={true}>
                 <EuiText size="xs" color="subdued">
                   {OptionsListStrings.popover.getInvalidSelectionsLabel(invalidSelections.length)}
                 </EuiText>
               </EuiFlexItem>
             </>
           )}
-          <EuiFlexItem grow={false}>
-            <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
+          <EuiFlexItem grow={true}>
+            <EuiFlexGroup
+              gutterSize="xs"
+              alignItems="center"
+              justifyContent="flexEnd"
+              responsive={false}
+            >
               <EuiFlexItem grow={false}>
                 <EuiToolTip
                   position="top"
