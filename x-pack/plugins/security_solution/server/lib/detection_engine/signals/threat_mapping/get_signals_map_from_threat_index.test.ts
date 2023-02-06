@@ -26,11 +26,25 @@ export const namedQuery = encodeThreatMatchNamedQuery({
   queryType: ThreatMatchQueryType.match,
 });
 
+const termsNamedQuery = encodeThreatMatchNamedQuery({
+  value: 'threat.indicator.domain',
+  field: 'event.domain',
+  queryType: ThreatMatchQueryType.term,
+});
+
 export const threatMock = {
   _id: 'threat-id-1',
   _index: 'threats-01',
   matched_queries: [namedQuery],
 };
+
+const termsThreatMock = {
+  _id: 'threat-id-1',
+  _index: 'threats-01',
+  matched_queries: [termsNamedQuery],
+};
+
+getThreatListMock.mockReturnValue({ hits: { hits: [] } });
 
 describe('getSignalsQueryMapFromThreatIndex', () => {
   it('should call getThreatList to fetch threats from ES', async () => {
@@ -48,15 +62,15 @@ describe('getSignalsQueryMapFromThreatIndex', () => {
   it('should return empty signals map if getThreatList return empty results', async () => {
     getThreatListMock.mockReturnValue({ hits: { hits: [] } });
 
-    const signalsMap = await getSignalsQueryMapFromThreatIndex({
+    const signalsQueryMap = await getSignalsQueryMapFromThreatIndex({
       threatSearchParams: threatSearchParamsMock,
       eventsCount: 50,
     });
 
-    expect(signalsMap).toEqual(new Map());
+    expect(signalsQueryMap).toEqual(new Map());
   });
 
-  it('should return signalsMap for signals if threats search results exhausted', async () => {
+  it('should return signalsQueryMap for signals if threats search results exhausted', async () => {
     const namedQuery2 = encodeThreatMatchNamedQuery({
       id: 'source-2',
       index: 'source-*',
@@ -81,12 +95,12 @@ describe('getSignalsQueryMapFromThreatIndex', () => {
     });
     getThreatListMock.mockReturnValueOnce({ hits: { hits: [] } });
 
-    const signalsMap = await getSignalsQueryMapFromThreatIndex({
+    const signalsQueryMap = await getSignalsQueryMapFromThreatIndex({
       threatSearchParams: threatSearchParamsMock,
       eventsCount: 50,
     });
 
-    expect(signalsMap).toEqual(
+    expect(signalsQueryMap).toEqual(
       new Map([
         [
           'source-1',
@@ -129,18 +143,163 @@ describe('getSignalsQueryMapFromThreatIndex', () => {
       ])
     );
   });
-  it('should return signalsMap for signals if threats number reaches max of MAX_NUMBER_OF_SIGNAL_MATCHES', async () => {
+  it('should return signalsQueryMap for signals if threats number reaches max of MAX_NUMBER_OF_SIGNAL_MATCHES', async () => {
     getThreatListMock.mockReturnValueOnce({
       hits: {
         hits: Array.from(Array(MAX_NUMBER_OF_SIGNAL_MATCHES + 1)).map(() => threatMock),
       },
     });
 
-    const signalsMap = await getSignalsQueryMapFromThreatIndex({
+    const signalsQueryMap = await getSignalsQueryMapFromThreatIndex({
       threatSearchParams: threatSearchParamsMock,
       eventsCount: 50,
     });
 
-    expect(signalsMap.get('source-1')).toHaveLength(MAX_NUMBER_OF_SIGNAL_MATCHES);
+    expect(signalsQueryMap.get('source-1')).toHaveLength(MAX_NUMBER_OF_SIGNAL_MATCHES);
+  });
+
+  it('should return empty signalsQueryMap for terms query if there no signalValueMap', async () => {
+    getThreatListMock.mockReturnValueOnce({
+      hits: {
+        hits: [termsThreatMock],
+      },
+    });
+
+    const signalsQueryMap = await getSignalsQueryMapFromThreatIndex({
+      threatSearchParams: threatSearchParamsMock,
+      eventsCount: 50,
+    });
+
+    expect(signalsQueryMap).toEqual(new Map());
+  });
+
+  it('should return empty signalsQueryMap for terms query if there wrong value in threat indicator', async () => {
+    getThreatListMock.mockReturnValueOnce({
+      hits: {
+        hits: [
+          {
+            ...termsThreatMock,
+            _source: {
+              threat: {
+                indicator: {
+                  domain: { a: 'b' },
+                },
+              },
+            },
+          },
+        ],
+      },
+    });
+
+    const signalValueMap = {
+      'event.domain': {
+        domain_1: ['signalId1', 'signalId2'],
+      },
+    };
+
+    const signalsQueryMap = await getSignalsQueryMapFromThreatIndex({
+      threatSearchParams: threatSearchParamsMock,
+      eventsCount: 50,
+      signalValueMap,
+    });
+
+    expect(signalsQueryMap).toEqual(new Map());
+  });
+
+  it('should return signalsQueryMap from threat indicators for termsQuery', async () => {
+    getThreatListMock.mockReturnValueOnce({
+      hits: {
+        hits: [
+          {
+            ...termsThreatMock,
+            _source: {
+              threat: {
+                indicator: {
+                  domain: 'domain_1',
+                },
+              },
+            },
+          },
+        ],
+      },
+    });
+
+    const signalValueMap = {
+      'event.domain': {
+        domain_1: ['signalId1', 'signalId2'],
+      },
+    };
+
+    const signalsQueryMap = await getSignalsQueryMapFromThreatIndex({
+      threatSearchParams: threatSearchParamsMock,
+      eventsCount: 50,
+      signalValueMap,
+    });
+
+    const queries = [
+      {
+        field: 'event.domain',
+        value: 'threat.indicator.domain',
+        id: 'threat-id-1',
+        index: 'threats-01',
+        queryType: ThreatMatchQueryType.term,
+      },
+    ];
+
+    expect(signalsQueryMap).toEqual(
+      new Map([
+        ['signalId1', queries],
+        ['signalId2', queries],
+      ])
+    );
+  });
+
+  it('should return signalsQueryMap from threat indicators which has array values for termsQuery', async () => {
+    getThreatListMock.mockReturnValueOnce({
+      hits: {
+        hits: [
+          {
+            ...termsThreatMock,
+            _source: {
+              threat: {
+                indicator: {
+                  domain: ['domain_3', 'domain_1', 'domain_2'],
+                },
+              },
+            },
+          },
+        ],
+      },
+    });
+
+    const signalValueMap = {
+      'event.domain': {
+        domain_1: ['signalId1'],
+        domain_2: ['signalId2'],
+      },
+    };
+
+    const signalsQueryMap = await getSignalsQueryMapFromThreatIndex({
+      threatSearchParams: threatSearchParamsMock,
+      eventsCount: 50,
+      signalValueMap,
+    });
+
+    const queries = [
+      {
+        field: 'event.domain',
+        value: 'threat.indicator.domain',
+        id: 'threat-id-1',
+        index: 'threats-01',
+        queryType: ThreatMatchQueryType.term,
+      },
+    ];
+
+    expect(signalsQueryMap).toEqual(
+      new Map([
+        ['signalId1', queries],
+        ['signalId2', queries],
+      ])
+    );
   });
 });
