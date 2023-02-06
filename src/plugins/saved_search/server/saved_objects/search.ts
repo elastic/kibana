@@ -39,6 +39,7 @@ export function getSavedSearchObjectType(
         viewMode: { type: 'keyword', index: false, doc_values: false },
         hideChart: { type: 'boolean', index: false, doc_values: false },
         isTextBasedQuery: { type: 'boolean', index: false, doc_values: false },
+        usesAdHocDataView: { type: 'boolean', index: false, doc_values: false },
         hideAggregatedPreview: { type: 'boolean', index: false, doc_values: false },
         hits: { type: 'integer', index: false, doc_values: false },
         kibanaSavedObjectMeta: {
@@ -67,6 +68,7 @@ export function getSavedSearchObjectType(
           },
         },
         rowsPerPage: { type: 'integer', index: false, doc_values: false },
+        breakdownField: { type: 'text' },
       },
     },
     migrations: () => getAllMigrations(getSearchSourceMigrations()),

@@ -22,6 +22,8 @@ jest.mock('../bulk_create_ml_signals');
 
 describe('ml_executor', () => {
   let jobsSummaryMock: jest.Mock;
+  let forceStartDatafeedsMock: jest.Mock;
+  let stopDatafeedsMock: jest.Mock;
   let mlMock: ReturnType<typeof mlPluginServerMock.createSetupContract>;
   let alertServices: RuleExecutorServicesMock;
   let ruleExecutionLogger: ReturnType<typeof ruleExecutionLogMock.forExecutors.create>;
@@ -39,6 +41,8 @@ describe('ml_executor', () => {
     mlMock = mlPluginServerMock.createSetupContract();
     mlMock.jobServiceProvider.mockReturnValue({
       jobsSummary: jobsSummaryMock,
+      forceStartDatafeeds: forceStartDatafeedsMock,
+      stopDatafeeds: stopDatafeedsMock,
     });
     alertServices = alertsMock.createRuleExecutorServices();
     ruleExecutionLogger = ruleExecutionLogMock.forExecutors.create({

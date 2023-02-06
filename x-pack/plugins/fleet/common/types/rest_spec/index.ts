@@ -18,3 +18,4 @@ export * from './fleet_setup';
 export * from './output';
 export * from './package_policy';
 export * from './settings';
+export * from './health_check';

@@ -7,7 +7,7 @@
 
 import React from 'react';
 import userEvent from '@testing-library/user-event';
-import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
+import { waitForEuiPopoverOpen, screen } from '@elastic/eui/lib/test/rtl';
 import {
   render,
   forNearestButton,
@@ -63,7 +63,13 @@ describe('ToggleAlertFlyoutButtonComponent', () => {
       );
       userEvent.click(getByText('Alerts and rules'));
       await waitForEuiPopoverOpen();
-      userEvent.hover(getByText(ToggleFlyoutTranslations.openAlertContextPanelLabel));
+
+      userEvent.hover(
+        screen
+          .getByTestSubject('xpack.synthetics.openAlertContextPanel')
+          .closest('span') as HTMLElement
+      );
+
       expect(
         await findByText('You need read-write access to Uptime to create alerts in this app.')
       ).toBeInTheDocument();

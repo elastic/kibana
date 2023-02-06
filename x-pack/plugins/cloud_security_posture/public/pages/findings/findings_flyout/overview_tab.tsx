@@ -46,7 +46,7 @@ const getDetailsList = (data: CspFinding, discoverIndexLink: string | undefined)
     description: (
       <>
         {data.rule.tags.map((tag) => (
-          <EuiBadge>{tag}</EuiBadge>
+          <EuiBadge key={tag}>{tag}</EuiBadge>
         ))}
       </>
     ),

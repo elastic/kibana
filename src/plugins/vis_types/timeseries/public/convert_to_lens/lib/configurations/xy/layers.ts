@@ -21,7 +21,6 @@ import { euiLightVars } from '@kbn/ui-theme';
 import { groupBy } from 'lodash';
 import { DataViewsPublicPluginStart, DataView } from '@kbn/data-plugin/public/data_views';
 import { getDefaultQueryLanguage } from '../../../../application/components/lib/get_default_query_language';
-import { fetchIndexPattern } from '../../../../../common/index_patterns_utils';
 import { ICON_TYPES_MAP } from '../../../../application/visualizations/constants';
 import { SUPPORTED_METRICS } from '../../metrics';
 import type { Annotation, Metric, Panel, Series } from '../../../../../common/types';
@@ -34,6 +33,7 @@ import {
   AnyColumnWithReferences,
 } from '../../convert';
 import { getChartType } from './chart_type';
+import { extractOrGenerateDatasourceInfo } from '../../datasource';
 
 export const isColumnWithReference = (column: Column): column is AnyColumnWithReferences =>
   Boolean((column as AnyColumnWithReferences).references);
@@ -144,22 +144,32 @@ export const getLayers = async (
   }
 
   const annotationsByIndexPatternAndIgnoreFlag = groupBy(model.annotations, (a) => {
-    const id = typeof a.index_pattern === 'object' && 'id' in a.index_pattern && a.index_pattern.id;
-    return `${id}-${Boolean(a.ignore_global_filters)}`;
+    const id =
+      typeof a.index_pattern === 'object' && 'id' in a.index_pattern
+        ? a.index_pattern.id
+        : a.index_pattern;
+    return `${id}-${a.time_field ?? ''}-${Boolean(a.ignore_global_filters)}`;
   });
 
   try {
     const annotationsLayers: Array<XYAnnotationsLayerConfig | undefined> = await Promise.all(
       Object.values(annotationsByIndexPatternAndIgnoreFlag).map(async (annotations) => {
         const [firstAnnotation] = annotations;
-        const indexPatternId =
-          typeof firstAnnotation.index_pattern === 'string'
-            ? firstAnnotation.index_pattern
-            : firstAnnotation.index_pattern?.id;
         const convertedAnnotations: EventAnnotationConfig[] = [];
-        const { indexPattern } =
-          (await fetchIndexPattern(indexPatternId && { id: indexPatternId }, dataViews)) || {};
 
+        const result = await extractOrGenerateDatasourceInfo(
+          firstAnnotation.index_pattern,
+          firstAnnotation.time_field,
+          false,
+          undefined,
+          undefined,
+          dataViews
+        );
+
+        if (!result) {
+          throw new Error('Invalid annotation datasource');
+        }
+        const { indexPattern } = result;
         if (indexPattern) {
           annotations.forEach((a: Annotation) => {
             const lensAnnotation = convertAnnotation(a, indexPattern);

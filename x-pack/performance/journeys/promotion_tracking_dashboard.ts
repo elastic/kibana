@@ -50,6 +50,6 @@ export const journey = new Journey({
     await page.click(subj('superDatePickerCommonlyUsed_Last_30 days'));
   })
 
-  .step('Wait for visualization animations to finish', async ({ page }) => {
-    await waitForVisualizations(page, 1);
+  .step('Wait for visualization animations to finish', async ({ page, log }) => {
+    await waitForVisualizations(page, log, 1);
   });

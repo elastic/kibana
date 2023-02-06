@@ -89,8 +89,8 @@ export class CloudExperimentsPlugin
         // We use the Cloud ID as the userId in the Cloud Experiments
         userId: createSHA256Hash(deps.cloud.cloudId),
         kibanaVersion: this.initializerContext.env.packageInfo.version,
-        trial_end_date: deps.cloud.trialEndDate?.toISOString(),
-        is_elastic_staff_owned: deps.cloud.isElasticStaffOwned,
+        trialEndDate: deps.cloud.trialEndDate?.toISOString(),
+        isElasticStaff: deps.cloud.isElasticStaffOwned,
       });
 
       // We only subscribe to the user metadata updates if Cloud is enabled.
@@ -146,7 +146,7 @@ export class CloudExperimentsPlugin
   private async addHasDataMetadata(
     core: CoreStart,
     dataViews: DataViewsServerPluginStart
-  ): Promise<{ has_data: boolean }> {
+  ): Promise<{ hasData: boolean }> {
     const dataViewsService = await dataViews.dataViewsServiceFactory(
       core.savedObjects.createInternalRepository(),
       core.elasticsearch.client.asInternalUser,
@@ -154,7 +154,7 @@ export class CloudExperimentsPlugin
       true // Ignore capabilities checks
     );
     return {
-      has_data: await dataViewsService.hasUserDataView(),
+      hasData: await dataViewsService.hasUserDataView(),
     };
   }
 }

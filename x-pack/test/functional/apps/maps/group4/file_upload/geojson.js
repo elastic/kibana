@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 import path from 'path';
-import uuid from 'uuid/v4';
+import { v4 as uuidv4 } from 'uuid';
 
 export default function ({ getPageObjects, getService }) {
   const PageObjects = getPageObjects(['geoFileUpload', 'maps']);
@@ -45,7 +45,7 @@ export default function ({ getPageObjects, getService }) {
     });
 
     it('should import geojson', async () => {
-      indexName = uuid();
+      indexName = uuidv4();
       await PageObjects.geoFileUpload.setIndexName(indexName);
       await PageObjects.geoFileUpload.uploadFile();
 

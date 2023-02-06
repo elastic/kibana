@@ -194,6 +194,12 @@ export function createPluginSetupContext<TPlugin, TPluginDependencies>(
       registerProvider: deps.capabilities.registerProvider,
       registerSwitcher: deps.capabilities.registerSwitcher,
     },
+    customBranding: {
+      register: (fetchFn) => {
+        deps.customBranding.register(plugin.name, fetchFn);
+      },
+      getBrandingFor: deps.customBranding.getBrandingFor,
+    },
     docLinks: deps.docLinks,
     elasticsearch: {
       legacy: deps.elasticsearch.legacy,
@@ -234,7 +240,9 @@ export function createPluginSetupContext<TPlugin, TPluginDependencies>(
     },
     savedObjects: {
       setClientFactoryProvider: deps.savedObjects.setClientFactoryProvider,
-      addClientWrapper: deps.savedObjects.addClientWrapper,
+      setEncryptionExtension: deps.savedObjects.setEncryptionExtension,
+      setSecurityExtension: deps.savedObjects.setSecurityExtension,
+      setSpacesExtension: deps.savedObjects.setSpacesExtension,
       registerType: deps.savedObjects.registerType,
       getKibanaIndex: deps.savedObjects.getKibanaIndex,
     },
@@ -248,6 +256,7 @@ export function createPluginSetupContext<TPlugin, TPluginDependencies>(
     },
     uiSettings: {
       register: deps.uiSettings.register,
+      registerGlobal: deps.uiSettings.registerGlobal,
     },
     getStartServices: () => plugin.startDependencies,
     deprecations: deps.deprecations.getRegistry(plugin.name),
@@ -283,6 +292,7 @@ export function createPluginStartContext<TPlugin, TPluginDependencies>(
     capabilities: {
       resolveCapabilities: deps.capabilities.resolveCapabilities,
     },
+    customBranding: deps.customBranding,
     docLinks: deps.docLinks,
     elasticsearch: {
       client: deps.elasticsearch.client,
@@ -309,6 +319,7 @@ export function createPluginStartContext<TPlugin, TPluginDependencies>(
     },
     uiSettings: {
       asScopedToClient: deps.uiSettings.asScopedToClient,
+      globalAsScopedToClient: deps.uiSettings.globalAsScopedToClient,
     },
     coreUsageData: deps.coreUsageData,
   };

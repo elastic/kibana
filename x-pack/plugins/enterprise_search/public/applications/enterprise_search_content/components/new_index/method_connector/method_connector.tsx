@@ -5,15 +5,17 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useEffect } from 'react';
 
 import { useActions, useValues } from 'kea';
 
 import {
+  EuiCallOut,
   EuiConfirmModal,
   EuiFlexGroup,
   EuiFlexItem,
   EuiLink,
+  EuiSpacer,
   EuiSteps,
   EuiText,
 } from '@elastic/eui';
@@ -28,6 +30,7 @@ import { KibanaLogic } from '../../../../shared/kibana';
 import { LicensingLogic } from '../../../../shared/licensing';
 import { AddConnectorApiLogic } from '../../../api/connector/add_connector_api_logic';
 
+import { FetchCloudHealthApiLogic } from '../../../api/stats/fetch_cloud_health_api_logic';
 import { LicensingCallout, LICENSING_FEATURE } from '../licensing_callout';
 import { CREATE_ELASTICSEARCH_INDEX_STEP, BUILD_SEARCH_EXPERIENCE_STEP } from '../method_steps';
 import { NewSearchIndexLogic } from '../new_search_index_logic';
@@ -43,10 +46,21 @@ export const MethodConnector: React.FC<{ isNative: boolean }> = ({ isNative }) =
   const { isModalVisible } = useValues(AddConnectorLogic);
   const { setIsModalVisible } = useActions(AddConnectorLogic);
   const { fullIndexName, language } = useValues(NewSearchIndexLogic);
-  const { isCloud } = useValues(KibanaLogic);
+  const { isCloud, cloud } = useValues(KibanaLogic);
   const { hasPlatinumLicense } = useValues(LicensingLogic);
+  const { data: cloudHealthData } = useValues(FetchCloudHealthApiLogic);
 
   const isGated = isNative && !isCloud && !hasPlatinumLicense;
+  const hasLowMemory =
+    isNative && isCloud && cloudHealthData && !cloudHealthData.has_min_connector_memory;
+
+  const { makeRequest: fetchCloudHealth } = useActions(FetchCloudHealthApiLogic);
+
+  useEffect(() => {
+    if (isCloud) {
+      fetchCloudHealth({});
+    }
+  }, [isCloud]);
 
   return (
     <EuiFlexGroup direction="column">
@@ -55,10 +69,41 @@ export const MethodConnector: React.FC<{ isNative: boolean }> = ({ isNative }) =
           <LicensingCallout feature={LICENSING_FEATURE.NATIVE_CONNECTOR} />
         </EuiFlexItem>
       )}
+      {hasLowMemory && (
+        <EuiFlexItem>
+          <EuiCallOut
+            title={i18n.translate(
+              'xpack.enterpriseSearch.content.nativeConnector.memoryCallout.title',
+              {
+                defaultMessage: 'Your Enterprise Search deployment does not have enough memory',
+              }
+            )}
+            color="warning"
+            iconType="alert"
+          >
+            {i18n.translate(
+              'xpack.enterpriseSearch.content.nativeConnector.memoryCallout.content',
+              {
+                defaultMessage:
+                  'Enterprise Search needs at least 4GB of memory to use a native connector. To proceed, please edit your deployment settings.',
+              }
+            )}
+            <EuiSpacer />
+            <EuiLink href={cloud.baseUrl} external>
+              {i18n.translate(
+                'xpack.enterpriseSearch.content.nativeConnector.memoryCallout.link.title',
+                {
+                  defaultMessage: 'Manage deployment',
+                }
+              )}
+            </EuiLink>
+          </EuiCallOut>
+        </EuiFlexItem>
+      )}
       <EuiFlexItem>
         <NewSearchIndexTemplate
           docsUrl={docLinks.connectors}
-          disabled={isGated}
+          disabled={isGated || hasLowMemory}
           error={errorToText(error)}
           title={
             isNative

@@ -6,6 +6,7 @@
  */
 
 import {
+  EuiBadge,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
@@ -16,8 +17,11 @@ import {
 import { i18n } from '@kbn/i18n';
 import { TypeOf } from '@kbn/typed-react-router-config';
 import React, { useMemo } from 'react';
-import { NOT_AVAILABLE_LABEL } from '../../../../../common/i18n';
 import { ServiceHealthStatus } from '../../../../../common/service_health_status';
+import {
+  ServiceInventoryFieldName,
+  ServiceListItem,
+} from '../../../../../common/service_inventory';
 import {
   TRANSACTION_PAGE_LOAD,
   TRANSACTION_REQUEST,
@@ -28,33 +32,25 @@ import {
   asTransactionRate,
 } from '../../../../../common/utils/formatters';
 import { useApmParams } from '../../../../hooks/use_apm_params';
+import { useApmRouter } from '../../../../hooks/use_apm_router';
 import { Breakpoints, useBreakpoints } from '../../../../hooks/use_breakpoints';
 import { useFallbackToTransactionsFetcher } from '../../../../hooks/use_fallback_to_transactions_fetcher';
 import { APIReturnType } from '../../../../services/rest/create_call_apm_api';
 import { unit } from '../../../../utils/style';
 import { ApmRoutes } from '../../../routing/apm_route_config';
 import { AggregatedTransactionsBadge } from '../../../shared/aggregated_transactions_badge';
-import { EnvironmentBadge } from '../../../shared/environment_badge';
-import { ListMetric } from '../../../shared/list_metric';
-import { ITableColumn, ManagedTable } from '../../../shared/managed_table';
-import { ServiceLink } from '../../../shared/service_link';
-import { TruncateWithTooltip } from '../../../shared/truncate_with_tooltip';
 import {
   ChartType,
   getTimeSeriesColor,
 } from '../../../shared/charts/helper/get_timeseries_color';
+import { EnvironmentBadge } from '../../../shared/environment_badge';
+import { ListMetric } from '../../../shared/list_metric';
+import { ITableColumn, ManagedTable } from '../../../shared/managed_table';
+import { ServiceLink } from '../../../shared/links/apm/service_link';
 import { HealthBadge } from './health_badge';
-import {
-  ServiceInventoryFieldName,
-  ServiceListItem,
-} from '../../../../../common/service_inventory';
 
 type ServicesDetailedStatisticsAPIResponse =
   APIReturnType<'POST /internal/apm/services/detailed_statistics'>;
-
-function formatString(value?: string | null) {
-  return value || NOT_AVAILABLE_LABEL;
-}
 
 export function getServiceColumns({
   query,
@@ -63,19 +59,53 @@ export function getServiceColumns({
   comparisonData,
   breakpoints,
   showHealthStatusColumn,
+  showAlertsColumn,
+  link,
+  serviceOverflowCount,
 }: {
   query: TypeOf<ApmRoutes, '/services'>['query'];
   showTransactionTypeColumn: boolean;
   showHealthStatusColumn: boolean;
+  showAlertsColumn: boolean;
   comparisonDataLoading: boolean;
   breakpoints: Breakpoints;
   comparisonData?: ServicesDetailedStatisticsAPIResponse;
+  link: any;
+  serviceOverflowCount: number;
 }): Array<ITableColumn<ServiceListItem>> {
   const { isSmall, isLarge, isXl } = breakpoints;
   const showWhenSmallOrGreaterThanLarge = isSmall || !isLarge;
   const showWhenSmallOrGreaterThanXL = isSmall || !isXl;
 
   return [
+    ...(showAlertsColumn
+      ? [
+          {
+            field: ServiceInventoryFieldName.AlertsCount,
+            name: '',
+            width: `${unit * 5}px`,
+            sortable: true,
+            render: (_, { serviceName, alertsCount }) => {
+              if (!alertsCount) {
+                return null;
+              }
+
+              return (
+                <EuiBadge
+                  iconType="alert"
+                  color="danger"
+                  href={link('/services/{serviceName}/alerts', {
+                    path: { serviceName },
+                    query,
+                  })}
+                >
+                  {alertsCount}
+                </EuiBadge>
+              );
+            },
+          } as ITableColumn<ServiceListItem>,
+        ]
+      : []),
     ...(showHealthStatusColumn
       ? [
           {
@@ -102,16 +132,11 @@ export function getServiceColumns({
       }),
       sortable: true,
       render: (_, { serviceName, agentName, transactionType }) => (
-        <TruncateWithTooltip
-          data-test-subj="apmServiceListAppLink"
-          text={formatString(serviceName)}
-          content={
-            <ServiceLink
-              agentName={agentName}
-              query={{ ...query, transactionType }}
-              serviceName={serviceName}
-            />
-          }
+        <ServiceLink
+          agentName={agentName}
+          query={{ ...query, transactionType }}
+          serviceName={serviceName}
+          serviceOverflowCount={serviceOverflowCount}
         />
       ),
     },
@@ -242,6 +267,7 @@ interface Props {
   isLoading: boolean;
   isFailure?: boolean;
   displayHealthStatus: boolean;
+  displayAlerts: boolean;
   initialSortField: ServiceInventoryFieldName;
   initialPageSize: number;
   initialSortDirection: 'asc' | 'desc';
@@ -250,8 +276,9 @@ interface Props {
     sortField: ServiceInventoryFieldName,
     sortDirection: 'asc' | 'desc'
   ) => ServiceListItem[];
-}
 
+  serviceOverflowCount: number;
+}
 export function ServiceList({
   items,
   noItemsMessage,
@@ -260,12 +287,15 @@ export function ServiceList({
   isLoading,
   isFailure,
   displayHealthStatus,
+  displayAlerts,
   initialSortField,
   initialSortDirection,
   initialPageSize,
   sortFn,
+  serviceOverflowCount,
 }: Props) {
   const breakpoints = useBreakpoints();
+  const { link } = useApmRouter();
 
   const showTransactionTypeColumn = items.some(
     ({ transactionType }) =>
@@ -298,6 +328,9 @@ export function ServiceList({
         comparisonData,
         breakpoints,
         showHealthStatusColumn: displayHealthStatus,
+        showAlertsColumn: displayAlerts,
+        link,
+        serviceOverflowCount,
       }),
     [
       query,
@@ -306,6 +339,9 @@ export function ServiceList({
       comparisonData,
       breakpoints,
       displayHealthStatus,
+      displayAlerts,
+      link,
+      serviceOverflowCount,
     ]
   );
 

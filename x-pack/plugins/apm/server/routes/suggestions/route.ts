@@ -10,7 +10,6 @@ import { maxSuggestions } from '@kbn/observability-plugin/common';
 import { getSuggestionsWithTermsEnum } from './get_suggestions_with_terms_enum';
 import { getSuggestionsWithTermsAggregation } from './get_suggestions_with_terms_aggregation';
 import { getSearchTransactionsEvents } from '../../lib/helpers/transactions';
-import { setupRequest } from '../../lib/helpers/setup_request';
 import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
 import { rangeRt } from '../default_api_types';
 import { getApmEventClient } from '../../lib/helpers/get_apm_event_client';
@@ -29,15 +28,12 @@ const suggestionsRoute = createApmServerRoute({
   }),
   options: { tags: ['access:apm'] },
   handler: async (resources): Promise<{ terms: string[] }> => {
-    const [setup, apmEventClient] = await Promise.all([
-      setupRequest(resources),
-      getApmEventClient(resources),
-    ]);
-    const { context, params } = resources;
+    const apmEventClient = await getApmEventClient(resources);
+    const { context, params, config } = resources;
     const { fieldName, fieldValue, serviceName, start, end } = params.query;
     const searchAggregatedTransactions = await getSearchTransactionsEvents({
       apmEventClient,
-      config: setup.config,
+      config,
       kuery: '',
     });
     const coreContext = await context.core;

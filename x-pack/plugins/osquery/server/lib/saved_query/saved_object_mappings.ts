@@ -123,6 +123,10 @@ export const packSavedObjectMappings: SavedObjectsType['mappings'] = {
     enabled: {
       type: 'boolean',
     },
+    shards: {
+      type: 'object',
+      enabled: false,
+    },
     version: {
       type: 'long',
     },
@@ -194,6 +198,10 @@ export const packAssetSavedObjectMappings: SavedObjectsType['mappings'] = {
     },
     version: {
       type: 'long',
+    },
+    shards: {
+      type: 'object',
+      enabled: false,
     },
     queries: {
       dynamic: false,

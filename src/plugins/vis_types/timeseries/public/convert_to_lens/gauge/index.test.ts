@@ -22,7 +22,7 @@ const mockIsValidMetrics = jest.fn();
 const mockGetDatasourceValue = jest
   .fn()
   .mockImplementation(() => Promise.resolve(stubLogstashDataView));
-const mockGetDataSourceInfo = jest.fn();
+const mockExtractOrGenerateDatasourceInfo = jest.fn();
 const mockGetSeriesAgg = jest.fn();
 
 jest.mock('../../services', () => ({
@@ -50,7 +50,7 @@ jest.mock('../lib/metrics', () => {
 });
 
 jest.mock('../lib/datasource', () => ({
-  getDataSourceInfo: jest.fn(() => mockGetDataSourceInfo()),
+  extractOrGenerateDatasourceInfo: jest.fn(() => mockExtractOrGenerateDatasourceInfo()),
 }));
 
 describe('convertToLens', () => {
@@ -77,7 +77,7 @@ describe('convertToLens', () => {
 
   beforeEach(() => {
     mockIsValidMetrics.mockReturnValue(true);
-    mockGetDataSourceInfo.mockReturnValue({
+    mockExtractOrGenerateDatasourceInfo.mockReturnValue({
       indexPatternId: 'test-index-pattern',
       timeField: 'timeField',
       indexPattern: { id: 'test-index-pattern' },
@@ -126,7 +126,7 @@ describe('convertToLens', () => {
       },
     } as Vis<Panel>);
     expect(result).toBeNull();
-    expect(mockGetDataSourceInfo).toBeCalledTimes(0);
+    expect(mockExtractOrGenerateDatasourceInfo).toBeCalledTimes(0);
   });
 
   test('should return null if only series agg is specified', async () => {
@@ -174,6 +174,33 @@ describe('convertToLens', () => {
         ],
       }),
     } as Vis<Panel>);
+    expect(result).toBeDefined();
+    expect(result?.type).toBe('lnsMetric');
+  });
+
+  test('should drop adhoc dataviews if action is required', async () => {
+    mockGetMetricsColumns.mockReturnValue([metricColumn]);
+    mockGetSeriesAgg.mockReturnValue({ metrics: [metric] });
+    mockGetConfigurationForGauge.mockReturnValue({});
+
+    const result = await convertToLens(
+      {
+        params: createPanel({
+          series: [
+            createSeries({
+              metrics: [{ id: 'some-id', type: METRIC_TYPES.AVG, field: 'test-field' }],
+              hidden: false,
+            }),
+            createSeries({
+              metrics: [{ id: 'some-id', type: METRIC_TYPES.AVG, field: 'test-field' }],
+              hidden: false,
+            }),
+          ],
+        }),
+      } as Vis<Panel>,
+      undefined,
+      true
+    );
     expect(result).toBeDefined();
     expect(result?.type).toBe('lnsMetric');
   });

@@ -23,7 +23,7 @@ export function useChartPanels({
 }: {
   chart?: UnifiedHistogramChartContext;
   toggleHideChart: () => void;
-  onTimeIntervalChange: (timeInterval: string) => void;
+  onTimeIntervalChange?: (timeInterval: string) => void;
   closePopover: () => void;
   onResetChartHeight?: () => void;
 }) {
@@ -107,7 +107,7 @@ export function useChartPanels({
             label: display,
             icon: val === chart.timeInterval ? 'check' : 'empty',
             onClick: () => {
-              onTimeIntervalChange(val);
+              onTimeIntervalChange?.(val);
               closePopover();
             },
             'data-test-subj': `unifiedHistogramTimeInterval-${display}`,

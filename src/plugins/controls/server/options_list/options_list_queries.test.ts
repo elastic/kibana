@@ -119,6 +119,9 @@ describe('options list queries', () => {
               "keywordSuggestions": Object {
                 "terms": Object {
                   "field": "coolTestField.keyword",
+                  "order": Object {
+                    "_count": "desc",
+                  },
                   "shard_size": 10,
                 },
               },
@@ -137,6 +140,7 @@ describe('options list queries', () => {
           fieldName: 'coolTestField.keyword',
           textFieldName: 'coolTestField',
           fieldSpec: { aggregatable: true } as unknown as FieldSpec,
+          sort: { by: '_count', direction: 'asc' },
         };
         const suggestionAggBuilder = getSuggestionAggregationBuilder(optionsListRequestBodyMock);
         expect(suggestionAggBuilder.buildAggregation(optionsListRequestBodyMock))
@@ -146,6 +150,9 @@ describe('options list queries', () => {
               "execution_hint": "map",
               "field": "coolTestField.keyword",
               "include": ".*",
+              "order": Object {
+                "_count": "asc",
+              },
               "shard_size": 10,
             },
           }
@@ -157,6 +164,7 @@ describe('options list queries', () => {
       const optionsListRequestBodyMock: OptionsListRequestBody = {
         fieldName: 'coolean',
         fieldSpec: { type: 'boolean' } as unknown as FieldSpec,
+        sort: { by: '_key', direction: 'desc' },
       };
       const suggestionAggBuilder = getSuggestionAggregationBuilder(optionsListRequestBodyMock);
       expect(suggestionAggBuilder.buildAggregation(optionsListRequestBodyMock))
@@ -165,6 +173,9 @@ describe('options list queries', () => {
           "terms": Object {
             "execution_hint": "map",
             "field": "coolean",
+            "order": Object {
+              "_key": "desc",
+            },
             "shard_size": 10,
           },
         }
@@ -176,6 +187,7 @@ describe('options list queries', () => {
         fieldName: 'coolNestedField',
         searchString: 'cooool',
         fieldSpec: { subType: { nested: { path: 'path.to.nested' } } } as unknown as FieldSpec,
+        sort: { by: '_key', direction: 'asc' },
       };
       const suggestionAggBuilder = getSuggestionAggregationBuilder(optionsListRequestBodyMock);
       expect(suggestionAggBuilder.buildAggregation(optionsListRequestBodyMock))
@@ -187,6 +199,9 @@ describe('options list queries', () => {
                 "execution_hint": "map",
                 "field": "coolNestedField",
                 "include": "cooool.*",
+                "order": Object {
+                  "_key": "asc",
+                },
                 "shard_size": 10,
               },
             },
@@ -212,6 +227,9 @@ describe('options list queries', () => {
             "execution_hint": "map",
             "field": "coolTestField.keyword",
             "include": "cooool.*",
+            "order": Object {
+              "_count": "desc",
+            },
             "shard_size": 10,
           },
         }
@@ -223,6 +241,7 @@ describe('options list queries', () => {
         const optionsListRequestBodyMock: OptionsListRequestBody = {
           fieldName: 'clientip',
           fieldSpec: { type: 'ip' } as unknown as FieldSpec,
+          sort: { by: '_count', direction: 'asc' },
         };
         const suggestionAggBuilder = getSuggestionAggregationBuilder(optionsListRequestBodyMock);
         expect(suggestionAggBuilder.buildAggregation(optionsListRequestBodyMock))
@@ -233,6 +252,9 @@ describe('options list queries', () => {
                 "terms": Object {
                   "execution_hint": "map",
                   "field": "clientip",
+                  "order": Object {
+                    "_count": "asc",
+                  },
                   "shard_size": 10,
                 },
               },
@@ -257,6 +279,7 @@ describe('options list queries', () => {
           fieldName: 'clientip',
           fieldSpec: { type: 'ip' } as unknown as FieldSpec,
           searchString: '41.77.243.255',
+          sort: { by: '_key', direction: 'desc' },
         };
         const suggestionAggBuilder = getSuggestionAggregationBuilder(optionsListRequestBodyMock);
         expect(suggestionAggBuilder.buildAggregation(optionsListRequestBodyMock))
@@ -267,6 +290,9 @@ describe('options list queries', () => {
                 "terms": Object {
                   "execution_hint": "map",
                   "field": "clientip",
+                  "order": Object {
+                    "_key": "desc",
+                  },
                   "shard_size": 10,
                 },
               },
@@ -290,6 +316,7 @@ describe('options list queries', () => {
           fieldName: 'clientip',
           fieldSpec: { type: 'ip' } as unknown as FieldSpec,
           searchString: 'f688:fb50:6433:bba2:604:f2c:194a:d3c5',
+          sort: { by: '_key', direction: 'asc' },
         };
         const suggestionAggBuilder = getSuggestionAggregationBuilder(optionsListRequestBodyMock);
         expect(suggestionAggBuilder.buildAggregation(optionsListRequestBodyMock))
@@ -300,6 +327,9 @@ describe('options list queries', () => {
                 "terms": Object {
                   "execution_hint": "map",
                   "field": "clientip",
+                  "order": Object {
+                    "_key": "asc",
+                  },
                   "shard_size": 10,
                 },
               },
@@ -333,6 +363,9 @@ describe('options list queries', () => {
                 "terms": Object {
                   "execution_hint": "map",
                   "field": "clientip",
+                  "order": Object {
+                    "_count": "desc",
+                  },
                   "shard_size": 10,
                 },
               },
@@ -357,6 +390,7 @@ describe('options list queries', () => {
           fieldName: 'clientip',
           fieldSpec: { type: 'ip' } as unknown as FieldSpec,
           searchString: 'cdb6:',
+          sort: { by: '_count', direction: 'desc' },
         };
         const suggestionAggBuilder = getSuggestionAggregationBuilder(optionsListRequestBodyMock);
         expect(suggestionAggBuilder.buildAggregation(optionsListRequestBodyMock))
@@ -367,6 +401,9 @@ describe('options list queries', () => {
                 "terms": Object {
                   "execution_hint": "map",
                   "field": "clientip",
+                  "order": Object {
+                    "_count": "desc",
+                  },
                   "shard_size": 10,
                 },
               },
@@ -409,11 +446,17 @@ describe('options list queries', () => {
         },
       };
       expect(suggestionAggBuilder.parse(rawSearchResponseMock)).toMatchInlineSnapshot(`
-        Array [
-          "cool1",
-          "cool2",
-          "cool3",
-        ]
+        Object {
+          "cool1": Object {
+            "doc_count": 5,
+          },
+          "cool2": Object {
+            "doc_count": 15,
+          },
+          "cool3": Object {
+            "doc_count": 10,
+          },
+        }
       `);
     });
 
@@ -432,10 +475,14 @@ describe('options list queries', () => {
         },
       };
       expect(suggestionAggBuilder.parse(rawSearchResponseMock)).toMatchInlineSnapshot(`
-        Array [
-          "false",
-          "true",
-        ]
+        Object {
+          "false": Object {
+            "doc_count": 55,
+          },
+          "true": Object {
+            "doc_count": 155,
+          },
+        }
       `);
     });
 
@@ -458,11 +505,17 @@ describe('options list queries', () => {
         },
       };
       expect(suggestionAggBuilder.parse(rawSearchResponseMock)).toMatchInlineSnapshot(`
-        Array [
-          "cool1",
-          "cool2",
-          "cool3",
-        ]
+        Object {
+          "cool1": Object {
+            "doc_count": 5,
+          },
+          "cool2": Object {
+            "doc_count": 15,
+          },
+          "cool3": Object {
+            "doc_count": 10,
+          },
+        }
       `);
     });
 
@@ -483,11 +536,17 @@ describe('options list queries', () => {
         },
       };
       expect(suggestionAggBuilder.parse(rawSearchResponseMock)).toMatchInlineSnapshot(`
-        Array [
-          "cool1",
-          "cool2",
-          "cool3",
-        ]
+        Object {
+          "cool1": Object {
+            "doc_count": 5,
+          },
+          "cool2": Object {
+            "doc_count": 15,
+          },
+          "cool3": Object {
+            "doc_count": 10,
+          },
+        }
       `);
     });
   });
@@ -532,7 +591,10 @@ describe('options list queries', () => {
         },
       },
     };
-    expect(suggestionAggBuilder.parse(rawSearchResponseMock)).toMatchInlineSnapshot(`
+
+    const parsed = suggestionAggBuilder.parse(rawSearchResponseMock);
+    /** first, verify that the sorting worked as expected */
+    expect(Object.keys(parsed)).toMatchInlineSnapshot(`
       Array [
         "52:ae76:5947:5e2a:551:fe6a:712a:c72",
         "111.52.174.2",
@@ -545,6 +607,41 @@ describe('options list queries', () => {
         "203.88.33.151",
         "1ec:aa98:b0a6:d07c:590:18a0:8a33:2eb8",
       ]
+    `);
+    /** then, make sure the object is structured properly */
+    expect(parsed).toMatchInlineSnapshot(`
+      Object {
+        "111.52.174.2": Object {
+          "doc_count": 11,
+        },
+        "196.162.13.39": Object {
+          "doc_count": 10,
+        },
+        "1ec:aa98:b0a6:d07c:590:18a0:8a33:2eb8": Object {
+          "doc_count": 6,
+        },
+        "203.88.33.151": Object {
+          "doc_count": 7,
+        },
+        "21.35.91.61": Object {
+          "doc_count": 8,
+        },
+        "21.35.91.62": Object {
+          "doc_count": 8,
+        },
+        "23.216.241.120": Object {
+          "doc_count": 9,
+        },
+        "28c7:c9a4:42fd:16b0:4de5:e41e:28d9:9172": Object {
+          "doc_count": 9,
+        },
+        "52:ae76:5947:5e2a:551:fe6a:712a:c72": Object {
+          "doc_count": 12,
+        },
+        "f7a9:640b:b5a0:1219:8d75:ed94:3c3e:2e63": Object {
+          "doc_count": 10,
+        },
+      }
     `);
   });
 });

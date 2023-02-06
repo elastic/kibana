@@ -22,7 +22,8 @@ import {
   getOptionalListField,
   getOptionalArrayField,
   getUnsupportedKeysError,
-  getMultipleUrlsOrHostsError,
+  getInvalidUrlsOrHostsError,
+  getHasTLSFields,
 } from './common_fields';
 
 export const getNormalizeHTTPFields = ({
@@ -47,10 +48,9 @@ export const getNormalizeHTTPFields = ({
 
   /* Check if monitor has multiple urls */
   const urls = getOptionalListField(monitor.urls);
-  if (urls.length > 1) {
-    errors.push(getMultipleUrlsOrHostsError(monitor, 'urls', version));
+  if (urls.length !== 1) {
+    errors.push(getInvalidUrlsOrHostsError(monitor, 'urls', version));
   }
-
   if (unsupportedKeys.length) {
     errors.push(getUnsupportedKeysError(monitor, unsupportedKeys, version));
   }
@@ -70,7 +70,12 @@ export const getNormalizeHTTPFields = ({
     [ConfigKey.TLS_VERSION]: get(monitor, ConfigKey.TLS_VERSION)
       ? (getOptionalListField(get(monitor, ConfigKey.TLS_VERSION)) as TLSVersion[])
       : defaultFields[ConfigKey.TLS_VERSION],
+    [ConfigKey.METADATA]: {
+      ...DEFAULT_FIELDS[DataStream.HTTP][ConfigKey.METADATA],
+      is_tls_enabled: getHasTLSFields(monitor),
+    },
   };
+
   return {
     normalizedFields: {
       ...defaultFields,

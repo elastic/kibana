@@ -9,7 +9,7 @@
 import type { MgetResponseItem } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import { isNotFoundFromUnsupportedServer } from '@kbn/core-elasticsearch-server-internal';
-import type { SavedObject } from '@kbn/core-saved-objects-common';
+import type { SavedObject } from '@kbn/core-saved-objects-server';
 import type {
   SavedObjectsBaseOptions,
   SavedObjectsBulkResolveObject,
@@ -17,12 +17,16 @@ import type {
   SavedObjectsIncrementCounterField,
   SavedObjectsIncrementCounterOptions,
 } from '@kbn/core-saved-objects-api-server';
-import type {
-  ISavedObjectTypeRegistry,
-  SavedObjectsRawDocSource,
+import {
+  AuditAction,
+  type ISavedObjectsEncryptionExtension,
+  type ISavedObjectsSecurityExtension,
+  type ISavedObjectTypeRegistry,
+  type SavedObjectsRawDocSource,
 } from '@kbn/core-saved-objects-server';
 import {
   SavedObjectsErrorHelpers,
+  SavedObjectsUtils,
   type DecoratedError,
 } from '@kbn/core-saved-objects-utils-server';
 import {
@@ -35,17 +39,20 @@ import {
   CORE_USAGE_STATS_TYPE,
   REPOSITORY_RESOLVE_OUTCOME_STATS,
 } from '@kbn/core-usage-data-base-server-internal';
+import pMap from 'p-map';
 import {
   getCurrentTime,
   getSavedObjectFromSource,
   normalizeNamespace,
   rawDocExistsInNamespace,
-  Either,
-  Right,
+  type Either,
+  type Right,
   isLeft,
   isRight,
 } from './internal_utils';
 import type { RepositoryEsClient } from './repository_es_client';
+
+const MAX_CONCURRENT_RESOLVE = 10;
 
 /**
  * Parameters for the internal bulkResolve function.
@@ -64,6 +71,8 @@ export interface InternalBulkResolveParams {
     counterFields: Array<string | SavedObjectsIncrementCounterField>,
     options?: SavedObjectsIncrementCounterOptions<T>
   ) => Promise<SavedObject<T>>;
+  encryptionExtension: ISavedObjectsEncryptionExtension | undefined;
+  securityExtension: ISavedObjectsSecurityExtension | undefined;
   objects: SavedObjectsBulkResolveObject[];
   options?: SavedObjectsBaseOptions;
 }
@@ -88,6 +97,13 @@ export interface InternalBulkResolveError {
   error: DecoratedError;
 }
 
+/** Type guard used in the repository. */
+export function isBulkResolveError<T>(
+  result: SavedObjectsResolveResponse<T> | InternalBulkResolveError
+): result is InternalBulkResolveError {
+  return !!(result as InternalBulkResolveError).error;
+}
+
 type AliasInfo = Pick<LegacyUrlAlias, 'targetId' | 'purpose'>;
 
 export async function internalBulkResolve<T>(
@@ -100,6 +116,8 @@ export async function internalBulkResolve<T>(
     serializer,
     getIndexForType,
     incrementCounterInternal,
+    encryptionExtension,
+    securityExtension,
     objects,
     options = {},
   } = params;
@@ -166,70 +184,85 @@ export async function internalBulkResolve<T>(
 
   let getResponseIndex = 0;
   let aliasInfoIndex = 0;
-  const resolveCounter = new ResolveCounter();
-  const resolvedObjects = allObjects.map<SavedObjectsResolveResponse<T> | InternalBulkResolveError>(
-    (either) => {
-      if (isLeft(either)) {
-        return either.value;
-      }
-      const exactMatchDoc = bulkGetResponse?.body.docs[getResponseIndex++];
-      let aliasMatchDoc: MgetResponseItem<SavedObjectsRawDocSource> | undefined;
-      const aliasInfo = aliasInfoArray[aliasInfoIndex++];
-      if (aliasInfo !== undefined) {
-        aliasMatchDoc = bulkGetResponse?.body.docs[getResponseIndex++];
-      }
-      const foundExactMatch =
-        // @ts-expect-error MultiGetHit._source is optional
-        exactMatchDoc.found && rawDocExistsInNamespace(registry, exactMatchDoc, namespace);
-      const foundAliasMatch =
-        // @ts-expect-error MultiGetHit._source is optional
-        aliasMatchDoc?.found && rawDocExistsInNamespace(registry, aliasMatchDoc, namespace);
 
-      const { type, id } = either.value;
-      let result: SavedObjectsResolveResponse<T> | null = null;
-      if (foundExactMatch && foundAliasMatch) {
-        result = {
-          // @ts-expect-error MultiGetHit._source is optional
-          saved_object: getSavedObjectFromSource(registry, type, id, exactMatchDoc),
-          outcome: 'conflict',
-          alias_target_id: aliasInfo!.targetId,
-          alias_purpose: aliasInfo!.purpose,
-        };
-        resolveCounter.recordOutcome(REPOSITORY_RESOLVE_OUTCOME_STATS.CONFLICT);
-      } else if (foundExactMatch) {
-        result = {
-          // @ts-expect-error MultiGetHit._source is optional
-          saved_object: getSavedObjectFromSource(registry, type, id, exactMatchDoc),
-          outcome: 'exactMatch',
-        };
-        resolveCounter.recordOutcome(REPOSITORY_RESOLVE_OUTCOME_STATS.EXACT_MATCH);
-      } else if (foundAliasMatch) {
-        result = {
-          saved_object: getSavedObjectFromSource(
-            registry,
-            type,
-            aliasInfo!.targetId,
-            // @ts-expect-error MultiGetHit._source is optional
-            aliasMatchDoc!
-          ),
-          outcome: 'aliasMatch',
-          alias_target_id: aliasInfo!.targetId,
-          alias_purpose: aliasInfo!.purpose,
-        };
-        resolveCounter.recordOutcome(REPOSITORY_RESOLVE_OUTCOME_STATS.ALIAS_MATCH);
-      }
-
-      if (result !== null) {
-        return result;
-      }
-      resolveCounter.recordOutcome(REPOSITORY_RESOLVE_OUTCOME_STATS.NOT_FOUND);
-      return {
-        type,
-        id,
-        error: SavedObjectsErrorHelpers.createGenericNotFoundError(type, id),
-      };
+  // Helper function for the map block below
+  async function getSavedObject(
+    objectType: string,
+    objectId: string,
+    doc: MgetResponseItem<SavedObjectsRawDocSource>
+  ) {
+    // Encryption
+    // @ts-expect-error MultiGetHit._source is optional
+    const object = getSavedObjectFromSource<T>(registry, objectType, objectId, doc);
+    if (!encryptionExtension?.isEncryptableType(object.type)) {
+      return object;
     }
-  );
+    return encryptionExtension.decryptOrStripResponseAttributes(object);
+  }
+
+  // map function for pMap below
+  const mapper = async (
+    either: Either<InternalBulkResolveError, SavedObjectsBulkResolveObject>
+  ) => {
+    if (isLeft(either)) {
+      return either.value;
+    }
+    const exactMatchDoc = bulkGetResponse?.body.docs[getResponseIndex++];
+    let aliasMatchDoc: MgetResponseItem<SavedObjectsRawDocSource> | undefined;
+    const aliasInfo = aliasInfoArray[aliasInfoIndex++];
+    if (aliasInfo !== undefined) {
+      aliasMatchDoc = bulkGetResponse?.body.docs[getResponseIndex++];
+    }
+    const foundExactMatch =
+      // @ts-expect-error MultiGetHit._source is optional
+      exactMatchDoc.found && rawDocExistsInNamespace(registry, exactMatchDoc, namespace);
+    const foundAliasMatch =
+      // @ts-expect-error MultiGetHit._source is optional
+      aliasMatchDoc?.found && rawDocExistsInNamespace(registry, aliasMatchDoc, namespace);
+
+    const { type, id } = either.value;
+    let result: SavedObjectsResolveResponse<T> | null = null;
+
+    if (foundExactMatch && foundAliasMatch) {
+      result = {
+        saved_object: await getSavedObject(type, id, exactMatchDoc!),
+        outcome: 'conflict',
+        alias_target_id: aliasInfo!.targetId,
+        alias_purpose: aliasInfo!.purpose,
+      };
+      resolveCounter.recordOutcome(REPOSITORY_RESOLVE_OUTCOME_STATS.CONFLICT);
+    } else if (foundExactMatch) {
+      result = {
+        saved_object: await getSavedObject(type, id, exactMatchDoc!),
+        outcome: 'exactMatch',
+      };
+      resolveCounter.recordOutcome(REPOSITORY_RESOLVE_OUTCOME_STATS.EXACT_MATCH);
+    } else if (foundAliasMatch) {
+      result = {
+        saved_object: await getSavedObject(type, aliasInfo!.targetId, aliasMatchDoc!),
+        outcome: 'aliasMatch',
+        alias_target_id: aliasInfo!.targetId,
+        alias_purpose: aliasInfo!.purpose,
+      };
+      resolveCounter.recordOutcome(REPOSITORY_RESOLVE_OUTCOME_STATS.ALIAS_MATCH);
+    }
+
+    if (result !== null) {
+      return result;
+    }
+    resolveCounter.recordOutcome(REPOSITORY_RESOLVE_OUTCOME_STATS.NOT_FOUND);
+    return {
+      type,
+      id,
+      error: SavedObjectsErrorHelpers.createGenericNotFoundError(type, id),
+    };
+  };
+
+  const resolveCounter = new ResolveCounter();
+
+  const resolvedObjects = await pMap(allObjects, mapper, {
+    concurrency: MAX_CONCURRENT_RESOLVE,
+  });
 
   incrementCounterInternal(
     CORE_USAGE_STATS_TYPE,
@@ -238,7 +271,87 @@ export async function internalBulkResolve<T>(
     { refresh: false }
   ).catch(() => {}); // if the call fails for some reason, intentionally swallow the error
 
-  return { resolved_objects: resolvedObjects };
+  const redacted = await authorizeAuditAndRedact(resolvedObjects, securityExtension, namespace);
+  return { resolved_objects: redacted };
+}
+
+/**
+ * Checks authorization, writes audit events, and redacts namespaces from the bulkResolve response. In other SavedObjectsRepository
+ * functions we do this before decrypting attributes. However, because of the bulkResolve logic involved in deciding between the exact match
+ * or alias match, it's cleaner to do authorization, auditing, and redaction all afterwards.
+ */
+async function authorizeAuditAndRedact<T>(
+  resolvedObjects: Array<SavedObjectsResolveResponse<T> | InternalBulkResolveError>,
+  securityExtension: ISavedObjectsSecurityExtension | undefined,
+  namespace: string | undefined
+) {
+  if (!securityExtension) {
+    return resolvedObjects;
+  }
+
+  const namespaceString = SavedObjectsUtils.namespaceIdToString(namespace);
+  const typesAndSpaces = new Map<string, Set<string>>();
+  const spacesToAuthorize = new Set<string>();
+  const auditableObjects: Array<{ type: string; id: string }> = [];
+
+  for (const result of resolvedObjects) {
+    let auditableObject: { type: string; id: string } | undefined;
+    if (isBulkResolveError(result)) {
+      const { type, id, error } = result;
+      if (!SavedObjectsErrorHelpers.isBadRequestError(error)) {
+        // Only "not found" errors should show up as audit events (not "unsupported type" errors)
+        auditableObject = { type, id };
+      }
+    } else {
+      const { type, id, namespaces = [] } = result.saved_object;
+      auditableObject = { type, id };
+      for (const space of namespaces) {
+        spacesToAuthorize.add(space);
+      }
+    }
+    if (auditableObject) {
+      auditableObjects.push(auditableObject);
+      const spacesToEnforce =
+        typesAndSpaces.get(auditableObject.type) ?? new Set([namespaceString]); // Always enforce authZ for the active space
+      spacesToEnforce.add(namespaceString);
+      typesAndSpaces.set(auditableObject.type, spacesToEnforce);
+      spacesToAuthorize.add(namespaceString);
+    }
+  }
+
+  if (typesAndSpaces.size === 0) {
+    // We only had "unsupported type" errors, there are no types to check privileges for, just return early
+    return resolvedObjects;
+  }
+
+  const authorizationResult = await securityExtension?.performAuthorization({
+    actions: new Set(['bulk_get']),
+    types: new Set(typesAndSpaces.keys()),
+    spaces: spacesToAuthorize,
+    enforceMap: typesAndSpaces,
+    auditCallback: (error) => {
+      for (const { type, id } of auditableObjects) {
+        securityExtension.addAuditEvent({
+          action: AuditAction.RESOLVE,
+          savedObject: { type, id },
+          error,
+        });
+      }
+    },
+  });
+
+  return resolvedObjects.map((result) => {
+    if (isBulkResolveError(result)) {
+      return result;
+    }
+    return {
+      ...result,
+      saved_object: securityExtension.redactNamespaces({
+        typeMap: authorizationResult.typeMap,
+        savedObject: result.saved_object,
+      }),
+    };
+  });
 }
 
 /** Separates valid and invalid object types */
@@ -317,7 +430,6 @@ async function fetchAndUpdateAliases(
     return item.update?.get;
   });
 }
-
 class ResolveCounter {
   private record = new Map<string, number>();
 

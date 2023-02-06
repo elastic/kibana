@@ -145,9 +145,6 @@ export SYNTHETICS_REMOTE_KIBANA_URL
   export TEST_FAILURES_ES_PASSWORD
 }
 
-KIBANA_BUILDBUDDY_CI_API_KEY=$(retry 5 5 vault read -field=value secret/kibana-issues/dev/kibana-buildbuddy-ci-api-key)
-export KIBANA_BUILDBUDDY_CI_API_KEY
-
 BAZEL_LOCAL_DEV_CACHE_CREDENTIALS_FILE="$HOME/.kibana-ci-bazel-remote-cache-local-dev.json"
 export BAZEL_LOCAL_DEV_CACHE_CREDENTIALS_FILE
 retry 5 5 vault read -field=service_account_json secret/kibana-issues/dev/kibana-ci-bazel-remote-cache-local-dev > "$BAZEL_LOCAL_DEV_CACHE_CREDENTIALS_FILE"

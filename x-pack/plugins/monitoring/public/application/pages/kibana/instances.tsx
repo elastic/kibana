@@ -13,9 +13,7 @@ import { ComponentProps } from '../../route_init';
 import { GlobalStateContext } from '../../contexts/global_state_context';
 import { useTable } from '../../hooks/use_table';
 import { KibanaTemplate } from './kibana_template';
-// @ts-ignore
 import { KibanaInstances } from '../../../components/kibana/instances';
-// @ts-ignore
 import { SetupModeRenderer, SetupModeProps } from '../../../components/renderers/setup_mode';
 import { SetupModeContext } from '../../../components/setup_mode/setup_mode_context';
 import { useBreadcrumbContainerContext } from '../../hooks/use_breadcrumbs';

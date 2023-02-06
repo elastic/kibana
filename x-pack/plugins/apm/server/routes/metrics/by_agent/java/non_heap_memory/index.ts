@@ -12,7 +12,7 @@ import {
   METRIC_JAVA_NON_HEAP_MEMORY_COMMITTED,
   METRIC_JAVA_NON_HEAP_MEMORY_USED,
   AGENT_NAME,
-} from '../../../../../../common/elasticsearch_fieldnames';
+} from '../../../../../../common/es_fields/apm';
 import { ChartBase } from '../../../types';
 import { fetchAndTransformMetrics } from '../../../fetch_and_transform_metrics';
 import { JAVA_AGENT_NAMES } from '../../../../../../common/agent_name';

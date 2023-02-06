@@ -86,7 +86,7 @@ describe('NewSearchIndexLogic', () => {
         });
       });
       it('calls makeRequest on whether API exists with a 150ms debounce', async () => {
-        jest.useFakeTimers('legacy');
+        jest.useFakeTimers({ legacyFakeTimers: true });
         NewSearchIndexLogic.actions.makeRequest = jest.fn();
         NewSearchIndexLogic.actions.setRawName('indexname');
         await nextTick();

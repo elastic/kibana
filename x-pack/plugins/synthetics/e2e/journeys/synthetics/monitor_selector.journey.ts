@@ -5,15 +5,18 @@
  * 2.0.
  */
 
-import { journey, step, expect, before } from '@elastic/synthetics';
+import { journey, step, expect, before, after } from '@elastic/synthetics';
+import { recordVideo } from '@kbn/observability-plugin/e2e/record_video';
 import {
   addTestMonitor,
   cleanTestMonitors,
   enableMonitorManagedViaApi,
 } from './services/add_monitor';
-import { syntheticsAppPageProvider } from '../../page_objects/synthetics_app';
+import { syntheticsAppPageProvider } from '../../page_objects/synthetics/synthetics_app';
 
 journey(`MonitorSelector`, async ({ page, params }) => {
+  recordVideo(page);
+
   const syntheticsApp = syntheticsAppPageProvider({ page, kibanaUrl: params.kibanaUrl });
   const testMonitor1 = 'Test monitor 1';
   const testMonitor2 = 'Test monitor 2';
@@ -26,6 +29,10 @@ journey(`MonitorSelector`, async ({ page, params }) => {
     await addTestMonitor(params.kibanaUrl, testMonitor1);
     await addTestMonitor(params.kibanaUrl, testMonitor2);
     await addTestMonitor(params.kibanaUrl, testMonitor3);
+  });
+
+  after(async () => {
+    await cleanTestMonitors(params);
   });
 
   step('Go to monitor-management', async () => {

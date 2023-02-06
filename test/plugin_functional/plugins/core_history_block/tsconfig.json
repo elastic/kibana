@@ -1,12 +1,14 @@
 {
   "extends": "../../../../tsconfig.base.json",
   "compilerOptions": {
-    "outDir": "./target/types"
+    "outDir": "target/types"
   },
   "include": ["index.ts", "public/**/*.ts", "public/**/*.tsx", "../../../../typings/**/*"],
-  "exclude": [],
+  "exclude": [
+    "target/**/*",
+  ],
   "kbn_references": [
-    { "path": "../../../../src/core/tsconfig.json" },
-    { "path": "../../../../src/plugins/kibana_react/tsconfig.json" }
+    "@kbn/core",
+    "@kbn/kibana-react-plugin"
   ]
 }

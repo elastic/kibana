@@ -6,28 +6,11 @@
  * Side Public License, v 1.
  */
 
-import type { Datatable, ExpressionFunctionDefinition } from '@kbn/expressions-plugin/common';
-import { ExtendedAnnotationLayerConfigResult } from '../types';
+import { EventAnnotationResultFn } from '../types';
 import { strings } from '../i18n';
 import { EXTENDED_ANNOTATION_LAYER } from '../constants';
 
-export interface EventAnnotationResultArgs {
-  layers?: ExtendedAnnotationLayerConfigResult[];
-  datatable: Datatable;
-}
-
-export interface EventAnnotationResultResult {
-  type: 'event_annotations_result';
-  layers: ExtendedAnnotationLayerConfigResult[];
-  datatable: Datatable;
-}
-
-export function eventAnnotationsResult(): ExpressionFunctionDefinition<
-  'event_annotations_result',
-  null,
-  EventAnnotationResultArgs,
-  EventAnnotationResultResult
-> {
+export function eventAnnotationsResult(): EventAnnotationResultFn {
   return {
     name: 'event_annotations_result',
     aliases: [],

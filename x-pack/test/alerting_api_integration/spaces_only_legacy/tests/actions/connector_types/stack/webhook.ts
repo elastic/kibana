@@ -14,7 +14,7 @@ import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
 import {
   getWebhookServer,
   getHttpsWebhookServer,
-} from '../../../../../common/fixtures/plugins/actions_simulators/server/plugin';
+} from '../../../../../common/plugins/actions_simulators/server/plugin';
 import { createTlsWebhookServer } from '../../../../../common/lib/get_tls_webhook_servers';
 
 // eslint-disable-next-line import/no-default-export

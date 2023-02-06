@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import {
   METRIC_SYSTEM_CPU_PERCENT,
   METRIC_PROCESS_CPU_PERCENT,
-} from '../../../../../../common/elasticsearch_fieldnames';
+} from '../../../../../../common/es_fields/apm';
 import { ChartBase } from '../../../types';
 import { fetchAndTransformMetrics } from '../../../fetch_and_transform_metrics';
 import { APMConfig } from '../../../../..';

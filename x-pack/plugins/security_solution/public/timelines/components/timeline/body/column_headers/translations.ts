@@ -31,10 +31,6 @@ export const SORT_AZ = i18n.translate('xpack.securitySolution.timeline.sortAZLab
   defaultMessage: 'Sort A-Z',
 });
 
-export const SORT_FIELDS = i18n.translate('xpack.securitySolution.timeline.sortFieldsButton', {
-  defaultMessage: 'Sort fields',
-});
-
 export const SORT_ZA = i18n.translate('xpack.securitySolution.timeline.sortZALabel', {
   defaultMessage: 'Sort Z-A',
 });

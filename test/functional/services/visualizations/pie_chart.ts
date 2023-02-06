@@ -178,6 +178,22 @@ export class PieChartService extends FtrService {
     );
   }
 
+  async getPieChartValues(isNewLibrary: boolean = true) {
+    this.log.debug('PieChart.getPieChartValues');
+    if (isNewLibrary) {
+      const slices =
+        (await this.visChart.getEsChartDebugState(partitionVisChartSelector))?.partition?.[0]
+          ?.partitions ?? [];
+      return slices.map((slice) => {
+        return slice.value;
+      });
+    }
+    const chartTypes = await this.find.allByCssSelector('path.slice', this.defaultFindTimeout * 2);
+    return await Promise.all(
+      chartTypes.map(async (chart) => await chart.getAttribute('data-value'))
+    );
+  }
+
   async getPieSliceCount(isNewLibrary: boolean = true) {
     this.log.debug('PieChart.getPieSliceCount');
     if (isNewLibrary) {
@@ -191,10 +207,13 @@ export class PieChartService extends FtrService {
   }
 
   async getSliceCountForAllPies() {
+    this.log.debug('PieChart.getSliceCountForAllPies');
     let pieSlices = 0;
     const charts =
       (await this.visChart.getAllESChartsDebugDataByTestSubj(partitionVisChartSelector)) ?? [];
+    this.log.debug(`Found ${charts.length} charts`);
     for (const chart of charts) {
+      await chart.moveMouseTo();
       const visContainer = await chart.findByCssSelector('.echChartStatus');
       const debugDataString: string | undefined = await visContainer.getAttribute(
         'data-ech-debug-state'

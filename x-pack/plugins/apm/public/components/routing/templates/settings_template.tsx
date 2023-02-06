@@ -6,13 +6,17 @@
  */
 
 import { EuiPageHeaderProps } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import React from 'react';
 import { CoreStart } from '@kbn/core/public';
-import { ApmMainTemplate } from './apm_main_template';
+import { i18n } from '@kbn/i18n';
+import { enableAgentExplorerView } from '@kbn/observability-plugin/public';
+import React from 'react';
+import { useDefaultEnvironment } from '../../../hooks/use_default_environment';
+import { Environment } from '../../../../common/environment_rt';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 import { useApmRouter } from '../../../hooks/use_apm_router';
+import { TechnicalPreviewBadge } from '../../shared/technical_preview_badge';
 import { ApmRouter } from '../apm_route_config';
+import { ApmMainTemplate } from './apm_main_template';
 
 type Tab = NonNullable<EuiPageHeaderProps['tabs']>[0] & {
   key:
@@ -22,7 +26,8 @@ type Tab = NonNullable<EuiPageHeaderProps['tabs']>[0] & {
     | 'apm-indices'
     | 'custom-links'
     | 'schema'
-    | 'general-settings';
+    | 'general-settings'
+    | 'agent-explorer';
   hidden?: boolean;
 };
 
@@ -34,7 +39,9 @@ interface Props {
 export function SettingsTemplate({ children, selectedTab }: Props) {
   const { core } = useApmPluginContext();
   const router = useApmRouter();
-  const tabs = getTabs({ core, selectedTab, router });
+  const defaultEnvironment = useDefaultEnvironment();
+
+  const tabs = getTabs({ core, selectedTab, router, defaultEnvironment });
 
   return (
     <ApmMainTemplate
@@ -55,12 +62,19 @@ function getTabs({
   core,
   selectedTab,
   router,
+  defaultEnvironment,
 }: {
   core: CoreStart;
   selectedTab: Tab['key'];
   router: ApmRouter;
+  defaultEnvironment: Environment;
 }) {
   const canReadMlJobs = !!core.application.capabilities.ml?.canGetJobs;
+
+  const agentExplorerEnabled = core.uiSettings.get<boolean>(
+    enableAgentExplorerView,
+    false
+  );
 
   const tabs: Tab[] = [
     {
@@ -76,6 +90,22 @@ function getTabs({
         defaultMessage: 'Agent Configuration',
       }),
       href: router.link('/settings/agent-configuration'),
+    },
+    {
+      key: 'agent-explorer',
+      label: i18n.translate('xpack.apm.settings.agentExplorer', {
+        defaultMessage: 'Agent Explorer',
+      }),
+      href: router.link('/settings/agent-explorer', {
+        query: {
+          environment: defaultEnvironment,
+          kuery: '',
+          agentLanguage: '',
+          serviceName: '',
+        },
+      }),
+      append: <TechnicalPreviewBadge icon="beaker" />,
+      hidden: !agentExplorerEnabled,
     },
     {
       key: 'agent-keys',
@@ -117,9 +147,10 @@ function getTabs({
 
   return tabs
     .filter((t) => !t.hidden)
-    .map(({ href, key, label }) => ({
+    .map(({ href, key, label, append }) => ({
       href,
       label,
+      append,
       isSelected: key === selectedTab,
     }));
 }

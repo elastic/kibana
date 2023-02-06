@@ -1,6 +1,6 @@
 post:
   summary: Package policy - Upgrade Dry run
-  operationId: upgrade-package-policy
+  operationId: upgrade-package-policy-dry-run
   requestBody:
     content:
       application/json:

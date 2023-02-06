@@ -15,7 +15,7 @@ export const kpiUserAuthenticationsAreaLensAttributes: LensAttributes = {
   state: {
     visualization: {
       axisTitlesVisibilitySettings: {
-        x: true,
+        x: false,
         yLeft: false,
         yRight: true,
       },

@@ -7,7 +7,7 @@
  */
 
 import Handlebars from '@kbn/handlebars';
-import { encode, RisonValue } from 'rison-node';
+import { encode } from '@kbn/rison';
 import dateMath from '@kbn/datemath';
 import moment, { Moment } from 'moment';
 import numeral from '@elastic/numeral';
@@ -44,7 +44,7 @@ function createSerializationHelper(
 handlebars.registerHelper('json', createSerializationHelper('json', JSON.stringify));
 handlebars.registerHelper(
   'rison',
-  createSerializationHelper('rison', (v) => encode(v as RisonValue))
+  createSerializationHelper('rison', (v) => encode(v))
 );
 
 handlebars.registerHelper('date', (...args) => {

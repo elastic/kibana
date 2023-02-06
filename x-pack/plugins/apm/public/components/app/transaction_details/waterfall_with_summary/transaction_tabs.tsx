@@ -8,11 +8,17 @@
 import { EuiSpacer, EuiTab, EuiTabs, EuiLoadingContent } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { LogStream } from '@kbn/infra-plugin/public';
-import React from 'react';
+import React, { useMemo } from 'react';
 import { Transaction } from '../../../../../typings/es_schemas/ui/transaction';
 import { TransactionMetadata } from '../../../shared/metadata_table/transaction_metadata';
 import { WaterfallContainer } from './waterfall_container';
 import { IWaterfall } from './waterfall_container/waterfall/waterfall_helpers/waterfall_helpers';
+
+export enum TransactionTab {
+  timeline = 'timeline',
+  metadata = 'metadata',
+  logs = 'logs',
+}
 
 interface Props {
   transaction?: Transaction;
@@ -30,27 +36,81 @@ export function TransactionTabs({
   transaction,
   waterfall,
   isLoading,
-  detailTab,
+  detailTab = TransactionTab.timeline,
   waterfallItemId,
   serviceName,
   onTabClick,
   showCriticalPath,
   onShowCriticalPathChange,
 }: Props) {
-  const tabs = [timelineTab, metadataTab, logsTab];
-  const currentTab = tabs.find(({ key }) => key === detailTab) ?? timelineTab;
+  const tabs: Record<
+    TransactionTab,
+    { label: string; component: React.ReactNode }
+  > = useMemo(
+    () => ({
+      [TransactionTab.timeline]: {
+        label: i18n.translate('xpack.apm.propertiesTable.tabs.timelineLabel', {
+          defaultMessage: 'Timeline',
+        }),
+        component: (
+          <TimelineTabContent
+            waterfallItemId={waterfallItemId}
+            serviceName={serviceName}
+            waterfall={waterfall}
+            showCriticalPath={showCriticalPath}
+            onShowCriticalPathChange={onShowCriticalPathChange}
+          />
+        ),
+      },
+      [TransactionTab.metadata]: {
+        label: i18n.translate('xpack.apm.propertiesTable.tabs.metadataLabel', {
+          defaultMessage: 'Metadata',
+        }),
+        component: (
+          <>{transaction && <MetadataTabContent transaction={transaction} />}</>
+        ),
+      },
+      [TransactionTab.logs]: {
+        label: i18n.translate('xpack.apm.propertiesTable.tabs.logsLabel', {
+          defaultMessage: 'Logs',
+        }),
+        component: (
+          <>
+            {transaction && (
+              <LogsTabContent
+                timestamp={transaction.timestamp.us}
+                duration={transaction.transaction.duration.us}
+                traceId={transaction.trace.id}
+              />
+            )}
+          </>
+        ),
+      },
+    }),
+    [
+      onShowCriticalPathChange,
+      serviceName,
+      showCriticalPath,
+      transaction,
+      waterfall,
+      waterfallItemId,
+    ]
+  );
+
+  const currentTab = tabs[detailTab];
   const TabContent = currentTab.component;
 
   return (
     <>
       <EuiTabs>
-        {tabs.map(({ key, label }) => {
+        {(Object.keys(TransactionTab) as TransactionTab[]).map((key) => {
+          const { label } = tabs[key];
           return (
             <EuiTab
               onClick={() => {
                 onTabClick(key);
               }}
-              isSelected={currentTab.key === key}
+              isSelected={detailTab === key}
               key={key}
             >
               {label}
@@ -63,48 +123,11 @@ export function TransactionTabs({
       {isLoading || !transaction ? (
         <EuiLoadingContent lines={3} data-test-sub="loading-content" />
       ) : (
-        <TabContent
-          waterfallItemId={waterfallItemId}
-          serviceName={serviceName}
-          waterfall={waterfall}
-          transaction={transaction}
-          showCriticalPath={showCriticalPath}
-          onShowCriticalPathChange={onShowCriticalPathChange}
-        />
+        <> {TabContent}</>
       )}
     </>
   );
 }
-
-export enum TransactionTab {
-  timeline = 'timeline',
-  metadata = 'metadata',
-  logs = 'logs',
-}
-
-const timelineTab = {
-  key: TransactionTab.timeline,
-  label: i18n.translate('xpack.apm.propertiesTable.tabs.timelineLabel', {
-    defaultMessage: 'Timeline',
-  }),
-  component: TimelineTabContent,
-};
-
-const metadataTab = {
-  key: TransactionTab.metadata,
-  label: i18n.translate('xpack.apm.propertiesTable.tabs.metadataLabel', {
-    defaultMessage: 'Metadata',
-  }),
-  component: MetadataTabContent,
-};
-
-const logsTab = {
-  key: TransactionTab.logs,
-  label: i18n.translate('xpack.apm.propertiesTable.tabs.logsLabel', {
-    defaultMessage: 'Logs',
-  }),
-  component: LogsTabContent,
-};
 
 function TimelineTabContent({
   waterfall,
@@ -131,21 +154,27 @@ function TimelineTabContent({
 }
 
 function MetadataTabContent({ transaction }: { transaction: Transaction }) {
-  return <TransactionMetadata transaction={transaction} />;
+  return <TransactionMetadata transactionId={transaction.transaction.id} />;
 }
 
-function LogsTabContent({ transaction }: { transaction: Transaction }) {
-  const startTimestamp = Math.floor(transaction.timestamp.us / 1000);
-  const endTimestamp = Math.ceil(
-    startTimestamp + transaction.transaction.duration.us / 1000
-  );
+function LogsTabContent({
+  timestamp,
+  duration,
+  traceId,
+}: {
+  timestamp: number;
+  duration: number;
+  traceId: string;
+}) {
+  const startTimestamp = Math.floor(timestamp / 1000);
+  const endTimestamp = Math.ceil(startTimestamp + duration / 1000);
   const framePaddingMs = 1000 * 60 * 60 * 24; // 24 hours
   return (
     <LogStream
       logView={{ type: 'log-view-reference', logViewId: 'default' }}
       startTimestamp={startTimestamp - framePaddingMs}
       endTimestamp={endTimestamp + framePaddingMs}
-      query={`trace.id:"${transaction.trace.id}" OR (not trace.id:* AND "${transaction.trace.id}")`}
+      query={`trace.id:"${traceId}" OR (not trace.id:* AND "${traceId}")`}
       height={640}
       columns={[
         { type: 'timestamp' },

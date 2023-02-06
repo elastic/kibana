@@ -11,13 +11,7 @@ import classNames from 'classnames';
 import { debounce, isEmpty } from 'lodash';
 import React, { useCallback, useEffect, useMemo, useState, useRef } from 'react';
 
-import {
-  EuiFilterButton,
-  EuiFilterGroup,
-  EuiPopover,
-  EuiTextColor,
-  useResizeObserver,
-} from '@elastic/eui';
+import { EuiFilterButton, EuiFilterGroup, EuiPopover, useResizeObserver } from '@elastic/eui';
 import { useReduxEmbeddableContext } from '@kbn/presentation-util-plugin/public';
 
 import { OptionsListStrings } from './options_list_strings';
@@ -46,20 +40,27 @@ export const OptionsListControl = ({ typeaheadSubject }: { typeaheadSubject: Sub
   const validSelections = select((state) => state.componentState.validSelections);
 
   const selectedOptions = select((state) => state.explicitInput.selectedOptions);
+  const existsSelected = select((state) => state.explicitInput.existsSelected);
   const controlStyle = select((state) => state.explicitInput.controlStyle);
   const singleSelect = select((state) => state.explicitInput.singleSelect);
-  const id = select((state) => state.explicitInput.id);
+  const fieldName = select((state) => state.explicitInput.fieldName);
   const exclude = select((state) => state.explicitInput.exclude);
+  const id = select((state) => state.explicitInput.id);
+
+  const placeholder = select((state) => state.explicitInput.placeholder);
 
   const loading = select((state) => state.output.loading);
 
   // debounce loading state so loading doesn't flash when user types
-  const [buttonLoading, setButtonLoading] = useState(true);
-  const debounceSetButtonLoading = useMemo(
-    () => debounce((latestLoading: boolean) => setButtonLoading(latestLoading), 100),
+  const [debouncedLoading, setDebouncedLoading] = useState(true);
+  const debounceSetLoading = useMemo(
+    () =>
+      debounce((latestLoading: boolean) => {
+        setDebouncedLoading(latestLoading);
+      }, 100),
     []
   );
-  useEffect(() => debounceSetButtonLoading(loading ?? false), [loading, debounceSetButtonLoading]);
+  useEffect(() => debounceSetLoading(loading ?? false), [loading, debounceSetLoading]);
 
   // remove all other selections if this control is single select
   useEffect(() => {
@@ -83,28 +84,40 @@ export const OptionsListControl = ({ typeaheadSubject }: { typeaheadSubject: Sub
       selectionDisplayNode: (
         <>
           {exclude && (
-            <EuiTextColor color="danger">
-              <b>{OptionsListStrings.control.getNegate()}</b>{' '}
-            </EuiTextColor>
+            <>
+              <span className="optionsList__negateLabel">
+                {existsSelected
+                  ? OptionsListStrings.control.getExcludeExists()
+                  : OptionsListStrings.control.getNegate()}
+              </span>{' '}
+            </>
           )}
-          {validSelections && (
-            <span>{validSelections?.join(OptionsListStrings.control.getSeparator())}</span>
-          )}
-          {invalidSelections && (
-            <span className="optionsList__filterInvalid">
-              {invalidSelections.join(OptionsListStrings.control.getSeparator())}
+          {existsSelected ? (
+            <span className={`optionsList__existsFilter`}>
+              {OptionsListStrings.controlAndPopover.getExists(+Boolean(exclude))}
             </span>
+          ) : (
+            <>
+              {validSelections && (
+                <span>{validSelections.join(OptionsListStrings.control.getSeparator())}</span>
+              )}
+              {invalidSelections && (
+                <span className="optionsList__filterInvalid">
+                  {invalidSelections.join(OptionsListStrings.control.getSeparator())}
+                </span>
+              )}
+            </>
           )}
         </>
       ),
     };
-  }, [exclude, validSelections, invalidSelections]);
+  }, [exclude, existsSelected, validSelections, invalidSelections]);
 
   const button = (
     <div className="optionsList--filterBtnWrapper" ref={resizeRef}>
       <EuiFilterButton
         iconType="arrowDown"
-        isLoading={buttonLoading}
+        isLoading={debouncedLoading}
         className={classNames('optionsList--filterBtn', {
           'optionsList--filterBtnSingle': controlStyle !== 'twoLine',
           'optionsList--filterBtnPlaceholder': !hasSelections,
@@ -115,7 +128,9 @@ export const OptionsListControl = ({ typeaheadSubject }: { typeaheadSubject: Sub
         numActiveFilters={validSelectionsCount}
         hasActiveFilters={Boolean(validSelectionsCount)}
       >
-        {hasSelections ? selectionDisplayNode : OptionsListStrings.control.getPlaceholder()}
+        {hasSelections || existsSelected
+          ? selectionDisplayNode
+          : placeholder ?? OptionsListStrings.control.getPlaceholder()}
       </EuiFilterButton>
     </div>
   );
@@ -136,8 +151,13 @@ export const OptionsListControl = ({ typeaheadSubject }: { typeaheadSubject: Sub
         className="optionsList__popoverOverride"
         closePopover={() => setIsPopoverOpen(false)}
         anchorClassName="optionsList__anchorOverride"
+        aria-label={OptionsListStrings.popover.getAriaLabel(fieldName)}
       >
-        <OptionsListPopover width={dimensions.width} updateSearchString={updateSearchString} />
+        <OptionsListPopover
+          width={dimensions.width}
+          isLoading={debouncedLoading}
+          updateSearchString={updateSearchString}
+        />
       </EuiPopover>
     </EuiFilterGroup>
   );

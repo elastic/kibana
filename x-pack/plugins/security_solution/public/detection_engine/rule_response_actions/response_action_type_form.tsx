@@ -16,21 +16,28 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { get } from 'lodash';
+import styled from 'styled-components';
+
 import { RESPONSE_ACTION_TYPES } from '../../../common/detection_engine/rule_response_actions/schemas';
-import type { ResponseActionValidatorRef } from './response_actions_form';
 import { OsqueryResponseAction } from './osquery/osquery_response_action';
 import { getActionDetails } from './constants';
 import { useFormData } from '../../shared_imports';
 import type { ArrayItem } from '../../shared_imports';
 
-interface IProps {
+interface ResponseActionTypeFormProps {
   item: ArrayItem;
   onDeleteAction: (id: number) => void;
-  formRef: React.RefObject<ResponseActionValidatorRef>;
 }
 
-export const ResponseActionTypeForm = React.memo((props: IProps) => {
-  const { item, onDeleteAction, formRef } = props;
+const StyledEuiAccordion = styled(EuiAccordion)`
+  background: ${({ theme }) => theme.eui.euiColorLightestShade};
+
+  .euiAccordion__buttonContent {
+    padding: ${({ theme }) => theme.eui.euiSizeM};
+  }
+`;
+
+const ResponseActionTypeFormComponent = ({ item, onDeleteAction }: ResponseActionTypeFormProps) => {
   const [_isOpen, setIsOpen] = useState(true);
 
   const [data] = useFormData();
@@ -38,11 +45,11 @@ export const ResponseActionTypeForm = React.memo((props: IProps) => {
 
   const getResponseActionTypeForm = useCallback(() => {
     if (action?.actionTypeId === RESPONSE_ACTION_TYPES.OSQUERY) {
-      return <OsqueryResponseAction item={item} formRef={formRef} />;
+      return <OsqueryResponseAction item={item} />;
     }
     // Place for other ResponseActionTypes
     return null;
-  }, [action?.actionTypeId, formRef, item]);
+  }, [action?.actionTypeId, item]);
 
   const handleDelete = useCallback(() => {
     onDeleteAction(item.id);
@@ -51,16 +58,12 @@ export const ResponseActionTypeForm = React.memo((props: IProps) => {
   const renderButtonContent = useMemo(() => {
     const { logo, name } = getActionDetails(action?.actionTypeId);
     return (
-      <EuiFlexGroup gutterSize="l" alignItems="center">
+      <EuiFlexGroup gutterSize="s" alignItems="center">
         <EuiFlexItem grow={false}>
           <EuiIcon type={logo} size="m" />
         </EuiFlexItem>
         <EuiFlexItem>
-          <EuiText>
-            <EuiFlexGroup gutterSize="s">
-              <EuiFlexItem grow={false}>{name}</EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiText>
+          <EuiText>{name}</EuiText>
         </EuiFlexItem>
       </EuiFlexGroup>
     );
@@ -69,6 +72,7 @@ export const ResponseActionTypeForm = React.memo((props: IProps) => {
   const renderExtraContent = useMemo(() => {
     return (
       <EuiButtonIcon
+        data-test-subj="remove-response-action"
         iconType="minusInCircle"
         color="danger"
         className="actAccordionActionForm__extraAction"
@@ -82,22 +86,23 @@ export const ResponseActionTypeForm = React.memo((props: IProps) => {
       />
     );
   }, [handleDelete]);
+
   return (
-    <EuiAccordion
+    <StyledEuiAccordion
       initialIsOpen={true}
       key={item.id}
       id={item.id.toString()}
       onToggle={setIsOpen}
       paddingSize="l"
-      className="actAccordionActionForm"
-      buttonContentClassName="actAccordionActionForm__button"
       data-test-subj={`alertActionAccordion`}
       buttonContent={renderButtonContent}
       extraAction={renderExtraContent}
     >
       {getResponseActionTypeForm()}
-    </EuiAccordion>
+    </StyledEuiAccordion>
   );
-});
+};
 
-ResponseActionTypeForm.displayName = 'ResponseActionTypeForm';
+ResponseActionTypeFormComponent.displayName = 'ResponseActionTypeForm';
+
+export const ResponseActionTypeForm = React.memo(ResponseActionTypeFormComponent);

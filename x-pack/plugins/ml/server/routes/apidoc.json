@@ -173,9 +173,11 @@
     "GetTrainedModelsNodesOverview",
     "GetTrainedModelPipelines",
     "StartTrainedModelDeployment",
+    "UpdateTrainedModelDeployment",
     "StopTrainedModelDeployment",
     "PutTrainedModel",
     "DeleteTrainedModel",
+    "SimulateIngestPipeline",
     "InferTrainedModelDeployment",
 
     "Alerting",

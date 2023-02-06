@@ -5,143 +5,178 @@
  * 2.0.
  */
 
-import { AggregationsSumAggregate } from '@elastic/elasticsearch/lib/api/types';
+import {
+  AggregationsAggregationContainer,
+  AggregationsDateRangeAggregate,
+  AggregationsSumAggregate,
+  AggregationsValueCountAggregate,
+  MsearchMultisearchBody,
+} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { ElasticsearchClient } from '@kbn/core/server';
 import { assertNever } from '@kbn/std';
+import { occurrencesBudgetingMethodSchema, timeslicesBudgetingMethodSchema } from '@kbn/slo-schema';
+
 import { SLO_DESTINATION_INDEX_NAME } from '../../assets/constants';
 import { toDateRange } from '../../domain/services/date_range';
 import { InternalQueryError } from '../../errors';
-import { Duration, IndicatorData, SLO } from '../../types/models';
-import { calendarAlignedTimeWindowSchema, rollingTimeWindowSchema } from '../../types/schema';
-import {
-  occurencesBudgetingMethodSchema,
-  timeslicesBudgetingMethodSchema,
-} from '../../types/schema';
+import { DateRange, Duration, IndicatorData, SLO } from '../../domain/models';
 
 export interface SLIClient {
-  fetchCurrentSLIData(slo: SLO): Promise<IndicatorData>;
+  fetchSLIDataFrom(
+    slo: SLO,
+    lookbackWindows: LookbackWindow[]
+  ): Promise<Record<WindowName, IndicatorData>>;
 }
 
-type AggKey = 'good' | 'total';
+type WindowName = string;
+
+interface LookbackWindow {
+  name: WindowName;
+  duration: Duration;
+}
+
+type EsAggregations = Record<WindowName, AggregationsDateRangeAggregate>;
 
 export class DefaultSLIClient implements SLIClient {
   constructor(private esClient: ElasticsearchClient) {}
 
-  async fetchCurrentSLIData(slo: SLO): Promise<IndicatorData> {
-    if (occurencesBudgetingMethodSchema.is(slo.budgeting_method)) {
-      const result = await this.esClient.search<unknown, Record<AggKey, AggregationsSumAggregate>>({
-        ...commonQuery(slo),
-        aggs: {
-          good: { sum: { field: 'slo.numerator' } },
-          total: { sum: { field: 'slo.denominator' } },
-        },
+  async fetchSLIDataFrom(
+    slo: SLO,
+    lookbackWindows: LookbackWindow[]
+  ): Promise<Record<WindowName, IndicatorData>> {
+    const sortedLookbackWindows = [...lookbackWindows].sort((a, b) =>
+      a.duration.isShorterThan(b.duration) ? 1 : -1
+    );
+    const longestLookbackWindow = sortedLookbackWindows[0];
+    const longestDateRange = toDateRange({
+      duration: longestLookbackWindow.duration,
+      isRolling: true,
+    });
+
+    if (occurrencesBudgetingMethodSchema.is(slo.budgetingMethod)) {
+      const result = await this.esClient.search<unknown, EsAggregations>({
+        ...commonQuery(slo, longestDateRange),
+        index: `${SLO_DESTINATION_INDEX_NAME}*`,
+        aggs: toLookbackWindowsAggregationsQuery(sortedLookbackWindows),
       });
 
-      return handleResult(result.aggregations);
+      return handleWindowedResult(result.aggregations, lookbackWindows);
     }
 
-    if (timeslicesBudgetingMethodSchema.is(slo.budgeting_method)) {
-      const result = await this.esClient.search<unknown, Record<AggKey, AggregationsSumAggregate>>({
-        ...commonQuery(slo),
-        aggs: {
-          slices: {
-            date_histogram: {
-              field: '@timestamp',
-              fixed_interval: toInterval(slo.objective.timeslice_window),
-            },
-            aggs: {
-              good: { sum: { field: 'slo.numerator' } },
-              total: { sum: { field: 'slo.denominator' } },
-              good_slice: {
-                bucket_script: {
-                  buckets_path: {
-                    good: 'good',
-                    total: 'total',
-                  },
-                  script: `params.good / params.total >= ${slo.objective.timeslice_target} ? 1 : 0`,
-                },
-              },
-              count_slice: {
-                bucket_script: {
-                  buckets_path: {},
-                  script: '1',
-                },
-              },
-            },
-          },
-          good: {
-            sum_bucket: {
-              buckets_path: 'slices>good_slice.value',
-            },
-          },
-          total: {
-            sum_bucket: {
-              buckets_path: 'slices>count_slice.value',
-            },
-          },
-        },
+    if (timeslicesBudgetingMethodSchema.is(slo.budgetingMethod)) {
+      const result = await this.esClient.search<unknown, EsAggregations>({
+        ...commonQuery(slo, longestDateRange),
+        index: `${SLO_DESTINATION_INDEX_NAME}*`,
+        aggs: toLookbackWindowsSlicedAggregationsQuery(slo, sortedLookbackWindows),
       });
 
-      return handleResult(result.aggregations);
+      return handleWindowedResult(result.aggregations, lookbackWindows);
     }
 
-    assertNever(slo.budgeting_method);
+    assertNever(slo.budgetingMethod);
   }
 }
 
-function fromSLOTimeWindowToEsRange(slo: SLO): { gte: string; lt: string } {
-  if (calendarAlignedTimeWindowSchema.is(slo.time_window)) {
-    const dateRange = toDateRange(slo.time_window);
-
-    return {
-      gte: `${dateRange.from.toISOString()}`,
-      lt: `${dateRange.to.toISOString()}`,
-    };
-  }
-
-  if (rollingTimeWindowSchema.is(slo.time_window)) {
-    return {
-      gte: `now-${slo.time_window.duration.value}${slo.time_window.duration.unit}/m`,
-      lt: `now/m`,
-    };
-  }
-
-  assertNever(slo.time_window);
-}
-
-function commonQuery(slo: SLO) {
+function commonQuery(
+  slo: SLO,
+  dateRange: DateRange
+): Pick<MsearchMultisearchBody, 'size' | 'query'> {
   return {
     size: 0,
-    index: `${SLO_DESTINATION_INDEX_NAME}*`,
     query: {
       bool: {
         filter: [
           { term: { 'slo.id': slo.id } },
           { term: { 'slo.revision': slo.revision } },
-          { range: { '@timestamp': fromSLOTimeWindowToEsRange(slo) } },
+          {
+            range: {
+              '@timestamp': { gte: dateRange.from.toISOString(), lt: dateRange.to.toISOString() },
+            },
+          },
         ],
       },
     },
   };
 }
 
-function handleResult(
-  aggregations: Record<AggKey, AggregationsSumAggregate> | undefined
-): IndicatorData {
-  const good = aggregations?.good;
-  const total = aggregations?.total;
-  if (good === undefined || good.value === null || total === undefined || total.value === null) {
-    throw new InternalQueryError('SLI aggregation query');
-  }
-
-  return {
-    good: good.value,
-    total: total.value,
-  };
+function toLookbackWindowsAggregationsQuery(sortedLookbackWindow: LookbackWindow[]) {
+  return sortedLookbackWindow.reduce<Record<string, AggregationsAggregationContainer>>(
+    (acc, lookbackWindow) => ({
+      ...acc,
+      [lookbackWindow.name]: {
+        date_range: {
+          field: '@timestamp',
+          ranges: [{ from: `now-${lookbackWindow.duration.format()}/m`, to: 'now/m' }],
+        },
+        aggs: {
+          good: { sum: { field: 'slo.numerator' } },
+          total: { sum: { field: 'slo.denominator' } },
+        },
+      },
+    }),
+    {}
+  );
 }
 
-function toInterval(duration: Duration | undefined): string {
-  if (duration === undefined) return '1m';
+function toLookbackWindowsSlicedAggregationsQuery(slo: SLO, lookbackWindows: LookbackWindow[]) {
+  return lookbackWindows.reduce<Record<string, AggregationsAggregationContainer>>(
+    (acc, lookbackWindow) => ({
+      ...acc,
+      [lookbackWindow.name]: {
+        date_range: {
+          field: '@timestamp',
+          ranges: [
+            {
+              from: `now-${lookbackWindow.duration.format()}/m`,
+              to: 'now/m',
+            },
+          ],
+        },
+        aggs: {
+          good: {
+            sum: {
+              field: 'slo.isGoodSlice',
+            },
+          },
+          total: {
+            value_count: {
+              field: 'slo.isGoodSlice',
+            },
+          },
+        },
+      },
+    }),
+    {}
+  );
+}
 
-  return `${duration.value}${duration.unit}`;
+function handleWindowedResult(
+  aggregations: Record<WindowName, AggregationsDateRangeAggregate> | undefined,
+  lookbackWindows: LookbackWindow[]
+): Record<WindowName, IndicatorData> {
+  if (aggregations === undefined) {
+    throw new InternalQueryError('Invalid aggregation response');
+  }
+
+  const indicatorDataPerLookbackWindow: Record<WindowName, IndicatorData> = {};
+  lookbackWindows.forEach((lookbackWindow) => {
+    const windowAggBuckets = aggregations[lookbackWindow.name]?.buckets;
+    if (!Array.isArray(windowAggBuckets) || windowAggBuckets.length === 0) {
+      throw new InternalQueryError('Invalid aggregation bucket response');
+    }
+    const bucket = windowAggBuckets[0];
+    const good = (bucket.good as AggregationsSumAggregate).value;
+    const total = (bucket.total as AggregationsValueCountAggregate).value;
+    if (good === null || total === null) {
+      throw new InternalQueryError('Invalid aggregation sum bucket response');
+    }
+
+    indicatorDataPerLookbackWindow[lookbackWindow.name] = {
+      good,
+      total,
+      dateRange: { from: new Date(bucket.from_as_string!), to: new Date(bucket.to_as_string!) },
+    };
+  });
+
+  return indicatorDataPerLookbackWindow;
 }

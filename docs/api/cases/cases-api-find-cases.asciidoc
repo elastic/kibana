@@ -6,6 +6,12 @@
 
 Retrieves a paginated subset of cases.
 
+[NOTE]
+====
+For the most up-to-date API details, refer to the
+{kib-repo}/tree/{branch}/x-pack/plugins/cases/docs/openapi[open API specification]. For a preview, check out <<case-apis>>.
+====
+
 === {api-request-title}
 
 `GET <kibana host>:<port>/api/cases/_find`
@@ -26,6 +32,12 @@ You must have `read` privileges for the *Cases* feature in the *Management*,
 default space is used.
 
 === {api-query-parms-title}
+
+`assignees`::
+(Optional, string or array of strings) Filters the returned cases by assignees.
+Valid values are `none` or unique identifiers for the user profiles. These
+identifiers can be found by using the
+{ref}/security-api-suggest-user-profile.html[suggest user profile API].
 
 `defaultSearchOperator`::
 (Optional, string) The default operator to use for the `simple_query_string`.

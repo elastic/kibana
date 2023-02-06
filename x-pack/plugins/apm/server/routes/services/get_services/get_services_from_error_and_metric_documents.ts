@@ -12,7 +12,7 @@ import {
   AGENT_NAME,
   SERVICE_ENVIRONMENT,
   SERVICE_NAME,
-} from '../../../../common/elasticsearch_fieldnames';
+} from '../../../../common/es_fields/apm';
 import { environmentQuery } from '../../../../common/utils/environment_query';
 import { serviceGroupQuery } from '../../../lib/service_group_query';
 import { ServiceGroup } from '../../../../common/service_groups';
@@ -87,15 +87,18 @@ export async function getServicesFromErrorAndMetricDocuments({
     }
   );
 
-  return (
-    response.aggregations?.sample.services.buckets.map((bucket) => {
-      return {
-        serviceName: bucket.key as string,
-        environments: bucket.environments.buckets.map(
-          (envBucket) => envBucket.key as string
-        ),
-        agentName: bucket.latest.top[0].metrics[AGENT_NAME] as AgentName,
-      };
-    }) ?? []
-  );
+  return {
+    services:
+      response.aggregations?.sample.services.buckets.map((bucket) => {
+        return {
+          serviceName: bucket.key as string,
+          environments: bucket.environments.buckets.map(
+            (envBucket) => envBucket.key as string
+          ),
+          agentName: bucket.latest.top[0].metrics[AGENT_NAME] as AgentName,
+        };
+      }) ?? [],
+    maxServiceCountExceeded:
+      (response.aggregations?.sample.services.sum_other_doc_count ?? 0) > 0,
+  };
 }

@@ -11,14 +11,14 @@ import { i18n } from '@kbn/i18n';
 export const EMPTY_VIEWER_STATE_EMPTY_TITLE = i18n.translate(
   'exceptionList-components.empty.viewer.state.empty.title',
   {
-    defaultMessage: 'Add exceptions to this rule',
+    defaultMessage: 'Add exceptions to this list',
   }
 );
 
 export const EMPTY_VIEWER_STATE_EMPTY_BODY = i18n.translate(
   'exceptionList-components.empty.viewer.state.empty.body',
   {
-    defaultMessage: 'There is no exception in your rule. Create your first rule exception.',
+    defaultMessage: 'There is no exception in your list. Create your first exception.',
   }
 );
 export const EMPTY_VIEWER_STATE_EMPTY_SEARCH_TITLE = i18n.translate(
@@ -137,6 +137,13 @@ export const EXCEPTION_LIST_HEADER_NAME_TEXTBOX = i18n.translate(
 export const EXCEPTION_LIST_HEADER_DESCRIPTION_TEXTBOX = i18n.translate(
   'exceptionList-components.exception_list_header_description_textbox',
   {
-    defaultMessage: 'Description',
+    defaultMessage: 'Description (optional)',
+  }
+);
+
+export const LIST_NAME_REQUIRED_ERROR = i18n.translate(
+  'exceptionList-components.exception_list_header_description_textboxexceptionList-components.exception_list_header_name_required_eror',
+  {
+    defaultMessage: 'List name cannot be empty',
   }
 );

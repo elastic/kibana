@@ -25,10 +25,11 @@ import {
   Wrapper,
   ChartWrapper,
 } from './common';
-import { VisualizationActions, HISTOGRAM_ACTIONS_BUTTON_CLASS } from '../visualization_actions';
+import { VisualizationActions } from '../visualization_actions';
 import type { VisualizationActionsProps } from '../visualization_actions/types';
 
 import { HoverVisibilityContainer } from '../hover_visibility_container';
+import { VISUALIZATION_ACTIONS_BUTTON_CLASS } from '../visualization_actions/utils';
 
 // custom series styles: https://ela.st/areachart-styling
 const getSeriesLineStyle = (): RecursivePartial<AreaSeriesStyle> => {
@@ -155,7 +156,7 @@ export const AreaChartComponent: React.FC<AreaChartComponentProps> = ({
 
   return (
     <Wrapper>
-      <HoverVisibilityContainer targetClassNames={[HISTOGRAM_ACTIONS_BUTTON_CLASS]}>
+      <HoverVisibilityContainer targetClassNames={[VISUALIZATION_ACTIONS_BUTTON_CLASS]}>
         {isValidSeriesExist && areaChart && (
           <ChartWrapper gutterSize="none">
             <EuiFlexItem grow={true}>

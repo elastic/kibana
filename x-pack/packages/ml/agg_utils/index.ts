@@ -5,9 +5,11 @@
  * 2.0.
  */
 
+export { RANDOM_SAMPLER_SEED } from './src/constants';
 export { buildSamplerAggregation } from './src/build_sampler_aggregation';
 export { fetchAggIntervals } from './src/fetch_agg_intervals';
 export { fetchHistogramsForFields } from './src/fetch_histograms_for_fields';
+export { getSampleProbability } from './src/get_sample_probability';
 export { getSamplerAggregationsResponsePath } from './src/get_sampler_aggregations_response_path';
 export { numberValidator } from './src/validate_number';
 

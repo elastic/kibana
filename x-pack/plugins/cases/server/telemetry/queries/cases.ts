@@ -10,6 +10,7 @@ import {
   CASE_SAVED_OBJECT,
   CASE_USER_ACTION_SAVED_OBJECT,
 } from '../../../common/constants';
+import { ESCaseStatus } from '../../services/cases/types';
 import type { ESCaseAttributes } from '../../services/cases/types';
 import { OWNERS } from '../constants';
 import type {
@@ -169,9 +170,9 @@ export const getCasesTelemetryData = async ({
       total: casesRes.total,
       ...getCountsFromBuckets(aggregationsBuckets.counts),
       status: {
-        open: findValueInBuckets(aggregationsBuckets.status, 'open'),
-        inProgress: findValueInBuckets(aggregationsBuckets.status, 'in-progress'),
-        closed: findValueInBuckets(aggregationsBuckets.status, 'closed'),
+        open: findValueInBuckets(aggregationsBuckets.status, ESCaseStatus.OPEN),
+        inProgress: findValueInBuckets(aggregationsBuckets.status, ESCaseStatus.IN_PROGRESS),
+        closed: findValueInBuckets(aggregationsBuckets.status, ESCaseStatus.CLOSED),
       },
       syncAlertsOn: findValueInBuckets(aggregationsBuckets.syncAlerts, 1),
       syncAlertsOff: findValueInBuckets(aggregationsBuckets.syncAlerts, 0),

@@ -11,6 +11,8 @@ import type { Logger } from '@kbn/logging';
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
+import type { QUERY_RULE_TYPE_ID, SAVED_QUERY_RULE_TYPE_ID } from '@kbn/securitysolution-rules';
+
 import type { RuleExecutorOptions, RuleType } from '@kbn/alerting-plugin/server';
 import type {
   AlertInstanceContext,
@@ -23,6 +25,7 @@ import type {
   PersistenceServices,
   IRuleDataClient,
   IRuleDataReader,
+  SuppressedAlertService,
 } from '@kbn/rule-registry-plugin/server';
 import type { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
 
@@ -39,6 +42,7 @@ import type {
 import type { ExperimentalFeatures } from '../../../../common/experimental_features';
 import type { ITelemetryEventsSender } from '../../telemetry/sender';
 import type { IRuleExecutionLogForExecutors, IRuleExecutionLogService } from '../rule_monitoring';
+import type { RefreshTypes } from '../types';
 
 export interface SecurityAlertTypeReturnValue<TState extends RuleTypeState> {
   bulkCreateTimes: string[];
@@ -76,6 +80,9 @@ export interface RunOpts<TParams extends RuleParams> {
   aggregatableTimestampField: string;
   unprocessedExceptions: ExceptionListItemSchema[];
   exceptionFilter: Filter | undefined;
+  alertTimestampOverride: Date | undefined;
+  alertWithSuppression: SuppressedAlertService;
+  refreshOnIndexingAlerts: RefreshTypes;
 }
 
 export type SecurityAlertType<
@@ -136,4 +143,7 @@ export interface CreateQueryRuleAdditionalOptions {
 
 export interface CreateQueryRuleOptions
   extends CreateRuleOptions,
-    CreateQueryRuleAdditionalOptions {}
+    CreateQueryRuleAdditionalOptions {
+  id: typeof QUERY_RULE_TYPE_ID | typeof SAVED_QUERY_RULE_TYPE_ID;
+  name: 'Custom Query Rule' | 'Saved Query Rule';
+}

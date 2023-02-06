@@ -28,3 +28,7 @@ export const TREEMAP = i18n.translate(
     defaultMessage: 'Treemap',
   }
 );
+
+export const CHARTS = i18n.translate('xpack.securitySolution.components.chartSelect.chartsOption', {
+  defaultMessage: 'Charts',
+});

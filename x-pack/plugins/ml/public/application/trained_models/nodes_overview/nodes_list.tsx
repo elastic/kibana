@@ -17,9 +17,9 @@ import { EuiBasicTableColumn } from '@elastic/eui/src/components/basic_table/bas
 import { i18n } from '@kbn/i18n';
 import { cloneDeep } from 'lodash';
 import { FIELD_FORMAT_IDS } from '@kbn/field-formats-plugin/common';
+import { usePageUrlState } from '@kbn/ml-url-state';
 import { ModelsBarStats, StatsBar } from '../../components/stats_bar';
 import { NodeDeploymentStatsResponse } from '../../../../common/types/trained_models';
-import { usePageUrlState } from '../../util/url_state';
 import { ML_PAGES } from '../../../../common/constants/locator';
 import { useTrainedModelsApiService } from '../../services/ml_api_service/trained_models';
 import { useTableSettings } from '../../data_frame_analytics/pages/analytics_management/components/analytics_list/use_table_settings';
@@ -31,6 +31,11 @@ import { useToastNotificationService } from '../../services/toast_notification_s
 import { useRefresh } from '../../routing/use_refresh';
 
 export type NodeItem = NodeDeploymentStatsResponse;
+
+interface PageUrlState {
+  pageKey: typeof ML_PAGES.TRAINED_MODELS_NODES;
+  pageUrlState: ListingPageUrlState;
+}
 
 export const getDefaultNodesListState = (): ListingPageUrlState => ({
   pageIndex: 0,
@@ -55,7 +60,7 @@ export const NodesList: FC<NodesListProps> = ({ compactView = false }) => {
   const [itemIdToExpandedRowMap, setItemIdToExpandedRowMap] = useState<Record<string, JSX.Element>>(
     {}
   );
-  const [pageState, updatePageState] = usePageUrlState(
+  const [pageState, updatePageState] = usePageUrlState<PageUrlState>(
     ML_PAGES.TRAINED_MODELS_NODES,
     getDefaultNodesListState()
   );
@@ -114,7 +119,7 @@ export const NodesList: FC<NodesListProps> = ({ compactView = false }) => {
                   defaultMessage: 'Expand',
                 })
           }
-          iconType={itemIdToExpandedRowMap[item.id] ? 'arrowUp' : 'arrowDown'}
+          iconType={itemIdToExpandedRowMap[item.id] ? 'arrowDown' : 'arrowRight'}
         />
       ),
       'data-test-subj': 'mlNodesTableRowDetailsToggle',

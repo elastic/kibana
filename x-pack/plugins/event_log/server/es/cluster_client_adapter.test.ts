@@ -779,7 +779,7 @@ describe('aggregateEventsWithAuthFilter', () => {
     });
     const options: AggregateEventsWithAuthFilter = {
       index: 'index-name',
-      namespace: 'namespace',
+      namespaces: ['namespace'],
       type: 'saved-object-type',
       aggregateOptions: DEFAULT_OPTIONS as AggregateOptionsType,
       authFilter: fromKueryExpression('test:test'),
@@ -796,6 +796,154 @@ describe('aggregateEventsWithAuthFilter', () => {
           options,
           pick(options.aggregateOptions, ['start', 'end', 'filter'])
         ),
+        aggs: {
+          genericAgg: {
+            term: {
+              field: 'event.action',
+              size: 10,
+            },
+          },
+        },
+      },
+    });
+    expect(result).toEqual({
+      aggregations: {
+        genericAgg: {
+          buckets: [
+            {
+              key: 'execute',
+              doc_count: 10,
+            },
+            {
+              key: 'execute-start',
+              doc_count: 10,
+            },
+            {
+              key: 'new-instance',
+              doc_count: 2,
+            },
+          ],
+        },
+      },
+    });
+  });
+
+  test('should call cluster with correct options when includeSpaceAgnostic is true', async () => {
+    clusterClient.search.mockResponse({
+      aggregations: {
+        genericAgg: {
+          buckets: [
+            {
+              key: 'execute',
+              doc_count: 10,
+            },
+            {
+              key: 'execute-start',
+              doc_count: 10,
+            },
+            {
+              key: 'new-instance',
+              doc_count: 2,
+            },
+          ],
+        },
+      },
+      hits: {
+        hits: [],
+        total: { relation: 'eq', value: 0 },
+      },
+      took: 0,
+      timed_out: false,
+      _shards: {
+        failed: 0,
+        successful: 0,
+        total: 0,
+        skipped: 0,
+      },
+    });
+    const options: AggregateEventsWithAuthFilter = {
+      index: 'index-name',
+      namespaces: ['namespace'],
+      type: 'saved-object-type',
+      aggregateOptions: DEFAULT_OPTIONS as AggregateOptionsType,
+      authFilter: fromKueryExpression('test:test'),
+      includeSpaceAgnostic: true,
+    };
+    const result = await clusterClientAdapter.aggregateEventsWithAuthFilter(options);
+
+    const [query] = clusterClient.search.mock.calls[0];
+    expect(query).toEqual({
+      index: 'index-name',
+      body: {
+        size: 0,
+        query: {
+          bool: {
+            filter: {
+              bool: {
+                minimum_should_match: 1,
+                should: [
+                  {
+                    match: {
+                      test: 'test',
+                    },
+                  },
+                ],
+              },
+            },
+            must: [
+              {
+                nested: {
+                  path: 'kibana.saved_objects',
+                  query: {
+                    bool: {
+                      must: [
+                        {
+                          term: {
+                            'kibana.saved_objects.rel': {
+                              value: 'primary',
+                            },
+                          },
+                        },
+                        {
+                          term: {
+                            'kibana.saved_objects.type': {
+                              value: 'saved-object-type',
+                            },
+                          },
+                        },
+                        {
+                          bool: {
+                            should: [
+                              {
+                                bool: {
+                                  should: [
+                                    {
+                                      term: {
+                                        'kibana.saved_objects.namespace': {
+                                          value: 'namespace',
+                                        },
+                                      },
+                                    },
+                                  ],
+                                },
+                              },
+                              {
+                                match: {
+                                  'kibana.saved_objects.space_agnostic': true,
+                                },
+                              },
+                            ],
+                          },
+                        },
+                      ],
+                    },
+                  },
+                },
+              },
+            ],
+          },
+        },
+
         aggs: {
           genericAgg: {
             term: {
@@ -1515,7 +1663,7 @@ describe('getQueryBody', () => {
 describe('getQueryBodyWithAuthFilter', () => {
   const options = {
     index: 'index-name',
-    namespace: undefined,
+    namespaces: undefined,
     type: 'saved-object-type',
     authFilter: fromKueryExpression('test:test'),
   };
@@ -1559,11 +1707,17 @@ describe('getQueryBodyWithAuthFilter', () => {
                     },
                     {
                       bool: {
-                        must_not: {
-                          exists: {
-                            field: 'kibana.saved_objects.namespace',
+                        should: [
+                          {
+                            bool: {
+                              must_not: {
+                                exists: {
+                                  field: 'kibana.saved_objects.namespace',
+                                },
+                              },
+                            },
                           },
-                        },
+                        ],
                       },
                     },
                   ],
@@ -1580,7 +1734,7 @@ describe('getQueryBodyWithAuthFilter', () => {
     expect(
       getQueryBodyWithAuthFilter(
         logger,
-        { ...options, namespace: 'namespace' } as AggregateEventsWithAuthFilter,
+        { ...options, namespaces: ['namespace'] } as AggregateEventsWithAuthFilter,
         {}
       )
     ).toEqual({
@@ -1619,10 +1773,16 @@ describe('getQueryBodyWithAuthFilter', () => {
                       },
                     },
                     {
-                      term: {
-                        'kibana.saved_objects.namespace': {
-                          value: 'namespace',
-                        },
+                      bool: {
+                        should: [
+                          {
+                            term: {
+                              'kibana.saved_objects.namespace': {
+                                value: 'namespace',
+                              },
+                            },
+                          },
+                        ],
                       },
                     },
                   ],
@@ -1713,11 +1873,17 @@ describe('getQueryBodyWithAuthFilter', () => {
                     },
                     {
                       bool: {
-                        must_not: {
-                          exists: {
-                            field: 'kibana.saved_objects.namespace',
+                        should: [
+                          {
+                            bool: {
+                              must_not: {
+                                exists: {
+                                  field: 'kibana.saved_objects.namespace',
+                                },
+                              },
+                            },
                           },
-                        },
+                        ],
                       },
                     },
                   ],
@@ -1772,11 +1938,17 @@ describe('getQueryBodyWithAuthFilter', () => {
                     },
                     {
                       bool: {
-                        must_not: {
-                          exists: {
-                            field: 'kibana.saved_objects.namespace',
+                        should: [
+                          {
+                            bool: {
+                              must_not: {
+                                exists: {
+                                  field: 'kibana.saved_objects.namespace',
+                                },
+                              },
+                            },
                           },
-                        },
+                        ],
                       },
                     },
                   ],
@@ -1838,11 +2010,17 @@ describe('getQueryBodyWithAuthFilter', () => {
                     },
                     {
                       bool: {
-                        must_not: {
-                          exists: {
-                            field: 'kibana.saved_objects.namespace',
+                        should: [
+                          {
+                            bool: {
+                              must_not: {
+                                exists: {
+                                  field: 'kibana.saved_objects.namespace',
+                                },
+                              },
+                            },
                           },
-                        },
+                        ],
                       },
                     },
                   ],
@@ -1905,11 +2083,17 @@ describe('getQueryBodyWithAuthFilter', () => {
                     },
                     {
                       bool: {
-                        must_not: {
-                          exists: {
-                            field: 'kibana.saved_objects.namespace',
+                        should: [
+                          {
+                            bool: {
+                              must_not: {
+                                exists: {
+                                  field: 'kibana.saved_objects.namespace',
+                                },
+                              },
+                            },
                           },
-                        },
+                        ],
                       },
                     },
                   ],

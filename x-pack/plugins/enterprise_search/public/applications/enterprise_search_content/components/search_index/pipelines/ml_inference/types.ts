@@ -5,9 +5,12 @@
  * 2.0.
  */
 
+import { InferencePipelineInferenceConfig } from '../../../../../../../common/types/pipelines';
+
 export interface InferencePipelineConfiguration {
   destinationField: string;
   existingPipeline?: boolean;
+  inferenceConfig?: InferencePipelineInferenceConfig;
   modelID: string;
   pipelineName: string;
   sourceField: string;
@@ -18,4 +21,10 @@ export interface AddInferencePipelineFormErrors {
   modelID?: string;
   pipelineName?: string;
   sourceField?: string;
+}
+
+export enum AddInferencePipelineSteps {
+  Configuration,
+  Test,
+  Review,
 }

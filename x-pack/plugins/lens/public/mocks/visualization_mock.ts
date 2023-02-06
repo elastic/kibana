@@ -49,7 +49,6 @@ export function createMockVisualization(id = 'testVis'): jest.Mocked<Visualizati
 
     setDimension: jest.fn(),
     removeDimension: jest.fn(),
-    getErrorMessages: jest.fn((_state) => undefined),
     renderDimensionEditor: jest.fn(),
   };
 }

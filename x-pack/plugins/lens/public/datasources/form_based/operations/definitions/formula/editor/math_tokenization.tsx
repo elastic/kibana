@@ -62,5 +62,7 @@ export const lexerRules = {
   },
 } as monaco.languages.IMonarchLanguage;
 
-monaco.languages.setMonarchTokensProvider(LANGUAGE_ID, lexerRules);
-monaco.languages.setLanguageConfiguration(LANGUAGE_ID, languageConfiguration);
+monaco.languages.onLanguage(LANGUAGE_ID, () => {
+  monaco.languages.setMonarchTokensProvider(LANGUAGE_ID, lexerRules);
+  monaco.languages.setLanguageConfiguration(LANGUAGE_ID, languageConfiguration);
+});

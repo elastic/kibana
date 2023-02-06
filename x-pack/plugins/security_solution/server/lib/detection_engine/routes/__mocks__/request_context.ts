@@ -110,7 +110,9 @@ const createSecuritySolutionRequestContextMock = (
 
   return {
     core,
-    endpointAuthz: getEndpointAuthzInitialStateMock(overrides.endpointAuthz),
+    getEndpointAuthz: jest.fn(async () =>
+      getEndpointAuthzInitialStateMock(overrides.endpointAuthz)
+    ),
     getConfig: jest.fn(() => clients.config),
     getFrameworkRequest: jest.fn(() => {
       return {
@@ -132,10 +134,6 @@ const createSecuritySolutionRequestContextMock = (
     getExceptionListClient: jest.fn(() => clients.lists.exceptionListClient),
     getInternalFleetServices: jest.fn(() => {
       // TODO: Mock EndpointInternalFleetServicesInterface and return the mocked object.
-      throw new Error('Not implemented');
-    }),
-    getScopedFleetServices: jest.fn((req: KibanaRequest) => {
-      // TODO: Mock EndpointScopedFleetServicesInterface and return the mocked object.
       throw new Error('Not implemented');
     }),
     getQueryRuleAdditionalOptions: {

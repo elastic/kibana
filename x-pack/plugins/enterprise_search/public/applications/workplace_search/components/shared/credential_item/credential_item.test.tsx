@@ -42,7 +42,7 @@ describe('CredentialItem', () => {
 
   it('handles credential visible toggle click', () => {
     const wrapper = shallow(<CredentialItem {...props} hideCopy />);
-    const button = wrapper.find(EuiButtonIcon).dive().find('button');
+    const button = wrapper.find(EuiButtonIcon);
     button.simulate('click');
 
     expect(wrapper.find(EuiFieldText)).toHaveLength(1);
@@ -51,7 +51,7 @@ describe('CredentialItem', () => {
   it('handles select all button click', () => {
     const wrapper = shallow(<CredentialItem {...props} hideCopy />);
     // Toggle isVisible before EuiFieldText is visible
-    const button = wrapper.find(EuiButtonIcon).dive().find('button');
+    const button = wrapper.find(EuiButtonIcon);
     button.simulate('click');
 
     const simulatedEvent = {

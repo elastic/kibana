@@ -91,7 +91,32 @@ export function getSyntheticsSingleMetricConfig({ dataView }: ConfigProps): Seri
         }),
         metricStateOptions: {
           titlePosition: 'bottom',
+          textAlign: 'center',
         },
+      },
+      {
+        id: 'monitor_total_runs',
+        label: i18n.translate('xpack.observability.expView.totalRuns', {
+          defaultMessage: 'Total Runs',
+        }),
+        metricStateOptions: {
+          titlePosition: 'bottom',
+        },
+        columnType: FORMULA_COLUMN,
+        formula: "unique_count(monitor.check_group, kql='summary: *')",
+        format: 'number',
+      },
+      {
+        id: 'monitor_complete',
+        label: i18n.translate('xpack.observability.expView.complete', {
+          defaultMessage: 'Complete',
+        }),
+        metricStateOptions: {
+          titlePosition: 'bottom',
+        },
+        columnType: FORMULA_COLUMN,
+        formula: 'unique_count(monitor.check_group, kql=\'monitor.status: "up"\')',
+        format: 'number',
       },
       {
         id: 'monitor_errors',
@@ -124,10 +149,15 @@ export function getSyntheticsSingleMetricConfig({ dataView }: ConfigProps): Seri
   };
 }
 
-const getColorPalette = (color: 'danger' | 'warning' | 'success'): LegacyMetricState['palette'] => {
+export const getColorPalette = (
+  color: 'danger' | 'warning' | 'success' | string
+): LegacyMetricState['palette'] => {
   const statusPalette = euiPaletteForStatus(5);
 
-  // TODO: add more colors
+  let valueColor = color ?? statusPalette[3];
+  if (color === 'danger') {
+    valueColor = statusPalette[3];
+  }
 
   return {
     name: 'custom',
@@ -139,8 +169,8 @@ const getColorPalette = (color: 'danger' | 'warning' | 'success'): LegacyMetricS
       rangeType: 'number',
       rangeMin: 0,
       progression: 'fixed',
-      stops: [{ color: statusPalette[3], stop: 100 }],
-      colorStops: [{ color: statusPalette[3], stop: 0 }],
+      stops: [{ color: valueColor, stop: 100 }],
+      colorStops: [{ color: valueColor, stop: 0 }],
       continuity: 'above',
       maxSteps: 5,
     },

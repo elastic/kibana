@@ -5,23 +5,30 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiButtonEmpty, EuiButton } from '@elastic/eui';
-import React, { forwardRef, useCallback, useImperativeHandle, useMemo, useRef } from 'react';
+import React, { forwardRef, useCallback, useImperativeHandle, useRef } from 'react';
 import styled from 'styled-components';
 
 import { Form, useForm, UseField } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
-import * as i18n from '../case_view/translations';
 import type { Content } from './schema';
 import { schema } from './schema';
 import { MarkdownRenderer, MarkdownEditorForm } from '../markdown_editor';
+import { removeItemFromSessionStorage } from '../utils';
+import { useCasesContext } from '../cases_context/use_cases_context';
+import { getMarkdownEditorStorageKey } from '../markdown_editor/utils';
+import { UserActionMarkdownFooter } from './markdown_form_footer';
 
 export const ContentWrapper = styled.div`
   padding: ${({ theme }) => `${theme.eui.euiSizeM} ${theme.eui.euiSizeL}`};
+  text-overflow: ellipsis;
+  word-break: break-word;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
 `;
 
 interface UserActionMarkdownProps {
   content: string;
   id: string;
+  caseId: string;
   isEditable: boolean;
   onChangeEditable: (id: string) => void;
   onSaveContent: (content: string) => void;
@@ -34,7 +41,7 @@ export interface UserActionMarkdownRefObject {
 const UserActionMarkdownComponent = forwardRef<
   UserActionMarkdownRefObject,
   UserActionMarkdownProps
->(({ id, content, isEditable, onChangeEditable, onSaveContent }, ref) => {
+>(({ id, content, caseId, isEditable, onChangeEditable, onSaveContent }, ref) => {
   const editorRef = useRef();
   const initialState = { content };
   const { form } = useForm<Content>({
@@ -44,11 +51,14 @@ const UserActionMarkdownComponent = forwardRef<
   });
 
   const fieldName = 'content';
+  const { appId } = useCasesContext();
+  const draftStorageKey = getMarkdownEditorStorageKey(appId, caseId, id);
   const { setFieldValue, submit } = form;
 
   const handleCancelAction = useCallback(() => {
     onChangeEditable(id);
-  }, [id, onChangeEditable]);
+    removeItemFromSessionStorage(draftStorageKey);
+  }, [id, onChangeEditable, draftStorageKey]);
 
   const handleSaveAction = useCallback(async () => {
     const { isValid, data } = await submit();
@@ -57,43 +67,14 @@ const UserActionMarkdownComponent = forwardRef<
       onSaveContent(data.content);
     }
     onChangeEditable(id);
-  }, [content, id, onChangeEditable, onSaveContent, submit]);
+    removeItemFromSessionStorage(draftStorageKey);
+  }, [content, id, onChangeEditable, onSaveContent, submit, draftStorageKey]);
 
   const setComment = useCallback(
     (newComment) => {
       setFieldValue(fieldName, newComment);
     },
     [setFieldValue]
-  );
-
-  const EditorButtons = useMemo(
-    () => (
-      <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
-        <EuiFlexItem grow={false}>
-          <EuiButtonEmpty
-            data-test-subj="user-action-cancel-markdown"
-            size="s"
-            onClick={handleCancelAction}
-            iconType="cross"
-          >
-            {i18n.CANCEL}
-          </EuiButtonEmpty>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiButton
-            data-test-subj="user-action-save-markdown"
-            color="success"
-            fill
-            iconType="save"
-            onClick={handleSaveAction}
-            size="s"
-          >
-            {i18n.SAVE}
-          </EuiButton>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    ),
-    [handleCancelAction, handleSaveAction]
   );
 
   useImperativeHandle(ref, () => ({
@@ -111,7 +92,14 @@ const UserActionMarkdownComponent = forwardRef<
           'aria-label': 'Cases markdown editor',
           value: content,
           id,
-          bottomRightContent: EditorButtons,
+          draftStorageKey,
+          bottomRightContent: (
+            <UserActionMarkdownFooter
+              handleSaveAction={handleSaveAction}
+              handleCancelAction={handleCancelAction}
+            />
+          ),
+          initialValue: content,
         }}
       />
     </Form>

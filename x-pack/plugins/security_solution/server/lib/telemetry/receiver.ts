@@ -29,8 +29,12 @@ import {
   THRESHOLD_RULE_TYPE_ID,
 } from '@kbn/securitysolution-rules';
 import type { TransportResult } from '@elastic/elasticsearch';
-import type { Agent, AgentPolicy } from '@kbn/fleet-plugin/common';
-import type { AgentClient, AgentPolicyServiceInterface } from '@kbn/fleet-plugin/server';
+import type { Agent, AgentPolicy, Installation } from '@kbn/fleet-plugin/common';
+import type {
+  AgentClient,
+  AgentPolicyServiceInterface,
+  PackageService,
+} from '@kbn/fleet-plugin/server';
 import type { ExceptionListClient } from '@kbn/lists-plugin/server';
 import type { EndpointAppContextService } from '../../endpoint/endpoint_app_context_services';
 import {
@@ -58,6 +62,7 @@ import type {
   ValueListIndicatorMatchResponseAggregation,
 } from './types';
 import { telemetryConfiguration } from './configuration';
+import { ENDPOINT_METRICS_INDEX } from '../../../common/constants';
 
 export interface ITelemetryReceiver {
   start(
@@ -65,10 +70,13 @@ export interface ITelemetryReceiver {
     kibanaIndex?: string,
     alertsIndex?: string,
     endpointContextService?: EndpointAppContextService,
-    exceptionListClient?: ExceptionListClient
+    exceptionListClient?: ExceptionListClient,
+    packageService?: PackageService
   ): Promise<void>;
 
   getClusterInfo(): ESClusterInfo | undefined;
+
+  fetchDetectionRulesPackageVersion(): Promise<Installation | undefined>;
 
   fetchFleetAgents(): Promise<
     | {
@@ -177,6 +185,7 @@ export class TelemetryReceiver implements ITelemetryReceiver {
   private alertsIndex?: string;
   private clusterInfo?: ESClusterInfo;
   private processTreeFetcher?: Fetcher;
+  private packageService?: PackageService;
   private readonly maxRecords = 10_000 as const;
 
   constructor(logger: Logger) {
@@ -188,14 +197,16 @@ export class TelemetryReceiver implements ITelemetryReceiver {
     kibanaIndex?: string,
     alertsIndex?: string,
     endpointContextService?: EndpointAppContextService,
-    exceptionListClient?: ExceptionListClient
+    exceptionListClient?: ExceptionListClient,
+    packageService?: PackageService
   ) {
     this.kibanaIndex = kibanaIndex;
     this.alertsIndex = alertsIndex;
-    this.agentClient = endpointContextService?.getAgentService()?.asInternalUser;
-    this.agentPolicyService = endpointContextService?.getAgentPolicyService();
+    this.agentClient = endpointContextService?.getInternalFleetServices().agent;
+    this.agentPolicyService = endpointContextService?.getInternalFleetServices().agentPolicy;
     this.esClient = core?.elasticsearch.client.asInternalUser;
     this.exceptionListClient = exceptionListClient;
+    this.packageService = packageService;
     this.soClient =
       core?.savedObjects.createInternalRepository() as unknown as SavedObjectsClientContract;
     this.clusterInfo = await this.fetchClusterInfo();
@@ -206,6 +217,10 @@ export class TelemetryReceiver implements ITelemetryReceiver {
 
   public getClusterInfo(): ESClusterInfo | undefined {
     return this.clusterInfo;
+  }
+
+  public async fetchDetectionRulesPackageVersion(): Promise<Installation | undefined> {
+    return this.packageService?.asInternalUser.getInstallation('security_detection_engine');
   }
 
   public async fetchFleetAgents() {
@@ -277,7 +292,7 @@ export class TelemetryReceiver implements ITelemetryReceiver {
 
     const query: SearchRequest = {
       expand_wildcards: ['open' as const, 'hidden' as const],
-      index: `.ds-metrics-endpoint.metrics-*`,
+      index: ENDPOINT_METRICS_INDEX,
       ignore_unavailable: false,
       body: {
         size: 0, // no query results required - only aggregation quantity

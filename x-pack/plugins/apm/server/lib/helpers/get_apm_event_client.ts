@@ -36,7 +36,10 @@ export async function getApmEventClient({
       debug: params.query._inspect,
       request,
       indices,
-      options: { includeFrozen },
+      options: {
+        includeFrozen,
+        forceSyntheticSource: config.forceSyntheticSource,
+      },
     });
   });
 }

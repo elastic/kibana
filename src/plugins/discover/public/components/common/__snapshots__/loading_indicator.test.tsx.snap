@@ -2,10 +2,10 @@
 
 exports[`Loading indicator default renders correctly 1`] = `
 <div
-  class="euiFlexGroup euiFlexGroup--alignItemsCenter euiFlexGroup--justifyContentSpaceAround euiFlexGroup--directionRow euiFlexGroup--responsive"
+  class="euiFlexGroup emotion-euiFlexGroup-responsive-none-spaceAround-center-row"
 >
   <div
-    class="euiFlexItem euiFlexItem--flexGrowZero"
+    class="euiFlexItem emotion-euiFlexItem-growZero"
   >
     <span
       aria-label="Loading"
@@ -18,10 +18,10 @@ exports[`Loading indicator default renders correctly 1`] = `
 
 exports[`Loading indicator elastic renders correctly 1`] = `
 <div
-  class="euiFlexGroup euiFlexGroup--alignItemsCenter euiFlexGroup--justifyContentSpaceAround euiFlexGroup--directionRow euiFlexGroup--responsive"
+  class="euiFlexGroup emotion-euiFlexGroup-responsive-none-spaceAround-center-row"
 >
   <div
-    class="euiFlexItem euiFlexItem--flexGrowZero"
+    class="euiFlexItem emotion-euiFlexItem-growZero"
   >
     <span
       aria-label="Loading"

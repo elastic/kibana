@@ -27,7 +27,7 @@ describe('Field editor Preview panel', () => {
   const { server, httpRequestsMockHelpers } = setupEnvironment();
 
   beforeAll(() => {
-    jest.useFakeTimers('legacy');
+    jest.useFakeTimers({ legacyFakeTimers: true });
   });
 
   afterAll(() => {
@@ -745,7 +745,13 @@ describe('Field editor Preview panel', () => {
       } = testBed;
 
       const expectedParamsToFetchClusterData = {
-        params: { index: indexPatternNameForTest, body: { size: 50 } },
+        params: {
+          index: indexPatternNameForTest,
+          body: {
+            fields: ['*'],
+            size: 50,
+          },
+        },
       };
 
       // Initial state
@@ -770,6 +776,7 @@ describe('Field editor Preview panel', () => {
       expect(searchMeta.lastCallParams).toEqual({
         params: {
           body: {
+            fields: ['*'],
             query: {
               ids: {
                 values: [nextId],

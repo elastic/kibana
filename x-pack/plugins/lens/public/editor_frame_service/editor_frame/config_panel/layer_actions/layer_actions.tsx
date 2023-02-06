@@ -22,6 +22,7 @@ import type { LayerType } from '../../../..';
 import type { LayerAction, Visualization } from '../../../../types';
 import { getCloneLayerAction } from './clone_layer_action';
 import { getRemoveLayerAction } from './remove_layer_action';
+import { getOpenLayerSettingsAction } from './open_layer_settings';
 
 export interface LayerActionsProps {
   layerIndex: number;
@@ -36,18 +37,28 @@ export const getSharedActions = ({
   activeVisualization,
   isOnlyLayer,
   isTextBasedLanguage,
+  hasLayerSettings,
+  openLayerSettings,
   onCloneLayer,
   onRemoveLayer,
 }: {
   onRemoveLayer: () => void;
   onCloneLayer: () => void;
   layerIndex: number;
+  layerId: string;
   isOnlyLayer: boolean;
   activeVisualization: Visualization;
+  visualizationState: unknown;
   layerType?: LayerType;
   isTextBasedLanguage?: boolean;
+  hasLayerSettings: boolean;
+  openLayerSettings: () => void;
   core: Pick<CoreStart, 'overlays' | 'theme'>;
 }) => [
+  getOpenLayerSettingsAction({
+    hasLayerSettings,
+    openLayerSettings,
+  }),
   getCloneLayerAction({
     execute: onCloneLayer,
     layerIndex,
@@ -57,7 +68,6 @@ export const getSharedActions = ({
   getRemoveLayerAction({
     execute: onRemoveLayer,
     layerIndex,
-    activeVisualization,
     layerType,
     isOnlyLayer,
     core,

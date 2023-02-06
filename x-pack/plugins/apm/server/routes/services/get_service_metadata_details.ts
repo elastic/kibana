@@ -24,7 +24,8 @@ import {
   SERVICE_VERSION,
   FAAS_ID,
   FAAS_TRIGGER_TYPE,
-} from '../../../common/elasticsearch_fieldnames';
+} from '../../../common/es_fields/apm';
+
 import { ContainerType } from '../../../common/service_metadata';
 import { TransactionRaw } from '../../../typings/es_schemas/raw/transaction_raw';
 import { getProcessorEventForTransactions } from '../../lib/helpers/transactions';
@@ -59,6 +60,7 @@ export interface ServiceMetadataDetails {
     type?: string;
     functionNames?: string[];
     faasTriggerTypes?: string[];
+    hostArchitecture?: string;
   };
   cloud?: {
     provider?: string;
@@ -102,6 +104,7 @@ export async function getServiceMetadataDetails({
         ProcessorEvent.metric,
       ],
     },
+    sort: [{ '@timestamp': { order: 'desc' as const } }],
     body: {
       track_total_hits: 1,
       size: 1,
@@ -212,6 +215,7 @@ export async function getServiceMetadataDetails({
           faasTriggerTypes: response.aggregations?.faasTriggerTypes.buckets.map(
             (bucket) => bucket.key as string
           ),
+          hostArchitecture: host?.architecture,
         }
       : undefined;
 

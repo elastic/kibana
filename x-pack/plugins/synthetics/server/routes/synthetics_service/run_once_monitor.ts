@@ -26,6 +26,8 @@ export const runOnceSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () =
 
     const validationResult = validateMonitor(monitor);
 
+    const spaceId = server.spaces.spacesService.getSpaceId(request);
+
     if (!validationResult.valid || !validationResult.decodedMonitor) {
       const { reason: message, details, payload } = validationResult;
       return response.badRequest({ body: { message, attributes: { details, ...payload } } });
@@ -33,12 +35,17 @@ export const runOnceSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () =
 
     const { syntheticsService } = syntheticsMonitorClient;
 
+    const paramsBySpace = await syntheticsService.getSyntheticsParams({ spaceId });
+
     const errors = await syntheticsService.runOnceConfigs([
       formatHeartbeatRequest({
         // making it enabled, even if it's disabled in the UI
         monitor: { ...validationResult.decodedMonitor, enabled: true },
         monitorId,
+        heartbeatId: monitorId,
         runOnce: true,
+        testRunId: monitorId,
+        params: paramsBySpace[spaceId],
       }),
     ]);
 

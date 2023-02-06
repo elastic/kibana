@@ -1,0 +1,15 @@
+{
+  "id": "files",
+  "version": "1.0.0",
+  "kibanaVersion": "kibana",
+  "owner": {
+    "name": "@elastic/kibana-app-services",
+    "githubTeam": "team:AppServicesUx"
+  },
+  "description": "File upload, download, sharing, and serving over HTTP implementation in Kibana.",
+  "server": true,
+  "ui": true,
+  "extraPublicDirs": ["common"],
+  "requiredBundles": ["kibanaUtils"],
+  "optionalPlugins": ["security", "usageCollection"]
+}

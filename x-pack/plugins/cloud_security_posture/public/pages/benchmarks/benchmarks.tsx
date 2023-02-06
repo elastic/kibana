@@ -6,24 +6,24 @@
  */
 
 import React, { useState } from 'react';
-import useLocalStorage from 'react-use/lib/useLocalStorage';
 import {
+  EuiButton,
   EuiFieldSearch,
   EuiFieldSearchProps,
-  EuiButton,
-  EuiSpacer,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiTextColor,
-  EuiText,
   EuiPageHeader,
+  EuiSpacer,
+  EuiText,
+  EuiTextColor,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import useDebounce from 'react-use/lib/useDebounce';
 import { i18n } from '@kbn/i18n';
+import { pagePathGetters } from '@kbn/fleet-plugin/public';
+import { CLOUD_SECURITY_POSTURE_PACKAGE_NAME } from '../../../common/constants';
 import { CloudPosturePageTitle } from '../../components/cloud_posture_page_title';
 import { CloudPosturePage } from '../../components/cloud_posture_page';
-import { useCISIntegrationLink } from '../../common/navigation/use_navigate_to_cis_integration';
 import { BenchmarksTable } from './benchmarks_table';
 import {
   useCspBenchmarkIntegrations,
@@ -31,24 +31,31 @@ import {
 } from './use_csp_benchmark_integrations';
 import { extractErrorMessage } from '../../../common/utils/helpers';
 import * as TEST_SUBJ from './test_subjects';
-import { LOCAL_STORAGE_PAGE_SIZE_BENCHMARK_KEY } from '../../../common/constants';
+import { LOCAL_STORAGE_PAGE_SIZE_BENCHMARK_KEY } from '../../common/constants';
+import { usePageSize } from '../../common/hooks/use_page_size';
+import { useKibana } from '../../common/hooks/use_kibana';
 
 const SEARCH_DEBOUNCE_MS = 300;
 
 const AddCisIntegrationButton = () => {
-  const cisIntegrationLink = useCISIntegrationLink();
+  const { http } = useKibana().services;
+
+  const integrationsPath = pagePathGetters
+    .integrations_all({
+      searchTerm: CLOUD_SECURITY_POSTURE_PACKAGE_NAME,
+    })
+    .join('');
 
   return (
     <EuiButton
       data-test-subj={TEST_SUBJ.ADD_INTEGRATION_TEST_SUBJ}
       fill
       iconType="plusInCircle"
-      href={cisIntegrationLink}
-      isDisabled={!cisIntegrationLink}
+      href={http.basePath.prepend(integrationsPath)}
     >
       <FormattedMessage
-        id="xpack.csp.benchmarks.benchmarksPageHeader.addKSPMIntegrationButtonLabel"
-        defaultMessage="Add a KSPM integration"
+        id="xpack.csp.benchmarks.benchmarksPageHeader.addIntegrationButtonLabel"
+        defaultMessage="Add Integration"
       />
     </EuiButton>
   );
@@ -114,11 +121,12 @@ const BenchmarkSearchField = ({
     <EuiFlexGroup>
       <EuiFlexItem grow={true} style={{ alignItems: 'flex-end' }}>
         <EuiFieldSearch
+          fullWidth
           onSearch={setLocalValue}
           isLoading={isLoading}
           placeholder={i18n.translate(
             'xpack.csp.benchmarks.benchmarkSearchField.searchPlaceholder',
-            { defaultMessage: 'e.g. benchmark name' }
+            { defaultMessage: 'Search integration name' }
           )}
           incremental
         />
@@ -128,14 +136,11 @@ const BenchmarkSearchField = ({
 };
 
 export const Benchmarks = () => {
-  const [pageSize, setPageSize] = useLocalStorage<number>(
-    LOCAL_STORAGE_PAGE_SIZE_BENCHMARK_KEY,
-    10
-  );
+  const { pageSize, setPageSize } = usePageSize(LOCAL_STORAGE_PAGE_SIZE_BENCHMARK_KEY);
   const [query, setQuery] = useState<UseCspBenchmarkIntegrationsProps>({
     name: '',
     page: 1,
-    perPage: pageSize || 10,
+    perPage: pageSize,
     sortField: 'package_policy.name',
     sortOrder: 'asc',
   });

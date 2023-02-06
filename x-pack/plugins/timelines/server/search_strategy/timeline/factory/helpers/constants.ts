@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-import { ALERT_RULE_CONSUMER, ALERT_RISK_SCORE, ALERT_SEVERITY } from '@kbn/rule-data-utils';
+import {
+  ALERT_RULE_CONSUMER,
+  ALERT_RISK_SCORE,
+  ALERT_SEVERITY,
+  ALERT_RULE_PARAMETERS,
+} from '@kbn/rule-data-utils';
 import { ENRICHMENT_DESTINATION_PATH } from '../../../../../common/constants';
 
 export const MATCHED_ATOMIC = 'matched.atomic';
@@ -40,6 +45,7 @@ export const CTI_ROW_RENDERER_FIELDS = [
   FEED_NAME_REFERENCE,
 ];
 
+// TODO: update all of these fields to use the constants from technical field names
 export const TIMELINE_EVENTS_FIELDS = [
   ALERT_RULE_CONSUMER,
   '@timestamp',
@@ -51,14 +57,17 @@ export const TIMELINE_EVENTS_FIELDS = [
   'kibana.alert.rule.name',
   'kibana.alert.rule.to',
   'kibana.alert.rule.uuid',
+  'kibana.alert.rule.rule_id',
   'kibana.alert.rule.type',
   'kibana.alert.original_event.kind',
   'kibana.alert.original_event.module',
   'kibana.alert.rule.version',
   ALERT_SEVERITY,
   ALERT_RISK_SCORE,
+  ALERT_RULE_PARAMETERS,
   'kibana.alert.threshold_result',
   'kibana.alert.building_block_type',
+  'kibana.alert.suppression.docs_count',
   'event.code',
   'event.module',
   'event.action',

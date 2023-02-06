@@ -20,7 +20,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import classNames from 'classnames';
 import { i18n } from '@kbn/i18n';
 import { DataViewField } from '@kbn/data-views-plugin/public';
-import { ES_FIELD_TYPES, KBN_FIELD_TYPES } from '@kbn/data-plugin/common';
+import { ES_FIELD_TYPES, KBN_FIELD_TYPES } from '@kbn/field-types';
 import { css } from '@emotion/react';
 import { useDataVisualizerKibana } from '../../../kibana_context';
 import { roundToDecimalPlace, kibanaFieldFormat } from '../utils';
@@ -36,8 +36,7 @@ interface Props {
   onAddFilter?: (field: DataViewField | string, value: string, type: '+' | '-') => void;
 }
 
-function getPercentLabel(docCount: number, topValuesSampleSize: number): string {
-  const percent = (100 * docCount) / topValuesSampleSize;
+function getPercentLabel(percent: number): string {
   if (percent >= 0.1) {
     return `${roundToDecimalPlace(percent, 1)}%`;
   } else {
@@ -47,76 +46,54 @@ function getPercentLabel(docCount: number, topValuesSampleSize: number): string 
 
 export const TopValues: FC<Props> = ({ stats, fieldFormat, barColor, compressed, onAddFilter }) => {
   const {
-    services: { data },
+    services: {
+      data: { fieldFormats },
+    },
   } = useDataVisualizerKibana();
 
-  const { fieldFormats } = data;
-
   if (stats === undefined || !stats.topValues) return null;
-  const {
-    topValues,
-    topValuesSampleSize,
-    count,
-    isTopValuesSampled,
-    fieldName,
-    sampleCount,
-    topValuesSamplerShardSize,
-  } = stats;
+  const { topValues, fieldName, sampleCount } = stats;
 
-  const totalDocuments = stats.totalDocuments;
+  const totalDocuments = stats.totalDocuments ?? sampleCount ?? 0;
+  const topValuesOtherCountPercent =
+    1 - (topValues ? topValues.reduce((acc, bucket) => acc + bucket.percent, 0) : 0);
+  const topValuesOtherCount = Math.floor(topValuesOtherCountPercent * (sampleCount ?? 0));
 
-  const progressBarMax = isTopValuesSampled === true ? topValuesSampleSize : count;
-
-  const topValuesOtherCount =
-    (progressBarMax ?? 0) -
-    (topValues ? topValues.map((value) => value.doc_count).reduce((v, acc) => acc + v, 0) : 0);
-
-  const countsElement =
-    totalDocuments !== undefined ? (
-      <EuiText color="subdued" size="xs">
-        {isTopValuesSampled ? (
-          <FormattedMessage
-            id="xpack.dataVisualizer.dataGrid.field.topValues.calculatedFromSampleRecordsLabel"
-            defaultMessage="Calculated from {sampledDocumentsFormatted} sample {sampledDocuments, plural, one {record} other {records}}."
-            values={{
-              sampledDocuments: sampleCount,
-              sampledDocumentsFormatted: (
-                <strong>
-                  {fieldFormats
-                    .getDefaultInstance(KBN_FIELD_TYPES.NUMBER, [ES_FIELD_TYPES.INTEGER])
-                    .convert(sampleCount)}
-                </strong>
-              ),
-            }}
-          />
-        ) : (
-          <FormattedMessage
-            id="xpack.dataVisualizer.dataGrid.field.topValues.calculatedFromTotalRecordsLabel"
-            defaultMessage="Calculated from {totalDocumentsFormatted} {totalDocuments, plural, one {record} other {records}}."
-            values={{
-              totalDocuments,
-              totalDocumentsFormatted: (
-                <strong>
-                  {fieldFormats
-                    .getDefaultInstance(KBN_FIELD_TYPES.NUMBER, [ES_FIELD_TYPES.INTEGER])
-                    .convert(totalDocuments ?? 0)}
-                </strong>
-              ),
-            }}
-          />
-        )}
-      </EuiText>
-    ) : (
-      <EuiText size="xs" textAlign={'center'}>
+  const countsElement = (
+    <EuiText color="subdued" size="xs">
+      {totalDocuments > (sampleCount ?? 0) ? (
         <FormattedMessage
-          id="xpack.dataVisualizer.dataGrid.field.topValues.calculatedFromSampleDescription"
-          defaultMessage="Calculated from sample of {topValuesSamplerShardSize} documents per shard"
+          id="xpack.dataVisualizer.dataGrid.field.topValues.calculatedFromSampleRecordsLabel"
+          defaultMessage="Calculated from {sampledDocumentsFormatted} sample {sampledDocuments, plural, one {record} other {records}}."
           values={{
-            topValuesSamplerShardSize,
+            sampledDocuments: sampleCount,
+            sampledDocumentsFormatted: (
+              <strong>
+                {fieldFormats
+                  .getDefaultInstance(KBN_FIELD_TYPES.NUMBER, [ES_FIELD_TYPES.INTEGER])
+                  .convert(sampleCount)}
+              </strong>
+            ),
           }}
         />
-      </EuiText>
-    );
+      ) : (
+        <FormattedMessage
+          id="xpack.dataVisualizer.dataGrid.field.topValues.calculatedFromTotalRecordsLabel"
+          defaultMessage="Calculated from {totalDocumentsFormatted} {totalDocuments, plural, one {record} other {records}}."
+          values={{
+            totalDocuments,
+            totalDocumentsFormatted: (
+              <strong>
+                {fieldFormats
+                  .getDefaultInstance(KBN_FIELD_TYPES.NUMBER, [ES_FIELD_TYPES.INTEGER])
+                  .convert(totalDocuments ?? 0)}
+              </strong>
+            ),
+          }}
+        />
+      )}
+    </EuiText>
+  );
 
   return (
     <ExpandedRowPanel
@@ -139,15 +116,15 @@ export const TopValues: FC<Props> = ({ stats, fieldFormat, barColor, compressed,
               <EuiFlexGroup gutterSize="xs" alignItems="center" key={value.key}>
                 <EuiFlexItem data-test-subj="dataVisualizerFieldDataTopValueBar">
                   <EuiProgress
-                    value={value.doc_count}
-                    max={progressBarMax}
+                    value={value.percent}
+                    max={1}
                     color={barColor}
                     size="xs"
                     label={kibanaFieldFormat(value.key, fieldFormat)}
                     className={classNames('eui-textTruncate', 'topValuesValueLabelContainer')}
                     valueText={`${value.doc_count}${
-                      progressBarMax !== undefined
-                        ? ` (${getPercentLabel(value.doc_count, progressBarMax)})`
+                      totalDocuments !== undefined
+                        ? ` (${getPercentLabel(value.percent * 100)})`
                         : ''
                     }`}
                   />
@@ -222,7 +199,7 @@ export const TopValues: FC<Props> = ({ stats, fieldFormat, barColor, compressed,
             <EuiFlexItem data-test-subj="dataVisualizerFieldDataTopValueBar">
               <EuiProgress
                 value={topValuesOtherCount}
-                max={progressBarMax}
+                max={totalDocuments}
                 color={barColor}
                 size="xs"
                 label={
@@ -233,8 +210,8 @@ export const TopValues: FC<Props> = ({ stats, fieldFormat, barColor, compressed,
                 }
                 className={classNames('eui-textTruncate', 'topValuesValueLabelContainer')}
                 valueText={`${topValuesOtherCount}${
-                  progressBarMax !== undefined
-                    ? ` (${getPercentLabel(topValuesOtherCount, progressBarMax)})`
+                  totalDocuments !== undefined
+                    ? ` (${getPercentLabel(topValuesOtherCountPercent * 100)})`
                     : ''
                 }`}
               />
@@ -249,12 +226,10 @@ export const TopValues: FC<Props> = ({ stats, fieldFormat, barColor, compressed,
           </EuiFlexGroup>
         ) : null}
 
-        {isTopValuesSampled === true && (
-          <Fragment>
-            <EuiSpacer size="xs" />
-            {countsElement}
-          </Fragment>
-        )}
+        <Fragment>
+          <EuiSpacer size="xs" />
+          {countsElement}
+        </Fragment>
       </div>
     </ExpandedRowPanel>
   );

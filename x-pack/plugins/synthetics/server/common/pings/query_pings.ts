@@ -5,8 +5,12 @@
  * 2.0.
  */
 
-import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { UMElasticsearchQueryFn } from '../../legacy_uptime/lib/adapters/framework';
+import {
+  Field,
+  QueryDslFieldAndFormat,
+  QueryDslQueryContainer,
+} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { UMElasticsearchQueryFnParams } from '../../legacy_uptime/lib/adapters/framework';
 import {
   GetPingsParams,
   HttpResponseBody,
@@ -60,27 +64,46 @@ function isStringArray(value: unknown): value is string[] {
   throw Error('Excluded locations can only be strings');
 }
 
-export const queryPings: UMElasticsearchQueryFn<GetPingsParams, PingsResponse> = async ({
-  uptimeEsClient,
-  dateRange: { from, to },
-  index,
-  monitorId,
-  status,
-  sort,
-  size: sizeParam,
-  locations,
-  excludedLocations,
-}) => {
+type QueryFields = Array<QueryDslFieldAndFormat | Field>;
+type GetParamsWithFields<F> = UMElasticsearchQueryFnParams<
+  GetPingsParams & { fields: QueryFields; fieldsExtractorFn: (doc: any) => F }
+>;
+type GetParamsWithoutFields = UMElasticsearchQueryFnParams<GetPingsParams>;
+
+export function queryPings(
+  params: UMElasticsearchQueryFnParams<GetPingsParams>
+): Promise<PingsResponse>;
+
+export function queryPings<F>(
+  params: UMElasticsearchQueryFnParams<GetParamsWithFields<F>>
+): Promise<{ total: number; pings: F[] }>;
+
+export async function queryPings<F>(
+  params: GetParamsWithFields<F> | GetParamsWithoutFields
+): Promise<PingsResponse | { total: number; pings: F[] }> {
+  const {
+    uptimeEsClient,
+    dateRange: { from, to },
+    index,
+    monitorId,
+    status,
+    sort,
+    size: sizeParam,
+    pageIndex,
+    locations,
+    excludedLocations,
+  } = params;
   const size = sizeParam ?? DEFAULT_PAGE_SIZE;
 
   const searchBody = {
     size,
+    from: pageIndex !== undefined ? pageIndex * size : 0,
     ...(index ? { from: index * size } : {}),
     query: {
       bool: {
         filter: [
           { range: { '@timestamp': { gte: from, lte: to } } },
-          ...(monitorId ? [{ term: { config_id: monitorId } }] : []),
+          ...(monitorId ? [{ term: { 'monitor.id': monitorId } }] : []),
           ...(status ? [{ term: { 'monitor.status': status } }] : []),
         ] as QueryDslQueryContainer[],
         ...REMOVE_NON_SUMMARY_BROWSER_CHECKS,
@@ -90,6 +113,8 @@ export const queryPings: UMElasticsearchQueryFn<GetPingsParams, PingsResponse> =
     ...((locations ?? []).length > 0
       ? { post_filter: { terms: { 'observer.geo.name': locations as unknown as string[] } } }
       : {}),
+    _source: true,
+    fields: [] as QueryFields,
   };
 
   // if there are excluded locations, add a clause to the query's filter
@@ -106,6 +131,23 @@ export const queryPings: UMElasticsearchQueryFn<GetPingsParams, PingsResponse> =
         ],
       },
     });
+  }
+
+  // If fields are queried, only query the subset of asked fields and omit _source
+  if (isGetParamsWithFields(params)) {
+    searchBody._source = false;
+    searchBody.fields = params.fields;
+
+    const {
+      body: {
+        hits: { hits, total },
+      },
+    } = await uptimeEsClient.search({ body: searchBody });
+
+    return {
+      total: total.value,
+      pings: hits.map((doc: any) => params.fieldsExtractorFn(doc)),
+    };
   }
 
   const {
@@ -131,4 +173,10 @@ export const queryPings: UMElasticsearchQueryFn<GetPingsParams, PingsResponse> =
     total: total.value,
     pings,
   };
-};
+}
+
+function isGetParamsWithFields<F>(
+  params: GetParamsWithFields<F> | GetParamsWithoutFields
+): params is GetParamsWithFields<F> {
+  return (params as GetParamsWithFields<F>).fields?.length > 0;
+}

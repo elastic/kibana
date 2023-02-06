@@ -86,11 +86,15 @@ export const SettingsView = memo<{ agentPolicy: AgentPolicy }>(
           // eslint-disable-next-line @typescript-eslint/naming-convention
           unenroll_timeout,
           // eslint-disable-next-line @typescript-eslint/naming-convention
+          inactivity_timeout,
+          // eslint-disable-next-line @typescript-eslint/naming-convention
           data_output_id,
           // eslint-disable-next-line @typescript-eslint/naming-convention
           monitoring_output_id,
           // eslint-disable-next-line @typescript-eslint/naming-convention
           download_source_id,
+          // eslint-disable-next-line @typescript-eslint/naming-convention
+          fleet_server_host_id,
         } = agentPolicy;
         const { data, error } = await sendUpdateAgentPolicy(agentPolicy.id, {
           name,
@@ -98,9 +102,11 @@ export const SettingsView = memo<{ agentPolicy: AgentPolicy }>(
           namespace,
           monitoring_enabled,
           unenroll_timeout,
+          inactivity_timeout,
           data_output_id,
           monitoring_output_id,
           download_source_id,
+          fleet_server_host_id,
         });
         if (data) {
           notifications.toasts.addSuccess(
@@ -142,9 +148,11 @@ export const SettingsView = memo<{ agentPolicy: AgentPolicy }>(
             'namespace',
             'monitoring_enabled',
             'unenroll_timeout',
+            'inactivity_timeout',
             'data_output_id',
             'monitoring_output_id',
-            'download_source_id'
+            'download_source_id',
+            'fleet_server_host_id'
           )
         ),
       [agentPolicy]

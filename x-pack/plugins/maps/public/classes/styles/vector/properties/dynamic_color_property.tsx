@@ -22,7 +22,6 @@ import {
   FieldFormatter,
   VECTOR_STYLES,
 } from '../../../../../common/constants';
-// @ts-expect-error
 import { isCategoricalStopsInvalid } from '../components/color/color_stops_utils';
 import { OTHER_CATEGORY_LABEL, OTHER_CATEGORY_DEFAULT_COLOR } from '../style_util';
 import { Break, BreakedLegend } from '../components/legend/breaked_legend';

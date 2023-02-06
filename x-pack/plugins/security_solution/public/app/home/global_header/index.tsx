@@ -64,7 +64,7 @@ export const GlobalHeader = React.memo(
     useVariation(
       cloudExperiments,
       'security-solutions.add-integrations-url',
-      ADD_DATA_PATH,
+      integrationsUrl,
       setAddIntegrationsUrl
     );
 

@@ -62,6 +62,7 @@ export default function (providerContext: FtrProviderContext) {
   describe('installs and uninstalls multiple packages side effects', async () => {
     skipIfNoDockerRegistry(providerContext);
     setupFleetAndAgents(providerContext);
+
     before(async () => {
       if (!server.enabled) return;
       await installPackages([

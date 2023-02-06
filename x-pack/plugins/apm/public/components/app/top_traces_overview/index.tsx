@@ -44,18 +44,20 @@ export function TopTracesOverview() {
   );
 
   return (
-    <>
-      <SearchBar />
+    <EuiFlexGroup direction="column">
+      <EuiFlexItem grow={false}>
+        <SearchBar />
+      </EuiFlexItem>
 
       {fallbackToTransactions && (
-        <EuiFlexGroup>
-          <EuiFlexItem>
-            <AggregatedTransactionsBadge />
-          </EuiFlexItem>
-        </EuiFlexGroup>
+        <EuiFlexItem grow={false}>
+          <AggregatedTransactionsBadge />
+        </EuiFlexItem>
       )}
 
-      <TraceList response={response} />
-    </>
+      <EuiFlexItem grow>
+        <TraceList response={response} />
+      </EuiFlexItem>
+    </EuiFlexGroup>
   );
 }

@@ -7,7 +7,7 @@
 
 export interface KeyValuePair {
   label: string;
-  value: string;
+  value: string | null;
 }
 
 export type ConnectorConfiguration = Record<string, KeyValuePair | null>;
@@ -15,6 +15,20 @@ export type ConnectorConfiguration = Record<string, KeyValuePair | null>;
 export interface ConnectorScheduling {
   enabled: boolean;
   interval: string;
+}
+
+export interface CustomScheduling {
+  configuration_overrides: Record<string, unknown>;
+  enabled: boolean;
+  interval: string;
+  last_synced: string | null;
+  name: string;
+}
+
+export type ConnectorCustomScheduling = Record<string, CustomScheduling | null>;
+
+export interface ConnectorPreferences extends Record<string, unknown> {
+  extract_full_html?: boolean | null;
 }
 
 export enum ConnectorStatus {
@@ -26,9 +40,13 @@ export enum ConnectorStatus {
 }
 
 export enum SyncStatus {
-  IN_PROGRESS = 'in_progress',
+  CANCELING = 'canceling',
+  CANCELED = 'canceled',
   COMPLETED = 'completed',
   ERROR = 'error',
+  IN_PROGRESS = 'in_progress',
+  PENDING = 'pending',
+  SUSPENDED = 'suspended',
 }
 
 export interface IngestPipelineParams {
@@ -38,11 +56,94 @@ export interface IngestPipelineParams {
   run_ml_inference: boolean;
 }
 
+export enum FilteringPolicy {
+  EXCLUDE = 'exclude',
+  INCLUDE = 'include',
+}
+
+export enum FilteringRuleRule {
+  CONTAINS = 'contains',
+  ENDS_WITH = 'ends_with',
+  EQUALS = 'equals',
+  GT = '>',
+  LT = '<',
+  REGEX = 'regex',
+  STARTS_WITH = 'starts_with',
+}
+
+export interface FilteringRule {
+  created_at: string;
+  field: string;
+  id: string;
+  order: number;
+  policy: FilteringPolicy;
+  rule: FilteringRuleRule;
+  updated_at: string;
+  value: string;
+}
+
+export interface FilteringValidation {
+  ids: string[];
+  messages: string[];
+}
+
+export enum FilteringValidationState {
+  EDITED = 'edited',
+  INVALID = 'invalid',
+  VALID = 'valid',
+}
+
+export interface FilteringRules {
+  advanced_snippet: {
+    created_at: string;
+    updated_at: string;
+    value: Record<string, unknown>;
+  };
+  rules: FilteringRule[];
+  validation: {
+    errors: FilteringValidation[];
+    state: FilteringValidationState;
+  };
+}
+
+export interface FilteringConfig {
+  active: FilteringRules;
+  domain: string;
+  draft: FilteringRules;
+}
+
+export enum TriggerMethod {
+  ON_DEMAND = 'on_demand',
+  SCHEDULED = 'scheduled',
+}
+
+export enum FeatureName {
+  FILTERING_ADVANCED_CONFIG = 'filtering_advanced_config',
+  FILTERING_RULES = 'filtering_rules',
+  SYNC_RULES = 'sync_rules',
+}
+
+export type ConnectorFeatures = Partial<{
+  [FeatureName.FILTERING_ADVANCED_CONFIG]: boolean;
+  [FeatureName.FILTERING_RULES]: boolean;
+  [FeatureName.SYNC_RULES]: {
+    advanced?: {
+      enabled: boolean;
+    };
+    basic?: {
+      enabled: boolean;
+    };
+  };
+}> | null;
+
 export interface Connector {
   api_key_id: string | null;
   configuration: ConnectorConfiguration;
+  custom_scheduling: ConnectorCustomScheduling;
   description: string | null;
   error: string | null;
+  features: ConnectorFeatures;
+  filtering: FilteringConfig[];
   id: string;
   index_name: string;
   is_native: boolean;
@@ -53,6 +154,7 @@ export interface Connector {
   last_synced: string | null;
   name: string;
   pipeline?: IngestPipelineParams | null;
+  preferences: ConnectorPreferences;
   scheduling: {
     enabled: boolean;
     interval: string; // crontab syntax
@@ -65,14 +167,37 @@ export interface Connector {
 export type ConnectorDocument = Omit<Connector, 'id'>;
 
 export interface ConnectorSyncJob {
+  cancelation_requested_at: string | null;
+  canceled_at: string | null;
   completed_at: string | null;
-  connector?: ConnectorDocument;
-  connector_id: string;
+  connector: {
+    configuration: ConnectorConfiguration;
+    filtering: FilteringRules[] | null;
+    id: string;
+    index_name: string;
+    language: string;
+    pipeline: IngestPipelineParams | null;
+    service_type: string;
+  };
   created_at: string;
   deleted_document_count: number;
   error: string | null;
-  index_name: string;
+  id: string;
   indexed_document_count: number;
+  indexed_document_volume: number;
+  last_seen: string;
+  metadata: Record<string, unknown>;
+  started_at: string;
   status: SyncStatus;
+  trigger_method: TriggerMethod;
   worker_hostname: string;
+}
+
+export type ConnectorSyncJobDocument = Omit<ConnectorSyncJob, 'id'>;
+
+export interface NativeConnector {
+  configuration: ConnectorConfiguration;
+  features: Connector['features'];
+  name: string;
+  serviceType: string;
 }

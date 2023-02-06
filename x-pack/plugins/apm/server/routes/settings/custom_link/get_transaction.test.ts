@@ -15,24 +15,23 @@ import {
   TRANSACTION_TYPE,
   SERVICE_ENVIRONMENT,
   TRANSACTION_NAME,
-} from '../../../../common/elasticsearch_fieldnames';
-import { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
+} from '../../../../common/es_fields/apm';
 
 describe('custom link get transaction', () => {
   let mock: SearchParamsMock;
   it('fetches without filter', async () => {
-    mock = await inspectSearchParams((setup, apmEventClient) =>
+    mock = await inspectSearchParams(({ mockApmEventClient }) =>
       getTransaction({
-        apmEventClient: apmEventClient as unknown as APMEventClient,
+        apmEventClient: mockApmEventClient,
       })
     );
 
     expect(mock.params).toMatchSnapshot();
   });
   it('fetches with all filter', async () => {
-    mock = await inspectSearchParams((setup, apmEventClient) =>
+    mock = await inspectSearchParams(({ mockApmEventClient }) =>
       getTransaction({
-        apmEventClient: apmEventClient as unknown as APMEventClient,
+        apmEventClient: mockApmEventClient,
         filters: {
           [SERVICE_NAME]: 'foo',
           [SERVICE_ENVIRONMENT]: 'bar',

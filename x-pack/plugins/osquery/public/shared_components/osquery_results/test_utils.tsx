@@ -52,6 +52,7 @@ export const getMockedKibanaConfig = (permissionType: unknown) =>
             update: true,
             push: true,
           })),
+          getRuleIdFromEvent: jest.fn(),
         },
         ui: {
           getCasesContext: jest.fn().mockImplementation(() => mockCasesContext),

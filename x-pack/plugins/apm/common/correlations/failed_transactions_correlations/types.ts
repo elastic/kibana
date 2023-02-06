@@ -8,7 +8,6 @@
 import { FieldValuePair, HistogramItem } from '../types';
 
 import { CORRELATIONS_IMPACT_THRESHOLD } from './constants';
-import { FieldStats } from '../field_stats_types';
 
 export interface FailedTransactionsCorrelation extends FieldValuePair {
   doc_count: number;
@@ -31,6 +30,5 @@ export interface FailedTransactionsCorrelationsResponse {
   overallHistogram?: HistogramItem[];
   totalDocCount?: number;
   errorHistogram?: HistogramItem[];
-  fieldStats?: FieldStats[];
   fallbackResult?: FailedTransactionsCorrelation;
 }

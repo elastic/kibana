@@ -94,7 +94,7 @@ export function HeaderActions({ alert }: HeaderActionsProps) {
           </EuiButton>
         }
       >
-        <EuiFlexGroup direction="column" alignItems="flexStart">
+        <EuiFlexGroup direction="column" alignItems="flexStart" gutterSize="s">
           <EuiButtonEmpty
             size="s"
             color="text"

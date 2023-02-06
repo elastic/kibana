@@ -34,6 +34,7 @@ class DocLinks {
   public appSearchWebCrawler: string;
   public appSearchWebCrawlerEventLogs: string;
   public appSearchWebCrawlerReference: string;
+  public behavioralAnalyticsEvents: string;
   public bulkApi: string;
   public clientsGoIndex: string;
   public clientsGuide: string;
@@ -78,11 +79,13 @@ class DocLinks {
   public languageAnalyzers: string;
   public languageClients: string;
   public licenseManagement: string;
+  public machineLearningStart: string;
   public pluginsIngestAttachment: string;
   public queryDsl: string;
   public searchUIAppSearch: string;
   public searchUIElasticsearch: string;
   public start: string;
+  public syncRules: string;
   public workplaceSearchApiKeys: string;
   public workplaceSearchBox: string;
   public workplaceSearchConfluenceCloud: string;
@@ -146,6 +149,7 @@ class DocLinks {
     this.appSearchWebCrawler = '';
     this.appSearchWebCrawlerEventLogs = '';
     this.appSearchWebCrawlerReference = '';
+    this.behavioralAnalyticsEvents = '';
     this.bulkApi = '';
     this.clientsGoIndex = '';
     this.clientsGuide = '';
@@ -190,11 +194,13 @@ class DocLinks {
     this.languageAnalyzers = '';
     this.languageClients = '';
     this.licenseManagement = '';
+    this.machineLearningStart = '';
     this.pluginsIngestAttachment = '';
     this.queryDsl = '';
     this.searchUIAppSearch = '';
     this.searchUIElasticsearch = '';
     this.start = '';
+    this.syncRules = '';
     this.workplaceSearchApiKeys = '';
     this.workplaceSearchBox = '';
     this.workplaceSearchConfluenceCloud = '';
@@ -260,6 +266,7 @@ class DocLinks {
     this.appSearchWebCrawler = docLinks.links.appSearch.webCrawler;
     this.appSearchWebCrawlerEventLogs = docLinks.links.appSearch.webCrawlerEventLogs;
     this.appSearchWebCrawlerReference = docLinks.links.appSearch.webCrawlerReference;
+    this.behavioralAnalyticsEvents = docLinks.links.enterpriseSearch.behavioralAnalyticsEvents;
     this.bulkApi = docLinks.links.enterpriseSearch.bulkApi;
     this.clientsGoIndex = docLinks.links.clients.goIndex;
     this.clientsGuide = docLinks.links.clients.guide;
@@ -272,7 +279,6 @@ class DocLinks {
     this.clientsNetIntroduction = docLinks.links.clients.netIntroduction;
     this.clientsNetNest = docLinks.links.clients.netNest;
     this.clientsNetSingleNode = docLinks.links.clients.netSingleNode;
-    this.clientsPerlGuide = docLinks.links.clients.perlGuide;
     this.clientsPhpConnecting = docLinks.links.clients.phpConnecting;
     this.clientsPhpGuide = docLinks.links.clients.phpGuide;
     this.clientsPhpInstallation = docLinks.links.clients.phpInstallation;
@@ -304,11 +310,13 @@ class DocLinks {
     this.languageAnalyzers = docLinks.links.enterpriseSearch.languageAnalyzers;
     this.languageClients = docLinks.links.enterpriseSearch.languageClients;
     this.licenseManagement = docLinks.links.enterpriseSearch.licenseManagement;
+    this.machineLearningStart = docLinks.links.enterpriseSearch.machineLearningStart;
     this.pluginsIngestAttachment = docLinks.links.plugins.ingestAttachment;
     this.queryDsl = docLinks.links.query.queryDsl;
     this.searchUIAppSearch = docLinks.links.searchUI.appSearch;
     this.searchUIElasticsearch = docLinks.links.searchUI.elasticsearch;
     this.start = docLinks.links.enterpriseSearch.start;
+    this.syncRules = docLinks.links.enterpriseSearch.syncRules;
     this.workplaceSearchApiKeys = docLinks.links.workplaceSearch.apiKeys;
     this.workplaceSearchBox = docLinks.links.workplaceSearch.box;
     this.workplaceSearchConfluenceCloud = docLinks.links.workplaceSearch.confluenceCloud;

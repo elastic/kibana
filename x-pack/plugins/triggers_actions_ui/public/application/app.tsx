@@ -25,18 +25,15 @@ import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 import { ActionsPublicPluginSetup } from '@kbn/actions-plugin/public';
+import { ruleDetailsRoute } from '@kbn/rule-data-utils';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { suspendedComponentWithProps } from './lib/suspended_component_with_props';
 import {
   ActionTypeRegistryContract,
   AlertsTableConfigurationRegistryContract,
   RuleTypeRegistryContract,
 } from '../types';
-import {
-  Section,
-  routeToRuleDetails,
-  legacyRouteToRuleDetails,
-  routeToConnectors,
-} from './constants';
+import { Section, legacyRouteToRuleDetails, routeToConnectors } from './constants';
 
 import { setDataViewsService } from '../common/lib/data_apis';
 import { KibanaContextProvider, useKibana } from '../common/lib/kibana';
@@ -47,6 +44,7 @@ const TriggersActionsUIHome = lazy(() => import('./home'));
 const RuleDetailsRoute = lazy(
   () => import('./sections/rule_details/components/rule_details_route')
 );
+const queryClient = new QueryClient();
 
 export interface TriggersAndActionsUiServices extends CoreStart {
   actions: ActionsPublicPluginSetup;
@@ -90,7 +88,9 @@ export const App = ({ deps }: { deps: TriggersAndActionsUiServices }) => {
         <KibanaThemeProvider theme$={theme$}>
           <KibanaContextProvider services={{ ...deps }}>
             <Router history={deps.history}>
-              <AppWithoutRouter sectionsRegex={sectionsRegex} />
+              <QueryClientProvider client={queryClient}>
+                <AppWithoutRouter sectionsRegex={sectionsRegex} />
+              </QueryClientProvider>
             </Router>
           </KibanaContextProvider>
         </KibanaThemeProvider>
@@ -113,7 +113,7 @@ export const AppWithoutRouter = ({ sectionsRegex }: { sectionsRegex: string }) =
           component={suspendedComponentWithProps(TriggersActionsUIHome, 'xl')}
         />
         <Route
-          path={routeToRuleDetails}
+          path={ruleDetailsRoute}
           component={suspendedComponentWithProps(RuleDetailsRoute, 'xl')}
         />
         <Route

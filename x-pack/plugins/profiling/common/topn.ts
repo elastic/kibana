@@ -19,11 +19,13 @@ export const OTHER_BUCKET_LABEL = i18n.translate('xpack.profiling.topn.otherBuck
 
 export interface CountPerTime {
   Timestamp: number;
+  Percentage: number;
   Count: number | null;
 }
 
 export interface TopNSample extends CountPerTime {
   Category: string;
+  Percentage: number;
 }
 
 export interface TopNSamples {
@@ -157,6 +159,8 @@ export function createTopNSamples(
   // from the total
   const otherFrameCountsByTimestamp = new Map<number, number>();
 
+  const totalFrameCountsByTimestamp = new Map<number, number>();
+
   let addOtherBucket = false;
 
   for (let i = 0; i < response.over_time.buckets.length; i++) {
@@ -170,6 +174,8 @@ export function createTopNSamples(
     }
 
     otherFrameCountsByTimestamp.set(timestamp, valueForOtherBucket);
+
+    totalFrameCountsByTimestamp.set(timestamp, bucket.count.value ?? 0);
   }
 
   // Only add the 'other' bucket if at least one value per timestamp is > 0
@@ -190,10 +196,12 @@ export function createTopNSamples(
   for (const category of bucketsByCategories.keys()) {
     const frameCountsByTimestamp = bucketsByCategories.get(category);
     for (const timestamp of timestamps) {
+      const count = frameCountsByTimestamp.get(timestamp) ?? 0;
       const sample: TopNSample = {
         Timestamp: timestamp,
-        Count: frameCountsByTimestamp.get(timestamp) ?? 0,
+        Count: count,
         Category: category,
+        Percentage: (count / totalFrameCountsByTimestamp.get(timestamp)!) * 100,
       };
       samples.push(sample);
     }
@@ -233,6 +241,7 @@ export function groupSamplesByCategory({
     }
     const series = seriesByCategory.get(sample.Category)!;
     series.push({
+      Percentage: sample.Percentage,
       Timestamp: sample.Timestamp,
       Count: sample.Count,
     });
@@ -255,10 +264,22 @@ export function groupSamplesByCategory({
     rotations: Math.ceil(subcharts.length / 10),
   });
 
+  // We want the mapping from the category string to the color to be constant,
+  // so that the same category string will always map to the same color.
+  const stringhash = (s: string): number => {
+    let hash: number = 0;
+    for (let i = 0; i < s.length; i++) {
+      const ch = s.charCodeAt(i);
+      hash = (hash << 5) - hash + ch; // eslint-disable-line no-bitwise
+      hash &= hash; // eslint-disable-line no-bitwise
+    }
+    return hash % subcharts.length;
+  };
+
   return orderBy(subcharts, ['Percentage', 'Category'], ['desc', 'asc']).map((chart, index) => {
     return {
       ...chart,
-      Color: colors[index],
+      Color: colors[stringhash(chart.Category)],
       Index: index + 1,
       Series: chart.Series.map((value) => {
         return {

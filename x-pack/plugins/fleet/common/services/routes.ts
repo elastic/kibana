@@ -22,6 +22,7 @@ import {
   PRECONFIGURATION_API_ROUTES,
   DOWNLOAD_SOURCE_API_ROUTES,
   FLEET_SERVER_HOST_API_ROUTES,
+  FLEET_PROXY_API_ROUTES,
 } from '../constants';
 
 export const epmRouteService = {
@@ -196,7 +197,6 @@ export const agentRouteService = {
     AGENT_API_ROUTES.UPGRADE_PATTERN.replace('{agentId}', agentId),
   getBulkUpgradePath: () => AGENT_API_ROUTES.BULK_UPGRADE_PATTERN,
   getActionStatusPath: () => AGENT_API_ROUTES.ACTION_STATUS_PATTERN,
-  getCurrentUpgradesPath: () => AGENT_API_ROUTES.CURRENT_UPGRADES_PATTERN,
   getCancelActionPath: (actionId: string) =>
     AGENT_API_ROUTES.CANCEL_ACTIONS_PATTERN.replace('{actionId}', actionId),
   getListPath: () => AGENT_API_ROUTES.LIST_PATTERN,
@@ -206,6 +206,16 @@ export const agentRouteService = {
     AGENT_API_ROUTES.ACTIONS_PATTERN.replace('{agentId}', agentId),
   getListTagsPath: () => AGENT_API_ROUTES.LIST_TAGS_PATTERN,
   getAvailableVersionsPath: () => AGENT_API_ROUTES.AVAILABLE_VERSIONS_PATTERN,
+  getRequestDiagnosticsPath: (agentId: string) =>
+    AGENT_API_ROUTES.REQUEST_DIAGNOSTICS_PATTERN.replace('{agentId}', agentId),
+  getBulkRequestDiagnosticsPath: () => AGENT_API_ROUTES.BULK_REQUEST_DIAGNOSTICS_PATTERN,
+  getListAgentUploads: (agentId: string) =>
+    AGENT_API_ROUTES.LIST_UPLOADS_PATTERN.replace('{agentId}', agentId),
+  getAgentFileDownloadLink: (fileId: string, fileName: string) =>
+    AGENT_API_ROUTES.GET_UPLOAD_FILE_PATTERN.replace('{fileId}', fileId).replace(
+      '{fileName}',
+      fileName
+    ),
 };
 
 export const outputRoutesService = {
@@ -217,6 +227,16 @@ export const outputRoutesService = {
     OUTPUT_API_ROUTES.DELETE_PATTERN.replace('{outputId}', outputId),
   getCreatePath: () => OUTPUT_API_ROUTES.CREATE_PATTERN,
   getCreateLogstashApiKeyPath: () => OUTPUT_API_ROUTES.LOGSTASH_API_KEY_PATTERN,
+};
+
+export const fleetProxiesRoutesService = {
+  getInfoPath: (itemId: string) => FLEET_PROXY_API_ROUTES.INFO_PATTERN.replace('{itemId}', itemId),
+  getUpdatePath: (itemId: string) =>
+    FLEET_PROXY_API_ROUTES.UPDATE_PATTERN.replace('{itemId}', itemId),
+  getListPath: () => FLEET_PROXY_API_ROUTES.LIST_PATTERN,
+  getDeletePath: (itemId: string) =>
+    FLEET_PROXY_API_ROUTES.DELETE_PATTERN.replace('{itemId}', itemId),
+  getCreatePath: () => FLEET_PROXY_API_ROUTES.CREATE_PATTERN,
 };
 
 export const fleetServerHostsRoutesService = {
@@ -236,8 +256,9 @@ export const settingsRoutesService = {
 };
 
 export const appRoutesService = {
-  getCheckPermissionsPath: (fleetServerSetup?: boolean) => APP_API_ROUTES.CHECK_PERMISSIONS_PATTERN,
+  getCheckPermissionsPath: () => APP_API_ROUTES.CHECK_PERMISSIONS_PATTERN,
   getRegenerateServiceTokenPath: () => APP_API_ROUTES.GENERATE_SERVICE_TOKEN_PATTERN,
+  postHealthCheckPath: () => APP_API_ROUTES.HEALTH_CHECK_PATTERN,
 };
 
 export const enrollmentAPIKeyRouteService = {

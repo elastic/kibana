@@ -17,6 +17,7 @@ export async function getOptimizerBuiltPaths() {
       [
         '**/*',
         '!**/{__fixtures__,__snapshots__,integration_tests,audit_bundle_dependencies,node}/**',
+        '!**/*.test.*',
       ],
       {
         cwd: Path.resolve(__dirname, '../'),

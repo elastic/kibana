@@ -5,5 +5,5 @@
  * 2.0.
  */
 
-export { WrappedAlertsPage as AlertsPage } from './alerts_page';
+export { AlertsPage } from './alerts_page';
 export type { TopAlert } from './types';

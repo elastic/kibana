@@ -1,0 +1,24 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "checkJs": true,
+    "outDir": "target/types",
+    "types": [
+      "jest",
+      "node"
+    ]
+  },
+  "include": [
+    "**/*.js",
+    "**/*.ts",
+  ],
+  "kbn_references": [
+    "@kbn/repo-info",
+    "@kbn/babel-transform",
+    "@kbn/peggy",
+    "@kbn/repo-packages",
+  ],
+  "exclude": [
+    "target/**/*",
+  ]
+}

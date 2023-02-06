@@ -14,7 +14,9 @@ import { KBN_FIELD_TYPES } from '@kbn/field-types';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import { stringHash } from '@kbn/ml-string-hash';
 
+import { buildRandomSamplerAggregation } from './build_random_sampler_aggregation';
 import { buildSamplerAggregation } from './build_sampler_aggregation';
+import { getRandomSamplerAggregationsResponsePath } from './get_random_sampler_aggregations_response_path';
 import { getSamplerAggregationsResponsePath } from './get_sampler_aggregations_response_path';
 import type { HistogramField, NumericColumnStatsMap } from './types';
 
@@ -30,8 +32,17 @@ export const fetchAggIntervals = async (
   fields: HistogramField[],
   samplerShardSize: number,
   runtimeMappings?: estypes.MappingRuntimeFields,
-  abortSignal?: AbortSignal
+  abortSignal?: AbortSignal,
+  randomSamplerProbability?: number
 ): Promise<NumericColumnStatsMap> => {
+  if (
+    samplerShardSize >= 1 &&
+    randomSamplerProbability !== undefined &&
+    randomSamplerProbability < 1
+  ) {
+    throw new Error('Sampler and Random Sampler cannot be used at the same time.');
+  }
+
   const numericColumns = fields.filter((field) => {
     return field.type === KBN_FIELD_TYPES.NUMBER || field.type === KBN_FIELD_TYPES.DATE;
   });
@@ -56,7 +67,10 @@ export const fetchAggIntervals = async (
       size: 0,
       body: {
         query,
-        aggs: buildSamplerAggregation(minMaxAggs, samplerShardSize),
+        aggs:
+          randomSamplerProbability === undefined
+            ? buildSamplerAggregation(minMaxAggs, samplerShardSize)
+            : buildRandomSamplerAggregation(minMaxAggs, randomSamplerProbability),
         size: 0,
         ...(isPopulatedObject(runtimeMappings) ? { runtime_mappings: runtimeMappings } : {}),
       },
@@ -64,7 +78,10 @@ export const fetchAggIntervals = async (
     { signal: abortSignal, maxRetries: 0 }
   );
 
-  const aggsPath = getSamplerAggregationsResponsePath(samplerShardSize);
+  const aggsPath =
+    randomSamplerProbability === undefined
+      ? getSamplerAggregationsResponsePath(samplerShardSize)
+      : getRandomSamplerAggregationsResponsePath(randomSamplerProbability);
   const aggregations = aggsPath.length > 0 ? get(body.aggregations, aggsPath) : body.aggregations;
 
   return Object.keys(aggregations).reduce((p, aggName) => {

@@ -32,6 +32,7 @@ export const ReportViewTypes = {
   cwv: 'core-web-vitals',
   mdd: 'device-data-distribution',
   smt: 'single-metric',
+  htm: 'heatmap',
 } as const;
 
 type ValueOf<T> = T[keyof T];
@@ -68,9 +69,11 @@ export interface MetricOption {
   timeScale?: string;
   showPercentileAnnotations?: boolean;
   formula?: string;
-  metricStateOptions?: Pick<MetricState, 'colorMode' | 'palette' | 'titlePosition'>;
+  metricStateOptions?: Pick<MetricState, 'colorMode' | 'palette' | 'titlePosition' | 'textAlign'>;
   palette?: PaletteOutput;
   format?: 'percent' | 'number';
+  emptyAsNull?: boolean;
+  timestampField?: string;
 }
 
 export interface SeriesConfig {
@@ -137,13 +140,21 @@ export interface UrlFilter {
 export interface ConfigProps {
   dataView?: DataView;
   series?: SeriesUrl;
+  spaceId?: string;
 }
 
 interface FormatType extends SerializedFieldFormat<FieldFormatParams> {
   id: 'duration' | 'number' | 'bytes' | 'percent';
 }
 
-export type AppDataType = 'synthetics' | 'ux' | 'infra_logs' | 'infra_metrics' | 'apm' | 'mobile';
+export type AppDataType =
+  | 'synthetics'
+  | 'ux'
+  | 'infra_logs'
+  | 'infra_metrics'
+  | 'apm'
+  | 'mobile'
+  | 'alerts';
 
 type InputFormat = 'microseconds' | 'milliseconds' | 'seconds';
 type OutputFormat = 'asSeconds' | 'asMilliseconds' | 'humanize' | 'humanizePrecise';

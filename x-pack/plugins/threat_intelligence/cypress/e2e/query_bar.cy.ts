@@ -28,22 +28,19 @@ import { selectRange } from '../tasks/select_range';
 import { login } from '../tasks/login';
 import { esArchiverLoad, esArchiverUnload } from '../tasks/es_archiver';
 
-before(() => {
-  login();
-});
-
 const THREAT_INTELLIGENCE = '/app/security/threat_intelligence/indicators';
 
 describe('Indicators', () => {
   before(() => {
-    esArchiverLoad('threat_intelligence');
+    esArchiverLoad('threat_intelligence/indicators_data');
+    login();
   });
   after(() => {
-    esArchiverUnload('threat_intelligence');
+    esArchiverUnload('threat_intelligence/indicators_data');
   });
 
   describe('Indicators query bar interaction', () => {
-    before(() => {
+    beforeEach(() => {
       cy.visit(THREAT_INTELLIGENCE);
 
       selectRange();
@@ -67,16 +64,30 @@ describe('Indicators', () => {
 
     it('should add filter to kql and filter in and out values when clicking in an indicators table cell', () => {
       cy.get(INDICATOR_TYPE_CELL).its('length').should('be.gte', 0);
-      cy.get(INDICATOR_TYPE_CELL).first().trigger('mouseover');
-      cy.get(INDICATORS_TABLE_CELL_FILTER_IN_BUTTON).should('exist').click();
+
+      cy.get(INDICATOR_TYPE_CELL)
+        .first()
+        .should('be.visible')
+        .trigger('mouseover')
+        .within((_cell) => {
+          cy.get(INDICATORS_TABLE_CELL_FILTER_IN_BUTTON).should('exist').click({
+            force: true,
+          });
+        });
+
       cy.get(KQL_FILTER).should('exist');
       cy.get(INDICATOR_TYPE_CELL).its('length').should('be.gte', 0);
     });
 
     it('should add negated filter and filter out and out values when clicking in an indicators table cell', () => {
       cy.get(INDICATOR_TYPE_CELL).its('length').should('be.gte', 0);
-      cy.get(INDICATOR_TYPE_CELL).first().trigger('mouseover');
-      cy.get(INDICATORS_TABLE_CELL_FILTER_OUT_BUTTON).should('exist').click();
+      cy.get(INDICATOR_TYPE_CELL)
+        .first()
+        .trigger('mouseover')
+        .within((_cell) => {
+          cy.get(INDICATORS_TABLE_CELL_FILTER_OUT_BUTTON).should('exist').click({ force: true });
+        });
+
       cy.get(KQL_FILTER).should('exist');
       cy.get(INDICATOR_TYPE_CELL).its('length').should('be.gte', 0);
     });

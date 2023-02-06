@@ -16,9 +16,15 @@ import {
   enrichSignalThreatMatches,
   groupAndMergeSignalMatches,
   getSignalMatchesFromThreatList,
+  MAX_NUMBER_OF_SIGNAL_MATCHES,
 } from './enrich_signal_threat_matches';
 import { getNamedQueryMock, getSignalHitMock } from './enrich_signal_threat_matches.mock';
-import type { GetMatchedThreats, ThreatListItem, ThreatMatchNamedQuery } from './types';
+import type {
+  GetMatchedThreats,
+  ThreatListItem,
+  ThreatMatchNamedQuery,
+  SignalMatch,
+} from './types';
 import { encodeThreatMatchNamedQuery } from './utils';
 
 describe('groupAndMergeSignalMatches', () => {
@@ -479,6 +485,7 @@ describe('enrichSignalThreatMatches', () => {
   let getMatchedThreats: GetMatchedThreats;
   let matchedQuery: string;
   let indicatorPath: string;
+  let signalMatches: SignalMatch[];
 
   beforeEach(() => {
     indicatorPath = 'threat.indicator';
@@ -501,6 +508,19 @@ describe('enrichSignalThreatMatches', () => {
         value: 'threat.indicator.domain',
       })
     );
+    signalMatches = [
+      {
+        signalId: '_id',
+        queries: [
+          getNamedQueryMock({
+            id: '123',
+            index: 'indicator_index',
+            field: 'event.domain',
+            value: 'threat.indicator.domain',
+          }),
+        ],
+      },
+    ];
   });
 
   it('performs no enrichment if there are no signals', async () => {
@@ -508,7 +528,8 @@ describe('enrichSignalThreatMatches', () => {
     const enrichedSignals = await enrichSignalThreatMatches(
       signals,
       getMatchedThreats,
-      indicatorPath
+      indicatorPath,
+      []
     );
 
     expect(enrichedSignals).toEqual([]);
@@ -527,7 +548,8 @@ describe('enrichSignalThreatMatches', () => {
     const enrichedSignals = await enrichSignalThreatMatches(
       signals,
       getMatchedThreats,
-      indicatorPath
+      indicatorPath,
+      signalMatches
     );
     const [enrichedHit] = enrichedSignals;
     const enrichments = get(enrichedHit._source, ENRICHMENT_DESTINATION_PATH);
@@ -561,7 +583,8 @@ describe('enrichSignalThreatMatches', () => {
     const enrichedSignals = await enrichSignalThreatMatches(
       signals,
       getMatchedThreats,
-      indicatorPath
+      indicatorPath,
+      signalMatches
     );
     const [enrichedHit] = enrichedSignals;
     const enrichments = get(enrichedHit._source, ENRICHMENT_DESTINATION_PATH);
@@ -599,7 +622,8 @@ describe('enrichSignalThreatMatches', () => {
     const enrichedSignals = await enrichSignalThreatMatches(
       signals,
       getMatchedThreats,
-      indicatorPath
+      indicatorPath,
+      signalMatches
     );
     const [enrichedHit] = enrichedSignals;
     const enrichments = get(enrichedHit._source, ENRICHMENT_DESTINATION_PATH);
@@ -636,7 +660,7 @@ describe('enrichSignalThreatMatches', () => {
     });
     const signals: SignalSourceHit[] = [signalHit];
     await expect(() =>
-      enrichSignalThreatMatches(signals, getMatchedThreats, indicatorPath)
+      enrichSignalThreatMatches(signals, getMatchedThreats, indicatorPath, signalMatches)
     ).rejects.toThrowError('Expected threat field to be an object, but found: whoops');
   });
 
@@ -655,14 +679,13 @@ describe('enrichSignalThreatMatches', () => {
         },
       }),
     ];
-    matchedQuery = encodeThreatMatchNamedQuery(
-      getNamedQueryMock({
-        id: '123',
-        index: 'custom_index',
-        field: 'event.domain',
-        value: 'custom_threat.custom_indicator.domain',
-      })
-    );
+    const namedQuery = getNamedQueryMock({
+      id: '123',
+      index: 'custom_index',
+      field: 'event.domain',
+      value: 'custom_threat.custom_indicator.domain',
+    });
+    matchedQuery = encodeThreatMatchNamedQuery(namedQuery);
     const signalHit = getSignalHitMock({
       _source: {
         event: {
@@ -675,7 +698,8 @@ describe('enrichSignalThreatMatches', () => {
     const enrichedSignals = await enrichSignalThreatMatches(
       signals,
       getMatchedThreats,
-      'custom_threat.custom_indicator'
+      'custom_threat.custom_indicator',
+      [{ signalId: '_id', queries: [namedQuery] }]
     );
     const [enrichedHit] = enrichedSignals;
     const enrichments = get(enrichedHit._source, ENRICHMENT_DESTINATION_PATH);
@@ -726,6 +750,12 @@ describe('enrichSignalThreatMatches', () => {
       },
       matched_queries: [matchedQuery],
     });
+    const otherMatchQuery = getNamedQueryMock({
+      id: '456',
+      index: 'other_custom_index',
+      field: 'event.other',
+      value: 'threat.indicator.domain',
+    });
     const otherSignalHit = getSignalHitMock({
       _id: 'signal123',
       _source: {
@@ -734,22 +764,27 @@ describe('enrichSignalThreatMatches', () => {
           other: 'test_val',
         },
       },
-      matched_queries: [
-        encodeThreatMatchNamedQuery(
-          getNamedQueryMock({
-            id: '456',
-            index: 'other_custom_index',
-            field: 'event.other',
-            value: 'threat.indicator.domain',
-          })
-        ),
-      ],
+      matched_queries: [encodeThreatMatchNamedQuery(otherMatchQuery)],
     });
     const signals: SignalSourceHit[] = [signalHit, otherSignalHit];
     const enrichedSignals = await enrichSignalThreatMatches(
       signals,
       getMatchedThreats,
-      indicatorPath
+      indicatorPath,
+      [
+        {
+          signalId: 'signal123',
+          queries: [
+            getNamedQueryMock({
+              id: '123',
+              index: 'indicator_index',
+              field: 'event.domain',
+              value: 'threat.indicator.domain',
+            }),
+            otherMatchQuery,
+          ],
+        },
+      ]
     );
     expect(enrichedSignals).toHaveLength(1);
 
@@ -802,7 +837,7 @@ describe('getSignalMatchesFromThreatList', () => {
     expect(signalMatches).toEqual([]);
   });
 
-  it('return signal mathces from threat indicators', () => {
+  it('return signal matches from threat indicators', () => {
     const signalMatches = getSignalMatchesFromThreatList([
       getThreatListItemMock({
         _id: 'threatId',
@@ -833,6 +868,7 @@ describe('getSignalMatchesFromThreatList', () => {
         value: 'threat.indicator.domain',
         index: 'threat_index',
         id: 'threatId',
+        queryType: 'mq',
       },
     ];
 
@@ -848,7 +884,167 @@ describe('getSignalMatchesFromThreatList', () => {
     ]);
   });
 
-  it('merge signal mathces if different threat indicators matched the same signal', () => {
+  it('return empty array for terms query if there no signalValueMap', () => {
+    const signalMatches = getSignalMatchesFromThreatList([
+      getThreatListItemMock({
+        _id: 'threatId',
+        matched_queries: [
+          encodeThreatMatchNamedQuery(
+            getNamedQueryMock({
+              value: 'threat.indicator.domain',
+              field: 'event.domain',
+              queryType: 'tq',
+            })
+          ),
+        ],
+      }),
+    ]);
+
+    expect(signalMatches).toEqual([]);
+  });
+
+  it('return empty array for terms query if there wrong value in threat indicator', () => {
+    const threat = getThreatListItemMock({
+      _id: 'threatId',
+      matched_queries: [
+        encodeThreatMatchNamedQuery(
+          getNamedQueryMock({
+            value: 'threat.indicator.domain',
+            field: 'event.domain',
+            queryType: 'tq',
+          })
+        ),
+      ],
+    });
+
+    threat._source = {
+      ...threat._source,
+      threat: {
+        indicator: {
+          domain: { a: 'b' },
+        },
+      },
+    };
+
+    const signalValueMap = {
+      'event.domain': {
+        domain_1: ['signalId1', 'signalId2'],
+      },
+    };
+
+    const signalMatches = getSignalMatchesFromThreatList([threat], signalValueMap);
+
+    expect(signalMatches).toEqual([]);
+  });
+
+  it('return signal matches from threat indicators for termsQuery', () => {
+    const threat = getThreatListItemMock({
+      _id: 'threatId',
+      matched_queries: [
+        encodeThreatMatchNamedQuery(
+          getNamedQueryMock({
+            value: 'threat.indicator.domain',
+            field: 'event.domain',
+            queryType: 'tq',
+          })
+        ),
+      ],
+    });
+
+    threat._source = {
+      ...threat._source,
+      threat: {
+        indicator: {
+          domain: 'domain_1',
+        },
+      },
+    };
+
+    const signalValueMap = {
+      'event.domain': {
+        domain_1: ['signalId1', 'signalId2'],
+      },
+    };
+
+    const signalMatches = getSignalMatchesFromThreatList([threat], signalValueMap);
+
+    const queries = [
+      {
+        field: 'event.domain',
+        value: 'threat.indicator.domain',
+        index: 'threat_index',
+        id: 'threatId',
+        queryType: 'tq',
+      },
+    ];
+
+    expect(signalMatches).toEqual([
+      {
+        signalId: 'signalId1',
+        queries,
+      },
+      {
+        signalId: 'signalId2',
+        queries,
+      },
+    ]);
+  });
+
+  it('return signal matches from threat indicators which has array values for termsQuery', () => {
+    const threat = getThreatListItemMock({
+      _id: 'threatId',
+      matched_queries: [
+        encodeThreatMatchNamedQuery(
+          getNamedQueryMock({
+            value: 'threat.indicator.domain',
+            field: 'event.domain',
+            queryType: 'tq',
+          })
+        ),
+      ],
+    });
+
+    threat._source = {
+      ...threat._source,
+      threat: {
+        indicator: {
+          domain: ['domain_3', 'domain_1', 'domain_2'],
+        },
+      },
+    };
+
+    const signalValueMap = {
+      'event.domain': {
+        domain_1: ['signalId1'],
+        domain_2: ['signalId2'],
+      },
+    };
+
+    const signalMatches = getSignalMatchesFromThreatList([threat], signalValueMap);
+
+    const queries = [
+      {
+        field: 'event.domain',
+        value: 'threat.indicator.domain',
+        index: 'threat_index',
+        id: 'threatId',
+        queryType: 'tq',
+      },
+    ];
+
+    expect(signalMatches).toEqual([
+      {
+        signalId: 'signalId1',
+        queries,
+      },
+      {
+        signalId: 'signalId2',
+        queries,
+      },
+    ]);
+  });
+
+  it('merge signal matches if different threat indicators matched the same signal', () => {
     const matchedQuery = [
       encodeThreatMatchNamedQuery(
         getNamedQueryMock({
@@ -875,6 +1071,7 @@ describe('getSignalMatchesFromThreatList', () => {
       value: 'threat.indicator.domain',
       index: 'threat_index',
       id: 'threatId',
+      queryType: 'mq',
     };
 
     expect(signalMatches).toEqual([
@@ -892,5 +1089,27 @@ describe('getSignalMatchesFromThreatList', () => {
         ],
       },
     ]);
+  });
+
+  it('limits number of signal matches to MAX_NUMBER_OF_SIGNAL_MATCHES', () => {
+    const threatList = Array.from(Array(2000), (index) =>
+      getThreatListItemMock({
+        _id: `threatId-${index}`,
+        matched_queries: [
+          encodeThreatMatchNamedQuery(
+            getNamedQueryMock({
+              id: 'signalId1',
+              index: 'source_index',
+              value: 'threat.indicator.domain',
+              field: 'event.domain',
+            })
+          ),
+        ],
+      })
+    );
+
+    const signalMatches = getSignalMatchesFromThreatList(threatList);
+
+    expect(signalMatches[0].queries).toHaveLength(MAX_NUMBER_OF_SIGNAL_MATCHES);
   });
 });

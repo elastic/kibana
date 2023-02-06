@@ -8,15 +8,11 @@
 import { mockedQueryService, mockedSearchService } from '../../../common/mocks/test_providers';
 import { BehaviorSubject, throwError } from 'rxjs';
 import { RequestAdapter } from '@kbn/inspector-plugin/common';
-import {
-  Aggregation,
-  AGGREGATION_NAME,
-  convertAggregationToChartSeries,
-  createFetchAggregatedIndicators,
-} from '.';
+import { Aggregation, convertAggregationToChartSeries, createFetchAggregatedIndicators } from '.';
+import { BARCHART_AGGREGATION_NAME, FactoryQueryType } from '../../../../common/constants';
 
 const aggregationResponse = {
-  rawResponse: { aggregations: { [AGGREGATION_NAME]: { buckets: [] } } },
+  rawResponse: { aggregations: { [BARCHART_AGGREGATION_NAME]: { buckets: [] } } },
 };
 
 const aggregation1: Aggregation = {
@@ -88,33 +84,13 @@ describe('FetchAggregatedIndicatorsService', () => {
           expect.objectContaining({
             params: expect.objectContaining({
               body: expect.objectContaining({
-                size: 0,
                 query: expect.objectContaining({ bool: expect.anything() }),
-                runtime_mappings: {
-                  'threat.indicator.name': { script: expect.anything(), type: 'keyword' },
-                  'threat.indicator.name_origin': { script: expect.anything(), type: 'keyword' },
-                },
-                aggregations: {
-                  [AGGREGATION_NAME]: {
-                    terms: {
-                      field: 'myField',
-                    },
-                    aggs: {
-                      events: {
-                        date_histogram: {
-                          field: '@timestamp',
-                          fixed_interval: expect.anything(),
-                          min_doc_count: 0,
-                          extended_bounds: expect.anything(),
-                        },
-                      },
-                    },
-                  },
-                },
-                fields: ['@timestamp', 'myField'],
               }),
               index: [],
             }),
+            factoryQueryType: FactoryQueryType.Barchart,
+            dateRange: expect.anything(),
+            field: 'myField',
           }),
           expect.anything()
         );

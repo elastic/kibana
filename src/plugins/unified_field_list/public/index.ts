@@ -7,14 +7,26 @@
  */
 
 import { UnifiedFieldListPlugin } from './plugin';
-
 export type {
   FieldStatsResponse,
   BucketedAggregation,
   NumberStatsResult,
   TopValuesResult,
 } from '../common/types';
-export type { FieldStatsProps, FieldStatsServices } from './components/field_stats';
+export { FieldList, type FieldListProps } from './components/field_list';
+export { FieldListGrouped, type FieldListGroupedProps } from './components/field_list_grouped';
+export { FieldListFilters, type FieldListFiltersProps } from './components/field_list_filters';
+export { FieldIcon, type FieldIconProps, getFieldIconProps } from './components/field_icon';
+export type {
+  FieldTopValuesBucketProps,
+  FieldTopValuesBucketParams,
+} from './components/field_stats';
+export { FieldTopValuesBucket } from './components/field_stats';
+export type {
+  FieldStatsProps,
+  FieldStatsServices,
+  FieldStatsState,
+} from './components/field_stats';
 export { FieldStats } from './components/field_stats';
 export {
   FieldPopover,
@@ -44,4 +56,47 @@ export type {
   UnifiedFieldListPluginSetup,
   UnifiedFieldListPluginStart,
   AddFieldFilterHandler,
+  FieldListGroups,
+  FieldsGroupDetails,
+  FieldTypeKnown,
+  GetCustomFieldType,
 } from './types';
+export { ExistenceFetchStatus, FieldsGroupNames } from './types';
+
+export {
+  useExistingFieldsFetcher,
+  useExistingFieldsReader,
+  resetExistingFieldsCache,
+  type ExistingFieldsInfo,
+  type ExistingFieldsFetcherParams,
+  type ExistingFieldsFetcher,
+  type ExistingFieldsReader,
+} from './hooks/use_existing_fields';
+
+export {
+  useGroupedFields,
+  type GroupedFieldsParams,
+  type GroupedFieldsResult,
+} from './hooks/use_grouped_fields';
+
+export {
+  useFieldFilters,
+  type FieldFiltersParams,
+  type FieldFiltersResult,
+} from './hooks/use_field_filters';
+
+export {
+  useQuerySubscriber,
+  hasQuerySubscriberData,
+  type QuerySubscriberResult,
+  type QuerySubscriberParams,
+} from './hooks/use_query_subscriber';
+
+export { wrapFieldNameOnDot } from './utils/wrap_field_name_on_dot';
+export {
+  getFieldTypeName,
+  getFieldTypeDescription,
+  KNOWN_FIELD_TYPES,
+  getFieldType,
+  getFieldIconType,
+} from './utils/field_types';

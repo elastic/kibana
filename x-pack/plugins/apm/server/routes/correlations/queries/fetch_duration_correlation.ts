@@ -10,7 +10,7 @@ import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import {
   SPAN_DURATION,
   TRANSACTION_DURATION,
-} from '../../../../common/elasticsearch_fieldnames';
+} from '../../../../common/es_fields/apm';
 import type { CommonCorrelationsQueryParams } from '../../../../common/correlations/types';
 import { getCommonCorrelationsQuery } from './get_common_correlations_query';
 import { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';

@@ -19,6 +19,18 @@ describe('syncStatusToText', () => {
   it('should return correct value for in progress', () => {
     expect(syncStatusToText(SyncStatus.IN_PROGRESS)).toEqual('Sync in progress');
   });
+  it('should return correct value for canceling', () => {
+    expect(syncStatusToText(SyncStatus.CANCELING)).toEqual('Canceling sync');
+  });
+  it('should return correct value for canceled', () => {
+    expect(syncStatusToText(SyncStatus.CANCELED)).toEqual('Sync canceled');
+  });
+  it('should return correct value for pending', () => {
+    expect(syncStatusToText(SyncStatus.PENDING)).toEqual('Sync pending');
+  });
+  it('should return correct value for suspended', () => {
+    expect(syncStatusToText(SyncStatus.SUSPENDED)).toEqual('Sync suspended');
+  });
 });
 
 describe('syncStatusToColor', () => {
@@ -30,5 +42,17 @@ describe('syncStatusToColor', () => {
   });
   it('should return correct value for in progress', () => {
     expect(syncStatusToColor(SyncStatus.IN_PROGRESS)).toEqual('warning');
+  });
+  it('should return correct value for canceling', () => {
+    expect(syncStatusToColor(SyncStatus.CANCELING)).toEqual('warning');
+  });
+  it('should return correct value for canceled', () => {
+    expect(syncStatusToColor(SyncStatus.CANCELED)).toEqual('danger');
+  });
+  it('should return correct value for pending', () => {
+    expect(syncStatusToColor(SyncStatus.PENDING)).toEqual('warning');
+  });
+  it('should return correct value for suspended', () => {
+    expect(syncStatusToColor(SyncStatus.SUSPENDED)).toEqual('warning');
   });
 });

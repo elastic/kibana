@@ -14,10 +14,18 @@
     "interfaces": [],
     "enums": [],
     "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
     "objects": [
       {
         "parentPluginId": "@kbn/core-environment-server-mocks",
-        "id": "def-server.environmentServiceMock",
+        "id": "def-common.environmentServiceMock",
         "type": "Object",
         "tags": [],
         "label": "environmentServiceMock",
@@ -28,7 +36,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-environment-server-mocks",
-            "id": "def-server.environmentServiceMock.create",
+            "id": "def-common.environmentServiceMock.create",
             "type": "Function",
             "tags": [],
             "label": "create",
@@ -44,7 +52,7 @@
           },
           {
             "parentPluginId": "@kbn/core-environment-server-mocks",
-            "id": "def-server.environmentServiceMock.createPrebootContract",
+            "id": "def-common.environmentServiceMock.createPrebootContract",
             "type": "Function",
             "tags": [],
             "label": "createPrebootContract",
@@ -62,7 +70,7 @@
           },
           {
             "parentPluginId": "@kbn/core-environment-server-mocks",
-            "id": "def-server.environmentServiceMock.createSetupContract",
+            "id": "def-common.environmentServiceMock.createSetupContract",
             "type": "Function",
             "tags": [],
             "label": "createSetupContract",
@@ -82,13 +90,5 @@
         "initialIsOpen": false
       }
     ]
-  },
-  "common": {
-    "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
-    "objects": []
   }
 }

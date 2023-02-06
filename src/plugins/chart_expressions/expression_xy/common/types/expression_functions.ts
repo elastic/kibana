@@ -72,6 +72,7 @@ export interface AxisExtentConfig {
   lowerBound?: number;
   upperBound?: number;
   enforce?: boolean;
+  niceValues?: boolean;
 }
 
 export interface AxisConfig {
@@ -239,6 +240,24 @@ export interface ExpressionAnnotationsLayers {
 export type ExpressionAnnotationResult = ExpressionAnnotationsLayers & {
   type: 'event_annotations_result';
 };
+
+export interface EventAnnotationResultArgs {
+  layers?: ExtendedAnnotationLayerConfigResult[];
+  datatable: Datatable;
+}
+
+export interface EventAnnotationResultResult {
+  type: 'event_annotations_result';
+  layers: ExtendedAnnotationLayerConfigResult[];
+  datatable: Datatable;
+}
+
+export type EventAnnotationResultFn = ExpressionFunctionDefinition<
+  'event_annotations_result',
+  null,
+  EventAnnotationResultArgs,
+  EventAnnotationResultResult
+>;
 
 export interface LayeredXYArgs {
   legend: LegendConfigResult;
@@ -470,4 +489,11 @@ export type YAxisConfigFn = ExpressionFunctionDefinition<
   null,
   YAxisConfig,
   YAxisConfigResult
+>;
+
+export type ExtendedAnnotationLayerFn = ExpressionFunctionDefinition<
+  typeof EXTENDED_ANNOTATION_LAYER,
+  null,
+  ExtendedAnnotationLayerArgs,
+  ExtendedAnnotationLayerConfigResult
 >;

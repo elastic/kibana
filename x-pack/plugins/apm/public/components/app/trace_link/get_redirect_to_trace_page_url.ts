@@ -6,7 +6,7 @@
  */
 
 import { format } from 'url';
-import { TRACE_ID } from '../../../../common/elasticsearch_fieldnames';
+import { TRACE_ID } from '../../../../common/es_fields/apm';
 
 export const getRedirectToTracePageUrl = ({
   traceId,

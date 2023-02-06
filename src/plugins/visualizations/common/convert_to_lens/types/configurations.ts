@@ -99,7 +99,7 @@ export interface EventAnnotationConfig {
   label: string;
   color?: string;
   isHidden?: boolean;
-  icon?: string;
+  icon?: (() => JSX.Element) | string;
   type: 'query';
   key: {
     type: 'point_in_time';
@@ -223,9 +223,9 @@ export interface MetricVisConfiguration {
 export interface PartitionLayerState {
   layerId: string;
   layerType: LayerType;
+  metrics: string[];
   primaryGroups: string[];
   secondaryGroups?: string[];
-  metric?: string;
   collapseFns?: Record<string, CollapseFunction>;
   numberDisplay: NumberDisplayType;
   categoryDisplay: CategoryDisplayType;

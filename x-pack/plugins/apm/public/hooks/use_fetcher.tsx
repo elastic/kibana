@@ -26,6 +26,10 @@ export enum FETCH_STATUS {
   NOT_INITIATED = 'not_initiated',
 }
 
+export const isPending = (fetchStatus: FETCH_STATUS) =>
+  fetchStatus === FETCH_STATUS.LOADING ||
+  fetchStatus === FETCH_STATUS.NOT_INITIATED;
+
 export interface FetcherResult<Data> {
   data?: Data;
   status: FETCH_STATUS;

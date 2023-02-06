@@ -42,7 +42,8 @@ export const Instructions = (props: InstructionProps) => {
     refreshAgentPolicies,
   } = props;
   const fleetStatus = useFleetStatus();
-  const { isUnhealthy: isFleetServerUnhealthy } = useFleetServerUnhealthy();
+  const { isUnhealthy: isFleetServerUnhealthy, isLoading: isLoadingFleetServerHealth } =
+    useFleetServerUnhealthy();
 
   useEffect(() => {
     refreshAgentPolicies();
@@ -66,24 +67,23 @@ export const Instructions = (props: InstructionProps) => {
 
   const fleetServers = agents?.items || [];
 
-  const displayFleetServerHosts = useMemo(() => {
-    return fleetServerHosts?.filter((f) => f.is_default)?.[0]?.host_urls || [];
-  }, [fleetServerHosts]);
+  if (isLoadingAgents || isLoadingAgentPolicies || isLoadingFleetServerHealth)
+    return <Loading size="l" />;
 
-  if (isLoadingAgents || isLoadingAgentPolicies) return <Loading size="l" />;
-
-  const hasNoFleetServerHost = fleetStatus.isReady && displayFleetServerHosts.length === 0;
+  const hasNoFleetServerHost = fleetStatus.isReady && (fleetServerHosts?.length ?? 0) === 0;
 
   const showAgentEnrollment =
-    fleetStatus.isReady &&
-    !isFleetServerUnhealthy &&
-    fleetServers.length > 0 &&
-    displayFleetServerHosts.length > 0;
+    isFleetServerPolicySelected ||
+    (fleetStatus.isReady &&
+      !isFleetServerUnhealthy &&
+      fleetServers.length > 0 &&
+      (fleetServerHosts?.length ?? 0) > 0);
 
   const showFleetServerEnrollment =
-    fleetServers.length === 0 ||
-    isFleetServerUnhealthy ||
-    (fleetStatus.missingRequirements ?? []).some((r) => r === FLEET_SERVER_PACKAGE);
+    !isFleetServerPolicySelected &&
+    (fleetServers.length === 0 ||
+      isFleetServerUnhealthy ||
+      (fleetStatus.missingRequirements ?? []).some((r) => r === FLEET_SERVER_PACKAGE));
 
   if (!isIntegrationFlow && showAgentEnrollment) {
     setSelectionType('radio');
@@ -113,7 +113,7 @@ export const Instructions = (props: InstructionProps) => {
             </>
           )}
           {isFleetServerPolicySelected ? (
-            <AdvancedTab selectedPolicyId={props.selectedPolicy?.id} />
+            <AdvancedTab selectedPolicyId={props.selectedPolicy?.id} onClose={() => undefined} />
           ) : (
             <ManagedSteps {...props} />
           )}

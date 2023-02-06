@@ -28,7 +28,7 @@ import {
   SERVICE_NAME,
   TRANSACTION_TYPE,
   TRANSACTION_NAME,
-} from '../../../common/elasticsearch_fieldnames';
+} from '../../../common/es_fields/apm';
 import { RandomSampler } from '../../lib/helpers/get_random_sampler';
 import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
 

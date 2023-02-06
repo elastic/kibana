@@ -76,7 +76,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           const expectedUrl =
             baseUrl +
             '/app/discover?_t=1453775307251#' +
-            '/?_g=(filters:!(),refreshInterval:(pause:!t,value:0),time' +
+            '/?_g=(filters:!(),refreshInterval:(pause:!t,value:60000),time' +
             ":(from:'2015-09-19T06:31:44.000Z',to:'2015-09" +
             "-23T18:31:44.000Z'))&_a=(columns:!(),filters:!(),index:'logstash-" +
             "*',interval:auto,query:(language:kuery,query:'')" +
@@ -102,7 +102,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             baseUrl +
             '/app/discover#' +
             '/view/ab12e3c0-f231-11e6-9486-733b1ac9221a' +
-            '?_g=(filters%3A!()%2CrefreshInterval%3A(pause%3A!t%2Cvalue%3A0)' +
+            '?_g=(filters%3A!()%2CrefreshInterval%3A(pause%3A!t%2Cvalue%3A60000)' +
             "%2Ctime%3A(from%3A'2015-09-19T06%3A31%3A44.000Z'%2C" +
             "to%3A'2015-09-23T18%3A31%3A44.000Z'))";
           await PageObjects.discover.loadSavedSearch('A Saved Search');

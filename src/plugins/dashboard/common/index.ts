@@ -8,19 +8,34 @@
 
 export type {
   GridData,
-  DashboardPanelMap,
-  SavedDashboardPanel,
-  DashboardAttributes,
-  DashboardPanelState,
-  DashboardContainerStateWithType,
+  DashboardOptions,
+  DashboardCapabilities,
+  SharedDashboardState,
 } from './types';
+
+export type {
+  DashboardPanelMap,
+  DashboardPanelState,
+  DashboardContainerInput,
+  DashboardContainerByValueInput,
+  DashboardContainerByReferenceInput,
+} from './dashboard_container/types';
+
+export type {
+  DashboardAttributes,
+  ParsedDashboardAttributes,
+  SavedDashboardPanel,
+} from './dashboard_saved_object/types';
 
 export {
   injectReferences,
   extractReferences,
-} from './persistable_state/dashboard_saved_object_references';
+} from './dashboard_saved_object/persistable_state/dashboard_saved_object_references';
 
-export { createInject, createExtract } from './persistable_state/dashboard_container_references';
+export {
+  createInject,
+  createExtract,
+} from './dashboard_container/persistable_state/dashboard_container_references';
 
 export {
   convertPanelStateToSavedDashboardPanel,

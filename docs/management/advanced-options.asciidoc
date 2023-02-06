@@ -146,8 +146,7 @@ Enables you to use {es} indices in *TSVB* visualizations.
 Affects the *TSVB* histogram density. Must be set higher than `histogram:maxBars`.
 
 [[query-allowleadingwildcards]]`query:allowLeadingWildcards`::
-Allows a wildcard (*) as the first character in a query clause. Only applies
-when experimental query features are enabled in the query bar. To disallow
+Allows a wildcard (*) as the first character in a query clause. To disallow
 leading wildcards in Lucene queries, use `query:queryString:options`.
 
 [[query-querystring-options]]`query:queryString:options`::
@@ -540,20 +539,12 @@ Enables the legacy time axis for charts in Lens, Discover, Visualize and TSVB
 [[visualization-heatmap-maxbuckets]]`visualization:heatmap:maxBuckets`::
 The maximum number of buckets a datasource can return. High numbers can have a negative impact on your browser rendering performance.
 
-[[visualization-visualize-pieChartslibrary]]`visualization:visualize:legacyPieChartsLibrary`::
-**The legacy pie charts are deprecated and will not be supported in a future version.**
-The visualize editor uses new pie charts with improved performance, color palettes, label positioning, and more. Enable this option if you prefer to use the legacy charts library.
-
 [[visualization-visualize-heatmapChartslibrary]]`visualization:visualize:legacyHeatmapChartsLibrary`::
 Disable this option if you prefer to use the new heatmap charts with improved performance, legend settings, and more..
 
 [[visualize-enablelabs]]`visualize:enableLabs`::
 Enables users to create, view, and edit experimental visualizations. When disabled,
 only production-ready visualizations are available to users.
-
-[[lens-sampling]]`lens:useFieldExistenceSampling`::
-**This setting is deprecated and will not be supported as of 8.6.**
-If enabled, document sampling is used to determine field existence (available or empty) for the Lens field list instead of relying on index mappings.
 
 [float]
 [[kibana-telemetry-settings]]
@@ -562,4 +553,4 @@ If enabled, document sampling is used to determine field existence (available or
 [horizontal]
 [[telemetry-enabled-advanced-setting]]`telemetry:enabled`::
 When enabled, helps improve the Elastic Stack by providing usage statistics for
-basic features. This data will not be shared outside of Elastic.
+basic features.

@@ -1,0 +1,39 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "target/types",
+  },
+  "include": [
+    "**/*.js",
+    "**/*.ts",
+  ],
+  "exclude": [
+    "target/**/*",
+  ],
+  "kbn_references": [
+    "@kbn/core",
+    { "path": "../../tsconfig.json" },
+    "@kbn/screenshotting-plugin",
+    "@kbn/test",
+    "@kbn/dev-cli-runner",
+    "@kbn/dev-cli-errors",
+    "@kbn/repo-info",
+    "@kbn/tooling-log",
+    "@kbn/plugin-discovery",
+    "@kbn/ci-stats-reporter",
+    "@kbn/jest-serializers",
+    "@kbn/i18n",
+    "@kbn/storybook",
+    "@kbn/std",
+    "@kbn/dev-utils",
+    "@kbn/utils",
+    "@kbn/optimizer",
+    "@kbn/bazel-runner",
+    "@kbn/peggy",
+    "@kbn/babel-transform",
+    "@kbn/import-resolver",
+    "@kbn/find-used-node-modules",
+    "@kbn/ts-projects",
+    "@kbn/repo-packages",
+  ]
+}

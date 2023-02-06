@@ -40,6 +40,7 @@ describe('createInitialState', () => {
     expect(
       createInitialState({
         kibanaVersion: '8.1.0',
+        waitForMigrationCompletion: true,
         targetMappings: {
           dynamic: 'strict',
           properties: { my_type: { properties: { title: { type: 'text' } } } },
@@ -80,6 +81,11 @@ describe('createInitialState', () => {
               Object {
                 "term": Object {
                   "type": "cases-sub-case",
+                },
+              },
+              Object {
+                "term": Object {
+                  "type": "csp_rule",
                 },
               },
               Object {
@@ -125,6 +131,11 @@ describe('createInitialState', () => {
               Object {
                 "term": Object {
                   "type": "server",
+                },
+              },
+              Object {
+                "term": Object {
+                  "type": "siem-detection-engine-rule-execution-info",
                 },
               },
               Object {
@@ -216,8 +227,30 @@ describe('createInitialState', () => {
         },
         "versionAlias": ".kibana_task_manager_8.1.0",
         "versionIndex": ".kibana_task_manager_8.1.0_001",
+        "waitForMigrationCompletion": true,
       }
     `);
+  });
+
+  it('creates the initial state for the model with waitForMigrationCompletion false,', () => {
+    expect(
+      createInitialState({
+        kibanaVersion: '8.1.0',
+        waitForMigrationCompletion: false,
+        targetMappings: {
+          dynamic: 'strict',
+          properties: { my_type: { properties: { title: { type: 'text' } } } },
+        },
+        migrationVersionPerType: {},
+        indexPrefix: '.kibana_task_manager',
+        migrationsConfig,
+        typeRegistry,
+        docLinks,
+        logger: mockLogger.get(),
+      })
+    ).toMatchObject({
+      waitForMigrationCompletion: false,
+    });
   });
 
   it('returns state with the correct `knownTypes`', () => {
@@ -236,6 +269,7 @@ describe('createInitialState', () => {
 
     const initialState = createInitialState({
       kibanaVersion: '8.1.0',
+      waitForMigrationCompletion: false,
       targetMappings: {
         dynamic: 'strict',
         properties: { my_type: { properties: { title: { type: 'text' } } } },
@@ -263,6 +297,7 @@ describe('createInitialState', () => {
 
     const initialState = createInitialState({
       kibanaVersion: '8.1.0',
+      waitForMigrationCompletion: false,
       targetMappings: {
         dynamic: 'strict',
         properties: { my_type: { properties: { title: { type: 'text' } } } },
@@ -282,6 +317,7 @@ describe('createInitialState', () => {
     const preMigrationScript = "ctx._id = ctx._source.type + ':' + ctx._id";
     const initialState = createInitialState({
       kibanaVersion: '8.1.0',
+      waitForMigrationCompletion: false,
       targetMappings: {
         dynamic: 'strict',
         properties: { my_type: { properties: { title: { type: 'text' } } } },
@@ -305,6 +341,7 @@ describe('createInitialState', () => {
       Option.isNone(
         createInitialState({
           kibanaVersion: '8.1.0',
+          waitForMigrationCompletion: false,
           targetMappings: {
             dynamic: 'strict',
             properties: { my_type: { properties: { title: { type: 'text' } } } },
@@ -324,6 +361,7 @@ describe('createInitialState', () => {
     expect(
       createInitialState({
         kibanaVersion: '8.1.0',
+        waitForMigrationCompletion: false,
         targetMappings: {
           dynamic: 'strict',
           properties: { my_type: { properties: { title: { type: 'text' } } } },
@@ -378,6 +416,7 @@ describe('createInitialState', () => {
     const logger = mockLogger.get();
     const initialState = createInitialState({
       kibanaVersion: '8.1.0',
+      waitForMigrationCompletion: false,
       targetMappings: {
         dynamic: 'strict',
         properties: { my_type: { properties: { title: { type: 'text' } } } },
@@ -398,6 +437,7 @@ describe('createInitialState', () => {
     const logger = mockLogger.get();
     const initialState = createInitialState({
       kibanaVersion: '8.1.0',
+      waitForMigrationCompletion: false,
       targetMappings: {
         dynamic: 'strict',
         properties: { my_type: { properties: { title: { type: 'text' } } } },
@@ -423,6 +463,7 @@ describe('createInitialState', () => {
   it('initializes the `discardUnknownObjects` flag to true if the value provided in the config matches the current kibana version', () => {
     const initialState = createInitialState({
       kibanaVersion: '8.1.0',
+      waitForMigrationCompletion: false,
       targetMappings: {
         dynamic: 'strict',
         properties: { my_type: { properties: { title: { type: 'text' } } } },
@@ -445,6 +486,7 @@ describe('createInitialState', () => {
     const logger = mockLogger.get();
     const initialState = createInitialState({
       kibanaVersion: '8.1.0',
+      waitForMigrationCompletion: false,
       targetMappings: {
         dynamic: 'strict',
         properties: { my_type: { properties: { title: { type: 'text' } } } },
@@ -470,6 +512,7 @@ describe('createInitialState', () => {
   it('initializes the `discardCorruptObjects` flag to true if the value provided in the config matches the current kibana version', () => {
     const initialState = createInitialState({
       kibanaVersion: '8.1.0',
+      waitForMigrationCompletion: false,
       targetMappings: {
         dynamic: 'strict',
         properties: { my_type: { properties: { title: { type: 'text' } } } },

@@ -1,0 +1,9 @@
+{
+  "id": "securityTestEndpoints",
+  "owner": { "name": "Platform Security", "githubTeam": "kibana-security" },
+  "version": "8.0.0",
+  "kibanaVersion": "kibana",
+  "requiredPlugins":["security", "taskManager"],
+  "server": true,
+  "ui": true
+}

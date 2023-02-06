@@ -5,9 +5,7 @@
  * 2.0.
  */
 import { errors } from '@elastic/elasticsearch';
-import type { SecurityHasPrivilegesIndexPrivilegesCheck } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { Logger, RequestHandler } from '@kbn/core/server';
-import { incrementApiUsageCounter } from '..';
 import {
   API_GET_ILM_POLICY_STATUS,
   API_MIGRATE_ILM_POLICY_URL,
@@ -17,6 +15,7 @@ import type { IlmPolicyStatusResponse } from '../../../common/types';
 import type { ReportingCore } from '../../core';
 import { IlmPolicyManager } from '../../lib';
 import { deprecations } from '../../lib/deprecations';
+import { getCounters } from '../lib';
 
 export const registerDeprecationsRoutes = (reporting: ReportingCore, logger: Logger) => {
   const { router } = reporting.getPluginSetupDeps();
@@ -40,7 +39,7 @@ export const registerDeprecationsRoutes = (reporting: ReportingCore, logger: Log
                 privileges: ['manage'], // required to do anything with the reporting indices
                 names: [store.getReportingIndexPattern()],
                 allow_restricted_indices: true,
-              } as unknown as SecurityHasPrivilegesIndexPrivilegesCheck, // TODO: Needed until `allow_restricted_indices` is added to the types.
+              },
             ],
           },
         });
@@ -60,7 +59,7 @@ export const registerDeprecationsRoutes = (reporting: ReportingCore, logger: Log
   router.get(
     { path: API_GET_ILM_POLICY_STATUS, validate: false },
     authzWrapper(async ({ core }, req, res) => {
-      incrementApiUsageCounter(
+      const counters = getCounters(
         req.route.method,
         API_GET_ILM_POLICY_STATUS,
         reporting.getUsageCounter()
@@ -81,12 +80,17 @@ export const registerDeprecationsRoutes = (reporting: ReportingCore, logger: Log
         const response: IlmPolicyStatusResponse = {
           status: await checkIlmMigrationStatus(),
         };
+
+        counters.usageCounter();
+
         return res.ok({ body: response });
       } catch (e) {
         logger.error(e);
+        const statusCode = e?.statusCode ?? 500;
+        counters.errorCounter(statusCode);
         return res.customError({
-          statusCode: e?.statusCode ?? 500,
           body: { message: e.message },
+          statusCode,
         });
       }
     })
@@ -95,7 +99,7 @@ export const registerDeprecationsRoutes = (reporting: ReportingCore, logger: Log
   router.put(
     { path: API_MIGRATE_ILM_POLICY_URL, validate: false },
     authzWrapper(async ({ core }, req, res) => {
-      incrementApiUsageCounter(
+      const counters = getCounters(
         req.route.method,
         API_GET_ILM_POLICY_STATUS,
         reporting.getUsageCounter()
@@ -134,6 +138,9 @@ export const registerDeprecationsRoutes = (reporting: ReportingCore, logger: Log
             },
           },
         });
+
+        counters.usageCounter();
+
         return res.ok();
       } catch (err) {
         logger.error(err);
@@ -141,14 +148,18 @@ export const registerDeprecationsRoutes = (reporting: ReportingCore, logger: Log
         if (err instanceof errors.ResponseError) {
           // If there were no reporting indices to update, that's OK because then there is nothing to migrate
           if (err.statusCode === 404) {
+            counters.errorCounter(undefined, 404);
             return res.ok();
           }
+
+          const statusCode = err.statusCode ?? 500;
+          counters.errorCounter(undefined, statusCode);
           return res.customError({
-            statusCode: err.statusCode ?? 500,
             body: {
               message: err.message,
               name: err.name,
             },
+            statusCode,
           });
         }
 

@@ -9,9 +9,7 @@ import React, { Component, Fragment } from 'react';
 import { EuiSuperSelect, EuiSpacer } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
-// @ts-expect-error
 import { IconStops } from './icon_stops';
-// @ts-expect-error
 import { getIconPaletteOptions, PREFERRED_ICONS } from '../../symbol_utils';
 import {
   CustomIcon,
@@ -28,7 +26,7 @@ const DEFAULT_ICON_STOPS: IconStop[] = [
   { stop: '', icon: PREFERRED_ICONS[1], iconSource: ICON_SOURCE.MAKI },
 ];
 
-interface StyleOptionChanges {
+export interface StyleOptionChanges {
   customIconStops?: IconStop[];
   iconPaletteId?: string | null;
   useCustomIconMap: boolean;

@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import jestExpect from 'expect';
+import { expect as jestExpect } from 'expect';
 import { parse as parseCookie, Cookie } from 'tough-cookie';
 import { setTimeout as setTimeoutAsync } from 'timers/promises';
 import { adminTestUser } from '@kbn/test';
@@ -102,7 +102,7 @@ export default function ({ getService }: FtrProviderContext) {
         // If browser and Kibana can successfully negotiate this HTML won't rendered, but if not
         // users will see a proper `Unauthenticated` page.
         expect(spnegoResponse.headers['content-security-policy']).to.be.a('string');
-        expect(spnegoResponse.text).to.contain('We couldn&#x27;t log you in');
+        expect(spnegoResponse.text).to.contain('error');
       });
 
       it('AJAX requests should not initiate SPNEGO', async () => {

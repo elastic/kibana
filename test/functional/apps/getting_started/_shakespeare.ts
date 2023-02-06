@@ -16,7 +16,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const log = getService('log');
   const retry = getService('retry');
   const security = getService('security');
-  const browser = getService('browser');
+  const config = getService('config');
   const kibanaServer = getService('kibanaServer');
   const PageObjects = getPageObjects([
     'console',
@@ -28,6 +28,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   ]);
 
   const xyChartSelector = 'xyVisChart';
+  const remoteName = 'ftr-remote:';
+  const indexPatternString = 'shakespeare';
+  const indexPattern = config.get('esTestCluster.ccs')
+    ? remoteName + indexPatternString
+    : indexPatternString;
 
   // https://www.elastic.co/guide/en/kibana/current/tutorial-load-dataset.html
 
@@ -38,21 +43,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     // order they are added.
     let aggIndex = 1;
     // Used to track flag before and after reset
-    let isNewChartsLibraryEnabled = true;
 
     before(async function () {
       log.debug('https://www.elastic.co/guide/en/kibana/current/tutorial-load-dataset.html');
-      isNewChartsLibraryEnabled = await PageObjects.visChart.isNewChartsLibraryEnabled();
       await security.testUser.setRoles(['kibana_admin', 'test_shakespeare_reader']);
       await kibanaServer.savedObjects.cleanStandardList();
       log.debug('Load shakespeare data');
-
-      if (!isNewChartsLibraryEnabled) {
-        await kibanaServer.uiSettings.update({
-          'visualization:visualize:legacyPieChartsLibrary': true,
-        });
-        await browser.refresh();
-      }
     });
 
     after(async () => {
@@ -64,9 +60,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('should create shakespeare index pattern', async function () {
       await PageObjects.common.navigateToApp('settings');
       log.debug('Create shakespeare index pattern');
-      await PageObjects.settings.createIndexPattern('shakespeare', null);
+      await PageObjects.settings.createIndexPattern(indexPattern, null);
       const patternName = await PageObjects.settings.getIndexPageHeading();
-      expect(patternName).to.be('shakespeare');
+      expect(patternName).to.be(indexPattern);
     });
 
     // https://www.elastic.co/guide/en/kibana/current/tutorial-visualizing.html
@@ -79,7 +75,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       log.debug('create shakespeare vertical bar chart');
       await PageObjects.visualize.navigateToNewAggBasedVisualization();
       await PageObjects.visualize.clickVerticalBarChart();
-      await PageObjects.visualize.clickNewSearch('shakespeare');
+      await PageObjects.visualize.clickNewSearch(indexPattern);
       await PageObjects.visChart.waitForVisualization();
 
       // Remove refresh click when vislib is removed

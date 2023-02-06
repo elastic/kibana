@@ -28,6 +28,7 @@ import apm from 'elastic-apm-node';
 import { executionContextServiceMock } from '@kbn/core/server/mocks';
 import { usageCountersServiceMock } from '@kbn/usage-collection-plugin/server/usage_counters/usage_counters_service.mock';
 import {
+  calculateDelay,
   TASK_MANAGER_RUN_TRANSACTION_TYPE,
   TASK_MANAGER_TRANSACTION_TYPE,
   TASK_MANAGER_TRANSACTION_TYPE_MARK_AS_RUNNING,
@@ -300,9 +301,8 @@ describe('TaskManagerRunner', () => {
       expect(instance.attempts).toEqual(initialAttempts + 1);
       expect(instance.status).toBe('running');
       expect(instance.startedAt!.getTime()).toEqual(Date.now());
-      expect(instance.retryAt!.getTime()).toEqual(
-        minutesFromNow((initialAttempts + 1) * 5).getTime() + timeoutMinutes * 60 * 1000
-      );
+      const expectedRunAt = Date.now() + calculateDelay(initialAttempts + 1);
+      expect(instance.retryAt!.getTime()).toEqual(expectedRunAt + timeoutMinutes * 60 * 1000);
       expect(instance.enabled).not.toBeDefined();
     });
 
@@ -569,7 +569,7 @@ describe('TaskManagerRunner', () => {
       sinon.assert.calledWith(getRetryStub, initialAttempts + 1);
       const instance = store.update.mock.calls[0][0];
 
-      const attemptDelay = (initialAttempts + 1) * 5 * 60 * 1000;
+      const attemptDelay = calculateDelay(initialAttempts + 1);
       const timeoutDelay = timeoutMinutes * 60 * 1000;
       expect(instance.retryAt!.getTime()).toEqual(
         new Date(Date.now() + attemptDelay + timeoutDelay).getTime()
@@ -817,7 +817,8 @@ describe('TaskManagerRunner', () => {
       const instance = store.update.mock.calls[0][0];
 
       expect(instance.id).toEqual(id);
-      expect(instance.runAt.getTime()).toEqual(minutesFromNow(initialAttempts * 5).getTime());
+      const expectedRunAt = new Date(Date.now() + calculateDelay(initialAttempts));
+      expect(instance.runAt.getTime()).toEqual(expectedRunAt.getTime());
       expect(instance.params).toEqual({ a: 'b' });
       expect(instance.state).toEqual({ hey: 'there' });
       expect(instance.enabled).not.toBeDefined();
@@ -1169,7 +1170,7 @@ describe('TaskManagerRunner', () => {
       sinon.assert.calledWith(getRetryStub, initialAttempts, error);
       const instance = store.update.mock.calls[0][0];
 
-      const expectedRunAt = new Date(Date.now() + initialAttempts * 5 * 60 * 1000);
+      const expectedRunAt = new Date(Date.now() + calculateDelay(initialAttempts));
       expect(instance.runAt.getTime()).toEqual(expectedRunAt.getTime());
       expect(instance.enabled).not.toBeDefined();
     });

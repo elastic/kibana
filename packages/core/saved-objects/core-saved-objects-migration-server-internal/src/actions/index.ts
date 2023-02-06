@@ -6,8 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { RetryableEsClientError } from './catch_retryable_es_client_errors';
-import { DocumentsTransformFailed } from '../core/migrate_raw_docs';
+import { type Either, right } from 'fp-ts/lib/Either';
+import type { RetryableEsClientError } from './catch_retryable_es_client_errors';
+import type { DocumentsTransformFailed } from '../core/migrate_raw_docs';
 
 export {
   BATCH_SIZE,
@@ -77,6 +78,12 @@ export { updateAliases } from './update_aliases';
 
 export type { CreateIndexParams } from './create_index';
 export { createIndex } from './create_index';
+
+export { checkTargetMappings } from './check_target_mappings';
+
+export { updateTargetMappingsMeta } from './update_target_mappings_meta';
+
+export const noop = async (): Promise<Either<never, 'noop'>> => right('noop' as const);
 
 export type {
   UpdateAndPickupMappingsResponse,

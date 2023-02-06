@@ -9,7 +9,7 @@
 import sinon from 'sinon';
 
 import { Progress } from './progress';
-import { Logger } from '../lib/logger';
+import { Logger } from '../../cli/logger';
 
 describe('kibana cli', function () {
   describe('plugin installer', function () {

@@ -151,7 +151,7 @@ describe('ErrorCallout', () => {
       />
     );
 
-    wrapper.find('[data-test-subj="errorCalloutDisassociateButton"]').at(0).simulate('click');
+    wrapper.find('button[data-test-subj="errorCalloutDisassociateButton"]').at(0).simulate('click');
 
     expect(mockDisassociate).toHaveBeenCalledWith([]);
   });

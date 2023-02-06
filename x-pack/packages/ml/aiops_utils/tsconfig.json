@@ -1,9 +1,7 @@
 {
-  "extends": "../../../../tsconfig.bazel.json",
+  "extends": "../../../../tsconfig.base.json",
   "compilerOptions": {
-    "declaration": true,
-    "emitDeclarationOnly": true,
-    "outDir": "target_types",
+    "outDir": "target/types",
     "stripInternal": false,
     "types": [
       "jest",
@@ -14,5 +12,12 @@
   "include": [
     "**/*.ts",
     "**/*.tsx",
+  ],
+  "kbn_references": [
+    "@kbn/logging",
+    "@kbn/core-http-server",
+  ],
+  "exclude": [
+    "target/**/*",
   ]
 }

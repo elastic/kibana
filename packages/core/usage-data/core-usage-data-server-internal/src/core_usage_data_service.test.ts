@@ -308,6 +308,7 @@ describe('CoreUsageDataService', () => {
                 },
                 "rewriteBasePath": false,
                 "securityResponseHeaders": Object {
+                  "crossOriginOpenerPolicy": "same-origin",
                   "disableEmbedding": false,
                   "permissionsPolicyConfigured": false,
                   "referrerPolicy": "no-referrer-when-downgrade",

@@ -12,8 +12,8 @@ import {
   EuiFlexItem,
   EuiForm,
   EuiLink,
-  EuiPageContent_Deprecated as EuiPageContent,
   EuiPageHeader,
+  EuiPageSection,
   EuiSpacer,
 } from '@elastic/eui';
 import React, { Component } from 'react';
@@ -58,9 +58,14 @@ interface Props {
   notifications: NotificationsStart;
   docLinks: DocLinksStart;
   history: ScopedHistory;
+  readOnly?: boolean;
 }
 
 export class EditRoleMappingPage extends Component<Props, State> {
+  static defaultProps: Partial<Props> = {
+    readOnly: false,
+  };
+
   constructor(props: any) {
     super(props);
     this.state = {
@@ -96,9 +101,9 @@ export class EditRoleMappingPage extends Component<Props, State> {
 
     if (loadState === 'loading') {
       return (
-        <EuiPageContent horizontalPosition="center" verticalPosition="center" color="subdued">
+        <EuiPageSection alignment="center" color="subdued">
           <SectionLoading />
-        </EuiPageContent>
+        </EuiPageSection>
       );
     }
 
@@ -141,9 +146,10 @@ export class EditRoleMappingPage extends Component<Props, State> {
 
         <EuiForm isInvalid={this.state.formError.isInvalid} error={this.state.formError.error}>
           <MappingInfoPanel
+            data-test-subj="roleMappingInfoPanel"
             roleMapping={this.state.roleMapping!}
             onChange={(roleMapping) => this.setState({ roleMapping })}
-            mode={this.editingExistingRoleMapping() ? 'edit' : 'create'}
+            mode={this.getInfoPanelMode()}
             validateForm={this.state.validateForm}
             canUseInlineScripts={this.state.canUseInlineScripts}
             canUseStoredScripts={this.state.canUseStoredScripts}
@@ -152,6 +158,7 @@ export class EditRoleMappingPage extends Component<Props, State> {
           />
           <EuiSpacer />
           <RuleEditorPanel
+            data-test-subj="roleMappingRulePanel"
             rawRules={this.state.roleMapping!.rules}
             validateForm={this.state.validateForm}
             onValidityChange={this.onRuleValidityChange}
@@ -164,6 +171,7 @@ export class EditRoleMappingPage extends Component<Props, State> {
               })
             }
             docLinks={this.props.docLinks}
+            readOnly={this.props.readOnly}
           />
           <EuiSpacer />
           {this.getFormButtons()}
@@ -172,7 +180,19 @@ export class EditRoleMappingPage extends Component<Props, State> {
     );
   }
 
+  private getInfoPanelMode = () => {
+    return this.props.readOnly ? 'view' : this.editingExistingRoleMapping() ? 'edit' : 'create';
+  };
+
   private getFormTitle = () => {
+    if (this.props.readOnly) {
+      return (
+        <FormattedMessage
+          id="xpack.security.management.editRoleMapping.readOnlyRoleMappingTitle"
+          defaultMessage="Viewing role mapping"
+        />
+      );
+    }
     if (this.editingExistingRoleMapping()) {
       return (
         <FormattedMessage
@@ -190,59 +210,95 @@ export class EditRoleMappingPage extends Component<Props, State> {
   };
 
   private getFormButtons = () => {
+    if (this.props.readOnly === true) {
+      return this.getReturnToRoleMappingListButton();
+    }
+
     return (
       <EuiFlexGroup>
-        <EuiFlexItem grow={false}>
-          <EuiButton
-            fill
-            onClick={this.saveRoleMapping}
-            isLoading={this.state.loadState === 'saveInProgress'}
-            disabled={!this.state.rulesValid || this.state.loadState === 'saveInProgress'}
-            data-test-subj="saveRoleMappingButton"
-          >
-            <FormattedMessage
-              id="xpack.security.management.editRoleMapping.saveRoleMappingButton"
-              defaultMessage="Save role mapping"
-            />
-          </EuiButton>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false} onClick={this.backToRoleMappingsList}>
-          <EuiButton>
-            <FormattedMessage
-              id="xpack.security.management.editRoleMapping.cancelButton"
-              defaultMessage="Cancel"
-            />
-          </EuiButton>
-        </EuiFlexItem>
+        <EuiFlexItem grow={false}>{this.getSaveButton()}</EuiFlexItem>
+        <EuiFlexItem grow={false}>{this.getCancelButton()}</EuiFlexItem>
         <EuiFlexItem grow={true} />
-        {this.editingExistingRoleMapping() && (
-          <EuiFlexItem grow={false}>
-            <DeleteProvider
-              roleMappingsAPI={this.props.roleMappingsAPI}
-              notifications={this.props.notifications}
-            >
-              {(deleteRoleMappingsPrompt) => {
-                return (
-                  <EuiButtonEmpty
-                    onClick={() =>
-                      deleteRoleMappingsPrompt([this.state.roleMapping!], () =>
-                        this.backToRoleMappingsList()
-                      )
-                    }
-                    color="danger"
-                  >
-                    <FormattedMessage
-                      id="xpack.security.management.editRoleMapping.deleteRoleMappingButton"
-                      defaultMessage="Delete role mapping"
-                    />
-                  </EuiButtonEmpty>
-                );
-              }}
-            </DeleteProvider>
-          </EuiFlexItem>
-        )}
+        {this.getDeleteButton()}
       </EuiFlexGroup>
     );
+  };
+
+  private getReturnToRoleMappingListButton = () => {
+    return (
+      <EuiButton
+        // {...reactRouterNavigate(this.props.history, '')}
+        onClick={this.backToRoleMappingsList}
+        iconType="arrowLeft"
+        data-test-subj="roleMappingFormReturnButton"
+      >
+        <FormattedMessage
+          id="xpack.security.management.editRoleMapping.returnToRoleMappingListButton"
+          defaultMessage="Back to role mappings"
+        />
+      </EuiButton>
+    );
+  };
+
+  private getSaveButton = () => {
+    return (
+      <EuiButton
+        fill
+        onClick={this.saveRoleMapping}
+        isLoading={this.state.loadState === 'saveInProgress'}
+        disabled={!this.state.rulesValid || this.state.loadState === 'saveInProgress'}
+        data-test-subj="saveRoleMappingButton"
+      >
+        <FormattedMessage
+          id="xpack.security.management.editRoleMapping.saveRoleMappingButton"
+          defaultMessage="Save role mapping"
+        />
+      </EuiButton>
+    );
+  };
+
+  private getCancelButton = () => {
+    return (
+      <EuiButton onClick={this.backToRoleMappingsList}>
+        <FormattedMessage
+          id="xpack.security.management.editRoleMapping.cancelButton"
+          defaultMessage="Cancel"
+        />
+      </EuiButton>
+    );
+  };
+
+  private getDeleteButton = () => {
+    if (this.editingExistingRoleMapping() && !this.props.readOnly) {
+      return (
+        <EuiFlexItem grow={false}>
+          <DeleteProvider
+            roleMappingsAPI={this.props.roleMappingsAPI}
+            notifications={this.props.notifications}
+          >
+            {(deleteRoleMappingsPrompt) => {
+              return (
+                <EuiButtonEmpty
+                  data-test-subj="deleteRoleMappingButton"
+                  onClick={() =>
+                    deleteRoleMappingsPrompt([this.state.roleMapping!], () =>
+                      this.backToRoleMappingsList()
+                    )
+                  }
+                  color="danger"
+                >
+                  <FormattedMessage
+                    id="xpack.security.management.editRoleMapping.deleteRoleMappingButton"
+                    defaultMessage="Delete role mapping"
+                  />
+                </EuiButtonEmpty>
+              );
+            }}
+          </DeleteProvider>
+        </EuiFlexItem>
+      );
+    }
+    return null;
   };
 
   private onRuleValidityChange = (rulesValid: boolean) => {
@@ -325,7 +381,8 @@ export class EditRoleMappingPage extends Component<Props, State> {
         hasCompatibleRealms,
       } = features;
 
-      const loadState: State['loadState'] = canManageRoleMappings ? 'ready' : 'permissionDenied';
+      const canLoad = canManageRoleMappings || this.props.readOnly;
+      const loadState: State['loadState'] = canLoad ? 'ready' : 'permissionDenied';
 
       this.setState({
         loadState,

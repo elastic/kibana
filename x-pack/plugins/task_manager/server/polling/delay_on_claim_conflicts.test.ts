@@ -16,7 +16,7 @@ import { TaskLifecycleEvent } from '../polling_lifecycle';
 import { FillPoolResult } from '../lib/fill_pool';
 
 describe('delayOnClaimConflicts', () => {
-  beforeEach(() => jest.useFakeTimers('legacy'));
+  beforeEach(() => jest.useFakeTimers({ legacyFakeTimers: true }));
 
   test(
     'initializes with a delay of 0',

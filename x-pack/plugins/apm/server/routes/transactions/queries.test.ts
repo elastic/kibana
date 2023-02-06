@@ -22,12 +22,12 @@ describe('transaction queries', () => {
   });
 
   it('fetches breakdown data for transactions', async () => {
-    mock = await inspectSearchParams((setup, apmEventClient) =>
+    mock = await inspectSearchParams(({ mockApmEventClient, mockConfig }) =>
       getTransactionBreakdown({
         serviceName: 'foo',
         transactionType: 'bar',
-        config: setup.config,
-        apmEventClient,
+        config: mockConfig,
+        apmEventClient: mockApmEventClient,
         environment: ENVIRONMENT_ALL.value,
         kuery: '',
         start: 0,
@@ -39,13 +39,13 @@ describe('transaction queries', () => {
   });
 
   it('fetches breakdown data for transactions for a transaction name', async () => {
-    mock = await inspectSearchParams((setup, apmEventClient) =>
+    mock = await inspectSearchParams(({ mockApmEventClient, mockConfig }) =>
       getTransactionBreakdown({
         serviceName: 'foo',
         transactionType: 'bar',
         transactionName: 'baz',
-        config: setup.config,
-        apmEventClient,
+        config: mockConfig,
+        apmEventClient: mockApmEventClient,
         environment: ENVIRONMENT_ALL.value,
         kuery: '',
         start: 0,
@@ -57,14 +57,14 @@ describe('transaction queries', () => {
   });
 
   it('fetches transaction trace samples', async () => {
-    mock = await inspectSearchParams((setup, apmEventClient) =>
+    mock = await inspectSearchParams(({ mockApmEventClient }) =>
       getTraceSamples({
         serviceName: 'foo',
         transactionName: 'bar',
         transactionType: 'baz',
         traceId: 'qux',
         transactionId: 'quz',
-        apmEventClient,
+        apmEventClient: mockApmEventClient,
         environment: ENVIRONMENT_ALL.value,
         kuery: '',
         start: 0,
@@ -76,11 +76,11 @@ describe('transaction queries', () => {
   });
 
   it('fetches a transaction', async () => {
-    mock = await inspectSearchParams((setup, apmEventClient) =>
+    mock = await inspectSearchParams(({ mockApmEventClient }) =>
       getTransaction({
         transactionId: 'foo',
         traceId: 'bar',
-        apmEventClient,
+        apmEventClient: mockApmEventClient,
         start: 0,
         end: 50000,
       })

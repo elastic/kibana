@@ -10,15 +10,15 @@ import { FtrProviderContext } from '../../../common/ftr_provider_context';
 // eslint-disable-next-line import/no-default-export
 export default function connectorsTests({ loadTestFile }: FtrProviderContext) {
   describe('Connectors', () => {
-    loadTestFile(require.resolve('./connector_types/cases/cases_webhook'));
-    loadTestFile(require.resolve('./connector_types/cases/jira'));
-    loadTestFile(require.resolve('./connector_types/cases/servicenow'));
-    loadTestFile(require.resolve('./connector_types/cases/swimlane'));
-    loadTestFile(require.resolve('./connector_types/stack/email'));
-    loadTestFile(require.resolve('./connector_types/stack/es_index'));
-    loadTestFile(require.resolve('./connector_types/stack/pagerduty'));
-    loadTestFile(require.resolve('./connector_types/stack/server_log'));
-    loadTestFile(require.resolve('./connector_types/stack/slack'));
-    loadTestFile(require.resolve('./connector_types/stack/webhook'));
+    loadTestFile(require.resolve('./connector_types/cases_webhook'));
+    loadTestFile(require.resolve('./connector_types/jira'));
+    loadTestFile(require.resolve('./connector_types/servicenow'));
+    loadTestFile(require.resolve('./connector_types/swimlane'));
+    loadTestFile(require.resolve('./connector_types/email'));
+    loadTestFile(require.resolve('./connector_types/es_index'));
+    loadTestFile(require.resolve('./connector_types/pagerduty'));
+    loadTestFile(require.resolve('./connector_types/server_log'));
+    loadTestFile(require.resolve('./connector_types/slack'));
+    loadTestFile(require.resolve('./connector_types/webhook'));
   });
 }

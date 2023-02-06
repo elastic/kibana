@@ -24,7 +24,7 @@ export const SolutionToolbarButton = ({ label, primary, className, ...rest }: Pr
     {...rest}
     size="m"
     color={primary ? 'primary' : 'text'}
-    className={`solutionToolbarButton ${className}`}
+    className={`${primary ? '' : 'solutionToolbarButton'} ${className}`}
     fill={primary}
   >
     {label}

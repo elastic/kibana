@@ -49,7 +49,6 @@ export interface CustomRule {
   name: string;
   description: string;
   dataSource: RuleDataSource;
-  interval?: string;
   severity?: string;
   riskScore?: string;
   tags?: string[];
@@ -59,6 +58,7 @@ export interface CustomRule {
   mitre?: Mitre[];
   note?: string;
   runsEvery?: Interval;
+  interval?: string;
   lookBack?: Interval;
   timeline?: CompleteTimeline;
   maxSignals?: number;
@@ -180,16 +180,8 @@ const getSeverityOverride4 = (): SeverityOverride => ({
   sourceValue: 'auditbeat',
 });
 
-// Default interval is 1m, our tests config overwrite this to 1s
-// See https://github.com/elastic/kibana/pull/125396 for details
 const getRunsEvery = (): Interval => ({
-  interval: '1',
-  timeType: 'Seconds',
-  type: 's',
-});
-
-const getRunsEveryFiveMinutes = (): Interval => ({
-  interval: '5',
+  interval: '100',
   timeType: 'Minutes',
   type: 'm',
 });
@@ -212,7 +204,7 @@ export const getDataViewRule = (): CustomRule => ({
   falsePositivesExamples: ['False1', 'False2'],
   mitre: [getMitre1(), getMitre2()],
   note: '# test markdown',
-  runsEvery: getRunsEveryFiveMinutes(),
+  runsEvery: getRunsEvery(),
   lookBack: getLookBack(),
   timeline: getTimeline(),
   maxSignals: 100,
@@ -305,7 +297,6 @@ export const getExistingRule = (): CustomRule => ({
   name: 'Rule 1',
   description: 'Description for Rule 1',
   dataSource: { index: ['auditbeat-*'], type: 'indexPatterns' },
-  interval: '100m',
   severity: 'High',
   riskScore: '19',
   tags: ['rule1'],
@@ -314,6 +305,7 @@ export const getExistingRule = (): CustomRule => ({
   mitre: [],
   note: 'This is my note',
   runsEvery: getRunsEvery(),
+  interval: '100m',
   lookBack: getLookBack(),
   timeline: getTimeline(),
   // Please do not change, or if you do, needs
@@ -395,8 +387,8 @@ export const getNewTermsRule = (): NewTermsRule => ({
 
 export const getMachineLearningRule = (): MachineLearningRule => ({
   machineLearningJobs: [
-    'v3_linux_anomalous_process_all_hosts',
-    'v3_linux_anomalous_network_activity',
+    'Unusual Linux Network Activity',
+    'Anomalous Process for a Linux Population',
   ],
   anomalyScoreThreshold: 20,
   name: 'New ML Rule Test',

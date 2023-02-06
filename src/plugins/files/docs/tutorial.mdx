@@ -1,0 +1,184 @@
+---
+id: kibDevTutorialFileService
+slug: /kibana-dev-docs/file-service
+title: Kibana file service
+description: The file service abstracts over a blob store and provides CRUD functionality for blobs.
+date: 2022-08-29
+tags: ['kibana', 'onboarding', 'dev', 'architecture']
+---
+
+## Use cases
+
+Blobs include any of the following:
+
+* User-provided images, like avatars or logos in all image formats
+* Documents, like PDFs or text files
+* Binaries or scripts
+* Visual or text outputs that need to be shared or downloaded at a later time
+* Memoizing results of a compute intensive operation
+* ...and many more!
+
+<DocCallOut title="Note on performance">
+  The default blob store is Elasticsearch. The file service optimizes how Elasticsearch is used for blob storage, however Elasticsearch is not a blob store by design! **Please report any performance issues you notice ASAP!**
+</DocCallOut>
+
+<DocCallOut title="A few notes on security">
+  The file service does not encrypt contents at rest. No additional processing (like compression) is done to blob contents.
+
+  When storing data in Elasticsearch, the file service uses a system index. System indices have strict access controls so most users will not be able to access documents with blob contents directly. However, plugins are able to expose file contents over HTTP (more on this later) and there is nothing preventing a plugin from bypassing regular security checks which may unintentionally expose files.
+
+  To ensure the most secure file storage experience:
+
+  1. Only expose the needed actions against your files
+  2. Control access to your files using security tags on your HTTP routes (see code snippets below)
+  3. Do not ask users to store data in files that should not be visible to other users of the app
+  4. Do not store sensitive data in files - if you have a use case that requires this, please reach out to the Kibana App Services team
+</DocCallOut>
+
+### Files and Saved Objects
+
+Files are a composition of Saved Objects (SOs) and blobs. SOs contain all metadata needed to provide file service functionality.
+
+The file blob, or file content, is stored _separately_. When creating a file we first need to create the file metadata, which acts as an upload target, and then upload file content.
+
+<DocCallOut title="File contents are immutable">
+  Once uploaded, the contents of a file do not change. Browsers, and other clients, should only need to download the contents of a file once, subsequent downloads should be served from the cache.
+
+  If you need to update the contents of a file, you should create a new file with new contents.
+</DocCallOut>
+
+#### Custom metadata
+
+Consumers of the file service are able to decide what metadata they want to associate with a file. The file service provides the ability to search custom data which is useful for tagging and filtering your files &mdash; all metadata must be serializable to JSON. Learn more about how to specify custom metadata below.
+
+### How to set up files for your plugin
+
+All setup examples are based on the [`filesExample` plugin](https://github.com/elastic/kibana/blob/b6693bd9260c1620ec5ad8f09141b534c3b02e81/examples/files_example/README.md).
+
+#### Prepare your plugin
+
+First add the  `files` plugin as a required dependency in your `kibana.json`:
+
+```json
+  "requiredPlugins": ["files"],
+```
+<br />
+
+#### Declare your file kind
+
+Your plugin can have more than one file kind. Each file kind should represent a specific use case, for example: an image for user avatars.
+
+```ts
+import { FileKind } from '@kbn/files-plugin/common';
+
+export const PLUGIN_ID = 'filesExample';
+
+const httpTags = {
+  tags: [`access:${PLUGIN_ID}`], // ensure that only users with access to this plugin can files of this kind
+};
+
+export const exampleFileKind: FileKind = {
+  id: 'filesExample',
+  maxSizeBytes: 8 * 1024 * 1024, // 8 MiB
+  http: {
+    create: httpTags,
+    delete: httpTags,
+    download: httpTags,
+    getById: httpTags,
+    list: httpTags,
+    // share: httpTags,
+    // update: httpTags,
+  },
+};
+```
+
+In this example we have chosen to disallow metadata updates and file sharing endpoints. **Make sure that you only expose the actions you need over HTTP**.
+
+<DocCallOut title="Ensure users can access their files">
+  HTTP access tags (`access:myApp`) define a new permission for an HTTP endpoint. **Ensure that users have the permissions they need to access their files!** See `KibanaFeatureConfig` for more information.
+</DocCallOut>
+
+#### Register the file kind
+
+Now we are able to register this file kind with the file service:
+
+```ts
+  // in your server-side and client-side plugin code
+  public setup(core: CoreSetup, { files }: {  files: FilesSetup }) {
+    files.registerFileKind(exampleFileKind);
+  }
+```
+
+#### Use the file client
+
+Let's use the file client now that we have all the boilerplate out of the way:
+
+```ts
+  // in your public code
+  const client = files.filesClientFactory.asScoped('filesExample'); // Create a file client that is scoped to "filesExample"
+  const result = await client.list();
+```
+
+**Note**: the server-side file client has unrestricted access to all files because it does
+not need to pass through HTTP API access control!
+
+Right now this list will be empty... How do we get our image avatars into the file service? By asking users!
+
+The file service provides a set of React UI components for you to leverage. Users can give you a new file (`UploadFile`) or select a from a set of files they have already uploaded (`FilePicker`).
+
+Let's go with the latter for now because users can pick from previously uploaded
+avatars or provide a new one.
+
+```tsx
+  const client = files.filesClientFactory.asUnscoped(); // Create a client not scoped to a file kind
+  ...
+  <FilesContext client={client}>
+    <FilePicker kind="filesExample" ... />
+  </FilesContext>
+  ...
+```
+
+You'll notice the `FilesContext` component was introduced here. This provides
+access to our registry of file kinds among other things so make sure your app is
+wrapped in this context.
+
+At this point you can use the public components provided by the file service
+to render an image in the browser:
+
+```tsx
+  const client = files.filesClientFactory.asUnscoped(); // Create a client not scoped to a file kind
+  ...
+  <Image src={client.getDownloadHref({ id: '<file-id>', kind: 'filesExample'  })} alt="..." />
+  ...
+```
+
+<DocCallOut title="File service React components">
+  To see the React components currently available in action run `yarn storybook files` and follow the prompts in the terminal.
+</DocCallOut>
+
+Alternatively, you can use the file client directly to create a new file from the browser:
+
+```ts
+  const { file } = await files.example.create({
+    name: 'my_file',
+    alt: 'My image',
+    /**
+    * How you define metadata is entirely up to you. Just make sure that your application
+    * remains compatible with previous versions of your metadata.
+    */
+    meta: { myValue: 'test' } as MyMetadata,
+    mimeType: 'image/png',
+  });
+  // ...
+  await files.example.upload({ id: file.id, body: blob });
+```
+
+## Recap
+
+After completing this tutorial you should have successfully integrated your application
+with the file service:
+
+* Have a file kind setup for your use case
+* Use the file client on server or client side to interact with files
+* Leverage existing file service UI components to greatly reduce the amount
+  of code needed to integrate your solution and provide a consistent UX

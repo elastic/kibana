@@ -39,7 +39,6 @@ export function termsQuery(
     return [];
   }
 
-  // @ts-expect-error undefined and null aren't assignable
   return [{ terms: { [field]: filtered } }];
 }
 
@@ -61,7 +60,7 @@ export function rangeQuery(
   ];
 }
 
-export function kqlQuery(kql: string): estypes.QueryDslQueryContainer[] {
+export function kqlQuery(kql?: string): estypes.QueryDslQueryContainer[] {
   if (!kql) {
     return [];
   }

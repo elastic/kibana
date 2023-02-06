@@ -22,6 +22,18 @@ properties:
   monitoring_output_id:
     type: string
     nullable: true
+  fleet_server_host_id:
+    type: string
+    nullable: true
+  download_source_id:
+    type: string
+    nullable: true
+  unenroll_timeout:
+    type: number
+    nullable: true
+  inactivity_timeout:
+    type: number
+    nullable: true
 required:
   - name
   - namespace

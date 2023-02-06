@@ -7,8 +7,8 @@
 
 import type { SavedObjectsClientContract, ElasticsearchClient } from '@kbn/core/server';
 
+import { v4 as uuidv4 } from 'uuid';
 import moment from 'moment';
-import uuid from 'uuid';
 
 import { isAgentUpgradeable } from '../../../common/services';
 
@@ -24,7 +24,7 @@ import type { GetAgentsOptions } from './crud';
 import { bulkUpdateAgents } from './crud';
 import { createErrorActionResults, createAgentAction } from './actions';
 import { getHostedPolicies, isHostedAgent } from './hosted_agent';
-import { BulkActionTaskType } from './bulk_actions_resolver';
+import { BulkActionTaskType } from './bulk_action_types';
 
 export class UpgradeActionRunner extends ActionRunner {
   protected async processAgents(agents: Agent[]): Promise<{ actionId: string }> {
@@ -100,7 +100,7 @@ export async function upgradeBatch(
   const now = new Date().toISOString();
   const data = {
     version: options.version,
-    source_uri: options.sourceUri,
+    sourceURI: options.sourceUri,
   };
 
   const rollingUpgradeOptions = getRollingUpgradeOptions(
@@ -120,7 +120,7 @@ export async function upgradeBatch(
     errors
   );
 
-  const actionId = options.actionId ?? uuid();
+  const actionId = options.actionId ?? uuidv4();
   const total = options.total ?? givenAgents.length;
 
   await createAgentAction(esClient, {
@@ -146,20 +146,29 @@ export async function upgradeBatch(
   };
 }
 
-const MINIMUM_EXECUTION_DURATION_SECONDS = 60 * 60 * 2; // 2h
+export const MINIMUM_EXECUTION_DURATION_SECONDS = 60 * 60 * 2; // 2h
 
-const getRollingUpgradeOptions = (startTime?: string, upgradeDurationSeconds?: number) => {
+export const getRollingUpgradeOptions = (startTime?: string, upgradeDurationSeconds?: number) => {
   const now = new Date().toISOString();
   // Perform a rolling upgrade
   if (upgradeDurationSeconds) {
+    const minExecutionDuration = Math.min(
+      MINIMUM_EXECUTION_DURATION_SECONDS,
+      upgradeDurationSeconds
+    );
     return {
       start_time: startTime ?? now,
-      minimum_execution_duration: Math.min(
-        MINIMUM_EXECUTION_DURATION_SECONDS,
-        upgradeDurationSeconds
-      ),
+      rollout_duration_seconds: upgradeDurationSeconds,
+      minimum_execution_duration: minExecutionDuration,
+      // expiration will not be taken into account with Fleet Server version >=8.7, it is kept for BWC
+      // in the next major, expiration and minimum_execution_duration should be removed
       expiration: moment(startTime ?? now)
-        .add(upgradeDurationSeconds, 'seconds')
+        .add(
+          upgradeDurationSeconds <= MINIMUM_EXECUTION_DURATION_SECONDS
+            ? minExecutionDuration * 2
+            : upgradeDurationSeconds,
+          'seconds'
+        )
         .toISOString(),
     };
   }

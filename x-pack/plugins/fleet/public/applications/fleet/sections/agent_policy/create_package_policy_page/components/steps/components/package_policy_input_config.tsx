@@ -6,7 +6,6 @@
  */
 
 import React, { useState, Fragment, memo, useMemo } from 'react';
-import styled from 'styled-components';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiFlexGrid,
@@ -23,10 +22,6 @@ import { isAdvancedVar, validationHasErrors } from '../../../services';
 
 import { PackagePolicyInputVarField } from './package_policy_input_var_field';
 
-const FlexItemWithMaxWidth = styled(EuiFlexItem)`
-  max-width: calc(50% - ${(props) => props.theme.eui.euiSizeL});
-`;
-
 export const PackagePolicyInputConfig: React.FunctionComponent<{
   hasInputStreams: boolean;
   packageInputVars?: RegistryVarsEntry[];
@@ -34,6 +29,7 @@ export const PackagePolicyInputConfig: React.FunctionComponent<{
   updatePackagePolicyInput: (updatedInput: Partial<NewPackagePolicyInput>) => void;
   inputVarsValidationResults: PackagePolicyConfigValidationResults;
   forceShowErrors?: boolean;
+  isEditPage?: boolean;
 }> = memo(
   ({
     hasInputStreams,
@@ -42,6 +38,7 @@ export const PackagePolicyInputConfig: React.FunctionComponent<{
     updatePackagePolicyInput,
     inputVarsValidationResults,
     forceShowErrors,
+    isEditPage = false,
   }) => {
     // Showing advanced options toggle state
     const [isShowingAdvanced, setIsShowingAdvanced] = useState<boolean>(false);
@@ -101,7 +98,7 @@ export const PackagePolicyInputConfig: React.FunctionComponent<{
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>
-        <FlexItemWithMaxWidth>
+        <EuiFlexItem>
           <EuiFlexGroup direction="column" gutterSize="m">
             {requiredVars.map((varDef) => {
               const { name: varName, type: varType } = varDef;
@@ -126,6 +123,7 @@ export const PackagePolicyInputConfig: React.FunctionComponent<{
                     }}
                     errors={inputVarsValidationResults.vars?.[varName]}
                     forceShowErrors={forceShowErrors}
+                    isEditPage={isEditPage}
                   />
                 </EuiFlexItem>
               );
@@ -183,6 +181,7 @@ export const PackagePolicyInputConfig: React.FunctionComponent<{
                             }}
                             errors={inputVarsValidationResults.vars?.[varName]}
                             forceShowErrors={forceShowErrors}
+                            isEditPage={isEditPage}
                           />
                         </EuiFlexItem>
                       );
@@ -191,7 +190,7 @@ export const PackagePolicyInputConfig: React.FunctionComponent<{
               </Fragment>
             ) : null}
           </EuiFlexGroup>
-        </FlexItemWithMaxWidth>
+        </EuiFlexItem>
       </EuiFlexGrid>
     );
   }

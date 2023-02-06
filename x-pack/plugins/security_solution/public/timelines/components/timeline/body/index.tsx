@@ -14,15 +14,12 @@ import {
   ARIA_COLINDEX_ATTRIBUTE,
   ARIA_ROWINDEX_ATTRIBUTE,
   onKeyDownFocusHandler,
-  getActionsColumnWidth,
 } from '@kbn/timelines-plugin/public';
+import { getActionsColumnWidth } from '../../../../common/components/header_actions';
+import type { ControlColumnProps } from '../../../../../common/types';
 import type { CellValueElementProps } from '../cell_rendering';
 import { DEFAULT_COLUMN_MIN_WIDTH } from './constants';
-import type {
-  ControlColumnProps,
-  RowRenderer,
-  TimelineTabs,
-} from '../../../../../common/types/timeline';
+import type { RowRenderer, TimelineTabs } from '../../../../../common/types/timeline';
 import { RowRendererId } from '../../../../../common/types/timeline';
 import type { BrowserFields } from '../../../../common/containers/source';
 import type { TimelineItem } from '../../../../../common/search_strategy/timeline';
@@ -91,6 +88,7 @@ export const StatefulBody = React.memo<Props>(
         selectedEventIds,
         show,
         queryFields,
+        selectAll,
       } = timelineDefaults,
     } = useSelector((state: State) => timelineBodySelector(state, id));
 
@@ -138,10 +136,10 @@ export const StatefulBody = React.memo<Props>(
 
     // Sync to selectAll so parent components can select all events
     useEffect(() => {
-      if (!isSelectAllChecked) {
+      if (selectAll && !isSelectAllChecked) {
         onSelectAll({ isSelected: true });
       }
-    }, [isSelectAllChecked, onSelectAll]);
+    }, [isSelectAllChecked, onSelectAll, selectAll]);
 
     const enabledRowRenderers = useMemo(() => {
       if (

@@ -9,13 +9,7 @@ import React, { useEffect } from 'react';
 
 import { useActions, useValues } from 'kea';
 
-import {
-  EuiBasicTable,
-  EuiBasicTableColumn,
-  EuiLink,
-  EuiSpacer,
-  EuiLoadingSpinner,
-} from '@elastic/eui';
+import { EuiBasicTable, EuiBasicTableColumn, EuiSpacer, EuiLoadingSpinner } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 
@@ -71,17 +65,6 @@ export const InferenceHistory: React.FC = () => {
               'The following inference processors were found in the _ingest.processors field of documents on this index.',
           }
         )}
-        footerDocLink={
-          // TODO: insert real doc link
-          <EuiLink href="#" target="_blank" color="subdued">
-            {i18n.translate(
-              'xpack.enterpriseSearch.content.indices.pipelines.tabs.inferenceHistory.docLink',
-              {
-                defaultMessage: 'Learn more about inference history',
-              }
-            )}
-          </EuiLink>
-        }
       >
         {isLoading ? (
           <EuiLoadingSpinner />
@@ -90,6 +73,10 @@ export const InferenceHistory: React.FC = () => {
             columns={historyColumns}
             items={inferenceHistory ?? []}
             rowHeader="pipeline"
+            noItemsMessage={i18n.translate(
+              'xpack.enterpriseSearch.content.indices.pipelines.tabs.inferenceHistory.emptyMessage',
+              { defaultMessage: 'This index has no inference history' }
+            )}
           />
         )}
       </DataPanel>

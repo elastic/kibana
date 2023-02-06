@@ -8,12 +8,24 @@
 import { i18n } from '@kbn/i18n';
 import { PluginSetupContract } from '@kbn/alerting-plugin/server';
 import { createLogThresholdExecutor, FIRED_ACTIONS } from './log_threshold_executor';
+import { extractReferences, injectReferences } from './log_threshold_references_manager';
 import {
   LOG_DOCUMENT_COUNT_RULE_TYPE_ID,
   ruleParamsRT,
 } from '../../../../common/alerting/logs/log_threshold';
 import { InfraBackendLibs } from '../../infra_types';
 import { decodeOrThrow } from '../../../../common/runtime_types';
+import { getAlertDetailsPageEnabledForApp } from '../common/utils';
+import {
+  alertDetailUrlActionVariableDescription,
+  groupByKeysActionVariableDescription,
+  cloudActionVariableDescription,
+  containerActionVariableDescription,
+  hostActionVariableDescription,
+  labelsActionVariableDescription,
+  orchestratorActionVariableDescription,
+  tagsActionVariableDescription,
+} from '../common/messages';
 
 const timestampActionVariableDescription = i18n.translate(
   'xpack.infra.logs.alerting.threshold.timestampActionVariableDescription',
@@ -96,6 +108,8 @@ export async function registerLogThresholdRuleType(
     );
   }
 
+  const config = libs.getAlertDetailsConfig();
+
   alertingPlugin.registerType({
     id: LOG_DOCUMENT_COUNT_RULE_TYPE_ID,
     name: i18n.translate('xpack.infra.logs.alertName', {
@@ -118,6 +132,7 @@ export async function registerLogThresholdRuleType(
         { name: 'matchingDocuments', description: documentCountActionVariableDescription },
         { name: 'conditions', description: conditionsActionVariableDescription },
         { name: 'group', description: groupByActionVariableDescription },
+        { name: 'groupByKeys', description: groupByKeysActionVariableDescription },
         // Ratio alerts
         { name: 'isRatio', description: isRatioActionVariableDescription },
         { name: 'reason', description: alertReasonMessageActionVariableDescription },
@@ -127,12 +142,26 @@ export async function registerLogThresholdRuleType(
           name: 'denominatorConditions',
           description: denominatorConditionsActionVariableDescription,
         },
+        ...(getAlertDetailsPageEnabledForApp(config, 'logs')
+          ? [{ name: 'alertDetailsUrl', description: alertDetailUrlActionVariableDescription }]
+          : []),
         {
           name: 'viewInAppUrl',
           description: viewInAppUrlActionVariableDescription,
         },
+        { name: 'cloud', description: cloudActionVariableDescription },
+        { name: 'host', description: hostActionVariableDescription },
+        { name: 'container', description: containerActionVariableDescription },
+        { name: 'orchestrator', description: orchestratorActionVariableDescription },
+        { name: 'labels', description: labelsActionVariableDescription },
+        { name: 'tags', description: tagsActionVariableDescription },
       ],
     },
     producer: 'logs',
+    getSummarizedAlerts: libs.logsRules.createGetSummarizedAlerts(),
+    useSavedObjectReferences: {
+      extractReferences,
+      injectReferences,
+    },
   });
 }

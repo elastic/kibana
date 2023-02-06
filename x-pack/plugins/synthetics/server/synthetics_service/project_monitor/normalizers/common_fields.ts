@@ -6,6 +6,8 @@
  */
 
 import { omit } from 'lodash';
+import { i18n } from '@kbn/i18n';
+import { formatLocation } from '../../../../common/utils/location_formatter';
 import { formatKibanaNamespace } from '../../../../common/formatters';
 import {
   BrowserFields,
@@ -50,7 +52,6 @@ export const getNormalizeCommonFields = ({
   namespace,
 }: NormalizedProjectProps): Partial<CommonFields> => {
   const defaultFields = DEFAULT_COMMON_FIELDS;
-
   const normalizedFields = {
     [ConfigKey.JOURNEY_ID]: monitor.id || defaultFields[ConfigKey.JOURNEY_ID],
     [ConfigKey.MONITOR_SOURCE_TYPE]: SourceType.PROJECT,
@@ -108,10 +109,24 @@ export const getMonitorLocations = ({
       );
     }) || [];
 
-  return [...publicLocs, ...privateLocs].filter(
-    (location) => location !== undefined
-  ) as BrowserFields[ConfigKey.LOCATIONS];
+  return [...publicLocs, ...privateLocs]
+    .filter((location) => location !== undefined)
+    .map((loc) => formatLocation(loc!)) as BrowserFields[ConfigKey.LOCATIONS];
 };
+
+const UNSUPPORTED_OPTION_TITLE = i18n.translate(
+  'xpack.synthetics.projectMonitorApi.validation.unsupportedOption.title',
+  {
+    defaultMessage: 'Unsupported Heartbeat option',
+  }
+);
+
+const INVALID_CONFIGURATION_TITLE = i18n.translate(
+  'xpack.synthetics.projectMonitorApi.validation.invalidConfiguration.title',
+  {
+    defaultMessage: 'Invalid Heartbeat configuration',
+  }
+);
 
 export const getUnsupportedKeysError = (
   monitor: ProjectMonitor,
@@ -119,7 +134,7 @@ export const getUnsupportedKeysError = (
   version: string
 ) => ({
   id: monitor.id,
-  reason: 'Unsupported Heartbeat option',
+  reason: UNSUPPORTED_OPTION_TITLE,
   details: `The following Heartbeat options are not supported for ${
     monitor.type
   } project monitors in ${version}: ${unsupportedKeys.join(
@@ -127,19 +142,25 @@ export const getUnsupportedKeysError = (
   )}. You monitor was not created or updated.`,
 });
 
-export const getMultipleUrlsOrHostsError = (
+export const getInvalidUrlsOrHostsError = (
   monitor: ProjectMonitor,
   key: 'hosts' | 'urls',
   version: string
 ) => ({
   id: monitor.id,
-  reason: 'Unsupported Heartbeat option',
-  details: `Multiple ${key} are not supported for ${
-    monitor.type
-  } project monitors in ${version}. Please set only 1 ${key.slice(
-    0,
-    -1
-  )} per monitor. You monitor was not created or updated.`,
+  reason: INVALID_CONFIGURATION_TITLE,
+  details: i18n.translate(
+    'xpack.synthetics.projectMonitorApi.validation.invalidUrlOrHosts.description',
+    {
+      defaultMessage:
+        '`{monitorType}` project monitors must have exactly one value for field `{key}` in version `{version}`. Your monitor was not created or updated.',
+      values: {
+        monitorType: monitor.type,
+        key,
+        version,
+      },
+    }
+  ),
 });
 
 export const getValueInSeconds = (value: string) => {
@@ -173,7 +194,7 @@ export const getOptionalListField = (value?: string[] | string): string[] => {
  * @param {Array | string} [value]
  * @returns {string} Returns first item when the value is an array, or the value itself
  */
-export const getOptionalArrayField = (value: string[] | string = '') => {
+export const getOptionalArrayField = (value: string[] | string = ''): string | undefined => {
   const array = getOptionalListField(value);
   return array[0];
 };
@@ -230,3 +251,7 @@ export const normalizeYamlConfig = (monitor: NormalizedProjectProps['monitor']) 
     unsupportedKeys,
   };
 };
+
+// returns true when any ssl fields are defined
+export const getHasTLSFields = (monitor: ProjectMonitor) =>
+  Object.keys(monitor).some((key) => key.includes('ssl'));

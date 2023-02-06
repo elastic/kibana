@@ -64,7 +64,7 @@ export function migrateFilter(filter: Filter, indexPattern?: DataViewBase) {
   }
 
   if (!filter.query) {
-    filter.query = {};
+    filter = { ...filter, query: {} };
   } else {
     // handle the case where .query already exists and filter has other top level keys on there
     filter = pick(filter, ['meta', 'query', '$state']);

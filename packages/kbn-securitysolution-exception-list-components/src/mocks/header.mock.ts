@@ -21,3 +21,18 @@ export const actions = [
     onClick: handleDelete,
   },
 ];
+export const actionsWithDisabledDelete = [
+  {
+    key: 'edit',
+    icon: 'pencil',
+    label: 'Edit detection exception',
+    onClick: handleEdit,
+  },
+  {
+    key: 'delete',
+    icon: 'trash',
+    disabled: true,
+    label: 'Delete detection exception',
+    onClick: handleDelete,
+  },
+];

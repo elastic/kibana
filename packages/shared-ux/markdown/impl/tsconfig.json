@@ -1,19 +1,22 @@
 {
-  "extends": "../../../../tsconfig.bazel.json",
+  "extends": "../../../../tsconfig.base.json",
   "compilerOptions": {
-    "declaration": true,
-    "emitDeclarationOnly": true,
-    "outDir": "target_types",
-    "stripInternal": false,
+    "outDir": "target/types",
     "types": [
       "jest",
       "node",
-      "react", 
+      "react",
       "@kbn/ambient-ui-types",
     ]
   },
   "include": [
     "**/*.ts",
     "**/*.tsx",
+  ],
+  "kbn_references": [
+    "@kbn/shared-ux-markdown-mocks",
+  ],
+  "exclude": [
+    "target/**/*",
   ]
 }

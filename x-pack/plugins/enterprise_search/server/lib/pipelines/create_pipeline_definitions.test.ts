@@ -130,6 +130,7 @@ describe('formatMlPipelineBody util function', () => {
       modelId,
       sourceField,
       destField,
+      undefined,
       mockClient as unknown as ElasticsearchClient
     );
     expect(actualResult).toEqual(expectedResult);
@@ -144,6 +145,7 @@ describe('formatMlPipelineBody util function', () => {
       modelId,
       sourceField,
       destField,
+      undefined,
       mockClient as unknown as ElasticsearchClient
     );
     await expect(asyncCall).rejects.toThrow(Error);
@@ -184,6 +186,7 @@ describe('formatMlPipelineBody util function', () => {
       modelId,
       sourceField,
       destField,
+      undefined,
       mockClient as unknown as ElasticsearchClient
     );
     expect(actualResult).toEqual(expectedResultWithNoInputField);

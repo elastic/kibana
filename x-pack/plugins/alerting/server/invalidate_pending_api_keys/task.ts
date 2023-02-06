@@ -19,6 +19,7 @@ import {
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
+import { SECURITY_EXTENSION_ID } from '@kbn/core-saved-objects-server';
 import { InvalidateAPIKeyResult } from '../rules_client';
 import { AlertingConfig } from '../config';
 import { timePeriodBeforeDate } from '../lib/get_cadence';
@@ -127,7 +128,7 @@ function taskRunner(
             getFakeKibanaRequest(http.basePath.serverBasePath),
             {
               includedHiddenTypes: ['api_key_pending_invalidation'],
-              excludedWrappers: ['security'],
+              excludedExtensions: [SECURITY_EXTENSION_ID],
             }
           );
           const encryptedSavedObjectsClient = encryptedSavedObjects.getClient({

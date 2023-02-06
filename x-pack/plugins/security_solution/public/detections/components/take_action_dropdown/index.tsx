@@ -8,8 +8,12 @@
 import React, { useCallback, useMemo, useState } from 'react';
 import { EuiButton, EuiContextMenuPanel, EuiPopover } from '@elastic/eui';
 import type { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
+import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import { GuidedOnboardingTourStep } from '../../../common/components/guided_onboarding_tour/tour_step';
-import { SecurityStepId } from '../../../common/components/guided_onboarding_tour/tour_config';
+import {
+  AlertsCasesTourSteps,
+  SecurityStepId,
+} from '../../../common/components/guided_onboarding_tour/tour_config';
 import { isActiveTimeline } from '../../../helpers';
 import { TableId } from '../../../../common/types';
 import { useResponderActionItem } from '../endpoint_responder';
@@ -22,7 +26,6 @@ import { useInvestigateInTimeline } from '../alerts_table/timeline_actions/use_i
 import { useEventFilterAction } from '../alerts_table/timeline_actions/use_event_filter_action';
 import { useHostIsolationAction } from '../host_isolation/use_host_isolation_action';
 import { getFieldValue } from '../host_isolation/helpers';
-import type { Ecs } from '../../../../common/ecs';
 import type { Status } from '../../../../common/detection_engine/schemas/common/schemas';
 import { isAlertFromEndpointAlert } from '../../../common/utils/endpoint_alert_check';
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
@@ -72,12 +75,12 @@ export const TakeActionDropdown = React.memo(
     scopeId,
   }: TakeActionDropdownProps) => {
     const tGridEnabled = useIsExperimentalFeatureEnabled('tGridEnabled');
-    const { loading: canAccessEndpointManagementLoading, canAccessEndpointManagement } =
+    const { loading: endpointPrivilegesLoading, canWriteEventFilters } =
       useUserPrivileges().endpointPrivileges;
 
     const canCreateEndpointEventFilters = useMemo(
-      () => !canAccessEndpointManagementLoading && canAccessEndpointManagement,
-      [canAccessEndpointManagement, canAccessEndpointManagementLoading]
+      () => !endpointPrivilegesLoading && canWriteEventFilters,
+      [canWriteEventFilters, endpointPrivilegesLoading]
     );
     const { osquery } = useKibana().services;
 
@@ -165,7 +168,6 @@ export const TakeActionDropdown = React.memo(
 
     const { eventFilterActionItems } = useEventFilterAction({
       onAddEventFilterClick: handleOnAddEventFilterClick,
-      disabled: !isEndpointEvent || !canCreateEndpointEventFilters,
     });
 
     const onMenuItemClick = useCallback(() => {
@@ -207,12 +209,13 @@ export const TakeActionDropdown = React.memo(
       () =>
         !isEvent && actionsData.ruleId
           ? [...statusActionItems, ...exceptionActionItems]
-          : isEndpointEvent
+          : isEndpointEvent && canCreateEndpointEventFilters
           ? eventFilterActionItems
           : [],
       [
         eventFilterActionItems,
         isEndpointEvent,
+        canCreateEndpointEventFilters,
         exceptionActionItems,
         statusActionItems,
         isEvent,
@@ -224,7 +227,7 @@ export const TakeActionDropdown = React.memo(
       scopeId as TableId
     );
 
-    const { addToCaseActionItems } = useAddToCaseActions({
+    const { addToCaseActionItems, handleAddToNewCaseClick } = useAddToCaseActions({
       ecsData,
       nonEcsData: detailsData?.map((d) => ({ field: d.field, value: d.values })) ?? [],
       onMenuItemClick,
@@ -256,7 +259,11 @@ export const TakeActionDropdown = React.memo(
 
     const takeActionButton = useMemo(
       () => (
-        <GuidedOnboardingTourStep step={4} stepId={SecurityStepId.alertsCases}>
+        <GuidedOnboardingTourStep
+          onClick={handleAddToNewCaseClick}
+          step={AlertsCasesTourSteps.addAlertToCase}
+          tourId={SecurityStepId.alertsCases}
+        >
           <EuiButton
             data-test-subj="take-action-dropdown-btn"
             fill
@@ -269,7 +276,7 @@ export const TakeActionDropdown = React.memo(
         </GuidedOnboardingTourStep>
       ),
 
-      [togglePopoverHandler]
+      [handleAddToNewCaseClick, togglePopoverHandler]
     );
 
     return items.length && !loadingEventDetails && ecsData ? (

@@ -109,3 +109,17 @@ export type HeatmapExpressionFunctionDefinition = ExpressionFunctionDefinition<
   HeatmapArguments,
   ExpressionValueRender<HeatmapExpressionProps>
 >;
+
+export type HeatmapLegendExpressionFunctionDefinition = ExpressionFunctionDefinition<
+  typeof EXPRESSION_HEATMAP_LEGEND_NAME,
+  null,
+  HeatmapLegendConfig,
+  HeatmapLegendConfigResult
+>;
+
+export type HeatmapGridExpressionFunctionDefinition = ExpressionFunctionDefinition<
+  typeof EXPRESSION_HEATMAP_GRID_NAME,
+  null,
+  HeatmapGridConfig,
+  HeatmapGridConfigResult
+>;

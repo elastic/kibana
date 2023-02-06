@@ -10,6 +10,7 @@ import { CoreStart } from '@kbn/core/public';
 import type { Query } from '@kbn/es-query';
 import memoizeOne from 'memoize-one';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type { DateRange } from '../../../../common';
 import type {
   DatasourceFixAction,
   FrameDatasourceAPI,
@@ -21,11 +22,12 @@ import type {
 import {
   operationDefinitionMap,
   operationDefinitions,
-  OperationType,
-  RequiredReference,
-  OperationDefinition,
-  GenericOperationDefinition,
-  TermsIndexPatternColumn,
+  type OperationType,
+  type RequiredReference,
+  type OperationDefinition,
+  type GenericOperationDefinition,
+  type TermsIndexPatternColumn,
+  type FieldBasedOperationErrorMessage,
 } from './definitions';
 import type { DataViewDragDropOperation, FormBasedLayer, FormBasedPrivateState } from '../types';
 import { getSortScoreByPriorityForField } from './operations';
@@ -903,8 +905,10 @@ export function canTransition({
   indexPattern,
   filterOperations,
   visualizationGroups,
+  dateRange,
 }: ColumnChange & {
   filterOperations: (meta: OperationMetadata) => boolean;
+  dateRange: DateRange;
 }): boolean {
   const previousColumn = layer.columns[columnId];
   if (!previousColumn) {
@@ -930,7 +934,7 @@ export function canTransition({
       Boolean(newColumn) &&
       !newLayer.incompleteColumns?.[columnId] &&
       filterOperations(newColumn) &&
-      !newDefinition.getErrorMessage?.(newLayer, columnId, indexPattern)?.length
+      !newDefinition.getErrorMessage?.(newLayer, columnId, indexPattern, dateRange)?.length
     );
   } catch (e) {
     return false;
@@ -1533,6 +1537,10 @@ export function updateLayerIndexPattern(
   };
 }
 
+type LayerErrorMessage = FieldBasedOperationErrorMessage & {
+  fixAction: DatasourceFixAction<FormBasedPrivateState>;
+};
+
 /**
  * Collects all errors from the columns in the layer, for display in the workspace. This includes:
  *
@@ -1549,15 +1557,7 @@ export function getErrorMessages(
   layerId: string,
   core: CoreStart,
   data: DataPublicPluginStart
-):
-  | Array<
-      | string
-      | {
-          message: string;
-          fixAction?: DatasourceFixAction<FormBasedPrivateState>;
-        }
-    >
-  | undefined {
+): LayerErrorMessage[] | undefined {
   const columns = Object.entries(layer.columns);
   const visibleManagedReferences = columns.filter(
     ([columnId, column]) =>
@@ -1574,7 +1574,14 @@ export function getErrorMessages(
       }
       const def = operationDefinitionMap[column.operationType];
       if (def.getErrorMessage) {
-        return def.getErrorMessage(layer, columnId, indexPattern, operationDefinitionMap);
+        const currentTimeRange = data.query.timefilter.timefilter.getAbsoluteTime();
+        return def.getErrorMessage(
+          layer,
+          columnId,
+          indexPattern,
+          { fromDate: currentTimeRange.from, toDate: currentTimeRange.to },
+          operationDefinitionMap
+        );
       }
     })
     .map((errorMessage) => {
@@ -1598,13 +1605,7 @@ export function getErrorMessages(
       };
     })
     // remove the undefined values
-    .filter((v) => v != null) as Array<
-    | string
-    | {
-        message: string;
-        fixAction?: DatasourceFixAction<FormBasedPrivateState>;
-      }
-  >;
+    .filter((v) => v != null) as LayerErrorMessage[];
 
   return errors.length ? errors : undefined;
 }

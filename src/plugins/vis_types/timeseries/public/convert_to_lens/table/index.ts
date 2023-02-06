@@ -6,13 +6,13 @@
  * Side Public License, v 1.
  */
 
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import { parseTimeShift } from '@kbn/data-plugin/common';
 import { getIndexPatternIds, Layer } from '@kbn/visualizations-plugin/common/convert_to_lens';
 import { PANEL_TYPES } from '../../../common/enums';
 import { getDataViewsStart } from '../../services';
 import { getColumnState } from '../lib/configurations/table';
-import { getDataSourceInfo } from '../lib/datasource';
+import { extractOrGenerateDatasourceInfo } from '../lib/datasource';
 import { getMetricsColumns, getBucketsColumns } from '../lib/series';
 import { getReducedTimeRange, isValidMetrics } from '../lib/metrics';
 import { ConvertTsvbToLensVisualization } from '../types';
@@ -28,156 +28,163 @@ const excludeMetaFromLayers = (layers: Record<string, ExtendedLayer>): Record<st
   return newLayers;
 };
 
+const invalidModelError = () => new Error('Invalid model');
+
 export const convertToLens: ConvertTsvbToLensVisualization = async (
   { params: model, uiState },
   timeRange
 ) => {
   const columnStates = [];
   const dataViews = getDataViewsStart();
-  const seriesNum = model.series.filter((series) => !series.hidden).length;
-  const sortConfig = uiState.get('table')?.sort ?? {};
 
-  const datasourceInfo = await getDataSourceInfo(
-    model.index_pattern,
-    model.time_field,
-    false,
-    undefined,
-    undefined,
-    dataViews
-  );
+  try {
+    const seriesNum = model.series.filter((series) => !series.hidden).length;
+    const sortConfig = uiState.get('table')?.sort ?? {};
 
-  if (!datasourceInfo) {
-    return null;
-  }
+    const datasourceInfo = await extractOrGenerateDatasourceInfo(
+      model.index_pattern,
+      model.time_field,
+      false,
+      undefined,
+      undefined,
+      dataViews
+    );
 
-  const { indexPatternId, indexPattern } = datasourceInfo;
-
-  const commonBucketsColumns = getBucketsColumns(
-    undefined,
-    {
-      split_mode: 'terms',
-      terms_field: model.pivot_id,
-      terms_size: model.pivot_rows ? model.pivot_rows.toString() : undefined,
-    },
-    [],
-    indexPattern!,
-    false,
-    model.pivot_label,
-    false
-  );
-
-  if (!commonBucketsColumns) {
-    return null;
-  }
-
-  const sortConfiguration = {
-    columnId: commonBucketsColumns[0].columnId,
-    direction: sortConfig.order,
-  };
-
-  columnStates.push(getColumnState(commonBucketsColumns[0].columnId));
-
-  let bucketsColumns: Column[] | null = [];
-
-  if (
-    !model.series.every(
-      (s) =>
-        ((!s.aggregate_by && !model.series[0].aggregate_by) ||
-          s.aggregate_by === model.series[0].aggregate_by) &&
-        ((!s.aggregate_function && !model.series[0].aggregate_function) ||
-          s.aggregate_function === model.series[0].aggregate_function)
-    )
-  ) {
-    return null;
-  }
-
-  if (model.series[0].aggregate_by) {
-    if (
-      !model.series[0].aggregate_function ||
-      !['sum', 'mean', 'min', 'max'].includes(model.series[0].aggregate_function)
-    ) {
-      return null;
+    if (!datasourceInfo) {
+      throw invalidModelError();
     }
-    bucketsColumns = getBucketsColumns(
+
+    const { indexPatternId, indexPattern } = datasourceInfo;
+
+    const commonBucketsColumns = getBucketsColumns(
       undefined,
       {
         split_mode: 'terms',
-        terms_field: model.series[0].aggregate_by,
+        terms_field: model.pivot_id,
+        terms_size: model.pivot_rows ? model.pivot_rows.toString() : undefined,
       },
       [],
       indexPattern!,
+      false,
+      model.pivot_label,
       false
     );
-    if (bucketsColumns === null) {
-      return null;
+
+    if (!commonBucketsColumns) {
+      throw invalidModelError();
     }
 
-    columnStates.push(
-      getColumnState(
-        bucketsColumns[0].columnId,
-        model.series[0].aggregate_function === 'mean' ? 'avg' : model.series[0].aggregate_function
+    const sortConfiguration = {
+      columnId: commonBucketsColumns[0].columnId,
+      direction: sortConfig.order,
+    };
+
+    columnStates.push(getColumnState(commonBucketsColumns[0].columnId));
+
+    let bucketsColumns: Column[] | null = [];
+
+    if (
+      !model.series.every(
+        (s) =>
+          ((!s.aggregate_by && !model.series[0].aggregate_by) ||
+            s.aggregate_by === model.series[0].aggregate_by) &&
+          ((!s.aggregate_function && !model.series[0].aggregate_function) ||
+            s.aggregate_function === model.series[0].aggregate_function)
       )
-    );
-  }
-
-  const metrics = [];
-
-  // handle multiple layers/series
-  for (const [_, series] of model.series.entries()) {
-    if (series.hidden) {
-      continue;
+    ) {
+      throw invalidModelError();
     }
 
-    // not valid time shift
-    if (series.offset_time && parseTimeShift(series.offset_time) === 'invalid') {
-      return null;
+    if (model.series[0].aggregate_by) {
+      if (
+        !model.series[0].aggregate_function ||
+        !['sum', 'mean', 'min', 'max'].includes(model.series[0].aggregate_function)
+      ) {
+        throw invalidModelError();
+      }
+      bucketsColumns = getBucketsColumns(
+        undefined,
+        {
+          split_mode: 'terms',
+          terms_field: model.series[0].aggregate_by,
+        },
+        [],
+        indexPattern!,
+        false
+      );
+      if (bucketsColumns === null) {
+        throw invalidModelError();
+      }
+
+      columnStates.push(
+        getColumnState(
+          bucketsColumns[0].columnId,
+          model.series[0].aggregate_function === 'mean' ? 'avg' : model.series[0].aggregate_function
+        )
+      );
     }
 
-    if (!isValidMetrics(series.metrics, PANEL_TYPES.TABLE, series.time_range_mode)) {
-      return null;
+    const metrics = [];
+
+    // handle multiple layers/series
+    for (const [_, series] of model.series.entries()) {
+      if (series.hidden) {
+        continue;
+      }
+
+      // not valid time shift
+      if (series.offset_time && parseTimeShift(series.offset_time) === 'invalid') {
+        throw invalidModelError();
+      }
+
+      if (!isValidMetrics(series.metrics, PANEL_TYPES.TABLE, series.time_range_mode)) {
+        throw invalidModelError();
+      }
+
+      const reducedTimeRange = getReducedTimeRange(model, series, timeRange);
+
+      // handle multiple metrics
+      const metricsColumns = getMetricsColumns(series, indexPattern!, seriesNum, {
+        reducedTimeRange,
+      });
+      if (!metricsColumns) {
+        throw invalidModelError();
+      }
+
+      columnStates.push(getColumnState(metricsColumns[0].columnId, undefined, series));
+
+      if (sortConfig.column === series.id) {
+        sortConfiguration.columnId = metricsColumns[0].columnId;
+      }
+
+      metrics.push(...metricsColumns);
     }
 
-    const reducedTimeRange = getReducedTimeRange(model, series, timeRange);
-
-    // handle multiple metrics
-    const metricsColumns = getMetricsColumns(series, indexPattern!, seriesNum, {
-      reducedTimeRange,
-    });
-    if (!metricsColumns) {
-      return null;
+    if (!metrics.length || metrics.every((metric) => metric.operationType === 'static_value')) {
+      throw invalidModelError();
     }
 
-    columnStates.push(getColumnState(metricsColumns[0].columnId, undefined, series));
+    const extendedLayer: ExtendedLayer = {
+      indexPatternId: indexPatternId as string,
+      layerId: uuidv4(),
+      columns: [...metrics, ...commonBucketsColumns, ...bucketsColumns],
+      columnOrder: [],
+    };
 
-    if (sortConfig.column === series.id) {
-      sortConfiguration.columnId = metricsColumns[0].columnId;
-    }
+    const layers = Object.values(excludeMetaFromLayers({ 0: extendedLayer }));
 
-    metrics.push(...metricsColumns);
-  }
-
-  if (!metrics.length || metrics.every((metric) => metric.operationType === 'static_value')) {
+    return {
+      type: 'lnsDatatable',
+      layers,
+      configuration: {
+        columns: columnStates,
+        layerId: extendedLayer.layerId,
+        layerType: 'data',
+        sorting: sortConfiguration,
+      },
+      indexPatternIds: getIndexPatternIds(layers),
+    };
+  } catch (e) {
     return null;
   }
-
-  const extendedLayer: ExtendedLayer = {
-    indexPatternId: indexPatternId as string,
-    layerId: uuid(),
-    columns: [...metrics, ...commonBucketsColumns, ...bucketsColumns],
-    columnOrder: [],
-  };
-
-  const layers = Object.values(excludeMetaFromLayers({ 0: extendedLayer }));
-
-  return {
-    type: 'lnsDatatable',
-    layers,
-    configuration: {
-      columns: columnStates,
-      layerId: extendedLayer.layerId,
-      layerType: 'data',
-      sorting: sortConfiguration,
-    },
-    indexPatternIds: getIndexPatternIds(layers),
-  };
 };

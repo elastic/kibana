@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import rison, { RisonValue } from 'rison-node';
+import rison from '@kbn/rison';
 import {
   buildQueryFilter,
   PhraseFilter,
@@ -29,7 +29,7 @@ export function createExploratoryViewRoutePath({
   const allShortSeries: AllShortSeries = allSeries.map((series) => convertToShortUrl(series));
 
   return `/exploratory-view/#?reportType=${reportType}&sr=${encodeUriIfNeeded(
-    rison.encode(allShortSeries as unknown as RisonValue)
+    rison.encode(allShortSeries)
   )}`;
 }
 

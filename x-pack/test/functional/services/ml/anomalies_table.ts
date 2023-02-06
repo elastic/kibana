@@ -56,6 +56,14 @@ export function MachineLearningAnomaliesTableProvider({ getService }: FtrProvide
       );
     },
 
+    async assertInfluencersCellsContainFilter(filterString: string) {
+      const tableRows = await testSubjects.findAll('mlAnomaliesListColumnInfluencers');
+      for (const row of tableRows) {
+        const influencerColumnCellText = await row.getVisibleText();
+        expect(influencerColumnCellText).to.eql(filterString);
+      }
+    },
+
     async assertAnomalyActionsMenuButtonExists(rowIndex: number) {
       const rowSubj = await this.getRowSubjByRowIndex(rowIndex);
       await testSubjects.existOrFail(`${rowSubj} > mlAnomaliesListRowActionsButton`);

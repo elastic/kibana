@@ -27,20 +27,17 @@ import { useGetLinkTo } from '../empty/use_policy_artifacts_empty_hooks';
 import type { ExceptionsListApiClient } from '../../../../../services/exceptions_list/exceptions_list_api_client';
 import { useListArtifact } from '../../../../../hooks/artifacts';
 import type { POLICY_ARTIFACT_LIST_LABELS } from './translations';
-import type { EventFiltersPageLocation } from '../../../../event_filters/types';
 import type { ArtifactListPageUrlParams } from '../../../../../components/artifact_list_page';
 
 interface PolicyArtifactsListProps {
   policy: ImmutableObject<PolicyData>;
   apiClient: ExceptionsListApiClient;
   searchableFields: string[];
-  getArtifactPath: (
-    location?: Partial<EventFiltersPageLocation> | Partial<ArtifactListPageUrlParams>
-  ) => string;
+  getArtifactPath: (location?: Partial<ArtifactListPageUrlParams>) => string;
   getPolicyArtifactsPath: (policyId: string) => string;
   labels: typeof POLICY_ARTIFACT_LIST_LABELS;
   onDeleteActionCallback: (item: ExceptionListItemSchema) => void;
-  externalPrivileges?: boolean;
+  canWriteArtifact?: boolean;
 }
 
 export const PolicyArtifactsList = React.memo<PolicyArtifactsListProps>(
@@ -52,7 +49,7 @@ export const PolicyArtifactsList = React.memo<PolicyArtifactsListProps>(
     getPolicyArtifactsPath,
     labels,
     onDeleteActionCallback,
-    externalPrivileges = true,
+    canWriteArtifact = false,
   }) => {
     useOldUrlSearchPaginationReplace();
     const { getAppUrl } = useAppUrl();
@@ -153,7 +150,7 @@ export const PolicyArtifactsList = React.memo<PolicyArtifactsListProps>(
         return {
           expanded: expandedItemsMap.get(item.id) || false,
           actions:
-            canCreateArtifactsByPolicy && externalPrivileges
+            canCreateArtifactsByPolicy && canWriteArtifact
               ? [fullDetailsAction, deleteAction]
               : [fullDetailsAction],
           policies: artifactCardPolicies,
@@ -163,7 +160,7 @@ export const PolicyArtifactsList = React.memo<PolicyArtifactsListProps>(
         artifactCardPolicies,
         canCreateArtifactsByPolicy,
         expandedItemsMap,
-        externalPrivileges,
+        canWriteArtifact,
         getAppUrl,
         getArtifactPath,
         labels.listFullDetailsActionTitle,

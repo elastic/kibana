@@ -6,11 +6,15 @@
  */
 
 import type { ESFilter } from '@kbn/es-types';
+import { getQueryStringFilter } from './search/get_query_string_filter';
 import { UMElasticsearchQueryFn } from '../adapters';
 import { CONTEXT_DEFAULTS } from '../../../../common/constants';
 import { Snapshot } from '../../../../common/runtime_types';
 import { QueryContext } from './search';
-import { EXCLUDE_RUN_ONCE_FILTER } from '../../../../common/constants/client_defaults';
+import {
+  EXCLUDE_RUN_ONCE_FILTER,
+  SUMMARY_FILTER,
+} from '../../../../common/constants/client_defaults';
 
 export interface GetSnapshotCountParams {
   dateRangeStart: string;
@@ -61,33 +65,15 @@ const statusCount = async (context: QueryContext): Promise<Snapshot> => {
 };
 
 const statusCountBody = (filters: ESFilter[], context: QueryContext) => {
+  if (context.query) {
+    filters.push(getQueryStringFilter(context.query));
+  }
+
   return {
     size: 0,
     query: {
       bool: {
-        ...(context.query
-          ? {
-              minimum_should_match: 1,
-              should: [
-                {
-                  multi_match: {
-                    query: escape(context.query),
-                    type: 'phrase_prefix',
-                    fields: ['monitor.id.text', 'monitor.name.text', 'url.full.text'],
-                  },
-                },
-              ],
-            }
-          : {}),
-        filter: [
-          {
-            exists: {
-              field: 'summary',
-            },
-          },
-          EXCLUDE_RUN_ONCE_FILTER,
-          ...filters,
-        ],
+        filter: [SUMMARY_FILTER, EXCLUDE_RUN_ONCE_FILTER, ...filters],
       },
     },
     aggs: {

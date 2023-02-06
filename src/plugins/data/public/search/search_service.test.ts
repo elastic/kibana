@@ -27,7 +27,7 @@ describe('Search service', () => {
   let mockCoreSetup: MockedKeys<CoreSetup>;
   let mockCoreStart: MockedKeys<CoreStart>;
   const initializerContext = coreMock.createPluginInitializerContext();
-  jest.useFakeTimers('modern');
+  jest.useFakeTimers();
   initializerContext.config.get = jest.fn().mockReturnValue({
     search: { aggs: { shardDelay: { enabled: false } }, sessions: { enabled: true } },
   });

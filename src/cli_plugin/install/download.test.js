@@ -15,7 +15,7 @@ import nock from 'nock';
 import globby from 'globby';
 import del from 'del';
 
-import { Logger } from '../lib/logger';
+import { Logger } from '../../cli/logger';
 import { UnsupportedProtocolError } from '../lib/errors';
 import { download, _downloadSingle, _getFilePath, _checkFilePathDeprecation } from './download';
 

@@ -30,6 +30,7 @@ export type {
   PreconfiguredAgentPolicy,
   AgentPolicyStatus,
   DataStream,
+  ShipperOutput,
   Output,
   NewOutput,
   OutputSOAttributes,
@@ -39,6 +40,9 @@ export type {
   NewFleetServerHost,
   FleetServerHost,
   FleetServerHostSOAttributes,
+  NewFleetProxy,
+  FleetProxy,
+  FleetProxySOAttributes,
   Installation,
   EpmPackageInstallStatus,
   InstallationStatus,
@@ -84,6 +88,7 @@ export type {
   PackageVerificationStatus,
   BulkInstallPackageInfo,
   PackageAssetReference,
+  ExperimentalDataStreamFeature,
 } from '../../common/types';
 export { ElasticsearchAssetType, KibanaAssetType, KibanaSavedObjectType } from '../../common/types';
 export { dataTypes } from '../../common/constants';

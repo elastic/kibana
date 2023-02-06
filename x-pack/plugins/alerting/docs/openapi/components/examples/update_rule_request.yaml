@@ -1,0 +1,21 @@
+summary: Update an index threshold rule.
+value:
+  notify_when: onActionGroupChange
+  params:
+    index: [".test-index"]
+    timeField: "@timestamp"
+    groupBy: top
+    aggType: avg
+    timeWindowSize: 5
+    timeWindowUnit: m
+    thresholdComparator: ">"
+    threshold: [1000]
+    aggField: sheet.version
+    termField: name.keyword
+    termSize: 6
+  schedule:
+    interval: 1m
+  actions: []
+  tags: []
+  name: new name
+  throttle: null

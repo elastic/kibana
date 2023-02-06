@@ -1,8 +1,7 @@
 {
-  "extends": "../../tsconfig.json",
+  "extends": "../../tsconfig.base.json",
   "compilerOptions": {
-    "outDir": "./target",
-    "skipLibCheck": true
+    "outDir": "target/types",
   },
   "include": [
     "index.ts",
@@ -10,10 +9,12 @@
     "public/**/*.tsx",
     "../../typings/**/*"
   ],
-  "exclude": [],
+  "exclude": [
+    "target/**/*",
+  ],
   "kbn_references": [
-    { "path": "../../src/core/tsconfig.json" },
-    { "path": "../developer_examples/tsconfig.json" },
-    { "path": "../../src/plugins/expressions/tsconfig.json" },
+    "@kbn/core",
+    "@kbn/developer-examples-plugin",
+    "@kbn/expressions-plugin",
   ]
 }

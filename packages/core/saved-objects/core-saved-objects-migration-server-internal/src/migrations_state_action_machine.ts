@@ -15,9 +15,9 @@ import {
   getRequestDebugMeta,
 } from '@kbn/core-elasticsearch-client-server-internal';
 import type { SavedObjectsRawDoc } from '@kbn/core-saved-objects-server';
-import { Model, Next, stateActionMachine } from './state_action_machine';
+import { type Model, type Next, stateActionMachine } from './state_action_machine';
 import { cleanup } from './migrations_state_machine_cleanup';
-import { ReindexSourceToTempTransform, ReindexSourceToTempIndexBulk, State } from './state';
+import type { ReindexSourceToTempTransform, ReindexSourceToTempIndexBulk, State } from './state';
 
 interface StateTransitionLogMeta extends LogMeta {
   kibana: {

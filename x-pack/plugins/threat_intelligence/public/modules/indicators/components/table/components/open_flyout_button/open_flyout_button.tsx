@@ -8,9 +8,8 @@
 import React, { VFC } from 'react';
 import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { Indicator } from '../../../../types';
-
-export const BUTTON_TEST_ID = 'tiToggleIndicatorFlyoutButton';
+import { Indicator } from '../../../../../../../common/types/indicator';
+import { BUTTON_TEST_ID } from './test_ids';
 
 const BUTTON_LABEL: string = i18n.translate(
   'xpack.threatIntelligence.indicator.table.viewDetailsButton',

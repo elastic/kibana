@@ -13,9 +13,13 @@ import {
   TRANSACTION_DURATION_HISTOGRAM,
   TRANSACTION_ROOT,
   PARENT_ID,
-} from '../../../../common/elasticsearch_fieldnames';
+  METRICSET_INTERVAL,
+  METRICSET_NAME,
+  TRANSACTION_DURATION_SUMMARY,
+} from '../../../../common/es_fields/apm';
 import { APMConfig } from '../../..';
 import { APMEventClient } from '../create_es_client/create_apm_event_client';
+import { ApmDocumentType } from '../../../../common/document_type';
 
 export async function getHasTransactionsEvents({
   start,
@@ -87,18 +91,43 @@ export async function getSearchTransactionsEvents({
 }
 
 export function getDurationFieldForTransactions(
-  searchAggregatedTransactions: boolean
+  typeOrSearchAgggregatedTransactions: ApmDocumentType | boolean
 ) {
-  return searchAggregatedTransactions
-    ? TRANSACTION_DURATION_HISTOGRAM
-    : TRANSACTION_DURATION;
+  let type: ApmDocumentType;
+  if (typeOrSearchAgggregatedTransactions === true) {
+    type = ApmDocumentType.TransactionMetric;
+  } else if (typeOrSearchAgggregatedTransactions === false) {
+    type = ApmDocumentType.TransactionEvent;
+  } else {
+    type = typeOrSearchAgggregatedTransactions;
+  }
+
+  if (type === ApmDocumentType.ServiceTransactionMetric) {
+    return TRANSACTION_DURATION_SUMMARY;
+  }
+
+  if (type === ApmDocumentType.TransactionMetric) {
+    return TRANSACTION_DURATION_HISTOGRAM;
+  }
+
+  return TRANSACTION_DURATION;
 }
 
 export function getDocumentTypeFilterForTransactions(
   searchAggregatedTransactions: boolean
 ) {
   return searchAggregatedTransactions
-    ? [{ exists: { field: TRANSACTION_DURATION_HISTOGRAM } }]
+    ? [
+        {
+          bool: {
+            filter: [{ exists: { field: TRANSACTION_DURATION_HISTOGRAM } }],
+            must_not: [
+              { terms: { [METRICSET_INTERVAL]: ['10m', '60m'] } },
+              { term: { [METRICSET_NAME]: 'service_transaction' } },
+            ],
+          },
+        },
+      ]
     : [];
 }
 

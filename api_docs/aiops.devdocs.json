@@ -5,6 +5,47 @@
     "functions": [
       {
         "parentPluginId": "aiops",
+        "id": "def-public.ChangePointDetection",
+        "type": "Function",
+        "tags": [],
+        "label": "ChangePointDetection",
+        "description": [
+          "\nLazy-wrapped LogCategorizationAppStateProps React component"
+        ],
+        "signature": [
+          "(props: React.PropsWithChildren<",
+          "LogCategorizationAppStateProps",
+          ">) => JSX.Element"
+        ],
+        "path": "x-pack/plugins/aiops/public/shared_lazy_components.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "aiops",
+            "id": "def-public.ChangePointDetection.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "props",
+            "description": [
+              "- properties specifying the data on which to run the analysis."
+            ],
+            "signature": [
+              "React.PropsWithChildren<",
+              "LogCategorizationAppStateProps",
+              ">"
+            ],
+            "path": "x-pack/plugins/aiops/public/shared_lazy_components.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "aiops",
         "id": "def-public.ExplainLogRateSpikes",
         "type": "Function",
         "tags": [],
@@ -146,6 +187,21 @@
         "description": [
           "\nThis is an internal hard coded feature flag so we can easily turn on/off the\n\"Explain log rate spikes UI\" during development until the first release."
         ],
+        "signature": [
+          "true"
+        ],
+        "path": "x-pack/plugins/aiops/common/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "aiops",
+        "id": "def-common.CHANGE_POINT_DETECTION_ENABLED",
+        "type": "boolean",
+        "tags": [],
+        "label": "CHANGE_POINT_DETECTION_ENABLED",
+        "description": [],
         "signature": [
           "true"
         ],

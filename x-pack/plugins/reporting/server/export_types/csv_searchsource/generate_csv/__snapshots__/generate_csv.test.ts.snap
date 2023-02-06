@@ -73,7 +73,7 @@ exports[`keeps order of the columns during the scroll 1`] = `
 "
 `;
 
-exports[`uses the scrollId to page all the data 1`] = `
+exports[`uses the pit ID to page all the data 1`] = `
 "date,ip,message
 \\"2020-12-31T00:14:28.000Z\\",\\"110.135.176.89\\",\\"hit from the initial search\\"
 \\"2020-12-31T00:14:28.000Z\\",\\"110.135.176.89\\",\\"hit from the initial search\\"

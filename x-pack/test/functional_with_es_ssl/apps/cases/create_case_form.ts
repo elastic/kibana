@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import { CaseSeverity } from '@kbn/cases-plugin/common/api';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import {
@@ -33,7 +33,7 @@ export default ({ getService, getPageObject }: FtrProviderContext) => {
     });
 
     it('creates a case from the stack management page', async () => {
-      const caseTitle = 'test-' + uuid.v4();
+      const caseTitle = 'test-' + uuidv4();
       await cases.create.openCreateCasePage();
       await cases.create.createCase({
         title: caseTitle,
@@ -73,7 +73,7 @@ export default ({ getService, getPageObject }: FtrProviderContext) => {
       });
 
       it('creates a case with assignees', async () => {
-        const caseTitle = 'test-' + uuid.v4();
+        const caseTitle = 'test-' + uuidv4();
         await cases.create.openCreateCasePage();
 
         await cases.create.setTitle(caseTitle);

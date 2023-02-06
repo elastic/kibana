@@ -6,7 +6,11 @@
  */
 
 import { Renderer, renderHook, RenderHookResult } from '@testing-library/react-hooks';
-import { generateMockIndicator, generateMockUrlIndicator, Indicator } from '../../indicators';
+import {
+  generateMockIndicator,
+  generateMockUrlIndicator,
+  Indicator,
+} from '../../../../common/types/indicator';
 import { TestProvidersComponent } from '../../../common/mocks/test_providers';
 import { useFilterInOut, UseFilterInValue } from '.';
 import { FilterIn } from '../utils';

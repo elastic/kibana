@@ -45,7 +45,7 @@ describe('<WatchStatusPage />', () => {
   let testBed: WatchStatusTestBed;
 
   beforeAll(() => {
-    jest.useFakeTimers('legacy');
+    jest.useFakeTimers({ legacyFakeTimers: true });
   });
 
   afterAll(() => {

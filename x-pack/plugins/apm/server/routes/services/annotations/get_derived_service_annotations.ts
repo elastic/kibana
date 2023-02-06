@@ -12,7 +12,7 @@ import { Annotation, AnnotationType } from '../../../../common/annotations';
 import {
   SERVICE_NAME,
   SERVICE_VERSION,
-} from '../../../../common/elasticsearch_fieldnames';
+} from '../../../../common/es_fields/apm';
 import { environmentQuery } from '../../../../common/utils/environment_query';
 import {
   getDocumentTypeFilterForTransactions,

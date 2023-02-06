@@ -16,18 +16,13 @@ import {
   getEstimatedSizeForDocumentsInIndex,
   getApmDiskSpacedUsedPct,
 } from './indices_stats_helpers';
-import { Setup } from '../../lib/helpers/setup_request';
 import { ApmPluginRequestHandlerContext } from '../typings';
 import {
   IndexLifecyclePhaseSelectOption,
   indexLifeCyclePhaseToDataTier,
 } from '../../../common/storage_explorer_types';
 import { RandomSampler } from '../../lib/helpers/get_random_sampler';
-import {
-  SERVICE_NAME,
-  TIER,
-  INDEX,
-} from '../../../common/elasticsearch_fieldnames';
+import { SERVICE_NAME, TIER, INDEX } from '../../../common/es_fields/apm';
 import { environmentQuery } from '../../../common/utils/environment_query';
 import {
   getDocumentTypeFilterForTransactions,
@@ -101,7 +96,6 @@ export async function getTracesPerMinute({
 }
 
 export async function getMainSummaryStats({
-  setup,
   apmEventClient,
   context,
   indexLifecyclePhase,
@@ -111,7 +105,6 @@ export async function getMainSummaryStats({
   environment,
   kuery,
 }: {
-  setup: Setup;
   apmEventClient: APMEventClient;
   context: ApmPluginRequestHandlerContext;
   indexLifecyclePhase: IndexLifecyclePhaseSelectOption;
@@ -122,7 +115,7 @@ export async function getMainSummaryStats({
   kuery: string;
 }) {
   const [totalIndicesStats, totalDiskSpace, res] = await Promise.all([
-    getTotalIndicesStats({ context, setup }),
+    getTotalIndicesStats({ context, apmEventClient }),
     getApmDiskSpacedUsedPct(context),
     apmEventClient.search('get_storage_explorer_main_summary_stats', {
       apm: {

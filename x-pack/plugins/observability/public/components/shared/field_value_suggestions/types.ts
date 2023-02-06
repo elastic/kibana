@@ -30,13 +30,15 @@ interface CommonProps {
   cardinalityField?: string;
   required?: boolean;
   keepHistory?: boolean;
+  showLogicalConditionSwitch?: boolean;
+  useLogicalAND?: boolean;
+  onChange: (val?: string[], excludedValue?: string[], isLogicalAND?: boolean) => void;
 }
 
 export type FieldValueSuggestionsProps = CommonProps & {
   dataViewTitle?: string;
   sourceField: string;
   asCombobox?: boolean;
-  onChange: (val?: string[], excludedValue?: string[]) => void;
   filters: ESFilter[];
   time?: { from: string; to: string };
   inspector?: IInspectorInfo;
@@ -44,7 +46,6 @@ export type FieldValueSuggestionsProps = CommonProps & {
 
 export type FieldValueSelectionProps = CommonProps & {
   loading?: boolean;
-  onChange: (val?: string[], excludedValue?: string[]) => void;
   values?: ListItem[];
   query?: string;
   setQuery: Dispatch<SetStateAction<string>>;

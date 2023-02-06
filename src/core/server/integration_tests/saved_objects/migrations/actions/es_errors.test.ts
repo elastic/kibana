@@ -6,10 +6,14 @@
  * Side Public License, v 1.
  */
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { ElasticsearchClient } from '../../../..';
 import { InternalCoreStart } from '@kbn/core-lifecycle-server-internal';
-import * as kbnTestServer from '../../../../../test_helpers/kbn_server';
-import { Root } from '../../../../root';
+import { Root } from '@kbn/core-root-server-internal';
+import type { ElasticsearchClient } from '../../../..';
+import {
+  createRootWithCorePlugins,
+  createTestServers,
+  type TestElasticsearchUtils,
+} from '@kbn/core-test-helpers-kbn-server';
 import {
   isWriteBlockException,
   isClusterShardLimitExceeded,
@@ -17,7 +21,7 @@ import {
   setWriteBlock,
 } from '@kbn/core-saved-objects-migration-server-internal';
 
-const { startES } = kbnTestServer.createTestServers({
+const { startES } = createTestServers({
   adjustTimeout: (t: number) => jest.setTimeout(t),
 });
 
@@ -25,11 +29,11 @@ describe('Elasticsearch Errors', () => {
   let root: Root;
   let start: InternalCoreStart;
   let client: ElasticsearchClient;
-  let esServer: kbnTestServer.TestElasticsearchUtils;
+  let esServer: TestElasticsearchUtils;
 
   beforeAll(async () => {
     esServer = await startES();
-    root = kbnTestServer.createRootWithCorePlugins({
+    root = createRootWithCorePlugins({
       server: {
         basePath: '/foo',
       },

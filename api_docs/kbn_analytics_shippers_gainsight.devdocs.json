@@ -265,6 +265,24 @@
           },
           {
             "parentPluginId": "@kbn/analytics-shippers-gainsight",
+            "id": "def-common.GainsightShipper.flush",
+            "type": "Function",
+            "tags": [],
+            "label": "flush",
+            "description": [
+              "\nFlushes all internal queues of the shipper.\nIt doesn't really do anything inside because this shipper doesn't hold any internal queues."
+            ],
+            "signature": [
+              "() => Promise<void>"
+            ],
+            "path": "packages/analytics/shippers/gainsight/src/gainsight_shipper.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/analytics-shippers-gainsight",
             "id": "def-common.GainsightShipper.shutdown",
             "type": "Function",
             "tags": [],

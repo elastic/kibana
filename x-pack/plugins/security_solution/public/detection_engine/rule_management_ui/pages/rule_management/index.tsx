@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useCallback } from 'react';
 import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 
 import { APP_UI_ID } from '../../../../../common/constants';
@@ -40,12 +40,19 @@ import { AllRules } from '../../components/rules_table';
 import { RulesTableContextProvider } from '../../components/rules_table/rules_table/rules_table_context';
 
 import * as i18n from '../../../../detections/pages/detection_engine/rules/translations';
+import { RulesPageTourComponent } from '../../components/rules_table/alternative_tour/tour';
+import { useInvalidateFetchRuleManagementFiltersQuery } from '../../../rule_management/api/hooks/use_fetch_rule_management_filters_query';
 
 const RulesPageComponent: React.FC = () => {
   const [isImportModalVisible, showImportModal, hideImportModal] = useBoolState();
   const [isValueListFlyoutVisible, showValueListFlyout, hideValueListFlyout] = useBoolState();
   const { navigateToApp } = useKibana().services.application;
   const invalidateFindRulesQuery = useInvalidateFindRulesQuery();
+  const invalidateFetchRuleManagementFilters = useInvalidateFetchRuleManagementFiltersQuery();
+  const invalidateRules = useCallback(() => {
+    invalidateFindRulesQuery();
+    invalidateFetchRuleManagementFilters();
+  }, [invalidateFindRulesQuery, invalidateFetchRuleManagementFilters]);
 
   const [
     {
@@ -92,7 +99,7 @@ const RulesPageComponent: React.FC = () => {
         description={i18n.SELECT_RULE}
         errorMessage={i18n.IMPORT_FAILED}
         failedDetailed={i18n.IMPORT_FAILED_DETAILED}
-        importComplete={invalidateFindRulesQuery}
+        importComplete={invalidateRules}
         importData={importRules}
         successMessage={i18n.SUCCESSFULLY_IMPORTED_RULES}
         showModal={isImportModalVisible}
@@ -134,17 +141,19 @@ const RulesPageComponent: React.FC = () => {
                   {i18n.IMPORT_RULE}
                 </EuiButton>
               </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <SecuritySolutionLinkButton
-                  data-test-subj="create-new-rule"
-                  fill
-                  iconType="plusInCircle"
-                  isDisabled={!hasUserCRUDPermission(canUserCRUD) || loading}
-                  deepLinkId={SecurityPageName.rulesCreate}
-                >
-                  {i18n.ADD_NEW_RULE}
-                </SecuritySolutionLinkButton>
-              </EuiFlexItem>
+              <RulesPageTourComponent>
+                <EuiFlexItem grow={false}>
+                  <SecuritySolutionLinkButton
+                    data-test-subj="create-new-rule"
+                    fill
+                    iconType="plusInCircle"
+                    isDisabled={!hasUserCRUDPermission(canUserCRUD) || loading}
+                    deepLinkId={SecurityPageName.rulesCreate}
+                  >
+                    {i18n.ADD_NEW_RULE}
+                  </SecuritySolutionLinkButton>
+                </EuiFlexItem>
+              </RulesPageTourComponent>
             </EuiFlexGroup>
           </HeaderPage>
           {(prePackagedRuleStatus === 'ruleNeedUpdate' ||

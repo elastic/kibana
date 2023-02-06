@@ -15,7 +15,9 @@ import {
 import { createLifecycleRuleTypeFactory } from '@kbn/rule-registry-plugin/server';
 import { asPercent } from '@kbn/observability-plugin/common/utils/formatters';
 import { termQuery } from '@kbn/observability-plugin/server';
+import { addSpaceIdToPath } from '@kbn/spaces-plugin/common';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
+import { getAlertDetailsUrl } from '@kbn/infra-plugin/server/lib/alerting/common/utils';
 import {
   ENVIRONMENT_NOT_DEFINED,
   getEnvironmentEsField,
@@ -34,7 +36,7 @@ import {
   SERVICE_ENVIRONMENT,
   SERVICE_NAME,
   TRANSACTION_TYPE,
-} from '../../../../../common/elasticsearch_fieldnames';
+} from '../../../../../common/es_fields/apm';
 import { EventOutcome } from '../../../../../common/event_outcome';
 import { asDecimalOrInteger } from '../../../../../common/utils/formatters';
 import { environmentQuery } from '../../../../../common/utils/environment_query';
@@ -62,10 +64,11 @@ const ruleTypeConfig = RULE_TYPES_CONFIG[ApmRuleType.TransactionErrorRate];
 
 export function registerTransactionErrorRateRuleType({
   alerting,
-  ruleDataClient,
-  logger,
-  config$,
   basePath,
+  config$,
+  logger,
+  observability,
+  ruleDataClient,
 }: RegisterRuleDependencies) {
   const createLifecycleRuleType = createLifecycleRuleTypeFactory({
     ruleDataClient,
@@ -83,24 +86,31 @@ export function registerTransactionErrorRateRuleType({
       },
       actionVariables: {
         context: [
-          apmActionVariables.transactionType,
-          apmActionVariables.serviceName,
+          ...(observability.getAlertDetailsConfig()?.apm.enabled
+            ? [apmActionVariables.alertDetailsUrl]
+            : []),
           apmActionVariables.environment,
-          apmActionVariables.threshold,
-          apmActionVariables.triggerValue,
           apmActionVariables.interval,
           apmActionVariables.reason,
+          apmActionVariables.serviceName,
+          apmActionVariables.threshold,
+          apmActionVariables.transactionType,
+          apmActionVariables.triggerValue,
           apmActionVariables.viewInAppUrl,
         ],
       },
       producer: APM_SERVER_FEATURE_ID,
       minimumLicenseRequired: 'basic',
       isExportable: true,
-      executor: async ({ services, params: ruleParams }) => {
+      executor: async ({ services, spaceId, params: ruleParams }) => {
         const config = await firstValueFrom(config$);
+
+        const { getAlertUuid, savedObjectsClient, scopedClusterClient } =
+          services;
+
         const indices = await getApmIndices({
           config,
-          savedObjectsClient: services.savedObjectsClient,
+          savedObjectsClient,
         });
 
         // only query transaction events when set to 'never',
@@ -178,12 +188,12 @@ export function registerTransactionErrorRateRuleType({
         };
 
         const response = await alertingEsClient({
-          scopedClusterClient: services.scopedClusterClient,
+          scopedClusterClient,
           params: searchParams,
         });
 
         if (!response.aggregations) {
-          return {};
+          return { state: {} };
         }
 
         const results = [];
@@ -219,6 +229,7 @@ export function registerTransactionErrorRateRuleType({
             errorRate,
             sourceFields,
           } = result;
+
           const reasonMessage = formatTransactionErrorRateReason({
             threshold: ruleParams.threshold,
             measured: errorRate,
@@ -228,27 +239,38 @@ export function registerTransactionErrorRateRuleType({
             windowUnit: ruleParams.windowUnit,
           });
 
+          const id = [
+            ApmRuleType.TransactionErrorRate,
+            serviceName,
+            transactionType,
+            environment,
+          ]
+            .filter((name) => name)
+            .join('_');
+
+          const alertUuid = getAlertUuid(id);
+
+          const alertDetailsUrl = getAlertDetailsUrl(
+            basePath,
+            spaceId,
+            alertUuid
+          );
+
           const relativeViewInAppUrl = getAlertUrlTransaction(
             serviceName,
             getEnvironmentEsField(environment)?.[SERVICE_ENVIRONMENT],
             transactionType
           );
-          const viewInAppUrl = basePath.publicBaseUrl
-            ? new URL(
-                basePath.prepend(relativeViewInAppUrl),
-                basePath.publicBaseUrl
-              ).toString()
-            : relativeViewInAppUrl;
+
+          const viewInAppUrl = addSpaceIdToPath(
+            basePath.publicBaseUrl,
+            spaceId,
+            relativeViewInAppUrl
+          );
+
           services
             .alertWithLifecycle({
-              id: [
-                ApmRuleType.TransactionErrorRate,
-                serviceName,
-                transactionType,
-                environment,
-              ]
-                .filter((name) => name)
-                .join('_'),
+              id,
               fields: {
                 [SERVICE_NAME]: serviceName,
                 ...getEnvironmentEsField(environment),
@@ -261,18 +283,19 @@ export function registerTransactionErrorRateRuleType({
               },
             })
             .scheduleActions(ruleTypeConfig.defaultActionGroupId, {
-              serviceName,
-              transactionType,
+              alertDetailsUrl,
               environment: getEnvironmentLabel(environment),
-              threshold: ruleParams.threshold,
-              triggerValue: asDecimalOrInteger(errorRate),
               interval: `${ruleParams.windowSize}${ruleParams.windowUnit}`,
               reason: reasonMessage,
+              serviceName,
+              threshold: ruleParams.threshold,
+              transactionType,
+              triggerValue: asDecimalOrInteger(errorRate),
               viewInAppUrl,
             });
         });
 
-        return {};
+        return { state: {} };
       },
     })
   );

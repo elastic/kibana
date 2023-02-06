@@ -1,7 +1,5 @@
 {
   "type": "shared-common",
   "id": "@kbn/mapbox-gl",
-  "owner": "@elastic/kibana-gis",
-  "runtimeDeps": [],
-  "typeDeps": []
+  "owner": "@elastic/kibana-gis"
 }

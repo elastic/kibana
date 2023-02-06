@@ -11,13 +11,10 @@ import { ANALYTICS_COLLECTIONS_INDEX } from '../..';
 
 import { ErrorCode } from '../../../common/types/error_codes';
 
-import { fetchAnalyticsCollectionByName } from './fetch_analytics_collection';
+import { fetchAnalyticsCollectionById } from './fetch_analytics_collection';
 
-export const deleteAnalyticsCollectionByName = async (
-  client: IScopedClusterClient,
-  name: string
-) => {
-  const analyticsCollection = await fetchAnalyticsCollectionByName(client, name);
+export const deleteAnalyticsCollectionById = async (client: IScopedClusterClient, id: string) => {
+  const analyticsCollection = await fetchAnalyticsCollectionById(client, id);
 
   if (!analyticsCollection) {
     throw new Error(ErrorCode.ANALYTICS_COLLECTION_NOT_FOUND);

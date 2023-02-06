@@ -37,19 +37,28 @@ export function DatePickerContextProvider({ children }: { children: React.ReactE
   const history = useHistory();
 
   const updateUrl = useCallback(
-    (nextQuery: {
-      rangeFrom?: string;
-      rangeTo?: string;
-      refreshPaused?: boolean;
-      refreshInterval?: number;
-    }) => {
-      history.push({
+    (
+      nextQuery: {
+        rangeFrom?: string;
+        rangeTo?: string;
+        refreshPaused?: boolean;
+        refreshInterval?: number;
+      },
+      isFirstRender: boolean = false
+    ) => {
+      const newHistory = {
         ...location,
         search: fromQuery({
           ...toQuery(location.search),
           ...nextQuery,
         }),
-      });
+      };
+
+      if (isFirstRender) {
+        history.replace(newHistory);
+      } else {
+        history.push(newHistory);
+      }
     },
     [history, location]
   );
@@ -108,7 +117,7 @@ export function DatePickerContextProvider({ children }: { children: React.ReactE
   );
 
   useMount(() => {
-    updateUrl({ rangeFrom: relativeStart, rangeTo: relativeEnd });
+    updateUrl({ rangeFrom: relativeStart, rangeTo: relativeEnd }, true);
   });
 
   return (

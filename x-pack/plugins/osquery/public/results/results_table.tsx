@@ -28,6 +28,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import React, { createContext, useEffect, useState, useCallback, useContext, useMemo } from 'react';
 import type { ECSMapping } from '@kbn/osquery-io-ts-types';
 import { pagePathGetters } from '@kbn/fleet-plugin/public';
+import styled from 'styled-components';
 import { AddToTimelineButton } from '../timelines/add_to_timeline_button';
 import { useAllResults } from './use_all_results';
 import type { ResultEdges } from '../../common/search_strategy';
@@ -46,6 +47,15 @@ import { AddToCaseWrapper } from '../cases/add_to_cases';
 
 const DataContext = createContext<ResultEdges>([]);
 
+const StyledEuiDataGrid = styled(EuiDataGrid)`
+  :not(.euiDataGrid--fullScreen) {
+    .euiDataGrid__virtualized {
+      height: 100% !important;
+      max-height: 500px;
+    }
+  }
+`;
+
 export interface ResultsTableComponentProps {
   actionId: string;
   selectedAgent?: string;
@@ -54,6 +64,7 @@ export interface ResultsTableComponentProps {
   endDate?: string;
   startDate?: string;
   liveQueryActionId?: string;
+  error?: string;
 }
 
 const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
@@ -63,6 +74,7 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
   startDate,
   endDate,
   liveQueryActionId,
+  error,
 }) => {
   const [isLive, setIsLive] = useState(true);
   const { data: hasActionResultsPrivileges } = useActionResultsPrivileges();
@@ -360,7 +372,7 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
   useEffect(
     () =>
       setIsLive(() => {
-        if (!agentIds?.length || expired) return false;
+        if (!agentIds?.length || expired || error) return false;
 
         return !!(
           aggregations.totalResponded !== agentIds?.length ||
@@ -374,6 +386,7 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
       aggregations?.totalRowCount,
       allResultsData?.edges.length,
       allResultsData?.total,
+      error,
       expired,
     ]
   );
@@ -419,7 +432,7 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
         </EuiPanel>
       ) : (
         <DataContext.Provider value={allResultsData?.edges}>
-          <EuiDataGrid
+          <StyledEuiDataGrid
             data-test-subj="osqueryResultsTable"
             aria-label="Osquery results"
             columns={columns}
@@ -429,7 +442,6 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
             leadingControlColumns={leadingControlColumns}
             sorting={tableSorting}
             pagination={tablePagination}
-            height="500px"
             toolbarVisibility={toolbarVisibility}
           />
         </DataContext.Provider>

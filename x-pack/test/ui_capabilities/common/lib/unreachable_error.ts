@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-class UnreachableError extends Error {
+export class UnreachableError extends Error {
   constructor(val: never) {
     super(`Unreachable: ${val}`);
   }

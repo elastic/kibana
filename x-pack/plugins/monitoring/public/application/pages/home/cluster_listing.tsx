@@ -9,7 +9,6 @@ import React, { useCallback, useContext, useEffect, useState } from 'react';
 import { Redirect } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-// @ts-ignore
 import { Listing } from '../../../components/cluster/listing';
 import { EnableAlertsModal } from '../../../alerts/enable_alerts_modal';
 import { GlobalStateContext } from '../../contexts/global_state_context';

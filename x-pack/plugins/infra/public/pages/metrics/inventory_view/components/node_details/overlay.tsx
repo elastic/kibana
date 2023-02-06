@@ -132,8 +132,8 @@ export const NodeContextPopover = ({
                       size="xs"
                       iconSide={'left'}
                       iconType={'popout'}
-                      href={nodeDetailMenuItemLinkProps.href}
                       flush="both"
+                      {...nodeDetailMenuItemLinkProps}
                     >
                       <FormattedMessage
                         id="xpack.infra.infra.nodeDetails.openAsPage"

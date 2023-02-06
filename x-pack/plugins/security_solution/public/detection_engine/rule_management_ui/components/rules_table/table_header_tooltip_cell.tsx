@@ -7,7 +7,7 @@
 
 import React from 'react';
 
-import { EuiToolTip, EuiIcon, EuiFlexGrid, EuiFlexItem } from '@elastic/eui';
+import { EuiToolTip, EuiIcon, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
 interface Props {
   title: string;
@@ -23,7 +23,7 @@ interface Props {
  * @param customTooltip React.ReactNode - any custom tooltip
  */
 const TableHeaderTooltipCellComponent = ({ title, tooltipContent, customTooltip }: Props) => (
-  <EuiFlexGrid gutterSize="none">
+  <EuiFlexGroup gutterSize="none">
     <EuiFlexItem style={{ width: 'calc(100% - 20px)' }}>
       <span className="eui-textTruncate">{title}</span>
     </EuiFlexItem>
@@ -38,7 +38,7 @@ const TableHeaderTooltipCellComponent = ({ title, tooltipContent, customTooltip 
         />
       </EuiToolTip>
     )}
-  </EuiFlexGrid>
+  </EuiFlexGroup>
 );
 
 export const TableHeaderTooltipCell = React.memo(TableHeaderTooltipCellComponent);

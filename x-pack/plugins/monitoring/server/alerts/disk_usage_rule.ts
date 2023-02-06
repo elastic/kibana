@@ -25,7 +25,6 @@ import {
   CommonAlertFilter,
 } from '../../common/types/alerts';
 import { RULE_DISK_USAGE, RULE_DETAILS } from '../../common/constants';
-// @ts-ignore
 import { ROUNDED_FLOAT } from '../../common/formatting';
 import { fetchDiskUsageNodeStats } from '../lib/alerts/fetch_disk_usage_node_stats';
 import { AlertMessageTokenType, AlertSeverity } from '../../common/enums';

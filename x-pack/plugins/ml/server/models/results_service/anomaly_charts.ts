@@ -11,6 +11,7 @@ import { each, find, get, keyBy, map, reduce, sortBy } from 'lodash';
 import type * as estypes from '@elastic/elasticsearch/lib/api/types';
 import { extent, max, min } from 'd3';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
+import { isDefined } from '@kbn/ml-is-defined';
 import type { MlClient } from '../../lib/ml_client';
 import { isRuntimeMappings } from '../../../common';
 import type {
@@ -37,9 +38,9 @@ import {
   aggregationTypeTransform,
   EntityField,
   getEntityFieldList,
+  isMultiBucketAnomaly,
 } from '../../../common/util/anomaly_utils';
 import { InfluencersFilterQuery } from '../../../common/types/es_client';
-import { isDefined } from '../../../common/types/guards';
 import { AnomalyRecordDoc, CombinedJob, Datafeed, RecordForInfluencer } from '../../shared';
 import { ES_AGGREGATION, ML_JOB_AGGREGATION } from '../../../common/constants/aggregation_types';
 import { parseInterval } from '../../../common/util/parse_interval';
@@ -1101,9 +1102,14 @@ export function anomalyChartsDataProvider(mlClient: MlClient, client: IScopedClu
             }
           }
 
-          if (record.multi_bucket_impact !== undefined) {
-            chartPoint.multiBucketImpact = record.multi_bucket_impact;
+          if (
+            record.anomaly_score_explanation !== undefined &&
+            record.anomaly_score_explanation.multi_bucket_impact !== undefined
+          ) {
+            chartPoint.multiBucketImpact = record.anomaly_score_explanation.multi_bucket_impact;
           }
+
+          chartPoint.isMultiBucketAnomaly = isMultiBucketAnomaly(record);
         }
       });
 

@@ -19,7 +19,7 @@ import {
   SPAN_DESTINATION_SERVICE_RESOURCE,
   SPAN_TYPE,
   SPAN_SUBTYPE,
-} from '../../../../../common/elasticsearch_fieldnames';
+} from '../../../../../common/es_fields/apm';
 import { ExternalConnectionNode } from '../../../../../common/service_map';
 
 const ExternalResourcesList = euiStyled.section`

@@ -7,37 +7,53 @@
 
 import { elasticsearchServiceMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
 
-import type { SavedObject } from '@kbn/core-saved-objects-common';
+import type { SavedObject } from '@kbn/core-saved-objects-server';
 
 import type { AgentPolicy } from '../../types';
 
 export function createClientMock() {
   const agentInHostedDoc = {
     _id: 'agent-in-hosted-policy',
+    _index: 'index',
     _source: {
       policy_id: 'hosted-agent-policy',
       local_metadata: { elastic: { agent: { version: '8.4.0', upgradeable: true } } },
+    },
+    fields: {
+      status: ['online'],
     },
   };
   const agentInHostedDoc2 = {
     _id: 'agent-in-hosted-policy2',
+    _index: 'index',
     _source: {
       policy_id: 'hosted-agent-policy',
       local_metadata: { elastic: { agent: { version: '8.4.0', upgradeable: true } } },
     },
+    fields: {
+      status: ['online'],
+    },
   };
   const agentInRegularDoc = {
     _id: 'agent-in-regular-policy',
+    _index: 'index',
     _source: {
       policy_id: 'regular-agent-policy',
       local_metadata: { elastic: { agent: { version: '8.4.0', upgradeable: true } } },
     },
+    fields: {
+      status: ['online'],
+    },
   };
   const agentInRegularDoc2 = {
     _id: 'agent-in-regular-policy2',
+    _index: 'index',
     _source: {
       policy_id: 'regular-agent-policy',
       local_metadata: { elastic: { agent: { version: '8.4.0', upgradeable: true } } },
+    },
+    fields: {
+      status: ['online'],
     },
   };
   const regularAgentPolicySO = {
@@ -72,6 +88,13 @@ export function createClientMock() {
     return {
       saved_objects: await Promise.all(options!.map(({ type, id }) => soClientMock.get(type, id))),
     };
+  });
+
+  soClientMock.find.mockResolvedValue({
+    saved_objects: [],
+    total: 0,
+    per_page: 10,
+    page: 1,
   });
 
   const esClientMock = elasticsearchServiceMock.createClusterClient().asInternalUser;
@@ -124,7 +147,24 @@ export function createClientMock() {
     };
   });
 
-  esClientMock.search.mockResolvedValue({ hits: { hits: [] } } as any);
+  esClientMock.search.mockImplementation(() =>
+    Promise.resolve({
+      took: 1,
+      timed_out: false,
+      _shards: {
+        failed: 0,
+        successful: 1,
+        total: 1,
+      },
+      hits: {
+        hits: [agentInHostedDoc, agentInRegularDoc, agentInRegularDoc2],
+        total: {
+          value: 3,
+          relation: 'eq',
+        },
+      },
+    })
+  );
 
   return {
     soClient: soClientMock,

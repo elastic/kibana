@@ -8,7 +8,7 @@
 import React from 'react';
 import type { EuiCommentProps } from '@elastic/eui';
 import { EuiText, EuiAvatar } from '@elastic/eui';
-import { capitalize } from 'lodash';
+import { capitalize, omit } from 'lodash';
 import moment from 'moment';
 
 import type {
@@ -34,11 +34,10 @@ import { getNewExceptionItem, addIdToEntries } from '@kbn/securitysolution-list-
 import type { DataViewBase } from '@kbn/es-query';
 import { removeIdFromExceptionItemsEntries } from '@kbn/securitysolution-list-hooks';
 
+import type { EcsSecurityExtension as Ecs, CodeSignature } from '@kbn/securitysolution-ecs';
 import * as i18n from './translations';
 import type { AlertData, Flattened } from './types';
 
-import type { Ecs } from '../../../../common/ecs';
-import type { CodeSignature } from '../../../../common/ecs/file';
 import { WithCopyToClipboard } from '../../../common/lib/clipboard/with_copy_to_clipboard';
 import exceptionableLinuxFields from './exceptionable_linux_fields.json';
 import exceptionableWindowsMacFields from './exceptionable_windows_mac_fields.json';
@@ -143,11 +142,12 @@ export const prepareExceptionItemsForBulkClose = (
   return exceptionItems.map((item: ExceptionListItemSchema) => {
     if (item.entries !== undefined) {
       const newEntries = item.entries.map((itemEntry: Entry | EntryNested) => {
+        const entry = omit(itemEntry, 'id') as Entry | EntryNested;
         return {
-          ...itemEntry,
-          field: itemEntry.field.startsWith('event.')
-            ? itemEntry.field.replace(/^event./, `${ALERT_ORIGINAL_EVENT}.`)
-            : itemEntry.field,
+          ...entry,
+          field: entry.field.startsWith('event.')
+            ? entry.field.replace(/^event./, `${ALERT_ORIGINAL_EVENT}.`)
+            : entry.field,
         };
       });
       return {

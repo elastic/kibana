@@ -89,10 +89,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       const alertName = generateUniqueKey();
       await rules.common.defineIndexThresholdAlert(alertName);
 
-      await testSubjects.click('notifyWhenSelect');
-      await testSubjects.click('onThrottleInterval');
-      await testSubjects.setValue('throttleInput', '10');
-
       // filterKuery validation
       await testSubjects.setValue('filterKuery', 'group:');
       const filterKueryInput = await testSubjects.find('filterKuery');
@@ -108,6 +104,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await find.clickByCssSelector('[data-test-subj="saveActionButtonModal"]:not(disabled)');
       const createdConnectorToastTitle = await pageObjects.common.closeToast();
       expect(createdConnectorToastTitle).to.eql(`Created '${slackConnectorName}'`);
+      await testSubjects.click('notifyWhenSelect');
+      await testSubjects.click('onThrottleInterval');
+      await testSubjects.setValue('throttleInput', '10');
       const messageTextArea = await find.byCssSelector('[data-test-subj="messageTextArea"]');
       expect(await messageTextArea.getAttribute('value')).to.eql(
         `alert '{{alertName}}' is active for group '{{context.group}}':
@@ -236,7 +235,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await testSubjects.missingOrFail('confirmRuleCloseModal');
 
       await pageObjects.triggersActionsUI.clickCreateAlertButton();
-      await testSubjects.setValue('intervalInput', '10');
+      await testSubjects.setValue('ruleNameInput', 'alertName');
       await testSubjects.click('cancelSaveRuleButton');
       await testSubjects.existOrFail('confirmRuleCloseModal');
       await testSubjects.click('confirmRuleCloseModal > confirmModalCancelButton');

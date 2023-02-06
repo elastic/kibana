@@ -12,7 +12,6 @@
 
 import { i18n } from '@kbn/i18n';
 import { CONDITIONS_NOT_SUPPORTED_FUNCTIONS } from '../constants/detector_rule';
-import { MULTI_BUCKET_IMPACT } from '../constants/multi_bucket_impact';
 import { ANOMALY_SEVERITY, ANOMALY_THRESHOLD, SEVERITY_COLORS } from '../constants/anomalies';
 import type { AnomaliesTableRecord, AnomalyRecordDoc } from '../types/anomalies';
 
@@ -119,6 +118,10 @@ function getSeverityTypes() {
   });
 }
 
+/**
+ * Returns whether the anomaly is in a categorization analysis.
+ * @param anomaly Anomaly table record
+ */
 export function isCategorizationAnomaly(anomaly: AnomaliesTableRecord): boolean {
   return anomaly.entityName === 'mlcategory';
 }
@@ -219,29 +222,54 @@ export function getSeverityColor(normalizedScore: number): string {
 }
 
 /**
- * Returns a label to use for the multi-bucket impact of an anomaly
- * according to the value of the multi_bucket_impact field of a record,
- * which ranges from -5 to +5.
- * @param multiBucketImpact - Value of the multi_bucket_impact field of a record, from -5 to +5
+ * Returns whether the anomaly record should be indicated in the UI as a multi-bucket anomaly,
+ * for example in anomaly charts with a cross-shaped marker.
+ * @param anomaly Anomaly table record
  */
-export function getMultiBucketImpactLabel(multiBucketImpact: number): string {
-  if (multiBucketImpact >= MULTI_BUCKET_IMPACT.HIGH) {
-    return i18n.translate('xpack.ml.anomalyUtils.multiBucketImpact.highLabel', {
-      defaultMessage: 'high',
-    });
-  } else if (multiBucketImpact >= MULTI_BUCKET_IMPACT.MEDIUM) {
-    return i18n.translate('xpack.ml.anomalyUtils.multiBucketImpact.mediumLabel', {
-      defaultMessage: 'medium',
-    });
-  } else if (multiBucketImpact >= MULTI_BUCKET_IMPACT.LOW) {
-    return i18n.translate('xpack.ml.anomalyUtils.multiBucketImpact.lowLabel', {
-      defaultMessage: 'low',
-    });
-  } else {
-    return i18n.translate('xpack.ml.anomalyUtils.multiBucketImpact.noneLabel', {
-      defaultMessage: 'none',
-    });
+export function isMultiBucketAnomaly(anomaly: AnomalyRecordDoc): boolean {
+  if (anomaly.anomaly_score_explanation === undefined) {
+    return false;
   }
+
+  const sb = anomaly.anomaly_score_explanation.single_bucket_impact;
+  const mb = anomaly.anomaly_score_explanation.multi_bucket_impact;
+
+  if (mb === undefined || mb === 0) {
+    return false;
+  }
+
+  if (sb !== undefined && sb > mb) {
+    return false;
+  }
+
+  if ((sb === undefined || sb === 0) && mb > 0) {
+    return true;
+  }
+
+  // Basis of use of 1.7 comes from the backend calculation for
+  // the single- and multi-bucket impacts
+  // 1.7 = 5.0/lg(e)/ln(1000)
+  // with the computation of the logarithm basis changed from e to 10.
+  if (sb !== undefined && mb > sb) {
+    return (((mb - sb) * mb) / sb) * 1.7 >= 2;
+  }
+
+  return false;
+}
+
+/**
+ * Returns the value on a scale of 1 to 5, from a log based scaled value for an
+ * anomaly score explanation impact field, such as anomaly_characteristics_impact,
+ * single_bucket_impact or multi_bucket_impact.
+ * @param score value from an impact field from the anomaly_score_explanation.
+ * @returns numeric value on an integer scale of 1 (low) to 5 (high).
+ */
+export function getAnomalyScoreExplanationImpactValue(score: number): number {
+  if (score < 2) return 1;
+  if (score < 4) return 2;
+  if (score < 7) return 3;
+  if (score < 12) return 4;
+  return 5;
 }
 
 /**

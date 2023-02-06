@@ -36,6 +36,8 @@ export default function ({ getService }: FtrProviderContext) {
   describe('Timeline migrations', () => {
     const esArchiver = getService('esArchiver');
     const es = getService('es');
+    const kibanaServer = getService('kibanaServer');
+    const spacesService = getService('spaces');
 
     describe('8.0 id migration', () => {
       const resolveWithSpaceApi = '/s/awesome-space/api/timeline/resolve';
@@ -44,13 +46,13 @@ export default function ({ getService }: FtrProviderContext) {
         await esArchiver.load(
           'x-pack/test/functional/es_archives/security_solution/timelines/7.15.0_space'
         );
-      });
-
-      after(async () => {
-        await esArchiver.unload(
-          'x-pack/test/functional/es_archives/security_solution/timelines/7.15.0_space'
+        await kibanaServer.importExport.load(
+          'x-pack/test/functional/fixtures/kbn_archiver/security_solution/timelines/7.15.0_space',
+          { space: 'awesome-space' }
         );
       });
+
+      after(async () => await spacesService.delete('awesome-space'));
 
       describe('resolve', () => {
         it('should return an aliasMatch outcome', async () => {

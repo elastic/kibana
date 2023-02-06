@@ -15,7 +15,6 @@ import {
 } from '../screens/exceptions';
 import {
   ALERTS_TAB,
-  BACK_TO_RULES,
   EXCEPTIONS_TAB,
   FIELDS_BROWSER_BTN,
   REFRESH_BUTTON,
@@ -29,6 +28,7 @@ import {
   EDIT_EXCEPTION_BTN,
   ENDPOINT_EXCEPTIONS_TAB,
   EDIT_RULE_SETTINGS_LINK,
+  BACK_TO_RULES_TABLE,
 } from '../screens/rule_details';
 import {
   addExceptionConditions,
@@ -40,7 +40,7 @@ import { addsFields, closeFieldsBrowser, filterFieldsBrowser } from './fields_br
 
 export const enablesRule = () => {
   // Rules get enabled via _bulk_action endpoint
-  cy.intercept('POST', '/api/detection_engine/rules/_bulk_action').as('bulk_action');
+  cy.intercept('POST', '/api/detection_engine/rules/_bulk_action?dry_run=false').as('bulk_action');
   cy.get(RULE_SWITCH).should('be.visible');
   cy.get(RULE_SWITCH).click();
   cy.wait('@bulk_action').then(({ response }) => {
@@ -131,8 +131,8 @@ export const waitForTheRuleToBeExecuted = () => {
   });
 };
 
-export const goBackToAllRulesTable = () => {
-  cy.get(BACK_TO_RULES).click();
+export const goBackToRulesTable = () => {
+  cy.get(BACK_TO_RULES_TABLE).click();
 };
 
 export const getDetails = (title: string | RegExp) =>

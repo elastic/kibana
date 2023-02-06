@@ -6,13 +6,12 @@
  * Side Public License, v 1.
  */
 
-import type {
-  SavedObjectsMigrationVersion,
-  SavedObjectReference,
-} from '@kbn/core-saved-objects-common';
+import type { SavedObjectsMigrationVersion } from '@kbn/core-saved-objects-common';
+import type { SavedObjectReference } from '@kbn/core-saved-objects-common';
 import type { MutatingOperationRefreshSetting, SavedObjectsBaseOptions } from './base';
 
 /**
+ * Options for the saved objects create operation
  *
  * @public
  */
@@ -38,6 +37,7 @@ export interface SavedObjectsCreateOptions extends SavedObjectsBaseOptions {
    * field set and you want to create it again.
    */
   coreMigrationVersion?: string;
+  /** Array of references to other saved objects */
   references?: SavedObjectReference[];
   /** The Elasticsearch Refresh setting for this operation */
   refresh?: MutatingOperationRefreshSetting;

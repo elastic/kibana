@@ -199,7 +199,7 @@ describe('search_bar', () => {
 
     // pick the button component out of the tree because
     // it's part of a popover and thus not covered by enzyme
-    instance.find('[data-test-subj="graphDatasourceButton"]').first().simulate('click');
+    instance.find('button[data-test-subj="graphDatasourceButton"]').first().simulate('click');
 
     expect(openSourceModal).toHaveBeenCalled();
   });

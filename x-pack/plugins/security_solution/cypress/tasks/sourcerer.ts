@@ -102,8 +102,9 @@ export const addIndexToDefault = (index: string) => {
           cy.get('[data-test-subj="toastCloseButton]"').click();
         }
       });
+
       cy.get('button[data-test-subj="advancedSetting-saveButton"]').click();
-      cy.get('.euiToast .euiButton--primary').click();
+      cy.get('button[data-test-subj="windowReloadButton"]').click();
       waitForPage(HOSTS_URL);
     });
 };
@@ -147,6 +148,6 @@ const refreshUntilAlertsIndexExists = async () => {
 };
 
 export const waitForAlertsIndexToExist = () => {
-  createCustomRuleEnabled(getNewRule(), '1', '100m', 100);
+  createCustomRuleEnabled(getNewRule(), '1', 100);
   refreshUntilAlertsIndexExists();
 };
