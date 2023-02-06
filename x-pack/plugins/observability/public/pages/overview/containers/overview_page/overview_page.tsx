@@ -92,12 +92,16 @@ export function OverviewPage() {
     })
   );
   const timeBuckets = useTimeBuckets();
-  const alertSummaryTimeRange = getAlertSummaryTimeRange(
-    {
-      from: relativeStart,
-      to: relativeEnd,
-    },
-    timeBuckets
+  const alertSummaryTimeRange = useMemo(
+    () =>
+      getAlertSummaryTimeRange(
+        {
+          from: relativeStart,
+          to: relativeEnd,
+        },
+        timeBuckets
+      ),
+    [relativeEnd, relativeStart, timeBuckets]
   );
 
   const chartThemes = {
