@@ -14,6 +14,7 @@ import {
   RectAnnotation,
   RectAnnotationDatum,
   RectAnnotationStyle,
+  AnnotationTooltipFormatter,
 } from '@elastic/charts';
 import { i18n } from '@kbn/i18n';
 import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiSpacer, useEuiTheme } from '@elastic/eui';
@@ -142,7 +143,7 @@ const partialDataText = i18n.translate('charts.partialData.bucketTooltipText', {
     'The selected time range does not include this entire bucket. It might contain partial data.',
 });
 
-const Prompt = () => {
+const Prompt: AnnotationTooltipFormatter = () => {
   const { euiTheme } = useEuiTheme();
   const headerPartialCss = css`
     font-weight: ${euiTheme.font.weight.regular};

@@ -12,12 +12,14 @@ import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { embeddablePluginMock } from '@kbn/embeddable-plugin/public/mocks';
 import { MockApmPluginContextWrapper } from '../../../../../context/apm_plugin/mock_apm_plugin_context';
 import { MemoryRouter } from 'react-router-dom';
+import { MapTypes } from '../../../../../../common/mobile/constants';
 
 describe('Embedded Map', () => {
   it('it renders', async () => {
     const mockSetLayerList = jest.fn();
     const mockUpdateInput = jest.fn();
     const mockRender = jest.fn();
+    const mockReload = jest.fn();
 
     const mockEmbeddable = embeddablePluginMock.createStartContract();
     mockEmbeddable.getEmbeddableFactory = jest.fn().mockImplementation(() => ({
@@ -25,6 +27,7 @@ describe('Embedded Map', () => {
         setLayerList: mockSetLayerList,
         updateInput: mockUpdateInput,
         render: mockRender,
+        reload: mockReload,
       }),
     }));
 
@@ -37,6 +40,7 @@ describe('Embedded Map', () => {
         <MockApmPluginContextWrapper>
           <KibanaContextProvider services={{ embeddable: mockEmbeddable }}>
             <EmbeddedMap
+              selectedMap={MapTypes.Http}
               filters={[]}
               start="2022-12-20T10:00:00.000Z"
               end="2022-12-20T10:15:00.000Z"

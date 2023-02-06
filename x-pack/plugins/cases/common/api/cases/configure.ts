@@ -7,7 +7,7 @@
 
 import * as rt from 'io-ts';
 
-import { UserRT } from '../user';
+import { UserRt } from '../user';
 import { CaseConnectorRt, ConnectorMappingsRt } from '../connectors';
 
 // TODO: we will need to add this type rt.literal('close-by-third-party')
@@ -44,9 +44,9 @@ export const CaseConfigureAttributesRt = rt.intersection([
   CasesConfigureBasicRt,
   rt.type({
     created_at: rt.string,
-    created_by: UserRT,
+    created_by: UserRt,
     updated_at: rt.union([rt.string, rt.null]),
-    updated_by: rt.union([UserRT, rt.null]),
+    updated_by: rt.union([UserRt, rt.null]),
   }),
 ]);
 
