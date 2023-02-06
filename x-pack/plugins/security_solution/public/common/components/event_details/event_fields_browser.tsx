@@ -8,7 +8,6 @@
 import { getOr, noop, sortBy } from 'lodash/fp';
 import { EuiInMemoryTable } from '@elastic/eui';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { useDispatch } from 'react-redux';
 import { rgba } from 'polished';
 import styled from 'styled-components';
 import {
@@ -19,7 +18,7 @@ import {
   onKeyDownFocusHandler,
 } from '@kbn/timelines-plugin/public';
 
-import { getScopedActions, isInTableScope, isTimelineScope } from '../../../helpers';
+import { isInTableScope, isTimelineScope } from '../../../helpers';
 import { tableDefaults } from '../../store/data_table/defaults';
 import { dataTableSelectors } from '../../store/data_table';
 import { ADD_TIMELINE_BUTTON_CLASS_NAME } from '../../../timelines/components/flyout/add_timeline_button';
@@ -32,7 +31,7 @@ import { timelineDefaults } from '../../../timelines/store/timeline/defaults';
 import { getColumns } from './columns';
 import { EVENT_FIELDS_TABLE_CLASS_NAME, onEventDetailsTabKeyPressed, search } from './helpers';
 import { useDeepEqualSelector } from '../../hooks/use_selector';
-import type { ColumnHeaderOptions, TimelineTabs } from '../../../../common/types/timeline';
+import type { TimelineTabs } from '../../../../common/types/timeline';
 
 interface Props {
   browserFields: BrowserFields;
@@ -163,7 +162,6 @@ const useFieldBrowserPagination = () => {
 export const EventFieldsBrowser = React.memo<Props>(
   ({ browserFields, data, eventId, isDraggable, timelineTabType, scopeId, isReadOnly }) => {
     const containerElement = useRef<HTMLDivElement | null>(null);
-    const dispatch = useDispatch();
     const getScope = useMemo(() => {
       if (isTimelineScope(scopeId)) {
         return timelineSelectors.getTimelineByIdSelector();
@@ -201,31 +199,6 @@ export const EventFieldsBrowser = React.memo<Props>(
       },
       [data, columnHeaders]
     );
-    const scopedActions = getScopedActions(scopeId);
-    const toggleColumn = useCallback(
-      (column: ColumnHeaderOptions) => {
-        if (!scopedActions) {
-          return;
-        }
-        if (columnHeaders.some((c) => c.id === column.id)) {
-          dispatch(
-            scopedActions.removeColumn({
-              columnId: column.id,
-              id: scopeId,
-            })
-          );
-        } else {
-          dispatch(
-            scopedActions.upsertColumn({
-              column,
-              id: scopeId,
-              index: 1,
-            })
-          );
-        }
-      },
-      [columnHeaders, dispatch, scopeId, scopedActions]
-    );
 
     const onSetRowProps = useCallback(({ ariaRowindex, field }: TimelineEventsDetailsItem) => {
       const rowIndex = ariaRowindex != null ? { 'data-rowindex': ariaRowindex } : {};
@@ -236,41 +209,18 @@ export const EventFieldsBrowser = React.memo<Props>(
       };
     }, []);
 
-    const onUpdateColumns = useCallback(
-      (columns) => {
-        if (scopedActions) {
-          dispatch(scopedActions.updateColumns({ id: scopeId, columns }));
-        }
-      },
-      [dispatch, scopeId, scopedActions]
-    );
-
     const columns = useMemo(
       () =>
         getColumns({
           browserFields,
-          columnHeaders,
           eventId,
-          onUpdateColumns,
           contextId: `event-fields-browser-for-${scopeId}-${timelineTabType}`,
           scopeId,
-          toggleColumn,
           getLinkValue,
           isDraggable,
           isReadOnly,
         }),
-      [
-        browserFields,
-        columnHeaders,
-        eventId,
-        onUpdateColumns,
-        scopeId,
-        timelineTabType,
-        toggleColumn,
-        getLinkValue,
-        isDraggable,
-        isReadOnly,
-      ]
+      [browserFields, eventId, scopeId, timelineTabType, getLinkValue, isDraggable, isReadOnly]
     );
 
     const focusSearchInput = useCallback(() => {

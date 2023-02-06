@@ -28,12 +28,15 @@ export interface ShowTopNActionContext extends CellActionExecutionContext {
   };
 }
 
-export const COLUMN_TOGGLE = i18n.translate('xpack.timelines.hoverActions.columnToggleLabel', {
-  defaultMessage: 'Toggle column in table',
-});
+export const COLUMN_TOGGLE = i18n.translate(
+  'xpack.securitySolution.actions.toggleColumnToggle.label',
+  {
+    defaultMessage: 'Toggle column in table',
+  }
+);
 
 export const NESTED_COLUMN = (field: string) =>
-  i18n.translate('xpack.timelines.hoverActions.nestedColumnToggleLabel', {
+  i18n.translate('xpack.securitySolution.actions.toggleColumnToggle.nestedLabel', {
     values: { field },
     defaultMessage:
       'The {field} field is an object, and is broken down into nested fields which can be added as columns',

@@ -12,10 +12,8 @@ import React from 'react';
 import styled from 'styled-components';
 import { CellActions, CellActionsMode } from '@kbn/cell-actions';
 import type { BrowserFields } from '../../containers/source';
-import type { OnUpdateColumns } from '../../../timelines/components/timeline/events';
 import * as i18n from './translations';
 import type { EventFieldsData } from './types';
-import type { ColumnHeaderOptions } from '../../../../common/types';
 import type { BrowserField } from '../../../../common/search_strategy';
 import { FieldValueCell } from './table/field_value_cell';
 import { FieldNameCell } from './table/field_name_cell';
@@ -42,23 +40,17 @@ export const getFieldFromBrowserField = memoizeOne(
 );
 export const getColumns = ({
   browserFields,
-  columnHeaders,
   eventId,
-  onUpdateColumns,
   contextId,
   scopeId,
-  toggleColumn,
   getLinkValue,
   isDraggable,
   isReadOnly,
 }: {
   browserFields: BrowserFields;
-  columnHeaders: ColumnHeaderOptions[];
   eventId: string;
-  onUpdateColumns: OnUpdateColumns;
   contextId: string;
   scopeId: string;
-  toggleColumn: (column: ColumnHeaderOptions) => void;
   getLinkValue: (field: string) => string | null;
   isDraggable?: boolean;
   isReadOnly?: boolean;
