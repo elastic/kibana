@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FC, useEffect, useState, useCallback } from 'react';
+import React, { FC, useEffect, useState, useCallback, useMemo } from 'react';
 import {
   Chart,
   Settings,
@@ -66,7 +66,7 @@ const TYPE_OPTIONS: EuiComboBoxOptionOption[] = Object.entries(TYPE_LABELS).map(
 
 export const JobMemoryTreeMap: FC<Props> = ({ node, type, height }) => {
   const isDarkTheme = useUiSettings().get('theme:darkMode');
-  const baseTheme = isDarkTheme ? DARK_THEME : LIGHT_THEME;
+  const baseTheme = useMemo(() => (isDarkTheme ? DARK_THEME : LIGHT_THEME), [isDarkTheme]);
 
   const bytesFormatter = useFieldFormatter(FIELD_FORMAT_IDS.BYTES);
   const { displayErrorToast } = useToastNotificationService();
