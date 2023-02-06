@@ -106,7 +106,7 @@ interface CspSetupInstalledStatus extends BaseCspSetupStatus {
   installedPackageVersion: string | undefined;
 }
 
-//export type CspSetupStatus = CspSetupInstalledStatus | CspSetupNotInstalledStatus;
+// export type CspSetupStatus = CspSetupInstalledStatus | CspSetupNotInstalledStatus;
 
 export type CspSetupStatus = BaseCspSetupStatus;
 
