@@ -31,6 +31,10 @@ export interface GuidedOnboardingApi {
     state: { status?: PluginStatus; guide?: GuideState },
     panelState: boolean
   ) => Promise<{ pluginState: PluginState } | undefined>;
+  activateGuideDefaultState: (
+    guideId: GuideId,
+    guide?: GuideState
+  ) => Promise<{ pluginState: PluginState } | undefined>;
   activateGuide: (
     guideId: GuideId,
     guide?: GuideState

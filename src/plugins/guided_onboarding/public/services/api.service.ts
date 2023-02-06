@@ -169,31 +169,16 @@ export class ApiService implements GuidedOnboardingApi {
   }
 
   /**
-   * Activates a guide by guideId.
-   * This is useful for the onboarding landing page, when a user selects a guide to start or continue.
+   * Activates a guide's default state by guideId.
+   * This is useful for defining an initial state for a guide.
    * @param {GuideId} guideId the id of the guide (one of search, kubernetes, siem)
    * @param {GuideState} guide (optional) the selected guide state, if it exists (i.e., if a user is continuing a guide)
    * @return {Promise} a promise with the updated plugin state
    */
-  public async activateGuide(
+  public async activateGuideDefaultState(
     guideId: GuideId,
     guide?: GuideState
   ): Promise<{ pluginState: PluginState } | undefined> {
-    // If we already have the guide state (i.e., user has already started the guide at some point),
-    // simply pass it through so they can continue where they left off, and update the guide to active
-    if (guide) {
-      return await this.updatePluginState(
-        {
-          status: 'in_progress',
-          guide: {
-            ...guide,
-            isActive: true,
-          },
-        },
-        true
-      );
-    }
-
     // If this is the 1st-time attempt, we need to create the default state
     const guideConfig = await this.configService.getGuideConfig(guideId);
 
@@ -215,8 +200,35 @@ export class ApiService implements GuidedOnboardingApi {
 
       return await this.updatePluginState(
         {
-          status: 'in_progress',
+          status: 'not_started',
           guide: updatedGuide,
+        },
+        true
+      );
+    }
+  }
+
+  /**
+   * Activates a guide by guideId.
+   * This is useful for the onboarding landing page, when a user selects a guide to start or continue.
+   * @param {GuideId} guideId the id of the guide (one of search, kubernetes, siem)
+   * @param {GuideState} guide (optional) the selected guide state, if it exists (i.e., if a user is continuing a guide)
+   * @return {Promise} a promise with the updated plugin state
+   */
+  public async activateGuide(
+    guideId: GuideId,
+    guide?: GuideState
+  ): Promise<{ pluginState: PluginState } | undefined> {
+    // If we already have the guide state (i.e., user has already started the guide at some point),
+    // simply pass it through so they can continue where they left off, and update the guide to active
+    if (guide) {
+      return await this.updatePluginState(
+        {
+          status: 'in_progress',
+          guide: {
+            ...guide,
+            isActive: true,
+          },
         },
         true
       );
@@ -347,7 +359,7 @@ export class ApiService implements GuidedOnboardingApi {
       steps: updatedSteps,
     };
 
-    return await this.updatePluginState({ guide: currentGuide }, false);
+    return await this.updatePluginState({ status: 'in_progress', guide: currentGuide }, false);
   }
 
   /**

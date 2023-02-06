@@ -78,9 +78,14 @@ export const getInProgressStepConfig = (
 export const isGuideActive = (pluginState?: PluginState, guideId?: GuideId): boolean => {
   // false if pluginState is undefined or plugin state is not in progress
   // or active guide is undefined
-  if (!pluginState || pluginState.status !== 'in_progress' || !pluginState.activeGuide) {
+  if (!pluginState || !pluginState.activeGuide) {
     return false;
   }
+
+  if (!pluginState.activeGuide.isActive) {
+    return false;
+  }
+
   // guideId is passed, check that it's the id of the active guide
   if (guideId) {
     const { activeGuide } = pluginState;

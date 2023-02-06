@@ -167,12 +167,12 @@ describe('GuidedOnboarding ApiService', () => {
       });
       apiService.setup(httpClient, true);
 
-      await apiService.activateGuide(testGuideId);
+      await apiService.activateGuideDefaultState(testGuideId);
 
       expect(httpClient.put).toHaveBeenCalledTimes(1);
       expect(httpClient.put).toHaveBeenCalledWith(`${API_BASE_PATH}/state`, {
         body: JSON.stringify({
-          status: 'in_progress',
+          status: 'not_started',
           guide: { ...testGuideDefaultState, status: 'not_started' },
         }),
       });
@@ -370,7 +370,7 @@ describe('GuidedOnboarding ApiService', () => {
       await apiService.startGuideStep(testGuideId, testGuideFirstStep);
 
       expect(httpClient.put).toHaveBeenCalledWith(`${API_BASE_PATH}/state`, {
-        body: JSON.stringify({ guide: testGuideStep1InProgressState }),
+        body: JSON.stringify({ status: 'in_progress', guide: testGuideStep1InProgressState }),
       });
     });
 

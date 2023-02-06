@@ -74,24 +74,34 @@ export const GuideButton = ({
           })}
     </EuiButton>
   );
+
+  const isGuideInActiveState = (): boolean => {
+    if (pluginState && pluginState.activeGuide) {
+      const { status, isActive } = pluginState.activeGuide;
+
+      if (!isActive || status === 'not_started') {
+        return false;
+      }
+
+      const { steps } = pluginState.activeGuide;
+
+      return (
+        steps.filter((step) => {
+          return step.status === 'inactive';
+        }).length !== steps.length
+      );
+    }
+
+    return false;
+  };
+
   // if there is no active guide
-  if (
-    !pluginState ||
-    !pluginState.activeGuide ||
-    !pluginState.activeGuide.isActive ||
-    // the guide has not started yet when the user just looks at the guide
-    // see https://github.com/elastic/kibana/issues/148912 for more context
-    pluginState.activeGuide.status === 'not_started'
-  ) {
+  if (!isGuideInActiveState()) {
     // if still active period and the user has not started a guide or skipped the guide,
     // display the button that redirects to the landing page
     if (
       pluginState?.isActivePeriod &&
-      (pluginState?.status === 'not_started' ||
-        pluginState?.status === 'skipped' ||
-        // plugin state 'in_progress' without an active guide is when the guide has not started yet
-        // see https://github.com/elastic/kibana/issues/148912 for context
-        pluginState.status === 'in_progress')
+      (pluginState?.status === 'not_started' || pluginState?.status === 'skipped')
     ) {
       return (
         <EuiButton

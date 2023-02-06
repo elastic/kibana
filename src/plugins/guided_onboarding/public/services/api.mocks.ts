@@ -19,7 +19,7 @@ export const wrongIntegration = 'notTestIntegration';
 export const testGuideDefaultState: GuideState = {
   guideId: 'testGuide',
   isActive: true,
-  status: 'in_progress',
+  status: 'not_started',
   steps: [
     {
       id: 'step1',
@@ -38,6 +38,7 @@ export const testGuideDefaultState: GuideState = {
 
 export const testGuideStep1ActiveState: GuideState = {
   ...testGuideDefaultState,
+  status: 'in_progress',
   steps: [
     {
       id: testGuideDefaultState.steps[0].id,
@@ -149,6 +150,12 @@ export const testGuideNotActiveState: GuideState = {
 export const mockPluginStateNotStarted: PluginState = {
   status: 'not_started',
   isActivePeriod: true,
+};
+
+export const mockPluginStateInDefaultGuideState: PluginState = {
+  status: 'not_started',
+  isActivePeriod: true,
+  activeGuide: testGuideDefaultState,
 };
 
 export const mockPluginStateInProgress: PluginState = {

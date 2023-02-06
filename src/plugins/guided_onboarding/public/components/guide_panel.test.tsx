@@ -29,6 +29,8 @@ import {
   readyToCompleteGuideState,
   mockPluginStateNotStarted,
   mockPluginStateInProgress,
+  mockPluginStateInDefaultGuideState,
+  testGuideDefaultState,
 } from '../services/api.mocks';
 import { GuidePanel } from './guide_panel';
 import { IUiSettingsClient } from '@kbn/core/public';
@@ -92,6 +94,18 @@ describe('Guided setup', () => {
   });
 
   describe('Button component', () => {
+    describe('when a guide is in default state', () => {
+      it('button is enabled', async () => {
+        const { exists, find } = await setupComponentWithPluginStateMock(
+          httpClient,
+          mockPluginStateInDefaultGuideState
+        );
+        expect(exists('guideButton')).toBe(false);
+        expect(exists('guideButtonRedirect')).toBe(true);
+        expect(find('guideButtonRedirect').text()).toEqual('Setup guides');
+      });
+    });
+
     describe('when a guide is active', () => {
       it('button is enabled', async () => {
         const { exists, find } = await setupComponentWithPluginStateMock(
@@ -377,11 +391,7 @@ describe('Guided setup', () => {
 
       test('can start a step if step has not been started', async () => {
         httpClient.put.mockResolvedValueOnce({
-          pluginState: {
-            status: 'in_progress',
-            isActivePeriod: true,
-            activeGuide: testGuideStep1InProgressState,
-          },
+          pluginState: testGuideDefaultState,
         });
         testBed = await setupComponentWithPluginStateMock(httpClient, mockPluginStateInProgress);
         const { exists, find, component } = testBed;
