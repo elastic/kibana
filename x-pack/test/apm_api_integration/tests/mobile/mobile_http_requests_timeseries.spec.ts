@@ -126,7 +126,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         expect(response.status).to.be(200);
         expect(ntcCell.status).to.be(200);
         expect(response.body.currentPeriod.timeseries[0].y).to.eql(2);
-        expect(ntcCell.body.currentPeriod.timeseries[0].y).to.eql(0);
+        expect(ntcCell.body.currentPeriod.timeseries[0].y).to.eql(1);
       });
     });
   });

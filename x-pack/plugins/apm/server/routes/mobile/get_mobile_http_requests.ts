@@ -82,6 +82,7 @@ async function getHttpRequestsTimeseries({
           filter: [
             ...termQuery(SPAN_TYPE, MobileSpanType.External),
             ...termQuery(SERVICE_NAME, serviceName),
+            ...termQuery(SPAN_TYPE, 'external'),
             ...termQuery(TRANSACTION_NAME, transactionName),
             ...rangeQuery(startWithOffset, endWithOffset),
             ...environmentQuery(environment),
