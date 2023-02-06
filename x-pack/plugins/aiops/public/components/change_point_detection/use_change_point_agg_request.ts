@@ -8,6 +8,7 @@
 import { useEffect, useCallback, useState, useMemo } from 'react';
 import { type QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { i18n } from '@kbn/i18n';
+import { useRefresh } from '@kbn/ml-date-picker';
 import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
 import {
   ChangePointAnnotation,
@@ -103,6 +104,8 @@ export function useChangePointResults(
   } = useAiopsAppContext();
 
   const { dataView } = useDataSource();
+
+  const refresh = useRefresh();
 
   const [results, setResults] = useState<ChangePointAnnotation[]>([]);
   const [activePage, setActivePage] = useState<number>(0);
@@ -219,7 +222,7 @@ export function useChangePointResults(
         cancelRequest();
       };
     },
-    [requestParams, query, splitFieldCardinality, fetchResults, reset, cancelRequest]
+    [requestParams, query, splitFieldCardinality, fetchResults, reset, cancelRequest, refresh]
   );
 
   const pagination = useMemo(() => {
