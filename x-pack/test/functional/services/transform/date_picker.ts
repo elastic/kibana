@@ -51,7 +51,7 @@ export function TransformDatePickerProvider({ getService, getPageObjects }: FtrP
       await testSubjects.existOrFail('mlDatePickerButtonUseFullData');
       await testSubjects.clickWhenNotDisabledWithoutRetry('mlDatePickerButtonUseFullData');
 
-      await retry.tryForTime(5000, async () => {
+      await retry.try(async () => {
         const actualTimeConfig = await pageObjects.timePicker.getTimeConfig();
 
         expect(actualTimeConfig).to.eql(
