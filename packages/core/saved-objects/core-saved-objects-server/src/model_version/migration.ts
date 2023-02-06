@@ -67,6 +67,12 @@ export interface SavedObjectModelBidirectionalMigration<
   PreviousAttributes = unknown,
   NewAttributes = unknown
 > {
+  /**
+   * The upward (old=>new) migration.
+   */
   up: SavedObjectModelMigrationFn<PreviousAttributes, NewAttributes>;
+  /**
+   * The downward (new=>old) migration.
+   */
   down: SavedObjectModelMigrationFn<NewAttributes, PreviousAttributes>;
 }
