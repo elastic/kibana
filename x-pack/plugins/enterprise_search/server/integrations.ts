@@ -471,4 +471,171 @@ export const registerEnterpriseSearchIntegrations = (
     shipper: 'enterprise_search',
     isBeta: false,
   });
+
+  customIntegrations.registerCustomIntegration({
+    id: 'postgresql',
+    title: i18n.translate('xpack.enterpriseSearch.workplaceSearch.integrations.postgresqlName', {
+      defaultMessage: 'PostgreSQL',
+    }),
+    description: i18n.translate(
+      'xpack.enterpriseSearch.workplaceSearch.integrations.postgreSQLDescription',
+      {
+        defaultMessage: 'Search over your content on PostgreSQL with Enterprise Search.',
+      }
+    ),
+    categories: ['enterprise_search', 'elastic_stack', 'custom', 'datastore'],
+    uiInternalPath: '/app/enterprise_search/content/search_indices/new_index?method=connector',
+    icons: [
+      {
+        type: 'svg',
+        src: http.basePath.prepend('/plugins/enterpriseSearch/assets/source_icons/postgresql.svg'),
+      },
+    ],
+    shipper: 'enterprise_search',
+    isBeta: false,
+  });
+
+  customIntegrations.registerCustomIntegration({
+    id: 'oracle',
+    title: i18n.translate('xpack.enterpriseSearch.workplaceSearch.integrations.oracleName', {
+      defaultMessage: 'Oracle',
+    }),
+    description: i18n.translate(
+      'xpack.enterpriseSearch.workplaceSearch.integrations.oracleDescription',
+      {
+        defaultMessage: 'Search over your content on Oracle with Enterprise Search.',
+      }
+    ),
+    categories: ['enterprise_search', 'elastic_stack', 'custom', 'datastore'],
+    uiInternalPath: '/app/enterprise_search/content/search_indices/new_index?method=connector',
+    icons: [
+      {
+        type: 'svg',
+        src: http.basePath.prepend('/plugins/enterpriseSearch/assets/source_icons/oracle.svg'),
+      },
+    ],
+    shipper: 'enterprise_search',
+    isBeta: false,
+  });
+
+  customIntegrations.registerCustomIntegration({
+    id: 'ms_sql',
+    title: i18n.translate('xpack.enterpriseSearch.workplaceSearch.integrations.msSqlName', {
+      defaultMessage: 'Microsoft SQL',
+    }),
+    description: i18n.translate(
+      'xpack.enterpriseSearch.workplaceSearch.integrations.msSqlDescription',
+      {
+        defaultMessage: 'Search over your content on Microsoft SQL Server with Enterprise Search.',
+      }
+    ),
+    categories: ['enterprise_search', 'custom', 'elastic_stack', 'datastore'],
+    uiInternalPath: '/app/enterprise_search/content/search_indices/new_index?method=connector',
+    icons: [
+      {
+        type: 'svg',
+        src: http.basePath.prepend(
+          '/plugins/enterpriseSearch/assets/source_icons/microsoft_sql.svg'
+        ),
+      },
+    ],
+    shipper: 'enterprise_search',
+    isBeta: false,
+  });
+
+  customIntegrations.registerCustomIntegration({
+    id: 'ms_sql',
+    title: i18n.translate('xpack.enterpriseSearch.workplaceSearch.integrations.networkDriveName', {
+      defaultMessage: 'Network Drive',
+    }),
+    description: i18n.translate(
+      'xpack.enterpriseSearch.workplaceSearch.integrations.netowkrDriveDescription',
+      {
+        defaultMessage: 'Search over your Network Drive content with Enterprise Search.',
+      }
+    ),
+    categories: ['enterprise_search', 'custom', 'elastic_stack', 'file_storage'],
+    uiInternalPath: '/app/enterprise_search/content/search_indices/new_index?method=connector',
+    icons: [
+      {
+        type: 'svg',
+        src: http.basePath.prepend(
+          '/plugins/enterpriseSearch/assets/source_icons/network_drive.svg'
+        ),
+      },
+    ],
+    shipper: 'enterprise_search',
+    isBeta: false,
+  });
+
+  customIntegrations.registerCustomIntegration({
+    id: 'amazon_s3',
+    title: i18n.translate('xpack.enterpriseSearch.workplaceSearch.integrations.s3', {
+      defaultMessage: 'Amazon S3',
+    }),
+    description: i18n.translate(
+      'xpack.enterpriseSearch.workplaceSearch.integrations.s3Description',
+      {
+        defaultMessage: 'Search over your content on Amazon S3 with Enterprise Search.',
+      }
+    ),
+    categories: ['enterprise_search', 'datastore', 'elastic_stack'],
+    uiInternalPath: '/app/enterprise_search/content/search_indices/new_index?method=connector',
+    icons: [
+      {
+        type: 'svg',
+        src: http.basePath.prepend('/plugins/enterpriseSearch/assets/source_icons/amazon_s3.svg'),
+      },
+    ],
+    shipper: 'enterprise_search',
+    isBeta: false,
+  });
+
+  customIntegrations.registerCustomIntegration({
+    id: 'google_cloud_storage',
+    title: i18n.translate('xpack.enterpriseSearch.workplaceSearch.integrations.googleCloud', {
+      defaultMessage: 'Google Cloud Storage',
+    }),
+    description: i18n.translate(
+      'xpack.enterpriseSearch.workplaceSearch.integrations.googleCloudDescription',
+      {
+        defaultMessage: 'Search over your content on Google Cloud Storage with Enterprise Search.',
+      }
+    ),
+    categories: ['enterprise_search', 'elastic_stack', 'custom'],
+    uiInternalPath: '/app/enterprise_search/content/search_indices/new_index?method=connector',
+    icons: [
+      {
+        type: 'svg',
+        src: http.basePath.prepend(
+          '/plugins/enterpriseSearch/assets/source_icons/google_cloud.svg'
+        ),
+      },
+    ],
+    shipper: 'enterprise_search',
+    isBeta: false,
+  });
+
+  customIntegrations.registerCustomIntegration({
+    id: 'azure_cloud_storage',
+    title: i18n.translate('xpack.enterpriseSearch.workplaceSearch.integrations.azureCloud', {
+      defaultMessage: 'Azure Cloud Storage',
+    }),
+    description: i18n.translate(
+      'xpack.enterpriseSearch.workplaceSearch.integrations.azureCloudDescription',
+      {
+        defaultMessage: 'Search over your content on Azure Cloud Storage with Enterprise Search.',
+      }
+    ),
+    categories: ['enterprise_search', 'elastic_stack', 'custom'],
+    uiInternalPath: '/app/enterprise_search/content/search_indices/new_index?method=connector',
+    icons: [
+      {
+        type: 'svg',
+        src: http.basePath.prepend('/plugins/enterpriseSearch/assets/source_icons/azure_cloud.svg'),
+      },
+    ],
+    shipper: 'enterprise_search',
+    isBeta: false,
+  });
 };

@@ -63,6 +63,7 @@ import type {
 } from './types';
 import { telemetryConfiguration } from './configuration';
 import { ENDPOINT_METRICS_INDEX } from '../../../common/constants';
+import { PREBUILT_RULES_PACKAGE_NAME } from '../../../common/detection_engine/constants';
 
 export interface ITelemetryReceiver {
   start(
@@ -220,7 +221,7 @@ export class TelemetryReceiver implements ITelemetryReceiver {
   }
 
   public async fetchDetectionRulesPackageVersion(): Promise<Installation | undefined> {
-    return this.packageService?.asInternalUser.getInstallation('security_detection_engine');
+    return this.packageService?.asInternalUser.getInstallation(PREBUILT_RULES_PACKAGE_NAME);
   }
 
   public async fetchFleetAgents() {
