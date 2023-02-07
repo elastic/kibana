@@ -243,7 +243,17 @@ export const ChangePointDetectionPage: FC = () => {
                     <EuiFlexItem grow={false}>
                       <EuiDescriptionList
                         type="inline"
-                        listItems={[{ title: 'p-value', description: v.p_value.toPrecision(3) }]}
+                        listItems={[
+                          {
+                            title: (
+                              <FormattedMessage
+                                id="xpack.aiops.explainLogRateSpikes.spikeAnalysisTableGroups.pValueLabel"
+                                defaultMessage="p-value"
+                              />
+                            ),
+                            description: v.p_value.toPrecision(3),
+                          },
+                        ]}
                       />
                     </EuiFlexItem>
                   ) : null}
