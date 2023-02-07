@@ -27,8 +27,9 @@ export async function getDocumentSources({
   enableContinuousRollups: boolean;
 }) {
   const currentRange = rangeQuery(start, end);
+  const diff = end - start;
   const kql = kqlQuery(kuery);
-  const beforeRange = rangeQuery(start - (end - start), end - (end - start));
+  const beforeRange = rangeQuery(start - diff, end - diff);
 
   const sourcesToCheck = [
     ...(enableServiceTransactionMetrics
@@ -122,6 +123,8 @@ export async function getDocumentSources({
       const { documentType, hasDataAfter, hasDataBefore, rollupInterval } =
         source;
 
+      const hasData = hasDataBefore || hasDataAfter;
+
       return {
         documentType,
         rollupInterval,
@@ -131,17 +134,13 @@ export async function getDocumentSources({
         // will see a mostly empty screen for a while after upgrading.
         // If we only check before, users with a new deployment will use raw transaction
         // events.
-        hasDocs: hasAnyDataBefore
-          ? hasDataBefore
-          : hasDataAfter || hasDataBefore,
+        hasDocs: hasAnyDataBefore ? hasDataBefore : hasData,
       };
     });
 
-  sources.push({
+  return sources.concat({
     documentType: ApmDocumentType.TransactionEvent,
     rollupInterval: RollupInterval.None,
     hasDocs: true,
   });
-
-  return sources;
 }

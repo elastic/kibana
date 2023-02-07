@@ -293,7 +293,7 @@ export class APMEventClient {
 
     const requestParams = {
       ...omit(params, 'apm'),
-      index: Array.isArray(index) ? index.join(',') : index,
+      index: index.join(','),
     };
 
     return this.callAsyncWithDebug({
