@@ -38,7 +38,7 @@ export const AlertTls: React.FC<{
 
   const onSearchChange = useCallback(
     (value: string) => {
-      setRuleParams('search', value);
+      setRuleParams('search', value === '' ? undefined : value);
     },
     [setRuleParams]
   );
