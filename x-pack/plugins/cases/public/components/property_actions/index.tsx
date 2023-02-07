@@ -24,17 +24,19 @@ const PropertyActionButton = React.memo<PropertyActionButtonProps>(
   ({ disabled = false, onClick, iconType, label, customDataTestSubj }) => {
     const dataTestSubjPrepend = makeDataTestSubjPrepend(customDataTestSubj);
 
-    return (<EuiButtonEmpty
-      aria-label={label}
-      color="text"
-      data-test-subj={`${dataTestSubjPrepend}-${iconType}`}
-      iconSide="left"
-      iconType={iconType}
-      isDisabled={disabled}
-      onClick={onClick}
-    >
-      {label}
-    </EuiButtonEmpty>)
+    return (
+      <EuiButtonEmpty
+        aria-label={label}
+        color="text"
+        data-test-subj={`${dataTestSubjPrepend}-${iconType}`}
+        iconSide="left"
+        iconType={iconType}
+        isDisabled={disabled}
+        onClick={onClick}
+      >
+        {label}
+      </EuiButtonEmpty>
+    );
   }
 );
 
@@ -80,23 +82,30 @@ export const PropertyActions = React.memo<PropertyActionsProps>(
         closePopover={onClosePopover}
         repositionOnScroll
       >
-        {propertyActions.map((action, key) => (
-          <EuiFlexItem grow={false} key={`${action.label}${key}`}>
-            <span>
-              <PropertyActionButton
-                disabled={action.disabled}
-                iconType={action.iconType}
-                label={action.label}
-                onClick={() => onClosePopover(action.onClick)}
-                customDataTestSubj={customDataTestSubj}
-              />
-            </span>
-          </EuiFlexItem>
-        ))}
-      </EuiFlexGroup>
-    </EuiPopover>
-  );
-});
+        <EuiFlexGroup
+          alignItems="flexStart"
+          data-test-subj={`${dataTestSubjPrepend}-group`}
+          direction="column"
+          gutterSize="none"
+        >
+          {propertyActions.map((action, key) => (
+            <EuiFlexItem grow={false} key={`${action.label}${key}`}>
+              <span>
+                <PropertyActionButton
+                  disabled={action.disabled}
+                  iconType={action.iconType}
+                  label={action.label}
+                  onClick={() => onClosePopover(action.onClick)}
+                  customDataTestSubj={customDataTestSubj}
+                />
+              </span>
+            </EuiFlexItem>
+          ))}
+        </EuiFlexGroup>
+      </EuiPopover>
+    );
+  }
+);
 
 PropertyActions.displayName = 'PropertyActions';
 
