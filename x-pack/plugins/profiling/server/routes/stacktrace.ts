@@ -302,7 +302,6 @@ export function updateStackFrameMap(
       const functionName = frame._source[ProfilingESField.StackframeFunctionName];
       const functionOffset = frame._source[ProfilingESField.StackframeFunctionOffset];
       const lineNumber = frame._source[ProfilingESField.StackframeLineNumber];
-      const sourceType = frame._source[ProfilingESField.StackframeSourceType];
 
       let stackFrame;
       if (Array.isArray(functionName)) {
@@ -316,7 +315,6 @@ export function updateStackFrameMap(
           FunctionName: functionName && functionName[0],
           FunctionOffset: functionOffset && functionOffset[0],
           LineNumber: lineNumber && lineNumber[0],
-          SourceType: sourceType && sourceType[0],
         };
       } else {
         stackFrame = {
@@ -324,7 +322,6 @@ export function updateStackFrameMap(
           FunctionName: functionName,
           FunctionOffset: functionOffset,
           LineNumber: lineNumber,
-          SourceType: sourceType,
         };
       }
 

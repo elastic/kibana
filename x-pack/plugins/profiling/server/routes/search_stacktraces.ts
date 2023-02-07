@@ -45,7 +45,6 @@ export function decodeStackTraceResponse(response: StackTraceResponse) {
       FunctionName: value.function_name[0],
       FunctionOffset: value.function_offset[0],
       LineNumber: value.line_number[0],
-      SourceType: value.source_type[0],
     } as StackFrame);
   }
 

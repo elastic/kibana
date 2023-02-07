@@ -59,7 +59,6 @@ describe('Stack trace response operations', () => {
           function_name: ['pthread_create'],
           function_offset: [0],
           line_number: [0],
-          source_type: [5],
         },
       },
       executables: {
@@ -133,7 +132,6 @@ describe('Stack trace response operations', () => {
           function_name: ['pthread_create'],
           function_offset: [],
           line_number: [],
-          source_type: [],
         },
       },
       executables: {

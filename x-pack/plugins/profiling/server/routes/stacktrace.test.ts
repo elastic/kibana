@@ -6,7 +6,7 @@
  */
 
 import LRUCache from 'lru-cache';
-import { createStackFrameID, StackTrace } from '../../common/profiling';
+import { createStackFrameID, StackFrame, StackFrameID, StackTrace } from '../../common/profiling';
 import { runLengthEncode } from '../../common/run_length_encoding';
 import { decodeStackTrace, EncodedStackTrace, updateStackFrameMap } from './stacktrace';
 
