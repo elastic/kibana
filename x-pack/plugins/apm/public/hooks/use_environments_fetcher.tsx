@@ -33,7 +33,8 @@ export function useEnvironmentsFetcher({
             },
           },
         }).then((response) => {
-          return { environments: response.environments };
+          // Spreading of original response is needed in order to display the api call in the inspector
+          return { ...response, environments: response.environments };
         });
       }
       return callApmApi('GET /internal/apm/suggestions', {
@@ -46,7 +47,7 @@ export function useEnvironmentsFetcher({
           },
         },
       }).then((response) => {
-        return { environments: response.terms };
+        return { ...response, environments: response.terms };
       });
     },
     [start, end, serviceName]
