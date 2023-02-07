@@ -13,7 +13,7 @@ import { ContentClient } from './content_client';
 import { RpcClient } from '../rpc_client';
 import { createRpcClientMock } from '../rpc_client/rpc_client.mock';
 import { useCreateContentMutation } from './content_client_mutation_hooks';
-import { CreateIn } from '../../common';
+import type { CreateIn } from '../../common';
 
 let contentClient: ContentClient;
 let rpcClient: jest.Mocked<RpcClient>;
@@ -27,7 +27,7 @@ const Wrapper: React.FC = ({ children }) => (
 );
 
 describe('useCreateContentMutation', () => {
-  test('should call rpcClient.get with input and resolve with output', async () => {
+  test('should call rpcClient.create with input and resolve with output', async () => {
     const input: CreateIn = { contentType: 'testType', data: { foo: 'bar' } };
     const output = { test: 'test' };
     rpcClient.create.mockImplementation(() => Promise.resolve(output));

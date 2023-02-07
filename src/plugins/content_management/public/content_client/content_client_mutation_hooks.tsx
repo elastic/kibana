@@ -8,7 +8,7 @@
 
 import { useMutation } from '@tanstack/react-query';
 import { useContentClient } from './content_client_context';
-import { CreateIn } from '../../common';
+import type { CreateIn } from '../../common';
 
 export const useCreateContentMutation = <I extends CreateIn = CreateIn, O = unknown>() => {
   const contentClient = useContentClient();

@@ -8,7 +8,7 @@
 
 import { useQuery, QueryObserverOptions } from '@tanstack/react-query';
 import { useContentClient } from './content_client_context';
-import { GetIn } from '../../common';
+import type { GetIn } from '../../common';
 
 /**
  * Exposed `useQuery` options
