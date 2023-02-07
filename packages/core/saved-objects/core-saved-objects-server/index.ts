@@ -108,6 +108,20 @@ export {
   type DecoratedError,
   type BulkResolveError,
 } from './src/saved_objects_error_helpers';
+
+export type {
+  SavedObjectsModelVersion,
+  SavedObjectsModelVersionMap,
+  SavedObjectsModelVersionMapProvider,
+  SavedObjectsModelChange,
+  SavedObjectsModelExpansionChange,
+  SavedObjectModelTransformationDoc,
+  SavedObjectModelTransformationContext,
+  SavedObjectModelTransformationFn,
+  SavedObjectModelBidirectionalTransformation,
+  SavedObjectModelTransformationResult,
+} from './src/model_version';
+
 export type {
   SavedObject,
   SavedObjectAttribute,
