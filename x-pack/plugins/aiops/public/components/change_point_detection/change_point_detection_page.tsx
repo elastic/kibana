@@ -95,7 +95,7 @@ export const ChangePointDetectionPage: FC = () => {
   if (metricFieldOptions.length === 0) {
     return (
       <EuiCallOut
-        title={i18n.translate('xpack.aiops.index.dataViewNotBasedOnTimeSeriesNotificationTitle', {
+        title={i18n.translate('xpack.aiops.index.dataViewWithoutMetricNotificationTitle', {
           defaultMessage: 'The data view "{dataViewTitle}" does not contain any metric fields.',
           values: { dataViewTitle: dataView.getName() },
         })}
@@ -103,7 +103,7 @@ export const ChangePointDetectionPage: FC = () => {
         iconType="alert"
       >
         <p>
-          {i18n.translate('xpack.aiops.index.changePointTimeSeriesNotificationDescription', {
+          {i18n.translate('xpack.aiops.index.dataViewWithoutMetricNotificationDescription', {
             defaultMessage:
               'Change point detection can only be run on data views with a metric field.',
           })}
