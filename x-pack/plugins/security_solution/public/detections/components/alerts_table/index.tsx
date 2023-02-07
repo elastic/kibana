@@ -26,6 +26,7 @@ import {
   GroupingContainer,
   GroupsSelector,
   isNoneGroup,
+  NONE_GROUP_KEY,
 } from '../../../common/components/grouping';
 import { useGlobalTime } from '../../../common/containers/use_global_time';
 import { combineQueries } from '../../../common/lib/kuery';
@@ -120,7 +121,7 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
 }) => {
   const dispatch = useDispatch();
   const [selectedGroup, setSelectedGroup] = useState<string>(
-    storage.get(`${ALERTS_TABLE_GROUPS_SELECTION_KEY}-${tableId}`)
+    storage.get(`${ALERTS_TABLE_GROUPS_SELECTION_KEY}-${tableId}`) ?? NONE_GROUP_KEY
   );
 
   const {
