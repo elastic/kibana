@@ -82,8 +82,8 @@ export function getServiceColumns({
       ? [
           {
             field: ServiceInventoryFieldName.AlertsCount,
-            name: '',
-            width: `${unit * 5}px`,
+            name: 'Active alerts',
+            width: `${unit * 8}px`,
             sortable: true,
             render: (_, { serviceName, alertsCount }) => {
               if (!alertsCount) {
@@ -91,16 +91,18 @@ export function getServiceColumns({
               }
 
               return (
-                <EuiBadge
-                  iconType="alert"
-                  color="danger"
-                  href={link('/services/{serviceName}/alerts', {
-                    path: { serviceName },
-                    query,
-                  })}
-                >
-                  {alertsCount}
-                </EuiBadge>
+                <EuiToolTip position="bottom" content="Active alerts">
+                  <EuiBadge
+                    iconType="alert"
+                    color="danger"
+                    href={link('/services/{serviceName}/alerts', {
+                      path: { serviceName },
+                      query,
+                    })}
+                  >
+                    {alertsCount}
+                  </EuiBadge>
+                </EuiToolTip>
               );
             },
           } as ITableColumn<ServiceListItem>,
@@ -150,7 +152,7 @@ export function getServiceColumns({
                 defaultMessage: 'Environment',
               }
             ),
-            width: `${unit * 10}px`,
+            width: `${unit * 9}px`,
             sortable: true,
             render: (_, { environments }) => (
               <EnvironmentBadge environments={environments ?? []} />
@@ -166,7 +168,7 @@ export function getServiceColumns({
               'xpack.apm.servicesTable.transactionColumnLabel',
               { defaultMessage: 'Transaction type' }
             ),
-            width: `${unit * 10}px`,
+            width: `${unit * 8}px`,
             sortable: true,
           },
         ]

@@ -12,9 +12,10 @@ import {
   EuiPageHeaderProps,
   EuiSpacer,
   EuiTitle,
+  EuiToolTip,
+  EuiBadge,
 } from '@elastic/eui';
 import { useLocation } from 'react-router-dom';
-import { EuiBadge } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { enableAwsLambdaMetrics } from '@kbn/observability-plugin/common';
 import { omit } from 'lodash';
@@ -45,6 +46,7 @@ import { TechnicalPreviewBadge } from '../../../shared/technical_preview_badge';
 import { ApmMainTemplate } from '../apm_main_template';
 import { AnalyzeDataButton } from './analyze_data_button';
 import { ServerlessType } from '../../../../../common/serverless';
+import { EuiNotificationBadge } from '@elastic/eui';
 
 type Tab = NonNullable<EuiPageHeaderProps['tabs']>[0] & {
   key:
@@ -357,13 +359,12 @@ function useTabs({ selectedTab }: { selectedTab: Tab['key'] }) {
         path: { serviceName },
         query,
       }),
-      prepend:
+      append:
         serviceAlertsCount.alertsCount > 0 ? (
-          <EuiBadge iconType="alert" color="danger">
-            {serviceAlertsCount.alertsCount}
-          </EuiBadge>
+          <EuiToolTip position="bottom" content="Active alerts">
+            <EuiBadge color="danger">{serviceAlertsCount.alertsCount}</EuiBadge>
+          </EuiToolTip>
         ) : null,
-      append: <TechnicalPreviewBadge icon="beaker" />,
       label: i18n.translate('xpack.apm.home.alertsTabLabel', {
         defaultMessage: 'Alerts',
       }),
