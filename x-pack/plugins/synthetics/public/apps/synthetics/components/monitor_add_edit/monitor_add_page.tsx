@@ -39,7 +39,7 @@ const MonitorAddPage = () => {
     return <LocationsLoadingError />;
   }
 
-  return !locationsLoaded ? (
+  return locationsLoaded ? (
     <MonitorForm space={space?.id}>
       <MonitorSteps stepMap={ADD_MONITOR_STEPS} />
     </MonitorForm>
