@@ -90,7 +90,6 @@ describe('createRule', () => {
             throttle: null,
             summary: false,
           },
-          uuid: '123-456',
         },
       ],
       createdAt: new Date('2021-04-01T21:33:13.247Z'),

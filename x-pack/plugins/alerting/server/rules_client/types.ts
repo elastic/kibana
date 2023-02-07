@@ -71,11 +71,11 @@ export interface RulesClientContext {
   readonly fieldsToExcludeFromPublicApi: Array<keyof SanitizedRule>;
 }
 
-export type NormalizedAlertAction = Omit<RuleAction, 'actionTypeId' | 'uuid'> & {
-  uuid?: string;
-};
+export type NormalizedAlertAction = Omit<RuleAction, 'actionTypeId'>;
 
-export type NormalizedAlertActionWithUuid = Omit<RuleAction, 'actionTypeId'>;
+export type NormalizedAlertActionWithUuid = Omit<RuleAction, 'actionTypeId' | 'uuid'> & {
+  uuid: string;
+};
 
 export interface RegistryAlertTypeWithAuth extends RegistryRuleType {
   authorizedConsumers: string[];

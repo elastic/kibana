@@ -16,7 +16,6 @@ const transformAction: RewriteRequestCase<RuleAction> = ({
   params,
   frequency,
 }) => ({
-  uuid,
   group,
   id,
   params,
@@ -30,6 +29,7 @@ const transformAction: RewriteRequestCase<RuleAction> = ({
         },
       }
     : {}),
+  ...(uuid && { uuid }),
 });
 
 const transformExecutionStatus: RewriteRequestCase<RuleExecutionStatus> = ({

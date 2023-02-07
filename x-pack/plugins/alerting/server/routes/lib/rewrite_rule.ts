@@ -57,7 +57,6 @@ export const rewriteRule = ({
     last_duration: executionStatus.lastDuration,
   },
   actions: actions.map(({ group, id, actionTypeId, params, frequency, uuid }) => ({
-    uuid,
     group,
     id,
     params,
@@ -71,6 +70,7 @@ export const rewriteRule = ({
           },
         }
       : {}),
+    ...(uuid && { uuid }),
   })),
   ...(lastRun ? { last_run: rewriteRuleLastRun(lastRun) } : {}),
   ...(nextRun ? { next_run: nextRun } : {}),

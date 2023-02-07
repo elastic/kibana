@@ -438,7 +438,6 @@ describe('action_form', () => {
           params: {
             message: '',
           },
-          uuid: '123-456',
         },
       ]);
       const actionOption = wrapper.find(`[data-test-subj=".jira-alerting-ActionTypeSelectOption"]`);
@@ -478,7 +477,6 @@ describe('action_form', () => {
             params: {
               message: '',
             },
-            uuid: '123-456',
           },
         ],
         'iHaveRecovered'
@@ -622,7 +620,6 @@ describe('action_form', () => {
           params: {
             message: '',
           },
-          uuid: '111-111',
         },
         {
           group: 'default',
@@ -631,7 +628,6 @@ describe('action_form', () => {
           params: {
             message: 'broken',
           },
-          uuid: '222-222',
         },
         {
           group: 'not the default',
@@ -640,7 +636,6 @@ describe('action_form', () => {
           params: {
             message: 'broken',
           },
-          uuid: '333-333',
         },
       ]);
       expect(setHasActionsWithBrokenConnector).toHaveBeenLastCalledWith(true);

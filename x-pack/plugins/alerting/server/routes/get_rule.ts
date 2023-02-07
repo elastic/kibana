@@ -71,7 +71,7 @@ const rewriteBodyRes: RewriteResponseCase<SanitizedRule<RuleTypeParams>> = ({
           throttle: frequency.throttle,
         }
       : undefined,
-    uuid,
+    ...(uuid && { uuid }),
   })),
   ...(lastRun ? { last_run: rewriteRuleLastRun(lastRun) } : {}),
   ...(nextRun ? { next_run: nextRun } : {}),

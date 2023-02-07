@@ -93,7 +93,6 @@ describe('rule_errors', () => {
           params: {
             name: 'yes',
           },
-          uuid: '123-456',
         },
       ];
       const result = validateBaseProperties(rule, config);
@@ -160,7 +159,6 @@ describe('rule_errors', () => {
             params: {
               name: 'yes',
             },
-            uuid: '111-111',
           },
           {
             id: '5678',
@@ -169,7 +167,6 @@ describe('rule_errors', () => {
             params: {
               name: 'yes',
             },
-            uuid: '222-222',
           },
         ],
 

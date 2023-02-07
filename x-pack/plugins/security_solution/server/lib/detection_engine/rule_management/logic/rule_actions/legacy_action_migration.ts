@@ -6,7 +6,7 @@
  */
 
 import { isEmpty } from 'lodash/fp';
-import { v4 as uuidv4 } from 'uuid';
+
 import type { RuleAction } from '@kbn/alerting-plugin/common';
 import type { RulesClient } from '@kbn/alerting-plugin/server';
 import type { SavedObjectReference, SavedObjectsClientContract } from '@kbn/core/server';
@@ -120,10 +120,7 @@ export const legacyMigrate = async ({
         data: migratedRule,
       });
 
-      return {
-        id: rule.id,
-        ...migratedRule,
-      };
+      return { id: rule.id, ...migratedRule };
     }
   });
 
@@ -172,7 +169,6 @@ export const getUpdatedActionsParams = ({
           ...resOfAction,
           id: actionReference[actionRef].id,
           actionTypeId,
-          uuid: uuidv4(),
         },
       ];
     }, []),

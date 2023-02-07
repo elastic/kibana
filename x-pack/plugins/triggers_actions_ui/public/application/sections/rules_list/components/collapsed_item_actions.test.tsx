@@ -67,7 +67,6 @@ describe('CollapsedItemActions', () => {
           actionTypeId: 'the_connector',
           group: 'rule',
           params: { message: 'test' },
-          uuid: '123-456',
         },
       ],
       params: { name: 'test rule type name' },

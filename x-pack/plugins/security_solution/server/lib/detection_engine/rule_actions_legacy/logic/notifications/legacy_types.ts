@@ -57,7 +57,7 @@ export interface LegacyClients {
  * @deprecated Once we are confident all rules relying on side-car actions SO's have been migrated to SO references we should remove this function
  */
 export interface LegacyNotificationAlertParams {
-  actions: Array<Omit<RuleAction, 'uuid'>>;
+  actions: RuleAction[];
   enabled: boolean;
   ruleAlertId: string;
   interval: string;
@@ -82,9 +82,7 @@ export interface LegacyReadNotificationParams {
  * @deprecated Once we are confident all rules relying on side-car actions SO's have been migrated to SO references we should remove this function
  */
 export const legacyIsAlertType = (
-  partialAlert: Omit<PartialRule<RuleTypeParams>, 'actions'> & {
-    actions: Array<Omit<RuleAction, 'uuid'>>;
-  }
+  partialAlert: PartialRule<RuleTypeParams>
 ): partialAlert is LegacyRuleNotificationAlertType => {
   return partialAlert.alertTypeId === LEGACY_NOTIFICATIONS_ID;
 };

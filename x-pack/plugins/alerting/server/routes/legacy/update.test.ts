@@ -48,7 +48,6 @@ describe('updateAlertRoute', () => {
         params: {
           baz: true,
         },
-        uuid: '123-456',
       },
     ],
     notifyWhen: RuleNotifyWhen.CHANGE,

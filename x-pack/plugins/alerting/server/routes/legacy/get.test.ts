@@ -48,7 +48,6 @@ describe('getAlertRoute', () => {
         params: {
           foo: true,
         },
-        uuid: '123-456',
       },
     ],
     consumer: 'bar',

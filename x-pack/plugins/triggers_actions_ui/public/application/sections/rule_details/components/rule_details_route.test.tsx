@@ -154,7 +154,6 @@ describe('getRuleData useEffect handler', () => {
         {
           group: '',
           id: uuidv4(),
-          uuid: uuidv4(),
           actionTypeId: connectorType.id,
           params: {},
         },
@@ -206,7 +205,6 @@ describe('getRuleData useEffect handler', () => {
         {
           group: '',
           id: uuidv4(),
-          uuid: uuidv4(),
           actionTypeId: connectorType.id,
           params: {},
         },
@@ -250,7 +248,6 @@ describe('getRuleData useEffect handler', () => {
         {
           group: '',
           id: uuidv4(),
-          uuid: uuidv4(),
           actionTypeId: connectorType.id,
           params: {},
         },
@@ -297,7 +294,6 @@ describe('getRuleData useEffect handler', () => {
         {
           group: '',
           id: uuidv4(),
-          uuid: uuidv4(),
           actionTypeId: connectorType.id,
           params: {},
         },
@@ -348,7 +344,6 @@ describe('getRuleData useEffect handler', () => {
         {
           group: '',
           id: uuidv4(),
-          uuid: uuidv4(),
           actionTypeId: connectorType.id,
           params: {},
         },
@@ -402,14 +397,12 @@ describe('getRuleData useEffect handler', () => {
         {
           group: '',
           id: uuidv4(),
-          uuid: uuidv4(),
           actionTypeId: availableConnectorType.id,
           params: {},
         },
         {
           group: '',
           id: uuidv4(),
-          uuid: uuidv4(),
           actionTypeId: missingConnectorType.id,
           params: {},
         },

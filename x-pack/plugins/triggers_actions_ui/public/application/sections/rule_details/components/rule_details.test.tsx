@@ -194,7 +194,6 @@ describe('rule_details', () => {
             {
               group: 'default',
               id: uuidv4(),
-              uuid: uuidv4(),
               params: {},
               actionTypeId: '.server-log',
             },
@@ -233,14 +232,12 @@ describe('rule_details', () => {
             {
               group: 'default',
               id: uuidv4(),
-              uuid: uuidv4(),
               params: {},
               actionTypeId: '.server-log',
             },
             {
               group: 'default',
               id: uuidv4(),
-              uuid: uuidv4(),
               params: {},
               actionTypeId: '.email',
             },
@@ -359,7 +356,6 @@ describe('rule_details', () => {
           {
             group: 'default',
             id: uuidv4(),
-            uuid: uuidv4(),
             params: {},
             actionTypeId: '.server-log',
           },
@@ -400,7 +396,6 @@ describe('rule_details', () => {
           {
             group: 'default',
             id: uuidv4(),
-            uuid: uuidv4(),
             params: {},
             actionTypeId: '.server-log',
           },
@@ -516,14 +511,12 @@ describe('rule_details', () => {
             id: 'connector-id-1',
             params: {},
             actionTypeId: '.server-log',
-            uuid: '111-111',
           },
           {
             group: 'default',
             id: 'connector-id-2',
             params: {},
             actionTypeId: '.server-log',
-            uuid: '222-222',
           },
         ],
       });
@@ -554,21 +547,18 @@ describe('rule_details', () => {
             id: 'connector-id-1',
             params: {},
             actionTypeId: '.server-log',
-            uuid: '111-111',
           },
           {
             group: 'default',
             id: 'connector-id-2',
             params: {},
             actionTypeId: '.server-log',
-            uuid: '222-222',
           },
           {
             group: 'default',
             id: 'connector-id-doesnt-exist',
             params: {},
             actionTypeId: '.server-log',
-            uuid: '333-333',
           },
         ],
       });
@@ -599,21 +589,18 @@ describe('rule_details', () => {
             id: 'connector-id-1',
             params: {},
             actionTypeId: '.server-log',
-            uuid: '111-111',
           },
           {
             group: 'default',
             id: 'connector-id-2',
             params: {},
             actionTypeId: '.server-log',
-            uuid: '222-222',
           },
           {
             group: 'default',
             id: 'connector-id-doesnt-exist',
             params: {},
             actionTypeId: '.server-log',
-            uuid: '333-333',
           },
         ],
       });

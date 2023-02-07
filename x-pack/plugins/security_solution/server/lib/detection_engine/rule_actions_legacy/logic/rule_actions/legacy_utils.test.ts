@@ -343,7 +343,7 @@ describe('legacy_utils', () => {
 
   describe('legacyTransformActionToReference', () => {
     type FuncReturn = ReturnType<typeof legacyTransformActionToReference>;
-    const alertAction: Omit<RuleAction, 'uuid'> = {
+    const alertAction: RuleAction = {
       id: '123',
       group: 'group_1',
       params: {

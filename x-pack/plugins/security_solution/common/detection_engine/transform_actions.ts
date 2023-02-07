@@ -15,7 +15,7 @@ export const transformRuleToAlertAction = ({
   action_type_id: actionTypeId,
   params,
   uuid,
-}: RuleAlertAction): Omit<RuleAction, 'uuid'> & { uuid?: string } => ({
+}: RuleAlertAction): RuleAction => ({
   group,
   id,
   params,
@@ -34,7 +34,7 @@ export const transformAlertToRuleAction = ({
   id,
   params,
   action_type_id: actionTypeId,
-  uuid,
+  ...(uuid && { uuid }),
 });
 
 export const transformRuleToAlertResponseAction = ({

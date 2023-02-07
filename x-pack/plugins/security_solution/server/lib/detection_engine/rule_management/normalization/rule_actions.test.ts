@@ -269,14 +269,12 @@ describe('Rule actions normalization', () => {
           group: 'group',
           actionTypeId: 'actionTypeId',
           params: {},
-          uuid: '111',
         },
         {
           id: 'id_2',
           group: 'group',
           actionTypeId: 'actionTypeId',
           params: {},
-          uuid: '222',
         },
       ];
 
@@ -287,14 +285,12 @@ describe('Rule actions normalization', () => {
           group: 'group',
           action_type_id: 'actionTypeId',
           params: {},
-          uuid: '111',
         },
         {
           id: 'id_2',
           group: 'group',
           action_type_id: 'actionTypeId',
           params: {},
-          uuid: '222',
         },
       ]);
     });
@@ -306,14 +302,12 @@ describe('Rule actions normalization', () => {
           group: 'group',
           actionTypeId: 'actionTypeId',
           params: {},
-          uuid: '111',
         },
         {
           id: 'id_2',
           group: 'group',
           actionTypeId: 'actionTypeId',
           params: {},
-          uuid: '222',
         },
       ];
       const legacyRuleActions: LegacyRuleActions = {
@@ -336,14 +330,12 @@ describe('Rule actions normalization', () => {
           group: 'group',
           action_type_id: 'actionTypeId',
           params: {},
-          uuid: '111',
         },
         {
           id: 'id_2',
           group: 'group',
           action_type_id: 'actionTypeId',
           params: {},
-          uuid: '222',
         },
       ]);
     });

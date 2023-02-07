@@ -57,11 +57,12 @@ import {
 import { getMappedParams } from '../common/mapped_params_utils';
 import { getAlertFromRaw, extractReferences, validateActions, updateMeta, addUuid } from '../lib';
 import {
+  NormalizedAlertAction,
   BulkOperationError,
   RuleBulkOperationAggregation,
   RulesClientContext,
   CreateAPIKeyResult,
-  NormalizedAlertAction,
+  NormalizedAlertActionWithUuid,
 } from '../types';
 
 export type BulkEditFields = keyof Pick<
@@ -453,7 +454,7 @@ async function updateRuleAttributesAndParamsInMemory<Params extends RuleTypePara
     } = await extractReferences(
       context,
       ruleType,
-      ruleActions.actions,
+      ruleActions.actions as NormalizedAlertActionWithUuid[],
       validatedMutatedAlertTypeParams
     );
 

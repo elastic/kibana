@@ -7,13 +7,12 @@
 import { CamelToSnake, RewriteRequestCase } from './rewrite_request_case';
 import { RuleAction } from '../../types';
 
-type ReqRuleAction = Omit<RuleAction, 'actionTypeId' | 'frequency' | 'uuid'> & {
+type ReqRuleAction = Omit<RuleAction, 'actionTypeId' | 'frequency'> & {
   frequency?: {
     [K in keyof NonNullable<RuleAction['frequency']> as CamelToSnake<K>]: NonNullable<
       RuleAction['frequency']
     >[K];
   };
-  uuid?: string;
 };
 export const rewriteActionsReq: (
   actions?: ReqRuleAction[]

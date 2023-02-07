@@ -6,8 +6,8 @@
  */
 
 import Boom from '@hapi/boom';
-import { SavedObjectReference, SavedObjectAttributes } from '@kbn/core/server';
 import { omit } from 'lodash';
+import { SavedObjectReference, SavedObjectAttributes } from '@kbn/core/server';
 import { UntypedNormalizedRuleType } from '../../rule_type_registry';
 import { Rule, RawRule, RuleTypeParams } from '../../types';
 import {
@@ -32,7 +32,6 @@ export function injectReferencesIntoActions(
     if (!reference) {
       throw new Error(`Action reference "${action.actionRef}" not found in alert id: ${alertId}`);
     }
-
     return {
       ...omit(action, 'actionRef'),
       id: reference.id,
