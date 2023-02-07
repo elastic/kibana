@@ -361,7 +361,7 @@ describe('Persistent rules table state', () => {
         expectTableSorting('Rule', 'asc');
         expectRowsPerPage(5);
         expectTablePage(2);
-        expectManagementTableRules(['rule 6', 'test 1']);
+        expectManagementTableRules(['rule 6', 'rule 7', 'test 1']);
       });
     });
 
@@ -541,6 +541,7 @@ describe('Persistent rules table state', () => {
           'rule 4',
           'rule 5',
           'rule 6',
+          'rule 7',
         ]);
       });
     });
@@ -592,6 +593,7 @@ describe('Persistent rules table state', () => {
           'rule 4',
           'rule 5',
           'rule 6',
+          'rule 7',
         ]);
       });
     });
@@ -622,6 +624,7 @@ describe('Persistent rules table state', () => {
         'rule 4',
         'rule 5',
         'rule 6',
+        'rule 7',
       ]);
     });
   });
