@@ -582,7 +582,7 @@ async function installPackageByUpload({
       savedObjectsClient,
       esClient,
       spaceId,
-      force: false,
+      force: true, // upload has implicit force
       packageInfo,
       paths,
     });
