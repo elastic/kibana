@@ -62,7 +62,7 @@ import type {
   RuleEventLogListProps,
   RuleEventLogListOptions,
   RulesListProps,
-  RulesListNotifyBadgeProps,
+  RulesListNotifyBadgePropsWithApi,
   AlertsTableConfigurationRegistry,
   CreateConnectorFlyoutProps,
   EditConnectorFlyoutProps,
@@ -79,7 +79,7 @@ import { ActionAccordionFormProps } from './application/sections/action_connecto
 import type { FieldBrowserProps } from './application/sections/field_browser/types';
 import { getRuleDefinitionLazy } from './common/get_rule_definition';
 import { RuleStatusPanelProps } from './application/sections/rule_details/components/rule_status_panel';
-import { AlertSummaryWidgetProps } from './application/sections/rule_details/components/alert_summary';
+import { AlertSummaryWidgetProps } from './application/sections/alert_summary_widget';
 import { getAlertSummaryWidgetLazy } from './common/get_rule_alerts_summary';
 import { RuleSnoozeModalProps } from './application/sections/rules_list/components/rule_snooze_modal';
 import { getRuleSnoozeModalLazy } from './common/get_rule_snooze_modal';
@@ -125,8 +125,8 @@ export interface TriggersAndActionsUIPublicPluginStart {
   ) => ReactElement<RuleEventLogListProps<T>>;
   getRulesList: (props: RulesListProps) => ReactElement;
   getRulesListNotifyBadge: (
-    props: RulesListNotifyBadgeProps
-  ) => ReactElement<RulesListNotifyBadgeProps>;
+    props: RulesListNotifyBadgePropsWithApi
+  ) => ReactElement<RulesListNotifyBadgePropsWithApi>;
   getRuleDefinition: (props: RuleDefinitionProps) => ReactElement<RuleDefinitionProps>;
   getRuleStatusPanel: (props: RuleStatusPanelProps) => ReactElement<RuleStatusPanelProps>;
   getAlertSummaryWidget: (props: AlertSummaryWidgetProps) => ReactElement<AlertSummaryWidgetProps>;
@@ -408,7 +408,7 @@ export class Plugin
       getRuleEventLogList: <T extends RuleEventLogListOptions>(props: RuleEventLogListProps<T>) => {
         return getRuleEventLogListLazy(props);
       },
-      getRulesListNotifyBadge: (props: RulesListNotifyBadgeProps) => {
+      getRulesListNotifyBadge: (props: RulesListNotifyBadgePropsWithApi) => {
         return getRulesListNotifyBadgeLazy(props);
       },
       getRulesList: (props: RulesListProps) => {

@@ -59,8 +59,12 @@ export const MetricItemIcon = ({
 
   const inProgress = testNowRun?.status === 'in-progress' || testNowRun?.status === 'loading';
 
-  const errorLink = useErrorDetailsLink({ configId: monitor.configId, stateId: ping?.state?.id! });
-  const euiShadow = useEuiShadow('l');
+  const errorLink = useErrorDetailsLink({
+    configId: monitor.configId,
+    stateId: ping?.state?.id!,
+    locationId: monitor.location.id,
+  });
+  const euiShadow = useEuiShadow('s');
 
   const testTime = useFormatTestRunAt(timestamp);
 
@@ -128,7 +132,6 @@ const StyledIcon = euiStyled.div<{ boxShadow: string }>`
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 8px;
   gap: 10px;
   width: 32px;
   height: 32px;
