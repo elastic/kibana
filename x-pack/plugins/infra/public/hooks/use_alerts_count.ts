@@ -6,17 +6,26 @@
  */
 
 import { useEffect, useRef } from 'react';
-import type { ValidFeatureId } from '@kbn/rule-data-utils';
-import { estypes } from '@elastic/elasticsearch';
-import { HttpSetup } from '@kbn/core/public';
-import { BASE_RAC_ALERTS_API_PATH } from '@kbn/rule-registry-plugin/common/constants';
 import useAsyncFn from 'react-use/lib/useAsyncFn';
+
+import { BASE_RAC_ALERTS_API_PATH } from '@kbn/rule-registry-plugin/common/constants';
+import { estypes } from '@elastic/elasticsearch';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import type { HttpSetup } from '@kbn/core/public';
+import type { ValidFeatureId } from '@kbn/rule-data-utils';
+
 import { InfraClientCoreStart } from '../types';
 
 interface UseAlertsCountProps {
   featureIds: ValidFeatureId[];
   filter?: estypes.QueryDslQueryContainer;
+}
+
+interface FetchAlertsCountParams {
+  featureIds: ValidFeatureId[];
+  filter?: estypes.QueryDslQueryContainer;
+  http: HttpSetup;
+  signal: AbortSignal;
 }
 
 interface AlertsCount {
@@ -63,12 +72,7 @@ async function fetchAlertsCount({
   filter,
   http,
   signal,
-}: {
-  featureIds: ValidFeatureId[];
-  filter?: estypes.QueryDslQueryContainer;
-  http: HttpSetup;
-  signal: AbortSignal;
-}): Promise<AlertsCount> {
+}: FetchAlertsCountParams): Promise<AlertsCount> {
   return http.post(`${BASE_RAC_ALERTS_API_PATH}/_alerts_count`, {
     signal,
     body: JSON.stringify({

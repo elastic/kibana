@@ -16,7 +16,7 @@ import { useCallback, useMemo } from 'react';
 import createContainer from 'constate';
 import { getTime } from '@kbn/data-plugin/common';
 import { TIMESTAMP } from '@kbn/rule-data-utils';
-import { buildEsQuery, Query } from '@kbn/es-query';
+import { BoolQuery, buildEsQuery, Query } from '@kbn/es-query';
 import { ALERT_STATUS_QUERY } from '@kbn/observability-plugin/public';
 import { AlertStatus } from '@kbn/observability-plugin/common';
 import { SnapshotNode } from '../../../../../common/http_api';
@@ -24,7 +24,7 @@ import { SnapshotMetricType } from '../../../../../common/inventory_models/types
 import { useSourceContext } from '../../../../containers/metrics_source';
 import { useSnapshot, UseSnapshotRequest } from '../../inventory_view/hooks/use_snaphot';
 import { useUnifiedSearchContext } from './use_unified_search';
-import { HostsState } from './use_unified_search_url_state';
+import { HostsState, StringDateRangeTimestamp } from './use_unified_search_url_state';
 
 const HOST_TABLE_METRICS: Array<{ type: SnapshotMetricType }> = [
   { type: 'rx' },
@@ -39,31 +39,15 @@ export const useHostsView = () => {
   const { sourceId } = useSourceContext();
   const { buildQuery, getDateRangeAsTimestamp, unifiedSearchDateRange } = useUnifiedSearchContext();
 
-  const baseRequest = useMemo(() => {
-    const esQuery = buildQuery();
-    const { from, to } = getDateRangeAsTimestamp();
-
-    const snapshotRequest: UseSnapshotRequest = {
-      filterQuery: esQuery ? JSON.stringify(esQuery) : null,
-      metrics: [],
-      groupBy: [],
-      nodeType: 'host',
-      sourceId,
-      currentTime: to,
-      includeTimeseries: false,
-      sendRequestImmediately: true,
-      timerange: {
-        interval: '1m',
-        from,
-        to,
-        ignoreLookback: true,
-      },
-      // The user might want to click on the submit button without changing the filters
-      // This makes sure all child components will re-render.
-      requestTs: Date.now(),
-    };
-    return snapshotRequest;
-  }, [buildQuery, getDateRangeAsTimestamp, sourceId]);
+  const baseRequest = useMemo(
+    () =>
+      createSnapshotRequest({
+        dateRange: getDateRangeAsTimestamp(),
+        esQuery: buildQuery(),
+        sourceId,
+      }),
+    [buildQuery, getDateRangeAsTimestamp, sourceId]
+  );
 
   // Snapshot endpoint internally uses the indices stored in source.configuration.metricAlias.
   // For the Unified Search, we create a data view, which for now will be built off of source.configuration.metricAlias too
@@ -75,17 +59,8 @@ export const useHostsView = () => {
   } = useSnapshot({ ...baseRequest, metrics: HOST_TABLE_METRICS });
 
   const getAlertsEsQuery = useCallback(
-    ({ status }: { status?: AlertStatus } = {}) => {
-      const hostsQuery = createHostsQuery(hostNodes);
-      const alertStatusQuery = createAlertStatusQuery(status);
-
-      const dateFilter = createDateFilter(unifiedSearchDateRange);
-
-      const queries = [hostsQuery, alertStatusQuery].filter(Boolean) as Query[];
-      const filters = dateFilter ? [dateFilter] : [];
-
-      return buildEsQuery(undefined, queries, filters);
-    },
+    (status?: AlertStatus) =>
+      createAlertsEsQuery({ dateRange: unifiedSearchDateRange, hostNodes, status }),
     [hostNodes, unifiedSearchDateRange]
   );
 
@@ -107,6 +82,54 @@ export const [HostsViewProvider, useHostsViewContext] = HostsView;
 /**
  * Helpers
  */
+const createSnapshotRequest = ({
+  esQuery,
+  sourceId,
+  dateRange,
+}: {
+  esQuery: { bool: BoolQuery } | null;
+  sourceId: string;
+  dateRange: StringDateRangeTimestamp;
+}): UseSnapshotRequest => ({
+  filterQuery: esQuery ? JSON.stringify(esQuery) : null,
+  metrics: [],
+  groupBy: [],
+  nodeType: 'host',
+  sourceId,
+  currentTime: dateRange.to,
+  includeTimeseries: false,
+  sendRequestImmediately: true,
+  timerange: {
+    interval: '1m',
+    from: dateRange.from,
+    to: dateRange.to,
+    ignoreLookback: true,
+  },
+  // The user might want to click on the submit button without changing the filters
+  // This makes sure all child components will re-render.
+  requestTs: Date.now(),
+});
+
+const createAlertsEsQuery = ({
+  dateRange,
+  hostNodes,
+  status,
+}: {
+  dateRange: HostsState['dateRange'];
+  hostNodes: SnapshotNode[];
+  status?: AlertStatus;
+}) => {
+  const hostsQuery = createHostsQuery(hostNodes);
+  const alertStatusQuery = createAlertStatusQuery(status);
+
+  const dateFilter = createDateFilter(dateRange);
+
+  const queries = [hostsQuery, alertStatusQuery].filter(Boolean) as Query[];
+  const filters = dateFilter ? [dateFilter] : [];
+
+  return buildEsQuery(undefined, queries, filters);
+};
+
 const createDateFilter = (date: HostsState['dateRange']) =>
   getTime(undefined, date, { fieldName: TIMESTAMP });
 

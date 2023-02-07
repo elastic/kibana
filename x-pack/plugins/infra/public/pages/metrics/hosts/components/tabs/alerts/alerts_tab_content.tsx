@@ -40,14 +40,14 @@ export const AlertsTabContent = () => {
 
   const {
     alertsTableConfigurationRegistry,
-    getAlertSummaryWidget: AlertSummaryWidget,
     getAlertsStateTable: AlertsStateTable,
+    getAlertSummaryWidget: AlertSummaryWidget,
   } = triggersActionsUi;
 
-  const alertsEsQueryFilter = getAlertsEsQuery({ status });
+  const alertsEsQueryFilter = getAlertsEsQuery(status);
 
-  const uiCapabilities = application?.capabilities;
   const CasesContext = cases.ui.getCasesContext();
+  const uiCapabilities = application?.capabilities;
   const casesCapabilities = cases.helpers.getUICapabilities(uiCapabilities.observabilityCases);
 
   const summaryTimeRange = getAlertSummaryTimeRange(unifiedSearchDateRange, timeBuckets);
@@ -60,23 +60,23 @@ export const AlertsTabContent = () => {
   return (
     <EuiFlexGroup direction="column" gutterSize="m">
       <EuiFlexItem>
-        <ObservabilityAlertStatusFilter status={status} onChange={setAlertStatus} />
+        <ObservabilityAlertStatusFilter onChange={setAlertStatus} status={status} />
       </EuiFlexItem>
       <EuiFlexItem>
         <AlertSummaryWidget
+          chartThemes={chartThemes}
           featureIds={infraAlertFeatureIds}
           filter={alertsEsQueryFilter}
           fullSize
           timeRange={summaryTimeRange}
-          chartThemes={chartThemes}
         />
       </EuiFlexItem>
       {alertsEsQueryFilter && (
         <EuiFlexItem>
           <CasesContext
+            features={{ alerts: { sync: false } }}
             owner={[INFRA_ALERT_FEATURE_ID]}
             permissions={casesCapabilities}
-            features={{ alerts: { sync: false } }}
           >
             <AlertsStateTable
               alertsTableConfigurationRegistry={alertsTableConfigurationRegistry}
