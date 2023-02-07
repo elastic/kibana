@@ -116,18 +116,19 @@ export class EnteredInput {
               const argChrLength = argNameMatch.length;
               const startSearchIndexForNextArg = pos + argChrLength;
               const charAfterArgName = input.charAt(startSearchIndexForNextArg);
+              const argNameMatchesAsWholeWord =
+                side === 'left' &&
+                charAfterArgName === '' &&
+                // if cursor is at the end of the argument name on the left side of the cursor,
+                // then we check to ensure that the first character of the Right side of the
+                // cursor is one of the separators. Example (| === cursor): `--file|s`
+                ARGUMENT_NAME_VALUE_SEPARATORS.includes(rightOfCursorText.charAt(0));
 
               // We need to Ensure that the argument name is not part of a longer word
               // (example: matches `--file` not `--files`)
               if (
-                pos > -1 &&
                 ARGUMENT_NAME_VALUE_SEPARATORS.includes(charAfterArgName) &&
-                ((side === 'left' &&
-                  charAfterArgName === '' &&
-                  // if cursor is at the end of the argument name on the left side of the cursor,
-                  // then we check to ensure that the first character of the Right side of the
-                  // cursor is one of the separators. Example (| === cursor): `--file|s`
-                  ARGUMENT_NAME_VALUE_SEPARATORS.includes(rightOfCursorText.charAt(0))) ||
+                (argNameMatchesAsWholeWord ||
                   (side === 'left' && charAfterArgName !== '') ||
                   side === 'right')
               ) {
