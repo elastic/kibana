@@ -115,7 +115,7 @@ describe('GuidedOnboarding ApiService', () => {
       expect(httpClient.get).toHaveBeenCalledWith(`${API_BASE_PATH}/guides`);
     });
 
-    it('sends a request even if another request is in flight', async () => {
+    it('a request to all guides state API is sent even when a fetch plugin state request is in flight at the same time', async () => {
       httpClient.get.mockImplementationOnce(() => {
         return new Promise((resolve) => setTimeout(resolve));
       });
@@ -144,13 +144,12 @@ describe('GuidedOnboarding ApiService', () => {
       });
     });
 
-    it('sends a request even if another request is in flight', async () => {
+    it('a request to update plugin state API is sent even when a fetch plugin state request is in flight at the same time', async () => {
       httpClient.get.mockImplementationOnce(() => {
         return new Promise((resolve) => setTimeout(resolve));
       });
       await apiService.fetchPluginState$().subscribe();
       expect(apiService.isLoading$.value).toBe(true);
-      await apiService.getGuideConfig(testGuideId);
       await apiService.updatePluginState({ guide: testGuideStep1InProgressState }, false);
       expect(httpClient.put).toHaveBeenCalledTimes(1);
       expect(httpClient.put).toHaveBeenCalledWith(`${API_BASE_PATH}/state`, {
@@ -750,7 +749,7 @@ describe('GuidedOnboarding ApiService', () => {
       expect(httpClient.get).toHaveBeenLastCalledWith(`${API_BASE_PATH}/configs/${testGuideId}`);
     });
 
-    it('sends a request even if another request is in flight', async () => {
+    it('a request to config API is sent even when a fetch plugin state request is in flight at the same time', async () => {
       httpClient.get.mockImplementationOnce(() => {
         return new Promise((resolve) => setTimeout(resolve));
       });
