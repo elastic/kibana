@@ -6,7 +6,7 @@
  */
 
 import Handlebars from '../..';
-import { expectTemplate } from '../__jest__/test_bench';
+import { expectTemplate, forEachCompileFunctionName } from '../__jest__/test_bench';
 
 describe('Regressions', () => {
   it('GH-94: Cannot read property of undefined', () => {
@@ -201,6 +201,19 @@ describe('Regressions', () => {
       .toCompileTo('Key: \nKey: name\nKey: value\n');
   });
 
+  it('GH-1054: Should handle simple safe string responses', () => {
+    expectTemplate('{{#wrap}}{{>partial}}{{/wrap}}')
+      .withHelpers({
+        wrap(options: Handlebars.HelperOptions) {
+          return new Handlebars.SafeString(options.fn());
+        },
+      })
+      .withPartials({
+        partial: '{{#wrap}}<partial>{{/wrap}}',
+      })
+      .toCompileTo('<partial>');
+  });
+
   it('GH-1065: Sparse arrays', () => {
     const array = [];
     array[1] = 'foo';
@@ -229,6 +242,34 @@ describe('Regressions', () => {
       .toCompileTo('notfoundbat');
   });
 
+  it('should support multiple levels of inline partials', () => {
+    expectTemplate('{{#> layout}}{{#*inline "subcontent"}}subcontent{{/inline}}{{/layout}}')
+      .withPartials({
+        doctype: 'doctype{{> content}}',
+        layout: '{{#> doctype}}{{#*inline "content"}}layout{{> subcontent}}{{/inline}}{{/doctype}}',
+      })
+      .toCompileTo('doctypelayoutsubcontent');
+  });
+
+  it('GH-1089: should support failover content in multiple levels of inline partials', () => {
+    expectTemplate('{{#> layout}}{{/layout}}')
+      .withPartials({
+        doctype: 'doctype{{> content}}',
+        layout:
+          '{{#> doctype}}{{#*inline "content"}}layout{{#> subcontent}}subcontent{{/subcontent}}{{/inline}}{{/doctype}}',
+      })
+      .toCompileTo('doctypelayoutsubcontent');
+  });
+
+  it('GH-1099: should support greater than 3 nested levels of inline partials', () => {
+    expectTemplate('{{#> layout}}Outer{{/layout}}')
+      .withPartials({
+        layout: '{{#> inner}}Inner{{/inner}}{{> @partial-block }}',
+        inner: '',
+      })
+      .toCompileTo('Outer');
+  });
+
   it('GH-1135 : Context handling within each iteration', () => {
     expectTemplate(
       '{{#each array}}\n' +
@@ -249,6 +290,19 @@ describe('Regressions', () => {
       .toCompileTo(' 1. IF: John--\n' + ' 2. MYIF: John==\n');
   });
 
+  it('GH-1186: Support block params for existing programs', () => {
+    expectTemplate(
+      '{{#*inline "test"}}{{> @partial-block }}{{/inline}}' +
+        '{{#>test }}{{#each listOne as |item|}}{{ item }}{{/each}}{{/test}}' +
+        '{{#>test }}{{#each listTwo as |item|}}{{ item }}{{/each}}{{/test}}'
+    )
+      .withInput({
+        listOne: ['a'],
+        listTwo: ['b'],
+      })
+      .toCompileTo('ab');
+  });
+
   it('GH-1319: "unless" breaks when "each" value equals "null"', () => {
     expectTemplate('{{#each list}}{{#unless ./prop}}parent={{../value}} {{/unless}}{{/each}}')
       .withInput({
@@ -256,6 +310,15 @@ describe('Regressions', () => {
         list: [null, 'a'],
       })
       .toCompileTo('parent=parent parent=parent ');
+  });
+
+  it('GH-1341: 4.0.7 release breaks {{#if @partial-block}} usage', () => {
+    expectTemplate('template {{>partial}} template')
+      .withPartials({
+        partialWithBlock: '{{#if @partial-block}} block {{> @partial-block}} block {{/if}}',
+        partial: '{{#> partialWithBlock}} partial {{/partialWithBlock}}',
+      })
+      .toCompileTo('template  block  partial  block  template');
   });
 
   it('should allow hash with protected array names', () => {
@@ -267,6 +330,42 @@ describe('Regressions', () => {
         },
       })
       .toCompileTo('foo');
+  });
+
+  describe('GH-1598: Performance degradation for partials since v4.3.0', () => {
+    let newHandlebarsInstance: typeof Handlebars;
+    let spy: jest.SpyInstance;
+    beforeEach(() => {
+      newHandlebarsInstance = Handlebars.create();
+    });
+    afterEach(() => {
+      spy.mockRestore();
+    });
+
+    forEachCompileFunctionName((compileName) => {
+      it(`should only compile global partials once when calling #${compileName}`, () => {
+        const compile = newHandlebarsInstance[compileName].bind(newHandlebarsInstance);
+        let calls;
+        switch (compileName) {
+          case 'compile':
+            spy = jest.spyOn(newHandlebarsInstance, 'template');
+            calls = 3;
+            break;
+          case 'compileAST':
+            spy = jest.spyOn(newHandlebarsInstance, 'compileAST');
+            calls = 2;
+            break;
+        }
+        newHandlebarsInstance.registerPartial({
+          dude: 'I am a partial',
+        });
+        const string = 'Dudes: {{> dude}} {{> dude}}';
+        compile(string)(); // This should compile template + partial once
+        compile(string)(); // This should only compile template
+        expect(spy).toHaveBeenCalledTimes(calls);
+        spy.mockRestore();
+      });
+    });
   });
 
   describe("GH-1639: TypeError: Cannot read property 'apply' of undefined\" when handlebars version > 4.6.0 (undocumented, deprecated usage)", () => {

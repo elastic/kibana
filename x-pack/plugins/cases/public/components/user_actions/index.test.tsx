@@ -197,13 +197,13 @@ describe(`UserActions`, () => {
 
     wrapper
       .find(
-        `[data-test-subj="comment-create-action-${props.data.comments[0].id}"] [data-test-subj="property-actions-ellipses"]`
+        `[data-test-subj="comment-create-action-${props.data.comments[0].id}"] [data-test-subj="property-actions-user-action-ellipses"]`
       )
       .first()
       .simulate('click');
     wrapper
       .find(
-        `[data-test-subj="comment-create-action-${props.data.comments[0].id}"] [data-test-subj="property-actions-pencil"]`
+        `[data-test-subj="comment-create-action-${props.data.comments[0].id}"] [data-test-subj="property-actions-user-action-pencil"]`
       )
       .first()
       .simulate('click');
@@ -241,14 +241,14 @@ describe(`UserActions`, () => {
 
     wrapper
       .find(
-        `[data-test-subj="comment-create-action-${props.data.comments[0].id}"] [data-test-subj="property-actions-ellipses"]`
+        `[data-test-subj="comment-create-action-${props.data.comments[0].id}"] [data-test-subj="property-actions-user-action-ellipses"]`
       )
       .first()
       .simulate('click');
 
     wrapper
       .find(
-        `[data-test-subj="comment-create-action-${props.data.comments[0].id}"] [data-test-subj="property-actions-pencil"]`
+        `[data-test-subj="comment-create-action-${props.data.comments[0].id}"] [data-test-subj="property-actions-user-action-pencil"]`
       )
       .first()
       .simulate('click');
@@ -293,12 +293,16 @@ describe(`UserActions`, () => {
     );
 
     wrapper
-      .find(`[data-test-subj="description-action"] [data-test-subj="property-actions-ellipses"]`)
+      .find(
+        `[data-test-subj="description-action"] [data-test-subj="property-actions-description-ellipses"]`
+      )
       .first()
       .simulate('click');
 
     wrapper
-      .find(`[data-test-subj="description-action"] [data-test-subj="property-actions-pencil"]`)
+      .find(
+        `[data-test-subj="description-action"] [data-test-subj="property-actions-description-pencil"]`
+      )
       .first()
       .simulate('click');
 
@@ -341,12 +345,16 @@ describe(`UserActions`, () => {
     expect(wrapper.find(`.euiMarkdownEditorTextArea`).text()).not.toContain(quoteableText);
 
     wrapper
-      .find(`[data-test-subj="description-action"] [data-test-subj="property-actions-ellipses"]`)
+      .find(
+        `[data-test-subj="description-action"] [data-test-subj="property-actions-description-ellipses"]`
+      )
       .first()
       .simulate('click');
 
     wrapper
-      .find(`[data-test-subj="description-action"] [data-test-subj="property-actions-quote"]`)
+      .find(
+        `[data-test-subj="description-action"] [data-test-subj="property-actions-description-quote"]`
+      )
       .first()
       .simulate('click');
 
@@ -402,14 +410,14 @@ describe(`UserActions`, () => {
 
     wrapper
       .find(
-        `[data-test-subj="comment-create-action-${props.data.comments[0].id}"] [data-test-subj="property-actions-ellipses"]`
+        `[data-test-subj="comment-create-action-${props.data.comments[0].id}"] [data-test-subj="property-actions-user-action-ellipses"]`
       )
       .first()
       .simulate('click');
 
     wrapper
       .find(
-        `[data-test-subj="comment-create-action-${props.data.comments[0].id}"] [data-test-subj="property-actions-pencil"]`
+        `[data-test-subj="comment-create-action-${props.data.comments[0].id}"] [data-test-subj="property-actions-user-action-pencil"]`
       )
       .first()
       .simulate('click');
@@ -463,12 +471,16 @@ describe(`UserActions`, () => {
       .simulate('change', { target: { value: newComment } });
 
     wrapper
-      .find(`[data-test-subj="description-action"] [data-test-subj="property-actions-ellipses"]`)
+      .find(
+        `[data-test-subj="description-action"] [data-test-subj="property-actions-description-ellipses"]`
+      )
       .first()
       .simulate('click');
 
     wrapper
-      .find(`[data-test-subj="description-action"] [data-test-subj="property-actions-pencil"]`)
+      .find(
+        `[data-test-subj="description-action"] [data-test-subj="property-actions-description-pencil"]`
+      )
       .first()
       .simulate('click');
 
