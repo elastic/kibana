@@ -17,7 +17,7 @@ export interface IMvtVectorSource extends IVectorSource {
     searchFilters: VectorSourceRequestMeta,
     refreshToken: string,
     hasLabels: boolean,
-    buffer: number,
+    buffer: number
   ): Promise<string>;
 
   /*

@@ -503,7 +503,7 @@ export class ESGeoGridSource extends AbstractESAggSource implements IMvtVectorSo
     searchFilters: VectorSourceRequestMeta,
     refreshToken: string,
     hasLabels: boolean,
-    buffer: number,
+    buffer: number
   ): Promise<string> {
     const dataView = await this.getIndexPattern();
     const searchSource = await this.makeSearchSource(searchFilters, 0);

@@ -228,9 +228,11 @@ export class MvtVectorLayer extends AbstractVectorLayer {
     await this._syncSupportsFeatureEditing({ syncContext, source: this.getSource() });
 
     let maxLineWidth = 0;
-    const lineWidth = this.getCurrentStyle().getAllStyleProperties().find(styleProperty => {
-      return styleProperty.getStyleName() === VECTOR_STYLES.LINE_WIDTH;
-    });
+    const lineWidth = this.getCurrentStyle()
+      .getAllStyleProperties()
+      .find((styleProperty) => {
+        return styleProperty.getStyleName() === VECTOR_STYLES.LINE_WIDTH;
+      });
     if (lineWidth) {
       if (!lineWidth.isDynamic() && lineWidth.isComplete()) {
         maxLineWidth = (lineWidth as StaticSizeProperty).getOptions().size;

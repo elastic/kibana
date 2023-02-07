@@ -825,7 +825,7 @@ export class ESSearchSource extends AbstractESSource implements IMvtVectorSource
     searchFilters: VectorSourceRequestMeta,
     refreshToken: string,
     hasLabels: boolean,
-    buffer: number,
+    buffer: number
   ): Promise<string> {
     const dataView = await this.getIndexPattern();
     const indexSettings = await loadIndexSettings(dataView.getIndexPattern());
