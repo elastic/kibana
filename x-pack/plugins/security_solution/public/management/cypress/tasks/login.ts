@@ -360,3 +360,25 @@ export const loginAndWaitForPage = (url: string) => {
   login();
   cy.visit(url);
 };
+
+export const getRoleWithArtifactReadPrivilege = (privilegePrefix: string) => {
+  const endpointSecurityPolicyManagerRole = getEndpointSecurityPolicyManager();
+
+  return {
+    ...endpointSecurityPolicyManagerRole,
+    kibana: [
+      {
+        ...endpointSecurityPolicyManagerRole.kibana[0],
+        feature: {
+          ...endpointSecurityPolicyManagerRole.kibana[0].feature,
+          siem: [
+            ...endpointSecurityPolicyManagerRole.kibana[0].feature.siem.filter(
+              (privilege) => privilege !== `${privilegePrefix}all`
+            ),
+            `${privilegePrefix}read`,
+          ],
+        },
+      },
+    ],
+  };
+};
