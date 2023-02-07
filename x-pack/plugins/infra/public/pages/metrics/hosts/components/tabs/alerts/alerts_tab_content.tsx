@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import React, { useState } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { AlertStatus } from '@kbn/observability-plugin/common';
@@ -13,7 +14,6 @@ import {
   useTimeBuckets,
 } from '@kbn/observability-plugin/public';
 import { AlertConsumers } from '@kbn/rule-data-utils';
-import React, { useMemo, useState } from 'react';
 import { InfraClientCoreStart, InfraClientStartDeps } from '../../../../../../types';
 import { useHostsViewContext } from '../../../hooks/use_hosts_view';
 import { useUnifiedSearchContext } from '../../../hooks/use_unified_search';
@@ -21,9 +21,9 @@ import { useUnifiedSearchContext } from '../../../hooks/use_unified_search';
 import {
   ALERTS_PER_PAGE,
   ALERTS_TABLE_ID,
-  infraAlertFeatureId,
+  INFRA_ALERT_FEATURE_ID,
   infraAlertFeatureIds,
-} from './config';
+} from '../config';
 
 export const AlertsTabContent = () => {
   const { services } = useKibana<InfraClientCoreStart & InfraClientStartDeps>();
@@ -50,9 +50,7 @@ export const AlertsTabContent = () => {
   const CasesContext = cases.ui.getCasesContext();
   const casesCapabilities = cases.helpers.getUICapabilities(uiCapabilities.observabilityCases);
 
-  const summaryTimeRange = useMemo(() => {
-    return getAlertSummaryTimeRange(unifiedSearchDateRange, timeBuckets);
-  }, [unifiedSearchDateRange, timeBuckets]);
+  const summaryTimeRange = getAlertSummaryTimeRange(unifiedSearchDateRange, timeBuckets);
 
   const chartThemes = {
     theme: charts.theme.useChartsTheme(),
@@ -76,7 +74,7 @@ export const AlertsTabContent = () => {
       {alertsEsQueryFilter && (
         <EuiFlexItem>
           <CasesContext
-            owner={[infraAlertFeatureId]}
+            owner={[INFRA_ALERT_FEATURE_ID]}
             permissions={casesCapabilities}
             features={{ alerts: { sync: false } }}
           >
