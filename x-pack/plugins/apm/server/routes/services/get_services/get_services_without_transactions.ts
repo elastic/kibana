@@ -18,8 +18,10 @@ import { serviceGroupQuery } from '../../../lib/service_group_query';
 import { ServiceGroup } from '../../../../common/service_groups';
 import { RandomSampler } from '../../../lib/helpers/get_random_sampler';
 import { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
+import { ApmDocumentType } from '../../../../common/document_type';
+import { RollupInterval } from '../../../../common/rollup';
 
-export async function getServicesFromErrorAndMetricDocuments({
+export async function getServicesWithoutTransactions({
   environment,
   apmEventClient,
   maxNumServices,
@@ -28,6 +30,8 @@ export async function getServicesFromErrorAndMetricDocuments({
   end,
   serviceGroup,
   randomSampler,
+  documentType,
+  rollupInterval,
 }: {
   apmEventClient: APMEventClient;
   environment: string;
@@ -37,13 +41,29 @@ export async function getServicesFromErrorAndMetricDocuments({
   end: number;
   serviceGroup: ServiceGroup | null;
   randomSampler: RandomSampler;
+  documentType: ApmDocumentType;
+  rollupInterval: RollupInterval;
 }) {
+  const isServiceTransactionMetric =
+    documentType === ApmDocumentType.ServiceTransactionMetric;
+
   const response = await apmEventClient.search(
-    'get_services_from_error_and_metric_documents',
+    isServiceTransactionMetric
+      ? 'get_services_from_service_summary'
+      : 'get_services_from_error_and_metric_documents',
     {
-      apm: {
-        events: [ProcessorEvent.metric, ProcessorEvent.error],
-      },
+      apm: isServiceTransactionMetric
+        ? {
+            sources: [
+              {
+                documentType: ApmDocumentType.ServiceSummaryMetric,
+                rollupInterval,
+              },
+            ],
+          }
+        : {
+            events: [ProcessorEvent.metric, ProcessorEvent.error],
+          },
       body: {
         track_total_hits: false,
         size: 0,
