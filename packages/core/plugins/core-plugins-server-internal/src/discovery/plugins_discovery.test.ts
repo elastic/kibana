@@ -151,7 +151,7 @@ const packageMock = {
   },
 };
 
-const pluginDir = (...segments: string[]) => resolve(REPO_ROOT, '../kibana-extra', ...segments);
+const pluginDir = (...segments: string[]) => resolve(REPO_ROOT, 'plugins', ...segments);
 const manifestPath = (...pluginPath: string[]) => resolve(pluginDir(...pluginPath), 'kibana.json');
 
 describe('plugins discovery system', () => {
