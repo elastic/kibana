@@ -15,6 +15,7 @@ import {
   EuiPanel,
   EuiSpacer,
   EuiCallOut,
+  EuiRange,
   EuiSelect,
   EuiFormRow,
 } from '@elastic/eui';
@@ -24,6 +25,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { isDefined } from '@kbn/ml-is-defined';
 import type { DocumentCountChartPoint } from './document_count_chart';
 import {
+  RANDOM_SAMPLER_STEP,
   RANDOM_SAMPLER_PROBABILITIES,
   RandomSamplerOption,
   RANDOM_SAMPLER_SELECT_OPTIONS,
@@ -167,7 +169,7 @@ export const DocumentCountContent: FC<Props> = ({
             panelPaddingSize="none"
             anchorPosition="downLeft"
           >
-            <EuiPanel style={{ maxWidth: 450 }}>
+            <EuiPanel style={{ maxWidth: 400 }}>
               <EuiFlexItem grow={true}>
                 <EuiCallOut size="s" color={'primary'} title={calloutInfoMessage} />
               </EuiFlexItem>
@@ -203,15 +205,21 @@ export const DocumentCountContent: FC<Props> = ({
                       }
                     )}
                   >
-                    <EuiSelect
+                    <EuiRange
+                      fullWidth
+                      showValue
+                      showTicks
+                      showRange={false}
+                      min={RANDOM_SAMPLER_STEP}
+                      max={50}
                       value={(samplingProbability ?? 1) * 100}
-                      options={RANDOM_SAMPLER_PROBABILITIES.map((d, idx) => ({
+                      ticks={RANDOM_SAMPLER_PROBABILITIES.map((d) => ({
                         value: d,
-                        text: `${d}%`,
+                        label: d === 0.001 || d >= 5 ? `${d}%` : '',
                       }))}
-                      onChange={(e) => {
-                        updateSamplingProbability(Number(e.currentTarget.value));
-                      }}
+                      onChange={(e) => updateSamplingProbability(Number(e.currentTarget.value))}
+                      step={RANDOM_SAMPLER_STEP}
+                      data-test-subj="dvRandomSamplerProbabilityRange"
                     />
                   </EuiFormRow>
                 </EuiFlexItem>
