@@ -140,7 +140,7 @@ export const ChangePointDetectionPage: FC = () => {
             <p>
               {i18n.translate('xpack.aiops.changePointDetection.cardinalityWarningMessage', {
                 defaultMessage:
-                  'The "{splitField}" field cardinality is {cardinality} which exceeds the limit of {cardinalityLimit}. Only the first {cardinalityLimit} partitions are analyzed.',
+                  'The "{splitField}" field cardinality is {cardinality} which exceeds the limit of {cardinalityLimit}. Only the first {cardinalityLimit} partitions, sorted by document count, are analyzed.',
                 values: {
                   cardinality: splitFieldCardinality,
                   cardinalityLimit: SPLIT_FIELD_CARDINALITY_LIMIT,
