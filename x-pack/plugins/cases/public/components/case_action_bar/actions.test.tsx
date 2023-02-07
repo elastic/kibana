@@ -66,7 +66,9 @@ describe('CaseView actions', () => {
     );
 
     expect(wrapper.find('[data-test-subj="confirm-delete-case-modal"]').exists()).toBeFalsy();
-    expect(wrapper.find('button[data-test-subj="property-actions-case-ellipses"]').exists()).toBeFalsy();
+    expect(
+      wrapper.find('button[data-test-subj="property-actions-case-ellipses"]').exists()
+    ).toBeFalsy();
   });
 
   it('toggle delete modal and confirm', async () => {
