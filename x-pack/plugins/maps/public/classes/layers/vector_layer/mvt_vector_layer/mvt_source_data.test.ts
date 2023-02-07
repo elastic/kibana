@@ -50,6 +50,7 @@ describe('syncMvtSourceData', () => {
     const syncContext = new MockSyncContext({ dataFilters: {} });
 
     await syncMvtSourceData({
+      buffer: 5,
       hasLabels: false,
       layerId: 'layer1',
       layerName: 'my layer',
@@ -99,6 +100,7 @@ describe('syncMvtSourceData', () => {
     };
 
     await syncMvtSourceData({
+      buffer: 5,
       hasLabels: false,
       layerId: 'layer1',
       layerName: 'my layer',
@@ -114,6 +116,7 @@ describe('syncMvtSourceData', () => {
             tileUrl: 'https://example.com/{x}/{y}/{z}.pbf?token=12345',
             refreshToken: '12345',
             hasLabels: false,
+            buffer: 5,
           };
         },
       } as unknown as DataRequest,
@@ -144,6 +147,7 @@ describe('syncMvtSourceData', () => {
     };
 
     await syncMvtSourceData({
+      buffer: 5,
       hasLabels: false,
       layerId: 'layer1',
       layerName: 'my layer',
@@ -159,6 +163,7 @@ describe('syncMvtSourceData', () => {
             tileUrl: 'https://example.com/{x}/{y}/{z}.pbf?token=12345',
             refreshToken: '12345',
             hasLabels: false,
+            buffer: 5,
           };
         },
       } as unknown as DataRequest,
@@ -186,6 +191,7 @@ describe('syncMvtSourceData', () => {
     };
 
     await syncMvtSourceData({
+      buffer: 5,
       hasLabels: false,
       layerId: 'layer1',
       layerName: 'my layer',
@@ -201,6 +207,7 @@ describe('syncMvtSourceData', () => {
             tileUrl: 'https://example.com/{x}/{y}/{z}.pbf?token=12345',
             refreshToken: '12345',
             hasLabels: false,
+            buffer: 5,
           };
         },
       } as unknown as DataRequest,
@@ -236,6 +243,7 @@ describe('syncMvtSourceData', () => {
     };
 
     await syncMvtSourceData({
+      buffer: 5,
       hasLabels: false,
       layerId: 'layer1',
       layerName: 'my layer',
@@ -251,6 +259,7 @@ describe('syncMvtSourceData', () => {
             tileUrl: 'https://example.com/{x}/{y}/{z}.pbf?token=12345',
             refreshToken: '12345',
             hasLabels: false,
+            buffer: 5,
           };
         },
       } as unknown as DataRequest,
@@ -278,6 +287,7 @@ describe('syncMvtSourceData', () => {
     };
 
     await syncMvtSourceData({
+      buffer: 5,
       hasLabels: false,
       layerId: 'layer1',
       layerName: 'my layer',
@@ -293,6 +303,7 @@ describe('syncMvtSourceData', () => {
             tileUrl: 'https://example.com/{x}/{y}/{z}.pbf?token=12345',
             refreshToken: '12345',
             hasLabels: false,
+            buffer: 5,
           };
         },
       } as unknown as DataRequest,
@@ -320,6 +331,7 @@ describe('syncMvtSourceData', () => {
     };
 
     await syncMvtSourceData({
+      buffer: 5,
       hasLabels: false,
       layerId: 'layer1',
       layerName: 'my layer',
@@ -335,6 +347,7 @@ describe('syncMvtSourceData', () => {
             tileUrl: 'https://example.com/{x}/{y}/{z}.pbf?token=12345',
             refreshToken: '12345',
             hasLabels: false,
+            buffer: 5,
           };
         },
       } as unknown as DataRequest,
@@ -362,6 +375,7 @@ describe('syncMvtSourceData', () => {
     };
 
     await syncMvtSourceData({
+      buffer: 5,
       hasLabels: true,
       layerId: 'layer1',
       layerName: 'my layer',
@@ -377,6 +391,51 @@ describe('syncMvtSourceData', () => {
             tileUrl: 'https://example.com/{x}/{y}/{z}.pbf?token=12345',
             refreshToken: '12345',
             hasLabels: false,
+            buffer: 5,
+          };
+        },
+      } as unknown as DataRequest,
+      requestMeta: { ...prevRequestMeta },
+      source: mockSource,
+      syncContext,
+    });
+    // @ts-expect-error
+    sinon.assert.calledOnce(syncContext.startLoading);
+    // @ts-expect-error
+    sinon.assert.calledOnce(syncContext.stopLoading);
+  });
+
+  test('Should re-sync when buffer state changes', async () => {
+    const syncContext = new MockSyncContext({ dataFilters: {} });
+    const prevRequestMeta = {
+      ...syncContext.dataFilters,
+      applyGlobalQuery: true,
+      applyGlobalTime: true,
+      applyForceRefresh: true,
+      fieldNames: [],
+      sourceMeta: {},
+      isForceRefresh: false,
+      isFeatureEditorOpenForLayer: false,
+    };
+
+    await syncMvtSourceData({
+      buffer: 5,
+      hasLabels: false,
+      layerId: 'layer1',
+      layerName: 'my layer',
+      prevDataRequest: {
+        getMeta: () => {
+          return prevRequestMeta;
+        },
+        getData: () => {
+          return {
+            tileMinZoom: 4,
+            tileMaxZoom: 14,
+            tileSourceLayer: 'aggs',
+            tileUrl: 'https://example.com/{x}/{y}/{z}.pbf?token=12345',
+            refreshToken: '12345',
+            hasLabels: false,
+            buffer: 7,
           };
         },
       } as unknown as DataRequest,
@@ -394,6 +453,7 @@ describe('syncMvtSourceData', () => {
     const syncContext = new MockSyncContext({ dataFilters: {} });
 
     await syncMvtSourceData({
+      buffer: 5,
       hasLabels: false,
       layerId: 'layer1',
       layerName: 'my layer',
