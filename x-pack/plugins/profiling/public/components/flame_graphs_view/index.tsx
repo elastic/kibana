@@ -11,11 +11,12 @@ import {
   EuiHorizontalRule,
   EuiPageHeaderContentProps,
   EuiPanel,
+  EuiSwitch,
   EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { pick } from 'lodash';
-import React from 'react';
+import React, { useState } from 'react';
 import { FlameGraphComparisonMode, FlameGraphNormalizationMode } from '../../../common/flamegraph';
 import { useProfilingParams } from '../../hooks/use_profiling_params';
 import { useProfilingRouter } from '../../hooks/use_profiling_router';
@@ -124,6 +125,8 @@ export function FlameGraphsView({ children }: { children: React.ReactElement }) 
       }),
     },
   ];
+
+  const [showInformationWindow, setShowInformationWindow] = useState(false);
 
   if (routePath === '/flamegraphs') {
     return <RedirectTo pathname="/flamegraphs/flamegraph" />;
@@ -244,6 +247,17 @@ export function FlameGraphsView({ children }: { children: React.ReactElement }) 
                     </EuiFlexGroup>
                   </EuiFlexItem>
                 ) : undefined}
+                <EuiFlexItem grow style={{ alignItems: 'flex-end' }}>
+                  <EuiSwitch
+                    checked={showInformationWindow}
+                    onChange={() => {
+                      setShowInformationWindow((prev) => !prev);
+                    }}
+                    label={i18n.translate('xpack.profiling.flameGraph.showInformationWindow', {
+                      defaultMessage: 'Show information window',
+                    })}
+                  />
+                </EuiFlexItem>
               </EuiFlexGroup>
             </EuiPanel>
           </EuiFlexItem>
@@ -257,6 +271,10 @@ export function FlameGraphsView({ children }: { children: React.ReactElement }) 
               comparisonMode={comparisonMode}
               baseline={baseline}
               comparison={comparison}
+              showInformationWindow={showInformationWindow}
+              onInformationWindowClose={() => {
+                setShowInformationWindow(false);
+              }}
             />
           </AsyncComponent>
           {children}
