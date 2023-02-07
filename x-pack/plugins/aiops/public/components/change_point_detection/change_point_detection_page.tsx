@@ -189,7 +189,7 @@ export const ChangePointDetectionPage: FC = () => {
               <p>
                 <FormattedMessage
                   id="xpack.aiops.changePointDetection.noChangePointsFoundMessage"
-                  defaultMessage="Detect statistically significant change points such as dips, spikes, and distribution changes in a metric. Select a metric and set a time range to start detecting change points in your data"
+                  defaultMessage="Detect statistically significant change points such as dips, spikes, and distribution changes in a metric. Select a metric and set a time range to start detecting change points in your data."
                 />
               </p>
             }

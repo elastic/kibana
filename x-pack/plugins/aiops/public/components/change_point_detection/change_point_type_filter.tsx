@@ -31,32 +31,32 @@ const changePointTypes: Array<{ value: ChangePointType; description: string }> =
   {
     value: 'dip',
     description: i18n.translate('xpack.aiops.changePointDetection.dipDescription', {
-      defaultMessage: 'a significant dip occurs at this change point',
+      defaultMessage: 'A significant dip occurs at this point.',
     }),
   },
   {
     value: 'spike',
     description: i18n.translate('xpack.aiops.changePointDetection.spikeDescription', {
-      defaultMessage: 'a significant spike occurs at this point',
+      defaultMessage: 'A significant spike occurs at this point.',
     }),
   },
   {
     value: 'distribution_change',
     description: i18n.translate('xpack.aiops.changePointDetection.distributionChangeDescription', {
-      defaultMessage: 'the overall distribution of the values has changed significantly',
+      defaultMessage: 'The overall distribution of the values has changed significantly.',
     }),
   },
   {
     value: 'step_change',
     description: i18n.translate('xpack.aiops.changePointDetection.stepChangeDescription', {
       defaultMessage:
-        'the change indicates a statistically significant step up or down in value distribution',
+        'The change indicates a statistically significant step up or down in value distribution.',
     }),
   },
   {
     value: 'trend_change',
     description: i18n.translate('xpack.aiops.changePointDetection.trendChangeDescription', {
-      defaultMessage: 'there is an overall trend change occurring at this point',
+      defaultMessage: 'An overall trend change occurs at this point.',
     }),
   },
 ];
