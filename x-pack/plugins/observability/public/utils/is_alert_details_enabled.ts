@@ -10,7 +10,6 @@ import { TopAlert } from '../pages/alerts';
 import { ConfigSchema } from '../plugin';
 
 const ALLOWED_RULE_TYPES = ['apm.transaction_duration'];
-const BLOCKED_RULE_TYPES = ['apm.error_rate', 'apm.transaction_error_rate', 'apm.anomaly'];
 
 const isUnsafeAlertDetailsFlag = (
   subject: string
@@ -29,9 +28,6 @@ export const isAlertDetailsEnabledPerApp = (
 
   // The feature flags for alertDetails are not specific enough so we need to check
   // the specific rule types to see if they should be blocked or not.
-  if (BLOCKED_RULE_TYPES.includes(ruleTypeId)) {
-    return false;
-  }
   if (ALLOWED_RULE_TYPES.includes(ruleTypeId)) {
     return true;
   }
