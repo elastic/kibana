@@ -26,6 +26,7 @@ import {
   pushedCase,
   tags,
   findCaseUserActionsResponse,
+  getCaseUsersMockResponse,
 } from '../mock';
 import type {
   CaseConnectors,
@@ -44,10 +45,7 @@ import { CaseStatuses } from '../../../common/api';
 import type { ValidFeatureId } from '@kbn/rule-data-utils';
 import type { UserProfile } from '@kbn/security-plugin/common';
 import { userProfiles } from '../user_profiles/api.mock';
-import {
-  getCaseConnectorsMockResponse,
-  getCaseUsersMockResponse,
-} from '../../common/mock/connectors';
+import { getCaseConnectorsMockResponse } from '../../common/mock/connectors';
 
 export const getCase = async (
   caseId: string,

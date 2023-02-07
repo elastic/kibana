@@ -103,32 +103,47 @@ export default ({ getService }: FtrProviderContext): void => {
           headers: superUserHeaders,
         });
 
-        const { participants, assignees, unassignedUsers } = await getCaseUsers({
+        const { participants, assignees, unassignedUsers, reporter } = await getCaseUsers({
           caseId: postedCase.id,
           supertest,
         });
 
         expect(participants).to.eql([
           {
-            username: superUserProfile.user.username,
-            full_name: superUserProfile.user.full_name,
-            email: superUserProfile.user.email,
-            profile_uid: superUserProfile.uid,
+            user: {
+              username: superUserProfile.user.username,
+              full_name: superUserProfile.user.full_name,
+              email: superUserProfile.user.email,
+              profile_uid: superUserProfile.uid,
+            },
           },
         ]);
 
-        expect(assignees).to.eql([
-          {
+        expect(reporter).to.eql({
+          user: {
             username: superUserProfile.user.username,
             full_name: superUserProfile.user.full_name,
             email: superUserProfile.user.email,
             profile_uid: superUserProfile.uid,
           },
+        });
+
+        expect(assignees).to.eql([
           {
-            username: secUserProfile.user.username,
-            full_name: secUserProfile.user.full_name,
-            email: secUserProfile.user.email,
-            profile_uid: secUserProfile.uid,
+            user: {
+              username: superUserProfile.user.username,
+              full_name: superUserProfile.user.full_name,
+              email: superUserProfile.user.email,
+              profile_uid: superUserProfile.uid,
+            },
+          },
+          {
+            user: {
+              username: secUserProfile.user.username,
+              full_name: secUserProfile.user.full_name,
+              email: secUserProfile.user.email,
+              profile_uid: secUserProfile.uid,
+            },
           },
         ]);
 
@@ -162,35 +177,50 @@ export default ({ getService }: FtrProviderContext): void => {
           headers: superUserHeaders,
         });
 
-        const { participants, assignees, unassignedUsers } = await getCaseUsers({
+        const { participants, assignees, unassignedUsers, reporter } = await getCaseUsers({
           caseId: postedCase.id,
           supertest,
         });
 
         expect(participants).to.eql([
           {
+            user: {
+              username: superUserProfile.user.username,
+              full_name: superUserProfile.user.full_name,
+              email: superUserProfile.user.email,
+              profile_uid: superUserProfile.uid,
+            },
+          },
+        ]);
+
+        expect(reporter).to.eql({
+          user: {
             username: superUserProfile.user.username,
             full_name: superUserProfile.user.full_name,
             email: superUserProfile.user.email,
             profile_uid: superUserProfile.uid,
           },
-        ]);
+        });
 
         expect(assignees).to.eql([
           {
-            username: superUserProfile.user.username,
-            full_name: superUserProfile.user.full_name,
-            email: superUserProfile.user.email,
-            profile_uid: superUserProfile.uid,
+            user: {
+              username: superUserProfile.user.username,
+              full_name: superUserProfile.user.full_name,
+              email: superUserProfile.user.email,
+              profile_uid: superUserProfile.uid,
+            },
           },
         ]);
 
         expect(unassignedUsers).to.eql([
           {
-            username: secUserProfile.user.username,
-            full_name: secUserProfile.user.full_name,
-            email: secUserProfile.user.email,
-            profile_uid: secUserProfile.uid,
+            user: {
+              username: secUserProfile.user.username,
+              full_name: secUserProfile.user.full_name,
+              email: secUserProfile.user.email,
+              profile_uid: secUserProfile.uid,
+            },
           },
         ]);
       });
@@ -231,32 +261,47 @@ export default ({ getService }: FtrProviderContext): void => {
           headers: superUserHeaders,
         });
 
-        const { participants, assignees, unassignedUsers } = await getCaseUsers({
+        const { participants, assignees, unassignedUsers, reporter } = await getCaseUsers({
           caseId: postedCase.id,
           supertest,
         });
 
         expect(participants).to.eql([
           {
-            username: superUserProfile.user.username,
-            full_name: superUserProfile.user.full_name,
-            email: superUserProfile.user.email,
-            profile_uid: superUserProfile.uid,
+            user: {
+              username: superUserProfile.user.username,
+              full_name: superUserProfile.user.full_name,
+              email: superUserProfile.user.email,
+              profile_uid: superUserProfile.uid,
+            },
           },
         ]);
 
-        expect(assignees).to.eql([
-          {
+        expect(reporter).to.eql({
+          user: {
             username: superUserProfile.user.username,
             full_name: superUserProfile.user.full_name,
             email: superUserProfile.user.email,
             profile_uid: superUserProfile.uid,
           },
+        });
+
+        expect(assignees).to.eql([
           {
-            username: secUserProfile.user.username,
-            full_name: secUserProfile.user.full_name,
-            email: secUserProfile.user.email,
-            profile_uid: secUserProfile.uid,
+            user: {
+              username: superUserProfile.user.username,
+              full_name: superUserProfile.user.full_name,
+              email: superUserProfile.user.email,
+              profile_uid: superUserProfile.uid,
+            },
+          },
+          {
+            user: {
+              username: secUserProfile.user.username,
+              full_name: secUserProfile.user.full_name,
+              email: secUserProfile.user.email,
+              profile_uid: secUserProfile.uid,
+            },
           },
         ]);
 

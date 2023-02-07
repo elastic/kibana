@@ -32,7 +32,7 @@ interface UserListProps {
   headline: string;
   loading?: boolean;
   users: CaseUserWithProfileInfo[];
-  userProfiles: Map<string, UserProfileWithAvatar>;
+  userProfiles?: Map<string, UserProfileWithAvatar>;
   dataTestSubj?: string;
 }
 

@@ -16,6 +16,7 @@ import type {
   ExternalReferenceComment,
   PersistableComment,
   FindCaseUserActions,
+  CaseUsers,
 } from '../../common/ui/types';
 import type {
   CaseConnector,
@@ -957,3 +958,85 @@ export const getPersistableStateAttachment = (
     ...viewObject,
   }),
 });
+
+export const getCaseUsersMockResponse = (): CaseUsers => {
+  return {
+    participants: [
+      {
+        user: {
+          email: 'case_all@elastic.co',
+          fullName: 'Cases',
+          username: 'cases_all',
+        },
+      },
+      {
+        user: {
+          email: null,
+          fullName: null,
+          username: 'elastic',
+          profileUid: 'u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0',
+        },
+      },
+    ],
+    reporter: {
+      user: {
+        email: 'case_all@elastic.co',
+        fullName: 'Cases',
+        username: 'cases_all',
+      },
+    },
+
+    assignees: [
+      {
+        user: {
+          email: '',
+          fullName: '',
+          username: 'alerts_read_only',
+          profileUid: 'u_62h24XVQzG4-MuH1-DqPmookrJY23aRa9h4fyULR6I8_0',
+        },
+      },
+      {
+        user: {
+          email: null,
+          fullName: null,
+          username: 'elastic',
+          profileUid: 'u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0',
+        },
+      },
+      {
+        user: {
+          email: 'fuzzy_marten@profiles.elastic.co',
+          fullName: 'Fuzzy Marten',
+          username: 'fuzzy_marten',
+          profileUid: 'u_3OgKOf-ogtr8kJ5B0fnRcqzXs2aQQkZLtzKEEFnKaYg_0',
+        },
+      },
+      {
+        user: {
+          email: 'misty_mackerel@profiles.elastic.co',
+          fullName: 'Misty Mackerel',
+          username: 'misty_mackerel',
+          profileUid: 'u_BXf_iGxcnicv4l-3-ER7I-XPpfanAFAap7uls86xV7A_0',
+        },
+      },
+    ],
+    unassignedUsers: [
+      {
+        user: {
+          email: '',
+          fullName: '',
+          username: 'cases_no_connectors',
+          profileUid: 'u_o0kPgaXwJ7odc3sNWH83yx9JMoVbou_z2CgIEhl2I8M_0',
+        },
+      },
+      {
+        user: {
+          email: 'valid_chimpanzee@profiles.elastic.co',
+          fullName: 'Valid Chimpanzee',
+          username: 'valid_chimpanzee',
+          profileUid: 'u_wEtPffVJIgxWIN8W79Rp84bbORN6x0wKiJ5eTsQvpBA_0',
+        },
+      },
+    ],
+  };
+};

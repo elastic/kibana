@@ -8,9 +8,8 @@
 import {
   alertComment,
   basicCase,
-  caseUserActions,
   connectorsMock,
-  getAlertUserAction,
+  getCaseUsersMockResponse,
 } from '../../../containers/mock';
 import React from 'react';
 import type { AppMockRenderer } from '../../../common/mock';
@@ -23,12 +22,13 @@ import { useFindCaseUserActions } from '../../../containers/use_find_case_user_a
 import { usePostPushToService } from '../../../containers/use_post_push_to_service';
 import { useGetSupportedActionConnectors } from '../../../containers/configure/use_get_supported_action_connectors';
 import { useGetTags } from '../../../containers/use_get_tags';
-import { useBulkGetUserProfiles } from '../../../containers/user_profiles/use_bulk_get_user_profiles';
 import { useGetCaseConnectors } from '../../../containers/use_get_case_connectors';
+import { useGetCaseUsers } from '../../../containers/use_get_case_users';
 import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
 import { waitForComponentToUpdate } from '../../../common/test_utils';
 import { waitFor } from '@testing-library/dom';
 import { getCaseConnectorsMockResponse } from '../../../common/mock/connectors';
+import { defaultUseFindCaseUserActions } from '../mocks';
 
 jest.mock('../../../containers/use_find_case_user_actions');
 jest.mock('../../../containers/configure/use_get_supported_action_connectors');
@@ -41,6 +41,7 @@ jest.mock('../../../containers/use_get_action_license');
 jest.mock('../../../containers/use_get_tags');
 jest.mock('../../../containers/user_profiles/use_bulk_get_user_profiles');
 jest.mock('../../../containers/use_get_case_connectors');
+jest.mock('../../../containers/use_get_case_users');
 
 (useGetTags as jest.Mock).mockReturnValue({ data: ['coke', 'pepsi'], refetch: jest.fn() });
 
@@ -74,18 +75,7 @@ const caseViewProps: CaseViewProps = {
     },
   ],
 };
-const fetchCaseUserActions = jest.fn();
 const pushCaseToExternalService = jest.fn();
-
-const defaultUseFindCaseUserActions = {
-  data: {
-    caseUserActions: [...caseUserActions, getAlertUserAction()],
-    participants: [caseData.createdBy],
-  },
-  refetch: fetchCaseUserActions,
-  isLoading: false,
-  isError: false,
-};
 
 export const caseProps = {
   ...caseViewProps,
@@ -93,11 +83,13 @@ export const caseProps = {
   fetchCaseMetrics: jest.fn(),
 };
 
+const caseUsers = getCaseUsersMockResponse();
+
 const useFindCaseUserActionsMock = useFindCaseUserActions as jest.Mock;
 const useGetConnectorsMock = useGetSupportedActionConnectors as jest.Mock;
 const usePostPushToServiceMock = usePostPushToService as jest.Mock;
-const useBulkGetUserProfilesMock = useBulkGetUserProfiles as jest.Mock;
 const useGetCaseConnectorsMock = useGetCaseConnectors as jest.Mock;
+const useGetCaseUsersMock = useGetCaseUsers as jest.Mock;
 
 describe('Case View Page activity tab', () => {
   const caseConnectors = getCaseConnectorsMockResponse();
@@ -106,11 +98,11 @@ describe('Case View Page activity tab', () => {
     useFindCaseUserActionsMock.mockReturnValue(defaultUseFindCaseUserActions);
     useGetConnectorsMock.mockReturnValue({ data: connectorsMock, isLoading: false });
     usePostPushToServiceMock.mockReturnValue({ isLoading: false, pushCaseToExternalService });
-    useBulkGetUserProfilesMock.mockReturnValue({ isLoading: false, data: new Map() });
     useGetCaseConnectorsMock.mockReturnValue({
       isLoading: false,
       data: caseConnectors,
     });
+    useGetCaseUsersMock.mockReturnValue({ isLoading: false, data: caseUsers });
   });
   let appMockRender: AppMockRenderer;
 

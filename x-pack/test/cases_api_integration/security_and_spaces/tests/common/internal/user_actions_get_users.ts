@@ -50,12 +50,15 @@ export default ({ getService }: FtrProviderContext): void => {
           title: 'new title',
         });
 
-        const { participants, assignees, unassignedUsers } = await getCaseUsers({
+        const { participants, assignees, unassignedUsers, reporter } = await getCaseUsers({
           caseId: postedCase.id,
           supertest,
         });
 
-        expect(participants).to.eql([{ username: 'elastic', full_name: null, email: null }]);
+        expect(participants).to.eql([
+          { user: { username: 'elastic', full_name: null, email: null } },
+        ]);
+        expect(reporter).to.eql({ user: { username: 'elastic', full_name: null, email: null } });
         expect(assignees).to.eql([]);
         expect(unassignedUsers).to.eql([]);
       });
@@ -85,14 +88,19 @@ export default ({ getService }: FtrProviderContext): void => {
           caseId: '163d5820-1284-21ed-81af-63a2bdfb2bf9',
         });
 
-        const { participants, assignees, unassignedUsers } = await getCaseUsers({
+        const { participants, assignees, unassignedUsers, reporter } = await getCaseUsers({
           caseId: theCase.id,
           supertest,
         });
 
-        expect(participants).to.eql([{ username: null, full_name: null, email: null }]);
-        expect(assignees).to.eql([{ profile_uid: 'abc' }]);
-        expect(unassignedUsers).to.eql([{ profile_uid: 'dfg' }]);
+        expect(participants).to.eql([{ user: { username: null, full_name: null, email: null } }]);
+        expect(reporter).to.eql({ user: { username: null, full_name: null, email: null } });
+        expect(assignees).to.eql([
+          { user: { profile_uid: 'abc', username: null, full_name: null, email: null } },
+        ]);
+        expect(unassignedUsers).to.eql([
+          { user: { profile_uid: 'dfg', username: null, full_name: null, email: null } },
+        ]);
       });
     });
 
@@ -162,19 +170,30 @@ export default ({ getService }: FtrProviderContext): void => {
           superUserHeaders
         );
 
-        const { participants, assignees, unassignedUsers } = await getCaseUsers({
+        const { participants, assignees, unassignedUsers, reporter } = await getCaseUsers({
           caseId: postedCase.id,
           supertest,
         });
 
         expect(participants).to.eql([
           {
+            user: {
+              username: superUserProfile.user.username,
+              full_name: superUserProfile.user.full_name,
+              email: superUserProfile.user.email,
+              profile_uid: superUserProfile.uid,
+            },
+          },
+        ]);
+
+        expect(reporter).to.eql({
+          user: {
             username: superUserProfile.user.username,
             full_name: superUserProfile.user.full_name,
             email: superUserProfile.user.email,
             profile_uid: superUserProfile.uid,
           },
-        ]);
+        });
 
         expect(assignees).to.eql([]);
         expect(unassignedUsers).to.eql([]);
@@ -197,19 +216,30 @@ export default ({ getService }: FtrProviderContext): void => {
           headers: superUserHeaders,
         });
 
-        const { participants, assignees, unassignedUsers } = await getCaseUsers({
+        const { participants, assignees, unassignedUsers, reporter } = await getCaseUsers({
           caseId: postedCase.id,
           supertest,
         });
 
         expect(participants).to.eql([
           {
+            user: {
+              username: superUserProfile.user.username,
+              full_name: superUserProfile.user.full_name,
+              email: superUserProfile.user.email,
+              profile_uid: superUserProfile.uid,
+            },
+          },
+        ]);
+
+        expect(reporter).to.eql({
+          user: {
             username: superUserProfile.user.username,
             full_name: superUserProfile.user.full_name,
             email: superUserProfile.user.email,
             profile_uid: superUserProfile.uid,
           },
-        ]);
+        });
 
         expect(assignees).to.eql([]);
         expect(unassignedUsers).to.eql([]);
@@ -232,25 +262,38 @@ export default ({ getService }: FtrProviderContext): void => {
           headers: secOnlyHeaders,
         });
 
-        const { participants, assignees, unassignedUsers } = await getCaseUsers({
+        const { participants, assignees, unassignedUsers, reporter } = await getCaseUsers({
           caseId: postedCase.id,
           supertest,
         });
 
         expect(participants).to.eql([
           {
-            username: secUserProfile.user.username,
-            full_name: secUserProfile.user.full_name,
-            email: secUserProfile.user.email,
-            profile_uid: secUserProfile.uid,
+            user: {
+              username: secUserProfile.user.username,
+              full_name: secUserProfile.user.full_name,
+              email: secUserProfile.user.email,
+              profile_uid: secUserProfile.uid,
+            },
           },
           {
+            user: {
+              username: superUserProfile.user.username,
+              full_name: superUserProfile.user.full_name,
+              email: superUserProfile.user.email,
+              profile_uid: superUserProfile.uid,
+            },
+          },
+        ]);
+
+        expect(reporter).to.eql({
+          user: {
             username: superUserProfile.user.username,
             full_name: superUserProfile.user.full_name,
             email: superUserProfile.user.email,
             profile_uid: superUserProfile.uid,
           },
-        ]);
+        });
 
         expect(assignees).to.eql([]);
         expect(unassignedUsers).to.eql([]);
@@ -281,25 +324,38 @@ export default ({ getService }: FtrProviderContext): void => {
           headers: secOnlyHeaders,
         });
 
-        const { participants, assignees, unassignedUsers } = await getCaseUsers({
+        const { participants, assignees, unassignedUsers, reporter } = await getCaseUsers({
           caseId: postedCase.id,
           supertest,
         });
 
         expect(participants).to.eql([
           {
-            username: secUserProfile.user.username,
-            full_name: secUserProfile.user.full_name,
-            email: secUserProfile.user.email,
-            profile_uid: secUserProfile.uid,
+            user: {
+              username: secUserProfile.user.username,
+              full_name: secUserProfile.user.full_name,
+              email: secUserProfile.user.email,
+              profile_uid: secUserProfile.uid,
+            },
           },
           {
+            user: {
+              username: superUserProfile.user.username,
+              full_name: superUserProfile.user.full_name,
+              email: superUserProfile.user.email,
+              profile_uid: superUserProfile.uid,
+            },
+          },
+        ]);
+
+        expect(reporter).to.eql({
+          user: {
             username: superUserProfile.user.username,
             full_name: superUserProfile.user.full_name,
             email: superUserProfile.user.email,
             profile_uid: superUserProfile.uid,
           },
-        ]);
+        });
 
         expect(assignees).to.eql([]);
         expect(unassignedUsers).to.eql([]);
