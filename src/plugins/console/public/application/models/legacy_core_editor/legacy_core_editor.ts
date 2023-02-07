@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import ace from 'brace';
+import ace, { type Annotation } from 'brace';
 import { Editor as IAceEditor, IEditSession as IAceEditSession } from 'brace';
 import $ from 'jquery';
 import {
@@ -402,8 +402,7 @@ export class LegacyCoreEditor implements CoreEditor {
         getCompletions: (
           // eslint-disable-next-line @typescript-eslint/naming-convention
           DO_NOT_USE_1: IAceEditor,
-          // eslint-disable-next-line @typescript-eslint/naming-convention
-          DO_NOT_USE_2: IAceEditSession,
+          aceEditSession: IAceEditSession,
           pos: { row: number; column: number },
           prefix: string,
           callback: (...args: unknown[]) => void
@@ -412,7 +411,30 @@ export class LegacyCoreEditor implements CoreEditor {
             lineNumber: pos.row + 1,
             column: pos.column + 1,
           };
-          autocompleter(position, prefix, callback);
+
+          const getAnnotationControls = () => {
+            let customAnnotation: Annotation;
+            return {
+              setAnnotation(text: string) {
+                const annotations = aceEditSession.getAnnotations();
+                customAnnotation = {
+                  text,
+                  row: pos.row,
+                  column: pos.column,
+                  type: 'warning',
+                };
+
+                aceEditSession.setAnnotations([...annotations, customAnnotation]);
+              },
+              removeAnnotation() {
+                aceEditSession.setAnnotations(
+                  aceEditSession.getAnnotations().filter((a: Annotation) => a !== customAnnotation)
+                );
+              },
+            };
+          };
+
+          autocompleter(position, prefix, callback, getAnnotationControls());
         },
       },
     ]);
