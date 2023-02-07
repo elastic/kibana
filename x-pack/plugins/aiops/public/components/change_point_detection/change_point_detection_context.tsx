@@ -187,12 +187,9 @@ export const ChangePointDetectionContextProvider: FC = ({ children }) => {
     if (!params.metricField && metricFieldOptions.length > 0) {
       params.metricField = metricFieldOptions[0].name;
     }
-    if (!params.splitField && splitFieldsOptions.length > 0) {
-      params.splitField = splitFieldsOptions[0].name;
-    }
     params.interval = bucketInterval?.expression!;
     return params;
-  }, [requestParamsFromUrl, metricFieldOptions, splitFieldsOptions, bucketInterval]);
+  }, [requestParamsFromUrl, metricFieldOptions, bucketInterval]);
 
   const updateFilters = useCallback(
     (update: Filter[]) => {

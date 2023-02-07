@@ -11,25 +11,35 @@ import { EuiComboBox, type EuiComboBoxOptionOption, EuiFormRow } from '@elastic/
 import { useChangePointDetectionContext } from './change_point_detection_context';
 
 interface SplitFieldSelectorProps {
-  value: string;
-  onChange: (value: string) => void;
+  value: string | undefined;
+  onChange: (value: string | undefined) => void;
 }
 
 export const SplitFieldSelector: FC<SplitFieldSelectorProps> = React.memo(({ value, onChange }) => {
   const { splitFieldsOptions } = useChangePointDetectionContext();
 
-  const options = useMemo<EuiComboBoxOptionOption[]>(() => {
-    return splitFieldsOptions.map((v) => ({ value: v.name, label: v.displayName }));
+  const options = useMemo<Array<EuiComboBoxOptionOption<string>>>(() => {
+    return [
+      {
+        name: undefined,
+        displayName: i18n.translate('xpack.aiops.changePointDetection.notSelectedSplitFieldLabel', {
+          defaultMessage: 'Not selected',
+        }),
+      },
+      ...splitFieldsOptions,
+    ].map((v) => ({
+      value: v.name,
+      label: v.displayName,
+    }));
   }, [splitFieldsOptions]);
 
   const selection = options.filter((v) => v.value === value);
 
   const onChangeCallback = useCallback(
-    (selectedOptions: EuiComboBoxOptionOption[]) => {
+    (selectedOptions: Array<EuiComboBoxOptionOption<string>>) => {
       const option = selectedOptions[0];
-      if (typeof option !== 'undefined') {
-        onChange(option.label);
-      }
+      const newValue = option?.value;
+      onChange(newValue);
     },
     [onChange]
   );
@@ -44,7 +54,7 @@ export const SplitFieldSelector: FC<SplitFieldSelectorProps> = React.memo(({ val
         options={options}
         selectedOptions={selection}
         onChange={onChangeCallback}
-        isClearable={false}
+        isClearable
         data-test-subj="aiopsChangePointSplitField"
       />
     </EuiFormRow>

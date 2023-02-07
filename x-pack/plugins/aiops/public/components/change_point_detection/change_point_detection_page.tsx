@@ -60,7 +60,7 @@ export const ChangePointDetectionPage: FC = () => {
   );
 
   const setSplitField = useCallback(
-    (splitField: string) => {
+    (splitField: string | undefined) => {
       updateRequestParams({ splitField });
     },
     [updateRequestParams]
@@ -132,7 +132,7 @@ export const ChangePointDetectionPage: FC = () => {
         </EuiFlexItem>
         {splitFieldsOptions.length > 0 ? (
           <EuiFlexItem grow={false} css={selectControlCss}>
-            <SplitFieldSelector value={requestParams.splitField!} onChange={setSplitField} />
+            <SplitFieldSelector value={requestParams.splitField} onChange={setSplitField} />
           </EuiFlexItem>
         ) : null}
 
