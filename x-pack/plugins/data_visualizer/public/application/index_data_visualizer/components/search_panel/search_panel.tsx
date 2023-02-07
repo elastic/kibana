@@ -21,7 +21,7 @@ import { DataView, DataViewField } from '@kbn/data-views-plugin/public';
 import { isDefined } from '@kbn/ml-is-defined';
 import { DataVisualizerFieldNamesFilter } from './field_name_filter';
 import { DataVisualizerFieldTypeFilter } from './field_type_filter';
-import { SupportedFieldType } from '../../../../../common/types';
+import type { SupportedFieldType } from '../../../../../common/types';
 import { SearchQueryLanguage } from '../../types/combined_query';
 import { useDataVisualizerKibana } from '../../../kibana_context';
 import { createMergedEsQuery } from '../../utils/saved_search_utils';
