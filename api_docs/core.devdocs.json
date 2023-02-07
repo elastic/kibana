@@ -5005,6 +5005,10 @@
                 "path": "x-pack/plugins/ml/public/application/app.tsx"
               },
               {
+                "plugin": "ml",
+                "path": "x-pack/plugins/ml/public/application/app.tsx"
+              },
+              {
                 "plugin": "infra",
                 "path": "x-pack/plugins/infra/public/hooks/use_find_saved_object.tsx"
               },
@@ -14016,11 +14020,31 @@
           },
           {
             "plugin": "ml",
+            "path": "x-pack/plugins/ml/public/application/routing/use_resolver.ts"
+          },
+          {
+            "plugin": "ml",
+            "path": "x-pack/plugins/ml/public/application/routing/use_resolver.ts"
+          },
+          {
+            "plugin": "ml",
+            "path": "x-pack/plugins/ml/public/application/routing/use_resolver.ts"
+          },
+          {
+            "plugin": "ml",
             "path": "x-pack/plugins/ml/public/application/services/dashboard_service.ts"
           },
           {
             "plugin": "ml",
             "path": "x-pack/plugins/ml/public/application/services/dashboard_service.ts"
+          },
+          {
+            "plugin": "ml",
+            "path": "x-pack/plugins/ml/public/application/routing/router.tsx"
+          },
+          {
+            "plugin": "ml",
+            "path": "x-pack/plugins/ml/public/application/routing/router.tsx"
           },
           {
             "plugin": "canvas",
@@ -15326,10 +15350,6 @@
               {
                 "plugin": "dashboard",
                 "path": "src/plugins/dashboard/public/dashboard_actions/clone_panel_action.tsx"
-              },
-              {
-                "plugin": "dataVisualizer",
-                "path": "x-pack/plugins/data_visualizer/public/application/index_data_visualizer/index_data_visualizer.tsx"
               },
               {
                 "plugin": "ml",
@@ -18318,14 +18338,6 @@
           {
             "plugin": "dataVisualizer",
             "path": "x-pack/plugins/data_visualizer/common/types/index.ts"
-          },
-          {
-            "plugin": "dataVisualizer",
-            "path": "x-pack/plugins/data_visualizer/public/application/index_data_visualizer/index_data_visualizer.tsx"
-          },
-          {
-            "plugin": "dataVisualizer",
-            "path": "x-pack/plugins/data_visualizer/public/application/index_data_visualizer/index_data_visualizer.tsx"
           },
           {
             "plugin": "ml",

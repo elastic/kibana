@@ -502,6 +502,10 @@ This plugin is currently under active development; do not use.
 |Contains the enhancements to the OSS discover app.
 
 
+|{kib-repo}blob/{branch}/x-pack/plugins/ecs_data_quality_dashboard/README.md[ecsDataQualityDashboard]
+|This plugin implements (server) APIs used to render the content of the Data Quality dashboard.
+
+
 |<<enhanced-embeddables-plugin>>
 |Enhances Embeddables by registering a custom factory provider. The enhanced factory provider
 adds dynamic actions to every embeddables state, in order to support drilldowns.
