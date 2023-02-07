@@ -5,21 +5,18 @@
  * 2.0.
  */
 
-import { KibanaServices } from '../../../common/lib/kibana';
-import { fieldHasCellActions } from '../../utils';
+import { addFilterIn, createFilterInActionFactory } from '@kbn/cell-actions';
 import type { SecurityAppStore } from '../../../common/store';
 import { timelineSelectors } from '../../../timelines/store/timeline';
+import { fieldHasCellActions } from '../../utils';
+import { KibanaServices } from '../../../common/lib/kibana';
 import { TimelineId } from '../../../../common/types';
-import {
-  createFilterOutAction as createGenericFilterOutAction,
-  addFilterOut,
-} from '../generic/filter_out';
 import { isTimelineScope } from '../../../helpers';
 import type { SecurityCellAction } from '../../types';
 
-const ID = 'security_filterOut';
+const ID = 'security_filterIn';
 
-export const createFilterOutAction = ({
+export const createFilterInAction = ({
   store,
   order,
 }: {
@@ -31,13 +28,13 @@ export const createFilterOutAction = ({
       query: { filterManager },
     },
   } = KibanaServices.get();
-
   const getTimelineById = timelineSelectors.getTimelineByIdSelector();
-  const genericFilterOut = createGenericFilterOutAction({ order, filterManager });
 
-  return {
-    ...genericFilterOut,
+  const createFilterIn = createFilterInActionFactory({ filterManager });
+
+  return createFilterIn<SecurityCellAction>({
     id: ID,
+    order,
     isCompatible: async ({ field }) => fieldHasCellActions(field.name),
     execute: async (executionContext) => {
       const { field, metadata } = executionContext;
@@ -47,10 +44,10 @@ export const createFilterOutAction = ({
           store.getState(),
           TimelineId.active
         )?.filterManager;
-        addFilterOut(field.name, field.value, timelineFilterManager);
+        addFilterIn(field.name, field.value, timelineFilterManager);
       } else {
-        genericFilterOut.execute(executionContext);
+        addFilterIn(field.name, field.value, filterManager);
       }
     },
-  };
+  });
 };

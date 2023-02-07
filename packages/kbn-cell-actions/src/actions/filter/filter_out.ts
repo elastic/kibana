@@ -1,8 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 /**
@@ -11,47 +12,45 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { CellAction } from '@kbn/cell-actions';
-import type { FilterManager } from '@kbn/data-plugin/public';
 import type { Filter } from '@kbn/es-query';
+import type { FilterManager } from '@kbn/data-plugin/public';
+import type { CellAction } from '../../types';
 
-export const FILTER_IN = i18n.translate('xpack.securitySolution.actions.filterIn', {
-  defaultMessage: 'Filter In',
+const ID = 'filterOut';
+const ICON = 'minusInCircle';
+const FILTER_OUT = i18n.translate('cellActions.actions.filterOut', {
+  defaultMessage: 'Filter Out',
 });
-const ID = 'filterIn';
-const ICON = 'plusInCircle';
 
-export const createFilterInAction = ({
+export const createFilterOutAction = ({
   filterManager,
-  order,
 }: {
   filterManager: FilterManager;
-  order?: number;
 }): CellAction => ({
   id: ID,
   type: ID,
-  order,
   getIconType: (): string => ICON,
-  getDisplayName: () => FILTER_IN,
-  getDisplayNameTooltip: () => FILTER_IN,
+  getDisplayName: () => FILTER_OUT,
+  getDisplayNameTooltip: () => FILTER_OUT,
   isCompatible: async ({ field }) => field.name != null,
   execute: async ({ field }) => {
-    addFilterIn(field.name, field.value, filterManager);
+    addFilterOut(field.name, field.value, filterManager);
   },
 });
 
-export const addFilterIn = (
+export const addFilterOut = (
   fieldName: string,
   value: string[] | string | null | undefined,
   filterManager: FilterManager | undefined
 ) => {
   if (filterManager != null) {
-    const filter = createFilterIn(fieldName, value);
+    const filter = createFilterOut(fieldName, value);
     filterManager.addFilters(filter);
   }
 };
 
-const createFilterIn = (key: string, value: string[] | string | null | undefined): Filter => {
+const createFilterOut = (key: string, value: string[] | string | null | undefined): Filter => {
+  const negate = value != null && value?.length > 0;
   const queryValue =
     value != null && value.length > 0 ? (Array.isArray(value) ? value[0] : value) : null;
   if (queryValue == null) {
@@ -63,6 +62,7 @@ const createFilterIn = (key: string, value: string[] | string | null | undefined
         alias: null,
         disabled: false,
         key,
+        negate,
         type: 'exists',
         value: 'exists',
       },
@@ -71,6 +71,7 @@ const createFilterIn = (key: string, value: string[] | string | null | undefined
   return {
     meta: {
       alias: null,
+      negate,
       disabled: false,
       type: 'phrase',
       key,

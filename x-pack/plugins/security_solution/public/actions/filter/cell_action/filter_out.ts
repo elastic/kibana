@@ -5,25 +5,18 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
+import { addFilterOut, createFilterOutActionFactory } from '@kbn/cell-actions';
+import { KibanaServices } from '../../../common/lib/kibana';
+import { fieldHasCellActions } from '../../utils';
 import type { SecurityAppStore } from '../../../common/store';
 import { timelineSelectors } from '../../../timelines/store/timeline';
-import { fieldHasCellActions } from '../../utils';
-import { KibanaServices } from '../../../common/lib/kibana';
 import { TimelineId } from '../../../../common/types';
-import {
-  createFilterInAction as createGenericFilterInAction,
-  addFilterIn,
-} from '../generic/filter_in';
 import { isTimelineScope } from '../../../helpers';
 import type { SecurityCellAction } from '../../types';
 
-export const FILTER_IN = i18n.translate('xpack.securitySolution.actions.filterIn', {
-  defaultMessage: 'Filter In',
-});
-const ID = 'security_filterIn';
+const ID = 'security_filterOut';
 
-export const createFilterInAction = ({
+export const createFilterOutAction = ({
   store,
   order,
 }: {
@@ -37,11 +30,11 @@ export const createFilterInAction = ({
   } = KibanaServices.get();
 
   const getTimelineById = timelineSelectors.getTimelineByIdSelector();
-  const genericFilterIn = createGenericFilterInAction({ order, filterManager });
+  const createFilterOut = createFilterOutActionFactory({ filterManager });
 
-  return {
-    ...genericFilterIn,
+  return createFilterOut<SecurityCellAction>({
     id: ID,
+    order,
     isCompatible: async ({ field }) => fieldHasCellActions(field.name),
     execute: async (executionContext) => {
       const { field, metadata } = executionContext;
@@ -51,10 +44,10 @@ export const createFilterInAction = ({
           store.getState(),
           TimelineId.active
         )?.filterManager;
-        addFilterIn(field.name, field.value, timelineFilterManager);
+        addFilterOut(field.name, field.value, timelineFilterManager);
       } else {
-        genericFilterIn.execute(executionContext);
+        addFilterOut(field.name, field.value, filterManager);
       }
     },
-  };
+  });
 };
