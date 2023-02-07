@@ -40,10 +40,18 @@ export function OverviewErrors() {
       ) : (
         <EuiFlexGroup gutterSize="xl">
           <EuiFlexItem grow={false}>
-            <OverviewErrorsCount from={from} to={to} monitorIds={status?.enabledIds ?? []} />
+            <OverviewErrorsCount
+              from={from}
+              to={to}
+              monitorIds={status?.enabledMonitorQueryIds ?? []}
+            />
           </EuiFlexItem>
           <EuiFlexItem grow={true}>
-            <OverviewErrorsSparklines from={from} to={to} monitorIds={status?.enabledIds ?? []} />
+            <OverviewErrorsSparklines
+              from={from}
+              to={to}
+              monitorIds={status?.enabledMonitorQueryIds ?? []}
+            />
           </EuiFlexItem>
           <EuiFlexItem grow={false} css={{ alignSelf: 'center' }}>
             <ErrorsLink disabled={true} />
