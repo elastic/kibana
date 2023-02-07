@@ -202,33 +202,37 @@ export const ChangePointDetectionPage: FC = () => {
           return (
             <EuiFlexItem key={v.group.value}>
               <EuiPanel paddingSize="s" hasBorder hasShadow={false}>
-                <EuiFlexGroup justifyContent={'spaceBetween'} alignItems={'center'}>
+                <EuiFlexGroup
+                  alignItems={'center'}
+                  justifyContent={'spaceBetween'}
+                  gutterSize={'s'}
+                >
                   <EuiFlexItem grow={false}>
-                    <EuiFlexGroup alignItems={'center'} gutterSize={'s'}>
-                      <EuiFlexItem grow={false}>
-                        <EuiDescriptionList
-                          type="inline"
-                          listItems={[{ title: v.group.name, description: v.group.value }]}
+                    <EuiDescriptionList
+                      type="inline"
+                      listItems={[{ title: v.group.name, description: v.group.value }]}
+                    />
+
+                    {v.reason ? (
+                      <EuiToolTip position="top" content={v.reason}>
+                        <EuiIcon
+                          tabIndex={0}
+                          color={'warning'}
+                          type="alert"
+                          title={i18n.translate(
+                            'xpack.aiops.changePointDetection.notResultsWarning',
+                            {
+                              defaultMessage: 'No change point agg results warning',
+                            }
+                          )}
                         />
-                      </EuiFlexItem>
-                      {v.reason ? (
-                        <EuiFlexItem grow={false}>
-                          <EuiToolTip position="top" content={v.reason}>
-                            <EuiIcon
-                              tabIndex={0}
-                              color={'warning'}
-                              type="alert"
-                              title={i18n.translate(
-                                'xpack.aiops.changePointDetection.notResultsWarning',
-                                {
-                                  defaultMessage: 'No change point agg results warning',
-                                }
-                              )}
-                            />
-                          </EuiToolTip>
-                        </EuiFlexItem>
-                      ) : null}
-                    </EuiFlexGroup>
+                      </EuiToolTip>
+                    ) : null}
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <EuiText color={'subdued'} size={'s'}>
+                      {requestParams.fn}({requestParams.metricField})
+                    </EuiText>
                   </EuiFlexItem>
                 </EuiFlexGroup>
 
