@@ -84,7 +84,7 @@ export const ChangePointTypeFilter: FC<ChangePointTypeFilterProps> = ({ value, o
 
   const selection: ChangePointTypeFilterSelection = !value
     ? [options[0]]
-    : options.filter((v) => value?.includes(v.value!));
+    : options.filter((v) => value.includes(v.value!));
 
   const onChangeCallback = useCallback(
     (selectedOptions: ChangePointTypeFilterSelection) => {
@@ -101,7 +101,7 @@ export const ChangePointTypeFilter: FC<ChangePointTypeFilterProps> = ({ value, o
     [onChange]
   );
 
-  const renderOption = ((option: FilterOption) => {
+  const renderOption = useCallback((option: FilterOption) => {
     const { label, description } = option;
 
     if (!description) {
@@ -117,7 +117,7 @@ export const ChangePointTypeFilter: FC<ChangePointTypeFilterProps> = ({ value, o
         </EuiFlexGroup>
       </EuiToolTip>
     );
-  }) as unknown as EuiComboBoxOptionsListProps<ChangePointUIValue>['renderOption'];
+  }, []) as unknown as EuiComboBoxOptionsListProps<ChangePointUIValue>['renderOption'];
 
   return (
     <EuiFormRow
