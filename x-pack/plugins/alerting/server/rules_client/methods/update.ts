@@ -44,22 +44,23 @@ export interface UpdateOptions<Params extends RuleTypeParams> {
     throttle?: string | null;
     notifyWhen?: RuleNotifyWhenType | null;
   };
+  allowMissingConnectorSecrets?: boolean;
 }
 
 export async function update<Params extends RuleTypeParams = never>(
   context: RulesClientContext,
-  { id, data }: UpdateOptions<Params>
+  { id, data, allowMissingConnectorSecrets }: UpdateOptions<Params>
 ): Promise<PartialRule<Params>> {
   return await retryIfConflicts(
     context.logger,
     `rulesClient.update('${id}')`,
-    async () => await updateWithOCC<Params>(context, { id, data })
+    async () => await updateWithOCC<Params>(context, { id, data, allowMissingConnectorSecrets })
   );
 }
 
 async function updateWithOCC<Params extends RuleTypeParams>(
   context: RulesClientContext,
-  { id, data }: UpdateOptions<Params>
+  { id, data, allowMissingConnectorSecrets }: UpdateOptions<Params>
 ): Promise<PartialRule<Params>> {
   let alertSavedObject: SavedObject<RawRule>;
 
@@ -105,7 +106,11 @@ async function updateWithOCC<Params extends RuleTypeParams>(
 
   context.ruleTypeRegistry.ensureRuleTypeEnabled(alertSavedObject.attributes.alertTypeId);
 
-  const updateResult = await updateAlert<Params>(context, { id, data }, alertSavedObject);
+  const updateResult = await updateAlert<Params>(
+    context,
+    { id, data, allowMissingConnectorSecrets },
+    alertSavedObject
+  );
 
   await Promise.all([
     alertSavedObject.attributes.apiKey
@@ -144,10 +149,9 @@ async function updateWithOCC<Params extends RuleTypeParams>(
 
 async function updateAlert<Params extends RuleTypeParams>(
   context: RulesClientContext,
-  { id, data }: UpdateOptions<Params>,
-  currentRule: SavedObject<RawRule>
+  { id, data, allowMissingConnectorSecrets }: UpdateOptions<Params>,
+  { attributes, version }: SavedObject<RawRule>
 ): Promise<PartialRule<Params>> {
-  const { attributes, version } = currentRule;
   const ruleType = context.ruleTypeRegistry.get(attributes.alertTypeId);
 
   // TODO https://github.com/elastic/kibana/issues/148414
@@ -163,7 +167,7 @@ async function updateAlert<Params extends RuleTypeParams>(
 
   // Validate
   const validatedAlertTypeParams = validateRuleTypeParams(data.params, ruleType.validate?.params);
-  await validateActions(context, ruleType, data);
+  await validateActions(context, ruleType, data, allowMissingConnectorSecrets);
 
   // Throw error if schedule interval is less than the minimum and we are enforcing it
   const intervalInMs = parseDuration(data.schedule.interval);
@@ -198,7 +202,7 @@ async function updateAlert<Params extends RuleTypeParams>(
   const notifyWhen = getRuleNotifyWhenType(data.notifyWhen ?? null, data.throttle ?? null);
 
   // Increment revision if applicable field has changed
-  const revision = incrementRevision(currentRule, updatedParams);
+  // const revision = incrementRevision(currentRule, updatedParams);
 
   let updatedObject: SavedObject<RawRule>;
   const createAttributes = updateMeta(context, {
@@ -208,7 +212,7 @@ async function updateAlert<Params extends RuleTypeParams>(
     params: updatedParams as RawRule['params'],
     actions,
     notifyWhen,
-    revision,
+    revision: 0, // TODO: Resolve after merge
     updatedBy: username,
     updatedAt: new Date().toISOString(),
   });

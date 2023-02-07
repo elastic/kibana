@@ -495,6 +495,10 @@ export const formatMillisecond = (
   ms: number,
   { maxMillis = 1000, digits }: { digits?: number; maxMillis?: number }
 ) => {
+  if (ms < 0) {
+    return '--';
+  }
+
   if (ms < maxMillis) {
     return `${ms.toFixed(digits ?? 0)} ms`;
   }

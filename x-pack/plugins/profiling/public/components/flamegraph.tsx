@@ -11,7 +11,6 @@ import {
   EuiFlexItem,
   EuiPanel,
   EuiSpacer,
-  EuiSwitch,
   EuiText,
   EuiTextColor,
   useEuiTheme,
@@ -98,22 +97,18 @@ function FlameGraphTooltip({
   label,
   countInclusive,
   countExclusive,
-  samples,
   totalSamples,
   comparisonCountInclusive,
   comparisonCountExclusive,
-  comparisonSamples,
   comparisonTotalSamples,
 }: {
   isRoot: boolean;
-  samples: number;
   label: string;
   countInclusive: number;
   countExclusive: number;
   totalSamples: number;
   comparisonCountInclusive?: number;
   comparisonCountExclusive?: number;
-  comparisonSamples?: number;
   comparisonTotalSamples?: number;
 }) {
   return (
@@ -179,6 +174,10 @@ export interface FlameGraphProps {
   comparisonMode: FlameGraphComparisonMode;
   primaryFlamegraph?: ElasticFlameGraph;
   comparisonFlamegraph?: ElasticFlameGraph;
+  baseline?: number;
+  comparison?: number;
+  showInformationWindow: boolean;
+  onInformationWindowClose: () => void;
 }
 
 export const FlameGraph: React.FC<FlameGraphProps> = ({
@@ -186,6 +185,10 @@ export const FlameGraph: React.FC<FlameGraphProps> = ({
   comparisonMode,
   primaryFlamegraph,
   comparisonFlamegraph,
+  baseline,
+  comparison,
+  showInformationWindow,
+  onInformationWindowClose,
 }) => {
   const theme = useEuiTheme();
 
@@ -197,6 +200,8 @@ export const FlameGraph: React.FC<FlameGraphProps> = ({
       colorDanger: theme.euiTheme.colors.danger,
       colorNeutral: theme.euiTheme.colors.lightShade,
       comparisonMode,
+      baseline,
+      comparison,
     });
   }, [
     primaryFlamegraph,
@@ -205,6 +210,8 @@ export const FlameGraph: React.FC<FlameGraphProps> = ({
     theme.euiTheme.colors.danger,
     theme.euiTheme.colors.lightShade,
     comparisonMode,
+    baseline,
+    comparison,
   ]);
 
   const chartTheme: PartialTheme = {
@@ -235,21 +242,8 @@ export const FlameGraph: React.FC<FlameGraphProps> = ({
     setHighlightedVmIndex(undefined);
   }, [columnarData.key]);
 
-  const [showInformationWindow, setShowInformationWindow] = useState(false);
-
   return (
     <EuiFlexGroup direction="column">
-      <EuiFlexItem grow={false} style={{ alignSelf: 'flex-end' }}>
-        <EuiSwitch
-          checked={showInformationWindow}
-          onChange={() => {
-            setShowInformationWindow((prev) => !prev);
-          }}
-          label={i18n.translate('xpack.profiling.flameGraph.showInformationWindow', {
-            defaultMessage: 'Show information window',
-          })}
-        />
-      </EuiFlexItem>
       <EuiFlexItem>
         <EuiFlexGroup direction="row">
           {columnarData.viewModel.label.length > 0 && (
@@ -273,7 +267,6 @@ export const FlameGraph: React.FC<FlameGraphProps> = ({
 
                       const valueIndex = props.values[0].valueAccessor as number;
                       const label = primaryFlamegraph.Label[valueIndex];
-                      const samples = primaryFlamegraph.CountInclusive[valueIndex];
                       const countInclusive = primaryFlamegraph.CountInclusive[valueIndex];
                       const countExclusive = primaryFlamegraph.CountExclusive[valueIndex];
                       const nodeID = primaryFlamegraph.ID[valueIndex];
@@ -284,14 +277,12 @@ export const FlameGraph: React.FC<FlameGraphProps> = ({
                         <FlameGraphTooltip
                           isRoot={valueIndex === 0}
                           label={label}
-                          samples={samples}
                           countInclusive={countInclusive}
                           countExclusive={countExclusive}
                           comparisonCountInclusive={comparisonNode?.CountInclusive}
                           comparisonCountExclusive={comparisonNode?.CountExclusive}
                           totalSamples={totalSamples}
                           comparisonTotalSamples={comparisonFlamegraph?.CountInclusive[0]}
-                          comparisonSamples={comparisonNode?.CountInclusive}
                         />
                       );
                     },
@@ -315,7 +306,7 @@ export const FlameGraph: React.FC<FlameGraphProps> = ({
                 totalSeconds={primaryFlamegraph?.TotalSeconds ?? 0}
                 totalSamples={totalSamples}
                 onClose={() => {
-                  setShowInformationWindow(false);
+                  onInformationWindowClose();
                 }}
               />
             </EuiFlexItem>
