@@ -9,7 +9,15 @@
 import React, { useCallback, useState } from 'react';
 import { css } from '@emotion/react';
 
-import { EuiCard, EuiFlexGroup, EuiFlexItem, EuiIcon, EuiSpacer, EuiTextColor } from '@elastic/eui';
+import {
+  EuiCard,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiIcon,
+  EuiSpacer,
+  EuiTextColor,
+  useEuiTheme,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import { GuideState } from '../../types';
@@ -55,6 +63,7 @@ export const GuideCard = ({
   activeFilter,
 }: GuideCardsProps & { card: GuideCardConstants }) => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const { euiTheme } = useEuiTheme();
   let guideState: GuideState | undefined;
   if (card.guideId) {
     guideState = guidesState.find((state) => state.guideId === card.guideId);
@@ -102,9 +111,9 @@ export const GuideCard = ({
             </EuiTextColor>
           )}
           {isComplete && (
-            <EuiFlexGroup gutterSize="s" alignItems="center">
+            <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
               <EuiFlexItem grow={false}>
-                <EuiIcon type="checkInCircleFilled" color="success" />
+                <EuiIcon type="checkInCircleFilled" color={euiTheme.colors.success} />
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <small>
@@ -115,6 +124,7 @@ export const GuideCard = ({
               </EuiFlexItem>
             </EuiFlexGroup>
           )}
+          {card.navigateTo && <EuiIcon type="document" />}
         </>
       }
     />
