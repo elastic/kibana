@@ -193,6 +193,14 @@ export function EndpointPolicyTestResourcesProvider({ getService }: FtrProviderC
                 policy: {
                   value: policyFactory(),
                 },
+                _config:{
+                  value:{
+                     type:"endpoint",
+                     endpointConfig:{
+                        preset:"EDRComplete"
+                     }
+                  }
+               },
               },
             },
           ],
