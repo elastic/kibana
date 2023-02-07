@@ -172,13 +172,16 @@ describe('current status route', () => {
           ['Europe - Germany', 'Asia/Pacific - Japan'],
           { from: 140000, to: 'now' },
           ['id1', 'id2'],
-          { id1: ['Asia/Pacific - Japan'], id2: ['Europe - Germany', 'Asia/Pacific - Japan'] }
+          { id1: ['Asia/Pacific - Japan'], id2: ['Europe - Germany', 'Asia/Pacific - Japan'] },
+          {
+            id1: 'id1',
+            id2: 'id2',
+          }
         )
       ).toEqual({
         pending: 0,
         down: 1,
-        enabledIds: ['id1', 'id2'],
-        allIds: ['id1', 'id2'],
+        enabledMonitorQueryIds: ['id1', 'id2'],
         up: 2,
         upConfigs: {
           'id1-Asia/Pacific - Japan': {
@@ -208,6 +211,7 @@ describe('current status route', () => {
             timestamp: expect.any(String),
           },
         },
+        pendingConfigs: {},
       });
     });
 
@@ -333,13 +337,16 @@ describe('current status route', () => {
           [...concernedLocations, ...times(9997).map((n) => 'Europe - Germany' + n)],
           { from: 2500, to: 'now' },
           ['id1', 'id2'],
-          { id1: [concernedLocations[0]], id2: [concernedLocations[1], concernedLocations[2]] }
+          { id1: [concernedLocations[0]], id2: [concernedLocations[1], concernedLocations[2]] },
+          {
+            id1: 'id1',
+            id2: 'id2',
+          }
         )
       ).toEqual({
         pending: 0,
         down: 1,
-        enabledIds: ['id1', 'id2'],
-        allIds: ['id1', 'id2'],
+        enabledMonitorQueryIds: ['id1', 'id2'],
         up: 2,
         upConfigs: {
           'id1-Asia/Pacific - Japan': {
@@ -369,6 +376,7 @@ describe('current status route', () => {
             timestamp: expect.any(String),
           },
         },
+        pendingConfigs: {},
       });
       expect(esClient.search).toHaveBeenCalledTimes(2);
       // These assertions are to ensure that we are paginating through the IDs we use for filtering
@@ -380,6 +388,191 @@ describe('current status route', () => {
         // @ts-expect-error mock search is not lining up with expected type
         esClient.search.mock.calls[1][0].body.query.bool.filter[2].terms['monitor.id']
       ).toEqual(['id2']);
+    });
+
+    it('handles pending configs', async () => {
+      const { esClient, uptimeEsClient } = getUptimeESMockClient();
+      esClient.search.mockResponseOnce(
+        getEsResponse([
+          {
+            key: 'id1',
+            location: {
+              buckets: [
+                {
+                  key: 'Asia/Pacific - Japan',
+                  status: {
+                    hits: {
+                      hits: [
+                        {
+                          _source: {
+                            '@timestamp': '2022-09-15T16:08:16.724Z',
+                            monitor: {
+                              status: 'up',
+                              id: 'id1',
+                            },
+                            summary: {
+                              up: 1,
+                              down: 0,
+                            },
+                            config_id: 'id1',
+                            observer: {
+                              geo: {
+                                name: 'Asia/Pacific - Japan',
+                              },
+                            },
+                          },
+                        },
+                      ],
+                    },
+                  },
+                },
+              ],
+            },
+          },
+          {
+            key: 'id2',
+            location: {
+              buckets: [
+                {
+                  key: 'Asia/Pacific - Japan',
+                  status: {
+                    hits: {
+                      hits: [
+                        {
+                          _source: {
+                            '@timestamp': '2022-09-15T16:09:16.724Z',
+                            monitor: {
+                              status: 'up',
+                              id: 'id2',
+                            },
+                            summary: {
+                              up: 1,
+                              down: 0,
+                            },
+                            config_id: 'id2',
+                            observer: {
+                              geo: {
+                                name: 'Asia/Pacific - Japan',
+                              },
+                            },
+                          },
+                        },
+                      ],
+                    },
+                  },
+                },
+                {
+                  key: 'Europe - Germany',
+                  status: {
+                    hits: {
+                      hits: [
+                        {
+                          _source: {
+                            '@timestamp': '2022-09-15T16:19:16.724Z',
+                            monitor: {
+                              status: 'down',
+                              id: 'id2',
+                            },
+                            summary: {
+                              down: 1,
+                              up: 0,
+                            },
+                            config_id: 'id2',
+                            observer: {
+                              geo: {
+                                name: 'Europe - Germany',
+                              },
+                            },
+                          },
+                        },
+                      ],
+                    },
+                  },
+                },
+              ],
+            },
+          },
+        ])
+      );
+      expect(
+        await queryMonitorStatus(
+          uptimeEsClient,
+          ['Europe - Germany', 'Asia/Pacific - Japan'],
+          { from: 140000, to: 'now' },
+          ['id1', 'id2', 'project-monitor-id', 'id4'],
+          {
+            id1: ['Asia/Pacific - Japan'],
+            id2: ['Europe - Germany', 'Asia/Pacific - Japan'],
+            'project-monitor-id': ['Europe - Germany', 'Asia/Pacific - Japan'],
+            id4: ['Europe - Germany', 'Asia/Pacific - Japan'],
+          },
+          {
+            id1: 'id1',
+            id2: 'id2',
+            'project-monitor-id': 'id3',
+            id4: 'id4',
+          }
+        )
+      ).toEqual({
+        pending: 0,
+        down: 1,
+        enabledMonitorQueryIds: ['id1', 'id2', 'project-monitor-id', 'id4'],
+        up: 2,
+        upConfigs: {
+          'id1-Asia/Pacific - Japan': {
+            configId: 'id1',
+            monitorQueryId: 'id1',
+            location: 'Asia/Pacific - Japan',
+            status: 'up',
+            ping: expect.any(Object),
+            timestamp: expect.any(String),
+          },
+          'id2-Asia/Pacific - Japan': {
+            configId: 'id2',
+            monitorQueryId: 'id2',
+            location: 'Asia/Pacific - Japan',
+            status: 'up',
+            ping: expect.any(Object),
+            timestamp: expect.any(String),
+          },
+        },
+        downConfigs: {
+          'id2-Europe - Germany': {
+            configId: 'id2',
+            monitorQueryId: 'id2',
+            location: 'Europe - Germany',
+            status: 'down',
+            ping: expect.any(Object),
+            timestamp: expect.any(String),
+          },
+        },
+        pendingConfigs: {
+          'id3-Asia/Pacific - Japan': {
+            configId: 'id3',
+            location: 'Asia/Pacific - Japan',
+            monitorQueryId: 'project-monitor-id',
+            status: 'unknown',
+          },
+          'id3-Europe - Germany': {
+            configId: 'id3',
+            location: 'Europe - Germany',
+            monitorQueryId: 'project-monitor-id',
+            status: 'unknown',
+          },
+          'id4-Asia/Pacific - Japan': {
+            configId: 'id4',
+            location: 'Asia/Pacific - Japan',
+            monitorQueryId: 'id4',
+            status: 'unknown',
+          },
+          'id4-Europe - Germany': {
+            configId: 'id4',
+            location: 'Europe - Germany',
+            monitorQueryId: 'id4',
+            status: 'unknown',
+          },
+        },
+      });
     });
   });
 });

@@ -23,10 +23,16 @@ import {
   enableAwsLambdaMetrics,
   apmAWSLambdaPriceFactor,
   apmAWSLambdaRequestCostPerMillion,
+  apmEnableServiceMetrics,
+  apmEnableContinuousRollups,
   enableCriticalPath,
   enableInfrastructureHostsView,
   profilingElasticsearchPlugin,
 } from '../common/ui_settings_keys';
+
+const betaLabel = i18n.translate('xpack.observability.uiSettings.betaLabel', {
+  defaultMessage: 'beta',
+});
 
 const technicalPreviewLabel = i18n.translate(
   'xpack.observability.uiSettings.technicalPreviewLabel',
@@ -286,6 +292,34 @@ export const uiSettings: Record<string, UiSettings> = {
     }),
     value: 0.2,
     schema: schema.number({ min: 0 }),
+  },
+  [apmEnableServiceMetrics]: {
+    category: [observabilityFeatureId],
+    name: i18n.translate('xpack.observability.apmEnableServiceMetrics', {
+      defaultMessage: 'Service transaction metrics',
+    }),
+    value: true,
+    description: i18n.translate('xpack.observability.apmEnableServiceMetricsDescription', {
+      defaultMessage:
+        '{betaLabel} Enables the usage of service transaction metrics, which are low cardinality metrics that can be used by certain views like the service inventory for faster loading times.',
+      values: { betaLabel: `<em>[${betaLabel}]</em>` },
+    }),
+    schema: schema.boolean(),
+    requiresPageReload: true,
+  },
+  [apmEnableContinuousRollups]: {
+    category: [observabilityFeatureId],
+    name: i18n.translate('xpack.observability.apmEnableContinuousRollups', {
+      defaultMessage: 'Continuous rollups',
+    }),
+    value: true,
+    description: i18n.translate('xpack.observability.apmEnableContinuousRollupsDescription', {
+      defaultMessage:
+        '{betaLabel} When continuous rollups is enabled, the UI will select metrics with the appropriate resolution. On larger time ranges, lower resolution metrics will be used, which will improve loading times.',
+      values: { betaLabel: `<em>[${betaLabel}]</em>` },
+    }),
+    schema: schema.boolean(),
+    requiresPageReload: true,
   },
   [enableCriticalPath]: {
     category: [observabilityFeatureId],

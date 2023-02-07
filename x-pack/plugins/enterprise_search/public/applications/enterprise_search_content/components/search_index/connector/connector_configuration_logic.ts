@@ -50,6 +50,7 @@ interface ConnectorConfigurationValues {
 }
 
 interface ConfigEntry {
+  isPasswordField: boolean;
   key: string;
   label: string;
   value: string;
@@ -179,6 +180,8 @@ export const ConnectorConfigurationLogic = kea<
       (configState) =>
         Object.keys(configState)
           .map((key) => ({
+            isPasswordField:
+              key.includes('password') || configState[key].label.toLowerCase().includes('password'),
             key,
             label: configState[key].label,
             value: configState[key].value,
