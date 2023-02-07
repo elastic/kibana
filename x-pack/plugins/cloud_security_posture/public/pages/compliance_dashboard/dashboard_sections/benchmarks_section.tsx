@@ -99,6 +99,7 @@ export const BenchmarksSection = ({
         : clusterB.stats.postureScore - clusterA.stats.postureScore
     );
   }, [complianceData.clusters, isClusterSortingAsc]);
+  const compactPadding = '16px';
 
   return (
     <>
@@ -140,7 +141,7 @@ export const BenchmarksSection = ({
             <EuiTitle
               size="xxs"
               css={css`
-                padding-left: 16px;
+                padding-left: ${euiTheme.size.l};
               `}
             >
               <div>
@@ -157,7 +158,7 @@ export const BenchmarksSection = ({
           <EuiTitle
             size="xxs"
             css={css`
-              padding-left: 16px;
+              padding-left: ${compactPadding};
             `}
           >
             <div>
@@ -189,7 +190,7 @@ export const BenchmarksSection = ({
             <ChartPanel
               hasBorder={false}
               panelStyles={css`
-                padding: 0 16px;
+                padding: 0 ${compactPadding};
               `}
             >
               <CloudPostureScoreChart
@@ -206,7 +207,7 @@ export const BenchmarksSection = ({
           <EuiFlexItem grow={dashboardColumnsGrow.third}>
             <RisksTable
               containerStyles={css`
-                padding: 0 16px;
+                padding: 0 ${compactPadding};
               `}
               compact
               data={cluster.groupedFindingsEvaluation}
