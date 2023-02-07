@@ -26,7 +26,7 @@ Set to `false` to disable Console. *Default: `true`*
 Add sources for the https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy/script-src[Content Security Policy `script-src` directive].
 
 `csp.disableUnsafeEval`::
-deprecated:[8.7.0,Use `csp.script_src: ['unsafe-eval']` instead if you wish to enable `unsafe-eval`. Will be removed in 8.8.0.] Set this to `false` to add the https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy/script-src#unsafe_eval_expressions[`unsafe-eval`] source expression to the `script-src` directive. *Default: `true`*
+deprecated:[8.7.0,Use `csp.script_src: ['unsafe-eval']` instead if you wish to enable `unsafe-eval`. This config option will have no effect from 8.9.0 and onwards.] Set this to `false` to add the https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy/script-src#unsafe_eval_expressions[`unsafe-eval`] source expression to the `script-src` directive. *Default: `true`*
 +
 When `csp.disableUnsafeEval` is set to `true`, Kibana will use a custom version of the Handlebars template library.
 Handlebars is used in various locations in the Kibana frontend where custom templates can be supplied by the user when for instance setting up a visualisation.
