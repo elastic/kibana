@@ -709,7 +709,7 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
       }
       enforceMap.set(obj.type, spacesToEnforce);
 
-      for (const space of obj.existingNamespaces ?? []) {
+      for (const space of obj.existingNamespaces) {
         if (space === ALL_NAMESPACES_STRING) continue; // Don't accidentally check for global privileges when the object exists in '*'
         spacesToAuthorize.add(space); // existing namespaces are included so we can later redact if necessary
       }
@@ -778,7 +778,7 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
       enforceMap.set(type, spacesToEnforce);
       spacesToAuthorize.add(objectNamespaceString);
 
-      for (const space of existingNamespaces ?? []) {
+      for (const space of existingNamespaces) {
         spacesToAuthorize.add(space); // existing namespaces are included so we can later redact if necessary
       }
     }
@@ -799,9 +799,10 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
   ): Promise<CheckAuthorizationResult<A>> {
     return this.internalAuthorizeDelete({
       namespace: params.namespace,
-      // force existing namespaces to be undefined because we do not want to
-      // check them in non-bulk delete
-      objects: [{ ...params.object, existingNamespaces: undefined }],
+      // delete params does not contain existingNamespaces because authz
+      // occurs prior to the preflight check. This is ok because we are
+      // only concerned with enforcing the current space.
+      objects: [{ ...params.object, existingNamespaces: [] }],
     });
   }
 
@@ -831,10 +832,8 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
       const { type } = obj;
       const spacesToEnforce = enforceMap.get(type) ?? new Set([namespaceString]); // Always enforce authZ for the active space
       enforceMap.set(type, spacesToEnforce);
-      if (action === SecurityAction.BULK_DELETE && obj.existingNamespaces) {
-        for (const space of obj.existingNamespaces) {
-          spacesToAuthorize.add(space); // existing namespaces are included when performing bulk delete only
-        }
+      for (const space of obj.existingNamespaces) {
+        spacesToAuthorize.add(space); // existing namespaces are authorized but not enforced
       }
     }
 
@@ -854,7 +853,7 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
   ): Promise<CheckAuthorizationResult<A>> {
     const { namespace, object, objectNotFound } = params;
     const spacesToEnforce = new Set([SavedObjectsUtils.namespaceIdToString(namespace)]); // Always check/enforce authZ for the active space
-    const existingNamespaces = object.existingNamespaces ?? [];
+    const existingNamespaces = object.existingNamespaces;
 
     return await this.authorize({
       actions: new Set([SecurityAction.GET]),
@@ -895,7 +894,7 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
       }
 
       // Existing namespaces are populated fom the bulkGet response docs
-      for (const space of obj.existingNamespaces ?? []) {
+      for (const space of obj.existingNamespaces) {
         spacesToAuthorize.add(space); // existing namespaces are included so we can later redact if necessary
       }
 
@@ -1287,7 +1286,7 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
         spacesToAuthorize.add(space);
       }
 
-      for (const space of existingNamespaces ?? []) {
+      for (const space of existingNamespaces) {
         // Existing namespaces are included so we can later redact if necessary
         // If this is a specific space, add it to the spaces we'll check privileges for (don't accidentally check for global privileges)
         if (space === ALL_NAMESPACES_STRING) continue;
@@ -1344,7 +1343,7 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
     const { previouslyCheckedNamespaces: authorizeNamespaces, objects } = params;
 
     const spacesToAuthorize = new Set<string>(authorizeNamespaces); // only for namespace redaction
-    for (const { type, id, existingNamespaces = [] } of objects) {
+    for (const { type, id, existingNamespaces } of objects) {
       for (const space of existingNamespaces) {
         spacesToAuthorize.add(space);
       }

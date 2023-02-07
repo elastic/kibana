@@ -54,14 +54,14 @@ const obj1 = {
   id: '6.0.0-alpha1',
   objectNamespace: 'foo',
   initialNamespaces: ['foo'],
-  existingNamespaces: undefined,
+  existingNamespaces: [],
 };
 const obj2 = {
   type: 'b',
   id: 'logstash-*',
   objectNamespace: undefined,
   initialNamespaces: undefined,
-  existingNamespaces: undefined,
+  existingNamespaces: [],
 };
 const obj3 = {
   type: 'c',
@@ -2289,7 +2289,7 @@ describe('delete', () => {
         spaces: expectedSpaces,
         enforceMap: expectedEnforceMap,
         auditOptions: {
-          objects: [{ ...obj3, existingNamespaces: undefined }],
+          objects: [{ ...obj3, existingNamespaces: [] }],
         },
       });
 
@@ -2315,7 +2315,7 @@ describe('delete', () => {
           ['login:']: { isGloballyAuthorized: true, authorizedSpaces: [] },
         }),
         auditOptions: {
-          objects: [{ ...obj3, existingNamespaces: undefined }],
+          objects: [{ ...obj3, existingNamespaces: [] }],
         },
       });
     });

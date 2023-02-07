@@ -384,7 +384,7 @@ describe('SavedObjectsRepository Security Extension', () => {
         type: 'multiNamespaceTypeCustomIndex',
         id: expect.objectContaining(/index-pattern:[0-9a-f]{8}-([0-9a-f]{4}-){3}[0-9a-f]{12}/),
         initialNamespaces: undefined,
-        existingNamespaces: undefined,
+        existingNamespaces: [],
       };
       const { namespace: actualNamespace, object: actualObject } =
         mockSecurityExt.authorizeCreate.mock.calls[0][0];
@@ -405,7 +405,7 @@ describe('SavedObjectsRepository Security Extension', () => {
         type: 'multiNamespaceTypeCustomIndex',
         id: expect.objectContaining(/index-pattern:[0-9a-f]{8}-([0-9a-f]{4}-){3}[0-9a-f]{12}/),
         initialNamespaces: multiNamespaceObjNamespaces,
-        existingNamespaces: undefined,
+        existingNamespaces: [],
       };
 
       const { namespace: actualNamespace, object: actualObject } =
@@ -902,9 +902,7 @@ describe('SavedObjectsRepository Security Extension', () => {
             type: obj._source?.type,
             id: obj._id.slice(obj._id.lastIndexOf(':') + 1), // find removes the space/type from the ID in the original raw doc
             existingNamespaces:
-              obj._source?.namespaces ?? obj._source?.namespace
-                ? [obj._source?.namespace]
-                : undefined,
+              obj._source?.namespaces ?? obj._source?.namespace ? [obj._source?.namespace] : [],
           };
         }),
       });
@@ -970,7 +968,7 @@ describe('SavedObjectsRepository Security Extension', () => {
       },
       {
         error: false,
-        existingNamespaces: undefined,
+        existingNamespaces: [],
         objectNamespaces: ['ns-3'],
         id: 'logstash-*',
         type: 'index-pattern',
@@ -1094,7 +1092,7 @@ describe('SavedObjectsRepository Security Extension', () => {
           },
           {
             error: false,
-            existingNamespaces: undefined,
+            existingNamespaces: [],
             objectNamespaces: objB.namespaces,
             id: objB.id,
             type: objB.type,
@@ -1210,13 +1208,13 @@ describe('SavedObjectsRepository Security Extension', () => {
           type: obj1.type,
           id: expect.objectContaining(/index-pattern:[0-9a-f]{8}-([0-9a-f]{4}-){3}[0-9a-f]{12}/),
           initialNamespaces: undefined,
-          existingNamespaces: undefined,
+          existingNamespaces: [],
         },
         {
           type: obj2.type,
           id: expect.objectContaining(/index-pattern:[0-9a-f]{8}-([0-9a-f]{4}-){3}[0-9a-f]{12}/),
           initialNamespaces: undefined,
-          existingNamespaces: undefined,
+          existingNamespaces: [],
         },
       ];
 
@@ -1253,13 +1251,13 @@ describe('SavedObjectsRepository Security Extension', () => {
           type: objA.type,
           id: expect.objectContaining(/index-pattern:[0-9a-f]{8}-([0-9a-f]{4}-){3}[0-9a-f]{12}/),
           initialNamespaces: objA.initialNamespaces,
-          existingNamespaces: undefined,
+          existingNamespaces: [],
         },
         {
           type: objB.type,
           id: expect.objectContaining(/index-pattern:[0-9a-f]{8}-([0-9a-f]{4}-){3}[0-9a-f]{12}/),
           initialNamespaces: objB.initialNamespaces,
-          existingNamespaces: undefined,
+          existingNamespaces: [],
         },
       ];
 
@@ -1297,13 +1295,13 @@ describe('SavedObjectsRepository Security Extension', () => {
           type: objA.type,
           id: expect.objectContaining(/index-pattern:[0-9a-f]{8}-([0-9a-f]{4}-){3}[0-9a-f]{12}/),
           initialNamespaces: objA.initialNamespaces,
-          existingNamespaces: undefined,
+          existingNamespaces: [],
         },
         {
           type: objB.type,
           id: expect.objectContaining(/index-pattern:[0-9a-f]{8}-([0-9a-f]{4}-){3}[0-9a-f]{12}/),
           initialNamespaces: objB.initialNamespaces,
-          existingNamespaces: undefined,
+          existingNamespaces: [],
         },
       ];
 
@@ -1409,10 +1407,12 @@ describe('SavedObjectsRepository Security Extension', () => {
         {
           type: obj1.type,
           id: expect.objectContaining(/index-pattern:[0-9a-f]{8}-([0-9a-f]{4}-){3}[0-9a-f]{12}/),
+          existingNamespaces: [],
         },
         {
           type: obj2.type,
           id: expect.objectContaining(/index-pattern:[0-9a-f]{8}-([0-9a-f]{4}-){3}[0-9a-f]{12}/),
+          existingNamespaces: [],
         },
       ];
 
@@ -1446,11 +1446,13 @@ describe('SavedObjectsRepository Security Extension', () => {
           type: obj1.type,
           id: expect.objectContaining(/index-pattern:[0-9a-f]{8}-([0-9a-f]{4}-){3}[0-9a-f]{12}/),
           objectNamespace: 'ns-1',
+          existingNamespaces: [],
         },
         {
           type: obj2.type,
           id: expect.objectContaining(/index-pattern:[0-9a-f]{8}-([0-9a-f]{4}-){3}[0-9a-f]{12}/),
           objectNamespace: 'ns-2',
+          existingNamespaces: [],
         },
       ];
 
@@ -1585,7 +1587,7 @@ describe('SavedObjectsRepository Security Extension', () => {
       expect(mockSecurityExt.authorizeBulkDelete).toHaveBeenCalledWith({
         namespace,
         objects: [
-          { type: obj1.type, id: obj1.id, existingNamespaces: undefined },
+          { type: obj1.type, id: obj1.id, existingNamespaces: [] },
           { type: obj2.type, id: obj2.id, existingNamespaces: ['foo-namespace', 'NS-1', 'NS-2'] },
         ],
       });

@@ -77,7 +77,7 @@ export interface AuthorizeObjectWithExistingSpaces extends AuthorizeObject {
    * Spaces where the object is known to exist. Usually populated
    * by document data from the result of an es query.
    */
-  existingNamespaces?: string[];
+  existingNamespaces: string[];
 }
 
 /**
@@ -191,7 +191,7 @@ export interface AuthorizeBulkUpdateParams extends AuthorizeParams {
  */
 export interface AuthorizeDeleteParams extends AuthorizeParams {
   /** The object to authorize */
-  object: AuthorizeObjectWithExistingSpaces;
+  object: AuthorizeObject;
 }
 
 /**
@@ -229,7 +229,7 @@ export interface AuthorizeBulkGetParams extends AuthorizeParams {
  */
 export interface AuthorizeCheckConflictsParams extends AuthorizeParams {
   /** The objects to authorize */
-  objects: AuthorizeObjectWithExistingSpaces[];
+  objects: AuthorizeObject[];
 }
 
 /**

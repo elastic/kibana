@@ -354,7 +354,7 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
         type,
         id,
         initialNamespaces,
-        existingNamespaces: preflightResult?.existingDocument?._source?.namespaces,
+        existingNamespaces: preflightResult?.existingDocument?._source?.namespaces ?? [],
       },
     });
 
@@ -514,7 +514,7 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
         type: object.type,
         id: object.id,
         initialNamespaces: object.initialNamespaces,
-        existingNamespaces: preflightResult?.existingDocument?._source.namespaces,
+        existingNamespaces: preflightResult?.existingDocument?._source.namespaces ?? [],
       };
     });
 
@@ -788,7 +788,12 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
 
     const { refresh = DEFAULT_REFRESH_SETTING, force } = options;
 
-    await this._securityExtension?.authorizeDelete({ namespace, object: { type, id } });
+    // we don't need to pass existing namespaces in because we're only concerned with authorizing
+    // the current space. This saves us from performing the preflight check if we're unauthorized
+    await this._securityExtension?.authorizeDelete({
+      namespace,
+      object: { type, id },
+    });
 
     const rawId = this._serializer.generateRawId(namespace, type, id);
     let preflightResult: PreflightCheckNamespacesResult | undefined;
@@ -1067,7 +1072,7 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
             type,
             id,
             // @ts-expect-error MultiGetHit._source is optional
-            existingNamespaces: preflightResult?._source?.namespaces,
+            existingNamespaces: preflightResult?._source?.namespaces ?? [],
           };
         }
       );
@@ -1457,7 +1462,7 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
         return {
           type: obj.type,
           id: obj.id,
-          existingNamespaces: obj.namespaces,
+          existingNamespaces: obj.namespaces ?? [],
         } as AuthorizeObjectWithExistingSpaces;
       }),
     });
@@ -1586,7 +1591,7 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
       saved_objects: expectedBulkGetResults.map((expectedResult) => {
         if (isLeft(expectedResult)) {
           const { type, id } = expectedResult.value;
-          authObjects.push({ type, id, error: true });
+          authObjects.push({ type, id, existingNamespaces: [], error: true });
           return expectedResult.value as any;
         }
 
@@ -1608,7 +1613,7 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
           id,
           objectNamespaces: namespaces,
           // @ts-expect-error MultiGetHit._source is optional
-          existingNamespaces: doc?._source?.namespaces,
+          existingNamespaces: doc?._source?.namespaces ?? [],
           error: docNotFound,
         });
 
@@ -1702,7 +1707,7 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
       object: {
         type,
         id,
-        existingNamespaces: body?._source?.namespaces,
+        existingNamespaces: body?._source?.namespaces ?? [],
       },
       objectNotFound,
     });
@@ -1780,8 +1785,7 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
       });
     }
 
-    // const namespaceString = SavedObjectsUtils.namespaceIdToString(namespace);
-    const existingNamespaces = preflightResult?.savedObjectNamespaces || [];
+    const existingNamespaces = preflightResult?.savedObjectNamespaces ?? [];
 
     const authorizationResult = await this._securityExtension?.authorizeUpdate({
       namespace,
@@ -2045,7 +2049,7 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
         id,
         objectNamespace,
         // @ts-expect-error MultiGetHit._source is optional
-        existingNamespaces: preflightResult?._source?.namespaces,
+        existingNamespaces: preflightResult?._source?.namespaces ?? [],
       };
     });
 
