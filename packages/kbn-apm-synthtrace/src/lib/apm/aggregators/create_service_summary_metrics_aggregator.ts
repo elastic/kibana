@@ -19,8 +19,7 @@ const KEY_FIELDS: Array<keyof ApmFields> = [
 export function createServiceSummaryMetricsAggregator(flushInterval: string) {
   return createApmMetricAggregator(
     {
-      filter: (event) =>
-        event['processor.event'] === 'metric' || event['processor.event'] === 'error',
+      filter: () => true,
       getAggregateKey: (event) => {
         // see https://github.com/elastic/apm-server/blob/main/x-pack/apm-server/aggregation/txmetrics/aggregator.go
         return hashKeysOf(event, KEY_FIELDS);
