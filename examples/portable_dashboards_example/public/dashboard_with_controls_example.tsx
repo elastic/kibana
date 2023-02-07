@@ -59,7 +59,17 @@ export const DashboardWithControlsExample = ({ dataView }: { dataView: DataView 
           }}
           onDashboardContainerLoaded={(container) => {
             const addFilterEmbeddable = async () => {
-              await container.addNewEmbeddable(FILTER_DEBUGGER_EMBEDDABLE, {});
+              const embeddable = await container.addNewEmbeddable(FILTER_DEBUGGER_EMBEDDABLE, {});
+              const prevPanelState = container.getExplicitInput().panels[embeddable.id];
+              // resize the new panel so that it fills up the entire width of the dashboard
+              container.updateInput({
+                panels: {
+                  [embeddable.id]: {
+                    ...prevPanelState,
+                    gridData: { i: embeddable.id, x: 0, y: 0, w: 48, h: 12 },
+                  },
+                },
+              });
             };
             addFilterEmbeddable();
             return; // this example is static, so don't need to do anything with the dashboard container
