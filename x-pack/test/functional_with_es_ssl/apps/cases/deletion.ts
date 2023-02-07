@@ -100,7 +100,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
             });
 
             it(`User ${user.username} cannot delete a case while on a specific case page`, async () => {
-              await testSubjects.click('property-actions-case-ellipses');
+              await testSubjects.missingOrFail('property-actions-case-ellipses');
               await testSubjects.missingOrFail('property-actions-case-trash');
             });
           });
