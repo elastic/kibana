@@ -67,11 +67,11 @@ export const ExplainLogRateSpikesPage: FC = () => {
   );
   const [globalState, setGlobalState] = useUrlState('_g');
 
-  const [currentSavedSearch, setCurrentSavedSearch] = useState(savedSearch);
+  const [selectedSavedSearch, setSelectedSavedSearch] = useState(savedSearch);
 
   useEffect(() => {
     if (savedSearch) {
-      setCurrentSavedSearch(savedSearch);
+      setSelectedSavedSearch(savedSearch);
     }
   }, [savedSearch]);
 
@@ -84,8 +84,8 @@ export const ExplainLogRateSpikesPage: FC = () => {
     }) => {
       // When the user loads a saved search and then clears or modifies the query
       // we should remove the saved search and replace it with the index pattern id
-      if (currentSavedSearch !== null) {
-        setCurrentSavedSearch(null);
+      if (selectedSavedSearch !== null) {
+        setSelectedSavedSearch(null);
       }
 
       setAiopsListState({
@@ -96,7 +96,7 @@ export const ExplainLogRateSpikesPage: FC = () => {
         filters: searchParams.filters,
       });
     },
-    [currentSavedSearch, aiopsListState, setAiopsListState]
+    [selectedSavedSearch, aiopsListState, setAiopsListState]
   );
 
   const {
@@ -108,7 +108,7 @@ export const ExplainLogRateSpikesPage: FC = () => {
     searchString,
     searchQuery,
   } = useData(
-    { currentDataView: dataView, currentSavedSearch },
+    { selectedDataView: dataView, selectedSavedSearch },
     aiopsListState,
     setGlobalState,
     currentSelectedChangePoint,
