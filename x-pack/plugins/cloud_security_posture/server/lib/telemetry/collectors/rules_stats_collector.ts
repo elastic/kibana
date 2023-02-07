@@ -6,13 +6,12 @@
  */
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { Logger } from '@kbn/core/server';
-import type { SearchRequest } from '@elastic/elasticsearch/lib/api/types';
+import type {
+  AggregationsMultiBucketBase,
+  SearchRequest,
+} from '@elastic/elasticsearch/lib/api/types';
 import type { CspmRulesStats } from './types';
 import { LATEST_FINDINGS_INDEX_DEFAULT_NS } from '../../../../common/constants';
-
-interface DocCount {
-  doc_count: number;
-}
 
 interface BenchmarkName {
   metrics: { 'rule.benchmark.name': string };
@@ -57,12 +56,12 @@ interface RuleEntity {
   benchmark_id: { top: BenchmarkId[] };
   benchmark_name: { top: BenchmarkName[] };
   benchmark_version: { top: BenchmarkVersion[] };
-  passed_findings_count: DocCount;
-  failed_findings_count: DocCount;
+  passed_findings_count: AggregationsMultiBucketBase;
+  failed_findings_count: AggregationsMultiBucketBase;
 }
 
-const getRulesStatsQuery = (index: string): SearchRequest => ({
-  index,
+const getRulesStatsQuery = (): SearchRequest => ({
+  index: LATEST_FINDINGS_INDEX_DEFAULT_NS,
   query: {
     match_all: {},
   },
@@ -242,9 +241,7 @@ export const getRulesStats = async (
     });
 
     if (isIndexExists) {
-      const rulesStatsResponse = await esClient.search<unknown, RulesStats>(
-        getRulesStatsQuery(LATEST_FINDINGS_INDEX_DEFAULT_NS)
-      );
+      const rulesStatsResponse = await esClient.search<unknown, RulesStats>(getRulesStatsQuery());
 
       const cspmRulesStats = rulesStatsResponse.aggregations
         ? getCspmRulesStats(rulesStatsResponse.aggregations, logger)
