@@ -12,7 +12,7 @@ import { MetricsGrid } from './metrics/metrics_grid';
 import { AlertsTabContent } from './alerts';
 
 import { AlertsTabBadge } from './alerts_tab_badge';
-import { TabId, tabIds } from './config';
+import { tabIds } from './config';
 
 const tabs = [
   {
@@ -32,14 +32,12 @@ const tabs = [
   },
 ];
 
-const initialRenderedTabsMap = tabs.reduce((map, tab, pos) => {
-  return { ...map, [tab.id]: pos === 0 };
-}, {} as Record<TabId, boolean>);
+const initialRenderedTabsSet = new Set([tabs[0].id]);
 
 export const Tabs = () => {
   // This map allow to keep track of which tabs content have been rendered the first time.
   // We need it in order to load a tab content only if it gets clicked, and then keep it in the DOM for performance improvement.
-  const renderedTabsMap = useRef(initialRenderedTabsMap);
+  const renderedTabsSet = useRef(initialRenderedTabsSet);
 
   const [selectedTabId, setSelectedTabId] = useState(tabs[0].id);
 
@@ -48,7 +46,7 @@ export const Tabs = () => {
       {...tab}
       key={index}
       onClick={() => {
-        renderedTabsMap.current[tab.id] = true; // On a tab click, mark the tab content as allowed to be rendered
+        renderedTabsSet.current.add(tab.id); // On a tab click, mark the tab content as allowed to be rendered
         setSelectedTabId(tab.id);
       }}
       isSelected={tab.id === selectedTabId}
@@ -66,10 +64,10 @@ export const Tabs = () => {
     <>
       <EuiTabs>{tabEntries}</EuiTabs>
       <EuiSpacer />
-      {renderedTabsMap.current[tabIds.METRICS] && (
+      {renderedTabsSet.current.has(tabIds.METRICS) && (
         <div hidden={selectedTabId !== tabIds.METRICS}>{metricTab}</div>
       )}
-      {renderedTabsMap.current[tabIds.ALERTS] && (
+      {renderedTabsSet.current.has(tabIds.ALERTS) && (
         <div hidden={selectedTabId !== tabIds.ALERTS}>{alertsTab}</div>
       )}
     </>
