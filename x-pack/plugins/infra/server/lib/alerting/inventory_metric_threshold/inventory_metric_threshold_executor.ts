@@ -76,7 +76,7 @@ export const createInventoryMetricThresholdExecutor = (libs: InfraBackendLibs) =
     InventoryMetricThresholdAlertState,
     InventoryMetricThresholdAlertContext,
     InventoryMetricThresholdAllowedActionGroups
-  >(async ({ services, params, executionId, spaceId, startedAt, rule: { id: ruleId } }) => {
+  >(async ({ services, params, executionId, spaceId, startedAt, rule: { id: ruleId, tags: ruleTags } }) => {
     const startTime = Date.now();
 
     const { criteria, filterQuery, sourceId = 'default', nodeType, alertOnNoData } = params;
@@ -227,7 +227,9 @@ export const createInventoryMetricThresholdExecutor = (libs: InfraBackendLibs) =
         const actionGroupId =
           nextState === AlertStates.WARNING ? WARNING_ACTIONS_ID : FIRED_ACTIONS_ID;
 
-        const additionalContext = results && results.length > 0 ? results[0][group].context : null;
+        let additionalContext = results && results.length > 0 ? results[0][group].context : null;
+        if (!additionalContext) additionalContext = { tags: [] };
+        additionalContext.tags = additionalContext.tags ? [...additionalContext.tags, ...ruleTags] : ruleTags;
 
         const alert = alertFactory(group, reason, actionGroupId, additionalContext);
         const indexedStartedDate = getAlertStartedDate(group) ?? startedAt.toISOString();

@@ -5,11 +5,12 @@
  * 2.0.
  */
 
+import { createResolvedLogViewMock } from '../../../common/log_views/resolved_log_view.mock';
 import { ILogViewsClient } from './types';
 
 export const createLogViewsClientMock = (): jest.Mocked<ILogViewsClient> => ({
   getLogView: jest.fn(),
-  getResolvedLogView: jest.fn(),
+  getResolvedLogView: jest.fn((logViewId: string) => Promise.resolve(createResolvedLogViewMock())),
   putLogView: jest.fn(),
   resolveLogView: jest.fn(),
 });
