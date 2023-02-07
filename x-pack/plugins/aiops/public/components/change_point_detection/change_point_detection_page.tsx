@@ -25,6 +25,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { Query } from '@kbn/es-query';
+import { useDataSource } from '../../hooks/use_data_source';
 import { SPLIT_FIELD_CARDINALITY_LIMIT } from './constants';
 import { ChangePointTypeFilter } from './change_point_type_filter';
 import { SearchBarWrapper } from './search_bar';
@@ -46,7 +47,10 @@ export const ChangePointDetectionPage: FC = () => {
     pagination,
     splitFieldCardinality,
     splitFieldsOptions,
+    metricFieldOptions,
   } = useChangePointDetectionContext();
+
+  const { dataView } = useDataSource();
 
   const setFn = useCallback(
     (fn: string) => {
@@ -87,6 +91,26 @@ export const ChangePointDetectionPage: FC = () => {
 
   const cardinalityExceeded =
     splitFieldCardinality && splitFieldCardinality > SPLIT_FIELD_CARDINALITY_LIMIT;
+
+  if (metricFieldOptions.length === 0) {
+    return (
+      <EuiCallOut
+        title={i18n.translate('xpack.aiops.index.dataViewNotBasedOnTimeSeriesNotificationTitle', {
+          defaultMessage: 'The data view "{dataViewTitle}" does not contain any metric fields.',
+          values: { dataViewTitle: dataView.getName() },
+        })}
+        color="danger"
+        iconType="alert"
+      >
+        <p>
+          {i18n.translate('xpack.aiops.index.changePointTimeSeriesNotificationDescription', {
+            defaultMessage:
+              'Change point detection can only be run on data views with a metric field.',
+          })}
+        </p>
+      </EuiCallOut>
+    );
+  }
 
   return (
     <div data-test-subj="aiopsChangePointDetectionPage">
