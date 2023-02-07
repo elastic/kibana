@@ -15,6 +15,7 @@
     "dashboard": "src/plugins/dashboard",
     "controls": "src/plugins/controls",
     "data": "src/plugins/data",
+    "ecsDataQualityDashboard": "x-pack/packages/kbn-ecs-data-quality-dashboard",
     "dataViews": "src/plugins/data_views",
     "devTools": "src/plugins/dev_tools",
     "discover": "src/plugins/discover",

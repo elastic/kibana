@@ -12,6 +12,10 @@ import {
   getCaseUserActionUrl,
   CaseUserActionDeprecatedResponse,
   CaseUserActionsDeprecatedResponse,
+  getCaseUserActionStatsUrl,
+  CaseUserActionStatsResponse,
+  GetCaseUsersResponse,
+  getCaseUsersUrl,
 } from '@kbn/cases-plugin/common/api';
 import type SuperTest from 'supertest';
 import { User } from './authentication/types';
@@ -67,4 +71,41 @@ export const findCaseUserActions = async ({
     .expect(expectedHttpCode);
 
   return userActions;
+};
+
+export const getCaseUserActionStats = async ({
+  supertest,
+  caseID,
+  expectedHttpCode = 200,
+  auth = { user: superUser, space: null },
+}: {
+  supertest: SuperTest.SuperTest<SuperTest.Test>;
+  caseID: string;
+  expectedHttpCode?: number;
+  auth?: { user: User; space: string | null };
+}): Promise<CaseUserActionStatsResponse> => {
+  const { body: userActionStats } = await supertest
+    .get(`${getSpaceUrlPrefix(auth.space)}${getCaseUserActionStatsUrl(caseID)}`)
+    .auth(auth.user.username, auth.user.password)
+    .expect(expectedHttpCode);
+
+  return userActionStats;
+};
+
+export const getCaseUsers = async ({
+  supertest,
+  caseId,
+  expectedHttpCode = 200,
+  auth = { user: superUser, space: null },
+}: {
+  supertest: SuperTest.SuperTest<SuperTest.Test>;
+  caseId: string;
+  expectedHttpCode?: number;
+  auth?: { user: User; space: string | null };
+}): Promise<GetCaseUsersResponse> => {
+  const { body: users } = await supertest
+    .get(`${getSpaceUrlPrefix(auth.space)}${getCaseUsersUrl(caseId)}`)
+    .auth(auth.user.username, auth.user.password)
+    .expect(expectedHttpCode);
+  return users;
 };

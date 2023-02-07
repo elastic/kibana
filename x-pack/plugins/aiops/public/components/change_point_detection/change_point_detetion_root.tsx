@@ -11,7 +11,7 @@ import { pick } from 'lodash';
 import { EuiSpacer } from '@elastic/eui';
 
 import { DataView } from '@kbn/data-views-plugin/common';
-import { SavedSearch } from '@kbn/saved-search-plugin/public';
+import type { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { StorageContextProvider } from '@kbn/ml-local-storage';
 import { UrlStateProvider } from '@kbn/ml-url-state';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
@@ -20,7 +20,6 @@ import { UI_SETTINGS } from '@kbn/data-plugin/common';
 import { toMountPoint, wrapWithTheme } from '@kbn/kibana-react-plugin/public';
 
 import { DataSourceContext } from '../../hooks/use_data_source';
-import { SavedSearchSavedObject } from '../../application/utils/search_utils';
 import { AiopsAppContext, AiopsAppDependencies } from '../../hooks/use_aiops_app_context';
 import { AIOPS_STORAGE_KEYS } from '../../types/storage';
 
@@ -33,7 +32,7 @@ const localStorage = new Storage(window.localStorage);
 
 export interface ChangePointDetectionAppStateProps {
   dataView: DataView;
-  savedSearch: SavedSearch | SavedSearchSavedObject | null;
+  savedSearch: SavedSearch | null;
   appDependencies: AiopsAppDependencies;
 }
 
