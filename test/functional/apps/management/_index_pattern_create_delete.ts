@@ -30,6 +30,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.settings.clickKibanaIndexPatterns();
     });
 
+    after(async function () {
+      await esArchiver.unload(
+        'test/functional/fixtures/es_archiver/kibana_sample_data_flights_index_pattern'
+      );
+    });
+
     describe('can open and close editor', function () {
       it('without creating index pattern', async function () {
         await PageObjects.settings.clickKibanaIndexPatterns();
