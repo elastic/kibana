@@ -195,11 +195,17 @@ export const sendEndpointActionResponse = async (
   }
 
   // For `get-file`, upload a file to ES
-  if (action.command === 'get-file' && !endpointResponse.error) {
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    const filePath = (
-      action as ActionDetails<ResponseActionGetFileOutputContent, ResponseActionGetFileParameters>
-    )?.parameters?.path!;
+  if ((action.command === 'execute' || action.command === 'get-file') && !endpointResponse.error) {
+    const filePath =
+      action.command === 'execute'
+        ? '/execute/file/path'
+        : // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+          (
+            action as ActionDetails<
+              ResponseActionGetFileOutputContent,
+              ResponseActionGetFileParameters
+            >
+          )?.parameters?.path!;
 
     const fileName = basename(filePath.replace(/\\/g, '/'));
     const fileMetaDoc: FileUploadMetadata = generateFileMetadataDocumentMock({
@@ -311,8 +317,13 @@ const getOutputDataIfNeeded = (action: ActionDetails): ResponseOutput => {
       } as ResponseOutput<ResponseActionGetFileOutputContent>;
 
     case 'execute':
+      const outputFileId = getFileDownloadId(action, action.agents[0]);
       return {
-        output: endpointActionGenerator.generateExecuteActionResponseOutput(),
+        output: endpointActionGenerator.generateExecuteActionResponseOutput({
+          content: {
+            outputFileId,
+          },
+        }),
       } as ResponseOutput<ResponseActionExecuteOutputContent>;
 
     default:

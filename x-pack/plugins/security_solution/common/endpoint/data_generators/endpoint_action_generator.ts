@@ -27,6 +27,7 @@ import type {
 } from '../types';
 import { ActivityLogItemTypes } from '../types';
 import { RESPONSE_ACTION_API_COMMANDS_NAMES } from '../service/response_actions/constants';
+import { getFileDownloadId } from '../service/response_actions/get_file_download_id';
 
 export class EndpointActionGenerator extends BaseDataGenerator {
   /** Generate a random endpoint Action request (isolate or unisolate) */
@@ -223,7 +224,11 @@ export class EndpointActionGenerator extends BaseDataGenerator {
 
       if (!details.outputs || Object.keys(details.outputs).length === 0) {
         details.outputs = {
-          [details.agents[0]]: this.generateExecuteActionResponseOutput(),
+          [details.agents[0]]: this.generateExecuteActionResponseOutput({
+            content: {
+              outputFileId: getFileDownloadId(details, details.agents[0]),
+            },
+          }),
         };
       }
     }
@@ -292,7 +297,7 @@ export class EndpointActionGenerator extends BaseDataGenerator {
   }
 
   generateExecuteActionResponseOutput(
-    overrides?: ActionResponseOutput<ResponseActionExecuteOutputContent>
+    overrides?: Partial<ActionResponseOutput<Partial<ResponseActionExecuteOutputContent>>>
   ): ActionResponseOutput<ResponseActionExecuteOutputContent> {
     return merge(
       {
@@ -300,9 +305,11 @@ export class EndpointActionGenerator extends BaseDataGenerator {
         content: {
           stdout: `-rw-r--r--    1 elastic  staff      458 Jan 26 09:10 doc.txt\
           -rw-r--r--     1 elastic  staff  298 Feb  2 09:10 readme.md`,
-          stderr: '',
+          stderr: `error line\
+          error line 2
+          error line 3 that is quite very long and will be truncated, and should not be visible in the UI`,
           stdoutTruncated: true,
-          stderrTruncated: false,
+          stderrTruncated: true,
           shell_code: 0,
           shell: 'bash',
           cwd: '/some/path',
