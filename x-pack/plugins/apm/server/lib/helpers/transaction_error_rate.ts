@@ -5,72 +5,104 @@
  * 2.0.
  */
 
+import {
+  AggregationsSumAggregation,
+  AggregationsValueCountAggregation,
+  QueryDslQueryContainer,
+} from '@elastic/elasticsearch/lib/api/types';
 import type {
   AggregationOptionsByType,
   AggregationResultOf,
+  AggregationResultOfMap,
 } from '@kbn/es-types';
-import { isNull } from 'lodash';
-import { EVENT_OUTCOME } from '../../../common/es_fields/apm';
+import { ApmDocumentType } from '../../../common/document_type';
+import {
+  EVENT_OUTCOME,
+  EVENT_SUCCESS_COUNT,
+} from '../../../common/es_fields/apm';
 import { EventOutcome } from '../../../common/event_outcome';
 
-export const getOutcomeAggregation = () => {
+export const getOutcomeAggregation = (
+  documentType: ApmDocumentType
+): {
+  successful_or_failed:
+    | { value_count: AggregationsValueCountAggregation }
+    | { filter: QueryDslQueryContainer };
+  successful:
+    | { sum: AggregationsSumAggregation }
+    | { filter: QueryDslQueryContainer };
+} => {
+  if (documentType === ApmDocumentType.ServiceTransactionMetric) {
+    return {
+      successful_or_failed: {
+        value_count: {
+          field: EVENT_SUCCESS_COUNT,
+        },
+      },
+      successful: {
+        sum: {
+          field: EVENT_SUCCESS_COUNT,
+        },
+      },
+    };
+  }
+
   return {
-    terms: {
-      field: EVENT_OUTCOME,
-      include: [EventOutcome.failure, EventOutcome.success],
+    successful_or_failed: {
+      filter: {
+        bool: {
+          filter: [
+            {
+              terms: {
+                [EVENT_OUTCOME]: [EventOutcome.failure, EventOutcome.success],
+              },
+            },
+          ],
+        },
+      },
+    },
+    successful: {
+      filter: {
+        bool: {
+          filter: [
+            {
+              terms: {
+                [EVENT_OUTCOME]: [EventOutcome.success],
+              },
+            },
+          ],
+        },
+      },
     },
   };
 };
 
 type OutcomeAggregation = ReturnType<typeof getOutcomeAggregation>;
 
-export const getTimeseriesAggregation = (
-  start: number,
-  end: number,
-  intervalString: string
-) => ({
-  date_histogram: {
-    field: '@timestamp',
-    fixed_interval: intervalString,
-    min_doc_count: 0,
-    extended_bounds: { min: start, max: end },
-  },
-  aggs: { outcomes: getOutcomeAggregation() },
-});
-
 export function calculateFailedTransactionRate(
-  outcomeResponse: AggregationResultOf<OutcomeAggregation, {}>
+  outcomeResponse: AggregationResultOfMap<OutcomeAggregation, {}>
 ) {
-  const outcomes = Object.fromEntries(
-    outcomeResponse.buckets.map(({ key, doc_count: count }) => [key, count])
-  );
+  const successfulTransactions =
+    'value' in outcomeResponse.successful
+      ? outcomeResponse.successful.value ?? 0
+      : outcomeResponse.successful.doc_count;
 
-  const failedTransactions = outcomes[EventOutcome.failure] ?? 0;
-  const successfulTransactions = outcomes[EventOutcome.success] ?? 0;
+  const successfulOrFailedTransactions =
+    'value' in outcomeResponse.successful_or_failed
+      ? outcomeResponse.successful_or_failed.value
+      : outcomeResponse.successful_or_failed.doc_count;
 
-  return failedTransactions / (successfulTransactions + failedTransactions);
-}
+  const failedTransactions =
+    successfulOrFailedTransactions - successfulTransactions;
 
-export function calculateFailedTransactionRateFromServiceMetrics({
-  failedTransactions,
-  successfulTransactions,
-}: {
-  failedTransactions: number | null;
-  successfulTransactions: number | null;
-}) {
-  if (isNull(failedTransactions) || failedTransactions === 0) {
-    return 0;
-  }
-
-  successfulTransactions = successfulTransactions ?? 0;
-  return failedTransactions / (successfulTransactions + failedTransactions);
+  return failedTransactions / successfulOrFailedTransactions;
 }
 
 export function getFailedTransactionRateTimeSeries(
   buckets: AggregationResultOf<
     {
       date_histogram: AggregationOptionsByType['date_histogram'];
-      aggs: { outcomes: OutcomeAggregation };
+      aggs: OutcomeAggregation;
     },
     {}
   >['buckets']
@@ -78,7 +110,7 @@ export function getFailedTransactionRateTimeSeries(
   return buckets.map((dateBucket) => {
     return {
       x: dateBucket.key,
-      y: calculateFailedTransactionRate(dateBucket.outcomes),
+      y: calculateFailedTransactionRate(dateBucket),
     };
   });
 }

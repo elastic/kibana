@@ -21,6 +21,7 @@ export type GetLensAttributes = (
 
 export interface VisualizationActionsProps {
   className?: string;
+  extraActions?: Action[];
   getLensAttributes?: GetLensAttributes;
   inputId?: InputsModelId.global | InputsModelId.timeline;
   inspectIndex?: number;
@@ -32,6 +33,7 @@ export interface VisualizationActionsProps {
   stackByField?: string;
   timerange: { from: string; to: string };
   title: React.ReactNode;
+  withDefaultActions?: boolean;
 }
 
 export interface EmbeddableData {
@@ -57,6 +59,7 @@ export interface LensEmbeddableComponentProps {
   stackByField?: string;
   timerange: { from: string; to: string };
   width?: string;
+  withActions?: boolean;
 }
 
 export enum RequestStatus {
