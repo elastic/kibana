@@ -71,7 +71,7 @@ export const useGetPackages = (query: GetPackagesRequest['query'] = {}) => {
 };
 
 export const useGetPackagesQuery = (query: GetPackagesRequest['query']) => {
-  return useQuery<GetPackagesResponse, RequestError>(['get-packages', query.prerelease], () =>
+  return useQuery<GetPackagesResponse, RequestError>(['get-packages', query], () =>
     sendRequestForRq<GetPackagesResponse>({
       path: epmRouteService.getListPath(),
       method: 'get',
