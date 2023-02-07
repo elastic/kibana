@@ -111,10 +111,10 @@ export const GettingStarted = () => {
     padding: calc(${euiTheme.size.base}*3) calc(${euiTheme.size.base}*4);
   `;
 
-  const activateGuide = useCallback(
+  const activateGuideDefaultState = useCallback(
     async (guideId: GuideId, guideState?: GuideState) => {
       try {
-        await guidedOnboardingService?.activateGuide(guideId, guideState);
+        await guidedOnboardingService?.activateGuideDefaultState(guideId, guideState);
       } catch (err) {
         getServices().toastNotifications.addDanger({
           title: i18n.translate('home.guidedOnboarding.gettingStarted.activateGuide.errorMessage', {
@@ -199,7 +199,7 @@ export const GettingStarted = () => {
         <GuideFilters activeFilter={filter} setActiveFilter={setFilter} />
         <EuiSpacer size="xxl" />
         <GuideCards
-          activateGuide={activateGuide}
+          activateGuideDefaultState={activateGuideDefaultState}
           navigateToApp={application.navigateToApp}
           activeFilter={filter}
           guidesState={guidesState}

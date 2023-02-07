@@ -20,7 +20,7 @@ import { GuideCard } from './guide_card';
 export type GuideCardSolutions = 'search' | 'observability' | 'security';
 
 export interface GuideCardsProps {
-  activateGuide: (guideId: GuideId, guideState?: GuideState) => Promise<void>;
+  activateGuideDefaultState: (guideId: GuideId, guideState?: GuideState) => Promise<void>;
   navigateToApp: ApplicationStart['navigateToApp'];
   activeFilter: GuideFilterValues;
   guidesState: GuideState[];

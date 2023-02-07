@@ -1,0 +1,51 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`guide cards snapshots should render card 1`] = `
+<EuiCard
+  betaBadgeProps={
+    Object {
+      "label": "search",
+    }
+  }
+  css={
+    Object {
+      "map": undefined,
+      "name": "9w6uxv",
+      "next": undefined,
+      "styles": "
+  position: relative;
+  min-height: 110px;
+  width: 380px;
+  .euiCard__content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+",
+      "toString": [Function],
+    }
+  }
+  description={<React.Fragment />}
+  hasBorder={false}
+  isDisabled={false}
+  onClick={[Function]}
+  title={
+    <React.Fragment>
+      <EuiSpacer
+        size="s"
+      />
+      <h3
+        style={
+          Object {
+            "fontWeight": 600,
+          }
+        }
+      >
+        test_title
+      </h3>
+    </React.Fragment>
+  }
+  titleSize="xs"
+/>
+`;

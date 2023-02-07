@@ -58,7 +58,7 @@ const getProgressLabel = (guideState: GuideState | undefined): string | undefine
 export const GuideCard = ({
   card,
   guidesState,
-  activateGuide,
+  activateGuideDefaultState,
   navigateToApp,
   activeFilter,
 }: GuideCardsProps & { card: GuideCardConstants }) => {
@@ -72,14 +72,14 @@ export const GuideCard = ({
   const onClick = useCallback(async () => {
     setIsLoading(true);
     if (card.guideId) {
-      await activateGuide(card.guideId, guideState);
+      await activateGuideDefaultState(card.guideId, guideState);
     } else if (card.navigateTo) {
       await navigateToApp(card.navigateTo?.appId, {
         path: card.navigateTo.path,
       });
     }
     setIsLoading(false);
-  }, [activateGuide, card.guideId, card.navigateTo, guideState, navigateToApp]);
+  }, [activateGuideDefaultState, card.guideId, card.navigateTo, guideState, navigateToApp]);
 
   const isHighlighted = activeFilter === 'all' || activeFilter === card.solution;
   const isComplete = guideState && guideState.status === 'complete';

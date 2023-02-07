@@ -11,7 +11,7 @@ exports[`guide cards snapshots should render all cards 1`] = `
     key="0"
   >
     <GuideCard
-      activateGuide={[MockFunction]}
+      activateGuideDefaultState={[MockFunction]}
       activeFilter="all"
       card={
         Object {
@@ -42,7 +42,7 @@ exports[`guide cards snapshots should render all cards 1`] = `
     key="1"
   >
     <GuideCard
-      activateGuide={[MockFunction]}
+      activateGuideDefaultState={[MockFunction]}
       activeFilter="all"
       card={
         Object {
@@ -68,7 +68,7 @@ exports[`guide cards snapshots should render all cards 1`] = `
     key="2"
   >
     <GuideCard
-      activateGuide={[MockFunction]}
+      activateGuideDefaultState={[MockFunction]}
       activeFilter="all"
       card={
         Object {
@@ -99,7 +99,7 @@ exports[`guide cards snapshots should render all cards 1`] = `
     key="3"
   >
     <GuideCard
-      activateGuide={[MockFunction]}
+      activateGuideDefaultState={[MockFunction]}
       activeFilter="all"
       card={
         Object {
@@ -122,7 +122,7 @@ exports[`guide cards snapshots should render all cards 1`] = `
     key="4"
   >
     <GuideCard
-      activateGuide={[MockFunction]}
+      activateGuideDefaultState={[MockFunction]}
       activeFilter="all"
       card={
         Object {
@@ -156,7 +156,7 @@ exports[`guide cards snapshots should render all cards 1`] = `
     key="5"
   >
     <GuideCard
-      activateGuide={[MockFunction]}
+      activateGuideDefaultState={[MockFunction]}
       activeFilter="all"
       card={
         Object {
@@ -190,7 +190,7 @@ exports[`guide cards snapshots should render all cards 1`] = `
     key="6"
   >
     <GuideCard
-      activateGuide={[MockFunction]}
+      activateGuideDefaultState={[MockFunction]}
       activeFilter="all"
       card={
         Object {
@@ -221,7 +221,7 @@ exports[`guide cards snapshots should render all cards 1`] = `
     key="7"
   >
     <GuideCard
-      activateGuide={[MockFunction]}
+      activateGuideDefaultState={[MockFunction]}
       activeFilter="all"
       card={
         Object {
@@ -247,7 +247,7 @@ exports[`guide cards snapshots should render all cards 1`] = `
     key="8"
   >
     <GuideCard
-      activateGuide={[MockFunction]}
+      activateGuideDefaultState={[MockFunction]}
       activeFilter="all"
       card={
         Object {
@@ -281,7 +281,7 @@ exports[`guide cards snapshots should render all cards 1`] = `
     key="9"
   >
     <GuideCard
-      activateGuide={[MockFunction]}
+      activateGuideDefaultState={[MockFunction]}
       activeFilter="all"
       card={
         Object {

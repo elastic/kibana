@@ -12,7 +12,7 @@ import { shallow } from 'enzyme';
 import { GuideCards, GuideCardsProps } from './guide_cards';
 
 const defaultProps: GuideCardsProps = {
-  activateGuide: jest.fn(),
+  activateGuideDefaultState: jest.fn(),
   navigateToApp: jest.fn(),
   activeFilter: 'all',
   guidesState: [],
