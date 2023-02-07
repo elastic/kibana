@@ -18,10 +18,10 @@ import { i18n } from '@kbn/i18n';
 import { RECORDS_FIELD, useTheme } from '@kbn/observability-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useSelector } from 'react-redux';
+import { selectOverviewStatus } from '../../../../state/overview_status';
 import { AlertsLink } from '../../../common/links/view_alerts';
 import { useAbsoluteDate } from '../../../../hooks';
 import { ClientPluginsStart } from '../../../../../../plugin';
-import { selectOverviewStatus } from '../../../../state';
 
 export const OverviewAlerts = () => {
   const { from, to } = useAbsoluteDate({ from: 'now-12h', to: 'now' });
@@ -33,7 +33,7 @@ export const OverviewAlerts = () => {
 
   const { status } = useSelector(selectOverviewStatus);
 
-  const loading = !status?.enabledIds || status?.enabledIds.length === 0;
+  const loading = !status?.allIds || status?.allIds.length === 0;
 
   return (
     <EuiPanel hasShadow={false} paddingSize="m" hasBorder>
@@ -61,7 +61,10 @@ export const OverviewAlerts = () => {
                   selectedMetricField: RECORDS_FIELD,
                   reportDefinitions: {
                     'kibana.alert.rule.category': ['Synthetics monitor status'],
-                    'monitor.id': status?.enabledIds,
+                    'monitor.id':
+                      status?.enabledMonitorQueryIds.length > 0
+                        ? status?.enabledMonitorQueryIds
+                        : ['false-id'],
                   },
                   filters: [{ field: 'kibana.alert.status', values: ['active', 'recovered'] }],
                   color: theme.eui.euiColorVis1,
@@ -83,7 +86,10 @@ export const OverviewAlerts = () => {
                   },
                   reportDefinitions: {
                     'kibana.alert.rule.category': ['Synthetics monitor status'],
-                    'monitor.id': status?.enabledIds,
+                    'monitor.id':
+                      status?.enabledMonitorQueryIds.length > 0
+                        ? status?.enabledMonitorQueryIds
+                        : ['false-id'],
                   },
                   dataType: 'alerts',
                   selectedMetricField: RECORDS_FIELD,
