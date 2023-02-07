@@ -6,6 +6,7 @@
  */
 
 import React, { useEffect } from 'react';
+import { i18n } from '@kbn/i18n';
 import { useDispatch, useSelector } from 'react-redux';
 import { EuiEmptyPrompt, EuiLoadingLogo } from '@elastic/eui';
 import { useTrackPageview } from '@kbn/observability-plugin/public';
@@ -16,6 +17,7 @@ import { ServiceAllowedWrapper } from '../common/wrappers/service_allowed_wrappe
 import { useKibanaSpace } from './hooks';
 import { MonitorSteps } from './steps';
 import { MonitorForm } from './form';
+import { LocationsLoadingError } from './locations_loading_error';
 import { ADD_MONITOR_STEPS } from './steps/step_config';
 import { useMonitorAddEditBreadcrumbs } from './use_breadcrumbs';
 
@@ -34,14 +36,7 @@ const MonitorAddPage = () => {
   }, [dispatch, locationsLoaded]);
 
   if (locationsError) {
-    return (
-      <EuiEmptyPrompt
-        iconType="alert"
-        color="danger"
-        title={<h3>Unable to testing locations</h3>}
-        body={<p>There was an error loading testing locations. Please try again later.</p>}
-      />
-    );
+    return <LocationsLoadingError />;
   }
 
   return !locationsLoaded ? (
@@ -51,7 +46,13 @@ const MonitorAddPage = () => {
   ) : (
     <EuiEmptyPrompt
       icon={<EuiLoadingLogo logo="logoKibana" size="xl" />}
-      title={<h3>Loading</h3>}
+      title={
+        <h3>
+          {i18n.translate('xpack.synthetics.monitorAddPage.loading.label', {
+            defaultMessage: 'Loading',
+          })}
+        </h3>
+      }
     />
   );
 };
