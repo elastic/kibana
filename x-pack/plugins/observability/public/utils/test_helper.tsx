@@ -35,7 +35,6 @@ const defaultConfig: ConfigSchema = {
       enabled: false,
     },
     alertDetails: {
-      apm: { enabled: false },
       logs: { enabled: false },
       metrics: { enabled: false },
       uptime: { enabled: false },
