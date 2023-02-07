@@ -7,7 +7,8 @@
  */
 
 import * as t from 'io-ts';
+import { IsoDateString } from '@kbn/securitysolution-io-ts-types';
 
-export const expireTime = t.string;
+export const expireTime = IsoDateString;
 export const expireTimeOrUndefined = t.union([expireTime, t.undefined]);
 export type ExpireTimeOrUndefined = t.TypeOf<typeof expireTimeOrUndefined>;
