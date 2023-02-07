@@ -9,6 +9,7 @@ import React from 'react';
 import { TestProviders } from '../../../../common/mock';
 import { AlertsProgressBar } from './alerts_progress_bar';
 import { parsedAlerts } from './mock_data';
+import type { GroupBySelection } from './types';
 
 jest.mock('../../../../common/lib/kibana');
 
@@ -21,7 +22,7 @@ describe('Alert by grouping', () => {
   const defaultProps = {
     data: [],
     isLoading: false,
-    stackByField: 'host.name',
+    groupBySelection: 'host.name' as GroupBySelection,
   };
 
   afterEach(() => {
@@ -38,7 +39,7 @@ describe('Alert by grouping', () => {
       );
       expect(
         container.querySelector(`[data-test-subj="alerts-progress-bar-title"]`)?.textContent
-      ).toEqual(defaultProps.stackByField);
+      ).toEqual(defaultProps.groupBySelection);
       expect(container.querySelector(`[data-test-subj="empty-proress-bar"]`)).toBeInTheDocument();
       expect(container.querySelector(`[data-test-subj="empty-proress-bar"]`)?.textContent).toEqual(
         'No items found'
@@ -50,7 +51,7 @@ describe('Alert by grouping', () => {
     act(() => {
       const { container } = render(
         <TestProviders>
-          <AlertsProgressBar data={parsedAlerts} isLoading={false} stackByField={'host.name'} />
+          <AlertsProgressBar data={parsedAlerts} isLoading={false} groupBySelection={'host.name'} />
         </TestProviders>
       );
       expect(
