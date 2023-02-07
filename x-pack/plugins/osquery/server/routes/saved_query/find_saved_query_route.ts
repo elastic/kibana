@@ -50,7 +50,7 @@ export const findSavedQueryRoute = (router: IRouter, osqueryContext: OsqueryAppC
         type: savedQuerySavedObjectType,
         page: request.query.page ?? 1,
         perPage: request.query.pageSize,
-        sortField: request.query.sort,
+        sortField: request.query.sort ?? 'id',
         sortOrder: (request.query.sortOrder as SortOrder) ?? 'desc',
       });
 
