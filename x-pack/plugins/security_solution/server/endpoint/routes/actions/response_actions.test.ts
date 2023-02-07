@@ -596,7 +596,7 @@ describe('Response actions', () => {
         expect(responseBody.action).toBeUndefined();
       });
 
-      it('handles execute without optional `timeout`', async () => {
+      it('handles execute without optional `timeout` and sets it to 2h if not given', async () => {
         const ctx = await callRoute(
           EXECUTE_ROUTE,
           {
@@ -618,6 +618,7 @@ describe('Response actions', () => {
         expect(actionDocs[0].body!.EndpointActions.data.command).toEqual('execute');
         const parameters = actionDocs[1].body!.data.parameters as ResponseActionsExecuteParameters;
         expect(parameters.command).toEqual('ls -al');
+        expect(parameters.timeout).toEqual(7200000);
         expect(actionDocs[1].body!.data.command).toEqual('execute');
 
         expect(mockResponse.ok).toBeCalled();
