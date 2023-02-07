@@ -53,6 +53,11 @@ describe('Core app routes', () => {
       const response = await kbnTestServer.request.get(root, '/base-path/foo/').expect(302);
       expect(response.get('location')).toEqual('/base-path/foo');
     });
+
+    it('URI encodes redirect path', async () => {
+      const response = await kbnTestServer.request.get(root, '/%5Csome-path/').expect(302);
+      expect(response.get('location')).toEqual('/base-path/%5Csome-path');
+    });
   });
 
   describe('`/` route', () => {

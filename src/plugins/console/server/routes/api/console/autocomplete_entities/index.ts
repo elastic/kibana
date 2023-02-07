@@ -16,7 +16,7 @@ import type { SemVer } from 'semver';
 import type { RouteDependencies } from '../../..';
 import { sanitizeHostname } from '../../../../lib/utils';
 import type { ESConfigForProxy } from '../../../../types';
-import { getRequestConfig } from '../proxy/create_handler';
+import { getRequestConfig, getProxyHeaders } from '../proxy/create_handler';
 
 interface SettingsToRetrieve {
   indices: boolean;
@@ -25,7 +25,7 @@ interface SettingsToRetrieve {
   dataStreams: boolean;
 }
 
-type Config = ESConfigForProxy & { headers: KibanaRequest['headers'] } & { kibanaVersion: SemVer };
+type Config = ESConfigForProxy & { request: KibanaRequest } & { kibanaVersion: SemVer };
 
 const MAX_RESPONSE_SIZE = 10 * 1024 * 1024; // 10MB
 // Limit the response size to 10MB, because the response can be very large and sending it to the client
@@ -103,15 +103,40 @@ const getEntity = (path: string, config: Config) => {
       const host = hosts[idx];
       const uri = new URL(host + path);
       const { protocol, hostname, port } = uri;
-      const { headers } = getRequestConfig(config.headers, config, uri.toString(), kibanaVersion);
+      const { headers, agent } = getRequestConfig(
+        config.request.headers,
+        config,
+        uri.toString(),
+        kibanaVersion
+      );
+      const proxyHeaders = getProxyHeaders(config.request);
       const client = protocol === 'https:' ? https : http;
+
+      const requestHeaders = {
+        ...headers,
+        ...proxyHeaders,
+      };
+
+      const hasHostHeader = Object.keys(requestHeaders).some((key) => key.toLowerCase() === 'host');
+      // if the host header is not set, then set it to the hostname. This is needed because the
+      // request will fail if the host header is not set and it is used to determine the node to
+      // send the request to in a multi-node cluster.
+      if (!hasHostHeader) {
+        requestHeaders.host = hostname;
+      }
+
       const options = {
         method: 'GET',
-        headers: { ...headers },
+        headers: {
+          ...requestHeaders,
+          'content-type': 'application/json',
+          'transfer-encoding': 'chunked',
+        },
         host: sanitizeHostname(hostname),
         port: port === '' ? undefined : parseInt(port, 10),
         protocol,
         path: `${path}?pretty=false`, // add pretty=false to compress the response by removing whitespace
+        agent,
       };
 
       try {
@@ -171,20 +196,20 @@ export const registerAutocompleteEntitiesRoute = (deps: RouteDependencies) => {
       }
 
       const legacyConfig = await deps.proxy.readLegacyESConfig();
-      const configWithHeaders = {
+      const config = {
         ...legacyConfig,
-        headers: request.headers,
+        request,
         kibanaVersion: deps.kibanaVersion,
       };
 
       // Wait for all requests to complete, in case one of them fails return the successfull ones
       const results = await Promise.allSettled([
-        getMappings(settings, configWithHeaders),
-        getAliases(settings, configWithHeaders),
-        getDataStreams(settings, configWithHeaders),
-        getLegacyTemplates(settings, configWithHeaders),
-        getIndexTemplates(settings, configWithHeaders),
-        getComponentTemplates(settings, configWithHeaders),
+        getMappings(settings, config),
+        getAliases(settings, config),
+        getDataStreams(settings, config),
+        getLegacyTemplates(settings, config),
+        getIndexTemplates(settings, config),
+        getComponentTemplates(settings, config),
       ]);
 
       const [mappings, aliases, dataStreams, legacyTemplates, indexTemplates, componentTemplates] =
