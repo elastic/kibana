@@ -611,7 +611,12 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
 
     // if we have moved to an input package we need to create the index templates
     // for the package policy as input packages create index templates per package policy
-    if (pkgInfo && pkgInfo.type === 'input' && oldPackagePolicy.package && oldPackagePolicy.package?.version !== pkgInfo.version) {
+    if (
+      pkgInfo &&
+      pkgInfo.type === 'input' &&
+      oldPackagePolicy.package &&
+      oldPackagePolicy.package?.version !== pkgInfo.version
+    ) {
       if (oldPackagePolicy.package) {
         const oldPackage = await getPackageInfo({
           savedObjectsClient: soClient,
@@ -621,7 +626,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
         });
 
         if (oldPackage.type === 'integration') {
-          installAssetsForInputPackagePolicy({
+          await installAssetsForInputPackagePolicy({
             logger: appContextService.getLogger(),
             soClient,
             esClient,
