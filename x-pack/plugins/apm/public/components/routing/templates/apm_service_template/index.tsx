@@ -46,7 +46,6 @@ import { TechnicalPreviewBadge } from '../../../shared/technical_preview_badge';
 import { ApmMainTemplate } from '../apm_main_template';
 import { AnalyzeDataButton } from './analyze_data_button';
 import { ServerlessType } from '../../../../../common/serverless';
-import { EuiNotificationBadge } from '@elastic/eui';
 
 type Tab = NonNullable<EuiPageHeaderProps['tabs']>[0] & {
   key:
