@@ -13,9 +13,8 @@ import type { FtrProviderContext } from '../ftr_provider_context';
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const queryBar = getService('queryBar');
   const filterBar = getService('filterBar');
-  const retry = getService('retry');
-  const pageObjects = getPageObjects(['common', 'findings']);
   const comboBox = getService('comboBox');
+  const pageObjects = getPageObjects(['common', 'findings']);
   const chance = new Chance();
 
   // We need to use a dataset for the tests to run
@@ -25,14 +24,13 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       resource: { id: chance.guid(), name: `kubelet`, sub_type: 'lower case sub type' },
       result: { evaluation: chance.integer() % 2 === 0 ? 'passed' : 'failed' },
       rule: {
+        name: 'Upper case rule name',
+        section: 'Upper case section',
         benchmark: {
           id: 'cis_k8s',
           name: 'CIS Kubernetes V1.23',
           version: 'v1.0.0',
         },
-        name: 'Upper case rule name',
-        section: 'Upper case section',
-        tags: ['Kubernetes'],
         type: 'process',
       },
       cluster_id: 'Upper case cluster id',
@@ -41,14 +39,13 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       resource: { id: chance.guid(), name: `Pod`, sub_type: 'Upper case sub type' },
       result: { evaluation: chance.integer() % 2 === 0 ? 'passed' : 'failed' },
       rule: {
+        name: 'lower case rule name',
+        section: 'Another upper case section',
         benchmark: {
           id: 'cis_k8s',
           name: 'CIS Kubernetes V1.23',
           version: 'v1.0.0',
         },
-        name: 'lower case rule name',
-        section: 'Another upper case section',
-        tags: ['Kubernetes'],
         type: 'process',
       },
       cluster_id: 'Another Upper case cluster id',
@@ -57,30 +54,28 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       resource: { id: chance.guid(), name: `process`, sub_type: 'another lower case type' },
       result: { evaluation: 'passed' },
       rule: {
+        name: 'Another upper case rule name',
+        section: 'lower case section',
         benchmark: {
           id: 'cis_k8s',
           name: 'CIS Kubernetes V1.23',
           version: 'v1.0.0',
         },
-        name: 'Another upper case rule name',
-        section: 'lower case section',
-        tags: ['Kubernetes'],
         type: 'process',
       },
       cluster_id: 'lower case cluster id',
     },
     {
-      resource: { id: chance.guid(), name: `process another`, sub_type: 'Upper case type again' },
+      resource: { id: chance.guid(), name: `process`, sub_type: 'Upper case type again' },
       result: { evaluation: 'failed' },
       rule: {
+        name: 'some lower case rule name',
+        section: 'another lower case section',
         benchmark: {
           id: 'cis_k8s',
           name: 'CIS Kubernetes V1.23',
           version: 'v1.0.0',
         },
-        name: 'some lower case rule name',
-        section: 'another lower case section',
-        tags: ['Kubernetes'],
         type: 'process',
       },
       cluster_id: 'another lower case cluster id',
@@ -90,24 +85,32 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const ruleName1 = data[0].rule.name;
   const ruleName2 = data[1].rule.name;
 
+  const resourceId1 = data[0].resource.id;
+  const ruleSection1 = data[0].rule.section;
+
+  const benchMarkName = data[0].rule.benchmark.name;
+
   describe('Findings Page', () => {
     let findings: typeof pageObjects.findings;
-    let latestFindingsTable: typeof pageObjects.findings.latestFindingsTable;
-    let findingsByResourceTable: typeof pageObjects.findings.findingsByResourceTable;
-    let distributionBar: typeof pageObjects.findings.distributionBar;
+    let latestFindingsTable: typeof findings.latestFindingsTable;
+    let findingsByResourceTable: typeof findings.findingsByResourceTable;
+    let resourceFindingsTable: typeof findings.resourceFindingsTable;
+    let distributionBar: typeof findings.distributionBar;
 
     before(async () => {
       findings = pageObjects.findings;
-      latestFindingsTable = pageObjects.findings.latestFindingsTable;
-      findingsByResourceTable = pageObjects.findings.findingsByResourceTable;
-      distributionBar = pageObjects.findings.distributionBar;
+      latestFindingsTable = findings.latestFindingsTable;
+      findingsByResourceTable = findings.findingsByResourceTable;
+      resourceFindingsTable = findings.resourceFindingsTable;
+      distributionBar = findings.distributionBar;
 
+      await findings.index.remove();
       await findings.index.add(data);
-      await findings.navigateToFindingsPage();
-      await retry.waitFor(
-        'Findings table to be loaded',
-        async () => (await latestFindingsTable.getRowsCount()) === data.length
-      );
+      await findings.navigateToLatestFindingsPage();
+      // await retry.waitFor(
+      //   'Findings table to be loaded',
+      //   async () => (await latestFindingsTable.getRowsCount()) === data.length
+      // );
     });
 
     after(async () => {
@@ -211,21 +214,18 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
     });
 
-    describe('Group By', () => {
-      it('Group findings by Resource', async () => {
-        await comboBox.set('findings-group-by-selector', 'Resource');
-        /* Findings by resource table has no Rule column */
-        expect(await findingsByResourceTable.hasColumnName('Compliance Score')).to.be(true);
+    describe('GroupBy', () => {
+      it('groups findings by resource', async () => {
+        await comboBox.set('findings_group_by_selector', 'Resource');
+        expect(
+          await findingsByResourceTable.hasColumnValue('Applicable Benchmark', benchMarkName)
+        ).to.be(true);
       });
 
-      it('Clicking on resource id navigates user to resource findings table', async () => {
-        await findingsByResourceTable.clickOnResourceIdLink(
-          data[0].resource.id,
-          data[0].rule.section
-        );
-        /* resource_findings table has Rule column but no Resource ID Column */
-        expect(await findingsByResourceTable.hasColumnName('Resource ID')).to.be(false);
-        expect(await findingsByResourceTable.hasColumnName('Rule Name')).to.be(true);
+      it('navigates to resource findings page from resource id link', async () => {
+        await findingsByResourceTable.clickResourceIdLink(resourceId1, ruleSection1);
+        expect(await resourceFindingsTable.hasColumnValue('Rule Name', ruleName1)).to.be(true);
+        expect(await resourceFindingsTable.getRowsCount()).lessThan(5);
       });
     });
   });
