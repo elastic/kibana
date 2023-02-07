@@ -460,7 +460,9 @@ describe('EditConnectorFlyout', () => {
 
       await act(async () => {
         await userEvent.clear(getByTestId('test-connector-text-field'));
-        await userEvent.type(getByTestId('test-connector-text-field'),'My updated text field', { delay: 100});
+        await userEvent.type(getByTestId('test-connector-text-field'), 'My updated text field', {
+          delay: 100,
+        });
 
         await userEvent.clear(getByTestId('nameInput'));
         await userEvent.type(getByTestId('nameInput'), 'My test', {
