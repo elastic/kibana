@@ -32,14 +32,14 @@ describe('timestamp field validator', () => {
   });
   test('timestamp options - pass with value', async () => {
     const result = await requireTimestampOptionValidator(options).validator({
-      value: 'a',
+      value: { label: 'a', value: 'a' },
     } as any);
     // no error
     expect(result).toBeUndefined();
   });
   test('timestamp options - fail, value not in list', async () => {
     const result = await requireTimestampOptionValidator(options).validator({
-      value: 'c',
+      value: { label: 'c', value: 'c' },
     } as any);
     // returns error
     expect(result).toBeDefined();

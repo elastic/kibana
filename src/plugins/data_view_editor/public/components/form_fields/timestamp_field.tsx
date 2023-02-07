@@ -30,10 +30,10 @@ interface Props {
 }
 
 export const requireTimestampOptionValidator = (options: TimestampOption[]): ValidationConfig => ({
-  validator: async ({ value }) => {
+  validator: async ({ value: selectedOption }) => {
     const isValueRequired = !!options.length;
-    const valueSelected = options.find((item) => item.fieldName === value);
-    if (isValueRequired && (!value || !valueSelected)) {
+    const valueSelected = options.find((item) => item.fieldName === (selectedOption as any).value);
+    if (isValueRequired && (!selectedOption || !valueSelected)) {
       return {
         message: i18n.translate(
           'indexPatternEditor.requireTimestampOption.ValidationErrorMessage',
