@@ -68,18 +68,29 @@ export const SearchIndex: React.FC = () => {
   const { indexName } = useValues(IndexNameLogic);
 
   /**
-   * Guided Onboarding needs us to mark the add data step as complete as soon as the user has data in an index
+   * Guided Onboarding needs us to mark the add data step as complete as soon as the user has data in an index.
+   * This needs to be checked for any of the 3 registered search guideIds
    * Putting it here guarantees that if a user is viewing an index with data, it'll be marked as complete
    */
   const { guidedOnboarding } = useValues(KibanaLogic);
-  const isDataStepActive = useObservable(
-    guidedOnboarding.guidedOnboardingApi!.isGuideStepActive$('search', 'add_data')
+  const isAppGuideActive = useObservable(
+    guidedOnboarding.guidedOnboardingApi!.isGuideStepActive$('appSearch', 'add_data')
+  );
+  const isWebsiteGuideActive = useObservable(
+    guidedOnboarding.guidedOnboardingApi!.isGuideStepActive$('websiteSearch', 'add_data')
+  );
+  const isDatabaseGuideActive = useObservable(
+    guidedOnboarding.guidedOnboardingApi!.isGuideStepActive$('databaseSearch', 'add_data')
   );
   useEffect(() => {
-    if (isDataStepActive && index?.count) {
-      guidedOnboarding.guidedOnboardingApi?.completeGuideStep('search', 'add_data');
+    if (isAppGuideActive && index?.count) {
+      guidedOnboarding.guidedOnboardingApi?.completeGuideStep('appSearch', 'add_data');
+    } else if (isWebsiteGuideActive && index?.count) {
+      guidedOnboarding.guidedOnboardingApi?.completeGuideStep('websiteSearch', 'add_data');
+    } else if (isDatabaseGuideActive && index?.count) {
+      guidedOnboarding.guidedOnboardingApi?.completeGuideStep('databaseSearch', 'add_data');
     }
-  }, [isDataStepActive, index?.count]);
+  }, [isAppGuideActive, isWebsiteGuideActive, isDatabaseGuideActive, index?.count]);
 
   useEffect(() => {
     if (
