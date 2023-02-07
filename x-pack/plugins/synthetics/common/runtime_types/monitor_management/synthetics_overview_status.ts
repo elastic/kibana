@@ -27,11 +27,24 @@ export const OverviewPingCode = t.interface({
 export const OverviewStatusMetaDataCodec = t.interface({
   monitorQueryId: t.string,
   configId: t.string,
+  status: t.string,
   location: t.string,
   timestamp: t.string,
-  status: t.string,
   ping: OverviewPingCode,
 });
+
+export const OverviewPendingStatusMetaDataCodec = t.intersection([
+  t.interface({
+    monitorQueryId: t.string,
+    configId: t.string,
+    status: t.string,
+    location: t.string,
+  }),
+  t.partial({
+    timestamp: t.string,
+    ping: OverviewPingCode,
+  }),
+]);
 
 export const OverviewStatusCodec = t.interface({
   allMonitorsCount: t.number,
@@ -43,8 +56,9 @@ export const OverviewStatusCodec = t.interface({
   disabledCount: t.number,
   upConfigs: t.record(t.string, OverviewStatusMetaDataCodec),
   downConfigs: t.record(t.string, OverviewStatusMetaDataCodec),
+  pendingConfigs: t.record(t.string, OverviewPendingStatusMetaDataCodec),
+  enabledMonitorQueryIds: t.array(t.string),
   allIds: t.array(t.string),
-  enabledIds: t.array(t.string),
 });
 
 export const OverviewStatusStateCodec = t.intersection([
@@ -58,3 +72,4 @@ export type OverviewPing = t.TypeOf<typeof OverviewPingCode>;
 export type OverviewStatus = t.TypeOf<typeof OverviewStatusCodec>;
 export type OverviewStatusState = t.TypeOf<typeof OverviewStatusStateCodec>;
 export type OverviewStatusMetaData = t.TypeOf<typeof OverviewStatusMetaDataCodec>;
+export type OverviewPendingStatusMetaData = t.TypeOf<typeof OverviewPendingStatusMetaDataCodec>;

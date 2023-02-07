@@ -3,12 +3,13 @@
  * See `packages/kbn-handlebars/LICENSE` for more information.
  */
 
-import Handlebars, {
-  type DecoratorFunction,
-  type DecoratorsHash,
-  type ExtendedCompileOptions,
-  type ExtendedRuntimeOptions,
-} from '../..';
+import Handlebars from '../..';
+import type {
+  DecoratorFunction,
+  DecoratorsHash,
+  ExtendedCompileOptions,
+  ExtendedRuntimeOptions,
+} from '../types';
 
 type CompileFns = 'compile' | 'compileAST';
 const compileFns: CompileFns[] = ['compile', 'compileAST'];
