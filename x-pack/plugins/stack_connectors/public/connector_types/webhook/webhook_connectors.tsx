@@ -7,7 +7,6 @@
 
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -31,6 +30,7 @@ import {
 import { fieldValidators } from '@kbn/es-ui-shared-plugin/static/forms/helpers';
 import type { ActionConnectorFieldsProps } from '@kbn/triggers-actions-ui-plugin/public';
 import { PasswordField } from '@kbn/triggers-actions-ui-plugin/public';
+import { OAuth } from '../lib/servicenow/auth_types';
 import * as i18n from './translations';
 
 const HTTP_VERBS = ['post', 'put'];
@@ -41,13 +41,14 @@ const WebhookActionConnectorFields: React.FunctionComponent<ActionConnectorField
 }) => {
   const { getFieldDefaultValue } = useFormContext();
   const [{ config, __internal__ }] = useFormData({
-    watch: ['config.hasAuth', '__internal__.hasHeaders'],
+    watch: ['config.hasAuth', '__internal__.hasHeaders', 'config.isOAuth'],
   });
 
   const hasHeadersDefaultValue = !!getFieldDefaultValue<boolean | undefined>('config.headers');
 
   const hasAuth = config == null ? true : config.hasAuth;
   const hasHeaders = __internal__ != null ? __internal__.hasHeaders : false;
+  const { isOAuth = false } = config ?? {};
 
   return (
     <>
@@ -93,31 +94,51 @@ const WebhookActionConnectorFields: React.FunctionComponent<ActionConnectorField
           />
         </EuiFlexItem>
       </EuiFlexGroup>
-      <EuiFlexGroup>
-        <EuiFlexItem>
-          <EuiSpacer size="m" />
-          <EuiTitle size="xxs">
-            <h4>
-              <FormattedMessage
-                id="xpack.stackConnectors.components.webhook.authenticationLabel"
-                defaultMessage="Authentication"
+
+      <UseField
+        path="config.isOAuth"
+        component={ToggleField}
+        config={{ defaultValue: false }}
+        componentProps={{
+          hasEmptyLabelSpace: true,
+          euiFieldProps: {
+            label: 'Use OAuth authentication',
+            disabled: readOnly,
+          },
+        }}
+      />
+      <EuiSpacer size="l" />
+      <EuiFlexItem>
+        {isOAuth ? (
+          <OAuth readOnly={readOnly} isLoading={false} />
+        ) : (
+          <EuiFlexGroup>
+            <EuiFlexItem>
+              <EuiSpacer size="m" />
+              <EuiTitle size="xxs">
+                <h4>
+                  <FormattedMessage
+                    id="xpack.stackConnectors.components.webhook.authenticationLabel"
+                    defaultMessage="Authentication"
+                  />
+                </h4>
+              </EuiTitle>
+              <EuiSpacer size="s" />
+              <UseField
+                path="config.hasAuth"
+                component={ToggleField}
+                config={{ defaultValue: true }}
+                componentProps={{
+                  euiFieldProps: {
+                    label: i18n.HAS_AUTH_LABEL,
+                    disabled: readOnly,
+                  },
+                }}
               />
-            </h4>
-          </EuiTitle>
-          <EuiSpacer size="s" />
-          <UseField
-            path="config.hasAuth"
-            component={ToggleField}
-            config={{ defaultValue: true }}
-            componentProps={{
-              euiFieldProps: {
-                label: i18n.HAS_AUTH_LABEL,
-                disabled: readOnly,
-              },
-            }}
-          />
-        </EuiFlexItem>
-      </EuiFlexGroup>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        )}
+      </EuiFlexItem>
       {hasAuth ? (
         <EuiFlexGroup justifyContent="spaceBetween">
           <EuiFlexItem>

@@ -24,6 +24,8 @@ import {
   SecurityConnectorFeatureId,
 } from '@kbn/actions-plugin/common/types';
 import { renderMustacheString } from '@kbn/actions-plugin/server/lib/mustache_renderer';
+import { ExternalIncidentServiceConfigurationBase } from '../lib/servicenow/schema';
+import { validate } from '../lib/servicenow/validators';
 import { getRetryAfterIntervalFromHeaders } from '../lib/http_response_retry_header';
 import { nullableType } from '../lib/nullable';
 import { isOk, promiseResult, Result } from '../lib/result_type';
@@ -54,6 +56,7 @@ const configSchemaProps = {
   }),
   headers: nullableType(HeadersSchema),
   hasAuth: schema.boolean({ defaultValue: true }),
+  ...ExternalIncidentServiceConfigurationBase,
 };
 const ConfigSchema = schema.object(configSchemaProps);
 export type ConnectorTypeConfigType = TypeOf<typeof ConfigSchema>;
@@ -61,8 +64,11 @@ export type ConnectorTypeConfigType = TypeOf<typeof ConfigSchema>;
 // secrets definition
 export type ConnectorTypeSecretsType = TypeOf<typeof SecretsSchema>;
 const secretSchemaProps = {
-  user: schema.nullable(schema.string()),
-  password: schema.nullable(schema.string()),
+  password: schema.nullable(schema.string()), // required if isOAuth = false
+  user: schema.nullable(schema.string()), // required if isOAuth = false
+  clientSecret: schema.nullable(schema.string()), // required if isOAuth = true
+  privateKey: schema.nullable(schema.string()), // required if isOAuth = true
+  privateKeyPassword: schema.nullable(schema.string()),
 };
 const SecretsSchema = schema.object(secretSchemaProps, {
   validate: (secrets) => {
@@ -102,6 +108,7 @@ export function getConnectorType(): WebhookConnectorType {
       },
       secrets: {
         schema: SecretsSchema,
+        customValidator: validate.secrets,
       },
       params: {
         schema: ParamsSchema,

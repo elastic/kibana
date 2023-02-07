@@ -9,7 +9,7 @@ import { schema } from '@kbn/config-schema';
 import { DEFAULT_ALERTS_GROUPING_KEY } from './config';
 
 export const ExternalIncidentServiceConfigurationBase = {
-  apiUrl: schema.string(),
+  // apiUrl: schema.string(),
   isOAuth: schema.boolean({ defaultValue: false }),
   userIdentifierValue: schema.nullable(schema.string()), // required if isOAuth = true
   clientId: schema.nullable(schema.string()), // required if isOAuth = true
