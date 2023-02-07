@@ -45,13 +45,6 @@ export class ProfilingPlugin implements Plugin {
         }),
         path: '/functions',
       },
-      {
-        id: 'adddata',
-        title: i18n.translate('xpack.profiling.navigation.noInstructionsLinlLabel', {
-          defaultMessage: 'Add data',
-        }),
-        path: '/add-data-instructions',
-      },
     ];
 
     const kuerySubject = new BehaviorSubject<string>('');
@@ -90,7 +83,7 @@ export class ProfilingPlugin implements Plugin {
       appRoute: '/app/profiling',
       category: DEFAULT_APP_CATEGORIES.observability,
       deepLinks: links,
-      async mount({ element, history, theme$ }: AppMountParameters) {
+      async mount({ element, history, theme$, setHeaderActionMenu }: AppMountParameters) {
         const [coreStart, pluginsStart] = (await coreSetup.getStartServices()) as [
           CoreStart,
           ProfilingPluginPublicStartDeps,
@@ -118,6 +111,7 @@ export class ProfilingPlugin implements Plugin {
             pluginsSetup,
             history,
             theme$,
+            setHeaderActionMenu,
           },
           element
         );

@@ -18,7 +18,7 @@ export function ProfilingAppPageTemplate({
   tabs,
   hideSearchBar = false,
   noDataConfig,
-  restrictWidth,
+  restrictWidth = false,
   pageTitle = i18n.translate('xpack.profiling.appPageTemplate.pageTitle', {
     defaultMessage: 'Universal Profiling',
   }),

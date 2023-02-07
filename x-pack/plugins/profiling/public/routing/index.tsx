@@ -32,6 +32,15 @@ const routes = {
       </RouteBreadcrumb>
     ),
     children: {
+      '/add-data-instructions': {
+        element: (
+          <NoDataPage
+            subTitle={i18n.translate('xpack.profiling.addDataTitle', {
+              defaultMessage: 'Select an option below to deploy the host-agent.',
+            })}
+          />
+        ),
+      },
       '/': {
         children: {
           '/stacktraces/{topNType}': {
@@ -178,15 +187,6 @@ const routes = {
                 }),
               },
             },
-          },
-          '/add-data-instructions': {
-            element: (
-              <NoDataPage
-                subTitle={i18n.translate('xpack.profiling.addDataTitle', {
-                  defaultMessage: 'Select an option below to deploy the host-agent.',
-                })}
-              />
-            ),
           },
           '/': {
             element: <RedirectTo pathname="/stacktraces/threads" />,
