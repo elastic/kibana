@@ -317,12 +317,23 @@ export function updateStackFrameMap(
           LineNumber: lineNumber && lineNumber[0],
         };
       } else {
-        stackFrame = {
-          FileName: fileName,
-          FunctionName: functionName,
-          FunctionOffset: functionOffset,
-          LineNumber: lineNumber,
-        };
+        if (fileName) {
+          stackFrame = {
+            FileName: fileName,
+            FunctionName: functionName,
+            FunctionOffset: functionOffset,
+            LineNumber: lineNumber,
+          };
+        } else {
+          // pre 8.7 format with synthetic source
+          const sf = frame._source.Stackframe;
+          stackFrame = {
+            FileName: sf.file?.name,
+            FunctionName: sf.function?.name,
+            FunctionOffset: sf.function?.offset ?? 0,
+            LineNumber: sf.line?.number ?? 0,
+          };
+        }
       }
 
       stackFrameMap.set(frame._id, stackFrame);
