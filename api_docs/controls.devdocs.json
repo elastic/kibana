@@ -1697,6 +1697,38 @@
           },
           {
             "parentPluginId": "controls",
+            "id": "def-public.OptionsListEmbeddable.onFatalError",
+            "type": "Function",
+            "tags": [],
+            "label": "onFatalError",
+            "description": [],
+            "signature": [
+              "(e: Error) => void"
+            ],
+            "path": "src/plugins/controls/public/options_list/embeddable/options_list_embeddable.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "controls",
+                "id": "def-public.OptionsListEmbeddable.onFatalError.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "e",
+                "description": [],
+                "signature": [
+                  "Error"
+                ],
+                "path": "src/plugins/controls/public/options_list/embeddable/options_list_embeddable.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "controls",
             "id": "def-public.OptionsListEmbeddable.destroy",
             "type": "Function",
             "tags": [],
@@ -4337,6 +4369,20 @@
           },
           {
             "parentPluginId": "controls",
+            "id": "def-public.OptionsListEmbeddableInput.hideActionBar",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "hideActionBar",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/plugins/controls/common/options_list/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "controls",
             "id": "def-public.OptionsListEmbeddableInput.hideExclude",
             "type": "CompoundType",
             "tags": [],
@@ -4369,20 +4415,6 @@
             "type": "CompoundType",
             "tags": [],
             "label": "hideSort",
-            "description": [],
-            "signature": [
-              "boolean | undefined"
-            ],
-            "path": "src/plugins/controls/common/options_list/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "controls",
-            "id": "def-public.OptionsListEmbeddableInput.hideActionBar",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "hideActionBar",
             "description": [],
             "signature": [
               "boolean | undefined"
@@ -4833,7 +4865,7 @@
           "ControlStyle",
           " | undefined; ignoreParentSettings?: ",
           "ParentIgnoreSettings",
-          " | undefined; } & { fieldName: string; parentFieldName?: string | undefined; childFieldName?: string | undefined; dataViewId: string; }"
+          " | undefined; } & { fieldName: string; dataViewId: string; }"
         ],
         "path": "src/plugins/controls/common/types.ts",
         "deprecated": false,
@@ -5947,6 +5979,20 @@
           },
           {
             "parentPluginId": "controls",
+            "id": "def-common.OptionsListEmbeddableInput.hideActionBar",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "hideActionBar",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/plugins/controls/common/options_list/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "controls",
             "id": "def-common.OptionsListEmbeddableInput.hideExclude",
             "type": "CompoundType",
             "tags": [],
@@ -5979,20 +6025,6 @@
             "type": "CompoundType",
             "tags": [],
             "label": "hideSort",
-            "description": [],
-            "signature": [
-              "boolean | undefined"
-            ],
-            "path": "src/plugins/controls/common/options_list/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "controls",
-            "id": "def-common.OptionsListEmbeddableInput.hideActionBar",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "hideActionBar",
             "description": [],
             "signature": [
               "boolean | undefined"

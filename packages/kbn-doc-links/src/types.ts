@@ -120,6 +120,7 @@ export interface DocLinks {
     readonly crawlerOverview: string;
     readonly deployTrainedModels: string;
     readonly documentLevelSecurity: string;
+    readonly engines: string;
     readonly ingestPipelines: string;
     readonly languageAnalyzers: string;
     readonly languageClients: string;

@@ -3,7 +3,7 @@
 exports[`guide cards snapshots should render all cards 1`] = `
 <EuiFlexGroup
   justifyContent="center"
-  responsive={true}
+  responsive={false}
   wrap={true}
 >
   <EuiFlexItem
@@ -15,11 +15,19 @@ exports[`guide cards snapshots should render all cards 1`] = `
       activeFilter="all"
       card={
         Object {
-          "guideId": "search",
+          "guideId": "appSearch",
           "order": 1,
           "solution": "search",
-          "telemetryId": "guided-onboarding--search--application",
-          "title": "Build an application on top of Elasticsearch",
+          "telemetryId": "onboarding--search--application",
+          "title": <FormattedMessage
+            defaultMessage="Build an application on {lineBreak} top of Elasticsearch"
+            id="guidedOnboardingPackage.gettingStarted.cards.appSearch.title"
+            values={
+              Object {
+                "lineBreak": <br />,
+              }
+            }
+          />,
         }
       }
       guidesState={Array []}
@@ -44,7 +52,7 @@ exports[`guide cards snapshots should render all cards 1`] = `
           },
           "order": 2,
           "solution": "observability",
-          "telemetryId": "guided-onboarding--observability--logs",
+          "telemetryId": "onboarding--observability--logs",
           "title": "Collect and analyze my logs",
         }
       }
@@ -67,8 +75,16 @@ exports[`guide cards snapshots should render all cards 1`] = `
           "guideId": "siem",
           "order": 3,
           "solution": "security",
-          "telemetryId": "guided-onboarding--security--siem",
-          "title": "Detect threats in my data with SIEM",
+          "telemetryId": "onboarding--security--siem",
+          "title": <FormattedMessage
+            defaultMessage="Detect threats in my {lineBreak} data with SIEM"
+            id="guidedOnboardingPackage.gettingStarted.cards.siemSecurity.title"
+            values={
+              Object {
+                "lineBreak": <br />,
+              }
+            }
+          />,
         }
       }
       guidesState={Array []}
@@ -87,10 +103,10 @@ exports[`guide cards snapshots should render all cards 1`] = `
       activeFilter="all"
       card={
         Object {
-          "guideId": "search",
+          "guideId": "websiteSearch",
           "order": 4,
           "solution": "search",
-          "telemetryId": "guided-onboarding--search--website",
+          "telemetryId": "onboarding--search--website",
           "title": "Add search to my website",
         }
       }
@@ -116,8 +132,16 @@ exports[`guide cards snapshots should render all cards 1`] = `
           },
           "order": 5,
           "solution": "observability",
-          "telemetryId": "guided-onboarding--observability--apm",
-          "title": "Monitor my application performance (APM / tracing)",
+          "telemetryId": "onboarding--observability--apm",
+          "title": <FormattedMessage
+            defaultMessage="Monitor my application {lineBreak} performance (APM / tracing)"
+            id="guidedOnboardingPackage.gettingStarted.cards.apmObservability.title"
+            values={
+              Object {
+                "lineBreak": <br />,
+              }
+            }
+          />,
         }
       }
       guidesState={Array []}
@@ -142,8 +166,16 @@ exports[`guide cards snapshots should render all cards 1`] = `
           },
           "order": 6,
           "solution": "security",
-          "telemetryId": "guided-onboarding--security--hosts",
-          "title": "Secure my hosts with endpoint security",
+          "telemetryId": "onboarding--security--hosts",
+          "title": <FormattedMessage
+            defaultMessage="Secure my hosts with {lineBreak} endpoint security"
+            id="guidedOnboardingPackage.gettingStarted.cards.hostsSecurity.title"
+            values={
+              Object {
+                "lineBreak": <br />,
+              }
+            }
+          />,
         }
       }
       guidesState={Array []}
@@ -162,11 +194,19 @@ exports[`guide cards snapshots should render all cards 1`] = `
       activeFilter="all"
       card={
         Object {
-          "guideId": "search",
+          "guideId": "databaseSearch",
           "order": 7,
           "solution": "search",
-          "telemetryId": "guided-onboarding--search--database",
-          "title": "Search across databases and business systems",
+          "telemetryId": "onboarding--search--database",
+          "title": <FormattedMessage
+            defaultMessage="Search across databases and {lineBreak} business systems"
+            id="guidedOnboardingPackage.gettingStarted.cards.databaseSearch.title"
+            values={
+              Object {
+                "lineBreak": <br />,
+              }
+            }
+          />,
         }
       }
       guidesState={Array []}
@@ -191,7 +231,7 @@ exports[`guide cards snapshots should render all cards 1`] = `
           },
           "order": 8,
           "solution": "observability",
-          "telemetryId": "guided-onboarding--observability--hosts",
+          "telemetryId": "onboarding--observability--hosts",
           "title": "Monitor my host metrics",
         }
       }
@@ -217,8 +257,16 @@ exports[`guide cards snapshots should render all cards 1`] = `
           },
           "order": 9,
           "solution": "security",
-          "telemetryId": "guided-onboarding--security--cloud",
-          "title": "Secure my cloud assets with posture management",
+          "telemetryId": "onboarding--security--cloud",
+          "title": <FormattedMessage
+            defaultMessage="Secure my cloud assets with {lineBreak} posture management"
+            id="guidedOnboardingPackage.gettingStarted.cards.cloudSecurity.title"
+            values={
+              Object {
+                "lineBreak": <br />,
+              }
+            }
+          />,
         }
       }
       guidesState={Array []}
@@ -240,7 +288,7 @@ exports[`guide cards snapshots should render all cards 1`] = `
           "guideId": "kubernetes",
           "order": 11,
           "solution": "observability",
-          "telemetryId": "guided-onboarding--observability--kubernetes",
+          "telemetryId": "onboarding--observability--kubernetes",
           "title": "Monitor Kubernetes clusters",
         }
       }

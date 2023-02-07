@@ -31,6 +31,7 @@ describe('Setup Indices', () => {
       version: CONNECTORS_VERSION,
       pipeline: defaultConnectorsPipelineMeta,
     },
+    dynamic: false,
     properties: {
       api_key_id: {
         type: 'keyword',
@@ -156,6 +157,7 @@ describe('Setup Indices', () => {
     _meta: {
       version: CONNECTORS_VERSION,
     },
+    dynamic: false,
     properties: {
       cancelation_requested_at: { type: 'date' },
       canceled_at: { type: 'date' },

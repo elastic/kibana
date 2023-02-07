@@ -11,6 +11,8 @@ import {
   EuiHorizontalRule,
   EuiPopover,
   EuiTitle,
+  EuiToolTip,
+  EuiIcon,
 } from '@elastic/eui';
 import cytoscape from 'cytoscape';
 import React, {
@@ -22,6 +24,7 @@ import React, {
   useRef,
   useState,
 } from 'react';
+import { i18n } from '@kbn/i18n';
 import { SERVICE_NAME, SPAN_TYPE } from '../../../../../common/es_fields/apm';
 import { Environment } from '../../../../../common/environment_rt';
 import { useTheme } from '../../../../hooks/use_theme';
@@ -207,6 +210,20 @@ export function Popover({
           <EuiTitle size="xxs">
             <h3 style={{ wordBreak: 'break-all' }}>
               {selectedElementData.label ?? selectedElementId}
+              {kuery && (
+                <EuiToolTip
+                  position="bottom"
+                  content={i18n.translate(
+                    'xpack.apm.serviceMap.kqlFilterInfo',
+                    {
+                      defaultMessage:
+                        'The KQL filter is not applied in the displayed stats.',
+                    }
+                  )}
+                >
+                  <EuiIcon tabIndex={0} type="iInCircle" />
+                </EuiToolTip>
+              )}
             </h3>
           </EuiTitle>
           <EuiHorizontalRule margin="xs" />
