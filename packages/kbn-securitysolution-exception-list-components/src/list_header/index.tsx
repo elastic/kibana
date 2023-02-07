@@ -31,7 +31,7 @@ interface ExceptionListHeaderComponentProps {
   onEditListDetails: (listDetails: ListDetails) => void;
   onDeleteList: () => void;
   onManageRules: () => void;
-  onExportModalOpen: () => void;
+  onExportList: () => void;
 }
 
 export interface BackOptions {
@@ -53,7 +53,7 @@ const ExceptionListHeaderComponent: FC<ExceptionListHeaderComponentProps> = ({
   onEditListDetails,
   onDeleteList,
   onManageRules,
-  onExportModalOpen,
+  onExportList,
 }) => {
   const { isModalVisible, listDetails, onEdit, onSave, onCancel } = useExceptionListHeader({
     name,
@@ -99,7 +99,7 @@ const ExceptionListHeaderComponent: FC<ExceptionListHeaderComponentProps> = ({
             securityLinkAnchorComponent={securityLinkAnchorComponent}
             onDeleteList={onDeleteList}
             onManageRules={onManageRules}
-            onExportModalOpen={onExportModalOpen}
+            onExportList={onExportList}
           />,
         ]}
         breadcrumbs={[

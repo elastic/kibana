@@ -86,7 +86,7 @@ export const ListsDetailViewComponent: FC = () => {
           backOptions={headerBackOptions}
           securityLinkAnchorComponent={ListDetailsLinkAnchor}
           onEditListDetails={onEditListDetails}
-          onExportModalOpen={onModalOpen}
+          onExportList={onModalOpen}
           onDeleteList={handleDelete}
           onManageRules={onManageRules}
         />

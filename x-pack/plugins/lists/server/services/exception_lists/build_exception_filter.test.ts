@@ -11,6 +11,7 @@ import type {
   ExceptionListItemSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
 
+import { ENTRIES } from '../../../common/constants.mock';
 import {
   getEntryMatchAnyExcludeMock,
   getEntryMatchAnyMock,
@@ -490,8 +491,8 @@ describe('build_exceptions_filter', () => {
       const futureDate = new Date(Date.now() + 1000000).toISOString();
       const expiredDate = new Date(Date.now() - 1000000).toISOString();
       const exceptions = [
-        { ...getExceptionListItemSchemaMock(), expire_time: futureDate },
-        { ...getExceptionListItemSchemaMock(), expire_time: expiredDate },
+        { ...getExceptionListItemSchemaMock(), entries: [ENTRIES[0]], expire_time: futureDate },
+        { ...getExceptionListItemSchemaMock(), entries: [ENTRIES[1]], expire_time: expiredDate },
         getExceptionListItemSchemaMock(),
       ];
 
@@ -515,39 +516,21 @@ describe('build_exceptions_filter', () => {
             "bool": Object {
               "should": Array [
                 Object {
-                  "bool": Object {
-                    "filter": Array [
-                      Object {
-                        "nested": Object {
-                          "path": "some.parentField",
-                          "query": Object {
-                            "bool": Object {
-                              "minimum_should_match": 1,
-                              "should": Array [
-                                Object {
-                                  "match_phrase": Object {
-                                    "some.parentField.nested.field": "some value",
-                                  },
-                                },
-                              ],
+                  "nested": Object {
+                    "path": "some.parentField",
+                    "query": Object {
+                      "bool": Object {
+                        "minimum_should_match": 1,
+                        "should": Array [
+                          Object {
+                            "match_phrase": Object {
+                              "some.parentField.nested.field": "some value",
                             },
                           },
-                          "score_mode": "none",
-                        },
+                        ],
                       },
-                      Object {
-                        "bool": Object {
-                          "minimum_should_match": 1,
-                          "should": Array [
-                            Object {
-                              "match_phrase": Object {
-                                "some.not.nested.field": "some value",
-                              },
-                            },
-                          ],
-                        },
-                      },
-                    ],
+                    },
+                    "score_mode": "none",
                   },
                 },
                 Object {

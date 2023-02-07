@@ -12,7 +12,7 @@ import { MenuItems } from '.';
 import { rules } from '../../mocks/rule_references.mock';
 import { securityLinkAnchorComponentMock } from '../../mocks/security_link_component.mock';
 
-const onExportModalOpen = jest.fn();
+const onExportList = jest.fn();
 const onDeleteList = jest.fn();
 const onManageRules = jest.fn();
 describe('MenuItems', () => {
@@ -22,7 +22,7 @@ describe('MenuItems', () => {
         isReadonly={false}
         linkedRules={rules}
         securityLinkAnchorComponent={securityLinkAnchorComponentMock}
-        onExportModalOpen={onExportModalOpen}
+        onExportList={onExportList}
         onDeleteList={onDeleteList}
         onManageRules={onManageRules}
       />
@@ -38,7 +38,7 @@ describe('MenuItems', () => {
         isReadonly={false}
         linkedRules={[]}
         securityLinkAnchorComponent={securityLinkAnchorComponentMock}
-        onExportModalOpen={onExportModalOpen}
+        onExportList={onExportList}
         onDeleteList={onDeleteList}
         onManageRules={onManageRules}
       />
@@ -53,7 +53,7 @@ describe('MenuItems', () => {
         isReadonly={false}
         linkedRules={[]}
         securityLinkAnchorComponent={securityLinkAnchorComponentMock}
-        onExportModalOpen={onExportModalOpen}
+        onExportList={onExportList}
         onDeleteList={onDeleteList}
         onManageRules={onManageRules}
       />
@@ -70,7 +70,7 @@ describe('MenuItems', () => {
         canUserEditList={false}
         linkedRules={rules}
         securityLinkAnchorComponent={securityLinkAnchorComponentMock}
-        onExportModalOpen={onExportModalOpen}
+        onExportList={onExportList}
         onDeleteList={onDeleteList}
         onManageRules={onManageRules}
       />
@@ -86,7 +86,7 @@ describe('MenuItems', () => {
         canUserEditList={false}
         linkedRules={rules}
         securityLinkAnchorComponent={securityLinkAnchorComponentMock}
-        onExportModalOpen={onExportModalOpen}
+        onExportList={onExportList}
         onDeleteList={onDeleteList}
         onManageRules={onManageRules}
       />
@@ -100,7 +100,7 @@ describe('MenuItems', () => {
         isReadonly={false}
         linkedRules={rules}
         securityLinkAnchorComponent={securityLinkAnchorComponentMock}
-        onExportModalOpen={onExportModalOpen}
+        onExportList={onExportList}
         onDeleteList={onDeleteList}
         onManageRules={onManageRules}
       />
@@ -114,7 +114,7 @@ describe('MenuItems', () => {
         isReadonly={false}
         linkedRules={rules}
         securityLinkAnchorComponent={securityLinkAnchorComponentMock}
-        onExportModalOpen={onExportModalOpen}
+        onExportList={onExportList}
         onDeleteList={onDeleteList}
         onManageRules={onManageRules}
       />
@@ -122,7 +122,7 @@ describe('MenuItems', () => {
     fireEvent.click(wrapper.getByTestId('MenuActionsButtonIcon'));
     fireEvent.click(wrapper.getByTestId('MenuActionsActionItem1'));
 
-    expect(onExportModalOpen).toHaveBeenCalled();
+    expect(onExportList).toHaveBeenCalled();
   });
   it('should call onDeleteList', () => {
     const wrapper = render(
@@ -130,7 +130,7 @@ describe('MenuItems', () => {
         isReadonly={false}
         linkedRules={rules}
         securityLinkAnchorComponent={securityLinkAnchorComponentMock}
-        onExportModalOpen={onExportModalOpen}
+        onExportList={onExportList}
         onDeleteList={onDeleteList}
         onManageRules={onManageRules}
       />
