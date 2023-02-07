@@ -16,7 +16,6 @@ import {
   EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiHealth,
   EuiProgress,
   EuiScreenReaderOnly,
   EuiText,
@@ -30,50 +29,14 @@ import {
   isPivotTransform,
   TransformId,
 } from '../../../../../../common/types/transform';
-import { TransformStats } from '../../../../../../common/types/transform_stats';
-import {
-  TRANSFORM_HEALTH_COLOR,
-  TRANSFORM_HEALTH_DESCRIPTION,
-  TRANSFORM_STATE,
-} from '../../../../../../common/constants';
+import { TRANSFORM_STATE } from '../../../../../../common/constants';
 
 import { getTransformProgress, TransformListRow, TRANSFORM_LIST_COLUMN } from '../../../../common';
 import { useActions } from './use_actions';
 import { isManagedTransform } from '../../../../common/managed_transforms_utils';
 
-// reflects https://github.com/elastic/elasticsearch/blob/master/x-pack/plugin/core/src/main/java/org/elasticsearch/xpack/core/transform/transforms/TransformStats.java#L250
-const STATE_COLOR = {
-  aborting: 'warning',
-  failed: 'danger',
-  indexing: 'primary',
-  started: 'primary',
-  stopped: 'hollow',
-  stopping: 'hollow',
-  waiting: 'hollow',
-} as const;
-
-export const getTaskStateBadge = (
-  state: TransformStats['state'],
-  reason?: TransformStats['reason']
-) => {
-  const color = STATE_COLOR[state];
-
-  if (state === TRANSFORM_STATE.FAILED && reason !== undefined) {
-    return (
-      <EuiToolTip content={reason}>
-        <EuiBadge className="transform__TaskStateBadge" color={color}>
-          {state}
-        </EuiBadge>
-      </EuiToolTip>
-    );
-  }
-
-  return (
-    <EuiBadge className="transform__TaskStateBadge" color={color}>
-      {state}
-    </EuiBadge>
-  );
-};
+import { TransformHealthColoredDot } from './transform_health_colored_dot';
+import { TransformTaskStateBadge } from './transform_task_state_badge';
 
 export const useColumns = (
   expandedRowItemIds: TransformId[],
@@ -239,7 +202,7 @@ export const useColumns = (
       sortable: (item: TransformListRow) => item.stats.state,
       truncateText: true,
       render(item: TransformListRow) {
-        return getTaskStateBadge(item.stats.state, item.stats.reason);
+        return <TransformTaskStateBadge state={item.stats.state} reason={item.stats.reason} />;
       },
       width: '100px',
     },
@@ -321,11 +284,7 @@ export const useColumns = (
       sortable: (item: TransformListRow) => item.stats.health.status,
       truncateText: true,
       render(item: TransformListRow) {
-        return (
-          <EuiToolTip content={TRANSFORM_HEALTH_DESCRIPTION[item.stats.health.status]}>
-            <EuiHealth color={TRANSFORM_HEALTH_COLOR[item.stats.health.status]} />
-          </EuiToolTip>
-        );
+        return <TransformHealthColoredDot healthStatus={item.stats.health.status} />;
       },
       width: '60px',
     },

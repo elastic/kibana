@@ -95,8 +95,7 @@ export const TRANSFORM_STATE = {
   WAITING: 'waiting',
 } as const;
 
-const transformStates = Object.values(TRANSFORM_STATE);
-export type TransformState = typeof transformStates[number];
+export type TransformState = typeof TRANSFORM_STATE[keyof typeof TRANSFORM_STATE];
 
 export const TRANSFORM_HEALTH = {
   GREEN: 'green',
@@ -105,8 +104,7 @@ export const TRANSFORM_HEALTH = {
   RED: 'red',
 } as const;
 
-const transformHealth = Object.values(TRANSFORM_HEALTH);
-export type TransformHealth = typeof transformHealth[number];
+export type TransformHealth = typeof TRANSFORM_HEALTH[keyof typeof TRANSFORM_HEALTH];
 
 export const TRANSFORM_HEALTH_COLOR = {
   green: 'success',
@@ -136,8 +134,7 @@ export const TRANSFORM_MODE = {
   CONTINUOUS: 'continuous',
 } as const;
 
-const transformModes = Object.values(TRANSFORM_MODE);
-export type TransformMode = typeof transformModes[number];
+export type TransformMode = typeof TRANSFORM_MODE[keyof typeof TRANSFORM_MODE];
 
 export const TRANSFORM_FUNCTION = {
   PIVOT: 'pivot',

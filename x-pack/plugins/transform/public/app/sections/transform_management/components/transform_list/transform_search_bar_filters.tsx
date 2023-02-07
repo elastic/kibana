@@ -16,7 +16,7 @@ import {
 } from '../../../../../../common/constants';
 import { isLatestTransform, isPivotTransform } from '../../../../../../common/types/transform';
 import { TransformListRow } from '../../../../common';
-import { getTaskStateBadge } from './use_columns';
+import { TransformTaskStateBadge } from './transform_task_state_badge';
 
 export const transformFilters: SearchFilterConfig[] = [
   {
@@ -27,7 +27,7 @@ export const transformFilters: SearchFilterConfig[] = [
     options: Object.values(TRANSFORM_STATE).map((val) => ({
       value: val,
       name: val,
-      view: getTaskStateBadge(val),
+      view: <TransformTaskStateBadge state={val} />,
     })),
   },
   {
