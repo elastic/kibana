@@ -117,7 +117,11 @@ export function TopNavMenu<QT extends AggregateQuery | Query = Query>(
     if (setMenuMountPoint) {
       return (
         <>
-          <MountPointPortal setMountPoint={setMenuMountPoint}>
+          <MountPointPortal
+            setMountPoint={(mountPoint) => {
+              setMenuMountPoint(mountPoint);
+            }}
+          >
             <span className={`${wrapperClassName} kbnTopNavMenu__badgeWrapper`}>
               {renderBadges()}
               {renderMenu(menuClassName)}
