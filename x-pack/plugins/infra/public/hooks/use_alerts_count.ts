@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { useRef } from 'react';
+import { useEffect, useRef } from 'react';
 import type { ValidFeatureId } from '@kbn/rule-data-utils';
 import { estypes } from '@elastic/elasticsearch';
 import { HttpSetup } from '@kbn/core/public';
 import { BASE_RAC_ALERTS_API_PATH } from '@kbn/rule-registry-plugin/common/constants';
-import useAsync from 'react-use/lib/useAsync';
+import useAsyncFn from 'react-use/lib/useAsyncFn';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { InfraClientCoreStart } from '../types';
 
@@ -29,25 +29,32 @@ export function useAlertsCount({ featureIds, filter }: UseAlertsCountProps) {
 
   const abortCtrlRef = useRef(new AbortController());
 
-  const {
-    value: alertsCount,
-    error,
-    loading,
-  } = useAsync(() => {
-    abortCtrlRef.current.abort();
-    abortCtrlRef.current = new AbortController();
-    return fetchAlertsCount({
-      featureIds,
-      filter,
-      http,
-      signal: abortCtrlRef.current.signal,
-    });
-  }, [featureIds, filter, http]);
+  const [state, refetch] = useAsyncFn(
+    () => {
+      abortCtrlRef.current.abort();
+      abortCtrlRef.current = new AbortController();
+      return fetchAlertsCount({
+        featureIds,
+        filter,
+        http,
+        signal: abortCtrlRef.current.signal,
+      });
+    },
+    [featureIds, filter, http],
+    { loading: true }
+  );
+
+  useEffect(() => {
+    refetch();
+  }, [refetch]);
+
+  const { value: alertsCount, error, loading } = state;
 
   return {
     alertsCount,
     error,
     loading,
+    refetch,
   };
 }
 
