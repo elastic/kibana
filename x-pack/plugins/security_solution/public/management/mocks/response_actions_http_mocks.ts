@@ -11,7 +11,7 @@ import {
   ACTION_DETAILS_ROUTE,
   ACTION_STATUS_ROUTE,
   GET_PROCESSES_ROUTE,
-  ENDPOINTS_ACTION_LIST_ROUTE,
+  BASE_ENDPOINT_ACTION_ROUTE,
   ISOLATE_HOST_ROUTE,
   UNISOLATE_HOST_ROUTE,
   KILL_PROCESS_ROUTE,
@@ -107,7 +107,7 @@ export const responseActionsHttpMocks = httpHandlerMockFactory<ResponseActionsHt
   },
   {
     id: 'actionList',
-    path: ENDPOINTS_ACTION_LIST_ROUTE,
+    path: BASE_ENDPOINT_ACTION_ROUTE,
     method: 'get',
     handler: (): ActionListApiResponse => {
       const response = new EndpointActionGenerator('seed').generateActionDetails();

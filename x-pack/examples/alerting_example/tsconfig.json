@@ -26,5 +26,6 @@
     "@kbn/i18n",
     "@kbn/core-application-common",
     "@kbn/shared-ux-router",
+    "@kbn/config-schema",
   ]
 }
