@@ -57,7 +57,7 @@ const CHARTS_IN_ORDER: Array<Pick<MetricChartProps, 'title' | 'type'> & { fullRo
   },
 ];
 
-export const MetricsGrid = () => {
+export const MetricsGrid = React.memo(() => {
   return (
     <EuiFlexGroup direction="column" gutterSize="s" data-test-subj="hostsView-metricChart">
       <EuiFlexItem>
@@ -87,4 +87,4 @@ export const MetricsGrid = () => {
       </EuiFlexItem>
     </EuiFlexGroup>
   );
-};
+});

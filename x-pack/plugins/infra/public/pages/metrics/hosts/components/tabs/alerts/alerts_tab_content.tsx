@@ -21,11 +21,12 @@ import { useUnifiedSearchContext } from '../../../hooks/use_unified_search';
 import {
   ALERTS_PER_PAGE,
   ALERTS_TABLE_ID,
-  INFRA_ALERT_FEATURE_ID,
+  casesFeatures,
+  casesOwner,
   infraAlertFeatureIds,
 } from '../config';
 
-export const AlertsTabContent = () => {
+export const AlertsTabContent = React.memo(() => {
   const { services } = useKibana<InfraClientCoreStart & InfraClientStartDeps>();
 
   const [status, setAlertStatus] = useState<AlertStatus>('all');
@@ -73,11 +74,7 @@ export const AlertsTabContent = () => {
       </EuiFlexItem>
       {alertsEsQueryFilter && (
         <EuiFlexItem>
-          <CasesContext
-            features={{ alerts: { sync: false } }}
-            owner={[INFRA_ALERT_FEATURE_ID]}
-            permissions={casesCapabilities}
-          >
+          <CasesContext features={casesFeatures} owner={casesOwner} permissions={casesCapabilities}>
             <AlertsStateTable
               alertsTableConfigurationRegistry={alertsTableConfigurationRegistry}
               configurationId={AlertConsumers.OBSERVABILITY}
@@ -94,4 +91,4 @@ export const AlertsTabContent = () => {
       )}
     </EuiFlexGroup>
   );
-};
+});

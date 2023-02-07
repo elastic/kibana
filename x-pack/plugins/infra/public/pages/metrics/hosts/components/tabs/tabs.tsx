@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo, useRef, useState } from 'react';
+import React, { useRef, useState } from 'react';
 import { EuiTabs, EuiTab, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { MetricsGrid } from './metrics/metrics_grid';
@@ -56,19 +56,19 @@ export const Tabs = () => {
     </EuiTab>
   ));
 
-  // We memoize the instances of these tabs to prevent a full rerender and data fetching on tab switch
-  const metricTab = useMemo(() => <MetricsGrid />, []);
-  const alertsTab = useMemo(() => <AlertsTabContent />, []);
-
   return (
     <>
       <EuiTabs>{tabEntries}</EuiTabs>
       <EuiSpacer />
       {renderedTabsSet.current.has(tabIds.METRICS) && (
-        <div hidden={selectedTabId !== tabIds.METRICS}>{metricTab}</div>
+        <div hidden={selectedTabId !== tabIds.METRICS}>
+          <MetricsGrid />
+        </div>
       )}
       {renderedTabsSet.current.has(tabIds.ALERTS) && (
-        <div hidden={selectedTabId !== tabIds.ALERTS}>{alertsTab}</div>
+        <div hidden={selectedTabId !== tabIds.ALERTS}>
+          <AlertsTabContent />
+        </div>
       )}
     </>
   );
