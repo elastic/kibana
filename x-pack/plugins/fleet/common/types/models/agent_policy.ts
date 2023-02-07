@@ -32,7 +32,7 @@ export interface NewAgentPolicy {
   download_source_id?: string | null;
   fleet_server_host_id?: string | null;
   schema_version?: string;
-  agent_features?: Array<{ name: string; enabled: boolean; [key: string]: any }>;
+  agent_features?: Array<{ name: string; enabled: boolean }>;
 }
 
 export interface AgentPolicy extends Omit<NewAgentPolicy, 'id'> {
@@ -113,7 +113,7 @@ export interface FullAgentPolicy {
       logs: boolean;
     };
     download: { sourceURI: string };
-    features: Record<string, { enabled: boolean; [key: string]: any }>;
+    features: Record<string, { enabled: boolean }>;
   };
 }
 

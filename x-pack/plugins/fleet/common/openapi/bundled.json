@@ -5812,7 +5812,6 @@
                 "type": "array",
                 "items": {
                   "type": "object",
-                  "additionalProperties": true,
                   "properties": {
                     "name": {
                       "type": "string"

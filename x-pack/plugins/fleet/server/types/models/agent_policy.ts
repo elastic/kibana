@@ -41,13 +41,10 @@ export const AgentPolicyBaseSchema = {
   fleet_server_host_id: schema.maybe(schema.nullable(schema.string())),
   agent_features: schema.maybe(
     schema.arrayOf(
-      schema.object(
-        {
-          name: schema.string(),
-          enabled: schema.boolean(),
-        },
-        { unknowns: 'allow' }
-      )
+      schema.object({
+        name: schema.string(),
+        enabled: schema.boolean(),
+      })
     )
   ),
 };

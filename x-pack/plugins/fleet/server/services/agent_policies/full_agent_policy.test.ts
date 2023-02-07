@@ -395,8 +395,8 @@ describe('getFullAgentPolicy', () => {
       revision: 1,
       monitoring_enabled: ['metrics'],
       agent_features: [
-        { name: 'fqdn', enabled: true, config_1: 'something' },
-        { name: 'feature2', enabled: true, config_2: 'something' },
+        { name: 'fqdn', enabled: true },
+        { name: 'feature2', enabled: true },
       ],
     });
     const agentPolicy = await getFullAgentPolicy(savedObjectsClientMock.create(), 'agent-policy');
@@ -425,11 +425,9 @@ describe('getFullAgentPolicy', () => {
         features: {
           fqdn: {
             enabled: true,
-            config_1: 'something',
           },
           feature2: {
             enabled: true,
-            config_2: 'something',
           },
         },
       },

@@ -114,7 +114,6 @@ const getSavedObjectTypes = (
         download_source_id: { type: 'keyword' },
         fleet_server_host_id: { type: 'keyword' },
         agent_features: {
-          dynamic: false,
           properties: {
             name: { type: 'keyword' },
             enabled: { type: 'boolean' },

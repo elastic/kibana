@@ -97,6 +97,24 @@ export default function (providerContext: FtrProviderContext) {
         expect(policy2.is_managed).to.equal(false);
       });
 
+      it('does not allow arbitrary config in agent_features value', async () => {
+        await supertest
+          .post(`/api/fleet/agent_policies`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: 'test-agent-features',
+            namespace: 'default',
+            agent_features: [
+              {
+                name: 'fqdn',
+                enabled: true,
+                config: "I'm not allowed yet",
+              },
+            ],
+          })
+          .expect(400);
+      });
+
       it('sets given agent_features value', async () => {
         const {
           body: { item: createdPolicy },
@@ -110,7 +128,6 @@ export default function (providerContext: FtrProviderContext) {
               {
                 name: 'fqdn',
                 enabled: true,
-                config_1: 'config_1',
               },
             ],
           })
@@ -121,7 +138,6 @@ export default function (providerContext: FtrProviderContext) {
           {
             name: 'fqdn',
             enabled: true,
-            config_1: 'config_1',
           },
         ]);
 
@@ -138,7 +154,6 @@ export default function (providerContext: FtrProviderContext) {
         expect(policyDocRes?.hits?.hits[0]?._source?.data?.agent?.features).to.eql({
           fqdn: {
             enabled: true,
-            config_1: 'config_1',
           },
         });
       });
