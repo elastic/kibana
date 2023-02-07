@@ -13,10 +13,10 @@ type Extend<C extends CellAction> = Partial<C> & {
 };
 
 export const createActionFactory = <P>(actionCreator: (params: P) => CellAction) => {
-  return (params: P) =>
-    <C extends CellAction>(extend: Extend<C>) => {
+  return (params: P) => {
+    const action = actionCreator(params);
+    return <C extends CellAction>(extend: Extend<C>) => {
       const { isCompatible: extendedIsCompatible, execute: extendedExecute, ...rest } = extend;
-      const action = actionCreator(params);
 
       let isCompatible = action.isCompatible;
 
@@ -41,4 +41,5 @@ export const createActionFactory = <P>(actionCreator: (params: P) => CellAction)
         ...rest,
       };
     };
+  };
 };
