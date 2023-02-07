@@ -10,14 +10,14 @@
   },
   "include": [
     "**/*.ts",
-    "**/*.tsx",
+    "**/*.tsx"
   ],
   "exclude": [
     "target/**/*"
   ],
   "kbn_references": [
-    "@kbn/i18n-react",
     "@kbn/i18n",
+    "@kbn/i18n-react",
     "@kbn/rule-data-utils"
   ]
 }

@@ -17,21 +17,21 @@ export interface AlertLifecycleStatusBadgeProps {
 }
 
 const ACTIVE_LABEL = i18n.translate(
-  'xpack.triggersActionsUI.components.alertLifecycleStatusBadge.activeLabel',
+  'alertsUIShared.components.alertLifecycleStatusBadge.activeLabel',
   {
     defaultMessage: 'Active',
   }
 );
 
 const RECOVERED_LABEL = i18n.translate(
-  'xpack.triggersActionsUI.components.alertLifecycleStatusBadge.recoveredLabel',
+  'alertsUIShared.components.alertLifecycleStatusBadge.recoveredLabel',
   {
     defaultMessage: 'Recovered',
   }
 );
 
 const FLAPPING_LABEL = i18n.translate(
-  'xpack.triggersActionsUI.components.alertLifecycleStatusBadge.flappingLabel',
+  'alertsUIShared.components.alertLifecycleStatusBadge.flappingLabel',
   {
     defaultMessage: 'Flapping',
   }
