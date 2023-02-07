@@ -8,6 +8,11 @@
 import { SERVICE_ENVIRONMENT } from '../../common/es_fields/apm';
 import { useFetcher } from './use_fetcher';
 import { Environment } from '../../common/environment_rt';
+import { APIReturnType } from '../services/rest/create_call_apm_api';
+
+type EnvironmentsAPIResponse = APIReturnType<'GET /internal/apm/environments'>;
+
+const INITIAL_DATA: EnvironmentsAPIResponse = { environments: [] };
 export function useEnvironmentsFetcher({
   serviceName,
   start,
@@ -17,7 +22,7 @@ export function useEnvironmentsFetcher({
   start?: string;
   end?: string;
 }) {
-  const { data, status } = useFetcher(
+  const { data = INITIAL_DATA, status } = useFetcher(
     (callApmApi) => {
       if (!start || !end) {
         return;
@@ -32,9 +37,6 @@ export function useEnvironmentsFetcher({
               serviceName,
             },
           },
-        }).then((response) => {
-          // Spreading of original response is needed in order to display the api call in the inspector
-          return { ...response, environments: response.environments };
         });
       }
       return callApmApi('GET /internal/apm/suggestions', {
@@ -47,14 +49,14 @@ export function useEnvironmentsFetcher({
           },
         },
       }).then((response) => {
-        return { ...response, environments: response.terms };
+        return { environments: response.terms };
       });
     },
     [start, end, serviceName]
   );
 
   return {
-    environments: (data?.environments ?? []) as Environment[],
+    environments: data.environments as Environment[],
     status,
   };
 }
