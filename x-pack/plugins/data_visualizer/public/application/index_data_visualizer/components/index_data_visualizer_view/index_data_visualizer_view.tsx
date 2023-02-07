@@ -71,7 +71,11 @@ import { DataVisualizerDataViewManagement } from '../data_view_management';
 import { GetAdditionalLinks } from '../../../common/components/results_links';
 import { useDataVisualizerGridData } from '../../hooks/use_data_visualizer_grid_data';
 import { DataVisualizerGridInput } from '../../embeddables/grid_embeddable/grid_embeddable';
-import { RANDOM_SAMPLER_OPTION, RandomSamplerOption } from '../../constants/random_sampler';
+import {
+  MIN_SAMPLER_PROBABILITY,
+  RANDOM_SAMPLER_OPTION,
+  RandomSamplerOption,
+} from '../../constants/random_sampler';
 
 interface DataVisualizerPageState {
   overallStats: OverallStats;
@@ -324,16 +328,14 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
   );
 
   const setRandomSamplerPreference = useCallback(
-    (pref: RandomSamplerOption) => {
-      if (
-        savedRandomSamplerPreference === RANDOM_SAMPLER_OPTION.ON_AUTOMATIC &&
-        pref === RANDOM_SAMPLER_OPTION.ON_MANUAL
-      ) {
-        setSamplingProbability(0.5);
+    (nextPref: RandomSamplerOption) => {
+      if (nextPref === RANDOM_SAMPLER_OPTION.ON_MANUAL) {
+        // By default, when switching to manual, default to 0.001%
+        setSamplingProbability(MIN_SAMPLER_PROBABILITY);
       }
-      saveRandomSamplerPreference(pref);
+      saveRandomSamplerPreference(nextPref);
     },
-    [setSamplingProbability, savedRandomSamplerPreference, saveRandomSamplerPreference]
+    [setSamplingProbability, saveRandomSamplerPreference]
   );
 
   useEffect(

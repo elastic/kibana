@@ -20,7 +20,7 @@ import {
   EuiFormRow,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { debounce, sortedIndex } from 'lodash';
+import { debounce } from 'lodash';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { isDefined } from '@kbn/ml-is-defined';
 import type { DocumentCountChartPoint } from './document_count_chart';
@@ -30,6 +30,7 @@ import {
   RandomSamplerOption,
   RANDOM_SAMPLER_SELECT_OPTIONS,
   RANDOM_SAMPLER_OPTION,
+  MIN_SAMPLER_PROBABILITY,
 } from '../../../index_data_visualizer/constants/random_sampler';
 import { TotalCountHeader } from './total_count_header';
 import type { DocumentCountStats } from '../../../../../common/types/field_stats';
@@ -68,15 +69,11 @@ export const DocumentCountContent: FC<Props> = ({
   const updateSamplingProbability = useCallback(
     debounce((newProbability: number) => {
       if (setSamplingProbability) {
-        const idx = sortedIndex(RANDOM_SAMPLER_PROBABILITIES, newProbability);
-        const closestPrev = RANDOM_SAMPLER_PROBABILITIES[idx - 1];
-        const closestNext = RANDOM_SAMPLER_PROBABILITIES[idx];
-        const closestProbability =
-          Math.abs(closestPrev - newProbability) < Math.abs(closestNext - newProbability)
-            ? closestPrev
-            : closestNext;
+        const nextProbability = Math.floor(newProbability) / 100;
 
-        setSamplingProbability(closestProbability / 100);
+        setSamplingProbability(
+          nextProbability < MIN_SAMPLER_PROBABILITY ? MIN_SAMPLER_PROBABILITY : nextProbability
+        );
       }
     }, 100),
     [setSamplingProbability]
@@ -204,18 +201,25 @@ export const DocumentCountContent: FC<Props> = ({
                         defaultMessage: 'Sampling percentage',
                       }
                     )}
+                    helpText={i18n.translate(
+                      'xpack.dataVisualizer.randomSamplerSettingsPopUp.randomSamplerPercentageRowHelpText',
+                      {
+                        defaultMessage:
+                          'Choose a value between 0.001% and 50% to randomly sample data.',
+                      }
+                    )}
                   >
                     <EuiRange
                       fullWidth
-                      showValue
                       showTicks
-                      showRange={false}
+                      showRange
+                      showInput="inputWithPopover"
                       min={RANDOM_SAMPLER_STEP}
                       max={50}
                       value={(samplingProbability ?? 1) * 100}
                       ticks={RANDOM_SAMPLER_PROBABILITIES.map((d) => ({
                         value: d,
-                        label: d === 0.001 || d >= 5 ? `${d}%` : '',
+                        label: d === 0.001 || d >= 5 ? `${d}` : '',
                       }))}
                       onChange={(e) => updateSamplingProbability(Number(e.currentTarget.value))}
                       step={RANDOM_SAMPLER_STEP}
