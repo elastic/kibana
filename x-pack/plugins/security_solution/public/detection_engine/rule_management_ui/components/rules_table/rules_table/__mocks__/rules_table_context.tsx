@@ -40,6 +40,7 @@ export const useRulesTableContextMock = {
       loadingRuleIds: [],
       loadingRulesAction: null,
       selectedRuleIds: [],
+      isDefault: true,
     },
     actions: {
       reFetchRules: jest.fn(),
@@ -54,6 +55,7 @@ export const useRulesTableContextMock = {
       setSelectedRuleIds: jest.fn(),
       setSortingOptions: jest.fn(),
       clearRulesSelection: jest.fn(),
+      clearFilters: jest.fn(),
     },
   }),
 };
