@@ -8,18 +8,15 @@
 import { useMemo } from 'react';
 import { SERVICE_NAME } from '../../common/es_fields/apm';
 import { termQuery } from '../../common/utils/term_query';
-import { useAnyOfApmParams } from './use_apm_params';
 import { environmentQuery } from '../../common/utils/environment_query';
 
-export function useFiltersForEmbeddableCharts() {
-  const {
-    path: { serviceName },
-    query: { environment },
-  } = useAnyOfApmParams(
-    '/mobile-services/{serviceName}/overview',
-    '/mobile-services/{serviceName}/transactions'
-  );
-
+export function useFiltersForEmbeddableCharts({
+  serviceName,
+  environment,
+}: {
+  serviceName: string;
+  environment: string;
+}) {
   return useMemo(
     () =>
       [

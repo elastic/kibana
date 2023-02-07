@@ -52,7 +52,6 @@ export const chartHeight = 288;
 export function MobileServiceOverview() {
   const { serviceName } = useApmServiceContext();
   const router = useApmRouter();
-  const embeddableFilters = useFiltersForEmbeddableCharts();
 
   const {
     query,
@@ -65,8 +64,15 @@ export function MobileServiceOverview() {
       osVersion,
       appVersion,
       netConnectionType,
+      offset,
+      comparisonEnabled,
     },
   } = useApmParams('/mobile-services/{serviceName}/overview');
+
+  const embeddableFilters = useFiltersForEmbeddableCharts({
+    serviceName,
+    environment,
+  });
 
   const kueryWithMobileFilters = getKueryWithMobileFilters({
     device,
@@ -167,6 +173,10 @@ export function MobileServiceOverview() {
                   start={start}
                   end={end}
                   kuery={kueryWithMobileFilters}
+                  environment={environment}
+                  offset={offset}
+                  serviceName={serviceName}
+                  comparisonEnabled={comparisonEnabled}
                 />
               </EuiFlexItem>
             </EuiFlexGroup>

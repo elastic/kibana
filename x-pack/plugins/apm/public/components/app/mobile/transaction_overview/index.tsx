@@ -43,7 +43,10 @@ export function MobileTransactionOverview() {
     },
   } = useApmParams('/mobile-services/{serviceName}/transactions');
 
-  const embeddableFilters = useFiltersForEmbeddableCharts();
+  const embeddableFilters = useFiltersForEmbeddableCharts({
+    serviceName,
+    environment,
+  });
 
   const kueryWithMobileFilters = getKueryWithMobileFilters({
     device,
@@ -86,6 +89,10 @@ export function MobileTransactionOverview() {
               start={start}
               end={end}
               kuery={kueryWithMobileFilters}
+              environment={environment}
+              serviceName={serviceName}
+              offset={offset}
+              comparisonEnabled={comparisonEnabled}
             />
           </EuiFlexItem>
         </EuiFlexGroup>
