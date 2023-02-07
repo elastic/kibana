@@ -286,6 +286,7 @@
     "@kbn/doc-links": "link:packages/kbn-doc-links",
     "@kbn/ebt-tools": "link:packages/kbn-ebt-tools",
     "@kbn/ecs": "link:packages/kbn-ecs",
+    "@kbn/ecs-data-quality-dashboard": "link:x-pack/packages/kbn-ecs-data-quality-dashboard",
     "@kbn/es-errors": "link:packages/kbn-es-errors",
     "@kbn/es-query": "link:packages/kbn-es-query",
     "@kbn/es-types": "link:packages/kbn-es-types",
