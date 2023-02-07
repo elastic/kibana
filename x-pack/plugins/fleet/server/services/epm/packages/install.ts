@@ -294,7 +294,7 @@ async function installPackageFromRegistry({
   const logger = appContextService.getLogger();
   // TODO: change epm API to /packageName/version so we don't need to do this
   const { pkgName, pkgVersion: version } = Registry.splitPkgKey(pkgkey);
-  let pkgVersion = version;
+  let pkgVersion = version ?? '';
 
   // if an error happens during getInstallType, report that we don't know
   let installType: InstallType = 'unknown';
