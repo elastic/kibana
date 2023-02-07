@@ -6,20 +6,36 @@
  * Side Public License, v 1.
  */
 
-import { SavedObjectsBulkCreateObject } from '@kbn/core-saved-objects-api-server';
-import { SavedObjectsType } from '@kbn/core-saved-objects-server';
+import type { SavedObjectsBulkCreateObject } from '@kbn/core-saved-objects-api-server';
+import type { SavedObjectsType } from '@kbn/core-saved-objects-server';
 
-export const baselineTypes: Array<Partial<SavedObjectsType>> = [
+const defaultType: SavedObjectsType<any> = {
+  name: 'defaultType',
+  hidden: false,
+  namespaceType: 'agnostic',
+  mappings: {
+    properties: {
+      name: { type: 'keyword' },
+    },
+  },
+  migrations: {},
+};
+
+export const baselineTypes: Array<SavedObjectsType<any>> = [
   {
+    ...defaultType,
     name: 'server',
   },
   {
+    ...defaultType,
     name: 'basic',
   },
   {
+    ...defaultType,
     name: 'deprecated',
   },
   {
+    ...defaultType,
     name: 'complex',
     mappings: {
       properties: {

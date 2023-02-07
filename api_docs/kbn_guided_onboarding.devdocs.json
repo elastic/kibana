@@ -215,7 +215,7 @@
             "label": "guideId",
             "description": [],
             "signature": [
-              "\"search\" | \"kubernetes\" | \"siem\" | \"testGuide\""
+              "\"kubernetes\" | \"siem\" | \"appSearch\" | \"websiteSearch\" | \"databaseSearch\" | \"testGuide\""
             ],
             "path": "packages/kbn-guided-onboarding/src/types.ts",
             "deprecated": false,
@@ -549,7 +549,7 @@
         "label": "GuideId",
         "description": [],
         "signature": [
-          "\"search\" | \"kubernetes\" | \"siem\" | \"testGuide\""
+          "\"kubernetes\" | \"siem\" | \"appSearch\" | \"websiteSearch\" | \"databaseSearch\" | \"testGuide\""
         ],
         "path": "packages/kbn-guided-onboarding/src/types.ts",
         "deprecated": false,
@@ -613,7 +613,7 @@
         "label": "testGuideId",
         "description": [],
         "signature": [
-          "\"search\" | \"kubernetes\" | \"siem\" | \"testGuide\""
+          "\"kubernetes\" | \"siem\" | \"appSearch\" | \"websiteSearch\" | \"databaseSearch\" | \"testGuide\""
         ],
         "path": "packages/kbn-guided-onboarding/src/common/test_guide_config.ts",
         "deprecated": false,

@@ -10,6 +10,8 @@ import Path from 'path';
 import fs from 'fs/promises';
 import { SemVer } from 'semver';
 
+import { defaultsDeep } from 'lodash';
+import { BehaviorSubject, firstValueFrom, map } from 'rxjs';
 import { ConfigService, Env } from '@kbn/config';
 import { getEnvOptions } from '@kbn/config-mocks';
 import { getPackages } from '@kbn/repo-packages';
@@ -18,49 +20,27 @@ import { KibanaMigrator } from '@kbn/core-saved-objects-migration-server-interna
 
 import {
   SavedObjectConfig,
-  SavedObjectsConfigType,
-  SavedObjectsMigrationConfigType,
+  type SavedObjectsConfigType,
+  type SavedObjectsMigrationConfigType,
   SavedObjectTypeRegistry,
 } from '@kbn/core-saved-objects-base-server-internal';
 import { SavedObjectsRepository } from '@kbn/core-saved-objects-api-server-internal';
 import {
   ElasticsearchConfig,
-  ElasticsearchConfigType,
+  type ElasticsearchConfigType,
 } from '@kbn/core-elasticsearch-server-internal';
 import { AgentManager, configureClient } from '@kbn/core-elasticsearch-client-server-internal';
-import { LoggingConfigType, LoggingSystem } from '@kbn/core-logging-server-internal';
-import { BehaviorSubject, firstValueFrom, map } from 'rxjs';
-import { defaultsDeep } from 'lodash';
+import { type LoggingConfigType, LoggingSystem } from '@kbn/core-logging-server-internal';
 import { docLinksServiceMock } from '@kbn/core-doc-links-server-mocks';
-import { ServiceConfigDescriptor } from '@kbn/core-base-server-internal';
 
-import { config as pathConfig } from '@kbn/utils';
-import { config as loggingConfig } from '@kbn/core-logging-server-internal';
-import { coreDeprecationProvider } from '@kbn/core-config-server-internal';
-import { nodeConfig } from '@kbn/core-node-server-internal';
-import { pidConfig } from '@kbn/core-environment-server-internal';
-import { executionContextConfig } from '@kbn/core-execution-context-server-internal';
-import { config as httpConfig, cspConfig, externalUrlConfig } from '@kbn/core-http-server-internal';
-import { config as elasticsearchConfig } from '@kbn/core-elasticsearch-server-internal';
-import { opsConfig } from '@kbn/core-metrics-server-internal';
-import {
-  savedObjectsConfig,
-  savedObjectsMigrationConfig,
-} from '@kbn/core-saved-objects-base-server-internal';
-import { config as i18nConfig } from '@kbn/core-i18n-server-internal';
-import { config as deprecationConfig } from '@kbn/core-deprecations-server-internal';
-import { statusConfig } from '@kbn/core-status-server-internal';
-import { uiSettingsConfig } from '@kbn/core-ui-settings-server-internal';
-import { config as pluginsConfig } from '@kbn/core-plugins-server-internal';
-import { elasticApmConfig } from '@kbn/core-root-server-internal/src/root/elastic_config';
-import { ISavedObjectTypeRegistry, SavedObjectsType } from '@kbn/core-saved-objects-server';
+import type { ISavedObjectTypeRegistry, SavedObjectsType } from '@kbn/core-saved-objects-server';
 import { esTestConfig, kibanaServerTestUser } from '@kbn/test';
 import { LoggerFactory } from '@kbn/logging';
 import { createTestServers } from '@kbn/core-test-helpers-kbn-server';
-import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import { registerServiceConfig } from '@kbn/core-root-server-internal';
 import { baselineDocuments, baselineTypes } from './kibana_migrator_test_kit.fixtures';
 
-const rootConfigPath = '';
 export const defaultLogFilePath = Path.join(__dirname, 'kibana_migrator_test_kit.log');
 
 // Extract current stack version from Env, to use as a default
@@ -68,11 +48,11 @@ export const defaultKibanaIndex = '.kibana_migrator_tests';
 export const currentVersion = Env.createDefault(REPO_ROOT, getEnvOptions()).packageInfo.version;
 export const nextMinor = new SemVer(currentVersion).inc('minor').format();
 
-interface KibanaMigratorTestKitParams {
+export interface KibanaMigratorTestKitParams {
   kibanaIndex?: string;
   kibanaVersion?: string;
   settings?: Record<string, any>;
-  types?: Array<Partial<SavedObjectsType<any>>>;
+  types?: Array<SavedObjectsType<any>>;
   logFilePath?: string;
 }
 
@@ -234,35 +214,7 @@ const getConfigService = (
   };
 
   const configService = new ConfigService(rawConfigProvider, env, loggerFactory);
-
-  const configDescriptors: Array<ServiceConfigDescriptor<unknown>> = [
-    cspConfig,
-    deprecationConfig,
-    elasticsearchConfig,
-    elasticApmConfig,
-    executionContextConfig,
-    externalUrlConfig,
-    httpConfig,
-    i18nConfig,
-    loggingConfig,
-    nodeConfig,
-    opsConfig,
-    pathConfig,
-    pidConfig,
-    pluginsConfig,
-    savedObjectsConfig,
-    savedObjectsMigrationConfig,
-    statusConfig,
-    uiSettingsConfig,
-  ];
-
-  configService.addDeprecationProvider(rootConfigPath, coreDeprecationProvider);
-  for (const descriptor of configDescriptors) {
-    if (descriptor.deprecations) {
-      configService.addDeprecationProvider(descriptor.path, descriptor.deprecations);
-    }
-    configService.setSchema(descriptor.path, descriptor.schema);
-  }
+  registerServiceConfig(configService);
   return configService;
 };
 
@@ -315,26 +267,9 @@ const getMigrator = async (
 
 const registerTypes = (
   typeRegistry: SavedObjectTypeRegistry,
-  types?: Array<Partial<SavedObjectsType<any>>>
+  types?: Array<SavedObjectsType<any>>
 ) => {
-  const defaultType: SavedObjectsType<any> = {
-    name: 'defaultType',
-    hidden: false,
-    namespaceType: 'agnostic',
-    mappings: {
-      properties: {
-        name: { type: 'keyword' },
-      },
-    },
-    migrations: {},
-  };
-
-  (types || []).forEach((type) =>
-    typeRegistry.registerType({
-      ...defaultType,
-      ...type,
-    })
-  );
+  (types || []).forEach((type) => typeRegistry.registerType(type));
 };
 
 interface GetMutatedMigratorParams {
@@ -371,7 +306,7 @@ export const getCompatibleMappingsMigrator = async ({
 }: GetMutatedMigratorParams & { filterDeprecated?: boolean } = {}) => {
   const types = baselineTypes
     .filter((type) => !filterDeprecated || type.name !== 'deprecated')
-    .map<Partial<SavedObjectsType>>((type) => {
+    .map<SavedObjectsType>((type) => {
       if (type.name === 'complex') {
         return {
           ...type,
@@ -399,7 +334,7 @@ export const getIncompatibleMappingsMigrator = async ({
   kibanaVersion = nextMinor,
   settings = {},
 }: GetMutatedMigratorParams = {}) => {
-  const types = baselineTypes.map<Partial<SavedObjectsType>>((type) => {
+  const types = baselineTypes.map<SavedObjectsType>((type) => {
     if (type.name === 'complex') {
       return {
         ...type,
