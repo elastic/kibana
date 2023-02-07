@@ -166,20 +166,20 @@ variables:
 `date`:: The date the rule scheduled the action, in ISO format.
 `kibanaBaseUrl`:: The configured <<server-publicBaseUrl,`server.publicBaseUrl`>>. If not configured, this will be empty.
 `alerts.all.count`:: The count of all alerts.
-`alerts.all.data`:: An array of objects for all alerts.
+`alerts.all.data`:: An array of objects for all alerts. See <<alert-data-fields>>
 `alerts.new.count`:: The count of new alerts.
-`alerts.new.data`:: An array of objects for new alerts.
+`alerts.new.data`:: An array of objects for new alerts. See <<alert-data-fields>>
 `alerts.ongoing.count`:: The count of ongoing alerts.
-`alerts.ongoing.data`:: An array of objects for ongoing alerts.
+`alerts.ongoing.data`:: An array of objects for ongoing alerts. See <<alert-data-fields>>
 `alerts.recovered.count`:: The count of recovered alerts.
-`alerts.recovered.data`:: An array of objects for recovered alerts.
+`alerts.recovered.data`:: An array of objects for recovered alerts. See <<alert-data-fields>>
 
 [float]
 [[alert-data-fields]]
-===== Fields available under alerts.*.data
+===== Fields available in "alerts.*.data" 
 
-The following fields are some examples of the fields available under
-`alerts.*.data`. It is not a comprehensive list.
+The following fields are some examples of the fields available in the objects in alerts data arrays mentioned above.
+(`alerts.all.data`, `alerts.new.data`, `alerts.ongoing.data`, `alerts.recovered.data`) and It is not a comprehensive list.
 
 `kibana.alert.start`:: Datetime stamp of alert start.
 `kibana.alert.end`:: Datetime stamp of alert end.
