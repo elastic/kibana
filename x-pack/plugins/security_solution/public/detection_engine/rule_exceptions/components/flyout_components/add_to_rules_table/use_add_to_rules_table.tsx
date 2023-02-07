@@ -15,10 +15,10 @@ import { i18n } from '@kbn/i18n';
 import * as myI18n from './translations';
 import * as commonI18n from '../translations';
 
-import { useFindRulesInMemory } from '../../../../rule_management_ui/components/rules_table/rules_table/use_find_rules_in_memory';
 import type { Rule } from '../../../../rule_management/logic/types';
 import { getRulesTableColumn } from '../utils';
 import { LinkRuleSwitch } from './link_rule_switch';
+import { useFindRules } from '../../../../rule_management/logic/use_find_rules';
 
 export interface ExceptionsAddToRulesComponentProps {
   initiallySelectedRules?: Rule[];
@@ -28,8 +28,7 @@ export const useAddToRulesTable = ({
   initiallySelectedRules,
   onRuleSelectionChange,
 }: ExceptionsAddToRulesComponentProps) => {
-  const { data: { rules } = { rules: [], total: 0 }, isFetched } = useFindRulesInMemory({
-    isInMemorySorting: true,
+  const { data: { rules } = { rules: [], total: 0 }, isFetched } = useFindRules({
     filterOptions: {
       filter: '',
       showCustomRules: false,
@@ -38,7 +37,6 @@ export const useAddToRulesTable = ({
     },
     sortingOptions: undefined,
     pagination: undefined,
-    refetchInterval: false,
   });
 
   const [pagination, setPagination] = useState({
