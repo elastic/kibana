@@ -18,6 +18,12 @@ import type { BrowserFields } from '../../../../common/search_strategy';
 import type { DataProvider, DataProvidersAnd } from '../../../../common/types';
 import { DataProviderType, EXISTS_OPERATOR } from '../../../../common/types';
 
+export type PrimitiveOrArrayOfPrimitives =
+  | string
+  | number
+  | boolean
+  | Array<string | number | boolean>;
+
 export interface CombineQueries {
   config: EsQueryConfig;
   dataProviders: DataProvider[];
@@ -29,8 +35,8 @@ export interface CombineQueries {
 }
 
 export const escapeQueryValue = (
-  val: string | number | Array<string | number> = ''
-): string | number | Array<string | number> => {
+  val: PrimitiveOrArrayOfPrimitives = ''
+): PrimitiveOrArrayOfPrimitives => {
   if (isString(val)) {
     if (isEmpty(val)) {
       return '""';
@@ -68,12 +74,13 @@ export const convertKueryToElasticSearchQuery = (
   }
 };
 
-const isNumber = (value: string | number | Array<string | number>) => !isNaN(Number(value));
+export const isNumber = (value: PrimitiveOrArrayOfPrimitives): value is number =>
+  !isNaN(Number(value));
 
-const convertDateFieldToQuery = (field: string, value: string | number | Array<string | number>) =>
+export const convertDateFieldToQuery = (field: string, value: PrimitiveOrArrayOfPrimitives) =>
   `${field}: ${isNumber(value) ? value : new Date(value.toString()).valueOf()}`;
 
-const getBaseFields = memoizeOne((browserFields: BrowserFields): string[] => {
+export const getBaseFields = memoizeOne((browserFields: BrowserFields): string[] => {
   const baseFields = get('base', browserFields);
   if (baseFields != null && baseFields.fields != null) {
     return Object.keys(baseFields.fields);
@@ -81,7 +88,7 @@ const getBaseFields = memoizeOne((browserFields: BrowserFields): string[] => {
   return [];
 });
 
-const getBrowserFieldPath = (field: string, browserFields: BrowserFields) => {
+export const getBrowserFieldPath = (field: string, browserFields: BrowserFields) => {
   const splitFields = field.split('.');
   const baseFields = getBaseFields(browserFields);
   if (baseFields.includes(field)) {
@@ -90,7 +97,7 @@ const getBrowserFieldPath = (field: string, browserFields: BrowserFields) => {
   return [splitFields[0], 'fields', field];
 };
 
-const checkIfFieldTypeIsDate = (field: string, browserFields: BrowserFields) => {
+export const checkIfFieldTypeIsDate = (field: string, browserFields: BrowserFields) => {
   const pathBrowserField = getBrowserFieldPath(field, browserFields);
   const browserField = get(pathBrowserField, browserFields);
   if (browserField != null && browserField.type === 'date') {
@@ -99,9 +106,9 @@ const checkIfFieldTypeIsDate = (field: string, browserFields: BrowserFields) => 
   return false;
 };
 
-const convertNestedFieldToQuery = (
+export const convertNestedFieldToQuery = (
   field: string,
-  value: string | number | Array<string | number>,
+  value: PrimitiveOrArrayOfPrimitives,
   browserFields: BrowserFields
 ) => {
   const pathBrowserField = getBrowserFieldPath(field, browserFields);
@@ -111,7 +118,7 @@ const convertNestedFieldToQuery = (
   return `${nestedPath}: { ${key}: ${browserField.type === 'date' ? `"${value}"` : value} }`;
 };
 
-const convertNestedFieldToExistQuery = (field: string, browserFields: BrowserFields) => {
+export const convertNestedFieldToExistQuery = (field: string, browserFields: BrowserFields) => {
   const pathBrowserField = getBrowserFieldPath(field, browserFields);
   const browserField = get(pathBrowserField, browserFields);
   const nestedPath = browserField.subType.nested.path;
@@ -119,7 +126,7 @@ const convertNestedFieldToExistQuery = (field: string, browserFields: BrowserFie
   return `${nestedPath}: { ${key}: * }`;
 };
 
-const checkIfFieldTypeIsNested = (field: string, browserFields: BrowserFields) => {
+export const checkIfFieldTypeIsNested = (field: string, browserFields: BrowserFields) => {
   const pathBrowserField = getBrowserFieldPath(field, browserFields);
   const browserField = get(pathBrowserField, browserFields);
   if (browserField != null && browserField.subType && browserField.subType.nested) {

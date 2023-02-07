@@ -28,6 +28,7 @@ import { indexHealthToHealthColor } from '../../../shared/constants/health_color
 import { generateEncodedPath } from '../../../shared/encode_path_params';
 import { KibanaLogic } from '../../../shared/kibana';
 import { EuiLinkTo } from '../../../shared/react_router_helpers';
+import { TelemetryLogic } from '../../../shared/telemetry/telemetry_logic';
 
 import { SEARCH_INDEX_PATH, EngineViewTabs } from '../../routes';
 import { IngestionMethod } from '../../types';
@@ -40,6 +41,7 @@ import { EngineIndicesLogic } from './engine_indices_logic';
 import { EngineViewHeaderActions } from './engine_view_header_actions';
 
 export const EngineIndices: React.FC = () => {
+  const { sendEnterpriseSearchTelemetry } = useActions(TelemetryLogic);
   const { engineData, engineName, isLoadingEngine, addIndicesFlyoutOpen } =
     useValues(EngineIndicesLogic);
   const { removeIndexFromEngine, openAddIndicesFlyout, closeAddIndicesFlyout } =
@@ -157,7 +159,13 @@ export const EngineIndices: React.FC = () => {
                 },
               }
             ),
-          onClick: (index) => setConfirmRemoveIndex(index.name),
+          onClick: (index) => {
+            setConfirmRemoveIndex(index.name);
+            sendEnterpriseSearchTelemetry({
+              action: 'clicked',
+              metric: 'entSearchContent-engines-indices-removeIndex',
+            });
+          },
           type: 'icon',
         },
       ],
@@ -180,6 +188,7 @@ export const EngineIndices: React.FC = () => {
           <EuiFlexGroup gutterSize="xs" alignItems="center">
             <EuiFlexItem>
               <EuiButton
+                data-telemetry-id="entSearchContent-engines-indices-addNewIndices"
                 data-test-subj="engine-add-new-indices-btn"
                 iconType="plusInCircle"
                 fill
@@ -224,6 +233,10 @@ export const EngineIndices: React.FC = () => {
             onConfirm={() => {
               removeIndexFromEngine(removeIndexConfirm);
               setConfirmRemoveIndex(null);
+              sendEnterpriseSearchTelemetry({
+                action: 'clicked',
+                metric: 'entSearchContent-engines-indices-removeIndexConfirm',
+              });
             }}
             title={i18n.translate(
               'xpack.enterpriseSearch.content.engine.indices.removeIndexConfirm.title',
