@@ -6,14 +6,13 @@
  */
 
 import { FtrConfigProviderContext } from '@kbn/test';
-import { resolve } from 'path';
 
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const baseConfig = await readConfigFile(require.resolve('../../config.base.ts'));
 
   return {
     ...baseConfig.getAll(),
-    testFiles: [resolve('.')],
+    testFiles: [require.resolve('.')],
     junit: {
       reportName: 'Chrome X-Pack UI Functional Tests with ES SSL - Cases',
     },
