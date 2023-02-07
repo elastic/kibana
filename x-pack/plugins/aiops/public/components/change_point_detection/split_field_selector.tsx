@@ -23,7 +23,7 @@ export const SplitFieldSelector: FC<SplitFieldSelectorProps> = React.memo(({ val
       {
         name: undefined,
         displayName: i18n.translate('xpack.aiops.changePointDetection.notSelectedSplitFieldLabel', {
-          defaultMessage: 'Not selected',
+          defaultMessage: '--- Not selected ---',
         }),
       },
       ...splitFieldsOptions,
