@@ -36,6 +36,7 @@ import {
   isRumAgentName,
   isServerlessAgent,
 } from '../../../../common/agent_name';
+import { NoTransactionsPrompt } from '../../shared/transactions_prompt/no_transactions_prompt';
 /**
  * The height a chart should be if it's next to a table with 5 rows and a title.
  * Add the height of the pagination row.
@@ -44,8 +45,13 @@ export const chartHeight = 288;
 
 export function ServiceOverview() {
   const router = useApmRouter();
-  const { serviceName, fallbackToTransactions, agentName, serverlessType } =
-    useApmServiceContext();
+  const {
+    serviceName,
+    fallbackToTransactions,
+    agentName,
+    serverlessType,
+    transactionType,
+  } = useApmServiceContext();
 
   const {
     query,
@@ -75,6 +81,10 @@ export function ServiceOverview() {
   const rowDirection: EuiFlexGroupProps['direction'] = isSingleColumn
     ? 'column'
     : 'row';
+
+  if (!transactionType) {
+    return <NoTransactionsPrompt />;
+  }
 
   return (
     <AnnotationsContextProvider

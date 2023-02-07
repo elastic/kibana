@@ -335,8 +335,7 @@ export function TransactionsTable({
             fixedHeight={fixedHeight}
             isEmptyAndNotInitiated={
               transactionGroupsTotalItems === 0 &&
-              status === FETCH_STATUS.NOT_INITIATED &&
-              !!transactionType
+              status === FETCH_STATUS.NOT_INITIATED
             }
           >
             <EuiBasicTable

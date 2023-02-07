@@ -8,7 +8,7 @@
 import { useMemo } from 'react';
 import { usePreviousPeriodLabel } from './use_previous_period_text';
 import { isTimeComparison } from '../components/shared/time_comparison/get_comparison_options';
-import { FETCH_STATUS, useFetcher } from './use_fetcher';
+import { useFetcher } from './use_fetcher';
 import { useLegacyUrlParams } from '../context/url_params_context/use_url_params';
 import { useApmServiceContext } from '../context/apm_service/use_apm_service_context';
 import { getLatencyChartSelector } from '../selectors/latency_chart_selectors';
@@ -97,7 +97,7 @@ export function useTransactionLatencyChartsFetcher({
 
   return {
     latencyChartsData: memoizedData,
-    latencyChartsStatus: transactionType ? status : FETCH_STATUS.SUCCESS,
+    latencyChartsStatus: status,
     latencyChartsError: error,
   };
 }
