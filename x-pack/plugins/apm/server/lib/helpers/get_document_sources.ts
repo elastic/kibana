@@ -113,7 +113,7 @@ export async function getDocumentSources({
     };
   });
 
-  const hasAnyDataBefore = !!checkedSources.find(
+  const hasAnyDataBefore = checkedSources.some(
     (source) => source.hasDataBefore
   );
 
