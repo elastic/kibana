@@ -11,7 +11,7 @@ import { merge } from 'rxjs';
 import type { TimeRange } from '@kbn/es-query';
 import { mlTimefilterRefresh$, useTimefilter } from '@kbn/ml-date-picker';
 
-import type { TimeRangeMs } from '../../../../../../../common/types/date_picker';
+import type { TimeRange as TimeRangeMs } from '@kbn/ml-date-picker';
 
 import { StepDefineExposedState } from '../common';
 import { StepDefineFormProps } from '../step_define_form';
