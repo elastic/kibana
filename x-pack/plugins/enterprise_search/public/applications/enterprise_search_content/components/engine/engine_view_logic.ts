@@ -104,16 +104,14 @@ export const EngineViewLogic = kea<MakeLogicType<EngineViewValues, EngineViewAct
     schemaFields: [
       () => [selectors.engineSchemaData],
       (data) =>
-        data?.field_capabilities?.fields
-          ? Object.entries(data?.field_capabilities?.fields)
-              .map(([name]) =>
-                Object.entries({
-                  field_name: name,
-                  field_type: [...Object.keys(data?.field_capabilities?.fields[name])],
-                })
-              )
-              .map((fields) => Object.fromEntries(fields))
-          : [],
+        Object.entries(data?.field_capabilities?.fields ?? {})
+          .map(([name]) =>
+            Object.entries({
+              field_name: name,
+              field_type: [...Object.keys(data?.field_capabilities?.fields[name])],
+            })
+          )
+          .map((fields) => Object.fromEntries(fields)),
     ],
   }),
 });
