@@ -85,6 +85,8 @@ export const getAlertsHistogramQuery = (
       },
     },
     runtime_mappings: runtimeMappings,
+    _source: false,
+    size: 0,
   };
 };
 

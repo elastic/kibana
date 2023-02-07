@@ -1670,6 +1670,61 @@
       },
       {
         "parentPluginId": "@kbn/securitysolution-list-utils",
+        "id": "def-common.getMappingConflictsInfo",
+        "type": "Function",
+        "tags": [],
+        "label": "getMappingConflictsInfo",
+        "description": [],
+        "signature": [
+          "(field: ",
+          {
+            "pluginId": "@kbn/securitysolution-list-utils",
+            "scope": "common",
+            "docId": "kibKbnSecuritysolutionListUtilsPluginApi",
+            "section": "def-common.DataViewField",
+            "text": "DataViewField"
+          },
+          ") => ",
+          {
+            "pluginId": "@kbn/securitysolution-list-utils",
+            "scope": "common",
+            "docId": "kibKbnSecuritysolutionListUtilsPluginApi",
+            "section": "def-common.FieldConflictsInfo",
+            "text": "FieldConflictsInfo"
+          },
+          "[] | null"
+        ],
+        "path": "packages/kbn-securitysolution-list-utils/src/helpers/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/securitysolution-list-utils",
+            "id": "def-common.getMappingConflictsInfo.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "field",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/securitysolution-list-utils",
+                "scope": "common",
+                "docId": "kibKbnSecuritysolutionListUtilsPluginApi",
+                "section": "def-common.DataViewField",
+                "text": "DataViewField"
+              }
+            ],
+            "path": "packages/kbn-securitysolution-list-utils/src/helpers/index.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/securitysolution-list-utils",
         "id": "def-common.getNewExceptionItem",
         "type": "Function",
         "tags": [],
@@ -2184,6 +2239,51 @@
     "interfaces": [
       {
         "parentPluginId": "@kbn/securitysolution-list-utils",
+        "id": "def-common.DataViewField",
+        "type": "Interface",
+        "tags": [],
+        "label": "DataViewField",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/securitysolution-list-utils",
+            "scope": "common",
+            "docId": "kibKbnSecuritysolutionListUtilsPluginApi",
+            "section": "def-common.DataViewField",
+            "text": "DataViewField"
+          },
+          " extends ",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.DataViewFieldBase",
+            "text": "DataViewFieldBase"
+          }
+        ],
+        "path": "packages/kbn-securitysolution-list-utils/src/types/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/securitysolution-list-utils",
+            "id": "def-common.DataViewField.conflictDescriptions",
+            "type": "Object",
+            "tags": [],
+            "label": "conflictDescriptions",
+            "description": [],
+            "signature": [
+              "Record<string, string[]> | undefined"
+            ],
+            "path": "packages/kbn-securitysolution-list-utils/src/types/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/securitysolution-list-utils",
         "id": "def-common.EmptyEntry",
         "type": "Interface",
         "tags": [],
@@ -2454,6 +2554,62 @@
               "(({ field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } & { id?: string | undefined; }) | ({ field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; } & { id?: string | undefined; }) | ({ field: string; operator: \"excluded\" | \"included\"; type: \"wildcard\"; value: string; } & { id?: string | undefined; }) | ({ field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; } & { id?: string | undefined; }))[]"
             ],
             "path": "packages/kbn-securitysolution-list-utils/src/types/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/securitysolution-list-utils",
+        "id": "def-common.FieldConflictsInfo",
+        "type": "Interface",
+        "tags": [],
+        "label": "FieldConflictsInfo",
+        "description": [],
+        "path": "packages/kbn-securitysolution-list-utils/src/helpers/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/securitysolution-list-utils",
+            "id": "def-common.FieldConflictsInfo.type",
+            "type": "string",
+            "tags": [],
+            "label": "type",
+            "description": [
+              "\nKibana field type"
+            ],
+            "path": "packages/kbn-securitysolution-list-utils/src/helpers/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-list-utils",
+            "id": "def-common.FieldConflictsInfo.totalIndexCount",
+            "type": "number",
+            "tags": [],
+            "label": "totalIndexCount",
+            "description": [
+              "\nTotal count of the indices of this type"
+            ],
+            "path": "packages/kbn-securitysolution-list-utils/src/helpers/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-list-utils",
+            "id": "def-common.FieldConflictsInfo.groupedIndices",
+            "type": "Array",
+            "tags": [],
+            "label": "groupedIndices",
+            "description": [
+              "\nGrouped indices info"
+            ],
+            "signature": [
+              "{ name: string; count: number; }[]"
+            ],
+            "path": "packages/kbn-securitysolution-list-utils/src/helpers/index.ts",
             "deprecated": false,
             "trackAdoption": false
           }
