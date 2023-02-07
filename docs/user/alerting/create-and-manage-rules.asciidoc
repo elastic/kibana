@@ -122,18 +122,21 @@ image::images/rule-flyout-action-details.png[UI for defining an email action]
 You can attach more than one action. Clicking the *Add action* button will prompt you to select another rule type and repeat the above steps again.
 
 [float]
+[[defining-rules-actions-variables]]
 ===== Action variables
-Using the https://mustache.github.io/[Mustache] template syntax `{{variable name}}`, you can pass rule values at the time a condition is detected to an action. You can access the list of available variables using the "add rule variable" button. 
+Using the https://mustache.github.io/[Mustache] template syntax `{{variable name}}`, you can pass rule values to an action at the time a condition is detected. You can access the list of available variables using the "add rule variable" button. 
 
-There are two sets of Action Variables depending on **Action frequency**:
+There are two sets of action variables depending on the action frequency:
 
-- **For each alert** : Variables for the Actions that are reporting for each alerts.
-- **Summary of alerts** : Variables for the Actions that are reporting a summary of alerts.
+- <<alert-action-variables,For each alert>>
+- <<alert-summary-action-variables,Summary of alerts>>
 
 [float]
-[[defining-rules-actions-variables]]
-===== 1- Action variables **For each alert** :
-Although available variables differ by rule type, all rule types pass the following variables:
+[[alert-action-variables]]
+===== Action variables for each alert
+
+Although available variables differ by rule type, when the action frequency is
+**For each alert**, all rule types pass the following variables:
 
 `rule.id`:: The ID of the rule.
 `rule.name`:: The name of the rule.
@@ -145,20 +148,23 @@ Although available variables differ by rule type, all rule types pass the follow
 `alert.actionSubgroup`:: The action subgroup of the alert that scheduled the action.
 `alert.actionGroupName`:: The name of the action group of the alert that scheduled the action.
 `alert.flapping`:: A flag on the alert that indicates whether the alert status is changing repeatedly.
-`kibanaBaseUrl`:: The configured <<server-publicBaseUrl, `server.publicBaseUrl`>>. If not configured, this will be empty.
-
+`kibanaBaseUrl`:: The configured <<server-publicBaseUrl,`server.publicBaseUrl`>>. If not configured, this will be empty.
 
 [float]
-[[defining-rules-actions-variables]]
-===== 2- Action variables for **Summary of alerts** :
-Please note: **Summary of alerts** option is only available for some rule types.
+[[alert-summary-action-variables]]
+===== Action variables for summary of alerts
+
+NOTE: This type of action frequency is not available for all rule types.
+
+When the action frequency is **Summary of alerts**, rules pass the following
+variables:
 
 `rule.id`:: The ID of the rule.
 `rule.name`:: The name of the rule.
 `rule.spaceId`:: The ID of the space for the rule.
 `rule.tags`:: The list of tags applied to the rule.
 `date`:: The date the rule scheduled the action, in ISO format.
-`kibanaBaseUrl`:: The configured <<server-publicBaseUrl, `server.publicBaseUrl`>>. If not configured, this will be empty.
+`kibanaBaseUrl`:: The configured <<server-publicBaseUrl,`server.publicBaseUrl`>>. If not configured, this will be empty.
 `alerts.all.count`:: The count of all alerts.
 `alerts.all.data`:: An array of objects for all alerts.
 `alerts.new.count`:: The count of new alerts.
@@ -169,13 +175,16 @@ Please note: **Summary of alerts** option is only available for some rule types.
 `alerts.recovered.data`:: An array of objects for recovered alerts.
 
 [float]
-===== Fields available under alerts.*.data 
-Below fields are just some examples of the fields available under alerts.*.data and is not comprehensive.
+[[alert-data-fields]]
+===== Fields available under alerts.*.data
+
+The following fields are some examples of the fields available under
+`alerts.*.data`. It is not a comprehensive list.
 
 `kibana.alert.start`:: Datetime stamp of alert start.
 `kibana.alert.end`:: Datetime stamp of alert end.
-`kibana.alert.status`:: Alert status (Active, OK etc).
-`kibana.alert.reason`:: The reason of the alert (Generated with the rule conditions).
+`kibana.alert.status`:: Alert status (for example, active or OK).
+`kibana.alert.reason`:: The reason of the alert (generated with the rule conditions).
 `kibana.alert.flapping`:: A flag on the alert that indicates whether the alert status is changing repeatedly.
 `kibana.alert.instance.id`:: ID of the source that generates the alert.
 
@@ -184,9 +193,9 @@ image::images/rule-flyout-action-variables.png[Passing rule values to an action]
 
 Some cases exist where the variable values will be "escaped", when used in a context where escaping is needed:
 
-- For the <<email-action-type, Email>> connector, the `message` action configuration property escapes any characters that would be interpreted as Markdown.
-- For the <<slack-action-type, Slack>> connector, the `message` action configuration property escapes any characters that would be interpreted as Slack Markdown.
-- For the <<webhook-action-type, Webhook>> connector, the `body` action configuration property escapes any characters that are invalid in JSON string values.
+- For the <<email-action-type,Email>> connector, the `message` action configuration property escapes any characters that would be interpreted as Markdown.
+- For the <<slack-action-type,Slack>> connector, the `message` action configuration property escapes any characters that would be interpreted as Slack Markdown.
+- For the <<webhook-action-type,Webhook>> connector, the `body` action configuration property escapes any characters that are invalid in JSON string values.
 
 Mustache also supports "triple braces" of the form `{{{variable name}}}`, which indicates no escaping should be done at all.  Care should be used when using this form, as it could end up rendering the variable content in such a way as to make the resulting parameter invalid or formatted incorrectly.
 
