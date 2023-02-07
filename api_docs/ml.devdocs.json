@@ -1413,6 +1413,27 @@
             "path": "x-pack/plugins/ml/public/application/components/data_grid/types.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "ml",
+            "id": "def-public.UseIndexDataReturnType.timeRangeMs",
+            "type": "Object",
+            "tags": [],
+            "label": "timeRangeMs",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/ml-date-picker",
+                "scope": "common",
+                "docId": "kibKbnMlDatePickerPluginApi",
+                "section": "def-common.TimeRange",
+                "text": "TimeRange"
+              },
+              " | undefined"
+            ],
+            "path": "x-pack/plugins/ml/public/application/components/data_grid/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false

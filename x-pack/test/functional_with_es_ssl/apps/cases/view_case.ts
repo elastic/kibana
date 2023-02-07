@@ -14,7 +14,7 @@ import {
   createUsersAndRoles,
   deleteUsersAndRoles,
 } from '../../../cases_api_integration/common/lib/authentication';
-import { users, roles, casesAllUser } from './common';
+import { users, roles, casesAllUser, casesAllUser2 } from './common';
 
 export default ({ getPageObject, getService }: FtrProviderContext) => {
   const header = getPageObject('header');
@@ -282,21 +282,13 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
           await header.waitUntilLoadingHasFinished();
 
-          const propertyActions = await find.allByCssSelector(
-            '[data-test-subj*="property-actions-ellipses"]'
-          );
-
-          propertyActions[propertyActions.length - 1].click();
+          await testSubjects.click('property-actions-user-action-ellipses');
 
           await header.waitUntilLoadingHasFinished();
 
-          const editAction = await find.byCssSelector(
-            '[data-test-subj*="property-actions-pencil"]'
-          );
+          await testSubjects.click('property-actions-user-action-pencil');
 
           await header.waitUntilLoadingHasFinished();
-
-          await editAction.click();
 
           const editCommentTextArea = await find.byCssSelector(
             '[data-test-subj*="user-action-markdown-form"] textarea.euiMarkdownEditorTextArea'
@@ -315,21 +307,13 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         });
 
         it('shows unsaved description message when page is refreshed', async () => {
-          const propertyActions = await find.allByCssSelector(
-            '[data-test-subj*="property-actions-ellipses"]'
-          );
-
-          propertyActions[1].click();
+          await testSubjects.click('property-actions-description-ellipses');
 
           await header.waitUntilLoadingHasFinished();
 
-          const editAction = await find.byCssSelector(
-            '[data-test-subj*="property-actions-pencil"]'
-          );
+          await testSubjects.click('property-actions-description-pencil');
 
           await header.waitUntilLoadingHasFinished();
-
-          await editAction.click();
 
           const editCommentTextArea = await find.byCssSelector(
             '[data-test-subj*="user-action-markdown-form"] textarea.euiMarkdownEditorTextArea'
@@ -379,7 +363,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
     describe('Assignees field', () => {
       before(async () => {
         await createUsersAndRoles(getService, users, roles);
-        await cases.api.activateUserProfiles([casesAllUser]);
+        await cases.api.activateUserProfiles([casesAllUser, casesAllUser2]);
       });
 
       after(async () => {
