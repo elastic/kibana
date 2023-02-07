@@ -7,12 +7,12 @@
  */
 
 export type {
-  SavedObjectModelMigrationDoc,
-  SavedObjectModelMigrationContext,
-  SavedObjectModelMigrationFn,
-  SavedObjectModelBidirectionalMigration,
-  SavedObjectModelMigrationResult,
-} from './migration';
+  SavedObjectModelTransformationDoc,
+  SavedObjectModelTransformationContext,
+  SavedObjectModelTransformationFn,
+  SavedObjectModelBidirectionalTransformation,
+  SavedObjectModelTransformationResult,
+} from './transformations';
 
 export type {
   SavedObjectsModelChange,

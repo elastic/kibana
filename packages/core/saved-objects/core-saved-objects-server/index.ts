@@ -95,11 +95,11 @@ export type {
   SavedObjectsModelVersionMapProvider,
   SavedObjectsModelChange,
   SavedObjectsModelExpansionChange,
-  SavedObjectModelMigrationDoc,
-  SavedObjectModelMigrationContext,
-  SavedObjectModelMigrationFn,
-  SavedObjectModelBidirectionalMigration,
-  SavedObjectModelMigrationResult,
+  SavedObjectModelTransformationDoc,
+  SavedObjectModelTransformationContext,
+  SavedObjectModelTransformationFn,
+  SavedObjectModelBidirectionalTransformation,
+  SavedObjectModelTransformationResult,
 } from './src/model_version';
 
 export type {

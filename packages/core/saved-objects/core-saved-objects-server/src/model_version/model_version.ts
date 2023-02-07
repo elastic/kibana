@@ -7,7 +7,7 @@
  */
 
 import type { SavedObjectsMappingProperties } from '../mapping_definition';
-import type { SavedObjectModelBidirectionalMigration } from './migration';
+import type { SavedObjectModelBidirectionalTransformation } from './transformations';
 
 /**
  * Represents a model version of a given savedObjects type.
@@ -46,9 +46,9 @@ export interface SavedObjectsModelExpansionChange<
    */
   type: 'expansion';
   /**
-   * (optional) A bidirectional migration to migrate the data from and/or to the previous model version.
+   * (optional) A bidirectional transformation to migrate the document from and/or to the previous model version.
    */
-  migration?: SavedObjectModelBidirectionalMigration<PreviousAttributes, NewAttributes>;
+  transformation?: SavedObjectModelBidirectionalTransformation<PreviousAttributes, NewAttributes>;
   /**
    * (optional) The new mappings introduced in this version.
    */
