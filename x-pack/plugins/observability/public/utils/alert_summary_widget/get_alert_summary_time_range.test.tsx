@@ -12,8 +12,8 @@ import { getAlertSummaryTimeRange, getDefaultAlertSummaryTimeRange } from '.';
 describe('AlertSummaryTimeRange', () => {
   describe('getDefaultAlertSummaryTimeRange', () => {
     it('should return default time in UTC format', () => {
-      const defaultTimeRange = getDefaultAlertSummaryTimeRange();
       const utcFormat = 'YYYY-MM-DDTHH:mm:ss.SSSZ';
+      const defaultTimeRange = getDefaultAlertSummaryTimeRange();
 
       expect(moment(defaultTimeRange.utcFrom, utcFormat, true).isValid()).toBeTruthy();
       expect(moment(defaultTimeRange.utcTo, utcFormat, true).isValid()).toBeTruthy();
@@ -21,6 +21,7 @@ describe('AlertSummaryTimeRange', () => {
   });
 
   describe('getAlertSummaryTimeRange', () => {
+    const utcRegex = /^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}.[0-9]{3}Z/;
     const timeBucketConfig = {
       'histogram:maxBars': 4,
       'histogram:barTarget': 3,
@@ -39,6 +40,7 @@ describe('AlertSummaryTimeRange', () => {
     it.each([
       // 15 minutes
       ['2023-01-09T12:07:54.441Z', '2023-01-09T12:22:54.441Z', '30s', 'HH:mm:ss'],
+      ['now-15m', 'now', '30s', 'HH:mm:ss'],
       // 30 minutes
       ['2023-01-09T11:53:43.605Z', '2023-01-09T12:23:43.605Z', '30s', 'HH:mm:ss'],
       // 1 hour
@@ -54,11 +56,11 @@ describe('AlertSummaryTimeRange', () => {
       // 1 year
       ['2022-01-08T23:00:00.000Z', '2023-01-09T12:33:09.906Z', '86400s', 'YYYY-MM-DD'],
     ])(
-      `Input: [%s, %s], Output: interval: %s, time format: %s `,
+      `Input: [%s, %s, %s, %s] should return dates in UTC format`,
       (from, to, fixedInterval, dateFormat) => {
-        expect(getAlertSummaryTimeRange({ from, to }, timeBuckets)).toEqual({
-          utcFrom: from,
-          utcTo: to,
+        expect(getAlertSummaryTimeRange({ from, to }, fixedInterval, timeBuckets)).toMatchObject({
+          utcFrom: expect.stringMatching(new RegExp(utcRegex)),
+          utcTo: expect.stringMatching(new RegExp(utcRegex)),
           fixedInterval,
           dateFormat,
         });

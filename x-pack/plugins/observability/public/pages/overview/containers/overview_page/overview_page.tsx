@@ -39,7 +39,7 @@ import { getNewsFeed } from '../../../../services/get_news_feed';
 import { buildEsQuery } from '../../../../utils/build_es_query';
 import { getAlertSummaryTimeRange } from '../../../../utils/alert_summary_widget';
 
-import { ALERTS_PER_PAGE, ALERTS_TABLE_ID } from './constants';
+import { ALERTS_PER_PAGE, ALERTS_TABLE_ID, DEFAULT_INTERVAL } from './constants';
 import { calculateBucketSize, useOverviewMetrics } from './helpers';
 
 export function OverviewPage() {
@@ -91,23 +91,6 @@ export function OverviewPage() {
       to: relativeEnd,
     })
   );
-  const timeBuckets = useTimeBuckets();
-  const alertSummaryTimeRange = useMemo(
-    () =>
-      getAlertSummaryTimeRange(
-        {
-          from: relativeStart,
-          to: relativeEnd,
-        },
-        timeBuckets
-      ),
-    [relativeEnd, relativeStart, timeBuckets]
-  );
-
-  const chartThemes = {
-    theme: charts.theme.useChartsTheme(),
-    baseTheme: charts.theme.useChartsBaseTheme(),
-  };
 
   const bucketSize = useMemo(
     () =>
@@ -117,6 +100,25 @@ export function OverviewPage() {
       }),
     [absoluteStart, absoluteEnd]
   );
+
+  const timeBuckets = useTimeBuckets();
+  const alertSummaryTimeRange = useMemo(
+    () =>
+      getAlertSummaryTimeRange(
+        {
+          from: relativeStart,
+          to: relativeEnd,
+        },
+        bucketSize?.intervalString || DEFAULT_INTERVAL,
+        timeBuckets
+      ),
+    [bucketSize, relativeEnd, relativeStart, timeBuckets]
+  );
+
+  const chartThemes = {
+    theme: charts.theme.useChartsTheme(),
+    baseTheme: charts.theme.useChartsBaseTheme(),
+  };
 
   useEffect(() => {
     setEsQuery(

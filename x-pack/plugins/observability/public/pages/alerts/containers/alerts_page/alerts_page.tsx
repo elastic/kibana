@@ -12,6 +12,8 @@ import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { loadRuleAggregations } from '@kbn/triggers-actions-ui-plugin/public';
 import { AlertConsumers } from '@kbn/rule-data-utils';
+import { calculateTimeRangeBucketSizeFrom } from '../../../overview/containers/overview_page/helpers/calculate_bucket_size';
+import { DEFAULT_INTERVAL } from '../../../overview/containers/overview_page/constants';
 import { useToasts } from '../../../../hooks/use_toast';
 import {
   alertSearchBarStateContainer,
@@ -76,6 +78,14 @@ function InternalAlertsPage() {
   });
   const { hasAnyData, isAllRequestsComplete } = useHasData();
   const [esQuery, setEsQuery] = useState<{ bool: BoolQuery }>();
+  const bucketSize = useMemo(
+    () =>
+      calculateTimeRangeBucketSizeFrom({
+        from: alertSearchBarStateProps.rangeFrom,
+        to: alertSearchBarStateProps.rangeTo,
+      }),
+    [alertSearchBarStateProps.rangeFrom, alertSearchBarStateProps.rangeTo]
+  );
   const timeBuckets = useTimeBuckets();
   const alertSummaryTimeRange = useMemo(
     () =>
@@ -84,9 +94,10 @@ function InternalAlertsPage() {
           from: alertSearchBarStateProps.rangeFrom,
           to: alertSearchBarStateProps.rangeTo,
         },
+        bucketSize?.intervalString || DEFAULT_INTERVAL,
         timeBuckets
       ),
-    [alertSearchBarStateProps.rangeFrom, alertSearchBarStateProps.rangeTo, timeBuckets]
+    [alertSearchBarStateProps.rangeFrom, alertSearchBarStateProps.rangeTo, bucketSize, timeBuckets]
   );
 
   useBreadcrumbs([
