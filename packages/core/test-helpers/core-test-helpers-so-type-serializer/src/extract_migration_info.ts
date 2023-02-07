@@ -21,7 +21,7 @@ export interface SavedObjectTypeMigrationInfo {
   mappings: Record<string, unknown>;
   hasExcludeOnUpgrade: boolean;
   modelVersions: ModelVersionSummary[];
-  switchToModelVersionAfter?: string;
+  switchToModelVersionAt?: string;
 }
 
 export interface ModelVersionSummary {
@@ -71,6 +71,6 @@ export const extractMigrationInfo = (soType: SavedObjectsType): SavedObjectTypeM
     mappings: getFlattenedObject(soType.mappings ?? {}),
     hasExcludeOnUpgrade: !!soType.excludeOnUpgrade,
     modelVersions,
-    switchToModelVersionAfter: soType.switchToModelVersionAfter,
+    switchToModelVersionAt: soType.switchToModelVersionAt,
   };
 };

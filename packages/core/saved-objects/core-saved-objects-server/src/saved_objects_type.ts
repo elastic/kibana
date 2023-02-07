@@ -227,7 +227,7 @@ export interface SavedObjectsType<Attributes = any> {
    * @remarks All types will be forced to switch to use the new API in a later version. This switch is
    *          allowing types owners to switch their types before the milestone.
    */
-  switchToModelVersionAfter?: string;
+  switchToModelVersionAt?: string;
 }
 
 /**

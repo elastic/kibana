@@ -160,13 +160,13 @@ describe('extractMigrationInfo', () => {
   });
 
   describe('modelVersions', () => {
-    it('returns the correct switchToModelVersionAfter', () => {
+    it('returns the correct switchToModelVersionAt', () => {
       const type = createType({
-        switchToModelVersionAfter: '8.8.0',
+        switchToModelVersionAt: '8.8.0',
       });
       const output = extractMigrationInfo(type);
 
-      expect(output.switchToModelVersionAfter).toEqual('8.8.0');
+      expect(output.switchToModelVersionAt).toEqual('8.8.0');
     });
 
     it('returns a proper summary of the model versions', () => {
