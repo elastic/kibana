@@ -75,22 +75,14 @@ export const CspNoDataPage = ({
   actionDescription,
   testId,
 }: CspNoDataPageProps) => {
-  const { euiTheme } = useEuiTheme();
   return (
     <NoDataPage
       data-test-subj={testId}
       css={css`
-        div:nth-child(3) {
+        > :nth-child(3) {
           display: block;
           margin: auto;
           width: 450px;
-          div[class*='euiCard__footer'] {
-            display: contents;
-          }
-          button {
-            margin: 0 auto;
-            margin-top: ${euiTheme.size.base};
-          }
         }
       `}
       pageTitle={pageTitle}
