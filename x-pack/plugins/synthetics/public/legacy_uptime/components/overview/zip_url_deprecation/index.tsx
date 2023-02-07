@@ -47,8 +47,8 @@ export const IntegrationDeprecation = () => {
       <EuiCallOut
         title={
           <FormattedMessage
-            id="xpack.synthetics.browser.zipUrl.deprecation.title"
-            defaultMessage="Deprecation notice"
+            id="xpack.synthetics.integration.deprecation.title"
+            defaultMessage="Migrate your Elastic Synthetics integration monitors before Elastic 8.8"
           />
         }
         color="warning"
@@ -57,8 +57,8 @@ export const IntegrationDeprecation = () => {
           <EuiFlexItem>
             <span>
               <FormattedMessage
-                id="xpack.synthetics.browser.zipUrl.deprecation.content"
-                defaultMessage="Zip URL is deprecated and will be removed in a future version. Use project monitors instead to create monitors from a remote repository and to migrate existing Zip URL monitors. {link}"
+                id="xpack.synthetics.integration.deprecation.content"
+                defaultMessage="You have at least one monitor configured using the Elastic Synthetics integration. From Elastic 8.8, the integration will be deprecated and you will no longer be able to edit these monitors. To avoid this, migrate them to Project monitors or add them to the new Synthetics app directly available in Observability before the 8.8 update. Check our {link} for more details."
                 values={{
                   link: (
                     <EuiLink
@@ -67,8 +67,8 @@ export const IntegrationDeprecation = () => {
                       external
                     >
                       <FormattedMessage
-                        id="xpack.synthetics.browser.zipUrl.deprecation.link"
-                        defaultMessage="Learn more"
+                        id="xpack.synthetics.integration.deprecation.link"
+                        defaultMessage="Synthetics migration docs"
                       />
                     </EuiLink>
                   ),
@@ -79,7 +79,7 @@ export const IntegrationDeprecation = () => {
           <EuiFlexItem grow={false}>
             <EuiButton onClick={handleDismissDeprecationNotice} color="warning">
               <FormattedMessage
-                id="xpack.synthetics.browser.zipUrl.deprecation.dismiss"
+                id="xpack.synthetics.integration.deprecation.dismiss"
                 defaultMessage="Dismiss"
               />
             </EuiButton>

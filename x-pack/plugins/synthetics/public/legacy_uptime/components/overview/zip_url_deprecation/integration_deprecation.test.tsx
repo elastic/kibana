@@ -15,7 +15,9 @@ import * as observabilityPublic from '@kbn/observability-plugin/public';
 export const mockStorage = new StubBrowserStorage();
 jest.mock('@kbn/observability-plugin/public');
 
-describe('ZipUrlDeprecation', () => {
+const DEPRECATION_TITLE = 'Migrate your Elastic Synthetics integration monitors before Elastic 8.8';
+
+describe('IntegrationDeprecation', () => {
   const { FETCH_STATUS } = observabilityPublic;
   it('shows deprecation notice when hasIntegrationMonitors is true', () => {
     jest.spyOn(observabilityPublic, 'useFetcher').mockReturnValue({
@@ -26,7 +28,7 @@ describe('ZipUrlDeprecation', () => {
     });
 
     render(<IntegrationDeprecation />);
-    expect(screen.getByText('Deprecation notice')).toBeInTheDocument();
+    expect(screen.getByText(DEPRECATION_TITLE)).toBeInTheDocument();
   });
 
   it('does not show deprecation notice when hasIntegrationMonitors is false', () => {
@@ -38,7 +40,7 @@ describe('ZipUrlDeprecation', () => {
     });
 
     render(<IntegrationDeprecation />);
-    expect(screen.queryByText('Deprecation notice')).not.toBeInTheDocument();
+    expect(screen.queryByText(DEPRECATION_TITLE)).not.toBeInTheDocument();
   });
 
   it('dismisses notification', () => {
@@ -50,9 +52,9 @@ describe('ZipUrlDeprecation', () => {
     });
 
     render(<IntegrationDeprecation />);
-    expect(screen.getByText('Deprecation notice')).toBeInTheDocument();
+    expect(screen.getByText(DEPRECATION_TITLE)).toBeInTheDocument();
     userEvent.click(screen.getByText('Dismiss'));
-    expect(screen.queryByText('Deprecation notice')).not.toBeInTheDocument();
+    expect(screen.queryByText(DEPRECATION_TITLE)).not.toBeInTheDocument();
   });
 
   it('does not show notification when session storage key is true', () => {
@@ -65,6 +67,6 @@ describe('ZipUrlDeprecation', () => {
     mockStorage.setItem(INTEGRATION_DEPRECATION_SESSION_STORAGE_KEY, 'true');
 
     render(<IntegrationDeprecation />);
-    expect(screen.queryByText('Deprecation notice')).not.toBeInTheDocument();
+    expect(screen.queryByText(DEPRECATION_TITLE)).not.toBeInTheDocument();
   });
 });
