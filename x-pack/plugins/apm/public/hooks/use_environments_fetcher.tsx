@@ -8,7 +8,6 @@
 import { SERVICE_ENVIRONMENT } from '../../common/es_fields/apm';
 import { useFetcher } from './use_fetcher';
 import { Environment } from '../../common/environment_rt';
-
 export function useEnvironmentsFetcher({
   serviceName,
   start,
@@ -33,6 +32,8 @@ export function useEnvironmentsFetcher({
               serviceName,
             },
           },
+        }).then((response) => {
+          return { environments: response.environments };
         });
       }
       return callApmApi('GET /internal/apm/suggestions', {
@@ -44,15 +45,15 @@ export function useEnvironmentsFetcher({
             fieldValue: '',
           },
         },
+      }).then((response) => {
+        return { environments: response.terms };
       });
     },
     [start, end, serviceName]
   );
 
   return {
-    environments: ((data as any)?.environments ||
-      (data as any)?.terms ||
-      []) as Environment[],
+    environments: (data?.environments ?? []) as Environment[],
     status,
   };
 }
