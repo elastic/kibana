@@ -206,7 +206,7 @@ export class ObservabilityDataViews {
       appIndices = indicesT;
     }
 
-    if (appIndices && hasData) {
+    if (appIndices && (hasData || indices)) {
       try {
         const dataViewId = getAppDataViewId(app, appIndices);
         const dataViewTitle = getAppIndicesWithPattern(app, appIndices);
