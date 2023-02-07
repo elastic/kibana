@@ -3548,6 +3548,20 @@
           },
           {
             "parentPluginId": "triggersActionsUi",
+            "id": "def-public.AlertsTableProps.showAlertStatusWithFlapping",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "showAlertStatusWithFlapping",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "triggersActionsUi",
             "id": "def-public.AlertsTableProps.trailingControlColumns",
             "type": "Array",
             "tags": [],
@@ -3768,6 +3782,20 @@
             "signature": [
               "EuiDataGridToolBarAdditionalControlsOptions",
               " | undefined"
+            ],
+            "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "triggersActionsUi",
+            "id": "def-public.AlertsTableProps.showInspectButton",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "showInspectButton",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
             ],
             "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
             "deprecated": false,
@@ -4075,7 +4103,7 @@
         "tags": [],
         "label": "AlertSummaryTimeRange",
         "description": [],
-        "path": "x-pack/plugins/triggers_actions_ui/public/application/sections/rule_details/components/alert_summary/types.ts",
+        "path": "x-pack/plugins/triggers_actions_ui/public/application/sections/alert_summary_widget/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -4086,7 +4114,7 @@
             "tags": [],
             "label": "utcFrom",
             "description": [],
-            "path": "x-pack/plugins/triggers_actions_ui/public/application/sections/rule_details/components/alert_summary/types.ts",
+            "path": "x-pack/plugins/triggers_actions_ui/public/application/sections/alert_summary_widget/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4097,7 +4125,7 @@
             "tags": [],
             "label": "utcTo",
             "description": [],
-            "path": "x-pack/plugins/triggers_actions_ui/public/application/sections/rule_details/components/alert_summary/types.ts",
+            "path": "x-pack/plugins/triggers_actions_ui/public/application/sections/alert_summary_widget/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4108,7 +4136,7 @@
             "tags": [],
             "label": "fixedInterval",
             "description": [],
-            "path": "x-pack/plugins/triggers_actions_ui/public/application/sections/rule_details/components/alert_summary/types.ts",
+            "path": "x-pack/plugins/triggers_actions_ui/public/application/sections/alert_summary_widget/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4122,7 +4150,7 @@
             "signature": [
               "string | JSX.Element | undefined"
             ],
-            "path": "x-pack/plugins/triggers_actions_ui/public/application/sections/rule_details/components/alert_summary/types.ts",
+            "path": "x-pack/plugins/triggers_actions_ui/public/application/sections/alert_summary_widget/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4136,7 +4164,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "x-pack/plugins/triggers_actions_ui/public/application/sections/rule_details/components/alert_summary/types.ts",
+            "path": "x-pack/plugins/triggers_actions_ui/public/application/sections/alert_summary_widget/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -5241,6 +5269,20 @@
             "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "triggersActionsUi",
+            "id": "def-public.RuleType.hasGetSummarizedAlerts",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "hasGetSummarizedAlerts",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -5430,6 +5472,20 @@
             "type": "string",
             "tags": [],
             "label": "defaultRecoveryMessage",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "triggersActionsUi",
+            "id": "def-public.RuleTypeModel.defaultSummaryMessage",
+            "type": "string",
+            "tags": [],
+            "label": "defaultSummaryMessage",
             "description": [],
             "signature": [
               "string | undefined"
@@ -8692,6 +8748,22 @@
               "isRequired": true
             }
           ],
+          "returnComment": []
+        },
+        {
+          "parentPluginId": "triggersActionsUi",
+          "id": "def-public.TriggersAndActionsUIPublicPluginStart.getRulesSettingsLink",
+          "type": "Function",
+          "tags": [],
+          "label": "getRulesSettingsLink",
+          "description": [],
+          "signature": [
+            "() => React.ReactElement<any, string | React.JSXElementConstructor<any>>"
+          ],
+          "path": "x-pack/plugins/triggers_actions_ui/public/plugin.ts",
+          "deprecated": false,
+          "trackAdoption": false,
+          "children": [],
           "returnComment": []
         }
       ],

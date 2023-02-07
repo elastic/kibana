@@ -12,7 +12,7 @@ import React from 'react';
 
 import { shallow, ShallowWrapper } from 'enzyme';
 
-import { EuiBasicTable, EuiEmptyPrompt } from '@elastic/eui';
+import { EuiBasicTable } from '@elastic/eui';
 
 import { mountWithIntl } from '../../../../test_helpers';
 
@@ -128,7 +128,7 @@ describe('CrawlRequestsTable', () => {
 
       wrapper = shallow(<CrawlRequestsTable />);
 
-      expect(wrapper.find(EuiBasicTable).dive().find(EuiEmptyPrompt)).toHaveLength(1);
+      expect(wrapper.render().find('.euiEmptyPrompt')).toHaveLength(1);
     });
   });
 });

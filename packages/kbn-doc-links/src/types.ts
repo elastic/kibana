@@ -120,6 +120,7 @@ export interface DocLinks {
     readonly crawlerOverview: string;
     readonly deployTrainedModels: string;
     readonly documentLevelSecurity: string;
+    readonly engines: string;
     readonly ingestPipelines: string;
     readonly languageAnalyzers: string;
     readonly languageClients: string;
@@ -433,6 +434,7 @@ export interface DocLinks {
     datastreams: string;
     datastreamsILM: string;
     datastreamsNamingScheme: string;
+    datastreamsManualRollover: string;
     installElasticAgent: string;
     installElasticAgentStandalone: string;
     packageSignatures: string;

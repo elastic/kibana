@@ -131,6 +131,7 @@ export class SavedSearchEmbeddable
       initialInput,
       {
         defaultTitle: savedSearch.title,
+        defaultDescription: savedSearch.description,
         editUrl,
         editPath,
         editApp: 'discover',
@@ -145,7 +146,7 @@ export class SavedSearchEmbeddable
     this.inspectorAdapters = {
       requests: new RequestAdapter(),
     };
-    this.panelTitle = savedSearch.title ?? '';
+    this.panelTitle = this.input.title ? this.input.title : savedSearch.title ?? '';
     this.initializeSearchEmbeddableProps();
 
     this.subscription = this.getUpdated$().subscribe(() => {
@@ -423,7 +424,6 @@ export class SavedSearchEmbeddable
     if (!searchProps || !searchProps.dataView) {
       return false;
     }
-
     return (
       !onlyDisabledFiltersChanged(this.input.filters, this.prevFilters) ||
       !isEqual(this.prevQuery, this.input.query) ||
@@ -594,10 +594,6 @@ export class SavedSearchEmbeddable
 
   public getInspectorAdapters() {
     return this.inspectorAdapters;
-  }
-
-  public getDescription() {
-    return this.savedSearch.description;
   }
 
   /**

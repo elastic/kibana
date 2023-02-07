@@ -13,10 +13,16 @@ import type { SavedObject } from '@kbn/core-saved-objects-common/src/server_type
 import type {
   GetCaseConnectorsResponse,
   CaseConnector,
-  CaseUserActionInjectedAttributesWithoutActionId,
+  CaseUserActionInjectedAttributes,
+  CaseExternalServiceBasic,
+  GetCaseConnectorsPushDetails,
 } from '../../../common/api';
 import { GetCaseConnectorsResponseRt } from '../../../common/api';
-import { isConnectorUserAction, isCreateCaseUserAction } from '../../../common/utils/user_actions';
+import {
+  isConnectorUserAction,
+  isCreateCaseUserAction,
+  isPushedUserAction,
+} from '../../../common/utils/user_actions';
 import { createCaseError } from '../../common/error';
 import type { CasesClientArgs } from '..';
 import type { Authorization, OwnerEntity } from '../../authorization';
@@ -50,6 +56,7 @@ export const getConnectors = async (
       connectors,
       latestUserAction,
       userActionService,
+      logger,
     });
 
     return GetCaseConnectorsResponseRt.encode(results);
@@ -68,7 +75,7 @@ const checkConnectorsAuthorization = async ({
   authorization,
 }: {
   connectors: CaseConnectorActivity[];
-  latestUserAction?: SavedObject<CaseUserActionInjectedAttributesWithoutActionId>;
+  latestUserAction?: SavedObject<CaseUserActionInjectedAttributes>;
   authorization: PublicMethodsOf<Authorization>;
 }) => {
   const entities: OwnerEntity[] = latestUserAction
@@ -106,6 +113,7 @@ const checkConnectorsAuthorization = async ({
 interface EnrichedPushInfo {
   latestPushDate: Date;
   oldestPushDate: Date;
+  externalService: CaseExternalServiceBasic;
   connectorFieldsUsedInPush: CaseConnector;
 }
 
@@ -115,30 +123,47 @@ const getConnectorsInfo = async ({
   latestUserAction,
   actionsClient,
   userActionService,
+  logger,
 }: {
   caseId: string;
   connectors: CaseConnectorActivity[];
-  latestUserAction?: SavedObject<CaseUserActionInjectedAttributesWithoutActionId>;
+  latestUserAction?: SavedObject<CaseUserActionInjectedAttributes>;
   actionsClient: PublicMethodsOf<ActionsClient>;
   userActionService: CaseUserActionService;
+  logger: CasesClientArgs['logger'];
 }): Promise<GetCaseConnectorsResponse> => {
   const connectorIds = connectors.map((connector) => connector.connectorId);
 
   const [pushInfo, actionConnectors] = await Promise.all([
-    getPushInfo({ caseId, activity: connectors, userActionService }),
-    actionsClient.getBulk(connectorIds),
+    getEnrichedPushInfo({ caseId, activity: connectors, userActionService }),
+    await getActionConnectors(actionsClient, logger, connectorIds),
   ]);
 
   return createConnectorInfoResult({ actionConnectors, connectors, pushInfo, latestUserAction });
 };
 
-interface PushTimeFrameDetails {
+const getActionConnectors = async (
+  actionsClient: PublicMethodsOf<ActionsClient>,
+  logger: CasesClientArgs['logger'],
+  ids: string[]
+): Promise<ActionResult[]> => {
+  try {
+    return await actionsClient.getBulk(ids);
+  } catch (error) {
+    // silent error and log it
+    logger.error(`Failed to retrieve action connectors in the get case connectors route: ${error}`);
+    return [];
+  }
+};
+
+interface PushDetails {
   connectorId: string;
+  externalService: CaseExternalServiceBasic;
   mostRecentPush: Date;
   oldestPush: Date;
 }
 
-const getPushInfo = async ({
+const getEnrichedPushInfo = async ({
   caseId,
   activity,
   userActionService,
@@ -147,24 +172,7 @@ const getPushInfo = async ({
   activity: CaseConnectorActivity[];
   userActionService: CaseUserActionService;
 }): Promise<Map<string, EnrichedPushInfo>> => {
-  const pushDetails: PushTimeFrameDetails[] = [];
-
-  for (const connectorInfo of activity) {
-    const mostRecentPushCreatedAt = getDate(connectorInfo.push?.mostRecent.attributes.created_at);
-    const oldestPushCreatedAt = getDate(connectorInfo.push?.oldest.attributes.created_at);
-
-    if (
-      connectorInfo.push != null &&
-      mostRecentPushCreatedAt != null &&
-      oldestPushCreatedAt != null
-    ) {
-      pushDetails.push({
-        connectorId: connectorInfo.connectorId,
-        mostRecentPush: mostRecentPushCreatedAt,
-        oldestPush: oldestPushCreatedAt,
-      });
-    }
-  }
+  const pushDetails = getPushDetails(activity);
 
   const connectorFieldsForPushes = await userActionService.getConnectorFieldsBeforeLatestPush(
     caseId,
@@ -180,12 +188,47 @@ const getPushInfo = async ({
       enrichedPushInfo.set(pushInfo.connectorId, {
         latestPushDate: pushInfo.mostRecentPush,
         oldestPushDate: pushInfo.oldestPush,
+        externalService: pushInfo.externalService,
         connectorFieldsUsedInPush: connectorFields,
       });
     }
   }
 
   return enrichedPushInfo;
+};
+
+const getPushDetails = (activity: CaseConnectorActivity[]) => {
+  const pushDetails: PushDetails[] = [];
+
+  for (const connectorInfo of activity) {
+    const externalService = getExternalServiceFromSavedObject(connectorInfo.push?.mostRecent);
+    const mostRecentPushCreatedAt = getDate(connectorInfo.push?.mostRecent.attributes.created_at);
+    const oldestPushCreatedAt = getDate(connectorInfo.push?.oldest.attributes.created_at);
+
+    if (
+      connectorInfo.push != null &&
+      externalService != null &&
+      mostRecentPushCreatedAt != null &&
+      oldestPushCreatedAt != null
+    ) {
+      pushDetails.push({
+        connectorId: connectorInfo.connectorId,
+        externalService,
+        mostRecentPush: mostRecentPushCreatedAt,
+        oldestPush: oldestPushCreatedAt,
+      });
+    }
+  }
+
+  return pushDetails;
+};
+
+const getExternalServiceFromSavedObject = (
+  savedObject: SavedObject<CaseUserActionInjectedAttributes> | undefined
+): CaseExternalServiceBasic | undefined => {
+  if (savedObject != null && isPushedUserAction(savedObject.attributes)) {
+    return savedObject.attributes.payload.externalService;
+  }
 };
 
 const getDate = (timestamp: string | undefined): Date | undefined => {
@@ -205,7 +248,7 @@ const isDateValid = (date: Date): boolean => {
 };
 
 const getConnectorInfoFromSavedObject = (
-  savedObject: SavedObject<CaseUserActionInjectedAttributesWithoutActionId> | undefined
+  savedObject: SavedObject<CaseUserActionInjectedAttributes> | undefined
 ): CaseConnector | undefined => {
   if (
     savedObject != null &&
@@ -225,13 +268,15 @@ const createConnectorInfoResult = ({
   actionConnectors: ActionResult[];
   connectors: CaseConnectorActivity[];
   pushInfo: Map<string, EnrichedPushInfo>;
-  latestUserAction?: SavedObject<CaseUserActionInjectedAttributesWithoutActionId>;
+  latestUserAction?: SavedObject<CaseUserActionInjectedAttributes>;
 }) => {
   const results: GetCaseConnectorsResponse = {};
+  const actionConnectorsMap = new Map(
+    actionConnectors.map((actionConnector) => [actionConnector.id, { ...actionConnector }])
+  );
 
-  for (let i = 0; i < connectors.length; i++) {
-    const connectorDetails = actionConnectors[i];
-    const aggregationConnector = connectors[i];
+  for (const aggregationConnector of connectors) {
+    const connectorDetails = actionConnectorsMap.get(aggregationConnector.connectorId);
     const connector = getConnectorInfoFromSavedObject(aggregationConnector.fields);
 
     const latestUserActionCreatedAt = getDate(latestUserAction?.attributes.created_at);
@@ -244,13 +289,16 @@ const createConnectorInfoResult = ({
         latestUserActionDate: latestUserActionCreatedAt,
       });
 
+      const pushDetails = convertEnrichedPushInfoToDetails(enrichedPushInfo);
+
       results[connector.id] = {
         ...connector,
-        name: connectorDetails.name,
-        needsToBePushed,
-        latestPushDate: enrichedPushInfo?.latestPushDate.toISOString(),
-        oldestPushDate: enrichedPushInfo?.oldestPushDate.toISOString(),
-        hasBeenPushed: hasBeenPushed(enrichedPushInfo),
+        name: connectorDetails?.name ?? connector.name,
+        push: {
+          needsToBePushed,
+          hasBeenPushed: hasBeenPushed(enrichedPushInfo),
+          ...(pushDetails && { details: pushDetails }),
+        },
       };
     }
   }
@@ -290,4 +338,18 @@ const hasDataToPush = ({
 
 const hasBeenPushed = (pushInfo: EnrichedPushInfo | undefined): boolean => {
   return pushInfo != null;
+};
+
+const convertEnrichedPushInfoToDetails = (
+  info: EnrichedPushInfo | undefined
+): GetCaseConnectorsPushDetails | undefined => {
+  if (info == null) {
+    return;
+  }
+
+  return {
+    latestUserActionPushDate: info.latestPushDate.toISOString(),
+    oldestUserActionPushDate: info.oldestPushDate.toISOString(),
+    externalService: info.externalService,
+  };
 };

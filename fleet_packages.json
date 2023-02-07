@@ -20,12 +20,12 @@
 [
   {
     "name": "apm",
-    "version": "8.7.0-preview-1674061297",
+    "version": "8.7.0-preview-1675078021",
     "forceAlignStackVersion": true
   },
   {
     "name": "elastic_agent",
-    "version": "1.4.1"
+    "version": "1.5.0"
   },
   {
     "name": "endpoint",

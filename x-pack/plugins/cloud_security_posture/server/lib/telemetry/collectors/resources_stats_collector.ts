@@ -7,6 +7,7 @@
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { Logger } from '@kbn/core/server';
 import type { SearchRequest } from '@elastic/elasticsearch/lib/api/types';
+import { getIdentifierRuntimeMapping } from '../../get_identifier_runtime_mapping';
 import type { CspmResourcesStats } from './types';
 import { LATEST_FINDINGS_INDEX_DEFAULT_NS } from '../../../../common/constants';
 
@@ -50,10 +51,11 @@ const getResourcesStatsQuery = (index: string): SearchRequest => ({
   query: {
     match_all: {},
   },
+  runtime_mappings: getIdentifierRuntimeMapping(),
   aggs: {
     accounts: {
       terms: {
-        field: 'cluster_id',
+        field: 'asset_identifier',
         order: {
           _count: 'desc',
         },

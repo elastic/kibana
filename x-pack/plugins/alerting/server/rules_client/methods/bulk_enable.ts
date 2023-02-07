@@ -253,7 +253,7 @@ export const tryToEnableTasks = async ({
         async () => taskManager.bulkEnable(taskIdsToEnable)
       );
       resultFromEnablingTasks?.errors?.forEach((error) => {
-        taskIdsFailedToBeEnabled.push(error.task.id);
+        taskIdsFailedToBeEnabled.push(error.id);
       });
       if (resultFromEnablingTasks.tasks.length) {
         logger.debug(
@@ -265,7 +265,7 @@ export const tryToEnableTasks = async ({
       if (resultFromEnablingTasks.errors.length) {
         logger.error(
           `Failure to enable schedules for underlying tasks: ${resultFromEnablingTasks.errors
-            .map((error) => error.task.id)
+            .map((error) => error.id)
             .join(', ')}`
         );
       }
