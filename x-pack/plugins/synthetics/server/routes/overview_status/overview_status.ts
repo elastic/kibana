@@ -92,14 +92,15 @@ export async function getStatus(
     ? intersection(listOfLocations, queryLocationsArray)
     : listOfLocations;
 
+  const range = {
+    from: moment().subtract(maxPeriod, 'milliseconds').subtract(20, 'minutes').toISOString(),
+    to: 'now',
+  };
+
   const { up, down, pending, upConfigs, downConfigs, pendingConfigs } = await queryMonitorStatus(
     uptimeEsClient,
     listOfLocationAfterFilter,
-    {
-      from: moment().subtract(maxPeriod, 'milliseconds').subtract(20, 'minutes').toISOString(),
-      to: 'now',
-    },
-    monitorLocationMap
+    range,
     enabledMonitorQueryIds,
     monitorLocationMap,
     monitorQueryIdToConfigIdMap

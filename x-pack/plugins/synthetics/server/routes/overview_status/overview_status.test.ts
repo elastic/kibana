@@ -6,7 +6,7 @@
  */
 
 import { getUptimeESMockClient } from '../../legacy_uptime/lib/requests/test_helpers';
-import { periodToMs } from './current_status';
+import { periodToMs } from './overview_status';
 import { queryMonitorStatus } from '../../queries/query_monitor_status';
 import times from 'lodash/times';
 
@@ -170,7 +170,7 @@ describe('current status route', () => {
         await queryMonitorStatus(
           uptimeEsClient,
           ['Europe - Germany', 'Asia/Pacific - Japan'],
-          { from: 140000, to: 'now' },
+          { from: 'now-1d', to: 'now' },
           ['id1', 'id2'],
           { id1: ['Asia/Pacific - Japan'], id2: ['Europe - Germany', 'Asia/Pacific - Japan'] },
           {
@@ -335,7 +335,7 @@ describe('current status route', () => {
         await queryMonitorStatus(
           uptimeEsClient,
           [...concernedLocations, ...times(9997).map((n) => 'Europe - Germany' + n)],
-          { from: 2500, to: 'now' },
+          { from: 'now-24h', to: 'now' },
           ['id1', 'id2'],
           { id1: [concernedLocations[0]], id2: [concernedLocations[1], concernedLocations[2]] },
           {
@@ -498,7 +498,7 @@ describe('current status route', () => {
         await queryMonitorStatus(
           uptimeEsClient,
           ['Europe - Germany', 'Asia/Pacific - Japan'],
-          { from: 140000, to: 'now' },
+          { from: 'now-12h', to: 'now' },
           ['id1', 'id2', 'project-monitor-id', 'id4'],
           {
             id1: ['Asia/Pacific - Japan'],

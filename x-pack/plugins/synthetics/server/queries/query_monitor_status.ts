@@ -8,18 +8,14 @@
 import pMap from 'p-map';
 import times from 'lodash/times';
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { intersection } from 'lodash';
 import { cloneDeep, intersection } from 'lodash';
-import { SearchRequest } from '@elastic/elasticsearch/lib/api/types';
 import { SUMMARY_FILTER } from '../../common/constants/client_defaults';
 import { createEsParams, UptimeEsClient } from '../legacy_uptime/lib/lib';
-import { OverviewPing, OverviewStatus, OverviewStatusMetaData } from '../../common/runtime_types';
-import { UptimeEsClient } from '../legacy_uptime/lib/lib';
 import {
+  OverviewPendingStatusMetaData,
+  OverviewPing,
   OverviewStatus,
   OverviewStatusMetaData,
-  OverviewPendingStatusMetaData,
-  Ping,
 } from '../../common/runtime_types';
 
 const DEFAULT_MAX_ES_BUCKET_SIZE = 10000;
@@ -41,7 +37,7 @@ export async function queryMonitorStatus(
   listOfLocations: string[],
   range: { from: string; to: string },
   monitorQueryIds: string[],
-  monitorLocationsMap: Record<string, string[]>
+  monitorLocationsMap: Record<string, string[]>,
   monitorQueryIdToConfigIdMap: Record<string, string>
 ): Promise<
   Omit<
@@ -60,8 +56,8 @@ export async function queryMonitorStatus(
   let pending = 0;
   const upConfigs: Record<string, OverviewStatusMetaData> = {};
   const downConfigs: Record<string, OverviewStatusMetaData> = {};
-const monitorsWithoutData = new Map(Object.entries(cloneDeep(monitorLocationsMap)));
-const pendingConfigs: Record<string, OverviewPendingStatusMetaData> = {};
+  const monitorsWithoutData = new Map(Object.entries(cloneDeep(monitorLocationsMap)));
+  const pendingConfigs: Record<string, OverviewPendingStatusMetaData> = {};
 
   await pMap(
     times(pageCount),
@@ -196,12 +192,12 @@ const pendingConfigs: Record<string, OverviewPendingStatusMetaData> = {};
             pending += 1;
           }
         });
-      },
-        { concurrency: 5 }
-      );
-  }
+      });
+    },
+    { concurrency: 5 }
+  );
 
-  // identify the remaining monitos without data, to determine pending monitors
+  // identify the remaining monitors without data, to determine pending monitors
   for (const [queryId, locs] of monitorsWithoutData) {
     locs.forEach((loc) => {
       pendingConfigs[`${monitorQueryIdToConfigIdMap[queryId]}-${loc}`] = {
