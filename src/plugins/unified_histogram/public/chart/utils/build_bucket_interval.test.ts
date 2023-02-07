@@ -7,7 +7,7 @@
  */
 
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
-import { dataViewWithTimefieldMock } from '../__mocks__/data_view_with_timefield';
+import { dataViewWithTimefieldMock } from '../../__mocks__/data_view_with_timefield';
 import { calculateBounds } from '@kbn/data-plugin/public';
 import { buildBucketInterval } from './build_bucket_interval';
 

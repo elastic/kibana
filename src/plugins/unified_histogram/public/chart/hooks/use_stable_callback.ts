@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { useCallback, useEffect, useRef } from 'react';
+import { useEffect, useRef } from 'react';
 
 /**
  * Accepts a callback and returns a function with a stable identity
@@ -19,5 +19,5 @@ export const useStableCallback = <T extends (...args: any[]) => any>(fn: T | und
     ref.current = fn;
   }, [fn]);
 
-  return useCallback((...args: Parameters<T>) => ref.current?.(...args), []);
+  return useRef((...args: Parameters<T>) => ref.current?.(...args)).current;
 };

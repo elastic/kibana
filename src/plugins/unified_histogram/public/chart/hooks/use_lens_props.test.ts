@@ -9,9 +9,9 @@
 import { renderHook } from '@testing-library/react-hooks';
 import { act } from 'react-test-renderer';
 import { Subject } from 'rxjs';
-import type { UnifiedHistogramInputMessage } from '../types';
-import { dataViewWithTimefieldMock } from '../__mocks__/data_view_with_timefield';
-import { getLensAttributes } from './get_lens_attributes';
+import type { UnifiedHistogramInputMessage } from '../../types';
+import { dataViewWithTimefieldMock } from '../../__mocks__/data_view_with_timefield';
+import { getLensAttributes } from '../utils/get_lens_attributes';
 import { getLensProps, useLensProps } from './use_lens_props';
 
 describe('useLensProps', () => {

@@ -13,7 +13,7 @@ import { i18n } from '@kbn/i18n';
 import React, { useCallback, useMemo } from 'react';
 import dateMath from '@kbn/datemath';
 import type { TimeRange } from '@kbn/data-plugin/common';
-import type { UnifiedHistogramBucketInterval } from '../types';
+import type { UnifiedHistogramBucketInterval } from '../../types';
 
 export const useTimeRange = ({
   uiSettings,

@@ -12,7 +12,7 @@ import type { DefaultInspectorAdapters } from '@kbn/expressions-plugin/common';
 import type { TypedLensByValueInput } from '@kbn/lens-plugin/public';
 import { useCallback, useEffect, useState } from 'react';
 import type { Observable } from 'rxjs';
-import type { UnifiedHistogramInputMessage, UnifiedHistogramRequestContext } from '../types';
+import type { UnifiedHistogramInputMessage, UnifiedHistogramRequestContext } from '../../types';
 import { useStableCallback } from './use_stable_callback';
 
 export const useLensProps = ({

@@ -12,7 +12,7 @@ import type {
   EuiContextMenuPanelDescriptor,
 } from '@elastic/eui';
 import { search } from '@kbn/data-plugin/public';
-import type { UnifiedHistogramChartContext } from '../types';
+import type { UnifiedHistogramChartContext } from '../../types';
 
 export function useChartPanels({
   chart,
