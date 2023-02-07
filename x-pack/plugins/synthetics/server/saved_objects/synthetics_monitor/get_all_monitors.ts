@@ -71,7 +71,7 @@ export const processMonitors = async (
    * latest ping for all enabled monitors.
    */
 
-  const enabledIds: string[] = [];
+  const enabledMonitorQueryIds: string[] = [];
   let disabledCount = 0;
   let disabledMonitorsCount = 0;
   let maxPeriod = 0;
@@ -79,6 +79,7 @@ export const processMonitors = async (
   const allIds: string[] = [];
   let listOfLocationsSet = new Set<string>();
   const monitorLocationMap: Record<string, string[]> = {};
+  const monitorQueryIdToConfigIdMap: Record<string, string> = {};
 
   let allLocations: ServiceLocation[] | null = null;
 
@@ -103,13 +104,15 @@ export const processMonitors = async (
 
     projectMonitorsCount += attrs?.[ConfigKey.MONITOR_SOURCE_TYPE] === SourceType.PROJECT ? 1 : 0;
 
+    monitorQueryIdToConfigIdMap[attrs[ConfigKey.MONITOR_QUERY_ID]] = attrs[ConfigKey.CONFIG_ID];
+
     if (attrs[ConfigKey.ENABLED] === false) {
       disabledCount += attrs[ConfigKey.LOCATIONS].length;
       disabledMonitorsCount += 1;
     } else {
       const missingLabels = new Set<string>();
 
-      enabledIds.push(attrs[ConfigKey.MONITOR_QUERY_ID]);
+      enabledMonitorQueryIds.push(attrs[ConfigKey.MONITOR_QUERY_ID]);
       const monLocs = new Set([
         ...(attrs[ConfigKey.LOCATIONS]
           .filter((loc) => {
@@ -138,11 +141,12 @@ export const processMonitors = async (
   return {
     maxPeriod,
     allIds,
-    enabledIds,
+    enabledMonitorQueryIds,
     disabledCount,
     monitorLocationMap,
     disabledMonitorsCount,
     projectMonitorsCount,
     listOfLocations: [...listOfLocationsSet],
+    monitorQueryIdToConfigIdMap,
   };
 };
