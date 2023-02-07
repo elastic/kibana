@@ -36,7 +36,7 @@ export const kubernetesGuideConfig: GuideConfig = {
           'xpack.observability.guideConfig.addDataStep.description.descriptionText',
           {
             defaultMessage:
-              'Install an Elastic Agent to get your Kubernetes data flowing. Optionally, deploy kube-state-metrics to your Kubernetes for more comprehensive metrics coverage.',
+              'To get your Kubernetes data flowing, install Elastic Agent in the Kubernetes cluster you want to monitor. Once Elastic Agent is deployed, you can optionally add kube-state-metrics for a more comprehensive metrics coverage.',
           }
         ),
         linkText: i18n.translate(
