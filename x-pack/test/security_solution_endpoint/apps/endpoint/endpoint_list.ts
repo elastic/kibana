@@ -82,8 +82,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     return tableData;
   };
 
-  // Failing: See https://github.com/elastic/kibana/issues/148111
-  describe.skip('endpoint list', function () {
+  describe('endpoint list', function () {
     const sleep = (ms = 100) => new Promise((resolve) => setTimeout(resolve, ms));
     let indexedData: IndexedHostsAndAlertsResponse;
     describe('when initially navigating to page', () => {
@@ -167,7 +166,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           expect(endpointDetailTitleNew).to.equal(endpointDetailTitleInitial);
         });
 
-        it('for the kql query: na, table shows an empty list', async () => {
+        // Failing: See https://github.com/elastic/kibana/issues/148111
+        it.skip('for the kql query: na, table shows an empty list', async () => {
           await pageObjects.endpoint.navigateToEndpointList();
           await browser.refresh();
           const adminSearchBar = await testSubjects.find('adminSearchBar');
@@ -195,7 +195,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           expect(tableData).to.eql(expectedDataFromQuery);
         });
 
-        it('for the kql filtering for united.endpoint.host.hostname, table shows 1 item', async () => {
+        it.skip('for the kql filtering for united.endpoint.host.hostname, table shows 1 item', async () => {
           const expectedDataFromQuery = [...expectedData.slice(0, 2).map((row) => [...row])];
           const hostName = expectedDataFromQuery[1][0];
           const adminSearchBar = await testSubjects.find('adminSearchBar');
