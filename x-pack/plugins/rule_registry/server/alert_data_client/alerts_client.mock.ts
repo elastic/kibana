@@ -22,6 +22,7 @@ const createAlertsClientMock = () => {
     getFeatureIdsByRegistrationContexts: jest.fn(),
     getBrowserFields: jest.fn(),
     getAlertSummary: jest.fn(),
+    ensureAllAlertsAuthorizedRead: jest.fn(),
   };
   return mocked;
 };

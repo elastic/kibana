@@ -359,22 +359,7 @@ export class AlertsClient {
     validate?: (source: ParsedTechnicalFields | undefined) => void;
   }) {
     try {
-      const mgetRes = await this.esClient.mget<ParsedTechnicalFields>({
-        docs: alerts.map(({ id, index }) => ({ _id: id, _index: index })),
-      });
-
-      await this.ensureAllAuthorized(mgetRes.docs, operation);
-      const ids = mgetRes.docs.map(({ _id }) => _id);
-
-      for (const id of ids) {
-        this.auditLogger?.log(
-          alertAuditEvent({
-            action: operationAlertAuditActionMap[operation],
-            id,
-            ...this.getOutcome(operation),
-          })
-        );
-      }
+      const mgetRes = await this.ensureAllAlertsAuthorized({ alerts, operation });
 
       const updateRequests = [];
 
@@ -542,6 +527,51 @@ export class AlertsClient {
         this.logger.error(errorMessage);
         throw Boom.notFound(errorMessage);
       }
+    }
+  }
+
+  /**
+   * Ensures that the user has access to the alerts
+   * for a given operation
+   */
+  private async ensureAllAlertsAuthorized({
+    alerts,
+    operation,
+  }: {
+    alerts: MgetAndAuditAlert[];
+    operation: ReadOperations.Find | ReadOperations.Get | WriteOperations.Update;
+  }) {
+    try {
+      const mgetRes = await this.esClient.mget<ParsedTechnicalFields>({
+        docs: alerts.map(({ id, index }) => ({ _id: id, _index: index })),
+      });
+
+      await this.ensureAllAuthorized(mgetRes.docs, operation);
+      const ids = mgetRes.docs.map(({ _id }) => _id);
+
+      for (const id of ids) {
+        this.auditLogger?.log(
+          alertAuditEvent({
+            action: operationAlertAuditActionMap[operation],
+            id,
+            ...this.getOutcome(operation),
+          })
+        );
+      }
+
+      return mgetRes;
+    } catch (exc) {
+      this.logger.error(`error in ensureAlertsAuthorized ${exc}`);
+      throw exc;
+    }
+  }
+
+  public async ensureAllAlertsAuthorizedRead({ alerts }: { alerts: MgetAndAuditAlert[] }) {
+    try {
+      await this.ensureAllAlertsAuthorized({ alerts, operation: ReadOperations.Get });
+    } catch (error) {
+      this.logger.error(`error authenticating alerts for read access: ${error}`);
+      throw error;
     }
   }
 
@@ -935,7 +965,7 @@ export class AlertsClient {
     }
   }
 
-  async getBrowserFields({
+  public async getBrowserFields({
     indices,
     metaFields,
     allowNoIndex,
