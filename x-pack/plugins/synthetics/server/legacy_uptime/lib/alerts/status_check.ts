@@ -104,8 +104,8 @@ export const hasFilters = (filters?: StatusCheckFilters) => {
 
 export const generateFilterDSL = async (
   getIndexPattern: () => Promise<IndexPatternTitleAndFields | undefined>,
-  filters: StatusCheckFilters,
-  search: string
+  filters?: StatusCheckFilters,
+  search?: string
 ) => {
   const filtersExist = hasFilters(filters);
   if (!filtersExist && !search) return undefined;
@@ -122,8 +122,8 @@ export const generateFilterDSL = async (
 
 export const formatFilterString = async (
   uptimeEsClient: UptimeEsClient,
-  filters: StatusCheckFilters,
-  search: string,
+  filters?: StatusCheckFilters,
+  search?: string,
   libs?: UMServerLibs
 ) =>
   await generateFilterDSL(
