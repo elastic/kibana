@@ -129,6 +129,8 @@ describe('getJourneyScreenshot', () => {
   });
 
   it('will return null when retry is exhausted', async () => {
+    const maxRetry = 3;
+    const initialBackoff = 10;
     const mockResponse = {
       headers: {
         get: jest.fn().mockImplementation((header) => {
@@ -144,7 +146,8 @@ describe('getJourneyScreenshot', () => {
     const mockFetch = jest.fn().mockReturnValue(mockResponse);
     global.fetch = mockFetch;
 
-    const result = await getJourneyScreenshot(url, true, 3, 10);
+    const result = await getJourneyScreenshot(url, true, maxRetry, initialBackoff);
     expect(result).toBeNull();
+    expect(mockFetch).toBeCalledTimes(maxRetry + 1);
   });
 });
