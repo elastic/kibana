@@ -14,7 +14,6 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiLink,
-  useEuiTheme,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { NoDataPage, NoDataPageProps } from '@kbn/kibana-react-plugin/public';
