@@ -17,67 +17,18 @@ import {
   EuiFlexItem,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { RuleSnooze, RuleSnoozeSchedule } from '@kbn/alerting-plugin/common';
-import { i18nAbbrMonthDayDate, i18nMonthDayDate } from '../../../lib/i18n_month_day_date';
-import { RuleTableItem, SnoozeSchedule } from '../../../../types';
-import { SnoozePanel, futureTimeToInterval } from './rule_snooze';
-import { useKibana } from '../../../../common/lib/kibana';
-import { isRuleSnoozed } from '../../../lib';
-
-export const SNOOZE_SUCCESS_MESSAGE = i18n.translate(
-  'xpack.triggersActionsUI.sections.rulesList.rulesListSnoozePanel.snoozeSuccess',
-  {
-    defaultMessage: 'Rule successfully snoozed',
-  }
-);
-
-export const UNSNOOZE_SUCCESS_MESSAGE = i18n.translate(
-  'xpack.triggersActionsUI.sections.rulesList.rulesListSnoozePanel.unsnoozeSuccess',
-  {
-    defaultMessage: 'Rule successfully unsnoozed',
-  }
-);
-
-export const SNOOZE_FAILED_MESSAGE = i18n.translate(
-  'xpack.triggersActionsUI.sections.rulesList.rulesListSnoozePanel.snoozeFailed',
-  {
-    defaultMessage: 'Unable to change rule snooze settings',
-  }
-);
-
-export interface RulesListNotifyBadgeProps {
-  rule: RuleTableItem;
-  isOpen: boolean;
-  isLoading: boolean;
-  previousSnoozeInterval?: string | null;
-  onClick: React.MouseEventHandler<HTMLButtonElement>;
-  onClose: () => void;
-  onLoading: (isLoading: boolean) => void;
-  onRuleChanged: () => void;
-  snoozeRule: (schedule: SnoozeSchedule, muteAll?: boolean) => Promise<void>;
-  unsnoozeRule: (scheduleIds?: string[]) => Promise<void>;
-  showTooltipInline?: boolean;
-  showOnHover?: boolean;
-}
-
-const openSnoozePanelAriaLabel = i18n.translate(
-  'xpack.triggersActionsUI.sections.rulesList.rulesListNotifyBadge.openSnoozePanel',
-  { defaultMessage: 'Open snooze panel' }
-);
-
-const getNextRuleSnoozeSchedule = (rule: { snoozeSchedule?: RuleSnooze }) => {
-  if (!rule.snoozeSchedule) return null;
-  // Disregard any snoozes without ids; these are non-scheduled snoozes
-  const explicitlyScheduledSnoozes = rule.snoozeSchedule.filter((s) => Boolean(s.id));
-  if (explicitlyScheduledSnoozes.length === 0) return null;
-  const nextSchedule = explicitlyScheduledSnoozes.reduce(
-    (a: RuleSnoozeSchedule, b: RuleSnoozeSchedule) => {
-      if (moment(b.rRule.dtstart).isBefore(moment(a.rRule.dtstart))) return b;
-      return a;
-    }
-  );
-  return nextSchedule;
-};
+import { useKibana } from '../../../../../common/lib/kibana';
+import { SnoozeSchedule } from '../../../../../types';
+import { i18nAbbrMonthDayDate, i18nMonthDayDate } from '../../../../lib/i18n_month_day_date';
+import { SnoozePanel, futureTimeToInterval } from '../rule_snooze';
+import { getNextRuleSnoozeSchedule, isRuleSnoozed } from './helpers';
+import {
+  OPEN_SNOOZE_PANEL_ARIA_LABEL,
+  SNOOZE_FAILED_MESSAGE,
+  SNOOZE_SUCCESS_MESSAGE,
+  UNSNOOZE_SUCCESS_MESSAGE,
+} from './translations';
+import { RulesListNotifyBadgeProps } from './types';
 
 export const RulesListNotifyBadge: React.FunctionComponent<RulesListNotifyBadgeProps> = (props) => {
   const {
@@ -175,7 +126,7 @@ export const RulesListNotifyBadge: React.FunctionComponent<RulesListNotifyBadgeP
         isLoading={isLoading}
         disabled={isLoading || !isEditable}
         data-test-subj="rulesListNotifyBadge-snoozed"
-        aria-label={openSnoozePanelAriaLabel}
+        aria-label={OPEN_SNOOZE_PANEL_ARIA_LABEL}
         minWidth={85}
         iconType="bellSlash"
         color="accent"
@@ -197,7 +148,7 @@ export const RulesListNotifyBadge: React.FunctionComponent<RulesListNotifyBadgeP
         minWidth={85}
         iconType="calendar"
         color="text"
-        aria-label={openSnoozePanelAriaLabel}
+        aria-label={OPEN_SNOOZE_PANEL_ARIA_LABEL}
         onClick={onClick}
       >
         <EuiText size="xs">{formattedSnoozeText}</EuiText>
@@ -217,7 +168,7 @@ export const RulesListNotifyBadge: React.FunctionComponent<RulesListNotifyBadgeP
         disabled={isLoading || !isEditable}
         display={isLoading ? 'base' : 'empty'}
         data-test-subj="rulesListNotifyBadge-unsnoozed"
-        aria-label={openSnoozePanelAriaLabel}
+        aria-label={OPEN_SNOOZE_PANEL_ARIA_LABEL}
         className={isOpen || isLoading ? '' : showOnHoverClass}
         iconType="bell"
         onClick={onClick}
@@ -233,7 +184,7 @@ export const RulesListNotifyBadge: React.FunctionComponent<RulesListNotifyBadgeP
         disabled={isLoading || !isEditable}
         display="base"
         data-test-subj="rulesListNotifyBadge-snoozedIndefinitely"
-        aria-label={openSnoozePanelAriaLabel}
+        aria-label={OPEN_SNOOZE_PANEL_ARIA_LABEL}
         iconType="bellSlash"
         color="accent"
         onClick={onClick}
@@ -343,6 +294,3 @@ export const RulesListNotifyBadge: React.FunctionComponent<RulesListNotifyBadgeP
   }
   return popover;
 };
-
-// eslint-disable-next-line import/no-default-export
-export { RulesListNotifyBadge as default };
