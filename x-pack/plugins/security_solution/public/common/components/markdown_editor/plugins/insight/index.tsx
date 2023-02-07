@@ -238,7 +238,7 @@ const InsightComponent = ({
       }),
     });
   }
-  const { data: alertData } = useContext(BasicAlertDataContext);
+  const { data: alertData, timestamp } = useContext(BasicAlertDataContext);
   const { dataProviders, filters } = useInsightDataProviders({
     providers: parsedProviders,
     alertData,
@@ -250,7 +250,7 @@ const InsightComponent = ({
   const timerange: TimeRange = useMemo(() => {
     if (relativeFrom && relativeTo) {
       const fromStr = relativeFrom;
-      const toStr = relativeTo;
+      const toStr = timestamp ? timestamp : relativeTo;
       const from = parseDateWithDefault(fromStr, DEFAULT_FROM_MOMENT).toISOString();
       const to = parseDateWithDefault(toStr, DEFAULT_TO_MOMENT, true).toISOString();
       return {
