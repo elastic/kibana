@@ -56,9 +56,9 @@ export default function eventLogAlertTests({ getService }: FtrProviderContext) {
           provider: 'alerting',
           actions: new Map([
             // make sure the counts of the # of events per type are as expected
-            ['execute', { gte: 9 }],
+            ['execute', { gte: 12 }],
             ['new-instance', { equal: 2 }],
-            ['active-instance', { gte: 4 }],
+            ['active-instance', { gte: 8 }],
             ['recovered-instance', { equal: 2 }],
           ]),
         });
@@ -85,17 +85,6 @@ export default function eventLogAlertTests({ getService }: FtrProviderContext) {
           eventExecutionIdSet.add(event?.kibana?.alert?.rule?.execution?.uuid);
         }
       });
-      if (totalUniqueExecutionIds.size !== totalExecutionEventCount) {
-        const executionEvents = events.filter((event) => event?.event?.action === 'execute');
-        const missingIds = [...totalUniqueExecutionIds].filter(
-          (id) =>
-            !executionEvents.some((event) => event?.kibana?.alert?.rule?.execution?.uuid === id)
-        );
-        const eventsMissingExecutions = events.filter((event) =>
-          missingIds.includes(event?.kibana?.alert?.rule?.execution?.uuid)
-        );
-        console.log('EXECUTION ID CHECK FAILED', JSON.stringify(eventsMissingExecutions, null, 4));
-      }
       // Ensure every execution actually had a unique id from the others
       expect(totalUniqueExecutionIds.size).to.equal(totalExecutionEventCount);
 
