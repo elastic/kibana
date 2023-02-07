@@ -179,6 +179,16 @@ export const RulesTableUtilityBar = React.memo<RulesTableUtilityBarProps>(
               >
                 {i18n.REFRESH_RULE_POPOVER_LABEL}
               </UtilityBarAction>
+              {!rulesTableContext.state.isDefault && (
+                <UtilityBarAction
+                  dataTestSubj="clearTableFilters"
+                  iconSide="left"
+                  iconType="cross"
+                  onClick={rulesTableContext.actions.clearFilters}
+                >
+                  {i18n.CLEAR_RULES_TABLE_FILTERS}
+                </UtilityBarAction>
+              )}
             </UtilityBarGroup>
           </>
         </UtilityBarSection>

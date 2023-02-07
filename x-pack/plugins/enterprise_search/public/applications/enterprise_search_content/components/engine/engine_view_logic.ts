@@ -39,6 +39,10 @@ export interface EngineViewValues {
 }
 
 export const EngineViewLogic = kea<MakeLogicType<EngineViewValues, EngineViewActions>>({
+  actions: {
+    closeDeleteEngineModal: true,
+    openDeleteEngineModal: true,
+  },
   connect: {
     actions: [
       FetchEngineApiLogic,
@@ -52,10 +56,6 @@ export const EngineViewLogic = kea<MakeLogicType<EngineViewValues, EngineViewAct
       FetchEngineApiLogic,
       ['data as engineData', 'status as fetchEngineApiStatus', 'error as fetchEngineApiError'],
     ],
-  },
-  actions: {
-    closeDeleteEngineModal: true,
-    openDeleteEngineModal: true,
   },
   listeners: ({ actions }) => ({
     deleteSuccess: () => {
