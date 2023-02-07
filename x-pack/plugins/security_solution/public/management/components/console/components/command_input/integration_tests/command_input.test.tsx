@@ -40,6 +40,10 @@ describe('When entering data into the Console input', () => {
     return renderResult.getByTestId('test-cmdInput-leftOfCursor').textContent;
   };
 
+  const getRightOfCursorText = () => {
+    return renderResult.getByTestId('test-cmdInput-rightOfCursor').textContent;
+  };
+
   const getFooterText = () => {
     return renderResult.getByTestId('test-footer').textContent;
   };
@@ -266,10 +270,6 @@ describe('When entering data into the Console input', () => {
   });
 
   describe('and keyboard special keys are pressed', () => {
-    const getRightOfCursorText = () => {
-      return renderResult.getByTestId('test-cmdInput-rightOfCursor').textContent;
-    };
-
     const selectLeftOfCursorText = () => {
       // Select text to the left of the cursor
       const selection = window.getSelection();
@@ -470,6 +470,22 @@ describe('When entering data into the Console input', () => {
       enterCommand('cmd7 --foo', { inputOnly: true });
 
       expect(getLeftOfCursorText()).toEqual('cmd7 --foo=foo[0]: foo selected');
+    });
+
+    it('should not insert Selector component if argument name is not a whole word', async () => {
+      render();
+      enterCommand('cmd7 --foobar', { inputOnly: true });
+
+      expect(getLeftOfCursorText()).toEqual('cmd7 --foobar');
+    });
+
+    it('should not insert Selector component if argument name is not a whole word while cursor is between the argument name', async () => {
+      render();
+      enterCommand('cmd7 --fooX', { inputOnly: true });
+      typeKeyboardKey('{ArrowLeft}');
+
+      expect(getLeftOfCursorText()).toEqual('cmd7 --foo');
+      expect(getRightOfCursorText()).toEqual('X');
     });
 
     it('should support using argument multiple times (allowMultiples: true)', async () => {
