@@ -344,11 +344,6 @@ describe('Terms Agg Other bucket helper', () => {
             2: {
               doc_count_error_upper_bound: 0,
               sum_other_doc_count: 8325,
-              buckets: [
-                { key: 'ios', doc_count: 2850 },
-                { key: 'win xp', doc_count: 2830 },
-                { key: '__missing__', doc_count: 1430 },
-              ],
             },
           },
           status: 200,
