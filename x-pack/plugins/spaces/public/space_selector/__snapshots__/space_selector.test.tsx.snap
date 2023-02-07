@@ -6,8 +6,9 @@ exports[`it renders without crashing 1`] = `
   data-test-subj="kibanaSpaceSelector"
   panelled={true}
 >
-  <_EuiPageEmptyPrompt
+  <_EuiPageSection
     className="spcSpaceSelector__pageContent"
+    color="transparent"
   >
     <EuiText
       size="s"
@@ -51,6 +52,6 @@ exports[`it renders without crashing 1`] = `
     <EuiLoadingSpinner
       size="xl"
     />
-  </_EuiPageEmptyPrompt>
+  </_EuiPageSection>
 </_KibanaPageTemplate>
 `;
