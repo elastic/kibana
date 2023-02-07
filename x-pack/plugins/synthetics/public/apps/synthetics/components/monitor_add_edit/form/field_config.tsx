@@ -443,6 +443,8 @@ export const FIELD = (readOnly?: boolean): FieldMap => ({
         setValue(ConfigKey.ENABLED, !!event.target.checked);
       },
       'data-test-subj': 'syntheticsEnableSwitch',
+      // enabled is an allowed field for read only
+      // isDisabled: readOnly,
     }),
   },
   [AlertConfigKey.STATUS_ENABLED]: {
@@ -465,7 +467,9 @@ export const FIELD = (readOnly?: boolean): FieldMap => ({
       onChange: (event) => {
         setValue(AlertConfigKey.STATUS_ENABLED, !!event.target.checked);
       },
-      disabled: readOnly,
+      'data-test-subj': 'syntheticsAlertStatusSwitch',
+      // alert config is an allowed field for read only
+      // isDisabled: readOnly,
     }),
   },
   [ConfigKey.TAGS]: {
