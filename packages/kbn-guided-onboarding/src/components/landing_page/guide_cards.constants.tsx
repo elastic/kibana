@@ -7,12 +7,14 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
+import React, { ReactNode } from 'react';
 import { GuideId } from '../../..';
 import { GuideCardSolutions } from './guide_cards';
 
 export interface GuideCardConstants {
   solution: GuideCardSolutions;
-  title: string;
+  title: string | ReactNode;
   // if present, guideId indicates which guide is opened when clicking the card
   guideId?: GuideId;
   // if present, navigateTo indicates where the user will be redirected, when clicking the card
@@ -30,9 +32,15 @@ export interface GuideCardConstants {
 export const guideCards: GuideCardConstants[] = [
   {
     solution: 'search',
-    title: i18n.translate('guidedOnboardingPackage.gettingStarted.cards.appSearch.title', {
-      defaultMessage: 'Build an application on top of Elasticsearch',
-    }),
+    title: (
+      <FormattedMessage
+        id="guidedOnboardingPackage.gettingStarted.cards.appSearch.title"
+        defaultMessage="Build an application on {lineBreak} top of Elasticsearch"
+        values={{
+          lineBreak: <br />,
+        }}
+      />
+    ),
     guideId: 'appSearch',
     telemetryId: 'onboarding--search--application',
     order: 1,
@@ -48,9 +56,15 @@ export const guideCards: GuideCardConstants[] = [
   },
   {
     solution: 'search',
-    title: i18n.translate('guidedOnboardingPackage.gettingStarted.cards.databaseSearch.title', {
-      defaultMessage: 'Search across databases and business systems',
-    }),
+    title: (
+      <FormattedMessage
+        id="guidedOnboardingPackage.gettingStarted.cards.databaseSearch.title"
+        defaultMessage="Search across databases and {lineBreak} business systems"
+        values={{
+          lineBreak: <br />,
+        }}
+      />
+    ),
     guideId: 'databaseSearch',
     telemetryId: 'onboarding--search--database',
     order: 7,
@@ -69,9 +83,15 @@ export const guideCards: GuideCardConstants[] = [
   },
   {
     solution: 'observability',
-    title: i18n.translate('guidedOnboardingPackage.gettingStarted.cards.apmObservability.title', {
-      defaultMessage: 'Monitor my application performance (APM / tracing)',
-    }),
+    title: (
+      <FormattedMessage
+        id="guidedOnboardingPackage.gettingStarted.cards.apmObservability.title"
+        defaultMessage="Monitor my application {lineBreak} performance (APM / tracing)"
+        values={{
+          lineBreak: <br />,
+        }}
+      />
+    ),
     navigateTo: {
       appId: 'home',
       path: '#/tutorial/apm',
@@ -105,18 +125,30 @@ export const guideCards: GuideCardConstants[] = [
   },
   {
     solution: 'security',
-    title: i18n.translate('guidedOnboardingPackage.gettingStarted.cards.siemSecurity.title', {
-      defaultMessage: 'Detect threats in my data with SIEM',
-    }),
+    title: (
+      <FormattedMessage
+        id="guidedOnboardingPackage.gettingStarted.cards.siemSecurity.title"
+        defaultMessage="Detect threats in my {lineBreak} data with SIEM"
+        values={{
+          lineBreak: <br />,
+        }}
+      />
+    ),
     guideId: 'siem',
     telemetryId: 'onboarding--security--siem',
     order: 3,
   },
   {
     solution: 'security',
-    title: i18n.translate('guidedOnboardingPackage.gettingStarted.cards.hostsSecurity.title', {
-      defaultMessage: 'Secure my hosts with endpoint security',
-    }),
+    title: (
+      <FormattedMessage
+        id="guidedOnboardingPackage.gettingStarted.cards.hostsSecurity.title"
+        defaultMessage="Secure my hosts with {lineBreak} endpoint security"
+        values={{
+          lineBreak: <br />,
+        }}
+      />
+    ),
     navigateTo: {
       appId: 'integrations',
       path: '/detail/endpoint/overview',
@@ -126,9 +158,15 @@ export const guideCards: GuideCardConstants[] = [
   },
   {
     solution: 'security',
-    title: i18n.translate('guidedOnboardingPackage.gettingStarted.cards.cloudSecurity.title', {
-      defaultMessage: 'Secure my cloud assets with posture management',
-    }),
+    title: (
+      <FormattedMessage
+        id="guidedOnboardingPackage.gettingStarted.cards.cloudSecurity.title"
+        defaultMessage="Secure my cloud assets with {lineBreak} posture management"
+        values={{
+          lineBreak: <br />,
+        }}
+      />
+    ),
     navigateTo: {
       appId: 'integrations',
       path: '/detail/cloud_security_posture/overview',
