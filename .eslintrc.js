@@ -902,7 +902,10 @@ module.exports = {
       files: ['x-pack/plugins/profiling/**/*.{js,mjs,ts,tsx}'],
       rules: {
         'react-hooks/rules-of-hooks': 'error', // Checks rules of Hooks
-        'react-hooks/exhaustive-deps': ['error', { additionalHooks: '^(useAsync)$' }],
+        'react-hooks/exhaustive-deps': [
+          'error',
+          { additionalHooks: '^(useAsync|useTimeRangeAsync|useAutoAbortedHttpClient)$' },
+        ],
       },
     },
     {

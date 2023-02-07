@@ -257,6 +257,8 @@ export class TaskRunner<
       updatedAt,
       enabled,
       actions,
+      muteAll,
+      snoozeSchedule,
     } = rule;
     const {
       params: { alertId: ruleId, spaceId },
@@ -373,6 +375,8 @@ export class TaskRunner<
                 updatedAt,
                 throttle,
                 notifyWhen,
+                muteAll,
+                snoozeSchedule,
               },
               logger: this.logger,
               flappingSettings,
