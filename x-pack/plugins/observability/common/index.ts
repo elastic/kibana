@@ -15,7 +15,6 @@ export { ProcessorEvent } from './processor_event';
 export type { AlertStatus } from './typings';
 
 export {
-  enableNewSyntheticsView,
   enableInspectEsQueries,
   maxSuggestions,
   enableComparisonByDefault,

@@ -12,10 +12,7 @@ import { AsApiContract } from '@kbn/actions-plugin/common';
 import { HttpSetup } from '@kbn/core/public';
 import { BASE_RAC_ALERTS_API_PATH } from '@kbn/rule-registry-plugin/common/constants';
 import { useKibana } from '../../common/lib/kibana';
-import {
-  Alert,
-  AlertSummaryTimeRange,
-} from '../sections/rule_details/components/alert_summary/types';
+import { Alert, AlertSummaryTimeRange } from '../sections/alert_summary_widget/types';
 
 interface UseLoadAlertSummaryProps {
   featureIds?: ValidFeatureId[];

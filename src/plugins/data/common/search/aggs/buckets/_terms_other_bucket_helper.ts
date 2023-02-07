@@ -59,7 +59,7 @@ const getAggResultBuckets = (
   const keyParts = key.split(OTHER_BUCKET_SEPARATOR);
   let responseAgg = response;
   for (const i in keyParts) {
-    if (keyParts[i]) {
+    if (keyParts[i] || keyParts[i] === '') {
       const responseAggs: Array<Record<string, any>> = values(responseAgg);
       // If you have multi aggs, we cannot just assume the first one is the `other` bucket,
       // so we need to loop over each agg until we find it.
