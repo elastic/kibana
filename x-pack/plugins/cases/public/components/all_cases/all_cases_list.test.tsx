@@ -426,6 +426,20 @@ describe.skip('AllCasesListGeneric', () => {
     });
   });
 
+  it('should render only Name, CreatedOn and Severity columns when isSelectorView=true', async () => {
+    const wrapper = mount(
+      <TestProviders>
+        <AllCasesList isSelectorView={true} />
+      </TestProviders>
+    );
+    await waitFor(() => {
+      expect(wrapper.find('[data-test-subj="tableHeaderCell_title_0"]').exists()).toBe(true);
+      expect(wrapper.find('[data-test-subj="tableHeaderCell_createdAt_1"]').exists()).toBe(true);
+      expect(wrapper.find('[data-test-subj="tableHeaderCell_severity_2"]').exists()).toBe(true);
+      expect(wrapper.find('[data-test-subj="tableHeaderCell_assignees_1"]').exists()).toBe(false);
+    });
+  });
+
   it('should sort by severity', async () => {
     const result = appMockRenderer.render(<AllCasesList isSelectorView={false} />);
 
@@ -698,12 +712,12 @@ describe.skip('AllCasesListGeneric', () => {
         queryParams: DEFAULT_QUERY_PARAMS,
       });
 
-      userEvent.click(getByTestId('options-filter-popover-button-Solution'));
+      userEvent.click(getByTestId('solution-filter-popover-button'));
 
       await waitForEuiPopoverOpen();
 
       userEvent.click(
-        getByTestId(`options-filter-popover-item-${SECURITY_SOLUTION_OWNER}`),
+        getByTestId(`solution-filter-popover-item-${SECURITY_SOLUTION_OWNER}`),
         undefined,
         {
           skipPointerEventsCheck: true,
@@ -725,7 +739,7 @@ describe.skip('AllCasesListGeneric', () => {
       });
 
       userEvent.click(
-        getByTestId(`options-filter-popover-item-${SECURITY_SOLUTION_OWNER}`),
+        getByTestId(`solution-filter-popover-item-${SECURITY_SOLUTION_OWNER}`),
         undefined,
         {
           skipPointerEventsCheck: true,
@@ -754,7 +768,7 @@ describe.skip('AllCasesListGeneric', () => {
         </TestProviders>
       );
 
-      expect(queryByTestId('options-filter-popover-button-Solution')).toBeFalsy();
+      expect(queryByTestId('solution-filter-popover-button')).toBeFalsy();
     });
 
     it('should call useGetCases with the correct owner on initial render', async () => {
