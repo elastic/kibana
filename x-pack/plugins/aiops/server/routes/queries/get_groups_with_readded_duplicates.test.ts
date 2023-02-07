@@ -10,7 +10,7 @@ import { changePoints } from '../../../common/__mocks__/artificial_logs/change_p
 
 import { duplicateIdentifier } from './duplicate_identifier';
 import { getGroupsWithReaddedDuplicates } from './get_groups_with_readded_duplicates';
-import { groupDuplicates } from './fetch_frequent_items';
+import { groupDuplicates } from './fetch_frequent_item_sets';
 import { getFieldValuePairCounts } from './get_field_value_pair_counts';
 import { getMarkedDuplicates } from './get_marked_duplicates';
 
