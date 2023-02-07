@@ -80,7 +80,7 @@ const EmptyErrors = () => {
 };
 
 const KEEP_CALM = i18n.translate('xpack.synthetics.errors.keepCalm', {
-  defaultMessage: 'Keep calm.',
+  defaultMessage: 'This monitor ran successfully during the selected period. Increase the time range to check for older errors.',
 });
 
 const NO_ERRORS_FOUND = i18n.translate('xpack.synthetics.errors.noErrorsFound', {
