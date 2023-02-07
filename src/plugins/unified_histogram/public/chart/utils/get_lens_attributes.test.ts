@@ -9,7 +9,7 @@
 import { getLensAttributes } from './get_lens_attributes';
 import { AggregateQuery, Filter, FilterStateStore, Query } from '@kbn/es-query';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
-import { dataViewWithTimefieldMock } from '../__mocks__/data_view_with_timefield';
+import { dataViewWithTimefieldMock } from '../../__mocks__/data_view_with_timefield';
 
 describe('getLensAttributes', () => {
   const dataView: DataView = dataViewWithTimefieldMock;

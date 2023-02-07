@@ -10,12 +10,12 @@ import type { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 import { DataPublicPluginStart, search, tabifyAggResponse } from '@kbn/data-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { TimeRange } from '@kbn/es-query';
-import type { UnifiedHistogramBucketInterval } from '../types';
+import type { UnifiedHistogramBucketInterval } from '../../types';
 import { getChartAggConfigs } from './get_chart_agg_configs';
 
 /**
  * Convert the response from the chart request into a format that can be used
- * by the unified histogram chart. The returned object should be used to update
+ * by the Unified Histogram chart. The returned object should be used to update
  * time range interval of histogram.
  */
 export const buildBucketInterval = ({

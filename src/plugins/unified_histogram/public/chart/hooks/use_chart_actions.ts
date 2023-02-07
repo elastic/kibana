@@ -7,7 +7,7 @@
  */
 
 import { useCallback, useEffect, useRef, useState } from 'react';
-import type { UnifiedHistogramChartContext } from '../types';
+import type { UnifiedHistogramChartContext } from '../../types';
 
 export const useChartActions = ({
   chart,

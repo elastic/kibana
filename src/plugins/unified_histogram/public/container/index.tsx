@@ -10,9 +10,24 @@ import { EuiDelayRender, EuiFlexGroup, EuiLoadingSpinner } from '@elastic/eui';
 import { withSuspense } from '@kbn/shared-ux-utility';
 import React, { lazy } from 'react';
 
-export type { UnifiedHistogramLayoutProps } from './layout';
+export type {
+  UnifiedHistogramUninitializedApi,
+  UnifiedHistogramInitializedApi,
+  UnifiedHistogramApi,
+  UnifiedHistogramContainerProps,
+  UnifiedHistogramInitializeOptions,
+} from './container';
+export type { UnifiedHistogramState, UnifiedHistogramStateOptions } from './services/state_service';
+export {
+  getChartHidden,
+  getTopPanelHeight,
+  getBreakdownField,
+  setChartHidden,
+  setTopPanelHeight,
+  setBreakdownField,
+} from './utils/local_storage_utils';
 
-const LazyUnifiedHistogramLayout = lazy(() => import('./layout'));
+const LazyUnifiedHistogramContainer = lazy(() => import('./container'));
 
 /**
  * A resizable layout component with two panels that renders a histogram with a hits
@@ -20,8 +35,8 @@ const LazyUnifiedHistogramLayout = lazy(() => import('./layout'));
  * If all context props are left undefined, the layout will render in a single panel
  * mode including only the main display.
  */
-export const UnifiedHistogramLayout = withSuspense(
-  LazyUnifiedHistogramLayout,
+export const UnifiedHistogramContainer = withSuspense(
+  LazyUnifiedHistogramContainer,
   <EuiDelayRender delay={300}>
     <EuiFlexGroup
       className="eui-fullHeight"

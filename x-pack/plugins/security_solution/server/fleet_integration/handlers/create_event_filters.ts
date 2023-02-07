@@ -97,6 +97,7 @@ export const createNonInteractiveSessionEventFilter = (
       itemId: uuidv4(),
       meta: [],
       comments: [],
+      expireTime: undefined,
     });
   } catch (err) {
     logger.error(`Error creating Event Filter: ${wrapErrorIfNeeded(err)}`);
