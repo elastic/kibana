@@ -71,6 +71,7 @@ class DocLinks {
   public elasticsearchMapping: string;
   public elasticsearchSecureCluster: string;
   public enterpriseSearchConfig: string;
+  public enterpriseSearchEngines: string;
   public enterpriseSearchMailService: string;
   public enterpriseSearchTroubleshootSetup: string;
   public enterpriseSearchUsersAccess: string;
@@ -186,6 +187,7 @@ class DocLinks {
     this.elasticsearchMapping = '';
     this.elasticsearchSecureCluster = '';
     this.enterpriseSearchConfig = '';
+    this.enterpriseSearchEngines = '';
     this.enterpriseSearchMailService = '';
     this.enterpriseSearchTroubleshootSetup = '';
     this.enterpriseSearchUsersAccess = '';
@@ -302,6 +304,7 @@ class DocLinks {
     this.elasticsearchMapping = docLinks.links.elasticsearch.mapping;
     this.elasticsearchSecureCluster = docLinks.links.elasticsearch.secureCluster;
     this.enterpriseSearchConfig = docLinks.links.enterpriseSearch.configuration;
+    this.enterpriseSearchEngines = docLinks.links.enterpriseSearch.engines;
     this.enterpriseSearchMailService = docLinks.links.enterpriseSearch.mailService;
     this.enterpriseSearchTroubleshootSetup = docLinks.links.enterpriseSearch.troubleshootSetup;
     this.enterpriseSearchUsersAccess = docLinks.links.enterpriseSearch.usersAccess;
