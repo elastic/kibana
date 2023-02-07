@@ -317,7 +317,7 @@ export function updateStackFrameMap(
           LineNumber: lineNumber && lineNumber[0],
         };
       } else {
-        if (fileName) {
+        if (fileName || functionName) {
           stackFrame = {
             FileName: fileName,
             FunctionName: functionName,
@@ -328,10 +328,10 @@ export function updateStackFrameMap(
           // pre 8.7 format with synthetic source
           const sf = frame._source.Stackframe;
           stackFrame = {
-            FileName: sf.file?.name,
-            FunctionName: sf.function?.name,
-            FunctionOffset: sf.function?.offset ?? 0,
-            LineNumber: sf.line?.number ?? 0,
+            FileName: sf?.file?.name,
+            FunctionName: sf?.function?.name,
+            FunctionOffset: sf?.function?.offset,
+            LineNumber: sf?.line?.number,
           };
         }
       }
