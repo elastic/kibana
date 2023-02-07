@@ -234,6 +234,12 @@ const responseActionSubFeatures: SubFeatureConfig[] = [
     name: i18n.translate('xpack.securitySolution.featureRegistry.subFeatures.fileOperations', {
       defaultMessage: 'File Operations',
     }),
+    description: i18n.translate(
+      'xpack.securitySolution.featureRegistry.subFeatures.fileOperations.description',
+      {
+        defaultMessage: 'Perform file-related response actions in the response console.',
+      }
+    ),
     privilegeGroups: [
       {
         groupType: 'mutually_exclusive',
