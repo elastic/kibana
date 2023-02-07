@@ -49,6 +49,7 @@ export const useUpdatePolicy = ({
       newPolicy,
       monitorType,
       config,
+      {},
       true
     );
 
