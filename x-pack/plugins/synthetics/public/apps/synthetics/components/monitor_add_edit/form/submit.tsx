@@ -81,7 +81,8 @@ export const ActionBar = ({ readOnly = false }: { readOnly: boolean }) => {
         <EuiFlexItem grow={false}>
           <NoPermissionsTooltip
             canEditSynthetics={canEditSynthetics}
-            canUpdatePrivateMonitor={canSavePrivateLocation}
+            canAddPrivateMonitor={isEdit || canSavePrivateLocation}
+            canUpdatePrivateMonitor={!isEdit || canSavePrivateLocation}
           >
             <EuiButton
               fill

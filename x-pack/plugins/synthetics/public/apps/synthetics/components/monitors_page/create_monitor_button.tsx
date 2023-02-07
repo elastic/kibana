@@ -27,15 +27,12 @@ export const CreateMonitorButton: React.FC = () => {
 
   const hasPublicLocation = locations.some((loc) => loc.isServiceManaged);
 
-  const canAddPublicMonitor = canEditSynthetics && hasPublicLocation;
-  const canAddPrivateMonitor = canEditSynthetics && canSaveIntegrations;
-
-  const canAddMonitor = canAddPublicMonitor || canAddPrivateMonitor;
+  const canAddMonitor = canEditSynthetics && (hasPublicLocation || canSaveIntegrations);
 
   return (
     <NoPermissionsTooltip
       canEditSynthetics={canEditSynthetics}
-      canUpdatePrivateMonitor={canSaveIntegrations}
+      canAddPrivateMonitor={canAddMonitor}
     >
       <EuiButton
         color="primary"
