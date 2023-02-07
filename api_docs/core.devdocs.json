@@ -5005,6 +5005,10 @@
                 "path": "x-pack/plugins/ml/public/application/app.tsx"
               },
               {
+                "plugin": "ml",
+                "path": "x-pack/plugins/ml/public/application/app.tsx"
+              },
+              {
                 "plugin": "infra",
                 "path": "x-pack/plugins/infra/public/hooks/use_find_saved_object.tsx"
               },
@@ -5081,6 +5085,14 @@
                 "path": "x-pack/plugins/graph/public/plugin.ts"
               },
               {
+                "plugin": "monitoring",
+                "path": "x-pack/plugins/monitoring/public/application/pages/elasticsearch/ingest_pipeline_modal.tsx"
+              },
+              {
+                "plugin": "synthetics",
+                "path": "x-pack/plugins/synthetics/public/apps/synthetics/components/monitors_page/common/monitor_filters/use_filters.ts"
+              },
+              {
                 "plugin": "synthetics",
                 "path": "x-pack/plugins/synthetics/public/legacy_uptime/components/monitor_management/monitor_config/use_monitor_name.ts"
               },
@@ -5095,10 +5107,6 @@
               {
                 "plugin": "synthetics",
                 "path": "x-pack/plugins/synthetics/public/legacy_uptime/components/monitor_management/hooks/use_invalid_monitors.tsx"
-              },
-              {
-                "plugin": "synthetics",
-                "path": "x-pack/plugins/synthetics/public/apps/synthetics/components/monitors_page/common/monitor_filters/use_filters.ts"
               },
               {
                 "plugin": "synthetics",
@@ -14012,11 +14020,31 @@
           },
           {
             "plugin": "ml",
+            "path": "x-pack/plugins/ml/public/application/routing/use_resolver.ts"
+          },
+          {
+            "plugin": "ml",
+            "path": "x-pack/plugins/ml/public/application/routing/use_resolver.ts"
+          },
+          {
+            "plugin": "ml",
+            "path": "x-pack/plugins/ml/public/application/routing/use_resolver.ts"
+          },
+          {
+            "plugin": "ml",
             "path": "x-pack/plugins/ml/public/application/services/dashboard_service.ts"
           },
           {
             "plugin": "ml",
             "path": "x-pack/plugins/ml/public/application/services/dashboard_service.ts"
+          },
+          {
+            "plugin": "ml",
+            "path": "x-pack/plugins/ml/public/application/routing/router.tsx"
+          },
+          {
+            "plugin": "ml",
+            "path": "x-pack/plugins/ml/public/application/routing/router.tsx"
           },
           {
             "plugin": "canvas",
@@ -15129,15 +15157,15 @@
               },
               {
                 "plugin": "synthetics",
+                "path": "x-pack/plugins/synthetics/public/apps/synthetics/components/monitors_page/common/monitor_filters/use_filters.ts"
+              },
+              {
+                "plugin": "synthetics",
                 "path": "x-pack/plugins/synthetics/public/legacy_uptime/components/monitor_management/monitor_config/use_monitor_name.ts"
               },
               {
                 "plugin": "synthetics",
                 "path": "x-pack/plugins/synthetics/public/legacy_uptime/components/monitor_management/manage_locations/hooks/use_location_monitors.ts"
-              },
-              {
-                "plugin": "synthetics",
-                "path": "x-pack/plugins/synthetics/public/apps/synthetics/components/monitors_page/common/monitor_filters/use_filters.ts"
               },
               {
                 "plugin": "synthetics",
@@ -15324,10 +15352,6 @@
                 "path": "src/plugins/dashboard/public/dashboard_actions/clone_panel_action.tsx"
               },
               {
-                "plugin": "dataVisualizer",
-                "path": "x-pack/plugins/data_visualizer/public/application/index_data_visualizer/index_data_visualizer.tsx"
-              },
-              {
                 "plugin": "ml",
                 "path": "x-pack/plugins/ml/public/application/util/index_utils.ts"
               },
@@ -15346,6 +15370,10 @@
               {
                 "plugin": "dashboardEnhanced",
                 "path": "x-pack/plugins/dashboard_enhanced/public/services/drilldowns/abstract_dashboard_drilldown/components/collect_config_container.tsx"
+              },
+              {
+                "plugin": "monitoring",
+                "path": "x-pack/plugins/monitoring/public/application/pages/elasticsearch/ingest_pipeline_modal.tsx"
               },
               {
                 "plugin": "synthetics",
@@ -18312,14 +18340,6 @@
             "path": "x-pack/plugins/data_visualizer/common/types/index.ts"
           },
           {
-            "plugin": "dataVisualizer",
-            "path": "x-pack/plugins/data_visualizer/public/application/index_data_visualizer/index_data_visualizer.tsx"
-          },
-          {
-            "plugin": "dataVisualizer",
-            "path": "x-pack/plugins/data_visualizer/public/application/index_data_visualizer/index_data_visualizer.tsx"
-          },
-          {
             "plugin": "ml",
             "path": "x-pack/plugins/ml/public/application/data_frame_analytics/pages/analytics_management/components/source_selection/source_selection.tsx"
           },
@@ -21172,19 +21192,19 @@
           },
           {
             "plugin": "synthetics",
-            "path": "x-pack/plugins/synthetics/public/apps/synthetics/state/monitor_details/api.ts"
-          },
-          {
-            "plugin": "synthetics",
-            "path": "x-pack/plugins/synthetics/public/apps/synthetics/state/monitor_details/api.ts"
-          },
-          {
-            "plugin": "synthetics",
             "path": "x-pack/plugins/synthetics/public/apps/synthetics/state/overview/api.ts"
           },
           {
             "plugin": "synthetics",
             "path": "x-pack/plugins/synthetics/public/apps/synthetics/state/overview/api.ts"
+          },
+          {
+            "plugin": "synthetics",
+            "path": "x-pack/plugins/synthetics/public/apps/synthetics/state/monitor_details/api.ts"
+          },
+          {
+            "plugin": "synthetics",
+            "path": "x-pack/plugins/synthetics/public/apps/synthetics/state/monitor_details/api.ts"
           },
           {
             "plugin": "upgradeAssistant",

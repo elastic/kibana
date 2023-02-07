@@ -13,6 +13,9 @@ import { coreMock, themeServiceMock } from '@kbn/core/public/mocks';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { savedObjectsPluginMock } from '@kbn/saved-objects-plugin/public/mocks';
+import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
+import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks';
+
 import { SharePluginStart } from '@kbn/share-plugin/public';
 
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
@@ -33,11 +36,13 @@ coreStart.savedObjects.client.find = jest.fn().mockResolvedValue({ savedObjects:
 
 const appDependencies: AppDependencies = {
   application: coreStart.application,
+  charts: chartPluginMock.createStartContract(),
   chrome: coreStart.chrome,
   data: dataStart,
   dataViews: dataViewsStart,
   docLinks: coreStart.docLinks,
   i18n: coreStart.i18n,
+  fieldFormats: fieldFormatsServiceMock.createStartContract(),
   notifications: coreSetup.notifications,
   uiSettings: coreStart.uiSettings,
   savedObjects: coreStart.savedObjects,

@@ -8,11 +8,10 @@
 
 import { memoize } from 'lodash';
 
-import { IFieldSubTypeMulti } from '@kbn/es-query';
 import { DataView } from '@kbn/data-views-plugin/common';
 
 import { pluginServices } from '../../services';
-import { DataControlFieldRegistry, IEditableControlFactory } from '../../types';
+import { DataControlField, DataControlFieldRegistry, IEditableControlFactory } from '../../types';
 
 export const getDataControlFieldRegistry = memoize(
   async (dataView: DataView) => {
@@ -21,50 +20,30 @@ export const getDataControlFieldRegistry = memoize(
   (dataView: DataView) => [dataView.id, JSON.stringify(dataView.fields.getAll())].join('|')
 );
 
-const doubleLinkFields = (dataView: DataView) => {
-  // double link the parent-child relationship specifically for case-sensitivity support for options lists
-  const fieldRegistry: DataControlFieldRegistry = {};
-
-  for (const field of dataView.fields.getAll()) {
-    if (!fieldRegistry[field.name]) {
-      fieldRegistry[field.name] = { field, compatibleControlTypes: [] };
-    }
-
-    const parentFieldName = (field.subType as IFieldSubTypeMulti)?.multi?.parent;
-    if (parentFieldName) {
-      fieldRegistry[field.name].parentFieldName = parentFieldName;
-
-      const parentField = dataView.getFieldByName(parentFieldName);
-      if (!fieldRegistry[parentFieldName] && parentField) {
-        fieldRegistry[parentFieldName] = { field: parentField, compatibleControlTypes: [] };
-      }
-      fieldRegistry[parentFieldName].childFieldName = field.name;
-    }
-  }
-  return fieldRegistry;
-};
-
 const loadFieldRegistryFromDataView = async (
   dataView: DataView
 ): Promise<DataControlFieldRegistry> => {
   const {
     controls: { getControlTypes, getControlFactory },
   } = pluginServices.getServices();
-  const newFieldRegistry: DataControlFieldRegistry = doubleLinkFields(dataView);
+
   const controlFactories = getControlTypes().map(
     (controlType) => getControlFactory(controlType) as IEditableControlFactory
   );
-  dataView.fields.map((dataViewField) => {
-    for (const factory of controlFactories) {
-      if (factory.isFieldCompatible) {
-        factory.isFieldCompatible(newFieldRegistry[dataViewField.name]);
+  const fieldRegistry: DataControlFieldRegistry = dataView.fields
+    .getAll()
+    .reduce((registry, field) => {
+      const test: DataControlField = { field, compatibleControlTypes: [] };
+      for (const factory of controlFactories) {
+        if (factory.isFieldCompatible) {
+          factory.isFieldCompatible(test);
+        }
       }
-    }
+      if (test.compatibleControlTypes.length === 0) {
+        return { ...registry };
+      }
+      return { ...registry, [field.name]: test };
+    }, {});
 
-    if (newFieldRegistry[dataViewField.name]?.compatibleControlTypes.length === 0) {
-      delete newFieldRegistry[dataViewField.name];
-    }
-  });
-
-  return newFieldRegistry;
+  return fieldRegistry;
 };
