@@ -140,9 +140,12 @@ export const generalSettings: RawSettingDefinition[] = [
     key: 'disable_instrumentations',
     type: 'text',
     defaultValue: '',
-    label: i18n.translate('xpack.apm.agentConfig.disableInstrumentations.label', {
-      defaultMessage: 'Disable instrumentations',
-    }),
+    label: i18n.translate(
+      'xpack.apm.agentConfig.disableInstrumentations.label',
+      {
+        defaultMessage: 'Disable instrumentations',
+      }
+    ),
     description: i18n.translate(
       'xpack.apm.agentConfig.disableInstrumentations.description',
       {
@@ -162,9 +165,12 @@ export const generalSettings: RawSettingDefinition[] = [
     key: 'disable_outgoing_tracecontext_headers',
     type: 'boolean',
     defaultValue: 'true',
-    label: i18n.translate('xpack.apm.agentConfig.disableOutgoingTracecontextHeaders.label', {
-      defaultMessage: 'Disable outgoing tracecontext headers',
-    }),
+    label: i18n.translate(
+      'xpack.apm.agentConfig.disableOutgoingTracecontextHeaders.label',
+      {
+        defaultMessage: 'Disable outgoing tracecontext headers',
+      }
+    ),
     description: i18n.translate(
       'xpack.apm.agentConfig.disableOutgoingTracecontextHeaders.description',
       {
@@ -386,9 +392,12 @@ export const generalSettings: RawSettingDefinition[] = [
     type: 'duration',
     min: '-1ms',
     defaultValue: '5ms',
-    label: i18n.translate('xpack.apm.agentConfig.spanStackTraceMinDuration.label', {
-      defaultMessage: 'Span stack trace minimum duration',
-    }),
+    label: i18n.translate(
+      'xpack.apm.agentConfig.spanStackTraceMinDuration.label',
+      {
+        defaultMessage: 'Span stack trace minimum duration',
+      }
+    ),
     description: i18n.translate(
       'xpack.apm.agentConfig.spanStackTraceMinDuration.description',
       {
