@@ -67,6 +67,8 @@ interface FilterOption {
   description: string;
 }
 
+type ChangePointTypeFilterSelection = Array<EuiComboBoxOptionOption<ChangePointUIValue>>;
+
 export const ChangePointTypeFilter: FC<ChangePointTypeFilterProps> = ({ value, onChange }) => {
   const options = useMemo<Array<EuiComboBoxOptionOption<ChangePointUIValue>>>(() => {
     return [{ value: undefined, description: '' }, ...changePointTypes].map((v) => ({
@@ -80,12 +82,12 @@ export const ChangePointTypeFilter: FC<ChangePointTypeFilterProps> = ({ value, o
     }));
   }, []);
 
-  const selection: Array<EuiComboBoxOptionOption<ChangePointUIValue>> = !value
+  const selection: ChangePointTypeFilterSelection = !value
     ? [options[0]]
     : options.filter((v) => value?.includes(v.value!));
 
   const onChangeCallback = useCallback(
-    (selectedOptions: Array<EuiComboBoxOptionOption<ChangePointUIValue>>) => {
+    (selectedOptions: ChangePointTypeFilterSelection) => {
       if (
         selectedOptions.length === 0 ||
         selectedOptions[selectedOptions.length - 1].value === undefined
