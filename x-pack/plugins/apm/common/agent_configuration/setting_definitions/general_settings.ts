@@ -93,7 +93,7 @@ export const generalSettings: RawSettingDefinition[] = [
           'The defaults end with a wildcard so that content types like `text/plain; charset=utf-8` are captured as well.',
       }
     ),
-    includeAgents: ['java'],
+    includeAgents: ['java', 'dotnet'],
   },
 
   // Capture headers
@@ -152,7 +152,7 @@ export const generalSettings: RawSettingDefinition[] = [
           'NOTE: If a span propagates distributed tracing ids, it will not be ignored, even if it is shorter than the configured threshold. This is to ensure that no broken traces are recorded.',
       }
     ),
-    includeAgents: ['java'],
+    includeAgents: ['java', 'dotnet', 'nodejs', 'python'],
   },
 
   {
@@ -172,7 +172,7 @@ export const generalSettings: RawSettingDefinition[] = [
           'When set, sends-to and receives-from the specified queues/topic will be ignored.',
       }
     ),
-    includeAgents: ['java'],
+    includeAgents: ['java', 'dotnet', 'nodejs'],
   },
 
   // LOG_LEVEL
@@ -250,7 +250,7 @@ export const generalSettings: RawSettingDefinition[] = [
           'Span compression reduces the collection, processing, and storage overhead, and removes clutter from the UI. The tradeoff is that some information such as DB statements of all the compressed spans will not be collected.',
       }
     ),
-    includeAgents: ['java'],
+    includeAgents: ['java', 'dotnet', 'python'],
   },
 
   {
@@ -271,7 +271,7 @@ export const generalSettings: RawSettingDefinition[] = [
           'Consecutive spans that are exact match and that are under this threshold will be compressed into a single composite span. This option does not apply to composite spans. This reduces the collection, processing, and storage overhead, and removes clutter from the UI. The tradeoff is that the DB statements of all the compressed spans will not be collected.',
       }
     ),
-    includeAgents: ['java'],
+    includeAgents: ['java', 'dotnet', 'python'],
   },
   {
     key: 'span_compression_same_kind_max_duration',
@@ -291,7 +291,7 @@ export const generalSettings: RawSettingDefinition[] = [
           'Consecutive spans to the same destination that are under this threshold will be compressed into a single composite span. This option does not apply to composite spans. This reduces the collection, processing, and storage overhead, and removes clutter from the UI. The tradeoff is that the DB statements of all the compressed spans will not be collected.',
       }
     ),
-    includeAgents: ['java'],
+    includeAgents: ['java', 'dotnet', 'python'],
   },
 
   // SPAN_FRAMES_MIN_DURATION
@@ -366,7 +366,7 @@ export const generalSettings: RawSettingDefinition[] = [
       { text: 'restart', value: 'restart' },
       { text: 'restart_external', value: 'restart_external' },
     ],
-    includeAgents: ['java'],
+    includeAgents: ['java', 'nodejs'],
   },
 
   // Transaction max spans
