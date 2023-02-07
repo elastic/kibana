@@ -16,10 +16,7 @@ import { mlTimefilterRefresh$, useTimefilter } from '@kbn/ml-date-picker';
 
 import type { DocumentStatsSearchStrategyParams } from '../get_document_stats';
 import type { AiOpsIndexBasedAppState } from '../components/explain_log_rate_spikes/explain_log_rate_spikes_app_state';
-import {
-  getEsQueryFromSavedSearch,
-  SavedSearchSavedObject,
-} from '../application/utils/search_utils';
+import { getEsQueryFromSavedSearch } from '../application/utils/search_utils';
 import type { GroupTableItem } from '../components/spike_analysis_table/types';
 
 import { useTimeBuckets } from './use_time_buckets';
@@ -31,9 +28,9 @@ const DEFAULT_BAR_TARGET = 75;
 
 export const useData = (
   {
-    currentDataView,
-    currentSavedSearch,
-  }: { currentDataView: DataView; currentSavedSearch: SavedSearch | SavedSearchSavedObject | null },
+    selectedDataView,
+    selectedSavedSearch,
+  }: { selectedDataView: DataView; selectedSavedSearch: SavedSearch | null },
   aiopsListState: AiOpsIndexBasedAppState,
   onUpdate: (params: Dictionary<unknown>) => void,
   selectedChangePoint?: ChangePoint,
@@ -55,9 +52,9 @@ export const useData = (
   /** Prepare required params to pass to search strategy **/
   const { searchQueryLanguage, searchString, searchQuery } = useMemo(() => {
     const searchData = getEsQueryFromSavedSearch({
-      dataView: currentDataView,
+      dataView: selectedDataView,
       uiSettings,
-      savedSearch: currentSavedSearch,
+      savedSearch: selectedSavedSearch,
       filterManager,
     });
 
@@ -82,8 +79,8 @@ export const useData = (
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
-    currentSavedSearch?.id,
-    currentDataView.id,
+    selectedSavedSearch?.id,
+    selectedDataView.id,
     aiopsListState.searchString,
     aiopsListState.searchQueryLanguage,
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -96,7 +93,7 @@ export const useData = (
   const _timeBuckets = useTimeBuckets();
 
   const timefilter = useTimefilter({
-    timeRangeSelector: currentDataView?.timeFieldName !== undefined,
+    timeRangeSelector: selectedDataView?.timeFieldName !== undefined,
     autoRefreshSelector: true,
   });
 
@@ -138,10 +135,10 @@ export const useData = (
         earliest: timefilterActiveBounds.min?.valueOf(),
         latest: timefilterActiveBounds.max?.valueOf(),
         intervalMs: _timeBuckets.getInterval()?.asMilliseconds(),
-        index: currentDataView.getIndexPattern(),
+        index: selectedDataView.getIndexPattern(),
         searchQuery,
-        timeFieldName: currentDataView.timeFieldName,
-        runtimeFieldMap: currentDataView.getRuntimeMappings(),
+        timeFieldName: selectedDataView.timeFieldName,
+        runtimeFieldMap: selectedDataView.getRuntimeMappings(),
       });
       setLastRefresh(Date.now());
     }

@@ -12,6 +12,7 @@ import { epmRouteService } from '@kbn/fleet-plugin/common';
 import type { InstallPackageResponse } from '@kbn/fleet-plugin/common/types';
 import { KibanaServices, useKibana } from '../lib/kibana';
 import { useUserPrivileges } from '../components/user_privileges';
+import { PREBUILT_RULES_PACKAGE_NAME } from '../../../common/detection_engine/constants';
 
 /**
  * Requests that the endpoint and security_detection_engine package be upgraded to the latest version
@@ -25,16 +26,16 @@ const sendUpgradeSecurityPackages = async (
   options: HttpFetchOptions = {},
   prebuiltRulesPackageVersion?: string
 ): Promise<void> => {
-  const packages = ['endpoint', 'security_detection_engine'];
+  const packages = ['endpoint', PREBUILT_RULES_PACKAGE_NAME];
   const requests: Array<Promise<InstallPackageResponse | BulkInstallPackagesResponse>> = [];
 
   // If `prebuiltRulesPackageVersion` is provided, try to install that version
   // Must be done as two separate requests as bulk API doesn't support versions
   if (prebuiltRulesPackageVersion != null) {
-    packages.splice(packages.indexOf('security_detection_engine'), 1);
+    packages.splice(packages.indexOf(PREBUILT_RULES_PACKAGE_NAME), 1);
     requests.push(
       http.post<InstallPackageResponse>(
-        epmRouteService.getInstallPath('security_detection_engine', prebuiltRulesPackageVersion),
+        epmRouteService.getInstallPath(PREBUILT_RULES_PACKAGE_NAME, prebuiltRulesPackageVersion),
         {
           ...options,
           body: JSON.stringify({
