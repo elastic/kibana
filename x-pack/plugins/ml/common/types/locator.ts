@@ -203,7 +203,7 @@ export interface TrainedModelsQueryState {
   modelId?: string;
 }
 
-export interface TrainedModelsNodesQueryState {
+export interface MemoryUsageNodesQueryState {
   nodeId?: string;
 }
 
@@ -276,7 +276,7 @@ export type MlLocatorState =
   | MlGenericUrlState
   | NotificationsUrlState
   | TrainedModelsUrlState
-  | TrainedModelsNodesUrlState;
+  | MemoryUsageUrlState;
 
 export type MlLocatorParams = MlLocatorState & SerializableRecord;
 
@@ -287,9 +287,9 @@ export type TrainedModelsUrlState = MLPageState<
   TrainedModelsQueryState | undefined
 >;
 
-export type TrainedModelsNodesUrlState = MLPageState<
-  typeof ML_PAGES.TRAINED_MODELS_NODES,
-  TrainedModelsNodesQueryState | undefined
+export type MemoryUsageUrlState = MLPageState<
+  typeof ML_PAGES.MEMORY_USAGE,
+  MemoryUsageNodesQueryState | undefined
 >;
 
 export interface NotificationsQueryState {

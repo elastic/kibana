@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { EuiButtonIcon, EuiFlexItem, EuiLink, EuiToolTip } from '@elastic/eui';
+import { EuiButtonIcon, EuiLink, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import { euiThemeVars } from '@kbn/ui-theme';
@@ -39,7 +39,7 @@ export function DimensionButton({
 }) {
   return (
     <>
-      <EuiFlexItem>
+      <div>
         <EuiToolTip
           content={message?.shortMessage || message?.longMessage || undefined}
           position="left"
@@ -63,12 +63,12 @@ export function DimensionButton({
             </DimensionButtonIcon>
           </EuiLink>
         </EuiToolTip>
-      </EuiFlexItem>
+      </div>
       <EuiButtonIcon
         className="lnsLayerPanel__dimensionRemove"
         data-test-subj="indexPattern-dimension-remove"
         iconType="trash"
-        size="s"
+        size="xs"
         color="danger"
         aria-label={i18n.translate('xpack.lens.indexPattern.removeColumnLabel', {
           defaultMessage: 'Remove configuration from "{groupLabel}"',
