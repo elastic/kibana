@@ -161,6 +161,8 @@ export type SanitizedRuleConfig = Pick<
   | 'updatedAt'
   | 'throttle'
   | 'notifyWhen'
+  | 'muteAll'
+  | 'snoozeSchedule'
 > & {
   producer: string;
   ruleTypeId: string;

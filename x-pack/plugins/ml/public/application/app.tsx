@@ -45,6 +45,12 @@ interface AppProps {
 
 const localStorage = new Storage(window.localStorage);
 
+// temporary function to hardcode the serverless state
+// this will be replaced by the true serverless information from kibana
+export function isServerless() {
+  return false;
+}
+
 /**
  * Provides global services available across the entire ML app.
  */
@@ -54,6 +60,7 @@ export function getMlGlobalServices(httpStart: HttpStart, usageCollection?: Usag
     httpService,
     mlApiServices: mlApiServicesProvider(httpService),
     mlUsageCollection: mlUsageCollectionProvider(usageCollection),
+    isServerless,
   };
 }
 
