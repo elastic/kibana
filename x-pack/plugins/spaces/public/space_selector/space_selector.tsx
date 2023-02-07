@@ -107,7 +107,7 @@ export class SpaceSelector extends Component<Props, State> {
         data-test-subj="kibanaSpaceSelector"
         panelled
       >
-        <KibanaPageTemplate.Section className="spcSpaceSelector__pageContent" color='transparent'>
+        <KibanaPageTemplate.Section className="spcSpaceSelector__pageContent" color="transparent">
           <EuiText textAlign="center" size="s">
             <EuiSpacer size="xxl" />
             <KibanaSolutionAvatar name="Elastic" size="xl" />
