@@ -7,12 +7,12 @@
 
 import * as t from 'io-ts';
 import { maxSuggestions } from '@kbn/observability-plugin/common';
+import { Environment } from '../../../common/environment_rt';
 import { getSearchTransactionsEvents } from '../../lib/helpers/transactions';
 import { getEnvironments } from './get_environments';
 import { rangeRt } from '../default_api_types';
 import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
 import { getApmEventClient } from '../../lib/helpers/get_apm_event_client';
-import { Environment } from '@kbn/apm-plugin/common/environment_rt';
 
 const environmentsRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/environments',
