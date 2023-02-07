@@ -143,6 +143,20 @@ describe('GuidedOnboarding ApiService', () => {
         body: JSON.stringify({ status: 'quit' }),
       });
     });
+
+    it('sends a request even if another request is in flight', async () => {
+      httpClient.get.mockImplementationOnce(() => {
+        return new Promise((resolve) => setTimeout(resolve));
+      });
+      await apiService.fetchPluginState$().subscribe();
+      expect(apiService.isLoading$.value).toBe(true);
+      await apiService.getGuideConfig(testGuideId);
+      await apiService.updatePluginState({ guide: testGuideStep1InProgressState }, false);
+      expect(httpClient.put).toHaveBeenCalledTimes(1);
+      expect(httpClient.put).toHaveBeenCalledWith(`${API_BASE_PATH}/state`, {
+        body: JSON.stringify({ guide: testGuideStep1InProgressState }),
+      });
+    });
   });
 
   describe('activateGuide', () => {
@@ -733,7 +747,18 @@ describe('GuidedOnboarding ApiService', () => {
       apiService.setup(httpClient, true);
       await apiService.getGuideConfig(testGuideId);
       expect(httpClient.get).toHaveBeenCalledTimes(1);
-      expect(httpClient.get).toHaveBeenCalledWith(`${API_BASE_PATH}/configs/${testGuideId}`);
+      expect(httpClient.get).toHaveBeenLastCalledWith(`${API_BASE_PATH}/configs/${testGuideId}`);
+    });
+
+    it('sends a request even if another request is in flight', async () => {
+      httpClient.get.mockImplementationOnce(() => {
+        return new Promise((resolve) => setTimeout(resolve));
+      });
+      await apiService.fetchPluginState$().subscribe();
+      expect(apiService.isLoading$.value).toBe(true);
+      await apiService.getGuideConfig(testGuideId);
+      expect(httpClient.get).toHaveBeenCalledTimes(2);
+      expect(httpClient.get).toHaveBeenLastCalledWith(`${API_BASE_PATH}/configs/${testGuideId}`);
     });
   });
 
