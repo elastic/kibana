@@ -17,8 +17,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const testSubjects = getService('testSubjects');
   const cases = getService('cases');
 
-  // Failing: See https://github.com/elastic/kibana/issues/145271
-  describe.skip('cases deletion sub privilege', () => {
+  describe('cases deletion sub privilege', () => {
     before(async () => {
       await createUsersAndRoles(getService, users, roles);
       await PageObjects.security.forceLogout();
@@ -101,7 +100,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
             });
 
             it(`User ${user.username} cannot delete a case while on a specific case page`, async () => {
-              await testSubjects.missingOrFail('case-view-actions');
+              await testSubjects.click('property-actions-case-ellipses');
+              await testSubjects.missingOrFail('property-actions-case-trash');
             });
           });
 

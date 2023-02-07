@@ -12,6 +12,10 @@
  * @implements {CacheInterface}
  */
 class NoCacheCache {
+  getKey() {
+    return '';
+  }
+
   getCode() {
     return undefined;
   }
