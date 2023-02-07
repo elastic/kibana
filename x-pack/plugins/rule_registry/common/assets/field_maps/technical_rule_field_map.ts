@@ -17,7 +17,7 @@ export const technicalRuleFieldMap = {
     Fields.EVENT_ACTION,
     Fields.TAGS
   ),
-  [Fields.ALERT_RULE_PARAMETERS]: { type: 'flattened', ignore_above: 4096 },
+  [Fields.ALERT_RULE_PARAMETERS]: { type: 'flattened', ignore_above: 4096, required: false },
   [Fields.ALERT_RULE_TYPE_ID]: { type: 'keyword', required: true },
   [Fields.ALERT_RULE_CONSUMER]: { type: 'keyword', required: true },
   [Fields.ALERT_RULE_PRODUCER]: { type: 'keyword', required: true },
@@ -26,14 +26,15 @@ export const technicalRuleFieldMap = {
   [Fields.ALERT_INSTANCE_ID]: { type: 'keyword', required: true },
   [Fields.ALERT_START]: { type: 'date' },
   [Fields.ALERT_TIME_RANGE]: {
+    required: false,
     type: 'date_range',
     format: 'epoch_millis||strict_date_optional_time',
   },
-  [Fields.ALERT_END]: { type: 'date' },
-  [Fields.ALERT_DURATION]: { type: 'long' },
-  [Fields.ALERT_SEVERITY]: { type: 'keyword' },
+  [Fields.ALERT_END]: { type: 'date', required: false },
+  [Fields.ALERT_DURATION]: { type: 'long', required: false },
+  [Fields.ALERT_SEVERITY]: { type: 'keyword', required: false },
   [Fields.ALERT_STATUS]: { type: 'keyword', required: true },
-  [Fields.ALERT_FLAPPING]: { type: 'boolean' },
+  [Fields.ALERT_FLAPPING]: { type: 'boolean', required: false },
   [Fields.VERSION]: {
     type: 'version',
     array: false,
