@@ -6,13 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { ID, LIST_ID, NAMESPACE_TYPE } from '../../constants/index.mock';
+import * as t from 'io-ts';
+import { IsoDateString } from '@kbn/securitysolution-io-ts-types';
 
-import { ExportExceptionListQuerySchema } from '.';
-
-export const getExportExceptionListQuerySchemaMock = (): ExportExceptionListQuerySchema => ({
-  id: ID,
-  list_id: LIST_ID,
-  namespace_type: NAMESPACE_TYPE,
-  include_expired_exceptions: 'true',
-});
+export const expireTime = IsoDateString;
+export const expireTimeOrUndefined = t.union([expireTime, t.undefined]);
+export type ExpireTimeOrUndefined = t.TypeOf<typeof expireTimeOrUndefined>;
