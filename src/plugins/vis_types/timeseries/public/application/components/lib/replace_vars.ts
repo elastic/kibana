@@ -7,7 +7,7 @@
  */
 
 import { encode, RisonValue } from 'rison-node';
-import Handlebars, { ExtendedCompileOptions, compileFnName } from '@kbn/handlebars';
+import Handlebars, { type ExtendedCompileOptions, compileFnName } from '@kbn/handlebars';
 import { i18n } from '@kbn/i18n';
 import { emptyLabel } from '../../../../common/empty_label';
 
