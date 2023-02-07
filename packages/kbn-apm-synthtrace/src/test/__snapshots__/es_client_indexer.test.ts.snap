@@ -71,34 +71,34 @@ Array [
   Object {
     "@timestamp": "2022-01-01T00:00:00.000Z",
     "metricset": Object {
+      "name": "service_summary",
+    },
+    "processor": Object {
+      "event": "metric",
+    },
+  },
+  Object {
+    "@timestamp": "2022-01-01T00:00:00.000Z",
+    "metricset": Object {
+      "name": "service_summary",
+    },
+    "processor": Object {
+      "event": "metric",
+    },
+  },
+  Object {
+    "@timestamp": "2022-01-01T00:00:00.000Z",
+    "metricset": Object {
+      "name": "service_summary",
+    },
+    "processor": Object {
+      "event": "metric",
+    },
+  },
+  Object {
+    "@timestamp": "2022-01-01T00:00:00.000Z",
+    "metricset": Object {
       "name": "span_breakdown",
-    },
-    "processor": Object {
-      "event": "metric",
-    },
-  },
-  Object {
-    "@timestamp": "2022-01-01T00:00:00.000Z",
-    "metricset": Object {
-      "name": "service_summary",
-    },
-    "processor": Object {
-      "event": "metric",
-    },
-  },
-  Object {
-    "@timestamp": "2022-01-01T00:00:00.000Z",
-    "metricset": Object {
-      "name": "service_summary",
-    },
-    "processor": Object {
-      "event": "metric",
-    },
-  },
-  Object {
-    "@timestamp": "2022-01-01T00:00:00.000Z",
-    "metricset": Object {
-      "name": "service_summary",
     },
     "processor": Object {
       "event": "metric",
@@ -149,25 +149,25 @@ Array [
   Object {
     "@timestamp": "2022-01-01T00:30:00.000Z",
     "metricset": Object {
+      "name": "service_summary",
+    },
+    "processor": Object {
+      "event": "metric",
+    },
+  },
+  Object {
+    "@timestamp": "2022-01-01T00:30:00.000Z",
+    "metricset": Object {
+      "name": "service_summary",
+    },
+    "processor": Object {
+      "event": "metric",
+    },
+  },
+  Object {
+    "@timestamp": "2022-01-01T00:30:00.000Z",
+    "metricset": Object {
       "name": "span_breakdown",
-    },
-    "processor": Object {
-      "event": "metric",
-    },
-  },
-  Object {
-    "@timestamp": "2022-01-01T00:30:00.000Z",
-    "metricset": Object {
-      "name": "service_summary",
-    },
-    "processor": Object {
-      "event": "metric",
-    },
-  },
-  Object {
-    "@timestamp": "2022-01-01T00:30:00.000Z",
-    "metricset": Object {
-      "name": "service_summary",
     },
     "processor": Object {
       "event": "metric",
