@@ -173,8 +173,8 @@ export class AlertsClient {
       // this is typed kind of crazy to fit the output of es api response to this
       _source?:
         | {
-            [ALERT_RULE_TYPE_ID]?: unknown;
-            [ALERT_RULE_CONSUMER]?: unknown;
+            [ALERT_RULE_TYPE_ID]?: string | null | undefined;
+            [ALERT_RULE_CONSUMER]?: string | null | undefined;
           }
         | null
         | undefined;
@@ -194,8 +194,8 @@ export class AlertsClient {
       { hitIds: [], ownersAndRuleTypeIds: [] } as {
         hitIds: string[];
         ownersAndRuleTypeIds: Array<{
-          [ALERT_RULE_TYPE_ID]: unknown;
-          [ALERT_RULE_CONSUMER]: unknown;
+          [ALERT_RULE_TYPE_ID]: string | null | undefined;
+          [ALERT_RULE_CONSUMER]: string | null | undefined;
         }>;
       }
     );
