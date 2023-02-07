@@ -8,7 +8,7 @@
 
 export * from './src/default_alerts_as_data';
 export * from './src/legacy_alerts_as_data';
-export { type TechnicalRuleDataFieldName } from './src/technical_field_names';
+export * from './src/technical_field_names';
 export * from './src/alerts_as_data_rbac';
 export * from './src/alerts_as_data_severity';
 export * from './src/alerts_as_data_status';

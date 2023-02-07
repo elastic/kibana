@@ -7,4 +7,6 @@
 
 export { alertFieldMap } from './field_maps/alert_field_map';
 export { legacyAlertFieldMap } from './field_maps/legacy_alert_field_map';
+export { mappingFromFieldMap } from './field_maps/mapping_from_field_map';
+export { type FieldMap } from './field_maps/types';
 export { getComponentTemplateFromFieldMap } from './field_maps/component_template_from_field_map';

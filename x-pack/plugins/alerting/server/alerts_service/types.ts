@@ -6,8 +6,7 @@
  */
 
 import { ClusterPutComponentTemplateRequest } from '@elastic/elasticsearch/lib/api/types';
-import { getComponentTemplateFromFieldMap } from '../../common/alert_schema';
-import { FieldMap } from '../../common/alert_schema/field_maps/types';
+import { FieldMap, getComponentTemplateFromFieldMap } from '../../common';
 
 export const getComponentTemplateName = (context?: string) =>
   `.alerts-${context ? `${context}` : 'framework'}-mappings`;

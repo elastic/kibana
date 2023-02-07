@@ -25,7 +25,13 @@ export * from './parse_duration';
 export * from './execution_log_types';
 export * from './rule_snooze_type';
 
-export { alertFieldMap, legacyAlertFieldMap } from './alert_schema';
+export {
+  alertFieldMap,
+  legacyAlertFieldMap,
+  mappingFromFieldMap,
+  getComponentTemplateFromFieldMap,
+  type FieldMap,
+} from './alert_schema';
 
 export interface AlertingFrameworkHealth {
   isSufficientlySecure: boolean;

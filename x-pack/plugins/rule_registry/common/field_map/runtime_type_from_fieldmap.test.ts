@@ -8,11 +8,11 @@ import { runtimeTypeFromFieldMap } from './runtime_type_from_fieldmap';
 
 describe('runtimeTypeFromFieldMap', () => {
   const fieldmapRt = runtimeTypeFromFieldMap({
-    keywordField: { type: 'keyword' },
-    longField: { type: 'long' },
-    booleanField: { type: 'boolean' },
+    keywordField: { type: 'keyword', required: false },
+    longField: { type: 'long', required: false },
+    booleanField: { type: 'boolean', required: false },
     requiredKeywordField: { type: 'keyword', required: true },
-    multiKeywordField: { type: 'keyword', array: true },
+    multiKeywordField: { type: 'keyword', array: true, required: false },
   } as const);
 
   it('accepts both singular and array fields', () => {

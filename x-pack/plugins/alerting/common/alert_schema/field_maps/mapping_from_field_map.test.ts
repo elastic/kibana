@@ -7,6 +7,7 @@
 import { mappingFromFieldMap } from './mapping_from_field_map';
 import { FieldMap } from './types';
 import { alertFieldMap } from './alert_field_map';
+import { legacyAlertFieldMap } from './legacy_alert_field_map';
 
 describe('mappingFromFieldMap', () => {
   const fieldMap: FieldMap = {
@@ -184,11 +185,17 @@ describe('mappingFromFieldMap', () => {
     expect(mappingFromFieldMap(alertFieldMap)).toEqual({
       dynamic: 'strict',
       properties: {
+        '@timestamp': {
+          type: 'date',
+        },
         kibana: {
           properties: {
             alert: {
               properties: {
                 action_group: {
+                  type: 'keyword',
+                },
+                case_ids: {
                   type: 'keyword',
                 },
                 duration: {
@@ -204,8 +211,18 @@ describe('mappingFromFieldMap', () => {
                 flapping: {
                   type: 'boolean',
                 },
-                id: {
-                  type: 'keyword',
+                flapping_history: {
+                  type: 'boolean',
+                },
+                instance: {
+                  properties: {
+                    id: {
+                      type: 'keyword',
+                    },
+                  },
+                },
+                last_detected: {
+                  type: 'date',
                 },
                 reason: {
                   type: 'keyword',
@@ -272,6 +289,58 @@ describe('mappingFromFieldMap', () => {
             },
           },
         },
+      },
+    });
+    expect(mappingFromFieldMap(legacyAlertFieldMap)).toEqual({
+      dynamic: 'strict',
+      properties: {
+        kibana: {
+          properties: {
+            alert: {
+              properties: {
+                risk_score: { type: 'float' },
+                rule: {
+                  properties: {
+                    author: { type: 'keyword' },
+                    created_at: { type: 'date' },
+                    created_by: { type: 'keyword' },
+                    description: { type: 'keyword' },
+                    enabled: { type: 'keyword' },
+                    from: { type: 'keyword' },
+                    interval: { type: 'keyword' },
+                    license: { type: 'keyword' },
+                    note: { type: 'keyword' },
+                    references: { type: 'keyword' },
+                    rule_id: { type: 'keyword' },
+                    rule_name_override: { type: 'keyword' },
+                    to: { type: 'keyword' },
+                    type: { type: 'keyword' },
+                    updated_at: { type: 'date' },
+                    updated_by: { type: 'keyword' },
+                    version: { type: 'keyword' },
+                  },
+                },
+                severity: { type: 'keyword' },
+                suppression: {
+                  properties: {
+                    docs_count: { type: 'long' },
+                    end: { type: 'date' },
+                    terms: {
+                      properties: { field: { type: 'keyword' }, value: { type: 'keyword' } },
+                    },
+                    start: { type: 'date' },
+                  },
+                },
+                system_status: { type: 'keyword' },
+                workflow_reason: { type: 'keyword' },
+                workflow_user: { type: 'keyword' },
+              },
+            },
+          },
+        },
+        ecs: { properties: { version: { type: 'keyword' } } },
+        event: { properties: { action: { type: 'keyword' }, kind: { type: 'keyword' } } },
+        tags: { type: 'keyword' },
       },
     });
   });

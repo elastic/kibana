@@ -13,7 +13,11 @@ const EVENT_ACTION = 'event.action' as const;
 const EVENT_KIND = 'event.kind' as const;
 const TAGS = 'tags' as const;
 
-// these are in the technical component template
+// These are the fields that are in the rule registry technical component template
+// that are NOT in the framework alerts as data common component template
+
+// We will maintain a legacy component template that can be used by legacy
+// rule registry rules with these fields.
 const ALERT_RISK_SCORE = `${ALERT_NAMESPACE}.risk_score` as const;
 const ALERT_RULE_AUTHOR = `${ALERT_RULE_NAMESPACE}.author` as const;
 const ALERT_RULE_CREATED_AT = `${ALERT_RULE_NAMESPACE}.created_at` as const;
@@ -44,52 +48,16 @@ const ALERT_SYSTEM_STATUS = `${ALERT_NAMESPACE}.system_status` as const;
 const ALERT_WORKFLOW_REASON = `${ALERT_NAMESPACE}.workflow_reason` as const;
 const ALERT_WORKFLOW_USER = `${ALERT_NAMESPACE}.workflow_user` as const;
 
-// // these fields are not in the technical component template
-// // namespaces
-// const ALERT_RULE_THREAT_NAMESPACE = `${ALERT_RULE_NAMESPACE}.threat` as const;
-
-// const EVENT_MODULE = 'event.module' as const;
-
-// // Fields pertaining to the alert
-// const ALERT_BUILDING_BLOCK_TYPE = `${ALERT_NAMESPACE}.building_block_type` as const;
-// const ALERT_EVALUATION_THRESHOLD = `${ALERT_NAMESPACE}.evaluation.threshold` as const;
-// const ALERT_EVALUATION_VALUE = `${ALERT_NAMESPACE}.evaluation.value` as const;
-
-// // Fields pertaining to the rule associated with the alert
-// const ALERT_RULE_EXCEPTIONS_LIST = `${ALERT_RULE_NAMESPACE}.exceptions_list` as const;
-// const ALERT_RULE_NAMESPACE_FIELD = `${ALERT_RULE_NAMESPACE}.namespace` as const;
-
-// // Fields pertaining to the threat tactic associated with the rule
-// const ALERT_THREAT_FRAMEWORK = `${ALERT_RULE_THREAT_NAMESPACE}.framework` as const;
-// const ALERT_THREAT_TACTIC_ID = `${ALERT_RULE_THREAT_NAMESPACE}.tactic.id` as const;
-// const ALERT_THREAT_TACTIC_NAME = `${ALERT_RULE_THREAT_NAMESPACE}.tactic.name` as const;
-// const ALERT_THREAT_TACTIC_REFERENCE = `${ALERT_RULE_THREAT_NAMESPACE}.tactic.reference` as const;
-// const ALERT_THREAT_TECHNIQUE_ID = `${ALERT_RULE_THREAT_NAMESPACE}.technique.id` as const;
-// const ALERT_THREAT_TECHNIQUE_NAME = `${ALERT_RULE_THREAT_NAMESPACE}.technique.name` as const;
-// const ALERT_THREAT_TECHNIQUE_REFERENCE =
-//   `${ALERT_RULE_THREAT_NAMESPACE}.technique.reference` as const;
-// const ALERT_THREAT_TECHNIQUE_SUBTECHNIQUE_ID =
-//   `${ALERT_RULE_THREAT_NAMESPACE}.technique.subtechnique.id` as const;
-// const ALERT_THREAT_TECHNIQUE_SUBTECHNIQUE_NAME =
-//   `${ALERT_RULE_THREAT_NAMESPACE}.technique.subtechnique.name` as const;
-// const ALERT_THREAT_TECHNIQUE_SUBTECHNIQUE_REFERENCE =
-//   `${ALERT_RULE_THREAT_NAMESPACE}.technique.subtechnique.reference` as const;
-
 export {
-  // ALERT_BUILDING_BLOCK_TYPE,
-  // ALERT_EVALUATION_THRESHOLD,
-  // ALERT_EVALUATION_VALUE,
   ALERT_RISK_SCORE,
   ALERT_RULE_AUTHOR,
   ALERT_RULE_CREATED_AT,
   ALERT_RULE_CREATED_BY,
   ALERT_RULE_DESCRIPTION,
   ALERT_RULE_ENABLED,
-  // ALERT_RULE_EXCEPTIONS_LIST,
   ALERT_RULE_FROM,
   ALERT_RULE_INTERVAL,
   ALERT_RULE_LICENSE,
-  // ALERT_RULE_NAMESPACE_FIELD,
   ALERT_RULE_NOTE,
   ALERT_RULE_REFERENCES,
   ALERT_RULE_RULE_ID,
@@ -107,21 +75,10 @@ export {
   ALERT_SUPPRESSION_TERMS,
   ALERT_SUPPRESSION_VALUE,
   ALERT_SYSTEM_STATUS,
-  // ALERT_THREAT_FRAMEWORK,
-  // ALERT_THREAT_TACTIC_ID,
-  // ALERT_THREAT_TACTIC_NAME,
-  // ALERT_THREAT_TACTIC_REFERENCE,
-  // ALERT_THREAT_TECHNIQUE_ID,
-  // ALERT_THREAT_TECHNIQUE_NAME,
-  // ALERT_THREAT_TECHNIQUE_REFERENCE,
-  // ALERT_THREAT_TECHNIQUE_SUBTECHNIQUE_ID,
-  // ALERT_THREAT_TECHNIQUE_SUBTECHNIQUE_NAME,
-  // ALERT_THREAT_TECHNIQUE_SUBTECHNIQUE_REFERENCE,
   ALERT_WORKFLOW_REASON,
   ALERT_WORKFLOW_USER,
   ECS_VERSION,
   EVENT_ACTION,
   EVENT_KIND,
-  // EVENT_MODULE,
   TAGS,
 };

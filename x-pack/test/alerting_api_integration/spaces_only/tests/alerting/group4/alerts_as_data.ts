@@ -6,7 +6,7 @@
  */
 
 import { alertFieldMap } from '@kbn/alerting-plugin/common/alert_schema';
-import { mappingFromFieldMap } from '@kbn/alerting-plugin/common/alert_schema/field_maps/mapping_from_field_map';
+import { mappingFromFieldMap } from '@kbn/alerting-plugin/common';
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 

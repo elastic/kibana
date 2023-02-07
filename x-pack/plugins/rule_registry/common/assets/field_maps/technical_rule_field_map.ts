@@ -24,7 +24,7 @@ export const technicalRuleFieldMap = {
   [Fields.ALERT_RULE_EXECUTION_UUID]: alertFieldMap[Fields.ALERT_RULE_EXECUTION_UUID],
   [Fields.ALERT_RULE_NAME]: alertFieldMap[Fields.ALERT_RULE_NAME],
   // want to change to 'object', is that ok?
-  [Fields.ALERT_RULE_PARAMETERS]: { type: 'flattened', ignore_above: 4096 },
+  [Fields.ALERT_RULE_PARAMETERS]: { type: 'flattened', ignore_above: 4096, required: false },
   // ---------------------------------------
   [Fields.ALERT_RULE_PRODUCER]: alertFieldMap[Fields.ALERT_RULE_PRODUCER],
   [Fields.ALERT_RULE_TAGS]: alertFieldMap[Fields.ALERT_RULE_TAGS],

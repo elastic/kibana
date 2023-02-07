@@ -139,6 +139,7 @@ it('matches snapshot', () => {
       },
       "kibana.alert.rule.parameters": Object {
         "ignore_above": 4096,
+        "required": false,
         "type": "flattened",
       },
       "kibana.alert.rule.producer": Object {
