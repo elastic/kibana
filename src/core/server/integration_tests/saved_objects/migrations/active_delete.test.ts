@@ -317,7 +317,7 @@ describe('when upgrading to a new stack version', () => {
         Record<string, AggregationsAggregate>
       > = await client.search({ index: kibanaIndex, size: 100 });
 
-      expect(indexContents.hits.hits.length).toEqual(10);
+      expect(indexContents.hits.hits.length).toEqual(8); // we're removing a couple of 'complex' (value < = 1)
 
       // double-check that the deprecated documents have not been deleted
       const deprecatedDocumentCount = indexContents.hits.hits.filter(
