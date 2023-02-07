@@ -18,7 +18,8 @@
     "triggersActionsUi",
     "observability",
     "ruleRegistry",
-    "unifiedSearch"
+    "unifiedSearch",
+    "security"
   ],
   "optionalPlugins": [
     "ml",
