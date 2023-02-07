@@ -154,14 +154,12 @@ class HandlebarsTestBench {
   private compileAndExecuteEval() {
     const renderEval = this.compileEval();
 
-    const runtimeOptions: ExtendedRuntimeOptions = Object.assign(
-      {
-        helpers: this.helpers,
-        partials: this.partials,
-        decorators: this.decorators,
-      },
-      this.runtimeOptions
-    );
+    const runtimeOptions: ExtendedRuntimeOptions = {
+      helpers: this.helpers as Record<string, Function>,
+      partials: this.partials as Record<string, HandlebarsTemplateDelegate>,
+      decorators: this.decorators,
+      ...this.runtimeOptions,
+    };
 
     this.execBeforeRender();
 
@@ -171,14 +169,12 @@ class HandlebarsTestBench {
   private compileAndExecuteAST() {
     const renderAST = this.compileAST();
 
-    const runtimeOptions: ExtendedRuntimeOptions = Object.assign(
-      {
-        helpers: this.helpers,
-        partials: this.partials,
-        decorators: this.decorators,
-      },
-      this.runtimeOptions
-    );
+    const runtimeOptions: ExtendedRuntimeOptions = {
+      helpers: this.helpers as Record<string, Function>,
+      partials: this.partials as Record<string, HandlebarsTemplateDelegate>,
+      decorators: this.decorators,
+      ...this.runtimeOptions,
+    };
 
     this.execBeforeRender();
 
