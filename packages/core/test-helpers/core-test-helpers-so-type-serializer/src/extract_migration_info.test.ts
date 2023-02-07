@@ -175,7 +175,7 @@ describe('extractMigrationInfo', () => {
           '1': {
             modelChange: {
               type: 'expansion',
-              migration: {
+              transformation: {
                 up: jest.fn(),
                 down: jest.fn(),
               },
@@ -217,7 +217,7 @@ describe('extractMigrationInfo', () => {
           '1': {
             modelChange: {
               type: 'expansion',
-              migration: {
+              transformation: {
                 up: jest.fn(),
                 down: jest.fn(),
               },
@@ -275,7 +275,7 @@ describe('extractMigrationInfo', () => {
           '1': {
             modelChange: {
               type: 'expansion',
-              migration: {
+              transformation: {
                 up: jest.fn(),
                 down: jest.fn(),
               },

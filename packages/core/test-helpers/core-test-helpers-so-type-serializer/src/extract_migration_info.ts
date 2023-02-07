@@ -56,7 +56,7 @@ export const extractMigrationInfo = (soType: SavedObjectsType): SavedObjectTypeM
     return {
       version,
       changeType: entry.modelChange.type,
-      hasMigration: !!entry.modelChange.migration,
+      hasMigration: !!entry.modelChange.transformation,
       newMappings: Object.keys(getFlattenedObject(entry.modelChange.addedMappings ?? {})),
     };
   });
