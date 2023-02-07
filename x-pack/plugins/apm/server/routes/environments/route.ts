@@ -12,6 +12,7 @@ import { getEnvironments } from './get_environments';
 import { rangeRt } from '../default_api_types';
 import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
 import { getApmEventClient } from '../../lib/helpers/get_apm_event_client';
+import { Environment } from '@kbn/apm-plugin/common/environment_rt';
 
 const environmentsRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/environments',
@@ -27,11 +28,7 @@ const environmentsRoute = createApmServerRoute({
   handler: async (
     resources
   ): Promise<{
-    environments: Array<
-      | 'ENVIRONMENT_NOT_DEFINED'
-      | 'ENVIRONMENT_ALL'
-      | t.Branded<string, import('@kbn/io-ts-utils').NonEmptyStringBrand>
-    >;
+    environments: Environment[];
   }> => {
     const apmEventClient = await getApmEventClient(resources);
     const { context, params, config } = resources;
