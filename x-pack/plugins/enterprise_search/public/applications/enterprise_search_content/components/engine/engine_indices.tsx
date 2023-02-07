@@ -13,9 +13,11 @@ import {
   EuiTableActionsColumnType,
   EuiBasicTableColumn,
   EuiButton,
+  EuiCallOut,
   EuiConfirmModal,
   EuiIcon,
   EuiInMemoryTable,
+  EuiSpacer,
   EuiText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -50,6 +52,8 @@ export const EngineIndices: React.FC = () => {
   if (!engineData) return null;
   const { indices } = engineData;
 
+  const hasUnknownIndices = indices.some(({ health }) => health === 'unknown');
+
   const removeIndexAction: EuiTableActionsColumnType<EnterpriseSearchEngineIndex>['actions'][0] = {
     color: 'danger',
     'data-test-subj': 'engine-remove-index-btn',
@@ -77,6 +81,7 @@ export const EngineIndices: React.FC = () => {
     },
     type: 'icon',
   };
+
   const columns: Array<EuiBasicTableColumn<EnterpriseSearchEngineIndex>> = [
     {
       field: 'name',
@@ -197,6 +202,29 @@ export const EngineIndices: React.FC = () => {
       engineName={engineName}
     >
       <>
+        {hasUnknownIndices && (
+          <>
+            <EuiCallOut
+              color="warning"
+              iconType="help"
+              title={i18n.translate(
+                'xpack.enterpriseSearch.content.engine.indices.unknownIndicesCallout.title',
+                { defaultMessage: 'Some of your indices are unavailable.' }
+              )}
+            >
+              <p>
+                {i18n.translate(
+                  'xpack.enterpriseSearch.content.engine.indices.unknownIndicesCallout.description',
+                  {
+                    defaultMessage:
+                      'Some data might be unreachable from this engine. Check for any pending operations or errors on affected indices, or remove those that should no longer be used by this engine.',
+                  }
+                )}
+              </p>
+            </EuiCallOut>
+            <EuiSpacer />
+          </>
+        )}
         <EuiInMemoryTable
           items={indices}
           columns={columns}
