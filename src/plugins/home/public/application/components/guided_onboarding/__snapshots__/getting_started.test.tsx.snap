@@ -53,7 +53,7 @@ exports[`getting started should render getting started component 1`] = `
       size="xxl"
     />
     <GuideCards
-      activateGuide={[Function]}
+      activateGuideDefaultState={[Function]}
       activeFilter="all"
       guidesState={Array []}
       navigateToApp={[MockFunction]}

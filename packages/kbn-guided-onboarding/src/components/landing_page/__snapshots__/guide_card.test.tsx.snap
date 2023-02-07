@@ -26,6 +26,7 @@ exports[`guide cards snapshots should render card 1`] = `
       "toString": [Function],
     }
   }
+  data-test-subj="test_telemetry_id"
   description={<React.Fragment />}
   hasBorder={false}
   isDisabled={false}
