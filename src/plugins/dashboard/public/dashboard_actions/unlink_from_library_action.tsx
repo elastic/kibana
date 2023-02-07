@@ -91,6 +91,9 @@ export class UnlinkFromLibraryAction implements Action<UnlinkFromLibraryActionCo
     const title = dashboardUnlinkFromLibraryActionStrings.getSuccessMessage(
       embeddable.getTitle() ? `'${embeddable.getTitle()}'` : ''
     );
+    if (dashboard.getExpandedPanelId() !== undefined) {
+      dashboard.setExpandedPanelId(undefined);
+    }
 
     this.toastsService.addSuccess({
       title,
