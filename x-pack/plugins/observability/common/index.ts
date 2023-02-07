@@ -27,6 +27,8 @@ export {
   enableAgentExplorerView,
   apmAWSLambdaPriceFactor,
   apmAWSLambdaRequestCostPerMillion,
+  apmEnableServiceMetrics,
+  apmEnableContinuousRollups,
   enableCriticalPath,
   profilingElasticsearchPlugin,
 } from './ui_settings_keys';
