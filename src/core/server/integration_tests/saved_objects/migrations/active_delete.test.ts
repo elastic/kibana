@@ -65,7 +65,7 @@ describe('when upgrading to a new stack version', () => {
       });
 
       it('the migrator is skipping reindex operation and executing CLEANUP_UNKNOWN_AND_EXCLUDED step', async () => {
-        checkLogContains([
+        await checkLogContains([
           'INIT -> WAIT_FOR_YELLOW_SOURCE.',
           'WAIT_FOR_YELLOW_SOURCE -> CLEANUP_UNKNOWN_AND_EXCLUDED.',
           // we gotta inform that we are deleting unknown documents too (discardUnknownObjects: true),
@@ -149,7 +149,7 @@ describe('when upgrading to a new stack version', () => {
           expect(errorMessage).toMatch(/deprecated:.*\(type: "deprecated"\)/);
         }
 
-        checkLogContains([
+        await checkLogContains([
           'INIT -> WAIT_FOR_YELLOW_SOURCE.',
           'WAIT_FOR_YELLOW_SOURCE -> CLEANUP_UNKNOWN_AND_EXCLUDED.',
           'CLEANUP_UNKNOWN_AND_EXCLUDED -> FATAL.',
@@ -162,7 +162,7 @@ describe('when upgrading to a new stack version', () => {
         migrator.prepareMigrations();
         await migrator.runMigrations();
 
-        checkLogContains([
+        await checkLogContains([
           'INIT -> WAIT_FOR_YELLOW_SOURCE.',
           'WAIT_FOR_YELLOW_SOURCE -> CLEANUP_UNKNOWN_AND_EXCLUDED.',
           'CLEANUP_UNKNOWN_AND_EXCLUDED -> PREPARE_COMPATIBLE_MIGRATION.',
@@ -206,7 +206,7 @@ describe('when upgrading to a new stack version', () => {
       });
 
       it('the migrator is skipping reindex operation and executing CLEANUP_UNKNOWN_AND_EXCLUDED step', async () => {
-        checkLogContains([
+        await checkLogContains([
           'INIT -> WAIT_FOR_YELLOW_SOURCE.',
           'WAIT_FOR_YELLOW_SOURCE -> CHECK_COMPATIBLE_MAPPINGS.', // this step is run only if mappings are compatible but NOT equal
           'CHECK_COMPATIBLE_MAPPINGS -> CLEANUP_UNKNOWN_AND_EXCLUDED.',
@@ -293,7 +293,7 @@ describe('when upgrading to a new stack version', () => {
           expect(errorMessage).toMatch(/deprecated:.*\(type: "deprecated"\)/);
         }
 
-        checkLogContains([
+        await checkLogContains([
           'INIT -> WAIT_FOR_YELLOW_SOURCE.',
           'WAIT_FOR_YELLOW_SOURCE -> CHECK_COMPATIBLE_MAPPINGS.', // this step is run only if mappings are compatible but NOT equal
           'CHECK_COMPATIBLE_MAPPINGS -> CLEANUP_UNKNOWN_AND_EXCLUDED.',
@@ -307,7 +307,7 @@ describe('when upgrading to a new stack version', () => {
         migrator.prepareMigrations();
         await migrator.runMigrations();
 
-        checkLogContains([
+        await checkLogContains([
           'INIT -> WAIT_FOR_YELLOW_SOURCE.',
           'WAIT_FOR_YELLOW_SOURCE -> CHECK_COMPATIBLE_MAPPINGS.', // this step is run only if mappings are compatible but NOT equal
           'CHECK_COMPATIBLE_MAPPINGS -> CLEANUP_UNKNOWN_AND_EXCLUDED.',
@@ -342,7 +342,7 @@ describe('when upgrading to a new stack version', () => {
       migrator.prepareMigrations();
       await migrator.runMigrations();
 
-      checkLogContains([
+      await checkLogContains([
         'INIT -> WAIT_FOR_YELLOW_SOURCE',
         'WAIT_FOR_YELLOW_SOURCE -> CHECK_COMPATIBLE_MAPPINGS.',
         'CHECK_COMPATIBLE_MAPPINGS -> CHECK_UNKNOWN_DOCUMENTS.',
