@@ -97,6 +97,9 @@ export class AddToLibraryAction implements Action<AddToLibraryActionContext> {
     const title = dashboardAddToLibraryActionStrings.getSuccessMessage(
       embeddable.getTitle() ? `'${embeddable.getTitle()}'` : ''
     );
+    if (dashboard.getExpandedPanelId() !== undefined) {
+      dashboard.setExpandedPanelId(undefined);
+    }
     this.toastsService.addSuccess({
       title,
       'data-test-subj': 'addPanelToLibrarySuccess',
