@@ -9,6 +9,7 @@ import { schema } from '@kbn/config-schema';
 import type { IRouter } from '@kbn/core/server';
 
 import { omit } from 'lodash';
+import type { SortOrder } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
 import { PLUGIN_ID } from '../../../common';
 import { savedQuerySavedObjectType } from '../../../common/types';
@@ -24,7 +25,16 @@ export const findSavedQueryRoute = (router: IRouter, osqueryContext: OsqueryAppC
           page: schema.maybe(schema.number()),
           pageSize: schema.maybe(schema.number()),
           sort: schema.maybe(schema.string()),
-          sortOrder: schema.maybe(schema.oneOf([schema.literal('asc'), schema.literal('desc')])),
+          sortOrder: schema.maybe(
+            schema.conditional(
+              schema.siblingRef('sort'),
+              schema.string(),
+              schema.oneOf([schema.literal('asc'), schema.literal('desc')]),
+              schema.string({
+                validate: () => 'sort has to be specified when using sortOrder',
+              })
+            )
+          ),
         }),
       },
       options: { tags: [`access:${PLUGIN_ID}-readSavedQueries`] },
@@ -41,7 +51,7 @@ export const findSavedQueryRoute = (router: IRouter, osqueryContext: OsqueryAppC
         page: request.query.page ?? 1,
         perPage: request.query.pageSize,
         sortField: request.query.sort,
-        sortOrder: request.query.sortOrder ?? 'desc',
+        sortOrder: (request.query.sortOrder as SortOrder) ?? 'desc',
       });
 
       const prebuiltSavedQueriesMap = await getInstalledSavedQueriesMap(
