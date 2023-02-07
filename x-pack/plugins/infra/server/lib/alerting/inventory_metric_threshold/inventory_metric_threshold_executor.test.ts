@@ -77,6 +77,7 @@ const mockOptions = {
     producer: '',
     ruleTypeId: '',
     ruleTypeName: '',
+    muteAll: false,
   },
   logger,
   flappingSettings: DEFAULT_FLAPPING_SETTINGS,
@@ -136,44 +137,26 @@ const services: RuleExecutorServicesMock &
   ...alertsServices,
   ...ruleRegistryMocks.createLifecycleAlertServices(alertsServices),
 };
-// services.savedObjectsClient.get.mockImplementation(async (type: string, sourceId: string) => {
-//     if (sourceId === 'alternate')
-//         return {
-//             id: 'alternate',
-//             attributes: { metricAlias: 'alternatebeat-*' },
-//             type,
-//             references: [],
-//         };
-//     if (sourceId === 'empty-response')
-//         return {
-//             id: 'empty',
-//             attributes: { metricAlias: 'empty-response' },
-//             type,
-//             references: [],
-//         };
-//     return { id: 'default', attributes: { metricAlias: 'metricbeat-*' }, type, references: [] };
-// });
 
 const alertInstances = new Map<string, AlertTestInstance>();
+
 services.alertFactory.create.mockImplementation((instanceID: string) => {
   const newAlertInstance: AlertTestInstance = {
     instance: alertsMock.createAlertFactory.create(),
     actionQueue: [],
     state: {},
   };
+
   const alertInstance: AlertTestInstance = persistAlertInstances
     ? alertInstances.get(instanceID) || newAlertInstance
     : newAlertInstance;
   alertInstances.set(instanceID, alertInstance);
 
-  // alertInstance.instance.replaceState.mockImplementation((newState: any) => {
-  //     alertInstance.state = newState;
-  //     return alertInstance.instance;
-  // });
   alertInstance.instance.scheduleActions.mockImplementation((id: string, action: any) => {
     alertInstance.actionQueue.push({ id, action });
     return alertInstance.instance;
   });
+
   return alertInstance.instance;
 });
 
