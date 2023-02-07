@@ -8,12 +8,9 @@
 import type { GetRenderCellValue } from '@kbn/triggers-actions-ui-plugin/public';
 import { TIMESTAMP } from '@kbn/rule-data-utils';
 import { SortOrder } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import {
-  AlertsTableConfigurationRegistry,
-  UseBulkActionsRegistry,
-} from '@kbn/triggers-actions-ui-plugin/public/types';
+import { AlertsTableConfigurationRegistry } from '@kbn/triggers-actions-ui-plugin/public/types';
 import { casesFeatureId, observabilityFeatureId } from '../../common';
-import { useBulkAddToCaseActions } from '../hooks/use_alert_bulk_case_actions';
+import { useBulkAddToCaseTriggerActions } from '../hooks/use_alert_bulk_case_actions';
 import { TopAlert, useToGetInternalFlyout } from '../pages/alerts';
 import { getRenderCellValue } from '../pages/alerts/components/render_cell_value';
 import { addDisplayNames } from '../pages/alerts/containers/alerts_table/add_display_names';
@@ -40,7 +37,7 @@ const getO11yAlertsTableConfiguration = (
     },
   ],
   useActionsColumn: getRowActions(observabilityRuleTypeRegistry, config),
-  useBulkActions: useBulkAddToCaseActions as UseBulkActionsRegistry,
+  useBulkActions: useBulkAddToCaseTriggerActions,
   useInternalFlyout: () => {
     const { header, body, footer } = useToGetInternalFlyout(observabilityRuleTypeRegistry);
     return { header, body, footer };
