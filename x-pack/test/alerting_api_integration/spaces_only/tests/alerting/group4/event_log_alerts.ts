@@ -83,10 +83,19 @@ export default function eventLogAlertTests({ getService }: FtrProviderContext) {
           eventExecutionIdSet.clear();
         } else {
           eventExecutionIdSet.add(event?.kibana?.alert?.rule?.execution?.uuid);
-          console.log('ACTION IS NOT EXECUTE', JSON.stringify(event, null, 4));
         }
       });
-
+      if (totalUniqueExecutionIds.size !== totalExecutionEventCount) {
+        const executionEvents = events.filter((event) => event?.event?.action === 'execute');
+        const missingIds = [...totalUniqueExecutionIds].filter(
+          (id) =>
+            !executionEvents.some((event) => event?.kibana?.alert?.rule?.execution?.uuid === id)
+        );
+        const eventsMissingExecutions = events.filter((event) =>
+          missingIds.includes(event?.kibana?.alert?.rule?.execution?.uuid)
+        );
+        console.log('EXECUTION ID CHECK FAILED', JSON.stringify(eventsMissingExecutions, null, 4));
+      }
       // Ensure every execution actually had a unique id from the others
       expect(totalUniqueExecutionIds.size).to.equal(totalExecutionEventCount);
 
