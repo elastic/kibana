@@ -24,7 +24,7 @@ export const technicalRuleFieldMap = {
   [Fields.SPACE_IDS]: { type: 'keyword', array: true, required: true },
   [Fields.ALERT_UUID]: { type: 'keyword', required: true },
   [Fields.ALERT_INSTANCE_ID]: { type: 'keyword', required: true },
-  [Fields.ALERT_START]: { type: 'date' },
+  [Fields.ALERT_START]: { type: 'date', required: false },
   [Fields.ALERT_TIME_RANGE]: {
     required: false,
     type: 'date_range',

@@ -202,6 +202,7 @@ export {
   ALERT_THREAT_TECHNIQUE_SUBTECHNIQUE_ID,
   ALERT_THREAT_TECHNIQUE_SUBTECHNIQUE_NAME,
   ALERT_THREAT_TECHNIQUE_SUBTECHNIQUE_REFERENCE,
+  EVENT_MODULE,
 };
 
 export type TechnicalRuleDataFieldName = ValuesType<typeof fields & typeof namespaces>;
