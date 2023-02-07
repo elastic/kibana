@@ -148,10 +148,6 @@ export class ApiService implements GuidedOnboardingApi {
     if (!this.client) {
       throw new Error('ApiService has not be initialized.');
     }
-    // don't send a request if a request is already in flight
-    if (this.isLoading$.value) {
-      return undefined;
-    }
 
     try {
       this.isLoading$.next(true);
@@ -473,10 +469,6 @@ export class ApiService implements GuidedOnboardingApi {
     }
     if (!this.client) {
       throw new Error('ApiService has not be initialized.');
-    }
-    // don't send a request if a request is already in flight
-    if (this.isLoading$.value) {
-      return undefined;
     }
     this.isLoading$.next(true);
     const config = await this.configService.getGuideConfig(guideId);
