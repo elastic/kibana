@@ -21,7 +21,7 @@ import { LocationsLoadingError } from './locations_loading_error';
 import { ADD_MONITOR_STEPS } from './steps/step_config';
 import { useMonitorAddEditBreadcrumbs } from './use_breadcrumbs';
 
-const MonitorAddPage = () => {
+export const MonitorAddPage = () => {
   useTrackPageview({ app: 'synthetics', path: 'add-monitor' });
   const { space } = useKibanaSpace();
   useTrackPageview({ app: 'synthetics', path: 'add-monitor', delay: 15000 });
