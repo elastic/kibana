@@ -514,7 +514,7 @@ describe('current status route', () => {
           }
         )
       ).toEqual({
-        pending: 0,
+        pending: 2,
         down: 1,
         enabledMonitorQueryIds: ['id1', 'id2', 'project-monitor-id', 'id4'],
         up: 2,
