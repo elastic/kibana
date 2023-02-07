@@ -24,6 +24,7 @@ global.kbnHandlebarsEnv = null;
 
 interface TestOptions {
   beforeEach?: Function;
+  beforeRender?: Function;
 }
 
 export function expectTemplate(template: string, options?: TestOptions) {
@@ -39,7 +40,6 @@ export function forEachCompileFunctionName(
 class HandlebarsTestBench {
   private template: string;
   private options: TestOptions;
-  private beforeRenderFn: Function = () => {};
   private compileOptions?: ExtendedCompileOptions;
   private runtimeOptions?: ExtendedRuntimeOptions;
   private helpers: { [name: string]: Handlebars.HelperDelegate | undefined } = {};
@@ -50,11 +50,6 @@ class HandlebarsTestBench {
   constructor(template: string, options: TestOptions = {}) {
     this.template = template;
     this.options = options;
-  }
-
-  beforeRender(fn: Function) {
-    this.beforeRenderFn = fn;
-    return this;
   }
 
   withCompileOptions(compileOptions?: ExtendedCompileOptions) {
@@ -168,7 +163,7 @@ class HandlebarsTestBench {
       this.runtimeOptions
     );
 
-    this.beforeRenderFn();
+    this.execBeforeRender();
 
     return renderEval(this.input, runtimeOptions);
   }
@@ -185,7 +180,7 @@ class HandlebarsTestBench {
       this.runtimeOptions
     );
 
-    this.beforeRenderFn();
+    this.execBeforeRender();
 
     return renderAST(this.input, runtimeOptions);
   }
@@ -198,6 +193,12 @@ class HandlebarsTestBench {
   private compileAST(handlebarsEnv = getHandlebarsEnv()) {
     this.execBeforeEach();
     return handlebarsEnv.compileAST(this.template, this.compileOptions);
+  }
+
+  private execBeforeRender() {
+    if (this.options.beforeRender) {
+      this.options.beforeRender();
+    }
   }
 
   private execBeforeEach() {
