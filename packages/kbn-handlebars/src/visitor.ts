@@ -27,7 +27,6 @@ import type {
   HelpersHash,
   NodeType,
   NonBlockHelperOptions,
-  PartialsHash,
   ProcessableBlockStatementNode,
   ProcessableNode,
   ProcessableNodeWithPathParts,
@@ -51,9 +50,6 @@ export class ElasticHandlebarsVisitor extends Handlebars.Visitor {
   private template?: string;
   private compileOptions: ExtendedCompileOptions;
   private runtimeOptions?: ExtendedRuntimeOptions;
-  private initialHelpers: HelpersHash;
-  private initialPartials: PartialsHash;
-  private initialDecorators: DecoratorsHash;
   private blockParamNames: any[][] = [];
   private blockParamValues: any[][] = [];
   private ast?: hbs.AST.Program;
@@ -65,10 +61,7 @@ export class ElasticHandlebarsVisitor extends Handlebars.Visitor {
   constructor(
     env: typeof Handlebars,
     input: string | hbs.AST.Program,
-    options: ExtendedCompileOptions = {},
-    helpers: HelpersHash,
-    partials: PartialsHash,
-    decorators: DecoratorsHash
+    options: ExtendedCompileOptions = {}
   ) {
     super();
 
@@ -95,10 +88,6 @@ export class ElasticHandlebarsVisitor extends Handlebars.Visitor {
       },
       this.compileOptions.knownHelpers
     );
-
-    this.initialHelpers = { ...helpers };
-    this.initialPartials = { ...partials };
-    this.initialDecorators = { ...decorators };
 
     const protoAccessControl = createProtoAccessControl({});
 
@@ -152,12 +141,12 @@ export class ElasticHandlebarsVisitor extends Handlebars.Visitor {
     this.output = [];
     this.runtimeOptions = { ...options };
     this.container.helpers = {
-      ...this.initialHelpers,
+      ...this.env.helpers,
       ...(options.helpers as HelpersHash),
     };
-    this.container.partials = { ...this.initialPartials, ...options.partials };
+    this.container.partials = { ...this.env.partials, ...options.partials };
     this.container.decorators = {
-      ...this.initialDecorators,
+      ...(this.env.decorators as DecoratorsHash),
       ...(options.decorators as DecoratorsHash),
     };
     this.container.hooks = {};
