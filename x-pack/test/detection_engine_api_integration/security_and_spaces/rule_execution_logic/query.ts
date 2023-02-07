@@ -1285,6 +1285,95 @@ export default ({ getService }: FtrProviderContext) => {
           });
         });
 
+        it('should create and update alerts in the same rule run without errors', async () => {
+          const id = uuidv4();
+          const timestamp = '2020-10-28T06:00:00.000Z';
+          // agent-1 should create an alert on the first rule run, then the second rule run should update that
+          // alert and make a new alert for agent-2
+          const firstDoc = {
+            id,
+            '@timestamp': timestamp,
+            agent: {
+              name: 'agent-1',
+            },
+          };
+          const laterTimestamp = '2020-10-28T07:00:00.000Z';
+          const secondDoc = {
+            id,
+            '@timestamp': laterTimestamp,
+            agent: {
+              name: 'agent-1',
+            },
+          };
+          const thirdDoc = {
+            id,
+            '@timestamp': laterTimestamp,
+            agent: {
+              name: 'agent-2',
+            },
+          };
+          await indexDocuments([firstDoc, secondDoc, thirdDoc]);
+
+          const rule: QueryRuleCreateProps = {
+            ...getRuleForSignalTesting(['ecs_compliant']),
+            query: `id:${id}`,
+            alert_suppression: {
+              group_by: ['agent.name'],
+              duration: {
+                value: 300,
+                unit: 'm',
+              },
+            },
+            from: 'now-1h',
+            interval: '1h',
+            timestamp_override: 'event.ingested',
+            max_signals: 150,
+          };
+
+          const { previewId, logs } = await previewRule({
+            supertest,
+            rule,
+            timeframeEnd: new Date('2020-10-28T07:30:00.000Z'),
+            invocationCount: 2,
+          });
+          const previewAlerts = await getPreviewAlerts({
+            es,
+            previewId,
+            size: 10,
+            sort: ['agent.name', ALERT_ORIGINAL_TIME],
+          });
+          expect(previewAlerts.length).to.eql(2);
+          expect(previewAlerts[0]._source).to.eql({
+            ...previewAlerts[0]._source,
+            [ALERT_SUPPRESSION_TERMS]: [
+              {
+                field: 'agent.name',
+                value: 'agent-1',
+              },
+            ],
+            [ALERT_ORIGINAL_TIME]: timestamp,
+            [ALERT_SUPPRESSION_START]: timestamp,
+            [ALERT_SUPPRESSION_END]: laterTimestamp,
+            [ALERT_SUPPRESSION_DOCS_COUNT]: 1,
+          });
+          expect(previewAlerts[1]._source).to.eql({
+            ...previewAlerts[1]._source,
+            [ALERT_SUPPRESSION_TERMS]: [
+              {
+                field: 'agent.name',
+                value: 'agent-2',
+              },
+            ],
+            [ALERT_ORIGINAL_TIME]: laterTimestamp,
+            [ALERT_SUPPRESSION_START]: laterTimestamp,
+            [ALERT_SUPPRESSION_END]: laterTimestamp,
+            [ALERT_SUPPRESSION_DOCS_COUNT]: 0,
+          });
+          for (const logEntry of logs) {
+            expect(logEntry.errors.length).to.eql(0);
+          }
+        });
+
         describe('with host risk index', async () => {
           before(async () => {
             await esArchiver.load('x-pack/test/functional/es_archives/entity/host_risk');
