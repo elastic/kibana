@@ -24,15 +24,12 @@ const COPY_TO_CLIPBOARD_SUCCESS = i18n.translate(
 );
 
 export const createCopyToClipboardAction = ({
-  order,
   notifications,
 }: {
-  order?: number;
   notifications: NotificationsStart;
 }): CellAction => ({
   id: ID,
   type: ID,
-  order,
   getIconType: (): string => ICON,
   getDisplayName: () => COPY_TO_CLIPBOARD,
   getDisplayNameTooltip: () => COPY_TO_CLIPBOARD,

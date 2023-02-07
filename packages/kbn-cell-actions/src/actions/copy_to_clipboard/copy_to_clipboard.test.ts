@@ -17,7 +17,6 @@ jest.mock('copy-to-clipboard', () => (text: string) => mockCopy(text));
 
 describe('Default createCopyToClipboardAction', () => {
   const copyToClipboardAction = createCopyToClipboardAction({
-    order: 1,
     notifications: { toasts: { addSuccess: mockSuccessToast } } as unknown as NotificationsStart,
   });
   const context = {
