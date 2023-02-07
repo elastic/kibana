@@ -96,6 +96,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         discoverAdjustSuperDatePicker: true,
         numFailureRetries: '7',
         expected: {
+          fullTimeRange: {
+            start: 'Jun 12, 2019 @ 00:04:19.000',
+            end: 'Jul 12, 2019 @ 23:45:36.000',
+          },
           pivotAdvancedEditorValueArr: ['{', '  "group_by": {', '    "category": {'],
           pivotAdvancedEditorValue: {
             group_by: {
@@ -294,6 +298,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         discoverAdjustSuperDatePicker: false,
         numFailureRetries: '-1',
         expected: {
+          fullTimeRange: {
+            start: 'Jun 12, 2019 @ 00:04:19.000',
+            end: 'Jul 12, 2019 @ 23:45:36.000',
+          },
           pivotAdvancedEditorValueArr: ['{', '  "group_by": {', '    "geoip.country_iso_code": {'],
           pivotAdvancedEditorValue: {
             group_by: {
@@ -368,6 +376,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         discoverAdjustSuperDatePicker: false,
         numFailureRetries: '0',
         expected: {
+          fullTimeRange: {
+            start: 'Jun 12, 2019 @ 00:04:19.000',
+            end: 'Jul 12, 2019 @ 23:45:36.000',
+          },
           pivotAdvancedEditorValueArr: ['{', '  "group_by": {', '    "customer_gender": {'],
           pivotAdvancedEditorValue: {
             group_by: {
@@ -428,6 +440,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         discoverAdjustSuperDatePicker: true,
         numFailureRetries: '101',
         expected: {
+          fullTimeRange: {
+            start: 'Jun 12, 2019 @ 00:04:19.000',
+            end: 'Jul 12, 2019 @ 23:45:36.000',
+          },
           latestPreview: {
             column: 0,
             values: [],
@@ -501,6 +517,25 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await transform.wizard.assertIndexPreviewLoaded();
 
           await transform.testExecution.logTestStep('shows the index preview');
+          await transform.wizard.assertIndexPreview(
+            testData.expected.indexPreview.columns,
+            testData.expected.indexPreview.rows
+          );
+
+          await transform.testExecution.logTestStep(
+            `sets the date picker back to the default '15 minutes ago'`
+          );
+          await transform.datePicker.quickSelect(15, 'm');
+
+          await transform.testExecution.logTestStep('again displays an empty index preview');
+          await transform.wizard.assertIndexPreviewEmpty();
+
+          await transform.testExecution.logTestStep(
+            `clicks the 'Use full data' button to auto-select time range`
+          );
+          await transform.datePicker.clickUseFullDataButton(testData.expected.fullTimeRange);
+
+          await transform.testExecution.logTestStep('again shows the index preview');
           await transform.wizard.assertIndexPreview(
             testData.expected.indexPreview.columns,
             testData.expected.indexPreview.rows
