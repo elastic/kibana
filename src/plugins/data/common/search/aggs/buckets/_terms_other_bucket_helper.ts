@@ -209,7 +209,7 @@ export const buildOtherBucketAgg = (
       exhaustiveBuckets = false;
     }
     if (aggIndex < index) {
-      each(agg.buckets, (bucket: any, bucketObjKey) => {
+      each(agg?.buckets, (bucket: any, bucketObjKey) => {
         const bucketKey = currentAgg.getKey(
           bucket,
           isNumber(bucketObjKey) ? undefined : bucketObjKey
