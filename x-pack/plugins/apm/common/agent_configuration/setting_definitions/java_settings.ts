@@ -9,7 +9,6 @@ import { i18n } from '@kbn/i18n';
 import { RawSettingDefinition } from './types';
 
 export const javaSettings: RawSettingDefinition[] = [
-  
   {
     key: 'application_packages',
     type: 'text',
@@ -75,9 +74,12 @@ export const javaSettings: RawSettingDefinition[] = [
     key: 'enable_experimental_instrumentations',
     type: 'boolean',
     defaultValue: 'false',
-    label: i18n.translate('xpack.apm.agentConfig.enableExperimentalInstrumentations.label', {
-      defaultMessage: 'Enable experimental instrumentations',
-    }),
+    label: i18n.translate(
+      'xpack.apm.agentConfig.enableExperimentalInstrumentations.label',
+      {
+        defaultMessage: 'Enable experimental instrumentations',
+      }
+    ),
     description: i18n.translate(
       'xpack.apm.agentConfig.enableExperimentalInstrumentations.description',
       {
@@ -95,9 +97,12 @@ export const javaSettings: RawSettingDefinition[] = [
     key: 'enable_instrumentations',
     type: 'text',
     defaultValue: '',
-    label: i18n.translate('xpack.apm.agentConfig.enableInstrumentations.label', {
-      defaultMessage: 'Disable instrumentations',
-    }),
+    label: i18n.translate(
+      'xpack.apm.agentConfig.enableInstrumentations.label',
+      {
+        defaultMessage: 'Disable instrumentations',
+      }
+    ),
     description: i18n.translate(
       'xpack.apm.agentConfig.enableInstrumentations.description',
       {
@@ -129,7 +134,7 @@ export const javaSettings: RawSettingDefinition[] = [
           'Experimental, requires latest version of the Java agent.\n' +
           '\n' +
           'If set to `true`,\n' +
-          'agent will send logs directly to APM server.'
+          'agent will send logs directly to APM server.',
       }
     ),
     includeAgents: ['java'],
@@ -139,9 +144,12 @@ export const javaSettings: RawSettingDefinition[] = [
     key: 'mongodb_capture_statement_commands',
     type: 'boolean',
     defaultValue: 'false',
-    label: i18n.translate('xpack.apm.agentConfig.mongodbCaptureStatementCommands.label', {
-      defaultMessage: 'MongoDB capture statement commands',
-    }),
+    label: i18n.translate(
+      'xpack.apm.agentConfig.mongodbCaptureStatementCommands.label',
+      {
+        defaultMessage: 'MongoDB capture statement commands',
+      }
+    ),
     description: i18n.translate(
       'xpack.apm.agentConfig.mongodbCaptureStatementCommands.description',
       {
