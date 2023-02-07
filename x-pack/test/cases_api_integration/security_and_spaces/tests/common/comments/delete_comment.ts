@@ -58,6 +58,7 @@ export default ({ getService }: FtrProviderContext): void => {
         });
 
         expect(comment).to.eql({});
+        expect(comment).to.eql({});
       });
     });
 
