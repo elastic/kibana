@@ -34,7 +34,7 @@ export const AlertTlsComponent: React.FC<Props> = ({
           value={TlsTranslations.criteriaValue}
         />
       </EuiFlexItem>
-      <EuiFlexItem>
+      <EuiFlexItem data-test-subj="tlsExpirationThreshold">
         <ValueExpression
           value={expirationThreshold}
           onChangeSelectedValue={(val) => {
@@ -44,7 +44,7 @@ export const AlertTlsComponent: React.FC<Props> = ({
           errors={[]}
         />
       </EuiFlexItem>
-      <EuiFlexItem>
+      <EuiFlexItem data-test-subj="tlsAgeExpirationThreshold">
         <ValueExpression
           value={ageThreshold}
           onChangeSelectedValue={(val) => {
