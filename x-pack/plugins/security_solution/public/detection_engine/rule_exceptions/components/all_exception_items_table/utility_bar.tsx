@@ -32,6 +32,10 @@ const StyledBarGroup = styled(EuiFlexGroup)`
   align-items: center;
 `;
 
+const PaginationUtilityBarText = styled(UtilityBarText)`
+  align-self: center;
+`;
+
 interface ExceptionsViewerUtilityProps {
   pagination: ExceptionsPagination;
   // Corresponds to last time exception items were fetched
@@ -54,7 +58,7 @@ const ExceptionsViewerUtilityComponent: React.FC<ExceptionsViewerUtilityProps> =
       <UtilityBar>
         <UtilityBarSection>
           <UtilityBarGroup>
-            <UtilityBarText dataTestSubj="exceptionsShowing">
+            <PaginationUtilityBarText dataTestSubj="exceptionsShowing">
               <FormattedMessage
                 id="xpack.securitySolution.exceptions.viewer.paginationDetails"
                 defaultMessage="Showing {partOne} of {partTwo}"
@@ -68,7 +72,7 @@ const ExceptionsViewerUtilityComponent: React.FC<ExceptionsViewerUtilityProps> =
                   partTwo: <StyledText>{`${pagination.totalItemCount}`}</StyledText>,
                 }}
               />
-            </UtilityBarText>
+            </PaginationUtilityBarText>
           </UtilityBarGroup>
         </UtilityBarSection>
         <UtilityBarSection>

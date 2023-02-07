@@ -517,7 +517,7 @@ const ExceptionsViewerComponent = ({
                 onChangeExceptionsToShow={handleExceptionsToShow}
                 lastUpdated={lastUpdated}
               />
-              <EuiSpacer size="l" />
+              <EuiSpacer size="m" />
               <ExceptionsViewerSearchBar
                 canAddException={isReadOnly}
                 isEndpoint={isEndpointSpecified}
