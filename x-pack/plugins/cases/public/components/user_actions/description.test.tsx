@@ -58,13 +58,13 @@ describe('createDescriptionUserActionBuilder ', () => {
       </TestProviders>
     );
 
-    expect(res.getByTestId('property-actions')).toBeInTheDocument();
+    expect(res.getByTestId('property-actions-description')).toBeInTheDocument();
 
-    userEvent.click(res.getByTestId('property-actions-ellipses'));
+    userEvent.click(res.getByTestId('property-actions-description-ellipses'));
     await waitForEuiPopoverOpen();
 
-    expect(res.queryByTestId('property-actions-pencil')).toBeInTheDocument();
-    userEvent.click(res.getByTestId('property-actions-pencil'));
+    expect(res.queryByTestId('property-actions-description-pencil')).toBeInTheDocument();
+    userEvent.click(res.getByTestId('property-actions-description-pencil'));
 
     await waitFor(() => {
       expect(builderArgs.handleManageMarkdownEditId).toHaveBeenCalledWith('description');
@@ -84,13 +84,13 @@ describe('createDescriptionUserActionBuilder ', () => {
       </TestProviders>
     );
 
-    expect(res.getByTestId('property-actions')).toBeInTheDocument();
+    expect(res.getByTestId('property-actions-description')).toBeInTheDocument();
 
-    userEvent.click(res.getByTestId('property-actions-ellipses'));
+    userEvent.click(res.getByTestId('property-actions-description-ellipses'));
     await waitForEuiPopoverOpen();
 
-    expect(res.queryByTestId('property-actions-quote')).toBeInTheDocument();
-    userEvent.click(res.getByTestId('property-actions-quote'));
+    expect(res.queryByTestId('property-actions-description-quote')).toBeInTheDocument();
+    userEvent.click(res.getByTestId('property-actions-description-quote'));
 
     await waitFor(() => {
       expect(builderArgs.handleManageQuote).toHaveBeenCalledWith('Security banana Issue');

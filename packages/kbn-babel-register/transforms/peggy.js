@@ -6,27 +6,16 @@
  * Side Public License, v 1.
  */
 
-const Fs = require('fs');
-const Crypto = require('crypto');
-
 const Peggy = require('@kbn/peggy');
 
 /** @type {import('./types').Transform} */
 const peggyTransform = (path, source, cache) => {
   const config = Peggy.findConfigFile(path);
-  const mtime = `${Fs.statSync(path).mtimeMs}`;
-  const key = !config
-    ? path
-    : `${path}.config.${Crypto.createHash('sha256')
-        .update(config.source)
-        .digest('hex')
-        .slice(0, 8)}`;
+  const key = cache.getKey(path, source);
 
-  if (cache.getMtime(key) === mtime) {
-    const code = cache.getCode(key);
-    if (code) {
-      return code;
-    }
+  const cached = cache.getCode(key);
+  if (cached) {
+    return cached;
   }
 
   const code = Peggy.getJsSourceSync({
@@ -40,7 +29,6 @@ const peggyTransform = (path, source, cache) => {
 
   cache.update(key, {
     code,
-    mtime,
   });
 
   return code;

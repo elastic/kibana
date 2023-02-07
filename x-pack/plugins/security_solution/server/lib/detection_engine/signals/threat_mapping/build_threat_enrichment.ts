@@ -6,10 +6,14 @@
  */
 
 import type { SignalsEnrichment } from '../types';
-import { enrichSignalThreatMatches } from './enrich_signal_threat_matches';
-import type { BuildThreatEnrichmentOptions, GetMatchedThreats } from './types';
-import { getThreatList } from './get_threat_list';
+import type { BuildThreatEnrichmentOptions } from './types';
+import { buildThreatMappingFilter } from './build_threat_mapping_filter';
+import { getSignalsQueryMapFromThreatIndex } from './get_signals_map_from_threat_index';
 
+import { threatEnrichmentFactory } from './threat_enrichment_factory';
+
+// we do want to make extra requests to the threat index to get enrichments from all threats
+// previously we were enriched alerts only from `currentThreatList` but not all threats
 export const buildThreatEnrichment = ({
   ruleExecutionLogger,
   services,
@@ -22,39 +26,50 @@ export const buildThreatEnrichment = ({
   reassignPitId,
   listClient,
   exceptionFilter,
+  threatMapping,
+  runtimeMappings,
 }: BuildThreatEnrichmentOptions): SignalsEnrichment => {
-  const getMatchedThreats: GetMatchedThreats = async (ids) => {
-    const matchedThreatsFilter = {
-      query: {
-        bool: {
-          filter: {
-            ids: { values: ids },
-          },
-        },
+  return async (signals) => {
+    const threatFiltersFromEvents = buildThreatMappingFilter({
+      threatMapping,
+      threatList: signals,
+      entryKey: 'field',
+      allowedFieldsForTermsQuery: {
+        source: {},
+        threat: {},
       },
-    };
-    const threatResponse = await getThreatList({
+    });
+
+    const threatSearchParams = {
       esClient: services.scopedClusterClient.asCurrentUser,
-      index: threatIndex,
-      language: threatLanguage,
-      perPage: undefined,
+      threatFilters: [...threatFilters, threatFiltersFromEvents],
       query: threatQuery,
+      language: threatLanguage,
+      index: threatIndex,
       ruleExecutionLogger,
-      searchAfter: undefined,
-      threatFilters: [...threatFilters, matchedThreatsFilter],
       threatListConfig: {
         _source: [`${threatIndicatorPath}.*`, 'threat.feed.*'],
         fields: undefined,
       },
       pitId,
       reassignPitId,
-      runtimeMappings: undefined,
+      runtimeMappings,
       listClient,
       exceptionFilter,
+    };
+
+    const signalsQueryMap = await getSignalsQueryMapFromThreatIndex({
+      threatSearchParams,
+      eventsCount: signals.length,
     });
 
-    return threatResponse.hits.hits;
-  };
+    const enrichment = threatEnrichmentFactory({
+      signalsQueryMap,
+      threatIndicatorPath,
+      threatFilters,
+      threatSearchParams,
+    });
 
-  return (signals) => enrichSignalThreatMatches(signals, getMatchedThreats, threatIndicatorPath);
+    return enrichment(signals);
+  };
 };
