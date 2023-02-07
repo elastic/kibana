@@ -46,13 +46,18 @@ export interface SavedObjectsModelExpansionChange<
    */
   type: 'expansion';
   /**
+   * (optional) A bidirectional migration to migrate the data from and/or to the previous model version.
+   */
+  migration?: SavedObjectModelBidirectionalMigration<PreviousAttributes, NewAttributes>;
+  /**
    * (optional) The new mappings introduced in this version.
    */
   addedMappings?: SavedObjectsMappingProperties;
   /**
-   * (optional) A bidirectional migration to migrate the data from and/or to the previous model version.
+   * (optional) A list of paths to mappings to flag as deprecated. Deprecated mappings should no longer be used and will
+   * eventually be deleted later.
    */
-  migration?: SavedObjectModelBidirectionalMigration<PreviousAttributes, NewAttributes>;
+  deprecatedMappings?: string[];
 }
 
 /**
