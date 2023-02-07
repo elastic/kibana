@@ -286,7 +286,7 @@ export const useColumns = (
       render(item: TransformListRow) {
         return <TransformHealthColoredDot healthStatus={item.stats.health.status} />;
       },
-      width: '60px',
+      width: '100px',
     },
     {
       name: i18n.translate('xpack.transform.tableActionLabel', { defaultMessage: 'Actions' }),

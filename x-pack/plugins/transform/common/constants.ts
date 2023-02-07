@@ -113,6 +113,21 @@ export const TRANSFORM_HEALTH_COLOR = {
   red: 'danger',
 } as const;
 
+export const TRANSFORM_HEALTH_LABEL = {
+  green: i18n.translate('xpack.transform.transformHealth.greenLabel', {
+    defaultMessage: 'Healthy',
+  }),
+  unknown: i18n.translate('xpack.transform.transformHealth.unknownLabel', {
+    defaultMessage: 'Unknown',
+  }),
+  yellow: i18n.translate('xpack.transform.transformHealth.yellowLabel', {
+    defaultMessage: 'Degraded',
+  }),
+  red: i18n.translate('xpack.transform.transformHealth.redLabel', {
+    defaultMessage: 'Outage',
+  }),
+} as const;
+
 export const TRANSFORM_HEALTH_DESCRIPTION = {
   green: i18n.translate('xpack.transform.transformHealth.greenDescription', {
     defaultMessage: 'The transform is healthy.',

@@ -13,6 +13,7 @@ import {
   type TransformHealth,
   TRANSFORM_HEALTH_COLOR,
   TRANSFORM_HEALTH_DESCRIPTION,
+  TRANSFORM_HEALTH_LABEL,
 } from '../../../../../../common/constants';
 
 interface TransformHealthProps {
@@ -22,7 +23,9 @@ interface TransformHealthProps {
 export const TransformHealthColoredDot: FC<TransformHealthProps> = ({ healthStatus }) => {
   return (
     <EuiToolTip content={TRANSFORM_HEALTH_DESCRIPTION[healthStatus]}>
-      <EuiHealth color={TRANSFORM_HEALTH_COLOR[healthStatus]} />
+      <EuiHealth color={TRANSFORM_HEALTH_COLOR[healthStatus]}>
+        <small>{TRANSFORM_HEALTH_LABEL[healthStatus]}</small>
+      </EuiHealth>
     </EuiToolTip>
   );
 };

@@ -15,6 +15,7 @@ import {
   TRANSFORM_STATE,
   TRANSFORM_HEALTH,
   TRANSFORM_HEALTH_COLOR,
+  TRANSFORM_HEALTH_LABEL,
 } from '../../../../../../common/constants';
 import { isLatestTransform, isPivotTransform } from '../../../../../../common/types/transform';
 import { TransformListRow } from '../../../../common';
@@ -61,7 +62,7 @@ export const transformFilters: SearchFilterConfig[] = [
           // For the color icon 'subdued' is used but for the badge we need 'hollow' instead.
           color={TRANSFORM_HEALTH_COLOR[val] === 'subdued' ? 'hollow' : TRANSFORM_HEALTH_COLOR[val]}
         >
-          {val}
+          {TRANSFORM_HEALTH_LABEL[val]}
         </EuiBadge>
       ),
     })),
