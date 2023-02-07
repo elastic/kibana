@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import type { Moment } from 'moment';
 import { Interval } from './interval';
 
 export class Timerange {
@@ -20,9 +21,14 @@ export class Timerange {
   }
 }
 
-export function timerange(from: Date | number, to: Date | number) {
-  return new Timerange(
-    from instanceof Date ? from : new Date(from),
-    to instanceof Date ? to : new Date(to)
-  );
+type DateLike = Date | number | Moment | string;
+
+function getDateFrom(date: DateLike): Date {
+  if (date instanceof Date) return date;
+  if (typeof date === 'number' || typeof date === 'string') return new Date(date);
+  return date.toDate();
+}
+
+export function timerange(from: Date | number | Moment, to: Date | number | Moment) {
+  return new Timerange(getDateFrom(from), getDateFrom(to));
 }
