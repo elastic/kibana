@@ -17,6 +17,7 @@ import { FunctionsView } from '../components/functions_view';
 import { RedirectTo } from '../components/redirect_to';
 import { RouteBreadcrumb } from '../components/route_breadcrumb';
 import { StackTracesView } from '../components/stack_traces_view';
+import { NoDataPage } from '../components/no_data_page';
 
 const routes = {
   '/': {
@@ -31,6 +32,15 @@ const routes = {
       </RouteBreadcrumb>
     ),
     children: {
+      '/add-data-instructions': {
+        element: (
+          <NoDataPage
+            subTitle={i18n.translate('xpack.profiling.addDataTitle', {
+              defaultMessage: 'Select an option below to deploy the host-agent.',
+            })}
+          />
+        ),
+      },
       '/': {
         children: {
           '/stacktraces/{topNType}': {
