@@ -6,6 +6,7 @@
     "autocomplete": "packages/kbn-securitysolution-autocomplete/src",
     "bfetch": "src/plugins/bfetch",
     "cases": ["packages/kbn-cases-components"],
+    "cellActions": "packages/kbn-cell-actions",
     "charts": "src/plugins/charts",
     "console": "src/plugins/console",
     "contentManagement": "packages/content-management",

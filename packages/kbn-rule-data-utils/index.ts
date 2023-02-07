@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+export * from './src/default_alerts_as_data';
 export * from './src/technical_field_names';
 export * from './src/alerts_as_data_rbac';
 export * from './src/alerts_as_data_severity';

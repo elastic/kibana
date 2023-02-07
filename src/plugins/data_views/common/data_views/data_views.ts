@@ -11,7 +11,7 @@ import type { PublicMethodsOf } from '@kbn/utility-types';
 import { castEsToKbnFieldTypeName } from '@kbn/field-types';
 import { FieldFormatsStartCommon, FORMATS_UI_SETTINGS } from '@kbn/field-formats-plugin/common';
 import { SavedObjectNotFound } from '@kbn/kibana-utils-plugin/common';
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import { DATA_VIEW_SAVED_OBJECT_TYPE } from '..';
 import { SavedObjectsClientCommon } from '../types';
 
@@ -916,7 +916,7 @@ export class DataViewsService {
     const metaFields = await this.config.get<string[] | undefined>(META_FIELDS);
 
     const spec = {
-      id: id ?? uuid.v4(),
+      id: id ?? uuidv4(),
       title,
       name: name || title,
       ...restOfSpec,

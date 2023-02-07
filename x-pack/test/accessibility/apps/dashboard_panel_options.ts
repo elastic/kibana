@@ -80,7 +80,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('dashboard panel- more options in view mode', async () => {
-      await dashboardPanelActions.toggleContextMenu(header);
       await dashboardPanelActions.openContextMenuMorePanel(header);
       await a11y.testAppSnapshot();
     });
@@ -89,7 +88,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await dashboardPanelActions.openContextMenuMorePanel(header);
       await dashboardPanelActions.clickExpandPanelToggle();
       await a11y.testAppSnapshot();
-      await dashboardPanelActions.toggleContextMenu(header);
       await dashboardPanelActions.openContextMenuMorePanel(header);
       await dashboardPanelActions.clickExpandPanelToggle();
     });
@@ -115,10 +113,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await dashboardPanelActions.toggleContextMenu(header);
       await dashboardPanelActions.customizePanel();
       await a11y.testAppSnapshot();
-      await testSubjects.click('customizePanelHideTitle');
+      await testSubjects.click('customEmbeddablePanelHideTitleSwitch');
       await a11y.testAppSnapshot();
-      await testSubjects.click('customizePanelHideTitle');
-      await testSubjects.click('saveNewTitleButton');
+      await testSubjects.click('customEmbeddablePanelHideTitleSwitch');
+      await testSubjects.click('saveCustomizePanelButton');
     });
 
     it('dashboard panel - Create drilldown panel', async () => {

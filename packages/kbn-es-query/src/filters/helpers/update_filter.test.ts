@@ -127,7 +127,7 @@ describe('updateFilter', () => {
       meta: {
         alias: '',
         index: 'index1',
-        params: { query: 0 },
+        params: { query: undefined },
         key: 'test-field',
         negate: true,
         type: 'phrase',

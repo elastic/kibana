@@ -14,38 +14,32 @@ get:
       content:
         application/json:
           schema:
-            type: object
-            required:
-              - connector_type_id
-              - id
-              - is_deprecated
-              - is_preconfigured
-              - name
-            properties:
-              config:
-                type: object
-                description: The configuration for the connector. Configuration properties vary depending on the connector type.
-                additionalProperties: true
-                nullable: true
-              connector_type_id:
-                $ref: '../components/schemas/connector_types.yaml'
-              id:
-                type: string
-                description: The identifier for the connector.
-                example: b0766e10-d190-11ec-b04c-776c77d14fca
-              is_deprecated:
-                $ref: '../components/schemas/is_deprecated.yaml'
-              is_missing_secrets:
-                $ref: '../components/schemas/is_missing_secrets.yaml'
-              is_preconfigured:
-                $ref: '../components/schemas/is_preconfigured.yaml'
-              name:
-                type: string
-                description: The display name for the connector.
-                example: my-connector
+            $ref: '../components/schemas/connector_response_properties.yaml'
           examples:
             getConnectorResponse:
               $ref: '../components/examples/get_connector_response.yaml'
+    '401':
+      description: Authorization information is missing or invalid.
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/401_response.yaml'
+    '404':
+      description: Object is not found.
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                example: Not Found
+              message:
+                type: string
+                example: "Saved object [action/baf33fc0-920c-11ed-b36a-874bd1548a00] not found"
+              statusCode:
+                type: integer
+                example: 404
   servers:
     - url: https://localhost:5601
 
@@ -58,12 +52,110 @@ delete:
   tags:
     - connectors
   parameters:
-    - $ref: ../components/headers/kbn_xsrf.yaml
+    - $ref: '../components/headers/kbn_xsrf.yaml'
     - $ref: '../components/parameters/connector_id.yaml'
     - $ref: '../components/parameters/space_id.yaml'
   responses:
     '204':
       description: Indicates a successful call.
+    '401':
+      description: Authorization information is missing or invalid.
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/401_response.yaml'
+    '404':
+      description: Object is not found.
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                example: Not Found
+              message:
+                type: string
+                example: "Saved object [action/baf33fc0-920c-11ed-b36a-874bd1548a00] not found"
+              statusCode:
+                type: integer
+                example: 404
+  servers:
+    - url: https://localhost:5601
+
+put:
+  summary: Updates the attributes for a connector.
+  operationId: updateConnector
+  description: >
+    You must have `all` privileges for the **Actions and Connectors** feature in the **Management** section of the Kibana feature privileges.
+  tags:
+    - connectors
+  parameters:
+    - $ref: '../components/headers/kbn_xsrf.yaml'
+    - $ref: '../components/parameters/connector_id.yaml'
+    - $ref: '../components/parameters/space_id.yaml'
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          title: Update connector request body properties
+          description: The properties vary depending on the connector type.
+          oneOf:
+            - $ref: '../components/schemas/update_connector_request_cases_webhook.yaml'
+#            - $ref: '../components/schemas/update_connector_request_email.yaml' 
+            - $ref: '../components/schemas/update_connector_request_index.yaml'  
+            - $ref: '../components/schemas/update_connector_request_jira.yaml'
+            - $ref: '../components/schemas/update_connector_request_opsgenie.yaml'
+#            - $ref: '../components/schemas/update_connector_request_pagerduty.yaml' 
+            - $ref: '../components/schemas/update_connector_request_resilient.yaml'
+            - $ref: '../components/schemas/update_connector_request_serverlog.yaml'
+            - $ref: '../components/schemas/update_connector_request_servicenow.yaml'
+            - $ref: '../components/schemas/update_connector_request_servicenow_itom.yaml'
+#            - $ref: '../components/schemas/update_connector_request_slack.yaml' 
+            - $ref: '../components/schemas/update_connector_request_swimlane.yaml' 
+#            - $ref: '../components/schemas/update_connector_request_teams.yaml'
+#            - $ref: '../components/schemas/update_connector_request_tines.yaml'
+#            - $ref: '../components/schemas/update_connector_request_webhook.yaml'
+#            - $ref: '../components/schemas/update_connector_request_xmatters.yaml'
+        examples:
+          updateIndexConnectorRequest:
+            $ref: '../components/examples/update_index_connector_request.yaml'
+  responses:
+    '200':
+      description: Indicates a successful call.
+      content:
+         application/json:
+          schema:
+            $ref: '../components/schemas/connector_response_properties.yaml'
+    '400':
+      description: Indicates a bad request.
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error: 
+                type: string
+                example: Bad Request
+              message:
+                type: string
+                example: "error validating action type config: [index]: expected value of type [string] but got [undefined]"
+              statusCode:
+                type: integer
+                example: 400
+    '401':
+      description: Authorization information is missing or invalid.
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/401_response.yaml'
+    '404':
+      description: Object is not found.
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/404_response.yaml'
   servers:
     - url: https://localhost:5601
 servers:

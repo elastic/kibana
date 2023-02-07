@@ -6,14 +6,7 @@
  */
 
 import React, { useCallback } from 'react';
-import {
-  EuiSwitch,
-  IconType,
-  EuiFormRow,
-  EuiButtonGroup,
-  htmlIdGenerator,
-  EuiSelect,
-} from '@elastic/eui';
+import { EuiSwitch, IconType, EuiFormRow, EuiButtonGroup, EuiSelect } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { isEqual } from 'lodash';
 import { AxisExtentConfig, YScaleType } from '@kbn/expression-xy-plugin/common';
@@ -29,8 +22,7 @@ import {
   ToolbarPopover,
   useDebouncedValue,
   AxisTitleSettings,
-  RangeInputField,
-  BucketAxisBoundsControl,
+  AxisBoundsControl,
 } from '../../../shared_components';
 import { XYLayerConfig, AxesSettingsConfig } from '../types';
 import { validateExtent } from '../axes_configuration';
@@ -214,7 +206,6 @@ const axisOrientationOptions: Array<{
   },
 ];
 
-const idPrefix = htmlIdGenerator()();
 export const AxisSettingsPopover: React.FunctionComponent<AxisSettingsPopoverProps> = ({
   layers,
   axis,
@@ -426,170 +417,19 @@ export const AxisSettingsPopover: React.FunctionComponent<AxisSettingsPopoverPro
           />
         </EuiFormRow>
       )}
-      {localExtent &&
-        setLocalExtent &&
-        (axis !== 'x' ? (
-          <MetricAxisBoundsControl
-            extent={localExtent}
-            setExtent={setLocalExtent}
-            dataBounds={dataBounds}
-            hasBarOrAreaOnAxis={hasBarOrAreaOnAxis}
-            hasPercentageAxis={hasPercentageAxis}
-            testSubjPrefix="lnsXY"
-          />
-        ) : (
-          <BucketAxisBoundsControl
-            extent={localExtent}
-            setExtent={setLocalExtent}
-            dataBounds={dataBounds}
-            testSubjPrefix="lnsXY"
-          />
-        ))}
+      {localExtent && setLocalExtent && (
+        <AxisBoundsControl
+          type={axis !== 'x' ? 'metric' : 'bucket'}
+          extent={localExtent}
+          setExtent={setLocalExtent}
+          dataBounds={dataBounds}
+          shouldIncludeZero={hasBarOrAreaOnAxis}
+          disableCustomRange={hasPercentageAxis}
+          testSubjPrefix="lnsXY"
+          // X axis is passing the extent object only in case of numeric histogram
+          canHaveNiceValues={axis !== 'x' || Boolean(extent)}
+        />
+      )}
     </ToolbarPopover>
   );
 };
-
-function MetricAxisBoundsControl({
-  extent,
-  setExtent,
-  dataBounds,
-  hasBarOrAreaOnAxis,
-  hasPercentageAxis,
-  testSubjPrefix,
-}: Required<Pick<AxisSettingsPopoverProps, 'extent' | 'setExtent'>> & {
-  dataBounds: AxisSettingsPopoverProps['dataBounds'];
-  hasBarOrAreaOnAxis: boolean;
-  hasPercentageAxis: boolean;
-  testSubjPrefix: string;
-}) {
-  const { inclusiveZeroError, boundaryError } = validateExtent(hasBarOrAreaOnAxis, extent);
-  return (
-    <>
-      <EuiFormRow
-        display="columnCompressed"
-        fullWidth
-        label={i18n.translate('xpack.lens.xyChart.axisExtent.label', {
-          defaultMessage: 'Bounds',
-        })}
-        helpText={
-          hasBarOrAreaOnAxis
-            ? i18n.translate('xpack.lens.xyChart.axisExtent.disabledDataBoundsMessage', {
-                defaultMessage: 'Only line charts can be fit to the data bounds',
-              })
-            : undefined
-        }
-      >
-        <EuiButtonGroup
-          isFullWidth
-          legend={i18n.translate('xpack.lens.xyChart.axisExtent.label', {
-            defaultMessage: 'Bounds',
-          })}
-          data-test-subj={`${testSubjPrefix}_axisBounds_groups`}
-          name="axisBounds"
-          buttonSize="compressed"
-          options={[
-            {
-              id: `${idPrefix}full`,
-              label: i18n.translate('xpack.lens.xyChart.axisExtent.full', {
-                defaultMessage: 'Full',
-              }),
-              'data-test-subj': `${testSubjPrefix}_axisExtent_groups_full'`,
-            },
-            {
-              id: `${idPrefix}dataBounds`,
-              label: i18n.translate('xpack.lens.xyChart.axisExtent.dataBounds', {
-                defaultMessage: 'Data',
-              }),
-              'data-test-subj': `${testSubjPrefix}_axisExtent_groups_DataBounds'`,
-              isDisabled: hasBarOrAreaOnAxis,
-            },
-            {
-              id: `${idPrefix}custom`,
-              label: i18n.translate('xpack.lens.xyChart.axisExtent.custom', {
-                defaultMessage: 'Custom',
-              }),
-              'data-test-subj': `${testSubjPrefix}_axisExtent_groups_custom'`,
-              isDisabled: hasPercentageAxis,
-            },
-          ]}
-          idSelected={`${idPrefix}${
-            (hasBarOrAreaOnAxis && extent.mode === 'dataBounds') || hasPercentageAxis
-              ? 'full'
-              : extent.mode
-          }`}
-          onChange={(id) => {
-            const newMode = id.replace(idPrefix, '') as AxisExtentConfig['mode'];
-            setExtent({
-              ...extent,
-              mode: newMode,
-              lowerBound:
-                newMode === 'custom' && dataBounds ? Math.min(0, dataBounds.min) : undefined,
-              upperBound: newMode === 'custom' && dataBounds ? dataBounds.max : undefined,
-            });
-          }}
-        />
-      </EuiFormRow>
-      {extent?.mode === 'custom' && !hasPercentageAxis && (
-        <RangeInputField
-          isInvalid={inclusiveZeroError || boundaryError}
-          label={' '}
-          helpText={
-            hasBarOrAreaOnAxis && (!inclusiveZeroError || boundaryError)
-              ? i18n.translate('xpack.lens.xyChart.inclusiveZero', {
-                  defaultMessage: 'Bounds must include zero.',
-                })
-              : undefined
-          }
-          error={
-            boundaryError
-              ? i18n.translate('xpack.lens.xyChart.boundaryError', {
-                  defaultMessage: 'Lower bound has to be larger than upper bound',
-                })
-              : hasBarOrAreaOnAxis && inclusiveZeroError
-              ? i18n.translate('xpack.lens.xyChart.inclusiveZero', {
-                  defaultMessage: 'Bounds must include zero.',
-                })
-              : undefined
-          }
-          testSubjLayout={`${testSubjPrefix}_axisExtent_customBounds`}
-          testSubjLower={`${testSubjPrefix}_axisExtent_lowerBound`}
-          testSubjUpper={`${testSubjPrefix}_axisExtent_upperBound`}
-          lowerValue={extent.lowerBound ?? ''}
-          onLowerValueChange={(e) => {
-            const val = Number(e.target.value);
-            const isEmptyValue = e.target.value === '' || Number.isNaN(Number(val));
-            setExtent({
-              ...extent,
-              lowerBound: isEmptyValue ? undefined : val,
-            });
-          }}
-          onLowerValueBlur={() => {
-            if (extent.lowerBound === undefined && dataBounds) {
-              setExtent({
-                ...extent,
-                lowerBound: Math.min(0, dataBounds.min),
-              });
-            }
-          }}
-          upperValue={extent.upperBound ?? ''}
-          onUpperValueChange={(e) => {
-            const val = Number(e.target.value);
-            const isEmptyValue = e.target.value === '' || Number.isNaN(Number(val));
-            setExtent({
-              ...extent,
-              upperBound: isEmptyValue ? undefined : val,
-            });
-          }}
-          onUpperValueBlur={() => {
-            if (extent.upperBound === undefined && dataBounds) {
-              setExtent({
-                ...extent,
-                upperBound: dataBounds.max,
-              });
-            }
-          }}
-        />
-      )}
-    </>
-  );
-}

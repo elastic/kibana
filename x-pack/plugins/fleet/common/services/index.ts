@@ -51,3 +51,11 @@ export {
 } from './datastream_es_name';
 
 export * from './file_storage';
+export {
+  getPackageReleaseLabel,
+  isPackagePrerelease,
+  mapPackageReleaseToIntegrationCardRelease,
+} from './package_prerelease';
+
+export { getAllowedOutputTypeForPolicy } from './output_helpers';
+export { agentStatusesToSummary } from './agent_statuses_to_summary';

@@ -9,3 +9,4 @@ export const TAKE_ACTION_BUTTON_TEST_ID = 'tiIndicatorFlyoutTakeActionButton';
 export const INVESTIGATE_IN_TIMELINE_TEST_ID = 'tiIndicatorFlyoutInvestigateInTimelineContextMenu';
 export const ADD_TO_EXISTING_CASE_TEST_ID = 'tiIndicatorFlyoutAddToExistingCaseContextMenu';
 export const ADD_TO_NEW_CASE_TEST_ID = 'tiIndicatorFlyoutAddToNewCaseContextMenu';
+export const ADD_TO_BLOCK_LIST_TEST_ID = 'tiIndicatorFlyoutAddToBlockListContextMenu';

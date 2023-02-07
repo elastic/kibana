@@ -167,7 +167,7 @@ export const Page: FC = () => {
       }),
       description: i18n.translate('xpack.ml.newJob.wizard.jobType.populationDescription', {
         defaultMessage:
-          'Detect activity that is unusual compared to the behavior of the population.',
+          'Detect unusual activity in a population. Recommended for high cardinality data.',
       }),
       id: 'mlJobTypeLinkPopulationJob',
     },
@@ -235,7 +235,7 @@ export const Page: FC = () => {
         defaultMessage: 'Geo',
       }),
       description: i18n.translate('xpack.ml.newJob.wizard.jobType.geoDescription', {
-        defaultMessage: 'Detect anomalies in the geographic location of the input data.',
+        defaultMessage: 'Detect anomalies in the geographic location of the data.',
       }),
       id: 'mlJobTypeLinkGeoJob',
     });

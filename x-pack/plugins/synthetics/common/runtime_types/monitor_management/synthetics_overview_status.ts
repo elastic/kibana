@@ -18,11 +18,16 @@ export const OverviewStatusMetaDataCodec = t.interface({
 });
 
 export const OverviewStatusCodec = t.interface({
+  allMonitorsCount: t.number,
+  disabledMonitorsCount: t.number,
+  projectMonitorsCount: t.number,
   up: t.number,
   down: t.number,
+  pending: t.number,
   disabledCount: t.number,
   upConfigs: t.record(t.string, OverviewStatusMetaDataCodec),
   downConfigs: t.record(t.string, OverviewStatusMetaDataCodec),
+  allIds: t.array(t.string),
   enabledIds: t.array(t.string),
 });
 

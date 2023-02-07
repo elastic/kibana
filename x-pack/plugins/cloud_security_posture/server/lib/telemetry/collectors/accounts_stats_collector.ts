@@ -7,7 +7,8 @@
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { Logger } from '@kbn/core/server';
 import type { SearchRequest } from '@elastic/elasticsearch/lib/api/types';
-import { calculatePostureScore } from '../../../routes/compliance_dashboard/get_stats';
+import { getIdentifierRuntimeMapping } from '../../get_identifier_runtime_mapping';
+import { calculatePostureScore } from '../../../../common/utils/helpers';
 import type { CspmAccountsStats } from './types';
 import { LATEST_FINDINGS_INDEX_DEFAULT_NS } from '../../../../common/constants';
 
@@ -54,13 +55,14 @@ interface AccountEntity {
 
 const getAccountsStatsQuery = (index: string): SearchRequest => ({
   index,
+  runtime_mappings: getIdentifierRuntimeMapping(),
   query: {
     match_all: {},
   },
   aggs: {
     accounts: {
       terms: {
-        field: 'cluster_id',
+        field: 'asset_identifier',
         order: {
           _count: 'desc',
         },

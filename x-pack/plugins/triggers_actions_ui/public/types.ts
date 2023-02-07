@@ -68,6 +68,7 @@ import type {
   RuleEventLogListProps,
   RuleEventLogListOptions,
 } from './application/sections/rule_details/components/rule_event_log_list';
+import type { AlertSummaryTimeRange } from './application/sections/alert_summary_widget/types';
 import type { CreateConnectorFlyoutProps } from './application/sections/action_connector_form/create_connector_flyout';
 import type { EditConnectorFlyoutProps } from './application/sections/action_connector_form/edit_connector_flyout';
 import type { RulesListNotifyBadgeProps } from './application/sections/rules_list/components/rules_list_notify_badge';
@@ -80,7 +81,6 @@ import type {
 } from './application/sections/field_browser/types';
 import { RulesListVisibleColumns } from './application/sections/rules_list/components/rules_list_column_selector';
 import { TimelineItem } from './application/sections/alerts_table/bulk_actions/components/toolbar';
-
 // In Triggers and Actions we treat all `Alert`s as `SanitizedRule<RuleTypeParams>`
 // so the `Params` is a black-box of Record<string, unknown>
 type SanitizedRule<Params extends RuleTypeParams = never> = Omit<
@@ -129,6 +129,7 @@ export type {
   GetFieldTableColumns,
   BrowserFieldItem,
   RulesListVisibleColumns,
+  AlertSummaryTimeRange,
 };
 export type { ActionType, AsApiContract };
 export {
@@ -324,6 +325,7 @@ export interface RuleType<
   actionVariables: ActionVariables;
   authorizedConsumers: Record<string, { read: boolean; all: boolean }>;
   enabledInLicense: boolean;
+  hasGetSummarizedAlerts?: boolean;
 }
 
 export type SanitizedRuleType = Omit<RuleType, 'apiKey'>;
@@ -377,6 +379,7 @@ export interface RuleTypeModel<Params extends RuleTypeParams = RuleTypeParams> {
   requiresAppContext: boolean;
   defaultActionMessage?: string;
   defaultRecoveryMessage?: string;
+  defaultSummaryMessage?: string;
   alertDetailsAppSection?:
     | React.FunctionComponent<any>
     | React.LazyExoticComponent<ComponentType<any>>;
@@ -447,13 +450,19 @@ export enum AlertsField {
   uuid = 'kibana.alert.rule.uuid',
 }
 
+export interface InspectQuery {
+  request: string[];
+  response: string[];
+}
+export type GetInspectQuery = () => InspectQuery;
+
 export interface FetchAlertData {
   activePage: number;
   alerts: EcsFieldsResponse[];
   alertsCount: number;
   isInitializing: boolean;
   isLoading: boolean;
-  getInspectQuery: () => { request: {}; response: {} };
+  getInspectQuery: GetInspectQuery;
   onPageChange: (pagination: RuleRegistrySearchRequestPagination) => void;
   onSortChange: (sort: EuiDataGridSorting['columns']) => void;
   refresh: () => void;
@@ -472,6 +481,7 @@ export interface AlertsTableProps {
   id?: string;
   leadingControlColumns: EuiDataGridControlColumn[];
   showExpandToDetails: boolean;
+  showAlertStatusWithFlapping?: boolean;
   trailingControlColumns: EuiDataGridControlColumn[];
   useFetchAlertsData: () => FetchAlertData;
   visibleColumns: string[];
@@ -483,6 +493,7 @@ export interface AlertsTableProps {
   onColumnsChange: (columns: EuiDataGridColumn[], visibleColumns: string[]) => void;
   onChangeVisibleColumns: (newColumns: string[]) => void;
   controls?: EuiDataGridToolBarAdditionalControlsOptions;
+  showInspectButton?: boolean;
 }
 
 // TODO We need to create generic type between our plugin, right now we have different one because of the old alerts table
@@ -509,8 +520,24 @@ export interface BulkActionsConfig {
   'data-test-subj'?: string;
   disableOnQuery: boolean;
   disabledLabel?: string;
-  onClick: (selectedIds: TimelineItem[], isAllSelected: boolean) => void;
+  onClick: (
+    selectedIds: TimelineItem[],
+    isAllSelected: boolean,
+    setIsBulkActionsLoading: (isLoading: boolean) => void
+  ) => void;
 }
+
+export interface RenderCustomActionsRowArgs {
+  alert: EcsFieldsResponse;
+  setFlyoutAlert: (data: unknown) => void;
+  id?: string;
+  setIsActionLoading?: (isLoading: boolean) => void;
+}
+
+export type UseActionsColumnRegistry = () => {
+  renderCustomActionsRow: (args: RenderCustomActionsRowArgs) => JSX.Element;
+  width?: number;
+};
 
 export type UseBulkActionsRegistry = () => BulkActionsConfig[];
 
@@ -525,18 +552,12 @@ export interface AlertsTableConfigurationRegistry {
   };
   sort?: SortCombinations[];
   getRenderCellValue?: GetRenderCellValue;
-  useActionsColumn?: () => {
-    renderCustomActionsRow: (
-      alert: EcsFieldsResponse,
-      setFlyoutAlert: (data: unknown) => void,
-      id?: string
-    ) => JSX.Element;
-    width?: number;
-  };
+  useActionsColumn?: UseActionsColumnRegistry;
   useBulkActions?: UseBulkActionsRegistry;
   usePersistentControls?: () => {
     right?: ReactNode;
   };
+  showInspectButton?: boolean;
 }
 
 export enum BulkActionsVerbs {
@@ -546,19 +567,28 @@ export enum BulkActionsVerbs {
   selectCurrentPage = 'selectCurrentPage',
   selectAll = 'selectAll',
   rowCountUpdate = 'rowCountUpdate',
+  updateRowLoadingState = 'updateRowLoadingState',
+  updateAllLoadingState = 'updateAllLoadingState',
 }
 
 export interface BulkActionsReducerAction {
   action: BulkActionsVerbs;
   rowIndex?: number;
   rowCount?: number;
+  isLoading?: boolean;
 }
 
 export interface BulkActionsState {
-  rowSelection: Set<number>;
+  rowSelection: Map<number, RowSelectionState>;
   isAllSelected: boolean;
   areAllVisibleRowsSelected: boolean;
   rowCount: number;
+}
+
+export type RowSelection = Map<number, RowSelectionState>;
+
+export interface RowSelectionState {
+  isLoading: boolean;
 }
 
 export type RuleStatus = 'enabled' | 'disabled' | 'snoozed';

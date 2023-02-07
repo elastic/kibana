@@ -13,6 +13,7 @@ import type {
   SavedObjectsClientContract,
   IBasePath,
 } from '@kbn/core/server';
+import type { ISavedObjectsSerializer } from '@kbn/core-saved-objects-server';
 import { SECURITY_EXTENSION_ID } from '@kbn/core-saved-objects-server';
 import type {
   AuditLogger,
@@ -126,10 +127,12 @@ export class CasesClientFactory {
       excludedExtensions: [SECURITY_EXTENSION_ID],
     });
 
+    const savedObjectsSerializer = savedObjectsService.createSerializer();
     const alertsClient = await this.options.ruleRegistry.getRacClientWithRequest(request);
 
     const services = this.createServices({
       unsecuredSavedObjectsClient,
+      savedObjectsSerializer,
       esClient: scopedClusterClient,
       request,
       auditLogger,
@@ -151,6 +154,7 @@ export class CasesClientFactory {
       securityStartPlugin: this.options.securityPluginStart,
       publicBaseUrl: this.options.publicBaseUrl,
       spaceId: this.options.spacesPluginStart.spacesService.getSpaceId(request),
+      savedObjectsSerializer,
     });
   }
 
@@ -162,12 +166,14 @@ export class CasesClientFactory {
 
   private createServices({
     unsecuredSavedObjectsClient,
+    savedObjectsSerializer,
     esClient,
     request,
     auditLogger,
     alertsClient,
   }: {
     unsecuredSavedObjectsClient: SavedObjectsClientContract;
+    savedObjectsSerializer: ISavedObjectsSerializer;
     esClient: ElasticsearchClient;
     request: KibanaRequest;
     auditLogger: AuditLogger;
@@ -175,10 +181,11 @@ export class CasesClientFactory {
   }): CasesServices {
     this.validateInitialization();
 
-    const attachmentService = new AttachmentService(
-      this.logger,
-      this.options.persistableStateAttachmentTypeRegistry
-    );
+    const attachmentService = new AttachmentService({
+      log: this.logger,
+      persistableStateAttachmentTypeRegistry: this.options.persistableStateAttachmentTypeRegistry,
+      unsecuredSavedObjectsClient,
+    });
 
     const caseService = new CasesService({
       log: this.logger,
@@ -213,6 +220,7 @@ export class CasesClientFactory {
         log: this.logger,
         persistableStateAttachmentTypeRegistry: this.options.persistableStateAttachmentTypeRegistry,
         unsecuredSavedObjectsClient,
+        savedObjectsSerializer,
         auditLogger,
       }),
       attachmentService,

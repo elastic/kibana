@@ -652,6 +652,11 @@ describe('migrations v2 model', () => {
 
           expect(newState.controlState).toBe('WAIT_FOR_YELLOW_SOURCE');
           expect(newState.sourceIndex.value).toBe('.kibana_7.invalid.0_001');
+          expect(newState.aliases).toEqual({
+            '.kibana': '.kibana_7.invalid.0_001',
+            '.kibana_7.11.0': '.kibana_7.11.0_001',
+            '.kibana_7.12.0': '.kibana_7.invalid.0_001',
+          });
         });
 
         test('INIT -> WAIT_FOR_YELLOW_SOURCE when migrating from a v2 migrations index (>= 7.11.0)', () => {
@@ -683,6 +688,10 @@ describe('migrations v2 model', () => {
           expect(newState.sourceIndex.value).toBe('.kibana_7.11.0_001');
           expect(newState.retryCount).toEqual(0);
           expect(newState.retryDelay).toEqual(0);
+          expect(newState.aliases).toEqual({
+            '.kibana': '.kibana_7.11.0_001',
+            '.kibana_7.11.0': '.kibana_7.11.0_001',
+          });
         });
 
         test('INIT -> WAIT_FOR_YELLOW_SOURCE when migrating from a v1 migrations index (>= 6.5 < 7.11.0)', () => {
@@ -701,6 +710,9 @@ describe('migrations v2 model', () => {
           expect(newState.sourceIndex.value).toBe('.kibana_3');
           expect(newState.retryCount).toEqual(0);
           expect(newState.retryDelay).toEqual(0);
+          expect(newState.aliases).toEqual({
+            '.kibana': '.kibana_3',
+          });
         });
         test('INIT -> LEGACY_SET_WRITE_BLOCK when migrating from a legacy index (>= 6.0.0 < 6.5)', () => {
           const res: ResponseType<'INIT'> = Either.right({
@@ -806,67 +818,6 @@ describe('migrations v2 model', () => {
           });
           expect(newState.retryCount).toEqual(0);
           expect(newState.retryDelay).toEqual(0);
-        });
-
-        describe('when upgrading to a new stack version', () => {
-          const unchangedMappingsState: State = {
-            ...baseState,
-            controlState: 'INIT',
-            kibanaVersion: '7.12.0', // new version!
-            currentAlias: '.kibana',
-            versionAlias: '.kibana_7.12.0',
-            versionIndex: '.kibana_7.11.0_001',
-          };
-          it('INIT -> PREPARE_COMPATIBLE_MIGRATION when the mappings have not changed', () => {
-            const res: ResponseType<'INIT'> = Either.right({
-              '.kibana_7.11.0_001': {
-                aliases: {
-                  '.kibana': {},
-                  '.kibana_7.11.0': {},
-                },
-                mappings: indexMapping,
-                settings: {},
-              },
-            });
-            const newState = model(unchangedMappingsState, res) as PrepareCompatibleMigration;
-
-            expect(newState.controlState).toEqual('PREPARE_COMPATIBLE_MIGRATION');
-            expect(newState.targetIndexRawMappings).toEqual({
-              _meta: {
-                migrationMappingPropertyHashes: {
-                  new_saved_object_type: '4a11183eee21e6fbad864f7a30b39ad0',
-                },
-              },
-              properties: {
-                new_saved_object_type: {
-                  properties: {
-                    value: {
-                      type: 'text',
-                    },
-                  },
-                },
-              },
-            });
-            expect(newState.versionAlias).toEqual('.kibana_7.12.0');
-            expect(newState.currentAlias).toEqual('.kibana');
-            // will point to
-            expect(newState.targetIndex).toEqual('.kibana_7.11.0_001');
-            expect(newState.preTransformDocsActions).toEqual([
-              {
-                add: {
-                  alias: '.kibana_7.12.0',
-                  index: '.kibana_7.11.0_001',
-                },
-              },
-              {
-                remove: {
-                  alias: '.kibana_7.11.0',
-                  index: '.kibana_7.11.0_001',
-                  must_exist: true,
-                },
-              },
-            ]);
-          });
         });
       });
     });
@@ -1259,25 +1210,129 @@ describe('migrations v2 model', () => {
     });
 
     describe('WAIT_FOR_YELLOW_SOURCE', () => {
-      const someMappings = {
-        properties: {},
-      } as const;
-
       const waitForYellowSourceState: WaitForYellowSourceState = {
         ...baseState,
         controlState: 'WAIT_FOR_YELLOW_SOURCE',
-        sourceIndex: Option.some('.kibana_3') as Option.Some<string>,
-        sourceIndexMappings: someMappings,
+        sourceIndex: Option.some('.kibana_7.11.0_001') as Option.Some<string>,
+        sourceIndexMappings: baseState.targetIndexMappings,
+        aliases: {
+          '.kibana': '.kibana_7.11.0_001',
+          '.kibana_7.11.0': '.kibana_7.11.0_001',
+        },
       };
 
-      test('WAIT_FOR_YELLOW_SOURCE -> CHECK_UNKNOWN_DOCUMENTS if action succeeds', () => {
-        const res: ResponseType<'WAIT_FOR_YELLOW_SOURCE'> = Either.right({});
-        const newState = model(waitForYellowSourceState, res);
-        expect(newState.controlState).toEqual('CHECK_UNKNOWN_DOCUMENTS');
+      describe('if action succeeds', () => {
+        test('it resets retry count and delay', () => {
+          const res: ResponseType<'WAIT_FOR_YELLOW_SOURCE'> = Either.right({});
+          const testState = {
+            ...waitForYellowSourceState,
+            retryCount: 1,
+            retryDelay: 2000,
+          };
+          const newState = model(testState, res);
+          expect(newState.retryCount).toEqual(0);
+          expect(newState.retryDelay).toEqual(0);
+        });
 
-        expect(newState).toMatchObject({
-          controlState: 'CHECK_UNKNOWN_DOCUMENTS',
-          sourceIndex: Option.some('.kibana_3'),
+        describe('and mappings match (diffMappings == false)', () => {
+          const unchangedMappingsState: State = {
+            ...waitForYellowSourceState,
+            controlState: 'WAIT_FOR_YELLOW_SOURCE',
+            kibanaVersion: '7.12.0', // new version!
+            currentAlias: '.kibana',
+            versionAlias: '.kibana_7.12.0',
+            versionIndex: '.kibana_7.11.0_001',
+          };
+
+          test('WAIT_FOR_YELLOW_SOURCE -> PREPARE_COMPATIBLE_MIGRATION', () => {
+            const res: ResponseType<'WAIT_FOR_YELLOW_SOURCE'> = Either.right({
+              '.kibana_7.11.0_001': {
+                aliases: {
+                  '.kibana': {},
+                  '.kibana_7.11.0': {},
+                },
+                mappings: indexMapping,
+                settings: {},
+              },
+            });
+            const newState = model(unchangedMappingsState, res) as PrepareCompatibleMigration;
+
+            expect(newState.controlState).toEqual('PREPARE_COMPATIBLE_MIGRATION');
+            expect(newState.targetIndexRawMappings).toEqual({
+              _meta: {
+                migrationMappingPropertyHashes: {
+                  new_saved_object_type: '4a11183eee21e6fbad864f7a30b39ad0',
+                },
+              },
+              properties: {
+                new_saved_object_type: {
+                  properties: {
+                    value: {
+                      type: 'text',
+                    },
+                  },
+                },
+              },
+            });
+            expect(newState.versionAlias).toEqual('.kibana_7.12.0');
+            expect(newState.currentAlias).toEqual('.kibana');
+            // will point to
+            expect(newState.targetIndex).toEqual('.kibana_7.11.0_001');
+            expect(newState.preTransformDocsActions).toEqual([
+              {
+                add: {
+                  alias: '.kibana_7.12.0',
+                  index: '.kibana_7.11.0_001',
+                },
+              },
+              {
+                remove: {
+                  alias: '.kibana_7.11.0',
+                  index: '.kibana_7.11.0_001',
+                  must_exist: true,
+                },
+              },
+            ]);
+          });
+        });
+
+        describe('and mappings DO NOT match (diffMappings == true)', () => {
+          const actualMappings: IndexMapping = {
+            properties: {
+              new_saved_object_type: {
+                properties: {
+                  value: { type: 'integer' },
+                },
+              },
+            },
+            _meta: {
+              migrationMappingPropertyHashes: {
+                new_saved_object_type: '5b11183eee21e6fbad864f7a30b39be1',
+              },
+            },
+          };
+
+          const changedMappingsState: State = {
+            ...waitForYellowSourceState,
+            controlState: 'WAIT_FOR_YELLOW_SOURCE',
+            kibanaVersion: '7.12.0', // new version!
+            currentAlias: '.kibana',
+            versionAlias: '.kibana_7.12.0',
+            versionIndex: '.kibana_7.11.0_001',
+            sourceIndexMappings: actualMappings,
+          };
+
+          test('WAIT_FOR_YELLOW_SOURCE -> CHECK_UNKNOWN_DOCUMENTS', () => {
+            const res: ResponseType<'WAIT_FOR_YELLOW_SOURCE'> = Either.right({});
+            const newState = model(changedMappingsState, res);
+            expect(newState.controlState).toEqual('CHECK_UNKNOWN_DOCUMENTS');
+
+            expect(newState).toMatchObject({
+              controlState: 'CHECK_UNKNOWN_DOCUMENTS',
+              sourceIndex: Option.some('.kibana_7.11.0_001'),
+              sourceIndexMappings: actualMappings,
+            });
+          });
         });
       });
 
@@ -1296,22 +1351,6 @@ describe('migrations v2 model', () => {
             "message": "Action failed with '[index_not_yellow_timeout] Timeout waiting for ... Refer to repeatedTimeoutRequests for information on how to resolve the issue.'. Retrying attempt 1 in 2 seconds.",
           }
         `);
-      });
-
-      test('WAIT_FOR_YELLOW_SOURCE -> CHECK_UNKNOWN_DOCUMENTS resets retry count and delay if action succeeds', () => {
-        const res: ResponseType<'WAIT_FOR_YELLOW_SOURCE'> = Either.right({});
-        const testState = {
-          ...waitForYellowSourceState,
-          retryCount: 1,
-          retryDelay: 2000,
-        };
-        const newState = model(testState, res);
-        expect(newState.controlState).toEqual('CHECK_UNKNOWN_DOCUMENTS');
-
-        expect(newState).toMatchObject({
-          controlState: 'CHECK_UNKNOWN_DOCUMENTS',
-          sourceIndex: Option.some('.kibana_3'),
-        });
       });
     });
 

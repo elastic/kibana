@@ -7,19 +7,19 @@
 
 import * as t from 'io-ts';
 import type { Either } from 'fp-ts/lib/Either';
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 
 import { NonEmptyString } from './non_empty_string';
 
 /**
  * Types the DefaultUuid as:
- *   - If null or undefined, then a default string uuid.v4() will be
+ *   - If null or undefined, then a default string uuidv4() will be
  *     created otherwise it will be checked just against an empty string
  */
 export const DefaultUuid = new t.Type<string, string | undefined, unknown>(
   'DefaultUuid',
   t.string.is,
   (input, context): Either<t.Errors, string> =>
-    input == null ? t.success(uuid.v4()) : NonEmptyString.validate(input, context),
+    input == null ? t.success(uuidv4()) : NonEmptyString.validate(input, context),
   t.identity
 );

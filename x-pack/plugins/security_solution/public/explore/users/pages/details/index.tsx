@@ -197,7 +197,7 @@ const UsersDetailsComponent: React.FC<UsersDetailsProps> = ({
               endDate={to}
               skip={isInitializing}
             >
-              {({ isLoadingAnomaliesData, anomaliesData }) => (
+              {({ isLoadingAnomaliesData, anomaliesData, jobNameById }) => (
                 <UserOverview
                   userName={detailName}
                   id={QUERY_ID}
@@ -210,6 +210,7 @@ const UsersDetailsComponent: React.FC<UsersDetailsProps> = ({
                   endDate={to}
                   narrowDateRange={narrowDateRange}
                   indexPatterns={selectedPatterns}
+                  jobNameById={jobNameById}
                 />
               )}
             </AnomalyTableProvider>

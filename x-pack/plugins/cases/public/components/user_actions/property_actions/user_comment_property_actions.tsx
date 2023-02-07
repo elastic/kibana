@@ -54,21 +54,22 @@ const UserCommentPropertyActionsComponent: React.FC<Props> = ({
             },
           ]
         : []),
-      ...(showTrashIcon
-        ? [
-            {
-              iconType: 'trash',
-              label: i18n.DELETE_COMMENT,
-              onClick: onModalOpen,
-            },
-          ]
-        : []),
       ...(showQuoteIcon
         ? [
             {
               iconType: 'quote',
               label: i18n.QUOTE,
               onClick: onQuote,
+            },
+          ]
+        : []),
+      ...(showTrashIcon
+        ? [
+            {
+              iconType: 'trash',
+              color: 'danger' as const,
+              label: i18n.DELETE_COMMENT,
+              onClick: onModalOpen,
             },
           ]
         : []),

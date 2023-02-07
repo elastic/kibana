@@ -15,20 +15,27 @@ import { RuleRunMetricsStore } from '../lib/rule_run_metrics_store';
 
 export interface LogAlertsParams<
   State extends AlertInstanceState,
-  Context extends AlertInstanceContext
+  Context extends AlertInstanceContext,
+  ActionGroupIds extends string,
+  RecoveryActionGroupId extends string
 > {
   logger: Logger;
   alertingEventLogger: AlertingEventLogger;
-  newAlerts: Record<string, Alert<State, Context>>;
-  activeAlerts: Record<string, Alert<State, Context>>;
-  recoveredAlerts: Record<string, Alert<State, Context>>;
+  newAlerts: Record<string, Alert<State, Context, ActionGroupIds>>;
+  activeAlerts: Record<string, Alert<State, Context, ActionGroupIds>>;
+  recoveredAlerts: Record<string, Alert<State, Context, RecoveryActionGroupId>>;
   ruleLogPrefix: string;
   ruleRunMetricsStore: RuleRunMetricsStore;
   canSetRecoveryContext: boolean;
   shouldPersistAlerts: boolean;
 }
 
-export function logAlerts<State extends AlertInstanceState, Context extends AlertInstanceContext>({
+export function logAlerts<
+  State extends AlertInstanceState,
+  Context extends AlertInstanceContext,
+  ActionGroupIds extends string,
+  RecoveryActionGroupId extends string
+>({
   logger,
   alertingEventLogger,
   newAlerts,
@@ -38,7 +45,7 @@ export function logAlerts<State extends AlertInstanceState, Context extends Aler
   ruleRunMetricsStore,
   canSetRecoveryContext,
   shouldPersistAlerts,
-}: LogAlertsParams<State, Context>) {
+}: LogAlertsParams<State, Context, ActionGroupIds, RecoveryActionGroupId>) {
   const newAlertIds = Object.keys(newAlerts);
   const activeAlertIds = Object.keys(activeAlerts);
   const recoveredAlertIds = Object.keys(recoveredAlerts);

@@ -9,6 +9,7 @@ import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-bro
 
 /**
  * @public
+ * @deprecated See https://github.com/elastic/kibana/issues/149098
  */
 export interface SavedObjectsStart {
   /** {@link SavedObjectsClientContract} */

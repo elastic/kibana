@@ -1,0 +1,12 @@
+title: Connector request properties for an Opsgenie connector
+required:
+  - apiUrl
+description: Defines properties for connectors when type is `.opsgenie`.
+type: object
+properties:
+  apiUrl:
+    description: >
+      The Opsgenie URL. For example, `https://api.opsgenie.com` or
+      `https://api.eu.opsgenie.com`. If you are using the
+      `xpack.actions.allowedHosts` setting, add the hostname to the allowed hosts.
+    type: string
