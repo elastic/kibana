@@ -19,6 +19,7 @@ const stories: Meta<{}> = {
   decorators: [
     (StoryComponent) => {
       const serviceName = 'testServiceName';
+      const transactionType = 'type';
       const mockCore = {
         http: {
           get: (endpoint: string) => {
@@ -37,6 +38,7 @@ const stories: Meta<{}> = {
       } as unknown as CoreStart;
       const serviceContextValue = {
         serviceName,
+        transactionType,
       } as unknown as APMServiceContextValue;
 
       return (
