@@ -7,7 +7,9 @@
 import React, { useContext } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiButton } from '@elastic/eui';
-import { useEnablement } from '../../hooks';
+import { useCanEditSynthetics } from '../../../../hooks/use_capabilities';
+import { NoPermissionsTooltip } from '../common/components/permissions';
+import { useEnablement, useFleetPermissions, useLocations } from '../../hooks';
 import { MONITOR_ADD_ROUTE } from '../../../../../common/constants';
 
 import { SyntheticsSettingsContext } from '../../contexts/synthetics_settings_context';
@@ -19,20 +21,36 @@ export const CreateMonitorButton: React.FC = () => {
     enablement: { isEnabled },
   } = useEnablement();
 
+  const canEditSynthetics = useCanEditSynthetics();
+  const { canSaveIntegrations } = useFleetPermissions();
+  const { locations } = useLocations();
+
+  const hasPublicLocation = locations.some((loc) => loc.isServiceManaged);
+
+  const canAddPublicMonitor = canEditSynthetics && hasPublicLocation;
+  const canAddPrivateMonitor = canEditSynthetics && canSaveIntegrations;
+
+  const canAddMonitor = canAddPublicMonitor || canAddPrivateMonitor;
+
   return (
-    <EuiButton
-      color="primary"
-      fill
-      iconSide="left"
-      iconType="plusInCircleFilled"
-      href={`${basePath}/app/synthetics${MONITOR_ADD_ROUTE}`}
-      isDisabled={!isEnabled}
-      data-test-subj="syntheticsAddMonitorBtn"
+    <NoPermissionsTooltip
+      canEditSynthetics={canEditSynthetics}
+      canUpdatePrivateMonitor={canSaveIntegrations}
     >
-      <FormattedMessage
-        id="xpack.synthetics.monitors.pageHeader.createButton.label"
-        defaultMessage="Create Monitor"
-      />
-    </EuiButton>
+      <EuiButton
+        color="primary"
+        fill
+        iconSide="left"
+        iconType="plusInCircleFilled"
+        href={`${basePath}/app/synthetics${MONITOR_ADD_ROUTE}`}
+        isDisabled={!isEnabled || !canAddMonitor}
+        data-test-subj="syntheticsAddMonitorBtn"
+      >
+        <FormattedMessage
+          id="xpack.synthetics.monitors.pageHeader.createButton.label"
+          defaultMessage="Create Monitor"
+        />
+      </EuiButton>
+    </NoPermissionsTooltip>
   );
 };
