@@ -329,7 +329,7 @@ describe('getMigrationHash', () => {
           '1': {
             modelChange: {
               type: 'expansion',
-              migration: { up: jest.fn(), down: jest.fn() },
+              transformation: { up: jest.fn(), down: jest.fn() },
             },
           },
           '2': {
@@ -347,7 +347,7 @@ describe('getMigrationHash', () => {
           '1': {
             modelChange: {
               type: 'expansion',
-              migration: { up: jest.fn(), down: jest.fn() },
+              transformation: { up: jest.fn(), down: jest.fn() },
             },
           },
           '2': {
@@ -370,7 +370,7 @@ describe('getMigrationHash', () => {
           '1': {
             modelChange: {
               type: 'expansion',
-              migration: { up: jest.fn(), down: jest.fn() },
+              transformation: { up: jest.fn(), down: jest.fn() },
             },
           },
           '2': {
@@ -396,7 +396,7 @@ describe('getMigrationHash', () => {
           '1': {
             modelChange: {
               type: 'expansion',
-              migration: { up: jest.fn(), down: jest.fn() },
+              transformation: { up: jest.fn(), down: jest.fn() },
             },
           },
         },
@@ -411,7 +411,7 @@ describe('getMigrationHash', () => {
           '1': {
             modelChange: {
               type: 'expansion',
-              migration: { up: jest.fn(), down: jest.fn() },
+              transformation: { up: jest.fn(), down: jest.fn() },
             },
           },
           '2': {
@@ -429,7 +429,7 @@ describe('getMigrationHash', () => {
           '1': {
             modelChange: {
               type: 'expansion',
-              migration: { up: jest.fn(), down: jest.fn() },
+              transformation: { up: jest.fn(), down: jest.fn() },
             },
           },
           '2': {
@@ -452,7 +452,7 @@ describe('getMigrationHash', () => {
           '1': {
             modelChange: {
               type: 'expansion',
-              migration: { up: jest.fn(), down: jest.fn() },
+              transformation: { up: jest.fn(), down: jest.fn() },
             },
           },
           '2': {
@@ -470,7 +470,7 @@ describe('getMigrationHash', () => {
           '1': {
             modelChange: {
               type: 'expansion',
-              migration: { up: jest.fn(), down: jest.fn() },
+              transformation: { up: jest.fn(), down: jest.fn() },
             },
           },
           '2': {
