@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useContext, useEffect } from 'react';
+import React, { useCallback, useContext, useEffect, useRef, useState } from 'react';
 import { EuiButtonIcon, EuiDataGridCellValueElementProps, EuiToolTip } from '@elastic/eui';
 import { euiLightVars as themeLight, euiDarkVars as themeDark } from '@kbn/ui-theme';
 import { i18n } from '@kbn/i18n';
@@ -17,8 +17,11 @@ import { DISCOVER_TOUR_STEP_ANCHOR_IDS } from '../discover_tour';
  * Button to expand a given row
  */
 export const ExpandButton = ({ rowIndex, setCellProps }: EuiDataGridCellValueElementProps) => {
+  const toolTipRef = useRef<EuiToolTip>(null);
+  const [pressed, setPressed] = useState<boolean>(false);
   const { expanded, setExpanded, rows, isDarkMode } = useContext(DiscoverGridContext);
   const current = rows[rowIndex];
+
   useEffect(() => {
     if (current.isAnchor) {
       setCellProps({
@@ -43,19 +46,40 @@ export const ExpandButton = ({ rowIndex, setCellProps }: EuiDataGridCellValueEle
   const testSubj = current.isAnchor
     ? 'docTableExpandToggleColumnAnchor'
     : 'docTableExpandToggleColumn';
+
+  const hideTooltip = useCallback(() => {
+    setTimeout(() => {
+      toolTipRef.current?.hideToolTip();
+    }, 100);
+  }, []);
+
+  useEffect(() => {
+    if (!isCurrentRowExpanded && pressed) {
+      setPressed(false);
+      hideTooltip();
+    }
+  }, [isCurrentRowExpanded, setPressed, pressed, hideTooltip]);
+
   if (!setExpanded) {
     return null;
   }
 
   return (
-    <EuiToolTip content={buttonLabel} delay="long">
+    <EuiToolTip content={buttonLabel} delay="long" ref={toolTipRef}>
       <EuiButtonIcon
         id={rowIndex === 0 ? DISCOVER_TOUR_STEP_ANCHOR_IDS.expandDocument : undefined}
         size="xs"
         iconSize="s"
         aria-label={buttonLabel}
         data-test-subj={testSubj}
-        onClick={() => setExpanded?.(isCurrentRowExpanded ? undefined : current)}
+        onClick={() => {
+          const nextHit = isCurrentRowExpanded ? undefined : current;
+          setExpanded?.(nextHit);
+          if (nextHit) {
+            setPressed(true);
+          }
+          hideTooltip();
+        }}
         color={isCurrentRowExpanded ? 'primary' : 'text'}
         iconType={isCurrentRowExpanded ? 'minimize' : 'expand'}
         isSelected={isCurrentRowExpanded}
