@@ -21,7 +21,7 @@ import { MetricsDataViewProvider } from './hooks/use_data_view';
 import { fullHeightContentStyles } from '../../../page_template.styles';
 import { UnifiedSearchProvider } from './hooks/use_unified_search';
 import { HostContainer } from './components/hosts_container';
-import { ExperimentalBadge } from './components/experimental_badge';
+import { ExperimentalBadge } from '../../../components/experimental_badge';
 
 const HOSTS_FEEDBACK_LINK = 'https://ela.st/host-feedback';
 

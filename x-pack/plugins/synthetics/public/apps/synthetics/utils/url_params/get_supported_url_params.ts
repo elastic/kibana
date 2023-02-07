@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { MonitorOverviewState } from '../../state';
 import { CLIENT_DEFAULTS_SYNTHETICS } from '../../../../../common/constants/synthetics/client_defaults';
 import { parseIsPaused } from './parse_is_paused';
 import { parseUrlInt } from './parse_url_int';
@@ -33,6 +34,8 @@ export interface SyntheticsUrlParams {
   locationId?: string;
   projects?: string[];
   schedules?: string[];
+  groupBy?: MonitorOverviewState['groupBy']['field'];
+  groupOrderBy?: MonitorOverviewState['groupBy']['order'];
 }
 
 const {
@@ -94,9 +97,13 @@ export const getSupportedUrlParams = (params: {
     locationId,
     projects,
     schedules,
+    groupBy,
+    groupOrderBy,
   } = filteredParams;
 
   return {
+    groupBy: groupBy as MonitorOverviewState['groupBy']['field'],
+    groupOrderBy: groupOrderBy as MonitorOverviewState['groupBy']['order'],
     pagination,
     absoluteDateRangeStart: parseAbsoluteDate(
       dateRangeStart || DATE_RANGE_START,
