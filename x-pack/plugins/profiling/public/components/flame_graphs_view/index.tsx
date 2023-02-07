@@ -116,7 +116,7 @@ export function FlameGraphsView({ children }: { children: React.ReactElement }) 
   }
 
   return (
-    <ProfilingAppPageTemplate tabs={tabs} hideSearchBar={isDifferentialView} fullHeight>
+    <ProfilingAppPageTemplate tabs={tabs} hideSearchBar={isDifferentialView}>
       <EuiFlexGroup direction="column">
         {isDifferentialView ? (
           <EuiFlexItem grow={false}>
