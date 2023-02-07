@@ -83,7 +83,6 @@ interface BaseCspSetupStatus {
   cspm: BaseCspSetupBothPolicy;
   kspm: BaseCspSetupBothPolicy;
   isPluginInitialized: boolean;
-  installedPolicyTemplates: PosturePolicyTemplate[];
 }
 
 interface CspSetupNotInstalledStatus extends BaseCspSetupStatus {

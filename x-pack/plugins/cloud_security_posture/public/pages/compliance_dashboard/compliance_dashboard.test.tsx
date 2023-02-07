@@ -89,7 +89,7 @@ describe('<ComplianceDashboard />', () => {
     (useCspSetupStatusApi as jest.Mock).mockImplementation(() =>
       createReactQueryResponse({
         status: 'success',
-        data: { status: 'not-deployed', installedPolicyTemplates: [] },
+        data: { kspm: { status: 'not-deployed' }, cspm: { status: 'not-deployed' } },
       })
     );
     (useCISIntegrationPoliciesLink as jest.Mock).mockImplementation(() => chance.url());
@@ -112,7 +112,7 @@ describe('<ComplianceDashboard />', () => {
     (useCspSetupStatusApi as jest.Mock).mockImplementation(() =>
       createReactQueryResponse({
         status: 'success',
-        data: { status: 'indexing', installedPolicyTemplates: [] },
+        data: { kspm: { status: 'indexing' }, cspm: { status: 'indexing' } },
       })
     );
     (useCspIntegrationLink as jest.Mock).mockImplementation(() => chance.url());
@@ -134,7 +134,7 @@ describe('<ComplianceDashboard />', () => {
     (useCspSetupStatusApi as jest.Mock).mockImplementation(() =>
       createReactQueryResponse({
         status: 'success',
-        data: { status: 'index-timeout', installedPolicyTemplates: [] },
+        data: { kspm: { status: 'index-timeout' }, cspm: { status: 'index-timeout' } },
       })
     );
     (useCspIntegrationLink as jest.Mock).mockImplementation(() => chance.url());
@@ -156,7 +156,7 @@ describe('<ComplianceDashboard />', () => {
     (useCspSetupStatusApi as jest.Mock).mockImplementation(() =>
       createReactQueryResponse({
         status: 'success',
-        data: { status: 'unprivileged', installedPolicyTemplates: [] },
+        data: { kspm: { status: 'unprivileged' }, cspm: { status: 'unprivileged' } },
       })
     );
     (useCspIntegrationLink as jest.Mock).mockImplementation(() => chance.url());
@@ -178,7 +178,7 @@ describe('<ComplianceDashboard />', () => {
     (useCspSetupStatusApi as jest.Mock).mockImplementation(() =>
       createReactQueryResponse({
         status: 'success',
-        data: { status: 'indexed', installedPolicyTemplates: ['cspm', 'kspm'] },
+        data: { kspm: { status: 'indexed' }, cspm: { status: 'indexed' } },
       })
     );
     (useKspmStatsApi as jest.Mock).mockImplementation(() => ({
@@ -209,7 +209,7 @@ describe('<ComplianceDashboard />', () => {
     (useCspSetupStatusApi as jest.Mock).mockImplementation(() =>
       createReactQueryResponse({
         status: 'success',
-        data: { status: 'indexed', installedPolicyTemplates: ['cspm', 'kspm'] },
+        data: { kspm: { status: 'indexed' } },
       })
     );
     (useKspmStatsApi as jest.Mock).mockImplementation(() => ({
@@ -241,7 +241,7 @@ describe('<ComplianceDashboard />', () => {
     (useCspSetupStatusApi as jest.Mock).mockImplementation(() =>
       createReactQueryResponse({
         status: 'success',
-        data: { status: 'indexed', installedPolicyTemplates: ['cspm', 'kspm'] },
+        data: { cspm: { status: 'indexed' } },
       })
     );
     (useKspmStatsApi as jest.Mock).mockImplementation(() => ({
@@ -273,7 +273,7 @@ describe('<ComplianceDashboard />', () => {
     (useCspSetupStatusApi as jest.Mock).mockImplementation(() =>
       createReactQueryResponse({
         status: 'success',
-        data: { status: 'indexed', installedPolicyTemplates: ['cspm'] },
+        data: { cspm: { status: 'indexing' } },
       })
     );
     (useKspmStatsApi as jest.Mock).mockImplementation(() => ({
@@ -305,7 +305,7 @@ describe('<ComplianceDashboard />', () => {
     (useCspSetupStatusApi as jest.Mock).mockImplementation(() =>
       createReactQueryResponse({
         status: 'success',
-        data: { status: 'indexed', installedPolicyTemplates: ['kspm'] },
+        data: { kspm: { status: 'indexed' } },
       })
     );
     (useKspmStatsApi as jest.Mock).mockImplementation(() => ({
@@ -337,7 +337,7 @@ describe('<ComplianceDashboard />', () => {
     (useCspSetupStatusApi as jest.Mock).mockImplementation(() =>
       createReactQueryResponse({
         status: 'success',
-        data: { status: 'indexed', installedPolicyTemplates: ['cspm', 'kspm'] },
+        data: { cspm: { status: 'indexed' }, kspm: { status: 'indexed' } },
       })
     );
     (useKspmStatsApi as jest.Mock).mockImplementation(() => ({
@@ -369,7 +369,7 @@ describe('<ComplianceDashboard />', () => {
     (useCspSetupStatusApi as jest.Mock).mockImplementation(() =>
       createReactQueryResponse({
         status: 'success',
-        data: { status: 'indexed', installedPolicyTemplates: ['cspm', 'kspm'] },
+        data: { cspm: { status: 'indexed' }, kspm: { status: 'indexed' } },
       })
     );
     (useKspmStatsApi as jest.Mock).mockImplementation(() => ({

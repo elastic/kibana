@@ -21,8 +21,8 @@ export const Findings = () => {
   const getSetupStatus = useCspSetupStatusApi();
 
   const hasFindings =
-    getSetupStatus.data?.cspm.status === 'indexed' ||
-    getSetupStatus.data?.kspm.status === 'indexed';
+    getSetupStatus.data?.cspm?.status === 'indexed' ||
+    getSetupStatus.data?.kspm?.status === 'indexed';
   if (!hasFindings) return <NoFindingsStates />;
 
   return (

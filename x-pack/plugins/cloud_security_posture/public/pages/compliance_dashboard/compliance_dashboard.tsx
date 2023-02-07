@@ -177,8 +177,8 @@ const IntegrationPostureDashboard = ({
 export const ComplianceDashboard = () => {
   const [selectedTab, setSelectedTab] = useState(CSPM_POLICY_TEMPLATE);
   const getSetupStatus = useCspSetupStatusApi();
-  const hasFindingsKspm = getSetupStatus.data?.kspm.status === 'indexed';
-  const hasFindingsCspm = getSetupStatus.data?.cspm.status === 'indexed';
+  const hasFindingsKspm = getSetupStatus.data?.kspm?.status === 'indexed';
+  const hasFindingsCspm = getSetupStatus.data?.cspm?.status === 'indexed';
   const cspmIntegrationLink = useCspIntegrationLink(CSPM_POLICY_TEMPLATE);
   const kspmIntegrationLink = useCspIntegrationLink(KSPM_POLICY_TEMPLATE);
 
@@ -194,8 +194,8 @@ export const ComplianceDashboard = () => {
     const selectInitialTab = () => {
       const cspmTotalFindings = getCspmDashboardData.data?.stats.totalFindings;
       const kspmTotalFindings = getKspmDashboardData.data?.stats.totalFindings;
-      const installedPolicyTemplatesCspm = getSetupStatus.data?.cspm.status;
-      const installedPolicyTemplatesKspm = getSetupStatus.data?.kspm.status;
+      const installedPolicyTemplatesCspm = getSetupStatus.data?.cspm?.status;
+      const installedPolicyTemplatesKspm = getSetupStatus.data?.kspm?.status;
 
       let preferredDashboard = CSPM_POLICY_TEMPLATE;
 
@@ -207,19 +207,19 @@ export const ComplianceDashboard = () => {
       else if (!!kspmTotalFindings) {
         preferredDashboard = KSPM_POLICY_TEMPLATE;
       }
-      // cspm is installed
-      else if (
-        installedPolicyTemplatesCspm !== 'unprivileged' &&
-        installedPolicyTemplatesCspm !== 'not-installed'
-      ) {
-        preferredDashboard = CSPM_POLICY_TEMPLATE;
-      }
       // kspm is installed
       else if (
         installedPolicyTemplatesKspm !== 'unprivileged' &&
         installedPolicyTemplatesKspm !== 'not-installed'
       ) {
         preferredDashboard = KSPM_POLICY_TEMPLATE;
+      }
+      // cspm is installed
+      else if (
+        installedPolicyTemplatesCspm !== 'unprivileged' &&
+        installedPolicyTemplatesCspm !== 'not-installed'
+      ) {
+        preferredDashboard = CSPM_POLICY_TEMPLATE;
       }
 
       setSelectedTab(preferredDashboard);
@@ -228,8 +228,8 @@ export const ComplianceDashboard = () => {
   }, [
     getCspmDashboardData.data?.stats.totalFindings,
     getKspmDashboardData.data?.stats.totalFindings,
-    getSetupStatus.data?.cspm.status,
-    getSetupStatus.data?.kspm.status,
+    getSetupStatus.data?.cspm?.status,
+    getSetupStatus.data?.kspm?.status,
   ]);
 
   const tabs = useMemo(
@@ -251,8 +251,8 @@ export const ComplianceDashboard = () => {
                   cspmIntegrationLink
                 )}
                 isIntegrationInstalled={
-                  getSetupStatus.data?.cspm.status !== 'unprivileged' &&
-                  getSetupStatus.data?.cspm.status !== 'not-installed'
+                  getSetupStatus.data?.cspm?.status !== 'unprivileged' &&
+                  getSetupStatus.data?.cspm?.status !== 'not-installed'
                 }
               />
             </div>
@@ -276,8 +276,8 @@ export const ComplianceDashboard = () => {
                   kspmIntegrationLink
                 )}
                 isIntegrationInstalled={
-                  getSetupStatus.data?.kspm.status !== 'unprivileged' &&
-                  getSetupStatus.data?.kspm.status !== 'not-installed'
+                  getSetupStatus.data?.kspm?.status !== 'unprivileged' &&
+                  getSetupStatus.data?.kspm?.status !== 'not-installed'
                 }
               />
             </div>
@@ -289,8 +289,8 @@ export const ComplianceDashboard = () => {
       cspmIntegrationLink,
       getCspmDashboardData,
       getKspmDashboardData,
-      getSetupStatus.data?.kspm.status,
-      getSetupStatus.data?.cspm.status,
+      getSetupStatus.data?.kspm?.status,
+      getSetupStatus.data?.cspm?.status,
       kspmIntegrationLink,
       selectedTab,
     ]

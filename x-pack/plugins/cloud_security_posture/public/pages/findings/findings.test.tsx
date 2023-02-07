@@ -71,7 +71,7 @@ describe('<Findings />', () => {
     (useCspSetupStatusApi as jest.Mock).mockImplementation(() =>
       createReactQueryResponse({
         status: 'success',
-        data: { status: 'not-deployed' },
+        data: { kspm: { status: 'not-deployed' }, cspm: { status: 'not-deployed' } },
       })
     );
     (useCISIntegrationPoliciesLink as jest.Mock).mockImplementation(() => chance.url());
@@ -94,7 +94,7 @@ describe('<Findings />', () => {
     (useCspSetupStatusApi as jest.Mock).mockImplementation(() =>
       createReactQueryResponse({
         status: 'success',
-        data: { status: 'indexing' },
+        data: { kspm: { status: 'indexing' }, cspm: { status: 'indexing' } },
       })
     );
     (useCspIntegrationLink as jest.Mock).mockImplementation(() => chance.url());
@@ -116,7 +116,7 @@ describe('<Findings />', () => {
     (useCspSetupStatusApi as jest.Mock).mockImplementation(() =>
       createReactQueryResponse({
         status: 'success',
-        data: { status: 'index-timeout' },
+        data: { kspm: { status: 'index-timeout' }, cspm: { status: 'index-timeout' } },
       })
     );
     (useCspIntegrationLink as jest.Mock).mockImplementation(() => chance.url());
@@ -138,7 +138,7 @@ describe('<Findings />', () => {
     (useCspSetupStatusApi as jest.Mock).mockImplementation(() =>
       createReactQueryResponse({
         status: 'success',
-        data: { status: 'unprivileged' },
+        data: { kspm: { status: 'unprivileged' }, cspm: { status: 'unprivileged' } },
       })
     );
     (useCspIntegrationLink as jest.Mock).mockImplementation(() => chance.url());
@@ -161,7 +161,7 @@ describe('<Findings />', () => {
 
     (useCspSetupStatusApi as jest.Mock).mockImplementation(() => ({
       status: 'success',
-      data: { status: 'indexed' },
+      data: { kspm: { status: 'indexed' }, cspm: { status: 'indexed' } },
     }));
     (source.fetch$ as jest.Mock).mockReturnValue(of({ rawResponse: { hits: { hits: [] } } }));
 

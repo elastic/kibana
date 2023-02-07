@@ -79,7 +79,12 @@ const calculateCspStatusCode = (
   if (indicesStatus.findingsLatest === 'unprivileged' || indicesStatus.score === 'unprivileged')
     return 'unprivileged';
   if (!installedPolicyTemplates.includes(postureTypeCheck)) return 'not-installed';
-  if (indicesStatus.findingsLatest === 'not-empty') return 'indexed';
+  if (
+    indicesStatus.findingsLatest === 'not-empty' &&
+    installedCspPackagePolicies !== 0 &&
+    healthyAgents !== 0
+  )
+    return 'indexed';
   if (healthyAgents === 0) return 'not-deployed';
   if (timeSinceInstallationInMinutes <= INDEX_TIMEOUT_IN_MINUTES) return 'indexing';
   if (timeSinceInstallationInMinutes > INDEX_TIMEOUT_IN_MINUTES) return 'index-timeout';
@@ -219,7 +224,6 @@ const getCspStatus = async ({
       indicesDetails,
       latestPackageVersion: latestCspPackageVersion,
       isPluginInitialized: isPluginInitialized(),
-      installedPolicyTemplates, // need to remove this
     };
 
   const response = {
@@ -237,7 +241,6 @@ const getCspStatus = async ({
     latestPackageVersion: latestCspPackageVersion,
     installedPackageVersion: installation?.install_version,
     isPluginInitialized: isPluginInitialized(),
-    installedPolicyTemplates, // need to remove this
   };
 
   assertResponse(response, logger);
