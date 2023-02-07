@@ -31,6 +31,7 @@ import {
 import { Pipeline } from '../../../../common/types';
 
 import { PipelineDetailsJsonBlock } from './details_json_block';
+import { stringifyJson } from '../../lib/utils';
 
 export interface Props {
   pipeline: Pipeline;
@@ -198,9 +199,7 @@ export const PipelineDetailsFlyout: FunctionComponent<Props> = ({
                 />
               </EuiDescriptionListTitle>
               <EuiDescriptionListDescription>
-                <EuiCodeBlock language="json">
-                  {JSON.stringify(pipeline._meta, null, 2)}
-                </EuiCodeBlock>
+                <EuiCodeBlock language="json">{stringifyJson(pipeline._meta, false)}</EuiCodeBlock>
               </EuiDescriptionListDescription>
             </>
           )}

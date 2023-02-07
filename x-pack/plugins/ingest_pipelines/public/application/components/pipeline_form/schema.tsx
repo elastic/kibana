@@ -6,25 +6,14 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { EuiCode } from '@elastic/eui';
+import React from 'react';
+import { parseJson, stringifyJson } from '../../lib/utils';
 import { FormSchema, FIELD_TYPES, fieldValidators, fieldFormatters } from '../../../shared_imports';
 
 const { emptyField, isJsonField } = fieldValidators;
 const { toInt } = fieldFormatters;
-
-const stringifyJson = (json: { [key: string]: any }): string =>
-  Object.keys(json).length ? JSON.stringify(json, null, 2) : '{\n\n}';
-
-const parseJson = (jsonString: string): object => {
-  let parsedJSON: any;
-
-  try {
-    parsedJSON = JSON.parse(jsonString);
-  } catch {
-    parsedJSON = {};
-  }
-
-  return parsedJSON;
-};
 
 export const pipelineFormSchema: FormSchema = {
   name: {
@@ -59,18 +48,24 @@ export const pipelineFormSchema: FormSchema = {
     label: i18n.translate('xpack.ingestPipelines.form.metaFieldLabel', {
       defaultMessage: '_meta field data (optional)',
     }),
-    helpText: i18n.translate('xpack.ingestPipelines.form.metaHelpText', {
-      defaultMessage: 'Use JSON format.',
-    }),
+    helpText: (
+      <FormattedMessage
+        id="xpack.ingestPipelines.form.metaHelpText"
+        defaultMessage="Use JSON format: {code}"
+        values={{
+          code: <EuiCode>{JSON.stringify({ arbitrary_data: 'anything_goes' })}</EuiCode>,
+        }}
+      />
+    ),
     serializer: (value) => {
-      const result = parseJson(value);
+      const result = parseJson(value, false);
       // If an empty object was passed, strip out this value entirely.
       if (!Object.keys(result).length) {
         return undefined;
       }
       return result;
     },
-    deserializer: stringifyJson,
+    deserializer: (value) => stringifyJson(value, false),
     validations: [
       {
         validator: isJsonField(

@@ -149,7 +149,7 @@ export const PipelineFormFields: React.FunctionComponent<Props> = ({
             <EuiSwitch
               label={
                 <FormattedMessage
-                  id="xpack.ingestPipelines.form.metadataDescription"
+                  id="xpack.ingestPipelines.form.metaSwitchCaption"
                   defaultMessage="Add metadata"
                 />
               }

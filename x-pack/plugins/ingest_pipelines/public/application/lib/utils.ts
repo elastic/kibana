@@ -5,21 +5,25 @@
  * 2.0.
  */
 
-export const stringifyJson = (json: any): string =>
-  Array.isArray(json) ? JSON.stringify(json, null, 2) : '[\n\n]';
+export const stringifyJson = (json: any, isList: boolean = true): string =>
+  (isList && Array.isArray(json)) || (!isList && Object.keys(json).length)
+    ? JSON.stringify(json, null, 2)
+    : isList
+    ? '[\n\n]'
+    : '{\n\n}';
 
-export const parseJson = (jsonString: string): object[] => {
+export const parseJson = (jsonString: string, isList: boolean = true): object[] => {
   let parsedJSON: any;
 
   try {
     parsedJSON = JSON.parse(jsonString);
 
-    if (!Array.isArray(parsedJSON)) {
+    if (isList && !Array.isArray(parsedJSON)) {
       // Convert object to array
       parsedJSON = [parsedJSON];
     }
   } catch {
-    parsedJSON = [];
+    parsedJSON = isList ? [] : {};
   }
 
   return parsedJSON;
