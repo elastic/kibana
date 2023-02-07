@@ -131,6 +131,7 @@ const EditConnectorFlyoutComponent: React.FC<EditConnectorFlyoutProps> = ({
   const { preSubmitValidator, submit, isValid: isFormValid, isSubmitting } = formState;
   const hasErrors = isFormValid === false;
   const isSaving = isUpdatingConnector || isSubmitting || isExecutingConnector;
+  const [currentConnectorItem, setCurrentConnectorItem] = useState<ActionConnector>(connector);
   const actionTypeModel: ActionTypeModel | null = actionTypeRegistry.get(connector.actionTypeId);
   const showButtons = canSave && actionTypeModel && !connector.isPreconfigured;
 
@@ -217,6 +218,7 @@ const EditConnectorFlyoutComponent: React.FC<EditConnectorFlyoutProps> = ({
         if (onConnectorUpdated) {
           onConnectorUpdated(updatedConnector);
         }
+        setCurrentConnectorItem(updatedConnector);
         setIsSaved(true);
         setIsEdit(false);
         setIsEdit(true);
@@ -266,7 +268,11 @@ const EditConnectorFlyoutComponent: React.FC<EditConnectorFlyoutProps> = ({
                   <>
                     <ConnectorForm
                       actionTypeModel={actionTypeModel}
-                      connector={getConnectorWithoutSecrets(connector)}
+                      connector={
+                        currentConnectorItem && !currentConnectorItem.isPreconfigured
+                          ? getConnectorWithoutSecrets(currentConnectorItem)
+                          : getConnectorWithoutSecrets(connector)
+                      }
                       isEdit={isEdit}
                       onChange={setFormState}
                       onFormModifiedChange={onFormModifiedChange}
