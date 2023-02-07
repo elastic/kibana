@@ -262,4 +262,61 @@ describe('extractMigrationInfo', () => {
       expect(output.modelVersions).toEqual([]);
     });
   });
+
+  describe('migrations and modelVersions', () => {
+    it('generate properties for both', () => {
+      const type = createType({
+        migrations: {
+          '8.3.3': dummyMigration,
+          '7.17.7': dummyMigration,
+          '8.0.2': dummyMigration,
+        },
+        modelVersions: {
+          '1': {
+            modelChange: {
+              type: 'expansion',
+              migration: {
+                up: jest.fn(),
+                down: jest.fn(),
+              },
+            },
+          },
+          '2': {
+            modelChange: {
+              type: 'expansion',
+              addedMappings: {
+                foo: {
+                  type: 'boolean',
+                },
+              },
+            },
+          },
+        },
+        switchToModelVersionAt: '8.8.0',
+      });
+
+      const output = extractMigrationInfo(type);
+
+      expect(output).toEqual(
+        expect.objectContaining({
+          migrationVersions: ['7.17.7', '8.0.2', '8.3.3'],
+          switchToModelVersionAt: '8.8.0',
+          modelVersions: [
+            {
+              version: '1',
+              changeType: 'expansion',
+              hasMigration: true,
+              newMappings: [],
+            },
+            {
+              version: '2',
+              changeType: 'expansion',
+              newMappings: ['foo.type'],
+              hasMigration: false,
+            },
+          ],
+        })
+      );
+    });
+  });
 });
