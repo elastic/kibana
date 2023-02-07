@@ -441,7 +441,9 @@ describe('When using Actions service utilities', () => {
           completedAt: COMPLETED_AT,
           wasSuccessful: true,
           errors: undefined,
-          outputs: {},
+          outputs: {
+            456: endpointActionGenerator.generateExecuteActionResponseOutput(),
+          },
           agentState: {
             '123': {
               completedAt: '2022-01-05T19:27:23.816Z',
