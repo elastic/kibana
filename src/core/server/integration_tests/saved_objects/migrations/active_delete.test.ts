@@ -10,12 +10,12 @@ import Path from 'path';
 import fs from 'fs/promises';
 import { SemVer } from 'semver';
 import { Env } from '@kbn/config';
-import { AggregationsAggregate, SearchResponse } from '@elastic/elasticsearch/lib/api/types';
+import type { AggregationsAggregate, SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 import { getEnvOptions } from '@kbn/config-mocks';
 import { REPO_ROOT } from '@kbn/repo-info';
-import { createTestServers, TestElasticsearchUtils } from '@kbn/core-test-helpers-kbn-server';
-import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
-import { SavedObjectsType } from '@kbn/core-saved-objects-server';
+import { createTestServers, type TestElasticsearchUtils } from '@kbn/core-test-helpers-kbn-server';
+import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import type { SavedObjectsType } from '@kbn/core-saved-objects-server';
 import { getKibanaMigratorTestKit } from './kibana_migrator_test_kit';
 import { baselineDocuments, baselineTypes } from './active_delete.fixtures';
 import { delay } from './test_utils';
@@ -267,10 +267,10 @@ describe('when upgrading to a new stack version', () => {
     });
 
     it('the migrator does not skip reindexing', async () => {
-      const incompatibleTypes: Array<Partial<SavedObjectsType<any>>> = baselineTypes.map((type) => {
+      const incompatibleTypes: Array<SavedObjectsType<any>> = baselineTypes.map((type) => {
         if (type.name === 'complex') {
           return {
-            name: 'complex',
+            ...type,
             mappings: {
               properties: {
                 name: { type: 'keyword' }, // text => keyword

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { BulkIndexByScrollFailure } from '@elastic/elasticsearch/lib/api/types';
+import type { BulkIndexByScrollFailure } from '@elastic/elasticsearch/lib/api/types';
 import type { TransformErrorObjects } from '../core';
 import type { DocumentIdAndType } from '../actions';
 

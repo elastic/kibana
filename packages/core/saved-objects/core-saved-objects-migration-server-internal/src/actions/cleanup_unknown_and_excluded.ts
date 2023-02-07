@@ -9,18 +9,22 @@
 import * as Either from 'fp-ts/lib/Either';
 import * as TaskEither from 'fp-ts/lib/TaskEither';
 import { pipe } from 'fp-ts/lib/function';
-import {
+import type {
   BulkIndexByScrollFailure,
   DeleteByQueryResponse,
   QueryDslQueryContainer,
 } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
-import { SavedObjectTypeExcludeFromUpgradeFilterHook } from '@kbn/core-saved-objects-server';
+import type { SavedObjectTypeExcludeFromUpgradeFilterHook } from '@kbn/core-saved-objects-server';
 import {
   catchRetryableEsClientErrors,
   type RetryableEsClientError,
 } from './catch_retryable_es_client_errors';
-import { checkForUnknownDocs, DocumentIdAndType, UnknownDocsFound } from './check_for_unknown_docs';
+import {
+  checkForUnknownDocs,
+  type DocumentIdAndType,
+  type UnknownDocsFound,
+} from './check_for_unknown_docs';
 import { isTypeof } from '.';
 import { calculateExcludeFilters } from './calculate_exclude_filters';
 import { REMOVED_TYPES } from '../core/unused_types';
