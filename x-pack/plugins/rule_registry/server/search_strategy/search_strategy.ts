@@ -170,7 +170,6 @@ export const ruleRegistrySearchStrategyProvider = (
             return hit;
           });
 
-
           try {
             response.inspect = { dsl: [JSON.stringify(params)] };
           } catch (error) {
