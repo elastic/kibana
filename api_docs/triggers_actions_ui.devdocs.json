@@ -3786,6 +3786,20 @@
             "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "triggersActionsUi",
+            "id": "def-public.AlertsTableProps.showInspectButton",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "showInspectButton",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -4089,7 +4103,7 @@
         "tags": [],
         "label": "AlertSummaryTimeRange",
         "description": [],
-        "path": "x-pack/plugins/triggers_actions_ui/public/application/sections/rule_details/components/alert_summary/types.ts",
+        "path": "x-pack/plugins/triggers_actions_ui/public/application/sections/alert_summary_widget/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -4100,7 +4114,7 @@
             "tags": [],
             "label": "utcFrom",
             "description": [],
-            "path": "x-pack/plugins/triggers_actions_ui/public/application/sections/rule_details/components/alert_summary/types.ts",
+            "path": "x-pack/plugins/triggers_actions_ui/public/application/sections/alert_summary_widget/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4111,7 +4125,7 @@
             "tags": [],
             "label": "utcTo",
             "description": [],
-            "path": "x-pack/plugins/triggers_actions_ui/public/application/sections/rule_details/components/alert_summary/types.ts",
+            "path": "x-pack/plugins/triggers_actions_ui/public/application/sections/alert_summary_widget/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4122,7 +4136,7 @@
             "tags": [],
             "label": "fixedInterval",
             "description": [],
-            "path": "x-pack/plugins/triggers_actions_ui/public/application/sections/rule_details/components/alert_summary/types.ts",
+            "path": "x-pack/plugins/triggers_actions_ui/public/application/sections/alert_summary_widget/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4136,7 +4150,7 @@
             "signature": [
               "string | JSX.Element | undefined"
             ],
-            "path": "x-pack/plugins/triggers_actions_ui/public/application/sections/rule_details/components/alert_summary/types.ts",
+            "path": "x-pack/plugins/triggers_actions_ui/public/application/sections/alert_summary_widget/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4150,7 +4164,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "x-pack/plugins/triggers_actions_ui/public/application/sections/rule_details/components/alert_summary/types.ts",
+            "path": "x-pack/plugins/triggers_actions_ui/public/application/sections/alert_summary_widget/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }

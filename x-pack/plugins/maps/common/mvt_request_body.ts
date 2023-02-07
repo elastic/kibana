@@ -6,13 +6,16 @@
  */
 
 import rison from '@kbn/rison';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { RENDER_AS } from './constants';
 
-export function decodeMvtResponseBody(encodedRequestBody: string): object {
-  return rison.decode(decodeURIComponent(encodedRequestBody).replace('%25', '%')) as object;
+export function decodeMvtResponseBody(encodedRequestBody: string): estypes.SearchRequest['body'] {
+  return rison.decode(
+    decodeURIComponent(encodedRequestBody).replace('%25', '%')
+  ) as estypes.SearchRequest['body'];
 }
 
-export function encodeMvtResponseBody(unencodedRequestBody: object): string {
+export function encodeMvtResponseBody(unencodedRequestBody: estypes.SearchRequest['body']): string {
   // URL encoding replaces unsafe ASCII characters with a '%' followed by two hexadecimal digits
   // encodeURIComponent does not encode '%'
   // This causes preexisting '%' to break decoding because they are not valid URL encoding
@@ -41,7 +44,10 @@ export function getAggsTileRequest({
   y: number;
   z: number;
 }) {
-  const requestBody = decodeMvtResponseBody(encodedRequestBody) as any;
+  const requestBody = decodeMvtResponseBody(encodedRequestBody);
+  if (!requestBody) {
+    throw new Error('Required requestBody parameter not provided');
+  }
   return {
     path: `/${encodeURIComponent(index)}/_mvt/${encodeURIComponent(
       geometryFieldName
@@ -58,7 +64,7 @@ export function getAggsTileRequest({
       fields: requestBody.fields ? requestBody.fields : [],
       runtime_mappings: requestBody.runtime_mappings,
       with_labels: hasLabels,
-    },
+    } as estypes.SearchMvtRequest['body'],
   };
 }
 
@@ -79,21 +85,30 @@ export function getHitsTileRequest({
   y: number;
   z: number;
 }) {
-  const requestBody = decodeMvtResponseBody(encodedRequestBody) as any;
+  const requestBody = decodeMvtResponseBody(encodedRequestBody);
+  if (!requestBody) {
+    throw new Error('Required requestBody parameter not provided');
+  }
+  const tileRequestBody = {
+    grid_precision: 0, // no aggs
+    exact_bounds: true,
+    extent: 4096, // full resolution,
+    query: requestBody.query,
+    runtime_mappings: requestBody.runtime_mappings,
+    track_total_hits: typeof requestBody.size === 'number' ? requestBody.size + 1 : false,
+    with_labels: hasLabels,
+  } as estypes.SearchMvtRequest['body'];
+  if (requestBody.fields) {
+    // @ts-expect-error SearchRequest['body'].fields and SearchMvtRequest['body'].fields types do not allign, even though they do in implemenation
+    tileRequestBody.fields = requestBody.fields;
+  }
+  if (requestBody.sort) {
+    tileRequestBody!.sort = requestBody.sort;
+  }
   return {
     path: `/${encodeURIComponent(index)}/_mvt/${encodeURIComponent(
       geometryFieldName
     )}/${z}/${x}/${y}`,
-    body: {
-      grid_precision: 0, // no aggs
-      exact_bounds: true,
-      extent: 4096, // full resolution,
-      query: requestBody.query,
-      fields: requestBody.fields ? requestBody.fields : [],
-      runtime_mappings: requestBody.runtime_mappings,
-      sort: requestBody.sort ? requestBody.sort : [],
-      track_total_hits: typeof requestBody.size === 'number' ? requestBody.size + 1 : false,
-      with_labels: hasLabels,
-    },
+    body: tileRequestBody,
   };
 }

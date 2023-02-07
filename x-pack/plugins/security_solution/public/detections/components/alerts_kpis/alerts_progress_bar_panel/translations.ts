@@ -26,3 +26,28 @@ export const OTHER = i18n.translate(
     defaultMessage: 'Other',
   }
 );
+
+export const HOST_NAME_LABEL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.alerts.alertsByGrouping.hostNameLabel',
+  {
+    defaultMessage: 'host',
+  }
+);
+export const USER_NAME_LABEL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.alerts.alertsByGrouping.userNameLabel',
+  {
+    defaultMessage: 'user',
+  }
+);
+export const DESTINATION_LABEL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.alerts.alertsByGrouping.destinationLabel',
+  {
+    defaultMessage: 'destination',
+  }
+);
+export const SOURCE_LABEL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.alerts.alertsByGrouping.sourceLabel',
+  {
+    defaultMessage: 'source',
+  }
+);
