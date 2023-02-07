@@ -9,15 +9,13 @@ import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import { fetcher } from './fetcher';
 import type { Usage } from './type';
 
-const SLO_USAGE_COLLECTOR_TYPE = 'slo';
-
 export function registerSloUsageCollector(usageCollection?: UsageCollectionSetup): void {
   if (!usageCollection) {
     return;
   }
 
   const sloUsageCollector = usageCollection.makeUsageCollector<Usage>({
-    type: SLO_USAGE_COLLECTOR_TYPE,
+    type: 'slo',
     schema: {
       slo: {
         total: {
