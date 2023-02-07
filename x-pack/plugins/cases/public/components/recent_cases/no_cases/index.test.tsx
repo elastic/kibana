@@ -57,4 +57,16 @@ describe('NoCases', () => {
     );
     expect(result.getByTestId(`no-cases-assigned-to-me`)).toBeInTheDocument();
   });
+
+  it('displays correct message when recently assigned tab is selected and user does not have create permissions', () => {
+    const result = render(
+      <TestProviders permissions={readCasesPermissions()}>
+        <NoCases recentCasesFilterBy="myRecentlyAssigned" />
+      </TestProviders>
+    );
+
+    expect(result.getByTestId(`no-cases-assigned-to-me`)).toBeInTheDocument();
+    expect(result.queryByTestId(`no-cases-readonly`)).not.toBeInTheDocument();
+    expect(result.queryByTestId('no-cases-create-case')).not.toBeInTheDocument();
+  });
 });

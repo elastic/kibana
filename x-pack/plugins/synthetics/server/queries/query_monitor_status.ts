@@ -4,12 +4,16 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { intersection } from 'lodash';
+import { cloneDeep, intersection } from 'lodash';
 import { SearchRequest } from '@elastic/elasticsearch/lib/api/types';
 import { SUMMARY_FILTER } from '../../common/constants/client_defaults';
 import { UptimeEsClient } from '../legacy_uptime/lib/lib';
-import { OverviewStatus, OverviewStatusMetaData, Ping } from '../../common/runtime_types';
+import {
+  OverviewStatus,
+  OverviewStatusMetaData,
+  OverviewPendingStatusMetaData,
+  Ping,
+} from '../../common/runtime_types';
 
 const DEFAULT_MAX_ES_BUCKET_SIZE = 10000;
 
@@ -17,17 +21,23 @@ export async function queryMonitorStatus(
   esClient: UptimeEsClient,
   listOfLocations: string[],
   range: { from: string | number; to: string },
-  ids: string[],
-  monitorLocationsMap: Record<string, string[]>
+  monitorQueryIds: string[],
+  monitorLocationsMap: Record<string, string[]>,
+  monitorQueryIdToConfigIdMap: Record<string, string>
 ): Promise<
   Omit<
     OverviewStatus,
-    'disabledCount' | 'allMonitorsCount' | 'disabledMonitorsCount' | 'projectMonitorsCount'
+    | 'disabledCount'
+    | 'allMonitorsCount'
+    | 'disabledMonitorsCount'
+    | 'projectMonitorsCount'
+    | 'allIds'
   >
 > {
   const idSize = Math.trunc(DEFAULT_MAX_ES_BUCKET_SIZE / listOfLocations.length || 1);
-  const pageCount = Math.ceil(ids.length / idSize);
+  const pageCount = Math.ceil(monitorQueryIds.length / idSize);
   const promises: Array<Promise<any>> = [];
+  const monitorsWithoutData = new Map(Object.entries(cloneDeep(monitorLocationsMap)));
   for (let i = 0; i < pageCount; i++) {
     const params: SearchRequest = {
       size: 0,
@@ -47,7 +57,7 @@ export async function queryMonitorStatus(
             },
             {
               terms: {
-                'monitor.id': (ids as string[]).slice(i * idSize, i * idSize + idSize),
+                'monitor.id': (monitorQueryIds as string[]).slice(i * idSize, i * idSize + idSize),
               },
             },
             ...(listOfLocations.length > 0
@@ -114,6 +124,7 @@ export async function queryMonitorStatus(
   let pending = 0;
   const upConfigs: Record<string, OverviewStatusMetaData> = {};
   const downConfigs: Record<string, OverviewStatusMetaData> = {};
+  const pendingConfigs: Record<string, OverviewPendingStatusMetaData> = {};
 
   for await (const response of promises) {
     response.body.aggregations?.id.buckets.forEach(
@@ -162,6 +173,14 @@ export async function queryMonitorStatus(
                 status: 'up',
               };
             }
+            const monitorsMissingData = monitorsWithoutData.get(monitorQueryId) || [];
+            monitorsWithoutData.set(
+              monitorQueryId,
+              monitorsMissingData?.filter((loc) => loc !== monLocation)
+            );
+            if (!monitorsWithoutData.get(monitorQueryId)?.length) {
+              monitorsWithoutData.delete(monitorQueryId);
+            }
           } else {
             pending += 1;
           }
@@ -169,5 +188,26 @@ export async function queryMonitorStatus(
       }
     );
   }
-  return { up, down, pending, upConfigs, downConfigs, enabledIds: ids, allIds: ids };
+
+  // identify the remaining monitos without data, to determine pending monitors
+  for (const [queryId, locs] of monitorsWithoutData) {
+    locs.forEach((loc) => {
+      pendingConfigs[`${monitorQueryIdToConfigIdMap[queryId]}-${loc}`] = {
+        configId: `${monitorQueryIdToConfigIdMap[queryId]}`,
+        monitorQueryId: queryId,
+        status: 'unknown',
+        location: loc,
+      };
+    });
+  }
+
+  return {
+    up,
+    down,
+    pending,
+    upConfigs,
+    downConfigs,
+    pendingConfigs,
+    enabledMonitorQueryIds: monitorQueryIds,
+  };
 }
