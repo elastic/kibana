@@ -19,11 +19,13 @@ import { SavedObjectsWarning } from '../components/saved_objects_warning';
 import { UpgradeWarning } from '../components/upgrade';
 import { HelpMenu } from '../components/help_menu';
 import { useMlKibana } from '../contexts/kibana';
-import { NodesList } from '../trained_models/nodes_overview';
+import { NodesList } from '../memory_usage/nodes_overview';
 import { MlPageHeader } from '../components/page_header';
 import { PageTitle } from '../components/page_title';
+import { useIsServerless } from '../contexts/kibana/use_is_serverless';
 
 export const OverviewPage: FC = () => {
+  const serverless = useIsServerless();
   const canViewMlNodes = checkPermission('canViewMlNodes');
 
   const disableCreateAnomalyDetectionJob = !checkPermission('canCreateJob') || !mlNodesAvailable();
@@ -62,7 +64,7 @@ export const OverviewPage: FC = () => {
 
       <GettingStartedCallout />
 
-      {canViewMlNodes ? (
+      {canViewMlNodes && serverless === false ? (
         <>
           <EuiPanel hasShadow={false} hasBorder>
             <NodesList compactView />
