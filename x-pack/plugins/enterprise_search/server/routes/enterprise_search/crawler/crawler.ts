@@ -6,6 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
+
 import { i18n } from '@kbn/i18n';
 
 import { ENTERPRISE_SEARCH_CONNECTOR_CRAWLER_SERVICE_TYPE } from '../../../../common/constants';
@@ -15,6 +16,7 @@ import { addConnector } from '../../../lib/connectors/add_connector';
 import { deleteConnectorById } from '../../../lib/connectors/delete_connector';
 import { fetchConnectorByIndexName } from '../../../lib/connectors/fetch_connectors';
 import { fetchCrawlerByIndexName } from '../../../lib/crawler/fetch_crawlers';
+import { updateHtmlExtraction } from '../../../lib/crawler/put_html_extraction';
 import { deleteIndex } from '../../../lib/indices/delete_index';
 import { RouteDependencies } from '../../../plugin';
 import { createError } from '../../../utils/create_error';
@@ -386,6 +388,44 @@ export function registerCrawlerRoutes(routeDependencies: RouteDependencies) {
     },
     enterpriseSearchRequestHandler.createRequest({
       path: '/api/ent/v1/internal/indices/:indexName/crawler2/crawl_schedule',
+    })
+  );
+
+  router.put(
+    {
+      path: '/internal/enterprise_search/indices/{indexName}/crawler/html_extraction',
+      validate: {
+        body: schema.object({
+          extract_full_html: schema.boolean(),
+        }),
+        params: schema.object({
+          indexName: schema.string(),
+        }),
+      },
+    },
+    elasticsearchErrorHandler(log, async (context, request, response) => {
+      const { client } = (await context.core).elasticsearch;
+
+      const connector = await fetchConnectorByIndexName(client, request.params.indexName);
+      if (
+        connector &&
+        connector.service_type === ENTERPRISE_SEARCH_CONNECTOR_CRAWLER_SERVICE_TYPE
+      ) {
+        await updateHtmlExtraction(client, request.body.extract_full_html, connector);
+        return response.ok();
+      } else {
+        return createError({
+          errorCode: ErrorCode.RESOURCE_NOT_FOUND,
+          message: i18n.translate(
+            'xpack.enterpriseSearch.server.routes.updateHtmlExtraction.noCrawlerFound',
+            {
+              defaultMessage: 'Could not find a crawler for this index',
+            }
+          ),
+          response,
+          statusCode: 404,
+        });
+      }
     })
   );
 

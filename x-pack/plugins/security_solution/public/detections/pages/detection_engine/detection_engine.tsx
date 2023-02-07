@@ -458,6 +458,8 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ({
               onShowBuildingBlockAlertsChanged={onShowBuildingBlockAlertsChangedCallback}
               showOnlyThreatIndicatorAlerts={showOnlyThreatIndicatorAlerts}
               onShowOnlyThreatIndicatorAlertsChanged={onShowOnlyThreatIndicatorAlertsCallback}
+              signalIndexName={signalIndexName}
+              runtimeMappings={runtimeMappings}
               to={to}
             />
           </SecuritySolutionPageWrapper>

@@ -646,6 +646,73 @@ describe('Terms Agg Other bucket helper', () => {
           expect((topAgg['1'] as any).buckets[1]['2'].buckets[3].key).toEqual('__other__');
         }
       });
+
+      test('correctly merges other bucket with nested terms agg with empty string', () => {
+        const response = {
+          ...nestedTermResponse,
+          aggregations: {
+            ...nestedTermResponse.aggregations,
+            '1': {
+              ...nestedTermResponse.aggregations['1'],
+              buckets: [
+                ...nestedTermResponse.aggregations['1'].buckets,
+                {
+                  '2': {
+                    doc_count_error_upper_bound: 0,
+                    sum_other_doc_count: 8325,
+                    buckets: [
+                      { key: 'ios', doc_count: 1850 },
+                      { key: 'win xp', doc_count: 1830 },
+                      { key: '__missing__', doc_count: 130 },
+                    ],
+                  },
+                  key: '',
+                  doc_count: 2830,
+                },
+              ],
+            },
+          },
+        };
+
+        const otherResponse = {
+          took: 3,
+          timed_out: false,
+          _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
+          hits: { total: 14005, max_score: 0, hits: [] },
+          aggregations: {
+            'other-filter': {
+              buckets: {
+                [`${SEP}US-with-dash`]: { doc_count: 2805 },
+                [`${SEP}IN-with-dash`]: { doc_count: 2804 },
+                [`${SEP}`]: { doc_count: 2804 },
+              },
+            },
+          },
+          status: 200,
+        };
+        const aggConfigs = getAggConfigs(nestedTerm.aggs);
+        const otherAggConfig = buildOtherBucketAgg(
+          aggConfigs,
+          aggConfigs.aggs[1] as IBucketAggConfig,
+          enrichResponseWithSampling(response)
+        );
+
+        expect(otherAggConfig).toBeDefined();
+        if (otherAggConfig) {
+          const mergedResponse = mergeOtherBucketAggResponse(
+            aggConfigs,
+            enrichResponseWithSampling(response),
+            enrichResponseWithSampling(otherResponse),
+            aggConfigs.aggs[1] as IBucketAggConfig,
+            otherAggConfig(),
+            constructSingleTermOtherFilter
+          );
+
+          const topAgg = getTopAggregations(mergedResponse);
+          expect((topAgg['1'] as any).buckets[2].key).toEqual('');
+          expect((topAgg['1'] as any).buckets[2]['2'].buckets[3].key).toEqual('__other__');
+        }
+      });
     });
 
     describe(`updateMissingBucket${getTitlePostfix()}`, () => {
