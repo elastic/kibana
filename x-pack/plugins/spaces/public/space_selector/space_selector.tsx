@@ -107,7 +107,7 @@ export class SpaceSelector extends Component<Props, State> {
         data-test-subj="kibanaSpaceSelector"
         panelled
       >
-        <KibanaPageTemplate.EmptyPrompt className="spcSpaceSelector__pageContent">
+        <KibanaPageTemplate.Section className="spcSpaceSelector__pageContent" color='transparent'>
           <EuiText textAlign="center" size="s">
             <EuiSpacer size="xxl" />
             <KibanaSolutionAvatar name="Elastic" size="xl" />
@@ -183,7 +183,7 @@ export class SpaceSelector extends Component<Props, State> {
               </EuiPanel>
             </Fragment>
           )}
-        </KibanaPageTemplate.EmptyPrompt>
+        </KibanaPageTemplate.Section>
       </KibanaPageTemplate>
     );
   }
