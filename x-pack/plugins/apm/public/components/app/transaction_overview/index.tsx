@@ -16,6 +16,7 @@ import { TransactionCharts } from '../../shared/charts/transaction_charts';
 import { replace } from '../../shared/links/url_helpers';
 import { TransactionsTable } from '../../shared/transactions_table';
 import { isServerlessAgent } from '../../../../common/agent_name';
+import { NoTransactionsPrompt } from '../../shared/transactions_prompt/no_transactions_prompt';
 
 export function TransactionOverview() {
   const {
@@ -43,6 +44,10 @@ export function TransactionOverview() {
   }
 
   const isServerless = isServerlessAgent(serverlessType);
+
+  if (!transactionType) {
+    return <NoTransactionsPrompt />;
+  }
 
   return (
     <>

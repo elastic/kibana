@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
+import { useFetcher } from '../../../../hooks/use_fetcher';
 import { useLegacyUrlParams } from '../../../../context/url_params_context/use_url_params';
 import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
 import { useAnyOfApmParams } from '../../../../hooks/use_apm_params';
@@ -71,7 +71,7 @@ export function useTransactionBreakdown({
 
   return {
     data,
-    status: transactionType ? status : FETCH_STATUS.SUCCESS,
+    status,
     error,
   };
 }
