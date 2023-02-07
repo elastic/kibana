@@ -196,13 +196,11 @@ export const buildOtherBucketAgg = (
     key: string
   ) => {
     // make sure there are actually results for the buckets
-    const aggregation = aggregations[aggId];
-    if (!aggregation || !aggregation.buckets.length) {
+    const agg = aggregations[aggId];
+    if (!agg || !agg.buckets.length) {
       noAggBucketResults = true;
       return;
     }
-
-    const agg = aggregations[aggId];
     const newAggIndex = aggIndex + 1;
     const newAgg = bucketAggs[newAggIndex];
     const currentAgg = bucketAggs[aggIndex];
