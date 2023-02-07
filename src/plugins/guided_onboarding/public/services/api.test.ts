@@ -31,6 +31,7 @@ import {
   mockPluginStateNotStarted,
   testGuideStep3ActiveState,
   testGuideStep2ReadyToCompleteState,
+  mockPluginStateStartedAndQuit,
 } from './api.mocks';
 
 describe('GuidedOnboarding ApiService', () => {
@@ -174,6 +175,23 @@ describe('GuidedOnboarding ApiService', () => {
         body: JSON.stringify({
           status: 'not_started',
           guide: { ...testGuideDefaultState, status: 'not_started' },
+        }),
+      });
+    });
+
+    it.skip('activates a guide that was previously quit', async () => {
+      httpClient.get.mockResolvedValueOnce({
+        pluginState: mockPluginStateStartedAndQuit,
+      });
+      apiService.setup(httpClient, true);
+
+      await apiService.activateGuideDefaultState(testGuideId);
+
+      expect(httpClient.put).toHaveBeenCalledTimes(1);
+      expect(httpClient.put).toHaveBeenCalledWith(`${API_BASE_PATH}/state`, {
+        body: JSON.stringify({
+          status: 'in_progress',
+          guide: testGuideStep1ActiveState,
         }),
       });
     });

@@ -183,6 +183,13 @@ export class ApiService implements GuidedOnboardingApi {
     const guideConfig = await this.configService.getGuideConfig(guideId);
 
     if (guideConfig) {
+      const pluginState = await firstValueFrom(this.fetchPluginState$());
+
+      // If guide was previously started and subsequently quit, activate progress state
+      if (!pluginState?.isActivePeriod && pluginState?.status === 'quit') {
+        return this.activateGuide(guideId, guide);
+      }
+
       const updatedSteps: GuideStep[] = guideConfig.steps.map((step) => {
         return {
           id: step.id,
