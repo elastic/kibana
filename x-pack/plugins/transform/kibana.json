@@ -14,7 +14,8 @@
     "share",
     "triggersActionsUi",
     "fieldFormats",
-    "unifiedSearch"
+    "unifiedSearch",
+    "charts"
   ],
   "optionalPlugins": [
     "security",

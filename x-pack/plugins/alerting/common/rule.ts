@@ -36,6 +36,12 @@ export type RuleExecutionStatuses = typeof RuleExecutionStatusValues[number];
 export const RuleLastRunOutcomeValues = ['succeeded', 'warning', 'failed'] as const;
 export type RuleLastRunOutcomes = typeof RuleLastRunOutcomeValues[number];
 
+export const RuleLastRunOutcomeOrderMap: Record<RuleLastRunOutcomes, number> = {
+  succeeded: 0,
+  warning: 10,
+  failed: 20,
+};
+
 export enum RuleExecutionStatusErrorReasons {
   Read = 'read',
   Decrypt = 'decrypt',
@@ -112,6 +118,7 @@ export interface RuleAggregationFormattedResult {
 
 export interface RuleLastRun {
   outcome: RuleLastRunOutcomes;
+  outcomeOrder?: number;
   warning?: RuleExecutionStatusErrorReasons | RuleExecutionStatusWarningReasons | null;
   outcomeMsg?: string[] | null;
   alertsCount: {
@@ -180,6 +187,8 @@ export type SanitizedRuleConfig = Pick<
   | 'updatedAt'
   | 'throttle'
   | 'notifyWhen'
+  | 'muteAll'
+  | 'snoozeSchedule'
 > & {
   producer: string;
   ruleTypeId: string;

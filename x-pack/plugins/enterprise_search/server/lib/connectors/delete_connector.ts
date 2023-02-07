@@ -9,6 +9,14 @@ import { IScopedClusterClient } from '@kbn/core/server';
 
 import { CONNECTORS_INDEX } from '../..';
 
+import { cancelSyncs } from './post_cancel_syncs';
+
 export const deleteConnectorById = async (client: IScopedClusterClient, id: string) => {
-  return await client.asCurrentUser.delete({ id, index: CONNECTORS_INDEX });
+  // timeout function to mitigate race condition with external connector running job and recreating index
+  const timeout = async () => {
+    const promise = new Promise((resolve) => setTimeout(resolve, 500));
+    return promise;
+  };
+  await Promise.all([cancelSyncs(client, id), timeout]);
+  return await client.asCurrentUser.delete({ id, index: CONNECTORS_INDEX, refresh: 'wait_for' });
 };
