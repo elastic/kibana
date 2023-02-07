@@ -11,7 +11,10 @@ export const getJsonSchemaQuerySchema = schema.object({
   /**
    * ES API path
    */
-  path: schema.string(),
+  path: schema.oneOf([
+    schema.literal('/_ml/anomaly_detectors/{job_id}'),
+    schema.literal('/_ml/datafeeds/{datafeed_id}'),
+  ]),
   /**
    * API Method
    */

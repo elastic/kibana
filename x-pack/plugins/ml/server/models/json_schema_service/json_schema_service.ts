@@ -29,40 +29,37 @@ export class JsonSchemaService {
    * @private
    */
   private extractProperties(propertyDef: PropertyDefinition): void {
-    if (propertyDef.$ref) {
-      const comp = propertyDef.$ref.split('/');
-      const refKey = comp[comp.length - 1];
+    for (const key in propertyDef) {
+      if (propertyDef.hasOwnProperty(key)) {
+        if (key === '$ref') {
+          const comp = propertyDef[key].split('/');
+          const refKey = comp[comp.length - 1];
 
-      // Some ES query types can't be resolved
-      if (!refKey.startsWith('Ml_Types_')) return;
+          // FIXME there is an issue with the maximum call stack size exceeded
+          if (!refKey.startsWith('Ml_Types_')) return;
 
-      const schemaComponent = this._schemaComponents[refKey];
+          const schemaComponent = this._schemaComponents[refKey];
 
-      delete propertyDef.$ref;
+          delete propertyDef.$ref;
 
-      for (const key in schemaComponent) {
-        if (schemaComponent.hasOwnProperty(key)) {
-          // @ts-ignore
-          propertyDef[key] = schemaComponent[key] as PropertyDefinition[typeof key];
+          for (const k in schemaComponent) {
+            if (schemaComponent.hasOwnProperty(k)) {
+              // @ts-ignore
+              propertyDef[k] = schemaComponent[k] as PropertyDefinition[typeof k];
+            }
+          }
+          this.extractProperties(propertyDef);
         }
-      }
-    }
 
-    if (propertyDef.properties) {
-      for (const key in propertyDef.properties) {
-        if (propertyDef.properties.hasOwnProperty(key)) {
-          this.extractProperties(propertyDef.properties[key]);
+        if (Array.isArray(propertyDef[key])) {
+          propertyDef[key].forEach((v) => {
+            if (typeof v === 'object') {
+              this.extractProperties(v);
+            }
+          });
+        } else if (typeof propertyDef[key] === 'object') {
+          this.extractProperties(propertyDef[key]);
         }
-      }
-    }
-
-    if (propertyDef.items) {
-      this.extractProperties(propertyDef.items);
-    }
-
-    if (propertyDef.anyOf) {
-      for (const a of propertyDef.anyOf) {
-        this.extractProperties(a);
       }
     }
   }
