@@ -21,8 +21,14 @@ import { EngineOverviewLogic } from './engine_overview_logic';
 import { EngineViewHeaderActions } from './engine_view_header_actions';
 
 export const EngineOverview: React.FC = () => {
-  const { engineName, indicesCount, documentsCount, fieldsCount, isLoadingEngine } =
-    useValues(EngineOverviewLogic);
+  const {
+    documentsCount,
+    engineName,
+    fieldsCount,
+    hasUnknownIndices,
+    indicesCount,
+    isLoadingEngine,
+  } = useValues(EngineOverviewLogic);
 
   return (
     <EnterpriseSearchEnginesPageTemplate
@@ -49,7 +55,11 @@ export const EngineOverview: React.FC = () => {
                 color="text"
               >
                 <EuiFlexGroup alignItems="center">
-                  <EuiIcon size="xxl" type="visTable" color="#98A2B3" />
+                  {hasUnknownIndices ? (
+                    <EuiIcon size="xxl" type="visTable" color="#F5BF23" />
+                  ) : (
+                    <EuiIcon size="xxl" type="visTable" color="#98A2B3" />
+                  )}
                   <EuiStat
                     titleSize="l"
                     isLoading={isLoadingEngine}
@@ -58,7 +68,7 @@ export const EngineOverview: React.FC = () => {
                       'xpack.enterpriseSearch.content.engine.overview.indicesDescription',
                       { defaultMessage: 'Indices' }
                     )}
-                    titleColor="primary"
+                    titleColor={hasUnknownIndices ? '#7A6013' : 'primary'}
                   />
                 </EuiFlexGroup>
               </EuiLinkTo>

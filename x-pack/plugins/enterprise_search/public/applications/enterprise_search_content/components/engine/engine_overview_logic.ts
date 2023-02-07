@@ -25,6 +25,7 @@ export interface EngineOverviewValues {
   engineFieldCapabilitiesData: typeof FetchEngineFieldCapabilitiesApiLogic.values.data;
   engineName: typeof EngineNameLogic.values.engineName;
   fieldsCount: number;
+  hasUnknownIndices: boolean;
   indices: EnterpriseSearchEngineIndex[];
   indicesCount: number;
   isLoadingEngine: typeof EngineViewLogic.values.isLoadingEngine;
@@ -76,6 +77,11 @@ export const EngineOverviewLogic = kea<MakeLogicType<EngineOverviewValues, Engin
         Object.values(engineFieldCapabilitiesData?.field_capabilities?.fields ?? {}).filter(
           (value) => !Object.values(value).some((field) => !!field.metadata_field)
         ).length,
+    ],
+    hasUnknownIndices: [
+      () => [selectors.indices],
+      (indices: EngineOverviewValues['indices']) =>
+        indices.some(({ health }) => health === 'unknown'),
     ],
     indices: [
       () => [selectors.engineData],
