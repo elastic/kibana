@@ -170,10 +170,11 @@ export const NoFindingsStates = () => {
   const getSetupStatus = useCspSetupStatusApi({
     options: { refetchInterval: REFETCH_INTERVAL_MS },
   });
-  const status = getSetupStatus.data?.kspm?.status;
   const statusKspm = getSetupStatus.data?.kspm?.status;
   const statusCspm = getSetupStatus.data?.cspm?.status;
   const indicesStatus = getSetupStatus.data?.indicesDetails;
+  // const status = postureType === 'cspm' ? statusCspm : statusKspm;
+  const status = getSetupStatus.data?.kspm?.status;
   const unprivilegedIndices =
     indicesStatus &&
     indicesStatus

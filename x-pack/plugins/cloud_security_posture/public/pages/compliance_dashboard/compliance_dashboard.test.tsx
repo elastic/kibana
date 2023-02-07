@@ -273,7 +273,7 @@ describe('<ComplianceDashboard />', () => {
     (useCspSetupStatusApi as jest.Mock).mockImplementation(() =>
       createReactQueryResponse({
         status: 'success',
-        data: { cspm: { status: 'indexing' } },
+        data: { cspm: { status: 'indexed', healthyAgents: 0, installedPackagePolicies: 1 } },
       })
     );
     (useKspmStatsApi as jest.Mock).mockImplementation(() => ({
@@ -305,7 +305,10 @@ describe('<ComplianceDashboard />', () => {
     (useCspSetupStatusApi as jest.Mock).mockImplementation(() =>
       createReactQueryResponse({
         status: 'success',
-        data: { kspm: { status: 'indexed' } },
+        data: {
+          kspm: { status: 'indexed', healthyAgents: 0, installedPackagePolicies: 1 },
+          cspm: { status: 'not-installed' },
+        },
       })
     );
     (useKspmStatsApi as jest.Mock).mockImplementation(() => ({

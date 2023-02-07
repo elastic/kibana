@@ -128,7 +128,7 @@ const IntegrationPostureDashboard = ({
   }
 
   // integration is installed, but there are no findings for this integration
-  if (noFindings) {
+  if (noFindings && isIntegrationInstalled) {
     return (
       // height is calculated for the screen height minus the kibana header, page title, and tabs
       <div
@@ -207,13 +207,6 @@ export const ComplianceDashboard = () => {
       else if (!!kspmTotalFindings) {
         preferredDashboard = KSPM_POLICY_TEMPLATE;
       }
-      // kspm is installed
-      else if (
-        installedPolicyTemplatesKspm !== 'unprivileged' &&
-        installedPolicyTemplatesKspm !== 'not-installed'
-      ) {
-        preferredDashboard = KSPM_POLICY_TEMPLATE;
-      }
       // cspm is installed
       else if (
         installedPolicyTemplatesCspm !== 'unprivileged' &&
@@ -221,7 +214,13 @@ export const ComplianceDashboard = () => {
       ) {
         preferredDashboard = CSPM_POLICY_TEMPLATE;
       }
-
+      // kspm is installed
+      else if (
+        installedPolicyTemplatesKspm !== 'unprivileged' &&
+        installedPolicyTemplatesKspm !== 'not-installed'
+      ) {
+        preferredDashboard = KSPM_POLICY_TEMPLATE;
+      }
       setSelectedTab(preferredDashboard);
     };
     selectInitialTab();
