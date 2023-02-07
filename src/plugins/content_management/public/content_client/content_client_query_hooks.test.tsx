@@ -13,7 +13,7 @@ import { ContentClient } from './content_client';
 import { RpcClient } from '../rpc_client';
 import { createRpcClientMock } from '../rpc_client/rpc_client.mock';
 import { useGetContentQuery } from './content_client_query_hooks';
-import { GetIn } from '../../common';
+import type { GetIn } from '../../common';
 
 let contentClient: ContentClient;
 let rpcClient: jest.Mocked<RpcClient>;

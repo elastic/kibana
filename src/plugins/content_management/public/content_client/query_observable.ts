@@ -12,9 +12,9 @@ import {
   QueryObserverOptions,
   QueryObserverResult,
   QueryClient,
+  QueryKey,
 } from '@tanstack/react-query';
 import { Observable } from 'rxjs';
-import type { QueryKey } from '@tanstack/query-core/src/types';
 
 export const createQueryObservable = <
   TQueryFnData = unknown,

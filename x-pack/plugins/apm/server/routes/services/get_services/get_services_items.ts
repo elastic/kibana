@@ -6,7 +6,7 @@
  */
 
 import { Logger } from '@kbn/logging';
-import { ApmDocumentType } from '../../../../common/document_type';
+import { ApmServiceTransactionDocumentType } from '../../../../common/document_type';
 import { RollupInterval } from '../../../../common/rollup';
 import { ServiceGroup } from '../../../../common/service_groups';
 import { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
@@ -15,7 +15,7 @@ import { MlClient } from '../../../lib/helpers/get_ml_client';
 import { RandomSampler } from '../../../lib/helpers/get_random_sampler';
 import { withApmSpan } from '../../../utils/with_apm_span';
 import { getHealthStatuses } from './get_health_statuses';
-import { getServicesFromErrorAndMetricDocuments } from './get_services_from_error_and_metric_documents';
+import { getServicesWithoutTransactions } from './get_services_without_transactions';
 import { getServicesAlerts } from './get_service_alerts';
 import { getServiceTransactionStats } from './get_service_transaction_stats';
 import { mergeServiceStats } from './merge_service_stats';
@@ -46,7 +46,7 @@ export async function getServicesItems({
   end: number;
   serviceGroup: ServiceGroup | null;
   randomSampler: RandomSampler;
-  documentType: ApmDocumentType;
+  documentType: ApmServiceTransactionDocumentType;
   rollupInterval: RollupInterval;
 }) {
   return withApmSpan('get_services_items', async () => {
@@ -64,7 +64,7 @@ export async function getServicesItems({
 
     const [
       { serviceStats, serviceOverflowCount },
-      { services, maxServiceCountExceeded },
+      { services: servicesWithoutTransactions, maxServiceCountExceeded },
       healthStatuses,
       alertCounts,
     ] = await Promise.all([
@@ -72,7 +72,7 @@ export async function getServicesItems({
         ...commonParams,
         apmEventClient,
       }),
-      getServicesFromErrorAndMetricDocuments({
+      getServicesWithoutTransactions({
         ...commonParams,
         apmEventClient,
       }),
@@ -90,7 +90,7 @@ export async function getServicesItems({
       items:
         mergeServiceStats({
           serviceStats,
-          servicesFromErrorAndMetricDocuments: services,
+          servicesWithoutTransactions,
           healthStatuses,
           alertCounts,
         }) ?? [],

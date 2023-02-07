@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
+import { lastValueFrom } from 'rxjs';
+import { takeWhile, toArray } from 'rxjs/operators';
 import type { RpcClient } from '../rpc_client';
 import { createRpcClientMock } from '../rpc_client/rpc_client.mock';
 import { ContentClient } from './content_client';
 import type { GetIn, CreateIn } from '../../common';
-import { lastValueFrom } from 'rxjs';
-import { takeWhile, toArray } from 'rxjs/operators';
 
 let contentClient: ContentClient;
 let rpcClient: jest.Mocked<RpcClient>;
@@ -24,7 +24,7 @@ describe('#get', () => {
   it('calls rpcClient.get with input and returns output', async () => {
     const input: GetIn = { id: 'test', contentType: 'testType' };
     const output = { test: 'test' };
-    rpcClient.get.mockImplementation(() => Promise.resolve(output));
+    rpcClient.get.mockResolvedValueOnce(output);
     expect(await contentClient.get(input)).toEqual(output);
     expect(rpcClient.get).toBeCalledWith(input);
   });
@@ -32,7 +32,7 @@ describe('#get', () => {
   it('calls rpcClient.get$ with input and returns output', async () => {
     const input: GetIn = { id: 'test', contentType: 'testType' };
     const output = { test: 'test' };
-    rpcClient.get.mockImplementation(() => Promise.resolve(output));
+    rpcClient.get.mockResolvedValueOnce(output);
     const get$ = contentClient.get$(input).pipe(
       takeWhile((result) => {
         return result.data == null;

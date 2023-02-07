@@ -7,9 +7,9 @@
  */
 
 import { QueryClient } from '@tanstack/react-query';
-import type { RpcClient } from '../rpc_client';
 import { createQueryObservable } from './query_observable';
-import { CreateIn, GetIn } from '../../common';
+import type { RpcClient } from '../rpc_client';
+import type { CreateIn, GetIn } from '../../common';
 
 const queryKeyBuilder = {
   all: (type: string) => [type] as const,
