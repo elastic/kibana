@@ -9,15 +9,13 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import classNames from 'classnames';
 import {
+  EuiButtonEmpty,
   EuiButtonIcon,
   EuiFormControlLayout,
   EuiFormLabel,
   EuiFormRow,
-  EuiIcon,
-  EuiLink,
   EuiLoadingChart,
   EuiPopover,
-  EuiText,
   EuiToolTip,
 } from '@elastic/eui';
 
@@ -40,25 +38,26 @@ interface ControlFrameErrorProps {
 const ControlFrameError = ({ error }: ControlFrameErrorProps) => {
   const [isPopoverOpen, setPopoverOpen] = useState(false);
   const popoverButton = (
-    <EuiText className="errorEmbeddableCompact__button" size="xs">
-      <EuiLink
-        className="eui-textTruncate"
-        color="subdued"
-        onClick={() => setPopoverOpen((open) => !open)}
-      >
-        <EuiIcon type="alert" color="danger" />
-        <FormattedMessage
-          id="controls.frame.error.message"
-          defaultMessage="An error has occurred. Read more"
-        />
-      </EuiLink>
-    </EuiText>
+    <EuiButtonEmpty
+      color="danger"
+      iconSize="m"
+      iconType={'alert'}
+      onClick={() => setPopoverOpen((open) => !open)}
+      className={'errorEmbeddableCompact__button'}
+      textProps={{ className: 'errorEmbeddableCompact__text' }}
+    >
+      <FormattedMessage
+        id="controls.frame.error.message"
+        defaultMessage="An error occurred. View more"
+      />
+    </EuiButtonEmpty>
   );
 
   return (
     <EuiPopover
       button={popoverButton}
       isOpen={isPopoverOpen}
+      className="errorEmbeddableCompact__popover"
       anchorClassName="errorEmbeddableCompact__popoverAnchor"
       closePopover={() => setPopoverOpen(false)}
     >

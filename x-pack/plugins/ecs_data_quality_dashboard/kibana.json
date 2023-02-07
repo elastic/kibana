@@ -1,0 +1,14 @@
+{
+  "description": "APIs used to assess the quality of data in Elasticsearch indexes",
+  "id": "ecsDataQualityDashboard",
+  "kibanaVersion": "kibana",
+  "optionalPlugins": [],
+  "owner": {
+    "githubTeam": "security-threat-hunting-investigations",
+    "name": "Threat Hunting Investigations"
+  },
+  "requiredPlugins": ["data"],
+  "server": true,
+  "ui": false,
+  "version": "1.0.0"
+}

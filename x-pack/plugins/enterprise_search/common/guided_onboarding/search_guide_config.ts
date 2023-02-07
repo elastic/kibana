@@ -13,11 +13,10 @@ export const websiteSearchGuideId = 'websiteSearch';
 export const databaseSearchGuideId = 'databaseSearch';
 const guideConfig: Omit<GuideConfig, 'telemetryId'> = {
   title: i18n.translate('xpack.enterpriseSearch.guideConfig.title', {
-    defaultMessage: 'Search my data',
+    defaultMessage: 'Build search experiences with Elasticsearch',
   }),
   description: i18n.translate('xpack.enterpriseSearch.guideConfig.description', {
-    defaultMessage:
-      'Build custom search experiences with your data using Elastic’s out-of-the-box web crawler, connectors, and robust APIs. Gain deep insights from the built-in search analytics to curate results and optimize relevance.',
+    defaultMessage: `We'll help you build a search experience with your data using Elastic's web crawler, connectors, and APIs.`,
   }),
   guideName: 'Enterprise Search',
   steps: [
@@ -26,17 +25,10 @@ const guideConfig: Omit<GuideConfig, 'telemetryId'> = {
       title: i18n.translate('xpack.enterpriseSearch.guideConfig.addDataStep.title', {
         defaultMessage: 'Add data',
       }),
-      descriptionList: [
-        i18n.translate('xpack.enterpriseSearch.guideConfig.addDataStep.description1', {
-          defaultMessage: 'Select an ingestion method.',
-        }),
-        i18n.translate('xpack.enterpriseSearch.guideConfig.addDataStep.description2', {
-          defaultMessage: 'Create a new Elasticsearch index.',
-        }),
-        i18n.translate('xpack.enterpriseSearch.guideConfig.addDataStep.description3', {
-          defaultMessage: 'Configure your ingestion settings.',
-        }),
-      ],
+      description: i18n.translate('xpack.enterpriseSearch.guideConfig.addDataStep.description', {
+        defaultMessage:
+          'Ingest your data, create an index, and enrich your data with customizable ingest and inference pipelines.',
+      }),
       location: {
         appID: 'enterpriseSearchContent',
         path: '/search_indices/new_index',
@@ -47,27 +39,12 @@ const guideConfig: Omit<GuideConfig, 'telemetryId'> = {
       title: i18n.translate('xpack.enterpriseSearch.guideConfig.searchExperienceStep.title', {
         defaultMessage: 'Build a search experience',
       }),
-      descriptionList: [
-        i18n.translate(
-          'xpack.enterpriseSearch.guideConfig.searchExperienceStep.descriptionList.item1',
-          {
-            defaultMessage: 'Learn more about Elastic’s Search UI framework.',
-          }
-        ),
-        i18n.translate(
-          'xpack.enterpriseSearch.guideConfig.searchExperienceStep.descriptionList.item2',
-          {
-            defaultMessage: 'Try the Search UI tutorial for Elasticsearch.',
-          }
-        ),
-        i18n.translate(
-          'xpack.enterpriseSearch.guideConfig.searchExperienceStep.descriptionList.item3',
-          {
-            defaultMessage:
-              'Build a world-class search experience for your customers, employees, or users.',
-          }
-        ),
-      ],
+      description: i18n.translate(
+        'xpack.enterpriseSearch.guideConfig.searchExperienceStep.description',
+        {
+          defaultMessage: `Learn more about Elastic's Search UI, try our Search UI tutorial for Elasticsearch, and build a search experience.`,
+        }
+      ),
       location: {
         appID: 'searchExperiences',
         path: '',
@@ -82,8 +59,7 @@ const guideConfig: Omit<GuideConfig, 'telemetryId'> = {
         description: i18n.translate(
           'xpack.enterpriseSearch.guideConfig.searchExperienceStep.manualCompletionPopoverDescription',
           {
-            defaultMessage:
-              'Take your time to explore how to use Search UI to build world-class search experiences. When you’re ready, click the Setup guide button to continue.',
+            defaultMessage: `Take your time to explore how to use Search UI to build world-class search experiences. When you're ready, click the Setup guide button to continue.`,
           }
         ),
         readyToCompleteOnNavigation: true,

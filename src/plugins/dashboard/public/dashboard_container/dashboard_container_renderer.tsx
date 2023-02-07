@@ -11,7 +11,9 @@ import './_dashboard_container.scss';
 import { v4 as uuidv4 } from 'uuid';
 import classNames from 'classnames';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { EuiLoadingElastic, useEuiOverflowScroll } from '@elastic/eui';
+import useObservable from 'react-use/lib/useObservable';
+
+import { EuiLoadingElastic, EuiLoadingSpinner, useEuiOverflowScroll } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { useReduxEmbeddableContext } from '@kbn/presentation-util-plugin/public';
 
@@ -41,12 +43,14 @@ export const DashboardContainerRenderer = ({
   const {
     embeddable,
     screenshotMode: { isScreenshotMode },
+    customBranding,
   } = pluginServices.getServices();
 
   const dashboardRoot = useRef(null);
   const [dashboardIdToBuild, setDashboardIdToBuild] = useState<string | undefined>(savedObjectId);
   const [dashboardContainer, setDashboardContainer] = useState<DashboardContainer>();
   const [loading, setLoading] = useState(true);
+  const showPlainSpinner = useObservable(customBranding.hasCustomBranding$, false);
 
   useEffect(() => {
     // check if dashboard container is expecting id change... if not, update dashboardIdToBuild to force it to rebuild the container.
@@ -112,9 +116,14 @@ export const DashboardContainerRenderer = ({
     ${useEuiOverflowScroll('y', true)}
   `;
 
+  const loadingSpinner = showPlainSpinner ? (
+    <EuiLoadingSpinner size="xxl" />
+  ) : (
+    <EuiLoadingElastic size="xxl" />
+  );
   return (
     <div className={viewportClasses} css={viewportStyles}>
-      {loading ? <EuiLoadingElastic size="xxl" /> : <div ref={dashboardRoot} />}
+      {loading ? loadingSpinner : <div ref={dashboardRoot} />}
     </div>
   );
 };
