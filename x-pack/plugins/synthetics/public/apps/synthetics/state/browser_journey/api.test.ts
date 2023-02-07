@@ -31,7 +31,7 @@ describe('getJourneyScreenshot', () => {
     };
 
     const mockFetch = jest.fn().mockResolvedValue(mockResponse);
-    (global as any).fetch = mockFetch;
+    global.fetch = mockFetch;
 
     const result = await getJourneyScreenshot('imgSrc');
     expect(result).toEqual({
@@ -55,7 +55,7 @@ describe('getJourneyScreenshot', () => {
     };
 
     const mockFetch = jest.fn().mockResolvedValue(mockResponse);
-    (global as any).fetch = mockFetch;
+    global.fetch = mockFetch;
 
     const result = await getJourneyScreenshot(url);
     expect(result).toEqual({
@@ -79,7 +79,7 @@ describe('getJourneyScreenshot', () => {
     };
 
     const mockFetch = jest.fn().mockResolvedValue(mockResponse);
-    (global as any).fetch = mockFetch;
+    global.fetch = mockFetch;
 
     const result = await getJourneyScreenshot(url, false);
     expect(result).toBeNull();
