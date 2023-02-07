@@ -86,6 +86,20 @@
           },
           {
             "parentPluginId": "dashboard",
+            "id": "def-public.DashboardContainer.onDestroyControlGroup",
+            "type": "Function",
+            "tags": [],
+            "label": "onDestroyControlGroup",
+            "description": [],
+            "signature": [
+              "(() => void) | undefined"
+            ],
+            "path": "src/plugins/dashboard/public/dashboard_container/embeddable/dashboard_container.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "dashboard",
             "id": "def-public.DashboardContainer.Unnamed",
             "type": "Function",
             "tags": [],

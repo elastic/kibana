@@ -130,11 +130,12 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('should return metrics if available and called with withMetrics', async () => {
+      const now = Date.now();
       await es.index({
         index: 'metrics-elastic_agent.elastic_agent-default',
         refresh: 'wait_for',
         document: {
-          '@timestamp': new Date(Date.now() - 3 * 60 * 1000).toISOString(),
+          '@timestamp': new Date(now - 2 * 60 * 1000).toISOString(),
           data_stream: {
             namespace: 'default',
             type: 'metrics',
@@ -159,7 +160,7 @@ export default function ({ getService }: FtrProviderContext) {
         index: 'metrics-elastic_agent.elastic_agent-default',
         refresh: 'wait_for',
         document: {
-          '@timestamp': new Date(Date.now() - 2 * 60 * 1000).toISOString(),
+          '@timestamp': new Date(now - 1 * 60 * 1000).toISOString(),
           elastic_agent: { id: 'agent1', process: 'elastic_agent' },
           data_stream: {
             namespace: 'default',
