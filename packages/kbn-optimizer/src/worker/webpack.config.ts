@@ -231,6 +231,7 @@ export function getWebpackConfig(bundle: Bundle, bundleRefs: BundleRefs, worker:
               babelrc: false,
               envName: worker.dist ? 'production' : 'development',
               presets: [BABEL_PRESET],
+              plugins: ['babel-plugin-istanbul'],
             },
           },
         },
