@@ -229,7 +229,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           policyInfo.agentPolicy.id
         );
 
-        expect(agentFullPolicyUpdated.inputs[0].policy.linux.advanced).to.eql({ capture_env_vars: 'LD_PRELOAD,LD_LIBRARY_PATH' });
+        expect(agentFullPolicyUpdated.inputs[0].policy.linux.advanced).to.eql({
+          capture_env_vars: 'LD_PRELOAD,LD_LIBRARY_PATH',
+        });
       });
     });
 
