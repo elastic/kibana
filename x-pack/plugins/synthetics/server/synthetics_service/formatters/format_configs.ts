@@ -6,6 +6,8 @@
  */
 
 import { isEmpty, isNil, omitBy } from 'lodash';
+import { Logger } from '@kbn/logging';
+import { replaceStringWithParams } from '../../../common/formatters/formatting_utils';
 import {
   BrowserFields,
   ConfigKey,
@@ -33,13 +35,27 @@ const UI_KEYS_TO_SKIP = [
   'secrets',
 ];
 
+const PARAMS_KEYS_TO_SKIP = [
+  'secrets',
+  'fields',
+  ConfigKey.LOCATIONS,
+  ConfigKey.TLS_VERSION,
+  ConfigKey.SOURCE_PROJECT_CONTENT,
+  ConfigKey.SOURCE_INLINE,
+];
+
 const uiToHeartbeatKeyMap = {
   throttling: ConfigKey.THROTTLING_CONFIG,
 };
 
 type YamlKeys = keyof typeof uiToHeartbeatKeyMap;
 
-export const formatMonitorConfig = (configKeys: ConfigKey[], config: Partial<MonitorFields>) => {
+export const formatMonitorConfigFields = (
+  configKeys: ConfigKey[],
+  config: Partial<MonitorFields>,
+  logger: Logger,
+  params: Record<string, string>
+) => {
   const formattedMonitor = {} as Record<ConfigKey | YamlKeys, any>;
 
   configKeys.forEach((key) => {
@@ -65,6 +81,9 @@ export const formatMonitorConfig = (configKeys: ConfigKey[], config: Partial<Mon
         formattedMonitor[key] = value;
       }
     }
+    if (!PARAMS_KEYS_TO_SKIP.includes(key)) {
+      formattedMonitor[key] = replaceStringWithParams(formattedMonitor[key], params, logger);
+    }
   });
 
   if (!config[ConfigKey.METADATA]?.is_tls_enabled) {
@@ -84,26 +103,45 @@ export const formatMonitorConfig = (configKeys: ConfigKey[], config: Partial<Mon
   return omitBy(formattedMonitor, isNil) as Partial<MonitorFields>;
 };
 
-export const formatHeartbeatRequest = ({
-  monitor,
-  monitorId,
-  heartbeatId,
-  runOnce,
-  testRunId,
-  params: globalParams,
-}: {
+export interface ConfigData {
   monitor: SyntheticsMonitor;
-  monitorId: string;
-  heartbeatId: string;
+  configId: string;
+  heartbeatId?: string;
   runOnce?: boolean;
   testRunId?: string;
   params: Record<string, string>;
-}): HeartbeatConfig => {
+}
+
+export const formatHeartbeatRequest = (
+  { monitor, configId, heartbeatId, runOnce, testRunId }: Omit<ConfigData, 'params'>,
+  paramsString: string
+): HeartbeatConfig => {
   const projectId = (monitor as BrowserFields)[ConfigKey.PROJECT_ID];
 
+  const heartbeatIdT = heartbeatId ?? monitor[ConfigKey.MONITOR_QUERY_ID];
+
+  return {
+    ...monitor,
+    id: heartbeatIdT,
+    fields: {
+      config_id: configId,
+      'monitor.project.name': projectId || undefined,
+      'monitor.project.id': projectId || undefined,
+      run_once: runOnce,
+      test_run_id: testRunId,
+    },
+    fields_under_root: true,
+    params: monitor.type === 'browser' ? paramsString : '',
+  };
+};
+
+export const mixParamsWithGlobalParams = (
+  globalParams: Record<string, string>,
+  monitor: SyntheticsMonitor
+) => {
   let params = { ...(globalParams ?? {}) };
 
-  let paramsString = '';
+  const paramsString = '';
 
   try {
     const monParamsStr = (monitor as BrowserFields)[ConfigKey.PARAMS];
@@ -113,22 +151,14 @@ export const formatHeartbeatRequest = ({
       params = { ...params, ...monitorParams };
     }
 
-    paramsString = isEmpty(params) ? '' : JSON.stringify(params);
+    if (!isEmpty(params)) {
+      return { str: JSON.stringify(params), mixed: params };
+    } else {
+      return { str: '', mixed: params };
+    }
   } catch (e) {
     // ignore
   }
 
-  return {
-    ...monitor,
-    id: heartbeatId,
-    fields: {
-      config_id: monitorId,
-      'monitor.project.name': projectId || undefined,
-      'monitor.project.id': projectId || undefined,
-      run_once: runOnce,
-      test_run_id: testRunId,
-    },
-    fields_under_root: true,
-    params: paramsString,
-  };
+  return { str: paramsString, params };
 };

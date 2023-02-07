@@ -36,7 +36,7 @@ export const getAllMonitors = async ({
   search?: string;
   filter?: string;
 } & Pick<SavedObjectsFindOptions, 'sortField' | 'sortOrder' | 'fields' | 'searchFields'>) => {
-  const finder = soClient.createPointInTimeFinder({
+  const finder = soClient.createPointInTimeFinder<EncryptedSyntheticsMonitor>({
     type: syntheticsMonitorType,
     perPage: 1000,
     search,
@@ -49,9 +49,7 @@ export const getAllMonitors = async ({
 
   const hits: Array<SavedObjectsFindResult<EncryptedSyntheticsMonitor>> = [];
   for await (const result of finder.find()) {
-    hits.push(
-      ...(result.saved_objects as Array<SavedObjectsFindResult<EncryptedSyntheticsMonitor>>)
-    );
+    hits.push(...result.saved_objects);
   }
 
   // no need to wait for it

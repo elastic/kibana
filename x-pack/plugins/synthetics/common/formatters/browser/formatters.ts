@@ -10,7 +10,6 @@ import { Formatter, commonFormatters } from '../common/formatters';
 import {
   arrayToJsonFormatter,
   objectToJsonFormatter,
-  paramReplaceFormatter,
   stringToJsonFormatter,
   tlsArrayToYamlFormatter,
   tlsValueToStringFormatter,
@@ -36,12 +35,21 @@ const throttlingFormatter: Formatter = (fields) => {
     .join('/');
 };
 
-export const browserFormatters: BrowserFormatMap = {
+export const deprecatedZipUrlFormatters = {
   [ConfigKey.SOURCE_ZIP_URL]: null,
   [ConfigKey.SOURCE_ZIP_USERNAME]: null,
   [ConfigKey.SOURCE_ZIP_PASSWORD]: null,
   [ConfigKey.SOURCE_ZIP_FOLDER]: null,
   [ConfigKey.SOURCE_ZIP_PROXY_URL]: null,
+  [ConfigKey.ZIP_URL_TLS_CERTIFICATE_AUTHORITIES]: tlsValueToYamlFormatter,
+  [ConfigKey.ZIP_URL_TLS_CERTIFICATE]: tlsValueToYamlFormatter,
+  [ConfigKey.ZIP_URL_TLS_KEY]: tlsValueToYamlFormatter,
+  [ConfigKey.ZIP_URL_TLS_KEY_PASSPHRASE]: tlsValueToStringFormatter,
+  [ConfigKey.ZIP_URL_TLS_VERIFICATION_MODE]: tlsValueToStringFormatter,
+  [ConfigKey.ZIP_URL_TLS_VERSION]: tlsArrayToYamlFormatter,
+};
+
+export const browserFormatters: BrowserFormatMap = {
   [ConfigKey.SOURCE_PROJECT_CONTENT]: null,
   [ConfigKey.PARAMS]: null,
   [ConfigKey.SCREENSHOTS]: null,
@@ -51,21 +59,16 @@ export const browserFormatters: BrowserFormatMap = {
   [ConfigKey.LATENCY]: null,
   [ConfigKey.IGNORE_HTTPS_ERRORS]: null,
   [ConfigKey.PLAYWRIGHT_OPTIONS]: null,
-  [ConfigKey.TEXT_ASSERTION]: paramReplaceFormatter,
-  [ConfigKey.PORT]: paramReplaceFormatter,
-  [ConfigKey.URLS]: paramReplaceFormatter,
+  [ConfigKey.TEXT_ASSERTION]: null,
+  [ConfigKey.PORT]: null,
+  [ConfigKey.URLS]: null,
   [ConfigKey.METADATA]: objectToJsonFormatter,
   [ConfigKey.SOURCE_INLINE]: stringToJsonFormatter,
   [ConfigKey.SYNTHETICS_ARGS]: arrayToJsonFormatter,
-  [ConfigKey.ZIP_URL_TLS_CERTIFICATE_AUTHORITIES]: tlsValueToYamlFormatter,
-  [ConfigKey.ZIP_URL_TLS_CERTIFICATE]: tlsValueToYamlFormatter,
-  [ConfigKey.ZIP_URL_TLS_KEY]: tlsValueToYamlFormatter,
-  [ConfigKey.ZIP_URL_TLS_KEY_PASSPHRASE]: tlsValueToStringFormatter,
-  [ConfigKey.ZIP_URL_TLS_VERIFICATION_MODE]: tlsValueToStringFormatter,
-  [ConfigKey.ZIP_URL_TLS_VERSION]: tlsArrayToYamlFormatter,
   [ConfigKey.JOURNEY_FILTERS_MATCH]: stringToJsonFormatter,
   [ConfigKey.JOURNEY_FILTERS_TAGS]: arrayToJsonFormatter,
   [ConfigKey.THROTTLING_CONFIG]: throttlingFormatter,
+  ...deprecatedZipUrlFormatters,
   ...commonFormatters,
   ...tlsFormatters,
 };

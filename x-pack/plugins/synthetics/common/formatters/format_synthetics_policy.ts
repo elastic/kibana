@@ -7,7 +7,7 @@
 
 import { NewPackagePolicy } from '@kbn/fleet-plugin/common';
 import { cloneDeep } from 'lodash';
-import { formatters } from './formatters';
+import { syntheticsPolicyFormatters } from './formatters';
 import { ConfigKey, DataStream, MonitorFields } from '../runtime_types';
 
 export const formatSyntheticsPolicy = (
@@ -45,8 +45,8 @@ export const formatSyntheticsPolicy = (
   configKeys.forEach((key) => {
     const configItem = dataStream?.vars?.[key];
     if (configItem) {
-      if (formatters[key]) {
-        configItem.value = formatters[key]?.(config, key);
+      if (syntheticsPolicyFormatters[key]) {
+        configItem.value = syntheticsPolicyFormatters[key]?.(config, key);
       } else if (key === ConfigKey.MONITOR_SOURCE_TYPE && isLegacy) {
         configItem.value = undefined;
       } else {

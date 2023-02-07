@@ -241,7 +241,7 @@ describe('formatHeartbeatRequest', () => {
     const heartbeatId = 'test-custom-heartbeat-id';
     const actual = formatHeartbeatRequest({
       monitor: testBrowserConfig as SyntheticsMonitor,
-      monitorId,
+      configId: monitorId,
       heartbeatId,
       params: {},
     });
@@ -263,7 +263,7 @@ describe('formatHeartbeatRequest', () => {
     const monitorId = 'test-monitor-id';
     const actual = formatHeartbeatRequest({
       monitor: testBrowserConfig as SyntheticsMonitor,
-      monitorId,
+      configId: monitorId,
       heartbeatId: monitorId,
       params: {},
     });
@@ -286,7 +286,7 @@ describe('formatHeartbeatRequest', () => {
     const monitor = { ...testBrowserConfig, project_id: undefined } as SyntheticsMonitor;
     const actual = formatHeartbeatRequest({
       monitor,
-      monitorId,
+      configId: monitorId,
       heartbeatId: monitorId,
       params: {},
     });
@@ -310,7 +310,7 @@ describe('formatHeartbeatRequest', () => {
     const monitor = { ...testBrowserConfig, project_id: '' } as SyntheticsMonitor;
     const actual = formatHeartbeatRequest({
       monitor,
-      monitorId,
+      configId: monitorId,
       heartbeatId: monitorId,
       params: {},
     });
@@ -333,7 +333,7 @@ describe('formatHeartbeatRequest', () => {
     const monitorId = 'test-monitor-id';
     const actual = formatHeartbeatRequest({
       monitor: testBrowserConfig as SyntheticsMonitor,
-      monitorId,
+      configId: monitorId,
       runOnce: true,
       heartbeatId: monitorId,
       params: {},
@@ -358,7 +358,7 @@ describe('formatHeartbeatRequest', () => {
     const testRunId = 'beep';
     const actual = formatHeartbeatRequest({
       monitor: testBrowserConfig as SyntheticsMonitor,
-      monitorId,
+      configId: monitorId,
       testRunId,
       heartbeatId: monitorId,
       params: {},
@@ -383,7 +383,7 @@ describe('formatHeartbeatRequest', () => {
     const testRunId = 'beep';
     const actual = formatHeartbeatRequest({
       monitor: { ...testBrowserConfig, params: '' } as SyntheticsMonitor,
-      monitorId,
+      configId: monitorId,
       testRunId,
       heartbeatId: monitorId,
       params: {},

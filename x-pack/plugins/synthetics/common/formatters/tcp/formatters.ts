@@ -8,7 +8,7 @@
 import { TCPFields, ConfigKey } from '../../runtime_types/monitor_management';
 
 import { Formatter, commonFormatters } from '../common/formatters';
-import { objectToJsonFormatter, paramReplaceFormatter } from '../formatting_utils';
+import { objectToJsonFormatter } from '../formatting_utils';
 import { tlsFormatters } from '../tls/formatters';
 
 export type TCPFormatMap = Record<keyof TCPFields, Formatter>;
@@ -20,9 +20,9 @@ export const tcpFormatters: TCPFormatMap = {
   [ConfigKey.RESPONSE_RECEIVE_CHECK]: null,
   [ConfigKey.REQUEST_SEND_CHECK]: null,
   [ConfigKey.PROXY_URL]: null,
-  [ConfigKey.PROXY_URL]: paramReplaceFormatter,
-  [ConfigKey.PORT]: paramReplaceFormatter,
-  [ConfigKey.URLS]: paramReplaceFormatter,
+  [ConfigKey.PROXY_URL]: null,
+  [ConfigKey.PORT]: null,
+  [ConfigKey.URLS]: null,
   ...tlsFormatters,
   ...commonFormatters,
 };

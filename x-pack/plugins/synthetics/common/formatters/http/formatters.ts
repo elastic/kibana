@@ -9,11 +9,7 @@ import { tlsFormatters } from '../tls/formatters';
 import { HTTPFields, ConfigKey } from '../../runtime_types/monitor_management';
 
 import { Formatter, commonFormatters } from '../common/formatters';
-import {
-  arrayToJsonFormatter,
-  objectToJsonFormatter,
-  paramReplaceFormatter,
-} from '../formatting_utils';
+import { arrayToJsonFormatter, objectToJsonFormatter } from '../formatting_utils';
 
 export type HTTPFormatMap = Record<keyof HTTPFields, Formatter>;
 
@@ -23,11 +19,11 @@ export const httpFormatters: HTTPFormatMap = {
   [ConfigKey.RESPONSE_BODY_INDEX]: null,
   [ConfigKey.RESPONSE_HEADERS_INDEX]: null,
   [ConfigKey.METADATA]: objectToJsonFormatter,
-  [ConfigKey.URLS]: paramReplaceFormatter,
-  [ConfigKey.USERNAME]: paramReplaceFormatter,
-  [ConfigKey.PASSWORD]: paramReplaceFormatter,
-  [ConfigKey.PROXY_URL]: paramReplaceFormatter,
-  [ConfigKey.PORT]: paramReplaceFormatter,
+  [ConfigKey.URLS]: null,
+  [ConfigKey.USERNAME]: null,
+  [ConfigKey.PASSWORD]: null,
+  [ConfigKey.PROXY_URL]: null,
+  [ConfigKey.PORT]: null,
   [ConfigKey.RESPONSE_BODY_CHECK_NEGATIVE]: arrayToJsonFormatter,
   [ConfigKey.RESPONSE_BODY_CHECK_POSITIVE]: arrayToJsonFormatter,
   [ConfigKey.RESPONSE_HEADERS_CHECK]: objectToJsonFormatter,

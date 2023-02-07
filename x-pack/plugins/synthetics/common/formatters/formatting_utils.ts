@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { Logger } from '@kbn/logging';
 import { replaceVarsWithParams, ParsedVars } from './lightweight_param_formatter';
 import variableParser from './variable_parser';
 import { ConfigKey, MonitorFields } from '../runtime_types';
@@ -16,10 +17,11 @@ export const arrayToJsonFormatter: FormatterFn = (fields, key) => {
   return value.length ? JSON.stringify(value) : null;
 };
 
-export const objectToJsonFormatter: FormatterFn = (fields, key) => {
-  const value = (fields[key] as Record<string, any>) ?? {};
+export const objectToJsonFormatter: FormatterFn = (fields, fieldKey) => {
+  const value = (fields[fieldKey] as Record<string, any>) ?? {};
+  if (Object.keys(value).length === 0) return null;
 
-  return Object.keys(value).length ? JSON.stringify(value) : null;
+  return JSON.stringify(value);
 };
 
 // only add tls settings if they are enabled by the user and isEnabled is true
@@ -59,29 +61,32 @@ export const stringToJsonFormatter: FormatterFn = (fields, key) => {
   return value ? JSON.stringify(value) : null;
 };
 
-export const paramReplaceFormatter = (fields: Partial<MonitorFields>, key: ConfigKey) => {
-  if (fields.type === 'browser') {
-    return fields[key] as string | null;
-  }
-
-  const value = fields[key] ?? null;
-
-  if (!value) {
+export const replaceStringWithParams = (
+  value: string | boolean | {} | [],
+  params: Record<string, string>,
+  logger: Logger
+) => {
+  if (!value || typeof value === 'boolean') {
     return value as string | null;
   }
-
-  let paramsObj: Record<string, string> = {};
 
   try {
-    const { params } = fields;
-    paramsObj = params ? JSON.parse(params) : {};
+    if (typeof value !== 'string') {
+      const strValue = JSON.stringify(value);
+      const parsedVars: ParsedVars = variableParser.parse(strValue);
+
+      const parseValue = replaceVarsWithParams(parsedVars, params);
+      return JSON.parse(parseValue);
+    }
+
+    const parsedVars: ParsedVars = variableParser.parse(value);
+
+    return replaceVarsWithParams(parsedVars, params);
   } catch (e) {
-    return value as string | null;
+    logger.info(`error parsing vars for value ${JSON.stringify(value)}`);
   }
 
-  const parsedVars: ParsedVars = variableParser.parse(value as string);
-
-  return replaceVarsWithParams(parsedVars, paramsObj);
+  return value as string | null;
 };
 
 export const secondsToCronFormatter: FormatterFn = (fields, key) => {

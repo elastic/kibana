@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { paramReplaceFormatter, secondsToCronFormatter } from '../formatting_utils';
+import { secondsToCronFormatter } from '../formatting_utils';
 import { ICMPFields, ConfigKey } from '../../runtime_types/monitor_management';
 
 import { Formatter, commonFormatters } from '../common/formatters';
@@ -13,7 +13,7 @@ import { Formatter, commonFormatters } from '../common/formatters';
 export type ICMPFormatMap = Record<keyof ICMPFields, Formatter>;
 
 export const icmpFormatters: ICMPFormatMap = {
-  [ConfigKey.HOSTS]: paramReplaceFormatter,
+  [ConfigKey.HOSTS]: null,
   [ConfigKey.WAIT]: secondsToCronFormatter,
   ...commonFormatters,
 };

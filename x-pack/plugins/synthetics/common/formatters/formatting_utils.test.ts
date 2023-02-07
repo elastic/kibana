@@ -5,11 +5,11 @@
  * 2.0.
  */
 import { ConfigKey } from '../runtime_types';
-import { paramReplaceFormatter } from './formatting_utils';
+import { replaceStringWithParams } from './formatting_utils';
 
 describe('formattingUtils', () => {
-  it('paramReplaceFormatter replaces params', () => {
-    const result = paramReplaceFormatter(
+  it('replaceStringWithParams replaces params', () => {
+    const result = replaceStringWithParams(
       { urls: '${homePageUrl}', params: JSON.stringify({ homePageUrl: 'https://elastic.co' }) },
       ConfigKey.URLS
     );
@@ -17,8 +17,8 @@ describe('formattingUtils', () => {
     expect(result).toEqual('https://elastic.co');
   });
 
-  it('paramReplaceFormatter returns same value in case no param', () => {
-    const result = paramReplaceFormatter(
+  it('replaceStringWithParams returns same value in case no param', () => {
+    const result = replaceStringWithParams(
       { urls: '${homePageUrl}', params: JSON.stringify({ homePageUrl1: 'https://elastic.co' }) },
       ConfigKey.URLS
     );
