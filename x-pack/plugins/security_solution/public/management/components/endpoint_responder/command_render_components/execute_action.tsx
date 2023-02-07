@@ -6,21 +6,49 @@
  */
 
 import React, { memo, useMemo } from 'react';
+import { EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
 import type { ExecuteActionRequestBody } from '../../../../../common/endpoint/schema/actions';
 import { useConsoleActionSubmitter } from '../hooks/use_console_action_submitter';
 import type { ResponseActionExecuteOutputContent } from '../../../../../common/endpoint/types';
 import { useSendExecuteEndpoint } from '../../../hooks/response_actions/use_send_execute_endpoint_request';
 import type { ActionRequestComponentProps } from '../types';
 import { parsedTimeoutInMilliseconds } from '../lib/utils';
+import {
+  ResponseActionFileDownloadLink,
+  type ResponseActionFileDownloadLinkProps,
+} from '../../response_action_file_download_link/response_action_file_download_link';
 
 const getOutputForAgent = (
+  action: ResponseActionFileDownloadLinkProps['action'],
   agentId?: string,
   outputs?: Record<string, { content: ResponseActionExecuteOutputContent }>
-): string => {
+) => {
   if (!(agentId && outputs && outputs[agentId])) {
-    return '';
+    return <></>;
   }
-  return outputs[agentId].content.stdout;
+
+  return (
+    <EuiFlexGroup direction="column">
+      <EuiFlexItem>
+        <EuiTitle size="xxs">
+          <h4>{'stdout:'}</h4>
+        </EuiTitle>
+        <div>{outputs[agentId].content.stdout}</div>
+      </EuiFlexItem>
+      <EuiFlexItem>
+        <EuiTitle size="xxs">
+          <h4>{'stderr:'}</h4>
+        </EuiTitle>
+        <div>{outputs[agentId].content.stderr}</div>
+      </EuiFlexItem>
+      <EuiFlexItem>
+        <EuiTitle size="xxs">
+          <h4>{'full output:'}</h4>
+        </EuiTitle>
+        <ResponseActionFileDownloadLink action={action} />
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  );
 };
 
 export const ExecuteActionResult = memo<
@@ -73,6 +101,7 @@ export const ExecuteActionResult = memo<
   return (
     <ResultComponent data-test-subj="executeSuccess" showTitle={false}>
       {getOutputForAgent(
+        completedActionDetails,
         command.commandDefinition?.meta?.endpointId,
         completedActionDetails.outputs
       )}
