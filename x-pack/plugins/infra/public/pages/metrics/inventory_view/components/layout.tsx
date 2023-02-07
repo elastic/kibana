@@ -32,7 +32,7 @@ import { createLegend } from '../lib/create_legend';
 import { useWaffleViewState } from '../hooks/use_waffle_view_state';
 import { BottomDrawer } from './bottom_drawer';
 import { LegendControls } from './waffle/legend_controls';
-import { TryItButton } from '../../../../components/try_it_button/try_it_button';
+import { TryItButton } from '../../../../components/try_it_button';
 
 interface Props {
   shouldLoadDefault: boolean;
@@ -146,7 +146,13 @@ export const Layout = React.memo(
             <TopActionContainer grow={false}>
               <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" gutterSize="m">
                 <Toolbar nodeType={nodeType} currentTime={currentTime} />
-                <EuiFlexGroup responsive={false} style={{ margin: 0, justifyContent: 'end' }}>
+                <EuiFlexGroup
+                  responsive={false}
+                  css={css`
+                    margin: 0;
+                    justifycontent: 'end';
+                  `}
+                >
                   {view === 'map' && (
                     <EuiFlexItem grow={false}>
                       <LegendControls

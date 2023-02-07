@@ -11,7 +11,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiButtonEmpty, EuiPanel } from '@elastic/eu
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { useUiTracker } from '@kbn/observability-plugin/public';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
-import { TryItButton } from '../../../../components/try_it_button/try_it_button';
+import { TryItButton } from '../../../../components/try_it_button';
 import { useWaffleOptionsContext } from '../hooks/use_waffle_options';
 import { InfraFormatter } from '../../../../lib/lib';
 import { Timeline } from './timeline/timeline';
