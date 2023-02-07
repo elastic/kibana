@@ -50,6 +50,7 @@ export const TextAreaWithMessageVariables: React.FunctionComponent<Props> = ({
       templatedVar +
       (inputTargetValue ?? '').substring(endPosition, (inputTargetValue ?? '').length);
     editAction(paramsProperty, newValue, index);
+    setWarning(validateParamsForWarnings(newValue, publicBaseUrl, messageVariables));
   };
 
   const onChangeWithMessageVariable = (e: React.ChangeEvent<HTMLTextAreaElement>) => {

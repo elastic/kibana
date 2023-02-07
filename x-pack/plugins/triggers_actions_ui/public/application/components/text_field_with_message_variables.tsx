@@ -90,8 +90,17 @@ export const TextFieldWithMessageVariables: React.FunctionComponent<Props> = ({
         templatedVar +
         (inputTargetValue ?? '').substring(endPosition, (inputTargetValue ?? '').length);
       editAction(paramsProperty, newValue, index);
+      setWarning(validateParamsForWarnings(newValue, publicBaseUrl, messageVariables));
     },
-    [currentTextElement, editAction, index, inputTargetValue, paramsProperty]
+    [
+      currentTextElement,
+      editAction,
+      index,
+      inputTargetValue,
+      paramsProperty,
+      publicBaseUrl,
+      messageVariables,
+    ]
   );
 
   const onChangeWithMessageVariable = (e: React.ChangeEvent<HTMLInputElement>) => {
