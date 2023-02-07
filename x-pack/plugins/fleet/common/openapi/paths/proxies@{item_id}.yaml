@@ -36,11 +36,6 @@ delete:
             required:
               - id
   parameters:
-    - schema:
-        type: string
-      name: itemId
-      in: path
-      required: true
     - $ref: ../components/headers/kbn_xsrf.yaml
 put:
   summary: Fleet Proxies - Update
@@ -76,9 +71,4 @@ put:
             required:
               - item
   parameters:
-    - schema:
-        type: string
-      name: itemId
-      in: path
-      required: true
     - $ref: ../components/headers/kbn_xsrf.yaml

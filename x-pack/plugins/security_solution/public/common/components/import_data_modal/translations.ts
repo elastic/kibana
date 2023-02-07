@@ -20,7 +20,12 @@ export const OVERWRITE_EXCEPTIONS_LABEL = i18n.translate(
     defaultMessage: 'Overwrite existing exception lists with conflicting "list_id"',
   }
 );
-
+export const OVERWRITE_ACTION_CONNECTORS_LABEL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.components.importRuleModal.overwriteActionConnectorsLabel',
+  {
+    defaultMessage: 'Overwrite existing connectors with conflicting action "id"',
+  }
+);
 export const SUCCESSFULLY_IMPORTED_EXCEPTIONS = (totalExceptions: number) =>
   i18n.translate(
     'xpack.securitySolution.detectionEngine.components.importRuleModal.exceptionsSuccessLabel',
@@ -28,6 +33,15 @@ export const SUCCESSFULLY_IMPORTED_EXCEPTIONS = (totalExceptions: number) =>
       values: { totalExceptions },
       defaultMessage:
         'Successfully imported {totalExceptions} {totalExceptions, plural, =1 {exception} other {exceptions}}.',
+    }
+  );
+export const SUCCESSFULLY_IMPORTED_CONNECTORS = (totalConnectors: number) =>
+  i18n.translate(
+    'xpack.securitySolution.detectionEngine.components.importRuleModal.connectorsSuccessLabel',
+    {
+      values: { totalConnectors },
+      defaultMessage:
+        'Successfully imported {totalConnectors} {totalConnectors, plural, =1 {connector} other {connectors}}.',
     }
   );
 
@@ -40,3 +54,36 @@ export const IMPORT_FAILED = (totalExceptions: number) =>
         'Failed to import {totalExceptions} {totalExceptions, plural, =1 {exception} other {exceptions}}',
     }
   );
+export const IMPORT_CONNECTORS_FAILED = (totalConnectors: number) =>
+  i18n.translate(
+    'xpack.securitySolution.detectionEngine.components.importRuleModal.importConnectorsFailedLabel',
+    {
+      values: { totalConnectors },
+      defaultMessage:
+        'Failed to import {totalConnectors} {totalConnectors, plural, =1 {connector} other {connectors}}',
+    }
+  );
+
+export const ACTION_CONNECTORS_WARNING_TITLE = (totalConnectors: number) =>
+  i18n.translate(
+    'xpack.securitySolution.detectionEngine.components.importRuleModal.actionConnectorsWarningTitle',
+    {
+      values: { totalConnectors },
+      defaultMessage:
+        '{totalConnectors} {totalConnectors, plural, =1 {connector} other {connectors}} imported',
+    }
+  );
+
+export const ACTION_CONNECTORS_WARNING_BUTTON = i18n.translate(
+  'xpack.securitySolution.detectionEngine.components.importRuleModal.actionConnectorsWarningButton',
+  {
+    defaultMessage: 'Go to connectors',
+  }
+);
+
+export const ACTION_CONNECTORS_ADDITIONAL_PRIVILEGES = i18n.translate(
+  'xpack.securitySolution.detectionEngine.components.importRuleModal.actionConnectorsAdditionalPrivilegesError',
+  {
+    defaultMessage: 'You need additional privileges to import rules with actions.',
+  }
+);

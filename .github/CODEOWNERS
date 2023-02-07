@@ -442,6 +442,8 @@
 # Security Solution sub teams
 
 ## Security Solution sub teams - Threat Hunting Investigations
+/x-pack/packages/kbn-ecs-data-quality-dashboard @elastic/security-threat-hunting-investigations
+/x-pack/plugins/ecs_data_quality_dashboard @elastic/security-threat-hunting-investigations
 /x-pack/plugins/timelines @elastic/security-threat-hunting-investigations
 
 /x-pack/plugins/security_solution/common/search_strategy/timeline @elastic/security-threat-hunting-investigations
@@ -1040,9 +1042,9 @@ packages/shared-ux/button/exit_full_screen/types @elastic/appex-sharedux
 packages/shared-ux/card/no_data/impl @elastic/appex-sharedux
 packages/shared-ux/card/no_data/mocks @elastic/appex-sharedux
 packages/shared-ux/card/no_data/types @elastic/appex-sharedux
-packages/shared-ux/code_editor/impl @elastic/shared-ux
-packages/shared-ux/code_editor/mocks @elastic/shared-ux
-packages/shared-ux/code_editor/types @elastic/shared-ux
+packages/shared-ux/code_editor/impl @elastic/appex-sharedux
+packages/shared-ux/code_editor/mocks @elastic/appex-sharedux
+packages/shared-ux/code_editor/types @elastic/appex-sharedux
 packages/shared-ux/file/context @elastic/appex-sharedux
 packages/shared-ux/file/file_picker/impl @elastic/appex-sharedux
 packages/shared-ux/file/file_upload/impl @elastic/appex-sharedux
@@ -1083,6 +1085,7 @@ packages/shared-ux/router/types @elastic/appex-sharedux
 packages/shared-ux/storybook/config @elastic/appex-sharedux
 packages/shared-ux/storybook/mock @elastic/appex-sharedux
 src/plugins/chart_expressions/common @elastic/kibana-visualizations
+x-pack/packages/kbn-ecs-data-quality-dashboard @elastic/security-threat-hunting-investigations
 x-pack/packages/ml/agg_utils @elastic/ml-ui
 x-pack/packages/ml/aiops_components @elastic/ml-ui
 x-pack/packages/ml/aiops_utils @elastic/ml-ui
