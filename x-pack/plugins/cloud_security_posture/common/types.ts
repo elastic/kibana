@@ -11,6 +11,8 @@ import { SUPPORTED_CLOUDBEAT_INPUTS, SUPPORTED_POLICY_TEMPLATES } from './consta
 import { CspRuleTemplateMetadata } from './schemas/csp_rule_template_metadata';
 
 export type Evaluation = 'passed' | 'failed' | 'NA';
+
+export type PostureTypes = 'cspm' | 'kspm';
 /** number between 1-100 */
 export type Score = number;
 
@@ -84,29 +86,6 @@ interface BaseCspSetupStatus {
   kspm: BaseCspSetupBothPolicy;
   isPluginInitialized: boolean;
 }
-
-interface CspSetupNotInstalledStatus extends BaseCspSetupStatus {
-  cspm: BaseCspSetupStatus['cspm'] & {
-    status: Extract<CspStatusCode, 'not-installed'>;
-  };
-  kspm: BaseCspSetupStatus['kspm'] & {
-    status: Extract<CspStatusCode, 'not-installed'>;
-  };
-}
-
-interface CspSetupInstalledStatus extends BaseCspSetupStatus {
-  cspm: BaseCspSetupStatus['cspm'] & {
-    status: Exclude<CspStatusCode, 'not-installed'>;
-  };
-  kspm: BaseCspSetupStatus['kspm'] & {
-    status: Exclude<CspStatusCode, 'not-installed'>;
-  };
-  // if installedPackageVersion == undefined but status != 'not-installed' it means the integration was installed in the past and findings were found
-  // status can be `indexed` but return with undefined package information in this case
-  installedPackageVersion: string | undefined;
-}
-
-// export type CspSetupStatus = CspSetupInstalledStatus | CspSetupNotInstalledStatus;
 
 export type CspSetupStatus = BaseCspSetupStatus;
 

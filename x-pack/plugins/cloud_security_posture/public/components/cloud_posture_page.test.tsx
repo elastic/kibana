@@ -144,7 +144,7 @@ describe('<CloudPosturePage />', () => {
     (useCspSetupStatusApi as jest.Mock).mockImplementation(() =>
       createReactQueryResponse({
         status: 'success',
-        data: { status: 'not-installed' },
+        data: { kspm: { status: 'not-installed' }, cspm: { status: 'not-installed' } },
       })
     );
     (useCspIntegrationLink as jest.Mock).mockImplementation(() => chance.url());

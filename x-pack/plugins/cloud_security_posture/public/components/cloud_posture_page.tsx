@@ -281,7 +281,10 @@ export const CloudPosturePage = <TData, TError>({
       return defaultLoadingRenderer();
     }
 
-    if (getSetupStatus.data.status === 'not-installed') {
+    if (
+      getSetupStatus.data?.kspm?.status === 'not-installed' &&
+      getSetupStatus.data?.cspm?.status === 'not-installed'
+    ) {
       return packageNotInstalledRenderer({ kspmIntegrationLink, cspmIntegrationLink });
     }
 

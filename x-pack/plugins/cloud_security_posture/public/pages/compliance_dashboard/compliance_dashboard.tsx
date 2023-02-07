@@ -166,9 +166,9 @@ const IntegrationPostureDashboard = ({
   // there are findings, displays dashboard even if integration is not installed
   return (
     <>
-      <SummarySection complianceData={complianceData} dashboardType={dashboardType} />
+      <SummarySection complianceData={complianceData!} dashboardType={dashboardType} />
       <EuiSpacer />
-      <BenchmarksSection complianceData={complianceData} dashboardType={dashboardType} />
+      <BenchmarksSection complianceData={complianceData!} dashboardType={dashboardType} />
       <EuiSpacer />
     </>
   );

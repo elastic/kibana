@@ -21,7 +21,12 @@ import {
   POSTURE_TYPE_CSPM,
 } from '../../../common/constants';
 import type { CspApiRequestHandlerContext, CspRouter } from '../../types';
-import type { CspSetupStatus, CspStatusCode, IndexStatus } from '../../../common/types';
+import type {
+  CspSetupStatus,
+  CspStatusCode,
+  IndexStatus,
+  PostureTypes,
+} from '../../../common/types';
 import {
   getAgentStatusesByAgentPolicies,
   getCspAgentPolicies,
@@ -63,7 +68,7 @@ const getHealthyAgents = async (
 };
 
 const calculateCspStatusCode = (
-  postureType: 'cspm' | 'kspm',
+  postureType: PostureTypes,
   indicesStatus: {
     findingsLatest: IndexStatus;
     findings: IndexStatus;
@@ -75,7 +80,8 @@ const calculateCspStatusCode = (
   installedPolicyTemplates: string[]
 ): CspStatusCode => {
   // We check privileges only for the relevant indices for our pages to appear
-  const postureTypeCheck = postureType === 'cspm' ? 'cspm' : 'kspm';
+  const postureTypeCheck =
+    postureType === POSTURE_TYPE_CSPM ? POSTURE_TYPE_CSPM : POSTURE_TYPE_KSPM;
   if (indicesStatus.findingsLatest === 'unprivileged' || indicesStatus.score === 'unprivileged')
     return 'unprivileged';
   if (!installedPolicyTemplates.includes(postureTypeCheck)) return 'not-installed';

@@ -18,7 +18,7 @@ import type {
   PackagePolicy,
 } from '@kbn/fleet-plugin/common';
 import { errors } from '@elastic/elasticsearch';
-import { PosturePolicyTemplate } from '../../common/types';
+import { PosturePolicyTemplate, PostureTypes } from '../../common/types';
 import { SUPPORTED_POLICY_TEMPLATES } from '../../common/constants';
 import { CSP_FLEET_PACKAGE_KUERY } from '../../common/utils/helpers';
 import {
@@ -45,10 +45,6 @@ const getPackageNameQuery = (
   const kquery = benchmarkFilter
     ? `${integrationNameQuery} AND ${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.name: *${benchmarkFilter}* AND ${integrationPostureType}`
     : `${integrationNameQuery} AND ${integrationPostureType}`;
-
-  // const kquery = benchmarkFilter
-  //   ? `${integrationNameQuery} AND ${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.name: *${benchmarkFilter}* AND ${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.posture_type: ${benchMarkPostureType}`
-  //   : `${integrationNameQuery} AND ${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.posture_type: ${benchMarkPostureType}`;
 
   return kquery;
 };
@@ -97,7 +93,7 @@ export const getCspPackagePolicies = (
   packagePolicyService: PackagePolicyClient,
   packageName: string,
   queryParams: Partial<BenchmarksQueryParams>,
-  postureType: string
+  postureType: PostureTypes
 ): Promise<ListResult<PackagePolicy>> => {
   const sortField = queryParams.sort_field?.replaceAll(BENCHMARK_PACKAGE_POLICY_PREFIX, '');
 
