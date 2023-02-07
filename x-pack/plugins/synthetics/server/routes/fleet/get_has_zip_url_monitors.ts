@@ -5,27 +5,18 @@
  * 2.0.
  */
 import { API_URLS } from '../../../common/constants';
-import { ConfigKey } from '../../../common/runtime_types';
 import { SyntheticsRestApiRouteFactory } from '../../legacy_uptime/routes/types';
 
-export const getHasZipUrlMonitorRoute: SyntheticsRestApiRouteFactory = () => ({
+export const getHasIntegrationMonitorsRoute: SyntheticsRestApiRouteFactory = () => ({
   method: 'GET',
-  path: API_URLS.SYNTHETICS_HAS_ZIP_URL_MONITORS,
+  path: API_URLS.SYNTHETICS_HAS_INTEGRATION_MONITORS,
   validate: {},
   handler: async ({ savedObjectsClient, server }): Promise<any> => {
     const monitors = await server.fleet.packagePolicyService.list(savedObjectsClient, {
       kuery: 'ingest-package-policies.package.name:synthetics',
     });
-    const hasZipUrlMonitors = monitors.items.some((item) => {
-      const browserInput = item.inputs.find((input) => input.type === 'synthetics/browser');
-      const streams = browserInput?.streams || [];
-      return streams.find((stream) => stream.data_stream.dataset === 'browser')?.compiled_stream?.[
-        ConfigKey.SOURCE_ZIP_URL
-      ];
-    });
     return {
-      hasZipUrlMonitors,
-      monitors: [],
+      hasIntegrationMonitors: monitors.total > 0,
     };
   },
 });
