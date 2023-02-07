@@ -67,20 +67,22 @@ export async function getStatus(
       ConfigKey.ENABLED,
       ConfigKey.LOCATIONS,
       ConfigKey.MONITOR_QUERY_ID,
+      ConfigKey.CONFIG_ID,
       ConfigKey.SCHEDULE,
       ConfigKey.MONITOR_SOURCE_TYPE,
     ],
   });
 
   const {
+    enabledMonitorQueryIds,
     allIds,
-    enabledIds,
     disabledCount,
     maxPeriod,
     listOfLocations,
     monitorLocationMap,
     disabledMonitorsCount,
     projectMonitorsCount,
+    monitorQueryIdToConfigIdMap,
   } = await processMonitors(allMonitors, server, soClient, syntheticsMonitorClient);
 
   // Account for locations filter
@@ -90,12 +92,13 @@ export async function getStatus(
     ? intersection(listOfLocations, queryLocationsArray)
     : listOfLocations;
 
-  const { up, down, pending, upConfigs, downConfigs } = await queryMonitorStatus(
+  const { up, down, pending, upConfigs, downConfigs, pendingConfigs } = await queryMonitorStatus(
     uptimeEsClient,
     listOfLocationAfterFilter,
     { from: maxPeriod, to: 'now' },
-    enabledIds,
-    monitorLocationMap
+    enabledMonitorQueryIds,
+    monitorLocationMap,
+    monitorQueryIdToConfigIdMap
   );
 
   return {
@@ -103,13 +106,14 @@ export async function getStatus(
     allMonitorsCount: allMonitors.length,
     disabledMonitorsCount,
     projectMonitorsCount,
-    enabledIds,
+    enabledMonitorQueryIds,
     disabledCount,
     up,
     down,
     pending,
     upConfigs,
     downConfigs,
+    pendingConfigs,
   };
 }
 
