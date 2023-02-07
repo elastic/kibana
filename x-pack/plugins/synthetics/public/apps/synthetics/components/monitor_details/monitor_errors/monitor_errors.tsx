@@ -80,7 +80,7 @@ const EmptyErrors = () => {
 };
 
 const KEEP_CALM = i18n.translate('xpack.synthetics.errors.keepCalm', {
-  defaultMessage: 'Keep calm and carry on.',
+  defaultMessage: 'Keep calm.',
 });
 
 const NO_ERRORS_FOUND = i18n.translate('xpack.synthetics.errors.noErrorsFound', {
