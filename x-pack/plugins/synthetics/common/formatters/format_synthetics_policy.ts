@@ -7,8 +7,18 @@
 
 import { NewPackagePolicy } from '@kbn/fleet-plugin/common';
 import { cloneDeep } from 'lodash';
+import { replaceStringWithParams } from './formatting_utils';
 import { syntheticsPolicyFormatters } from './formatters';
 import { ConfigKey, DataStream, MonitorFields } from '../runtime_types';
+
+export const PARAMS_KEYS_TO_SKIP = [
+  'secrets',
+  'fields',
+  ConfigKey.LOCATIONS,
+  ConfigKey.TLS_VERSION,
+  ConfigKey.SOURCE_PROJECT_CONTENT,
+  ConfigKey.SOURCE_INLINE,
+];
 
 export const formatSyntheticsPolicy = (
   newPolicy: NewPackagePolicy,
@@ -20,6 +30,7 @@ export const formatSyntheticsPolicy = (
       'monitor.project.id': string;
     }
   >,
+  params: Record<string, string>,
   isLegacy?: boolean
 ) => {
   const configKeys = Object.keys(config) as ConfigKey[];
@@ -51,6 +62,9 @@ export const formatSyntheticsPolicy = (
         configItem.value = undefined;
       } else {
         configItem.value = config[key] === undefined || config[key] === null ? null : config[key];
+      }
+      if (!PARAMS_KEYS_TO_SKIP.includes(key)) {
+        configItem.value = replaceStringWithParams(configItem.value, params);
       }
     }
   });

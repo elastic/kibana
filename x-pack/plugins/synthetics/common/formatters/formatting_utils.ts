@@ -64,7 +64,7 @@ export const stringToJsonFormatter: FormatterFn = (fields, key) => {
 export const replaceStringWithParams = (
   value: string | boolean | {} | [],
   params: Record<string, string>,
-  logger: Logger
+  logger?: Logger
 ) => {
   if (!value || typeof value === 'boolean') {
     return value as string | null;
@@ -83,7 +83,7 @@ export const replaceStringWithParams = (
 
     return replaceVarsWithParams(parsedVars, params);
   } catch (e) {
-    logger.info(`error parsing vars for value ${JSON.stringify(value)}`);
+    logger?.info(`error parsing vars for value ${JSON.stringify(value)}`);
   }
 
   return value as string | null;

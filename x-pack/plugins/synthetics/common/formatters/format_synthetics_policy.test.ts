@@ -7,12 +7,14 @@
 import { ConfigKey, DataStream } from '../runtime_types';
 import { formatSyntheticsPolicy } from './format_synthetics_policy';
 
+const gParams = { proxyUrl: 'https://proxy.com' };
 describe('formatSyntheticsPolicy', () => {
   it('formats browser policy', () => {
     const { formattedPolicy } = formatSyntheticsPolicy(
       testNewPolicy,
       DataStream.BROWSER,
-      browserConfig
+      browserConfig,
+      gParams
     );
 
     expect(formattedPolicy).toEqual({
@@ -500,10 +502,15 @@ describe('formatSyntheticsPolicy', () => {
   });
 
   it.each([true, false])('formats http policy', (isTLSEnabled) => {
-    const { formattedPolicy } = formatSyntheticsPolicy(testNewPolicy, DataStream.HTTP, {
-      ...httpPolicy,
-      [ConfigKey.METADATA]: { is_tls_enabled: isTLSEnabled },
-    });
+    const { formattedPolicy } = formatSyntheticsPolicy(
+      testNewPolicy,
+      DataStream.HTTP,
+      {
+        ...httpPolicy,
+        [ConfigKey.METADATA]: { is_tls_enabled: isTLSEnabled },
+      },
+      gParams
+    );
 
     expect(formattedPolicy).toEqual({
       enabled: true,

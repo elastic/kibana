@@ -35,7 +35,7 @@ const UI_KEYS_TO_SKIP = [
   'secrets',
 ];
 
-const PARAMS_KEYS_TO_SKIP = [
+export const PARAMS_KEYS_TO_SKIP = [
   'secrets',
   'fields',
   ConfigKey.LOCATIONS,
@@ -141,7 +141,7 @@ export const mixParamsWithGlobalParams = (
   globalParams: Record<string, string>,
   monitor: SyntheticsMonitor
 ) => {
-  let params = { ...(globalParams ?? {}) };
+  let params: Record<string, string> = { ...(globalParams ?? {}) };
 
   const paramsString = '';
 
@@ -154,9 +154,9 @@ export const mixParamsWithGlobalParams = (
     }
 
     if (!isEmpty(params)) {
-      return { str: JSON.stringify(params), mixed: params };
+      return { str: JSON.stringify(params), params };
     } else {
-      return { str: '', mixed: params };
+      return { str: '', params };
     }
   } catch (e) {
     // ignore
