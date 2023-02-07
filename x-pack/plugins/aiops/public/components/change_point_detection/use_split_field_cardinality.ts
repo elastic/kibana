@@ -19,7 +19,10 @@ import { useDataSource } from '../../hooks/use_data_source';
  * @param splitField
  * @param query
  */
-export function useSplitFieldCardinality(splitField: string, query: QueryDslQueryContainer) {
+export function useSplitFieldCardinality(
+  splitField: string | undefined,
+  query: QueryDslQueryContainer
+) {
   const [cardinality, setCardinality] = useState<number | null>(null);
   const { dataView } = useDataSource();
 
@@ -46,6 +49,10 @@ export function useSplitFieldCardinality(splitField: string, query: QueryDslQuer
 
   useEffect(
     function performCardinalityCheck() {
+      if (splitField === undefined) {
+        return;
+      }
+
       cancelRequest();
 
       getSplitFieldCardinality<
@@ -62,7 +69,7 @@ export function useSplitFieldCardinality(splitField: string, query: QueryDslQuer
         }
       });
     },
-    [getSplitFieldCardinality, requestPayload, cancelRequest]
+    [getSplitFieldCardinality, requestPayload, cancelRequest, splitField]
   );
 
   return cardinality;

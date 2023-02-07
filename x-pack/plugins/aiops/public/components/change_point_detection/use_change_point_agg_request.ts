@@ -9,6 +9,7 @@ import { useEffect, useCallback, useState, useMemo } from 'react';
 import { type QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { i18n } from '@kbn/i18n';
 import { useRefresh } from '@kbn/ml-date-picker';
+import { isDefined } from '@kbn/ml-is-defined';
 import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
 import {
   ChangePointAnnotation,
@@ -23,7 +24,7 @@ interface RequestOptions {
   index: string;
   fn: string;
   metricField: string;
-  splitField: string;
+  splitField?: string;
   timeField: string;
   timeInterval: string;
   afterKey?: string;
@@ -33,60 +34,71 @@ function getChangePointDetectionRequestBody(
   { index, fn, metricField, splitField, timeInterval, timeField, afterKey }: RequestOptions,
   query: QueryDslQueryContainer
 ) {
+  const timeSeriesAgg = {
+    over_time: {
+      date_histogram: {
+        field: timeField,
+        fixed_interval: timeInterval,
+      },
+      aggs: {
+        function_value: {
+          [fn]: {
+            field: metricField,
+          },
+        },
+      },
+    },
+    change_point_request: {
+      change_point: {
+        buckets_path: 'over_time>function_value',
+      },
+    },
+    // Bucket selecting and sorting are only applicable for partitions
+    ...(isDefined(splitField)
+      ? {
+          select: {
+            bucket_selector: {
+              buckets_path: { p_value: 'change_point_request.p_value' },
+              script: 'params.p_value < 1',
+            },
+          },
+          sort: {
+            bucket_sort: {
+              sort: [{ 'change_point_request.p_value': { order: 'asc' } }],
+            },
+          },
+        }
+      : {}),
+  };
+
+  const aggregations = splitField
+    ? {
+        groupings: {
+          composite: {
+            size: COMPOSITE_AGG_SIZE,
+            ...(afterKey !== undefined ? { after: { splitFieldTerm: afterKey } } : {}),
+            sources: [
+              {
+                splitFieldTerm: {
+                  terms: {
+                    field: splitField,
+                  },
+                },
+              },
+            ],
+          },
+          aggregations: timeSeriesAgg,
+        },
+      }
+    : timeSeriesAgg;
+
   return {
     params: {
       index,
       size: 0,
       body: {
         query,
-        aggregations: {
-          groupings: {
-            composite: {
-              size: COMPOSITE_AGG_SIZE,
-              ...(afterKey !== undefined ? { after: { splitFieldTerm: afterKey } } : {}),
-              sources: [
-                {
-                  splitFieldTerm: {
-                    terms: {
-                      field: splitField,
-                    },
-                  },
-                },
-              ],
-            },
-            aggregations: {
-              over_time: {
-                date_histogram: {
-                  field: timeField,
-                  fixed_interval: timeInterval,
-                },
-                aggs: {
-                  function_value: {
-                    [fn]: {
-                      field: metricField,
-                    },
-                  },
-                },
-              },
-              change_point_request: {
-                change_point: {
-                  buckets_path: 'over_time>function_value',
-                },
-              },
-              select: {
-                bucket_selector: {
-                  buckets_path: { p_value: 'change_point_request.p_value' },
-                  script: 'params.p_value < 1',
-                },
-              },
-              sort: {
-                bucket_sort: {
-                  sort: [{ 'change_point_request.p_value': { order: 'asc' } }],
-                },
-              },
-            },
-          },
-        },
+        aggregations,
       },
     },
   };
@@ -111,6 +123,8 @@ export function useChangePointResults(
   const [activePage, setActivePage] = useState<number>(0);
   const [progress, setProgress] = useState<number>(0);
 
+  const isSingleMetric = !isDefined(requestParams.splitField);
+
   const totalAggPages = useMemo<number>(() => {
     return Math.ceil(
       Math.min(splitFieldCardinality ?? 0, SPLIT_FIELD_CARDINALITY_LIMIT) / COMPOSITE_AGG_SIZE
@@ -129,7 +143,7 @@ export function useChangePointResults(
   const fetchResults = useCallback(
     async (pageNumber: number = 1, afterKey?: string) => {
       try {
-        if (!totalAggPages) {
+        if (!isSingleMetric && !totalAggPages) {
           setProgress(100);
           return;
         }
@@ -156,7 +170,11 @@ export function useChangePointResults(
           return;
         }
 
-        const buckets = result.rawResponse.aggregations.groupings.buckets;
+        const buckets = (
+          isSingleMetric
+            ? [result.rawResponse.aggregations]
+            : result.rawResponse.aggregations.groupings.buckets
+        ) as ChangePointAggResponse['aggregations']['groupings']['buckets'];
 
         setProgress(Math.min(Math.round((pageNumber / totalAggPages) * 100), 100));
 
@@ -166,10 +184,14 @@ export function useChangePointResults(
           const rawPValue = v.change_point_request.type[changePointType].p_value;
 
           return {
-            group: {
-              name: requestParams.splitField,
-              value: v.key.splitFieldTerm,
-            },
+            ...(isSingleMetric
+              ? {}
+              : {
+                  group: {
+                    name: requestParams.splitField,
+                    value: v.key.splitFieldTerm,
+                  },
+                }),
             type: changePointType,
             p_value: rawPValue,
             timestamp: timeAsString,
@@ -192,7 +214,7 @@ export function useChangePointResults(
         });
 
         if (
-          result.rawResponse.aggregations.groupings.after_key?.splitFieldTerm &&
+          result.rawResponse.aggregations?.groupings?.after_key?.splitFieldTerm &&
           pageNumber < totalAggPages
         ) {
           await fetchResults(
@@ -210,7 +232,7 @@ export function useChangePointResults(
         });
       }
     },
-    [runRequest, requestParams, query, dataView, totalAggPages, toasts]
+    [runRequest, requestParams, query, dataView, totalAggPages, toasts, isSingleMetric]
   );
 
   useEffect(
@@ -241,11 +263,15 @@ export function useChangePointResults(
   return { results: resultPerPage, isLoading, reset, progress, pagination };
 }
 
+/**
+ * Response type for aggregation with composite agg pagination.
+ * TODO: update type for the single metric
+ */
 interface ChangePointAggResponse {
   took: number;
   timed_out: boolean;
   _shards: { total: number; failed: number; successful: number; skipped: number };
-  hits: { hits: any[]; total: number; max_score: null };
+  hits: { hits: unknown[]; total: number; max_score: null };
   aggregations: {
     groupings: {
       after_key?: {

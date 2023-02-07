@@ -33,37 +33,38 @@ export const ChartComponent: FC<ChartComponentProps> = React.memo(({ annotation 
   const { dataView } = useDataSource();
   const { requestParams, bucketInterval } = useChangePointDetectionContext();
 
-  const filters = useMemo(
-    () => [
-      {
-        meta: {
-          index: dataView.id!,
-          alias: null,
-          negate: false,
-          disabled: false,
-          type: 'phrase',
-          key: annotation.group.name,
-          params: {
-            query: annotation.group.value,
+  const filters = useMemo(() => {
+    return annotation.group
+      ? [
+          {
+            meta: {
+              index: dataView.id!,
+              alias: null,
+              negate: false,
+              disabled: false,
+              type: 'phrase',
+              key: annotation.group.name,
+              params: {
+                query: annotation.group.value,
+              },
+            },
+            query: {
+              match_phrase: {
+                [annotation.group.name]: annotation.group.value,
+              },
+            },
+            $state: {
+              store: FilterStateStore.APP_STATE,
+            },
           },
-        },
-        query: {
-          match_phrase: {
-            [annotation.group.name]: annotation.group.value,
-          },
-        },
-        $state: {
-          store: FilterStateStore.APP_STATE,
-        },
-      },
-    ],
-    [dataView.id, annotation.group]
-  );
+        ]
+      : [];
+  }, [dataView.id, annotation.group]);
 
   // @ts-ignore incorrect types for attributes
   const attributes = useMemo<TypedLensByValueInput['attributes']>(() => {
     return {
-      title: annotation.group.value,
+      title: annotation.group?.value ?? '',
       description: '',
       visualizationType: 'lnsXY',
       type: 'lens',
@@ -205,7 +206,7 @@ export const ChartComponent: FC<ChartComponentProps> = React.memo(({ annotation 
 
   return (
     <EmbeddableComponent
-      id={`changePointChart_${annotation.group.value}`}
+      id={`changePointChart_${annotation.group ? annotation.group.value : annotation.label}`}
       style={{ height: 350 }}
       timeRange={timeRange}
       attributes={attributes}

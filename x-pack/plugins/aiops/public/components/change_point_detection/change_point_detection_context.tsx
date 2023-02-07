@@ -38,7 +38,7 @@ export interface ChangePointDetectionPageUrlState {
 
 export interface ChangePointDetectionRequestParams {
   fn: string;
-  splitField: string;
+  splitField?: string;
   metricField: string;
   interval: string;
   query: Query;
@@ -100,7 +100,7 @@ export interface ChangePointAnnotation {
   label: string;
   reason: string;
   timestamp: string;
-  group: {
+  group?: {
     name: string;
     value: string;
   };

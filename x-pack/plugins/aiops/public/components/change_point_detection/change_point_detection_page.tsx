@@ -45,6 +45,7 @@ export const ChangePointDetectionPage: FC = () => {
     progress,
     pagination,
     splitFieldCardinality,
+    splitFieldsOptions,
   } = useChangePointDetectionContext();
 
   const setFn = useCallback(
@@ -105,9 +106,11 @@ export const ChangePointDetectionPage: FC = () => {
         <EuiFlexItem grow={false} css={selectControlCss}>
           <MetricFieldSelector value={requestParams.metricField} onChange={setMetricField} />
         </EuiFlexItem>
-        <EuiFlexItem grow={false} css={selectControlCss}>
-          <SplitFieldSelector value={requestParams.splitField} onChange={setSplitField} />
-        </EuiFlexItem>
+        {splitFieldsOptions.length > 0 ? (
+          <EuiFlexItem grow={false} css={selectControlCss}>
+            <SplitFieldSelector value={requestParams.splitField!} onChange={setSplitField} />
+          </EuiFlexItem>
+        ) : null}
 
         <EuiFlexItem css={{ visibility: progress === 100 ? 'hidden' : 'visible' }} grow={false}>
           <EuiProgress
@@ -200,7 +203,7 @@ export const ChangePointDetectionPage: FC = () => {
       <EuiFlexGrid columns={annotations.length >= 2 ? 2 : 1} responsive gutterSize={'m'}>
         {annotations.map((v) => {
           return (
-            <EuiFlexItem key={v.group.value}>
+            <EuiFlexItem key={v.group?.value ?? 'single_metric'}>
               <EuiPanel paddingSize="s" hasBorder hasShadow={false}>
                 <EuiFlexGroup
                   alignItems={'center'}
@@ -208,10 +211,12 @@ export const ChangePointDetectionPage: FC = () => {
                   gutterSize={'s'}
                 >
                   <EuiFlexItem grow={false}>
-                    <EuiDescriptionList
-                      type="inline"
-                      listItems={[{ title: v.group.name, description: v.group.value }]}
-                    />
+                    {v.group ? (
+                      <EuiDescriptionList
+                        type="inline"
+                        listItems={[{ title: v.group.name, description: v.group.value }]}
+                      />
+                    ) : null}
 
                     {v.reason ? (
                       <EuiToolTip position="top" content={v.reason}>
