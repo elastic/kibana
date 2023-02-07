@@ -15,8 +15,8 @@ for general guidelines, read [Kibana Testing Guide](https://www.elastic.co/guide
 ### Tests
 
 1. Unit Tests (Jest) - located in sibling files to the source code
-2. [Integration Tests](../../../test/api_integration/apis/cloud_security_posture/index.ts)
-3. [End-to-End Tests](../../../test/cloud_security_posture_functional/pages/index.ts)
+2. [Integration Tests](../../test/api_integration/apis/cloud_security_posture/index.ts)
+3. [End-to-End Tests](../../test/cloud_security_posture_functional/pages/index.ts)
 
 ### Tools
 
@@ -55,8 +55,7 @@ yarn test:ftr --config x-pack/test/cloud_security_posture_functional/config.ts -
 
 <br/>
 
-> **Note**
-> in development, run them separately with `ftr:runner` and `ftr:server`
+test runner (FTR) can be used separately with `ftr:runner` and `ftr:server`:
 
 ```bash
 yarn test:ftr:server --config x-pack/test/api_integration/config.ts
