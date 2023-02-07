@@ -24,12 +24,24 @@ import {
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
-import { mlTimefilterRefresh$, useTimefilter, DatePickerWrapper } from '@kbn/ml-date-picker';
+import {
+  mlTimefilterRefresh$,
+  useTimefilter,
+  DatePickerWrapper,
+  FullTimeRangeSelector,
+  FROZEN_TIER_PREFERENCE,
+} from '@kbn/ml-date-picker';
+import { useStorage } from '@kbn/ml-local-storage';
 import { useUrlState } from '@kbn/ml-url-state';
 
 import { PivotAggDict } from '../../../../../../common/types/pivot_aggs';
 import { PivotGroupByDict } from '../../../../../../common/types/pivot_group_by';
 import { TRANSFORM_FUNCTION } from '../../../../../../common/constants';
+import {
+  TRANSFORM_FROZEN_TIER_PREFERENCE,
+  type TransformStorageKey,
+  type TransformStorageMapped,
+} from '../../../../../../common/types/storage';
 
 import {
   getIndexDevConsoleStatement,
@@ -89,6 +101,14 @@ export const StepDefineForm: FC<StepDefineFormProps> = React.memo((props) => {
   const {
     ml: { DataGrid },
   } = useAppDependencies();
+  const [frozenDataPreference, setFrozenDataPreference] = useStorage<
+    TransformStorageKey,
+    TransformStorageMapped<typeof TRANSFORM_FROZEN_TIER_PREFERENCE>
+  >(
+    TRANSFORM_FROZEN_TIER_PREFERENCE,
+    // By default we will exclude frozen data tier
+    FROZEN_TIER_PREFERENCE.EXCLUDE
+  );
   const toastNotifications = useToastNotifications();
   const stepDefineForm = useStepDefineForm(props);
 
@@ -311,6 +331,14 @@ export const StepDefineForm: FC<StepDefineFormProps> = React.memo((props) => {
                     </EuiFlexItem>
                   </EuiFlexGroup>
                 )}
+                <FullTimeRangeSelector
+                  frozenDataPreference={frozenDataPreference}
+                  setFrozenDataPreference={setFrozenDataPreference}
+                  dataView={dataView}
+                  query={undefined}
+                  disabled={false}
+                  timefilter={timefilter}
+                />
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiFormRow>

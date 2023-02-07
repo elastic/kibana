@@ -397,22 +397,6 @@ describe('validateAndConvertAggregations', () => {
     );
   });
 
-  it('throws an error when an attributes is not respecting its schema definition', () => {
-    const aggregations: AggsMap = {
-      someAgg: {
-        terms: {
-          missing: 'expecting a number',
-        },
-      },
-    };
-
-    expect(() =>
-      validateAndConvertAggregations(['alert'], aggregations, mockMappings)
-    ).toThrowErrorMatchingInlineSnapshot(
-      `"[someAgg.terms.missing]: expected value of type [number] but got [string]"`
-    );
-  });
-
   it('throws an error when trying to validate an unknown aggregation type', () => {
     const aggregations: AggsMap = {
       someAgg: {
