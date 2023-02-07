@@ -9,7 +9,6 @@ import { schema } from '@kbn/config-schema';
 import type { IRouter } from '@kbn/core/server';
 
 import { omit } from 'lodash';
-import type { SortOrder } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
 import { PLUGIN_ID } from '../../../common';
 import { savedQuerySavedObjectType } from '../../../common/types';
@@ -22,19 +21,12 @@ export const findSavedQueryRoute = (router: IRouter, osqueryContext: OsqueryAppC
       path: '/api/osquery/saved_queries',
       validate: {
         query: schema.object({
-          page: schema.maybe(schema.number()),
+          page: schema.number({ defaultValue: 1 }),
           pageSize: schema.maybe(schema.number()),
-          sort: schema.maybe(schema.string()),
-          sortOrder: schema.maybe(
-            schema.conditional(
-              schema.siblingRef('sort'),
-              schema.string(),
-              schema.oneOf([schema.literal('asc'), schema.literal('desc')]),
-              schema.string({
-                validate: () => 'sort has to be specified when using sortOrder',
-              })
-            )
-          ),
+          sort: schema.string({ defaultValue: 'id' }),
+          sortOrder: schema.oneOf([schema.literal('asc'), schema.literal('desc')], {
+            defaultValue: 'desc',
+          }),
         }),
       },
       options: { tags: [`access:${PLUGIN_ID}-readSavedQueries`] },
@@ -48,10 +40,10 @@ export const findSavedQueryRoute = (router: IRouter, osqueryContext: OsqueryAppC
         prebuilt: boolean;
       }>({
         type: savedQuerySavedObjectType,
-        page: request.query.page ?? 1,
+        page: request.query.page,
         perPage: request.query.pageSize,
-        sortField: request.query.sort ?? 'id',
-        sortOrder: (request.query.sortOrder as SortOrder) ?? 'desc',
+        sortField: request.query.sort,
+        sortOrder: request.query.sortOrder,
       });
 
       const prebuiltSavedQueriesMap = await getInstalledSavedQueriesMap(
