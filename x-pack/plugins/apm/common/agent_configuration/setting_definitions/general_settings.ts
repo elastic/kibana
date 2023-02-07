@@ -8,6 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import { captureBodyRt } from '../runtime_types/capture_body_rt';
 import { logLevelRt } from '../runtime_types/log_level_rt';
+import { logEcsReformattingRt } from '../runtime_types/log_ecs_reformatting_rt';
 import { traceContinuationStrategyRt } from '../runtime_types/trace_continuation_strategy_rt';
 import { RawSettingDefinition } from './types';
 
@@ -136,6 +137,47 @@ export const generalSettings: RawSettingDefinition[] = [
   },
 
   {
+    key: 'disable_instrumentations',
+    type: 'text',
+    defaultValue: '',
+    label: i18n.translate('xpack.apm.agentConfig.disableInstrumentations.label', {
+      defaultMessage: 'Disable instrumentations',
+    }),
+    description: i18n.translate(
+      'xpack.apm.agentConfig.disableInstrumentations.description',
+      {
+        defaultMessage:
+          'Comma-separated list of modules to disable instrumentation for.\n' +
+          'When instrumentation is disabled for a module, no spans will be collected for that module.\n' +
+          '\n' +
+          'The up-to-date list of modules for which instrumentation can be disabled is language specific ' +
+          'and can be found under the following links: ' +
+          '[Java](https://www.elastic.co/guide/en/apm/agent/java/current/config-core.html#config-disable-instrumentations)',
+      }
+    ),
+    includeAgents: ['java'],
+  },
+
+  {
+    key: 'disable_outgoing_tracecontext_headers',
+    type: 'boolean',
+    defaultValue: 'true',
+    label: i18n.translate('xpack.apm.agentConfig.disableOutgoingTracecontextHeaders.label', {
+      defaultMessage: 'Disable outgoing tracecontext headers',
+    }),
+    description: i18n.translate(
+      'xpack.apm.agentConfig.disableOutgoingTracecontextHeaders.description',
+      {
+        defaultMessage:
+          'Use this option to disable `tracecontext` headers injection to any outgoing communication.\n' +
+          '\n' +
+          'WARNING: Disabling `tracecontext` headers injection means that distributed tracing will not work on downstream services.',
+      }
+    ),
+    includeAgents: ['java'],
+  },
+
+  {
     key: 'exit_span_min_duration',
     type: 'duration',
     defaultValue: '0ms',
@@ -173,6 +215,32 @@ export const generalSettings: RawSettingDefinition[] = [
       }
     ),
     includeAgents: ['java', 'dotnet', 'nodejs'],
+  },
+
+  {
+    key: 'log_ecs_reformatting',
+    validation: logEcsReformattingRt,
+    type: 'select',
+    defaultValue: 'off',
+    label: i18n.translate('xpack.apm.agentConfig.logEcsReformatting.label', {
+      defaultMessage: 'Log ECS reformatting',
+    }),
+    description: i18n.translate(
+      'xpack.apm.agentConfig.logEcsReformatting.description',
+      {
+        defaultMessage:
+          'Specifying whether and how the agent should automatically reformat application logs into ' +
+          '[ECS-compatible JSON](https://www.elastic.co/guide/en/ecs-logging/overview/master/intro.html), ' +
+          'suitable for ingestion into Elasticsearch for further Log analysis.',
+      }
+    ),
+    options: [
+      { text: 'off', value: 'off' },
+      { text: 'shade', value: 'shade' },
+      { text: 'replace', value: 'replace' },
+      { text: 'override', value: 'override' },
+    ],
+    includeAgents: ['java'],
   },
 
   // LOG_LEVEL
@@ -307,10 +375,33 @@ export const generalSettings: RawSettingDefinition[] = [
       'xpack.apm.agentConfig.spanFramesMinDuration.description',
       {
         defaultMessage:
-          'In its default settings, the APM agent will collect a stack trace with every recorded span.\nWhile this is very helpful to find the exact place in your code that causes the span, collecting this stack trace does have some overhead. \nWhen setting this option to a negative value, like `-1ms`, stack traces will be collected for all spans. Setting it to a positive value, e.g. `5ms`, will limit stack trace collection to spans with durations equal to or longer than the given value, e.g. 5 milliseconds.\n\nTo disable stack trace collection for spans completely, set the value to `0ms`.',
+          '(Deprecated) In its default settings, the APM agent will collect a stack trace with every recorded span.\nWhile this is very helpful to find the exact place in your code that causes the span, collecting this stack trace does have some overhead. \nWhen setting this option to a negative value, like `-1ms`, stack traces will be collected for all spans. Setting it to a positive value, e.g. `5ms`, will limit stack trace collection to spans with durations equal to or longer than the given value, e.g. 5 milliseconds.\n\nTo disable stack trace collection for spans completely, set the value to `0ms`.',
       }
     ),
     excludeAgents: ['js-base', 'rum-js', 'nodejs', 'php'],
+  },
+
+  {
+    key: 'span_stack_trace_min_duration',
+    type: 'duration',
+    min: '-1ms',
+    defaultValue: '5ms',
+    label: i18n.translate('xpack.apm.agentConfig.spanStackTraceMinDuration.label', {
+      defaultMessage: 'Span stack trace minimum duration',
+    }),
+    description: i18n.translate(
+      'xpack.apm.agentConfig.spanStackTraceMinDuration.description',
+      {
+        defaultMessage:
+          'While this is very helpful to find the exact place in your code that causes the span, ' +
+          'collecting this stack trace does have some overhead. When setting this option to the value `0ms`, ' +
+          'stack traces will be collected for all spans. Setting it to a positive value, e.g. `5ms`, will limit ' +
+          'stack trace collection to spans with durations equal to or longer than the given value, e.g. 5 milliseconds.\n' +
+          '\n' +
+          'To disable stack trace collection for spans completely, set the value to `-1ms`.',
+      }
+    ),
+    includeAgents: ['java', 'nodejs', 'python'],
   },
 
   // STACK_TRACE_LIMIT
