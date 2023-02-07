@@ -15,6 +15,7 @@ import { store } from '../../../state';
 import { ClientPluginsStart } from '../../../../plugin';
 import { AlertTls } from '../../../components/overview/alerts/alerts_containers/alert_tls';
 import { kibanaService } from '../../../state/kibana_service';
+import { UptimeDataViewContextProvider } from '../../../contexts/uptime_data_view_context';
 
 interface Props {
   core: CoreStart;
@@ -29,7 +30,9 @@ export default function TLSAlert({ core, plugins, ruleParams, setRuleParams }: P
   return (
     <ReduxProvider store={store}>
       <KibanaContextProvider services={{ ...core, ...plugins }}>
-        <AlertTls ruleParams={ruleParams} setRuleParams={setRuleParams} />
+        <UptimeDataViewContextProvider dataViews={plugins.dataViews}>
+          <AlertTls ruleParams={ruleParams} setRuleParams={setRuleParams} />
+        </UptimeDataViewContextProvider>
       </KibanaContextProvider>
     </ReduxProvider>
   );
