@@ -54,7 +54,7 @@ export const DiscoverHistogramLayout = ({
   });
 
   // Initialized when the first search has been requested or
-  // when in SQL mode since search sessions are not supported
+  // when in text-based mode since search sessions are not supported
   if (!searchSessionId && !isPlainRecord) {
     return null;
   }
