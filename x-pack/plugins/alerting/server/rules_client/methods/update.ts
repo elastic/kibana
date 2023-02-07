@@ -150,8 +150,9 @@ async function updateWithOCC<Params extends RuleTypeParams>(
 async function updateAlert<Params extends RuleTypeParams>(
   context: RulesClientContext,
   { id, data, allowMissingConnectorSecrets }: UpdateOptions<Params>,
-  { attributes, version }: SavedObject<RawRule>
+  currentRule: SavedObject<RawRule>
 ): Promise<PartialRule<Params>> {
+  const { attributes, version } = currentRule;
   const ruleType = context.ruleTypeRegistry.get(attributes.alertTypeId);
 
   // TODO https://github.com/elastic/kibana/issues/148414
@@ -202,7 +203,7 @@ async function updateAlert<Params extends RuleTypeParams>(
   const notifyWhen = getRuleNotifyWhenType(data.notifyWhen ?? null, data.throttle ?? null);
 
   // Increment revision if applicable field has changed
-  // const revision = incrementRevision(currentRule, updatedParams);
+  const revision = incrementRevision(currentRule, updatedParams);
 
   let updatedObject: SavedObject<RawRule>;
   const createAttributes = updateMeta(context, {
@@ -212,7 +213,7 @@ async function updateAlert<Params extends RuleTypeParams>(
     params: updatedParams as RawRule['params'],
     actions,
     notifyWhen,
-    revision: 0, // TODO: Resolve after merge
+    revision,
     updatedBy: username,
     updatedAt: new Date().toISOString(),
   });
