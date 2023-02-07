@@ -21,11 +21,7 @@ import { DatePickerContextProvider } from '@kbn/ml-date-picker';
 import { UI_SETTINGS } from '@kbn/data-plugin/common';
 import { toMountPoint, wrapWithTheme } from '@kbn/kibana-react-plugin/public';
 
-import {
-  SEARCH_QUERY_LANGUAGE,
-  SearchQueryLanguage,
-  SavedSearchSavedObject,
-} from '../../application/utils/search_utils';
+import { SEARCH_QUERY_LANGUAGE, SearchQueryLanguage } from '../../application/utils/search_utils';
 import type { AiopsAppDependencies } from '../../hooks/use_aiops_app_context';
 import { AiopsAppContext } from '../../hooks/use_aiops_app_context';
 import { DataSourceContext } from '../../hooks/use_data_source';
@@ -41,7 +37,7 @@ export interface ExplainLogRateSpikesAppStateProps {
   /** The data view to analyze. */
   dataView: DataView;
   /** The saved search to analyze. */
-  savedSearch: SavedSearch | SavedSearchSavedObject | null;
+  savedSearch: SavedSearch | null;
   /** App dependencies */
   appDependencies: AiopsAppDependencies;
 }
