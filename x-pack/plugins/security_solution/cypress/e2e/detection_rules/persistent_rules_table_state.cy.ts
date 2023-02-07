@@ -30,6 +30,9 @@ import {
   expectRulesMonitoringTab,
   expectNoTags,
   expectElasticAndCustomRules,
+  expectDisabledRules,
+  expectEnabledAndDisabledRules,
+  filterByDisabledRules,
 } from '../../tasks/alerts_detection_rules';
 import {
   RULES_MANAGEMENT_TABLE,
@@ -45,11 +48,12 @@ import {
   sortByTableColumn,
 } from '../../tasks/table_pagination';
 
-function createRule(id: string, name: string, tags?: string[]): void {
+function createRule(id: string, name: string, tags?: string[], enabled = false): void {
   const rule = getNewRule();
 
   rule.name = name;
   rule.tags = tags;
+  rule.enabled = enabled;
 
   createCustomRule(rule, id);
 }
@@ -62,6 +66,7 @@ function createTestRules(): void {
   createRule('5', 'rule 4', ['tag-b']);
   createRule('6', 'rule 5', ['tag-b', 'tag-c']);
   createRule('7', 'rule 6', ['tag-b']);
+  createRule('8', 'rule 7', ['tag-b'], true);
 }
 
 function visitWithState(urlTableState: Record<string, unknown>): void {
@@ -78,6 +83,7 @@ function changeRulesTableState(): void {
   filterBySearchTerm('rule');
   filterByTags(['tag-b']);
   filterByCustomRules();
+  filterByDisabledRules();
   sortByTableColumn('Rule', 'asc');
   setRowsPerPageTo(5);
 }
@@ -86,6 +92,7 @@ function expectRulesTableState(): void {
   expectFilterSearchTerm('rule');
   expectTags(['tag-b']);
   expectCustomRules();
+  expectDisabledRules();
   expectTableSorting('Rule', 'asc');
   expectRowsPerPage(5);
 }
@@ -94,6 +101,7 @@ function expectDefaultRulesTableState(): void {
   expectFilterSearchTerm('');
   expectNoTags();
   expectElasticAndCustomRules();
+  expectEnabledAndDisabledRules();
   expectTableSorting('Enabled', 'desc');
   expectRowsPerPage(20);
   expectTablePage(1);
@@ -138,6 +146,7 @@ describe('Persistent rules table state', () => {
         searchTerm: 'test',
         tags: ['tag-c'],
         source: 'prebuilt',
+        enabled: true,
         field: 'severity',
         order: 'desc',
         perPage: 10,
@@ -147,6 +156,7 @@ describe('Persistent rules table state', () => {
         searchTerm: 'rule',
         tags: ['tag-b'],
         source: 'custom',
+        enabled: false,
         field: 'name',
         order: 'asc',
         perPage: 5,
@@ -276,6 +286,7 @@ describe('Persistent rules table state', () => {
           searchTerm: 'rule',
           tags: ['tag-b'],
           source: 'custom',
+          enabled: false,
           field: 'name',
           order: 'asc',
           perPage: 5,
@@ -292,6 +303,7 @@ describe('Persistent rules table state', () => {
           searchTerm: 'rule',
           tags: ['tag-b'],
           source: 'custom',
+          enabled: false,
           field: 'name',
           order: 'asc',
           perPage: 5,
@@ -301,6 +313,7 @@ describe('Persistent rules table state', () => {
         expectFilterSearchTerm('rule');
         expectTags(['tag-b']);
         expectCustomRules();
+        expectDisabledRules();
         expectTableSorting('Rule', 'asc');
         expectRowsPerPage(20);
         expectTablePage(1);
@@ -312,6 +325,7 @@ describe('Persistent rules table state', () => {
           searchTerm: 'rule',
           tags: ['tag-b'],
           source: 'custom',
+          enabled: false,
           field: 'name',
           order: 'asc',
           perPage: -1,
@@ -321,6 +335,7 @@ describe('Persistent rules table state', () => {
         expectFilterSearchTerm('rule');
         expectTags(['tag-b']);
         expectCustomRules();
+        expectDisabledRules();
         expectTableSorting('Rule', 'asc');
         expectRowsPerPage(20);
         expectTablePage(1);
@@ -332,6 +347,7 @@ describe('Persistent rules table state', () => {
           searchTerm: 'rule',
           tags: ['tag-b'],
           source: 'invalid',
+          enabled: false,
           field: 'name',
           order: 'asc',
           perPage: 5,
@@ -341,6 +357,7 @@ describe('Persistent rules table state', () => {
         expectFilterSearchTerm('');
         expectNoTags();
         expectElasticAndCustomRules();
+        expectEnabledAndDisabledRules();
         expectTableSorting('Rule', 'asc');
         expectRowsPerPage(5);
         expectTablePage(2);
@@ -355,6 +372,7 @@ describe('Persistent rules table state', () => {
           searchTerm: 'rule',
           tags: ['tag-b'],
           source: 'custom',
+          enabled: false,
           field: 'name',
           order: 'asc',
           perPage: 5,
@@ -372,6 +390,7 @@ describe('Persistent rules table state', () => {
           searchTerm: 'rule',
           tags: ['tag-b'],
           source: 'custom',
+          enabled: false,
           field: 'name',
           order: 'asc',
           perPage: -1,
@@ -382,6 +401,7 @@ describe('Persistent rules table state', () => {
         expectFilterSearchTerm('rule');
         expectTags(['tag-b']);
         expectCustomRules();
+        expectDisabledRules();
         expectTableSorting('Rule', 'asc');
         expectRowsPerPage(20);
         expectTablePage(1);
@@ -393,6 +413,7 @@ describe('Persistent rules table state', () => {
           searchTerm: 'rule',
           tags: ['tag-b'],
           source: 'invalid',
+          enabled: false,
           field: 'name',
           order: 'asc',
           perPage: 5,
@@ -403,6 +424,7 @@ describe('Persistent rules table state', () => {
         expectFilterSearchTerm('');
         expectNoTags();
         expectElasticAndCustomRules();
+        expectEnabledAndDisabledRules();
         expectTableSorting('Rule', 'asc');
         expectRowsPerPage(5);
         expectTablePage(1);

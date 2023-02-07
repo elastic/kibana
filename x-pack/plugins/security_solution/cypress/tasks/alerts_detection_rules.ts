@@ -58,6 +58,8 @@ import {
   RULES_TABLE_REFRESH_INDICATOR,
   RULES_MANAGEMENT_TAB,
   RULES_MONITORING_TAB,
+  ENABLED_RULES_BTN,
+  DISABLED_RULES_BTN,
 } from '../screens/alerts_detection_rules';
 import type { RULES_MONITORING_TABLE } from '../screens/alerts_detection_rules';
 import { EUI_CHECKBOX } from '../screens/common/controls';
@@ -188,6 +190,14 @@ export const filterByElasticRules = () => {
 
 export const filterByCustomRules = () => {
   cy.get(CUSTOM_RULES_BTN).click({ force: true });
+};
+
+export const filterByEnabledRules = () => {
+  cy.get(ENABLED_RULES_BTN).click({ force: true });
+};
+
+export const filterByDisabledRules = () => {
+  cy.get(DISABLED_RULES_BTN).click({ force: true });
 };
 
 export const goToRuleDetails = () => {
@@ -391,6 +401,21 @@ export const expectElasticAndCustomRules = () => {
   cy.get(`${ELASTIC_RULES_BTN}.euiFilterButton-hasActiveFilters`).should('not.exist');
   cy.get(CUSTOM_RULES_BTN).should('exist');
   cy.get(`${CUSTOM_RULES_BTN}.euiFilterButton-hasActiveFilters`).should('not.exist');
+};
+
+export const expectEnabledRules = () => {
+  cy.get(`${ENABLED_RULES_BTN}.euiFilterButton-hasActiveFilters`).should('exist');
+};
+
+export const expectDisabledRules = () => {
+  cy.get(`${DISABLED_RULES_BTN}.euiFilterButton-hasActiveFilters`).should('exist');
+};
+
+export const expectEnabledAndDisabledRules = () => {
+  cy.get(ENABLED_RULES_BTN).should('exist');
+  cy.get(`${ENABLED_RULES_BTN}.euiFilterButton-hasActiveFilters`).should('not.exist');
+  cy.get(DISABLED_RULES_BTN).should('exist');
+  cy.get(`${DISABLED_RULES_BTN}.euiFilterButton-hasActiveFilters`).should('not.exist');
 };
 
 export const expectNumberOfRules = (
