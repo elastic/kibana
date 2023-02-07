@@ -49,6 +49,7 @@ export const ruleRegistrySearchStrategyProvider = (
       // is different than every other solution so we need to special case
       // those requests.
       let siemRequest = false;
+      let params = {};
       if (request.featureIds.length === 1 && request.featureIds[0] === AlertConsumers.SIEM) {
         siemRequest = true;
       } else if (request.featureIds.includes(AlertConsumers.SIEM)) {
@@ -123,7 +124,7 @@ export const ruleRegistrySearchStrategyProvider = (
                 }),
           };
           const size = request.pagination ? request.pagination.pageSize : MAX_ALERT_SEARCH_SIZE;
-          const params = {
+          params = {
             allow_no_indices: true,
             index: indices,
             ignore_unavailable: true,
@@ -143,7 +144,7 @@ export const ruleRegistrySearchStrategyProvider = (
             deps
           );
         }),
-        map((response) => {
+        map((response: RuleRegistrySearchResponse) => {
           if (!response.rawResponse?.hits?.hits) {
             return response;
           }
@@ -168,6 +169,14 @@ export const ruleRegistrySearchStrategyProvider = (
 
             return hit;
           });
+
+
+          try {
+            response.inspect = { dsl: [JSON.stringify(params)] };
+          } catch (error) {
+            logger.error(`Failed to stringify rule registry search strategy params: ${error}`);
+            response.inspect = { dsl: [] };
+          }
 
           return {
             ...response,
