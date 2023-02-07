@@ -17,7 +17,6 @@ import { asPercent } from '@kbn/observability-plugin/common/utils/formatters';
 import { termQuery } from '@kbn/observability-plugin/server';
 import { addSpaceIdToPath } from '@kbn/spaces-plugin/common';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
-import { getAlertDetailsUrl } from '@kbn/infra-plugin/server/lib/alerting/common/utils';
 import {
   ENVIRONMENT_NOT_DEFINED,
   getEnvironmentEsField,
@@ -67,7 +66,6 @@ export function registerTransactionErrorRateRuleType({
   basePath,
   config$,
   logger,
-  observability,
   ruleDataClient,
 }: RegisterRuleDependencies) {
   const createLifecycleRuleType = createLifecycleRuleTypeFactory({
@@ -86,9 +84,6 @@ export function registerTransactionErrorRateRuleType({
       },
       actionVariables: {
         context: [
-          ...(observability.getAlertDetailsConfig()?.apm.enabled
-            ? [apmActionVariables.alertDetailsUrl]
-            : []),
           apmActionVariables.environment,
           apmActionVariables.interval,
           apmActionVariables.reason,
@@ -105,8 +100,7 @@ export function registerTransactionErrorRateRuleType({
       executor: async ({ services, spaceId, params: ruleParams }) => {
         const config = await firstValueFrom(config$);
 
-        const { getAlertUuid, savedObjectsClient, scopedClusterClient } =
-          services;
+        const { savedObjectsClient, scopedClusterClient } = services;
 
         const indices = await getApmIndices({
           config,
@@ -248,14 +242,6 @@ export function registerTransactionErrorRateRuleType({
             .filter((name) => name)
             .join('_');
 
-          const alertUuid = getAlertUuid(id);
-
-          const alertDetailsUrl = getAlertDetailsUrl(
-            basePath,
-            spaceId,
-            alertUuid
-          );
-
           const relativeViewInAppUrl = getAlertUrlTransaction(
             serviceName,
             getEnvironmentEsField(environment)?.[SERVICE_ENVIRONMENT],
@@ -283,7 +269,6 @@ export function registerTransactionErrorRateRuleType({
               },
             })
             .scheduleActions(ruleTypeConfig.defaultActionGroupId, {
-              alertDetailsUrl,
               environment: getEnvironmentLabel(environment),
               interval: `${ruleParams.windowSize}${ruleParams.windowUnit}`,
               reason: reasonMessage,

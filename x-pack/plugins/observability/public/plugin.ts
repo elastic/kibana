@@ -66,9 +66,6 @@ export interface ConfigSchema {
       enabled: boolean;
     };
     alertDetails: {
-      apm: {
-        enabled: boolean;
-      };
       metrics: {
         enabled: boolean;
       };

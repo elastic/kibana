@@ -15,7 +15,6 @@ import {
 import { createLifecycleRuleTypeFactory } from '@kbn/rule-registry-plugin/server';
 import { termQuery } from '@kbn/observability-plugin/server';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
-import { getAlertDetailsUrl } from '@kbn/infra-plugin/server/lib/alerting/common/utils';
 import { addSpaceIdToPath } from '@kbn/spaces-plugin/common';
 
 import {
@@ -60,7 +59,6 @@ export function registerErrorCountRuleType({
   basePath,
   config$,
   logger,
-  observability,
   ruleDataClient,
 }: RegisterRuleDependencies) {
   const createLifecycleRuleType = createLifecycleRuleTypeFactory({
@@ -79,9 +77,6 @@ export function registerErrorCountRuleType({
       },
       actionVariables: {
         context: [
-          ...(observability.getAlertDetailsConfig()?.apm.enabled
-            ? [apmActionVariables.alertDetailsUrl]
-            : []),
           apmActionVariables.environment,
           apmActionVariables.interval,
           apmActionVariables.reason,
@@ -97,8 +92,7 @@ export function registerErrorCountRuleType({
       executor: async ({ params: ruleParams, services, spaceId }) => {
         const config = await firstValueFrom(config$);
 
-        const { getAlertUuid, savedObjectsClient, scopedClusterClient } =
-          services;
+        const { savedObjectsClient, scopedClusterClient } = services;
 
         const indices = await getApmIndices({
           config,
@@ -191,13 +185,6 @@ export function registerErrorCountRuleType({
               relativeViewInAppUrl
             );
 
-            const alertUuid = getAlertUuid(id);
-            const alertDetailsUrl = getAlertDetailsUrl(
-              basePath,
-              spaceId,
-              alertUuid
-            );
-
             services
               .alertWithLifecycle({
                 id,
@@ -212,7 +199,6 @@ export function registerErrorCountRuleType({
                 },
               })
               .scheduleActions(ruleTypeConfig.defaultActionGroupId, {
-                alertDetailsUrl,
                 environment: getEnvironmentLabel(environment),
                 interval: `${ruleParams.windowSize}${ruleParams.windowUnit}`,
                 reason: alertReason,
