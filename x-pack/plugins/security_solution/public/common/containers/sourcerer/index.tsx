@@ -26,6 +26,7 @@ import {
   OVERVIEW_PATH,
   RULES_PATH,
   CASES_PATH,
+  DATA_QUALITY_PATH,
 } from '../../../../common/constants';
 import { TimelineId } from '../../../../common/types';
 import { useDeepEqualSelector } from '../../hooks/use_selector';
@@ -464,6 +465,7 @@ export const getScopeFromPath = (
 
 export const sourcererPaths = [
   ALERTS_PATH,
+  DATA_QUALITY_PATH,
   `${RULES_PATH}/id/:id`,
   HOSTS_PATH,
   USERS_PATH,

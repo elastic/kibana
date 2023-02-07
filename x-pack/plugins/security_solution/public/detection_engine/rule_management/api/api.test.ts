@@ -493,6 +493,7 @@ describe('Detections Rules API', () => {
         },
         query: {
           overwrite: false,
+          overwrite_action_connectors: false,
           overwrite_exceptions: false,
         },
       });
@@ -510,6 +511,7 @@ describe('Detections Rules API', () => {
         query: {
           overwrite: true,
           overwrite_exceptions: false,
+          overwrite_action_connectors: false,
         },
       });
     });
@@ -523,6 +525,10 @@ describe('Detections Rules API', () => {
         exceptions_errors: [],
         exceptions_success: true,
         exceptions_success_count: 0,
+        action_connectors_success: true,
+        action_connectors_success_count: 0,
+        action_connectors_errors: [],
+        action_connectors_warnings: [],
       });
       const resp = await importRules({ fileToImport, signal: abortCtrl.signal });
       expect(resp).toEqual({
@@ -533,6 +539,10 @@ describe('Detections Rules API', () => {
         exceptions_errors: [],
         exceptions_success: true,
         exceptions_success_count: 0,
+        action_connectors_success: true,
+        action_connectors_success_count: 0,
+        action_connectors_errors: [],
+        action_connectors_warnings: [],
       });
     });
   });
