@@ -114,11 +114,13 @@ export interface ConfigData {
 
 export const formatHeartbeatRequest = (
   { monitor, configId, heartbeatId, runOnce, testRunId }: Omit<ConfigData, 'params'>,
-  paramsString: string
+  params?: string
 ): HeartbeatConfig => {
   const projectId = (monitor as BrowserFields)[ConfigKey.PROJECT_ID];
 
   const heartbeatIdT = heartbeatId ?? monitor[ConfigKey.MONITOR_QUERY_ID];
+
+  const paramsString = params ?? (monitor as BrowserFields)[ConfigKey.PARAMS];
 
   return {
     ...monitor,
