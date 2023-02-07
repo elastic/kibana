@@ -177,7 +177,12 @@ describe('SyntheticsMonitorClient', () => {
     );
 
     expect(syntheticsService.editConfig).toHaveBeenCalledTimes(1);
-    expect(syntheticsService.editConfig).toHaveBeenCalledWith(deletePayload);
+    expect(syntheticsService.editConfig).toHaveBeenCalledWith([
+      {
+        monitor,
+        configId: id,
+      },
+    ]);
     expect(syntheticsService.deleteConfigs).toHaveBeenCalledTimes(1);
     expect(client.privateLocationAPI.editMonitors).toHaveBeenCalledTimes(1);
   });

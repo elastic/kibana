@@ -109,7 +109,7 @@ describe('syncEditedMonitor', () => {
     expect(syntheticsService.editConfig).toHaveBeenCalledWith(
       expect.arrayContaining([
         expect.objectContaining({
-          id: '7af7e2f0-d5dc-11ec-87ac-bdfdb894c53d',
+          configId: '7af7e2f0-d5dc-11ec-87ac-bdfdb894c53d',
         }),
       ])
     );
