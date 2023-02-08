@@ -11,7 +11,7 @@
  * 2.0.
  */
 
-import { ENDPOINTS_ACTION_LIST_ROUTE } from '../../../../common/endpoint/constants';
+import { BASE_ENDPOINT_ACTION_ROUTE } from '../../../../common/endpoint/constants';
 import { EndpointActionListRequestSchema } from '../../../../common/endpoint/schema/actions';
 import { actionListHandler } from './list_handler';
 
@@ -28,7 +28,7 @@ export function registerActionListRoutes(
 ) {
   router.get(
     {
-      path: ENDPOINTS_ACTION_LIST_ROUTE,
+      path: BASE_ENDPOINT_ACTION_ROUTE,
       validate: EndpointActionListRequestSchema,
       options: { authRequired: true, tags: ['access:securitySolution'] },
     },
