@@ -96,7 +96,7 @@ export const MetricItemIcon = ({
                 }
               }}
             >
-              <EuiButtonIcon iconType="alert" color="danger" size="m" />
+              <EuiButtonIcon iconType="alert" color="danger" size="m" aria-label={ERROR_DETAILS} />
             </StyledIcon>
           }
           isOpen={configIdByLocation === isPopoverOpen}
