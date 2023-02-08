@@ -48,6 +48,7 @@ import {
   NameField,
   schema,
   Footer,
+  SubmittingType,
   AdvancedParamsContent,
   PreviewPanel,
   RollupBetaWarning,
@@ -297,7 +298,14 @@ const IndexPatternEditorFlyoutContentComponent = ({
             form.setFieldValue('isAdHoc', adhoc || false);
             form.submit();
           }}
-          submitDisabled={form.isSubmitted && !form.isValid}
+          submitDisabled={(form.isSubmitted && !form.isValid) || form.isSubmitting}
+          submittingType={
+            form.isSubmitting
+              ? form.getFormData().isAdHoc
+                ? SubmittingType.savingAsAdHoc
+                : SubmittingType.persisting
+              : undefined
+          }
           isEdit={!!editData}
           isPersisted={Boolean(editData && editData.isPersisted())}
           allowAdHoc={allowAdHoc}

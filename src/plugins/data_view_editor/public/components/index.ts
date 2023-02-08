@@ -15,6 +15,6 @@ export { schema } from './form_schema';
 export { NameField, TimestampField, TypeField, TitleField } from './form_fields';
 export { PreviewPanel } from './preview_panel';
 export { LoadingIndices } from './loading_indices';
-export { Footer } from './footer';
+export { Footer, SubmittingType } from './footer';
 export { AdvancedParamsContent } from './advanced_params_content';
 export { RollupBetaWarning } from './rollup_beta_warning';
