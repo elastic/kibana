@@ -67,6 +67,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   };
 
   // Failing: See https://github.com/elastic/kibana/issues/150561
+  // Failing: See https://github.com/elastic/kibana/issues/150562
   describe.skip('Download CSV', () => {
     before('initialize tests', async () => {
       log.debug('ReportingPage:initTests');
