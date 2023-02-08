@@ -169,7 +169,7 @@ variables:
 `alerts.all.data`::
 An array of objects for all alerts. The following object properties are examples; it is not a comprehensive list.
 +
-.Properties of the alerts.all.data objects:
+.Properties of the alerts.all.data objects
 [%collapsible%open]
 =====
 //# tag::alerts-data[]
@@ -187,7 +187,7 @@ An array of objects for all alerts. The following object properties are examples
 `alerts.new.data`::
 An array of objects for new alerts. The following object properties are examples; it is not a comprehensive list.
 +
-.Properties of the alerts.new.data objects:
+.Properties of the alerts.new.data objects
 [%collapsible]
 =====
 include::create-and-manage-rules.asciidoc[tag=alerts-data]
@@ -198,7 +198,7 @@ include::create-and-manage-rules.asciidoc[tag=alerts-data]
 `alerts.ongoing.data`::
 An array of objects for ongoing alerts. The following object properties are examples; it is not a comprehensive list.
 +
-.Properties of the alerts.ongoing.data objects:
+.Properties of the alerts.ongoing.data objects
 [%collapsible]
 =====
 include::create-and-manage-rules.asciidoc[tag=alerts-data]
@@ -209,7 +209,7 @@ include::create-and-manage-rules.asciidoc[tag=alerts-data]
 `alerts.recovered.data`::
 An array of objects for recovered alerts. The following object properties are examples; it is not a comprehensive list.
 +
-.Properties of the alerts.recovered.data objects:
+.Properties of the alerts.recovered.data objects
 [%collapsible]
 =====
 include::create-and-manage-rules.asciidoc[tag=alerts-data]
