@@ -18,10 +18,16 @@ import { savedSearchMock, savedSearchMockWithTimeField } from '../../../__mocks_
 import { discoverServiceMock } from '../../../__mocks__/services';
 import { dataViewMock } from '../../../__mocks__/data_view';
 import { dataViewComplexMock } from '../../../__mocks__/data_view_complex';
+import { DiscoverAppStateContainer } from './discover_app_state_container';
 
 let history: History;
 let state: DiscoverStateContainer;
 const getCurrentUrl = () => history.createHref(history.location);
+const startSync = (appState: DiscoverAppStateContainer) => {
+  const { start, stop } = appState.syncState();
+  start();
+  return stop;
+};
 
 describe('Test discover state', () => {
   let stopSync = () => {};
@@ -35,7 +41,7 @@ describe('Test discover state', () => {
       history,
     });
     await state.appState.update({}, true);
-    stopSync = state.startSync();
+    stopSync = startSync(state.appState);
   });
   afterEach(() => {
     stopSync();
@@ -43,7 +49,7 @@ describe('Test discover state', () => {
   });
   test('setting app state and syncing to URL', async () => {
     state.setAppState({ index: 'modified' });
-    state.flushToUrl();
+    state.kbnUrlStateStorage.kbnUrlControls.flush();
     expect(getCurrentUrl()).toMatchInlineSnapshot(
       `"/#?_a=(columns:!(default_column),index:modified,interval:auto,sort:!())"`
     );
@@ -97,7 +103,7 @@ describe('Test discover initial state sort handling', () => {
       history,
     });
     await state.appState.update({}, true);
-    const stopSync = state.startSync();
+    const stopSync = startSync(state.appState);
     expect(state.appState.getState().sort).toEqual([['order_date', 'desc']]);
     stopSync();
   });
@@ -111,7 +117,7 @@ describe('Test discover initial state sort handling', () => {
       history,
     });
     await state.appState.update({}, true);
-    const stopSync = state.startSync();
+    const stopSync = startSync(state.appState);
     expect(state.appState.getState().sort).toEqual([['bytes', 'desc']]);
     stopSync();
   });
@@ -124,7 +130,7 @@ describe('Test discover initial state sort handling', () => {
       history,
     });
     await state.appState.update({}, true);
-    const stopSync = state.startSync();
+    const stopSync = startSync(state.appState);
     expect(state.appState.getState().sort).toEqual([['timestamp', 'desc']]);
     stopSync();
   });
