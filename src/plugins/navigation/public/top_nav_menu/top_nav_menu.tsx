@@ -7,13 +7,7 @@
  */
 
 import React, { ReactElement } from 'react';
-import {
-  EuiBadge,
-  EuiBadgeGroup,
-  EuiBadgeProps,
-  EuiHeaderLinks,
-  EuiScreenReaderLive,
-} from '@elastic/eui';
+import { EuiBadge, EuiBadgeGroup, EuiBadgeProps, EuiHeaderLinks } from '@elastic/eui';
 import classNames from 'classnames';
 
 import { MountPoint } from '@kbn/core/public';
@@ -101,11 +95,9 @@ export function TopNavMenu<QT extends AggregateQuery | Query = Query>(
   function renderMenu(className: string): ReactElement | null {
     if (!config || config.length === 0) return null;
     return (
-      <EuiScreenReaderLive>
-        <EuiHeaderLinks data-test-subj="top-nav" gutterSize="xs" className={className}>
-          {renderItems()}
-        </EuiHeaderLinks>
-      </EuiScreenReaderLive>
+      <EuiHeaderLinks data-test-subj="top-nav" gutterSize="xs" className={className}>
+        {renderItems()}
+      </EuiHeaderLinks>
     );
   }
 

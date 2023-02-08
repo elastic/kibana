@@ -10,7 +10,6 @@ import React from 'react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { AggregateQuery, Query } from '@kbn/es-query';
 import { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
-import { EuiScreenReaderLive } from '@elastic/eui';
 import { TopNavMenuProps, TopNavMenu } from './top_nav_menu';
 import { RegisteredTopNavMenuData } from './top_nav_menu_data';
 
@@ -25,11 +24,9 @@ export function createTopNav(
     const config = (props.config || []).concat(relevantConfig);
 
     return (
-      <EuiScreenReaderLive>
-        <I18nProvider>
-          <TopNavMenu {...props} unifiedSearch={unifiedSearch} config={config} />
-        </I18nProvider>
-      </EuiScreenReaderLive>
+      <I18nProvider>
+        <TopNavMenu {...props} unifiedSearch={unifiedSearch} config={config} />
+      </I18nProvider>
     );
   };
 }
