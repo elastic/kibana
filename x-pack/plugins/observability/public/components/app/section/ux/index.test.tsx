@@ -21,6 +21,8 @@ jest.mock('react-router-dom', () => ({
 }));
 
 describe('UXSection', () => {
+  const bucketSize = { intervalString: '60s', bucketSize: 60, dateFormat: 'YYYY-MM-DD HH:mm' };
+
   beforeAll(() => {
     jest.spyOn(hasDataHook, 'useHasData').mockReturnValue({
       hasDataMap: {
@@ -44,9 +46,7 @@ describe('UXSection', () => {
       status: fetcherHook.FETCH_STATUS.SUCCESS,
       refetch: jest.fn(),
     });
-    const { getByText, getAllByText } = render(
-      <UXSection bucketSize={{ bucketSize: 60, intervalString: '60s' }} />
-    );
+    const { getByText, getAllByText } = render(<UXSection bucketSize={bucketSize} />);
 
     expect(getByText('User Experience')).toBeInTheDocument();
     expect(getByText('Show dashboard')).toBeInTheDocument();
@@ -79,7 +79,7 @@ describe('UXSection', () => {
       refetch: jest.fn(),
     });
     const { getByText, queryAllByText, getAllByText } = render(
-      <UXSection bucketSize={{ bucketSize: 60, intervalString: '60s' }} />
+      <UXSection bucketSize={bucketSize} />
     );
 
     expect(getByText('User Experience')).toBeInTheDocument();
@@ -94,7 +94,7 @@ describe('UXSection', () => {
       refetch: jest.fn(),
     });
     const { getByText, queryAllByText, getAllByText } = render(
-      <UXSection bucketSize={{ bucketSize: 60, intervalString: '60s' }} />
+      <UXSection bucketSize={bucketSize} />
     );
 
     expect(getByText('User Experience')).toBeInTheDocument();
