@@ -20,11 +20,11 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useSelector } from 'react-redux';
 import { selectOverviewStatus } from '../../../../state/overview_status';
 import { AlertsLink } from '../../../common/links/view_alerts';
-import { useAbsoluteDate } from '../../../../hooks';
+import { useRefreshedRange } from '../../../../hooks';
 import { ClientPluginsStart } from '../../../../../../plugin';
 
 export const OverviewAlerts = () => {
-  const { from, to } = useAbsoluteDate({ from: 'now-12h', to: 'now' });
+  const { from, to } = useRefreshedRange(12, 'hours');
 
   const { observability } = useKibana<ClientPluginsStart>().services;
   const { ExploratoryViewEmbeddable } = observability;
@@ -47,6 +47,7 @@ export const OverviewAlerts = () => {
         <EuiFlexGroup alignItems="center" gutterSize="m">
           <EuiFlexItem grow={false}>
             <ExploratoryViewEmbeddable
+              id="monitorActiveAlertsCount"
               dataTestSubj="monitorActiveAlertsCount"
               reportType="single-metric"
               customHeight="70px"
@@ -74,6 +75,7 @@ export const OverviewAlerts = () => {
           </EuiFlexItem>
           <EuiFlexItem>
             <ExploratoryViewEmbeddable
+              id="monitorActiveAlertsOverTime"
               sparklineMode
               customHeight="70px"
               reportType="kpi-over-time"

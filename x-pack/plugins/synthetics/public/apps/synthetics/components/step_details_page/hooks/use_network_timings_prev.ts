@@ -158,9 +158,9 @@ export const useNetworkTimingsPrevious24Hours = (
         },
       },
     },
-    [configId, stepIndex, checkGroupId],
+    [],
     {
-      name: `stepNetworkPreviousTimings/${configId}/${stepIndex}`,
+      name: `stepNetworkPreviousTimings/${configId}/${checkGroupId}/${stepIndex}`,
       isRequestReady: Boolean(timestamp),
     }
   );
@@ -196,7 +196,7 @@ export const useNetworkTimingsPrevious24Hours = (
   };
 
   return {
-    loading,
+    loading: loading && !data,
     timings,
     timingsWithLabels: getTimingWithLabels(timings),
   };

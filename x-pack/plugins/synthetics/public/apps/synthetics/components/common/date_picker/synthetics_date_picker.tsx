@@ -7,6 +7,7 @@
 
 import React, { useContext, useEffect } from 'react';
 import { EuiSuperDatePicker } from '@elastic/eui';
+import { CLIENT_DEFAULTS_SYNTHETICS } from '../../../../../../common/constants/synthetics/client_defaults';
 import { useUrlParams } from '../../../hooks';
 import { CLIENT_DEFAULTS } from '../../../../../../common/constants';
 import {
@@ -16,7 +17,7 @@ import {
 } from '../../../contexts';
 
 const isSyntheticsDefaultDateRange = (dateRangeStart: string, dateRangeEnd: string) => {
-  const { DATE_RANGE_START, DATE_RANGE_END } = CLIENT_DEFAULTS;
+  const { DATE_RANGE_START, DATE_RANGE_END } = CLIENT_DEFAULTS_SYNTHETICS;
 
   return dateRangeStart === DATE_RANGE_START && dateRangeEnd === DATE_RANGE_END;
 };
@@ -32,8 +33,8 @@ export const SyntheticsDatePicker = ({ fullWidth }: { fullWidth?: boolean }) => 
   const sharedTimeState = data?.query.timefilter.timefilter.getTime();
 
   const {
-    autorefreshInterval,
-    autorefreshIsPaused,
+    refreshInterval,
+    refreshPaused,
     dateRangeStart: start,
     dateRangeEnd: end,
   } = getUrlParams();
@@ -70,8 +71,8 @@ export const SyntheticsDatePicker = ({ fullWidth }: { fullWidth?: boolean }) => 
       start={start}
       end={end}
       commonlyUsedRanges={euiCommonlyUsedRanges}
-      isPaused={autorefreshIsPaused}
-      refreshInterval={autorefreshInterval}
+      isPaused={refreshPaused}
+      refreshInterval={refreshInterval}
       onTimeChange={({ start: startN, end: endN }) => {
         if (data?.query?.timefilter?.timefilter) {
           data?.query.timefilter.timefilter.setTime({ from: startN, to: endN });
@@ -81,11 +82,11 @@ export const SyntheticsDatePicker = ({ fullWidth }: { fullWidth?: boolean }) => 
         refreshApp();
       }}
       onRefresh={refreshApp}
-      onRefreshChange={({ isPaused, refreshInterval }) => {
+      onRefreshChange={({ isPaused, refreshInterval: newRefreshInterval }) => {
         updateUrl({
-          autorefreshInterval:
-            refreshInterval === undefined ? autorefreshInterval : refreshInterval,
-          autorefreshIsPaused: isPaused,
+          refreshInterval:
+            newRefreshInterval === undefined ? newRefreshInterval : newRefreshInterval,
+          refreshPaused: isPaused,
         });
       }}
     />

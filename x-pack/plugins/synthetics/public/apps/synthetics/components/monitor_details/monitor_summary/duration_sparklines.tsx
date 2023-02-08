@@ -36,6 +36,7 @@ export const DurationSparklines = (props: DurationSparklinesProps) => {
   return (
     <>
       <ExploratoryViewEmbeddable
+        id="avgDurationSparkline"
         reportType={ReportTypes.KPI}
         axisTitlesVisibility={{ x: false, yRight: false, yLeft: false }}
         legendIsVisible={false}

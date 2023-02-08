@@ -34,6 +34,7 @@ export const DurationPanel = (props: DurationPanelProps) => {
 
   return (
     <ExploratoryViewEmbeddable
+      id="avgDuration"
       align="left"
       customHeight="70px"
       reportType={ReportTypes.SINGLE_METRIC}

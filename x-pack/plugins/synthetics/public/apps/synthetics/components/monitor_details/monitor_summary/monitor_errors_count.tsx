@@ -33,6 +33,7 @@ export const MonitorErrorsCount = ({ monitorId, from, to }: MonitorErrorsCountPr
 
   return (
     <ExploratoryViewEmbeddable
+      id="monitorErrorsCount"
       align="left"
       customHeight="70px"
       reportType={ReportTypes.SINGLE_METRIC}

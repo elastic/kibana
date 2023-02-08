@@ -30,7 +30,7 @@ const UseUrlParamsTestComponent = ({
       <button
         id="setUrlParams"
         onClick={() => {
-          updateUrlParams(updateParams);
+          updateUrlParams(updateParams as any);
         }}
       >
         Set url params
@@ -54,11 +54,13 @@ describe('useUrlParams', () => {
   it('accepts router props, updates URL params, and returns the current params', async () => {
     const { findByText, history } = render(
       <SyntheticsRefreshContext.Provider
-        value={{
-          lastRefresh: 123,
-          refreshApp: jest.fn(),
-          refreshInterval: APP_DEFAULT_REFRESH_INTERVAL,
-        }}
+        value={
+          {
+            lastRefresh: 123,
+            refreshApp: jest.fn(),
+            refreshInterval: APP_DEFAULT_REFRESH_INTERVAL,
+          } as any
+        }
       >
         <UseUrlParamsTestComponent hook={useUrlParams} />
       </SyntheticsRefreshContext.Provider>
@@ -78,11 +80,13 @@ describe('useUrlParams', () => {
   it('clears search when null is passed to params', async () => {
     const { findByText, history } = render(
       <SyntheticsRefreshContext.Provider
-        value={{
-          lastRefresh: 123,
-          refreshApp: jest.fn(),
-          refreshInterval: APP_DEFAULT_REFRESH_INTERVAL,
-        }}
+        value={
+          {
+            lastRefresh: 123,
+            refreshApp: jest.fn(),
+            refreshInterval: APP_DEFAULT_REFRESH_INTERVAL,
+          } as any
+        }
       >
         <UseUrlParamsTestComponent hook={useUrlParams} updateParams={null} />
       </SyntheticsRefreshContext.Provider>

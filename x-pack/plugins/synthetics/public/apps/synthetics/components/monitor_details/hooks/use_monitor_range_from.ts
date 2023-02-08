@@ -7,18 +7,21 @@
 
 import { useMemo } from 'react';
 import moment from 'moment';
+import { useRefreshedRange } from '../../../hooks';
 import { useSelectedMonitor } from './use_selected_monitor';
 
-export const useEarliestStartDate = () => {
+export const useMonitorRangeFrom = () => {
   const { monitor, loading } = useSelectedMonitor();
+
+  const { from, to } = useRefreshedRange(30, 'days');
 
   return useMemo(() => {
     if (monitor?.created_at) {
       const diff = moment(monitor?.created_at).diff(moment().subtract(30, 'day'), 'days');
       if (diff > 0) {
-        return { from: monitor?.created_at, loading };
+        return { to, from: monitor?.created_at, loading };
       }
     }
-    return { from: 'now-30d/d', loading };
-  }, [monitor?.created_at, loading]);
+    return { to, from, loading };
+  }, [monitor?.created_at, to, from, loading]);
 };

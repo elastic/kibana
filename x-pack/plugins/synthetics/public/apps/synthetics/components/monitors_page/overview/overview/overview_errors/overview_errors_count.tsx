@@ -32,6 +32,7 @@ export const OverviewErrorsCount = ({
 
   return (
     <ExploratoryViewEmbeddable
+      id="overviewErrorsCount"
       align="left"
       customHeight="70px"
       reportType={ReportTypes.SINGLE_METRIC}

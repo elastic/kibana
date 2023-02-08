@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { useEsSearch } from '@kbn/observability-plugin/public';
 import { useParams } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
+import { useReduxEsSearch } from '../../../hooks/use_redux_es_search';
 import { formatBytes } from './use_object_metrics';
 import { formatMillisecond } from '../step_metrics/step_metrics';
 import {
@@ -36,7 +36,7 @@ export const useStepMetrics = (step?: JourneyStep) => {
   const checkGroupId = step?.monitor.check_group ?? urlParams.checkGroupId;
   const stepIndex = step?.synthetics.step?.index ?? urlParams.stepIndex;
 
-  const { data } = useEsSearch(
+  const { data } = useReduxEsSearch(
     {
       index: SYNTHETICS_INDEX_PATTERN,
       body: {
@@ -91,20 +91,17 @@ export const useStepMetrics = (step?: JourneyStep) => {
         },
       },
     },
-    [stepIndex, checkGroupId],
-    { name: 'stepMetrics' }
+    [],
+    { name: `stepMetrics/${checkGroupId}/${stepIndex}` }
   );
 
-  const { data: transferData } = useEsSearch(
+  const { data: transferData } = useReduxEsSearch(
     {
       index: SYNTHETICS_INDEX_PATTERN,
       body: {
         size: 0,
         runtime_mappings: {
           'synthetics.payload.transfer_size': {
-            type: 'double',
-          },
-          'synthetics.payload.resource_size': {
             type: 'double',
           },
         },
@@ -135,17 +132,12 @@ export const useStepMetrics = (step?: JourneyStep) => {
               field: 'synthetics.payload.transfer_size',
             },
           },
-          resourceSize: {
-            sum: {
-              field: 'synthetics.payload.resource_size',
-            },
-          },
         },
       },
     },
-    [stepIndex, checkGroupId],
+    [],
     {
-      name: 'stepMetricsFromNetworkInfos',
+      name: `stepMetricsFromNetworkInfos/${checkGroupId}/${stepIndex}`,
     }
   );
 
@@ -153,10 +145,6 @@ export const useStepMetrics = (step?: JourneyStep) => {
   const transferDataVal = transferData?.aggregations?.transferSize?.value ?? 0;
 
   return {
-    ...(data?.aggregations ?? {}),
-    transferData: transferData?.aggregations?.transferSize?.value ?? 0,
-    resourceSize: transferData?.aggregations?.resourceSize?.value ?? 0,
-
     metrics: [
       {
         label: STEP_DURATION_LABEL,

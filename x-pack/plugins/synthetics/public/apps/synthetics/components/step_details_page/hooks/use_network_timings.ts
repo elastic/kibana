@@ -115,7 +115,7 @@ export const useNetworkTimings = (checkGroupIdArg?: string, stepIndexArg?: numbe
         },
       },
     },
-    [checkGroupId, stepIndex],
+    [],
     { name: `stepNetworkTimingsMetrics/${checkGroupId}/${stepIndex}` }
   );
 

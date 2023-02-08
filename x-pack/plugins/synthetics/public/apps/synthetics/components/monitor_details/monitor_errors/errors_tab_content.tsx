@@ -15,7 +15,7 @@ import { MonitorErrorsCount } from '../monitor_summary/monitor_errors_count';
 import { FailedTestsCount } from './failed_tests_count';
 import { MonitorFailedTests } from './failed_tests';
 import { ErrorsList } from './errors_list';
-import { useAbsoluteDate, useGetUrlParams } from '../../../hooks';
+import { useRefreshedRangeFromUrl } from '../../../hooks';
 import { useMonitorQueryId } from '../hooks/use_monitor_query_id';
 
 export const ErrorsTabContent = ({
@@ -25,9 +25,7 @@ export const ErrorsTabContent = ({
   errorStates: PingState[];
   loading: boolean;
 }) => {
-  const { dateRangeStart, dateRangeEnd } = useGetUrlParams();
-
-  const time = useAbsoluteDate({ from: dateRangeStart, to: dateRangeEnd });
+  const time = useRefreshedRangeFromUrl();
 
   const monitorId = useMonitorQueryId();
 

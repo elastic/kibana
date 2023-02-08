@@ -11,7 +11,7 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useTheme } from '@kbn/observability-plugin/public';
 import { ReportTypes } from '@kbn/observability-plugin/public';
 
-import { useAbsoluteDate } from '../../../../hooks';
+import { useRefreshedRange } from '../../../../hooks';
 import { ClientPluginsStart } from '../../../../../../plugin';
 import * as labels from '../labels';
 
@@ -21,7 +21,7 @@ export const MonitorTestRunsCount = ({ monitorIds }: { monitorIds: string[] }) =
 
   const { ExploratoryViewEmbeddable } = observability;
 
-  const { from: absFrom, to: absTo } = useAbsoluteDate({ from: 'now-30d', to: 'now' });
+  const { from, to } = useRefreshedRange(30, 'days');
 
   return (
     <ExploratoryViewEmbeddable
@@ -29,7 +29,7 @@ export const MonitorTestRunsCount = ({ monitorIds }: { monitorIds: string[] }) =
       reportType={ReportTypes.SINGLE_METRIC}
       attributes={[
         {
-          time: { from: absFrom, to: absTo },
+          time: { from, to },
           reportDefinitions: {
             'monitor.id': monitorIds.length > 0 ? monitorIds : ['false-monitor-id'], // Show no data when monitorIds is empty
           },
