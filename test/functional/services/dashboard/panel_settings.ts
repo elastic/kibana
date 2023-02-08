@@ -106,7 +106,10 @@ export function DashboardCustomizePanelProvider({ getService }: FtrProviderConte
 
     public async clickCancelButton() {
       log.debug('clickCancelButton');
-      await testSubjects.click('cancelCustomizePanelButton');
+      await this.retry.try(async () => {
+        await testSubjects.click('cancelCustomizePanelButton');
+        await testSubjects.waitForDeleted('cancelCustomizePanelButton');
+      });
     }
 
     public async clickToggleShowCustomTimeRange() {
