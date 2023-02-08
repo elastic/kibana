@@ -121,9 +121,7 @@ export class ElasticChartService extends FtrService {
    * used to get chart data from `@elastic/charts`
    * requires `window._echDebugStateFlag` to be true
    */
-  public async getChartDebugDataFromChart(
-    chart: WebElementWrapper,
-  ): Promise<DebugState> {
+  public async getChartDebugDataFromChart(chart: WebElementWrapper): Promise<DebugState> {
     const visContainer = await chart.findByCssSelector('.echChartStatus');
     const debugDataString: string | undefined = await visContainer.getAttribute(
       'data-ech-debug-state'
@@ -131,7 +129,9 @@ export class ElasticChartService extends FtrService {
     this.log.debug('data-ech-debug-state: ', debugDataString);
 
     if (debugDataString === undefined) {
-      throw Error(`Elastic charts debugState not found, ensure 'setNewChartUiDebugFlag' is called before DOM rendering starts.`);
+      throw Error(
+        `Elastic charts debugState not found, ensure 'setNewChartUiDebugFlag' is called before DOM rendering starts.`
+      );
     }
 
     try {
