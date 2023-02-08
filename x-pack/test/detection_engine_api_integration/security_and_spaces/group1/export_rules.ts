@@ -19,15 +19,27 @@ import {
   getSimpleRuleOutput,
   getWebHookAction,
   removeServerGeneratedProperties,
+  waitForRuleSuccessOrStatus,
 } from '../../utils';
+
+const DYNAMIC_FIELDS_AVAILABILITY_TIMEOUT_MS = 300;
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
+  const esArchiver = getService('esArchiver');
   const log = getService('log');
 
   describe('export_rules', () => {
     describe('exporting rules', () => {
+      before(async () => {
+        await esArchiver.load('x-pack/test/functional/es_archives/auditbeat/hosts');
+      });
+
+      after(async () => {
+        await esArchiver.unload('x-pack/test/functional/es_archives/auditbeat/hosts');
+      });
+
       beforeEach(async () => {
         await createSignalsIndex(supertest, log);
       });
@@ -63,6 +75,62 @@ export default ({ getService }: FtrProviderContext): void => {
         const bodyToTest = removeServerGeneratedProperties(bodySplitAndParsed);
 
         expect(bodyToTest).to.eql(getSimpleRuleOutput());
+      });
+
+      it('should export a single executed rule with a rule_id', async () => {
+        const ruleId = 'rule-1';
+
+        const rule = await createRule(supertest, log, getSimpleRule(ruleId, true));
+
+        await waitForRuleSuccessOrStatus(supertest, log, rule.id);
+
+        // Wait for execution_summary to be available
+        await new Promise((resolve) => setTimeout(resolve, DYNAMIC_FIELDS_AVAILABILITY_TIMEOUT_MS));
+
+        const { body } = await supertest
+          .post(`${DETECTION_ENGINE_RULES_URL}/_export`)
+          .set('kbn-xsrf', 'true')
+          .send()
+          .expect(200)
+          .parse(binaryToString);
+
+        const bodySplitAndParsed = JSON.parse(body.toString().split(/\n/)[0]);
+
+        expect(bodySplitAndParsed).to.eql({
+          ...getSimpleRuleOutput(ruleId, true),
+          id: rule.id,
+          created_at: rule.created_at,
+          updated_at: rule.updated_at,
+        });
+      });
+
+      it('should export a single executed rule by its rule_id', async () => {
+        const ruleId = 'rule-1';
+
+        const rule = await createRule(supertest, log, getSimpleRule(ruleId, true));
+
+        await waitForRuleSuccessOrStatus(supertest, log, rule.id);
+
+        // Wait for execution_summary to be available
+        await new Promise((resolve) => setTimeout(resolve, DYNAMIC_FIELDS_AVAILABILITY_TIMEOUT_MS));
+
+        const { body } = await supertest
+          .post(`${DETECTION_ENGINE_RULES_URL}/_export`)
+          .set('kbn-xsrf', 'true')
+          .send({
+            objects: [{ rule_id: 'rule-1' }],
+          })
+          .expect(200)
+          .parse(binaryToString);
+
+        const bodySplitAndParsed = JSON.parse(body.toString().split(/\n/)[0]);
+
+        expect(bodySplitAndParsed).to.eql({
+          ...getSimpleRuleOutput(ruleId, true),
+          id: rule.id,
+          created_at: rule.created_at,
+          updated_at: rule.updated_at,
+        });
       });
 
       it('should export a exported count with a single rule_id', async () => {
