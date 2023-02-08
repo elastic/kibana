@@ -14,14 +14,15 @@ import type { AppMockRenderer } from '../../common/mock';
 import { createAppMockRenderer } from '../../common/mock';
 import '../../common/mock/match_media';
 import { useCaseViewNavigation, useUrlParams } from '../../common/navigation/hooks';
-import { useGetConnectors } from '../../containers/configure/use_connectors';
+import { useGetSupportedActionConnectors } from '../../containers/configure/use_get_supported_action_connectors';
 import { basicCaseClosed, connectorsMock } from '../../containers/mock';
 import type { UseGetCase } from '../../containers/use_get_case';
 import { useGetCase } from '../../containers/use_get_case';
 import { useGetCaseMetrics } from '../../containers/use_get_case_metrics';
-import { useGetCaseUserActions } from '../../containers/use_get_case_user_actions';
+import { useFindCaseUserActions } from '../../containers/use_find_case_user_actions';
 import { useGetTags } from '../../containers/use_get_tags';
 import { usePostPushToService } from '../../containers/use_post_push_to_service';
+import { useGetCaseConnectors } from '../../containers/use_get_case_connectors';
 import { useUpdateCase } from '../../containers/use_update_case';
 import { useBulkGetUserProfiles } from '../../containers/user_profiles/use_bulk_get_user_profiles';
 import { CaseViewPage } from './case_view_page';
@@ -31,21 +32,23 @@ import {
   defaultGetCase,
   defaultGetCaseMetrics,
   defaultUpdateCaseState,
-  defaultUseGetCaseUserActions,
+  defaultUseFindCaseUserActions,
 } from './mocks';
 import type { CaseViewPageProps } from './types';
 import { userProfiles } from '../../containers/user_profiles/api.mock';
 import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
 import { CASE_VIEW_PAGE_TABS } from '../../../common/types';
+import { getCaseConnectorsMockResponse } from '../../common/mock/connectors';
 
 jest.mock('../../containers/use_get_action_license');
 jest.mock('../../containers/use_update_case');
 jest.mock('../../containers/use_get_case_metrics');
-jest.mock('../../containers/use_get_case_user_actions');
+jest.mock('../../containers/use_find_case_user_actions');
 jest.mock('../../containers/use_get_tags');
 jest.mock('../../containers/use_get_case');
-jest.mock('../../containers/configure/use_connectors');
+jest.mock('../../containers/configure/use_get_supported_action_connectors');
 jest.mock('../../containers/use_post_push_to_service');
+jest.mock('../../containers/use_get_case_connectors');
 jest.mock('../../containers/user_profiles/use_bulk_get_user_profiles');
 jest.mock('../user_actions/timestamp', () => ({
   UserActionTimestamp: () => <></>,
@@ -58,9 +61,10 @@ const useFetchCaseMock = useGetCase as jest.Mock;
 const useUrlParamsMock = useUrlParams as jest.Mock;
 const useCaseViewNavigationMock = useCaseViewNavigation as jest.Mock;
 const useUpdateCaseMock = useUpdateCase as jest.Mock;
-const useGetCaseUserActionsMock = useGetCaseUserActions as jest.Mock;
-const useGetConnectorsMock = useGetConnectors as jest.Mock;
+const useFindCaseUserActionsMock = useFindCaseUserActions as jest.Mock;
+const useGetConnectorsMock = useGetSupportedActionConnectors as jest.Mock;
 const usePostPushToServiceMock = usePostPushToService as jest.Mock;
+const useGetCaseConnectorsMock = useGetCaseConnectors as jest.Mock;
 const useGetCaseMetricsMock = useGetCaseMetrics as jest.Mock;
 const useGetTagsMock = useGetTags as jest.Mock;
 const useBulkGetUserProfilesMock = useBulkGetUserProfiles as jest.Mock;
@@ -94,14 +98,19 @@ describe('CaseViewPage', () => {
   const pushCaseToExternalService = jest.fn();
   const data = caseProps.caseData;
   let appMockRenderer: AppMockRenderer;
+  const caseConnectors = getCaseConnectorsMockResponse();
 
   beforeEach(() => {
     mockGetCase();
     jest.clearAllMocks();
     useUpdateCaseMock.mockReturnValue(defaultUpdateCaseState);
     useGetCaseMetricsMock.mockReturnValue(defaultGetCaseMetrics);
-    useGetCaseUserActionsMock.mockReturnValue(defaultUseGetCaseUserActions);
+    useFindCaseUserActionsMock.mockReturnValue(defaultUseFindCaseUserActions);
     usePostPushToServiceMock.mockReturnValue({ isLoading: false, pushCaseToExternalService });
+    useGetCaseConnectorsMock.mockReturnValue({
+      isLoading: false,
+      data: caseConnectors,
+    });
     useGetConnectorsMock.mockReturnValue({ data: connectorsMock, isLoading: false });
     useGetTagsMock.mockReturnValue({ data: [], isLoading: false });
     useBulkGetUserProfilesMock.mockReturnValue({ data: new Map(), isLoading: false });
@@ -249,17 +258,20 @@ describe('CaseViewPage', () => {
   });
 
   it('should push updates on button click', async () => {
-    useGetCaseUserActionsMock.mockImplementation(() => ({
-      ...defaultUseGetCaseUserActions,
+    useGetCaseConnectorsMock.mockImplementation(() => ({
+      isLoading: false,
       data: {
-        ...defaultUseGetCaseUserActions.data,
-        hasDataToPush: true,
+        ...caseConnectors,
+        'resilient-2': {
+          ...caseConnectors['resilient-2'],
+          push: { ...caseConnectors['resilient-2'].push, needsToBePushed: true },
+        },
       },
     }));
 
     const result = appMockRenderer.render(<CaseViewPage {...caseProps} />);
 
-    expect(result.getByTestId('has-data-to-push-button')).toBeInTheDocument();
+    expect(result.getByTestId('push-to-external-service')).toBeInTheDocument();
 
     userEvent.click(result.getByTestId('push-to-external-service'));
 
@@ -314,7 +326,7 @@ describe('CaseViewPage', () => {
       expect(updateObject.updateKey).toEqual('connector');
       expect(updateObject.updateValue).toEqual({
         id: 'resilient-2',
-        name: 'My Connector 2',
+        name: 'My Resilient connector',
         type: ConnectorTypes.resilient,
         fields: {
           incidentTypes: null,
@@ -337,7 +349,7 @@ describe('CaseViewPage', () => {
 
   it('should show loading content when loading user actions', async () => {
     const useFetchAlertData = jest.fn().mockReturnValue([true]);
-    useGetCaseUserActionsMock.mockReturnValue({
+    useFindCaseUserActionsMock.mockReturnValue({
       data: undefined,
       isError: false,
       isLoading: true,
@@ -391,20 +403,15 @@ describe('CaseViewPage', () => {
 
   it('should show the correct connector name on the push button', async () => {
     useGetConnectorsMock.mockImplementation(() => ({ data: connectorsMock, isLoading: false }));
-    useGetCaseUserActionsMock.mockImplementation(() => ({
-      ...defaultUseGetCaseUserActions,
-      data: {
-        ...defaultUseGetCaseUserActions.data,
-        hasDataToPush: true,
-      },
-    }));
 
     const result = appMockRenderer.render(
       <CaseViewPage {...{ ...caseProps, connector: { ...caseProps, name: 'old-name' } }} />
     );
 
     await waitFor(() => {
-      expect(result.getByTestId('has-data-to-push-button')).toHaveTextContent('My Connector 2');
+      expect(result.getByTestId('push-to-external-service')).toHaveTextContent(
+        'My Resilient connector'
+      );
     });
   });
 

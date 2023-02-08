@@ -25,7 +25,7 @@ describe('Stack Connectors Plugin', () => {
     it('should register built in connector types', () => {
       const actionsSetup = actionsMock.createSetup();
       plugin.setup(coreSetup, { actions: actionsSetup });
-      expect(actionsSetup.registerType).toHaveBeenCalledTimes(15);
+      expect(actionsSetup.registerType).toHaveBeenCalledTimes(16);
       expect(actionsSetup.registerType).toHaveBeenNthCalledWith(
         1,
         expect.objectContaining({

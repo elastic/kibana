@@ -13,7 +13,7 @@ import {
   ForLastExpression,
   RuleTypeParamsExpressionProps,
 } from '@kbn/triggers-actions-ui-plugin/public';
-import { ResolvedLogViewField } from '../../../../../common/log_views';
+import { LogViewReference, ResolvedLogViewField } from '../../../../../common/log_views';
 import {
   Comparator,
   isOptimizableGroupedThreshold,
@@ -35,6 +35,7 @@ import { errorsRT } from '../../validation';
 import { Criteria } from './criteria';
 import { Threshold } from './threshold';
 import { TypeSwitcher } from './type_switcher';
+import { LogViewSwitcher } from './log_view_switcher';
 
 export interface ExpressionCriteria {
   field?: string;
@@ -53,6 +54,11 @@ const DEFAULT_BASE_EXPRESSION = {
 
 const DEFAULT_FIELD = 'log.level';
 
+const createLogViewReference = (logViewId: string): LogViewReference => ({
+  logViewId,
+  type: 'log-view-reference',
+});
+
 const createDefaultCriterion = (
   availableFields: ResolvedLogViewField[],
   value: ExpressionCriteria['value']
@@ -62,9 +68,11 @@ const createDefaultCriterion = (
     : { field: undefined, comparator: undefined, value: undefined };
 
 const createDefaultCountRuleParams = (
-  availableFields: ResolvedLogViewField[]
+  availableFields: ResolvedLogViewField[],
+  logView: LogViewReference
 ): PartialCountRuleParams => ({
   ...DEFAULT_BASE_EXPRESSION,
+  logView,
   count: {
     value: 75,
     comparator: Comparator.GT,
@@ -73,9 +81,11 @@ const createDefaultCountRuleParams = (
 });
 
 const createDefaultRatioRuleParams = (
-  availableFields: ResolvedLogViewField[]
+  availableFields: ResolvedLogViewField[],
+  logView: LogViewReference
 ): PartialRatioRuleParams => ({
   ...DEFAULT_BASE_EXPRESSION,
+  logView,
   count: {
     value: 2,
     comparator: Comparator.GT,
@@ -216,20 +226,24 @@ export const Editor: React.FC<RuleTypeParamsExpressionProps<PartialRuleParams, L
     [setRuleParams]
   );
 
+  const logViewReferemnce = useMemo(() => createLogViewReference(logViewId), [logViewId]);
+
   const defaultCountAlertParams = useMemo(
-    () => createDefaultCountRuleParams(supportedFields),
-    [supportedFields]
+    () => createDefaultCountRuleParams(supportedFields, logViewReferemnce),
+    [supportedFields, logViewReferemnce]
   );
 
   const updateType = useCallback(
     (type: ThresholdType) => {
       const defaults =
-        type === 'count' ? defaultCountAlertParams : createDefaultRatioRuleParams(supportedFields);
+        type === 'count'
+          ? defaultCountAlertParams
+          : createDefaultRatioRuleParams(supportedFields, logViewReferemnce);
       // Reset properties that don't make sense switching from one context to the other
       setRuleParams('count', defaults.count);
       setRuleParams('criteria', defaults.criteria);
     },
-    [defaultCountAlertParams, setRuleParams, supportedFields]
+    [defaultCountAlertParams, setRuleParams, supportedFields, logViewReferemnce]
   );
 
   useMount(() => {
@@ -268,6 +282,8 @@ export const Editor: React.FC<RuleTypeParamsExpressionProps<PartialRuleParams, L
 
   return (
     <>
+      {resolvedLogView && <LogViewSwitcher logView={resolvedLogView} />}
+
       <TypeSwitcher criteria={ruleParams.criteria || []} updateType={updateType} />
 
       {ruleParams.criteria && !isRatioRule(ruleParams.criteria) && criteriaComponent}

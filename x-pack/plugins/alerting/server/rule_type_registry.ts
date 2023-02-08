@@ -358,6 +358,7 @@ export class RuleTypeRegistry {
             ruleTaskTimeout,
             defaultScheduleInterval,
             doesSetRecoveryContext,
+            getSummarizedAlerts,
           },
         ]: [string, UntypedNormalizedRuleType]) => ({
           id,
@@ -377,6 +378,7 @@ export class RuleTypeRegistry {
             name,
             minimumLicenseRequired
           ).isValid,
+          hasGetSummarizedAlerts: !!getSummarizedAlerts,
         })
       )
     );

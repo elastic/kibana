@@ -28,7 +28,7 @@ import {
 } from '../../../common/api';
 import { CASE_COMMENT_SAVED_OBJECT } from '../../../common/constants';
 
-import { createIncident, getDurationInSeconds } from './utils';
+import { createIncident, getDurationInSeconds, getUserProfiles } from './utils';
 import { createCaseError } from '../../common/error';
 import {
   createAlertUpdateRequest,
@@ -241,7 +241,6 @@ export const push = async (
       }),
 
       attachmentService.bulkUpdate({
-        unsecuredSavedObjectsClient,
         comments: comments.saved_objects
           .filter((comment) => comment.attributes.pushed_at == null)
           .map((comment) => ({
@@ -318,17 +317,11 @@ const getProfiles = async (
     ...(caseInfo.created_by?.profile_uid != null ? [caseInfo.created_by.profile_uid] : []),
   ]);
 
-  if (uids.size <= 0) {
+  const userProfiles = await getUserProfiles(securityStartPlugin, uids);
+
+  if (userProfiles.size <= 0) {
     return;
   }
 
-  const userProfiles =
-    (await securityStartPlugin.userProfiles.bulkGet({
-      uids,
-    })) ?? [];
-
-  return userProfiles.reduce<Map<string, UserProfile>>((acc, profile) => {
-    acc.set(profile.uid, profile);
-    return acc;
-  }, new Map());
+  return userProfiles;
 };

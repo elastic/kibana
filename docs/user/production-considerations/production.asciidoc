@@ -51,10 +51,17 @@ Settings that must be the same:
 [source,js]
 --------
 xpack.security.encryptionKey //decrypting session information
+xpack.security.authc.* // authentication configuration
+xpack.security.session.* // session configuration
 xpack.reporting.encryptionKey //decrypting reports
 xpack.encryptedSavedObjects.encryptionKey // decrypting saved objects
 xpack.encryptedSavedObjects.keyRotation.decryptionOnlyKeys // saved objects encryption key rotation, if any
 --------
+
+[WARNING]
+====
+If the authentication configuration does not match, sessions from unrecognized providers in each {kib} instance will be deleted during that instance's regular session cleanup. Similarly, inconsistencies in session configuration can also lead to undesired session logouts. This also applies to any {kib} instances that are backed by the same {es} instance and share the same kibana.index, even if they are not behind the same load balancer.
+====
 
 Separate configuration files can be used from the command line by using the `-c` flag:
 [source,js]
