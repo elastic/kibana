@@ -29,6 +29,7 @@ interface Props {
   hasRightOffset?: boolean;
   showInspect?: boolean;
   position?: CSSProperties['position'];
+  additionalMenuOptions?: React.ReactNode[];
 }
 
 export const RightTopMenu = ({
@@ -41,6 +42,7 @@ export const RightTopMenu = ({
   hasRightOffset,
   showInspect = true,
   position = 'absolute',
+  additionalMenuOptions = [],
 }: Props) => {
   const alignItems = tableView === 'gridView' ? 'baseline' : 'center';
   const justTitle = useMemo(() => <TitleText data-test-subj="title">{title}</TitleText>, [title]);
@@ -48,6 +50,19 @@ export const RightTopMenu = ({
   const tGridEventRenderedViewEnabled = useIsExperimentalFeatureEnabled(
     'tGridEventRenderedViewEnabled'
   );
+
+  const menuOptions = useMemo(
+    () =>
+      additionalMenuOptions.length
+        ? additionalMenuOptions.map((additionalMenuOption, i) => (
+            <UpdatedFlexItem grow={false} $show={!loading} key={i}>
+              {additionalMenuOption}
+            </UpdatedFlexItem>
+          ))
+        : null,
+    [additionalMenuOptions, loading]
+  );
+
   return (
     <UpdatedFlexGroup
       alignItems={alignItems}
@@ -73,6 +88,7 @@ export const RightTopMenu = ({
             <SummaryViewSelector viewSelected={tableView} onViewChange={onViewChange} />
           </UpdatedFlexItem>
         )}
+      {menuOptions}
     </UpdatedFlexGroup>
   );
 };

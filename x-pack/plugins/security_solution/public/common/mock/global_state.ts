@@ -45,6 +45,7 @@ import { getScopePatternListSelection } from '../store/sourcerer/helpers';
 import { mockBrowserFields, mockIndexFields, mockRuntimeMappings } from '../containers/source/mock';
 import { usersModel } from '../../explore/users/store';
 import { UsersFields } from '../../../common/search_strategy/security_solution/users/common';
+import { defaultGroup } from '../store/grouping/defaults';
 
 export const mockSourcererState = {
   ...initialSourcererState,
@@ -411,6 +412,13 @@ export const mockGlobalState: State = {
           showBuildingBlockAlerts: false,
           showOnlyThreatIndicatorAlerts: false,
         },
+      },
+    },
+  },
+  groups: {
+    groupById: {
+      testing: {
+        ...defaultGroup,
       },
     },
   },

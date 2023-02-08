@@ -17,6 +17,7 @@ import {
   EuiToolTip,
   EuiWindowEvent,
 } from '@elastic/eui';
+import type { Filter } from '@kbn/es-query';
 import { i18n as i18nTranslate } from '@kbn/i18n';
 import { Route } from '@kbn/kibana-react-plugin/public';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -31,8 +32,9 @@ import type { Dispatch } from 'redux';
 import { isTab } from '@kbn/timelines-plugin/public';
 import type { DataViewListItem } from '@kbn/data-views-plugin/common';
 
-import { useDataTableFilters } from '../../../../common/hooks/use_data_table_filters';
 import { AlertsTableComponent } from '../../../../detections/components/alerts_table';
+import { GroupedAlertsTable } from '../../../../detections/components/alerts_table/grouped_alerts';
+import { useDataTableFilters } from '../../../../common/hooks/use_data_table_filters';
 import { FILTER_OPEN, TableId } from '../../../../../common/types';
 import { isMlRule } from '../../../../../common/machine_learning/helpers';
 import { TabNavigationWithBreadcrumbs } from '../../../../common/components/navigation/tab_navigation_with_breadcrumbs';
@@ -186,6 +188,7 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
   const dispatch = useDispatch();
   const containerElement = useRef<HTMLDivElement | null>(null);
   const getTable = useMemo(() => dataTableSelectors.getTableByIdSelector(), []);
+
   const graphEventId = useShallowEqualSelector(
     (state) => (getTable(state, TableId.alertsOnRuleDetailsPage) ?? tableDefaults).graphEventId
   );
@@ -193,7 +196,7 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
     (state) => (getTable(state, TableId.alertsOnRuleDetailsPage) ?? tableDefaults).updated
   );
   const isAlertsLoading = useShallowEqualSelector(
-    (state) => (getTable(state, TableId.alertsOnAlertsPage) ?? tableDefaults).isLoading
+    (state) => (getTable(state, TableId.alertsOnRuleDetailsPage) ?? tableDefaults).isLoading
   );
   const getGlobalFiltersQuerySelector = useMemo(
     () => inputsSelectors.globalFiltersQuerySelector(),
@@ -213,6 +216,8 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
       canUserCRUD,
       hasIndexRead,
       signalIndexName,
+      hasIndexWrite,
+      hasIndexMaintenance,
     },
   ] = useUserData();
   const { loading: listsConfigLoading, needsConfiguration: needsListsConfiguration } =
@@ -603,6 +608,23 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
     [containerElement, onSkipFocusBeforeEventsTable, onSkipFocusAfterEventsTable]
   );
 
+  const renderGroupedAlertTable = useCallback(
+    (groupingFilters: Filter[]) => {
+      return (
+        <AlertsTableComponent
+          configId={ALERTS_TABLE_REGISTRY_CONFIG_IDS.RULE_DETAILS}
+          flyoutSize="m"
+          inputFilters={[...alertMergedFilters, ...groupingFilters]}
+          tableId={TableId.alertsOnRuleDetailsPage}
+          from={from}
+          to={to}
+          isLoading={false}
+        />
+      );
+    },
+    [alertMergedFilters, from, to]
+  );
+
   const {
     isBulkDuplicateConfirmationVisible,
     showBulkDuplicateConfirmation,
@@ -817,14 +839,18 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
                       <EuiSpacer />
                     </Display>
                     {ruleId != null && (
-                      <AlertsTableComponent
-                        configId={ALERTS_TABLE_REGISTRY_CONFIG_IDS.RULE_DETAILS}
-                        flyoutSize="m"
-                        inputFilters={alertMergedFilters}
+                      <GroupedAlertsTable
                         tableId={TableId.alertsOnRuleDetailsPage}
+                        defaultFilters={alertMergedFilters}
+                        hasIndexWrite={hasIndexWrite ?? false}
+                        hasIndexMaintenance={hasIndexMaintenance ?? false}
                         from={from}
+                        loading={loading}
                         to={to}
-                        isLoading={showUpdating}
+                        signalIndexName={signalIndexName}
+                        runtimeMappings={runtimeMappings}
+                        currentAlertStatusFilterValue={filterGroup}
+                        renderChildComponent={renderGroupedAlertTable}
                       />
                     )}
                   </>

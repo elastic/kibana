@@ -10,6 +10,7 @@ import { map, filter, ignoreElements, tap, withLatestFrom, delay } from 'rxjs/op
 import type { Epic } from 'redux-observable';
 import { get } from 'lodash/fp';
 
+import { updateTotalCount } from '../../../timelines/store/timeline/actions';
 import type { TableIdLiteral } from '../../../../common/types';
 import { addTableInStorage } from '../../../timelines/containers/local_storage';
 
@@ -24,6 +25,7 @@ import {
   updateSort,
   changeViewMode,
   updateShowBuildingBlockAlertsFilter,
+  updateIsLoading,
 } from './actions';
 import type { TimelineEpicDependencies } from '../../../timelines/store/timeline/types';
 
@@ -40,6 +42,8 @@ const tableActionTypes = [
   updateSort.type,
   changeViewMode.type,
   updateShowBuildingBlockAlertsFilter.type,
+  updateTotalCount.type,
+  updateIsLoading.type,
 ];
 
 export const createDataTableLocalStorageEpic =

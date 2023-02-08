@@ -25,6 +25,7 @@ import type { Dispatch } from 'redux';
 import { isTab } from '@kbn/timelines-plugin/public';
 import type { Filter } from '@kbn/es-query';
 import type { DocLinks } from '@kbn/doc-links';
+import { ALERTS_TABLE_REGISTRY_CONFIG_IDS } from '../../../../common/constants';
 import { useDataTableFilters } from '../../../common/hooks/use_data_table_filters';
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import { FILTER_OPEN, TableId } from '../../../../common/types';
@@ -74,11 +75,11 @@ import { NoPrivileges } from '../../../common/components/no_privileges';
 import { HeaderPage } from '../../../common/components/header_page';
 import { LandingPageComponent } from '../../../common/components/landing_page';
 import { DetectionPageFilterSet } from '../../components/detection_page_filters';
-import { AlertsTableComponent } from '../../components/alerts_table';
 import type { FilterGroupHandler } from '../../../common/components/filter_group/types';
 import type { Status } from '../../../../common/detection_engine/schemas/common/schemas';
 import { AlertsTableFilterGroup } from '../../components/alerts_table/alerts_filter_group';
-import { ALERTS_TABLE_REGISTRY_CONFIG_IDS } from '../../../../common/constants';
+import { GroupedAlertsTable } from '../../components/alerts_table/grouped_alerts';
+import { AlertsTableComponent } from '../../components/alerts_table';
 /**
  * Need a 100% height here to account for the graph/analyze tool, which sets no explicit height parameters, but fills the available space.
  */
@@ -123,6 +124,8 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ({
       signalIndexName,
       canUserREAD,
       hasIndexRead,
+      hasIndexWrite,
+      hasIndexMaintenance,
     },
   ] = useUserData();
   const { loading: listsConfigLoading, needsConfiguration: needsListsConfiguration } =
@@ -355,6 +358,23 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ({
     ]
   );
 
+  const renderGroupedAlertTable = useCallback(
+    (groupingFilters: Filter[]) => {
+      return (
+        <AlertsTableComponent
+          configId={ALERTS_TABLE_REGISTRY_CONFIG_IDS.ALERTS_PAGE}
+          flyoutSize="m"
+          inputFilters={[...alertsTableDefaultFilters, ...groupingFilters]}
+          tableId={TableId.alertsOnAlertsPage}
+          from={from}
+          to={to}
+          isLoading={false}
+        />
+      );
+    },
+    [alertsTableDefaultFilters, from, to]
+  );
+
   if (loading) {
     return (
       <SecuritySolutionPageWrapper>
@@ -436,14 +456,18 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ({
               />
               <EuiSpacer size="l" />
             </Display>
-            <AlertsTableComponent
-              configId={ALERTS_TABLE_REGISTRY_CONFIG_IDS.ALERTS_PAGE}
-              flyoutSize="m"
-              inputFilters={alertsTableDefaultFilters}
+            <GroupedAlertsTable
               tableId={TableId.alertsOnAlertsPage}
+              loading={isAlertTableLoading}
+              hasIndexWrite={hasIndexWrite ?? false}
+              hasIndexMaintenance={hasIndexMaintenance ?? false}
               from={from}
+              defaultFilters={alertsTableDefaultFilters}
+              signalIndexName={signalIndexName}
+              runtimeMappings={runtimeMappings}
               to={to}
-              isLoading={isAlertTableLoading}
+              currentAlertStatusFilterValue={filterGroup}
+              renderChildComponent={renderGroupedAlertTable}
             />
           </SecuritySolutionPageWrapper>
         </StyledFullHeightContainer>

@@ -38,9 +38,16 @@ describe('createInitialState', () => {
       kibanaDataViews: [mockSourcererState.defaultDataView],
       signalIndexName: 'siem-signals-default',
     };
-    const initState = createInitialState(mockPluginState, defaultState, {
-      dataTable: { tableById: {} },
-    });
+    const initState = createInitialState(
+      mockPluginState,
+      defaultState,
+      {
+        dataTable: { tableById: {} },
+      },
+      {
+        groups: { groupById: {} },
+      }
+    );
     beforeEach(() => {
       (useDeepEqualSelector as jest.Mock).mockImplementation((cb) => cb(initState));
     });
@@ -72,6 +79,11 @@ describe('createInitialState', () => {
         {
           dataTable: {
             tableById: {},
+          },
+        },
+        {
+          groups: {
+            groupById: {},
           },
         }
       );

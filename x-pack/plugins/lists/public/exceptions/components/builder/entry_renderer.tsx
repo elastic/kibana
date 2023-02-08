@@ -7,7 +7,16 @@
 
 import React, { useCallback, useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiIconTip } from '@elastic/eui';
+import {
+  EuiAccordion,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiFormRow,
+  EuiIcon,
+  EuiIconTip,
+  EuiSpacer,
+  useEuiPaddingSize,
+} from '@elastic/eui';
 import styled from 'styled-components';
 import {
   ExceptionListType,
@@ -27,6 +36,7 @@ import {
   getEntryOnOperatorChange,
   getEntryOnWildcardChange,
   getFilteredIndexPatterns,
+  getMappingConflictsInfo,
   getOperatorOptions,
 } from '@kbn/securitysolution-list-utils';
 import {
@@ -96,6 +106,8 @@ export const BuilderEntryItem: React.FC<EntryItemProps> = ({
   operatorsList,
   allowCustomOptions = false,
 }): JSX.Element => {
+  const sPaddingSize = useEuiPaddingSize('s');
+
   const handleError = useCallback(
     (err: boolean): void => {
       setErrorsExist(err);
@@ -194,49 +206,82 @@ export const BuilderEntryItem: React.FC<EntryItemProps> = ({
           onChange={handleFieldChange}
           acceptsCustomOptions={entry.nested == null}
           data-test-subj="exceptionBuilderEntryField"
+          showMappingConflicts={true}
         />
       );
 
-      if (isFirst) {
+      const warningIconCss = { marginRight: `${sPaddingSize}` };
+      const getMappingConflictsWarning = (field: DataViewFieldBase): React.ReactNode | null => {
+        const conflictsInfo = getMappingConflictsInfo(field);
+        if (!conflictsInfo) {
+          return null;
+        }
         return (
-          <EuiFormRow
-            fullWidth
-            label={i18n.FIELD}
-            helpText={
-              entry.nested == null && allowCustomOptions
-                ? i18n.CUSTOM_COMBOBOX_OPTION_TEXT
-                : undefined
-            }
-            data-test-subj="exceptionBuilderEntryFieldFormRow"
-          >
-            {comboBox}
-          </EuiFormRow>
+          <>
+            <EuiSpacer size="s" />
+            <EuiAccordion
+              id={'1'}
+              buttonContent={
+                <>
+                  <EuiIcon tabIndex={0} type="alert" size="s" css={warningIconCss} />
+                  {i18n.FIELD_CONFLICT_INDICES_WARNING_DESCRIPTION}
+                </>
+              }
+              arrowDisplay="none"
+            >
+              {conflictsInfo.map((info) => {
+                const groupDetails = info.groupedIndices.map(
+                  ({ name, count }) =>
+                    `${count > 1 ? i18n.CONFLICT_MULTIPLE_INDEX_DESCRIPTION(name, count) : name}`
+                );
+                return (
+                  <>
+                    <EuiSpacer size="s" />
+                    {`${
+                      info.totalIndexCount > 1
+                        ? i18n.CONFLICT_MULTIPLE_INDEX_DESCRIPTION(info.type, info.totalIndexCount)
+                        : info.type
+                    }: ${groupDetails.join(', ')}`}
+                  </>
+                );
+              })}
+              <EuiSpacer size="s" />
+            </EuiAccordion>
+          </>
         );
-      } else {
-        return (
-          <EuiFormRow
-            fullWidth
-            label={''}
-            helpText={
-              entry.nested == null && allowCustomOptions
-                ? i18n.CUSTOM_COMBOBOX_OPTION_TEXT
-                : undefined
-            }
-            data-test-subj="exceptionBuilderEntryFieldFormRow"
-          >
-            {comboBox}
-          </EuiFormRow>
+      };
+
+      const customOptionText =
+        entry.nested == null && allowCustomOptions ? i18n.CUSTOM_COMBOBOX_OPTION_TEXT : undefined;
+      const helpText =
+        entry.field?.type !== 'conflict' ? (
+          customOptionText
+        ) : (
+          <>
+            {customOptionText}
+            {getMappingConflictsWarning(entry.field)}
+          </>
         );
-      }
+      return (
+        <EuiFormRow
+          fullWidth
+          label={isFirst ? i18n.FIELD : ''}
+          helpText={helpText}
+          data-test-subj="exceptionBuilderEntryFieldFormRow"
+        >
+          {comboBox}
+        </EuiFormRow>
+      );
     },
     [
       indexPattern,
       entry,
       listType,
       listTypeSpecificIndexPatternFilter,
-      handleFieldChange,
       osTypes,
       isDisabled,
+      handleFieldChange,
+      sPaddingSize,
       allowCustomOptions,
     ]
   );
