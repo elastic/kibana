@@ -42,7 +42,6 @@
  */
 
 import Boom from '@hapi/boom';
-import { v5 as uuidv5 } from 'uuid';
 import { set } from '@kbn/safer-lodash-set';
 import _ from 'lodash';
 import Semver from 'semver';
@@ -52,9 +51,9 @@ import type {
   SavedObjectUnsanitizedDoc,
   ISavedObjectTypeRegistry,
 } from '@kbn/core-saved-objects-server';
-import type { ActiveMigrations, TransformResult } from '../document_migrator/types';
-import { buildActiveMigrations } from '../document_migrator/build_active_migrations';
-import { validateMigrationDefinition } from '../document_migrator/validate_migrations';
+import type { ActiveMigrations, TransformResult } from './types';
+import { buildActiveMigrations } from './build_active_migrations';
+import { validateMigrationDefinition } from './validate_migrations';
 
 export type MigrateFn = (doc: SavedObjectUnsanitizedDoc) => SavedObjectUnsanitizedDoc;
 export type MigrateAndConvertFn = (doc: SavedObjectUnsanitizedDoc) => SavedObjectUnsanitizedDoc[];
@@ -461,16 +460,4 @@ function assertNoDowngrades(
         `to ${docVersion[downgrade]}.`
     );
   }
-}
-
-/**
- * Deterministically regenerates a saved object's ID based upon it's current namespace, type, and ID. This ensures that we can regenerate
- * any existing object IDs without worrying about collisions if two objects that exist in different namespaces share an ID. It also ensures
- * that we can later regenerate any inbound object references to match.
- *
- * @note This is only intended to be used when single-namespace object types are converted into multi-namespace object types.
- * @internal
- */
-export function deterministicallyRegenerateObjectId(namespace: string, type: string, id: string) {
-  return uuidv5(`${namespace}:${type}:${id}`, uuidv5.DNS); // the uuidv5 namespace constant (uuidv5.DNS) is arbitrary
 }
