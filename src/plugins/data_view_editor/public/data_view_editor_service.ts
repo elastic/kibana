@@ -129,7 +129,6 @@ export class DataViewEditorService {
   private requireTimestampField: boolean;
   private type = INDEX_PATTERN_TYPE.DEFAULT;
 
-  // state
   private indexPattern = '';
   private allowHidden = false;
 
