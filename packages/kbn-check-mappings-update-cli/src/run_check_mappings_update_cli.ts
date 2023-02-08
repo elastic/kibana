@@ -19,7 +19,7 @@ import { readCurrentMappings, updateCurrentMappings } from './current_mappings';
 run(
   async ({ log, flagsReader, addCleanupTask }) => {
     const fix = flagsReader.boolean('fix');
-    const verify = flagsReader.boolean('verify');
+    const verify = !fix && flagsReader.boolean('verify');
 
     /**
      * Algorithm for checking compatible mappings. Should work in CI or local
@@ -93,7 +93,7 @@ run(
         verify: true,
       },
       help: `
-        --fix              If the current mappings differ from the mappings in the file, update the current_mappings.json file
+        --fix              If the current mappings differ from the mappings in the file, update the current_mappings.json file. Skips all verification steps.
         --no-verify        Don't run any validation, just update the current_mappings.json file.
       `,
     },
