@@ -11,6 +11,8 @@ import { CommonlyUsed } from '../../page_objects/time_picker';
 
 export function DashboardCustomizePanelProvider({ getService }: FtrProviderContext) {
   const log = getService('log');
+  const retry = getService('retry');
+  const toasts = getService('toasts');
   const testSubjects = getService('testSubjects');
 
   return new (class DashboardCustomizePanel {
@@ -95,7 +97,11 @@ export function DashboardCustomizePanelProvider({ getService }: FtrProviderConte
 
     public async clickSaveButton() {
       log.debug('clickSaveButton');
-      await testSubjects.click('saveCustomizePanelButton');
+      await this.retry.try(async () => {
+        await toasts.dismissAllToasts();
+        await testSubjects.click('saveCustomizePanelButton');
+        await testSubjects.waitForDeleted('saveCustomizePanelButton');
+      });
     }
 
     public async clickCancelButton() {
