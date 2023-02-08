@@ -47,39 +47,17 @@ import { set } from '@kbn/safer-lodash-set';
 import _ from 'lodash';
 import Semver from 'semver';
 import type { Logger } from '@kbn/logging';
-import type {
-  SavedObjectsMigrationVersion,
-  SavedObjectsNamespaceType,
-} from '@kbn/core-saved-objects-common';
+import type { SavedObjectsMigrationVersion } from '@kbn/core-saved-objects-common';
 import type {
   SavedObjectUnsanitizedDoc,
-  SavedObjectsType,
   ISavedObjectTypeRegistry,
-  SavedObjectMigrationFn,
-  SavedObjectMigrationMap,
 } from '@kbn/core-saved-objects-server';
-import { DEFAULT_NAMESPACE_STRING, SavedObjectsUtils } from '@kbn/core-saved-objects-utils-server';
-import {
-  type LegacyUrlAlias,
-  LEGACY_URL_ALIAS_TYPE,
-} from '@kbn/core-saved-objects-base-server-internal';
-import { MigrationLogger } from './migration_logger';
-import { TransformSavedObjectDocumentError } from '.';
+import type { ActiveMigrations, TransformResult } from '../document_migrator/types';
+import { buildActiveMigrations } from '../document_migrator/build_active_migrations';
+import { validateMigrationDefinition } from '../document_migrator/validate_migrations';
 
 export type MigrateFn = (doc: SavedObjectUnsanitizedDoc) => SavedObjectUnsanitizedDoc;
 export type MigrateAndConvertFn = (doc: SavedObjectUnsanitizedDoc) => SavedObjectUnsanitizedDoc[];
-
-interface TransformResult {
-  /**
-   * This is the original document that has been transformed.
-   */
-  transformedDoc: SavedObjectUnsanitizedDoc;
-  /**
-   * These are any new document(s) that have been created during the transformation process; these are not transformed, but they are marked
-   * as up-to-date. Only conversion transforms generate additional documents.
-   */
-  additionalDocs: SavedObjectUnsanitizedDoc[];
-}
 
 type ApplyTransformsFn = (
   doc: SavedObjectUnsanitizedDoc,
@@ -95,35 +73,6 @@ interface DocumentMigratorOptions {
   typeRegistry: ISavedObjectTypeRegistry;
   convertVersion?: string;
   log: Logger;
-}
-
-interface ActiveMigrations {
-  [type: string]: {
-    /** Derived from `migrate` transforms and `convert` transforms */
-    latestMigrationVersion?: string;
-    /** Derived from `reference` transforms */
-    latestCoreMigrationVersion?: string;
-    transforms: Transform[];
-  };
-}
-
-interface Transform {
-  version: string;
-  transform: (doc: SavedObjectUnsanitizedDoc) => TransformResult;
-  /**
-   * There are two "migrationVersion" transform types:
-   *   * `migrate` - These transforms are defined and added by consumers using the type registry; each is applied to a single object type
-   *     based on an object's `migrationVersion[type]` field. These are applied during index migrations and document migrations.
-   *   * `convert` - These transforms are defined by core and added by consumers using the type registry; each is applied to a single object
-   *     type based on an object's `migrationVersion[type]` field. These are applied during index migrations, NOT document migrations.
-   *
-   * There is one "coreMigrationVersion" transform type:
-   *   * `reference` - These transforms are defined by core and added by consumers using the type registry; they are applied to all object
-   *     types based on their `coreMigrationVersion` field. These are applied during index migrations, NOT document migrations.
-   *
-   * If any additional transform types are added, the functions below should be updated to account for them.
-   */
-  transformType: 'migrate' | 'convert' | 'reference';
 }
 
 /**
@@ -156,7 +105,6 @@ export class DocumentMigrator implements VersionedTransformer {
    */
   constructor({ typeRegistry, kibanaVersion, convertVersion, log }: DocumentMigratorOptions) {
     validateMigrationDefinition(typeRegistry, kibanaVersion, convertVersion);
-
     this.documentMigratorOptions = { typeRegistry, kibanaVersion, log };
   }
 
@@ -239,170 +187,6 @@ export class DocumentMigrator implements VersionedTransformer {
     });
     return [transformedDoc, ...additionalDocs];
   };
-}
-
-function validateMigrationsMapObject(
-  name: string,
-  kibanaVersion: string,
-  migrationsMap?: SavedObjectMigrationMap
-) {
-  function assertObject(obj: any, prefix: string) {
-    if (!obj || typeof obj !== 'object') {
-      throw new Error(`${prefix} Got ${obj}.`);
-    }
-  }
-
-  function assertValidSemver(version: string, type: string) {
-    if (!Semver.valid(version)) {
-      throw new Error(
-        `Invalid migration for type ${type}. Expected all properties to be semvers, but got ${version}.`
-      );
-    }
-    if (Semver.gt(version, kibanaVersion)) {
-      throw new Error(
-        `Invalid migration for type ${type}. Property '${version}' cannot be greater than the current Kibana version '${kibanaVersion}'.`
-      );
-    }
-  }
-
-  function assertValidTransform(fn: any, version: string, type: string) {
-    if (typeof fn !== 'function') {
-      throw new Error(`Invalid migration ${type}.${version}: expected a function, but got ${fn}.`);
-    }
-  }
-
-  if (migrationsMap) {
-    assertObject(
-      migrationsMap,
-      `Migrations map for type ${name} should be an object like { '2.0.0': (doc) => doc }.`
-    );
-
-    Object.entries(migrationsMap).forEach(([version, fn]) => {
-      assertValidSemver(version, name);
-      assertValidTransform(fn, version, name);
-    });
-  }
-}
-
-/**
- * Basic validation that the migration definition matches our expectations. We can't
- * rely on TypeScript here, as the caller may be JavaScript / ClojureScript / any compile-to-js
- * language. So, this is just to provide a little developer-friendly error messaging. Joi was
- * giving weird errors, so we're just doing manual validation.
- */
-function validateMigrationDefinition(
-  registry: ISavedObjectTypeRegistry,
-  kibanaVersion: string,
-  convertVersion?: string
-) {
-  function assertObjectOrFunction(entity: any, prefix: string) {
-    if (!entity || (typeof entity !== 'function' && typeof entity !== 'object')) {
-      throw new Error(`${prefix} Got! ${typeof entity}, ${JSON.stringify(entity)}.`);
-    }
-  }
-
-  function assertValidConvertToMultiNamespaceType(
-    namespaceType: SavedObjectsNamespaceType,
-    convertToMultiNamespaceTypeVersion: string,
-    type: string
-  ) {
-    if (namespaceType !== 'multiple' && namespaceType !== 'multiple-isolated') {
-      throw new Error(
-        `Invalid convertToMultiNamespaceTypeVersion for type ${type}. Expected namespaceType to be 'multiple' or 'multiple-isolated', but got '${namespaceType}'.`
-      );
-    } else if (!Semver.valid(convertToMultiNamespaceTypeVersion)) {
-      throw new Error(
-        `Invalid convertToMultiNamespaceTypeVersion for type ${type}. Expected value to be a semver, but got '${convertToMultiNamespaceTypeVersion}'.`
-      );
-    } else if (convertVersion && Semver.neq(convertToMultiNamespaceTypeVersion, convertVersion)) {
-      throw new Error(
-        `Invalid convertToMultiNamespaceTypeVersion for type ${type}. Value '${convertToMultiNamespaceTypeVersion}' cannot be any other than '${convertVersion}'.`
-      );
-    } else if (Semver.gt(convertToMultiNamespaceTypeVersion, kibanaVersion)) {
-      throw new Error(
-        `Invalid convertToMultiNamespaceTypeVersion for type ${type}. Value '${convertToMultiNamespaceTypeVersion}' cannot be greater than the current Kibana version '${kibanaVersion}'.`
-      );
-    } else if (Semver.patch(convertToMultiNamespaceTypeVersion)) {
-      throw new Error(
-        `Invalid convertToMultiNamespaceTypeVersion for type ${type}. Value '${convertToMultiNamespaceTypeVersion}' cannot be used on a patch version (must be like 'x.y.0').`
-      );
-    }
-  }
-
-  registry.getAllTypes().forEach((type) => {
-    const { name, migrations, convertToMultiNamespaceTypeVersion, namespaceType } = type;
-    if (migrations) {
-      assertObjectOrFunction(
-        type.migrations,
-        `Migration for type ${name} should be an object or a function returning an object like { '2.0.0': (doc) => doc }.`
-      );
-    }
-    if (convertToMultiNamespaceTypeVersion) {
-      // CHECKPOINT 1
-      assertValidConvertToMultiNamespaceType(
-        namespaceType,
-        convertToMultiNamespaceTypeVersion,
-        name
-      );
-    }
-  });
-}
-
-/**
- * Converts migrations from a format that is convenient for callers to a format that
- * is convenient for our internal usage:
- * From: { type: { version: fn } }
- * To:   { type: { latestMigrationVersion?: string; latestCoreMigrationVersion?: string; transforms: [{ version: string, transform: fn }] } }
- */
-function buildActiveMigrations(
-  typeRegistry: ISavedObjectTypeRegistry,
-  kibanaVersion: string,
-  log: Logger
-): ActiveMigrations {
-  const referenceTransforms = getReferenceTransforms(typeRegistry);
-
-  return typeRegistry.getAllTypes().reduce((migrations, type) => {
-    const migrationsMap =
-      typeof type.migrations === 'function' ? type.migrations() : type.migrations;
-    validateMigrationsMapObject(type.name, kibanaVersion, migrationsMap);
-
-    const migrationTransforms = Object.entries(migrationsMap ?? {}).map<Transform>(
-      ([version, transform]) => ({
-        version,
-        transform: wrapWithTry(version, type, transform, log),
-        transformType: 'migrate',
-      })
-    );
-    const conversionTransforms = getConversionTransforms(type);
-    const transforms = [
-      ...referenceTransforms,
-      ...conversionTransforms,
-      ...migrationTransforms,
-    ].sort(transformComparator);
-
-    if (!transforms.length) {
-      return migrations;
-    }
-
-    const migrationVersionTransforms: Transform[] = [];
-    const coreMigrationVersionTransforms: Transform[] = [];
-    transforms.forEach((x) => {
-      if (x.transformType === 'migrate' || x.transformType === 'convert') {
-        migrationVersionTransforms.push(x);
-      } else {
-        coreMigrationVersionTransforms.push(x);
-      }
-    });
-
-    return {
-      ...migrations,
-      [type.name]: {
-        latestMigrationVersion: _.last(migrationVersionTransforms)?.version,
-        latestCoreMigrationVersion: _.last(coreMigrationVersionTransforms)?.version,
-        transforms,
-      },
-    };
-  }, {} as ActiveMigrations);
 }
 
 /**
@@ -525,162 +309,6 @@ function markAsUpToDate(
       return version ? set(acc, prop, version) : acc;
     }, {}),
     coreMigrationVersion: kibanaVersion,
-  };
-}
-
-/**
- * Converts a single-namespace object to a multi-namespace object. This primarily entails removing the `namespace` field and adding the
- * `namespaces` field.
- *
- * If the object does not exist in the default namespace (undefined), its ID is also regenerated, and an "originId" is added to preserve
- * legacy import/copy behavior.
- */
-function convertNamespaceType(doc: SavedObjectUnsanitizedDoc) {
-  const { namespace, ...otherAttrs } = doc;
-  const additionalDocs: SavedObjectUnsanitizedDoc[] = [];
-
-  // If this object exists in the default namespace, return it with the appropriate `namespaces` field without changing its ID.
-  if (namespace === undefined) {
-    return {
-      transformedDoc: { ...otherAttrs, namespaces: [DEFAULT_NAMESPACE_STRING] },
-      additionalDocs,
-    };
-  }
-
-  const { id: originId, type } = otherAttrs;
-  const id = SavedObjectsUtils.getConvertedObjectId(namespace, type, originId!);
-  const legacyUrlAlias: SavedObjectUnsanitizedDoc<LegacyUrlAlias> = {
-    id: `${namespace}:${type}:${originId}`,
-    type: LEGACY_URL_ALIAS_TYPE,
-    attributes: {
-      // NOTE TO MAINTAINERS: If a saved object migration is added in `src/core/server/saved_objects/object_types/registration.ts`, these
-      // values must be updated accordingly. That's because a user can upgrade Kibana from 7.17 to 8.x, and any defined migrations will not
-      // be applied to aliases that are created during the conversion process.
-      sourceId: originId,
-      targetNamespace: namespace,
-      targetType: type,
-      targetId: id,
-      purpose: 'savedObjectConversion',
-    },
-  };
-  additionalDocs.push(legacyUrlAlias);
-  return {
-    transformedDoc: { ...otherAttrs, id, originId, namespaces: [namespace] },
-    additionalDocs,
-  };
-}
-
-/**
- * Returns all applicable conversion transforms for a given object type.
- */
-function getConversionTransforms(type: SavedObjectsType): Transform[] {
-  const { convertToMultiNamespaceTypeVersion } = type;
-  if (!convertToMultiNamespaceTypeVersion) {
-    return [];
-  }
-  return [
-    {
-      version: convertToMultiNamespaceTypeVersion,
-      transform: convertNamespaceType,
-      transformType: 'convert',
-    },
-  ];
-}
-
-/**
- * Returns all applicable reference transforms for all object types.
- */
-function getReferenceTransforms(typeRegistry: ISavedObjectTypeRegistry): Transform[] {
-  const transformMap = typeRegistry
-    .getAllTypes()
-    .filter((type) => type.convertToMultiNamespaceTypeVersion)
-    .reduce((acc, { convertToMultiNamespaceTypeVersion: version, name }) => {
-      const types = acc.get(version!) ?? new Set();
-      return acc.set(version!, types.add(name));
-    }, new Map<string, Set<string>>());
-
-  return Array.from(transformMap, ([version, types]) => ({
-    version,
-    transform: (doc) => {
-      const { namespace, references } = doc;
-      if (namespace && references?.length) {
-        return {
-          transformedDoc: {
-            ...doc,
-            references: references.map(({ type, id, ...attrs }) => ({
-              ...attrs,
-              type,
-              id: types.has(type)
-                ? SavedObjectsUtils.getConvertedObjectId(namespace, type, id)
-                : id,
-            })),
-          },
-          additionalDocs: [],
-        };
-      }
-      return { transformedDoc: doc, additionalDocs: [] };
-    },
-    transformType: 'reference',
-  }));
-}
-
-/**
- * Transforms are sorted in ascending order by version. One version may contain multiple transforms; 'reference' transforms always run
- * first, 'convert' transforms always run second, and 'migrate' transforms always run last. This is because:
- *  1. 'convert' transforms get rid of the `namespace` field, which must be present for 'reference' transforms to function correctly.
- *  2. 'migrate' transforms are defined by the consumer, and may change the object type or migrationVersion which resets the migration loop
- *     and could cause any remaining transforms for this version to be skipped.
- */
-function transformComparator(a: Transform, b: Transform) {
-  const semver = Semver.compare(a.version, b.version);
-  if (semver !== 0) {
-    return semver;
-  } else if (a.transformType !== b.transformType) {
-    if (a.transformType === 'migrate') {
-      return 1;
-    } else if (b.transformType === 'migrate') {
-      return -1;
-    } else if (a.transformType === 'convert') {
-      return 1;
-    } else if (b.transformType === 'convert') {
-      return -1;
-    }
-  }
-  return 0;
-}
-
-/**
- * If a specific transform function fails, this tacks on a bit of information
- * about the document and transform that caused the failure.
- */
-function wrapWithTry(
-  version: string,
-  type: SavedObjectsType,
-  migrationFn: SavedObjectMigrationFn,
-  log: Logger
-) {
-  const context = Object.freeze({
-    log: new MigrationLogger(log),
-    migrationVersion: version,
-    convertToMultiNamespaceTypeVersion: type.convertToMultiNamespaceTypeVersion,
-    isSingleNamespaceType: type.namespaceType === 'single',
-  });
-
-  return function tryTransformDoc(doc: SavedObjectUnsanitizedDoc) {
-    try {
-      const result = migrationFn(doc, context);
-
-      // A basic check to help migration authors detect basic errors
-      // (e.g. forgetting to return the transformed doc)
-      if (!result || !result.type) {
-        throw new Error(`Invalid saved object returned from migration ${type.name}:${version}.`);
-      }
-
-      return { transformedDoc: result, additionalDocs: [] };
-    } catch (error) {
-      log.error(error);
-      throw new TransformSavedObjectDocumentError(error, version);
-    }
   };
 }
 
