@@ -6,7 +6,15 @@
  */
 
 import React, { memo, useMemo } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
+import {
+  EuiAccordion,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiSpacer,
+  EuiText,
+  useGeneratedHtmlId,
+} from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import type { ExecuteActionRequestBody } from '../../../../../common/endpoint/schema/actions';
 import { useConsoleActionSubmitter } from '../hooks/use_console_action_submitter';
 import type { ResponseActionExecuteOutputContent } from '../../../../../common/endpoint/types';
@@ -18,38 +26,93 @@ import {
   type ResponseActionFileDownloadLinkProps,
 } from '../../response_action_file_download_link/response_action_file_download_link';
 
-const getOutputForAgent = (
-  action: ResponseActionFileDownloadLinkProps['action'],
-  agentId?: string,
-  outputs?: Record<string, { content: ResponseActionExecuteOutputContent }>
-) => {
-  if (!(agentId && outputs && outputs[agentId])) {
-    return <></>;
-  }
+const EXECUTE_FILE_LINK_TITLE = i18n.translate(
+  'xpack.securitySolution.responseActionExecuteDownloadLink.downloadButtonLabel',
+  { defaultMessage: 'Click here to download full output' }
+);
 
-  return (
-    <EuiFlexGroup direction="column">
-      <EuiFlexItem>
-        <EuiTitle size="xxs">
-          <h4>{'stdout:'}</h4>
-        </EuiTitle>
-        <div>{outputs[agentId].content.stdout}</div>
-      </EuiFlexItem>
-      <EuiFlexItem>
-        <EuiTitle size="xxs">
-          <h4>{'stderr:'}</h4>
-        </EuiTitle>
-        <div>{outputs[agentId].content.stderr}</div>
-      </EuiFlexItem>
-      <EuiFlexItem>
-        <EuiTitle size="xxs">
-          <h4>{'full output:'}</h4>
-        </EuiTitle>
-        <ResponseActionFileDownloadLink action={action} />
-      </EuiFlexItem>
-    </EuiFlexGroup>
-  );
-};
+const ExecutionActionOutputGist = memo(
+  ({
+    content,
+    id,
+    initialIsOpen = false,
+    type,
+  }: {
+    content: string;
+    id: string;
+    initialIsOpen?: boolean;
+    type: 'output' | 'error';
+  }) => {
+    return (
+      <EuiAccordion
+        id={id}
+        initialIsOpen={initialIsOpen}
+        buttonContent={i18n.translate(
+          'xpack.securitySolution.responseActionExecuteAccordion.buttonText',
+          {
+            values: { type },
+            defaultMessage: 'Execution {type} (truncated)',
+          }
+        )}
+        paddingSize="s"
+      >
+        <EuiText size="s">
+          <p>{content}</p>
+        </EuiText>
+      </EuiAccordion>
+    );
+  }
+);
+ExecutionActionOutputGist.displayName = 'ExecutionActionOutputGist';
+
+const ExecuteActionOutput = memo(
+  ({
+    action,
+    agentId,
+    outputs,
+  }: {
+    action: ResponseActionFileDownloadLinkProps['action'];
+    agentId?: string;
+    outputs?: Record<string, { content: ResponseActionExecuteOutputContent }>;
+  }) => {
+    const prefix = 'executeActionOutputAccordions';
+    const executionOutputAccordionStdout = useGeneratedHtmlId({
+      prefix,
+      suffix: 'stdout',
+    });
+    const executionOutputAccordionStderr = useGeneratedHtmlId({
+      prefix,
+      suffix: 'stderr',
+    });
+
+    if (!(agentId && outputs && outputs[agentId])) {
+      return <></>;
+    }
+
+    return (
+      <EuiFlexGroup direction="column">
+        <EuiFlexItem>
+          <ResponseActionFileDownloadLink action={action} buttonTitle={EXECUTE_FILE_LINK_TITLE} />
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <ExecutionActionOutputGist
+            content={outputs[agentId].content.stdout}
+            id={executionOutputAccordionStdout}
+            initialIsOpen
+            type="output"
+          />
+          <EuiSpacer size="m" />
+          <ExecutionActionOutputGist
+            content={outputs[agentId].content.stderr}
+            id={executionOutputAccordionStderr}
+            type="error"
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    );
+  }
+);
+ExecuteActionOutput.displayName = 'ExecuteActionOutput';
 
 export const ExecuteActionResult = memo<
   ActionRequestComponentProps<{
@@ -58,7 +121,6 @@ export const ExecuteActionResult = memo<
   }>
 >(({ command, setStore, store, status, setStatus, ResultComponent }) => {
   const actionCreator = useSendExecuteEndpoint();
-
   const actionRequestBody = useMemo<undefined | ExecuteActionRequestBody>(() => {
     const endpointId = command.commandDefinition?.meta?.endpointId;
 
@@ -99,12 +161,19 @@ export const ExecuteActionResult = memo<
 
   // Show results
   return (
-    <ResultComponent data-test-subj="executeSuccess" showTitle={false}>
-      {getOutputForAgent(
-        completedActionDetails,
-        command.commandDefinition?.meta?.endpointId,
-        completedActionDetails.outputs
+    <ResultComponent
+      data-test-subj="executeSuccess"
+      showAs="success"
+      title={i18n.translate(
+        'xpack.securitySolution.endpointResponseActions.executeAction.successTitle',
+        { defaultMessage: 'Command execution was successful.' }
       )}
+    >
+      <ExecuteActionOutput
+        action={completedActionDetails}
+        agentId={command.commandDefinition?.meta?.endpointId}
+        outputs={completedActionDetails.outputs}
+      />
     </ResultComponent>
   );
 });

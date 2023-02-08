@@ -228,7 +228,7 @@ export const sendEndpointActionResponse = async (
           sha256: '8d61673c9d782297b3c774ded4e3d88f31a8869a8f25cf5cdd402ba6822d1d28',
         },
         mime_type: 'application/zip',
-        name: 'upload.zip',
+        name: action.command === 'execute' ? 'full-output.zip' : 'upload.zip',
         extension: 'zip',
         size: 125,
         Status: 'READY',

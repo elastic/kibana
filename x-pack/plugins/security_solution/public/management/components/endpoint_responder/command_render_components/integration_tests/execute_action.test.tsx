@@ -22,6 +22,7 @@ import { EXECUTE_ROUTE } from '../../../../../../common/endpoint/constants';
 import { getEndpointAuthzInitialStateMock } from '../../../../../../common/endpoint/service/authz/mocks';
 import type { EndpointPrivileges } from '../../../../../../common/endpoint/types';
 import { INSUFFICIENT_PRIVILEGES_FOR_COMMAND } from '../../../../../common/translations';
+import type { HttpFetchOptionsWithPath } from '@kbn/core-http-browser';
 
 jest.mock('../../../../../common/components/user_privileges');
 jest.mock('../../../../../common/experimental_features_service');
@@ -144,5 +145,33 @@ describe('When using execute action from response actions console', () => {
     expect(renderResult.getByTestId('test-badArgument-message').textContent).toEqual(
       'Argument can only be used once: --comment'
     );
+  });
+
+  it('should display download link once action completes', async () => {
+    const actionDetailsApiResponseMock: ReturnType<typeof apiMocks.responseProvider.actionDetails> =
+      {
+        data: {
+          ...apiMocks.responseProvider.actionDetails({
+            path: '/1',
+          } as HttpFetchOptionsWithPath).data,
+
+          completedAt: new Date().toISOString(),
+          command: 'execute',
+        },
+      };
+    apiMocks.responseProvider.actionDetails.mockReturnValue(actionDetailsApiResponseMock);
+
+    await render();
+    enterConsoleCommand(renderResult, 'execute --command="ls -l"');
+
+    await waitFor(() => {
+      expect(apiMocks.responseProvider.actionDetails).toHaveBeenCalled();
+    });
+
+    await waitFor(() => {
+      expect(renderResult.getByTestId('executeSuccess').textContent).toEqual(
+        'Command execution was successful.'
+      );
+    });
   });
 });
