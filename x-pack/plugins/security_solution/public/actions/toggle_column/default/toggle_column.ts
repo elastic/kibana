@@ -8,7 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import type { CellAction, CellActionExecutionContext } from '@kbn/cell-actions';
 
-import { fieldHasCellActions, isInSecurityApp } from '../../utils';
+import { fieldHasCellActions } from '../../utils';
 import type { SecurityAppStore } from '../../../common/store';
 import { getScopedActions, isInTableScope, isTimelineScope } from '../../../helpers';
 import { timelineDefaults } from '../../../timelines/store/timeline/defaults';
@@ -16,7 +16,6 @@ import { defaultColumnHeaderType, tableDefaults } from '../../../common/store/da
 import { timelineSelectors } from '../../../timelines/store/timeline';
 import { dataTableSelectors } from '../../../common/store/data_table';
 import { DEFAULT_COLUMN_MIN_WIDTH } from '../../../timelines/components/timeline/body/constants';
-import { KibanaServices } from '../../../common/lib/kibana';
 
 export const ACTION_ID = 'security_toggleColumn';
 const ICON = 'listAdd';
@@ -48,69 +47,58 @@ export const createToggleColumnAction = ({
 }: {
   store: SecurityAppStore;
   order?: number;
-}): CellAction<ShowTopNActionContext> => {
-  let currentAppId: string | undefined;
+}): CellAction<ShowTopNActionContext> => ({
+  id: ACTION_ID,
+  type: ACTION_ID,
+  order,
+  getIconType: (): string => ICON,
+  getDisplayName: () => COLUMN_TOGGLE,
+  getDisplayNameTooltip: ({ field, metadata }) =>
+    metadata?.isObjectArray ? NESTED_COLUMN(field.name) : COLUMN_TOGGLE,
+  isCompatible: async ({ field, metadata }) => {
+    return (
+      fieldHasCellActions(field.name) &&
+      !!metadata?.scopeId &&
+      (isTimelineScope(metadata?.scopeId) || isInTableScope(metadata?.scopeId))
+    );
+  },
+  execute: async ({ metadata, field }) => {
+    const scopeId = metadata?.scopeId;
 
-  const { application: applicationService } = KibanaServices.get();
+    if (!scopeId) return;
 
-  applicationService.currentAppId$.subscribe((appId) => {
-    currentAppId = appId;
-  });
+    const selector = isTimelineScope(scopeId)
+      ? timelineSelectors.getTimelineByIdSelector()
+      : dataTableSelectors.getTableByIdSelector();
 
-  return {
-    id: ACTION_ID,
-    type: ACTION_ID,
-    order,
-    getIconType: (): string => ICON,
-    getDisplayName: () => COLUMN_TOGGLE,
-    getDisplayNameTooltip: ({ field, metadata }) =>
-      metadata?.isObjectArray ? NESTED_COLUMN(field.name) : COLUMN_TOGGLE,
-    isCompatible: async ({ field, metadata }) => {
-      return (
-        isInSecurityApp(currentAppId) &&
-        fieldHasCellActions(field.name) &&
-        !!metadata?.scopeId &&
-        (isTimelineScope(metadata?.scopeId) || isInTableScope(metadata?.scopeId))
+    const defaults = isTimelineScope(scopeId) ? timelineDefaults : tableDefaults;
+    const { columns } = selector(store.getState(), scopeId) ?? defaults;
+
+    const scopedActions = getScopedActions(scopeId);
+
+    if (!scopedActions) {
+      return;
+    }
+
+    if (columns.some((c) => c.id === field.name)) {
+      store.dispatch(
+        scopedActions.removeColumn({
+          columnId: field.name,
+          id: scopeId,
+        })
       );
-    },
-    execute: async ({ metadata, field }) => {
-      const scopeId = metadata?.scopeId;
-
-      if (!scopeId) return;
-
-      const selector = isTimelineScope(scopeId)
-        ? timelineSelectors.getTimelineByIdSelector()
-        : dataTableSelectors.getTableByIdSelector();
-
-      const defaults = isTimelineScope(scopeId) ? timelineDefaults : tableDefaults;
-      const { columns } = selector(store.getState(), scopeId) ?? defaults;
-
-      const scopedActions = getScopedActions(scopeId);
-
-      if (!scopedActions) {
-        return;
-      }
-
-      if (columns.some((c) => c.id === field.name)) {
-        store.dispatch(
-          scopedActions.removeColumn({
-            columnId: field.name,
-            id: scopeId,
-          })
-        );
-      } else {
-        store.dispatch(
-          scopedActions.upsertColumn({
-            column: {
-              columnHeaderType: defaultColumnHeaderType,
-              id: field.name,
-              initialWidth: DEFAULT_COLUMN_MIN_WIDTH,
-            },
-            id: scopeId,
-            index: 1,
-          })
-        );
-      }
-    },
-  };
-};
+    } else {
+      store.dispatch(
+        scopedActions.upsertColumn({
+          column: {
+            columnHeaderType: defaultColumnHeaderType,
+            id: field.name,
+            initialWidth: DEFAULT_COLUMN_MIN_WIDTH,
+          },
+          id: scopeId,
+          index: 1,
+        })
+      );
+    }
+  },
+});
