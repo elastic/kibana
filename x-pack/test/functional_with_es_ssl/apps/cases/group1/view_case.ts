@@ -9,12 +9,12 @@ import expect from '@kbn/expect';
 import uuid from 'uuid';
 import { CaseStatuses } from '@kbn/cases-plugin/common';
 import { CaseSeverity } from '@kbn/cases-plugin/common/api';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import { FtrProviderContext } from '../../../ftr_provider_context';
 import {
   createUsersAndRoles,
   deleteUsersAndRoles,
-} from '../../../cases_api_integration/common/lib/authentication';
-import { users, roles, casesAllUser, casesAllUser2 } from './common';
+} from '../../../../cases_api_integration/common/lib/authentication';
+import { users, roles, casesAllUser, casesAllUser2 } from '../common';
 
 export default ({ getPageObject, getService }: FtrProviderContext) => {
   const header = getPageObject('header');
