@@ -85,5 +85,8 @@ const createAlertStatusQuery = (status: AlertStatus = 'all'): Query | null =>
 
 const createHostsQuery = (hosts: SnapshotNode[]): Query => ({
   language: 'kuery',
-  query: hosts.map((host) => `host.name : "${host.name}"`).join(' or '),
+  query:
+    hosts.length > 0
+      ? hosts.map((host) => `host.name : "${host.name}"`).join(' or ')
+      : 'host.name : ""',
 });
