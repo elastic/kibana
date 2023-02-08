@@ -97,7 +97,7 @@ describe('SlackParamsFields renders', () => {
           actionConnector={{ config: { type: 'web_api' } } as any}
           actionParams={{
             subAction: 'postMessage',
-            subActionParams: { channels: ['general'], text: 'some text' },
+            subActionParams: { channels: [], text: 'some text' },
           }}
           errors={{ message: [] }}
           editAction={() => {}}
