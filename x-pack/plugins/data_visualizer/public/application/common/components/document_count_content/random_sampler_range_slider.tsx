@@ -10,6 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { isDefined } from '@kbn/ml-is-defined';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useState } from 'react';
+import { roundToDecimalPlace } from '../utils';
 import {
   MIN_SAMPLER_PROBABILITY,
   RANDOM_SAMPLER_PROBABILITIES,
@@ -26,11 +27,14 @@ export const RandomSamplerRangeSlider = ({
   // Keep track of the input in sampling probability slider when mode is on - manual
   // before 'Apply' is clicked
   const [samplingProbabilityInput, setSamplingProbabilityInput] = useState(samplingProbability);
+
   const isInvalidSamplingProbabilityInput =
     !isDefined(samplingProbabilityInput) ||
     isNaN(samplingProbabilityInput) ||
     samplingProbabilityInput <= 0 ||
     samplingProbabilityInput >= 50;
+
+  const inputValue = (samplingProbabilityInput ?? MIN_SAMPLER_PROBABILITY) * 100;
 
   return (
     <EuiFlexItem grow={true}>
@@ -57,7 +61,9 @@ export const RandomSamplerRangeSlider = ({
             showInput="inputWithPopover"
             min={RANDOM_SAMPLER_STEP}
             max={50}
-            value={(samplingProbabilityInput ?? MIN_SAMPLER_PROBABILITY) * 100}
+            // Rounding to 0 decimal place because sometimes js results in weird number when multiplying fractions
+            // e.g. 0.07 * 100 yields 7.000000000000001
+            value={inputValue >= 1 ? roundToDecimalPlace(inputValue, 0) : inputValue}
             ticks={RANDOM_SAMPLER_PROBABILITIES.map((d) => ({
               value: d,
               label: d === 0.001 || d >= 5 ? `${d}` : '',
@@ -75,11 +81,11 @@ export const RandomSamplerRangeSlider = ({
               if (value > 0 && value <= 1) {
                 setSamplingProbabilityInput(value / 100);
               } else {
-                const nextVal = value > prevValue ? Math.ceil(value) : Math.floor(value);
                 // Because the incremental step is very small (0.0001),
-                // everytime user clicks the ^ in the numerical input
-                // we need to make sure it rounds up to the next whole number
-                setSamplingProbabilityInput(nextVal / 100);
+                // everytime user clicks the ^/∨ in the numerical input
+                // we need to make sure it rounds up or down to the next whole number
+                const nearestInt = value > prevValue ? Math.ceil(value) : Math.floor(value);
+                setSamplingProbabilityInput(nearestInt / 100);
               }
             }}
             step={RANDOM_SAMPLER_STEP}
