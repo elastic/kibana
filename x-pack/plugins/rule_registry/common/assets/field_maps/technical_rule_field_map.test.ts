@@ -43,22 +43,18 @@ it('matches snapshot', () => {
         "type": "keyword",
       },
       "kibana.alert.duration.us": Object {
-        "array": false,
         "required": false,
         "type": "long",
       },
       "kibana.alert.end": Object {
-        "array": false,
         "required": false,
         "type": "date",
       },
       "kibana.alert.flapping": Object {
-        "array": false,
         "required": false,
         "type": "boolean",
       },
       "kibana.alert.instance.id": Object {
-        "array": false,
         "required": true,
         "type": "keyword",
       },
@@ -83,7 +79,6 @@ it('matches snapshot', () => {
         "type": "keyword",
       },
       "kibana.alert.rule.consumer": Object {
-        "array": false,
         "required": true,
         "type": "keyword",
       },
@@ -143,7 +138,6 @@ it('matches snapshot', () => {
         "type": "flattened",
       },
       "kibana.alert.rule.producer": Object {
-        "array": false,
         "required": true,
         "type": "keyword",
       },
@@ -163,7 +157,6 @@ it('matches snapshot', () => {
         "type": "keyword",
       },
       "kibana.alert.rule.rule_type_id": Object {
-        "array": false,
         "required": true,
         "type": "keyword",
       },
@@ -203,17 +196,14 @@ it('matches snapshot', () => {
         "type": "keyword",
       },
       "kibana.alert.severity": Object {
-        "array": false,
         "required": false,
         "type": "keyword",
       },
       "kibana.alert.start": Object {
-        "array": false,
         "required": false,
         "type": "date",
       },
       "kibana.alert.status": Object {
-        "array": false,
         "required": true,
         "type": "keyword",
       },
@@ -248,13 +238,11 @@ it('matches snapshot', () => {
         "type": "keyword",
       },
       "kibana.alert.time_range": Object {
-        "array": false,
         "format": "epoch_millis||strict_date_optional_time",
         "required": false,
         "type": "date_range",
       },
       "kibana.alert.uuid": Object {
-        "array": false,
         "required": true,
         "type": "keyword",
       },
