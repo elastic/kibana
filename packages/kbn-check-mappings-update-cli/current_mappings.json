@@ -372,6 +372,9 @@
           }
         }
       },
+      "expire_time": {
+        "type": "date"
+      },
       "item_id": {
         "type": "keyword"
       },
@@ -507,6 +510,9 @@
             "type": "keyword"
           }
         }
+      },
+      "expire_time": {
+        "type": "date"
       },
       "item_id": {
         "type": "keyword"
@@ -2011,6 +2017,13 @@
                 "type": "keyword"
               }
             }
+          },
+          "assignees": {
+            "properties": {
+              "uid": {
+                "type": "keyword"
+              }
+            }
           }
         }
       },
@@ -2099,6 +2112,16 @@
       },
       "fleet_server_host_id": {
         "type": "keyword"
+      },
+      "agent_features": {
+        "properties": {
+          "name": {
+            "type": "keyword"
+          },
+          "enabled": {
+            "type": "boolean"
+          }
+        }
       }
     }
   },
@@ -2352,6 +2375,7 @@
           },
           "features": {
             "type": "nested",
+            "dynamic": false,
             "properties": {
               "synthetic_source": {
                 "type": "boolean"
@@ -2607,38 +2631,6 @@
           "ecs_mapping": {
             "type": "object",
             "enabled": false
-          }
-        }
-      }
-    }
-  },
-  "csp_rule": {
-    "dynamic": false,
-    "properties": {
-      "metadata": {
-        "type": "object",
-        "properties": {
-          "name": {
-            "type": "keyword",
-            "fields": {
-              "text": {
-                "type": "text"
-              }
-            }
-          }
-        }
-      },
-      "package_policy_id": {
-        "type": "keyword"
-      },
-      "policy_id": {
-        "type": "keyword"
-      },
-      "enabled": {
-        "type": "boolean",
-        "fields": {
-          "keyword": {
-            "type": "keyword"
           }
         }
       }
@@ -2965,45 +2957,6 @@
           "params": {
             "type": "object",
             "enabled": false
-          }
-        }
-      }
-    }
-  },
-  "siem-detection-engine-rule-execution-info": {
-    "properties": {
-      "last_execution": {
-        "type": "object",
-        "properties": {
-          "date": {
-            "type": "date"
-          },
-          "status": {
-            "type": "keyword",
-            "ignore_above": 1024
-          },
-          "status_order": {
-            "type": "long"
-          },
-          "message": {
-            "type": "text"
-          },
-          "metrics": {
-            "type": "object",
-            "properties": {
-              "total_search_duration_ms": {
-                "type": "long"
-              },
-              "total_indexing_duration_ms": {
-                "type": "long"
-              },
-              "total_enrichment_duration_ms": {
-                "type": "long"
-              },
-              "execution_gap_duration_s": {
-                "type": "long"
-              }
-            }
           }
         }
       }
