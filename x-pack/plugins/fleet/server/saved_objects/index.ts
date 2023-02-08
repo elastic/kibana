@@ -53,6 +53,7 @@ import {
   migrateInstallationToV860,
   migratePackagePolicyToV860,
 } from './migrations/to_v8_6_0';
+import { migratePackagePolicyToV870 } from './migrations/security_solution';
 
 /*
  * Saved object types and mappings
@@ -112,6 +113,12 @@ const getSavedObjectTypes = (
         monitoring_output_id: { type: 'keyword' },
         download_source_id: { type: 'keyword' },
         fleet_server_host_id: { type: 'keyword' },
+        agent_features: {
+          properties: {
+            name: { type: 'keyword' },
+            enabled: { type: 'boolean' },
+          },
+        },
       },
     },
     migrations: {
@@ -205,6 +212,7 @@ const getSavedObjectTypes = (
       '8.4.0': migratePackagePolicyToV840,
       '8.5.0': migratePackagePolicyToV850,
       '8.6.0': migratePackagePolicyToV860,
+      '8.7.0': migratePackagePolicyToV870,
     },
   },
   [PACKAGES_SAVED_OBJECT_TYPE]: {
