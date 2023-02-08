@@ -5,103 +5,81 @@
  * 2.0.
  */
 
-import React, { useEffect, useState } from 'react';
-import { EuiComboBox, EuiComboBoxOptionOption, EuiFlexGroup, EuiFormRow } from '@elastic/eui';
-import { Control, Controller, UseFormWatch } from 'react-hook-form';
-import type { CreateSLOInput } from '@kbn/slo-schema';
+import React from 'react';
+import { EuiFlexGroup } from '@elastic/eui';
+import { Control } from 'react-hook-form';
 import { i18n } from '@kbn/i18n';
-import {
-  Suggestion,
-  useFetchApmSuggestions,
-} from '../../../../hooks/slo/use_fetch_apm_suggestions';
+import type { CreateSLOInput } from '@kbn/slo-schema';
+
+import { FieldSelector } from './field_selector';
 
 export interface Props {
   control: Control<CreateSLOInput>;
-  watch: UseFormWatch<CreateSLOInput>;
 }
 
-interface Option {
-  value: string;
-  label: string;
-}
-
-export function ApmLatencyIndicatorTypeForm({ control, watch }: Props) {
-  const [search, setSearch] = useState<string>('');
-  const { data: suggestions, loading } = useFetchApmSuggestions({
-    fieldName: 'service.name',
-    search,
-  });
-  const [options, setOptions] = useState<Option[]>([]);
-
-  useEffect(() => {
-    setOptions(createOptions(suggestions));
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [suggestions.length]);
-
+export function ApmLatencyIndicatorTypeForm({ control }: Props) {
   return (
     <EuiFlexGroup direction="column" gutterSize="l">
-      <EuiFormRow
+      <FieldSelector
         label={i18n.translate('xpack.observability.slos.sloEdit.apmLatency.serviceName', {
           defaultMessage: 'Service name',
         })}
-      >
-        <Controller
-          name="indicator.params.service"
-          control={control}
-          rules={{ required: true }}
-          render={({ field, fieldState }) => (
-            <EuiComboBox
-              {...field}
-              aria-label={i18n.translate(
-                'xpack.observability.slos.sloEdit.apmLatency.serviceName.placeholder',
-                {
-                  defaultMessage: 'Select the APM service',
-                }
-              )}
-              async
-              data-test-subj="apmLatencyServiceSelector"
-              isClearable={true}
-              isInvalid={!!fieldState.error}
-              isLoading={loading}
-              onChange={(selected: EuiComboBoxOptionOption[]) => {
-                if (selected.length) {
-                  return field.onChange(selected[0].value);
-                }
-
-                field.onChange('');
-              }}
-              onSearchChange={(value: string) => {
-                setSearch(value);
-              }}
-              options={options}
-              placeholder={i18n.translate(
-                'xpack.observability.slos.sloEdit.apmLatency.serviceName.placeholder',
-                {
-                  defaultMessage: 'Select the APM service',
-                }
-              )}
-              selectedOptions={
-                !!field.value
-                  ? [
-                      {
-                        value: field.value,
-                        label: field.value,
-                        'data-test-subj': 'apmLatencyServiceSelectedValue',
-                      },
-                    ]
-                  : []
-              }
-              singleSelection
-            />
-          )}
-        />
-      </EuiFormRow>
+        placeholder={i18n.translate(
+          'xpack.observability.slos.sloEdit.apmLatency.serviceName.placeholder',
+          {
+            defaultMessage: 'Select the APM service',
+          }
+        )}
+        fieldName="service.name"
+        name="indicator.params.service"
+        control={control}
+        dataTestSubj="apmLatencyServiceSelector"
+      />
+      <FieldSelector
+        label={i18n.translate('xpack.observability.slos.sloEdit.apmLatency.serviceEnvironment', {
+          defaultMessage: 'Service environment',
+        })}
+        placeholder={i18n.translate(
+          'xpack.observability.slos.sloEdit.apmLatency.serviceEnvironment.placeholder',
+          {
+            defaultMessage: 'Select the environment',
+          }
+        )}
+        fieldName="service.environment"
+        name="indicator.params.environment"
+        control={control}
+        dataTestSubj="apmLatencyEnvironmentSelector"
+      />
+      <FieldSelector
+        label={i18n.translate('xpack.observability.slos.sloEdit.apmLatency.transactionType', {
+          defaultMessage: 'Transaction type',
+        })}
+        placeholder={i18n.translate(
+          'xpack.observability.slos.sloEdit.apmLatency.transactionType.placeholder',
+          {
+            defaultMessage: 'Select the transaction type',
+          }
+        )}
+        fieldName="transaction.type"
+        name="indicator.params.transactionType"
+        control={control}
+        dataTestSubj="apmLatencyTransactionTypeSelector"
+      />
+      <FieldSelector
+        label={i18n.translate('xpack.observability.slos.sloEdit.apmLatency.transactionName', {
+          defaultMessage: 'Transaction name',
+        })}
+        placeholder={i18n.translate(
+          'xpack.observability.slos.sloEdit.apmLatency.transactionName.placeholder',
+          {
+            defaultMessage: 'Select the transaction name',
+          }
+        )}
+        fieldName="transaction.name"
+        name="indicator.params.transactionName"
+        control={control}
+        dataTestSubj="apmLatencyTransactionNameSelector"
+      />
     </EuiFlexGroup>
   );
-}
-
-function createOptions(suggestions: Suggestion[]): Option[] {
-  return suggestions
-    .map((suggestion) => ({ label: suggestion, value: suggestion }))
-    .sort((a, b) => String(a.label).localeCompare(b.label));
 }
