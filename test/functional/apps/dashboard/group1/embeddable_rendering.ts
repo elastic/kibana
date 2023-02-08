@@ -99,7 +99,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     await dashboardExpect.vegaTextsDoNotExist(['5,000']);
   };
 
-  describe.only('dashboard embeddable rendering', function describeIndexTests() {
+  describe('dashboard embeddable rendering', function describeIndexTests() {
     before(async () => {
       await security.testUser.setRoles(['kibana_admin', 'animals', 'test_logstash_reader']);
       await kibanaServer.savedObjects.cleanStandardList();
@@ -129,8 +129,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('adding visualizations', async () => {
-      await elasticChart.setNewChartUiDebugFlag(true);
-
       visNames = await dashboardAddPanel.addEveryVisualization('"Rendering Test"');
       expect(visNames.length).to.be.equal(24);
       await dashboardExpect.visualizationsArePresent(visNames);
@@ -161,7 +159,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('initial render test', async () => {
       await PageObjects.header.waitUntilLoadingHasFinished();
       await PageObjects.dashboard.waitForRenderComplete();
-      await elasticChart.setNewChartUiDebugFlag();
       await expectAllDataRenders();
     });
 
@@ -180,8 +177,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       const alert = await browser.getAlert();
       await alert?.accept();
 
+      // setNewChartUiDebugFlag required because window._echDebugStateFlag flag is reset after refresh
+      await elasticChart.setNewChartUiDebugFlag(true);
+
       await PageObjects.header.waitUntilLoadingHasFinished();
-      await elasticChart.setNewChartUiDebugFlag();
       await PageObjects.dashboard.waitForRenderComplete();
       await expectAllDataRenders();
     });
