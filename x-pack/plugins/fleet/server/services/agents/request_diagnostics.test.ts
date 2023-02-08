@@ -40,8 +40,8 @@ describe('requestDiagnostics (plural)', () => {
   it('can request diagnostics for multiple agents', async () => {
     const { soClient, esClient, agentInRegularDocNewer, agentInRegularDocNewer2 } =
       createClientMock();
-    const idsToUnenroll = [agentInRegularDocNewer._id, agentInRegularDocNewer2._id];
-    await bulkRequestDiagnostics(esClient, soClient, { agentIds: idsToUnenroll });
+    const idsToAction = [agentInRegularDocNewer._id, agentInRegularDocNewer2._id];
+    await bulkRequestDiagnostics(esClient, soClient, { agentIds: idsToAction });
 
     expect(esClient.create).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -56,13 +56,13 @@ describe('requestDiagnostics (plural)', () => {
 
   it('should report error when diagnostics for older agent', async () => {
     const { soClient, esClient, agentInRegularDoc, agentInRegularDocNewer } = createClientMock();
-    const idsToUnenroll = [agentInRegularDocNewer._id, agentInRegularDoc._id];
-    await bulkRequestDiagnostics(esClient, soClient, { agentIds: idsToUnenroll });
+    const idsToAction = [agentInRegularDocNewer._id, agentInRegularDoc._id];
+    await bulkRequestDiagnostics(esClient, soClient, { agentIds: idsToAction });
 
     expect(esClient.create).toHaveBeenCalledWith(
       expect.objectContaining({
         body: expect.objectContaining({
-          agents: ['agent-in-regular-policy-newer'],
+          agents: ['agent-in-regular-policy-newer', 'agent-in-regular-policy'],
           type: 'REQUEST_DIAGNOSTICS',
         }),
         index: '.fleet-actions',

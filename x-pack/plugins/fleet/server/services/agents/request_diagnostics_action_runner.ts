@@ -46,18 +46,15 @@ export async function requestDiagnosticsBatch(
   const actionId = options.actionId ?? uuidv4();
   const total = options.total ?? givenAgents.length;
 
-  const supportedAgents: Agent[] = givenAgents.reduce((acc: Agent[], agent: Agent) => {
-    if (isAgentRequestDiagnosticsSupported(agent)) {
-      acc.push(agent);
-    } else {
+  givenAgents.forEach((agent: Agent) => {
+    if (!isAgentRequestDiagnosticsSupported(agent)) {
       errors[agent.id] = new FleetError(
         `Agent ${agent.id} does not support request diagnostics action.`
       );
     }
-    return acc;
-  }, []);
+  });
 
-  const agentIds = supportedAgents.map((agent) => agent.id);
+  const agentIds = givenAgents.map((agent) => agent.id);
 
   await createAgentAction(esClient, {
     id: actionId,
