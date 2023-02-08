@@ -16,7 +16,7 @@ export interface ActiveMigrations {
 }
 
 /**
- *
+ * Structure containing all the required info to perform a type's conversion
  */
 export interface TypeConversion {
   /** Derived from `migrate` transforms and `convert` transforms */
@@ -49,8 +49,6 @@ export interface Transform {
  * There is one "coreMigrationVersion" transform type:
  *   * `reference` - These transforms are defined by core and added by consumers using the type registry; they are applied to all object
  *     types based on their `coreMigrationVersion` field. These are applied during index migrations, NOT document migrations.
- *
- * If any additional transform types are added, the functions below should be updated to account for them.
  */
 export type TransformType = 'migrate' | 'convert' | 'reference';
 
