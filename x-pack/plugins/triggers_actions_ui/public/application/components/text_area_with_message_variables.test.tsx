@@ -9,14 +9,6 @@ import React from 'react';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { TextAreaWithMessageVariables } from './text_area_with_message_variables';
 
-jest.mock('../../common/lib/kibana');
-
-jest.mock('../lib/validate_params_for_warnings', () => {
-  return {
-    validateParamsForWarnings: jest.fn().mockReturnValue('This is a test warning.'),
-  };
-});
-
 describe('TextAreaWithMessageVariables', () => {
   const editAction = jest.fn();
   const props = {
@@ -32,7 +24,7 @@ describe('TextAreaWithMessageVariables', () => {
     label: 'label',
   };
 
-  beforeEach(() => jest.clearAllMocks());
+  beforeEach(() => jest.resetAllMocks());
 
   test('renders variables with double braces by default', () => {
     const wrapper = mountWithIntl(<TextAreaWithMessageVariables {...props} />);
@@ -63,13 +55,5 @@ describe('TextAreaWithMessageVariables', () => {
 
     expect(editAction).toHaveBeenCalledTimes(1);
     expect(editAction).toHaveBeenCalledWith(props.paramsProperty, '{{{myVar}}}', props.index);
-  });
-
-  test('renders warnings if they are passed in', () => {
-    const wrapper = mountWithIntl(<TextAreaWithMessageVariables {...props} />);
-    wrapper.find('EuiTextArea').simulate('change', { target: { value: 'dolor sit amet' } });
-
-    const callOut = wrapper.find('EuiCallOut');
-    expect(callOut.text()).toMatchInlineSnapshot(`"This is a test warning."`);
   });
 });

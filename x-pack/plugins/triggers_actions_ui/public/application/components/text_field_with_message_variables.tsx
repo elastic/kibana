@@ -6,14 +6,11 @@
  */
 
 import React, { useCallback, useMemo, useState } from 'react';
-import { get } from 'lodash';
-import { EuiCallOut, EuiFieldText, EuiFlexGroup, EuiFormRow } from '@elastic/eui';
+import { EuiFieldText, EuiFormRow } from '@elastic/eui';
 import './add_message_variables.scss';
 import { ActionVariable } from '@kbn/alerting-plugin/common';
 import { AddMessageVariables } from './add_message_variables';
 import { templateActionVariable } from '../lib';
-import { validateParamsForWarnings } from '../lib/validate_params_for_warnings';
-import { useKibana } from '../../common/lib/kibana';
 
 interface Props {
   buttonTitle?: string;
@@ -75,10 +72,7 @@ export const TextFieldWithMessageVariables: React.FunctionComponent<Props> = ({
   wrapField = false,
   showButtonTitle,
 }) => {
-  const publicBaseUrl = get(useKibana(), 'services.http.basePath.publicBaseUrl');
-
   const [currentTextElement, setCurrentTextElement] = useState<HTMLInputElement | null>(null);
-  const [warning, setWarning] = useState<string | null>(null);
 
   const onSelectMessageVariable = useCallback(
     (variable: ActionVariable) => {
@@ -90,22 +84,12 @@ export const TextFieldWithMessageVariables: React.FunctionComponent<Props> = ({
         templatedVar +
         (inputTargetValue ?? '').substring(endPosition, (inputTargetValue ?? '').length);
       editAction(paramsProperty, newValue, index);
-      setWarning(validateParamsForWarnings(newValue, publicBaseUrl, messageVariables));
     },
-    [
-      currentTextElement,
-      editAction,
-      index,
-      inputTargetValue,
-      paramsProperty,
-      publicBaseUrl,
-      messageVariables,
-    ]
+    [currentTextElement, editAction, index, inputTargetValue, paramsProperty]
   );
 
   const onChangeWithMessageVariable = (e: React.ChangeEvent<HTMLInputElement>) => {
     editAction(paramsProperty, e.target.value, index);
-    setWarning(validateParamsForWarnings(e.target.value, publicBaseUrl, messageVariables));
   };
   const VariableButton = useMemo(
     () => (
@@ -121,33 +105,26 @@ export const TextFieldWithMessageVariables: React.FunctionComponent<Props> = ({
   );
 
   return (
-    <EuiFlexGroup direction="column">
-      <Wrapper wrapField={wrapField} formRowProps={formRowProps} button={VariableButton}>
-        <EuiFieldText
-          fullWidth
-          name={paramsProperty}
-          id={`${paramsProperty}Id`}
-          isInvalid={errors && errors.length > 0 && inputTargetValue !== undefined}
-          data-test-subj={`${paramsProperty}Input`}
-          value={inputTargetValue || ''}
-          defaultValue={defaultValue}
-          onChange={(e: React.ChangeEvent<HTMLInputElement>) => onChangeWithMessageVariable(e)}
-          onFocus={(e: React.FocusEvent<HTMLInputElement>) => {
-            setCurrentTextElement(e.target);
-          }}
-          onBlur={(e: React.FocusEvent<HTMLInputElement>) => {
-            if (!inputTargetValue) {
-              editAction(paramsProperty, '', index);
-            }
-          }}
-          append={wrapField ? undefined : VariableButton}
-        />
-      </Wrapper>
-      {warning ? (
-        <>
-          <EuiCallOut size="s" color="warning" title={warning} />
-        </>
-      ) : null}
-    </EuiFlexGroup>
+    <Wrapper wrapField={wrapField} formRowProps={formRowProps} button={VariableButton}>
+      <EuiFieldText
+        fullWidth
+        name={paramsProperty}
+        id={`${paramsProperty}Id`}
+        isInvalid={errors && errors.length > 0 && inputTargetValue !== undefined}
+        data-test-subj={`${paramsProperty}Input`}
+        value={inputTargetValue || ''}
+        defaultValue={defaultValue}
+        onChange={(e: React.ChangeEvent<HTMLInputElement>) => onChangeWithMessageVariable(e)}
+        onFocus={(e: React.FocusEvent<HTMLInputElement>) => {
+          setCurrentTextElement(e.target);
+        }}
+        onBlur={(e: React.FocusEvent<HTMLInputElement>) => {
+          if (!inputTargetValue) {
+            editAction(paramsProperty, '', index);
+          }
+        }}
+        append={wrapField ? undefined : VariableButton}
+      />
+    </Wrapper>
   );
 };

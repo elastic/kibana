@@ -43,4 +43,8 @@ describe('validateParamsForWarnings', () => {
       validateParamsForWarnings('Test for {{context.url}}', 'http://test', actionVariables)
     ).toBeFalsy();
   });
+
+  test('does not returns warnings when publicUrl is not set and the value is not a string', () => {
+    expect(validateParamsForWarnings(10, undefined, actionVariables)).toBeFalsy();
+  });
 });

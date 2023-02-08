@@ -7,7 +7,7 @@
 
 import { intersection } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { ActionVariable } from '@kbn/alerting-plugin/common';
+import { ActionVariable, RuleActionParam } from '@kbn/alerting-plugin/common';
 
 const publicUrlWarning = i18n.translate(
   'xpack.triggersActionsUI.sections.actionTypeForm.warning.publicUrl',
@@ -17,12 +17,12 @@ const publicUrlWarning = i18n.translate(
 );
 
 export function validateParamsForWarnings(
-  value: string,
+  value: RuleActionParam,
   publicBaseUrl: string | undefined,
   actionVariables: ActionVariable[] | undefined
 ): string | null {
   const mustacheRegex = /[^{\}]+(?=}})/g;
-  if (!publicBaseUrl) {
+  if (!publicBaseUrl && value && typeof value === 'string') {
     const publicUrlFields = (actionVariables || [])
       .filter((v) => v.usesPublicBaseUrl)
       .map((v) => v.name);

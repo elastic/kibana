@@ -6,14 +6,11 @@
  */
 
 import React, { useState } from 'react';
-import { get } from 'lodash';
-import { EuiTextArea, EuiFormRow, EuiFlexGroup, EuiCallOut } from '@elastic/eui';
+import { EuiTextArea, EuiFormRow } from '@elastic/eui';
 import './add_message_variables.scss';
 import { ActionVariable } from '@kbn/alerting-plugin/common';
 import { AddMessageVariables } from './add_message_variables';
 import { templateActionVariable } from '../lib';
-import { useKibana } from '../../common/lib/kibana';
-import { validateParamsForWarnings } from '../lib/validate_params_for_warnings';
 
 interface Props {
   messageVariables?: ActionVariable[];
@@ -36,10 +33,7 @@ export const TextAreaWithMessageVariables: React.FunctionComponent<Props> = ({
   label,
   errors,
 }) => {
-  const publicBaseUrl = get(useKibana(), 'services.http.basePath.publicBaseUrl');
-
   const [currentTextElement, setCurrentTextElement] = useState<HTMLTextAreaElement | null>(null);
-  const [warning, setWarning] = useState<string | null>(null);
 
   const onSelectMessageVariable = (variable: ActionVariable) => {
     const templatedVar = templateActionVariable(variable);
@@ -50,12 +44,10 @@ export const TextAreaWithMessageVariables: React.FunctionComponent<Props> = ({
       templatedVar +
       (inputTargetValue ?? '').substring(endPosition, (inputTargetValue ?? '').length);
     editAction(paramsProperty, newValue, index);
-    setWarning(validateParamsForWarnings(newValue, publicBaseUrl, messageVariables));
   };
 
   const onChangeWithMessageVariable = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     editAction(paramsProperty, e.target.value, index);
-    setWarning(validateParamsForWarnings(e.target.value, publicBaseUrl, messageVariables));
   };
 
   return (
@@ -73,30 +65,23 @@ export const TextAreaWithMessageVariables: React.FunctionComponent<Props> = ({
         />
       }
     >
-      <EuiFlexGroup direction="column">
-        <EuiTextArea
-          disabled={isDisabled}
-          fullWidth
-          isInvalid={errors && errors.length > 0 && inputTargetValue !== undefined}
-          name={paramsProperty}
-          value={inputTargetValue || ''}
-          data-test-subj={`${paramsProperty}TextArea`}
-          onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => onChangeWithMessageVariable(e)}
-          onFocus={(e: React.FocusEvent<HTMLTextAreaElement>) => {
-            setCurrentTextElement(e.target);
-          }}
-          onBlur={() => {
-            if (!inputTargetValue) {
-              editAction(paramsProperty, '', index);
-            }
-          }}
-        />
-        {warning ? (
-          <>
-            <EuiCallOut size="s" color="warning" title={warning} />
-          </>
-        ) : null}
-      </EuiFlexGroup>
+      <EuiTextArea
+        disabled={isDisabled}
+        fullWidth
+        isInvalid={errors && errors.length > 0 && inputTargetValue !== undefined}
+        name={paramsProperty}
+        value={inputTargetValue || ''}
+        data-test-subj={`${paramsProperty}TextArea`}
+        onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => onChangeWithMessageVariable(e)}
+        onFocus={(e: React.FocusEvent<HTMLTextAreaElement>) => {
+          setCurrentTextElement(e.target);
+        }}
+        onBlur={() => {
+          if (!inputTargetValue) {
+            editAction(paramsProperty, '', index);
+          }
+        }}
+      />
     </EuiFormRow>
   );
 };
