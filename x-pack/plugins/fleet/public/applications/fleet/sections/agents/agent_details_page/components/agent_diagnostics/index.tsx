@@ -25,6 +25,8 @@ import styled from 'styled-components';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 
+import { isAgentRequestDiagnosticsSupported } from '../../../../../../../../common/services';
+
 import {
   sendGetAgentUploads,
   sendPostRequestDiagnostics,
@@ -235,7 +237,12 @@ export const AgentDiagnosticsTab: React.FunctionComponent<AgentDiagnosticsProps>
         </EuiCallOut>
       </EuiFlexItem>
       <FlexStartEuiFlexItem>
-        <EuiButton fill size="m" onClick={onSubmit} disabled={isSubmitting}>
+        <EuiButton
+          fill
+          size="m"
+          onClick={onSubmit}
+          disabled={isSubmitting || !isAgentRequestDiagnosticsSupported(agent)}
+        >
           <FormattedMessage
             id="xpack.fleet.agentList.diagnosticsOneButton"
             defaultMessage="Request diagnostics .zip"

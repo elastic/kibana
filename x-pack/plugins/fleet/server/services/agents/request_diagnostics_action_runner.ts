@@ -8,10 +8,14 @@
 import { v4 as uuidv4 } from 'uuid';
 import type { ElasticsearchClient } from '@kbn/core/server';
 
+import { isAgentRequestDiagnosticsSupported } from '../../../common/services';
+
 import type { Agent } from '../../types';
 
+import { FleetError } from '../../errors';
+
 import { ActionRunner } from './action_runner';
-import { createAgentAction } from './actions';
+import { createAgentAction, createErrorActionResults } from './actions';
 import { BulkActionTaskType } from './bulk_action_types';
 
 export class RequestDiagnosticsActionRunner extends ActionRunner {
@@ -36,12 +40,24 @@ export async function requestDiagnosticsBatch(
     total?: number;
   }
 ): Promise<{ actionId: string }> {
+  const errors: Record<Agent['id'], Error> = {};
   const now = new Date().toISOString();
 
   const actionId = options.actionId ?? uuidv4();
   const total = options.total ?? givenAgents.length;
 
-  const agentIds = givenAgents.map((agent) => agent.id);
+  const supportedAgents: Agent[] = givenAgents.reduce((acc: Agent[], agent: Agent) => {
+    if (isAgentRequestDiagnosticsSupported(agent)) {
+      acc.push(agent);
+    } else {
+      errors[agent.id] = new FleetError(
+        `Agent ${agent.id} does not support request diagnostics action.`
+      );
+    }
+    return acc;
+  }, []);
+
+  const agentIds = supportedAgents.map((agent) => agent.id);
 
   await createAgentAction(esClient, {
     id: actionId,
@@ -50,6 +66,13 @@ export async function requestDiagnosticsBatch(
     type: 'REQUEST_DIAGNOSTICS',
     total,
   });
+
+  await createErrorActionResults(
+    esClient,
+    actionId,
+    errors,
+    'agent does not support request diagnostics action'
+  );
 
   return {
     actionId,
