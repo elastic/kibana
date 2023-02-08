@@ -2606,6 +2606,28 @@ describe('successful migrations', () => {
         expect(migratedAlert870.references).toEqual([]);
       });
     });
+
+    test('migrates last run outcome order', () => {
+      const migration870 = getMigrations(encryptedSavedObjectsSetup, {}, isPreconfigured)['8.7.0'];
+
+      // Failed rule
+      const failedRule = getMockData({ lastRun: { outcome: 'failed' } });
+      const failedRule870 = migration870(failedRule, migrationContext);
+      expect(failedRule870.attributes.lastRun).toEqual({ outcome: 'failed', outcomeOrder: 20 });
+
+      // Rule with warnings
+      const warningRule = getMockData({ lastRun: { outcome: 'warning' } });
+      const warningRule870 = migration870(warningRule, migrationContext);
+      expect(warningRule870.attributes.lastRun).toEqual({ outcome: 'warning', outcomeOrder: 10 });
+
+      // Succeeded rule
+      const succeededRule = getMockData({ lastRun: { outcome: 'succeeded' } });
+      const succeededRule870 = migration870(succeededRule, migrationContext);
+      expect(succeededRule870.attributes.lastRun).toEqual({
+        outcome: 'succeeded',
+        outcomeOrder: 0,
+      });
+    });
   });
 
   describe('Metrics Inventory Threshold rule', () => {
