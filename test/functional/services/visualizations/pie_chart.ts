@@ -218,10 +218,13 @@ export class PieChartService extends FtrService {
       const debugDataString: string | undefined = await visContainer.getAttribute(
         'data-ech-debug-state'
       );
+      this.log.debug('data-ech-debug-state: ', debugDataString);
       if (debugDataString) {
         const parsedData = JSON.parse(debugDataString);
         const partition = parsedData?.partition?.[0] ?? [];
         pieSlices += partition.partitions.length;
+      } else {
+        throw new Error(`Unable to find '.echChartStatus' attribute 'data-ech-debug-state'`);
       }
     }
     return pieSlices;
