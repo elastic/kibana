@@ -17,7 +17,7 @@ import {
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
+import { FormattedNumber, FormattedPlural } from '@kbn/i18n-react';
 
 import { EnterpriseSearchEngine } from '../../../../../../../common/types/engines';
 import { Page } from '../../../../../../../common/types/pagination';
@@ -98,12 +98,18 @@ export const EnginesListTable: React.FC<EnginesListTableProps> = ({
           data-telemetry-id="entSearchContent-engines-table-viewEngineIndices"
           onClick={() => viewEngineIndices(engine.name)}
         >
-          <FormattedMessage
-            id="xpack.enterpriseSearch.content.enginesList.table.column.view.indices"
-            defaultMessage="{indicesLength} indices"
-            values={{
-              indicesLength: indices.length,
-            }}
+          <FormattedNumber value={indices.length} />
+          &nbsp;
+          <FormattedPlural
+            value={indices.length}
+            one={i18n.translate(
+              'xpack.enterpriseSearch.content.enginesList.table.column.view.indices.single',
+              { defaultMessage: 'index' }
+            )}
+            other={i18n.translate(
+              'xpack.enterpriseSearch.content.enginesList.table.column.view.indices.multiple',
+              { defaultMessage: 'indices' }
+            )}
           />
         </EuiButtonEmpty>
       ),
