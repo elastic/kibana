@@ -25,7 +25,7 @@ const MISSING_PRIVILEGES_CALLOUT = 'missing-user-privileges';
 describe('All rules - read only', () => {
   before(() => {
     cleanKibana();
-    createCustomRule(getNewRule(), '1');
+    createCustomRule(getNewRule(), { ruleId: '1' });
     login(ROLES.reader);
   });
 

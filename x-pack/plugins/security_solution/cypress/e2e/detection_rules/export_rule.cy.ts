@@ -5,12 +5,16 @@
  * 2.0.
  */
 
+import path from 'path';
+
 import { expectedExportedRule, getNewRule } from '../../objects/rule';
 
 import {
   TOASTER_BODY,
   MODAL_CONFIRMATION_BODY,
   MODAL_CONFIRMATION_BTN,
+  TOASTER,
+  EXPORTED_RULES_FILENAME,
 } from '../../screens/alerts_detection_rules';
 
 import {
@@ -20,6 +24,8 @@ import {
   selectNumberOfRules,
   bulkExportRules,
   selectAllRules,
+  importRules,
+  expectNumberOfRules,
 } from '../../tasks/alerts_detection_rules';
 import { createExceptionList, deleteExceptionList } from '../../tasks/api_calls/exceptions';
 import { getExceptionList } from '../../objects/exception';
@@ -33,6 +39,8 @@ import { getAvailablePrebuiltRulesCount } from '../../tasks/api_calls/prebuilt_r
 const exceptionList = getExceptionList();
 
 describe('Export rules', () => {
+  const downloadsFolder = Cypress.config('downloadsFolder');
+
   before(() => {
     cleanKibana();
     login();
@@ -45,7 +53,7 @@ describe('Export rules', () => {
     // Rules get exported via _bulk_action endpoint
     cy.intercept('POST', '/api/detection_engine/rules/_bulk_action').as('bulk_action');
     visitWithoutDateRange(DETECTIONS_RULE_MANAGEMENT_URL);
-    createCustomRule(getNewRule()).as('ruleResponse');
+    createCustomRule(getNewRule(), { enabled: true }).as('ruleResponse');
   });
 
   it('Exports a custom rule', function () {
@@ -54,6 +62,19 @@ describe('Export rules', () => {
       cy.wrap(response?.body).should('eql', expectedExportedRule(this.ruleResponse));
       cy.get(TOASTER_BODY).should('have.text', 'Successfully exported 1 of 1 rule.');
     });
+  });
+
+  it('Imports an exported custom rule', function () {
+    exportFirstRule();
+
+    cy.get(TOASTER).should('have.text', 'Rules exported');
+    cy.get(TOASTER_BODY).should('have.text', 'Successfully exported 1 of 1 rule.');
+
+    deleteAlertsAndRules();
+    importRules(path.join(downloadsFolder, EXPORTED_RULES_FILENAME));
+
+    cy.get(TOASTER).should('have.text', 'Successfully imported 1 rule');
+    expectNumberOfRules(1);
   });
 
   it('shows a modal saying that no rules can be exported if all the selected rules are prebuilt', function () {

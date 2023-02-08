@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import { RULES_MANAGEMENT_TABLE, TOASTER } from '../../screens/alerts_detection_rules';
+import {
+  RULES_TO_IMPORT_FILENAME,
+  RULES_MANAGEMENT_TABLE,
+  TOASTER,
+} from '../../screens/alerts_detection_rules';
 import {
   expectNumberOfRules,
   expectToContainRule,
@@ -32,7 +36,7 @@ describe('Import rules', () => {
     const expectedNumberOfRules = 1;
     const expectedImportedRuleName = 'Test Custom Rule';
 
-    importRules('7_16_rules.ndjson');
+    importRules(RULES_TO_IMPORT_FILENAME);
 
     cy.wait('@import').then(({ response }) => {
       cy.wrap(response?.statusCode).should('eql', 200);
@@ -47,14 +51,14 @@ describe('Import rules', () => {
   });
 
   it('Shows error toaster when trying to import rule and exception list that already exist', function () {
-    importRules('7_16_rules.ndjson');
+    importRules(RULES_TO_IMPORT_FILENAME);
 
     cy.wait('@import').then(({ response }) => {
       cy.wrap(response?.statusCode).should('eql', 200);
     });
 
     reload();
-    importRules('7_16_rules.ndjson');
+    importRules(RULES_TO_IMPORT_FILENAME);
 
     cy.wait('@import').then(({ response }) => {
       cy.wrap(response?.statusCode).should('eql', 200);
@@ -63,14 +67,14 @@ describe('Import rules', () => {
   });
 
   it('Does not show error toaster when trying to import rule and exception list that already exist when overwrite is true', function () {
-    importRules('7_16_rules.ndjson');
+    importRules(RULES_TO_IMPORT_FILENAME);
 
     cy.wait('@import').then(({ response }) => {
       cy.wrap(response?.statusCode).should('eql', 200);
     });
 
     reload();
-    importRulesWithOverwriteAll('7_16_rules.ndjson');
+    importRulesWithOverwriteAll(RULES_TO_IMPORT_FILENAME);
 
     cy.wait('@import').then(({ response }) => {
       cy.wrap(response?.statusCode).should('eql', 200);

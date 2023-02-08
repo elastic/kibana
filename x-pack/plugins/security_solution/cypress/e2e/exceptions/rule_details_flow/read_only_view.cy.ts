@@ -49,7 +49,7 @@ describe('Exceptions viewer read only', () => {
             },
           ],
         },
-        '2'
+        { ruleId: '2' }
       );
     });
 

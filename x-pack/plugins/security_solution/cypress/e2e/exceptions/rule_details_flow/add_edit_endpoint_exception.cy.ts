@@ -73,7 +73,7 @@ describe('Add endpoint exception from rule details', () => {
             },
           ],
         },
-        '2'
+        { ruleId: '2' }
       );
     });
   });

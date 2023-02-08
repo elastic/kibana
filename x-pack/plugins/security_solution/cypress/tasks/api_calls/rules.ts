@@ -38,9 +38,14 @@ export const createMachineLearningRule = (rule: MachineLearningRule, ruleId = 'm
     failOnStatusCode: false,
   });
 
+interface CustomRuleOptions {
+  ruleId?: string;
+  enabled?: boolean;
+}
+
 export const createCustomRule = (
   rule: CustomRule,
-  ruleId = 'rule_testing'
+  options?: CustomRuleOptions
 ): Cypress.Chainable<Cypress.Response<unknown>> => {
   const riskScore = rule.riskScore != null ? parseInt(rule.riskScore, 10) : undefined;
   const severity = rule.severity != null ? rule.severity.toLocaleLowerCase() : undefined;
@@ -51,7 +56,7 @@ export const createCustomRule = (
     method: 'POST',
     url: 'api/detection_engine/rules',
     body: {
-      rule_id: ruleId,
+      rule_id: options?.ruleId ?? 'rule_testing',
       risk_score: riskScore,
       description: rule.description,
       interval,
@@ -63,7 +68,7 @@ export const createCustomRule = (
       data_view_id: rule.dataSource.type === 'dataView' ? rule.dataSource.dataView : undefined,
       query: rule.customQuery,
       language: 'kuery',
-      enabled: rule.enabled ?? false,
+      enabled: options?.enabled ?? false,
       exceptions_list: rule.exceptionLists ?? [],
       tags: rule.tags,
       ...(timeline?.id ?? timeline?.templateTimelineId

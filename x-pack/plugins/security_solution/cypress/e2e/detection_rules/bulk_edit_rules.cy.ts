@@ -141,7 +141,7 @@ describe('Detection rules, bulk edit', () => {
         name: RULE_NAME,
         ...defaultRuleData,
       },
-      '1'
+      { ruleId: '1' }
     );
     createEventCorrelationRule({ ...getEqlRule(), ...defaultRuleData }, '2');
     createMachineLearningRule({ ...getMachineLearningRule(), ...defaultRuleData });

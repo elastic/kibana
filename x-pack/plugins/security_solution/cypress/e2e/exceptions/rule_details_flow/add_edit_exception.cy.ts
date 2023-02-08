@@ -100,7 +100,7 @@ describe('Add/edit exception from rule details', () => {
               },
             ],
           },
-          '2'
+          { ruleId: '2' }
         );
         createExceptionListItem(exceptionList.list_id, {
           list_id: exceptionList.list_id,
