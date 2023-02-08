@@ -101,7 +101,7 @@ export const EngineIndices: React.FC = () => {
             {name}
           </EuiLinkTo>
         ),
-      sortable: true,
+      sortable: ({ name }: EnterpriseSearchEngineIndex) => name,
       truncateText: true,
       width: '40%',
     },

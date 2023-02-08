@@ -18,6 +18,7 @@ const DEFAULT_VALUES: EngineOverviewValues = {
   engineFieldCapabilitiesData: undefined,
   engineName: '',
   fieldsCount: 0,
+  hasUnknownIndices: false,
   indices: [],
   indicesCount: 0,
   isLoadingEngine: true,
