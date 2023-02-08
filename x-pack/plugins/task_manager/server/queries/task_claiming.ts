@@ -248,7 +248,6 @@ export class TaskClaiming {
     taskTypes,
   }: OwnershipClaimingOpts): Promise<ClaimOwnershipResult> => {
     const partitions = await this.taskPartitioner.getPartitions();
-    console.log({ partitions });
     const { docs, tasksConflicted } = await this.claimAvailableTasksImpl({
       claimOwnershipUntil,
       size,
