@@ -9,9 +9,13 @@ import {
   UserActionFindResponse,
   getCaseFindUserActionsUrl,
   UserActionFindRequest,
-  CaseUserActionsResponse,
   getCaseUserActionUrl,
-  CaseUserActionResponse,
+  CaseUserActionDeprecatedResponse,
+  CaseUserActionsDeprecatedResponse,
+  getCaseUserActionStatsUrl,
+  CaseUserActionStatsResponse,
+  GetCaseUsersResponse,
+  getCaseUsersUrl,
 } from '@kbn/cases-plugin/common/api';
 import type SuperTest from 'supertest';
 import { User } from './authentication/types';
@@ -20,11 +24,11 @@ import { superUser } from './authentication/users';
 import { getSpaceUrlPrefix, removeServerGeneratedPropertiesFromObject } from './utils';
 
 export const removeServerGeneratedPropertiesFromUserAction = (
-  attributes: CaseUserActionResponse
+  attributes: CaseUserActionDeprecatedResponse
 ) => {
-  const keysToRemove: Array<keyof CaseUserActionResponse> = ['action_id', 'created_at'];
+  const keysToRemove: Array<keyof CaseUserActionDeprecatedResponse> = ['action_id', 'created_at'];
   return removeServerGeneratedPropertiesFromObject<
-    CaseUserActionResponse,
+    CaseUserActionDeprecatedResponse,
     typeof keysToRemove[number]
   >(attributes, keysToRemove);
 };
@@ -39,7 +43,7 @@ export const getCaseUserActions = async ({
   caseID: string;
   expectedHttpCode?: number;
   auth?: { user: User; space: string | null };
-}): Promise<CaseUserActionsResponse> => {
+}): Promise<CaseUserActionsDeprecatedResponse> => {
   const { body: userActions } = await supertest
     .get(`${getSpaceUrlPrefix(auth.space)}${getCaseUserActionUrl(caseID)}`)
     .auth(auth.user.username, auth.user.password)
@@ -67,4 +71,41 @@ export const findCaseUserActions = async ({
     .expect(expectedHttpCode);
 
   return userActions;
+};
+
+export const getCaseUserActionStats = async ({
+  supertest,
+  caseID,
+  expectedHttpCode = 200,
+  auth = { user: superUser, space: null },
+}: {
+  supertest: SuperTest.SuperTest<SuperTest.Test>;
+  caseID: string;
+  expectedHttpCode?: number;
+  auth?: { user: User; space: string | null };
+}): Promise<CaseUserActionStatsResponse> => {
+  const { body: userActionStats } = await supertest
+    .get(`${getSpaceUrlPrefix(auth.space)}${getCaseUserActionStatsUrl(caseID)}`)
+    .auth(auth.user.username, auth.user.password)
+    .expect(expectedHttpCode);
+
+  return userActionStats;
+};
+
+export const getCaseUsers = async ({
+  supertest,
+  caseId,
+  expectedHttpCode = 200,
+  auth = { user: superUser, space: null },
+}: {
+  supertest: SuperTest.SuperTest<SuperTest.Test>;
+  caseId: string;
+  expectedHttpCode?: number;
+  auth?: { user: User; space: string | null };
+}): Promise<GetCaseUsersResponse> => {
+  const { body: users } = await supertest
+    .get(`${getSpaceUrlPrefix(auth.space)}${getCaseUsersUrl(caseId)}`)
+    .auth(auth.user.username, auth.user.password)
+    .expect(expectedHttpCode);
+  return users;
 };

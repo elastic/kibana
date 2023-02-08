@@ -8,7 +8,7 @@
 import React, { memo, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { PackagePolicyEditExtensionComponentProps } from '@kbn/fleet-plugin/public';
-import { EuiButton, EuiCallOut } from '@elastic/eui';
+import { EuiButton, EuiCallOut, EuiSpacer } from '@elastic/eui';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { PolicyConfig, MonitorFields } from './types';
 import { ConfigKey, DataStream, TLSFields } from './types';
@@ -22,6 +22,7 @@ import {
   TLSFieldsContextProvider,
 } from './contexts';
 import { normalizers } from './helpers/normalizers';
+import { IntegrationDeprecationCallout } from '../overview/integration_deprecation/integration_deprecation_callout';
 
 /**
  * Exports Synthetics-specific package policy instructions
@@ -124,6 +125,8 @@ export const SyntheticsPolicyEditExtensionWrapper = memo<PackagePolicyEditExtens
             <TCPContextProvider defaultValues={fullDefaultConfig?.[DataStream.TCP]}>
               <ICMPSimpleFieldsContextProvider defaultValues={fullDefaultConfig?.[DataStream.ICMP]}>
                 <BrowserContextProvider defaultValues={fullDefaultConfig?.[DataStream.BROWSER]}>
+                  <IntegrationDeprecationCallout />
+                  <EuiSpacer />
                   <SyntheticsPolicyEditExtension
                     newPolicy={newPolicy}
                     onChange={onChange}

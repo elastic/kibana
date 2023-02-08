@@ -5,13 +5,12 @@
  * 2.0.
  */
 
-import type { CellActionExecutionContext } from '@kbn/ui-actions-plugin/public';
-import { createAction } from '@kbn/ui-actions-plugin/public';
 import { i18n } from '@kbn/i18n';
+import type { CellAction } from '@kbn/cell-actions';
 import { createFilter } from '../helpers';
 import type { SecurityAppStore } from '../../../common/store';
 import { timelineSelectors } from '../../../timelines/store/timeline';
-import { isInSecurityApp } from '../../utils';
+import { fieldHasCellActions, isInSecurityApp } from '../../utils';
 import { KibanaServices } from '../../../common/lib/kibana';
 import { TimelineId } from '../../../../common/types';
 
@@ -27,14 +26,14 @@ export const createFilterInAction = ({
 }: {
   store: SecurityAppStore;
   order?: number;
-}) => {
+}): CellAction => {
   const { application: applicationService } = KibanaServices.get();
   let currentAppId: string | undefined;
   applicationService.currentAppId$.subscribe((appId) => {
     currentAppId = appId;
   });
 
-  return createAction<CellActionExecutionContext>({
+  return {
     id: ID,
     type: ID,
     order,
@@ -42,11 +41,11 @@ export const createFilterInAction = ({
     getDisplayName: () => FILTER_IN,
     getDisplayNameTooltip: () => FILTER_IN,
     isCompatible: async ({ field }) =>
-      isInSecurityApp(currentAppId) && field.name != null && field.value != null,
+      isInSecurityApp(currentAppId) && fieldHasCellActions(field.name),
     execute: async ({ field }) => {
-      const makeFilter = (currentVal: string | null | undefined) =>
+      const makeFilter = (currentVal?: string[] | string | null) =>
         currentVal?.length === 0
-          ? createFilter(field.name, undefined)
+          ? createFilter(field.name, null)
           : createFilter(field.name, currentVal);
 
       const state = store.getState();
@@ -57,5 +56,5 @@ export const createFilterInAction = ({
         filterManager.addFilters(makeFilter(field.value));
       }
     },
-  });
+  };
 };

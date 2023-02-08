@@ -6,21 +6,26 @@
  */
 
 import React, { FC, useMemo } from 'react';
+import moment from 'moment-timezone';
 
 import { EuiButtonEmpty, EuiTabbedContent } from '@elastic/eui';
+
 import { Optional } from '@kbn/utility-types';
 import { i18n } from '@kbn/i18n';
 import { stringHash } from '@kbn/ml-string-hash';
 
-import moment from 'moment-timezone';
 import { isDefined } from '@kbn/ml-is-defined';
+
+import { TransformHealthAlertRule } from '../../../../../../common/types/alerting';
+
 import { TransformListRow } from '../../../../common';
 import { useAppDependencies } from '../../../../app_dependencies';
+
 import { ExpandedRowDetailsPane, SectionConfig, SectionItem } from './expanded_row_details_pane';
 import { ExpandedRowJsonPane } from './expanded_row_json_pane';
 import { ExpandedRowMessagesPane } from './expanded_row_messages_pane';
 import { ExpandedRowPreviewPane } from './expanded_row_preview_pane';
-import { TransformHealthAlertRule } from '../../../../../../common/types/alerting';
+import { TransformHealthColoredDot } from './transform_health_colored_dot';
 
 function getItemDescription(value: any) {
   if (typeof value === 'object') {
@@ -62,6 +67,12 @@ export const ExpandedRow: FC<Props> = ({ item, onAlertEdit }) => {
     stateItems.push({
       title: 'node.name',
       description: item.stats.node.name,
+    });
+  }
+  if (item.stats.health !== undefined) {
+    stateItems.push({
+      title: 'health',
+      description: <TransformHealthColoredDot healthStatus={item.stats.health.status} />,
     });
   }
 

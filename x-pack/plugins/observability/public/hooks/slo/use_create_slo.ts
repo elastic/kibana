@@ -41,6 +41,9 @@ export function useCreateOrUpdateSlo(): UseCreateOrUpdateSlo {
         setSuccess(true);
       } catch (e) {
         setError(e);
+      } finally {
+        setSuccess(false);
+        setLoading(false);
       }
     },
     [http]
@@ -58,6 +61,9 @@ export function useCreateOrUpdateSlo(): UseCreateOrUpdateSlo {
         setSuccess(true);
       } catch (e) {
         setError(e);
+      } finally {
+        setSuccess(false);
+        setLoading(false);
       }
     },
     [http]

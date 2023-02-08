@@ -7,7 +7,7 @@
  */
 
 import type { SavedObject } from '@kbn/core-saved-objects-common';
-import type { EcsEventOutcome } from '@kbn/ecs';
+import type { EcsEvent } from '@kbn/ecs';
 
 /**
  * The PerformAuthorizationParams interface contains settings for checking
@@ -169,7 +169,7 @@ export interface AddAuditEventParams {
    * The outcome of the operation
    * 'failure' | 'success' | 'unknown'
    */
-  outcome?: EcsEventOutcome;
+  outcome?: EcsEvent['outcome'];
   /**
    * relevant saved object information
    * object containing type & id strings

@@ -68,6 +68,10 @@ export interface WebhookActionParams {
   body?: string;
 }
 
+export interface TorqActionParams {
+  body?: string;
+}
+
 export interface EmailConfig {
   from: string;
   host: string;
@@ -121,6 +125,16 @@ export interface WebhookSecrets {
 }
 
 export type WebhookActionConnector = UserConfiguredActionConnector<WebhookConfig, WebhookSecrets>;
+
+export interface TorqConfig {
+  url: string;
+}
+
+export interface TorqSecrets {
+  token: string;
+}
+
+export type TorqActionConnector = UserConfiguredActionConnector<TorqConfig, TorqSecrets>;
 
 export enum XmattersSeverityOptions {
   CRITICAL = 'critical',

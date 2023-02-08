@@ -166,7 +166,9 @@ export const addNotesToTimeline = (notes: string) => {
           delay: 0,
           force: true,
         });
-        cy.get(ADD_NOTE_BUTTON).trigger('click');
+        cy.get(ADD_NOTE_BUTTON)
+          .pipe(($ele) => $ele.trigger('click'))
+          .should('have.attr', 'disabled');
         cy.get(`${NOTES_TAB_BUTTON} .euiBadge`).should('have.text', `${notesCount + 1}`);
       });
   });

@@ -34,6 +34,7 @@ import {
 import {
   createFiltersFromValueClickAction,
   createFiltersFromRangeSelectAction,
+  createMultiValueClickActionDefinition,
   createValueClickActionDefinition,
   createSelectRangeActionDefinition,
 } from './actions';
@@ -151,6 +152,13 @@ export class DataPublicPlugin
       'VALUE_CLICK_TRIGGER',
       createValueClickActionDefinition(() => ({
         uiActions,
+      }))
+    );
+
+    uiActions.addTriggerAction(
+      'MULTI_VALUE_CLICK_TRIGGER',
+      createMultiValueClickActionDefinition(() => ({
+        filterManager: query.filterManager,
       }))
     );
 

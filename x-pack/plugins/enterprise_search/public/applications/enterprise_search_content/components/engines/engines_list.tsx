@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 
 import { useActions, useValues } from 'kea';
 import useThrottle from 'react-use/lib/useThrottle';
@@ -16,23 +16,27 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage, FormattedNumber } from '@kbn/i18n-react';
 
 import { INPUT_THROTTLE_DELAY_MS } from '../../../shared/constants/timers';
-import { DataPanel } from '../../../shared/data_panel/data_panel';
+import { docLinks } from '../../../shared/doc_links';
 
-import { EnterpriseSearchContentPageTemplate } from '../layout/page_template';
+import { EnterpriseSearchEnginesPageTemplate } from '../layout/engines_page_template';
 
 import { EmptyEnginesPrompt } from './components/empty_engines_prompt';
 import { EnginesListTable } from './components/tables/engines_table';
+import { CreateEngineFlyout } from './create_engine_flyout';
 import { DeleteEngineModal } from './delete_engine_modal';
+import { EngineListIndicesFlyout } from './engines_list_flyout';
+import { EnginesListFlyoutLogic } from './engines_list_flyout_logic';
 import { EnginesListLogic } from './engines_list_logic';
 
 const CreateButton: React.FC = () => {
+  const { openEngineCreate } = useActions(EnginesListLogic);
   return (
     <EuiButton
       fill
       iconType="plusInCircle"
       data-test-subj="enterprise-search-content-engines-creation-button"
       data-telemetry-id="entSearchContent-engines-list-createEngine"
-      href={'TODO'}
+      onClick={openEngineCreate}
     >
       {i18n.translate('xpack.enterpriseSearch.content.engines.createEngineButtonLabel', {
         defaultMessage: 'Create engine',
@@ -42,22 +46,49 @@ const CreateButton: React.FC = () => {
 };
 
 export const EnginesList: React.FC = () => {
-  const { fetchEngines, onPaginate, openDeleteEngineModal } = useActions(EnginesListLogic);
-  const { meta, results, isLoading } = useValues(EnginesListLogic);
-  const [searchQuery, setSearchValue] = useState('');
+  const {
+    closeDeleteEngineModal,
+    closeEngineCreate,
+    fetchEngines,
+    onPaginate,
+    openDeleteEngineModal,
+    setSearchQuery,
+    setIsFirstRequest,
+  } = useActions(EnginesListLogic);
+
+  const { openFetchEngineFlyout } = useActions(EnginesListFlyoutLogic);
+
+  const {
+    createEngineFlyoutOpen,
+    deleteModalEngineName,
+    hasNoEngines,
+    isDeleteModalVisible,
+    isLoading,
+    meta,
+    results,
+    searchQuery,
+  } = useValues(EnginesListLogic);
+
   const throttledSearchQuery = useThrottle(searchQuery, INPUT_THROTTLE_DELAY_MS);
 
   useEffect(() => {
-    fetchEngines({
-      meta,
-      searchQuery: throttledSearchQuery,
-    });
+    fetchEngines();
   }, [meta.from, meta.size, throttledSearchQuery]);
 
+  useEffect(() => {
+    // We don't want to trigger loading for each search query change, so we need this
+    // flag to set if the call to backend is first request.
+    setIsFirstRequest();
+  }, []);
   return (
     <>
-      <DeleteEngineModal />
-      <EnterpriseSearchContentPageTemplate
+      {isDeleteModalVisible ? (
+        <DeleteEngineModal engineName={deleteModalEngineName} onClose={closeDeleteEngineModal} />
+      ) : null}
+
+      <EngineListIndicesFlyout />
+      {createEngineFlyoutOpen && <CreateEngineFlyout onClose={closeEngineCreate} />}
+      <EnterpriseSearchEnginesPageTemplate
         pageChrome={[
           i18n.translate('xpack.enterpriseSearch.content.engines.breadcrumb', {
             defaultMessage: 'Engines',
@@ -72,12 +103,10 @@ export const EnginesList: React.FC = () => {
                 documentationUrl: (
                   <EuiLink
                     data-test-subj="engines-documentation-link"
-                    href="TODO"
+                    href={docLinks.enterpriseSearchEngines}
                     target="_blank"
                     data-telemetry-id="entSearchContent-engines-documentation-viewDocumentaion"
                   >
-                    {' '}
-                    {/* TODO: navigate to documentation url */}{' '}
                     {i18n.translate('xpack.enterpriseSearch.content.engines.documentation', {
                       defaultMessage: 'explore our Engines documentation',
                     })}
@@ -89,13 +118,12 @@ export const EnginesList: React.FC = () => {
           pageTitle: i18n.translate('xpack.enterpriseSearch.content.engines.title', {
             defaultMessage: 'Engines',
           }),
-          rightSideItems: [<CreateButton />],
+          rightSideItems: isLoading ? [] : !hasNoEngines ? [<CreateButton />] : [],
         }}
         pageViewTelemetry="Engines"
         isLoading={isLoading}
       >
-        <EuiSpacer />
-        {results.length ? (
+        {!hasNoEngines ? (
           <>
             <div>
               <EuiFieldSearch
@@ -114,7 +142,7 @@ export const EnginesList: React.FC = () => {
                 )}
                 fullWidth
                 onChange={(event) => {
-                  setSearchValue(event.currentTarget.value);
+                  setSearchQuery(event.currentTarget.value);
                 }}
               />
             </div>
@@ -123,12 +151,12 @@ export const EnginesList: React.FC = () => {
               {i18n.translate(
                 'xpack.enterpriseSearch.content.engines.searchPlaceholder.description',
                 {
-                  defaultMessage: 'Locate an engine via name or indices',
+                  defaultMessage: 'Locate an engine via name or by its included indices.',
                 }
               )}
             </EuiText>
 
-            <EuiSpacer size="m" />
+            <EuiSpacer />
             <EuiText size="s">
               <FormattedMessage
                 id="xpack.enterpriseSearch.content.engines.enginesList.description"
@@ -148,23 +176,15 @@ export const EnginesList: React.FC = () => {
                 }}
               />
             </EuiText>
-            <DataPanel
-              title={
-                <h2>
-                  {i18n.translate('xpack.enterpriseSearch.content.engines.title', {
-                    defaultMessage: 'Engines',
-                  })}
-                </h2>
-              }
-            >
-              <EnginesListTable
-                enginesList={results}
-                meta={meta}
-                onChange={onPaginate}
-                onDelete={openDeleteEngineModal}
-                loading={false}
-              />
-            </DataPanel>
+
+            <EnginesListTable
+              enginesList={results}
+              meta={meta}
+              onChange={onPaginate}
+              onDelete={openDeleteEngineModal}
+              viewEngineIndices={openFetchEngineFlyout}
+              loading={false}
+            />
           </>
         ) : (
           <EmptyEnginesPrompt>
@@ -174,7 +194,7 @@ export const EnginesList: React.FC = () => {
 
         <EuiSpacer size="xxl" />
         <div />
-      </EnterpriseSearchContentPageTemplate>
+      </EnterpriseSearchEnginesPageTemplate>
     </>
   );
 };

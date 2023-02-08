@@ -9,7 +9,8 @@ import type {
   AuditAction,
   AddAuditEventParams as SavedObjectEventParams,
 } from '@kbn/core-saved-objects-server';
-import type { EcsEventOutcome, EcsEventType, KibanaRequest, LogMeta } from '@kbn/core/server';
+import type { EcsEvent, KibanaRequest, LogMeta } from '@kbn/core/server';
+import type { ArrayElement } from '@kbn/utility-types';
 
 import type { AuthenticationProvider } from '../../common/model';
 import type { AuthenticationResult } from '../authentication/authentication_result';
@@ -355,7 +356,7 @@ const savedObjectAuditVerbs: Record<AuditAction, VerbsTuple> = {
   ],
 };
 
-const savedObjectAuditTypes: Record<AuditAction, EcsEventType> = {
+const savedObjectAuditTypes: Record<AuditAction, ArrayElement<EcsEvent['type']>> = {
   saved_object_create: 'creation',
   saved_object_get: 'access',
   saved_object_resolve: 'access',
@@ -430,7 +431,7 @@ const spaceAuditVerbs: Record<SpaceAuditAction, VerbsTuple> = {
   space_find: ['access', 'accessing', 'accessed'],
 };
 
-const spaceAuditTypes: Record<SpaceAuditAction, EcsEventType> = {
+const spaceAuditTypes: Record<SpaceAuditAction, ArrayElement<EcsEvent['type']>> = {
   space_create: 'creation',
   space_get: 'access',
   space_update: 'change',
@@ -440,7 +441,7 @@ const spaceAuditTypes: Record<SpaceAuditAction, EcsEventType> = {
 
 export interface SpacesAuditEventParams {
   action: SpaceAuditAction;
-  outcome?: EcsEventOutcome;
+  outcome?: EcsEvent['outcome'];
   savedObject?: NonNullable<AuditEvent['kibana']>['saved_object'];
   error?: Error;
 }
