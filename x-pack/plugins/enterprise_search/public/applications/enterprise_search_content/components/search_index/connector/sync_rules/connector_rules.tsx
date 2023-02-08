@@ -143,7 +143,7 @@ export const ConnectorSyncRules: React.FC = () => {
                         'xpack.enterpriseSearch.content.index.connector.syncRules.basicRulesDescription',
                         {
                           defaultMessage:
-                            'These rules apply to documents in the integration filtering phase.',
+                            'These rules apply to documents during the integration filtering phase.',
                         }
                       )}
                     </p>
