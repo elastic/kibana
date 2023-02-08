@@ -255,7 +255,6 @@ describe('DocumentMigrator', () => {
         type: 'user',
         attributes: { name: 'Chris' },
         migrationVersion: { user: '1.2.3' },
-        coreMigrationVersion: kibanaVersion,
       });
     });
 
@@ -308,7 +307,6 @@ describe('DocumentMigrator', () => {
         attributes: { name: 'Tyler' },
         migrationVersion: { acl: '2.3.5' },
         acl: 'admins-only, sucka!',
-        coreMigrationVersion: kibanaVersion,
       });
     });
 
@@ -347,7 +345,6 @@ describe('DocumentMigrator', () => {
         id: 'me',
         type: 'user',
         attributes: { name: 'Tyler' },
-        coreMigrationVersion: kibanaVersion,
       });
     });
 
@@ -420,7 +417,6 @@ describe('DocumentMigrator', () => {
         type: 'dog',
         attributes: { name: 'Callie', b: 'B', c: 'C' },
         migrationVersion: { dog: '2.0.1' },
-        coreMigrationVersion: kibanaVersion,
       });
     });
 
@@ -525,7 +521,6 @@ describe('DocumentMigrator', () => {
         type: 'dog',
         attributes: { name: 'Callie', a: 1, b: 2, c: 3 },
         migrationVersion: { dog: '10.0.1' },
-        coreMigrationVersion: kibanaVersion,
       });
     });
 
@@ -560,7 +555,6 @@ describe('DocumentMigrator', () => {
         attributes: { name: 'Callie' },
         animal: 'Animal: Doggie',
         migrationVersion: { animal: '1.0.0', dog: '2.2.4' },
-        coreMigrationVersion: kibanaVersion,
       });
     });
 
@@ -588,7 +582,6 @@ describe('DocumentMigrator', () => {
         type: 'dog',
         attributes: { title: 'Title: Name: Callie' },
         migrationVersion: { dog: '1.0.2' },
-        coreMigrationVersion: kibanaVersion,
       });
     });
 
@@ -622,7 +615,6 @@ describe('DocumentMigrator', () => {
         type: 'cat',
         attributes: { name: 'Kitty Callie' },
         migrationVersion: { dog: '2.2.4', cat: '1.0.0' },
-        coreMigrationVersion: kibanaVersion,
       });
     });
 
@@ -694,7 +686,6 @@ describe('DocumentMigrator', () => {
         type: 'cat',
         attributes: { name: 'Boo' },
         migrationVersion: { cat: '1.0.0', foo: '5.6.7' },
-        coreMigrationVersion: kibanaVersion,
       });
     });
 
@@ -848,7 +839,7 @@ describe('DocumentMigrator', () => {
           type: 'dog',
           attributes: { name: 'Leslie' },
           references: [{ id: 'favorite', type: 'toy', name: 'BALL!' }],
-          coreMigrationVersion: kibanaVersion,
+          coreMigrationVersion: '1.0.0',
           namespace: 'foo-namespace',
           // there is no 'namespaces' field because no conversion transform was applied; this scenario is contrived for a clean test case but is not indicative of a real-world scenario
         });
@@ -883,7 +874,7 @@ describe('DocumentMigrator', () => {
           attributes: { name: 'Leslie' },
           migrationVersion: { dog: '2.0.0' },
           references: [{ id: 'favorite', type: 'toy', name: 'BALL!' }],
-          coreMigrationVersion: kibanaVersion,
+          coreMigrationVersion: '3.0.0',
           namespace: 'foo-namespace',
           // there is no 'namespaces' field because no conversion transform was applied; this scenario is contrived for a clean test case but is not indicative of a real-world scenario
         });
@@ -994,7 +985,7 @@ describe('DocumentMigrator', () => {
                 purpose: 'savedObjectConversion',
               },
               migrationVersion: { [LEGACY_URL_ALIAS_TYPE]: '0.1.2' },
-              coreMigrationVersion: kibanaVersion,
+              coreMigrationVersion: '1.0.0',
             },
           ]);
         });
@@ -1070,7 +1061,7 @@ describe('DocumentMigrator', () => {
                 purpose: 'savedObjectConversion',
               },
               migrationVersion: { [LEGACY_URL_ALIAS_TYPE]: '0.1.2' },
-              coreMigrationVersion: kibanaVersion,
+              coreMigrationVersion: '1.0.0',
             },
           ]);
         });
@@ -1196,7 +1187,7 @@ describe('DocumentMigrator', () => {
                 purpose: 'savedObjectConversion',
               },
               migrationVersion: { [LEGACY_URL_ALIAS_TYPE]: '0.1.2' },
-              coreMigrationVersion: kibanaVersion,
+              coreMigrationVersion: '1.0.0',
             },
           ]);
         });
@@ -1280,7 +1271,7 @@ describe('DocumentMigrator', () => {
                 purpose: 'savedObjectConversion',
               },
               migrationVersion: { [LEGACY_URL_ALIAS_TYPE]: '0.1.2' },
-              coreMigrationVersion: kibanaVersion,
+              coreMigrationVersion: '1.0.0',
             },
           ]);
         });

@@ -210,15 +210,13 @@ function buildDocumentTransform({
     let transformedDoc: SavedObjectUnsanitizedDoc;
     let additionalDocs: SavedObjectUnsanitizedDoc[] = [];
     if (doc.migrationVersion) {
-      const result = applyMigrations(doc, migrations, kibanaVersion, convertNamespaceTypes);
+      const result = applyMigrations(doc, migrations, convertNamespaceTypes);
       transformedDoc = result.transformedDoc;
       additionalDocs = additionalDocs.concat(
-        result.additionalDocs.map((x) =>
-          markAsUpToDate(x, migrations, kibanaVersion, convertNamespaceTypes)
-        )
+        result.additionalDocs.map((x) => markAsUpToDate(x, migrations))
       );
     } else {
-      transformedDoc = markAsUpToDate(doc, migrations, kibanaVersion, convertNamespaceTypes);
+      transformedDoc = markAsUpToDate(doc, migrations);
     }
 
     // In order to keep tests a bit more stable, we won't
@@ -260,7 +258,6 @@ function validateCoreMigrationVersion(doc: SavedObjectUnsanitizedDoc, kibanaVers
 function applyMigrations(
   doc: SavedObjectUnsanitizedDoc,
   migrations: ActiveMigrations,
-  kibanaVersion: string,
   convertNamespaceTypes: boolean
 ) {
   let additionalDocs: SavedObjectUnsanitizedDoc[] = [];
@@ -269,8 +266,14 @@ function applyMigrations(
 
     if (!prop) {
       // Ensure that newly created documents have an up-to-date coreMigrationVersion field
+      const { coreMigrationVersion = getLatestCoreVersion(doc, migrations), ...transformedDoc } =
+        doc;
+
       return {
-        transformedDoc: { ...doc, coreMigrationVersion: doc.coreMigrationVersion || kibanaVersion },
+        transformedDoc: {
+          ...transformedDoc,
+          ...(coreMigrationVersion ? { coreMigrationVersion } : {}),
+        },
         additionalDocs,
       };
     }
@@ -297,23 +300,20 @@ function propVersion(doc: SavedObjectUnsanitizedDoc, prop: string) {
 /**
  * Sets the doc's migrationVersion to be the most recent version
  */
-function markAsUpToDate(
-  doc: SavedObjectUnsanitizedDoc,
-  migrations: ActiveMigrations,
-  kibanaVersion: string,
-  convertNamespaceTypes: boolean
-) {
+function markAsUpToDate(doc: SavedObjectUnsanitizedDoc, migrations: ActiveMigrations) {
+  const { coreMigrationVersion = getLatestCoreVersion(doc, migrations), ...rest } = doc;
+
   return {
-    ...doc,
+    ...rest,
     migrationVersion: props(doc).reduce((acc, prop) => {
       const version = maxVersion(
         migrations[prop]?.latestVersion.migrate,
-        convertNamespaceTypes ? migrations[prop]?.latestVersion.convert : undefined
+        migrations[prop]?.latestVersion.convert
       );
 
       return version ? set(acc, prop, version) : acc;
     }, {}),
-    coreMigrationVersion: doc.coreMigrationVersion || kibanaVersion,
+    ...(coreMigrationVersion ? { coreMigrationVersion } : {}),
   };
 }
 
@@ -374,6 +374,16 @@ function hasPendingMigrationTransform(
   const migrationVersion = doc.migrationVersion?.[prop];
 
   return latestVersion && (!migrationVersion || Semver.gt(latestVersion, migrationVersion));
+}
+
+function getLatestCoreVersion(doc: SavedObjectUnsanitizedDoc, migrations: ActiveMigrations) {
+  let latestVersion: string | undefined;
+
+  for (const prop of props(doc)) {
+    latestVersion = maxVersion(latestVersion, migrations[prop]?.latestVersion.reference);
+  }
+
+  return latestVersion;
 }
 
 /**
