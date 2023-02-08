@@ -7,7 +7,14 @@
 
 import { useEffect } from 'react';
 import * as React from 'react';
-import { EuiAccordion, EuiText, EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
+import {
+  EuiAccordion,
+  EuiText,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiLoadingSpinner,
+  EuiTitle,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import styled from 'styled-components';
 import { BrowserStepsList } from '../../common/monitor_test_result/browser_steps_list';
@@ -75,19 +82,28 @@ export const BrowserTestRunResult = ({ expectPings, onDone, testRunId }: Props) 
 
             {(isStepsLoadingFailed || isDownMonitor) &&
               summaryDoc?.error?.message?.includes('journey did not finish executing') && (
-                <StdErrorLogs checkGroup={summaryDoc.monitor.check_group} hideTitle={true} />
+                <StdErrorLogs
+                  checkGroup={summaryDoc.monitor.check_group}
+                  hideTitle={completedSteps === 0}
+                  pageSize={completedSteps === 0 ? 5 : 2}
+                />
               )}
 
             {completedSteps > 0 && (
-              <BrowserStepsList
-                steps={steps}
-                loading={Boolean(stepLoadingInProgress)}
-                error={undefined}
-                showStepNumber={true}
-                compressed={true}
-                testNowMode={true}
-                showLastSuccessful={false}
-              />
+              <>
+                <EuiTitle size="xxxs">
+                  <h3>{STEPS_LABEL}</h3>
+                </EuiTitle>
+                <BrowserStepsList
+                  steps={steps}
+                  loading={Boolean(stepLoadingInProgress)}
+                  error={undefined}
+                  showStepNumber={true}
+                  compressed={true}
+                  testNowMode={true}
+                  showLastSuccessful={false}
+                />
+              </>
             )}
           </AccordionWrapper>
         );
@@ -142,4 +158,8 @@ const FAILED_TO_RUN = i18n.translate('xpack.synthetics.monitorManagement.failedR
 
 const LOADING_STEPS = i18n.translate('xpack.synthetics.monitorManagement.loadingSteps', {
   defaultMessage: 'Loading steps...',
+});
+
+const STEPS_LABEL = i18n.translate('xpack.synthetics.monitorManagement.steps', {
+  defaultMessage: 'Steps',
 });

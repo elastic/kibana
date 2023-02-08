@@ -2749,6 +2749,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/alerts-ui-shared@link:packages/kbn-alerts-ui-shared":
+  version "0.0.0"
+  uid ""
+
 "@kbn/alerts@link:packages/kbn-alerts":
   version "0.0.0"
   uid ""
@@ -3666,6 +3670,10 @@
   uid ""
 
 "@kbn/ebt-tools@link:packages/kbn-ebt-tools":
+  version "0.0.0"
+  uid ""
+
+"@kbn/ecs-data-quality-dashboard@link:x-pack/packages/kbn-ecs-data-quality-dashboard":
   version "0.0.0"
   uid ""
 
