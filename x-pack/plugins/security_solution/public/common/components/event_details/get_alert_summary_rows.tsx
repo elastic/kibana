@@ -203,22 +203,36 @@ function getFieldsByRuleType(ruleType?: string): EventSummaryField[] {
 }
 
 /**
+ * Returns a list of fields based on user-defined overrides
+ */
+function getFieldsByOverrides(overrides: EventSummaryField[]): EventSummaryField[] {
+  return overrides.map((override) => ({
+    ...override,
+    // If the override doesn't have an id, use the override field as the id
+    id: override.id ?? override.overrideField,
+  }));
+}
+
+/**
  * Assembles a list of fields to display based on the event
  */
 function getEventFieldsToDisplay({
   eventCategories,
   eventCode,
   eventRuleType,
+  eventSummaryOverrides,
 }: {
   eventCategories: EventCategories;
   eventCode?: string;
   eventRuleType?: string;
+  eventSummaryOverrides: EventSummaryField[];
 }): EventSummaryField[] {
   const fields = [
     ...alwaysDisplayedFields,
     ...getFieldsByCategory(eventCategories),
     ...getFieldsByEventCode(eventCode, eventCategories),
     ...getFieldsByRuleType(eventRuleType),
+    ...getFieldsByOverrides(eventSummaryOverrides),
   ];
 
   // Filter all fields by their id to make sure there are no duplicates
@@ -281,11 +295,15 @@ export const getSummaryRows = ({
   const eventRuleType = Array.isArray(eventRuleTypeField?.originalValue)
     ? eventRuleTypeField?.originalValue?.[0]
     : eventRuleTypeField?.originalValue;
+  const eventSummaryOverrides: EventSummaryField[] = [
+    {'id': 'destination.ip'},
+  ]
 
   const tableFields = getEventFieldsToDisplay({
     eventCategories,
     eventCode,
     eventRuleType,
+    eventSummaryOverrides: eventSummaryOverrides ?? [],
   });
 
   return data != null
