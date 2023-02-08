@@ -10,14 +10,15 @@ import React, { useState } from 'react';
 import { useActions, useValues } from 'kea';
 
 import {
-  EuiTableActionsColumnType,
   EuiBasicTableColumn,
   EuiButton,
   EuiCallOut,
   EuiConfirmModal,
   EuiIcon,
   EuiInMemoryTable,
+  EuiLink,
   EuiSpacer,
+  EuiTableActionsColumnType,
   EuiText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -84,18 +85,22 @@ export const EngineIndices: React.FC = () => {
 
   const columns: Array<EuiBasicTableColumn<EnterpriseSearchEngineIndex>> = [
     {
-      field: 'name',
       name: i18n.translate('xpack.enterpriseSearch.content.engine.indices.name.columnTitle', {
         defaultMessage: 'Index name',
       }),
-      render: (name: string) => (
-        <EuiLinkTo
-          data-test-subj="engine-index-link"
-          to={generateEncodedPath(SEARCH_INDEX_PATH, { indexName: name })}
-        >
-          {name}
-        </EuiLinkTo>
-      ),
+      render: ({ health, name }: EnterpriseSearchEngineIndex) =>
+        health === 'unknown' ? (
+          <EuiLink onClick={() => {}} color="subdued">
+            {name}
+          </EuiLink>
+        ) : (
+          <EuiLinkTo
+            data-test-subj="engine-index-link"
+            to={generateEncodedPath(SEARCH_INDEX_PATH, { indexName: name })}
+          >
+            {name}
+          </EuiLinkTo>
+        ),
       sortable: true,
       truncateText: true,
       width: '40%',
