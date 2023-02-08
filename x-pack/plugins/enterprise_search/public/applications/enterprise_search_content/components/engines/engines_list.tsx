@@ -16,8 +16,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage, FormattedNumber } from '@kbn/i18n-react';
 
 import { INPUT_THROTTLE_DELAY_MS } from '../../../shared/constants/timers';
-
-import { DataPanel } from '../../../shared/data_panel/data_panel';
+import { docLinks } from '../../../shared/doc_links';
 
 import { EnterpriseSearchEnginesPageTemplate } from '../layout/engines_page_template';
 
@@ -54,6 +53,7 @@ export const EnginesList: React.FC = () => {
     onPaginate,
     openDeleteEngineModal,
     setSearchQuery,
+    setIsFirstRequest,
   } = useActions(EnginesListLogic);
 
   const { openFetchEngineFlyout } = useActions(EnginesListFlyoutLogic);
@@ -61,6 +61,7 @@ export const EnginesList: React.FC = () => {
   const {
     createEngineFlyoutOpen,
     deleteModalEngineName,
+    hasNoEngines,
     isDeleteModalVisible,
     isLoading,
     meta,
@@ -74,6 +75,11 @@ export const EnginesList: React.FC = () => {
     fetchEngines();
   }, [meta.from, meta.size, throttledSearchQuery]);
 
+  useEffect(() => {
+    // We don't want to trigger loading for each search query change, so we need this
+    // flag to set if the call to backend is first request.
+    setIsFirstRequest();
+  }, []);
   return (
     <>
       {isDeleteModalVisible ? (
@@ -97,12 +103,10 @@ export const EnginesList: React.FC = () => {
                 documentationUrl: (
                   <EuiLink
                     data-test-subj="engines-documentation-link"
-                    href="TODO"
+                    href={docLinks.enterpriseSearchEngines}
                     target="_blank"
                     data-telemetry-id="entSearchContent-engines-documentation-viewDocumentaion"
                   >
-                    {' '}
-                    {/* TODO: navigate to documentation url */}{' '}
                     {i18n.translate('xpack.enterpriseSearch.content.engines.documentation', {
                       defaultMessage: 'explore our Engines documentation',
                     })}
@@ -114,13 +118,12 @@ export const EnginesList: React.FC = () => {
           pageTitle: i18n.translate('xpack.enterpriseSearch.content.engines.title', {
             defaultMessage: 'Engines',
           }),
-          rightSideItems: results.length ? [<CreateButton />] : [],
+          rightSideItems: isLoading ? [] : !hasNoEngines ? [<CreateButton />] : [],
         }}
         pageViewTelemetry="Engines"
         isLoading={isLoading}
       >
-        <EuiSpacer />
-        {results.length ? (
+        {!hasNoEngines ? (
           <>
             <div>
               <EuiFieldSearch
@@ -148,12 +151,12 @@ export const EnginesList: React.FC = () => {
               {i18n.translate(
                 'xpack.enterpriseSearch.content.engines.searchPlaceholder.description',
                 {
-                  defaultMessage: 'Locate an engine via name or indices',
+                  defaultMessage: 'Locate an engine via name or by its included indices.',
                 }
               )}
             </EuiText>
 
-            <EuiSpacer size="m" />
+            <EuiSpacer />
             <EuiText size="s">
               <FormattedMessage
                 id="xpack.enterpriseSearch.content.engines.enginesList.description"
@@ -173,24 +176,15 @@ export const EnginesList: React.FC = () => {
                 }}
               />
             </EuiText>
-            <DataPanel
-              title={
-                <h2>
-                  {i18n.translate('xpack.enterpriseSearch.content.engines.title', {
-                    defaultMessage: 'Engines',
-                  })}
-                </h2>
-              }
-            >
-              <EnginesListTable
-                enginesList={results}
-                meta={meta}
-                onChange={onPaginate}
-                onDelete={openDeleteEngineModal}
-                viewEngineIndices={openFetchEngineFlyout}
-                loading={false}
-              />
-            </DataPanel>
+
+            <EnginesListTable
+              enginesList={results}
+              meta={meta}
+              onChange={onPaginate}
+              onDelete={openDeleteEngineModal}
+              viewEngineIndices={openFetchEngineFlyout}
+              loading={false}
+            />
           </>
         ) : (
           <EmptyEnginesPrompt>
