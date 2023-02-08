@@ -410,7 +410,14 @@ export const SettingsPage: React.FC<Props> = memo(({ packageInfo, theme$ }: Prop
                     </EuiFlexItem>
                     <EuiFlexItem grow={false}>
                       <div>
-                        <ReinstallButton {...packageInfo} />
+                        <ReinstallButton
+                          {...packageInfo}
+                          installSource={
+                            'savedObject' in packageInfo
+                              ? packageInfo.savedObject.attributes.install_source
+                              : ''
+                          }
+                        />
                       </div>
                     </EuiFlexItem>
                   </EuiFlexGroup>
