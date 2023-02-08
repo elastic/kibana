@@ -345,11 +345,26 @@ const EmbeddableMessagesPopover = ({ messages }: { messages: UserMessage[] }) =>
   );
 };
 
-const allDisplayLocations: UserMessagesDisplayLocationId[] = [
+const blockingMessageDisplayLocations: UserMessagesDisplayLocationId[] = [
   'visualization',
   'visualizationOnEmbeddable',
-  'embeddableBadge',
 ];
+
+const MessagesBadge = ({ onMount }: { onMount: (el: HTMLDivElement) => void }) => (
+  <div
+    css={css({
+      position: 'absolute',
+      zIndex: 2,
+      left: 0,
+      bottom: 0,
+    })}
+    ref={(el) => {
+      if (el) {
+        onMount(el);
+      }
+    }}
+  />
+);
 
 export class Embeddable
   extends AbstractEmbeddable<LensEmbeddableInput, LensEmbeddableOutput>
@@ -366,7 +381,6 @@ export class Embeddable
   private savedVis: Document | undefined;
   private expression: string | undefined | null;
   private domNode: HTMLElement | Element | undefined;
-  private badgeDomNode: HTMLElement | Element | undefined;
   private subscription: Subscription;
   private isInitialized = false;
   private inputReloadSubscriptions: Subscription[];
@@ -886,20 +900,22 @@ export class Embeddable
 
     this.domNode.setAttribute('data-shared-item', '');
 
-    const allErrors = this.getUserMessages(allDisplayLocations, { severity: 'error' });
+    const blockingErrors = this.getUserMessages(blockingMessageDisplayLocations, {
+      severity: 'error',
+    });
 
     this.updateOutput({
       loading: true,
-      error: allErrors.length
+      error: blockingErrors.length
         ? new Error(
-            typeof allErrors[0].longMessage === 'string'
-              ? allErrors[0].longMessage
-              : allErrors[0].shortMessage
+            typeof blockingErrors[0].longMessage === 'string'
+              ? blockingErrors[0].longMessage
+              : blockingErrors[0].shortMessage
           )
         : undefined,
     });
 
-    if (allErrors.length) {
+    if (blockingErrors.length) {
       this.renderComplete.dispatchError();
     } else {
       this.renderComplete.dispatchInProgress();
@@ -907,57 +923,48 @@ export class Embeddable
 
     const input = this.getInput();
 
-    if (this.expression && !allErrors.length) {
+    if (this.expression && !blockingErrors.length) {
       render(
-        <KibanaThemeProvider theme$={this.deps.theme.theme$}>
-          <ExpressionWrapper
-            ExpressionRenderer={this.expressionRenderer}
-            expression={this.expression || null}
-            lensInspector={this.lensInspector}
-            searchContext={this.getMergedSearchContext()}
-            variables={{
-              embeddableTitle: this.getTitle(),
-              ...(input.palette ? { theme: { palette: input.palette } } : {}),
-            }}
-            searchSessionId={this.externalSearchContext.searchSessionId}
-            handleEvent={this.handleEvent}
-            onData$={this.updateActiveData}
-            onRender$={this.onRender}
-            interactive={!input.disableTriggers}
-            renderMode={input.renderMode}
-            syncColors={input.syncColors}
-            syncTooltips={input.syncTooltips}
-            syncCursor={input.syncCursor}
-            hasCompatibleActions={this.hasCompatibleActions}
-            getCompatibleCellValueActions={this.getCompatibleCellValueActions}
-            className={input.className}
-            style={input.style}
-            executionContext={this.getExecutionContext()}
-            addUserMessages={(messages) => this.addUserMessages(messages)}
-            onRuntimeError={(message) => {
-              this.updateOutput({ error: new Error(message) });
-              this.logError('runtime');
-            }}
-            noPadding={this.visDisplayOptions.noPadding}
-          />
-          <div
-            css={css({
-              position: 'absolute',
-              zIndex: 2,
-              left: 0,
-              bottom: 0,
-            })}
-            ref={(el) => {
-              if (el) {
-                this.badgeDomNode = el;
-                this.renderUserMessages();
-              }
-            }}
-          />
-        </KibanaThemeProvider>,
+        <>
+          <KibanaThemeProvider theme$={this.deps.theme.theme$}>
+            <ExpressionWrapper
+              ExpressionRenderer={this.expressionRenderer}
+              expression={this.expression || null}
+              lensInspector={this.lensInspector}
+              searchContext={this.getMergedSearchContext()}
+              variables={{
+                embeddableTitle: this.getTitle(),
+                ...(input.palette ? { theme: { palette: input.palette } } : {}),
+              }}
+              searchSessionId={this.externalSearchContext.searchSessionId}
+              handleEvent={this.handleEvent}
+              onData$={this.updateActiveData}
+              onRender$={this.onRender}
+              interactive={!input.disableTriggers}
+              renderMode={input.renderMode}
+              syncColors={input.syncColors}
+              syncTooltips={input.syncTooltips}
+              syncCursor={input.syncCursor}
+              hasCompatibleActions={this.hasCompatibleActions}
+              getCompatibleCellValueActions={this.getCompatibleCellValueActions}
+              className={input.className}
+              style={input.style}
+              executionContext={this.getExecutionContext()}
+              addUserMessages={(messages) => this.addUserMessages(messages)}
+              onRuntimeError={(message) => {
+                this.updateOutput({ error: new Error(message) });
+                this.logError('runtime');
+              }}
+              noPadding={this.visDisplayOptions.noPadding}
+            />
+          </KibanaThemeProvider>
+          <MessagesBadge onMount={this.renderBadgeMessages} />
+        </>,
         domNode
       );
     }
+
+    this.renderUserMessages();
   }
 
   private renderUserMessages() {
@@ -976,22 +983,25 @@ export class Embeddable
               />
             </I18nProvider>
           </KibanaThemeProvider>
+          <MessagesBadge onMount={this.renderBadgeMessages} />
         </>,
         this.domNode
       );
     }
+  }
 
+  private renderBadgeMessages = (badgeDomNode: HTMLDivElement) => {
     const messages = this.getUserMessages('embeddableBadge');
 
-    if (messages.length && this.badgeDomNode) {
+    if (messages.length) {
       render(
         <KibanaThemeProvider theme$={this.deps.theme.theme$}>
           <EmbeddableMessagesPopover messages={messages} />
         </KibanaThemeProvider>,
-        this.badgeDomNode
+        badgeDomNode
       );
     }
-  }
+  };
 
   private readonly hasCompatibleActions = async (
     event: ExpressionRendererEvent
@@ -1254,8 +1264,10 @@ export class Embeddable
       ]);
     }
 
-    const allErrors = this.getUserMessages(allDisplayLocations, { severity: 'error' });
-    if (allErrors.length) {
+    const blockingErrors = this.getUserMessages(blockingMessageDisplayLocations, {
+      severity: 'error',
+    });
+    if (blockingErrors.length) {
       this.logError('validation');
     }
 
