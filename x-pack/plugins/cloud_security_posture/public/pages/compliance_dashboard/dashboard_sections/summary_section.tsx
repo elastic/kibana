@@ -36,10 +36,11 @@ export const dashboardColumnsGrow: Record<string, EuiFlexItemProps['grow']> = {
   third: 8,
 };
 
-// TODO: CIS AWS - replace query to use policy_template field when available
 export const getPolicyTemplateQuery = (policyTemplate: PosturePolicyTemplate) => {
-  if (policyTemplate === CSPM_POLICY_TEMPLATE) return { 'rule.benchmark.id': 'cis_aws' };
-  if (policyTemplate === KSPM_POLICY_TEMPLATE) return { 'rule.benchmark.id': 'cis_k8s' };
+  if (policyTemplate === CSPM_POLICY_TEMPLATE)
+    return { 'rule.benchmark.posture_type': CSPM_POLICY_TEMPLATE };
+  if (policyTemplate === KSPM_POLICY_TEMPLATE)
+    return { 'rule.benchmark.posture_type': KSPM_POLICY_TEMPLATE };
   return {};
 };
 

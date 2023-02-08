@@ -79,6 +79,7 @@ describe('AgentActivityFlyout', () => {
         expiration: '2099-09-16T10:00:00.000Z',
         creationTime: '2022-09-15T10:00:00.000Z',
         nbAgentsFailed: 0,
+        hasRolloutPeriod: true,
       },
     ];
     mockUseActionStatus.mockReturnValue({
@@ -105,6 +106,45 @@ describe('AgentActivityFlyout', () => {
     });
 
     expect(mockAbortUpgrade).toHaveBeenCalled();
+  });
+
+  it('should not render cancel button if the upgrade is set to happen immediately', () => {
+    const mockActionStatuses = [
+      {
+        actionId: 'action2',
+        nbAgentsActionCreated: 5,
+        nbAgentsAck: 0,
+        version: '8.5.0',
+        startTime: '2022-09-15T10:00:00.000Z',
+        type: 'UPGRADE',
+        nbAgentsActioned: 5,
+        status: 'IN_PROGRESS',
+        expiration: '2099-09-16T10:00:00.000Z',
+        creationTime: '2022-09-15T10:00:00.000Z',
+        nbAgentsFailed: 0,
+        hasRolloutPeriod: false,
+      },
+    ];
+    mockUseActionStatus.mockReturnValue({
+      currentActions: mockActionStatuses,
+      abortUpgrade: mockAbortUpgrade,
+      isFirstLoading: true,
+    });
+    const result = renderComponent();
+
+    expect(result.getByText('Agent activity')).toBeInTheDocument();
+
+    expect(
+      result.container.querySelector('[data-test-subj="upgradeInProgressTitle"]')!.textContent
+    ).toEqual('Upgrading 5 agents to version 8.5.0');
+    // compare without whitespace, &nbsp; doesn't match
+    expect(
+      result.container
+        .querySelector('[data-test-subj="upgradeInProgressDescription"]')!
+        .textContent?.replace(/\s/g, '')
+    ).toContain('Started on Sep 15, 2022 10:00 AM. Learn more'.replace(/\s/g, ''));
+
+    expect(result.queryByText('Cancel')).not.toBeInTheDocument();
   });
 
   it('should render agent activity for scheduled upgrade', () => {

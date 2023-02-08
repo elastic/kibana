@@ -154,6 +154,7 @@ export interface ActionStatus {
   cancellationTime?: string;
   newPolicyId?: string;
   creationTime: string;
+  hasRolloutPeriod?: boolean;
 }
 
 export interface AgentDiagnostics {
@@ -163,6 +164,7 @@ export interface AgentDiagnostics {
   filePath: string;
   status: 'READY' | 'AWAITING_UPLOAD' | 'DELETED' | 'IN_PROGRESS' | 'FAILED';
   actionId: string;
+  error?: string;
 }
 
 // Generated from FleetServer schema.json

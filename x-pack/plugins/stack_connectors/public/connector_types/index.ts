@@ -22,6 +22,7 @@ import { getSlackConnectorType } from './slack';
 import { getSwimlaneConnectorType } from './swimlane';
 import { getTeamsConnectorType } from './teams';
 import { getTinesConnectorType } from './tines';
+import { getTorqConnectorType } from './torq';
 import { getWebhookConnectorType } from './webhook';
 import { getXmattersConnectorType } from './xmatters';
 
@@ -55,5 +56,6 @@ export function registerConnectorTypes({
   connectorTypeRegistry.register(getResilientConnectorType());
   connectorTypeRegistry.register(getOpsgenieConnectorType());
   connectorTypeRegistry.register(getTeamsConnectorType());
+  connectorTypeRegistry.register(getTorqConnectorType());
   connectorTypeRegistry.register(getTinesConnectorType());
 }

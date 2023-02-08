@@ -712,7 +712,7 @@ export const getXyVisualization = ({
           errors.push({
             severity: 'error',
             fixableInEditor: true,
-            displayLocations: [{ id: 'dimensionTrigger', dimensionId: annotation.id }],
+            displayLocations: [{ id: 'dimensionButton', dimensionId: annotation.id }],
             shortMessage: i18n.translate(
               'xpack.lens.xyChart.addAnnotationsLayerLabelDisabledHelp',
               {
@@ -732,7 +732,7 @@ export const getXyVisualization = ({
               fixableInEditor: true,
               displayLocations: [
                 { id: 'visualization' },
-                { id: 'dimensionTrigger', dimensionId: annotation.id },
+                { id: 'dimensionButton', dimensionId: annotation.id },
               ],
               shortMessage: errorMessage,
               longMessage: (
@@ -889,17 +889,9 @@ export const getXyVisualization = ({
       state?.layers.filter(isAnnotationsLayer).map(({ indexPatternId }) => indexPatternId) ?? []
     );
   },
-  renderDimensionTrigger({ columnId, label, hideTooltip, invalid, invalidMessage }) {
+  renderDimensionTrigger({ columnId, label }) {
     if (label) {
-      return (
-        <DimensionTrigger
-          id={columnId}
-          hideTooltip={hideTooltip}
-          isInvalid={invalid}
-          invalidMessage={invalidMessage}
-          label={label || defaultAnnotationLabel}
-        />
-      );
+      return <DimensionTrigger id={columnId} label={label || defaultAnnotationLabel} />;
     }
     return null;
   },
