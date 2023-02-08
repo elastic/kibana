@@ -29,7 +29,7 @@ import type {
   KibanaAssetType,
 } from '../../../../../types';
 import { entries } from '../../../../../types';
-import { useGetCategories } from '../../../../../hooks';
+import { useGetCategoriesQuery } from '../../../../../hooks';
 import { AssetTitleMap, DisplayedAssets, ServiceTitleMap } from '../../../constants';
 
 import { NoticeModal } from './notice_modal';
@@ -59,10 +59,10 @@ const Replacements = euiStyled(EuiFlexItem)`
 `;
 
 export const Details: React.FC<Props> = memo(({ packageInfo }) => {
-  const { data: categoriesData, isLoading: isLoadingCategories } = useGetCategories();
+  const { data: categoriesData, isLoading: isLoadingCategories } = useGetCategoriesQuery();
   const packageCategories: string[] = useMemo(() => {
-    if (!isLoadingCategories && categoriesData && categoriesData.response) {
-      return categoriesData.response
+    if (!isLoadingCategories && categoriesData?.items) {
+      return categoriesData.items
         .filter((category) => packageInfo.categories?.includes(category.id as PackageSpecCategory))
         .map((category) => category.title);
     }
