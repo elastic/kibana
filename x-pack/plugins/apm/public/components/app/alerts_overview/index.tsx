@@ -103,6 +103,7 @@ export function AlertsOverview() {
               configurationId={AlertConsumers.OBSERVABILITY}
               featureIds={[AlertConsumers.APM]}
               query={esQuery}
+              showAlertStatusWithFlapping
               showExpandToDetails={false}
             />
           )}

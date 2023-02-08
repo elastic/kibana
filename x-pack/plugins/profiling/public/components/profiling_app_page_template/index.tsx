@@ -9,6 +9,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiPageHeaderContentProps } from '@elastic/e
 import { i18n } from '@kbn/i18n';
 import React, { useEffect } from 'react';
 import { useHistory } from 'react-router-dom';
+import { NoDataPageProps } from '@kbn/shared-ux-page-no-data-types';
 import { useProfilingDependencies } from '../contexts/profiling_dependencies/use_profiling_dependencies';
 import { PrimaryProfilingSearchBar } from './primary_profiling_search_bar';
 
@@ -16,12 +17,18 @@ export function ProfilingAppPageTemplate({
   children,
   tabs,
   hideSearchBar = false,
-  fullHeight = false,
+  noDataConfig,
+  restrictWidth = false,
+  pageTitle = i18n.translate('xpack.profiling.appPageTemplate.pageTitle', {
+    defaultMessage: 'Universal Profiling',
+  }),
 }: {
   children: React.ReactElement;
   tabs: EuiPageHeaderContentProps['tabs'];
   hideSearchBar?: boolean;
-  fullHeight?: boolean;
+  noDataConfig?: NoDataPageProps;
+  restrictWidth?: boolean;
+  pageTitle?: React.ReactNode;
 }) {
   const {
     start: { observability },
@@ -37,12 +44,12 @@ export function ProfilingAppPageTemplate({
 
   return (
     <ObservabilityPageTemplate
+      noDataConfig={noDataConfig}
       pageHeader={{
-        pageTitle: i18n.translate('xpack.profiling.appPageTemplate.pageTitle', {
-          defaultMessage: 'Universal Profiling',
-        }),
+        pageTitle,
         tabs,
       }}
+      restrictWidth={restrictWidth}
       pageSectionProps={{
         contentProps: {
           style: {

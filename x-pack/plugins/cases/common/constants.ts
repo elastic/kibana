@@ -94,6 +94,9 @@ export const INTERNAL_SUGGEST_USER_PROFILES_URL =
   `${CASES_INTERNAL_URL}/_suggest_user_profiles` as const;
 export const INTERNAL_CONNECTORS_URL = `${CASES_INTERNAL_URL}/{case_id}/_connectors` as const;
 export const INTERNAL_BULK_GET_CASES_URL = `${CASES_INTERNAL_URL}/_bulk_get` as const;
+export const INTERNAL_GET_CASE_USER_ACTIONS_STATS_URL =
+  `${CASES_INTERNAL_URL}/{case_id}/user_actions/_stats` as const;
+export const INTERNAL_CASE_USERS_URL = `${CASES_INTERNAL_URL}/{case_id}/_users` as const;
 
 /**
  * Action routes
@@ -117,18 +120,21 @@ export const GENERAL_CASES_OWNER = APP_ID;
 
 export const OWNER_INFO = {
   [SECURITY_SOLUTION_OWNER]: {
+    id: SECURITY_SOLUTION_OWNER,
     appId: 'securitySolutionUI',
     label: 'Security',
     iconType: 'logoSecurity',
     appRoute: '/app/security',
   },
   [OBSERVABILITY_OWNER]: {
+    id: OBSERVABILITY_OWNER,
     appId: 'observability-overview',
     label: 'Observability',
     iconType: 'logoObservability',
     appRoute: '/app/observability',
   },
   [GENERAL_CASES_OWNER]: {
+    id: GENERAL_CASES_OWNER,
     appId: 'management',
     label: 'Stack',
     iconType: 'casesApp',

@@ -10,7 +10,6 @@ import { EuiDescriptionList, EuiSpacer, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useStepMetrics } from '../../step_details_page/hooks/use_step_metrics';
 import { JourneyStepScreenshotContainer } from '../screenshot/journey_step_screenshot_container';
-import { formatBytes } from '../../step_details_page/hooks/use_object_metrics';
 import { ThresholdIndicator } from '../components/thershold_indicator';
 import { useNetworkTimings } from '../../step_details_page/hooks/use_network_timings';
 import { useNetworkTimingsPrevious24Hours } from '../../step_details_page/hooks/use_network_timings_prev';
@@ -62,16 +61,12 @@ export const ResultDetails = ({
 };
 
 export const TimingDetails = ({ step }: { step: JourneyStep }) => {
-  const { timingsWithLabels, transferSize } = useNetworkTimings(
+  const { timingsWithLabels } = useNetworkTimings(
     step.monitor.check_group,
     step.synthetics.step?.index
   );
 
-  const {
-    timingsWithLabels: prevTimingsWithLabels,
-    loading,
-    transferSizePrev,
-  } = useNetworkTimingsPrevious24Hours(
+  const { timingsWithLabels: prevTimingsWithLabels, loading } = useNetworkTimingsPrevious24Hours(
     step.synthetics.step?.index,
     step['@timestamp'],
     step.monitor.check_group
@@ -92,19 +87,6 @@ export const TimingDetails = ({ step }: { step: JourneyStep }) => {
         />
       ),
     };
-  });
-
-  items.push({
-    title: transferSize.label,
-    description: (
-      <ThresholdIndicator
-        loading={loading}
-        current={transferSize.value}
-        previous={transferSizePrev.value}
-        currentFormatted={formatBytes(transferSize.value ?? 0)}
-        previousFormatted={formatBytes(transferSizePrev.value ?? 0)}
-      />
-    ),
   });
 
   return (

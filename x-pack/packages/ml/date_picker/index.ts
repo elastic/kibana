@@ -13,6 +13,7 @@ export {
   useRefreshIntervalUpdates,
   useTimefilter,
   useTimeRangeUpdates,
+  useRefresh,
 } from './src/hooks/use_timefilter';
 export { DatePickerWrapper } from './src/components/date_picker_wrapper';
 export {
