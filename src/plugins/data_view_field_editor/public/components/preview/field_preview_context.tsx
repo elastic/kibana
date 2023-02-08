@@ -20,7 +20,6 @@ import { renderToString } from 'react-dom/server';
 import useDebounce from 'react-use/lib/useDebounce';
 import { i18n } from '@kbn/i18n';
 import { get } from 'lodash';
-import { castEsToKbnFieldTypeName } from '@kbn/field-types';
 import { BehaviorSubject } from 'rxjs';
 import { RuntimePrimitiveTypes } from '../../shared_imports';
 import { useStateSelector } from '../../state_utils';
@@ -102,7 +101,6 @@ export const FieldPreviewProvider: FunctionComponent<{ controller: PreviewContro
       notifications,
       api: { getFieldPreview },
     },
-    fieldFormats,
     fieldName$,
   } = useFieldEditorContext();
 
@@ -162,28 +160,6 @@ export const FieldPreviewProvider: FunctionComponent<{ controller: PreviewContro
       lastExecutePainlessRequestParams.current.documentId !== currentDocId
     );
   }, [type, script, currentDocId]);
-
-  const valueFormatter = useCallback(
-    (value: unknown) => {
-      if (format?.id) {
-        const formatter = fieldFormats.getInstance(format.id, format.params);
-        if (formatter) {
-          return formatter.getConverterFor('html')(value) ?? JSON.stringify(value);
-        }
-      }
-
-      if (type) {
-        const fieldType = castEsToKbnFieldTypeName(type);
-        const defaultFormatterForType = fieldFormats.getDefaultInstance(fieldType);
-        if (defaultFormatterForType) {
-          return defaultFormatterForType.getConverterFor('html')(value) ?? JSON.stringify(value);
-        }
-      }
-
-      return defaultValueFormatter(value);
-    },
-    [format, type, fieldFormats]
-  );
 
   const fetchSampleDocuments = useCallback(
     async (limit: number = 50) => {
@@ -312,14 +288,14 @@ export const FieldPreviewProvider: FunctionComponent<{ controller: PreviewContro
   const updateSingleFieldPreview = useCallback(
     (fieldName: string, values: unknown[]) => {
       const [value] = values;
-      const formattedValue = valueFormatter(value);
+      const formattedValue = controller.valueFormatter({ value, type, format });
 
       controller.setPreviewResponse({
         fields: [{ key: fieldName, value, formattedValue }],
         error: null,
       });
     },
-    [valueFormatter, controller]
+    [controller, type, format]
   );
 
   const updateCompositeFieldPreview = useCallback(
@@ -336,7 +312,7 @@ export const FieldPreviewProvider: FunctionComponent<{ controller: PreviewContro
           updatedFieldsInScript.push(fieldName);
 
           const [value] = values;
-          const formattedValue = valueFormatter(value);
+          const formattedValue = controller.valueFormatter({ value, type, format });
 
           return {
             key: parentName
@@ -357,7 +333,7 @@ export const FieldPreviewProvider: FunctionComponent<{ controller: PreviewContro
         error: null,
       });
     },
-    [valueFormatter, parentName, name, fieldPreview$, fieldName$, controller]
+    [parentName, name, fieldPreview$, fieldName$, controller, type, format]
   );
 
   const updatePreview = useCallback(async () => {
@@ -600,7 +576,7 @@ export const FieldPreviewProvider: FunctionComponent<{ controller: PreviewContro
             ? get(document?._source, name ?? '') ?? get(document?.fields, name ?? '') // When there is no script we try to read the value from _source/fields
             : field?.value;
 
-        const formattedValue = valueFormatter(nextValue);
+        const formattedValue = controller.valueFormatter({ value: nextValue, type, format });
 
         return {
           ...field,
@@ -609,7 +585,7 @@ export const FieldPreviewProvider: FunctionComponent<{ controller: PreviewContro
         };
       }),
     });
-  }, [name, script, document, valueFormatter, controller]);
+  }, [name, script, document, controller, type, format]);
 
   useEffect(() => {
     if (script?.source === undefined) {
