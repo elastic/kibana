@@ -2388,7 +2388,7 @@
             "label": "value",
             "description": [],
             "signature": [
-              "string | number | (string | number)[]"
+              "string | number | boolean | (string | number | boolean)[]"
             ],
             "path": "x-pack/plugins/timelines/common/types/timeline/data_provider/index.ts",
             "deprecated": false,
@@ -2402,7 +2402,7 @@
             "label": "displayValue",
             "description": [],
             "signature": [
-              "string | number | undefined"
+              "string | number | boolean | undefined"
             ],
             "path": "x-pack/plugins/timelines/common/types/timeline/data_provider/index.ts",
             "deprecated": false,

@@ -428,7 +428,20 @@ export class DashboardPageControls extends FtrService {
     await this.retry.try(async () => {
       expect(await this.optionsListPopoverGetAvailableOptions()).to.eql(expectation);
     });
+    if (await this.testSubjects.exists('optionsList-cardinality-label')) {
+      expect(await this.optionsListGetCardinalityValue()).to.be(
+        Object.keys(expectation.suggestions).length.toLocaleString()
+      );
+    }
     if (!skipOpen) await this.optionsListEnsurePopoverIsClosed(controlId);
+  }
+
+  public async optionsListGetCardinalityValue() {
+    this.log.debug(`getting the value of the cardinality badge`);
+    const cardinalityLabel = await (
+      await this.testSubjects.find('optionsList-cardinality-label')
+    ).getVisibleText();
+    return cardinalityLabel.split(' ')[0];
   }
 
   public async optionsListPopoverSearchForOption(search: string) {

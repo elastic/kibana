@@ -94,6 +94,7 @@ export interface EventsViewerProps {
   unit?: (n: number) => string;
   indexNames?: string[];
   bulkActions: boolean | BulkActionsProp;
+  additionalRightMenuOptions?: React.ReactNode[];
 }
 
 /**
@@ -122,6 +123,7 @@ const StatefulEventsViewerComponent: React.FC<EventsViewerProps & PropsFromRedux
   bulkActions,
   setSelected,
   clearSelected,
+  additionalRightMenuOptions,
 }) => {
   const dispatch = useDispatch();
   const theme: EuiTheme = useContext(ThemeContext);
@@ -551,6 +553,7 @@ const StatefulEventsViewerComponent: React.FC<EventsViewerProps & PropsFromRedux
                     onViewChange={(selectedView) => setTableView(selectedView)}
                     additionalFilters={additionalFilters}
                     hasRightOffset={tableView === 'gridView' && nonDeletedEvents.length > 0}
+                    additionalMenuOptions={additionalRightMenuOptions}
                   />
 
                   {!hasAlerts && !loading && !graphOverlay && <EmptyTable height="short" />}
