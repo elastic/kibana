@@ -1,6 +1,6 @@
 include::action-types/email.asciidoc[]
 include::action-types/resilient.asciidoc[]
-include::action-types/index.asciidoc[]
+include::action-types/index.asciidoc[leveloffset=+1]
 include::action-types/jira.asciidoc[]
 include::action-types/teams.asciidoc[]
 include::action-types/opsgenie.asciidoc[]
