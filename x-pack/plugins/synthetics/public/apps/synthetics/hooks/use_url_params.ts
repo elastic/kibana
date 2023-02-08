@@ -16,7 +16,7 @@ function getParsedParams(search: string) {
 
 export type GetUrlParams = () => SyntheticsUrlParams;
 export type UpdateUrlParams = (
-  updatedParams: Partial<SyntheticsUrlParams>,
+  updatedParams: Partial<SyntheticsUrlParams> | null,
   replaceState?: boolean
 ) => void;
 
