@@ -12,11 +12,11 @@ import { UserProfileBulkGetParams, UserProfileServiceStart } from '@kbn/security
 import { INTERNAL_SUGGEST_USER_PROFILES_URL } from '@kbn/cases-plugin/common/constants';
 import { SuggestUserProfilesRequest } from '@kbn/cases-plugin/common/api';
 import { UserProfileService } from '@kbn/cases-plugin/server/services';
-import { superUser } from './authentication/users';
-import { User } from './authentication/types';
-import { getSpaceUrlPrefix } from './utils';
-import { FtrProviderContext as CommonFtrProviderContext } from '../ftr_provider_context';
-import { getUserInfo } from './authentication';
+import { superUser } from '../authentication/users';
+import { User } from '../authentication/types';
+import { getSpaceUrlPrefix } from './helpers';
+import { FtrProviderContext as CommonFtrProviderContext } from '../../ftr_provider_context';
+import { getUserInfo } from '../authentication';
 
 type BulkGetUserProfilesParams = Omit<UserProfileBulkGetParams, 'uids'> & { uids: string[] };
 
