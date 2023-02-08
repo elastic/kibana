@@ -30,7 +30,7 @@ import {
 
 const TOTAL_FIELDS_LIMIT = 2500;
 const INSTALLATION_TIMEOUT = 20 * 60 * 1000; // 20 minutes
-
+const LEGACY_ALERT_CONTEXT = 'legacy-alert';
 interface AlertsServiceParams {
   logger: Logger;
   pluginStop$: Observable<void>;
@@ -106,7 +106,7 @@ export class AlertsService implements IAlertsService {
           () =>
             this.createOrUpdateComponentTemplate(
               esClient,
-              getComponentTemplate(legacyAlertFieldMap, 'legacy-alert')
+              getComponentTemplate(legacyAlertFieldMap, LEGACY_ALERT_CONTEXT)
             ),
         ];
 
@@ -128,7 +128,8 @@ export class AlertsService implements IAlertsService {
     });
   }
 
-  public register({ context, fieldMap }: IRuleTypeAlerts, timeoutMs?: number) {
+  public register(opts: IRuleTypeAlerts, timeoutMs?: number) {
+    const { context, fieldMap } = opts;
     // check whether this context has been registered before
     if (this.registeredContexts.has(context)) {
       const registeredFieldMap = this.registeredContexts.get(context);
@@ -141,37 +142,49 @@ export class AlertsService implements IAlertsService {
 
     this.options.logger.info(`Registering resources for context "${context}".`);
     this.registeredContexts.set(context, fieldMap);
-    this.resourceInitializationHelper.add({ context, fieldMap }, timeoutMs);
+    this.resourceInitializationHelper.add(opts, timeoutMs);
   }
 
-  private async initializeContext({ context, fieldMap }: IRuleTypeAlerts, timeoutMs?: number) {
+  private async initializeContext(
+    { context, fieldMap, useLegacyAlerts }: IRuleTypeAlerts,
+    timeoutMs?: number
+  ) {
     const esClient = await this.options.elasticsearchClientPromise;
 
     const indexTemplateAndPattern = getIndexTemplateAndPattern(context);
 
-    // Context specific initialization installs component template, index template and write index
-    // If fieldMap is empty, don't create context specific component template
-    const initFns = isEmpty(fieldMap)
-      ? [
-          async () =>
-            await this.createOrUpdateIndexTemplate(esClient, indexTemplateAndPattern, [
-              getComponentTemplateName(),
-            ]),
-          async () => await this.createConcreteWriteIndex(esClient, indexTemplateAndPattern),
-        ]
-      : [
-          async () =>
-            await this.createOrUpdateComponentTemplate(
-              esClient,
-              getComponentTemplate(fieldMap, context)
-            ),
-          async () =>
-            await this.createOrUpdateIndexTemplate(esClient, indexTemplateAndPattern, [
-              getComponentTemplateName(),
-              getComponentTemplateName(context),
-            ]),
-          async () => await this.createConcreteWriteIndex(esClient, indexTemplateAndPattern),
-        ];
+    let initFns: Array<() => Promise<void>> = [];
+
+    // List of component templates to reference
+    const componentTemplateRefs: string[] = [];
+
+    // If fieldMap is not empty, create a context specific component template
+    if (!isEmpty(fieldMap)) {
+      const componentTemplate = getComponentTemplate(fieldMap, context);
+      initFns.push(
+        async () => await this.createOrUpdateComponentTemplate(esClient, componentTemplate)
+      );
+      componentTemplateRefs.push(componentTemplate.name);
+    }
+
+    // If useLegacy is set to true, add the legacy alert component template to the references
+    if (useLegacyAlerts) {
+      componentTemplateRefs.push(getComponentTemplateName(LEGACY_ALERT_CONTEXT));
+    }
+
+    // Add framework component template to the references
+    componentTemplateRefs.push(getComponentTemplateName());
+
+    // Context specific initialization installs index template and write index
+    initFns = initFns.concat([
+      async () =>
+        await this.createOrUpdateIndexTemplate(
+          esClient,
+          indexTemplateAndPattern,
+          componentTemplateRefs
+        ),
+      async () => await this.createConcreteWriteIndex(esClient, indexTemplateAndPattern),
+    ]);
 
     for (const fn of initFns) {
       await this.installWithTimeout(async () => await fn(), timeoutMs);

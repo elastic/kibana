@@ -70,7 +70,6 @@ export const alertFieldMap = {
     array: false,
     required: true,
   },
-  // this is not in the technical field mapping ??
   [ALERT_LAST_DETECTED]: {
     type: 'date',
     required: false,

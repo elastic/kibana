@@ -9,6 +9,7 @@ import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mo
 import { errors as EsErrors } from '@elastic/elasticsearch';
 import { ReplaySubject, Subject } from 'rxjs';
 import { AlertsService } from './alerts_service';
+import { IRuleTypeAlerts } from '../types';
 
 let logger: ReturnType<typeof loggingSystemMock['createLogger']>;
 const clusterClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
@@ -75,37 +76,49 @@ const IlmPutBody = {
   name: 'alerts-default-ilm-policy',
 };
 
-const getIndexTemplatePutBody = (context?: string) => ({
-  name: `.alerts-${context ? context : 'test'}-default-template`,
-  body: {
-    index_patterns: [`.alerts-${context ? context : 'test'}-default-*`],
-    composed_of: ['.alerts-framework-mappings', `.alerts-${context ? context : 'test'}-mappings`],
-    template: {
-      settings: {
-        auto_expand_replicas: '0-1',
-        hidden: true,
-        'index.lifecycle': {
-          name: 'alerts-default-ilm-policy',
-          rollover_alias: `.alerts-${context ? context : 'test'}-default`,
+interface GetIndexTemplatePutBodyOpts {
+  context?: string;
+  useLegacyAlerts?: boolean;
+}
+const getIndexTemplatePutBody = (opts?: GetIndexTemplatePutBodyOpts) => {
+  const context = opts ? opts.context : undefined;
+  const useLegacyAlerts = opts ? opts.useLegacyAlerts : undefined;
+  return {
+    name: `.alerts-${context ? context : 'test'}-default-template`,
+    body: {
+      index_patterns: [`.alerts-${context ? context : 'test'}-default-*`],
+      composed_of: [
+        `.alerts-${context ? context : 'test'}-mappings`,
+        ...(useLegacyAlerts ? ['.alerts-legacy-alert-mappings'] : []),
+        '.alerts-framework-mappings',
+      ],
+      template: {
+        settings: {
+          auto_expand_replicas: '0-1',
+          hidden: true,
+          'index.lifecycle': {
+            name: 'alerts-default-ilm-policy',
+            rollover_alias: `.alerts-${context ? context : 'test'}-default`,
+          },
+          'index.mapping.total_fields.limit': 2500,
         },
-        'index.mapping.total_fields.limit': 2500,
+        mappings: {
+          dynamic: false,
+        },
       },
-      mappings: {
-        dynamic: false,
+      _meta: {
+        managed: true,
       },
     },
-    _meta: {
-      managed: true,
-    },
-  },
-});
+  };
+};
 
-const TestRegistrationContext = {
+const TestRegistrationContext: IRuleTypeAlerts = {
   context: 'test',
   fieldMap: { field: { type: 'keyword', required: false } },
 };
 
-const AnotherRegistrationContext = {
+const AnotherRegistrationContext: IRuleTypeAlerts = {
   context: 'another',
   fieldMap: { field: { type: 'keyword', required: false } },
 };
@@ -228,7 +241,7 @@ describe('Alerts Service', () => {
       expect(clusterClient.indices.putIndexTemplate).toHaveBeenCalledTimes(2);
       expect(clusterClient.indices.putIndexTemplate).toHaveBeenNthCalledWith(
         1,
-        getIndexTemplatePutBody('another')
+        getIndexTemplatePutBody({ context: 'another' })
       );
       expect(clusterClient.indices.putIndexTemplate).toHaveBeenNthCalledWith(
         2,
@@ -302,6 +315,44 @@ describe('Alerts Service', () => {
 
       expect(clusterClient.indices.putIndexTemplate).toHaveBeenCalledWith(
         getIndexTemplatePutBody()
+      );
+      expect(clusterClient.indices.getAlias).toHaveBeenCalledWith({
+        index: '.alerts-test-default-*',
+      });
+      expect(clusterClient.indices.putSettings).toHaveBeenCalledTimes(2);
+      expect(clusterClient.indices.simulateIndexTemplate).toHaveBeenCalledTimes(2);
+      expect(clusterClient.indices.putMapping).toHaveBeenCalledTimes(2);
+      expect(clusterClient.indices.create).toHaveBeenCalledWith({
+        index: '.alerts-test-default-000001',
+        body: {
+          aliases: {
+            '.alerts-test-default': {
+              is_write_index: true,
+            },
+          },
+        },
+      });
+    });
+
+    test('should correctly install resources for context when useLegacyAlerts is true', async () => {
+      alertsService.register({ ...TestRegistrationContext, useLegacyAlerts: true });
+      await new Promise((r) => setTimeout(r, 50));
+      expect(await alertsService.isContextInitialized(TestRegistrationContext.context)).toEqual(
+        true
+      );
+
+      expect(clusterClient.ilm.putLifecycle).toHaveBeenCalledWith(IlmPutBody);
+
+      expect(clusterClient.cluster.putComponentTemplate).toHaveBeenCalledTimes(3);
+      const componentTemplate1 = clusterClient.cluster.putComponentTemplate.mock.calls[0][0];
+      expect(componentTemplate1.name).toEqual('.alerts-framework-mappings');
+      const componentTemplate2 = clusterClient.cluster.putComponentTemplate.mock.calls[1][0];
+      expect(componentTemplate2.name).toEqual('.alerts-legacy-alert-mappings');
+      const componentTemplate3 = clusterClient.cluster.putComponentTemplate.mock.calls[2][0];
+      expect(componentTemplate3.name).toEqual('.alerts-test-mappings');
+
+      expect(clusterClient.indices.putIndexTemplate).toHaveBeenCalledWith(
+        getIndexTemplatePutBody({ useLegacyAlerts: true })
       );
       expect(clusterClient.indices.getAlias).toHaveBeenCalledWith({
         index: '.alerts-test-default-*',

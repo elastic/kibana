@@ -246,8 +246,8 @@ describe('mappingFromFieldMap', () => {
                       type: 'keyword',
                     },
                     parameters: {
-                      type: 'object',
-                      enabled: false,
+                      type: 'flattened',
+                      ignore_above: 4096,
                     },
                     producer: {
                       type: 'keyword',
