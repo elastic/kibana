@@ -97,7 +97,7 @@ export function DashboardCustomizePanelProvider({ getService }: FtrProviderConte
 
     public async clickSaveButton() {
       log.debug('clickSaveButton');
-      await this.retry.try(async () => {
+      await retry.try(async () => {
         await toasts.dismissAllToasts();
         await testSubjects.click('saveCustomizePanelButton');
         await testSubjects.waitForDeleted('saveCustomizePanelButton');
@@ -106,7 +106,7 @@ export function DashboardCustomizePanelProvider({ getService }: FtrProviderConte
 
     public async clickCancelButton() {
       log.debug('clickCancelButton');
-      await this.retry.try(async () => {
+      await retry.try(async () => {
         await testSubjects.click('cancelCustomizePanelButton');
         await testSubjects.waitForDeleted('cancelCustomizePanelButton');
       });
