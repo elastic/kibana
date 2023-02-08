@@ -20,6 +20,7 @@ export class PieChartService extends FtrService {
   private readonly testSubjects = this.ctx.getService('testSubjects');
   private readonly find = this.ctx.getService('find');
   private readonly panelActions = this.ctx.getService('dashboardPanelActions');
+  private readonly elasticChart = this.ctx.getService('elasticChart');
   private readonly defaultFindTimeout = this.config.get('timeouts.find');
   private readonly visChart = this.ctx.getPageObject('visChart');
 
@@ -214,18 +215,9 @@ export class PieChartService extends FtrService {
     this.log.debug(`Found ${charts.length} charts`);
     for (const chart of charts) {
       await chart.moveMouseTo();
-      const visContainer = await chart.findByCssSelector('.echChartStatus');
-      const debugDataString: string | undefined = await visContainer.getAttribute(
-        'data-ech-debug-state'
-      );
-      this.log.debug('data-ech-debug-state: ', debugDataString);
-      if (debugDataString) {
-        const parsedData = JSON.parse(debugDataString);
-        const partition = parsedData?.partition?.[0] ?? [];
-        pieSlices += partition.partitions.length;
-      } else {
-        throw new Error(`Unable to find '.echChartStatus' attribute 'data-ech-debug-state'`);
-      }
+      const pieChartData = await this.elasticChart.getChartDebugDataFromChart(chart);
+      const partition = pieChartData?.partition?.[0] ?? [];
+      pieSlices += partition.partitions.length;
     }
     return pieSlices;
   }

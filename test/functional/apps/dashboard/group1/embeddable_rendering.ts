@@ -27,6 +27,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const security = getService('security');
   const dashboardExpect = getService('dashboardExpect');
   const dashboardAddPanel = getService('dashboardAddPanel');
+  const queryBar = getService('queryBar');
   const PageObjects = getPageObjects([
     'common',
     'dashboard',
@@ -181,6 +182,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await elasticChart.setNewChartUiDebugFlag(true);
 
       await PageObjects.header.waitUntilLoadingHasFinished();
+      await PageObjects.dashboard.waitForRenderComplete();
+
+      // call query refresh to guarantee all panels are rendered after window._echDebugStateFlag is set
+      await queryBar.clickQuerySubmitButton();
       await PageObjects.dashboard.waitForRenderComplete();
       await expectAllDataRenders();
     });
