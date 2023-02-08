@@ -146,7 +146,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
           }
         ),
         order: 5,
-        value: '',
+        value: 'true',
       },
       ssl_ca: {
         label: i18n.translate(
