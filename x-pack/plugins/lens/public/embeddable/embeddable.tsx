@@ -197,13 +197,7 @@ export interface ViewUnderlyingDataArgs {
   columns: string[];
 }
 
-export function VisualizationErrorPanel({
-  errors,
-  canEdit,
-}: {
-  errors: UserMessage[];
-  canEdit: boolean;
-}) {
+function VisualizationErrorPanel({ errors, canEdit }: { errors: UserMessage[]; canEdit: boolean }) {
   const showMore = errors.length > 1;
   const canFixInLens = canEdit && errors.some(({ fixableInEditor }) => fixableInEditor);
   return (
