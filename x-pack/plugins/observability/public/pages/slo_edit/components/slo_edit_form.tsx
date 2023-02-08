@@ -25,7 +25,7 @@ import type { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import { useKibana } from '../../../utils/kibana_react';
 import { useCreateOrUpdateSlo } from '../../../hooks/slo/use_create_slo';
 import { useCheckFormPartialValidities } from '../helpers/use_check_form_partial_validities';
-import { SloEditFormDefinitionCustomKql } from './slo_edit_form_definition_custom_kql';
+import { CustomKqlIndicatorTypeForm } from './custom_kql/custom_kql_indicator_type_form';
 import { SloEditFormDescription } from './slo_edit_form_description';
 import { SloEditFormObjectives } from './slo_edit_form_objectives';
 import {
@@ -35,6 +35,7 @@ import {
 } from '../helpers/process_slo_form_values';
 import { paths } from '../../../config';
 import { SLI_OPTIONS, SLO_EDIT_FORM_DEFAULT_VALUES } from '../constants';
+import { ApmLatencyIndicatorTypeForm } from './apm_latency/apm_latency_indicator_type_form';
 
 export interface Props {
   slo: SLOWithSummaryResponse | undefined;
@@ -99,6 +100,17 @@ export function SloEditForm({ slo }: Props) {
     }
   }, [success, error, toasts, isEditMode, getValues, navigateToUrl, basePath]);
 
+  const getIndicatorTypeForm = () => {
+    switch (watch('indicator.type')) {
+      case 'sli.kql.custom':
+        return <CustomKqlIndicatorTypeForm control={control} watch={watch} />;
+      case 'sli.apm.transactionDuration':
+        return <ApmLatencyIndicatorTypeForm control={control} watch={watch} />;
+      default:
+        return null;
+    }
+  };
+
   return (
     <EuiTimeline data-test-subj="sloForm">
       <EuiTimelineItem
@@ -143,9 +155,7 @@ export function SloEditForm({ slo }: Props) {
 
           <EuiSpacer size="xxl" />
 
-          {watch('indicator.type') === 'sli.kql.custom' ? (
-            <SloEditFormDefinitionCustomKql control={control} watch={watch} />
-          ) : null}
+          {getIndicatorTypeForm()}
 
           <EuiSpacer size="m" />
         </EuiPanel>

@@ -9,12 +9,9 @@ import React from 'react';
 import { ComponentStory } from '@storybook/react';
 import { FormProvider, useForm } from 'react-hook-form';
 
-import { KibanaReactStorybookDecorator } from '../../../utils/kibana_react.storybook_decorator';
-import {
-  SloEditFormDefinitionCustomKql as Component,
-  Props,
-} from './slo_edit_form_definition_custom_kql';
-import { SLO_EDIT_FORM_DEFAULT_VALUES } from '../constants';
+import { KibanaReactStorybookDecorator } from '../../../../utils/kibana_react.storybook_decorator';
+import { CustomKqlIndicatorTypeForm as Component, Props } from './custom_kql_indicator_type_form';
+import { SLO_EDIT_FORM_DEFAULT_VALUES } from '../../constants';
 
 export default {
   component: Component,

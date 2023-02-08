@@ -11,15 +11,15 @@ import { i18n } from '@kbn/i18n';
 import { Control, UseFormWatch } from 'react-hook-form';
 import type { CreateSLOInput } from '@kbn/slo-schema';
 
-import { IndexSelection } from './custom_kql/index_selection';
-import { QueryBuilder } from './custom_kql/query_builder';
+import { IndexSelection } from './index_selection';
+import { QueryBuilder } from './query_builder';
 
 export interface Props {
   control: Control<CreateSLOInput>;
   watch: UseFormWatch<CreateSLOInput>;
 }
 
-export function SloEditFormDefinitionCustomKql({ control, watch }: Props) {
+export function CustomKqlIndicatorTypeForm({ control, watch }: Props) {
   return (
     <EuiFlexGroup direction="column" gutterSize="l">
       <EuiFlexItem>
