@@ -83,6 +83,7 @@ describe('syncMvtSourceData', () => {
       tileUrl: 'https://example.com/{x}/{y}/{z}.pbf',
       refreshToken: '12345',
       hasLabels: false,
+      buffer: 5,
     });
   });
 
