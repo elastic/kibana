@@ -48,15 +48,18 @@ const SlackActionFields: React.FunctionComponent<ActionConnectorFieldsProps> = (
   return (
     <>
       <EuiSpacer size="xs" />
-      <EuiButtonGroup
-        isFullWidth
-        buttonSize="m"
-        color="primary"
-        legend={i18n.SLACK_LEGEND}
-        options={slackTypeButtons}
-        idSelected={selectedSlackType}
-        onChange={onChange}
-      />
+      {!isEdit && (
+        <EuiButtonGroup
+          isFullWidth
+          buttonSize="m"
+          color="primary"
+          legend={i18n.SLACK_LEGEND}
+          options={slackTypeButtons}
+          idSelected={selectedSlackType}
+          onChange={onChange}
+          data-test-subj="slackTypeChangeButton"
+        />
+      )}
       <HiddenField path={'config.type'} config={{ defaultValue: defaultSlackType }} />
       <EuiSpacer size="m" />
       {selectedSlackType === 'webhook' ? (

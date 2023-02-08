@@ -60,8 +60,30 @@ describe('SlackActionFields renders', () => {
       </ConnectorFormTestProvider>
     );
 
+    expect(screen.getByTestId('slackTypeChangeButton')).toBeInTheDocument();
     expect(screen.getByTestId('secrets.token-input')).toBeInTheDocument();
     expect(screen.getByTestId('secrets.token-input')).toHaveValue('some token');
+  });
+
+  it('should not show slack type tabs when in editing mode', async () => {
+    const actionConnector = {
+      secrets: {
+        token: 'some token',
+      },
+      id: 'test',
+      actionTypeId: '.slack',
+      name: 'slack',
+      config: {},
+      isDeprecated: false,
+    };
+
+    render(
+      <ConnectorFormTestProvider connector={actionConnector} onSubmit={onSubmit}>
+        <SlackActionFields readOnly={false} isEdit={true} registerPreSubmitValidator={() => {}} />
+      </ConnectorFormTestProvider>
+    );
+
+    expect(screen.queryByTestId('slackTypeChangeButton')).not.toBeInTheDocument();
   });
 
   it('connector validation succeeds when connector config is valid for Web API type', async () => {
