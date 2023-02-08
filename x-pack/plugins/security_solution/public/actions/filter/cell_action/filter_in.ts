@@ -30,9 +30,9 @@ export const createFilterInAction = ({
   } = KibanaServices.get();
   const getTimelineById = timelineSelectors.getTimelineByIdSelector();
 
-  const createFilterIn = createFilterInActionFactory({ filterManager });
+  const filterInActionFactory = createFilterInActionFactory({ filterManager });
 
-  return createFilterIn<SecurityCellAction>({
+  return filterInActionFactory<SecurityCellAction>({
     id: ID,
     order,
     isCompatible: async ({ field }) => fieldHasCellActions(field.name),

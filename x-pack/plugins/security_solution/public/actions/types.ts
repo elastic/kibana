@@ -9,7 +9,13 @@ import type { CellAction, CellActionExecutionContext } from '@kbn/cell-actions';
 
 export interface SecurityCellActionExecutionContext extends CellActionExecutionContext {
   metadata?: {
-    scopeId?: string; // needed in dataTables (events/alerts tables) and Timeline
+    /**
+     * `metadata.scopeId` is used by some actions (e.g. filterIn/Out) to discriminate the Timeline
+     * and the DataTables (alerts, events, rules preview..) actions execution.
+     * It is required when cellActions are attached inside the Timeline or dataTable scope,
+     * it can be omitted in otherwise.
+     */
+    scopeId?: string;
   };
 }
 

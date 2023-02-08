@@ -8,14 +8,12 @@
 
 import { CellAction } from '../types';
 
-type Extend<C extends CellAction> = Partial<C> & {
-  id: string; // id is required
-};
+type ActionFactory = <C extends CellAction = CellAction>(extend: Partial<C>) => C;
 
 export const createActionFactory = <P>(actionCreator: (params: P) => CellAction) => {
-  return (params: P) => {
+  return (params: P): ActionFactory => {
     const action = actionCreator(params);
-    return <C extends CellAction>(extend: Extend<C>) => {
+    return <C extends CellAction = CellAction>(extend: Partial<C>) => {
       const { isCompatible: extendedIsCompatible, execute: extendedExecute, ...rest } = extend;
 
       let isCompatible = action.isCompatible;
@@ -24,9 +22,8 @@ export const createActionFactory = <P>(actionCreator: (params: P) => CellAction)
         if (extendedExecute) {
           isCompatible = extendedIsCompatible;
         } else {
-          // if isCompatible is extended but execute is not, we have to call the default isCompatible along with
-          // the extended (in can only be more restrictive), to make sure it won't break the default execute implementation
           isCompatible = async (context) => {
+            // call extended and default `isCompatible` to make sure the default `execute` will run properly
             return (await action.isCompatible(context)) && (await extendedIsCompatible(context));
           };
         }
@@ -35,7 +32,7 @@ export const createActionFactory = <P>(actionCreator: (params: P) => CellAction)
       const execute = extendedExecute ?? action.execute;
 
       return {
-        ...action,
+        ...(action as C),
         isCompatible,
         execute,
         ...rest,

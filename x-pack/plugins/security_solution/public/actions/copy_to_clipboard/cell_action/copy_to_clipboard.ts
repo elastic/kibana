@@ -14,8 +14,8 @@ const ID = 'security_copyToClipboard';
 
 export const createCopyToClipboardAction = ({ order }: { order?: number }): SecurityCellAction => {
   const { notifications } = KibanaServices.get();
-  const createCopyToClipboard = createCopyToClipboardActionFactory({ notifications });
-  return createCopyToClipboard<SecurityCellAction>({
+  const copyToClipboardActionFactory = createCopyToClipboardActionFactory({ notifications });
+  return copyToClipboardActionFactory<SecurityCellAction>({
     id: ID,
     order,
     isCompatible: async ({ field }) => fieldHasCellActions(field.name),
