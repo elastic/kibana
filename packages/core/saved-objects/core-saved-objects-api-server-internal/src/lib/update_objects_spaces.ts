@@ -183,7 +183,7 @@ export async function updateObjectsSpaces({
       type,
       id,
       // @ts-expect-error MultiGetHit._source is optional
-      existingNamespaces: preflightResult?._source?.namespaces,
+      existingNamespaces: preflightResult?._source?.namespaces ?? [],
     };
   });
 
