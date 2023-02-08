@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { unzip as unzipSync } from 'zlib';
+import { unzip as unzipAsyncCallback } from 'zlib';
 import pRetry from 'p-retry';
 import type { APIReturnType } from '@kbn/apm-plugin/public/services/rest/create_call_apm_api';
 import type { ApmSourceMap } from '@kbn/apm-plugin/server/routes/source_maps/create_apm_source_map_index_template';
@@ -15,7 +15,7 @@ import { promisify } from 'util';
 import { GetResponse } from '@elastic/elasticsearch/lib/api/types';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 
-const unzip = promisify(unzipSync);
+const unzip = promisify(unzipAsyncCallback);
 
 const SAMPLE_SOURCEMAP = {
   version: 3,
