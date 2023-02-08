@@ -24,7 +24,7 @@ import { getColumnByAccessor } from '@kbn/visualizations-plugin/common/utils';
 import { extractContainerType, extractVisualizationType } from '@kbn/chart-expressions-common';
 import { VisTypePieDependencies } from '../plugin';
 import { PARTITION_VIS_RENDERER_NAME } from '../../common/constants';
-import { CellValueAction, GetCompatibleCellValueActions } from '../types';
+import { CellValueAction, MultiFilterEvent, GetCompatibleCellValueActions } from '../types';
 import { ChartTypes, PartitionVisParams, RenderValue } from '../../common/types';
 
 export const strings = {
@@ -110,6 +110,10 @@ export const getPartitionVisRenderer: (
       plugins.charts.palettes.getPalettes(),
     ]);
 
+    const onClickMultiValue = (data: MultiFilterEvent['data']) => {
+      handlers.event({ name: 'multiFilter', data });
+    };
+
     render(
       <I18nProvider>
         <KibanaThemeProvider theme$={core.theme.theme$}>
@@ -125,6 +129,7 @@ export const getPartitionVisRenderer: (
               interactive={handlers.isInteractive()}
               uiState={handlers.uiState as PersistedState}
               services={{ data: plugins.data, fieldFormats: plugins.fieldFormats }}
+              onClickMultiValue={onClickMultiValue}
               syncColors={syncColors}
               columnCellValueActions={columnCellValueActions}
             />

@@ -14,11 +14,14 @@ import {
   Partition,
   Position,
   Settings,
-  TooltipProps,
+  Tooltip,
   TooltipType,
   SeriesIdentifier,
   PartitionElementEvent,
+  TooltipValue,
 } from '@elastic/charts';
+import { i18n } from '@kbn/i18n';
+
 import { useEuiTheme } from '@elastic/eui';
 import type { PaletteRegistry } from '@kbn/coloring';
 import { LegendToggle, ChartsPluginSetup } from '@kbn/charts-plugin/public';
@@ -68,7 +71,7 @@ import {
 } from './partition_vis_component.styles';
 import { ChartTypes } from '../../common/types';
 import { filterOutConfig } from '../utils/filter_out_config';
-import { ColumnCellValueActions, FilterEvent, StartDeps } from '../types';
+import { ColumnCellValueActions, FilterEvent, StartDeps, MultiFilterEvent } from '../types';
 
 declare global {
   interface Window {
@@ -85,6 +88,7 @@ export interface PartitionVisComponentProps {
   uiState: PersistedState;
   fireEvent: IInterpreterRenderHandlers['event'];
   renderComplete: IInterpreterRenderHandlers['done'];
+  onClickMultiValue: (data: MultiFilterEvent['data']) => void;
   interactive: boolean;
   chartsThemeService: ChartsPluginSetup['theme'];
   palettesRegistry: PaletteRegistry;
@@ -360,10 +364,6 @@ const PartitionVisComponent = (props: PartitionVisComponentProps) => {
   );
 
   const fixedViewPort = document.getElementById('app-fixed-viewport');
-  const tooltip: TooltipProps = {
-    ...(fixedViewPort ? { boundary: fixedViewPort } : {}),
-    type: visParams.addTooltip ? TooltipType.Follow : TooltipType.None,
-  };
   const legendPosition = visParams.legendPosition ?? Position.Right;
 
   const splitChartColumnAccessor = splitColumn
@@ -391,6 +391,30 @@ const PartitionVisComponent = (props: PartitionVisComponentProps) => {
 
   const isEmpty = visData.rows.length === 0;
   const isMetricEmpty = visData.rows.every((row) => !row[metricColumn.id]);
+
+  const filterSelectedTooltipValues = (
+    tooltipSelectedValues: Array<TooltipValue<Record<string, string | number>, SeriesIdentifier>>
+  ) => {
+    // const layerIndexes: number[] = [];
+    // console.dir(tooltipSelectedValues);
+    // console.dir(visParams);
+    // console.dir(visData);
+    tooltipSelectedValues.forEach((v, idx) => {
+      visData.columns.forEach((column) => {
+        const value = v.label;
+        const row = visData.rows.findIndex((r) => r[column.id] === value);
+        if (row > -1) {
+          props.onClickMultiValue({
+            data: {
+              column: idx,
+              value: [value],
+              table: visData,
+            },
+          });
+        }
+      }, []);
+    });
+  };
 
   /**
    * Checks whether data have negative values.
@@ -446,6 +470,35 @@ const PartitionVisComponent = (props: PartitionVisComponentProps) => {
               />
             )}
             <Chart size="100%">
+              <Tooltip<Record<string, string | number>, SeriesIdentifier>
+                boundary={fixedViewPort ?? undefined}
+                actions={
+                  interactive
+                    ? [
+                        {
+                          disabled: (selected) => selected.length < 1,
+                          label: (selected) =>
+                            selected.length === 0
+                              ? i18n.translate(
+                                  'expressionPartitionVis.tooltipActions.emptyFilterSelection',
+                                  {
+                                    defaultMessage: 'Select at least one series to filter',
+                                  }
+                                )
+                              : i18n.translate(
+                                  'expressionPartitionVis.tooltipActions.filterValues',
+                                  {
+                                    defaultMessage: 'Filter {seriesNumber} series',
+                                    values: { seriesNumber: selected.length },
+                                  }
+                                ),
+                          onSelect: filterSelectedTooltipValues,
+                        },
+                      ]
+                    : undefined
+                }
+                type={visParams.addTooltip ? TooltipType.Follow : TooltipType.None}
+              />
               <ChartSplit
                 splitColumnAccessor={splitChartColumnAccessor}
                 splitRowAccessor={splitChartRowAccessor}
@@ -463,7 +516,6 @@ const PartitionVisComponent = (props: PartitionVisComponentProps) => {
                 legendMaxDepth={visParams.nestedLegend ? undefined : 1}
                 legendColorPicker={props.uiState ? LegendColorPickerWrapper : undefined}
                 flatLegend={flatLegend}
-                tooltip={tooltip}
                 showLegendExtra={visParams.showValuesInLegend}
                 onElementClick={([elementEvent]) => {
                   // this cast is safe because we are rendering a partition chart
