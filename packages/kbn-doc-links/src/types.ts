@@ -218,6 +218,7 @@ export interface DocLinks {
     readonly std_dev: string;
     readonly sum: string;
     readonly top_hits: string;
+    readonly change_point: string;
   };
   readonly runtimeFields: {
     readonly overview: string;
