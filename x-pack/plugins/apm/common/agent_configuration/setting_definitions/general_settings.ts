@@ -410,7 +410,7 @@ export const generalSettings: RawSettingDefinition[] = [
           'To disable stack trace collection for spans completely, set the value to `-1ms`.',
       }
     ),
-    includeAgents: ['java', 'nodejs', 'python'],
+    includeAgents: ['java', 'dotnet', 'nodejs', 'python'],
   },
 
   // STACK_TRACE_LIMIT
