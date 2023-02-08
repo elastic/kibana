@@ -47,6 +47,7 @@
     "apm"
   ],
   "requiredBundles": [
+    "alerting",
     "fleet",
     "kibanaReact",
     "kibanaUtils",
