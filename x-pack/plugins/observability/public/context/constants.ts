@@ -5,6 +5,9 @@
  * 2.0.
  */
 
-export interface SyntheticsHasZipUrlMonitorsResponse {
-  hasZipUrlMonitors: boolean;
-}
+export const ALERT_APP = 'alert';
+export const UX_APP = 'ux';
+export const SYNTHETICS_APP = 'synthetics';
+export const APM_APP = 'apm';
+export const INFRA_LOGS_APP = 'infra_logs';
+export const INFRA_METRICS_APP = 'infra_metrics';
