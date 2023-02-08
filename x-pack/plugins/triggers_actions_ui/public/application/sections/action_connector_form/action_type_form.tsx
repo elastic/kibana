@@ -497,11 +497,7 @@ export const ActionTypeForm = ({
                             {i18n.translate(
                               'xpack.triggersActionsUI.sections.actionTypeForm.actionWarningsTitle',
                               {
-                                defaultMessage:
-                                  '{warningsToShow} {warningsToShow, plural, one {warning} other {warnings}}',
-                                values: {
-                                  warningsToShow: 1,
-                                },
+                                defaultMessage: '1 warning',
                               }
                             )}
                           </EuiBadge>
