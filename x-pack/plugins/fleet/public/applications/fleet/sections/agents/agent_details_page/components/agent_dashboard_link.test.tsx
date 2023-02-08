@@ -9,12 +9,12 @@ import React from 'react';
 
 import { createFleetTestRendererMock } from '../../../../../../mock';
 import type { Agent, AgentPolicy } from '../../../../types';
-import { useGetPackageInfoByKey } from '../../../../../../hooks/use_request/epm';
+import { useGetPackageInfoByKeyQuery } from '../../../../../../hooks/use_request/epm';
 
 import { AgentDashboardLink } from './agent_dashboard_link';
 
-const mockedUseGetPackageInfoByKey = useGetPackageInfoByKey as jest.MockedFunction<
-  typeof useGetPackageInfoByKey
+const mockedUseGetPackageInfoByKeyQuery = useGetPackageInfoByKeyQuery as jest.MockedFunction<
+  typeof useGetPackageInfoByKeyQuery
 >;
 
 jest.mock('../../../../../../hooks/use_fleet_status', () => ({
@@ -27,14 +27,14 @@ jest.mock('../../../../../../hooks/use_request/epm');
 
 describe('AgentDashboardLink', () => {
   it('should enable the button if elastic_agent package is installed and policy has monitoring enabled', async () => {
-    mockedUseGetPackageInfoByKey.mockReturnValue({
+    mockedUseGetPackageInfoByKeyQuery.mockReturnValue({
       isLoading: false,
       data: {
         item: {
           status: 'installed',
         },
       },
-    } as ReturnType<typeof useGetPackageInfoByKey>);
+    } as ReturnType<typeof useGetPackageInfoByKeyQuery>);
     const testRenderer = createFleetTestRendererMock();
 
     const result = testRenderer.render(
@@ -57,14 +57,14 @@ describe('AgentDashboardLink', () => {
   });
 
   it('should not enable the button if elastic_agent package is not installed and policy has monitoring enabled', async () => {
-    mockedUseGetPackageInfoByKey.mockReturnValue({
+    mockedUseGetPackageInfoByKeyQuery.mockReturnValue({
       isLoading: false,
       data: {
         item: {
           status: 'not_installed',
         },
       },
-    } as ReturnType<typeof useGetPackageInfoByKey>);
+    } as ReturnType<typeof useGetPackageInfoByKeyQuery>);
     const testRenderer = createFleetTestRendererMock();
 
     const result = testRenderer.render(
@@ -88,14 +88,14 @@ describe('AgentDashboardLink', () => {
   });
 
   it('should link to the agent policy settings tab if logs and metrics are not enabled for that policy', async () => {
-    mockedUseGetPackageInfoByKey.mockReturnValue({
+    mockedUseGetPackageInfoByKeyQuery.mockReturnValue({
       isLoading: false,
       data: {
         item: {
           status: 'installed',
         },
       },
-    } as ReturnType<typeof useGetPackageInfoByKey>);
+    } as ReturnType<typeof useGetPackageInfoByKeyQuery>);
     const testRenderer = createFleetTestRendererMock();
 
     const result = testRenderer.render(

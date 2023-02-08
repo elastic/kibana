@@ -6,9 +6,10 @@
  */
 
 import { API_URLS } from '../../../../common/constants';
-import { SyntheticsHasZipUrlMonitorsResponse } from '../../../../common/types/zip_url_deprecation';
+import { SyntheticsHasIntegrationMonitorsResponse } from '../../../../common/types/integration_deprecation';
 import { apiService } from './utils';
 
-export const getHasZipUrlMonitors = async (): Promise<SyntheticsHasZipUrlMonitorsResponse> => {
-  return await apiService.get(API_URLS.SYNTHETICS_HAS_ZIP_URL_MONITORS);
-};
+export const getHasIntegrationMonitors =
+  async (): Promise<SyntheticsHasIntegrationMonitorsResponse> => {
+    return await apiService.get(API_URLS.SYNTHETICS_HAS_INTEGRATION_MONITORS);
+  };
