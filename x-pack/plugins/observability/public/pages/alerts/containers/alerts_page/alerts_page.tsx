@@ -12,8 +12,11 @@ import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { loadRuleAggregations } from '@kbn/triggers-actions-ui-plugin/public';
 import { AlertConsumers } from '@kbn/rule-data-utils';
-import { calculateTimeRangeBucketSizeFrom } from '../../../overview/containers/overview_page/helpers/calculate_bucket_size';
-import { DEFAULT_INTERVAL } from '../../../overview/containers/overview_page/constants';
+import { calculateTimeRangeBucketSize } from '../../../overview/containers/overview_page/helpers/calculate_bucket_size';
+import {
+  DEFAULT_DATE_FORMAT,
+  DEFAULT_INTERVAL,
+} from '../../../overview/containers/overview_page/constants';
 import { useToasts } from '../../../../hooks/use_toast';
 import {
   alertSearchBarStateContainer,
@@ -78,15 +81,18 @@ function InternalAlertsPage() {
   });
   const { hasAnyData, isAllRequestsComplete } = useHasData();
   const [esQuery, setEsQuery] = useState<{ bool: BoolQuery }>();
+  const timeBuckets = useTimeBuckets();
   const bucketSize = useMemo(
     () =>
-      calculateTimeRangeBucketSizeFrom({
-        from: alertSearchBarStateProps.rangeFrom,
-        to: alertSearchBarStateProps.rangeTo,
-      }),
-    [alertSearchBarStateProps.rangeFrom, alertSearchBarStateProps.rangeTo]
+      calculateTimeRangeBucketSize(
+        {
+          from: alertSearchBarStateProps.rangeFrom,
+          to: alertSearchBarStateProps.rangeTo,
+        },
+        timeBuckets
+      ),
+    [alertSearchBarStateProps.rangeFrom, alertSearchBarStateProps.rangeTo, timeBuckets]
   );
-  const timeBuckets = useTimeBuckets();
   const alertSummaryTimeRange = useMemo(
     () =>
       getAlertSummaryTimeRange(
@@ -95,9 +101,9 @@ function InternalAlertsPage() {
           to: alertSearchBarStateProps.rangeTo,
         },
         bucketSize?.intervalString || DEFAULT_INTERVAL,
-        timeBuckets
+        bucketSize?.dateFormat || DEFAULT_DATE_FORMAT
       ),
-    [alertSearchBarStateProps.rangeFrom, alertSearchBarStateProps.rangeTo, bucketSize, timeBuckets]
+    [alertSearchBarStateProps.rangeFrom, alertSearchBarStateProps.rangeTo, bucketSize]
   );
 
   useBreadcrumbs([

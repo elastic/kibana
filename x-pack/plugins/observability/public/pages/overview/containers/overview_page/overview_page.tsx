@@ -39,7 +39,12 @@ import { getNewsFeed } from '../../../../services/get_news_feed';
 import { buildEsQuery } from '../../../../utils/build_es_query';
 import { getAlertSummaryTimeRange } from '../../../../utils/alert_summary_widget';
 
-import { ALERTS_PER_PAGE, ALERTS_TABLE_ID, DEFAULT_INTERVAL } from './constants';
+import {
+  ALERTS_PER_PAGE,
+  ALERTS_TABLE_ID,
+  DEFAULT_DATE_FORMAT,
+  DEFAULT_INTERVAL,
+} from './constants';
 import { calculateBucketSize, useOverviewMetrics } from './helpers';
 
 export function OverviewPage() {
@@ -92,16 +97,16 @@ export function OverviewPage() {
     })
   );
 
+  const timeBuckets = useTimeBuckets();
   const bucketSize = useMemo(
     () =>
       calculateBucketSize({
         start: absoluteStart,
         end: absoluteEnd,
+        timeBuckets,
       }),
-    [absoluteStart, absoluteEnd]
+    [absoluteStart, absoluteEnd, timeBuckets]
   );
-
-  const timeBuckets = useTimeBuckets();
   const alertSummaryTimeRange = useMemo(
     () =>
       getAlertSummaryTimeRange(
@@ -110,9 +115,9 @@ export function OverviewPage() {
           to: relativeEnd,
         },
         bucketSize?.intervalString || DEFAULT_INTERVAL,
-        timeBuckets
+        bucketSize?.dateFormat || DEFAULT_DATE_FORMAT
       ),
-    [bucketSize, relativeEnd, relativeStart, timeBuckets]
+    [bucketSize, relativeEnd, relativeStart]
   );
 
   const chartThemes = {

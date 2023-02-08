@@ -5,23 +5,36 @@
  * 2.0.
  */
 
+import { TimeBuckets } from '@kbn/data-plugin/common';
 import { TimeRange } from '@kbn/es-query';
 import { getAbsoluteTime } from '../../../../../utils/date';
 import { DEFAULT_INTERVAL } from '../constants';
 import { Bucket, BucketSize } from '../types';
 import { getBucketSize } from '../../../../../utils/get_bucket_size';
 
-export function calculateBucketSize({ start, end }: Bucket): BucketSize {
+export function calculateBucketSize({ start, end, timeBuckets }: Bucket): BucketSize {
   if (start && end) {
-    return getBucketSize({ start, end, minInterval: DEFAULT_INTERVAL });
+    const { bucketSize, intervalString } = getBucketSize({
+      start,
+      end,
+      minInterval: DEFAULT_INTERVAL,
+    });
+    timeBuckets.setInterval(intervalString);
+
+    return {
+      bucketSize,
+      intervalString,
+      dateFormat: timeBuckets.getScaledDateFormat(),
+    };
   }
 }
 
-export function calculateTimeRangeBucketSizeFrom({ from, to }: TimeRange): BucketSize {
+export function calculateTimeRangeBucketSize(
+  { from, to }: TimeRange,
+  timeBuckets: TimeBuckets
+): BucketSize {
   const start = getAbsoluteTime(from);
   const end = getAbsoluteTime(to, { roundUp: true });
 
-  if (start && end) {
-    return getBucketSize({ start, end, minInterval: DEFAULT_INTERVAL });
-  }
+  return calculateBucketSize({ start, end, timeBuckets });
 }
