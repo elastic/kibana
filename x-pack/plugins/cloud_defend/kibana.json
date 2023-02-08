@@ -7,7 +7,7 @@
     "githubTeam": "sec-cloudnative-integrations"
   },
   "description": "Defend for Containers",
-  "server": false,
+  "server": true,
   "ui": true,
   "requiredPlugins": ["fleet", "kibanaReact"],
   "optionalPlugins": []

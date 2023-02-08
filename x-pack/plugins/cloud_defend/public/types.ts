@@ -7,6 +7,12 @@
 
 import type { FleetSetup, FleetStart } from '@kbn/fleet-plugin/public';
 import { NewPackagePolicy } from '@kbn/fleet-plugin/public';
+import type { ComponentType, ReactNode } from 'react';
+import type { CloudDefendPageId } from './common/navigation/types';
+
+/**
+ * cloud_defend plugin types
+ */
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface CloudDefendPluginSetup {}
@@ -20,6 +26,19 @@ export interface CloudDefendPluginStartDeps {
   fleet: FleetStart;
 }
 
+export interface CloudDefendSecuritySolutionContext {
+  /** Gets the `FiltersGlobal` component for embedding a filter bar in the security solution application. */
+  getFiltersGlobalComponent: () => ComponentType<{ children: ReactNode }>;
+  /** Gets the `SpyRoute` component for navigation highlighting and breadcrumbs. */
+  getSpyRouteComponent: () => ComponentType<{
+    pageName: CloudDefendPageId;
+    state?: Record<string, string | undefined>;
+  }>;
+}
+
+/**
+ * cloud_defend/control types
+ */
 export enum ControlResponseAction {
   alert = 'alert',
   block = 'block',

@@ -4,18 +4,29 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { lazy } from 'react';
-import { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
+import type { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
+import React, { lazy, Suspense } from 'react';
+import type { CloudDefendRouterProps } from './application/router';
 import {
   CloudDefendPluginSetup,
   CloudDefendPluginStart,
   CloudDefendPluginStartDeps,
 } from './types';
 import { INTEGRATION_PACKAGE_NAME } from '../common/constants';
+import { LoadingState } from './components/loading_state';
 
 const LazyEditPolicy = lazy(() => import('./components/fleet_extensions/policy_extension_edit'));
 const LazyCreatePolicy = lazy(
   () => import('./components/fleet_extensions/policy_extension_create')
+);
+
+const RouterLazy = lazy(() => import('./application/router'));
+const Router = (props: CloudDefendRouterProps) => (
+  <Suspense fallback={<LoadingState />}>
+    <RouterLazy {...props} />
+  </Suspense>
 );
 
 export class CloudDefendPlugin implements Plugin<CloudDefendPluginSetup, CloudDefendPluginStart> {
@@ -37,7 +48,16 @@ export class CloudDefendPlugin implements Plugin<CloudDefendPluginSetup, CloudDe
       Component: LazyEditPolicy,
     });
 
-    return {};
+    return {
+      getCloudDefendRouter: () => (props: CloudDefendRouterProps) =>
+        (
+          <KibanaContextProvider services={{ ...core, ...plugins }}>
+            <RedirectAppLinks coreStart={core}>
+              <Router {...props} />
+            </RedirectAppLinks>
+          </KibanaContextProvider>
+        ),
+    };
   }
 
   public stop() {}
