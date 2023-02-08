@@ -16,6 +16,7 @@
     "cloudSecurityPosture",
     "dashboard",
     "data",
+    "ecsDataQualityDashboard",
     "dataViews",
     "embeddable",
     "eventLog",
@@ -35,7 +36,8 @@
     "uiActions",
     "unifiedSearch",
     "files",
-    "controls"
+    "controls",
+    "dataViews"
   ],
   "optionalPlugins": [
     "cloudExperiments",

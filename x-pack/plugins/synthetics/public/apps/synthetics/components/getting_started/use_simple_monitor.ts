@@ -8,9 +8,9 @@
 import { useFetcher } from '@kbn/observability-plugin/public';
 import { useEffect } from 'react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { useSyntheticsRefreshContext } from '../../contexts';
-import { selectServiceLocationsState } from '../../state';
+import { cleanMonitorListState, selectServiceLocationsState } from '../../state';
 import { showSyncErrors } from '../monitors_page/management/show_sync_errors';
 import { fetchCreateMonitor } from '../../state';
 import { DEFAULT_FIELDS } from '../../../../../common/constants/monitor_defaults';
@@ -26,6 +26,8 @@ import { kibanaService } from '../../../../utils/kibana_service';
 export const useSimpleMonitor = ({ monitorData }: { monitorData?: SimpleFormData }) => {
   const { application } = useKibana().services;
   const { locations: serviceLocations } = useSelector(selectServiceLocationsState);
+
+  const dispatch = useDispatch();
 
   const { refreshApp } = useSyntheticsRefreshContext();
 
@@ -66,9 +68,10 @@ export const useSimpleMonitor = ({ monitorData }: { monitorData?: SimpleFormData
         toastLifeTimeMs: 3000,
       });
       refreshApp();
+      dispatch(cleanMonitorListState());
       application?.navigateToApp('synthetics', { path: 'monitors' });
     }
-  }, [application, data, loading, refreshApp, serviceLocations]);
+  }, [application, data, dispatch, loading, refreshApp, serviceLocations]);
 
   return { data: data as SyntheticsMonitorWithId, loading };
 };

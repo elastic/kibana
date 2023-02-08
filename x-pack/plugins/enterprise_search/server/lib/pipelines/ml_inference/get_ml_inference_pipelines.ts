@@ -26,9 +26,15 @@ export const getMlInferencePipelines = async (
   // Fetch all ML inference pipelines and trained models that are accessible in the current
   // Kibana space
   const [fetchedInferencePipelines, trainedModels] = await Promise.all([
-    esClient.ingest.getPipeline({
-      id: 'ml-inference-*',
-    }),
+    esClient.ingest
+      .getPipeline({
+        id: 'ml-inference-*',
+      })
+      .catch((e) => {
+        // handle no pipelines 404 error and return empty record
+        if (e?.meta?.statusCode === 404) return {};
+        throw e;
+      }),
     trainedModelsProvider.getTrainedModels({}),
   ]);
   const accessibleModelIds = Object.values(trainedModels.trained_model_configs).map(

@@ -53,9 +53,7 @@ export const LicenseModal: React.FunctionComponent<Props> = ({
   return (
     <EuiModal maxWidth={true} onClose={onClose}>
       <EuiModalHeader>
-        <EuiModalHeaderTitle>
-          <h1>{licenseName}</h1>
-        </EuiModalHeaderTitle>
+        <EuiModalHeaderTitle>{licenseName}</EuiModalHeaderTitle>
       </EuiModalHeader>
       <EuiModalBody>
         <EuiCodeBlock overflowHeight={360}>
