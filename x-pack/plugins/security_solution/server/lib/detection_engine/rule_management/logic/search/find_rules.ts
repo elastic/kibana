@@ -6,24 +6,25 @@
  */
 
 import type { FindResult, RulesClient } from '@kbn/alerting-plugin/server';
+import type { FindRulesSortFieldOrUndefined } from '../../../../../../common/detection_engine/rule_management';
 
 import type {
   FieldsOrUndefined,
   PageOrUndefined,
   PerPageOrUndefined,
   QueryFilterOrUndefined,
-  SortFieldOrUndefined,
   SortOrderOrUndefined,
 } from '../../../../../../common/detection_engine/schemas/common';
 
 import type { RuleParams } from '../../../rule_schema';
 import { enrichFilterWithRuleTypeMapping } from './enrich_filter_with_rule_type_mappings';
+import { transformSortField } from './transform_sort_field';
 
 export interface FindRuleOptions {
   rulesClient: RulesClient;
   filter: QueryFilterOrUndefined;
   fields: FieldsOrUndefined;
-  sortField: SortFieldOrUndefined;
+  sortField: FindRulesSortFieldOrUndefined;
   sortOrder: SortOrderOrUndefined;
   page: PageOrUndefined;
   perPage: PerPageOrUndefined;
@@ -45,7 +46,7 @@ export const findRules = ({
       perPage,
       filter: enrichFilterWithRuleTypeMapping(filter),
       sortOrder,
-      sortField,
+      sortField: transformSortField(sortField),
     },
   });
 };
