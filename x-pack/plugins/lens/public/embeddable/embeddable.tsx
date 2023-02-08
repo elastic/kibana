@@ -958,7 +958,12 @@ export class Embeddable
               noPadding={this.visDisplayOptions.noPadding}
             />
           </KibanaThemeProvider>
-          <MessagesBadge onMount={this.renderBadgeMessages} />
+          <MessagesBadge
+            onMount={(el) => {
+              this.badgeDomNode = el;
+              this.renderBadgeMessages();
+            }}
+          />
         </>,
         domNode
       );
@@ -983,22 +988,37 @@ export class Embeddable
               />
             </I18nProvider>
           </KibanaThemeProvider>
-          <MessagesBadge onMount={this.renderBadgeMessages} />
+          <MessagesBadge
+            onMount={(el) => {
+              this.badgeDomNode = el;
+              this.renderBadgeMessages();
+            }}
+          />
         </>,
         this.domNode
       );
     }
+
+    this.renderBadgeMessages();
   }
 
-  private renderBadgeMessages = (badgeDomNode: HTMLDivElement) => {
+  badgeDomNode?: HTMLDivElement;
+
+  /**
+   * This method is called on every render, and also whenever the badges dom node is created
+   * That happens after either the expression renderer or the visualization error panel is rendered.
+   *
+   * You should not call this method on its own. Use renderUserMessages instead.
+   */
+  private renderBadgeMessages = () => {
     const messages = this.getUserMessages('embeddableBadge');
 
-    if (messages.length) {
+    if (messages.length && this.badgeDomNode) {
       render(
         <KibanaThemeProvider theme$={this.deps.theme.theme$}>
           <EmbeddableMessagesPopover messages={messages} />
         </KibanaThemeProvider>,
-        badgeDomNode
+        this.badgeDomNode
       );
     }
   };
