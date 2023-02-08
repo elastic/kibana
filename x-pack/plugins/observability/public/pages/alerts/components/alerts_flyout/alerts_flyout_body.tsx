@@ -19,17 +19,18 @@ import {
   ALERT_DURATION,
   ALERT_EVALUATION_THRESHOLD,
   ALERT_EVALUATION_VALUE,
+  ALERT_FLAPPING,
   ALERT_RULE_CATEGORY,
   ALERT_RULE_UUID,
   ALERT_STATUS_ACTIVE,
   ALERT_STATUS_RECOVERED,
 } from '@kbn/rule-data-utils';
+import { AlertLifecycleStatusBadge } from '@kbn/alerts-ui-shared';
 import moment from 'moment-timezone';
 import { useKibana, useUiSetting } from '@kbn/kibana-react-plugin/public';
 import { RULE_DETAILS_PAGE_ID } from '../../../rule_details/constants';
 import { asDuration } from '../../../../../common/utils/formatters';
 import { translations, paths } from '../../../../config';
-import { AlertStatusIndicator } from '../../../../components/shared/alert_status_indicator';
 import { FlyoutProps } from './types';
 
 // eslint-disable-next-line import/no-default-export
@@ -47,8 +48,9 @@ export default function AlertsFlyoutBody({ alert, id: pageId }: FlyoutProps) {
     {
       title: translations.alertsFlyout.statusLabel,
       description: (
-        <AlertStatusIndicator
+        <AlertLifecycleStatusBadge
           alertStatus={alert.active ? ALERT_STATUS_ACTIVE : ALERT_STATUS_RECOVERED}
+          flapping={alert.fields[ALERT_FLAPPING]}
         />
       ),
     },
