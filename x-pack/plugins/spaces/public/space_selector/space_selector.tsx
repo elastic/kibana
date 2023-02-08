@@ -113,16 +113,16 @@ export class SpaceSelector extends Component<Props, State> {
             <KibanaSolutionAvatar name="Elastic" size="xl" />
             <EuiSpacer size="xxl" />
             <EuiTextColor color="subdued">
-            <h1
-              // plain `eui` class undos forced focus style on non-EUI components
-              className="eui spcSpaceSelector__pageHeader"
-              tabIndex={0}
-              ref={this.setHeaderRef}
-            >
-              <FormattedMessage
-                id="xpack.spaces.spaceSelector.selectSpacesTitle"
-                defaultMessage="Select your space"
-              />
+              <h1
+                // plain `eui` class undos forced focus style on non-EUI components
+                className="eui spcSpaceSelector__pageHeader"
+                tabIndex={0}
+                ref={this.setHeaderRef}
+              >
+                <FormattedMessage
+                  id="xpack.spaces.spaceSelector.selectSpacesTitle"
+                  defaultMessage="Select your space"
+                />
               </h1>
               <p>
                 <FormattedMessage
