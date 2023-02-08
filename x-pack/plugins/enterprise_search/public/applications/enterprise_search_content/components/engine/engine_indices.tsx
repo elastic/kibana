@@ -39,6 +39,7 @@ import { EnterpriseSearchEnginesPageTemplate } from '../layout/engines_page_temp
 
 import { AddIndicesFlyout } from './add_indices_flyout';
 import { EngineIndicesLogic } from './engine_indices_logic';
+import { EngineViewHeaderActions } from './engine_view_header_actions';
 
 export const EngineIndices: React.FC = () => {
   const { sendEnterpriseSearchTelemetry } = useActions(TelemetryLogic);
@@ -199,6 +200,9 @@ export const EngineIndices: React.FC = () => {
                   }
                 )}
               </EuiButton>
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <EngineViewHeaderActions />
             </EuiFlexItem>
           </EuiFlexGroup>,
         ],
