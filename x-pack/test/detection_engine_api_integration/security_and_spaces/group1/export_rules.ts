@@ -19,16 +19,15 @@ import {
   getSimpleRuleOutput,
   getWebHookAction,
   removeServerGeneratedProperties,
+  waitForEventLogExecuteComplete,
   waitForRuleSuccessOrStatus,
 } from '../../utils';
-import { waitForDelay } from '../../utils/wait_for_delay';
-
-const DYNAMIC_FIELDS_AVAILABILITY_TIMEOUT_MS = 300;
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
+  const es = getService('es');
   const log = getService('log');
 
   describe('export_rules', () => {
@@ -84,9 +83,7 @@ export default ({ getService }: FtrProviderContext): void => {
         const rule = await createRule(supertest, log, getSimpleRule(ruleId, true));
 
         await waitForRuleSuccessOrStatus(supertest, log, rule.id);
-
-        // Wait for execution_summary to be available
-        await waitForDelay(DYNAMIC_FIELDS_AVAILABILITY_TIMEOUT_MS);
+        await waitForEventLogExecuteComplete(es, log, rule.id);
 
         const { body } = await supertest
           .post(`${DETECTION_ENGINE_RULES_URL}/_export`)
@@ -111,9 +108,7 @@ export default ({ getService }: FtrProviderContext): void => {
         const rule = await createRule(supertest, log, getSimpleRule(ruleId, true));
 
         await waitForRuleSuccessOrStatus(supertest, log, rule.id);
-
-        // Wait for execution_summary to be available
-        await waitForDelay(DYNAMIC_FIELDS_AVAILABILITY_TIMEOUT_MS);
+        await waitForEventLogExecuteComplete(es, log, rule.id);
 
         const { body } = await supertest
           .post(`${DETECTION_ENGINE_RULES_URL}/_export`)
