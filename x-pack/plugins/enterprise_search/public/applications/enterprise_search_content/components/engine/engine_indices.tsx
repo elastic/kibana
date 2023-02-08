@@ -120,6 +120,13 @@ export const EngineIndices: React.FC = () => {
       name: i18n.translate('xpack.enterpriseSearch.content.engine.indices.docsCount.columnTitle', {
         defaultMessage: 'Docs count',
       }),
+      render: (count: number | null) =>
+        count === null
+          ? i18n.translate(
+              'xpack.enterpriseSearch.content.engine.indices.docsCount.notAvailableLabel',
+              { defaultMessage: 'N/A' }
+            )
+          : count,
       sortable: true,
       truncateText: true,
       width: '15%',
@@ -141,6 +148,7 @@ export const EngineIndices: React.FC = () => {
     {
       actions: [
         {
+          available: (index) => index.health !== 'unknown',
           'data-test-subj': 'engine-view-index-btn',
           description: i18n.translate(
             'xpack.enterpriseSearch.content.engine.indices.actions.viewIndex.title',
@@ -206,7 +214,7 @@ export const EngineIndices: React.FC = () => {
           <>
             <EuiCallOut
               color="warning"
-              iconType="help"
+              iconType="alert"
               title={i18n.translate(
                 'xpack.enterpriseSearch.content.engine.indices.unknownIndicesCallout.title',
                 { defaultMessage: 'Some of your indices are unavailable.' }
