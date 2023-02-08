@@ -40,7 +40,7 @@ import {
   SyntheticsRestApiRouteFactory,
   SyntheticsStreamingRouteFactory,
 } from '../legacy_uptime/routes';
-import { getHasIntegrationMonitorsRoute } from './fleet/get_has_zip_url_monitors';
+import { getHasIntegrationMonitorsRoute } from './fleet/get_has_integration_monitors';
 import { addSyntheticsParamsRoute } from './settings/add_param';
 import { enableDefaultAlertingRoute } from './default_alerts/enable_default_alert';
 import { getDefaultAlertingRoute } from './default_alerts/get_default_alert';
