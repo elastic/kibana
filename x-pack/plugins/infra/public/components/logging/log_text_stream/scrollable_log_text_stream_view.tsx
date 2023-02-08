@@ -95,12 +95,14 @@ export class ScrollableLogTextStreamView extends React.PureComponent<
         target: nextProps.target,
         targetId: getStreamItemId(getStreamItemBeforeTimeKey(nextProps.items, nextProps.target!)),
         items: nextItems,
+        isScrollLocked: false,
       };
     } else if (!hasItems) {
       return {
         target: null,
         targetId: null,
         items: [],
+        isScrollLocked: false,
       };
     } else if (
       hasItems &&
@@ -109,6 +111,7 @@ export class ScrollableLogTextStreamView extends React.PureComponent<
       return {
         ...prevState,
         items: nextItems,
+        isScrollLocked: false,
       };
     }
 
@@ -337,9 +340,9 @@ export class ScrollableLogTextStreamView extends React.PureComponent<
       pagesBelow: number;
       fromScroll: boolean;
     }) => {
-      if (fromScroll && this.props.isStreaming) {
+      if (fromScroll) {
         this.setState({
-          isScrollLocked: pagesBelow !== 0,
+          isScrollLocked: this.props.isStreaming ? pagesBelow > 0 : false,
         });
       }
       this.props.reportVisibleInterval({
