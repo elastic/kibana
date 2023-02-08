@@ -137,7 +137,7 @@ export function DiscoverLayout({
     config: uiSettings,
     dataView,
     dataViews,
-    setAppState: stateContainer.setAppState,
+    setAppState: stateContainer.appState.update,
     useNewFieldsApi,
     columns,
     sort,

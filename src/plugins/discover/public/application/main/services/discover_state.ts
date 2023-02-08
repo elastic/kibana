@@ -82,10 +82,6 @@ export interface DiscoverStateContainer {
     data: DataPublicPluginStart
   ) => () => void;
   /**
-   * Set app state to with a partial new app state
-   */
-  setAppState: (newState: Partial<AppState>) => void;
-  /**
    * Pause the auto refresh interval without pushing an entry to history
    */
   pauseAutoRefreshInterval: () => Promise<void>;
@@ -221,7 +217,6 @@ export function getDiscoverStateContainer({
     internalState: internalStateContainer,
     dataState: dataStateContainer,
     searchSessionManager,
-    setAppState: (newPartial: AppState) => appStateContainer.update(newPartial),
     pauseAutoRefreshInterval,
     initializeAndSync: () => appStateContainer.initAndSync(savedSearch),
     actions: {

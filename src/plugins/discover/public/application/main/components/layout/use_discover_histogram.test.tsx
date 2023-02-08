@@ -88,16 +88,19 @@ jest.mock('@kbn/unified-field-list-plugin/public', () => {
 function getStateContainer() {
   const stateContainer = getDiscoverStateMock({ isTimeBased: true });
 
-  stateContainer.setAppState({
+  stateContainer.appState.update({
     interval: 'auto',
     hideChart: false,
     breakdownField: 'extension',
   });
+  const appState = stateContainer.appState;
 
-  const wrappedStateContainer = Object.create(stateContainer);
-  wrappedStateContainer.setAppState = jest.fn((newState) => stateContainer.setAppState(newState));
+  stateContainer.appState = {
+    ...appState,
+    update: jest.fn((newState) => appState.update(newState)),
+  };
 
-  return wrappedStateContainer;
+  return stateContainer;
 }
 
 jest.mock('../../hooks/use_saved_search_messages', () => {
@@ -379,7 +382,7 @@ describe('useDiscoverHistogram', () => {
       });
       expect(inspectorAdapters.lensRequests).toBeDefined();
       expect(storage.set).toHaveBeenCalledWith(CHART_HIDDEN_KEY, false);
-      expect(stateContainer.setAppState).toHaveBeenCalledWith({ hideChart: false });
+      expect(stateContainer.appState.update).toHaveBeenCalledWith({ hideChart: false });
       act(() => {
         hook.result.current?.onChartHiddenChange(true);
         session$.next('321');
@@ -387,7 +390,7 @@ describe('useDiscoverHistogram', () => {
       hook.rerender();
       expect(inspectorAdapters.lensRequests).toBeUndefined();
       expect(storage.set).toHaveBeenCalledWith(CHART_HIDDEN_KEY, true);
-      expect(stateContainer.setAppState).toHaveBeenCalledWith({ hideChart: true });
+      expect(stateContainer.appState.update).toHaveBeenCalledWith({ hideChart: true });
     });
 
     it('should set lensRequests when onChartLoad is called', async () => {
@@ -425,7 +428,7 @@ describe('useDiscoverHistogram', () => {
         result.current?.onChartHiddenChange(true);
       });
       expect(storage.set).toHaveBeenCalledWith(CHART_HIDDEN_KEY, true);
-      expect(stateContainer.setAppState).toHaveBeenCalledWith({ hideChart: true });
+      expect(stateContainer.appState.update).toHaveBeenCalledWith({ hideChart: true });
     });
 
     it('should update interval when onTimeIntervalChange is called', async () => {
@@ -438,7 +441,7 @@ describe('useDiscoverHistogram', () => {
       act(() => {
         result.current?.onTimeIntervalChange('auto');
       });
-      expect(stateContainer.setAppState).toHaveBeenCalledWith({ interval: 'auto' });
+      expect(stateContainer.appState.update).toHaveBeenCalledWith({ interval: 'auto' });
     });
 
     it('should update breakdownField when onBreakdownFieldChange is called', async () => {
@@ -453,7 +456,7 @@ describe('useDiscoverHistogram', () => {
           dataViewWithTimefieldMock.getFieldByName('extension')
         );
       });
-      expect(stateContainer.setAppState).toHaveBeenCalledWith({ breakdownField: 'extension' });
+      expect(stateContainer.appState.update).toHaveBeenCalledWith({ breakdownField: 'extension' });
     });
 
     it('should update total hits when onTotalHitsChange is called', async () => {

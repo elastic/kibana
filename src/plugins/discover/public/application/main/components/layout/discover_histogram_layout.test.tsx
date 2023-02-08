@@ -42,12 +42,10 @@ import { DiscoverMainProvider } from '../../services/discover_state_provider';
 function getStateContainer() {
   const stateContainer = getDiscoverStateMock({ isTimeBased: true });
 
-  stateContainer.setAppState({
+  stateContainer.appState.update({
     interval: 'auto',
     hideChart: false,
   });
-
-  stateContainer.setAppState = jest.fn();
 
   return stateContainer;
 }

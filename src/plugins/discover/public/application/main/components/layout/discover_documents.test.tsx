@@ -12,7 +12,6 @@ import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { setHeaderActionMenuMounter } from '../../../../kibana_services';
 import { esHits } from '../../../../__mocks__/es_hits';
 import { savedSearchMock } from '../../../../__mocks__/saved_search';
-import { DiscoverStateContainer } from '../../services/discover_state';
 import { DataDocuments$ } from '../../services/discover_data_state_container';
 import { discoverServiceMock } from '../../../../__mocks__/services';
 import { FetchStatus } from '../../../types';
@@ -38,7 +37,7 @@ function mountComponent(fetchStatus: FetchStatus, hits: EsHitRecord[]) {
     result: hits.map((hit) => buildDataTableRecord(hit, dataViewMock)),
   }) as DataDocuments$;
   const stateContainer = getDiscoverStateMock({});
-  stateContainer.setAppState({ index: dataViewMock.id });
+  stateContainer.appState.update({ index: dataViewMock.id });
   stateContainer.dataState.data$.documents$ = documents$;
 
   const props = {
@@ -83,26 +82,20 @@ describe('Discover documents layout', () => {
   });
 
   test('should set rounded width to state on resize column', () => {
-    let state = {
+    const state = {
       grid: { columns: { timestamp: { width: 173 }, someField: { width: 197 } } },
     } as AppState;
-    const stateContainer = {
-      setAppState: (newState: Partial<AppState>) => {
-        state = { ...state, ...newState };
-      },
-      appState: {
-        getState: () => state,
-      },
-    } as unknown as DiscoverStateContainer;
+    const container = getDiscoverStateMock({});
+    container.appState.update(state);
 
     onResize(
       {
         columnId: 'someField',
         width: 205.5435345534,
       },
-      stateContainer
+      container
     );
 
-    expect(state.grid?.columns?.someField.width).toEqual(206);
+    expect(container.appState.getState().grid?.columns?.someField.width).toEqual(206);
   });
 });

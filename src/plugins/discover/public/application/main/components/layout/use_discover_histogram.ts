@@ -123,7 +123,7 @@ export const useDiscoverHistogram = ({
 
   const onTimeIntervalChange = useCallback(
     (newInterval: string) => {
-      stateContainer.setAppState({ interval: newInterval });
+      stateContainer.appState.update({ interval: newInterval });
     },
     [stateContainer]
   );
@@ -192,7 +192,7 @@ export const useDiscoverHistogram = ({
   const onChartHiddenChange = useCallback(
     (chartHidden: boolean) => {
       storage.set(CHART_HIDDEN_KEY, chartHidden);
-      stateContainer.setAppState({ hideChart: chartHidden });
+      stateContainer.appState.update({ hideChart: chartHidden });
     },
     [stateContainer, storage]
   );
@@ -229,7 +229,7 @@ export const useDiscoverHistogram = ({
 
   const onBreakdownFieldChange = useCallback(
     (newBreakdownField: DataViewField | undefined) => {
-      stateContainer.setAppState({ breakdownField: newBreakdownField?.name });
+      stateContainer.appState.update({ breakdownField: newBreakdownField?.name });
     },
     [stateContainer]
   );

@@ -11,7 +11,7 @@ import type { DataView, DataViewsContract } from '@kbn/data-views-plugin/public'
 
 import { Capabilities, IUiSettingsClient } from '@kbn/core/public';
 import { isEqual } from 'lodash';
-import { DiscoverStateContainer as DiscoverGetStateReturn } from '../application/main/services/discover_state';
+import { DiscoverAppStateContainer } from '../application/main/services/discover_app_state_container';
 import { GetStateReturn as ContextGetStateReturn } from '../application/context/services/context_state';
 import { getStateColumnActions } from '../components/doc_table/actions/columns';
 
@@ -21,7 +21,7 @@ interface UseColumnsProps {
   dataView: DataView;
   dataViews: DataViewsContract;
   useNewFieldsApi: boolean;
-  setAppState: DiscoverGetStateReturn['setAppState'] | ContextGetStateReturn['setAppState'];
+  setAppState: DiscoverAppStateContainer['update'] | ContextGetStateReturn['setAppState'];
   columns?: string[];
   sort?: string[][];
 }
