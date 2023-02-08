@@ -13,7 +13,6 @@ import {
   BulkCreateCommentRequest,
   CaseResponse,
   CaseStatuses,
-  CommentRequest,
   CommentType,
 } from '@kbn/cases-plugin/common/api';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
@@ -485,49 +484,59 @@ export default ({ getService }: FtrProviderContext): void => {
           await esArchiver.unload('x-pack/test/functional/es_archives/auditbeat/hosts');
         });
 
-        const bulkCreateCommentAndRefreshIndex = async ({
+        const bulkCreateAttachmentsAndRefreshIndex = async ({
           caseId,
-          alertId,
-          alertIndex,
+          alerts,
           expectedHttpCode = 200,
           auth = { user: superUser, space: null },
         }: {
           caseId: string;
-          alertId: string;
-          alertIndex: string;
+          alerts: Array<{ id: string; index: string }>;
           expectedHttpCode?: number;
           auth?: { user: User; space: string | null };
         }) => {
           await bulkCreateAttachments({
             supertest: supertestWithoutAuth,
             caseId,
-            params: [
-              {
-                alertId,
-                index: alertIndex,
-                rule: {
-                  id: 'id',
-                  name: 'name',
-                },
-                owner: 'securitySolutionFixture',
-                type: CommentType.alert,
+            params: alerts.map((alert) => ({
+              alertId: alert.id,
+              index: alert.index,
+              rule: {
+                id: 'id',
+                name: 'name',
               },
-            ],
+              owner: 'securitySolutionFixture',
+              type: CommentType.alert,
+            })),
             expectedHttpCode,
             auth,
           });
 
-          await es.indices.refresh({ index: alertIndex });
+          await es.indices.refresh({ index: alerts.map((alert) => alert.index) });
         };
 
-        const bulkCreateAlertsAndVerifyAlertStatus = async (
-          syncAlerts: boolean,
-          expectedAlertStatus: string
-        ) => {
-          const postedCase = await createCase(supertest, {
-            ...postCaseReq,
-            settings: { syncAlerts },
-          });
+        const bulkCreateAlertsAndVerifyAlertStatus = async ({
+          syncAlerts,
+          expectedAlertStatus,
+          caseAuth,
+          attachmentExpectedHttpCode,
+          attachmentAuth,
+        }: {
+          syncAlerts: boolean;
+          expectedAlertStatus: string;
+          caseAuth?: { user: User; space: string | null };
+          attachmentExpectedHttpCode?: number;
+          attachmentAuth?: { user: User; space: string | null };
+        }) => {
+          const postedCase = await createCase(
+            supertest,
+            {
+              ...postCaseReq,
+              settings: { syncAlerts },
+            },
+            200,
+            caseAuth
+          );
 
           await updateCase({
             supertest,
@@ -540,38 +549,33 @@ export default ({ getService }: FtrProviderContext): void => {
                 },
               ],
             },
+            auth: caseAuth,
           });
 
           const signals = await createSecuritySolutionAlerts(supertest, log);
 
-          const attachments: CommentRequest[] = [];
+          const alerts: Array<{ id: string; index: string }> = [];
           const indices: string[] = [];
           const ids: string[] = [];
 
           signals.hits.hits.forEach((alert) => {
             expect(alert._source?.[ALERT_WORKFLOW_STATUS]).eql('open');
-            attachments.push({
-              alertId: alert._id,
+
+            alerts.push({
+              id: alert._id,
               index: alert._index,
-              rule: {
-                id: 'id',
-                name: 'name',
-              },
-              owner: 'securitySolutionFixture',
-              type: CommentType.alert,
             });
 
             indices.push(alert._index);
             ids.push(alert._id);
           });
 
-          await bulkCreateAttachments({
-            supertest,
+          await bulkCreateAttachmentsAndRefreshIndex({
             caseId: postedCase.id,
-            params: attachments,
+            alerts,
+            auth: attachmentAuth,
+            expectedHttpCode: attachmentExpectedHttpCode,
           });
-
-          await es.indices.refresh({ index: indices });
 
           const updatedAlerts = await getSecuritySolutionAlerts(supertest, ids);
 
@@ -594,10 +598,9 @@ export default ({ getService }: FtrProviderContext): void => {
           const alert = signals.hits.hits[0];
 
           for (const theCase of cases) {
-            await bulkCreateCommentAndRefreshIndex({
+            await bulkCreateAttachmentsAndRefreshIndex({
               caseId: theCase.id,
-              alertId: alert._id,
-              alertIndex: alert._index,
+              alerts: [{ id: alert._id, index: alert._index }],
             });
           }
 
@@ -612,11 +615,42 @@ export default ({ getService }: FtrProviderContext): void => {
         };
 
         it('should change the status of the alerts if sync alert is on', async () => {
-          await bulkCreateAlertsAndVerifyAlertStatus(true, 'acknowledged');
+          await bulkCreateAlertsAndVerifyAlertStatus({
+            syncAlerts: true,
+            expectedAlertStatus: 'acknowledged',
+          });
         });
 
         it('should NOT change the status of the alert if sync alert is off', async () => {
-          await bulkCreateAlertsAndVerifyAlertStatus(false, 'open');
+          await bulkCreateAlertsAndVerifyAlertStatus({
+            syncAlerts: false,
+            expectedAlertStatus: 'open',
+          });
+        });
+
+        it('should change the status of the alert when the user has read access only', async () => {
+          await bulkCreateAlertsAndVerifyAlertStatus({
+            syncAlerts: true,
+            expectedAlertStatus: 'acknowledged',
+            caseAuth: {
+              user: superUser,
+              space: 'space1',
+            },
+            attachmentAuth: { user: secOnlyReadAlerts, space: 'space1' },
+          });
+        });
+
+        it('should NOT change the status of the alert when the user does NOT have access to the alert', async () => {
+          await bulkCreateAlertsAndVerifyAlertStatus({
+            syncAlerts: true,
+            expectedAlertStatus: 'open',
+            caseAuth: {
+              user: superUser,
+              space: 'space1',
+            },
+            attachmentExpectedHttpCode: 403,
+            attachmentAuth: { user: obsSec, space: 'space1' },
+          });
         });
 
         it('should add the case ID to the alert schema', async () => {
@@ -632,10 +666,9 @@ export default ({ getService }: FtrProviderContext): void => {
           const postedCase = cases[0];
           const alert = updatedAlert.hits.hits[0];
 
-          await bulkCreateCommentAndRefreshIndex({
+          await bulkCreateAttachmentsAndRefreshIndex({
             caseId: postedCase.id,
-            alertId: alert._id,
-            alertIndex: alert._index,
+            alerts: [{ id: alert._id, index: alert._index }],
           });
 
           const updatedAlertSecondTime = await getSecuritySolutionAlerts(supertest, [alert._id]);
@@ -653,10 +686,9 @@ export default ({ getService }: FtrProviderContext): void => {
             settings: { syncAlerts: false },
           });
 
-          await bulkCreateCommentAndRefreshIndex({
+          await bulkCreateAttachmentsAndRefreshIndex({
             caseId: postedCase.id,
-            alertId: alert._id,
-            alertIndex: alert._index,
+            alerts: [{ id: alert._id, index: alert._index }],
             expectedHttpCode: 400,
           });
         });
@@ -675,10 +707,9 @@ export default ({ getService }: FtrProviderContext): void => {
           const signals = await createSecuritySolutionAlerts(supertest, log);
           const alert = signals.hits.hits[0];
 
-          await bulkCreateCommentAndRefreshIndex({
+          await bulkCreateAttachmentsAndRefreshIndex({
             caseId: postedCase.id,
-            alertId: alert._id,
-            alertIndex: alert._index,
+            alerts: [{ id: alert._id, index: alert._index }],
             expectedHttpCode: 200,
             auth: { user: secOnlyReadAlerts, space: 'space1' },
           });
@@ -698,10 +729,9 @@ export default ({ getService }: FtrProviderContext): void => {
           const signals = await createSecuritySolutionAlerts(supertest, log);
           const alert = signals.hits.hits[0];
 
-          await bulkCreateCommentAndRefreshIndex({
+          await bulkCreateAttachmentsAndRefreshIndex({
             caseId: postedCase.id,
-            alertId: alert._id,
-            alertIndex: alert._index,
+            alerts: [{ id: alert._id, index: alert._index }],
             expectedHttpCode: 403,
             auth: { user: obsSec, space: 'space1' },
           });

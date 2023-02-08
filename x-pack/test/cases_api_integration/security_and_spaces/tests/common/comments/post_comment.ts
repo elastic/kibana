@@ -401,14 +401,28 @@ export default ({ getService }: FtrProviderContext): void => {
           await es.indices.refresh({ index: alertIndex });
         };
 
-        const bulkCreateAlertsAndVerifyAlertStatus = async (
-          syncAlerts: boolean,
-          expectedAlertStatus: string
-        ) => {
-          const postedCase = await createCase(supertest, {
-            ...postCaseReq,
-            settings: { syncAlerts },
-          });
+        const bulkCreateAlertsAndVerifyAlertStatus = async ({
+          syncAlerts,
+          expectedAlertStatus,
+          caseAuth,
+          attachmentExpectedHttpCode,
+          attachmentAuth,
+        }: {
+          syncAlerts: boolean;
+          expectedAlertStatus: string;
+          caseAuth?: { user: User; space: string | null };
+          attachmentExpectedHttpCode?: number;
+          attachmentAuth?: { user: User; space: string | null };
+        }) => {
+          const postedCase = await createCase(
+            supertest,
+            {
+              ...postCaseReq,
+              settings: { syncAlerts },
+            },
+            200,
+            caseAuth
+          );
 
           await updateCase({
             supertest,
@@ -421,6 +435,7 @@ export default ({ getService }: FtrProviderContext): void => {
                 },
               ],
             },
+            auth: caseAuth,
           });
 
           const signals = await createSecuritySolutionAlerts(supertest, log);
@@ -432,6 +447,8 @@ export default ({ getService }: FtrProviderContext): void => {
             caseId: postedCase.id,
             alertId: alert._id,
             alertIndex: alert._index,
+            expectedHttpCode: attachmentExpectedHttpCode,
+            auth: attachmentAuth,
           });
 
           const updatedAlert = await getSecuritySolutionAlerts(supertest, [alert._id]);
@@ -471,11 +488,42 @@ export default ({ getService }: FtrProviderContext): void => {
         };
 
         it('should change the status of the alert if sync alert is on', async () => {
-          await bulkCreateAlertsAndVerifyAlertStatus(true, 'acknowledged');
+          await bulkCreateAlertsAndVerifyAlertStatus({
+            syncAlerts: true,
+            expectedAlertStatus: 'acknowledged',
+          });
         });
 
         it('should NOT change the status of the alert if sync alert is off', async () => {
-          await bulkCreateAlertsAndVerifyAlertStatus(false, 'open');
+          await bulkCreateAlertsAndVerifyAlertStatus({
+            syncAlerts: false,
+            expectedAlertStatus: 'open',
+          });
+        });
+
+        it('should change the status of the alert when the user has read access only', async () => {
+          await bulkCreateAlertsAndVerifyAlertStatus({
+            syncAlerts: true,
+            expectedAlertStatus: 'acknowledged',
+            caseAuth: {
+              user: superUser,
+              space: 'space1',
+            },
+            attachmentAuth: { user: secOnlyReadAlerts, space: 'space1' },
+          });
+        });
+
+        it('should NOT change the status of the alert when the user does NOT have access to the alert', async () => {
+          await bulkCreateAlertsAndVerifyAlertStatus({
+            syncAlerts: true,
+            expectedAlertStatus: 'open',
+            caseAuth: {
+              user: superUser,
+              space: 'space1',
+            },
+            attachmentExpectedHttpCode: 403,
+            attachmentAuth: { user: obsSec, space: 'space1' },
+          });
         });
 
         it('should add the case ID to the alert schema', async () => {

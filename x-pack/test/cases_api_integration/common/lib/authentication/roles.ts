@@ -194,7 +194,12 @@ export const securitySolutionOnlyReadAlerts: Role = {
   name: 'sec_only_read_alerts',
   privileges: {
     elasticsearch: {
-      indices: [],
+      indices: [
+        {
+          names: ['*'],
+          privileges: ['all'],
+        },
+      ],
     },
     kibana: [
       {
