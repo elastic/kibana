@@ -153,7 +153,7 @@ function getMissingIndexPatternsErrors(
                   href={core.application.getUrlForApp('management', {
                     path: '/kibana/indexPatterns/create',
                   })}
-                  style={{ display: 'block' }}
+                  style={{ width: '100%', textAlign: 'center' }}
                   data-test-subj="configuration-failure-reconfigure-indexpatterns"
                 >
                   {i18n.translate('xpack.lens.editorFrame.dataViewReconfigure', {
