@@ -4,7 +4,15 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import {
+  EuiButtonIcon,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiSpacer,
+  EuiTitle,
+  EuiToolTip,
+} from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { TypeOf } from '@kbn/typed-react-router-config';
 import React from 'react';
 import { useAnyOfProfilingParams } from '../hooks/use_profiling_params';
@@ -54,15 +62,63 @@ export function PrimaryAndComparisonSearchBar() {
   }
 
   return (
-    <EuiFlexGroup direction="row" gutterSize="xs">
+    <EuiFlexGroup direction="row" gutterSize="xs" alignItems="flexEnd">
       <EuiFlexItem>
+        <EuiTitle size="xxs">
+          <h3>
+            {i18n.translate('xpack.profiling.comparisonSearch.baselineTitle', {
+              defaultMessage: 'Baseline flamegraph',
+            })}
+          </h3>
+        </EuiTitle>
+        <EuiSpacer size="s" />
         <PrimaryProfilingSearchBar showSubmitButton={false} />
       </EuiFlexItem>
+      <EuiFlexItem grow={false} style={{ padding: '0 8px' }}>
+        <EuiToolTip position="top" content="Swap sides">
+          <EuiButtonIcon
+            iconType="merge"
+            size="m"
+            onClick={() => {
+              const next = {
+                ...query,
+                rangeFrom: comparisonRangeFrom,
+                rangeTo: comparisonRangeTo,
+                kuery: comparisonKuery,
+                comparisonRangeFrom: query.rangeFrom,
+                comparisonRangeTo: query.rangeTo,
+                comparisonKuery: query.kuery,
+              };
+
+              if (routePath === '/flamegraphs/differential') {
+                profilingRouter.push(routePath, {
+                  path,
+                  query: next as TypeOf<ProfilingRoutes, '/flamegraphs/differential'>['query'],
+                });
+              } else {
+                profilingRouter.push(routePath, {
+                  path,
+                  query: next as TypeOf<ProfilingRoutes, '/functions/differential'>['query'],
+                });
+              }
+            }}
+          />
+        </EuiToolTip>
+      </EuiFlexItem>
       <EuiFlexItem>
+        <EuiTitle size="xxs">
+          <h3>
+            {i18n.translate('xpack.profiling.comparisonSearch.comparisonTitle', {
+              defaultMessage: 'Comparison flamegraph',
+            })}
+          </h3>
+        </EuiTitle>
+        <EuiSpacer size="s" />
         <ProfilingSearchBar
           kuery={comparisonKuery}
           rangeFrom={comparisonRangeFrom}
           rangeTo={comparisonRangeTo}
+          showSubmitButton={false}
           onQuerySubmit={(next) => {
             navigate({
               kuery: String(next.query?.query || ''),
