@@ -15041,6 +15041,10 @@
                 "path": "src/plugins/data_view_management/public/components/edit_index_pattern/edit_index_pattern.tsx"
               },
               {
+                "plugin": "dataViewManagement",
+                "path": "src/plugins/data_view_management/public/components/edit_index_pattern/edit_index_pattern.tsx"
+              },
+              {
                 "plugin": "dataViews",
                 "path": "src/plugins/data_views/common/data_views/data_view.test.ts"
               },
@@ -22634,6 +22638,10 @@
               {
                 "plugin": "dataViewManagement",
                 "path": "src/plugins/data_view_management/public/components/edit_index_pattern/source_filters_table/components/table/table.tsx"
+              },
+              {
+                "plugin": "dataViewManagement",
+                "path": "src/plugins/data_view_management/public/components/edit_index_pattern/edit_index_pattern.tsx"
               },
               {
                 "plugin": "dataViewManagement",

@@ -1994,7 +1994,7 @@
                 "section": "def-common.SanitizedRule",
                 "text": "SanitizedRule"
               },
-              "<never>, \"name\" | \"tags\" | \"id\" | \"enabled\" | \"actions\" | \"throttle\" | \"consumer\" | \"schedule\" | \"createdBy\" | \"updatedBy\" | \"createdAt\" | \"updatedAt\" | \"notifyWhen\"> & { producer: string; ruleTypeId: string; ruleTypeName: string; }"
+              "<never>, \"name\" | \"tags\" | \"id\" | \"enabled\" | \"actions\" | \"throttle\" | \"consumer\" | \"schedule\" | \"createdBy\" | \"updatedBy\" | \"createdAt\" | \"updatedAt\" | \"muteAll\" | \"notifyWhen\" | \"snoozeSchedule\"> & { producer: string; ruleTypeId: string; ruleTypeName: string; }"
             ],
             "path": "x-pack/plugins/alerting/server/types.ts",
             "deprecated": false,
@@ -6082,6 +6082,20 @@
           },
           {
             "parentPluginId": "alerting",
+            "id": "def-common.RuleLastRun.outcomeOrder",
+            "type": "number",
+            "tags": [],
+            "label": "outcomeOrder",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "x-pack/plugins/alerting/common/rule.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "alerting",
             "id": "def-common.RuleLastRun.warning",
             "type": "CompoundType",
             "tags": [],
@@ -7998,7 +8012,7 @@
             "section": "def-common.SanitizedRule",
             "text": "SanitizedRule"
           },
-          "<never>, \"name\" | \"tags\" | \"id\" | \"enabled\" | \"actions\" | \"throttle\" | \"consumer\" | \"schedule\" | \"createdBy\" | \"updatedBy\" | \"createdAt\" | \"updatedAt\" | \"notifyWhen\"> & { producer: string; ruleTypeId: string; ruleTypeName: string; }"
+          "<never>, \"name\" | \"tags\" | \"id\" | \"enabled\" | \"actions\" | \"throttle\" | \"consumer\" | \"schedule\" | \"createdBy\" | \"updatedBy\" | \"createdAt\" | \"updatedAt\" | \"muteAll\" | \"notifyWhen\" | \"snoozeSchedule\"> & { producer: string; ruleTypeId: string; ruleTypeName: string; }"
         ],
         "path": "x-pack/plugins/alerting/common/rule.ts",
         "deprecated": false,
@@ -8398,6 +8412,53 @@
         "path": "x-pack/plugins/alerting/common/rule.ts",
         "deprecated": false,
         "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "alerting",
+        "id": "def-common.RuleLastRunOutcomeOrderMap",
+        "type": "Object",
+        "tags": [],
+        "label": "RuleLastRunOutcomeOrderMap",
+        "description": [],
+        "path": "x-pack/plugins/alerting/common/rule.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "alerting",
+            "id": "def-common.RuleLastRunOutcomeOrderMap.succeeded",
+            "type": "number",
+            "tags": [],
+            "label": "succeeded",
+            "description": [],
+            "path": "x-pack/plugins/alerting/common/rule.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "alerting",
+            "id": "def-common.RuleLastRunOutcomeOrderMap.warning",
+            "type": "number",
+            "tags": [],
+            "label": "warning",
+            "description": [],
+            "path": "x-pack/plugins/alerting/common/rule.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "alerting",
+            "id": "def-common.RuleLastRunOutcomeOrderMap.failed",
+            "type": "number",
+            "tags": [],
+            "label": "failed",
+            "description": [],
+            "path": "x-pack/plugins/alerting/common/rule.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
         "initialIsOpen": false
       },
       {

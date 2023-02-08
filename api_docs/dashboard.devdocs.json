@@ -876,7 +876,7 @@
                 "section": "def-common.PanelState",
                 "text": "PanelState"
               },
-              "<{ id: string; }>>, generateNewId?: boolean | undefined) => Promise<void>"
+              "<{ id: string; }>>, generateNewId?: boolean | undefined) => Promise<string>"
             ],
             "path": "src/plugins/dashboard/public/dashboard_container/embeddable/dashboard_container.tsx",
             "deprecated": false,
@@ -1094,7 +1094,7 @@
                 "section": "def-public.DashboardContainer",
                 "text": "DashboardContainer"
               },
-              ", type: string, explicitInput: Partial<EEI>, embeddableId?: string | undefined) => Promise<void | ",
+              ", type: string, explicitInput: Partial<EEI>, embeddableId?: string | undefined) => Promise<string | ",
               {
                 "pluginId": "embeddable",
                 "scope": "public",
