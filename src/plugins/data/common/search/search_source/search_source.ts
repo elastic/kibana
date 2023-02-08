@@ -59,17 +59,7 @@
  */
 
 import { setWith } from '@kbn/safer-lodash-set';
-import {
-  difference,
-  isEqual,
-  isFunction,
-  isObject,
-  keyBy,
-  pick,
-  uniqueId,
-  uniqWith,
-  concat,
-} from 'lodash';
+import { difference, isEqual, isFunction, isObject, keyBy, pick, uniqueId, concat } from 'lodash';
 import {
   catchError,
   finalize,
@@ -879,28 +869,26 @@ export class SearchSource {
         // inject the format from the computed fields if one isn't given
         const docvaluesIndex = keyBy(filteredDocvalueFields, 'field');
         const bodyFields = this.getFieldsWithoutSourceFilters(index, body.fields);
-        body.fields = uniqWith(
-          bodyFields.concat(filteredDocvalueFields),
-          (fld1: SearchFieldValue, fld2: SearchFieldValue) => {
-            const field1Name = this.getFieldName(fld1);
-            const field2Name = this.getFieldName(fld2);
-            return field1Name === field2Name;
-          }
-        )
-          .filter((fld: SearchFieldValue) => {
-            return !metaFields.includes(this.getFieldName(fld));
-          })
-          .map((fld: SearchFieldValue) => {
-            const fieldName = this.getFieldName(fld);
+
+        const uniqueFields = new Set();
+        for (const field of bodyFields.concat(filteredDocvalueFields)) {
+          const fieldName = this.getFieldName(field);
+          if (!metaFields.includes(fieldName) && !uniqueFields.has(fieldName)) {
             if (Object.keys(docvaluesIndex).includes(fieldName)) {
               // either provide the field object from computed docvalues,
               // or merge the user-provided field with the one in docvalues
-              return typeof fld === 'string'
-                ? docvaluesIndex[fld]
-                : this.getFieldFromDocValueFieldsOrIndexPattern(docvaluesIndex, fld, index);
+              uniqueFields.add(
+                typeof fieldName === 'string'
+                  ? docvaluesIndex[fieldName]
+                  : this.getFieldFromDocValueFieldsOrIndexPattern(docvaluesIndex, fieldName, index)
+              );
+            } else {
+              uniqueFields.add(fieldName);
             }
-            return fld;
-          });
+          }
+        }
+
+        body.fields = [...uniqueFields];
       }
     } else {
       body.fields = filteredDocvalueFields;
