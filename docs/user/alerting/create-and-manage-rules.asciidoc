@@ -232,7 +232,7 @@ Mustache also supports "triple braces" of the form `{{{variable name}}}`, which 
 
 When the action frequency is **For each alert**, each rule type defines additional variables as properties of the variable `context`.  For example, if a rule type defines a variable `value`, it can be used in an action parameter as `{{context.value}}`.  
 
-For diagnostic or exploratory purposes, action variables whose values are objects, such as `context`, can be referenced directly as variables. The resulting value will be a JSON representation of the object. For example, if an action parameter includes `{{context}}`, it will expand to the JSON representation of all the variables and values provided by the rule type. To see alert-specific variables, use `{{.}} `.
+For diagnostic or exploratory purposes, action variables whose values are objects, such as `context`, can be referenced directly as variables. The resulting value will be a JSON representation of the object. For example, if an action parameter includes `{{context}}`, it will expand to the JSON representation of all the variables and values provided by the rule type. To see alert-specific variables, use `{{.}}`.
 
 For situations where your rule response returns arrays of data, you can loop through the `context`:
 
