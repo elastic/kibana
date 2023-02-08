@@ -41,7 +41,10 @@ interface AggregationParams {
   end: number;
   serviceGroup: ServiceGroup | null;
   randomSampler: RandomSampler;
-  documentType: ApmDocumentType;
+  documentType:
+    | ApmDocumentType.ServiceTransactionMetric
+    | ApmDocumentType.TransactionMetric
+    | ApmDocumentType.TransactionEvent;
   rollupInterval: RollupInterval;
 }
 

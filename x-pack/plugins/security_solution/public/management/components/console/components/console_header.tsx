@@ -44,7 +44,7 @@ export const ConsoleHeader = memo<ConsoleHeaderProps>(({ TitleComponent }) => {
       justifyContent="spaceBetween"
       responsive={false}
     >
-      <EuiFlexItem grow={1} className="eui-textTruncate">
+      <EuiFlexItem grow={1} className="eui-textTruncate noThemeOverrides">
         {TitleComponent ? <TitleComponent /> : ''}
       </EuiFlexItem>
       {!isHelpOpen && (
