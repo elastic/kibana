@@ -7,7 +7,7 @@
  */
 
 import { ContentType } from './content_type';
-import { ContentTypeDetails } from './types';
+import type { ContentTypeDetails } from './content_type_details';
 
 test('create a content type with just an id', () => {
   const type = new ContentType({ id: 'test' });

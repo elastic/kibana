@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import type { ContentTypeDetails } from './types';
+import type { ContentTypeDetails } from './content_type_details';
 import { ContentType } from './content_type';
 
-export class ContentRegistry {
+export class ContentTypeRegistry {
   private readonly types: Map<string, ContentType> = new Map();
 
   public register(details: ContentTypeDetails): ContentType {

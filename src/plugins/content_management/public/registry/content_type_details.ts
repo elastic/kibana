@@ -6,6 +6,8 @@
  * Side Public License, v 1.
  */
 
+import type { CrudClient } from '../crud_client';
+
 /**
  * Content type definition as it is registered in the content registry.
  */
@@ -36,6 +38,12 @@ export interface ContentTypeDetails {
    * Specifies item type. Defaults to 'other'.
    */
   kind?: ContentTypeKind;
+
+  /**
+   * CRUD client to use for this type.
+   * If not provided the default CRUD client is used assuming that this type has a server-side content registry
+   */
+  crud?: CrudClient;
 }
 
 /**

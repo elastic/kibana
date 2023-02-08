@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
-import { ContentRegistry } from './registry';
+import { ContentTypeRegistry } from './registry';
 
-let registry: ContentRegistry;
+let registry: ContentTypeRegistry;
 
 beforeEach(() => {
-  registry = new ContentRegistry();
+  registry = new ContentTypeRegistry();
 });
 
 test('registering a content type', () => {

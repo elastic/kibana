@@ -6,6 +6,9 @@
  * Side Public License, v 1.
  */
 
-export type { ContentTypeKind, ContentTypeDetails } from './content_type_details';
-export { ContentType } from './content_type';
-export { ContentTypeRegistry } from './registry';
+import type { GetIn, CreateIn } from '../../common';
+
+export interface CrudClient {
+  get<I extends GetIn = GetIn, O = unknown>(input: I): Promise<O>;
+  create<I extends CreateIn = CreateIn, O = unknown>(input: I): Promise<O>;
+}

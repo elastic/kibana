@@ -6,4 +6,5 @@
  * Side Public License, v 1.
  */
 
-export { RpcClient } from './rpc_client';
+export type { CrudClient } from './crud_client';
+export { DefaultCrudClient } from './default_crud_client';

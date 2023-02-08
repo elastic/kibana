@@ -6,7 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { ContentTypeDetails, ContentTypeKind } from './types';
+import { ContentTypeDetails, ContentTypeKind } from './content_type_details';
+import type { CrudClient } from '../crud_client';
 
 export class ContentType {
   constructor(public readonly details: ContentTypeDetails) {}
@@ -29,5 +30,9 @@ export class ContentType {
 
   icon(): string {
     return this.details.icon ?? 'questionInCircle';
+  }
+
+  crud(): CrudClient | undefined {
+    return this.details.crud;
   }
 }

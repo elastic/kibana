@@ -7,7 +7,7 @@
  */
 
 import type { ContentClient } from './content_client';
-import type { ContentRegistry } from './registry';
+import type { ContentTypeRegistry } from './registry';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface SetupDependencies {}
@@ -16,10 +16,10 @@ export interface SetupDependencies {}
 export interface StartDependencies {}
 
 export interface ContentManagementPublicSetup {
-  registry: Pick<ContentRegistry, 'register'>;
+  registry: Pick<ContentTypeRegistry, 'register'>;
 }
 
 export interface ContentManagementPublicStart {
   client: ContentClient;
-  registry: Pick<ContentRegistry, 'get' | 'getAll'>;
+  registry: Pick<ContentTypeRegistry, 'get' | 'getAll'>;
 }
