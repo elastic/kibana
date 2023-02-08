@@ -225,6 +225,8 @@ export const previewRulesRoute = async (
             ruleTypeName,
             updatedAt: new Date(),
             updatedBy: username ?? 'preview-updated-by',
+            muteAll: false,
+            snoozeSchedule: [],
           };
 
           let invocationStartTime;

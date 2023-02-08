@@ -239,7 +239,6 @@ export function DiscoverLayout({
           setExpandedDoc={setExpandedDoc}
           savedSearch={savedSearch}
           stateContainer={stateContainer}
-          isTimeBased={isTimeBased}
           columns={currentColumns}
           viewMode={viewMode}
           onAddFilter={onAddFilter as DocViewFilterFn}

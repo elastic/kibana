@@ -19,7 +19,10 @@
     "kibanaReact",
     "unifiedSearch",
     "dataViews",
-    "charts"
+    "charts",
+    "spaces",
+    "cloud",
+    "fleet"
   ],
   "optionalPlugins": [],
   "configPath": [
