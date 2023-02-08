@@ -1,5 +1,23 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`Reporting APIs CSV Generation from SearchSource _id field is a big integer, passes through the value without mutation (ES 7) 1`] = `
+"_id,_index,_score,_type,message_type,timestamp
+202209071000000604,test_elastic,-,_doc,OP,Jan 1, 2020 @ 11:00:00.000
+202209071000000605,test_elastic,-,_doc,OP,Jan 1, 2020 @ 11:00:00.000
+202209071000000606,test_elastic,-,_doc,OP,Jan 1, 2020 @ 11:00:00.000
+202209071000000607,test_elastic,-,_doc,OP,Jan 1, 2020 @ 11:00:00.000
+"
+`;
+
+exports[`Reporting APIs CSV Generation from SearchSource _id field is a big integer, passes through the value without mutation (ES 8) 1`] = `
+"_id,_index,_score,_type,message_type,timestamp
+202209071000000604,test_elastic,-,-,OP,Jan 1, 2020 @ 11:00:00.000
+202209071000000605,test_elastic,-,-,OP,Jan 1, 2020 @ 11:00:00.000
+202209071000000606,test_elastic,-,-,OP,Jan 1, 2020 @ 11:00:00.000
+202209071000000607,test_elastic,-,-,OP,Jan 1, 2020 @ 11:00:00.000
+"
+`;
+
 exports[`Reporting APIs CSV Generation from SearchSource Exports CSV with all fields when using defaults (ES 7) 1`] = `
 "_id,_index,_score,_type,category,category.keyword,currency,customer_first_name,customer_first_name.keyword,customer_full_name,customer_full_name.keyword,customer_gender,customer_id,customer_last_name,customer_last_name.keyword,customer_phone,day_of_week,day_of_week_i,email,geoip.city_name,geoip.continent_name,geoip.country_iso_code,geoip.location,geoip.region_name,manufacturer,manufacturer.keyword,order_date,order_id,products._id,products._id.keyword,products.base_price,products.base_unit_price,products.category,products.category.keyword,products.created_on,products.discount_amount,products.discount_percentage,products.manufacturer,products.manufacturer.keyword,products.min_price,products.price,products.product_id,products.product_name,products.product_name.keyword,products.quantity,products.sku,products.tax_amount,products.taxful_price,products.taxless_price,products.unit_discount_amount,sku,taxful_total_price,taxless_total_price,total_quantity,total_unique_products,type,user
 9AMtOW0BH63Xcmy432DJ,ecommerce,-,_doc,Men's Clothing,Men's Clothing,EUR,Boris,Boris,Boris Bradley,Boris Bradley,MALE,36,Bradley,Bradley,(empty),Wednesday,2,boris@bradley-family.zzz,-,Europe,GB,{
