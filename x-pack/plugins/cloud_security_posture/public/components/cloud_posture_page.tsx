@@ -14,7 +14,6 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiLink,
-  useEuiTheme,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { NoDataPage, NoDataPageProps } from '@kbn/kibana-react-plugin/public';
@@ -75,19 +74,14 @@ export const CspNoDataPage = ({
   actionDescription,
   testId,
 }: CspNoDataPageProps) => {
-  const { euiTheme } = useEuiTheme();
   return (
     <NoDataPage
       data-test-subj={testId}
       css={css`
-        div:nth-child(3) {
+        > :nth-child(3) {
           display: block;
           margin: auto;
           width: 450px;
-          button {
-            margin: 0 auto;
-            margin-top: ${euiTheme.size.base};
-          }
         }
       `}
       pageTitle={pageTitle}

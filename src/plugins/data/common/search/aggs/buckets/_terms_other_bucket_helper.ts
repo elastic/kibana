@@ -196,12 +196,11 @@ export const buildOtherBucketAgg = (
     key: string
   ) => {
     // make sure there are actually results for the buckets
-    if (aggregations[aggId]?.buckets.length < 1) {
+    const agg = aggregations[aggId];
+    if (!agg || !agg.buckets.length) {
       noAggBucketResults = true;
       return;
     }
-
-    const agg = aggregations[aggId];
     const newAggIndex = aggIndex + 1;
     const newAgg = bucketAggs[newAggIndex];
     const currentAgg = bucketAggs[aggIndex];
@@ -209,7 +208,7 @@ export const buildOtherBucketAgg = (
       exhaustiveBuckets = false;
     }
     if (aggIndex < index) {
-      each(agg.buckets, (bucket: any, bucketObjKey) => {
+      each(agg?.buckets, (bucket: any, bucketObjKey) => {
         const bucketKey = currentAgg.getKey(
           bucket,
           isNumber(bucketObjKey) ? undefined : bucketObjKey
