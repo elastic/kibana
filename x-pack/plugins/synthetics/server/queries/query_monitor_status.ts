@@ -4,23 +4,38 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import pMap from 'p-map';
+import times from 'lodash/times';
+import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { cloneDeep, intersection } from 'lodash';
-import { SearchRequest } from '@elastic/elasticsearch/lib/api/types';
 import { SUMMARY_FILTER } from '../../common/constants/client_defaults';
-import { UptimeEsClient } from '../legacy_uptime/lib/lib';
+import { createEsParams, UptimeEsClient } from '../legacy_uptime/lib/lib';
 import {
+  OverviewPendingStatusMetaData,
+  OverviewPing,
   OverviewStatus,
   OverviewStatusMetaData,
-  OverviewPendingStatusMetaData,
-  Ping,
 } from '../../common/runtime_types';
 
 const DEFAULT_MAX_ES_BUCKET_SIZE = 10000;
 
+const fields = [
+  '@timestamp',
+  'summary',
+  'monitor',
+  'observer',
+  'config_id',
+  'error',
+  'agent',
+  'url',
+  'state',
+];
+
 export async function queryMonitorStatus(
   esClient: UptimeEsClient,
   listOfLocations: string[],
-  range: { from: string | number; to: string },
+  range: { from: string; to: string },
   monitorQueryIds: string[],
   monitorLocationsMap: Record<string, string[]>,
   monitorQueryIdToConfigIdMap: Record<string, string>
@@ -36,105 +51,97 @@ export async function queryMonitorStatus(
 > {
   const idSize = Math.trunc(DEFAULT_MAX_ES_BUCKET_SIZE / listOfLocations.length || 1);
   const pageCount = Math.ceil(monitorQueryIds.length / idSize);
-  const promises: Array<Promise<any>> = [];
-  const monitorsWithoutData = new Map(Object.entries(cloneDeep(monitorLocationsMap)));
-  for (let i = 0; i < pageCount; i++) {
-    const params: SearchRequest = {
-      size: 0,
-      query: {
-        bool: {
-          filter: [
-            SUMMARY_FILTER,
-            {
-              range: {
-                '@timestamp': {
-                  // @ts-ignore
-                  gte: range.from,
-                  // @ts-expect-error can't mix number and string in client definition
-                  lte: range.to,
-                },
-              },
-            },
-            {
-              terms: {
-                'monitor.id': (monitorQueryIds as string[]).slice(i * idSize, i * idSize + idSize),
-              },
-            },
-            ...(listOfLocations.length > 0
-              ? [
-                  {
-                    terms: {
-                      'observer.geo.name': listOfLocations,
-                    },
-                  },
-                ]
-              : []),
-          ],
-        },
-      },
-      aggs: {
-        id: {
-          terms: {
-            field: 'monitor.id',
-            size: idSize,
-          },
-          aggs: {
-            location: {
-              terms: {
-                field: 'observer.geo.name',
-                size: listOfLocations.length || 100,
-              },
-              aggs: {
-                status: {
-                  top_hits: {
-                    size: 1,
-                    sort: [
-                      {
-                        '@timestamp': {
-                          order: 'desc',
-                        },
-                      },
-                    ],
-                    _source: {
-                      includes: [
-                        '@timestamp',
-                        'summary',
-                        'monitor',
-                        'observer',
-                        'config_id',
-                        'error',
-                        'agent',
-                        'url',
-                        'state',
-                      ],
-                    },
-                  },
-                },
-              },
-            },
-          },
-        },
-      },
-    };
-
-    promises.push(esClient.search({ body: params }, 'getCurrentStatusOverview' + i));
-  }
   let up = 0;
   let down = 0;
   let pending = 0;
   const upConfigs: Record<string, OverviewStatusMetaData> = {};
   const downConfigs: Record<string, OverviewStatusMetaData> = {};
+  const monitorsWithoutData = new Map(Object.entries(cloneDeep(monitorLocationsMap)));
   const pendingConfigs: Record<string, OverviewPendingStatusMetaData> = {};
 
-  for await (const response of promises) {
-    response.body.aggregations?.id.buckets.forEach(
-      ({ location, key: queryId }: { location: any; key: string }) => {
-        const locationSummaries = location.buckets.map(
-          ({ status, key: locationName }: { key: string; status: any }) => {
-            const ping = status.hits.hits[0]._source as Ping & { '@timestamp': string };
-            return { location: locationName, ping };
-          }
-        ) as Array<{ location: string; ping: Ping & { '@timestamp': string } }>;
+  await pMap(
+    times(pageCount),
+    async (i) => {
+      const idsToQuery = (monitorQueryIds as string[]).slice(i * idSize, i * idSize + idSize);
+      const params = createEsParams({
+        body: {
+          size: 0,
+          query: {
+            bool: {
+              filter: [
+                SUMMARY_FILTER,
+                {
+                  range: {
+                    '@timestamp': {
+                      gte: range.from,
+                      lte: range.to,
+                    },
+                  },
+                },
+                {
+                  terms: {
+                    'monitor.id': idsToQuery,
+                  },
+                },
+              ] as QueryDslQueryContainer[],
+            },
+          },
+          aggs: {
+            id: {
+              terms: {
+                field: 'monitor.id',
+                size: idSize,
+              },
+              aggs: {
+                location: {
+                  terms: {
+                    field: 'observer.geo.name',
+                    size: listOfLocations.length || 100,
+                  },
+                  aggs: {
+                    status: {
+                      top_hits: {
+                        size: 1,
+                        sort: [
+                          {
+                            '@timestamp': {
+                              order: 'desc',
+                            },
+                          },
+                        ],
+                        _source: {
+                          includes: fields,
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      });
+
+      if (listOfLocations.length > 0) {
+        params.body.query.bool.filter.push({
+          terms: {
+            'observer.geo.name': listOfLocations,
+          },
+        });
+      }
+
+      const { body: result } = await esClient.search<OverviewPing, typeof params>(
+        params,
+        'getCurrentStatusOverview' + i
+      );
+
+      pending += idsToQuery.length - (result.aggregations?.id.buckets.length ?? 0);
+
+      result.aggregations?.id.buckets.forEach(({ location, key: queryId }) => {
+        const locationSummaries = location.buckets.map(({ status, key: locationName }) => {
+          const ping = status.hits.hits[0]._source;
+          return { location: locationName, ping };
+        });
 
         // discard any locations that are not in the monitorLocationsMap for the given monitor as well as those which are
         // in monitorLocationsMap but not in listOfLocations
@@ -185,11 +192,12 @@ export async function queryMonitorStatus(
             pending += 1;
           }
         });
-      }
-    );
-  }
+      });
+    },
+    { concurrency: 5 }
+  );
 
-  // identify the remaining monitos without data, to determine pending monitors
+  // identify the remaining monitors without data, to determine pending monitors
   for (const [queryId, locs] of monitorsWithoutData) {
     locs.forEach((loc) => {
       pendingConfigs[`${monitorQueryIdToConfigIdMap[queryId]}-${loc}`] = {
