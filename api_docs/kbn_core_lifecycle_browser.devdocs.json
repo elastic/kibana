@@ -710,6 +710,10 @@
                 "path": "x-pack/plugins/ml/public/application/app.tsx"
               },
               {
+                "plugin": "ml",
+                "path": "x-pack/plugins/ml/public/application/app.tsx"
+              },
+              {
                 "plugin": "infra",
                 "path": "x-pack/plugins/infra/public/hooks/use_find_saved_object.tsx"
               },
