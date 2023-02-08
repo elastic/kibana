@@ -19,6 +19,7 @@ import {
 import { i18n } from '@kbn/i18n';
 
 import { HistoricalSummaryResponse, SLOWithSummaryResponse } from '@kbn/slo-schema';
+import { useCapabilities } from '../../../hooks/slo/use_capabilities';
 import { useKibana } from '../../../utils/kibana_react';
 import { useCreateOrUpdateSlo } from '../../../hooks/slo/use_create_slo';
 import { SloSummary } from './slo_summary';
@@ -53,6 +54,7 @@ export function SloListItem({
     application: { navigateToUrl },
     http: { basePath },
   } = useKibana().services;
+  const { hasWriteCapabilities } = useCapabilities();
 
   const { createSlo, loading: isCloning, success: isCloned } = useCreateOrUpdateSlo();
 
@@ -158,6 +160,7 @@ export function SloListItem({
                 <EuiContextMenuItem
                   key="edit"
                   icon="pencil"
+                  disabled={!hasWriteCapabilities}
                   onClick={handleEdit}
                   data-test-subj="sloActionsEdit"
                 >
@@ -167,6 +170,7 @@ export function SloListItem({
                 </EuiContextMenuItem>,
                 <EuiContextMenuItem
                   key="clone"
+                  disabled={!hasWriteCapabilities}
                   icon="copy"
                   onClick={handleClone}
                   data-test-subj="sloActionsClone"
@@ -178,6 +182,7 @@ export function SloListItem({
                 <EuiContextMenuItem
                   key="delete"
                   icon="trash"
+                  disabled={!hasWriteCapabilities}
                   onClick={handleDelete}
                   data-test-subj="sloActionsDelete"
                 >
