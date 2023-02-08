@@ -41,6 +41,7 @@ import { useCurrentEuiTheme } from '../../../common/hooks/use_current_eui_theme'
 import {
   DV_FROZEN_TIER_PREFERENCE,
   DV_RANDOM_SAMPLER_PREFERENCE,
+  DV_RANDOM_SAMPLER_P_VALUE,
   type DVKey,
   type DVStorageMapped,
 } from '../../types/storage';
@@ -147,6 +148,11 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
     DVStorageMapped<typeof DV_RANDOM_SAMPLER_PREFERENCE>
   >(DV_RANDOM_SAMPLER_PREFERENCE, RANDOM_SAMPLER_OPTION.ON_AUTOMATIC);
 
+  const [savedRandomSamplerProbability, saveRandomSamplerProbability] = useStorage<
+    DVKey,
+    DVStorageMapped<typeof DV_RANDOM_SAMPLER_P_VALUE>
+  >(DV_RANDOM_SAMPLER_P_VALUE, MIN_SAMPLER_PROBABILITY);
+
   const [frozenDataPreference, setFrozenDataPreference] = useStorage<
     DVKey,
     DVStorageMapped<typeof DV_FROZEN_TIER_PREFERENCE>
@@ -160,6 +166,7 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
     () =>
       getDefaultDataVisualizerListState({
         rndSamplerPref: savedRandomSamplerPreference,
+        probability: savedRandomSamplerProbability,
       }),
     // We just need to load the saved preference when the page is first loaded
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -322,20 +329,29 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
 
   const setSamplingProbability = useCallback(
     (value: number | null) => {
+      if (savedRandomSamplerPreference === RANDOM_SAMPLER_OPTION.ON_MANUAL && value !== null) {
+        saveRandomSamplerProbability(value);
+      }
       setDataVisualizerListState({ ...dataVisualizerListState, probability: value });
     },
-    [dataVisualizerListState, setDataVisualizerListState]
+    [
+      dataVisualizerListState,
+      saveRandomSamplerProbability,
+      savedRandomSamplerPreference,
+      setDataVisualizerListState,
+    ]
   );
 
   const setRandomSamplerPreference = useCallback(
     (nextPref: RandomSamplerOption) => {
       if (nextPref === RANDOM_SAMPLER_OPTION.ON_MANUAL) {
-        // By default, when switching to manual, default to 0.001%
-        setSamplingProbability(MIN_SAMPLER_PROBABILITY);
+        // By default, when switching to manual, restore previously chosen probability
+        // else, default to 0.001%
+        setSamplingProbability(savedRandomSamplerProbability ?? MIN_SAMPLER_PROBABILITY);
       }
       saveRandomSamplerPreference(nextPref);
     },
-    [setSamplingProbability, saveRandomSamplerPreference]
+    [savedRandomSamplerProbability, setSamplingProbability, saveRandomSamplerPreference]
   );
 
   useEffect(

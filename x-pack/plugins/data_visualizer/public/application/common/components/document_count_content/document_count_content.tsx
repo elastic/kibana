@@ -179,15 +179,9 @@ export const DocumentCountContent: FC<Props> = ({
                   data-test-subj="dvRandomSamplerOptionsSelect"
                   options={RANDOM_SAMPLER_SELECT_OPTIONS}
                   value={randomSamplerPreference}
-                  onChange={(e) => {
-                    if (
-                      e.target.value === RANDOM_SAMPLER_OPTION.ON_AUTOMATIC &&
-                      setSamplingProbability
-                    ) {
-                      setSamplingProbability(null);
-                    }
-                    setRandomSamplerPreference(e.target.value as RandomSamplerOption);
-                  }}
+                  onChange={(e) =>
+                    setRandomSamplerPreference(e.target.value as RandomSamplerOption)
+                  }
                 />
               </EuiFormRow>
 

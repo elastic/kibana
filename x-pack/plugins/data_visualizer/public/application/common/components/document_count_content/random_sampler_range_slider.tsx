@@ -75,9 +75,11 @@ export const RandomSamplerRangeSlider = ({
               if (value > 0 && value <= 1) {
                 setSamplingProbabilityInput(value / 100);
               } else {
-                setSamplingProbabilityInput(
-                  Math.floor(Math.floor(value) + (value > prevValue ? 1 : 0)) / 100
-                );
+                const nextVal = value > prevValue ? Math.ceil(value) : Math.floor(value);
+                // Because the incremental step is very small (0.0001),
+                // everytime user clicks the ^ in the numerical input
+                // we need to make sure it rounds up to the next whole number
+                setSamplingProbabilityInput(nextVal / 100);
               }
             }}
             step={RANDOM_SAMPLER_STEP}
