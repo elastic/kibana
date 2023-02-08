@@ -9,9 +9,9 @@
 import { HttpSetup } from '@kbn/core/public';
 import { API_ENDPOINT } from '../../common';
 import type { GetIn, CreateIn, ProcedureName } from '../../common';
-import type { CrudClient } from './crud_client';
+import type { CrudClient } from '../crud_client/crud_client';
 
-export class DefaultCrudClient implements CrudClient {
+export class RpcClient implements CrudClient {
   constructor(private http: { post: HttpSetup['post'] }) {}
 
   public get<I extends GetIn = GetIn, O = unknown>(input: I): Promise<O> {

@@ -34,10 +34,10 @@ export class ContentManagementPlugin
 
   public start(core: CoreStart, deps: StartDependencies) {
     // don't actually expose the client and the registry until it is used to avoid increasing bundle size
-    // const defaultCrudClient = new DefaultCrudClient(core.http);
+    // const rpcClient = new RpcClient(core.http);
     // const contentTypeRegistry = new ContentTypeRegistry();
     // const contentClient = new ContentClient(
-    //   (contentType) => contentTypeRegistry.get(contentType)?.crud() ?? defaultCrudClient
+    //   (contentType) => contentTypeRegistry.get(contentType)?.crud() ?? rpcClient
     // );
     // return { client: contentClient, registry: contentTypeRegistry };
     return { client: {} as ContentClient, registry: {} as ContentTypeRegistry };
