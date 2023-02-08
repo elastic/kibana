@@ -17,6 +17,8 @@ import {
   enableInspectEsQueries,
   apmAWSLambdaPriceFactor,
   apmAWSLambdaRequestCostPerMillion,
+  apmEnableServiceMetrics,
+  apmEnableContinuousRollups,
 } from '@kbn/observability-plugin/common';
 import { isEmpty } from 'lodash';
 import React from 'react';
@@ -32,6 +34,8 @@ const apmSettingsKeys = [
   apmLabsButton,
   apmAWSLambdaPriceFactor,
   apmAWSLambdaRequestCostPerMillion,
+  apmEnableServiceMetrics,
+  apmEnableContinuousRollups,
 ];
 
 export function GeneralSettings() {

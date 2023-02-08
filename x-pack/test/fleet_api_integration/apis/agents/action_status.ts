@@ -195,6 +195,7 @@ export default function (providerContext: FtrProviderContext) {
             status: 'IN_PROGRESS',
             creationTime: '2022-09-15T10:00:00.000Z',
             nbAgentsFailed: 0,
+            hasRolloutPeriod: false,
           },
           {
             actionId: 'action3',
@@ -207,6 +208,7 @@ export default function (providerContext: FtrProviderContext) {
             creationTime: '2022-09-15T10:00:00.000Z',
             nbAgentsFailed: 0,
             completionTime: '2022-09-15T12:00:00.000Z',
+            hasRolloutPeriod: false,
           },
           {
             actionId: 'action4',
@@ -218,6 +220,7 @@ export default function (providerContext: FtrProviderContext) {
             expiration: '2022-09-14T10:00:00.000Z',
             creationTime: '2022-09-15T10:00:00.000Z',
             nbAgentsFailed: 0,
+            hasRolloutPeriod: false,
           },
           {
             actionId: 'action5',
@@ -231,6 +234,7 @@ export default function (providerContext: FtrProviderContext) {
             creationTime: '2022-09-15T10:00:00.000Z',
             nbAgentsFailed: 0,
             cancellationTime: '2022-09-15T11:00:00.000Z',
+            hasRolloutPeriod: false,
           },
           {
             actionId: 'action7',
@@ -244,6 +248,7 @@ export default function (providerContext: FtrProviderContext) {
             creationTime: '2022-09-15T10:00:00.000Z',
             nbAgentsFailed: 1,
             completionTime: '2022-09-15T11:00:00.000Z',
+            hasRolloutPeriod: false,
           },
         ]);
       });
