@@ -36,6 +36,7 @@ export interface CellActionField {
    * Example: 'My-Laptop'
    */
   value: string | string[] | null | undefined;
+  negate?: boolean;
 }
 
 export enum CellActionsMode {

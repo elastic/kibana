@@ -32,7 +32,7 @@ export const createFilterInAction = ({ order }: { order?: number }): CellAction 
     const makeFilter = (currentVal: string | string[] | null | undefined) =>
       currentVal?.length === 0
         ? createFilter(field.name, null)
-        : createFilter(field.name, currentVal);
+        : createFilter(field.name, currentVal, field?.negate);
 
     if (filterManager != null) {
       filterManager.addFilters(makeFilter(field.value));
