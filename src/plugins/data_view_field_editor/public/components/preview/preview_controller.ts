@@ -11,7 +11,7 @@ import type { ISearchStart } from '@kbn/data-plugin/public';
 import { BehaviorSubject } from 'rxjs';
 import { PreviewState } from './types';
 import { BehaviorObservable } from '../../state_utils';
-import { EsDocument } from './types';
+import { EsDocument, ScriptErrorCodes } from './types';
 
 interface PreviewControllerDependencies {
   dataView: DataView;
@@ -30,6 +30,7 @@ const previewStateDefault: PreviewState = {
   documentSource: 'cluster',
   /** Keep track if the script painless syntax is being validated and if it is valid  */
   scriptEditorValidation: { isValidating: false, isValid: true, message: null },
+  previewResponse: { fields: [], error: null },
 };
 
 export class PreviewController {
@@ -105,5 +106,24 @@ export class PreviewController {
 
   setCustomId = (customId?: string) => {
     this.updateState({ customId });
+  };
+
+  setPreviewError = (error: PreviewState['previewResponse']['error']) => {
+    this.updateState({ previewResponse: { ...this.state.previewResponse, error } });
+  };
+
+  setPreviewResponse = (previewResponse: PreviewState['previewResponse']) => {
+    this.updateState({ previewResponse });
+  };
+
+  clearPreviewError = (errorCode: ScriptErrorCodes) => {
+    const { previewResponse: prev } = this.state;
+    const error = prev.error === null || prev.error?.code === errorCode ? null : prev.error;
+    this.updateState({
+      previewResponse: {
+        ...prev,
+        error,
+      },
+    });
   };
 }

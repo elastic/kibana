@@ -32,7 +32,6 @@ import type {
   Context,
   Params,
   EsDocument,
-  ScriptErrorCodes,
   FetchDocError,
   FieldPreview,
   PreviewState,
@@ -109,11 +108,6 @@ export const FieldPreviewProvider: FunctionComponent<{ controller: PreviewContro
 
   const fieldPreview$ = useRef(new BehaviorSubject<FieldPreview[] | undefined>(undefined));
 
-  /** Response from the Painless _execute API */
-  const [previewResponse, setPreviewResponse] = useState<{
-    fields: Context['fields'];
-    error: Context['error'];
-  }>({ fields: [], error: null });
   const [initialPreviewComplete, setInitialPreviewComplete] = useState(false);
 
   /** Possible error while fetching sample documents */
@@ -169,23 +163,6 @@ export const FieldPreviewProvider: FunctionComponent<{ controller: PreviewContro
     );
   }, [type, script, currentDocId]);
 
-  const setPreviewError = useCallback((error: Context['error']) => {
-    setPreviewResponse((prev) => ({
-      ...prev,
-      error,
-    }));
-  }, []);
-
-  const clearPreviewError = useCallback((errorCode: ScriptErrorCodes) => {
-    setPreviewResponse((prev) => {
-      const error = prev.error === null || prev.error?.code === errorCode ? null : prev.error;
-      return {
-        ...prev,
-        error,
-      };
-    });
-  }, []);
-
   const valueFormatter = useCallback(
     (value: unknown) => {
       if (format?.id) {
@@ -217,7 +194,7 @@ export const FieldPreviewProvider: FunctionComponent<{ controller: PreviewContro
 
       lastExecutePainlessRequestParams.current.documentId = undefined;
       setIsFetchingDocument(true);
-      setPreviewResponse({ fields: [], error: null });
+      controller.setPreviewResponse({ fields: [], error: null });
 
       const [response, searchError] = await search
         .search({
@@ -337,12 +314,12 @@ export const FieldPreviewProvider: FunctionComponent<{ controller: PreviewContro
       const [value] = values;
       const formattedValue = valueFormatter(value);
 
-      setPreviewResponse({
+      controller.setPreviewResponse({
         fields: [{ key: fieldName, value, formattedValue }],
         error: null,
       });
     },
-    [valueFormatter]
+    [valueFormatter, controller]
   );
 
   const updateCompositeFieldPreview = useCallback(
@@ -375,12 +352,12 @@ export const FieldPreviewProvider: FunctionComponent<{ controller: PreviewContro
         .sort((a, b) => a.key.localeCompare(b.key));
 
       fieldPreview$.current.next(fields);
-      setPreviewResponse({
+      controller.setPreviewResponse({
         fields,
         error: null,
       });
     },
-    [valueFormatter, parentName, name, fieldPreview$, fieldName$]
+    [valueFormatter, parentName, name, fieldPreview$, fieldName$, controller]
   );
 
   const updatePreview = useCallback(async () => {
@@ -437,7 +414,7 @@ export const FieldPreviewProvider: FunctionComponent<{ controller: PreviewContro
       const { values, error } = response.data;
 
       if (error) {
-        setPreviewResponse({
+        controller.setPreviewResponse({
           fields: [
             {
               key: name ?? '',
@@ -474,6 +451,7 @@ export const FieldPreviewProvider: FunctionComponent<{ controller: PreviewContro
     updateSingleFieldPreview,
     updateCompositeFieldPreview,
     currentDocIndex,
+    controller,
   ]);
 
   const reset = useCallback(() => {
@@ -482,7 +460,7 @@ export const FieldPreviewProvider: FunctionComponent<{ controller: PreviewContro
     previewCount.current = 0;
 
     controller.setDocuments([]);
-    setPreviewResponse({ fields: [], error: null });
+    controller.setPreviewResponse({ fields: [], error: null });
     setIsLoadingPreview(false);
     setIsFetchingDocument(false);
   }, [controller]);
@@ -490,8 +468,6 @@ export const FieldPreviewProvider: FunctionComponent<{ controller: PreviewContro
   const ctx = useMemo<Context>(
     () => ({
       controller,
-      fields: previewResponse.fields,
-      error: previewResponse.error,
       fieldPreview$: fieldPreview$.current,
       isPreviewAvailable,
       isLoadingPreview,
@@ -518,7 +494,6 @@ export const FieldPreviewProvider: FunctionComponent<{ controller: PreviewContro
     [
       controller,
       currentIdx,
-      previewResponse,
       fieldPreview$,
       fetchDocError,
       params,
@@ -580,74 +555,70 @@ export const FieldPreviewProvider: FunctionComponent<{ controller: PreviewContro
    * Whenever the name or the format changes we immediately update the preview
    */
   useEffect(() => {
-    setPreviewResponse((prev) => {
-      const { fields } = prev;
+    const { previewResponse: prev } = controller.state$.getValue();
+    const { fields } = prev;
 
-      let updatedFields: Context['fields'] = fields.map((field) => {
-        let key = name ?? '';
+    let updatedFields: PreviewState['previewResponse']['fields'] = fields.map((field) => {
+      let key = name ?? '';
 
-        if (type === 'composite') {
-          // restore initial key segement (the parent name), which was not returned
-          const { 1: fieldName } = field.key.split('.');
-          key = `${name ?? ''}.${fieldName}`;
-        }
-
-        return {
-          ...field,
-          key,
-        };
-      });
-
-      // If the user has entered a name but not yet any script we will display
-      // the field in the preview with just the name
-      if (updatedFields.length === 0 && name !== null) {
-        updatedFields = [
-          { key: name, value: undefined, formattedValue: undefined, type: undefined },
-        ];
+      if (type === 'composite') {
+        // restore initial key segement (the parent name), which was not returned
+        const { 1: fieldName } = field.key.split('.');
+        key = `${name ?? ''}.${fieldName}`;
       }
 
       return {
-        ...prev,
-        fields: updatedFields,
+        ...field,
+        key,
       };
     });
-  }, [name, type, parentName]);
+
+    // If the user has entered a name but not yet any script we will display
+    // the field in the preview with just the name
+    if (updatedFields.length === 0 && name !== null) {
+      updatedFields = [{ key: name, value: undefined, formattedValue: undefined, type: undefined }];
+    }
+
+    controller.setPreviewResponse({
+      ...prev,
+      fields: updatedFields,
+    });
+  }, [name, type, parentName, controller]);
 
   /**
    * Whenever the format changes we immediately update the preview
    */
   useEffect(() => {
-    setPreviewResponse((prev) => {
-      const { fields } = prev;
+    const { previewResponse: prev } = controller.state$.getValue();
+    const { fields } = prev;
 
-      return {
-        ...prev,
-        fields: fields.map((field) => {
-          const nextValue =
-            script === null && Boolean(document)
-              ? get(document?._source, name ?? '') ?? get(document?.fields, name ?? '') // When there is no script we try to read the value from _source/fields
-              : field?.value;
+    controller.setPreviewResponse({
+      ...prev,
+      fields: fields.map((field) => {
+        const nextValue =
+          script === null && Boolean(document)
+            ? get(document?._source, name ?? '') ?? get(document?.fields, name ?? '') // When there is no script we try to read the value from _source/fields
+            : field?.value;
 
-          const formattedValue = valueFormatter(nextValue);
+        const formattedValue = valueFormatter(nextValue);
 
-          return {
-            ...field,
-            value: nextValue,
-            formattedValue,
-          };
-        }),
-      };
+        return {
+          ...field,
+          value: nextValue,
+          formattedValue,
+        };
+      }),
     });
-  }, [name, script, document, valueFormatter]);
+  }, [name, script, document, valueFormatter, controller]);
 
   useEffect(() => {
     if (script?.source === undefined) {
       // Whenever the source is not defined ("Set value" is toggled off or the
       // script is empty) we clear the error and update the params cache.
       lastExecutePainlessRequestParams.current.script = undefined;
-      setPreviewError(null);
+      controller.setPreviewError(null);
     }
-  }, [script?.source, setPreviewError]);
+  }, [script?.source, controller]);
 
   // Handle the validation state coming from the Painless DiagnosticAdapter
   // (see @kbn-monaco/src/painless/diagnostics_adapter.ts)
@@ -674,16 +645,16 @@ export const FieldPreviewProvider: FunctionComponent<{ controller: PreviewContro
                   }),
               },
             };
-      setPreviewError(error);
+      controller.setPreviewError(error);
 
       // Make sure to update the lastExecutePainlessRequestParams cache so when the user updates
       // the script and fixes the syntax the "updatePreview()" will run
       lastExecutePainlessRequestParams.current.script = script?.source;
     } else {
       // Clear possible previous syntax error
-      clearPreviewError('PAINLESS_SYNTAX_ERROR');
+      controller.clearPreviewError('PAINLESS_SYNTAX_ERROR');
     }
-  }, [scriptEditorValidation, script?.source, setPreviewError, clearPreviewError]);
+  }, [scriptEditorValidation, script?.source, controller]);
 
   /**
    * Whenever updatePreview() changes (meaning whenever a param changes)

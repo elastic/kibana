@@ -16,6 +16,7 @@ import { DocumentsNavPreview } from './documents_nav_preview';
 import { FieldPreviewError } from './field_preview_error';
 import { PreviewListItem } from './field_list/field_list_item';
 import { PreviewFieldList } from './field_list/field_list';
+import { useStateSelector } from '../../state_utils';
 
 import './field_preview.scss';
 
@@ -28,12 +29,12 @@ export const FieldPreview = () => {
       value: { name, script, format },
     },
     isLoadingPreview,
-    fields,
-    error,
     documents: { fetchDocError },
     reset,
     isPreviewAvailable,
+    controller,
   } = useFieldPreviewContext();
+  const { fields, error } = useStateSelector(controller.state$, (state) => state.previewResponse);
 
   // To show the preview we at least need a name to be defined, the script or the format
   // and an first response from the _execute API
