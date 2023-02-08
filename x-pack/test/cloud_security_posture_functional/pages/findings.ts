@@ -13,6 +13,7 @@ import type { FtrProviderContext } from '../ftr_provider_context';
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const queryBar = getService('queryBar');
   const filterBar = getService('filterBar');
+  const comboBox = getService('comboBox');
   const retry = getService('retry');
   const pageObjects = getPageObjects(['common', 'findings']);
   const chance = new Chance();
@@ -26,6 +27,12 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       rule: {
         name: 'Upper case rule name',
         section: 'Upper case section',
+        benchmark: {
+          id: 'cis_k8s',
+          name: 'CIS Kubernetes V1.23',
+          version: 'v1.0.0',
+        },
+        type: 'process',
       },
       cluster_id: 'Upper case cluster id',
     },
@@ -35,6 +42,12 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       rule: {
         name: 'lower case rule name',
         section: 'Another upper case section',
+        benchmark: {
+          id: 'cis_k8s',
+          name: 'CIS Kubernetes V1.23',
+          version: 'v1.0.0',
+        },
+        type: 'process',
       },
       cluster_id: 'Another Upper case cluster id',
     },
@@ -44,6 +57,12 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       rule: {
         name: 'Another upper case rule name',
         section: 'lower case section',
+        benchmark: {
+          id: 'cis_k8s',
+          name: 'CIS Kubernetes V1.23',
+          version: 'v1.0.0',
+        },
+        type: 'process',
       },
       cluster_id: 'lower case cluster id',
     },
@@ -53,6 +72,12 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       rule: {
         name: 'some lower case rule name',
         section: 'another lower case section',
+        benchmark: {
+          id: 'cis_k8s',
+          name: 'CIS Kubernetes V1.23',
+          version: 'v1.0.0',
+        },
+        type: 'process',
       },
       cluster_id: 'another lower case cluster id',
     },
@@ -61,21 +86,30 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const ruleName1 = data[0].rule.name;
   const ruleName2 = data[1].rule.name;
 
+  const resourceId1 = data[0].resource.id;
+  const ruleSection1 = data[0].rule.section;
+
+  const benchMarkName = data[0].rule.benchmark.name;
+
   describe('Findings Page', () => {
     let findings: typeof pageObjects.findings;
-    let table: typeof pageObjects.findings.table;
-    let distributionBar: typeof pageObjects.findings.distributionBar;
+    let latestFindingsTable: typeof findings.latestFindingsTable;
+    let findingsByResourceTable: typeof findings.findingsByResourceTable;
+    let resourceFindingsTable: typeof findings.resourceFindingsTable;
+    let distributionBar: typeof findings.distributionBar;
 
     before(async () => {
       findings = pageObjects.findings;
-      table = pageObjects.findings.table;
-      distributionBar = pageObjects.findings.distributionBar;
+      latestFindingsTable = findings.latestFindingsTable;
+      findingsByResourceTable = findings.findingsByResourceTable;
+      resourceFindingsTable = findings.resourceFindingsTable;
+      distributionBar = findings.distributionBar;
 
       await findings.index.add(data);
-      await findings.navigateToFindingsPage();
+      await findings.navigateToLatestFindingsPage();
       await retry.waitFor(
         'Findings table to be loaded',
-        async () => (await table.getRowsCount()) === data.length
+        async () => (await latestFindingsTable.getRowsCount()) === data.length
       );
     });
 
@@ -88,44 +122,44 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await filterBar.addFilter({ field: 'rule.name', operation: 'is', value: ruleName1 });
 
         expect(await filterBar.hasFilter('rule.name', ruleName1)).to.be(true);
-        expect(await table.hasColumnValue('Rule Name', ruleName1)).to.be(true);
+        expect(await latestFindingsTable.hasColumnValue('Rule Name', ruleName1)).to.be(true);
       });
 
       it('remove filter', async () => {
         await filterBar.removeFilter('rule.name');
 
         expect(await filterBar.hasFilter('rule.name', ruleName1)).to.be(false);
-        expect(await table.getRowsCount()).to.be(data.length);
+        expect(await latestFindingsTable.getRowsCount()).to.be(data.length);
       });
 
       it('set search query', async () => {
         await queryBar.setQuery(ruleName1);
         await queryBar.submitQuery();
 
-        expect(await table.hasColumnValue('Rule Name', ruleName1)).to.be(true);
-        expect(await table.hasColumnValue('Rule Name', ruleName2)).to.be(false);
+        expect(await latestFindingsTable.hasColumnValue('Rule Name', ruleName1)).to.be(true);
+        expect(await latestFindingsTable.hasColumnValue('Rule Name', ruleName2)).to.be(false);
 
         await queryBar.setQuery('');
         await queryBar.submitQuery();
 
-        expect(await table.getRowsCount()).to.be(data.length);
+        expect(await latestFindingsTable.getRowsCount()).to.be(data.length);
       });
     });
 
     describe('Table Filters', () => {
       it('add cell value filter', async () => {
-        await table.addCellFilter('Rule Name', ruleName1, false);
+        await latestFindingsTable.addCellFilter('Rule Name', ruleName1, false);
 
         expect(await filterBar.hasFilter('rule.name', ruleName1)).to.be(true);
-        expect(await table.hasColumnValue('Rule Name', ruleName1)).to.be(true);
+        expect(await latestFindingsTable.hasColumnValue('Rule Name', ruleName1)).to.be(true);
       });
 
       it('add negated cell value filter', async () => {
-        await table.addCellFilter('Rule Name', ruleName1, true);
+        await latestFindingsTable.addCellFilter('Rule Name', ruleName1, true);
 
         expect(await filterBar.hasFilter('rule.name', ruleName1, true, false, true)).to.be(true);
-        expect(await table.hasColumnValue('Rule Name', ruleName1)).to.be(false);
-        expect(await table.hasColumnValue('Rule Name', ruleName2)).to.be(true);
+        expect(await latestFindingsTable.hasColumnValue('Rule Name', ruleName1)).to.be(false);
+        expect(await latestFindingsTable.hasColumnValue('Rule Name', ruleName2)).to.be(true);
 
         await filterBar.removeFilter('rule.name');
       });
@@ -155,8 +189,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           ['Resource Type', 'desc', sortByAlphabeticalOrder],
         ];
         for (const [columnName, dir, sortingMethod] of testCases) {
-          await table.toggleColumnSort(columnName, dir);
-          const values = (await table.getColumnValues(columnName)).filter(Boolean);
+          await latestFindingsTable.toggleColumnSort(columnName, dir);
+          const values = (await latestFindingsTable.getColumnValues(columnName)).filter(Boolean);
           expect(values).to.not.be.empty();
 
           const sorted = values
@@ -173,10 +207,24 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           await distributionBar.filterBy(type);
 
           const items = data.filter(({ result }) => result.evaluation === type);
-          expect(await table.getFindingsCount(type)).to.eql(items.length);
+          expect(await latestFindingsTable.getFindingsCount(type)).to.eql(items.length);
 
           await filterBar.removeFilter('result.evaluation');
         });
+      });
+    });
+
+    describe('GroupBy', () => {
+      it('groups findings by resource', async () => {
+        await comboBox.set('findings_group_by_selector', 'Resource');
+        expect(
+          await findingsByResourceTable.hasColumnValue('Applicable Benchmark', benchMarkName)
+        ).to.be(true);
+      });
+
+      it('navigates to resource findings page from resource id link', async () => {
+        await findingsByResourceTable.clickResourceIdLink(resourceId1, ruleSection1);
+        expect(await resourceFindingsTable.hasColumnValue('Rule Name', ruleName1)).to.be(true);
       });
     });
   });
