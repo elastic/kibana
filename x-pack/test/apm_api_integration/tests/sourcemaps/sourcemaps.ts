@@ -153,7 +153,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           sourcemap: SAMPLE_SOURCEMAP,
         });
 
-        await waitForSourceMapCount(1); // TODO: rename to "waitForSourceMapInApmIndexCount"
+        await waitForSourceMapCount(1);
       });
 
       it('is uploaded as a fleet artifact', async () => {
