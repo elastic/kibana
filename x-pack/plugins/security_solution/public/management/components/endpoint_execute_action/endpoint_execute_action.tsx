@@ -25,26 +25,51 @@ const EXECUTE_FILE_LINK_TITLE = i18n.translate(
   { defaultMessage: 'Click here to download full output' }
 );
 
+const ACCORDION_BUTTON_TEXT = Object.freeze({
+  output: {
+    regular: i18n.translate(
+      'xpack.securitySolution.responseActionExecuteAccordion.outputButtonTextRegular',
+      {
+        defaultMessage: 'Execution output',
+      }
+    ),
+    truncated: i18n.translate(
+      'xpack.securitySolution.responseActionExecuteAccordion.outputButtonTextTruncated',
+      {
+        defaultMessage: 'Execution output (truncated)',
+      }
+    ),
+  },
+  error: {
+    regular: i18n.translate(
+      'xpack.securitySolution.responseActionExecuteAccordion.errorButtonTextRegular',
+      {
+        defaultMessage: 'Execution error',
+      }
+    ),
+    truncated: i18n.translate(
+      'xpack.securitySolution.responseActionExecuteAccordion.errorButtonTextTruncated',
+      {
+        defaultMessage: 'Execution error (truncated)',
+      }
+    ),
+  },
+});
 interface ExecuteActionOutputProps {
   content: string;
   id: string;
   initialIsOpen?: boolean;
-  type: 'output' | 'error';
+  isTruncated: boolean;
+  type: 'error' | 'output';
 }
 
 const ExecutionActionOutputGist = memo<ExecuteActionOutputProps>(
-  ({ content, id, initialIsOpen = false, type }) => {
+  ({ content, id, initialIsOpen = false, isTruncated, type }) => {
     return (
       <EuiAccordion
         id={id}
         initialIsOpen={initialIsOpen}
-        buttonContent={i18n.translate(
-          'xpack.securitySolution.responseActionExecuteAccordion.buttonText',
-          {
-            values: { type },
-            defaultMessage: 'Execution {type} (truncated)',
-          }
-        )}
+        buttonContent={ACCORDION_BUTTON_TEXT[type][isTruncated ? 'truncated' : 'regular']}
         paddingSize="s"
       >
         <EuiText size="s">
@@ -92,6 +117,7 @@ export const ExecuteAction = memo<ExecuteActionProps>(
             <ExecutionActionOutputGist
               content={outputs[agentId].content.stdout}
               id={executionOutputAccordionStdout}
+              isTruncated={outputs[agentId].content.stdoutTruncated}
               initialIsOpen
               type="output"
             />
@@ -99,6 +125,7 @@ export const ExecuteAction = memo<ExecuteActionProps>(
             <ExecutionActionOutputGist
               content={outputs[agentId].content.stderr}
               id={executionOutputAccordionStderr}
+              isTruncated={outputs[agentId].content.stderrTruncated}
               type="error"
             />
           </EuiFlexItem>
