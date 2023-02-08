@@ -25,25 +25,18 @@ import { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { loadDataView, resolveDataView } from '../utils/resolve_data_view';
 import { DataStateContainer, getDataStateContainer } from './discover_data_state_container';
 import { DiscoverSearchSessionManager } from './discover_search_session';
-import { DiscoverAppLocatorParams, DISCOVER_APP_LOCATOR } from '../../../../common';
+import { DISCOVER_APP_LOCATOR, DiscoverAppLocatorParams } from '../../../../common';
 import {
   AppState,
   DiscoverAppStateContainer,
   getDiscoverAppStateContainer,
+  GLOBAL_STATE_URL_KEY,
 } from './discover_app_state_container';
 import {
   getInternalStateContainer,
   InternalStateContainer,
 } from './discover_internal_state_container';
 import { DiscoverServices } from '../../../build_services';
-
-export interface AppStateUrl extends Omit<AppState, 'sort'> {
-  /**
-   * Necessary to take care of legacy links [fieldName,direction]
-   */
-  sort?: string[][] | [string, string];
-}
-
 interface DiscoverStateContainerParams {
   /**
    * Browser history
@@ -89,17 +82,9 @@ export interface DiscoverStateContainer {
     data: DataPublicPluginStart
   ) => () => void;
   /**
-   * Start sync between state and URL -- only used for testing
-   */
-  startSync: () => () => void;
-  /**
    * Set app state to with a partial new app state
    */
   setAppState: (newState: Partial<AppState>) => void;
-  /**
-   * Sync state to URL, used for testing
-   */
-  flushToUrl: () => void;
   /**
    * Pause the auto refresh interval without pushing an entry to history
    */
@@ -149,9 +134,6 @@ export interface DiscoverStateContainer {
     replaceAdHocDataViewWithId: (id: string, dataView: DataView) => void;
   };
 }
-
-export const APP_STATE_URL_KEY = '_a';
-const GLOBAL_STATE_URL_KEY = '_g';
 
 /**
  * Builds and returns appState and globalState containers and helper functions
@@ -239,13 +221,7 @@ export function getDiscoverStateContainer({
     internalState: internalStateContainer,
     dataState: dataStateContainer,
     searchSessionManager,
-    startSync: () => {
-      const { start, stop } = appStateContainer.syncState();
-      start();
-      return stop;
-    },
     setAppState: (newPartial: AppState) => appStateContainer.update(newPartial),
-    flushToUrl: () => stateStorage.kbnUrlControls.flush(),
     pauseAutoRefreshInterval,
     initializeAndSync: () => appStateContainer.initAndSync(savedSearch),
     actions: {

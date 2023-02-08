@@ -29,9 +29,9 @@ import { getValidFilters } from '../../../utils/get_valid_filters';
 import { cleanupUrlState } from '../utils/cleanup_url_state';
 import { getStateDefaults } from '../utils/get_state_defaults';
 import { handleSourceColumnState } from '../../../utils/state_helpers';
-import { APP_STATE_URL_KEY, AppStateUrl } from './discover_state';
 import { DiscoverGridSettings } from '../../../components/discover_grid/types';
 
+export const APP_STATE_URL_KEY = '_a';
 export interface DiscoverAppStateContainer extends ReduxLikeStateContainer<AppState> {
   /**
    * Returns the previous state, used for diffing e.g. if fetching new data is necessary
@@ -271,6 +271,15 @@ export const getDiscoverAppStateContainer = ({
     update,
   };
 };
+
+export interface AppStateUrl extends Omit<AppState, 'sort'> {
+  /**
+   * Necessary to take care of legacy links [fieldName,direction]
+   */
+  sort?: string[][] | [string, string];
+}
+
+export const GLOBAL_STATE_URL_KEY = '_g';
 
 function getInitialState(
   stateStorage: IKbnUrlStateStorage,
