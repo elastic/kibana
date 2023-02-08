@@ -14,6 +14,8 @@ import {
   EuiFlexItem,
   EuiLoadingSpinner,
   EuiTitle,
+  EuiCallOut,
+  useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import styled from 'styled-components';
@@ -31,6 +33,7 @@ interface Props {
   onDone: (testRunId: string) => void;
 }
 export const BrowserTestRunResult = ({ expectPings, onDone, testRunId }: Props) => {
+  const { euiTheme } = useEuiTheme();
   const { summariesLoading, expectedSummariesLoaded, stepLoadingInProgress, checkGroupResults } =
     useBrowserRunOnceMonitors({
       testRunId,
@@ -76,8 +79,23 @@ export const BrowserTestRunResult = ({ expectPings, onDone, testRunId }: Props) 
                 </EuiFlexItem>
               </EuiFlexGroup>
             )}
+
             {(isStepsLoadingFailed || isDownMonitor) && (
-              <EuiText color="danger">{summaryDoc?.error?.message ?? FAILED_TO_RUN}</EuiText>
+              <EuiCallOut
+                data-test-subj="monitorTestRunErrorCallout"
+                style={{
+                  marginTop: euiTheme.base,
+                  marginBottom: euiTheme.base,
+                  borderRadius: euiTheme.border.radius.medium,
+                  fontWeight: euiTheme.font.weight.semiBold,
+                }}
+                title={ERROR_RUNNING_TEST}
+                size="s"
+                color="danger"
+                iconType="alert"
+              >
+                <EuiText color="danger">{summaryDoc?.error?.message ?? FAILED_TO_RUN}</EuiText>
+              </EuiCallOut>
             )}
 
             {(isStepsLoadingFailed || isDownMonitor) &&
@@ -154,6 +172,10 @@ function getButtonContent({
 
 const FAILED_TO_RUN = i18n.translate('xpack.synthetics.monitorManagement.failedRun', {
   defaultMessage: 'Failed to run steps',
+});
+
+const ERROR_RUNNING_TEST = i18n.translate('xpack.synthetics.testRun.runErrorLabel', {
+  defaultMessage: 'Error running test',
 });
 
 const LOADING_STEPS = i18n.translate('xpack.synthetics.monitorManagement.loadingSteps', {
