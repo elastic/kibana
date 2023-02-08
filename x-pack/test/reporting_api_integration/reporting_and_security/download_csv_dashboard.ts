@@ -426,6 +426,11 @@ export default function ({ getService }: FtrProviderContext) {
         await kibanaServer.importExport.load(
           'x-pack/test/functional/fixtures/kbn_archiver/reporting/big_int_id_field'
         );
+        await kibanaServer.uiSettings.update({
+          'csv:quoteValues': false,
+          'dateFormat:tz': 'UTC',
+          defaultIndex: 'logstash-*',
+        });
         const {
           status: resStatus,
           type: resType,
