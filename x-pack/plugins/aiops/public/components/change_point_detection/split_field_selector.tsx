@@ -5,32 +5,57 @@
  * 2.0.
  */
 
-import React, { FC, useMemo } from 'react';
+import React, { FC, useMemo, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiFormRow, EuiSelect, type EuiSelectOption } from '@elastic/eui';
+import { EuiComboBox, type EuiComboBoxOptionOption, EuiFormRow } from '@elastic/eui';
 import { useChangePointDetectionContext } from './change_point_detection_context';
 
 interface SplitFieldSelectorProps {
-  value: string;
-  onChange: (value: string) => void;
+  value: string | undefined;
+  onChange: (value: string | undefined) => void;
 }
 
 export const SplitFieldSelector: FC<SplitFieldSelectorProps> = React.memo(({ value, onChange }) => {
   const { splitFieldsOptions } = useChangePointDetectionContext();
 
-  const options = useMemo<EuiSelectOption[]>(() => {
-    return splitFieldsOptions.map((v) => ({ value: v.name, text: v.displayName }));
+  const options = useMemo<Array<EuiComboBoxOptionOption<string>>>(() => {
+    return [
+      {
+        name: undefined,
+        displayName: i18n.translate('xpack.aiops.changePointDetection.notSelectedSplitFieldLabel', {
+          defaultMessage: '--- Not selected ---',
+        }),
+      },
+      ...splitFieldsOptions,
+    ].map((v) => ({
+      value: v.name,
+      label: v.displayName,
+    }));
   }, [splitFieldsOptions]);
+
+  const selection = options.filter((v) => v.value === value);
+
+  const onChangeCallback = useCallback(
+    (selectedOptions: Array<EuiComboBoxOptionOption<string>>) => {
+      const option = selectedOptions[0];
+      const newValue = option?.value;
+      onChange(newValue);
+    },
+    [onChange]
+  );
 
   return (
     <EuiFormRow>
-      <EuiSelect
+      <EuiComboBox
         prepend={i18n.translate('xpack.aiops.changePointDetection.selectSpitFieldLabel', {
           defaultMessage: 'Split field',
         })}
+        singleSelection={{ asPlainText: true }}
         options={options}
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
+        selectedOptions={selection}
+        onChange={onChangeCallback}
+        isClearable
+        data-test-subj="aiopsChangePointSplitField"
       />
     </EuiFormRow>
   );

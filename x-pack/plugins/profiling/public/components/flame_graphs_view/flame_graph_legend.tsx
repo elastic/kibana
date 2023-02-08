@@ -52,6 +52,7 @@ export function FlameGraphLegend({
                         {legendItems.map(({ color, label }) => {
                           return (
                             <EuiFlexItem
+                              key={label}
                               style={{ backgroundColor: color, justifyContent: 'center' }}
                             >
                               {label ? (

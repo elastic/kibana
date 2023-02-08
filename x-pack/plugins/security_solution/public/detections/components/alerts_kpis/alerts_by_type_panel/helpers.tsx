@@ -7,7 +7,7 @@
 import { has } from 'lodash';
 import type { AlertType, AlertsByTypeAgg, AlertsTypeData } from './types';
 import type { AlertSearchResponse } from '../../../containers/detection_engine/alerts/types';
-import type { SummaryChartsData } from '../alerts_summary_charts_panel/types';
+import type { SummaryChartsData, SummaryChartsAgg } from '../alerts_summary_charts_panel/types';
 
 export const ALERT_TYPE_COLOR = {
   Detection: '#D36086',
@@ -59,6 +59,12 @@ const getAggregateAlerts = (
   return ret;
 };
 
-export const isAlertsTypeData = (data: SummaryChartsData[]): data is AlertsTypeData[] => {
+export const getIsAlertsTypeData = (data: SummaryChartsData[]): data is AlertsTypeData[] => {
   return data?.every((x) => has(x, 'type'));
+};
+
+export const getIsAlertsByTypeAgg = (
+  data: AlertSearchResponse<{}, SummaryChartsAgg>
+): data is AlertSearchResponse<{}, AlertsByTypeAgg> => {
+  return has(data, 'aggregations.alertsByRule');
 };
