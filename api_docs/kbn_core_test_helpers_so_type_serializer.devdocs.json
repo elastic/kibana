@@ -242,6 +242,35 @@
             "path": "packages/core/test-helpers/core-test-helpers-so-type-serializer/src/extract_migration_info.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-test-helpers-so-type-serializer",
+            "id": "def-common.SavedObjectTypeMigrationInfo.modelVersions",
+            "type": "Array",
+            "tags": [],
+            "label": "modelVersions",
+            "description": [],
+            "signature": [
+              "ModelVersionSummary",
+              "[]"
+            ],
+            "path": "packages/core/test-helpers/core-test-helpers-so-type-serializer/src/extract_migration_info.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-test-helpers-so-type-serializer",
+            "id": "def-common.SavedObjectTypeMigrationInfo.switchToModelVersionAt",
+            "type": "string",
+            "tags": [],
+            "label": "switchToModelVersionAt",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/core/test-helpers/core-test-helpers-so-type-serializer/src/extract_migration_info.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
