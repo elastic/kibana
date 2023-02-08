@@ -148,6 +148,7 @@ it('matches snapshot', () => {
         "type": "keyword",
       },
       "kibana.alert.rule.parameters": Object {
+        "array": false,
         "ignore_above": 4096,
         "required": false,
         "type": "flattened",

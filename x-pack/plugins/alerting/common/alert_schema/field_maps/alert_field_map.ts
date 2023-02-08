@@ -102,8 +102,9 @@ export const alertFieldMap = {
     required: true,
   },
   [ALERT_RULE_PARAMETERS]: {
-    type: 'object',
-    enabled: false,
+    array: false,
+    type: 'flattened',
+    ignore_above: 4096,
     required: false,
   },
   [ALERT_RULE_PRODUCER]: {
