@@ -17,8 +17,12 @@ import { FieldPreviewError } from './field_preview_error';
 import { PreviewListItem } from './field_list/field_list_item';
 import { PreviewFieldList } from './field_list/field_list';
 import { useStateSelector } from '../../state_utils';
+import { PreviewState } from './types';
 
 import './field_preview.scss';
+
+const previewResponseSelector = (state: PreviewState) => state.previewResponse;
+const isLoadingPreviewSelector = (state: PreviewState) => state.isLoadingPreview;
 
 export const FieldPreview = () => {
   const [fieldListHeight, setFieldListHeight] = useState(-1);
@@ -28,13 +32,12 @@ export const FieldPreview = () => {
     params: {
       value: { name, script, format },
     },
-    isLoadingPreview,
     documents: { fetchDocError },
-    reset,
     isPreviewAvailable,
     controller,
   } = useFieldPreviewContext();
-  const { fields, error } = useStateSelector(controller.state$, (state) => state.previewResponse);
+  const { fields, error } = useStateSelector(controller.state$, previewResponseSelector);
+  const isLoadingPreview = useStateSelector(controller.state$, isLoadingPreviewSelector);
 
   // To show the preview we at least need a name to be defined, the script or the format
   // and an first response from the _execute API
@@ -74,9 +77,8 @@ export const FieldPreview = () => {
   useEffect(() => {
     // When unmounting the preview pannel we make sure to reset
     // the state of the preview panel.
-    return reset;
-  }, [reset]);
-
+    return () => controller.reset();
+  }, [controller]);
   return (
     <div
       className="indexPatternFieldEditor__previewPannel"

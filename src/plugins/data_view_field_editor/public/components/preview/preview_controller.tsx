@@ -12,9 +12,11 @@ import { BehaviorSubject } from 'rxjs';
 import { castEsToKbnFieldTypeName } from '@kbn/field-types';
 import { renderToString } from 'react-dom/server';
 import React from 'react';
+import { i18n } from '@kbn/i18n';
+import { firstValueFrom } from 'rxjs';
 import { PreviewState } from './types';
 import { BehaviorObservable } from '../../state_utils';
-import { EsDocument, ScriptErrorCodes, Params } from './types';
+import { EsDocument, ScriptErrorCodes, Params, FetchDocError } from './types';
 import type { FieldFormatsStart } from '../../shared_imports';
 
 export const defaultValueFormatter = (value: unknown) => {
@@ -41,6 +43,12 @@ const previewStateDefault: PreviewState = {
   /** Keep track if the script painless syntax is being validated and if it is valid  */
   scriptEditorValidation: { isValidating: false, isValid: true, message: null },
   previewResponse: { fields: [], error: null },
+  /** Flag to indicate if we are loading document from cluster */
+  isFetchingDocument: false,
+  /** Flag to indicate if we are loading a single document by providing its ID */
+  customDocIdToLoad: null,
+  fetchDocError: null,
+  isLoadingPreview: false,
 };
 
 export class PreviewController {
@@ -66,6 +74,20 @@ export class PreviewController {
   private state: PreviewState = previewStateDefault;
   private internalState$: BehaviorSubject<PreviewState>;
   state$: BehaviorObservable<PreviewState>;
+
+  // We keep in cache the latest params sent to the _execute API so we don't make unecessary requests
+  // when changing parameters that don't affect the preview result (e.g. changing the "name" field).
+  lastExecutePainlessRequestParams: {
+    type: Params['type'];
+    script: string | undefined;
+    documentId: string | undefined;
+  } = {
+    type: null,
+    script: undefined,
+    documentId: undefined,
+  };
+
+  previewCount = 0;
 
   private updateState = (newState: Partial<PreviewState>) => {
     this.state = { ...this.state, ...newState };
@@ -166,5 +188,152 @@ export class PreviewController {
     }
 
     return defaultValueFormatter(value);
+  };
+
+  setIsFetchingDocument = (isFetchingDocument: boolean) => {
+    this.updateState({ isFetchingDocument });
+  };
+
+  setCustomDocIdToLoad = (customDocIdToLoad: string | null) => {
+    this.updateState({ customDocIdToLoad });
+  };
+
+  setFetchDocError = (fetchDocError: FetchDocError | null) => {
+    this.updateState({ fetchDocError });
+  };
+
+  setIsLoadingPreview = (isLoadingPreview: boolean) => {
+    this.updateState({ isLoadingPreview });
+  };
+
+  fetchSampleDocuments = async (limit: number = 50) => {
+    if (typeof limit !== 'number') {
+      // We guard ourself from passing an <input /> event accidentally
+      throw new Error('The "limit" option must be a number');
+    }
+
+    this.lastExecutePainlessRequestParams.documentId = undefined;
+    // todo
+    this.updateState({ isFetchingDocument: true, previewResponse: { fields: [], error: null } });
+
+    const [response, searchError] = await firstValueFrom(
+      this.search.search({
+        params: {
+          index: this.dataView.getIndexPattern(),
+          body: {
+            fields: ['*'],
+            size: limit,
+          },
+        },
+      })
+    )
+      .then((res) => [res, null])
+      .catch((err) => [null, err]);
+
+    // todo
+    this.updateState({ isFetchingDocument: false, customDocIdToLoad: null });
+
+    const error: FetchDocError | null = Boolean(searchError)
+      ? {
+          code: 'ERR_FETCHING_DOC',
+          error: {
+            message: searchError.toString(),
+            reason: i18n.translate(
+              'indexPatternFieldEditor.fieldPreview.error.errorLoadingSampleDocumentsDescription',
+              {
+                defaultMessage: 'Error loading sample documents.',
+              }
+            ),
+          },
+        }
+      : null;
+
+    this.setFetchDocError(error);
+
+    if (error === null) {
+      this.setDocuments(response ? response.rawResponse.hits.hits : []);
+    }
+  };
+
+  loadDocument = async (id: string) => {
+    if (!Boolean(id.trim())) {
+      return;
+    }
+
+    this.lastExecutePainlessRequestParams.documentId = undefined;
+    this.setIsFetchingDocument(true);
+
+    const [response, searchError] = await firstValueFrom(
+      this.search.search({
+        params: {
+          index: this.dataView.getIndexPattern(),
+          body: {
+            size: 1,
+            fields: ['*'],
+            query: {
+              ids: {
+                values: [id],
+              },
+            },
+          },
+        },
+      })
+    )
+      .then((res) => [res, null])
+      .catch((err) => [null, err]);
+
+    this.setIsFetchingDocument(false);
+
+    const isDocumentFound = response?.rawResponse.hits.total > 0;
+    const loadedDocuments: EsDocument[] = isDocumentFound ? response.rawResponse.hits.hits : [];
+    const error: FetchDocError | null = Boolean(searchError)
+      ? {
+          code: 'ERR_FETCHING_DOC',
+          error: {
+            message: searchError.toString(),
+            reason: i18n.translate(
+              'indexPatternFieldEditor.fieldPreview.error.errorLoadingDocumentDescription',
+              {
+                defaultMessage: 'Error loading document.',
+              }
+            ),
+          },
+        }
+      : isDocumentFound === false
+      ? {
+          code: 'DOC_NOT_FOUND',
+          error: {
+            message: i18n.translate(
+              'indexPatternFieldEditor.fieldPreview.error.documentNotFoundDescription',
+              {
+                defaultMessage: 'Document ID not found',
+              }
+            ),
+          },
+        }
+      : null;
+
+    this.setFetchDocError(error);
+
+    if (error === null) {
+      this.setDocuments(loadedDocuments);
+    } else {
+      // Make sure we disable the "Updating..." indicator as we have an error
+      // and we won't fetch the preview
+      this.setIsLoadingPreview(false);
+    }
+  };
+
+  reset = () => {
+    // By resetting the previewCount we will discard previous inflight
+    // API call response coming in after calling reset() was called
+    this.previewCount = 0;
+
+    this.updateState({
+      documents: [],
+      previewResponse: { fields: [], error: null },
+      isLoadingPreview: false,
+      isFetchingDocument: false,
+    });
   };
 }

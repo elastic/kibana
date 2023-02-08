@@ -60,6 +60,10 @@ export interface PreviewState {
     fields: FieldPreview[];
     error: PreviewError | null;
   };
+  isFetchingDocument: boolean;
+  customDocIdToLoad: string | null;
+  fetchDocError: FetchDocError | null;
+  isLoadingPreview: boolean;
 }
 
 export interface FetchDocError {
@@ -121,7 +125,6 @@ export interface Context {
     update: (updated: Partial<Params>) => void;
   };
   isPreviewAvailable: boolean;
-  isLoadingPreview: boolean;
   documents: {
     loadSingle: (id: string) => void;
     loadFromCluster: () => Promise<void>;
@@ -135,7 +138,6 @@ export interface Context {
     isFirstDoc: boolean;
     isLastDoc: boolean;
   };
-  reset: () => void;
 }
 
 export type PainlessExecuteContext =
