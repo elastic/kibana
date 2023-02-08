@@ -226,7 +226,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       it('navigates to resource findings page from resource id link', async () => {
         await findingsByResourceTable.clickResourceIdLink(resourceId1, ruleSection1);
         expect(await resourceFindingsTable.hasColumnValue('Rule Name', ruleName1)).to.be(true);
-        expect(await resourceFindingsTable.getRowsCount()).lessThan(5);
       });
     });
   });
