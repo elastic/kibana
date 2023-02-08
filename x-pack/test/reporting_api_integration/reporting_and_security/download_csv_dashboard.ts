@@ -419,18 +419,95 @@ export default function ({ getService }: FtrProviderContext) {
       });
     });
 
+    describe('validation', () => {
+      it('Return a 404', async () => {
+        const { body } = (await generateAPI.getCSVFromSearchSource(
+          getMockJobParams({
+            searchSource: {
+              index: 'gobbledygook',
+            },
+          })
+        )) as supertest.Response;
+        const expectedBody = {
+          error: 'Not Found',
+          message: 'Saved object [index-pattern/gobbledygook] not found',
+          statusCode: 404,
+        };
+        expect(body).to.eql(expectedBody);
+      });
+
+      // NOTE: this test requires having the test server run with `xpack.reporting.csv.maxSizeBytes=6000`
+      describe(`Searches large amount of data, stops at Max Size Reached`, () => {
+        let resText: string;
+        before(async () => {
+          await reportingAPI.initEcommerce();
+
+          const {
+            status: resStatus,
+            type: resType,
+            text,
+          } = (await generateAPI.getCSVFromSearchSource(
+            getMockJobParams({
+              searchSource: {
+                version: true,
+                query: { query: '', language: 'kuery' },
+                index: '5193f870-d861-11e9-a311-0fa548c5f953',
+                sort: [{ order_date: 'desc' }],
+                fields: ['*'],
+                filter: [],
+                parent: {
+                  query: { language: 'kuery', query: '' },
+                  filter: [],
+                  parent: {
+                    filter: [
+                      {
+                        meta: { index: '5193f870-d861-11e9-a311-0fa548c5f953', params: {} },
+                        range: {
+                          order_date: {
+                            gte: '2019-03-23T00:00:00.000Z',
+                            lte: '2019-10-04T00:00:00.000Z',
+                            format: 'strict_date_optional_time',
+                          },
+                        },
+                      },
+                    ],
+                  },
+                },
+              },
+              browserTimezone: 'UTC',
+              title: 'Ecommerce Data',
+            })
+          )) as supertest.Response;
+
+          expect(resStatus).to.eql(200);
+          expect(resType).to.eql('text/csv');
+
+          await reportingAPI.teardownEcommerce();
+          resText = text;
+        });
+
+        itIfEs7('(ES 7)', async () => {
+          expectSnapshot(resText).toMatch();
+        });
+
+        itIfEs8('(ES 8)', async () => {
+          expectSnapshot(resText).toMatch();
+        });
+      });
+    });
+
     describe('_id field is a big integer, passes through the value without mutation', () => {
       let resText: string;
       before(async () => {
-        await esArchiver.load('x-pack/test/functional/es_archives/reporting/big_int_id_field');
-        await kibanaServer.importExport.load(
-          'x-pack/test/functional/fixtures/kbn_archiver/reporting/big_int_id_field'
-        );
         await kibanaServer.uiSettings.update({
           'csv:quoteValues': false,
           'dateFormat:tz': 'UTC',
           defaultIndex: 'logstash-*',
         });
+        await esArchiver.load('x-pack/test/functional/es_archives/reporting/big_int_id_field');
+        await kibanaServer.importExport.load(
+          'x-pack/test/functional/fixtures/kbn_archiver/reporting/big_int_id_field'
+        );
         const {
           status: resStatus,
           type: resType,
@@ -513,83 +590,6 @@ export default function ({ getService }: FtrProviderContext) {
 
       itIfEs8('(ES 8)', async () => {
         expectSnapshot(resText).toMatch();
-      });
-    });
-
-    describe('validation', () => {
-      it('Return a 404', async () => {
-        const { body } = (await generateAPI.getCSVFromSearchSource(
-          getMockJobParams({
-            searchSource: {
-              index: 'gobbledygook',
-            },
-          })
-        )) as supertest.Response;
-        const expectedBody = {
-          error: 'Not Found',
-          message: 'Saved object [index-pattern/gobbledygook] not found',
-          statusCode: 404,
-        };
-        expect(body).to.eql(expectedBody);
-      });
-
-      // NOTE: this test requires having the test server run with `xpack.reporting.csv.maxSizeBytes=6000`
-      describe(`Searches large amount of data, stops at Max Size Reached`, () => {
-        let resText: string;
-        before(async () => {
-          await reportingAPI.initEcommerce();
-
-          const {
-            status: resStatus,
-            type: resType,
-            text,
-          } = (await generateAPI.getCSVFromSearchSource(
-            getMockJobParams({
-              searchSource: {
-                version: true,
-                query: { query: '', language: 'kuery' },
-                index: '5193f870-d861-11e9-a311-0fa548c5f953',
-                sort: [{ order_date: 'desc' }],
-                fields: ['*'],
-                filter: [],
-                parent: {
-                  query: { language: 'kuery', query: '' },
-                  filter: [],
-                  parent: {
-                    filter: [
-                      {
-                        meta: { index: '5193f870-d861-11e9-a311-0fa548c5f953', params: {} },
-                        range: {
-                          order_date: {
-                            gte: '2019-03-23T00:00:00.000Z',
-                            lte: '2019-10-04T00:00:00.000Z',
-                            format: 'strict_date_optional_time',
-                          },
-                        },
-                      },
-                    ],
-                  },
-                },
-              },
-              browserTimezone: 'UTC',
-              title: 'Ecommerce Data',
-            })
-          )) as supertest.Response;
-
-          expect(resStatus).to.eql(200);
-          expect(resType).to.eql('text/csv');
-
-          await reportingAPI.teardownEcommerce();
-          resText = text;
-        });
-
-        itIfEs7('(ES 7)', async () => {
-          expectSnapshot(resText).toMatch();
-        });
-
-        itIfEs8('(ES 8)', async () => {
-          expectSnapshot(resText).toMatch();
-        });
       });
     });
   });
