@@ -118,7 +118,7 @@ export const requestIndexFieldSearch = async (
   if ('dataViewId' in request) {
     let dataView;
     try {
-      dataView = await dataViewService.get(request.dataViewId);
+      dataView = await dataViewService.getDeprecated(request.dataViewId);
     } catch (r) {
       if (
         r.output.payload.statusCode === 404 &&

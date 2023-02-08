@@ -75,7 +75,7 @@ describe('index pattern usage collection', () => {
     });
 
     it('when there are both runtime fields or scripted fields', async () => {
-      indexPatterns.get = jest.fn().mockResolvedValue({
+      indexPatterns.getDeprecated = jest.fn().mockResolvedValue({
         getScriptedFields: () => [scriptedFieldA, scriptedFieldB, scriptedFieldC],
         fields: [runtimeFieldA, runtimeFieldB, runtimeFieldC],
       });
@@ -96,7 +96,7 @@ describe('index pattern usage collection', () => {
     });
 
     it('when there are only runtime fields', async () => {
-      indexPatterns.get = jest.fn().mockResolvedValue({
+      indexPatterns.getDeprecated = jest.fn().mockResolvedValue({
         getScriptedFields: () => [],
         fields: [runtimeFieldA, runtimeFieldB, runtimeFieldC],
       });
@@ -117,7 +117,7 @@ describe('index pattern usage collection', () => {
     });
 
     it('when there are only scripted fields', async () => {
-      indexPatterns.get = jest.fn().mockResolvedValue({
+      indexPatterns.getDeprecated = jest.fn().mockResolvedValue({
         getScriptedFields: () => [scriptedFieldA, scriptedFieldB, scriptedFieldC],
         fields: [],
       });

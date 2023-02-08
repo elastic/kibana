@@ -141,23 +141,23 @@ describe('IndexPatterns', () => {
     });
 
     // make two requests before first can complete
-    const indexPatternPromise = indexPatterns.get(id);
-    indexPatterns.get(id);
+    const indexPatternPromise = indexPatterns.getDeprecated(id);
+    indexPatterns.getDeprecated(id);
 
     indexPatternPromise.then((indexPattern) => {
       expect(savedObjectsClient.get).toBeCalledTimes(1);
       expect(indexPattern).toBeDefined();
     });
 
-    expect(await indexPatternPromise).toBe(await indexPatterns.get(id));
+    expect(await indexPatternPromise).toBe(await indexPatterns.getDeprecated(id));
     SOClientGetDelay = 0;
   });
 
   test('force field refresh', async () => {
     const id = '1';
-    await indexPatterns.get(id);
+    await indexPatterns.getDeprecated(id);
     expect(apiClient.getFieldsForWildcard).toBeCalledTimes(1);
-    await indexPatterns.get(id, undefined, true);
+    await indexPatterns.getDeprecated(id, undefined, true);
     expect(apiClient.getFieldsForWildcard).toBeCalledTimes(2);
   });
 
@@ -188,8 +188,8 @@ describe('IndexPatterns', () => {
       doWithTimeout(() => indexPatterns.create({ id }), 1),
       doWithTimeout(() => indexPatterns.create({ id }), 10),
 
-      doWithTimeout(() => indexPatterns.get(id), 10),
-      doWithTimeout(() => indexPatterns.get(id), 40),
+      doWithTimeout(() => indexPatterns.getDeprecated(id), 10),
+      doWithTimeout(() => indexPatterns.getDeprecated(id), 40),
     ]).then((results) =>
       results.forEach((value) => {
         expect(value.id).toBe(id);
@@ -197,7 +197,7 @@ describe('IndexPatterns', () => {
     );
 
     // tests after promise was resolved
-    expect((await indexPatterns.get(id)).id).toBe(id);
+    expect((await indexPatterns.getDeprecated(id)).id).toBe(id);
     expect((await indexPatterns.create({ id })).id).toBe(id);
 
     expect(mockedCreateFromSpec).toHaveBeenCalledTimes(1);
@@ -216,7 +216,7 @@ describe('IndexPatterns', () => {
       },
     });
 
-    expect((await indexPatterns.get(id)).fields.length).toBe(1);
+    expect((await indexPatterns.getDeprecated(id)).fields.length).toBe(1);
   });
 
   test('savedObjectCache pre-fetches title, type, typeMeta', async () => {
@@ -242,11 +242,11 @@ describe('IndexPatterns', () => {
 
   test('deletes the index pattern', async () => {
     const id = '1';
-    const indexPattern = await indexPatterns.get(id);
+    const indexPattern = await indexPatterns.getDeprecated(id);
 
     expect(indexPattern).toBeDefined();
     await indexPatterns.delete(id);
-    expect(indexPattern).not.toBe(await indexPatterns.get(id));
+    expect(indexPattern).not.toBe(await indexPatterns.getDeprecated(id));
   });
 
   test('delete will throw if insufficient access', async () => {
@@ -263,11 +263,11 @@ describe('IndexPatterns', () => {
     });
 
     // Create a normal index patterns
-    const pattern = await indexPatterns.get('foo');
+    const pattern = await indexPatterns.getDeprecated('foo');
     indexPatterns.clearInstanceCache();
 
     // Create the same one - we're going to handle concurrency
-    const samePattern = await indexPatterns.get('foo');
+    const samePattern = await indexPatterns.getDeprecated('foo');
 
     // This will conflict because samePattern did a save (from refreshFields)
     // but the resave should work fine
@@ -372,7 +372,7 @@ describe('IndexPatterns', () => {
 
   test('correctly composes runtime field', async () => {
     setDocsourcePayload('id', savedObject);
-    const indexPattern = await indexPatterns.get('id');
+    const indexPattern = await indexPatterns.getDeprecated('id');
     expect(indexPattern.fields).toMatchSnapshot();
   });
 
@@ -391,16 +391,16 @@ describe('IndexPatterns', () => {
     const id = '1';
 
     // failed request!
-    expect(indexPatterns.get(id)).rejects.toBeDefined();
+    expect(indexPatterns.getDeprecated(id)).rejects.toBeDefined();
 
     // successful subsequent request
-    expect(async () => await indexPatterns.get(id)).toBeDefined();
+    expect(async () => await indexPatterns.getDeprecated(id)).toBeDefined();
   });
 
   test('can set and remove field format', async () => {
     const id = 'id';
     setDocsourcePayload(id, savedObject);
-    const dataView = await indexPatterns.get(id);
+    const dataView = await indexPatterns.getDeprecated(id);
     dataView.setFieldFormat('field', { id: 'formatId' });
     await indexPatterns.updateSavedObject(dataView);
     let lastCall = (savedObjectsClient.update as jest.Mock).mock.calls.pop() ?? [];

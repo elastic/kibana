@@ -91,7 +91,7 @@ export class AggsService {
   public start({ indexPatterns, fieldFormats }: AggsStartDependencies): AggsStart {
     const { calculateAutoTimeExpression, types, createAggConfigs } = this.aggsCommonService.start({
       getConfig: this.getConfig!,
-      getIndexPattern: indexPatterns.get,
+      getIndexPattern: indexPatterns.getDeprecated,
       calculateBounds: this.calculateBounds,
       fieldFormats,
     });

@@ -21,7 +21,7 @@ export const getDiscoverHelpersAsync = async () => await import('../async_servic
 
 export const createOpenInDiscoverAction = (
   locator: DiscoverAppLocator,
-  dataViews: Pick<DataViewsService, 'get'>,
+  dataViews: Pick<DataViewsService, 'getDeprecated'>,
   hasDiscoverAccess: boolean
 ) =>
   createAction<Context>({

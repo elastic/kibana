@@ -115,7 +115,7 @@ describe('createStaticDataView', () => {
       dataViewService,
     });
 
-    expect(dataViewService.get).toHaveBeenCalled();
+    expect(dataViewService.getDeprecated).toHaveBeenCalled();
     expect(dataViewService.createAndSave).toHaveBeenCalled();
     // @ts-ignore
     expect(dataViewService.createAndSave.mock.calls[0][0].title).toBe(
@@ -144,7 +144,7 @@ describe('createStaticDataView', () => {
       dataViewService,
     });
 
-    expect(dataViewService.get).toHaveBeenCalled();
+    expect(dataViewService.getDeprecated).toHaveBeenCalled();
     expect(dataViewService.createAndSave).not.toHaveBeenCalled();
   });
 });

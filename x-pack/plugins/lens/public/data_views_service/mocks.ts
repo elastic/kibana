@@ -230,5 +230,5 @@ export function mockDataViewsService() {
       ];
     }),
     create: jest.fn(),
-  } as unknown as Pick<DataViewsContract, 'get' | 'getIdsWithTitle' | 'create'>;
+  } as unknown as Pick<DataViewsContract, 'getDeprecated' | 'getIdsWithTitle' | 'create'>;
 }

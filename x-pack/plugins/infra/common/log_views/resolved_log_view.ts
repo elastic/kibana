@@ -90,7 +90,7 @@ const resolveDataViewReference = async (
 
   const { dataViewId } = logViewAttributes.logIndices;
 
-  const dataView = await dataViewsService.get(dataViewId).catch((error) => {
+  const dataView = await dataViewsService.getDeprecated(dataViewId).catch((error) => {
     throw new ResolveLogViewError(`Failed to fetch data view "${dataViewId}": ${error}`, error);
   });
 

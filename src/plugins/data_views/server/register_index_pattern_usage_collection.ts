@@ -82,7 +82,7 @@ export async function getIndexPatternTelemetry(indexPatterns: DataViewsContract)
 
   await ids.reduce(async (col, id) => {
     await col;
-    const ip = await indexPatterns.get(id);
+    const ip = await indexPatterns.getDeprecated(id);
 
     const scriptedFields = ip.getScriptedFields();
     const runtimeFields = ip.fields.filter((fld) => !!fld.runtimeField);

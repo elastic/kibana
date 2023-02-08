@@ -58,7 +58,7 @@ export const registerCreateScriptedFieldRoute = (
           throw new Error('Only scripted fields can be created.');
         }
 
-        const indexPattern = await indexPatternsService.get(id);
+        const indexPattern = await indexPatternsService.getDeprecated(id);
 
         if (indexPattern.fields.getByName(field.name)) {
           throw new Error(`Field [name = ${field.name}] already exists.`);

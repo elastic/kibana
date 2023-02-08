@@ -49,7 +49,7 @@ export function getFunctionDefinition({
 
       const { indexPatterns } = await getStartDependencies(kibanaRequest);
 
-      const indexPattern = await indexPatterns.get(args.id);
+      const indexPattern = await indexPatterns.getDeprecated(args.id);
 
       return { type: 'index_pattern', value: indexPattern.toSpec() };
     },

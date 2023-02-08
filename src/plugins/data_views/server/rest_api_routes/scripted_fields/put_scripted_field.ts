@@ -58,7 +58,7 @@ export const registerPutScriptedFieldRoute = (
           throw new Error('Only scripted fields can be put.');
         }
 
-        const indexPattern = await indexPatternsService.get(id);
+        const indexPattern = await indexPatternsService.getDeprecated(id);
 
         const oldFieldObject = indexPattern.fields.getByName(field.name);
         if (!!oldFieldObject) {

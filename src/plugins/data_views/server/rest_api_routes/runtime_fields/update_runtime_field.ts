@@ -45,7 +45,7 @@ export const updateRuntimeField = async ({
   runtimeField,
 }: UpdateRuntimeFieldArgs) => {
   usageCollection?.incrementCounter({ counterName });
-  const dataView = await dataViewsService.get(id);
+  const dataView = await dataViewsService.getDeprecated(id);
   const existingRuntimeField = dataView.getRuntimeField(name);
 
   if (!existingRuntimeField) {

@@ -34,7 +34,7 @@ export const deleteRuntimeField = async ({
   name,
 }: DeleteRuntimeFieldArgs) => {
   usageCollection?.incrementCounter({ counterName });
-  const dataView = await dataViewsService.get(id);
+  const dataView = await dataViewsService.getDeprecated(id);
   const field = dataView.getRuntimeField(name);
 
   if (!field) {

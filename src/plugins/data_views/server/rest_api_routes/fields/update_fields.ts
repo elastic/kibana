@@ -40,7 +40,7 @@ export const updateFields = async ({
   fields,
 }: UpdateFieldsArgs) => {
   usageCollection?.incrementCounter({ counterName });
-  const dataView = await dataViewsService.get(id);
+  const dataView = await dataViewsService.getDeprecated(id);
 
   const fieldNames = Object.keys(fields);
 

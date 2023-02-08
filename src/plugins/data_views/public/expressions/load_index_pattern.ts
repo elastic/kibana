@@ -36,7 +36,7 @@ export function getFunctionDefinition({
     async fn(input, args) {
       const { indexPatterns } = await getStartDependencies();
 
-      const indexPattern = await indexPatterns.get(args.id);
+      const indexPattern = await indexPatterns.getDeprecated(args.id);
 
       return { type: 'index_pattern', value: indexPattern.toSpec() };
     },

@@ -44,7 +44,7 @@ export const createRuntimeField = async ({
   runtimeField,
 }: CreateRuntimeFieldArgs) => {
   usageCollection?.incrementCounter({ counterName });
-  const dataView = await dataViewsService.get(id);
+  const dataView = await dataViewsService.getDeprecated(id);
 
   if (dataView.fields.getByName(name) || dataView.getRuntimeField(name)) {
     throw new Error(`Field [name = ${name}] already exists.`);

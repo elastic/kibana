@@ -396,7 +396,7 @@ export class DataViewsService {
       perPage: size,
     });
     const getIndexPatternPromises = savedObjects.map(async (savedObject) => {
-      return await this.get(savedObject.id);
+      return await this.getDeprecated(savedObject.id);
     });
     return await Promise.all(getIndexPatternPromises);
   };
@@ -458,7 +458,7 @@ export class DataViewsService {
   getDefault = async (displayErrors: boolean = true) => {
     const defaultIndexPatternId = await this.getDefaultId();
     if (defaultIndexPatternId) {
-      return await this.get(defaultIndexPatternId, displayErrors);
+      return await this.getDeprecated(defaultIndexPatternId, displayErrors);
     }
 
     return null;
@@ -876,7 +876,7 @@ export class DataViewsService {
    * @param displayErrors - If set false, API consumer is responsible for displaying and handling errors.
    * @param refreshFields - If set true, will fetch fields from the index pattern
    */
-  get = async (
+  getDeprecated = async (
     id: string,
     displayErrors: boolean = true,
     refreshFields = false
@@ -1064,7 +1064,7 @@ export class DataViewsService {
       })
       .catch(async (err) => {
         if (err?.response?.status === 409 && saveAttempts++ < MAX_ATTEMPTS_TO_RESOLVE_CONFLICTS) {
-          const samePattern = await this.get(indexPattern.id as string, displayErrors);
+          const samePattern = await this.getDeprecated(indexPattern.id as string, displayErrors);
           // What keys changed from now and what the server returned
           const updatedBody = samePattern.getAsSavedObjectBody();
 
@@ -1168,7 +1168,7 @@ export class DataViewsService {
     }
 
     if (defaultId) {
-      return this.get(defaultId, undefined, refreshFields);
+      return this.getDeprecated(defaultId, undefined, refreshFields);
     } else {
       return null;
     }

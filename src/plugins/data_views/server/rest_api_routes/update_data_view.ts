@@ -58,7 +58,7 @@ export const updateDataView = async ({
   counterName,
 }: UpdateDataViewArgs) => {
   usageCollection?.incrementCounter({ counterName });
-  const dataView = await dataViewsService.get(id);
+  const dataView = await dataViewsService.getDeprecated(id);
   const {
     title,
     timeFieldName,

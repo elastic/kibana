@@ -21,7 +21,7 @@ describe('loader', () => {
   describe('loadIndexPatterns', () => {
     it('should not load index patterns that are already loaded', async () => {
       const dataViewsService = mockDataViewsService();
-      dataViewsService.get = jest.fn(() =>
+      dataViewsService.getDeprecated = jest.fn(() =>
         Promise.reject('mockIndexPatternService.get should not have been called')
       );
 

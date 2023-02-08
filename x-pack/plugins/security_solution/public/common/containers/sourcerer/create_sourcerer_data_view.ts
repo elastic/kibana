@@ -60,7 +60,7 @@ export const createSourcererDataView = async ({
     } catch (err) {
       const error = transformError(err);
       if (err.name === 'DuplicateDataViewError' || error.statusCode === 409) {
-        siemDataView = await dataViewService.get(dataViewId);
+        siemDataView = await dataViewService.getDeprecated(dataViewId);
       } else {
         throw error;
       }
@@ -69,7 +69,7 @@ export const createSourcererDataView = async ({
     const siemDataViewTitle = siemDataViewExist
       ? ensurePatternFormat(siemDataViewExist.title.split(',')).join()
       : '';
-    siemDataView = await dataViewService.get(dataViewId);
+    siemDataView = await dataViewService.getDeprecated(dataViewId);
 
     if (patternListAsTitle !== siemDataViewTitle) {
       siemDataView.title = patternListAsTitle;

@@ -28,7 +28,7 @@ interface Context {
   filters?: Filter[];
   openInSameTab?: boolean;
   hasDiscoverAccess: boolean;
-  dataViews: Pick<DataViewsService, 'get'>;
+  dataViews: Pick<DataViewsService, 'getDeprecated'>;
   locator?: DiscoverAppLocator;
   timeFieldName?: string;
 }
@@ -64,7 +64,7 @@ async function getDiscoverLocationParams({
     // shouldn't be executed because of the isCompatible check
     throw new Error('Underlying data is not ready');
   }
-  const dataView = await dataViews.get(args.dataViewSpec.id!);
+  const dataView = await dataViews.getDeprecated(args.dataViewSpec.id!);
   let filtersToApply = [...(filters || []), ...args.filters];
   let timeRangeToApply = args.timeRange;
   // if the target data view is time based, attempt to split out a time range from the provided filters

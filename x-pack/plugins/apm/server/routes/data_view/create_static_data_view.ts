@@ -117,7 +117,9 @@ async function getShouldCreateOrUpdate({
   apmDataViewTitle: string;
 }) {
   try {
-    const existingDataView = await dataViewService.get(APM_STATIC_DATA_VIEW_ID);
+    const existingDataView = await dataViewService.getDeprecated(
+      APM_STATIC_DATA_VIEW_ID
+    );
     return existingDataView.title !== apmDataViewTitle;
   } catch (e) {
     // ignore exception if the data view (saved object) is not found

@@ -32,7 +32,7 @@ const FilterItemSetComponent = (props: FilterItemSetProps) => {
     // applicable to `alert` page as new alert mappings are added when first alert
     // is encountered
     (async () => {
-      const dataView = await dataViewService.get(dataViewId ?? '');
+      const dataView = await dataViewService.getDeprecated(dataViewId ?? '');
       if (!dataView) return;
       for (const filter of DEFAULT_DETECTION_PAGE_FILTERS) {
         const fieldExists = dataView.getFieldByName(filter.fieldName);

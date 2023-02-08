@@ -54,18 +54,18 @@ describe('DatatableUtilitiesService', () => {
   describe('getDataView', () => {
     it('should return a data view instance', async () => {
       const column = { meta: { index: 'index' } } as DatatableColumn;
-      const dataView = {} as ReturnType<DataViewsContract['get']>;
-      dataViews.get.mockReturnValue(dataView);
+      const dataView = {} as ReturnType<DataViewsContract['getDeprecated']>;
+      dataViews.getDeprecated.mockReturnValue(dataView);
 
       await expect(datatableUtilitiesService.getDataView(column)).resolves.toBe(dataView);
-      expect(dataViews.get).toHaveBeenCalledWith('index');
+      expect(dataViews.getDeprecated).toHaveBeenCalledWith('index');
     });
 
     it('should return undefined when there is no index metadata', async () => {
       const column = { meta: {} } as DatatableColumn;
 
       await expect(datatableUtilitiesService.getDataView(column)).resolves.toBeUndefined();
-      expect(dataViews.get).not.toHaveBeenCalled();
+      expect(dataViews.getDeprecated).not.toHaveBeenCalled();
     });
   });
 

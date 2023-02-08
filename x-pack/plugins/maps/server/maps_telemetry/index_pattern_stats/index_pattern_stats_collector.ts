@@ -60,7 +60,7 @@ export class IndexPatternStatsCollector {
     await asyncForEach(indexPatternIds, async (indexPatternId) => {
       let indexPattern;
       try {
-        indexPattern = await this._indexPatternsService.get(indexPatternId);
+        indexPattern = await this._indexPatternsService.getDeprecated(indexPatternId);
       } catch (e) {
         return;
       }
@@ -93,7 +93,7 @@ export class IndexPatternStatsCollector {
 
     let indexPattern;
     try {
-      indexPattern = await this._indexPatternsService.get(indexPatternId);
+      indexPattern = await this._indexPatternsService.getDeprecated(indexPatternId);
     } catch (e) {
       return false;
     }

@@ -61,7 +61,7 @@ export const createIndexPatternsMock = (
   indexPatterns: IndexPatternMock[]
 ): {
   getIdsWithTitle: DataViewsContract['getIdsWithTitle'];
-  get: (...args: Parameters<DataViewsContract['get']>) => Promise<IndexPatternMock>;
+  get: (...args: Parameters<DataViewsContract['getDeprecated']>) => Promise<IndexPatternMock>;
 } => {
   return {
     async getIdsWithTitle(_refresh?: boolean) {

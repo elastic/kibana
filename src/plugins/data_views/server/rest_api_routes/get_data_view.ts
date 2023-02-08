@@ -33,7 +33,7 @@ export const getDataView = async ({
   id,
 }: GetDataViewArgs) => {
   usageCollection?.incrementCounter({ counterName });
-  return dataViewsService.get(id);
+  return dataViewsService.getDeprecated(id);
 };
 
 const getDataViewRouteFactory =

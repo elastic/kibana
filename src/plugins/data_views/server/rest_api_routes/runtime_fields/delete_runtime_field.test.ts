@@ -15,7 +15,7 @@ describe('delete runtime field', () => {
   it('call usageCollection', () => {
     const usageCollection = getUsageCollection();
 
-    dataViewsService.get.mockImplementation(
+    dataViewsService.getDeprecated.mockImplementation(
       async (id: string) =>
         ({
           removeRuntimeField: jest.fn(),
