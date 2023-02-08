@@ -105,12 +105,18 @@ describe('migration from 7.13 to 7.14+ with many failed action_tasks', () => {
       expect(actionTaskParamsCount).toBeLessThan(1000);
       expect(tasksCount).toBeLessThan(1000);
 
-      expect(await getCounts('.kibana_7.13.5_001', '.kibana_task_manager_7.13.5_001')).toEqual({
-        // .kibana mappings changes are NOT compatible, we reindex and preserve old index's documents
-        actionTaskParamsCount: 2010,
-        // .kibana_task_manager mappings changes are compatible, we skip reindex and actively delete unwanted documents
-        tasksCount: 954,
-      });
+      const {
+        actionTaskParamsCount: oldIndexActionTaskParamsCount,
+        tasksCount: oldIndexTasksCount,
+      } = await getCounts('.kibana_7.13.5_001', '.kibana_task_manager_7.13.5_001');
+
+      // .kibana mappings changes are NOT compatible, we reindex and preserve old index's documents
+      expect(oldIndexActionTaskParamsCount).toEqual(2010);
+
+      // ATM .kibana_task_manager mappings changes are compatible, we skip reindex and actively delete unwanted documents
+      // if the mappings become incompatible in the future, the we will reindex and the old index must still contain all 2020 docs
+      // if the mappings remain compatible, we reuse the existing index and actively delete unwanted documents from it
+      expect(oldIndexTasksCount === 2020 || oldIndexTasksCount < 1000).toEqual(true);
     });
   });
 });
