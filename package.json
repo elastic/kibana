@@ -408,6 +408,7 @@
     "@kbn/utility-types": "link:packages/kbn-utility-types",
     "@kbn/utility-types-jest": "link:packages/kbn-utility-types-jest",
     "@kbn/utils": "link:packages/kbn-utils",
+    "@kubernetes/client-node": "^0.18.1",
     "@loaders.gl/core": "^2.3.1",
     "@loaders.gl/json": "^2.3.1",
     "@loaders.gl/shapefile": "^2.3.1",
