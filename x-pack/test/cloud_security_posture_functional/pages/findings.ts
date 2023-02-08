@@ -105,7 +105,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       resourceFindingsTable = findings.resourceFindingsTable;
       distributionBar = findings.distributionBar;
 
-      await findings.index.remove();
       await findings.index.add(data);
       await findings.navigateToLatestFindingsPage();
       await retry.waitFor(
