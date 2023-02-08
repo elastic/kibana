@@ -74,7 +74,7 @@ export const useBrowserRunOnceMonitors = ({
   skipDetails?: boolean;
   expectSummaryDocs: number;
 }) => {
-  const { refreshTimer, lastRefresh } = useTickTick(5 * 1000, refresh);
+  const { refreshTimer, lastRefresh } = useTickTick(10 * 1000, refresh);
 
   const [checkGroupResults, setCheckGroupResults] = useState<CheckGroupResult[]>(() => {
     return new Array(expectSummaryDocs)

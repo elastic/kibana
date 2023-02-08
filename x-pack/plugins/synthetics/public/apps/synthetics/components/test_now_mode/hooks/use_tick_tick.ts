@@ -19,7 +19,7 @@ export function useTickTick(interval?: number, refresh = true) {
         refreshApp();
       }
       setNextTick(Date.now());
-    }, interval ?? 5 * 1000)
+    }, interval ?? 10 * 1000)
   );
 
   useEffect(() => {
