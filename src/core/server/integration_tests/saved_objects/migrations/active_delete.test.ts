@@ -358,8 +358,7 @@ describe('when upgrading to a new stack version', () => {
         Record<string, AggregationsAggregate>
       > = await client.search({ index: defaultKibanaIndex, size: 100 });
 
-      // we have just deleted the 2 excluded complex types (see fixtures)
-      expect(indexContents.hits.hits.length).toEqual(8);
+      expect(indexContents.hits.hits.length).toEqual(8); // we're removing a couple of 'complex' (value < = 1)
 
       // double-check that the deprecated documents have not been deleted
       expect(countResultsByType(indexContents, 'deprecated')).toEqual(3);

@@ -9,6 +9,8 @@ import React from 'react';
 import { useQueryToggle } from '../../../../common/containers/query_toggle';
 import { TestProviders } from '../../../../common/mock';
 import { AlertsSummaryChartsPanel } from '.';
+import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
+import type { GroupBySelection } from '../alerts_progress_bar_panel/types';
 
 jest.mock('../../../../common/lib/kibana');
 jest.mock('../../../../common/containers/query_toggle');
@@ -18,14 +20,22 @@ jest.mock('react-router-dom', () => {
   return { ...actual, useLocation: jest.fn().mockReturnValue({ pathname: '' }) };
 });
 
+const mockUseIsExperimentalFeatureEnabled = useIsExperimentalFeatureEnabled as jest.Mock;
+jest.mock('../../../../common/hooks/use_experimental_features');
+
 describe('AlertsSummaryChartsPanel', () => {
   const defaultProps = {
     signalIndexName: 'signalIndexName',
+    isExpanded: true,
+    setIsExpanded: jest.fn(),
+    groupBySelection: 'host.name' as GroupBySelection,
+    setGroupBySelection: jest.fn(),
   };
   const mockSetToggle = jest.fn();
   const mockUseQueryToggle = useQueryToggle as jest.Mock;
   beforeEach(() => {
     mockUseQueryToggle.mockReturnValue({ toggleStatus: true, setToggleStatus: mockSetToggle });
+    mockUseIsExperimentalFeatureEnabled.mockReturnValue(false);
   });
 
   test('renders correctly', async () => {
@@ -89,7 +99,7 @@ describe('AlertsSummaryChartsPanel', () => {
       });
     });
 
-    test('toggleStatus=true, render', async () => {
+    it('alertsPageChartsEnabled is false and toggleStatus=true, render', async () => {
       await act(async () => {
         const { container } = render(
           <TestProviders>
@@ -102,12 +112,39 @@ describe('AlertsSummaryChartsPanel', () => {
       });
     });
 
-    test('toggleStatus=false, hide', async () => {
+    it('alertsPageChartsEnabled is false and toggleStatus=false, hide', async () => {
       mockUseQueryToggle.mockReturnValue({ toggleStatus: false, setToggleStatus: mockSetToggle });
       await act(async () => {
         const { container } = render(
           <TestProviders>
             <AlertsSummaryChartsPanel {...defaultProps} />
+          </TestProviders>
+        );
+        expect(
+          container.querySelector('[data-test-subj="alerts-charts-container"]')
+        ).not.toBeInTheDocument();
+      });
+    });
+
+    it('alertsPageChartsEnabled is true and isExpanded=true, render', async () => {
+      mockUseIsExperimentalFeatureEnabled.mockReturnValue(true);
+      await act(async () => {
+        const { container } = render(
+          <TestProviders>
+            <AlertsSummaryChartsPanel {...defaultProps} />
+          </TestProviders>
+        );
+        expect(
+          container.querySelector('[data-test-subj="alerts-charts-container"]')
+        ).toBeInTheDocument();
+      });
+    });
+    it('alertsPageChartsEnabled is true and isExpanded=false, hide', async () => {
+      mockUseIsExperimentalFeatureEnabled.mockReturnValue(true);
+      await act(async () => {
+        const { container } = render(
+          <TestProviders>
+            <AlertsSummaryChartsPanel {...defaultProps} isExpanded={false} />
           </TestProviders>
         );
         expect(

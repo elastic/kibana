@@ -52,7 +52,7 @@ export const ML_PAGES = {
   ANOMALY_DETECTION_CREATE_JOB_SELECT_INDEX: 'jobs/new_job/step/index_or_search',
   ANOMALY_DETECTION_CREATE_JOB_FROM_LENS: 'jobs/new_job/from_lens',
   ANOMALY_DETECTION_CREATE_JOB_FROM_MAP: 'jobs/new_job/from_map',
-  ANOMALY_DETECTION_MODULES_VIEW_OR_CREATE: '/modules/check_view_or_create',
+  ANOMALY_DETECTION_MODULES_VIEW_OR_CREATE: 'modules/check_view_or_create',
   SETTINGS: 'settings',
   CALENDARS_MANAGE: 'settings/calendars_list',
   CALENDARS_NEW: 'settings/calendars_list/new_calendar',
