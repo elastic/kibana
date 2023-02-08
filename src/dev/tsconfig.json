@@ -37,5 +37,6 @@
     "@kbn/picomatcher",
     "@kbn/repo-file-maps",
     "@kbn/get-repo-files",
+    "@kbn/import-locator",
   ]
 }

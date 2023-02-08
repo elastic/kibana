@@ -1,5 +1,5 @@
 {
-  "name": "analytics_ftr_helpers",
+  "name": "@kbn/analytics-ftr-helpers-plugin",
   "version": "1.0.0",
   "kibana": {
     "version": "kibana",

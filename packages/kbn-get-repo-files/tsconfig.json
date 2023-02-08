@@ -15,6 +15,7 @@
   "kbn_references": [
     "@kbn/repo-info",
     "@kbn/repo-path",
+    "@kbn/repo-packages",
   ],
   "exclude": [
     "target/**/*",

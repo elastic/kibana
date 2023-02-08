@@ -12,9 +12,9 @@
   ],
   "kbn_references": [
     "@kbn/core",
-    "@kbn/cases-plugin",
-    "@kbn/lens-plugin",
-    "@kbn/kibana-react-plugin",
-    "@kbn/i18n-react",
+    "@kbn/config-schema",
+    "@kbn/std",
+    "@kbn/encrypted-saved-objects-plugin",
+    "@kbn/spaces-plugin",
   ]
 }
