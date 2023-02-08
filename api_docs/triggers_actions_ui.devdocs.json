@@ -8561,9 +8561,9 @@
           "description": [],
           "signature": [
             "(props: ",
-            "RulesListNotifyBadgeProps",
+            "RulesListNotifyBadgePropsWithApi",
             ") => React.ReactElement<",
-            "RulesListNotifyBadgeProps",
+            "RulesListNotifyBadgePropsWithApi",
             ", string | React.JSXElementConstructor<any>>"
           ],
           "path": "x-pack/plugins/triggers_actions_ui/public/plugin.ts",
@@ -8578,7 +8578,7 @@
               "label": "props",
               "description": [],
               "signature": [
-                "RulesListNotifyBadgeProps"
+                "RulesListNotifyBadgePropsWithApi"
               ],
               "path": "x-pack/plugins/triggers_actions_ui/public/plugin.ts",
               "deprecated": false,
