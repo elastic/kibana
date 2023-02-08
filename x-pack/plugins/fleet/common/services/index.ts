@@ -20,7 +20,10 @@ export { isValidNamespace, INVALID_NAMESPACE_CHARACTERS } from './is_valid_names
 export { isDiffPathProtocol } from './is_diff_path_protocol';
 export { LicenseService } from './license';
 export { isAgentUpgradeable } from './is_agent_upgradeable';
-export { isAgentRequestDiagnosticsSupported } from './is_agent_request_diagnostics_supported';
+export {
+  isAgentRequestDiagnosticsSupported,
+  MINIMUM_DIAGNOSTICS_AGENT_VERSION,
+} from './is_agent_request_diagnostics_supported';
 export {
   isInputOnlyPolicyTemplate,
   isIntegrationPolicyTemplate,

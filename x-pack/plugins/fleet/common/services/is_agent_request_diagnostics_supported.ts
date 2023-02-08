@@ -9,6 +9,8 @@ import semverGte from 'semver/functions/gte';
 
 import type { Agent } from '../types';
 
+export const MINIMUM_DIAGNOSTICS_AGENT_VERSION = '8.7.0';
+
 export function isAgentRequestDiagnosticsSupported(agent: Agent) {
   let agentVersion: string;
   if (typeof agent?.local_metadata?.elastic?.agent?.version === 'string') {
@@ -16,5 +18,5 @@ export function isAgentRequestDiagnosticsSupported(agent: Agent) {
   } else {
     return false;
   }
-  return semverGte(agentVersion, '8.7.0');
+  return semverGte(agentVersion, MINIMUM_DIAGNOSTICS_AGENT_VERSION);
 }
