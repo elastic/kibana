@@ -149,11 +149,11 @@ describe('Background Search Session Management Table', () => {
     });
   });
 
-  // FLAKY: https://github.com/elastic/kibana/issues/88928
   describe('fetching sessions data', () => {
     test('re-fetches data', async () => {
       jest.useFakeTimers({ legacyFakeTimers: true });
-      sessionsClient.find = jest.fn();
+      const find = jest.fn();
+      sessionsClient.find = find;
       mockConfig = {
         ...mockConfig,
         management: {
@@ -175,16 +175,16 @@ describe('Background Search Session Management Table', () => {
             />
           </LocaleWrapper>
         );
-        // initial find
-        await jest.advanceTimersByTime(100);
-        // first refresh
+        // initial fetch
+        await jest.advanceTimersByTime(500);
+        expect(find).toHaveBeenCalledTimes(1);
+        // refetch 1
         await jest.advanceTimersByTime(10000);
-        // second refresh
+        expect(find).toHaveBeenCalledTimes(2);
+        // refetch 2
         await jest.advanceTimersByTime(10000);
+        expect(find).toHaveBeenCalledTimes(3);
       });
-
-      // 1 for initial load + 2 refresh calls
-      expect(sessionsClient.find).toBeCalledTimes(3);
 
       jest.useRealTimers();
     });
