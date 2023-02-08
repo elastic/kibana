@@ -16,7 +16,6 @@ import {
   EuiConfirmModal,
   EuiIcon,
   EuiInMemoryTable,
-  EuiLink,
   EuiSpacer,
   EuiTableActionsColumnType,
   EuiText,
@@ -90,9 +89,7 @@ export const EngineIndices: React.FC = () => {
       }),
       render: ({ health, name }: EnterpriseSearchEngineIndex) =>
         health === 'unknown' ? (
-          <EuiLink onClick={() => {}} color="subdued">
-            {name}
-          </EuiLink>
+          name
         ) : (
           <EuiLinkTo
             data-test-subj="engine-index-link"
