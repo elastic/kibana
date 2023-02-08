@@ -21,6 +21,7 @@ import {
   removeServerGeneratedProperties,
   waitForRuleSuccessOrStatus,
 } from '../../utils';
+import { waitForDelay } from '../../utils/wait_for_delay';
 
 const DYNAMIC_FIELDS_AVAILABILITY_TIMEOUT_MS = 300;
 
@@ -85,7 +86,7 @@ export default ({ getService }: FtrProviderContext): void => {
         await waitForRuleSuccessOrStatus(supertest, log, rule.id);
 
         // Wait for execution_summary to be available
-        await new Promise((resolve) => setTimeout(resolve, DYNAMIC_FIELDS_AVAILABILITY_TIMEOUT_MS));
+        await waitForDelay(DYNAMIC_FIELDS_AVAILABILITY_TIMEOUT_MS);
 
         const { body } = await supertest
           .post(`${DETECTION_ENGINE_RULES_URL}/_export`)
@@ -112,7 +113,7 @@ export default ({ getService }: FtrProviderContext): void => {
         await waitForRuleSuccessOrStatus(supertest, log, rule.id);
 
         // Wait for execution_summary to be available
-        await new Promise((resolve) => setTimeout(resolve, DYNAMIC_FIELDS_AVAILABILITY_TIMEOUT_MS));
+        await waitForDelay(DYNAMIC_FIELDS_AVAILABILITY_TIMEOUT_MS);
 
         const { body } = await supertest
           .post(`${DETECTION_ENGINE_RULES_URL}/_export`)
