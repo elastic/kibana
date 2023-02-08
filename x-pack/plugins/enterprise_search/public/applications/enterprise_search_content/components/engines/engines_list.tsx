@@ -16,6 +16,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage, FormattedNumber } from '@kbn/i18n-react';
 
 import { INPUT_THROTTLE_DELAY_MS } from '../../../shared/constants/timers';
+import { docLinks } from '../../../shared/doc_links';
 
 import { EnterpriseSearchEnginesPageTemplate } from '../layout/engines_page_template';
 
@@ -102,12 +103,10 @@ export const EnginesList: React.FC = () => {
                 documentationUrl: (
                   <EuiLink
                     data-test-subj="engines-documentation-link"
-                    href="TODO"
+                    href={docLinks.enterpriseSearchEngines}
                     target="_blank"
                     data-telemetry-id="entSearchContent-engines-documentation-viewDocumentaion"
                   >
-                    {' '}
-                    {/* TODO: navigate to documentation url */}{' '}
                     {i18n.translate('xpack.enterpriseSearch.content.engines.documentation', {
                       defaultMessage: 'explore our Engines documentation',
                     })}

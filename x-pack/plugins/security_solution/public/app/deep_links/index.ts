@@ -27,6 +27,7 @@ import {
   BLOCKLIST,
   CREATE_NEW_RULE,
   DASHBOARDS,
+  DATA_QUALITY,
   DETECT,
   DETECTION_RESPONSE,
   ENDPOINTS,
@@ -54,6 +55,7 @@ import {
   BLOCKLIST_PATH,
   CASES_FEATURE_ID,
   CASES_PATH,
+  DATA_QUALITY_PATH,
   DETECTION_RESPONSE_PATH,
   ENDPOINTS_PATH,
   EVENT_FILTERS_PATH,
@@ -177,6 +179,17 @@ export const securitySolutionsDeepLinks: SecuritySolutionDeepLink[] = [
         keywords: [
           i18n.translate('xpack.securitySolution.search.entityAnalytics', {
             defaultMessage: 'Entity Analytics',
+          }),
+        ],
+      },
+      {
+        id: SecurityPageName.dataQuality,
+        title: DATA_QUALITY,
+        path: DATA_QUALITY_PATH,
+        features: [FEATURE.general],
+        keywords: [
+          i18n.translate('xpack.securitySolution.search.dataQualityDashboard', {
+            defaultMessage: 'Data quality',
           }),
         ],
       },
