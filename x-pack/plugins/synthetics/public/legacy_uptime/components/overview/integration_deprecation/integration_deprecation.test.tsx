@@ -9,62 +9,64 @@ import userEvent from '@testing-library/user-event';
 import { StubBrowserStorage } from '@kbn/test-jest-helpers';
 import { screen } from '@testing-library/react';
 import { render } from '../../../lib/helper/rtl_helpers';
-import { ZipUrlDeprecation, ZIP_URL_DEPRECATION_SESSION_STORAGE_KEY } from '.';
+import { IntegrationDeprecation, INTEGRATION_DEPRECATION_SESSION_STORAGE_KEY } from '.';
 import * as observabilityPublic from '@kbn/observability-plugin/public';
 
 export const mockStorage = new StubBrowserStorage();
 jest.mock('@kbn/observability-plugin/public');
 
-describe('ZipUrlDeprecation', () => {
+const DEPRECATION_TITLE = 'Migrate your Elastic Synthetics integration monitors before Elastic 8.8';
+
+describe('IntegrationDeprecation', () => {
   const { FETCH_STATUS } = observabilityPublic;
-  it('shows deprecation notice when hasZipUrlMonitors is true', () => {
+  it('shows deprecation notice when hasIntegrationMonitors is true', () => {
     jest.spyOn(observabilityPublic, 'useFetcher').mockReturnValue({
       status: FETCH_STATUS.SUCCESS,
-      data: { hasZipUrlMonitors: true },
+      data: { hasIntegrationMonitors: true },
       refetch: () => null,
       loading: false,
     });
 
-    render(<ZipUrlDeprecation />);
-    expect(screen.getByText('Deprecation notice')).toBeInTheDocument();
+    render(<IntegrationDeprecation />);
+    expect(screen.getByText(DEPRECATION_TITLE)).toBeInTheDocument();
   });
 
-  it('does not show deprecation notice when hasZipUrlMonitors is false', () => {
+  it('does not show deprecation notice when hasIntegrationMonitors is false', () => {
     jest.spyOn(observabilityPublic, 'useFetcher').mockReturnValue({
       status: FETCH_STATUS.SUCCESS,
-      data: { hasZipUrlMonitors: false },
+      data: { hasIntegrationMonitors: false },
       refetch: () => null,
       loading: false,
     });
 
-    render(<ZipUrlDeprecation />);
-    expect(screen.queryByText('Deprecation notice')).not.toBeInTheDocument();
+    render(<IntegrationDeprecation />);
+    expect(screen.queryByText(DEPRECATION_TITLE)).not.toBeInTheDocument();
   });
 
   it('dismisses notification', () => {
     jest.spyOn(observabilityPublic, 'useFetcher').mockReturnValue({
       status: FETCH_STATUS.SUCCESS,
-      data: { hasZipUrlMonitors: true },
+      data: { hasIntegrationMonitors: true },
       refetch: () => null,
       loading: false,
     });
 
-    render(<ZipUrlDeprecation />);
-    expect(screen.getByText('Deprecation notice')).toBeInTheDocument();
+    render(<IntegrationDeprecation />);
+    expect(screen.getByText(DEPRECATION_TITLE)).toBeInTheDocument();
     userEvent.click(screen.getByText('Dismiss'));
-    expect(screen.queryByText('Deprecation notice')).not.toBeInTheDocument();
+    expect(screen.queryByText(DEPRECATION_TITLE)).not.toBeInTheDocument();
   });
 
   it('does not show notification when session storage key is true', () => {
     jest.spyOn(observabilityPublic, 'useFetcher').mockReturnValue({
       status: FETCH_STATUS.SUCCESS,
-      data: { hasZipUrlMonitors: true },
+      data: { hasIntegrationMonitors: true },
       refetch: () => null,
       loading: false,
     });
-    mockStorage.setItem(ZIP_URL_DEPRECATION_SESSION_STORAGE_KEY, 'true');
+    mockStorage.setItem(INTEGRATION_DEPRECATION_SESSION_STORAGE_KEY, 'true');
 
-    render(<ZipUrlDeprecation />);
-    expect(screen.queryByText('Deprecation notice')).not.toBeInTheDocument();
+    render(<IntegrationDeprecation />);
+    expect(screen.queryByText(DEPRECATION_TITLE)).not.toBeInTheDocument();
   });
 });

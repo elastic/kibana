@@ -5,7 +5,10 @@
  * 2.0.
  */
 
+// TODO: Refactor this away from constate, which is unmaintained, as this is the only
+// usage of it across the Fleet codebase
 import createContainer from 'constate';
+
 import React, { useCallback, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n-react';

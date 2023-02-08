@@ -15,7 +15,7 @@ import {
   LEGACY_URL_ALIAS_TYPE,
 } from '@kbn/core-saved-objects-base-server-internal';
 import { DocumentMigrator } from './document_migrator';
-import { TransformSavedObjectDocumentError } from './transform_saved_object_document_error';
+import { TransformSavedObjectDocumentError } from '../core/transform_saved_object_document_error';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 
 const mockLoggerFactory = loggingSystemMock.create();

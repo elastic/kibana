@@ -5,6 +5,6 @@
  * 2.0.
  */
 
-export interface SyntheticsHasZipUrlMonitorsResponse {
-  hasZipUrlMonitors: boolean;
+export interface SyntheticsHasIntegrationMonitorsResponse {
+  hasIntegrationMonitors: boolean;
 }
