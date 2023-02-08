@@ -30,13 +30,17 @@ const SlackActionFields: React.FunctionComponent<ActionConnectorFieldsProps> = (
   readOnly,
   registerPreSubmitValidator,
 }) => {
-  const [selectedSlackType, setSelectedSlackType] = useState('web_api');
+  const { setFieldValue, getFieldDefaultValue } = useFormContext();
+
+  const defaultSlackType = getFieldDefaultValue('config.type');
+  const [selectedSlackType, setSelectedSlackType] = useState(
+    getFieldDefaultValue<string>('config.type') ?? 'web_api'
+  );
 
   const onChange = (id: string) => {
     setSelectedSlackType(id);
   };
 
-  const { setFieldValue } = useFormContext();
   useEffect(() => {
     setFieldValue('config.type', selectedSlackType);
   }, [selectedSlackType, setFieldValue]);
@@ -53,7 +57,7 @@ const SlackActionFields: React.FunctionComponent<ActionConnectorFieldsProps> = (
         idSelected={selectedSlackType}
         onChange={onChange}
       />
-      <HiddenField path={'config.type'} config={{ defaultValue: 'web_api' }} />
+      <HiddenField path={'config.type'} config={{ defaultValue: defaultSlackType }} />
       <EuiSpacer size="m" />
       {selectedSlackType === 'webhook' ? (
         <SlackWebhookActionFields
