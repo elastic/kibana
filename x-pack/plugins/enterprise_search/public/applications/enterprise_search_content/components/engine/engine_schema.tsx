@@ -19,7 +19,6 @@ import { EnterpriseSearchEnginesPageTemplate } from '../layout/engines_page_temp
 import { EngineIndicesLogic } from './engine_indices_logic';
 
 import { EngineViewLogic } from './engine_view_logic';
-import { EngineViewHeaderActions } from './engine_view_header_actions';
 
 export const EngineSchema: React.FC = () => {
   const { engineName } = useValues(EngineIndicesLogic);
@@ -52,7 +51,6 @@ export const EngineSchema: React.FC = () => {
         pageTitle: i18n.translate('xpack.enterpriseSearch.content.engine.schema.pageTitle', {
           defaultMessage: 'Schema',
         }),
-        rightSideItems: [<EngineViewHeaderActions />],
       }}
       engineName={engineName}
     >
