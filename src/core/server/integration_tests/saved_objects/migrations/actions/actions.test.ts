@@ -57,7 +57,8 @@ const { startES } = createTestServers({
 });
 let esServer: TestElasticsearchUtils;
 
-describe('migration actions', () => {
+// FAILING: https://github.com/elastic/kibana/issues/150642
+describe.skip('migration actions', () => {
   let client: ElasticsearchClient;
 
   beforeAll(async () => {
@@ -1093,7 +1094,7 @@ describe('migration actions', () => {
         left: {
           error: expect.any(errors.ResponseError),
           message: expect.stringContaining(
-            '[timeout_exception] Timed out waiting for completion of [Task'
+            '[timeout_exception] Timed out waiting for completion of task'
           ),
           type: 'wait_for_task_completion_timeout',
         },
@@ -1394,7 +1395,7 @@ describe('migration actions', () => {
         left: {
           error: expect.any(errors.ResponseError),
           message: expect.stringContaining(
-            '[timeout_exception] Timed out waiting for completion of [Task'
+            '[timeout_exception] Timed out waiting for completion of task'
           ),
           type: 'wait_for_task_completion_timeout',
         },

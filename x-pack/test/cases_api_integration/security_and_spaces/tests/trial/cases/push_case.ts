@@ -42,14 +42,14 @@ import {
   calculateDuration,
   getComment,
   bulkCreateAttachments,
-} from '../../../../common/lib/utils';
-import {
+  loginUsers,
+  setupSuperUserProfile,
   getServiceNowConnector,
   createCaseWithConnector,
   getRecordingServiceNowSimulatorServer,
   getServiceNowSimulationServer,
   createConnector,
-} from '../../../../common/lib/connectors';
+} from '../../../../common/lib/api';
 import {
   globalRead,
   noKibanaPrivileges,
@@ -60,7 +60,6 @@ import {
   superUser,
 } from '../../../../common/lib/authentication/users';
 import { RecordingServiceNowSimulator } from '../../../../../alerting_api_integration/common/plugins/actions_simulators/server/servicenow_simulation';
-import { loginUsers, setupSuperUserProfile } from '../../../../common/lib/user_profiles';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {

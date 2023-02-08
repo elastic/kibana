@@ -16,7 +16,7 @@ import {
   deleteAllCaseItems,
   getCaseMetrics,
   updateCase,
-} from '../../../../common/lib/utils';
+} from '../../../../common/lib/api';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {
