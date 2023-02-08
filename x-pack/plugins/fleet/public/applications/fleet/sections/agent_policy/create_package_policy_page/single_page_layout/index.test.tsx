@@ -20,7 +20,7 @@ import {
   sendGetAgentStatus,
   useIntraAppState,
   useStartServices,
-  useGetPackageInfoByKey,
+  useGetPackageInfoByKeyQuery,
 } from '../../../../hooks';
 
 jest.mock('../../../../hooks', () => {
@@ -42,10 +42,10 @@ jest.mock('../../../../hooks', () => {
     sendGetOneAgentPolicy: jest.fn().mockResolvedValue({
       data: { item: { id: 'agent-policy-1', name: 'Agent policy 1', namespace: 'default' } },
     }),
+    useGetPackageInfoByKeyQuery: jest.fn(),
     sendGetSettings: jest.fn().mockResolvedValue({
       data: { item: {} },
     }),
-    useGetPackageInfoByKey: jest.fn(),
     sendCreatePackagePolicy: jest
       .fn()
       .mockResolvedValue({ data: { item: { id: 'policy-1', inputs: [] } } }),
@@ -186,7 +186,7 @@ describe('when on the package policy create page', () => {
       isLoading: false,
     };
 
-    (useGetPackageInfoByKey as jest.Mock).mockReturnValue(mockPackageInfo);
+    (useGetPackageInfoByKeyQuery as jest.Mock).mockReturnValue(mockPackageInfo);
   });
 
   describe('and Route state is provided via Fleet HashRouter', () => {
@@ -355,7 +355,7 @@ describe('when on the package policy create page', () => {
     });
 
     test('should create agent policy without sys monitoring when new hosts is selected for system integration', async () => {
-      (useGetPackageInfoByKey as jest.Mock).mockReturnValue({
+      (useGetPackageInfoByKeyQuery as jest.Mock).mockReturnValue({
         ...mockPackageInfo,
         data: {
           item: {
