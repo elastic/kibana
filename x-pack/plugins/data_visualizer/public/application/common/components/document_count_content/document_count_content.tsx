@@ -15,32 +15,28 @@ import {
   EuiPanel,
   EuiSpacer,
   EuiCallOut,
-  EuiRange,
   EuiSelect,
   EuiFormRow,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { debounce } from 'lodash';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { isDefined } from '@kbn/ml-is-defined';
 import type { DocumentCountChartPoint } from './document_count_chart';
 import {
-  RANDOM_SAMPLER_STEP,
-  RANDOM_SAMPLER_PROBABILITIES,
   RandomSamplerOption,
   RANDOM_SAMPLER_SELECT_OPTIONS,
   RANDOM_SAMPLER_OPTION,
-  MIN_SAMPLER_PROBABILITY,
 } from '../../../index_data_visualizer/constants/random_sampler';
 import { TotalCountHeader } from './total_count_header';
 import type { DocumentCountStats } from '../../../../../common/types/field_stats';
 import { DocumentCountChart } from './document_count_chart';
+import { RandomSamplerRangeSlider } from './random_sampler_range_slider';
 
 export interface Props {
   documentCountStats?: DocumentCountStats;
   totalCount: number;
   samplingProbability?: number | null;
-  setSamplingProbability?: (value: number) => void;
+  setSamplingProbability?: (value: number | null) => void;
   randomSamplerPreference?: RandomSamplerOption;
   setRandomSamplerPreference: (value: RandomSamplerOption) => void;
   loading: boolean;
@@ -64,20 +60,6 @@ export const DocumentCountContent: FC<Props> = ({
   const closeSamplingOptions = useCallback(() => {
     setShowSamplingOptionsPopover(false);
   }, [setShowSamplingOptionsPopover]);
-
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  const updateSamplingProbability = useCallback(
-    debounce((newProbability: number) => {
-      if (setSamplingProbability) {
-        const nextProbability = Math.floor(newProbability) / 100;
-
-        setSamplingProbability(
-          nextProbability < MIN_SAMPLER_PROBABILITY ? MIN_SAMPLER_PROBABILITY : nextProbability
-        );
-      }
-    }, 100),
-    [setSamplingProbability]
-  );
 
   const calloutInfoMessage = useMemo(() => {
     switch (randomSamplerPreference) {
@@ -123,7 +105,7 @@ export const DocumentCountContent: FC<Props> = ({
 
   const approximate = documentCountStats.randomlySampled === true;
 
-  const ProbabilityUsed =
+  const ProbabilityUsedMessage =
     randomSamplerPreference !== RANDOM_SAMPLER_OPTION.OFF && isDefined(samplingProbability) ? (
       <div data-test-subj="dvRandomSamplerAutomaticProbabilityMsg">
         <EuiSpacer size="m" />
@@ -132,6 +114,18 @@ export const DocumentCountContent: FC<Props> = ({
           id="xpack.dataVisualizer.randomSamplerSettingsPopUp.probabilityLabel"
           defaultMessage="Probability used: {samplingProbability}%"
           values={{ samplingProbability: samplingProbability * 100 }}
+        />
+      </div>
+    ) : null;
+
+  const CalculatingProbMessage =
+    randomSamplerPreference !== RANDOM_SAMPLER_OPTION.OFF && isDefined(samplingProbability) ? (
+      <div data-test-subj="dvRandomSamplerAutomaticProbabilityMsg">
+        <EuiSpacer size="m" />
+
+        <FormattedMessage
+          id="xpack.dataVisualizer.randomSamplerSettingsPopUp.calculatingProbabilityLabel"
+          defaultMessage="Calculating the optimal probability"
         />
       </div>
     ) : null;
@@ -185,50 +179,27 @@ export const DocumentCountContent: FC<Props> = ({
                   data-test-subj="dvRandomSamplerOptionsSelect"
                   options={RANDOM_SAMPLER_SELECT_OPTIONS}
                   value={randomSamplerPreference}
-                  onChange={(e) =>
-                    setRandomSamplerPreference(e.target.value as RandomSamplerOption)
-                  }
+                  onChange={(e) => {
+                    if (
+                      e.target.value === RANDOM_SAMPLER_OPTION.ON_AUTOMATIC &&
+                      setSamplingProbability
+                    ) {
+                      setSamplingProbability(null);
+                    }
+                    setRandomSamplerPreference(e.target.value as RandomSamplerOption);
+                  }}
                 />
               </EuiFormRow>
 
               {randomSamplerPreference === RANDOM_SAMPLER_OPTION.ON_MANUAL ? (
-                <EuiFlexItem grow={true}>
-                  <EuiSpacer size="m" />
-                  <EuiFormRow
-                    label={i18n.translate(
-                      'xpack.dataVisualizer.randomSamplerSettingsPopUp.randomSamplerPercentageRowLabel',
-                      {
-                        defaultMessage: 'Sampling percentage',
-                      }
-                    )}
-                    helpText={i18n.translate(
-                      'xpack.dataVisualizer.randomSamplerSettingsPopUp.randomSamplerPercentageRowHelpText',
-                      {
-                        defaultMessage:
-                          'Choose a value between 0.001% and 50% to randomly sample data.',
-                      }
-                    )}
-                  >
-                    <EuiRange
-                      fullWidth
-                      showTicks
-                      showRange
-                      showInput="inputWithPopover"
-                      min={RANDOM_SAMPLER_STEP}
-                      max={50}
-                      value={(samplingProbability ?? 1) * 100}
-                      ticks={RANDOM_SAMPLER_PROBABILITIES.map((d) => ({
-                        value: d,
-                        label: d === 0.001 || d >= 5 ? `${d}` : '',
-                      }))}
-                      onChange={(e) => updateSamplingProbability(Number(e.currentTarget.value))}
-                      step={RANDOM_SAMPLER_STEP}
-                      data-test-subj="dvRandomSamplerProbabilityRange"
-                    />
-                  </EuiFormRow>
-                </EuiFlexItem>
+                <RandomSamplerRangeSlider
+                  samplingProbability={samplingProbability}
+                  setSamplingProbability={setSamplingProbability}
+                />
+              ) : loading ? (
+                CalculatingProbMessage
               ) : (
-                ProbabilityUsed
+                ProbabilityUsedMessage
               )}
             </EuiPanel>
           </EuiPopover>
