@@ -60,6 +60,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
         mute_all: false,
         muted_alert_ids: [],
         notify_when: 'onThrottleInterval',
+        revision: 1,
         scheduled_task_id: createdAlert.scheduled_task_id,
         created_at: response.body.created_at,
         updated_at: response.body.updated_at,
@@ -124,6 +125,8 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
           message: `Saved object [alert/${createdAlert.id}] not found`,
         });
     });
+
+    // TODO: Port over SecuritySolution `version` update() FTR tests
 
     describe('legacy', () => {
       it('should handle update alert request appropriately', async () => {

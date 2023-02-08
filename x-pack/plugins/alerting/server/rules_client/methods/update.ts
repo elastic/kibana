@@ -203,7 +203,11 @@ async function updateAlert<Params extends RuleTypeParams>(
   const notifyWhen = getRuleNotifyWhenType(data.notifyWhen ?? null, data.throttle ?? null);
 
   // Increment revision if applicable field has changed
-  const revision = incrementRevision(currentRule, updatedParams);
+  const revision = incrementRevision<Params>(
+    currentRule,
+    { id, data, allowMissingConnectorSecrets },
+    updatedParams
+  );
 
   let updatedObject: SavedObject<RawRule>;
   const createAttributes = updateMeta(context, {

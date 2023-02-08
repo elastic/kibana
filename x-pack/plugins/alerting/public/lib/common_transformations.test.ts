@@ -343,6 +343,7 @@ describe('common_transformations', () => {
         "nextRun": 2021-12-15T12:34:55.789Z,
         "notifyWhen": "onActiveAlert",
         "params": Object {},
+        "revision": 0,
         "schedule": Object {
           "interval": "1s",
         },

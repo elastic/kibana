@@ -6,13 +6,33 @@
  */
 
 import { SavedObject } from '@kbn/core/server';
+import { get, isEqual } from 'lodash';
 import { RawRule, RuleTypeParams } from '../../types';
+import { fieldsToExcludeFromRevisionUpdates, UpdateOptions } from '..';
 
-export function incrementRevision(
+export function incrementRevision<Params extends RuleTypeParams>(
   currentRule: SavedObject<RawRule>,
+  { data }: UpdateOptions<Params>,
   updatedParams: RuleTypeParams
 ): number {
-  // TODO: Update logic as outlined in https://github.com/elastic/kibana/issues/137164
-  // TODO: Potentially streamline with 'skipped logic' being introduced in https://github.com/elastic/kibana/pull/144461
-  return currentRule.attributes.revision + 1;
+  // Diff root level fields
+  for (const [field, value] of Object.entries(data).filter(([key]) => key !== 'params')) {
+    if (!fieldsToExcludeFromRevisionUpdates.map(toString).includes(field)) {
+      if (!isEqual(value, get(currentRule.attributes, field))) {
+        return currentRule.attributes.revision + 1;
+      }
+    }
+  }
+
+  // Diff rule params
+  for (const [field, value] of Object.entries(updatedParams)) {
+    // TODO: Remove 'version' from SecuritySolution (and maybe have a way for
+    // TODO: RuleTypes to declare fields that can be revision skipped as well?)
+    if (!fieldsToExcludeFromRevisionUpdates.map(toString).includes(field) && field !== 'version') {
+      if (!isEqual(value, get(currentRule.attributes.params, field))) {
+        return currentRule.attributes.revision + 1;
+      }
+    }
+  }
+  return currentRule.attributes.revision;
 }

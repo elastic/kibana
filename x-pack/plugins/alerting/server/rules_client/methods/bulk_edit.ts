@@ -436,7 +436,7 @@ async function updateRuleAttributesAndParamsInMemory<Params extends RuleTypePara
       });
       return;
     } else {
-      // All bulk edit operations result in revision increment, so no need to check which fields have changed
+      // All BulkEditOperation's result in a revision increment, so no need to check which fields have changed
       attributes.revision = rule.attributes.revision + 1;
     }
 
