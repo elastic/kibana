@@ -361,7 +361,15 @@ function useTabs({ selectedTab }: { selectedTab: Tab['key'] }) {
       }),
       append:
         serviceAlertsCount.alertsCount > 0 ? (
-          <EuiToolTip position="bottom" content="Active alerts">
+          <EuiToolTip
+            position="bottom"
+            content={i18n.translate(
+              'xpack.apm.home.serviceAlertsTable.tooltip.activeAlertsExplanation',
+              {
+                defaultMessage: 'Active alerts',
+              }
+            )}
+          >
             <EuiBadge color="danger">{serviceAlertsCount.alertsCount}</EuiBadge>
           </EuiToolTip>
         ) : null,

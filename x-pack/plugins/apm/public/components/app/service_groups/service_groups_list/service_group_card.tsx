@@ -81,7 +81,15 @@ export function ServiceGroupsCard({
           </ServiceStat>
           <ServiceStat loading={isLoading} grow={isLoading}>
             {serviceGroupCounts && serviceGroupCounts.alerts > 0 && (
-              <EuiToolTip position="bottom" content="Active alerts">
+              <EuiToolTip
+                position="bottom"
+                content={i18n.translate(
+                  'xpack.apm.home.serviceGroups.tooltip.activeAlertsExplanation',
+                  {
+                    defaultMessage: 'Active alerts',
+                  }
+                )}
+              >
                 <EuiBadge
                   iconType="alert"
                   color="danger"

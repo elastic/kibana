@@ -82,7 +82,9 @@ export function getServiceColumns({
       ? [
           {
             field: ServiceInventoryFieldName.AlertsCount,
-            name: 'Active alerts',
+            name: i18n.translate('xpack.apm.servicesTable.alertsColumnLabel', {
+              defaultMessage: 'Active alerts',
+            }),
             width: `${unit * 8}px`,
             sortable: true,
             render: (_, { serviceName, alertsCount }) => {
@@ -91,7 +93,15 @@ export function getServiceColumns({
               }
 
               return (
-                <EuiToolTip position="bottom" content="Active alerts">
+                <EuiToolTip
+                  position="bottom"
+                  content={i18n.translate(
+                    'xpack.apm.home.servicesTable.tooltip.activeAlertsExplanation',
+                    {
+                      defaultMessage: 'Active alerts',
+                    }
+                  )}
+                >
                   <EuiBadge
                     iconType="alert"
                     color="danger"
