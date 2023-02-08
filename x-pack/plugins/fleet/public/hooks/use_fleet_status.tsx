@@ -44,6 +44,7 @@ export const FleetStatusProvider: React.FC = ({ children }) => {
     isReady: false,
   });
 
+  // TODO: Refactor to use react-query
   const sendGetStatus = useCallback(
     async function sendGetStatus() {
       try {
