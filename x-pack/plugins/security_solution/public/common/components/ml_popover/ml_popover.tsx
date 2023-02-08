@@ -15,7 +15,7 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useCallback, useState, useMemo } from 'react';
 import styled from 'styled-components';
-import { MLJobsAwaitingNodeWarning } from '@kbn/ml-plugin/public';
+import { MLJobsAwaitingNodeWarning, MlNodeAvailableWarningShared } from '@kbn/ml-plugin/public';
 import { useKibana } from '../../lib/kibana';
 import { filterJobs } from './helpers';
 import { JobsTableFilters } from './jobs_table/filters/jobs_table_filters';
@@ -48,6 +48,8 @@ const defaultFilterProps: JobsFilters = {
 export const MlPopover = React.memo(() => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const [filterProperties, setFilterProperties] = useState(defaultFilterProps);
+  const [mlNodesAvailable, setMlNodesAvailable] = useState(false);
+
   const {
     isMlAdmin,
     isLicensed,
@@ -178,10 +180,12 @@ export const MlPopover = React.memo(() => {
           )}
 
           <MLJobsAwaitingNodeWarning jobIds={installedJobsIds} />
+          <MlNodeAvailableWarningShared size="s" nodeAvailableCallback={setMlNodesAvailable} />
           <JobsTable
             isLoading={isLoadingSecurityJobs || isLoadingEnableDataFeed}
             jobs={filteredJobs}
             onJobStateChange={handleJobStateChange}
+            mlNodesAvailable={mlNodesAvailable}
           />
         </PopoverContentsDiv>
       </EuiPopover>
