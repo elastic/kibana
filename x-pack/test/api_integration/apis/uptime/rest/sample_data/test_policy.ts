@@ -13,7 +13,8 @@ export const getTestSyntheticsPolicy = (
   name: string,
   id: string,
   locationName?: string,
-  namespace?: string
+  namespace?: string,
+  isTLSEnabled?: boolean
 ): PackagePolicy => ({
   id: '2bfd7da0-22ed-11ed-8c6b-09a2d21dfbc3-27337270-22ed-11ed-8c6b-09a2d21dfbc3-default',
   version: 'WzE2MjYsMV0=',
@@ -34,8 +35,7 @@ export const getTestSyntheticsPolicy = (
           release: 'experimental',
           vars: {
             __ui: {
-              value:
-                '{"is_tls_enabled":false,"is_zip_url_tls_enabled":false,"script_source":{"is_generated_script":false,"file_name":"test-file.name"}}',
+              value: `{"is_tls_enabled":${isTLSEnabled || false}}`,
               type: 'yaml',
             },
             enabled: { value: true, type: 'bool' },
@@ -62,12 +62,18 @@ export const getTestSyntheticsPolicy = (
             'check.response.headers': { value: null, type: 'yaml' },
             'check.response.body.positive': { value: null, type: 'yaml' },
             'check.response.body.negative': { value: null, type: 'yaml' },
-            'ssl.certificate_authorities': { value: '"t.string"', type: 'yaml' },
-            'ssl.certificate': { value: '"t.string"', type: 'yaml' },
-            'ssl.key': { value: '"t.string"', type: 'yaml' },
-            'ssl.key_passphrase': { value: 't.string', type: 'text' },
-            'ssl.verification_mode': { value: 'certificate', type: 'text' },
-            'ssl.supported_protocols': { value: '["TLSv1.1","TLSv1.2"]', type: 'yaml' },
+            'ssl.certificate_authorities': {
+              value: isTLSEnabled ? '"t.string"' : null,
+              type: 'yaml',
+            },
+            'ssl.certificate': { value: isTLSEnabled ? '"t.string"' : null, type: 'yaml' },
+            'ssl.key': { value: isTLSEnabled ? '"t.string"' : null, type: 'yaml' },
+            'ssl.key_passphrase': { value: isTLSEnabled ? 't.string' : null, type: 'text' },
+            'ssl.verification_mode': { value: isTLSEnabled ? 'certificate' : null, type: 'text' },
+            'ssl.supported_protocols': {
+              value: isTLSEnabled ? '["TLSv1.1","TLSv1.2"]' : null,
+              type: 'yaml',
+            },
             location_name: { value: locationName || 'Test private location 0', type: 'text' },
             id: { value: id, type: 'text' },
             config_id: { value: id, type: 'text' },
@@ -79,9 +85,7 @@ export const getTestSyntheticsPolicy = (
           id: 'synthetics/http-http-2bfd7da0-22ed-11ed-8c6b-09a2d21dfbc3-27337270-22ed-11ed-8c6b-09a2d21dfbc3-default',
           compiled_stream: {
             __ui: {
-              is_tls_enabled: false,
-              is_zip_url_tls_enabled: false,
-              script_source: { is_generated_script: false, file_name: 'test-file.name' },
+              is_tls_enabled: isTLSEnabled || false,
             },
             type: 'http',
             name,
@@ -102,12 +106,16 @@ export const getTestSyntheticsPolicy = (
             'check.request.headers': { sampleHeader: 'sampleHeaderValue' },
             'check.request.body': 'testValue',
             'check.response.status': ['200', '201'],
-            'ssl.certificate': 't.string',
-            'ssl.certificate_authorities': 't.string',
-            'ssl.key': 't.string',
-            'ssl.key_passphrase': 't.string',
-            'ssl.verification_mode': 'certificate',
-            'ssl.supported_protocols': ['TLSv1.1', 'TLSv1.2'],
+            ...(isTLSEnabled
+              ? {
+                  'ssl.certificate': 't.string',
+                  'ssl.certificate_authorities': 't.string',
+                  'ssl.key': 't.string',
+                  'ssl.key_passphrase': 't.string',
+                  'ssl.verification_mode': 'certificate',
+                  'ssl.supported_protocols': ['TLSv1.1', 'TLSv1.2'],
+                }
+              : {}),
             processors: [
               {
                 add_observer_metadata: { geo: { name: locationName || 'Test private location 0' } },

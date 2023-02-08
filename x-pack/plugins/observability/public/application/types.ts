@@ -46,4 +46,5 @@ export interface ObservabilityAppServices {
   uiSettings: IUiSettingsClient;
   unifiedSearch: UnifiedSearchPublicPluginStart;
   isDev?: boolean;
+  kibanaVersion: string;
 }

@@ -163,9 +163,10 @@ describe('useTagsAction', () => {
     });
 
     await waitFor(() => {
-      expect(appMockRender.coreStart.notifications.toasts.addSuccess).toHaveBeenCalledWith(
-        'Edited case'
-      );
+      expect(appMockRender.coreStart.notifications.toasts.addSuccess).toHaveBeenCalledWith({
+        title: 'Edited case',
+        className: 'eui-textBreakWord',
+      });
     });
   });
 
@@ -188,9 +189,10 @@ describe('useTagsAction', () => {
     });
 
     await waitFor(() => {
-      expect(appMockRender.coreStart.notifications.toasts.addSuccess).toHaveBeenCalledWith(
-        'Edited 2 cases'
-      );
+      expect(appMockRender.coreStart.notifications.toasts.addSuccess).toHaveBeenCalledWith({
+        title: 'Edited 2 cases',
+        className: 'eui-textBreakWord',
+      });
     });
   });
 

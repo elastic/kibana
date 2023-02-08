@@ -50,8 +50,11 @@ describe('CaseView actions', () => {
     );
 
     expect(wrapper.find('[data-test-subj="confirm-delete-case-modal"]').exists()).toBeFalsy();
-    wrapper.find('button[data-test-subj="property-actions-ellipses"]').first().simulate('click');
-    wrapper.find('button[data-test-subj="property-actions-trash"]').simulate('click');
+    wrapper
+      .find('button[data-test-subj="property-actions-case-ellipses"]')
+      .first()
+      .simulate('click');
+    wrapper.find('button[data-test-subj="property-actions-case-trash"]').simulate('click');
     expect(wrapper.find('[data-test-subj="confirm-delete-case-modal"]').exists()).toBeTruthy();
   });
 
@@ -63,7 +66,9 @@ describe('CaseView actions', () => {
     );
 
     expect(wrapper.find('[data-test-subj="confirm-delete-case-modal"]').exists()).toBeFalsy();
-    expect(wrapper.find('button[data-test-subj="property-actions-ellipses"]').exists()).toBeFalsy();
+    expect(
+      wrapper.find('button[data-test-subj="property-actions-case-ellipses"]').exists()
+    ).toBeFalsy();
   });
 
   it('toggle delete modal and confirm', async () => {
@@ -77,8 +82,11 @@ describe('CaseView actions', () => {
       </TestProviders>
     );
 
-    wrapper.find('button[data-test-subj="property-actions-ellipses"]').first().simulate('click');
-    wrapper.find('button[data-test-subj="property-actions-trash"]').simulate('click');
+    wrapper
+      .find('button[data-test-subj="property-actions-case-ellipses"]')
+      .first()
+      .simulate('click');
+    wrapper.find('button[data-test-subj="property-actions-case-trash"]').simulate('click');
 
     expect(wrapper.find('[data-test-subj="confirm-delete-case-modal"]').exists()).toBeTruthy();
     wrapper.find('button[data-test-subj="confirmModalConfirmButton"]').simulate('click');
@@ -106,9 +114,12 @@ describe('CaseView actions', () => {
 
     expect(wrapper.find('[data-test-subj="confirm-delete-case-modal"]').exists()).toBeFalsy();
 
-    wrapper.find('button[data-test-subj="property-actions-ellipses"]').first().simulate('click');
+    wrapper
+      .find('button[data-test-subj="property-actions-case-ellipses"]')
+      .first()
+      .simulate('click');
     expect(
-      wrapper.find('[data-test-subj="property-actions-popout"]').first().prop('aria-label')
+      wrapper.find('[data-test-subj="property-actions-case-popout"]').first().prop('aria-label')
     ).toEqual(i18n.VIEW_INCIDENT(basicPush.externalTitle));
   });
 });

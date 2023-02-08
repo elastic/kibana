@@ -233,7 +233,7 @@ describe('CaseActionBar', () => {
       </TestProviders>
     );
 
-    expect(queryByTestId('property-actions-ellipses')).not.toBeInTheDocument();
+    expect(queryByTestId('property-actions-case-ellipses')).not.toBeInTheDocument();
     expect(queryByText('Delete case')).not.toBeInTheDocument();
   });
 
@@ -244,7 +244,7 @@ describe('CaseActionBar', () => {
       </TestProviders>
     );
 
-    userEvent.click(screen.getByTestId('property-actions-ellipses'));
+    userEvent.click(screen.getByTestId('property-actions-case-ellipses'));
     expect(queryByText('Delete case')).toBeInTheDocument();
   });
 });

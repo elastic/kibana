@@ -22,6 +22,7 @@ import {
   getOptionalListField,
   getMultipleUrlsOrHostsError,
   getUnsupportedKeysError,
+  getHasTLSFields,
 } from './common_fields';
 
 export const getNormalizeTCPFields = ({
@@ -65,6 +66,10 @@ export const getNormalizeTCPFields = ({
     [ConfigKey.TLS_VERSION]: get(monitor, ConfigKey.TLS_VERSION)
       ? (getOptionalListField(get(monitor, ConfigKey.TLS_VERSION)) as TLSVersion[])
       : defaultFields[ConfigKey.TLS_VERSION],
+    [ConfigKey.METADATA]: {
+      ...DEFAULT_FIELDS[DataStream.TCP][ConfigKey.METADATA],
+      is_tls_enabled: getHasTLSFields(monitor),
+    },
   };
   return {
     normalizedFields: {
