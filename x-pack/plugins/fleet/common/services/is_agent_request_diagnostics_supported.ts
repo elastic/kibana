@@ -12,11 +12,9 @@ import type { Agent } from '../types';
 export const MINIMUM_DIAGNOSTICS_AGENT_VERSION = '8.7.0';
 
 export function isAgentRequestDiagnosticsSupported(agent: Agent) {
-  let agentVersion: string;
-  if (typeof agent?.local_metadata?.elastic?.agent?.version === 'string') {
-    agentVersion = agent.local_metadata.elastic.agent.version;
-  } else {
+  if (typeof agent?.local_metadata?.elastic?.agent?.version !== 'string') {
     return false;
   }
+  const agentVersion = agent.local_metadata.elastic.agent.version;
   return semverGte(agentVersion, MINIMUM_DIAGNOSTICS_AGENT_VERSION);
 }

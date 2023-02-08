@@ -234,6 +234,8 @@ export const AgentDiagnosticsTab: React.FunctionComponent<AgentDiagnosticsProps>
     </EuiButton>
   );
 
+  const requestDiagnosticsNotSupportedTooltip = `Request diagnostics action is not supported for agents before version ${MINIMUM_DIAGNOSTICS_AGENT_VERSION}.`;
+
   return (
     <EuiFlexGroup direction="column" gutterSize="l">
       <EuiFlexItem>
@@ -261,7 +263,7 @@ export const AgentDiagnosticsTab: React.FunctionComponent<AgentDiagnosticsProps>
             content={
               <FormattedMessage
                 id="xpack.fleet.requestDiagnostics.notSupportedTooltip"
-                defaultMessage={`Request diagnostics action is not supported for agents before version ${MINIMUM_DIAGNOSTICS_AGENT_VERSION}.`}
+                defaultMessage={requestDiagnosticsNotSupportedTooltip}
               />
             }
           >
