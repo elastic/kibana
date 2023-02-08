@@ -98,6 +98,19 @@ export const transformAlertsToRules = (
   return rules.map((rule) => internalRuleToAPIResponse(rule, legacyRuleActions[rule.id]));
 };
 
+export const transformRuleToExportableFormat = (
+  rule: RuleResponse
+): Omit<RuleResponse, 'execution_summary'> => {
+  const exportedRule = {
+    ...rule,
+  };
+
+  // Fields containing runtime information shouldn't be exported. It causes import failures.
+  delete exportedRule.execution_summary;
+
+  return exportedRule;
+};
+
 export const transformFindAlerts = (
   ruleFindResults: FindResult<RuleParams>,
   legacyRuleActions: Record<string, LegacyRulesActionsSavedObject | undefined>
