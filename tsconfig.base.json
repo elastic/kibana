@@ -26,6 +26,8 @@
       "@kbn/alerting-plugin/*": ["x-pack/plugins/alerting/*"],
       "@kbn/alerts": ["packages/kbn-alerts"],
       "@kbn/alerts/*": ["packages/kbn-alerts/*"],
+      "@kbn/alerts-ui-shared": ["packages/kbn-alerts-ui-shared"],
+      "@kbn/alerts-ui-shared/*": ["packages/kbn-alerts-ui-shared/*"],
       "@kbn/ambient-common-types": ["packages/kbn-ambient-common-types"],
       "@kbn/ambient-common-types/*": ["packages/kbn-ambient-common-types/*"],
       "@kbn/ambient-ftr-types": ["packages/kbn-ambient-ftr-types"],
