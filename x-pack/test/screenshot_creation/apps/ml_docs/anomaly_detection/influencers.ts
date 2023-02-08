@@ -41,9 +41,6 @@ export default function ({ getService }: FtrProviderContext) {
     query: { bool: { must: [{ match_all: {} }] } },
   };
 
-  const cellSize = 15;
-  const viewBySwimLaneTestSubj = 'mlAnomalyExplorerSwimlaneViewBy';
-
   describe('population analysis', function () {
     before(async () => {
       await ml.api.createAndRunAnomalyDetectionLookbackJob(
