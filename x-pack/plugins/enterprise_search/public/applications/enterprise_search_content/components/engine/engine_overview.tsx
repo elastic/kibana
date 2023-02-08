@@ -56,7 +56,7 @@ export const EngineOverview: React.FC = () => {
               >
                 <EuiFlexGroup alignItems="center">
                   {hasUnknownIndices ? (
-                    <EuiIcon size="xxl" type="visTable" color="#F5BF23" />
+                    <EuiIcon size="xxl" type="alert" color="#F5BF23" />
                   ) : (
                     <EuiIcon size="xxl" type="visTable" color="#98A2B3" />
                   )}
