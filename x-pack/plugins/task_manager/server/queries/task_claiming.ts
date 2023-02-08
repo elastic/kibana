@@ -38,6 +38,7 @@ import {
 } from '../task_store';
 import { FillPoolResult } from '../lib/fill_pool';
 import { TASK_MANAGER_TRANSACTION_TYPE } from '../task_running';
+import { TaskPartitioner } from '../task_partitioner';
 
 export interface TaskClaimingOpts {
   logger: Logger;
@@ -47,6 +48,7 @@ export interface TaskClaimingOpts {
   maxAttempts: number;
   excludedTaskTypes: string[];
   getCapacity: (taskType?: string) => number;
+  taskPartitioner: TaskPartitioner;
 }
 
 export interface OwnershipClaimingOpts {
@@ -111,6 +113,7 @@ export class TaskClaiming {
   private readonly taskMaxAttempts: Record<string, number>;
   private readonly excludedTaskTypes: string[];
   private readonly unusedTypes: string[];
+  private readonly taskPartitioner: TaskPartitioner;
 
   /**
    * Constructs a new TaskStore.
@@ -128,6 +131,7 @@ export class TaskClaiming {
     this.taskMaxAttempts = Object.fromEntries(this.normalizeMaxAttempts(this.definitions));
     this.excludedTaskTypes = opts.excludedTaskTypes;
     this.unusedTypes = opts.unusedTypes;
+    this.taskPartitioner = opts.taskPartitioner;
 
     this.events$ = new Subject<TaskClaim>();
   }
@@ -243,6 +247,8 @@ export class TaskClaiming {
     size,
     taskTypes,
   }: OwnershipClaimingOpts): Promise<ClaimOwnershipResult> => {
+    const partitions = await this.taskPartitioner.getPartitions();
+    console.log({ partitions });
     const { docs, tasksConflicted } = await this.claimAvailableTasksImpl({
       claimOwnershipUntil,
       size,

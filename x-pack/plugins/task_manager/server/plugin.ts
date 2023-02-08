@@ -36,6 +36,7 @@ import { EphemeralTask, ConcreteTaskInstance } from './task';
 import { registerTaskManagerUsageCollector } from './usage';
 import { TASK_MANAGER_INDEX } from './constants';
 import { AdHocTaskCounter } from './lib/adhoc_task_counter';
+import { TaskPartitioner } from './task_partitioner';
 
 export interface TaskManagerSetupContract {
   /**
@@ -225,6 +226,7 @@ export class TaskManagerPlugin
 
     // Only poll for tasks if configured to run tasks
     if (this.shouldRunBackgroundTasks) {
+      const taskPartitioner = new TaskPartitioner('dep-fcaa0795577348e9ba367c5b1189e613');
       this.taskPollingLifecycle = new TaskPollingLifecycle({
         config: this.config!,
         definitions: this.definitions,
@@ -235,6 +237,7 @@ export class TaskManagerPlugin
         usageCounter: this.usageCounter,
         middleware: this.middleware,
         elasticsearchAndSOAvailability$: this.elasticsearchAndSOAvailability$!,
+        taskPartitioner,
         ...managedConfiguration,
       });
 
