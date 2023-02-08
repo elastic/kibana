@@ -5,7 +5,6 @@ type: object
 required:
   - consumer
   - name
-  - notify_when
   - params
   - rule_type_id
   - schedule
