@@ -20,7 +20,7 @@ describe('updateConnectorConfigurationLogic', () => {
     it('calls correct api', async () => {
       const promise = Promise.resolve('result');
       http.post.mockReturnValue(promise);
-      const configuration = { configurationKey: { label: 'hello', value: 'yeahhhh' } };
+      const configuration = { configurationKey: 'yeahhhh' };
       const result = postConnectorConfiguration({
         configuration,
         connectorId: 'anIndexId',

@@ -9,12 +9,10 @@ import { kea, MakeLogicType } from 'kea';
 
 import { ConnectorConfiguration, ConnectorStatus } from '../../../../../../common/types/connectors';
 import { isNotNullish } from '../../../../../../common/utils/is_not_nullish';
-import { Actions } from '../../../../shared/api_logic/create_api_logic';
 
 import {
   ConnectorConfigurationApiLogic,
-  PostConnectorConfigurationArgs,
-  PostConnectorConfigurationResponse,
+  PostConnectorConfigurationActions,
 } from '../../../api/connector/update_connector_configuration_api_logic';
 import {
   CachedFetchIndexApiLogic,
@@ -24,7 +22,7 @@ import { FetchIndexApiResponse } from '../../../api/index/fetch_index_api_logic'
 import { isConnectorIndex } from '../../../utils/indices';
 
 type ConnectorConfigurationActions = Pick<
-  Actions<PostConnectorConfigurationArgs, PostConnectorConfigurationResponse>,
+  PostConnectorConfigurationActions,
   'apiSuccess' | 'makeRequest'
 > & {
   fetchIndexApiSuccess: CachedFetchIndexApiLogicActions['apiSuccess'];
@@ -149,7 +147,17 @@ export const ConnectorConfigurationLogic = kea<
     saveConfig: () => {
       if (isConnectorIndex(values.index)) {
         actions.makeRequest({
-          configuration: values.localConfigState,
+          configuration: Object.keys(values.localConfigState)
+            .map((key) =>
+              values.localConfigState[key]
+                ? { key, value: values.localConfigState[key]?.value ?? '' }
+                : null
+            )
+            .filter(isNotNullish)
+            .reduce(
+              (prev: Record<string, string>, { key, value }) => ({ ...prev, [key]: value }),
+              {}
+            ),
           connectorId: values.index.connector.id,
           indexName: values.index.connector.index_name,
         });
