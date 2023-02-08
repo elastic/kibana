@@ -13,7 +13,7 @@ import {
 import { get, isEmpty, isEqual } from 'lodash';
 import { Logger, ElasticsearchClient } from '@kbn/core/server';
 import { firstValueFrom, Observable } from 'rxjs';
-import { alertFieldMap, type FieldMap } from '../../common';
+import { alertFieldMap, legacyAlertFieldMap, type FieldMap } from '../../common';
 import { ILM_POLICY_NAME, DEFAULT_ILM_POLICY } from './default_lifecycle_policy';
 import {
   getComponentTemplate,
@@ -103,6 +103,11 @@ export class AlertsService implements IAlertsService {
         const initFns = [
           () => this.createOrUpdateIlmPolicy(esClient),
           () => this.createOrUpdateComponentTemplate(esClient, getComponentTemplate(alertFieldMap)),
+          () =>
+            this.createOrUpdateComponentTemplate(
+              esClient,
+              getComponentTemplate(legacyAlertFieldMap, 'legacy-alert')
+            ),
         ];
 
         for (const fn of initFns) {
