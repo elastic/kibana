@@ -4,10 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useState } from 'react';
+import React from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { AlertStatus } from '@kbn/observability-plugin/common';
 import {
   getAlertSummaryTimeRange,
   ObservabilityAlertStatusFilter,
@@ -15,7 +14,6 @@ import {
 } from '@kbn/observability-plugin/public';
 import { AlertConsumers } from '@kbn/rule-data-utils';
 import { InfraClientCoreStart, InfraClientStartDeps } from '../../../../../../types';
-import { useHostsViewContext } from '../../../hooks/use_hosts_view';
 import { useUnifiedSearchContext } from '../../../hooks/use_unified_search';
 
 import {
@@ -25,13 +23,12 @@ import {
   casesOwner,
   infraAlertFeatureIds,
 } from '../config';
+import { useAlertsQuery } from '../../../hooks/use_alerts_query';
 
 export const AlertsTabContent = React.memo(() => {
   const { services } = useKibana<InfraClientCoreStart & InfraClientStartDeps>();
 
-  const [status, setAlertStatus] = useState<AlertStatus>('all');
-
-  const { getAlertsEsQuery } = useHostsViewContext();
+  const { alertStatus, setAlertStatus, alertsEsQueryByStatus } = useAlertsQuery();
 
   const { unifiedSearchDateRange } = useUnifiedSearchContext();
 
@@ -44,8 +41,6 @@ export const AlertsTabContent = React.memo(() => {
     getAlertsStateTable: AlertsStateTable,
     getAlertSummaryWidget: AlertSummaryWidget,
   } = triggersActionsUi;
-
-  const alertsEsQueryFilter = getAlertsEsQuery(status);
 
   const CasesContext = cases.ui.getCasesContext();
   const uiCapabilities = application?.capabilities;
@@ -61,18 +56,18 @@ export const AlertsTabContent = React.memo(() => {
   return (
     <EuiFlexGroup direction="column" gutterSize="m">
       <EuiFlexItem>
-        <ObservabilityAlertStatusFilter onChange={setAlertStatus} status={status} />
+        <ObservabilityAlertStatusFilter onChange={setAlertStatus} status={alertStatus} />
       </EuiFlexItem>
       <EuiFlexItem>
         <AlertSummaryWidget
           chartThemes={chartThemes}
           featureIds={infraAlertFeatureIds}
-          filter={alertsEsQueryFilter}
+          filter={alertsEsQueryByStatus}
           fullSize
           timeRange={summaryTimeRange}
         />
       </EuiFlexItem>
-      {alertsEsQueryFilter && (
+      {alertsEsQueryByStatus && (
         <EuiFlexItem>
           <CasesContext features={casesFeatures} owner={casesOwner} permissions={casesCapabilities}>
             <AlertsStateTable
@@ -82,7 +77,7 @@ export const AlertsTabContent = React.memo(() => {
               flyoutSize="s"
               id={ALERTS_TABLE_ID}
               pageSize={ALERTS_PER_PAGE}
-              query={alertsEsQueryFilter}
+              query={alertsEsQueryByStatus}
               showAlertStatusWithFlapping
               showExpandToDetails={false}
             />

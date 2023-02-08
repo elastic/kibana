@@ -12,19 +12,14 @@
  * 2.0.
  */
 
-import { useCallback, useMemo } from 'react';
+import { useMemo } from 'react';
 import createContainer from 'constate';
-import { getTime } from '@kbn/data-plugin/common';
-import { TIMESTAMP } from '@kbn/rule-data-utils';
-import { BoolQuery, buildEsQuery, Query } from '@kbn/es-query';
-import { ALERT_STATUS_QUERY } from '@kbn/observability-plugin/public';
-import { AlertStatus } from '@kbn/observability-plugin/common';
-import { SnapshotNode } from '../../../../../common/http_api';
+import { BoolQuery } from '@kbn/es-query';
 import { SnapshotMetricType } from '../../../../../common/inventory_models/types';
 import { useSourceContext } from '../../../../containers/metrics_source';
 import { useSnapshot, UseSnapshotRequest } from '../../inventory_view/hooks/use_snaphot';
 import { useUnifiedSearchContext } from './use_unified_search';
-import { HostsState, StringDateRangeTimestamp } from './use_unified_search_url_state';
+import { StringDateRangeTimestamp } from './use_unified_search_url_state';
 
 const HOST_TABLE_METRICS: Array<{ type: SnapshotMetricType }> = [
   { type: 'rx' },
@@ -37,7 +32,7 @@ const HOST_TABLE_METRICS: Array<{ type: SnapshotMetricType }> = [
 
 export const useHostsView = () => {
   const { sourceId } = useSourceContext();
-  const { buildQuery, getDateRangeAsTimestamp, unifiedSearchDateRange } = useUnifiedSearchContext();
+  const { buildQuery, getDateRangeAsTimestamp } = useUnifiedSearchContext();
 
   const baseRequest = useMemo(
     () =>
@@ -58,17 +53,7 @@ export const useHostsView = () => {
     nodes: hostNodes,
   } = useSnapshot({ ...baseRequest, metrics: HOST_TABLE_METRICS });
 
-  const getAlertsEsQuery = useCallback(
-    (status?: AlertStatus) =>
-      createAlertsEsQuery({ dateRange: unifiedSearchDateRange, hostNodes, status }),
-    [hostNodes, unifiedSearchDateRange]
-  );
-
-  const alertsEsQueryFilter = useMemo(() => getAlertsEsQuery(), [getAlertsEsQuery]);
-
   return {
-    alertsEsQueryFilter,
-    getAlertsEsQuery,
     baseRequest,
     loading,
     error,
@@ -108,35 +93,4 @@ const createSnapshotRequest = ({
   // The user might want to click on the submit button without changing the filters
   // This makes sure all child components will re-render.
   requestTs: Date.now(),
-});
-
-const createAlertsEsQuery = ({
-  dateRange,
-  hostNodes,
-  status,
-}: {
-  dateRange: HostsState['dateRange'];
-  hostNodes: SnapshotNode[];
-  status?: AlertStatus;
-}) => {
-  const hostsQuery = createHostsQuery(hostNodes);
-  const alertStatusQuery = createAlertStatusQuery(status);
-
-  const dateFilter = createDateFilter(dateRange);
-
-  const queries = [hostsQuery, alertStatusQuery].filter(Boolean) as Query[];
-  const filters = dateFilter ? [dateFilter] : [];
-
-  return buildEsQuery(undefined, queries, filters);
-};
-
-const createDateFilter = (date: HostsState['dateRange']) =>
-  getTime(undefined, date, { fieldName: TIMESTAMP });
-
-const createAlertStatusQuery = (status: AlertStatus = 'all'): Query | null =>
-  ALERT_STATUS_QUERY[status] ? { query: ALERT_STATUS_QUERY[status], language: 'kuery' } : null;
-
-const createHostsQuery = (hosts: SnapshotNode[]): Query => ({
-  language: 'kuery',
-  query: hosts.map((host) => `host.name : "${host.name}"`).join(' or '),
 });
