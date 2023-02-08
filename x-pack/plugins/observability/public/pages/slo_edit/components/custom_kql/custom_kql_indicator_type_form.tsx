@@ -29,17 +29,14 @@ export function CustomKqlIndicatorTypeForm({ control, watch }: Props) {
       <EuiFlexItem>
         <QueryBuilder
           control={control}
-          dataTestSubj="sloFormCustomKqlFilterQueryInput"
+          dataTestSubj="customKqlIndicatorFormQueryFilterInput"
           indexPatternString={watch('indicator.params.index')}
-          label={i18n.translate(
-            'xpack.observability.slos.sloEdit.sloDefinition.customKql.queryFilter',
-            {
-              defaultMessage: 'Query filter',
-            }
-          )}
+          label={i18n.translate('xpack.observability.slos.sloEdit.sliType.customKql.queryFilter', {
+            defaultMessage: 'Query filter',
+          })}
           name="indicator.params.filter"
           placeholder={i18n.translate(
-            'xpack.observability.slos.sloEdit.sloDefinition.customKql.customFilter',
+            'xpack.observability.slos.sloEdit.sliType.customKql.customFilter',
             {
               defaultMessage: 'Custom filter to apply on the index',
             }
@@ -50,17 +47,14 @@ export function CustomKqlIndicatorTypeForm({ control, watch }: Props) {
       <EuiFlexItem>
         <QueryBuilder
           control={control}
-          dataTestSubj="sloFormCustomKqlGoodQueryInput"
+          dataTestSubj="customKqlIndicatorFormGoodQueryInput"
           indexPatternString={watch('indicator.params.index')}
-          label={i18n.translate(
-            'xpack.observability.slos.sloEdit.sloDefinition.customKql.goodQuery',
-            {
-              defaultMessage: 'Good query',
-            }
-          )}
+          label={i18n.translate('xpack.observability.slos.sloEdit.sliType.customKql.goodQuery', {
+            defaultMessage: 'Good query',
+          })}
           name="indicator.params.good"
           placeholder={i18n.translate(
-            'xpack.observability.slos.sloEdit.sloDefinition.customKql.goodQueryPlaceholder',
+            'xpack.observability.slos.sloEdit.sliType.customKql.goodQueryPlaceholder',
             {
               defaultMessage: 'Define the good events',
             }
@@ -71,17 +65,14 @@ export function CustomKqlIndicatorTypeForm({ control, watch }: Props) {
       <EuiFlexItem>
         <QueryBuilder
           control={control}
-          dataTestSubj="sloFormCustomKqlTotalQueryInput"
+          dataTestSubj="customKqlIndicatorFormTotalQueryInput"
           indexPatternString={watch('indicator.params.index')}
-          label={i18n.translate(
-            'xpack.observability.slos.sloEdit.sloDefinition.customKql.totalQuery',
-            {
-              defaultMessage: 'Total query',
-            }
-          )}
+          label={i18n.translate('xpack.observability.slos.sloEdit.sliType.customKql.totalQuery', {
+            defaultMessage: 'Total query',
+          })}
           name="indicator.params.total"
           placeholder={i18n.translate(
-            'xpack.observability.slos.sloEdit.sloDefinition.customKql.totalQueryPlaceholder',
+            'xpack.observability.slos.sloEdit.sliType.customKql.totalQueryPlaceholder',
             {
               defaultMessage: 'Define the total events',
             }
