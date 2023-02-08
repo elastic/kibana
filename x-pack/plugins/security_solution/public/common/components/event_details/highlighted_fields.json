@@ -1,0 +1,6 @@
+{
+    "fields": [
+        "event.type",
+        "host.id"
+    ]
+}

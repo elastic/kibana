@@ -35,6 +35,8 @@ import type { TimelineEventsDetailsItem } from '../../../../common/search_strate
 
 import { isAlertFromEndpointEvent } from '../../utils/endpoint_alert_check';
 
+import highlightedFieldOverrides from './highlighted_fields.json';
+
 const THRESHOLD_TERMS_FIELD = `${ALERT_THRESHOLD_RESULT}.terms.field`;
 const THRESHOLD_TERMS_VALUE = `${ALERT_THRESHOLD_RESULT}.terms.value`;
 const THRESHOLD_CARDINALITY_FIELD = `${ALERT_THRESHOLD_RESULT}.cardinality.field`;
@@ -206,11 +208,7 @@ function getFieldsByRuleType(ruleType?: string): EventSummaryField[] {
  * Returns a list of fields based on user-defined overrides
  */
 function getFieldsByOverrides(overrides: EventSummaryField[]): EventSummaryField[] {
-  return overrides.map((override) => ({
-    ...override,
-    // If the override doesn't have an id, use the override field as the id
-    id: override.id ?? override.overrideField,
-  }));
+  return overrides;
 }
 
 /**
@@ -295,15 +293,16 @@ export const getSummaryRows = ({
   const eventRuleType = Array.isArray(eventRuleTypeField?.originalValue)
     ? eventRuleTypeField?.originalValue?.[0]
     : eventRuleTypeField?.originalValue;
-  const eventSummaryOverrides: EventSummaryField[] = [
-    {'id': 'destination.ip'},
-  ]
+
+  const eventSummaryOverrides: EventSummaryField[] = highlightedFieldOverrides.fields.map(
+    (override: string) => ({'id': override})
+  );
 
   const tableFields = getEventFieldsToDisplay({
     eventCategories,
     eventCode,
     eventRuleType,
-    eventSummaryOverrides: eventSummaryOverrides ?? [],
+    eventSummaryOverrides,
   });
 
   return data != null
