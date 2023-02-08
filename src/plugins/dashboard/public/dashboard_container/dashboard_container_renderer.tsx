@@ -113,7 +113,7 @@ export const DashboardContainerRenderer = ({
   );
 
   const viewportStyles = css`
-    ${useEuiOverflowScroll('y', true)}
+    ${useEuiOverflowScroll('y', false)}
   `;
 
   const loadingSpinner = showPlainSpinner ? (
