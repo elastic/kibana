@@ -182,6 +182,10 @@ export class AlertService {
     );
   }
 
+  private getNonEmptyAlerts(alerts: AlertInfo[]): AlertInfo[] {
+    return alerts.filter((alert) => !AlertService.isEmptyAlert(alert));
+  }
+
   public async getAlerts(alertsInfo: AlertInfo[]): Promise<MgetResponse<Alert> | undefined> {
     try {
       const docs = alertsInfo
@@ -207,7 +211,7 @@ export class AlertService {
 
   public async bulkUpdateCases({ alerts, caseIds }: UpdateAlertCasesRequest): Promise<void> {
     try {
-      const nonEmptyAlerts = alerts.filter((alert) => !AlertService.isEmptyAlert(alert));
+      const nonEmptyAlerts = this.getNonEmptyAlerts(alerts);
 
       if (nonEmptyAlerts.length <= 0) {
         return;
@@ -220,6 +224,26 @@ export class AlertService {
     } catch (error) {
       throw createCaseError({
         message: `Failed to add case info to alerts for caseIds ${caseIds}: ${error}`,
+        error,
+        logger: this.logger,
+      });
+    }
+  }
+
+  public async ensureAlertsAuthorized({ alerts }: { alerts: AlertInfo[] }): Promise<void> {
+    try {
+      const nonEmptyAlerts = this.getNonEmptyAlerts(alerts);
+
+      if (nonEmptyAlerts.length <= 0) {
+        return;
+      }
+
+      await this.alertsClient.ensureAllAlertsAuthorizedRead({
+        alerts: nonEmptyAlerts,
+      });
+    } catch (error) {
+      throw createCaseError({
+        message: `Failed to authorize alerts: ${error}`,
         error,
         logger: this.logger,
       });

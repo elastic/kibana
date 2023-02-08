@@ -35,13 +35,12 @@ import {
 import type { CasesClientArgs } from '../../client';
 import type { RefreshSetting } from '../../services/types';
 import { createCaseError } from '../error';
-import type { CaseSavedObject } from '../types';
+import type { AlertInfo, CaseSavedObject } from '../types';
 import {
   countAlertsForID,
   flattenCommentSavedObjects,
   transformNewComment,
   getOrUpdateLensReferences,
-  createAlertUpdateStatusRequest,
   isCommentRequestTypeAlert,
   getAlertInfoFromComments,
 } from '../utils';
@@ -312,31 +311,28 @@ export class CaseCommentModel {
       (attachment): attachment is CommentRequestAlertType => attachment.type === CommentType.alert
     );
 
-    if (this.caseInfo.attributes.settings.syncAlerts) {
-      await this.updateAlertsStatus(alertAttachments);
-    }
+    const alerts = getAlertInfoFromComments(alertAttachments);
 
-    if (alertAttachments.length > 0) {
-      await this.updateAlertsSchemaWithCaseInfo(alertAttachments);
+    if (alerts.length > 0) {
+      await this.params.services.alertsService.ensureAlertsAuthorized({ alerts });
+      await this.updateAlertsSchemaWithCaseInfo(alerts);
+
+      if (this.caseInfo.attributes.settings.syncAlerts) {
+        await this.updateAlertsStatus(alerts);
+      }
     }
   }
 
-  private async updateAlertsStatus(alerts: CommentRequest[]) {
-    const alertsToUpdate = alerts
-      .map((alert) =>
-        createAlertUpdateStatusRequest({
-          comment: alert,
-          status: this.caseInfo.attributes.status,
-        })
-      )
-      .flat();
+  private async updateAlertsStatus(alerts: AlertInfo[]) {
+    const alertsToUpdate = alerts.map((alert) => ({
+      ...alert,
+      status: this.caseInfo.attributes.status,
+    }));
 
     await this.params.services.alertsService.updateAlertsStatus(alertsToUpdate);
   }
 
-  private async updateAlertsSchemaWithCaseInfo(alertAttachments: CommentRequestAlertType[]) {
-    const alerts = getAlertInfoFromComments(alertAttachments);
-
+  private async updateAlertsSchemaWithCaseInfo(alerts: AlertInfo[]) {
     await this.params.services.alertsService.bulkUpdateCases({
       alerts,
       caseIds: [this.caseInfo.id],
