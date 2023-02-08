@@ -38,7 +38,7 @@ describe('<FindingsTable />', () => {
     return props;
   };
 
-  it('opens and closes and flyout', () => {
+  it('opens/closes the flyout when clicked on expand/close buttons ', () => {
     renderWrapper({ items: [getFindingsFixture()] });
 
     expect(screen.queryByTestId('findings_flyout')).not.toBeInTheDocument();
