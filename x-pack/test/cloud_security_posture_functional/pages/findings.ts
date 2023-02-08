@@ -14,6 +14,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const queryBar = getService('queryBar');
   const filterBar = getService('filterBar');
   const comboBox = getService('comboBox');
+  const retry = getService('retry');
   const pageObjects = getPageObjects(['common', 'findings']);
   const chance = new Chance();
 
@@ -107,10 +108,10 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await findings.index.remove();
       await findings.index.add(data);
       await findings.navigateToLatestFindingsPage();
-      // await retry.waitFor(
-      //   'Findings table to be loaded',
-      //   async () => (await latestFindingsTable.getRowsCount()) === data.length
-      // );
+      await retry.waitFor(
+        'Findings table to be loaded',
+        async () => (await latestFindingsTable.getRowsCount()) === data.length
+      );
     });
 
     after(async () => {
