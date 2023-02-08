@@ -45,6 +45,8 @@ export const BrowserTestRunResult = ({ expectPings, onDone, testRunId }: Props) 
         const isStepsLoadingFailed =
           summaryDoc && !summariesLoading && !stepLoadingInProgress && steps.length === 0;
 
+        const isDownMonitor = summaryDoc?.monitor?.status === 'down';
+
         return (
           <AccordionWrapper
             key={'accordion-' + checkGroupId}
@@ -67,11 +69,11 @@ export const BrowserTestRunResult = ({ expectPings, onDone, testRunId }: Props) 
                 </EuiFlexItem>
               </EuiFlexGroup>
             )}
-            {isStepsLoadingFailed && (
+            {(isStepsLoadingFailed || isDownMonitor) && (
               <EuiText color="danger">{summaryDoc?.error?.message ?? FAILED_TO_RUN}</EuiText>
             )}
 
-            {isStepsLoadingFailed &&
+            {(isStepsLoadingFailed || isDownMonitor) &&
               summaryDoc?.error?.message?.includes('journey did not finish executing') && (
                 <StdErrorLogs checkGroup={summaryDoc.monitor.check_group} hideTitle={true} />
               )}
@@ -83,6 +85,8 @@ export const BrowserTestRunResult = ({ expectPings, onDone, testRunId }: Props) 
                 error={undefined}
                 showStepNumber={true}
                 compressed={true}
+                testNowMode={true}
+                showLastSuccessful={false}
               />
             )}
           </AccordionWrapper>

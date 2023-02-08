@@ -129,6 +129,9 @@ export const StdErrorLogs = ({
         executeQueryOptions={{
           defaultFields: ['@timestamp', 'synthetics.payload.message'],
         }}
+        pagination={{
+          pageSize: 2,
+        }}
       />
     </>
   );
