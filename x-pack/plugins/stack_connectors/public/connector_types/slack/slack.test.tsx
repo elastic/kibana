@@ -30,13 +30,16 @@ describe('connectorTypeRegistry.get() works', () => {
 });
 
 describe('slack action params validation', () => {
-  test('if action params validation succeeds when action params is valid', async () => {
+  test('should succeed when action params include valid message', async () => {
     const actionParams = {
       message: 'message {test}',
     };
 
     expect(await connectorTypeModel.validateParams(actionParams)).toEqual({
-      errors: { message: [] },
+      errors: {
+        message: [],
+        'subActionParams.channels': [],
+      },
     });
   });
 
@@ -48,6 +51,77 @@ describe('slack action params validation', () => {
     expect(await connectorTypeModel.validateParams(actionParams)).toEqual({
       errors: {
         message: ['Message is required.'],
+        'subActionParams.channels': [],
+      },
+    });
+  });
+
+  test('should succeed when action params include valid message and channels list', async () => {
+    const actionParams = {
+      subAction: 'postMessage',
+      subActionParams: { channels: ['general'], text: 'some text' },
+    };
+
+    expect(await connectorTypeModel.validateParams(actionParams)).toEqual({
+      errors: {
+        message: [],
+        'subActionParams.channels': [],
+      },
+    });
+  });
+
+  test('should fail when action params do not includes any channels', async () => {
+    const actionParams = {
+      subAction: 'postMessage',
+      subActionParams: { channels: [], text: 'some text' },
+    };
+
+    expect(await connectorTypeModel.validateParams(actionParams)).toEqual({
+      errors: {
+        message: [],
+        'subActionParams.channels': ['At least one selected channel is required.'],
+      },
+    });
+  });
+
+  test('should fail when channels field is missing in action params', async () => {
+    const actionParams = {
+      subAction: 'postMessage',
+      subActionParams: { text: 'some text' },
+    };
+
+    expect(await connectorTypeModel.validateParams(actionParams)).toEqual({
+      errors: {
+        message: [],
+        'subActionParams.channels': ['At least one selected channel is required.'],
+      },
+    });
+  });
+
+  test('should fail when field text doesnot exist', async () => {
+    const actionParams = {
+      subAction: 'postMessage',
+      subActionParams: { channels: ['general'] },
+    };
+
+    expect(await connectorTypeModel.validateParams(actionParams)).toEqual({
+      errors: {
+        message: ['Message is required.'],
+        'subActionParams.channels': [],
+      },
+    });
+  });
+
+  test('should fail when text is empty string', async () => {
+    const actionParams = {
+      subAction: 'postMessage',
+      subActionParams: { channels: ['general'], text: '' },
+    };
+
+    expect(await connectorTypeModel.validateParams(actionParams)).toEqual({
+      errors: {
+        message: ['Message is required.'],
+        'subActionParams.channels': [],
       },
     });
   });
