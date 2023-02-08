@@ -41,9 +41,15 @@ interface Props {
   fetchStatus: FETCH_STATUS;
   distribution: ErrorDistributionAPIResponse;
   title: React.ReactNode;
+  isEmpty: boolean;
 }
 
-export function ErrorDistribution({ distribution, title, fetchStatus }: Props) {
+export function ErrorDistribution({
+  distribution,
+  title,
+  fetchStatus,
+  isEmpty,
+}: Props) {
   const { core } = useApmPluginContext();
   const theme = useTheme();
 
@@ -88,7 +94,7 @@ export function ErrorDistribution({ distribution, title, fetchStatus }: Props) {
         <span>{title}</span>
       </EuiTitle>
       <ChartContainer
-        hasData={!!distribution}
+        hasData={!isEmpty}
         height={256}
         status={fetchStatus}
         id="errorDistribution"

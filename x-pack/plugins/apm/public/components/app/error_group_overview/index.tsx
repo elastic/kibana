@@ -13,18 +13,22 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { orderBy } from 'lodash';
 import React from 'react';
 import { v4 as uuidv4 } from 'uuid';
-import { orderBy } from 'lodash';
-import { isTimeComparison } from '../../shared/time_comparison/get_comparison_options';
 import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
 import { ChartPointerEventContextProvider } from '../../../context/chart_pointer_event/chart_pointer_event_context';
 import { useApmParams } from '../../../hooks/use_apm_params';
 import { useErrorGroupDistributionFetcher } from '../../../hooks/use_error_group_distribution_fetcher';
-import { useFetcher, isPending } from '../../../hooks/use_fetcher';
+import {
+  FETCH_STATUS,
+  isPending,
+  useFetcher,
+} from '../../../hooks/use_fetcher';
 import { useTimeRange } from '../../../hooks/use_time_range';
 import { APIReturnType } from '../../../services/rest/create_call_apm_api';
 import { FailedTransactionRateChart } from '../../shared/charts/failed_transaction_rate_chart';
+import { isTimeComparison } from '../../shared/time_comparison/get_comparison_options';
 import { ErrorDistribution } from '../error_group_details/distribution';
 import { ErrorGroupList } from './error_group_list';
 
@@ -32,6 +36,8 @@ type ErrorGroupMainStatistics =
   APIReturnType<'GET /internal/apm/services/{serviceName}/errors/groups/main_statistics'>;
 type ErrorGroupDetailedStatistics =
   APIReturnType<'POST /internal/apm/services/{serviceName}/errors/groups/detailed_statistics'>;
+type ErrorsDistribution =
+  APIReturnType<'GET /internal/apm/services/{serviceName}/errors/distribution'>;
 
 const INITIAL_STATE_MAIN_STATISTICS: {
   errorGroupMainStatistics: ErrorGroupMainStatistics['errorGroups'];
@@ -46,6 +52,12 @@ const INITIAL_STATE_MAIN_STATISTICS: {
 const INITIAL_STATE_DETAILED_STATISTICS: ErrorGroupDetailedStatistics = {
   currentPeriod: {},
   previousPeriod: {},
+};
+
+const INITIAL_STATE_ERRORS_DISTRIBUTION: ErrorsDistribution = {
+  currentPeriod: [],
+  previousPeriod: [],
+  bucketSize: 0,
 };
 
 export function ErrorGroupOverview() {
@@ -67,68 +79,70 @@ export function ErrorGroupOverview() {
   } = useApmParams('/services/{serviceName}/errors');
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
-  const { errorDistributionData, status } = useErrorGroupDistributionFetcher({
-    serviceName,
-    groupId: undefined,
-    environment,
-    kuery,
-  });
+  const { errorDistributionData = INITIAL_STATE_ERRORS_DISTRIBUTION, status } =
+    useErrorGroupDistributionFetcher({
+      serviceName,
+      groupId: undefined,
+      environment,
+      kuery,
+    });
 
-  const { data: errorGroupListData = INITIAL_STATE_MAIN_STATISTICS } =
-    useFetcher(
-      (callApmApi) => {
-        const normalizedSortDirection =
-          sortDirection === 'asc' ? 'asc' : 'desc';
+  const {
+    data: errorGroupListData = INITIAL_STATE_MAIN_STATISTICS,
+    status: errorGroupListDataStatus,
+  } = useFetcher(
+    (callApmApi) => {
+      const normalizedSortDirection = sortDirection === 'asc' ? 'asc' : 'desc';
 
-        if (start && end) {
-          return callApmApi(
-            'GET /internal/apm/services/{serviceName}/errors/groups/main_statistics',
-            {
-              params: {
-                path: {
-                  serviceName,
-                },
-                query: {
-                  environment,
-                  kuery,
-                  start,
-                  end,
-                  sortField,
-                  sortDirection: normalizedSortDirection,
-                },
+      if (start && end) {
+        return callApmApi(
+          'GET /internal/apm/services/{serviceName}/errors/groups/main_statistics',
+          {
+            params: {
+              path: {
+                serviceName,
               },
-            }
-          ).then((response) => {
-            const currentPageGroupIds = orderBy(
-              response.errorGroups,
-              sortField,
-              sortDirection
-            )
-              .slice(page * pageSize, (page + 1) * pageSize)
-              .map(({ groupId }) => groupId)
-              .sort();
+              query: {
+                environment,
+                kuery,
+                start,
+                end,
+                sortField,
+                sortDirection: normalizedSortDirection,
+              },
+            },
+          }
+        ).then((response) => {
+          const currentPageGroupIds = orderBy(
+            response.errorGroups,
+            sortField,
+            sortDirection
+          )
+            .slice(page * pageSize, (page + 1) * pageSize)
+            .map(({ groupId }) => groupId)
+            .sort();
 
-            return {
-              // Everytime the main statistics is refetched, updates the requestId making the comparison API to be refetched.
-              requestId: uuidv4(),
-              errorGroupMainStatistics: response.errorGroups,
-              currentPageGroupIds,
-            };
-          });
-        }
-      },
-      [
-        environment,
-        kuery,
-        serviceName,
-        start,
-        end,
-        sortField,
-        sortDirection,
-        page,
-        pageSize,
-      ]
-    );
+          return {
+            // Everytime the main statistics is refetched, updates the requestId making the comparison API to be refetched.
+            requestId: uuidv4(),
+            errorGroupMainStatistics: response.errorGroups,
+            currentPageGroupIds,
+          };
+        });
+      }
+    },
+    [
+      environment,
+      kuery,
+      serviceName,
+      start,
+      end,
+      sortField,
+      sortDirection,
+      page,
+      pageSize,
+    ]
+  );
 
   const { requestId, errorGroupMainStatistics, currentPageGroupIds } =
     errorGroupListData;
@@ -169,10 +183,6 @@ export function ErrorGroupOverview() {
     { preservePreviousData: false }
   );
 
-  if (!errorDistributionData || !errorGroupListData) {
-    return null;
-  }
-
   return (
     <EuiFlexGroup direction="column" gutterSize="s">
       <EuiFlexItem>
@@ -187,6 +197,9 @@ export function ErrorGroupOverview() {
                     'xpack.apm.serviceDetails.metrics.errorOccurrencesChart.title',
                     { defaultMessage: 'Error occurrences' }
                   )}
+                  isEmpty={
+                    errorDistributionData === INITIAL_STATE_ERRORS_DISTRIBUTION
+                  }
                 />
               </EuiPanel>
             </EuiFlexItem>
@@ -219,6 +232,7 @@ export function ErrorGroupOverview() {
             comparisonEnabled={comparisonEnabled}
             initialSortField={sortField}
             initialSortDirection={sortDirection}
+            isLoading={errorGroupListDataStatus === FETCH_STATUS.LOADING}
           />
         </EuiPanel>
       </EuiFlexItem>
