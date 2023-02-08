@@ -5,7 +5,4 @@
  * 2.0.
  */
 
-export {
-  ResponseActionFileDownloadLink,
-  type ResponseActionFileDownloadLinkProps,
-} from './response_action_file_download_link';
+export { ExecuteAction } from './endpoint_execute_action';
