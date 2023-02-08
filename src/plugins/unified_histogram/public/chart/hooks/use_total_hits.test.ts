@@ -7,8 +7,8 @@
  */
 
 import { Filter } from '@kbn/es-query';
-import { UnifiedHistogramFetchStatus, UnifiedHistogramInput$ } from '../types';
-import { dataViewWithTimefieldMock } from '../__mocks__/data_view_with_timefield';
+import { UnifiedHistogramFetchStatus, UnifiedHistogramInput$ } from '../../types';
+import { dataViewWithTimefieldMock } from '../../__mocks__/data_view_with_timefield';
 import { useTotalHits } from './use_total_hits';
 import { useEffect as mockUseEffect } from 'react';
 import { renderHook } from '@testing-library/react-hooks';

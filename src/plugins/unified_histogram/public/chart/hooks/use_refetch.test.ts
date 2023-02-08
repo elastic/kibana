@@ -16,8 +16,8 @@ import {
   UnifiedHistogramHitsContext,
   UnifiedHistogramInput$,
   UnifiedHistogramRequestContext,
-} from '../types';
-import { dataViewWithTimefieldMock } from '../__mocks__/data_view_with_timefield';
+} from '../../types';
+import { dataViewWithTimefieldMock } from '../../__mocks__/data_view_with_timefield';
 import { Subject } from 'rxjs';
 
 describe('useRefetch', () => {

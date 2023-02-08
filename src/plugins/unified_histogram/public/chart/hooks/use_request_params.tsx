@@ -9,7 +9,7 @@
 import { getAbsoluteTimeRange } from '@kbn/data-plugin/common';
 import type { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
 import { useCallback, useMemo, useRef } from 'react';
-import type { UnifiedHistogramServices } from '../types';
+import type { UnifiedHistogramServices } from '../../types';
 import { useStableCallback } from './use_stable_callback';
 
 export const useRequestParams = ({

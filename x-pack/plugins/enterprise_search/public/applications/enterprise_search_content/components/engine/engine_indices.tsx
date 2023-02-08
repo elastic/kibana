@@ -10,6 +10,7 @@ import React, { useState } from 'react';
 import { useActions, useValues } from 'kea';
 
 import {
+  EuiTableActionsColumnType,
   EuiBasicTableColumn,
   EuiButton,
   EuiConfirmModal,
@@ -52,6 +53,33 @@ export const EngineIndices: React.FC = () => {
   if (!engineData) return null;
   const { indices } = engineData;
 
+  const removeIndexAction: EuiTableActionsColumnType<EnterpriseSearchEngineIndex>['actions'][0] = {
+    color: 'danger',
+    'data-test-subj': 'engine-remove-index-btn',
+    description: i18n.translate(
+      'xpack.enterpriseSearch.content.engine.indices.actions.removeIndex.title',
+      {
+        defaultMessage: 'Remove this index from engine',
+      }
+    ),
+    icon: 'minusInCircle',
+    isPrimary: false,
+    name: (index: EnterpriseSearchEngineIndex) =>
+      i18n.translate('xpack.enterpriseSearch.content.engine.indices.actions.removeIndex.caption', {
+        defaultMessage: 'Remove index {indexName}',
+        values: {
+          indexName: index.name,
+        },
+      }),
+    onClick: (index: EnterpriseSearchEngineIndex) => {
+      setConfirmRemoveIndex(index.name);
+      sendEnterpriseSearchTelemetry({
+        action: 'clicked',
+        metric: 'entSearchContent-engines-indices-removeIndex',
+      });
+    },
+    type: 'icon',
+  };
   const columns: Array<EuiBasicTableColumn<EnterpriseSearchEngineIndex>> = [
     {
       field: 'name',
@@ -138,36 +166,7 @@ export const EngineIndices: React.FC = () => {
             ),
           type: 'icon',
         },
-        {
-          color: 'danger',
-          'data-test-subj': 'engine-remove-index-btn',
-          description: i18n.translate(
-            'xpack.enterpriseSearch.content.engine.indices.actions.removeIndex.title',
-            {
-              defaultMessage: 'Remove this index from engine',
-            }
-          ),
-          icon: 'minusInCircle',
-          isPrimary: false,
-          name: (index) =>
-            i18n.translate(
-              'xpack.enterpriseSearch.content.engine.indices.actions.removeIndex.caption',
-              {
-                defaultMessage: 'Remove index {indexName}',
-                values: {
-                  indexName: index.name,
-                },
-              }
-            ),
-          onClick: (index) => {
-            setConfirmRemoveIndex(index.name);
-            sendEnterpriseSearchTelemetry({
-              action: 'clicked',
-              metric: 'entSearchContent-engines-indices-removeIndex',
-            });
-          },
-          type: 'icon',
-        },
+        ...(indices.length > 1 ? [removeIndexAction] : []),
       ],
       name: i18n.translate('xpack.enterpriseSearch.content.engine.indices.actions.columnTitle', {
         defaultMessage: 'Actions',
