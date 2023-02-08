@@ -121,16 +121,16 @@ export class AgentManager extends Manager {
     // TODO: Try to use direct file download link or use the artifact manager to retrieve the latest version
     // https://artifacts-api.elastic.co/v1/versions/8.7.0-SNAPSHOT/builds/latest/projects/elastic-agent/packages/elastic-agent-8.6.0-SNAPSHOT-linux-arm64.tar.gz/file
     await execa.command(
-      `multipass exec ${this.vmName} -- curl -L https://snapshots.elastic.co/8.6.0-9105192d/downloads/beats/elastic-agent/elastic-agent-8.6.0-SNAPSHOT-linux-arm64.tar.gz -o elastic-agent-8.6.0-SNAPSHOT-linux-arm64.tar.gz`,
+      `multipass exec ${this.vmName} -- curl -L https://snapshots.elastic.co/8.6.0-9105192d/downloads/beats/elastic-agent/elastic-agent-8.6.0-SNAPSHOT-linux-arm64.tar.gz -o elastic-agent-8.6.0-SNAPSHOT-linux-arm64.tar.gz`
     );
 
     execa.commandSync(
-      `multipass exec ${this.vmName} -- tar -zxf elastic-agent-8.6.0-SNAPSHOT-linux-arm64.tar.gz`,
+      `multipass exec ${this.vmName} -- tar -zxf elastic-agent-8.6.0-SNAPSHOT-linux-arm64.tar.gz`
     );
 
     // TODO: Use config service to retrieve the proper --url
     execa.commandSync(
-      `multipass exec ${this.vmName} --working-directory /home/ubuntu/elastic-agent-8.6.0-SNAPSHOT-linux-arm64 -- sudo ./elastic-agent enroll --url=https://${hostIp}:8220 --enrollment-token=${enrollmentToken} --insecure`,
+      `multipass exec ${this.vmName} --working-directory /home/ubuntu/elastic-agent-8.6.0-SNAPSHOT-linux-arm64 -- sudo ./elastic-agent enroll --url=https://${hostIp}:8220 --enrollment-token=${enrollmentToken} --insecure`
     );
 
     this.log.info('Running the agent');
