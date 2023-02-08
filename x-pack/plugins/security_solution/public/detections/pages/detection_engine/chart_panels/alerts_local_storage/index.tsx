@@ -22,6 +22,7 @@ import {
   STACK_BY_SETTING_NAME,
   TREND_CHART_CATEGORY,
   VIEW_CATEGORY,
+  GROUP_BY_SETTING_NAME,
 } from './constants';
 import {
   DEFAULT_STACK_BY_FIELD,
@@ -30,6 +31,7 @@ import {
 import type { AlertsSettings } from './types';
 import type { AlertViewSelection } from '../chart_select/helpers';
 import { TREND_ID } from '../chart_select/helpers';
+import type { GroupBySelection } from '../../../../components/alerts_kpis/alerts_progress_bar_panel/types';
 
 export const useAlertsLocalStorage = (): AlertsSettings => {
   const [alertViewSelection, setAlertViewSelection] = useLocalStorage<AlertViewSelection>({
@@ -38,6 +40,16 @@ export const useAlertsLocalStorage = (): AlertsSettings => {
       category: VIEW_CATEGORY,
       page: ALERTS_PAGE,
       setting: ALERT_VIEW_SELECTION_SETTING_NAME,
+    }),
+    isInvalidDefault: isDefaultWhenEmptyString,
+  });
+
+  const [groupBySelection, setGroupBySelection] = useLocalStorage<GroupBySelection>({
+    defaultValue: 'host.name',
+    key: getSettingKey({
+      category: VIEW_CATEGORY,
+      page: ALERTS_PAGE,
+      setting: GROUP_BY_SETTING_NAME,
     }),
     isInvalidDefault: isDefaultWhenEmptyString,
   });
@@ -103,12 +115,14 @@ export const useAlertsLocalStorage = (): AlertsSettings => {
     alertViewSelection,
     countTableStackBy0,
     countTableStackBy1,
+    groupBySelection,
     isTreemapPanelExpanded,
     riskChartStackBy0,
     riskChartStackBy1,
     setAlertViewSelection,
     setCountTableStackBy0,
     setCountTableStackBy1,
+    setGroupBySelection,
     setIsTreemapPanelExpanded,
     setRiskChartStackBy0,
     setRiskChartStackBy1,

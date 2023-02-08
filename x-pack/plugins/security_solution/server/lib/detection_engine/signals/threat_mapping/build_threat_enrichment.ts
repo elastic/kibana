@@ -6,13 +6,11 @@
  */
 
 import type { SignalsEnrichment } from '../types';
-import {
-  enrichSignalThreatMatches,
-  getSignalMatchesFromThreatList,
-} from './enrich_signal_threat_matches';
 import type { BuildThreatEnrichmentOptions } from './types';
 import { buildThreatMappingFilter } from './build_threat_mapping_filter';
-import { getAllThreatListHits } from './get_threat_list';
+import { getSignalsQueryMapFromThreatIndex } from './get_signals_map_from_threat_index';
+
+import { threatEnrichmentFactory } from './threat_enrichment_factory';
 
 // we do want to make extra requests to the threat index to get enrichments from all threats
 // previously we were enriched alerts only from `currentThreatList` but not all threats
@@ -42,7 +40,7 @@ export const buildThreatEnrichment = ({
       },
     });
 
-    const threatListHits = await getAllThreatListHits({
+    const threatSearchParams = {
       esClient: services.scopedClusterClient.asCurrentUser,
       threatFilters: [...threatFilters, threatFiltersFromEvents],
       query: threatQuery,
@@ -58,15 +56,20 @@ export const buildThreatEnrichment = ({
       runtimeMappings,
       listClient,
       exceptionFilter,
+    };
+
+    const signalsQueryMap = await getSignalsQueryMapFromThreatIndex({
+      threatSearchParams,
+      eventsCount: signals.length,
     });
 
-    const signalMatches = getSignalMatchesFromThreatList(threatListHits);
-
-    return enrichSignalThreatMatches(
-      signals,
-      () => Promise.resolve(threatListHits),
+    const enrichment = threatEnrichmentFactory({
+      signalsQueryMap,
       threatIndicatorPath,
-      signalMatches
-    );
+      threatFilters,
+      threatSearchParams,
+    });
+
+    return enrichment(signals);
   };
 };
