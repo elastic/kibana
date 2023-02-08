@@ -98,6 +98,7 @@ import {
   AddUserMessages,
   isMessageRemovable,
   UserMessagesGetter,
+  UserMessagesDisplayLocationId,
 } from '../types';
 
 import { getEditPath, DOC_TYPE } from '../../common';
@@ -350,6 +351,12 @@ const EmbeddableMessagesPopover = ({ messages }: { messages: UserMessage[] }) =>
   );
 };
 
+const allDisplayLocations: UserMessagesDisplayLocationId[] = [
+  'visualization',
+  'visualizationOnEmbeddable',
+  'embeddableBadge',
+];
+
 export class Embeddable
   extends AbstractEmbeddable<LensEmbeddableInput, LensEmbeddableOutput>
   implements
@@ -556,16 +563,6 @@ export class Embeddable
       filters ?? {}
     );
   };
-
-  private get allErrors() {
-    return this.getUserMessages(['visualization', 'visualizationOnEmbeddable', 'embeddableBadge'], {
-      severity: 'error',
-    });
-  }
-
-  private get hasAnyErrors() {
-    return this.allErrors.length > 0;
-  }
 
   private _userMessages: UserMessage[] = [];
 
@@ -895,20 +892,20 @@ export class Embeddable
 
     this.domNode.setAttribute('data-shared-item', '');
 
-    const errors = this.allErrors;
+    const allErrors = this.getUserMessages(allDisplayLocations, { severity: 'error' });
 
     this.updateOutput({
       loading: true,
-      error: errors.length
+      error: allErrors.length
         ? new Error(
-            typeof errors[0].longMessage === 'string'
-              ? errors[0].longMessage
-              : errors[0].shortMessage
+            typeof allErrors[0].longMessage === 'string'
+              ? allErrors[0].longMessage
+              : allErrors[0].shortMessage
           )
         : undefined,
     });
 
-    if (errors.length) {
+    if (allErrors.length) {
       this.renderComplete.dispatchError();
     } else {
       this.renderComplete.dispatchInProgress();
@@ -916,7 +913,7 @@ export class Embeddable
 
     const input = this.getInput();
 
-    if (this.expression && !errors.length) {
+    if (this.expression && !allErrors.length) {
       render(
         <KibanaThemeProvider theme$={this.deps.theme.theme$}>
           <ExpressionWrapper
@@ -1263,7 +1260,8 @@ export class Embeddable
       ]);
     }
 
-    if (this.hasAnyErrors) {
+    const allErrors = this.getUserMessages(allDisplayLocations, { severity: 'error' });
+    if (allErrors.length) {
       this.logError('validation');
     }
 
