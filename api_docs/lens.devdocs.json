@@ -9027,8 +9027,6 @@
         "description": [],
         "signature": [
           "(",
-          "LensByReferenceInput",
-          " | ",
           {
             "pluginId": "lens",
             "scope": "public",
@@ -9036,6 +9034,8 @@
             "section": "def-public.TypedLensByValueInput",
             "text": "TypedLensByValueInput"
           },
+          " | ",
+          "LensByReferenceInput",
           ") & { withDefaultActions?: boolean | undefined; extraActions?: ",
           {
             "pluginId": "uiActions",
