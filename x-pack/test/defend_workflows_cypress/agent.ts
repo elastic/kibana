@@ -14,8 +14,6 @@ import { ChildProcess } from 'child_process';
 // import { getLatestVersion } from './artifact_manager';
 import { Manager } from './resource_manager';
 
-const VM_NAME = 'endpoint10';
-
 export interface AgentManagerParams {
   user: string;
   password: string;
@@ -29,6 +27,7 @@ export class AgentManager extends Manager {
   private log: ToolingLog;
   private agentProcess?: ChildProcess;
   private requestOptions: AxiosRequestConfig;
+  private vmName: string;
   private agentPolicyId?: string;
   constructor(params: AgentManagerParams, log: ToolingLog, requestOptions: AxiosRequestConfig) {
     super();
@@ -36,6 +35,7 @@ export class AgentManager extends Manager {
     this.params = params;
     this.requestOptions = requestOptions;
     this.agentPolicyId = undefined;
+    this.vmName = Math.random().toString(36).slice(2);
   }
 
   public async setup() {
@@ -109,37 +109,34 @@ export class AgentManager extends Manager {
     );
     const enrollmentToken = find(
       apiKeys.data.items,
-      (item) => item.policy_id === agentPolicyId
+      (item) => item.policy_id === this.agentPolicyId
     ).api_key;
 
     const hostIp = find(os.networkInterfaces().en0, { family: 'IPv4' })?.address ?? '0.0.0.0';
 
     // TODO: Receive the name of the VM and store in the variable
-    execa.commandSync(`multipass launch --name ${VM_NAME}`, { forceKillAfterTimeout: false });
+    execa.commandSync(`multipass launch --name ${this.vmName}`);
 
     // TODO: Allow to pass agent version as env variable
     // TODO: Try to use direct file download link or use the artifact manager to retrieve the latest version
     // https://artifacts-api.elastic.co/v1/versions/8.7.0-SNAPSHOT/builds/latest/projects/elastic-agent/packages/elastic-agent-8.6.0-SNAPSHOT-linux-arm64.tar.gz/file
     await execa.command(
-      `multipass exec ${VM_NAME} -- curl -L https://snapshots.elastic.co/8.6.0-9105192d/downloads/beats/elastic-agent/elastic-agent-8.6.0-SNAPSHOT-linux-arm64.tar.gz -o elastic-agent-8.6.0-SNAPSHOT-linux-arm64.tar.gz`,
-      { forceKillAfterTimeout: false }
+      `multipass exec ${this.vmName} -- curl -L https://snapshots.elastic.co/8.6.0-9105192d/downloads/beats/elastic-agent/elastic-agent-8.6.0-SNAPSHOT-linux-arm64.tar.gz -o elastic-agent-8.6.0-SNAPSHOT-linux-arm64.tar.gz`,
     );
 
     execa.commandSync(
-      `multipass exec ${VM_NAME} -- tar -zxf elastic-agent-8.6.0-SNAPSHOT-linux-arm64.tar.gz`,
-      { forceKillAfterTimeout: false }
+      `multipass exec ${this.vmName} -- tar -zxf elastic-agent-8.6.0-SNAPSHOT-linux-arm64.tar.gz`,
     );
 
     // TODO: Use config service to retrieve the proper --url
     execa.commandSync(
-      `multipass exec ${VM_NAME} --working-directory /home/ubuntu/elastic-agent-8.6.0-SNAPSHOT-linux-arm64 -- sudo ./elastic-agent enroll --url=https://${hostIp}:8220 --enrollment-token=${enrollmentToken} --insecure`,
-      { forceKillAfterTimeout: false }
+      `multipass exec ${this.vmName} --working-directory /home/ubuntu/elastic-agent-8.6.0-SNAPSHOT-linux-arm64 -- sudo ./elastic-agent enroll --url=https://${hostIp}:8220 --enrollment-token=${enrollmentToken} --insecure`,
     );
 
     this.log.info('Running the agent');
 
     execa.command(
-      `multipass exec ${VM_NAME} --working-directory /home/ubuntu/elastic-agent-8.6.0-SNAPSHOT-linux-arm64 -- sudo ./elastic-agent &>/dev/null &`
+      `multipass exec ${this.vmName} --working-directory /home/ubuntu/elastic-agent-8.6.0-SNAPSHOT-linux-arm64 -- sudo ./elastic-agent &>/dev/null &`
     );
 
     // TODO: try to wait for the endpoint agent to be online
@@ -166,7 +163,7 @@ export class AgentManager extends Manager {
 
   protected _cleanup() {
     this.log.info('Cleaning up the agent process');
-    execa.command(`multipass delete ${VM_NAME} && multipass purge`);
+    execa.command(`multipass delete ${this.vmName} && multipass purge`);
     if (this.agentProcess) {
       if (!this.agentProcess.kill(9)) {
         this.log.warning('Unable to kill agent process');

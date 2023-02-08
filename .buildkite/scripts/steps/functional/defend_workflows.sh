@@ -14,3 +14,4 @@ echo "--- Defend Workflows Cypress tests"
 node scripts/functional_tests \
   --debug --bail \
   --config x-pack/test/defend_workflows_cypress/cli_config.ts
+
