@@ -22,6 +22,7 @@ import { description } from '../../common/description';
 import { name } from '../../common/name';
 import { meta } from '../../common/meta';
 import { tags } from '../../common/tags';
+import { ExpireTimeOrUndefined, expireTimeOrUndefined } from '../../common';
 
 export const createEndpointListItemSchema = t.intersection([
   t.exact(
@@ -39,6 +40,7 @@ export const createEndpointListItemSchema = t.intersection([
       meta, // defaults to undefined if not set during decode
       os_types: osTypeArrayOrUndefined, // defaults to empty array if not set during decode
       tags, // defaults to empty array if not set during decode
+      expire_time: expireTimeOrUndefined, // defaults to undefined if not set during decode
     })
   ),
 ]);
@@ -48,11 +50,12 @@ export type CreateEndpointListItemSchema = t.OutputOf<typeof createEndpointListI
 // This type is used after a decode since some things are defaults after a decode.
 export type CreateEndpointListItemSchemaDecoded = Omit<
   RequiredKeepUndefined<t.TypeOf<typeof createEndpointListItemSchema>>,
-  'tags' | 'item_id' | 'entries' | 'comments' | 'os_types'
+  'tags' | 'item_id' | 'entries' | 'comments' | 'os_types' | 'expire_time'
 > & {
   comments: CreateCommentsArray;
   tags: Tags;
   item_id: ItemId;
   entries: EntriesArray;
   os_types: OsTypeArray;
+  expire_time: ExpireTimeOrUndefined;
 };

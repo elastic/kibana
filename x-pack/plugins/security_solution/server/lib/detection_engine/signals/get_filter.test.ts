@@ -233,6 +233,7 @@ describe('get_filter', () => {
 
     test('returns a query when given a list', async () => {
       const { filter } = await buildExceptionFilter({
+        startedAt: new Date(),
         listClient: getListClientMock(),
         lists: [getExceptionListItemSchemaMock()],
         alias: null,
