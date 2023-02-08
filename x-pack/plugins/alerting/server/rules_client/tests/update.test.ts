@@ -85,6 +85,7 @@ describe('update()', () => {
       alertTypeId: 'myType',
       schedule: { interval: '1m' },
       consumer: 'myApp',
+      revision: 0,
       scheduledTaskId: 'task-123',
       params: {},
       actions: [
@@ -105,7 +106,6 @@ describe('update()', () => {
       ],
     },
     references: [],
-    revision: 0,
     version: '123',
   };
   const existingDecryptedAlert = {
@@ -231,6 +231,7 @@ describe('update()', () => {
           },
         ],
         notifyWhen: 'onActiveAlert',
+        revision: 1,
         scheduledTaskId: 'task-123',
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
@@ -326,6 +327,7 @@ describe('update()', () => {
         "params": Object {
           "bar": true,
         },
+        "revision": 1,
         "schedule": Object {
           "interval": "1m",
         },
@@ -521,6 +523,7 @@ describe('update()', () => {
           },
         ],
         notifyWhen: 'onActiveAlert',
+        revision: 1,
         scheduledTaskId: 'task-123',
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
@@ -575,7 +578,6 @@ describe('update()', () => {
       },
     });
 
-    // TODO: Review update results once increment logic is finalized
     expect(unsecuredSavedObjectsClient.create).toHaveBeenNthCalledWith(
       1,
       'alert',
@@ -666,6 +668,7 @@ describe('update()', () => {
         "params": Object {
           "bar": true,
         },
+        "revision": 1,
         "schedule": Object {
           "interval": "1m",
         },
@@ -740,6 +743,7 @@ describe('update()', () => {
           },
         ],
         notifyWhen: 'onActiveAlert',
+        revision: 1,
         scheduledTaskId: 'task-123',
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
@@ -778,7 +782,6 @@ describe('update()', () => {
       },
     });
 
-    // TODO: Review update results once increment logic is finalized
     expect(extractReferencesFn).toHaveBeenCalledWith(ruleParams);
     expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledWith(
       'alert',
@@ -841,6 +844,7 @@ describe('update()', () => {
           "bar": true,
           "parameterThatIsSavedObjectId": "9",
         },
+        "revision": 1,
         "schedule": Object {
           "interval": "1m",
         },
@@ -878,6 +882,7 @@ describe('update()', () => {
           },
         ],
         apiKey: Buffer.from('123:abc').toString('base64'),
+        revision: 1,
         scheduledTaskId: 'task-123',
       },
       updated_at: new Date().toISOString(),
@@ -931,6 +936,7 @@ describe('update()', () => {
         "params": Object {
           "bar": true,
         },
+        "revision": 1,
         "schedule": Object {
           "interval": "1m",
         },
@@ -1033,6 +1039,7 @@ describe('update()', () => {
             },
           },
         ],
+        revision: 1,
         scheduledTaskId: 'task-123',
         apiKey: null,
       },
@@ -1088,6 +1095,7 @@ describe('update()', () => {
         "params": Object {
           "bar": true,
         },
+        "revision": 1,
         "schedule": Object {
           "interval": "1m",
         },
@@ -2068,6 +2076,7 @@ describe('update()', () => {
           },
         ],
         notifyWhen: 'onActiveAlert',
+        revision: 1,
         scheduledTaskId: 'task-123',
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
@@ -2132,6 +2141,7 @@ describe('update()', () => {
         name: 'abc',
         notifyWhen: 'onActiveAlert',
         params: { bar: true },
+        revision: 1,
         schedule: { interval: '1m' },
         scheduledTaskId: 'task-123',
         tags: ['foo'],
@@ -2166,6 +2176,7 @@ describe('update()', () => {
         "params": Object {
           "bar": true,
         },
+        "revision": 1,
         "schedule": Object {
           "interval": "1m",
         },

@@ -70,8 +70,7 @@ export default ({ getService }: FtrProviderContext) => {
           .expect(200);
 
         const outputRule = getSimpleMlRuleOutput();
-        outputRule.version = 2;
-        outputRule.revision = 1;
+        outputRule.version = 2; // NOTE: Revision is not updated as `machine_learning_job_id` value doesn't actually change
         const bodyToCompare = removeServerGeneratedProperties(body);
         expect(bodyToCompare).to.eql(outputRule);
       });
@@ -379,6 +378,7 @@ export default ({ getService }: FtrProviderContext) => {
           },
         ];
         outputRule.throttle = '1h';
+        outputRule.revision = 2; // Expected revision is 2 as call to `createLegacyRuleAction()` does two separate rules updates for `notifyWhen` & `actions` field
         const bodyToCompare = removeServerGeneratedProperties(patchResponse.body);
         expect(bodyToCompare).to.eql(outputRule);
       });

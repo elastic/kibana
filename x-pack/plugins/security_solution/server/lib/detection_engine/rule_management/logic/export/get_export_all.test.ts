@@ -288,6 +288,7 @@ describe('getExportAll', () => {
       throttle: 'rule',
       note: '# Investigative notes',
       version: 1,
+      revision: 0,
       exceptions_list: getListArrayMock(),
     });
     expect(detailsJson).toEqual({
