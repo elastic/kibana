@@ -54,8 +54,7 @@ export default ({ getPageObjects, getPageObject, getService }: FtrProviderContex
       await testSubjects.click('.slack-card');
 
       await testSubjects.setValue('nameInput', connectorName);
-
-      await testSubjects.setValue('slackWebhookUrlInput', 'https://test.com');
+      await testSubjects.setValue('secrets.token-input', 'some token');
 
       await find.clickByCssSelector(
         '[data-test-subj="create-connector-flyout-save-btn"]:not(disabled)'
@@ -96,7 +95,7 @@ export default ({ getPageObjects, getPageObject, getService }: FtrProviderContex
 
       await testSubjects.setValue('nameInput', updatedConnectorName);
 
-      await testSubjects.setValue('slackWebhookUrlInput', 'https://test.com');
+      await testSubjects.setValue('secrets.token-input', 'https://test.com');
 
       await find.clickByCssSelector(
         '[data-test-subj="edit-connector-flyout-save-btn"]:not(disabled)'
