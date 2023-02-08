@@ -447,7 +447,6 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
               <StatefulEventsViewer
                 additionalFilters={additionalFiltersComponent}
                 currentFilter={filterGroup as AlertWorkflowStatus}
-                defaultCellActions={defaultCellActions}
                 defaultModel={getAlertsDefaultModel(license)}
                 end={to}
                 bulkActions={bulkActions}
