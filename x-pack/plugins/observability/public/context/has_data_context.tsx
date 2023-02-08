@@ -31,11 +31,11 @@ export type HasDataMap = Record<
 >;
 
 export interface HasDataContextValue {
+  forceUpdate: string;
   hasDataMap: Partial<HasDataMap>;
-  hasAnyData?: boolean;
   isAllRequestsComplete: boolean;
   onRefreshTimeRange: () => void;
-  forceUpdate: string;
+  hasAnyData?: boolean;
 }
 
 export const HasDataContext = createContext({} as HasDataContextValue);
@@ -49,11 +49,16 @@ export function HasDataContextProvider({ children }: { children: React.ReactNode
 
   const [hasDataMap, setHasDataMap] = useState<HasDataContextValue['hasDataMap']>({});
 
-  const isExploratoryView = useRouteMatch('/exploratory-view');
+  // This provider checks all the registered dataloaders for different apps
+  // within the Observability solution to see if any of them has any data.
+  // This is used on the Overview page to render the widgets.
+  // Todo: investigate whether or not a refactor is in order: https://github.com/elastic/kibana/issues/150544
+
+  const isOverview = Boolean(useRouteMatch('/overview'));
 
   useEffect(
     () => {
-      if (!isExploratoryView)
+      if (isOverview) {
         asyncForEach(apps, async (app) => {
           try {
             const updateState = ({
@@ -120,9 +125,10 @@ export function HasDataContextProvider({ children }: { children: React.ReactNode
             }));
           }
         });
+      }
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [isExploratoryView]
+    [isOverview]
   );
 
   useEffect(() => {
