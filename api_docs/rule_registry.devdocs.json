@@ -4782,6 +4782,55 @@
           }
         ],
         "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "ruleRegistry",
+        "id": "def-common.RuleRegistrySearchResponse",
+        "type": "Interface",
+        "tags": [],
+        "label": "RuleRegistrySearchResponse",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "ruleRegistry",
+            "scope": "common",
+            "docId": "kibRuleRegistryPluginApi",
+            "section": "def-common.RuleRegistrySearchResponse",
+            "text": "RuleRegistrySearchResponse"
+          },
+          " extends ",
+          {
+            "pluginId": "data",
+            "scope": "common",
+            "docId": "kibDataSearchPluginApi",
+            "section": "def-common.IEsSearchResponse",
+            "text": "IEsSearchResponse"
+          },
+          "<",
+          "EcsFieldsResponse",
+          ">"
+        ],
+        "path": "x-pack/plugins/rule_registry/common/search_strategy/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "ruleRegistry",
+            "id": "def-common.RuleRegistrySearchResponse.inspect",
+            "type": "Object",
+            "tags": [],
+            "label": "inspect",
+            "description": [],
+            "signature": [
+              "RuleRegistryInspect",
+              " | undefined"
+            ],
+            "path": "x-pack/plugins/rule_registry/common/search_strategy/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
       }
     ],
     "enums": [],
@@ -4877,34 +4926,6 @@
             "text": "RuleRegistrySearchRequestPagination"
           },
           " | undefined; }"
-        ],
-        "path": "x-pack/plugins/rule_registry/common/search_strategy/index.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "ruleRegistry",
-        "id": "def-common.RuleRegistrySearchResponse",
-        "type": "Type",
-        "tags": [],
-        "label": "RuleRegistrySearchResponse",
-        "description": [],
-        "signature": [
-          {
-            "pluginId": "data",
-            "scope": "common",
-            "docId": "kibDataSearchPluginApi",
-            "section": "def-common.IKibanaSearchResponse",
-            "text": "IKibanaSearchResponse"
-          },
-          "<",
-          "SearchResponse",
-          "<",
-          "EcsFieldsResponse",
-          ", Record<string, ",
-          "AggregationsAggregate",
-          ">>>"
         ],
         "path": "x-pack/plugins/rule_registry/common/search_strategy/index.ts",
         "deprecated": false,

@@ -115,6 +115,7 @@ export const createUpdateSuccessToaster = (
 
   const toast: ToastInputFields = {
     title: i18n.UPDATED_CASE(caseAfterUpdate.title),
+    className: 'eui-textBreakWord',
   };
 
   if (valueToUpdateIsSettings(key, value) && value?.syncAlerts && caseHasAlerts) {
