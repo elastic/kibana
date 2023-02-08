@@ -261,7 +261,7 @@ export const AgentDiagnosticsTab: React.FunctionComponent<AgentDiagnosticsProps>
             content={
               <FormattedMessage
                 id="xpack.fleet.requestDiagnostics.notSupportedTooltip"
-                defaultMessage="Request diagnostics action is not supported for agents before version {version}."
+                defaultMessage="Requesting agent diagnostics is not supported for agents before version {version}."
                 values={{ version: MINIMUM_DIAGNOSTICS_AGENT_VERSION }}
               />
             }
