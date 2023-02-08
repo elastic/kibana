@@ -186,7 +186,7 @@ export function EndpointPolicyTestResourcesProvider({ getService }: FtrProviderC
           enabled: true,
           inputs: [
             {
-              type: 'endpoint',
+              type: 'ENDPOINT_INTEGRATION_CONFIG',
               enabled: true,
               streams: [],
               config: {
