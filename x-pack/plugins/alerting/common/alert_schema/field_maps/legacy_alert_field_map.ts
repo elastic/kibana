@@ -38,9 +38,8 @@ import {
   EVENT_KIND,
   TAGS,
 } from '@kbn/rule-data-utils';
-import { FieldMap } from './types';
 
-export const legacyAlertFieldMap: FieldMap = {
+export const legacyAlertFieldMap = {
   [ALERT_RISK_SCORE]: {
     type: 'float',
     array: false,
@@ -197,6 +196,6 @@ export const legacyAlertFieldMap: FieldMap = {
     array: true,
     required: false,
   },
-};
+} as const;
 
 export type LegacyAlertFieldMap = typeof legacyAlertFieldMap;

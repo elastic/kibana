@@ -33,9 +33,8 @@ import {
   TIMESTAMP,
   VERSION,
 } from '@kbn/rule-data-utils';
-import { FieldMap } from './types';
 
-export const alertFieldMap: FieldMap = {
+export const alertFieldMap = {
   [ALERT_ACTION_GROUP]: {
     type: 'keyword',
     array: false,
@@ -168,6 +167,6 @@ export const alertFieldMap: FieldMap = {
     array: false,
     required: false,
   },
-};
+} as const;
 
 export type AlertFieldMap = typeof alertFieldMap;
