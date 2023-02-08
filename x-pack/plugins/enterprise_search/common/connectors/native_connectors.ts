@@ -138,6 +138,26 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         order: 4,
         value: '',
       },
+      ssl_disabled: {
+        label: i18n.translate(
+          'xpack.enterpriseSearch.nativeConnectors.mysql.configuration.sslDisabledLabel',
+          {
+            defaultMessage: 'Disable SSL (true/false)',
+          }
+        ),
+        order: 5,
+        value: '',
+      },
+      ssl_ca: {
+        label: i18n.translate(
+          'xpack.enterpriseSearch.nativeConnectors.mysql.configuration.sslCertificateLabel',
+          {
+            defaultMessage: 'SSL certificate',
+          }
+        ),
+        order: 6,
+        value: '',
+      },
     },
     features: {
       [FeatureName.SYNC_RULES]: {
