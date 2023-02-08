@@ -113,6 +113,12 @@ const getSavedObjectTypes = (
         monitoring_output_id: { type: 'keyword' },
         download_source_id: { type: 'keyword' },
         fleet_server_host_id: { type: 'keyword' },
+        agent_features: {
+          properties: {
+            name: { type: 'keyword' },
+            enabled: { type: 'boolean' },
+          },
+        },
       },
     },
     migrations: {

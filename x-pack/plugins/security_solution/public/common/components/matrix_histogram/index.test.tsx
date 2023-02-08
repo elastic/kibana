@@ -29,11 +29,7 @@ jest.mock('../charts/barchart', () => ({
 
 jest.mock('../../containers/matrix_histogram');
 
-jest.mock('../visualization_actions', () => ({
-  VisualizationActions: jest.fn(({ className }: { className: string }) => (
-    <div data-test-subj="mock-viz-actions" className={className} />
-  )),
-}));
+jest.mock('../visualization_actions/actions');
 
 jest.mock('./utils', () => ({
   getBarchartConfigs: jest.fn(),
@@ -197,8 +193,8 @@ describe('Matrix Histogram Component', () => {
       wrapper = mount(<MatrixHistogram {...testProps} />, {
         wrappingComponent: TestProviders,
       });
-      expect(wrapper.find('[data-test-subj="mock-viz-actions"]').exists()).toBe(true);
-      expect(wrapper.find('[data-test-subj="mock-viz-actions"]').prop('className')).toEqual(
+      expect(wrapper.find('[data-test-subj="visualizationActions"]').exists()).toBe(true);
+      expect(wrapper.find('[data-test-subj="visualizationActions"]').prop('className')).toEqual(
         'histogram-viz-actions'
       );
     });
