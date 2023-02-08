@@ -42,7 +42,7 @@ describe('application-level user messages', () => {
           ],
           "fixableInEditor": true,
           "longMessage": "Visualization type not found.",
-          "severity": "warning",
+          "severity": "error",
           "shortMessage": "",
         },
       ]
