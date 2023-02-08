@@ -172,6 +172,7 @@ export function createRecentNavLink(
       if (event.button === 0 && !isModifiedOrPrevented(event)) {
         event.preventDefault();
         navigateToUrl(href);
+        // <EuiScreenReaderLive>{href}</EuiScreenReaderLive>;
       }
     },
   };

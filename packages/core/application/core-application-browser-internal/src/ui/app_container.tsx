@@ -10,7 +10,7 @@ import './app_container.scss';
 
 import { Observable } from 'rxjs';
 import React, { Fragment, FC, useLayoutEffect, useRef, useState, MutableRefObject } from 'react';
-import { EuiLoadingElastic, EuiLoadingSpinner, EuiScreenReaderLive } from '@elastic/eui';
+import { EuiLoadingElastic, EuiLoadingSpinner } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 import type { CoreTheme } from '@kbn/core-theme-browser';
@@ -98,7 +98,6 @@ export const AppContainer: FC<Props> = ({
       }
     };
 
-    <EuiScreenReaderLive>{mounter.appRoute}</EuiScreenReaderLive>;
     mount();
 
     return unmount;
