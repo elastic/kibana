@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import { isEqual } from 'lodash';
 import useLifecycles from 'react-use/lib/useLifecycles';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
@@ -48,7 +48,7 @@ export const ControlGroupRenderer = ({
 }: ControlGroupRendererProps) => {
   const controlGroupRef = useRef(null);
   const [controlGroup, setControlGroup] = useState<ControlGroupContainer>();
-  const id = useMemo(() => uuid.v4(), []);
+  const id = useMemo(() => uuidv4(), []);
   /**
    * Use Lifecycles to load initial control group container
    */

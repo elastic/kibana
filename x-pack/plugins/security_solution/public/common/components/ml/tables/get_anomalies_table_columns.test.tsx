@@ -32,6 +32,7 @@ describe('getAnomaliesDefaultTableColumns', () => {
       AnomaliesBy
     >;
     const anomaly: AnomaliesBy = {
+      jobName: undefined,
       anomaly: {
         detectorIndex: 0,
         entityName: 'entity-name-1',

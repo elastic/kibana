@@ -22,6 +22,7 @@ import { createLifecycleRuleTypeFactory } from './create_lifecycle_rule_type_fac
 import { ISearchStartSearchSource } from '@kbn/data-plugin/common';
 import { SharePluginStart } from '@kbn/share-plugin/server';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
+import { DEFAULT_FLAPPING_SETTINGS } from '@kbn/alerting-plugin/common/rules_settings';
 
 type RuleTestHelpers = ReturnType<typeof createRule>;
 
@@ -101,7 +102,7 @@ function createRule(shouldWriteAlerts: boolean = true) {
         executionId: 'b33f65d7-6e8b-4aae-8d20-c93613dec9f9',
         logger: loggerMock.create(),
         namespace: 'namespace',
-        params: {},
+        params: { threshold: 1, operator: '>' },
         previousStartedAt,
         rule: {
           id: 'alertId',
@@ -110,6 +111,7 @@ function createRule(shouldWriteAlerts: boolean = true) {
           createdAt,
           createdBy: 'createdBy',
           enabled: true,
+          muteAll: false,
           name: 'name',
           notifyWhen: 'onActionGroupChange',
           producer: 'producer',
@@ -118,6 +120,7 @@ function createRule(shouldWriteAlerts: boolean = true) {
           schedule: {
             interval: '1m',
           },
+          snoozeSchedule: [],
           tags: ['tags'],
           throttle: null,
           updatedAt: createdAt,
@@ -138,6 +141,7 @@ function createRule(shouldWriteAlerts: boolean = true) {
         spaceId: 'spaceId',
         startedAt,
         state,
+        flappingSettings: DEFAULT_FLAPPING_SETTINGS,
       })) ?? {}) as Record<string, any>);
 
       previousStartedAt = startedAt;
@@ -246,6 +250,10 @@ describe('createLifecycleRuleTypeFactory', () => {
               "kibana.alert.rule.consumer": "consumer",
               "kibana.alert.rule.execution.uuid": "b33f65d7-6e8b-4aae-8d20-c93613dec9f9",
               "kibana.alert.rule.name": "name",
+              "kibana.alert.rule.parameters": Object {
+                "operator": ">",
+                "threshold": 1,
+              },
               "kibana.alert.rule.producer": "producer",
               "kibana.alert.rule.rule_type_id": "ruleTypeId",
               "kibana.alert.rule.tags": Array [
@@ -278,6 +286,10 @@ describe('createLifecycleRuleTypeFactory', () => {
               "kibana.alert.rule.consumer": "consumer",
               "kibana.alert.rule.execution.uuid": "b33f65d7-6e8b-4aae-8d20-c93613dec9f9",
               "kibana.alert.rule.name": "name",
+              "kibana.alert.rule.parameters": Object {
+                "operator": ">",
+                "threshold": 1,
+              },
               "kibana.alert.rule.producer": "producer",
               "kibana.alert.rule.rule_type_id": "ruleTypeId",
               "kibana.alert.rule.tags": Array [

@@ -5183,6 +5183,46 @@
               }
             }
           }
+        },
+        "rules_stats": {
+          "type": "array",
+          "items": {
+            "properties": {
+              "rule_id": {
+                "type": "keyword"
+              },
+              "rule_name": {
+                "type": "keyword"
+              },
+              "rule_section": {
+                "type": "keyword"
+              },
+              "rule_version": {
+                "type": "keyword"
+              },
+              "rule_number": {
+                "type": "keyword"
+              },
+              "posture_type": {
+                "type": "keyword"
+              },
+              "benchmark_id": {
+                "type": "keyword"
+              },
+              "benchmark_name": {
+                "type": "keyword"
+              },
+              "benchmark_version": {
+                "type": "keyword"
+              },
+              "passed_findings_count": {
+                "type": "long"
+              },
+              "failed_findings_count": {
+                "type": "long"
+              }
+            }
+          }
         }
       }
     },
@@ -9532,6 +9572,12 @@
           "type": "long",
           "_meta": {
             "description": "The session cleanup interval that is configured, in minutes (0 if disabled)."
+          }
+        },
+        "sessionConcurrentSessionsMaxSessions": {
+          "type": "long",
+          "_meta": {
+            "description": "The maximum number of the concurrent user sessions (0 if not configured)."
           }
         },
         "anonymousCredentialType": {

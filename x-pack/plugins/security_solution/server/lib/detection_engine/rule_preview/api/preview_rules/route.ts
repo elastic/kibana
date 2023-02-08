@@ -5,7 +5,7 @@
  * 2.0.
  */
 import moment from 'moment';
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { QUERY_RULE_TYPE_ID, SAVED_QUERY_RULE_TYPE_ID } from '@kbn/securitysolution-rules';
 import type { Logger, StartServicesAccessor } from '@kbn/core/server';
@@ -15,7 +15,7 @@ import type {
   AlertInstanceState,
   RuleTypeState,
 } from '@kbn/alerting-plugin/common';
-import { parseDuration } from '@kbn/alerting-plugin/common';
+import { parseDuration, DISABLE_FLAPPING_SETTINGS } from '@kbn/alerting-plugin/common';
 import type { ExecutorType } from '@kbn/alerting-plugin/server/types';
 import type { Alert } from '@kbn/alerting-plugin/server';
 
@@ -121,7 +121,7 @@ export const previewRulesRoute = async (
         await listsContext?.getExceptionListClient().createEndpointList();
 
         const spaceId = siemClient.getSpaceId();
-        const previewId = uuid.v4();
+        const previewId = uuidv4();
         const username = security?.authc.getCurrentUser(request)?.username;
         const loggedStatusChanges: Array<RuleExecutionContext & StatusChangeArgs> = [];
         const previewRuleExecutionLogger = createPreviewRuleExecutionLogger(loggedStatusChanges);
@@ -225,6 +225,8 @@ export const previewRulesRoute = async (
             ruleTypeName,
             updatedAt: new Date(),
             updatedBy: username ?? 'preview-updated-by',
+            muteAll: false,
+            snoozeSchedule: [],
           };
 
           let invocationStartTime;
@@ -238,7 +240,7 @@ export const previewRulesRoute = async (
             invocationStartTime = moment();
 
             ({ state: statePreview } = (await executor({
-              executionId: uuid.v4(),
+              executionId: uuidv4(),
               params,
               previousStartedAt,
               rule,
@@ -263,11 +265,12 @@ export const previewRulesRoute = async (
               startedAt: startedAt.toDate(),
               state: statePreview,
               logger,
+              flappingSettings: DISABLE_FLAPPING_SETTINGS,
             })) as { state: TState });
 
             const errors = loggedStatusChanges
               .filter((item) => item.newStatus === RuleExecutionStatus.failed)
-              .map((item) => item.message ?? 'Unkown Error');
+              .map((item) => item.message ?? 'Unknown Error');
 
             const warnings = loggedStatusChanges
               .filter((item) => item.newStatus === RuleExecutionStatus['partial failure'])

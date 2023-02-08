@@ -57,6 +57,7 @@ export interface Paginated<T> {
 
 export interface SLORepository {
   save(slo: SLO): Promise<SLO>;
+  findAllByIds(ids: string[]): Promise<SLO[]>;
   findById(id: string): Promise<SLO>;
   deleteById(id: string): Promise<void>;
   find(criteria: Criteria, sort: Sort, pagination: Pagination): Promise<Paginated<SLO>>;
@@ -115,6 +116,25 @@ export class KibanaSavedObjectsSLORepository implements SLORepository {
       perPage: response.per_page,
       results: response.saved_objects.map((slo) => toSLO(slo.attributes)),
     };
+  }
+
+  async findAllByIds(ids: string[]): Promise<SLO[]> {
+    if (ids.length === 0) return [];
+
+    try {
+      const response = await this.soClient.find<StoredSLO>({
+        type: SO_SLO_TYPE,
+        page: 1,
+        perPage: ids.length,
+        filter: `slo.attributes.id:(${ids.join(' or ')})`,
+      });
+      return response.saved_objects.map((slo) => toSLO(slo.attributes));
+    } catch (err) {
+      if (SavedObjectsErrorHelpers.isNotFoundError(err)) {
+        throw new SLONotFound(`SLOs [${ids.join(',')}] not found`);
+      }
+      throw err;
+    }
   }
 }
 

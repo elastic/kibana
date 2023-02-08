@@ -25,14 +25,13 @@ describe('test useSearchSession', () => {
     const nextId = 'id';
     discoverServiceMock.data.search.session.start = jest.fn(() => nextId);
 
-    const { result } = renderHook(() => {
+    renderHook(() => {
       return useSearchSession({
         services: discoverServiceMock,
-        history,
         stateContainer,
         savedSearch: savedSearchMock,
       });
     });
-    expect(result.current.getNextSearchSessionId()).toBe('id');
+    expect(stateContainer.searchSessionManager.getNextSearchSessionId()).toBe('id');
   });
 });

@@ -387,8 +387,8 @@ export const getNewTermsRule = (): NewTermsRule => ({
 
 export const getMachineLearningRule = (): MachineLearningRule => ({
   machineLearningJobs: [
-    'v3_linux_anomalous_network_activity',
-    'v3_linux_anomalous_process_all_hosts',
+    'Unusual Linux Network Activity',
+    'Anomalous Process for a Linux Population',
   ],
   anomalyScoreThreshold: 20,
   name: 'New ML Rule Test',
@@ -573,6 +573,11 @@ export const expectedExportedRule = (ruleResponse: Cypress.Response<RuleResponse
     missing_exception_list_items: [],
     missing_exception_lists: [],
     missing_exception_lists_count: 0,
+    exported_action_connector_count: 0,
+    missing_action_connection_count: 0,
+    missing_action_connections: [],
+    excluded_action_connection_count: 0,
+    excluded_action_connections: [],
   };
 
   return `${JSON.stringify(rule)}\n${JSON.stringify(details)}\n`;

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import {
   EuiAvatar,
   EuiButton,
@@ -50,7 +50,7 @@ export function SloEditForm({ slo }: Props) {
     notifications: { toasts },
   } = useKibana().services;
 
-  const { control, watch, getFieldState, getValues, formState, trigger } = useForm({
+  const { control, watch, getFieldState, getValues, formState } = useForm({
     defaultValues: SLO_EDIT_FORM_DEFAULT_VALUES,
     values: transformSloResponseToCreateSloInput(slo),
     mode: 'all',
@@ -73,28 +73,31 @@ export function SloEditForm({ slo }: Props) {
     }
   };
 
-  if (success) {
-    toasts.addSuccess(
-      isEditMode
-        ? i18n.translate('xpack.observability.slos.sloEdit.update.success', {
-            defaultMessage: 'Successfully updated {name}',
-            values: { name: getValues().name },
-          })
-        : i18n.translate('xpack.observability.slos.sloEdit.creation.success', {
-            defaultMessage: 'Successfully created {name}',
-            values: { name: getValues().name },
-          })
-    );
-    navigateToUrl(basePath.prepend(paths.observability.slos));
-  }
+  useEffect(() => {
+    if (success) {
+      toasts.addSuccess(
+        isEditMode
+          ? i18n.translate('xpack.observability.slos.sloEdit.update.success', {
+              defaultMessage: 'Successfully updated {name}',
+              values: { name: getValues().name },
+            })
+          : i18n.translate('xpack.observability.slos.sloEdit.creation.success', {
+              defaultMessage: 'Successfully created {name}',
+              values: { name: getValues().name },
+            })
+      );
 
-  if (error) {
-    toasts.addError(new Error(error), {
-      title: i18n.translate('xpack.observability.slos.sloEdit.creation.error', {
-        defaultMessage: 'Something went wrong',
-      }),
-    });
-  }
+      navigateToUrl(basePath.prepend(paths.observability.slos));
+    }
+
+    if (error) {
+      toasts.addError(new Error(error), {
+        title: i18n.translate('xpack.observability.slos.sloEdit.creation.error', {
+          defaultMessage: 'Something went wrong',
+        }),
+      });
+    }
+  }, [success, error, toasts, isEditMode, getValues, navigateToUrl, basePath]);
 
   return (
     <EuiTimeline data-test-subj="sloForm">
@@ -141,7 +144,7 @@ export function SloEditForm({ slo }: Props) {
           <EuiSpacer size="xxl" />
 
           {watch('indicator.type') === 'sli.kql.custom' ? (
-            <SloEditFormDefinitionCustomKql control={control} trigger={trigger} />
+            <SloEditFormDefinitionCustomKql control={control} watch={watch} />
           ) : null}
 
           <EuiSpacer size="m" />

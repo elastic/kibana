@@ -96,11 +96,13 @@ export async function getSharingData(
        * Discover does not set fields, since having all fields is needed for the UI.
        */
       const useFieldsApi = !config.get(SEARCH_FIELDS_FROM_SOURCE);
-      if (useFieldsApi && columns.length) {
-        searchSource.setField(
-          'fields',
-          columns.map((field) => ({ field, include_unmapped: 'true' }))
-        );
+      if (useFieldsApi) {
+        searchSource.removeField('fieldsFromSource');
+        const fields = columns.length
+          ? columns.map((field) => ({ field, include_unmapped: 'true' }))
+          : [{ field: '*', include_unmapped: 'true' }];
+
+        searchSource.setField('fields', fields);
       }
       return searchSource.getSerializedFields(true);
     },

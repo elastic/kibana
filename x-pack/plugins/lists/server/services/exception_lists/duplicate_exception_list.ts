@@ -6,7 +6,7 @@
  */
 
 import { SavedObjectsClientContract } from '@kbn/core/server';
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import {
   CreateExceptionListItemSchema,
   ExceptionListSchema,
@@ -40,7 +40,7 @@ export const duplicateExceptionListAndItems = async ({
   user,
 }: CreateExceptionListOptions): Promise<ExceptionListSchema> => {
   // Generate a new static listId
-  const newListId = uuid.v4();
+  const newListId = uuidv4();
 
   // fetch list container
   const listToDuplicate = await getExceptionList({
@@ -77,7 +77,7 @@ export const duplicateExceptionListAndItems = async ({
   const executeFunctionOnStream = (response: FoundExceptionListItemSchema): void => {
     const transformedItems = response.data.map((item) => {
       // Generate a new static listId
-      const newItemId = uuid.v4();
+      const newItemId = uuidv4();
 
       return {
         comments: [],

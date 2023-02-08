@@ -5,6 +5,10 @@
  * 2.0.
  */
 
+import {
+  READ_FLAPPING_SETTINGS_SUB_FEATURE_ID,
+  ALL_FLAPPING_SETTINGS_SUB_FEATURE_ID,
+} from '@kbn/alerting-plugin/common';
 import { ES_TEST_INDEX_NAME } from '@kbn/alerting-api-integration-helpers';
 import { Space, User } from '../common/types';
 
@@ -51,6 +55,7 @@ const GlobalRead: User = {
           alertsFixture: ['read'],
           alertsRestrictedFixture: ['read'],
           actionsSimulators: ['read'],
+          rulesSettings: ['read', READ_FLAPPING_SETTINGS_SUB_FEATURE_ID],
         },
         spaces: ['*'],
       },
@@ -78,6 +83,7 @@ const Space1All: User = {
           actions: ['all'],
           alertsFixture: ['all'],
           actionsSimulators: ['all'],
+          rulesSettings: ['all', ALL_FLAPPING_SETTINGS_SUB_FEATURE_ID],
         },
         spaces: ['space1'],
       },

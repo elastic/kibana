@@ -35,7 +35,7 @@ import { registerConnectorsToMockActionRegistry } from '../../common/mock/regist
 import { createStartServicesMock } from '../../common/lib/kibana/kibana_react.mock';
 import { waitForComponentToUpdate } from '../../common/test_utils';
 import { useCreateAttachments } from '../../containers/use_create_attachments';
-import { useGetConnectors } from '../../containers/configure/use_connectors';
+import { useGetSupportedActionConnectors } from '../../containers/configure/use_get_supported_action_connectors';
 import { useGetTags } from '../../containers/use_get_tags';
 import { useUpdateCase } from '../../containers/use_update_case';
 import { useGetCases, DEFAULT_QUERY_PARAMS } from '../../containers/use_get_cases';
@@ -51,7 +51,7 @@ jest.mock('../../containers/use_get_action_license');
 jest.mock('../../containers/use_get_tags');
 jest.mock('../../containers/user_profiles/use_get_current_user_profile');
 jest.mock('../../containers/user_profiles/use_bulk_get_user_profiles');
-jest.mock('../../containers/configure/use_connectors');
+jest.mock('../../containers/configure/use_get_supported_action_connectors');
 jest.mock('../../common/lib/kibana');
 jest.mock('../../common/navigation/hooks');
 jest.mock('../app/use_available_owners', () => ({
@@ -65,7 +65,7 @@ const useGetTagsMock = useGetTags as jest.Mock;
 const useGetCurrentUserProfileMock = useGetCurrentUserProfile as jest.Mock;
 const useBulkGetUserProfilesMock = useBulkGetUserProfiles as jest.Mock;
 const useKibanaMock = useKibana as jest.MockedFunction<typeof useKibana>;
-const useGetConnectorsMock = useGetConnectors as jest.Mock;
+const useGetConnectorsMock = useGetSupportedActionConnectors as jest.Mock;
 const useCreateAttachmentsMock = useCreateAttachments as jest.Mock;
 const useUpdateCaseMock = useUpdateCase as jest.Mock;
 const useLicenseMock = useLicense as jest.Mock;
@@ -206,6 +206,7 @@ describe('AllCasesListGeneric', () => {
             id: null,
             createdAt: null,
             createdBy: null,
+            updatedAt: null,
             status: null,
             severity: null,
             tags: null,
@@ -272,16 +273,22 @@ describe('AllCasesListGeneric', () => {
     expect(res.getByTestId('tableHeaderCell_title_0')).toBeInTheDocument();
   });
 
+  it('renders the updated on column', async () => {
+    const res = appMockRenderer.render(<AllCasesList />);
+
+    expect(res.getByTestId('tableHeaderCell_updatedAt_5')).toBeInTheDocument();
+  });
+
   it('renders the status column', async () => {
     const res = appMockRenderer.render(<AllCasesList />);
 
-    expect(res.getByTestId('tableHeaderCell_status_6')).toBeInTheDocument();
+    expect(res.getByTestId('tableHeaderCell_status_7')).toBeInTheDocument();
   });
 
   it('renders the severity column', async () => {
     const res = appMockRenderer.render(<AllCasesList />);
 
-    expect(res.getByTestId('tableHeaderCell_severity_7')).toBeInTheDocument();
+    expect(res.getByTestId('tableHeaderCell_severity_8')).toBeInTheDocument();
   });
 
   it('should render the case stats', async () => {
@@ -395,7 +402,7 @@ describe('AllCasesListGeneric', () => {
     const result = appMockRenderer.render(<AllCasesList isSelectorView={false} />);
 
     userEvent.click(
-      within(result.getByTestId('tableHeaderCell_status_6')).getByTestId('tableHeaderSortButton')
+      within(result.getByTestId('tableHeaderCell_status_7')).getByTestId('tableHeaderSortButton')
     );
 
     await waitFor(() => {
@@ -411,11 +418,25 @@ describe('AllCasesListGeneric', () => {
     });
   });
 
+  it('should render only Name, CreatedOn and Severity columns when isSelectorView=true', async () => {
+    const wrapper = mount(
+      <TestProviders>
+        <AllCasesList isSelectorView={true} />
+      </TestProviders>
+    );
+    await waitFor(() => {
+      expect(wrapper.find('[data-test-subj="tableHeaderCell_title_0"]').exists()).toBe(true);
+      expect(wrapper.find('[data-test-subj="tableHeaderCell_createdAt_1"]').exists()).toBe(true);
+      expect(wrapper.find('[data-test-subj="tableHeaderCell_severity_2"]').exists()).toBe(true);
+      expect(wrapper.find('[data-test-subj="tableHeaderCell_assignees_1"]').exists()).toBe(false);
+    });
+  });
+
   it('should sort by severity', async () => {
     const result = appMockRenderer.render(<AllCasesList isSelectorView={false} />);
 
     userEvent.click(
-      within(result.getByTestId('tableHeaderCell_severity_7')).getByTestId('tableHeaderSortButton')
+      within(result.getByTestId('tableHeaderCell_severity_8')).getByTestId('tableHeaderSortButton')
     );
 
     await waitFor(() => {
@@ -444,6 +465,26 @@ describe('AllCasesListGeneric', () => {
           queryParams: {
             ...DEFAULT_QUERY_PARAMS,
             sortField: SortFieldCase.title,
+            sortOrder: 'asc',
+          },
+        })
+      );
+    });
+  });
+
+  it('should sort by updatedOn', async () => {
+    const result = appMockRenderer.render(<AllCasesList isSelectorView={false} />);
+
+    userEvent.click(
+      within(result.getByTestId('tableHeaderCell_updatedAt_5')).getByTestId('tableHeaderSortButton')
+    );
+
+    await waitFor(() => {
+      expect(useGetCasesMock).toHaveBeenLastCalledWith(
+        expect.objectContaining({
+          queryParams: {
+            ...DEFAULT_QUERY_PARAMS,
+            sortField: SortFieldCase.updatedAt,
             sortOrder: 'asc',
           },
         })
@@ -661,12 +702,12 @@ describe('AllCasesListGeneric', () => {
         queryParams: DEFAULT_QUERY_PARAMS,
       });
 
-      userEvent.click(getByTestId('options-filter-popover-button-Solution'));
+      userEvent.click(getByTestId('solution-filter-popover-button'));
 
       await waitForEuiPopoverOpen();
 
       userEvent.click(
-        getByTestId(`options-filter-popover-item-${SECURITY_SOLUTION_OWNER}`),
+        getByTestId(`solution-filter-popover-item-${SECURITY_SOLUTION_OWNER}`),
         undefined,
         {
           skipPointerEventsCheck: true,
@@ -688,7 +729,7 @@ describe('AllCasesListGeneric', () => {
       });
 
       userEvent.click(
-        getByTestId(`options-filter-popover-item-${SECURITY_SOLUTION_OWNER}`),
+        getByTestId(`solution-filter-popover-item-${SECURITY_SOLUTION_OWNER}`),
         undefined,
         {
           skipPointerEventsCheck: true,
@@ -717,7 +758,7 @@ describe('AllCasesListGeneric', () => {
         </TestProviders>
       );
 
-      expect(queryByTestId('options-filter-popover-button-Solution')).toBeFalsy();
+      expect(queryByTestId('solution-filter-popover-button')).toBeFalsy();
     });
 
     it('should call useGetCases with the correct owner on initial render', async () => {

@@ -18,9 +18,10 @@ import { Log } from './log';
 const packageMatcher = makeMatcher(['**/*', '!**/.*']);
 
 /**
- * Any non-package code must match this in order to trigger a restart
+ * Any code that is outside of a package must match this in order to trigger a restart
  */
 const nonPackageMatcher = makeMatcher([
+  'config/**/*.yml',
   'src/**',
   '!src/{dev,fixtures}/**',
   'x-pack/plugins/**',
@@ -76,7 +77,7 @@ export class Watcher {
 
           // ignore changes in any devOnly package, these can't power the server so we can ignore them
           if (pkg?.devOnly) {
-            return;
+            return pkg.id === '@kbn/babel-register';
           }
 
           const result = this.classifier.classify(event.path);

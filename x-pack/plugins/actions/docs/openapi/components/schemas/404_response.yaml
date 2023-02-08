@@ -1,0 +1,15 @@
+type: object
+properties:
+  error:
+    type: string
+    example: Not Found
+    enum:
+      - Not Found
+  message:
+    type: string
+    example: "Saved object [action/baf33fc0-920c-11ed-b36a-874bd1548a00] not found"
+  statusCode:
+    type: integer
+    example: 404
+    enum:
+      - 404

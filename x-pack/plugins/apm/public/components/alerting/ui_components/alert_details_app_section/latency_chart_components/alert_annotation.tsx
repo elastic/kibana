@@ -14,7 +14,7 @@ import {
 import moment from 'moment';
 import { EuiIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { DEFAULT_DATE_FORMAT } from '../constants';
+import { CHART_ANNOTATION_RED_COLOR, DEFAULT_DATE_FORMAT } from '../constants';
 
 export function AlertAnnotation({ alertStarted }: { alertStarted: number }) {
   return (
@@ -36,11 +36,11 @@ export function AlertAnnotation({ alertStarted }: { alertStarted: number }) {
       style={{
         line: {
           strokeWidth: 3,
-          stroke: '#f00',
+          stroke: CHART_ANNOTATION_RED_COLOR,
           opacity: 1,
         },
       }}
-      marker={<EuiIcon type="alert" color="red" />}
+      marker={<EuiIcon type="alert" color={CHART_ANNOTATION_RED_COLOR} />}
       markerPosition={Position.Top}
     />
   );

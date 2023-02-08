@@ -50,6 +50,24 @@ export function syntheticsAppPageProvider({ page, kibanaUrl }: { page: Page; kib
       }
     },
 
+    async navigateToStepDetails({
+      configId,
+      stepIndex,
+      checkGroup,
+      doLogin = true,
+    }: {
+      checkGroup: string;
+      configId: string;
+      stepIndex: number;
+      doLogin?: boolean;
+    }) {
+      const stepDetails = `/monitor/${configId}/test-run/${checkGroup}/step/${stepIndex}?locationId=us_central`;
+      await page.goto(overview + stepDetails, { waitUntil: 'networkidle' });
+      if (doLogin) {
+        await this.loginToKibana();
+      }
+    },
+
     async waitForMonitorManagementLoadingToFinish() {
       while (true) {
         if ((await page.$(this.byTestId('uptimeLoader'))) === null) break;
@@ -71,25 +89,21 @@ export function syntheticsAppPageProvider({ page, kibanaUrl }: { page: Page; kib
     },
 
     async navigateToAddMonitor() {
-      if (await page.isVisible('text=select a different monitor type', { timeout: 0 })) {
-        await page.click('text=select a different monitor type');
-      } else if (await page.isVisible('text=Create monitor', { timeout: 0 })) {
-        await page.click('text=Create monitor');
-      } else {
-        await page.goto(addMonitor, {
-          waitUntil: 'networkidle',
-        });
-      }
+      await page.goto(addMonitor, {
+        waitUntil: 'networkidle',
+      });
     },
 
     async ensureIsOnMonitorConfigPage() {
       await page.isVisible('[data-test-subj=monitorSettingsSection]');
     },
 
-    async confirmAndSave() {
+    async confirmAndSave(isUpdate: boolean = false) {
       await this.ensureIsOnMonitorConfigPage();
       await this.clickByTestSubj('syntheticsMonitorConfigSubmitButton');
-      return await this.findByText('Monitor added successfully.');
+      return await this.findByText(
+        isUpdate ? 'Monitor updated successfully.' : 'Monitor added successfully.'
+      );
     },
 
     async deleteMonitors() {

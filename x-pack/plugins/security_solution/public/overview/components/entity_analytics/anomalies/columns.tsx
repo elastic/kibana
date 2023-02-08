@@ -45,11 +45,11 @@ export const useAnomaliesColumns = (
         truncateText: true,
         mobileOptions: { show: true },
         'data-test-subj': 'anomalies-table-column-name',
-        render: (name, { count, job }) => {
+        render: (jobName, { count, job }) => {
           if (count > 0 || (job && isJobStarted(job.jobState, job.datafeedState))) {
-            return name;
+            return jobName;
           } else {
-            return <MediumShadeText>{name}</MediumShadeText>;
+            return <MediumShadeText>{jobName}</MediumShadeText>;
           }
         },
       },

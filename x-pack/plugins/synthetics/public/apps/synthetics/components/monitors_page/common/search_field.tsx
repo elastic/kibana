@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { EuiFieldSearch } from '@elastic/eui';
 import useDebounce from 'react-use/lib/useDebounce';
 import { i18n } from '@kbn/i18n';
@@ -15,7 +15,7 @@ export function SearchField() {
   const { query } = useGetUrlParams();
   const [_, updateUrlParams] = useUrlParams();
 
-  const [search, setSearch] = useState(query || '');
+  const [search, setSearch] = useState<undefined | string>('');
 
   useDebounce(
     () => {
@@ -27,13 +27,26 @@ export function SearchField() {
     [search]
   );
 
+  // Hydrate search input
+  const hasInputChangedRef = useRef(false);
+  useEffect(() => {
+    if (query && query !== search && !hasInputChangedRef.current) {
+      setSearch(query);
+    }
+
+    // Run only to sync url with input
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [query]);
+
   return (
     <EuiFieldSearch
+      css={{ minWidth: 230 }}
       fullWidth
       placeholder={PLACEHOLDER_TEXT}
       value={search}
       onChange={(e) => {
-        setSearch(e.target.value);
+        hasInputChangedRef.current = true;
+        setSearch(e.target.value ?? '');
       }}
       isClearable={true}
       aria-label={PLACEHOLDER_TEXT}

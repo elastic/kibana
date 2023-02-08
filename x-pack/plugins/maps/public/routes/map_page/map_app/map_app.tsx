@@ -9,7 +9,7 @@ import React from 'react';
 import _ from 'lodash';
 import { finalize, switchMap, tap } from 'rxjs/operators';
 import { i18n } from '@kbn/i18n';
-import { AppLeaveAction, AppMountParameters } from '@kbn/core/public';
+import { AppLeaveAction, AppMountParameters, ScopedHistory } from '@kbn/core/public';
 import { Adapters } from '@kbn/embeddable-plugin/public';
 import { Subscription } from 'rxjs';
 import { type Filter, FilterStateStore, type Query, type TimeRange } from '@kbn/es-query';
@@ -42,7 +42,6 @@ import { AppStateManager, startAppStateSyncing } from '../url_state';
 import { MapContainer } from '../../../connected_components/map_container';
 import { getIndexPatternsFromIds } from '../../../index_pattern_util';
 import { getTopNavConfig } from '../top_nav_config';
-import { goToSpecifiedPath } from '../../../render_app';
 import { getEditPath, getFullPath, APP_ID } from '../../../../common/constants';
 import { getMapEmbeddableDisplayName } from '../../../../common/i18n_getters';
 import {
@@ -84,7 +83,7 @@ export interface Props {
   isSaveDisabled: boolean;
   query: Query | undefined;
   setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'];
-  history: AppMountParameters['history'];
+  history: ScopedHistory;
 }
 
 export interface State {
@@ -397,7 +396,7 @@ export class MapApp extends React.Component<Props, State> {
           }),
           text: `${err.message}`,
         });
-        goToSpecifiedPath('/');
+        this.props.history.push('/');
       }
       return;
     }
@@ -420,7 +419,7 @@ export class MapApp extends React.Component<Props, State> {
       return;
     }
 
-    this.props.savedMap.setBreadcrumbs();
+    this.props.savedMap.setBreadcrumbs(this.props.history);
     getCoreChrome().docTitle.change(this.props.savedMap.getTitle());
     const savedObjectId = this.props.savedMap.getSavedObjectId();
     if (savedObjectId) {
@@ -457,6 +456,7 @@ export class MapApp extends React.Component<Props, State> {
       enableFullScreen: this.props.enableFullScreen,
       openMapSettings: this.props.openMapSettings,
       inspectorAdapters: this.props.inspectorAdapters,
+      history: this.props.history,
     });
 
     const { TopNavMenu } = getNavigation().ui;

@@ -6,11 +6,13 @@
  */
 
 import React from 'react';
-import { EuiButtonIcon, EuiLink } from '@elastic/eui';
+import { EuiButtonIcon, EuiLink, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { ColorIndicator } from '../color_indicator';
+import { css } from '@emotion/react';
+import { euiThemeVars } from '@kbn/ui-theme';
+import { DimensionButtonIcon } from '../dimension_button_icon';
 import { PaletteIndicator } from '../palette_indicator';
-import { VisualizationDimensionGroupConfig, AccessorConfig } from '../../../../types';
+import { VisualizationDimensionGroupConfig, AccessorConfig, UserMessage } from '../../../../types';
 
 const triggerLinkA11yText = (label: string) =>
   i18n.translate('xpack.lens.configure.editConfig', {
@@ -25,7 +27,7 @@ export function DimensionButton({
   onRemoveClick,
   accessorConfig,
   label,
-  invalid,
+  message,
 }: {
   group: VisualizationDimensionGroupConfig;
   children: React.ReactElement;
@@ -33,26 +35,40 @@ export function DimensionButton({
   onRemoveClick: (id: string) => void;
   accessorConfig: AccessorConfig;
   label: string;
-  invalid?: boolean;
+  message: UserMessage | undefined;
 }) {
   return (
     <>
-      <EuiLink
-        className="lnsLayerPanel__dimensionLink"
-        data-test-subj="lnsLayerPanel-dimensionLink"
-        onClick={() => onClick(accessorConfig.columnId)}
-        aria-label={triggerLinkA11yText(label)}
-        title={triggerLinkA11yText(label)}
-        color={invalid || group.invalid ? 'danger' : undefined}
-      >
-        <ColorIndicator accessorConfig={accessorConfig}>{children}</ColorIndicator>
-      </EuiLink>
+      <div>
+        <EuiToolTip
+          content={message?.shortMessage || message?.longMessage || undefined}
+          position="left"
+        >
+          <EuiLink
+            className="lnsLayerPanel__dimensionLink"
+            data-test-subj="lnsLayerPanel-dimensionLink"
+            onClick={() => onClick(accessorConfig.columnId)}
+            aria-label={triggerLinkA11yText(label)}
+            title={triggerLinkA11yText(label)}
+            color={
+              message?.severity === 'error'
+                ? 'danger'
+                : message?.severity === 'warning'
+                ? 'warning'
+                : undefined
+            }
+          >
+            <DimensionButtonIcon message={message} accessorConfig={accessorConfig}>
+              {children}
+            </DimensionButtonIcon>
+          </EuiLink>
+        </EuiToolTip>
+      </div>
       <EuiButtonIcon
         className="lnsLayerPanel__dimensionRemove"
         data-test-subj="indexPattern-dimension-remove"
-        iconType="cross"
-        iconSize="s"
-        size="s"
+        iconType="trash"
+        size="xs"
         color="danger"
         aria-label={i18n.translate('xpack.lens.indexPattern.removeColumnLabel', {
           defaultMessage: 'Remove configuration from "{groupLabel}"',
@@ -63,6 +79,12 @@ export function DimensionButton({
           values: { groupLabel: group.groupLabel },
         })}
         onClick={() => onRemoveClick(accessorConfig.columnId)}
+        css={css`
+          color: ${euiThemeVars.euiTextSubduedColor};
+          &:hover {
+            color: ${euiThemeVars.euiColorDangerText};
+          }
+        `}
       />
       <PaletteIndicator accessorConfig={accessorConfig} />
     </>

@@ -31,6 +31,13 @@ export function getRoutingTransform() {
 
           if (metricsetName === 'app') {
             index = `metrics-apm.app.${document['service.name']}-default`;
+          } else if (
+            metricsetName === 'transaction' ||
+            metricsetName === 'service_transaction' ||
+            metricsetName === 'service_destination' ||
+            metricsetName === 'service_summary'
+          ) {
+            index = `metrics-apm.${metricsetName}.${document['metricset.interval']!}-default`;
           } else {
             index = `metrics-apm.internal-default`;
           }

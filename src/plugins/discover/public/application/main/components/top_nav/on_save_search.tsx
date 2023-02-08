@@ -187,7 +187,7 @@ export async function onSaveSearch({
       onClose={onClose ?? (() => {})}
     />
   );
-  showSaveModal(saveModal, services.core.i18n.Context);
+  showSaveModal(saveModal);
 }
 
 const SaveSearchObjectModal: React.FC<{

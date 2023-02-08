@@ -15,13 +15,11 @@ import { EuiIconTip } from '@elastic/eui';
 import {
   ALERT_DURATION,
   ALERT_END,
+  ALERT_RULE_UUID,
   ALERT_EVALUATION_THRESHOLD,
   ALERT_RULE_TYPE_ID,
 } from '@kbn/rule-data-utils';
 import moment from 'moment';
-import { getTransactionType } from '../../../../context/apm_service/apm_service_context';
-import { useServiceAgentFetcher } from '../../../../context/apm_service/use_service_agent_fetcher';
-import { useServiceTransactionTypesFetcher } from '../../../../context/apm_service/use_service_transaction_types_fetcher';
 import { asPercent } from '../../../../../common/utils/formatters';
 import { APIReturnType } from '../../../../services/rest/create_call_apm_api';
 import { getDurationFormatter } from '../../../../../common/utils/formatters/duration';
@@ -48,6 +46,7 @@ import {
 import { getAggsTypeFromRule, isLatencyThresholdRuleType } from './helpers';
 import { filterNil } from '../../../shared/charts/latency_chart';
 import { errorRateI18n } from '../../../shared/charts/failed_transaction_rate_chart';
+import { LatencyAlertsHistoryChart } from './latency_alerts_history_chart';
 import {
   AlertActiveRect,
   AlertAnnotation,
@@ -100,23 +99,7 @@ export function AlertDetailsAppSection({
         .toISOString();
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
-  const { agentName } = useServiceAgentFetcher({
-    serviceName,
-    start,
-    end,
-  });
-  const transactionTypes = useServiceTransactionTypesFetcher({
-    serviceName,
-    start,
-    end,
-  });
-
-  const transactionType = getTransactionType({
-    transactionType: alert.fields[TRANSACTION_TYPE],
-    transactionTypes,
-    agentName,
-  });
-
+  const transactionType = alert.fields[TRANSACTION_TYPE];
   const comparisonChartTheme = getComparisonChartTheme();
   const INITIAL_STATE = {
     currentPeriod: [],
@@ -442,6 +425,18 @@ export function AlertDetailsAppSection({
               </EuiPanel>
             </EuiFlexItem>
           </EuiFlexGroup>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <LatencyAlertsHistoryChart
+            ruleId={alert.fields[ALERT_RULE_UUID]}
+            serviceName={serviceName}
+            start={start}
+            end={end}
+            transactionType={transactionType}
+            latencyAggregationType={latencyAggregationType}
+            environment={environment}
+            timeZone={timeZone}
+          />
         </EuiFlexItem>
       </ChartPointerEventContextProvider>
     </EuiFlexGroup>
