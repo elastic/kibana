@@ -530,7 +530,7 @@ export const expectedExportedRule = (ruleResponse: Cypress.Response<RuleResponse
     name,
     tags,
     interval: '100m',
-    enabled: false,
+    enabled: true,
     description,
     risk_score: riskScore,
     severity,
