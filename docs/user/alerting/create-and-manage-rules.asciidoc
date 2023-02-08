@@ -125,7 +125,10 @@ You can attach more than one action. Clicking the *Add action* button will promp
 [[defining-rules-actions-variables]]
 ===== Action variables
 
-Using the https://mustache.github.io/[Mustache] template syntax `{{variable name}}`, you can pass rule values to an action at the time a condition is detected. You can access the list of available variables using the "add rule variable" button.
+Using the https://mustache.github.io/[Mustache] template syntax `{{variable name}}`, you can pass rule values to an action at the time a condition is detected. You can access the list of available variables using the "add rule variable" button:
+
+[role="screenshot"]
+image::images/rule-flyout-action-variables.png[Passing rule values to an action]
 
 All rule types pass the following variables:
 
@@ -173,12 +176,12 @@ An array of objects for all alerts. The following object properties are examples
 [%collapsible%open]
 =====
 //# tag::alerts-data[]
-`kibana.alert.end`:: Datetime stamp of alert end.
-`kibana.alert.flapping`:: A flag on the alert that indicates whether the alert status is changing repeatedly.
-`kibana.alert.instance.id`:: ID of the source that generates the alert.
-`kibana.alert.reason`:: The reason of the alert (generated with the rule conditions).
-`kibana.alert.start`:: Datetime stamp of alert start.
-`kibana.alert.status`:: Alert status (for example, active or OK).
+`kibana.alert.end`:: Datetime stamp of alert end. preview:[]
+`kibana.alert.flapping`:: A flag on the alert that indicates whether the alert status is changing repeatedly. preview:[]
+`kibana.alert.instance.id`:: ID of the source that generates the alert. preview:[]
+`kibana.alert.reason`:: The reason of the alert (generated with the rule conditions). preview:[]
+`kibana.alert.start`:: Datetime stamp of alert start. preview:[]
+`kibana.alert.status`:: Alert status (for example, active or OK). preview:[]
 //# end::alerts-data[]
 =====
 
@@ -214,9 +217,6 @@ An array of objects for recovered alerts. The following object properties are ex
 =====
 include::create-and-manage-rules.asciidoc[tag=alerts-data]
 =====
-
-[role="screenshot"]
-image::images/rule-flyout-action-variables.png[Passing rule values to an action]
 
 Some cases exist where the variable values will be "escaped", when used in a context where escaping is needed:
 
