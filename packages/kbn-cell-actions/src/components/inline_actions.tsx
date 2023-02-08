@@ -7,7 +7,7 @@
  */
 
 import React, { useCallback, useMemo, useState } from 'react';
-import { EuiFlexGroup } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { ActionItem } from './cell_action_item';
 import { usePartitionActions } from '../hooks/actions';
 import { ExtraActionsPopOver } from './extra_actions_popover';
@@ -45,27 +45,32 @@ export const InlineActions: React.FC<InlineActionsProps> = ({
 
   return (
     <EuiFlexGroup
+      responsive={false}
       alignItems="flexStart"
       gutterSize="none"
       data-test-subj="inlineActions"
       className={`inlineActions ${isPopoverOpen ? 'inlineActions-popoverOpen' : ''}`}
     >
       {visibleActions.map((action, index) => (
-        <ActionItem
-          key={`action-item-${index}`}
-          action={action}
-          actionContext={actionContext}
-          showTooltip={showActionTooltips}
-        />
+        <EuiFlexItem grow={false}>
+          <ActionItem
+            key={`action-item-${index}`}
+            action={action}
+            actionContext={actionContext}
+            showTooltip={showActionTooltips}
+          />
+        </EuiFlexItem>
       ))}
       {extraActions.length > 0 ? (
-        <ExtraActionsPopOver
-          actions={extraActions}
-          actionContext={actionContext}
-          button={button}
-          closePopOver={closePopOver}
-          isOpen={isPopoverOpen}
-        />
+        <EuiFlexItem grow={false}>
+          <ExtraActionsPopOver
+            actions={extraActions}
+            actionContext={actionContext}
+            button={button}
+            closePopOver={closePopOver}
+            isOpen={isPopoverOpen}
+          />
+        </EuiFlexItem>
       ) : null}
     </EuiFlexGroup>
   );
