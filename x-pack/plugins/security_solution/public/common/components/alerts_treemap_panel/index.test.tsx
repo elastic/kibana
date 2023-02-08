@@ -214,7 +214,7 @@ describe('AlertsTreemapPanel', () => {
       </TestProviders>
     );
 
-    await waitFor(() => expect(screen.getByTestId('chartSelect')).toBeInTheDocument());
+    await waitFor(() => expect(screen.getByTestId('chart-select-tabs')).toBeInTheDocument());
   });
 
   it('renders field selection when `isPanelExpanded` is true', async () => {
@@ -305,6 +305,6 @@ describe('AlertsTreemapPanel', () => {
       </TestProviders>
     );
 
-    await waitFor(() => expect(screen.getByTestId('treemap')).toBeInTheDocument());
+    await waitFor(() => expect(screen.getByTestId('alerts-treemap')).toBeInTheDocument());
   });
 });

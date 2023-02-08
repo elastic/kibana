@@ -49,3 +49,8 @@ yarn test:ftr --config x-pack/test/cloud_security_posture_functional/config.ts
 
 > **Note**
 > in development, run them separately with `ftr:runner` and `ftr:server`
+
+```bash
+yarn test:ftr:server --config x-pack/test/api_integration/config.ts
+yarn test:ftr:runner --include-tag=cloud_security_posture --config x-pack/test/api_integration/config.ts
+```
