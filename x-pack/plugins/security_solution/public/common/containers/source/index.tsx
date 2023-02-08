@@ -38,7 +38,18 @@ export const getIndexFields = memoizeOne(
     fields && fields.length > 0
       ? {
           fields: fields.map((field) =>
-            pick(['name', 'searchable', 'type', 'aggregatable', 'esTypes', 'subType'], field)
+            pick(
+              [
+                'name',
+                'searchable',
+                'type',
+                'aggregatable',
+                'esTypes',
+                'subType',
+                'conflictDescriptions',
+              ],
+              field
+            )
           ),
           title,
         }
@@ -90,7 +101,8 @@ interface FetchIndexReturn {
 export const useFetchIndex = (
   indexNames: string[],
   onlyCheckIfIndicesExist: boolean = false,
-  strategy: string = 'indexFields'
+  strategy: string = 'indexFields',
+  includeUnmapped: boolean = false
 ): [boolean, FetchIndexReturn] => {
   console.log('indexNames', indexNames);
   const { data } = useKibana().services;

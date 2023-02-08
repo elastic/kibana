@@ -23,6 +23,7 @@ import {
 } from '../../../utils/test_helpers';
 import { fromQuery } from '../../shared/links/url_helpers';
 import { TransactionOverview } from '.';
+import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 
 const KibanaReactContext = createKibanaReactContext({
   uiSettings: { get: () => true },
@@ -56,6 +57,7 @@ function setup({
     .mockReturnValue({
       agentName: 'nodejs',
       runtimeName: 'node',
+      serverlessType: undefined,
       error: undefined,
       status: useFetcherHook.FETCH_STATUS.SUCCESS,
     });
@@ -63,15 +65,17 @@ function setup({
   jest.spyOn(useFetcherHook, 'useFetcher').mockReturnValue({} as any);
 
   return renderWithTheme(
-    <KibanaReactContext.Provider>
-      <MockApmPluginContextWrapper history={history}>
-        <UrlParamsProvider>
-          <ApmServiceContextProvider>
-            <TransactionOverview />
-          </ApmServiceContextProvider>
-        </UrlParamsProvider>
-      </MockApmPluginContextWrapper>
-    </KibanaReactContext.Provider>
+    <IntlProvider locale="en">
+      <KibanaReactContext.Provider>
+        <MockApmPluginContextWrapper history={history}>
+          <UrlParamsProvider>
+            <ApmServiceContextProvider>
+              <TransactionOverview />
+            </ApmServiceContextProvider>
+          </UrlParamsProvider>
+        </MockApmPluginContextWrapper>
+      </KibanaReactContext.Provider>
+    </IntlProvider>
   );
 }
 

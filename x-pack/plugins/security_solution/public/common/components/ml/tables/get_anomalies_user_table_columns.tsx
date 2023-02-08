@@ -8,7 +8,7 @@
 import React from 'react';
 import type { Columns } from '../../../../explore/components/paginated_table';
 import type { AnomaliesByUser, Anomaly } from '../types';
-import { getRowItemDraggable } from '../../tables/helpers';
+import { getRowItemsWithActions } from '../../tables/helpers';
 import { createCompoundAnomalyKey } from './create_compound_key';
 import { UserDetailsLink } from '../../links';
 
@@ -32,15 +32,14 @@ export const getAnomaliesUserTableColumns = (
     field: 'userName',
     sortable: true,
     render: (userName, anomaliesByUser) =>
-      getRowItemDraggable({
-        rowItem: userName,
-        attrName: 'user.name',
+      getRowItemsWithActions({
+        values: [userName],
+        fieldName: 'user.name',
         idPrefix: `anomalies-user-table-userName-${createCompoundAnomalyKey(
           anomaliesByUser.anomaly
         )}-userName`,
-        render: (item) => <UserDetailsLink userName={item} />,
-        isAggregatable: true,
         fieldType: 'keyword',
+        render: (item) => <UserDetailsLink userName={item} />,
       }),
   },
   ...getAnomaliesDefaultTableColumns(startDate, endDate),

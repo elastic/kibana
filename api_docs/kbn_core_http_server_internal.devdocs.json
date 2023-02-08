@@ -95,6 +95,17 @@
           },
           {
             "parentPluginId": "@kbn/core-http-server-internal",
+            "id": "def-common.CspConfig.disableUnsafeEval",
+            "type": "boolean",
+            "tags": [],
+            "label": "disableUnsafeEval",
+            "description": [],
+            "path": "packages/core/http/core-http-server-internal/src/csp/csp_config.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-http-server-internal",
             "id": "def-common.CspConfig.warnLegacyBrowsers",
             "type": "boolean",
             "tags": [],
@@ -912,10 +923,10 @@
                 "pluginId": "@kbn/config-schema",
                 "scope": "common",
                 "docId": "kibKbnConfigSchemaPluginApi",
-                "section": "def-common.ConditionalType",
-                "text": "ConditionalType"
+                "section": "def-common.Type",
+                "text": "Type"
               },
-              "<true, boolean, boolean>; script_src: ",
+              "<boolean>; script_src: ",
               {
                 "pluginId": "@kbn/config-schema",
                 "scope": "common",

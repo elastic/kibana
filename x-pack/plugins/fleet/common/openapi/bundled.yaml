@@ -556,17 +556,6 @@ paths:
                   - items
       operationId: update-package
       description: ''
-      parameters:
-        - schema:
-            type: string
-          name: pkgName
-          in: path
-          required: true
-        - schema:
-            type: string
-          name: pkgVersion
-          in: path
-          required: true
       requestBody:
         content:
           application/json:
@@ -856,6 +845,12 @@ paths:
         - $ref: '#/components/parameters/show_upgradeable'
         - $ref: '#/components/parameters/sort_field'
         - $ref: '#/components/parameters/sort_order'
+        - $ref: '#/components/parameters/with_metrics'
+        - name: getStatusSummary
+          in: query
+          required: false
+          schema:
+            type: boolean
       security:
         - basicAuth: []
   /agents/bulk_upgrade:
@@ -983,6 +978,8 @@ paths:
                 required:
                   - item
       operationId: get-agent
+      parameters:
+        - $ref: '#/components/parameters/with_metrics'
     put:
       summary: Agent - Update
       tags: []
@@ -2240,11 +2237,6 @@ paths:
                   - id
       parameters:
         - schema:
-            type: string
-          name: packagePolicyId
-          in: path
-          required: true
-        - schema:
             type: boolean
           name: force
           in: query
@@ -2644,11 +2636,6 @@ paths:
                 required:
                   - id
       parameters:
-        - schema:
-            type: string
-          name: itemId
-          in: path
-          required: true
         - $ref: '#/components/parameters/kbn_xsrf'
     put:
       summary: Fleet Server Hosts - Update
@@ -2680,11 +2667,6 @@ paths:
                 required:
                   - item
       parameters:
-        - schema:
-            type: string
-          name: itemId
-          in: path
-          required: true
         - $ref: '#/components/parameters/kbn_xsrf'
   /proxies:
     get:
@@ -2787,11 +2769,6 @@ paths:
                 required:
                   - id
       parameters:
-        - schema:
-            type: string
-          name: itemId
-          in: path
-          required: true
         - $ref: '#/components/parameters/kbn_xsrf'
     put:
       summary: Fleet Proxies - Update
@@ -2827,11 +2804,6 @@ paths:
                 required:
                   - item
       parameters:
-        - schema:
-            type: string
-          name: itemId
-          in: path
-          required: true
         - $ref: '#/components/parameters/kbn_xsrf'
   /kubernetes:
     get:
@@ -2934,6 +2906,13 @@ components:
         enum:
           - asc
           - desc
+    with_metrics:
+      name: withMetrics
+      in: query
+      description: Return agent metrics, false by default
+      required: false
+      schema:
+        type: boolean
   schemas:
     fleet_setup_response:
       title: Fleet Setup response
@@ -3405,6 +3384,17 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/agent_component'
+        metrics:
+          type: object
+          properties:
+            cpu_avg:
+              type: number
+              description: >-
+                Average agent CPU usage during the last 5 minutes, number
+                between 0-1
+            memory_size_byte_avg:
+              type: number
+              description: Average agent memory consumption during the last 5 minutes
       required:
         - type
         - active
@@ -3430,6 +3420,27 @@ components:
           type: number
         perPage:
           type: number
+        statusSummary:
+          type: object
+          properties:
+            offline:
+              type: number
+            error:
+              type: number
+            online:
+              type: number
+            inactive:
+              type: number
+            enrolling:
+              type: number
+            unenrolling:
+              type: number
+            unenrolled:
+              type: number
+            updating:
+              type: number
+            degraded':
+              type: number
       required:
         - items
         - total
@@ -3693,6 +3704,18 @@ components:
               type: number
             agents:
               type: number
+            agent_features:
+              type: array
+              items:
+                type: object
+                properties:
+                  name:
+                    type: string
+                  enabled:
+                    type: boolean
+                required:
+                  - name
+                  - enabled
           required:
             - id
             - status

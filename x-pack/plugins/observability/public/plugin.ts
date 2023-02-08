@@ -25,6 +25,7 @@ import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { DiscoverStart } from '@kbn/discover-plugin/public';
 import type { EmbeddableStart } from '@kbn/embeddable-plugin/public';
 import type { HomePublicPluginSetup, HomePublicPluginStart } from '@kbn/home-plugin/public';
+import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
 import { CasesDeepLinkId, CasesUiStart, getCasesDeepLinks } from '@kbn/cases-plugin/public';
 import type { LensPublicStart } from '@kbn/lens-plugin/public';
 import {
@@ -41,6 +42,7 @@ import { SecurityPluginStart } from '@kbn/security-plugin/public';
 import { GuidedOnboardingPluginStart } from '@kbn/guided-onboarding-plugin/public';
 import { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import { LicensingPluginStart } from '@kbn/licensing-plugin/public';
+import { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import { RuleDetailsLocatorDefinition } from './locators/rule_details';
 import { observabilityAppId, observabilityFeatureId, casesPath } from '../common';
 import { createLazyObservabilityPageTemplate } from './components/shared';
@@ -92,6 +94,7 @@ export interface ObservabilityPublicPluginsSetup {
 export interface ObservabilityPublicPluginsStart {
   actionTypeRegistry: ActionTypeRegistryContract;
   cases: CasesUiStart;
+  charts: ChartsPluginStart;
   data: DataPublicPluginStart;
   dataViews: DataViewsPublicPluginStart;
   discover: DiscoverStart;
@@ -105,6 +108,7 @@ export interface ObservabilityPublicPluginsStart {
   spaces: SpacesPluginStart;
   triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
   usageCollection: UsageCollectionSetup;
+  unifiedSearch: UnifiedSearchPublicPluginStart;
   home?: HomePublicPluginStart;
 }
 
@@ -183,6 +187,7 @@ export class Plugin
     const category = DEFAULT_APP_CATEGORIES.observability;
     const euiIconType = 'logoObservability';
     const config = this.initContext.config.get();
+    const kibanaVersion = this.initContext.env.packageInfo.version;
 
     createCallObservabilityApi(coreSetup.http);
 
@@ -207,6 +212,7 @@ export class Plugin
         ObservabilityPageTemplate: navigation.PageTemplate,
         usageCollection: pluginsSetup.usageCollection,
         isDev: this.initContext.env.mode.dev,
+        kibanaVersion,
       });
     };
 

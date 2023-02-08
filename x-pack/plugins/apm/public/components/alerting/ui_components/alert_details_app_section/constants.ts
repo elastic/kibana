@@ -5,3 +5,4 @@
  * 2.0.
  */
 export const DEFAULT_DATE_FORMAT = 'HH:mm:ss';
+export const CHART_ANNOTATION_RED_COLOR = '#BD271E';

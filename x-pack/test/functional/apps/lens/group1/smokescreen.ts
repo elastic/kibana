@@ -540,16 +540,16 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
         operation: 'cumulative_sum',
       });
-      expect(await PageObjects.lens.getErrorCount()).to.eql(1);
+      expect(await PageObjects.lens.getWorkspaceErrorCount()).to.eql(1);
 
       await PageObjects.lens.removeDimension('lnsXY_xDimensionPanel');
-      expect(await PageObjects.lens.getErrorCount()).to.eql(2);
+      expect(await PageObjects.lens.getWorkspaceErrorCount()).to.eql(2);
 
       await PageObjects.lens.dragFieldToDimensionTrigger(
         '@timestamp',
         'lnsXY_xDimensionPanel > lns-empty-dimension'
       );
-      expect(await PageObjects.lens.getErrorCount()).to.eql(1);
+      expect(await PageObjects.lens.getWorkspaceErrorCount()).to.eql(1);
 
       expect(await PageObjects.lens.hasChartSwitchWarning('lnsDatatable')).to.eql(false);
       await PageObjects.lens.switchToVisualization('lnsDatatable');

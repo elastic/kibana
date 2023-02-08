@@ -31,7 +31,7 @@ import {
   mockTimelineData,
 } from '../../../common/mock';
 import type { CreateTimeline, UpdateTimelineLoading } from './types';
-import type { Ecs } from '../../../../common/ecs';
+import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import type { DataProvider } from '../../../../common/types/timeline';
 import {
   TimelineId,
@@ -78,6 +78,7 @@ export const getExceptionListItemSchemaMock = (
   created_by: USER,
   description: DESCRIPTION,
   entries: ENTRIES,
+  expire_time: undefined,
   id: '1',
   item_id: 'endpoint_list_item',
   list_id: 'endpoint_list_id',

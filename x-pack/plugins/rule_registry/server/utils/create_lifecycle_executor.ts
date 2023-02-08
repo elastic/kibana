@@ -47,6 +47,7 @@ import { fetchExistingAlerts } from './fetch_existing_alerts';
 import { getCommonAlertFields } from './get_common_alert_fields';
 import { getUpdatedFlappingHistory } from './get_updated_flapping_history';
 import { fetchAlertByAlertUUID } from './fetch_alert_by_uuid';
+import { getAlertsForNotification } from './get_alerts_for_notification';
 
 type ImplicitTechnicalFieldName = CommonAlertFieldNameLatest | CommonAlertIdFieldNameLatest;
 
@@ -74,7 +75,9 @@ export interface LifecycleAlertServices<
   alertWithLifecycle: LifecycleAlertService<InstanceState, InstanceContext, ActionGroupIds>;
   getAlertStartedDate: (alertInstanceId: string) => string | null;
   getAlertUuid: (alertInstanceId: string) => string;
-  getAlertByAlertUuid: (alertUuid: string) => { [x: string]: any } | null;
+  getAlertByAlertUuid: (
+    alertUuid: string
+  ) => Promise<Partial<ParsedTechnicalFields & ParsedExperimentalFields> | null> | null;
 }
 
 export type LifecycleRuleExecutor<
@@ -104,6 +107,7 @@ const trackedAlertStateRt = rt.type({
   flappingHistory: rt.array(rt.boolean),
   // flapping flag that indicates whether the alert is flapping
   flapping: rt.boolean,
+  pendingRecoveredCount: rt.number,
 });
 
 export type TrackedLifecycleAlertState = rt.TypeOf<typeof trackedAlertStateRt>;
@@ -160,6 +164,7 @@ export const createLifecycleExecutor =
     const {
       services: { alertFactory, shouldWriteAlerts },
       state: previousState,
+      flappingSettings,
     } = options;
 
     const ruleDataClientWriter = await ruleDataClient.getWriter();
@@ -264,6 +269,7 @@ export const createLifecycleExecutor =
         const isActive = !isRecovered;
 
         const flappingHistory = getUpdatedFlappingHistory<State>(
+          flappingSettings,
           alertId,
           state,
           isNew,
@@ -276,6 +282,7 @@ export const createLifecycleExecutor =
           alertUuid,
           started,
           flapping: isCurrentlyFlapping,
+          pendingRecoveredCount,
         } = !isNew
           ? state.trackedAlerts[alertId]
           : {
@@ -284,9 +291,10 @@ export const createLifecycleExecutor =
               flapping: state.trackedAlertsRecovered[alertId]
                 ? state.trackedAlertsRecovered[alertId].flapping
                 : false,
+              pendingRecoveredCount: 0,
             };
 
-        const flapping = isFlapping(flappingHistory, isCurrentlyFlapping);
+        const flapping = isFlapping(flappingSettings, flappingHistory, isCurrentlyFlapping);
 
         const event: ParsedTechnicalFields & ParsedExperimentalFields = {
           ...alertData?.fields,
@@ -317,13 +325,17 @@ export const createLifecycleExecutor =
           event,
           flappingHistory,
           flapping,
+          pendingRecoveredCount,
         };
       });
 
     const trackedEventsToIndex = makeEventsDataMapFor(trackedAlertIds);
     const newEventsToIndex = makeEventsDataMapFor(newAlertIds);
     const trackedRecoveredEventsToIndex = makeEventsDataMapFor(trackedAlertRecoveredIds);
-    const allEventsToIndex = [...trackedEventsToIndex, ...newEventsToIndex];
+    const allEventsToIndex = [
+      ...getAlertsForNotification(flappingSettings, trackedEventsToIndex),
+      ...newEventsToIndex,
+    ];
 
     // Only write alerts if:
     // - writing is enabled
@@ -354,11 +366,14 @@ export const createLifecycleExecutor =
     const nextTrackedAlerts = Object.fromEntries(
       allEventsToIndex
         .filter(({ event }) => event[ALERT_STATUS] !== ALERT_STATUS_RECOVERED)
-        .map(({ event, flappingHistory, flapping }) => {
+        .map(({ event, flappingHistory, flapping, pendingRecoveredCount }) => {
           const alertId = event[ALERT_INSTANCE_ID]!;
           const alertUuid = event[ALERT_UUID]!;
           const started = new Date(event[ALERT_START]!).toISOString();
-          return [alertId, { alertId, alertUuid, started, flappingHistory, flapping }];
+          return [
+            alertId,
+            { alertId, alertUuid, started, flappingHistory, flapping, pendingRecoveredCount },
+          ];
         })
     );
 
@@ -370,13 +385,16 @@ export const createLifecycleExecutor =
             // this is a space saving effort that will stop tracking a recovered alert if it wasn't flapping and doesn't have state changes
             // in the last max capcity number of executions
             event[ALERT_STATUS] === ALERT_STATUS_RECOVERED &&
-            (flapping || flappingHistory.filter((f) => f).length > 0)
+            (flapping || flappingHistory.filter((f: boolean) => f).length > 0)
         )
-        .map(({ event, flappingHistory, flapping }) => {
+        .map(({ event, flappingHistory, flapping, pendingRecoveredCount }) => {
           const alertId = event[ALERT_INSTANCE_ID]!;
           const alertUuid = event[ALERT_UUID]!;
           const started = new Date(event[ALERT_START]!).toISOString();
-          return [alertId, { alertId, alertUuid, started, flappingHistory, flapping }];
+          return [
+            alertId,
+            { alertId, alertUuid, started, flappingHistory, flapping, pendingRecoveredCount },
+          ];
         })
     );
 

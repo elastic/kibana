@@ -41,6 +41,7 @@ import {
 } from './saved_objects_table';
 import { Flyout, Relationships } from './components';
 import { SavedObjectWithMetadata } from '../../types';
+import { customBrandingServiceMock } from '@kbn/core-custom-branding-browser-mocks';
 
 const convertType = (type: string): SavedObjectManagementTypeInfo => ({
   name: type,
@@ -120,6 +121,7 @@ describe('SavedObjectsTable', () => {
     };
 
     http.post.mockResolvedValue([]);
+    http.delete.mockResolvedValue({ id: 'test' });
 
     getSavedObjectCountsMock.mockReturnValue({
       'index-pattern': 0,
@@ -141,11 +143,12 @@ describe('SavedObjectsTable', () => {
       goInspectObject: () => {},
       canGoInApp: () => true,
       search,
+      customBranding: customBrandingServiceMock.createStartContract(),
     };
 
     findObjectsMock.mockImplementation(() => ({
       total: 4,
-      savedObjects: [
+      saved_objects: [
         {
           id: '1',
           type: 'index-pattern',

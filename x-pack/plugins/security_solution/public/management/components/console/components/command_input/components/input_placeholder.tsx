@@ -19,6 +19,7 @@ const InputPlaceholderContainer = styled(EuiText)`
   padding-left: 0.5em;
   width: 96%;
   color: ${({ theme: { eui } }) => eui.euiFormControlPlaceholderText};
+  user-select: none;
 `;
 
 export const InputPlaceholder = memo(() => {

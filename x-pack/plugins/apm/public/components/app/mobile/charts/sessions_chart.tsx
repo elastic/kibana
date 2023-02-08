@@ -24,8 +24,8 @@ import {
 import { usePreviousPeriodLabel } from '../../../../hooks/use_previous_period_text';
 
 const INITIAL_STATE = {
-  currentPeriod: [],
-  previousPeriod: [],
+  currentPeriod: { timeseries: [] },
+  previousPeriod: { timeseries: [] },
 };
 
 type SessionsChart =
@@ -95,7 +95,7 @@ export function SessionsChart({
 
   const timeseries = [
     {
-      data: data.currentPeriod,
+      data: data.currentPeriod.timeseries,
       type: 'linemark',
       color: currentPeriodColor,
       title: i18n.translate('xpack.apm.transactions.sessionsChartTitle', {
@@ -105,7 +105,7 @@ export function SessionsChart({
     ...(comparisonEnabled
       ? [
           {
-            data: data.previousPeriod,
+            data: data.previousPeriod.timeseries,
             type: 'area',
             color: previousPeriodColor,
             title: previousPeriodLabel,

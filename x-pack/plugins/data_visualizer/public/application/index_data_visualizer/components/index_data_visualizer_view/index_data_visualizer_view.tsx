@@ -36,6 +36,7 @@ import {
 } from '@kbn/ml-date-picker';
 import { useStorage } from '@kbn/ml-local-storage';
 
+import type { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { useCurrentEuiTheme } from '../../../common/hooks/use_current_eui_theme';
 import {
   DV_FROZEN_TIER_PREFERENCE,
@@ -57,7 +58,7 @@ import {
   DataVisualizerIndexBasedPageUrlState,
 } from '../../types/index_data_visualizer_state';
 import { SEARCH_QUERY_LANGUAGE, SearchQueryLanguage } from '../../types/combined_query';
-import { SupportedFieldType, SavedSearchSavedObject } from '../../../../../common/types';
+import type { SupportedFieldType } from '../../../../../common/types';
 import { useDataVisualizerKibana } from '../../../kibana_context';
 import { FieldCountPanel } from '../../../common/components/field_count_panel';
 import { DocumentCountContent } from '../../../common/components/document_count_content';
@@ -129,7 +130,7 @@ export const getDefaultDataVisualizerListState = (
 
 export interface IndexDataVisualizerViewProps {
   currentDataView: DataView;
-  currentSavedSearch: SavedSearchSavedObject | null;
+  currentSavedSearch: SavedSearch | null;
   currentSessionId?: string;
   getAdditionalLinks?: GetAdditionalLinks;
 }
@@ -177,12 +178,6 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
   );
 
   const { currentDataView, currentSessionId, getAdditionalLinks } = dataVisualizerProps;
-
-  useEffect(() => {
-    if (dataVisualizerProps?.currentSavedSearch !== undefined) {
-      setCurrentSavedSearch(dataVisualizerProps?.currentSavedSearch);
-    }
-  }, [dataVisualizerProps?.currentSavedSearch]);
 
   useEffect(() => {
     if (!currentDataView.isTimeBased()) {
@@ -474,14 +469,13 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
     [currentDataView.timeFieldName]
   );
 
+  const isWithinLargeBreakpoint = useIsWithinMaxBreakpoint('l');
   const dvPageHeader = css({
-    [useEuiBreakpoint(['xs', 's', 'm', 'l', 'xl'])]: {
+    [useEuiBreakpoint(['xs', 's', 'm', 'l'])]: {
       flexDirection: 'column',
       alignItems: 'flex-start',
     },
   });
-
-  const isWithinXl = useIsWithinMaxBreakpoint('xl');
 
   return (
     <EuiPageBody data-test-subj="dataVisualizerIndexPage" paddingSize="none" panelled={false}>
@@ -505,7 +499,7 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
               </EuiFlexGroup>
             </EuiPageContentHeaderSection>
 
-            {isWithinXl ? <EuiSpacer size="m" /> : null}
+            {isWithinLargeBreakpoint ? <EuiSpacer size="m" /> : null}
             <EuiFlexGroup
               alignItems="center"
               justifyContent="flexEnd"
@@ -528,6 +522,7 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
                 <DatePickerWrapper
                   isAutoRefreshOnly={!hasValidTimeField}
                   showRefresh={!hasValidTimeField}
+                  width="full"
                 />
               </EuiFlexItem>
             </EuiFlexGroup>
@@ -536,7 +531,7 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
       </EuiFlexGroup>
       <EuiSpacer size="m" />
       <EuiPageContentBody>
-        <EuiFlexGroup gutterSize="m" direction={isWithinXl ? 'column' : 'row'}>
+        <EuiFlexGroup gutterSize="m" direction={isWithinLargeBreakpoint ? 'column' : 'row'}>
           <EuiFlexItem>
             <EuiPanel hasShadow={false} hasBorder>
               <SearchPanel
@@ -598,7 +593,7 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
               />
             </EuiPanel>
           </EuiFlexItem>
-          {isWithinXl ? <EuiSpacer size="m" /> : null}
+          {isWithinLargeBreakpoint ? <EuiSpacer size="m" /> : null}
           <EuiFlexItem grow={false}>
             <ActionsPanel
               dataView={currentDataView}

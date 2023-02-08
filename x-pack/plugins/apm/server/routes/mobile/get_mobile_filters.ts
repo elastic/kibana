@@ -52,12 +52,7 @@ export async function getMobileFilters({
 }): Promise<MobileFilters> {
   const response = await apmEventClient.search('get_mobile_filters', {
     apm: {
-      events: [
-        ProcessorEvent.error,
-        ProcessorEvent.metric,
-        ProcessorEvent.transaction,
-        ProcessorEvent.span,
-      ],
+      events: [ProcessorEvent.transaction],
     },
     body: {
       track_total_hits: false,

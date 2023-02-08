@@ -44,6 +44,8 @@ import {
   RuleTypeParams,
   RuleTypeState,
   parseDuration,
+  RawAlertInstance,
+  RuleLastRunOutcomeOrderMap,
 } from '../../common';
 import { NormalizedRuleType, UntypedNormalizedRuleType } from '../rule_type_registry';
 import { getEsErrorMessage } from '../lib/errors';
@@ -256,6 +258,8 @@ export class TaskRunner<
       updatedAt,
       enabled,
       actions,
+      muteAll,
+      snoozeSchedule,
     } = rule;
     const {
       params: { alertId: ruleId, spaceId },
@@ -294,6 +298,8 @@ export class TaskRunner<
       ...wrappedClientOptions,
       searchSourceClient,
     });
+    const rulesSettingsClient = this.context.getRulesSettingsClientWithRequest(fakeRequest);
+    const flappingSettings = await rulesSettingsClient.flapping().get();
 
     const { updatedRuleTypeState } = await this.timer.runWithTimer(
       TaskRunnerTimerSpan.RuleTypeRun,
@@ -370,8 +376,11 @@ export class TaskRunner<
                 updatedAt,
                 throttle,
                 notifyWhen,
+                muteAll,
+                snoozeSchedule,
               },
               logger: this.logger,
+              flappingSettings,
             })
           );
 
@@ -417,6 +426,7 @@ export class TaskRunner<
         ruleLabel,
         ruleRunMetricsStore,
         shouldLogAndScheduleActionsForAlerts: this.shouldLogAndScheduleActionsForAlerts(),
+        flappingSettings,
       });
     });
 
@@ -455,8 +465,16 @@ export class TaskRunner<
       }
     });
 
-    const { alertsToReturn, recoveredAlertsToReturn } =
-      this.legacyAlertsClient.getAlertsToSerialize();
+    let alertsToReturn: Record<string, RawAlertInstance> = {};
+    let recoveredAlertsToReturn: Record<string, RawAlertInstance> = {};
+    // Only serialize alerts into task state if we're auto-recovering, otherwise
+    // we don't need to keep this information around.
+    if (this.ruleType.autoRecoverAlerts) {
+      const { alertsToReturn: alerts, recoveredAlertsToReturn: recovered } =
+        this.legacyAlertsClient.getAlertsToSerialize();
+      alertsToReturn = alerts;
+      recoveredAlertsToReturn = recovered;
+    }
 
     return {
       metrics: ruleRunMetricsStore.getMetrics(),
@@ -478,6 +496,7 @@ export class TaskRunner<
     if (apm.currentTransaction) {
       apm.currentTransaction.name = `Execute Alerting Rule`;
       apm.currentTransaction.addLabels({
+        alerting_rule_space_id: spaceId,
         alerting_rule_id: ruleId,
       });
     }
@@ -807,10 +826,12 @@ export class TaskRunner<
     this.logger.debug(
       `Updating rule task for ${this.ruleType.id} rule with id ${ruleId} - execution error due to timeout`
     );
+    const outcome = 'failed';
     await this.updateRuleSavedObjectPostRun(ruleId, namespace, {
       executionStatus: ruleExecutionStatusToRaw(executionStatus),
       lastRun: {
-        outcome: 'failed',
+        outcome,
+        outcomeOrder: RuleLastRunOutcomeOrderMap[outcome],
         warning: RuleExecutionStatusErrorReasons.Timeout,
         outcomeMsg,
         alertsCount: {},

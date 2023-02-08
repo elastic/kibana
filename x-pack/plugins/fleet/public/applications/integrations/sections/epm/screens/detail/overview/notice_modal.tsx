@@ -48,9 +48,7 @@ export const NoticeModal: React.FunctionComponent<Props> = ({ noticePath, onClos
   return (
     <EuiModal maxWidth={true} onClose={onClose}>
       <EuiModalHeader>
-        <EuiModalHeaderTitle>
-          <h1>NOTICE.txt</h1>
-        </EuiModalHeaderTitle>
+        <EuiModalHeaderTitle>NOTICE.txt</EuiModalHeaderTitle>
       </EuiModalHeader>
       <EuiModalBody>
         <EuiCodeBlock overflowHeight={360}>

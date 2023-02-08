@@ -9,7 +9,7 @@
 import { schema } from '@kbn/config-schema';
 import type { InternalCoreUsageDataSetup } from '@kbn/core-usage-data-base-server-internal';
 import type { InternalSavedObjectRouter } from '../internal_types';
-import { catchAndReturnBoomErrors } from './utils';
+import { catchAndReturnBoomErrors, throwIfTypeNotVisibleByAPI } from './utils';
 
 interface RouteDependencies {
   coreUsageData: InternalCoreUsageDataSetup;
@@ -35,10 +35,11 @@ export const registerDeleteRoute = (
     catchAndReturnBoomErrors(async (context, req, res) => {
       const { type, id } = req.params;
       const { force } = req.query;
-      const { getClient } = (await context.core).savedObjects;
+      const { getClient, typeRegistry } = (await context.core).savedObjects;
 
       const usageStatsClient = coreUsageData.getClient();
       usageStatsClient.incrementSavedObjectsDelete({ request: req }).catch(() => {});
+      throwIfTypeNotVisibleByAPI(type, typeRegistry);
 
       const client = getClient();
       const result = await client.delete(type, id, { force });
