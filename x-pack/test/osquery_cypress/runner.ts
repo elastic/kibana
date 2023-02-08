@@ -75,6 +75,22 @@ export async function OsqueryCypressVisualTestRunner(context: FtrProviderContext
   await startOsqueryCypress(context, 'open');
 }
 
+export async function OsqueryCypressServerlessTestRunner(context: FtrProviderContext) {
+  const esClient = context.getService('es');
+
+  await esClient.indices.putSettings({
+    index: '*,.*,-.security*,-.fleet-*,-.async-search*,-.transform-internal-*,-.tasks*',
+    expand_wildcards: 'all',
+    allow_no_indices: true,
+    ignore_unavailable: true,
+    settings: {
+      refresh_interval: '5s',
+    },
+  });
+
+  await startOsqueryCypress(context, 'open');
+}
+
 function startOsqueryCypress(context: FtrProviderContext, cypressCommand: string) {
   const log = context.getService('log');
   const config = context.getService('config');

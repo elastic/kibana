@@ -9,6 +9,7 @@
     "cypress:open-as-ci": "node ../../../scripts/functional_tests --config ../../test/osquery_cypress/visual_config.ts",
     "cypress:run": "../../../node_modules/.bin/cypress run --config-file ./cypress.config.ts",
     "cypress:run-as-ci": "node ../../../scripts/functional_tests --config ../../test/osquery_cypress/cli_config.ts",
+    "cypress:serverless": "node ../../../scripts/functional_tests --config ../../test/osquery_cypress/serverless_config.ts",
     "nyc": "../../../node_modules/.bin/nyc report --reporter=text-summary"
   }
 }
