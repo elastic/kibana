@@ -138,7 +138,7 @@ describe('Export rules', () => {
               },
             ],
           },
-          '2'
+          { ruleId: '2' }
         )
       );
     });
