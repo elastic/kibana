@@ -46,8 +46,10 @@ export const EXCEPTIONS_TABLE_SHOWING_LISTS = '[data-test-subj="showingException
 export const EXCEPTIONS_TABLE_DELETE_BTN =
   '[data-test-subj="sharedListOverflowCardActionItemDelete"]';
 
-export const EXCEPTIONS_TABLE_EXPORT_BTN =
+export const EXCEPTIONS_TABLE_EXPORT_MODAL_BTN =
   '[data-test-subj="sharedListOverflowCardActionItemExport"]';
+
+export const EXCEPTIONS_TABLE_EXPORT_CONFIRM_BTN = '[data-test-subj="confirmModalConfirmButton"]';
 
 export const EXCEPTIONS_TABLE_SEARCH_CLEAR =
   '[data-test-subj="allExceptionListsPanel"] button.euiFormControlLayoutClearButton';
