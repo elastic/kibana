@@ -18,6 +18,7 @@ import type { ControlState } from './state_action_machine';
 import type { AliasAction } from './actions';
 import type { TransformErrorObjects } from './core';
 import type { MigrationLog, Progress } from './types';
+import type { BulkOperation } from './model/create_batches';
 
 export interface BaseState extends ControlState {
   /** The first part of the index name such as `.kibana` or `.kibana_task_manager` */
@@ -295,7 +296,7 @@ export interface ReindexSourceToTempTransform extends ReindexSourceToTempBatch {
 
 export interface ReindexSourceToTempIndexBulk extends ReindexSourceToTempBatch {
   readonly controlState: 'REINDEX_SOURCE_TO_TEMP_INDEX_BULK';
-  readonly transformedDocBatches: [SavedObjectsRawDoc[]];
+  readonly bulkOperationBatches: BulkOperation[][];
   readonly currentBatch: number;
 }
 
@@ -388,7 +389,7 @@ export interface TransformedDocumentsBulkIndex extends PostInitState {
    * Write the up-to-date transformed documents to the target index
    */
   readonly controlState: 'TRANSFORMED_DOCUMENTS_BULK_INDEX';
-  readonly transformedDocBatches: SavedObjectsRawDoc[][];
+  readonly bulkOperationBatches: BulkOperation[][];
   readonly currentBatch: number;
   readonly lastHitSortValue: number[] | undefined;
   readonly hasTransformedDocs: boolean;

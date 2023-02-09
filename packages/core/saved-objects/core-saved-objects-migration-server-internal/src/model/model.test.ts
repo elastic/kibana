@@ -55,6 +55,7 @@ import type { AliasAction, RetryableEsClientError } from '../actions';
 import type { ResponseType } from '../next';
 import { createInitialProgress } from './progress';
 import { model } from './model';
+import type { BulkIndexOperationTuple, BulkOperation } from './create_batches';
 
 describe('migrations v2 model', () => {
   const indexMapping: IndexMapping = {
@@ -113,6 +114,26 @@ describe('migrations v2 model', () => {
     },
     waitForMigrationCompletion: false,
   };
+
+  const aProcessedDoc = {
+    _id: 'a:b',
+    _source: { type: 'a', a: { name: 'HOI!' }, migrationVersion: {}, references: [] },
+  };
+
+  const processedDocs: SavedObjectsRawDoc[] = [aProcessedDoc];
+
+  const bulkOperationBatches: BulkOperation[][] = [
+    [
+      [
+        {
+          index: {
+            _id: aProcessedDoc._id,
+          },
+        },
+        aProcessedDoc._source,
+      ],
+    ],
+  ];
 
   describe('exponential retry delays for retryable_es_client_error', () => {
     let state: State = {
@@ -1897,12 +1918,6 @@ describe('migrations v2 model', () => {
         transformErrors: [],
         progress: { processed: undefined, total: 1 },
       };
-      const processedDocs = [
-        {
-          _id: 'a:b',
-          _source: { type: 'a', a: { name: 'HOI!' }, migrationVersion: {}, references: [] },
-        },
-      ] as SavedObjectsRawDoc[];
 
       it('REINDEX_SOURCE_TO_TEMP_TRANSFORM -> REINDEX_SOURCE_TO_TEMP_INDEX_BULK if action succeeded', () => {
         const res: ResponseType<'REINDEX_SOURCE_TO_TEMP_TRANSFORM'> = Either.right({
@@ -1911,7 +1926,7 @@ describe('migrations v2 model', () => {
         const newState = model(state, res) as ReindexSourceToTempIndexBulk;
         expect(newState.controlState).toEqual('REINDEX_SOURCE_TO_TEMP_INDEX_BULK');
         expect(newState.currentBatch).toEqual(0);
-        expect(newState.transformedDocBatches).toEqual([processedDocs]);
+        expect(newState.bulkOperationBatches).toEqual(bulkOperationBatches);
         expect(newState.progress.processed).toBe(0); // Result of `(undefined ?? 0) + corruptDocumentsId.length`
       });
 
@@ -1967,18 +1982,10 @@ describe('migrations v2 model', () => {
     });
 
     describe('REINDEX_SOURCE_TO_TEMP_INDEX_BULK', () => {
-      const transformedDocBatches = [
-        [
-          {
-            _id: 'a:b',
-            _source: { type: 'a', a: { name: 'HOI!' }, migrationVersion: {}, references: [] },
-          },
-        ],
-      ] as [SavedObjectsRawDoc[]];
       const reindexSourceToTempIndexBulkState: ReindexSourceToTempIndexBulk = {
         ...baseState,
         controlState: 'REINDEX_SOURCE_TO_TEMP_INDEX_BULK',
-        transformedDocBatches,
+        bulkOperationBatches,
         currentBatch: 0,
         versionIndexReadyActions: Option.none,
         sourceIndex: Option.some('.kibana') as Option.Some<string>,
@@ -2381,12 +2388,6 @@ describe('migrations v2 model', () => {
         progress: createInitialProgress(),
       };
       describe('OUTDATED_DOCUMENTS_TRANSFORM if action succeeds', () => {
-        const processedDocs = [
-          {
-            _id: 'a:b',
-            _source: { type: 'a', a: { name: 'HOI!' }, migrationVersion: {}, references: [] },
-          },
-        ] as SavedObjectsRawDoc[];
         test('OUTDATED_DOCUMENTS_TRANSFORM -> TRANSFORMED_DOCUMENTS_BULK_INDEX if action succeeds', () => {
           const res: ResponseType<'OUTDATED_DOCUMENTS_TRANSFORM'> = Either.right({ processedDocs });
           const newState = model(
@@ -2394,7 +2395,7 @@ describe('migrations v2 model', () => {
             res
           ) as TransformedDocumentsBulkIndex;
           expect(newState.controlState).toEqual('TRANSFORMED_DOCUMENTS_BULK_INDEX');
-          expect(newState.transformedDocBatches).toEqual([processedDocs]);
+          expect(newState.bulkOperationBatches).toEqual(bulkOperationBatches);
           expect(newState.currentBatch).toEqual(0);
           expect(newState.retryCount).toEqual(0);
           expect(newState.retryDelay).toEqual(0);
@@ -2480,30 +2481,28 @@ describe('migrations v2 model', () => {
     });
 
     describe('TRANSFORMED_DOCUMENTS_BULK_INDEX', () => {
-      const transformedDocBatches = [
-        [
-          // batch 0
-          {
-            _id: 'a:b',
-            _source: { type: 'a', a: { name: 'HOI!' }, migrationVersion: {}, references: [] },
+      const idToIndexOperation = (_id: string): BulkIndexOperationTuple => [
+        // "index" operations have a first part with the operation and the SO id
+        {
+          index: {
+            _id,
           },
-          {
-            _id: 'a:c',
-            _source: { type: 'a', a: { name: 'HOI!' }, migrationVersion: {}, references: [] },
-          },
-        ],
-        [
-          // batch 1
-          {
-            _id: 'a:d',
-            _source: { type: 'a', a: { name: 'HOI!' }, migrationVersion: {}, references: [] },
-          },
-        ],
-      ] as SavedObjectsRawDoc[][];
+        },
+        // and a second part with the object _source
+        { type: 'a', a: { name: `HOI ${_id}!` }, migrationVersion: {}, references: [] },
+        // these two parts are then serialized to NDJSON by esClient and sent over with POST _bulk
+      ];
+
+      const customBulkOperationBatches: BulkOperation[][] = [
+        // batch 0
+        ['a:b', 'a:c'].map(idToIndexOperation),
+        // batch 1
+        ['a:d'].map(idToIndexOperation),
+      ];
       const transformedDocumentsBulkIndexState: TransformedDocumentsBulkIndex = {
         ...baseState,
         controlState: 'TRANSFORMED_DOCUMENTS_BULK_INDEX',
-        transformedDocBatches,
+        bulkOperationBatches: customBulkOperationBatches,
         currentBatch: 0,
         versionIndexReadyActions: Option.none,
         sourceIndex: Option.some('.kibana') as Option.Some<string>,
