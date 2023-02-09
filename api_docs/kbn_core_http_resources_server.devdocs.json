@@ -513,9 +513,9 @@
             "section": "def-common.KibanaErrorResponseFactory",
             "text": "KibanaErrorResponseFactory"
           },
-          " & { custom<T extends string | Record<string, any> | Error | ",
+          " & { custom<T extends string | Record<string, any> | Error | Buffer | ",
           "Stream",
-          " | Buffer | { message: string | Error; attributes?: ",
+          " | { message: string | Error; attributes?: ",
           {
             "pluginId": "@kbn/core-http-server",
             "scope": "common",
