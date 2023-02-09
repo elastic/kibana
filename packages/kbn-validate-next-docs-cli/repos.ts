@@ -25,15 +25,23 @@ function lines(read: NodeJS.ReadableStream) {
 }
 
 function getGithubBase() {
-  const originUrl = execa.sync('git', ['remote', 'get-url', 'origin'], {
-    encoding: 'utf8',
-  }).stdout;
+  try {
+    const originUrl = execa.sync('git', ['remote', 'get-url', 'origin'], {
+      encoding: 'utf8',
+    }).stdout;
 
-  if (originUrl.startsWith('https:')) {
-    return `https://github.com/`;
+    if (originUrl.startsWith('git@')) {
+      return `git@github.com:`;
+    }
+  } catch {
+    // noop
   }
 
-  return `git@github.com:`;
+  if (process.env.GITHUB_TOKEN) {
+    return `https://${process.env.GITHUB_TOKEN}@github.com/`;
+  }
+
+  return `https://github.com/`;
 }
 
 export class Repo {
@@ -60,9 +68,9 @@ export class Repo {
     return true;
   }
 
-  async run(cmd: string, args: string[], opts?: { showOutput?: boolean }) {
+  async run(cmd: string, args: string[], opts: { desc: string; showOutput?: boolean }) {
     try {
-      if (!opts?.showOutput) {
+      if (!opts.showOutput) {
         await execa(cmd, args, {
           cwd: this.dir,
           maxBuffer: Infinity,
@@ -93,28 +101,31 @@ export class Repo {
         ]);
       });
     } catch (error) {
-      if (opts?.showOutput) {
-        this.log.debug(`Failed to run [${cmd} ${args.join(' ')}] in [${this.name}]`);
-      } else {
-        this.log.debug(`Failed to run [${cmd} ${args.join(' ')}] in [${this.name}]`, error);
-      }
+      this.log.debug(
+        `Failed to run [${opts.desc}] in [${this.name}]`,
+        opts.showOutput ? error : undefined
+      );
 
-      throw quietFail(`${this.name}: ${cmd} ${args.join(' ')} failed`);
+      throw quietFail(`${this.name}: ${opts.desc} failed`);
     }
   }
 
   async update() {
     try {
       this.log.info('updating', this.name);
-      await this.run('git', ['reset', '--hard']);
-      await this.run('git', [
-        'clean',
-        '-fdx',
-        ...(this.name === 'elastic/docs.elastic.dev'
-          ? ['-e', '/.docsmobile', '-e', '/node_modules']
-          : []),
-      ]);
-      await this.run('git', ['pull', this.dir]);
+      await this.run('git', ['reset', '--hard'], { desc: 'git reset --hard' });
+      await this.run(
+        'git',
+        [
+          'clean',
+          '-fdx',
+          ...(this.name === 'elastic/docs.elastic.dev'
+            ? ['-e', '/.docsmobile', '-e', '/node_modules']
+            : []),
+        ],
+        { desc: 'git clean -fdx' }
+      );
+      await this.run('git', ['pull'], { desc: 'git pull' });
     } catch {
       quietFail(`failed to update ${this.name}`);
     }
@@ -125,7 +136,9 @@ export class Repo {
       this.log.info('cloning', this.name);
       Fs.mkdirSync(this.dir, { recursive: true });
       const depth = process.env.CI ? ['--depth', '1'] : [];
-      await this.run('git', ['clone', ...depth, `${this.githubBase}${this.name}.git`, '.']);
+      await this.run('git', ['clone', ...depth, `${this.githubBase}${this.name}.git`, '.'], {
+        desc: 'git clone ...',
+      });
     } catch {
       quietFail(`Failed to clone ${this.name}`);
     }

@@ -54,16 +54,19 @@ run(
       },
     ]);
 
-    const opts = { showOutput: flagsReader.boolean('debug') || flagsReader.boolean('verbose') };
+    const showOutput = flagsReader.boolean('debug') || flagsReader.boolean('verbose');
     try {
       log.info('[docs.elastic.dev] installing deps with yarn');
-      await docsRepo.run('yarn', [], opts);
+      await docsRepo.run('yarn', [], { desc: 'yarn install', showOutput });
 
       log.info('[docs.elastic.dev] initializing docsmobile');
-      await docsRepo.run('yarn', ['docsmobile', 'init'], opts);
+      await docsRepo.run('yarn', ['docsmobile', 'init'], {
+        desc: 'yarn docsmobile init',
+        showOutput,
+      });
 
       log.info('[docs.elastic.dev] building');
-      await docsRepo.run('yarn', ['build'], opts);
+      await docsRepo.run('yarn', ['build'], { desc: 'yarn build', showOutput });
     } catch {
       quietFail(`failed to build docs`);
     }
