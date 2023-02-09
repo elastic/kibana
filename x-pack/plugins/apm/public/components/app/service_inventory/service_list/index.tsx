@@ -82,8 +82,10 @@ export function getServiceColumns({
       ? [
           {
             field: ServiceInventoryFieldName.AlertsCount,
-            name: '',
-            width: `${unit * 5}px`,
+            name: i18n.translate('xpack.apm.servicesTable.alertsColumnLabel', {
+              defaultMessage: 'Active alerts',
+            }),
+            width: `${unit * 8}px`,
             sortable: true,
             render: (_, { serviceName, alertsCount }) => {
               if (!alertsCount) {
@@ -91,16 +93,26 @@ export function getServiceColumns({
               }
 
               return (
-                <EuiBadge
-                  iconType="alert"
-                  color="danger"
-                  href={link('/services/{serviceName}/alerts', {
-                    path: { serviceName },
-                    query,
-                  })}
+                <EuiToolTip
+                  position="bottom"
+                  content={i18n.translate(
+                    'xpack.apm.home.servicesTable.tooltip.activeAlertsExplanation',
+                    {
+                      defaultMessage: 'Active alerts',
+                    }
+                  )}
                 >
-                  {alertsCount}
-                </EuiBadge>
+                  <EuiBadge
+                    iconType="alert"
+                    color="danger"
+                    href={link('/services/{serviceName}/alerts', {
+                      path: { serviceName },
+                      query,
+                    })}
+                  >
+                    {alertsCount}
+                  </EuiBadge>
+                </EuiToolTip>
               );
             },
           } as ITableColumn<ServiceListItem>,
@@ -150,7 +162,7 @@ export function getServiceColumns({
                 defaultMessage: 'Environment',
               }
             ),
-            width: `${unit * 10}px`,
+            width: `${unit * 9}px`,
             sortable: true,
             render: (_, { environments }) => (
               <EnvironmentBadge environments={environments ?? []} />
@@ -166,7 +178,7 @@ export function getServiceColumns({
               'xpack.apm.servicesTable.transactionColumnLabel',
               { defaultMessage: 'Transaction type' }
             ),
-            width: `${unit * 10}px`,
+            width: `${unit * 8}px`,
             sortable: true,
           },
         ]

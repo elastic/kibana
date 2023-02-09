@@ -13,8 +13,8 @@ import { EuiFlexGroup, EuiFlexItem, EuiText, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
+import { AuthenticationPanelDeleteConfirmationModal } from './auth_panel_delete_confirm_modal';
 import { AuthenticationPanelActions } from './authentication_panel_actions';
-import { AuthenticationPanelDeleteConfirmationModal } from './authentication_panel_delete_confirmation_modal';
 import { AuthenticationPanelEditContent } from './authentication_panel_edit_content';
 import { AuthenticationPanelLogic } from './authentication_panel_logic';
 import { AuthenticationPanelViewContent } from './authentication_panel_view_content';
