@@ -18,6 +18,5 @@
     "@kbn/repo-packages",
     "@kbn/picomatcher",
     "@kbn/dev-cli-errors",
-    "@kbn/get-repo-files",
   ]
 }

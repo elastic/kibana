@@ -61,6 +61,10 @@ export default function ({ getService }: FtrProviderContext) {
               },
             ],
             version: 1,
+            _meta: {
+              field_1: 'test',
+              field_2: 10,
+            },
           })
           .expect(200);
 
@@ -73,7 +77,7 @@ export default function ({ getService }: FtrProviderContext) {
         const { body } = await supertest
           .post(API_BASE_PATH)
           .set('kbn-xsrf', 'xxx')
-          // Excludes description, version and on_failure processors
+          // Excludes description, version, on_failure processors, and _meta
           .send({
             name: REQUIRED_FIELDS_PIPELINE_ID,
             processors: [
@@ -106,6 +110,10 @@ export default function ({ getService }: FtrProviderContext) {
               },
             ],
             version: 1,
+            _meta: {
+              field_1: 'test',
+              field_2: 10,
+            },
           })
           .expect(409);
 
@@ -137,6 +145,10 @@ export default function ({ getService }: FtrProviderContext) {
             },
           },
         ],
+        _meta: {
+          field_1: 'test',
+          field_2: 10,
+        },
       };
 
       before(async () => {
@@ -159,6 +171,10 @@ export default function ({ getService }: FtrProviderContext) {
           .send({
             ...PIPELINE,
             description: 'updated test pipeline description',
+            _meta: {
+              field_1: 'updated',
+              new_field: 3,
+            },
           })
           .expect(200);
 
@@ -175,7 +191,7 @@ export default function ({ getService }: FtrProviderContext) {
           .set('kbn-xsrf', 'xxx')
           .send({
             processors: PIPELINE.processors,
-            // removes description, version and on_failure
+            // removes description, version, on_failure, and _meta
           })
           .expect(200);
 
@@ -193,6 +209,10 @@ export default function ({ getService }: FtrProviderContext) {
           .send({
             ...PIPELINE,
             description: 'updated test pipeline description',
+            _meta: {
+              field_1: 'updated',
+              new_field: 3,
+            },
           })
           .expect(404);
 
@@ -217,6 +237,10 @@ export default function ({ getService }: FtrProviderContext) {
           },
         ],
         version: 1,
+        _meta: {
+          field_1: 'test',
+          field_2: 10,
+        },
       };
 
       before(async () => {
@@ -274,6 +298,10 @@ export default function ({ getService }: FtrProviderContext) {
           },
         ],
         version: 1,
+        _meta: {
+          field_1: 'test',
+          field_2: 10,
+        },
       };
 
       const pipelineA = { body: PIPELINE, id: 'test_delete_pipeline_a' };
@@ -378,6 +406,9 @@ export default function ({ getService }: FtrProviderContext) {
                   },
                 },
               ],
+              _meta: {
+                field: 'test simulate metadata',
+              },
             },
             documents: [
               {

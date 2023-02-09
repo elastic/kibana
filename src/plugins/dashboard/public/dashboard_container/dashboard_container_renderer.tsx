@@ -10,10 +10,11 @@ import './_dashboard_container.scss';
 
 import { v4 as uuidv4 } from 'uuid';
 import classNames from 'classnames';
-import useObservable from 'react-use/lib/useObservable';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
+import useObservable from 'react-use/lib/useObservable';
 
-import { EuiLoadingElastic, EuiLoadingSpinner } from '@elastic/eui';
+import { EuiLoadingElastic, EuiLoadingSpinner, useEuiOverflowScroll } from '@elastic/eui';
+import { css } from '@emotion/react';
 
 import {
   DashboardContainerFactory,
@@ -107,13 +108,20 @@ export const DashboardContainerRenderer = ({
     { 'dashboardViewport--screenshotMode': isScreenshotMode() },
     { 'dashboardViewport--loading': loading }
   );
+
+  const viewportStyles = css`
+    ${useEuiOverflowScroll('y', false)}
+  `;
+
   const loadingSpinner = showPlainSpinner ? (
     <EuiLoadingSpinner size="xxl" />
   ) : (
     <EuiLoadingElastic size="xxl" />
   );
   return (
-    <div className={viewportClasses}>{loading ? loadingSpinner : <div ref={dashboardRoot} />}</div>
+    <div className={viewportClasses} css={viewportStyles}>
+      {loading ? loadingSpinner : <div ref={dashboardRoot} />}
+    </div>
   );
 };
 
