@@ -69,6 +69,8 @@ export function FieldSelector({
       <EuiFormLabel>{label}</EuiFormLabel>
 
       <Controller
+        shouldUnregister={true}
+        defaultValue=""
         name={name}
         control={control}
         rules={{ required: true }}

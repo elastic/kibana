@@ -69,7 +69,9 @@ export function SloEditForm({ slo }: Props) {
       const processedValues = transformValuesToUpdateSLOInput(values);
       updateSlo(slo.id, processedValues);
     } else {
+      console.log('raw', JSON.stringify(values));
       const processedValues = transformValuesToCreateSLOInput(values);
+      console.log('processed', JSON.stringify(processedValues));
       createSlo(processedValues);
     }
   };
@@ -113,6 +115,7 @@ export function SloEditForm({ slo }: Props) {
 
   return (
     <EuiTimeline data-test-subj="sloForm">
+      <pre>{JSON.stringify(watch(), null, 2)}</pre>
       <EuiTimelineItem
         verticalAlign="top"
         icon={

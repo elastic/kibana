@@ -25,6 +25,7 @@ export function SloEditFormObjectivesTimeslices({ control }: Props) {
           })}
         </EuiFormLabel>
         <Controller
+          shouldUnregister={true}
           name="objective.timesliceTarget"
           control={control}
           defaultValue={95}
@@ -55,6 +56,7 @@ export function SloEditFormObjectivesTimeslices({ control }: Props) {
         </EuiFormLabel>
 
         <Controller
+          shouldUnregister={true}
           name="objective.timesliceWindow"
           defaultValue="1"
           control={control}
