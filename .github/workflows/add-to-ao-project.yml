@@ -10,7 +10,7 @@ jobs:
       github.event.label.name == 'Team: Actionable Observability'
     steps:
       - name: Add
-        uses: richkuz/projectnext-label-assigner@1.0.2
+        uses: richkuz/projectnext-label-assigner@1.1.0
         id: add_to_projects
         with:
           config: |

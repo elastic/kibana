@@ -54,7 +54,7 @@
             "path": "packages/core/saved-objects/core-saved-objects-browser-internal/src/saved_objects_service.ts"
           },
           {
-            "plugin": "core",
+            "plugin": "@kbn/core",
             "path": "src/core/public/index.ts"
           },
           {
@@ -170,7 +170,7 @@
             "path": "packages/core/saved-objects/core-saved-objects-browser-mocks/src/saved_objects_service.mock.ts"
           },
           {
-            "plugin": "core",
+            "plugin": "@kbn/core",
             "path": "src/core/server/index.ts"
           }
         ],
