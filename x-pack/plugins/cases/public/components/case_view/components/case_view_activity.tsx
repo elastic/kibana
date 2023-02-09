@@ -32,6 +32,7 @@ import { SeveritySidebarSelector } from '../../severity/sidebar_selector';
 import { useFindCaseUserActions } from '../../../containers/use_find_case_user_actions';
 import { AssignUsers } from './assign_users';
 import type { Assignee } from '../../user_profiles/types';
+import { convertToCaseUserWithProfileInfo } from '../../user_profiles/user_converter';
 
 const buildUserProfilesMap = (users?: CaseUsers): Map<string, UserProfileWithAvatar> => {
   const userProfiles = new Map();
@@ -173,6 +174,11 @@ export const CaseViewActivity = ({
   const showConnectorSidebar =
     pushToServiceAuthorized && userActionsData && caseConnectors && supportedActionConnectors;
 
+  const reporterAsArray =
+    caseUsers?.reporter != null
+      ? [caseUsers.reporter]
+      : [convertToCaseUserWithProfileInfo(caseData.createdBy)];
+
   return (
     <>
       <EuiFlexItem grow={6}>
@@ -229,15 +235,13 @@ export const CaseViewActivity = ({
             selectedSeverity={caseData.severity}
             onSeverityChange={onUpdateSeverity}
           />
-          {caseUsers?.reporter ? (
-            <UserList
-              dataTestSubj="case-view-user-list-reporter"
-              theCase={caseData}
-              headline={i18n.REPORTER}
-              users={[caseUsers.reporter]}
-              userProfiles={userProfiles}
-            />
-          ) : null}
+          <UserList
+            dataTestSubj="case-view-user-list-reporter"
+            theCase={caseData}
+            headline={i18n.REPORTER}
+            users={reporterAsArray}
+            userProfiles={userProfiles}
+          />
           {caseUsers?.participants ? (
             <UserList
               dataTestSubj="case-view-user-list-participants"
