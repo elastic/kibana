@@ -175,7 +175,7 @@ export const BenchmarksSection = ({
             grow={dashboardColumnsGrow.second}
             data-test-subj={DASHBOARD_TABLE_COLUMN_SCORE_TEST_ID}
           >
-            <CloudPostureScoreChart
+            <ComplianceScoreChart
               compact
               id={`${cluster.meta.assetIdentifierId}_score_chart`}
               data={cluster.stats}
