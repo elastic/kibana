@@ -405,8 +405,8 @@
                         "install_source": {
                           "type": "string",
                           "enum": [
-                            "registry",
                             "upload",
+                            "registry",
                             "bundled"
                           ]
                         }

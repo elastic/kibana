@@ -68,8 +68,8 @@ post:
                   install_source:
                     type: string
                     enum:
-                      - registry
                       - upload
+                      - registry
                       - bundled
             required:
               - items
