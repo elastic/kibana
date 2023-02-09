@@ -14,6 +14,7 @@ import {
 import { agentPolicyService } from '../agent_policy';
 import { appContextService } from '../app_context';
 
+const DEFAULT_BATCH_SIZE = 100;
 function getOutdatedAgentPoliciesBatch(soClient: SavedObjectsClientContract, batchSize: number) {
   return agentPolicyService.list(soClient, {
     perPage: batchSize,
@@ -30,7 +31,7 @@ export async function upgradeAgentPolicySchemaVersion(soClient: SavedObjectsClie
   const config = appContextService.getConfig();
   const logger = appContextService.getLogger();
 
-  const batchSize = config?.setup?.agentPolicySchemaUpgradeBatchSize ?? 100;
+  const batchSize = config?.setup?.agentPolicySchemaUpgradeBatchSize ?? DEFAULT_BATCH_SIZE;
   let outdatedAgentPolicies = await getOutdatedAgentPoliciesBatch(soClient, batchSize);
   logger.debug(`Found ${outdatedAgentPolicies.total} outdated agent policies`);
   while (outdatedAgentPolicies.total > 0) {
