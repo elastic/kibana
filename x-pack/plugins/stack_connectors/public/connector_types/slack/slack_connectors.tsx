@@ -18,10 +18,12 @@ const slackTypeButtons = [
   {
     id: 'webhook',
     label: i18n.WEBHOOK,
+    'data-test-subj': 'webhookButton',
   },
   {
     id: 'web_api',
     label: i18n.WEB_API,
+    'data-test-subj': 'webApiButton',
   },
 ];
 
