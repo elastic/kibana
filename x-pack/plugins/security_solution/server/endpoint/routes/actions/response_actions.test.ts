@@ -400,7 +400,7 @@ describe('Response actions', () => {
 
     it('sends the `execute` command payload from the execute route', async () => {
       const ctx = await callRoute(EXECUTE_ROUTE, {
-        body: { endpoint_ids: ['XYZ'], parameters: { command: 'ls -al'} },
+        body: { endpoint_ids: ['XYZ'], parameters: { command: 'ls -al' } },
       });
       const actionDoc: EndpointAction = (
         ctx.core.elasticsearch.client.asInternalUser.index.mock
@@ -690,7 +690,6 @@ describe('Response actions', () => {
       });
     });
 
-
     describe('License Level', () => {
       // FIXME: This test also works for downgraded licenses (Gold)
       it('allows platinum license levels to isolate hosts', async () => {
@@ -752,7 +751,7 @@ describe('Response actions', () => {
         expect(mockResponse.forbidden).toBeCalled();
       });
 
-      it('prohibits user from performing execute action if `canWriteExecuteOperations` is `false`', async ()=> {
+      it('prohibits user from performing execute action if `canWriteExecuteOperations` is `false`', async () => {
         await callRoute(EXECUTE_ROUTE, {
           body: { endpoint_ids: ['XYZ'] },
           authz: { canWriteExecuteOperations: false },
