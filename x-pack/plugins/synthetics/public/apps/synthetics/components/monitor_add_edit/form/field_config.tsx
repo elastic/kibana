@@ -886,8 +886,9 @@ export const FIELD = (readOnly?: boolean): FieldMap => ({
     label: i18n.translate('xpack.synthetics.monitorConfig.params.label', {
       defaultMessage: 'Parameters',
     }),
+    controlled: true,
     component: JSONEditor,
-    props: ({ setValue }): JSONCodeEditorProps => ({
+    props: (): JSONCodeEditorProps => ({
       id: 'syntheticsMonitorConfigParams',
       height: '100px',
       ariaLabel: i18n.translate('xpack.synthetics.monitorConfig.paramsAria.label', {
