@@ -208,22 +208,8 @@ export function registerErrorCountRuleType({
                 interval: `${ruleParams.windowSize}${ruleParams.windowUnit}`,
                 reason: alertReason,
                 serviceName,
-                threshold: i18n.translate(
-                  'xpack.apm.alerts.errorCount.threshold',
-                  {
-                    defaultMessage:
-                      '{threshold} {threshold, plural, one {error} other {errors}}',
-                    values: { threshold: ruleParams.threshold },
-                  }
-                ),
-                triggerValue: i18n.translate(
-                  'xpack.apm.alerts.errorCount.thresholdValue',
-                  {
-                    defaultMessage:
-                      '{thresholdValue} {thresholdValue, plural, one {error} other {errors}}',
-                    values: { thresholdValue: errorCount },
-                  }
-                ),
+                threshold: ruleParams.threshold,
+                triggerValue: errorCount,
                 viewInAppUrl,
               });
           });
