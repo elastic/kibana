@@ -362,7 +362,6 @@ export class CsvGenerator {
           break; // empty report with just the header
         }
 
-        // FIXME: make tabifyDocs handle the formatting, to get the same formatting logic as Discover?
         const formatters = this.getFormatters(table);
         await this.generateRows(columns, table, builder, formatters, settings);
 
