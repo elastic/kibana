@@ -1,9 +1,9 @@
 {
   "author": "Elastic",
-  "name": "session_view",
-  "version": "8.0.0",
+  "name": "@kbn/session-view-plugin",
+  "version": "1.0.0",
   "private": true,
-  "license": "Elastic-License",
+  "license": "Elastic License 2.0",
   "scripts": {
     "test:jest": "node ../../scripts/jest",
     "test:coverage": "node ../../scripts/jest --coverage"

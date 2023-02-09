@@ -9,30 +9,29 @@ import { asMutableArray } from '../../../../common/utils/as_mutable_array';
 import { joinByKey } from '../../../../common/utils/join_by_key';
 import { getServicesAlerts } from './get_service_alerts';
 import { getHealthStatuses } from './get_health_statuses';
-import { getServicesFromErrorAndMetricDocuments } from './get_services_from_error_and_metric_documents';
+import { getServicesWithoutTransactions } from './get_services_without_transactions';
 import { getServiceTransactionStats } from './get_service_transaction_stats';
 
 export function mergeServiceStats({
   serviceStats,
-  servicesFromErrorAndMetricDocuments,
+  servicesWithoutTransactions,
   healthStatuses,
   alertCounts,
 }: {
   serviceStats: Awaited<
     ReturnType<typeof getServiceTransactionStats>
   >['serviceStats'];
-  servicesFromErrorAndMetricDocuments: Awaited<
-    ReturnType<typeof getServicesFromErrorAndMetricDocuments>
+  servicesWithoutTransactions: Awaited<
+    ReturnType<typeof getServicesWithoutTransactions>
   >['services'];
   healthStatuses: Awaited<ReturnType<typeof getHealthStatuses>>;
   alertCounts: Awaited<ReturnType<typeof getServicesAlerts>>;
 }) {
   const foundServiceNames = serviceStats.map(({ serviceName }) => serviceName);
 
-  const servicesWithOnlyMetricDocuments =
-    servicesFromErrorAndMetricDocuments.filter(
-      ({ serviceName }) => !foundServiceNames.includes(serviceName)
-    );
+  const servicesWithOnlyMetricDocuments = servicesWithoutTransactions.filter(
+    ({ serviceName }) => !foundServiceNames.includes(serviceName)
+  );
 
   const allServiceNames = foundServiceNames.concat(
     servicesWithOnlyMetricDocuments.map(({ serviceName }) => serviceName)
@@ -47,7 +46,7 @@ export function mergeServiceStats({
   return joinByKey(
     asMutableArray([
       ...serviceStats,
-      ...servicesFromErrorAndMetricDocuments,
+      ...servicesWithoutTransactions,
       ...matchedHealthStatuses,
       ...alertCounts,
     ] as const),

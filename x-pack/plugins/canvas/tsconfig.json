@@ -77,6 +77,7 @@
     "@kbn/core-apps-server-internal",
     "@kbn/flot-charts",
     "@kbn/shared-ux-router",
+    "@kbn/babel-register",
   ],
   "exclude": [
     "target/**/*",

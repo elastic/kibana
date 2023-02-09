@@ -17,7 +17,7 @@ import { sendEndpointMetadataUpdate } from '../../common/endpoint_metadata_servi
 import { FleetActionGenerator } from '../../../../common/endpoint/data_generators/fleet_action_generator';
 import {
   ENDPOINT_ACTION_RESPONSES_INDEX,
-  ENDPOINTS_ACTION_LIST_ROUTE,
+  BASE_ENDPOINT_ACTION_ROUTE,
   FILE_STORAGE_DATA_INDEX,
   FILE_STORAGE_METADATA_INDEX,
 } from '../../../../common/endpoint/constants';
@@ -51,7 +51,7 @@ export const fetchEndpointActionList = async (
     return (
       await kbn.request<ActionListApiResponse>({
         method: 'GET',
-        path: ENDPOINTS_ACTION_LIST_ROUTE,
+        path: BASE_ENDPOINT_ACTION_ROUTE,
         query: options,
       })
     ).data;
