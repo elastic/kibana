@@ -98,7 +98,7 @@ export class ESGeoGridSource extends AbstractESAggSource implements IMvtVectorSo
       const resolutionPropChange = sourceChanges.find((sourceChange) => {
         return sourceChange.propName === 'resolution';
       });
-      if (resolutionPropChange) {
+      if (resolutionPropChange && 'getPropertiesDescriptor' in sourceEditorArgs.style) {
         const propertiesDescriptor = (
           sourceEditorArgs.style as VectorStyle
         ).getPropertiesDescriptor();
