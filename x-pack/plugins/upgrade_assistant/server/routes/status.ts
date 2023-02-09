@@ -48,12 +48,12 @@ export function registerUpgradeStatusRoute({
             return {
               migration_status: 'NO_MIGRATION_NEEDED',
               features: [],
-            }
+            };
           }
 
           // Fetch system indices migration status from ES
           return await getESSystemIndicesMigrationStatus(esClient.asCurrentUser);
-        }
+        };
 
         const { migration_status: systemIndicesMigrationStatus, features } =
           await getSystemIndicesMigrationStatus();
