@@ -84,16 +84,14 @@ export const createCaseCommentSavedObjectType = ({
       },
       externalReferenceMetadata: {
         dynamic: false,
-        type: 'object',
-        enabled: false,
+        properties: {},
       },
       persistableStateAttachmentTypeId: {
         type: 'keyword',
       },
       persistableStateAttachmentState: {
         dynamic: false,
-        type: 'object',
-        enabled: false,
+        properties: {},
       },
       pushed_at: {
         type: 'date',
