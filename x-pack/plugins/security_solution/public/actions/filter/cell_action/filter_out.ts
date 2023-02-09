@@ -44,9 +44,13 @@ export const createFilterOutAction = ({
           store.getState(),
           TimelineId.active
         )?.filterManager;
-        addFilterOut(field.name, field.value, timelineFilterManager);
+        addFilterOut({
+          filterManager: timelineFilterManager,
+          fieldName: field.name,
+          value: field.value,
+        });
       } else {
-        addFilterOut(field.name, field.value, filterManager);
+        addFilterOut({ filterManager, fieldName: field.name, value: field.value });
       }
     },
   });

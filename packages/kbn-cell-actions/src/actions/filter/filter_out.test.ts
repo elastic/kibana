@@ -12,10 +12,18 @@ import { createFilterOutAction } from './filter_out';
 
 const mockFilterManager = { addFilters: jest.fn() } as unknown as FilterManager;
 
-describe('Default createFilterOutAction', () => {
-  const filterInAction = createFilterOutAction({ filterManager: mockFilterManager });
+const mockCreateFilter = jest.fn((..._: any) => ({}));
+jest.mock('./create_filter', () => ({
+  createFilter: (...params: any) => mockCreateFilter(...params),
+}));
+
+const fieldName = 'user.name';
+const value = 'the value';
+
+describe('createFilterOutAction', () => {
+  const filterOutAction = createFilterOutAction({ filterManager: mockFilterManager });
   const context = {
-    field: { name: 'user.name', value: 'the value', type: 'text' },
+    field: { name: fieldName, value, type: 'text' },
   } as CellActionExecutionContext;
 
   beforeEach(() => {
@@ -23,23 +31,77 @@ describe('Default createFilterOutAction', () => {
   });
 
   it('should return display name', () => {
-    expect(filterInAction.getDisplayName(context)).toEqual('Filter Out');
+    expect(filterOutAction.getDisplayName(context)).toEqual('Filter Out');
   });
 
   it('should return icon type', () => {
-    expect(filterInAction.getIconType(context)).toEqual('minusInCircle');
+    expect(filterOutAction.getIconType(context)).toEqual('minusInCircle');
   });
 
   describe('isCompatible', () => {
     it('should return true if everything is okay', async () => {
-      expect(await filterInAction.isCompatible(context)).toEqual(true);
+      expect(await filterOutAction.isCompatible(context)).toEqual(true);
+    });
+
+    it('should return false if field.name not valid', async () => {
+      expect(
+        await filterOutAction.isCompatible({
+          ...context,
+          field: { ...context.field, name: '' },
+        })
+      ).toEqual(false);
     });
   });
 
   describe('execute', () => {
-    it('should execute normally', async () => {
-      await filterInAction.execute(context);
+    it('should add the filter to filterManager', async () => {
+      await filterOutAction.execute(context);
       expect(mockFilterManager.addFilters).toHaveBeenCalled();
+    });
+
+    it('should create negate filter query with value', async () => {
+      await filterOutAction.execute(context);
+      expect(mockCreateFilter).toHaveBeenCalledWith(fieldName, value, true);
+    });
+
+    it('should create negate filter query with array value', async () => {
+      await filterOutAction.execute({
+        ...context,
+        field: { ...context.field, value: [value] },
+      });
+      expect(mockCreateFilter).toHaveBeenCalledWith(fieldName, [value], true);
+    });
+
+    it('should create filter query with null value', async () => {
+      await filterOutAction.execute({
+        ...context,
+        field: { ...context.field, value: null },
+      });
+      expect(mockCreateFilter).toHaveBeenCalledWith(fieldName, null, false);
+    });
+
+    it('should create filter query with undefined value', async () => {
+      await filterOutAction.execute({
+        ...context,
+        field: { ...context.field, value: undefined },
+      });
+      expect(mockCreateFilter).toHaveBeenCalledWith(fieldName, undefined, false);
+    });
+
+    it('should create negate filter query with empty string value', async () => {
+      await filterOutAction.execute({
+        ...context,
+        field: { ...context.field, value: '' },
+      });
+      expect(mockCreateFilter).toHaveBeenCalledWith(fieldName, '', false);
+    });
+
+    it('should create negate filter query with empty array value', async () => {
+      await filterOutAction.execute({
+        ...context,
+        field: { ...context.field, value: [] },
+      });
+      expect(mockCreateFilter).toHaveBeenCalledWith(fieldName, [], false);
     });
   });
 });

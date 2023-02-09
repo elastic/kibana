@@ -15,6 +15,7 @@ import { i18n } from '@kbn/i18n';
 import type { FilterManager } from '@kbn/data-plugin/public';
 import type { Filter } from '@kbn/es-query';
 import type { CellAction } from '../../types';
+import { createFilter } from './create_filter';
 
 const ID = 'filterIn';
 const ICON = 'plusInCircle';
@@ -32,58 +33,31 @@ export const createFilterInAction = ({
   getIconType: (): string => ICON,
   getDisplayName: () => FILTER_IN,
   getDisplayNameTooltip: () => FILTER_IN,
-  isCompatible: async ({ field }) => field.name != null,
+  isCompatible: async ({ field }) => !!field.name,
   execute: async ({ field }) => {
-    addFilterIn(field.name, field.value, filterManager);
+    addFilterIn({ filterManager, fieldName: field.name, value: field.value });
   },
 });
 
-export const addFilterIn = (
-  fieldName: string,
-  value: string[] | string | null | undefined,
-  filterManager: FilterManager | undefined
-) => {
+export const addFilterIn = ({
+  filterManager,
+  fieldName,
+  value,
+  negate,
+}: {
+  filterManager: FilterManager | undefined;
+  fieldName: string;
+  value: string[] | string | null | undefined;
+  negate?: boolean;
+}) => {
   if (filterManager != null) {
-    const filter = createFilterIn(fieldName, value);
+    const filter = createFilterIn(fieldName, value, negate);
     filterManager.addFilters(filter);
   }
 };
 
-const createFilterIn = (key: string, value: string[] | string | null | undefined): Filter => {
-  const queryValue =
-    value != null && value.length > 0 ? (Array.isArray(value) ? value[0] : value) : null;
-  if (queryValue == null) {
-    return {
-      exists: {
-        field: key,
-      },
-      meta: {
-        alias: null,
-        disabled: false,
-        key,
-        type: 'exists',
-        value: 'exists',
-      },
-    } as Filter;
-  }
-  return {
-    meta: {
-      alias: null,
-      disabled: false,
-      type: 'phrase',
-      key,
-      value: queryValue,
-      params: {
-        query: queryValue,
-      },
-    },
-    query: {
-      match: {
-        [key]: {
-          query: queryValue,
-          type: 'phrase',
-        },
-      },
-    },
-  };
-};
+const createFilterIn = (
+  key: string,
+  value: string[] | string | null | undefined,
+  negate: boolean = value == null || value.length === 0
+): Filter => createFilter(key, value, negate);

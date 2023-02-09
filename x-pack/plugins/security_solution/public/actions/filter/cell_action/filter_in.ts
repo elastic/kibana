@@ -44,9 +44,13 @@ export const createFilterInAction = ({
           store.getState(),
           TimelineId.active
         )?.filterManager;
-        addFilterIn(field.name, field.value, timelineFilterManager);
+        addFilterIn({
+          filterManager: timelineFilterManager,
+          fieldName: field.name,
+          value: field.value,
+        });
       } else {
-        addFilterIn(field.name, field.value, filterManager);
+        addFilterIn({ filterManager, fieldName: field.name, value: field.value });
       }
     },
   });
