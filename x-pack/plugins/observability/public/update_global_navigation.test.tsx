@@ -17,6 +17,7 @@ describe('updateGlobalNavigation', () => {
   describe('when no observability apps are enabled', () => {
     it('hides the overview link', () => {
       const capabilities = {
+        [sloFeatureId]: { read: false },
         navLinks: { apm: false, logs: false, metrics: false, uptime: false },
       } as unknown as ApplicationStart['capabilities'];
       const deepLinks: AppDeepLink[] = [];
@@ -168,7 +169,7 @@ describe('updateGlobalNavigation', () => {
         const capabilities = {
           [casesFeatureId]: { read_cases: true },
           [sloFeatureId]: { read: true },
-          navLinks: { apm: true, logs: false, metrics: false, uptime: false },
+          navLinks: { apm: false, logs: false, metrics: false, uptime: false },
         } as unknown as ApplicationStart['capabilities'];
 
         const sloRoute = {

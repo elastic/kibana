@@ -50,10 +50,9 @@ export function updateGlobalNavigation({
       case 'slos':
         return {
           ...link,
-          navLinkStatus:
-            someVisible && capabilities[sloFeatureId].read
-              ? AppNavLinkStatus.visible
-              : AppNavLinkStatus.hidden,
+          navLinkStatus: capabilities[sloFeatureId].read
+            ? AppNavLinkStatus.visible
+            : AppNavLinkStatus.hidden,
         };
       default:
         return link;
@@ -62,6 +61,9 @@ export function updateGlobalNavigation({
 
   updater$.next(() => ({
     deepLinks: updatedDeepLinks,
-    navLinkStatus: someVisible ? AppNavLinkStatus.visible : AppNavLinkStatus.hidden,
+    navLinkStatus:
+      someVisible || capabilities[sloFeatureId].read
+        ? AppNavLinkStatus.visible
+        : AppNavLinkStatus.hidden,
   }));
 }
