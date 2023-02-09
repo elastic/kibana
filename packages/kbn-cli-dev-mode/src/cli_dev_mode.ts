@@ -149,9 +149,6 @@ export class CliDevMode {
     this.optimizer = new Optimizer({
       enabled: !cliArgs.disableOptimizer,
       repoRoot: REPO_ROOT,
-      oss: cliArgs.oss,
-      pluginPaths: config.plugins.additionalPluginPaths,
-      pluginScanDirs: config.plugins.pluginSearchPaths,
       runExamples: cliArgs.runExamples,
       cache: cliArgs.cache,
       dist: cliArgs.dist,
@@ -159,6 +156,8 @@ export class CliDevMode {
       silent: !!cliArgs.silent,
       verbose: !!cliArgs.verbose,
       watch: cliArgs.watch,
+      pluginPaths: config.plugins.additionalPluginPaths,
+      pluginScanDirs: config.plugins.pluginSearchPaths,
     });
   }
 

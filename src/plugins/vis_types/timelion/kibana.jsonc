@@ -1,0 +1,27 @@
+{
+  "type": "plugin",
+  "id": "@kbn/vis-type-timelion-plugin",
+  "owner": "@elastic/kibana-visualizations",
+  "description": "Registers the timelion visualization. Also contains the backend for both timelion app and timelion visualization.",
+  "plugin": {
+    "id": "visTypeTimelion",
+    "server": true,
+    "browser": true,
+    "requiredPlugins": [
+      "visualizations",
+      "data",
+      "expressions",
+      "charts",
+      "dataViews",
+      "fieldFormats"
+    ],
+    "optionalPlugins": [
+      "usageCollection"
+    ],
+    "requiredBundles": [
+      "kibanaUtils",
+      "kibanaReact",
+      "visDefaultEditor"
+    ]
+  }
+}

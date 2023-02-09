@@ -1,0 +1,13 @@
+{
+  "type": "plugin",
+  "id": "@kbn/task-manager-performance-plugin",
+  "owner": "@elastic/response-ops",
+  "plugin": {
+    "id": "taskManagerPerformance",
+    "server": true,
+    "browser": false,
+    "requiredPlugins": [
+      "taskManager"
+    ]
+  }
+}

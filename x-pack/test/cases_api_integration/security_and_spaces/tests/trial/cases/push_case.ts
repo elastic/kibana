@@ -11,6 +11,7 @@ import http from 'http';
 
 import expect from '@kbn/expect';
 import { CaseConnector, CaseStatuses, CommentType, User } from '@kbn/cases-plugin/common/api';
+import { RecordingServiceNowSimulator } from '@kbn/actions-simulators-plugin/server/servicenow_simulation';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import { ObjectRemover as ActionsRemover } from '../../../../../alerting_api_integration/common/lib';
 
@@ -59,7 +60,6 @@ import {
   secOnlyRead,
   superUser,
 } from '../../../../common/lib/authentication/users';
-import { RecordingServiceNowSimulator } from '../../../../../alerting_api_integration/common/plugins/actions_simulators/server/servicenow_simulation';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {

@@ -19,7 +19,6 @@
     "@kbn/dev-cli-errors",
     "@kbn/repo-info",
     "@kbn/tooling-log",
-    "@kbn/plugin-discovery",
     "@kbn/ci-stats-reporter",
     "@kbn/jest-serializers",
     "@kbn/i18n",
@@ -36,5 +35,9 @@
     "@kbn/ts-projects",
     "@kbn/repo-packages",
     "@kbn/config-schema",
+    "@kbn/picomatcher",
+    "@kbn/repo-file-maps",
+    "@kbn/get-repo-files",
+    "@kbn/import-locator",
   ]
 }

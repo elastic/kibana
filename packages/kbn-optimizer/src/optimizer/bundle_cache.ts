@@ -12,7 +12,7 @@ import * as Rx from 'rxjs';
 import { mergeAll } from 'rxjs/operators';
 import { dllManifestPath } from '@kbn/ui-shared-deps-npm';
 
-import { Bundle, BundleRefs, Hashes, parseDllManifest } from '../common';
+import { Bundle, BundleRemotes, Hashes, parseDllManifest } from '../common';
 
 import { OptimizerConfig } from './optimizer_config';
 import { diffCacheKey } from './diff_cache_key';
@@ -46,7 +46,7 @@ export function getBundleCacheEvent$(
   return Rx.defer(async () => {
     const events: BundleCacheEvent[] = [];
     const eligibleBundles: Bundle[] = [];
-    const bundleRefs = BundleRefs.fromBundles(config.bundles);
+    const bundleRemotes = BundleRemotes.fromBundles(config.bundles);
 
     for (const bundle of config.filteredBundles) {
       if (!config.cache) {
@@ -88,8 +88,8 @@ export function getBundleCacheEvent$(
         continue;
       }
 
-      const bundleRefExportIds = bundle.cache.getBundleRefExportIds();
-      if (!bundleRefExportIds) {
+      const remoteBundleImportReqs = bundle.cache.getRemoteBundleImportReqs();
+      if (!remoteBundleImportReqs) {
         events.push({
           type: 'bundle not cached',
           reason: 'bundle references missing',
@@ -98,16 +98,15 @@ export function getBundleCacheEvent$(
         continue;
       }
 
-      const refs = bundleRefs.filterByExportIds(bundleRefExportIds);
-      const bundleRefsDiff = diffCacheKey(
-        refs.map((r) => r.exportId).sort((a, b) => a.localeCompare(b)),
-        bundleRefExportIds
-      );
-      if (bundleRefsDiff) {
+      const validRemoteBundleImportReqs = bundleRemotes
+        .unionImportReqs(remoteBundleImportReqs)
+        .sort((a, b) => a.localeCompare(b));
+      const bundleRemotesDiff = diffCacheKey(validRemoteBundleImportReqs, remoteBundleImportReqs);
+      if (bundleRemotesDiff) {
         events.push({
           type: 'bundle not cached',
           reason: 'bundle references outdated',
-          diff: bundleRefsDiff,
+          diff: bundleRemotesDiff,
           bundle,
         });
         continue;

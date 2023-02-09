@@ -12,7 +12,6 @@
   ],
   "kbn_references": [
     "@kbn/dev-cli-runner",
-    "@kbn/dev-cli-errors",
     "@kbn/import-resolver",
     "@kbn/repo-source-classifier",
     "@kbn/get-repo-files",

@@ -1,9 +1,9 @@
 {
   "author": "Elastic",
-  "name": "osquery",
-  "version": "8.0.0",
+  "name": "@kbn/osquery-plugin",
+  "version": "1.0.0",
   "private": true,
-  "license": "Elastic-License",
+  "license": "Elastic License 2.0",
   "scripts": {
     "cypress:open": "../../../node_modules/.bin/cypress open --config-file ./cypress.config.ts",
     "cypress:open-as-ci": "node ../../../scripts/functional_tests --config ../../test/osquery_cypress/visual_config.ts",

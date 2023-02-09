@@ -17,7 +17,7 @@ import {
   WorkerMsg,
   isWorkerMsg,
   WorkerMsgs,
-  BundleRefs,
+  BundleRemotes,
 } from '../common';
 
 import { runCompilers } from './run_compilers';
@@ -96,7 +96,7 @@ Rx.defer(() => {
 
       const workerConfig = parseWorkerConfig(msg.args[0]);
       const bundles = parseBundles(msg.args[1]);
-      const bundleRefs = BundleRefs.parseSpec(msg.args[2]);
+      const bundleRefs = BundleRemotes.parseSpec(msg.args[2]);
 
       // set BROWSERSLIST_ENV so that style/babel loaders see it before running compilers
       process.env.BROWSERSLIST_ENV = workerConfig.browserslistEnv;

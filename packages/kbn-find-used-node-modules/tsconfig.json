@@ -13,6 +13,8 @@
   "kbn_references": [
     "@kbn/import-resolver",
     "@kbn/babel-preset",
+    "@kbn/import-locator",
+    "@kbn/repo-info",
   ],
   "exclude": [
     "target/**/*",

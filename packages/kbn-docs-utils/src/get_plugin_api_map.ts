@@ -37,14 +37,8 @@ export function getPluginApiMap(
   const pluginApiMap: { [key: string]: PluginApi } = {};
   plugins.forEach((plugin) => {
     const captureReferences =
-      collectReferences && (!pluginFilter || pluginFilter.indexOf(plugin.manifest.id) >= 0);
-    pluginApiMap[plugin.manifest.id] = getPluginApi(
-      project,
-      plugin,
-      plugins,
-      log,
-      captureReferences
-    );
+      collectReferences && (!pluginFilter || pluginFilter.indexOf(plugin.id) >= 0);
+    pluginApiMap[plugin.id] = getPluginApi(project, plugin, plugins, log, captureReferences);
   });
 
   // Mapping of plugin id to the missing source API id to all the plugin API items that referenced this item.
@@ -54,7 +48,7 @@ export function getPluginApiMap(
   const adoptionTrackedAPIs: AdoptionTrackedAPIsByPlugin = {};
 
   plugins.forEach((plugin) => {
-    const id = plugin.manifest.id;
+    const id = plugin.id;
     const pluginApi = pluginApiMap[id];
     removeBrokenLinks(pluginApi, missingApiItems, pluginApiMap, log);
     collectDeprecations(pluginApi, referencedDeprecations, unreferencedDeprecations);

@@ -13,16 +13,14 @@ import Fsp from 'fs/promises';
 import { REPO_ROOT } from '../../lib/paths.mjs';
 
 /**
- * @param {string[]} tsconfigPaths
+ * @param {string[]} tsConfigRepoRels
  * @param {import('@kbn/some-dev-log').SomeDevLog} log
  */
-export async function regenerateTsconfigPaths(tsconfigPaths, log) {
+export async function regenerateTsconfigPaths(tsConfigRepoRels, log) {
   const path = Path.resolve(REPO_ROOT, 'packages/kbn-ts-projects/config-paths.json');
   const existingContent = Fs.existsSync(path) ? await Fsp.readFile(path, 'utf8') : undefined;
 
-  const entries = [...tsconfigPaths]
-    .map((abs) => Path.relative(REPO_ROOT, abs))
-    .sort((a, b) => a.localeCompare(b));
+  const entries = Array.from(tsConfigRepoRels).sort((a, b) => a.localeCompare(b));
 
   const content = JSON.stringify(entries, null, 2);
   if (content !== existingContent) {

@@ -1,0 +1,26 @@
+{
+  "type": "plugin",
+  "id": "@kbn/ui-actions-enhanced-plugin",
+  "owner": "@elastic/appex-sharedux",
+  "description": "Extends UI Actions plugin with more functionality",
+  "plugin": {
+    "id": "uiActionsEnhanced",
+    "server": true,
+    "browser": true,
+    "configPath": [
+      "src",
+      "ui_actions_enhanced"
+    ],
+    "requiredPlugins": [
+      "embeddable",
+      "uiActions"
+    ],
+    "optionalPlugins": [
+      "licensing"
+    ],
+    "requiredBundles": [
+      "kibanaUtils",
+      "kibanaReact"
+    ]
+  }
+}

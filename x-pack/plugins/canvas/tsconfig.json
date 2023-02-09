@@ -76,6 +76,7 @@
     "@kbn/storybook",
     "@kbn/core-apps-server-internal",
     "@kbn/flot-charts",
+    "@kbn/babel-register",
   ],
   "exclude": [
     "target/**/*",
