@@ -17,7 +17,6 @@ import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { getAlertDetailsUrl } from '@kbn/infra-plugin/server/lib/alerting/common/utils';
 import { addSpaceIdToPath } from '@kbn/spaces-plugin/common';
 
-import { i18n } from '@kbn/i18n';
 import {
   ENVIRONMENT_NOT_DEFINED,
   getEnvironmentEsField,
