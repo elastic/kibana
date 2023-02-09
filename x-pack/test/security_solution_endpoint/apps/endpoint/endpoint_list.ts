@@ -124,7 +124,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       describe('for the search bar', () => {
         let adminSearchBar: WebElementWrapper;
-        let querySubmitButton:WebElementWrapper;
+        let querySubmitButton: WebElementWrapper;
         beforeEach(async () => {
           await pageObjects.endpoint.waitForTableToHaveData('endpointListTable', 60000);
           adminSearchBar = await testSubjects.find('adminSearchBar');
@@ -183,7 +183,11 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       describe('when the hostname is clicked on,', () => {
         before(async () => {
-          await pageObjects.endpoint.waitForTableToHaveNumberOfEntries('endpointListTable', 3, 90000);
+          await pageObjects.endpoint.waitForTableToHaveNumberOfEntries(
+            'endpointListTable',
+            3,
+            90000
+          );
         });
         it('display the details flyout', async () => {
           await (await testSubjects.find('hostnameCellLink')).click();
