@@ -5,8 +5,15 @@
  * 2.0.
  */
 
-import { EuiSpacer, EuiFlexGroup, EuiFlexItem, EuiButton } from '@elastic/eui';
-import React from 'react';
+import {
+  EuiSpacer,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiButton,
+  EuiCallOut,
+  EuiText,
+} from '@elastic/eui';
+import React, { useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { isString } from 'lodash';
 import { EuiButtonEmpty } from '@elastic/eui';
@@ -20,6 +27,8 @@ import { FormRowSelect } from './form_row_select';
 import { LegacyAPMLink } from '../../../../../shared/links/apm/apm_link';
 import { FormRowSuggestionsSelect } from './form_row_suggestions_select';
 import { SERVICE_NAME } from '../../../../../../../common/es_fields/apm';
+import { FormattedMessage } from '@kbn/i18n-react';
+
 interface Props {
   newConfig: AgentConfigurationIntake;
   setNewConfig: React.Dispatch<React.SetStateAction<AgentConfigurationIntake>>;
@@ -27,6 +36,8 @@ interface Props {
 }
 
 export function ServicePage({ newConfig, setNewConfig, onClickNext }: Props) {
+  const [isAgentConfigurationSupported, setIsAgentConfigurationSupported] =
+    useState<boolean>(true);
   const { data: environmentsData, status: environmentsStatus } = useFetcher(
     (callApmApi) => {
       if (newConfig.service.name) {
@@ -81,6 +92,12 @@ export function ServicePage({ newConfig, setNewConfig, onClickNext }: Props) {
     })
   );
 
+  useEffect(() => {
+    setIsAgentConfigurationSupported(
+      !newConfig.agent_name?.startsWith('opentelemetry/')
+    );
+  }, [newConfig.agent_name]);
+
   return (
     <>
       {/* Service name options */}
@@ -106,7 +123,29 @@ export function ServicePage({ newConfig, setNewConfig, onClickNext }: Props) {
           }));
         }}
         dataTestSubj="serviceNameComboBox"
+        isInvalid={!isAgentConfigurationSupported}
       />
+      {!isAgentConfigurationSupported && (
+        <EuiCallOut
+          title={i18n.translate(
+            'xpack.apm.settings.agentConfiguration.otel.error.calloutTitle',
+            {
+              defaultMessage:
+                'Services with OpenTelemetry Agents are not supported',
+            }
+          )}
+          color="danger"
+          iconType="alert"
+        >
+          <EuiText size="s">
+            <FormattedMessage
+              defaultMessage="Selected service uses an OpenTelemetry agent. OpenTelemetry agents
+            are currently not supported by the agent configuration service."
+              id="xpack.apm.settings.agentConfiguration.otel.error.calloutDescription"
+            />
+          </EuiText>
+        </EuiCallOut>
+      )}
       {/* Environment options */}
       <FormRowSelect
         title={i18n.translate(
@@ -162,7 +201,8 @@ export function ServicePage({ newConfig, setNewConfig, onClickNext }: Props) {
             isDisabled={
               !newConfig.service.name ||
               !newConfig.service.environment ||
-              agentNameStatus === FETCH_STATUS.LOADING
+              agentNameStatus === FETCH_STATUS.LOADING ||
+              !isAgentConfigurationSupported
             }
           >
             {i18n.translate(

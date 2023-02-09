@@ -23,6 +23,7 @@ interface Props {
   allowAll?: boolean;
   onChange: (value?: string) => void;
   dataTestSubj?: string;
+  isInvalid?: boolean;
 }
 
 export function FormRowSuggestionsSelect({
@@ -34,6 +35,7 @@ export function FormRowSuggestionsSelect({
   allowAll = true,
   onChange,
   dataTestSubj,
+  isInvalid,
 }: Props) {
   return (
     <EuiDescribedFormGroup
@@ -55,6 +57,7 @@ export function FormRowSuggestionsSelect({
           dataTestSubj={dataTestSubj}
           start={moment().subtract(24, 'h').toISOString()}
           end={moment().toISOString()}
+          isInvalid={isInvalid}
         />
       </EuiFormRow>
     </EuiDescribedFormGroup>
