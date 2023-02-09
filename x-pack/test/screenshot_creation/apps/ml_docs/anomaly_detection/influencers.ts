@@ -41,9 +41,6 @@ export default function ({ getService }: FtrProviderContext) {
     query: { bool: { must: [{ match_all: {} }] } },
   };
 
-  const cellSize = 15;
-  const viewBySwimLaneTestSubj = 'mlAnomalyExplorerSwimlaneViewBy';
-
   describe('population analysis', function () {
     before(async () => {
       await ml.api.createAndRunAnomalyDetectionLookbackJob(
@@ -58,22 +55,6 @@ export default function ({ getService }: FtrProviderContext) {
       await ml.api.cleanMlIndices();
     });
 
-    it('wizard screenshot', async () => {
-      await ml.testExecution.logTestStep('navigate to job list');
-      await ml.navigation.navigateToMl();
-      await ml.navigation.navigateToJobManagement();
-
-      await ml.testExecution.logTestStep('open job in wizard');
-      await ml.jobTable.filterWithSearchString(populationJobConfig.job_id, 1);
-      await ml.jobTable.clickCloneJobAction(populationJobConfig.job_id);
-      await ml.jobTypeSelection.assertPopulationJobWizardOpen();
-
-      await ml.testExecution.logTestStep('continue to the pick fields step and take screenshot');
-      await ml.jobWizardCommon.advanceToPickFieldsSection();
-      await commonScreenshots.removeFocusFromElement();
-      await commonScreenshots.takeScreenshot('ml-population-job', screenshotDirectories);
-    });
-
     it('anomaly explorer screenshots', async () => {
       await ml.testExecution.logTestStep('navigate to job list');
       await ml.navigation.navigateToMl();
@@ -84,28 +65,7 @@ export default function ({ getService }: FtrProviderContext) {
       await ml.jobTable.filterWithSearchString(populationJobConfig.job_id, 1);
       await ml.jobTable.clickOpenJobInAnomalyExplorerButton(populationJobConfig.job_id);
       await ml.commonUI.waitForMlLoadingIndicatorToDisappear();
-      await commonScreenshots.takeScreenshot('ml-population-results', screenshotDirectories);
-      await ml.testExecution.logTestStep(
-        'select swim lane tile, expand anomaly row and take screenshot'
-      );
-      const cells = await ml.swimLane.getCells(viewBySwimLaneTestSubj);
-      const sampleCell = cells[0];
-      await ml.swimLane.selectSingleCell(viewBySwimLaneTestSubj, {
-        x: sampleCell.x + cellSize,
-        y: sampleCell.y + cellSize,
-      });
-      await ml.swimLane.waitForSwimLanesToLoad();
-
-      await ml.anomalyExplorer.scrollChartsContainerIntoView();
-      await ml.anomaliesTable.ensureDetailsOpen(0);
-      await ml.anomaliesTable.scrollRowIntoView(0);
-      await ml.testExecution.logTestStep('take screenshot');
-      await commonScreenshots.takeScreenshot(
-        'ml-population-anomaly',
-        screenshotDirectories,
-        1500,
-        1300
-      );
+      await commonScreenshots.takeScreenshot('influencers', screenshotDirectories);
     });
   });
 }
