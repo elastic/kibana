@@ -125,7 +125,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       describe('for the search bar', () => {
         let adminSearchBar: WebElementWrapper;
         before(async () => {
-          waitForTableToHaveData('endpointListTable', 60000);
+          await pageObjects.endpoint.waitForTableToHaveData('endpointListTable', 60000);
           adminSearchBar = await testSubjects.find('adminSearchBar');
         });
         afterEach(async () => {
