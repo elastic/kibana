@@ -7,8 +7,6 @@
 
 import type { SecurityAppStore } from '../../../common/store/types';
 import { KibanaServices } from '../../../common/lib/kibana';
-import { APP_UI_ID } from '../../../../common/constants';
-import { Subject } from 'rxjs';
 import { TableId } from '../../../../common/types';
 import { createToggleColumnAction } from './toggle_column';
 
@@ -17,8 +15,7 @@ import { mockGlobalState } from '../../../common/mock';
 import { dataTableActions } from '../../../common/store/data_table';
 
 jest.mock('../../../common/lib/kibana');
-const currentAppId$ = new Subject<string | undefined>();
-KibanaServices.get().application.currentAppId$ = currentAppId$.asObservable();
+
 const mockWarningToast = jest.fn();
 KibanaServices.get().notifications.toasts.addWarning = mockWarningToast;
 
@@ -42,7 +39,6 @@ describe('Default createToggleColumnAction', () => {
   const toggleColumnAction = createToggleColumnAction({ store, order: 1 });
 
   beforeEach(() => {
-    currentAppId$.next(APP_UI_ID);
     jest.clearAllMocks();
   });
 
@@ -55,11 +51,6 @@ describe('Default createToggleColumnAction', () => {
   });
 
   describe('isCompatible', () => {
-    it('should return false if not in Security', async () => {
-      currentAppId$.next('not security');
-      expect(await toggleColumnAction.isCompatible(context)).toEqual(false);
-    });
-
     it('should return false if scopeId is undefined', async () => {
       expect(
         await toggleColumnAction.isCompatible({ ...context, metadata: { scopeId: undefined } })
