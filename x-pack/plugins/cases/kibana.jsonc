@@ -1,0 +1,42 @@
+{
+  "type": "plugin",
+  "id": "@kbn/cases-plugin",
+  "owner": "@elastic/response-ops",
+  "description": "The Case management system in Kibana",
+  "plugin": {
+    "id": "cases",
+    "server": true,
+    "browser": true,
+    "configPath": [
+      "xpack",
+      "cases"
+    ],
+    "requiredPlugins": [
+      "actions",
+      "data",
+      "embeddable",
+      "esUiShared",
+      "lens",
+      "licensing",
+      "features",
+      "kibanaReact",
+      "kibanaUtils",
+      "triggersActionsUi",
+      "management",
+      "spaces",
+      "security",
+      "notifications"
+    ],
+    "optionalPlugins": [
+      "home",
+      "taskManager",
+      "usageCollection"
+    ],
+    "requiredBundles": [
+      "savedObjects"
+    ],
+    "extraPublicDirs": [
+      "common"
+    ]
+  }
+}

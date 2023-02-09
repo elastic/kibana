@@ -282,6 +282,7 @@ const EmbeddableMessagesPopover = ({ messages }: { messages: UserMessage[] }) =>
   return (
     <MessageList
       messages={messages}
+      useSmallIconsOnButton={true}
       customButtonStyles={css`
         block-size: ${euiTheme.size.l};
         border-radius: 0 ${euiTheme.border.radius.medium} 0 ${euiTheme.border.radius.small};

@@ -20,11 +20,9 @@ import { act } from 'react-dom/test-utils';
 import { EuiFieldText } from '@elastic/eui';
 import { I18nProvider, __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { render, waitFor, screen } from '@testing-library/react';
-import {
-  DEFAULT_FREQUENCY_WITHOUT_SUMMARY,
-  DEFAULT_FREQUENCY_WITH_SUMMARY,
-} from '../../../common/constants';
+import { DEFAULT_FREQUENCY } from '../../../common/constants';
 import { transformActionVariables } from '../../lib/action_variables';
+import { RuleNotifyWhen } from '@kbn/alerting-plugin/common';
 
 jest.mock('../../../common/lib/kibana');
 const actionTypeRegistry = actionTypeRegistryMock.create();
@@ -312,7 +310,7 @@ describe('action_type_form', () => {
       actionTypeId: '.pagerduty',
       group: 'default',
       params: {},
-      frequency: DEFAULT_FREQUENCY_WITHOUT_SUMMARY,
+      frequency: DEFAULT_FREQUENCY,
     };
     const wrapper = render(
       <IntlProvider locale="en">
@@ -320,7 +318,11 @@ describe('action_type_form', () => {
           index: 1,
           actionItem,
           setActionFrequencyProperty: () => {
-            actionItem.frequency = DEFAULT_FREQUENCY_WITH_SUMMARY;
+            actionItem.frequency = {
+              notifyWhen: RuleNotifyWhen.ACTIVE,
+              throttle: null,
+              summary: true,
+            };
           },
         })}
       </IntlProvider>
