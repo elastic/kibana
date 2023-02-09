@@ -84,6 +84,7 @@ export function FieldInput({ field, dataView, onHandleField }: FieldInputProps) 
         placeholder={strings.getFieldSelectPlaceholderLabel()}
         sortMatchesBy="startsWith"
         singleSelection={{ asPlainText: true }}
+        aria-label={strings.getFieldSelectPlaceholderLabel()}
         isClearable={false}
         compressed
         fullWidth

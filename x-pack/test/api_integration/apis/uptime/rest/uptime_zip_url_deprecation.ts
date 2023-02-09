@@ -65,7 +65,9 @@ export default function (providerContext: FtrProviderContext) {
     ],
   });
 
-  describe('UptimeZipUrlDeprecation', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/150565
+  // Failing: See https://github.com/elastic/kibana/issues/150566
+  describe.skip('UptimeZipUrlDeprecation', () => {
     let agentPolicyId: string;
 
     before(async function () {
