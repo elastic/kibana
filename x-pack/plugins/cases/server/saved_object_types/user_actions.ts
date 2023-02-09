@@ -60,6 +60,12 @@ export const createCaseUserActionSavedObjectType = (
               persistableStateAttachmentTypeId: { type: 'keyword' },
             },
           },
+          assignees: {
+            properties: {
+              // assignees.uid
+              uid: { type: 'keyword' },
+            },
+          },
         },
       },
       owner: {

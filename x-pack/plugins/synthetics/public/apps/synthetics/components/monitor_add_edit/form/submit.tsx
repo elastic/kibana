@@ -12,19 +12,23 @@ import { i18n } from '@kbn/i18n';
 import { useFormContext } from 'react-hook-form';
 import { FETCH_STATUS } from '@kbn/observability-plugin/public';
 import { RunTestButton } from './run_test_btn';
+import { useCanEditSynthetics } from '../../../../../hooks/use_capabilities';
+import { useFleetPermissions } from '../../../hooks';
 import { useMonitorSave } from '../hooks/use_monitor_save';
+import { NoPermissionsTooltip } from '../../common/components/permissions';
 import { DeleteMonitor } from '../../monitors_page/management/monitor_list_table/delete_monitor';
-import { ConfigKey, SourceType, SyntheticsMonitor } from '../types';
+import { ConfigKey, ServiceLocation, SourceType, SyntheticsMonitor } from '../types';
 import { format } from './formatter';
 
 import { MONITORS_ROUTE } from '../../../../../../common/constants';
 
-export const ActionBar = () => {
+export const ActionBar = ({ readOnly = false }: { readOnly: boolean }) => {
   const { monitorId } = useParams<{ monitorId: string }>();
   const history = useHistory();
   const {
     handleSubmit,
     formState: { errors, defaultValues },
+    getValues,
   } = useFormContext();
 
   const [monitorPendingDeletion, setMonitorPendingDeletion] = useState<SyntheticsMonitor | null>(
@@ -35,9 +39,16 @@ export const ActionBar = () => {
 
   const { status, loading, isEdit } = useMonitorSave({ monitorData });
 
+  const canEditSynthetics = useCanEditSynthetics();
+  const { canSaveIntegrations } = useFleetPermissions();
+  const hasAnyPrivateLocationSelected = getValues(ConfigKey.LOCATIONS)?.some(
+    ({ isServiceManaged }: ServiceLocation) => !isServiceManaged
+  );
+  const canSavePrivateLocation = !hasAnyPrivateLocationSelected || canSaveIntegrations;
+
   const formSubmitter = (formData: Record<string, any>) => {
     if (!Object.keys(errors).length) {
-      setMonitorData(format(formData));
+      setMonitorData(format(formData, readOnly));
     }
   };
 
@@ -68,15 +79,21 @@ export const ActionBar = () => {
           <RunTestButton />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiButton
-            fill
-            isLoading={loading}
-            iconType="plusInCircleFilled"
-            onClick={handleSubmit(formSubmitter)}
-            data-test-subj="syntheticsMonitorConfigSubmitButton"
+          <NoPermissionsTooltip
+            canEditSynthetics={canEditSynthetics}
+            canAddPrivateMonitor={isEdit || canSavePrivateLocation}
+            canUpdatePrivateMonitor={!isEdit || canSavePrivateLocation}
           >
-            {isEdit ? UPDATE_MONITOR_LABEL : CREATE_MONITOR_LABEL}
-          </EuiButton>
+            <EuiButton
+              fill
+              isLoading={loading}
+              onClick={handleSubmit(formSubmitter)}
+              data-test-subj="syntheticsMonitorConfigSubmitButton"
+              disabled={!canEditSynthetics || !canSavePrivateLocation}
+            >
+              {isEdit ? UPDATE_MONITOR_LABEL : CREATE_MONITOR_LABEL}
+            </EuiButton>
+          </NoPermissionsTooltip>
         </EuiFlexItem>
       </EuiFlexGroup>
       {monitorPendingDeletion && (

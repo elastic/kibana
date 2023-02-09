@@ -76,7 +76,7 @@ export const TestRunDetails = () => {
             <EuiSpacer size="m" />
             <StepScreenshotDetails stepIndex={stepIndex} step={step} stateId={stateId} />
             <EuiSpacer size="m" />
-            <StepTabs stepsData={stepsData} step={step} loading={stepsLoading} />
+            <StepTabs stepsList={stepsData.steps} step={step} loading={stepsLoading} />
           </EuiPanel>
           <EuiSpacer size="m" />
           <TestRunSteps isLoading={stepsLoading} steps={stepsData?.steps ?? []} />

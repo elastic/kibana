@@ -191,9 +191,9 @@ export const CASE_COMMENT_EXTERNAL_REFERENCE = `[data-test-subj="comment-externa
 
 export const CASE_ACTION_WRAPPER = `[data-test-subj="case-action-bar-wrapper"]`;
 
-export const CASE_ELLIPSE_BUTTON = `[data-test-subj="property-actions-ellipses"]`;
+export const CASE_ELLIPSE_BUTTON = `[data-test-subj="property-actions-case-ellipses"]`;
 
-export const CASE_ELLIPSE_DELETE_CASE_OPTION = `[data-test-subj="property-actions-trash"]`;
+export const CASE_ELLIPSE_DELETE_CASE_OPTION = `[data-test-subj="property-actions-case-trash"]`;
 
 export const CASE_ELLIPSE_DELETE_CASE_CONFIRMATION_BUTTON = `[data-test-subj="confirmModalConfirmButton"]`;
 

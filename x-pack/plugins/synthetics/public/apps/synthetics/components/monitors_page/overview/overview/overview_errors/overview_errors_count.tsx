@@ -15,11 +15,11 @@ interface MonitorErrorsCountProps {
   from: string;
   to: string;
   locationLabel?: string;
-  monitorId: string[];
+  monitorIds: string[];
 }
 
 export const OverviewErrorsCount = ({
-  monitorId,
+  monitorIds,
   from,
   to,
   locationLabel,
@@ -39,7 +39,7 @@ export const OverviewErrorsCount = ({
         {
           time,
           reportDefinitions: {
-            'monitor.id': monitorId,
+            'monitor.id': monitorIds.length > 0 ? monitorIds : ['false-monitor-id'],
             ...(locationLabel ? { 'observer.geo.name': [locationLabel] } : {}),
           },
           dataType: 'synthetics',

@@ -11,7 +11,7 @@ import { uniq, xorBy } from 'lodash';
 import type { CustomIntegration } from '@kbn/custom-integrations-plugin/common';
 
 import type { IntegrationPreferenceType } from '../../../components/integration_preference';
-import { usePackages, useCategories } from '../../../../../hooks';
+import { useGetPackagesQuery, useGetCategoriesQuery } from '../../../../../hooks';
 import {
   useGetAppendCustomIntegrations,
   useGetReplacementCustomIntegrations,
@@ -130,7 +130,7 @@ export const useAvailablePackages = () => {
     data: eprPackages,
     isLoading: isLoadingAllPackages,
     error: eprPackageLoadingError,
-  } = usePackages(prereleaseIntegrationsEnabled);
+  } = useGetPackagesQuery({ prerelease: prereleaseIntegrationsEnabled });
 
   // Remove Kubernetes package granularity
   if (eprPackages?.items) {
@@ -182,22 +182,23 @@ export const useAvailablePackages = () => {
   );
 
   const {
-    data: eprCategories,
+    data: eprCategoriesRes,
     isLoading: isLoadingCategories,
     error: eprCategoryLoadingError,
-  } = useCategories(prereleaseIntegrationsEnabled);
+  } = useGetCategoriesQuery({ prerelease: prereleaseIntegrationsEnabled });
 
+  const eprCategories = useMemo(() => eprCategoriesRes?.items || [], [eprCategoriesRes]);
   // Subcategories
   const subCategories = useMemo(() => {
-    return eprCategories?.items.filter((item) => item.parent_id !== undefined);
-  }, [eprCategories?.items]);
+    return eprCategories?.filter((item) => item.parent_id !== undefined);
+  }, [eprCategories]);
 
   const allCategories: CategoryFacet[] = useMemo(() => {
     const eprAndCustomCategories: CategoryFacet[] = isLoadingCategories
       ? []
       : mergeCategoriesAndCount(
           eprCategories
-            ? (eprCategories.items as Array<{ id: string; title: string; count: number }>)
+            ? (eprCategories as Array<{ id: string; title: string; count: number }>)
             : [],
           cards
         );

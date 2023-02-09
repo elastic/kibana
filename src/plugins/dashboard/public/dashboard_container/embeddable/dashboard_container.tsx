@@ -96,7 +96,7 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
   public controlGroup?: ControlGroupContainer;
 
   // Dashboard State
-  private onDestroyControlGroup?: () => void;
+  public onDestroyControlGroup?: () => void;
   private subscriptions: Subscription = new Subscription();
 
   private initialized$: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
@@ -416,6 +416,8 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
       ReactDOM.unmountComponentAtNode(this.domNode);
     }
     this.domNode = dom;
+
+    this.domNode.className = 'dashboardContainer';
 
     const { Wrapper: DashboardReduxWrapper } = this.reduxEmbeddableTools;
     ReactDOM.render(
