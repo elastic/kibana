@@ -9,7 +9,8 @@
 import * as Either from 'fp-ts/lib/Either';
 import * as Option from 'fp-ts/lib/Option';
 
-import { type AliasAction, isTypeof } from '../actions';
+import { isTypeof } from '../actions';
+import type { AliasAction } from '../actions';
 import type { AllActionStates, State } from '../state';
 import type { ResponseType } from '../next';
 import {
@@ -769,10 +770,8 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
         (stateP.corruptDocumentIds.length === 0 && stateP.transformErrors.length === 0) ||
         stateP.discardCorruptObjects
       ) {
-        const processedDocs = Either.isRight(res)
-          ? res.right.processedDocs
-          : res.left.processedDocs;
-        const batches = createBatches(processedDocs, stateP.tempIndex, stateP.maxBatchSizeBytes);
+        const documents = Either.isRight(res) ? res.right.processedDocs : res.left.processedDocs;
+        const batches = createBatches({ documents, maxBatchSizeBytes: stateP.maxBatchSizeBytes });
         if (Either.isRight(batches)) {
           let corruptDocumentIds = stateP.corruptDocumentIds;
           let transformErrors = stateP.transformErrors;
@@ -787,7 +786,7 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
             corruptDocumentIds,
             transformErrors,
             controlState: 'REINDEX_SOURCE_TO_TEMP_INDEX_BULK', // handles the actual bulk indexing into temp index
-            transformedDocBatches: batches.right,
+            bulkOperationBatches: batches.right,
             currentBatch: 0,
             progress,
           };
@@ -796,7 +795,7 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
             ...stateP,
             controlState: 'FATAL',
             reason: fatalReasonDocumentExceedsMaxBatchSizeBytes({
-              _id: batches.left.document._id,
+              _id: batches.left.documentId,
               docSizeBytes: batches.left.docSizeBytes,
               maxBatchSizeBytes: batches.left.maxBatchSizeBytes,
             }),
@@ -832,7 +831,7 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
   } else if (stateP.controlState === 'REINDEX_SOURCE_TO_TEMP_INDEX_BULK') {
     const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;
     if (Either.isRight(res)) {
-      if (stateP.currentBatch + 1 < stateP.transformedDocBatches.length) {
+      if (stateP.currentBatch + 1 < stateP.bulkOperationBatches.length) {
         return {
           ...stateP,
           controlState: 'REINDEX_SOURCE_TO_TEMP_INDEX_BULK',
@@ -974,25 +973,40 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
       } else {
         // we don't have any more outdated documents and need to either fail or move on to updating the target mappings.
         if (stateP.corruptDocumentIds.length > 0 || stateP.transformErrors.length > 0) {
-          const transformFailureReason = extractTransformFailuresReason(
-            stateP.migrationDocLinks.resolveMigrationFailures,
-            stateP.corruptDocumentIds,
-            stateP.transformErrors
-          );
-          return {
-            ...stateP,
-            controlState: 'FATAL',
-            reason: transformFailureReason,
-          };
-        } else {
-          // If there are no more results we have transformed all outdated
-          // documents and we didn't encounter any corrupt documents or transformation errors
-          // and can proceed to the next step
-          return {
-            ...stateP,
-            controlState: 'OUTDATED_DOCUMENTS_SEARCH_CLOSE_PIT',
-          };
+          if (!stateP.discardCorruptObjects) {
+            const transformFailureReason = extractTransformFailuresReason(
+              stateP.migrationDocLinks.resolveMigrationFailures,
+              stateP.corruptDocumentIds,
+              stateP.transformErrors
+            );
+            return {
+              ...stateP,
+              controlState: 'FATAL',
+              reason: transformFailureReason,
+            };
+          }
+
+          // at this point, users have configured kibana to discard corrupt objects
+          // thus, we can ignore corrupt documents and transform errors and proceed with the migration
+          logs = [
+            ...stateP.logs,
+            {
+              level: 'warning',
+              message: extractDiscardedCorruptDocs(
+                stateP.corruptDocumentIds,
+                stateP.transformErrors
+              ),
+            },
+          ];
         }
+
+        // If there are no more results we have transformed all outdated
+        // documents and we didn't encounter any corrupt documents or transformation errors
+        // and can proceed to the next step
+        return {
+          ...stateP,
+          controlState: 'OUTDATED_DOCUMENTS_SEARCH_CLOSE_PIT',
+        };
       }
     } else {
       throwBadResponse(stateP, res);
@@ -1004,20 +1018,36 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
     // Otherwise the progress might look off when there are errors.
     const progress = incrementProcessedProgress(stateP.progress, stateP.outdatedDocuments.length);
 
-    if (Either.isRight(res)) {
-      // we haven't seen corrupt documents or any transformation errors thus far in the migration
-      // index the migrated docs
-      if (stateP.corruptDocumentIds.length === 0 && stateP.transformErrors.length === 0) {
-        const batches = createBatches(
-          res.right.processedDocs,
-          stateP.targetIndex,
-          stateP.maxBatchSizeBytes
-        );
+    if (
+      Either.isRight(res) ||
+      (isTypeof(res.left, 'documents_transform_failed') && stateP.discardCorruptObjects)
+    ) {
+      // we might have some transformation errors, but user has chosen to discard them
+      if (
+        (stateP.corruptDocumentIds.length === 0 && stateP.transformErrors.length === 0) ||
+        stateP.discardCorruptObjects
+      ) {
+        const documents = Either.isRight(res) ? res.right.processedDocs : res.left.processedDocs;
+
+        let corruptDocumentIds = stateP.corruptDocumentIds;
+        let transformErrors = stateP.transformErrors;
+
+        if (Either.isLeft(res)) {
+          corruptDocumentIds = [...stateP.corruptDocumentIds, ...res.left.corruptDocumentIds];
+          transformErrors = [...stateP.transformErrors, ...res.left.transformErrors];
+        }
+
+        const batches = createBatches({
+          documents,
+          corruptDocumentIds,
+          transformErrors,
+          maxBatchSizeBytes: stateP.maxBatchSizeBytes,
+        });
         if (Either.isRight(batches)) {
           return {
             ...stateP,
             controlState: 'TRANSFORMED_DOCUMENTS_BULK_INDEX',
-            transformedDocBatches: batches.right,
+            bulkOperationBatches: batches.right,
             currentBatch: 0,
             hasTransformedDocs: true,
             progress,
@@ -1027,7 +1057,7 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
             ...stateP,
             controlState: 'FATAL',
             reason: fatalReasonDocumentExceedsMaxBatchSizeBytes({
-              _id: batches.left.document._id,
+              _id: batches.left.documentId,
               docSizeBytes: batches.left.docSizeBytes,
               maxBatchSizeBytes: batches.left.maxBatchSizeBytes,
             }),
@@ -1060,7 +1090,7 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
   } else if (stateP.controlState === 'TRANSFORMED_DOCUMENTS_BULK_INDEX') {
     const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;
     if (Either.isRight(res)) {
-      if (stateP.currentBatch + 1 < stateP.transformedDocBatches.length) {
+      if (stateP.currentBatch + 1 < stateP.bulkOperationBatches.length) {
         return {
           ...stateP,
           controlState: 'TRANSFORMED_DOCUMENTS_BULK_INDEX',
