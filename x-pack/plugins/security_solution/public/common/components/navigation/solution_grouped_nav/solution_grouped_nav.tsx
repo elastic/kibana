@@ -21,6 +21,7 @@ import type { DefaultSideNavItem, SideNavItem } from './types';
 import { isCustomItem, isDefaultItem } from './types';
 import { EuiIconSpaces } from './icons/spaces';
 import type { LinkCategories } from '../../../links';
+import { METRIC_TYPE, TELEMETRY_EVENT, track } from '../../../lib/telemetry';
 
 export interface SolutionGroupedNavProps {
   items: SideNavItem[];
@@ -198,6 +199,7 @@ const SolutionNavItemComponent: React.FC<SolutionNavItemProps> = ({
   const onButtonClick: React.MouseEventHandler = (ev) => {
     ev.preventDefault();
     ev.stopPropagation();
+    track(METRIC_TYPE.CLICK, `${TELEMETRY_EVENT.GROUPED_NAVIGATION_TOGGLE}${id}`);
     onOpenPanelNav(id);
   };
 

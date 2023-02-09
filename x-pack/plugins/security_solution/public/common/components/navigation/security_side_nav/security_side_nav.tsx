@@ -23,6 +23,7 @@ import { EuiIconLaunch } from './icons/launch';
 import { useShowTimeline } from '../../../utils/timeline/use_show_timeline';
 import { useIsPolicySettingsBarVisible } from '../../../../management/pages/policy/view/policy_hooks';
 import { bottomNavOffset } from '../../../lib/helpers';
+import { METRIC_TYPE, TELEMETRY_EVENT, track } from '../../../lib/telemetry';
 
 const isFooterNavItem = (id: SecurityPageName) =>
   id === SecurityPageName.landing || id === SecurityPageName.administration;
@@ -65,7 +66,12 @@ const useFormatSideNavItem = (): FormatSideNavItems => {
       const formatDefaultItem = (navItem: NavLinkItem): DefaultSideNavItem => ({
         id: navItem.id,
         label: navItem.title,
-        ...getSecuritySolutionLinkProps({ deepLinkId: navItem.id }),
+        ...getSecuritySolutionLinkProps({
+          deepLinkId: navItem.id,
+          onClick: () => {
+            track(METRIC_TYPE.CLICK, `${TELEMETRY_EVENT.NAVIGATION}${navItem.id}`);
+          },
+        }),
         ...(navItem.categories && navItem.categories.length > 0
           ? { categories: navItem.categories }
           : {}),

@@ -32,6 +32,7 @@ import {
 import type { DefaultSideNavItem } from './types';
 import type { LinkCategories } from '../../../links/types';
 import { NavItemBetaBadge } from '../nav_item_beta_badge';
+import { METRIC_TYPE, TELEMETRY_EVENT, track } from '../../../lib/telemetry';
 
 export interface SolutionNavPanelProps {
   onClose: () => void;
@@ -172,6 +173,7 @@ const SolutionNavPanelItems: React.FC<SolutionNavPanelItemsProps> = ({ items, on
           data-test-subj={`groupedNavPanelLink-${id}`}
           href={href}
           onClick={(ev) => {
+            track(METRIC_TYPE.CLICK, `${TELEMETRY_EVENT.GROUPED_NAVIGATION}${id}`);
             onClose();
             onClick?.(ev);
           }}

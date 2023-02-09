@@ -56,4 +56,17 @@ export enum TELEMETRY_EVENT {
 
   // UI Interactions
   TAB_CLICKED = 'tab_',
+
+  // Landing pages
+  LANDING_CARD = 'landing_card_',
+  // Landing page - dashboard
+  DASHBOARD = 'navigate_to_dashboard',
+  CREATE_DASHBOARD = 'create_dashboard',
+
+  // Breadcrumbs
+  BREADCRUMB = 'breadcrumb_',
+  // Navigation
+  NAVIGATION = 'navigation_',
+  GROUPED_NAVIGATION = 'grouped_navigation_',
+  GROUPED_NAVIGATION_TOGGLE = 'grouped_navigation_toggle_',
 }

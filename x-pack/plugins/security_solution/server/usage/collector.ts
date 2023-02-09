@@ -10,6 +10,7 @@ import type { CollectorDependencies } from './types';
 import { getDetectionsMetrics } from './detections/get_metrics';
 import { getInternalSavedObjectsClient } from './get_internal_saved_objects_client';
 import { getEndpointMetrics } from './endpoint/get_metrics';
+import { getDashboardMetrics } from './dashboards/get_dashboards_metrics';
 
 export type RegisterCollector = (deps: CollectorDependencies) => void;
 
@@ -2419,6 +2420,10 @@ export const registerCollector: RegisterCollector = ({
           mlClient: ml,
         }),
         getEndpointMetrics({ esClient, logger }),
+        getDashboardMetrics({
+          savedObjectsClient,
+          logger,
+        }),
       ]);
       return {
         detectionMetrics: detectionMetrics.status === 'fulfilled' ? detectionMetrics.value : {},
