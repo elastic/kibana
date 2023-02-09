@@ -179,13 +179,14 @@ describe('GuidedOnboarding ApiService', () => {
       });
     });
 
-    it.skip('activates a guide that was previously quit', async () => {
-      httpClient.get.mockResolvedValueOnce({
+    it('activates a guide that was previously quit', async () => {
+      httpClient.get.mockResolvedValue({
+        config: testGuideConfig,
         pluginState: mockPluginStateStartedAndQuit,
       });
       apiService.setup(httpClient, true);
 
-      await apiService.activateGuideDefaultState(testGuideId);
+      await apiService.activateGuideDefaultState(testGuideId, testGuideStep1ActiveState);
 
       expect(httpClient.put).toHaveBeenCalledTimes(1);
       expect(httpClient.put).toHaveBeenCalledWith(`${API_BASE_PATH}/state`, {
