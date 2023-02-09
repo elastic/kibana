@@ -58,7 +58,7 @@ export function SloEditForm({ slo }: Props) {
   });
 
   const { isDefinitionValid, isDescriptionValid, isObjectiveValid } = useCheckFormPartialValidities(
-    { getFieldState, formState }
+    { getFieldState, formState, watch }
   );
 
   const { loading, success, error, createSlo, updateSlo } = useCreateOrUpdateSlo();
@@ -69,9 +69,7 @@ export function SloEditForm({ slo }: Props) {
       const processedValues = transformValuesToUpdateSLOInput(values);
       updateSlo(slo.id, processedValues);
     } else {
-      console.log('raw', JSON.stringify(values));
       const processedValues = transformValuesToCreateSLOInput(values);
-      console.log('processed', JSON.stringify(processedValues));
       createSlo(processedValues);
     }
   };
