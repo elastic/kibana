@@ -72,7 +72,6 @@ export const DashboardWithControlsExample = ({ dataView }: { dataView: DataView 
               });
             };
             addFilterEmbeddable();
-            return; // this example is static, so don't need to do anything with the dashboard container
           }}
         />
       </EuiPanel>
