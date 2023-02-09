@@ -191,33 +191,6 @@ describe('HoverActionsPopover', () => {
     expect(queryByLabelText('test-action-2')).toBeInTheDocument();
     expect(queryByLabelText('test-action-3')).toBeInTheDocument();
   });
-
-  it("does not render actions defined on 'disabledActions' prop", async () => {
-    const actions = [makeAction('test-action-1'), makeAction('test-action-2')];
-    const getActionsPromise = Promise.resolve(actions);
-    const getActions = () => getActionsPromise;
-
-    const { getByTestId, queryByLabelText } = render(
-      <CellActionsProvider getTriggerCompatibleActions={getActions}>
-        <HoverActionsPopover
-          disabledActions={['test-action-1']}
-          visibleCellActions={5}
-          actionContext={actionContext}
-          showActionTooltips={false}
-        >
-          <TestComponent />
-        </HoverActionsPopover>
-      </CellActionsProvider>
-    );
-
-    await hoverElement(getByTestId('test-component'), async () => {
-      await getActionsPromise;
-      jest.runAllTimers();
-    });
-
-    expect(queryByLabelText('test-action-1')).not.toBeInTheDocument();
-    expect(queryByLabelText('test-action-2')).toBeInTheDocument();
-  });
 });
 
 const hoverElement = async (element: Element, waitForChange: () => Promise<unknown>) => {

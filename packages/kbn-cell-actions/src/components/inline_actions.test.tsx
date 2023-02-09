@@ -62,31 +62,4 @@ describe('InlineActions', () => {
 
     expect(queryAllByRole('button').length).toBe(5);
   });
-
-  it("does not render actions defined on 'disabledActions' prop", async () => {
-    const getActionsPromise = Promise.resolve([
-      makeAction('action-1'),
-      makeAction('action-2'),
-      makeAction('action-3'),
-    ]);
-    const getActions = () => getActionsPromise;
-    const { queryByLabelText } = render(
-      <CellActionsProvider getTriggerCompatibleActions={getActions}>
-        <InlineActions
-          disabledActions={['action-2']}
-          visibleCellActions={5}
-          actionContext={actionContext}
-          showActionTooltips={false}
-        />
-      </CellActionsProvider>
-    );
-
-    await act(async () => {
-      await getActionsPromise;
-    });
-
-    expect(queryByLabelText('action-1')).toBeInTheDocument();
-    expect(queryByLabelText('action-2')).not.toBeInTheDocument();
-    expect(queryByLabelText('action-3')).toBeInTheDocument();
-  });
 });

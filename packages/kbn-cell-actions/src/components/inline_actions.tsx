@@ -28,12 +28,8 @@ export const InlineActions: React.FC<InlineActionsProps> = ({
   visibleCellActions,
   disabledActions,
 }) => {
-  const { value: allActions } = useLoadActions(actionContext);
-  const filteredActions = useMemo(
-    () => (allActions ?? []).filter(({ id }) => !disabledActions?.includes(id)),
-    [allActions, disabledActions]
-  );
-  const { extraActions, visibleActions } = usePartitionActions(filteredActions, visibleCellActions);
+  const { value: actions } = useLoadActions(actionContext, { disabledActions });
+  const { extraActions, visibleActions } = usePartitionActions(actions ?? [], visibleCellActions);
 
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const togglePopOver = useCallback(() => setIsPopoverOpen((isOpen) => !isOpen), []);

@@ -54,16 +54,11 @@ export const HoverActionsPopover: React.FC<Props> = ({
   const [isExtraActionsPopoverOpen, setIsExtraActionsPopoverOpen] = useState(false);
   const [showHoverContent, setShowHoverContent] = useState(false);
 
-  const [{ value: actions }, loadActions] = useLoadActionsFn();
-
-  const filteredActions = useMemo(
-    () => (actions ?? []).filter(({ id }) => !disabledActions?.includes(id)),
-    [actions, disabledActions]
-  );
+  const [{ value: actions }, loadActions] = useLoadActionsFn({ disabledActions });
 
   const { visibleActions, extraActions } = useMemo(
-    () => partitionActions(filteredActions, visibleCellActions),
-    [filteredActions, visibleCellActions]
+    () => partitionActions(actions ?? [], visibleCellActions),
+    [actions, visibleCellActions]
   );
 
   const openPopOverDebounced = useMemo(
