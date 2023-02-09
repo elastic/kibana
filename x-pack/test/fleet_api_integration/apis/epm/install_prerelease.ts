@@ -22,7 +22,8 @@ export default function (providerContext: FtrProviderContext) {
     await supertest.delete(`/api/fleet/epm/packages/${pkg}/${version}`).set('kbn-xsrf', 'xxxx');
   };
 
-  describe('installs package that has a prerelease version', async () => {
+  // Failing: See https://github.com/elastic/kibana/issues/149844
+  describe.skip('installs package that has a prerelease version', async () => {
     skipIfNoDockerRegistry(providerContext);
     setupFleetAndAgents(providerContext);
 

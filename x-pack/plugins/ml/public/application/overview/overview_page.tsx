@@ -11,7 +11,6 @@ import { i18n } from '@kbn/i18n';
 import { mlTimefilterRefresh$, useTimefilter } from '@kbn/ml-date-picker';
 import { checkPermission } from '../capabilities/check_capabilities';
 import { mlNodesAvailable } from '../ml_nodes_check';
-import { GettingStartedCallout } from './components/getting_started_callout';
 import { OverviewContent } from './components/content';
 import { NodeAvailableWarning } from '../components/node_available_warning';
 import { JobsAwaitingNodeWarning } from '../components/jobs_awaiting_node_warning';
@@ -61,8 +60,6 @@ export const OverviewPage: FC = () => {
         }}
       />
       <UpgradeWarning />
-
-      <GettingStartedCallout />
 
       {canViewMlNodes && serverless === false ? (
         <>

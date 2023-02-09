@@ -73,13 +73,14 @@ describe('ConnectorConfigurationLogic', () => {
       it('should set local config entry and sort keys', () => {
         ConnectorConfigurationLogic.actions.setConfigState({
           bar: { label: 'foo', value: 'foofoo' },
-          foo: { label: 'thirdBar', value: 'fourthBar' },
+          password: { label: 'thirdBar', value: 'fourthBar' },
         });
         ConnectorConfigurationLogic.actions.setLocalConfigState({
           bar: { label: 'foo', value: 'foofoo' },
-          foo: { label: 'thirdBar', value: 'fourthBar' },
+          password: { label: 'thirdBar', value: 'fourthBar' },
         });
         ConnectorConfigurationLogic.actions.setLocalConfigEntry({
+          isPasswordField: false,
           key: 'bar',
           label: 'foo',
           value: 'fafa',
@@ -88,19 +89,19 @@ describe('ConnectorConfigurationLogic', () => {
           ...DEFAULT_VALUES,
           configState: {
             bar: { label: 'foo', value: 'foofoo' },
-            foo: { label: 'thirdBar', value: 'fourthBar' },
+            password: { label: 'thirdBar', value: 'fourthBar' },
           },
           configView: [
             { key: 'bar', label: 'foo', value: 'foofoo' },
-            { key: 'foo', label: 'thirdBar', value: 'fourthBar' },
+            { key: 'password', label: 'thirdBar', value: 'fourthBar' },
           ],
           localConfigState: {
             bar: { label: 'foo', value: 'fafa' },
-            foo: { label: 'thirdBar', value: 'fourthBar' },
+            password: { label: 'thirdBar', value: 'fourthBar' },
           },
           localConfigView: [
-            { key: 'bar', label: 'foo', value: 'fafa' },
-            { key: 'foo', label: 'thirdBar', value: 'fourthBar' },
+            { isPasswordField: false, key: 'bar', label: 'foo', value: 'fafa' },
+            { isPasswordField: true, key: 'password', label: 'thirdBar', value: 'fourthBar' },
           ],
         });
       });
@@ -140,7 +141,7 @@ describe('ConnectorConfigurationLogic', () => {
           },
           isEditing: true,
           localConfigState: connectorIndex.connector.configuration,
-          localConfigView: [{ key: 'foo', label: 'bar', value: 'barbar' }],
+          localConfigView: [{ isPasswordField: false, key: 'foo', label: 'bar', value: 'barbar' }],
           shouldStartInEditMode: true,
         });
       });
