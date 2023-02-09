@@ -17,7 +17,6 @@ import {
   alertStateActionVariableDescription,
   cloudActionVariableDescription,
   containerActionVariableDescription,
-  groupActionVariableDescription,
   groupByKeysActionVariableDescription,
   hostActionVariableDescription,
   labelsActionVariableDescription,
@@ -107,6 +106,14 @@ export async function registerMetricThresholdRuleType(
     equation: schema.maybe(schema.string()),
     label: schema.maybe(schema.string()),
   });
+
+  const groupActionVariableDescription = i18n.translate(
+    'xpack.infra.metrics.alerting.groupActionVariableDescription',
+    {
+      defaultMessage:
+        'Name of the group(s) reporting data. For accessing each group key, use context.groupByKeys.',
+    }
+  );
 
   alertingPlugin.registerType({
     id: METRIC_THRESHOLD_ALERT_TYPE_ID,
