@@ -37,4 +37,19 @@ describe('EngineOverviewLogic', () => {
   it('has expected default values', () => {
     expect(EngineOverviewLogic.values).toEqual(DEFAULT_VALUES);
   });
+
+  describe('listeners', () => {
+    describe('setEngineName', () => {
+      it('refetches the engine field capabilities', () => {
+        jest.spyOn(EngineOverviewLogic.actions, 'fetchEngineFieldCapabilities');
+
+        EngineOverviewLogic.actions.setEngineName('foobar');
+
+        expect(EngineOverviewLogic.actions.fetchEngineFieldCapabilities).toHaveBeenCalledTimes(1);
+        expect(EngineOverviewLogic.actions.fetchEngineFieldCapabilities).toHaveBeenCalledWith({
+          engineName: 'foobar',
+        });
+      });
+    });
+  });
 });
