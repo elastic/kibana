@@ -253,32 +253,34 @@ export const getXyChartRenderer = ({
     ReactDOM.render(
       <KibanaThemeProvider theme$={deps.kibanaTheme.theme$}>
         <I18nProvider>
-          <div css={chartContainerStyle} data-test-subj="xyVisChart">
-            <XYChartReportable
-              {...config}
-              data={deps.data}
-              formatFactory={deps.formatFactory}
-              chartsActiveCursorService={deps.activeCursor}
-              chartsThemeService={deps.theme}
-              paletteService={deps.paletteService}
-              timeZone={deps.timeZone}
-              timeFormat={deps.timeFormat}
-              eventAnnotationService={deps.eventAnnotationService}
-              useLegacyTimeAxis={deps.useLegacyTimeAxis}
-              minInterval={calculateMinInterval(deps.data.datatableUtilities, config)}
-              interactive={handlers.isInteractive()}
-              onClickValue={onClickValue}
-              onClickMultiValue={onClickMultiValue}
-              layerCellValueActions={layerCellValueActions}
-              onSelectRange={onSelectRange}
-              renderMode={handlers.getRenderMode()}
-              syncColors={config.syncColors}
-              syncTooltips={config.syncTooltips}
-              syncCursor={config.syncCursor}
-              uiState={handlers.uiState as PersistedState}
-              renderComplete={renderComplete}
-            />
-          </div>{' '}
+          <>
+            <div css={chartContainerStyle} data-test-subj="xyVisChart">
+              <XYChartReportable
+                {...config}
+                data={deps.data}
+                formatFactory={deps.formatFactory}
+                chartsActiveCursorService={deps.activeCursor}
+                chartsThemeService={deps.theme}
+                paletteService={deps.paletteService}
+                timeZone={deps.timeZone}
+                timeFormat={deps.timeFormat}
+                eventAnnotationService={deps.eventAnnotationService}
+                useLegacyTimeAxis={deps.useLegacyTimeAxis}
+                minInterval={calculateMinInterval(deps.data.datatableUtilities, config)}
+                interactive={handlers.isInteractive()}
+                onClickValue={onClickValue}
+                onClickMultiValue={onClickMultiValue}
+                layerCellValueActions={layerCellValueActions}
+                onSelectRange={onSelectRange}
+                renderMode={handlers.getRenderMode()}
+                syncColors={config.syncColors}
+                syncTooltips={config.syncTooltips}
+                syncCursor={config.syncCursor}
+                uiState={handlers.uiState as PersistedState}
+                renderComplete={renderComplete}
+              />
+            </div>{' '}
+          </>
         </I18nProvider>
       </KibanaThemeProvider>,
       domNode
