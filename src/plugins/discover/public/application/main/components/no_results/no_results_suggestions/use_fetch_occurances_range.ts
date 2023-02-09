@@ -47,7 +47,7 @@ export const useFetchOccurrencesRange = (params: Params): Result => {
     async (dataView?: DataView, query?: Query | AggregateQuery, filters?: Filter[]) => {
       let occurrencesRange = null;
 
-      if (dataView?.isTimeBased() && dataView?.timeFieldName && query && mountedRef.current) {
+      if (dataView?.isTimeBased() && query && mountedRef.current) {
         abortControllerRef.current?.abort();
         abortControllerRef.current = new AbortController();
 
@@ -114,7 +114,7 @@ async function fetchDocumentsTimeRange({
     data.search.search(
       {
         params: {
-          index: dataView.title,
+          index: dataView.getIndexPattern(),
           size: 0,
           body: {
             query: dslQuery ?? { match_all: {} },
