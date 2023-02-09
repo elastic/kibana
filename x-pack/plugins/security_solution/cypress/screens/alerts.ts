@@ -31,8 +31,6 @@ export const ALERTS_COUNT = '[data-test-subj="toolbar-alerts-count"]';
 export const ALERTS_TREND_SIGNAL_RULE_NAME_PANEL =
   '[data-test-subj="render-content-kibana.alert.rule.name"]';
 
-export const CHART_SELECT = '[data-test-subj="chartSelect"]';
-
 export const CLOSE_ALERT_BTN = '[data-test-subj="close-alert-status"]';
 
 export const CLOSE_SELECTED_ALERTS_BTN = '[data-test-subj="closed-alert-status"]';
@@ -90,7 +88,7 @@ export const RULE_NAME = '[data-test-subj^=formatted-field][data-test-subj$=rule
 
 export const SELECTED_ALERTS = '[data-test-subj="selectedShowBulkActionsButton"]';
 
-export const SELECT_TABLE = '[data-test-subj="table"]';
+export const SELECT_AGGREGATION_CHART = '[data-test-subj="chart-select-table"]';
 
 export const SEND_ALERT_TO_TIMELINE_BTN = '[data-test-subj="send-alert-to-timeline-button"]';
 

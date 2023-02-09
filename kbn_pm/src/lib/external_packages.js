@@ -6,9 +6,11 @@
  * Side Public License, v 1.
  */
 module.exports = {
+  /** @returns {import('@kbn/repo-packages')} */
   ['@kbn/repo-packages']() {
-    require('@kbn/babel-register').install();
-    return require('@kbn/repo-packages');
+    // we need to load this package before we install node modules so we can't use @kbn/* imports here
+    // eslint-disable-next-line import/no-dynamic-require
+    return require('../../../' + 'packages/kbn-repo-packages');
   },
 
   ['@kbn/ci-stats-reporter']() {
@@ -29,25 +31,5 @@ module.exports = {
   ['@kbn/get-repo-files']() {
     require('@kbn/babel-register').install();
     return require('@kbn/get-repo-files');
-  },
-
-  ['@kbn/repo-info']() {
-    require('@kbn/babel-register').install();
-    return require('@kbn/repo-info');
-  },
-
-  ['@kbn/ts-projects']() {
-    require('@kbn/babel-register').install();
-    return require('@kbn/ts-projects');
-  },
-
-  /**
-   * @param {string} absPath
-   * @returns {unknown}
-   */
-  reqAbs(absPath) {
-    require('@kbn/babel-register').install();
-    // eslint-disable-next-line import/no-dynamic-require
-    return require(absPath);
   },
 };

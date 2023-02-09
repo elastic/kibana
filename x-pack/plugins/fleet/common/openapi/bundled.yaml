@@ -3704,6 +3704,18 @@ components:
               type: number
             agents:
               type: number
+            agent_features:
+              type: array
+              items:
+                type: object
+                properties:
+                  name:
+                    type: string
+                  enabled:
+                    type: boolean
+                required:
+                  - name
+                  - enabled
           required:
             - id
             - status
