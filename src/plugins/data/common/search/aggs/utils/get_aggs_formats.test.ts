@@ -181,7 +181,7 @@ describe('getAggsFormats', () => {
 
     const format = getAggFormat(mapping, getFormat);
 
-    expect(format.convert('text')).toBeUndefined();
+    expect(format.convert('text')).toBe('');
     expect(getFormat).toHaveBeenCalledTimes(terms.length);
   });
 });

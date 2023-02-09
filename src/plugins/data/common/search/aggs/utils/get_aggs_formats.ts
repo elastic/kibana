@@ -166,7 +166,7 @@ export function getAggsFormats(getFieldFormat: GetFieldFormat): FieldFormatInsta
 
         return (val as MultiFieldKey)?.keys
           ?.map((valPart, i) => formats[i].convert(valPart, type))
-          .join(joinTemplate);
+          .join(joinTemplate) ?? '';
       };
       getConverterFor = (type: FieldFormatsContentType) => (val: string) => this.convert(val, type);
     },
