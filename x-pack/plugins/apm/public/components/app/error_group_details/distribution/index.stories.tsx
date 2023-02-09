@@ -70,6 +70,7 @@ export function Example() {
       fetchStatus={FETCH_STATUS.SUCCESS}
       distribution={distribution}
       title="Foo title"
+      isEmpty={false}
     />
   );
 }
@@ -84,6 +85,7 @@ export function EmptyState() {
         previousPeriod: [],
       }}
       title="Foo title"
+      isEmpty={true}
     />
   );
 }
