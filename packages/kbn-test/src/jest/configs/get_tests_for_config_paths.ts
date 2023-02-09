@@ -32,21 +32,26 @@ export async function getTestsForConfigPaths(
   configPaths: Iterable<string>
 ): Promise<TestsForConfigPath[]> {
   return await asyncMapWithLimit(configPaths, 60, async (path) => {
-    const config = await readConfig(EMPTY_ARGV, path);
-    const searchSource = new SearchSource(
-      await Runtime.createContext(config.projectConfig, {
-        maxWorkers: 1,
-        watchman: false,
-        watch: false,
-        console: NO_WARNINGS_CONSOLE,
-      })
-    );
+    try {
+      const config = await readConfig(EMPTY_ARGV, path);
+      const searchSource = new SearchSource(
+        await Runtime.createContext(config.projectConfig, {
+          maxWorkers: 1,
+          watchman: false,
+          watch: false,
+          console: NO_WARNINGS_CONSOLE,
+        })
+      );
 
-    const results = await searchSource.getTestPaths(config.globalConfig, undefined, undefined);
+      const results = await searchSource.getTestPaths(config.globalConfig, undefined, undefined);
 
-    return {
-      path,
-      testPaths: new Set(results.tests.map((t) => t.path)),
-    };
+      return {
+        path,
+        testPaths: new Set(results.tests.map((t) => t.path)),
+      };
+    } catch (error) {
+      error.message = `Failed to get test for config ${path}: ${error.message}`;
+      throw error;
+    }
   });
 }
