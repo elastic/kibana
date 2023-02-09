@@ -22,11 +22,11 @@ export class TelemetryClient implements ITelemetryClient {
 
   public reportHostEntryClicked = ({
     hostname,
-    cloud_provider: cloudProvider = 'unknown',
+    cloud_provider: cloudProvider,
   }: HostEntryClickedParams) => {
     this.analytics.reportEvent(InfraTelemetryEventTypes.HOSTS_ENTRY_CLICKED, {
       hostname,
-      cloud_provider: cloudProvider,
+      cloud_provider: cloudProvider ?? 'unknown',
     });
   };
 
