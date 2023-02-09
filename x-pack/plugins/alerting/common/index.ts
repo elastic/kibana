@@ -27,6 +27,7 @@ export * from './rule_snooze_type';
 
 export {
   alertFieldMap,
+  ecsFieldMap,
   legacyAlertFieldMap,
   mappingFromFieldMap,
   getComponentTemplateFromFieldMap,

@@ -6,6 +6,7 @@
  */
 
 export { alertFieldMap } from './field_maps/alert_field_map';
+export { ecsFieldMap } from './field_maps/ecs_field_map';
 export { legacyAlertFieldMap } from './field_maps/legacy_alert_field_map';
 export { mappingFromFieldMap } from './field_maps/mapping_from_field_map';
 export { type FieldMap } from './field_maps/types';

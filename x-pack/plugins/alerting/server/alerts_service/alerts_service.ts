@@ -13,7 +13,7 @@ import {
 import { get, isEmpty, isEqual } from 'lodash';
 import { Logger, ElasticsearchClient } from '@kbn/core/server';
 import { firstValueFrom, Observable } from 'rxjs';
-import { alertFieldMap, legacyAlertFieldMap, type FieldMap } from '../../common';
+import { alertFieldMap, ecsFieldMap, legacyAlertFieldMap, type FieldMap } from '../../common';
 import { ILM_POLICY_NAME, DEFAULT_ILM_POLICY } from './default_lifecycle_policy';
 import {
   getComponentTemplate,
@@ -31,6 +31,7 @@ import {
 const TOTAL_FIELDS_LIMIT = 2500;
 const INSTALLATION_TIMEOUT = 20 * 60 * 1000; // 20 minutes
 const LEGACY_ALERT_CONTEXT = 'legacy-alert';
+const ECS_CONTEXT = `ecs`;
 interface AlertsServiceParams {
   logger: Logger;
   pluginStop$: Observable<void>;
@@ -107,6 +108,11 @@ export class AlertsService implements IAlertsService {
             this.createOrUpdateComponentTemplate(
               esClient,
               getComponentTemplate(legacyAlertFieldMap, LEGACY_ALERT_CONTEXT)
+            ),
+          () =>
+            this.createOrUpdateComponentTemplate(
+              esClient,
+              getComponentTemplate(ecsFieldMap, ECS_CONTEXT)
             ),
         ];
 

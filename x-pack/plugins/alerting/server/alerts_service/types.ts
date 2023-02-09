@@ -39,5 +39,5 @@ export const getComponentTemplate = (
     name: getComponentTemplateName(context),
     fieldMap,
     // set field limit slightly higher than actual number of fields
-    fieldLimit: Math.ceil(Object.keys(fieldMap).length / 100) * 100,
+    fieldLimit: Math.ceil(Object.keys(fieldMap).length / 1000) * 1000,
   });
