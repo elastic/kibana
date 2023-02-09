@@ -484,7 +484,7 @@ export const getEndpointConsoleCommands = ({
             'xpack.securitySolution.endpointConsoleCommands.execute.args.timeout.about',
             {
               defaultMessage:
-                'The timeout in units of time (h for hours, m for minutes, s for seconds) for the endpoint to wait for the script to complete. Example: 37m. If not given, it defaults to 4 hours.' ,
+                'The timeout in units of time (h for hours, m for minutes, s for seconds) for the endpoint to wait for the script to complete. Example: 37m. If not given, it defaults to 4 hours.',
             }
           ),
           validate: executeTimeoutValidator,

@@ -26,7 +26,10 @@ import type {
   ResponseActionExecuteOutputContent,
 } from '../types';
 import { ActivityLogItemTypes } from '../types';
-import { DEFAULT_EXECUTE_ACTION_TIMEOUT, RESPONSE_ACTION_API_COMMANDS_NAMES } from '../service/response_actions/constants';
+import {
+  DEFAULT_EXECUTE_ACTION_TIMEOUT,
+  RESPONSE_ACTION_API_COMMANDS_NAMES,
+} from '../service/response_actions/constants';
 import { getFileDownloadId } from '../service/response_actions/get_file_download_id';
 
 export class EndpointActionGenerator extends BaseDataGenerator {
