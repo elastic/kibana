@@ -2058,6 +2058,39 @@
       },
       {
         "parentPluginId": "@kbn/test",
+        "id": "def-common.findTestPluginPaths",
+        "type": "Function",
+        "tags": [],
+        "label": "findTestPluginPaths",
+        "description": [],
+        "signature": [
+          "(dirs: string | string[]) => string[]"
+        ],
+        "path": "packages/kbn-test/src/find_test_plugin_paths.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/test",
+            "id": "def-common.findTestPluginPaths.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "dirs",
+            "description": [],
+            "signature": [
+              "string | string[]"
+            ],
+            "path": "packages/kbn-test/src/find_test_plugin_paths.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/test",
         "id": "def-common.getKibanaCliArg",
         "type": "Function",
         "tags": [],
@@ -3271,7 +3304,7 @@
           },
           " extends Omit<",
           "ClientOptions",
-          ", \"node\" | \"nodes\" | \"tls\">"
+          ", \"nodes\" | \"node\" | \"tls\">"
         ],
         "path": "packages/kbn-test/src/es/es_client_for_testing.ts",
         "deprecated": false,
@@ -3450,7 +3483,7 @@
               "\nDetermine if a service is avaliable"
             ],
             "signature": [
-              "{ (serviceName: \"log\" | \"config\" | \"lifecycle\" | \"dockerServers\" | \"esVersion\" | \"dedicatedTaskRunner\"): true; <K extends keyof ServiceMap>(serviceName: K): serviceName is K; (serviceName: string): serviceName is Extract<keyof ServiceMap, string>; }"
+              "{ (serviceName: \"config\" | \"log\" | \"lifecycle\" | \"dockerServers\" | \"esVersion\" | \"dedicatedTaskRunner\"): true; <K extends keyof ServiceMap>(serviceName: K): serviceName is K; (serviceName: string): serviceName is Extract<keyof ServiceMap, string>; }"
             ],
             "path": "packages/kbn-test/src/functional_test_runner/public_types.ts",
             "deprecated": false,
@@ -3464,7 +3497,7 @@
                 "label": "serviceName",
                 "description": [],
                 "signature": [
-                  "\"log\" | \"config\" | \"lifecycle\" | \"dockerServers\" | \"esVersion\" | \"dedicatedTaskRunner\""
+                  "\"config\" | \"log\" | \"lifecycle\" | \"dockerServers\" | \"esVersion\" | \"dedicatedTaskRunner\""
                 ],
                 "path": "packages/kbn-test/src/functional_test_runner/public_types.ts",
                 "deprecated": false,
@@ -3482,7 +3515,7 @@
             "label": "hasService",
             "description": [],
             "signature": [
-              "{ (serviceName: \"log\" | \"config\" | \"lifecycle\" | \"dockerServers\" | \"esVersion\" | \"dedicatedTaskRunner\"): true; <K extends keyof ServiceMap>(serviceName: K): serviceName is K; (serviceName: string): serviceName is Extract<keyof ServiceMap, string>; }"
+              "{ (serviceName: \"config\" | \"log\" | \"lifecycle\" | \"dockerServers\" | \"esVersion\" | \"dedicatedTaskRunner\"): true; <K extends keyof ServiceMap>(serviceName: K): serviceName is K; (serviceName: string): serviceName is Extract<keyof ServiceMap, string>; }"
             ],
             "path": "packages/kbn-test/src/functional_test_runner/public_types.ts",
             "deprecated": false,
@@ -3514,7 +3547,7 @@
             "label": "hasService",
             "description": [],
             "signature": [
-              "{ (serviceName: \"log\" | \"config\" | \"lifecycle\" | \"dockerServers\" | \"esVersion\" | \"dedicatedTaskRunner\"): true; <K extends keyof ServiceMap>(serviceName: K): serviceName is K; (serviceName: string): serviceName is Extract<keyof ServiceMap, string>; }"
+              "{ (serviceName: \"config\" | \"log\" | \"lifecycle\" | \"dockerServers\" | \"esVersion\" | \"dedicatedTaskRunner\"): true; <K extends keyof ServiceMap>(serviceName: K): serviceName is K; (serviceName: string): serviceName is Extract<keyof ServiceMap, string>; }"
             ],
             "path": "packages/kbn-test/src/functional_test_runner/public_types.ts",
             "deprecated": false,
@@ -4970,7 +5003,7 @@
         "signature": [
           "KbnTestConfig"
         ],
-        "path": "packages/kbn-test/src/kbn/kbn_test_config.ts",
+        "path": "packages/kbn-test/kbn_test_config.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
