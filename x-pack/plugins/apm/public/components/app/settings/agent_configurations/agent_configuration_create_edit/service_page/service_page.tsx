@@ -95,14 +95,12 @@ export function ServicePage({ newConfig, setNewConfig, onClickNext }: Props) {
   );
 
   useEffect(() => {
-    if (newConfig.service.name === 'ALL_OPTION_VALUE') {
-      setIsAgentConfigurationSupported(true);
-    } else if (newConfig.agent_name) {
-      setIsAgentConfigurationSupported(
-        !isOpenTelemetryAgentName(newConfig.agent_name as AgentName)
-      );
-    }
-  }, [newConfig.agent_name, newConfig.service.name]);
+    setIsAgentConfigurationSupported(
+      newConfig.agent_name
+        ? !isOpenTelemetryAgentName(newConfig.agent_name as AgentName)
+        : true
+    );
+  }, [newConfig.agent_name]);
 
   return (
     <>
