@@ -124,7 +124,8 @@ export class Repo {
     try {
       this.log.info('cloning', this.name);
       Fs.mkdirSync(this.dir, { recursive: true });
-      await this.run('git', ['clone', `${this.githubBase}${this.name}.git`, '.']);
+      const depth = process.env.CI ? ['--depth', '1'] : [];
+      await this.run('git', ['clone', ...depth, `${this.githubBase}${this.name}.git`, '.']);
     } catch {
       quietFail(`Failed to clone ${this.name}`);
     }
