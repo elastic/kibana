@@ -92,6 +92,13 @@ exports[`APM telemetry helpers getApmTelemetry generates a JSON object with the 
                               "properties": {
                                 "version": {
                                   "type": "keyword"
+                                },
+                                "activation": {
+                                  "properties": {
+                                    "method": {
+                                      "type": "keyword"
+                                    }
+                                  }
                                 }
                               }
                             },
@@ -146,6 +153,13 @@ exports[`APM telemetry helpers getApmTelemetry generates a JSON object with the 
                               "properties": {
                                 "version": {
                                   "type": "keyword"
+                                },
+                                "activation": {
+                                  "properties": {
+                                    "method": {
+                                      "type": "keyword"
+                                    }
+                                  }
                                 }
                               }
                             },
@@ -200,6 +214,13 @@ exports[`APM telemetry helpers getApmTelemetry generates a JSON object with the 
                               "properties": {
                                 "version": {
                                   "type": "keyword"
+                                },
+                                "activation": {
+                                  "properties": {
+                                    "method": {
+                                      "type": "keyword"
+                                    }
+                                  }
                                 }
                               }
                             },
@@ -254,6 +275,13 @@ exports[`APM telemetry helpers getApmTelemetry generates a JSON object with the 
                               "properties": {
                                 "version": {
                                   "type": "keyword"
+                                },
+                                "activation": {
+                                  "properties": {
+                                    "method": {
+                                      "type": "keyword"
+                                    }
+                                  }
                                 }
                               }
                             },
@@ -308,6 +336,13 @@ exports[`APM telemetry helpers getApmTelemetry generates a JSON object with the 
                               "properties": {
                                 "version": {
                                   "type": "keyword"
+                                },
+                                "activation": {
+                                  "properties": {
+                                    "method": {
+                                      "type": "keyword"
+                                    }
+                                  }
                                 }
                               }
                             },
@@ -362,6 +397,13 @@ exports[`APM telemetry helpers getApmTelemetry generates a JSON object with the 
                               "properties": {
                                 "version": {
                                   "type": "keyword"
+                                },
+                                "activation": {
+                                  "properties": {
+                                    "method": {
+                                      "type": "keyword"
+                                    }
+                                  }
                                 }
                               }
                             },
@@ -416,6 +458,13 @@ exports[`APM telemetry helpers getApmTelemetry generates a JSON object with the 
                               "properties": {
                                 "version": {
                                   "type": "keyword"
+                                },
+                                "activation": {
+                                  "properties": {
+                                    "method": {
+                                      "type": "keyword"
+                                    }
+                                  }
                                 }
                               }
                             },
@@ -470,6 +519,13 @@ exports[`APM telemetry helpers getApmTelemetry generates a JSON object with the 
                               "properties": {
                                 "version": {
                                   "type": "keyword"
+                                },
+                                "activation": {
+                                  "properties": {
+                                    "method": {
+                                      "type": "keyword"
+                                    }
+                                  }
                                 }
                               }
                             },
@@ -524,6 +580,13 @@ exports[`APM telemetry helpers getApmTelemetry generates a JSON object with the 
                               "properties": {
                                 "version": {
                                   "type": "keyword"
+                                },
+                                "activation": {
+                                  "properties": {
+                                    "method": {
+                                      "type": "keyword"
+                                    }
+                                  }
                                 }
                               }
                             },
@@ -578,6 +641,13 @@ exports[`APM telemetry helpers getApmTelemetry generates a JSON object with the 
                               "properties": {
                                 "version": {
                                   "type": "keyword"
+                                },
+                                "activation": {
+                                  "properties": {
+                                    "method": {
+                                      "type": "keyword"
+                                    }
+                                  }
                                 }
                               }
                             },
@@ -632,6 +702,13 @@ exports[`APM telemetry helpers getApmTelemetry generates a JSON object with the 
                               "properties": {
                                 "version": {
                                   "type": "keyword"
+                                },
+                                "activation": {
+                                  "properties": {
+                                    "method": {
+                                      "type": "keyword"
+                                    }
+                                  }
                                 }
                               }
                             },
@@ -1175,6 +1252,13 @@ exports[`APM telemetry helpers getApmTelemetry generates a JSON object with the 
                             },
                             "version": {
                               "type": "keyword"
+                            },
+                            "activation": {
+                              "properties": {
+                                "method": {
+                                  "type": "keyword"
+                                }
+                              }
                             }
                           }
                         },
