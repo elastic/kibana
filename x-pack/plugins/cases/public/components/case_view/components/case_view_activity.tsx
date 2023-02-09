@@ -244,7 +244,7 @@ export const CaseViewActivity = ({
               theCase={caseData}
               headline={i18n.PARTICIPANTS}
               loading={isLoadingUserActions}
-              users={caseUsers.participants}
+              users={[...caseUsers.participants, ...caseUsers.assignees]}
               userProfiles={userProfiles}
             />
           ) : null}
