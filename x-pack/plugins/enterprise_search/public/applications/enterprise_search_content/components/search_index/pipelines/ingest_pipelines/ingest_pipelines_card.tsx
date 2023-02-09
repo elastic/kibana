@@ -63,7 +63,7 @@ export const IngestPipelinesCard: React.FC = () => {
           <EuiPanel color="subdued">
             <DefaultPipelineItem
               index={index}
-              openModal={openPipelineSettings}
+              openPipelineSettings={openPipelineSettings}
               pipelineName={pipelineName}
               ingestionMethod={ingestionMethod}
               indexName={indexName}
