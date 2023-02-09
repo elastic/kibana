@@ -134,11 +134,11 @@ describe('migration v2', () => {
               //   { id: 'foo:2', type: 'foo', foo: { status: 'not_migrated_2' } },
               //   { id: 'bar:2', type: 'bar', bar: { status: 'not_migrated_2' } },
               // ];
-              dataArchive: Path.join(__dirname, 'archives', '7.13.0_5k_so_node_01.zip'),
+              dataArchive: Path.join(__dirname, '..', 'archives', '7.13.0_5k_so_node_01.zip'),
             },
             {
               name: 'node-02',
-              dataArchive: Path.join(__dirname, 'archives', '7.13.0_5k_so_node_02.zip'),
+              dataArchive: Path.join(__dirname, '..', 'archives', '7.13.0_5k_so_node_02.zip'),
             },
           ],
         },
