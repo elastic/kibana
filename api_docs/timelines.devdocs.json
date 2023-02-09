@@ -923,7 +923,7 @@
               "EuiButtonIconPropsForAnchor",
               ", ",
               "EuiButtonIconPropsForButton",
-              "> & { type?: \"reset\" | \"button\" | \"submit\" | undefined; } & ",
+              "> & { type?: \"button\" | \"reset\" | \"submit\" | undefined; } & ",
               "EuiButtonIconProps",
               " & { onClick?: React.MouseEventHandler<HTMLButtonElement> | undefined; } & React.ButtonHTMLAttributes<HTMLButtonElement> & { buttonRef?: React.Ref<HTMLButtonElement> | undefined; }) | (",
               "DisambiguateSet",
@@ -2996,7 +2996,7 @@
             "label": "language",
             "description": [],
             "signature": [
-              "\"eql\" | \"lucene\" | \"kuery\""
+              "\"kuery\" | \"eql\" | \"lucene\""
             ],
             "path": "x-pack/plugins/timelines/common/search_strategy/timeline/events/all/index.ts",
             "deprecated": false,
@@ -4060,7 +4060,7 @@
         "signature": [
           "Pick<",
           "EuiDataGridColumn",
-          ", \"schema\" | \"id\" | \"actions\" | \"display\" | \"defaultSortDirection\" | \"displayAsText\" | \"initialWidth\" | \"isSortable\"> & { aggregatable?: boolean | undefined; dataTableCellActions?: ",
+          ", \"id\" | \"actions\" | \"schema\" | \"display\" | \"defaultSortDirection\" | \"displayAsText\" | \"initialWidth\" | \"isSortable\"> & { aggregatable?: boolean | undefined; dataTableCellActions?: ",
           "DataTableCellAction",
           "[] | undefined; category?: string | undefined; columnHeaderType: ",
           "ColumnHeaderType",
@@ -4087,7 +4087,7 @@
         "label": "DataProvidersAnd",
         "description": [],
         "signature": [
-          "{ name: string; type?: ",
+          "{ type?: ",
           {
             "pluginId": "timelines",
             "scope": "common",
@@ -4095,7 +4095,7 @@
             "section": "def-common.DataProviderType",
             "text": "DataProviderType"
           },
-          " | undefined; id: string; enabled: boolean; excluded: boolean; kqlQuery: string; queryMatch: ",
+          " | undefined; id: string; name: string; enabled: boolean; excluded: boolean; kqlQuery: string; queryMatch: ",
           {
             "pluginId": "timelines",
             "scope": "common",
@@ -4155,7 +4155,7 @@
         "label": "EntityType",
         "description": [],
         "signature": [
-          "\"sessions\" | \"alerts\" | \"events\""
+          "\"alerts\" | \"events\" | \"sessions\""
         ],
         "path": "x-pack/plugins/timelines/common/search_strategy/timeline/events/index.ts",
         "deprecated": false,
@@ -4261,7 +4261,7 @@
         "label": "TimelineKpiStrategyRequest",
         "description": [],
         "signature": [
-          "{ params?: ",
+          "{ id?: string | undefined; params?: ",
           {
             "pluginId": "data",
             "scope": "common",
@@ -4269,7 +4269,7 @@
             "section": "def-common.ISearchRequestParams",
             "text": "ISearchRequestParams"
           },
-          " | undefined; id?: string | undefined; timerange?: ",
+          " | undefined; timerange?: ",
           {
             "pluginId": "timelines",
             "scope": "common",
