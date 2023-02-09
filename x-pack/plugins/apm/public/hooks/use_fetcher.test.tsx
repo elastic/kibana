@@ -32,6 +32,34 @@ function wrapper({ children }: WrapperProps) {
 }
 
 describe('useFetcher', () => {
+  describe('when data fetch is dropped', () => {
+    let hook: RenderHookResult<
+      WrapperProps,
+      FetcherResult<unknown> & {
+        refetch: () => void;
+      }
+    >;
+
+    beforeEach(() => {
+      hook = renderHook(
+        () =>
+          useFetcher(() => {
+            return;
+          }, []),
+        { wrapper }
+      );
+    });
+
+    it('should update status to dropped', async () => {
+      expect(hook.result.current).toEqual({
+        data: undefined,
+        error: undefined,
+        refetch: expect.any(Function),
+        status: 'dropped',
+      });
+    });
+  });
+
   describe('when resolving after 500ms', () => {
     let hook: RenderHookResult<
       WrapperProps,

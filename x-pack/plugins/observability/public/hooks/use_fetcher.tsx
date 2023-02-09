@@ -8,6 +8,7 @@
 import { useEffect, useState, useMemo } from 'react';
 
 export enum FETCH_STATUS {
+  DROPPED = 'dropped',
   LOADING = 'loading',
   SUCCESS = 'success',
   FAILURE = 'failure',

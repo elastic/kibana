@@ -20,6 +20,7 @@ import {
 } from '../services/rest/create_call_apm_api';
 
 export enum FETCH_STATUS {
+  DROPPED = 'dropped',
   LOADING = 'loading',
   SUCCESS = 'success',
   FAILURE = 'failure',
@@ -107,6 +108,10 @@ export function useFetcher<TReturn>(
       // This can happen if the data fetching is conditional (based on certain inputs).
       // In these cases it is not desirable to invoke the global loading spinner, or change the status to success
       if (!promise) {
+        setResult({
+          status: FETCH_STATUS.DROPPED,
+        });
+
         return;
       }
 
