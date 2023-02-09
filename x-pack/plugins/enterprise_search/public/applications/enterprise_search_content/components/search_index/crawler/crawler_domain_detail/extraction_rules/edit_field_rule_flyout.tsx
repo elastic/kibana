@@ -487,7 +487,7 @@ export const EditFieldRuleFlyout: React.FC<EditFieldRuleFlyoutProps> = ({
               external
             >
               {i18n.translate(
-                'xpack.enterpriseSearch.content.indices.extractionRules.editRule.contentField.cssSelectorsLink',
+                'xpack.enterpriseSearch.content.indices.extractionRules.editRule.contentField.differentContentLink',
                 {
                   defaultMessage: 'Learn more about storing different kinds of content',
                 }
