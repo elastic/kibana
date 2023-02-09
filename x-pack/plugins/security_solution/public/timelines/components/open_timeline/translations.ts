@@ -6,6 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import type { TimelineType } from '@kbn/timelines-plugin/common';
 
 export const BATCH_ACTIONS = i18n.translate(
   'xpack.securitySolution.open.timeline.batchActionsTitle',
@@ -116,12 +117,10 @@ export const ONLY_FAVORITES = i18n.translate(
   }
 );
 
-export const CREATE_RULE_FROM_TIMELINE = i18n.translate(
-  'xpack.securitySolution.open.timeline.createRuleFromTimelineTooltip',
-  {
-    defaultMessage: 'Create rule from timeline',
-  }
-);
+export const CREATE_RULE_FROM_TIMELINE = (timelineType: TimelineType) =>
+  i18n.translate('xpack.securitySolution.open.timeline.createRuleFromTimelineTooltip', {
+    defaultMessage: `Create rule from ${timelineType === 'template' ? 'template' : 'timeline'}`,
+  });
 
 export const CREATE_TEMPLATE_FROM_TIMELINE = i18n.translate(
   'xpack.securitySolution.open.timeline.createTemplateFromTimelineTooltip',

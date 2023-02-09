@@ -137,7 +137,8 @@ export const getActionsColumns = ({
   };
 
   const createRuleFromTimeline = {
-    name: i18n.CREATE_RULE_FROM_TIMELINE,
+    name: ({ timelineType }: OpenTimelineResult) =>
+      i18n.CREATE_RULE_FROM_TIMELINE(timelineType || TimelineType.default),
     icon: 'indexEdit',
     onClick: (selectedTimeline: OpenTimelineResult) => {
       if (onCreateRule != null && selectedTimeline.savedObjectId)
