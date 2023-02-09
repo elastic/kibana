@@ -24,6 +24,7 @@ export function encodeMvtResponseBody(unencodedRequestBody: estypes.SearchReques
 }
 
 export function getAggsTileRequest({
+  buffer,
   encodedRequestBody,
   geometryFieldName,
   gridPrecision,
@@ -34,6 +35,7 @@ export function getAggsTileRequest({
   y,
   z,
 }: {
+  buffer: number;
   encodedRequestBody: string;
   geometryFieldName: string;
   gridPrecision: number;
@@ -53,6 +55,7 @@ export function getAggsTileRequest({
       geometryFieldName
     )}/${z}/${x}/${y}`,
     body: {
+      buffer,
       size: 0, // no hits
       grid_precision: gridPrecision,
       exact_bounds: false,
@@ -69,6 +72,7 @@ export function getAggsTileRequest({
 }
 
 export function getHitsTileRequest({
+  buffer,
   encodedRequestBody,
   geometryFieldName,
   hasLabels,
@@ -77,6 +81,7 @@ export function getHitsTileRequest({
   y,
   z,
 }: {
+  buffer: number;
   encodedRequestBody: string;
   geometryFieldName: string;
   hasLabels: boolean;
@@ -90,6 +95,7 @@ export function getHitsTileRequest({
     throw new Error('Required requestBody parameter not provided');
   }
   const tileRequestBody = {
+    buffer,
     grid_precision: 0, // no aggs
     exact_bounds: true,
     extent: 4096, // full resolution,
