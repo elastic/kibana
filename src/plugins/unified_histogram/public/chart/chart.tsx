@@ -72,7 +72,7 @@ export interface ChartProps {
   onBrushEnd?: LensEmbeddableInput['onBrushEnd'];
 }
 
-const HistogramMemoized = memo(Histogram);
+export const HistogramMemoized = memo(Histogram);
 
 export function Chart({
   className,
@@ -185,11 +185,20 @@ export function Chart({
         title: chart?.title,
         filters,
         query,
-        dataView,
+        dataViewId: dataView.id,
+        timeFieldName: dataView.timeFieldName,
         timeInterval: chart?.timeInterval,
         breakdownField: breakdown?.field,
       }),
-    [breakdown?.field, chart?.timeInterval, chart?.title, dataView, filters, query]
+    [
+      breakdown?.field,
+      chart?.timeInterval,
+      chart?.title,
+      dataView.id,
+      dataView.timeFieldName,
+      filters,
+      query,
+    ]
   );
 
   const getRelativeTimeRange = useMemo(

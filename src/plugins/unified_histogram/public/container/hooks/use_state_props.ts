@@ -43,9 +43,10 @@ export const useStateProps = (stateService: UnifiedHistogramStateService | undef
     return query && isOfAggregateQueryType(query) && getAggregateQueryMode(query) === 'sql';
   }, [query]);
 
+  const dataViewIsTimeBased = dataView?.isTimeBased() ?? false;
   const isTimeBased = useMemo(() => {
-    return dataView && dataView.type !== DataViewType.ROLLUP && dataView.isTimeBased();
-  }, [dataView]);
+    return dataView?.type !== DataViewType.ROLLUP && dataViewIsTimeBased;
+  }, [dataView?.type, dataViewIsTimeBased]);
 
   const hits = useMemo(() => {
     if (isPlainRecord || totalHitsResult instanceof Error) {

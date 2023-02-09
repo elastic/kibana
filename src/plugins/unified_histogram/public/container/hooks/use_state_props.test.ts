@@ -198,6 +198,87 @@ describe('useStateProps', () => {
     `);
   });
 
+  it('should update the props when the data view becomes time based or not', () => {
+    let isTimeBased = true;
+    const stateService = getStateService({
+      initialState: {
+        ...initialState,
+        dataView: {
+          ...dataViewMock,
+          isTimeBased: () => isTimeBased,
+        } as DataView,
+      },
+    });
+    const hook = renderHook(() => useStateProps(stateService));
+    expect(hook.result.current).toMatchInlineSnapshot(`
+      Object {
+        "breakdown": Object {
+          "field": Object {
+            "aggregatable": true,
+            "displayName": "bytesDisplayName",
+            "filterable": true,
+            "name": "bytes",
+            "scripted": false,
+            "sortable": true,
+            "type": "number",
+          },
+        },
+        "chart": Object {
+          "hidden": false,
+          "timeInterval": "auto",
+        },
+        "hits": Object {
+          "status": "uninitialized",
+          "total": undefined,
+        },
+        "onBreakdownFieldChange": [Function],
+        "onChartHiddenChange": [Function],
+        "onChartLoad": [Function],
+        "onTimeIntervalChange": [Function],
+        "onTopPanelHeightChange": [Function],
+        "onTotalHitsChange": [Function],
+        "request": Object {
+          "adapter": RequestAdapter {
+            "_events": Object {},
+            "_eventsCount": 0,
+            "_maxListeners": undefined,
+            "requests": Map {},
+            Symbol(kCapture): false,
+          },
+          "searchSessionId": "123",
+        },
+      }
+    `);
+    isTimeBased = false;
+    hook.rerender();
+    expect(hook.result.current).toMatchInlineSnapshot(`
+      Object {
+        "breakdown": undefined,
+        "chart": undefined,
+        "hits": Object {
+          "status": "uninitialized",
+          "total": undefined,
+        },
+        "onBreakdownFieldChange": [Function],
+        "onChartHiddenChange": [Function],
+        "onChartLoad": [Function],
+        "onTimeIntervalChange": [Function],
+        "onTopPanelHeightChange": [Function],
+        "onTotalHitsChange": [Function],
+        "request": Object {
+          "adapter": RequestAdapter {
+            "_events": Object {},
+            "_eventsCount": 0,
+            "_maxListeners": undefined,
+            "requests": Map {},
+            Symbol(kCapture): false,
+          },
+          "searchSessionId": "123",
+        },
+      }
+    `);
+  });
+
   it('should execute callbacks correctly', () => {
     const stateService = getStateService({ initialState });
     const { result } = renderHook(() => useStateProps(stateService));

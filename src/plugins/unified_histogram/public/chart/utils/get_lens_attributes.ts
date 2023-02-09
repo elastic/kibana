@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
+import type { DataViewField } from '@kbn/data-views-plugin/public';
 import type { AggregateQuery, Filter, Query } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import type {
@@ -22,14 +22,16 @@ export const getLensAttributes = ({
   title,
   filters,
   query,
-  dataView,
+  dataViewId,
+  timeFieldName,
   timeInterval,
   breakdownField,
 }: {
   title?: string;
   filters: Filter[];
   query: Query | AggregateQuery;
-  dataView: DataView;
+  dataViewId: string | undefined;
+  timeFieldName: string | undefined;
   timeInterval: string | undefined;
   breakdownField: DataViewField | undefined;
 }) => {
@@ -45,10 +47,10 @@ export const getLensAttributes = ({
     date_column: {
       dataType: 'date',
       isBucketed: true,
-      label: dataView.timeFieldName ?? '',
+      label: timeFieldName ?? '',
       operationType: 'date_histogram',
       scale: 'interval',
-      sourceField: dataView.timeFieldName,
+      sourceField: timeFieldName,
       params: {
         interval: timeInterval ?? 'auto',
       },
@@ -111,12 +113,12 @@ export const getLensAttributes = ({
       }),
     references: [
       {
-        id: dataView.id ?? '',
+        id: dataViewId ?? '',
         name: 'indexpattern-datasource-current-indexpattern',
         type: 'index-pattern',
       },
       {
-        id: dataView.id ?? '',
+        id: dataViewId ?? '',
         name: 'indexpattern-datasource-layer-unifiedHistogram',
         type: 'index-pattern',
       },

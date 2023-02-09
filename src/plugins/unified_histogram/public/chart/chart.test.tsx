@@ -11,7 +11,7 @@ import { act } from 'react-dom/test-utils';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { UnifiedHistogramFetchStatus } from '../types';
-import { Chart } from './chart';
+import { Chart, HistogramMemoized } from './chart';
 import type { ReactWrapper } from 'enzyme';
 import { unifiedHistogramServicesMock } from '../__mocks__/services';
 import { searchSourceInstanceMock } from '@kbn/data-plugin/common/search/search_source/mocks';
@@ -190,5 +190,93 @@ describe('Chart', () => {
   it('should not render BreakdownFieldSelector when chart is visible and breakdown is undefined', async () => {
     const component = await mountComponent({ noBreakdown: true });
     expect(component.find(BreakdownFieldSelector).exists()).toBeFalsy();
+  });
+
+  it('should update lensAttributes when the data view time field changes', async () => {
+    const dataView = {
+      ...dataViewWithTimefieldMock,
+      timeFieldName: 'timeField',
+    } as DataView;
+    const component = await mountComponent({ dataView });
+    let lensAttributes = component.find(HistogramMemoized).prop('lensAttributes');
+    expect(lensAttributes.state.datasourceStates.formBased.layers.unifiedHistogram)
+      .toMatchInlineSnapshot(`
+      Object {
+        "columnOrder": Array [
+          "date_column",
+          "count_column",
+        ],
+        "columns": Object {
+          "count_column": Object {
+            "dataType": "number",
+            "isBucketed": false,
+            "label": "Count of records",
+            "operationType": "count",
+            "params": Object {
+              "format": Object {
+                "id": "number",
+                "params": Object {
+                  "decimals": 0,
+                },
+              },
+            },
+            "scale": "ratio",
+            "sourceField": "___records___",
+          },
+          "date_column": Object {
+            "dataType": "date",
+            "isBucketed": true,
+            "label": "timeField",
+            "operationType": "date_histogram",
+            "params": Object {
+              "interval": "auto",
+            },
+            "scale": "interval",
+            "sourceField": "timeField",
+          },
+        },
+      }
+    `);
+    dataView.timeFieldName = 'newTimeField';
+    component.setProps({}).update();
+    lensAttributes = component.find(HistogramMemoized).prop('lensAttributes');
+    expect(lensAttributes.state.datasourceStates.formBased.layers.unifiedHistogram)
+      .toMatchInlineSnapshot(`
+      Object {
+        "columnOrder": Array [
+          "date_column",
+          "count_column",
+        ],
+        "columns": Object {
+          "count_column": Object {
+            "dataType": "number",
+            "isBucketed": false,
+            "label": "Count of records",
+            "operationType": "count",
+            "params": Object {
+              "format": Object {
+                "id": "number",
+                "params": Object {
+                  "decimals": 0,
+                },
+              },
+            },
+            "scale": "ratio",
+            "sourceField": "___records___",
+          },
+          "date_column": Object {
+            "dataType": "date",
+            "isBucketed": true,
+            "label": "newTimeField",
+            "operationType": "date_histogram",
+            "params": Object {
+              "interval": "auto",
+            },
+            "scale": "interval",
+            "sourceField": "newTimeField",
+          },
+        },
+      }
+    `);
   });
 });

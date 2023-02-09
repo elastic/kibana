@@ -45,7 +45,15 @@ describe('getLensAttributes', () => {
   it('should return correct attributes', () => {
     const breakdownField: DataViewField | undefined = undefined;
     expect(
-      getLensAttributes({ title: 'test', filters, query, dataView, timeInterval, breakdownField })
+      getLensAttributes({
+        title: 'test',
+        filters,
+        query,
+        dataViewId: dataView.id,
+        timeFieldName: dataView.timeFieldName,
+        timeInterval,
+        breakdownField,
+      })
     ).toMatchInlineSnapshot(`
       Object {
         "references": Array [
@@ -185,7 +193,15 @@ describe('getLensAttributes', () => {
       (f) => f.name === 'extension'
     );
     expect(
-      getLensAttributes({ title: 'test', filters, query, dataView, timeInterval, breakdownField })
+      getLensAttributes({
+        title: 'test',
+        filters,
+        query,
+        dataViewId: dataView.id,
+        timeFieldName: dataView.timeFieldName,
+        timeInterval,
+        breakdownField,
+      })
     ).toMatchInlineSnapshot(`
       Object {
         "references": Array [
@@ -343,7 +359,15 @@ describe('getLensAttributes', () => {
       (f) => f.name === 'scripted'
     );
     expect(
-      getLensAttributes({ title: 'test', filters, query, dataView, timeInterval, breakdownField })
+      getLensAttributes({
+        title: 'test',
+        filters,
+        query,
+        dataViewId: dataView.id,
+        timeFieldName: dataView.timeFieldName,
+        timeInterval,
+        breakdownField,
+      })
     ).toMatchInlineSnapshot(`
       Object {
         "references": Array [
