@@ -264,7 +264,7 @@ export class ProjectMonitorFormatter {
   public getProjectMonitorsForProject = async () => {
     const finder = this.savedObjectsClient.createPointInTimeFinder({
       type: syntheticsMonitorType,
-      perPage: 1000,
+      perPage: 5000,
       filter: this.projectFilter,
     });
 
