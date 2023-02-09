@@ -319,7 +319,7 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = memo(
         const datum = v.datum;
         if (!datum) return;
         const { x, y } = datum;
-        if (x === v.value && xAxisColumn) {
+        if (String(x) === v.value && xAxisColumn) {
           const row = table.rows.find((r) => {
             if (formattedTable.formattedColumns[xAxisColumn.id]) {
               // stringify the value to compare with the chart value
@@ -334,7 +334,7 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = memo(
             });
           }
         }
-        if (y === v.value && yAxisColumn) {
+        if (String(y) === v.value && yAxisColumn) {
           const row = table.rows.find((r) => {
             if (formattedTable.formattedColumns[yAxisColumn.id]) {
               // stringify the value to compare with the chart value
@@ -349,18 +349,18 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = memo(
             });
           }
         }
-        if (points.length) {
-          points.forEach((p) => {
-            onClickMultiValue({
-              data: {
-                column: p.column,
-                value: [p.value],
-                table,
-              },
-            });
-          });
-        }
       });
+      if (points.length) {
+        points.forEach((p) => {
+          onClickMultiValue({
+            data: {
+              column: p.column,
+              value: [p.value],
+              table,
+            },
+          });
+        });
+      }
     };
 
     const onBrushEnd = useCallback(
