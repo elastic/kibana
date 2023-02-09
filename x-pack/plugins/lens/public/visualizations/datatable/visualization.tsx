@@ -104,7 +104,7 @@ export const getDatatableVisualization = ({
 
   initialize(addNewLayer, state) {
     return (
-      state || {
+      (state as DatatableVisualizationState) || {
         columns: [],
         layerId: addNewLayer(),
         layerType: LayerTypes.DATA,

@@ -221,7 +221,7 @@ export const getGaugeVisualization = ({
 
   initialize(addNewLayer, state, mainPalette) {
     return (
-      state || {
+      (state as GaugeVisualizationState) || {
         layerId: addNewLayer(),
         layerType: LayerTypes.DATA,
         shape: GaugeShapes.HORIZONTAL_BULLET,

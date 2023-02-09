@@ -201,7 +201,7 @@ export const getLegacyMetricVisualization = ({
 
   initialize(addNewLayer, state) {
     return (
-      state || {
+      (state as LegacyMetricState) || {
         layerId: addNewLayer(),
         accessor: undefined,
         layerType: LayerTypes.DATA,

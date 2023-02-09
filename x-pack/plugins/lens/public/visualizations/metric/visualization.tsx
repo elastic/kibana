@@ -376,7 +376,7 @@ export const getMetricVisualization = ({
 
   initialize(addNewLayer, state, mainPalette) {
     return (
-      state ?? {
+      (state as MetricVisualizationState) || {
         layerId: addNewLayer(),
         layerType: layerTypes.DATA,
         palette: mainPalette,
