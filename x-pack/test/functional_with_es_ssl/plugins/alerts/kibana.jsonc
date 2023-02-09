@@ -1,0 +1,15 @@
+{
+  "type": "plugin",
+  "id": "@kbn/alerting-fixture-plugin",
+  "owner": "@elastic/response-ops",
+  "plugin": {
+    "id": "alertingFixture",
+    "server": true,
+    "browser": true,
+    "requiredPlugins": [
+      "alerting",
+      "triggersActionsUi",
+      "features"
+    ]
+  }
+}

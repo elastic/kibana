@@ -7,7 +7,7 @@
 
 import { MappingRuntimeFieldType } from '@elastic/elasticsearch/lib/api/types';
 import { TransformPutTransformRequest } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { calendarAlignedTimeWindowSchema, timeslicesBudgetingMethodSchema } from '@kbn/slo-schema';
+import { timeslicesBudgetingMethodSchema } from '@kbn/slo-schema';
 
 import { TransformSettings } from '../../../assets/transform_templates/slo_transform_template';
 import { SLO } from '../../../domain/models';
@@ -29,36 +29,6 @@ export abstract class TransformGenerator {
           source: `emit(${slo.revision})`,
         },
       },
-      'slo._internal.name': {
-        type: 'keyword' as MappingRuntimeFieldType,
-        script: {
-          source: `emit('${slo.name}')`,
-        },
-      },
-      'slo._internal.budgeting_method': {
-        type: 'keyword' as MappingRuntimeFieldType,
-        script: {
-          source: `emit('${slo.budgetingMethod}')`,
-        },
-      },
-      'slo._internal.objective.target': {
-        type: 'double' as MappingRuntimeFieldType,
-        script: {
-          source: `emit(${slo.objective.target})`,
-        },
-      },
-      'slo._internal.time_window.duration': {
-        type: 'keyword' as MappingRuntimeFieldType,
-        script: {
-          source: `emit('${slo.timeWindow.duration.format()}')`,
-        },
-      },
-      'slo._internal.time_window.is_rolling': {
-        type: 'boolean' as MappingRuntimeFieldType,
-        script: {
-          source: calendarAlignedTimeWindowSchema.is(slo.timeWindow) ? `emit(false)` : `emit(true)`,
-        },
-      },
     };
   }
 
@@ -77,31 +47,6 @@ export abstract class TransformGenerator {
       'slo.revision': {
         terms: {
           field: 'slo.revision',
-        },
-      },
-      'slo._internal.name': {
-        terms: {
-          field: 'slo._internal.name',
-        },
-      },
-      'slo._internal.budgeting_method': {
-        terms: {
-          field: 'slo._internal.budgeting_method',
-        },
-      },
-      'slo._internal.objective.target': {
-        terms: {
-          field: 'slo._internal.objective.target',
-        },
-      },
-      'slo._internal.time_window.duration': {
-        terms: {
-          field: 'slo._internal.time_window.duration',
-        },
-      },
-      'slo._internal.time_window.is_rolling': {
-        terms: {
-          field: 'slo._internal.time_window.is_rolling',
         },
       },
       // Field used in the destination index, using @timestamp as per mapping definition

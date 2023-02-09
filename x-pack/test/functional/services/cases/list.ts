@@ -81,9 +81,6 @@ export function CasesTableServiceProvider(
         rows = await find.allByCssSelector('[data-test-subj*="cases-table-row-"', 100);
         if (rows.length > 0) {
           await this.bulkDeleteAllCases();
-          // wait for a second
-          await new Promise((r) => setTimeout(r, 1000));
-          await header.waitUntilLoadingHasFinished();
         }
       } while (rows.length > 0);
     },
@@ -165,11 +162,11 @@ export function CasesTableServiceProvider(
 
     async filterByOwner(owner: string) {
       await common.clickAndValidate(
-        'options-filter-popover-button-Solution',
-        `options-filter-popover-item-${owner}`
+        'solution-filter-popover-button',
+        `solution-filter-popover-item-${owner}`
       );
 
-      await testSubjects.click(`options-filter-popover-item-${owner}`);
+      await testSubjects.click(`solution-filter-popover-item-${owner}`);
     },
 
     async refreshTable() {

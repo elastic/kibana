@@ -214,7 +214,7 @@ export const FORM_CONFIG = (readOnly: boolean): FieldConfig => ({
       FIELD(readOnly)[AlertConfigKey.STATUS_ENABLED],
     ],
     step3: [FIELD(readOnly)['source.inline'], FIELD(readOnly)[ConfigKey.PARAMS]],
-    scriptEdit: [FIELD(readOnly)['source.inline']],
+    scriptEdit: [FIELD(readOnly)['source.inline'], FIELD(readOnly)[ConfigKey.PARAMS]],
     advanced: [
       {
         ...DEFAULT_DATA_OPTIONS(readOnly),
