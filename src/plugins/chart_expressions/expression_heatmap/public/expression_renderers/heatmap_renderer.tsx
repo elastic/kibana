@@ -20,6 +20,7 @@ import {
   HeatmapExpressionProps,
   FilterEvent,
   BrushEvent,
+  MultiFilterEvent,
 } from '../../common';
 import {
   getDatatableUtilities,
@@ -54,6 +55,10 @@ export const heatmapRenderer: (
       handlers.event({ name: 'brush', data });
     };
 
+    const onClickMultiValue = (data: MultiFilterEvent['data']) => {
+      handlers.event({ name: 'multiFilter', data });
+    };
+
     const renderComplete = () => {
       const executionContext = handlers.getExecutionContext();
       const containerType = extractContainerType(executionContext);
@@ -84,6 +89,7 @@ export const heatmapRenderer: (
             {...config}
             onClickValue={onClickValue}
             onSelectRange={onSelectRange}
+            onClickMultiValue={onClickMultiValue}
             timeZone={timeZone}
             datatableUtilities={getDatatableUtilities()}
             formatFactory={getFormatService().deserialize}

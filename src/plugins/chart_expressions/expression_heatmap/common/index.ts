@@ -13,6 +13,7 @@ export type {
   HeatmapExpressionProps,
   FilterEvent,
   BrushEvent,
+  MultiFilterEvent,
   FormatFactory,
   HeatmapRenderProps,
   HeatmapLegendConfigResult,

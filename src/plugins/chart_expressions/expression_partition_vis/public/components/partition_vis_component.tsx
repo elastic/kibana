@@ -395,10 +395,12 @@ const PartitionVisComponent = (props: PartitionVisComponentProps) => {
   const filterSelectedTooltipValues = (
     tooltipSelectedValues: Array<TooltipValue<Record<string, string | number>, SeriesIdentifier>>
   ) => {
-    // const layerIndexes: number[] = [];
     // console.dir(tooltipSelectedValues);
-    // console.dir(visParams);
     // console.dir(visData);
+    // tooltipSelectedValues.forEach((v, idx) => {
+    //   const data = getFilterEventData(visData, v.seriesIdentifier);
+    // });
+
     tooltipSelectedValues.forEach((v, idx) => {
       visData.columns.forEach((column) => {
         const value = v.label;

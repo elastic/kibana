@@ -18,11 +18,15 @@ import {
   ScaleType,
   Settings,
   TooltipType,
-  TooltipProps,
   ESFixedIntervalUnit,
   ESCalendarIntervalUnit,
   PartialTheme,
+  Tooltip,
+  TooltipValue,
+  SeriesIdentifier,
+  Cell,
 } from '@elastic/charts';
+import { i18n } from '@kbn/i18n';
 import type { CustomPaletteState } from '@kbn/charts-plugin/public';
 import { search } from '@kbn/data-plugin/public';
 import { LegendToggle, EmptyPlaceholder, useActiveCursor } from '@kbn/charts-plugin/public';
@@ -142,6 +146,7 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = memo(
     datatableUtilities,
     onClickValue,
     onSelectRange,
+    onClickMultiValue,
     paletteService,
     uiState,
     interactive,
@@ -304,6 +309,42 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = memo(
       ]
     );
 
+    const filterSelectedTooltipValues = (
+      tooltipSelectedValues: Array<
+        TooltipValue<Record<string, Cell | string | number>, SeriesIdentifier>
+      >
+    ) => {
+      const points: Array<{ column: number; value: string | number | Cell }> = [];
+      tooltipSelectedValues.forEach((v) => {
+        const datum = v.datum;
+        if (!datum) return;
+        const { x, y } = datum;
+        if (x === v.value) {
+          points.push({
+            column: xAxisColumnIndex,
+            value: x,
+          });
+        }
+        if (y === v.value && yAxisColumn) {
+          points.push({
+            column: yAxisColumnIndex,
+            value: y,
+          });
+        }
+        if (points.length) {
+          points.forEach((p) => {
+            onClickMultiValue({
+              data: {
+                column: p.column,
+                value: [p.value],
+                table,
+              },
+            });
+          });
+        }
+      });
+    };
+
     const onBrushEnd = useCallback(
       (e: HeatmapBrushEvent) => {
         const { x, y } = e;
@@ -432,10 +473,6 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = memo(
         };
       }
     }
-
-    const tooltip: TooltipProps = {
-      type: args.showTooltip ? TooltipType.Follow : TooltipType.None,
-    };
 
     const valueFormatter = (d: number) => {
       let value = d;
@@ -575,6 +612,31 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = memo(
           }}
         >
           <Chart ref={chartRef}>
+            <Tooltip<Record<string, string | number | Cell>, SeriesIdentifier>
+              actions={
+                interactive
+                  ? [
+                      {
+                        disabled: (selected) => selected.length < 1,
+                        label: (selected) =>
+                          selected.length === 0
+                            ? i18n.translate(
+                                'expressionHeatmapVis.tooltipActions.emptyFilterSelection',
+                                {
+                                  defaultMessage: 'Select at least one series to filter',
+                                }
+                              )
+                            : i18n.translate('expressionHeatmapVis.tooltipActions.filterValues', {
+                                defaultMessage: 'Filter {seriesNumber} series',
+                                values: { seriesNumber: selected.length },
+                              }),
+                        onSelect: filterSelectedTooltipValues,
+                      },
+                    ]
+                  : undefined
+              }
+              type={args.showTooltip ? TooltipType.Follow : TooltipType.None}
+            />
             <Settings
               onRenderChange={onRenderChange}
               noResults={
@@ -590,7 +652,7 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = memo(
               legendSize={LegendSizeToPixels[args.legend.legendSize ?? DEFAULT_LEGEND_SIZE]}
               legendColorPicker={uiState ? LegendColorPickerWrapper : undefined}
               debugState={window._echDebugStateFlag ?? false}
-              tooltip={tooltip}
+              // tooltip={tooltip}
               theme={[themeOverrides, chartTheme]}
               baseTheme={chartBaseTheme}
               xDomain={{
