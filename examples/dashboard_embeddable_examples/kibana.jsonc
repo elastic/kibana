@@ -1,0 +1,18 @@
+{
+  "type": "plugin",
+  "id": "@kbn/dashboard-embeddable-examples-plugin",
+  "owner": "@elastic/kibana-presentation",
+  "description": "Example app that shows how to embed a dashboard in an application",
+  "plugin": {
+    "id": "dashboardEmbeddableExamples",
+    "server": false,
+    "browser": true,
+    "requiredPlugins": [
+      "embeddable",
+      "embeddableExamples",
+      "dashboard",
+      "developerExamples",
+      "kibanaReact"
+    ]
+  }
+}

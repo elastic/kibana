@@ -2232,7 +2232,7 @@
             "label": "osType",
             "description": [],
             "signature": [
-              "\"android\" | \"ios\""
+              "\"ios\" | \"android\""
             ],
             "path": "packages/kbn-apm-synthtrace-client/src/lib/apm/mobile_device.ts",
             "deprecated": false,
