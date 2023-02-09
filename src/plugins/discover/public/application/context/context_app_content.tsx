@@ -86,9 +86,10 @@ export function ContextAppContent({
   const areSuccessorsLoading =
     successorsStatus === LoadingStatus.LOADING || successorsStatus === LoadingStatus.UNINITIALIZED;
 
+  const timeFieldName = dataView.timeFieldName;
   const showTimeCol = useMemo(
-    () => !config.get(DOC_HIDE_TIME_COLUMN_SETTING, false) && !!dataView.timeFieldName,
-    [config, dataView]
+    () => !config.get(DOC_HIDE_TIME_COLUMN_SETTING, false) && !!timeFieldName,
+    [config, timeFieldName]
   );
   const defaultStepSize = useMemo(() => parseInt(config.get(CONTEXT_STEP_SETTING), 10), [config]);
 
@@ -111,8 +112,8 @@ export function ContextAppContent({
     [setAppState]
   );
   const sort = useMemo(() => {
-    return [[dataView.timeFieldName!, SortDirection.desc]];
-  }, [dataView]);
+    return [[timeFieldName!, SortDirection.desc]];
+  }, [timeFieldName]);
 
   return (
     <Fragment>

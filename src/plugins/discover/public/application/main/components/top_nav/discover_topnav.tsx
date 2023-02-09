@@ -65,9 +65,10 @@ export const DiscoverTopNav = ({
   const adHocDataViews = useInternalStateSelector((state) => state.adHocDataViews);
   const dataView = useInternalStateSelector((state) => state.dataView!);
   const savedDataViews = useInternalStateSelector((state) => state.savedDataViews);
+  const dataViewIsTimeBased = dataView.isTimeBased();
   const showDatePicker = useMemo(
-    () => dataView.isTimeBased() && dataView.type !== DataViewType.ROLLUP,
-    [dataView]
+    () => dataViewIsTimeBased && dataView.type !== DataViewType.ROLLUP,
+    [dataView.type, dataViewIsTimeBased]
   );
   const services = useDiscoverServices();
   const { dataViewEditor, navigation, dataViewFieldEditor, data, uiSettings, dataViews } = services;

@@ -155,12 +155,10 @@ function DiscoverDocumentsComponent({
     [stateContainer]
   );
 
+  const timeFieldName = dataView.timeFieldName;
   const showTimeCol = useMemo(
-    () =>
-      !isPlainRecord &&
-      !uiSettings.get(DOC_HIDE_TIME_COLUMN_SETTING, false) &&
-      !!dataView.timeFieldName,
-    [isPlainRecord, uiSettings, dataView.timeFieldName]
+    () => !isPlainRecord && !uiSettings.get(DOC_HIDE_TIME_COLUMN_SETTING, false) && !!timeFieldName,
+    [isPlainRecord, timeFieldName, uiSettings]
   );
 
   if (isDataViewLoading || (isEmptyDataResult && isDataLoading)) {

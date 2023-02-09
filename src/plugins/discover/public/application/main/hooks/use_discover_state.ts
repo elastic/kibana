@@ -303,11 +303,13 @@ export function useDiscoverState({
    * We need to make sure the auto refresh interval is disabled for
    * non-time series data or rollups since we don't show the date picker
    */
+  const dataViewIsTimeBased = dataView.isTimeBased();
+
   useEffect(() => {
-    if (dataView && (!dataView.isTimeBased() || dataView.type === DataViewType.ROLLUP)) {
+    if (dataView && (!dataViewIsTimeBased || dataView.type === DataViewType.ROLLUP)) {
       stateContainer.pauseAutoRefreshInterval();
     }
-  }, [dataView, stateContainer]);
+  }, [dataView, dataViewIsTimeBased, stateContainer]);
 
   return {
     inspectorAdapters,

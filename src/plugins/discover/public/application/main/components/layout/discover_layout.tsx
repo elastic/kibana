@@ -107,9 +107,10 @@ export function DiscoverLayout({
   // in a non time based way using the regular _search API, since the internal
   // representation of those documents does not have the time field that _field_caps
   // reports us.
+  const dataViewIsTimeBased = dataView.isTimeBased();
   const isTimeBased = useMemo(() => {
-    return dataView.type !== DataViewType.ROLLUP && dataView.isTimeBased();
-  }, [dataView]);
+    return dataView.type !== DataViewType.ROLLUP && dataViewIsTimeBased;
+  }, [dataView.type, dataViewIsTimeBased]);
 
   const initialSidebarClosed = Boolean(storage.get(SIDEBAR_CLOSED_KEY));
   const [isSidebarClosed, setIsSidebarClosed] = useState(initialSidebarClosed);
