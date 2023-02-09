@@ -36,8 +36,7 @@ export class EndpointMetadataGenerator extends BaseDataGenerator {
     }
 
     // v8.8 introduced execute capability
-    //  change this to 8.8.0 before merging
-    if (gte(agentVersion, '8.7.0')) {
+    if (gte(agentVersion, '8.8.0')) {
       capabilities.push('execute');
     }
 

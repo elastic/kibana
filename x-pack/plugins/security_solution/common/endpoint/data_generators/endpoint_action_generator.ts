@@ -308,11 +308,18 @@ export class EndpointActionGenerator extends BaseDataGenerator {
       {
         type: 'json',
         content: {
-          stdout: `-rw-r--r--    1 elastic  staff      458 Jan 26 09:10 doc.txt\
+          stdout: this.randomChoice([
+            this.randomString(1280),
+            `-rw-r--r--    1 elastic  staff      458 Jan 26 09:10 doc.txt\
           -rw-r--r--     1 elastic  staff  298 Feb  2 09:10 readme.md`,
-          stderr: `error line\
-          error line 2
-          error line 3 that is quite very long and will be truncated, and should not be visible in the UI\ errorline3thathasalotmoretextthatdoesnotendfortestingpurposesrepeatalotoftexthereandkeepaddingmoreandmoretextwithoutendtheideabeingthatwedonotuseperiodsorcommassothattheconsoleuiisunabletobreakthislinewithoutsomecssrulessowiththislineweshouldbeabletotestthatwithgenerateddata`,
+          ]),
+          stderr: this.randomChoice([
+            this.randomString(1280),
+            `error line 1\
+          error line 2\
+          error line 3 that is quite very long and will be truncated, and should not be visible in the UI\
+          errorline4thathasalotmoretextthatdoesnotendfortestingpurposesrepeatalotoftexthereandkeepaddingmoreandmoretextwithoutendtheideabeingthatwedonotuseperiodsorcommassothattheconsoleuiisunabletobreakthislinewithoutsomecssrulessowiththislineweshouldbeabletotestthatwithgenerateddata`,
+          ]),
           stdoutTruncated: true,
           stderrTruncated: true,
           shell_code: 0,
