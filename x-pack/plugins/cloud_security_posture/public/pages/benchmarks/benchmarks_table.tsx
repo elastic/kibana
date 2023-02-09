@@ -12,6 +12,8 @@ import {
   type Pagination,
   type CriteriaWithPagination,
   EuiLink,
+  EuiIcon,
+  EuiToolTip,
 } from '@elastic/eui';
 import React from 'react';
 import { generatePath } from 'react-router-dom';
@@ -144,6 +146,15 @@ const BENCHMARKS_TABLE_COLUMNS: Array<EuiBasicTableColumn<Benchmark>> = [
     truncateText: true,
     sortable: true,
     'data-test-subj': TEST_SUBJ.BENCHMARKS_TABLE_COLUMNS.CREATED_BY,
+    render: (createdBy: Benchmark['package_policy']['created_by']) => {
+      return (
+        <EuiToolTip position="top" content={createdBy} anchorClassName="eui-textTruncate">
+          <span>
+            <EuiIcon type="user" /> {createdBy}
+          </span>
+        </EuiToolTip>
+      );
+    },
   },
   {
     field: 'package_policy.created_at',
