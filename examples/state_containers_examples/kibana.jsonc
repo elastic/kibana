@@ -1,0 +1,19 @@
+{
+  "type": "plugin",
+  "id": "@kbn/state-containers-examples-plugin",
+  "owner": "@elastic/appex-sharedux",
+  "description": "Example plugin of how to use kibanaUtils services",
+  "plugin": {
+    "id": "stateContainersExamples",
+    "server": false,
+    "browser": true,
+    "requiredPlugins": [
+      "navigation",
+      "data",
+      "developerExamples"
+    ],
+    "requiredBundles": [
+      "kibanaUtils"
+    ]
+  }
+}

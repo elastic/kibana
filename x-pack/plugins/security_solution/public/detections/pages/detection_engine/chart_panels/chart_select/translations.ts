@@ -32,3 +32,38 @@ export const TREEMAP = i18n.translate(
 export const CHARTS = i18n.translate('xpack.securitySolution.components.chartSelect.chartsOption', {
   defaultMessage: 'Charts',
 });
+
+export const TABLE_TITLE = i18n.translate(
+  'xpack.securitySolution.components.chartSelect.tableOptionTitle',
+  {
+    defaultMessage: 'Aggregations',
+  }
+);
+
+export const TREND_TITLE = i18n.translate(
+  'xpack.securitySolution.components.chartSelect.trendOptionTitle',
+  {
+    defaultMessage: 'Trend Analysis',
+  }
+);
+
+export const TREEMAP_TITLE = i18n.translate(
+  'xpack.securitySolution.components.chartSelect.treemapOptionTitle',
+  {
+    defaultMessage: 'Multi-dimensional',
+  }
+);
+
+export const CHARTS_TITLE = i18n.translate(
+  'xpack.securitySolution.components.chartSelect.chartsOptionTitle',
+  {
+    defaultMessage: 'Summary',
+  }
+);
+
+export const LEGEND_TITLE = i18n.translate(
+  'xpack.securitySolution.components.chartSelect.legendTitle',
+  {
+    defaultMessage: 'Select a tab',
+  }
+);
