@@ -8,6 +8,8 @@
 /*
  * This module contains helpers for managing the task manager storage layer.
  */
+import murmurhash from 'murmurhash';
+import uuid from 'uuid';
 import { Subject } from 'rxjs';
 import { omit, defaults, get } from 'lodash';
 import { SavedObjectError } from '@kbn/core-saved-objects-common';
@@ -89,6 +91,10 @@ export interface UpdateByQueryResult {
   total: number;
 }
 
+interface SerializedConcreteTaskInstanceWithPartition extends SerializedConcreteTaskInstance {
+  partition: number;
+}
+
 /**
  * Wraps an elasticsearch connection and provides a task manager-specific
  * interface into the index.
@@ -144,10 +150,14 @@ export class TaskStore {
 
     let savedObject;
     try {
-      savedObject = await this.savedObjectsRepository.create<SerializedConcreteTaskInstance>(
+      const id = taskInstance.id || uuid.v4();
+      savedObject = await this.savedObjectsRepository.create<SerializedConcreteTaskInstanceWithPartition>(
         'task',
-        taskInstanceToAttributes(taskInstance),
-        { id: taskInstance.id, refresh: false }
+        {
+          ...taskInstanceToAttributes(taskInstance),
+          partition: murmurhash.v3(id) % 360
+        },
+        { id, refresh: false }
       );
       if (get(taskInstance, 'schedule.interval', null) == null) {
         this.adHocTaskCounter.increment();
@@ -168,16 +178,20 @@ export class TaskStore {
   public async bulkSchedule(taskInstances: TaskInstance[]): Promise<ConcreteTaskInstance[]> {
     const objects = taskInstances.map((taskInstance) => {
       this.definitions.ensureHas(taskInstance.taskType);
+      const id = taskInstance.id || uuid.v4();
       return {
         type: 'task',
-        attributes: taskInstanceToAttributes(taskInstance),
-        id: taskInstance.id,
+        attributes: {
+          ...taskInstanceToAttributes(taskInstance),
+          partition: murmurhash.v3(id) % 360
+        },
+        id: id,
       };
     });
 
     let savedObjects;
     try {
-      savedObjects = await this.savedObjectsRepository.bulkCreate<SerializedConcreteTaskInstance>(
+      savedObjects = await this.savedObjectsRepository.bulkCreate<SerializedConcreteTaskInstanceWithPartition>(
         objects,
         { refresh: false }
       );

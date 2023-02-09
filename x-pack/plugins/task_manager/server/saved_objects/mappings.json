@@ -4,6 +4,9 @@
       "taskType": {
         "type": "keyword"
       },
+      "partition": {
+        "type": "integer"
+      },
       "scheduledAt": {
         "type": "date"
       },
