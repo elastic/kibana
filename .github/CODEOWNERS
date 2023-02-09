@@ -583,7 +583,7 @@ packages/kbn-config-mocks @elastic/kibana-core
 packages/kbn-config-schema @elastic/kibana-core
 src/plugins/console @elastic/platform-deployment-management
 packages/content-management/content_editor @elastic/appex-sharedux
-src/plugins/content_management @elastic/appex-sharedux
+src/plugins/content_management @elastic/kibana-global-experience
 packages/content-management/table_list @elastic/appex-sharedux
 examples/controls_example @elastic/kibana-presentation
 src/plugins/controls @elastic/kibana-presentation
