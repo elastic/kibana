@@ -47,7 +47,8 @@ import type {
   ResponseActionParametersWithPidOrEntityId,
   ResponseActionsExecuteParameters,
 } from '../../../../common/endpoint/types';
-import { DEFAULT_EXECUTE_ACTION_TIMEOUT, ResponseActionsApiCommandNames } from '../../../../common/endpoint/service/response_actions/constants';
+import type { ResponseActionsApiCommandNames } from '../../../../common/endpoint/service/response_actions/constants';
+import { DEFAULT_EXECUTE_ACTION_TIMEOUT } from '../../../../common/endpoint/service/response_actions/constants';
 import type {
   SecuritySolutionPluginRouter,
   SecuritySolutionRequestHandlerContext,
