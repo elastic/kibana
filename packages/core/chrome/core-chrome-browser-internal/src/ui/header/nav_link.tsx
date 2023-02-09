@@ -53,7 +53,7 @@ export function createEuiListItem({
       if (!isModifiedOrPrevented(event)) {
         onClick();
         <EuiScreenReaderLive>
-          {i18n.translate('core.ui.recentLinks.linkItem.screenReaderLabel', {
+          {i18n.translate('core.ui.recentLinks.linkItem.screenReaderAnnouncement', {
             defaultMessage: '{url}, type: {title}',
             values: {
               url,
