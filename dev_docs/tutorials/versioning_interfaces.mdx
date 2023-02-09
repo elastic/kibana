@@ -198,6 +198,9 @@ common
 import type { PortableDashboard } from '@kbn/dashboard/common';
 import type { DataSource } from '../data_source/v2';
 
+// Optionally, re-export the entire set of types.
+export * from './v1';
+
 interface WeatherDashboard {
   /** A unqiue ID for this weather dashboard */
   id: string;
@@ -226,6 +229,12 @@ interface CreateWeatherDashboardHTTPResponse {
 // Imagine this pattern for the update and list endpoints too.
 
 ```
+
+<DocCallOut title="Inherit types from the `v1` namespace">
+ It is possible to add `export * from './v1';` to the top of our `weather_dashboard/v2.ts` file to re-export unchanged types and avoid copying the whole file.
+
+ However, copying and adapting the entire set of types is OK too. If we have correctly grouped our sub-domains we should be versioning all collections of types together.
+</DocCallOut>
 
 Now we update the `latest.ts` and `index.ts` files accordingly:
 
