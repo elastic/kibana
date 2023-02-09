@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { TableId } from '../../../common/types';
+import { TableId } from '@kbn/securitysolution-data-table';
 import { InputsModelId } from '../store/inputs/constants';
 import {
   Direction,

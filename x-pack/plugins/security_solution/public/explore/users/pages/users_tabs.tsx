@@ -19,7 +19,7 @@ import { AnomaliesUserTable } from '../../../common/components/ml/tables/anomali
 import { UserRiskScoreQueryTabBody } from './navigation/user_risk_score_tab_body';
 import { EventsQueryTabBody } from '../../../common/components/events_tab';
 import { userNameExistsFilter } from './details/helpers';
-import { TableId } from '../../../../common/types';
+import { TableId } from '@kbn/securitysolution-data-table';
 
 export const UsersTabs = memo<UsersTabsProps>(
   ({ deleteQuery, filterQuery, from, indexNames, isInitializing, setQuery, to, type }) => {

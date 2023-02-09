@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { tableDefaults } from '../../store/data_table/defaults';
-import type { SubsetDataTableModel } from '../../store/data_table/model';
+import { tableDefaults } from '@kbn/securitysolution-data-table';
+import type { SubsetDataTableModel } from '@kbn/securitysolution-data-table';
 import type { ColumnHeaderOptions } from '../../../../common/types/timeline';
 import { defaultColumnHeaderType } from '../../../timelines/components/timeline/body/column_headers/default_headers';
 import { DEFAULT_DATE_COLUMN_MIN_WIDTH } from '../../../timelines/components/timeline/body/constants';

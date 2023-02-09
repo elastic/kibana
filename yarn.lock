@@ -4845,6 +4845,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/securitysolution-data-table@link:packages/kbn-securitysolution-data-table":
+  version "0.0.0"
+  uid ""
+
 "@kbn/securitysolution-ecs@link:packages/kbn-securitysolution-ecs":
   version "0.0.0"
   uid ""

@@ -24,7 +24,7 @@ import {
   UncommonProcessQueryTabBody,
   SessionsTabBody,
 } from '../navigation';
-import { TableId } from '../../../../../common/types';
+import { TableId } from '@kbn/securitysolution-data-table';
 
 export const HostDetailsTabs = React.memo<HostDetailsTabsProps>(
   ({

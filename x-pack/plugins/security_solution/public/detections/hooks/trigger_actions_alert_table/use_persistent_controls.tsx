@@ -8,16 +8,20 @@
 import React, { useCallback, useMemo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { isNoneGroup } from '@kbn/securitysolution-grouping';
+import {
+  dataTableSelectors,
+  tableDefaults,
+  dataTableActions,
+} from '@kbn/securitysolution-data-table';
+import type { ViewSelection, TableId } from '@kbn/securitysolution-data-table';
 import type { State } from '../../../common/store';
 import { useDataTableFilters } from '../../../common/hooks/use_data_table_filters';
-import { dataTableSelectors } from '../../../common/store/data_table';
-import { changeViewMode } from '../../../common/store/data_table/actions';
-import type { ViewSelection, TableId } from '../../../../common/types';
 import { useShallowEqualSelector } from '../../../common/hooks/use_selector';
 import { RightTopMenu } from '../../../common/components/events_viewer/right_top_menu';
 import { AdditionalFiltersAction } from '../../components/alerts_table/additional_filters_action';
-import { tableDefaults } from '../../../common/store/data_table/defaults';
 import { groupSelectors } from '../../../common/store/grouping';
+
+const { changeViewMode } = dataTableActions;
 
 export const getPersistentControlsHook = (tableId: TableId) => {
   const usePersistentControls = () => {

@@ -1054,6 +1054,8 @@
       "@kbn/security-test-endpoints-plugin/*": ["x-pack/test/security_functional/plugins/test_endpoints/*"],
       "@kbn/securitysolution-autocomplete": ["packages/kbn-securitysolution-autocomplete"],
       "@kbn/securitysolution-autocomplete/*": ["packages/kbn-securitysolution-autocomplete/*"],
+      "@kbn/securitysolution-data-table": ["packages/kbn-securitysolution-data-table"],
+      "@kbn/securitysolution-data-table/*": ["packages/kbn-securitysolution-data-table/*"],
       "@kbn/securitysolution-ecs": ["packages/kbn-securitysolution-ecs"],
       "@kbn/securitysolution-ecs/*": ["packages/kbn-securitysolution-ecs/*"],
       "@kbn/securitysolution-es-utils": ["packages/kbn-securitysolution-es-utils"],

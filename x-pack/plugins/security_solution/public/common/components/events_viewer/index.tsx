@@ -5,6 +5,17 @@
  * 2.0.
  */
 
+import {
+  dataTableActions,
+  DataTableComponent,
+  defaultHeaders,
+  getEventIdToDataMapping,
+} from '@kbn/securitysolution-data-table';
+import type {
+  SubsetDataTableModel,
+  TableId,
+  ViewSelection,
+} from '@kbn/securitysolution-data-table';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { AlertConsumers } from '@kbn/rule-data-utils';
 import React, { useRef, useCallback, useMemo, useEffect, useState, useContext } from 'react';
@@ -25,10 +36,7 @@ import type {
   OnSelectAll,
   SetEventsDeleted,
   SetEventsLoading,
-  TableId,
-  ViewSelection,
 } from '../../../../common/types';
-import { dataTableActions } from '../../store/data_table';
 import { InputsModelId } from '../../store/inputs/constants';
 import type { State } from '../../store';
 import { inputsActions } from '../../store/actions';
@@ -46,7 +54,6 @@ import {
   useSessionViewNavigation,
   useSessionView,
 } from '../../../timelines/components/timeline/session_tab_content/use_session_view';
-import type { SubsetDataTableModel } from '../../store/data_table/model';
 import {
   EventsContainerLoading,
   FullScreenContainer,
@@ -57,13 +64,10 @@ import {
 import { getDefaultViewSelection, getCombinedFilterQuery } from './helpers';
 import { useTimelineEvents } from './use_timelines_events';
 import { TableContext, EmptyTable, TableLoading } from './shared';
-import { DataTableComponent } from '../data_table';
 import type { AlertWorkflowStatus } from '../../types';
 import { useQueryInspector } from '../page/manage_query';
 import type { SetQuery } from '../../containers/use_global_time/types';
-import { defaultHeaders } from '../../store/data_table/defaults';
 import { checkBoxControlColumn, transformControlColumns } from '../control_columns';
-import { getEventIdToDataMapping } from '../data_table/helpers';
 import { RightTopMenu } from './right_top_menu';
 import { useAlertBulkActions } from './use_alert_bulk_actions';
 import type { BulkActionsProp } from '../toolbar/bulk_actions/types';
@@ -151,7 +155,11 @@ const StatefulEventsViewerComponent: React.FC<EventsViewerProps & PropsFromRedux
     } = defaultModel,
   } = useSelector((state: State) => eventsViewerSelector(state, tableId));
 
-  const { uiSettings, data } = useKibana().services;
+  const {
+    uiSettings,
+    data,
+    triggersActionsUi: { getFieldBrowser },
+  } = useKibana().services;
 
   const [tableView, setTableView] = useState<ViewSelection>(
     getDefaultViewSelection({
@@ -582,6 +590,7 @@ const StatefulEventsViewerComponent: React.FC<EventsViewerProps & PropsFromRedux
                             pagination={pagination}
                             isEventRenderedView={tableView === 'eventRenderedView'}
                             rowHeightsOptions={rowHeightsOptions}
+                            getFieldBrowser={getFieldBrowser}
                           />
                         </StatefulEventContext.Provider>
                       </ScrollableFlexItem>

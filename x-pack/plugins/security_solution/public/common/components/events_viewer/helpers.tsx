@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { ViewSelection } from '../../../../common/types';
-import { TableId } from '../../../../common/types';
+import type { ViewSelection } from '@kbn/securitysolution-data-table';
+import { TableId } from '@kbn/securitysolution-data-table';
 import type { CombineQueries } from '../../lib/kuery';
 import { buildTimeRangeFilter, combineQueries } from '../../lib/kuery';
 

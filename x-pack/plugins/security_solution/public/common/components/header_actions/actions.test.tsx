@@ -12,7 +12,7 @@ import { mockTimelineData, mockTimelineModel, TestProviders } from '../../mock';
 import { useShallowEqualSelector } from '../../hooks/use_selector';
 import { useIsExperimentalFeatureEnabled } from '../../hooks/use_experimental_features';
 import { licenseService } from '../../hooks/use_license';
-import { TableId } from '../../../../common/types';
+import { TableId } from '@kbn/securitysolution-data-table';
 import { useTourContext } from '../guided_onboarding_tour';
 import { GuidedOnboardingTourStep, SecurityTourStep } from '../guided_onboarding_tour/tour_step';
 import { SecurityStepId } from '../guided_onboarding_tour/tour_config';

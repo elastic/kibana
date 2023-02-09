@@ -14,7 +14,7 @@ import styled from 'styled-components';
 
 import { isTab } from '@kbn/timelines-plugin/public';
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
-import { TableId } from '../../../../common/types';
+import { dataTableSelectors, tableDefaults, TableId } from '@kbn/securitysolution-data-table';
 import { InputsModelId } from '../../../common/store/inputs/constants';
 import { SecurityPageName } from '../../../app/types';
 import type { UpdateDateRange } from '../../../common/components/charts/common';
@@ -51,8 +51,6 @@ import { useDeepEqualSelector, useShallowEqualSelector } from '../../../common/h
 import { useInvalidFilterQuery } from '../../../common/hooks/use_invalid_filter_query';
 import { sourceOrDestinationIpExistsFilter } from '../../../common/components/visualization_actions/utils';
 import { LandingPageComponent } from '../../../common/components/landing_page';
-import { dataTableSelectors } from '../../../common/store/data_table';
-import { tableDefaults } from '../../../common/store/data_table/defaults';
 /**
  * Need a 100% height here to account for the graph/analyze tool, which sets no explicit height parameters, but fills the available space.
  */

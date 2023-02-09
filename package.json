@@ -532,6 +532,7 @@
     "@kbn/security-solution-plugin": "link:x-pack/plugins/security_solution",
     "@kbn/security-test-endpoints-plugin": "link:x-pack/test/security_functional/plugins/test_endpoints",
     "@kbn/securitysolution-autocomplete": "link:packages/kbn-securitysolution-autocomplete",
+    "@kbn/securitysolution-data-table": "link:packages/kbn-securitysolution-data-table",
     "@kbn/securitysolution-ecs": "link:packages/kbn-securitysolution-ecs",
     "@kbn/securitysolution-es-utils": "link:packages/kbn-securitysolution-es-utils",
     "@kbn/securitysolution-exception-list-components": "link:packages/kbn-securitysolution-exception-list-components",

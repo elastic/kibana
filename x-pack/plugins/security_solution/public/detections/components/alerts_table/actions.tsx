@@ -31,7 +31,7 @@ import {
 
 import { lastValueFrom } from 'rxjs';
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
-import type { DataTableModel } from '../../../common/store/data_table/types';
+import type { DataTableModel } from '@kbn/securitysolution-data-table';
 import {
   ALERT_ORIGINAL_TIME,
   ALERT_GROUP_ID,

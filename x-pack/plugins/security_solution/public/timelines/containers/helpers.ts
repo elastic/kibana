@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+import { TableId } from '@kbn/securitysolution-data-table';
 import type { TimelineResult } from '../../../common/types';
-import { TableId } from '../../../common/types';
 import { DEFAULT_ALERTS_INDEX } from '../../../common/constants';
 
 export const getTimelineQueryTypes = (timeline: TimelineResult) => ({

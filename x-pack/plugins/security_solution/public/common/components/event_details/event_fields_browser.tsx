@@ -18,9 +18,8 @@ import {
   onKeyDownFocusHandler,
 } from '@kbn/timelines-plugin/public';
 
+import { dataTableSelectors, tableDefaults } from '@kbn/securitysolution-data-table';
 import { isInTableScope, isTimelineScope } from '../../../helpers';
-import { tableDefaults } from '../../store/data_table/defaults';
-import { dataTableSelectors } from '../../store/data_table';
 import { ADD_TIMELINE_BUTTON_CLASS_NAME } from '../../../timelines/components/flyout/add_timeline_button';
 import { timelineSelectors } from '../../../timelines/store/timeline';
 import type { BrowserFields } from '../../containers/source';

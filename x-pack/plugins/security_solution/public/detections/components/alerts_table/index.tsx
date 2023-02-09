@@ -15,13 +15,17 @@ import type { AlertsTableStateProps } from '@kbn/triggers-actions-ui-plugin/publ
 import styled from 'styled-components';
 import { useDispatch, useSelector } from 'react-redux';
 import { getEsQueryConfig } from '@kbn/data-plugin/public';
+import {
+  dataTableActions,
+  dataTableSelectors,
+  getColumnHeaders,
+  tableDefaults,
+  TableId,
+} from '@kbn/securitysolution-data-table';
 import { useGlobalTime } from '../../../common/containers/use_global_time';
-import { tableDefaults } from '../../../common/store/data_table/defaults';
 import { useLicense } from '../../../common/hooks/use_license';
-import { updateIsLoading, updateTotalCount } from '../../../common/store/data_table/actions';
 import { VIEW_SELECTION } from '../../../../common/constants';
 import { DEFAULT_COLUMN_MIN_WIDTH } from '../../../timelines/components/timeline/body/constants';
-import { dataTableActions, dataTableSelectors } from '../../../common/store/data_table';
 import { eventsDefaultModel } from '../../../common/components/events_viewer/default_model';
 import { GraphOverlay } from '../../../timelines/components/graph_overlay';
 import {
@@ -35,15 +39,15 @@ import { StatefulEventContext } from '../../../common/components/events_viewer/s
 import { getDataTablesInStorageByIds } from '../../../timelines/containers/local_storage';
 import { useSourcererDataView } from '../../../common/containers/sourcerer';
 import { SourcererScopeName } from '../../../common/store/sourcerer/model';
-import { TableId } from '../../../../common/types';
 import { useKibana } from '../../../common/lib/kibana';
 import { useShallowEqualSelector } from '../../../common/hooks/use_selector';
 import { getColumns } from '../../configurations/security_solution_detections';
-import { getColumnHeaders } from '../../../common/components/data_table/column_headers/helpers';
 import { buildTimeRangeFilter } from './helpers';
 import { eventsViewerSelector } from '../../../common/components/events_viewer/selectors';
 import type { State } from '../../../common/store';
 import * as i18n from './translations';
+
+const { updateIsLoading, updateTotalCount } = dataTableActions;
 
 const storage = new Storage(localStorage);
 

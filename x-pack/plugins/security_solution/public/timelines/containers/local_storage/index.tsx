@@ -7,13 +7,16 @@
 
 import { isEmpty } from 'lodash/fp';
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
-import { TableId } from '../../../../common/types/data_table';
-import type { DataTableState } from '../../../common/store/data_table/types';
+import type {
+  DataTableState,
+  DataTableModel,
+  TableIdLiteral,
+} from '@kbn/securitysolution-data-table';
+import { TableId } from '@kbn/securitysolution-data-table';
+import type { ColumnHeaderOptions } from '@kbn/timelines-plugin/common';
 import { ALERTS_TABLE_REGISTRY_CONFIG_IDS, VIEW_SELECTION } from '../../../../common/constants';
-import type { ColumnHeaderOptions, TableIdLiteral } from '../../../../common/types';
 import type { DataTablesStorage } from './types';
 import { useKibana } from '../../../common/lib/kibana';
-import type { DataTableModel } from '../../../common/store/data_table/model';
 
 export const LOCAL_STORAGE_TABLE_KEY = 'securityDataTable';
 const LOCAL_STORAGE_TIMELINE_KEY_LEGACY = 'timelines';

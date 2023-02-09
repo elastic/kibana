@@ -14,6 +14,7 @@ import { matchPath, Redirect } from 'react-router-dom';
 import type { Capabilities, CoreStart } from '@kbn/core/public';
 import type { DocLinks } from '@kbn/doc-links';
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
+import { dataTableActions, TableId } from '@kbn/securitysolution-data-table';
 import {
   ALERTS_PATH,
   APP_UI_ID,
@@ -35,8 +36,7 @@ import { SecurityPageName } from './app/types';
 import type { InspectResponse, StartedSubPlugins } from './types';
 import { CASES_SUB_PLUGIN_KEY } from './types';
 import { timelineActions } from './timelines/store/timeline';
-import { dataTableActions } from './common/store/data_table';
-import { TableId, TimelineId } from '../common/types';
+import { TimelineId } from '../common/types';
 
 export const parseRoute = (location: Pick<Location, 'hash' | 'pathname' | 'search'>) => {
   if (!isEmpty(location.hash)) {

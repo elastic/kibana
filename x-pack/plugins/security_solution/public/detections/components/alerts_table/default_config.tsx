@@ -12,8 +12,8 @@ import {
 } from '@kbn/rule-data-utils';
 
 import type { Filter } from '@kbn/es-query';
-import type { SubsetDataTableModel } from '../../../common/store/data_table/model';
-import { tableDefaults } from '../../../common/store/data_table/defaults';
+import { tableDefaults } from '@kbn/securitysolution-data-table';
+import type { SubsetDataTableModel } from '@kbn/securitysolution-data-table';
 import type { Status } from '../../../../common/detection_engine/schemas/common/schemas';
 import {
   getColumns,

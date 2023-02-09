@@ -9,6 +9,7 @@ import type { Storage } from '@kbn/kibana-utils-plugin/public';
 import type { AlertsTableConfigurationRegistryContract } from '@kbn/triggers-actions-ui-plugin/public';
 
 import type { AlertsTableConfigurationRegistry } from '@kbn/triggers-actions-ui-plugin/public/types';
+import { TableId } from '@kbn/securitysolution-data-table';
 import { getUseTriggersActionsFieldBrowserOptions } from '../../../detections/hooks/trigger_actions_alert_table/use_trigger_actions_browser_fields_options';
 import { getUseCellActionsHook } from '../../../detections/hooks/trigger_actions_alert_table/use_cell_actions';
 import { getBulkActionHook } from '../../../detections/hooks/trigger_actions_alert_table/use_bulk_actions';
@@ -20,7 +21,6 @@ import {
   CASES_FEATURE_ID,
 } from '../../../../common/constants';
 import { getDataTablesInStorageByIds } from '../../../timelines/containers/local_storage';
-import { TableId } from '../../../../common/types';
 import { getColumns } from '../../../detections/configurations/security_solution_detections';
 import { getRenderCellValueHook } from '../../../detections/configurations/security_solution_detections/render_cell_value';
 import { useToGetInternalFlyout } from '../../../timelines/components/side_panel/event_details/flyout';

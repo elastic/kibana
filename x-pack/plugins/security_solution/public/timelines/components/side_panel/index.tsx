@@ -12,6 +12,7 @@ import { EuiFlyout } from '@elastic/eui';
 
 import type { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { EntityType } from '@kbn/timelines-plugin/common';
+import { dataTableSelectors } from '@kbn/securitysolution-data-table';
 import { getScopedActions, isInTableScope, isTimelineScope } from '../../../helpers';
 import { timelineSelectors } from '../../store/timeline';
 import { timelineDefaults } from '../../store/timeline/defaults';
@@ -22,7 +23,6 @@ import { EventDetailsPanel } from './event_details';
 import { HostDetailsPanel } from './host_details';
 import { NetworkDetailsPanel } from './network_details';
 import { UserDetailsPanel } from './user_details';
-import { dataTableSelectors } from '../../../common/store/data_table';
 
 interface DetailsPanelProps {
   browserFields: BrowserFields;

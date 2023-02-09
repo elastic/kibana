@@ -9,7 +9,7 @@ import { render, screen } from '@testing-library/react';
 import React from 'react';
 
 import { TestProviders } from '../../../../../../../../common/mock';
-import { TableId } from '../../../../../../../../../common/types';
+import { TableId } from '@kbn/securitysolution-data-table';
 import { AlertFieldBadge } from '.';
 
 const contextId = 'test';
