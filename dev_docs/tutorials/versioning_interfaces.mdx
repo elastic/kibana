@@ -1,0 +1,240 @@
+---
+id: kibDevTutorialVersioningInterfaces
+slug: /kibana-dev-docs/versioning-interfaces
+title: Versioning interfaces
+description: We need to keep old versions of interfaces available. This tutorial describes a strategy for managing versions of your interfaces over time.
+date: 2023-02-09
+tags: ['kibana', 'onboarding', 'dev', 'architecture']
+---
+
+To support versioned APIs we need to keep past versions of interfaces around, this tutorial presents one strategy to manage your interfaces.
+
+## The strategy
+
+Every plugin has a _domain_. A domain consists of a one or more concepts, usually objects, that are related in some logical way.
+
+At a high level the strategy for versioning our interfaces will is:
+
+> Version a collection of related interfaces together. Whenever a single interface changes, increment the version of the entire set of interfaces.
+
+The following is a practical example of this strategy. We will introduce this strategy to a pre-existing domain that is not versioned.
+
+### An example: Weather insights unversioned
+Consider a fictional Kibana plugin called "Weather insights". It allows users to easily create and curate a dashboards that house visualisations and metrics for weather data. Inside of this plugin are the following concepts:
+
+1. **Data source**: an endpoint that is scraped and ingested into ES for aggregation and search.
+2. **Weather dashboard**: a set of visualisations and metrics that draws from a data source.
+
+We have the following `common` interfaces:
+
+```ts
+interface DataSource {
+  /** Some URL that provides weather data in an expected format for scraping */
+  url: string;
+  /** The data view data is stored in */
+  dataViewId: string;
+  /** Username to use with source URL */
+  username?: string;
+  /** Password to use with source URL */
+  password?: string;
+}
+
+/** Fictional type, only used for this example as an external type */
+import type { PortableDashboard } from '@kbn/dashboard/common';
+
+interface WeatherDashboard {
+  /** A unqiue ID for this weather dashboard */
+  id: string;
+  /** Definition of a dashboard imported from the `dashboard` plugin */
+  dashboard: PortableDashboard;
+  /** Data source to use with this dashboard */
+  source: DataSource;
+}
+
+type UnsavedWeatherDashboard = Omit<WeatherDashboard, 'id'>;
+
+/** Below are the HTTP APIs based on the domain types */
+
+interface GetWeatherDashboardHTTPResponse {
+  weatherDashboard: WeatherDashboard;
+}
+
+interface CreateWeatherDashboardHTTPBody {
+  weatherDashboard: UnsavedWeatherDashboard;
+}
+
+interface CreateWeatherDashboardHTTPResponse {
+  weatherDashboard: WeatherDashboard;
+}
+
+// Imagine this pattern for the update and list endpoints too.
+```
+
+This is the _unversioned_ interface exposed by the Weather insights plugin.
+
+### An example: Weather insights versioned
+
+The following product requirements are added to the Weather insights plugin:
+
+1. We want data sources to have a more user-friendly name
+2. We want to introduce a new feature: **Predictions** that will generate forecasts based on past and current weather data
+
+#### Preparing our interfaces for versions
+
+We are going to make our current set of interfaces `v1`. Let's reflect this in our code by creating this new file structure in `common`:
+
+```
+common
+  index.ts
+  latest.ts
+  data_source
+    v1.ts
+  weather_dashboard
+    v1.ts
+public
+  ...
+server
+  ...
+```
+
+By placing `DataSource` and `WeatherDashboard` in two folders we indicate that they _could_ version independently. Specifically,
+`WeatherDashboard` may version independently of `DataSource`.
+
+**Note:** At this stage, splitting these concepts may be overkill if we expect `WeatherDashboard` to _rarely_ change, but for this example we would like the ability to version them separately.
+
+The `latest.ts` file is going to act as an alias to the latest set of interfaces. It will look like this:
+
+```ts
+// "export *" is considered safe here because we ONLY have types in these files.
+export * from './data_source/v1';
+export * from './weather_data/v1';
+```
+
+Our `index.ts` file will contain:
+
+```ts
+// Explicit export of everything from latest
+export { DataSource, WeatherDashboard, GetWeatherDashboardHTTPResponse } from './latest';
+
+export * as weatherDashboardV1 from './weather_dashboard/v1';
+export * as dataSourceV1 from './data_source/v1';
+```
+
+How we use these types depends on the whether the code in question should "know" about versions or not.
+
+```ts
+// This type is being pulled from "latest", so whenever a new latest is linked,
+// it will also point to the latest WeatherDashboard.
+import type { WeatherDashboard } from '../common';
+
+function logIt(dashboard: WeatherDashboard) {
+  logger.debug(dashboard);
+}
+```
+
+```ts
+// Consider this route handler that expects V1 weather dashboard requests
+import type { weatherDashboardV1 } from '../common';
+
+const handler = (ctx, req, res) => {
+  const body: weatherDashboardV1.GetWeatherDashboardHTTPResponse = { ... };
+  return res.ok({ body });
+}
+```
+
+### Introducing a new field to `DataSource`
+
+Now that we have prepared our interfaces to be versioned, let's introduce a our user-friendly name field to `DataSource`.
+
+Create a new `v2.ts` file under the `data_source` directory:
+
+```
+common
+  data_source
+    v1.ts
+    v2.ts
+```
+
+The `v2.ts` file will contain:
+
+```ts
+interface DataSource {
+  /** Some URL that provides weather data in an expected format for scraping */
+  url: string;
+  /** A user-friendly name */
+  name?: string;
+  /** The data view data is stored in */
+  dataViewId: string;
+  /** Username to use with source URL */
+  username?: string;
+  /** Password to use with source URL */
+  password?: string;
+}
+```
+
+We also need to update the `WeatherDashboard` interface to use our new `DataSource` interface:
+
+```
+common
+  weather_dashboard
+    v1.ts
+    v2.ts
+```
+
+```ts
+// common/weather_dashboard/v2.ts
+// This is largely a copy of v1.ts, but using a new WeatherDashboard type in all
+// the relevant places
+
+/** Fictional type, only used for this example as an external type */
+import type { PortableDashboard } from '@kbn/dashboard/common';
+import type { DataSource } from '../data_source/v2';
+
+interface WeatherDashboard {
+  /** A unqiue ID for this weather dashboard */
+  id: string;
+  /** Definition of a dashboard imported from the `dashboard` plugin */
+  dashboard: PortableDashboard;
+  /** Data source to use with this dashboard */
+  source: DataSource;
+}
+
+type UnsavedWeatherDashboard = Omit<WeatherDashboard, 'id'>;
+
+/** Below are the HTTP APIs based on the domain types */
+
+interface GetWeatherDashboardHTTPResponse {
+  weatherDashboard: WeatherDashboard;
+}
+
+interface CreateWeatherDashboardHTTPBody {
+  weatherDashboard: UnsavedWeatherDashboard;
+}
+
+interface CreateWeatherDashboardHTTPResponse {
+  weatherDashboard: WeatherDashboard;
+}
+
+// Imagine this pattern for the update and list endpoints too.
+
+```
+
+All that is left to do now is to update our `latest.ts` and `index.ts` files:
+
+```ts
+// latest.ts
+export * from './data_source/v2';
+export * from './weather_dashboard/v2';
+```
+
+```ts
+// index.ts
+// Explicit export of everything from latest
+export { DataSource, WeatherDashboard, GetWeatherDashboardHTTPResponse } from './latest';
+
+export * as weatherDashboardV1 from './weather_dashboard/v1';
+export * as dataSourceV1 from './data_source/v1';
+
+export * as weatherDashboardV2 from './weather_dashboard/v2';
+export * as dataSourceV2 from './data_source/v2';
+```
