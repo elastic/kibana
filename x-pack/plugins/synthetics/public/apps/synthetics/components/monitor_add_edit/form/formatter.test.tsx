@@ -84,6 +84,11 @@ describe('format', () => {
         include_headers: true,
         include_body: 'on_error',
       },
+      alert: {
+        status: {
+          enabled: false,
+        },
+      },
     };
   });
 
@@ -140,6 +145,11 @@ describe('format', () => {
       'url.port': null,
       username: '',
       id: '',
+      alert: {
+        status: {
+          enabled: false,
+        },
+      },
     });
   });
 
@@ -224,6 +234,11 @@ describe('format', () => {
         service: {
           name: '',
         },
+        alert: {
+          status: {
+            enabled: false,
+          },
+        },
       };
       expect(format(browserFormFields)).toEqual({
         ...DEFAULT_FIELDS[DataStream.BROWSER],
@@ -290,6 +305,11 @@ describe('format', () => {
         'url.port': null,
         urls: '',
         id: '',
+        alert: {
+          status: {
+            enabled: false,
+          },
+        },
       });
     }
   );
@@ -356,6 +376,11 @@ describe('format', () => {
       'url.port': null,
       username: '',
       id: '',
+      alert: {
+        status: {
+          enabled: false,
+        },
+      },
     });
   });
 
