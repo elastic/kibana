@@ -53,8 +53,12 @@ export function createEuiListItem({
       if (!isModifiedOrPrevented(event)) {
         onClick();
         <EuiScreenReaderLive>
-          {i18n.translate(`navigate to ${url} application called ${title}`, {
-            defaultMessage: 'Navigated to new app',
+          {i18n.translate('core.ui.recentLinks.linkItem.screenReaderLabel', {
+            defaultMessage: '{url}, type: {title}',
+            values: {
+              url,
+              title,
+            },
           })}
         </EuiScreenReaderLive>;
       }
