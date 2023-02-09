@@ -57,8 +57,7 @@ const { startES } = createTestServers({
 });
 let esServer: TestElasticsearchUtils;
 
-// FAILING: https://github.com/elastic/kibana/issues/150642
-describe.skip('migration actions', () => {
+describe('migration actions', () => {
   let client: ElasticsearchClient;
 
   beforeAll(async () => {
