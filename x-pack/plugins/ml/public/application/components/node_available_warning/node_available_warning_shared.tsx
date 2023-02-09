@@ -8,8 +8,7 @@
 import React, { FC, useEffect } from 'react';
 
 import { EuiCallOutProps } from '@elastic/eui';
-import { useMlNodeCheck } from './use_ml_node_check';
-import { useCloudCheck } from './use_cloud_check';
+import { useMlNodeAvailableCheck } from './hooks';
 import { Warning } from './warning';
 
 interface Props {
@@ -18,8 +17,7 @@ interface Props {
 }
 
 export const MlNodeAvailableWarningShared: FC<Props> = ({ nodeAvailableCallback, size }) => {
-  const { mlNodesAvailable } = useMlNodeCheck();
-  const { isCloud, deploymentId, isCloudTrial } = useCloudCheck();
+  const { mlNodesAvailable, isCloud, deploymentId, isCloudTrial } = useMlNodeAvailableCheck();
 
   useEffect(
     function callCallback() {
