@@ -1,0 +1,98 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import React, { type FC } from 'react';
+
+import { formatDate, EuiSpacer, EuiInMemoryTable } from '@elastic/eui';
+
+import { i18n } from '@kbn/i18n';
+
+import type { TransformHealthIssue } from '../../../../../../common/types/transform_stats';
+
+import { TransformListRow } from '../../../../common';
+
+import { TransformHealthColoredDot } from './transform_health_colored_dot';
+
+const TIME_FORMAT = 'YYYY-MM-DD HH:mm:ss';
+
+interface ExpandedRowHealthPaneProps {
+  health: TransformListRow['stats']['health'];
+}
+
+export const ExpandedRowHealthPane: FC<ExpandedRowHealthPaneProps> = ({ health }) => {
+  const sorting = {
+    sort: {
+      field: 'first_occurrence' as const,
+      direction: 'desc' as const,
+    },
+  };
+
+  const { status, issues } = health;
+
+  if (issues === undefined) {
+    return (
+      <>
+        <EuiSpacer size="s" />
+        <TransformHealthColoredDot healthStatus={status} compact={false} />
+      </>
+    );
+  }
+
+  const columns = [
+    {
+      field: 'first_occurrence',
+      name: i18n.translate(
+        'xpack.transform.transformList.transformDetails.healthPane.firstOccurrenceLabel',
+        {
+          defaultMessage: 'First Occurrence',
+        }
+      ),
+      render: (firstOccurrence: number) => formatDate(firstOccurrence, TIME_FORMAT),
+      sortable: true,
+    },
+    {
+      field: 'count',
+      name: i18n.translate('xpack.transform.transformList.transformDetails.healthPane.countLabel', {
+        defaultMessage: 'count',
+      }),
+      sortable: true,
+      width: '60px',
+    },
+    {
+      field: 'issue',
+      name: i18n.translate('xpack.transform.transformList.transformDetails.healthPane.issueLabel', {
+        defaultMessage: 'Issue',
+      }),
+      sortable: true,
+    },
+    {
+      field: 'details',
+      name: i18n.translate(
+        'xpack.transform.transformList.transformDetails.healthPane.detailsLabel',
+        {
+          defaultMessage: 'Details',
+        }
+      ),
+      width: '50%',
+    },
+  ];
+
+  return (
+    <div data-test-subj="transformHealthTabContent">
+      <EuiSpacer size="s" />
+      <TransformHealthColoredDot healthStatus={status} compact={false} />
+      <EuiSpacer size="s" />
+      <EuiInMemoryTable<TransformHealthIssue>
+        items={issues}
+        columns={columns}
+        compressed={true}
+        pagination={true}
+        sorting={sorting}
+      />
+    </div>
+  );
+};

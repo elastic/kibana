@@ -5,17 +5,16 @@
  * 2.0.
  */
 
-import React, { MouseEvent, useState } from 'react';
+import React, { MouseEvent, useState, type FC } from 'react';
 
 import {
+  formatDate,
   EuiSpacer,
   EuiBasicTable,
   EuiBasicTableProps,
   EuiToolTip,
   EuiButtonIcon,
 } from '@elastic/eui';
-// @ts-ignore
-import { formatDate } from '@elastic/eui/lib/services/format';
 import { euiLightVars as theme } from '@kbn/ui-theme';
 
 import { i18n } from '@kbn/i18n';
@@ -30,7 +29,7 @@ import { useRefreshTransformList } from '../../../../common';
 
 const TIME_FORMAT = 'YYYY-MM-DD HH:mm:ss';
 
-interface Props {
+interface ExpandedRowMessagesPaneProps {
   transformId: string;
 }
 
@@ -39,7 +38,7 @@ interface Sorting {
   direction: 'asc' | 'desc';
 }
 
-export const ExpandedRowMessagesPane: React.FC<Props> = ({ transformId }) => {
+export const ExpandedRowMessagesPane: FC<ExpandedRowMessagesPaneProps> = ({ transformId }) => {
   const [messages, setMessages] = useState<any[]>([]);
   const [msgCount, setMsgCount] = useState<number>(0);
 

@@ -25,6 +25,7 @@ import { ExpandedRowDetailsPane, SectionConfig, SectionItem } from './expanded_r
 import { ExpandedRowJsonPane } from './expanded_row_json_pane';
 import { ExpandedRowMessagesPane } from './expanded_row_messages_pane';
 import { ExpandedRowPreviewPane } from './expanded_row_preview_pane';
+import { ExpandedRowHealthPane } from './expanded_row_health_pane';
 import { TransformHealthColoredDot } from './transform_health_colored_dot';
 
 function getItemDescription(value: any) {
@@ -281,6 +282,20 @@ export const ExpandedRow: FC<Props> = ({ item, onAlertEdit }) => {
       content: <ExpandedRowPreviewPane transformConfig={item.config} />,
     },
   ];
+
+  if (item.stats.health) {
+    tabs.push({
+      id: `transform-health-tab-${tabId}`,
+      'data-test-subj': 'transformHealthTab',
+      name: i18n.translate(
+        'xpack.transform.transformList.transformDetails.tabs.transformHealthLabel',
+        {
+          defaultMessage: 'Health',
+        }
+      ),
+      content: <ExpandedRowHealthPane health={item.stats.health} />,
+    });
+  }
 
   // Using `expand=false` here so the tabs themselves don't spread
   // across the full width. The 100% width is used so the bottom line
