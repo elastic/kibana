@@ -10,17 +10,15 @@ import { mountWithIntl } from '@kbn/test-jest-helpers';
 
 import { ExceptionsAddToRulesOptions } from '.';
 import { TestProviders } from '../../../../../common/mock';
-import { useFindRulesInMemory } from '../../../../rule_management_ui/components/rules_table/rules_table/use_find_rules_in_memory';
+import { useFindRules } from '../../../../rule_management/logic/use_find_rules';
 import { getRulesSchemaMock } from '../../../../../../common/detection_engine/rule_schema/mocks';
 import type { Rule } from '../../../../rule_management/logic/types';
 
-jest.mock(
-  '../../../../rule_management_ui/components/rules_table/rules_table/use_find_rules_in_memory'
-);
+jest.mock('../../../../rule_management/logic/use_find_rules');
 
 describe('ExceptionsAddToRulesOptions', () => {
   beforeEach(() => {
-    (useFindRulesInMemory as jest.Mock).mockReturnValue({
+    (useFindRules as jest.Mock).mockReturnValue({
       data: {
         rules: [getRulesSchemaMock(), { ...getRulesSchemaMock(), id: '345', name: 'My rule' }],
         total: 0,
