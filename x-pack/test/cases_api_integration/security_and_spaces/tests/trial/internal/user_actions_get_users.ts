@@ -119,8 +119,8 @@ export default ({ getService }: FtrProviderContext): void => {
               username: superUserProfile.user.username,
               full_name: superUserProfile.user.full_name,
               email: superUserProfile.user.email,
-              profile_uid: superUserProfile.uid,
             },
+            uid: superUserProfile.uid,
           },
         ]);
 
@@ -129,8 +129,8 @@ export default ({ getService }: FtrProviderContext): void => {
             username: superUserProfile.user.username,
             full_name: superUserProfile.user.full_name,
             email: superUserProfile.user.email,
-            profile_uid: superUserProfile.uid,
           },
+          uid: superUserProfile.uid,
         });
 
         expect(assignees).to.eql([
@@ -139,16 +139,16 @@ export default ({ getService }: FtrProviderContext): void => {
               username: superUserProfile.user.username,
               full_name: superUserProfile.user.full_name,
               email: superUserProfile.user.email,
-              profile_uid: superUserProfile.uid,
             },
+            uid: superUserProfile.uid,
           },
           {
             user: {
               username: secUserProfile.user.username,
               full_name: secUserProfile.user.full_name,
               email: secUserProfile.user.email,
-              profile_uid: secUserProfile.uid,
             },
+            uid: secUserProfile.uid,
           },
         ]);
 
@@ -193,8 +193,8 @@ export default ({ getService }: FtrProviderContext): void => {
               username: superUserProfile.user.username,
               full_name: superUserProfile.user.full_name,
               email: superUserProfile.user.email,
-              profile_uid: superUserProfile.uid,
             },
+            uid: superUserProfile.uid,
           },
         ]);
 
@@ -203,8 +203,8 @@ export default ({ getService }: FtrProviderContext): void => {
             username: superUserProfile.user.username,
             full_name: superUserProfile.user.full_name,
             email: superUserProfile.user.email,
-            profile_uid: superUserProfile.uid,
           },
+          uid: superUserProfile.uid,
         });
 
         expect(assignees).to.eql([
@@ -213,8 +213,8 @@ export default ({ getService }: FtrProviderContext): void => {
               username: superUserProfile.user.username,
               full_name: superUserProfile.user.full_name,
               email: superUserProfile.user.email,
-              profile_uid: superUserProfile.uid,
             },
+            uid: superUserProfile.uid,
           },
         ]);
 
@@ -224,8 +224,8 @@ export default ({ getService }: FtrProviderContext): void => {
               username: secUserProfile.user.username,
               full_name: secUserProfile.user.full_name,
               email: secUserProfile.user.email,
-              profile_uid: secUserProfile.uid,
             },
+            uid: secUserProfile.uid,
           },
         ]);
       });
@@ -277,8 +277,8 @@ export default ({ getService }: FtrProviderContext): void => {
               username: superUserProfile.user.username,
               full_name: superUserProfile.user.full_name,
               email: superUserProfile.user.email,
-              profile_uid: superUserProfile.uid,
             },
+            uid: superUserProfile.uid,
           },
         ]);
 
@@ -287,8 +287,8 @@ export default ({ getService }: FtrProviderContext): void => {
             username: superUserProfile.user.username,
             full_name: superUserProfile.user.full_name,
             email: superUserProfile.user.email,
-            profile_uid: superUserProfile.uid,
           },
+          uid: superUserProfile.uid,
         });
 
         expect(assignees).to.eql([
@@ -297,16 +297,16 @@ export default ({ getService }: FtrProviderContext): void => {
               username: superUserProfile.user.username,
               full_name: superUserProfile.user.full_name,
               email: superUserProfile.user.email,
-              profile_uid: superUserProfile.uid,
             },
+            uid: superUserProfile.uid,
           },
           {
             user: {
               username: secUserProfile.user.username,
               full_name: secUserProfile.user.full_name,
               email: secUserProfile.user.email,
-              profile_uid: secUserProfile.uid,
             },
+            uid: secUserProfile.uid,
           },
         ]);
 

@@ -102,10 +102,10 @@ export default ({ getService }: FtrProviderContext): void => {
         expect(participants).to.eql([{ user: { username: null, full_name: null, email: null } }]);
         expect(reporter).to.eql({ user: { username: null, full_name: null, email: null } });
         expect(assignees).to.eql([
-          { user: { profile_uid: 'abc', username: null, full_name: null, email: null } },
+          { uid: 'abc', user: { username: null, full_name: null, email: null } },
         ]);
         expect(unassignedUsers).to.eql([
-          { user: { profile_uid: 'dfg', username: null, full_name: null, email: null } },
+          { uid: 'dfg', user: { username: null, full_name: null, email: null } },
         ]);
       });
     });
@@ -187,8 +187,8 @@ export default ({ getService }: FtrProviderContext): void => {
               username: superUserProfile.user.username,
               full_name: superUserProfile.user.full_name,
               email: superUserProfile.user.email,
-              profile_uid: superUserProfile.uid,
             },
+            uid: superUserProfile.uid,
           },
         ]);
 
@@ -197,8 +197,8 @@ export default ({ getService }: FtrProviderContext): void => {
             username: superUserProfile.user.username,
             full_name: superUserProfile.user.full_name,
             email: superUserProfile.user.email,
-            profile_uid: superUserProfile.uid,
           },
+          uid: superUserProfile.uid,
         });
 
         expect(assignees).to.eql([]);
@@ -233,8 +233,8 @@ export default ({ getService }: FtrProviderContext): void => {
               username: superUserProfile.user.username,
               full_name: superUserProfile.user.full_name,
               email: superUserProfile.user.email,
-              profile_uid: superUserProfile.uid,
             },
+            uid: superUserProfile.uid,
           },
         ]);
 
@@ -243,8 +243,8 @@ export default ({ getService }: FtrProviderContext): void => {
             username: superUserProfile.user.username,
             full_name: superUserProfile.user.full_name,
             email: superUserProfile.user.email,
-            profile_uid: superUserProfile.uid,
           },
+          uid: superUserProfile.uid,
         });
 
         expect(assignees).to.eql([]);
@@ -279,16 +279,16 @@ export default ({ getService }: FtrProviderContext): void => {
               username: secUserProfile.user.username,
               full_name: secUserProfile.user.full_name,
               email: secUserProfile.user.email,
-              profile_uid: secUserProfile.uid,
             },
+            uid: secUserProfile.uid,
           },
           {
             user: {
               username: superUserProfile.user.username,
               full_name: superUserProfile.user.full_name,
               email: superUserProfile.user.email,
-              profile_uid: superUserProfile.uid,
             },
+            uid: superUserProfile.uid,
           },
         ]);
 
@@ -297,8 +297,8 @@ export default ({ getService }: FtrProviderContext): void => {
             username: superUserProfile.user.username,
             full_name: superUserProfile.user.full_name,
             email: superUserProfile.user.email,
-            profile_uid: superUserProfile.uid,
           },
+          uid: superUserProfile.uid,
         });
 
         expect(assignees).to.eql([]);
@@ -341,16 +341,16 @@ export default ({ getService }: FtrProviderContext): void => {
               username: secUserProfile.user.username,
               full_name: secUserProfile.user.full_name,
               email: secUserProfile.user.email,
-              profile_uid: secUserProfile.uid,
             },
+            uid: secUserProfile.uid,
           },
           {
             user: {
               username: superUserProfile.user.username,
               full_name: superUserProfile.user.full_name,
               email: superUserProfile.user.email,
-              profile_uid: superUserProfile.uid,
             },
+            uid: superUserProfile.uid,
           },
         ]);
 
@@ -359,8 +359,8 @@ export default ({ getService }: FtrProviderContext): void => {
             username: superUserProfile.user.username,
             full_name: superUserProfile.user.full_name,
             email: superUserProfile.user.email,
-            profile_uid: superUserProfile.uid,
           },
+          uid: superUserProfile.uid,
         });
 
         expect(assignees).to.eql([]);
