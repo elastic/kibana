@@ -18,7 +18,7 @@ import {
   createConfiguration,
   getConfiguration,
   ensureSavedObjectIsAuthorized,
-} from '../../../../common/lib/utils';
+} from '../../../../common/lib/api';
 
 import {
   secOnly,
