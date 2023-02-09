@@ -32,7 +32,7 @@ import {
 import {
   useAuthz,
   useLink,
-  usePackageInstallations,
+  useIsPackagePolicyUpgradable,
   usePermissionCheck,
   useStartServices,
 } from '../../../../../hooks';
@@ -62,7 +62,7 @@ export const PackagePoliciesTable: React.FunctionComponent<Props> = ({
   const { application } = useStartServices();
   const canWriteIntegrationPolicies = useAuthz().integrations.writeIntegrationPolicies;
   const canReadIntegrationPolicies = useAuthz().integrations.readIntegrationPolicies;
-  const { updatableIntegrations } = usePackageInstallations();
+  const { isPackagePolicyUpgradable } = useIsPackagePolicyUpgradable();
   const { getHref } = useLink();
 
   const permissionCheck = usePermissionCheck();
@@ -80,15 +80,7 @@ export const PackagePoliciesTable: React.FunctionComponent<Props> = ({
           namespacesValues.add(packagePolicy.namespace);
         }
 
-        const updatableIntegrationRecord = updatableIntegrations.get(
-          packagePolicy.package?.name ?? ''
-        );
-
-        const hasUpgrade =
-          !!updatableIntegrationRecord &&
-          updatableIntegrationRecord.policiesToUpgrade.some(
-            ({ pkgPolicyId }) => pkgPolicyId === packagePolicy.id
-          );
+        const hasUpgrade = isPackagePolicyUpgradable(packagePolicy);
 
         return {
           ...packagePolicy,
@@ -105,7 +97,7 @@ export const PackagePoliciesTable: React.FunctionComponent<Props> = ({
       .map(toFilterOption);
 
     return [mappedPackagePolicies, namespaceFilterOptions];
-  }, [originalPackagePolicies, updatableIntegrations]);
+  }, [originalPackagePolicies, isPackagePolicyUpgradable]);
 
   const columns = useMemo(
     (): EuiInMemoryTableProps<InMemoryPackagePolicy>['columns'] => [

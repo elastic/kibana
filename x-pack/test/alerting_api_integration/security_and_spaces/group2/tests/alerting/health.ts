@@ -6,16 +6,10 @@
  */
 
 import expect from '@kbn/expect';
+import { ESTestIndexTool, ES_TEST_INDEX_NAME } from '@kbn/alerting-api-integration-helpers';
 import { UserAtSpaceScenarios } from '../../../scenarios';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
-import {
-  getUrlPrefix,
-  getTestRuleData,
-  ObjectRemover,
-  AlertUtils,
-  ESTestIndexTool,
-  ES_TEST_INDEX_NAME,
-} from '../../../../common/lib';
+import { getUrlPrefix, getTestRuleData, ObjectRemover, AlertUtils } from '../../../../common/lib';
 
 // eslint-disable-next-line import/no-default-export
 export default function createFindTests({ getService }: FtrProviderContext) {

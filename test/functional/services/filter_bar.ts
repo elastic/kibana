@@ -194,6 +194,14 @@ export class FilterBarService extends FtrService {
     });
   }
 
+  public async pressConfirmOnFilterEditorConfirmModal() {
+    await this.retry.try(async () => {
+      const confirmModal = await this.testSubjects.find(`close-filter-editor-confirm-modal`);
+      const cancelButton = await confirmModal.findByTestSubject('confirmModalConfirmButton');
+      await cancelButton.click();
+    });
+  }
+
   private async addOrFilter(path: string) {
     const filterForm = await this.testSubjects.find(`filter-${path}`);
     const addOrBtn = await filterForm.findByTestSubject('add-or-filter');
@@ -294,7 +302,7 @@ export class FilterBarService extends FtrService {
 
       await this.createFilter(filter);
 
-      await this.testSubjects.clickWhenNotDisabledWithoutRetry('saveFilter');
+      await this.testSubjects.clickWhenNotDisabled('saveFilter');
     });
     await this.header.awaitGlobalLoadingIndicatorHidden();
   }

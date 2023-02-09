@@ -20,6 +20,8 @@ import { isOfAggregateQueryType } from '@kbn/es-query';
 import { DataViewPicker } from '@kbn/unified-search-plugin/public';
 import { type DataViewField, getFieldSubtypeMulti } from '@kbn/data-views-plugin/public';
 import {
+  FieldList,
+  FieldListFilters,
   FieldListGrouped,
   FieldListGroupedProps,
   FieldsGroupNames,
@@ -27,10 +29,10 @@ import {
   triggerVisualizeActionsTextBasedLanguages,
   useGroupedFields,
 } from '@kbn/unified-field-list-plugin/public';
+import { VIEW_MODE } from '../../../../../common/constants';
 import { useAppStateSelector } from '../../services/discover_app_state_container';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { DiscoverField } from './discover_field';
-import { DiscoverFieldSearch } from './discover_field_search';
 import { FIELDS_LIMIT_SETTING, PLUGIN_ID } from '../../../../../common';
 import {
   getSelectedFields,
@@ -38,24 +40,18 @@ import {
   type SelectedFieldsResult,
   INITIAL_SELECTED_FIELDS_RESULT,
 } from './lib/group_fields';
-import { doesFieldMatchFilters, FieldFilterState, setFieldFilterProp } from './lib/field_filter';
 import { DiscoverSidebarResponsiveProps } from './discover_sidebar_responsive';
-import { VIEW_MODE } from '../../../../components/view_mode_toggle';
 import { getUiActions } from '../../../../kibana_services';
 import { getRawRecordType } from '../../utils/get_raw_record_type';
-import { RecordRawType } from '../../hooks/use_saved_search';
+import { RecordRawType } from '../../services/discover_data_state_container';
 
 const fieldSearchDescriptionId = htmlIdGenerator()();
 
 export interface DiscoverSidebarProps extends DiscoverSidebarResponsiveProps {
   /**
-   * Current state of the field filter, filtering fields by name, type, ...
+   * Show loading instead of the field list if processing
    */
-  fieldFilter: FieldFilterState;
-  /**
-   * Change current state of fieldFilter
-   */
-  setFieldFilter: (next: FieldFilterState) => void;
+  isProcessing: boolean;
 
   /**
    * Callback to close the flyout if sidebar is rendered in a flyout
@@ -82,7 +78,7 @@ export interface DiscoverSidebarProps extends DiscoverSidebarResponsiveProps {
   createNewDataView?: () => void;
 
   /**
-   * All fields: fields from data view and unmapped fields
+   * All fields: fields from data view and unmapped fields or columns from text-based search
    */
   allFields: DataViewField[] | null;
 
@@ -108,16 +104,15 @@ export interface DiscoverSidebarProps extends DiscoverSidebarResponsiveProps {
 }
 
 export function DiscoverSidebarComponent({
+  isProcessing,
   alwaysShowActionButtons = false,
   columns,
-  fieldFilter,
   documents$,
   allFields,
   onAddField,
   onAddFilter,
   onRemoveField,
   selectedDataView,
-  setFieldFilter,
   trackUiMetric,
   useNewFieldsApi = false,
   onFieldEdited,
@@ -137,41 +132,6 @@ export function DiscoverSidebarComponent({
   );
   const query = useAppStateSelector((state) => state.query);
 
-  const onChangeFieldSearch = useCallback(
-    (filterName: string, value: string | boolean | undefined) => {
-      const newState = setFieldFilterProp(fieldFilter, filterName, value);
-      setFieldFilter(newState);
-    },
-    [fieldFilter, setFieldFilter]
-  );
-
-  const { fieldTypes, presentFieldTypes } = useMemo(() => {
-    const result = ['any'];
-    const dataViewFieldTypes = new Set<string>();
-    if (Array.isArray(allFields)) {
-      for (const field of allFields) {
-        if (field.type !== '_source') {
-          // If it's a string type, we want to distinguish between keyword and text
-          // For this purpose we need the ES type
-          const type =
-            field.type === 'string' &&
-            field.esTypes &&
-            ['keyword', 'text'].includes(field.esTypes[0])
-              ? field.esTypes?.[0]
-              : field.type;
-          // _id and _index would map to string, that's why we don't add the string type here
-          if (type && type !== 'string') {
-            dataViewFieldTypes.add(type);
-          }
-          if (result.indexOf(field.type) === -1) {
-            result.push(field.type);
-          }
-        }
-      }
-    }
-    return { fieldTypes: result, presentFieldTypes: Array.from(dataViewFieldTypes) };
-  }, [allFields]);
-
   const showFieldStats = useMemo(() => viewMode === VIEW_MODE.DOCUMENT_LEVEL, [viewMode]);
   const [selectedFieldsState, setSelectedFieldsState] = useState<SelectedFieldsResult>(
     INITIAL_SELECTED_FIELDS_RESULT
@@ -181,9 +141,14 @@ export function DiscoverSidebarComponent({
   >(undefined);
 
   useEffect(() => {
-    const result = getSelectedFields(selectedDataView, columns);
+    const result = getSelectedFields({
+      dataView: selectedDataView,
+      columns,
+      allFields,
+      isPlainRecord,
+    });
     setSelectedFieldsState(result);
-  }, [selectedDataView, columns, setSelectedFieldsState]);
+  }, [selectedDataView, columns, setSelectedFieldsState, allFields, isPlainRecord]);
 
   useEffect(() => {
     if (isPlainRecord || !useNewFieldsApi) {
@@ -244,12 +209,6 @@ export function DiscoverSidebarComponent({
   }, [columns, selectedDataView, query]);
 
   const popularFieldsLimit = useMemo(() => uiSettings.get(FIELDS_LIMIT_SETTING), [uiSettings]);
-  const onFilterField: GroupedFieldsParams<DataViewField>['onFilterField'] = useCallback(
-    (field) => {
-      return doesFieldMatchFilters(field, fieldFilter);
-    },
-    [fieldFilter]
-  );
   const onSupportedFieldFilter: GroupedFieldsParams<DataViewField>['onSupportedFieldFilter'] =
     useCallback(
       (field) => {
@@ -267,7 +226,7 @@ export function DiscoverSidebarComponent({
         };
       }
     }, []);
-  const { fieldListGroupedProps } = useGroupedFields({
+  const { fieldListFiltersProps, fieldListGroupedProps } = useGroupedFields({
     dataViewId: (!isPlainRecord && selectedDataView?.id) || null, // passing `null` for text-based queries
     allFields,
     popularFieldsLimit: !isPlainRecord ? popularFieldsLimit : 0,
@@ -277,18 +236,17 @@ export function DiscoverSidebarComponent({
       dataViews,
       core,
     },
-    onFilterField,
     onSupportedFieldFilter,
     onOverrideFieldGroupDetails,
   });
 
   const renderFieldItem: FieldListGroupedProps<DataViewField>['renderFieldItem'] = useCallback(
-    ({ field, groupName }) => (
+    ({ field, groupName, fieldSearchHighlight }) => (
       <li key={`field${field.name}`} data-attr-field={field.name}>
         <DiscoverField
           alwaysShowActionButton={alwaysShowActionButtons}
           field={field}
-          highlight={fieldFilter.name}
+          highlight={fieldSearchHighlight}
           dataView={selectedDataView!}
           onAddField={onAddField}
           onRemoveField={onRemoveField}
@@ -321,7 +279,6 @@ export function DiscoverSidebarComponent({
       showFieldStats,
       columns,
       selectedFieldsState.selectedFieldsMap,
-      fieldFilter.name,
     ]
   );
 
@@ -359,55 +316,52 @@ export function DiscoverSidebarComponent({
             }}
           />
         )}
-        <EuiFlexItem grow={false}>
-          <form>
-            <DiscoverFieldSearch
-              onChange={onChangeFieldSearch}
-              value={fieldFilter.name}
-              types={fieldTypes}
-              presentFieldTypes={presentFieldTypes}
-              isPlainRecord={isPlainRecord}
-              fieldSearchDescriptionId={fieldSearchDescriptionId}
-            />
-          </form>
-        </EuiFlexItem>
         <EuiFlexItem>
-          {showFieldList && (
-            <FieldListGrouped
-              {...fieldListGroupedProps}
-              renderFieldItem={renderFieldItem}
-              screenReaderDescriptionId={fieldSearchDescriptionId}
-            />
-          )}
+          <FieldList
+            isProcessing={isProcessing}
+            prepend={<FieldListFilters {...fieldListFiltersProps} />}
+            className="dscSidebar__list"
+          >
+            {showFieldList ? (
+              <FieldListGrouped
+                {...fieldListGroupedProps}
+                renderFieldItem={renderFieldItem}
+                screenReaderDescriptionId={fieldSearchDescriptionId}
+                localStorageKeyPrefix="discover"
+              />
+            ) : (
+              <EuiFlexItem grow />
+            )}
+            {!!editField && (
+              <EuiFlexItem grow={false}>
+                <EuiButton
+                  iconType="indexOpen"
+                  data-test-subj="dataView-add-field_btn"
+                  onClick={() => editField()}
+                  size="s"
+                >
+                  {i18n.translate('discover.fieldChooser.addField.label', {
+                    defaultMessage: 'Add a field',
+                  })}
+                </EuiButton>
+              </EuiFlexItem>
+            )}
+            {isPlainRecord && (
+              <EuiFlexItem grow={false}>
+                <EuiButton
+                  iconType="lensApp"
+                  data-test-subj="textBased-visualize"
+                  onClick={visualizeAggregateQuery}
+                  size="s"
+                >
+                  {i18n.translate('discover.textBasedLanguages.visualize.label', {
+                    defaultMessage: 'Visualize in Lens',
+                  })}
+                </EuiButton>
+              </EuiFlexItem>
+            )}
+          </FieldList>
         </EuiFlexItem>
-        {!!editField && (
-          <EuiFlexItem grow={false}>
-            <EuiButton
-              iconType="indexOpen"
-              data-test-subj="dataView-add-field_btn"
-              onClick={() => editField()}
-              size="s"
-            >
-              {i18n.translate('discover.fieldChooser.addField.label', {
-                defaultMessage: 'Add a field',
-              })}
-            </EuiButton>
-          </EuiFlexItem>
-        )}
-        {isPlainRecord && (
-          <EuiFlexItem grow={false}>
-            <EuiButton
-              iconType="lensApp"
-              data-test-subj="textBased-visualize"
-              onClick={visualizeAggregateQuery}
-              size="s"
-            >
-              {i18n.translate('discover.textBasedLanguages.visualize.label', {
-                defaultMessage: 'Visualize in Lens',
-              })}
-            </EuiButton>
-          </EuiFlexItem>
-        )}
       </EuiFlexGroup>
     </EuiPageSideBar>
   );

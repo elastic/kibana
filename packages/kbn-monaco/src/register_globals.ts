@@ -12,43 +12,15 @@ import { SQLLang } from './sql';
 import { monaco } from './monaco_imports';
 import { ESQL_THEME_ID, ESQLLang, buildESQlTheme } from './esql';
 import { registerLanguage, registerTheme } from './helpers';
-import { createWorkersRegistry } from './workers_registry';
 
 export const DEFAULT_WORKER_ID = 'default';
-
-const Yaml = 'yaml';
-
-const workerRegistry = createWorkersRegistry(DEFAULT_WORKER_ID);
-
-workerRegistry.register(
-  DEFAULT_WORKER_ID,
-  async () => await import('!!raw-loader!../../target_workers/default.editor.worker.js')
-);
-
-workerRegistry.register(
+const langSpecificWorkerIds = [
   XJsonLang.ID,
-  async () => await import('!!raw-loader!../../target_workers/xjson.editor.worker.js')
-);
-
-workerRegistry.register(
   PainlessLang.ID,
-  async () => await import('!!raw-loader!../../target_workers/painless.editor.worker.js')
-);
-
-workerRegistry.register(
   ESQLLang.ID,
-  async () => await import('!!raw-loader!../../target_workers/esql.editor.worker.js')
-);
-
-workerRegistry.register(
   monaco.languages.json.jsonDefaults.languageId,
-  async () => await import('!!raw-loader!../../target_workers/json.editor.worker.js')
-);
-
-workerRegistry.register(
-  Yaml,
-  async () => await import('!!raw-loader!../../target_workers/yaml.editor.worker.js')
-);
+  'yaml',
+];
 
 /**
  * Register languages and lexer rules
@@ -63,9 +35,18 @@ registerLanguage(ESQLLang);
  */
 registerTheme(ESQL_THEME_ID, buildESQlTheme());
 
+const monacoBundleDir = (window as any).__kbnPublicPath__?.['kbn-monaco'];
+
 // @ts-ignore
 window.MonacoEnvironment = {
   // needed for functional tests so that we can get value from 'editor'
   monaco,
-  getWorker: workerRegistry.getWorker,
+  getWorkerUrl: monacoBundleDir
+    ? (_: string, languageId: string) => {
+        const workerId = langSpecificWorkerIds.includes(languageId)
+          ? languageId
+          : DEFAULT_WORKER_ID;
+        return `${monacoBundleDir}${workerId}.editor.worker.js`;
+      }
+    : () => undefined,
 };

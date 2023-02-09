@@ -9,11 +9,8 @@ import React, { Ref } from 'react';
 import { ShapeDrawer, ShapeRef, ShapeDrawerComponentProps } from '../reusable';
 import { getShape } from './shapes';
 
-const ProgressDrawerComponent = React.forwardRef(
+export const ProgressDrawerComponent = React.forwardRef(
   (props: ShapeDrawerComponentProps, ref: Ref<ShapeRef>) => (
     <ShapeDrawer {...props} ref={ref} getShape={getShape} />
   )
 );
-
-// eslint-disable-next-line import/no-default-export
-export { ProgressDrawerComponent as default };

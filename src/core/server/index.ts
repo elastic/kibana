@@ -194,6 +194,8 @@ export type {
   HttpServerInfo,
   HttpServicePreboot,
   HttpServiceStart,
+  RawRequest,
+  FakeRawRequest,
 } from '@kbn/core-http-server';
 export type { IExternalUrlPolicy } from '@kbn/core-http-common';
 
@@ -213,7 +215,7 @@ export type {
   AppenderConfigType,
 } from '@kbn/core-logging-server';
 export type { Logger, LoggerFactory, LogMeta, LogRecord, LogLevel } from '@kbn/logging';
-export type { Ecs, EcsEventCategory, EcsEventKind, EcsEventOutcome, EcsEventType } from '@kbn/ecs';
+export type { Ecs, EcsEvent } from '@kbn/ecs';
 
 export type { NodeInfo, NodeRoles } from '@kbn/core-node-server';
 
@@ -237,11 +239,6 @@ export type { PluginName, DiscoveredPlugin } from '@kbn/core-base-common';
 
 export type { SavedObjectsStart } from '@kbn/core-saved-objects-browser';
 export type {
-  SavedObject,
-  SavedObjectAttribute,
-  SavedObjectAttributes,
-  SavedObjectAttributeSingle,
-  SavedObjectReference,
   SavedObjectsMigrationVersion,
   SavedObjectsImportConflictError,
   SavedObjectsImportAmbiguousConflictError,
@@ -310,6 +307,11 @@ export type {
   SavedObjectsBulkDeleteStatus,
 } from '@kbn/core-saved-objects-api-server';
 export type {
+  SavedObject,
+  SavedObjectAttribute,
+  SavedObjectAttributes,
+  SavedObjectAttributeSingle,
+  SavedObjectReference,
   SavedObjectsServiceSetup,
   SavedObjectsServiceStart,
   SavedObjectsClientProviderOptions,
@@ -387,7 +389,6 @@ export type {
 
 export type {
   UiSettingsParams,
-  PublicUiSettingsParams,
   UiSettingsType,
   UserProvidedValues,
   DeprecationSettings,
@@ -529,3 +530,5 @@ export type {
   PublicHttpServiceSetup as HttpServiceSetup,
   HttpServiceSetup as BaseHttpServiceSetup,
 };
+
+export type { CustomBrandingSetup } from '@kbn/core-custom-branding-server';

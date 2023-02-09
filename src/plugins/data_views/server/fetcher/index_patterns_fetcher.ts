@@ -61,6 +61,7 @@ export class IndexPatternsFetcher {
     type?: string;
     rollupIndex?: string;
     indexFilter?: QueryDslQueryContainer;
+    fields?: string[];
   }): Promise<{ fields: FieldDescriptor[]; indices: string[] }> {
     const { pattern, metaFields = [], fieldCapsOptions, type, rollupIndex, indexFilter } = options;
     const patternList = Array.isArray(pattern) ? pattern : pattern.split(',');
@@ -81,6 +82,7 @@ export class IndexPatternsFetcher {
         include_unmapped: fieldCapsOptions?.includeUnmapped,
       },
       indexFilter,
+      fields: options.fields || ['*'],
     });
     if (type === 'rollup' && rollupIndex) {
       const rollupFields: FieldDescriptor[] = [];
@@ -124,7 +126,7 @@ export class IndexPatternsFetcher {
       patternList
         .map(async (index) => {
           // perserve negated patterns
-          if (index.startsWith('-')) {
+          if (index.startsWith('-') || index.includes(':-')) {
             return true;
           }
           const searchResponse = await this.elasticsearchClient.fieldCaps({

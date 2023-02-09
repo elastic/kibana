@@ -7,9 +7,10 @@
 
 import expect from '@kbn/expect';
 import { SavedObjectsUtils } from '@kbn/core/server';
+import { ESTestIndexTool } from '@kbn/alerting-api-integration-helpers';
 import { UserAtSpaceScenarios, Superuser } from '../../../scenarios';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
-import { ESTestIndexTool, getUrlPrefix, ObjectRemover, AlertUtils } from '../../../../common/lib';
+import { getUrlPrefix, ObjectRemover, AlertUtils } from '../../../../common/lib';
 import { setupSpacesAndUsers } from '../../../setup';
 
 // eslint-disable-next-line import/no-default-export

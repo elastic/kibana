@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import { schema } from '@kbn/config-schema';
 import { RulesClient, ConstructorOptions } from '../rules_client';
 import { savedObjectsClientMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { ruleTypeRegistryMock } from '../../rule_type_registry.mock';
 import { alertingAuthorizationMock } from '../../authorization/alerting_authorization.mock';
-import { IntervalSchedule } from '../../types';
+import { IntervalSchedule, RuleNotifyWhen } from '../../types';
 import { RecoveredActionGroup } from '../../../common';
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
 import { actionsAuthorizationMock } from '@kbn/actions-plugin/server/mocks';
@@ -87,8 +87,6 @@ describe('update()', () => {
       consumer: 'myApp',
       scheduledTaskId: 'task-123',
       params: {},
-      throttle: null,
-      notifyWhen: null,
       actions: [
         {
           group: 'default',
@@ -97,6 +95,11 @@ describe('update()', () => {
           actionRef: '1',
           params: {
             foo: true,
+          },
+          frequency: {
+            summary: false,
+            notifyWhen: RuleNotifyWhen.CHANGE,
+            throttle: null,
           },
         },
       ],
@@ -148,7 +151,9 @@ describe('update()', () => {
       minimumLicenseRequired: 'basic',
       isExportable: true,
       recoveryActionGroup: RecoveredActionGroup,
-      async executor() {},
+      async executor() {
+        return { state: {} };
+      },
       producer: 'alerts',
     });
   });
@@ -701,7 +706,9 @@ describe('update()', () => {
       defaultActionGroupId: 'default',
       minimumLicenseRequired: 'basic',
       isExportable: true,
-      async executor() {},
+      async executor() {
+        return { state: {} };
+      },
       producer: 'alerts',
       useSavedObjectReferences: {
         extractReferences: extractReferencesFn,
@@ -886,7 +893,7 @@ describe('update()', () => {
           bar: true,
         },
         throttle: '5m',
-        notifyWhen: null,
+        notifyWhen: 'onThrottleInterval',
         actions: [
           {
             group: 'default',
@@ -1198,7 +1205,9 @@ describe('update()', () => {
           param1: schema.string(),
         }),
       },
-      async executor() {},
+      async executor() {
+        return { state: {} };
+      },
       producer: 'alerts',
     });
     await expect(
@@ -1249,6 +1258,11 @@ describe('update()', () => {
             params: {
               foo: true,
             },
+            frequency: {
+              summary: false,
+              notifyWhen: 'onActionGroupChange',
+              throttle: null,
+            },
           },
         ],
         scheduledTaskId: 'task-123',
@@ -1292,6 +1306,11 @@ describe('update()', () => {
             params: {
               foo: true,
             },
+            frequency: {
+              summary: false,
+              notifyWhen: 'onActionGroupChange',
+              throttle: null,
+            },
           },
         ],
         scheduledTaskId: 'task-123',
@@ -1314,14 +1333,17 @@ describe('update()', () => {
         params: {
           bar: true,
         },
-        throttle: null,
-        notifyWhen: null,
         actions: [
           {
             group: 'default',
             id: '1',
             params: {
               foo: true,
+            },
+            frequency: {
+              summary: false,
+              notifyWhen: 'onActionGroupChange',
+              throttle: null,
             },
           },
         ],
@@ -1390,6 +1412,11 @@ describe('update()', () => {
             params: {
               foo: true,
             },
+            frequency: {
+              summary: false,
+              notifyWhen: 'onActionGroupChange',
+              throttle: null,
+            },
           },
           {
             group: 'default',
@@ -1398,6 +1425,11 @@ describe('update()', () => {
             params: {
               foo: true,
             },
+            frequency: {
+              summary: false,
+              notifyWhen: 'onActionGroupChange',
+              throttle: null,
+            },
           },
           {
             group: 'default',
@@ -1405,6 +1437,11 @@ describe('update()', () => {
             actionTypeId: 'test2',
             params: {
               foo: true,
+            },
+            frequency: {
+              summary: false,
+              notifyWhen: 'onActionGroupChange',
+              throttle: null,
             },
           },
         ],
@@ -1439,8 +1476,6 @@ describe('update()', () => {
         params: {
           bar: true,
         },
-        throttle: '5m',
-        notifyWhen: null,
         actions: [
           {
             group: 'default',
@@ -1448,6 +1483,11 @@ describe('update()', () => {
             params: {
               foo: true,
             },
+            frequency: {
+              summary: false,
+              notifyWhen: 'onThrottleInterval',
+              throttle: '5m',
+            },
           },
           {
             group: 'default',
@@ -1455,12 +1495,22 @@ describe('update()', () => {
             params: {
               foo: true,
             },
+            frequency: {
+              summary: false,
+              notifyWhen: 'onThrottleInterval',
+              throttle: '5m',
+            },
           },
           {
             group: 'default',
             id: '2',
             params: {
               foo: true,
+            },
+            frequency: {
+              summary: false,
+              notifyWhen: 'onThrottleInterval',
+              throttle: '5m',
             },
           },
         ],
@@ -1488,14 +1538,17 @@ describe('update()', () => {
           params: {
             bar: true,
           },
-          throttle: null,
-          notifyWhen: null,
           actions: [
             {
               group: 'default',
               id: '1',
               params: {
                 foo: true,
+              },
+              frequency: {
+                summary: false,
+                notifyWhen: 'onActionGroupChange',
+                throttle: null,
               },
             },
           ],
@@ -1523,12 +1576,17 @@ describe('update()', () => {
       ruleTypeRegistry.get.mockReturnValueOnce({
         id: '123',
         name: 'Test',
-        actionGroups: [{ id: 'default', name: 'Default' }],
+        actionGroups: [
+          { id: 'default', name: 'Default' },
+          { id: 'group2', name: 'Action Group 2' },
+        ],
         defaultActionGroupId: 'default',
         minimumLicenseRequired: 'basic',
         isExportable: true,
         recoveryActionGroup: RecoveredActionGroup,
-        async executor() {},
+        async executor() {
+          return { state: {} };
+        },
         producer: 'alerts',
       });
       encryptedSavedObjects.getDecryptedAsInternalUser.mockResolvedValueOnce({
@@ -1572,6 +1630,11 @@ describe('update()', () => {
               params: {
                 foo: true,
               },
+              frequency: {
+                summary: false,
+                notifyWhen: 'onActionGroupChange',
+                throttle: null,
+              },
             },
           ],
           scheduledTaskId: taskId,
@@ -1589,8 +1652,8 @@ describe('update()', () => {
     }
 
     test('updating the alert schedule should call taskManager.bulkUpdateSchedules', async () => {
-      const alertId = uuid.v4();
-      const taskId = uuid.v4();
+      const alertId = uuidv4();
+      const taskId = uuidv4();
 
       mockApiCalls(alertId, taskId, { interval: '60m' }, { interval: '1m' });
 
@@ -1603,14 +1666,17 @@ describe('update()', () => {
           params: {
             bar: true,
           },
-          throttle: null,
-          notifyWhen: null,
           actions: [
             {
               group: 'default',
               id: '1',
               params: {
                 foo: true,
+              },
+              frequency: {
+                summary: false,
+                notifyWhen: 'onActionGroupChange',
+                throttle: null,
               },
             },
           ],
@@ -1621,8 +1687,8 @@ describe('update()', () => {
     });
 
     test('updating the alert without changing the schedule should not call taskManager.bulkUpdateSchedules', async () => {
-      const alertId = uuid.v4();
-      const taskId = uuid.v4();
+      const alertId = uuidv4();
+      const taskId = uuidv4();
 
       mockApiCalls(alertId, taskId, { interval: '1m' }, { interval: '1m' });
 
@@ -1635,14 +1701,17 @@ describe('update()', () => {
           params: {
             bar: true,
           },
-          throttle: null,
-          notifyWhen: null,
           actions: [
             {
               group: 'default',
               id: '1',
               params: {
                 foo: true,
+              },
+              frequency: {
+                summary: false,
+                notifyWhen: 'onActionGroupChange',
+                throttle: null,
               },
             },
           ],
@@ -1653,8 +1722,8 @@ describe('update()', () => {
     });
 
     test('throws error when mixing and matching global and per-action frequency values', async () => {
-      const alertId = uuid.v4();
-      const taskId = uuid.v4();
+      const alertId = uuidv4();
+      const taskId = uuidv4();
 
       mockApiCalls(alertId, taskId, { interval: '1m' }, { interval: '1m' });
       await expect(
@@ -1683,7 +1752,7 @@ describe('update()', () => {
                 },
               },
               {
-                group: 'default',
+                group: 'group2',
                 id: '2',
                 params: {
                   foo: true,
@@ -1698,7 +1767,7 @@ describe('update()', () => {
           },
         })
       ).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"Cannot specify per-action frequency params when notify_when and throttle are defined at the rule level: default, default"`
+        `"Failed to validate actions due to the following error: Cannot specify per-action frequency params when notify_when or throttle are defined at the rule level: default, group2"`
       );
       expect(unsecuredSavedObjectsClient.create).not.toHaveBeenCalled();
       expect(taskManager.schedule).not.toHaveBeenCalled();
@@ -1739,15 +1808,15 @@ describe('update()', () => {
           },
         })
       ).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"Cannot specify per-action frequency params when notify_when and throttle are defined at the rule level: default"`
+        `"Failed to validate actions due to the following error: Cannot specify per-action frequency params when notify_when or throttle are defined at the rule level: default"`
       );
       expect(unsecuredSavedObjectsClient.create).not.toHaveBeenCalled();
       expect(taskManager.schedule).not.toHaveBeenCalled();
     });
 
     test('throws error when neither global frequency nor action frequency are defined', async () => {
-      const alertId = uuid.v4();
-      const taskId = uuid.v4();
+      const alertId = uuidv4();
+      const taskId = uuidv4();
 
       mockApiCalls(alertId, taskId, { interval: '1m' }, { interval: '1m' });
 
@@ -1775,15 +1844,15 @@ describe('update()', () => {
           },
         })
       ).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"Actions missing frequency parameters: default"`
+        `"Failed to validate actions due to the following error: Actions missing frequency parameters: default"`
       );
       expect(unsecuredSavedObjectsClient.create).not.toHaveBeenCalled();
       expect(taskManager.schedule).not.toHaveBeenCalled();
     });
 
     test('throws error when when some actions are missing frequency params', async () => {
-      const alertId = uuid.v4();
-      const taskId = uuid.v4();
+      const alertId = uuidv4();
+      const taskId = uuidv4();
 
       mockApiCalls(alertId, taskId, { interval: '1m' }, { interval: '1m' });
 
@@ -1823,15 +1892,15 @@ describe('update()', () => {
           },
         })
       ).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"Actions missing frequency parameters: default"`
+        `"Failed to validate actions due to the following error: Actions missing frequency parameters: default"`
       );
       expect(unsecuredSavedObjectsClient.create).not.toHaveBeenCalled();
       expect(taskManager.schedule).not.toHaveBeenCalled();
     });
 
     test('logs when update of schedule of an alerts underlying task fails', async () => {
-      const alertId = uuid.v4();
-      const taskId = uuid.v4();
+      const alertId = uuidv4();
+      const taskId = uuidv4();
 
       mockApiCalls(alertId, taskId, { interval: '1m' }, { interval: '30s' });
 
@@ -1847,14 +1916,17 @@ describe('update()', () => {
           params: {
             bar: true,
           },
-          throttle: null,
-          notifyWhen: null,
           actions: [
             {
               group: 'default',
               id: '1',
               params: {
                 foo: true,
+              },
+              frequency: {
+                summary: false,
+                notifyWhen: 'onActionGroupChange',
+                throttle: null,
               },
             },
           ],
@@ -1944,9 +2016,160 @@ describe('update()', () => {
           ],
         },
       })
-    ).rejects.toThrowErrorMatchingInlineSnapshot(`"Invalid connectors: another connector"`);
+    ).rejects.toThrowErrorMatchingInlineSnapshot(
+      `"Failed to validate actions due to the following error: Invalid connectors: another connector"`
+    );
     expect(unsecuredSavedObjectsClient.create).not.toHaveBeenCalled();
     expect(taskManager.schedule).not.toHaveBeenCalled();
+  });
+  test('should update a rule even if action is missing secret when allowMissingConnectorSecrets is true', async () => {
+    // Reset from default behaviour
+    actionsClient.getBulk.mockReset();
+    actionsClient.getBulk.mockResolvedValue([
+      {
+        id: '1',
+        actionTypeId: '.slack',
+        config: {},
+        isMissingSecrets: true,
+        name: 'slack connector',
+        isPreconfigured: false,
+        isDeprecated: false,
+      },
+    ]);
+    actionsClient.isPreconfigured.mockReset();
+    actionsClient.isPreconfigured.mockReturnValueOnce(false);
+    actionsClient.isPreconfigured.mockReturnValueOnce(true);
+    actionsClient.isPreconfigured.mockReturnValueOnce(true);
+    unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
+      id: '1',
+      type: 'alert',
+      attributes: {
+        enabled: true,
+        schedule: { interval: '1m' },
+        params: {
+          bar: true,
+        },
+        actions: [
+          {
+            group: 'default',
+            actionRef: 'action_0',
+            actionTypeId: '.slack',
+            params: {
+              foo: true,
+            },
+          },
+        ],
+        notifyWhen: 'onActiveAlert',
+        scheduledTaskId: 'task-123',
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      },
+      references: [
+        {
+          name: 'action_0',
+          type: 'action',
+          id: '1',
+        },
+        {
+          name: 'param:soRef_0',
+          type: 'someSavedObjectType',
+          id: '9',
+        },
+      ],
+    });
+    const result = await rulesClient.update({
+      id: '1',
+      data: {
+        schedule: { interval: '1m' },
+        name: 'abc',
+        tags: ['foo'],
+        params: {
+          bar: true,
+        },
+        throttle: null,
+        notifyWhen: 'onActiveAlert',
+        actions: [
+          {
+            group: 'default',
+            id: '1',
+            params: {
+              foo: true,
+            },
+          },
+        ],
+      },
+      allowMissingConnectorSecrets: true,
+    });
+
+    expect(unsecuredSavedObjectsClient.create).toHaveBeenNthCalledWith(
+      1,
+      'alert',
+      {
+        actions: [
+          {
+            group: 'default',
+            actionRef: 'action_0',
+            actionTypeId: '.slack',
+            params: {
+              foo: true,
+            },
+          },
+        ],
+        alertTypeId: 'myType',
+        apiKey: null,
+        apiKeyOwner: null,
+        consumer: 'myApp',
+        enabled: true,
+        meta: { versionApiKeyLastmodified: 'v7.10.0' },
+        name: 'abc',
+        notifyWhen: 'onActiveAlert',
+        params: { bar: true },
+        schedule: { interval: '1m' },
+        scheduledTaskId: 'task-123',
+        tags: ['foo'],
+        throttle: null,
+        updatedAt: '2019-02-12T21:01:22.479Z',
+        updatedBy: 'elastic',
+      },
+      {
+        id: '1',
+        overwrite: true,
+        references: [{ id: '1', name: 'action_0', type: 'action' }],
+        version: '123',
+      }
+    );
+
+    expect(result).toMatchInlineSnapshot(`
+      Object {
+        "actions": Array [
+          Object {
+            "actionTypeId": ".slack",
+            "group": "default",
+            "id": "1",
+            "params": Object {
+              "foo": true,
+            },
+          },
+        ],
+        "createdAt": 2019-02-12T21:01:22.479Z,
+        "enabled": true,
+        "id": "1",
+        "notifyWhen": "onActiveAlert",
+        "params": Object {
+          "bar": true,
+        },
+        "schedule": Object {
+          "interval": "1m",
+        },
+        "scheduledTaskId": "task-123",
+        "updatedAt": 2019-02-12T21:01:22.479Z,
+      }
+    `);
+    expect(encryptedSavedObjects.getDecryptedAsInternalUser).toHaveBeenCalledWith('alert', '1', {
+      namespace: 'default',
+    });
+    expect(unsecuredSavedObjectsClient.get).not.toHaveBeenCalled();
+    expect(actionsClient.isPreconfigured).toHaveBeenCalledTimes(1);
   });
 
   test('logs warning when creating with an interval less than the minimum configured one when enforce = false', async () => {

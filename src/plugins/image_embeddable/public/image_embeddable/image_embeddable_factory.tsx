@@ -8,6 +8,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { IExternalUrl } from '@kbn/core-http-browser';
+import type { AuthenticatedUser } from '@kbn/security-plugin/common/model';
 import {
   IContainer,
   EmbeddableInput,
@@ -18,10 +19,12 @@ import {
   FileImageMetadata,
   imageEmbeddableFileKind,
   ThemeServiceStart,
+  UiActionsStart,
 } from '../imports';
 import { ImageEmbeddable, IMAGE_EMBEDDABLE_TYPE } from './image_embeddable';
 import { ImageConfig } from '../types';
 import { createValidateUrl } from '../utils/validate_url';
+import { ImageClickContext } from '../actions';
 
 export interface ImageEmbeddableFactoryDeps {
   start: () => {
@@ -30,6 +33,8 @@ export interface ImageEmbeddableFactoryDeps {
     files: FilesClient<FileImageMetadata>;
     externalUrl: IExternalUrl;
     theme: ThemeServiceStart;
+    getUser: () => Promise<AuthenticatedUser | undefined>;
+    uiActions: UiActionsStart;
   };
 }
 
@@ -53,6 +58,16 @@ export class ImageEmbeddableFactoryDefinition
       {
         getImageDownloadHref: this.getImageDownloadHref,
         validateUrl: createValidateUrl(this.deps.start().externalUrl),
+        actions: {
+          executeTriggerActions: (triggerId: string, context: ImageClickContext) =>
+            this.deps.start().uiActions.executeTriggerActions(triggerId, context),
+          hasTriggerActions: (triggerId: string, context: ImageClickContext) =>
+            this.deps
+              .start()
+              .uiActions.getTriggerCompatibleActions(triggerId, context)
+              .catch(() => [])
+              .then((actions) => actions.length > 0),
+        },
       },
       initialInput,
       parent
@@ -71,15 +86,19 @@ export class ImageEmbeddableFactoryDefinition
 
   public async getExplicitInput(initialInput: ImageEmbeddableInput) {
     const { configureImage } = await import('../image_editor');
+    const start = this.deps.start();
+    const { files, overlays, theme, application, externalUrl, getUser } = start;
+    const user = await getUser();
 
     const imageConfig = await configureImage(
       {
-        files: this.deps.start().files,
-        overlays: this.deps.start().overlays,
-        currentAppId$: this.deps.start().application.currentAppId$,
-        validateUrl: createValidateUrl(this.deps.start().externalUrl),
+        files,
+        overlays,
+        theme,
+        user,
+        currentAppId$: application.currentAppId$,
+        validateUrl: createValidateUrl(externalUrl),
         getImageDownloadHref: this.getImageDownloadHref,
-        theme: this.deps.start().theme,
       },
       initialInput ? initialInput.imageConfig : undefined
     );

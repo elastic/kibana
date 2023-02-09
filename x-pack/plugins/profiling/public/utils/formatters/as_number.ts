@@ -5,7 +5,13 @@
  * 2.0.
  */
 
+import { NOT_AVAILABLE_LABEL } from '../../../common';
+
 export function asNumber(value: number): string {
+  if (isNaN(value)) {
+    return NOT_AVAILABLE_LABEL;
+  }
+
   if (value === 0) {
     return '0';
   }

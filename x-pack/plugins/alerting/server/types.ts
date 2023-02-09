@@ -11,6 +11,7 @@ import type {
   SavedObjectReference,
   IUiSettingsClient,
 } from '@kbn/core/server';
+import { DataViewsContract } from '@kbn/data-views-plugin/common';
 import { ISearchStartSearchSource } from '@kbn/data-plugin/common';
 import { LicenseType } from '@kbn/licensing-plugin/server';
 import {
@@ -20,9 +21,11 @@ import {
   Logger,
 } from '@kbn/core/server';
 import type { PublicMethodsOf } from '@kbn/utility-types';
+import { SharePluginStart } from '@kbn/share-plugin/server';
 import { RuleTypeRegistry as OrigruleTypeRegistry } from './rule_type_registry';
 import { PluginSetupContract, PluginStartContract } from './plugin';
 import { RulesClient } from './rules_client';
+import { RulesSettingsClient, RulesSettingsFlappingClient } from './rules_settings_client';
 export * from '../common';
 import {
   Rule,
@@ -47,6 +50,8 @@ import {
   RuleLastRun,
 } from '../common';
 import { PublicAlertFactory } from './alert/create_alert_factory';
+import { FieldMap } from '../common/alert_schema/field_maps/types';
+import { RulesSettingsFlappingProperties } from '../common/rules_settings';
 export type WithoutQueryAndParams<T> = Pick<T, Exclude<keyof T, 'query' | 'params'>>;
 export type SpaceIdToNamespaceFunction = (spaceId?: string) => string | undefined;
 export type { RuleTypeParams };
@@ -55,6 +60,7 @@ export type { RuleTypeParams };
  */
 export interface AlertingApiRequestHandlerContext {
   getRulesClient: () => RulesClient;
+  getRulesSettingsClient: () => RulesSettingsClient;
   listTypes: RuleTypeRegistry['list'];
   getFrameworkHealth: () => Promise<AlertsHealth>;
   areApiKeysEnabled: () => Promise<boolean>;
@@ -84,6 +90,9 @@ export interface RuleExecutorServices<
   shouldWriteAlerts: () => boolean;
   shouldStopExecution: () => boolean;
   ruleMonitoringService?: PublicRuleMonitoringService;
+  share: SharePluginStart;
+  dataViews: DataViewsContract;
+  ruleResultService?: PublicRuleResultService;
 }
 
 export interface RuleExecutorOptions<
@@ -103,6 +112,7 @@ export interface RuleExecutorOptions<
   startedAt: Date;
   state: State;
   namespace?: string;
+  flappingSettings: RulesSettingsFlappingProperties;
 }
 
 export interface RuleParamsAndRefs<Params extends RuleTypeParams> {
@@ -118,7 +128,7 @@ export type ExecutorType<
   ActionGroupIds extends string = never
 > = (
   options: RuleExecutorOptions<Params, State, InstanceState, InstanceContext, ActionGroupIds>
-) => Promise<State | void>;
+) => Promise<{ state: State }>;
 
 export interface RuleTypeParamsValidator<Params extends RuleTypeParams> {
   validate: (object: unknown) => Params;
@@ -151,6 +161,11 @@ export interface SummarizedAlerts {
   };
 }
 export type GetSummarizedAlertsFn = (opts: GetSummarizedAlertsFnOpts) => Promise<SummarizedAlerts>;
+export interface IRuleTypeAlerts {
+  context: string;
+  namespace?: string;
+  fieldMap: FieldMap;
+}
 
 export interface GetRuleUrlFnOpts<Params extends RuleTypeParams> {
   id: string;
@@ -209,6 +224,7 @@ export interface RuleType<
   getSummarizedAlerts?: GetSummarizedAlertsFn;
   getRuleUrl?: GetRuleUrlFn<Params>;
 
+  alerts?: IRuleTypeAlerts;
   /**
    * Determines whether framework should
    * automatically make recovery determination. Defaults to true.
@@ -302,6 +318,7 @@ export interface RawRule extends SavedObjectAttributes {
   isSnoozedUntil?: string | null;
   lastRun?: RawRuleLastRun | null;
   nextRun?: string | null;
+  running?: boolean | null;
 }
 
 export interface AlertingPlugin {
@@ -331,13 +348,26 @@ export type RuleTypeRegistry = PublicMethodsOf<OrigruleTypeRegistry>;
 
 export type RulesClientApi = PublicMethodsOf<RulesClient>;
 
-export interface PublicRuleMonitoringService {
+export type RulesSettingsClientApi = PublicMethodsOf<RulesSettingsClient>;
+export type RulesSettingsFlappingClientApi = PublicMethodsOf<RulesSettingsFlappingClient>;
+
+export interface PublicMetricsSetters {
   setLastRunMetricsTotalSearchDurationMs: (totalSearchDurationMs: number) => void;
   setLastRunMetricsTotalIndexingDurationMs: (totalIndexingDurationMs: number) => void;
   setLastRunMetricsTotalAlertsDetected: (totalAlertDetected: number) => void;
   setLastRunMetricsTotalAlertsCreated: (totalAlertCreated: number) => void;
   setLastRunMetricsGapDurationS: (gapDurationS: number) => void;
 }
+
+export interface PublicLastRunSetters {
+  addLastRunError: (outcome: string) => void;
+  addLastRunWarning: (outcomeMsg: string) => void;
+  setLastRunOutcomeMessage: (warning: string) => void;
+}
+
+export type PublicRuleMonitoringService = PublicMetricsSetters;
+
+export type PublicRuleResultService = PublicLastRunSetters;
 
 export interface RawRuleLastRun extends SavedObjectAttributes, RuleLastRun {}
 export interface RawRuleMonitoring extends SavedObjectAttributes, RuleMonitoring {}

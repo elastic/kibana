@@ -181,9 +181,7 @@ export const useRuleFromTimeline = (setRuleQuery: SetRuleQuery): RuleFromTimelin
 
   // start handle set rule from timeline id
   const getInitialUrlParamValue = useGetInitialUrlParamValue<string>(RULE_FROM_TIMELINE_URL_PARAM);
-  const { decodedParam: timelineIdFromUrl } = useMemo(getInitialUrlParamValue, [
-    getInitialUrlParamValue,
-  ]);
+  const timelineIdFromUrl = useMemo(getInitialUrlParamValue, [getInitialUrlParamValue]);
 
   const getTimelineById = useCallback(
     (timelineId: string) => {

@@ -7,7 +7,13 @@
 
 import type { IKibanaResponse } from '@kbn/core/server';
 
-import type { FleetAuthzRouter } from '../../services/security';
+import type { FleetAuthz } from '../../../common';
+
+import {
+  calculateRouteAuthz,
+  type FleetAuthzRouter,
+  getRouteRequiredAuthz,
+} from '../../services/security';
 
 import type {
   DeletePackageResponse,
@@ -29,7 +35,7 @@ import {
   InstallPackageByUploadRequestSchema,
   DeletePackageRequestSchema,
   DeletePackageRequestSchemaDeprecated,
-  BulkUpgradePackagesFromRegistryRequestSchema,
+  BulkInstallPackagesFromRegistryRequestSchema,
   GetStatsRequestSchema,
   UpdatePackageRequestSchema,
   UpdatePackageRequestSchemaDeprecated,
@@ -111,9 +117,9 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
     {
       path: EPM_API_ROUTES.INFO_PATTERN,
       validate: GetInfoRequestSchema,
-      fleetAuthz: {
-        integrations: { readPackageInfo: true },
-      },
+      fleetAuthz: (fleetAuthz: FleetAuthz): boolean =>
+        calculateRouteAuthz(fleetAuthz, getRouteRequiredAuthz('get', EPM_API_ROUTES.INFO_PATTERN))
+          .granted,
     },
     getInfoHandler
   );
@@ -143,7 +149,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
   router.post(
     {
       path: EPM_API_ROUTES.BULK_INSTALL_PATTERN,
-      validate: BulkUpgradePackagesFromRegistryRequestSchema,
+      validate: BulkInstallPackagesFromRegistryRequestSchema,
       fleetAuthz: {
         integrations: { installPackages: true, upgradePackages: true },
       },
@@ -186,9 +192,11 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
     {
       path: EPM_API_ROUTES.INFO_PATTERN_DEPRECATED,
       validate: GetInfoRequestSchemaDeprecated,
-      fleetAuthz: {
-        integrations: { readPackageInfo: true },
-      },
+      fleetAuthz: (fleetAuthz: FleetAuthz): boolean =>
+        calculateRouteAuthz(
+          fleetAuthz,
+          getRouteRequiredAuthz('get', EPM_API_ROUTES.INFO_PATTERN_DEPRECATED)
+        ).granted,
     },
     async (context, request, response) => {
       const newRequest = { ...request, params: splitPkgKey(request.params.pkgkey) } as any;
@@ -236,7 +244,11 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
       },
     },
     async (context, request, response) => {
-      const newRequest = { ...request, params: splitPkgKey(request.params.pkgkey) } as any;
+      const newRequest = {
+        ...request,
+        params: splitPkgKey(request.params.pkgkey),
+        query: request.query,
+      } as any;
       const resp: IKibanaResponse<InstallPackageResponse> = await installPackageFromRegistryHandler(
         context,
         newRequest,

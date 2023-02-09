@@ -1,9 +1,7 @@
 {
   "extends": "../../../tsconfig.base.json",
   "compilerOptions": {
-    "outDir": "./target/types",
-    "emitDeclarationOnly": true,
-    "declaration": true,
+    "outDir": "target/types",
   },
   "include": [
     // add all the folders containg files to be compiled
@@ -17,27 +15,26 @@
     "../../../typings/**/*"
   ],
   "kbn_references": [
-    { "path": "../../../src/core/tsconfig.json" },
+    "@kbn/core",
     // add references to other TypeScript projects the plugin depends on
 
     // requiredPlugins from ./kibana.json
-    { "path": "../licensing/tsconfig.json" },
-    { "path": "../../../src/plugins/data/tsconfig.json" },
-    { "path": "../encrypted_saved_objects/tsconfig.json" },
+    "@kbn/data-plugin",
 
     // optionalPlugins from ./kibana.json
-    { "path": "../security/tsconfig.json" },
-    { "path": "../features/tsconfig.json" },
-    { "path": "../cloud/tsconfig.json" },
-    { "path": "../../../src/plugins/usage_collection/tsconfig.json" },
-    { "path": "../../../src/plugins/home/tsconfig.json" },
 
     // requiredBundles from ./kibana.json
-    { "path": "../../../src/plugins/kibana_react/tsconfig.json" },
-    { "path": "../../../src/plugins/es_ui_shared/tsconfig.json" },
-    { "path": "../infra/tsconfig.json" },
-    { "path": "../../../src/plugins/kibana_utils/tsconfig.json" },
-    { "path": "../rule_registry/tsconfig.json" },
-    { "path": "../session_view/tsconfig.json" }
+    "@kbn/kibana-react-plugin",
+    "@kbn/rule-registry-plugin",
+    "@kbn/session-view-plugin",
+    "@kbn/i18n",
+    "@kbn/timelines-plugin",
+    "@kbn/es-query",
+    "@kbn/ui-theme",
+    "@kbn/i18n-react",
+    "@kbn/config-schema",
+  ],
+  "exclude": [
+    "target/**/*",
   ]
 }

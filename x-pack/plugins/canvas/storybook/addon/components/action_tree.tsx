@@ -7,7 +7,7 @@
 
 import React, { FC } from 'react';
 import { isObject, isDate } from 'lodash';
-import uuid from 'uuid/v4';
+import { v4 as uuidv4 } from 'uuid';
 import { EuiTreeView } from '@elastic/eui';
 
 import { Node } from '@elastic/eui/src/components/tree_view/tree_view';
@@ -20,17 +20,17 @@ const actionToTree = (recordedAction: RecordedAction) => {
   return [
     {
       label: 'Action',
-      id: uuid(),
+      id: uuidv4(),
       children: jsonToTree(action),
     },
     {
       label: 'Previous State',
-      id: uuid(),
+      id: uuidv4(),
       children: jsonToTree(previousState),
     },
     {
       label: 'Current State',
-      id: uuid(),
+      id: uuidv4(),
       children: jsonToTree(newState),
     },
   ];
@@ -46,7 +46,7 @@ const jsonToTree: (obj: Record<string, any>) => Node[] = (obj) => {
       return null;
     }
 
-    const id = uuid();
+    const id = uuidv4();
 
     if (isDate(value)) {
       return { label: `${label}: ${(value as Date).toDateString()}` };

@@ -1,4 +1,10 @@
 {
-  "extends": "../../tsconfig.bazel.json",
-  "include": ["index.d.ts"]
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "target/types"
+  },
+  "include": ["index.d.ts"],
+  "exclude": [
+    "target/**/*",
+  ]
 }

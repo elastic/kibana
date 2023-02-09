@@ -49,6 +49,7 @@ export interface TypesResult {
 export interface FileResult {
   type: 'file';
   absolute: string;
+  pkgId?: string;
   nodeModule?: string;
   prefix?: string;
   postfix?: string;

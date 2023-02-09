@@ -6,6 +6,7 @@
  */
 
 import { useMemo, useState } from 'react';
+import type { Filter } from '@kbn/es-query';
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
 import type { DataProvider } from '@kbn/timelines-plugin/common';
 import { TimelineId } from '../../../../../../common/types/timeline';
@@ -17,6 +18,7 @@ import { SourcererScopeName } from '../../../../store/sourcerer/model';
 
 export interface UseInsightQuery {
   dataProviders: DataProvider[];
+  filters: Filter[];
 }
 
 export interface UseInsightQueryResult {
@@ -26,7 +28,10 @@ export interface UseInsightQueryResult {
   hasError: boolean;
 }
 
-export const useInsightQuery = ({ dataProviders }: UseInsightQuery): UseInsightQueryResult => {
+export const useInsightQuery = ({
+  dataProviders,
+  filters,
+}: UseInsightQuery): UseInsightQueryResult => {
   const { uiSettings } = useKibana().services;
   const esQueryConfig = useMemo(() => getEsQueryConfig(uiSettings), [uiSettings]);
   const { browserFields, selectedPatterns, indexPattern, dataViewId } = useSourcererDataView(
@@ -41,7 +46,7 @@ export const useInsightQuery = ({ dataProviders }: UseInsightQuery): UseInsightQ
           dataProviders,
           indexPattern,
           browserFields,
-          filters: [],
+          filters,
           kqlQuery: {
             query: '',
             language: 'kuery',
@@ -54,7 +59,7 @@ export const useInsightQuery = ({ dataProviders }: UseInsightQuery): UseInsightQ
       setHasError(true);
       return null;
     }
-  }, [browserFields, dataProviders, esQueryConfig, hasError, indexPattern]);
+  }, [browserFields, dataProviders, esQueryConfig, hasError, indexPattern, filters]);
 
   const [isQueryLoading, { events, totalCount }] = useTimelineEvents({
     dataViewId,

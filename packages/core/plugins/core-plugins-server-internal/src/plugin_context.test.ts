@@ -8,7 +8,7 @@
 
 import { duration } from 'moment';
 import { first } from 'rxjs/operators';
-import { REPO_ROOT, fromRoot } from '@kbn/utils';
+import { REPO_ROOT, fromRoot } from '@kbn/repo-info';
 import { rawConfigServiceMock, getEnvOptions, configServiceMock } from '@kbn/config-mocks';
 import type { CoreContext } from '@kbn/core-base-server-internal';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';

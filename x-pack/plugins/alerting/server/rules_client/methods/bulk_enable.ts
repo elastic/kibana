@@ -8,6 +8,9 @@
 import pMap from 'p-map';
 import { KueryNode, nodeBuilder } from '@kbn/es-query';
 import { SavedObjectsBulkUpdateObject } from '@kbn/core/server';
+import { withSpan } from '@kbn/apm-utils';
+import { Logger } from '@kbn/core/server';
+import { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import { RawRule, IntervalSchedule } from '../../types';
 import { convertRuleIdsToKueryNode } from '../../lib';
 import { ruleAuditEvent, RuleAuditAction } from '../common/audit_events';
@@ -33,7 +36,9 @@ const getShouldScheduleTask = async (
   if (!scheduledTaskId) return true;
   try {
     // make sure scheduledTaskId exist
-    await context.taskManager.get(scheduledTaskId);
+    await withSpan({ name: 'getShouldScheduleTask', type: 'rules' }, () =>
+      context.taskManager.get(scheduledTaskId)
+    );
     return false;
   } catch (err) {
     return true;
@@ -66,36 +71,11 @@ export const bulkEnableRules = async (context: RulesClientContext, options: Bulk
 
   const [taskIdsToEnable] = accListSpecificForBulkOperation;
 
-  const taskIdsFailedToBeEnabled: string[] = [];
-  if (taskIdsToEnable.length > 0) {
-    try {
-      const resultFromEnablingTasks = await context.taskManager.bulkEnable(taskIdsToEnable);
-      resultFromEnablingTasks?.errors?.forEach((error) => {
-        taskIdsFailedToBeEnabled.push(error.task.id);
-      });
-      if (resultFromEnablingTasks.tasks.length) {
-        context.logger.debug(
-          `Successfully enabled schedules for underlying tasks: ${resultFromEnablingTasks.tasks
-            .map((task) => task.id)
-            .join(', ')}`
-        );
-      }
-      if (resultFromEnablingTasks.errors.length) {
-        context.logger.error(
-          `Failure to enable schedules for underlying tasks: ${resultFromEnablingTasks.errors
-            .map((error) => error.task.id)
-            .join(', ')}`
-        );
-      }
-    } catch (error) {
-      taskIdsFailedToBeEnabled.push(...taskIdsToEnable);
-      context.logger.error(
-        `Failure to enable schedules for underlying tasks: ${taskIdsToEnable.join(
-          ', '
-        )}. TaskManager bulkEnable failed with Error: ${error.message}`
-      );
-    }
-  }
+  const taskIdsFailedToBeEnabled = await tryToEnableTasks({
+    taskIdsToEnable,
+    logger: context.logger,
+    taskManager: context.taskManager,
+  });
 
   const updatedRules = rules.map(({ id, attributes, references }) => {
     return getAlertFromRaw(
@@ -117,109 +97,123 @@ const bulkEnableRulesWithOCC = async (
 ) => {
   const additionalFilter = nodeBuilder.is('alert.attributes.enabled', 'false');
 
-  const rulesFinder =
-    await context.encryptedSavedObjectsClient.createPointInTimeFinderDecryptedAsInternalUser<RawRule>(
-      {
-        filter: filter ? nodeBuilder.and([filter, additionalFilter]) : additionalFilter,
-        type: 'alert',
-        perPage: 100,
-        ...(context.namespace ? { namespaces: [context.namespace] } : undefined),
-      }
-    );
+  const rulesFinder = await withSpan(
+    {
+      name: 'encryptedSavedObjectsClient.createPointInTimeFinderDecryptedAsInternalUser',
+      type: 'rules',
+    },
+    async () =>
+      await context.encryptedSavedObjectsClient.createPointInTimeFinderDecryptedAsInternalUser<RawRule>(
+        {
+          filter: filter ? nodeBuilder.and([filter, additionalFilter]) : additionalFilter,
+          type: 'alert',
+          perPage: 100,
+          ...(context.namespace ? { namespaces: [context.namespace] } : undefined),
+        }
+      )
+  );
 
   const rulesToEnable: Array<SavedObjectsBulkUpdateObject<RawRule>> = [];
-  const taskIdsToEnable: string[] = [];
   const errors: BulkOperationError[] = [];
   const ruleNameToRuleIdMapping: Record<string, string> = {};
   const username = await context.getUserName();
 
-  for await (const response of rulesFinder.find()) {
-    await pMap(response.saved_objects, async (rule) => {
-      try {
-        if (rule.attributes.enabled === true) return;
-        if (rule.attributes.actions.length) {
+  await withSpan(
+    { name: 'Get rules, collect them and their attributes', type: 'rules' },
+    async () => {
+      for await (const response of rulesFinder.find()) {
+        await pMap(response.saved_objects, async (rule) => {
           try {
-            await context.actionsAuthorization.ensureAuthorized('execute');
+            if (rule.attributes.actions.length) {
+              try {
+                await context.actionsAuthorization.ensureAuthorized('execute');
+              } catch (error) {
+                throw Error(`Rule not authorized for bulk enable - ${error.message}`);
+              }
+            }
+            if (rule.attributes.name) {
+              ruleNameToRuleIdMapping[rule.id] = rule.attributes.name;
+            }
+
+            const updatedAttributes = updateMeta(context, {
+              ...rule.attributes,
+              ...(!rule.attributes.apiKey &&
+                (await createNewAPIKeySet(context, { attributes: rule.attributes, username }))),
+              enabled: true,
+              updatedBy: username,
+              updatedAt: new Date().toISOString(),
+              executionStatus: {
+                status: 'pending',
+                lastDuration: 0,
+                lastExecutionDate: new Date().toISOString(),
+                error: null,
+                warning: null,
+              },
+            });
+
+            const shouldScheduleTask = await getShouldScheduleTask(
+              context,
+              rule.attributes.scheduledTaskId
+            );
+
+            let scheduledTaskId;
+            if (shouldScheduleTask) {
+              const scheduledTask = await scheduleTask(context, {
+                id: rule.id,
+                consumer: rule.attributes.consumer,
+                ruleTypeId: rule.attributes.alertTypeId,
+                schedule: rule.attributes.schedule as IntervalSchedule,
+                throwOnConflict: false,
+              });
+              scheduledTaskId = scheduledTask.id;
+            }
+
+            rulesToEnable.push({
+              ...rule,
+              attributes: {
+                ...updatedAttributes,
+                ...(scheduledTaskId ? { scheduledTaskId } : undefined),
+              },
+            });
+
+            context.auditLogger?.log(
+              ruleAuditEvent({
+                action: RuleAuditAction.ENABLE,
+                outcome: 'unknown',
+                savedObject: { type: 'alert', id: rule.id },
+              })
+            );
           } catch (error) {
-            throw Error(`Rule not authorized for bulk enable - ${error.message}`);
+            errors.push({
+              message: error.message,
+              rule: {
+                id: rule.id,
+                name: rule.attributes?.name,
+              },
+            });
+            context.auditLogger?.log(
+              ruleAuditEvent({
+                action: RuleAuditAction.ENABLE,
+                error,
+              })
+            );
           }
-        }
-        if (rule.attributes.name) {
-          ruleNameToRuleIdMapping[rule.id] = rule.attributes.name;
-        }
-
-        const updatedAttributes = updateMeta(context, {
-          ...rule.attributes,
-          ...(!rule.attributes.apiKey &&
-            (await createNewAPIKeySet(context, { attributes: rule.attributes, username }))),
-          enabled: true,
-          updatedBy: username,
-          updatedAt: new Date().toISOString(),
-          executionStatus: {
-            status: 'pending',
-            lastDuration: 0,
-            lastExecutionDate: new Date().toISOString(),
-            error: null,
-            warning: null,
-          },
         });
-
-        const shouldScheduleTask = await getShouldScheduleTask(
-          context,
-          rule.attributes.scheduledTaskId
-        );
-
-        let scheduledTaskId;
-        if (shouldScheduleTask) {
-          const scheduledTask = await scheduleTask(context, {
-            id: rule.id,
-            consumer: rule.attributes.consumer,
-            ruleTypeId: rule.attributes.alertTypeId,
-            schedule: rule.attributes.schedule as IntervalSchedule,
-            throwOnConflict: false,
-          });
-          scheduledTaskId = scheduledTask.id;
-        }
-
-        rulesToEnable.push({
-          ...rule,
-          attributes: {
-            ...updatedAttributes,
-            ...(scheduledTaskId ? { scheduledTaskId } : undefined),
-          },
-        });
-
-        context.auditLogger?.log(
-          ruleAuditEvent({
-            action: RuleAuditAction.ENABLE,
-            outcome: 'unknown',
-            savedObject: { type: 'alert', id: rule.id },
-          })
-        );
-      } catch (error) {
-        errors.push({
-          message: error.message,
-          rule: {
-            id: rule.id,
-            name: rule.attributes?.name,
-          },
-        });
-        context.auditLogger?.log(
-          ruleAuditEvent({
-            action: RuleAuditAction.ENABLE,
-            error,
-          })
-        );
       }
-    });
-  }
-  await rulesFinder.close();
+      await rulesFinder.close();
+    }
+  );
 
-  const result = await context.unsecuredSavedObjectsClient.bulkCreate(rulesToEnable, {
-    overwrite: true,
-  });
+  const result = await withSpan(
+    { name: 'unsecuredSavedObjectsClient.bulkCreate', type: 'rules' },
+    () =>
+      context.unsecuredSavedObjectsClient.bulkCreate(rulesToEnable, {
+        overwrite: true,
+      })
+  );
 
   const rules: Array<SavedObjectsBulkUpdateObject<RawRule>> = [];
+  const taskIdsToEnable: string[] = [];
 
   result.saved_objects.forEach((rule) => {
     if (rule.error === undefined) {
@@ -239,4 +233,50 @@ const bulkEnableRulesWithOCC = async (
     }
   });
   return { errors, rules, accListSpecificForBulkOperation: [taskIdsToEnable] };
+};
+
+export const tryToEnableTasks = async ({
+  taskIdsToEnable,
+  logger,
+  taskManager,
+}: {
+  taskIdsToEnable: string[];
+  logger: Logger;
+  taskManager: TaskManagerStartContract;
+}) => {
+  const taskIdsFailedToBeEnabled: string[] = [];
+
+  if (taskIdsToEnable.length > 0) {
+    try {
+      const resultFromEnablingTasks = await withSpan(
+        { name: 'taskManager.bulkEnable', type: 'rules' },
+        async () => taskManager.bulkEnable(taskIdsToEnable)
+      );
+      resultFromEnablingTasks?.errors?.forEach((error) => {
+        taskIdsFailedToBeEnabled.push(error.id);
+      });
+      if (resultFromEnablingTasks.tasks.length) {
+        logger.debug(
+          `Successfully enabled schedules for underlying tasks: ${resultFromEnablingTasks.tasks
+            .map((task) => task.id)
+            .join(', ')}`
+        );
+      }
+      if (resultFromEnablingTasks.errors.length) {
+        logger.error(
+          `Failure to enable schedules for underlying tasks: ${resultFromEnablingTasks.errors
+            .map((error) => error.id)
+            .join(', ')}`
+        );
+      }
+    } catch (error) {
+      taskIdsFailedToBeEnabled.push(...taskIdsToEnable);
+      logger.error(
+        `Failure to enable schedules for underlying tasks: ${taskIdsToEnable.join(
+          ', '
+        )}. TaskManager bulkEnable failed with Error: ${error.message}`
+      );
+    }
+  }
+  return taskIdsFailedToBeEnabled;
 };

@@ -30,11 +30,6 @@ export const mockState: SyntheticsAppState = {
     searchText: '',
     monitorId: '',
   },
-  indexStatus: {
-    data: null,
-    error: null,
-    loading: false,
-  },
   serviceLocations: {
     throttling: DEFAULT_THROTTLING,
     locations: [
@@ -72,7 +67,8 @@ export const mockState: SyntheticsAppState = {
       sortField: `${ConfigKey.NAME}.keyword`,
       sortOrder: 'asc',
       tags: undefined,
-      monitorType: undefined,
+      monitorTypes: undefined,
+      projects: undefined,
       locations: undefined,
     },
     monitorUpsertStatuses: {},
@@ -103,8 +99,10 @@ export const mockState: SyntheticsAppState = {
     loaded: false,
     loading: false,
     flyoutConfig: null,
-    status: null,
-    statusError: null,
+    groupBy: {
+      field: 'none',
+      order: 'asc',
+    },
   },
   syntheticsEnablement: { loading: false, error: null, enablement: null },
   monitorDetails: getMonitorDetailsMockSlice(),
@@ -123,6 +121,23 @@ export const mockState: SyntheticsAppState = {
   },
   dynamicSettings: {
     loading: false,
+  },
+  defaultAlerting: {
+    loading: false,
+    error: null,
+    success: null,
+  },
+  elasticsearch: {
+    results: {},
+    loading: {},
+    error: {},
+  },
+  manualTestRuns: {},
+  overviewStatus: {
+    loaded: false,
+    loading: false,
+    status: null,
+    error: null,
   },
 };
 
@@ -149,6 +164,8 @@ function getBrowserJourneyMockSlice() {
       { hash: '4bae236101175ae7746cb922f4c511083af4fbcd', hitTime: 1658682270849 },
       { hash: 'ec95c047e2e05a27598451fdaa7f24db973eb933', hitTime: 1658682270849 },
     ],
+    journeys: {},
+    journeysLoading: {},
   };
 }
 

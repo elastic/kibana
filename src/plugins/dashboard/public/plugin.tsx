@@ -33,8 +33,8 @@ import type {
 import { APP_WRAPPER_CLASS } from '@kbn/core/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
+import { replaceUrlHashQuery } from '@kbn/kibana-utils-plugin/common';
 import { createKbnUrlTracker } from '@kbn/kibana-utils-plugin/public';
-import { replaceUrlHashQuery } from '@kbn/kibana-utils-plugin/public';
 import type { SavedObjectsStart } from '@kbn/saved-objects-plugin/public';
 import type { VisualizationsStart } from '@kbn/visualizations-plugin/public';
 import type { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
@@ -49,6 +49,7 @@ import type { DataPublicPluginSetup, DataPublicPluginStart } from '@kbn/data-plu
 import type { UrlForwardingSetup, UrlForwardingStart } from '@kbn/url-forwarding-plugin/public';
 import type { SavedObjectTaggingOssPluginStart } from '@kbn/saved-objects-tagging-oss-plugin/public';
 
+import { CustomBrandingStart } from '@kbn/core-custom-branding-browser';
 import { DashboardContainerFactoryDefinition } from './dashboard_container/embeddable/dashboard_container_factory';
 import {
   type DashboardAppLocator,
@@ -97,6 +98,7 @@ export interface DashboardStartDependencies {
   urlForwarding: UrlForwardingStart;
   usageCollection?: UsageCollectionStart;
   visualizations: VisualizationsStart;
+  customBranding: CustomBrandingStart;
 }
 
 export interface DashboardSetup {

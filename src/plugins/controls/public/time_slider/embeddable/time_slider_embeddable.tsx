@@ -35,7 +35,7 @@ import {
   roundDownToNextStepSizeFactor,
   roundUpToNextStepSizeFactor,
 } from '../time_utils';
-import { getRoundedTimeRangeBounds } from '../time_slider_selectors';
+import { getIsAnchored, getRoundedTimeRangeBounds } from '../time_slider_selectors';
 
 export class TimeSliderControlEmbeddable extends Embeddable<
   TimeSliderControlEmbeddableInput,
@@ -262,8 +262,25 @@ export class TimeSliderControlEmbeddable extends Embeddable<
     const value = getState().componentState.value;
     const range = getState().componentState.range;
     const ticks = getState().componentState.ticks;
+    const isAnchored = getIsAnchored(getState());
     const tickRange = ticks[1].value - ticks[0].value;
     const timeRangeBounds = getRoundedTimeRangeBounds(getState());
+
+    if (isAnchored) {
+      if (value === undefined || value[TO_INDEX] >= timeRangeBounds[TO_INDEX]) {
+        this.onTimesliceChange([timeRangeBounds[FROM_INDEX], ticks[0].value]);
+        return;
+      }
+
+      const nextTick = ticks.find((tick) => {
+        return tick.value > value[TO_INDEX];
+      });
+      this.onTimesliceChange([
+        timeRangeBounds[FROM_INDEX],
+        nextTick ? nextTick.value : timeRangeBounds[TO_INDEX],
+      ]);
+      return;
+    }
 
     if (value === undefined || value[TO_INDEX] >= timeRangeBounds[TO_INDEX]) {
       const from = timeRangeBounds[FROM_INDEX];
@@ -291,8 +308,22 @@ export class TimeSliderControlEmbeddable extends Embeddable<
     const value = getState().componentState.value;
     const range = getState().componentState.range;
     const ticks = getState().componentState.ticks;
+    const isAnchored = getIsAnchored(getState());
     const tickRange = ticks[1].value - ticks[0].value;
     const timeRangeBounds = getRoundedTimeRangeBounds(getState());
+
+    if (isAnchored) {
+      const prevTick = value
+        ? [...ticks].reverse().find((tick) => {
+            return tick.value < value[TO_INDEX];
+          })
+        : ticks[ticks.length - 1];
+      this.onTimesliceChange([
+        timeRangeBounds[FROM_INDEX],
+        prevTick ? prevTick.value : timeRangeBounds[TO_INDEX],
+      ]);
+      return;
+    }
 
     if (value === undefined || value[FROM_INDEX] <= timeRangeBounds[FROM_INDEX]) {
       const to = timeRangeBounds[TO_INDEX];

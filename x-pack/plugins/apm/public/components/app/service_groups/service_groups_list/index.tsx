@@ -43,7 +43,7 @@ export function ServiceGroupsList() {
 
   const { serviceGroups } = data;
 
-  const { data: servicesGroupCounts = {} } = useFetcher(
+  const { data: servicesGroupCounts = {}, status: statsStatus } = useFetcher(
     (callApmApi) => {
       if (serviceGroups.length) {
         return callApmApi('GET /internal/apm/service-group/counts');
@@ -53,6 +53,7 @@ export function ServiceGroupsList() {
   );
 
   const isLoading = isPending(status);
+  const isLoadingStats = isPending(statsStatus);
 
   const filteredItems = isEmpty(filter)
     ? serviceGroups
@@ -192,7 +193,7 @@ export function ServiceGroupsList() {
                   <ServiceGroupsListItems
                     items={items}
                     serviceGroupCounts={servicesGroupCounts}
-                    isLoading={isLoading}
+                    isLoading={isLoadingStats}
                   />
                 ) : (
                   <EuiEmptyPrompt

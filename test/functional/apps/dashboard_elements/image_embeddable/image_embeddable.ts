@@ -10,9 +10,14 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const PageObjects = getPageObjects(['common', 'dashboard']);
+  const PageObjects = getPageObjects(['common', 'dashboard', 'discover', 'header']);
   const testSubjects = getService('testSubjects');
   const kibanaServer = getService('kibanaServer');
+  const retry = getService('retry');
+
+  const dashboardPanelActions = getService('dashboardPanelActions');
+  const dashboardDrilldownPanelActions = getService('dashboardDrilldownPanelActions');
+  const dashboardDrilldownsManage = getService('dashboardDrilldownsManage');
 
   describe('image embeddable', function () {
     before(async () => {
@@ -43,6 +48,38 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       const img = await panel.findByCssSelector('img.euiImage');
       const imgSrc = await img.getAttribute('src');
       expect(imgSrc).to.contain(`files/defaultImage`);
+    });
+
+    it('image embeddable should support drilldowns', async () => {
+      await dashboardPanelActions.openContextMenu();
+      await dashboardDrilldownPanelActions.expectExistsCreateDrilldownAction();
+      await dashboardDrilldownPanelActions.clickCreateDrilldown();
+      await dashboardDrilldownsManage.expectsCreateDrilldownFlyoutOpen();
+
+      await testSubjects.click('actionFactoryItem-DASHBOARD_TO_DASHBOARD_DRILLDOWN');
+      await dashboardDrilldownsManage.fillInDashboardToDashboardDrilldownWizard({
+        drilldownName: `My drilldown`,
+        destinationDashboardTitle: `few panels`,
+      });
+
+      await dashboardDrilldownsManage.saveChanges();
+      await dashboardDrilldownsManage.closeFlyout();
+
+      expect(await PageObjects.dashboard.getPanelDrilldownCount()).to.be(1);
+
+      const panel = (await PageObjects.dashboard.getDashboardPanels())[0];
+      const img = await panel.findByCssSelector('img.euiImage');
+
+      const oldDashboardId = await PageObjects.dashboard.getDashboardIdFromCurrentUrl();
+
+      await img.click();
+
+      await retry.waitFor('navigate to different dashboard', async () => {
+        const newDashboardId = await PageObjects.dashboard.getDashboardIdFromCurrentUrl();
+        return typeof newDashboardId === 'string' && oldDashboardId !== newDashboardId;
+      });
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      await PageObjects.dashboard.waitForRenderComplete();
     });
   });
 }

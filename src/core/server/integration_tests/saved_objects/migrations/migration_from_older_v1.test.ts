@@ -10,7 +10,7 @@ import Path from 'path';
 import Fs from 'fs';
 import Util from 'util';
 import Semver from 'semver';
-import { REPO_ROOT } from '@kbn/utils';
+import { REPO_ROOT } from '@kbn/repo-info';
 import { Env } from '@kbn/config';
 import { getEnvOptions } from '@kbn/config-mocks';
 import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';

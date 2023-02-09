@@ -79,7 +79,7 @@ import {
 } from '../../tasks/alerts_detection_rules';
 import { createCustomRuleEnabled } from '../../tasks/api_calls/rules';
 import { createTimeline } from '../../tasks/api_calls/timelines';
-import { cleanKibana, deleteAlertsAndRules } from '../../tasks/common';
+import { cleanKibana, deleteAlertsAndRules, deleteConnectors } from '../../tasks/common';
 import { addEmailConnectorAndRuleAction } from '../../tasks/common/rule_actions';
 import {
   continueWithNextSection,
@@ -356,6 +356,7 @@ describe('Custom query rules', () => {
 
       before(() => {
         deleteAlertsAndRules();
+        deleteConnectors();
         createCustomRuleEnabled(getExistingRule(), 'rule1');
       });
       beforeEach(() => {

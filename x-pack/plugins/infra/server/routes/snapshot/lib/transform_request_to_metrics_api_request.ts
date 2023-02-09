@@ -38,9 +38,7 @@ export const transformRequestToMetricsAPIRequest = async ({
   const metricsApiRequest: MetricsAPIRequest = {
     indexPattern: sourceOverrides?.indexPattern ?? source.configuration.metricAlias,
     timerange: {
-      from: timeRangeWithIntervalApplied.from,
-      to: timeRangeWithIntervalApplied.to,
-      interval: timeRangeWithIntervalApplied.interval,
+      ...timeRangeWithIntervalApplied,
     },
     metrics: transformSnapshotMetricsToMetricsAPIMetrics(snapshotRequest),
     limit: snapshotRequest.overrideCompositeSize

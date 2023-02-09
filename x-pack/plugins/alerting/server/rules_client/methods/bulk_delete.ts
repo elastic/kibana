@@ -7,10 +7,12 @@
 
 import { KueryNode, nodeBuilder } from '@kbn/es-query';
 import { SavedObjectsBulkUpdateObject } from '@kbn/core/server';
+import { withSpan } from '@kbn/apm-utils';
 import { RawRule } from '../../types';
 import { convertRuleIdsToKueryNode } from '../../lib';
 import { bulkMarkApiKeysForInvalidation } from '../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation';
 import { ruleAuditEvent, RuleAuditAction } from '../common/audit_events';
+import { tryToRemoveTasks } from '../common';
 import { getAuthorizationFilter, checkAuthorizationAndGetTotal, getAlertFromRaw } from '../lib';
 import {
   retryIfBulkOperationConflicts,
@@ -35,54 +37,32 @@ export const bulkDeleteRules = async (context: RulesClientContext, options: Bulk
     action: 'DELETE',
   });
 
-  const { rules, errors, accListSpecificForBulkOperation } = await retryIfBulkOperationConflicts({
-    action: 'DELETE',
-    logger: context.logger,
-    bulkOperation: (filterKueryNode: KueryNode | null) =>
-      bulkDeleteWithOCC(context, { filter: filterKueryNode }),
-    filter: kueryNodeFilterWithAuth,
-  });
+  const { rules, errors, accListSpecificForBulkOperation } = await withSpan(
+    { name: 'retryIfBulkOperationConflicts', type: 'rules' },
+    () =>
+      retryIfBulkOperationConflicts({
+        action: 'DELETE',
+        logger: context.logger,
+        bulkOperation: (filterKueryNode: KueryNode | null) =>
+          bulkDeleteWithOCC(context, { filter: filterKueryNode }),
+        filter: kueryNodeFilterWithAuth,
+      })
+  );
 
   const [apiKeysToInvalidate, taskIdsToDelete] = accListSpecificForBulkOperation;
 
-  const taskIdsFailedToBeDeleted: string[] = [];
-  const taskIdsSuccessfullyDeleted: string[] = [];
-  if (taskIdsToDelete.length > 0) {
-    try {
-      const resultFromDeletingTasks = await context.taskManager.bulkRemoveIfExist(taskIdsToDelete);
-      resultFromDeletingTasks?.statuses.forEach((status) => {
-        if (status.success) {
-          taskIdsSuccessfullyDeleted.push(status.id);
-        } else {
-          taskIdsFailedToBeDeleted.push(status.id);
-        }
-      });
-      if (taskIdsSuccessfullyDeleted.length) {
-        context.logger.debug(
-          `Successfully deleted schedules for underlying tasks: ${taskIdsSuccessfullyDeleted.join(
-            ', '
-          )}`
-        );
-      }
-      if (taskIdsFailedToBeDeleted.length) {
-        context.logger.error(
-          `Failure to delete schedules for underlying tasks: ${taskIdsFailedToBeDeleted.join(', ')}`
-        );
-      }
-    } catch (error) {
-      context.logger.error(
-        `Failure to delete schedules for underlying tasks: ${taskIdsToDelete.join(
-          ', '
-        )}. TaskManager bulkRemoveIfExist failed with Error: ${error.message}`
-      );
-    }
-  }
-
-  await bulkMarkApiKeysForInvalidation(
-    { apiKeys: apiKeysToInvalidate },
-    context.logger,
-    context.unsecuredSavedObjectsClient
-  );
+  const [result] = await Promise.allSettled([
+    tryToRemoveTasks({
+      taskIdsToDelete,
+      logger: context.logger,
+      taskManager: context.taskManager,
+    }),
+    bulkMarkApiKeysForInvalidation(
+      { apiKeys: apiKeysToInvalidate },
+      context.logger,
+      context.unsecuredSavedObjectsClient
+    ),
+  ]);
 
   const deletedRules = rules.map(({ id, attributes, references }) => {
     return getAlertFromRaw(
@@ -95,58 +75,74 @@ export const bulkDeleteRules = async (context: RulesClientContext, options: Bulk
     );
   });
 
-  return { errors, rules: deletedRules, total, taskIdsFailedToBeDeleted };
+  if (result.status === 'fulfilled') {
+    return { errors, total, rules: deletedRules, taskIdsFailedToBeDeleted: result.value };
+  } else {
+    return { errors, total, rules: deletedRules, taskIdsFailedToBeDeleted: [] };
+  }
 };
 
 const bulkDeleteWithOCC = async (
   context: RulesClientContext,
   { filter }: { filter: KueryNode | null }
 ) => {
-  const rulesFinder =
-    await context.encryptedSavedObjectsClient.createPointInTimeFinderDecryptedAsInternalUser<RawRule>(
-      {
+  const rulesFinder = await withSpan(
+    {
+      name: 'encryptedSavedObjectsClient.createPointInTimeFinderDecryptedAsInternalUser',
+      type: 'rules',
+    },
+    () =>
+      context.encryptedSavedObjectsClient.createPointInTimeFinderDecryptedAsInternalUser<RawRule>({
         filter,
         type: 'alert',
         perPage: 100,
         ...(context.namespace ? { namespaces: [context.namespace] } : undefined),
-      }
-    );
+      })
+  );
 
   const rulesToDelete: Array<SavedObjectsBulkUpdateObject<RawRule>> = [];
-  const apiKeysToInvalidate: string[] = [];
-  const taskIdsToDelete: string[] = [];
-  const errors: BulkOperationError[] = [];
   const apiKeyToRuleIdMapping: Record<string, string> = {};
   const taskIdToRuleIdMapping: Record<string, string> = {};
   const ruleNameToRuleIdMapping: Record<string, string> = {};
 
-  for await (const response of rulesFinder.find()) {
-    for (const rule of response.saved_objects) {
-      if (rule.attributes.apiKey) {
-        apiKeyToRuleIdMapping[rule.id] = rule.attributes.apiKey;
-      }
-      if (rule.attributes.name) {
-        ruleNameToRuleIdMapping[rule.id] = rule.attributes.name;
-      }
-      if (rule.attributes.scheduledTaskId) {
-        taskIdToRuleIdMapping[rule.id] = rule.attributes.scheduledTaskId;
-      }
-      rulesToDelete.push(rule);
+  await withSpan(
+    { name: 'Get rules, collect them and their attributes', type: 'rules' },
+    async () => {
+      for await (const response of rulesFinder.find()) {
+        for (const rule of response.saved_objects) {
+          if (rule.attributes.apiKey) {
+            apiKeyToRuleIdMapping[rule.id] = rule.attributes.apiKey;
+          }
+          if (rule.attributes.name) {
+            ruleNameToRuleIdMapping[rule.id] = rule.attributes.name;
+          }
+          if (rule.attributes.scheduledTaskId) {
+            taskIdToRuleIdMapping[rule.id] = rule.attributes.scheduledTaskId;
+          }
+          rulesToDelete.push(rule);
 
-      context.auditLogger?.log(
-        ruleAuditEvent({
-          action: RuleAuditAction.DELETE,
-          outcome: 'unknown',
-          savedObject: { type: 'alert', id: rule.id },
-        })
-      );
+          context.auditLogger?.log(
+            ruleAuditEvent({
+              action: RuleAuditAction.DELETE,
+              outcome: 'unknown',
+              savedObject: { type: 'alert', id: rule.id },
+            })
+          );
+        }
+      }
+      await rulesFinder.close();
     }
-  }
-  await rulesFinder.close();
+  );
 
-  const result = await context.unsecuredSavedObjectsClient.bulkDelete(rulesToDelete);
+  const result = await withSpan(
+    { name: 'unsecuredSavedObjectsClient.bulkDelete', type: 'rules' },
+    () => context.unsecuredSavedObjectsClient.bulkDelete(rulesToDelete)
+  );
 
   const deletedRuleIds: string[] = [];
+  const apiKeysToInvalidate: string[] = [];
+  const taskIdsToDelete: string[] = [];
+  const errors: BulkOperationError[] = [];
 
   result.statuses.forEach((status) => {
     if (status.error === undefined) {

@@ -9,9 +9,9 @@ import { i18n } from '@kbn/i18n';
 import type { EuiSideNavItemType } from '@elastic/eui';
 import React, { ReactNode, useCallback, useMemo } from 'react';
 import { AIOPS_ENABLED, CHANGE_POINT_DETECTION_ENABLED } from '@kbn/aiops-plugin/common';
+import { useUrlState } from '@kbn/ml-url-state';
 import { NotificationsIndicator } from './notifications_indicator';
 import type { MlLocatorParams } from '../../../../common/types/locator';
-import { useUrlState } from '../../util/url_state';
 import { useMlLocator, useNavigateToPath } from '../../contexts/kibana';
 import { isFullLicense } from '../../license';
 import type { MlRoute } from '../../routing';
@@ -95,6 +95,15 @@ export function useSideNavItems(activeRoute: MlRoute | undefined) {
             ),
             disabled: disableLinks,
             testSubj: 'mlMainTab notifications',
+          },
+          {
+            id: 'memory_usage',
+            pathId: ML_PAGES.MEMORY_USAGE,
+            name: i18n.translate('xpack.ml.navMenu.memoryUsageText', {
+              defaultMessage: 'Memory Usage',
+            }),
+            disabled: disableLinks || !canViewMlNodes,
+            testSubj: 'mlMainTab nodesOverview',
           },
         ],
       },
@@ -195,15 +204,6 @@ export function useSideNavItems(activeRoute: MlRoute | undefined) {
             }),
             disabled: disableLinks,
             testSubj: 'mlMainTab trainedModels',
-          },
-          {
-            id: 'nodes_overview',
-            pathId: ML_PAGES.TRAINED_MODELS_NODES,
-            name: i18n.translate('xpack.ml.navMenu.nodesOverviewText', {
-              defaultMessage: 'Nodes',
-            }),
-            disabled: disableLinks || !canViewMlNodes,
-            testSubj: 'mlMainTab nodesOverview',
           },
         ],
       },

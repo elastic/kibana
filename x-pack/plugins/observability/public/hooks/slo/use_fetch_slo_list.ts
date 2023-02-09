@@ -8,11 +8,10 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { HttpSetup } from '@kbn/core/public';
 
-import type { SLOList } from '../../typings/slo';
+import { FindSLOResponse } from '@kbn/slo-schema';
 import { useDataFetcher } from '../use_data_fetcher';
-import { toSLO } from '../../utils/slo/slo';
 
-const EMPTY_LIST: SLOList = {
+const EMPTY_LIST: FindSLOResponse = {
   results: [],
   total: 0,
   page: 0,
@@ -22,33 +21,42 @@ const EMPTY_LIST: SLOList = {
 interface SLOListParams {
   name?: string;
   page?: number;
+  sortBy?: string;
+  indicatorTypes?: string[];
 }
 
 export interface UseFetchSloListResponse {
-  sloList: SLOList;
+  sloList: FindSLOResponse;
   loading: boolean;
   error: boolean;
 }
 
 export function useFetchSloList({
   name,
-  refetch,
   page,
-}: {
+  refetch,
+  sortBy,
+  indicatorTypes,
+}: SLOListParams & {
   refetch: boolean;
-  name?: string;
-  page?: number;
 }): UseFetchSloListResponse {
   const [sloList, setSloList] = useState(EMPTY_LIST);
 
-  const params: SLOListParams = useMemo(() => ({ name, page }), [name, page]);
+  const params: SLOListParams = useMemo(
+    () => ({ name, page, sortBy, indicatorTypes }),
+    [name, page, sortBy, indicatorTypes]
+  );
   const shouldExecuteApiCall = useCallback(
     (apiCallParams: SLOListParams) =>
-      apiCallParams.name === params.name || apiCallParams.page === params.page || refetch,
+      apiCallParams.name === params.name ||
+      apiCallParams.page === params.page ||
+      apiCallParams.sortBy === params.sortBy ||
+      apiCallParams.indicatorTypes === params.indicatorTypes ||
+      refetch,
     [params, refetch]
   );
 
-  const { data, loading, error } = useDataFetcher<SLOListParams, SLOList>({
+  const { data, loading, error } = useDataFetcher<SLOListParams, FindSLOResponse>({
     paramsForApiCall: params,
     initialDataState: sloList,
     executeApiCall: fetchSloList,
@@ -66,34 +74,23 @@ const fetchSloList = async (
   params: SLOListParams,
   abortController: AbortController,
   http: HttpSetup
-): Promise<SLOList> => {
+): Promise<FindSLOResponse> => {
   try {
-    const response = await http.get<Record<string, unknown>>(`/api/observability/slos`, {
+    const response = await http.get<FindSLOResponse>(`/api/observability/slos`, {
       query: {
         ...(params.page && { page: params.page }),
         ...(params.name && { name: params.name }),
+        ...(params.sortBy && { sortBy: params.sortBy }),
+        ...(params.indicatorTypes &&
+          params.indicatorTypes.length > 0 && { indicatorTypes: params.indicatorTypes.join(',') }),
       },
       signal: abortController.signal,
     });
-    if (response !== undefined) {
-      return toSLOList(response);
-    }
+
+    return response;
   } catch (error) {
     // ignore error for retrieving slos
   }
 
   return EMPTY_LIST;
 };
-
-function toSLOList(response: Record<string, unknown>): SLOList {
-  if (!Array.isArray(response.results)) {
-    throw new Error('Invalid response');
-  }
-
-  return {
-    results: response.results.map(toSLO),
-    page: Number(response.page),
-    perPage: Number(response.per_page),
-    total: Number(response.total),
-  };
-}

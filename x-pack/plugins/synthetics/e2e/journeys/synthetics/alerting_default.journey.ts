@@ -7,10 +7,13 @@
 
 import { journey, step, expect, before, after } from '@elastic/synthetics';
 import { byTestId } from '@kbn/observability-plugin/e2e/utils';
+import { recordVideo } from '@kbn/observability-plugin/e2e/record_video';
 import { syntheticsAppPageProvider } from '../../page_objects/synthetics/synthetics_app';
 import { cleanSettings } from './services/settings';
 
 journey('AlertingDefaults', async ({ page, params }) => {
+  recordVideo(page);
+
   const syntheticsApp = syntheticsAppPageProvider({ page, kibanaUrl: params.kibanaUrl });
 
   page.setDefaultTimeout(60 * 1000);

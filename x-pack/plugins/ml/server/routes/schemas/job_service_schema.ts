@@ -66,6 +66,12 @@ export const jobIdsSchema = schema.object({
   jobIds: schema.arrayOf(schema.string()),
 });
 
+export const deleteJobsSchema = schema.object({
+  /** List of job IDs. */
+  jobIds: schema.arrayOf(schema.string()),
+  deleteUserAnnotations: schema.maybe(schema.boolean()),
+});
+
 export const optionalJobIdsSchema = schema.object({
   /** Optional list of job IDs. */
   jobIds: schema.maybe(schema.arrayOf(schema.string())),

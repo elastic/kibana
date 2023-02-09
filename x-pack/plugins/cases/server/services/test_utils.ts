@@ -18,7 +18,7 @@ import type {
 import { CaseSeverity, CaseStatuses, ConnectorTypes, NONE_CONNECTOR_ID } from '../../common/api';
 import { CASE_SAVED_OBJECT, SECURITY_SOLUTION_OWNER } from '../../common/constants';
 import type { ESCaseAttributes, ExternalServicesWithoutConnectorId } from './cases/types';
-import { ESCaseSeverity } from './cases/types';
+import { ESCaseSeverity, ESCaseStatus } from './cases/types';
 import { getNoneCaseConnector } from '../common/utils';
 
 /**
@@ -110,7 +110,7 @@ export const basicESCaseFields: ESCaseAttributes = {
   duration: null,
   description: 'This is a brand new case of a bad meanie defacing data',
   title: 'Super Bad Security Issue',
-  status: CaseStatuses.open,
+  status: ESCaseStatus.OPEN,
   tags: ['defacement'],
   updated_at: '2019-11-25T21:54:48.952Z',
   updated_by: {
@@ -125,6 +125,8 @@ export const basicESCaseFields: ESCaseAttributes = {
   },
   owner: SECURITY_SOLUTION_OWNER,
   assignees: [],
+  total_alerts: -1,
+  total_comments: -1,
 };
 
 export const basicCaseFields: CaseAttributes = {

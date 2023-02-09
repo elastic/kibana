@@ -95,7 +95,7 @@ export const ExpandableHostDetails = ({
       endDate={to}
       skip={isInitializing}
     >
-      {({ isLoadingAnomaliesData, anomaliesData }) => (
+      {({ isLoadingAnomaliesData, anomaliesData, jobNameById }) => (
         <HostOverview
           contextID={contextID}
           id={ID}
@@ -110,6 +110,7 @@ export const ExpandableHostDetails = ({
           endDate={to}
           narrowDateRange={narrowDateRange}
           hostName={hostName}
+          jobNameById={jobNameById}
         />
       )}
     </AnomalyTableProvider>

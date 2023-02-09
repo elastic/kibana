@@ -38,10 +38,13 @@ export const DefaultCellRenderer: React.FC<CellValueElementProps> = ({
   scopeId,
   truncate,
   enableActions = true,
+  asPlainText,
 }) => {
-  const asPlainText = useMemo(() => {
-    return getLinkColumnDefinition(header.id, header.type, undefined) !== undefined && !isTimeline;
-  }, [header.id, header.type, isTimeline]);
+  const asPlainTextDefault = useMemo(() => {
+    return (
+      getLinkColumnDefinition(header.id, header.type, header.linkField) !== undefined && !isTimeline
+    );
+  }, [header.id, header.linkField, header.type, isTimeline]);
 
   const values = useGetMappedNonEcsValue({
     data,
@@ -54,7 +57,7 @@ export const DefaultCellRenderer: React.FC<CellValueElementProps> = ({
     <>
       <StyledContent className={styledContentClassName} $isDetails={isDetails}>
         {getColumnRenderer(header.id, columnRenderers, data).renderColumn({
-          asPlainText, // we want to render value with links as plain text but keep other formatters like badge.
+          asPlainText: asPlainText ?? asPlainTextDefault, // we want to render value with links as plain text but keep other formatters like badge. Except rule name for non preview tables
           columnName: header.id,
           ecsData,
           eventId,

@@ -12,10 +12,11 @@ import { AddToTimelineCellAction } from '../../../../timeline';
 import { FilterInCellAction, FilterOutCellAction } from '../../../../query_bar';
 import { fieldAndValueValid, getIndicatorFieldAndValue } from '../../../utils';
 import type { Pagination } from '../../../services';
-
-export const CELL_TIMELINE_BUTTON_TEST_ID = 'tiIndicatorsTableCellTimelineButton';
-export const CELL_FILTER_IN_BUTTON_TEST_ID = 'tiIndicatorsTableCellFilterInButton';
-export const CELL_FILTER_OUT_BUTTON_TEST_ID = 'tiIndicatorsTableCellFilterOutButton';
+import {
+  FILTER_IN_BUTTON_TEST_ID,
+  FILTER_OUT_BUTTON_TEST_ID,
+  TIMELINE_BUTTON_TEST_ID,
+} from './test_ids';
 
 export interface CellActionsProps
   extends Omit<EuiDataGridColumnCellActionProps, 'colIndex' | 'isExpanded'> {
@@ -54,19 +55,19 @@ export const CellActions: VFC<CellActionsProps> = ({
         data={indicator}
         field={key}
         Component={Component}
-        data-test-subj={CELL_FILTER_IN_BUTTON_TEST_ID}
+        data-test-subj={FILTER_IN_BUTTON_TEST_ID}
       />
       <FilterOutCellAction
         data={indicator}
         field={key}
         Component={Component}
-        data-test-subj={CELL_FILTER_OUT_BUTTON_TEST_ID}
+        data-test-subj={FILTER_OUT_BUTTON_TEST_ID}
       />
       <AddToTimelineCellAction
         data={indicator}
         field={key}
         Component={Component}
-        data-test-subj={CELL_TIMELINE_BUTTON_TEST_ID}
+        data-test-subj={TIMELINE_BUTTON_TEST_ID}
       />
     </>
   );

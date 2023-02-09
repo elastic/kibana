@@ -8,8 +8,8 @@
 
 import { DataView } from '@kbn/data-views-plugin/public';
 import { cellHasFormulas, createEscapeValue } from '@kbn/data-plugin/common';
+import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { formatFieldValue } from './format_value';
-import { DiscoverServices } from '../build_services';
 import { DataTableRecord } from '../types';
 
 interface ConvertedResult {
@@ -22,19 +22,18 @@ export const convertValueToString = ({
   rows,
   columnId,
   dataView,
-  services,
+  fieldFormats,
   options,
 }: {
   rowIndex: number;
   rows: DataTableRecord[];
   columnId: string;
   dataView: DataView;
-  services: DiscoverServices;
+  fieldFormats: FieldFormatsStart;
   options?: {
-    disableMultiline?: boolean;
+    compatibleWithCSV?: boolean; // values as one-liner + escaping formulas + adding wrapping quotes
   };
 }): ConvertedResult => {
-  const { fieldFormats } = services;
   if (!rows[rowIndex]) {
     return {
       formattedString: '',
@@ -45,7 +44,8 @@ export const convertValueToString = ({
   const value = rowFlattened?.[columnId];
   const field = dataView.fields.getByName(columnId);
   const valuesArray = Array.isArray(value) ? value : [value];
-  const disableMultiline = options?.disableMultiline ?? false;
+  const disableMultiline = options?.compatibleWithCSV ?? false;
+  const enableEscapingForValue = options?.compatibleWithCSV ?? false;
 
   if (field?.type === '_source') {
     return {
@@ -72,7 +72,7 @@ export const convertValueToString = ({
 
       if (typeof formattedValue === 'string') {
         withFormula = withFormula || cellHasFormulas(formattedValue);
-        return escapeFormattedValue(formattedValue);
+        return enableEscapingForValue ? escapeFormattedValue(formattedValue) : formattedValue;
       }
 
       return stringify(formattedValue, disableMultiline) || '';

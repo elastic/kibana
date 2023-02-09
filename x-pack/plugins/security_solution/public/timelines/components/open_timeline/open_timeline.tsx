@@ -21,7 +21,7 @@ import {
 } from '../../../common/components/utility_bar';
 
 import { importTimelines } from '../../containers/api';
-
+import { useUserPrivileges } from '../../../common/components/user_privileges';
 import { useEditTimelineBatchActions } from './edit_timeline_batch_actions';
 import { useEditTimelineActions } from './edit_timeline_actions';
 import { EditTimelineActions } from './export_timeline';
@@ -78,8 +78,9 @@ export const OpenTimeline = React.memo<OpenTimelineProps>(
       onCompleteEditTimelineAction,
     } = useEditTimelineActions();
 
+    const { kibanaSecuritySolutionsPrivileges } = useUserPrivileges();
     const { getBatchItemsPopoverContent } = useEditTimelineBatchActions({
-      deleteTimelines,
+      deleteTimelines: kibanaSecuritySolutionsPrivileges.crud ? deleteTimelines : undefined,
       selectedItems,
       tableRef,
       timelineType,
@@ -149,28 +150,41 @@ export const OpenTimeline = React.memo<OpenTimelineProps>(
     }, [setImportDataModalToggle, refetch]);
 
     const actionTimelineToShow = useMemo<ActionTimelineToShow[]>(() => {
-      const createRule: ActionTimelineToShow[] = ['createRule'];
-      const timelineActions: ActionTimelineToShow[] = [
-        'createFrom',
-        'duplicate',
-        ...(onCreateRule != null ? createRule : []),
-      ];
+      if (kibanaSecuritySolutionsPrivileges.crud) {
+        const createRule: ActionTimelineToShow[] = ['createRule'];
+        const timelineActions: ActionTimelineToShow[] = [
+          'createFrom',
+          'duplicate',
+          ...(onCreateRule != null ? createRule : []),
+        ];
 
+        if (timelineStatus !== TimelineStatus.immutable) {
+          timelineActions.push('export');
+          timelineActions.push('selectable');
+        }
+
+        if (
+          onDeleteSelected != null &&
+          deleteTimelines != null &&
+          timelineStatus !== TimelineStatus.immutable
+        ) {
+          timelineActions.push('delete');
+        }
+
+        return timelineActions;
+      }
+      // user with read access should only see export
       if (timelineStatus !== TimelineStatus.immutable) {
-        timelineActions.push('export');
-        timelineActions.push('selectable');
+        return ['export', 'selectable'];
       }
-
-      if (
-        onDeleteSelected != null &&
-        deleteTimelines != null &&
-        timelineStatus !== TimelineStatus.immutable
-      ) {
-        timelineActions.push('delete');
-      }
-
-      return timelineActions;
-    }, [onCreateRule, timelineStatus, onDeleteSelected, deleteTimelines]);
+      return [];
+    }, [
+      onCreateRule,
+      timelineStatus,
+      onDeleteSelected,
+      deleteTimelines,
+      kibanaSecuritySolutionsPrivileges,
+    ]);
 
     const SearchRowContent = useMemo(() => <>{templateTimelineFilter}</>, [templateTimelineFilter]);
 

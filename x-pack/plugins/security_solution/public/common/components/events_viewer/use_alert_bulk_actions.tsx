@@ -8,7 +8,7 @@
 import { EuiLoadingSpinner } from '@elastic/eui';
 import React, { lazy, Suspense, useMemo } from 'react';
 import type { TimelineItem } from '../../../../common/search_strategy';
-import type { AlertWorkflowStatus, Refetch } from '../../types';
+import type { AlertWorkflowStatus } from '../../types';
 import type { BulkActionsProp } from '../toolbar/bulk_actions/types';
 
 const StatefulAlertBulkActions = lazy(() => import('../toolbar/bulk_actions/alert_bulk_actions'));
@@ -17,7 +17,6 @@ interface OwnProps {
   tableId: string;
   data: TimelineItem[];
   totalItems: number;
-  refetch: Refetch;
   indexNames: string[];
   hasAlertsCrud: boolean;
   showCheckboxes: boolean;
@@ -30,7 +29,6 @@ export const useAlertBulkActions = ({
   tableId,
   data,
   totalItems,
-  refetch,
   indexNames,
   hasAlertsCrud,
   showCheckboxes,
@@ -106,7 +104,6 @@ export const useAlertBulkActions = ({
               onActionSuccess={onAlertStatusActionSuccess}
               onActionFailure={onAlertStatusActionFailure}
               customBulkActions={additionalBulkActions}
-              refetch={refetch}
             />
           </Suspense>
         )}
@@ -119,7 +116,6 @@ export const useAlertBulkActions = ({
       indexNames,
       onAlertStatusActionFailure,
       onAlertStatusActionSuccess,
-      refetch,
       showAlertStatusActions,
       showBulkActions,
       tableId,

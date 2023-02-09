@@ -1,9 +1,7 @@
 {
   "extends": "../../../tsconfig.base.json",
   "compilerOptions": {
-    "outDir": "./target/types",
-    "emitDeclarationOnly": true,
-    "declaration": true,
+    "outDir": "target/types",
   },
   "include": [
     "__jest__/**/*",
@@ -14,15 +12,25 @@
     "../../../typings/**/*",
   ],
   "kbn_references": [
-    { "path": "../../../src/core/tsconfig.json" },
-    { "path": "../licensing/tsconfig.json" },
-    { "path": "../features/tsconfig.json" },
-    { "path": "../cloud/tsconfig.json" },
-    { "path": "../security/tsconfig.json" },
-    { "path": "../../../src/plugins/management/tsconfig.json"},
-    { "path": "../../../src/plugins/usage_collection/tsconfig.json"},
-    { "path": "../../../src/plugins/home/tsconfig.json"},
-    { "path": "../../../src/plugins/kibana_react/tsconfig.json" },
-    { "path": "../../../src/plugins/es_ui_shared/tsconfig.json" }
+    "@kbn/core",
+    "@kbn/licensing-plugin",
+    "@kbn/features-plugin",
+    "@kbn/cloud-plugin",
+    "@kbn/security-plugin",
+    "@kbn/management-plugin",
+    "@kbn/usage-collection-plugin",
+    "@kbn/home-plugin",
+    "@kbn/kibana-react-plugin",
+    "@kbn/es-ui-shared-plugin",
+    "@kbn/test-jest-helpers",
+    "@kbn/i18n",
+    "@kbn/utility-types",
+    "@kbn/share-plugin",
+    "@kbn/i18n-react",
+    "@kbn/analytics",
+    "@kbn/config-schema",
+  ],
+  "exclude": [
+    "target/**/*",
   ]
 }

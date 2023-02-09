@@ -6,12 +6,12 @@
  */
 
 import { createAction } from 'redux-actions';
+import { TestNowResponse } from '../../../../common/types';
 import {
   FetchMonitorStatesQueryArgs,
   MonitorSummariesResult,
 } from '../../../../common/runtime_types';
 import { createAsyncAction } from './utils';
-import { TestNowResponse } from '../api';
 
 export const getMonitorList = createAction<FetchMonitorStatesQueryArgs>('GET_MONITOR_LIST');
 export const getMonitorListSuccess = createAction<MonitorSummariesResult>(

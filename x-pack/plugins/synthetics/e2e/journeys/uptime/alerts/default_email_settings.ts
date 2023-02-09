@@ -19,9 +19,12 @@ import {
   byTestId,
   waitForLoadingToFinish,
 } from '@kbn/observability-plugin/e2e/utils';
+import { recordVideo } from '@kbn/observability-plugin/e2e/record_video';
 import { settingsPageProvider } from '../../../page_objects/uptime/settings';
 
 journey('DefaultEmailSettings', async ({ page, params }) => {
+  recordVideo(page);
+
   const settings = settingsPageProvider({ page, kibanaUrl: params.kibanaUrl });
 
   before(async () => {

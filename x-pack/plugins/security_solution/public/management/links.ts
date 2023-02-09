@@ -13,7 +13,6 @@ import { checkArtifactHasData } from './services/exceptions_list/check_artifact_
 import {
   calculateEndpointAuthz,
   getEndpointAuthzInitialState,
-  calculatePermissionsFromCapabilities,
 } from '../../common/endpoint/service/authz';
 import {
   BLOCKLIST_PATH,
@@ -130,7 +129,8 @@ export const links: LinkItem = {
       id: SecurityPageName.exceptions,
       title: EXCEPTIONS,
       description: i18n.translate('xpack.securitySolution.appLinks.exceptionsDescription', {
-        defaultMessage: 'Create and manage exceptions to prevent the creation of unwanted alerts.',
+        defaultMessage:
+          'Create and manage shared exception lists to prevent the creation of unwanted alerts.',
       }),
       landingIcon: IconExceptionLists,
       path: EXCEPTIONS_PATH,
@@ -242,7 +242,6 @@ export const getManagementFilteredLinks = async (
 
   const { endpointRbacEnabled, endpointRbacV1Enabled } = ExperimentalFeaturesService.get();
   const isEndpointRbacEnabled = endpointRbacEnabled || endpointRbacV1Enabled;
-  const endpointPermissions = calculatePermissionsFromCapabilities(core.application.capabilities);
 
   const linksToExclude: SecurityPageName[] = [];
 
@@ -286,7 +285,6 @@ export const getManagementFilteredLinks = async (
         fleetAuthz,
         currentUser.roles,
         isEndpointRbacEnabled,
-        endpointPermissions,
         hasHostIsolationExceptions
       )
     : getEndpointAuthzInitialState();

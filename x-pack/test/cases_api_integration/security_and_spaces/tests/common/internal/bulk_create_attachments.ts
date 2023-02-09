@@ -28,14 +28,14 @@ import {
 import {
   deleteAllCaseItems,
   createCase,
-  getCaseUserActions,
-  removeServerGeneratedPropertiesFromUserAction,
   removeServerGeneratedPropertiesFromSavedObject,
   superUserSpace1Auth,
   createCaseAndBulkCreateAttachments,
   bulkCreateAttachments,
   updateCase,
-} from '../../../../common/lib/utils';
+  getCaseUserActions,
+  removeServerGeneratedPropertiesFromUserAction,
+} from '../../../../common/lib/api';
 import {
   createSignalsIndex,
   deleteSignalsIndex,

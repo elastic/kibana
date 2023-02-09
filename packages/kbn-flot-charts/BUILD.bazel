@@ -34,16 +34,3 @@ js_library(
   package_name = PKG_REQUIRE_NAME,
   visibility = ["//visibility:public"],
 )
-
-pkg_npm(
-  name = "npm_module",
-  deps = [":" + PKG_DIRNAME],
-)
-
-filegroup(
-  name = "build",
-  srcs = [
-    ":npm_module",
-  ],
-  visibility = ["//visibility:public"],
-)

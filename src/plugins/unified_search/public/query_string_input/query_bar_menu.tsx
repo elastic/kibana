@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   EuiButtonIcon,
   EuiContextMenu,
@@ -24,6 +24,10 @@ import type { SavedQueryService, SavedQuery } from '@kbn/data-plugin/public';
 import { QueryBarMenuPanels, QueryBarMenuPanelsProps } from './query_bar_menu_panels';
 import { FilterEditorWrapper } from './filter_editor_wrapper';
 import { popoverDragAndDropCss } from './add_filter_popover.styles';
+import {
+  withCloseFilterEditorConfirmModal,
+  WithCloseFilterEditorConfirmModalProps,
+} from '../filter_bar/filter_editor';
 
 export const strings = {
   getFilterSetButtonLabel: () =>
@@ -32,7 +36,7 @@ export const strings = {
     }),
 };
 
-export interface QueryBarMenuProps {
+export interface QueryBarMenuProps extends WithCloseFilterEditorConfirmModalProps {
   language: string;
   onQueryChange: (payload: { dateRange: TimeRange; query?: Query }) => void;
   onQueryBarSubmit: (payload: { dateRange: TimeRange; query?: Query }) => void;
@@ -60,7 +64,7 @@ export interface QueryBarMenuProps {
   isDisabled?: boolean;
 }
 
-export function QueryBarMenu({
+function QueryBarMenuComponent({
   language,
   nonKqlMode,
   dateRangeFrom,
@@ -86,8 +90,12 @@ export function QueryBarMenu({
   timeRangeForSuggestionsOverride,
   buttonProps,
   isDisabled,
+  onCloseFilterPopover,
+  onLocalFilterCreate,
+  onLocalFilterUpdate,
 }: QueryBarMenuProps) {
   const [renderedComponent, setRenderedComponent] = useState('menu');
+
   const euiTheme = useEuiTheme();
 
   useEffect(() => {
@@ -96,15 +104,21 @@ export function QueryBarMenu({
     }
   }, [openQueryBarMenu]);
 
+  const plainClosePopover = useCallback(
+    () => toggleFilterBarMenuPopover(false),
+    [toggleFilterBarMenuPopover]
+  );
+
+  const closePopover = useCallback(() => {
+    onCloseFilterPopover([plainClosePopover]);
+  }, [onCloseFilterPopover, plainClosePopover]);
+
   const normalContextMenuPopoverId = useGeneratedHtmlId({
     prefix: 'normalContextMenuPopover',
   });
+
   const onButtonClick = () => {
     toggleFilterBarMenuPopover(!openQueryBarMenu);
-  };
-
-  const closePopover = () => {
-    toggleFilterBarMenuPopover(false);
   };
 
   const button = (
@@ -138,7 +152,7 @@ export function QueryBarMenu({
     manageFilterSetComponent,
     hiddenPanelOptions,
     nonKqlMode,
-    closePopover,
+    closePopover: plainClosePopover,
     onQueryBarSubmit,
     onFiltersUpdated,
     onClearSavedQuery,
@@ -168,11 +182,15 @@ export function QueryBarMenu({
           <EuiContextMenuPanel
             items={[
               <FilterEditorWrapper
+                key="filter-editor-wrapper"
                 indexPatterns={indexPatterns}
                 filters={filters!}
                 timeRangeForSuggestionsOverride={timeRangeForSuggestionsOverride}
                 onFiltersUpdated={onFiltersUpdated}
-                closePopover={closePopover}
+                onLocalFilterUpdate={onLocalFilterUpdate}
+                onLocalFilterCreate={onLocalFilterCreate}
+                closePopoverOnAdd={plainClosePopover}
+                closePopoverOnCancel={plainClosePopover}
               />,
             ]}
           />
@@ -186,7 +204,7 @@ export function QueryBarMenu({
         id={normalContextMenuPopoverId}
         button={button}
         isOpen={openQueryBarMenu}
-        closePopover={closePopover}
+        closePopover={renderedComponent === 'addFilter' ? closePopover : plainClosePopover}
         panelPaddingSize="none"
         anchorPosition="downLeft"
         repositionOnScroll
@@ -200,3 +218,5 @@ export function QueryBarMenu({
     </>
   );
 }
+
+export const QueryBarMenu = withCloseFilterEditorConfirmModal(QueryBarMenuComponent);

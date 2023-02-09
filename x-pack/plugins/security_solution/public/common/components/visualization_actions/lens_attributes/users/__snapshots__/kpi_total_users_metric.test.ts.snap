@@ -60,6 +60,23 @@ Object {
         "meta": Object {
           "alias": null,
           "disabled": false,
+          "key": "user.name",
+          "negate": false,
+          "params": Object {
+            "query": "elastic",
+          },
+          "type": "phrase",
+        },
+        "query": Object {
+          "match_phrase": Object {
+            "user.name": "elastic",
+          },
+        },
+      },
+      Object {
+        "meta": Object {
+          "alias": null,
+          "disabled": false,
           "key": "_index",
           "negate": false,
           "params": Array [

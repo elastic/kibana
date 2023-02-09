@@ -10,7 +10,8 @@ import _ from 'lodash';
 import { debounceTime } from 'rxjs/operators';
 import semverSatisfies from 'semver/functions/satisfies';
 
-import { IKbnUrlStateStorage, replaceUrlHashQuery } from '@kbn/kibana-utils-plugin/public';
+import { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
+import { replaceUrlHashQuery } from '@kbn/kibana-utils-plugin/common';
 
 import {
   DashboardPanelMap,

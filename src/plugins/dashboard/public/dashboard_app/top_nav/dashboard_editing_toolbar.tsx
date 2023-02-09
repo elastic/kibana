@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-import { EuiHorizontalRule } from '@elastic/eui';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
 import {
@@ -19,12 +18,15 @@ import {
 import { BaseVisType, VisTypeAlias } from '@kbn/visualizations-plugin/public';
 import React from 'react';
 import { useCallback } from 'react';
+import { useEuiTheme } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { dashboardReplacePanelActionStrings } from '../../dashboard_actions/_dashboard_actions_strings';
 import { DASHBOARD_APP_ID, DASHBOARD_UI_METRIC_ID } from '../../dashboard_constants';
 import { useDashboardContainerContext } from '../../dashboard_container/dashboard_container_renderer';
 import { pluginServices } from '../../services/plugin_services';
 import { getCreateVisualizationButtonTitle } from '../_dashboard_app_strings';
 import { EditorMenu } from './editor_menu';
+import { ControlsToolbarButton } from './controls_toolbar_button';
 
 export function DashboardEditingToolbar() {
   const {
@@ -35,6 +37,7 @@ export function DashboardEditingToolbar() {
     embeddable: { getStateTransfer, getEmbeddableFactory },
     visualizations: { get: getVisualization, getAliases: getVisTypeAliases },
   } = pluginServices.getServices();
+  const { euiTheme } = useEuiTheme();
 
   const { embeddableInstance: dashboardContainer } = useDashboardContainerContext();
 
@@ -165,9 +168,23 @@ export function DashboardEditingToolbar() {
     .map(getVisTypeQuickButton)
     .filter((button) => button) as QuickButtonProps[];
 
+  const extraButtons = [
+    <EditorMenu createNewVisType={createNewVisType} createNewEmbeddable={createNewEmbeddable} />,
+    <AddFromLibraryButton
+      onClick={() => dashboardContainer.addFromLibrary()}
+      data-test-subj="dashboardAddPanelButton"
+    />,
+  ];
+  if (dashboardContainer.controlGroup) {
+    extraButtons.push(<ControlsToolbarButton controlGroup={dashboardContainer.controlGroup} />);
+  }
+
   return (
-    <>
-      <EuiHorizontalRule margin="none" />
+    <div
+      css={css`
+        padding: 0 ${euiTheme.size.s} ${euiTheme.size.s} ${euiTheme.size.s};
+      `}
+    >
       <SolutionToolbar isDarkModeEnabled={IS_DARK_THEME}>
         {{
           primaryActionButton: (
@@ -180,19 +197,9 @@ export function DashboardEditingToolbar() {
             />
           ),
           quickButtonGroup: <QuickButtonGroup buttons={quickButtons} />,
-          extraButtons: [
-            <EditorMenu
-              createNewVisType={createNewVisType}
-              createNewEmbeddable={createNewEmbeddable}
-            />,
-            <AddFromLibraryButton
-              onClick={() => dashboardContainer.addFromLibrary()}
-              data-test-subj="dashboardAddPanelButton"
-            />,
-            dashboardContainer.controlGroup?.getToolbarButtons(),
-          ],
+          extraButtons,
         }}
       </SolutionToolbar>
-    </>
+    </div>
   );
 }

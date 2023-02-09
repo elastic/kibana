@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { REPO_ROOT } from '@kbn/utils';
+// @ts-ignore we have to check types with "allowJs: false" for now, causing this import to fail
+import { REPO_ROOT } from '@kbn/repo-info';
 import expect from '@kbn/expect';
 import fs from 'fs';
 import path from 'path';
@@ -66,7 +67,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     await testSubjects.existOrFail('csvDownloadStarted'); // validate toast panel
   };
 
-  describe('Download CSV', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/150561
+  // Failing: See https://github.com/elastic/kibana/issues/150562
+  // Failing: See https://github.com/elastic/kibana/issues/148314
+  // Failing: See https://github.com/elastic/kibana/issues/150563
+  // Failing: See https://github.com/elastic/kibana/issues/150561
+  describe.skip('Download CSV', () => {
     before('initialize tests', async () => {
       log.debug('ReportingPage:initTests');
       await browser.setWindowSize(1600, 850);

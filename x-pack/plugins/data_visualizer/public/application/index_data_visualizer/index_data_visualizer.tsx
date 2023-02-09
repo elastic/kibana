@@ -5,36 +5,51 @@
  * 2.0.
  */
 import '../_index.scss';
+import { pick } from 'lodash';
 import React, { FC, useCallback, useEffect, useState } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
 import { parse, stringify } from 'query-string';
 import { isEqual } from 'lodash';
 import { encode } from '@kbn/rison';
-import { SimpleSavedObject } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
-import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import { Storage } from '@kbn/kibana-utils-plugin/public';
+import {
+  KibanaContextProvider,
+  KibanaThemeProvider,
+  toMountPoint,
+  wrapWithTheme,
+} from '@kbn/kibana-react-plugin/public';
+import { StorageContextProvider } from '@kbn/ml-local-storage';
 import { DataView } from '@kbn/data-views-plugin/public';
+import { getNestedProperty } from '@kbn/ml-nested-property';
+import { DatePickerContextProvider } from '@kbn/ml-date-picker';
+import { UI_SETTINGS } from '@kbn/data-plugin/common';
+import {
+  Provider as UrlStateContextProvider,
+  parseUrlState,
+  isRisonSerializationRequired,
+  type Accessor,
+  type Dictionary,
+  type SetUrlState,
+} from '@kbn/ml-url-state';
+import { getSavedSearch, type SavedSearch } from '@kbn/saved-search-plugin/public';
 import { getCoreStart, getPluginsStart } from '../../kibana_services';
 import {
-  IndexDataVisualizerViewProps,
+  type IndexDataVisualizerViewProps,
   IndexDataVisualizerView,
 } from './components/index_data_visualizer_view';
-import {
-  Accessor,
-  Provider as UrlStateContextProvider,
-  Dictionary,
-  parseUrlState,
-  SetUrlState,
-  getNestedProperty,
-  isRisonSerializationRequired,
-} from '../common/util/url_state';
 import { useDataVisualizerKibana } from '../kibana_context';
-import { GetAdditionalLinks } from '../common/components/results_links';
-import { DATA_VISUALIZER_APP_LOCATOR, IndexDataVisualizerLocatorParams } from './locator';
+import type { GetAdditionalLinks } from '../common/components/results_links';
+import { DATA_VISUALIZER_APP_LOCATOR, type IndexDataVisualizerLocatorParams } from './locator';
 import { DATA_VISUALIZER_INDEX_VIEWER } from './constants/index_data_visualizer_viewer';
 import { INDEX_DATA_VISUALIZER_NAME } from '../common/constants';
+import { DV_STORAGE_KEYS } from './types/storage';
 
-export interface DataVisualizerUrlStateContextProviderProps {
+const XXL_BREAKPOINT = 1400;
+
+const localStorage = new Storage(window.localStorage);
+
+export interface DataVisualizerStateContextProviderProps {
   IndexDataVisualizerComponent: FC<IndexDataVisualizerViewProps>;
   getAdditionalLinks?: GetAdditionalLinks;
 }
@@ -70,9 +85,10 @@ export const getLocatorParams = (params: {
   return locatorParams;
 };
 
-export const DataVisualizerUrlStateContextProvider: FC<
-  DataVisualizerUrlStateContextProviderProps
-> = ({ IndexDataVisualizerComponent, getAdditionalLinks }) => {
+export const DataVisualizerStateContextProvider: FC<DataVisualizerStateContextProviderProps> = ({
+  IndexDataVisualizerComponent,
+  getAdditionalLinks,
+}) => {
   const { services } = useDataVisualizerKibana();
   const {
     data: { dataViews, search },
@@ -84,9 +100,7 @@ export const DataVisualizerUrlStateContextProvider: FC<
   const { search: urlSearchString } = useLocation();
 
   const [currentDataView, setCurrentDataView] = useState<DataView | undefined>(undefined);
-  const [currentSavedSearch, setCurrentSavedSearch] = useState<SimpleSavedObject<unknown> | null>(
-    null
-  );
+  const [currentSavedSearch, setCurrentSavedSearch] = useState<SavedSearch | null>(null);
 
   const [currentSessionId, setCurrentSessionId] = useState<string | undefined>(undefined);
 
@@ -145,21 +159,21 @@ export const DataVisualizerUrlStateContextProvider: FC<
       if (typeof parsedQueryString?.savedSearchId === 'string') {
         const savedSearchId = parsedQueryString.savedSearchId;
         try {
-          const savedSearch = await savedObjectsClient.get('search', savedSearchId);
-          const dataViewId = savedSearch.references.find((ref) => ref.type === 'index-pattern')?.id;
-          if (dataViewId !== undefined && savedSearch) {
-            try {
-              const dataView = await dataViews.get(dataViewId);
-              setCurrentSavedSearch(savedSearch);
-              setCurrentDataView(dataView);
-            } catch (e) {
-              toasts.addError(e, {
-                title: i18n.translate('xpack.dataVisualizer.index.dataViewErrorMessage', {
-                  defaultMessage: 'Error finding data view',
-                }),
-              });
-            }
+          const savedSearch = await getSavedSearch(savedSearchId, {
+            search,
+            savedObjectsClient,
+          });
+          const dataView = savedSearch.searchSource.getField('index');
+
+          if (!dataView) {
+            toasts.addDanger({
+              title: i18n.translate('xpack.dataVisualizer.index.dataViewErrorMessage', {
+                defaultMessage: 'Error finding data view',
+              }),
+            });
           }
+          setCurrentSavedSearch(savedSearch);
+          setCurrentDataView(dataView);
         } catch (e) {
           toasts.addError(e, {
             title: i18n.translate('xpack.dataVisualizer.index.savedSearchErrorMessage', {
@@ -176,7 +190,7 @@ export const DataVisualizerUrlStateContextProvider: FC<
       }
     };
     getDataView();
-  }, [savedObjectsClient, toasts, dataViews, urlSearchString]);
+  }, [savedObjectsClient, toasts, dataViews, urlSearchString, search]);
 
   const setUrlState: SetUrlState = useCallback(
     (
@@ -289,14 +303,31 @@ export const IndexDataVisualizer: FC<{
     unifiedSearch,
     ...coreStart,
   };
+  const datePickerDeps = {
+    ...pick(services, ['data', 'http', 'notifications', 'theme', 'uiSettings']),
+    toMountPoint,
+    wrapWithTheme,
+    uiSettingsKeys: UI_SETTINGS,
+  };
 
   return (
-    <KibanaThemeProvider theme$={coreStart.theme.theme$}>
+    <KibanaThemeProvider
+      theme$={coreStart.theme.theme$}
+      modify={{
+        breakpoint: {
+          xxl: XXL_BREAKPOINT,
+        },
+      }}
+    >
       <KibanaContextProvider services={{ ...services }}>
-        <DataVisualizerUrlStateContextProvider
-          IndexDataVisualizerComponent={IndexDataVisualizerView}
-          getAdditionalLinks={getAdditionalLinks}
-        />
+        <StorageContextProvider storage={localStorage} storageKeys={DV_STORAGE_KEYS}>
+          <DatePickerContextProvider {...datePickerDeps}>
+            <DataVisualizerStateContextProvider
+              IndexDataVisualizerComponent={IndexDataVisualizerView}
+              getAdditionalLinks={getAdditionalLinks}
+            />
+          </DatePickerContextProvider>
+        </StorageContextProvider>
       </KibanaContextProvider>
     </KibanaThemeProvider>
   );

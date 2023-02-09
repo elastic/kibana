@@ -22,7 +22,7 @@ import styled from 'styled-components';
 
 import { CodeEditor } from '@kbn/kibana-react-plugin/public';
 
-import type { RegistryVarsEntry } from '../../../../../../types';
+import type { DataStream, RegistryVarsEntry } from '../../../../../../types';
 
 import { MultiTextInput } from './multi_text_input';
 import { DatasetComboBox } from './dataset_combo';
@@ -39,7 +39,9 @@ export const PackagePolicyInputVarField: React.FunctionComponent<{
   forceShowErrors?: boolean;
   frozen?: boolean;
   packageType?: string;
-  datasets?: string[];
+  packageName?: string;
+  datastreams?: DataStream[];
+  isEditPage?: boolean;
 }> = memo(
   ({
     varDef,
@@ -49,7 +51,9 @@ export const PackagePolicyInputVarField: React.FunctionComponent<{
     forceShowErrors,
     frozen,
     packageType,
-    datasets = [],
+    packageName,
+    datastreams = [],
+    isEditPage = false,
   }) => {
     const [isDirty, setIsDirty] = useState<boolean>(false);
     const { multi, required, type, title, name, description } = varDef;
@@ -68,9 +72,16 @@ export const PackagePolicyInputVarField: React.FunctionComponent<{
           />
         );
       }
-
       if (name === 'data_stream.dataset' && packageType === 'input') {
-        return <DatasetComboBox datasets={datasets} value={value} onChange={onChange} />;
+        return (
+          <DatasetComboBox
+            pkgName={packageName}
+            datastreams={datastreams}
+            value={value}
+            onChange={onChange}
+            isDisabled={isEditPage}
+          />
+        );
       }
       switch (type) {
         case 'textarea':
@@ -152,7 +163,20 @@ export const PackagePolicyInputVarField: React.FunctionComponent<{
             />
           );
       }
-    }, [isInvalid, multi, onChange, type, value, fieldLabel, frozen, datasets, name, packageType]);
+    }, [
+      multi,
+      name,
+      packageType,
+      type,
+      value,
+      onChange,
+      frozen,
+      packageName,
+      datastreams,
+      isEditPage,
+      isInvalid,
+      fieldLabel,
+    ]);
 
     // Boolean cannot be optional by default set to false
     const isOptional = useMemo(() => type !== 'bool' && !required, [required, type]);

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { ANTLRErrorListener, RecognitionException, Recognizer } from 'antlr4ts';
+import { ANTLRErrorListener, Recognizer } from 'antlr4ts';
 import type { EditorError } from '../types';
 
 export class ANTLREErrorListener implements ANTLRErrorListener<any> {
@@ -17,8 +17,7 @@ export class ANTLREErrorListener implements ANTLRErrorListener<any> {
     offendingSymbol: any,
     line: number,
     column: number,
-    message: string,
-    e: RecognitionException | undefined
+    message: string
   ): void {
     let endColumn = column + 1;
 

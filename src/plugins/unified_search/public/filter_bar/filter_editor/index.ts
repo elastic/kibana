@@ -40,3 +40,6 @@ export { TruncatedLabel } from './truncated_label';
 
 export { FilterEditor } from './filter_editor';
 export type { FilterEditorProps } from './filter_editor';
+
+export { withCloseFilterEditorConfirmModal } from './with_close_confirm_modal';
+export type { WithCloseFilterEditorConfirmModalProps } from './with_close_confirm_modal';

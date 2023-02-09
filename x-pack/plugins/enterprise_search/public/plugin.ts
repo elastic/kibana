@@ -328,7 +328,7 @@ export class EnterpriseSearchPlugin implements Plugin {
       this.data = await http.get('/internal/enterprise_search/config_data');
       this.hasInitialized = true;
     } catch (e) {
-      this.data.errorConnectingMessage = `${e.res.status} ${e.message}`;
+      this.data.errorConnectingMessage = `${e.response.status} ${e.message}`;
     }
   }
 }

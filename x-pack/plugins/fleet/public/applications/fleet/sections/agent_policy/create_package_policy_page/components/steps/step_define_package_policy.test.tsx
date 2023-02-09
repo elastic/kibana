@@ -92,7 +92,7 @@ describe('StepDefinePackagePolicy', () => {
 
   let testRenderer: TestRenderer;
   let renderResult: ReturnType<typeof testRenderer.render>;
-  const render = ({ isUpdate } = { isUpdate: false }) =>
+  const render = () =>
     (renderResult = testRenderer.render(
       <StepDefinePackagePolicy
         agentPolicy={agentPolicy}
@@ -101,7 +101,6 @@ describe('StepDefinePackagePolicy', () => {
         updatePackagePolicy={mockUpdatePackagePolicy}
         validationResults={validationResults}
         submitAttempted={false}
-        isUpdate={isUpdate}
       />
     ));
 
@@ -165,7 +164,7 @@ describe('StepDefinePackagePolicy', () => {
   describe('update', () => {
     describe('when package vars are introduced in a new package version', () => {
       it('should display new package vars', () => {
-        render({ isUpdate: true });
+        render();
 
         waitFor(async () => {
           expect(renderResult.getByDisplayValue('showUserVarVal')).toBeInTheDocument();

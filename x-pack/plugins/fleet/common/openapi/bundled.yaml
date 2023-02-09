@@ -247,7 +247,31 @@ paths:
               schema:
                 $ref: '#/components/schemas/bulk_install_packages_response'
       operationId: bulk-install-packages
-    parameters: []
+      parameters:
+        - in: query
+          name: prerelease
+          schema:
+            type: boolean
+            default: false
+          description: >-
+            Whether to return prerelease versions of packages (e.g. beta, rc,
+            preview) 
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                packages:
+                  type: array
+                  items:
+                    type: string
+                  description: list of package names to install
+                force:
+                  type: boolean
+                  description: force install to ignore package verification errors
+              required:
+                - packages
   /epm/packages/{pkgkey}:
     get:
       summary: Packages - Info
@@ -285,6 +309,14 @@ paths:
           name: pkgkey
           in: path
           required: true
+        - in: query
+          name: prerelease
+          schema:
+            type: boolean
+            default: false
+          description: >-
+            Whether to return prerelease versions of packages (e.g. beta, rc,
+            preview) 
       deprecated: true
     post:
       summary: Packages - Install
@@ -437,6 +469,14 @@ paths:
           Return all fields from the package manifest, not just those supported
           by the Elastic Package Registry
         in: query
+      - in: query
+        name: prerelease
+        schema:
+          type: boolean
+          default: false
+        description: >-
+          Whether to return prerelease versions of packages (e.g. beta, rc,
+          preview) 
     post:
       summary: Packages - Install
       tags: []
@@ -516,17 +556,6 @@ paths:
                   - items
       operationId: update-package
       description: ''
-      parameters:
-        - schema:
-            type: string
-          name: pkgName
-          in: path
-          required: true
-        - schema:
-            type: string
-          name: pkgVersion
-          in: path
-          required: true
       requestBody:
         content:
           application/json:
@@ -735,6 +764,8 @@ paths:
                     type: integer
                   inactive:
                     type: integer
+                  unenrolled:
+                    type: integer
                   offline:
                     type: integer
                   online:
@@ -791,6 +822,8 @@ paths:
       parameters:
         - schema:
             type: array
+            items:
+              type: string
           name: agentsIds
           in: query
           required: true
@@ -814,6 +847,12 @@ paths:
         - $ref: '#/components/parameters/show_upgradeable'
         - $ref: '#/components/parameters/sort_field'
         - $ref: '#/components/parameters/sort_order'
+        - $ref: '#/components/parameters/with_metrics'
+        - name: getStatusSummary
+          in: query
+          required: false
+          schema:
+            type: boolean
       security:
         - basicAuth: []
   /agents/bulk_upgrade:
@@ -941,6 +980,8 @@ paths:
                 required:
                   - item
       operationId: get-agent
+      parameters:
+        - $ref: '#/components/parameters/with_metrics'
     put:
       summary: Agent - Update
       tags: []
@@ -1032,6 +1073,11 @@ paths:
                   $ref: '#/components/schemas/agent_action'
   /agents/{agentId}/actions/{actionId}/cancel:
     parameters:
+      - schema:
+          type: string
+        name: agentId
+        in: path
+        required: true
       - schema:
           type: string
         name: actionId
@@ -2198,11 +2244,6 @@ paths:
                   - id
       parameters:
         - schema:
-            type: string
-          name: packagePolicyId
-          in: path
-          required: true
-        - schema:
             type: boolean
           name: force
           in: query
@@ -2602,11 +2643,6 @@ paths:
                 required:
                   - id
       parameters:
-        - schema:
-            type: string
-          name: itemId
-          in: path
-          required: true
         - $ref: '#/components/parameters/kbn_xsrf'
     put:
       summary: Fleet Server Hosts - Update
@@ -2638,11 +2674,6 @@ paths:
                 required:
                   - item
       parameters:
-        - schema:
-            type: string
-          name: itemId
-          in: path
-          required: true
         - $ref: '#/components/parameters/kbn_xsrf'
   /proxies:
     get:
@@ -2745,11 +2776,6 @@ paths:
                 required:
                   - id
       parameters:
-        - schema:
-            type: string
-          name: itemId
-          in: path
-          required: true
         - $ref: '#/components/parameters/kbn_xsrf'
     put:
       summary: Fleet Proxies - Update
@@ -2785,11 +2811,6 @@ paths:
                 required:
                   - item
       parameters:
-        - schema:
-            type: string
-          name: itemId
-          in: path
-          required: true
         - $ref: '#/components/parameters/kbn_xsrf'
   /kubernetes:
     get:
@@ -2844,6 +2865,7 @@ components:
       in: header
       name: kbn-xsrf
       required: true
+      description: Kibana's anti Cross-Site Request Forgery token. Can be any string value.
     page_size:
       name: perPage
       in: query
@@ -2892,6 +2914,13 @@ components:
         enum:
           - asc
           - desc
+    with_metrics:
+      name: withMetrics
+      in: query
+      description: Return agent metrics, false by default
+      required: false
+      schema:
+        type: boolean
   schemas:
     fleet_setup_response:
       title: Fleet Setup response
@@ -3363,6 +3392,17 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/agent_component'
+        metrics:
+          type: object
+          properties:
+            cpu_avg:
+              type: number
+              description: >-
+                Average agent CPU usage during the last 5 minutes, number
+                between 0-1
+            memory_size_byte_avg:
+              type: number
+              description: Average agent memory consumption during the last 5 minutes
       required:
         - type
         - active
@@ -3388,6 +3428,27 @@ components:
           type: number
         perPage:
           type: number
+        statusSummary:
+          type: object
+          properties:
+            offline:
+              type: number
+            error:
+              type: number
+            online:
+              type: number
+            inactive:
+              type: number
+            enrolling:
+              type: number
+            unenrolling:
+              type: number
+            unenrolled:
+              type: number
+            updating:
+              type: number
+            degraded':
+              type: number
       required:
         - items
         - total
@@ -3651,6 +3712,18 @@ components:
               type: number
             agents:
               type: number
+            agent_features:
+              type: array
+              items:
+                type: object
+                properties:
+                  name:
+                    type: string
+                  enabled:
+                    type: boolean
+                required:
+                  - name
+                  - enabled
           required:
             - id
             - status
@@ -4073,6 +4146,25 @@ components:
               type: string
             key:
               type: string
+        proxy_id:
+          type: string
+        shipper:
+          type: object
+          properties:
+            disk_queue_enabled:
+              type: boolean
+            disk_queue_path:
+              type: string
+            disk_queue_max_size:
+              type: number
+            disk_queue_encryption_enabled:
+              type: boolean
+            disk_queue_compression_enabled:
+              type: boolean
+            compression_level:
+              type: number
+            loadbalance:
+              type: boolean
       required:
         - id
         - is_default

@@ -6,7 +6,7 @@
  */
 
 export const STATUS_ROUTE_PATH = '/internal/cloud_security_posture/status';
-export const STATS_ROUTE_PATH = '/internal/cloud_security_posture/stats';
+export const STATS_ROUTE_PATH = '/internal/cloud_security_posture/stats/{policy_template}';
 export const BENCHMARKS_ROUTE_PATH = '/internal/cloud_security_posture/benchmarks';
 
 export const CLOUD_SECURITY_POSTURE_PACKAGE_NAME = 'cloud_security_posture';
@@ -41,7 +41,6 @@ export const INTERNAL_FEATURE_FLAGS = {
   showFindingsGroupBy: true,
 } as const;
 
-export const CSP_RULE_SAVED_OBJECT_TYPE = 'csp_rule';
 export const CSP_RULE_TEMPLATE_SAVED_OBJECT_TYPE = 'csp-rule-template';
 
 export const CLOUDBEAT_VANILLA = 'cloudbeat/cis_k8s'; // Integration input
@@ -51,14 +50,11 @@ export const CLOUDBEAT_GCP = 'cloudbeat/cis_gcp'; // Integration input
 export const CLOUDBEAT_AZURE = 'cloudbeat/cis_azure'; // Integration input
 export const KSPM_POLICY_TEMPLATE = 'kspm';
 export const CSPM_POLICY_TEMPLATE = 'cspm';
-export const SUPPORTED_POLICY_TEMPLATES = [KSPM_POLICY_TEMPLATE, CSPM_POLICY_TEMPLATE];
+export const SUPPORTED_POLICY_TEMPLATES = [KSPM_POLICY_TEMPLATE, CSPM_POLICY_TEMPLATE] as const;
 export const SUPPORTED_CLOUDBEAT_INPUTS = [
   CLOUDBEAT_VANILLA,
   CLOUDBEAT_EKS,
   CLOUDBEAT_AWS,
   CLOUDBEAT_GCP,
   CLOUDBEAT_AZURE,
-];
-
-export type CLOUDBEAT_INTEGRATION = typeof SUPPORTED_CLOUDBEAT_INPUTS[number];
-export type POLICY_TEMPLATE = typeof SUPPORTED_POLICY_TEMPLATES[number];
+] as const;

@@ -53,8 +53,8 @@ export const alertMappings: SavedObjectsTypeMappingDefinition = {
           type: 'keyword',
         },
         params: {
-          enabled: false,
-          type: 'object',
+          dynamic: false,
+          properties: {},
         },
         frequency: {
           properties: {
@@ -338,6 +338,9 @@ export const alertMappings: SavedObjectsTypeMappingDefinition = {
           },
         },
       },
+    },
+    running: {
+      type: 'boolean',
     },
   },
 };

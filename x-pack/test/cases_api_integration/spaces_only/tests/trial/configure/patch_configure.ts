@@ -18,12 +18,12 @@ import {
   deleteConfiguration,
   createConfiguration,
   updateConfiguration,
-  getServiceNowConnector,
-  createConnector,
   getAuthWithSuperUser,
   getActionsSpace,
+  getServiceNowConnector,
+  createConnector,
   getServiceNowSimulationServer,
-} from '../../../../common/lib/utils';
+} from '../../../../common/lib/api';
 import { nullUser } from '../../../../common/lib/mock';
 
 // eslint-disable-next-line import/no-default-export

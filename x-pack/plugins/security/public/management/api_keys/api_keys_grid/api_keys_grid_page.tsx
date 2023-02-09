@@ -518,7 +518,7 @@ export class APIKeysGridPage extends Component<Props, State> {
           return (
             <EuiText color="subdued" size="s">
               <EuiLink
-                data-test-subj={`roleRowName-${recordAP.name}`}
+                data-test-subj={`apiKeyRowName-${recordAP.name}`}
                 onClick={() => {
                   this.setState({ selectedApiKey: recordAP, isUpdateFlyoutVisible: true });
                 }}

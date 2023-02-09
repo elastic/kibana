@@ -71,6 +71,8 @@ describe('FleetAuthzRouter', () => {
     const mockContext = createAppContextStartContractMock();
     // @ts-expect-error type doesn't properly respect deeply mocked keys
     mockContext.securityStart.authz.actions.api.get.mockImplementation((priv) => `api:${priv}`);
+    // @ts-expect-error type doesn't properly respect deeply mocked keys
+    mockContext.securityStart.authz.actions.ui.get.mockImplementation((priv) => `ui:${priv}`);
 
     mockContext.securityStart.authc.getCurrentUser.mockReturnValue({
       username: 'foo',

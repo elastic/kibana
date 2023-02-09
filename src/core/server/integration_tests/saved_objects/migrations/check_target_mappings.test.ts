@@ -8,10 +8,9 @@
 
 import Path from 'path';
 import fs from 'fs/promises';
-import { SemVer } from 'semver';
 import JSON5 from 'json5';
 import { Env } from '@kbn/config';
-import { REPO_ROOT } from '@kbn/utils';
+import { REPO_ROOT } from '@kbn/repo-info';
 import { getEnvOptions } from '@kbn/config-mocks';
 import { Root } from '@kbn/core-root-server-internal';
 import { LogRecord } from '@kbn/logging';
@@ -20,10 +19,9 @@ import {
   createTestServers,
   type TestElasticsearchUtils,
 } from '@kbn/core-test-helpers-kbn-server';
+import { delay } from './test_utils';
 
 const logFilePath = Path.join(__dirname, 'check_target_mappings.log');
-
-const delay = (seconds: number) => new Promise((resolve) => setTimeout(resolve, seconds * 1000));
 
 async function removeLogFile() {
   // ignore errors if it doesn't exist
@@ -137,55 +135,6 @@ describe('migration v2 - CHECK_TARGET_MAPPINGS', () => {
 
       // start Kibana a first time to create the system indices
       root = createRoot(currentVersion); // we discard a bunch of SO that have become unknown since 8.4.0
-      await root.preboot();
-      await root.setup();
-      await root.start();
-
-      // Check for migration steps present in the logs
-      logs = await parseLogFile();
-      expect(logIncludes(logs, 'CREATE_NEW_TARGET')).toEqual(false);
-      expect(logIncludes(logs, 'CHECK_TARGET_MAPPINGS -> UPDATE_TARGET_MAPPINGS')).toEqual(true);
-      expect(
-        logIncludes(logs, 'UPDATE_TARGET_MAPPINGS -> UPDATE_TARGET_MAPPINGS_WAIT_FOR_TASK')
-      ).toEqual(true);
-      expect(
-        logIncludes(logs, 'UPDATE_TARGET_MAPPINGS_WAIT_FOR_TASK -> UPDATE_TARGET_MAPPINGS_META')
-      ).toEqual(true);
-      expect(
-        logIncludes(logs, 'UPDATE_TARGET_MAPPINGS_META -> CHECK_VERSION_INDEX_READY_ACTIONS')
-      ).toEqual(true);
-      expect(
-        logIncludes(logs, 'CHECK_VERSION_INDEX_READY_ACTIONS -> MARK_VERSION_INDEX_READY')
-      ).toEqual(true);
-      expect(logIncludes(logs, 'MARK_VERSION_INDEX_READY -> DONE')).toEqual(true);
-      expect(logIncludes(logs, 'Migration completed')).toEqual(true);
-    });
-
-    it('runs UPDATE_TARGET_MAPPINGS even if the mappings have NOT changed', async () => {
-      const { startES } = createTestServers({
-        adjustTimeout: (t: number) => jest.setTimeout(t),
-        settings: {
-          es: {
-            license: 'basic',
-          },
-        },
-      });
-
-      esServer = await startES();
-
-      // start Kibana a first time to create the system indices
-      root = createRoot();
-      await root.preboot();
-      await root.setup();
-      await root.start();
-
-      // stop Kibana and remove logs
-      await root.shutdown();
-      await delay(10);
-      await removeLogFile();
-
-      const nextMinor = new SemVer(currentVersion).inc('patch').format();
-      root = createRoot(undefined, nextMinor);
       await root.preboot();
       await root.setup();
       await root.start();

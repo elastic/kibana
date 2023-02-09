@@ -128,7 +128,7 @@ export function MachineLearningDataFrameAnalyticsTableProvider({
     ) {
       const testSubjStr =
         tableEnvironment === 'mlDataFrameAnalytics'
-          ? 'mlRefreshPageButton'
+          ? 'mlDatePickerRefreshPageButton'
           : 'mlAnalyticsRefreshListButton';
       await this.waitForRefreshButtonLoaded(testSubjStr);
       await testSubjects.click(`~${testSubjStr}`);
@@ -212,7 +212,7 @@ export function MachineLearningDataFrameAnalyticsTableProvider({
     public async assertAnalyticsJobDisplayedInTable(
       analyticsId: string,
       shouldBeDisplayed: boolean,
-      refreshButtonTestSubj = 'mlRefreshPageButton'
+      refreshButtonTestSubj = 'mlDatePickerRefreshPageButton'
     ) {
       await this.waitForRefreshButtonLoaded(refreshButtonTestSubj);
       await testSubjects.click(`~${refreshButtonTestSubj}`);

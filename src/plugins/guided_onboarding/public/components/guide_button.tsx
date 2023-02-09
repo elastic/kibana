@@ -9,9 +9,9 @@
 import React from 'react';
 import { EuiButton } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { GuideState } from '@kbn/guided-onboarding';
+import type { GuideState, GuideConfig } from '@kbn/guided-onboarding';
 
-import type { GuideConfig, PluginState } from '../../common';
+import type { PluginState } from '../../common';
 import { GuideButtonPopover } from './guide_button_popover';
 
 interface GuideButtonProps {
@@ -75,12 +75,23 @@ export const GuideButton = ({
     </EuiButton>
   );
   // if there is no active guide
-  if (!pluginState || !pluginState.activeGuide || !pluginState.activeGuide.isActive) {
+  if (
+    !pluginState ||
+    !pluginState.activeGuide ||
+    !pluginState.activeGuide.isActive ||
+    // the guide has not started yet when the user just looks at the guide
+    // see https://github.com/elastic/kibana/issues/148912 for more context
+    pluginState.activeGuide.status === 'not_started'
+  ) {
     // if still active period and the user has not started a guide or skipped the guide,
     // display the button that redirects to the landing page
     if (
       pluginState?.isActivePeriod &&
-      (pluginState?.status === 'not_started' || pluginState?.status === 'skipped')
+      (pluginState?.status === 'not_started' ||
+        pluginState?.status === 'skipped' ||
+        // plugin state 'in_progress' without an active guide is when the guide has not started yet
+        // see https://github.com/elastic/kibana/issues/148912 for context
+        pluginState.status === 'in_progress')
     ) {
       return (
         <EuiButton

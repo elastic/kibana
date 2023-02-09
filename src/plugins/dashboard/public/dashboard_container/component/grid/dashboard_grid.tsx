@@ -17,10 +17,9 @@ import ReactGridLayout, { Layout, ReactGridLayoutProps } from 'react-grid-layout
 import { ViewMode, EmbeddablePhaseEvent } from '@kbn/embeddable-plugin/public';
 
 import { DashboardPanelState } from '../../../../common';
-import { DashboardLoadedEventStatus } from '../../types';
 import { DashboardGridItem } from './dashboard_grid_item';
-import { DashboardLoadedInfo } from '../../embeddable/dashboard_container';
 import { useDashboardContainerContext } from '../../dashboard_container_renderer';
+import { DashboardLoadedEventStatus, DashboardRenderPerformanceStats } from '../../types';
 import { DASHBOARD_GRID_COLUMN_COUNT, DASHBOARD_GRID_HEIGHT } from '../../../dashboard_constants';
 import { getPanelLayoutsAreEqual } from '../../embeddable/integrations/diff_state/dashboard_diffing_utils';
 
@@ -103,31 +102,28 @@ interface PanelLayout extends Layout {
   i: string;
 }
 
-interface DashboardPerformanceTracker {
+type DashboardRenderPerformanceTracker = DashboardRenderPerformanceStats & {
   panelIds: Record<string, Record<string, number>>;
-  loadStartTime: number;
-  lastTimeToData: number;
   status: DashboardLoadedEventStatus;
   doneCount: number;
-}
-
-const defaultPerformanceTracker: DashboardPerformanceTracker = {
-  panelIds: {},
-  loadStartTime: performance.now(),
-  lastTimeToData: 0,
-  status: 'done',
-  doneCount: 0,
 };
 
-export interface DashboardGridProps {
-  onDataLoaded?: (data: DashboardLoadedInfo) => void;
-}
+const getDefaultPerformanceTracker: () => DashboardRenderPerformanceTracker = () => ({
+  panelsRenderStartTime: performance.now(),
+  panelsRenderDoneTime: 0,
+  lastTimeToData: 0,
 
-export const DashboardGrid = ({ onDataLoaded }: DashboardGridProps) => {
+  panelIds: {},
+  doneCount: 0,
+  status: 'done',
+});
+
+export const DashboardGrid = () => {
   const {
     actions: { setPanels },
     useEmbeddableDispatch,
     useEmbeddableSelector: select,
+    embeddableInstance: dashboardContainer,
   } = useDashboardContainerContext();
   const dispatch = useEmbeddableDispatch();
 
@@ -143,13 +139,11 @@ export const DashboardGrid = ({ onDataLoaded }: DashboardGridProps) => {
   );
 
   // reset performance tracker on each render.
-  const performanceRefs = useRef<DashboardPerformanceTracker>(defaultPerformanceTracker);
-  performanceRefs.current = defaultPerformanceTracker;
+  const performanceRefs = useRef<DashboardRenderPerformanceTracker>(getDefaultPerformanceTracker());
+  performanceRefs.current = getDefaultPerformanceTracker();
 
   const onPanelStatusChange = useCallback(
     (info: EmbeddablePhaseEvent) => {
-      if (!onDataLoaded) return;
-
       if (performanceRefs.current.panelIds[info.id] === undefined || info.status === 'loading') {
         performanceRefs.current.panelIds[info.id] = {};
       } else if (info.status === 'error') {
@@ -163,20 +157,12 @@ export const DashboardGrid = ({ onDataLoaded }: DashboardGridProps) => {
       if (info.status === 'error' || info.status === 'rendered') {
         performanceRefs.current.doneCount++;
         if (performanceRefs.current.doneCount === panelsInOrder.length) {
-          const doneTime = performance.now();
-          const data: DashboardLoadedInfo = {
-            timeToData:
-              (performanceRefs.current.lastTimeToData || doneTime) -
-              performanceRefs.current.loadStartTime,
-            timeToDone: doneTime - performanceRefs.current.loadStartTime,
-            numOfPanels: panelsInOrder.length,
-            status,
-          };
-          onDataLoaded(data);
+          performanceRefs.current.panelsRenderDoneTime = performance.now();
+          dashboardContainer.reportPerformanceMetrics(performanceRefs.current);
         }
       }
     },
-    [onDataLoaded, panelsInOrder]
+    [dashboardContainer, panelsInOrder.length]
   );
 
   const onLayoutChange = useCallback(

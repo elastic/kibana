@@ -8,6 +8,7 @@
 import pMap from 'p-map';
 import Boom from '@hapi/boom';
 import { KueryNode } from '@kbn/es-query';
+import { withSpan } from '@kbn/apm-utils';
 import { RawRule } from '../../types';
 import { WriteOperations, ReadOperations, AlertingAuthorizationEntity } from '../../authorization';
 import { BulkAction, RuleBulkOperationAggregation } from '../types';
@@ -45,25 +46,27 @@ export const checkAuthorizationAndGetTotal = async (
       RuleAuditAction: RuleAuditAction.DISABLE,
     },
   };
-  const { aggregations, total } = await context.unsecuredSavedObjectsClient.find<
-    RawRule,
-    RuleBulkOperationAggregation
-  >({
-    filter,
-    page: 1,
-    perPage: 0,
-    type: 'alert',
-    aggs: {
-      alertTypeId: {
-        multi_terms: {
-          terms: [
-            { field: 'alert.attributes.alertTypeId' },
-            { field: 'alert.attributes.consumer' },
-          ],
+
+  const { aggregations, total } = await withSpan(
+    { name: 'unsecuredSavedObjectsClient.find', type: 'rules' },
+    () =>
+      context.unsecuredSavedObjectsClient.find<RawRule, RuleBulkOperationAggregation>({
+        filter,
+        page: 1,
+        perPage: 0,
+        type: 'alert',
+        aggs: {
+          alertTypeId: {
+            multi_terms: {
+              terms: [
+                { field: 'alert.attributes.alertTypeId' },
+                { field: 'alert.attributes.consumer' },
+              ],
+            },
+          },
         },
-      },
-    },
-  });
+      })
+  );
 
   if (total > MAX_RULES_NUMBER_FOR_BULK_OPERATION) {
     throw Boom.badRequest(
@@ -77,28 +80,30 @@ export const checkAuthorizationAndGetTotal = async (
     throw Boom.badRequest(`No rules found for bulk ${action.toLocaleLowerCase()}`);
   }
 
-  await pMap(
-    buckets,
-    async ({ key: [ruleType, consumer] }) => {
-      context.ruleTypeRegistry.ensureRuleTypeEnabled(ruleType);
-      try {
-        await context.authorization.ensureAuthorized({
-          ruleTypeId: ruleType,
-          consumer,
-          operation: actionToConstantsMapping[action].WriteOperation,
-          entity: AlertingAuthorizationEntity.Rule,
-        });
-      } catch (error) {
-        context.auditLogger?.log(
-          ruleAuditEvent({
-            action: actionToConstantsMapping[action].RuleAuditAction,
-            error,
-          })
-        );
-        throw error;
-      }
-    },
-    { concurrency: RULE_TYPE_CHECKS_CONCURRENCY }
+  await withSpan({ name: 'authorization.ensureAuthorized', type: 'rules' }, () =>
+    pMap(
+      buckets,
+      async ({ key: [ruleType, consumer, actions] }) => {
+        context.ruleTypeRegistry.ensureRuleTypeEnabled(ruleType);
+        try {
+          await context.authorization.ensureAuthorized({
+            ruleTypeId: ruleType,
+            consumer,
+            operation: actionToConstantsMapping[action].WriteOperation,
+            entity: AlertingAuthorizationEntity.Rule,
+          });
+        } catch (error) {
+          context.auditLogger?.log(
+            ruleAuditEvent({
+              action: actionToConstantsMapping[action].RuleAuditAction,
+              error,
+            })
+          );
+          throw error;
+        }
+      },
+      { concurrency: RULE_TYPE_CHECKS_CONCURRENCY }
+    )
   );
   return { total };
 };

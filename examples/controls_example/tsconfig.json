@@ -1,7 +1,7 @@
 {
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
-    "outDir": "./target/types"
+    "outDir": "target/types"
   },
   "include": [
     "index.ts",
@@ -11,13 +11,19 @@
     "server/**/*.ts",
     "../../typings/**/*"
   ],
-  "exclude": [],
+  "exclude": [
+    "target/**/*",
+  ],
   "kbn_references": [
-    { "path": "../../src/core/tsconfig.json" },
-    { "path": "../developer_examples/tsconfig.json" },
-    { "path": "../../src/plugins/data/tsconfig.json" },
-    { "path": "../../src/plugins/controls/tsconfig.json" },
-    { "path": "../../src/plugins/navigation/tsconfig.json" },
-    { "path": "../../src/plugins/presentation_util/tsconfig.json" }
+    "@kbn/core",
+    "@kbn/developer-examples-plugin",
+    "@kbn/data-plugin",
+    "@kbn/controls-plugin",
+    "@kbn/navigation-plugin",
+    "@kbn/presentation-util-plugin",
+    "@kbn/shared-ux-page-kibana-template",
+    "@kbn/embeddable-plugin",
+    "@kbn/data-views-plugin",
+    "@kbn/es-query",
   ]
 }

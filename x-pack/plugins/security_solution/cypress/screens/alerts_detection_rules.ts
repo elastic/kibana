@@ -75,7 +75,7 @@ export const RULES_TABLE = '[data-test-subj="rules-table"]';
 
 export const RULES_ROW = '.euiTableRow';
 
-export const RULES_MONITORING_TABLE = '[data-test-subj="allRulesTableTab-monitoring"]';
+export const RULES_MONITORING_TABLE = '[role="tablist"] > [data-test-subj="navigation-monitoring"]';
 
 export const SEVERITY = '[data-test-subj="severity"]';
 
@@ -123,10 +123,13 @@ export const TOASTER_BODY = '[data-test-subj="globalToastList"] [data-test-subj=
 
 export const TOASTER_ERROR_BTN = '[data-test-subj="errorToastBtn"]';
 
-export const RULE_IMPORT_OVERWRITE_CHECKBOX = '[id="import-data-modal-checkbox-label"]';
+export const RULE_IMPORT_OVERWRITE_CHECKBOX = '[id="importDataModalCheckboxLabel"]';
 
 export const RULE_IMPORT_OVERWRITE_EXCEPTIONS_CHECKBOX =
-  '[id="import-data-modal-exceptions-checkbox-label"]';
+  '[id="importDataModalExceptionsCheckboxLabel"]';
+
+export const RULE_IMPORT_OVERWRITE_CONNECTORS_CHECKBOX =
+  '[id="importDataModalActionConnectorsCheckbox"]';
 
 export const RULES_TAGS_POPOVER_BTN = '[data-test-subj="tagsDisplayPopoverButton"]';
 
@@ -143,5 +146,3 @@ export const REFRESH_SETTINGS_SWITCH = '[data-test-subj="refreshSettingsSwitch"]
 export const REFRESH_SETTINGS_SELECTION_NOTE = '[data-test-subj="refreshSettingsSelectionNote"]';
 
 export const REFRESH_RULES_STATUS = '[data-test-subj="refreshRulesStatus"]';
-
-export const RULE_DETAILS_BACK_TO_ALL_RULES = '[data-test-subj="ruleDetailsBackToAllRules"]';

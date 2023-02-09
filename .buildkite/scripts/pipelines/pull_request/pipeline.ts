@@ -66,12 +66,14 @@ const uploadPipeline = (pipelineContent: string | object) => {
         /^x-pack\/plugins\/timelines/,
         /^x-pack\/plugins\/triggers_actions_ui\/public\/application\/sections\/action_connector_form/,
         /^x-pack\/plugins\/triggers_actions_ui\/public\/application\/context\/actions_connectors_context\.tsx/,
+        /^x-pack\/test\/defend_workflows_cypress/,
         /^x-pack\/test\/security_solution_cypress/,
         /^fleet_packages\.json/, // It contains reference to prebuilt detection rules, we want to run security solution tests if it changes
       ])) ||
       GITHUB_PR_LABELS.includes('ci:all-cypress-suites')
     ) {
       pipeline.push(getPipeline('.buildkite/pipelines/pull_request/security_solution.yml'));
+      pipeline.push(getPipeline('.buildkite/pipelines/pull_request/defend_workflows.yml'));
     }
 
     if (
@@ -118,6 +120,7 @@ const uploadPipeline = (pipelineContent: string | object) => {
       GITHUB_PR_LABELS.includes('ci:all-cypress-suites')
     ) {
       pipeline.push(getPipeline('.buildkite/pipelines/pull_request/fleet_cypress.yml'));
+      pipeline.push(getPipeline('.buildkite/pipelines/pull_request/defend_workflows.yml'));
     }
 
     if (
@@ -131,11 +134,21 @@ const uploadPipeline = (pipelineContent: string | object) => {
       pipeline.push(getPipeline('.buildkite/pipelines/pull_request/observability_plugin.yml'));
     }
 
-    if (await doAnyChangesMatch([/^x-pack\/plugins\/synthetics/])) {
+    if (
+      await doAnyChangesMatch([
+        /^x-pack\/plugins\/synthetics/,
+        /^x-pack\/plugins\/observability\/public\/components\/shared\/exploratory_view/,
+      ])
+    ) {
       pipeline.push(getPipeline('.buildkite/pipelines/pull_request/synthetics_plugin.yml'));
     }
 
-    if (await doAnyChangesMatch([/^x-pack\/plugins\/ux/])) {
+    if (
+      await doAnyChangesMatch([
+        /^x-pack\/plugins\/ux/,
+        /^x-pack\/plugins\/observability\/public\/components\/shared\/exploratory_view/,
+      ])
+    ) {
       pipeline.push(getPipeline('.buildkite/pipelines/pull_request/ux_plugin_e2e.yml'));
     }
 

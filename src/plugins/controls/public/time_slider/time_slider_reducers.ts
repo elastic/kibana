@@ -58,6 +58,12 @@ export const timeSliderReducers = {
   ) => {
     state.componentState.range = action.payload.range;
   },
+  setIsAnchored: (
+    state: WritableDraft<TimeSliderReduxState>,
+    action: PayloadAction<{ isAnchored: boolean }>
+  ) => {
+    state.explicitInput.isAnchored = action.payload.isAnchored;
+  },
   setIsOpen: (
     state: WritableDraft<TimeSliderReduxState>,
     action: PayloadAction<{ isOpen: boolean }>

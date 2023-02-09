@@ -13,11 +13,11 @@ import {
   expectNumberOfRules,
   expectToContainRule,
   filterBySearchTerm,
-  goBackFromRuleDetails,
   goToRuleDetails,
 } from '../../tasks/alerts_detection_rules';
 import { RULE_SEARCH_FIELD } from '../../screens/alerts_detection_rules';
 import { createCustomRule } from '../../tasks/api_calls/rules';
+import { goBackToRulesTable } from '../../tasks/rule_details';
 
 function createRule(id: string, name: string, tags?: string[]): void {
   const rule = getNewRule();
@@ -63,7 +63,7 @@ describe('Persistent rules table state', () => {
     expectToContainRule('rule 1');
 
     goToRuleDetails();
-    goBackFromRuleDetails();
+    goBackToRulesTable();
 
     cy.get(RULE_SEARCH_FIELD).should('have.value', 'rule 1');
     expectNumberOfRules(1);

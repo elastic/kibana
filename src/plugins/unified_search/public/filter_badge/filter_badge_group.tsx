@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
+import React, { Fragment } from 'react';
 import type { Filter, BooleanRelation, DataViewBase } from '@kbn/es-query';
 import { EuiTextColor } from '@elastic/eui';
 import { FilterBadgeErrorBoundary } from './filter_badge_error_boundary';
@@ -41,7 +41,7 @@ export function FilterBadgeGroup({
         const showRelationDelimiter = booleanRelation && index + 1 < filterArr.length;
         const showBrackets = shouldShowBrackets && (filter.meta.negate || filterArr.length > 1);
         return (
-          <>
+          <Fragment key={index}>
             <FilterExpressionBadge
               filter={filter}
               shouldShowBrackets={showBrackets}
@@ -49,7 +49,7 @@ export function FilterBadgeGroup({
               filterLabelStatus={filterLabelStatus}
             />
             {showRelationDelimiter && <BooleanRelationDelimiter conditional={booleanRelation} />}
-          </>
+          </Fragment>
         );
       })}
     </FilterBadgeErrorBoundary>

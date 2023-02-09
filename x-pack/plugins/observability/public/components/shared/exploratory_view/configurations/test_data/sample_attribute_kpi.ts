@@ -37,6 +37,7 @@ export const sampleAttributeKpi = {
                 operationType: 'date_histogram',
                 params: {
                   interval: 'auto',
+                  includeEmptyRows: true,
                 },
                 scale: 'interval',
                 sourceField: '@timestamp',

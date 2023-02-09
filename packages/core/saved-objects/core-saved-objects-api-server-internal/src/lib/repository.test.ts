@@ -23,7 +23,7 @@ import {
 import type { Payload } from '@hapi/boom';
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
-import type { SavedObject, SavedObjectReference } from '@kbn/core-saved-objects-common';
+import type { SavedObject, SavedObjectReference } from '@kbn/core-saved-objects-server';
 import type {
   SavedObjectsBaseOptions,
   SavedObjectsFindOptions,

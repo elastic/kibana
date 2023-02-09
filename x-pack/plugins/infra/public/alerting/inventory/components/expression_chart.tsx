@@ -53,7 +53,6 @@ export const ExpressionChart: React.FC<Props> = ({
         .valueOf(),
       to: moment().valueOf(),
       forceInterval: true,
-      ignoreLookback: true,
     }),
     [expression.timeSize, expression.timeUnit]
   );

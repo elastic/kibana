@@ -14,7 +14,7 @@ import type {
   CreatePackagePolicyRequest,
   CreatePackagePolicyResponse,
   DeleteAgentPolicyResponse,
-  DeletePackagePoliciesResponse,
+  PostDeletePackagePoliciesResponse,
 } from '@kbn/fleet-plugin/common';
 import { AGENT_POLICY_API_ROUTES, PACKAGE_POLICY_API_ROUTES } from '@kbn/fleet-plugin/common';
 import type { PolicyData } from '../types';
@@ -33,7 +33,8 @@ export interface IndexedFleetEndpointPolicyResponse {
 export const indexFleetEndpointPolicy = async (
   kbnClient: KbnClient,
   policyName: string,
-  endpointPackageVersion: string = '8.0.0'
+  endpointPackageVersion: string = '8.0.0',
+  agentPolicyName?: string
 ): Promise<IndexedFleetEndpointPolicyResponse> => {
   const response: IndexedFleetEndpointPolicyResponse = {
     integrationPolicies: [],
@@ -42,7 +43,8 @@ export const indexFleetEndpointPolicy = async (
 
   // Create Agent Policy first
   const newAgentPolicyData: CreateAgentPolicyRequest['body'] = {
-    name: `Policy for ${policyName} (${Math.random().toString(36).substr(2, 5)})`,
+    name:
+      agentPolicyName || `Policy for ${policyName} (${Math.random().toString(36).substr(2, 5)})`,
     description: `Policy created with endpoint data generator (${policyName})`,
     namespace: 'default',
   };
@@ -102,7 +104,7 @@ export const indexFleetEndpointPolicy = async (
 };
 
 export interface DeleteIndexedFleetEndpointPoliciesResponse {
-  integrationPolicies: DeletePackagePoliciesResponse | undefined;
+  integrationPolicies: PostDeletePackagePoliciesResponse | undefined;
   agentPolicies: DeleteAgentPolicyResponse[] | undefined;
 }
 
@@ -132,7 +134,7 @@ export const deleteIndexedFleetEndpointPolicies = async (
             packagePolicyIds: indexData.integrationPolicies.map((policy) => policy.id),
           },
         })
-        .catch(wrapErrorAndRejectPromise)) as AxiosResponse<DeletePackagePoliciesResponse>
+        .catch(wrapErrorAndRejectPromise)) as AxiosResponse<PostDeletePackagePoliciesResponse>
     ).data;
   }
 

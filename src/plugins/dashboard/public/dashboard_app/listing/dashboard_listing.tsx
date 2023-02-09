@@ -24,6 +24,9 @@ import type { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import type { SavedObjectsFindOptionsReference, SimpleSavedObject } from '@kbn/core/public';
 import { TableListView, type UserContentCommonSchema } from '@kbn/content-management-table-list';
 
+import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
+import { SAVED_OBJECT_DELETE_TIME, SAVED_OBJECT_LOADED_TIME } from '../../dashboard_constants';
+
 import {
   getDashboardBreadcrumb,
   dashboardListingTableStrings,
@@ -274,6 +277,7 @@ export const DashboardListing = ({
         referencesToExclude?: SavedObjectsFindOptionsReference[];
       } = {}
     ) => {
+      const searchStartTime = window.performance.now();
       return findDashboards
         .findSavedObjects({
           search: searchTerm,
@@ -282,6 +286,15 @@ export const DashboardListing = ({
           hasNoReference: referencesToExclude,
         })
         .then(({ total, hits }) => {
+          const searchEndTime = window.performance.now();
+          const searchDuration = searchEndTime - searchStartTime;
+          reportPerformanceMetricEvent(pluginServices.getServices().analytics, {
+            eventName: SAVED_OBJECT_LOADED_TIME,
+            duration: searchDuration,
+            meta: {
+              saved_object_type: DASHBOARD_SAVED_OBJECT_TYPE,
+            },
+          });
           return {
             total,
             hits: hits.map(toTableListViewSavedObject),
@@ -293,16 +306,31 @@ export const DashboardListing = ({
 
   const deleteItems = useCallback(
     async (dashboardsToDelete: Array<{ id: string }>) => {
-      await Promise.all(
-        dashboardsToDelete.map(({ id }) => {
-          dashboardSessionStorage.clearState(id);
-          return savedObjectsClient.delete(DASHBOARD_SAVED_OBJECT_TYPE, id);
-        })
-      ).catch((error) => {
+      try {
+        const deleteStartTime = window.performance.now();
+
+        await Promise.all(
+          dashboardsToDelete.map(({ id }) => {
+            dashboardSessionStorage.clearState(id);
+            return savedObjectsClient.delete(DASHBOARD_SAVED_OBJECT_TYPE, id);
+          })
+        );
+
+        const deleteDuration = window.performance.now() - deleteStartTime;
+        reportPerformanceMetricEvent(pluginServices.getServices().analytics, {
+          eventName: SAVED_OBJECT_DELETE_TIME,
+          duration: deleteDuration,
+          meta: {
+            saved_object_type: DASHBOARD_SAVED_OBJECT_TYPE,
+            total: dashboardsToDelete.length,
+          },
+        });
+      } catch (error) {
         toasts.addError(error, {
           title: dashboardListingErrorStrings.getErrorDeletingDashboardToast(),
         });
-      });
+      }
+
       setUnsavedDashboardIds(dashboardSessionStorage.getDashboardIdsWithUnsavedChanges());
     },
     [savedObjectsClient, dashboardSessionStorage, toasts]

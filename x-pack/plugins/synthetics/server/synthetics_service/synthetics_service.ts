@@ -361,16 +361,22 @@ export class SyntheticsService {
   }
 
   async deleteConfigs(configs: SyntheticsMonitorWithId[]) {
-    const output = await this.getOutput();
-    if (!output) {
-      return;
-    }
+    const hasPublicLocations = configs.some(({ locations }) =>
+      locations.some(({ isServiceManaged }) => isServiceManaged)
+    );
 
-    const data = {
-      output,
-      monitors: this.formatConfigs(configs),
-    };
-    return await this.apiClient.delete(data);
+    if (hasPublicLocations) {
+      const output = await this.getOutput();
+      if (!output) {
+        return;
+      }
+
+      const data = {
+        output,
+        monitors: this.formatConfigs(configs),
+      };
+      return await this.apiClient.delete(data);
+    }
   }
 
   async deleteAllConfigs() {

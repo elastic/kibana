@@ -20,7 +20,7 @@ import { appContextService } from '../../services/app_context';
 import { setupFleet } from '../../services/setup';
 import type { FleetRequestHandlerContext } from '../../types';
 
-import { createFleetAuthzMock } from '../../../common';
+import { createFleetAuthzMock } from '../../../common/mocks';
 
 import { fleetSetupHandler } from './handlers';
 

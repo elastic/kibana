@@ -88,7 +88,7 @@ Message::   The message for the alert (required).
 Opsgenie tags::   The tags for the alert (optional).
 Priority::  The priority level for the alert.
 Description::   A description that provides detailed information about the alert (optional).
-Alias::   The alert identifier, which is used for alert de-duplication in Opsgenie. For more information, refer to the https://support.atlassian.com/opsgenie/docs/what-is-alert-de-duplication/[Opsgenie documentation] (optional).
+Alias::   The alert identifier, which is used for alert deduplication in Opsgenie. For more information, refer to the https://support.atlassian.com/opsgenie/docs/what-is-alert-de-duplication/[Opsgenie documentation] (optional).
 Entity::  The domain of the alert (optional).
 Source::  The source of the alert (optional).
 User::    The display name of the owner (optional).
@@ -145,7 +145,7 @@ Example JSON editor contents
 
 The close alert action has the following configuration properties.
 
-Alias::   The alert identifier, which is used for alert de-duplication in Opsgenie (required). The alias must match the value used when creating the alert. For more information, refer to the https://support.atlassian.com/opsgenie/docs/what-is-alert-de-duplication/[Opsgenie documentation].
+Alias::   The alert identifier, which is used for alert deduplication in Opsgenie (required). The alias must match the value used when creating the alert. For more information, refer to the https://support.atlassian.com/opsgenie/docs/what-is-alert-de-duplication/[Opsgenie documentation].
 Note::    Additional information for the alert (optional).
 Source::  The display name of the source (optional).
 User::    The display name of the owner (optional).

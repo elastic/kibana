@@ -5,20 +5,16 @@
  * 2.0.
  */
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
 
 import type { Agent } from '../../types';
 import { AgentReassignmentError } from '../../errors';
 
-import { getAgentDocuments } from './crud';
-import type { GetAgentsOptions } from '.';
-import { searchHitToAgent } from './helpers';
-import { UpdateAgentTagsActionRunner, updateTagsBatch } from './update_agent_tags_action_runner';
+import { SO_SEARCH_LIMIT } from '../../constants';
 
-function isMgetDoc(doc?: estypes.MgetResponseItem<unknown>): doc is estypes.GetGetResult {
-  return Boolean(doc && 'found' in doc);
-}
+import { getAgentsById, getAgentsByKuery, openPointInTime } from './crud';
+import type { GetAgentsOptions } from '.';
+import { UpdateAgentTagsActionRunner, updateTagsBatch } from './update_agent_tags_action_runner';
 
 export async function updateAgentTags(
   soClient: SavedObjectsClientContract,
@@ -31,27 +27,52 @@ export async function updateAgentTags(
   const givenAgents: Agent[] = [];
 
   if ('agentIds' in options) {
-    const givenAgentsResults = await getAgentDocuments(esClient, options.agentIds);
-    for (const agentResult of givenAgentsResults) {
-      if (isMgetDoc(agentResult) && agentResult.found === false) {
-        outgoingErrors[agentResult._id] = new AgentReassignmentError(
-          `Cannot find agent ${agentResult._id}`
+    const maybeAgents = await getAgentsById(esClient, soClient, options.agentIds);
+    for (const maybeAgent of maybeAgents) {
+      if ('notFound' in maybeAgent) {
+        outgoingErrors[maybeAgent.id] = new AgentReassignmentError(
+          `Cannot find agent ${maybeAgent.id}`
         );
       } else {
-        givenAgents.push(searchHitToAgent(agentResult));
+        givenAgents.push(maybeAgent);
       }
     }
   } else if ('kuery' in options) {
+    const batchSize = options.batchSize ?? SO_SEARCH_LIMIT;
+
+    const filters = [];
+    if (options.kuery !== '') {
+      filters.push(options.kuery);
+    }
+    if (tagsToAdd.length === 1 && tagsToRemove.length === 0) {
+      filters.push(`NOT (tags:${tagsToAdd[0]})`);
+    } else if (tagsToRemove.length === 1 && tagsToAdd.length === 0) {
+      filters.push(`tags:${tagsToRemove[0]}`);
+    }
+
+    const kuery = filters.map((filter) => `(${filter})`).join(' AND ');
+    const pitId = await openPointInTime(esClient);
+
+    // calculate total count
+    const res = await getAgentsByKuery(esClient, soClient, {
+      kuery,
+      showInactive: options.showInactive ?? false,
+      perPage: 0,
+      pitId,
+    });
+
     return await new UpdateAgentTagsActionRunner(
       esClient,
       soClient,
       {
         ...options,
-        kuery: options.kuery,
+        kuery,
         tagsToAdd,
         tagsToRemove,
+        batchSize,
+        total: res.total,
       },
-      { pitId: '' }
+      { pitId }
     ).runActionAsyncWithRetry();
   }
 

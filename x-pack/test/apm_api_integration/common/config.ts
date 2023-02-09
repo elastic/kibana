@@ -58,6 +58,8 @@ type ApmApiClientKey =
   | 'createAndAllAgentKeysUser'
   | 'monitorClusterAndIndicesUser';
 
+export type ApmApiClient = Record<ApmApiClientKey, Awaited<ReturnType<typeof getApmApiClient>>>;
+
 export interface CreateTest {
   testFiles: string[];
   servers: any;
@@ -66,9 +68,7 @@ export interface CreateTest {
     apmFtrConfig: () => ApmFtrConfig;
     registry: ({ getService }: FtrProviderContext) => ReturnType<typeof RegistryProvider>;
     synthtraceEsClient: (context: InheritedFtrProviderContext) => Promise<ApmSynthtraceEsClient>;
-    apmApiClient: (
-      context: InheritedFtrProviderContext
-    ) => Record<ApmApiClientKey, Awaited<ReturnType<typeof getApmApiClient>>>;
+    apmApiClient: (context: InheritedFtrProviderContext) => ApmApiClient;
     ml: ({ getService }: FtrProviderContext) => ReturnType<typeof MachineLearningAPIProvider>;
   };
   junit: { reportName: string };

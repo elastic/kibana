@@ -13,6 +13,7 @@ import { extractTimeRange } from '@kbn/es-query';
 import { ApplyGlobalFilterActionContext } from '@kbn/unified-search-plugin/public';
 import { IEmbeddable, EmbeddableInput } from '@kbn/embeddable-plugin/public';
 import { EnhancedEmbeddableContext } from '@kbn/embeddable-enhanced-plugin/public';
+import { IMAGE_CLICK_TRIGGER } from '@kbn/image-embeddable-plugin/public';
 import {
   AbstractDashboardDrilldown,
   AbstractDashboardDrilldownParams,
@@ -40,7 +41,7 @@ export type Params = AbstractDashboardDrilldownParams;
 export class EmbeddableToDashboardDrilldown extends AbstractDashboardDrilldown<Context> {
   public readonly id = EMBEDDABLE_TO_DASHBOARD_DRILLDOWN;
 
-  public readonly supportedTriggers = () => [APPLY_FILTER_TRIGGER];
+  public readonly supportedTriggers = () => [APPLY_FILTER_TRIGGER, IMAGE_CLICK_TRIGGER];
 
   protected async getLocation(
     config: Config,

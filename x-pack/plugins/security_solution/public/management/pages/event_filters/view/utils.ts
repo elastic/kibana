@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import type { CreateExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
-import type { Ecs } from '../../../../../common/ecs';
+import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import { ENDPOINT_EVENT_FILTERS_LIST_ID } from '../constants';
 
 const osTypeBasedOnAgentType = (data?: Ecs) => {
@@ -48,7 +48,7 @@ export const getInitialExceptionFromEvent = (data?: Ecs): CreateExceptionListIte
   item_id: undefined,
   list_id: ENDPOINT_EVENT_FILTERS_LIST_ID,
   meta: {
-    temporaryUuid: uuid.v4(),
+    temporaryUuid: uuidv4(),
   },
   name: '',
   namespace_type: 'agnostic',

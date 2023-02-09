@@ -108,6 +108,43 @@
           },
           {
             "parentPluginId": "@kbn/shared-ux-file-picker",
+            "id": "def-common.Props.shouldAllowDelete",
+            "type": "Function",
+            "tags": [],
+            "label": "shouldAllowDelete",
+            "description": [
+              "\nA function which determines whether to show a delete button for a file."
+            ],
+            "signature": [
+              "((file: ",
+              "FileJSON",
+              "<unknown>) => boolean) | undefined"
+            ],
+            "path": "packages/shared-ux/file/file_picker/impl/src/file_picker.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/shared-ux-file-picker",
+                "id": "def-common.Props.shouldAllowDelete.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "file",
+                "description": [],
+                "signature": [
+                  "FileJSON",
+                  "<unknown>"
+                ],
+                "path": "packages/shared-ux/file/file_picker/impl/src/file_picker.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/shared-ux-file-picker",
             "id": "def-common.Props.onClose",
             "type": "Function",
             "tags": [],

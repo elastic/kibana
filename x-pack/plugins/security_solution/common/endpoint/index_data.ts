@@ -9,8 +9,8 @@ import type { Client } from '@elastic/elasticsearch';
 import seedrandom from 'seedrandom';
 import type { KbnClient } from '@kbn/test';
 import type { AxiosResponse } from 'axios';
-import type { CreatePackagePolicyResponse, GetPackagesResponse } from '@kbn/fleet-plugin/common';
-import { EPM_API_ROUTES } from '@kbn/fleet-plugin/common';
+import type { CreatePackagePolicyResponse, GetInfoResponse } from '@kbn/fleet-plugin/common';
+import { epmRouteService } from '@kbn/fleet-plugin/common';
 import type { TreeOptions } from './generate_data';
 import { EndpointDocGenerator } from './generate_data';
 import type {
@@ -121,15 +121,16 @@ export async function indexHostsAndAlerts(
   return response;
 }
 
-const getEndpointPackageInfo = async (
+export const getEndpointPackageInfo = async (
   kbnClient: KbnClient
-): Promise<GetPackagesResponse['items'][0]> => {
+): Promise<GetInfoResponse['item']> => {
+  const path = epmRouteService.getInfoPath('endpoint');
   const endpointPackage = (
     (await kbnClient.request({
-      path: `${EPM_API_ROUTES.LIST_PATTERN}?category=security`,
+      path,
       method: 'GET',
-    })) as AxiosResponse<GetPackagesResponse>
-  ).data.items.find((epmPackage) => epmPackage.name === 'endpoint');
+    })) as AxiosResponse<GetInfoResponse>
+  ).data.item;
 
   if (!endpointPackage) {
     throw new Error('EPM Endpoint package was not found!');

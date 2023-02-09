@@ -34,6 +34,7 @@ const appFieldFormats: Record<AppDataType, FieldFormat[] | null> = {
   apm: apmFieldFormats,
   synthetics: syntheticsFieldFormats,
   mobile: apmFieldFormats,
+  alerts: null,
 };
 
 const appRuntimeFields: Record<AppDataType, Array<{ name: string; field: RuntimeField }> | null> = {
@@ -43,6 +44,7 @@ const appRuntimeFields: Record<AppDataType, Array<{ name: string; field: Runtime
   apm: null,
   synthetics: syntheticsRuntimeFields,
   mobile: null,
+  alerts: null,
 };
 
 function getFieldFormatsForApp(app: AppDataType) {
@@ -56,6 +58,7 @@ export const dataViewList: Record<AppDataType, string> = {
   infra_logs: 'infra_logs_static_index_pattern_id',
   infra_metrics: 'infra_metrics_static_index_pattern_id',
   mobile: 'mobile_static_index_pattern_id',
+  alerts: 'alerts_static_index_pattern_id',
 };
 
 const getAppIndicesWithPattern = (app: AppDataType, indices: string) => {
@@ -78,6 +81,11 @@ export async function getDataTypeIndices(dataType: AppDataType) {
       return {
         hasData: Boolean(resultApm?.hasData),
         indices: getApmDataViewTitle(resultApm?.indices),
+      };
+    case 'alerts':
+      return {
+        hasData: true,
+        indices: '.alerts-observability*',
       };
     default:
       const resultUx = await getDataHandler(dataType)?.hasData();
@@ -191,11 +199,14 @@ export class ObservabilityDataViews {
 
   async getDataView(app: AppDataType, indices?: string): Promise<DataView | undefined> {
     let appIndices = indices;
+    let hasData = false;
     if (!appIndices) {
-      appIndices = (await getDataTypeIndices(app)).indices;
+      const { indices: indicesT, hasData: hData } = await getDataTypeIndices(app);
+      hasData = hData;
+      appIndices = indicesT;
     }
 
-    if (appIndices) {
+    if (appIndices && (hasData || indices)) {
       try {
         const dataViewId = getAppDataViewId(app, appIndices);
         const dataViewTitle = getAppIndicesWithPattern(app, appIndices);

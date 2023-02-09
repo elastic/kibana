@@ -10,90 +10,55 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
-  EuiSelect,
-  useGeneratedHtmlId,
+  EuiIcon,
+  EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { ChangeEvent, useEffect, useState } from 'react';
+import React, { ChangeEvent, useState } from 'react';
 
-import { Duration, DurationUnit } from '../../../typings';
-
-interface DurationUnitOption {
-  value: DurationUnit;
-  text: string;
-}
-
-const durationUnitOptions: DurationUnitOption[] = [
-  { value: 'm', text: 'minute' },
-  { value: 'h', text: 'hour' },
-];
-
-const MIN_DURATION_IN_MINUTES = 30;
-const MAX_DURATION_IN_MINUTES = 1440;
-const MAX_DURATION_IN_HOURS = 24;
+import { toMinutes } from '../../../utils/slo/duration';
+import { Duration } from '../../../typings';
 
 interface Props {
+  shortWindowDuration: Duration;
   initialDuration?: Duration;
+  errors?: string[];
   onChange: (duration: Duration) => void;
 }
 
-export function LongWindowDuration({ initialDuration, onChange }: Props) {
+export function LongWindowDuration({
+  shortWindowDuration,
+  initialDuration,
+  onChange,
+  errors,
+}: Props) {
   const [durationValue, setDurationValue] = useState<number>(initialDuration?.value ?? 1);
-  const [durationUnit, setDurationUnit] = useState<DurationUnit>(
-    initialDuration?.unit ?? durationUnitOptions[0].value
-  );
-  const [error, setError] = useState<string | undefined>(undefined);
+  const hasError = errors !== undefined && errors.length > 0;
 
   const onDurationValueChange = (e: ChangeEvent<HTMLInputElement>) => {
-    const value = parseInt(e.target.value, 10);
-    setDurationValue(!isNaN(value) ? value : 1);
-    onChange({ value, unit: durationUnit });
+    const value = Number(e.target.value);
+    setDurationValue(value);
+    onChange({ value, unit: 'h' });
   };
 
-  const onDurationUnitChange = (e: ChangeEvent<HTMLSelectElement>) => {
-    const unit = e.target.value === 'm' ? 'm' : 'h';
-    setDurationUnit(unit);
-    onChange({ value: durationValue, unit });
-  };
-
-  useEffect(() => {
-    if (isValidDuration(durationValue, durationUnit)) {
-      setError(undefined);
-    } else {
-      setError(errorText);
-    }
-  }, [durationValue, durationUnit]);
-
-  const isValidDuration = (value: number, unit: DurationUnit): boolean => {
-    return (
-      (unit === 'm' && value >= MIN_DURATION_IN_MINUTES && value <= MAX_DURATION_IN_MINUTES) ||
-      (unit === 'h' && value <= MAX_DURATION_IN_HOURS)
-    );
-  };
-
-  const selectId = useGeneratedHtmlId({ prefix: 'durationUnitSelect' });
   return (
-    <EuiFormRow label={rowLabel} fullWidth isInvalid={!!error} error={error}>
+    <EuiFormRow
+      label={getRowLabel(shortWindowDuration)}
+      fullWidth
+      isInvalid={hasError}
+      error={hasError ? errors[0] : undefined}
+    >
       <EuiFlexGroup direction="row">
-        <EuiFlexItem grow={false} style={{ width: 100 }}>
+        <EuiFlexItem>
           <EuiFieldNumber
-            isInvalid={!!error}
+            isInvalid={hasError}
             min={1}
+            max={24}
+            step={1}
             value={String(durationValue)}
             onChange={onDurationValueChange}
             aria-label={valueLabel}
             data-test-subj="durationValueInput"
-          />
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <EuiSelect
-            id={selectId}
-            isInvalid={!!error}
-            options={durationUnitOptions}
-            value={durationUnit}
-            onChange={onDurationUnitChange}
-            aria-label={unitLabel}
-            data-test-subj="durationUnitSelect"
           />
         </EuiFlexItem>
       </EuiFlexGroup>
@@ -101,19 +66,24 @@ export function LongWindowDuration({ initialDuration, onChange }: Props) {
   );
 }
 
-const rowLabel = i18n.translate('xpack.observability.slo.rules.longWindow.rowLabel', {
-  defaultMessage: 'Long window',
-});
+const getRowLabel = (shortWindowDuration: Duration) => (
+  <>
+    {i18n.translate('xpack.observability.slo.rules.longWindow.rowLabel', {
+      defaultMessage: 'Lookback period (hours)',
+    })}{' '}
+    <EuiToolTip position="top" content={getTooltipText(shortWindowDuration)}>
+      <EuiIcon tabIndex={0} type="iInCircle" />
+    </EuiToolTip>
+  </>
+);
+
+const getTooltipText = (shortWindowDuration: Duration) =>
+  i18n.translate('xpack.observability.slo.rules.longWindowDuration.tooltip', {
+    defaultMessage:
+      'Lookback period over which the burn rate is computed. A shorter lookback period of {shortWindowDuration} minutes (1/12 the lookback period) will be used for faster recovery',
+    values: { shortWindowDuration: toMinutes(shortWindowDuration) },
+  });
 
 const valueLabel = i18n.translate('xpack.observability.slo.rules.longWindow.valueLabel', {
-  defaultMessage: 'Enter a duration value for the long window',
-});
-
-const unitLabel = i18n.translate('xpack.observability.slo.rules.longWindow.unitLabel', {
-  defaultMessage: 'Select a duration unit for the long window',
-});
-
-const errorText = i18n.translate('xpack.observability.slo.rules.longWindow.errorText', {
-  defaultMessage:
-    'The long window must be at least 30 minutes and cannot exceed 24 hours or 1440 minutes.',
+  defaultMessage: 'Enter the lookback period in hours',
 });

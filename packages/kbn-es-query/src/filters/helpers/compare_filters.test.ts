@@ -14,7 +14,7 @@ import {
   buildQueryFilter,
   FilterStateStore,
 } from '..';
-import { DataViewBase } from '@kbn/es-query';
+import { DataViewBase } from '../../..';
 
 describe('filter manager utilities', () => {
   describe('compare filters', () => {

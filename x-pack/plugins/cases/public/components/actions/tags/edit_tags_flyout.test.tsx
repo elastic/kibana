@@ -12,7 +12,7 @@ import { createAppMockRenderer } from '../../../common/mock';
 import { basicCase } from '../../../containers/mock';
 import { waitForComponentToUpdate } from '../../../common/test_utils';
 import { EditTagsFlyout } from './edit_tags_flyout';
-import { waitFor } from '@testing-library/dom';
+import { waitFor } from '@testing-library/react';
 
 jest.mock('../../../containers/api');
 
@@ -65,12 +65,11 @@ describe('EditTagsFlyout', () => {
     });
 
     userEvent.click(result.getByText('coke'));
-
     userEvent.click(result.getByTestId('cases-edit-tags-flyout-submit'));
 
     expect(props.onSaveTags).toHaveBeenCalledWith({
-      selectedTags: ['pepsi'],
-      unSelectedTags: ['coke'],
+      selectedItems: ['pepsi'],
+      unSelectedItems: ['coke'],
     });
   });
 

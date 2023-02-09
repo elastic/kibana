@@ -243,63 +243,6 @@ describe('when on the endpoint list page', () => {
     });
   });
 
-  describe('when determining when to show the enrolling message', () => {
-    afterEach(() => {
-      jest.clearAllMocks();
-    });
-
-    it('should display the enrolling message when there are less Endpoints than Agents', async () => {
-      reactTestingLibrary.act(() => {
-        const mockedEndpointListData = mockEndpointResultList({
-          total: 4,
-        });
-        setEndpointListApiMockImplementation(coreStart.http, {
-          endpointsResults: mockedEndpointListData.data,
-          totalAgentsUsingEndpoint: 5,
-        });
-      });
-      const renderResult = render();
-      await reactTestingLibrary.act(async () => {
-        await middlewareSpy.waitForAction('serverReturnedAgenstWithEndpointsTotal');
-      });
-      expect(renderResult.queryByTestId('endpointsEnrollingNotification')).not.toBeNull();
-    });
-
-    it('should NOT display the enrolling message when there are equal Endpoints than Agents', async () => {
-      reactTestingLibrary.act(() => {
-        const mockedEndpointListData = mockEndpointResultList({
-          total: 5,
-        });
-        setEndpointListApiMockImplementation(coreStart.http, {
-          endpointsResults: mockedEndpointListData.data,
-          totalAgentsUsingEndpoint: 5,
-        });
-      });
-      const renderResult = render();
-      await reactTestingLibrary.act(async () => {
-        await middlewareSpy.waitForAction('serverReturnedAgenstWithEndpointsTotal');
-      });
-      expect(renderResult.queryByTestId('endpointsEnrollingNotification')).toBeNull();
-    });
-
-    it('should NOT display the enrolling message when there are more Endpoints than Agents', async () => {
-      reactTestingLibrary.act(() => {
-        const mockedEndpointListData = mockEndpointResultList({
-          total: 6,
-        });
-        setEndpointListApiMockImplementation(coreStart.http, {
-          endpointsResults: mockedEndpointListData.data,
-          totalAgentsUsingEndpoint: 5,
-        });
-      });
-      const renderResult = render();
-      await reactTestingLibrary.act(async () => {
-        await middlewareSpy.waitForAction('serverReturnedAgenstWithEndpointsTotal');
-      });
-      expect(renderResult.queryByTestId('endpointsEnrollingNotification')).toBeNull();
-    });
-  });
-
   describe('when there is no selected host in the url', () => {
     describe('when list data loads', () => {
       const generatedPolicyStatuses: Array<

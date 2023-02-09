@@ -346,7 +346,7 @@ export class FleetPlugin
         const coreContext = await context.core;
         const authz = await getAuthzFromRequest(request);
         const esClient = coreContext.elasticsearch.client;
-
+        const soClient = coreContext.savedObjects.getClient();
         const routeRequiredAuthz = getRouteRequiredAuthz(request.route.method, request.route.path);
         const routeAuthz = routeRequiredAuthz
           ? calculateRouteAuthz(authz, routeRequiredAuthz)
@@ -359,7 +359,7 @@ export class FleetPlugin
 
         return {
           get agentClient() {
-            const agentService = plugin.setupAgentService(esClient.asInternalUser);
+            const agentService = plugin.setupAgentService(esClient.asInternalUser, soClient);
 
             return {
               asCurrentUser: agentService.asScoped(request),
@@ -502,6 +502,7 @@ export class FleetPlugin
       }
     })();
 
+    const internalSoClient = new SavedObjectsClient(core.savedObjects.createInternalRepository());
     return {
       authz: {
         fromRequest: getAuthzFromRequest,
@@ -510,9 +511,12 @@ export class FleetPlugin
       esIndexPatternService: new ESIndexPatternSavedObjectService(),
       packageService: this.setupPackageService(
         core.elasticsearch.client.asInternalUser,
-        new SavedObjectsClient(core.savedObjects.createInternalRepository())
+        internalSoClient
       ),
-      agentService: this.setupAgentService(core.elasticsearch.client.asInternalUser),
+      agentService: this.setupAgentService(
+        core.elasticsearch.client.asInternalUser,
+        internalSoClient
+      ),
       agentPolicyService: {
         get: agentPolicyService.get,
         list: agentPolicyService.list,
@@ -536,12 +540,15 @@ export class FleetPlugin
     this.fleetStatus$.complete();
   }
 
-  private setupAgentService(internalEsClient: ElasticsearchClient): AgentService {
+  private setupAgentService(
+    internalEsClient: ElasticsearchClient,
+    internalSoClient: SavedObjectsClientContract
+  ): AgentService {
     if (this.agentService) {
       return this.agentService;
     }
 
-    this.agentService = new AgentServiceImpl(internalEsClient);
+    this.agentService = new AgentServiceImpl(internalEsClient, internalSoClient);
     return this.agentService;
   }
 

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { LogicMounter, mockFlashMessageHelpers } from '../../../../__mocks__/kea_logic';
+import { LogicMounter } from '../../../../__mocks__/kea_logic';
 
 import { UpdateConnectorSchedulingApiLogic } from '../../../api/connector/update_connector_scheduling_api_logic';
 
@@ -13,7 +13,6 @@ import { ConnectorSchedulingLogic } from './connector_scheduling_logic';
 
 describe('ConnectorSchedulingLogic', () => {
   const { mount } = new LogicMounter(ConnectorSchedulingLogic);
-  const { clearFlashMessages, flashAPIErrors, flashSuccessToast } = mockFlashMessageHelpers;
   const DEFAULT_VALUES = {
     hasChanges: false,
   };
@@ -45,33 +44,6 @@ describe('ConnectorSchedulingLogic', () => {
           ...DEFAULT_VALUES,
           hasChanges: true,
         });
-      });
-    });
-  });
-
-  describe('actions', () => {
-    describe('makeRequest', () => {
-      it('should call clearFlashMessages', () => {
-        ConnectorSchedulingLogic.actions.makeRequest({
-          connectorId: 'id',
-          scheduling: {
-            enabled: true,
-            interval: 'interval',
-          },
-        });
-        expect(clearFlashMessages).toHaveBeenCalled();
-      });
-    });
-    describe('apiError', () => {
-      it('should call flashAPIError', () => {
-        ConnectorSchedulingLogic.actions.apiError('error' as any);
-        expect(flashAPIErrors).toHaveBeenCalledWith('error');
-      });
-    });
-    describe('apiSuccess', () => {
-      it('should call flashAPIError', () => {
-        ConnectorSchedulingLogic.actions.apiSuccess('success' as any);
-        expect(flashSuccessToast).toHaveBeenCalledWith('Scheduling successfully updated');
       });
     });
   });

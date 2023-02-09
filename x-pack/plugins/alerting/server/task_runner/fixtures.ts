@@ -6,7 +6,14 @@
  */
 
 import { TaskStatus } from '@kbn/task-manager-plugin/server';
-import { Rule, RuleTypeParams, RecoveredActionGroup, RuleMonitoring } from '../../common';
+import {
+  Rule,
+  RuleTypeParams,
+  RecoveredActionGroup,
+  RuleMonitoring,
+  RuleLastRunOutcomeOrderMap,
+  RuleLastRunOutcomes,
+} from '../../common';
 import { getDefaultMonitoring } from '../lib/monitoring';
 import { UntypedNormalizedRuleType } from '../rule_type_registry';
 import { EVENT_LOG_ACTIONS } from '../plugin';
@@ -74,7 +81,7 @@ export const generateSavedObjectParams = ({
   error?: null | { reason: string; message: string };
   warning?: null | { reason: string; message: string };
   status?: string;
-  outcome?: string;
+  outcome?: RuleLastRunOutcomes;
   nextRun?: string | null;
   successRatio?: number;
   history?: RuleMonitoring['run']['history'];
@@ -110,7 +117,9 @@ export const generateSavedObjectParams = ({
     },
     lastRun: {
       outcome,
-      outcomeMsg: error?.message || warning?.message || null,
+      outcomeOrder: RuleLastRunOutcomeOrderMap[outcome],
+      outcomeMsg:
+        (error?.message && [error?.message]) || (warning?.message && [warning?.message]) || null,
       warning: error?.reason || warning?.reason || null,
       alertsCount: {
         active: 0,
@@ -121,6 +130,7 @@ export const generateSavedObjectParams = ({
       },
     },
     nextRun,
+    running: false,
   },
   { refresh: false, namespace: undefined },
 ];
@@ -142,6 +152,7 @@ export const ruleType: jest.Mocked<UntypedNormalizedRuleType> = {
   producer: 'alerts',
   cancelAlertsOnRuleTimeout: true,
   ruleTaskTimeout: '5m',
+  autoRecoverAlerts: true,
 };
 
 export const mockRunNowResponse = {
@@ -282,7 +293,7 @@ export const generateRunnerResult = ({
     state: {
       ...(state && { alertInstances }),
       ...(state && { alertRecoveredInstances }),
-      ...(state && { alertTypeState: undefined }),
+      ...(state && { alertTypeState: {} }),
       ...(state && { previousStartedAt: new Date('1970-01-01T00:00:00.000Z') }),
       ...(state && { summaryActions }),
     },
@@ -344,6 +355,7 @@ export const generateAlertInstance = (
       },
       flappingHistory,
       flapping: false,
+      pendingRecoveredCount: 0,
     },
     state: {
       bar: false,

@@ -19,9 +19,16 @@ import {
   EuiFieldText,
   EuiSuperSelect,
   EuiToolTip,
+  EuiBadge,
+  EuiRadioGroup,
+  EuiText,
+  EuiFlexGroup,
+  EuiFlexItem,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
+
+import styled from 'styled-components';
 
 import { dataTypes } from '../../../../../../../common/constants';
 import type { NewAgentPolicy, AgentPolicy } from '../../../../types';
@@ -41,6 +48,10 @@ import {
   useFleetServerHostsOptions,
 } from './hooks';
 
+const LeftPaddedEUIBadge = styled(EuiBadge)`
+  margin-left: 5px;
+`;
+
 interface Props {
   agentPolicy: Partial<NewAgentPolicy | AgentPolicy>;
   updateAgentPolicy: (u: Partial<NewAgentPolicy | AgentPolicy>) => void;
@@ -56,6 +67,7 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
   isEditing = false,
   onDelete = () => {},
 }) => {
+  const { agentFqdnMode: agentFqdnModeEnabled } = ExperimentalFeaturesService.get();
   const { docLinks } = useStartServices();
   const [touchedFields, setTouchedFields] = useState<{ [key: string]: boolean }>({});
   const {
@@ -75,8 +87,6 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
   const hasManagedPackagePolicy =
     'package_policies' in agentPolicy &&
     agentPolicy?.package_policies?.some((packagePolicy) => packagePolicy.is_managed);
-
-  const { inactivityTimeout: inactivityTimeoutEnabled } = ExperimentalFeaturesService.get();
 
   return (
     <>
@@ -266,84 +276,42 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
         title={
           <h4>
             <FormattedMessage
-              id="xpack.fleet.agentPolicyForm.unenrollmentTimeoutLabel"
-              defaultMessage="Unenrollment timeout"
+              id="xpack.fleet.agentPolicyForm.inactivityTimeoutLabel"
+              defaultMessage="Inactivity timeout"
             />
           </h4>
         }
         description={
           <FormattedMessage
-            id="xpack.fleet.agentPolicyForm.unenrollmentTimeoutDescription"
-            defaultMessage="An optional timeout in seconds. If provided, an agent will automatically unenroll after being gone for this period of time."
+            id="xpack.fleet.agentPolicyForm.inactivityTimeoutDescription"
+            defaultMessage="An optional timeout in seconds. If provided, an agent will automatically change to inactive status and be filtered out of the agents list."
           />
         }
       >
         <EuiFormRow
           fullWidth
           error={
-            touchedFields.unenroll_timeout && validation.unenroll_timeout
-              ? validation.unenroll_timeout
+            touchedFields.inactivity_timeout && validation.inactivity_timeout
+              ? validation.inactivity_timeout
               : null
           }
-          isInvalid={Boolean(touchedFields.unenroll_timeout && validation.unenroll_timeout)}
+          isInvalid={Boolean(touchedFields.inactivity_timeout && validation.inactivity_timeout)}
         >
           <EuiFieldNumber
             fullWidth
             disabled={agentPolicy.is_managed === true}
-            value={agentPolicy.unenroll_timeout || ''}
+            value={agentPolicy.inactivity_timeout || ''}
             min={0}
             onChange={(e) => {
               updateAgentPolicy({
-                unenroll_timeout: e.target.value ? Number(e.target.value) : 0,
+                inactivity_timeout: e.target.value ? Number(e.target.value) : 0,
               });
             }}
-            isInvalid={Boolean(touchedFields.unenroll_timeout && validation.unenroll_timeout)}
-            onBlur={() => setTouchedFields({ ...touchedFields, unenroll_timeout: true })}
+            isInvalid={Boolean(touchedFields.inactivity_timeout && validation.inactivity_timeout)}
+            onBlur={() => setTouchedFields({ ...touchedFields, inactivity_timeout: true })}
           />
         </EuiFormRow>
       </EuiDescribedFormGroup>
-      {inactivityTimeoutEnabled && (
-        <EuiDescribedFormGroup
-          title={
-            <h4>
-              <FormattedMessage
-                id="xpack.fleet.agentPolicyForm.inactivityTimeoutLabel"
-                defaultMessage="Inactivity timeout"
-              />
-            </h4>
-          }
-          description={
-            <FormattedMessage
-              id="xpack.fleet.agentPolicyForm.inactivityTimeoutDescription"
-              defaultMessage="An optional timeout in seconds. If provided, an agent will automatically change to inactive status and be filtered out of the agents list."
-            />
-          }
-        >
-          <EuiFormRow
-            fullWidth
-            error={
-              touchedFields.inactivity_timeout && validation.inactivity_timeout
-                ? validation.inactivity_timeout
-                : null
-            }
-            isInvalid={Boolean(touchedFields.inactivity_timeout && validation.inactivity_timeout)}
-          >
-            <EuiFieldNumber
-              fullWidth
-              disabled={agentPolicy.is_managed === true}
-              value={agentPolicy.inactivity_timeout || ''}
-              min={0}
-              onChange={(e) => {
-                updateAgentPolicy({
-                  inactivity_timeout: e.target.value ? Number(e.target.value) : 0,
-                });
-              }}
-              isInvalid={Boolean(touchedFields.inactivity_timeout && validation.inactivity_timeout)}
-              onBlur={() => setTouchedFields({ ...touchedFields, inactivity_timeout: true })}
-            />
-          </EuiFormRow>
-        </EuiDescribedFormGroup>
-      )}
       <EuiDescribedFormGroup
         title={
           <h4>
@@ -501,6 +469,144 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
           />
         </EuiFormRow>
       </EuiDescribedFormGroup>
+      <EuiDescribedFormGroup
+        title={
+          <h4>
+            <FormattedMessage
+              id="xpack.fleet.agentPolicyForm.unenrollmentTimeoutLabel"
+              defaultMessage="Unenrollment timeout"
+            />
+            <EuiToolTip
+              content={i18n.translate('xpack.fleet.agentPolicyForm.unenrollmentTimeoutTooltip', {
+                defaultMessage:
+                  'This setting is deprecated and will be removed in a future release. Consider using inactivity timeout instead',
+              })}
+            >
+              <LeftPaddedEUIBadge color="hollow">
+                <FormattedMessage
+                  id="xpack.fleet.agentPolicyForm.unenrollmentTimeoutDeprecatedLabel"
+                  defaultMessage="Deprecated"
+                />
+              </LeftPaddedEUIBadge>
+            </EuiToolTip>
+          </h4>
+        }
+        description={
+          <FormattedMessage
+            id="xpack.fleet.agentPolicyForm.unenrollmentTimeoutDescription"
+            defaultMessage="An optional timeout in seconds. If provided, and fleet server is below version 8.7.0, an agent will automatically unenroll after being gone for this period of time."
+          />
+        }
+      >
+        <EuiFormRow
+          fullWidth
+          error={
+            touchedFields.unenroll_timeout && validation.unenroll_timeout
+              ? validation.unenroll_timeout
+              : null
+          }
+          isInvalid={Boolean(touchedFields.unenroll_timeout && validation.unenroll_timeout)}
+        >
+          <EuiFieldNumber
+            fullWidth
+            disabled={agentPolicy.is_managed === true}
+            value={agentPolicy.unenroll_timeout || ''}
+            min={0}
+            onChange={(e) => {
+              updateAgentPolicy({
+                unenroll_timeout: e.target.value ? Number(e.target.value) : 0,
+              });
+            }}
+            isInvalid={Boolean(touchedFields.unenroll_timeout && validation.unenroll_timeout)}
+            onBlur={() => setTouchedFields({ ...touchedFields, unenroll_timeout: true })}
+          />
+        </EuiFormRow>
+      </EuiDescribedFormGroup>
+      {agentFqdnModeEnabled && (
+        <EuiDescribedFormGroup
+          title={
+            <h4>
+              <FormattedMessage
+                id="xpack.fleet.agentPolicyForm.hostnameFormatLabel"
+                defaultMessage="Host name format"
+              />
+            </h4>
+          }
+          description={
+            <FormattedMessage
+              id="xpack.fleet.agentPolicyForm.hostnameFormatLabelDescription"
+              defaultMessage="Select how you would like agent domain names to be displayed."
+            />
+          }
+        >
+          <EuiFormRow fullWidth>
+            <EuiRadioGroup
+              options={[
+                {
+                  id: 'hostname',
+                  label: (
+                    <>
+                      <EuiFlexGroup gutterSize="xs" direction="column">
+                        <EuiFlexItem grow={false}>
+                          <EuiText size="s">
+                            <b>
+                              <FormattedMessage
+                                id="xpack.fleet.agentPolicyForm.hostnameFormatOptionHostname"
+                                defaultMessage="Hostname"
+                              />
+                            </b>
+                          </EuiText>
+                        </EuiFlexItem>
+                        <EuiFlexItem grow={false}>
+                          <EuiText size="s" color="subdued">
+                            <FormattedMessage
+                              id="xpack.fleet.agentPolicyForm.hostnameFormatOptionHostnameExample"
+                              defaultMessage="ex: My-Laptop"
+                            />
+                          </EuiText>
+                        </EuiFlexItem>
+                      </EuiFlexGroup>
+                      <EuiSpacer size="s" />
+                    </>
+                  ),
+                },
+                {
+                  id: 'fqdn',
+                  label: (
+                    <EuiFlexGroup gutterSize="xs" direction="column">
+                      <EuiFlexItem grow={false}>
+                        <EuiText size="s">
+                          <b>
+                            <FormattedMessage
+                              id="xpack.fleet.agentPolicyForm.hostnameFormatOptionFqdn"
+                              defaultMessage="Fully Qualified Domain Name (FQDN)"
+                            />
+                          </b>
+                        </EuiText>
+                      </EuiFlexItem>
+                      <EuiFlexItem grow={false}>
+                        <EuiText size="s" color="subdued">
+                          <FormattedMessage
+                            id="xpack.fleet.agentPolicyForm.hostnameFormatOptionFqdnExample"
+                            defaultMessage="ex: My-Laptop.admin.acme.co"
+                          />
+                        </EuiText>
+                      </EuiFlexItem>
+                    </EuiFlexGroup>
+                  ),
+                },
+              ]}
+              idSelected={agentPolicy.agent_features?.length ? 'fqdn' : 'hostname'}
+              onChange={(id: string) => {
+                updateAgentPolicy({
+                  agent_features: id === 'hostname' ? [] : [{ name: 'fqdn', enabled: true }],
+                });
+              }}
+              name="radio group"
+            />
+          </EuiFormRow>
+        </EuiDescribedFormGroup>
+      )}
       {isEditing && 'id' in agentPolicy && !agentPolicy.is_managed ? (
         <EuiDescribedFormGroup
           title={

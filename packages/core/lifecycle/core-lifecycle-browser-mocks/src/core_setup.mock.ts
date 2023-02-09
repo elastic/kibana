@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-import { injectedMetadataServiceMock } from '@kbn/core-injected-metadata-browser-mocks';
 import { docLinksServiceMock } from '@kbn/core-doc-links-browser-mocks';
 import { themeServiceMock } from '@kbn/core-theme-browser-mocks';
 import { analyticsServiceMock } from '@kbn/core-analytics-browser-mocks';
@@ -17,6 +16,7 @@ import { uiSettingsServiceMock, settingsServiceMock } from '@kbn/core-ui-setting
 import { deprecationsServiceMock } from '@kbn/core-deprecations-browser-mocks';
 import { notificationServiceMock } from '@kbn/core-notifications-browser-mocks';
 import { applicationServiceMock } from '@kbn/core-application-browser-mocks';
+import { customBrandingServiceMock } from '@kbn/core-custom-branding-browser-mocks';
 import { createCoreStartMock } from './core_start.mock';
 
 export function createCoreSetupMock({
@@ -31,6 +31,7 @@ export function createCoreSetupMock({
   const mock = {
     analytics: analyticsServiceMock.createAnalyticsServiceSetup(),
     application: applicationServiceMock.createSetupContract(),
+    customBranding: customBrandingServiceMock.createSetupContract(),
     docLinks: docLinksServiceMock.createSetupContract(),
     executionContext: executionContextServiceMock.createSetupContract(),
     fatalErrors: fatalErrorsServiceMock.createSetupContract(),
@@ -42,9 +43,6 @@ export function createCoreSetupMock({
     uiSettings: uiSettingsServiceMock.createSetupContract(),
     settings: settingsServiceMock.createSetupContract(),
     deprecations: deprecationsServiceMock.createSetupContract(),
-    injectedMetadata: {
-      getInjectedVar: injectedMetadataServiceMock.createSetupContract().getInjectedVar,
-    },
     theme: themeServiceMock.createSetupContract(),
   };
 

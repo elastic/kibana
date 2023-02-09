@@ -49,8 +49,16 @@ export class DataViewsApiClient implements IDataViewsApiClient {
    * @param options options for fields request
    */
   getFieldsForWildcard(options: GetFieldsOptions) {
-    const { pattern, metaFields, type, rollupIndex, allowNoIndex, indexFilter, includeUnmapped } =
-      options;
+    const {
+      pattern,
+      metaFields,
+      type,
+      rollupIndex,
+      allowNoIndex,
+      indexFilter,
+      includeUnmapped,
+      fields,
+    } = options;
     return this._request<FieldsForWildcardResponse>(
       this._getUrl(['_fields_for_wildcard']),
       {
@@ -60,6 +68,7 @@ export class DataViewsApiClient implements IDataViewsApiClient {
         rollup_index: rollupIndex,
         allow_no_index: allowNoIndex,
         include_unmapped: includeUnmapped,
+        fields,
       },
       indexFilter ? JSON.stringify({ index_filter: indexFilter }) : undefined
     ).then((response) => {

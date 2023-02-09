@@ -7,7 +7,7 @@
 
 import { Filter, FilterStateStore } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
-import { createAction } from '@kbn/ui-actions-plugin/public';
+import type { UiActionsActionDefinition } from '@kbn/ui-actions-plugin/public';
 import { firstValueFrom } from 'rxjs';
 import { DASHBOARD_APP_ID } from '@kbn/dashboard-plugin/public';
 import { MlCoreSetup } from '../plugin';
@@ -21,8 +21,8 @@ const supportedApps = [DASHBOARD_APP_ID];
 
 export function createApplyInfluencerFiltersAction(
   getStartServices: MlCoreSetup['getStartServices']
-) {
-  return createAction<SwimLaneDrilldownContext>({
+): UiActionsActionDefinition<SwimLaneDrilldownContext> {
+  return {
     id: 'apply-to-current-view',
     type: APPLY_INFLUENCER_FILTERS_ACTION,
     getIconType(context: SwimLaneDrilldownContext): string {
@@ -85,5 +85,5 @@ export function createApplyInfluencerFiltersAction(
         supportedApps.includes(appId!)
       );
     },
-  });
+  };
 }

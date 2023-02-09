@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { merge } from 'lodash';
 import type { PublicContract } from '@kbn/utility-types';
 import { ESSearchRequest, ESSearchResponse } from '@kbn/es-types';
 import type { GetSummarizedAlertsFnOpts } from '@kbn/alerting-plugin/server';
@@ -21,7 +22,6 @@ import {
   QueryDslQueryContainer,
   SearchTotalHits,
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { merge } from 'lodash';
 import { ParsedTechnicalFields } from '../../common';
 import { ParsedExperimentalFields } from '../../common/parse_experimental_fields';
 import { IRuleDataClient, IRuleDataReader } from '../rule_data_client';
@@ -200,9 +200,6 @@ const expandDottedField = (dottedFieldName: string, val: unknown): object => {
 };
 
 const expandFlattenedAlert = (alert: object) => {
-  if (Array.isArray(alert)) {
-    return alert;
-  }
   return Object.entries(alert).reduce(
     (acc, [key, val]) => merge(acc, expandDottedField(key, val)),
     {}
@@ -215,8 +212,8 @@ const getHitsWithCount = <TSearchRequest extends ESSearchRequest>(
 ) => {
   const toReturn = {
     count: (response.hits.total as SearchTotalHits).value,
-    data: response.hits.hits.map((r) => {
-      const { _id, _index, _source } = r;
+    data: response.hits.hits.map((hit) => {
+      const { _id, _index, _source } = hit;
 
       const rawAlert = {
         _id,

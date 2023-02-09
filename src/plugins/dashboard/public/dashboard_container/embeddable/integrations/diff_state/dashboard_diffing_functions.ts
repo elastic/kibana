@@ -99,6 +99,11 @@ export const dashboardDiffingFunctions: DashboardDiffFunctions = {
     return true;
   },
 
+  refreshInterval: ({ currentValue, lastValue, currentInput }) => {
+    if (!currentInput.timeRestore) return true; // if time restore is set to false, refresh interval doesn't count as a change.
+    return fastIsEqual(currentValue, lastValue);
+  },
+
   controlGroupInput: ({ currentValue, lastValue }) =>
     persistableControlGroupInputIsEqual(currentValue, lastValue),
 

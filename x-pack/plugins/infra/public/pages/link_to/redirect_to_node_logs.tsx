@@ -6,19 +6,19 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { LinkDescriptor } from '@kbn/observability-plugin/public';
 import { flowRight } from 'lodash';
 import React from 'react';
 import { Redirect, RouteComponentProps } from 'react-router-dom';
 import useMount from 'react-use/lib/useMount';
-import { LinkDescriptor } from '@kbn/observability-plugin/public';
 import { findInventoryFields } from '../../../common/inventory_models';
 import { InventoryItemType } from '../../../common/inventory_models/types';
 import { LoadingPage } from '../../components/loading_page';
-import { replaceLogFilterInQueryString } from '../../containers/logs/log_filter';
 import { replaceLogPositionInQueryString } from '../../containers/logs/log_position';
 import { replaceSourceIdInQueryString } from '../../containers/source_id';
 import { useKibanaContextForPlugin } from '../../hooks/use_kibana';
 import { useLogView } from '../../hooks/use_log_view';
+import { replaceLogFilterInQueryString } from '../../observability_logs/log_stream_query_state';
 import { getFilterFromLocation, getTimeFromLocation } from './query_params';
 
 type RedirectToNodeLogsType = RouteComponentProps<{

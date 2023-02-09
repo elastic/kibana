@@ -60,7 +60,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       it('shows logs navlink', async () => {
         const navLinks = (await appsMenu.readLinks()).map((link) => link.text);
-        expect(navLinks).to.eql(['Overview', 'Alerts', 'SLOs', 'Logs', 'Stack Management']);
+        expect(navLinks).to.contain('Logs');
       });
 
       describe('logs landing page without data', () => {
@@ -123,7 +123,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       it('shows logs navlink', async () => {
         const navLinks = (await appsMenu.readLinks()).map((link) => link.text);
-        expect(navLinks).to.eql(['Overview', 'Alerts', 'SLOs', 'Logs', 'Stack Management']);
+        expect(navLinks).to.contain('Logs');
       });
 
       describe('logs landing page without data', () => {

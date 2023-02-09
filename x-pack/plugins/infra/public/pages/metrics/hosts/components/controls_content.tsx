@@ -9,18 +9,19 @@ import React, { useEffect, useState } from 'react';
 import { ControlGroupContainer, CONTROL_GROUP_TYPE } from '@kbn/controls-plugin/public';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
 import { Filter, TimeRange } from '@kbn/es-query';
+import { DataView } from '@kbn/data-views-plugin/public';
 import { LazyControlsRenderer } from './lazy_controls_renderer';
 import { useControlPanels } from '../hooks/use_control_panels_url_state';
 
 interface Props {
   timeRange: TimeRange;
-  dataViewId: string;
+  dataView: DataView;
   filters: Filter[];
   query: {
     language: string;
     query: string;
   };
-  setPanelFilters: React.Dispatch<React.SetStateAction<null | Filter[]>>;
+  onFilterChange: (filters: Filter[]) => void;
 }
 
 // Disable refresh, allow our timerange changes to refresh the embeddable.
@@ -31,12 +32,12 @@ const REFRESH_CONFIG = {
 
 export const ControlsContent: React.FC<Props> = ({
   timeRange,
-  dataViewId,
+  dataView,
   query,
   filters,
-  setPanelFilters,
+  onFilterChange,
 }) => {
-  const [controlPanel, setControlPanels] = useControlPanels(dataViewId);
+  const [controlPanel, setControlPanels] = useControlPanels(dataView);
   const [controlGroup, setControlGroup] = useState<ControlGroupContainer | undefined>();
 
   useEffect(() => {
@@ -44,27 +45,23 @@ export const ControlsContent: React.FC<Props> = ({
       return;
     }
     const filtersSubscription = controlGroup.onFiltersPublished$.subscribe((newFilters) => {
-      setPanelFilters([...newFilters]);
+      onFilterChange(newFilters);
     });
-    const inputSubscription = controlGroup
-      .getInput$()
-      .subscribe(({ panels, filters: currentFilters }) => {
-        setControlPanels(panels);
-        if (currentFilters?.length === 0) {
-          setPanelFilters([]);
-        }
-      });
+    const inputSubscription = controlGroup.getInput$().subscribe(({ panels }) => {
+      setControlPanels(panels);
+    });
+
     return () => {
       filtersSubscription.unsubscribe();
       inputSubscription.unsubscribe();
     };
-  }, [controlGroup, setControlPanels, setPanelFilters]);
+  }, [controlGroup, onFilterChange, setControlPanels]);
 
   return (
     <LazyControlsRenderer
       filters={filters}
       getInitialInput={async () => ({
-        id: dataViewId,
+        id: dataView.id ?? '',
         type: CONTROL_GROUP_TYPE,
         timeRange,
         refreshConfig: REFRESH_CONFIG,

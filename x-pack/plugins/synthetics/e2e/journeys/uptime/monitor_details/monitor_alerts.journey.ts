@@ -8,6 +8,7 @@
 import { journey, step, expect, before, Page } from '@elastic/synthetics';
 import { noop } from 'lodash';
 import { byTestId, delay } from '@kbn/observability-plugin/e2e/utils';
+import { recordVideo } from '@kbn/observability-plugin/e2e/record_video';
 import { monitorDetailsPageProvider } from '../../../page_objects/uptime/monitor_details';
 
 const dateRangeStart = '2019-09-10T12:40:08.078Z';
@@ -18,6 +19,8 @@ const alertId = 'uptime-anomaly-alert';
 const alertThreshold = 'major';
 
 journey('MonitorAlerts', async ({ page, params }: { page: Page; params: any }) => {
+  recordVideo(page);
+
   const monitorDetails = monitorDetailsPageProvider({ page, kibanaUrl: params.kibanaUrl });
 
   before(async () => {

@@ -1,14 +1,20 @@
 {
   "extends": "../../../tsconfig.base.json",
   "compilerOptions": {
-    "outDir": "./target/types",
-    "emitDeclarationOnly": true,
-    "declaration": true,
+    "outDir": "target/types",
   },
   "include": ["common/**/*", "public/**/*", "server/**/*", ".storybook/**/*"],
   "kbn_references": [
-    { "path": "../../core/tsconfig.json" },
-    { "path": "../files/tsconfig.json" },
-    { "path": "../management/tsconfig.json" }
+    "@kbn/core",
+    "@kbn/files-plugin",
+    "@kbn/management-plugin",
+    "@kbn/i18n",
+    "@kbn/content-management-table-list",
+    "@kbn/kibana-react-plugin",
+    "@kbn/i18n-react",
+    "@kbn/shared-ux-file-image",
+  ],
+  "exclude": [
+    "target/**/*",
   ]
 }

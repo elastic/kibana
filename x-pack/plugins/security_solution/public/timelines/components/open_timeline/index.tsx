@@ -7,9 +7,9 @@
 
 import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
+import { encode } from '@kbn/rison';
 
 import { RULE_FROM_TIMELINE_URL_PARAM } from '../../../detections/containers/detection_engine/rules/use_rule_from_timeline';
-import { encodeRisonUrlState } from '../../../common/utils/global_query_string/helpers';
 import { useNavigation } from '../../../common/lib/kibana';
 import { SecurityPageName } from '../../../../common/constants';
 import { useShallowEqualSelector } from '../../../common/hooks/use_selector';
@@ -283,7 +283,7 @@ export const StatefulOpenTimelineComponent = React.memo<OpenTimelineOwnProps>(
       (savedObjectId) =>
         navigateTo({
           deepLinkId: SecurityPageName.rulesCreate,
-          path: `?${RULE_FROM_TIMELINE_URL_PARAM}=${encodeRisonUrlState(savedObjectId)}`,
+          path: `?${RULE_FROM_TIMELINE_URL_PARAM}=${encode(savedObjectId)}`,
         }),
       [navigateTo]
     );

@@ -13,7 +13,14 @@ import type { RequestHandler } from '@kbn/core/server';
 
 import { groupBy, keyBy } from 'lodash';
 
-import { agentPolicyService, appContextService, packagePolicyService } from '../../services';
+import { populatePackagePolicyAssignedAgentsCount } from '../../services/package_policies/populate_package_policy_assigned_agents_count';
+
+import {
+  agentPolicyService,
+  appContextService,
+  checkAllowedPackages,
+  packagePolicyService,
+} from '../../services';
 import type {
   GetPackagePoliciesRequestSchema,
   GetOnePackagePolicyRequestSchema,
@@ -30,7 +37,7 @@ import type {
 import type {
   BulkGetPackagePoliciesResponse,
   CreatePackagePolicyResponse,
-  DeletePackagePoliciesResponse,
+  PostDeletePackagePoliciesResponse,
   NewPackagePolicy,
   UpgradePackagePolicyDryRunResponse,
   UpgradePackagePolicyResponse,
@@ -43,48 +50,13 @@ import { simplifiedPackagePolicytoNewPackagePolicy } from '../../../common/servi
 
 import type { SimplifiedPackagePolicy } from '../../../common/services/simplified_package_policy_helper';
 
-const getAllowedPackageNamesMessage = (allowedPackageNames: string[]): string => {
-  return `Allowed package.name's: ${allowedPackageNames.join(', ')}`;
-};
-
-/**
- * Validates that Package Policy data only includes `package.name`'s that are in the list of
- * `allowedPackageNames`. If an error is encountered, then a message is return, otherwise, undefined.
- *
- * @param data
- * @param allowedPackageNames
- */
-const validatePackagePolicyDataIsScopedToAllowedPackageNames = (
-  data: PackagePolicy[],
-  allowedPackageNames: string[] | undefined
-): string | undefined => {
-  if (!data.length || typeof allowedPackageNames === 'undefined') {
-    return;
-  }
-
-  if (!allowedPackageNames.length) {
-    return 'Authorization denied due to lack of integration package privileges';
-  }
-
-  // Because List type of APIs have an un-bounded `perPage` query param, we only validate the
-  // data up to the first package.name that we find is not authorized.
-  for (const packagePolicy of data) {
-    if (!packagePolicy.package) {
-      return `Authorization denied. ${getAllowedPackageNamesMessage(allowedPackageNames)}`;
-    }
-
-    if (!allowedPackageNames.includes(packagePolicy.package.name)) {
-      return `Authorization denied to [package.name=${
-        packagePolicy.package.name
-      }]. ${getAllowedPackageNamesMessage(allowedPackageNames)}`;
-    }
-  }
-};
+export const isNotNull = <T>(value: T | null): value is T => value !== null;
 
 export const getPackagePoliciesHandler: FleetRequestHandler<
   undefined,
   TypeOf<typeof GetPackagePoliciesRequestSchema.query>
 > = async (context, request, response) => {
+  const esClient = (await context.core).elasticsearch.client.asInternalUser;
   const fleetContext = await context.fleet;
   const soClient = fleetContext.internalSoClient;
   const limitedToPackages = fleetContext.limitedToPackages;
@@ -95,17 +67,10 @@ export const getPackagePoliciesHandler: FleetRequestHandler<
       request.query
     );
 
-    // specific to package-level RBAC
-    const validationResult = validatePackagePolicyDataIsScopedToAllowedPackageNames(
-      items,
-      limitedToPackages
-    );
-    if (validationResult) {
-      return response.forbidden({
-        body: {
-          message: validationResult,
-        },
-      });
+    checkAllowedPackages(items, limitedToPackages, 'package.name');
+
+    if (request.query.withAgentCount) {
+      await populatePackagePolicyAssignedAgentsCount(esClient, items);
     }
 
     // agnostic to package-level RBAC
@@ -139,17 +104,7 @@ export const bulkGetPackagePoliciesHandler: FleetRequestHandler<
 
     const body: BulkGetPackagePoliciesResponse = { items: items ?? [] };
 
-    const validationResult = validatePackagePolicyDataIsScopedToAllowedPackageNames(
-      body.items,
-      limitedToPackages
-    );
-    if (validationResult) {
-      return response.forbidden({
-        body: {
-          message: validationResult,
-        },
-      });
-    }
+    checkAllowedPackages(body.items, limitedToPackages, 'package.name');
 
     return response.ok({
       body,
@@ -179,17 +134,7 @@ export const getOnePackagePolicyHandler: FleetRequestHandler<
     const packagePolicy = await packagePolicyService.get(soClient, packagePolicyId);
 
     if (packagePolicy) {
-      const validationResult = validatePackagePolicyDataIsScopedToAllowedPackageNames(
-        [packagePolicy],
-        limitedToPackages
-      );
-      if (validationResult) {
-        return response.forbidden({
-          body: {
-            message: validationResult,
-          },
-        });
-      }
+      checkAllowedPackages([packagePolicy], limitedToPackages, 'package.name');
 
       return response.ok({
         body: {
@@ -302,33 +247,21 @@ export const createPackagePolicyHandler: FleetRequestHandler<
       } as NewPackagePolicy);
     }
 
-    const newData = await packagePolicyService.runExternalCallbacks(
-      'packagePolicyCreate',
-      newPackagePolicy,
-      context,
-      request
-    );
-
     // Create package policy
     const packagePolicy = await fleetContext.packagePolicyService.asCurrentUser.create(
       soClient,
       esClient,
-      newData,
+      newPackagePolicy,
       {
         user,
         force,
         spaceId,
-      }
-    );
-
-    const enrichedPackagePolicy = await packagePolicyService.runExternalCallbacks(
-      'packagePolicyPostCreate',
-      packagePolicy,
+      },
       context,
       request
     );
 
-    const body: CreatePackagePolicyResponse = { item: enrichedPackagePolicy };
+    const body: CreatePackagePolicyResponse = { item: packagePolicy };
 
     return response.ok({
       body,
@@ -423,12 +356,6 @@ export const updatePackagePolicyHandler: FleetRequestHandler<
         vars: body.vars ?? packagePolicy.vars,
       } as NewPackagePolicy;
     }
-    newData = await packagePolicyService.runExternalCallbacks(
-      'packagePolicyUpdate',
-      newData,
-      context,
-      request
-    );
 
     const updatedPackagePolicy = await packagePolicyService.update(
       soClient,
@@ -455,25 +382,17 @@ export const deletePackagePolicyHandler: RequestHandler<
   const soClient = coreContext.savedObjects.client;
   const esClient = coreContext.elasticsearch.client.asInternalUser;
   const user = appContextService.getSecurity()?.authc.getCurrentUser(request) || undefined;
+
   try {
-    const body: DeletePackagePoliciesResponse = await packagePolicyService.delete(
+    const body: PostDeletePackagePoliciesResponse = await packagePolicyService.delete(
       soClient,
       esClient,
       request.body.packagePolicyIds,
-      { user, force: request.body.force, skipUnassignFromAgentPolicies: request.body.force }
+      { user, force: request.body.force, skipUnassignFromAgentPolicies: request.body.force },
+      context,
+      request
     );
-    try {
-      await packagePolicyService.runExternalCallbacks(
-        'postPackagePolicyDelete',
-        body,
-        context,
-        request
-      );
-    } catch (error) {
-      const logger = appContextService.getLogger();
-      logger.error(`An error occurred executing external callback: ${error}`);
-      logger.error(error);
-    }
+
     return response.ok({
       body,
     });
@@ -491,12 +410,15 @@ export const deleteOnePackagePolicyHandler: RequestHandler<
   const soClient = coreContext.savedObjects.client;
   const esClient = coreContext.elasticsearch.client.asInternalUser;
   const user = appContextService.getSecurity()?.authc.getCurrentUser(request) || undefined;
+
   try {
     const res = await packagePolicyService.delete(
       soClient,
       esClient,
       [request.params.packagePolicyId],
-      { user, force: request.query.force, skipUnassignFromAgentPolicies: request.query.force }
+      { user, force: request.query.force, skipUnassignFromAgentPolicies: request.query.force },
+      context,
+      request
     );
 
     if (
@@ -509,18 +431,7 @@ export const deleteOnePackagePolicyHandler: RequestHandler<
         body: res[0].body,
       });
     }
-    try {
-      await packagePolicyService.runExternalCallbacks(
-        'postPackagePolicyDelete',
-        res,
-        context,
-        request
-      );
-    } catch (error) {
-      const logger = appContextService.getLogger();
-      logger.error(`An error occurred executing external callback: ${error}`);
-      logger.error(error);
-    }
+
     return response.ok({
       body: { id: request.params.packagePolicyId },
     });

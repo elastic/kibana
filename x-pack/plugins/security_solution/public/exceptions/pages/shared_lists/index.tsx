@@ -10,6 +10,7 @@ import type { EuiSearchBarProps } from '@elastic/eui';
 
 import {
   EuiButtonEmpty,
+  EuiButtonIcon,
   EuiContextMenuItem,
   EuiContextMenuPanel,
   EuiPagination,
@@ -86,7 +87,12 @@ export const SharedLists = React.memo(() => {
   const loading = userInfoLoading || listsConfigLoading;
 
   const {
-    services: { http, notifications, timelines },
+    services: {
+      http,
+      notifications,
+      timelines,
+      application: { navigateToApp },
+    },
   } = useKibana();
   const { exportExceptionList, deleteExceptionList } = useApi(http);
 
@@ -186,10 +192,21 @@ export const SharedLists = React.memo(() => {
   );
 
   const handleExport = useCallback(
-    ({ id, listId, namespaceType }: { id: string; listId: string; namespaceType: NamespaceType }) =>
+    ({
+        id,
+        listId,
+        namespaceType,
+        includeExpiredExceptions,
+      }: {
+        id: string;
+        listId: string;
+        namespaceType: NamespaceType;
+        includeExpiredExceptions: boolean;
+      }) =>
       async () => {
         await exportExceptionList({
           id,
+          includeExpiredExceptions,
           listId,
           namespaceType,
           onError: handleExportError,
@@ -384,10 +401,28 @@ export const SharedLists = React.memo(() => {
         <EuiFlexItem>
           <EuiPageHeader
             pageTitle={i18n.ALL_EXCEPTIONS}
-            description={timelines.getLastUpdated({
-              showUpdating: loading,
-              updatedAt: lastUpdated,
-            })}
+            description={
+              <>
+                <div>
+                  {"To view rule specific exceptions navigate to that rule's details page."}
+                  <EuiButtonIcon
+                    iconType="popout"
+                    aria-label="go-to-rules"
+                    color="primary"
+                    onClick={() =>
+                      navigateToApp('security', { openInNewTab: true, path: '/rules' })
+                    }
+                  />
+                </div>
+                {/* TODO: update the above text to incorporate a navigateToApp link to the rule management page */}
+                <div>
+                  {timelines.getLastUpdated({
+                    showUpdating: loading,
+                    updatedAt: lastUpdated,
+                  })}
+                </div>
+              </>
+            }
           />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>

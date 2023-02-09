@@ -32,9 +32,10 @@ export async function executor(core: CoreSetup, options: ExecutorOptions<EsQuery
     spaceId,
     logger,
   } = options;
-  const { alertFactory, scopedClusterClient, searchSourceClient } = services;
+  const { alertFactory, scopedClusterClient, searchSourceClient, share, dataViews } = services;
   const currentTimestamp = new Date().toISOString();
   const publicBaseUrl = core.http.basePath.publicBaseUrl ?? '';
+  const spacePrefix = spaceId !== 'default' ? `/s/${spaceId}` : '';
   const alertLimit = alertFactory.alertLimit.getValue();
   const compareFn = ComparatorFns.get(params.thresholdComparator);
   if (compareFn == null) {
@@ -49,13 +50,15 @@ export async function executor(core: CoreSetup, options: ExecutorOptions<EsQuery
   // avoid counting a document multiple times.
   // latestTimestamp will be ignored if set for grouped queries
   let latestTimestamp: string | undefined = tryToParseAsDate(state.latestTimestamp);
-  const { parsedResults, dateStart, dateEnd } = esQueryRule
+  const { parsedResults, dateStart, dateEnd, link } = esQueryRule
     ? await fetchEsQuery({
         ruleId,
         name,
         alertLimit,
         params: params as OnlyEsQueryRuleParams,
         timestamp: latestTimestamp,
+        publicBaseUrl,
+        spacePrefix,
         services: {
           scopedClusterClient,
           logger,
@@ -66,19 +69,15 @@ export async function executor(core: CoreSetup, options: ExecutorOptions<EsQuery
         alertLimit,
         params: params as OnlySearchSourceRuleParams,
         latestTimestamp,
+        spacePrefix,
         services: {
+          share,
           searchSourceClient,
           logger,
+          dataViews,
         },
       });
 
-  const base = publicBaseUrl;
-  const spacePrefix = spaceId !== 'default' ? `/s/${spaceId}` : '';
-  const link = esQueryRule
-    ? `${base}${spacePrefix}/app/management/insightsAndAlerting/triggersActions/rule/${ruleId}`
-    : `${base}${spacePrefix}/app/discover#/viewAlert/${ruleId}?from=${dateStart}&to=${dateEnd}&checksum=${getChecksum(
-        params as OnlyEsQueryRuleParams
-      )}`;
   const unmetGroupValues: Record<string, number> = {};
   for (const result of parsedResults.results) {
     const alertId = result.group;
@@ -162,7 +161,7 @@ export async function executor(core: CoreSetup, options: ExecutorOptions<EsQuery
     });
     recoveredAlert.setContext(recoveryContext);
   }
-  return { latestTimestamp };
+  return { state: { latestTimestamp } };
 }
 
 function getInvalidWindowSizeError(windowValue: string) {

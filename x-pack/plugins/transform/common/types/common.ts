@@ -20,7 +20,3 @@ export function dictionaryToArray<TValue>(dict: Dictionary<TValue>): TValue[] {
 export type DeepPartial<T> = {
   [P in keyof T]?: DeepPartial<T[P]>;
 };
-
-export function isDefined<T>(argument: T | undefined | null): argument is T {
-  return argument !== undefined && argument !== null;
-}

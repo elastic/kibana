@@ -29,12 +29,11 @@ import { IndicatorsFlyoutJson } from './json_tab';
 import { IndicatorsFlyoutTable } from './table_tab';
 import { unwrapValue } from '../../utils';
 import { IndicatorsFlyoutOverview } from './overview_tab';
-
-export const TITLE_TEST_ID = 'tiIndicatorFlyoutTitle';
-export const SUBTITLE_TEST_ID = 'tiIndicatorFlyoutSubtitle';
-export const TABS_TEST_ID = 'tiIndicatorFlyoutTabs';
-export const MORE_ACTIONS_ID = 'tiIndicatorFlyoutMoreActions';
-
+import {
+  INDICATORS_FLYOUT_TABS_TEST_ID,
+  INDICATORS_FLYOUT_TITLE_TEST_ID,
+  INDICATORS_FLYOUT_SUBTITLE_TEST_ID,
+} from './test_ids';
 enum TAB_IDS {
   overview,
   table,
@@ -142,7 +141,7 @@ export const IndicatorsFlyout: VFC<IndicatorsFlyoutProps> = ({
     <EuiFlyout onClose={closeFlyout} aria-labelledby={flyoutTitleId}>
       <EuiFlyoutHeader hasBorder>
         <EuiTitle>
-          <h2 data-test-subj={TITLE_TEST_ID} id={flyoutTitleId}>
+          <h2 data-test-subj={INDICATORS_FLYOUT_TITLE_TEST_ID} id={flyoutTitleId}>
             <FormattedMessage
               id="xpack.threatIntelligence.indicator.flyout.panelTitleWithOverviewTab"
               defaultMessage="Indicator details"
@@ -151,7 +150,7 @@ export const IndicatorsFlyout: VFC<IndicatorsFlyoutProps> = ({
         </EuiTitle>
         <EuiSpacer size="s" />
         <EuiText size={'xs'}>
-          <p data-test-subj={SUBTITLE_TEST_ID}>
+          <p data-test-subj={INDICATORS_FLYOUT_SUBTITLE_TEST_ID}>
             <FormattedMessage
               id="xpack.threatIntelligence.indicator.flyout.panelSubTitle"
               defaultMessage="First seen: "
@@ -160,7 +159,7 @@ export const IndicatorsFlyout: VFC<IndicatorsFlyoutProps> = ({
           </p>
         </EuiText>
         <EuiSpacer size="m" />
-        <EuiTabs data-test-subj={TABS_TEST_ID} style={{ marginBottom: '-25px' }}>
+        <EuiTabs data-test-subj={INDICATORS_FLYOUT_TABS_TEST_ID} style={{ marginBottom: '-25px' }}>
           {renderTabs}
         </EuiTabs>
       </EuiFlyoutHeader>

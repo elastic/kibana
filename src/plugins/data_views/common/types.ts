@@ -315,6 +315,7 @@ export interface GetFieldsOptions {
   allowNoIndex?: boolean;
   indexFilter?: QueryDslQueryContainer;
   includeUnmapped?: boolean;
+  fields?: string[];
 }
 
 /**

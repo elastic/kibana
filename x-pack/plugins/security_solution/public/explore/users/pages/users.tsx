@@ -18,7 +18,7 @@ import { InputsModelId } from '../../../common/store/inputs/constants';
 import { SecurityPageName } from '../../../app/types';
 import { FiltersGlobal } from '../../../common/components/filters_global';
 import { HeaderPage } from '../../../common/components/header_page';
-import { SecuritySolutionTabNavigation } from '../../../common/components/navigation';
+import { TabNavigationWithBreadcrumbs } from '../../../common/components/navigation/tab_navigation_with_breadcrumbs';
 
 import { SiemSearchBar } from '../../../common/components/search_bar';
 import { SecuritySolutionPageWrapper } from '../../../common/components/page_wrapper';
@@ -211,7 +211,7 @@ const UsersComponent = () => {
 
             <EuiSpacer />
 
-            <SecuritySolutionTabNavigation navTabs={navTabs} />
+            <TabNavigationWithBreadcrumbs navTabs={navTabs} />
 
             <EuiSpacer />
 

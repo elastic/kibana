@@ -27,6 +27,7 @@ export const getActionsColumns = ({
   onOpenDeleteTimelineModal,
   onOpenTimeline,
   onCreateRule,
+  hasCrudAccess,
 }: {
   actionTimelineToShow: ActionTimelineToShow[];
   deleteTimelines?: DeleteTimelines;
@@ -34,6 +35,7 @@ export const getActionsColumns = ({
   onOpenDeleteTimelineModal?: OnOpenDeleteTimelineModal;
   onOpenTimeline: OnOpenTimeline;
   onCreateRule?: OnCreateRuleFromTimeline;
+  hasCrudAccess: boolean;
 }): [TimelineActionsOverflowColumns] => {
   const createTimelineFromTemplate = {
     name: i18n.CREATE_TIMELINE_FROM_TEMPLATE,
@@ -149,10 +151,9 @@ export const getActionsColumns = ({
     'data-test-subj': 'create-rule-from-timeline',
     available: () => actionTimelineToShow.includes('createRule') && onCreateRule != null,
   };
-
   return [
     {
-      width: '80px',
+      width: hasCrudAccess ? '80px' : '150px',
       actions: [
         createTimelineFromTemplate,
         createTemplateFromTimeline,

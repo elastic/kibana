@@ -128,6 +128,10 @@ interface MLInferenceProcessorsActions {
     FetchMlInferencePipelinesResponse
   >['makeRequest'];
   mappingsApiError: Actions<GetMappingsArgs, GetMappingsResponse>['apiError'];
+  mlInferencePipelinesSuccess: Actions<
+    FetchMlInferencePipelinesArgs,
+    FetchMlInferencePipelinesResponse
+  >['apiSuccess'];
   mlModelsApiError: TrainedModelsApiLogicActions['apiError'];
   selectExistingPipeline: (pipelineName: string) => {
     pipelineName: string;
@@ -162,6 +166,7 @@ export interface MLInferenceProcessorsValues {
   mlInferencePipelinesData: FetchMlInferencePipelinesResponse | undefined;
   mlModelsData: TrainedModel[] | null;
   mlModelsStatus: Status;
+  selectedMLModel: TrainedModel | null;
   sourceFields: string[] | undefined;
   supportedMLModels: TrainedModel[];
 }
@@ -184,7 +189,10 @@ export const MLInferenceLogic = kea<
   connect: {
     actions: [
       FetchMlInferencePipelinesApiLogic,
-      ['makeRequest as makeMlInferencePipelinesRequest'],
+      [
+        'makeRequest as makeMlInferencePipelinesRequest',
+        'apiSuccess as mlInferencePipelinesSuccess',
+      ],
       MappingsApiLogic,
       ['makeRequest as makeMappingRequest', 'apiError as mappingsApiError'],
       TrainedModelsApiLogic,
@@ -241,6 +249,7 @@ export const MLInferenceLogic = kea<
             ? configuration.destinationField
             : undefined,
         indexName,
+        inferenceConfig: configuration.inferenceConfig,
         modelId: configuration.modelID,
         pipelineName: configuration.pipelineName,
         sourceField: configuration.sourceField,
@@ -263,6 +272,18 @@ export const MLInferenceLogic = kea<
       actions.makeMlInferencePipelinesRequest(undefined);
       actions.makeMLModelsRequest(undefined);
       actions.makeMappingRequest({ indexName });
+    },
+    mlInferencePipelinesSuccess: (data) => {
+      if (
+        (data?.length ?? 0) === 0 &&
+        values.addInferencePipelineModal.configuration.existingPipeline === undefined
+      ) {
+        // Default to a new pipeline if there are no existing pipelines to choose
+        actions.setInferencePipelineConfiguration({
+          ...values.addInferencePipelineModal.configuration,
+          existingPipeline: false,
+        });
+      }
     },
   }),
   path: ['enterprise_search', 'content', 'pipelines_add_ml_inference_pipeline'],
@@ -343,6 +364,7 @@ export const MLInferenceLogic = kea<
           model,
           pipelineName: configuration.pipelineName,
           sourceField: configuration.sourceField,
+          inferenceConfig: configuration.inferenceConfig,
         });
       },
     ],
@@ -433,6 +455,19 @@ export const MLInferenceLogic = kea<
           .filter((p): p is MLInferencePipelineOption => p !== undefined);
 
         return existingPipelines;
+      },
+    ],
+    selectedMLModel: [
+      () => [selectors.supportedMLModels, selectors.addInferencePipelineModal],
+      (
+        supportedMLModels: MLInferenceProcessorsValues['supportedMLModels'],
+        addInferencePipelineModal: MLInferenceProcessorsValues['addInferencePipelineModal']
+      ) => {
+        return (
+          supportedMLModels.find(
+            (model) => model.model_id === addInferencePipelineModal.configuration.modelID
+          ) ?? null
+        );
       },
     ],
   }),

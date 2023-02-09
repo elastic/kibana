@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import type { MutableRefObject } from 'react';
 import React from 'react';
 import type { RenderHookResult } from '@testing-library/react-hooks';
 import { renderHook } from '@testing-library/react-hooks';
@@ -21,6 +22,7 @@ import { InputsModelId } from '../../store/inputs/constants';
 import { useRefetchByRestartingSession } from './use_refetch_by_session';
 import { inputsActions } from '../../store/actions';
 import type { Refetch } from '../../store/inputs/model';
+import type { ISessionService } from '@kbn/data-plugin/public';
 
 const state: State = mockGlobalState;
 
@@ -60,14 +62,11 @@ describe(`useRefetchByRestartingSession`, () => {
       children: React.ReactNode;
     },
     {
-      searchSessionId: string;
+      session: MutableRefObject<ISessionService>;
       refetchByRestartingSession: Refetch;
     }
   >;
-  const mockSessionStart = jest
-    .fn()
-    .mockReturnValueOnce('mockSessionId')
-    .mockReturnValue('mockSessionId1');
+  const mockSessionStart = jest.fn().mockReturnValue('mockSessionId');
   const mockSession = {
     start: mockSessionStart,
   };
@@ -97,20 +96,15 @@ describe(`useRefetchByRestartingSession`, () => {
     );
   });
 
-  it('should start a session', () => {
-    expect(mockSessionStart).toHaveBeenCalledTimes(1);
-    expect(res.result.current.searchSessionId).toBe('mockSessionId');
-  });
-
   it('should start a session when clicking refetchByRestartingSession', () => {
     res.result.current.refetchByRestartingSession();
-    expect(mockSessionStart).toHaveBeenCalledTimes(2);
+    expect(mockSessionStart).toHaveBeenCalledTimes(1);
     expect(inputsActions.setInspectionParameter).toHaveBeenCalledWith({
       id: 'test',
       selectedInspectIndex: 0,
       isInspected: false,
       inputId: InputsModelId.global,
-      searchSessionId: 'mockSessionId1',
+      searchSessionId: 'mockSessionId',
     });
   });
 });

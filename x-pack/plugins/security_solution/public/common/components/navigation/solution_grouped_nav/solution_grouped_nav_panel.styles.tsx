@@ -5,14 +5,31 @@
  * 2.0.
  */
 import { EuiPanel, EuiTitle, transparentize } from '@elastic/eui';
-import styled from 'styled-components';
+import styled, { createGlobalStyle } from 'styled-components';
+
+const EUI_HEADER_HEIGHT = '93px';
+const PANEL_LEFT_OFFSET = '249px';
+const PANEL_WIDTH = '340px';
+
+export const panelClass = 'solutionGroupedNavPanel';
+
+/**
+ * We need to target the body to check the header banner class which is a parent element
+ * of the portal panel. A global style is needed.
+ * (This rule should be moved to the Kibana core rendering styles if this navigation becomes generic)
+ */
+export const GlobalPanelStyle = createGlobalStyle<{ theme: { eui: { euiSizeXL: string } } }>`
+  body.kbnBody--hasHeaderBanner .${panelClass} {
+    top: calc(${EUI_HEADER_HEIGHT} + ${({ theme }) => theme.eui.euiSizeXL});
+  }
+`;
 
 export const EuiPanelStyled = styled(EuiPanel)<{ $bottomOffset?: string }>`
   position: fixed;
-  top: 93px;
-  left: 249px;
+  top: ${EUI_HEADER_HEIGHT};
+  left: ${PANEL_LEFT_OFFSET};
   bottom: 0;
-  width: 340px;
+  width: ${PANEL_WIDTH};
   height: inherit;
 
   // If the bottom bar is visible add padding to the navigation

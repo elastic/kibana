@@ -12,8 +12,8 @@ import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { setHeaderActionMenuMounter } from '../../../../kibana_services';
 import { esHits } from '../../../../__mocks__/es_hits';
 import { savedSearchMock } from '../../../../__mocks__/saved_search';
-import { AppState, GetStateReturn } from '../../services/discover_state';
-import { DataDocuments$ } from '../../hooks/use_saved_search';
+import { DiscoverStateContainer } from '../../services/discover_state';
+import { DataDocuments$ } from '../../services/discover_data_state_container';
 import { discoverServiceMock } from '../../../../__mocks__/services';
 import { FetchStatus } from '../../../types';
 import { DiscoverDocuments, onResize } from './discover_documents';
@@ -21,6 +21,9 @@ import { dataViewMock } from '../../../../__mocks__/data_view';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { buildDataTableRecord } from '../../../../utils/build_data_record';
 import { EsHitRecord } from '../../../../types';
+import { DiscoverMainProvider } from '../../services/discover_state_provider';
+import { getDiscoverStateMock } from '../../../../__mocks__/discover_state.mock';
+import { AppState } from '../../services/discover_app_state_container';
 
 setHeaderActionMenuMounter(jest.fn());
 
@@ -34,24 +37,28 @@ function mountComponent(fetchStatus: FetchStatus, hits: EsHitRecord[]) {
     fetchStatus,
     result: hits.map((hit) => buildDataTableRecord(hit, dataViewMock)),
   }) as DataDocuments$;
+  const stateContainer = getDiscoverStateMock({});
+  stateContainer.setAppState({ index: dataViewMock.id });
+  stateContainer.dataState.data$.documents$ = documents$;
 
   const props = {
     expandedDoc: undefined,
     dataView: dataViewMock,
     onAddFilter: jest.fn(),
     savedSearch: savedSearchMock,
-    documents$,
-    searchSource: documents$,
+    searchSource: savedSearchMock.searchSource,
     setExpandedDoc: jest.fn(),
     state: { columns: [] },
-    stateContainer: { setAppState: () => {} } as unknown as GetStateReturn,
+    stateContainer,
     navigateTo: jest.fn(),
     onFieldEdited: jest.fn(),
   };
 
   return mountWithIntl(
     <KibanaContextProvider services={services}>
-      <DiscoverDocuments {...props} />
+      <DiscoverMainProvider value={stateContainer}>
+        <DiscoverDocuments {...props} />
+      </DiscoverMainProvider>
     </KibanaContextProvider>
   );
 }
@@ -83,15 +90,17 @@ describe('Discover documents layout', () => {
       setAppState: (newState: Partial<AppState>) => {
         state = { ...state, ...newState };
       },
-    } as unknown as GetStateReturn;
+      appState: {
+        getState: () => state,
+      },
+    } as unknown as DiscoverStateContainer;
 
     onResize(
       {
         columnId: 'someField',
         width: 205.5435345534,
       },
-      stateContainer,
-      state
+      stateContainer
     );
 
     expect(state.grid?.columns?.someField.width).toEqual(206);

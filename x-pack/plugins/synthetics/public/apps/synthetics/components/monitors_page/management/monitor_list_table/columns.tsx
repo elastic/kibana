@@ -5,48 +5,54 @@
  * 2.0.
  */
 
-import { EuiBadge, EuiBasicTableColumn, EuiThemeComputed } from '@elastic/eui';
+import { EuiBasicTableColumn } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { useHistory } from 'react-router-dom';
+import { FETCH_STATUS } from '@kbn/observability-plugin/public';
+import {
+  isStatusEnabled,
+  toggleStatusAlert,
+} from '../../../../../../../common/runtime_types/monitor_management/alert_config';
+import { NoPermissionsTooltip } from '../../../common/components/permissions';
 import { TagsBadges } from '../../../common/components/tag_badges';
+import { useMonitorAlertEnable } from '../../../../hooks/use_monitor_alert_enable';
+import * as labels from './labels';
 import { MonitorDetailsLink } from './monitor_details_link';
 
 import {
   ConfigKey,
-  DataStream,
   EncryptedSyntheticsSavedMonitor,
   OverviewStatusState,
-  Ping,
   ServiceLocations,
-  SourceType,
   SyntheticsMonitorSchedule,
 } from '../../../../../../../common/runtime_types';
 
+import { canUpdatePrivateMonitor, useFleetPermissions } from '../../../../hooks';
+import { MonitorTypeBadge } from '../../../common/components/monitor_type_badge';
 import { getFrequencyLabel } from './labels';
-import { Actions } from './actions';
 import { MonitorEnabled } from './monitor_enabled';
 import { MonitorLocations } from './monitor_locations';
 
 export function useMonitorListColumns({
-  basePath,
-  euiTheme,
   canEditSynthetics,
-  reloadPage,
   loading,
-  status,
+  overviewStatus,
+  setMonitorPendingDeletion,
 }: {
-  basePath: string;
-  euiTheme: EuiThemeComputed;
-  errorSummaries?: Ping[];
-  errorSummariesById: Map<string, Ping>;
   canEditSynthetics: boolean;
-  syntheticsMonitors: EncryptedSyntheticsSavedMonitor[];
   loading: boolean;
-  status: OverviewStatusState | null;
-  reloadPage: () => void;
-}) {
+  overviewStatus: OverviewStatusState | null;
+  setMonitorPendingDeletion: (config: EncryptedSyntheticsSavedMonitor) => void;
+}): Array<EuiBasicTableColumn<EncryptedSyntheticsSavedMonitor>> {
   const history = useHistory();
+
+  const { alertStatus, updateAlertEnabledState } = useMonitorAlertEnable();
+  const { canSaveIntegrations } = useFleetPermissions();
+
+  const isActionLoading = (fields: EncryptedSyntheticsSavedMonitor) => {
+    return alertStatus(fields[ConfigKey.CONFIG_ID]) === FETCH_STATUS.LOADING;
+  };
 
   return [
     {
@@ -57,9 +63,22 @@ export function useMonitorListColumns({
       }),
       sortable: true,
       render: (_: string, monitor: EncryptedSyntheticsSavedMonitor) => (
-        <MonitorDetailsLink basePath={basePath} monitor={monitor} />
+        <MonitorDetailsLink monitor={monitor} />
       ),
     },
+    // Only show Project ID column if project monitors are present
+    ...(overviewStatus?.projectMonitorsCount ?? 0 > 0
+      ? [
+          {
+            align: 'left' as const,
+            field: ConfigKey.PROJECT_ID as string,
+            name: i18n.translate('xpack.synthetics.management.monitorList.projectId', {
+              defaultMessage: 'Project ID',
+            }),
+            sortable: true,
+          },
+        ]
+      : []),
     {
       align: 'left' as const,
       field: ConfigKey.MONITOR_TYPE,
@@ -67,8 +86,18 @@ export function useMonitorListColumns({
         defaultMessage: 'Type',
       }),
       sortable: true,
-      render: (monitorType: DataStream) => (
-        <EuiBadge>{monitorType === DataStream.BROWSER ? 'Browser' : 'Ping'}</EuiBadge>
+      render: (_: string, monitor: EncryptedSyntheticsSavedMonitor) => (
+        <MonitorTypeBadge
+          monitor={monitor}
+          ariaLabel={labels.getFilterForTypeMessage(monitor[ConfigKey.MONITOR_TYPE])}
+          onClick={() => {
+            history.push({
+              search: `monitorTypes=${encodeURIComponent(
+                JSON.stringify([monitor[ConfigKey.MONITOR_TYPE]])
+              )}`,
+            });
+          }}
+        />
       ),
     },
     {
@@ -91,7 +120,7 @@ export function useMonitorListColumns({
           <MonitorLocations
             monitorId={monitor[ConfigKey.CONFIG_ID] ?? monitor.id}
             locations={locations}
-            status={status}
+            status={overviewStatus}
           />
         ) : null,
     },
@@ -105,7 +134,7 @@ export function useMonitorListColumns({
         <TagsBadges
           tags={tags}
           onClick={(tag) => {
-            history.push({ search: `tags=${JSON.stringify([tag])}` });
+            history.push({ search: `tags=${encodeURIComponent(JSON.stringify([tag]))}` });
           }}
         />
       ),
@@ -121,7 +150,7 @@ export function useMonitorListColumns({
         <MonitorEnabled
           configId={monitor[ConfigKey.CONFIG_ID]}
           monitor={monitor}
-          reloadPage={reloadPage}
+          reloadPage={() => {}}
           isSwitchable={!loading}
         />
       ),
@@ -131,16 +160,84 @@ export function useMonitorListColumns({
       name: i18n.translate('xpack.synthetics.management.monitorList.actions', {
         defaultMessage: 'Actions',
       }),
-      render: (fields: EncryptedSyntheticsSavedMonitor) => (
-        <Actions
-          euiTheme={euiTheme}
-          configId={fields[ConfigKey.CONFIG_ID]}
-          name={fields[ConfigKey.NAME]}
-          canEditSynthetics={canEditSynthetics}
-          reloadPage={reloadPage}
-          isProjectMonitor={fields[ConfigKey.MONITOR_SOURCE_TYPE] === SourceType.PROJECT}
-        />
-      ),
+      actions: [
+        {
+          'data-test-subj': 'syntheticsMonitorEditAction',
+          isPrimary: true,
+          name: (fields) => (
+            <NoPermissionsTooltip
+              canEditSynthetics={canEditSynthetics}
+              canUpdatePrivateMonitor={canUpdatePrivateMonitor(fields, canSaveIntegrations)}
+            >
+              {labels.EDIT_LABEL}
+            </NoPermissionsTooltip>
+          ),
+          description: labels.EDIT_LABEL,
+          icon: 'pencil',
+          type: 'icon',
+          enabled: (fields) =>
+            canEditSynthetics &&
+            !isActionLoading(fields) &&
+            canUpdatePrivateMonitor(fields, canSaveIntegrations),
+          onClick: (fields) => {
+            history.push({
+              pathname: `/edit-monitor/${fields[ConfigKey.CONFIG_ID]}`,
+            });
+          },
+        },
+        {
+          'data-test-subj': 'syntheticsMonitorDeleteAction',
+          isPrimary: true,
+          name: (fields) => (
+            <NoPermissionsTooltip
+              canEditSynthetics={canEditSynthetics}
+              canUpdatePrivateMonitor={canUpdatePrivateMonitor(fields, canSaveIntegrations)}
+            >
+              {labels.DELETE_LABEL}
+            </NoPermissionsTooltip>
+          ),
+          description: labels.DELETE_LABEL,
+          icon: 'trash',
+          type: 'icon',
+          color: 'danger',
+          enabled: (fields) =>
+            canEditSynthetics &&
+            !isActionLoading(fields) &&
+            canUpdatePrivateMonitor(fields, canSaveIntegrations),
+          onClick: (fields) => {
+            setMonitorPendingDeletion(fields);
+          },
+        },
+        {
+          description: labels.DISABLE_STATUS_ALERT,
+          name: (fields) =>
+            isStatusEnabled(fields[ConfigKey.ALERT_CONFIG])
+              ? labels.DISABLE_STATUS_ALERT
+              : labels.ENABLE_STATUS_ALERT,
+          icon: (fields) =>
+            isStatusEnabled(fields[ConfigKey.ALERT_CONFIG]) ? 'bellSlash' : 'bell',
+          type: 'icon',
+          color: 'danger',
+          enabled: (fields) => canEditSynthetics && !isActionLoading(fields),
+          onClick: (fields) => {
+            updateAlertEnabledState({
+              monitor: {
+                [ConfigKey.ALERT_CONFIG]: toggleStatusAlert(fields[ConfigKey.ALERT_CONFIG]),
+              },
+              name: fields[ConfigKey.NAME],
+              configId: fields[ConfigKey.CONFIG_ID],
+            });
+          },
+        },
+        /*
+      TODO: Implement duplication functionality
+      const duplicateMenuItem = (
+        <EuiContextMenuItem key="xpack.synthetics.duplicateMonitor" icon="copy" onClick={closePopover}>
+          {labels.DUPLICATE_LABEL}
+        </EuiContextMenuItem>
+      );
+      */
+      ],
     },
-  ] as Array<EuiBasicTableColumn<EncryptedSyntheticsSavedMonitor>>;
+  ];
 }

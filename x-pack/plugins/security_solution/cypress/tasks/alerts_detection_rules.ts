@@ -56,7 +56,7 @@ import {
   MODAL_CONFIRMATION_CANCEL_BTN,
   MODAL_CONFIRMATION_BODY,
   RULE_SEARCH_FIELD,
-  RULE_DETAILS_BACK_TO_ALL_RULES,
+  RULE_IMPORT_OVERWRITE_CONNECTORS_CHECKBOX,
 } from '../screens/alerts_detection_rules';
 import { EUI_CHECKBOX } from '../screens/common/controls';
 import { ALL_ACTIONS } from '../screens/rule_details';
@@ -182,10 +182,6 @@ export const filterByCustomRules = () => {
 
 export const goToRuleDetails = () => {
   cy.get(RULE_NAME).first().click({ force: true });
-};
-
-export const goBackFromRuleDetails = () => {
-  cy.get(RULE_DETAILS_BACK_TO_ALL_RULES).click({ force: true });
 };
 
 export const goToTheRuleDetailsOf = (ruleName: string) => {
@@ -373,11 +369,7 @@ export const expectNumberOfRules = (expectedNumber: number) => {
 };
 
 export const expectToContainRule = (ruleName: string) => {
-  cy.get(RULES_TABLE).then(($table) => {
-    const rulesRow = cy.wrap($table.find(RULES_ROW));
-
-    rulesRow.should('include.text', ruleName);
-  });
+  cy.get(RULES_TABLE).find(RULES_ROW).should('include.text', ruleName);
 };
 
 const selectOverwriteRulesImport = () => {
@@ -391,13 +383,18 @@ const selectOverwriteExceptionsRulesImport = () => {
     .pipe(($el) => $el.trigger('click'))
     .should('be.checked');
 };
-
+const selectOverwriteConnectorsRulesImport = () => {
+  cy.get(RULE_IMPORT_OVERWRITE_CONNECTORS_CHECKBOX)
+    .pipe(($el) => $el.trigger('click'))
+    .should('be.checked');
+};
 export const importRulesWithOverwriteAll = (rulesFile: string) => {
   cy.get(RULE_IMPORT_MODAL).click();
   cy.get(INPUT_FILE).should('exist');
   cy.get(INPUT_FILE).trigger('click', { force: true }).attachFile(rulesFile).trigger('change');
   selectOverwriteRulesImport();
   selectOverwriteExceptionsRulesImport();
+  selectOverwriteConnectorsRulesImport();
   cy.get(RULE_IMPORT_MODAL_BUTTON).last().click({ force: true });
   cy.get(INPUT_FILE).should('not.exist');
 };

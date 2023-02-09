@@ -108,7 +108,7 @@ export function registerAnomalyRuleType({
       isExportable: true,
       executor: async ({ params, services, spaceId }) => {
         if (!ml) {
-          return {};
+          return { state: {} };
         }
 
         const { savedObjectsClient, scopedClusterClient, getAlertUuid } =
@@ -143,7 +143,7 @@ export function registerAnomalyRuleType({
         const threshold = selectedOption.threshold;
 
         if (mlJobs.length === 0) {
-          return {};
+          return { state: {} };
         }
 
         // start time must be at least 30, does like this to support rules created before this change where default was 15
@@ -337,7 +337,7 @@ export function registerAnomalyRuleType({
             });
         }
 
-        return {};
+        return { state: {} };
       },
     })
   );

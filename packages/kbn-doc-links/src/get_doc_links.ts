@@ -124,6 +124,8 @@ export const getDocLinks = ({ kibanaBranch }: GetDocLinkOptions): DocLinks => {
     },
     enterpriseSearch: {
       apiKeys: `${KIBANA_DOCS}api-keys.html`,
+      behavioralAnalytics: `${ENTERPRISE_SEARCH_DOCS}analytics-overview.html`,
+      behavioralAnalyticsEvents: `${ENTERPRISE_SEARCH_DOCS}analytics-events.html`,
       bulkApi: `${ELASTICSEARCH_DOCS}docs-bulk.html`,
       configuration: `${ENTERPRISE_SEARCH_DOCS}configuration.html`,
       connectors: `${ENTERPRISE_SEARCH_DOCS}connectors.html`,
@@ -134,6 +136,7 @@ export const getDocLinks = ({ kibanaBranch }: GetDocLinkOptions): DocLinks => {
       crawlerOverview: `${ENTERPRISE_SEARCH_DOCS}crawler.html`,
       deployTrainedModels: `${MACHINE_LEARNING_DOCS}ml-nlp-deploy-models.html`,
       documentLevelSecurity: `${ELASTICSEARCH_DOCS}document-level-security.html`,
+      engines: `${ENTERPRISE_SEARCH_DOCS}engines.html`,
       ingestPipelines: `${ENTERPRISE_SEARCH_DOCS}ingest-pipelines.html`,
       languageAnalyzers: `${ELASTICSEARCH_DOCS}analysis-lang-analyzer.html`,
       languageClients: `${ENTERPRISE_SEARCH_DOCS}programming-language-clients.html`,
@@ -239,6 +242,7 @@ export const getDocLinks = ({ kibanaBranch }: GetDocLinkOptions): DocLinks => {
       sum: `${ELASTICSEARCH_DOCS}search-aggregations-metrics-sum-aggregation.html`,
       top_hits: `${ELASTICSEARCH_DOCS}search-aggregations-metrics-top-hits-aggregation.html`,
       top_metrics: `${ELASTICSEARCH_DOCS}search-aggregations-metrics-top-metrics.html`,
+      change_point: `${ELASTICSEARCH_DOCS}search-aggregations-change-point-aggregation.html`,
     },
     runtimeFields: {
       overview: `${ELASTICSEARCH_DOCS}runtime.html`,
@@ -380,7 +384,7 @@ export const getDocLinks = ({ kibanaBranch }: GetDocLinkOptions): DocLinks => {
       responseActions: `${SECURITY_SOLUTION_DOCS}response-actions.html`,
       configureEndpointIntegrationPolicy: `${SECURITY_SOLUTION_DOCS}configure-endpoint-integration-policy.html`,
       exceptions: {
-        value_lists: `${SECURITY_SOLUTION_DOCS}detections-ui-exceptions.html`,
+        value_lists: `${SECURITY_SOLUTION_DOCS}value-lists-exceptions.html`,
       },
       privileges: `${SECURITY_SOLUTION_DOCS}endpoint-management-req.html`,
     },
@@ -414,6 +418,7 @@ export const getDocLinks = ({ kibanaBranch }: GetDocLinkOptions): DocLinks => {
       anomalyDetection: `${MACHINE_LEARNING_DOCS}ml-ad-overview.html`,
       anomalyDetectionJobs: `${MACHINE_LEARNING_DOCS}ml-ad-finding-anomalies.html`,
       anomalyDetectionConfiguringCategories: `${MACHINE_LEARNING_DOCS}ml-configuring-categories.html`,
+      anomalyDetectionScoreExplanation: `${MACHINE_LEARNING_DOCS}ml-ad-explain.html`,
       anomalyDetectionBucketSpan: `${MACHINE_LEARNING_DOCS}ml-ad-run-jobs.html#ml-ad-bucket-span`,
       anomalyDetectionCardinality: `${MACHINE_LEARNING_DOCS}ml-ad-run-jobs.html#ml-ad-cardinality`,
       anomalyDetectionCreateJobs: `${MACHINE_LEARNING_DOCS}ml-ad-run-jobs.html#ml-ad-create-job`,
@@ -489,6 +494,9 @@ export const getDocLinks = ({ kibanaBranch }: GetDocLinkOptions): DocLinks => {
       slackAction: `${KIBANA_DOCS}slack-action-type.html#configuring-slack`,
       teamsAction: `${KIBANA_DOCS}teams-action-type.html#configuring-teams`,
       connectors: `${KIBANA_DOCS}action-types.html`,
+    },
+    taskManager: {
+      healthMonitoring: `${KIBANA_DOCS}task-manager-health-monitoring.html`,
     },
     maps: {
       guide: `${KIBANA_DOCS}maps.html`,
@@ -656,6 +664,7 @@ export const getDocLinks = ({ kibanaBranch }: GetDocLinkOptions): DocLinks => {
       datastreams: `${FLEET_DOCS}data-streams.html`,
       datastreamsILM: `${FLEET_DOCS}data-streams.html#data-streams-ilm`,
       datastreamsNamingScheme: `${FLEET_DOCS}data-streams.html#data-streams-naming-scheme`,
+      datastreamsManualRollover: `${ELASTICSEARCH_DOCS}use-a-data-stream.html#manually-roll-over-a-data-stream`,
       installElasticAgent: `${FLEET_DOCS}install-fleet-managed-elastic-agent.html`,
       installElasticAgentStandalone: `${FLEET_DOCS}install-standalone-elastic-agent.html`,
       upgradeElasticAgent: `${FLEET_DOCS}upgrade-elastic-agent.html`,
@@ -685,7 +694,6 @@ export const getDocLinks = ({ kibanaBranch }: GetDocLinkOptions): DocLinks => {
       netIntroduction: `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/client/net-api/${DOC_LINK_VERSION}/introduction.html`,
       netNest: `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/client/net-api/${DOC_LINK_VERSION}/nest.html`,
       netSingleNode: `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/client/net-api/${DOC_LINK_VERSION}/connecting.html#single-node`,
-      perlGuide: `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/client/perl-api/${DOC_LINK_VERSION}/index.html`,
       phpConnecting: `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/client/php-api/${DOC_LINK_VERSION}/connecting.html`,
       phpInstallation: `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/client/php-api/${DOC_LINK_VERSION}/installation.html`,
       phpGuide: `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/client/php-api/${DOC_LINK_VERSION}/index.html`,

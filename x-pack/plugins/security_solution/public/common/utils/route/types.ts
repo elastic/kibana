@@ -7,10 +7,8 @@
 
 import type * as H from 'history';
 import type React from 'react';
-import type { RouteComponentProps } from 'react-router-dom';
 
-import type { TimelineType } from '../../../../common/types/timeline';
-
+import type { AllRulesTabs } from '../../../detection_engine/rule_management_ui/components/rules_table/rules_table_toolbar';
 import type { HostsTableType } from '../../../explore/hosts/store/model';
 import type { NetworkRouteType } from '../../../explore/network/pages/navigation/types';
 import type { AlertDetailRouteType } from '../../../detections/pages/alert_details/types';
@@ -19,17 +17,10 @@ import type { FlowTarget } from '../../../../common/search_strategy';
 import type { UsersTableType } from '../../../explore/users/store/model';
 import type { SecurityPageName } from '../../../app/types';
 
-export type SiemRouteType =
-  | HostsTableType
-  | NetworkRouteType
-  | AlertDetailRouteType
-  | TimelineType
-  | AdministrationType
-  | UsersTableType;
-export interface RouteSpyState {
-  pageName: SecurityPageName;
+interface GenericRouteSpyState<Page = string, Tabs = string> {
+  pageName: Page;
   detailName: string | undefined;
-  tabName: SiemRouteType | undefined;
+  tabName?: Tabs;
   search: string;
   pathName: string;
   history?: H.History;
@@ -37,25 +28,37 @@ export interface RouteSpyState {
   state?: Record<string, string | undefined>;
 }
 
-export interface HostRouteSpyState extends RouteSpyState {
-  tabName: HostsTableType | undefined;
-}
+export type RouteSpyState =
+  | GenericRouteSpyState<SecurityPageName.hosts, HostsTableType>
+  | GenericRouteSpyState<SecurityPageName.users, UsersTableType>
+  | GenericRouteSpyState<SecurityPageName.network, NetworkRouteType>
+  | GenericRouteSpyState<SecurityPageName.alerts, AlertDetailRouteType>
+  | GenericRouteSpyState<SecurityPageName.administration, AdministrationType>
+  | GenericRouteSpyState<SecurityPageName.rules, AllRulesTabs>
+  | GenericRouteSpyState<
+      Exclude<
+        SecurityPageName,
+        | SecurityPageName.hosts
+        | SecurityPageName.users
+        | SecurityPageName.network
+        | SecurityPageName.alerts
+        | SecurityPageName.administration
+        | SecurityPageName.rules
+      >,
+      never
+    >;
 
-export interface UsersRouteSpyState extends RouteSpyState {
-  tabName: UsersTableType | undefined;
-}
-
-export interface NetworkRouteSpyState extends RouteSpyState {
-  tabName: NetworkRouteType | undefined;
-}
-
-export interface AlertDetailRouteSpyState extends RouteSpyState {
-  tabName: AlertDetailRouteType | undefined;
-}
-
-export interface AdministrationRouteSpyState extends RouteSpyState {
-  tabName: AdministrationType | undefined;
-}
+export type HostRouteSpyState = GenericRouteSpyState<SecurityPageName.hosts, HostsTableType>;
+export type UsersRouteSpyState = GenericRouteSpyState<SecurityPageName.users, UsersTableType>;
+export type NetworkRouteSpyState = GenericRouteSpyState<SecurityPageName.network, NetworkRouteType>;
+export type AlertDetailRouteSpyState = GenericRouteSpyState<
+  SecurityPageName.alerts,
+  AlertDetailRouteType
+>;
+export type AdministrationRouteSpyState = GenericRouteSpyState<
+  SecurityPageName.administration,
+  AdministrationType
+>;
 
 export type RouteSpyAction =
   | {
@@ -64,10 +67,7 @@ export type RouteSpyAction =
     }
   | {
       type: 'updateRouteWithOutSearch';
-      route: Pick<
-        RouteSpyState,
-        'pageName' & 'detailName' & 'tabName' & 'pathName' & 'history' & 'state'
-      >;
+      route: Omit<RouteSpyState, 'search'>;
     }
   | {
       type: 'updateRoute';
@@ -77,12 +77,3 @@ export type RouteSpyAction =
 export interface ManageRoutesSpyProps {
   children: React.ReactNode;
 }
-
-export type SpyRouteProps = RouteComponentProps<{
-  detailName: string | undefined;
-  tabName: HostsTableType | undefined;
-  search: string;
-  flowTarget: FlowTarget | undefined;
-}> & {
-  state?: Record<string, string | undefined>;
-};

@@ -10,9 +10,7 @@ import React from 'react';
 import { QueryClientProvider } from '@tanstack/react-query';
 import type { CoreStart } from '@kbn/core/public';
 
-import { useAllLiveQueries } from '../../actions/use_all_live_queries';
 import { KibanaContextProvider } from '../../common/lib/kibana';
-import { Direction } from '../../../common/search_strategy';
 
 import { queryClient } from '../../query_client';
 import { KibanaThemeProvider } from '../../shared_imports';
@@ -23,41 +21,30 @@ import { OsqueryResult } from './osquery_result';
 const OsqueryActionResultsComponent: React.FC<OsqueryActionResultsProps> = ({
   agentIds,
   ruleName,
-  alertId,
+  actionItems,
   ecsData,
-}) => {
-  const { data: actionsData } = useAllLiveQueries({
-    filterQuery: { term: { alert_ids: alertId } },
-    activePage: 0,
-    limit: 100,
-    direction: Direction.desc,
-    sortField: '@timestamp',
-  });
+}) => (
+  <div data-test-subj={'osquery-results'}>
+    {actionItems?.map((item) => {
+      const actionId = item.fields?.action_id?.[0];
+      const queryId = item.fields?.['queries.action_id']?.[0];
+      const startDate = item.fields?.['@timestamp'][0];
 
-  return (
-    <div data-test-subj={'osquery-results'}>
-      {actionsData?.data.items.map((item, index) => {
-        const actionId = item.fields?.action_id?.[0];
-        const queryId = item.fields?.['queries.action_id']?.[0];
-        // const query = item.fields?.['queries.query']?.[0];
-        const startDate = item.fields?.['@timestamp'][0];
-
-        return (
-          <OsqueryResult
-            key={actionId + index}
-            actionId={actionId}
-            queryId={queryId}
-            startDate={startDate}
-            ruleName={ruleName}
-            agentIds={agentIds}
-            ecsData={ecsData}
-          />
-        );
-      })}
-      <EuiSpacer size="s" />
-    </div>
-  );
-};
+      return (
+        <OsqueryResult
+          key={actionId}
+          actionId={actionId}
+          queryId={queryId}
+          startDate={startDate}
+          ruleName={ruleName}
+          agentIds={agentIds}
+          ecsData={ecsData}
+        />
+      );
+    })}
+    <EuiSpacer size="s" />
+  </div>
+);
 
 export const OsqueryActionResults = React.memo(OsqueryActionResultsComponent);
 

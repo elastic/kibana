@@ -5,54 +5,101 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiSpacer } from '@elastic/eui';
-import { assertNever } from '@kbn/std';
+import numeral from '@elastic/numeral';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText } from '@elastic/eui';
+import { RuleTypeParamsExpressionProps } from '@kbn/triggers-actions-ui-plugin/public';
 import React, { useEffect, useState } from 'react';
+import { i18n } from '@kbn/i18n';
+import { SLOResponse } from '@kbn/slo-schema';
 
-import { Duration, SLO } from '../../../typings';
-import { SloSelector } from '../../shared/slo/slo_selector/slo_selector';
+import { toDuration, toMinutes } from '../../../utils/slo/duration';
+import { useFetchSloDetails } from '../../../hooks/slo/use_fetch_slo_details';
+import { BurnRateRuleParams, Duration, DurationUnit } from '../../../typings';
+import { SloSelector } from './slo_selector';
 import { BurnRate } from './burn_rate';
 import { LongWindowDuration } from './long_window_duration';
+import { ValidationBurnRateRuleResult } from './validation';
 
-export function BurnRateRuleEditor() {
-  const [selectedSlo, setSelectedSlo] = useState<SLO | undefined>(undefined);
-  const [longWindowDuration, setLongWindowDuration] = useState<Duration>({ value: 1, unit: 'h' });
-  const [, setShortWindowDuration] = useState<Duration>({ value: 5, unit: 'm' });
-  const [, setBurnRate] = useState<number>(1);
-  const [maxBurnRate, setMaxBurnRate] = useState<number>(1);
+type Props = Pick<
+  RuleTypeParamsExpressionProps<BurnRateRuleParams>,
+  'ruleParams' | 'setRuleParams'
+> &
+  ValidationBurnRateRuleResult;
+
+export function BurnRateRuleEditor(props: Props) {
+  const { setRuleParams, ruleParams, errors } = props;
+  const { loading: loadingInitialSlo, slo: initialSlo } = useFetchSloDetails(ruleParams?.sloId);
+
+  const [selectedSlo, setSelectedSlo] = useState<SLOResponse | undefined>(undefined);
+  const [longWindowDuration, setLongWindowDuration] = useState<Duration>({
+    value: ruleParams?.longWindow?.value ?? 1,
+    unit: (ruleParams?.longWindow?.unit as DurationUnit) ?? 'h',
+  });
+  const [shortWindowDuration, setShortWindowDuration] = useState<Duration>({
+    value: ruleParams?.shortWindow?.value ?? 5,
+    unit: (ruleParams?.shortWindow?.unit as DurationUnit) ?? 'm',
+  });
+  const [burnRate, setBurnRate] = useState<number>(ruleParams?.burnRateThreshold ?? 1);
+  const [maxBurnRate, setMaxBurnRate] = useState<number>(ruleParams?.maxBurnRateThreshold ?? 1);
+
+  useEffect(() => {
+    const hasInitialSlo = !loadingInitialSlo && initialSlo !== undefined;
+    setSelectedSlo(hasInitialSlo ? initialSlo : undefined);
+  }, [loadingInitialSlo, initialSlo, setRuleParams]);
 
   const onLongWindowDurationChange = (duration: Duration) => {
     setLongWindowDuration(duration);
-    const longWindowdurationInMinutes = toMinutes(duration);
-    const shortWindowDurationValue = Math.floor(longWindowdurationInMinutes / 12);
+    const longWindowDurationInMinutes = toMinutes(duration);
+    const shortWindowDurationValue = Math.floor(longWindowDurationInMinutes / 12);
     setShortWindowDuration({ value: shortWindowDurationValue, unit: 'm' });
   };
 
   const onBurnRateChange = (value: number) => {
     setBurnRate(value);
+    setRuleParams('burnRateThreshold', value);
   };
 
-  const onSelectedSlo = (slo: SLO | undefined) => {
+  const onSelectedSlo = (slo: SLOResponse | undefined) => {
     setSelectedSlo(slo);
+    setRuleParams('sloId', slo?.id);
   };
 
   useEffect(() => {
     if (selectedSlo) {
-      const sloDurationInMinutes = toMinutes(selectedSlo.timeWindow.duration);
+      const sloDurationInMinutes = toMinutes(toDuration(selectedSlo.timeWindow.duration));
       const longWindowDurationInMinutes = toMinutes(longWindowDuration);
-      setMaxBurnRate(Math.floor(sloDurationInMinutes / longWindowDurationInMinutes));
-    } else {
-      setMaxBurnRate(1);
+      const maxBurnRateThreshold = Math.floor(sloDurationInMinutes / longWindowDurationInMinutes);
+      setMaxBurnRate(maxBurnRateThreshold);
     }
   }, [longWindowDuration, selectedSlo]);
+
+  useEffect(() => {
+    setRuleParams('longWindow', longWindowDuration);
+    setRuleParams('shortWindow', shortWindowDuration);
+  }, [shortWindowDuration, longWindowDuration, setRuleParams]);
+
+  useEffect(() => {
+    setRuleParams('burnRateThreshold', burnRate);
+    setRuleParams('maxBurnRateThreshold', maxBurnRate);
+  }, [burnRate, maxBurnRate, setRuleParams]);
+
+  const computeErrorBudgetExhaustionInHours = () => {
+    if (selectedSlo && longWindowDuration?.value > 0 && burnRate >= 1) {
+      return numeral(
+        longWindowDuration.value /
+          ((burnRate * toMinutes(longWindowDuration)) /
+            toMinutes(toDuration(selectedSlo.timeWindow.duration)))
+      ).format('0a');
+    }
+
+    return 'N/A';
+  };
 
   return (
     <EuiFlexGroup direction="column">
       <EuiFlexGroup direction="row">
         <EuiFlexItem>
-          <EuiFormRow label="Select SLO" fullWidth>
-            <SloSelector onSelected={onSelectedSlo} />
-          </EuiFormRow>
+          <SloSelector initialSlo={selectedSlo} onSelected={onSelectedSlo} errors={errors.sloId} />
         </EuiFlexItem>
       </EuiFlexGroup>
 
@@ -60,34 +107,38 @@ export function BurnRateRuleEditor() {
         <EuiFlexItem>
           <LongWindowDuration
             initialDuration={longWindowDuration}
+            shortWindowDuration={shortWindowDuration}
             onChange={onLongWindowDurationChange}
+            errors={errors.longWindow}
           />
         </EuiFlexItem>
         <EuiFlexItem>
-          <BurnRate maxBurnRate={maxBurnRate} onChange={onBurnRateChange} />
+          <BurnRate
+            initialBurnRate={burnRate}
+            maxBurnRate={maxBurnRate}
+            onChange={onBurnRateChange}
+            errors={errors.burnRateThreshold}
+          />
         </EuiFlexItem>
       </EuiFlexGroup>
 
+      <EuiFlexGroup direction="row">
+        <EuiFlexItem>
+          <EuiText size="s" color="subdued">
+            {getErrorBudgetExhaustionText(computeErrorBudgetExhaustionInHours())}
+          </EuiText>
+        </EuiFlexItem>
+      </EuiFlexGroup>
       <EuiSpacer size="m" />
     </EuiFlexGroup>
   );
 }
 
-function toMinutes(duration: Duration) {
-  switch (duration.unit) {
-    case 'm':
-      return duration.value;
-    case 'h':
-      return duration.value * 60;
-    case 'd':
-      return duration.value * 24 * 60;
-    case 'w':
-      return duration.value * 7 * 24 * 60;
-    case 'M':
-      return duration.value * 30 * 24 * 60;
-    case 'Y':
-      return duration.value * 365 * 24 * 60;
-  }
-
-  assertNever(duration.unit);
-}
+const getErrorBudgetExhaustionText = (formatedHours: string) =>
+  i18n.translate('xpack.observability.slo.rules.errorBudgetExhaustion.text', {
+    defaultMessage:
+      "At this rate, the SLO's error budget will be exhausted after {formatedHours} hours.",
+    values: {
+      formatedHours,
+    },
+  });

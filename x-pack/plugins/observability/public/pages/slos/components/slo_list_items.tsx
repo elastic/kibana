@@ -4,49 +4,64 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+
+import { SLOWithSummaryResponse } from '@kbn/slo-schema';
+import { useFetchHistoricalSummary } from '../../../hooks/slo/use_fetch_historical_summary';
 import { SloListItem } from './slo_list_item';
 import { SloListEmpty } from './slo_list_empty';
-import { sortSlos } from '../helpers/sort_slos';
-import { filterSlos } from '../helpers/filter_slos';
-import { SLO } from '../../../typings';
-import { SortItem, SortType } from './slo_list_search_filter_sort_bar';
 import { SloListError } from './slo_list_error';
 
-export interface SloListItemsProps {
-  slos: SLO[];
+export interface Props {
+  sloList: SLOWithSummaryResponse[];
   loading: boolean;
   error: boolean;
-  filters: SortItem[];
-  sort: SortType | undefined;
+  onCloned: () => void;
+  onCloning: () => void;
   onDeleted: () => void;
   onDeleting: () => void;
 }
 
 export function SloListItems({
-  slos,
+  sloList,
   loading,
   error,
-  filters,
-  sort,
+  onCloned,
+  onCloning,
   onDeleted,
   onDeleting,
-}: SloListItemsProps) {
+}: Props) {
+  const [sloIds, setSloIds] = useState<string[]>([]);
+  useEffect(() => {
+    setSloIds(sloList.map((slo) => slo.id));
+  }, [sloList]);
+
+  const { loading: historicalSummaryLoading, data: historicalSummaryBySlo } =
+    useFetchHistoricalSummary({ sloIds });
+
+  if (!loading && !error && sloList.length === 0) {
+    return <SloListEmpty />;
+  }
+  if (!loading && error) {
+    return <SloListError />;
+  }
+
   return (
     <EuiFlexGroup direction="column" gutterSize="s">
-      {slos.length
-        ? slos
-            .filter(filterSlos(filters))
-            .sort(sortSlos(sort))
-            .map((slo) => (
-              <EuiFlexItem key={slo.id}>
-                <SloListItem slo={slo} onDeleted={onDeleted} onDeleting={onDeleting} />
-              </EuiFlexItem>
-            ))
-        : null}
-      {!loading && slos.length === 0 && !error ? <SloListEmpty /> : null}
-      {!loading && slos.length === 0 && error ? <SloListError /> : null}
+      {sloList.map((slo) => (
+        <EuiFlexItem key={slo.id}>
+          <SloListItem
+            slo={slo}
+            historicalSummary={historicalSummaryBySlo[slo.id]}
+            historicalSummaryLoading={historicalSummaryLoading}
+            onCloned={onCloned}
+            onCloning={onCloning}
+            onDeleted={onDeleted}
+            onDeleting={onDeleting}
+          />
+        </EuiFlexItem>
+      ))}
     </EuiFlexGroup>
   );
 }

@@ -5,13 +5,9 @@
  * 2.0.
  */
 
-import type {
-  ElasticsearchClient,
-  SavedObjectsClient,
-  SavedObjectsFindResponse,
-} from '@kbn/core/server';
-import { has, map, mapKeys, set, unset } from 'lodash';
-import type { PackagePolicy } from '@kbn/fleet-plugin/common';
+import type { SavedObjectsClient, SavedObjectsFindResponse } from '@kbn/core/server';
+import { has, map, mapKeys, set } from 'lodash';
+import type { NewPackagePolicy } from '@kbn/fleet-plugin/common';
 import { AGENT_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
 import produce from 'immer';
 import { convertShardsToObject } from '../routes/utils';
@@ -22,15 +18,13 @@ import { convertSOQueriesToPackConfig } from '../routes/pack/utils';
 import type { PackSavedObject } from '../common/types';
 
 export const updateGlobalPacksCreateCallback = async (
-  packagePolicy: PackagePolicy,
+  packagePolicy: NewPackagePolicy,
   packsClient: SavedObjectsClient,
   allPacks: SavedObjectsFindResponse<PackSavedObjectAttributes>,
-  osqueryContext: OsqueryAppContextService,
-  esClient: ElasticsearchClient
+  osqueryContext: OsqueryAppContextService
 ) => {
   const agentPolicyService = osqueryContext.getAgentPolicyService();
 
-  const packagePolicyService = osqueryContext.getPackagePolicyService();
   const agentPoliciesResult = await agentPolicyService?.getByIds(packsClient, [
     packagePolicy.policy_id,
   ]);
@@ -71,25 +65,21 @@ export const updateGlobalPacksCreateCallback = async (
       })
     );
 
-    await packagePolicyService?.update(
-      packsClient,
-      esClient,
-      packagePolicy.id,
-      produce<PackagePolicy>(packagePolicy, (draft) => {
-        unset(draft, 'id');
-        if (!has(draft, 'inputs[0].streams')) {
-          set(draft, 'inputs[0].streams', []);
-        }
+    return produce<NewPackagePolicy>(packagePolicy, (draft) => {
+      if (!has(draft, 'inputs[0].streams')) {
+        set(draft, 'inputs[0].streams', []);
+      }
 
-        map(packsContainingShardForPolicy, (pack) => {
-          set(draft, `inputs[0].config.osquery.value.packs.${pack.attributes.name}`, {
-            shard: 100,
-            queries: convertSOQueriesToPackConfig(pack.attributes.queries),
-          });
+      map(packsContainingShardForPolicy, (pack) => {
+        set(draft, `inputs[0].config.osquery.value.packs.${pack.attributes.name}`, {
+          shard: 100,
+          queries: convertSOQueriesToPackConfig(pack.attributes.queries),
         });
+      });
 
-        return draft;
-      })
-    );
+      return draft;
+    });
   }
+
+  return packagePolicy;
 };
