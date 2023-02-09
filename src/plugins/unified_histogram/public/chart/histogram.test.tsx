@@ -32,7 +32,8 @@ const getMockLensAttributes = () =>
       language: 'kuery',
       query: '',
     },
-    dataView: dataViewWithTimefieldMock,
+    dataViewId: dataViewWithTimefieldMock.id,
+    timeFieldName: dataViewWithTimefieldMock.timeFieldName,
     timeInterval: 'auto',
     breakdownField: dataViewWithTimefieldMock.getFieldByName('extension'),
   });
