@@ -8,10 +8,17 @@
 
 import { getAutocompleteInfo } from '../../services';
 
-export function expandAliases(indicesOrAliases: string | string[]) {
+/**
+ * Expands provided  aliases and data streams
+ * @param indicesOrAliases - single value or an array of indices, aliases and data streams
+ * @returns {string | string[]} - single index or an array of resolved indices from provided input.
+ */
+export function expandAliases(indicesOrAliases: string | string[]): string | string[] {
   // takes a list of indices or aliases or a string which may be either and returns a list of indices
   // returns a list for multiple values or a string for a single.
   const perAliasIndexes = getAutocompleteInfo().alias.perAliasIndexes;
+  const perDataStreamIndices = getAutocompleteInfo().dataStream.perDataStreamIndices;
+
   if (!indicesOrAliases) {
     return indicesOrAliases;
   }
@@ -23,6 +30,9 @@ export function expandAliases(indicesOrAliases: string | string[]) {
   indicesOrAliases = indicesOrAliases.flatMap((iOrA) => {
     if (perAliasIndexes[iOrA]) {
       return perAliasIndexes[iOrA];
+    }
+    if (perDataStreamIndices[iOrA]) {
+      return perDataStreamIndices[iOrA];
     }
     return [iOrA];
   });
