@@ -107,7 +107,6 @@ describe('Status API', () => {
     return { mockRouter, routeDependencies };
   };
 
-  
   describe('GET /api/upgrade_assistant/status', () => {
     afterEach(() => {
       jest.resetAllMocks();
@@ -122,7 +121,7 @@ describe('Status API', () => {
       });
 
       getESSystemIndicesMigrationStatusMock.mockResolvedValue(systemIndicesNoMigrationResponse);
-      
+
       const resp = await routeDependencies.router.getHandler({
         method: 'get',
         pathPattern: '/api/upgrade_assistant/status',
@@ -170,7 +169,7 @@ describe('Status API', () => {
       });
 
       getESSystemIndicesMigrationStatusMock.mockResolvedValue(systemIndicesMigrationResponse);
-      
+
       const resp = await routeDependencies.router.getHandler({
         method: 'get',
         pathPattern: '/api/upgrade_assistant/status',
