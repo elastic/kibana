@@ -17,7 +17,6 @@ import React, { useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { isString } from 'lodash';
 import { EuiButtonEmpty } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { AgentConfigurationIntake } from '../../../../../../../common/agent_configuration/configuration_types';
 import {
   omitAllOption,
@@ -28,6 +27,9 @@ import { FormRowSelect } from './form_row_select';
 import { LegacyAPMLink } from '../../../../../shared/links/apm/apm_link';
 import { FormRowSuggestionsSelect } from './form_row_suggestions_select';
 import { SERVICE_NAME } from '../../../../../../../common/es_fields/apm';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { isOpenTelemetryAgentName } from '../../../../../../../common/agent_name';
+import { AgentName } from '../../../../../../../typings/es_schemas/ui/fields/agent';
 
 interface Props {
   newConfig: AgentConfigurationIntake;
@@ -93,10 +95,14 @@ export function ServicePage({ newConfig, setNewConfig, onClickNext }: Props) {
   );
 
   useEffect(() => {
-    setIsAgentConfigurationSupported(
-      !newConfig.agent_name?.startsWith('opentelemetry/')
-    );
-  }, [newConfig.agent_name]);
+    if (newConfig.service.name === 'ALL_OPTION_VALUE') {
+      setIsAgentConfigurationSupported(true);
+    } else if (newConfig.agent_name) {
+      setIsAgentConfigurationSupported(
+        !isOpenTelemetryAgentName(newConfig.agent_name as AgentName)
+      );
+    }
+  }, [newConfig.agent_name, newConfig.service.name]);
 
   return (
     <>
