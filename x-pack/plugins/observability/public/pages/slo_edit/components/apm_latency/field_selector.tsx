@@ -13,6 +13,7 @@ import {
   Suggestion,
   useFetchApmSuggestions,
 } from '../../../../hooks/slo/use_fetch_apm_suggestions';
+import { i18n } from '@kbn/i18n';
 
 interface Option {
   label: string;
@@ -20,6 +21,7 @@ interface Option {
 }
 
 interface Props {
+  allowAllOption?: boolean;
   control: Control<CreateSLOInput>;
   dataTestSubj: string;
   fieldName: string;
@@ -29,6 +31,7 @@ interface Props {
 }
 
 export function FieldSelector({
+  allowAllOption = true,
   control,
   dataTestSubj,
   fieldName,
@@ -44,7 +47,20 @@ export function FieldSelector({
   const [options, setOptions] = useState<Option[]>([]);
 
   useEffect(() => {
-    setOptions(createOptions(suggestions));
+    setOptions(
+      createOptions(suggestions).concat(
+        allowAllOption
+          ? [
+              {
+                value: '*',
+                label: i18n.translate('xpack.observability.slos.sloEdit.apmFieldSelector.all', {
+                  defaultMessage: 'All',
+                }),
+              },
+            ]
+          : []
+      )
+    );
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [suggestions.length]);
 

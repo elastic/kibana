@@ -22,6 +22,7 @@ export function ApmLatencyIndicatorTypeForm({ control }: Props) {
     <EuiFlexGroup direction="column" gutterSize="l">
       <EuiFlexGroup direction="row" gutterSize="l">
         <FieldSelector
+          allowAllOption={false}
           label={i18n.translate('xpack.observability.slos.sloEdit.apmLatency.serviceName', {
             defaultMessage: 'Service name',
           })}
