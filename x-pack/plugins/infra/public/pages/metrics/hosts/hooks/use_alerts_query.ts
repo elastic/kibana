@@ -36,7 +36,9 @@ export const useAlertsQueryImpl = () => {
     [hostNodes, unifiedSearchDateRange]
   );
 
-  const alertsEsQuery = useMemo(() => getAlertsEsQuery(), [getAlertsEsQuery]);
+  // Regenerate the query when status change even if is not used.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const alertsEsQuery = useMemo(() => getAlertsEsQuery(), [getAlertsEsQuery, alertStatus]);
 
   const alertsEsQueryByStatus = useMemo(
     () => getAlertsEsQuery(alertStatus),
