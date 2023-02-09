@@ -6,7 +6,6 @@
  */
 
 import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
-import { isElasticsearchVersionConflictError } from '@kbn/fleet-plugin/server/errors/utils';
 import { Logger } from '@kbn/core/server';
 import { APM_SOURCE_MAP_INDEX } from '../settings/apm_indices/get_apm_indices';
 import { ApmSourceMap } from './create_apm_source_map_index_template';
@@ -44,18 +43,11 @@ export async function createApmSourceMap({
     service: { name: serviceName, version: serviceVersion },
   };
 
-  try {
-    const id = getSourceMapId({ serviceName, serviceVersion, bundleFilepath });
-    logger.debug(`Create APM source map: "${id}"`);
-    return await internalESClient.create<ApmSourceMap>({
-      index: APM_SOURCE_MAP_INDEX,
-      id,
-      body: doc,
-    });
-  } catch (e) {
-    // we ignore 409 errors from the create (document already exists)
-    if (!isElasticsearchVersionConflictError(e)) {
-      throw e;
-    }
-  }
+  const id = getSourceMapId({ serviceName, serviceVersion, bundleFilepath });
+  logger.debug(`Create APM source map: "${id}"`);
+  return await internalESClient.index<ApmSourceMap>({
+    index: APM_SOURCE_MAP_INDEX,
+    id,
+    body: doc,
+  });
 }
