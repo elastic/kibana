@@ -115,6 +115,8 @@ const mockOptions = {
     producer: '',
     ruleTypeId: '',
     ruleTypeName: '',
+    muteAll: false,
+    snoozeSchedule: [],
   },
   logger,
   flappingSettings: DEFAULT_FLAPPING_SETTINGS,

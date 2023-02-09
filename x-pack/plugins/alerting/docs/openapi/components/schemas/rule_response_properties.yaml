@@ -12,7 +12,6 @@ required:
   - mute_all
   - muted_alert_ids
   - name
-  - notify_when
   - params
   - rule_type_id
   - schedule
@@ -115,6 +114,9 @@ properties:
     description: >
       The identifier for the type of rule. For example, `.es-query`, `.index-threshold`, `logs.alert.document.count`, `monitoring_alert_cluster_health`, `siem.thresholdRule`, or `xpack.ml.anomaly_detection_alert`.
     example: monitoring_alert_cluster_health
+  running:
+    type: boolean
+    description: Indicates whether the rule is running.
   schedule:
     $ref: 'schedule.yaml'
   scheduled_task_id:
