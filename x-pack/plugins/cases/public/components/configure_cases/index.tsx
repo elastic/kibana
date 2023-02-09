@@ -84,12 +84,15 @@ export const ConfigureCases: React.FC = React.memo(() => {
     refetch: refetchActionTypes,
   } = useGetActionTypes();
 
-  const onConnectorUpdated = useCallback(async (updatedConnector) => {
-    setEditedConnectorItem(updatedConnector);
-    refetchConnectors();
-    refetchActionTypes();
-    refetchCaseConfigure();
-  }, [refetchActionTypes, refetchCaseConfigure, refetchConnectors, setEditedConnectorItem]);
+  const onConnectorUpdated = useCallback(
+    async (updatedConnector) => {
+      setEditedConnectorItem(updatedConnector);
+      refetchConnectors();
+      refetchActionTypes();
+      refetchCaseConfigure();
+    },
+    [refetchActionTypes, refetchCaseConfigure, refetchConnectors, setEditedConnectorItem]
+  );
 
   const isLoadingAny =
     isLoadingConnectors || persistLoading || loadingCaseConfigure || isLoadingActionTypes;
