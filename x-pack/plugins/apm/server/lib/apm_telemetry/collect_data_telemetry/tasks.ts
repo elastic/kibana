@@ -951,8 +951,8 @@ export const tasks: TelemetryTask[] = [
           [agentName]: {
             agent: {
               activation_method: aggregations[AGENT_ACTIVATION_METHOD].buckets
-                  .map((bucket) => bucket.key as string)
-                  .slice(0, size),
+                .map((bucket) => bucket.key as string)
+                .slice(0, size),
               version: aggregations[AGENT_VERSION].buckets.map(
                 (bucket) => bucket.key as string
               ),
