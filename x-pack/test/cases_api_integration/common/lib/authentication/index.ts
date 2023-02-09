@@ -10,7 +10,7 @@ import { Role, User, UserInfo } from './types';
 import { obsOnly, secOnly, secOnlyNoDelete, secOnlyRead, users } from './users';
 import { roles } from './roles';
 import { spaces } from './spaces';
-import { loginUsers } from '../user_profiles';
+import { loginUsers } from '../api';
 
 export const getUserInfo = (user: User): UserInfo => ({
   username: user.username,

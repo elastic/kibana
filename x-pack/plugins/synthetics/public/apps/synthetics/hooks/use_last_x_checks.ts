@@ -25,9 +25,11 @@ export function useLastXChecks<Fields>({
   locationId,
   fields = ['*'],
   size = 50,
+  timestamp,
 }: {
   monitorId: string;
   locationId: string;
+  timestamp?: string;
   fields?: string[];
   size?: number;
 }) {
@@ -63,7 +65,7 @@ export function useLastXChecks<Fields>({
 
   const { data } = useReduxEsSearch<Ping, typeof params>(params, [lastRefresh], {
     name: `zGetLastXMonitorRunsByLocation/${monitorId}/${locationId}`,
-    isRequestReady: locationsLoaded, // don't run query until locations are loaded
+    isRequestReady: locationsLoaded && Boolean(timestamp), // don't run query until locations are loaded
   });
 
   const dataAsJSON = JSON.stringify(data?.hits?.hits);
