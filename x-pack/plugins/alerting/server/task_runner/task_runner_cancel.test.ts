@@ -235,6 +235,7 @@ describe('Task Runner Cancel', () => {
           outcomeMsg: [
             'test:1: execution cancelled due to timeout - exceeded rule type timeout of 5m',
           ],
+          outcomeOrder: 20,
           warning: 'timeout',
         },
         monitoring: {
