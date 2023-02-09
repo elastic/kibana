@@ -78,13 +78,15 @@ export default function AlertsFlyoutBody({ alert, id: pageId }: FlyoutProps) {
       title: translations.alertsFlyout.expectedValueLabel,
       description: formatAlertEvaluationValue(
         alert.fields[ALERT_RULE_TYPE_ID],
-        alert.fields[ALERT_EVALUATION_THRESHOLD]),
+        alert.fields[ALERT_EVALUATION_THRESHOLD]
+      ),
     },
     {
       title: translations.alertsFlyout.actualValueLabel,
       description: formatAlertEvaluationValue(
         alert.fields[ALERT_RULE_TYPE_ID],
-        alert.fields[ALERT_EVALUATION_VALUE]),
+        alert.fields[ALERT_EVALUATION_VALUE]
+      ),
     },
     {
       title: translations.alertsFlyout.ruleTypeLabel,
