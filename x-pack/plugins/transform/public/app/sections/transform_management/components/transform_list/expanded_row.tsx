@@ -259,6 +259,21 @@ export const ExpandedRow: FC<Props> = ({ item, onAlertEdit }) => {
       name: 'JSON',
       content: <ExpandedRowJsonPane json={item.config} />,
     },
+    ...(item.stats.health
+      ? [
+          {
+            id: `transform-health-tab-${tabId}`,
+            'data-test-subj': 'transformHealthTab',
+            name: i18n.translate(
+              'xpack.transform.transformList.transformDetails.tabs.transformHealthLabel',
+              {
+                defaultMessage: 'Health',
+              }
+            ),
+            content: <ExpandedRowHealthPane health={item.stats.health} />,
+          },
+        ]
+      : []),
     {
       id: `transform-messages-tab-${tabId}`,
       'data-test-subj': 'transformMessagesTab',
@@ -282,20 +297,6 @@ export const ExpandedRow: FC<Props> = ({ item, onAlertEdit }) => {
       content: <ExpandedRowPreviewPane transformConfig={item.config} />,
     },
   ];
-
-  if (item.stats.health) {
-    tabs.push({
-      id: `transform-health-tab-${tabId}`,
-      'data-test-subj': 'transformHealthTab',
-      name: i18n.translate(
-        'xpack.transform.transformList.transformDetails.tabs.transformHealthLabel',
-        {
-          defaultMessage: 'Health',
-        }
-      ),
-      content: <ExpandedRowHealthPane health={item.stats.health} />,
-    });
-  }
 
   // Using `expand=false` here so the tabs themselves don't spread
   // across the full width. The 100% width is used so the bottom line

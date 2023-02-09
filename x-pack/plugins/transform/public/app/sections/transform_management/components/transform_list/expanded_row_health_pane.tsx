@@ -11,36 +11,26 @@ import { formatDate, EuiSpacer, EuiInMemoryTable } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 
+import { TIME_FORMAT } from '../../../../../../common/constants';
 import type { TransformHealthIssue } from '../../../../../../common/types/transform_stats';
 
 import { TransformListRow } from '../../../../common';
 
 import { TransformHealthColoredDot } from './transform_health_colored_dot';
 
-const TIME_FORMAT = 'YYYY-MM-DD HH:mm:ss';
-
 interface ExpandedRowHealthPaneProps {
   health: TransformListRow['stats']['health'];
 }
 
 export const ExpandedRowHealthPane: FC<ExpandedRowHealthPaneProps> = ({ health }) => {
+  const { status, issues } = health;
+
   const sorting = {
     sort: {
       field: 'first_occurrence' as const,
       direction: 'desc' as const,
     },
   };
-
-  const { status, issues } = health;
-
-  if (issues === undefined) {
-    return (
-      <>
-        <EuiSpacer size="s" />
-        <TransformHealthColoredDot healthStatus={status} compact={false} />
-      </>
-    );
-  }
 
   const columns = [
     {
@@ -85,14 +75,18 @@ export const ExpandedRowHealthPane: FC<ExpandedRowHealthPaneProps> = ({ health }
     <div data-test-subj="transformHealthTabContent">
       <EuiSpacer size="s" />
       <TransformHealthColoredDot healthStatus={status} compact={false} />
-      <EuiSpacer size="s" />
-      <EuiInMemoryTable<TransformHealthIssue>
-        items={issues}
-        columns={columns}
-        compressed={true}
-        pagination={true}
-        sorting={sorting}
-      />
+      {Array.isArray(issues) && issues.length > 0 && (
+        <>
+          <EuiSpacer size="s" />
+          <EuiInMemoryTable<TransformHealthIssue>
+            items={issues}
+            columns={columns}
+            compressed={true}
+            pagination={true}
+            sorting={sorting}
+          />
+        </>
+      )}
     </div>
   );
 };

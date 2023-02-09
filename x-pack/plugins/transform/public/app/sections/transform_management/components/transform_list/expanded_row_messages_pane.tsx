@@ -19,15 +19,13 @@ import { euiLightVars as theme } from '@kbn/ui-theme';
 
 import { i18n } from '@kbn/i18n';
 
-import { DEFAULT_MAX_AUDIT_MESSAGE_SIZE } from '../../../../../../common/constants';
+import { DEFAULT_MAX_AUDIT_MESSAGE_SIZE, TIME_FORMAT } from '../../../../../../common/constants';
 import { isGetTransformsAuditMessagesResponseSchema } from '../../../../../../common/api_schemas/type_guards';
 import { TransformMessage } from '../../../../../../common/types/messages';
 
 import { useApi } from '../../../../hooks/use_api';
 import { JobIcon } from '../../../../components/job_icon';
 import { useRefreshTransformList } from '../../../../common';
-
-const TIME_FORMAT = 'YYYY-MM-DD HH:mm:ss';
 
 interface ExpandedRowMessagesPaneProps {
   transformId: string;
