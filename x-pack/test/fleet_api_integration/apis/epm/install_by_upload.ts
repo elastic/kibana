@@ -49,8 +49,14 @@ export default function (providerContext: FtrProviderContext) {
     '../fixtures/direct_upload_packages/apache_invalid_toplevel_mismatch_0.1.4.zip'
   );
 
+  const testPkgArchiveZipNewer = path.join(
+    path.dirname(__filename),
+    '../fixtures/direct_upload_packages/apache-0.1.5.zip'
+  );
+
   const testPkgName = 'apache';
   const testPkgVersion = '0.1.4';
+  const testPkgNewVersion = '0.1.5';
   const server = dockerServers.get('registry');
 
   const deletePackage = async (name: string, version: string) => {
@@ -61,10 +67,11 @@ export default function (providerContext: FtrProviderContext) {
     skipIfNoDockerRegistry(providerContext);
     setupFleetAndAgents(providerContext);
 
-    afterEach(async () => {
+    after(async () => {
       if (server) {
         // remove the packages just in case it being installed will affect other tests
         await deletePackage(testPkgName, testPkgVersion);
+        await deletePackage(testPkgName, testPkgNewVersion);
       }
     });
 
@@ -77,6 +84,18 @@ export default function (providerContext: FtrProviderContext) {
         .send(buf)
         .expect(200);
       expect(res.body.items.length).to.be(30);
+    });
+
+    it('should upgrade when uploading a newer tar archive', async () => {
+      const buf = fs.readFileSync(testPkgArchiveZipNewer);
+      const res = await supertest
+        .post(`/api/fleet/epm/packages`)
+        .set('kbn-xsrf', 'xxxx')
+        .type('application/zip')
+        .send(buf)
+        .expect(200);
+      expect(res.body.items.length).to.be(30);
+      expect(res.body.items.some((item: any) => item.id.includes(testPkgNewVersion)));
     });
 
     it('should install a zip archive correctly and package info should return correctly after validation', async function () {
