@@ -870,25 +870,27 @@ export class SearchSource {
         const docvaluesIndex = keyBy(filteredDocvalueFields, 'field');
         const bodyFields = this.getFieldsWithoutSourceFilters(index, body.fields);
 
-        const uniqueFields = new Set();
+        const uniqueFieldNames = new Set();
+        const uniqueFields = [];
         for (const field of bodyFields.concat(filteredDocvalueFields)) {
           const fieldName = this.getFieldName(field);
-          if (!metaFields.includes(fieldName) && !uniqueFields.has(fieldName)) {
-            if (Object.keys(docvaluesIndex).includes(fieldName)) {
-              // either provide the field object from computed docvalues,
-              // or merge the user-provided field with the one in docvalues
-              uniqueFields.add(
-                typeof fieldName === 'string'
-                  ? docvaluesIndex[fieldName]
-                  : this.getFieldFromDocValueFieldsOrIndexPattern(docvaluesIndex, fieldName, index)
-              );
-            } else {
-              uniqueFields.add(fieldName);
-            }
+          if (metaFields.includes(fieldName) || uniqueFieldNames.has(fieldName)) {
+            continue;
+          }
+          uniqueFieldNames.add(fieldName);
+          if (Object.keys(docvaluesIndex).includes(fieldName)) {
+            // either provide the field object from computed docvalues,
+            // or merge the user-provided field with the one in docvalues
+            uniqueFields.push(
+              typeof field === 'string'
+                ? docvaluesIndex[field]
+                : this.getFieldFromDocValueFieldsOrIndexPattern(docvaluesIndex, field, index)
+            );
+          } else {
+            uniqueFields.push(field);
           }
         }
-
-        body.fields = [...uniqueFields];
+        body.fields = uniqueFields;
       }
     } else {
       body.fields = filteredDocvalueFields;
