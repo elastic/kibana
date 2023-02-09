@@ -31,8 +31,8 @@ export const RandomSamplerRangeSlider = ({
   const isInvalidSamplingProbabilityInput =
     !isDefined(samplingProbabilityInput) ||
     isNaN(samplingProbabilityInput) ||
-    samplingProbabilityInput <= 0 ||
-    samplingProbabilityInput >= 50;
+    samplingProbabilityInput < MIN_SAMPLER_PROBABILITY ||
+    samplingProbabilityInput > 0.5;
 
   const inputValue = (samplingProbabilityInput ?? MIN_SAMPLER_PROBABILITY) * 100;
 
@@ -63,17 +63,16 @@ export const RandomSamplerRangeSlider = ({
             max={50}
             // Rounding to 0 decimal place because sometimes js results in weird number when multiplying fractions
             // e.g. 0.07 * 100 yields 7.000000000000001
-            value={inputValue >= 1 ? roundToDecimalPlace(inputValue, 0) : inputValue}
+            value={
+              inputValue >= 1
+                ? roundToDecimalPlace(inputValue, 0)
+                : roundToDecimalPlace(inputValue, 3)
+            }
             ticks={RANDOM_SAMPLER_PROBABILITIES.map((d) => ({
               value: d,
               label: d === 0.001 || d >= 5 ? `${d}` : '',
             }))}
-            isInvalid={
-              !isDefined(samplingProbabilityInput) ||
-              isNaN(samplingProbabilityInput) ||
-              samplingProbabilityInput <= 0 ||
-              samplingProbabilityInput >= 50
-            }
+            isInvalid={isInvalidSamplingProbabilityInput}
             onChange={(e) => {
               const value = parseFloat((e.target as HTMLInputElement).value);
               const prevValue = samplingProbabilityInput ? samplingProbabilityInput * 100 : value;

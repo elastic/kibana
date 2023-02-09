@@ -347,7 +347,13 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
       if (nextPref === RANDOM_SAMPLER_OPTION.ON_MANUAL) {
         // By default, when switching to manual, restore previously chosen probability
         // else, default to 0.001%
-        setSamplingProbability(savedRandomSamplerProbability ?? MIN_SAMPLER_PROBABILITY);
+        setSamplingProbability(
+          savedRandomSamplerProbability &&
+            savedRandomSamplerProbability > 0 &&
+            savedRandomSamplerProbability <= 0.5
+            ? savedRandomSamplerProbability
+            : MIN_SAMPLER_PROBABILITY
+        );
       }
       saveRandomSamplerPreference(nextPref);
     },
