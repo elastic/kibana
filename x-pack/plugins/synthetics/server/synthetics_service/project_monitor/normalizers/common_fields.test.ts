@@ -102,34 +102,37 @@ describe('getNormalizeCommonFields', () => {
       };
       const normalizedFields = getNormalizeCommonFields(config as NormalizedProjectProps); // typecasting to allow testing of invalid user configs
       expect(normalizedFields).toEqual({
-        alert: {
-          status: {
-            enabled: statusEnabled ?? true,
+        errors: [],
+        normalizedFields: {
+          alert: {
+            status: {
+              enabled: statusEnabled ?? true,
+            },
           },
-        },
-        custom_heartbeat_id: 'test-id-test-projectId-test-namespace',
-        enabled: true,
-        hash: '',
-        journey_id: 'test-id',
-        locations: [
-          {
-            geo: undefined,
-            id: 'us_central',
-            isServiceManaged: true,
-            label: 'US North America',
+          custom_heartbeat_id: 'test-id-test-projectId-test-namespace',
+          enabled: true,
+          hash: '',
+          journey_id: 'test-id',
+          locations: [
+            {
+              geo: undefined,
+              id: 'us_central',
+              isServiceManaged: true,
+              label: 'US North America',
+            },
+          ],
+          name: 'A monitor',
+          namespace: 'test_namespace',
+          origin: 'project',
+          original_space: 'test-namespace',
+          project_id: 'test-projectId',
+          schedule: {
+            number: '3',
+            unit: 'm',
           },
-        ],
-        name: 'A monitor',
-        namespace: 'test_namespace',
-        origin: 'project',
-        original_space: 'test-namespace',
-        project_id: 'test-projectId',
-        schedule: {
-          number: '3',
-          unit: 'm',
+          tags: [],
+          timeout: '16',
         },
-        tags: [],
-        timeout: '16',
       });
     }
   );
@@ -159,34 +162,37 @@ describe('getNormalizeCommonFields', () => {
     };
     const normalizedFields = getNormalizeCommonFields(config as NormalizedProjectProps); // typecasting to allow testing of invalid user configs
     expect(normalizedFields).toEqual({
-      alert: {
-        status: {
-          enabled: true,
+      errors: [],
+      normalizedFields: {
+        alert: {
+          status: {
+            enabled: true,
+          },
         },
-      },
-      custom_heartbeat_id: 'test-id-test-projectId-test-namespace',
-      enabled: true,
-      hash: '',
-      journey_id: 'test-id',
-      locations: [
-        {
-          geo: undefined,
-          id: 'us_central',
-          isServiceManaged: true,
-          label: 'US North America',
+        custom_heartbeat_id: 'test-id-test-projectId-test-namespace',
+        enabled: true,
+        hash: '',
+        journey_id: 'test-id',
+        locations: [
+          {
+            geo: undefined,
+            id: 'us_central',
+            isServiceManaged: true,
+            label: 'US North America',
+          },
+        ],
+        name: 'A monitor',
+        namespace: 'test_namespace',
+        origin: 'project',
+        original_space: 'test-namespace',
+        project_id: 'test-projectId',
+        schedule: {
+          number: '3',
+          unit: 'm',
         },
-      ],
-      name: 'A monitor',
-      namespace: 'test_namespace',
-      origin: 'project',
-      original_space: 'test-namespace',
-      project_id: 'test-projectId',
-      schedule: {
-        number: '3',
-        unit: 'm',
+        tags: [],
+        timeout: '16',
       },
-      tags: [],
-      timeout: '16',
     });
   });
 });
