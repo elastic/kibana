@@ -194,7 +194,7 @@
               "\nCurrent session management\n{@link ISessionService}"
             ],
             "signature": [
-              "{ start: () => string; save: () => Promise<void>; destroy: () => void; readonly state$: ",
+              "{ start: () => string; save: () => Promise<void>; clear: () => void; destroy: () => void; readonly state$: ",
               "Observable",
               "<",
               {
@@ -212,7 +212,7 @@
               "Observable",
               "<boolean>; hasAccess: () => boolean; trackSearch: (searchDescriptor: TrackSearchDescriptor) => TrackSearchHandler; getSessionId: () => string | undefined; getSession$: () => ",
               "Observable",
-              "<string | undefined>; isStored: () => boolean; isRestore: () => boolean; restore: (sessionId: string) => void; continue: (sessionId: string) => void; clear: () => void; cancel: () => Promise<void>; renameCurrentSession: (newName: string) => Promise<void>; isCurrentSession: (sessionId?: string | undefined) => boolean; getSearchOptions: (sessionId?: string | undefined) => Required<Pick<",
+              "<string | undefined>; isStored: () => boolean; isRestore: () => boolean; restore: (sessionId: string) => void; continue: (sessionId: string) => void; cancel: () => Promise<void>; renameCurrentSession: (newName: string) => Promise<void>; isCurrentSession: (sessionId?: string | undefined) => boolean; getSearchOptions: (sessionId?: string | undefined) => Required<Pick<",
               {
                 "pluginId": "data",
                 "scope": "common",
@@ -252,26 +252,8 @@
               "\nSearch sessions SO CRUD\n{@link ISessionsClient}"
             ],
             "signature": [
-              "{ get: (sessionId: string) => Promise<",
+              "{ create: ({ name, appId, locatorId, initialState, restoreState, sessionId, }: { name: string; appId: string; locatorId: string; initialState: Record<string, unknown>; restoreState: Record<string, unknown>; sessionId: string; }) => Promise<",
               "SearchSessionSavedObject",
-              ">; delete: (sessionId: string) => Promise<void>; create: ({ name, appId, locatorId, initialState, restoreState, sessionId, }: { name: string; appId: string; locatorId: string; initialState: Record<string, unknown>; restoreState: Record<string, unknown>; sessionId: string; }) => Promise<",
-              "SearchSessionSavedObject",
-              ">; find: (options: Omit<",
-              {
-                "pluginId": "@kbn/core-saved-objects-api-server",
-                "scope": "common",
-                "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-                "section": "def-common.SavedObjectsFindOptions",
-                "text": "SavedObjectsFindOptions"
-              },
-              ", \"type\">) => Promise<",
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataSearchPluginApi",
-                "section": "def-common.SearchSessionsFindResponse",
-                "text": "SearchSessionsFindResponse"
-              },
               ">; update: (sessionId: string, attributes: unknown) => Promise<",
               {
                 "pluginId": "@kbn/core-saved-objects-api-server",
@@ -288,23 +270,25 @@
                 "section": "def-common.SearchSessionSavedObjectAttributes",
                 "text": "SearchSessionSavedObjectAttributes"
               },
-              ">>; rename: (sessionId: string, newName: string) => Promise<",
+              ">>; get: (sessionId: string) => Promise<",
+              "SearchSessionSavedObject",
+              ">; delete: (sessionId: string) => Promise<void>; find: (options: Omit<",
               {
                 "pluginId": "@kbn/core-saved-objects-api-server",
                 "scope": "common",
                 "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-                "section": "def-common.SavedObjectsUpdateResponse",
-                "text": "SavedObjectsUpdateResponse"
+                "section": "def-common.SavedObjectsFindOptions",
+                "text": "SavedObjectsFindOptions"
               },
-              "<Pick<",
+              ", \"type\">) => Promise<",
               {
                 "pluginId": "data",
                 "scope": "common",
                 "docId": "kibDataSearchPluginApi",
-                "section": "def-common.SearchSessionSavedObjectAttributes",
-                "text": "SearchSessionSavedObjectAttributes"
+                "section": "def-common.SearchSessionsFindResponse",
+                "text": "SearchSessionsFindResponse"
               },
-              ", \"name\">>>; extend: (sessionId: string, expires: string) => Promise<",
+              ">; extend: (sessionId: string, expires: string) => Promise<",
               {
                 "pluginId": "@kbn/core-saved-objects-api-server",
                 "scope": "common",
@@ -320,7 +304,23 @@
                 "section": "def-common.SearchSessionSavedObjectAttributes",
                 "text": "SearchSessionSavedObjectAttributes"
               },
-              ", unknown>>; }"
+              ", unknown>>; rename: (sessionId: string, newName: string) => Promise<",
+              {
+                "pluginId": "@kbn/core-saved-objects-api-server",
+                "scope": "common",
+                "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
+                "section": "def-common.SavedObjectsUpdateResponse",
+                "text": "SavedObjectsUpdateResponse"
+              },
+              "<Pick<",
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataSearchPluginApi",
+                "section": "def-common.SearchSessionSavedObjectAttributes",
+                "text": "SearchSessionSavedObjectAttributes"
+              },
+              ", \"name\">>>; }"
             ],
             "path": "src/plugins/data/public/search/types.ts",
             "deprecated": false,
@@ -662,7 +662,7 @@
               "\nCurrent session management\n{@link ISessionService}"
             ],
             "signature": [
-              "{ start: () => string; save: () => Promise<void>; destroy: () => void; readonly state$: ",
+              "{ start: () => string; save: () => Promise<void>; clear: () => void; destroy: () => void; readonly state$: ",
               "Observable",
               "<",
               {
@@ -680,7 +680,7 @@
               "Observable",
               "<boolean>; hasAccess: () => boolean; trackSearch: (searchDescriptor: TrackSearchDescriptor) => TrackSearchHandler; getSessionId: () => string | undefined; getSession$: () => ",
               "Observable",
-              "<string | undefined>; isStored: () => boolean; isRestore: () => boolean; restore: (sessionId: string) => void; continue: (sessionId: string) => void; clear: () => void; cancel: () => Promise<void>; renameCurrentSession: (newName: string) => Promise<void>; isCurrentSession: (sessionId?: string | undefined) => boolean; getSearchOptions: (sessionId?: string | undefined) => Required<Pick<",
+              "<string | undefined>; isStored: () => boolean; isRestore: () => boolean; restore: (sessionId: string) => void; continue: (sessionId: string) => void; cancel: () => Promise<void>; renameCurrentSession: (newName: string) => Promise<void>; isCurrentSession: (sessionId?: string | undefined) => boolean; getSearchOptions: (sessionId?: string | undefined) => Required<Pick<",
               {
                 "pluginId": "data",
                 "scope": "common",
@@ -720,26 +720,8 @@
               "\nSearch sessions SO CRUD\n{@link ISessionsClient}"
             ],
             "signature": [
-              "{ get: (sessionId: string) => Promise<",
+              "{ create: ({ name, appId, locatorId, initialState, restoreState, sessionId, }: { name: string; appId: string; locatorId: string; initialState: Record<string, unknown>; restoreState: Record<string, unknown>; sessionId: string; }) => Promise<",
               "SearchSessionSavedObject",
-              ">; delete: (sessionId: string) => Promise<void>; create: ({ name, appId, locatorId, initialState, restoreState, sessionId, }: { name: string; appId: string; locatorId: string; initialState: Record<string, unknown>; restoreState: Record<string, unknown>; sessionId: string; }) => Promise<",
-              "SearchSessionSavedObject",
-              ">; find: (options: Omit<",
-              {
-                "pluginId": "@kbn/core-saved-objects-api-server",
-                "scope": "common",
-                "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-                "section": "def-common.SavedObjectsFindOptions",
-                "text": "SavedObjectsFindOptions"
-              },
-              ", \"type\">) => Promise<",
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataSearchPluginApi",
-                "section": "def-common.SearchSessionsFindResponse",
-                "text": "SearchSessionsFindResponse"
-              },
               ">; update: (sessionId: string, attributes: unknown) => Promise<",
               {
                 "pluginId": "@kbn/core-saved-objects-api-server",
@@ -756,23 +738,25 @@
                 "section": "def-common.SearchSessionSavedObjectAttributes",
                 "text": "SearchSessionSavedObjectAttributes"
               },
-              ">>; rename: (sessionId: string, newName: string) => Promise<",
+              ">>; get: (sessionId: string) => Promise<",
+              "SearchSessionSavedObject",
+              ">; delete: (sessionId: string) => Promise<void>; find: (options: Omit<",
               {
                 "pluginId": "@kbn/core-saved-objects-api-server",
                 "scope": "common",
                 "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-                "section": "def-common.SavedObjectsUpdateResponse",
-                "text": "SavedObjectsUpdateResponse"
+                "section": "def-common.SavedObjectsFindOptions",
+                "text": "SavedObjectsFindOptions"
               },
-              "<Pick<",
+              ", \"type\">) => Promise<",
               {
                 "pluginId": "data",
                 "scope": "common",
                 "docId": "kibDataSearchPluginApi",
-                "section": "def-common.SearchSessionSavedObjectAttributes",
-                "text": "SearchSessionSavedObjectAttributes"
+                "section": "def-common.SearchSessionsFindResponse",
+                "text": "SearchSessionsFindResponse"
               },
-              ", \"name\">>>; extend: (sessionId: string, expires: string) => Promise<",
+              ">; extend: (sessionId: string, expires: string) => Promise<",
               {
                 "pluginId": "@kbn/core-saved-objects-api-server",
                 "scope": "common",
@@ -788,7 +772,23 @@
                 "section": "def-common.SearchSessionSavedObjectAttributes",
                 "text": "SearchSessionSavedObjectAttributes"
               },
-              ", unknown>>; }"
+              ", unknown>>; rename: (sessionId: string, newName: string) => Promise<",
+              {
+                "pluginId": "@kbn/core-saved-objects-api-server",
+                "scope": "common",
+                "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
+                "section": "def-common.SavedObjectsUpdateResponse",
+                "text": "SavedObjectsUpdateResponse"
+              },
+              "<Pick<",
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataSearchPluginApi",
+                "section": "def-common.SearchSessionSavedObjectAttributes",
+                "text": "SearchSessionSavedObjectAttributes"
+              },
+              ", \"name\">>>; }"
             ],
             "path": "src/plugins/data/public/search/types.ts",
             "deprecated": false,
@@ -1300,26 +1300,8 @@
         "label": "ISessionsClient",
         "description": [],
         "signature": [
-          "{ get: (sessionId: string) => Promise<",
+          "{ create: ({ name, appId, locatorId, initialState, restoreState, sessionId, }: { name: string; appId: string; locatorId: string; initialState: Record<string, unknown>; restoreState: Record<string, unknown>; sessionId: string; }) => Promise<",
           "SearchSessionSavedObject",
-          ">; delete: (sessionId: string) => Promise<void>; create: ({ name, appId, locatorId, initialState, restoreState, sessionId, }: { name: string; appId: string; locatorId: string; initialState: Record<string, unknown>; restoreState: Record<string, unknown>; sessionId: string; }) => Promise<",
-          "SearchSessionSavedObject",
-          ">; find: (options: Omit<",
-          {
-            "pluginId": "@kbn/core-saved-objects-api-server",
-            "scope": "common",
-            "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-            "section": "def-common.SavedObjectsFindOptions",
-            "text": "SavedObjectsFindOptions"
-          },
-          ", \"type\">) => Promise<",
-          {
-            "pluginId": "data",
-            "scope": "common",
-            "docId": "kibDataSearchPluginApi",
-            "section": "def-common.SearchSessionsFindResponse",
-            "text": "SearchSessionsFindResponse"
-          },
           ">; update: (sessionId: string, attributes: unknown) => Promise<",
           {
             "pluginId": "@kbn/core-saved-objects-api-server",
@@ -1336,23 +1318,25 @@
             "section": "def-common.SearchSessionSavedObjectAttributes",
             "text": "SearchSessionSavedObjectAttributes"
           },
-          ">>; rename: (sessionId: string, newName: string) => Promise<",
+          ">>; get: (sessionId: string) => Promise<",
+          "SearchSessionSavedObject",
+          ">; delete: (sessionId: string) => Promise<void>; find: (options: Omit<",
           {
             "pluginId": "@kbn/core-saved-objects-api-server",
             "scope": "common",
             "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-            "section": "def-common.SavedObjectsUpdateResponse",
-            "text": "SavedObjectsUpdateResponse"
+            "section": "def-common.SavedObjectsFindOptions",
+            "text": "SavedObjectsFindOptions"
           },
-          "<Pick<",
+          ", \"type\">) => Promise<",
           {
             "pluginId": "data",
             "scope": "common",
             "docId": "kibDataSearchPluginApi",
-            "section": "def-common.SearchSessionSavedObjectAttributes",
-            "text": "SearchSessionSavedObjectAttributes"
+            "section": "def-common.SearchSessionsFindResponse",
+            "text": "SearchSessionsFindResponse"
           },
-          ", \"name\">>>; extend: (sessionId: string, expires: string) => Promise<",
+          ">; extend: (sessionId: string, expires: string) => Promise<",
           {
             "pluginId": "@kbn/core-saved-objects-api-server",
             "scope": "common",
@@ -1368,7 +1352,23 @@
             "section": "def-common.SearchSessionSavedObjectAttributes",
             "text": "SearchSessionSavedObjectAttributes"
           },
-          ", unknown>>; }"
+          ", unknown>>; rename: (sessionId: string, newName: string) => Promise<",
+          {
+            "pluginId": "@kbn/core-saved-objects-api-server",
+            "scope": "common",
+            "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
+            "section": "def-common.SavedObjectsUpdateResponse",
+            "text": "SavedObjectsUpdateResponse"
+          },
+          "<Pick<",
+          {
+            "pluginId": "data",
+            "scope": "common",
+            "docId": "kibDataSearchPluginApi",
+            "section": "def-common.SearchSessionSavedObjectAttributes",
+            "text": "SearchSessionSavedObjectAttributes"
+          },
+          ", \"name\">>>; }"
         ],
         "path": "src/plugins/data/public/search/session/sessions_client.ts",
         "deprecated": false,
@@ -1383,7 +1383,7 @@
         "label": "ISessionService",
         "description": [],
         "signature": [
-          "{ start: () => string; save: () => Promise<void>; destroy: () => void; readonly state$: ",
+          "{ start: () => string; save: () => Promise<void>; clear: () => void; destroy: () => void; readonly state$: ",
           "Observable",
           "<",
           {
@@ -1401,7 +1401,7 @@
           "Observable",
           "<boolean>; hasAccess: () => boolean; trackSearch: (searchDescriptor: TrackSearchDescriptor) => TrackSearchHandler; getSessionId: () => string | undefined; getSession$: () => ",
           "Observable",
-          "<string | undefined>; isStored: () => boolean; isRestore: () => boolean; restore: (sessionId: string) => void; continue: (sessionId: string) => void; clear: () => void; cancel: () => Promise<void>; renameCurrentSession: (newName: string) => Promise<void>; isCurrentSession: (sessionId?: string | undefined) => boolean; getSearchOptions: (sessionId?: string | undefined) => Required<Pick<",
+          "<string | undefined>; isStored: () => boolean; isRestore: () => boolean; restore: (sessionId: string) => void; continue: (sessionId: string) => void; cancel: () => Promise<void>; renameCurrentSession: (newName: string) => Promise<void>; isCurrentSession: (sessionId?: string | undefined) => boolean; getSearchOptions: (sessionId?: string | undefined) => Required<Pick<",
           {
             "pluginId": "data",
             "scope": "common",
@@ -1606,7 +1606,7 @@
                 "label": "config",
                 "description": [],
                 "signature": [
-                  "Readonly<{} & { search: Readonly<{} & { aggs: Readonly<{} & { shardDelay: Readonly<{} & { enabled: boolean; }>; }>; asyncSearch: Readonly<{ pollInterval?: number | undefined; } & { waitForCompletion: moment.Duration; keepAlive: moment.Duration; batchedReduceSize: number; }>; sessions: Readonly<{} & { enabled: boolean; notTouchedTimeout: moment.Duration; maxUpdateRetries: number; defaultExpiration: moment.Duration; management: Readonly<{} & { refreshInterval: moment.Duration; maxSessions: number; refreshTimeout: moment.Duration; expiresSoonWarning: moment.Duration; }>; }>; }>; }>"
+                  "Readonly<{} & { search: Readonly<{} & { aggs: Readonly<{} & { shardDelay: Readonly<{} & { enabled: boolean; }>; }>; asyncSearch: Readonly<{ pollInterval?: number | undefined; } & { waitForCompletion: moment.Duration; keepAlive: moment.Duration; batchedReduceSize: number; }>; sessions: Readonly<{} & { enabled: boolean; management: Readonly<{} & { refreshInterval: moment.Duration; maxSessions: number; refreshTimeout: moment.Duration; expiresSoonWarning: moment.Duration; }>; notTouchedTimeout: moment.Duration; maxUpdateRetries: number; defaultExpiration: moment.Duration; }>; }>; }>"
                 ],
                 "path": "src/plugins/data/server/search/session/session_service.ts",
                 "deprecated": false,
@@ -2846,7 +2846,7 @@
                 "section": "def-common.SearchSessionStatusResponse",
                 "text": "SearchSessionStatusResponse"
               },
-              ">; getConfig: () => Readonly<{} & { enabled: boolean; notTouchedTimeout: moment.Duration; maxUpdateRetries: number; defaultExpiration: moment.Duration; management: Readonly<{} & { refreshInterval: moment.Duration; maxSessions: number; refreshTimeout: moment.Duration; expiresSoonWarning: moment.Duration; }>; }>; }"
+              ">; getConfig: () => Readonly<{} & { enabled: boolean; management: Readonly<{} & { refreshInterval: moment.Duration; maxSessions: number; refreshTimeout: moment.Duration; expiresSoonWarning: moment.Duration; }>; notTouchedTimeout: moment.Duration; maxUpdateRetries: number; defaultExpiration: moment.Duration; }>; }"
             ],
             "path": "src/plugins/data/server/search/session/session_service.ts",
             "deprecated": false,
@@ -3134,11 +3134,9 @@
                 "label": "options",
                 "description": [],
                 "signature": [
-                  "{ filter?: any; search?: string | undefined; fields?: string[] | undefined; aggs?: Record<string, ",
+                  "{ page?: number | undefined; filter?: any; aggs?: Record<string, ",
                   "AggregationsAggregationContainer",
-                  "> | undefined; searchAfter?: ",
-                  "SortResults",
-                  " | undefined; pit?: ",
+                  "> | undefined; search?: string | undefined; namespaces?: string[] | undefined; sortField?: string | undefined; fields?: string[] | undefined; preference?: string | undefined; pit?: ",
                   {
                     "pluginId": "@kbn/core-saved-objects-api-server",
                     "scope": "common",
@@ -3146,9 +3144,11 @@
                     "section": "def-common.SavedObjectsPitParams",
                     "text": "SavedObjectsPitParams"
                   },
-                  " | undefined; page?: number | undefined; perPage?: number | undefined; sortField?: string | undefined; sortOrder?: ",
+                  " | undefined; perPage?: number | undefined; defaultSearchOperator?: \"AND\" | \"OR\" | undefined; searchFields?: string[] | undefined; rootSearchFields?: string[] | undefined; sortOrder?: ",
                   "SortOrder",
-                  " | undefined; searchFields?: string[] | undefined; rootSearchFields?: string[] | undefined; hasReference?: ",
+                  " | undefined; searchAfter?: ",
+                  "SortResults",
+                  " | undefined; hasReference?: ",
                   {
                     "pluginId": "@kbn/core-saved-objects-api-server",
                     "scope": "common",
@@ -3180,7 +3180,7 @@
                     "section": "def-common.SavedObjectsFindOptionsReference",
                     "text": "SavedObjectsFindOptionsReference"
                   },
-                  "[] | undefined; hasNoReferenceOperator?: \"AND\" | \"OR\" | undefined; defaultSearchOperator?: \"AND\" | \"OR\" | undefined; namespaces?: string[] | undefined; typeToNamespacesMap?: Map<string, string[] | undefined> | undefined; preference?: string | undefined; }"
+                  "[] | undefined; hasNoReferenceOperator?: \"AND\" | \"OR\" | undefined; typeToNamespacesMap?: Map<string, string[] | undefined> | undefined; }"
                 ],
                 "path": "src/plugins/data/server/search/session/types.ts",
                 "deprecated": false,
@@ -7225,7 +7225,19 @@
                     "section": "def-common.SearchSource",
                     "text": "SearchSource"
                   },
-                  "; history: ",
+                  "; fetch: (options?: ",
+                  {
+                    "pluginId": "data",
+                    "scope": "common",
+                    "docId": "kibDataSearchPluginApi",
+                    "section": "def-common.SearchSourceSearchOptions",
+                    "text": "SearchSourceSearchOptions"
+                  },
+                  ") => Promise<",
+                  "SearchResponse",
+                  "<unknown, Record<string, ",
+                  "AggregationsAggregate",
+                  ">>>; history: ",
                   "SearchRequest",
                   "[]; setOverwriteDataViewType: (overwriteType: string | false | undefined) => void; setField: <K extends keyof ",
                   {
@@ -7393,19 +7405,7 @@
                   "SearchResponse",
                   "<T, Record<string, ",
                   "AggregationsAggregate",
-                  ">>>>; fetch: (options?: ",
-                  {
-                    "pluginId": "data",
-                    "scope": "common",
-                    "docId": "kibDataSearchPluginApi",
-                    "section": "def-common.SearchSourceSearchOptions",
-                    "text": "SearchSourceSearchOptions"
-                  },
-                  ") => Promise<",
-                  "SearchResponse",
-                  "<unknown, Record<string, ",
-                  "AggregationsAggregate",
-                  ">>>; onRequestStart: (handler: (searchSource: ",
+                  ">>>>; onRequestStart: (handler: (searchSource: ",
                   {
                     "pluginId": "data",
                     "scope": "common",
@@ -8922,6 +8922,7 @@
             "label": "filterFieldTypes",
             "description": [],
             "signature": [
+              "\"*\" | ",
               {
                 "pluginId": "@kbn/field-types",
                 "scope": "common",
@@ -8929,7 +8930,7 @@
                 "section": "def-common.KBN_FIELD_TYPES",
                 "text": "KBN_FIELD_TYPES"
               },
-              " | \"*\" | ",
+              " | ",
               {
                 "pluginId": "@kbn/field-types",
                 "scope": "common",
@@ -15698,7 +15699,7 @@
             "section": "def-common.DataView",
             "text": "DataView"
           },
-          ", aggName: \"date_histogram\" | \"date_range\", getConfig: <T = any>(key: string) => T, { shouldDetectTimeZone }: { shouldDetectTimeZone?: boolean | undefined; } | undefined) => string"
+          ", aggName: \"date_range\" | \"date_histogram\", getConfig: <T = any>(key: string) => T, { shouldDetectTimeZone }: { shouldDetectTimeZone?: boolean | undefined; } | undefined) => string"
         ],
         "path": "src/plugins/data/common/search/aggs/utils/infer_time_zone.ts",
         "deprecated": false,
@@ -15782,7 +15783,7 @@
             "label": "aggName",
             "description": [],
             "signature": [
-              "\"date_histogram\" | \"date_range\""
+              "\"date_range\" | \"date_histogram\""
             ],
             "path": "src/plugins/data/common/search/aggs/utils/infer_time_zone.ts",
             "deprecated": false,
@@ -26200,7 +26201,7 @@
             "label": "aggregate",
             "description": [],
             "signature": [
-              "\"min\" | \"max\" | \"concat\" | \"sum\" | \"average\""
+              "\"min\" | \"max\" | \"sum\" | \"concat\" | \"average\""
             ],
             "path": "src/plugins/data/common/search/aggs/metrics/top_hit.ts",
             "deprecated": false,
@@ -31599,7 +31600,7 @@
         "label": "AggConfigOptions",
         "description": [],
         "signature": [
-          "{ schema?: string | undefined; type: ",
+          "{ type: ",
           {
             "pluginId": "data",
             "scope": "common",
@@ -31607,7 +31608,7 @@
             "section": "def-common.IAggType",
             "text": "IAggType"
           },
-          "; params?: {} | ",
+          "; id?: string | undefined; params?: {} | ",
           {
             "pluginId": "@kbn/utility-types",
             "scope": "common",
@@ -31615,7 +31616,7 @@
             "section": "def-common.SerializableRecord",
             "text": "SerializableRecord"
           },
-          " | undefined; id?: string | undefined; enabled?: boolean | undefined; }"
+          " | undefined; schema?: string | undefined; enabled?: boolean | undefined; }"
         ],
         "path": "src/plugins/data/common/search/aggs/agg_config.ts",
         "deprecated": false,
@@ -32524,7 +32525,7 @@
         "label": "CreateAggConfigParams",
         "description": [],
         "signature": [
-          "{ schema?: string | undefined; type: string | ",
+          "{ type: string | ",
           {
             "pluginId": "data",
             "scope": "common",
@@ -32532,7 +32533,7 @@
             "section": "def-common.IAggType",
             "text": "IAggType"
           },
-          "; params?: {} | ",
+          "; id?: string | undefined; params?: {} | ",
           {
             "pluginId": "@kbn/utility-types",
             "scope": "common",
@@ -32540,7 +32541,7 @@
             "section": "def-common.SerializableRecord",
             "text": "SerializableRecord"
           },
-          " | undefined; id?: string | undefined; enabled?: boolean | undefined; }"
+          " | undefined; schema?: string | undefined; enabled?: boolean | undefined; }"
         ],
         "path": "src/plugins/data/common/search/aggs/agg_configs.ts",
         "deprecated": false,
@@ -34273,6 +34274,7 @@
         "label": "FieldTypes",
         "description": [],
         "signature": [
+          "\"*\" | ",
           {
             "pluginId": "@kbn/field-types",
             "scope": "common",
@@ -34280,7 +34282,7 @@
             "section": "def-common.KBN_FIELD_TYPES",
             "text": "KBN_FIELD_TYPES"
           },
-          " | \"*\" | ",
+          " | ",
           {
             "pluginId": "@kbn/field-types",
             "scope": "common",
@@ -34968,7 +34970,19 @@
             "section": "def-common.SearchSource",
             "text": "SearchSource"
           },
-          "; history: ",
+          "; fetch: (options?: ",
+          {
+            "pluginId": "data",
+            "scope": "common",
+            "docId": "kibDataSearchPluginApi",
+            "section": "def-common.SearchSourceSearchOptions",
+            "text": "SearchSourceSearchOptions"
+          },
+          ") => Promise<",
+          "SearchResponse",
+          "<unknown, Record<string, ",
+          "AggregationsAggregate",
+          ">>>; history: ",
           "SearchRequest",
           "[]; setOverwriteDataViewType: (overwriteType: string | false | undefined) => void; setField: <K extends keyof ",
           {
@@ -35136,19 +35150,7 @@
           "SearchResponse",
           "<T, Record<string, ",
           "AggregationsAggregate",
-          ">>>>; fetch: (options?: ",
-          {
-            "pluginId": "data",
-            "scope": "common",
-            "docId": "kibDataSearchPluginApi",
-            "section": "def-common.SearchSourceSearchOptions",
-            "text": "SearchSourceSearchOptions"
-          },
-          ") => Promise<",
-          "SearchResponse",
-          "<unknown, Record<string, ",
-          "AggregationsAggregate",
-          ">>>; onRequestStart: (handler: (searchSource: ",
+          ">>>>; onRequestStart: (handler: (searchSource: ",
           {
             "pluginId": "data",
             "scope": "common",
@@ -35500,7 +35502,7 @@
         "label": "SearchTypes",
         "description": [],
         "signature": [
-          "string | number | boolean | object | string[] | number[] | boolean[] | object[] | undefined"
+          "string | number | boolean | object | string[] | boolean[] | number[] | object[] | undefined"
         ],
         "path": "src/plugins/data/common/search/expressions/eql_raw_response.ts",
         "deprecated": false,
@@ -36124,7 +36126,7 @@
                     "label": "types",
                     "description": [],
                     "signature": [
-                      "(\"number\" | \"string\")[]"
+                      "(\"string\" | \"number\")[]"
                     ],
                     "path": "src/plugins/data/common/search/expressions/date_range.ts",
                     "deprecated": false,
@@ -36165,7 +36167,7 @@
                     "label": "types",
                     "description": [],
                     "signature": [
-                      "(\"number\" | \"string\")[]"
+                      "(\"string\" | \"number\")[]"
                     ],
                     "path": "src/plugins/data/common/search/expressions/date_range.ts",
                     "deprecated": false,
@@ -37897,7 +37899,7 @@
                     "label": "types",
                     "description": [],
                     "signature": [
-                      "(\"number\" | \"string\")[]"
+                      "(\"string\" | \"number\")[]"
                     ],
                     "path": "src/plugins/data/common/search/expressions/geo_point.ts",
                     "deprecated": false,
@@ -38293,7 +38295,7 @@
             "label": "inputTypes",
             "description": [],
             "signature": [
-              "(\"null\" | \"kibana_context\")[]"
+              "(\"kibana_context\" | \"null\")[]"
             ],
             "path": "src/plugins/data/common/search/expressions/kibana.ts",
             "deprecated": false,
@@ -41107,7 +41109,7 @@
                     "label": "types",
                     "description": [],
                     "signature": [
-                      "(\"number\" | \"string\")[]"
+                      "(\"string\" | \"number\")[]"
                     ],
                     "path": "src/plugins/data/common/search/expressions/range.ts",
                     "deprecated": false,
@@ -41148,7 +41150,7 @@
                     "label": "types",
                     "description": [],
                     "signature": [
-                      "(\"number\" | \"string\")[]"
+                      "(\"string\" | \"number\")[]"
                     ],
                     "path": "src/plugins/data/common/search/expressions/range.ts",
                     "deprecated": false,
@@ -41189,7 +41191,7 @@
                     "label": "types",
                     "description": [],
                     "signature": [
-                      "(\"number\" | \"string\")[]"
+                      "(\"string\" | \"number\")[]"
                     ],
                     "path": "src/plugins/data/common/search/expressions/range.ts",
                     "deprecated": false,
@@ -41230,7 +41232,7 @@
                     "label": "types",
                     "description": [],
                     "signature": [
-                      "(\"number\" | \"string\")[]"
+                      "(\"string\" | \"number\")[]"
                     ],
                     "path": "src/plugins/data/common/search/expressions/range.ts",
                     "deprecated": false,
