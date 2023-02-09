@@ -964,34 +964,59 @@ export const getCaseUsersMockResponse = (): CaseUsers => {
     participants: [
       {
         user: {
-          email: 'case_all@elastic.co',
-          full_name: 'Cases',
-          username: 'cases_all',
+          email: 'participant_1@elastic.co',
+          full_name: 'Participant 1',
+          username: 'participant_1',
+        },
+      },
+      {
+        user: {
+          email: 'participant_2@elastic.co',
+          full_name: null,
+          username: 'participant_2',
         },
       },
       {
         user: {
           email: null,
           full_name: null,
-          username: 'elastic',
+          username: 'participant_3',
         },
-        uid: 'u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0',
+      },
+      {
+        user: {
+          email: null,
+          full_name: null,
+          username: 'participant_4',
+        },
+        uid: 'participant_4_uid',
+        avatar: { initials: 'P4' },
+      },
+      {
+        user: {
+          email: 'participant_5@elastic.co',
+          full_name: 'Participant 5',
+          username: 'participant_5',
+        },
+        uid: 'participant_5_uid',
       },
     ],
     reporter: {
       user: {
-        email: 'case_all@elastic.co',
-        full_name: 'Cases',
-        username: 'cases_all',
+        email: 'reporter_1@elastic.co',
+        full_name: 'Reporter 1',
+        username: 'reporter_1',
       },
+      uid: 'reporter_1_uid',
+      avatar: { initials: 'R1' },
     },
 
     assignees: [
       {
         user: {
-          email: '',
-          full_name: '',
-          username: 'alerts_read_only',
+          email: null,
+          full_name: null,
+          username: null,
         },
         uid: 'u_62h24XVQzG4-MuH1-DqPmookrJY23aRa9h4fyULR6I8_0',
       },
@@ -1027,7 +1052,7 @@ export const getCaseUsersMockResponse = (): CaseUsers => {
           full_name: '',
           username: 'cases_no_connectors',
         },
-        uid: 'u_o0kPgaXwJ7odc3sNWH83yx9JMoVbou_z2CgIEhl2I8M_0',
+        uid: 'u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0',
       },
       {
         user: {
@@ -1035,7 +1060,7 @@ export const getCaseUsersMockResponse = (): CaseUsers => {
           full_name: 'Valid Chimpanzee',
           username: 'valid_chimpanzee',
         },
-        uid: 'u_wEtPffVJIgxWIN8W79Rp84bbORN6x0wKiJ5eTsQvpBA_0',
+        uid: 'u_A_tM4n0wPkdiQ9smmd8o0Hr_h61XQfu8aRPh9GMoRoc_0',
       },
     ],
   };
