@@ -319,17 +319,35 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = memo(
         const datum = v.datum;
         if (!datum) return;
         const { x, y } = datum;
-        if (x === v.value) {
-          points.push({
-            column: xAxisColumnIndex,
-            value: x,
+        if (x === v.value && xAxisColumn) {
+          const row = table.rows.find((r) => {
+            if (formattedTable.formattedColumns[xAxisColumn.id]) {
+              // stringify the value to compare with the chart value
+              return xValuesFormatter.convert(r[xAxisColumn.id]) === x;
+            }
+            return r[xAxisColumn.id] === x;
           });
+          if (row) {
+            points.push({
+              column: xAxisColumnIndex,
+              value: row[xAxisColumn.id],
+            });
+          }
         }
         if (y === v.value && yAxisColumn) {
-          points.push({
-            column: yAxisColumnIndex,
-            value: y,
+          const row = table.rows.find((r) => {
+            if (formattedTable.formattedColumns[yAxisColumn.id]) {
+              // stringify the value to compare with the chart value
+              return yValuesFormatter.convert(r[yAxisColumn.id]) === y;
+            }
+            return r[yAxisColumn.id] === y;
           });
+          if (row) {
+            points.push({
+              column: yAxisColumnIndex,
+              value: row[yAxisColumn.id],
+            });
+          }
         }
         if (points.length) {
           points.forEach((p) => {
