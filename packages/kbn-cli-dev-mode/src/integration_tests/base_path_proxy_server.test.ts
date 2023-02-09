@@ -84,7 +84,7 @@ describe('BasePathProxyServer', () => {
   test('root URL will return a redirect location with exactly 3 characters that are a-z (or spalger)', async () => {
     const res = await proxySupertest.get('/');
     const location = res.header.location;
-    expect(location).toMatch(/^(spalger|[a-z]{3})$/);
+    expect(location).toMatch(/^\/(spalger|[a-z]{3})$/);
   });
 
   test('forwards request with the correct path', async () => {
