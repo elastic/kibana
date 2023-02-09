@@ -702,7 +702,7 @@
             "label": "ticksPosition",
             "description": [],
             "signature": [
-              "\"auto\" | \"hidden\" | \"bands\""
+              "\"hidden\" | \"auto\" | \"bands\""
             ],
             "path": "src/plugins/chart_expressions/expression_gauge/common/types/expression_functions.ts",
             "deprecated": false,
@@ -716,7 +716,7 @@
             "label": "labelMajorMode",
             "description": [],
             "signature": [
-              "\"none\" | \"auto\" | \"custom\""
+              "\"none\" | \"custom\" | \"auto\""
             ],
             "path": "src/plugins/chart_expressions/expression_gauge/common/types/expression_functions.ts",
             "deprecated": false,
@@ -831,7 +831,7 @@
             "label": "shape",
             "description": [],
             "signature": [
-              "\"horizontalBullet\" | \"verticalBullet\" | \"arc\" | \"circle\""
+              "\"arc\" | \"circle\" | \"horizontalBullet\" | \"verticalBullet\""
             ],
             "path": "src/plugins/chart_expressions/expression_gauge/common/types/expression_functions.ts",
             "deprecated": false,
@@ -1112,7 +1112,7 @@
         "label": "GaugeLabelMajorMode",
         "description": [],
         "signature": [
-          "\"none\" | \"auto\" | \"custom\""
+          "\"none\" | \"custom\" | \"auto\""
         ],
         "path": "src/plugins/chart_expressions/expression_gauge/common/types/expression_functions.ts",
         "deprecated": false,
@@ -1175,7 +1175,7 @@
         "label": "GaugeShape",
         "description": [],
         "signature": [
-          "\"horizontalBullet\" | \"verticalBullet\" | \"arc\" | \"circle\""
+          "\"arc\" | \"circle\" | \"horizontalBullet\" | \"verticalBullet\""
         ],
         "path": "src/plugins/chart_expressions/expression_gauge/common/types/expression_functions.ts",
         "deprecated": false,
@@ -1190,7 +1190,7 @@
         "label": "GaugeTicksPosition",
         "description": [],
         "signature": [
-          "\"auto\" | \"hidden\" | \"bands\""
+          "\"hidden\" | \"auto\" | \"bands\""
         ],
         "path": "src/plugins/chart_expressions/expression_gauge/common/types/expression_functions.ts",
         "deprecated": false,

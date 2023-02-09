@@ -55,6 +55,7 @@ export function Stackframe({
           codeLanguage={codeLanguage}
           stackframe={stackframe}
           isLibraryFrame={isLibraryFrame}
+          idx={id}
         />
       </NoContextFrameHeadingWrapper>
     );
@@ -67,6 +68,7 @@ export function Stackframe({
           codeLanguage={codeLanguage}
           stackframe={stackframe}
           isLibraryFrame={isLibraryFrame}
+          idx={id}
         />
       }
       id={id}

@@ -53,6 +53,7 @@ import {
   migrateInstallationToV860,
   migratePackagePolicyToV860,
 } from './migrations/to_v8_6_0';
+import { migratePackagePolicyToV870 } from './migrations/security_solution';
 
 /*
  * Saved object types and mappings
@@ -112,6 +113,12 @@ const getSavedObjectTypes = (
         monitoring_output_id: { type: 'keyword' },
         download_source_id: { type: 'keyword' },
         fleet_server_host_id: { type: 'keyword' },
+        agent_features: {
+          properties: {
+            name: { type: 'keyword' },
+            enabled: { type: 'boolean' },
+          },
+        },
       },
     },
     migrations: {
@@ -177,48 +184,13 @@ const getSavedObjectTypes = (
           },
         },
         elasticsearch: {
-          enabled: false,
-          properties: {
-            privileges: {
-              properties: {
-                cluster: { type: 'keyword' },
-              },
-            },
-          },
+          dynamic: false,
+          properties: {},
         },
         vars: { type: 'flattened' },
         inputs: {
-          type: 'nested',
-          enabled: false,
-          properties: {
-            type: { type: 'keyword' },
-            policy_template: { type: 'keyword' },
-            enabled: { type: 'boolean' },
-            vars: { type: 'flattened' },
-            config: { type: 'flattened' },
-            compiled_input: { type: 'flattened' },
-            streams: {
-              type: 'nested',
-              properties: {
-                id: { type: 'keyword' },
-                enabled: { type: 'boolean' },
-                data_stream: {
-                  properties: {
-                    dataset: { type: 'keyword' },
-                    type: { type: 'keyword' },
-                    elasticsearch: {
-                      properties: {
-                        privileges: { type: 'flattened' },
-                      },
-                    },
-                  },
-                },
-                vars: { type: 'flattened' },
-                config: { type: 'flattened' },
-                compiled_stream: { type: 'flattened' },
-              },
-            },
-          },
+          dynamic: false,
+          properties: {},
         },
         revision: { type: 'integer' },
         updated_at: { type: 'date' },
@@ -240,6 +212,7 @@ const getSavedObjectTypes = (
       '8.4.0': migratePackagePolicyToV840,
       '8.5.0': migratePackagePolicyToV850,
       '8.6.0': migratePackagePolicyToV860,
+      '8.7.0': migratePackagePolicyToV870,
     },
   },
   [PACKAGES_SAVED_OBJECT_TYPE]: {
@@ -256,8 +229,8 @@ const getSavedObjectTypes = (
         internal: { type: 'boolean' },
         keep_policies_up_to_date: { type: 'boolean', index: false },
         es_index_patterns: {
-          enabled: false,
-          type: 'object',
+          dynamic: false,
+          properties: {},
         },
         verification_status: { type: 'keyword' },
         verification_key_id: { type: 'keyword' },
@@ -270,13 +243,13 @@ const getSavedObjectTypes = (
           },
         },
         installed_kibana: {
-          type: 'object',
-          enabled: false,
+          dynamic: false,
+          properties: {},
         },
         installed_kibana_space_id: { type: 'keyword' },
         package_assets: {
-          type: 'object',
-          enabled: false,
+          dynamic: false,
+          properties: {},
         },
         install_started_at: { type: 'date' },
         install_version: { type: 'keyword' },
@@ -289,6 +262,7 @@ const getSavedObjectTypes = (
             data_stream: { type: 'keyword' },
             features: {
               type: 'nested',
+              dynamic: false,
               properties: {
                 synthetic_source: { type: 'boolean' },
                 tsdb: { type: 'boolean' },

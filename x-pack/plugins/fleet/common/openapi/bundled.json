@@ -880,24 +880,6 @@
         },
         "operationId": "update-package",
         "description": "",
-        "parameters": [
-          {
-            "schema": {
-              "type": "string"
-            },
-            "name": "pkgName",
-            "in": "path",
-            "required": true
-          },
-          {
-            "schema": {
-              "type": "string"
-            },
-            "name": "pkgVersion",
-            "in": "path",
-            "required": true
-          }
-        ],
         "requestBody": {
           "content": {
             "application/json": {
@@ -1369,6 +1351,17 @@
           },
           {
             "$ref": "#/components/parameters/sort_order"
+          },
+          {
+            "$ref": "#/components/parameters/with_metrics"
+          },
+          {
+            "name": "getStatusSummary",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
           }
         ],
         "security": [
@@ -1569,7 +1562,12 @@
             }
           }
         },
-        "operationId": "get-agent"
+        "operationId": "get-agent",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/with_metrics"
+          }
+        ]
       },
       "put": {
         "summary": "Agent - Update",
@@ -3611,14 +3609,6 @@
         "parameters": [
           {
             "schema": {
-              "type": "string"
-            },
-            "name": "packagePolicyId",
-            "in": "path",
-            "required": true
-          },
-          {
-            "schema": {
               "type": "boolean"
             },
             "name": "force",
@@ -4258,14 +4248,6 @@
         },
         "parameters": [
           {
-            "schema": {
-              "type": "string"
-            },
-            "name": "itemId",
-            "in": "path",
-            "required": true
-          },
-          {
             "$ref": "#/components/parameters/kbn_xsrf"
           }
         ]
@@ -4317,14 +4299,6 @@
           }
         },
         "parameters": [
-          {
-            "schema": {
-              "type": "string"
-            },
-            "name": "itemId",
-            "in": "path",
-            "required": true
-          },
           {
             "$ref": "#/components/parameters/kbn_xsrf"
           }
@@ -4488,14 +4462,6 @@
         },
         "parameters": [
           {
-            "schema": {
-              "type": "string"
-            },
-            "name": "itemId",
-            "in": "path",
-            "required": true
-          },
-          {
             "$ref": "#/components/parameters/kbn_xsrf"
           }
         ]
@@ -4553,14 +4519,6 @@
           }
         },
         "parameters": [
-          {
-            "schema": {
-              "type": "string"
-            },
-            "name": "itemId",
-            "in": "path",
-            "required": true
-          },
           {
             "$ref": "#/components/parameters/kbn_xsrf"
           }
@@ -4707,6 +4665,15 @@
             "asc",
             "desc"
           ]
+        }
+      },
+      "with_metrics": {
+        "name": "withMetrics",
+        "in": "query",
+        "description": "Return agent metrics, false by default",
+        "required": false,
+        "schema": {
+          "type": "boolean"
         }
       }
     },
@@ -5376,6 +5343,19 @@
             "items": {
               "$ref": "#/components/schemas/agent_component"
             }
+          },
+          "metrics": {
+            "type": "object",
+            "properties": {
+              "cpu_avg": {
+                "type": "number",
+                "description": "Average agent CPU usage during the last 5 minutes, number between 0-1"
+              },
+              "memory_size_byte_avg": {
+                "type": "number",
+                "description": "Average agent memory consumption during the last 5 minutes"
+              }
+            }
           }
         },
         "required": [
@@ -5411,6 +5391,38 @@
           },
           "perPage": {
             "type": "number"
+          },
+          "statusSummary": {
+            "type": "object",
+            "properties": {
+              "offline": {
+                "type": "number"
+              },
+              "error": {
+                "type": "number"
+              },
+              "online": {
+                "type": "number"
+              },
+              "inactive": {
+                "type": "number"
+              },
+              "enrolling": {
+                "type": "number"
+              },
+              "unenrolling": {
+                "type": "number"
+              },
+              "unenrolled": {
+                "type": "number"
+              },
+              "updating": {
+                "type": "number"
+              },
+              "degraded'": {
+                "type": "number"
+              }
+            }
           }
         },
         "required": [
@@ -5795,6 +5807,24 @@
               },
               "agents": {
                 "type": "number"
+              },
+              "agent_features": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "name": {
+                      "type": "string"
+                    },
+                    "enabled": {
+                      "type": "boolean"
+                    }
+                  },
+                  "required": [
+                    "name",
+                    "enabled"
+                  ]
+                }
               }
             },
             "required": [

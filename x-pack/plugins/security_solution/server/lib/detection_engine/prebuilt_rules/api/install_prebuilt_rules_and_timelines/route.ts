@@ -32,6 +32,7 @@ import { rulesToMap } from '../../logic/utils';
 
 import { installPrepackagedTimelines } from '../../../../timeline/routes/prepackaged_timelines/install_prepackaged_timelines';
 import { buildSiemResponse } from '../../../routes/utils';
+import { installPrebuiltRulesPackage } from './install_prebuilt_rules_package';
 
 export const installPrebuiltRulesAndTimelinesRoute = (router: SecuritySolutionPluginRouter) => {
   router.put(
@@ -103,7 +104,14 @@ export const createPrepackagedRules = async (
     await exceptionsListClient.createEndpointList();
   }
 
-  const latestPrepackagedRulesMap = await getLatestPrebuiltRules(ruleAssetsClient);
+  let latestPrepackagedRulesMap = await getLatestPrebuiltRules(ruleAssetsClient);
+  if (latestPrepackagedRulesMap.size === 0) {
+    // Seems no packages with prepackaged rules were installed, try to install the default rules package
+    await installPrebuiltRulesPackage(config, context);
+
+    // Try to get the prepackaged rules again
+    latestPrepackagedRulesMap = await getLatestPrebuiltRules(ruleAssetsClient);
+  }
   const installedPrePackagedRules = rulesToMap(await getExistingPrepackagedRules({ rulesClient }));
   const rulesToInstall = getRulesToInstall(latestPrepackagedRulesMap, installedPrePackagedRules);
   const rulesToUpdate = getRulesToUpdate(latestPrepackagedRulesMap, installedPrePackagedRules);

@@ -16,7 +16,14 @@ import {
   PartitionLayout,
   Settings,
 } from '@elastic/charts';
-import { EuiLoadingSpinner, EuiSpacer, EuiTitle } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiIconTip,
+  EuiLoadingSpinner,
+  EuiSpacer,
+  EuiTitle,
+} from '@elastic/eui';
 import { useTheme } from '@kbn/observability-plugin/public';
 import { formatMillisecond } from '../common/network_data/data_formatting';
 
@@ -47,9 +54,18 @@ export const NetworkTimingsDonut = () => {
 
   return (
     <>
-      <EuiTitle size="xs">
-        <h3>{TIMINGS_BREAKDOWN}</h3>
-      </EuiTitle>
+      <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+        <EuiFlexItem grow={false}>
+          <EuiTitle size="xs">
+            <h3>{TIMINGS_BREAKDOWN}</h3>
+          </EuiTitle>
+        </EuiFlexItem>
+
+        <EuiFlexItem grow={false}>
+          <EuiIconTip content={SUM_TIMINGS} position="right" />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+
       <EuiSpacer size="m" />
       <Chart size={{ height: 240 }}>
         <Settings theme={[themeOverrides, LIGHT_THEME ?? {}]} showLegend={false} />
@@ -58,7 +74,7 @@ export const NetworkTimingsDonut = () => {
           data={networkTimings.timingsWithLabels}
           layout={PartitionLayout.sunburst}
           valueAccessor={(d: Datum) => d?.value}
-          valueFormatter={(d: number) => formatMillisecond(d)}
+          valueFormatter={(d: number) => formatMillisecond(d, {})}
           layers={[
             {
               groupByRollup: (d: Datum) => d.label,
@@ -80,4 +96,8 @@ export const NetworkTimingsDonut = () => {
 
 const TIMINGS_BREAKDOWN = i18n.translate('xpack.synthetics.stepDetailsRoute.timingsBreakdown', {
   defaultMessage: 'Timing breakdown',
+});
+
+const SUM_TIMINGS = i18n.translate('xpack.synthetics.stepDetailsRoute.timingsBreakdown.info', {
+  defaultMessage: 'Sum of all network request timings',
 });

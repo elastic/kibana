@@ -502,6 +502,40 @@ describe('workspace_panel', () => {
     expect(trigger.exec).toHaveBeenCalledWith({ data: { ...eventData, timeFieldName: undefined } });
   });
 
+  it('should execute a multi value click trigger on expression event', async () => {
+    const framePublicAPI = createMockFramePublicAPI();
+    framePublicAPI.datasourceLayers = {
+      first: mockDatasource.publicAPIMock,
+    };
+    mockDatasource.toExpression.mockReturnValue('datasource');
+    mockDatasource.getLayers.mockReturnValue(['first']);
+    const props = defaultProps;
+
+    const mounted = await mountWithProvider(
+      <WorkspacePanel
+        {...props}
+        datasourceMap={{
+          testDatasource: mockDatasource,
+        }}
+        framePublicAPI={framePublicAPI}
+        visualizationMap={{
+          testVis: { ...mockVisualization, toExpression: () => 'testVis' },
+        }}
+        ExpressionRenderer={expressionRendererMock}
+        plugins={{ ...props.plugins, uiActions: uiActionsMock }}
+      />
+    );
+    instance = mounted.instance;
+
+    const onEvent = expressionRendererMock.mock.calls[0][0].onEvent!;
+
+    const eventData = { myData: true, table: { rows: [], columns: [] }, column: 0 };
+    onEvent({ name: 'multiFilter', data: eventData });
+
+    expect(uiActionsMock.getTrigger).toHaveBeenCalledWith(VIS_EVENT_TO_TRIGGER.multiFilter);
+    expect(trigger.exec).toHaveBeenCalledWith({ data: { ...eventData, timeFieldName: undefined } });
+  });
+
   it('should call getTriggerCompatibleActions on hasCompatibleActions call from within renderer', async () => {
     const framePublicAPI = createMockFramePublicAPI();
     framePublicAPI.datasourceLayers = {

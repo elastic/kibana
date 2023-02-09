@@ -5,24 +5,42 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useTheme } from '@kbn/observability-plugin/public';
 
+import { useAbsoluteDate } from '../../../../hooks';
 import { ClientPluginsStart } from '../../../../../../plugin';
 import * as labels from '../labels';
 
-interface Props {
-  from?: string;
-  to?: string;
-}
-export const MonitorTestRunsSparkline = ({ from = 'now-30d', to = 'now' }: Props) => {
+export const MonitorTestRunsSparkline = ({ monitorIds }: { monitorIds: string[] }) => {
   const { observability } = useKibana<ClientPluginsStart>().services;
 
   const { ExploratoryViewEmbeddable } = observability;
 
   const theme = useTheme();
+
+  const { from, to } = useAbsoluteDate({ from: 'now-30d', to: 'now' });
+
+  const attributes = useMemo(() => {
+    return [
+      {
+        seriesType: 'area' as const,
+        time: { from, to },
+        reportDefinitions: {
+          'monitor.id': monitorIds.length > 0 ? monitorIds : ['false-monitor-id'], // Show no data when monitorIds is empty
+        },
+        dataType: 'synthetics' as const,
+        selectedMetricField: 'monitor.check_group',
+        filters: [],
+        name: labels.TEST_RUNS_LABEL,
+        color: theme.eui.euiColorVis1,
+        operationType: 'unique_count',
+      },
+    ];
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [from, JSON.stringify({ ids: [...monitorIds].sort() }), theme.eui.euiColorVis1, to]);
 
   return (
     <ExploratoryViewEmbeddable
@@ -30,21 +48,7 @@ export const MonitorTestRunsSparkline = ({ from = 'now-30d', to = 'now' }: Props
       axisTitlesVisibility={{ x: false, yRight: false, yLeft: false }}
       legendIsVisible={false}
       hideTicks={true}
-      attributes={[
-        {
-          seriesType: 'area',
-          time: { from, to },
-          reportDefinitions: {
-            'monitor.id': [],
-            'observer.geo.name': [],
-          },
-          dataType: 'synthetics',
-          selectedMetricField: 'monitor.check_group',
-          name: labels.TEST_RUNS_LABEL,
-          color: theme.eui.euiColorVis1,
-          operationType: 'unique_count',
-        },
-      ]}
+      attributes={attributes}
       customHeight={'68px'}
     />
   );

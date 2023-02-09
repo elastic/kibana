@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React, { useState } from 'react';
 import { Switch, Route } from 'react-router-dom';
 
 import type { CustomIntegration } from '@kbn/custom-integrations-plugin/common';
@@ -26,7 +26,7 @@ import type {
   IntegrationCardReleaseLabel,
 } from '../../../../../../../common/types/models';
 
-import { useGetPackages } from '../../../../hooks';
+import { useGetPackagesQuery } from '../../../../hooks';
 
 import type { CategoryFacet, ExtendedIntegrationCategory } from './category_facets';
 
@@ -112,15 +112,15 @@ export const mapToCard = ({
 };
 
 export const EPMHomePage: React.FC = () => {
+  const [prereleaseEnabled, setPrereleaseEnabled] = useState<boolean>(false);
+
   // loading packages to find installed ones
-  const { data: allPackages, isLoading } = useGetPackages({
-    prerelease: true,
+  const { data: allPackages, isLoading } = useGetPackagesQuery({
+    prerelease: prereleaseEnabled,
   });
 
-  const installedPackages = useMemo(
-    () =>
-      (allPackages?.response || []).filter((pkg) => pkg.status === installationStatuses.Installed),
-    [allPackages?.response]
+  const installedPackages = (allPackages?.items || []).filter(
+    (pkg) => pkg.status === installationStatuses.Installed
   );
 
   const unverifiedPackageCount = installedPackages.filter(
@@ -141,7 +141,7 @@ export const EPMHomePage: React.FC = () => {
       </Route>
       <Route path={INTEGRATIONS_ROUTING_PATHS.integrations_all}>
         <DefaultLayout section="browse" notificationsBySection={notificationsBySection}>
-          <AvailablePackages />
+          <AvailablePackages setPrereleaseEnabled={setPrereleaseEnabled} />
         </DefaultLayout>
       </Route>
     </Switch>

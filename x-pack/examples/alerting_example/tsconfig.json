@@ -25,5 +25,6 @@
     "@kbn/developer-examples-plugin",
     "@kbn/i18n",
     "@kbn/core-application-common",
+    "@kbn/config-schema",
   ]
 }

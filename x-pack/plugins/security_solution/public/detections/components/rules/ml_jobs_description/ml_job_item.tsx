@@ -32,7 +32,7 @@ const MlJobItemComponent: FC<{
   return (
     <Wrapper {...props}>
       <div>
-        <MlJobLink jobId={job.id} />
+        <MlJobLink jobId={job.id} jobName={job.customSettings?.security_app_display_name} />
         <MlAuditIcon message={job.auditMessage} />
       </div>
       <EuiFlexGroup justifyContent="flexStart">

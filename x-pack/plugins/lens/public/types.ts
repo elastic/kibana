@@ -24,7 +24,11 @@ import type {
   RowClickContext,
   VisualizeFieldContext,
 } from '@kbn/ui-actions-plugin/public';
-import type { ClickTriggerEvent, BrushTriggerEvent } from '@kbn/charts-plugin/public';
+import type {
+  ClickTriggerEvent,
+  BrushTriggerEvent,
+  MultiClickTriggerEvent,
+} from '@kbn/charts-plugin/public';
 import type { IndexPatternAggRestrictions } from '@kbn/data-plugin/public';
 import type { FieldSpec, DataViewSpec, DataView } from '@kbn/data-views-plugin/common';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
@@ -285,7 +289,7 @@ type UserMessageDisplayLocation =
         | 'textBasedLanguagesQueryInput'
         | 'banner';
     }
-  | { id: 'dimensionTrigger'; dimensionId: string };
+  | { id: 'dimensionButton'; dimensionId: string };
 
 export type UserMessagesDisplayLocationId = UserMessageDisplayLocation['id'];
 
@@ -307,7 +311,7 @@ export interface UserMessageFilters {
 
 export type UserMessagesGetter = (
   locationId: UserMessagesDisplayLocationId | UserMessagesDisplayLocationId[] | undefined,
-  filters: UserMessageFilters
+  filters?: UserMessageFilters
 ) => UserMessage[];
 
 export type AddUserMessages = (messages: RemovableUserMessage[]) => () => void;
@@ -502,16 +506,6 @@ export interface Datasource<T = unknown, P = unknown> {
    */
   isTimeBased: (state: T, indexPatterns: IndexPatternMap) => boolean;
   /**
-   * Given the current state layer and a columnId will verify if the column configuration has errors
-   */
-  isValidColumn: (
-    state: T,
-    indexPatterns: IndexPatternMap,
-    layerId: string,
-    columnId: string,
-    dateRange?: DateRange
-  ) => boolean;
-  /**
    * Are these datasources equivalent?
    */
   isEqual: (
@@ -652,9 +646,6 @@ export type DatasourceDimensionProps<T> = SharedDimensionProps & {
   activeData?: Record<string, Datatable>;
   dateRange: DateRange;
   indexPatterns: IndexPatternMap;
-  hideTooltip?: boolean;
-  invalid?: boolean;
-  invalidMessage?: string | React.ReactNode;
 };
 export type ParamEditorCustomProps = Record<string, unknown> & {
   labels?: string[];
@@ -1241,8 +1232,6 @@ export interface Visualization<T = unknown, P = unknown> {
     columnId: string;
     label: string;
     hideTooltip?: boolean;
-    invalid?: boolean;
-    invalidMessage?: string | React.ReactNode;
   }) => JSX.Element | null;
   /**
    * Creates map of columns ids and unique lables. Used only for noDatasource layers
@@ -1338,6 +1327,12 @@ export interface LensTableRowContextMenuEvent {
 
 export function isLensFilterEvent(event: ExpressionRendererEvent): event is ClickTriggerEvent {
   return event.name === 'filter';
+}
+
+export function isLensMultiFilterEvent(
+  event: ExpressionRendererEvent
+): event is MultiClickTriggerEvent {
+  return event.name === 'multiFilter';
 }
 
 export function isLensBrushEvent(event: ExpressionRendererEvent): event is BrushTriggerEvent {

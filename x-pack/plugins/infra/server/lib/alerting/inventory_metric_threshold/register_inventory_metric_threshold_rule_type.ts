@@ -28,11 +28,12 @@ import {
   alertStateActionVariableDescription,
   cloudActionVariableDescription,
   containerActionVariableDescription,
-  groupActionVariableDescription,
   hostActionVariableDescription,
   labelsActionVariableDescription,
   metricActionVariableDescription,
   orchestratorActionVariableDescription,
+  originalAlertStateActionVariableDescription,
+  originalAlertStateWasActionVariableDescription,
   reasonActionVariableDescription,
   tagsActionVariableDescription,
   thresholdActionVariableDescription,
@@ -72,6 +73,13 @@ const condition = schema.object({
     })
   ),
 });
+
+const groupActionVariableDescription = i18n.translate(
+  'xpack.infra.inventory.alerting.groupActionVariableDescription',
+  {
+    defaultMessage: 'Name of the group reporting data',
+  }
+);
 
 export async function registerMetricInventoryThresholdRuleType(
   alertingPlugin: PluginSetupContract,
@@ -124,6 +132,15 @@ export async function registerMetricInventoryThresholdRuleType(
         { name: 'orchestrator', description: orchestratorActionVariableDescription },
         { name: 'labels', description: labelsActionVariableDescription },
         { name: 'tags', description: tagsActionVariableDescription },
+        { name: 'originalAlertState', description: originalAlertStateActionVariableDescription },
+        {
+          name: 'originalAlertStateWasALERT',
+          description: originalAlertStateWasActionVariableDescription,
+        },
+        {
+          name: 'originalAlertStateWasWARNING',
+          description: originalAlertStateWasActionVariableDescription,
+        },
       ],
     },
     getSummarizedAlerts: libs.metricsRules.createGetSummarizedAlerts(),

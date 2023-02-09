@@ -6,9 +6,10 @@
  */
 
 import { chunk } from 'lodash';
+
 import { transformDataToNdjson } from '@kbn/securitysolution-utils';
 
-import type { Logger } from '@kbn/core/server';
+import type { ISavedObjectsExporter, KibanaRequest, Logger } from '@kbn/core/server';
 import type { ExceptionListClient } from '@kbn/lists-plugin/server';
 import type { RulesClient, RuleExecutorServices } from '@kbn/alerting-plugin/server';
 
@@ -17,6 +18,7 @@ import { getExportDetailsNdjson } from './get_export_details_ndjson';
 import { isAlertType } from '../../../rule_schema';
 import { findRules } from '../search/find_rules';
 import { getRuleExceptionsForExport } from './get_export_rule_exceptions';
+import { getRuleActionConnectorsForExport } from './get_export_rule_action_connectors';
 
 // eslint-disable-next-line no-restricted-imports
 import { legacyGetBulkRuleActionsSavedObject } from '../../../rule_actions_legacy';
@@ -44,11 +46,14 @@ export const getExportByObjectIds = async (
   exceptionsClient: ExceptionListClient | undefined,
   savedObjectsClient: RuleExecutorServices['savedObjectsClient'],
   objects: Array<{ rule_id: string }>,
-  logger: Logger
+  logger: Logger,
+  actionsExporter: ISavedObjectsExporter,
+  request: KibanaRequest
 ): Promise<{
   rulesNdjson: string;
   exportDetails: string;
   exceptionLists: string | null;
+  actionConnectors: string;
 }> => {
   const rulesAndErrors = await getRulesFromObjects(
     rulesClient,
@@ -56,23 +61,33 @@ export const getExportByObjectIds = async (
     objects,
     logger
   );
+  const { rules, missingRules } = rulesAndErrors;
 
   // Retrieve exceptions
-  const exceptions = rulesAndErrors.rules.flatMap((rule) => rule.exceptions_list ?? []);
+  const exceptions = rules.flatMap((rule) => rule.exceptions_list ?? []);
   const { exportData: exceptionLists, exportDetails: exceptionDetails } =
     await getRuleExceptionsForExport(exceptions, exceptionsClient);
 
-  const rulesNdjson = transformDataToNdjson(rulesAndErrors.rules);
+  // Retrieve Action-Connectors
+  const { actionConnectors, actionConnectorDetails } = await getRuleActionConnectorsForExport(
+    rules,
+    actionsExporter,
+    request
+  );
+
+  const rulesNdjson = transformDataToNdjson(rules);
   const exportDetails = getExportDetailsNdjson(
-    rulesAndErrors.rules,
-    rulesAndErrors.missingRules,
-    exceptionDetails
+    rules,
+    missingRules,
+    exceptionDetails,
+    actionConnectorDetails
   );
 
   return {
     rulesNdjson,
     exportDetails,
     exceptionLists,
+    actionConnectors,
   };
 };
 
@@ -118,9 +133,14 @@ export const getRulesFromObjects = async (
       isAlertType(matchingRule) &&
       matchingRule.params.immutable !== true
     ) {
+      const rule = internalRuleToAPIResponse(matchingRule, legacyActions[matchingRule.id]);
+
+      // Fields containing runtime information shouldn't be exported. It causes import failures.
+      delete rule.execution_summary;
+
       return {
         statusCode: 200,
-        rule: internalRuleToAPIResponse(matchingRule, null, legacyActions[matchingRule.id]),
+        rule,
       };
     } else {
       return {

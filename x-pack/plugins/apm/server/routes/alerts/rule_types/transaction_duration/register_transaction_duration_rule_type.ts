@@ -59,8 +59,8 @@ import {
 } from '../get_service_group_fields';
 
 const paramsSchema = schema.object({
-  serviceName: schema.string(),
-  transactionType: schema.string(),
+  serviceName: schema.maybe(schema.string()),
+  transactionType: schema.maybe(schema.string()),
   windowSize: schema.number(),
   windowUnit: schema.string(),
   threshold: schema.number(),
@@ -281,7 +281,7 @@ export function registerTransactionDurationRuleType({
               [TRANSACTION_TYPE]: transactionType,
               [PROCESSOR_EVENT]: ProcessorEvent.transaction,
               [ALERT_EVALUATION_VALUE]: transactionDuration,
-              [ALERT_EVALUATION_THRESHOLD]: thresholdMicroseconds,
+              [ALERT_EVALUATION_THRESHOLD]: ruleParams.threshold,
               [ALERT_REASON]: reason,
               ...sourceFields,
             },
@@ -292,7 +292,7 @@ export function registerTransactionDurationRuleType({
             interval: `${ruleParams.windowSize}${ruleParams.windowUnit}`,
             reason,
             serviceName,
-            threshold: thresholdMicroseconds,
+            threshold: ruleParams.threshold,
             transactionType,
             triggerValue: transactionDurationFormatted,
             viewInAppUrl,
