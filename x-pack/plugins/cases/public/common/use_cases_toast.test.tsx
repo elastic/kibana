@@ -346,7 +346,10 @@ describe('Use cases toast hook', () => {
 
       result.current.showSuccessToast('my title');
 
-      expect(successMock).toHaveBeenCalledWith('my title');
+      expect(successMock).toHaveBeenCalledWith({
+        className: 'eui-textBreakWord',
+        title: 'my title',
+      });
     });
   });
 });

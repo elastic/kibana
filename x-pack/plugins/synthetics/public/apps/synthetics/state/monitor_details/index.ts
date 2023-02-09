@@ -88,10 +88,12 @@ export const monitorDetailsReducer = createReducer(initialState, (builder) => {
     .addCase(getMonitorAction.get, (state, action) => {
       state.syntheticsMonitorDispatchedAt = action.meta.dispatchedAt;
       state.syntheticsMonitorLoading = true;
+      state.error = null;
     })
     .addCase(getMonitorAction.success, (state, action) => {
       state.syntheticsMonitor = action.payload;
       state.syntheticsMonitorLoading = false;
+      state.error = null;
     })
     .addCase(getMonitorAction.fail, (state, action) => {
       state.error = action.payload;
