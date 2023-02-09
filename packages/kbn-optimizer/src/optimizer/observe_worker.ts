@@ -12,7 +12,7 @@ import { fork, type ChildProcess } from 'child_process';
 import * as Rx from 'rxjs';
 import { map, takeUntil, first, ignoreElements } from 'rxjs/operators';
 
-import { isWorkerMsg, WorkerConfig, WorkerMsg, Bundle, BundleRefs } from '../common';
+import { isWorkerMsg, WorkerConfig, WorkerMsg, Bundle, BundleRemotes } from '../common';
 
 import { observeStdio$ } from './observe_stdio';
 import { OptimizerConfig } from './optimizer_config';
@@ -112,6 +112,8 @@ function initWorker(
     })
   );
 
+  const remotes = BundleRemotes.fromBundles(config.bundles).toSpecJson();
+
   return Rx.concat(
     msg$.pipe(first((msg) => msg === 'init')),
     Rx.defer(() => {
@@ -119,7 +121,7 @@ function initWorker(
         args: [
           JSON.stringify(workerConfig),
           JSON.stringify(bundles.map((b) => b.toSpec())),
-          BundleRefs.fromBundles(config.bundles).toSpecJson(),
+          remotes,
         ],
       });
       return [];
