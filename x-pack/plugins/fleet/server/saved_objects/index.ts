@@ -184,48 +184,13 @@ const getSavedObjectTypes = (
           },
         },
         elasticsearch: {
-          enabled: false,
-          properties: {
-            privileges: {
-              properties: {
-                cluster: { type: 'keyword' },
-              },
-            },
-          },
+          dynamic: false,
+          properties: {},
         },
         vars: { type: 'flattened' },
         inputs: {
-          type: 'nested',
-          enabled: false,
-          properties: {
-            type: { type: 'keyword' },
-            policy_template: { type: 'keyword' },
-            enabled: { type: 'boolean' },
-            vars: { type: 'flattened' },
-            config: { type: 'flattened' },
-            compiled_input: { type: 'flattened' },
-            streams: {
-              type: 'nested',
-              properties: {
-                id: { type: 'keyword' },
-                enabled: { type: 'boolean' },
-                data_stream: {
-                  properties: {
-                    dataset: { type: 'keyword' },
-                    type: { type: 'keyword' },
-                    elasticsearch: {
-                      properties: {
-                        privileges: { type: 'flattened' },
-                      },
-                    },
-                  },
-                },
-                vars: { type: 'flattened' },
-                config: { type: 'flattened' },
-                compiled_stream: { type: 'flattened' },
-              },
-            },
-          },
+          dynamic: false,
+          properties: {},
         },
         revision: { type: 'integer' },
         updated_at: { type: 'date' },
@@ -264,8 +229,8 @@ const getSavedObjectTypes = (
         internal: { type: 'boolean' },
         keep_policies_up_to_date: { type: 'boolean', index: false },
         es_index_patterns: {
-          enabled: false,
-          type: 'object',
+          dynamic: false,
+          properties: {},
         },
         verification_status: { type: 'keyword' },
         verification_key_id: { type: 'keyword' },
@@ -278,13 +243,13 @@ const getSavedObjectTypes = (
           },
         },
         installed_kibana: {
-          type: 'object',
-          enabled: false,
+          dynamic: false,
+          properties: {},
         },
         installed_kibana_space_id: { type: 'keyword' },
         package_assets: {
-          type: 'object',
-          enabled: false,
+          dynamic: false,
+          properties: {},
         },
         install_started_at: { type: 'date' },
         install_version: { type: 'keyword' },

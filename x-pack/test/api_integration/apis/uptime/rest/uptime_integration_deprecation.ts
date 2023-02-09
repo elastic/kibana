@@ -65,9 +65,7 @@ export default function (providerContext: FtrProviderContext) {
     ],
   });
 
-  // Failing: See https://github.com/elastic/kibana/issues/150565
-  // Failing: See https://github.com/elastic/kibana/issues/150566
-  describe.skip('UptimeZipUrlDeprecation', () => {
+  describe('UptimeIntegrationDeprecation', () => {
     let agentPolicyId: string;
 
     before(async function () {
@@ -80,9 +78,27 @@ export default function (providerContext: FtrProviderContext) {
         })
         .expect(200);
       agentPolicyId = agentPolicyResponse.item.id;
+    });
 
-      // create a policy without a zip url
+    after(async function () {
       await supertest
+        .post(`/api/fleet/agent_policies/delete`)
+        .set('kbn-xsrf', 'xxxx')
+        .send({ agentPolicyId });
+    });
+
+    it('should return hasIntegrationMonitors false when there are not any zip url policies', async function () {
+      const { body } = await supertest
+        .get(`/internal/uptime/fleet/has_integration_monitors`)
+        .set('kbn-xsrf', 'xxxx')
+        .send()
+        .expect(200);
+
+      expect(body.hasIntegrationMonitors).to.eql(false);
+    });
+
+    it('should return hasIntegrationMonitors true when there are zip url policies', async function () {
+      const { body } = await supertest
         .post(`/api/fleet/package_policies`)
         .set('kbn-xsrf', 'xxxx')
         .send({
@@ -99,55 +115,16 @@ export default function (providerContext: FtrProviderContext) {
           },
         })
         .expect(200);
-    });
-
-    after(async function () {
-      await supertest
-        .post(`/api/fleet/agent_policies/delete`)
-        .set('kbn-xsrf', 'xxxx')
-        .send({ agentPolicyId });
-    });
-
-    it('should return hasZipUrlMonitors false when there are not any zip url policies', async function () {
-      const { body } = await supertest
-        .get(`/internal/uptime/fleet/has_zip_url_monitors`)
-        .set('kbn-xsrf', 'xxxx')
-        .send()
-        .expect(200);
-
-      expect(body.hasZipUrlMonitors).to.eql(false);
-    });
-
-    it('should return hasZipUrlMonitors true when there are zip url policies', async function () {
-      const { body } = await supertest
-        .post(`/api/fleet/package_policies`)
-        .set('kbn-xsrf', 'xxxx')
-        .send({
-          name: `synthetics-test ${uuidv4()}`,
-          description: '',
-          namespace: 'default',
-          policy_id: agentPolicyId,
-          enabled: true,
-          inputs: [getBrowserZipInput('testZipUrl')],
-          package: {
-            name: 'synthetics',
-            title: 'For Synthetics Tests',
-            version: '0.10.2',
-          },
-        })
-        .expect(200);
 
       const policyId = body.item.id;
 
-      expect(body.item.inputs[0].streams[0].vars['source.zip_url.url'].value).to.eql('testZipUrl');
-
       const { body: response } = await supertest
-        .get(`/internal/uptime/fleet/has_zip_url_monitors`)
+        .get(`/internal/uptime/fleet/has_integration_monitors`)
         .set('kbn-xsrf', 'xxxx')
         .send()
         .expect(200);
 
-      expect(response.hasZipUrlMonitors).to.eql(true);
+      expect(response.hasIntegrationMonitors).to.eql(true);
 
       // delete policy we just made
       await supertest
