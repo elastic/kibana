@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { camelCase } from 'lodash';
 import type {
   CreateRuleExceptionListItemSchema,
   ExceptionListItemSchema,
@@ -152,15 +151,10 @@ export const fetchRules = async ({
 }: FetchRulesProps): Promise<FetchRulesResponse> => {
   const filterString = convertRulesFilterToKQL(filterOptions);
 
-  // Sort field is camel cased because we use that in our mapping, but display snake case on the front end
-  const getFieldNameForSortField = (field: string) => {
-    return field === 'name' ? `${field}.keyword` : camelCase(field);
-  };
-
   const query = {
     page: pagination.page,
     per_page: pagination.perPage,
-    sort_field: getFieldNameForSortField(sortingOptions.field),
+    sort_field: sortingOptions.field,
     sort_order: sortingOptions.order,
     ...(filterString !== '' ? { filter: filterString } : {}),
   };

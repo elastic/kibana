@@ -822,6 +822,8 @@ paths:
       parameters:
         - schema:
             type: array
+            items:
+              type: string
           name: agentsIds
           in: query
           required: true
@@ -1071,6 +1073,11 @@ paths:
                   $ref: '#/components/schemas/agent_action'
   /agents/{agentId}/actions/{actionId}/cancel:
     parameters:
+      - schema:
+          type: string
+        name: agentId
+        in: path
+        required: true
       - schema:
           type: string
         name: actionId
@@ -2858,6 +2865,7 @@ components:
       in: header
       name: kbn-xsrf
       required: true
+      description: Kibana's anti Cross-Site Request Forgery token. Can be any string value.
     page_size:
       name: perPage
       in: query

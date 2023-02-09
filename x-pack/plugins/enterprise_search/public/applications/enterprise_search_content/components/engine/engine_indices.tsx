@@ -10,11 +10,10 @@ import React, { useState } from 'react';
 import { useActions, useValues } from 'kea';
 
 import {
+  EuiTableActionsColumnType,
   EuiBasicTableColumn,
   EuiButton,
   EuiConfirmModal,
-  EuiFlexGroup,
-  EuiFlexItem,
   EuiIcon,
   EuiInMemoryTable,
   EuiText,
@@ -38,7 +37,6 @@ import { EnterpriseSearchEnginesPageTemplate } from '../layout/engines_page_temp
 
 import { AddIndicesFlyout } from './add_indices_flyout';
 import { EngineIndicesLogic } from './engine_indices_logic';
-import { EngineViewHeaderActions } from './engine_view_header_actions';
 
 export const EngineIndices: React.FC = () => {
   const { sendEnterpriseSearchTelemetry } = useActions(TelemetryLogic);
@@ -52,6 +50,33 @@ export const EngineIndices: React.FC = () => {
   if (!engineData) return null;
   const { indices } = engineData;
 
+  const removeIndexAction: EuiTableActionsColumnType<EnterpriseSearchEngineIndex>['actions'][0] = {
+    color: 'danger',
+    'data-test-subj': 'engine-remove-index-btn',
+    description: i18n.translate(
+      'xpack.enterpriseSearch.content.engine.indices.actions.removeIndex.title',
+      {
+        defaultMessage: 'Remove this index from engine',
+      }
+    ),
+    icon: 'minusInCircle',
+    isPrimary: false,
+    name: (index: EnterpriseSearchEngineIndex) =>
+      i18n.translate('xpack.enterpriseSearch.content.engine.indices.actions.removeIndex.caption', {
+        defaultMessage: 'Remove index {indexName}',
+        values: {
+          indexName: index.name,
+        },
+      }),
+    onClick: (index: EnterpriseSearchEngineIndex) => {
+      setConfirmRemoveIndex(index.name);
+      sendEnterpriseSearchTelemetry({
+        action: 'clicked',
+        metric: 'entSearchContent-engines-indices-removeIndex',
+      });
+    },
+    type: 'icon',
+  };
   const columns: Array<EuiBasicTableColumn<EnterpriseSearchEngineIndex>> = [
     {
       field: 'name',
@@ -138,36 +163,7 @@ export const EngineIndices: React.FC = () => {
             ),
           type: 'icon',
         },
-        {
-          color: 'danger',
-          'data-test-subj': 'engine-remove-index-btn',
-          description: i18n.translate(
-            'xpack.enterpriseSearch.content.engine.indices.actions.removeIndex.title',
-            {
-              defaultMessage: 'Remove this index from engine',
-            }
-          ),
-          icon: 'minusInCircle',
-          isPrimary: false,
-          name: (index) =>
-            i18n.translate(
-              'xpack.enterpriseSearch.content.engine.indices.actions.removeIndex.caption',
-              {
-                defaultMessage: 'Remove index {indexName}',
-                values: {
-                  indexName: index.name,
-                },
-              }
-            ),
-          onClick: (index) => {
-            setConfirmRemoveIndex(index.name);
-            sendEnterpriseSearchTelemetry({
-              action: 'clicked',
-              metric: 'entSearchContent-engines-indices-removeIndex',
-            });
-          },
-          type: 'icon',
-        },
+        ...(indices.length > 1 ? [removeIndexAction] : []),
       ],
       name: i18n.translate('xpack.enterpriseSearch.content.engine.indices.actions.columnTitle', {
         defaultMessage: 'Actions',
@@ -185,27 +181,17 @@ export const EngineIndices: React.FC = () => {
           defaultMessage: 'Indices',
         }),
         rightSideItems: [
-          <EuiFlexGroup gutterSize="xs" alignItems="center">
-            <EuiFlexItem>
-              <EuiButton
-                data-telemetry-id="entSearchContent-engines-indices-addNewIndices"
-                data-test-subj="engine-add-new-indices-btn"
-                iconType="plusInCircle"
-                fill
-                onClick={openAddIndicesFlyout}
-              >
-                {i18n.translate(
-                  'xpack.enterpriseSearch.content.engine.indices.addNewIndicesButton',
-                  {
-                    defaultMessage: 'Add new indices',
-                  }
-                )}
-              </EuiButton>
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <EngineViewHeaderActions />
-            </EuiFlexItem>
-          </EuiFlexGroup>,
+          <EuiButton
+            data-telemetry-id="entSearchContent-engines-indices-addNewIndices"
+            data-test-subj="engine-add-new-indices-btn"
+            iconType="plusInCircle"
+            fill
+            onClick={openAddIndicesFlyout}
+          >
+            {i18n.translate('xpack.enterpriseSearch.content.engine.indices.addNewIndicesButton', {
+              defaultMessage: 'Add new indices',
+            })}
+          </EuiButton>,
         ],
       }}
       engineName={engineName}
