@@ -92,7 +92,7 @@ export const getNormalizeCommonFields = ({
             ...defaultFields[ConfigKey.ALERT_CONFIG]?.status,
             enabled:
               monitor.alert?.status?.enabled ??
-              defaultFields[ConfigKey.ALERT_CONFIG].status.enabled ??
+              defaultFields[ConfigKey.ALERT_CONFIG]?.status?.enabled ??
               true,
           },
         }
