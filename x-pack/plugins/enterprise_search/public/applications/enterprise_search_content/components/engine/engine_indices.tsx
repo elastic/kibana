@@ -19,6 +19,7 @@ import {
   EuiSpacer,
   EuiTableActionsColumnType,
   EuiText,
+  useEuiBackgroundColor,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
@@ -41,6 +42,7 @@ import { AddIndicesFlyout } from './add_indices_flyout';
 import { EngineIndicesLogic } from './engine_indices_logic';
 
 export const EngineIndices: React.FC = () => {
+  const subduedBackground = useEuiBackgroundColor('subdued');
   const { sendEnterpriseSearchTelemetry } = useActions(TelemetryLogic);
   const { engineData, engineName, isLoadingEngine, addIndicesFlyoutOpen } =
     useValues(EngineIndicesLogic);
@@ -238,6 +240,13 @@ export const EngineIndices: React.FC = () => {
         <EuiInMemoryTable
           items={indices}
           columns={columns}
+          rowProps={(index: EnterpriseSearchEngineIndex) => {
+            if (index.health === 'unknown') {
+              return { style: { backgroundColor: subduedBackground } };
+            }
+
+            return {};
+          }}
           search={{
             box: {
               incremental: true,
