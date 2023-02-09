@@ -18,6 +18,7 @@ import { ViewMode } from '@kbn/embeddable-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { TopNavMenuProps } from '@kbn/navigation-plugin/public';
 
+import { EuiHorizontalRule } from '@elastic/eui';
 import {
   getDashboardTitle,
   leaveConfirmStrings,
@@ -261,6 +262,7 @@ export function DashboardTopNav({ embedSettings, redirectTo }: DashboardTopNavPr
         </PresentationUtilContextProvider>
       ) : null}
       {viewMode === ViewMode.EDIT ? <DashboardEditingToolbar /> : null}
+      <EuiHorizontalRule margin="none" />
     </>
   );
 }
