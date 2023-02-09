@@ -125,7 +125,6 @@
     "advancedSettings.form.saveButtonLabel": "保存更改",
     "advancedSettings.form.saveButtonTooltipWithInvalidChanges": "保存前请修复无效的设置。",
     "advancedSettings.form.saveErrorMessage": "无法保存",
-    "advancedSettings.pageTitle": "设置",
     "advancedSettings.searchBar.unableToParseQueryErrorMessage": "无法解析查询",
     "advancedSettings.searchBarAriaLabel": "搜索高级设置",
     "advancedSettings.voiceAnnouncement.ariaLabel": "“高级设置”的结果信息",

@@ -84,7 +84,7 @@ export const IntegrationsAppContext: React.FC<{
                   <KibanaThemeProvider theme$={theme$}>
                     <EuiThemeProvider darkMode={isDarkMode}>
                       <QueryClientProvider client={queryClient}>
-                        <ReactQueryDevtools initialIsOpen={true} />
+                        <ReactQueryDevtools initialIsOpen={false} />
                         <UIExtensionsContext.Provider value={extensions}>
                           <FleetStatusProvider>
                             <startServices.customIntegrations.ContextProvider>
