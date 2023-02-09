@@ -19,6 +19,7 @@ async function withFleetAgent(
 ) {
   const log = getService('log');
   const config = getService('config');
+  const kbnClient = getService('kibanaServer');
 
   const esHost = Url.format(config.get('servers.elasticsearch'));
   const params: AgentManagerParams = {
@@ -32,17 +33,8 @@ async function withFleetAgent(
       port: config.get('servers.kibana.port'),
     }),
   };
-  const requestOptions = {
-    headers: {
-      'kbn-xsrf': 'kibana',
-    },
-    auth: {
-      username: params.user,
-      password: params.password,
-    },
-  };
-  const fleetManager = new FleetManager(params, log, requestOptions);
-  const agentManager = new AgentManager(params, log, requestOptions);
+  const fleetManager = new FleetManager(params, log, kbnClient);
+  const agentManager = new AgentManager(params, log, kbnClient);
 
   // Since the managers will create uncaughtException event handlers we need to exit manually
   process.on('uncaughtException', (err) => {

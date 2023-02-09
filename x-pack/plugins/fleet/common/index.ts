@@ -61,6 +61,7 @@ export {
   appRoutesService,
   packagePolicyRouteService,
   fleetSetupRouteService,
+  enrollmentAPIKeyRouteService,
   // Package policy helpers
   isValidNamespace,
   INVALID_NAMESPACE_CHARACTERS,

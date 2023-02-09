@@ -33,7 +33,7 @@ export interface IndexedFleetEndpointPolicyResponse {
 export const indexFleetEndpointPolicy = async (
   kbnClient: KbnClient,
   policyName: string,
-  endpointPackageVersion: string = '8.0.0',
+  endpointPackageVersion: string = '8.7.0',
   agentPolicyName?: string
 ): Promise<IndexedFleetEndpointPolicyResponse> => {
   const response: IndexedFleetEndpointPolicyResponse = {
@@ -47,6 +47,7 @@ export const indexFleetEndpointPolicy = async (
       agentPolicyName || `Policy for ${policyName} (${Math.random().toString(36).substr(2, 5)})`,
     description: `Policy created with endpoint data generator (${policyName})`,
     namespace: 'default',
+    monitoring_enabled: ['logs', 'metrics'],
   };
 
   let agentPolicy: AxiosResponse<CreateAgentPolicyResponse>;
@@ -86,7 +87,7 @@ export const indexFleetEndpointPolicy = async (
     namespace: 'default',
     package: {
       name: 'endpoint',
-      title: 'endpoint',
+      title: 'Elastic Defend',
       version: endpointPackageVersion,
     },
   };

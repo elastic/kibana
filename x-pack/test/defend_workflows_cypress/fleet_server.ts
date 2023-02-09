@@ -7,7 +7,12 @@
 
 import { ChildProcess, spawn } from 'child_process';
 import { ToolingLog } from '@kbn/tooling-log';
-import axios, { AxiosRequestConfig } from 'axios';
+import { KbnClient } from '@kbn/test';
+import { agentPolicyRouteService, appRoutesService } from '@kbn/fleet-plugin/common';
+import {
+  CreateAgentPolicyResponse,
+  GenerateServiceTokenResponse,
+} from '@kbn/fleet-plugin/common/types';
 import { Manager } from './resource_manager';
 import { getLatestVersion } from './artifact_manager';
 
@@ -23,12 +28,12 @@ export class FleetManager extends Manager {
   private fleetProcess?: ChildProcess;
   private config: AgentManagerParams;
   private log: ToolingLog;
-  private requestOptions: AxiosRequestConfig;
-  constructor(config: AgentManagerParams, log: ToolingLog, requestOptions: AxiosRequestConfig) {
+  private kbnClient: KbnClient;
+  constructor(config: AgentManagerParams, log: ToolingLog, kbnClient: KbnClient) {
     super();
     this.config = config;
     this.log = log;
-    this.requestOptions = requestOptions;
+    this.kbnClient = kbnClient;
   }
   public async setup(): Promise<void> {
     this.log.info('Setting fleet up');
@@ -39,24 +44,25 @@ export class FleetManager extends Manager {
           data: {
             item: { id: policyId },
           },
-        } = await axios.post(
-          `${this.config.kibanaUrl}/api/fleet/agent_policies`,
-          {
+        } = await this.kbnClient.request<CreateAgentPolicyResponse>({
+          method: 'POST',
+          path: agentPolicyRouteService.getCreatePath(),
+          body: {
             name: 'Default Fleet Server policy',
             description: '',
             namespace: 'default',
             monitoring_enabled: ['logs', 'metrics'],
             has_fleet_server: true,
           },
-          this.requestOptions
-        );
+        });
 
-        const response = await axios.post(
-          `${this.config.kibanaUrl}/api/fleet/service_tokens`,
-          {},
-          this.requestOptions
-        );
-        const serviceToken = response.data.value;
+        const {
+          data: { value: serviceToken },
+        } = await this.kbnClient.request<GenerateServiceTokenResponse>({
+          method: 'POST',
+          path: appRoutesService.getRegenerateServiceTokenPath(),
+          body: {},
+        });
         const artifact = `docker.elastic.co/beats/elastic-agent:${await getLatestVersion()}`;
         this.log.info(artifact);
 
@@ -64,8 +70,9 @@ export class FleetManager extends Manager {
 
         const args = [
           'run',
+          '--detach',
           '-p',
-          `8220:8220`,
+          '8220:8220',
           '--add-host',
           'host.docker.internal:host-gateway',
           '--env',
