@@ -10,10 +10,16 @@ import { Cookie } from 'tough-cookie';
 import { UserProfile } from '@kbn/security-plugin/common';
 import { securitySolutionOnlyAllSpacesRole } from '../../../../common/lib/authentication/roles';
 import { getPostCaseRequest } from '../../../../common/lib/mock';
-import { createCase, deleteAllCaseItems, getCase, updateCase } from '../../../../common/lib/utils';
+import {
+  createCase,
+  deleteAllCaseItems,
+  getCase,
+  updateCase,
+  getCaseUsers,
+  loginUsers,
+  bulkGetUserProfiles,
+} from '../../../../common/lib/api';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
-import { getCaseUsers } from '../../../../common/lib/user_actions';
-import { loginUsers, bulkGetUserProfiles } from '../../../../common/lib/user_profiles';
 import { createUsersAndRoles, deleteUsersAndRoles } from '../../../../common/lib/authentication';
 import {
   obsOnly,

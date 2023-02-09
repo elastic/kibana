@@ -302,7 +302,7 @@
         "label": "ProcedureName",
         "description": [],
         "signature": [
-          "\"get\" | \"create\""
+          "\"create\" | \"get\""
         ],
         "path": "src/plugins/content_management/common/rpc.ts",
         "deprecated": false,
