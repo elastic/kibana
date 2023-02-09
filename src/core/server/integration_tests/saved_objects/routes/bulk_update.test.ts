@@ -176,13 +176,20 @@ describe('PUT /api/saved_objects/_bulk_update', () => {
 
   it('logs a warning message when called', async () => {
     await supertest(httpSetup.server.listener)
-      .post('/api/saved_objects/_bulk_update')
+      .put('/api/saved_objects/_bulk_update')
       .send([
         {
           type: 'visualization',
           id: 'dd7caf20-9efd-11e7-acb3-3dab96693fab',
           attributes: {
             title: 'An existing visualization',
+          },
+        },
+        {
+          type: 'dashboard',
+          id: 'be3733a0-9efe-11e7-acb3-3dab96693fab',
+          attributes: {
+            title: 'An existing dashboard',
           },
         },
       ])
