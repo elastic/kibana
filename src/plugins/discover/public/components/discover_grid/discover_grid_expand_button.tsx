@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useCallback, useContext, useEffect, useRef, useState } from 'react';
+import React, { useContext, useEffect, useRef, useState } from 'react';
 import { EuiButtonIcon, EuiDataGridCellValueElementProps, EuiToolTip } from '@elastic/eui';
 import { euiLightVars as themeLight, euiDarkVars as themeDark } from '@kbn/ui-theme';
 import { i18n } from '@kbn/i18n';
@@ -47,18 +47,14 @@ export const ExpandButton = ({ rowIndex, setCellProps }: EuiDataGridCellValueEle
     ? 'docTableExpandToggleColumnAnchor'
     : 'docTableExpandToggleColumn';
 
-  const hideTooltip = useCallback(() => {
-    setTimeout(() => {
-      toolTipRef.current?.hideToolTip();
-    }, 100);
-  }, []);
-
   useEffect(() => {
     if (!isCurrentRowExpanded && pressed) {
       setPressed(false);
-      hideTooltip();
+      setTimeout(() => {
+        toolTipRef.current?.hideToolTip();
+      }, 100);
     }
-  }, [isCurrentRowExpanded, setPressed, pressed, hideTooltip]);
+  }, [isCurrentRowExpanded, setPressed, pressed]);
 
   if (!setExpanded) {
     return null;
@@ -74,11 +70,9 @@ export const ExpandButton = ({ rowIndex, setCellProps }: EuiDataGridCellValueEle
         data-test-subj={testSubj}
         onClick={() => {
           const nextHit = isCurrentRowExpanded ? undefined : current;
+          toolTipRef.current?.hideToolTip();
+          setPressed(Boolean(nextHit));
           setExpanded?.(nextHit);
-          if (nextHit) {
-            setPressed(true);
-          }
-          hideTooltip();
         }}
         color={isCurrentRowExpanded ? 'primary' : 'text'}
         iconType={isCurrentRowExpanded ? 'minimize' : 'expand'}
