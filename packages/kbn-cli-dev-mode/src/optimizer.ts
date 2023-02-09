@@ -35,11 +35,10 @@ export interface Options {
   watch: boolean;
   cache: boolean;
   dist: boolean;
-  oss: boolean;
   runExamples: boolean;
-  pluginPaths: string[];
-  pluginScanDirs: string[];
   writeLogTo?: Writable;
+  pluginPaths?: string[];
+  pluginScanDirs?: string[];
 }
 
 export class Optimizer {
@@ -61,7 +60,6 @@ export class Optimizer {
       includeCoreBundle: true,
       cache: options.cache,
       dist: options.dist,
-      oss: options.oss,
       examples: options.runExamples,
       pluginPaths: options.pluginPaths,
       pluginScanDirs: options.pluginScanDirs,
