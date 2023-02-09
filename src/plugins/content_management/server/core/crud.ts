@@ -36,6 +36,7 @@ export class ContentCrud implements ContentStorage {
       type: 'getItemStart',
       contentId,
       contentType: this.contentType,
+      options,
     });
 
     try {
@@ -55,7 +56,7 @@ export class ContentCrud implements ContentStorage {
         contentId,
         contentType: this.contentType,
         options,
-        error: e,
+        error: e.message,
       });
 
       throw e;
@@ -117,6 +118,7 @@ export class ContentCrud implements ContentStorage {
         type: 'createItemSuccess',
         contentType: this.contentType,
         data: result,
+        options,
       });
 
       return result;
@@ -126,7 +128,7 @@ export class ContentCrud implements ContentStorage {
         contentType: this.contentType,
         data,
         options,
-        error: e,
+        error: e.message,
       });
 
       throw e;
@@ -155,6 +157,7 @@ export class ContentCrud implements ContentStorage {
         contentId: id,
         contentType: this.contentType,
         data: result,
+        options,
       });
 
       return result;
@@ -165,7 +168,7 @@ export class ContentCrud implements ContentStorage {
         contentType: this.contentType,
         data,
         options,
-        error: e,
+        error: e.message,
       });
 
       throw e;
@@ -191,6 +194,7 @@ export class ContentCrud implements ContentStorage {
         type: 'deleteItemSuccess',
         contentId: id,
         contentType: this.contentType,
+        options,
       });
 
       return res;
@@ -200,7 +204,7 @@ export class ContentCrud implements ContentStorage {
         contentId: id,
         contentType: this.contentType,
         options,
-        error: e,
+        error: e.message,
       });
 
       throw e;

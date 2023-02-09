@@ -11,7 +11,21 @@ import { Core } from './core';
 import { createMemoryStorage, MockContent } from './mocks';
 import { ContentRegistry } from './registry';
 import { ContentCrud } from './crud';
-import { GetItemStart } from './event_types';
+import type {
+  GetItemStart,
+  GetItemSuccess,
+  GetItemError,
+  CreateItemStart,
+  CreateItemSuccess,
+  CreateItemError,
+  UpdateItemStart,
+  UpdateItemSuccess,
+  UpdateItemError,
+  DeleteItemStart,
+  DeleteItemSuccess,
+  DeleteItemError,
+} from './event_types';
+import { EventBus } from './event_bus';
 
 const logger = loggingSystemMock.createLogger();
 
@@ -180,6 +194,7 @@ describe('Content Core', () => {
           } = coreSetup;
 
           const listener = jest.fn();
+          // Listen to all "getItemStart" events, regardless of the content type
           eventBus.on('getItemStart', listener);
 
           const event: GetItemStart = {
@@ -216,6 +231,8 @@ describe('Content Core', () => {
           );
 
           const listener = jest.fn();
+
+          // Listen to "getItemStart" events *only* on the "foo" content type
           eventBus.on('getItemStart', CONTENT_TYPE, listener);
 
           let event: GetItemStart = {
@@ -237,10 +254,258 @@ describe('Content Core', () => {
           expect(listener).toHaveBeenCalledWith(event);
         });
 
-        describe('crud operation should emit start|success|error events', () => {
-          // TODO
-          test('should work', () => {
-            expect(true).toBe(true);
+        describe('crud operations should emit start|success|error events', () => {
+          let contentCrud: ContentCrud;
+          let eventBus: EventBus;
+
+          beforeEach(() => {
+            const {
+              api: { register, crud, eventBus: _eventBus },
+            } = coreSetup;
+            register(CONTENT_TYPE, contentConfig);
+            contentCrud = crud(CONTENT_TYPE);
+            eventBus = _eventBus;
+          });
+
+          test('get()', async () => {
+            const data = { title: 'Hello' };
+
+            await contentCrud.create<Omit<MockContent, 'id'>, { id: string }>(ctx, data, {
+              id: '1234',
+            });
+
+            const listener = jest.fn();
+            const sub = eventBus.events$.subscribe(listener);
+
+            const promise = contentCrud.get(ctx, '1234', { someOption: 'baz' });
+
+            const getItemStart: GetItemStart = {
+              type: 'getItemStart',
+              contentId: '1234',
+              contentType: CONTENT_TYPE,
+              options: { someOption: 'baz' },
+            };
+
+            expect(listener).toHaveBeenCalledWith(getItemStart);
+
+            await promise;
+
+            const getItemSuccess: GetItemSuccess = {
+              type: 'getItemSuccess',
+              contentId: '1234',
+              data: {
+                id: '1234',
+                ...data,
+              },
+              contentType: CONTENT_TYPE,
+            };
+
+            expect(listener).toHaveBeenCalledWith(getItemSuccess);
+
+            listener.mockReset();
+
+            const errorMessage = 'Ohhh no!';
+            const reject = jest.fn();
+            await contentCrud.get(ctx, '1234', { errorToThrow: errorMessage }).catch(reject);
+
+            const getItemError: GetItemError = {
+              type: 'getItemError',
+              contentId: '1234',
+              contentType: CONTENT_TYPE,
+              error: errorMessage,
+              options: { errorToThrow: errorMessage },
+            };
+
+            expect(listener).toHaveBeenLastCalledWith(getItemError);
+
+            expect(reject).toHaveBeenCalledWith(new Error(errorMessage));
+
+            sub.unsubscribe();
+          });
+
+          test('create()', async () => {
+            const data = { title: 'Hello' };
+
+            const listener = jest.fn();
+            const sub = eventBus.events$.subscribe(listener);
+
+            const promise = contentCrud.create<Omit<MockContent, 'id'>, { id: string }>(ctx, data, {
+              id: '1234',
+            });
+
+            const createItemStart: CreateItemStart = {
+              type: 'createItemStart',
+              contentType: CONTENT_TYPE,
+              data,
+              options: { id: '1234' },
+            };
+
+            expect(listener).toHaveBeenCalledWith(createItemStart);
+
+            await promise;
+
+            const createItemSuccess: CreateItemSuccess = {
+              type: 'createItemSuccess',
+              data: {
+                id: '1234',
+                ...data,
+              },
+              contentType: CONTENT_TYPE,
+              options: { id: '1234' },
+            };
+
+            expect(listener).toHaveBeenCalledWith(createItemSuccess);
+
+            listener.mockReset();
+
+            const errorMessage = 'Ohhh no!';
+            const reject = jest.fn();
+            await contentCrud
+              .create<Omit<MockContent, 'id'>, { id: string; errorToThrow: string }>(ctx, data, {
+                id: '1234',
+                errorToThrow: errorMessage,
+              })
+              .catch(reject);
+
+            const createItemError: CreateItemError = {
+              type: 'createItemError',
+              contentType: CONTENT_TYPE,
+              data,
+              error: errorMessage,
+              options: { id: '1234', errorToThrow: errorMessage },
+            };
+
+            expect(listener).toHaveBeenLastCalledWith(createItemError);
+
+            expect(reject).toHaveBeenCalledWith(new Error(errorMessage));
+
+            sub.unsubscribe();
+          });
+
+          test('update()', async () => {
+            await contentCrud.create<Omit<MockContent, 'id'>, { id: string }>(
+              ctx,
+              { title: 'Hello' },
+              {
+                id: '1234',
+              }
+            );
+
+            const listener = jest.fn();
+            const sub = eventBus.events$.subscribe(listener);
+
+            const data = { title: 'Updated' };
+
+            const promise = await contentCrud.update(ctx, '1234', data, { someOptions: 'baz' });
+
+            const updateItemStart: UpdateItemStart = {
+              type: 'updateItemStart',
+              contentId: '1234',
+              contentType: CONTENT_TYPE,
+              data,
+              options: { someOptions: 'baz' },
+            };
+
+            expect(listener).toHaveBeenCalledWith(updateItemStart);
+
+            await promise;
+
+            const updateItemSuccess: UpdateItemSuccess = {
+              type: 'updateItemSuccess',
+              contentId: '1234',
+              contentType: CONTENT_TYPE,
+              data: {
+                id: '1234',
+                ...data,
+              },
+              options: { someOptions: 'baz' },
+            };
+
+            expect(listener).toHaveBeenCalledWith(updateItemSuccess);
+
+            listener.mockReset();
+
+            const errorMessage = 'Ohhh no!';
+            const reject = jest.fn();
+            await contentCrud
+              .update(ctx, '1234', data, {
+                errorToThrow: errorMessage,
+              })
+              .catch(reject);
+
+            const updateItemError: UpdateItemError = {
+              type: 'updateItemError',
+              contentType: CONTENT_TYPE,
+              contentId: '1234',
+              data,
+              error: errorMessage,
+              options: { errorToThrow: errorMessage },
+            };
+
+            expect(listener).toHaveBeenLastCalledWith(updateItemError);
+
+            expect(reject).toHaveBeenCalledWith(new Error(errorMessage));
+
+            sub.unsubscribe();
+          });
+
+          test('delete()', async () => {
+            await contentCrud.create<Omit<MockContent, 'id'>, { id: string }>(
+              ctx,
+              { title: 'Hello' },
+              {
+                id: '1234',
+              }
+            );
+
+            const listener = jest.fn();
+            const sub = eventBus.events$.subscribe(listener);
+
+            const promise = await contentCrud.delete(ctx, '1234', { someOptions: 'baz' });
+
+            const deleteItemStart: DeleteItemStart = {
+              type: 'deleteItemStart',
+              contentId: '1234',
+              contentType: CONTENT_TYPE,
+              options: { someOptions: 'baz' },
+            };
+
+            expect(listener).toHaveBeenCalledWith(deleteItemStart);
+
+            await promise;
+
+            const deleteItemSuccess: DeleteItemSuccess = {
+              type: 'deleteItemSuccess',
+              contentId: '1234',
+              contentType: CONTENT_TYPE,
+              options: { someOptions: 'baz' },
+            };
+
+            expect(listener).toHaveBeenCalledWith(deleteItemSuccess);
+
+            listener.mockReset();
+
+            const errorMessage = 'Ohhh no!';
+            const reject = jest.fn();
+            await contentCrud
+              .delete(ctx, '1234', {
+                errorToThrow: errorMessage,
+              })
+              .catch(reject);
+
+            const deleteItemError: DeleteItemError = {
+              type: 'deleteItemError',
+              contentType: CONTENT_TYPE,
+              contentId: '1234',
+              error: errorMessage,
+              options: { errorToThrow: errorMessage },
+            };
+
+            expect(listener).toHaveBeenLastCalledWith(deleteItemError);
+
+            expect(reject).toHaveBeenCalledWith(new Error(errorMessage));
+
+            sub.unsubscribe();
           });
         });
       });

@@ -21,8 +21,13 @@ class InMemoryStorage implements ContentStorage {
   async get(
     ctx: StorageContext,
     id: string,
-    { forwardInResponse }: { forwardInResponse?: object } = {}
+    { forwardInResponse, errorToThrow }: { forwardInResponse?: object; errorToThrow?: string } = {}
   ) {
+    // This allows us to test that proper error events are thrown when the storage layer op fails
+    if (errorToThrow) {
+      throw new Error(errorToThrow);
+    }
+
     if (forwardInResponse) {
       // We add this so we can test that options are passed down to the storage layer
       return {
@@ -44,8 +49,13 @@ class InMemoryStorage implements ContentStorage {
   async create(
     ctx: StorageContext,
     data: Omit<MockContent, 'id'>,
-    { id: _id }: { id?: string } = {}
+    { id: _id, errorToThrow }: { id?: string; errorToThrow?: string } = {}
   ): Promise<MockContent> {
+    // This allows us to test that proper error events are thrown when the storage layer op fails
+    if (errorToThrow) {
+      throw new Error(errorToThrow);
+    }
+
     const nextId = idx++;
     const id = _id ?? nextId.toString();
 
@@ -63,8 +73,13 @@ class InMemoryStorage implements ContentStorage {
     ctx: StorageContext,
     id: string,
     data: Partial<Omit<MockContent, 'id'>>,
-    { forwardInResponse }: { forwardInResponse?: object } = {}
+    { forwardInResponse, errorToThrow }: { forwardInResponse?: object; errorToThrow?: string } = {}
   ) {
+    // This allows us to test that proper error events are thrown when the storage layer op fails
+    if (errorToThrow) {
+      throw new Error(errorToThrow);
+    }
+
     const content = this.db.get(id);
     if (!content) {
       throw new Error(`Content to update not found [${id}].`);
@@ -91,8 +106,13 @@ class InMemoryStorage implements ContentStorage {
   async delete(
     ctx: StorageContext,
     id: string,
-    { forwardInResponse }: { forwardInResponse?: object } = {}
+    { forwardInResponse, errorToThrow }: { forwardInResponse?: object; errorToThrow?: string } = {}
   ) {
+    // This allows us to test that proper error events are thrown when the storage layer op fails
+    if (errorToThrow) {
+      throw new Error(errorToThrow);
+    }
+
     if (!this.db.has(id)) {
       return {
         status: 'error',

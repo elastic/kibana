@@ -61,6 +61,7 @@ export interface CreateItemSuccess {
   type: 'createItemSuccess';
   contentType: string;
   data: object;
+  options?: object;
 }
 
 export interface CreateItemError {
@@ -84,6 +85,7 @@ export interface UpdateItemSuccess {
   contentId: string;
   contentType: string;
   data: object;
+  options?: object;
 }
 
 export interface UpdateItemError {
@@ -106,6 +108,7 @@ export interface DeleteItemSuccess {
   type: 'deleteItemSuccess';
   contentId: string;
   contentType: string;
+  options?: object;
 }
 
 export interface DeleteItemError {
