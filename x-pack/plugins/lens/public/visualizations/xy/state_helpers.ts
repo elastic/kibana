@@ -136,6 +136,11 @@ export function extractReferences(state: XYState) {
   return { savedObjectReferences, state: { ...state, layers: persistableLayers } };
 }
 
+export function isPersistedState(state: XYPersistedState | XYState): state is XYPersistedState {
+  const annotationLayers = state.layers.filter((l) => isAnnotationsLayer(l));
+  return annotationLayers.some((l) => !('indexPatternId' in l));
+}
+
 export function injectReferences(
   state: XYPersistedState,
   references?: SavedObjectReference[],

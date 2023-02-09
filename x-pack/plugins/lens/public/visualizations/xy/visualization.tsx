@@ -57,6 +57,7 @@ import {
   getAnnotationLayerErrors,
   injectReferences,
   isHorizontalChart,
+  isPersistedState,
 } from './state_helpers';
 import { toExpression, toPreviewExpression, getSortedAccessors } from './to_expression';
 import { getAccessorColorConfigs, getColorAssignments } from './color_assignment';
@@ -210,10 +211,6 @@ export const getXyVisualization = ({
     return extractReferences(state);
   },
 
-  fromPersistableState(state, references, initialContext) {
-    return injectReferences(state, references, initialContext);
-  },
-
   getDescription,
 
   switchVisualizationType(seriesType: string, state: State) {
@@ -228,9 +225,13 @@ export const getXyVisualization = ({
 
   triggers: [VIS_EVENT_TO_TRIGGER.filter, VIS_EVENT_TO_TRIGGER.brush],
 
-  initialize(addNewLayer, state) {
+  initialize(addNewLayer, state, _, references, initialContext) {
+    let finalState = state;
+    if (state && isPersistedState(state)) {
+      finalState = injectReferences(state, references, initialContext);
+    }
     return (
-      state || {
+      (finalState as XYState) || {
         title: 'Empty XY chart',
         legend: { isVisible: true, position: Position.Right },
         valueLabels: 'hide',

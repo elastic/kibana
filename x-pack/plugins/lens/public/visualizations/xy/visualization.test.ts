@@ -219,6 +219,88 @@ describe('xy_visualization', () => {
     it('loads from persisted state', () => {
       expect(xyVisualization.initialize(() => 'first', exampleState())).toEqual(exampleState());
     });
+
+    it('should inject references on annotation layers', () => {
+      const baseState = exampleState();
+      expect(
+        xyVisualization.initialize!(
+          () => 'first',
+          {
+            ...baseState,
+            layers: [
+              ...baseState.layers,
+              {
+                layerId: 'annotation',
+                layerType: layerTypes.ANNOTATIONS,
+                annotations: [exampleAnnotation2],
+                ignoreGlobalFilters: true,
+              },
+            ],
+          },
+          undefined,
+          [
+            {
+              type: 'index-pattern',
+              name: `xy-visualization-layer-annotation`,
+              id: 'indexPattern1',
+            },
+          ]
+        )
+      ).toEqual({
+        ...baseState,
+        layers: [
+          ...baseState.layers,
+          {
+            layerId: 'annotation',
+            layerType: layerTypes.ANNOTATIONS,
+            indexPatternId: 'indexPattern1',
+            annotations: [exampleAnnotation2],
+            ignoreGlobalFilters: true,
+          },
+        ],
+      });
+    });
+
+    it('should fallback to the first dataView reference in case there are missing annotation references', () => {
+      const baseState = exampleState();
+      expect(
+        xyVisualization.initialize!(
+          () => 'first',
+          {
+            ...baseState,
+            layers: [
+              ...baseState.layers,
+              {
+                layerId: 'annotation',
+                layerType: layerTypes.ANNOTATIONS,
+                annotations: [exampleAnnotation2],
+                ignoreGlobalFilters: true,
+              },
+            ],
+          },
+          undefined,
+          [
+            {
+              type: 'index-pattern',
+              name: 'something-else',
+              id: 'indexPattern1',
+            },
+          ]
+        )
+      ).toEqual({
+        ...baseState,
+        layers: [
+          ...baseState.layers,
+          {
+            layerId: 'annotation',
+            layerType: layerTypes.ANNOTATIONS,
+            indexPatternId: 'indexPattern1',
+            annotations: [exampleAnnotation2],
+            ignoreGlobalFilters: true,
+          },
+        ],
+      });
+    });
   });
 
   describe('#removeLayer', () => {
@@ -2879,86 +2961,6 @@ describe('xy_visualization', () => {
         '4': 'Event [2]',
         '5': 'Event [1] [1]',
         '6': 'Custom [1]',
-      });
-    });
-  });
-
-  describe('#fromPersistableState', () => {
-    it('should inject references on annotation layers', () => {
-      const baseState = exampleState();
-      expect(
-        xyVisualization.fromPersistableState!(
-          {
-            ...baseState,
-            layers: [
-              ...baseState.layers,
-              {
-                layerId: 'annotation',
-                layerType: layerTypes.ANNOTATIONS,
-                annotations: [exampleAnnotation2],
-                ignoreGlobalFilters: true,
-              },
-            ],
-          },
-          [
-            {
-              type: 'index-pattern',
-              name: `xy-visualization-layer-annotation`,
-              id: 'indexPattern1',
-            },
-          ]
-        )
-      ).toEqual({
-        ...baseState,
-        layers: [
-          ...baseState.layers,
-          {
-            layerId: 'annotation',
-            layerType: layerTypes.ANNOTATIONS,
-            indexPatternId: 'indexPattern1',
-            annotations: [exampleAnnotation2],
-            ignoreGlobalFilters: true,
-          },
-        ],
-      });
-    });
-
-    it('should fallback to the first dataView reference in case there are missing annotation references', () => {
-      const baseState = exampleState();
-      expect(
-        xyVisualization.fromPersistableState!(
-          {
-            ...baseState,
-            layers: [
-              ...baseState.layers,
-              {
-                layerId: 'annotation',
-                layerType: layerTypes.ANNOTATIONS,
-                annotations: [exampleAnnotation2],
-                ignoreGlobalFilters: true,
-              },
-            ],
-          },
-          [
-            {
-              type: 'index-pattern',
-              name: 'something-else',
-              id: 'indexPattern1',
-            },
-          ]
-        )
-      ).toEqual({
-        ...baseState,
-        layers: [
-          ...baseState.layers,
-          {
-            layerId: 'annotation',
-            layerType: layerTypes.ANNOTATIONS,
-            indexPatternId: 'indexPattern1',
-            annotations: [exampleAnnotation2],
-            ignoreGlobalFilters: true,
-          },
-        ],
       });
     });
   });
