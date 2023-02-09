@@ -30,7 +30,7 @@
         "label": "HttpResourcesMock",
         "description": [],
         "signature": [
-          "{ setup: jest.MockInstance<{ createRegistrar: (router: ",
+          "{ start: jest.MockInstance<void, []>; setup: jest.MockInstance<{ createRegistrar: (router: ",
           {
             "pluginId": "@kbn/core-http-server",
             "scope": "common",
@@ -56,7 +56,7 @@
           },
           "; }, [deps: ",
           "SetupDeps",
-          "]>; start: jest.MockInstance<void, []>; stop: jest.MockInstance<void, []>; preboot: jest.MockInstance<{ createRegistrar: (router: ",
+          "]>; stop: jest.MockInstance<void, []>; preboot: jest.MockInstance<{ createRegistrar: (router: ",
           {
             "pluginId": "@kbn/core-http-server",
             "scope": "common",
@@ -685,9 +685,9 @@
                 "section": "def-common.CustomHttpResponseOptions",
                 "text": "CustomHttpResponseOptions"
               },
-              "<",
+              "<Buffer | ",
               "Stream",
-              " | Buffer | ",
+              " | ",
               {
                 "pluginId": "@kbn/core-http-server",
                 "scope": "common",
@@ -703,9 +703,9 @@
                 "section": "def-common.CustomHttpResponseOptions",
                 "text": "CustomHttpResponseOptions"
               },
-              "<",
+              "<Buffer | ",
               "Stream",
-              " | Buffer | ",
+              " | ",
               {
                 "pluginId": "@kbn/core-http-server",
                 "scope": "common",
@@ -737,9 +737,9 @@
                 "section": "def-common.CustomHttpResponseOptions",
                 "text": "CustomHttpResponseOptions"
               },
-              "<string | Record<string, any> | Error | ",
+              "<string | Record<string, any> | Error | Buffer | ",
               "Stream",
-              " | Buffer | { message: string | Error; attributes?: ",
+              " | { message: string | Error; attributes?: ",
               {
                 "pluginId": "@kbn/core-http-server",
                 "scope": "common",
@@ -747,9 +747,9 @@
                 "section": "def-common.ResponseErrorAttributes",
                 "text": "ResponseErrorAttributes"
               },
-              " | undefined; } | undefined>]> & (<T extends string | Record<string, any> | Error | ",
+              " | undefined; } | undefined>]> & (<T extends string | Record<string, any> | Error | Buffer | ",
               "Stream",
-              " | Buffer | { message: string | Error; attributes?: ",
+              " | { message: string | Error; attributes?: ",
               {
                 "pluginId": "@kbn/core-http-server",
                 "scope": "common",

@@ -263,7 +263,7 @@
               "\nThe object containing the field name and type, needed for the compatibility check"
             ],
             "signature": [
-              "{ name: string; type: string; }"
+              "{ type: string; name: string; }"
             ],
             "path": "packages/kbn-cell-actions/src/types.ts",
             "deprecated": false,

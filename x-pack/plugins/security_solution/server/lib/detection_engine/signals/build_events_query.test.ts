@@ -789,6 +789,7 @@ describe('create_signals', () => {
         alias: null,
         chunkSize: 1024,
         excludeExceptions: true,
+        startedAt: new Date(),
       });
       const request = buildEqlSearchRequest({
         query: 'process where true',
