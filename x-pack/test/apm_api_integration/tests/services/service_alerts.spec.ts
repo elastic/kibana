@@ -5,10 +5,11 @@
  * 2.0.
  */
 import expect from '@kbn/expect';
-import { ApmRuleType } from '@kbn/apm-plugin/common/rules/apm_rule_types';
+import { AggregationType, ApmRuleType } from '@kbn/apm-plugin/common/rules/apm_rule_types';
 import { apm, timerange } from '@kbn/apm-synthtrace-client';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { waitForActiveAlert } from '../../common/utils/wait_for_active_alert';
+import { createAlertingRule } from '../alerts/alerting_api_helper';
 
 export default function ServiceAlerts({ getService }: FtrProviderContext) {
   const registry = getService('registry');
@@ -43,27 +44,20 @@ export default function ServiceAlerts({ getService }: FtrProviderContext) {
   }
 
   async function createRule() {
-    return supertest
-      .post(`/api/alerting/rule`)
-      .set('kbn-xsrf', 'true')
-      .send({
-        params: {
-          serviceName: goService,
-          transactionType: '',
-          windowSize: 99,
-          windowUnit: 'y',
-          threshold: 100,
-          aggregationType: 'avg',
-          environment: 'testing',
-        },
-        consumer: 'apm',
-        schedule: { interval: '1m' },
-        tags: ['apm'],
-        name: `Latency threshold | ${goService}`,
-        rule_type_id: ApmRuleType.TransactionDuration,
-        notify_when: 'onActiveAlert',
-        actions: [],
-      });
+    return createAlertingRule({
+      supertest,
+      name: `Latency threshold | ${goService}`,
+      params: {
+        serviceName: goService,
+        transactionType: '',
+        windowSize: 99,
+        windowUnit: 'y',
+        threshold: 100,
+        aggregationType: AggregationType.Avg,
+        environment: 'testing',
+      },
+      ruleTypeId: ApmRuleType.TransactionDuration,
+    });
   }
 
   registry.when('Service alerts', { config: 'basic', archives: [] }, () => {

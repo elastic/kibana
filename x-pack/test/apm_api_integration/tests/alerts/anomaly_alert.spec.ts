@@ -9,8 +9,10 @@ import { ApmRuleType } from '@kbn/apm-plugin/common/rules/apm_rule_types';
 import { apm, timerange } from '@kbn/apm-synthtrace-client';
 import expect from '@kbn/expect';
 import { range } from 'lodash';
+import { ANOMALY_SEVERITY } from '@kbn/apm-plugin/common/ml_constants';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { createAndRunApmMlJobs } from '../../common/utils/create_and_run_apm_ml_jobs';
+import { createAlertingRule } from './alerting_api_helper';
 import { waitForRuleStatus } from './wait_for_rule_status';
 
 export default function ApiTest({ getService }: FtrProviderContext) {
@@ -81,26 +83,17 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         });
 
         it('checks if alert is active', async () => {
-          const { body: createdRule } = await supertest
-            .post(`/api/alerting/rule`)
-            .set('kbn-xsrf', 'foo')
-            .send({
-              params: {
-                environment: 'production',
-                windowSize: 99,
-                windowUnit: 'y',
-                anomalySeverityType: 'warning',
-              },
-              consumer: 'apm',
-              schedule: {
-                interval: '1m',
-              },
-              tags: ['apm', 'service.name:service-a'],
-              name: 'Latency anomaly | service-a',
-              rule_type_id: ApmRuleType.Anomaly,
-              notify_when: 'onActiveAlert',
-              actions: [],
-            });
+          const { body: createdRule } = await createAlertingRule({
+            supertest,
+            name: 'Latency anomaly | service-a',
+            params: {
+              environment: 'production',
+              windowSize: 99,
+              windowUnit: 'y',
+              anomalySeverityType: ANOMALY_SEVERITY.WARNING,
+            },
+            ruleTypeId: ApmRuleType.Anomaly,
+          });
 
           ruleId = createdRule.id;
 
