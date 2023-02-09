@@ -115,7 +115,9 @@ export class ScrollableLogTextStreamView extends React.PureComponent<
       };
     }
 
-    return null;
+    return {
+      isScrollLocked: false,
+    };
   }
 
   constructor(props: ScrollableLogTextStreamViewProps) {
