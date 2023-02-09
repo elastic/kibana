@@ -23,14 +23,14 @@
       "kibanaUtils",
       "triggersActionsUi",
       "management",
-      "spaces",
       "security",
       "notifications"
     ],
     "optionalPlugins": [
       "home",
       "taskManager",
-      "usageCollection"
+      "usageCollection",
+      "spaces"
     ],
     "requiredBundles": [
       "savedObjects"
