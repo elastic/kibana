@@ -171,6 +171,8 @@ export class Plugin implements ISecuritySolutionPlugin {
       plugins,
       endpointAppContextService: this.endpointAppContextService,
       ruleExecutionLogService,
+      kibanaVersion: pluginContext.env.packageInfo.version,
+      kibanaBranch: pluginContext.env.packageInfo.branch,
     });
 
     const router = core.http.createRouter<SecuritySolutionRequestHandlerContext>();
@@ -357,6 +359,8 @@ export class Plugin implements ISecuritySolutionPlugin {
       appClientFactory.setup({
         getSpaceId: depsStart.spaces?.spacesService?.getSpaceId,
         config,
+        kibanaVersion: pluginContext.env.packageInfo.version,
+        kibanaBranch: pluginContext.env.packageInfo.branch,
       });
 
       const endpointFieldsStrategy = endpointFieldsProvider(
