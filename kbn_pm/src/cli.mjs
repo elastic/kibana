@@ -23,7 +23,7 @@ import { Log } from './lib/log.mjs';
 import External from './lib/external_packages.js';
 
 const start = Date.now();
-const args = new Args(process.argv.slice(2), process.env.CI ? ['--quiet'] : []);
+const args = new Args(process.argv.slice(2), []);
 const log = new Log(args.getLoggingLevel());
 const cmdName = args.getCommandName();
 
