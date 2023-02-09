@@ -13,6 +13,7 @@ import {
   useTimeBuckets,
 } from '@kbn/observability-plugin/public';
 import { AlertConsumers } from '@kbn/rule-data-utils';
+import { HeightRetainer } from '../../../../../../components/height_retainer';
 import { InfraClientCoreStart, InfraClientStartDeps } from '../../../../../../types';
 import { useUnifiedSearchContext } from '../../../hooks/use_unified_search';
 
@@ -54,38 +55,44 @@ export const AlertsTabContent = React.memo(() => {
   };
 
   return (
-    <EuiFlexGroup direction="column" gutterSize="m">
-      <EuiFlexGroup justifyContent="flexStart" alignItems="center">
-        <EuiFlexItem grow={false}>
-          <ObservabilityAlertStatusFilter onChange={setAlertStatus} status={alertStatus} />
-        </EuiFlexItem>
-      </EuiFlexGroup>
-      <EuiFlexItem>
-        <AlertSummaryWidget
-          chartThemes={chartThemes}
-          featureIds={infraAlertFeatureIds}
-          filter={alertsEsQueryByStatus}
-          fullSize
-          timeRange={summaryTimeRange}
-        />
-      </EuiFlexItem>
-      {alertsEsQueryByStatus && (
+    <HeightRetainer>
+      <EuiFlexGroup direction="column" gutterSize="m">
+        <EuiFlexGroup justifyContent="flexStart" alignItems="center">
+          <EuiFlexItem grow={false}>
+            <ObservabilityAlertStatusFilter onChange={setAlertStatus} status={alertStatus} />
+          </EuiFlexItem>
+        </EuiFlexGroup>
         <EuiFlexItem>
-          <CasesContext features={casesFeatures} owner={casesOwner} permissions={casesCapabilities}>
-            <AlertsStateTable
-              alertsTableConfigurationRegistry={alertsTableConfigurationRegistry}
-              configurationId={AlertConsumers.OBSERVABILITY}
-              featureIds={infraAlertFeatureIds}
-              flyoutSize="s"
-              id={ALERTS_TABLE_ID}
-              pageSize={ALERTS_PER_PAGE}
-              query={alertsEsQueryByStatus}
-              showAlertStatusWithFlapping
-              showExpandToDetails={false}
-            />
-          </CasesContext>
+          <AlertSummaryWidget
+            chartThemes={chartThemes}
+            featureIds={infraAlertFeatureIds}
+            filter={alertsEsQueryByStatus}
+            fullSize
+            timeRange={summaryTimeRange}
+          />
         </EuiFlexItem>
-      )}
-    </EuiFlexGroup>
+        {alertsEsQueryByStatus && (
+          <EuiFlexItem>
+            <CasesContext
+              features={casesFeatures}
+              owner={casesOwner}
+              permissions={casesCapabilities}
+            >
+              <AlertsStateTable
+                alertsTableConfigurationRegistry={alertsTableConfigurationRegistry}
+                configurationId={AlertConsumers.OBSERVABILITY}
+                featureIds={infraAlertFeatureIds}
+                flyoutSize="s"
+                id={ALERTS_TABLE_ID}
+                pageSize={ALERTS_PER_PAGE}
+                query={alertsEsQueryByStatus}
+                showAlertStatusWithFlapping
+                showExpandToDetails={false}
+              />
+            </CasesContext>
+          </EuiFlexItem>
+        )}
+      </EuiFlexGroup>
+    </HeightRetainer>
   );
 });
