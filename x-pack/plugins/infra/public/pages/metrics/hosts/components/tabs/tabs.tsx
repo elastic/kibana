@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import React, { useRef, useState } from 'react';
+import React, { useRef } from 'react';
 import { EuiTabs, EuiTab, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { MetricsGrid } from './metrics/metrics_grid';
 import { AlertsTabContent } from './alerts';
 
 import { AlertsTabBadge } from './alerts_tab_badge';
-import { tabIds } from './config';
+import { tabIds, useTabId } from '../../hooks/use_tab_id';
 
 const tabs = [
   {
@@ -28,18 +28,16 @@ const tabs = [
       defaultMessage: 'Alerts',
     }),
     append: <AlertsTabBadge />,
-    'data-test-subj': 'hostsView_tab_alerts',
+    'data-test-subj': 'hostsView-tabs-alerts',
   },
 ];
 
-const initialRenderedTabsSet = new Set([tabs[0].id]);
-
 export const Tabs = () => {
+  const [selectedTabId, setSelectedTabId] = useTabId();
+
   // This map allow to keep track of which tabs content have been rendered the first time.
   // We need it in order to load a tab content only if it gets clicked, and then keep it in the DOM for performance improvement.
-  const renderedTabsSet = useRef(initialRenderedTabsSet);
-
-  const [selectedTabId, setSelectedTabId] = useState(tabs[0].id);
+  const renderedTabsSet = useRef(new Set([selectedTabId]));
 
   const tabEntries = tabs.map((tab, index) => (
     <EuiTab

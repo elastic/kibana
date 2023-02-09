@@ -15,8 +15,3 @@ export const INFRA_ALERT_FEATURE_ID = 'infrastructure';
 export const infraAlertFeatureIds: ValidFeatureId[] = [AlertConsumers.INFRASTRUCTURE];
 export const casesFeatures = { alerts: { sync: false } };
 export const casesOwner = [INFRA_ALERT_FEATURE_ID];
-
-export const tabIds = {
-  ALERTS: 'alerts',
-  METRICS: 'metrics',
-};

@@ -15,7 +15,7 @@ import { useCallback, useMemo, useState } from 'react';
 import createContainer from 'constate';
 import { getTime } from '@kbn/data-plugin/common';
 import { TIMESTAMP } from '@kbn/rule-data-utils';
-import { buildEsQuery, Query } from '@kbn/es-query';
+import { buildEsQuery, Filter, Query } from '@kbn/es-query';
 import { ALERT_STATUS_QUERY } from '@kbn/observability-plugin/public';
 import { AlertStatus } from '@kbn/observability-plugin/common';
 import { SnapshotNode } from '../../../../../common/http_api';
@@ -68,13 +68,13 @@ const createAlertsEsQuery = ({
   hostNodes: SnapshotNode[];
   status?: AlertStatus;
 }) => {
-  const hostsQuery = createHostsQuery(hostNodes);
   const alertStatusQuery = createAlertStatusQuery(status);
 
   const dateFilter = createDateFilter(dateRange);
+  const hostsFilter = createHostsFilter(hostNodes);
 
-  const queries = [hostsQuery, alertStatusQuery].filter(Boolean) as Query[];
-  const filters = dateFilter ? [dateFilter] : [];
+  const queries = alertStatusQuery ? [alertStatusQuery] : [];
+  const filters = [hostsFilter, dateFilter].filter(Boolean) as Filter[];
 
   return buildEsQuery(undefined, queries, filters);
 };
@@ -85,10 +85,11 @@ const createDateFilter = (date: HostsState['dateRange']) =>
 const createAlertStatusQuery = (status: AlertStatus = 'all'): Query | null =>
   ALERT_STATUS_QUERY[status] ? { query: ALERT_STATUS_QUERY[status], language: 'kuery' } : null;
 
-const createHostsQuery = (hosts: SnapshotNode[]): Query => ({
-  language: 'kuery',
-  query:
-    hosts.length > 0
-      ? hosts.map((host) => `host.name : "${host.name}"`).join(' or ')
-      : 'host.name : ""',
+const createHostsFilter = (hosts: SnapshotNode[]): Filter => ({
+  query: {
+    terms: {
+      'host.name': hosts.map((p) => p.name),
+    },
+  },
+  meta: {},
 });
