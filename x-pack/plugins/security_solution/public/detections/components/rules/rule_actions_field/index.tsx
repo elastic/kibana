@@ -58,6 +58,7 @@ const ContainerActions = styled.div.attrs(
 
 export const RuleActionsField: React.FC<Props> = ({ field, messageVariables }) => {
   const [fieldErrors, setFieldErrors] = useState<string | null>(null);
+  const [isInitializingAction, setIsInitializingAction] = useState(false);
   const form = useFormContext();
   const { isSubmitted, isSubmitting, isValid } = form;
   const {
@@ -83,6 +84,9 @@ export const RuleActionsField: React.FC<Props> = ({ field, messageVariables }) =
   const setActionIdByIndex = useCallback(
     (id: string, index: number) => {
       const updatedActions = [...(actions as Array<Partial<RuleAction>>)];
+      if (isEmpty(updatedActions[index].params)) {
+        setIsInitializingAction(true);
+      }
       updatedActions[index] = deepMerge(updatedActions[index], { id });
       field.setValue(updatedActions);
     },
@@ -99,23 +103,28 @@ export const RuleActionsField: React.FC<Props> = ({ field, messageVariables }) =
       // validation is not triggered correctly when actions params updated (more details in https://github.com/elastic/kibana/issues/142217)
       // wrapping field.setValue in setTimeout fixes the issue above
       // and triggers validation after params have been updated
-      setTimeout(
-        () =>
-          field.setValue((prevValue: RuleAction[]) => {
-            const updatedActions = [...prevValue];
-            updatedActions[index] = {
-              ...updatedActions[index],
-              params: {
-                ...updatedActions[index].params,
-                [key]: value,
-              },
-            };
-            return updatedActions;
-          }),
-        0
-      );
+      const updateValue = () => {
+        field.setValue((prevValue: RuleAction[]) => {
+          const updatedActions = [...prevValue];
+          updatedActions[index] = {
+            ...updatedActions[index],
+            params: {
+              ...updatedActions[index].params,
+              [key]: value,
+            },
+          };
+          return updatedActions;
+        });
+      };
+
+      if (isInitializingAction) {
+        setTimeout(updateValue, 0);
+        setIsInitializingAction(false);
+      } else {
+        updateValue();
+      }
     },
-    [field]
+    [field, isInitializingAction]
   );
 
   const actionForm = useMemo(
