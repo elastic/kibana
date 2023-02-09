@@ -192,9 +192,7 @@ class HandlebarsTestBench {
   }
 
   private execBeforeRender() {
-    if (this.options.beforeRender) {
-      this.options.beforeRender();
-    }
+    this.options.beforeRender?.();
   }
 
   private execBeforeEach() {
