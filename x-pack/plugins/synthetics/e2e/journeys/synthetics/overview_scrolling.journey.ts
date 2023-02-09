@@ -47,6 +47,9 @@ journey('Overview Scrolling', async ({ page, params }) => {
   });
 
   step('scroll until you see showing all monitors', async () => {
+    setTimeout(() => {
+      throw new Error('scrolling timed out');
+    }, 120_000);
     let showingAllMonitorsNode;
 
     const gridItems = await page.locator(`[data-test-subj="syntheticsOverviewGridItem"]`);
@@ -56,7 +59,7 @@ journey('Overview Scrolling', async ({ page, params }) => {
     expect(count <= 32).toBe(true);
 
     while (!showingAllMonitorsNode) {
-      await page.mouse.wheel(0, 100);
+      await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
       showingAllMonitorsNode = await page.$(`text="Showing all monitors"`);
     }
 
