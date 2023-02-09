@@ -17,7 +17,7 @@ import createContainer from 'constate';
 import { BoolQuery } from '@kbn/es-query';
 import { SnapshotMetricType } from '../../../../../common/inventory_models/types';
 import { useSourceContext } from '../../../../containers/metrics_source';
-import { useSnapshot, UseSnapshotRequest } from '../../inventory_view/hooks/use_snaphot';
+import { useSnapshot, type UseSnapshotRequest } from '../../inventory_view/hooks/use_snaphot';
 import { useUnifiedSearchContext } from './use_unified_search';
 import { StringDateRangeTimestamp } from './use_unified_search_url_state';
 

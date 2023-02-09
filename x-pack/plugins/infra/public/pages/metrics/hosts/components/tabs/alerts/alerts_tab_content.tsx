@@ -14,7 +14,7 @@ import {
 } from '@kbn/observability-plugin/public';
 import { AlertConsumers } from '@kbn/rule-data-utils';
 import { HeightRetainer } from '../../../../../../components/height_retainer';
-import { InfraClientCoreStart, InfraClientStartDeps } from '../../../../../../types';
+import type { InfraClientCoreStart, InfraClientStartDeps } from '../../../../../../types';
 import { useUnifiedSearchContext } from '../../../hooks/use_unified_search';
 
 import {

@@ -5,10 +5,7 @@
  * 2.0.
  */
 import React from 'react';
-import { EuiToolTip } from '@elastic/eui';
-import { EuiNotificationBadge } from '@elastic/eui';
-import { EuiIcon } from '@elastic/eui';
-import { EuiLoadingSpinner } from '@elastic/eui';
+import { EuiIcon, EuiLoadingSpinner, EuiNotificationBadge, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useAlertsCount } from '../../../../../hooks/use_alerts_count';
 import { infraAlertFeatureIds } from './config';
