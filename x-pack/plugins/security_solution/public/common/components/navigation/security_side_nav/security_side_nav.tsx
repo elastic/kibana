@@ -36,23 +36,29 @@ type FormatSideNavItems = (navItems: NavLinkItem) => SideNavItem;
 const GetStartedCustomLinkComponent: React.FC<{
   isSelected: boolean;
   title: string;
-}> = ({ isSelected, title }) => (
-  <SecuritySolutionLinkAnchor
-    deepLinkId={SecurityPageName.landing}
-    color={isSelected ? 'primary' : 'text'}
-  >
-    <EuiListGroupItem
-      label={title.toUpperCase()}
-      size="xs"
+}> = ({ isSelected, title }) => {
+  const onClick = useCallback(() => {
+    track(METRIC_TYPE.CLICK, `${TELEMETRY_EVENT.NAVIGATION}${SecurityPageName.landing}`);
+  }, []);
+  return (
+    <SecuritySolutionLinkAnchor
+      deepLinkId={SecurityPageName.landing}
       color={isSelected ? 'primary' : 'text'}
-      iconType={EuiIconLaunch}
-      iconProps={{
-        color: isSelected ? 'primary' : 'text',
-      }}
-    />
-    <EuiHorizontalRule margin="xs" />
-  </SecuritySolutionLinkAnchor>
-);
+      onClick={onClick}
+    >
+      <EuiListGroupItem
+        label={title.toUpperCase()}
+        size="xs"
+        color={isSelected ? 'primary' : 'text'}
+        iconType={EuiIconLaunch}
+        iconProps={{
+          color: isSelected ? 'primary' : 'text',
+        }}
+      />
+      <EuiHorizontalRule margin="xs" />
+    </SecuritySolutionLinkAnchor>
+  );
+};
 const GetStartedCustomLink = React.memo(GetStartedCustomLinkComponent);
 
 /**
