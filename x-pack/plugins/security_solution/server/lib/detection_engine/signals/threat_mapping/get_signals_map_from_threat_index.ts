@@ -34,8 +34,6 @@ interface GetSignalsQueryMapFromThreatIndexOptionsMatch {
   termsQueryAllowed: false;
 }
 
-type GetSignalsQueryMapFromThreatIndexOptions = GetSignalsQueryMapFromThreatIndexOptionsTerms | GetSignalsQueryMapFromThreatIndexOptionsMatch;
-
 /**
  * fetches threats and creates signals map from results, that matches signal is with list of threat queries
  */
@@ -44,9 +42,11 @@ type GetSignalsQueryMapFromThreatIndexOptions = GetSignalsQueryMapFromThreatInde
  * @param options.termsQueryAllowed - if terms query allowed to be executed, then signalValueMap should be provided
  * @param options.signalValueMap - map of signal values from terms query results
  */
-export async function getSignalsQueryMapFromThreatIndex(options: GetSignalsQueryMapFromThreatIndexOptionsTerms): Promise<SignalsQueryMap>;
-export async function getSignalsQueryMapFromThreatIndex(options: GetSignalsQueryMapFromThreatIndexOptionsMatch): Promise<SignalsQueryMap>;
-export async function getSignalsQueryMapFromThreatIndex (options: GetSignalsQueryMapFromThreatIndexOptions ): Promise<SignalsQueryMap> {
+export async function getSignalsQueryMapFromThreatIndex(
+  options:
+    | GetSignalsQueryMapFromThreatIndexOptionsTerms
+    | GetSignalsQueryMapFromThreatIndexOptionsMatch
+): Promise<SignalsQueryMap> {
   const { threatSearchParams, eventsCount, termsQueryAllowed } = options;
 
   let threatList: Awaited<ReturnType<typeof getThreatList>> | undefined;
@@ -133,4 +133,4 @@ export async function getSignalsQueryMapFromThreatIndex (options: GetSignalsQuer
   }
 
   return signalsQueryMap;
-};
+}
