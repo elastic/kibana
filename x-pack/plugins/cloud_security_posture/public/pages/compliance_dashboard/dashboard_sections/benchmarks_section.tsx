@@ -173,6 +173,9 @@ export const BenchmarksSection = ({
           </EuiFlexItem>
           <EuiFlexItem
             grow={dashboardColumnsGrow.second}
+            css={css`
+              margin-left: -${euiTheme.size.s};
+            `}
             data-test-subj={DASHBOARD_TABLE_COLUMN_SCORE_TEST_ID}
           >
             <CloudPostureScoreChart
