@@ -99,7 +99,7 @@ export function createEuiButtonItem({
       navigateToUrl(url);
     },
     isDisabled: disabled,
-    dataTestSubj: `collapsibleNavAppButton-${id}`,
+    'data-test-subj': dataTestSubj || `collapsibleNavAppButton-${id}`,
   };
 }
 
