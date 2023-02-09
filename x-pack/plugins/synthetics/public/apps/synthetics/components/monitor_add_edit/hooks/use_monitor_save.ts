@@ -8,13 +8,18 @@
 import { FETCH_STATUS, useFetcher } from '@kbn/observability-plugin/public';
 import { useParams, useRouteMatch } from 'react-router-dom';
 import { useEffect } from 'react';
+import { useDispatch } from 'react-redux';
 import { i18n } from '@kbn/i18n';
 import { MONITOR_EDIT_ROUTE } from '../../../../../../common/constants';
 import { SyntheticsMonitor } from '../../../../../../common/runtime_types';
 import { createMonitorAPI, updateMonitorAPI } from '../../../state/monitor_management/api';
 import { kibanaService } from '../../../../../utils/kibana_service';
+import { cleanMonitorListState } from '../../../state';
+import { useSyntheticsRefreshContext } from '../../../contexts';
 
 export const useMonitorSave = ({ monitorData }: { monitorData?: SyntheticsMonitor }) => {
+  const dispatch = useDispatch();
+  const { refreshApp } = useSyntheticsRefreshContext();
   const { monitorId } = useParams<{ monitorId: string }>();
 
   const editRouteMatch = useRouteMatch({ path: MONITOR_EDIT_ROUTE });
@@ -42,12 +47,14 @@ export const useMonitorSave = ({ monitorData }: { monitorData?: SyntheticsMonito
         toastLifeTimeMs: 3000,
       });
     } else if (status === FETCH_STATUS.SUCCESS && !loading) {
+      refreshApp();
+      dispatch(cleanMonitorListState());
       kibanaService.toasts.addSuccess({
         title: monitorId ? MONITOR_UPDATED_SUCCESS_LABEL : MONITOR_SUCCESS_LABEL,
         toastLifeTimeMs: 3000,
       });
     }
-  }, [data, status, monitorId, loading]);
+  }, [data, status, monitorId, loading, refreshApp, dispatch]);
 
   return { status, loading, isEdit };
 };
