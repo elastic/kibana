@@ -79,6 +79,7 @@ export const ExpandedRowHealthPane: FC<ExpandedRowHealthPaneProps> = ({ health }
         <>
           <EuiSpacer size="s" />
           <EuiInMemoryTable<TransformHealthIssue>
+            data-test-subj="transformHealthTabContentIssueTable"
             items={issues}
             columns={columns}
             compressed={true}

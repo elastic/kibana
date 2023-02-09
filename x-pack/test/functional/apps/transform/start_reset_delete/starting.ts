@@ -9,6 +9,7 @@ import {
   TRANSFORM_STATE,
   TRANSFORM_HEALTH,
   TRANSFORM_HEALTH_LABEL,
+  TRANSFORM_HEALTH_DESCRIPTION,
 } from '@kbn/transform-plugin/common/constants';
 import {
   TransformLatestConfig,
@@ -23,6 +24,7 @@ interface TestDataPivot {
   mode: 'batch' | 'continuous';
   type: 'pivot';
   expected: {
+    healthDescription: string;
     healthLabel: string;
     healthStatus: string;
   };
@@ -34,6 +36,7 @@ interface TestDataLatest {
   mode: 'batch' | 'continuous';
   type: 'latest';
   expected: {
+    healthDescription: string;
     healthLabel: string;
     healthStatus: string;
   };
@@ -54,6 +57,7 @@ export default function ({ getService }: FtrProviderContext) {
         mode: 'batch',
         type: 'pivot',
         expected: {
+          healthDescription: TRANSFORM_HEALTH_DESCRIPTION.green,
           healthLabel: TRANSFORM_HEALTH_LABEL.green,
           healthStatus: TRANSFORM_HEALTH.GREEN,
         },
@@ -64,6 +68,7 @@ export default function ({ getService }: FtrProviderContext) {
         mode: 'continuous',
         type: 'pivot',
         expected: {
+          healthDescription: TRANSFORM_HEALTH_DESCRIPTION.green,
           healthLabel: TRANSFORM_HEALTH_LABEL.green,
           healthStatus: TRANSFORM_HEALTH.GREEN,
         },
@@ -74,6 +79,7 @@ export default function ({ getService }: FtrProviderContext) {
         mode: 'continuous',
         type: 'pivot',
         expected: {
+          healthDescription: TRANSFORM_HEALTH_DESCRIPTION.yellow,
           healthLabel: TRANSFORM_HEALTH_LABEL.yellow,
           healthStatus: TRANSFORM_HEALTH.YELLOW,
         },
@@ -84,6 +90,7 @@ export default function ({ getService }: FtrProviderContext) {
         mode: 'batch',
         type: 'latest',
         expected: {
+          healthDescription: TRANSFORM_HEALTH_DESCRIPTION.green,
           healthLabel: TRANSFORM_HEALTH_LABEL.green,
           healthStatus: TRANSFORM_HEALTH.GREEN,
         },
@@ -94,6 +101,7 @@ export default function ({ getService }: FtrProviderContext) {
         mode: 'continuous',
         type: 'latest',
         expected: {
+          healthDescription: TRANSFORM_HEALTH_DESCRIPTION.green,
           healthLabel: TRANSFORM_HEALTH_LABEL.green,
           healthStatus: TRANSFORM_HEALTH.GREEN,
         },
@@ -158,6 +166,12 @@ export default function ({ getService }: FtrProviderContext) {
           await transform.table.assertTransformRowActionEnabled(transformId, 'Start', true);
           await transform.table.clickTransformRowAction(transformId, 'Start');
           await transform.table.confirmStartTransform();
+
+          await transform.table.assertTransformExpandedRowHealth(
+            testData.expected.healthDescription,
+            testData.expected.healthStatus !== TRANSFORM_HEALTH.GREEN
+          );
+
           await transform.table.clearSearchString(testDataList.length);
 
           if (testData.mode === 'continuous') {

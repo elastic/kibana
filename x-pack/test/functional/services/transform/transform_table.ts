@@ -204,6 +204,7 @@ export function TransformTableProvider({ getService }: FtrProviderContext) {
 
       // Walk through the rest of the tabs and check if the corresponding content shows up
       await this.switchToExpandedRowTab('transformJsonTab', '~transformJsonTabContent');
+      await this.switchToExpandedRowTab('transformHealthTab', '~transformHealthTabContent');
       await this.switchToExpandedRowTab('transformMessagesTab', '~transformMessagesTabContent');
       await this.switchToExpandedRowTab('transformPreviewTab', '~transformPivotPreview');
     }
@@ -252,6 +253,36 @@ export function TransformTableProvider({ getService }: FtrProviderContext) {
           `Expected transform messages text to include '${expectedText}'`
         );
       });
+
+      // Switch back to details tab
+      await this.switchToExpandedRowTab('transformDetailsTab', '~transformDetailsTabContent');
+    }
+
+    public async assertTransformExpandedRowHealth(
+      expectedText: string,
+      expectIssueTableToExist: boolean
+    ) {
+      await this.ensureDetailsOpen();
+
+      // The expanded row should show the details tab content by default
+      await testSubjects.existOrFail('transformDetailsTab');
+      await testSubjects.existOrFail('~transformDetailsTabContent');
+
+      // Click on the messages tab and assert the messages
+      await this.switchToExpandedRowTab('transformHealthTab', '~transformHealthTabContent');
+      await retry.tryForTime(30 * 1000, async () => {
+        const actualText = await testSubjects.getVisibleText('~transformHealthTabContent');
+        expect(actualText.toLowerCase()).to.contain(
+          expectedText.toLowerCase(),
+          `Expected transform messages text to include '${expectedText}'`
+        );
+      });
+
+      if (expectIssueTableToExist) {
+        await testSubjects.existOrFail('transformHealthTabContentIssueTable');
+      } else {
+        await testSubjects.missingOrFail('transformHealthTabContentIssueTable');
+      }
 
       // Switch back to details tab
       await this.switchToExpandedRowTab('transformDetailsTab', '~transformDetailsTabContent');
