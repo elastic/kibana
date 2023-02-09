@@ -27,7 +27,7 @@ import { useCancelAddPackagePolicy } from '../hooks';
 import { splitPkgKey } from '../../../../../../../common/services';
 import { generateNewAgentPolicyWithDefaults } from '../../../../services';
 import type { NewAgentPolicy } from '../../../../types';
-import { useConfig, sendGetAgentStatus, useGetPackageInfoByKey } from '../../../../hooks';
+import { useConfig, sendGetAgentStatus, useGetPackageInfoByKeyQuery } from '../../../../hooks';
 import {
   Loading,
   Error as ErrorComponent,
@@ -97,7 +97,7 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
     data: packageInfoData,
     error: packageInfoError,
     isLoading: isPackageInfoLoading,
-  } = useGetPackageInfoByKey(pkgName, pkgVersion, { full: true, prerelease });
+  } = useGetPackageInfoByKeyQuery(pkgName, pkgVersion, { full: true, prerelease });
   const packageInfo = useMemo(() => {
     if (packageInfoData && packageInfoData.item) {
       return packageInfoData.item;
