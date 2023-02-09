@@ -6,33 +6,33 @@
  * Side Public License, v 1.
  */
 
+import Path from 'path';
 import globby from 'globby';
 import { ImportResolver } from '@kbn/import-resolver';
+import { ImportLocator } from '@kbn/import-locator';
+import { readPackageMap, Package, PluginPackage } from '@kbn/repo-packages';
 import { findUsedNodeModules } from '@kbn/find-used-node-modules';
 
-export async function findUsedDependencies(listedPkgDependencies: any, baseDir: any) {
-  // Define the entry points for the server code in order to
-  // look for the server side dependencies
-  const serverEntries = await globby(
-    [
-      // main code entries
-      'src/cli*/dist.js',
-      // core entry
-      'src/core/server/index.js',
-      // plugin entries
-      'src/plugins/**/server/index.js',
-      'x-pack/plugins/**/server/index.js',
-      // entries that are loaded into the server with dynamic require() calls
-      'src/plugins/vis_types/timelion/server/**/*.js',
-    ],
-    {
-      cwd: baseDir,
-      ignore: ['**/public/**'],
-      absolute: true,
-    }
-  );
+export async function findUsedDependencies(
+  listedPkgDependencies: any,
+  repoRoot: any,
+  plugins: PluginPackage[]
+) {
+  const resolver = ImportResolver.create(
+    repoRoot,
+    Array.from(readPackageMap().values()).flatMap((repoRel) => {
+      try {
+        return Package.fromManifest(repoRoot, Path.resolve(repoRoot, repoRel, 'kibana.jsonc'));
+      } catch (error) {
+        if (error.code === 'ENOENT') {
+          // ignore paths which weren't copied into the build
+          return [];
+        }
 
-  const resolver = ImportResolver.create(baseDir);
+        throw error;
+      }
+    })
+  );
 
   // Get the dependencies found searching through the server
   // side code entries that were provided
@@ -42,8 +42,30 @@ export async function findUsedDependencies(listedPkgDependencies: any, baseDir: 
     // find all the node modules we actually use on the server, including the peerDependencies of our used node_modules which are used within those deps
     ...(await findUsedNodeModules({
       resolver,
-      entryPaths: serverEntries,
+      locator: new ImportLocator(),
       findUsedPeers: true,
+      entryPaths: [
+        ...plugins.flatMap((p) =>
+          p.manifest.plugin.server
+            ? Path.resolve(repoRoot, p.normalizedRepoRelativeDir, 'server/index.js')
+            : []
+        ),
+        ...(await globby(
+          [
+            // main code entries
+            'src/cli*/dist.js',
+            // core entry
+            'src/core/server/index.js',
+            // entries that are loaded into the server with dynamic require() calls
+            'src/plugins/vis_types/timelion/server/**/*.js',
+          ],
+          {
+            cwd: repoRoot,
+            ignore: ['**/public/**'],
+            absolute: true,
+          }
+        )),
+      ],
     })),
   ];
 

@@ -27,7 +27,6 @@ import type {
   HelpersHash,
   NodeType,
   NonBlockHelperOptions,
-  PartialsHash,
   ProcessableBlockStatementNode,
   ProcessableNode,
   ProcessableNodeWithPathParts,
@@ -51,9 +50,6 @@ export class ElasticHandlebarsVisitor extends Handlebars.Visitor {
   private template?: string;
   private compileOptions: ExtendedCompileOptions;
   private runtimeOptions?: ExtendedRuntimeOptions;
-  private initialHelpers: HelpersHash;
-  private initialPartials: PartialsHash;
-  private initialDecorators: DecoratorsHash;
   private blockParamNames: any[][] = [];
   private blockParamValues: any[][] = [];
   private ast?: hbs.AST.Program;
@@ -65,10 +61,7 @@ export class ElasticHandlebarsVisitor extends Handlebars.Visitor {
   constructor(
     env: typeof Handlebars,
     input: string | hbs.AST.Program,
-    options: ExtendedCompileOptions = {},
-    helpers: HelpersHash,
-    partials: PartialsHash,
-    decorators: DecoratorsHash
+    options: ExtendedCompileOptions = {}
   ) {
     super();
 
@@ -80,13 +73,7 @@ export class ElasticHandlebarsVisitor extends Handlebars.Visitor {
       this.template = input as string;
     }
 
-    this.compileOptions = Object.assign(
-      {
-        data: true,
-      },
-      options
-    );
-
+    this.compileOptions = { data: true, ...options };
     this.compileOptions.knownHelpers = Object.assign(
       Object.create(null),
       {
@@ -101,10 +88,6 @@ export class ElasticHandlebarsVisitor extends Handlebars.Visitor {
       },
       this.compileOptions.knownHelpers
     );
-
-    this.initialHelpers = Object.assign({}, helpers);
-    this.initialPartials = Object.assign({}, partials);
-    this.initialDecorators = Object.assign({}, decorators);
 
     const protoAccessControl = createProtoAccessControl({});
 
@@ -156,13 +139,16 @@ export class ElasticHandlebarsVisitor extends Handlebars.Visitor {
   render(context: any, options: ExtendedRuntimeOptions = {}): string {
     this.contexts = [context];
     this.output = [];
-    this.runtimeOptions = Object.assign({}, options);
-    this.container.helpers = Object.assign(this.initialHelpers, options.helpers);
-    this.container.partials = Object.assign(this.initialPartials, options.partials);
-    this.container.decorators = Object.assign(
-      this.initialDecorators,
-      options.decorators as DecoratorsHash
-    );
+    this.runtimeOptions = { ...options };
+    this.container.helpers = {
+      ...this.env.helpers,
+      ...(options.helpers as HelpersHash),
+    };
+    this.container.partials = { ...this.env.partials, ...options.partials };
+    this.container.decorators = {
+      ...(this.env.decorators as DecoratorsHash),
+      ...(options.decorators as DecoratorsHash),
+    };
     this.container.hooks = {};
     this.processedRootDecorators = false;
     this.processedDecoratorsForProgram.clear();
@@ -540,7 +526,7 @@ export class ElasticHandlebarsVisitor extends Handlebars.Visitor {
       };
 
       if (fn.partials) {
-        options.partials = Object.assign({}, options.partials, fn.partials);
+        options.partials = { ...options.partials, ...fn.partials };
       }
     }
 
@@ -694,7 +680,7 @@ export class ElasticHandlebarsVisitor extends Handlebars.Visitor {
       nextContext: any,
       runtimeOptions: ExtendedRuntimeOptions = {}
     ) => {
-      runtimeOptions = Object.assign({}, runtimeOptions);
+      runtimeOptions = { ...runtimeOptions };
 
       // inherit data in blockParams from parent program
       runtimeOptions.data = runtimeOptions.data || this.runtimeOptions!.data;
