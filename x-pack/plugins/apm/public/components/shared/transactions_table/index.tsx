@@ -49,7 +49,7 @@ const INITIAL_STATE: InitialState = {
   requestId: '',
   mainStatisticsData: {
     transactionGroups: [],
-    maxTransactionGroupsExceeded: true,
+    maxTransactionGroupsExceeded: false,
     transactionOverflowCount: 0,
     transactionGroupsTotalItems: 0,
   },

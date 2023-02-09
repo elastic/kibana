@@ -52,9 +52,9 @@ export {
   isWriteBlockException,
   isIndexNotFoundException,
 } from './src/actions/es_errors';
-export { deterministicallyRegenerateObjectId } from './src/core/document_migrator';
 export {
   REMOVED_TYPES,
+  deterministicallyRegenerateObjectId,
   type DocumentsTransformFailed,
   type DocumentsTransformSuccess,
 } from './src/core';

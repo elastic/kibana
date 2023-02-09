@@ -34,6 +34,7 @@ class DocLinks {
   public appSearchWebCrawler: string;
   public appSearchWebCrawlerEventLogs: string;
   public appSearchWebCrawlerReference: string;
+  public behavioralAnalytics: string;
   public behavioralAnalyticsEvents: string;
   public bulkApi: string;
   public clientsGoIndex: string;
@@ -71,6 +72,7 @@ class DocLinks {
   public elasticsearchMapping: string;
   public elasticsearchSecureCluster: string;
   public enterpriseSearchConfig: string;
+  public enterpriseSearchEngines: string;
   public enterpriseSearchMailService: string;
   public enterpriseSearchTroubleshootSetup: string;
   public enterpriseSearchUsersAccess: string;
@@ -149,6 +151,7 @@ class DocLinks {
     this.appSearchWebCrawler = '';
     this.appSearchWebCrawlerEventLogs = '';
     this.appSearchWebCrawlerReference = '';
+    this.behavioralAnalytics = '';
     this.behavioralAnalyticsEvents = '';
     this.bulkApi = '';
     this.clientsGoIndex = '';
@@ -186,6 +189,7 @@ class DocLinks {
     this.elasticsearchMapping = '';
     this.elasticsearchSecureCluster = '';
     this.enterpriseSearchConfig = '';
+    this.enterpriseSearchEngines = '';
     this.enterpriseSearchMailService = '';
     this.enterpriseSearchTroubleshootSetup = '';
     this.enterpriseSearchUsersAccess = '';
@@ -266,6 +270,7 @@ class DocLinks {
     this.appSearchWebCrawler = docLinks.links.appSearch.webCrawler;
     this.appSearchWebCrawlerEventLogs = docLinks.links.appSearch.webCrawlerEventLogs;
     this.appSearchWebCrawlerReference = docLinks.links.appSearch.webCrawlerReference;
+    this.behavioralAnalytics = docLinks.links.enterpriseSearch.behavioralAnalytics;
     this.behavioralAnalyticsEvents = docLinks.links.enterpriseSearch.behavioralAnalyticsEvents;
     this.bulkApi = docLinks.links.enterpriseSearch.bulkApi;
     this.clientsGoIndex = docLinks.links.clients.goIndex;
@@ -302,6 +307,7 @@ class DocLinks {
     this.elasticsearchMapping = docLinks.links.elasticsearch.mapping;
     this.elasticsearchSecureCluster = docLinks.links.elasticsearch.secureCluster;
     this.enterpriseSearchConfig = docLinks.links.enterpriseSearch.configuration;
+    this.enterpriseSearchEngines = docLinks.links.enterpriseSearch.engines;
     this.enterpriseSearchMailService = docLinks.links.enterpriseSearch.mailService;
     this.enterpriseSearchTroubleshootSetup = docLinks.links.enterpriseSearch.troubleshootSetup;
     this.enterpriseSearchUsersAccess = docLinks.links.enterpriseSearch.usersAccess;

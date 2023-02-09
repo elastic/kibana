@@ -17,7 +17,7 @@ import { Loader } from '../../../../common/components/loader';
 import { useBoolState } from '../../../../common/hooks/use_bool_state';
 import { useValueChanged } from '../../../../common/hooks/use_value_changed';
 import { PrePackagedRulesPrompt } from '../../../../detections/components/rules/pre_packaged_rules/load_empty_prompt';
-import type { Rule, RulesSortingFields } from '../../../rule_management/logic';
+import type { Rule } from '../../../rule_management/logic';
 import * as i18n from '../../../../detections/pages/detection_engine/rules/translations';
 import type { EuiBasicTableOnChange } from '../../../../detections/pages/detection_engine/rules/types';
 import { BulkActionDryRunConfirmation } from './bulk_actions/bulk_action_dry_run_confirmation';
@@ -39,6 +39,7 @@ import { BulkActionDuplicateExceptionsConfirmation } from './bulk_actions/bulk_d
 import { useStartMlJobs } from '../../../rule_management/logic/use_start_ml_jobs';
 import { RULES_TABLE_PAGE_SIZE_OPTIONS } from './constants';
 import { useRuleManagementFilters } from '../../../rule_management/logic/use_rule_management_filters';
+import type { FindRulesSortField } from '../../../../../common/detection_engine/rule_management';
 
 const INITIAL_SORT_FIELD = 'enabled';
 
@@ -141,7 +142,7 @@ export const RulesTables = React.memo<RulesTableProps>(({ selectedTab }) => {
   const tableOnChangeCallback = useCallback(
     ({ page, sort }: EuiBasicTableOnChange) => {
       setSortingOptions({
-        field: (sort?.field as RulesSortingFields) ?? INITIAL_SORT_FIELD, // Narrowing EuiBasicTable sorting types
+        field: (sort?.field as FindRulesSortField) ?? INITIAL_SORT_FIELD, // Narrowing EuiBasicTable sorting types
         order: sort?.direction ?? 'desc',
       });
       setPage(page.index + 1);

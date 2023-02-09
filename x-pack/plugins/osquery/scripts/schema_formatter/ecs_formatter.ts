@@ -40,12 +40,19 @@ const RESTRICTED_FIELDS = [
 
 run(
   async ({ flags }) => {
-    const schemaPath = path.resolve(`./public/common/schemas/ecs/`);
+    const schemaPath = path.resolve(`../../public/common/schemas/ecs/`);
     const schemaFile = path.join(schemaPath, flags.schema_version as string);
     const schemaData = await require(schemaFile);
 
+    const transformToLowerCase = (obj: Record<string, unknown>) =>
+      Object.fromEntries(Object.entries(obj).map(([key, val]) => [key.toLowerCase(), val]));
+
+    const schemaDataWithLowerCaseFieldNames = schemaData.map((obj: Record<string, unknown>) =>
+      transformToLowerCase(obj)
+    );
+
     const filteredSchemaData = filter(
-      schemaData,
+      schemaDataWithLowerCaseFieldNames,
       (field) => !RESTRICTED_FIELDS.includes(field.field)
     );
     const formattedSchema = map(filteredSchemaData, partialRight(pick, ECS_COLUMN_SCHEMA_FIELDS));
