@@ -18,7 +18,7 @@ export interface State {
   moduleCount?: number;
   workUnits?: number;
   referencedPaths?: string[];
-  bundleRefExportIds?: string[];
+  remoteBundleImportReqs?: string[];
   dllRefKeys?: string[];
 }
 
@@ -87,8 +87,8 @@ export class BundleCache {
     return this.get().referencedPaths;
   }
 
-  public getBundleRefExportIds() {
-    return this.get().bundleRefExportIds;
+  public getRemoteBundleImportReqs() {
+    return this.get().remoteBundleImportReqs;
   }
 
   public getDllRefKeys() {

@@ -18,7 +18,6 @@
     "@kbn/std",
     "@kbn/utility-types",
     "@kbn/i18n",
-    "@kbn/plugin-discovery",
     "@kbn/doc-links",
     "@kbn/repo-packages"
   ],

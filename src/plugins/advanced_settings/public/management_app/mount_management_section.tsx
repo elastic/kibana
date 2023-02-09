@@ -20,7 +20,8 @@ import { ManagementAppMountParams } from '@kbn/management-plugin/public';
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import { StartServicesAccessor } from '@kbn/core/public';
 
-import { AdvancedSettings, QUERY } from './advanced_settings';
+import { QUERY } from './advanced_settings';
+import { Settings } from './settings';
 import { ComponentRegistry } from '../types';
 
 import './index.scss';
@@ -59,7 +60,7 @@ export async function mountManagementSection(
   usageCollection?: UsageCollectionSetup
 ) {
   params.setBreadcrumbs(crumb);
-  const [{ uiSettings, notifications, docLinks, application, chrome }] = await getStartServices();
+  const [{ settings, notifications, docLinks, application, chrome }] = await getStartServices();
 
   const canSave = application.capabilities.advancedSettings.save as boolean;
   const trackUiMetric = usageCollection?.reportUiCounter.bind(usageCollection, 'advanced_settings');
@@ -78,12 +79,12 @@ export async function mountManagementSection(
             {/* TODO: remove route param (`query`) in 7.13 */}
             <Route path={`/:${QUERY}`}>{(props) => <Redirect to={redirectUrl(props)} />}</Route>
             <Route path="/">
-              <AdvancedSettings
+              <Settings
                 history={params.history}
                 enableSaving={canSave}
                 toasts={notifications.toasts}
                 docLinks={docLinks.links}
-                uiSettings={uiSettings}
+                settingsService={settings}
                 theme={params.theme$}
                 componentRegistry={componentRegistry}
                 trackUiMetric={trackUiMetric}
