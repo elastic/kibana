@@ -1191,3 +1191,6 @@ packages/kbn-yarn-lock-validator @elastic/kibana-operations
 
 # Design (at the bottom for specificity of SASS files)
 **/*.scss  @elastic/kibana-design
+
+# Changes to translation files should not ping code reviewers
+!x-pack/plugins/translations/translations @elastic/kibana-localization
