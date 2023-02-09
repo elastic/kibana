@@ -182,7 +182,7 @@ export const ExecuteActionRequestSchema = {
           }
         },
       }),
-      timeout: schema.maybe(schema.number({ min: 1 })),
+      timeout: schema.maybe(schema.number({ min: 0 })),
     }),
   }),
 };

@@ -450,7 +450,31 @@ describe('actions schemas', () => {
       }).toThrow();
     });
 
-    it('should accept at least 1 valid endpoint id and a command', () => {
+    it('should not accept optional negative integers for timeout with at least one endpoint_id and a command parameter', () => {
+      expect(() => {
+        ExecuteActionRequestSchema.body.validate({
+          endpoint_ids: ['endpoint_id'],
+          parameters: {
+            command: 'ls -al',
+            timeout: -1,
+          },
+        });
+      }).toThrow();
+    });
+
+    it('should not accept optional invalid timeout with at least one endpoint_id and a command parameter', () => {
+      expect(() => {
+        ExecuteActionRequestSchema.body.validate({
+          endpoint_ids: ['endpoint_id'],
+          parameters: {
+            command: 'ls -al',
+            timeout: '',
+          },
+        });
+      }).toThrow();
+    });
+
+    it('should accept at least one valid endpoint id and a command', () => {
       expect(() => {
         ExecuteActionRequestSchema.body.validate({
           endpoint_ids: ['endpoint_id'],
@@ -472,18 +496,6 @@ describe('actions schemas', () => {
       }).not.toThrow();
     });
 
-    it('should not accept optional invalid timeout with at least one endpoint_id and a command parameter', () => {
-      expect(() => {
-        ExecuteActionRequestSchema.body.validate({
-          endpoint_ids: ['endpoint_id'],
-          parameters: {
-            command: 'ls -al',
-            timeout: '',
-          },
-        });
-      }).toThrow();
-    });
-
     it('should also accept a valid timeout with at least one endpoint_id and a command parameter', () => {
       expect(() => {
         ExecuteActionRequestSchema.body.validate({
@@ -491,6 +503,18 @@ describe('actions schemas', () => {
           parameters: {
             command: 'ls -al',
             timeout: 1000,
+          },
+        });
+      }).not.toThrow();
+    });
+
+    it('should also accept a `0` as timeout with at least one endpoint_id and a command parameter', () => {
+      expect(() => {
+        ExecuteActionRequestSchema.body.validate({
+          endpoint_ids: ['endpoint_id'],
+          parameters: {
+            command: 'ls -al',
+            timeout: 0,
           },
         });
       }).not.toThrow();

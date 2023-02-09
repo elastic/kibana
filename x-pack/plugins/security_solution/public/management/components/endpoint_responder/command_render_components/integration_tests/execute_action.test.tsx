@@ -132,7 +132,7 @@ describe('When using execute action from response actions console', () => {
 
     await waitFor(() => {
       expect(apiMocks.responseProvider.execute).toHaveBeenCalledWith({
-        body: '{"endpoint_ids":["a.b.c"],"parameters":{"command":"ls -al","timeout":7200000}}',
+        body: '{"endpoint_ids":["a.b.c"],"parameters":{"command":"ls -al","timeout":14400000}}',
         path: EXECUTE_ROUTE,
       });
     });

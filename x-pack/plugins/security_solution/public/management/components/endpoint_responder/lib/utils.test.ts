@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { parsedPidOrEntityIdParameter, parsedTimeoutInMilliseconds } from './utils';
+import { parsedPidOrEntityIdParameter, parsedExecuteTimeout } from './utils';
 
 describe('Endpoint Responder - Utilities', () => {
   describe('when using parsedPidOrEntityIdParameter()', () => {
@@ -25,21 +25,21 @@ describe('Endpoint Responder - Utilities', () => {
     });
   });
 
-  describe('#parsedTimeoutInMilliseconds', () => {
-    it('should return milliseconds for 2h if no timeout is defined', () => {
-      expect(parsedTimeoutInMilliseconds()).toEqual(7200000);
+  describe('#parsedExecuteTimeout', () => {
+    it('should return `undefined` if no timeout is defined', () => {
+      expect(parsedExecuteTimeout()).toEqual(undefined);
     });
-    it('should return milliseconds for 2h if timeout does not match pattern', () => {
-      expect(parsedTimeoutInMilliseconds('23d')).toEqual(7200000);
+    it('should return `undefined` if timeout does not match pattern', () => {
+      expect(parsedExecuteTimeout('23d')).toEqual(undefined);
     });
     it('should return correct milliseconds for hours', () => {
-      expect(parsedTimeoutInMilliseconds('23h')).toEqual(82800000);
+      expect(parsedExecuteTimeout('23h')).toEqual(82800000);
     });
     it('should return correct milliseconds for minutes', () => {
-      expect(parsedTimeoutInMilliseconds('23m')).toEqual(1380000);
+      expect(parsedExecuteTimeout('23m')).toEqual(1380000);
     });
     it('should return correct milliseconds for seconds', () => {
-      expect(parsedTimeoutInMilliseconds('23s')).toEqual(23000);
+      expect(parsedExecuteTimeout('23s')).toEqual(23000);
     });
   });
 });

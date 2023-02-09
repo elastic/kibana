@@ -47,7 +47,7 @@ import type {
   ResponseActionParametersWithPidOrEntityId,
   ResponseActionsExecuteParameters,
 } from '../../../../common/endpoint/types';
-import type { ResponseActionsApiCommandNames } from '../../../../common/endpoint/service/response_actions/constants';
+import { DEFAULT_EXECUTE_ACTION_TIMEOUT, ResponseActionsApiCommandNames } from '../../../../common/endpoint/service/response_actions/constants';
 import type {
   SecuritySolutionPluginRouter,
   SecuritySolutionRequestHandlerContext,
@@ -255,15 +255,13 @@ function responseActionRequestHandler<T extends EndpointActionDataParameterTypes
     let logsEndpointActionsResult;
 
     const getActionParameters = () => {
-      // set timeout to 2h (if not specified or when timeout is specified as 0) when command is `execute`
+      // set timeout to 4h (if not specified or when timeout is specified as 0) when command is `execute`
       if (command === 'execute') {
         const actionRequestParams = req.body.parameters as ResponseActionsExecuteParameters;
-        if (
-          typeof actionRequestParams?.timeout === 'undefined' ||
-          (typeof actionRequestParams?.timeout === 'number' && actionRequestParams.timeout === 0)
-        ) {
-          return { ...actionRequestParams, timeout: 7200000 };
+        if (typeof actionRequestParams?.timeout === 'undefined') {
+          return { ...actionRequestParams, timeout: DEFAULT_EXECUTE_ACTION_TIMEOUT };
         }
+        return actionRequestParams;
       }
 
       // for all other commands return the parameters as is

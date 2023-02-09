@@ -26,7 +26,7 @@ import type {
   ResponseActionExecuteOutputContent,
 } from '../types';
 import { ActivityLogItemTypes } from '../types';
-import { RESPONSE_ACTION_API_COMMANDS_NAMES } from '../service/response_actions/constants';
+import { DEFAULT_EXECUTE_ACTION_TIMEOUT, RESPONSE_ACTION_API_COMMANDS_NAMES } from '../service/response_actions/constants';
 import { getFileDownloadId } from '../service/response_actions/get_file_download_id';
 
 export class EndpointActionGenerator extends BaseDataGenerator {
@@ -218,7 +218,9 @@ export class EndpointActionGenerator extends BaseDataGenerator {
           >
         ).parameters = {
           command: (overrides.parameters as ResponseActionsExecuteParameters).command ?? 'ls -al',
-          timeout: (overrides.parameters as ResponseActionsExecuteParameters).timeout ?? 7200000, // 2hrs
+          timeout:
+            (overrides.parameters as ResponseActionsExecuteParameters).timeout ??
+            DEFAULT_EXECUTE_ACTION_TIMEOUT, // 4hrs
         };
       }
 

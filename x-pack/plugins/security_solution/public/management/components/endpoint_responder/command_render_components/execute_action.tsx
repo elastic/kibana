@@ -13,7 +13,7 @@ import { useConsoleActionSubmitter } from '../hooks/use_console_action_submitter
 import type { ResponseActionExecuteOutputContent } from '../../../../../common/endpoint/types';
 import { useSendExecuteEndpoint } from '../../../hooks/response_actions/use_send_execute_endpoint_request';
 import type { ActionRequestComponentProps } from '../types';
-import { parsedTimeoutInMilliseconds } from '../lib/utils';
+import { parsedExecuteTimeout } from '../lib/utils';
 import { ExecuteAction } from '../../endpoint_execute_action';
 
 export const ExecuteActionResult = memo<
@@ -31,7 +31,7 @@ export const ExecuteActionResult = memo<
           endpoint_ids: [endpointId],
           parameters: {
             command: command.args.args.command[0],
-            timeout: parsedTimeoutInMilliseconds(command.args.args.timeout?.[0]),
+            timeout: parsedExecuteTimeout(command.args.args.timeout?.[0]),
           },
           comment: command.args.args?.comment?.[0],
         }
