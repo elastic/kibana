@@ -14,6 +14,7 @@ import {
   deleteAllDocsFromMetadataCurrentIndex,
   deleteAllDocsFromMetadataUnitedIndex,
 } from '../../../security_solution_endpoint_api_int/apis/data_stream_helper';
+import { WebElementWrapper } from '../../../../../test/functional/services/lib/web_element_wrapper';
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const pageObjects = getPageObjects(['common', 'endpoint', 'header', 'endpointPageUtils']);
@@ -121,45 +122,57 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         expect(tableData.sort()).to.eql(expectedData.sort());
       });
 
-      it('for the kql query: na, table shows an empty list', async () => {
-        const adminSearchBar = await testSubjects.find('adminSearchBar');
-        await adminSearchBar.clearValueWithKeyboard();
-        await adminSearchBar.type('na');
-        const querySubmitButton = await testSubjects.find('querySubmitButton');
-        await querySubmitButton.click();
-        const expectedDataFromQuery = [
-          [
-            'Endpoint',
-            'Agent status',
-            'Policy',
-            'Policy status',
-            'OS',
-            'IP address',
-            'Version',
-            'Last active',
-            'Actions',
-          ],
-          ['No items found'],
-        ];
+      describe('for the search bar', () => {
+        let adminSearchBar: WebElementWrapper;
+        before(async () => {
+          waitForTableToHaveData('endpointListTable', 60000);
+          adminSearchBar = await testSubjects.find('adminSearchBar');
+        });
+        afterEach(async () => {
+          await adminSearchBar.clearValueWithKeyboard();
+        });
+        it('when the kql query is `na`, table shows an empty list', async () => {
+          await adminSearchBar.clearValueWithKeyboard();
+          await adminSearchBar.type('na');
+          const querySubmitButton = await testSubjects.find('querySubmitButton');
+          await querySubmitButton.click();
+          const expectedDataFromQuery = [
+            [
+              'Endpoint',
+              'Agent status',
+              'Policy',
+              'Policy status',
+              'OS',
+              'IP address',
+              'Version',
+              'Last active',
+              'Actions',
+            ],
+            ['No items found'],
+          ];
 
-        await pageObjects.endpoint.waitForTableToNotHaveData('endpointListTable');
-        const tableData = await pageObjects.endpointPageUtils.tableData('endpointListTable');
-        expect(tableData).to.eql(expectedDataFromQuery);
-      });
+          await pageObjects.endpoint.waitForTableToNotHaveData('endpointListTable', 10000);
+          const tableData = await pageObjects.endpointPageUtils.tableData('endpointListTable');
+          expect(tableData).to.eql(expectedDataFromQuery);
+        });
 
-      it('for the kql filtering for united.endpoint.host.hostname, table shows 1 item', async () => {
-        const expectedDataFromQuery = [...expectedData.slice(0, 2).map((row) => [...row])];
-        const hostName = expectedDataFromQuery[1][0];
-        const adminSearchBar = await testSubjects.find('adminSearchBar');
-        await adminSearchBar.clearValueWithKeyboard();
-        await adminSearchBar.type(
-          `united.endpoint.host.hostname : "${hostName}" or host.hostname : "${hostName}" `
-        );
-        const querySubmitButton = await testSubjects.find('querySubmitButton');
-        await querySubmitButton.click();
-        await pageObjects.endpoint.waitForTableToHaveNumberOfEntries('endpointListTable', 1, 90000);
-        const tableData = await formattedTableData();
-        expect(tableData.sort()).to.eql(expectedDataFromQuery.sort());
+        it('when the kql filters for united.endpoint.host.hostname, table shows 1 item', async () => {
+          const expectedDataFromQuery = [...expectedData.slice(0, 2).map((row) => [...row])];
+          const hostName = expectedDataFromQuery[1][0];
+          await adminSearchBar.clearValueWithKeyboard();
+          await adminSearchBar.type(
+            `united.endpoint.host.hostname : "${hostName}" or host.hostname : "${hostName}" `
+          );
+          const querySubmitButton = await testSubjects.find('querySubmitButton');
+          await querySubmitButton.click();
+          await pageObjects.endpoint.waitForTableToHaveNumberOfEntries(
+            'endpointListTable',
+            1,
+            90000
+          );
+          const tableData = await formattedTableData();
+          expect(tableData.sort()).to.eql(expectedDataFromQuery.sort());
+        });
       });
       it('does not show the details flyout initially', async () => {
         await testSubjects.missingOrFail('endpointDetailsFlyout');
