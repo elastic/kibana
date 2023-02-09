@@ -6,8 +6,8 @@
  */
 
 import React from 'react';
-import { EuiFlexGroup } from '@elastic/eui';
-import { Control } from 'react-hook-form';
+import { EuiFieldNumber, EuiFlexGroup, EuiFlexItem, EuiFormLabel } from '@elastic/eui';
+import { Control, Controller } from 'react-hook-form';
 import { i18n } from '@kbn/i18n';
 import type { CreateSLOInput } from '@kbn/slo-schema';
 
@@ -85,6 +85,36 @@ export function ApmLatencyIndicatorTypeForm({ control }: Props) {
           control={control}
           dataTestSubj="apmLatencyTransactionNameSelector"
         />
+      </EuiFlexGroup>
+
+      <EuiFlexGroup direction="row" gutterSize="l">
+        <EuiFlexItem>
+          <EuiFormLabel>
+            {i18n.translate('xpack.observability.slos.sloEdit.apmLatency.threshold.placeholder', {
+              defaultMessage: 'Threshold (ms)',
+            })}
+          </EuiFormLabel>
+          <Controller
+            shouldUnregister={true}
+            name="indicator.params.threshold"
+            control={control}
+            defaultValue={250}
+            rules={{
+              required: true,
+              min: 0,
+            }}
+            render={({ field: { ref, ...field } }) => (
+              <EuiFieldNumber
+                {...field}
+                value={String(field.value)}
+                data-test-subj="apmLatencyThresholdInput"
+                min={0}
+                onChange={(event) => field.onChange(Number(event.target.value))}
+              />
+            )}
+          />
+        </EuiFlexItem>
+        <EuiFlexItem />
       </EuiFlexGroup>
     </EuiFlexGroup>
   );

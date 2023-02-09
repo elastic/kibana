@@ -38,7 +38,7 @@ export function useSectionFormValidation({ getFieldState, getValues, formState, 
             'indicator.params.environment',
             'indicator.params.transactionType',
             'indicator.params.transactionName',
-            'indicator.params.threshold.us',
+            'indicator.params.threshold',
           ] as const
         ).every((field) => !getFieldState(field, formState).invalid && getValues(field) !== '') &&
         (['indicator.params.index'] as const).every(
