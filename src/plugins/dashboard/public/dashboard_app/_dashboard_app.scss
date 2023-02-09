@@ -1,9 +1,8 @@
 @import 'src/core/public/mixins';
 
 .dshAppWrapper {
-  @include euiBreakpoint('xs', 's', 'm', 'l', 'xl') {
-    @include kibanaFullBodyHeight();
-  }
+  @include kibanaFullBodyHeight();
+  
   display: flex;
   flex-direction: column;
 }
