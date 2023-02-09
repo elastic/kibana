@@ -11,7 +11,6 @@ import { Agent as HttpsAgent, ServerOptions as TlsOptions } from 'https';
 import apm from 'elastic-apm-node';
 import { Server, Request } from '@hapi/hapi';
 import HapiProxy from '@hapi/h2o2';
-import { sampleSize } from 'lodash';
 import * as Rx from 'rxjs';
 import { take } from 'rxjs/operators';
 import { ByteSizeValue } from '@kbn/config-schema';
@@ -21,8 +20,7 @@ import { DevConfig, HttpConfig } from './config';
 import { Log } from './log';
 
 const ONE_GIGABYTE = 1024 * 1024 * 1024;
-const alphabet = 'abcdefghijklmnopqrztuvwxyz'.split('');
-const getRandomBasePath = () => sampleSize(alphabet, 3).join('');
+const getRandomBasePath = () => `spencer`;
 
 export interface BasePathProxyServerOptions {
   shouldRedirectFromOldBasePath: (path: string) => boolean;
