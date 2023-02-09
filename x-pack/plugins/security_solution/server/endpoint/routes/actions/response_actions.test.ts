@@ -398,6 +398,17 @@ describe('Response actions', () => {
       expect(actionDoc.data.command).toEqual('get-file');
     });
 
+    it('sends the `execute` command payload from the execute route', async () => {
+      const ctx = await callRoute(EXECUTE_ROUTE, {
+        body: { endpoint_ids: ['XYZ'], parameters: { command: 'ls -al'} },
+      });
+      const actionDoc: EndpointAction = (
+        ctx.core.elasticsearch.client.asInternalUser.index.mock
+          .calls[0][0] as estypes.IndexRequest<EndpointAction>
+      ).body!;
+      expect(actionDoc.data.command).toEqual('execute');
+    });
+
     describe('With endpoint data streams', () => {
       it('handles unisolation', async () => {
         const ctx = await callRoute(
@@ -679,7 +690,9 @@ describe('Response actions', () => {
       });
     });
 
+
     describe('License Level', () => {
+      // FIXME: This test also works for downgraded licenses (Gold)
       it('allows platinum license levels to isolate hosts', async () => {
         await callRoute(ISOLATE_HOST_ROUTE_V2, {
           body: { endpoint_ids: ['XYZ'] },
@@ -735,6 +748,14 @@ describe('Response actions', () => {
         await callRoute(UNISOLATE_HOST_ROUTE_V2, {
           body: { endpoint_ids: ['XYZ'] },
           authz: { canUnIsolateHost: false },
+        });
+        expect(mockResponse.forbidden).toBeCalled();
+      });
+
+      it('prohibits user from performing execute action if `canWriteExecuteOperations` is `false`', async ()=> {
+        await callRoute(EXECUTE_ROUTE, {
+          body: { endpoint_ids: ['XYZ'] },
+          authz: { canWriteExecuteOperations: false },
         });
         expect(mockResponse.forbidden).toBeCalled();
       });
