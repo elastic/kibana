@@ -490,4 +490,27 @@ describe('AlertsTableState', () => {
       });
     });
   });
+
+  describe('Client provided toolbar visiblity options', () => {
+    it('hide column order control', () => {
+      const customTableProps: AlertsTableStateProps = {
+        ...tableProps,
+        toolbarVisibility: { showColumnSelector: false },
+      };
+
+      render(<AlertsTableWithLocale {...customTableProps} />);
+
+      expect(screen.queryByTestId('dataGridColumnSelectorButton')).not.toBeInTheDocument();
+    });
+    it('hide sort Selection', () => {
+      const customTableProps: AlertsTableStateProps = {
+        ...tableProps,
+        toolbarVisibility: { showSortSelector: false },
+      };
+
+      render(<AlertsTableWithLocale {...customTableProps} />);
+
+      expect(screen.queryByTestId('dataGridColumnSortingButton')).not.toBeInTheDocument();
+    });
+  });
 });

@@ -178,6 +178,7 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
       fieldBrowserOptions,
       getInspectQuery,
       showInspectButton,
+      toolbarVisiblityProp: props.toolbarVisibility,
     });
   }, [
     bulkActionsState,
@@ -197,6 +198,7 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
     fieldBrowserOptions,
     getInspectQuery,
     showInspectButton,
+    props.toolbarVisibility,
   ])();
 
   const leadingControlColumns = useMemo(() => {

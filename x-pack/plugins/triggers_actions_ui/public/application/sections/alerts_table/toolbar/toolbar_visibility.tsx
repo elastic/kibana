@@ -112,6 +112,7 @@ export const getToolbarVisibility = ({
   fieldBrowserOptions,
   getInspectQuery,
   showInspectButton,
+  toolbarVisiblityProp,
 }: {
   bulkActions: BulkActionsConfig[];
   alertsCount: number;
@@ -130,6 +131,7 @@ export const getToolbarVisibility = ({
   fieldBrowserOptions?: FieldBrowserOptions;
   getInspectQuery: GetInspectQuery;
   showInspectButton: boolean;
+  toolbarVisiblityProp?: EuiDataGridToolBarVisibilityOptions;
 }): EuiDataGridToolBarVisibilityOptions => {
   const selectedRowsCount = rowSelection.size;
   const defaultVisibility = getDefaultVisibility({
@@ -147,7 +149,11 @@ export const getToolbarVisibility = ({
   const isBulkActionsActive =
     selectedRowsCount === 0 || selectedRowsCount === undefined || bulkActions.length === 0;
 
-  if (isBulkActionsActive) return defaultVisibility;
+  if (isBulkActionsActive)
+    return {
+      ...defaultVisibility,
+      ...(toolbarVisiblityProp ?? {}),
+    };
 
   const options = {
     showColumnSelector: false,
@@ -172,6 +178,7 @@ export const getToolbarVisibility = ({
         ),
       },
     },
+    ...(toolbarVisiblityProp ?? {}),
   };
 
   return options;

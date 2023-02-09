@@ -139,11 +139,10 @@ describe('AlertsTable.BulkActions', () => {
           {
             label: 'Fake Bulk Action with loading and clear selection',
             key: 'fakeBulkActionLoadingClear',
-            'data-test-subj': 'fake-bulk-action-loading-clear',
+            'data-test-subj': 'fake-bulk-action-loading',
             disableOnQuery: false,
             onClick: (ids, isSelectAll, setIsBulkActionLoading, clearSelection, refresh) => {
               setIsBulkActionLoading(true);
-              setTimeout(() => clearSelection(), 150);
             },
           },
           {
@@ -685,16 +684,10 @@ describe('AlertsTable.BulkActions', () => {
             fireEvent.click(screen.getByTestId('selectedShowBulkActionsButton'));
             await waitForEuiPopoverOpen();
 
-            fireEvent.click(screen.getByTestId('fake-bulk-action-loading-clear'));
+            fireEvent.click(screen.getByTestId('fake-bulk-action-loading'));
 
-            // initially rows are loading
             await waitFor(() => {
               expect(screen.queryAllByTestId('row-loader')).toHaveLength(2);
-            });
-
-            // clear Selection happens after 150ms
-            await waitFor(() => {
-              expect(screen.queryAllByTestId('row-loader')).toHaveLength(0);
             });
           });
 

@@ -14,6 +14,7 @@ import {
   EuiEmptyPrompt,
   EuiFlyoutSize,
   EuiDataGridProps,
+  EuiDataGridToolBarVisibilityOptions,
 } from '@elastic/eui';
 import type { ValidFeatureId } from '@kbn/rule-data-utils';
 import type {
@@ -68,6 +69,7 @@ export type AlertsTableStateProps = {
   browserFields?: BrowserFields;
   onUpdate?: (args: TableUpdateHandlerArgs) => void;
   showAlertStatusWithFlapping?: boolean;
+  toolbarVisibility?: EuiDataGridToolBarVisibilityOptions;
 } & Partial<EuiDataGridProps>;
 
 export interface AlertsTableStorage {
@@ -111,6 +113,7 @@ const AlertsTableState = ({
   browserFields: propBrowserFields,
   onUpdate,
   showAlertStatusWithFlapping,
+  toolbarVisibility,
 }: AlertsTableStateProps) => {
   const { cases } = useKibana<{ cases: CaseUi }>().services;
 
@@ -274,7 +277,7 @@ const AlertsTableState = ({
     updatedAt,
   ]);
 
-  const tableProps = useMemo(
+  const tableProps: AlertsTableProps = useMemo(
     () => ({
       alertsTableConfiguration,
       columns,
@@ -304,6 +307,7 @@ const AlertsTableState = ({
       gridStyle,
       controls: persistentControls,
       showInspectButton,
+      toolbarVisibility,
     }),
     [
       alertsTableConfiguration,
@@ -328,6 +332,7 @@ const AlertsTableState = ({
       gridStyle,
       persistentControls,
       showInspectButton,
+      toolbarVisibility,
     ]
   );
 

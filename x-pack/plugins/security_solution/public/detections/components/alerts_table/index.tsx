@@ -174,25 +174,27 @@ export const AlertsTableComponent: FC<DetectionEngineAlertTableProps> = ({
     return JSON.parse(combinedQuery.filterQuery);
   }, [combinedQuery]);
 
+  const isEventRenderedView = tableView === VIEW_SELECTION.eventRenderedView;
+
   const gridStyle = useMemo(
     () =>
       ({
         border: 'none',
         fontSize: 's',
         header: 'underline',
-        stripes: tableView === VIEW_SELECTION.eventRenderedView,
+        stripes: isEventRenderedView,
       } as EuiDataGridStyle),
-    [tableView]
+    [isEventRenderedView]
   );
 
   const rowHeightsOptions: EuiDataGridRowHeightsOptions | undefined = useMemo(() => {
-    if (tableView === 'eventRenderedView') {
+    if (isEventRenderedView) {
       return {
         defaultHeight: 'auto',
       };
     }
     return undefined;
-  }, [tableView]);
+  }, [isEventRenderedView]);
 
   const dataTableStorage = getDataTablesInStorageByIds(storage, [TableId.alertsOnAlertsPage]);
   const columnsFormStorage = dataTableStorage?.[TableId.alertsOnAlertsPage]?.columns ?? [];
@@ -204,13 +206,13 @@ export const AlertsTableComponent: FC<DetectionEngineAlertTableProps> = ({
   );
 
   const finalColumns = useMemo(
-    () => (tableView === VIEW_SELECTION.eventRenderedView ? evenRenderedColumns : alertColumns),
-    [evenRenderedColumns, alertColumns, tableView]
+    () => (isEventRenderedView ? evenRenderedColumns : alertColumns),
+    [evenRenderedColumns, alertColumns, isEventRenderedView]
   );
 
   const finalBrowserFields = useMemo(
-    () => (tableView === VIEW_SELECTION.eventRenderedView ? undefined : browserFields),
-    [tableView, browserFields]
+    () => (isEventRenderedView ? {} : browserFields),
+    [isEventRenderedView, browserFields]
   );
 
   const onAlertTableUpdate: AlertsTableStateProps['onUpdate'] = useCallback(
@@ -249,6 +251,10 @@ export const AlertsTableComponent: FC<DetectionEngineAlertTableProps> = ({
       columns: finalColumns,
       browserFields: finalBrowserFields,
       onUpdate: onAlertTableUpdate,
+      toolbarVisibility: {
+        showColumnSelector: !isEventRenderedView,
+        showSortSelector: !isEventRenderedView,
+      },
     }),
     [
       finalBoolQuery,
@@ -260,6 +266,7 @@ export const AlertsTableComponent: FC<DetectionEngineAlertTableProps> = ({
       finalColumns,
       finalBrowserFields,
       onAlertTableUpdate,
+      isEventRenderedView,
       tableView,
     ]
   );
