@@ -27,10 +27,10 @@ interface Props {
   onLoadJson: OnDoneLoadJsonHandler;
   onProcessorsUpdate: OnUpdateHandler;
   hasVersion: boolean;
+  hasMeta: boolean;
   onEditorFlyoutOpen: () => void;
   isEditing?: boolean;
   canEditName?: boolean;
-  defaultValue: { [key: string]: any };
 }
 
 const UseField = getUseField({ component: Field });
@@ -43,15 +43,13 @@ export const PipelineFormFields: React.FunctionComponent<Props> = ({
   onProcessorsUpdate,
   isEditing,
   hasVersion,
+  hasMeta,
   onEditorFlyoutOpen,
   canEditName,
-  defaultValue,
 }) => {
   const [isVersionVisible, setIsVersionVisible] = useState<boolean>(hasVersion);
 
-  const [isMetaVisible, setIsMetaVisible] = useState<boolean>(
-    Boolean(defaultValue._meta && Object.keys(defaultValue._meta).length)
-  );
+  const [isMetaVisible, setIsMetaVisible] = useState<boolean>(hasMeta);
 
   return (
     <>

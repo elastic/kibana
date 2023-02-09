@@ -132,9 +132,9 @@ export const PipelineForm: React.FunctionComponent<PipelineFormProps> = ({
           onFailure={processorsState.onFailure}
           onProcessorsUpdate={onProcessorsChangeHandler}
           hasVersion={Boolean(defaultValue.version)}
+          hasMeta={Boolean(defaultValue._meta && Object.keys(defaultValue._meta).length)}
           isEditing={isEditing}
           canEditName={canEditName}
-          defaultValue={defaultValue}
         />
 
         {/* Form submission */}
