@@ -12,7 +12,7 @@ import styled from 'styled-components';
 import { useTrackPageview } from '@kbn/observability-plugin/public';
 import { useBreadcrumbs } from '../hooks/use_breadcrumbs';
 import { MonitorList } from '../components/overview/monitor_list/monitor_list_container';
-import { ZipUrlDeprecation } from '../components/overview/zip_url_deprecation';
+import { IntegrationDeprecation } from '../components/overview/integration_deprecation';
 import { StatusPanel } from '../components/overview/status_panel';
 import { QueryBar } from '../components/overview/query_bar/query_bar';
 import { MONITORING_OVERVIEW_LABEL } from '../routes';
@@ -20,7 +20,7 @@ import { FilterGroup } from '../components/overview/filter_group/filter_group';
 
 const EuiFlexItemStyled = styled(EuiFlexItem)`
   && {
-    min-width: 800px;
+    min-width: 700px;
     @media only screen and (max-width: 1128px) {
       min-width: 500px;
     }
@@ -40,7 +40,7 @@ export const OverviewPageComponent = () => {
     <>
       <EuiFlexGroup direction="column" gutterSize="none">
         <EuiFlexItem grow={true}>
-          <ZipUrlDeprecation />
+          <IntegrationDeprecation />
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiFlexGroup gutterSize="xs" wrap responsive={false}>

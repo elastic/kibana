@@ -24,8 +24,14 @@ export const fetchSyncJobsStats = async (client: IScopedClusterClient): Promise<
   const orphanedJobsCountResponse = await client.asCurrentUser.count({
     index: CONNECTORS_JOBS_INDEX,
     query: {
-      terms: {
-        'connector.id': ids,
+      bool: {
+        must_not: [
+          {
+            terms: {
+              'connector.id': ids,
+            },
+          },
+        ],
       },
     },
   });
@@ -39,7 +45,7 @@ export const fetchSyncJobsStats = async (client: IScopedClusterClient): Promise<
     },
   });
 
-  const longRunningProgressJobsCountResponse = await client.asCurrentUser.count({
+  const idleJobsCountResponse = await client.asCurrentUser.count({
     index: CONNECTORS_JOBS_INDEX,
     query: {
       bool: {
@@ -52,7 +58,7 @@ export const fetchSyncJobsStats = async (client: IScopedClusterClient): Promise<
           {
             range: {
               last_seen: {
-                lt: moment().subtract(1, 'day').toISOString(),
+                lt: moment().subtract(1, 'minute').toISOString(),
               },
             },
           },
@@ -62,10 +68,10 @@ export const fetchSyncJobsStats = async (client: IScopedClusterClient): Promise<
   });
 
   const errorResponse = await client.asCurrentUser.count({
-    index: CONNECTORS_JOBS_INDEX,
+    index: CONNECTORS_INDEX,
     query: {
       term: {
-        status: SyncStatus.ERROR,
+        last_sync_status: SyncStatus.ERROR,
       },
     },
   });
@@ -109,7 +115,7 @@ export const fetchSyncJobsStats = async (client: IScopedClusterClient): Promise<
           {
             range: {
               last_seen: {
-                gt: moment().subtract(30, 'minutes').toISOString(),
+                lt: moment().subtract(30, 'minutes').toISOString(),
               },
             },
           },
@@ -121,9 +127,9 @@ export const fetchSyncJobsStats = async (client: IScopedClusterClient): Promise<
   const response = {
     connected: connectedResponse.count,
     errors: errorResponse.count,
+    idle: idleJobsCountResponse.count,
     in_progress: inProgressJobsCountResponse.count,
     incomplete: incompleteResponse.count,
-    long_running: longRunningProgressJobsCountResponse.count,
     orphaned_jobs: orphanedJobsCountResponse.count,
   };
 

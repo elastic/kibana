@@ -441,11 +441,11 @@ export const buildOSSFeatures = ({
             kibana: ['filesManagement'],
           },
           savedObject: {
-            all: ['files'],
+            all: ['file', 'fileShare'],
             read: [],
           },
           ui: [],
-          api: ['files:manageFiles'],
+          api: ['files:manageFiles', 'files:defaultImage'],
         },
         read: {
           app: ['kibana'],
@@ -454,10 +454,43 @@ export const buildOSSFeatures = ({
           },
           savedObject: {
             all: [],
-            read: ['files'],
+            read: ['file', 'fileShare'],
           },
           ui: [],
-          api: ['files:manageFiles'],
+          api: ['files:manageFiles', 'files:defaultImage'],
+        },
+      },
+    },
+    {
+      id: 'filesSharedImage',
+      name: i18n.translate('xpack.features.filesSharedImagesFeatureName', {
+        defaultMessage: 'Shared images',
+      }),
+      order: 1600,
+      category: DEFAULT_APP_CATEGORIES.management,
+      app: ['kibana'],
+      catalogue: [],
+      privilegesTooltip: i18n.translate('xpack.features.filesSharedImagesPrivilegesTooltip', {
+        defaultMessage: 'Required to access images stored in Kibana.',
+      }),
+      privileges: {
+        all: {
+          app: ['kibana'],
+          savedObject: {
+            all: ['file'],
+            read: [],
+          },
+          ui: [],
+          api: ['files:defaultImage'],
+        },
+        read: {
+          app: ['kibana'],
+          savedObject: {
+            all: [],
+            read: ['file'],
+          },
+          ui: [],
+          api: ['files:defaultImage'],
         },
       },
     },

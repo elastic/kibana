@@ -9,7 +9,7 @@
 
 import { get, flow } from 'lodash';
 import moment from 'moment';
-import rison, { RisonObject, RisonValue } from 'rison-node';
+import rison, { type RisonValue } from '@kbn/rison';
 import { parseInterval } from '../../../common/util/parse_interval';
 import { escapeForElasticsearchQuery, replaceStringTokens } from './string_utils';
 import {
@@ -133,7 +133,7 @@ export function escapeForKQL(value: string | number): string {
 
 type GetResultTokenValue = (v: string) => string;
 
-export const isRisonObject = (value: RisonValue): value is RisonObject => {
+export const isRisonObject = (value: RisonValue): value is Record<string, RisonValue> => {
   return value !== null && typeof value === 'object';
 };
 

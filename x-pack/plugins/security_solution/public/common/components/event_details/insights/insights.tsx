@@ -6,7 +6,9 @@
  */
 
 import React from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
+import { EuiBetaBadge, EuiFlexGroup, EuiFlexItem, EuiIcon, EuiTitle } from '@elastic/eui';
+import { euiStyled } from '@kbn/kibana-react-plugin/common';
+import { ALERT_SUPPRESSION_DOCS_COUNT } from '@kbn/rule-data-utils';
 import { find } from 'lodash/fp';
 
 import * as i18n from './translations';
@@ -22,6 +24,13 @@ import { RelatedCases } from './related_cases';
 import { RelatedAlertsBySourceEvent } from './related_alerts_by_source_event';
 import { RelatedAlertsBySession } from './related_alerts_by_session';
 import { RelatedAlertsUpsell } from './related_alerts_upsell';
+
+const StyledInsightItem = euiStyled(EuiFlexItem)`
+  border: 1px solid ${({ theme }) => theme.eui.euiColorLightShade};
+  padding: 10px 8px;
+  border-radius: 6px;
+  display: inline-flex;
+`;
 
 interface Props {
   browserFields: BrowserFields;
@@ -68,6 +77,12 @@ export const Insights = React.memo<Props>(
     );
     const hasSourceEventInfo = hasData(sourceEventField);
 
+    const alertSuppressionField = find(
+      { category: 'kibana', field: ALERT_SUPPRESSION_DOCS_COUNT },
+      data
+    );
+    const hasAlertSuppressionField = hasData(alertSuppressionField);
+
     const userCasesPermissions = useGetUserCasesPermissions();
     const hasCasesReadPermissions = userCasesPermissions.read;
 
@@ -100,6 +115,20 @@ export const Insights = React.memo<Props>(
               <h5>{i18n.INSIGHTS}</h5>
             </EuiTitle>
           </EuiFlexItem>
+
+          {hasAlertSuppressionField && (
+            <StyledInsightItem>
+              <div>
+                <EuiIcon type="layers" style={{ marginLeft: '4px', marginRight: '8px' }} />
+                {i18n.SUPPRESSED_ALERTS_COUNT(parseInt(alertSuppressionField.values[0], 10))}
+                <EuiBetaBadge
+                  label={i18n.SUPPRESSED_ALERTS_COUNT_TECHNICAL_PREVIEW}
+                  style={{ verticalAlign: 'middle', marginLeft: '8px' }}
+                  size="s"
+                />
+              </div>
+            </StyledInsightItem>
+          )}
 
           {hasCasesReadPermissions && (
             <EuiFlexItem>

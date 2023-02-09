@@ -8,14 +8,14 @@
 
 import { FILES_MANAGE_PRIVILEGE } from '../../common/constants';
 import type { FilesRouter } from './types';
-
 import { FilesMetrics } from '../../common';
+import { FilesClient } from '../../common/files_client';
 import { CreateRouteDefinition, FILES_API_ROUTES } from './api_routes';
 import type { FilesRequestHandler } from './types';
 
 const method = 'get' as const;
 
-export type Endpoint = CreateRouteDefinition<{}, FilesMetrics>;
+export type Endpoint = CreateRouteDefinition<{}, FilesMetrics, FilesClient['getMetrics']>;
 
 const handler: FilesRequestHandler = async ({ files }, req, res) => {
   const { fileService } = await files;

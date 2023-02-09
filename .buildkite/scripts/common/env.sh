@@ -108,3 +108,6 @@ export BROWSERSLIST_IGNORE_OLD_DATA=true
 export TEST_GROUP_TYPE_UNIT="Jest Unit Tests"
 export TEST_GROUP_TYPE_INTEGRATION="Jest Integration Tests"
 export TEST_GROUP_TYPE_FUNCTIONAL="Functional Tests"
+
+# tells the gh command what our default repo is
+export GH_REPO=github.com/elastic/kibana

@@ -6,30 +6,37 @@
  */
 
 import type { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
 import type { Filter, Query } from '@kbn/es-query';
-import { EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
+import { EuiFlexItem, EuiLoadingContent } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
 import styled from 'styled-components';
 
+import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { useAlertsLocalStorage } from './alerts_local_storage';
 import type { AlertsSettings } from './alerts_local_storage/types';
 import { ChartContextMenu } from './chart_context_menu';
 import { ChartSelect } from './chart_select';
-import { TABLE, TREEMAP, TREND } from './chart_select/translations';
+import { ChartCollapse } from './chart_collapse';
+import * as i18n from './chart_select/translations';
 import { AlertsTreemapPanel } from '../../../../common/components/alerts_treemap_panel';
 import type { UpdateDateRange } from '../../../../common/components/charts/common';
 import { useEuiComboBoxReset } from '../../../../common/components/use_combo_box_reset';
 import { AlertsHistogramPanel } from '../../../components/alerts_kpis/alerts_histogram_panel';
+import { AlertsSummaryChartsPanel } from '../../../components/alerts_kpis/alerts_summary_charts_panel';
 import {
   DEFAULT_STACK_BY_FIELD,
   DEFAULT_STACK_BY_FIELD1,
 } from '../../../components/alerts_kpis/common/config';
 import { AlertsCountPanel } from '../../../components/alerts_kpis/alerts_count_panel';
 import { GROUP_BY_LABEL } from '../../../components/alerts_kpis/common/translations';
+import { RESET_GROUP_BY_FIELDS } from '../../../../common/components/chart_settings_popover/configurations/default/translations';
+import { useQueryToggle } from '../../../../common/containers/query_toggle';
 
-const TABLE_PANEL_HEIGHT = 330; // px
-const TRENT_CHART_HEIGHT = 127; // px
-const TREND_CHART_PANEL_HEIGHT = 256; // px
+const TREND_CHART_HEIGHT = 280; // px
+const CHART_PANEL_HEIGHT = 375; // px
+
+const DETECTIONS_ALERTS_CHARTS_PANEL_ID = 'detection-alerts-charts-panel';
 
 const FullHeightFlexItem = styled(EuiFlexItem)`
   height: 100%;
@@ -41,7 +48,7 @@ const ChartSelectContainer = styled.div`
 
 export interface Props {
   addFilter: ({ field, value }: { field: string; value: string | number }) => void;
-  alertsHistogramDefaultFilters: Filter[];
+  alertsDefaultFilters: Filter[];
   isLoadingIndexPattern: boolean;
   query: Query;
   runtimeMappings: MappingRuntimeFields;
@@ -51,23 +58,30 @@ export interface Props {
 
 const ChartPanelsComponent: React.FC<Props> = ({
   addFilter,
-  alertsHistogramDefaultFilters,
+  alertsDefaultFilters,
   isLoadingIndexPattern,
   query,
   runtimeMappings,
   signalIndexName,
   updateDateRangeCallback,
 }: Props) => {
+  const { toggleStatus: isExpanded, setToggleStatus: setIsExpanded } = useQueryToggle(
+    DETECTIONS_ALERTS_CHARTS_PANEL_ID
+  );
+  const isAlertsPageChartsEnabled = useIsExperimentalFeatureEnabled('alertsPageChartsEnabled');
+
   const {
     alertViewSelection,
     countTableStackBy0,
     countTableStackBy1,
+    groupBySelection,
     isTreemapPanelExpanded,
     riskChartStackBy0,
     riskChartStackBy1,
     setAlertViewSelection,
     setCountTableStackBy0,
     setCountTableStackBy1,
+    setGroupBySelection,
     setIsTreemapPanelExpanded,
     setRiskChartStackBy0,
     setRiskChartStackBy1,
@@ -109,6 +123,35 @@ const ChartPanelsComponent: React.FC<Props> = ({
     onResetStackByField1();
   }, [onResetStackByField0, onResetStackByField1]);
 
+  const resetGroupByFieldAction = useMemo(
+    () => [
+      {
+        id: 'resetGroupByField',
+
+        getDisplayName(context: ActionExecutionContext<object>): string {
+          return RESET_GROUP_BY_FIELDS;
+        },
+        getIconType(context: ActionExecutionContext<object>): string | undefined {
+          return 'editorRedo';
+        },
+        type: 'actionButton',
+        async isCompatible(context: ActionExecutionContext<object>): Promise<boolean> {
+          return true;
+        },
+        async execute(context: ActionExecutionContext<object>): Promise<void> {
+          onReset();
+          updateCommonStackBy0(DEFAULT_STACK_BY_FIELD);
+
+          if (updateCommonStackBy1 != null) {
+            updateCommonStackBy1(DEFAULT_STACK_BY_FIELD1);
+          }
+        },
+        order: 5,
+      },
+    ],
+    [onReset, updateCommonStackBy0, updateCommonStackBy1]
+  );
+
   const chartOptionsContextMenu = useCallback(
     (queryId: string) => (
       <ChartContextMenu
@@ -123,46 +166,77 @@ const ChartPanelsComponent: React.FC<Props> = ({
     [onReset, updateCommonStackBy0, updateCommonStackBy1]
   );
 
-  const title = useMemo(
-    () => (
-      <ChartSelectContainer>
-        <ChartSelect
-          alertViewSelection={alertViewSelection}
-          setAlertViewSelection={setAlertViewSelection}
+  const title = useMemo(() => {
+    if (isAlertsPageChartsEnabled) {
+      return isExpanded ? (
+        <ChartSelectContainer>
+          <ChartSelect
+            alertViewSelection={alertViewSelection}
+            setAlertViewSelection={setAlertViewSelection}
+          />
+        </ChartSelectContainer>
+      ) : (
+        <ChartCollapse
+          groupBySelection={groupBySelection}
+          filters={alertsDefaultFilters}
+          query={query}
+          signalIndexName={signalIndexName}
+          runtimeMappings={runtimeMappings}
         />
-      </ChartSelectContainer>
-    ),
-    [alertViewSelection, setAlertViewSelection]
-  );
+      );
+    } else {
+      return (
+        <ChartSelectContainer>
+          <ChartSelect
+            alertViewSelection={alertViewSelection}
+            setAlertViewSelection={setAlertViewSelection}
+          />
+        </ChartSelectContainer>
+      );
+    }
+  }, [
+    alertViewSelection,
+    setAlertViewSelection,
+    isAlertsPageChartsEnabled,
+    isExpanded,
+    groupBySelection,
+    alertsDefaultFilters,
+    query,
+    signalIndexName,
+    runtimeMappings,
+  ]);
 
   return (
     <div data-test-subj="chartPanels">
       {alertViewSelection === 'trend' && (
         <FullHeightFlexItem grow={2}>
           {isLoadingIndexPattern ? (
-            <EuiLoadingSpinner data-test-subj="trendLoadingSpinner" size="xl" />
+            <EuiLoadingContent lines={10} data-test-subj="trendLoadingSpinner" />
           ) : (
             <AlertsHistogramPanel
               alignHeader="flexStart"
-              chartHeight={TRENT_CHART_HEIGHT}
+              chartHeight={TREND_CHART_HEIGHT}
               chartOptionsContextMenu={chartOptionsContextMenu}
               comboboxRef={stackByField0ComboboxRef}
               defaultStackByOption={trendChartStackBy}
-              filters={alertsHistogramDefaultFilters}
-              inspectTitle={TREND}
-              setComboboxInputRef={setStackByField0ComboboxInputRef}
+              extraActions={resetGroupByFieldAction}
+              filters={alertsDefaultFilters}
+              inspectTitle={i18n.TREND}
               onFieldSelected={updateCommonStackBy0}
-              panelHeight={TREND_CHART_PANEL_HEIGHT}
+              panelHeight={CHART_PANEL_HEIGHT}
               query={query}
+              runtimeMappings={runtimeMappings}
+              setComboboxInputRef={setStackByField0ComboboxInputRef}
               showCountsInLegend={true}
-              showGroupByPlaceholder={true}
+              showGroupByPlaceholder={false}
               showTotalAlertsCount={false}
+              signalIndexName={signalIndexName}
               stackByLabel={GROUP_BY_LABEL}
               title={title}
               titleSize={'s'}
-              signalIndexName={signalIndexName}
               updateDateRange={updateDateRangeCallback}
-              runtimeMappings={runtimeMappings}
+              isExpanded={isExpanded}
+              setIsExpanded={setIsExpanded}
             />
           )}
         </FullHeightFlexItem>
@@ -171,26 +245,29 @@ const ChartPanelsComponent: React.FC<Props> = ({
       {alertViewSelection === 'table' && (
         <FullHeightFlexItem grow={1}>
           {isLoadingIndexPattern ? (
-            <EuiLoadingSpinner data-test-subj="tableLoadingSpinner" size="xl" />
+            <EuiLoadingContent lines={10} data-test-subj="tableLoadingSpinner" />
           ) : (
             <AlertsCountPanel
               alignHeader="flexStart"
               chartOptionsContextMenu={chartOptionsContextMenu}
-              filters={alertsHistogramDefaultFilters}
-              inspectTitle={TABLE}
-              panelHeight={TABLE_PANEL_HEIGHT}
+              extraActions={resetGroupByFieldAction}
+              filters={alertsDefaultFilters}
+              inspectTitle={i18n.TABLE}
+              panelHeight={CHART_PANEL_HEIGHT}
               query={query}
               runtimeMappings={runtimeMappings}
               setStackByField0={updateCommonStackBy0}
               setStackByField0ComboboxInputRef={setStackByField0ComboboxInputRef}
-              stackByField0ComboboxRef={stackByField0ComboboxRef}
               setStackByField1={updateCommonStackBy1}
               setStackByField1ComboboxInputRef={setStackByField1ComboboxInputRef}
-              stackByField1ComboboxRef={stackByField1ComboboxRef}
               signalIndexName={signalIndexName}
               stackByField0={countTableStackBy0}
+              stackByField0ComboboxRef={stackByField0ComboboxRef}
               stackByField1={countTableStackBy1}
+              stackByField1ComboboxRef={stackByField1ComboboxRef}
               title={title}
+              isExpanded={isExpanded}
+              setIsExpanded={setIsExpanded}
             />
           )}
         </FullHeightFlexItem>
@@ -199,29 +276,54 @@ const ChartPanelsComponent: React.FC<Props> = ({
       {alertViewSelection === 'treemap' && (
         <FullHeightFlexItem grow={1}>
           {isLoadingIndexPattern ? (
-            <EuiLoadingSpinner data-test-subj="treemapLoadingSpinner" size="xl" />
+            <EuiLoadingContent lines={10} data-test-subj="treemapLoadingSpinner" />
           ) : (
             <AlertsTreemapPanel
               addFilter={addFilter}
               alignHeader="flexStart"
               chartOptionsContextMenu={chartOptionsContextMenu}
-              inspectTitle={TREEMAP}
-              isPanelExpanded={isTreemapPanelExpanded}
-              filters={alertsHistogramDefaultFilters}
+              height={CHART_PANEL_HEIGHT}
+              inspectTitle={i18n.TREEMAP}
+              isPanelExpanded={isAlertsPageChartsEnabled ? isExpanded : isTreemapPanelExpanded}
+              filters={alertsDefaultFilters}
               query={query}
-              setIsPanelExpanded={setIsTreemapPanelExpanded}
+              riskSubAggregationField="kibana.alert.risk_score"
+              setIsPanelExpanded={
+                isAlertsPageChartsEnabled ? setIsExpanded : setIsTreemapPanelExpanded
+              }
               setStackByField0={updateCommonStackBy0}
               setStackByField0ComboboxInputRef={setStackByField0ComboboxInputRef}
-              stackByField0ComboboxRef={stackByField0ComboboxRef}
               setStackByField1={updateCommonStackBy1}
               setStackByField1ComboboxInputRef={setStackByField1ComboboxInputRef}
-              stackByField1ComboboxRef={stackByField1ComboboxRef}
               signalIndexName={signalIndexName}
               stackByField0={riskChartStackBy0}
+              stackByField0ComboboxRef={stackByField0ComboboxRef}
               stackByField1={riskChartStackBy1}
+              stackByField1ComboboxRef={stackByField1ComboboxRef}
               title={title}
-              riskSubAggregationField="kibana.alert.risk_score"
+            />
+          )}
+        </FullHeightFlexItem>
+      )}
+
+      {isAlertsPageChartsEnabled && alertViewSelection === 'charts' && (
+        <FullHeightFlexItem grow={1}>
+          {isLoadingIndexPattern ? (
+            <EuiLoadingContent lines={10} data-test-subj="chartsLoadingSpinner" />
+          ) : (
+            <AlertsSummaryChartsPanel
+              alignHeader="flexStart"
+              addFilter={addFilter}
+              filters={alertsDefaultFilters}
+              query={query}
+              panelHeight={CHART_PANEL_HEIGHT}
+              signalIndexName={signalIndexName}
+              title={title}
               runtimeMappings={runtimeMappings}
+              isExpanded={isExpanded}
+              setIsExpanded={setIsExpanded}
+              groupBySelection={groupBySelection}
+              setGroupBySelection={setGroupBySelection}
             />
           )}
         </FullHeightFlexItem>

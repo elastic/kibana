@@ -1,0 +1,31 @@
+parameters:
+  - schema:
+      type: string
+    name: fileId
+    in: path
+    required: true
+  - schema:
+      type: string
+    name: fileName
+    in: path
+    required: true
+get:
+  summary: Get agent upload file
+  tags: []
+  responses:
+    '200':
+      description: OK
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              body:
+                type: object
+                properties:
+                  items:
+                    type: object
+                    properties:
+                      body: {}
+                      headers: {}
+  operationId: get-agent-upload-file

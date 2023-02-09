@@ -7,7 +7,6 @@
 import React from 'react';
 import { cloneDeep } from 'lodash/fp';
 
-import { tGridReducer } from '@kbn/timelines-plugin/public';
 import {
   TestProviders,
   mockGlobalState,
@@ -59,13 +58,7 @@ export const mockCreateStoreWithQueryFilters = () => {
       filters: filterFromSearchBar,
     },
   };
-  return createStore(
-    myState,
-    SUB_PLUGINS_REDUCER,
-    { dataTable: tGridReducer },
-    kibanaObservable,
-    storage
-  );
+  return createStore(myState, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
 };
 
 export const wrapper = ({ children }: { children: React.ReactElement }) => (
@@ -136,3 +129,50 @@ export const mockAttributes: LensAttributes = {
     },
   ],
 };
+
+export const mockExtraFilter = [
+  {
+    meta: {
+      type: 'phrases',
+      key: '_index',
+      params: ['.alerts-security.alerts-default'],
+      alias: null,
+      negate: false,
+      disabled: false,
+    },
+    query: {
+      bool: {
+        should: [
+          {
+            match_phrase: {
+              _index: '.alerts-security.alerts-default',
+            },
+          },
+        ],
+        minimum_should_match: 1,
+      },
+    },
+  },
+];
+
+export const mockRulePreviewFilter = (internalReferenceId: string, ruleId: string) => [
+  {
+    meta: {
+      disabled: false,
+      negate: false,
+      alias: null,
+      index: internalReferenceId,
+      key: 'kibana.alert.rule.uuid',
+      field: 'kibana.alert.rule.uuid',
+      params: {
+        query: ruleId,
+      },
+      type: 'phrase',
+    },
+    query: {
+      match_phrase: {
+        'kibana.alert.rule.uuid': ruleId,
+      },
+    },
+  },
+];

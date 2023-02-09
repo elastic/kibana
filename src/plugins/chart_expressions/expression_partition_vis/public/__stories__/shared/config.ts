@@ -34,6 +34,7 @@ export const config: RenderValue['visConfig'] = {
     truncate: 0,
     valuesFormat: ValueFormats.PERCENT,
     last_level: false,
+    colorOverrides: {},
   },
   dimensions: {
     metrics: [

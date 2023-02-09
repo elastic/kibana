@@ -28,6 +28,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import { IngestPipelineParams } from '../../../../../../../common/types/connectors';
+import { docLinks } from '../../../../../shared/doc_links';
 
 import { CurlRequest } from '../../components/curl_request/curl_request';
 
@@ -124,7 +125,7 @@ export const IngestPipelineModal: React.FC<IngestPipelineModalProps> = ({
               </EuiFlexItem>
               <EuiSpacer />
               <EuiFlexItem>
-                <EuiLink href="TODO TODO TODO: Insert actual docslink" external>
+                <EuiLink href={docLinks.ingestPipelines} external>
                   {i18n.translate(
                     'xpack.enterpriseSearch.content.index.pipelines.ingestModal.modalIngestLinkLabel',
                     {

@@ -25,7 +25,7 @@ const readOperations: Record<AlertingEntity, string[]> = {
     'find',
     'getRuleExecutionKPI',
   ],
-  alert: ['get', 'find', 'getAuthorizedAlertsIndices'],
+  alert: ['get', 'find', 'getAuthorizedAlertsIndices', 'getAlertSummary'],
 };
 
 const writeOperations: Record<AlertingEntity, string[]> = {
@@ -44,6 +44,7 @@ const writeOperations: Record<AlertingEntity, string[]> = {
     'bulkEdit',
     'bulkDelete',
     'bulkEnable',
+    'bulkDisable',
     'unsnooze',
   ],
   alert: ['update'],

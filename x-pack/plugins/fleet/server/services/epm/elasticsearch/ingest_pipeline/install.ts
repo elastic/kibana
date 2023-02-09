@@ -9,7 +9,12 @@ import type { TransportRequestOptions } from '@elastic/elasticsearch';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 
 import { ElasticsearchAssetType } from '../../../../types';
-import type { EsAssetReference, RegistryDataStream, InstallablePackage } from '../../../../types';
+import type {
+  EsAssetReference,
+  RegistryDataStream,
+  InstallablePackage,
+  PackageInfo,
+} from '../../../../types';
 import { getAsset, getPathParts } from '../../archive';
 import type { ArchiveEntry } from '../../archive';
 import {
@@ -34,8 +39,9 @@ import {
 import type { PipelineInstall, RewriteSubstitution } from './types';
 
 export const prepareToInstallPipelines = (
-  installablePackage: InstallablePackage,
-  paths: string[]
+  installablePackage: InstallablePackage | PackageInfo,
+  paths: string[],
+  onlyForDataStreams?: RegistryDataStream[]
 ): {
   assetsToAdd: EsAssetReference[];
   install: (esClient: ElasticsearchClient, logger: Logger) => Promise<void>;
@@ -43,7 +49,7 @@ export const prepareToInstallPipelines = (
   // unlike other ES assets, pipeline names are versioned so after a template is updated
   // it can be created pointing to the new template, without removing the old one and effecting data
   // so do not remove the currently installed pipelines here
-  const dataStreams = installablePackage.data_streams;
+  const dataStreams = onlyForDataStreams || installablePackage.data_streams;
   const { version: pkgVersion } = installablePackage;
   const pipelinePaths = paths.filter((path) => isPipeline(path));
   const topLevelPipelinePaths = paths.filter((path) => isTopLevelPipeline(path));
@@ -141,7 +147,7 @@ export async function installAllPipelines({
   logger: Logger;
   paths: string[];
   dataStream?: RegistryDataStream;
-  installablePackage: InstallablePackage;
+  installablePackage: InstallablePackage | PackageInfo;
 }): Promise<EsAssetReference[]> {
   const pipelinePaths = dataStream
     ? paths.filter((path) => isDataStreamPipeline(path, dataStream.path))
@@ -219,7 +225,7 @@ async function installPipeline({
   esClient: ElasticsearchClient;
   logger: Logger;
   pipeline: PipelineInstall;
-  installablePackage?: InstallablePackage;
+  installablePackage?: InstallablePackage | PackageInfo;
   shouldAddCustomPipelineProcessor?: boolean;
 }): Promise<EsAssetReference> {
   let pipelineToInstall = appendMetadataToIngestPipeline({

@@ -7,12 +7,18 @@
  */
 
 const Path = require('path');
+const Fs = require('fs');
+
+const { REPO_ROOT } = require('@kbn/repo-info');
+
+const localDist = Path.resolve(__dirname, '../shared_built_assets');
+const bazelDist = Path.resolve(REPO_ROOT, 'bazel-bin', Path.relative(REPO_ROOT, localDist));
 
 // extracted const vars
 /**
  * Absolute path to the distributable directory
  */
-const distDir = Path.resolve(__dirname, '../../shared_built_assets');
+const distDir = Fs.existsSync(localDist) ? localDist : bazelDist;
 
 /**
  * Filename of the main bundle file in the distributable directory
@@ -73,11 +79,12 @@ const externals = {
    * runtime deps which don't need to be copied across all bundles
    */
   tslib: '__kbnSharedDeps__.TsLib',
+  uuid: '__kbnSharedDeps__.Uuid',
   '@kbn/analytics': '__kbnSharedDeps__.KbnAnalytics',
   '@kbn/es-query': '__kbnSharedDeps__.KbnEsQuery',
   '@kbn/std': '__kbnSharedDeps__.KbnStd',
   '@kbn/safer-lodash-set': '__kbnSharedDeps__.SaferLodashSet',
-  'rison-node': '__kbnSharedDeps__.RisonNode',
+  '@kbn/rison': '__kbnSharedDeps__.KbnRison',
   history: '__kbnSharedDeps__.History',
   classnames: '__kbnSharedDeps__.Classnames',
   '@tanstack/react-query': '__kbnSharedDeps__.ReactQuery',

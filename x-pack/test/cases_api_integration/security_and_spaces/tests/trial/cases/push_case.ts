@@ -34,20 +34,22 @@ import {
   updateCase,
   deleteAllCaseItems,
   superUserSpace1Auth,
-  createCaseWithConnector,
-  createConnector,
-  getServiceNowConnector,
   getConnectorMappingsFromES,
   getCase,
-  getServiceNowSimulationServer,
   createConfiguration,
   getSignalsWithES,
   delay,
   calculateDuration,
-  getRecordingServiceNowSimulatorServer,
   getComment,
   bulkCreateAttachments,
-} from '../../../../common/lib/utils';
+  loginUsers,
+  setupSuperUserProfile,
+  getServiceNowConnector,
+  createCaseWithConnector,
+  getRecordingServiceNowSimulatorServer,
+  getServiceNowSimulationServer,
+  createConnector,
+} from '../../../../common/lib/api';
 import {
   globalRead,
   noKibanaPrivileges,
@@ -57,8 +59,7 @@ import {
   secOnlyRead,
   superUser,
 } from '../../../../common/lib/authentication/users';
-import { RecordingServiceNowSimulator } from '../../../../../alerting_api_integration/common/fixtures/plugins/actions_simulators/server/servicenow_simulation';
-import { loginUsers, setupSuperUserProfile } from '../../../../common/lib/user_profiles';
+import { RecordingServiceNowSimulator } from '../../../../../alerting_api_integration/common/plugins/actions_simulators/server/servicenow_simulation';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {

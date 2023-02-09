@@ -1,7 +1,7 @@
 {
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
-    "outDir": "./target/types"
+    "outDir": "target/types"
   },
   "include": [
     "index.ts",
@@ -11,14 +11,16 @@
     "common/**/*.ts",
     "../../typings/**/*"
   ],
-  "exclude": [],
+  "exclude": [
+    "target/**/*",
+  ],
   "kbn_references": [
-    { "path": "../../src/core/tsconfig.json" },
-    { "path": "../../src/plugins/kibana_utils/tsconfig.json" },
-    { "path": "../../src/plugins/kibana_react/tsconfig.json" },
-    { "path": "../../src/plugins/navigation/tsconfig.json" },
-    { "path": "../../src/plugins/data/tsconfig.json" },
-    { "path": "../../src/plugins/data_views/tsconfig.json" },
-    { "path": "../developer_examples/tsconfig.json" },
+    "@kbn/core",
+    "@kbn/kibana-utils-plugin",
+    "@kbn/navigation-plugin",
+    "@kbn/data-plugin",
+    "@kbn/data-views-plugin",
+    "@kbn/developer-examples-plugin",
+    "@kbn/es-query",
   ]
 }

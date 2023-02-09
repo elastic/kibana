@@ -8,6 +8,7 @@
 
 import type { HttpStart } from '@kbn/core/public';
 import type { ScopedFilesClient, FilesClient } from '../types';
+import { getFileKindsRegistry } from '../../common/file_kinds_registry';
 import {
   API_BASE_PATH,
   FILES_API_BASE_PATH,
@@ -169,6 +170,9 @@ export function createFilesClient({
     },
     publicDownload: ({ token, fileName }) => {
       return http.get(apiRoutes.getPublicDownloadRoute(fileName), { query: { token } });
+    },
+    getFileKind(id: string) {
+      return getFileKindsRegistry().get(id);
     },
   };
   return api;

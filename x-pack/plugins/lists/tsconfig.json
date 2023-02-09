@@ -2,9 +2,7 @@
 {
   "extends": "../../../tsconfig.base.json",
   "compilerOptions": {
-    "outDir": "./target/types",
-    "emitDeclarationOnly": true,
-    "declaration": true,
+    "outDir": "target/types",
   },
   "include": [
     "common/**/*",
@@ -14,9 +12,34 @@
     "server/**/*.json",
   ],
   "kbn_references": [
-    { "path": "../../../src/core/tsconfig.json" },
-    { "path": "../spaces/tsconfig.json" },
-    { "path": "../security/tsconfig.json"},
-    { "path": "../../../src/plugins/unified_search/tsconfig.json" }
+    "@kbn/core",
+    "@kbn/spaces-plugin",
+    "@kbn/security-plugin",
+    "@kbn/unified-search-plugin",
+    "@kbn/securitysolution-io-ts-list-types",
+    "@kbn/securitysolution-list-constants",
+    "@kbn/securitysolution-list-hooks",
+    "@kbn/securitysolution-list-api",
+    "@kbn/kibana-react-plugin",
+    "@kbn/i18n",
+    "@kbn/data-plugin",
+    "@kbn/securitysolution-list-utils",
+    "@kbn/securitysolution-utils",
+    "@kbn/es-query",
+    "@kbn/i18n-react",
+    "@kbn/securitysolution-autocomplete",
+    "@kbn/config-schema",
+    "@kbn/securitysolution-io-ts-utils",
+    "@kbn/core-http-server",
+    "@kbn/securitysolution-es-utils",
+    "@kbn/securitysolution-io-ts-types",
+    "@kbn/std",
+    "@kbn/utils",
+    "@kbn/logging-mocks",
+    "@kbn/utility-types",
+    "@kbn/core-elasticsearch-client-server-mocks",
+  ],
+  "exclude": [
+    "target/**/*",
   ]
 }

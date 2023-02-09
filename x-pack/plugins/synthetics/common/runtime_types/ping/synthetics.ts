@@ -7,6 +7,7 @@
 
 import { isRight } from 'fp-ts/lib/Either';
 import * as t from 'io-ts';
+import { ErrorStateCodec } from './error_state';
 
 /**
  * This type has some overlap with the Ping type, but it helps avoid runtime type
@@ -61,6 +62,7 @@ export const SyntheticsDataType = t.partial({
 
 export const JourneyStepType = t.intersection([
   t.partial({
+    config_id: t.string,
     monitor: t.partial({
       duration: t.type({
         us: t.number,
@@ -252,6 +254,9 @@ export const SyntheticsJourneyApiResponseType = t.intersection([
           previous: t.type({
             timestamp: t.string,
             checkGroup: t.string,
+          }),
+          summary: t.type({
+            state: ErrorStateCodec,
           }),
         }),
       ]),

@@ -20,7 +20,7 @@ import { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import { MonitoringStats } from '../monitoring';
 import { TaskManagerConfig } from '../config';
 import {
-  SummarizedBackgroundTaskUtilizationStat,
+  BackgroundTaskUtilizationStat,
   summarizeUtilizationStats,
 } from '../monitoring/background_task_utilization_statistics';
 import { MonitoredStat } from '../monitoring/monitoring_stats_stream';
@@ -29,7 +29,7 @@ export interface MonitoredUtilization {
   process_uuid: string;
   timestamp: string;
   last_update: string;
-  stats: MonitoredStat<SummarizedBackgroundTaskUtilizationStat> | null;
+  stats: MonitoredStat<BackgroundTaskUtilizationStat> | null;
 }
 
 export interface BackgroundTaskUtilRouteParams {

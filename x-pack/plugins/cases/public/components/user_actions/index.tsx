@@ -36,6 +36,12 @@ const MyEuiCommentList = styled(EuiCommentList)`
       transition: 0.8s;
     }
 
+    & .draftFooter {
+      & .euiCommentEvent__body {
+        padding: 0;
+      }
+    }
+
     & .euiComment.isEdit {
       & .euiCommentEvent {
         border: none;
@@ -74,7 +80,7 @@ const MyEuiCommentList = styled(EuiCommentList)`
 
 export const UserActions = React.memo(
   ({
-    caseServices,
+    caseConnectors,
     caseUserActions,
     userProfiles,
     currentUserProfile,
@@ -91,8 +97,11 @@ export const UserActions = React.memo(
   }: UserActionTreeProps) => {
     const { detailName: caseId, commentId } = useCaseViewParams();
     const [initLoading, setInitLoading] = useState(true);
-    const { externalReferenceAttachmentTypeRegistry, persistableStateAttachmentTypeRegistry } =
-      useCasesContext();
+    const {
+      externalReferenceAttachmentTypeRegistry,
+      persistableStateAttachmentTypeRegistry,
+      appId,
+    } = useCasesContext();
 
     const alertIdsWithoutRuleInfo = useMemo(
       () => getManualAlertIdsWithNoRuleId(caseData.comments),
@@ -141,6 +150,7 @@ export const UserActions = React.memo(
     const descriptionCommentListObj: EuiCommentProps = useMemo(
       () =>
         getDescriptionUserAction({
+          appId,
           userProfiles,
           caseData,
           commentRefs,
@@ -151,6 +161,7 @@ export const UserActions = React.memo(
           handleManageQuote,
         }),
       [
+        appId,
         userProfiles,
         caseData,
         commentRefs,
@@ -177,13 +188,14 @@ export const UserActions = React.memo(
             }
 
             const userActionBuilder = builder({
+              appId,
               caseData,
+              caseConnectors,
               externalReferenceAttachmentTypeRegistry,
               persistableStateAttachmentTypeRegistry,
               userAction,
               userProfiles,
               currentUserProfile,
-              caseServices,
               comments: caseData.comments,
               index,
               commentRefs,
@@ -207,6 +219,8 @@ export const UserActions = React.memo(
           [descriptionCommentListObj]
         ),
       [
+        appId,
+        caseConnectors,
         caseUserActions,
         userProfiles,
         currentUserProfile,
@@ -214,7 +228,6 @@ export const UserActions = React.memo(
         persistableStateAttachmentTypeRegistry,
         descriptionCommentListObj,
         caseData,
-        caseServices,
         commentRefs,
         manageMarkdownEditIds,
         selectedOutlineCommentId,

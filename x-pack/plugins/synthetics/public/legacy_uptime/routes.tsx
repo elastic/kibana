@@ -240,7 +240,7 @@ const getRoutes = (): RouteProps[] => {
         defaultMessage: 'Monitor Management | {baseTitle}',
         values: { baseTitle },
       }),
-      path: MONITOR_MANAGEMENT_ROUTE + '/:type',
+      path: MONITOR_MANAGEMENT_ROUTE + '/:type?',
       component: () => (
         <ServiceAllowedWrapper>
           <MonitorManagementPage />

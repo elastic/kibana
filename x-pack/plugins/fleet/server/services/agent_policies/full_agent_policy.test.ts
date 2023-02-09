@@ -231,7 +231,7 @@ describe('getFullAgentPolicy', () => {
       },
       agent: {
         download: {
-          source_uri: 'http://default-registry.co',
+          sourceURI: 'http://default-registry.co',
         },
         monitoring: {
           namespace: 'default',
@@ -267,7 +267,7 @@ describe('getFullAgentPolicy', () => {
       },
       agent: {
         download: {
-          source_uri: 'http://default-registry.co',
+          sourceURI: 'http://default-registry.co',
         },
         monitoring: {
           namespace: 'default',
@@ -352,7 +352,7 @@ describe('getFullAgentPolicy', () => {
     expect(agentPolicy?.outputs.default).toBeDefined();
   });
 
-  it('should return the source_uri from the agent policy', async () => {
+  it('should return the sourceURI from the agent policy', async () => {
     mockAgentPolicy({
       namespace: 'default',
       revision: 1,
@@ -376,7 +376,7 @@ describe('getFullAgentPolicy', () => {
       },
       agent: {
         download: {
-          source_uri: 'http://custom-registry-test',
+          sourceURI: 'http://custom-registry-test',
         },
         monitoring: {
           namespace: 'default',
@@ -384,6 +384,51 @@ describe('getFullAgentPolicy', () => {
           enabled: true,
           logs: false,
           metrics: true,
+        },
+      },
+    });
+  });
+
+  it('should add + transform agent features', async () => {
+    mockAgentPolicy({
+      namespace: 'default',
+      revision: 1,
+      monitoring_enabled: ['metrics'],
+      agent_features: [
+        { name: 'fqdn', enabled: true },
+        { name: 'feature2', enabled: true },
+      ],
+    });
+    const agentPolicy = await getFullAgentPolicy(savedObjectsClientMock.create(), 'agent-policy');
+
+    expect(agentPolicy).toMatchObject({
+      id: 'agent-policy',
+      outputs: {
+        default: {
+          type: 'elasticsearch',
+          hosts: ['http://127.0.0.1:9201'],
+        },
+      },
+      inputs: [],
+      revision: 1,
+      fleet: {
+        hosts: ['http://fleetserver:8220'],
+      },
+      agent: {
+        monitoring: {
+          namespace: 'default',
+          use_output: 'default',
+          enabled: true,
+          logs: false,
+          metrics: true,
+        },
+        features: {
+          fqdn: {
+            enabled: true,
+          },
+          feature2: {
+            enabled: true,
+          },
         },
       },
     });

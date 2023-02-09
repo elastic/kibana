@@ -6,12 +6,10 @@
  * Side Public License, v 1.
  */
 
-const Path = require('path');
-const Fs = require('fs');
+require('@kbn/babel-register').install();
 
-const normalizePath = require('normalize-path');
-const { discoverPackageManifestPaths, Jsonc } = require('@kbn/bazel-packages');
-const { REPO_ROOT } = require('@kbn/utils');
+const { getPackages } = require('@kbn/repo-packages');
+const { REPO_ROOT } = require('@kbn/repo-info');
 
 const APACHE_2_0_LICENSE_HEADER = `
 /*
@@ -122,10 +120,9 @@ const VENN_DIAGRAM_HEADER = `
 `;
 
 /** Packages which should not be included within production code. */
-const DEV_PACKAGE_DIRS = discoverPackageManifestPaths(REPO_ROOT).flatMap((path) => {
-  const manifest = Jsonc.parse(Fs.readFileSync(path, 'utf8'));
-  return !!manifest.devOnly ? normalizePath(Path.relative(REPO_ROOT, Path.dirname(path))) : [];
-});
+const DEV_PACKAGE_DIRS = getPackages(REPO_ROOT).flatMap((pkg) =>
+  pkg.isDevOnly ? pkg.normalizedRepoRelativeDir : []
+);
 
 /** Directories (at any depth) which include dev-only code. */
 const DEV_DIRECTORIES = [
@@ -137,6 +134,7 @@ const DEV_DIRECTORIES = [
   '__mocks__',
   '__stories__',
   'e2e',
+  'cypress',
   'fixtures',
   'ftr_e2e',
   'integration_tests',
@@ -165,7 +163,7 @@ const DEV_FILE_PATTERNS = [
   'mock.{js,ts,tsx}',
   '_stubs.{js,ts,tsx}',
   '{testHelpers,test_helper,test_utils}.{js,ts,tsx}',
-  '{postcss,webpack}.config.js',
+  '{postcss,webpack,cypress}.config.{js,ts}',
 ];
 
 /** Glob patterns which describe dev-only code. */
@@ -175,10 +173,10 @@ const DEV_PATTERNS = [
   ...DEV_FILE_PATTERNS.map((file) => `{packages,src,x-pack}/**/${file}`),
   'packages/kbn-interpreter/tasks/**/*',
   'src/dev/**/*',
-  'x-pack/{dev-tools,tasks,scripts,test,build_chromium}/**/*',
-  'x-pack/plugins/*/server/scripts/**/*',
-  'x-pack/plugins/fleet/cypress',
+  'x-pack/{dev-tools,tasks,test,build_chromium}/**/*',
   'x-pack/performance/**/*',
+  'src/setup_node_env/index.js',
+  'src/cli/dev.js',
 ];
 
 /** Restricted imports with suggested alternatives */
@@ -520,7 +518,7 @@ module.exports = {
       },
     },
     {
-      files: ['packages/kbn-handlebars/src/upstream/**/*.{js,mjs,ts,tsx}'],
+      files: ['packages/kbn-handlebars/src/spec/**/*.{js,mjs,ts,tsx}'],
       rules: {
         '@kbn/eslint/require-license-header': [
           'error',
@@ -599,6 +597,7 @@ module.exports = {
         'x-pack/test/saved_object_api_integration/*/apis/**/*',
         'x-pack/test/ui_capabilities/*/tests/**/*',
         'x-pack/test/performance/**/*.ts',
+        '**/cypress.config.{js,ts}',
       ],
       rules: {
         'import/no-default-export': 'off',
@@ -903,7 +902,10 @@ module.exports = {
       files: ['x-pack/plugins/profiling/**/*.{js,mjs,ts,tsx}'],
       rules: {
         'react-hooks/rules-of-hooks': 'error', // Checks rules of Hooks
-        'react-hooks/exhaustive-deps': ['error', { additionalHooks: '^(useAsync)$' }],
+        'react-hooks/exhaustive-deps': [
+          'error',
+          { additionalHooks: '^(useAsync|useTimeRangeAsync|useAutoAbortedHttpClient)$' },
+        ],
       },
     },
     {
@@ -947,6 +949,8 @@ module.exports = {
     {
       // front end and common typescript and javascript files only
       files: [
+        'x-pack/plugins/ecs_data_quality_dashboard/common/**/*.{js,mjs,ts,tsx}',
+        'x-pack/packages/kbn-ecs-data-quality-dashboard/common/**/*.{js,mjs,ts,tsx}',
         'x-pack/plugins/security_solution/public/**/*.{js,mjs,ts,tsx}',
         'x-pack/plugins/security_solution/common/**/*.{js,mjs,ts,tsx}',
         'x-pack/plugins/timelines/public/**/*.{js,mjs,ts,tsx}',
@@ -972,11 +976,15 @@ module.exports = {
       // We use this section to add rules in which we do not want to apply to test files.
       // This should be a very small set as most linter rules are useful for tests as well.
       files: [
+        'x-pack/plugins/ecs_data_quality_dashboard/**/*.{ts,tsx}',
+        'x-pack/packages/kbn-ecs-data-quality-dashboard/**/*.{ts,tsx}',
         'x-pack/plugins/security_solution/**/*.{ts,tsx}',
         'x-pack/plugins/timelines/**/*.{ts,tsx}',
         'x-pack/plugins/cases/**/*.{ts,tsx}',
       ],
       excludedFiles: [
+        'x-pack/plugins/ecs_data_quality_dashboard/**/*.{test,mock,test_helper}.{ts,tsx}',
+        'x-pack/packages/kbn-ecs-data-quality-dashboard/**/*.{test,mock,test_helper}.{ts,tsx}',
         'x-pack/plugins/security_solution/**/*.{test,mock,test_helper}.{ts,tsx}',
         'x-pack/plugins/timelines/**/*.{test,mock,test_helper}.{ts,tsx}',
         'x-pack/plugins/cases/**/*.{test,mock,test_helper}.{ts,tsx}',
@@ -988,6 +996,8 @@ module.exports = {
     {
       // typescript only for front and back end
       files: [
+        'x-pack/plugins/ecs_data_quality_dashboard/**/*.{ts,tsx}',
+        'x-pack/packages/kbn-ecs-data-quality-dashboard/**/*.{ts,tsx}',
         'x-pack/plugins/security_solution/**/*.{ts,tsx}',
         'x-pack/plugins/timelines/**/*.{ts,tsx}',
         'x-pack/plugins/cases/**/*.{ts,tsx}',
@@ -1018,6 +1028,8 @@ module.exports = {
     {
       // typescript and javascript for front and back end
       files: [
+        'x-pack/plugins/ecs_data_quality_dashboard/**/*.{js,mjs,ts,tsx}',
+        'x-pack/packages/kbn-ecs-data-quality-dashboard/**/*.{js,mjs,ts,tsx}',
         'x-pack/plugins/security_solution/**/*.{js,mjs,ts,tsx}',
         'x-pack/plugins/timelines/**/*.{js,mjs,ts,tsx}',
         'x-pack/plugins/cases/**/*.{js,mjs,ts,tsx}',
@@ -1697,13 +1709,6 @@ module.exports = {
     },
 
     /**
-     * Prettier disables all conflicting rules, listing as last override so it takes precedence
-     */
-    {
-      files: ['**/*'],
-      rules: require('eslint-config-prettier').rules,
-    },
-    /**
      * Enterprise Search Prettier override
      * Lints unnecessary backticks - @see https://github.com/prettier/eslint-config-prettier/blob/main/README.md#forbid-unnecessary-backticks
      */
@@ -1724,5 +1729,23 @@ module.exports = {
         '@kbn/imports/no_unresolvable_imports': 'off',
       },
     },
+
+    /**
+     * Code inside .buildkite runs separately from everything else in CI, before bootstrap, with ts-node. It needs a few tweaks because of this.
+     */
+    {
+      files: 'packages/kbn-{package-*,repo-*,dep-*}/**/*',
+      rules: {
+        'max-classes-per-file': 'off',
+      },
+    },
   ],
 };
+
+/**
+ * Prettier disables all conflicting rules, listing as last override so it takes precedence
+ * people kept ignoring that this was last so it's now defined outside of the overrides list
+ */
+/** eslint-disable-next-line */
+module.exports.overrides.push({ files: ['**/*'], rules: require('eslint-config-prettier').rules });
+/** PLEASE DON'T PUT THINGS AFTER THIS */

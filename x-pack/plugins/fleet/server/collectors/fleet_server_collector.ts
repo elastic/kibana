@@ -7,6 +7,8 @@
 
 import type { SavedObjectsClient, ElasticsearchClient } from '@kbn/core/server';
 
+import { PACKAGE_POLICY_SAVED_OBJECT_TYPE, SO_SEARCH_LIMIT } from '../constants';
+
 import { packagePolicyService } from '../services';
 import { getAgentStatusForAgentPolicy } from '../services/agents';
 import { listFleetServerHosts } from '../services/fleet_server_host';
@@ -68,6 +70,7 @@ export const getFleetServerUsage = async (
 
   const { total, inactive, online, error, updating, offline } = await getAgentStatusForAgentPolicy(
     esClient,
+    soClient,
     undefined,
     Array.from(policyIds)
       .map((policyId) => `(policy_id:"${policyId}")`)
@@ -83,4 +86,48 @@ export const getFleetServerUsage = async (
     total_all_statuses: total + inactive,
     num_host_urls: numHostsUrls,
   };
+};
+
+export const getFleetServerConfig = async (soClient: SavedObjectsClient): Promise<any> => {
+  const res = await packagePolicyService.list(soClient, {
+    page: 1,
+    perPage: SO_SEARCH_LIMIT,
+    kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name:fleet_server`,
+  });
+  const getInputConfig = (item: any) => {
+    const config = (item.inputs[0] ?? {}).compiled_input;
+    if (config?.server) {
+      // whitelist only server limits, timeouts and runtime, sometimes fields are coming in "server.limits" format instead of nested object
+      const newConfig = Object.keys(config)
+        .filter((key) => key.startsWith('server'))
+        .reduce((acc: any, curr: string) => {
+          if (curr === 'server') {
+            acc.server = {};
+            Object.keys(config.server)
+              .filter(
+                (key) =>
+                  key.startsWith('limits') ||
+                  key.startsWith('timeouts') ||
+                  key.startsWith('runtime')
+              )
+              .forEach((serverKey: string) => {
+                acc.server[serverKey] = config.server[serverKey];
+                return acc;
+              });
+          } else {
+            acc[curr] = config[curr];
+          }
+          return acc;
+        }, {});
+
+      return newConfig;
+    } else {
+      return {};
+    }
+  };
+  const policies = res.items.map((item) => ({
+    input_config: getInputConfig(item),
+  }));
+
+  return { policies };
 };

@@ -1549,9 +1549,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/core-saved-objects-api-server",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-                "section": "def-server.SavedObjectsClientContract",
+                "section": "def-common.SavedObjectsClientContract",
                 "text": "SavedObjectsClientContract"
               }
             ],
@@ -1597,9 +1597,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/logging",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnLoggingPluginApi",
-                "section": "def-server.Logger",
+                "section": "def-common.Logger",
                 "text": "Logger"
               }
             ],
@@ -1904,7 +1904,7 @@
           "\nPossible type values in the schema"
         ],
         "signature": [
-          "\"boolean\" | \"date\" | \"keyword\" | \"text\" | \"long\" | \"double\" | \"short\" | \"float\" | \"byte\" | \"integer\""
+          "\"boolean\" | \"date\" | \"keyword\" | \"text\" | \"long\" | \"double\" | \"short\" | \"byte\" | \"float\" | \"integer\""
         ],
         "path": "packages/analytics/client/src/schema/types.ts",
         "deprecated": false,

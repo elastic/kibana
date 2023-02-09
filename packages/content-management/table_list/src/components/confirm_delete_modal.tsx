@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { EuiConfirmModal } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
@@ -72,10 +72,9 @@ export function ConfirmDeleteModal<T>({
   onCancel,
   onConfirm,
 }: Props<T>) {
-  const { deleteBtnLabel, deletingBtnLabel, title, description, cancelBtnLabel } = getI18nTexts(
-    items,
-    entityName,
-    entityNamePlural
+  const { deleteBtnLabel, deletingBtnLabel, title, description, cancelBtnLabel } = useMemo(
+    () => getI18nTexts(items, entityName, entityNamePlural),
+    [entityName, entityNamePlural, items]
   );
 
   return (

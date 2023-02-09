@@ -27,6 +27,7 @@ describe('useAlertsLocalStorage', () => {
       alertViewSelection: 'trend', // default to the trend chart
       countTableStackBy0: 'kibana.alert.rule.name',
       countTableStackBy1: 'host.name',
+      groupBySelection: 'host.name',
       isTreemapPanelExpanded: true,
       riskChartStackBy0: 'kibana.alert.rule.name',
       riskChartStackBy1: 'host.name',

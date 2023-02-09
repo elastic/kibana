@@ -8,11 +8,15 @@
 import { EuiFlexItem, EuiPanel } from '@elastic/eui';
 import { orderBy } from 'lodash';
 import React, { useState } from 'react';
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import { isTimeComparison } from '../../shared/time_comparison/get_comparison_options';
 import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
 import { useApmParams } from '../../../hooks/use_apm_params';
-import { FETCH_STATUS, useFetcher } from '../../../hooks/use_fetcher';
+import {
+  FETCH_STATUS,
+  isPending,
+  useFetcher,
+} from '../../../hooks/use_fetcher';
 import { useTimeRange } from '../../../hooks/use_time_range';
 import { APIReturnType } from '../../../services/rest/create_call_apm_api';
 import { InstancesLatencyDistributionChart } from '../../shared/charts/instances_latency_distribution_chart';
@@ -120,7 +124,7 @@ export function ServiceOverviewInstancesChartAndTable({
       ).then((response) => {
         return {
           // Everytime the main statistics is refetched, updates the requestId making the detailed API to be refetched.
-          requestId: uuid(),
+          requestId: uuidv4(),
           currentPeriodItems: response.currentPeriod,
           currentPeriodItemsCount: response.currentPeriod.length,
           previousPeriodItems: response.previousPeriod,
@@ -232,10 +236,7 @@ export function ServiceOverviewInstancesChartAndTable({
             mainStatsItems={currentPeriodOrderedItems}
             mainStatsStatus={mainStatsStatus}
             mainStatsItemCount={currentPeriodItemsCount}
-            detailedStatsLoading={
-              detailedStatsStatus === FETCH_STATUS.LOADING ||
-              detailedStatsStatus === FETCH_STATUS.NOT_INITIATED
-            }
+            detailedStatsLoading={isPending(detailedStatsStatus)}
             detailedStatsData={detailedStatsData}
             serviceName={serviceName}
             tableOptions={tableOptions}

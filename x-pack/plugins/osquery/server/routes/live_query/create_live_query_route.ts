@@ -12,6 +12,7 @@ import { some, filter } from 'lodash';
 import deepEqual from 'fast-deep-equal';
 
 import type { ECSMappingOrUndefined } from '@kbn/osquery-io-ts-types';
+import { replaceParamsQuery } from '../../../common/utils/replace_params_query';
 import { createLiveQueryRequestBodySchema } from '../../../common/schemas/routes/live_query';
 import type { CreateLiveQueryRequestBodySchema } from '../../../common/schemas/routes/live_query';
 import { buildRouteValidation } from '../../utils/build_validation/route_validation';
@@ -32,6 +33,7 @@ export const createLiveQueryRoute = (router: IRouter, osqueryContext: OsqueryApp
     },
     async (context, request, response) => {
       const [coreStartServices] = await osqueryContext.getStartServices();
+      const soClient = (await context.core).savedObjects.client;
 
       const {
         osquery: { writeLiveQueries, runSavedQueries },
@@ -65,9 +67,17 @@ export const createLiveQueryRoute = (router: IRouter, osqueryContext: OsqueryApp
                 osqueryQueries,
                 (payload: {
                   configuration: { query: string; ecs_mapping: ECSMappingOrUndefined };
-                }) =>
-                  payload?.configuration?.query === request.body.query &&
-                  deepEqual(payload?.configuration?.ecs_mapping, request.body.ecs_mapping)
+                }) => {
+                  const { result: replacedConfigurationQuery } = replaceParamsQuery(
+                    payload.configuration.query,
+                    alertData
+                  );
+
+                  return (
+                    replacedConfigurationQuery === request.body.query &&
+                    deepEqual(payload.configuration.ecs_mapping, request.body.ecs_mapping)
+                  );
+                }
               );
 
               if (!requestQueryExistsInTheInvestigationGuide) throw new Error();
@@ -85,7 +95,7 @@ export const createLiveQueryRoute = (router: IRouter, osqueryContext: OsqueryApp
         const { response: osqueryAction } = await createActionHandler(
           osqueryContext,
           request.body,
-          { currentUser }
+          { soClient, metadata: { currentUser } }
         );
 
         return response.ok({

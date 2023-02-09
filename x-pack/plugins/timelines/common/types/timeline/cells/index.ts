@@ -7,10 +7,9 @@
 
 import { EuiDataGridCellValueElementProps } from '@elastic/eui';
 import type { Filter } from '@kbn/es-query';
-import { RowRenderer } from '../..';
-import { Ecs } from '../../../ecs';
+import { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
+import { ColumnHeaderOptions, RowRenderer } from '../..';
 import { BrowserFields, TimelineNonEcsData } from '../../../search_strategy';
-import { ColumnHeaderOptions } from '../columns';
 
 /** The following props are provided to the function called by `renderCellValue` */
 export type CellValueElementProps = EuiDataGridCellValueElementProps & {
@@ -31,4 +30,5 @@ export type CellValueElementProps = EuiDataGridCellValueElementProps & {
   truncate?: boolean;
   key?: string;
   closeCellPopover?: () => void;
+  enableActions?: boolean;
 };

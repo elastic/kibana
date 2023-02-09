@@ -32,31 +32,35 @@ describe('ALL - Edit saved query', () => {
     }).click();
     cy.contains('Custom key/value pairs.').should('exist');
     cy.contains('Hours of uptime').should('exist');
-    cy.get('[data-test-subj="ECSMappingEditorForm"]').within(() => {
-      cy.react('EuiButtonIcon', { props: { iconType: 'trash' } }).click();
-    });
+    cy.get('[data-test-subj="ECSMappingEditorForm"]')
+      .first()
+      .within(() => {
+        cy.react('EuiButtonIcon', { props: { iconType: 'trash' } }).click();
+      });
 
-    cy.react('PlatformCheckBoxGroupField').within(() => {
-      cy.react('EuiCheckbox', {
-        props: {
-          id: 'linux',
-          checked: true,
-        },
-      }).should('exist');
-      cy.react('EuiCheckbox', {
-        props: {
-          id: 'darwin',
-          checked: true,
-        },
-      }).should('exist');
+    cy.react('PlatformCheckBoxGroupField')
+      .first()
+      .within(() => {
+        cy.react('EuiCheckbox', {
+          props: {
+            id: 'linux',
+            checked: true,
+          },
+        }).should('exist');
+        cy.react('EuiCheckbox', {
+          props: {
+            id: 'darwin',
+            checked: true,
+          },
+        }).should('exist');
 
-      cy.react('EuiCheckbox', {
-        props: {
-          id: 'windows',
-          checked: false,
-        },
-      }).should('exist');
-    });
+        cy.react('EuiCheckbox', {
+          props: {
+            id: 'windows',
+            checked: false,
+          },
+        }).should('exist');
+      });
 
     cy.get('#windows').check({ force: true });
 
@@ -70,26 +74,28 @@ describe('ALL - Edit saved query', () => {
     cy.contains('Custom key/value pairs').should('not.exist');
     cy.contains('Hours of uptime').should('not.exist');
 
-    cy.react('PlatformCheckBoxGroupField').within(() => {
-      cy.react('EuiCheckbox', {
-        props: {
-          id: 'linux',
-          checked: true,
-        },
-      }).should('exist');
-      cy.react('EuiCheckbox', {
-        props: {
-          id: 'darwin',
-          checked: true,
-        },
-      }).should('exist');
+    cy.react('PlatformCheckBoxGroupField')
+      .first()
+      .within(() => {
+        cy.react('EuiCheckbox', {
+          props: {
+            id: 'linux',
+            checked: true,
+          },
+        }).should('exist');
+        cy.react('EuiCheckbox', {
+          props: {
+            id: 'darwin',
+            checked: true,
+          },
+        }).should('exist');
 
-      cy.react('EuiCheckbox', {
-        props: {
-          id: 'windows',
-          checked: true,
-        },
-      }).should('exist');
-    });
+        cy.react('EuiCheckbox', {
+          props: {
+            id: 'windows',
+            checked: true,
+          },
+        }).should('exist');
+      });
   });
 });

@@ -10,9 +10,9 @@ import { ElasticsearchClient } from '@kbn/core/server';
 import { Readable } from 'stream';
 import {
   createTestServers,
-  TestElasticsearchUtils,
-  TestKibanaUtils,
-} from '@kbn/core/test_helpers/kbn_server';
+  type TestElasticsearchUtils,
+  type TestKibanaUtils,
+} from '@kbn/core-test-helpers-kbn-server';
 
 import { ElasticsearchBlobStorageClient, BLOB_STORAGE_SYSTEM_INDEX_NAME } from '../es';
 

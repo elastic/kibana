@@ -6,21 +6,21 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
-import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { ApmMainTemplate } from './apm_main_template';
-import { SpanIcon } from '../../shared/span_icon';
-import { useApmParams } from '../../../hooks/use_apm_params';
-import { useTimeRange } from '../../../hooks/use_time_range';
-import { useFetcher } from '../../../hooks/use_fetcher';
-import { useApmRouter } from '../../../hooks/use_apm_router';
-import { useApmRoutePath } from '../../../hooks/use_apm_route_path';
-import { SearchBar } from '../../shared/search_bar';
+import React from 'react';
 import {
   getKueryBarBoolFilter,
   kueryBarPlaceholder,
 } from '../../../../common/dependencies';
-import { useOperationBreakdownEnabledSetting } from '../../../hooks/use_operations_breakdown_enabled_setting';
+import { useApmParams } from '../../../hooks/use_apm_params';
+import { useApmRouter } from '../../../hooks/use_apm_router';
+import { useApmRoutePath } from '../../../hooks/use_apm_route_path';
+import { useFetcher } from '../../../hooks/use_fetcher';
+import { useTimeRange } from '../../../hooks/use_time_range';
+import { BetaBadge } from '../../shared/beta_badge';
+import { SearchBar } from '../../shared/search_bar';
+import { SpanIcon } from '../../shared/span_icon';
+import { ApmMainTemplate } from './apm_main_template';
 
 interface Props {
   children: React.ReactNode;
@@ -37,9 +37,6 @@ export function DependencyDetailTemplate({ children }: Props) {
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 
   const path = useApmRoutePath();
-
-  const isOperationsBreakdownFeatureEnabled =
-    useOperationBreakdownEnabledSetting();
 
   const kueryBarBoolFilter = getKueryBarBoolFilter({
     environment,
@@ -67,32 +64,31 @@ export function DependencyDetailTemplate({ children }: Props) {
 
   const { data: { metadata } = {} } = dependencyMetadataFetch;
 
-  const tabs = isOperationsBreakdownFeatureEnabled
-    ? [
-        {
-          key: 'overview',
-          href: router.link('/dependencies/overview', {
-            query,
-          }),
-          label: i18n.translate('xpack.apm.DependencyDetailOverview.title', {
-            defaultMessage: 'Overview',
-          }),
-          isSelected: path === '/dependencies/overview',
-        },
-        {
-          key: 'operations',
-          href: router.link('/dependencies/operations', {
-            query,
-          }),
-          label: i18n.translate('xpack.apm.DependencyDetailOperations.title', {
-            defaultMessage: 'Operations',
-          }),
-          isSelected:
-            path === '/dependencies/operations' ||
-            path === '/dependencies/operation',
-        },
-      ]
-    : [];
+  const tabs = [
+    {
+      key: 'overview',
+      href: router.link('/dependencies/overview', {
+        query,
+      }),
+      label: i18n.translate('xpack.apm.DependencyDetailOverview.title', {
+        defaultMessage: 'Overview',
+      }),
+      isSelected: path === '/dependencies/overview',
+    },
+    {
+      key: 'operations',
+      href: router.link('/dependencies/operations', {
+        query,
+      }),
+      label: i18n.translate('xpack.apm.DependencyDetailOperations.title', {
+        defaultMessage: 'Operations',
+      }),
+      isSelected:
+        path === '/dependencies/operations' ||
+        path === '/dependencies/operation',
+      append: <BetaBadge icon="beta" />,
+    },
+  ];
 
   return (
     <ApmMainTemplate

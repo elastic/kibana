@@ -7,7 +7,7 @@
 
 import { SavedObjectUnsanitizedDoc } from '@kbn/core-saved-objects-server';
 import { EncryptedSavedObjectsPluginSetup } from '@kbn/encrypted-saved-objects-plugin/server';
-import { getMappedParams } from '../../../rules_client/lib/mapped_params_utils';
+import { getMappedParams } from '../../../rules_client/common';
 import { RawRule } from '../../../types';
 import { createEsoMigration, pipeMigrations } from '../utils';
 

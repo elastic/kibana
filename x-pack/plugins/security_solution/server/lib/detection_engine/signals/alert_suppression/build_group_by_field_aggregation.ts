@@ -22,6 +22,7 @@ export const buildGroupByFieldAggregation = ({
         [field]: {
           terms: {
             field,
+            missing_bucket: true,
           },
         },
       })),
@@ -30,7 +31,7 @@ export const buildGroupByFieldAggregation = ({
     aggs: {
       topHits: {
         top_hits: {
-          size: maxSignals,
+          size: 1,
           sort: [
             {
               [aggregatableTimestampField]: {

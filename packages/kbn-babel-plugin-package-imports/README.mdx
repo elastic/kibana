@@ -1,0 +1,11 @@
+---
+id: kibDevDocsOpsBabelPluginPackageImports
+slug: /kibana-dev-docs/ops/babel-plugin-package-imports
+title: "@kbn/babel-plugin-package-imports"
+description: A babel plugin that transforms our @kbn/{NAME} imports into paths
+date: 2022-05-19
+tags: ['kibana', 'dev', 'contributor', 'operations', 'babel', 'plugin', 'packages', 'imports']
+---
+
+When developing inside the Kibana repository importing a package from any other package is just easy as
+importing `@kbn/{package-name}`. However not every package is a node_module yet and while that is something we are working on to accomplish we need a way to dealing with it for now. Using this babel plugin is our transitory solution. It allows us to import from module ids and then transform it automatically back into paths on the transpiled code without friction for our engineering teams. 

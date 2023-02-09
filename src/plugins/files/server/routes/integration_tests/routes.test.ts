@@ -6,8 +6,9 @@
  * Side Public License, v 1.
  */
 
+import { TypeOf } from '@kbn/config-schema';
 import type { FileJSON } from '../../../common';
-import type { CreateFileKindHttpEndpoint } from '../../../common/api_routes';
+import type { rt } from '../file_kind/create';
 import { setupIntegrationEnvironment, TestEnvironmentUtils } from '../../test_utils';
 
 describe('File HTTP API', () => {
@@ -28,7 +29,7 @@ describe('File HTTP API', () => {
 
   describe('find', () => {
     beforeEach(async () => {
-      const args: Array<CreateFileKindHttpEndpoint['inputs']['body']> = [
+      const args: Array<TypeOf<typeof rt.body>> = [
         {
           name: 'firstFile',
           alt: 'my first alt',
@@ -55,7 +56,7 @@ describe('File HTTP API', () => {
         },
       ];
 
-      const files = await Promise.all(args.map((arg) => createFile(arg)));
+      const files = await Promise.all(args.map((arg) => createFile(arg as any)));
 
       for (const file of files.slice(0, 2)) {
         await request

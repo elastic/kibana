@@ -55,6 +55,10 @@ export function useFetcher<TReturn>(
 
       const promise = fn({ signal });
       if (!promise) {
+        setResult((prevResult) => ({
+          ...prevResult,
+          status: FETCH_STATUS.NOT_INITIATED,
+        }));
         return;
       }
 
@@ -74,6 +78,7 @@ export function useFetcher<TReturn>(
         if (!signal.aborted) {
           setResult({
             data,
+            loading: false,
             status: FETCH_STATUS.SUCCESS,
             error: undefined,
           } as FetcherResult<InferResponseType<TReturn>>);

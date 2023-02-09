@@ -17,6 +17,7 @@ import { ALERTS_URL } from '../../urls/navigation';
 import {
   OPEN_ALERT_DETAILS_PAGE_CONTEXT_MENU_BTN,
   TIMELINE_CONTEXT_MENU_BTN,
+  ALERTS_REFRESH_BTN,
 } from '../../screens/alerts';
 import { PAGE_TITLE } from '../../screens/common/page';
 import { OPEN_ALERT_DETAILS_PAGE } from '../../screens/alerts_details';
@@ -29,12 +30,21 @@ describe('Alert Details Page Navigation', () => {
       cleanKibana();
       login();
       createCustomRuleEnabled(rule, 'rule1');
-      visit(ALERTS_URL);
-      waitForAlertsPanelToBeLoaded();
     });
 
     describe('context menu', () => {
+      beforeEach(() => {
+        visit(ALERTS_URL);
+        waitForAlertsPanelToBeLoaded();
+      });
+
       it('should navigate to the details page from the alert context menu', () => {
+        // Sometimes the alerts are not loaded yet, so we need to refresh the page
+        cy.get(TIMELINE_CONTEXT_MENU_BTN).then(($btns) => {
+          if ($btns.length === 0) {
+            cy.get(ALERTS_REFRESH_BTN).click();
+          }
+        });
         cy.get(TIMELINE_CONTEXT_MENU_BTN).first().click({ force: true });
         cy.get(OPEN_ALERT_DETAILS_PAGE_CONTEXT_MENU_BTN).click({ force: true });
         cy.get(PAGE_TITLE).should('contain.text', rule.name);

@@ -29,7 +29,6 @@ interface MonitoringStats {
         };
       };
       recurring: {
-        tasks_per_min: number;
         ran: {
           service_time: {
             actual: number;
@@ -78,13 +77,10 @@ export default function ({ getService }: FtrProviderContext) {
     it('should return the task manager background task utilization for recurring stats', async () => {
       const {
         value: {
-          // eslint-disable-next-line @typescript-eslint/naming-convention
-          recurring: { tasks_per_min, ran },
+          recurring: { ran },
         },
       } = (await getBackgroundTaskUtilization()).stats;
       const serviceTime = ran.service_time;
-      expect(typeof tasks_per_min).to.eql('number');
-
       expect(typeof serviceTime.actual).to.eql('number');
       expect(typeof serviceTime.adjusted).to.eql('number');
       expect(typeof serviceTime.task_counter).to.eql('number');

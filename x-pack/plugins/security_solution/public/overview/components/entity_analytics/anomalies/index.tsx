@@ -29,11 +29,11 @@ import {
   LinkButton,
   useGetSecuritySolutionLinkProps,
 } from '../../../../common/components/links';
-import { HostsTableType } from '../../../../hosts/store/model';
+import { HostsTableType } from '../../../../explore/hosts/store/model';
 import { getTabsOnHostsUrl } from '../../../../common/components/link_to/redirect_to_hosts';
 import { SecurityPageName } from '../../../../app/types';
 import { getTabsOnUsersUrl } from '../../../../common/components/link_to/redirect_to_users';
-import { UsersTableType } from '../../../../users/store/model';
+import { UsersTableType } from '../../../../explore/users/store/model';
 import { useKibana } from '../../../../common/lib/kibana';
 import { useEnableDataFeed } from '../../../../common/components/ml_popover/hooks/use_enable_data_feed';
 import type { SecurityJob } from '../../../../common/components/ml_popover/types';
@@ -163,43 +163,49 @@ export const EntityAnalyticsAnomalies = () => {
         </EuiFlexGroup>
       </HeaderSection>
 
-      {incompatibleJobCount > 0 && (
-        <>
-          <EuiCallOut
-            title={i18n.MODULE_NOT_COMPATIBLE_TITLE(incompatibleJobCount)}
-            data-test-subj="incompatible_jobs_warnings"
-            color="warning"
-            iconType="alert"
-            size="s"
-          >
-            <p>
-              <FormattedMessage
-                defaultMessage="We could not find any data, see {mlDocs} for more information on Machine Learning job requirements."
-                id="xpack.securitySolution.components.mlPopup.moduleNotCompatibleDescription"
-                values={{
-                  mlDocs: (
-                    <a href={`${docLinks.links.siem.ml}`} rel="noopener noreferrer" target="_blank">
-                      {i18n.ANOMALY_DETECTION_DOCS}
-                    </a>
-                  ),
-                }}
-              />
-            </p>
-          </EuiCallOut>
-
-          <EuiSpacer size="m" />
-        </>
-      )}
-      <MLJobsAwaitingNodeWarning jobIds={installedJobsIds} />
       {toggleStatus && (
-        <EuiInMemoryTable
-          responsive={false}
-          items={data}
-          columns={columns}
-          loading={isSearchLoading}
-          id={TABLE_QUERY_ID}
-          sorting={TABLE_SORTING}
-        />
+        <>
+          {incompatibleJobCount > 0 && (
+            <>
+              <EuiCallOut
+                title={i18n.MODULE_NOT_COMPATIBLE_TITLE(incompatibleJobCount)}
+                data-test-subj="incompatible_jobs_warnings"
+                color="warning"
+                iconType="alert"
+                size="s"
+              >
+                <p>
+                  <FormattedMessage
+                    defaultMessage="We could not find any data, see {mlDocs} for more information on Machine Learning job requirements."
+                    id="xpack.securitySolution.components.mlPopup.moduleNotCompatibleDescription"
+                    values={{
+                      mlDocs: (
+                        <a
+                          href={`${docLinks.links.siem.ml}`}
+                          rel="noopener noreferrer"
+                          target="_blank"
+                        >
+                          {i18n.ANOMALY_DETECTION_DOCS}
+                        </a>
+                      ),
+                    }}
+                  />
+                </p>
+              </EuiCallOut>
+
+              <EuiSpacer size="m" />
+            </>
+          )}
+          <MLJobsAwaitingNodeWarning jobIds={installedJobsIds} />
+          <EuiInMemoryTable
+            responsive={false}
+            items={data}
+            columns={columns}
+            loading={isSearchLoading}
+            id={TABLE_QUERY_ID}
+            sorting={TABLE_SORTING}
+          />
+        </>
       )}
     </EuiPanel>
   );

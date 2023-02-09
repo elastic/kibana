@@ -93,7 +93,7 @@ export default function ({ getService }: FtrProviderContext) {
         await ml.trainedModelsTable.assertPipelinesTabContent(false);
       });
 
-      it('displays the built-in model and no actions are enabled', async () => {
+      it('displays the built-in model with only Test action enabled', async () => {
         await ml.testExecution.logTestStep('should display the model in the table');
         await ml.trainedModelsTable.filterWithSearchString(builtInModelData.modelId, 1);
 
@@ -120,6 +120,21 @@ export default function ({ getService }: FtrProviderContext) {
         await ml.trainedModelsTable.assertModelDeleteActionButtonExists(
           builtInModelData.modelId,
           false
+        );
+
+        await ml.testExecution.logTestStep('should have enabled the button that opens Test flyout');
+        await ml.trainedModelsTable.assertModelTestButtonExists(builtInModelData.modelId, true);
+
+        await ml.trainedModelsTable.testModel(
+          'lang_ident',
+          builtInModelData.modelId,
+          {
+            inputText: 'Goedemorgen! Ik ben een appel.',
+          },
+          {
+            title: 'This looks like Dutch,Flemish',
+            topLang: { code: 'nl', minProbability: 0.9 },
+          }
         );
       });
 

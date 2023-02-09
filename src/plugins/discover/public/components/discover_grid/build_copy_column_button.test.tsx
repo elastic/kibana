@@ -20,7 +20,7 @@ describe('Build a column button to copy to clipboard', () => {
   it('should copy a column name to clipboard on click', () => {
     const { label, iconType, onClick } = buildCopyColumnNameButton({
       columnDisplayName: 'test-field-name',
-      services: discoverServiceMock,
+      toastNotifications: discoverServiceMock.toastNotifications,
     });
     execCommandMock.mockImplementationOnce(() => true);
 
@@ -49,7 +49,7 @@ describe('Build a column button to copy to clipboard', () => {
     const { label, iconType, onClick } = buildCopyColumnValuesButton({
       columnId: 'extension',
       columnDisplayName: 'custom_extension',
-      services: discoverServiceMock,
+      toastNotifications: discoverServiceMock.toastNotifications,
       rowsCount: 3,
       valueToStringConverter: discoverGridContextMock.valueToStringConverter,
     });
@@ -72,7 +72,7 @@ describe('Build a column button to copy to clipboard', () => {
     } = buildCopyColumnValuesButton({
       columnId: '_source',
       columnDisplayName: 'Document',
-      services: discoverServiceMock,
+      toastNotifications: discoverServiceMock.toastNotifications,
       valueToStringConverter: discoverGridContextMock.valueToStringConverter,
       rowsCount: 3,
     });
@@ -101,7 +101,7 @@ describe('Build a column button to copy to clipboard', () => {
   it('should not copy to clipboard on click', () => {
     const { label, iconType, onClick } = buildCopyColumnNameButton({
       columnDisplayName: 'test-field-name',
-      services: discoverServiceMock,
+      toastNotifications: discoverServiceMock.toastNotifications,
     });
     execCommandMock.mockImplementationOnce(() => false);
 

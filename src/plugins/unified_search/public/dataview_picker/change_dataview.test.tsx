@@ -15,7 +15,7 @@ import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { indexPatternEditorPluginMock as dataViewEditorPluginMock } from '@kbn/data-view-editor-plugin/public/mocks';
 import { ChangeDataView } from './change_dataview';
-import { DataViewPickerPropsExtended, TextBasedLanguages } from '.';
+import { DataViewPickerPropsExtended, TextBasedLanguages } from './data_view_picker';
 
 describe('DataView component', () => {
   const createMockWebStorage = () => ({

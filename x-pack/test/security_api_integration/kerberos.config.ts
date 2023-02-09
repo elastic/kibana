@@ -15,10 +15,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const kerberosKeytabPath = resolve(__dirname, './fixtures/kerberos/krb5.keytab');
   const kerberosConfigPath = resolve(__dirname, './fixtures/kerberos/krb5.conf');
 
-  const testEndpointsPlugin = resolve(
-    __dirname,
-    '../security_functional/fixtures/common/test_endpoints'
-  );
+  const testEndpointsPlugin = resolve(__dirname, '../security_functional/plugins/test_endpoints');
 
   const auditLogPath = resolve(__dirname, './fixtures/audit/kerberos.log');
 

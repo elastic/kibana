@@ -166,9 +166,17 @@ describe('View agents list', () => {
   });
 
   describe('Agent status filter', () => {
+    const clearFilters = () => {
+      cy.getBySel(FLEET_AGENT_LIST_PAGE.STATUS_FILTER).click();
+      cy.get('button').contains('Healthy').click();
+      cy.get('button').contains('Unhealthy').click();
+      cy.get('button').contains('Updating').click();
+      cy.get('button').contains('Offline').click();
+      cy.getBySel(FLEET_AGENT_LIST_PAGE.STATUS_FILTER).click();
+    };
     it('should filter on healthy (16 result)', () => {
       cy.visit('/app/fleet/agents');
-
+      clearFilters();
       cy.getBySel(FLEET_AGENT_LIST_PAGE.STATUS_FILTER).click();
 
       cy.get('button').contains('Healthy').click();
@@ -179,7 +187,7 @@ describe('View agents list', () => {
 
     it('should filter on unhealthy (1 result)', () => {
       cy.visit('/app/fleet/agents');
-
+      clearFilters();
       cy.getBySel(FLEET_AGENT_LIST_PAGE.STATUS_FILTER).click();
 
       cy.get('button').contains('Unhealthy').click();
@@ -190,6 +198,7 @@ describe('View agents list', () => {
 
     it('should filter on inactive (0 result)', () => {
       cy.visit('/app/fleet/agents');
+      clearFilters();
 
       cy.getBySel(FLEET_AGENT_LIST_PAGE.STATUS_FILTER).click();
 
@@ -200,6 +209,7 @@ describe('View agents list', () => {
 
     it('should filter on healthy and unhealthy', () => {
       cy.visit('/app/fleet/agents');
+      clearFilters();
 
       cy.getBySel(FLEET_AGENT_LIST_PAGE.STATUS_FILTER).click();
 

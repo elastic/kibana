@@ -14,6 +14,26 @@ import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 
 const NO_DATA_POPOVER_STORAGE_KEY = 'data.noDataPopover';
 
+export const strings = {
+  getNoDataPopoverContent: () =>
+    i18n.translate('unifiedSearch.noDataPopover.content', {
+      defaultMessage:
+        "This time range doesn't contain any data. Increase or adjust the time range to see more fields and create charts.",
+    }),
+  getNoDataPopoverSubtitle: () =>
+    i18n.translate('unifiedSearch.noDataPopover.subtitle', { defaultMessage: 'Tip' }),
+
+  getNoDataPopoverTitle: () =>
+    i18n.translate('unifiedSearch.noDataPopover.title', {
+      defaultMessage: 'Empty dataset',
+    }),
+
+  getNoDataPopoverDismissAction: () =>
+    i18n.translate('unifiedSearch.noDataPopover.dismissAction', {
+      defaultMessage: "Don't show again",
+    }),
+};
+
 export function NoDataPopover({
   showNoDataPopover,
   storage,
@@ -42,12 +62,7 @@ export function NoDataPopover({
       }}
       content={
         <EuiText size="s">
-          <p style={{ maxWidth: 300 }}>
-            {i18n.translate('unifiedSearch.noDataPopover.content', {
-              defaultMessage:
-                "This time range doesn't contain any data. Increase or adjust the time range to see more fields and create charts.",
-            })}
-          </p>
+          <p style={{ maxWidth: 300 }}>{strings.getNoDataPopoverContent()}</p>
         </EuiText>
       }
       minWidth={300}
@@ -56,10 +71,8 @@ export function NoDataPopover({
       step={1}
       stepsTotal={1}
       isStepOpen={noDataPopoverVisible}
-      subtitle={i18n.translate('unifiedSearch.noDataPopover.subtitle', { defaultMessage: 'Tip' })}
-      title={i18n.translate('unifiedSearch.noDataPopover.title', {
-        defaultMessage: 'Empty dataset',
-      })}
+      subtitle={strings.getNoDataPopoverSubtitle()}
+      title={strings.getNoDataPopoverTitle()}
       footerAction={
         <EuiButtonEmpty
           size="xs"
@@ -72,9 +85,7 @@ export function NoDataPopover({
             setNoDataPopoverVisible(false);
           }}
         >
-          {i18n.translate('unifiedSearch.noDataPopover.dismissAction', {
-            defaultMessage: "Don't show again",
-          })}
+          {strings.getNoDataPopoverDismissAction()}
         </EuiButtonEmpty>
       }
     >

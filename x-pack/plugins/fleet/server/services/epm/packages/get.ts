@@ -14,7 +14,11 @@ import {
   PACKAGE_POLICY_SAVED_OBJECT_TYPE,
 } from '../../../../common/constants';
 import { isPackageLimited } from '../../../../common/services';
-import type { PackageUsageStats, PackagePolicySOAttributes } from '../../../../common/types';
+import type {
+  PackageUsageStats,
+  PackagePolicySOAttributes,
+  Installable,
+} from '../../../../common/types';
 import { PACKAGES_SAVED_OBJECT_TYPE } from '../../../constants';
 import type {
   ArchivePackage,
@@ -23,7 +27,12 @@ import type {
   GetCategoriesRequest,
 } from '../../../../common/types';
 import type { Installation, PackageInfo } from '../../../types';
-import { FleetError, PackageFailedVerificationError, PackageNotFoundError } from '../../../errors';
+import {
+  FleetError,
+  PackageFailedVerificationError,
+  PackageNotFoundError,
+  RegistryResponseError,
+} from '../../../errors';
 import { appContextService } from '../..';
 import * as Registry from '../registry';
 import { getEsPackage } from '../archive/storage';
@@ -63,6 +72,11 @@ export async function getPackages(
   });
   // get the installed packages
   const packageSavedObjects = await getPackageSavedObjects(savedObjectsClient);
+
+  const packagesNotInRegistry = packageSavedObjects.saved_objects
+    .filter((pkg) => !registryItems.some((item) => item.name === pkg.id))
+    .map((pkg) => createInstallableFrom({ ...pkg.attributes, title: nameAsTitle(pkg.id) }, pkg));
+
   const packageList = registryItems
     .map((item) =>
       createInstallableFrom(
@@ -70,6 +84,7 @@ export async function getPackages(
         packageSavedObjects.saved_objects.find(({ id }) => id === item.name)
       )
     )
+    .concat(packagesNotInRegistry as Installable<any>)
     .sort(sortByName);
 
   if (!excludeInstallStatus) {
@@ -305,8 +320,16 @@ export async function getPackageFromSource(options: {
     if (res) {
       logger.debug(`retrieved package ${pkgName}-${pkgVersion} from cache`);
     } else {
-      res = await Registry.getPackage(pkgName, pkgVersion, { ignoreUnverified });
-      logger.debug(`retrieved package ${pkgName}-${pkgVersion} from registry`);
+      try {
+        res = await Registry.getPackage(pkgName, pkgVersion, { ignoreUnverified });
+        logger.debug(`retrieved package ${pkgName}-${pkgVersion} from registry`);
+      } catch (err) {
+        if (err instanceof RegistryResponseError && err.status === 404) {
+          res = await Registry.getBundledArchive(pkgName, pkgVersion);
+        } else {
+          throw err;
+        }
+      }
     }
   }
   if (!res) {

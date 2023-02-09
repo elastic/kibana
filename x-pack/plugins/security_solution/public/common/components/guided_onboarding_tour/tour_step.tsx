@@ -8,7 +8,7 @@
 import React, { useCallback, useMemo } from 'react';
 
 import type { EuiTourStepProps } from '@elastic/eui';
-import { EuiButton, EuiImage, EuiSpacer, EuiText, EuiTourStep } from '@elastic/eui';
+import { EuiButtonEmpty, EuiImage, EuiSpacer, EuiText, EuiTourStep } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import styled from 'styled-components';
@@ -76,11 +76,12 @@ export const SecurityTourStep = ({ children, onClick, step, tourId }: SecurityTo
   }
   const { anchor, content, imageConfig, dataTestSubj, hideNextButton = false, ...rest } = tourStep;
   const footerAction: EuiTourStepProps['footerAction'] = !hideNextButton ? (
-    <EuiButton
-      size="s"
+    <EuiButtonEmpty
       onClick={onClickNext}
       onKeyDown={onKeyDown}
-      color="success"
+      size="xs"
+      color="text"
+      flush="right"
       data-test-subj="onboarding--securityTourNextStepButton"
       tour-step="nextButton"
     >
@@ -88,7 +89,7 @@ export const SecurityTourStep = ({ children, onClick, step, tourId }: SecurityTo
         id="xpack.securitySolution.guided_onboarding.nextStep.buttonLabel"
         defaultMessage="Next"
       />
-    </EuiButton>
+    </EuiButtonEmpty>
   ) : (
     <>
       {/* Passing empty element instead of undefined. If undefined "Skip tour" button is shown, we do not want that*/}
@@ -99,7 +100,7 @@ export const SecurityTourStep = ({ children, onClick, step, tourId }: SecurityTo
     ...rest,
     content: (
       <>
-        <EuiText size="xs">
+        <EuiText size="s">
           <p>{content}</p>
         </EuiText>
         {imageConfig && (

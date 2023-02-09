@@ -8,13 +8,17 @@
 
 import path from 'path';
 import { unlink } from 'fs/promises';
-import { REPO_ROOT } from '@kbn/utils';
+import { REPO_ROOT } from '@kbn/repo-info';
 import { Env } from '@kbn/config';
 import { getEnvOptions } from '@kbn/config-mocks';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
-import * as kbnTestServer from '../../../../test_helpers/kbn_server';
 import type { InternalCoreStart } from '@kbn/core-lifecycle-server-internal';
 import { Root } from '@kbn/core-root-server-internal';
+import {
+  createTestServers,
+  createRootWithCorePlugins,
+  type TestElasticsearchUtils,
+} from '@kbn/core-test-helpers-kbn-server';
 
 const kibanaVersion = Env.createDefault(REPO_ROOT, getEnvOptions()).packageInfo.version;
 const logFilePath = path.join(__dirname, '7.7.2_xpack_100k.log');
@@ -28,7 +32,7 @@ async function removeLogFile() {
 const UNUSED_SO_COUNT = 4;
 
 describe('migration from 7.7.2-xpack with 100k objects', () => {
-  let esServer: kbnTestServer.TestElasticsearchUtils;
+  let esServer: TestElasticsearchUtils;
   let root: Root;
   let coreStart: InternalCoreStart;
   let esClient: ElasticsearchClient;
@@ -38,7 +42,7 @@ describe('migration from 7.7.2-xpack with 100k objects', () => {
   });
 
   const startServers = async ({ dataArchive, oss }: { dataArchive: string; oss: boolean }) => {
-    const { startES } = kbnTestServer.createTestServers({
+    const { startES } = createTestServers({
       adjustTimeout: (t: number) => jest.setTimeout(600000),
       settings: {
         es: {
@@ -48,7 +52,7 @@ describe('migration from 7.7.2-xpack with 100k objects', () => {
       },
     });
 
-    root = kbnTestServer.createRootWithCorePlugins(
+    root = createRootWithCorePlugins(
       {
         migrations: {
           skip: false,

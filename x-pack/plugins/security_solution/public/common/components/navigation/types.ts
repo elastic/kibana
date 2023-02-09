@@ -7,14 +7,7 @@
 
 import type { IconType } from '@elastic/eui';
 import { SecurityPageName } from '../../../app/types';
-import type { SiemRouteType } from '../../utils/route/types';
 import type { LinkCategories } from '../../links';
-
-export interface TabNavigationComponentProps {
-  pageName: string;
-  tabName: SiemRouteType | undefined;
-  pathName: string;
-}
 
 export type SearchNavTab = NavTab | { urlKey: UrlStateType; isDetailPage: boolean };
 
@@ -51,7 +44,8 @@ export type UrlStateType =
   | 'indicators'
   | 'cloud_posture'
   | 'findings'
-  | 'entity_analytics';
+  | 'entity_analytics'
+  | 'data_quality';
 
 export type SecurityNavGroup = Record<SecurityNavGroupKey, NavGroupTab>;
 export interface NavTab {
@@ -91,6 +85,7 @@ export const securityNavKeys = [
   SecurityPageName.cloudSecurityPostureFindings,
   SecurityPageName.cloudSecurityPostureBenchmarks,
   SecurityPageName.entityAnalytics,
+  SecurityPageName.dataQuality,
 ] as const;
 export type SecurityNavKey = typeof securityNavKeys[number];
 

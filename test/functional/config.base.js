@@ -69,6 +69,9 @@ export default async function ({ readConfigFile }) {
       management: {
         pathname: '/app/management',
       },
+      filesManagement: {
+        pathname: '/app/management/kibana/filesManagement',
+      },
       /** @obsolete "management" should be instead of "settings" **/
       settings: {
         pathname: '/app/management',
@@ -388,7 +391,7 @@ export default async function ({ readConfigFile }) {
             cluster: [],
             indices: [
               {
-                names: ['without-timefield', 'with-timefield'],
+                names: ['without-timefield', 'with-timefield', 'with-different-timefield'],
                 privileges: ['read', 'view_index_metadata'],
                 field_security: { grant: ['*'], except: [] },
               },

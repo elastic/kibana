@@ -8,6 +8,7 @@
 
 import React from 'react';
 import { act } from 'react-dom/test-utils';
+import { ReactWrapper } from 'enzyme';
 import { EuiLoadingSpinner, EuiProgress } from '@elastic/eui';
 import { coreMock } from '@kbn/core/public/mocks';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
@@ -120,6 +121,18 @@ describe('UnifiedFieldList <FieldStats />', () => {
     });
   });
 
+  async function mountComponent(component: React.ReactElement): Promise<ReactWrapper> {
+    let wrapper: ReactWrapper;
+    await act(async () => {
+      wrapper = await mountWithIntl(component);
+      // wait for lazy modules if any
+      await new Promise((resolve) => setTimeout(resolve, 0));
+      await wrapper.update();
+    });
+
+    return wrapper!;
+  }
+
   beforeEach(() => {
     (loadFieldStats as jest.Mock).mockReset();
     (loadFieldStats as jest.Mock).mockImplementation(() => Promise.resolve({}));
@@ -134,7 +147,7 @@ describe('UnifiedFieldList <FieldStats />', () => {
       });
     });
 
-    const wrapper = mountWithIntl(
+    const wrapper = await mountComponent(
       <FieldStats
         {...defaultProps}
         query={{ query: 'geo.src : "US"', language: 'kuery' }}
@@ -148,8 +161,6 @@ describe('UnifiedFieldList <FieldStats />', () => {
         toDate="now-7d"
       />
     );
-
-    await wrapper.update();
 
     expect(loadFieldStats).toHaveBeenCalledWith({
       abortController: new AbortController(),
@@ -260,33 +271,27 @@ describe('UnifiedFieldList <FieldStats />', () => {
   });
 
   it('should not request field stats for range fields', async () => {
-    const wrapper = await mountWithIntl(
+    const wrapper = await mountComponent(
       <FieldStats {...defaultProps} field={dataView.fields.find((f) => f.name === 'ip_range')!} />
     );
 
-    await wrapper.update();
-
     expect(loadFieldStats).toHaveBeenCalled();
 
     expect(wrapper.text()).toBe('Analysis is not available for this field.');
   });
 
-  it('should not request field stats for geo fields', async () => {
-    const wrapper = await mountWithIntl(
+  it('should request field examples for geo fields', async () => {
+    const wrapper = await mountComponent(
       <FieldStats {...defaultProps} field={dataView.fields.find((f) => f.name === 'geo_shape')!} />
     );
 
-    await wrapper.update();
-
     expect(loadFieldStats).toHaveBeenCalled();
 
-    expect(wrapper.text()).toBe('Analysis is not available for this field.');
+    expect(wrapper.text()).toBe('No field data for the current search.');
   });
 
   it('should render a message if no data is found', async () => {
-    const wrapper = await mountWithIntl(<FieldStats {...defaultProps} />);
-
-    await wrapper.update();
+    const wrapper = await mountComponent(<FieldStats {...defaultProps} />);
 
     expect(loadFieldStats).toHaveBeenCalled();
 
@@ -302,9 +307,7 @@ describe('UnifiedFieldList <FieldStats />', () => {
       });
     });
 
-    const wrapper = mountWithIntl(<FieldStats {...defaultProps} />);
-
-    await wrapper.update();
+    const wrapper = await mountComponent(<FieldStats {...defaultProps} />);
 
     await act(async () => {
       resolveFunction!({
@@ -330,7 +333,7 @@ describe('UnifiedFieldList <FieldStats />', () => {
       });
     });
 
-    const wrapper = mountWithIntl(
+    const wrapper = await mountComponent(
       <FieldStats
         {...defaultProps}
         query={{ language: 'kuery', query: '' }}
@@ -339,8 +342,6 @@ describe('UnifiedFieldList <FieldStats />', () => {
         toDate="now"
       />
     );
-
-    await wrapper.update();
 
     expect(loadFieldStats).toHaveBeenCalledWith({
       abortController: new AbortController(),
@@ -433,7 +434,7 @@ describe('UnifiedFieldList <FieldStats />', () => {
       });
     });
 
-    const wrapper = mountWithIntl(
+    const wrapper = await mountComponent(
       <FieldStats
         {...defaultProps}
         field={
@@ -445,8 +446,6 @@ describe('UnifiedFieldList <FieldStats />', () => {
         }
       />
     );
-
-    await wrapper.update();
 
     expect(wrapper.find(EuiLoadingSpinner)).toHaveLength(1);
 
@@ -507,7 +506,7 @@ describe('UnifiedFieldList <FieldStats />', () => {
       });
     });
 
-    const wrapper = mountWithIntl(
+    const wrapper = await mountComponent(
       <FieldStats
         {...defaultProps}
         field={dataView.fields[0]}
@@ -517,8 +516,6 @@ describe('UnifiedFieldList <FieldStats />', () => {
         toDate="now"
       />
     );
-
-    await wrapper.update();
 
     expect(loadFieldStats).toHaveBeenCalledWith({
       abortController: new AbortController(),
@@ -615,7 +612,7 @@ describe('UnifiedFieldList <FieldStats />', () => {
 
     const field = dataView.fields.find((f) => f.name === 'machine.ram')!;
 
-    const wrapper = mountWithIntl(
+    const wrapper = await mountComponent(
       <FieldStats
         {...defaultProps}
         field={field}
@@ -625,8 +622,6 @@ describe('UnifiedFieldList <FieldStats />', () => {
         toDate="now"
       />
     );
-
-    await wrapper.update();
 
     expect(loadFieldStats).toHaveBeenCalledWith({
       abortController: new AbortController(),

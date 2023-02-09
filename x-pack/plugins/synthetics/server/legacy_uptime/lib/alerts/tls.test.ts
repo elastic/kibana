@@ -6,7 +6,7 @@
  */
 import moment from 'moment';
 import { tlsAlertFactory, getCertSummary } from './tls';
-import { TLS } from '../../../../common/constants/alerts';
+import { TLS } from '../../../../common/constants/uptime_alerts';
 import { CertResult } from '../../../../common/runtime_types';
 import { createRuleTypeMocks, bootstrapDependencies } from './test_utils';
 import { DYNAMIC_SETTINGS_DEFAULTS } from '../../../../common/constants';

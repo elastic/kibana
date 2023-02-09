@@ -293,5 +293,32 @@ describe('#setupSavedObjects', () => {
         expect(res.saved_objects[0].error).toHaveProperty('message', 'Test failure');
       }
     });
+
+    it('properly re-exposes `close` method of the underlying point in time finder ', async () => {
+      // The finder that underlying repository returns is an instance of a `PointInTimeFinder` class that cannot, and
+      // unlike object literal it cannot be "copied" with the spread operator. We should make sure we properly re-expose
+      // `close` function.
+      const mockClose = jest.fn();
+      mockSavedObjectsRepository.createPointInTimeFinder = jest.fn().mockImplementation(() => {
+        class MockPointInTimeFinder {
+          async close() {
+            mockClose();
+          }
+          async *find() {}
+        }
+
+        return new MockPointInTimeFinder();
+      });
+
+      const finder = await setupContract().createPointInTimeFinderDecryptedAsInternalUser({
+        type: 'known-type',
+      });
+
+      expect(finder.find).toBeInstanceOf(Function);
+      expect(finder.close).toBeInstanceOf(Function);
+
+      await finder.close();
+      expect(mockClose).toHaveBeenCalledTimes(1);
+    });
   });
 });

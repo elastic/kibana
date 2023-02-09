@@ -20,7 +20,7 @@ import {
   ReadOperations,
   AlertingAuthorizationEntity,
 } from './alerting_authorization';
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import { RecoveredActionGroup } from '../../common';
 import { RegistryRuleType } from '../rule_type_registry';
 import { AlertingAuthorizationFilterType } from './alerting_authorization_kuery';
@@ -192,7 +192,9 @@ beforeEach(() => {
     minimumLicenseRequired: 'basic',
     isExportable: true,
     recoveryActionGroup: RecoveredActionGroup,
-    async executor() {},
+    async executor() {
+      return { state: {} };
+    },
     producer: 'myApp',
   }));
   features.getKibanaFeatures.mockReturnValue([
@@ -208,8 +210,8 @@ describe('AlertingAuthorization', () => {
   describe('constructor', () => {
     test(`fetches the user's current space`, async () => {
       const space = {
-        id: uuid.v4(),
-        name: uuid.v4(),
+        id: uuidv4(),
+        name: uuidv4(),
         disabledFeatures: [],
       };
       getSpace.mockResolvedValue(space);
@@ -547,55 +549,6 @@ describe('AlertingAuthorization', () => {
           mockAuthorizationAction('myType', 'myOtherApp', 'alert', 'update'),
           mockAuthorizationAction('myType', 'myApp', 'alert', 'update'),
         ],
-      });
-    });
-
-    test('ensures the user has privileges to execute alerts when all features are disabled', async () => {
-      features.getKibanaFeatures.mockReturnValue([]);
-      const { authorization } = mockSecurity();
-      const checkPrivileges: jest.MockedFunction<
-        ReturnType<typeof authorization.checkPrivilegesDynamicallyWithRequest>
-      > = jest.fn();
-      authorization.checkPrivilegesDynamicallyWithRequest.mockReturnValue(checkPrivileges);
-      const alertAuthorization = new AlertingAuthorization({
-        request,
-        authorization,
-        ruleTypeRegistry,
-        features,
-        getSpace,
-        getSpaceId,
-      });
-
-      checkPrivileges.mockResolvedValueOnce({
-        username: 'some-user',
-        hasAllRequested: true,
-        privileges: { kibana: [] },
-      });
-
-      await alertAuthorization.ensureAuthorized({
-        ruleTypeId: 'myType',
-        consumer: 'alerts',
-        operation: WriteOperations.Update,
-        entity: AlertingAuthorizationEntity.Alert,
-      });
-
-      expect(ruleTypeRegistry.get).toHaveBeenCalledWith('myType');
-
-      expect(authorization.actions.alerting.get).toHaveBeenCalledTimes(2);
-      expect(authorization.actions.alerting.get).toHaveBeenCalledWith(
-        'myType',
-        'alerts',
-        'alert',
-        'update'
-      );
-      expect(authorization.actions.alerting.get).toHaveBeenCalledWith(
-        'myType',
-        'myApp',
-        'alert',
-        'update'
-      );
-      expect(checkPrivileges).toHaveBeenCalledWith({
-        kibana: [mockAuthorizationAction('myType', 'myApp', 'alert', 'update')],
       });
     });
 

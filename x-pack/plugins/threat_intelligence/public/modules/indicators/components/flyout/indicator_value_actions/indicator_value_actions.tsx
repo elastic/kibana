@@ -14,17 +14,19 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { useIndicatorsFlyoutContext } from '../use_context';
 import { Indicator } from '../../../../../../common/types/indicator';
 import { FilterInButtonIcon, FilterOutButtonIcon } from '../../../../query_bar';
-import { AddToTimelineContextMenu } from '../../../../timeline';
+import { AddToTimelineButtonIcon, AddToTimelineContextMenu } from '../../../../timeline';
 import { fieldAndValueValid, getIndicatorFieldAndValue } from '../../../utils';
-import { CopyToClipboardContextMenu } from '../../copy_to_clipboard';
-
-export const TIMELINE_BUTTON_TEST_ID = 'TimelineButton';
-export const FILTER_IN_BUTTON_TEST_ID = 'FilterInButton';
-export const FILTER_OUT_BUTTON_TEST_ID = 'FilterOutButton';
-export const COPY_TO_CLIPBOARD_BUTTON_TEST_ID = 'CopyToClipboardButton';
-export const POPOVER_BUTTON_TEST_ID = 'PopoverButton';
+import { CopyToClipboardButtonIcon, CopyToClipboardContextMenu } from '../../copy_to_clipboard';
+import {
+  COPY_TO_CLIPBOARD_BUTTON_TEST_ID,
+  FILTER_IN_BUTTON_TEST_ID,
+  FILTER_OUT_BUTTON_TEST_ID,
+  POPOVER_BUTTON_TEST_ID,
+  TIMELINE_BUTTON_TEST_ID,
+} from './test_ids';
 
 const MORE_ACTIONS_BUTTON_LABEL = i18n.translate('xpack.threatIntelligence.more-actions.popover', {
   defaultMessage: 'More actions',
@@ -45,11 +47,21 @@ interface IndicatorValueActions {
   ['data-test-subj']?: string;
 }
 
+/**
+ * This component render a set of actions for the user.
+ * Currently used in the indicators flyout (overview and table tabs).
+ *
+ * It gets a readOnly boolean from context, that drives what is displayed.
+ * - in the cases view usage, we only display add to timeline and copy to clipboard.
+ * - in the indicators table usave, we display all options
+ */
 export const IndicatorValueActions: VFC<IndicatorValueActions> = ({
   indicator,
   field,
   'data-test-subj': dataTestSubj,
 }) => {
+  const { kqlBarIntegration } = useIndicatorsFlyoutContext();
+
   const [isPopoverOpen, setPopover] = useState(false);
 
   const { key, value } = getIndicatorFieldAndValue(indicator, field);
@@ -63,13 +75,22 @@ export const IndicatorValueActions: VFC<IndicatorValueActions> = ({
   const copyToClipboardTestId = `${dataTestSubj}${COPY_TO_CLIPBOARD_BUTTON_TEST_ID}`;
   const popoverTestId = `${dataTestSubj}${POPOVER_BUTTON_TEST_ID}`;
 
+  if (kqlBarIntegration) {
+    return (
+      <EuiFlexGroup justifyContent="center" alignItems="center" gutterSize="none">
+        <AddToTimelineButtonIcon data={indicator} field={field} data-test-subj={timelineTestId} />
+        <CopyToClipboardButtonIcon value={value as string} data-test-subj={copyToClipboardTestId} />
+      </EuiFlexGroup>
+    );
+  }
+
   const popoverItems = [
     <AddToTimelineContextMenu data={indicator} field={field} data-test-subj={timelineTestId} />,
     <CopyToClipboardContextMenu value={value as string} data-test-subj={copyToClipboardTestId} />,
   ];
 
   return (
-    <EuiFlexGroup justifyContent="center" alignItems="center">
+    <EuiFlexGroup justifyContent="center" alignItems="center" gutterSize="none">
       <FilterInButtonIcon data={indicator} field={field} data-test-subj={filterInTestId} />
       <FilterOutButtonIcon data={indicator} field={field} data-test-subj={filterOutTestId} />
       <EuiPopover

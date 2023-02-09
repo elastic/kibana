@@ -14,6 +14,7 @@ export type Event = Exclude<IEvent, undefined>;
 interface CreateActionEventLogRecordParams {
   actionId: string;
   action: string;
+  actionExecutionId: string;
   name?: string;
   message?: string;
   namespace?: string;
@@ -32,11 +33,24 @@ interface CreateActionEventLogRecordParams {
     relation?: string;
   }>;
   relatedSavedObjects?: RelatedSavedObjects;
+  isPreconfigured?: boolean;
 }
 
 export function createActionEventLogRecordObject(params: CreateActionEventLogRecordParams): Event {
-  const { action, message, task, namespace, executionId, spaceId, consumer, relatedSavedObjects } =
-    params;
+  const {
+    action,
+    message,
+    task,
+    namespace,
+    executionId,
+    spaceId,
+    consumer,
+    relatedSavedObjects,
+    name,
+    actionExecutionId,
+    isPreconfigured,
+    actionId,
+  } = params;
 
   const kibanaAlertRule = {
     ...(consumer ? { consumer } : {}),
@@ -62,10 +76,19 @@ export function createActionEventLogRecordObject(params: CreateActionEventLogRec
         type: so.type,
         id: so.id,
         type_id: so.typeId,
+        // set space_agnostic to true for preconfigured connectors
+        ...(so.type === 'action' && isPreconfigured ? { space_agnostic: isPreconfigured } : {}),
         ...(namespace ? { namespace } : {}),
       })),
       ...(spaceId ? { space_ids: [spaceId] } : {}),
       ...(task ? { task: { scheduled: task.scheduled, schedule_delay: task.scheduleDelay } } : {}),
+      action: {
+        ...(name ? { name } : {}),
+        id: actionId,
+        execution: {
+          uuid: actionExecutionId,
+        },
+      },
     },
     ...(message ? { message } : {}),
   };

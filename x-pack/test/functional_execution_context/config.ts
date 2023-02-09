@@ -9,7 +9,7 @@ import { CA_CERT_PATH } from '@kbn/dev-utils';
 import { FtrConfigProviderContext, getKibanaCliLoggers } from '@kbn/test';
 import { logFilePath } from './test_utils';
 
-const alertTestPlugin = Path.resolve(__dirname, './fixtures/plugins/alerts');
+const alertTestPlugin = Path.resolve(__dirname, './plugins/alerts');
 
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const functionalConfig = await readConfigFile(require.resolve('../functional/config.base.js'));

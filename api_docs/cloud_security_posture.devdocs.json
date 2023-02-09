@@ -157,7 +157,7 @@
               "Gets the `SpyRoute` component for navigation highlighting and breadcrumbs."
             ],
             "signature": [
-              "() => React.ComponentType<{ pageName?: ",
+              "() => React.ComponentType<{ pageName: ",
               {
                 "pluginId": "cloudSecurityPosture",
                 "scope": "public",
@@ -165,27 +165,7 @@
                 "section": "def-public.CloudSecurityPosturePageId",
                 "text": "CloudSecurityPosturePageId"
               },
-              " | undefined; }>"
-            ],
-            "path": "x-pack/plugins/cloud_security_posture/public/types.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "cloudSecurityPosture",
-            "id": "def-public.CspSecuritySolutionContext.getManageBreadcrumbEntry",
-            "type": "Function",
-            "tags": [],
-            "label": "getManageBreadcrumbEntry",
-            "description": [
-              "Gets the `Manage` breadcrumb entry."
-            ],
-            "signature": [
-              "() => ",
-              "BreadcrumbEntry",
-              " | undefined"
+              "; state?: Record<string, string | undefined> | undefined; }>"
             ],
             "path": "x-pack/plugins/cloud_security_posture/public/types.ts",
             "deprecated": false,
@@ -226,7 +206,7 @@
           "\nAll the IDs for the cloud security posture pages.\nThis needs to match the cloud security posture page entries in `SecurityPageName` in `x-pack/plugins/security_solution/common/constants.ts`."
         ],
         "signature": [
-          "\"cloud_security_posture-dashboard\" | \"cloud_security_posture-findings\" | \"cloud_security_posture-benchmarks\" | \"cloud_security_posture-rules\""
+          "\"cloud_security_posture-dashboard\" | \"cloud_security_posture-findings\" | \"cloud_security_posture-benchmarks\" | \"cloud_security_posture-benchmarks-rules\""
         ],
         "path": "x-pack/plugins/cloud_security_posture/public/common/navigation/types.ts",
         "deprecated": false,

@@ -1,7 +1,7 @@
 {
   "extends": "../../../tsconfig.base.json",
   "compilerOptions": {
-    "outDir": "./target/types"
+    "outDir": "target/types"
   },
   "include": [
     "index.ts",
@@ -10,12 +10,17 @@
     "server/**/*.ts",
     "../../../typings/**/*",
   ],
-  "exclude": [],
+  "exclude": [
+    "target/**/*",
+  ],
   "kbn_references": [
-    { "path": "../../../src/core/tsconfig.json" },
-    { "path": "../../../src/plugins/kibana_react/tsconfig.json" },
-    { "path": "../../plugins/alerting/tsconfig.json" },
-    { "path": "../../plugins/triggers_actions_ui/tsconfig.json" },
-    { "path": "../../../examples/developer_examples/tsconfig.json" },
+    "@kbn/core",
+    "@kbn/kibana-react-plugin",
+    "@kbn/alerting-plugin",
+    "@kbn/triggers-actions-ui-plugin",
+    "@kbn/developer-examples-plugin",
+    "@kbn/rule-data-utils",
+    "@kbn/data-plugin",
+    "@kbn/i18n-react",
   ]
 }

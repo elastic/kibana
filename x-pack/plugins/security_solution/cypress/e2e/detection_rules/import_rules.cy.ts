@@ -5,8 +5,13 @@
  * 2.0.
  */
 
-import { RULES_ROW, RULES_TABLE, TOASTER } from '../../screens/alerts_detection_rules';
-import { importRules, importRulesWithOverwriteAll } from '../../tasks/alerts_detection_rules';
+import { TOASTER } from '../../screens/alerts_detection_rules';
+import {
+  expectNumberOfRules,
+  expectToContainRule,
+  importRules,
+  importRulesWithOverwriteAll,
+} from '../../tasks/alerts_detection_rules';
 import { cleanKibana, deleteAlertsAndRules, reload } from '../../tasks/common';
 import { login, visitWithoutDateRange } from '../../tasks/login';
 
@@ -33,15 +38,11 @@ describe('Import rules', () => {
       cy.wrap(response?.statusCode).should('eql', 200);
       cy.get(TOASTER).should(
         'have.text',
-        'Successfully imported 1 ruleSuccessfully imported 2 exceptions.'
+        'Successfully imported 1 ruleSuccessfully imported 1 exception.'
       );
 
-      cy.get(RULES_TABLE).then(($table) => {
-        const rulesRow = cy.wrap($table.find(RULES_ROW));
-
-        rulesRow.should('have.length', expectedNumberOfRules);
-        rulesRow.should('include.text', expectedImportedRuleName);
-      });
+      expectNumberOfRules(expectedNumberOfRules);
+      expectToContainRule(expectedImportedRuleName);
     });
   });
 
@@ -75,7 +76,7 @@ describe('Import rules', () => {
       cy.wrap(response?.statusCode).should('eql', 200);
       cy.get(TOASTER).should(
         'have.text',
-        'Successfully imported 1 ruleSuccessfully imported 2 exceptions.'
+        'Successfully imported 1 ruleSuccessfully imported 1 exception.'
       );
     });
   });

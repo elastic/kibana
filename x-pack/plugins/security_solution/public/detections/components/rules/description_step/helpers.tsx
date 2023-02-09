@@ -15,6 +15,7 @@ import {
   EuiIcon,
   EuiToolTip,
   EuiFlexGrid,
+  EuiBetaBadge,
 } from '@elastic/eui';
 import { ALERT_RISK_SCORE } from '@kbn/rule-data-utils';
 
@@ -26,8 +27,7 @@ import styled from 'styled-components';
 import { FieldIcon } from '@kbn/react-field';
 
 import type { ThreatMapping, Type } from '@kbn/securitysolution-io-ts-alerting-types';
-import { getDisplayValueFromFilter } from '@kbn/data-plugin/public';
-import { FilterLabel } from '@kbn/unified-search-plugin/public';
+import { FilterBadgeGroup } from '@kbn/unified-search-plugin/public';
 import { MATCHES, AND, OR } from '../../../../common/components/threat_match/translations';
 import type { EqlOptionsSelected } from '../../../../../common/search_strategy';
 import { assertUnreachable } from '../../../../../common/utility_types';
@@ -45,7 +45,9 @@ import { SeverityBadge } from '../severity_badge';
 import type {
   AboutStepRiskScore,
   AboutStepSeverity,
+  Duration,
 } from '../../../pages/detection_engine/rules/types';
+import { GroupByOptions } from '../../../pages/detection_engine/rules/types';
 import { defaultToEmptyTag } from '../../../../common/components/empty_value';
 import { ThreatEuiFlexGroup } from './threat_description';
 import type { LicenseService } from '../../../../../common/license';
@@ -101,11 +103,7 @@ export const buildQueryBarDescription = ({
               <EuiFlexItem grow={false} key={`${field}-filter-${index}`}>
                 <EuiBadgeWrap color="hollow">
                   {indexPatterns != null ? (
-                    <FilterLabel
-                      filter={filter}
-                      // @ts-ignore-next-line
-                      valueLabel={getDisplayValueFromFilter(filter, [indexPatterns])}
-                    />
+                    <FilterBadgeGroup filters={[filter]} dataViews={[indexPatterns]} />
                   ) : (
                     <EuiLoadingSpinner size="m" />
                   )}
@@ -536,26 +534,60 @@ export const buildAlertSuppressionDescription = (
       )}
     </EuiFlexGroup>
   );
-  if (license.isAtLeast(minimumLicenseForSuppression)) {
-    return [
-      {
-        title: label,
-        description,
-      },
-    ];
-  } else {
-    return [
-      {
-        title: (
-          <>
-            {label}&nbsp;
-            <EuiToolTip position="top" content={i18n.ALERT_SUPPRESSION_INSUFFICIENT_LICENSE}>
-              <EuiIcon type={'alert'} size="l" color="#BD271E" />
-            </EuiToolTip>
-          </>
-        ),
-        description,
-      },
-    ];
-  }
+
+  const title = (
+    <>
+      {label}
+      <EuiBetaBadge
+        label={i18n.ALERT_SUPPRESSION_TECHNICAL_PREVIEW}
+        style={{ verticalAlign: 'middle', marginLeft: '8px' }}
+        size="s"
+      />
+      {!license.isAtLeast(minimumLicenseForSuppression) && (
+        <EuiToolTip position="top" content={i18n.ALERT_SUPPRESSION_INSUFFICIENT_LICENSE}>
+          <EuiIcon type={'alert'} size="l" color="#BD271E" style={{ marginLeft: '8px' }} />
+        </EuiToolTip>
+      )}
+    </>
+  );
+  return [
+    {
+      title,
+      description,
+    },
+  ];
+};
+
+export const buildAlertSuppressionWindowDescription = (
+  label: string,
+  value: Duration,
+  license: LicenseService,
+  groupByRadioSelection: GroupByOptions
+): ListItems[] => {
+  const description =
+    groupByRadioSelection === GroupByOptions.PerTimePeriod
+      ? `${value.value}${value.unit}`
+      : i18n.ALERT_SUPPRESSION_PER_RULE_EXECUTION;
+
+  const title = (
+    <>
+      {label}
+      <EuiBetaBadge
+        label={i18n.ALERT_SUPPRESSION_TECHNICAL_PREVIEW}
+        style={{ verticalAlign: 'middle', marginLeft: '8px' }}
+        size="s"
+      />
+      {!license.isAtLeast(minimumLicenseForSuppression) && (
+        <EuiToolTip position="top" content={i18n.ALERT_SUPPRESSION_INSUFFICIENT_LICENSE}>
+          <EuiIcon type={'alert'} size="l" color="#BD271E" style={{ marginLeft: '8px' }} />
+        </EuiToolTip>
+      )}
+    </>
+  );
+  return [
+    {
+      title,
+      description,
+    },
+  ];
 };

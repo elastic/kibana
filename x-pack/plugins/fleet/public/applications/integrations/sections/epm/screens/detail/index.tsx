@@ -25,9 +25,11 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import semverLt from 'semver/functions/lt';
 
-import { getPackageReleaseLabel } from '../../../../../../services/package_prerelease';
-
-import { splitPkgKey } from '../../../../../../../common/services';
+import {
+  getPackageReleaseLabel,
+  isPackagePrerelease,
+  splitPkgKey,
+} from '../../../../../../../common/services';
 import { HIDDEN_API_REFERENCE_PACKAGES } from '../../../../../../../common/constants';
 
 import {
@@ -37,14 +39,14 @@ import {
   useBreadcrumbs,
   useStartServices,
   useAuthz,
-  usePermissionCheck,
+  usePermissionCheckQuery,
   useIntegrationsStateContext,
-  useGetSettings,
+  useGetSettingsQuery,
 } from '../../../../hooks';
 import { INTEGRATIONS_ROUTING_PATHS } from '../../../../constants';
-import { ExperimentalFeaturesService, isPackagePrerelease } from '../../../../services';
+import { ExperimentalFeaturesService } from '../../../../services';
 import {
-  useGetPackageInfoByKey,
+  useGetPackageInfoByKeyQuery,
   useLink,
   useAgentPolicyContext,
   useIsGuidedOnboardingActive,
@@ -61,7 +63,7 @@ import {
 import type { WithHeaderLayoutProps } from '../../../../layouts';
 import { WithHeaderLayout } from '../../../../layouts';
 
-import { useIsFirstTimeAgentUser } from './hooks';
+import { useIsFirstTimeAgentUserQuery } from './hooks';
 import { getInstallPkgRouteOptions } from './utils';
 import {
   IntegrationAgentPolicyCount,
@@ -112,17 +114,24 @@ export function Detail() {
   const { getFromIntegrations } = useIntegrationsStateContext();
   const { pkgkey, panel } = useParams<DetailParams>();
   const { getHref, getPath } = useLink();
-  const canInstallPackages = useAuthz().integrations.installPackages;
-  const canReadPackageSettings = useAuthz().integrations.readPackageSettings;
-  const canReadIntegrationPolicies = useAuthz().integrations.readIntegrationPolicies;
-  const permissionCheck = usePermissionCheck();
-  const missingSecurityConfiguration =
-    !permissionCheck.data?.success && permissionCheck.data?.error === 'MISSING_SECURITY';
-  const userCanInstallPackages = canInstallPackages && permissionCheck.data?.success;
   const history = useHistory();
   const { pathname, search, hash } = useLocation();
   const queryParams = useMemo(() => new URLSearchParams(search), [search]);
   const integration = useMemo(() => queryParams.get('integration'), [queryParams]);
+
+  const canInstallPackages = useAuthz().integrations.installPackages;
+  const canReadPackageSettings = useAuthz().integrations.readPackageSettings;
+  const canReadIntegrationPolicies = useAuthz().integrations.readIntegrationPolicies;
+
+  const {
+    data: permissionCheck,
+    error: permissionCheckError,
+    isLoading: isPermissionCheckLoading,
+  } = usePermissionCheckQuery();
+  const missingSecurityConfiguration =
+    !permissionCheck?.success && permissionCheckError === 'MISSING_SECURITY';
+  const userCanInstallPackages = canInstallPackages && permissionCheck?.success;
+
   const services = useStartServices();
   const isCloud = !!services?.cloud?.cloudId;
   const { createPackagePolicyMultiPageLayout: isExperimentalAddIntegrationPageEnabled } =
@@ -161,7 +170,7 @@ export function Detail() {
     boolean | undefined
   >();
 
-  const { data: settings } = useGetSettings();
+  const { data: settings } = useGetSettingsQuery();
 
   useEffect(() => {
     const isEnabled = Boolean(settings?.item.prerelease_integrations_enabled);
@@ -174,9 +183,8 @@ export function Detail() {
     data: packageInfoData,
     error: packageInfoError,
     isLoading: packageInfoLoading,
-    isInitialRequest: packageIsInitialRequest,
-    resendRequest: refreshPackageInfo,
-  } = useGetPackageInfoByKey(pkgName, pkgVersion, {
+    refetch: refetchPackageInfo,
+  } = useGetPackageInfoByKeyQuery(pkgName, pkgVersion, {
     prerelease: prereleaseIntegrationsEnabled,
   });
 
@@ -184,7 +192,7 @@ export function Detail() {
   const [latestPrereleaseVersion, setLatestPrereleaseVersion] = useState<string | undefined>();
 
   // fetch latest GA version (prerelease=false)
-  const { data: packageInfoLatestGAData } = useGetPackageInfoByKey(pkgName, '', {
+  const { data: packageInfoLatestGAData } = useGetPackageInfoByKeyQuery(pkgName, '', {
     prerelease: false,
   });
 
@@ -197,7 +205,7 @@ export function Detail() {
   }, [packageInfoLatestGAData?.item]);
 
   // fetch latest Prerelease version (prerelease=true)
-  const { data: packageInfoLatestPrereleaseData } = useGetPackageInfoByKey(pkgName, '', {
+  const { data: packageInfoLatestPrereleaseData } = useGetPackageInfoByKeyQuery(pkgName, '', {
     prerelease: true,
   });
 
@@ -206,7 +214,7 @@ export function Detail() {
   }, [packageInfoLatestPrereleaseData?.item.version]);
 
   const { isFirstTimeAgentUser = false, isLoading: firstTimeUserLoading } =
-    useIsFirstTimeAgentUser();
+    useIsFirstTimeAgentUserQuery();
   const isGuidedOnboardingActive = useIsGuidedOnboardingActive(pkgName);
 
   // Refresh package info when status change
@@ -218,17 +226,14 @@ export function Detail() {
     }
     if (oldPackageInstallStatus === 'not_installed' && packageInstallStatus === 'installed') {
       setOldPackageStatus(packageInstallStatus);
-      refreshPackageInfo();
+      refetchPackageInfo();
     }
-  }, [packageInstallStatus, oldPackageInstallStatus, refreshPackageInfo]);
+  }, [packageInstallStatus, oldPackageInstallStatus, refetchPackageInfo]);
 
-  const isLoading =
-    (packageInfoLoading && !packageIsInitialRequest) ||
-    permissionCheck.isLoading ||
-    firstTimeUserLoading;
+  const isLoading = packageInfoLoading || isPermissionCheckLoading || firstTimeUserLoading;
 
   const showCustomTab =
-    useUIExtension(packageInfoData?.item.name ?? '', 'package-detail-custom') !== undefined;
+    useUIExtension(packageInfoData?.item?.name ?? '', 'package-detail-custom') !== undefined;
 
   // Track install status state
   useEffect(() => {
@@ -696,7 +701,7 @@ export function Detail() {
               defaultMessage="Error loading integration details"
             />
           }
-          error={packageInfoError}
+          error={packageInfoError.message}
         />
       ) : isLoading || !packageInfo ? (
         <Loading />

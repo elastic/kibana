@@ -106,7 +106,7 @@ export const QueryFormTypeChooser: React.FC<QueryFormTypeProps> = ({
           />
         </h5>
       </EuiTitle>
-      <EuiListGroup flush gutterSize="m" size="l" maxWidth={false}>
+      <EuiListGroup flush gutterSize="m" size="m" maxWidth={false}>
         {FORM_TYPE_ITEMS.map((item) => (
           <EuiListGroupItem
             wrapText

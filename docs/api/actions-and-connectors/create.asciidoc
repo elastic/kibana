@@ -6,6 +6,12 @@
 
 Creates a connector.
 
+[NOTE]
+====
+For the most up-to-date API details, refer to the
+{kib-repo}/tree/{branch}/x-pack/plugins/actions/docs/openapi[open API specification]. For a preview, check out <<connector-apis>>.
+====
+
 [[create-connector-api-request]]
 === {api-request-title}
 
@@ -15,9 +21,8 @@ Creates a connector.
 
 === {api-prereq-title}
 
-You must have `all` privileges for the *Actions and Connectors* feature in the
-*Management* section of the
-<<kibana-feature-privileges,{kib} feature privileges>>.
+You must have `all` privileges for the *{connectors-feature}* feature in the
+*Management* section of the <<kibana-feature-privileges,{kib} feature privileges>>.
 
 [[create-connector-api-path-params]]
 === {api-path-parms-title}
@@ -122,9 +127,9 @@ the selected user field is `Email`, the user identifier should be the user's
 email address. This property is required when `isOAuth` is `true`.
 
 `usesTableApi`::
-(Optional, string) Determines whether the connector uses the Table API or the
+(Optional, boolean) Determines whether the connector uses the Table API or the
 Import Set API. This property is supported only for {sn-itsm} and {sn-sir}
-connectors.
+connectors. The default value is `true`.
 +
 NOTE: If this property is set to false, the Elastic application should be
 installed in {sn}.
@@ -153,7 +158,7 @@ installed in {sn}.
 (Optional, object) Mapping for the alert ID.
 
 `fieldType`::::
-(Required, object) The type of the field in {swimlane}.
+(Required, string) The type of the field in {swimlane}.
 
 `id`::::
 (Required, string) The id of the field in {swimlane}.
@@ -168,7 +173,7 @@ installed in {sn}.
 (Optional, object) Mapping for the case ID.
 
 `fieldType`::::
-(Required, object) The type of the field in {swimlane}.
+(Required, string) The type of the field in {swimlane}.
 
 `id`::::
 (Required, string) The id of the field in {swimlane}.
@@ -183,7 +188,7 @@ installed in {sn}.
 (Optional, object) Mapping for the case name.
 
 `fieldType`::::
-(Required, object) The type of the field in {swimlane}.
+(Required, string) The type of the field in {swimlane}.
 
 `id`::::
 (Required, string) The id of the field in {swimlane}.
@@ -198,7 +203,7 @@ installed in {sn}.
 (Optional, object) Mapping for the case comments.
 
 `fieldType`::::
-(Required, object) The type of the field in {swimlane}.
+(Required, string) The type of the field in {swimlane}.
 
 `id`::::
 (Required, string) The id of the field in {swimlane}.
@@ -213,7 +218,7 @@ installed in {sn}.
 (Optional, object) Mapping for the case description.
 
 `fieldType`::::
-(Required, object) The type of the field in {swimlane}.
+(Required, string) The type of the field in {swimlane}.
 
 `id`::::
 (Required, string) The id of the field in {swimlane}.
@@ -228,7 +233,7 @@ installed in {sn}.
 (Optional, object) Mapping for the name of the alert's rule.
 
 `fieldType`::::
-(Required, Object) The type of the field in {swimlane}.
+(Required, string) The type of the field in {swimlane}.
 
 `id`::::
 (Required, string) The id of the field in {swimlane}.
@@ -243,7 +248,7 @@ installed in {sn}.
 (Optional, object) Mapping for the severity.
 
 `fieldType`::::
-(Required, object) The type of the field in {swimlane}.
+(Required, string) The type of the field in {swimlane}.
 
 `id`::::
 (Required, string) The id of the field in {swimlane}.

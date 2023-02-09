@@ -5,10 +5,9 @@
  * 2.0.
  */
 
+import { timeslicesBudgetingMethodSchema, Duration, DurationUnit } from '@kbn/slo-schema';
 import { IllegalArgumentError } from '../../errors';
 import { SLO } from '../models';
-import { Duration, DurationUnit } from '../models/duration';
-import { timeslicesBudgetingMethodSchema } from '../../types/schema';
 
 /**
  * Asserts the SLO is valid from a business invariants point of view.
@@ -22,24 +21,36 @@ export function validateSLO(slo: SLO) {
     throw new IllegalArgumentError('Invalid objective.target');
   }
 
-  if (!isValidTimeWindowDuration(slo.time_window.duration)) {
+  if (!isValidTimeWindowDuration(slo.timeWindow.duration)) {
     throw new IllegalArgumentError('Invalid time_window.duration');
   }
 
-  if (timeslicesBudgetingMethodSchema.is(slo.budgeting_method)) {
+  if (timeslicesBudgetingMethodSchema.is(slo.budgetingMethod)) {
     if (
-      slo.objective.timeslice_target === undefined ||
-      !isValidTargetNumber(slo.objective.timeslice_target)
+      slo.objective.timesliceTarget === undefined ||
+      !isValidTargetNumber(slo.objective.timesliceTarget)
     ) {
       throw new IllegalArgumentError('Invalid objective.timeslice_target');
     }
 
     if (
-      slo.objective.timeslice_window === undefined ||
-      !isValidTimesliceWindowDuration(slo.objective.timeslice_window, slo.time_window.duration)
+      slo.objective.timesliceWindow === undefined ||
+      !isValidTimesliceWindowDuration(slo.objective.timesliceWindow, slo.timeWindow.duration)
     ) {
       throw new IllegalArgumentError('Invalid objective.timeslice_window');
     }
+  }
+
+  validateSettings(slo);
+}
+
+function validateSettings(slo: SLO) {
+  if (!isValidFrequencySettings(slo.settings.frequency)) {
+    throw new IllegalArgumentError('Invalid settings.frequency');
+  }
+
+  if (!isValidSyncDelaySettings(slo.settings.syncDelay)) {
+    throw new IllegalArgumentError('Invalid settings.sync_delay');
   }
 }
 
@@ -61,5 +72,25 @@ function isValidTimesliceWindowDuration(timesliceWindow: Duration, timeWindow: D
   return (
     [DurationUnit.Minute, DurationUnit.Hour].includes(timesliceWindow.unit) &&
     timesliceWindow.isShorterThan(timeWindow)
+  );
+}
+
+/**
+ * validate that 1 minute <= frequency < 1 hour
+ */
+function isValidFrequencySettings(frequency: Duration): boolean {
+  return (
+    frequency.isLongerOrEqualThan(new Duration(1, DurationUnit.Minute)) &&
+    frequency.isShorterThan(new Duration(1, DurationUnit.Hour))
+  );
+}
+
+/**
+ * validate that 1 minute <= sync_delay < 6 hour
+ */
+function isValidSyncDelaySettings(syncDelay: Duration): boolean {
+  return (
+    syncDelay.isLongerOrEqualThan(new Duration(1, DurationUnit.Minute)) &&
+    syncDelay.isShorterThan(new Duration(6, DurationUnit.Hour))
   );
 }

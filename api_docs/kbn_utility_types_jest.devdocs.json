@@ -13,10 +13,18 @@
     "functions": [],
     "interfaces": [],
     "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
     "misc": [
       {
         "parentPluginId": "@kbn/utility-types-jest",
-        "id": "def-server.DeeplyMockedKeys",
+        "id": "def-common.DeeplyMockedKeys",
         "type": "Type",
         "tags": [],
         "label": "DeeplyMockedKeys",
@@ -25,9 +33,9 @@
           "{ [P in keyof T]: T[P] extends (...args: any[]) => any ? jest.MockInstance<ReturnType<T[P]>, Parameters<T[P]>> : ",
           {
             "pluginId": "@kbn/utility-types-jest",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnUtilityTypesJestPluginApi",
-            "section": "def-server.DeeplyMockedKeys",
+            "section": "def-common.DeeplyMockedKeys",
             "text": "DeeplyMockedKeys"
           },
           "<T[P]>; } & T"
@@ -39,7 +47,7 @@
       },
       {
         "parentPluginId": "@kbn/utility-types-jest",
-        "id": "def-server.MockedKeys",
+        "id": "def-common.MockedKeys",
         "type": "Type",
         "tags": [],
         "label": "MockedKeys",
@@ -53,14 +61,6 @@
         "initialIsOpen": false
       }
     ],
-    "objects": []
-  },
-  "common": {
-    "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
     "objects": []
   }
 }

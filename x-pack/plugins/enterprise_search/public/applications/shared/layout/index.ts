@@ -8,4 +8,4 @@
 export type { PageTemplateProps } from './page_template';
 export { EnterpriseSearchPageTemplateWrapper } from './page_template';
 export { generateNavLink } from './nav_link_helpers';
-export { useEnterpriseSearchNav } from './nav';
+export { useEnterpriseSearchNav, useEnterpriseSearchEngineNav } from './nav';

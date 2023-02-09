@@ -34,9 +34,6 @@ export function scaledFloat(field: Field): Properties {
   const fieldProps = getDefaultProperties(field);
   fieldProps.type = 'scaled_float';
   fieldProps.scaling_factor = field.scaling_factor || DEFAULT_SCALING_FACTOR;
-  if (field.metric_type) {
-    fieldProps.time_series_metric = field.metric_type;
-  }
 
   return fieldProps;
 }

@@ -7,6 +7,7 @@
  */
 
 import { FilesPlugin } from './plugin';
+export { defaultImageFileKind } from '../common/default_image_file_kind';
 export type { FilesSetup, FilesStart } from './plugin';
 export type {
   FilesClient,
@@ -14,15 +15,6 @@ export type {
   FilesClientFactory,
   FilesClientResponses,
 } from './types';
-export {
-  FilesContext,
-  Image,
-  type ImageProps,
-  UploadFile,
-  type UploadFileProps,
-  FilePicker,
-  type FilePickerProps,
-} from './components';
 
 export function plugin() {
   return new FilesPlugin();

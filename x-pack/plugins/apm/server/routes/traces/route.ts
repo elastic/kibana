@@ -19,7 +19,7 @@ import {
 import { getTransaction } from '../transactions/get_transaction';
 import { getRootTransactionByTraceId } from '../transactions/get_transaction_by_trace';
 import { getTopTracesPrimaryStats } from './get_top_traces_primary_stats';
-import { getTraceItems } from './get_trace_items';
+import { getTraceItems, TraceItems } from './get_trace_items';
 import { getTraceSamplesByQuery } from './get_trace_samples_by_query';
 import { getRandomSampler } from '../../lib/helpers/get_random_sampler';
 import { getApmEventClient } from '../../lib/helpers/get_apm_event_client';
@@ -27,6 +27,7 @@ import {
   CriticalPathResponse,
   getAggregatedCriticalPath,
 } from './get_aggregated_critical_path';
+import { getSpan } from '../transactions/get_span';
 
 const tracesRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/traces',
@@ -88,27 +89,31 @@ const tracesByIdRoute = createApmServerRoute({
     path: t.type({
       traceId: t.string,
     }),
-    query: rangeRt,
+    query: t.intersection([rangeRt, t.type({ entryTransactionId: t.string })]),
   }),
   options: { tags: ['access:apm'] },
   handler: async (
     resources
   ): Promise<{
-    exceedsMax: boolean;
-    traceDocs: Array<
-      | import('./../../../typings/es_schemas/ui/transaction').Transaction
-      | import('./../../../typings/es_schemas/ui/span').Span
-    >;
-    errorDocs: Array<
-      import('./../../../typings/es_schemas/ui/apm_error').APMError
-    >;
-    linkedChildrenOfSpanCountBySpanId: Record<string, number>;
+    traceItems: TraceItems;
+    entryTransaction?: import('./../../../typings/es_schemas/ui/transaction').Transaction;
   }> => {
     const apmEventClient = await getApmEventClient(resources);
     const { params, config } = resources;
     const { traceId } = params.path;
-    const { start, end } = params.query;
-    return getTraceItems(traceId, config, apmEventClient, start, end);
+    const { start, end, entryTransactionId } = params.query;
+    const [traceItems, entryTransaction] = await Promise.all([
+      getTraceItems(traceId, config, apmEventClient, start, end),
+      getTransaction({
+        transactionId: entryTransactionId,
+        traceId,
+        apmEventClient,
+      }),
+    ]);
+    return {
+      traceItems,
+      entryTransaction,
+    };
   },
 });
 
@@ -232,6 +237,60 @@ const aggregatedCriticalPathRoute = createApmServerRoute({
   },
 });
 
+const transactionFromTraceByIdRoute = createApmServerRoute({
+  endpoint: 'GET /internal/apm/traces/{traceId}/transactions/{transactionId}',
+  params: t.type({
+    path: t.type({
+      traceId: t.string,
+      transactionId: t.string,
+    }),
+  }),
+  options: { tags: ['access:apm'] },
+  handler: async (
+    resources
+  ): Promise<
+    import('./../../../typings/es_schemas/ui/transaction').Transaction
+  > => {
+    const { params } = resources;
+    const { transactionId, traceId } = params.path;
+    const apmEventClient = await getApmEventClient(resources);
+    return await getTransaction({
+      transactionId,
+      traceId,
+      apmEventClient,
+    });
+  },
+});
+
+const spanFromTraceByIdRoute = createApmServerRoute({
+  endpoint: 'GET /internal/apm/traces/{traceId}/spans/{spanId}',
+  params: t.type({
+    path: t.type({
+      traceId: t.string,
+      spanId: t.string,
+    }),
+    query: t.union([t.partial({ parentTransactionId: t.string }), t.undefined]),
+  }),
+  options: { tags: ['access:apm'] },
+  handler: async (
+    resources
+  ): Promise<{
+    span?: import('./../../../typings/es_schemas/ui/span').Span;
+    parentTransaction?: import('./../../../typings/es_schemas/ui/transaction').Transaction;
+  }> => {
+    const { params } = resources;
+    const { spanId, traceId } = params.path;
+    const { parentTransactionId } = params.query;
+    const apmEventClient = await getApmEventClient(resources);
+    return await getSpan({
+      spanId,
+      parentTransactionId,
+      traceId,
+      apmEventClient,
+    });
+  },
+});
+
 export const traceRouteRepository = {
   ...tracesByIdRoute,
   ...tracesRoute,
@@ -239,4 +298,6 @@ export const traceRouteRepository = {
   ...transactionByIdRoute,
   ...findTracesRoute,
   ...aggregatedCriticalPathRoute,
+  ...transactionFromTraceByIdRoute,
+  ...spanFromTraceByIdRoute,
 };

@@ -34,6 +34,7 @@ export interface LiveQueryFormFields {
   savedQueryId?: string | null;
   ecs_mapping: ECSMapping;
   packId: string[];
+  queryType: 'query' | 'pack';
 }
 
 interface DefaultLiveQueryFormFields {
@@ -95,7 +96,6 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
   );
 
   const [showSavedQueryFlyout, setShowSavedQueryFlyout] = useState(false);
-  const [queryType, setQueryType] = useState<string>('query');
   const [isLive, setIsLive] = useState(false);
 
   const queryState = getFieldState('query');
@@ -103,6 +103,7 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
   const handleShowSaveQueryFlyout = useCallback(() => setShowSavedQueryFlyout(true), []);
   const handleCloseSaveQueryFlyout = useCallback(() => setShowSavedQueryFlyout(false), []);
 
+  const { queryType } = watchedValues;
   const {
     data,
     isLoading,
@@ -241,7 +242,7 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
       }
 
       if (defaultValue?.packId && canRunPacks) {
-        setQueryType('pack');
+        setValue('queryType', 'pack');
 
         if (!isPackDataFetched) return;
         const selectedPackOption = find(packsData?.data, ['id', defaultValue.packId]);
@@ -261,11 +262,11 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
       }
 
       if (canRunSingleQuery) {
-        return setQueryType('query');
+        return setValue('queryType', 'query');
       }
 
       if (canRunPacks) {
-        return setQueryType('pack');
+        return setValue('queryType', 'pack');
       }
     }
   }, [canRunPacks, canRunSingleQuery, defaultValue, isPackDataFetched, packsData?.data, setValue]);
@@ -286,17 +287,14 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
     }
   }, [queryType, cleanupLiveQuery, resetField, setValue, clearErrors, defaultValue]);
 
+  const groupStyles = useMemo(() => ({ gap: 16 }), []);
+
   return (
     <>
       <FormProvider {...hooksForm}>
-        <EuiFlexGroup direction="column">
+        <EuiFlexGroup direction="column" css={groupStyles}>
           {queryField && (
-            <QueryPackSelectable
-              queryType={queryType}
-              setQueryType={setQueryType}
-              canRunPacks={canRunPacks}
-              canRunSingleQuery={canRunSingleQuery}
-            />
+            <QueryPackSelectable canRunPacks={canRunPacks} canRunSingleQuery={canRunSingleQuery} />
           )}
           {!hideAgentsField && (
             <EuiFlexItem>

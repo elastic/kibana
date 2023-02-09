@@ -22,6 +22,10 @@
     "cypress:run-as-ci": "node --max-old-space-size=2048 ../../../scripts/functional_tests --config ../../test/security_solution_cypress/cli_config_parallel.ts",
     "cypress:run-as-ci:firefox": "node --max-old-space-size=2048 ../../../scripts/functional_tests --config ../../test/security_solution_cypress/config.firefox.ts",
     "cypress:run:upgrade": "yarn cypress:run:reporter --browser chrome --config specPattern=./cypress/upgrade_e2e/**/*.cy.ts",
+    "cypress:dw:open": "yarn cypress open --config-file ./public/management/cypress.config.ts",
+    "cypress:dw:open-as-ci": "node ../../../scripts/functional_tests --config ../../test/defend_workflows_cypress/visual_config.ts",
+    "cypress:dw:run": "yarn cypress run --config-file ./public/management/cypress.config.ts",
+    "cypress:dw:run-as-ci": "node ../../../scripts/functional_tests --config ../../test/defend_workflows_cypress/cli_config.ts",
     "junit:merge": "../../../node_modules/.bin/mochawesome-merge ../../../target/kibana-security-solution/cypress/results/mochawesome*.json > ../../../target/kibana-security-solution/cypress/results/output.json && ../../../node_modules/.bin/marge ../../../target/kibana-security-solution/cypress/results/output.json --reportDir ../../../target/kibana-security-solution/cypress/results && mkdir -p ../../../target/junit && cp ../../../target/kibana-security-solution/cypress/results/*.xml ../../../target/junit/",
     "test:generate": "node scripts/endpoint/resolver_generator"
   }

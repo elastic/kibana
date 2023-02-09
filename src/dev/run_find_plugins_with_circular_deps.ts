@@ -11,7 +11,7 @@ import { parseDependencyTree, parseCircular, prettyCircular } from 'dpdm';
 import { relative } from 'path';
 import { getPluginSearchPaths } from '@kbn/plugin-discovery';
 import { run } from '@kbn/dev-cli-runner';
-import { REPO_ROOT } from '@kbn/utils';
+import { REPO_ROOT } from '@kbn/repo-info';
 
 interface Options {
   debug?: boolean;

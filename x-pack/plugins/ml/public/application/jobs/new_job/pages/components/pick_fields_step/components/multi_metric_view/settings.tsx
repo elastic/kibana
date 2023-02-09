@@ -6,7 +6,7 @@
  */
 
 import React, { Fragment, FC } from 'react';
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 
 import { BucketSpan } from '../bucket_span';
 import { SplitFieldSelector } from '../split_field';
@@ -28,6 +28,9 @@ export const MultiMetricSettings: FC<Props> = ({ setIsValid }) => {
           <Influencers />
         </EuiFlexItem>
       </EuiFlexGroup>
+
+      <EuiSpacer />
+
       <EuiFlexGroup gutterSize="xl">
         <EuiFlexItem>
           <BucketSpan setIsValid={setIsValid} />

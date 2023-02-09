@@ -21,6 +21,7 @@ import { DataTableRecord, EsHitRecord } from '../../../types';
 import { TableRowDetails } from './table_row_details';
 import { useDiscoverServices } from '../../../hooks/use_discover_services';
 import { DOC_HIDE_TIME_COLUMN_SETTING, MAX_DOC_FIELDS_DISPLAYED } from '../../../../common';
+import { type ShouldShowFieldInTableHandler } from '../../../utils/get_should_show_field_handler';
 
 export type DocTableRow = EsHitRecord & {
   isAnchor?: boolean;
@@ -34,7 +35,7 @@ export interface TableRowProps {
   row: DataTableRecord;
   dataView: DataView;
   useNewFieldsApi: boolean;
-  fieldsToShow: string[];
+  shouldShowFieldHandler: ShouldShowFieldInTableHandler;
   onAddColumn?: (column: string) => void;
   onRemoveColumn?: (column: string) => void;
 }
@@ -47,7 +48,7 @@ export const TableRow = ({
   row,
   dataView,
   useNewFieldsApi,
-  fieldsToShow,
+  shouldShowFieldHandler,
   onAddColumn,
   onRemoveColumn,
 }: TableRowProps) => {
@@ -77,7 +78,7 @@ export const TableRow = ({
     // If we're formatting the _source column, don't use the regular field formatter,
     // but our Discover mechanism to format a hit in a better human-readable way.
     if (fieldName === '_source') {
-      return formatRow(row, dataView, fieldsToShow, maxEntries, fieldFormats);
+      return formatRow(row, dataView, shouldShowFieldHandler, maxEntries, fieldFormats);
     }
 
     const formattedField = formatFieldValue(
@@ -136,7 +137,7 @@ export const TableRow = ({
   }
 
   if (columns.length === 0 && useNewFieldsApi) {
-    const formatted = formatRow(row, dataView, fieldsToShow, maxEntries, fieldFormats);
+    const formatted = formatRow(row, dataView, shouldShowFieldHandler, maxEntries, fieldFormats);
 
     rowCells.push(
       <TableCell

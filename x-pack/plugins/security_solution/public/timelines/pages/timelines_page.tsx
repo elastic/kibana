@@ -47,9 +47,9 @@ export const TimelinesPageComponent: React.FC = () => {
         <>
           <SecuritySolutionPageWrapper>
             <HeaderPage title={i18n.PAGE_TITLE}>
-              <EuiFlexGroup gutterSize="s" alignItems="center">
-                <EuiFlexItem>
-                  {capabilitiesCanUserCRUD && (
+              {capabilitiesCanUserCRUD && (
+                <EuiFlexGroup gutterSize="s" alignItems="center">
+                  <EuiFlexItem>
                     <EuiButton
                       iconType="indexOpen"
                       onClick={onImportTimelineBtnClick}
@@ -57,26 +57,26 @@ export const TimelinesPageComponent: React.FC = () => {
                     >
                       {i18n.ALL_TIMELINES_IMPORT_TIMELINE_TITLE}
                     </EuiButton>
+                  </EuiFlexItem>
+                  {tabName === TimelineType.default ? (
+                    <EuiFlexItem>
+                      <NewTimeline
+                        timelineId={TimelineId.active}
+                        outline={true}
+                        data-test-subj="create-default-btn"
+                      />
+                    </EuiFlexItem>
+                  ) : (
+                    <EuiFlexItem>
+                      <NewTemplateTimeline
+                        outline={true}
+                        title={NEW_TEMPLATE_TIMELINE}
+                        data-test-subj="create-template-btn"
+                      />
+                    </EuiFlexItem>
                   )}
-                </EuiFlexItem>
-                {tabName === TimelineType.default ? (
-                  <EuiFlexItem>
-                    <NewTimeline
-                      timelineId={TimelineId.active}
-                      outline={true}
-                      data-test-subj="create-default-btn"
-                    />
-                  </EuiFlexItem>
-                ) : (
-                  <EuiFlexItem>
-                    <NewTemplateTimeline
-                      outline={true}
-                      title={NEW_TEMPLATE_TIMELINE}
-                      data-test-subj="create-template-btn"
-                    />
-                  </EuiFlexItem>
-                )}
-              </EuiFlexGroup>
+                </EuiFlexGroup>
+              )}
             </HeaderPage>
 
             <TimelinesContainer data-test-subj="timelines-container">

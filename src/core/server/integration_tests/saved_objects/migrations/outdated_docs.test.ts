@@ -9,8 +9,12 @@
 import Path from 'path';
 import Fs from 'fs';
 import Util from 'util';
-import { kibanaPackageJson as pkg } from '@kbn/utils';
-import * as kbnTestServer from '../../../../test_helpers/kbn_server';
+import { kibanaPackageJson as pkg } from '@kbn/repo-info';
+import {
+  createRootWithCorePlugins,
+  createTestServers,
+  type TestElasticsearchUtils,
+} from '@kbn/core-test-helpers-kbn-server';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { Root } from '@kbn/core-root-server-internal';
 
@@ -23,7 +27,7 @@ async function removeLogFile() {
 }
 
 describe('migration v2', () => {
-  let esServer: kbnTestServer.TestElasticsearchUtils;
+  let esServer: TestElasticsearchUtils;
   let root: Root;
 
   beforeAll(async () => {
@@ -43,7 +47,7 @@ describe('migration v2', () => {
 
   it('migrates the documents to the highest version', async () => {
     const migratedIndex = `.kibana_${pkg.version}_001`;
-    const { startES } = kbnTestServer.createTestServers({
+    const { startES } = createTestServers({
       adjustTimeout: (t: number) => jest.setTimeout(t),
       settings: {
         es: {
@@ -91,7 +95,7 @@ describe('migration v2', () => {
 });
 
 function createRoot() {
-  return kbnTestServer.createRootWithCorePlugins(
+  return createRootWithCorePlugins(
     {
       migrations: {
         skip: false,

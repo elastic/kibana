@@ -9,7 +9,7 @@ import { renderHook } from '@testing-library/react-hooks';
 import { createMemoryHistory } from 'history';
 import React, { PropsWithChildren } from 'react';
 import { Router } from 'react-router-dom';
-import { encode } from 'rison-node';
+import { encode } from '@kbn/rison';
 import { coreMock } from '@kbn/core/public/mocks';
 import { CoreScopedHistory } from '@kbn/core/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';

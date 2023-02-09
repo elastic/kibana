@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 
 import {
   EuiFlexGroup,
@@ -15,16 +15,26 @@ import {
   EuiIconTip,
   EuiSwitch,
   EuiSwitchEvent,
+  Direction,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 
+import {
+  getCompatibleSortingTypes,
+  OPTIONS_LIST_DEFAULT_SORT,
+  OptionsListSortBy,
+} from '../../../common/options_list/suggestions_sorting';
 import { OptionsListStrings } from './options_list_strings';
 import { ControlEditorProps, OptionsListEmbeddableInput } from '../..';
+
 interface OptionsListEditorState {
-  singleSelect?: boolean;
+  sortDirection: Direction;
   runPastTimeout?: boolean;
+  singleSelect?: boolean;
   hideExclude?: boolean;
   hideExists?: boolean;
+  hideSort?: boolean;
+  sortBy: OptionsListSortBy;
 }
 
 interface SwitchProps {
@@ -35,13 +45,29 @@ interface SwitchProps {
 export const OptionsListEditorOptions = ({
   initialInput,
   onChange,
+  fieldType,
 }: ControlEditorProps<OptionsListEmbeddableInput>) => {
   const [state, setState] = useState<OptionsListEditorState>({
-    singleSelect: initialInput?.singleSelect,
+    sortDirection: initialInput?.sort?.direction ?? OPTIONS_LIST_DEFAULT_SORT.direction,
+    sortBy: initialInput?.sort?.by ?? OPTIONS_LIST_DEFAULT_SORT.by,
     runPastTimeout: initialInput?.runPastTimeout,
+    singleSelect: initialInput?.singleSelect,
     hideExclude: initialInput?.hideExclude,
     hideExists: initialInput?.hideExists,
+    hideSort: initialInput?.hideSort,
   });
+
+  useEffect(() => {
+    // when field type changes, ensure that the selected sort type is still valid
+    if (!getCompatibleSortingTypes(fieldType).includes(state.sortBy)) {
+      onChange({ sort: OPTIONS_LIST_DEFAULT_SORT });
+      setState((s) => ({
+        ...s,
+        sortBy: OPTIONS_LIST_DEFAULT_SORT.by,
+        sortDirection: OPTIONS_LIST_DEFAULT_SORT.direction,
+      }));
+    }
+  }, [fieldType, onChange, state.sortBy]);
 
   const SwitchWithTooltip = ({
     switchProps,
@@ -77,31 +103,7 @@ export const OptionsListEditorOptions = ({
             onChange({ singleSelect: !state.singleSelect });
             setState((s) => ({ ...s, singleSelect: !s.singleSelect }));
           }}
-        />
-      </EuiFormRow>
-      <EuiFormRow>
-        <EuiSwitch
-          label={OptionsListStrings.editor.getHideExcludeTitle()}
-          checked={!state.hideExclude}
-          onChange={() => {
-            onChange({ hideExclude: !state.hideExclude });
-            setState((s) => ({ ...s, hideExclude: !s.hideExclude }));
-            if (initialInput?.exclude) onChange({ exclude: false });
-          }}
-        />
-      </EuiFormRow>
-      <EuiFormRow>
-        <SwitchWithTooltip
-          label={OptionsListStrings.editor.getHideExistsQueryTitle()}
-          tooltip={OptionsListStrings.editor.getHideExistsQueryTooltip()}
-          switchProps={{
-            checked: !state.hideExists,
-            onChange: () => {
-              onChange({ hideExists: !state.hideExists });
-              setState((s) => ({ ...s, hideExists: !s.hideExists }));
-              if (initialInput?.existsSelected) onChange({ existsSelected: false });
-            },
-          }}
+          data-test-subj={'optionsListControl__allowMultipleAdditionalSetting'}
         />
       </EuiFormRow>
       <EuiFormRow>
@@ -115,6 +117,7 @@ export const OptionsListEditorOptions = ({
               setState((s) => ({ ...s, runPastTimeout: !s.runPastTimeout }));
             },
           }}
+          data-test-subj={'optionsListControl__runPastTimeoutAdditionalSetting'}
         />
       </EuiFormRow>
     </>

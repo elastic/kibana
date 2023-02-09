@@ -10,6 +10,7 @@ import { EuiFlyoutFooter, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { find } from 'lodash/fp';
 import type { ConnectedProps } from 'react-redux';
 import { connect } from 'react-redux';
+import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import { isActiveTimeline } from '../../../../../helpers';
 import { TakeActionDropdown } from '../../../../../detections/components/take_action_dropdown';
 import type { TimelineEventsDetailsItem } from '../../../../../../common/search_strategy';
@@ -19,7 +20,6 @@ import { EventFiltersFlyout } from '../../../../../management/pages/event_filter
 import { useEventFilterModal } from '../../../../../detections/components/alerts_table/timeline_actions/use_event_filter_modal';
 import { getFieldValue } from '../../../../../detections/components/host_isolation/helpers';
 import type { Status } from '../../../../../../common/detection_engine/schemas/common/schemas';
-import type { Ecs } from '../../../../../../common/ecs';
 import type { inputsModel, State } from '../../../../../common/store';
 import { inputsSelectors } from '../../../../../common/store';
 import { OsqueryFlyout } from '../../../../../detections/components/osquery/osquery_flyout';
@@ -44,6 +44,7 @@ interface AddExceptionModalWrapperData {
   alertStatus: Status;
   eventId: string;
   ruleId: string;
+  ruleRuleId: string;
   ruleName: string;
 }
 
@@ -93,6 +94,7 @@ export const FlyoutFooterComponent = React.memo(
       () =>
         [
           { category: 'signal', field: 'signal.rule.id', name: 'ruleId' },
+          { category: 'signal', field: 'signal.rule.rule_id', name: 'ruleRuleId' },
           { category: 'signal', field: 'signal.rule.name', name: 'ruleName' },
           { category: 'signal', field: 'kibana.alert.workflow_status', name: 'alertStatus' },
           { category: '_id', field: '_id', name: 'eventId' },
@@ -173,6 +175,7 @@ export const FlyoutFooterComponent = React.memo(
       */}
         {openAddExceptionFlyout &&
           addExceptionModalWrapperData.ruleId != null &&
+          addExceptionModalWrapperData.ruleRuleId != null &&
           addExceptionModalWrapperData.eventId != null && (
             <AddExceptionFlyoutWrapper
               {...addExceptionModalWrapperData}

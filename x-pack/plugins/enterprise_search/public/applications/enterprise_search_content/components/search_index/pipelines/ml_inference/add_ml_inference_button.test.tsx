@@ -19,7 +19,7 @@ const DEFAULT_VALUES = {
   canUseMlInferencePipeline: true,
   capabilities: {
     ml: {
-      canAccessML: true,
+      canGetTrainedModels: true,
     },
   },
   hasIndexIngestionPipeline: true,
@@ -39,7 +39,7 @@ describe('add inference pipeline button', () => {
     const button = wrapper.find(EuiButton);
     expect(button.text()).toBe('Add Inference Pipeline');
   });
-  it('renders permission tooltip with no ml access', () => {
+  it('renders permission tooltip when user cannot get trained models', () => {
     setMockValues({ ...DEFAULT_VALUES, capabilities: {} });
     const wrapper = mount(<AddMLInferencePipelineButton onClick={onClick} />);
     expect(wrapper.find(EuiButton)).toHaveLength(1);

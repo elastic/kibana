@@ -27,6 +27,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const objectRemover = new ObjectRemover(supertest);
 
   async function refreshAlertsList() {
+    await testSubjects.click('logsTab');
     await testSubjects.click('rulesTab');
   }
 
@@ -243,13 +244,13 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await pageObjects.triggersActionsUI.searchAlerts(createdAlert.name);
 
       await testSubjects.click(`checkboxSelectRow-${createdAlert.id}`);
-
       await testSubjects.click('bulkAction');
+      await testSubjects.click('bulkDisable');
 
-      await testSubjects.click('disableAll');
-
-      // Enable all button shows after clicking disable all
-      await testSubjects.existOrFail('enableAll');
+      await retry.try(async () => {
+        const toastTitle = await pageObjects.common.closeToast();
+        expect(toastTitle).to.eql('Disabled 1 rule');
+      });
 
       await pageObjects.triggersActionsUI.ensureRuleActionStatusApplied(
         createdAlert.name,
@@ -260,19 +261,14 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
     it('should enable all selection', async () => {
       const createdAlert = await createAlert({ supertest, objectRemover });
+      await disableAlert({ supertest, alertId: createdAlert.id });
+
       await refreshAlertsList();
       await pageObjects.triggersActionsUI.searchAlerts(createdAlert.name);
 
       await testSubjects.click(`checkboxSelectRow-${createdAlert.id}`);
-
       await testSubjects.click('bulkAction');
-
-      await testSubjects.click('disableAll');
-
-      await testSubjects.click('enableAll');
-
-      // Disable all button shows after clicking enable all
-      await testSubjects.existOrFail('disableAll');
+      await testSubjects.click('bulkEnable');
 
       await pageObjects.triggersActionsUI.ensureRuleActionStatusApplied(
         createdAlert.name,
@@ -497,6 +493,11 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
               id: action.id,
               group: 'default',
               params: { level: 'info', message: 'gfghfhg' },
+              frequency: {
+                summary: false,
+                notify_when: 'onActionGroupChange',
+                throttle: null,
+              },
             },
           ],
         },
@@ -673,6 +674,11 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
               id: action.id,
               group: 'default',
               params: { level: 'info', message: 'gfghfhg' },
+              frequency: {
+                summary: false,
+                notify_when: 'onActionGroupChange',
+                throttle: null,
+              },
             },
           ],
         },

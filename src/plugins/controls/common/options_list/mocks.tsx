@@ -10,27 +10,35 @@ import { createReduxEmbeddableTools } from '@kbn/presentation-util-plugin/public
 
 import { OptionsListEmbeddable, OptionsListEmbeddableFactory } from '../../public';
 import { OptionsListComponentState, OptionsListReduxState } from '../../public/options_list/types';
-import { optionsListReducers } from '../../public/options_list/options_list_reducers';
+import {
+  getDefaultComponentState,
+  optionsListReducers,
+} from '../../public/options_list/options_list_reducers';
 import { ControlFactory, ControlOutput } from '../../public/types';
 import { OptionsListEmbeddableInput } from './types';
 
 const mockOptionsListComponentState = {
+  ...getDefaultComponentState(),
   field: undefined,
   totalCardinality: 0,
-  availableOptions: ['woof', 'bark', 'meow', 'quack', 'moo'],
+  availableOptions: {
+    woof: { doc_count: 100 },
+    bark: { doc_count: 75 },
+    meow: { doc_count: 50 },
+    quack: { doc_count: 25 },
+    moo: { doc_count: 5 },
+  },
   invalidSelections: [],
   validSelections: [],
-  searchString: { value: '', valid: true },
 } as OptionsListComponentState;
 
-const mockOptionsListEmbeddableInput = {
+export const mockOptionsListEmbeddableInput = {
   id: 'sample options list',
   fieldName: 'sample field',
   dataViewId: 'sample id',
   selectedOptions: [],
   runPastTimeout: false,
   singleSelect: false,
-  allowExclude: false,
   exclude: false,
 } as OptionsListEmbeddableInput;
 

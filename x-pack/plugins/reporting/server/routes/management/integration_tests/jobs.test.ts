@@ -161,7 +161,7 @@ describe('GET /api/reporting/jobs/download', () => {
     await supertest(httpSetup.server.listener).get('/api/reporting/jobs/download/poo').expect(404);
   });
 
-  it('returns a 401 if not a valid job type', async () => {
+  it('returns a 403 if not a valid job type', async () => {
     mockEsClient.search.mockResponseOnce(
       getHits({
         jobtype: 'invalidJobType',
@@ -172,7 +172,7 @@ describe('GET /api/reporting/jobs/download', () => {
 
     await server.start();
 
-    await supertest(httpSetup.server.listener).get('/api/reporting/jobs/download/poo').expect(401);
+    await supertest(httpSetup.server.listener).get('/api/reporting/jobs/download/poo').expect(403);
   });
 
   it(`returns job's info`, async () => {

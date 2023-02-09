@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+/* eslint-disable complexity */
+
 import { has, isEmpty } from 'lodash/fp';
 import type { Unit } from '@kbn/datemath';
 import moment from 'moment';
@@ -42,7 +44,10 @@ import type {
   RuleStepsFormData,
   RuleStep,
 } from '../../../../detections/pages/detection_engine/rules/types';
-import { DataSourceType } from '../../../../detections/pages/detection_engine/rules/types';
+import {
+  DataSourceType,
+  GroupByOptions,
+} from '../../../../detections/pages/detection_engine/rules/types';
 import type { RuleCreateProps } from '../../../../../common/detection_engine/rule_schema';
 import { stepActionsDefaultValue } from '../../../../detections/components/rules/step_rule_actions';
 
@@ -436,19 +441,27 @@ export const formatDefineStepData = (defineStepData: DefineStepRule): DefineStep
       }
     : {
         ...(ruleFields.groupByFields.length > 0
-          ? { alert_suppression: { group_by: ruleFields.groupByFields } }
+          ? {
+              alert_suppression: {
+                group_by: ruleFields.groupByFields,
+                duration:
+                  ruleFields.groupByRadioSelection === GroupByOptions.PerTimePeriod
+                    ? ruleFields.groupByDuration
+                    : undefined,
+              },
+            }
           : {}),
         index: ruleFields.index,
         filters: ruleFields.queryBar?.filters,
         language: ruleFields.queryBar?.query?.language,
         query: ruleFields.queryBar?.query?.query as string,
         saved_id: undefined,
-        type: 'query' as Type,
+        type: 'query' as const,
         // rule only be updated as saved_query type if it has saved_id and shouldLoadQueryDynamically checkbox checked
         ...(['query', 'saved_query'].includes(ruleType) &&
           ruleFields.queryBar?.saved_id &&
           ruleFields.shouldLoadQueryDynamically && {
-            type: 'saved_query' as Type,
+            type: 'saved_query' as const,
             query: undefined,
             filters: undefined,
             saved_id: ruleFields.queryBar.saved_id,

@@ -1,14 +1,27 @@
 {
   "extends": "../tsconfig.base.json",
   "compilerOptions": {
-    "outDir": "target",
+    "outDir": "target/types",
     "checkJs": true,
-    "target": "ES2022",
     "module": "ESNext"
   },
   "include": [
     "src/**/*.mjs",
+    "src/**/*.js",
     "src/**/*.ts",
   ],
-  "exclude": []
+  "exclude": [
+    "target/**/*",
+  ],
+  "kbn_references": [
+    "@kbn/babel-register",
+    "@kbn/repo-info",
+    "@kbn/yarn-lock-validator",
+    "@kbn/get-repo-files",
+    "@kbn/sort-package-json",
+    { "path": "../src/dev/tsconfig.json" },
+    "@kbn/ci-stats-reporter",
+    "@kbn/ts-projects",
+    "@kbn/repo-packages"
+  ]
 }

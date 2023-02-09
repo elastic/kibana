@@ -56,9 +56,9 @@ export const editSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => (
     const monitor = request.body as SyntheticsMonitor;
     const { monitorId } = request.params;
 
-    const spaceId = server.spaces.spacesService.getSpaceId(request);
-
     try {
+      const { id: spaceId } = await server.spaces.spacesService.getActiveSpace(request);
+
       const previousMonitor: SavedObject<EncryptedSyntheticsMonitor> = await savedObjectsClient.get(
         syntheticsMonitorType,
         monitorId
@@ -88,6 +88,10 @@ export const editSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => (
 
       const monitorWithRevision = {
         ...validationResult.decodedMonitor,
+        /* reset config hash to empty string. Ensures that the synthetics agent is able
+         * to update project monitors on when next pushed after they are edited via the UI,
+         * through the enable/disable monitor toggle */
+        [ConfigKey.CONFIG_HASH]: '',
         revision: (previousMonitor.attributes[ConfigKey.REVISION] || 0) + 1,
       };
 
@@ -158,7 +162,14 @@ export const syncEditedMonitor = async ({
     const allPrivateLocations = await getSyntheticsPrivateLocations(savedObjectsClient);
 
     const editSyncPromise = syntheticsMonitorClient.editMonitors(
-      [{ monitor: monitorWithId as MonitorFields, id: previousMonitor.id, previousMonitor }],
+      [
+        {
+          monitor: monitorWithId as MonitorFields,
+          id: previousMonitor.id,
+          previousMonitor,
+          decryptedPreviousMonitor,
+        },
+      ],
       request,
       savedObjectsClient,
       allPrivateLocations,

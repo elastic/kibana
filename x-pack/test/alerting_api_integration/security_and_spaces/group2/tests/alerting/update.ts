@@ -113,6 +113,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
                 ...updatedData,
                 id: createdAlert.id,
                 rule_type_id: 'test.noop',
+                running: false,
                 consumer: 'alertsFixture',
                 created_by: 'elastic',
                 enabled: true,
@@ -210,6 +211,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
                 ...updatedData,
                 id: createdAlert.id,
                 rule_type_id: 'test.restricted-noop',
+                running: false,
                 consumer: 'alertsRestrictedFixture',
                 created_by: 'elastic',
                 enabled: true,
@@ -310,6 +312,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
                 ...updatedData,
                 id: createdAlert.id,
                 rule_type_id: 'test.unrestricted-noop',
+                running: false,
                 consumer: 'alertsFixture',
                 created_by: 'elastic',
                 enabled: true,
@@ -378,6 +381,17 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
           switch (scenario.id) {
             case 'no_kibana_privileges at space1':
             case 'space_1_all at space2':
+              expect(response.statusCode).to.eql(403);
+              expect(response.body).to.eql({
+                error: 'Forbidden',
+                message: getConsumerUnauthorizedErrorMessage(
+                  'update',
+                  'test.restricted-noop',
+                  'alerts'
+                ),
+                statusCode: 403,
+              });
+              break;
             case 'global_read at space1':
             case 'space_1_all at space1':
             case 'space_1_all_alerts_none_actions at space1':
@@ -399,6 +413,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
                 ...updatedData,
                 id: createdAlert.id,
                 rule_type_id: 'test.restricted-noop',
+                running: false,
                 consumer: 'alerts',
                 created_by: 'elastic',
                 enabled: true,
@@ -497,6 +512,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
                 ...updatedData,
                 id: createdAlert.id,
                 rule_type_id: 'test.noop',
+                running: false,
                 consumer: 'alertsFixture',
                 created_by: 'elastic',
                 enabled: true,

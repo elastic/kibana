@@ -80,7 +80,7 @@ const serializeColumns = (item: Record<string, unknown>, columns: string[]) => {
 };
 
 export class VegaAdapter {
-  private debugValuesSubject = new ReplaySubject<DebugValues>();
+  private debugValuesSubject = new ReplaySubject<DebugValues>(1);
   private error = new BehaviorSubject<string | undefined>(undefined);
 
   bindInspectValues(debugValues: DebugValues) {

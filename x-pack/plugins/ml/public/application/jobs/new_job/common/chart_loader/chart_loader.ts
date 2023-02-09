@@ -8,7 +8,6 @@
 import memoizeOne from 'memoize-one';
 import { isEqual } from 'lodash';
 import type { DataView } from '@kbn/data-views-plugin/common';
-import { IndexPatternTitle } from '../../../../../../common/types/kibana';
 import { IndicesOptions } from '../../../../../../common/types/anomaly_detection_jobs';
 import {
   Field,
@@ -32,7 +31,7 @@ export type LineChartData = Record<DetectorIndex, LineChartPoint[]>;
 const eq = (newArgs: any[], lastArgs: any[]) => isEqual(newArgs, lastArgs);
 
 export class ChartLoader {
-  private _indexPatternTitle: IndexPatternTitle = '';
+  protected _dataView: DataView;
   private _timeFieldName: string = '';
   private _query: object = {};
 
@@ -42,7 +41,7 @@ export class ChartLoader {
   private _getCategoryFields = memoizeOne(getCategoryFieldsOrig, eq);
 
   constructor(indexPattern: DataView, query: object) {
-    this._indexPatternTitle = indexPattern.title;
+    this._dataView = indexPattern;
     this._query = query;
 
     if (typeof indexPattern.timeFieldName === 'string') {
@@ -70,7 +69,7 @@ export class ChartLoader {
       const aggFieldPairNames = aggFieldPairs.map(getAggFieldPairNames);
 
       const resp = await this._newJobLineChart(
-        this._indexPatternTitle,
+        this._dataView.getIndexPattern(),
         this._timeFieldName,
         start,
         end,
@@ -107,7 +106,7 @@ export class ChartLoader {
       const aggFieldPairNames = aggFieldPairs.map(getAggFieldPairNames);
 
       const resp = await this._newJobPopulationsChart(
-        this._indexPatternTitle,
+        this._dataView.getIndexPattern(),
         this._timeFieldName,
         start,
         end,
@@ -133,7 +132,7 @@ export class ChartLoader {
   ): Promise<LineChartPoint[]> {
     if (this._timeFieldName !== '') {
       const resp = await this._getEventRateData(
-        this._indexPatternTitle,
+        this._dataView.getIndexPattern(),
         this._query,
         this._timeFieldName,
         start,
@@ -160,7 +159,7 @@ export class ChartLoader {
     indicesOptions?: IndicesOptions
   ): Promise<string[]> {
     const { results } = await this._getCategoryFields(
-      this._indexPatternTitle,
+      this._dataView.getIndexPattern(),
       field.name,
       10,
       this._query,

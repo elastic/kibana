@@ -6,7 +6,15 @@
  */
 
 import React from 'react';
-import { EuiTitle, EuiText, EuiSpacer, EuiButtonEmpty } from '@elastic/eui';
+import {
+  EuiTitle,
+  EuiText,
+  EuiSpacer,
+  EuiButtonEmpty,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiBetaBadge,
+} from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import { useLink } from '../../../../hooks';
@@ -26,15 +34,21 @@ export const FleetProxiesSection: React.FunctionComponent<FleetProxiesSectionPro
 
   return (
     <>
-      <EuiTitle size="s">
-        <h4>
-          <FormattedMessage
-            id="xpack.fleet.settings.fleetProxiesSection.title"
-            defaultMessage="Proxies"
-          />
-        </h4>
-      </EuiTitle>
-      <EuiSpacer size="xs" />
+      <EuiFlexGroup gutterSize="xs">
+        <EuiFlexItem grow={false}>
+          <EuiTitle size="s">
+            <h4>
+              <FormattedMessage
+                id="xpack.fleet.settings.fleetProxiesSection.title"
+                defaultMessage="Proxies"
+              />
+            </h4>
+          </EuiTitle>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiBetaBadge label="beta" />
+        </EuiFlexItem>
+      </EuiFlexGroup>
       <EuiText color="subdued" size="m">
         <FormattedMessage
           id="xpack.fleet.settings.fleetProxiesSection.subtitle"

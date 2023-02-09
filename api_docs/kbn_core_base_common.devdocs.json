@@ -11,10 +11,18 @@
   "server": {
     "classes": [],
     "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
     "interfaces": [
       {
         "parentPluginId": "@kbn/core-base-common",
-        "id": "def-server.DiscoveredPlugin",
+        "id": "def-common.DiscoveredPlugin",
         "type": "Interface",
         "tags": [],
         "label": "DiscoveredPlugin",
@@ -27,7 +35,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-base-common",
-            "id": "def-server.DiscoveredPlugin.id",
+            "id": "def-common.DiscoveredPlugin.id",
             "type": "string",
             "tags": [],
             "label": "id",
@@ -40,7 +48,7 @@
           },
           {
             "parentPluginId": "@kbn/core-base-common",
-            "id": "def-server.DiscoveredPlugin.configPath",
+            "id": "def-common.DiscoveredPlugin.configPath",
             "type": "CompoundType",
             "tags": [],
             "label": "configPath",
@@ -56,7 +64,7 @@
           },
           {
             "parentPluginId": "@kbn/core-base-common",
-            "id": "def-server.DiscoveredPlugin.type",
+            "id": "def-common.DiscoveredPlugin.type",
             "type": "Enum",
             "tags": [],
             "label": "type",
@@ -66,9 +74,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/core-base-common",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreBaseCommonPluginApi",
-                "section": "def-server.PluginType",
+                "section": "def-common.PluginType",
                 "text": "PluginType"
               }
             ],
@@ -78,7 +86,7 @@
           },
           {
             "parentPluginId": "@kbn/core-base-common",
-            "id": "def-server.DiscoveredPlugin.requiredPlugins",
+            "id": "def-common.DiscoveredPlugin.requiredPlugins",
             "type": "Object",
             "tags": [],
             "label": "requiredPlugins",
@@ -94,7 +102,7 @@
           },
           {
             "parentPluginId": "@kbn/core-base-common",
-            "id": "def-server.DiscoveredPlugin.optionalPlugins",
+            "id": "def-common.DiscoveredPlugin.optionalPlugins",
             "type": "Object",
             "tags": [],
             "label": "optionalPlugins",
@@ -110,7 +118,7 @@
           },
           {
             "parentPluginId": "@kbn/core-base-common",
-            "id": "def-server.DiscoveredPlugin.requiredBundles",
+            "id": "def-common.DiscoveredPlugin.requiredBundles",
             "type": "Object",
             "tags": [],
             "label": "requiredBundles",
@@ -126,7 +134,7 @@
           },
           {
             "parentPluginId": "@kbn/core-base-common",
-            "id": "def-server.DiscoveredPlugin.enabledOnAnonymousPages",
+            "id": "def-common.DiscoveredPlugin.enabledOnAnonymousPages",
             "type": "CompoundType",
             "tags": [],
             "label": "enabledOnAnonymousPages",
@@ -147,7 +155,7 @@
     "enums": [
       {
         "parentPluginId": "@kbn/core-base-common",
-        "id": "def-server.PluginType",
+        "id": "def-common.PluginType",
         "type": "Enum",
         "tags": [],
         "label": "PluginType",
@@ -161,7 +169,7 @@
     "misc": [
       {
         "parentPluginId": "@kbn/core-base-common",
-        "id": "def-server.EUI_STYLES_GLOBAL",
+        "id": "def-common.EUI_STYLES_GLOBAL",
         "type": "string",
         "tags": [],
         "label": "EUI_STYLES_GLOBAL",
@@ -176,7 +184,7 @@
       },
       {
         "parentPluginId": "@kbn/core-base-common",
-        "id": "def-server.PluginName",
+        "id": "def-common.PluginName",
         "type": "Type",
         "tags": [],
         "label": "PluginName",
@@ -193,7 +201,7 @@
       },
       {
         "parentPluginId": "@kbn/core-base-common",
-        "id": "def-server.PluginOpaqueId",
+        "id": "def-common.PluginOpaqueId",
         "type": "Type",
         "tags": [],
         "label": "PluginOpaqueId",
@@ -207,14 +215,6 @@
         "initialIsOpen": false
       }
     ],
-    "objects": []
-  },
-  "common": {
-    "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
     "objects": []
   }
 }

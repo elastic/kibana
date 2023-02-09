@@ -53,6 +53,7 @@ export enum WriteOperations {
   BulkEdit = 'bulkEdit',
   BulkDelete = 'bulkDelete',
   BulkEnable = 'bulkEnable',
+  BulkDisable = 'bulkDisable',
   Unsnooze = 'unsnooze',
 }
 
@@ -70,6 +71,7 @@ interface HasPrivileges {
 type AuthorizedConsumers = Record<string, HasPrivileges>;
 export interface RegistryAlertTypeWithAuth extends RegistryRuleType {
   authorizedConsumers: AuthorizedConsumers;
+  hasGetSummarizedAlerts?: boolean;
 }
 
 type IsAuthorizedAtProducerLevel = boolean;
@@ -128,10 +130,12 @@ export class AlertingAuthorization {
       });
 
     this.allPossibleConsumers = this.featuresIds.then((featuresIds) => {
-      return asAuthorizedConsumers([ALERTS_FEATURE_ID, ...featuresIds], {
-        read: true,
-        all: true,
-      });
+      return featuresIds.size
+        ? asAuthorizedConsumers([ALERTS_FEATURE_ID, ...featuresIds], {
+            read: true,
+            all: true,
+          })
+        : {};
     });
   }
 

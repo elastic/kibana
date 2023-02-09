@@ -7,7 +7,7 @@
  */
 import Hapi from '@hapi/hapi';
 import { IncomingMessage } from 'http';
-import { kibanaPackageJson as pkg } from '@kbn/utils';
+import { kibanaPackageJson as pkg } from '@kbn/repo-info';
 
 // proxy setup
 const defaultProxyOptions = (hostname: string, port: string) => ({

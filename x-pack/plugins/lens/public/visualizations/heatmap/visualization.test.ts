@@ -21,7 +21,12 @@ import {
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
 import { Position } from '@elastic/charts';
 import type { HeatmapVisualizationState } from './types';
-import type { DatasourceLayers, OperationDescriptor } from '../../types';
+import type {
+  DatasourceLayers,
+  FramePublicAPI,
+  OperationDescriptor,
+  UserMessage,
+} from '../../types';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { themeServiceMock } from '@kbn/core/public/mocks';
 
@@ -160,7 +165,7 @@ describe('heatmap', () => {
             accessors: [
               {
                 columnId: 'v-accessor',
-                triggerIcon: 'colorBy',
+                triggerIconType: 'colorBy',
                 palette: ['blue', 'yellow'],
               },
             ],
@@ -276,7 +281,7 @@ describe('heatmap', () => {
             accessors: [
               {
                 columnId: 'v-accessor',
-                triggerIcon: 'none',
+                triggerIconType: 'none',
               },
             ],
             filterOperations: isCellValueSupported,
@@ -581,7 +586,7 @@ describe('heatmap', () => {
     });
   });
 
-  describe('#getErrorMessages', () => {
+  describe('#getUserMessages', () => {
     test('should not return an error when chart has empty configuration', () => {
       const mockState = {
         shape: CHART_SHAPES.HEATMAP,
@@ -590,8 +595,10 @@ describe('heatmap', () => {
         getHeatmapVisualization({
           paletteService,
           theme,
-        }).getErrorMessages(mockState)
-      ).toEqual(undefined);
+        }).getUserMessages!(mockState, {
+          frame: {} as FramePublicAPI,
+        })
+      ).toHaveLength(0);
     });
 
     test('should return an error when the X accessor is missing', () => {
@@ -603,88 +610,108 @@ describe('heatmap', () => {
         getHeatmapVisualization({
           paletteService,
           theme,
-        }).getErrorMessages(mockState)
-      ).toEqual([
-        {
-          longMessage: 'Configuration for the horizontal axis is missing.',
-          shortMessage: 'Missing Horizontal axis.',
-        },
-      ]);
-    });
-  });
-
-  describe('#getWarningMessages', () => {
-    beforeEach(() => {
-      const mockDatasource = createMockDatasource('testDatasource');
-
-      mockDatasource.publicAPIMock.getOperationForColumnId.mockReturnValue({
-        dataType: 'string',
-        label: 'MyOperation',
-      } as OperationDescriptor);
-
-      frame.datasourceLayers = {
-        first: mockDatasource.publicAPIMock,
-      };
+        }).getUserMessages!(mockState, {
+          frame: {} as FramePublicAPI,
+        })
+      ).toMatchInlineSnapshot(`
+        Array [
+          Object {
+            "displayLocations": Array [
+              Object {
+                "id": "visualization",
+              },
+            ],
+            "fixableInEditor": true,
+            "longMessage": "Configuration for the horizontal axis is missing.",
+            "severity": "error",
+            "shortMessage": "Missing Horizontal axis.",
+          },
+        ]
+      `);
     });
 
-    test('should not return warning messages when the layer it not configured', () => {
-      const mockState = {
-        shape: CHART_SHAPES.HEATMAP,
-        valueAccessor: 'v-accessor',
-      } as HeatmapVisualizationState;
-      expect(
-        getHeatmapVisualization({
-          paletteService,
-          theme,
-        }).getWarningMessages!(mockState, frame)
-      ).toEqual(undefined);
-    });
+    describe('warnings', () => {
+      beforeEach(() => {
+        const mockDatasource = createMockDatasource('testDatasource');
 
-    test('should not return warning messages when the data table is empty', () => {
-      frame.activeData = {
-        first: {
-          type: 'datatable',
-          rows: [],
-          columns: [],
-        },
-      };
-      const mockState = {
-        shape: CHART_SHAPES.HEATMAP,
-        valueAccessor: 'v-accessor',
-        layerId: 'first',
-      } as HeatmapVisualizationState;
-      expect(
-        getHeatmapVisualization({
-          paletteService,
-          theme,
-        }).getWarningMessages!(mockState, frame)
-      ).toEqual(undefined);
-    });
+        mockDatasource.publicAPIMock.getOperationForColumnId.mockReturnValue({
+          dataType: 'string',
+          label: 'MyOperation',
+        } as OperationDescriptor);
 
-    test('should return a warning message when cell value data contains arrays', () => {
-      frame.activeData = {
-        first: {
-          type: 'datatable',
-          rows: [
-            {
-              'v-accessor': [1, 2, 3],
-            },
-          ],
-          columns: [],
-        },
-      };
+        frame.datasourceLayers = {
+          first: mockDatasource.publicAPIMock,
+        };
+      });
 
-      const mockState = {
-        shape: CHART_SHAPES.HEATMAP,
-        valueAccessor: 'v-accessor',
-        layerId: 'first',
-      } as HeatmapVisualizationState;
-      expect(
-        getHeatmapVisualization({
-          paletteService,
-          theme,
-        }).getWarningMessages!(mockState, frame)
-      ).toHaveLength(1);
+      const onlyWarnings = (messages: UserMessage[]) =>
+        messages.filter(({ severity }) => severity === 'warning');
+
+      test('should not return warning messages when the layer it not configured', () => {
+        const mockState = {
+          shape: CHART_SHAPES.HEATMAP,
+          valueAccessor: 'v-accessor',
+        } as HeatmapVisualizationState;
+        expect(
+          onlyWarnings(
+            getHeatmapVisualization({
+              paletteService,
+              theme,
+            }).getUserMessages!(mockState, { frame })
+          )
+        ).toHaveLength(0);
+      });
+
+      test('should not return warning messages when the data table is empty', () => {
+        frame.activeData = {
+          first: {
+            type: 'datatable',
+            rows: [],
+            columns: [],
+          },
+        };
+        const mockState = {
+          shape: CHART_SHAPES.HEATMAP,
+          valueAccessor: 'v-accessor',
+          layerId: 'first',
+        } as HeatmapVisualizationState;
+        expect(
+          onlyWarnings(
+            getHeatmapVisualization({
+              paletteService,
+              theme,
+            }).getUserMessages!(mockState, { frame })
+          )
+        ).toHaveLength(0);
+      });
+
+      test('should return a warning message when cell value data contains arrays', () => {
+        frame.activeData = {
+          first: {
+            type: 'datatable',
+            rows: [
+              {
+                'v-accessor': [1, 2, 3],
+              },
+            ],
+            columns: [],
+          },
+        };
+
+        const mockState = {
+          shape: CHART_SHAPES.HEATMAP,
+          valueAccessor: 'v-accessor',
+          layerId: 'first',
+        } as HeatmapVisualizationState;
+        expect(
+          onlyWarnings(
+            getHeatmapVisualization({
+              paletteService,
+              theme,
+            }).getUserMessages!(mockState, { frame })
+          )
+        ).toHaveLength(1);
+      });
     });
   });
 });

@@ -15,13 +15,14 @@ import type {
 } from '@kbn/data-plugin/public';
 import type { Filter } from '@kbn/es-query';
 import type { SavedSearch, SortOrder } from '@kbn/saved-search-plugin/public';
+import { AppState } from '../application/main/services/discover_app_state_container';
 import { getSortForSearchSource } from './sorting';
 import {
   DOC_HIDE_TIME_COLUMN_SETTING,
   SEARCH_FIELDS_FROM_SOURCE,
   SORT_DEFAULT_ORDER_SETTING,
 } from '../../common';
-import { AppState, isEqualFilters } from '../application/main/services/discover_state';
+import { isEqualFilters } from '../application/main/services/discover_state';
 
 /**
  * Preparing data to share the current state as link or CSV/Report
@@ -95,11 +96,13 @@ export async function getSharingData(
        * Discover does not set fields, since having all fields is needed for the UI.
        */
       const useFieldsApi = !config.get(SEARCH_FIELDS_FROM_SOURCE);
-      if (useFieldsApi && columns.length) {
-        searchSource.setField(
-          'fields',
-          columns.map((field) => ({ field, include_unmapped: 'true' }))
-        );
+      if (useFieldsApi) {
+        searchSource.removeField('fieldsFromSource');
+        const fields = columns.length
+          ? columns.map((field) => ({ field, include_unmapped: 'true' }))
+          : [{ field: '*', include_unmapped: 'true' }];
+
+        searchSource.setField('fields', fields);
       }
       return searchSource.getSerializedFields(true);
     },

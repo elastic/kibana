@@ -43,25 +43,26 @@ export const getAPIKeyForSyntheticsService = async ({
     const apiKey = await syntheticsServiceAPIKeySavedObject.get(server);
 
     if (apiKey) {
-      const isValid = await server.security.authc.apiKeys.validate({
-        id: apiKey.id,
-        api_key: apiKey.apiKey,
-      });
+      const [isValid, { index }] = await Promise.all([
+        server.security.authc.apiKeys.validate({
+          id: apiKey.id,
+          api_key: apiKey.apiKey,
+        }),
+        checkHasPrivileges(server, apiKey),
+      ]);
 
-      if (isValid) {
-        const { index } = await checkHasPrivileges(server, apiKey);
+      const indexPermissions = index[syntheticsIndex];
 
-        const indexPermissions = index[syntheticsIndex];
+      const hasPermissions =
+        indexPermissions.auto_configure &&
+        indexPermissions.create_doc &&
+        indexPermissions.view_index_metadata;
 
-        const hasPermissions =
-          indexPermissions.auto_configure &&
-          indexPermissions.create_doc &&
-          indexPermissions.view_index_metadata;
+      if (!hasPermissions) {
+        return { isValid: false, apiKey };
+      }
 
-        if (!hasPermissions) {
-          return { isValid: false, apiKey };
-        }
-      } else {
+      if (!isValid) {
         server.logger.info('Synthetics api is no longer valid');
       }
 

@@ -8,11 +8,14 @@
 import { useCallback, useState } from 'react';
 
 import { i18n } from '@kbn/i18n';
+import { safeLoad } from 'js-yaml';
 
 import {
   sendPostOutput,
   useComboInput,
   useInput,
+  useNumberInput,
+  useSelectInput,
   useSwitchInput,
   useStartServices,
   sendPutOutput,
@@ -31,6 +34,33 @@ import {
   validateSSLKey,
 } from './output_form_validators';
 import { confirmUpdate } from './confirm_update';
+
+const DEFAULT_QUEUE_MAX_SIZE = 4096;
+
+export interface OutputFormInputsType {
+  nameInput: ReturnType<typeof useInput>;
+  typeInput: ReturnType<typeof useInput>;
+  elasticsearchUrlInput: ReturnType<typeof useComboInput>;
+  diskQueueEnabledInput: ReturnType<typeof useSwitchInput>;
+  diskQueuePathInput: ReturnType<typeof useInput>;
+  diskQueueMaxSizeInput: ReturnType<typeof useNumberInput>;
+  diskQueueEncryptionEnabled: ReturnType<typeof useSwitchInput>;
+  diskQueueCompressionEnabled: ReturnType<typeof useSwitchInput>;
+  compressionLevelInput: ReturnType<typeof useSelectInput>;
+  logstashHostsInput: ReturnType<typeof useComboInput>;
+  additionalYamlConfigInput: ReturnType<typeof useInput>;
+  defaultOutputInput: ReturnType<typeof useSwitchInput>;
+  defaultMonitoringOutputInput: ReturnType<typeof useSwitchInput>;
+  caTrustedFingerprintInput: ReturnType<typeof useInput>;
+  sslCertificateInput: ReturnType<typeof useInput>;
+  sslKeyInput: ReturnType<typeof useInput>;
+  sslCertificateAuthoritiesInput: ReturnType<typeof useComboInput>;
+  proxyIdInput: ReturnType<typeof useInput>;
+  loadBalanceEnabledInput: ReturnType<typeof useSwitchInput>;
+  memQueueEvents: ReturnType<typeof useNumberInput>;
+  queueFlushTimeout: ReturnType<typeof useNumberInput>;
+  maxBatchBytes: ReturnType<typeof useNumberInput>;
+}
 
 export function useOutputForm(onSucess: () => void, output?: Output) {
   const fleetStatus = useFleetStatus();
@@ -77,6 +107,63 @@ export function useOutputForm(onSucess: () => void, output?: Output) {
     validateESHosts,
     isPreconfigured
   );
+  /*
+  Shipper feature flag - currently depends on the content of the yaml
+  # Enables the shipper:
+  shipper: {}
+
+  # Also enables the shipper:
+  shipper:
+    enabled: true
+
+  # Yet another way of enabling it:
+  shipper:
+    queue:
+      ...
+
+  # Disables the shipper
+  shipper:
+    enabled: false
+  */
+  const configJs = output?.config_yaml ? safeLoad(output?.config_yaml) : {};
+  const isShipperDisabled = !configJs?.shipper || configJs?.shipper?.enabled === false;
+
+  const diskQueueEnabledInput = useSwitchInput(output?.shipper?.disk_queue_enabled ?? false);
+  const diskQueuePathInput = useInput(
+    output?.shipper?.disk_queue_path ?? '',
+    undefined,
+    !diskQueueEnabledInput.value ?? false
+  );
+  const diskQueueMaxSizeInput = useNumberInput(
+    output?.shipper?.disk_queue_max_size ?? DEFAULT_QUEUE_MAX_SIZE,
+    undefined,
+    !diskQueueEnabledInput.value ?? false
+  );
+  const diskQueueEncryptionEnabled = useSwitchInput(
+    output?.shipper?.disk_queue_encryption_enabled ?? false,
+    !diskQueueEnabledInput.value ?? false
+  );
+  const loadBalanceEnabledInput = useSwitchInput(output?.shipper?.disk_queue_enabled ?? false);
+  const diskQueueCompressionEnabled = useSwitchInput(
+    output?.shipper?.disk_queue_compression_enabled ?? false
+  );
+
+  const options = Array.from(Array(10).keys())
+    .slice(1)
+    .map((val) => {
+      return { value: `${val}`, text: `Level ${val}` };
+    });
+  const compressionLevelInput = useSelectInput(
+    options,
+    `${output?.shipper?.compression_level}` ?? options[0].value,
+    !diskQueueCompressionEnabled.value ?? false
+  );
+
+  // These parameters are yet tbd - https://github.com/elastic/kibana/issues/147613
+  const memQueueEvents = useNumberInput(output?.shipper?.mem_queue_events || undefined);
+  const queueFlushTimeout = useNumberInput(output?.shipper?.queue_flush_timeout || undefined);
+  const maxBatchBytes = useNumberInput(output?.shipper?.max_batch_bytes || undefined);
+
   // Logstash inputs
   const logstashHostsInput = useComboInput(
     'logstashHostsComboxBox',
@@ -102,10 +189,16 @@ export function useOutputForm(onSucess: () => void, output?: Output) {
 
   const isLogstash = typeInput.value === 'logstash';
 
-  const inputs = {
+  const inputs: OutputFormInputsType = {
     nameInput,
     typeInput,
     elasticsearchUrlInput,
+    diskQueueEnabledInput,
+    diskQueuePathInput,
+    diskQueueEncryptionEnabled,
+    diskQueueMaxSizeInput,
+    diskQueueCompressionEnabled,
+    compressionLevelInput,
     logstashHostsInput,
     additionalYamlConfigInput,
     defaultOutputInput,
@@ -115,6 +208,10 @@ export function useOutputForm(onSucess: () => void, output?: Output) {
     sslKeyInput,
     sslCertificateAuthoritiesInput,
     proxyIdInput,
+    loadBalanceEnabledInput,
+    memQueueEvents,
+    queueFlushTimeout,
+    maxBatchBytes,
   };
 
   const hasChanged = Object.values(inputs).some((input) => input.hasChanged);
@@ -127,6 +224,7 @@ export function useOutputForm(onSucess: () => void, output?: Output) {
     const caTrustedFingerprintValid = caTrustedFingerprintInput.validate();
     const sslCertificateValid = sslCertificateInput.validate();
     const sslKeyValid = sslKeyInput.validate();
+    const diskQueuePathValid = diskQueuePathInput.validate();
 
     if (isLogstash) {
       // validate logstash
@@ -143,18 +241,20 @@ export function useOutputForm(onSucess: () => void, output?: Output) {
         elasticsearchUrlsValid &&
         additionalYamlConfigValid &&
         nameInputValid &&
-        caTrustedFingerprintValid
+        caTrustedFingerprintValid &&
+        diskQueuePathValid
       );
     }
   }, [
-    isLogstash,
     nameInput,
-    sslCertificateInput,
-    sslKeyInput,
     elasticsearchUrlInput,
     logstashHostsInput,
     additionalYamlConfigInput,
     caTrustedFingerprintInput,
+    sslCertificateInput,
+    sslKeyInput,
+    diskQueuePathInput,
+    isLogstash,
   ]);
 
   const submit = useCallback(async () => {
@@ -163,6 +263,33 @@ export function useOutputForm(onSucess: () => void, output?: Output) {
         return;
       }
       setIsloading(true);
+
+      let shipperParams = {};
+      if (!isShipperDisabled) {
+        shipperParams = {
+          shipper: {
+            disk_queue_enabled: diskQueueEnabledInput.value,
+            disk_queue_path:
+              diskQueueEnabledInput.value && diskQueuePathInput.value
+                ? diskQueuePathInput.value
+                : '',
+            disk_queue_max_size:
+              diskQueueEnabledInput.value && diskQueueMaxSizeInput.value
+                ? diskQueueMaxSizeInput.value
+                : null,
+            disk_queue_encryption_enabled:
+              diskQueueEnabledInput.value && diskQueueEncryptionEnabled.value,
+            disk_queue_compression_enabled: diskQueueCompressionEnabled.value,
+            compression_level: diskQueueCompressionEnabled.value
+              ? Number(compressionLevelInput.value)
+              : null,
+            loadbalance: loadBalanceEnabledInput.value,
+            mem_queue_events: memQueueEvents.value ? Number(memQueueEvents.value) : null,
+            queue_flush_timeout: queueFlushTimeout.value ? Number(queueFlushTimeout.value) : null,
+            max_batch_bytes: maxBatchBytes.value ? Number(maxBatchBytes.value) : null,
+          },
+        };
+      }
 
       const proxyIdValue = proxyIdInput.value !== '' ? proxyIdInput.value : null;
       const data: PostOutputRequest['body'] = isLogstash
@@ -181,6 +308,7 @@ export function useOutputForm(onSucess: () => void, output?: Output) {
               ),
             },
             proxy_id: proxyIdValue,
+            ...shipperParams,
           }
         : {
             name: nameInput.value,
@@ -191,6 +319,7 @@ export function useOutputForm(onSucess: () => void, output?: Output) {
             config_yaml: additionalYamlConfigInput.value,
             ca_trusted_fingerprint: caTrustedFingerprintInput.value,
             proxy_id: proxyIdValue,
+            ...shipperParams,
           };
 
       if (output) {
@@ -223,25 +352,35 @@ export function useOutputForm(onSucess: () => void, output?: Output) {
       });
     }
   }, [
-    isLogstash,
     validate,
-    confirm,
-    additionalYamlConfigInput.value,
-    defaultMonitoringOutputInput.value,
-    defaultOutputInput.value,
-    elasticsearchUrlInput.value,
-    logstashHostsInput.value,
-    caTrustedFingerprintInput.value,
-    sslCertificateInput.value,
-    sslCertificateAuthoritiesInput.value,
-    sslKeyInput.value,
+    isLogstash,
+    isShipperDisabled,
     nameInput.value,
     typeInput.value,
+    logstashHostsInput.value,
+    defaultOutputInput.value,
+    defaultMonitoringOutputInput.value,
+    additionalYamlConfigInput.value,
+    sslCertificateInput.value,
+    sslKeyInput.value,
+    sslCertificateAuthoritiesInput.value,
+    elasticsearchUrlInput.value,
+    caTrustedFingerprintInput.value,
     proxyIdInput.value,
-
     notifications.toasts,
     onSucess,
     output,
+    diskQueueEnabledInput.value,
+    diskQueuePathInput.value,
+    diskQueueMaxSizeInput.value,
+    diskQueueEncryptionEnabled.value,
+    diskQueueCompressionEnabled.value,
+    compressionLevelInput.value,
+    loadBalanceEnabledInput.value,
+    memQueueEvents.value,
+    queueFlushTimeout.value,
+    maxBatchBytes.value,
+    confirm,
   ]);
 
   return {
@@ -249,6 +388,7 @@ export function useOutputForm(onSucess: () => void, output?: Output) {
     submit,
     isLoading,
     hasEncryptedSavedObjectConfigured,
+    isShipperEnabled: !isShipperDisabled,
     isDisabled:
       isLoading ||
       isPreconfigured ||

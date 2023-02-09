@@ -499,7 +499,7 @@ Object {
           </p>
           <div>
             <div
-              class="euiContextMenuPanel"
+              class="euiContextMenuPanel eui-scrollBar css-zos0rl"
               data-test-subj="MenuActionsMenuPanel"
               tabindex="-1"
             >
@@ -779,7 +779,7 @@ Object {
           </p>
           <div>
             <div
-              class="euiContextMenuPanel"
+              class="euiContextMenuPanel eui-scrollBar css-zos0rl"
               data-test-subj="MenuActionsMenuPanel"
               tabindex="-1"
             >

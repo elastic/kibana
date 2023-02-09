@@ -65,7 +65,17 @@ export function buildResultColumns(
   };
 
   const resultColumns = [...input.columns];
-  // add output column after input column in the table
-  resultColumns.splice(resultColumns.indexOf(inputColumnDefinition) + 1, 0, outputColumnDefinition);
+
+  // If input and output are the same, replace the input column with the output one
+  // otherwise add output column after input column in the table
+  const offset = inputColumnId === outputColumnId ? 0 : 1;
+  // replace 1 item in case of same column, otherwise just append
+  const replacingItems = inputColumnId === outputColumnId ? 1 : 0;
+  resultColumns.splice(
+    resultColumns.indexOf(inputColumnDefinition) + offset,
+    replacingItems,
+    outputColumnDefinition
+  );
+
   return resultColumns;
 }

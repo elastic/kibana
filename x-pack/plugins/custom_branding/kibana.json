@@ -1,0 +1,14 @@
+{
+  "id": "customBranding",
+  "version": "1.0.0",
+  "kibanaVersion": "kibana",
+  "owner": {
+    "name": "global-experience",
+    "githubTeam": "kibana-global-experience"
+  },
+  "description": " Enables customization of Kibana",
+  "server": true,
+  "ui": true,
+  "requiredPlugins": ["licensing", "licenseApiGuard"],
+  "optionalPlugins": []
+}

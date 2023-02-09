@@ -24,19 +24,32 @@ export interface ReturnUseFetchExceptionFlyoutData {
  *
  */
 export const useFetchIndexPatterns = (rules: Rule[] | null): ReturnUseFetchExceptionFlyoutData => {
-  const { data } = useKibana().services;
+  const { data, spaces } = useKibana().services;
   const [dataViewLoading, setDataViewLoading] = useState(false);
+  const [activeSpaceId, setActiveSpaceId] = useState('');
   const isSingleRule = useMemo(() => rules != null && rules.length === 1, [rules]);
   const isMLRule = useMemo(
     () => rules != null && isSingleRule && rules[0].type === 'machine_learning',
     [isSingleRule, rules]
   );
+
+  useEffect(() => {
+    const fetchAndSetActiveSpace = async () => {
+      if (spaces) {
+        const aSpace = await spaces.getActiveSpace();
+        setActiveSpaceId(aSpace.id);
+      }
+    };
+    fetchAndSetActiveSpace();
+  }, [spaces]);
   // If data view is defined, it superceeds use of rule defined index patterns.
   // If no rule is available, use fields from default data view id.
   const memoDataViewId = useMemo(
     () =>
-      rules != null && isSingleRule ? rules[0].data_view_id || null : 'security-solution-default',
-    [isSingleRule, rules]
+      rules != null && isSingleRule
+        ? rules[0].data_view_id || null
+        : `security-solution-${activeSpaceId}`,
+    [isSingleRule, rules, activeSpaceId]
   );
 
   const memoNonDataViewIndexPatterns = useMemo(
@@ -67,23 +80,37 @@ export const useFetchIndexPatterns = (rules: Rule[] | null): ReturnUseFetchExcep
     }
   }, [jobs, isMLRule, memoDataViewId, memoNonDataViewIndexPatterns]);
 
-  const [isIndexPatternLoading, { indexPatterns: indexIndexPatterns }] =
-    useFetchIndex(memoRuleIndices);
+  const [isIndexPatternLoading, { indexPatterns: indexIndexPatterns }] = useFetchIndex(
+    memoRuleIndices,
+    false,
+    'indexFields',
+    true
+  );
 
   // Data view logic
   const [dataViewIndexPatterns, setDataViewIndexPatterns] = useState<DataViewBase | null>(null);
   useEffect(() => {
     const fetchSingleDataView = async () => {
-      if (memoDataViewId) {
+      // ensure the memoized data view includes a space id, otherwise
+      // we could be trying to fetch a data view that does not exist, which would
+      // throw an error here.
+      if (activeSpaceId !== '' && memoDataViewId) {
         setDataViewLoading(true);
         const dv = await data.dataViews.get(memoDataViewId);
+        const fieldsWithUnmappedInfo = await data.dataViews.getFieldsForIndexPattern(dv, {
+          pattern: '',
+          includeUnmapped: true,
+        });
         setDataViewLoading(false);
-        setDataViewIndexPatterns(dv);
+        setDataViewIndexPatterns({
+          ...dv,
+          fields: fieldsWithUnmappedInfo,
+        });
       }
     };
 
     fetchSingleDataView();
-  }, [memoDataViewId, data.dataViews, setDataViewIndexPatterns]);
+  }, [memoDataViewId, data.dataViews, setDataViewIndexPatterns, activeSpaceId]);
 
   // Determine whether to use index patterns or data views
   const indexPatternsToUse = useMemo(

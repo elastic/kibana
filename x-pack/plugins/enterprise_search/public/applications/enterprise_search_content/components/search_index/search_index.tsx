@@ -33,9 +33,10 @@ import { baseBreadcrumbs } from '../search_indices';
 import { getHeaderActions } from './components/header_actions/header_actions';
 import { ConnectorConfiguration } from './connector/connector_configuration';
 import { ConnectorSchedulingComponent } from './connector/connector_scheduling';
-import { ConnectorFiltering } from './connector/filtering/connector_filtering';
+import { ConnectorSyncRules } from './connector/sync_rules/connector_rules';
 import { AutomaticCrawlScheduler } from './crawler/automatic_crawl_scheduler/automatic_crawl_scheduler';
 import { CrawlCustomSettingsFlyout } from './crawler/crawl_custom_settings_flyout/crawl_custom_settings_flyout';
+import { CrawlerConfiguration } from './crawler/crawler_configuration/crawler_configuration';
 import { SearchIndexDomainManagement } from './crawler/domain_management/domain_management';
 import { SearchIndexDocuments } from './documents';
 import { SearchIndexIndexMappings } from './index_mappings';
@@ -52,10 +53,11 @@ export enum SearchIndexTabId {
   PIPELINES = 'pipelines',
   // connector indices
   CONFIGURATION = 'configuration',
-  FILTERS = 'filters',
+  SYNC_RULES = 'sync_rules',
   SCHEDULING = 'scheduling',
   // crawler indices
   DOMAIN_MANAGEMENT = 'domain_management',
+  CRAWLER_CONFIGURATION = 'crawler_configuration',
 }
 
 export const SearchIndex: React.FC = () => {
@@ -68,18 +70,29 @@ export const SearchIndex: React.FC = () => {
   const { indexName } = useValues(IndexNameLogic);
 
   /**
-   * Guided Onboarding needs us to mark the add data step as complete as soon as the user has data in an index
+   * Guided Onboarding needs us to mark the add data step as complete as soon as the user has data in an index.
+   * This needs to be checked for any of the 3 registered search guideIds
    * Putting it here guarantees that if a user is viewing an index with data, it'll be marked as complete
    */
   const { guidedOnboarding } = useValues(KibanaLogic);
-  const isDataStepActive = useObservable(
-    guidedOnboarding.guidedOnboardingApi!.isGuideStepActive$('search', 'add_data')
+  const isAppGuideActive = useObservable(
+    guidedOnboarding.guidedOnboardingApi!.isGuideStepActive$('appSearch', 'add_data')
+  );
+  const isWebsiteGuideActive = useObservable(
+    guidedOnboarding.guidedOnboardingApi!.isGuideStepActive$('websiteSearch', 'add_data')
+  );
+  const isDatabaseGuideActive = useObservable(
+    guidedOnboarding.guidedOnboardingApi!.isGuideStepActive$('databaseSearch', 'add_data')
   );
   useEffect(() => {
-    if (isDataStepActive && index?.count) {
-      guidedOnboarding.guidedOnboardingApi?.completeGuideStep('search', 'add_data');
+    if (isAppGuideActive && index?.count) {
+      guidedOnboarding.guidedOnboardingApi?.completeGuideStep('appSearch', 'add_data');
+    } else if (isWebsiteGuideActive && index?.count) {
+      guidedOnboarding.guidedOnboardingApi?.completeGuideStep('websiteSearch', 'add_data');
+    } else if (isDatabaseGuideActive && index?.count) {
+      guidedOnboarding.guidedOnboardingApi?.completeGuideStep('databaseSearch', 'add_data');
     }
-  }, [isDataStepActive, index?.count]);
+  }, [isAppGuideActive, isWebsiteGuideActive, isDatabaseGuideActive, index?.count]);
 
   useEffect(() => {
     if (
@@ -112,7 +125,7 @@ export const SearchIndex: React.FC = () => {
       content: <SearchIndexIndexMappings />,
       id: SearchIndexTabId.INDEX_MAPPINGS,
       name: i18n.translate('xpack.enterpriseSearch.content.searchIndex.indexMappingsTabLabel', {
-        defaultMessage: 'Index Mappings',
+        defaultMessage: 'Index mappings',
       }),
     },
   ];
@@ -128,10 +141,10 @@ export const SearchIndex: React.FC = () => {
     ...(hasFilteringFeature
       ? [
           {
-            content: <ConnectorFiltering />,
-            id: SearchIndexTabId.FILTERS,
-            name: i18n.translate('xpack.enterpriseSearch.content.searchIndex.filtersTabLabel', {
-              defaultMessage: 'Filters',
+            content: <ConnectorSyncRules />,
+            id: SearchIndexTabId.SYNC_RULES,
+            name: i18n.translate('xpack.enterpriseSearch.content.searchIndex.syncRulesTabLabel', {
+              defaultMessage: 'Sync rules',
             }),
           },
         ]
@@ -152,6 +165,16 @@ export const SearchIndex: React.FC = () => {
       name: i18n.translate('xpack.enterpriseSearch.content.searchIndex.domainManagementTabLabel', {
         defaultMessage: 'Manage Domains',
       }),
+    },
+    {
+      content: <CrawlerConfiguration />,
+      id: SearchIndexTabId.CRAWLER_CONFIGURATION,
+      name: i18n.translate(
+        'xpack.enterpriseSearch.content.searchIndex.crawlerConfigurationTabLabel',
+        {
+          defaultMessage: 'Configuration',
+        }
+      ),
     },
     {
       content: <AutomaticCrawlScheduler />,

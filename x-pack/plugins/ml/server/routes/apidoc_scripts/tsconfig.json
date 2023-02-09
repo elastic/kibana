@@ -1,14 +1,15 @@
 {
   "extends": "../../../../../../tsconfig.base.json",
   "compilerOptions": {
-    "outDir": "./target"
+    "outDir": "target/types"
   },
   "include": [
-    "schema_worker.ts",
-    "schema_parser.ts",
-    "schema_extractor.ts",
-    "version_filter.ts",
-    "types.ts",
-    "header_generator.ts"
+    "*.ts"
+  ],
+  "exclude": [
+    "target/**/*"
+  ],
+  "kbn_references": [
+    "@kbn/repo-info",
   ]
 }

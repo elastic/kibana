@@ -1,0 +1,1066 @@
+{
+  "id": "@kbn/core-test-helpers-kbn-server",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/core-test-helpers-kbn-server",
+        "id": "def-common.createRoot",
+        "type": "Function",
+        "tags": [],
+        "label": "createRoot",
+        "description": [
+          "\nCreates an instance of Root with default configuration\ntailored for unit tests.\n"
+        ],
+        "signature": [
+          "(settings: {}, cliArgs: Partial<",
+          "CliArgs",
+          ">) => ",
+          {
+            "pluginId": "@kbn/core-root-server-internal",
+            "scope": "common",
+            "docId": "kibKbnCoreRootServerInternalPluginApi",
+            "section": "def-common.Root",
+            "text": "Root"
+          }
+        ],
+        "path": "packages/core/test-helpers/core-test-helpers-kbn-server/src/create_root.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-test-helpers-kbn-server",
+            "id": "def-common.createRoot.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "settings",
+            "description": [
+              "Any config overrides for this instance."
+            ],
+            "signature": [
+              "{}"
+            ],
+            "path": "packages/core/test-helpers/core-test-helpers-kbn-server/src/create_root.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/core-test-helpers-kbn-server",
+            "id": "def-common.createRoot.$2",
+            "type": "Object",
+            "tags": [],
+            "label": "cliArgs",
+            "description": [],
+            "signature": [
+              "Partial<",
+              "CliArgs",
+              ">"
+            ],
+            "path": "packages/core/test-helpers/core-test-helpers-kbn-server/src/create_root.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-test-helpers-kbn-server",
+        "id": "def-common.createRootWithCorePlugins",
+        "type": "Function",
+        "tags": [],
+        "label": "createRootWithCorePlugins",
+        "description": [
+          "\n Creates an instance of Root, including all of the core plugins,\n with default configuration tailored for unit tests.\n"
+        ],
+        "signature": [
+          "(settings: {}, cliArgs: Partial<",
+          "CliArgs",
+          ">, customKibanaVersion: string | undefined) => ",
+          {
+            "pluginId": "@kbn/core-root-server-internal",
+            "scope": "common",
+            "docId": "kibKbnCoreRootServerInternalPluginApi",
+            "section": "def-common.Root",
+            "text": "Root"
+          }
+        ],
+        "path": "packages/core/test-helpers/core-test-helpers-kbn-server/src/create_root.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-test-helpers-kbn-server",
+            "id": "def-common.createRootWithCorePlugins.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "settings",
+            "description": [
+              "Any config overrides for this instance."
+            ],
+            "signature": [
+              "{}"
+            ],
+            "path": "packages/core/test-helpers/core-test-helpers-kbn-server/src/create_root.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/core-test-helpers-kbn-server",
+            "id": "def-common.createRootWithCorePlugins.$2",
+            "type": "Object",
+            "tags": [],
+            "label": "cliArgs",
+            "description": [],
+            "signature": [
+              "Partial<",
+              "CliArgs",
+              ">"
+            ],
+            "path": "packages/core/test-helpers/core-test-helpers-kbn-server/src/create_root.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/core-test-helpers-kbn-server",
+            "id": "def-common.createRootWithCorePlugins.$3",
+            "type": "string",
+            "tags": [],
+            "label": "customKibanaVersion",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/core/test-helpers/core-test-helpers-kbn-server/src/create_root.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-test-helpers-kbn-server",
+        "id": "def-common.createRootWithSettings",
+        "type": "Function",
+        "tags": [],
+        "label": "createRootWithSettings",
+        "description": [],
+        "signature": [
+          "(settings: Record<string, any>, cliArgs: Partial<",
+          "CliArgs",
+          ">, customKibanaVersion: string | undefined) => ",
+          {
+            "pluginId": "@kbn/core-root-server-internal",
+            "scope": "common",
+            "docId": "kibKbnCoreRootServerInternalPluginApi",
+            "section": "def-common.Root",
+            "text": "Root"
+          }
+        ],
+        "path": "packages/core/test-helpers/core-test-helpers-kbn-server/src/create_root.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-test-helpers-kbn-server",
+            "id": "def-common.createRootWithSettings.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "settings",
+            "description": [],
+            "signature": [
+              "Record<string, any>"
+            ],
+            "path": "packages/core/test-helpers/core-test-helpers-kbn-server/src/create_root.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/core-test-helpers-kbn-server",
+            "id": "def-common.createRootWithSettings.$2",
+            "type": "Object",
+            "tags": [],
+            "label": "cliArgs",
+            "description": [],
+            "signature": [
+              "Partial<",
+              "CliArgs",
+              ">"
+            ],
+            "path": "packages/core/test-helpers/core-test-helpers-kbn-server/src/create_root.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/core-test-helpers-kbn-server",
+            "id": "def-common.createRootWithSettings.$3",
+            "type": "string",
+            "tags": [],
+            "label": "customKibanaVersion",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/core/test-helpers/core-test-helpers-kbn-server/src/create_root.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-test-helpers-kbn-server",
+        "id": "def-common.createTestServers",
+        "type": "Function",
+        "tags": [
+          "prop",
+          "prop"
+        ],
+        "label": "createTestServers",
+        "description": [
+          "\nCreates an instance of the Root, including all of the core \"legacy\" plugins,\nwith default configuration tailored for unit tests, and starts es.\n"
+        ],
+        "signature": [
+          "({\n  adjustTimeout,\n  settings = {},\n}: { adjustTimeout: (timeout: number) => void; settings?: { es?: Partial<",
+          {
+            "pluginId": "@kbn/test",
+            "scope": "common",
+            "docId": "kibKbnTestPluginApi",
+            "section": "def-common.CreateTestEsClusterOptions",
+            "text": "CreateTestEsClusterOptions"
+          },
+          "> | undefined; kbn?: { [key: string]: any; plugins?: { [key: string]: any; paths: string[]; } | undefined; } | undefined; users?: { username: string; password: string; roles: string[]; }[] | undefined; } | undefined; }) => ",
+          {
+            "pluginId": "@kbn/core-test-helpers-kbn-server",
+            "scope": "common",
+            "docId": "kibKbnCoreTestHelpersKbnServerPluginApi",
+            "section": "def-common.TestUtils",
+            "text": "TestUtils"
+          }
+        ],
+        "path": "packages/core/test-helpers/core-test-helpers-kbn-server/src/create_root.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-test-helpers-kbn-server",
+            "id": "def-common.createTestServers.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  adjustTimeout,\n  settings = {},\n}",
+            "description": [],
+            "path": "packages/core/test-helpers/core-test-helpers-kbn-server/src/create_root.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-test-helpers-kbn-server",
+                "id": "def-common.createTestServers.$1.adjustTimeout",
+                "type": "Function",
+                "tags": [],
+                "label": "adjustTimeout",
+                "description": [],
+                "signature": [
+                  "(timeout: number) => void"
+                ],
+                "path": "packages/core/test-helpers/core-test-helpers-kbn-server/src/create_root.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "children": [
+                  {
+                    "parentPluginId": "@kbn/core-test-helpers-kbn-server",
+                    "id": "def-common.createTestServers.$1.adjustTimeout.$1",
+                    "type": "number",
+                    "tags": [],
+                    "label": "timeout",
+                    "description": [],
+                    "signature": [
+                      "number"
+                    ],
+                    "path": "packages/core/test-helpers/core-test-helpers-kbn-server/src/create_root.ts",
+                    "deprecated": false,
+                    "trackAdoption": false,
+                    "isRequired": true
+                  }
+                ],
+                "returnComment": []
+              },
+              {
+                "parentPluginId": "@kbn/core-test-helpers-kbn-server",
+                "id": "def-common.createTestServers.$1.settings",
+                "type": "Object",
+                "tags": [],
+                "label": "settings",
+                "description": [],
+                "signature": [
+                  "{ es?: Partial<",
+                  {
+                    "pluginId": "@kbn/test",
+                    "scope": "common",
+                    "docId": "kibKbnTestPluginApi",
+                    "section": "def-common.CreateTestEsClusterOptions",
+                    "text": "CreateTestEsClusterOptions"
+                  },
+                  "> | undefined; kbn?: { [key: string]: any; plugins?: { [key: string]: any; paths: string[]; } | undefined; } | undefined; users?: { username: string; password: string; roles: string[]; }[] | undefined; } | undefined"
+                ],
+                "path": "packages/core/test-helpers/core-test-helpers-kbn-server/src/create_root.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-test-helpers-kbn-server",
+        "id": "def-common.getSupertest",
+        "type": "Function",
+        "tags": [],
+        "label": "getSupertest",
+        "description": [
+          "\nReturns supertest request attached to the core's internal native Node server."
+        ],
+        "signature": [
+          "(root: ",
+          {
+            "pluginId": "@kbn/core-root-server-internal",
+            "scope": "common",
+            "docId": "kibKbnCoreRootServerInternalPluginApi",
+            "section": "def-common.Root",
+            "text": "Root"
+          },
+          ", method: ",
+          {
+            "pluginId": "@kbn/core-test-helpers-kbn-server",
+            "scope": "common",
+            "docId": "kibKbnCoreTestHelpersKbnServerPluginApi",
+            "section": "def-common.HttpMethod",
+            "text": "HttpMethod"
+          },
+          ", path: string) => ",
+          "Test"
+        ],
+        "path": "packages/core/test-helpers/core-test-helpers-kbn-server/src/create_root.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-test-helpers-kbn-server",
+            "id": "def-common.getSupertest.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "root",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-root-server-internal",
+                "scope": "common",
+                "docId": "kibKbnCoreRootServerInternalPluginApi",
+                "section": "def-common.Root",
+                "text": "Root"
+              }
+            ],
+            "path": "packages/core/test-helpers/core-test-helpers-kbn-server/src/create_root.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/core-test-helpers-kbn-server",
+            "id": "def-common.getSupertest.$2",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "method",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-test-helpers-kbn-server",
+                "scope": "common",
+                "docId": "kibKbnCoreTestHelpersKbnServerPluginApi",
+                "section": "def-common.HttpMethod",
+                "text": "HttpMethod"
+              }
+            ],
+            "path": "packages/core/test-helpers/core-test-helpers-kbn-server/src/create_root.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/core-test-helpers-kbn-server",
+            "id": "def-common.getSupertest.$3",
+            "type": "string",
+            "tags": [],
+            "label": "path",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "packages/core/test-helpers/core-test-helpers-kbn-server/src/create_root.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/core-test-helpers-kbn-server",
+        "id": "def-common.TestElasticsearchUtils",
+        "type": "Interface",
+        "tags": [],
+        "label": "TestElasticsearchUtils",
+        "description": [],
+        "path": "packages/core/test-helpers/core-test-helpers-kbn-server/src/create_root.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-test-helpers-kbn-server",
+            "id": "def-common.TestElasticsearchUtils.stop",
+            "type": "Function",
+            "tags": [],
+            "label": "stop",
+            "description": [],
+            "signature": [
+              "() => Promise<void>"
+            ],
+            "path": "packages/core/test-helpers/core-test-helpers-kbn-server/src/create_root.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-test-helpers-kbn-server",
+            "id": "def-common.TestElasticsearchUtils.es",
+            "type": "Any",
+            "tags": [],
+            "label": "es",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "packages/core/test-helpers/core-test-helpers-kbn-server/src/create_root.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-test-helpers-kbn-server",
+            "id": "def-common.TestElasticsearchUtils.hosts",
+            "type": "Array",
+            "tags": [],
+            "label": "hosts",
+            "description": [],
+            "signature": [
+              "string[]"
+            ],
+            "path": "packages/core/test-helpers/core-test-helpers-kbn-server/src/create_root.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-test-helpers-kbn-server",
+            "id": "def-common.TestElasticsearchUtils.username",
+            "type": "string",
+            "tags": [],
+            "label": "username",
+            "description": [],
+            "path": "packages/core/test-helpers/core-test-helpers-kbn-server/src/create_root.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-test-helpers-kbn-server",
+            "id": "def-common.TestElasticsearchUtils.password",
+            "type": "string",
+            "tags": [],
+            "label": "password",
+            "description": [],
+            "path": "packages/core/test-helpers/core-test-helpers-kbn-server/src/create_root.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-test-helpers-kbn-server",
+        "id": "def-common.TestKibanaUtils",
+        "type": "Interface",
+        "tags": [],
+        "label": "TestKibanaUtils",
+        "description": [],
+        "path": "packages/core/test-helpers/core-test-helpers-kbn-server/src/create_root.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-test-helpers-kbn-server",
+            "id": "def-common.TestKibanaUtils.root",
+            "type": "Object",
+            "tags": [],
+            "label": "root",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-root-server-internal",
+                "scope": "common",
+                "docId": "kibKbnCoreRootServerInternalPluginApi",
+                "section": "def-common.Root",
+                "text": "Root"
+              }
+            ],
+            "path": "packages/core/test-helpers/core-test-helpers-kbn-server/src/create_root.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-test-helpers-kbn-server",
+            "id": "def-common.TestKibanaUtils.coreSetup",
+            "type": "Object",
+            "tags": [],
+            "label": "coreSetup",
+            "description": [],
+            "signature": [
+              "InternalCoreSetup"
+            ],
+            "path": "packages/core/test-helpers/core-test-helpers-kbn-server/src/create_root.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-test-helpers-kbn-server",
+            "id": "def-common.TestKibanaUtils.coreStart",
+            "type": "Object",
+            "tags": [],
+            "label": "coreStart",
+            "description": [],
+            "signature": [
+              "InternalCoreStart"
+            ],
+            "path": "packages/core/test-helpers/core-test-helpers-kbn-server/src/create_root.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-test-helpers-kbn-server",
+            "id": "def-common.TestKibanaUtils.stop",
+            "type": "Function",
+            "tags": [],
+            "label": "stop",
+            "description": [],
+            "signature": [
+              "() => Promise<void>"
+            ],
+            "path": "packages/core/test-helpers/core-test-helpers-kbn-server/src/create_root.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-test-helpers-kbn-server",
+        "id": "def-common.TestUtils",
+        "type": "Interface",
+        "tags": [],
+        "label": "TestUtils",
+        "description": [],
+        "path": "packages/core/test-helpers/core-test-helpers-kbn-server/src/create_root.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-test-helpers-kbn-server",
+            "id": "def-common.TestUtils.startES",
+            "type": "Function",
+            "tags": [],
+            "label": "startES",
+            "description": [],
+            "signature": [
+              "() => Promise<",
+              {
+                "pluginId": "@kbn/core-test-helpers-kbn-server",
+                "scope": "common",
+                "docId": "kibKbnCoreTestHelpersKbnServerPluginApi",
+                "section": "def-common.TestElasticsearchUtils",
+                "text": "TestElasticsearchUtils"
+              },
+              ">"
+            ],
+            "path": "packages/core/test-helpers/core-test-helpers-kbn-server/src/create_root.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-test-helpers-kbn-server",
+            "id": "def-common.TestUtils.startKibana",
+            "type": "Function",
+            "tags": [],
+            "label": "startKibana",
+            "description": [],
+            "signature": [
+              "() => Promise<",
+              {
+                "pluginId": "@kbn/core-test-helpers-kbn-server",
+                "scope": "common",
+                "docId": "kibKbnCoreTestHelpersKbnServerPluginApi",
+                "section": "def-common.TestKibanaUtils",
+                "text": "TestKibanaUtils"
+              },
+              ">"
+            ],
+            "path": "packages/core/test-helpers/core-test-helpers-kbn-server/src/create_root.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/core-test-helpers-kbn-server",
+        "id": "def-common.HttpMethod",
+        "type": "Type",
+        "tags": [],
+        "label": "HttpMethod",
+        "description": [],
+        "signature": [
+          "\"get\" | \"post\" | \"put\" | \"delete\" | \"patch\" | \"head\""
+        ],
+        "path": "packages/core/test-helpers/core-test-helpers-kbn-server/src/create_root.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": [
+      {
+        "parentPluginId": "@kbn/core-test-helpers-kbn-server",
+        "id": "def-common.request",
+        "type": "Object",
+        "tags": [],
+        "label": "request",
+        "description": [],
+        "path": "packages/core/test-helpers/core-test-helpers-kbn-server/src/create_root.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-test-helpers-kbn-server",
+            "id": "def-common.request.delete",
+            "type": "Function",
+            "tags": [],
+            "label": "delete",
+            "description": [],
+            "signature": [
+              "(root: ",
+              {
+                "pluginId": "@kbn/core-root-server-internal",
+                "scope": "common",
+                "docId": "kibKbnCoreRootServerInternalPluginApi",
+                "section": "def-common.Root",
+                "text": "Root"
+              },
+              ", path: string) => ",
+              "Test"
+            ],
+            "path": "packages/core/test-helpers/core-test-helpers-kbn-server/src/create_root.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-test-helpers-kbn-server",
+                "id": "def-common.request.delete.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "root",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/core-root-server-internal",
+                    "scope": "common",
+                    "docId": "kibKbnCoreRootServerInternalPluginApi",
+                    "section": "def-common.Root",
+                    "text": "Root"
+                  }
+                ],
+                "path": "packages/core/test-helpers/core-test-helpers-kbn-server/src/create_root.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/core-test-helpers-kbn-server",
+                "id": "def-common.request.delete.$2",
+                "type": "string",
+                "tags": [],
+                "label": "path",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/core/test-helpers/core-test-helpers-kbn-server/src/create_root.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-test-helpers-kbn-server",
+            "id": "def-common.request.get",
+            "type": "Function",
+            "tags": [],
+            "label": "get",
+            "description": [],
+            "signature": [
+              "(root: ",
+              {
+                "pluginId": "@kbn/core-root-server-internal",
+                "scope": "common",
+                "docId": "kibKbnCoreRootServerInternalPluginApi",
+                "section": "def-common.Root",
+                "text": "Root"
+              },
+              ", path: string) => ",
+              "Test"
+            ],
+            "path": "packages/core/test-helpers/core-test-helpers-kbn-server/src/create_root.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-test-helpers-kbn-server",
+                "id": "def-common.request.get.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "root",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/core-root-server-internal",
+                    "scope": "common",
+                    "docId": "kibKbnCoreRootServerInternalPluginApi",
+                    "section": "def-common.Root",
+                    "text": "Root"
+                  }
+                ],
+                "path": "packages/core/test-helpers/core-test-helpers-kbn-server/src/create_root.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/core-test-helpers-kbn-server",
+                "id": "def-common.request.get.$2",
+                "type": "string",
+                "tags": [],
+                "label": "path",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/core/test-helpers/core-test-helpers-kbn-server/src/create_root.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-test-helpers-kbn-server",
+            "id": "def-common.request.head",
+            "type": "Function",
+            "tags": [],
+            "label": "head",
+            "description": [],
+            "signature": [
+              "(root: ",
+              {
+                "pluginId": "@kbn/core-root-server-internal",
+                "scope": "common",
+                "docId": "kibKbnCoreRootServerInternalPluginApi",
+                "section": "def-common.Root",
+                "text": "Root"
+              },
+              ", path: string) => ",
+              "Test"
+            ],
+            "path": "packages/core/test-helpers/core-test-helpers-kbn-server/src/create_root.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-test-helpers-kbn-server",
+                "id": "def-common.request.head.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "root",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/core-root-server-internal",
+                    "scope": "common",
+                    "docId": "kibKbnCoreRootServerInternalPluginApi",
+                    "section": "def-common.Root",
+                    "text": "Root"
+                  }
+                ],
+                "path": "packages/core/test-helpers/core-test-helpers-kbn-server/src/create_root.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/core-test-helpers-kbn-server",
+                "id": "def-common.request.head.$2",
+                "type": "string",
+                "tags": [],
+                "label": "path",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/core/test-helpers/core-test-helpers-kbn-server/src/create_root.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-test-helpers-kbn-server",
+            "id": "def-common.request.post",
+            "type": "Function",
+            "tags": [],
+            "label": "post",
+            "description": [],
+            "signature": [
+              "(root: ",
+              {
+                "pluginId": "@kbn/core-root-server-internal",
+                "scope": "common",
+                "docId": "kibKbnCoreRootServerInternalPluginApi",
+                "section": "def-common.Root",
+                "text": "Root"
+              },
+              ", path: string) => ",
+              "Test"
+            ],
+            "path": "packages/core/test-helpers/core-test-helpers-kbn-server/src/create_root.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-test-helpers-kbn-server",
+                "id": "def-common.request.post.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "root",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/core-root-server-internal",
+                    "scope": "common",
+                    "docId": "kibKbnCoreRootServerInternalPluginApi",
+                    "section": "def-common.Root",
+                    "text": "Root"
+                  }
+                ],
+                "path": "packages/core/test-helpers/core-test-helpers-kbn-server/src/create_root.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/core-test-helpers-kbn-server",
+                "id": "def-common.request.post.$2",
+                "type": "string",
+                "tags": [],
+                "label": "path",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/core/test-helpers/core-test-helpers-kbn-server/src/create_root.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-test-helpers-kbn-server",
+            "id": "def-common.request.put",
+            "type": "Function",
+            "tags": [],
+            "label": "put",
+            "description": [],
+            "signature": [
+              "(root: ",
+              {
+                "pluginId": "@kbn/core-root-server-internal",
+                "scope": "common",
+                "docId": "kibKbnCoreRootServerInternalPluginApi",
+                "section": "def-common.Root",
+                "text": "Root"
+              },
+              ", path: string) => ",
+              "Test"
+            ],
+            "path": "packages/core/test-helpers/core-test-helpers-kbn-server/src/create_root.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-test-helpers-kbn-server",
+                "id": "def-common.request.put.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "root",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/core-root-server-internal",
+                    "scope": "common",
+                    "docId": "kibKbnCoreRootServerInternalPluginApi",
+                    "section": "def-common.Root",
+                    "text": "Root"
+                  }
+                ],
+                "path": "packages/core/test-helpers/core-test-helpers-kbn-server/src/create_root.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/core-test-helpers-kbn-server",
+                "id": "def-common.request.put.$2",
+                "type": "string",
+                "tags": [],
+                "label": "path",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/core/test-helpers/core-test-helpers-kbn-server/src/create_root.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-test-helpers-kbn-server",
+            "id": "def-common.request.patch",
+            "type": "Function",
+            "tags": [],
+            "label": "patch",
+            "description": [],
+            "signature": [
+              "(root: ",
+              {
+                "pluginId": "@kbn/core-root-server-internal",
+                "scope": "common",
+                "docId": "kibKbnCoreRootServerInternalPluginApi",
+                "section": "def-common.Root",
+                "text": "Root"
+              },
+              ", path: string) => ",
+              "Test"
+            ],
+            "path": "packages/core/test-helpers/core-test-helpers-kbn-server/src/create_root.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-test-helpers-kbn-server",
+                "id": "def-common.request.patch.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "root",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/core-root-server-internal",
+                    "scope": "common",
+                    "docId": "kibKbnCoreRootServerInternalPluginApi",
+                    "section": "def-common.Root",
+                    "text": "Root"
+                  }
+                ],
+                "path": "packages/core/test-helpers/core-test-helpers-kbn-server/src/create_root.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/core-test-helpers-kbn-server",
+                "id": "def-common.request.patch.$2",
+                "type": "string",
+                "tags": [],
+                "label": "path",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/core/test-helpers/core-test-helpers-kbn-server/src/create_root.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ]
+  }
+}

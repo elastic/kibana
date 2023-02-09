@@ -13,7 +13,12 @@ import { httpServiceMock } from '@kbn/core/public/mocks';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
-import { CommonRuleParams, EsQueryRuleMetaData, EsQueryRuleParams, SearchType } from '../types';
+import {
+  CommonEsQueryRuleParams,
+  EsQueryRuleMetaData,
+  EsQueryRuleParams,
+  SearchType,
+} from '../types';
 import { EsQueryRuleTypeExpression } from './expression';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { Subject } from 'rxjs';
@@ -54,6 +59,7 @@ const defaultEsQueryRuleParams: EsQueryRuleParams<SearchType.esQuery> = {
   esQuery: `{\n  \"query\":{\n    \"match_all\" : {}\n  }\n}`,
   searchType: SearchType.esQuery,
   excludeHitsFromPreviousRun: true,
+  aggType: 'count',
 };
 const defaultSearchSourceRuleParams: EsQueryRuleParams<SearchType.searchSource> = {
   size: 100,
@@ -66,6 +72,7 @@ const defaultSearchSourceRuleParams: EsQueryRuleParams<SearchType.searchSource> 
   searchType: SearchType.searchSource,
   searchConfiguration: {},
   excludeHitsFromPreviousRun: true,
+  aggType: 'count',
 };
 
 const dataViewPluginMock = dataViewPluginMocks.createStartContract();
@@ -146,7 +153,7 @@ const Wrapper: React.FC<{
   ruleParams: EsQueryRuleParams<SearchType.searchSource> | EsQueryRuleParams<SearchType.esQuery>;
   metadata?: EsQueryRuleMetaData;
 }> = ({ ruleParams, metadata }) => {
-  const [currentRuleParams, setCurrentRuleParams] = useState<CommonRuleParams>(ruleParams);
+  const [currentRuleParams, setCurrentRuleParams] = useState<CommonEsQueryRuleParams>(ruleParams);
   const errors = {
     index: [],
     esQuery: [],
@@ -168,7 +175,7 @@ const Wrapper: React.FC<{
       }}
       setRuleProperty={(name, params) => {
         if (name === 'params') {
-          setCurrentRuleParams(params as CommonRuleParams);
+          setCurrentRuleParams(params as CommonEsQueryRuleParams);
         }
       }}
       errors={errors}

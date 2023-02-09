@@ -227,6 +227,6 @@ describe('DetectionResponse', () => {
     );
 
     expect(result.queryByTestId('detectionResponsePage')).not.toBeInTheDocument();
-    expect(result.queryByTestId('noPermissionPage')).toBeInTheDocument();
+    expect(result.queryByTestId('noPrivilegesPage')).toBeInTheDocument();
   });
 });

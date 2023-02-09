@@ -23,30 +23,27 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { useUiSetting } from '@kbn/kibana-react-plugin/public';
 import { capitalize, get } from 'lodash';
 import React, { Fragment } from 'react';
+import type { TableChange, Sorting, Pagination } from '../../../application/hooks/use_table';
+import type { AlertsByName } from '../../../alerts/types';
 import { KIBANA_SYSTEM_ID } from '../../../../common/constants';
 import { SetupModeFeature } from '../../../../common/enums';
-import { CommonAlertStatus } from '../../../../common/types/alerts';
 import { ElasticsearchSourceKibanaStats } from '../../../../common/types/es';
 import { AlertsStatus } from '../../../alerts/status';
 import { ExternalConfigContext } from '../../../application/contexts/external_config_context';
-// @ts-ignore
 import { formatMetric, formatNumber } from '../../../lib/format_number';
 import { getSafeForExternalLink } from '../../../lib/get_safe_for_external_link';
 import { isSetupModeFeatureEnabled } from '../../../lib/setup_mode';
-// @ts-ignore
 import { SetupModeBadge } from '../../setup_mode/badge';
-// @ts-ignore
 import { ListingCallOut } from '../../setup_mode/listing_callout';
 import { STATUS_ICON_TYPES } from '../../status_icon';
-// @ts-ignore
 import { EuiMonitoringTable } from '../../table';
-// @ts-ignore
 import { ClusterStatus } from '../cluster_status';
 import { formatLastSeenTimestamp } from '../format_last_seen_timestamp';
+import type { SetupMode } from '../../setup_mode/types';
 
 const getColumns = (
-  setupMode: any,
-  alerts: { [alertTypeId: string]: CommonAlertStatus[] },
+  setupMode: SetupMode,
+  alerts: AlertsByName,
   dateFormat: string,
   staleStatusThresholdSeconds: number
 ) => {
@@ -209,11 +206,11 @@ const getColumns = (
 
 interface Props {
   clusterStatus: any;
-  alerts: { [alertTypeId: string]: CommonAlertStatus[] };
-  setupMode: any;
-  sorting: any;
-  pagination: any;
-  onTableChange: any;
+  alerts: AlertsByName;
+  setupMode: SetupMode;
+  sorting: Sorting;
+  pagination: Pagination;
+  onTableChange: (e: TableChange) => void;
   instances: ElasticsearchSourceKibanaStats[];
 }
 
@@ -255,7 +252,6 @@ export const KibanaInstances: React.FC<Props> = (props: Props) => {
     setupModeCallOut = (
       <ListingCallOut
         setupModeData={setupMode.data}
-        useNodeIdentifier={false}
         productName={KIBANA_SYSTEM_ID}
         customRenderer={() => {
           const customRenderResponse = {

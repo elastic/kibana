@@ -8,7 +8,7 @@
 
 import { PayloadAction } from '@reduxjs/toolkit';
 import { WritableDraft } from 'immer/dist/types/types-external';
-import { EuiRangeTick } from '@elastic/eui/src/components/form/range/range_ticks';
+import { EuiRangeTick } from '@elastic/eui';
 import { TimeSliderReduxState } from './types';
 
 export const timeSliderReducers = {
@@ -57,6 +57,12 @@ export const timeSliderReducers = {
     action: PayloadAction<{ range?: number }>
   ) => {
     state.componentState.range = action.payload.range;
+  },
+  setIsAnchored: (
+    state: WritableDraft<TimeSliderReduxState>,
+    action: PayloadAction<{ isAnchored: boolean }>
+  ) => {
+    state.explicitInput.isAnchored = action.payload.isAnchored;
   },
   setIsOpen: (
     state: WritableDraft<TimeSliderReduxState>,

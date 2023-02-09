@@ -5,10 +5,12 @@
  * 2.0.
  */
 
+import type { SavedObjectsImportSuccess } from '@kbn/core-saved-objects-common';
 import { taggableTypes } from '@kbn/saved-objects-tagging-plugin/common/constants';
 import type { IAssignmentService, ITagsClient } from '@kbn/saved-objects-tagging-plugin/server';
 
 import type { KibanaAssetType } from '../../../../../common';
+import { appContextService } from '../../../app_context';
 
 import type { ArchiveAsset } from './install';
 import { KibanaSavedObjectTypeMapping } from './install';
@@ -28,11 +30,17 @@ interface TagAssetsParams {
   pkgTitle: string;
   pkgName: string;
   spaceId: string;
+  importedAssets: SavedObjectsImportSuccess[];
 }
 
 export async function tagKibanaAssets(opts: TagAssetsParams) {
-  const { savedObjectTagAssignmentService, kibanaAssets } = opts;
-  const taggableAssets = getTaggableAssets(kibanaAssets);
+  const { savedObjectTagAssignmentService, kibanaAssets, importedAssets } = opts;
+  const getNewId = (assetId: string) =>
+    importedAssets.find((imported) => imported.id === assetId)?.destinationId ?? assetId;
+  const taggableAssets = getTaggableAssets(kibanaAssets).map((asset) => ({
+    ...asset,
+    id: getNewId(asset.id),
+  }));
 
   // no assets to tag
   if (taggableAssets.length === 0) {
@@ -44,12 +52,20 @@ export async function tagKibanaAssets(opts: TagAssetsParams) {
     ensurePackageTag(opts),
   ]);
 
-  await savedObjectTagAssignmentService.updateTagAssignments({
-    tags: [managedTagId, packageTagId],
-    assign: taggableAssets,
-    unassign: [],
-    refresh: false,
-  });
+  try {
+    await savedObjectTagAssignmentService.updateTagAssignments({
+      tags: [managedTagId, packageTagId],
+      assign: taggableAssets,
+      unassign: [],
+      refresh: false,
+    });
+  } catch (error) {
+    if (error.status === 404) {
+      appContextService.getLogger().warn(error.message);
+      return;
+    }
+    throw error;
+  }
 }
 
 function getTaggableAssets(kibanaAssets: TagAssetsParams['kibanaAssets']) {

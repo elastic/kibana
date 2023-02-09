@@ -9,10 +9,18 @@
     "objects": []
   },
   "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
     "classes": [
       {
         "parentPluginId": "@kbn/journeys",
-        "id": "def-server.Journey",
+        "id": "def-common.Journey",
         "type": "Class",
         "tags": [],
         "label": "Journey",
@@ -20,9 +28,9 @@
         "signature": [
           {
             "pluginId": "@kbn/journeys",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnJourneysPluginApi",
-            "section": "def-server.Journey",
+            "section": "def-common.Journey",
             "text": "Journey"
           },
           "<CtxExt>"
@@ -33,7 +41,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/journeys",
-            "id": "def-server.Journey.convertToFtrConfigProvider",
+            "id": "def-common.Journey.convertToFtrConfigProvider",
             "type": "Function",
             "tags": [],
             "label": "convertToFtrConfigProvider",
@@ -42,17 +50,17 @@
               "(journey: ",
               {
                 "pluginId": "@kbn/journeys",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnJourneysPluginApi",
-                "section": "def-server.Journey",
+                "section": "def-common.Journey",
                 "text": "Journey"
               },
               "<any>) => ",
               {
                 "pluginId": "@kbn/test",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnTestPluginApi",
-                "section": "def-server.FtrConfigProvider",
+                "section": "def-common.FtrConfigProvider",
                 "text": "FtrConfigProvider"
               }
             ],
@@ -62,7 +70,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/journeys",
-                "id": "def-server.Journey.convertToFtrConfigProvider.$1",
+                "id": "def-common.Journey.convertToFtrConfigProvider.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "journey",
@@ -70,9 +78,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/journeys",
-                    "scope": "server",
+                    "scope": "common",
                     "docId": "kibKbnJourneysPluginApi",
-                    "section": "def-server.Journey",
+                    "section": "def-common.Journey",
                     "text": "Journey"
                   },
                   "<any>"
@@ -87,7 +95,7 @@
           },
           {
             "parentPluginId": "@kbn/journeys",
-            "id": "def-server.Journey.load",
+            "id": "def-common.Journey.load",
             "type": "Function",
             "tags": [],
             "label": "load",
@@ -98,9 +106,9 @@
               "(path: string) => Promise<",
               {
                 "pluginId": "@kbn/journeys",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnJourneysPluginApi",
-                "section": "def-server.Journey",
+                "section": "def-common.Journey",
                 "text": "Journey"
               },
               "<any>>"
@@ -111,7 +119,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/journeys",
-                "id": "def-server.Journey.load.$1",
+                "id": "def-common.Journey.load.$1",
                 "type": "string",
                 "tags": [],
                 "label": "path",
@@ -129,7 +137,7 @@
           },
           {
             "parentPluginId": "@kbn/journeys",
-            "id": "def-server.Journey.steps",
+            "id": "def-common.Journey.steps",
             "type": "Array",
             "tags": [],
             "label": "#steps",
@@ -137,9 +145,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/journeys",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnJourneysPluginApi",
-                "section": "def-server.Step",
+                "section": "def-common.Step",
                 "text": "Step"
               },
               "<CtxExt>[]"
@@ -150,7 +158,7 @@
           },
           {
             "parentPluginId": "@kbn/journeys",
-            "id": "def-server.Journey.config",
+            "id": "def-common.Journey.config",
             "type": "Object",
             "tags": [],
             "label": "config",
@@ -158,9 +166,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/journeys",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnJourneysPluginApi",
-                "section": "def-server.JourneyConfig",
+                "section": "def-common.JourneyConfig",
                 "text": "JourneyConfig"
               },
               "<CtxExt>"
@@ -171,7 +179,7 @@
           },
           {
             "parentPluginId": "@kbn/journeys",
-            "id": "def-server.Journey.Unnamed",
+            "id": "def-common.Journey.Unnamed",
             "type": "Function",
             "tags": [],
             "label": "Constructor",
@@ -187,7 +195,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/journeys",
-                "id": "def-server.Journey.Unnamed.$1",
+                "id": "def-common.Journey.Unnamed.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "opts",
@@ -206,7 +214,7 @@
           },
           {
             "parentPluginId": "@kbn/journeys",
-            "id": "def-server.Journey.step",
+            "id": "def-common.Journey.step",
             "type": "Function",
             "tags": [],
             "label": "step",
@@ -224,7 +232,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/journeys",
-                "id": "def-server.Journey.step.$1",
+                "id": "def-common.Journey.step.$1",
                 "type": "string",
                 "tags": [],
                 "label": "name",
@@ -239,7 +247,7 @@
               },
               {
                 "parentPluginId": "@kbn/journeys",
-                "id": "def-server.Journey.step.$2",
+                "id": "def-common.Journey.step.$2",
                 "type": "Function",
                 "tags": [],
                 "label": "fn",
@@ -259,7 +267,7 @@
           },
           {
             "parentPluginId": "@kbn/journeys",
-            "id": "def-server.Journey.testProvider",
+            "id": "def-common.Journey.testProvider",
             "type": "Function",
             "tags": [],
             "label": "testProvider",
@@ -270,9 +278,9 @@
               "({ getService }: ",
               {
                 "pluginId": "@kbn/ftr-common-functional-services",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
-                "section": "def-server.FtrProviderContext",
+                "section": "def-common.FtrProviderContext",
                 "text": "FtrProviderContext"
               },
               ") => void"
@@ -283,7 +291,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/journeys",
-                "id": "def-server.Journey.testProvider.$1",
+                "id": "def-common.Journey.testProvider.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "{ getService }",
@@ -291,9 +299,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/ftr-common-functional-services",
-                    "scope": "server",
+                    "scope": "common",
                     "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
-                    "section": "def-server.FtrProviderContext",
+                    "section": "def-common.FtrProviderContext",
                     "text": "FtrProviderContext"
                   }
                 ],
@@ -310,7 +318,7 @@
       },
       {
         "parentPluginId": "@kbn/journeys",
-        "id": "def-server.JourneyConfig",
+        "id": "def-common.JourneyConfig",
         "type": "Class",
         "tags": [],
         "label": "JourneyConfig",
@@ -318,9 +326,9 @@
         "signature": [
           {
             "pluginId": "@kbn/journeys",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnJourneysPluginApi",
-            "section": "def-server.JourneyConfig",
+            "section": "def-common.JourneyConfig",
             "text": "JourneyConfig"
           },
           "<CtxExt>"
@@ -331,7 +339,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/journeys",
-            "id": "def-server.JourneyConfig.opts",
+            "id": "def-common.JourneyConfig.opts",
             "type": "Object",
             "tags": [],
             "label": "#opts",
@@ -346,7 +354,7 @@
           },
           {
             "parentPluginId": "@kbn/journeys",
-            "id": "def-server.JourneyConfig.path",
+            "id": "def-common.JourneyConfig.path",
             "type": "string",
             "tags": [],
             "label": "#path",
@@ -357,7 +365,7 @@
           },
           {
             "parentPluginId": "@kbn/journeys",
-            "id": "def-server.JourneyConfig.name",
+            "id": "def-common.JourneyConfig.name",
             "type": "string",
             "tags": [],
             "label": "#name",
@@ -368,7 +376,7 @@
           },
           {
             "parentPluginId": "@kbn/journeys",
-            "id": "def-server.JourneyConfig.Unnamed",
+            "id": "def-common.JourneyConfig.Unnamed",
             "type": "Function",
             "tags": [],
             "label": "Constructor",
@@ -382,7 +390,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/journeys",
-                "id": "def-server.JourneyConfig.Unnamed.$1",
+                "id": "def-common.JourneyConfig.Unnamed.$1",
                 "type": "string",
                 "tags": [],
                 "label": "path",
@@ -397,7 +405,7 @@
               },
               {
                 "parentPluginId": "@kbn/journeys",
-                "id": "def-server.JourneyConfig.Unnamed.$2",
+                "id": "def-common.JourneyConfig.Unnamed.$2",
                 "type": "Object",
                 "tags": [],
                 "label": "opts",
@@ -416,7 +424,7 @@
           },
           {
             "parentPluginId": "@kbn/journeys",
-            "id": "def-server.JourneyConfig.getEsArchives",
+            "id": "def-common.JourneyConfig.getEsArchives",
             "type": "Function",
             "tags": [],
             "label": "getEsArchives",
@@ -432,7 +440,7 @@
           },
           {
             "parentPluginId": "@kbn/journeys",
-            "id": "def-server.JourneyConfig.getKbnArchives",
+            "id": "def-common.JourneyConfig.getKbnArchives",
             "type": "Function",
             "tags": [],
             "label": "getKbnArchives",
@@ -448,7 +456,7 @@
           },
           {
             "parentPluginId": "@kbn/journeys",
-            "id": "def-server.JourneyConfig.isXpack",
+            "id": "def-common.JourneyConfig.isXpack",
             "type": "Function",
             "tags": [],
             "label": "isXpack",
@@ -464,7 +472,7 @@
           },
           {
             "parentPluginId": "@kbn/journeys",
-            "id": "def-server.JourneyConfig.getExtraApmLabels",
+            "id": "def-common.JourneyConfig.getExtraApmLabels",
             "type": "Function",
             "tags": [],
             "label": "getExtraApmLabels",
@@ -480,7 +488,7 @@
           },
           {
             "parentPluginId": "@kbn/journeys",
-            "id": "def-server.JourneyConfig.getRepoRelPath",
+            "id": "def-common.JourneyConfig.getRepoRelPath",
             "type": "Function",
             "tags": [],
             "label": "getRepoRelPath",
@@ -496,7 +504,7 @@
           },
           {
             "parentPluginId": "@kbn/journeys",
-            "id": "def-server.JourneyConfig.getPath",
+            "id": "def-common.JourneyConfig.getPath",
             "type": "Function",
             "tags": [],
             "label": "getPath",
@@ -512,7 +520,7 @@
           },
           {
             "parentPluginId": "@kbn/journeys",
-            "id": "def-server.JourneyConfig.getName",
+            "id": "def-common.JourneyConfig.getName",
             "type": "Function",
             "tags": [],
             "label": "getName",
@@ -528,7 +536,7 @@
           },
           {
             "parentPluginId": "@kbn/journeys",
-            "id": "def-server.JourneyConfig.shouldAutoLogin",
+            "id": "def-common.JourneyConfig.shouldAutoLogin",
             "type": "Function",
             "tags": [],
             "label": "shouldAutoLogin",
@@ -544,7 +552,7 @@
           },
           {
             "parentPluginId": "@kbn/journeys",
-            "id": "def-server.JourneyConfig.isSkipped",
+            "id": "def-common.JourneyConfig.isSkipped",
             "type": "Function",
             "tags": [],
             "label": "isSkipped",
@@ -560,7 +568,7 @@
           },
           {
             "parentPluginId": "@kbn/journeys",
-            "id": "def-server.JourneyConfig.getScalabilityConfig",
+            "id": "def-common.JourneyConfig.getScalabilityConfig",
             "type": "Function",
             "tags": [],
             "label": "getScalabilityConfig",
@@ -569,9 +577,9 @@
               "() => ",
               {
                 "pluginId": "@kbn/journeys",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnJourneysPluginApi",
-                "section": "def-server.ScalabilitySetup",
+                "section": "def-common.ScalabilitySetup",
                 "text": "ScalabilitySetup"
               },
               " | undefined"
@@ -584,7 +592,7 @@
           },
           {
             "parentPluginId": "@kbn/journeys",
-            "id": "def-server.JourneyConfig.getExtendedStepCtx",
+            "id": "def-common.JourneyConfig.getExtendedStepCtx",
             "type": "Function",
             "tags": [],
             "label": "getExtendedStepCtx",
@@ -602,7 +610,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/journeys",
-                "id": "def-server.JourneyConfig.getExtendedStepCtx.$1",
+                "id": "def-common.JourneyConfig.getExtendedStepCtx.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "ctx",
@@ -623,7 +631,7 @@
       },
       {
         "parentPluginId": "@kbn/journeys",
-        "id": "def-server.JourneyScreenshots",
+        "id": "def-common.JourneyScreenshots",
         "type": "Class",
         "tags": [],
         "label": "JourneyScreenshots",
@@ -634,7 +642,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/journeys",
-            "id": "def-server.JourneyScreenshots.load",
+            "id": "def-common.JourneyScreenshots.load",
             "type": "Function",
             "tags": [],
             "label": "load",
@@ -643,9 +651,9 @@
               "(journeyName: string) => Promise<",
               {
                 "pluginId": "@kbn/journeys",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnJourneysPluginApi",
-                "section": "def-server.JourneyScreenshots",
+                "section": "def-common.JourneyScreenshots",
                 "text": "JourneyScreenshots"
               },
               ">"
@@ -656,7 +664,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/journeys",
-                "id": "def-server.JourneyScreenshots.load.$1",
+                "id": "def-common.JourneyScreenshots.load.$1",
                 "type": "string",
                 "tags": [],
                 "label": "journeyName",
@@ -674,7 +682,7 @@
           },
           {
             "parentPluginId": "@kbn/journeys",
-            "id": "def-server.JourneyScreenshots.dir",
+            "id": "def-common.JourneyScreenshots.dir",
             "type": "string",
             "tags": [],
             "label": "#dir",
@@ -685,7 +693,7 @@
           },
           {
             "parentPluginId": "@kbn/journeys",
-            "id": "def-server.JourneyScreenshots.manifestPath",
+            "id": "def-common.JourneyScreenshots.manifestPath",
             "type": "string",
             "tags": [],
             "label": "#manifestPath",
@@ -696,7 +704,7 @@
           },
           {
             "parentPluginId": "@kbn/journeys",
-            "id": "def-server.JourneyScreenshots.manifest",
+            "id": "def-common.JourneyScreenshots.manifest",
             "type": "Object",
             "tags": [],
             "label": "#manifest",
@@ -707,7 +715,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/journeys",
-                "id": "def-server.JourneyScreenshots.manifest.steps",
+                "id": "def-common.JourneyScreenshots.manifest.steps",
                 "type": "Array",
                 "tags": [],
                 "label": "steps",
@@ -723,7 +731,7 @@
           },
           {
             "parentPluginId": "@kbn/journeys",
-            "id": "def-server.JourneyScreenshots.Unnamed",
+            "id": "def-common.JourneyScreenshots.Unnamed",
             "type": "Function",
             "tags": [],
             "label": "Constructor",
@@ -737,7 +745,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/journeys",
-                "id": "def-server.JourneyScreenshots.Unnamed.$1",
+                "id": "def-common.JourneyScreenshots.Unnamed.$1",
                 "type": "string",
                 "tags": [],
                 "label": "journeyName",
@@ -755,7 +763,7 @@
           },
           {
             "parentPluginId": "@kbn/journeys",
-            "id": "def-server.JourneyScreenshots.isLocked",
+            "id": "def-common.JourneyScreenshots.isLocked",
             "type": "Object",
             "tags": [],
             "label": "#isLocked",
@@ -770,7 +778,7 @@
           },
           {
             "parentPluginId": "@kbn/journeys",
-            "id": "def-server.JourneyScreenshots.lock",
+            "id": "def-common.JourneyScreenshots.lock",
             "type": "Function",
             "tags": [],
             "label": "lock",
@@ -784,7 +792,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/journeys",
-                "id": "def-server.JourneyScreenshots.lock.$1",
+                "id": "def-common.JourneyScreenshots.lock.$1",
                 "type": "Function",
                 "tags": [],
                 "label": "fn",
@@ -802,7 +810,7 @@
           },
           {
             "parentPluginId": "@kbn/journeys",
-            "id": "def-server.JourneyScreenshots.addError",
+            "id": "def-common.JourneyScreenshots.addError",
             "type": "Function",
             "tags": [],
             "label": "addError",
@@ -818,7 +826,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/journeys",
-                "id": "def-server.JourneyScreenshots.addError.$1",
+                "id": "def-common.JourneyScreenshots.addError.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "step",
@@ -833,7 +841,7 @@
               },
               {
                 "parentPluginId": "@kbn/journeys",
-                "id": "def-server.JourneyScreenshots.addError.$2",
+                "id": "def-common.JourneyScreenshots.addError.$2",
                 "type": "Object",
                 "tags": [],
                 "label": "screenshot",
@@ -848,7 +856,7 @@
               },
               {
                 "parentPluginId": "@kbn/journeys",
-                "id": "def-server.JourneyScreenshots.addError.$3",
+                "id": "def-common.JourneyScreenshots.addError.$3",
                 "type": "Object",
                 "tags": [],
                 "label": "fullscreenScreenshot",
@@ -866,7 +874,7 @@
           },
           {
             "parentPluginId": "@kbn/journeys",
-            "id": "def-server.JourneyScreenshots.addSuccess",
+            "id": "def-common.JourneyScreenshots.addSuccess",
             "type": "Function",
             "tags": [],
             "label": "addSuccess",
@@ -882,7 +890,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/journeys",
-                "id": "def-server.JourneyScreenshots.addSuccess.$1",
+                "id": "def-common.JourneyScreenshots.addSuccess.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "step",
@@ -897,7 +905,7 @@
               },
               {
                 "parentPluginId": "@kbn/journeys",
-                "id": "def-server.JourneyScreenshots.addSuccess.$2",
+                "id": "def-common.JourneyScreenshots.addSuccess.$2",
                 "type": "Object",
                 "tags": [],
                 "label": "screenshot",
@@ -912,7 +920,7 @@
               },
               {
                 "parentPluginId": "@kbn/journeys",
-                "id": "def-server.JourneyScreenshots.addSuccess.$3",
+                "id": "def-common.JourneyScreenshots.addSuccess.$3",
                 "type": "Object",
                 "tags": [],
                 "label": "fullscreenScreenshot",
@@ -930,7 +938,7 @@
           },
           {
             "parentPluginId": "@kbn/journeys",
-            "id": "def-server.JourneyScreenshots.get",
+            "id": "def-common.JourneyScreenshots.get",
             "type": "Function",
             "tags": [],
             "label": "get",
@@ -952,7 +960,7 @@
     "interfaces": [
       {
         "parentPluginId": "@kbn/journeys",
-        "id": "def-server.ScalabilitySetup",
+        "id": "def-common.ScalabilitySetup",
         "type": "Interface",
         "tags": [],
         "label": "ScalabilitySetup",
@@ -963,7 +971,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/journeys",
-            "id": "def-server.ScalabilitySetup.maxDuration",
+            "id": "def-common.ScalabilitySetup.maxDuration",
             "type": "string",
             "tags": [],
             "label": "maxDuration",
@@ -976,7 +984,42 @@
           },
           {
             "parentPluginId": "@kbn/journeys",
-            "id": "def-server.ScalabilitySetup.warmup",
+            "id": "def-common.ScalabilitySetup.responseTimeMetric",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "responseTimeMetric",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/journeys",
+                "scope": "common",
+                "docId": "kibKbnJourneysPluginApi",
+                "section": "def-common.ResponseTimeMetric",
+                "text": "ResponseTimeMetric"
+              },
+              " | undefined"
+            ],
+            "path": "packages/kbn-journeys/journey/journey_config.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/journeys",
+            "id": "def-common.ScalabilitySetup.responseTimeThreshold",
+            "type": "Object",
+            "tags": [],
+            "label": "responseTimeThreshold",
+            "description": [],
+            "signature": [
+              "{ threshold1: number; threshold2: number; threshold3: number; } | undefined"
+            ],
+            "path": "packages/kbn-journeys/journey/journey_config.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/journeys",
+            "id": "def-common.ScalabilitySetup.warmup",
             "type": "Array",
             "tags": [],
             "label": "warmup",
@@ -984,9 +1027,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/journeys",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnJourneysPluginApi",
-                "section": "def-server.ScalabilityAction",
+                "section": "def-common.ScalabilityAction",
                 "text": "ScalabilityAction"
               },
               "[]"
@@ -997,7 +1040,7 @@
           },
           {
             "parentPluginId": "@kbn/journeys",
-            "id": "def-server.ScalabilitySetup.test",
+            "id": "def-common.ScalabilitySetup.test",
             "type": "Array",
             "tags": [],
             "label": "test",
@@ -1005,9 +1048,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/journeys",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnJourneysPluginApi",
-                "section": "def-server.ScalabilityAction",
+                "section": "def-common.ScalabilityAction",
                 "text": "ScalabilityAction"
               },
               "[]"
@@ -1021,7 +1064,7 @@
       },
       {
         "parentPluginId": "@kbn/journeys",
-        "id": "def-server.Step",
+        "id": "def-common.Step",
         "type": "Interface",
         "tags": [],
         "label": "Step",
@@ -1029,9 +1072,9 @@
         "signature": [
           {
             "pluginId": "@kbn/journeys",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnJourneysPluginApi",
-            "section": "def-server.Step",
+            "section": "def-common.Step",
             "text": "Step"
           },
           "<CtxExt>"
@@ -1042,7 +1085,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/journeys",
-            "id": "def-server.Step.name",
+            "id": "def-common.Step.name",
             "type": "string",
             "tags": [],
             "label": "name",
@@ -1053,7 +1096,7 @@
           },
           {
             "parentPluginId": "@kbn/journeys",
-            "id": "def-server.Step.index",
+            "id": "def-common.Step.index",
             "type": "number",
             "tags": [],
             "label": "index",
@@ -1064,7 +1107,7 @@
           },
           {
             "parentPluginId": "@kbn/journeys",
-            "id": "def-server.Step.fn",
+            "id": "def-common.Step.fn",
             "type": "Function",
             "tags": [],
             "label": "fn",
@@ -1080,7 +1123,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/journeys",
-                "id": "def-server.Step.fn.$1",
+                "id": "def-common.Step.fn.$1",
                 "type": "CompoundType",
                 "tags": [],
                 "label": "ctx",
@@ -1105,7 +1148,22 @@
     "misc": [
       {
         "parentPluginId": "@kbn/journeys",
-        "id": "def-server.ScalabilityAction",
+        "id": "def-common.ResponseTimeMetric",
+        "type": "Type",
+        "tags": [],
+        "label": "ResponseTimeMetric",
+        "description": [],
+        "signature": [
+          "\"min\" | \"max\" | \"25%\" | \"50%\" | \"75%\" | \"80%\" | \"85%\" | \"90%\" | \"95%\" | \"99%\""
+        ],
+        "path": "packages/kbn-journeys/journey/journey_config.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/journeys",
+        "id": "def-common.ScalabilityAction",
         "type": "Type",
         "tags": [],
         "label": "ScalabilityAction",
@@ -1121,14 +1179,6 @@
         "initialIsOpen": false
       }
     ],
-    "objects": []
-  },
-  "common": {
-    "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
     "objects": []
   }
 }

@@ -7,7 +7,7 @@
  */
 
 import { ExecutionContext } from '@kbn/expressions-plugin/common';
-import { functionWrapper, fontStyle } from '@kbn/presentation-util-plugin/common';
+import { functionWrapper, fontStyle } from '@kbn/presentation-util-plugin/test_helpers';
 import { metricFunction } from './metric_function';
 
 describe('metric', () => {

@@ -10,6 +10,7 @@ import { FtrProviderContext } from '../ftr_provider_context';
 export function ApiKeysPageProvider({ getService }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const find = getService('find');
+  const monacoEditor = getService('monacoEditor');
 
   return {
     async noAPIKeysHeading() {
@@ -40,12 +41,28 @@ export function ApiKeysPageProvider({ getService }: FtrProviderContext) {
       return await testSubjects.setValue('apiKeyNameInput', apiKeyName);
     },
 
+    async getApiKeyName() {
+      return await testSubjects.find('apiKeyNameInput');
+    },
+
     async setApiKeyCustomExpiration(expirationTime: string) {
       return await testSubjects.setValue('apiKeyCustomExpirationInput', expirationTime);
     },
 
-    async submitOnCreateApiKey() {
+    async toggleCustomExpiration() {
+      return await testSubjects.click('apiKeyCustomExpirationSwitch');
+    },
+
+    async clickSubmitButtonOnApiKeyFlyout() {
       return await testSubjects.click('formFlyoutSubmitButton');
+    },
+
+    async waitForSubmitButtonOnApiKeyFlyoutEnabled() {
+      return testSubjects.waitForEnabled('formFlyoutSubmitButton', 10000);
+    },
+
+    async clickCancelButtonOnApiKeyFlyout() {
+      return await testSubjects.click('formFlyoutCancelButton');
     },
 
     async isApiKeyModalExists() {
@@ -55,10 +72,6 @@ export function ApiKeysPageProvider({ getService }: FtrProviderContext) {
     async getNewApiKeyCreation() {
       const euiCallOutHeader = await find.byCssSelector('.euiCallOutHeader__title');
       return euiCallOutHeader.getVisibleText();
-    },
-
-    async toggleCustomExpiration() {
-      return await testSubjects.click('apiKeyCustomExpirationSwitch');
     },
 
     async getErrorCallOutText() {
@@ -91,6 +104,50 @@ export function ApiKeysPageProvider({ getService }: FtrProviderContext) {
         await testSubjects.click('bulkInvalidateActionButton');
         await testSubjects.click('confirmModalConfirmButton');
       }
+    },
+
+    async clickExistingApiKeyToOpenFlyout(apiKeyName: string) {
+      await testSubjects.click(`apiKeyRowName-${apiKeyName}`);
+    },
+
+    async ensureApiKeyExists(apiKeyName: string) {
+      await testSubjects.existOrFail(`apiKeyRowName-${apiKeyName}`);
+    },
+
+    async getMetadataSwitch() {
+      return await testSubjects.find('apiKeysMetadataSwitch');
+    },
+
+    async getCodeEditorValueByIndex(index: number) {
+      return await monacoEditor.getCodeEditorValue(index);
+    },
+
+    async setCodeEditorValueByIndex(index: number, data: string) {
+      await monacoEditor.setCodeEditorValue(data, index);
+    },
+
+    async getRestrictPrivilegesSwitch() {
+      return await testSubjects.find('apiKeysRoleDescriptorsSwitch');
+    },
+
+    async getFlyoutTitleText() {
+      const header = await find.byClassName('euiFlyoutHeader');
+      return header.getVisibleText();
+    },
+
+    async getFlyoutUsername() {
+      const usernameField = await testSubjects.find('apiKeyFlyoutUsername');
+      return usernameField.getVisibleText();
+    },
+
+    async getFlyoutApiKeyStatus() {
+      const apiKeyStatusField = await testSubjects.find('apiKeyStatus');
+      return apiKeyStatusField.getVisibleText();
+    },
+
+    async getApiKeyUpdateSuccessToast() {
+      const toast = await testSubjects.find('updateApiKeySuccessToast');
+      return toast.getVisibleText();
     },
   };
 }

@@ -48,9 +48,9 @@ image::user/alerting/images/rule-types-index-threshold-preview.png[Five clauses 
 [float]
 ==== Example
 
-In this example, you will use the {kib} <<add-sample-data, sample weblog dataset>> to set up and tune the conditions on an index threshold rule. For this example, you want to detect when any of the top four sites serve more than 420,000 bytes over a 24 hour period.
+In this example, you will use the {kib} <<add-sample-data,sample weblog dataset>> to set up and tune the conditions on an index threshold rule. For this example, you want to detect when any of the top four sites serve more than 420,000 bytes over a 24 hour period.
 
-.  Open the main menu, then click **Stack Management > Rules and Connectors**.
+.  Open the main menu, then click *{stack-manage-app} > {rules-ui}*.
 
 .  Create a new rule that is checked every four hours and triggers actions when the rule status changes.
 +

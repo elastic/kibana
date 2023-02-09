@@ -15,8 +15,20 @@ import {
 } from '../../common';
 
 function transformAction(input: AsApiContract<RuleAction>): RuleAction {
-  const { connector_type_id: actionTypeId, ...rest } = input;
-  return { actionTypeId, ...rest };
+  const { connector_type_id: actionTypeId, frequency, ...rest } = input;
+  return {
+    actionTypeId,
+    ...(frequency
+      ? {
+          frequency: {
+            summary: frequency.summary,
+            throttle: frequency.throttle,
+            notifyWhen: frequency.notify_when,
+          },
+        }
+      : {}),
+    ...rest,
+  };
 }
 
 // AsApiContract does not deal with object properties that are dates - the
@@ -51,10 +63,16 @@ function transformMonitoring(input: RuleMonitoring): RuleMonitoring {
 }
 
 function transformLastRun(input: AsApiContract<RuleLastRun>): RuleLastRun {
-  const { outcome_msg: outcomeMsg, alerts_count: alertsCount, ...rest } = input;
+  const {
+    outcome_msg: outcomeMsg,
+    alerts_count: alertsCount,
+    outcome_order: outcomeOrder,
+    ...rest
+  } = input;
   return {
     outcomeMsg,
     alertsCount,
+    outcomeOrder,
     ...rest,
   };
 }

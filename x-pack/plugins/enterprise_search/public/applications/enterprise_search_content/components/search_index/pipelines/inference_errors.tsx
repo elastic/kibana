@@ -16,14 +16,16 @@ import { i18n } from '@kbn/i18n';
 import { MlInferenceError } from '../../../../../../common/types/pipelines';
 import { DataPanel } from '../../../../shared/data_panel/data_panel';
 
+import { FetchMlInferenceErrorsApiLogic } from '../../../api/pipelines/fetch_ml_inference_pipeline_errors';
+
 import { InferenceErrorsLogic } from './inference_errors_logic';
 
 export const InferenceErrors: React.FC = () => {
   const { indexName, isLoading, inferenceErrors } = useValues(InferenceErrorsLogic);
-  const { fetchIndexInferenceErrorLogs } = useActions(InferenceErrorsLogic);
+  const { makeRequest } = useActions(FetchMlInferenceErrorsApiLogic);
 
   useEffect(() => {
-    fetchIndexInferenceErrorLogs({ indexName });
+    makeRequest({ indexName });
   }, [indexName]);
 
   const errorsColumns: Array<EuiBasicTableColumn<MlInferenceError>> = [

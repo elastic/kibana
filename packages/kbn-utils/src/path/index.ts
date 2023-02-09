@@ -9,7 +9,7 @@
 import { join } from 'path';
 import { accessSync, constants } from 'fs';
 import { TypeOf, schema } from '@kbn/config-schema';
-import { REPO_ROOT } from '../repo_root';
+import { REPO_ROOT } from '@kbn/repo-info';
 
 const isString = (v: any): v is string => typeof v === 'string';
 

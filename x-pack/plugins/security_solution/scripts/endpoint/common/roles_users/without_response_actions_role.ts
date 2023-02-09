@@ -7,7 +7,7 @@
 
 import type { Role } from '@kbn/security-plugin/common';
 
-export const noResponseActionsRole: Omit<Role, 'name'> = {
+export const getNoResponseActionsRole: () => Omit<Role, 'name'> = () => ({
   elasticsearch: {
     cluster: ['manage'],
     indices: [
@@ -59,4 +59,4 @@ export const noResponseActionsRole: Omit<Role, 'name'> = {
       spaces: ['*'],
     },
   ],
-};
+});

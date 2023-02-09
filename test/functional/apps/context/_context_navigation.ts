@@ -31,8 +31,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(await filterBar.hasFilter(columnName, value, true)).to.eql(true);
     }
     expect(await PageObjects.timePicker.getTimeConfigAsAbsoluteTimes()).to.eql({
-      start: 'Sep 18, 2015 @ 06:31:44.000',
-      end: 'Sep 23, 2015 @ 18:31:44.000',
+      start: PageObjects.timePicker.defaultStartTime,
+      end: PageObjects.timePicker.defaultEndTime,
     });
   };
 
@@ -45,7 +45,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.common.navigateToApp('discover');
       await PageObjects.header.waitUntilLoadingHasFinished();
       for (const [columnName, value] of TEST_FILTER_COLUMN_NAMES) {
-        await filterBar.addFilter(columnName, 'is', value);
+        await filterBar.addFilter({ field: columnName, operation: 'is', value });
       }
     });
 

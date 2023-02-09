@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import rison from 'rison-node';
+import rison from '@kbn/rison';
 
 import { Workspace } from '../types';
 

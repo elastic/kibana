@@ -9,6 +9,7 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 
 export function ActionsAPIServiceProvider({ getService }: FtrProviderContext) {
   const kbnSupertest = getService('supertest');
+  const log = getService('log');
 
   return {
     async createConnector({
@@ -37,10 +38,24 @@ export function ActionsAPIServiceProvider({ getService }: FtrProviderContext) {
     },
 
     async deleteConnector(id: string) {
-      return kbnSupertest
+      log.debug(`Deleting connector with id '${id}'...`);
+      const rsp = kbnSupertest
         .delete(`/api/actions/connector/${id}`)
         .set('kbn-xsrf', 'foo')
         .expect(204, '');
+      log.debug('> Connector deleted.');
+      return rsp;
+    },
+
+    async deleteAllConnectors() {
+      const { body } = await kbnSupertest
+        .get(`/api/actions/connectors`)
+        .set('kbn-xsrf', 'foo')
+        .expect(200);
+
+      for (const connector of body) {
+        await this.deleteConnector(connector.id);
+      }
     },
   };
 }

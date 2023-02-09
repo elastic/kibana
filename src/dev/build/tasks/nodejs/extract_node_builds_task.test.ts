@@ -9,7 +9,7 @@
 import { readFileSync } from 'fs';
 import Path from 'path';
 
-import { REPO_ROOT } from '@kbn/utils';
+import { REPO_ROOT } from '@kbn/repo-info';
 import { ToolingLog, ToolingLogCollectingWriter } from '@kbn/tooling-log';
 import { createAbsolutePathSerializer, createRecursiveSerializer } from '@kbn/jest-serializers';
 
@@ -41,7 +41,9 @@ async function setup() {
     targetAllPlatforms: true,
     dockerContextUseLocalArtifact: false,
     dockerCrossCompile: false,
+    dockerNamespace: null,
     dockerPush: false,
+    dockerTag: '',
     dockerTagQualifier: '',
   });
 

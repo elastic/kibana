@@ -5,21 +5,14 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { observer, timerange } from '../..';
+import { observer, AgentConfigFields } from '@kbn/apm-synthtrace-client';
 import { Scenario } from '../cli/scenario';
-import { getLogger } from '../cli/utils/get_common_services';
-import { RunOptions } from '../cli/utils/parse_run_cli_flags';
-import { AgentConfigFields } from '../lib/agent_config/agent_config_fields';
 
-const scenario: Scenario<AgentConfigFields> = async (runOptions: RunOptions) => {
-  const logger = getLogger(runOptions);
-
+const scenario: Scenario<AgentConfigFields> = async ({ logger }) => {
   return {
-    generate: ({ from, to }) => {
+    generate: ({ range }) => {
       const agentConfig = observer().agentConfig();
 
-      const range = timerange(from, to);
       return range
         .interval('30s')
         .rate(1)

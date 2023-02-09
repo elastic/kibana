@@ -6,9 +6,11 @@
  */
 
 import { EuiButtonGroup, EuiButtonGroupOptionProps } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { ALL_ALERTS, ACTIVE_ALERTS, RECOVERED_ALERTS } from '../constants';
 import { AlertStatusFilterProps } from '../types';
+import { AlertStatus } from '../../../../../common/typings';
 
 const options: EuiButtonGroupOptionProps[] = [
   {
@@ -34,11 +36,13 @@ const options: EuiButtonGroupOptionProps[] = [
 export function AlertsStatusFilter({ status, onChange }: AlertStatusFilterProps) {
   return (
     <EuiButtonGroup
-      legend="Filter by"
+      legend={i18n.translate('xpack.observability.alerts.alertStatusFilter.legend', {
+        defaultMessage: 'Filter by',
+      })}
       color="primary"
       options={options}
       idSelected={status}
-      onChange={onChange}
+      onChange={(id) => onChange(id as AlertStatus)}
     />
   );
 }

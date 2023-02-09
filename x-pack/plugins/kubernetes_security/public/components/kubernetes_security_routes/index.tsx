@@ -60,6 +60,9 @@ const KubernetesSecurityRoutesComponent = ({
   indexPattern,
   globalFilter,
   renderSessionsView,
+  responseActionClick,
+  handleTreeNavSelection,
+  responseActionButtonProps,
 }: KubernetesSecurityDeps) => {
   const [shouldHideCharts, setShouldHideCharts] = useLocalStorage(
     LOCAL_STORAGE_HIDE_WIDGETS_KEY,
@@ -296,6 +299,9 @@ const KubernetesSecurityRoutesComponent = ({
           globalFilter={globalFilterForKubernetes}
           renderSessionsView={renderSessionsView}
           indexPattern={indexPattern}
+          responseActionButtonProps={responseActionButtonProps}
+          responseActionClick={responseActionClick}
+          handleTreeNavSelection={handleTreeNavSelection}
         />
       </Route>
     </Switch>

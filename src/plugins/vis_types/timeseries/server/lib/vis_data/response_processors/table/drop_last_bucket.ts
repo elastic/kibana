@@ -7,8 +7,6 @@
  */
 
 import { isLastValueTimerangeMode } from '../../helpers';
-
-// @ts-expect-error no typed yet
 import { dropLastBucket } from '../series/drop_last_bucket';
 
 import type { TableResponseProcessorsFunction } from './types';

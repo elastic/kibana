@@ -25,7 +25,7 @@ interface GetSearchDslOptions {
   defaultSearchOperator?: SearchOperator;
   searchFields?: string[];
   rootSearchFields?: string[];
-  searchAfter?: estypes.Id[];
+  searchAfter?: estypes.SortResults;
   sortField?: string;
   sortOrder?: estypes.SortOrder;
   namespaces?: string[];

@@ -6,9 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { schema } from '@kbn/config-schema';
+import { schema, Type } from '@kbn/config-schema';
 import { ReplaySubject } from 'rxjs';
 import { Readable } from 'stream';
+import type { FilesClient } from '../../../common/files_client';
 import type { FileKind } from '../../../common/types';
 import type { CreateRouteDefinition } from '../../../common/api_routes';
 import { FILES_API_ROUTES } from '../api_routes';
@@ -23,7 +24,7 @@ const rt = {
   params: schema.object({
     id: schema.string(),
   }),
-  body: schema.stream(),
+  body: schema.stream() as Type<unknown>,
   query: schema.object({
     selfDestructOnAbort: schema.maybe(schema.boolean()),
   }),
@@ -34,7 +35,8 @@ export type Endpoint = CreateRouteDefinition<
   {
     ok: true;
     size: number;
-  }
+  },
+  FilesClient['upload']
 >;
 
 export const handler: CreateHandler<Endpoint> = async ({ files, fileKind }, req, res) => {

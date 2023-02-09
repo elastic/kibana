@@ -51,7 +51,7 @@ describe('EmailNotificationService', () => {
         ],
       },
       message:
-        'You are assigned to an Elastic Kibana Case.\r\n\r\nTitle: Super Bad Security Issue\r\n\r\nStatus: open\r\n\r\nSeverity: low\r\n\r\nTags: defacement\r\n\r\n\r\n\r\n[View the case details](https://example.com/app/security/cases/mock-id-1)',
+        'You are assigned to an Elastic Case.\r\n\r\nTitle: Super Bad Security Issue\r\n\r\nStatus: open\r\n\r\nSeverity: low\r\n\r\nTags: defacement\r\n\r\n\r\n\r\n[View the case details](https://example.com/app/security/cases/mock-id-1)',
       subject: '[Elastic][Cases] Super Bad Security Issue',
       to: ['damaged_raccoon@elastic.co', 'physical_dinosaur@elastic.co', 'wet_dingo@elastic.co'],
     });
@@ -74,7 +74,7 @@ describe('EmailNotificationService', () => {
         ],
       },
       message:
-        'You are assigned to an Elastic Kibana Case.\r\n\r\nTitle: Super Bad Security Issue\r\n\r\nStatus: open\r\n\r\nSeverity: low\r\n\r\nTags: defacement\r\n\r\n\r\n\r\n[View the case details](https://example.com/app/security/cases/mock-id-1)',
+        'You are assigned to an Elastic Case.\r\n\r\nTitle: Super Bad Security Issue\r\n\r\nStatus: open\r\n\r\nSeverity: low\r\n\r\nTags: defacement\r\n\r\n\r\n\r\n[View the case details](https://example.com/app/security/cases/mock-id-1)',
       subject: '[Elastic][Cases] Super Bad Security Issue',
       to: ['damaged_raccoon@elastic.co', 'physical_dinosaur@elastic.co', 'wet_dingo@elastic.co'],
     });
@@ -102,7 +102,7 @@ describe('EmailNotificationService', () => {
         ],
       },
       message:
-        'You are assigned to an Elastic Kibana Case.\r\n\r\nTitle: Super Bad Security Issue\r\n\r\nStatus: open\r\n\r\nSeverity: low\r\n\r\nTags: defacement\r\n\r\n\r\n\r\n[View the case details](https://example.com/app/security/cases/mock-id-1)',
+        'You are assigned to an Elastic Case.\r\n\r\nTitle: Super Bad Security Issue\r\n\r\nStatus: open\r\n\r\nSeverity: low\r\n\r\nTags: defacement\r\n\r\n\r\n\r\n[View the case details](https://example.com/app/security/cases/mock-id-1)',
       subject: '[Elastic][Cases] Super Bad Security Issue',
       to: ['physical_dinosaur@elastic.co'],
     });
@@ -125,7 +125,7 @@ describe('EmailNotificationService', () => {
         ],
       },
       message:
-        'You are assigned to an Elastic Kibana Case.\r\n\r\nTitle: Super Bad Security Issue\r\n\r\nStatus: open\r\n\r\nSeverity: low\r\n\r\nTags: defacement\r\n\r\n\r\n\r\n[View the case details](https://example.com/app/security/cases/mock-id-1)',
+        'You are assigned to an Elastic Case.\r\n\r\nTitle: Super Bad Security Issue\r\n\r\nStatus: open\r\n\r\nSeverity: low\r\n\r\nTags: defacement\r\n\r\n\r\n\r\n[View the case details](https://example.com/app/security/cases/mock-id-1)',
       subject: '[Elastic][Cases] Super Bad Security Issue',
       to: ['damaged_raccoon@elastic.co', 'physical_dinosaur@elastic.co', 'wet_dingo@elastic.co'],
     });
@@ -156,7 +156,7 @@ describe('EmailNotificationService', () => {
         ],
       },
       message:
-        'You are assigned to an Elastic Kibana Case.\r\n\r\nTitle: Super Bad Security Issue\r\n\r\nStatus: open\r\n\r\nSeverity: low\r\n\r\nTags: defacement\r\n\r\n\r\n\r\n[View the case details](https://example.com/s/test-space/app/security/cases/mock-id-1)',
+        'You are assigned to an Elastic Case.\r\n\r\nTitle: Super Bad Security Issue\r\n\r\nStatus: open\r\n\r\nSeverity: low\r\n\r\nTags: defacement\r\n\r\n\r\n\r\n[View the case details](https://example.com/s/test-space/app/security/cases/mock-id-1)',
       subject: '[Elastic][Cases] Super Bad Security Issue',
       to: ['damaged_raccoon@elastic.co', 'physical_dinosaur@elastic.co', 'wet_dingo@elastic.co'],
     });
@@ -186,7 +186,7 @@ describe('EmailNotificationService', () => {
         ],
       },
       message:
-        'You are assigned to an Elastic Kibana Case.\r\n\r\nTitle: Super Bad Security Issue\r\n\r\nStatus: open\r\n\r\nSeverity: low\r\n\r\nTags: defacement\r\n\r\n',
+        'You are assigned to an Elastic Case.\r\n\r\nTitle: Super Bad Security Issue\r\n\r\nStatus: open\r\n\r\nSeverity: low\r\n\r\nTags: defacement\r\n\r\n',
       subject: '[Elastic][Cases] Super Bad Security Issue',
       to: ['damaged_raccoon@elastic.co', 'physical_dinosaur@elastic.co', 'wet_dingo@elastic.co'],
     });
@@ -209,7 +209,7 @@ describe('EmailNotificationService', () => {
         ],
       },
       message:
-        'You are assigned to an Elastic Kibana Case.\r\n\r\nTitle: Super Bad Security Issue\r\n\r\nStatus: open\r\n\r\nSeverity: low\r\n\r\nTags: one, two\r\n\r\n\r\n\r\n[View the case details](https://example.com/app/security/cases/mock-id-1)',
+        'You are assigned to an Elastic Case.\r\n\r\nTitle: Super Bad Security Issue\r\n\r\nStatus: open\r\n\r\nSeverity: low\r\n\r\nTags: one, two\r\n\r\n\r\n\r\n[View the case details](https://example.com/app/security/cases/mock-id-1)',
       subject: '[Elastic][Cases] Super Bad Security Issue',
       to: ['damaged_raccoon@elastic.co', 'physical_dinosaur@elastic.co', 'wet_dingo@elastic.co'],
     });
@@ -232,7 +232,7 @@ describe('EmailNotificationService', () => {
         ],
       },
       message:
-        'You are assigned to an Elastic Kibana Case.\r\n\r\nTitle: Super Bad Security Issue\r\n\r\nStatus: open\r\n\r\nSeverity: low\r\n\r\n\r\n\r\n[View the case details](https://example.com/app/security/cases/mock-id-1)',
+        'You are assigned to an Elastic Case.\r\n\r\nTitle: Super Bad Security Issue\r\n\r\nStatus: open\r\n\r\nSeverity: low\r\n\r\n\r\n\r\n[View the case details](https://example.com/app/security/cases/mock-id-1)',
       subject: '[Elastic][Cases] Super Bad Security Issue',
       to: ['damaged_raccoon@elastic.co', 'physical_dinosaur@elastic.co', 'wet_dingo@elastic.co'],
     });

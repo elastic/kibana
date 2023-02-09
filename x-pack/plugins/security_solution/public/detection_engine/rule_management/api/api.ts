@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import { camelCase } from 'lodash';
 import type {
   CreateRuleExceptionListItemSchema,
   ExceptionListItemSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
 
+import type { RuleManagementFiltersResponse } from '../../../../common/detection_engine/rule_management/api/rules/filters/response_schema';
+import { RULE_MANAGEMENT_FILTERS_URL } from '../../../../common/detection_engine/rule_management/api/urls';
 import type { BulkActionsDryRunErrCode } from '../../../../common/constants';
 import {
   DETECTION_ENGINE_RULES_BULK_ACTION,
   DETECTION_ENGINE_RULES_PREVIEW,
   DETECTION_ENGINE_RULES_URL,
   DETECTION_ENGINE_RULES_URL_FIND,
-  DETECTION_ENGINE_TAGS_URL,
 } from '../../../../common/constants';
 
 import {
@@ -33,7 +33,6 @@ import type {
   BulkActionDuplicatePayload,
 } from '../../../../common/detection_engine/rule_management/api/rules/bulk_actions/request_schema';
 import { BulkActionType } from '../../../../common/detection_engine/rule_management/api/rules/bulk_actions/request_schema';
-
 import type {
   RuleResponse,
   PreviewResponse,
@@ -152,15 +151,10 @@ export const fetchRules = async ({
 }: FetchRulesProps): Promise<FetchRulesResponse> => {
   const filterString = convertRulesFilterToKQL(filterOptions);
 
-  // Sort field is camel cased because we use that in our mapping, but display snake case on the front end
-  const getFieldNameForSortField = (field: string) => {
-    return field === 'name' ? `${field}.keyword` : camelCase(field);
-  };
-
   const query = {
     page: pagination.page,
     per_page: pagination.perPage,
-    sort_field: getFieldNameForSortField(sortingOptions.field),
+    sort_field: sortingOptions.field,
     sort_order: sortingOptions.order,
     ...(filterString !== '' ? { filter: filterString } : {}),
   };
@@ -189,6 +183,7 @@ export const fetchRuleById = async ({ id, signal }: FetchRuleProps): Promise<Rul
 
 export interface BulkActionSummary {
   failed: number;
+  skipped: number;
   succeeded: number;
   total: number;
 }
@@ -197,6 +192,7 @@ export interface BulkActionResult {
   updated: Rule[];
   created: Rule[];
   deleted: Rule[];
+  skipped: Rule[];
 }
 
 export interface BulkActionAggregatedError {
@@ -206,14 +202,22 @@ export interface BulkActionAggregatedError {
   rules: Array<{ id: string; name?: string }>;
 }
 
+export interface BulkActionAttributes {
+  summary: BulkActionSummary;
+  results: BulkActionResult;
+  errors?: BulkActionAggregatedError[];
+}
+
 export interface BulkActionResponse {
   success?: boolean;
   rules_count?: number;
-  attributes: {
-    summary: BulkActionSummary;
-    results: BulkActionResult;
-    errors?: BulkActionAggregatedError[];
-  };
+  attributes: BulkActionAttributes;
+}
+
+export interface BulkActionErrorResponse {
+  message: string;
+  status_code: number;
+  attributes?: BulkActionAttributes;
 }
 
 export type QueryOrIds = { query: string; ids?: undefined } | { query?: undefined; ids: string[] };
@@ -331,6 +335,7 @@ export const importRules = async ({
   fileToImport,
   overwrite = false,
   overwriteExceptions = false,
+  overwriteActionConnectors = false,
   signal,
 }: ImportDataProps): Promise<ImportDataResponse> => {
   const formData = new FormData();
@@ -341,7 +346,11 @@ export const importRules = async ({
     {
       method: 'POST',
       headers: { 'Content-Type': undefined },
-      query: { overwrite, overwrite_exceptions: overwriteExceptions },
+      query: {
+        overwrite,
+        overwrite_exceptions: overwriteExceptions,
+        overwrite_action_connectors: overwriteActionConnectors,
+      },
       body: formData,
       signal,
     }
@@ -380,17 +389,19 @@ export const exportRules = async ({
   });
 };
 
-export type FetchTagsResponse = string[];
-
 /**
- * Fetch all unique Tags used by Rules
+ * Fetch rule filters related information like installed rules count, tags and etc
  *
  * @param signal to cancel request
  *
  * @throws An error if response is not OK
  */
-export const fetchTags = async ({ signal }: { signal?: AbortSignal }): Promise<FetchTagsResponse> =>
-  KibanaServices.get().http.fetch<FetchTagsResponse>(DETECTION_ENGINE_TAGS_URL, {
+export const fetchRuleManagementFilters = async ({
+  signal,
+}: {
+  signal?: AbortSignal;
+}): Promise<RuleManagementFiltersResponse> =>
+  KibanaServices.get().http.fetch<RuleManagementFiltersResponse>(RULE_MANAGEMENT_FILTERS_URL, {
     method: 'GET',
     signal,
   });

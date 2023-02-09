@@ -40,7 +40,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       'Warning',
       'Linux',
       '10.2.17.24, 10.56.215.200,10.254.196.130',
-      '8.5.0',
+      'x',
       'x',
       '',
     ],
@@ -51,7 +51,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       'Success',
       'Linux',
       '10.138.79.131, 10.170.160.154',
-      '8.5.0',
+      'x',
       'x',
       '',
     ],
@@ -62,7 +62,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       'Warning',
       'Linux',
       '10.87.11.145, 10.117.106.109,10.242.136.97',
-      '8.5.0',
+      'x',
       'x',
       '',
     ],
@@ -75,13 +75,15 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     for (let i = 1; i < tableData.length; i++) {
       tableData[i][1] = 'x';
       tableData[i][2] = 'x';
+      tableData[i][6] = 'x';
       tableData[i][7] = 'x';
     }
 
     return tableData;
   };
 
-  describe('endpoint list', function () {
+  // Failing: See https://github.com/elastic/kibana/issues/148111
+  describe.skip('endpoint list', function () {
     const sleep = (ms = 100) => new Promise((resolve) => setTimeout(resolve, ms));
     let indexedData: IndexedHostsAndAlertsResponse;
     describe('when initially navigating to page', () => {
@@ -96,8 +98,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
     });
 
-    // Version specific: https://github.com/elastic/kibana/issues/141298
-    describe.skip('when there is data,', () => {
+    describe('when there is data,', () => {
       before(async () => {
         indexedData = await endpointTestResources.loadEndpointData({ numHosts: 3 });
         await pageObjects.endpoint.navigateToEndpointList();

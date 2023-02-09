@@ -50,7 +50,9 @@
     "lens",
     "maps",
     "savedObjects",
+    "savedSearch",
     "usageCollection",
+    "unifiedFieldList",
     "unifiedSearch"
   ],
   "extraPublicDirs": [

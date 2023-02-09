@@ -6,23 +6,28 @@
  */
 
 import { before, after, expect, journey, step } from '@elastic/synthetics';
+import { recordVideo } from '@kbn/observability-plugin/e2e/record_video';
 import {
   addTestMonitor,
   cleanTestMonitors,
   enableMonitorManagedViaApi,
 } from './services/add_monitor';
-import { syntheticsAppPageProvider } from '../../page_objects/synthetics_app';
+import { syntheticsAppPageProvider } from '../../page_objects/synthetics/synthetics_app';
 
 journey('Overview Scrolling', async ({ page, params }) => {
+  recordVideo(page);
+
   const syntheticsApp = syntheticsAppPageProvider({ page, kibanaUrl: params.kibanaUrl });
 
   before(async () => {
     await enableMonitorManagedViaApi(params.kibanaUrl);
     await cleanTestMonitors(params);
 
+    const allPromises = [];
     for (let i = 0; i < 100; i++) {
-      await addTestMonitor(params.kibanaUrl, `test monitor ${i}`);
+      allPromises.push(addTestMonitor(params.kibanaUrl, `test monitor ${i}`));
     }
+    await Promise.all(allPromises);
 
     await syntheticsApp.waitForLoadingToFinish();
   });

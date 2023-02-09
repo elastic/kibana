@@ -56,7 +56,7 @@ export class EmailNotificationService implements NotificationService {
     publicBaseUrl?: IBasePath['publicBaseUrl']
   ) {
     const lineBreak = '\r\n\r\n';
-    let message = `You are assigned to an Elastic Kibana Case.${lineBreak}`;
+    let message = `You are assigned to an Elastic Case.${lineBreak}`;
     message = `${message}Title: ${theCase.attributes.title}${lineBreak}`;
     message = `${message}Status: ${theCase.attributes.status}${lineBreak}`;
     message = `${message}Severity: ${theCase.attributes.severity}${lineBreak}`;

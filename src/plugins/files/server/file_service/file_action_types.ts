@@ -91,9 +91,17 @@ export interface FindFileArgs extends Pagination {
    */
   extension?: string[];
   /**
+   * File mime type(s).
+   */
+  mimeType?: string[];
+  /**
    * File status(es).
    */
   status?: string[];
+  /**
+   * ID of user who created the file.
+   */
+  user?: string[];
   /**
    * File metadata values. These values are governed by the consumer.
    */

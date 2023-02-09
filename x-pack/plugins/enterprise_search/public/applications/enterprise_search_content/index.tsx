@@ -17,11 +17,18 @@ import { HttpLogic } from '../shared/http';
 import { KibanaLogic } from '../shared/kibana';
 import { VersionMismatchPage } from '../shared/version_mismatch';
 
+import { EnginesRouter } from './components/engines/engines_router';
 import { ErrorConnecting } from './components/error_connecting';
 import { NotFound } from './components/not_found';
 import { SearchIndicesRouter } from './components/search_indices';
 import { Settings } from './components/settings';
-import { SETUP_GUIDE_PATH, ROOT_PATH, SEARCH_INDICES_PATH, SETTINGS_PATH } from './routes';
+import {
+  SETUP_GUIDE_PATH,
+  ROOT_PATH,
+  SEARCH_INDICES_PATH,
+  SETTINGS_PATH,
+  ENGINES_PATH,
+} from './routes';
 
 export const EnterpriseSearchContent: React.FC<InitialAppData> = (props) => {
   const { config } = useValues(KibanaLogic);
@@ -73,6 +80,9 @@ export const EnterpriseSearchContentConfigured: React.FC<Required<InitialAppData
       </Route>
       <Route path={SETTINGS_PATH}>
         <Settings />
+      </Route>
+      <Route path={ENGINES_PATH}>
+        <EnginesRouter />
       </Route>
       <Route>
         <NotFound />

@@ -110,6 +110,7 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
                 ],
                 enabled: true,
                 rule_type_id: 'test.noop',
+                running: false,
                 consumer: 'alertsFixture',
                 params: {},
                 created_by: user.username,
@@ -260,6 +261,13 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
           switch (scenario.id) {
             case 'no_kibana_privileges at space1':
             case 'space_1_all at space2':
+              expect(response.statusCode).to.eql(403);
+              expect(response.body).to.eql({
+                error: 'Forbidden',
+                message: getConsumerUnauthorizedErrorMessage('create', 'test.noop', 'alerts'),
+                statusCode: 403,
+              });
+              break;
             case 'global_read at space1':
               expect(response.statusCode).to.eql(403);
               expect(response.body).to.eql({

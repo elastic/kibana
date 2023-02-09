@@ -33,18 +33,16 @@ export async function getSuggestionsWithTermsEnum({
         ProcessorEvent.metric,
       ],
     },
-    body: {
-      case_insensitive: true,
-      field: fieldName,
-      size,
-      string: fieldValue,
-      index_filter: {
-        range: {
-          ['@timestamp']: {
-            gte: start,
-            lte: end,
-            format: 'epoch_millis',
-          },
+    case_insensitive: true,
+    field: fieldName,
+    size,
+    string: fieldValue,
+    index_filter: {
+      range: {
+        ['@timestamp']: {
+          gte: start,
+          lte: end,
+          format: 'epoch_millis',
         },
       },
     },

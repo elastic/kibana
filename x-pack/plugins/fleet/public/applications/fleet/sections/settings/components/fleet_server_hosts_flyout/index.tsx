@@ -25,6 +25,7 @@ import {
   EuiFormRow,
   EuiSwitch,
   EuiComboBox,
+  EuiCallOut,
 } from '@elastic/eui';
 
 import { MultiRowInput } from '../multi_row_input';
@@ -76,6 +77,23 @@ export const FleetServerHostsFlyout: React.FunctionComponent<FleetServerHostsFly
         </EuiTitle>
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
+        <EuiCallOut
+          size="m"
+          color="warning"
+          iconType="alert"
+          title={
+            <FormattedMessage
+              id="xpack.fleet.settings.fleetServerHostsFlyout.warningCalloutTitle"
+              defaultMessage="Changing these settings can break your agent connections"
+            />
+          }
+        >
+          <FormattedMessage
+            id="xpack.fleet.settings.fleetServerHostsFlyout.warningCalloutDescription"
+            defaultMessage="Invalid settings can break the connection between Elastic Agent and Fleet Server. If this happens, you will need to re-enroll your agents."
+          />
+        </EuiCallOut>
+        <EuiSpacer size="m" />
         <EuiForm onSubmit={form.submit}>
           <TextInput
             label={
@@ -131,6 +149,7 @@ export const FleetServerHostsFlyout: React.FunctionComponent<FleetServerHostsFly
                     defaultMessage: 'Specify host URL',
                   }
                 )}
+                isUrl
               />
             </>
           </EuiFormRow>

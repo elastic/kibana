@@ -26,7 +26,7 @@ import { getInternalSavedObjectsClient } from '../../lib/helpers/get_internal_sa
 import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
 import { getLatestApmPackage } from './get_latest_apm_package';
 import { getJavaAgentVersionsFromRegistry } from './get_java_agent_versions';
-import { createInternalESClient } from '../../lib/helpers/create_es_client/create_internal_es_client';
+import { createInternalESClientWithContext } from '../../lib/helpers/create_es_client/create_internal_es_client';
 
 const hasFleetDataRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/fleet/has_apm_policies',
@@ -36,8 +36,9 @@ const hasFleetDataRoute = createApmServerRoute({
     if (!fleetPluginStart) {
       return { hasApmPolicies: false };
     }
+    const coreStart = await core.start();
     const packagePolicies = await getApmPackagePolicies({
-      core,
+      coreStart,
       fleetPluginStart,
     });
     return { hasApmPolicies: packagePolicies.total > 0 };
@@ -90,8 +91,9 @@ const fleetAgentsRoute = createApmServerRoute({
       return { cloudStandaloneSetup, fleetAgents: [], isFleetEnabled: false };
     }
     // fetches package policies that contains APM integrations
+    const coreStart = await core.start();
     const packagePolicies = await getApmPackagePolicies({
-      core,
+      coreStart,
       fleetPluginStart,
     });
 
@@ -100,7 +102,7 @@ const fleetAgentsRoute = createApmServerRoute({
     // fetches all agents with the found package policies
     const fleetAgents = await getFleetAgents({
       policyIds: Object.keys(policiesGroupedById),
-      core,
+      coreStart,
       fleetPluginStart,
     });
 
@@ -140,7 +142,8 @@ const saveApmServerSchemaRoute = createApmServerRoute({
   }),
   handler: async (resources): Promise<void> => {
     const { params, logger, core } = resources;
-    const savedObjectsClient = await getInternalSavedObjectsClient(core.setup);
+    const coreStart = await core.start();
+    const savedObjectsClient = await getInternalSavedObjectsClient(coreStart);
     const { schema } = params.body;
     await savedObjectsClient.create(
       APM_SERVER_SCHEMA_SAVED_OBJECT_TYPE,
@@ -199,8 +202,9 @@ const getMigrationCheckRoute = createApmServerRoute({
         })
       : undefined;
     const apmPackagePolicy = getApmPackagePolicy(cloudAgentPolicy);
+    const coreStart = await core.start();
     const packagePolicies = await getApmPackagePolicies({
-      core,
+      coreStart,
       fleetPluginStart,
     });
     const latestApmPackage = await getLatestApmPackage({
@@ -245,7 +249,7 @@ const createCloudApmPackagePolicyRoute = createApmServerRoute({
       throw Boom.forbidden(CLOUD_SUPERUSER_REQUIRED_MESSAGE);
     }
 
-    const internalESClient = await createInternalESClient({
+    const internalESClient = await createInternalESClientWithContext({
       context,
       request,
       debug: resources.params.query._inspect,

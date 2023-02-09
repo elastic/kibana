@@ -16,8 +16,8 @@ export interface RuleStatsState {
   snoozed: number;
 }
 
-export interface TopAlert {
-  fields: ParsedTechnicalFields & ParsedExperimentalFields;
+export interface TopAlert<TAdditionalMetaFields extends Record<string, any> = {}> {
+  fields: ParsedTechnicalFields & ParsedExperimentalFields & TAdditionalMetaFields;
   start: number;
   lastUpdated: number;
   reason: string;

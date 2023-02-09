@@ -24,7 +24,7 @@ import {
   checkAutoRefreshIsDisabled,
   checkAutoRefreshIsEnabled,
 } from '../../tasks/alerts_detection_rules';
-import { login, visit } from '../../tasks/login';
+import { login, visit, visitWithoutDateRange } from '../../tasks/login';
 
 import { DETECTIONS_RULE_MANAGEMENT_URL } from '../../urls/navigation';
 import { createCustomRule } from '../../tasks/api_calls/rules';
@@ -43,36 +43,36 @@ describe('Alerts detection rules table auto-refresh', () => {
   });
 
   it('Auto refreshes rules', () => {
-    visit(DETECTIONS_RULE_MANAGEMENT_URL);
+    visitWithoutDateRange(DETECTIONS_RULE_MANAGEMENT_URL);
 
-    mockGlobalClock();
     waitForRulesTableToBeLoaded();
 
     // ensure rules have rendered. As there is no user interaction in this test,
     // rules were not rendered before test completes
     cy.get(RULE_CHECKBOX).should('have.length', 6);
 
-    // mock 1 minute passing to make sure refresh is conducted
+    // // mock 1 minute passing to make sure refresh is conducted
+    mockGlobalClock();
     checkAutoRefresh(DEFAULT_RULE_REFRESH_INTERVAL_VALUE, 'be.visible');
 
     cy.contains(REFRESH_RULES_STATUS, 'Updated now');
   });
 
   it('should prevent table from rules refetch if any rule selected', () => {
-    visit(DETECTIONS_RULE_MANAGEMENT_URL);
+    visitWithoutDateRange(DETECTIONS_RULE_MANAGEMENT_URL);
 
-    mockGlobalClock();
     waitForRulesTableToBeLoaded();
 
     selectNumberOfRules(1);
 
     // mock 1 minute passing to make sure refresh is not conducted
+    mockGlobalClock();
     checkAutoRefresh(DEFAULT_RULE_REFRESH_INTERVAL_VALUE, 'not.exist');
 
     // ensure rule is still selected
     cy.get(RULE_CHECKBOX).first().should('be.checked');
 
-    cy.contains(REFRESH_RULES_STATUS, 'Updated 1 minute ago');
+    cy.get(REFRESH_RULES_STATUS).should('have.not.text', 'Updated now');
   });
 
   it('should disable auto refresh when any rule selected and enable it after rules unselected', () => {

@@ -14,6 +14,7 @@ export function getDistributionInPercentageColumn({
   columnFilter,
   lensFormulaHelper,
   formula,
+  format,
 }: {
   label?: string;
   columnFilter?: string;
@@ -21,6 +22,7 @@ export function getDistributionInPercentageColumn({
   lensFormulaHelper: FormulaPublicApi;
   dataView: DataView;
   formula?: string;
+  format?: string;
 }) {
   const yAxisColId = `y-axis-column-${layerId}`;
 
@@ -36,12 +38,15 @@ export function getDistributionInPercentageColumn({
     {
       formula: lensFormula,
       label,
-      format: {
-        id: 'percent',
-        params: {
-          decimals: 0,
-        },
-      },
+      format:
+        format === 'percent' || !format
+          ? {
+              id: 'percent',
+              params: {
+                decimals: 0,
+              },
+            }
+          : undefined,
     },
     {
       columns: {},

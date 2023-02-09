@@ -57,7 +57,13 @@ export async function updateToV3({
     );
   }
 
-  await createAnomalyDetectionJobs({ mlClient, indices, environments, logger });
+  await createAnomalyDetectionJobs({
+    mlClient,
+    esClient,
+    indices,
+    environments,
+    logger,
+  });
 
   return true;
 }

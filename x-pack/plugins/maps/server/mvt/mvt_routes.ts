@@ -13,6 +13,7 @@ import { CoreStart, KibanaRequest, KibanaResponseFactory, Logger } from '@kbn/co
 import { IRouter } from '@kbn/core/server';
 import type { DataRequestHandlerContext } from '@kbn/data-plugin/server';
 import { errors } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import {
   MVT_GETTILE_API_PATH,
   API_ROOT_PATH,
@@ -61,7 +62,10 @@ export function initMVTRoutes({
       const y = parseInt((params as any).y, 10) as number;
       const z = parseInt((params as any).z, 10) as number;
 
-      let tileRequest: { path: string; body: object } | undefined;
+      let tileRequest: { path: string; body: estypes.SearchMvtRequest['body'] } = {
+        path: '',
+        body: {},
+      };
       try {
         tileRequest = getHitsTileRequest({
           encodedRequestBody: query.requestBody as string,
@@ -123,7 +127,10 @@ export function initMVTRoutes({
       const y = parseInt((params as any).y, 10) as number;
       const z = parseInt((params as any).z, 10) as number;
 
-      let tileRequest: { path: string; body: object } | undefined;
+      let tileRequest: { path: string; body: estypes.SearchMvtRequest['body'] } = {
+        path: '',
+        body: {},
+      };
       try {
         tileRequest = getAggsTileRequest({
           encodedRequestBody: query.requestBody as string,
@@ -168,7 +175,7 @@ async function getTile({
   path,
 }: {
   abortController: AbortController;
-  body: object;
+  body: estypes.SearchMvtRequest['body'];
   context: DataRequestHandlerContext;
   core: CoreStart;
   executionContext: KibanaExecutionContext;

@@ -9,27 +9,27 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import classNames from 'classnames';
 import {
+  EuiButtonEmpty,
   EuiButtonIcon,
   EuiFormControlLayout,
   EuiFormLabel,
   EuiFormRow,
-  EuiIcon,
-  EuiLink,
   EuiLoadingChart,
   EuiPopover,
-  EuiText,
   EuiToolTip,
 } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n-react';
 import { Markdown } from '@kbn/kibana-react-plugin/public';
-import { useReduxContainerContext } from '@kbn/presentation-util-plugin/public';
+import { useReduxEmbeddableContext } from '@kbn/presentation-util-plugin/public';
 import { ControlGroupReduxState } from '../types';
 import { pluginServices } from '../../services';
 import { EditControlButton } from '../editor/edit_control';
 import { ControlGroupStrings } from '../control_group_strings';
 import { useChildEmbeddable } from '../../hooks/use_child_embeddable';
 import { TIME_SLIDER_CONTROL } from '../../../common';
+import { controlGroupReducers } from '../state/control_group_reducers';
+import { ControlGroupContainer } from '..';
 
 interface ControlFrameErrorProps {
   error: Error;
@@ -38,25 +38,26 @@ interface ControlFrameErrorProps {
 const ControlFrameError = ({ error }: ControlFrameErrorProps) => {
   const [isPopoverOpen, setPopoverOpen] = useState(false);
   const popoverButton = (
-    <EuiText className="errorEmbeddableCompact__button" size="xs">
-      <EuiLink
-        className="eui-textTruncate"
-        color="subdued"
-        onClick={() => setPopoverOpen((open) => !open)}
-      >
-        <EuiIcon type="alert" color="danger" />
-        <FormattedMessage
-          id="controls.frame.error.message"
-          defaultMessage="An error has occurred. Read more"
-        />
-      </EuiLink>
-    </EuiText>
+    <EuiButtonEmpty
+      color="danger"
+      iconSize="m"
+      iconType={'alert'}
+      onClick={() => setPopoverOpen((open) => !open)}
+      className={'errorEmbeddableCompact__button'}
+      textProps={{ className: 'errorEmbeddableCompact__text' }}
+    >
+      <FormattedMessage
+        id="controls.frame.error.message"
+        defaultMessage="An error occurred. View more"
+      />
+    </EuiButtonEmpty>
   );
 
   return (
     <EuiPopover
       button={popoverButton}
       isOpen={isPopoverOpen}
+      className="errorEmbeddableCompact__popover"
       anchorClassName="errorEmbeddableCompact__popoverAnchor"
       closePopover={() => setPopoverOpen(false)}
     >
@@ -85,10 +86,12 @@ export const ControlFrame = ({
   const embeddableRoot: React.RefObject<HTMLDivElement> = useMemo(() => React.createRef(), []);
   const [fatalError, setFatalError] = useState<Error>();
 
-  const {
-    useEmbeddableSelector: select,
-    containerActions: { untilEmbeddableLoaded, removeEmbeddable },
-  } = useReduxContainerContext<ControlGroupReduxState>();
+  const { useEmbeddableSelector: select, embeddableInstance: controlGroup } =
+    useReduxEmbeddableContext<
+      ControlGroupReduxState,
+      typeof controlGroupReducers,
+      ControlGroupContainer
+    >();
 
   const controlStyle = select((state) => state.explicitInput.controlStyle);
 
@@ -97,7 +100,11 @@ export const ControlFrame = ({
     overlays: { openConfirm },
   } = pluginServices.getServices();
 
-  const embeddable = useChildEmbeddable({ untilEmbeddableLoaded, embeddableId, embeddableType });
+  const embeddable = useChildEmbeddable({
+    untilEmbeddableLoaded: controlGroup.untilEmbeddableLoaded.bind(controlGroup),
+    embeddableType,
+    embeddableId,
+  });
 
   const [title, setTitle] = useState<string>();
 
@@ -143,7 +150,7 @@ export const ControlFrame = ({
               buttonColor: 'danger',
             }).then((confirmed) => {
               if (confirmed) {
-                removeEmbeddable(embeddableId);
+                controlGroup.removeEmbeddable(embeddableId);
               }
             })
           }

@@ -492,7 +492,7 @@ export function MachineLearningJobWizardCommonProvider(
     },
 
     async clickUseFullDataButton(expectedStartDate: string, expectedEndDate: string) {
-      await testSubjects.clickWhenNotDisabledWithoutRetry('mlButtonUseFullData');
+      await testSubjects.clickWhenNotDisabledWithoutRetry('mlDatePickerButtonUseFullData');
       await this.assertDateRangeSelection(expectedStartDate, expectedEndDate);
     },
 

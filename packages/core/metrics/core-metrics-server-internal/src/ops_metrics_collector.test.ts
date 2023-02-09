@@ -8,8 +8,8 @@
 
 import { loggerMock } from '@kbn/logging-mocks';
 import { httpServiceMock } from '@kbn/core-http-server-mocks';
-import { sampleEsClientMetrics } from '@kbn/core-metrics-server-mocks';
 import { AgentManager } from '@kbn/core-elasticsearch-client-server-internal';
+import type { ElasticsearchClientsMetrics } from '@kbn/core-metrics-server';
 import {
   mockEsClientCollector,
   mockOsCollector,
@@ -17,6 +17,12 @@ import {
   mockServerCollector,
 } from './ops_metrics_collector.test.mocks';
 import { OpsMetricsCollector } from './ops_metrics_collector';
+
+export const sampleEsClientMetrics: ElasticsearchClientsMetrics = {
+  totalActiveSockets: 25,
+  totalIdleSockets: 2,
+  totalQueuedRequests: 0,
+};
 
 describe('OpsMetricsCollector', () => {
   let collector: OpsMetricsCollector;

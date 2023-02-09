@@ -111,9 +111,9 @@
           "T & ",
           {
             "pluginId": "@kbn/utility-types",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnUtilityTypesPluginApi",
-            "section": "def-server.JsonObject",
+            "section": "def-common.JsonObject",
             "text": "JsonObject"
           }
         ],

@@ -294,7 +294,7 @@ const formattedTime = (time?: string) => {
 const inProgressTitle = (action: ActionStatus) => (
   <FormattedMessage
     id="xpack.fleet.agentActivity.inProgressTitle"
-    defaultMessage="{inProgressText} {nbAgents} {agents} {reassignText}{upgradeText}"
+    defaultMessage="{inProgressText} {nbAgents} {agents} {reassignText}{upgradeText}{failuresText}"
     values={{
       nbAgents:
         action.nbAgentsAck >= action.nbAgentsActioned
@@ -307,6 +307,7 @@ const inProgressTitle = (action: ActionStatus) => (
       reassignText:
         action.type === 'POLICY_REASSIGN' && action.newPolicyId ? `to ${action.newPolicyId}` : '',
       upgradeText: action.type === 'UPGRADE' ? `to version ${action.version}` : '',
+      failuresText: action.nbAgentsFailed > 0 ? `, has ${action.nbAgentsFailed} failure(s)` : '',
     }}
   />
 );
@@ -326,7 +327,7 @@ const ActivityItem: React.FunctionComponent<{ action: ActionStatus }> = ({ actio
     <EuiText>
       <FormattedMessage
         id="xpack.fleet.agentActivity.completedTitle"
-        defaultMessage="{nbAgents} {agents} {completedText}"
+        defaultMessage="{nbAgents} {agents} {completedText}{offlineText}"
         values={{
           nbAgents:
             action.nbAgentsAck === action.nbAgentsActioned
@@ -334,6 +335,12 @@ const ActivityItem: React.FunctionComponent<{ action: ActionStatus }> = ({ actio
               : action.nbAgentsAck + ' of ' + action.nbAgentsActioned,
           agents: action.nbAgentsActioned === 1 ? 'agent' : 'agents',
           completedText: getAction(action.type).completedText,
+          offlineText:
+            action.status === 'ROLLOUT_PASSED' && action.nbAgentsActioned - action.nbAgentsAck > 0
+              ? `, ${
+                  action.nbAgentsActioned - action.nbAgentsAck
+                } agent(s) offline during the rollout period`
+              : '',
         }}
       />
     </EuiText>
@@ -349,6 +356,19 @@ const ActivityItem: React.FunctionComponent<{ action: ActionStatus }> = ({ actio
     />
   );
 
+  const failedDescription = (
+    <EuiText color="subdued">
+      <p>
+        <FormattedMessage
+          id="xpack.fleet.agentActivityFlyout.failureDescription"
+          defaultMessage="A problem occurred during this operation."
+        />
+        &nbsp;
+        {inProgressDescription(action.creationTime)}
+      </p>
+    </EuiText>
+  );
+
   const displayByStatus: {
     [key: string]: {
       icon: ReactNode;
@@ -362,6 +382,22 @@ const ActivityItem: React.FunctionComponent<{ action: ActionStatus }> = ({ actio
       title: <EuiText>{inProgressTitle(action)}</EuiText>,
       titleColor: inProgressTitleColor,
       description: <EuiText color="subdued">{inProgressDescription(action.creationTime)}</EuiText>,
+    },
+    ROLLOUT_PASSED: {
+      icon:
+        action.nbAgentsFailed > 0 ? (
+          <EuiIcon size="m" type="alert" color="red" />
+        ) : (
+          <EuiIcon size="m" type="checkInCircleFilled" color="green" />
+        ),
+      title: completeTitle,
+      titleColor: action.nbAgentsFailed > 0 ? 'red' : 'green',
+      description:
+        action.nbAgentsFailed > 0 ? (
+          failedDescription
+        ) : (
+          <EuiText color="subdued">{completedDescription}</EuiText>
+        ),
     },
     COMPLETE: {
       icon: <EuiIcon size="m" type="checkInCircleFilled" color="green" />,
@@ -389,18 +425,7 @@ const ActivityItem: React.FunctionComponent<{ action: ActionStatus }> = ({ actio
       icon: <EuiIcon size="m" type="alert" color="red" />,
       title: completeTitle,
       titleColor: 'red',
-      description: (
-        <EuiText color="subdued">
-          <p>
-            <FormattedMessage
-              id="xpack.fleet.agentActivityFlyout.failureDescription"
-              defaultMessage=" A problem occurred during this operation."
-            />
-            &nbsp;
-            {inProgressDescription(action.creationTime)}
-          </p>
-        </EuiText>
-      ),
+      description: failedDescription,
     },
     CANCELLED: {
       icon: <EuiIcon size="m" type="alert" color="grey" />,
@@ -507,6 +532,10 @@ export const UpgradeInProgressActivityItem: React.FunctionComponent<{
     return startDate > now;
   }, [action]);
 
+  const showCancelButton = useMemo(() => {
+    return isScheduled || action.hasRolloutPeriod;
+  }, [action, isScheduled]);
+
   return (
     <EuiPanel hasBorder={true} borderRadius="none">
       <EuiFlexGroup direction="column" gutterSize="m">
@@ -567,17 +596,19 @@ export const UpgradeInProgressActivityItem: React.FunctionComponent<{
               </EuiText>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiButton
-                size="s"
-                onClick={onClickAbortUpgrade}
-                isLoading={isAborting}
-                data-test-subj="abortBtn"
-              >
-                <FormattedMessage
-                  id="xpack.fleet.agentActivityFlyout.abortUpgradeButtom"
-                  defaultMessage="Abort upgrade"
-                />
-              </EuiButton>
+              {showCancelButton ? (
+                <EuiButton
+                  size="s"
+                  onClick={onClickAbortUpgrade}
+                  isLoading={isAborting}
+                  data-test-subj="abortBtn"
+                >
+                  <FormattedMessage
+                    id="xpack.fleet.agentActivityFlyout.abortUpgradeButtom"
+                    defaultMessage="Cancel"
+                  />
+                </EuiButton>
+              ) : null}
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>

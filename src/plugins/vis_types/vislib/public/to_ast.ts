@@ -89,7 +89,7 @@ export const toExpressionAst = async <TVisParams extends VisParams>(
   const visTypeVislib = buildExpressionFunction<VisTypeVislibExpressionFunctionDefinition>(
     vislibVisName,
     {
-      type: vis.type.name as Exclude<VislibChartType, 'pie'>,
+      type: vis.type.name as VislibChartType,
       visConfig: JSON.stringify({ ...visConfig, dimensions }),
     }
   );

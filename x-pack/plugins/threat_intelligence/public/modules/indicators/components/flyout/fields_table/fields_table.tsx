@@ -65,7 +65,7 @@ export const IndicatorFieldsTable: VFC<IndicatorFieldsTableProps> = ({
 
   return (
     <EuiInMemoryTable
-      items={fields}
+      items={fields.sort()}
       columns={columns}
       sorting={true}
       data-test-subj={dataTestSubj}

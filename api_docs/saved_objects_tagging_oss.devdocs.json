@@ -131,7 +131,7 @@
               "\nReturn an observable that will emit everytime the cache's state mutates."
             ],
             "signature": [
-              "() => ",
+              "(params?: { waitForInitialization?: boolean | undefined; } | undefined) => ",
               "Observable",
               "<",
               {
@@ -146,7 +146,35 @@
             "path": "src/plugins/saved_objects_tagging_oss/public/api.ts",
             "deprecated": false,
             "trackAdoption": false,
-            "children": [],
+            "children": [
+              {
+                "parentPluginId": "savedObjectsTaggingOss",
+                "id": "def-public.ITagsCache.getState$.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "params",
+                "description": [],
+                "path": "src/plugins/saved_objects_tagging_oss/public/api.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "children": [
+                  {
+                    "parentPluginId": "savedObjectsTaggingOss",
+                    "id": "def-public.ITagsCache.getState$.$1.waitForInitialization",
+                    "type": "CompoundType",
+                    "tags": [],
+                    "label": "waitForInitialization",
+                    "description": [],
+                    "signature": [
+                      "boolean | undefined"
+                    ],
+                    "path": "src/plugins/saved_objects_tagging_oss/public/api.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  }
+                ]
+              }
+            ],
             "returnComment": []
           }
         ],
@@ -184,9 +212,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/core-saved-objects-api-server",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-                "section": "def-server.SavedObjectsFindOptionsReference",
+                "section": "def-common.SavedObjectsFindOptionsReference",
                 "text": "SavedObjectsFindOptionsReference"
               },
               "[]"
@@ -205,9 +233,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/core-saved-objects-api-server",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-                "section": "def-server.SavedObjectsFindOptionsReference",
+                "section": "def-common.SavedObjectsFindOptionsReference",
                 "text": "SavedObjectsFindOptionsReference"
               },
               "[]"
@@ -633,9 +661,9 @@
               "(tagName: string) => ",
               {
                 "pluginId": "@kbn/core-saved-objects-api-server",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-                "section": "def-server.SavedObjectsFindOptionsReference",
+                "section": "def-common.SavedObjectsFindOptionsReference",
                 "text": "SavedObjectsFindOptionsReference"
               },
               " | undefined"
@@ -680,14 +708,15 @@
                 "section": "def-public.ParseSearchQueryOptions",
                 "text": "ParseSearchQueryOptions"
               },
-              " | undefined) => ",
+              " | undefined) => Promise<",
               {
                 "pluginId": "savedObjectsTaggingOss",
                 "scope": "public",
                 "docId": "kibSavedObjectsTaggingOssPluginApi",
                 "section": "def-public.ParsedSearchQuery",
                 "text": "ParsedSearchQuery"
-              }
+              },
+              ">"
             ],
             "path": "src/plugins/saved_objects_tagging_oss/public/api.ts",
             "deprecated": false,
@@ -758,9 +787,9 @@
               " | ",
               {
                 "pluginId": "@kbn/core-saved-objects-api-server",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-                "section": "def-server.SavedObjectsFindOptionsReference",
+                "section": "def-common.SavedObjectsFindOptionsReference",
                 "text": "SavedObjectsFindOptionsReference"
               },
               ")[]) => string[]"
@@ -788,9 +817,9 @@
                   " | ",
                   {
                     "pluginId": "@kbn/core-saved-objects-api-server",
-                    "scope": "server",
+                    "scope": "common",
                     "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-                    "section": "def-server.SavedObjectsFindOptionsReference",
+                    "section": "def-common.SavedObjectsFindOptionsReference",
                     "text": "SavedObjectsFindOptionsReference"
                   },
                   ")[]"

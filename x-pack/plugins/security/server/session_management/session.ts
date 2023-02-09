@@ -13,7 +13,9 @@ import { promisify } from 'util';
 import type { KibanaRequest, Logger } from '@kbn/core/server';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 
+import type { AuditServiceSetup } from '..';
 import type { AuthenticationProvider } from '../../common';
+import { userSessionConcurrentLimitLogoutEvent } from '../audit';
 import type { ConfigType } from '../config';
 import type { SessionCookie } from './session_cookie';
 import { SessionExpiredError, SessionMissingError, SessionUnexpectedError } from './session_errors';
@@ -52,6 +54,12 @@ export interface SessionValue {
   lifespanExpiration: number | null;
 
   /**
+   * The Unix time in ms which is the time when the session was initially created. The value can also be 0 indicating
+   * the migrated session that was created before `createdAt` field was introduced.
+   */
+  createdAt: number;
+
+  /**
    * Session value that is fed to the authentication provider. The shape is unknown upfront and
    * entirely determined by the authentication provider that owns the current session.
    */
@@ -79,6 +87,7 @@ export interface SessionOptions {
   readonly sessionIndex: PublicMethodsOf<SessionIndex>;
   readonly sessionCookie: PublicMethodsOf<SessionCookie>;
   readonly config: Pick<ConfigType, 'encryptionKey' | 'session'>;
+  readonly audit: AuditServiceSetup;
 }
 
 export interface SessionValueContentToEncrypt {
@@ -188,6 +197,26 @@ export class Session {
       return { error: new SessionUnexpectedError(), value: null };
     }
 
+    // The only reason why we check if the session is within the concurrent session limit _after_ decryption
+    // is to record decrypted username and profile id in the audit logs.
+    const isSessionWithinConcurrentSessionLimit =
+      await this.options.sessionIndex.isWithinConcurrentSessionLimit(sessionIndexValue);
+    if (!isSessionWithinConcurrentSessionLimit) {
+      this.options.audit.asScoped(request).log(
+        userSessionConcurrentLimitLogoutEvent({
+          username: decryptedContent.username,
+          userProfileId: decryptedContent.userProfileId,
+          provider: sessionIndexValue.provider,
+        })
+      );
+
+      sessionLogger.warn(
+        'Session is outside the concurrent session limit and will be invalidated.'
+      );
+      await this.invalidate(request, { match: 'current' });
+      return { error: new SessionUnexpectedError(), value: null };
+    }
+
     return {
       error: null,
       value: {
@@ -206,7 +235,10 @@ export class Session {
   async create(
     request: KibanaRequest,
     sessionValue: Readonly<
-      Omit<SessionValue, 'sid' | 'idleTimeoutExpiration' | 'lifespanExpiration' | 'metadata'>
+      Omit<
+        SessionValue,
+        'sid' | 'idleTimeoutExpiration' | 'lifespanExpiration' | 'createdAt' | 'metadata'
+      >
     >
   ) {
     const [sid, aad] = await Promise.all([
@@ -226,6 +258,7 @@ export class Session {
       ...publicSessionValue,
       ...sessionExpirationInfo,
       sid,
+      createdAt: Date.now(),
       usernameHash: username && Session.getUsernameHash(username),
       content: await this.crypto.encrypt(JSON.stringify({ username, userProfileId, state }), aad),
     });
@@ -242,7 +275,7 @@ export class Session {
   }
 
   /**
-   * Creates or updates session value for the specified request.
+   * Updates session value for the specified request.
    * @param request Request instance to set session value for.
    * @param sessionValue Session value parameters.
    */
@@ -258,7 +291,10 @@ export class Session {
       sessionValue.provider,
       sessionCookieValue.lifespanExpiration
     );
-    const { username, userProfileId, state, metadata, ...publicSessionInfo } = sessionValue;
+    // We filter out the `createdAt` field and rely on the one stored in `metadata.index` since it isn't
+    // supposed to be updated after it was initially set during creation.
+    const { username, userProfileId, state, metadata, createdAt, ...publicSessionInfo } =
+      sessionValue;
 
     // First try to store session in the index and only then in the cookie to make sure cookie is
     // only updated if server side session is created successfully.
@@ -483,6 +519,8 @@ export class Session {
       username,
       userProfileId,
       state,
+      // If the session was created before `createdAt` field was introduced, we set it to 0.
+      createdAt: publicSessionValue.createdAt ?? 0,
       metadata: { index: sessionIndexValue },
     };
   }

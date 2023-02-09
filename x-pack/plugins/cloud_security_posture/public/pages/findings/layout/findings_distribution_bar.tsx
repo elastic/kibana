@@ -126,6 +126,7 @@ const DistributionBar: React.FC<Omit<Props, 'pageEnd' | 'pageStart'>> = ({
         distributionOnClick={() => {
           distributionOnClick(RULE_PASSED);
         }}
+        data-test-subj="distribution_bar_passed"
       />
       <DistributionBarPart
         value={failed}
@@ -133,6 +134,7 @@ const DistributionBar: React.FC<Omit<Props, 'pageEnd' | 'pageStart'>> = ({
         distributionOnClick={() => {
           distributionOnClick(RULE_FAILED);
         }}
+        data-test-subj="distribution_bar_failed"
       />
     </EuiFlexGroup>
   );
@@ -142,12 +144,15 @@ const DistributionBarPart = ({
   value,
   color,
   distributionOnClick,
+  ...rest
 }: {
   value: number;
   color: string;
   distributionOnClick: () => void;
+  ['data-test-subj']: string;
 }) => (
   <button
+    data-test-subj={rest['data-test-subj']}
     onClick={distributionOnClick}
     css={css`
       flex: ${value};

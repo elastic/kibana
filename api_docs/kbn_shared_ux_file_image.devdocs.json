@@ -1,0 +1,98 @@
+{
+  "id": "@kbn/shared-ux-file-image",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/shared-ux-file-image",
+        "id": "def-common.Image",
+        "type": "Function",
+        "tags": [
+          "note"
+        ],
+        "label": "Image",
+        "description": [
+          "\nA wrapper around the <EuiImage/> that can renders blurhash by the file service while the image is loading\n"
+        ],
+        "signature": [
+          "({ src, url, alt, onLoad, onError, meta, ...rest }: ",
+          {
+            "pluginId": "@kbn/shared-ux-file-image",
+            "scope": "common",
+            "docId": "kibKbnSharedUxFileImagePluginApi",
+            "section": "def-common.Props",
+            "text": "Props"
+          },
+          ") => JSX.Element"
+        ],
+        "path": "packages/shared-ux/file/image/impl/src/image.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/shared-ux-file-image",
+            "id": "def-common.Image.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "{ src, url, alt, onLoad, onError, meta, ...rest }",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/shared-ux-file-image",
+                "scope": "common",
+                "docId": "kibKbnSharedUxFileImagePluginApi",
+                "section": "def-common.Props",
+                "text": "Props"
+              }
+            ],
+            "path": "packages/shared-ux/file/image/impl/src/image.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/shared-ux-file-image",
+        "id": "def-common.Props",
+        "type": "Type",
+        "tags": [],
+        "label": "Props",
+        "description": [],
+        "signature": [
+          "{ meta?: ",
+          "FileImageMetadata",
+          " | undefined; } & ",
+          "EuiImageProps"
+        ],
+        "path": "packages/shared-ux/file/image/impl/src/image.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": []
+  }
+}
