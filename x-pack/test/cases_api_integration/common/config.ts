@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { CA_CERT_PATH } from '@kbn/dev-utils';
-import { FtrConfigProviderContext } from '@kbn/test';
-
 import path from 'path';
-import fs from 'fs';
+
+import { CA_CERT_PATH } from '@kbn/dev-utils';
+import { FtrConfigProviderContext, findTestPluginPaths } from '@kbn/test';
+
+import { getAllExternalServiceSimulatorPaths } from '@kbn/actions-simulators-plugin/server/plugin';
 import { services } from './services';
-import { getAllExternalServiceSimulatorPaths } from '../../alerting_api_integration/common/plugins/actions_simulators/server/plugin';
 
 interface CreateTestConfigOptions {
   license: string;
@@ -58,23 +58,6 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
       },
     };
 
-    // Find all folders in ./plugins since we treat all them as plugin folder
-    const pluginDir = path.resolve(__dirname, 'plugins');
-    const pluginPaths = fs
-      .readdirSync(pluginDir)
-      .map((n) => path.resolve(pluginDir, n))
-      .filter((p) => fs.statSync(p));
-
-    // This is needed so that we can correctly use the alerting test frameworks mock implementation for the connectors.
-    const alertingPluginDir = path.resolve(
-      __dirname,
-      '../../alerting_api_integration/common/plugins'
-    );
-    const alertingPluginsPaths = fs
-      .readdirSync(alertingPluginDir)
-      .map((n) => path.resolve(alertingPluginDir, n))
-      .filter((p) => fs.statSync(p));
-
     return {
       testFiles,
       servers,
@@ -104,7 +87,10 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
           ...disabledPlugins
             .filter((k) => k !== 'security')
             .map((key) => `--xpack.${key}.enabled=false`),
-          ...pluginPaths.concat(alertingPluginsPaths).map((p) => `--plugin-path=${p}`),
+          ...findTestPluginPaths([
+            path.resolve(__dirname, 'plugins'),
+            path.resolve(__dirname, '../../alerting_api_integration/common/plugins'),
+          ]),
           `--xpack.actions.preconfigured=${JSON.stringify({
             'preconfigured-servicenow': {
               name: 'preconfigured-servicenow',

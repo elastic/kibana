@@ -271,16 +271,16 @@ export const useEnterpriseSearchEngineNav = (engineName?: string, isEmptyState?:
                 to: `${enginePath}/${EngineViewTabs.INDICES}`,
               }),
             },
-            // {
-            //   id: 'enterpriseSearchEngineSchema',
-            //   name: i18n.translate('xpack.enterpriseSearch.nav.engine.schemaTitle', {
-            //     defaultMessage: 'Schema',
-            //   }),
-            //   ...generateNavLink({
-            //     shouldNotCreateHref: true,
-            //     to: `${enginePath}/${EngineViewTabs.SCHEMA}`,
-            //   }),
-            // },
+            {
+              id: 'enterpriseSearchEngineSchema',
+              name: i18n.translate('xpack.enterpriseSearch.nav.engine.schemaTitle', {
+                defaultMessage: 'Schema',
+              }),
+              ...generateNavLink({
+                shouldNotCreateHref: true,
+                to: `${enginePath}/${EngineViewTabs.SCHEMA}`,
+              }),
+            },
             // Hidden until Preview page is available
             // {
             //   id: 'enterpriseSearchEnginePreview',
