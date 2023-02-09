@@ -129,6 +129,10 @@
           "id": "kibDevTutorialSavedObject"
         },
         {
+          "id": "kibDevTutorialVersioningTSInterfaces",
+          "label": "Versioning TypesScript interfaces"
+        },
+        {
           "id": "kibDevTutorialSubmitPullRequest"
         },
         {
