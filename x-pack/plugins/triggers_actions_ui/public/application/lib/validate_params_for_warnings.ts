@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { intersection } from 'lodash';
+import { some } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { ActionVariable, RuleActionParam } from '@kbn/alerting-plugin/common';
 
@@ -21,14 +21,16 @@ export function validateParamsForWarnings(
   publicBaseUrl: string | undefined,
   actionVariables: ActionVariable[] | undefined
 ): string | null {
-  const mustacheRegex = /[^{\}]+(?=}})/g;
+  const mustacheRegex = /[^<%\>]+(?=%>)|[^{\}]+(?=}})/g;
   if (!publicBaseUrl && value && typeof value === 'string') {
     const publicUrlFields = (actionVariables || [])
       .filter((v) => v.usesPublicBaseUrl)
-      .map((v) => v.name);
-
+      .map((v) => v.name.replace(/^(params\.|context\.|state\.)/, ''));
     const contextVariables = value.match(mustacheRegex);
-    if (intersection(contextVariables, publicUrlFields).length > 0) {
+    const hasUrlFields = some(contextVariables, (contextVariable) =>
+      some(publicUrlFields, (publicUrlField) => contextVariable.indexOf(publicUrlField) > -1)
+    );
+    if (hasUrlFields) {
       return publicUrlWarning;
     }
   }

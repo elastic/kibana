@@ -22,14 +22,30 @@ describe('validateParamsForWarnings', () => {
   ];
 
   test('returns warnings when publicUrl is not set and there are publicUrl variables used', () => {
+    const warning = 'server.publicBaseUrl is not set. Actions will use relative URLs.';
+    expect(
+      validateParamsForWarnings('Test for {{context.url}}', undefined, actionVariables)
+    ).toEqual(warning);
+
+    expect(
+      validateParamsForWarnings('{{#context}}link: {{url}}{{/context}}', undefined, actionVariables)
+    ).toEqual(warning);
+
     expect(
       validateParamsForWarnings(
-        'Test for {{context.url}}',
-
+        '{{#context.url}}link: {{.}}{{/context.url}}',
         undefined,
         actionVariables
       )
-    ).toEqual('server.publicBaseUrl is not set. Actions will use relative URLs.');
+    ).toEqual(warning);
+
+    expect(
+      validateParamsForWarnings('link: {{ context.url }}', undefined, actionVariables)
+    ).toEqual(warning);
+
+    expect(
+      validateParamsForWarnings('{{=<% %>=}}link: <%context.url%>', undefined, actionVariables)
+    ).toEqual(warning);
   });
 
   test('does not return warnings when publicUrl is not set and there are publicUrl variables not used', () => {
