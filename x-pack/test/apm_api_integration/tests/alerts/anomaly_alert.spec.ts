@@ -83,7 +83,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         });
 
         it('checks if alert is active', async () => {
-          const { body: createdRule } = await createAlertingRule({
+          const createdRule = await createAlertingRule({
             supertest,
             name: 'Latency anomaly | service-a',
             params: {

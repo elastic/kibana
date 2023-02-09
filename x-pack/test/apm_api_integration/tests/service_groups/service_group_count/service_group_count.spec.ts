@@ -27,7 +27,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   const start = Date.now() - 24 * 60 * 60 * 1000;
   const end = Date.now();
 
-  async function createRule() {
+  function createRule() {
     return createAlertingRule({
       supertest,
       name: 'Latency threshold | synth-go',
@@ -83,7 +83,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     describe('with alerts', () => {
       let ruleId: string;
       before(async () => {
-        const { body: createdRule } = await createRule();
+        const createdRule = await createRule();
         ruleId = createdRule.id;
         await waitForActiveAlert({ ruleId, esClient, log });
       });

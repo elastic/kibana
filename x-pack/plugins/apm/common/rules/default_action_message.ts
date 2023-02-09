@@ -15,7 +15,7 @@ export const errorCountMessage = i18n.translate(
 - Service name: \\{\\{context.serviceName\\}\\}
 - Environment: \\{\\{context.environment\\}\\}
 - Threshold: \\{\\{context.threshold\\}\\}
-- Triggered value: \\{\\{context.triggerValue\\}\\} over the last \\{\\{context.interval\\}\\}`,
+- Triggered value: \\{\\{context.triggerValue\\}\\} errors over the last \\{\\{context.interval\\}\\}`,
   }
 );
 

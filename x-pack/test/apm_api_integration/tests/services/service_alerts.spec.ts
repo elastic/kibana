@@ -43,7 +43,7 @@ export default function ServiceAlerts({ getService }: FtrProviderContext) {
     });
   }
 
-  async function createRule() {
+  function createRule() {
     return createAlertingRule({
       supertest,
       name: `Latency threshold | ${goService}`,
@@ -115,7 +115,7 @@ export default function ServiceAlerts({ getService }: FtrProviderContext) {
     describe('with alerts', () => {
       let ruleId: string;
       before(async () => {
-        const { body: createdRule } = await createRule();
+        const createdRule = await createRule();
         ruleId = createdRule.id;
         await waitForActiveAlert({ ruleId, esClient, log });
       });

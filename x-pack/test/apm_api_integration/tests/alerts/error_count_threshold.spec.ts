@@ -161,7 +161,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
 - Service name: service-a
 - Environment: production
-- Threshold: 1 errors
+- Threshold: 1
 - Triggered value: 15 errors over the last 99y`
         );
       });
