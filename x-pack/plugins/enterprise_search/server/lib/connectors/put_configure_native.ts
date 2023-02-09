@@ -32,7 +32,7 @@ export const configureNativeConnector = async (
     },
     id: connectorId,
     index: CONNECTORS_INDEX,
-    refresh: true,
+    refresh: true, // TODO: review stateless elasticsearch impact
   });
 
   return result.result === 'updated' ? true : false;

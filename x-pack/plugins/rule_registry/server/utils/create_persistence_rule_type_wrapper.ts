@@ -318,7 +318,7 @@ export const createPersistenceRuleTypeWrapper: CreatePersistenceRuleTypeWrapper 
 
                 const bulkResponse = await ruleDataClientWriter.bulk({
                   body: [...duplicateAlertUpdates, ...mapAlertsToBulkCreate(augmentedAlerts)],
-                  refresh: true,
+                  refresh: true, // TODO: review stateless elasticsearch impact
                 });
 
                 if (bulkResponse == null) {

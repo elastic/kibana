@@ -157,7 +157,7 @@ export class ReportingStore {
     const doc = {
       index: report._index!,
       id: report._id,
-      refresh: true,
+      refresh: true, // TODO: review stateless elasticsearch impact
       body: {
         ...report.toReportSource(),
         ...sourceDoc({
@@ -289,7 +289,7 @@ export class ReportingStore {
         index: report._index,
         if_seq_no: report._seq_no,
         if_primary_term: report._primary_term,
-        refresh: true,
+        refresh: true, // TODO: review stateless elasticsearch impact
         body: { doc },
       });
     } catch (err) {
@@ -328,7 +328,7 @@ export class ReportingStore {
         index: report._index,
         if_seq_no: report._seq_no,
         if_primary_term: report._primary_term,
-        refresh: true,
+        refresh: true, // TODO: review stateless elasticsearch impact
         body: { doc },
       });
     } catch (err) {
@@ -363,7 +363,7 @@ export class ReportingStore {
         index: report._index,
         if_seq_no: report._seq_no,
         if_primary_term: report._primary_term,
-        refresh: true,
+        refresh: true, // TODO: review stateless elasticsearch impact
         body: { doc },
       });
     } catch (err) {
@@ -390,7 +390,7 @@ export class ReportingStore {
         index: report._index,
         if_seq_no: report._seq_no,
         if_primary_term: report._primary_term,
-        refresh: true,
+        refresh: true, // TODO: review stateless elasticsearch impact
         body: { doc },
       });
     } catch (err) {

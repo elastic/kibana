@@ -701,7 +701,7 @@ export class AlertsClient {
         const result = await this.esClient.updateByQuery({
           index,
           conflicts: 'proceed',
-          refresh: true,
+          refresh: true, // TODO: review stateless elasticsearch impact
           body: {
             script: {
               source: `if (ctx._source['${ALERT_WORKFLOW_STATUS}'] != null) {

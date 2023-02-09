@@ -49,7 +49,7 @@ export const pickupUpdatedMappings =
         scroll_size: BATCH_SIZE,
         // force a refresh so that we can query the updated index immediately
         // after the operation completes
-        refresh: true,
+        refresh: true, // TODO: review stateless elasticsearch impact
         // Create a task and return task id instead of blocking until complete
         wait_for_completion: false,
       })

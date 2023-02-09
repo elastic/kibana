@@ -90,7 +90,7 @@ export const createMigration = async ({
       },
     },
     ...reindexQueryOptions,
-    refresh: true,
+    refresh: true, // TODO: review stateless elasticsearch impact
     wait_for_completion: false,
   });
 
