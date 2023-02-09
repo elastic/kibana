@@ -53,9 +53,9 @@ const buildUserProfilesMap = (users?: CaseUsers): Map<string, UserProfileWithAva
      * profile UID is not enough as a user can use our API to add
      * an assignee with a non existing UID.
      */
-    if (user.user.profileUid != null && user.user.username != null) {
-      userProfiles.set(user.user.profileUid, {
-        uid: user.user.profileUid,
+    if (user.uid != null && user.user.username != null) {
+      userProfiles.set(user.uid, {
+        uid: user.uid,
         user: user.user,
         data: {
           avatar: user.avatar,

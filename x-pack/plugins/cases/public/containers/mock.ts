@@ -965,23 +965,23 @@ export const getCaseUsersMockResponse = (): CaseUsers => {
       {
         user: {
           email: 'case_all@elastic.co',
-          fullName: 'Cases',
+          full_name: 'Cases',
           username: 'cases_all',
         },
       },
       {
         user: {
           email: null,
-          fullName: null,
+          full_name: null,
           username: 'elastic',
-          profileUid: 'u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0',
         },
+        uid: 'u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0',
       },
     ],
     reporter: {
       user: {
         email: 'case_all@elastic.co',
-        fullName: 'Cases',
+        full_name: 'Cases',
         username: 'cases_all',
       },
     },
@@ -990,52 +990,52 @@ export const getCaseUsersMockResponse = (): CaseUsers => {
       {
         user: {
           email: '',
-          fullName: '',
+          full_name: '',
           username: 'alerts_read_only',
-          profileUid: 'u_62h24XVQzG4-MuH1-DqPmookrJY23aRa9h4fyULR6I8_0',
         },
+        uid: 'u_62h24XVQzG4-MuH1-DqPmookrJY23aRa9h4fyULR6I8_0',
       },
       {
         user: {
           email: null,
-          fullName: null,
+          full_name: null,
           username: 'elastic',
-          profileUid: 'u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0',
         },
+        uid: 'u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0',
       },
       {
         user: {
           email: 'fuzzy_marten@profiles.elastic.co',
-          fullName: 'Fuzzy Marten',
+          full_name: 'Fuzzy Marten',
           username: 'fuzzy_marten',
-          profileUid: 'u_3OgKOf-ogtr8kJ5B0fnRcqzXs2aQQkZLtzKEEFnKaYg_0',
         },
+        uid: 'u_3OgKOf-ogtr8kJ5B0fnRcqzXs2aQQkZLtzKEEFnKaYg_0',
       },
       {
         user: {
           email: 'misty_mackerel@profiles.elastic.co',
-          fullName: 'Misty Mackerel',
+          full_name: 'Misty Mackerel',
           username: 'misty_mackerel',
-          profileUid: 'u_BXf_iGxcnicv4l-3-ER7I-XPpfanAFAap7uls86xV7A_0',
         },
+        uid: 'u_BXf_iGxcnicv4l-3-ER7I-XPpfanAFAap7uls86xV7A_0',
       },
     ],
     unassignedUsers: [
       {
         user: {
           email: '',
-          fullName: '',
+          full_name: '',
           username: 'cases_no_connectors',
-          profileUid: 'u_o0kPgaXwJ7odc3sNWH83yx9JMoVbou_z2CgIEhl2I8M_0',
         },
+        uid: 'u_o0kPgaXwJ7odc3sNWH83yx9JMoVbou_z2CgIEhl2I8M_0',
       },
       {
         user: {
           email: 'valid_chimpanzee@profiles.elastic.co',
-          fullName: 'Valid Chimpanzee',
+          full_name: 'Valid Chimpanzee',
           username: 'valid_chimpanzee',
-          profileUid: 'u_wEtPffVJIgxWIN8W79Rp84bbORN6x0wKiJ5eTsQvpBA_0',
         },
+        uid: 'u_wEtPffVJIgxWIN8W79Rp84bbORN6x0wKiJ5eTsQvpBA_0',
       },
     ],
   };

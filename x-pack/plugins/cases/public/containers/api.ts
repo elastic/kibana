@@ -30,7 +30,6 @@ import type {
   SingleCaseMetricsResponse,
   CasesFindResponse,
   GetCaseConnectorsResponse,
-  GetCaseUsersResponse,
 } from '../../common/api';
 import {
   CommentType,
@@ -411,10 +410,8 @@ export const getCaseConnectors = async (
 };
 
 export const getCaseUsers = async (caseId: string, signal: AbortSignal): Promise<CaseUsers> => {
-  const res = await KibanaServices.get().http.fetch<GetCaseUsersResponse>(getCaseUsersUrl(caseId), {
+  return KibanaServices.get().http.fetch<CaseUsers>(getCaseUsersUrl(caseId), {
     method: 'GET',
     signal,
   });
-
-  return convertToCamelCase<GetCaseUsersResponse, CaseUsers>(res);
 };

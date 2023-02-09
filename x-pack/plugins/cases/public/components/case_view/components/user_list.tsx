@@ -121,7 +121,15 @@ const getValidUsers = (
   userProfiles: Map<string, UserProfileWithAvatar>
 ): UserInfoWithAvatar[] => {
   const validUsers = users.reduce<Map<string, UserInfoWithAvatar>>((acc, user) => {
-    const convertedUser = convertToUserInfo(user.user, userProfiles);
+    const userCamelCase = {
+      email: user.user.email,
+      fullName: user.user.full_name,
+      username: user.user.username,
+      profileUid: user.uid,
+    };
+
+    const convertedUser = convertToUserInfo(userCamelCase, userProfiles);
+
     if (convertedUser != null) {
       acc.set(convertedUser.key, convertedUser.userInfo);
     }

@@ -88,7 +88,7 @@ export type CasesStatus = SnakeToCamelCase<CasesStatusResponse>;
 export type CasesMetrics = SnakeToCamelCase<CasesMetricsResponse>;
 export type CaseUpdateRequest = SnakeToCamelCase<CasePatchRequest>;
 export type CaseConnectors = SnakeToCamelCase<GetCaseConnectorsResponse>;
-export type CaseUsers = SnakeToCamelCase<GetCaseUsersResponse>;
+export type CaseUsers = GetCaseUsersResponse;
 
 export interface ResolvedCase {
   case: Case;

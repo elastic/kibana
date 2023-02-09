@@ -7,19 +7,22 @@
 
 import * as rt from 'io-ts';
 
+const UserWithoutProfileUidRt = rt.type({
+  email: rt.union([rt.undefined, rt.null, rt.string]),
+  full_name: rt.union([rt.undefined, rt.null, rt.string]),
+  username: rt.union([rt.undefined, rt.null, rt.string]),
+});
+
 export const UserRt = rt.intersection([
-  rt.type({
-    email: rt.union([rt.undefined, rt.null, rt.string]),
-    full_name: rt.union([rt.undefined, rt.null, rt.string]),
-    username: rt.union([rt.undefined, rt.null, rt.string]),
-  }),
+  UserWithoutProfileUidRt,
   rt.partial({ profile_uid: rt.string }),
 ]);
 
 export const UserWithProfileInfoRt = rt.intersection([
   rt.type({
-    user: UserRt,
+    user: UserWithoutProfileUidRt,
   }),
+  rt.partial({ uid: rt.string }),
   rt.partial({
     avatar: rt.partial({ initials: rt.string, color: rt.string, imageUrl: rt.string }),
   }),

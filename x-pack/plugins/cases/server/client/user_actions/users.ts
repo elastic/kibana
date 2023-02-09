@@ -136,9 +136,9 @@ const getUserInformation = (
       email: userProfile?.user.email ?? userInfo?.email ?? null,
       full_name: userProfile?.user.full_name ?? userInfo?.full_name ?? null,
       username: userProfile?.user.username ?? userInfo?.username ?? null,
-      profile_uid: userProfile?.uid ?? uid ?? userInfo?.profile_uid,
     },
     avatar: userProfile?.data.avatar,
+    uid: userProfile?.uid ?? uid ?? userInfo?.profile_uid,
   };
 };
 
