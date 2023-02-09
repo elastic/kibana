@@ -8,7 +8,7 @@ export const TIMESTAMP = 'timestamp.us';
 export const AGENT = 'agent';
 export const AGENT_NAME = 'agent.name';
 export const AGENT_VERSION = 'agent.version';
-export const AGENT_ACTIVATION_METHOD = 'agent.activation.method';
+export const AGENT_ACTIVATION_METHOD = 'agent.activation_method';
 
 export const DESTINATION_ADDRESS = 'destination.address';
 
