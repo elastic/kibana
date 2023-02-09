@@ -28,7 +28,7 @@ export const TransformHealthColoredDot: FC<TransformHealthProps> = ({
   return compact ? (
     <EuiToolTip content={TRANSFORM_HEALTH_DESCRIPTION[healthStatus]}>
       <EuiHealth color={TRANSFORM_HEALTH_COLOR[healthStatus]}>
-        <small>{TRANSFORM_HEALTH_LABEL[healthStatus]}</small>
+        <small data-test-subj="transformListHealth">{TRANSFORM_HEALTH_LABEL[healthStatus]}</small>
       </EuiHealth>
     </EuiToolTip>
   ) : (

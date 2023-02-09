@@ -5,9 +5,41 @@
  * 2.0.
  */
 
-import { TRANSFORM_STATE } from '@kbn/transform-plugin/common/constants';
+import {
+  TRANSFORM_STATE,
+  TRANSFORM_HEALTH,
+  TRANSFORM_HEALTH_LABEL,
+} from '@kbn/transform-plugin/common/constants';
+import {
+  TransformLatestConfig,
+  TransformPivotConfig,
+} from '@kbn/transform-plugin/common/types/transform';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import { getLatestTransformConfig, getPivotTransformConfig } from '../helpers';
+
+interface TestDataPivot {
+  suiteTitle: string;
+  originalConfig: TransformPivotConfig;
+  mode: 'batch' | 'continuous';
+  type: 'pivot';
+  expected: {
+    healthLabel: string;
+    healthStatus: string;
+  };
+}
+
+interface TestDataLatest {
+  suiteTitle: string;
+  originalConfig: TransformLatestConfig;
+  mode: 'batch' | 'continuous';
+  type: 'latest';
+  expected: {
+    healthLabel: string;
+    healthStatus: string;
+  };
+}
+
+type TestData = TestDataPivot | TestDataLatest;
 
 export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
@@ -15,26 +47,56 @@ export default function ({ getService }: FtrProviderContext) {
 
   describe('starting', function () {
     const PREFIX = 'starting';
-    const testDataList = [
+    const testDataList: TestData[] = [
       {
         suiteTitle: 'batch transform with pivot configuration',
         originalConfig: getPivotTransformConfig(PREFIX, false),
         mode: 'batch',
+        type: 'pivot',
+        expected: {
+          healthLabel: TRANSFORM_HEALTH_LABEL.green,
+          healthStatus: TRANSFORM_HEALTH.GREEN,
+        },
       },
       {
         suiteTitle: 'continuous transform with pivot configuration',
         originalConfig: getPivotTransformConfig(PREFIX, true),
         mode: 'continuous',
+        type: 'pivot',
+        expected: {
+          healthLabel: TRANSFORM_HEALTH_LABEL.green,
+          healthStatus: TRANSFORM_HEALTH.GREEN,
+        },
+      },
+      {
+        suiteTitle: 'non healthy continuous transform with pivot configuration',
+        originalConfig: getPivotTransformConfig(PREFIX, true, true),
+        mode: 'continuous',
+        type: 'pivot',
+        expected: {
+          healthLabel: TRANSFORM_HEALTH_LABEL.yellow,
+          healthStatus: TRANSFORM_HEALTH.YELLOW,
+        },
       },
       {
         suiteTitle: 'batch transform with latest configuration',
         originalConfig: getLatestTransformConfig(PREFIX, false),
         mode: 'batch',
+        type: 'latest',
+        expected: {
+          healthLabel: TRANSFORM_HEALTH_LABEL.green,
+          healthStatus: TRANSFORM_HEALTH.GREEN,
+        },
       },
       {
         suiteTitle: 'continuous transform with latest configuration',
         originalConfig: getLatestTransformConfig(PREFIX, true),
         mode: 'continuous',
+        type: 'latest',
+        expected: {
+          healthLabel: TRANSFORM_HEALTH_LABEL.green,
+          healthStatus: TRANSFORM_HEALTH.GREEN,
+        },
       },
     ];
 
@@ -43,7 +105,23 @@ export default function ({ getService }: FtrProviderContext) {
       await transform.testResources.createIndexPatternIfNeeded('ft_ecommerce', 'order_date');
 
       for (const testData of testDataList) {
-        await transform.api.createTransform(testData.originalConfig.id, testData.originalConfig);
+        if (
+          testData.expected.healthStatus === TRANSFORM_HEALTH.YELLOW &&
+          testData.type === 'pivot'
+        ) {
+          testData.originalConfig.pivot.aggregations['products.base_price.fail'] = {
+            avg: {
+              script: {
+                source: "def a = doc['non_existing'].value",
+              },
+            },
+          };
+        }
+        await transform.api.createTransform(
+          testData.originalConfig.id,
+          testData.originalConfig,
+          testData.expected.healthStatus === TRANSFORM_HEALTH.YELLOW
+        );
       }
       await transform.testResources.setKibanaTimeZoneToUTC();
       await transform.securityUI.loginAsTransformPowerUser();
@@ -88,9 +166,15 @@ export default function ({ getService }: FtrProviderContext) {
               testData.originalConfig.id,
               TRANSFORM_STATE.STOPPED
             );
-          } else {
+          } else if (testData.mode === 'batch') {
+            await transform.testExecution.logTestStep('should display a healthy status');
             await transform.table.assertTransformRowProgressGreaterThan(transformId, 0);
           }
+
+          await transform.table.assertTransformRowHealth(
+            testData.originalConfig.id,
+            testData.expected.healthLabel
+          );
 
           await transform.table.assertTransformRowStatusNotEql(
             testData.originalConfig.id,

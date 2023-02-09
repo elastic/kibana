@@ -57,6 +57,11 @@ export function TransformTableProvider({ getService }: FtrProviderContext) {
             .findTestSubject('transformListColumnProgress')
             .findTestSubject('transformListProgress')
             .attr('value'),
+          health: $tr
+            .findTestSubject('transformListColumnHealth')
+            .findTestSubject('transformListHealth')
+            .text()
+            .trim(),
         });
       }
 
@@ -136,6 +141,18 @@ export function TransformTableProvider({ getService }: FtrProviderContext) {
         expect(transformRow.progress).to.greaterThan(
           0,
           `Expected transform row progress to be greater than '${expectedProgress}' (got '${transformRow.progress}')`
+        );
+      });
+    }
+
+    public async assertTransformRowHealth(transformId: string, health: string) {
+      await retry.tryForTime(30 * 1000, async () => {
+        await this.refreshTransformList();
+        const rows = await this.parseTransformTable();
+        const transformRow = rows.filter((row) => row.id === transformId)[0];
+        expect(transformRow.health).to.eql(
+          health,
+          `Expected transform row status to not be '${health}' (got '${transformRow.health}')`
         );
       });
     }
