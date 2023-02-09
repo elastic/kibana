@@ -33,7 +33,6 @@
     "@kbn/test-jest-helpers",
     "@kbn/core-custom-branding-browser",
     "@kbn/core-custom-branding-browser-mocks",
-    "@kbn/shared-ux-router",
   ],
   "exclude": [
     "target/**/*",
