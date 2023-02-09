@@ -1193,4 +1193,4 @@ packages/kbn-yarn-lock-validator @elastic/kibana-operations
 **/*.scss  @elastic/kibana-design
 
 # Changes to translation files should not ping code reviewers
-!x-pack/plugins/translations/translations @elastic/kibana-localization
+x-pack/plugins/translations/translations

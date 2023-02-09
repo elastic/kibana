@@ -32,7 +32,7 @@ const GENERATED_TRAILER = `
 **/*.scss  @elastic/kibana-design
 
 # Changes to translation files should not ping code reviewers
-!x-pack/plugins/translations/translations @elastic/kibana-localization
+x-pack/plugins/translations/translations
 `;
 
 function normalizeDir(dirish: string): string {
