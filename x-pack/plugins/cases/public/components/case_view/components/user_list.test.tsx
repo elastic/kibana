@@ -41,7 +41,7 @@ describe('UserList ', () => {
         headline={i18n.REPORTER}
         users={[
           {
-            user,
+            user: { ...user, full_name: user.fullName },
           },
         ]}
       />
