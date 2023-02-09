@@ -73,9 +73,7 @@ export const getSignalsQueryMapFromThreatIndex = async ({
 
   threatList = await getThreatList({ ...threatSearchParams, searchAfter: undefined });
 
-  while (
-    maxThreatsReachedMap.size < eventsCount && threatList?.hits.hits.length > 0
-  ) {
+  while (maxThreatsReachedMap.size < eventsCount && threatList?.hits.hits.length > 0) {
     threatList.hits.hits.forEach((threatHit) => {
       const matchedQueries = threatHit?.matched_queries || [];
 
