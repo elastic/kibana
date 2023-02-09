@@ -9,11 +9,11 @@ import React, { useEffect, useState } from 'react';
 import { EuiComboBox, EuiComboBoxOptionOption, EuiFlexItem, EuiFormLabel } from '@elastic/eui';
 import { Control, Controller, FieldPath } from 'react-hook-form';
 import { CreateSLOInput } from '@kbn/slo-schema';
+import { i18n } from '@kbn/i18n';
 import {
   Suggestion,
   useFetchApmSuggestions,
 } from '../../../../hooks/slo/use_fetch_apm_suggestions';
-import { i18n } from '@kbn/i18n';
 
 interface Option {
   label: string;
