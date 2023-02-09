@@ -312,7 +312,7 @@ export class EndpointActionGenerator extends BaseDataGenerator {
           -rw-r--r--     1 elastic  staff  298 Feb  2 09:10 readme.md`,
           stderr: `error line\
           error line 2
-          error line 3 that is quite very long and will be truncated, and should not be visible in the UI`,
+          error line 3 that is quite very long and will be truncated, and should not be visible in the UI\ errorline3thathasalotmoretextthatdoesnotendfortestingpurposesrepeatalotoftexthereandkeepaddingmoreandmoretextwithoutendtheideabeingthatwedonotuseperiodsorcommassothattheconsoleuiisunabletobreakthislinewithoutsomecssrulessowiththislineweshouldbeabletotestthatwithgenerateddata`,
           stdoutTruncated: true,
           stderrTruncated: true,
           shell_code: 0,

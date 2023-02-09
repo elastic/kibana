@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { memo } from 'react';
+import React, { memo, useMemo } from 'react';
 import {
   EuiAccordion,
   EuiFlexGroup,
@@ -14,11 +14,12 @@ import {
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import {
-  ResponseActionFileDownloadLink,
-  type ResponseActionFileDownloadLinkProps,
-} from '../response_action_file_download_link';
-import type { ResponseActionExecuteOutputContent } from '../../../../common/endpoint/types';
+import { ResponseActionFileDownloadLink } from '../response_action_file_download_link';
+import type {
+  ActionDetails,
+  MaybeImmutable,
+  ResponseActionExecuteOutputContent,
+} from '../../../../common/endpoint/types';
 
 const EXECUTE_FILE_LINK_TITLE = i18n.translate(
   'xpack.securitySolution.responseActionExecuteDownloadLink.downloadButtonLabel',
@@ -57,14 +58,17 @@ const ACCORDION_BUTTON_TEXT = Object.freeze({
 });
 interface ExecuteActionOutputProps {
   content: string;
-  id: string;
   initialIsOpen?: boolean;
   isTruncated: boolean;
   type: 'error' | 'output';
 }
 
-const ExecutionActionOutputGist = memo<ExecuteActionOutputProps>(
-  ({ content, id, initialIsOpen = false, isTruncated, type }) => {
+const ExecutionActionOutputAccordion = memo<ExecuteActionOutputProps>(
+  ({ content, initialIsOpen = false, isTruncated, type }) => {
+    const id = useGeneratedHtmlId({
+      prefix: 'executeActionOutputAccordions',
+      suffix: type,
+    });
     return (
       <EuiAccordion
         id={id}
@@ -72,34 +76,38 @@ const ExecutionActionOutputGist = memo<ExecuteActionOutputProps>(
         buttonContent={ACCORDION_BUTTON_TEXT[type][isTruncated ? 'truncated' : 'regular']}
         paddingSize="s"
       >
-        <EuiText size="s">
+        <EuiText
+          size="s"
+          style={{
+            whiteSpace: 'pre-wrap',
+            lineBreak: 'anywhere',
+          }}
+        >
           <p>{content}</p>
         </EuiText>
       </EuiAccordion>
     );
   }
 );
-ExecutionActionOutputGist.displayName = 'ExecutionActionOutputGist';
+ExecutionActionOutputAccordion.displayName = 'ExecutionActionOutputAccordion';
 
-interface ExecuteActionProps {
-  action: ResponseActionFileDownloadLinkProps['action'];
+interface ExecuteActionHostResponseOutputProps {
+  action: MaybeImmutable<ActionDetails>;
   agentId?: string;
   'data-test-subj'?: string;
-  outputs?: Record<string, { content: ResponseActionExecuteOutputContent }>;
   textSize?: 's' | 'xs';
 }
 
-export const ExecuteAction = memo<ExecuteActionProps>(
-  ({ action, agentId, 'data-test-subj': dataTestSubj, outputs, textSize }) => {
-    const prefix = 'executeActionOutputAccordions';
-    const executionOutputAccordionStdout = useGeneratedHtmlId({
-      prefix,
-      suffix: 'stdout',
-    });
-    const executionOutputAccordionStderr = useGeneratedHtmlId({
-      prefix,
-      suffix: 'stderr',
-    });
+export const ExecuteActionHostResponseOutput = memo<ExecuteActionHostResponseOutputProps>(
+  ({ action, agentId, 'data-test-subj': dataTestSubj, textSize }) => {
+    const outputContent = useMemo(
+      () =>
+        agentId &&
+        action.outputs &&
+        action.outputs[agentId] &&
+        (action.outputs[agentId].content as ResponseActionExecuteOutputContent),
+      [agentId, action]
+    );
 
     return (
       <EuiFlexGroup direction="column" data-test-subj={dataTestSubj}>
@@ -111,21 +119,18 @@ export const ExecuteAction = memo<ExecuteActionProps>(
           />
         </EuiFlexItem>
 
-        {/* TODO: add outputs to action list API when the tray is expanded */}
-        {agentId && outputs && outputs[agentId] && (
+        {outputContent && (
           <EuiFlexItem>
-            <ExecutionActionOutputGist
-              content={outputs[agentId].content.stdout}
-              id={executionOutputAccordionStdout}
-              isTruncated={outputs[agentId].content.stdoutTruncated}
+            <ExecutionActionOutputAccordion
+              content={outputContent.stdout}
+              isTruncated={outputContent.stdoutTruncated}
               initialIsOpen
               type="output"
             />
             <EuiSpacer size="m" />
-            <ExecutionActionOutputGist
-              content={outputs[agentId].content.stderr}
-              id={executionOutputAccordionStderr}
-              isTruncated={outputs[agentId].content.stderrTruncated}
+            <ExecutionActionOutputAccordion
+              content={outputContent.stderr}
+              isTruncated={outputContent.stderrTruncated}
               type="error"
             />
           </EuiFlexItem>
@@ -134,4 +139,4 @@ export const ExecuteAction = memo<ExecuteActionProps>(
     );
   }
 );
-ExecuteAction.displayName = 'ExecuteAction';
+ExecuteActionHostResponseOutput.displayName = 'ExecuteActionHostResponseOutput';

@@ -508,18 +508,6 @@ describe('actions schemas', () => {
       }).not.toThrow();
     });
 
-    it('should also accept a `0` as timeout with at least one endpoint_id and a command parameter', () => {
-      expect(() => {
-        ExecuteActionRequestSchema.body.validate({
-          endpoint_ids: ['endpoint_id'],
-          parameters: {
-            command: 'ls -al',
-            timeout: 0,
-          },
-        });
-      }).not.toThrow();
-    });
-
     it('should also accept an optional comment', () => {
       expect(() => {
         ExecuteActionRequestSchema.body.validate({

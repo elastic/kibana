@@ -182,7 +182,10 @@ export const ExecuteActionRequestSchema = {
           }
         },
       }),
-      timeout: schema.maybe(schema.number({ min: 0 })),
+      /**
+       * The max timeout value before the command is killed. Number represents milliseconds
+       */
+      timeout: schema.maybe(schema.number({ min: 1 })),
     }),
   }),
 };

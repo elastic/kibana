@@ -14,7 +14,7 @@ import type { ResponseActionExecuteOutputContent } from '../../../../../common/e
 import { useSendExecuteEndpoint } from '../../../hooks/response_actions/use_send_execute_endpoint_request';
 import type { ActionRequestComponentProps } from '../types';
 import { parsedExecuteTimeout } from '../lib/utils';
-import { ExecuteAction } from '../../endpoint_execute_action';
+import { ExecuteActionHostResponseOutput } from '../../endpoint_execute_action';
 
 export const ExecuteActionResult = memo<
   ActionRequestComponentProps<{
@@ -71,10 +71,9 @@ export const ExecuteActionResult = memo<
         { defaultMessage: 'Command execution was successful.' }
       )}
     >
-      <ExecuteAction
+      <ExecuteActionHostResponseOutput
         action={completedActionDetails}
         agentId={command.commandDefinition?.meta?.endpointId}
-        outputs={completedActionDetails.outputs}
       />
     </ResultComponent>
   );

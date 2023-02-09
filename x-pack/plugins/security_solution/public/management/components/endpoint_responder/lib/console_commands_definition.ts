@@ -54,11 +54,7 @@ const pidValidator = (argData: ParsedArgData): true | string => {
 };
 
 const executeTimeoutValidator = (argData: ParsedArgData): true | string => {
-  const emptyResult = emptyArgumentValidator(argData);
-
-  if (emptyResult !== true) {
-    return emptyResult;
-  } else if (String(argData).trim().length && validateUnitOfTime(String(argData).trim())) {
+  if (String(argData).trim().length && validateUnitOfTime(String(argData).trim())) {
     return true;
   } else {
     return i18n.translate('xpack.securitySolution.endpointConsoleCommands.invalidExecuteTimeout', {
@@ -487,6 +483,7 @@ export const getEndpointConsoleCommands = ({
                 'The timeout in units of time (h for hours, m for minutes, s for seconds) for the endpoint to wait for the script to complete. Example: 37m. If not given, it defaults to 4 hours.',
             }
           ),
+          mustHaveValue: 'non-empty-string',
           validate: executeTimeoutValidator,
         },
         comment: {

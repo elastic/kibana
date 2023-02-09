@@ -607,36 +607,6 @@ describe('Response actions', () => {
         expect(responseBody.action).toBeUndefined();
       });
 
-      it('handles execute with `0` timeout', async () => {
-        const ctx = await callRoute(
-          EXECUTE_ROUTE,
-          {
-            body: { endpoint_ids: ['XYZ'], parameters: { command: 'ls -al', timeout: 0 } },
-          },
-          { endpointDsExists: true }
-        );
-        const indexDoc = ctx.core.elasticsearch.client.asInternalUser.index;
-        const actionDocs: [
-          { index: string; body?: LogsEndpointAction },
-          { index: string; body?: EndpointAction }
-        ] = [
-          indexDoc.mock.calls[0][0] as estypes.IndexRequest<LogsEndpointAction>,
-          indexDoc.mock.calls[1][0] as estypes.IndexRequest<EndpointAction>,
-        ];
-
-        expect(actionDocs[0].index).toEqual(ENDPOINT_ACTIONS_INDEX);
-        expect(actionDocs[1].index).toEqual(AGENT_ACTIONS_INDEX);
-        expect(actionDocs[0].body!.EndpointActions.data.command).toEqual('execute');
-        const parameters = actionDocs[1].body!.data.parameters as ResponseActionsExecuteParameters;
-        expect(parameters.command).toEqual('ls -al');
-        expect(parameters.timeout).toEqual(0);
-        expect(actionDocs[1].body!.data.command).toEqual('execute');
-
-        expect(mockResponse.ok).toBeCalled();
-        const responseBody = mockResponse.ok.mock.calls[0][0]?.body as ResponseActionApiResponse;
-        expect(responseBody.action).toBeUndefined();
-      });
-
       it('handles execute without optional `timeout` and sets it to 4 hrs if not given', async () => {
         const ctx = await callRoute(
           EXECUTE_ROUTE,

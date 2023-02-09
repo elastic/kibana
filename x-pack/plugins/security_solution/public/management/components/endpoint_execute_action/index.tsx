@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { ExecuteAction } from './endpoint_execute_action';
+export { ExecuteActionHostResponseOutput } from './execute_action_host_response';
