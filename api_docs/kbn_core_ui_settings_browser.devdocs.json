@@ -538,7 +538,7 @@
         "label": "PublicUiSettingsParams",
         "description": [],
         "signature": [
-          "{ name?: string | undefined; value?: unknown; description?: string | undefined; category?: string[] | undefined; options?: string[] | number[] | undefined; optionLabels?: Record<string, string> | undefined; requiresPageReload?: boolean | undefined; readonly?: boolean | undefined; sensitive?: boolean | undefined; type?: ",
+          "{ type?: ",
           {
             "pluginId": "@kbn/core-ui-settings-common",
             "scope": "common",
@@ -546,15 +546,7 @@
             "section": "def-common.UiSettingsType",
             "text": "UiSettingsType"
           },
-          " | undefined; deprecation?: ",
-          {
-            "pluginId": "@kbn/core-ui-settings-common",
-            "scope": "common",
-            "docId": "kibKbnCoreUiSettingsCommonPluginApi",
-            "section": "def-common.DeprecationSettings",
-            "text": "DeprecationSettings"
-          },
-          " | undefined; order?: number | undefined; metric?: { type: string; name: string; } | undefined; scope?: ",
+          " | undefined; options?: string[] | number[] | undefined; value?: unknown; scope?: ",
           {
             "pluginId": "@kbn/core-ui-settings-common",
             "scope": "common",
@@ -562,7 +554,15 @@
             "section": "def-common.UiSettingsScope",
             "text": "UiSettingsScope"
           },
-          " | undefined; }"
+          " | undefined; order?: number | undefined; name?: string | undefined; description?: string | undefined; category?: string[] | undefined; optionLabels?: Record<string, string> | undefined; requiresPageReload?: boolean | undefined; readonly?: boolean | undefined; sensitive?: boolean | undefined; deprecation?: ",
+          {
+            "pluginId": "@kbn/core-ui-settings-common",
+            "scope": "common",
+            "docId": "kibKbnCoreUiSettingsCommonPluginApi",
+            "section": "def-common.DeprecationSettings",
+            "text": "DeprecationSettings"
+          },
+          " | undefined; metric?: { type: string; name: string; } | undefined; }"
         ],
         "path": "packages/core/ui-settings/core-ui-settings-browser/src/types.ts",
         "deprecated": false,
