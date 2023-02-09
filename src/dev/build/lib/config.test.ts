@@ -35,6 +35,9 @@ const setup = async ({ targetAllPlatforms = true }: { targetAllPlatforms?: boole
     dockerPush: false,
     dockerTag: '',
     dockerTagQualifier: '',
+    downloadFreshNode: true,
+    withExamplePlugins: false,
+    withTestPlugins: true,
   });
 };
 
