@@ -150,6 +150,11 @@ export class TaskManagerPlugin
         startServicesPromise.then(({ elasticsearch }) => elasticsearch.client),
     });
 
+    router.post({ path: '/api/task_manager/_stop', validate: false }, async (context, req, res) => {
+      this.taskPollingLifecycle!.stop();
+      return res.ok({ body: `Aye, aye, captain` });
+    });
+
     core.status.derivedStatus$.subscribe((status) =>
       this.logger.debug(`status core.status.derivedStatus now set to ${status.level}`)
     );
