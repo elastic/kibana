@@ -20,66 +20,71 @@ export interface Props {
 export function ApmLatencyIndicatorTypeForm({ control }: Props) {
   return (
     <EuiFlexGroup direction="column" gutterSize="l">
-      <FieldSelector
-        label={i18n.translate('xpack.observability.slos.sloEdit.apmLatency.serviceName', {
-          defaultMessage: 'Service name',
-        })}
-        placeholder={i18n.translate(
-          'xpack.observability.slos.sloEdit.apmLatency.serviceName.placeholder',
-          {
-            defaultMessage: 'Select the APM service',
-          }
-        )}
-        fieldName="service.name"
-        name="indicator.params.service"
-        control={control}
-        dataTestSubj="apmLatencyServiceSelector"
-      />
-      <FieldSelector
-        label={i18n.translate('xpack.observability.slos.sloEdit.apmLatency.serviceEnvironment', {
-          defaultMessage: 'Service environment',
-        })}
-        placeholder={i18n.translate(
-          'xpack.observability.slos.sloEdit.apmLatency.serviceEnvironment.placeholder',
-          {
-            defaultMessage: 'Select the environment',
-          }
-        )}
-        fieldName="service.environment"
-        name="indicator.params.environment"
-        control={control}
-        dataTestSubj="apmLatencyEnvironmentSelector"
-      />
-      <FieldSelector
-        label={i18n.translate('xpack.observability.slos.sloEdit.apmLatency.transactionType', {
-          defaultMessage: 'Transaction type',
-        })}
-        placeholder={i18n.translate(
-          'xpack.observability.slos.sloEdit.apmLatency.transactionType.placeholder',
-          {
-            defaultMessage: 'Select the transaction type',
-          }
-        )}
-        fieldName="transaction.type"
-        name="indicator.params.transactionType"
-        control={control}
-        dataTestSubj="apmLatencyTransactionTypeSelector"
-      />
-      <FieldSelector
-        label={i18n.translate('xpack.observability.slos.sloEdit.apmLatency.transactionName', {
-          defaultMessage: 'Transaction name',
-        })}
-        placeholder={i18n.translate(
-          'xpack.observability.slos.sloEdit.apmLatency.transactionName.placeholder',
-          {
-            defaultMessage: 'Select the transaction name',
-          }
-        )}
-        fieldName="transaction.name"
-        name="indicator.params.transactionName"
-        control={control}
-        dataTestSubj="apmLatencyTransactionNameSelector"
-      />
+      <EuiFlexGroup direction="row" gutterSize="l">
+        <FieldSelector
+          label={i18n.translate('xpack.observability.slos.sloEdit.apmLatency.serviceName', {
+            defaultMessage: 'Service name',
+          })}
+          placeholder={i18n.translate(
+            'xpack.observability.slos.sloEdit.apmLatency.serviceName.placeholder',
+            {
+              defaultMessage: 'Select the APM service',
+            }
+          )}
+          fieldName="service.name"
+          name="indicator.params.service"
+          control={control}
+          dataTestSubj="apmLatencyServiceSelector"
+        />
+        <FieldSelector
+          label={i18n.translate('xpack.observability.slos.sloEdit.apmLatency.serviceEnvironment', {
+            defaultMessage: 'Service environment',
+          })}
+          placeholder={i18n.translate(
+            'xpack.observability.slos.sloEdit.apmLatency.serviceEnvironment.placeholder',
+            {
+              defaultMessage: 'Select the environment',
+            }
+          )}
+          fieldName="service.environment"
+          name="indicator.params.environment"
+          control={control}
+          dataTestSubj="apmLatencyEnvironmentSelector"
+        />
+      </EuiFlexGroup>
+
+      <EuiFlexGroup direction="row" gutterSize="l">
+        <FieldSelector
+          label={i18n.translate('xpack.observability.slos.sloEdit.apmLatency.transactionType', {
+            defaultMessage: 'Transaction type',
+          })}
+          placeholder={i18n.translate(
+            'xpack.observability.slos.sloEdit.apmLatency.transactionType.placeholder',
+            {
+              defaultMessage: 'Select the transaction type',
+            }
+          )}
+          fieldName="transaction.type"
+          name="indicator.params.transactionType"
+          control={control}
+          dataTestSubj="apmLatencyTransactionTypeSelector"
+        />
+        <FieldSelector
+          label={i18n.translate('xpack.observability.slos.sloEdit.apmLatency.transactionName', {
+            defaultMessage: 'Transaction name',
+          })}
+          placeholder={i18n.translate(
+            'xpack.observability.slos.sloEdit.apmLatency.transactionName.placeholder',
+            {
+              defaultMessage: 'Select the transaction name',
+            }
+          )}
+          fieldName="transaction.name"
+          name="indicator.params.transactionName"
+          control={control}
+          dataTestSubj="apmLatencyTransactionNameSelector"
+        />
+      </EuiFlexGroup>
     </EuiFlexGroup>
   );
 }

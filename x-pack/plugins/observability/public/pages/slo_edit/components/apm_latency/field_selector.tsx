@@ -6,7 +6,7 @@
  */
 
 import React, { useEffect, useState } from 'react';
-import { EuiComboBox, EuiComboBoxOptionOption, EuiFormRow } from '@elastic/eui';
+import { EuiComboBox, EuiComboBoxOptionOption, EuiFlexItem, EuiFormLabel } from '@elastic/eui';
 import { Control, Controller, FieldPath } from 'react-hook-form';
 import { CreateSLOInput } from '@kbn/slo-schema';
 import {
@@ -49,7 +49,9 @@ export function FieldSelector({
   }, [suggestions.length]);
 
   return (
-    <EuiFormRow label={label}>
+    <EuiFlexItem>
+      <EuiFormLabel>{label}</EuiFormLabel>
+
       <Controller
         name={name}
         control={control}
@@ -76,7 +78,7 @@ export function FieldSelector({
             options={options}
             placeholder={placeholder}
             selectedOptions={
-              typeof field.value === 'string'
+              !!field.value && typeof field.value === 'string'
                 ? [
                     {
                       value: field.value,
@@ -90,7 +92,7 @@ export function FieldSelector({
           />
         )}
       />
-    </EuiFormRow>
+    </EuiFlexItem>
   );
 }
 
