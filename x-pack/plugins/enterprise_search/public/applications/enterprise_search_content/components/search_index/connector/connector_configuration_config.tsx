@@ -30,8 +30,8 @@ export const ConnectorConfigurationConfig: React.FC = ({ children }) => {
   const { configView, isEditing } = useValues(ConnectorConfigurationLogic);
   const { setIsEditing } = useActions(ConnectorConfigurationLogic);
 
-  const displayList = configView.map(({ label, value }) => ({
-    description: value ?? '--',
+  const displayList = configView.map(({ label, isPasswordField, value }) => ({
+    description: isPasswordField && !!value ? '********' : value || '--',
     title: label,
   }));
 

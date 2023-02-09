@@ -22,9 +22,16 @@ export const initTlsLegacyAlertType: AlertTypeInitializer<RuleTypeModel> = ({
   documentationUrl(docLinks) {
     return `${docLinks.ELASTIC_WEBSITE_URL}guide/en/observability/${docLinks.DOC_LINK_VERSION}/tls-certificate-alert.html`;
   },
-  ruleParamsExpression: (params: any) => <TLSAlert core={core} plugins={plugins} params={params} />,
+  ruleParamsExpression: (params: any) => (
+    <TLSAlert
+      core={core}
+      plugins={plugins}
+      ruleParams={params.ruleParams}
+      setRuleParams={params.setRuleParams}
+    />
+  ),
   description,
   validate: () => ({ errors: {} }),
   defaultActionMessage,
-  requiresAppContext: false,
+  requiresAppContext: true,
 });

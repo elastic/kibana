@@ -310,6 +310,12 @@ export async function mountApp(
         if (!initialContext) {
           data.query.filterManager.setAppFilters([]);
         }
+        // if user comes from a dashboard to convert a legacy viz to a Lens chart
+        // we clear up the dashboard filters and query
+        if (initialContext && 'isEmbeddable' in initialContext && initialContext.isEmbeddable) {
+          data.query.filterManager.setAppFilters([]);
+          data.query.queryString.clearQuery();
+        }
         lensStore.dispatch(setState(getPreloadedState(storeDeps) as LensAppState));
         lensStore.dispatch(loadInitial({ redirectCallback, initialInput, history: props.history }));
       }, [initialInput, props.history, redirectCallback]);
