@@ -55,9 +55,11 @@ export const AlertsTabContent = React.memo(() => {
 
   return (
     <EuiFlexGroup direction="column" gutterSize="m">
-      <EuiFlexItem>
-        <ObservabilityAlertStatusFilter onChange={setAlertStatus} status={alertStatus} />
-      </EuiFlexItem>
+      <EuiFlexGroup justifyContent="flexStart" alignItems="center">
+        <EuiFlexItem grow={false}>
+          <ObservabilityAlertStatusFilter onChange={setAlertStatus} status={alertStatus} />
+        </EuiFlexItem>
+      </EuiFlexGroup>
       <EuiFlexItem>
         <AlertSummaryWidget
           chartThemes={chartThemes}
