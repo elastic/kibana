@@ -124,17 +124,21 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       describe('for the search bar', () => {
         let adminSearchBar: WebElementWrapper;
-        before(async () => {
+        let querySubmitButton:WebElementWrapper;
+        beforeEach(async () => {
           await pageObjects.endpoint.waitForTableToHaveData('endpointListTable', 60000);
           adminSearchBar = await testSubjects.find('adminSearchBar');
+          querySubmitButton = await testSubjects.find('querySubmitButton');
         });
         afterEach(async () => {
+          adminSearchBar = await testSubjects.find('adminSearchBar');
+          querySubmitButton = await testSubjects.find('querySubmitButton');
           await adminSearchBar.clearValueWithKeyboard();
+          await querySubmitButton.click();
         });
         it('when the kql query is `na`, table shows an empty list', async () => {
           await adminSearchBar.clearValueWithKeyboard();
           await adminSearchBar.type('na');
-          const querySubmitButton = await testSubjects.find('querySubmitButton');
           await querySubmitButton.click();
           const expectedDataFromQuery = [
             [
@@ -163,7 +167,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           await adminSearchBar.type(
             `united.endpoint.host.hostname : "${hostName}" or host.hostname : "${hostName}" `
           );
-          const querySubmitButton = await testSubjects.find('querySubmitButton');
           await querySubmitButton.click();
           await pageObjects.endpoint.waitForTableToHaveNumberOfEntries(
             'endpointListTable',
@@ -179,6 +182,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
 
       describe('when the hostname is clicked on,', () => {
+        before(async () => {
+          await pageObjects.endpoint.waitForTableToHaveNumberOfEntries('endpointListTable', 3, 90000);
+        });
         it('display the details flyout', async () => {
           await (await testSubjects.find('hostnameCellLink')).click();
           await testSubjects.existOrFail('endpointDetailsFlyout');
