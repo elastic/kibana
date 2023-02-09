@@ -1,18 +1,17 @@
-import crypto from 'crypto';
+import murmurhash from 'murmurhash';
 
 
 function hash(partition: number, podName: string){
-  // TODO: Is this this hashing algo we should be using?
-  return crypto.createHash('md5').update(`${partition}}:${podName}`).digest().readBigUInt64BE();
+  return murmurhash.v3(`${partition}}:${podName}`);
 }
 
 // TODO: Optimize. This can almost certainly be optimized...
 export function rendezvousHash(podName: string, podNames: string[], partitions: number[], k: number) : number[] {
-  const maxes = Array<Array<[string, bigint]>>();
+  const maxes = Array<Array<[string, number]>>();
   for (let i = 0; i < partitions.length; ++i) {
     maxes[i] = new Array();
     for (let ii = 0; ii < k; ++ii) {
-      maxes[i][ii] = ['', -1n];
+      maxes[i][ii] = ['', -1];
     }
   }
 

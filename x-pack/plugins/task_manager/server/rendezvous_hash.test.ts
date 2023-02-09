@@ -62,21 +62,21 @@ test(`three pods`, function () {
   const fooPartitions = rendezvousHash('foo', allPods, allPartitions, 2);
   expect(fooPartitions).toMatchInlineSnapshot(`
     Array [
-      1,
+      0,
+      2,
       3,
       4,
       5,
       6,
-      9,
+      7,
+      8,
       10,
       11,
-      12,
       13,
       14,
+      15,
       16,
       17,
-      18,
-      19,
     ]
   `);
 
@@ -84,30 +84,30 @@ test(`three pods`, function () {
   expect(barPartitions).toMatchInlineSnapshot(`
     Array [
       0,
+      1,
       2,
-      5,
-      6,
+      3,
       7,
-      8,
       9,
+      10,
       11,
       12,
       13,
-      15,
+      18,
+      19,
     ]
   `);
 
   const quzPartitions = rendezvousHash('quz', allPods, allPartitions, 2);
   expect(quzPartitions).toMatchInlineSnapshot(`
     Array [
-      0,
       1,
-      2,
-      3,
       4,
-      7,
+      5,
+      6,
       8,
-      10,
+      9,
+      12,
       14,
       15,
       16,
