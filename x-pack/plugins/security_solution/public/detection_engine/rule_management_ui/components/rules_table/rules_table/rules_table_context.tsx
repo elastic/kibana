@@ -5,38 +5,37 @@
  * 2.0.
  */
 
+import { isEqual } from 'lodash';
 import React, {
   createContext,
   useCallback,
   useContext,
   useEffect,
   useMemo,
-  useState,
   useRef,
+  useState,
 } from 'react';
-import { isEqual } from 'lodash';
 import { DEFAULT_RULES_TABLE_REFRESH_SETTING } from '../../../../../../common/constants';
 import { invariant } from '../../../../../../common/utils/invariant';
-import { useReplaceUrlParams } from '../../../../../common/utils/global_query_string/helpers';
-import { useKibana, useUiSetting$ } from '../../../../../common/lib/kibana';
 import { URL_PARAM_KEY } from '../../../../../common/hooks/use_url_state';
+import { useKibana, useUiSetting$ } from '../../../../../common/lib/kibana';
+import { useReplaceUrlParams } from '../../../../../common/utils/global_query_string/helpers';
 import type {
   FilterOptions,
   PaginationOptions,
   Rule,
   SortingOptions,
 } from '../../../../rule_management/logic/types';
+import { useFindRules } from '../../../../rule_management/logic/use_find_rules';
+import { RULES_TABLE_STATE_STORAGE_KEY } from '../constants';
 import {
+  DEFAULT_FILTER_OPTIONS,
   DEFAULT_PAGE,
   DEFAULT_RULES_PER_PAGE,
-  DEFAULT_FILTER_OPTIONS,
   DEFAULT_SORTING_OPTIONS,
 } from './rules_table_defaults';
 import { RuleSource } from './rules_table_saved_state';
-import { useFindRulesInMemory } from './use_find_rules_in_memory';
 import { useRulesTableSavedState } from './use_rules_table_saved_state';
-import { getRulesComparator } from './utils';
-import { RULES_TABLE_STATE_STORAGE_KEY } from '../constants';
 
 export interface RulesTableState {
   /**
@@ -63,10 +62,6 @@ export interface RulesTableState {
    * Is true whenever a request is in-flight, which includes initial loading as well as background refetches.
    */
   isFetching: boolean;
-  /**
-   * Is true when we store and sort all rules in-memory.
-   */
-  isInMemorySorting: boolean;
   /**
    * Is true then there is no cached data and the query is currently fetching.
    */
@@ -129,10 +124,9 @@ export interface LoadingRules {
 }
 
 export interface RulesTableActions {
-  reFetchRules: ReturnType<typeof useFindRulesInMemory>['refetch'];
+  reFetchRules: ReturnType<typeof useFindRules>['refetch'];
   setFilterOptions: (newFilter: Partial<FilterOptions>) => void;
   setIsAllSelected: React.Dispatch<React.SetStateAction<boolean>>;
-  setIsInMemorySorting: (value: boolean) => void;
   setIsPreflightInProgress: React.Dispatch<React.SetStateAction<boolean>>;
   /**
    * enable/disable rules table auto refresh
@@ -169,24 +163,19 @@ interface RulesTableContextProviderProps {
   children: React.ReactNode;
 }
 
-const IN_MEMORY_STORAGE_KEY = 'detection-rules-table-in-memory';
-
 export const RulesTableContextProvider = ({ children }: RulesTableContextProviderProps) => {
   const [autoRefreshSettings] = useUiSetting$<{
     on: boolean;
     value: number;
     idleTimeout: number;
   }>(DEFAULT_RULES_TABLE_REFRESH_SETTING);
-  const { storage, sessionStorage } = useKibana().services;
+  const { sessionStorage } = useKibana().services;
   const {
     filter: savedFilter,
     sorting: savedSorting,
     pagination: savedPagination,
   } = useRulesTableSavedState();
 
-  const [isInMemorySorting, setIsInMemorySorting] = useState<boolean>(
-    storage.get(IN_MEMORY_STORAGE_KEY) ?? false
-  );
   const [filterOptions, setFilterOptions] = useState<FilterOptions>({
     filter: savedFilter?.searchTerm ?? DEFAULT_FILTER_OPTIONS.filter,
     tags: savedFilter?.tags ?? DEFAULT_FILTER_OPTIONS.tags,
@@ -200,6 +189,7 @@ export const RulesTableContextProvider = ({ children }: RulesTableContextProvide
     field: savedSorting?.field ?? DEFAULT_SORTING_OPTIONS.field,
     order: savedSorting?.order ?? DEFAULT_SORTING_OPTIONS.order,
   });
+
   const [isAllSelected, setIsAllSelected] = useState(false);
   const [isRefreshOn, setIsRefreshOn] = useState(autoRefreshSettings.on);
   const [loadingRules, setLoadingRules] = useState<LoadingRules>({
@@ -211,19 +201,6 @@ export const RulesTableContextProvider = ({ children }: RulesTableContextProvide
   const [perPage, setPerPage] = useState(savedPagination?.perPage ?? DEFAULT_RULES_PER_PAGE);
   const [selectedRuleIds, setSelectedRuleIds] = useState<string[]>([]);
   const autoRefreshBeforePause = useRef<boolean | null>(null);
-
-  const toggleInMemorySorting = useCallback(
-    (value: boolean) => {
-      setIsInMemorySorting(value); // Update state so the table gets re-rendered
-      storage.set(IN_MEMORY_STORAGE_KEY, value); // Persist new value in the local storage
-
-      // Reset sorting options when switching to server-side implementation as currently selected sorting might not be supported
-      if (value === false) {
-        setSortingOptions(DEFAULT_SORTING_OPTIONS);
-      }
-    },
-    [storage]
-  );
 
   const isActionInProgress = loadingRules.ids.length > 0;
 
@@ -285,25 +262,23 @@ export const RulesTableContextProvider = ({ children }: RulesTableContextProvide
     isFetching,
     isLoading,
     isRefetching,
-  } = useFindRulesInMemory({
-    isInMemorySorting,
-    filterOptions,
-    sortingOptions,
-    pagination,
-    refetchInterval: isRefreshOn && !isActionInProgress && autoRefreshSettings.value,
-  });
-
-  // Paginate and sort rules
-  const rulesToDisplay = isInMemorySorting
-    ? rules.sort(getRulesComparator(sortingOptions)).slice((page - 1) * perPage, page * perPage)
-    : rules;
+  } = useFindRules(
+    {
+      filterOptions,
+      sortingOptions,
+      pagination,
+    },
+    {
+      refetchInterval: isRefreshOn && !isActionInProgress && autoRefreshSettings.value,
+      keepPreviousData: true, // Use this option so that the state doesn't jump between "success" and "loading" on page change
+    }
+  );
 
   const actions = useMemo(
     () => ({
       reFetchRules: refetch,
       setFilterOptions: handleFilterOptionsChange,
       setIsAllSelected,
-      setIsInMemorySorting: toggleInMemorySorting,
       setIsRefreshOn,
       setLoadingRules,
       setPage,
@@ -318,7 +293,6 @@ export const RulesTableContextProvider = ({ children }: RulesTableContextProvide
       refetch,
       handleFilterOptionsChange,
       setIsAllSelected,
-      toggleInMemorySorting,
       setIsRefreshOn,
       setLoadingRules,
       setPage,
@@ -334,7 +308,7 @@ export const RulesTableContextProvider = ({ children }: RulesTableContextProvide
   const providerValue = useMemo(
     () => ({
       state: {
-        rules: rulesToDisplay,
+        rules,
         pagination: {
           page,
           perPage,
@@ -346,7 +320,6 @@ export const RulesTableContextProvider = ({ children }: RulesTableContextProvide
         isAllSelected,
         isFetched,
         isFetching,
-        isInMemorySorting,
         isLoading,
         isRefetching,
         isRefreshOn,
@@ -358,17 +331,15 @@ export const RulesTableContextProvider = ({ children }: RulesTableContextProvide
         isDefault: isDefaultState(filterOptions, sortingOptions, {
           page,
           perPage,
-          total: isInMemorySorting ? rules.length : total,
+          total,
         }),
       },
       actions,
     }),
     [
-      rulesToDisplay,
+      rules,
       page,
       perPage,
-      isInMemorySorting,
-      rules.length,
       total,
       filterOptions,
       isPreflightInProgress,
