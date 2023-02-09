@@ -97,7 +97,7 @@ describe('authorization', () => {
         logger: loggingSystemMock.createLogger(),
       });
 
-      // @ts-expect-error
+      // @ts-expect-error: featureCaseOwners is a private method of the auth class
       expect([...auth.featureCaseOwners.values()]).toEqual(['a']);
     });
 
