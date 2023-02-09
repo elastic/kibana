@@ -13,20 +13,18 @@ To support versioned APIs we need to keep past versions of interfaces around, th
 
 Every plugin has a _domain_. A domain consists of a one or more concepts, usually objects, that are related in some logical way.
 
-At a high level the strategy for versioning our interfaces will is:
+At a high level the strategy for versioning our interfaces is:
 
-> Version a collection of related interfaces together. Whenever a single interface changes, increment the version of the entire set of interfaces.
+> Version a collection of related interfaces together. Whenever a single interface changes, increment the version of the entire collection of interfaces.
 
 Characteristics of this strategy:
 
-1. Avoid the `extends` keyword. This leads to cleaner API docs being extracted.
+1. Avoid the `extends` keyword for referencing past interfaces. This results in cleaner API docs being generated.
 2. Leverage `* as` to create versioned namespaces rather than versioned interfaces.
 3. It is verbose, for a single change in a collection, we create a new version of the related collection.
 
-The following is a practical example. We will introduce this strategy to a pre-existing domain that is not versioned.
-
 ### An example: Weather insights unversioned
-Consider a fictional Kibana plugin called "Weather insights". It allows users to easily create and curate dashboards that house visualisations and metrics for weather data. Inside of this plugin are the following concepts:
+Consider a fictional Kibana plugin called "Weather insights". It allows users to easily create and curate dashboards that house visualisations and metrics for weather data. The domain contains the following:
 
 1. **Data source**: an endpoint that is scraped and ingested into ES for aggregation and search.
 2. **Weather dashboard**: a set of visualisations and metrics that draws from a data source.
@@ -76,18 +74,18 @@ interface CreateWeatherDashboardHTTPResponse {
 // Imagine this pattern for the update and list endpoints too.
 ```
 
-This is the _unversioned_ interface exposed by the Weather insights plugin.
-
 ### An example: Weather insights versioned
 
 The following product requirements are added to the Weather insights plugin:
 
-1. We want data sources to have a more user-friendly name
-2. We want to introduce a new feature: **Predictions** that will generate forecasts based on past and current weather data
+1. Data sources need a more user-friendly name, currently we just show a URL
+2. New feature: **Predictions** that will generate forecasts based on past and current weather data
+
+Before we make these changes, we need to make sure that our current interfaces are not lost.
 
 #### Preparing our interfaces for versions
 
-We are going to make our current set of interfaces `v1`. Let's reflect this in our code by creating this new file structure in `common`:
+We are going to make our current set of interfaces `v1`. Let's reflect this in our code by creating this file structure in `common`:
 
 ```
 common
@@ -126,7 +124,7 @@ export * as weatherDashboardV1 from './weather_dashboard/v1';
 export * as dataSourceV1 from './data_source/v1';
 ```
 
-How we use these types depends on the whether the code in question should "know" about versions or not.
+How we use these types depends on whether the code is aware of versions or not. Generally, code that is aware of multiple versions will create greater complexity.
 
 ```ts
 // This type is being pulled from "latest", so whenever a new latest is linked,
@@ -137,6 +135,10 @@ function logIt(dashboard: WeatherDashboard) {
   logger.debug(dashboard);
 }
 ```
+
+<DocCallOut title="Minimize the impact of refactors">
+  By referencing types linked from `latest.ts` we will not have to refactor all our app code to point to the latest version of `WeatherDashboard`. This happens by simply re-exporting the newest types from `latest.ts`.
+</DocCallOut>
 
 ```ts
 // Consider this route handler that expects V1 weather dashboard requests
@@ -150,7 +152,7 @@ const handler = (ctx, req, res) => {
 
 ### Introducing a new field to `DataSource`
 
-Now that we have prepared our interfaces to be versioned, let's introduce a our user-friendly name field to `DataSource`.
+Now that we have prepared our interfaces to be versioned, let's introduce the `name` field to `DataSource`.
 
 Create a new `v2.ts` file under the `data_source` directory:
 
@@ -244,3 +246,60 @@ export * as dataSourceV1 from './data_source/v1';
 export * as weatherDashboardV2 from './weather_dashboard/v2';
 export * as dataSourceV2 from './data_source/v2';
 ```
+
+### Introduce a new sub-domain: `Prediction`
+
+For our second product requirement we are going to introduce a new concept. Let's start by updating our folder structure:
+
+```
+common
+  index.ts
+  latets.ts
+  data_source
+  weather_dashboard
+  prediction
+    v1.ts
+```
+
+```ts
+// common/prediction/v1.ts
+
+import type { DataSource } from '../data_source/v2';
+
+/** Random set of weather models, just for illustration */
+type Model = 'GFS' | 'ECMWF' | 'GEM';
+
+/** Limited set of options rather than "string" so we can more easily version */
+type TimeFrame = '1d' | '2d' | '3d' | '4d' | '5d' | '6d' | '1w' | '2w';
+
+interface PredictionInput {
+  /** How far back we should look in our data */
+  start_date: string;
+  /** How far out to predict. Note, longer time frames result in lower accuracy */
+  time_frame: TimeFrame;
+  /** Choice of weather model to use */
+  model: Model;
+  /** Data source for this prediction */
+  dataSource: DataSource;
+}
+
+interface PredictionOutput { ... }
+
+// Below are HTTP APIs for predictions
+
+interface CreatePredictionHTTPBody {
+  input: PredictionInput;
+}
+
+interface CreatePredictionHTTPResponse {
+  result: PredictionOutput;
+}
+
+// And so forth...
+```
+
+Both `WeatherDashboard` and `Prediction` reference `DataSource`. Therefore, both will increment their version whenever `DataSource` changes.
+
+## Challenge
+
+Normalize our domain objects by only holding a reference to `DataSource` in `WeatherDashboard` and `Prediction` domain objects.
