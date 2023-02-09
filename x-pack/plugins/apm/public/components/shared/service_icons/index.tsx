@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiSkeletonRectangle } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { ReactChild, useState } from 'react';
 import { useTheme } from '../../../hooks/use_theme';
@@ -126,6 +126,10 @@ export function ServiceIcons({ start, end, serviceName }: Props) {
 
   const isLoading = !icons && iconsFetchStatus === FETCH_STATUS.LOADING;
 
+  if (isLoading) {
+    return <EuiLoadingSpinner data-test-subj="loading" />;
+  }
+
   const popoverItems: PopoverItem[] = [
     {
       key: 'service',
@@ -182,46 +186,31 @@ export function ServiceIcons({ start, end, serviceName }: Props) {
   ];
 
   return (
-    <EuiFlexItem grow={false}>
-      <EuiSkeletonRectangle
-        isLoading={isLoading}
-        contentAriaLabel="Demo skeleton card"
-        width={40}
-        height={40}
-        style={{ marginTop: '3px' }}
-        borderRadius="m"
-      >
-        <EuiFlexGroup gutterSize="s" responsive={false}>
-          {popoverItems.map((item) => {
-            if (item.isVisible) {
-              return (
-                <EuiFlexItem
-                  grow={false}
-                  data-test-subj={item.key}
-                  key={item.key}
-                >
-                  <IconPopover
-                    isOpen={selectedIconPopover === item.key}
-                    icon={item.icon}
-                    detailsFetchStatus={detailsFetchStatus}
-                    title={item.title}
-                    onClick={() => {
-                      setSelectedIconPopover((prevSelectedIconPopover) =>
-                        item.key === prevSelectedIconPopover ? null : item.key
-                      );
-                    }}
-                    onClose={() => {
-                      setSelectedIconPopover(null);
-                    }}
-                  >
-                    {item.component}
-                  </IconPopover>
-                </EuiFlexItem>
-              );
-            }
-          })}
-        </EuiFlexGroup>
-      </EuiSkeletonRectangle>
-    </EuiFlexItem>
+    <EuiFlexGroup gutterSize="s" responsive={false}>
+      {popoverItems.map((item) => {
+        if (item.isVisible) {
+          return (
+            <EuiFlexItem grow={false} data-test-subj={item.key} key={item.key}>
+              <IconPopover
+                isOpen={selectedIconPopover === item.key}
+                icon={item.icon}
+                detailsFetchStatus={detailsFetchStatus}
+                title={item.title}
+                onClick={() => {
+                  setSelectedIconPopover((prevSelectedIconPopover) =>
+                    item.key === prevSelectedIconPopover ? null : item.key
+                  );
+                }}
+                onClose={() => {
+                  setSelectedIconPopover(null);
+                }}
+              >
+                {item.component}
+              </IconPopover>
+            </EuiFlexItem>
+          );
+        }
+      })}
+    </EuiFlexGroup>
   );
 }
