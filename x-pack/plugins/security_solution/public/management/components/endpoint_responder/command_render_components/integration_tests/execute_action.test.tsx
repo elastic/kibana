@@ -104,7 +104,7 @@ describe('When using execute action from response actions console', () => {
     enterConsoleCommand(renderResult, 'execute --command=""');
 
     expect(renderResult.getByTestId('test-badArgument-message').textContent).toEqual(
-      'Invalid argument value: --command. Argument cannot be empty'
+      'Argument --command must have a value'
     );
   });
 
@@ -113,7 +113,7 @@ describe('When using execute action from response actions console', () => {
     enterConsoleCommand(renderResult, 'execute --command="ls -al" --timeout=""');
 
     expect(renderResult.getByTestId('test-badArgument-message').textContent).toEqual(
-      'Invalid argument value: --timeout. Argument cannot be empty'
+      'Argument --timeout must have a value'
     );
   });
 

@@ -469,9 +469,7 @@ export const getEndpointConsoleCommands = ({
               defaultMessage: 'The command to execute',
             }
           ),
-          validate: (argData) => {
-            return emptyArgumentValidator(argData);
-          },
+          mustHaveValue: 'non-empty-string',
         },
         timeout: {
           required: false,

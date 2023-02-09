@@ -99,10 +99,9 @@ interface ExecuteActionHostResponseOutputProps {
 }
 
 export const ExecuteActionHostResponseOutput = memo<ExecuteActionHostResponseOutputProps>(
-  ({ action, agentId, 'data-test-subj': dataTestSubj, textSize }) => {
+  ({ action, agentId = action.agents[0], 'data-test-subj': dataTestSubj, textSize }) => {
     const outputContent = useMemo(
       () =>
-        agentId &&
         action.outputs &&
         action.outputs[agentId] &&
         (action.outputs[agentId].content as ResponseActionExecuteOutputContent),
