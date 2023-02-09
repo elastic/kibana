@@ -23,6 +23,7 @@ export class TaskPartitioner {
     this.k8sServiceLabelSelector = k8sServiceLabelSelector;
   }
 
+  // TODO: Implement some form of caching
   async getPartitions() : Promise<number[]> {
     const allPodNames = await this.getAllPodNames();
     const podPartitions = rendezvousHash(this.podName, allPodNames, this.allPartitions, 2);

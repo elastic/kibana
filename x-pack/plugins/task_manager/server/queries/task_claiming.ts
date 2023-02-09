@@ -247,7 +247,7 @@ export class TaskClaiming {
     size,
     taskTypes,
   }: OwnershipClaimingOpts): Promise<ClaimOwnershipResult> => {
-    const partitions = await this.taskPartitioner.getPartitions();
+
     const { docs, tasksConflicted } = await this.claimAvailableTasksImpl({
       claimOwnershipUntil,
       size,
@@ -283,6 +283,8 @@ export class TaskClaiming {
     size,
     taskTypes,
   }: OwnershipClaimingOpts): Promise<ClaimAvailableTasksResult> {
+    const partitions = await this.taskPartitioner.getPartitions();
+
     const { taskTypesToClaim = [] } = groupBy(this.definitions.getAllTypes(), (type) =>
       taskTypes.has(type) && !this.isTaskTypeExcluded(type) ? 'taskTypesToClaim' : 'taskTypesToSkip'
     );
@@ -295,7 +297,7 @@ export class TaskClaiming {
     );
 
     const sort: NonNullable<SearchOpts['sort']> = [SortByRunAtAndRetryAt];
-    const query = matchesClauses(queryForScheduledTasks, filterDownBy(InactiveTasks));
+    const query = matchesClauses(queryForScheduledTasks, filterDownBy(InactiveTasks), { bool: { must: { terms: { 'task.partition': partitions }}} });
     const apmTrans = apm.startTransaction(
       TASK_MANAGER_MARK_AS_CLAIMED,
       TASK_MANAGER_TRANSACTION_TYPE
