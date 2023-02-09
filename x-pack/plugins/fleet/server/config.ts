@@ -118,6 +118,11 @@ export const config: PluginConfigDescriptor = {
     outputs: PreconfiguredOutputsSchema,
     fleetServerHosts: PreconfiguredFleetServerHostsSchema,
     agentIdVerificationEnabled: schema.boolean({ defaultValue: true }),
+    setup: schema.maybe(
+      schema.object({
+        agentPolicySchemaUpgradeBatchSize: schema.maybe(schema.number()),
+      })
+    ),
     developer: schema.object({
       disableRegistryVersionCheck: schema.boolean({ defaultValue: false }),
       allowAgentUpgradeSourceUri: schema.boolean({ defaultValue: false }),
