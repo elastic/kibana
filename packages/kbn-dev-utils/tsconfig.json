@@ -13,8 +13,8 @@
   "kbn_references": [
     "@kbn/dev-cli-runner",
     "@kbn/dev-cli-errors",
-    "@kbn/plugin-discovery",
     "@kbn/repo-info",
+    "@kbn/repo-packages",
   ],
   "exclude": [
     "target/**/*",

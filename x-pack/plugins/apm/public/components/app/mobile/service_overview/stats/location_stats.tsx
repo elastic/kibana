@@ -9,7 +9,6 @@ import { i18n } from '@kbn/i18n';
 import { EuiIcon, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React, { useCallback } from 'react';
 import { useTheme } from '@kbn/observability-plugin/public';
-import { useAnyOfApmParams } from '../../../../../hooks/use_apm_params';
 import { useFetcher, isPending } from '../../../../../hooks/use_fetcher';
 import { CLIENT_GEO_COUNTRY_NAME } from '../../../../../../common/es_fields/apm';
 import { NOT_AVAILABLE_LABEL } from '../../../../../../common/i18n';
@@ -50,17 +49,20 @@ export function MobileLocationStats({
   start,
   end,
   kuery,
+  serviceName,
+  offset,
+  environment,
+  comparisonEnabled,
 }: {
   start: string;
   end: string;
   kuery: string;
+  serviceName: string;
+  offset?: string;
+  environment: string;
+  comparisonEnabled: boolean;
 }) {
   const euiTheme = useTheme();
-
-  const {
-    path: { serviceName },
-    query: { environment, offset, comparisonEnabled },
-  } = useAnyOfApmParams('/mobile-services/{serviceName}/overview');
 
   const previousPeriodLabel = usePreviousPeriodLabel();
 
