@@ -3,5 +3,5 @@
   "paths": {
     "cloudDefend": "."
   },
-  "translations": ["translations/ja-JP.json"]
+  "translations": []
 }

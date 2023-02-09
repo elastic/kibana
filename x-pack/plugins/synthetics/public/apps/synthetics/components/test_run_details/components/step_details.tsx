@@ -61,7 +61,7 @@ export const StepDetails = ({
       <EuiSpacer size="m" />
       <StepScreenshotDetails stepIndex={stepIndex} step={step} />
       <EuiSpacer size="m" />
-      <StepTabs stepsData={stepsData} step={step} loading={loading} />
+      <StepTabs stepsList={stepsData.steps} step={step} loading={loading} />
     </EuiPanel>
   );
 };
