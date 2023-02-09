@@ -16,7 +16,7 @@ const SlackParamsFields: React.FunctionComponent<
   ActionParamsProps<WebhookParams | ExecutorPostMessageParams>
 > = (props) => {
   const { actionConnector } = props;
-  const { type: slackType } = (actionConnector as unknown as SlackActionConnector)?.config;
+  const slackType = (actionConnector as unknown as SlackActionConnector)?.config?.type;
 
   return (
     <>
