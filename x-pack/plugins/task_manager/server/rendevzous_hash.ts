@@ -32,7 +32,7 @@ export function rendezvousHash(podName: string, podNames: string[], partitions: 
   for (let i = 0; i < partitions.length; ++i) {
       for (let iii = 0; iii < k; ++iii) {
         if (maxes[i][iii][0] === podName) {
-          podPartitions.push(i);
+          podPartitions.push(partitions[i]);
         }
       }
   }

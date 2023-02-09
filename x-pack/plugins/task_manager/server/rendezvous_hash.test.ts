@@ -6,7 +6,6 @@ test(`two pods`, function () {
   const fooPartitions = rendezvousHash('foo', allPods, allPartitions, 2);
   expect(fooPartitions).toMatchInlineSnapshot(`
     Array [
-      0,
       1,
       2,
       3,
@@ -26,13 +25,13 @@ test(`two pods`, function () {
       17,
       18,
       19,
+      20,
     ]
   `);
 
   const barPartitions = rendezvousHash('bar', allPods, allPartitions, 2);
   expect(barPartitions).toMatchInlineSnapshot(`
     Array [
-      0,
       1,
       2,
       3,
@@ -52,6 +51,7 @@ test(`two pods`, function () {
       17,
       18,
       19,
+      20,
     ]
   `);
 });
@@ -62,58 +62,58 @@ test(`three pods`, function () {
   const fooPartitions = rendezvousHash('foo', allPods, allPartitions, 2);
   expect(fooPartitions).toMatchInlineSnapshot(`
     Array [
-      0,
-      2,
+      1,
       3,
       4,
       5,
       6,
       7,
       8,
-      10,
+      9,
       11,
-      13,
+      12,
       14,
       15,
       16,
       17,
+      18,
     ]
   `);
 
   const barPartitions = rendezvousHash('bar', allPods, allPartitions, 2);
   expect(barPartitions).toMatchInlineSnapshot(`
     Array [
-      0,
       1,
       2,
       3,
-      7,
-      9,
+      4,
+      8,
       10,
       11,
       12,
       13,
-      18,
+      14,
       19,
+      20,
     ]
   `);
 
   const quzPartitions = rendezvousHash('quz', allPods, allPartitions, 2);
   expect(quzPartitions).toMatchInlineSnapshot(`
     Array [
-      1,
-      4,
+      2,
       5,
       6,
-      8,
+      7,
       9,
-      12,
-      14,
+      10,
+      13,
       15,
       16,
       17,
       18,
       19,
+      20,
     ]
   `);
 });
