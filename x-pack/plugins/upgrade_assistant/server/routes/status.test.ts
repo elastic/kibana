@@ -86,7 +86,7 @@ const systemIndicesNoMigrationResponse = {
   features: [],
 };
 
-describe('Status API', () => {  
+describe('Status API', () => {
   const registerRoutes = (featureSetOverrides: Partial<FeatureSet> = {}) => {
     const mockRouter = createMockRouter();
     const routeDependencies: any = {
@@ -95,7 +95,7 @@ describe('Status API', () => {
           mlSnapshots: true,
           migrateSystemIndices: true,
           reindexCorrectiveActions: true,
-          ...featureSetOverrides
+          ...featureSetOverrides,
         },
       },
       router: mockRouter,
@@ -209,7 +209,7 @@ describe('Status API', () => {
     it('skips ES system indices migration check when featureSet.migrateSystemIndices is set to false', async () => {
       const { routeDependencies } = registerRoutes({ migrateSystemIndices: false });
       getESUpgradeStatusMock.mockResolvedValue(esNoDeprecationsResponse);
-      
+
       getKibanaUpgradeStatusMock.mockResolvedValue({
         totalCriticalDeprecations: 0,
       });
@@ -226,7 +226,7 @@ describe('Status API', () => {
         readyForUpgrade: true,
         details: 'All deprecation warnings have been resolved.',
       });
-    })
+    });
 
     it('returns an error if it throws', async () => {
       const { routeDependencies } = registerRoutes();
