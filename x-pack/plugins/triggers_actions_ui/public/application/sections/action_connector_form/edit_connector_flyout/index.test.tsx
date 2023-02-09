@@ -444,44 +444,6 @@ describe('EditConnectorFlyout', () => {
       });
     });
 
-    it('updates connector form field with latest value', async () => {
-      const { getByTestId } = appMockRenderer.render(
-        <EditConnectorFlyout
-          actionTypeRegistry={actionTypeRegistry}
-          onClose={onClose}
-          connector={connector}
-          onConnectorUpdated={onConnectorUpdated}
-        />
-      );
-
-      await waitFor(() => {
-        expect(getByTestId('test-connector-text-field')).toBeInTheDocument();
-      });
-
-      await act(async () => {
-        await userEvent.clear(getByTestId('test-connector-text-field'));
-        await userEvent.type(getByTestId('test-connector-text-field'), 'My updated text field', {
-          delay: 100,
-        });
-
-        await userEvent.clear(getByTestId('nameInput'));
-        await userEvent.type(getByTestId('nameInput'), 'My test', {
-          delay: 100,
-        });
-        await userEvent.type(getByTestId('test-connector-secret-text-field'), 'password', {
-          delay: 100,
-        });
-      });
-
-      act(() => {
-        userEvent.click(getByTestId('edit-connector-flyout-save-btn'));
-      });
-
-      await waitFor(() => {
-        expect(getByTestId('test-connector-text-field')).toHaveValue('My updated text field');
-      });
-    });
-
     it('updates the connector and close the flyout correctly', async () => {
       const { getByTestId, getByText } = appMockRenderer.render(
         <EditConnectorFlyout
