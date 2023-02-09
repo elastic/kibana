@@ -9,7 +9,7 @@
 import { getAutocompleteInfo } from '../../services';
 
 /**
- * Expands provided  aliases and data streams
+ * Expands provided aliases, data streams and wildcards
  * @param indicesOrAliases - single value or an array of indices, aliases and data streams
  * @returns {string | string[]} - single index or an array of resolved indices from provided input.
  */
@@ -18,6 +18,7 @@ export function expandAliases(indicesOrAliases: string | string[]): string | str
   // returns a list for multiple values or a string for a single.
   const perAliasIndexes = getAutocompleteInfo().alias.perAliasIndexes;
   const perDataStreamIndices = getAutocompleteInfo().dataStream.perDataStreamIndices;
+  const perWildcardIndices = getAutocompleteInfo().mapping.perWildcardIndices;
 
   if (!indicesOrAliases) {
     return indicesOrAliases;
@@ -33,6 +34,9 @@ export function expandAliases(indicesOrAliases: string | string[]): string | str
     }
     if (perDataStreamIndices[iOrA]) {
       return perDataStreamIndices[iOrA];
+    }
+    if (perWildcardIndices[iOrA]) {
+      return perWildcardIndices[iOrA];
     }
     return [iOrA];
   });
