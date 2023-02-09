@@ -15,7 +15,7 @@ import {
   EuiLink,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { css, SerializedStyles } from '@emotion/react';
+import { css } from '@emotion/react';
 import { ComplianceScoreBar } from '../../../components/compliance_score_bar';
 import { ComplianceDashboardData, GroupedFindingsEvaluation } from '../../../../common/types';
 
@@ -26,7 +26,6 @@ export interface RisksTableProps {
   onViewAllClick: () => void;
   viewAllButtonTitle: string;
   compact?: boolean;
-  containerStyles?: SerializedStyles;
 }
 
 export const getTopRisks = (
@@ -47,7 +46,6 @@ export const RisksTable = ({
   onViewAllClick,
   viewAllButtonTitle,
   compact,
-  containerStyles,
 }: RisksTableProps) => {
   const columns: Array<EuiBasicTableColumn<GroupedFindingsEvaluation>> = useMemo(
     () => [
@@ -84,19 +82,16 @@ export const RisksTable = ({
   const sortedByComplianceScore = getTopRisks(cisSectionsEvaluations, maxItems);
 
   return (
-    <EuiFlexGroup
-      direction="column"
-      justifyContent="spaceBetween"
-      gutterSize="none"
-      css={containerStyles}
-    >
+    <EuiFlexGroup direction="column" justifyContent="spaceBetween" gutterSize="none">
       <EuiFlexItem>
         <EuiInMemoryTable<GroupedFindingsEvaluation>
           className="risk-table"
           css={
             compact
               ? css`
-                  margin-top: -10px;
+                  thead {
+                    display: none;
+                  }
                   .euiTable .euiTableRow .euiTableRowCell {
                     border-top: none;
                   }

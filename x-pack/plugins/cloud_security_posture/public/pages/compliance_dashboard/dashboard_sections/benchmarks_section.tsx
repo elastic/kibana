@@ -12,7 +12,6 @@ import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiTitle, useEuiTheme } from '@elas
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import { ChartPanel } from '../../../components/chart_panel';
 import { CloudPostureScoreChart } from '../compliance_charts/cloud_posture_score_chart';
 import type {
   Cluster,
@@ -99,7 +98,6 @@ export const BenchmarksSection = ({
         : clusterB.stats.postureScore - clusterA.stats.postureScore
     );
   }, [complianceData.clusters, isClusterSortingAsc]);
-  const compactPadding = '16px';
 
   return (
     <>
@@ -138,12 +136,7 @@ export const BenchmarksSection = ({
             data-test-subj={DASHBOARD_TABLE_HEADER_SCORE_TEST_ID}
             onClick={toggleClustersSortingDirection}
           >
-            <EuiTitle
-              size="xxs"
-              css={css`
-                padding-left: ${euiTheme.size.l};
-              `}
-            >
+            <EuiTitle size="xxs">
               <div>
                 <FormattedMessage
                   id="xpack.csp.dashboard.benchmarkSection.columnsHeader.complianceScoreTitle"
@@ -155,12 +148,7 @@ export const BenchmarksSection = ({
           </button>
         </EuiFlexItem>
         <EuiFlexItem grow={dashboardColumnsGrow.third}>
-          <EuiTitle
-            size="xxs"
-            css={css`
-              padding-left: ${compactPadding};
-            `}
-          >
+          <EuiTitle size="xxs">
             <div>
               <FormattedMessage
                 id="xpack.csp.dashboard.benchmarkSection.columnsHeader.complianceByCisSectionTitle"
@@ -185,30 +173,23 @@ export const BenchmarksSection = ({
           </EuiFlexItem>
           <EuiFlexItem
             grow={dashboardColumnsGrow.second}
+            css={css`
+              margin-left: -${euiTheme.size.s};
+            `}
             data-test-subj={DASHBOARD_TABLE_COLUMN_SCORE_TEST_ID}
           >
-            <ChartPanel
-              hasBorder={false}
-              panelStyles={css`
-                padding: 0 ${compactPadding};
-              `}
-            >
-              <CloudPostureScoreChart
-                compact
-                id={`${cluster.meta.assetIdentifierId}_score_chart`}
-                data={cluster.stats}
-                trend={cluster.trend}
-                onEvalCounterClick={(evaluation) =>
-                  navToFindingsByClusterAndEvaluation(cluster, evaluation)
-                }
-              />
-            </ChartPanel>
+            <CloudPostureScoreChart
+              compact
+              id={`${cluster.meta.assetIdentifierId}_score_chart`}
+              data={cluster.stats}
+              trend={cluster.trend}
+              onEvalCounterClick={(evaluation) =>
+                navToFindingsByClusterAndEvaluation(cluster, evaluation)
+              }
+            />
           </EuiFlexItem>
           <EuiFlexItem grow={dashboardColumnsGrow.third}>
             <RisksTable
-              containerStyles={css`
-                padding: 0 ${compactPadding};
-              `}
               compact
               data={cluster.groupedFindingsEvaluation}
               maxItems={3}
