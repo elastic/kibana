@@ -880,24 +880,6 @@
         },
         "operationId": "update-package",
         "description": "",
-        "parameters": [
-          {
-            "schema": {
-              "type": "string"
-            },
-            "name": "pkgName",
-            "in": "path",
-            "required": true
-          },
-          {
-            "schema": {
-              "type": "string"
-            },
-            "name": "pkgVersion",
-            "in": "path",
-            "required": true
-          }
-        ],
         "requestBody": {
           "content": {
             "application/json": {
@@ -1322,7 +1304,10 @@
         "parameters": [
           {
             "schema": {
-              "type": "array"
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
             },
             "name": "agentsIds",
             "in": "query",
@@ -1737,6 +1722,14 @@
     },
     "/agents/{agentId}/actions/{actionId}/cancel": {
       "parameters": [
+        {
+          "schema": {
+            "type": "string"
+          },
+          "name": "agentId",
+          "in": "path",
+          "required": true
+        },
         {
           "schema": {
             "type": "string"
@@ -3627,14 +3620,6 @@
         "parameters": [
           {
             "schema": {
-              "type": "string"
-            },
-            "name": "packagePolicyId",
-            "in": "path",
-            "required": true
-          },
-          {
-            "schema": {
               "type": "boolean"
             },
             "name": "force",
@@ -4274,14 +4259,6 @@
         },
         "parameters": [
           {
-            "schema": {
-              "type": "string"
-            },
-            "name": "itemId",
-            "in": "path",
-            "required": true
-          },
-          {
             "$ref": "#/components/parameters/kbn_xsrf"
           }
         ]
@@ -4333,14 +4310,6 @@
           }
         },
         "parameters": [
-          {
-            "schema": {
-              "type": "string"
-            },
-            "name": "itemId",
-            "in": "path",
-            "required": true
-          },
           {
             "$ref": "#/components/parameters/kbn_xsrf"
           }
@@ -4504,14 +4473,6 @@
         },
         "parameters": [
           {
-            "schema": {
-              "type": "string"
-            },
-            "name": "itemId",
-            "in": "path",
-            "required": true
-          },
-          {
             "$ref": "#/components/parameters/kbn_xsrf"
           }
         ]
@@ -4569,14 +4530,6 @@
           }
         },
         "parameters": [
-          {
-            "schema": {
-              "type": "string"
-            },
-            "name": "itemId",
-            "in": "path",
-            "required": true
-          },
           {
             "$ref": "#/components/parameters/kbn_xsrf"
           }
@@ -4660,7 +4613,8 @@
         },
         "in": "header",
         "name": "kbn-xsrf",
-        "required": true
+        "required": true,
+        "description": "Kibana's anti Cross-Site Request Forgery token. Can be any string value."
       },
       "page_size": {
         "name": "perPage",
@@ -5865,6 +5819,24 @@
               },
               "agents": {
                 "type": "number"
+              },
+              "agent_features": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "name": {
+                      "type": "string"
+                    },
+                    "enabled": {
+                      "type": "boolean"
+                    }
+                  },
+                  "required": [
+                    "name",
+                    "enabled"
+                  ]
+                }
               }
             },
             "required": [

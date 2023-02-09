@@ -33,3 +33,17 @@ export const DETECTIONS = i18n.translate(
     defaultMessage: 'Detections',
   }
 );
+
+export const PREVENTION = i18n.translate(
+  'xpack.securitySolution.detectionEngine.alerts.alertsByType.prevention',
+  {
+    defaultMessage: 'Prevention',
+  }
+);
+
+export const DETECTION = i18n.translate(
+  'xpack.securitySolution.detectionEngine.alerts.alertsByType.detection',
+  {
+    defaultMessage: 'Detection',
+  }
+);
