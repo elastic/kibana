@@ -15,13 +15,13 @@ import {
   EuiForm,
   EuiFormRow,
   EuiLink,
-  EuiModal,
-  EuiModalBody,
-  EuiModalFooter,
-  EuiModalHeader,
-  EuiModalHeaderTitle,
+  EuiFlyout,
+  EuiFlyoutBody,
+  EuiFlyoutFooter,
+  EuiFlyoutHeader,
   EuiSpacer,
   EuiText,
+  EuiTitle,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
@@ -34,8 +34,8 @@ import { CurlRequest } from '../../components/curl_request/curl_request';
 
 import { PipelineSettingsForm } from '../pipeline_settings_form';
 
-interface IngestPipelineModalProps {
-  closeModal: () => void;
+interface IngestPipelineFlyoutProps {
+  closeFlyout: () => void;
   displayOnly: boolean;
   indexName: string;
   ingestionMethod: string;
@@ -45,8 +45,8 @@ interface IngestPipelineModalProps {
   setPipeline: (pipeline: IngestPipelineParams) => void;
 }
 
-export const IngestPipelineModal: React.FC<IngestPipelineModalProps> = ({
-  closeModal,
+export const IngestPipelineFlyout: React.FC<IngestPipelineFlyoutProps> = ({
+  closeFlyout,
   displayOnly,
   indexName,
   ingestionMethod,
@@ -58,18 +58,20 @@ export const IngestPipelineModal: React.FC<IngestPipelineModalProps> = ({
   const { name } = pipeline;
 
   return (
-    <EuiModal onClose={closeModal} maxWidth={'40rem'}>
-      <EuiModalHeader>
+    <EuiFlyout onClose={closeFlyout} maxWidth={'40rem'}>
+      <EuiFlyoutHeader>
         <EuiFlexGroup direction="column" gutterSize="none">
           <EuiFlexItem>
-            <EuiModalHeaderTitle>
-              {i18n.translate(
-                'xpack.enterpriseSearch.content.index.pipelines.ingestModal.modalHeaderTitle',
-                {
-                  defaultMessage: 'Pipeline settings',
-                }
-              )}
-            </EuiModalHeaderTitle>
+            <EuiTitle>
+              <h2>
+                {i18n.translate(
+                  'xpack.enterpriseSearch.content.index.pipelines.ingestFlyout.modalHeaderTitle',
+                  {
+                    defaultMessage: 'Pipeline settings',
+                  }
+                )}
+              </h2>
+            </EuiTitle>
           </EuiFlexItem>
           <EuiFlexItem>
             <EuiText color="subdued">
@@ -77,8 +79,8 @@ export const IngestPipelineModal: React.FC<IngestPipelineModalProps> = ({
             </EuiText>
           </EuiFlexItem>
         </EuiFlexGroup>
-      </EuiModalHeader>
-      <EuiModalBody>
+      </EuiFlyoutHeader>
+      <EuiFlyoutBody>
         <EuiFlexGroup direction="column" gutterSize="none">
           <EuiFlexItem>
             <EuiFlexGroup direction="column" gutterSize="none">
@@ -88,13 +90,13 @@ export const IngestPipelineModal: React.FC<IngestPipelineModalProps> = ({
                     <>
                       <p>
                         <FormattedMessage
-                          id="xpack.enterpriseSearch.content.index.pipelines.ingestModal.modalBodyAPIText"
+                          id="xpack.enterpriseSearch.content.index.pipelines.ingestFlyout.modalBodyAPIText"
                           defaultMessage="{apiIndex} Changes made to the settings below are for reference only. These settings will not be persisted to your index or pipeline."
                           values={{
                             apiIndex: (
                               <strong>
                                 {i18n.translate(
-                                  'xpack.enterpriseSearch.content.index.pipelines.ingestModal.apiIndex',
+                                  'xpack.enterpriseSearch.content.index.pipelines.ingestFlyout.apiIndex',
                                   { defaultMessage: 'This is an API-based index.' }
                                 )}
                               </strong>
@@ -104,7 +106,7 @@ export const IngestPipelineModal: React.FC<IngestPipelineModalProps> = ({
                       </p>
                       <p>
                         {i18n.translate(
-                          'xpack.enterpriseSearch.content.index.pipelines.ingestModal.modalBodyAPITextCont',
+                          'xpack.enterpriseSearch.content.index.pipelines.ingestFlyout.modalBodyAPITextCont',
                           {
                             defaultMessage:
                               "In order to use this pipeline on your API-based indices you'll need to explicitly reference it in your API requests.",
@@ -114,7 +116,7 @@ export const IngestPipelineModal: React.FC<IngestPipelineModalProps> = ({
                     </>
                   ) : (
                     i18n.translate(
-                      'xpack.enterpriseSearch.content.index.pipelines.ingestModal.modalBodyConnectorText',
+                      'xpack.enterpriseSearch.content.index.pipelines.ingestFlyout.modalBodyConnectorText',
                       {
                         defaultMessage:
                           'This pipeline runs automatically on all Crawler and Connector indices created through Enterprise Search.',
@@ -127,7 +129,7 @@ export const IngestPipelineModal: React.FC<IngestPipelineModalProps> = ({
               <EuiFlexItem>
                 <EuiLink href={docLinks.ingestPipelines} external>
                   {i18n.translate(
-                    'xpack.enterpriseSearch.content.index.pipelines.ingestModal.modalIngestLinkLabel',
+                    'xpack.enterpriseSearch.content.index.pipelines.ingestFlyout.modalIngestLinkLabel',
                     {
                       defaultMessage: 'Learn more about Enterprise Search ingest pipelines',
                     }
@@ -168,7 +170,7 @@ export const IngestPipelineModal: React.FC<IngestPipelineModalProps> = ({
                 <EuiText size="m" id="ingestPipelineHeader" grow={false}>
                   <strong>
                     {i18n.translate(
-                      'xpack.enterpriseSearch.content.index.pipelines.ingestModal.curlHeader',
+                      'xpack.enterpriseSearch.content.index.pipelines.ingestFlyout.curlHeader',
                       {
                         defaultMessage: 'Sample cURL request to ingest a document',
                       }
@@ -185,38 +187,42 @@ export const IngestPipelineModal: React.FC<IngestPipelineModalProps> = ({
             </>
           )}
         </EuiFlexGroup>
-      </EuiModalBody>
-      <EuiModalFooter>
+      </EuiFlyoutBody>
+      <EuiFlyoutFooter>
         {displayOnly ? (
-          <EuiButton fill onClick={closeModal}>
+          <EuiButton fill onClick={closeFlyout}>
             {i18n.translate(
-              'xpack.enterpriseSearch.content.index.pipelines.ingestModal.closeButtonLabel',
+              'xpack.enterpriseSearch.content.index.pipelines.ingestFlyout.closeButtonLabel',
               {
                 defaultMessage: 'Close',
               }
             )}
           </EuiButton>
         ) : (
-          <>
-            <EuiButtonEmpty onClick={closeModal}>
-              {i18n.translate(
-                'xpack.enterpriseSearch.content.index.pipelines.ingestModal.cancelButtonLabel',
-                {
-                  defaultMessage: 'Cancel',
-                }
-              )}
-            </EuiButtonEmpty>
-            <EuiButton fill onClick={savePipeline} isLoading={isLoading}>
-              {i18n.translate(
-                'xpack.enterpriseSearch.content.index.pipelines.ingestModal.saveButtonLabel',
-                {
-                  defaultMessage: 'Save',
-                }
-              )}
-            </EuiButton>
-          </>
+          <EuiFlexGroup justifyContent="spaceBetween">
+            <EuiFlexItem grow={false}>
+              <EuiButtonEmpty onClick={closeFlyout}>
+                {i18n.translate(
+                  'xpack.enterpriseSearch.content.index.pipelines.ingestFlyout.cancelButtonLabel',
+                  {
+                    defaultMessage: 'Cancel',
+                  }
+                )}
+              </EuiButtonEmpty>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiButton fill onClick={savePipeline} isLoading={isLoading}>
+                {i18n.translate(
+                  'xpack.enterpriseSearch.content.index.pipelines.ingestFlyout.saveButtonLabel',
+                  {
+                    defaultMessage: 'Save',
+                  }
+                )}
+              </EuiButton>
+            </EuiFlexItem>
+          </EuiFlexGroup>
         )}
-      </EuiModalFooter>
-    </EuiModal>
+      </EuiFlyoutFooter>
+    </EuiFlyout>
   );
 };
