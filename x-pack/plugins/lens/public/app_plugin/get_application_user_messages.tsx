@@ -70,7 +70,7 @@ export const getApplicationUserMessages = ({
 function getMissingVisTypeError(): UserMessage {
   return {
     severity: 'error',
-    displayLocations: [{ id: 'visualization' }],
+    displayLocations: [{ id: 'visualizationOnEmbeddable' }],
     fixableInEditor: true,
     shortMessage: '',
     longMessage: i18n.translate('xpack.lens.editorFrame.expressionMissingVisualizationType', {
