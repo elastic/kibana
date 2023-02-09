@@ -125,8 +125,10 @@ const registerCreateDataViewRouteFactory =
               'content-type': 'application/json',
             },
             body: {
-              [serviceKey]: dataView.toSpec(),
-              namespaces: dataView.namespaces,
+              [serviceKey]: {
+                ...dataView.toSpec(),
+                namespaces: dataView.namespaces,
+              },
             },
           });
         })
