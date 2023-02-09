@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { EuiIcon, EuiListGroupItemProps } from '@elastic/eui';
+import { EuiIcon, EuiListGroupItemProps, EuiScreenReaderLive } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import type { HttpStart } from '@kbn/core-http-browser';
@@ -52,6 +52,11 @@ export function createEuiListItem({
     onClick(event: React.MouseEvent<HTMLButtonElement, MouseEvent>) {
       if (!isModifiedOrPrevented(event)) {
         onClick();
+        <EuiScreenReaderLive>
+          {i18n.translate(`navigate to ${url} application called ${title}`, {
+            defaultMessage: 'Navigated to new app',
+          })}
+        </EuiScreenReaderLive>;
       }
 
       if (

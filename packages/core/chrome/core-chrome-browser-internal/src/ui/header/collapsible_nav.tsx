@@ -17,7 +17,6 @@ import {
   EuiListGroupItem,
   EuiCollapsibleNavProps,
   EuiButton,
-  EuiScreenReaderLive,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { groupBy, sortBy } from 'lodash';
@@ -275,7 +274,6 @@ export function CollapsibleNav({
             size="s"
             className="kbnCollapsibleNav__recentsListGroup"
           />
-          <EuiScreenReaderLive>{recentlyAccessed[0].label}</EuiScreenReaderLive>
         </EuiCollapsibleNavGroup>
       )}
 
@@ -326,7 +324,6 @@ export function CollapsibleNav({
                 gutterSize="none"
                 size="s"
               />
-              <EuiScreenReaderLive>{category.label}</EuiScreenReaderLive>
             </EuiCollapsibleNavGroup>
           );
         })}
