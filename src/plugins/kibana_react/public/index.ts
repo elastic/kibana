@@ -37,7 +37,12 @@ export { overviewPageActions, OverviewPageFooter } from './overview_page';
 export type { KibanaReactOverlays } from './overlays';
 export { createReactOverlays } from './overlays';
 
-export { useUiSetting, useUiSetting$ } from './ui_settings';
+export {
+  useUiSetting,
+  useGlobalUiSetting,
+  useUiSetting$,
+  useGlobalUiSetting$,
+} from './ui_settings';
 
 export { useExecutionContext } from './use_execution_context';
 
