@@ -532,10 +532,11 @@ const addEndpointExceptionListWithValidation = async ({
 export { addEndpointExceptionListWithValidation as addEndpointExceptionList };
 
 /**
- * Fetch an ExceptionList by providing a ExceptionList ID
+ * Export an ExceptionList by providing a ExceptionList ID
  *
  * @param http Kibana http service
  * @param id ExceptionList ID (not list_id)
+ * @param includeExpiredExceptions boolean for including expired exceptions
  * @param listId ExceptionList LIST_ID (not id)
  * @param namespaceType ExceptionList namespace_type
  * @param signal to cancel request
@@ -545,13 +546,19 @@ export { addEndpointExceptionListWithValidation as addEndpointExceptionList };
 export const exportExceptionList = async ({
   http,
   id,
+  includeExpiredExceptions,
   listId,
   namespaceType,
   signal,
 }: ExportExceptionListProps): Promise<Blob> =>
   http.fetch<Blob>(`${EXCEPTION_LIST_URL}/_export`, {
     method: 'POST',
-    query: { id, list_id: listId, namespace_type: namespaceType },
+    query: {
+      id,
+      list_id: listId,
+      namespace_type: namespaceType,
+      include_expired_exceptions: includeExpiredExceptions,
+    },
     signal,
   });
 
