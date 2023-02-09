@@ -21,7 +21,7 @@ import { MAX_NUMBER_OF_SIGNAL_MATCHES } from './enrich_signal_threat_matches';
 
 export type SignalsQueryMap = Map<string, ThreatMatchNamedQuery[]>;
 
-interface GetSignalsMatchesFromThreatIndexOptions {
+interface GetSignalsQueryMapFromThreatIndexOptions {
   threatSearchParams: Omit<GetThreatListOptions, 'searchAfter'>;
   eventsCount: number;
   signalValueMap?: SignalValuesMap;
@@ -34,7 +34,7 @@ export const getSignalsQueryMapFromThreatIndex = async ({
   threatSearchParams,
   eventsCount,
   signalValueMap,
-}: GetSignalsMatchesFromThreatIndexOptions): Promise<SignalsQueryMap> => {
+}: GetSignalsQueryMapFromThreatIndexOptions): Promise<SignalsQueryMap> => {
   let threatList: Awaited<ReturnType<typeof getThreatList>> | undefined;
   const signalsQueryMap = new Map<string, ThreatMatchNamedQuery[]>();
   // number of threat matches per signal is limited by MAX_NUMBER_OF_SIGNAL_MATCHES. Once it hits this number, threats stop to be processed for a signal
@@ -50,9 +50,6 @@ export const getSignalsQueryMapFromThreatIndex = async ({
     decodedQuery: ThreatMatchNamedQuery | ThreatTermNamedQuery;
   }) => {
     const signalMatch = signalsQueryMap.get(signalId);
-    if (!signalMatch) {
-      signalsQueryMap.set(signalId, []);
-    }
 
     const threatQuery = {
       id: threatHit._id,
@@ -74,15 +71,11 @@ export const getSignalsQueryMapFromThreatIndex = async ({
     }
   };
 
-  while (
-    maxThreatsReachedMap.size < eventsCount &&
-    (threatList ? threatList?.hits.hits.length > 0 : true)
-  ) {
-    threatList = await getThreatList({
-      ...threatSearchParams,
-      searchAfter: threatList?.hits.hits[threatList.hits.hits.length - 1].sort || undefined,
-    });
+  threatList = await getThreatList({ ...threatSearchParams, searchAfter: undefined });
 
+  while (
+    maxThreatsReachedMap.size < eventsCount && threatList?.hits.hits.length > 0
+  ) {
     threatList.hits.hits.forEach((threatHit) => {
       const matchedQueries = threatHit?.matched_queries || [];
 
@@ -119,6 +112,11 @@ export const getSignalsQueryMapFromThreatIndex = async ({
           });
         }
       });
+    });
+
+    threatList = await getThreatList({
+      ...threatSearchParams,
+      searchAfter: threatList.hits.hits[threatList.hits.hits.length - 1].sort,
     });
   }
 
