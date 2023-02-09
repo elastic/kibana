@@ -7,6 +7,11 @@
 import { ToolingLog } from '@kbn/tooling-log';
 import expect from '@kbn/expect';
 import type SuperTest from 'supertest';
+import type { Client } from '@elastic/elasticsearch';
+import type {
+  AggregationsAggregate,
+  SearchResponse,
+} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 const WAIT_FOR_STATUS_INCREMENT = 500;
 
@@ -47,6 +52,40 @@ export async function waitForRuleStatus({
     expectedStatus,
     waitMillis: waitMillis - WAIT_FOR_STATUS_INCREMENT,
     supertest,
+    log,
+  });
+}
+
+export async function waitForDocumentInIndex<T>({
+  es,
+  indexName,
+  waitMillis = 10000,
+  log,
+}: {
+  es: Client;
+  indexName: string;
+  waitMillis?: number;
+  log: ToolingLog;
+}): Promise<SearchResponse<T, Record<string, AggregationsAggregate>>> {
+  if (waitMillis < 0) {
+    expect().fail(`waiting for ${indexName} timed out`);
+  }
+  try {
+    const response = await es.search<T>({ index: indexName });
+    if (response.hits.hits.length > 0) {
+      return response;
+    }
+  } catch (e) {
+    // Do nothing
+  }
+  log.debug(`Waiting for documents in index: ${indexName}, retrying...`);
+
+  await delay(WAIT_FOR_STATUS_INCREMENT);
+
+  return await waitForDocumentInIndex({
+    es,
+    indexName,
+    waitMillis: waitMillis - WAIT_FOR_STATUS_INCREMENT,
     log,
   });
 }

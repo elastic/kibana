@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { schema } from '@kbn/config-schema';
 import { firstValueFrom } from 'rxjs';
 import {
   ALERT_EVALUATION_THRESHOLD,
@@ -18,6 +17,7 @@ import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { getAlertDetailsUrl } from '@kbn/infra-plugin/server/lib/alerting/common/utils';
 import { addSpaceIdToPath } from '@kbn/spaces-plugin/common';
 
+import { i18n } from '@kbn/i18n';
 import {
   ENVIRONMENT_NOT_DEFINED,
   getEnvironmentEsField,
@@ -44,14 +44,7 @@ import {
   getServiceGroupFieldsAgg,
   getServiceGroupFields,
 } from '../get_service_group_fields';
-
-const paramsSchema = schema.object({
-  windowSize: schema.number(),
-  windowUnit: schema.string(),
-  threshold: schema.number(),
-  serviceName: schema.maybe(schema.string()),
-  environment: schema.string(),
-});
+import { errorCountParamsSchema } from '../../../../../common/rules/schema';
 
 const ruleTypeConfig = RULE_TYPES_CONFIG[ApmRuleType.ErrorCount];
 
@@ -74,9 +67,7 @@ export function registerErrorCountRuleType({
       name: ruleTypeConfig.name,
       actionGroups: ruleTypeConfig.actionGroups,
       defaultActionGroupId: ruleTypeConfig.defaultActionGroupId,
-      validate: {
-        params: paramsSchema,
-      },
+      validate: { params: errorCountParamsSchema },
       actionVariables: {
         context: [
           ...(observability.getAlertDetailsConfig()?.apm.enabled
@@ -217,8 +208,22 @@ export function registerErrorCountRuleType({
                 interval: `${ruleParams.windowSize}${ruleParams.windowUnit}`,
                 reason: alertReason,
                 serviceName,
-                threshold: ruleParams.threshold,
-                triggerValue: errorCount,
+                threshold: i18n.translate(
+                  'xpack.apm.alerts.errorCount.threshold',
+                  {
+                    defaultMessage:
+                      '{threshold} {threshold, plural, one {error} other {errors}}',
+                    values: { threshold: ruleParams.threshold },
+                  }
+                ),
+                triggerValue: i18n.translate(
+                  'xpack.apm.alerts.errorCount.thresholdValue',
+                  {
+                    defaultMessage:
+                      '{thresholdValue} {thresholdValue, plural, one {error} other {errors}}',
+                    values: { thresholdValue: errorCount },
+                  }
+                ),
                 viewInAppUrl,
               });
           });

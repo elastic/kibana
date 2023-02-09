@@ -6,7 +6,6 @@
  */
 
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { schema } from '@kbn/config-schema';
 import {
   ALERT_EVALUATION_THRESHOLD,
   ALERT_EVALUATION_VALUE,
@@ -23,7 +22,6 @@ import { getAlertUrlTransaction } from '../../../../../common/utils/formatters';
 import { SearchAggregatedTransactionSetting } from '../../../../../common/aggregated_transactions';
 import {
   ApmRuleType,
-  AggregationType,
   RULE_TYPES_CONFIG,
   APM_SERVER_FEATURE_ID,
   formatTransactionDurationReason,
@@ -57,20 +55,7 @@ import {
   getServiceGroupFields,
   getServiceGroupFieldsAgg,
 } from '../get_service_group_fields';
-
-const paramsSchema = schema.object({
-  serviceName: schema.maybe(schema.string()),
-  transactionType: schema.maybe(schema.string()),
-  windowSize: schema.number(),
-  windowUnit: schema.string(),
-  threshold: schema.number(),
-  aggregationType: schema.oneOf([
-    schema.literal(AggregationType.Avg),
-    schema.literal(AggregationType.P95),
-    schema.literal(AggregationType.P99),
-  ]),
-  environment: schema.string(),
-});
+import { transactionDurationParamsSchema } from '../../../../../common/rules/schema';
 
 const ruleTypeConfig = RULE_TYPES_CONFIG[ApmRuleType.TransactionDuration];
 
@@ -92,9 +77,7 @@ export function registerTransactionDurationRuleType({
     name: ruleTypeConfig.name,
     actionGroups: ruleTypeConfig.actionGroups,
     defaultActionGroupId: ruleTypeConfig.defaultActionGroupId,
-    validate: {
-      params: paramsSchema,
-    },
+    validate: { params: transactionDurationParamsSchema },
     actionVariables: {
       context: [
         ...(observability.getAlertDetailsConfig()?.apm.enabled

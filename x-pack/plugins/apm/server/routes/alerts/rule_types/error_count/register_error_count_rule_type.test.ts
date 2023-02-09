@@ -143,8 +143,8 @@ describe('Error count alert', () => {
       ),
       serviceName: 'foo',
       environment: 'env-foo',
-      threshold: 2,
-      triggerValue: 5,
+      threshold: '2 errors',
+      triggerValue: '5 errors',
       reason: 'Error count is 5 in the last 5 mins for foo. Alert when > 2.',
       interval: '5m',
       viewInAppUrl:
@@ -156,8 +156,8 @@ describe('Error count alert', () => {
       ),
       serviceName: 'foo',
       environment: 'env-foo-2',
-      threshold: 2,
-      triggerValue: 4,
+      threshold: '2 errors',
+      triggerValue: '4 errors',
       reason: 'Error count is 4 in the last 5 mins for foo. Alert when > 2.',
       interval: '5m',
       viewInAppUrl:
@@ -170,8 +170,8 @@ describe('Error count alert', () => {
       serviceName: 'bar',
       environment: 'env-bar',
       reason: 'Error count is 3 in the last 5 mins for bar. Alert when > 2.',
-      threshold: 2,
-      triggerValue: 3,
+      threshold: '2 errors',
+      triggerValue: '3 errors',
       interval: '5m',
       viewInAppUrl:
         'http://localhost:5601/eyr/app/apm/services/bar/errors?environment=env-bar',

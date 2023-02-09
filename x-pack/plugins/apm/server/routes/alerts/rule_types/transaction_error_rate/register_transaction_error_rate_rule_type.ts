@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { schema } from '@kbn/config-schema';
 import { firstValueFrom } from 'rxjs';
 import {
   ALERT_EVALUATION_THRESHOLD,
@@ -50,15 +49,7 @@ import {
   getServiceGroupFields,
   getServiceGroupFieldsAgg,
 } from '../get_service_group_fields';
-
-const paramsSchema = schema.object({
-  windowSize: schema.number(),
-  windowUnit: schema.string(),
-  threshold: schema.number(),
-  transactionType: schema.maybe(schema.string()),
-  serviceName: schema.maybe(schema.string()),
-  environment: schema.string(),
-});
+import { transactionErrorRateParamsSchema } from '../../../../../common/rules/schema';
 
 const ruleTypeConfig = RULE_TYPES_CONFIG[ApmRuleType.TransactionErrorRate];
 
@@ -81,9 +72,7 @@ export function registerTransactionErrorRateRuleType({
       name: ruleTypeConfig.name,
       actionGroups: ruleTypeConfig.actionGroups,
       defaultActionGroupId: ruleTypeConfig.defaultActionGroupId,
-      validate: {
-        params: paramsSchema,
-      },
+      validate: { params: transactionErrorRateParamsSchema },
       actionVariables: {
         context: [
           ...(observability.getAlertDetailsConfig()?.apm.enabled
