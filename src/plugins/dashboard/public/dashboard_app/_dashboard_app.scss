@@ -2,7 +2,7 @@
 
 .dshAppWrapper {
   @include kibanaFullBodyHeight();
-  
+
   display: flex;
   flex-direction: column;
 }
