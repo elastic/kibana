@@ -10,6 +10,7 @@ const { inspect } = require('util');
 const Path = require('path');
 
 const { readPackageJson } = require('./parse_package_json');
+const { PLUGIN_CATEGORY } = require('./plugin_category_info');
 const { readPackageManifest } = require('./parse_package_manifest');
 
 /**
@@ -37,12 +38,12 @@ class Package {
   }
 
   /**
-   * Sort an array of bazel packages
+   * Sort an array of packages
    * @param {Package} a
    * @param {Package} b
    */
   static sorter(a, b) {
-    return a.normalizedRepoRelativeDir.localeCompare(b.normalizedRepoRelativeDir);
+    return a.manifest.id.localeCompare(b.manifest.id);
   }
 
   /**
@@ -114,19 +115,25 @@ class Package {
      * @readonly
      */
     this.id = manifest.id;
+  }
 
-    /**
-     * Is this package highlighted as a "dev only" package? If so it will always
-     * be listed in the devDependencies and will never end up in the build
-     * @type {boolean}
-     * @readonly
-     */
-    this.isDevOnly = !!this.manifest.devOnly;
+  /**
+   * Is this package highlighted as a "dev only" package? If so it will always
+   * be listed in the devDependencies and will never end up in the build
+   * @returns {boolean}
+   */
+  isDevOnly() {
+    return (
+      !!this.manifest.devOnly ||
+      this.manifest.type === 'functional-tests' ||
+      this.manifest.type === 'test-helper'
+    );
   }
 
   /**
    * Does this package expose a plugin, is it of one of the plugin types?
-   * @returns {this is import('./types').PluginPackageManifest}
+   * @readonly
+   * @returns {this is import('./types').PluginPackage}
    */
   isPlugin() {
     return this.manifest.type === 'plugin';
@@ -139,6 +146,11 @@ class Package {
   getPluginCategories() {
     if (!this.isPlugin()) {
       throw new Error('package is not a plugin, check pkg.isPlugin before calling this method');
+    }
+
+    const preCalculated = this.manifest.plugin[PLUGIN_CATEGORY];
+    if (preCalculated) {
+      return { ...preCalculated };
     }
 
     const dir = this.normalizedRepoRelativeDir;

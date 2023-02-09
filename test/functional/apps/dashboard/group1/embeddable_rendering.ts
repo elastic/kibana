@@ -27,6 +27,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const security = getService('security');
   const dashboardExpect = getService('dashboardExpect');
   const dashboardAddPanel = getService('dashboardAddPanel');
+  const queryBar = getService('queryBar');
   const PageObjects = getPageObjects([
     'common',
     'dashboard',
@@ -129,8 +130,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('adding visualizations', async () => {
-      await elasticChart.setNewChartUiDebugFlag(true);
-
       visNames = await dashboardAddPanel.addEveryVisualization('"Rendering Test"');
       expect(visNames.length).to.be.equal(24);
       await dashboardExpect.visualizationsArePresent(visNames);
@@ -161,7 +160,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('initial render test', async () => {
       await PageObjects.header.waitUntilLoadingHasFinished();
       await PageObjects.dashboard.waitForRenderComplete();
-      await elasticChart.setNewChartUiDebugFlag();
       await expectAllDataRenders();
     });
 
@@ -180,8 +178,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       const alert = await browser.getAlert();
       await alert?.accept();
 
+      // setNewChartUiDebugFlag required because window._echDebugStateFlag flag is reset after refresh
+      await elasticChart.setNewChartUiDebugFlag(true);
+
       await PageObjects.header.waitUntilLoadingHasFinished();
-      await elasticChart.setNewChartUiDebugFlag();
+      await PageObjects.dashboard.waitForRenderComplete();
+
+      // call query refresh to guarantee all panels are rendered after window._echDebugStateFlag is set
+      await queryBar.clickQuerySubmitButton();
       await PageObjects.dashboard.waitForRenderComplete();
       await expectAllDataRenders();
     });
