@@ -197,3 +197,6 @@ export const DEFAULT_CONTINUOUS_MODE_DELAY = '60s';
 export const DEFAULT_TRANSFORM_FREQUENCY = '1m';
 export const DEFAULT_TRANSFORM_SETTINGS_DOCS_PER_SECOND = null;
 export const DEFAULT_TRANSFORM_SETTINGS_MAX_PAGE_SEARCH_SIZE = 500;
+
+// Used in the transform list's expanded row for the messages and issues table.
+export const TIME_FORMAT = 'YYYY-MM-DD HH:mm:ss';
