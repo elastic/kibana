@@ -9,7 +9,6 @@ import React from 'react';
 import { FormProvider } from 'react-hook-form';
 import {
   EuiButtonEmpty,
-  EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFlyoutBody,
@@ -20,11 +19,11 @@ import {
   EuiButton,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { usePrivateLocationPermissions } from './hooks/use_private_location_permission';
+import { useFleetPermissions } from '../../../hooks/use_fleet_permissions';
 import { useFormWrapped } from '../../../../../hooks/use_form_wrapped';
 import { PrivateLocation } from '../../../../../../common/runtime_types';
+import { FleetPermissionsCallout } from '../../common/components/permissions';
 import { LocationForm } from './location_form';
-import { NEED_FLEET_READ_AGENT_POLICIES_PERMISSION, NEED_PERMISSIONS } from './translations';
 
 export const AddLocationFlyout = ({
   onSubmit,
@@ -55,7 +54,7 @@ export const AddLocationFlyout = ({
 
   const { handleSubmit } = form;
 
-  const { canReadAgentPolicies } = usePrivateLocationPermissions();
+  const { canReadAgentPolicies } = useFleetPermissions();
 
   const closeFlyout = () => {
     setIsOpen(false);
@@ -70,11 +69,8 @@ export const AddLocationFlyout = ({
           </EuiTitle>
         </EuiFlyoutHeader>
         <EuiFlyoutBody>
-          {!canReadAgentPolicies && (
-            <EuiCallOut title={NEED_PERMISSIONS} color="warning" iconType="help">
-              <p>{NEED_FLEET_READ_AGENT_POLICIES_PERMISSION}</p>
-            </EuiCallOut>
-          )}
+          {!canReadAgentPolicies && <FleetPermissionsCallout />}
+
           <LocationForm privateLocations={privateLocations} />
         </EuiFlyoutBody>
         <EuiFlyoutFooter>

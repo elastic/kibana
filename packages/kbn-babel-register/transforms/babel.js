@@ -6,25 +6,18 @@
  * Side Public License, v 1.
  */
 
-const Fs = require('fs');
-
 const { transformCode } = require('@kbn/babel-transform');
 
 /** @type {import('./types').Transform} */
 const babelTransform = (path, source, cache) => {
-  const mtime = `${Fs.statSync(path).mtimeMs}`;
-
-  if (cache.getMtime(path) === mtime) {
-    const code = cache.getCode(path);
-    if (code) {
-      return code;
-    }
+  const key = cache.getKey(path, source);
+  const cached = cache.getCode(key);
+  if (cached) {
+    return cached;
   }
 
   const result = transformCode(path, source);
-
-  cache.update(path, {
-    mtime,
+  cache.update(key, {
     code: result.code,
     map: result.map,
   });
