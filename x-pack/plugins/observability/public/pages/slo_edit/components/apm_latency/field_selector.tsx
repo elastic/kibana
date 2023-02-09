@@ -47,20 +47,20 @@ export function FieldSelector({
   const [options, setOptions] = useState<Option[]>([]);
 
   useEffect(() => {
-    setOptions(
-      createOptions(suggestions).concat(
-        allowAllOption
-          ? [
-              {
-                value: '*',
-                label: i18n.translate('xpack.observability.slos.sloEdit.apmFieldSelector.all', {
-                  defaultMessage: 'All',
-                }),
-              },
-            ]
-          : []
-      )
-    );
+    const opts = (
+      allowAllOption
+        ? [
+            {
+              value: '*',
+              label: i18n.translate('xpack.observability.slos.sloEdit.apmFieldSelector.all', {
+                defaultMessage: 'All',
+              }),
+            },
+          ]
+        : []
+    ).concat(createOptions(suggestions));
+
+    setOptions(opts);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [suggestions.length]);
 

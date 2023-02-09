@@ -45,7 +45,7 @@ export function SloEditFormObjectives({ control, watch }: Props) {
             name="budgetingMethod"
             control={control}
             rules={{ required: true }}
-            render={({ field }) => (
+            render={({ field: { ref, ...field } }) => (
               <EuiSelect
                 id={budgetingSelect}
                 data-test-subj="sloFormBudgetingMethodSelect"
@@ -67,7 +67,7 @@ export function SloEditFormObjectives({ control, watch }: Props) {
             name="timeWindow.duration"
             control={control}
             rules={{ required: true }}
-            render={({ field }) => (
+            render={({ field: { ref, ...field } }) => (
               <EuiSelect
                 id={timeWindowSelect}
                 data-test-subj="sloFormTimeWindowDurationSelect"
@@ -94,7 +94,7 @@ export function SloEditFormObjectives({ control, watch }: Props) {
               min: 0.001,
               max: 99.999,
             }}
-            render={({ field }) => (
+            render={({ field: { ref, ...field } }) => (
               <EuiFieldNumber
                 data-test-subj="sloFormObjectiveTargetInput"
                 {...field}

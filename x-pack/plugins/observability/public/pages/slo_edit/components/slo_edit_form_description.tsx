@@ -39,7 +39,7 @@ export function SloEditFormDescription({ control }: Props) {
           name="name"
           control={control}
           rules={{ required: true }}
-          render={({ field }) => (
+          render={({ field: { ref, ...field } }) => (
             <EuiFieldText
               fullWidth
               id={sloNameId}
@@ -67,7 +67,7 @@ export function SloEditFormDescription({ control }: Props) {
           name="description"
           defaultValue=""
           control={control}
-          render={({ field }) => (
+          render={({ field: { ref, ...field } }) => (
             <EuiTextArea
               fullWidth
               id={descriptionId}

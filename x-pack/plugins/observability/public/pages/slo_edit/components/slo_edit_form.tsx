@@ -117,7 +117,6 @@ export function SloEditForm({ slo }: Props) {
 
   return (
     <EuiTimeline data-test-subj="sloForm">
-      <pre>{JSON.stringify(watch(), null, 2)}</pre>
       <EuiTimelineItem
         verticalAlign="top"
         icon={
@@ -151,7 +150,7 @@ export function SloEditForm({ slo }: Props) {
             name="indicator.type"
             control={control}
             rules={{ required: true }}
-            render={({ field }) => (
+            render={({ field: { ref, ...field } }) => (
               <EuiSelect
                 data-test-subj="sloFormIndicatorTypeSelect"
                 {...field}
