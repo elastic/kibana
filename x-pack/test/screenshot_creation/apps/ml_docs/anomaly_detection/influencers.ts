@@ -55,17 +55,6 @@ export default function ({ getService }: FtrProviderContext) {
       await ml.api.cleanMlIndices();
     });
 
-    it('wizard screenshot', async () => {
-      await ml.testExecution.logTestStep('navigate to job list');
-      await ml.navigation.navigateToMl();
-      await ml.navigation.navigateToJobManagement();
-
-      await ml.testExecution.logTestStep('open job in wizard');
-      await ml.jobTable.filterWithSearchString(populationJobConfig.job_id, 1);
-      await ml.jobTable.clickCloneJobAction(populationJobConfig.job_id);
-      await ml.jobTypeSelection.assertPopulationJobWizardOpen();
-    });
-
     it('anomaly explorer screenshots', async () => {
       await ml.testExecution.logTestStep('navigate to job list');
       await ml.navigation.navigateToMl();
