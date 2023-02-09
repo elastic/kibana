@@ -58,6 +58,13 @@ export const QUERY_PREVIEW_SELECT_ARIA = i18n.translate(
   }
 );
 
+export const RULE_PREVIEW_ERROR = i18n.translate(
+  'xpack.securitySolution.detectionEngine.queryPreview.rulePreviewError',
+  {
+    defaultMessage: 'Failed to preview rule',
+  }
+);
+
 export const QUERY_PREVIEW_LABEL = i18n.translate(
   'xpack.securitySolution.detectionEngine.queryPreview.queryPreviewLabel',
   {
