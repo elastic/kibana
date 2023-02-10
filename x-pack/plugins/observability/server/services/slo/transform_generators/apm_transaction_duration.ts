@@ -19,7 +19,7 @@ import {
 } from '../../../assets/constants';
 import { getSLOTransformTemplate } from '../../../assets/transform_templates/slo_transform_template';
 import { SLO, APMTransactionDurationIndicator } from '../../../domain/models';
-import { TransformGenerator } from '.';
+import { getElastichsearchQueryOrThrow, TransformGenerator } from '.';
 import { DEFAULT_APM_INDEX } from './constants';
 import { Query } from './types';
 
@@ -83,6 +83,10 @@ export class ApmTransactionDurationTransformGenerator extends TransformGenerator
           'transaction.type': indicator.params.transactionType,
         },
       });
+    }
+
+    if (!!indicator.params.filter) {
+      queryFilter.push(getElastichsearchQueryOrThrow(indicator.params.filter));
     }
 
     return {
