@@ -16,6 +16,28 @@ import { getConfigPath, getConfigDirectory } from '@kbn/utils';
 import { isKibanaDistributable } from '@kbn/repo-info';
 import { readKeystore } from '../keystore/read_keystore';
 
+/** @typedef {'es' | 'oblt' | 'security'} ServerlessProjectMode */
+/** @type {ServerlessProjectMode[]} */
+const VALID_SERVERLESS_PROJECT_MODE = ['es', 'oblt', 'security'];
+
+/**
+ * @param {Record<string, unknown>} opts
+ * @returns {ServerlessProjectMode | null}
+ */
+function getServerlessProjectMode(opts) {
+  if (!opts.serverless) {
+    return null;
+  }
+
+  if (VALID_SERVERLESS_PROJECT_MODE.includes(opts.serverless)) {
+    return opts.serverless;
+  }
+
+  throw new Error(
+    `invalid --serverless value, must be one of ${VALID_SERVERLESS_PROJECT_MODE.join(', ')}`
+  );
+}
+
 function canRequire(path) {
   try {
     require.resolve(path);
@@ -212,7 +234,7 @@ export default function (program) {
         '--run-examples',
         'Adds plugin paths for all the Kibana example plugins and runs with no base path'
       )
-      .option('--serverless', 'Start Kibana with serverless configuration overrides');
+      .option('--serverless <oblt|security|es>', 'Start Kibana in a serverless project mode');
   }
 
   if (DEV_MODE_SUPPORTED) {
@@ -237,17 +259,20 @@ export default function (program) {
   command.action(async function (opts) {
     const unknownOptions = this.getUnknownOptions();
     const configs = [getConfigPath(), ...getEnvConfigs(), ...(opts.config || [])];
+    const serverlessMode = getServerlessProjectMode(opts);
 
     // we "unshift" .serverless. config so that it only overrides defaults
-    if (opts.serverless) {
-      maybeAddConfig('kibana.serverless.yml', configs, 'unshift');
+    if (serverlessMode) {
+      maybeAddConfig(`serverless.yml`, configs, 'push');
+      maybeAddConfig(`serverless.${serverlessMode}.yml`, configs, 'unshift');
     }
 
     // .dev. configs are "pushed" so that they override all other config files
     if (opts.dev && opts.devConfig !== false) {
       maybeAddConfig('kibana.dev.yml', configs, 'push');
-      if (opts.serverless) {
-        maybeAddConfig('kibana.serverless.dev.yml', configs, 'push');
+      if (serverlessMode) {
+        maybeAddConfig(`serverless.dev.yml`, configs, 'push');
+        maybeAddConfig(`serverless.${serverlessMode}.dev.yml`, configs, 'push');
       }
     }
 
