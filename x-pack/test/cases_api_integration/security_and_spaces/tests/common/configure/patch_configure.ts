@@ -18,7 +18,7 @@ import {
   updateConfiguration,
   getConfigurationRequest,
   getConfiguration,
-} from '../../../../common/lib/utils';
+} from '../../../../common/lib/api';
 import {
   secOnly,
   obsOnlyRead,

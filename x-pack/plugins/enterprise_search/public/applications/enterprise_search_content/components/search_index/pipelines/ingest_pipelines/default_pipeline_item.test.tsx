@@ -28,7 +28,7 @@ describe('DefaultPipelineItem', () => {
         index={index}
         indexName={index.name}
         ingestionMethod={ingestionMethod}
-        openModal={mockOpenModal}
+        openPipelineSettings={mockOpenModal}
         pipelineName={mockPipelineState.name}
         pipelineState={mockPipelineState}
       />
@@ -58,7 +58,7 @@ describe('DefaultPipelineItem', () => {
         index={index}
         indexName={index.name}
         ingestionMethod={ingestionMethod}
-        openModal={mockOpenModal}
+        openPipelineSettings={mockOpenModal}
         pipelineName={mockPipelineState.name}
         pipelineState={mockPipelineState}
       />
