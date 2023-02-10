@@ -12,10 +12,7 @@ import {
 import { getNewRule } from '../../../objects/rule';
 import { login, visitWithoutDateRange } from '../../../tasks/login';
 import { createCustomRule } from '../../../tasks/api_calls/rules';
-import {
-  editException,
-  editExceptionFlyoutItemName,
-} from '../../../tasks/exceptions';
+import { editException, editExceptionFlyoutItemName } from '../../../tasks/exceptions';
 import { EXCEPTIONS_URL } from '../../../urls/navigation';
 
 import {
@@ -41,23 +38,21 @@ describe('Add/edit exception from excpetion management page', () => {
   describe('create exception item', () => {
     it('create exception item', () => {
       const FIELD_DIFFERENT_FROM_EXISTING_ITEM_FIELD = 'agent.name';
-      cy.get(MANAGE_EXCEPTION_CREATE_BUTTON_MENU).click()
-      cy.get(MANAGE_EXCEPTION_CREATE_BUTTON_EXCEPTION).click()
+      cy.get(MANAGE_EXCEPTION_CREATE_BUTTON_MENU).click();
+      cy.get(MANAGE_EXCEPTION_CREATE_BUTTON_EXCEPTION).click();
 
       // edit exception item name
       editExceptionFlyoutItemName('Name');
       editException(FIELD_DIFFERENT_FROM_EXISTING_ITEM_FIELD, 0, 0);
-      
+
       // should select some rules
       cy.get(CONFIRM_BTN).should('have.attr', 'disabled');
-      
+
       // select rule
-      cy.get(RULE_ACTION_LINK_RULE_SWITCH).find('button').click()
+      cy.get(RULE_ACTION_LINK_RULE_SWITCH).find('button').click();
 
       // should be available to submit
       cy.get(CONFIRM_BTN).should('not.have.attr', 'disabled');
     });
   });
-
-
 });

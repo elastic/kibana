@@ -429,7 +429,9 @@ export const AddExceptionFlyout = memo(function AddExceptionFlyout({
       itemConditionValidationErrorExists ||
       expireErrorExists ||
       (addExceptionToRadioSelection === 'add_to_lists' && isEmpty(exceptionListsToAddTo)) ||
-      (addExceptionToRadioSelection === 'select_rules_to_add_to' && isEmpty(selectedRulesToAddTo)) && listType ===  ExceptionListTypeEnum.RULE_DEFAULT,
+      (addExceptionToRadioSelection === 'select_rules_to_add_to' &&
+        isEmpty(selectedRulesToAddTo) &&
+        listType === ExceptionListTypeEnum.RULE_DEFAULT),
     [
       isSubmitting,
       isClosingAlerts,
@@ -441,7 +443,7 @@ export const AddExceptionFlyout = memo(function AddExceptionFlyout({
       exceptionListsToAddTo,
       expireErrorExists,
       selectedRulesToAddTo,
-      listType
+      listType,
     ]
   );
 
