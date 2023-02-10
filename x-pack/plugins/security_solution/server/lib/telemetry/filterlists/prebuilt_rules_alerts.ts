@@ -67,6 +67,7 @@ export const prebuiltRuleAllowlistFields: AllowlistFields = {
   'event.dataset': true,
   'event.outcome': true,
   'event.module': true,
+  'powershell.file.script_block_text': true,
   job_id: true,
   causes: true,
   typical: true,
@@ -135,7 +136,7 @@ export const prebuiltRuleAllowlistFields: AllowlistFields = {
     name: true,
     parent: {
       args: true,
-      commmand_line: true,
+      command_line: true,
       entity_id: true,
       executable: true,
       Ext: {
@@ -145,14 +146,16 @@ export const prebuiltRuleAllowlistFields: AllowlistFields = {
       },
       name: true,
       pid: true,
-      original_file_name: true,
+      pe: {
+        original_file_name: true,
+      },
     },
     pid: true,
     working_directory: true,
   },
   registry: {
     data: {
-      string: true,
+      strings: true,
     },
     path: true,
     value: true,
@@ -274,11 +277,6 @@ export const prebuiltRuleAllowlistFields: AllowlistFields = {
         ForwardTo: true,
         RedirectTo: true,
       },
-    },
-  },
-  powershell: {
-    file: {
-      script_block_text: true,
     },
   },
   // winlog
