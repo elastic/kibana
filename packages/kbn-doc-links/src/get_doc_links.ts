@@ -575,6 +575,7 @@ export const getDocLinks = ({ kibanaBranch }: GetDocLinkOptions): DocLinks => {
       painlessExecute: `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/painless/${DOC_LINK_VERSION}/painless-execute-api.html`,
       painlessExecuteAPIContexts: `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/painless/${DOC_LINK_VERSION}/painless-execute-api.html#_contexts`,
       putComponentTemplateMetadata: `${ELASTICSEARCH_DOCS}indices-component-template.html#component-templates-metadata`,
+      putPipelineMetadata: `${ELASTICSEARCH_DOCS}put-pipeline-api.html#pipeline-metadata`,
       putEnrichPolicy: `${ELASTICSEARCH_DOCS}put-enrich-policy-api.html`,
       putIndexTemplateV1: `${ELASTICSEARCH_DOCS}indices-templates-v1.html`,
       putSnapshotLifecyclePolicy: `${ELASTICSEARCH_DOCS}slm-api-put-policy.html`,
