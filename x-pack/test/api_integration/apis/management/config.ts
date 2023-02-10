@@ -5,17 +5,13 @@
  * 2.0.
  */
 
-/* eslint-disable import/no-default-export */
-
 import { FtrConfigProviderContext } from '@kbn/test';
 
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
-  const baseIntegrationTestsConfig = await readConfigFile(require.resolve('./config.base.ts'));
+  const baseIntegrationTestsConfig = await readConfigFile(require.resolve('../../config.base.ts'));
+
   return {
     ...baseIntegrationTestsConfig.getAll(),
-    testFiles: ['./apis/security/security_trial'],
-    junit: {
-      reportName: 'X-Pack API Integration Tests (Security Trial)',
-    },
+    testFiles: [require.resolve('.')],
   };
 }
