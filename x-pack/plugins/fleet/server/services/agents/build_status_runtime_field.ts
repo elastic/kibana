@@ -20,17 +20,17 @@ export type InactivityTimeouts = Awaited<
   ReturnType<typeof agentPolicyService['getInactivityTimeouts']>
 >;
 
-const _buildInactiveClause = (opts: {
+const _buildInactiveCondition = (opts: {
   now: number;
   inactivityTimeouts: InactivityTimeouts;
   maxAgentPoliciesWithInactivityTimeout: number;
   field: (path: string) => string;
   logger?: Logger;
-}) => {
+}): string | null => {
   const { now, inactivityTimeouts, maxAgentPoliciesWithInactivityTimeout, field, logger } = opts;
   // if there are no policies with inactivity timeouts, then no agents are inactive
   if (inactivityTimeouts.length === 0) {
-    return 'false';
+    return null;
   }
 
   const totalAgentPoliciesWithInactivityTimeouts = inactivityTimeouts.reduce(
@@ -44,10 +44,10 @@ const _buildInactiveClause = (opts: {
     // only log this warning once as this code is executed a lot
     once(() => {
       logger?.warn(
-        `There are ${totalAgentPoliciesWithInactivityTimeouts} agent policies with an inactivity timeout set but the maximum allowed is ${maxAgentPoliciesWithInactivityTimeout}. Agents will be marked as inactive after 2 weeks of inactivity.`
+        `There are ${totalAgentPoliciesWithInactivityTimeouts} agent policies with an inactivity timeout set but the maximum allowed is ${maxAgentPoliciesWithInactivityTimeout}. Agents will not be marked as inactive.`
       );
     })();
-    return 'false';
+    return null;
   }
 
   const policyClauses = inactivityTimeouts
@@ -73,7 +73,7 @@ function _buildSource(
   const normalizedPrefix = pathPrefix ? `${pathPrefix}${pathPrefix.endsWith('.') ? '' : '.'}` : '';
   const field = (path: string) => `doc['${normalizedPrefix + path}']`;
   const now = Date.now();
-  const agentIsInactive = _buildInactiveClause({
+  const agentIsInactiveCondition = _buildInactiveCondition({
     now,
     inactivityTimeouts,
     maxAgentPoliciesWithInactivityTimeout,
@@ -91,12 +91,11 @@ function _buildSource(
         );
     if (${field('active')}.size() > 0 && ${field('active')}.value == false) {
       emit('unenrolled'); 
-    } else if (${agentIsInactive}) {
-      emit('inactive');
-    } else if (
+    } ${agentIsInactiveCondition ? `else if (${agentIsInactiveCondition}) {emit('inactive');}` : ''}
+      else if (
         lastCheckinMillis > 0 
         && lastCheckinMillis 
-        < (${now - MS_BEFORE_OFFLINE}L)
+        < ${now - MS_BEFORE_OFFLINE}L
     ) { 
       emit('offline'); 
     } else if (
@@ -122,7 +121,7 @@ function _buildSource(
       emit('degraded');
     } else { 
       emit('online'); 
-    }`.replace(/\s{2,}/g, ' '); // remove newlines and double spaces to save characters
+    }`.replace(/\s{2,}/g, ' '); // replace newlines and double spaces to save characters
 }
 
 // exported for testing
