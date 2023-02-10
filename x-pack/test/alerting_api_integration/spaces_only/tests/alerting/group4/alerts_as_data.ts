@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { alertFieldMap, legacyAlertFieldMap } from '@kbn/alerting-plugin/common';
+import { alertFieldMap, ecsFieldMap, legacyAlertFieldMap } from '@kbn/alerting-plugin/common';
 import { mappingFromFieldMap } from '@kbn/alerting-plugin/common';
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
@@ -15,12 +15,14 @@ export default function createAlertsAsDataTest({ getService }: FtrProviderContex
   const es = getService('es');
   const frameworkMappings = mappingFromFieldMap(alertFieldMap, 'strict');
   const legacyAlertMappings = mappingFromFieldMap(legacyAlertFieldMap, 'strict');
+  const ecsMappings = mappingFromFieldMap(ecsFieldMap, 'strict');
 
   describe('alerts as data', () => {
     it('should install common alerts as data resources on startup', async () => {
       const ilmPolicyName = 'alerts-default-ilm-policy';
       const frameworkComponentTemplateName = '.alerts-framework-mappings';
       const legacyComponentTemplateName = '.alerts-legacy-alert-mappings';
+      const ecsComponentTemplateName = '.alerts-ecs-mappings';
 
       const commonIlmPolicy = await es.ilm.getLifecycle({
         name: ilmPolicyName,
@@ -59,7 +61,7 @@ export default function createAlertsAsDataTest({ getService }: FtrProviderContex
           number_of_shards: 1,
           mapping: {
             total_fields: {
-              limit: 100,
+              limit: 1000,
             },
           },
         },
@@ -81,7 +83,27 @@ export default function createAlertsAsDataTest({ getService }: FtrProviderContex
           number_of_shards: 1,
           mapping: {
             total_fields: {
-              limit: 100,
+              limit: 1000,
+            },
+          },
+        },
+      });
+
+      const { component_templates: componentTemplates3 } = await es.cluster.getComponentTemplate({
+        name: ecsComponentTemplateName,
+      });
+
+      expect(componentTemplates3.length).to.eql(1);
+      const ecsComponentTemplate = componentTemplates3[0];
+
+      expect(ecsComponentTemplate.name).to.eql(ecsComponentTemplateName);
+      expect(ecsComponentTemplate.component_template.template.mappings).to.eql(ecsMappings);
+      expect(ecsComponentTemplate.component_template.template.settings).to.eql({
+        index: {
+          number_of_shards: 1,
+          mapping: {
+            total_fields: {
+              limit: 2000,
             },
           },
         },
@@ -122,7 +144,7 @@ export default function createAlertsAsDataTest({ getService }: FtrProviderContex
           number_of_shards: 1,
           mapping: {
             total_fields: {
-              limit: 100,
+              limit: 1000,
             },
           },
         },
@@ -138,8 +160,8 @@ export default function createAlertsAsDataTest({ getService }: FtrProviderContex
         '.alerts-test.always-firing-default-*',
       ]);
       expect(contextIndexTemplate.index_template.composed_of).to.eql([
-        '.alerts-framework-mappings',
         '.alerts-test.always-firing-mappings',
+        '.alerts-framework-mappings',
       ]);
       expect(contextIndexTemplate.index_template.template!.mappings).to.eql({
         dynamic: false,
