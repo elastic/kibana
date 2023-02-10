@@ -124,13 +124,13 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       describe('for the search bar', () => {
         let adminSearchBar: WebElementWrapper;
-        let querySubmitButton:WebElementWrapper;
-        beforeEach(async () => {
+        let querySubmitButton: WebElementWrapper;
+        before(async () => {
           await pageObjects.endpoint.waitForTableToHaveData('endpointListTable', 60000);
           adminSearchBar = await testSubjects.find('adminSearchBar');
           querySubmitButton = await testSubjects.find('querySubmitButton');
         });
-        afterEach(async () => {
+        after(async () => {
           adminSearchBar = await testSubjects.find('adminSearchBar');
           querySubmitButton = await testSubjects.find('querySubmitButton');
           await adminSearchBar.clearValueWithKeyboard();
@@ -163,10 +163,12 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         it('when the kql filters for united.endpoint.host.hostname, table shows 1 item', async () => {
           const expectedDataFromQuery = [...expectedData.slice(0, 2).map((row) => [...row])];
           const hostName = expectedDataFromQuery[1][0];
+          adminSearchBar = await testSubjects.find('adminSearchBar');
           await adminSearchBar.clearValueWithKeyboard();
           await adminSearchBar.type(
             `united.endpoint.host.hostname : "${hostName}" or host.hostname : "${hostName}" `
           );
+          querySubmitButton = await testSubjects.find('querySubmitButton');
           await querySubmitButton.click();
           await pageObjects.endpoint.waitForTableToHaveNumberOfEntries(
             'endpointListTable',
@@ -183,7 +185,11 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       describe('when the hostname is clicked on,', () => {
         before(async () => {
-          await pageObjects.endpoint.waitForTableToHaveNumberOfEntries('endpointListTable', 3, 90000);
+          await pageObjects.endpoint.waitForTableToHaveNumberOfEntries(
+            'endpointListTable',
+            3,
+            90000
+          );
         });
         it('display the details flyout', async () => {
           await (await testSubjects.find('hostnameCellLink')).click();
