@@ -90,6 +90,7 @@ steps:
         TARGET_FILE: kibana-controller.yaml
         IMAGE_TAG: "$GIT_ABBREV_COMMIT"
         SERVICE: kibana-controller
+        IMAGE_OVERRIDES: "docker.elastic.co/kibana-ci/kibana:$GIT_ABBREV_COMMIT"
 EOF
 
 else
