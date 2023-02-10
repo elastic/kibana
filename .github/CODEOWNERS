@@ -58,6 +58,7 @@ packages/kbn-cell-actions @elastic/security-threat-hunting-explore
 src/plugins/chart_expressions/common @elastic/kibana-visualizations
 packages/kbn-chart-icons @elastic/kibana-visualizations
 src/plugins/charts @elastic/kibana-visualizations
+packages/kbn-check-mappings-update-cli @elastic/kibana-core
 packages/kbn-ci-stats-core @elastic/kibana-operations
 packages/kbn-ci-stats-performance-metrics @elastic/kibana-operations
 packages/kbn-ci-stats-reporter @elastic/kibana-operations
@@ -642,7 +643,6 @@ x-pack/examples/triggers_actions_ui_example @elastic/response-ops
 x-pack/plugins/triggers_actions_ui @elastic/response-ops
 packages/kbn-ts-projects @elastic/kibana-operations
 packages/kbn-ts-type-check-cli @elastic/kibana-operations
-packages/kbn-check-mappings-update-cli @elastic/kibana-core
 packages/kbn-typed-react-router-config @elastic/apm-ui
 packages/kbn-ui-actions-browser @elastic/appex-sharedux
 x-pack/examples/ui_actions_enhanced_examples @elastic/appex-sharedux
@@ -1204,6 +1204,11 @@ x-pack/plugins/translations/translations
 # Design (at the bottom for specificity of SASS files)
 **/*.scss  @elastic/kibana-design
 
+####
+## These rules are always last so they take ultimate priority over everything else
+####
+
+**/*.scss  @elastic/kibana-design
 ####
 ## These rules are always last so they take ultimate priority over everything else
 ####
