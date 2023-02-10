@@ -10,7 +10,7 @@ disabled:
   - x-pack/test/localization/config.base.ts
   - test/server_integration/config.base.js
   - x-pack/test/functional_with_es_ssl/config.base.ts
-  - x-pack/test/api_integration/config.base.ts
+  - x-pack/test/api_integration/config.ts
 
   # QA suites that are run out-of-band
   - x-pack/test/stack_functional_integration/configs/config.stack_functional_integration_base.js
