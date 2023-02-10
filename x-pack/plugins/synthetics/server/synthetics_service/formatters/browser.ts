@@ -14,7 +14,7 @@ import { arrayFormatter, objectFormatter, stringToObjectFormatter } from './form
 
 export type BrowserFormatMap = Record<keyof BrowserFields, Formatter>;
 
-const throttlingFormatter: Formatter = (fields, key) => {
+const throttlingFormatter: Formatter = (fields) => {
   if (!fields[ConfigKey.IS_THROTTLING_ENABLED]) return false;
 
   return {

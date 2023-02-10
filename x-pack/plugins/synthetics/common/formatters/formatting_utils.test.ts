@@ -10,7 +10,7 @@ import { loggerMock } from '@kbn/logging-mocks';
 describe('replaceStringWithParams', () => {
   const logger = loggerMock.create();
 
-  it(' replaces params', () => {
+  it('replaces params', () => {
     const result = replaceStringWithParams(
       '${homePageUrl}',
       { homePageUrl: 'https://elastic.co' },
@@ -20,12 +20,8 @@ describe('replaceStringWithParams', () => {
     expect(result).toEqual('https://elastic.co');
   });
 
-  it(' returns same value in case no param', () => {
-    const result = replaceStringWithParams(
-      '${homePageUrl}',
-      { homePageUrl1: 'https://elastic.co' },
-      logger
-    );
+  it('returns empty value in case no param', () => {
+    const result = replaceStringWithParams('${homePageUrl}', {}, logger);
 
     expect(result).toEqual('');
   });
@@ -54,6 +50,16 @@ describe('replaceStringWithParams', () => {
     const result = replaceStringWithParams(
       'Basic ${homePageUrl} ${homePageUrl1}',
       { homePageUrl: 'https://elastic.co', homePageUrl1: 'https://elastic.co/product' },
+      logger
+    );
+
+    expect(result).toEqual('Basic https://elastic.co https://elastic.co/product');
+  });
+
+  it('works with default value', () => {
+    const result = replaceStringWithParams(
+      'Basic ${homePageUrl:https://elastic.co} ${homePageUrl1}',
+      { homePageUrl1: 'https://elastic.co/product' },
       logger
     );
 

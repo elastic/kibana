@@ -6,7 +6,11 @@
  */
 import { omit } from 'lodash';
 import { FormattedValue } from './common';
-import { formatMonitorConfigFields, formatHeartbeatRequest } from './format_configs';
+import {
+  formatMonitorConfigFields,
+  formatHeartbeatRequest,
+  mixParamsWithGlobalParams,
+} from './format_configs';
 import {
   ConfigKey,
   DataStream,
@@ -425,6 +429,47 @@ describe('formatHeartbeatRequest', () => {
         test_run_id: testRunId,
       },
       fields_under_root: true,
+    });
+  });
+});
+
+describe('mixParamsWithGlobalParams', () => {
+  it('mixes global params with local', () => {
+    const actual = mixParamsWithGlobalParams(
+      {
+        username: 'test-user',
+        password: 'test-password',
+        url: 'test-url',
+      },
+      { params: '{"a":"param"}' } as any
+    );
+    expect(actual).toEqual({
+      params: {
+        a: 'param',
+        password: 'test-password',
+        url: 'test-url',
+        username: 'test-user',
+      },
+      str: '{"username":"test-user","password":"test-password","url":"test-url","a":"param"}',
+    });
+  });
+
+  it('local params gets preference', () => {
+    const actual = mixParamsWithGlobalParams(
+      {
+        username: 'test-user',
+        password: 'test-password',
+        url: 'test-url',
+      },
+      { params: '{"username":"superpower-user"}' } as any
+    );
+    expect(actual).toEqual({
+      params: {
+        password: 'test-password',
+        url: 'test-url',
+        username: 'superpower-user',
+      },
+      str: '{"username":"superpower-user","password":"test-password","url":"test-url"}',
     });
   });
 });

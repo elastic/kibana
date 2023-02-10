@@ -69,25 +69,13 @@ describe('LightweightParamFormatter', () => {
     const result = replaceVarsWithParams(formatter, params);
     expect(result).toEqual('escaped $,${var}');
   });
-  it('reference", "${reference}', () => {
+  it('works with simple variable', () => {
     const expected: ParsedVars = [{ content: { default: null, name: 'reference' }, type: 'var' }];
     const formatter = variableParser.parse('${reference}', params);
     expect(formatter).toEqual(expected);
 
     const result = replaceVarsWithParams(formatter, params);
     expect(result).toEqual('abc');
-  });
-  it('exp in middle', () => {
-    const expected: ParsedVars = [
-      { content: 'test ', type: 'nonvar' },
-      { content: { default: null, name: 'splice' }, type: 'var' },
-      { content: ' this', type: 'nonvar' },
-    ];
-    const formatter = variableParser.parse('test ${splice} this', params);
-    expect(formatter).toEqual(expected);
-
-    const result = replaceVarsWithParams(formatter, params);
-    expect(result).toEqual('test value this');
   });
   it('exp at beginning', () => {
     const formatter = variableParser.parse('${splice} test', params);
@@ -109,73 +97,6 @@ describe('LightweightParamFormatter', () => {
     expect(result).toEqual('test value');
   });
 
-  it.skip('exp with escaped $', () => {
-    const expected: ParsedVars = [
-      {
-        content: '$,${',
-        type: 'nonvar',
-      },
-      {
-        content: {
-          default: null,
-          name: 'HOME',
-        },
-        type: 'var',
-      },
-      {
-        content: '$,}',
-        type: 'nonvar',
-      },
-    ];
-
-    const formatter = variableParser.parse('$${${HOME}$}', params);
-    expect(formatter).toEqual(expected);
-
-    const result = replaceVarsWithParams(formatter, params);
-    expect(result).toEqual('${/user/shahzad}');
-  });
-  // it('exp nested', () => {
-  //   const expected: ParsedVars = [
-  //     { content: { default: null, name: '${nested' }, type: 'var' },
-  //     { content: '}', type: 'nonvar' },
-  //   ];
-  //
-  //   const formatter = variableParser.parse('\\$\\{${nested}\\}', params);
-  //   expect(formatter).toEqual(expected);
-  //
-  //   const result = replaceVarsWithParams(formatter, params);
-  //   expect(result).toEqual('value');
-  // });
-  // it('exp nested in middle', () => {
-  //   const formatter = variableParser.parse('${test.${this}.test}', params);
-  //   expect(formatter).toEqual([
-  //     { content: { default: null, name: 'test.${this' }, type: 'var' },
-  //     { content: '.test}', type: 'nonvar' },
-  //   ]);
-  // });
-  // it('exp nested at beginning', () => {
-  //   const formatter = variableParser.parse('${${test}.this}', params);
-  //   expect(formatter).toEqual([
-  //     { content: { default: null, name: '${test' }, type: 'var' },
-  //     { content: '.this}', type: 'nonvar' },
-  //   ]);
-  // });
-  // it('exp nested at end', () => {
-  //   const formatter = variableParser.parse('${test.${this}}', params);
-  //   expect(formatter).toEqual([
-  //     {
-  //       content: {
-  //         default: null,
-  //         name: 'test.${this',
-  //       },
-  //       type: 'var',
-  //     },
-  //     {
-  //       content: '}',
-  //       type: 'nonvar',
-  //     },
-  //   ]);
-  // });
   it('exp with default', () => {
     const expected: ParsedVars = [{ content: { default: 'default', name: 'test' }, type: 'var' }];
 

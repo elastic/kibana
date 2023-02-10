@@ -11,6 +11,6 @@ import { ICMPFields } from '../../../common/runtime_types/monitor_management';
 
 export type ICMPFormatMap = Record<keyof ICMPFields, Formatter>;
 export const icmpFormatters: ICMPFormatMap = {
-  ...basicICMPFormatters,
   ...commonFormatters,
+  ...basicICMPFormatters,
 };

@@ -7,6 +7,7 @@
 
 import { isEmpty, isNil, omitBy } from 'lodash';
 import { Logger } from '@kbn/logging';
+import { PARAMS_KEYS_TO_SKIP } from '../../../common/formatters/format_synthetics_policy';
 import { replaceStringWithParams } from '../../../common/formatters/formatting_utils';
 import {
   BrowserFields,
@@ -33,15 +34,6 @@ const UI_KEYS_TO_SKIP = [
   ConfigKey.CONFIG_HASH,
   ConfigKey.ALERT_CONFIG,
   'secrets',
-];
-
-export const PARAMS_KEYS_TO_SKIP = [
-  'secrets',
-  'fields',
-  ConfigKey.LOCATIONS,
-  ConfigKey.TLS_VERSION,
-  ConfigKey.SOURCE_PROJECT_CONTENT,
-  ConfigKey.SOURCE_INLINE,
 ];
 
 const uiToHeartbeatKeyMap = {

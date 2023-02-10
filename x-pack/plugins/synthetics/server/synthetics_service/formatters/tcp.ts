@@ -12,8 +12,8 @@ import { ConfigKey, TCPFields } from '../../../common/runtime_types/monitor_mana
 
 export type TCPFormatMap = Record<keyof TCPFields, Formatter>;
 export const tcpFormatters: TCPFormatMap = {
-  ...baicTCPFormatters,
-  [ConfigKey.METADATA]: null,
   ...tlsFormatters,
   ...commonFormatters,
+  ...baicTCPFormatters,
+  [ConfigKey.METADATA]: null,
 };

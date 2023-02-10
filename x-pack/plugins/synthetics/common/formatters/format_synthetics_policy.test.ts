@@ -379,7 +379,8 @@ describe('formatSyntheticsPolicy', () => {
                 },
                 params: {
                   type: 'yaml',
-                  value: '{"proxyUrl":"https://proxy.com"}',
+                  value:
+                    '{"proxyUrl":"https://proxy.com/local","proxyUsername":"username","proxyPassword":"password"}',
                 },
                 playwright_options: {
                   type: 'yaml',
@@ -1214,7 +1215,8 @@ const browserConfig: any = {
     is_zip_url_tls_enabled: false,
     is_tls_enabled: false,
   },
-  params: '{"proxyUrl":"https://proxy.com"}',
+  params:
+    '{"proxyUrl":"https://proxy.com/local","proxyUsername":"username","proxyPassword":"password"}',
   'url.port': null,
   'source.inline.script':
     'step("Visit /users api route", async () => {\\n  const response = await page.goto(\'https://nextjs-test-synthetics.vercel.app/api/users\');\\n  expect(response.status()).toEqual(200);\\n});',
