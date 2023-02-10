@@ -6,7 +6,7 @@
  */
 
 import * as rt from 'io-ts';
-import { UserRT } from '../../user';
+import { UserRt } from '../../user';
 
 /**
  * These values are used in a number of places including to define the accepted values in the
@@ -42,7 +42,7 @@ export const ActionsRt = rt.keyof(Actions);
 
 export const UserActionCommonAttributesRt = rt.type({
   created_at: rt.string,
-  created_by: UserRT,
+  created_by: UserRt,
   owner: rt.string,
   action: ActionsRt,
 });

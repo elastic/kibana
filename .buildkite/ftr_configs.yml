@@ -9,6 +9,7 @@ disabled:
   - x-pack/test/functional_enterprise_search/base_config.ts
   - x-pack/test/localization/config.base.ts
   - test/server_integration/config.base.js
+  - x-pack/test/functional_with_es_ssl/config.base.ts
 
   # QA suites that are run out-of-band
   - x-pack/test/stack_functional_integration/configs/config.stack_functional_integration_base.js
@@ -180,7 +181,10 @@ enabled:
   - x-pack/test/functional_embedded/config.ts
   - x-pack/test/functional_enterprise_search/without_host_configured.config.ts
   - x-pack/test/functional_execution_context/config.ts
-  - x-pack/test/functional_with_es_ssl/config.ts
+  - x-pack/test/functional_with_es_ssl/apps/cases/group1/config.ts
+  - x-pack/test/functional_with_es_ssl/apps/cases/group2/config.ts
+  - x-pack/test/functional_with_es_ssl/apps/discover_ml_uptime/config.ts
+  - x-pack/test/functional_with_es_ssl/apps/triggers_actions_ui/config.ts
   - x-pack/test/functional/apps/advanced_settings/config.ts
   - x-pack/test/functional/apps/aiops/config.ts
   - x-pack/test/functional/apps/api_keys/config.ts
@@ -243,6 +247,7 @@ enabled:
   - x-pack/test/functional/config_security_basic.ts
   - x-pack/test/functional/config.ccs.ts
   - x-pack/test/functional/config.firefox.js
+  - x-pack/test/functional_cloud/config.ts
   - x-pack/test/kubernetes_security/basic/config.ts
   - x-pack/test/licensing_plugin/config.public.ts
   - x-pack/test/licensing_plugin/config.ts

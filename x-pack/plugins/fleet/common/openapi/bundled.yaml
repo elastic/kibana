@@ -556,17 +556,6 @@ paths:
                   - items
       operationId: update-package
       description: ''
-      parameters:
-        - schema:
-            type: string
-          name: pkgName
-          in: path
-          required: true
-        - schema:
-            type: string
-          name: pkgVersion
-          in: path
-          required: true
       requestBody:
         content:
           application/json:
@@ -833,6 +822,8 @@ paths:
       parameters:
         - schema:
             type: array
+            items:
+              type: string
           name: agentsIds
           in: query
           required: true
@@ -1082,6 +1073,11 @@ paths:
                   $ref: '#/components/schemas/agent_action'
   /agents/{agentId}/actions/{actionId}/cancel:
     parameters:
+      - schema:
+          type: string
+        name: agentId
+        in: path
+        required: true
       - schema:
           type: string
         name: actionId
@@ -2248,11 +2244,6 @@ paths:
                   - id
       parameters:
         - schema:
-            type: string
-          name: packagePolicyId
-          in: path
-          required: true
-        - schema:
             type: boolean
           name: force
           in: query
@@ -2652,11 +2643,6 @@ paths:
                 required:
                   - id
       parameters:
-        - schema:
-            type: string
-          name: itemId
-          in: path
-          required: true
         - $ref: '#/components/parameters/kbn_xsrf'
     put:
       summary: Fleet Server Hosts - Update
@@ -2688,11 +2674,6 @@ paths:
                 required:
                   - item
       parameters:
-        - schema:
-            type: string
-          name: itemId
-          in: path
-          required: true
         - $ref: '#/components/parameters/kbn_xsrf'
   /proxies:
     get:
@@ -2795,11 +2776,6 @@ paths:
                 required:
                   - id
       parameters:
-        - schema:
-            type: string
-          name: itemId
-          in: path
-          required: true
         - $ref: '#/components/parameters/kbn_xsrf'
     put:
       summary: Fleet Proxies - Update
@@ -2835,11 +2811,6 @@ paths:
                 required:
                   - item
       parameters:
-        - schema:
-            type: string
-          name: itemId
-          in: path
-          required: true
         - $ref: '#/components/parameters/kbn_xsrf'
   /kubernetes:
     get:
@@ -2894,6 +2865,7 @@ components:
       in: header
       name: kbn-xsrf
       required: true
+      description: Kibana's anti Cross-Site Request Forgery token. Can be any string value.
     page_size:
       name: perPage
       in: query
@@ -3740,6 +3712,18 @@ components:
               type: number
             agents:
               type: number
+            agent_features:
+              type: array
+              items:
+                type: object
+                properties:
+                  name:
+                    type: string
+                  enabled:
+                    type: boolean
+                required:
+                  - name
+                  - enabled
           required:
             - id
             - status
