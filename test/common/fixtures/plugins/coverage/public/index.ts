@@ -6,9 +6,8 @@
  * Side Public License, v 1.
  */
 
-import type { CustomBrandingStart } from '@kbn/core-custom-branding-browser';
+import { CodeCoverageReportingPlugin } from './plugin';
 
-export interface DashboardCustomBrandingService {
-  hasCustomBranding$: CustomBrandingStart['hasCustomBranding$'];
-  customBranding$: CustomBrandingStart['customBranding$'];
+export function plugin() {
+  return new CodeCoverageReportingPlugin();
 }
