@@ -20,8 +20,8 @@ import {
   getQuerySignalIds,
 } from '../../../detection_engine_api_integration/utils';
 import { superUser } from './authentication/users';
-import { getSpaceUrlPrefix } from './utils';
 import { User } from './authentication/types';
+import { getSpaceUrlPrefix } from './api/helpers';
 
 export const createSecuritySolutionAlerts = async (
   supertest: SuperTest.SuperTest<SuperTest.Test>,

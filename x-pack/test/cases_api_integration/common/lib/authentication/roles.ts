@@ -213,6 +213,24 @@ export const securitySolutionOnlyReadAlerts: Role = {
   },
 };
 
+export const securitySolutionOnlyReadNoIndexAlerts: Role = {
+  name: 'sec_only_read_no_index_alerts',
+  privileges: {
+    elasticsearch: {
+      indices: [],
+    },
+    kibana: [
+      {
+        feature: {
+          securitySolutionFixture: ['all'],
+          siem: ['read'],
+        },
+        spaces: ['space1'],
+      },
+    ],
+  },
+};
+
 export const observabilityOnlyAll: Role = {
   name: 'obs_only_all',
   privileges: {
@@ -321,4 +339,5 @@ export const roles = [
   observabilityOnlyRead,
   observabilityOnlyReadAlerts,
   testDisabledPluginAll,
+  securitySolutionOnlyReadNoIndexAlerts,
 ];

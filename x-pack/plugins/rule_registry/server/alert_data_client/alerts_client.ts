@@ -561,7 +561,7 @@ export class AlertsClient {
 
       return mgetRes;
     } catch (exc) {
-      this.logger.error(`error in ensureAlertsAuthorized ${exc}`);
+      this.logger.error(`error in ensureAllAlertsAuthorized ${exc}`);
       throw exc;
     }
   }

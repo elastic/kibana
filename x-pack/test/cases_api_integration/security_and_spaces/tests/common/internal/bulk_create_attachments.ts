@@ -50,6 +50,7 @@ import {
   secOnly,
   secOnlyRead,
   secOnlyReadAlerts,
+  secSolutionOnlyReadNoIndexAlerts,
   superUser,
 } from '../../../../common/lib/authentication/users';
 import {
@@ -626,7 +627,7 @@ export default ({ getService }: FtrProviderContext): void => {
           });
         });
 
-        it('should change the status of the alert when the user has read access only', async () => {
+        it('should change the status of the alert when the user has write access to the indices and only read access to the siem solution', async () => {
           await bulkCreateAlertsAndVerifyAlertStatus({
             syncAlerts: true,
             expectedAlertStatus: 'acknowledged',
@@ -648,6 +649,19 @@ export default ({ getService }: FtrProviderContext): void => {
             },
             attachmentExpectedHttpCode: 403,
             attachmentAuth: { user: obsSec, space: 'space1' },
+          });
+        });
+
+        it('should NOT change the status of the alert when the user has read access to the kibana feature but no read access to the ES index', async () => {
+          await bulkCreateAlertsAndVerifyAlertStatus({
+            syncAlerts: true,
+            expectedAlertStatus: 'open',
+            caseAuth: {
+              user: superUser,
+              space: 'space1',
+            },
+            attachmentExpectedHttpCode: 500,
+            attachmentAuth: { user: secSolutionOnlyReadNoIndexAlerts, space: 'space1' },
           });
         });
 
@@ -732,6 +746,28 @@ export default ({ getService }: FtrProviderContext): void => {
             alerts: [{ id: alert._id, index: alert._index }],
             expectedHttpCode: 403,
             auth: { user: obsSec, space: 'space1' },
+          });
+        });
+
+        it('should add the case ID to the alert schema when the user has read access to the kibana feature but no read access to the ES index', async () => {
+          const postedCase = await createCase(
+            supertest,
+            {
+              ...postCaseReq,
+              settings: { syncAlerts: false },
+            },
+            200,
+            { user: superUser, space: 'space1' }
+          );
+
+          const signals = await createSecuritySolutionAlerts(supertest, log);
+          const alert = signals.hits.hits[0];
+
+          await bulkCreateAttachmentsAndRefreshIndex({
+            caseId: postedCase.id,
+            alerts: [{ id: alert._id, index: alert._index }],
+            expectedHttpCode: 200,
+            auth: { user: secSolutionOnlyReadNoIndexAlerts, space: 'space1' },
           });
         });
       });
