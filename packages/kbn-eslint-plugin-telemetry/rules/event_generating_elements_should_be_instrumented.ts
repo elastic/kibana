@@ -10,7 +10,7 @@ import type { Rule } from 'eslint';
 import { TSESTree } from '@typescript-eslint/typescript-estree';
 
 import { getIntentFromNodeArray } from '../helpers/get_intent_from_node';
-import { getPathToComponent } from '../helpers/get_path_to_component';
+import { getAppName } from '../helpers/get_app_name';
 
 const EVENT_GENERATING_ELEMENTS = [
   'EuiButton',
@@ -61,14 +61,16 @@ export const eventGeneratingElementsShouldBeInstrumented: Rule.RuleModule = {
             // 1. Path to component
             const cwd = getCwd();
             const fileName = getFilename();
-            const pathToComponent = getPathToComponent(fileName, cwd);
+            const appName = getAppName(fileName, cwd);
 
             // 2. Component name
             const functionDeclaration = getScope().block as TSESTree.FunctionDeclaration;
-            const componentName = functionDeclaration.id?.name.toLowerCase();
+            const componentName = `${functionDeclaration.id?.name
+              .charAt(0)
+              .toUpperCase()}${functionDeclaration.id?.name.slice(1)}`;
 
             // 3. The element name that generates events which can be instrumented
-            const eventGeneratingElement = name.replace('Eui', '').toLowerCase();
+            const eventGeneratingElement = name.replace('Eui', '');
 
             // 4. The intention of the element (i.e. "Select date", "Submit", "Cancel")
             const potentialIntent = getIntentFromNodeArray(
@@ -76,8 +78,7 @@ export const eventGeneratingElementsShouldBeInstrumented: Rule.RuleModule = {
             );
 
             // 5. Putting it together
-            const dataTestSubjectSuggestion = `${pathToComponent}|${componentName}|${eventGeneratingElement}`;
-            const dataTestPurposeSuggestion = `${potentialIntent}`;
+            const dataTestSubjectSuggestion = `${appName}${componentName}${potentialIntent}${eventGeneratingElement}`;
 
             // 6. Report feedback to engineer
             report({
@@ -86,7 +87,7 @@ export const eventGeneratingElementsShouldBeInstrumented: Rule.RuleModule = {
               fix(fixer) {
                 return fixer.insertTextAfterRange(
                   range,
-                  ` data-test-subj="${dataTestSubjectSuggestion}" data-test-purpose="${dataTestPurposeSuggestion}"`
+                  ` data-test-subj="${dataTestSubjectSuggestion}"`
                 );
               },
             });

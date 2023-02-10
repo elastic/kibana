@@ -5,20 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-function strip(input: string): string {
-  if (!input) return '';
-
-  return input
-    .toLowerCase()
-    .trim()
-    .replaceAll(' ', '-')
-    .replaceAll('(', '')
-    .replaceAll(')', '')
-    .replaceAll('{', '')
-    .replaceAll('}', '')
-    .replaceAll('?', '');
-}
+import camelCase from 'lodash/camelCase';
 
 /*
     Attempts to get a string representation of the intent
@@ -28,7 +15,7 @@ function strip(input: string): string {
     it has been passed. It does not recursively traverse the
     AST tree.
 
-    It currently supports:
+    Currently supported:
         - flat text (JSXText)
         - translated text via <FormattedMessage> component -> uses `defaultMessage`
         - translated text via {i18n.translate} call -> uses `defaultMessage` 
@@ -78,4 +65,12 @@ export function getIntentFromNodeArray(node: any): string {
 
     return acc;
   }, '');
+}
+
+function strip(input: string): string {
+  if (!input) return '';
+
+  const cleanedString = camelCase(input);
+
+  return `${cleanedString.charAt(0).toUpperCase()}${cleanedString.slice(1)}`;
 }
