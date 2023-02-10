@@ -1304,7 +1304,10 @@
         "parameters": [
           {
             "schema": {
-              "type": "array"
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
             },
             "name": "agentsIds",
             "in": "query",
@@ -1719,6 +1722,14 @@
     },
     "/agents/{agentId}/actions/{actionId}/cancel": {
       "parameters": [
+        {
+          "schema": {
+            "type": "string"
+          },
+          "name": "agentId",
+          "in": "path",
+          "required": true
+        },
         {
           "schema": {
             "type": "string"
@@ -4602,7 +4613,8 @@
         },
         "in": "header",
         "name": "kbn-xsrf",
-        "required": true
+        "required": true,
+        "description": "Kibana's anti Cross-Site Request Forgery token. Can be any string value."
       },
       "page_size": {
         "name": "perPage",
