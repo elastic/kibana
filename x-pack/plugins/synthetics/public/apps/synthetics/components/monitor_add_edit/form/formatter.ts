@@ -20,7 +20,7 @@ export const formatter = (fields: Record<string, any>) => {
   return monitorFields as MonitorFields;
 };
 
-export const READ_ONLY_FIELDS = [ConfigKey.ENABLED];
+export const ALLOWED_FIELDS = [ConfigKey.ENABLED, ConfigKey.ALERT_CONFIG];
 
 export const format = (fields: Record<string, unknown>, readOnly: boolean = false) => {
   const formattedFields = formatter(fields) as MonitorFields;
@@ -65,5 +65,5 @@ export const format = (fields: Record<string, unknown>, readOnly: boolean = fals
     },
   };
   const formFields = formattedMap[fields[ConfigKey.FORM_MONITOR_TYPE] as FormMonitorType];
-  return readOnly ? pick(formFields, READ_ONLY_FIELDS) : formFields;
+  return readOnly ? pick(formFields, ALLOWED_FIELDS) : formFields;
 };
