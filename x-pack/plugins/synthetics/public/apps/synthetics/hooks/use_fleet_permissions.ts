@@ -6,20 +6,38 @@
  */
 
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { BrowserFields, ConfigKey } from '../../../../../../../common/runtime_types';
-import { ClientPluginsStart } from '../../../../../../plugin';
+import { ClientPluginsStart } from '../../../plugin';
+import {
+  BrowserFields,
+  ConfigKey,
+  EncryptedSyntheticsMonitor,
+} from '../../../../common/runtime_types';
 
-export function usePrivateLocationPermissions(monitor?: BrowserFields) {
+export function useFleetPermissions() {
   const { fleet } = useKibana<ClientPluginsStart>().services;
 
   const canSaveIntegrations: boolean = Boolean(fleet?.authz.integrations.writeIntegrationPolicies);
   const canReadAgentPolicies = Boolean(fleet?.authz.fleet.readAgentPolicies);
 
+  return {
+    canReadAgentPolicies,
+    canSaveIntegrations,
+  };
+}
+
+export function useCanUpdatePrivateMonitor(monitor: EncryptedSyntheticsMonitor) {
+  const { canSaveIntegrations } = useFleetPermissions();
+
+  return canUpdatePrivateMonitor(monitor, canSaveIntegrations);
+}
+
+export function canUpdatePrivateMonitor(
+  monitor: EncryptedSyntheticsMonitor,
+  canSaveIntegrations: boolean
+) {
   const locations = (monitor as BrowserFields)?.[ConfigKey.LOCATIONS];
 
   const hasPrivateLocation = locations?.some((location) => !location.isServiceManaged);
 
-  const canUpdatePrivateMonitor = !(hasPrivateLocation && !canSaveIntegrations);
-
-  return { canUpdatePrivateMonitor, canReadAgentPolicies };
+  return !(hasPrivateLocation && !canSaveIntegrations);
 }
