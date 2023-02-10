@@ -13,7 +13,7 @@ import {
   EuiCallOut,
   EuiText,
 } from '@elastic/eui';
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { isString } from 'lodash';
 import { EuiButtonEmpty } from '@elastic/eui';
@@ -38,8 +38,6 @@ interface Props {
 }
 
 export function ServicePage({ newConfig, setNewConfig, onClickNext }: Props) {
-  const [isAgentConfigurationSupported, setIsAgentConfigurationSupported] =
-    useState<boolean>(true);
   const { data: environmentsData, status: environmentsStatus } = useFetcher(
     (callApmApi) => {
       if (newConfig.service.name) {
@@ -94,13 +92,10 @@ export function ServicePage({ newConfig, setNewConfig, onClickNext }: Props) {
     })
   );
 
-  useEffect(() => {
-    setIsAgentConfigurationSupported(
-      newConfig.agent_name
-        ? !isOpenTelemetryAgentName(newConfig.agent_name as AgentName)
-        : true
-    );
-  }, [newConfig.agent_name]);
+  const isAgentConfigurationSupported =
+    !newConfig.agent_name ||
+    (newConfig.agent_name &&
+      !isOpenTelemetryAgentName(newConfig.agent_name as AgentName));
 
   return (
     <>
