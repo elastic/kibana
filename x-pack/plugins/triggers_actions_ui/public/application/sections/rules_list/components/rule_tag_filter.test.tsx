@@ -35,9 +35,7 @@ const onChangeMock = jest.fn();
 
 const ruleTags = ['a', 'b', 'c', 'd', 'e', 'f'];
 
-const RuleTagFilterWithProviders: React.FunctionComponent<RuleTagFilterProps> = (
-  props
-) => (
+const RuleTagFilterWithProviders: React.FunctionComponent<RuleTagFilterProps> = (props) => (
   <IntlProvider locale="en">
     <QueryClientProvider client={queryClient}>
       <RuleTagFilter {...props} />
@@ -49,7 +47,7 @@ describe('rule_tag_filter', () => {
   beforeEach(() => {
     onChangeMock.mockReset();
     loadRuleTags.mockResolvedValue({
-      ruleTags
+      ruleTags,
     });
     useKibanaMock().services.notifications.toasts = {
       addSuccess: jest.fn(),
@@ -62,7 +60,7 @@ describe('rule_tag_filter', () => {
     mockIntersectionObserver.mockReturnValue({
       observe: () => null,
       unobserve: () => null,
-      disconnect: () => null
+      disconnect: () => null,
     });
     window.IntersectionObserver = mockIntersectionObserver;
   });
@@ -113,7 +111,11 @@ describe('rule_tag_filter', () => {
   it('renders selected tags even if they get deleted from the tags array', () => {
     const selectedTags = ['g', 'h'];
     const wrapper = mountWithIntl(
-      <RuleTagFilterWithProviders canLoadRules selectedTags={selectedTags} onChange={onChangeMock} />
+      <RuleTagFilterWithProviders
+        canLoadRules
+        selectedTags={selectedTags}
+        onChange={onChangeMock}
+      />
     );
 
     wrapper.find(EuiFilterButton).simulate('click');
