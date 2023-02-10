@@ -20,6 +20,7 @@ import {
 } from '../services/rest/create_call_apm_api';
 
 export enum FETCH_STATUS {
+  ABORTED = 'aborted',
   LOADING = 'loading',
   SUCCESS = 'success',
   FAILURE = 'failure',
@@ -88,7 +89,7 @@ type InferResponseType<TReturn> = Exclude<TReturn, undefined> extends Promise<
   : unknown;
 
 export function useFetcher<TReturn>(
-  fn: (callApmApi: AutoAbortedAPMClient) => TReturn,
+  fn: (callApmApi: AutoAbortedAPMClient, abort: () => void) => TReturn,
   fnDeps: any[],
   options: {
     preservePreviousData?: boolean;
@@ -118,7 +119,11 @@ export function useFetcher<TReturn>(
       const signal = controller.signal;
 
       const promise = fn(
-        createAutoAbortedAPMClient(signal, addInspectorRequest)
+        createAutoAbortedAPMClient(signal, addInspectorRequest),
+        () => {
+          setResult({ status: FETCH_STATUS.ABORTED });
+          controller.abort();
+        }
       );
       // if `fn` doesn't return a promise it is a signal that data fetching was not initiated.
       // This can happen if the data fetching is conditional (based on certain inputs).
@@ -129,7 +134,10 @@ export function useFetcher<TReturn>(
 
       setResult((prevResult) => ({
         data: preservePreviousData ? prevResult.data : undefined, // preserve data from previous state while loading next state
-        status: FETCH_STATUS.LOADING,
+        status:
+          prevResult.status !== FETCH_STATUS.ABORTED
+            ? FETCH_STATUS.LOADING
+            : prevResult.status,
         error: undefined,
       }));
 

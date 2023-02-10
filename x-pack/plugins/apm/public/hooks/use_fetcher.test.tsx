@@ -32,6 +32,30 @@ function wrapper({ children }: WrapperProps) {
 }
 
 describe('useFetcher', () => {
+  describe('when aborting', () => {
+    let hook: RenderHookResult<
+      WrapperProps,
+      FetcherResult<unknown> & {
+        refetch: () => void;
+      }
+    >;
+
+    beforeEach(() => {
+      hook = renderHook(() => useFetcher((_, abort) => abort(), []), {
+        wrapper,
+      });
+    });
+
+    it('should update status to aborted', async () => {
+      expect(hook.result.current).toEqual({
+        data: undefined,
+        error: undefined,
+        refetch: expect.any(Function),
+        status: 'aborted',
+      });
+    });
+  });
+
   describe('when resolving after 500ms', () => {
     let hook: RenderHookResult<
       WrapperProps,
