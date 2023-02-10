@@ -65,11 +65,6 @@ export const KillOrSuspendProcessRequestSchema = {
   }),
 };
 
-export const ResponseActionBodySchema = schema.oneOf([
-  NoParametersRequestSchema.body,
-  KillOrSuspendProcessRequestSchema.body,
-]);
-
 export const EndpointActionLogRequestSchema = {
   query: schema.object({
     page: schema.number({ defaultValue: 1, min: 1 }),
@@ -187,7 +182,19 @@ export const ExecuteActionRequestSchema = {
           }
         },
       }),
+      /**
+       * The max timeout value before the command is killed. Number represents milliseconds
+       */
       timeout: schema.maybe(schema.number({ min: 1 })),
     }),
   }),
 };
+
+export type ExecuteActionRequestBody = TypeOf<typeof ExecuteActionRequestSchema.body>;
+
+export const ResponseActionBodySchema = schema.oneOf([
+  NoParametersRequestSchema.body,
+  KillOrSuspendProcessRequestSchema.body,
+  EndpointActionGetFileSchema.body,
+  ExecuteActionRequestSchema.body,
+]);
