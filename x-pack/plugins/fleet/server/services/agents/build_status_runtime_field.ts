@@ -165,7 +165,8 @@ export async function buildAgentStatusRuntimeField(
 ) {
   const config = appContextService.getConfig();
   const logger = appContextService.getLogger();
-  const maxAgentPoliciesWithInactivityTimeout = config?.maxAgentPoliciesWithInactivityTimeout;
+  const maxAgentPoliciesWithInactivityTimeout =
+    config?.developer?.maxAgentPoliciesWithInactivityTimeout;
   const inactivityTimeouts = await agentPolicyService.getInactivityTimeouts(soClient);
 
   return _buildStatusRuntimeField({
