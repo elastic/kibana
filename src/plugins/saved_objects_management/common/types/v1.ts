@@ -75,7 +75,6 @@ export interface SavedObjectInvalidRelation {
 
 export interface SavedObjectManagementTypeInfo {
   name: string;
-  // TODO: Fix. We should not directly expose these values to public code.
   namespaceType: SavedObjectsNamespaceType;
   hidden: boolean;
   displayName: string;
