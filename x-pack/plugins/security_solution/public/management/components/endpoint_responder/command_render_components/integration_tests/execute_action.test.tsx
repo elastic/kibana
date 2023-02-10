@@ -91,7 +91,7 @@ describe('When using execute action from response actions console', () => {
   });
 
   it('should show an error if `execute` is entered without `--command` argument', async () => {
-    await render([]);
+    await render();
     enterConsoleCommand(renderResult, 'execute');
 
     expect(renderResult.getByTestId('test-badArgument-message').textContent).toEqual(
