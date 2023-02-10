@@ -12,7 +12,8 @@ import type { ISavedObjectTypeRegistry } from '@kbn/core-saved-objects-server';
 import type { Transform, ActiveMigrations } from './types';
 import { getReferenceTransforms, getConversionTransforms } from './internal_transforms';
 import { validateMigrationsMapObject } from './validate_migrations';
-import { transformComparator, wrapWithTry } from './utils';
+import { transformComparator, convertMigrationFunction } from './utils';
+import { getModelVersionTransforms } from './model_version';
 
 /**
  * Converts migrations from a format that is convenient for callers to a format that
@@ -29,21 +30,25 @@ export function buildActiveMigrations(
 
   return typeRegistry.getAllTypes().reduce((migrations, type) => {
     const migrationsMap =
-      typeof type.migrations === 'function' ? type.migrations() : type.migrations;
+      typeof type.migrations === 'function' ? type.migrations() : type.migrations ?? {};
     validateMigrationsMapObject(type.name, kibanaVersion, migrationsMap);
 
     const migrationTransforms = Object.entries(migrationsMap ?? {}).map<Transform>(
       ([version, transform]) => ({
         version,
-        transform: wrapWithTry(version, type, transform, log),
+        transform: convertMigrationFunction(version, type, transform, log),
         transformType: 'migrate',
       })
     );
+
+    const modelVersionTransforms = getModelVersionTransforms({ log, typeDefinition: type });
+
     const conversionTransforms = getConversionTransforms(type);
     const transforms = [
       ...referenceTransforms,
       ...conversionTransforms,
       ...migrationTransforms,
+      ...modelVersionTransforms,
     ].sort(transformComparator);
 
     if (!transforms.length) {
