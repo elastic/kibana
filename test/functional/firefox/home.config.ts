@@ -6,18 +6,20 @@
  * Side Public License, v 1.
  */
 
-export default async function ({ readConfigFile }) {
-  const firefoxConfig = await readConfigFile(require.resolve('./firefox/config.base.ts'));
+/* eslint-disable import/no-default-export */
+
+import { FtrConfigProviderContext } from '@kbn/test';
+
+export default async function ({ readConfigFile }: FtrConfigProviderContext) {
+  const baseConfig = await readConfigFile(require.resolve('./config.base.ts'));
 
   return {
-    ...firefoxConfig.getAll(),
+    ...baseConfig.getAll(),
 
-    browser: {
-      type: 'msedge',
-    },
+    testFiles: [require.resolve('../apps/home')],
 
     junit: {
-      reportName: 'MS Chromium Edge UI Functional Tests',
+      reportName: 'Firefox UI Functional Tests - Home',
     },
   };
 }
