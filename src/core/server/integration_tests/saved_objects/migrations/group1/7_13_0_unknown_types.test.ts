@@ -45,7 +45,7 @@ describe('migration v2', () => {
           // dataset contains 2 type of unknown docs
           // `foo` documents
           // `space` documents (to mimic a migration with disabled plugins)
-          dataArchive: Path.join(__dirname, 'archives', '7.13.0_with_unknown_so.zip'),
+          dataArchive: Path.join(__dirname, '..', 'archives', '7.13.0_with_unknown_so.zip'),
         },
       },
     }));

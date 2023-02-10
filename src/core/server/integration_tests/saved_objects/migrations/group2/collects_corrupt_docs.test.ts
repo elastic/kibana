@@ -15,7 +15,7 @@ import {
   type TestElasticsearchUtils,
 } from '@kbn/core-test-helpers-kbn-server';
 import { Root } from '@kbn/core-root-server-internal';
-import { getMigrationDocLink } from './test_utils';
+import { getMigrationDocLink } from '../test_utils';
 
 const migrationDocLink = getMigrationDocLink().resolveMigrationFailures;
 const logFilePath = Path.join(__dirname, 'collects_corrupt_docs.log');
@@ -56,7 +56,12 @@ describe('migration v2 with corrupt saved object documents', () => {
           //   - foo:1 and foo:2 have correct values for their `number` property (13 and 42 respectively)
           //   - foo:3 and foo:4 don't have the property, and will fail during the `7.14.0` registered migration
           // contains migrated index with 8.0 aliases to skip migration, but run outdated doc search
-          dataArchive: Path.join(__dirname, 'archives', '8.0.0_document_migration_failure.zip'),
+          dataArchive: Path.join(
+            __dirname,
+            '..',
+            'archives',
+            '8.0.0_document_migration_failure.zip'
+          ),
         },
       },
     });
