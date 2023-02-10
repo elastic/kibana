@@ -71,6 +71,7 @@ const Item = React.forwardRef<HTMLDivElement, Props>(
         style={{ ...style, zIndex: focusedPanelId === id ? 2 : 'auto' }}
         className={[classes, className].join(' ')}
         data-test-subj="dashboardPanel"
+        id={`panel-${id}`}
         ref={ref}
         {...rest}
       >

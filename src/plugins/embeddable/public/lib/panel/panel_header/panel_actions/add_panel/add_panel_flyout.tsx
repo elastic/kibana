@@ -15,7 +15,8 @@ import { CoreSetup, SavedObjectAttributes, SimpleSavedObject, Toast } from '@kbn
 import { EuiContextMenuItem, EuiFlyoutBody, EuiFlyoutHeader, EuiTitle } from '@elastic/eui';
 
 import { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
-import { EmbeddableFactory, EmbeddableStart } from '../../../../..';
+import { EmbeddableError } from '../../../../embeddables/i_embeddable';
+import { Embeddable, EmbeddableFactory, EmbeddableStart } from '../../../../..';
 import { IContainer } from '../../../../containers';
 import { EmbeddableFactoryNotFoundError } from '../../../../errors';
 import { SavedObjectFinderCreateNew } from './saved_object_finder_create_new';
@@ -30,6 +31,7 @@ interface Props {
   SavedObjectFinder: React.ComponentType<any>;
   showCreateNewMenu?: boolean;
   reportUiCounter?: UsageCollectionStart['reportUiCounter'];
+  onAddPanel?: (embeddable) => void;
 }
 
 interface State {
@@ -101,7 +103,7 @@ export class AddPanelFlyout extends React.Component<Props, State> {
       throw new EmbeddableFactoryNotFoundError(savedObjectType);
     }
 
-    this.props.container.addNewEmbeddable<SavedObjectEmbeddableInput>(
+    const embeddable = await this.props.container.addNewEmbeddable<SavedObjectEmbeddableInput>(
       factoryForSavedObjectType.type,
       { savedObjectId }
     );
@@ -109,6 +111,9 @@ export class AddPanelFlyout extends React.Component<Props, State> {
     this.doTelemetryForAddEvent(this.props.container.type, factoryForSavedObjectType, so);
 
     this.showToast(name);
+    if (this.props.onAddPanel) {
+      this.props.onAddPanel(embeddable);
+    }
   };
 
   private doTelemetryForAddEvent(

@@ -107,6 +107,7 @@ export function DashboardEditingToolbar() {
       );
 
       if (newEmbeddable) {
+        dashboardContainer.scrollToPanel(newEmbeddable.id);
         toasts.addSuccess({
           title: dashboardReplacePanelActionStrings.getSuccessMessage(newEmbeddable.getTitle()),
           'data-test-subj': 'addEmbeddableToDashboardSuccess',

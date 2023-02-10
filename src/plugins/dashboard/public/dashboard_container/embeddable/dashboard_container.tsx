@@ -9,7 +9,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { cloneDeep, omit } from 'lodash';
-import { BehaviorSubject, Subject, Subscription } from 'rxjs';
+import { BehaviorSubject, firstValueFrom, Subject, Subscription, take } from 'rxjs';
 
 import {
   lazyLoadReduxEmbeddablePackage,
@@ -74,6 +74,7 @@ import { DashboardViewport } from '../component/viewport/dashboard_viewport';
 import { dashboardContainerReducers } from '../state/dashboard_container_reducers';
 import { DashboardSavedObjectService } from '../../services/dashboard_saved_object/types';
 import { dashboardContainerInputIsByValue } from '../../../common/dashboard_container/type_guards';
+import { useEuiShadow, useEuiTheme } from '@elastic/eui';
 
 export interface InheritedChildInput {
   filters: Filter[];
@@ -270,10 +271,9 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
     const incomingEmbeddable = creationOptions?.incomingEmbeddable;
     if (incomingEmbeddable) {
       initialInput.viewMode = ViewMode.EDIT; // view mode must always be edit to recieve an embeddable.
-      if (
-        incomingEmbeddable.embeddableId &&
-        Boolean(initialInput.panels[incomingEmbeddable.embeddableId])
-      ) {
+      let panelExists = incomingEmbeddable.embeddableId &&
+      Boolean(initialInput.panels[incomingEmbeddable.embeddableId]);
+      if (panelExists) {
         // this embeddable already exists, we will update the explicit input.
         const panelToUpdate = initialInput.panels[incomingEmbeddable.embeddableId];
         const sameType = panelToUpdate.type === incomingEmbeddable.type;
@@ -289,12 +289,23 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
           // maintain hide panel titles setting.
           hidePanelTitles: panelToUpdate.explicitInput.hidePanelTitles,
         };
-      } else {
-        // otherwise this incoming embeddable is brand new and can be added via the default method after the dashboard container is created.
-        this.untilInitialized().then(() =>
-          this.addNewEmbeddable(incomingEmbeddable.type, incomingEmbeddable.input)
-        );
+      } 
+
+      // otherwise this incoming embeddable is brand new and can be added via the default method after the dashboard container is created.
+      this.untilInitialized().then(async () =>
+      {
+        let panelId = incomingEmbeddable?.embeddableId;
+
+        if(!panelExists) {
+          const newEmbeddable = await this.addNewEmbeddable(incomingEmbeddable.type, incomingEmbeddable.input);
+          panelId = newEmbeddable.id;
+        }
+
+        if(panelId) {
+          this.scrollToPanel(panelId);
+        }
       }
+      );
     }
 
     // start search sessions integration
@@ -624,5 +635,25 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
       }
     }
     return titles;
+  }
+
+  public scrollToPanel = (id:string ) => {
+    setTimeout(()=> {
+      document.getElementById(`panel-${id}`)?.scrollIntoView();
+      this.highlightPanel(id);
+    }, 0)
+  }
+
+  public scrollToTop = () => {
+    setTimeout(()=> {
+      document.getElementsByClassName(`dashboardViewport`)[0]?.scrollTo({top: 0});
+    }, 0)
+  }
+
+  public highlightPanel = async (id: string) => {
+    const panelToHighlight = document.getElementById(`panel-${id}`);
+    // do the highlight 
+
+
   }
 }
