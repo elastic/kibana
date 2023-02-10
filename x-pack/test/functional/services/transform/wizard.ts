@@ -378,6 +378,17 @@ export function TransformWizardProvider({ getService, getPageObjects }: FtrProvi
       await this.assertSelectedTransformFunction(transformFunction);
     },
 
+    async clickUniqueKeysInputFieldStatTrigger(
+      fieldName: string,
+      fieldType?: 'keyword' | 'date' | 'number'
+    ) {
+      await ml.fieldStatsFlyout.clickFieldStatButtonTrigger(
+        'transformWizardUniqueKeysSelector',
+        fieldName,
+        fieldType
+      );
+    },
+
     async assertUniqueKeysInputExists() {
       await testSubjects.existOrFail('transformWizardUniqueKeysSelector > comboBoxInput');
     },
@@ -405,6 +416,17 @@ export function TransformWizardProvider({ getService, getPageObjects }: FtrProvi
       ]);
     },
 
+    async clickSortFieldInputFieldStatTrigger(
+      fieldName: string,
+      fieldType?: 'keyword' | 'date' | 'number'
+    ) {
+      await ml.fieldStatsFlyout.clickFieldStatButtonTrigger(
+        'transformWizardSortFieldSelector',
+        fieldName,
+        fieldType
+      );
+    },
+
     async assertSortFieldInputExists() {
       await testSubjects.existOrFail('transformWizardSortFieldSelector > comboBoxInput');
     },
@@ -424,6 +446,17 @@ export function TransformWizardProvider({ getService, getPageObjects }: FtrProvi
     async setSortFieldValue(identificator: string, label: string) {
       await comboBox.set('transformWizardSortFieldSelector > comboBoxInput', identificator);
       await this.assertSortFieldInputValue(identificator);
+    },
+
+    async clickGroupByInputFieldStatTrigger(
+      fieldName: string,
+      fieldType?: 'keyword' | 'date' | 'number'
+    ) {
+      await ml.fieldStatsFlyout.clickFieldStatButtonTrigger(
+        'transformGroupBySelection',
+        fieldName,
+        fieldType
+      );
     },
 
     async assertGroupByInputExists() {
@@ -483,6 +516,17 @@ export function TransformWizardProvider({ getService, getPageObjects }: FtrProvi
       return `${parentSelector && `${parentSelector} > `}${
         parentSelector ? 'transformSubAggregationSelection' : 'transformAggregationSelection'
       } > comboBoxInput`;
+    },
+
+    async clickAggInputFieldStatTrigger(
+      fieldName: string,
+      fieldType?: 'keyword' | 'date' | 'number'
+    ) {
+      await ml.fieldStatsFlyout.clickFieldStatButtonTrigger(
+        'transformAggregationSelection',
+        fieldName,
+        fieldType
+      );
     },
 
     async assertAggregationInputExists(parentSelector?: string) {

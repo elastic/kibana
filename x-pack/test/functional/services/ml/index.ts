@@ -61,6 +61,7 @@ import { MachineLearningCasesProvider } from './cases';
 import { AnomalyChartsProvider } from './anomaly_charts';
 import { NotificationsProvider } from './notifications';
 import { MlTableServiceProvider } from './common_table_service';
+import { MachineLearningFieldStatsFlyoutProvider } from './field_stats_flyout';
 
 export function MachineLearningProvider(context: FtrProviderContext) {
   const commonAPI = MachineLearningCommonAPIProvider(context);
@@ -103,6 +104,7 @@ export function MachineLearningProvider(context: FtrProviderContext) {
   const dataVisualizerIndexPatternManagement =
     MachineLearningDataVisualizerIndexPatternManagementProvider(context, dataVisualizerTable);
 
+  const fieldStatsFlyout = MachineLearningFieldStatsFlyoutProvider(context);
   const forecast = MachineLearningForecastProvider(context);
   const jobAnnotations = MachineLearningJobAnnotationsProvider(context);
   const jobManagement = MachineLearningJobManagementProvider(context, api);
@@ -162,6 +164,7 @@ export function MachineLearningProvider(context: FtrProviderContext) {
     dataVisualizerIndexBased,
     dataVisualizerIndexPatternManagement,
     dataVisualizerTable,
+    fieldStatsFlyout,
     forecast,
     jobAnnotations,
     jobManagement,

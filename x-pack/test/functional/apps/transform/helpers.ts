@@ -30,6 +30,14 @@ export interface BaseTransformTestData {
   destinationDataViewTimeField?: string;
   discoverAdjustSuperDatePicker: boolean;
   numFailureRetries?: string;
+  fieldStatsEntries?: Array<{
+    fieldName: string;
+    type: 'keyword' | 'number' | 'date';
+    isGroupByInput?: boolean;
+    isAggInput?: boolean;
+    isUniqueKeyInput?: boolean;
+    isSortFieldInput?: boolean;
+  }>;
 }
 
 export interface PivotTransformTestData extends BaseTransformTestData {
