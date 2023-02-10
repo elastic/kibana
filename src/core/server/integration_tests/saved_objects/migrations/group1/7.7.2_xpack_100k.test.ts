@@ -111,7 +111,7 @@ describe('migration from 7.7.2-xpack with 100k objects', () => {
     await removeLogFile();
     await startServers({
       oss: false,
-      dataArchive: path.join(__dirname, 'archives', '7.7.2_xpack_100k_obj.zip'),
+      dataArchive: path.join(__dirname, '..', 'archives', '7.7.2_xpack_100k_obj.zip'),
     });
   });
 

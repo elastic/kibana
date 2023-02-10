@@ -15,7 +15,7 @@ import {
 } from './services/add_monitor';
 import { syntheticsAppPageProvider } from '../../page_objects/synthetics/synthetics_app';
 
-journey('Overview Scrolling', async ({ page, params }) => {
+journey('OverviewScrolling', async ({ page, params }) => {
   recordVideo(page);
 
   const syntheticsApp = syntheticsAppPageProvider({ page, kibanaUrl: params.kibanaUrl });
