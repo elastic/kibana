@@ -12,6 +12,7 @@ import type { Logger } from '@kbn/core/server';
 import {
   installationStatuses,
   PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+  SO_SEARCH_LIMIT,
 } from '../../../../common/constants';
 import { isPackageLimited } from '../../../../common/services';
 import type {
@@ -137,6 +138,7 @@ export async function getPackageSavedObjects(
   return savedObjectsClient.find<Installation>({
     ...(options || {}),
     type: PACKAGES_SAVED_OBJECT_TYPE,
+    perPage: SO_SEARCH_LIMIT,
   });
 }
 
