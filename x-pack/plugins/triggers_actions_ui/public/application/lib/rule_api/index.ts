@@ -6,7 +6,7 @@
  */
 
 export { alertingFrameworkHealth } from './health';
-export type { LoadRuleAggregationsProps } from './aggregate_helpers';
+export type { LoadRuleAggregationsProps, LoadRuleTagsProps } from './aggregate_helpers';
 export { loadRuleAggregations, loadRuleTags } from './aggregate';
 export { createRule } from './create';
 export { cloneRule } from './clone';

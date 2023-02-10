@@ -37,11 +37,12 @@ interface RulesListFiltersBarProps {
   showActionFilter: boolean;
   rulesStatusesTotal: Record<string, number>;
   rulesLastRunOutcomesTotal: Record<string, number>;
-  tags: string[];
   filterOptions: TypeFilterProps['options'];
   actionTypes: ActionType[];
   lastUpdate: string;
   showErrors: boolean;
+  canLoadRules: boolean;
+  refresh?: Date;
   updateFilters: (updateFiltersProps: UpdateFiltersProps) => void;
   setInputText: (text: string) => void;
   onClearSelection: () => void;
@@ -56,11 +57,12 @@ export const RulesListFiltersBar = React.memo((props: RulesListFiltersBarProps) 
     showActionFilter = true,
     rulesStatusesTotal,
     rulesLastRunOutcomesTotal,
-    tags,
     actionTypes,
     filterOptions,
     lastUpdate,
     showErrors,
+    canLoadRules,
+    refresh,
     updateFilters,
     setInputText,
     onClearSelection,
@@ -77,7 +79,8 @@ export const RulesListFiltersBar = React.memo((props: RulesListFiltersBarProps) 
       return [
         <RuleTagFilter
           isGrouped
-          tags={tags}
+          refresh={refresh}
+          canLoadRules={canLoadRules}
           selectedTags={filters.tags}
           onChange={(value) => updateFilters({ filter: 'tags', value })}
         />,

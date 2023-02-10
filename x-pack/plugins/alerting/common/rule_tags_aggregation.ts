@@ -21,10 +21,16 @@ export type RuleTagsAggregationOptions = Pick<
 
 export interface RuleTagsAggregationFormattedResult {
   ruleTags: string[];
+  afterKey?: {
+    tags: string;
+  };
 }
 
 export interface RuleTagsAggregationResult extends Record<string, unknown> {
   tags: {
+    after_key?: {
+      tags: string;
+    };
     buckets: Array<{
       key: {
         tags: string;
@@ -42,7 +48,7 @@ interface GetRuleTagsAggregationParams {
 export const getRuleTagsAggregation = (
   params?: GetRuleTagsAggregationParams
 ): Record<string, AggregationsAggregationContainer> => {
-  const { maxTags = 50, after } = params || {};
+  const { maxTags = 10, after } = params || {};
   return {
     tags: {
       composite: {
@@ -74,5 +80,6 @@ export const formatRuleTagsAggregationResult = (
   const tagsBuckets = aggregations.tags.buckets || [];
   return {
     ruleTags: tagsBuckets.map((bucket) => bucket.key.tags),
+    ...(aggregations.tags.after_key ? { afterKey: aggregations.tags.after_key } : {}),
   };
 };
