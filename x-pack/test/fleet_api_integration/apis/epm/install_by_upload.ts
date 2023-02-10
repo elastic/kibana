@@ -90,7 +90,7 @@ export default function (providerContext: FtrProviderContext) {
       expect(res.body.items.length).to.be(30);
     });
 
-    it('should upgrade when uploading a newer tar archive', async () => {
+    it('should upgrade when uploading a newer zip archive', async () => {
       await uploadPackage();
 
       const buf = fs.readFileSync(testPkgArchiveZipNewer);
