@@ -1617,7 +1617,7 @@
   resolved "https://registry.yarnpkg.com/@elastic/numeral/-/numeral-2.5.1.tgz#96acf39c3d599950646ef8ccfd24a3f057cf4932"
   integrity sha512-Tby6TKjixRFY+atVNeYUdGr9m0iaOq8230KTwn8BbUhkh7LwozfgKq0U98HRX7n63ZL62szl+cDKTYzh5WPCFQ==
 
-"@elastic/react-search-ui-views@1.19.1":
+"@elastic/react-search-ui-views@1.19.1", "@elastic/react-search-ui-views@^1.19.1":
   version "1.19.1"
   resolved "https://registry.yarnpkg.com/@elastic/react-search-ui-views/-/react-search-ui-views-1.19.1.tgz#c44c5c823de5b5c61cc2f1f6bedbd973af0e78bc"
   integrity sha512-1IOVoG5GYKvrKoYZL247bd7eKVQAR4iJaYBkA4KOa8CEXdc3+N0Z63uAit+4+pAH6Z6IONNwk2iQPMDf2zjQGA==

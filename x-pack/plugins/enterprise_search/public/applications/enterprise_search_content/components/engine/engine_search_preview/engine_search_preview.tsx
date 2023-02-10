@@ -10,6 +10,7 @@ import React from 'react';
 import { useValues } from 'kea';
 
 import {
+  EuiBadge,
   EuiBasicTable,
   EuiBasicTableColumn,
   EuiFieldSearch,
@@ -65,13 +66,21 @@ const ResultsView: React.FC<ResultsViewProps> = ({ children }) => {
 
 const ResultView: React.FC<ResultViewProps> = ({ result }) => {
   const fields = Object.entries(result)
-    .filter(([key]) => !key.startsWith('_'))
+    .filter(([key]) => !key.startsWith('_') && key !== 'id')
     .map(([key, value]) => {
       return {
         name: key,
         value: value.raw,
       };
     });
+
+  const {
+    _meta: {
+      id,
+      rawHit: { _index: index },
+    },
+  } = result;
+
   const columns: Array<EuiBasicTableColumn<SearchResult>> = [
     {
       field: 'name',
@@ -85,15 +94,24 @@ const ResultView: React.FC<ResultViewProps> = ({ result }) => {
     {
       field: 'value',
       name: 'value',
-      render: (value: string) => {
-        return value;
-      },
+      render: (value: string) => value,
     },
   ];
 
   return (
-    <EuiPanel paddingSize="s">
-      <EuiBasicTable items={fields} rowHeader="firstName" columns={columns} />
+    <EuiPanel paddingSize="m">
+      <EuiFlexGroup direction="column">
+        <EuiFlexGroup justifyContent="spaceBetween">
+          <code>ID: {id}</code>
+          <EuiFlexItem grow={false}>
+            <EuiFlexGroup gutterSize="xs" alignItems="center">
+              <code>from</code>
+              <EuiBadge color="hollow">{index}</EuiBadge>
+            </EuiFlexGroup>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+        <EuiBasicTable items={fields} rowHeader="firstName" columns={columns} />
+      </EuiFlexGroup>
     </EuiPanel>
   );
 };
@@ -113,12 +131,10 @@ const InputView: React.FC<InputViewProps> = ({ getInputProps }) => {
 const SortingView: React.FC<SortingViewProps> = ({ options = [], value, onChange }) => {
   return (
     <EuiSelect
-      options={options.map((option) => {
-        return {
-          value: option.value,
-          text: option.label,
-        };
-      })}
+      options={options.map((option) => ({
+        text: option.label,
+        value: option.value,
+      }))}
       value={value}
       onChange={(e) => onChange(e.currentTarget.value)}
       aria-label="Use aria labels when no actual label is in use"
