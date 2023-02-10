@@ -152,7 +152,7 @@ export class AlertsService implements IAlertsService {
   }
 
   private async initializeContext(
-    { context, fieldMap, useLegacyAlerts }: IRuleTypeAlerts,
+    { context, fieldMap, useEcs, useLegacyAlerts }: IRuleTypeAlerts,
     timeoutMs?: number
   ) {
     const esClient = await this.options.elasticsearchClientPromise;
@@ -176,6 +176,11 @@ export class AlertsService implements IAlertsService {
     // If useLegacy is set to true, add the legacy alert component template to the references
     if (useLegacyAlerts) {
       componentTemplateRefs.push(getComponentTemplateName(LEGACY_ALERT_CONTEXT));
+    }
+
+    // If useEcs is set to true, add the ECS component template to the references
+    if (useEcs) {
+      componentTemplateRefs.push(getComponentTemplateName(ECS_CONTEXT));
     }
 
     // Add framework component template to the references

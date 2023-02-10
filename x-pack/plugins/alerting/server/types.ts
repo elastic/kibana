@@ -165,6 +165,7 @@ export interface IRuleTypeAlerts {
   context: string;
   namespace?: string;
   fieldMap: FieldMap;
+  useEcs?: boolean;
   useLegacyAlerts?: boolean;
 }
 

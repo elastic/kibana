@@ -79,10 +79,12 @@ const IlmPutBody = {
 interface GetIndexTemplatePutBodyOpts {
   context?: string;
   useLegacyAlerts?: boolean;
+  useEcs?: boolean;
 }
 const getIndexTemplatePutBody = (opts?: GetIndexTemplatePutBodyOpts) => {
   const context = opts ? opts.context : undefined;
   const useLegacyAlerts = opts ? opts.useLegacyAlerts : undefined;
+  const useEcs = opts ? opts.useEcs : undefined;
   return {
     name: `.alerts-${context ? context : 'test'}-default-template`,
     body: {
@@ -90,6 +92,7 @@ const getIndexTemplatePutBody = (opts?: GetIndexTemplatePutBodyOpts) => {
       composed_of: [
         `.alerts-${context ? context : 'test'}-mappings`,
         ...(useLegacyAlerts ? ['.alerts-legacy-alert-mappings'] : []),
+        ...(useEcs ? ['.alerts-ecs-mappings'] : []),
         '.alerts-framework-mappings',
       ],
       template: {
@@ -361,6 +364,46 @@ describe('Alerts Service', () => {
 
       expect(clusterClient.indices.putIndexTemplate).toHaveBeenCalledWith(
         getIndexTemplatePutBody({ useLegacyAlerts: true })
+      );
+      expect(clusterClient.indices.getAlias).toHaveBeenCalledWith({
+        index: '.alerts-test-default-*',
+      });
+      expect(clusterClient.indices.putSettings).toHaveBeenCalledTimes(2);
+      expect(clusterClient.indices.simulateIndexTemplate).toHaveBeenCalledTimes(2);
+      expect(clusterClient.indices.putMapping).toHaveBeenCalledTimes(2);
+      expect(clusterClient.indices.create).toHaveBeenCalledWith({
+        index: '.alerts-test-default-000001',
+        body: {
+          aliases: {
+            '.alerts-test-default': {
+              is_write_index: true,
+            },
+          },
+        },
+      });
+    });
+
+    test('should correctly install resources for context when useEcs is true', async () => {
+      alertsService.register({ ...TestRegistrationContext, useEcs: true });
+      await new Promise((r) => setTimeout(r, 50));
+      expect(await alertsService.isContextInitialized(TestRegistrationContext.context)).toEqual(
+        true
+      );
+
+      expect(clusterClient.ilm.putLifecycle).toHaveBeenCalledWith(IlmPutBody);
+
+      expect(clusterClient.cluster.putComponentTemplate).toHaveBeenCalledTimes(4);
+      const componentTemplate1 = clusterClient.cluster.putComponentTemplate.mock.calls[0][0];
+      expect(componentTemplate1.name).toEqual('.alerts-framework-mappings');
+      const componentTemplate2 = clusterClient.cluster.putComponentTemplate.mock.calls[1][0];
+      expect(componentTemplate2.name).toEqual('.alerts-legacy-alert-mappings');
+      const componentTemplate3 = clusterClient.cluster.putComponentTemplate.mock.calls[2][0];
+      expect(componentTemplate3.name).toEqual('.alerts-ecs-mappings');
+      const componentTemplate4 = clusterClient.cluster.putComponentTemplate.mock.calls[3][0];
+      expect(componentTemplate4.name).toEqual('.alerts-test-mappings');
+
+      expect(clusterClient.indices.putIndexTemplate).toHaveBeenCalledWith(
+        getIndexTemplatePutBody({ useEcs: true })
       );
       expect(clusterClient.indices.getAlias).toHaveBeenCalledWith({
         index: '.alerts-test-default-*',
