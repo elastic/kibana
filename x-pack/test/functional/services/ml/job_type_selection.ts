@@ -34,8 +34,17 @@ export function MachineLearningJobTypeSelectionProvider({ getService }: FtrProvi
       await this.assertPopulationJobWizardOpen();
     },
 
+    async selectGeoJob() {
+      await testSubjects.clickWhenNotDisabledWithoutRetry('mlJobTypeLinkGeoJob');
+      await this.assertGeoJobWizardOpen();
+    },
+
     async assertPopulationJobWizardOpen() {
       await testSubjects.existOrFail('mlPageJobWizard population');
+    },
+
+    async assertGeoJobWizardOpen() {
+      await testSubjects.existOrFail('mlPageJobWizard geo');
     },
 
     async selectAdvancedJob() {
