@@ -454,6 +454,7 @@ export const SharedLists = React.memo(() => {
                 </EuiContextMenuItem>,
                 <EuiContextMenuItem
                   key={'createItem'}
+                  data-test-subj="manageExceptionListCreateExceptionButton"
                   onClick={() => {
                     onCloseCreatePopover();
                     setDisplayAddExceptionItemFlyout(true);
