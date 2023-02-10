@@ -4,7 +4,16 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, EuiText } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiFlexGrid,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiLink,
+  EuiLoadingSpinner,
+  EuiMarkdownFormat,
+  EuiText,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
 import { AsyncStatus, useAsync } from '../hooks/use_async';
@@ -81,12 +90,40 @@ export function CheckSetup({ children }: { children: React.ReactElement }) {
           action: {
             elasticAgent: {
               description: (
-                <EuiText>
-                  {i18n.translate('xpack.profiling.noDataConfig.action.title', {
-                    defaultMessage: `Universal Profiling provides fleet-wide, whole-system, continuous profiling with zero instrumentation.
+                <EuiFlexGrid>
+                  <EuiText>
+                    {i18n.translate('xpack.profiling.noDataConfig.action.title', {
+                      defaultMessage: `Universal Profiling provides fleet-wide, whole-system, continuous profiling with zero instrumentation.
               Understand what lines of code are consuming compute resources, at all times, and across your entire infrastructure.`,
-                  })}
-                </EuiText>
+                    })}
+                  </EuiText>
+                  <EuiMarkdownFormat>
+                    {i18n.translate('xpack.profiling.noDataConfig.action.permissionsWarning', {
+                      defaultMessage:
+                        'To setup Universal Profiling, you must be logged in as a superuser, typically the `elastic` user.',
+                    })}
+                  </EuiMarkdownFormat>
+                  <EuiText size={'s'}>
+                    {i18n.translate('xpack.profiling.noDataConfig.action.dataRetention', {
+                      defaultMessage: `Normal data storage costs apply for profiling data stored in Elasticsearch.
+                      Refer to the documentation to control data retention. `,
+                    })}
+                    <EuiLink target="_blank" href={docsLink}>
+                      Read more.
+                    </EuiLink>
+                  </EuiText>
+                  <EuiText size={'xs'}>
+                    {i18n.translate('xpack.profiling.noDataConfig.action.legalBetaTerms', {
+                      defaultMessage: `By using this feature, you acknowledge that you have read and agree to `,
+                    })}
+                    <EuiLink
+                      target="_blank"
+                      href={`https://www.elastic.co/agreements/beta-release-terms`}
+                    >
+                      Elastic&apos;s Beta Release Terms
+                    </EuiLink>
+                  </EuiText>
+                </EuiFlexGrid>
               ),
               onClick: (event: React.MouseEvent<HTMLElement, MouseEvent>) => {
                 event.preventDefault();
