@@ -61,7 +61,12 @@ describe('migration v2', () => {
           //  },
           // },
           // contains migrated index with 8.0 aliases to skip migration, but run outdated doc search
-          dataArchive: Path.join(__dirname, 'archives', '8.0.0_migrated_with_outdated_docs.zip'),
+          dataArchive: Path.join(
+            __dirname,
+            '..',
+            'archives',
+            '8.0.0_migrated_with_outdated_docs.zip'
+          ),
         },
       },
     });

@@ -39,7 +39,12 @@ describe('migration v2', () => {
       settings: {
         es: {
           license: 'basic',
-          dataArchive: Path.join(__dirname, 'archives', '7.14.0_xpack_sample_saved_objects.zip'),
+          dataArchive: Path.join(
+            __dirname,
+            '..',
+            'archives',
+            '7.14.0_xpack_sample_saved_objects.zip'
+          ),
           esArgs: ['http.max_content_length=1mb'],
         },
       },
