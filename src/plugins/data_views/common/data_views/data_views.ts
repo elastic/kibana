@@ -214,13 +214,14 @@ export interface DataViewsServicePublicMethods {
   getDefaultId: () => Promise<string | null>;
   /**
    * Get default data view, if it doesn't exist, choose and save new default data view and return it.
-   * @param refreshFields - refresh field list when true
-   * @param displayErrors - If set false, API consumer is responsible for displaying and handling errors.
+   * @param {Object} options
+   * @param {boolean} options.refreshFields - If true, will refresh the fields of the default data view
+   * @param {boolean} [options.displayErrors=true] - If set false, API consumer is responsible for displaying and handling errors.
    */
-  getDefaultDataView: (
-    refreshFields?: boolean,
-    displayErrors?: boolean
-  ) => Promise<DataView | null>;
+  getDefaultDataView: (options?: {
+    refreshFields?: boolean;
+    displayErrors?: boolean;
+  }) => Promise<DataView | null>;
   /**
    * Get fields for data view
    * @param dataView - Data view instance or spec
@@ -1154,14 +1155,15 @@ export class DataViewsService {
    * another data view is selected as default and returned.
    * If no possible data view found to become a default returns null.
    *
-   * @param {boolean} refreshFields - if true, will refresh the fields of the default data view
-   * @param {boolean} displayErrors - If set false, API consumer is responsible for displaying and handling errors.
+   * @param {Object} options
+   * @param {boolean} options.refreshFields - If true, will refresh the fields of the default data view
+   * @param {boolean} [options.displayErrors=true] - If set false, API consumer is responsible for displaying and handling errors.
    * @returns default data view
    */
-  async getDefaultDataView(
-    refreshFields?: boolean,
-    displayErrors: boolean = true
-  ): Promise<DataView | null> {
+  async getDefaultDataView(options?: {
+    displayErrors: boolean;
+    refreshFields?: boolean;
+  }): Promise<DataView | null> {
     const patterns = await this.getIdsWithTitle();
     let defaultId: string | undefined = await this.config.get('defaultIndex');
     const exists = defaultId ? patterns.some((pattern) => pattern.id === defaultId) : false;
@@ -1182,7 +1184,7 @@ export class DataViewsService {
     }
 
     if (defaultId) {
-      return this.get(defaultId, displayErrors, refreshFields);
+      return this.get(defaultId, options?.displayErrors, options?.refreshFields);
     } else {
       return null;
     }

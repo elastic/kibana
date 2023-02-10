@@ -104,7 +104,7 @@ export function DiscoverMainRoute(props: Props) {
 
         let defaultDataView: DataView | null = null;
         try {
-          defaultDataView = await data.dataViews.getDefaultDataView(undefined, false);
+          defaultDataView = await data.dataViews.getDefaultDataView({ displayErrors: false });
         } catch (e) {
           //
         }

@@ -85,7 +85,7 @@ export async function loadDataView(
   let defaultDataView: DataView | null = null;
   if (!fetchedDataView) {
     try {
-      defaultDataView = await dataViews.getDefaultDataView(undefined, false);
+      defaultDataView = await dataViews.getDefaultDataView({ displayErrors: false });
     } catch (e) {
       //
     }

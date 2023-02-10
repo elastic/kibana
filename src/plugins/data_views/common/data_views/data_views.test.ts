@@ -445,9 +445,9 @@ describe('IndexPatterns', () => {
 
       const refreshFields = true;
       const displayErrors = false;
-      expect(await indexPatterns.getDefaultDataView(refreshFields, displayErrors)).toBeInstanceOf(
-        DataView
-      );
+      expect(
+        await indexPatterns.getDefaultDataView({ refreshFields, displayErrors })
+      ).toBeInstanceOf(DataView);
       expect(savedObjectsClient.get).toBeCalledTimes(1);
       expect(savedObjectsClient.find).toBeCalledTimes(1);
 
