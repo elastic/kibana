@@ -4057,6 +4057,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/example-data-access-plugin@link:x-pack/plugins/example-plugin-data-access":
+  version "0.0.0"
+  uid ""
+
 "@kbn/expect@link:packages/kbn-expect":
   version "0.0.0"
   uid ""

@@ -1,0 +1,20 @@
+{
+  "type": "plugin",
+  "id": "@kbn/example-data-access-plugin",
+  "owner": [
+    "@jasonrhodes"
+  ],
+  "plugin": {
+    "id": "exampleDataAccess",
+    "server": true,
+    "browser": false,
+    "configPath": [
+      "xpack",
+      "exampleDataAccess"
+    ],
+    "requiredPlugins": [
+      "data"
+    ],
+    "optionalPlugins": []
+  }
+}

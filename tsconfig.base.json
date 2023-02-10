@@ -666,6 +666,8 @@
       "@kbn/event-log-fixture-plugin/*": ["x-pack/test/plugin_api_integration/plugins/event_log/*"],
       "@kbn/event-log-plugin": ["x-pack/plugins/event_log"],
       "@kbn/event-log-plugin/*": ["x-pack/plugins/event_log/*"],
+      "@kbn/example-data-access-plugin": ["x-pack/plugins/example-plugin-data-access"],
+      "@kbn/example-data-access-plugin/*": ["x-pack/plugins/example-plugin-data-access/*"],
       "@kbn/expect": ["packages/kbn-expect"],
       "@kbn/expect/*": ["packages/kbn-expect/*"],
       "@kbn/exploratory-view-example-plugin": ["x-pack/examples/exploratory_view_example"],
