@@ -234,6 +234,12 @@ const responseActionSubFeatures: SubFeatureConfig[] = [
     name: i18n.translate('xpack.securitySolution.featureRegistry.subFeatures.fileOperations', {
       defaultMessage: 'File Operations',
     }),
+    description: i18n.translate(
+      'xpack.securitySolution.featureRegistry.subFeatures.fileOperations.description',
+      {
+        defaultMessage: 'Perform file-related response actions in the response console.',
+      }
+    ),
     privilegeGroups: [
       {
         groupType: 'mutually_exclusive',
@@ -248,43 +254,6 @@ const responseActionSubFeatures: SubFeatureConfig[] = [
               read: [],
             },
             ui: ['writeFileOperations'],
-          },
-        ],
-      },
-    ],
-  },
-  {
-    requireAllSpaces: true,
-    privilegesTooltip: i18n.translate(
-      'xpack.securitySolution.featureRegistry.subFeatures.executeOperations.privilegesTooltip',
-      {
-        defaultMessage: 'All Spaces is required for Execute Operations access.',
-      }
-    ),
-    name: i18n.translate('xpack.securitySolution.featureRegistry.subFeatures.executeOperations', {
-      defaultMessage: 'Execute Operations',
-    }),
-    description: i18n.translate(
-      'xpack.securitySolution.featureRegistry.subFeatures.executeOperations.description',
-      {
-        // TODO: Update this description before 8.8 FF
-        defaultMessage: 'Perform script execution on the endpoint.',
-      }
-    ),
-    privilegeGroups: [
-      {
-        groupType: 'mutually_exclusive',
-        privileges: [
-          {
-            api: [`${APP_ID}-writeExecuteOperations`],
-            id: 'execute_operations_all',
-            includeIn: 'none',
-            name: 'All',
-            savedObject: {
-              all: [],
-              read: [],
-            },
-            ui: ['writeExecuteOperations'],
           },
         ],
       },
@@ -611,6 +580,46 @@ const subFeatures: SubFeatureConfig[] = [
   ...responseActionSubFeatures,
 ];
 
+// execute operations are not available in 8.7,
+// but will be available in 8.8
+const executeActionSubFeature: SubFeatureConfig = {
+  requireAllSpaces: true,
+  privilegesTooltip: i18n.translate(
+    'xpack.securitySolution.featureRegistry.subFeatures.executeOperations.privilegesTooltip',
+    {
+      defaultMessage: 'All Spaces is required for Execute Operations access.',
+    }
+  ),
+  name: i18n.translate('xpack.securitySolution.featureRegistry.subFeatures.executeOperations', {
+    defaultMessage: 'Execute Operations',
+  }),
+  description: i18n.translate(
+    'xpack.securitySolution.featureRegistry.subFeatures.executeOperations.description',
+    {
+      // TODO: Update this description before 8.8 FF
+      defaultMessage: 'Perform script execution on the endpoint.',
+    }
+  ),
+  privilegeGroups: [
+    {
+      groupType: 'mutually_exclusive',
+      privileges: [
+        {
+          api: [`${APP_ID}-writeExecuteOperations`],
+          id: 'execute_operations_all',
+          includeIn: 'none',
+          name: 'All',
+          savedObject: {
+            all: [],
+            read: [],
+          },
+          ui: ['writeExecuteOperations'],
+        },
+      ],
+    },
+  ],
+};
+
 function getSubFeatures(experimentalFeatures: ConfigType['experimentalFeatures']) {
   let filteredSubFeatures: SubFeatureConfig[] = [];
 
@@ -627,10 +636,8 @@ function getSubFeatures(experimentalFeatures: ConfigType['experimentalFeatures']
   }
 
   // behind FF (planned for 8.8)
-  if (!experimentalFeatures.responseActionExecuteEnabled) {
-    filteredSubFeatures = filteredSubFeatures.filter((subFeat) => {
-      return subFeat.name !== 'Execute operations';
-    });
+  if (experimentalFeatures.responseActionExecuteEnabled) {
+    filteredSubFeatures = [...filteredSubFeatures, executeActionSubFeature];
   }
 
   return filteredSubFeatures;

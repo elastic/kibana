@@ -7,10 +7,13 @@
 
 export interface KeyValuePair {
   label: string;
+  order?: number | null;
   value: string | null;
 }
 
-export type ConnectorConfiguration = Record<string, KeyValuePair | null>;
+export type ConnectorConfiguration = Record<string, KeyValuePair | null> & {
+  extract_full_html?: { label: string; value: boolean };
+};
 
 export interface ConnectorScheduling {
   enabled: boolean;

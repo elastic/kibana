@@ -532,6 +532,10 @@ export const UpgradeInProgressActivityItem: React.FunctionComponent<{
     return startDate > now;
   }, [action]);
 
+  const showCancelButton = useMemo(() => {
+    return isScheduled || action.hasRolloutPeriod;
+  }, [action, isScheduled]);
+
   return (
     <EuiPanel hasBorder={true} borderRadius="none">
       <EuiFlexGroup direction="column" gutterSize="m">
@@ -592,17 +596,19 @@ export const UpgradeInProgressActivityItem: React.FunctionComponent<{
               </EuiText>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiButton
-                size="s"
-                onClick={onClickAbortUpgrade}
-                isLoading={isAborting}
-                data-test-subj="abortBtn"
-              >
-                <FormattedMessage
-                  id="xpack.fleet.agentActivityFlyout.abortUpgradeButtom"
-                  defaultMessage="Cancel"
-                />
-              </EuiButton>
+              {showCancelButton ? (
+                <EuiButton
+                  size="s"
+                  onClick={onClickAbortUpgrade}
+                  isLoading={isAborting}
+                  data-test-subj="abortBtn"
+                >
+                  <FormattedMessage
+                    id="xpack.fleet.agentActivityFlyout.abortUpgradeButtom"
+                    defaultMessage="Cancel"
+                  />
+                </EuiButton>
+              ) : null}
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>

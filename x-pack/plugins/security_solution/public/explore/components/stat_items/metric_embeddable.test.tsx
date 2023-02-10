@@ -13,11 +13,7 @@ import React from 'react';
 import { TestProviders } from '../../../common/mock';
 import type { LensAttributes } from '../../../common/components/visualization_actions/types';
 
-jest.mock('../../../common/components/visualization_actions', () => {
-  return {
-    VisualizationActions: () => <div data-test-subj="visualizationActions" />,
-  };
-});
+jest.mock('../../../common/components/visualization_actions/actions');
 
 jest.mock('../../../common/components/visualization_actions/lens_embeddable', () => {
   return {
