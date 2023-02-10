@@ -84,6 +84,19 @@ export const getNormalizeCommonFields = ({
       ? getValueInSeconds(monitor.timeout)
       : defaultFields[ConfigKey.TIMEOUT],
     [ConfigKey.CONFIG_HASH]: monitor.hash || defaultFields[ConfigKey.CONFIG_HASH],
+    // picking out keys specifically, so users can't add arbitrary fields
+    [ConfigKey.ALERT_CONFIG]: monitor.alert
+      ? {
+          ...defaultFields[ConfigKey.ALERT_CONFIG],
+          status: {
+            ...defaultFields[ConfigKey.ALERT_CONFIG]?.status,
+            enabled:
+              monitor.alert?.status?.enabled ??
+              defaultFields[ConfigKey.ALERT_CONFIG]?.status?.enabled ??
+              true,
+          },
+        }
+      : defaultFields[ConfigKey.ALERT_CONFIG],
   };
   return { normalizedFields, errors };
 };
