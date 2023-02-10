@@ -20,7 +20,7 @@ interface Option {
   value: string;
 }
 
-interface Props {
+export interface Props {
   allowAllOption?: boolean;
   control: Control<CreateSLOInput>;
   dataTestSubj: string;

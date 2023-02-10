@@ -7,15 +7,15 @@
 
 import React from 'react';
 import { ComponentStory } from '@storybook/react';
-import { FormProvider, useForm } from 'react-hook-form';
 
+import { FormProvider, useForm } from 'react-hook-form';
 import { KibanaReactStorybookDecorator } from '../../../../utils/kibana_react.storybook_decorator';
-import { CustomKqlIndicatorTypeForm as Component, Props } from './custom_kql_indicator_type_form';
+import { FieldSelector as Component, Props } from './field_selector';
 import { SLO_EDIT_FORM_DEFAULT_VALUES } from '../../constants';
 
 export default {
   component: Component,
-  title: 'app/SLO/EditPage/CustomKQL/Form',
+  title: 'app/SLO/EditPage/ApmLatency/FieldSelector',
   decorators: [KibanaReactStorybookDecorator],
 };
 
@@ -23,12 +23,18 @@ const Template: ComponentStory<typeof Component> = (props: Props) => {
   const methods = useForm({ defaultValues: SLO_EDIT_FORM_DEFAULT_VALUES });
   return (
     <FormProvider {...methods}>
-      <Component {...props} control={methods.control} watch={methods.watch} />
+      <Component {...props} control={methods.control} />
     </FormProvider>
   );
 };
 
-const defaultProps = {};
+const defaultProps: Omit<Props, 'control'> = {
+  dataTestSubj: 'dataTestSubj',
+  name: 'name' as const,
+  placeholder: 'Select the APM service',
+  fieldName: 'service.name',
+  label: 'Service name',
+};
 
-export const Form = Template.bind({});
-Form.args = defaultProps;
+export const FieldSelector = Template.bind({});
+FieldSelector.args = defaultProps;

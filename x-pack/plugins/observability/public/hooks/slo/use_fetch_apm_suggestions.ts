@@ -17,7 +17,7 @@ export interface UseFetchApmSuggestions {
   error: boolean;
 }
 
-interface Params {
+export interface Params {
   fieldName: string;
   search: string;
 }
