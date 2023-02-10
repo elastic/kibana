@@ -8,9 +8,9 @@
 import { uniqueId } from 'lodash';
 import { useEffect, useState } from 'react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { FETCH_STATUS } from '../hooks/use_fetcher';
 import { getObservabilityAlerts } from '../services/get_observability_alerts';
-import { ObservabilityAppServices } from '../application/types';
+import { FETCH_STATUS } from './use_fetcher';
+import type { ObservabilityAppServices } from '../application/types';
 
 export function useHasAlertData() {
   const { http } = useKibana<ObservabilityAppServices>().services;
@@ -48,7 +48,7 @@ export function useHasAlertData() {
       fetchAlerts();
       setForceUpdate('');
     }
-  }, [forceUpdate, http]);
+  }, [forceUpdate, http, state.hasData]);
 
   return {
     hasData: state.hasData === true,
