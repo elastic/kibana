@@ -21,18 +21,7 @@ import {
   EuiSelect,
   EuiSpacer,
 } from '@elastic/eui';
-import {
-  ErrorBoundary,
-  Facet,
-  SearchProvider,
-  SearchBox,
-  Results,
-  PagingInfo,
-  ResultsPerPage,
-  Paging,
-  Sorting,
-  WithSearch,
-} from '@elastic/react-search-ui';
+import { SearchProvider, SearchBox, Results, Sorting } from '@elastic/react-search-ui';
 import {
   ResultsViewProps,
   ResultViewProps,
