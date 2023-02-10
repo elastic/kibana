@@ -25,6 +25,8 @@ const printUsage = () =>
     [--kibana]: full url of kibana instance to create agents and policy in e.g http://localhost:5601/mybase, defaults to http://localhost:5601
     [--username]: username for kibana, defaults to elastic
     [--password]: password for kibana, defaults to changeme
+    [--batches]: run the script in batches, defaults to 1 e.g if count is 50 and batches is 10, 500 agents will be created and 10 agent policies
+    [--concurrentBatches]: how many batches to run concurrently, defaults to 10
 `);
 
 const DEFAULT_KIBANA_URL = 'http://localhost:5601';
@@ -49,6 +51,8 @@ const {
   agentVersion: agentVersionArg,
   username: kbnUsername = DEFAULT_KIBANA_USERNAME,
   password: kbnPassword = DEFAULT_KIBANA_PASSWORD,
+  batches: batchesArg,
+  concurrentBatches: concurrentBatchesArg = 10,
   // ignore yargs positional args, we only care about named args
   _,
   $0,
@@ -59,6 +63,8 @@ const statusesArg = (statusArg as string).split(',') as AgentStatus[];
 const inactivityTimeout = inactivityTimeoutArg
   ? Number(inactivityTimeoutArg).valueOf()
   : DEFAULT_UNENROLL_TIMEOUT;
+const batches = inactivityTimeoutArg ? Number(batchesArg).valueOf() : 1;
+const concurrentBatches = concurrentBatchesArg ? Number(concurrentBatchesArg).valueOf() : 10;
 const count = countArg ? Number(countArg).valueOf() : DEFAULT_AGENT_COUNT;
 const kbnAuth = 'Basic ' + Buffer.from(kbnUsername + ':' + kbnPassword).toString('base64');
 
@@ -258,7 +264,7 @@ async function createAgentPolicy(id: string) {
       name: id,
       namespace: 'default',
       description: '',
-      monitoring_enabled: ['logs'],
+      monitoring_enabled: ['logs', 'metrics'],
       inactivity_timeout: inactivityTimeout,
     }),
     headers: {
@@ -314,23 +320,40 @@ export async function run() {
     logger.info(`Deleted ${deleteRes.deleted} agents, took ${deleteRes.took}ms`);
   }
 
-  logger.info('Creating agent policy');
-
-  const agentPolicyId = 'script-create-agent-' + uuidv4();
-  const agentPolicy = await createAgentPolicy(agentPolicyId);
-  logger.info(`Created agent policy ${agentPolicy.item.id}`);
-
   logger.info('Creating fleet superuser');
   const { role, user } = await createSuperUser();
   logger.info(`Role "${ES_SUPERUSER}" ${role.role.created ? 'created' : 'already exists'}`);
   logger.info(`User "${ES_SUPERUSER}" ${user.created ? 'created' : 'already exists'}`);
 
-  logger.info('Creating agent documents');
-  const statusMap = statusesArg.reduce((acc, status) => ({ ...acc, [status]: count }), {});
-  logStatusMap(statusMap);
-  const agents = createAgentsWithStatuses(statusMap, agentPolicyId, agentVersion);
-  const createRes = await createAgentDocsBulk(agents);
-  logger.info(
-    `Created ${createRes.items.length} agent docs, took ${createRes.took}, errors: ${createRes.errors}`
-  );
+  let batchesRemaining = batches;
+  let totalAgents = 0;
+  while (batchesRemaining > 0) {
+    const currentBatchSize = Math.min(concurrentBatches, batchesRemaining);
+    if (batches > 1) {
+      logger.info(`Running ${currentBatchSize} batches. ${batchesRemaining} batches remaining`);
+    }
+
+    await Promise.all(
+      Array(currentBatchSize)
+        .fill(0)
+        .map(async (__, i) => {
+          const agentPolicyId = 'script-create-agent-' + uuidv4();
+          const agentPolicy = await createAgentPolicy(agentPolicyId);
+          logger.info(`Created agent policy ${agentPolicy.item.id}`);
+
+          const statusMap = statusesArg.reduce((acc, status) => ({ ...acc, [status]: count }), {});
+          logStatusMap(statusMap);
+          const agents = createAgentsWithStatuses(statusMap, agentPolicyId, agentVersion);
+          const createRes = await createAgentDocsBulk(agents);
+          logger.info(
+            `Batch complete, created ${createRes.items.length} agent docs, took ${createRes.took}, errors: ${createRes.errors}`
+          );
+          totalAgents += createRes.items.length;
+        })
+    );
+
+    batchesRemaining -= currentBatchSize;
+  }
+
+  logger.info(`All batches complete. Created ${totalAgents} agents in total. Goodbye!`);
 }
