@@ -17,6 +17,7 @@ import { EngineViewLogic } from './engine_view_logic';
 
 export interface EngineOverviewActions {
   fetchEngineFieldCapabilities: typeof FetchEngineFieldCapabilitiesApiLogic.actions.makeRequest;
+  setEngineName: typeof EngineNameLogic.actions.setEngineName;
 }
 export interface EngineOverviewValues {
   documentsCount: number;
@@ -30,6 +31,24 @@ export interface EngineOverviewValues {
   indicesCount: number;
   isLoadingEngine: typeof EngineViewLogic.values.isLoadingEngine;
 }
+
+export const selectIndices = (engineData: EngineOverviewValues['engineData']) =>
+  engineData?.indices ?? [];
+
+export const selectIndicesCount = (indices: EngineOverviewValues['indices']) => indices.length;
+
+export const selectHasUnknownIndices = (indices: EngineOverviewValues['indices']) =>
+  indices.some(({ health }) => health === 'unknown');
+
+export const selectDocumentsCount = (indices: EngineOverviewValues['indices']) =>
+  indices.reduce((sum, { count }) => sum + count, 0);
+
+export const selectFieldsCount = (
+  engineFieldCapabilitiesData: EngineOverviewValues['engineFieldCapabilitiesData']
+) =>
+  Object.values(engineFieldCapabilitiesData?.field_capabilities?.fields ?? {}).filter(
+    (value) => !Object.values(value).some((field) => !!field.metadata_field)
+  ).length;
 
 export const EngineOverviewLogic = kea<MakeLogicType<EngineOverviewValues, EngineOverviewActions>>({
   actions: {},
@@ -58,38 +77,19 @@ export const EngineOverviewLogic = kea<MakeLogicType<EngineOverviewValues, Engin
       }
     },
   }),
-  listeners: ({ actions }) => ({
-    setEngineName: ({ engineName }) => {
+  listeners: ({ actions, values }) => ({
+    setEngineName: () => {
+      const { engineName } = values;
       actions.fetchEngineFieldCapabilities({ engineName });
     },
   }),
   path: ['enterprise_search', 'content', 'engine_overview_logic'],
   reducers: {},
   selectors: ({ selectors }) => ({
-    documentsCount: [
-      () => [selectors.indices],
-      (indices: EngineOverviewValues['indices']) =>
-        indices.reduce((sum, { count }) => sum + count, 0),
-    ],
-    fieldsCount: [
-      () => [selectors.engineFieldCapabilitiesData],
-      (engineFieldCapabilitiesData: EngineOverviewValues['engineFieldCapabilitiesData']) =>
-        Object.values(engineFieldCapabilitiesData?.field_capabilities?.fields ?? {}).filter(
-          (value) => !Object.values(value).some((field) => !!field.metadata_field)
-        ).length,
-    ],
-    hasUnknownIndices: [
-      () => [selectors.indices],
-      (indices: EngineOverviewValues['indices']) =>
-        indices.some(({ health }) => health === 'unknown'),
-    ],
-    indices: [
-      () => [selectors.engineData],
-      (engineData: EngineOverviewValues['engineData']) => engineData?.indices ?? [],
-    ],
-    indicesCount: [
-      () => [selectors.indices],
-      (indices: EngineOverviewValues['indices']) => indices.length,
-    ],
+    documentsCount: [() => [selectors.indices], selectDocumentsCount],
+    fieldsCount: [() => [selectors.engineFieldCapabilitiesData], selectFieldsCount],
+    hasUnknownIndices: [() => [selectors.indices], selectHasUnknownIndices],
+    indices: [() => [selectors.engineData], selectIndices],
+    indicesCount: [() => [selectors.indices], selectIndicesCount],
   }),
 });
