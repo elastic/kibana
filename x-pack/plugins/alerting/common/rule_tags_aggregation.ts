@@ -48,7 +48,7 @@ interface GetRuleTagsAggregationParams {
 export const getRuleTagsAggregation = (
   params?: GetRuleTagsAggregationParams
 ): Record<string, AggregationsAggregationContainer> => {
-  const { maxTags = 10, after } = params || {};
+  const { maxTags = 50, after } = params || {};
   return {
     tags: {
       composite: {
