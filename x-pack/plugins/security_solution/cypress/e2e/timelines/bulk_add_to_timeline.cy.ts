@@ -20,7 +20,6 @@ import { esArchiverLoad, esArchiverUnload } from '../../tasks/es_archiver';
 import { waitsForEventsToBeLoaded } from '../../tasks/hosts/events';
 import { openEvents, openSessions } from '../../tasks/hosts/main';
 import { login, visit } from '../../tasks/login';
-import { closeTimelineUsingCloseButton } from '../../tasks/security_main';
 import { ALERTS_URL, HOSTS_URL } from '../../urls/navigation';
 
 const assertFirstPageEventsAddToTimeline = () => {
@@ -59,14 +58,11 @@ describe('Bulk Investigate in Timeline', () => {
   context('Alerts', () => {
     before(() => {
       createCustomRuleEnabled(getNewRule());
-      visit(ALERTS_URL);
-    });
-    beforeEach(() => {
-      waitForAlertsToPopulate();
     });
 
-    afterEach(() => {
-      closeTimelineUsingCloseButton();
+    beforeEach(() => {
+      visit(ALERTS_URL);
+      waitForAlertsToPopulate();
     });
 
     it('Adding multiple alerts to the timeline should be successful', () => {
@@ -79,14 +75,10 @@ describe('Bulk Investigate in Timeline', () => {
   });
 
   context('Host -> Events Viewer', () => {
-    before(() => {
+    beforeEach(() => {
       visit(HOSTS_URL);
       openEvents();
       waitsForEventsToBeLoaded();
-    });
-
-    afterEach(() => {
-      closeTimelineUsingCloseButton();
     });
 
     it('Adding multiple alerts to the timeline should be successful', () => {
@@ -99,14 +91,10 @@ describe('Bulk Investigate in Timeline', () => {
   });
 
   context('Host -> Sessions Viewer', () => {
-    before(() => {
+    beforeEach(() => {
       visit(HOSTS_URL);
       openSessions();
       waitsForEventsToBeLoaded();
-    });
-
-    afterEach(() => {
-      closeTimelineUsingCloseButton();
     });
 
     it('Adding multiple alerts to the timeline should be successful', () => {

@@ -16,6 +16,8 @@ export interface AgentUsage {
   healthy: number;
   unhealthy: number;
   offline: number;
+  inactive: number;
+  unenrolled: number;
   total_all_statuses: number;
   updating: number;
 }
@@ -31,19 +33,23 @@ export const getAgentUsage = async (
       healthy: 0,
       unhealthy: 0,
       offline: 0,
+      inactive: 0,
+      unenrolled: 0,
       total_all_statuses: 0,
       updating: 0,
     };
   }
 
-  const { total, inactive, online, error, offline, updating } =
-    await AgentService.getAgentStatusForAgentPolicy(esClient);
+  const { total, inactive, online, error, offline, updating, unenrolled } =
+    await AgentService.getAgentStatusForAgentPolicy(esClient, soClient);
   return {
     total_enrolled: total,
     healthy: online,
     unhealthy: error,
     offline,
-    total_all_statuses: total + inactive,
+    inactive,
+    unenrolled,
+    total_all_statuses: total + unenrolled,
     updating,
   };
 };

@@ -35,6 +35,7 @@ export class KibanaService {
 
   async start({ server }: KibanaServiceStartDependencies) {
     server.addRoute(new RootRoute(this.kibanaConfig, this.logger));
+    this.logger.info('Server is ready');
   }
 
   stop() {

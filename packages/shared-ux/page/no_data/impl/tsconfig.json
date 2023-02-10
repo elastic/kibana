@@ -1,9 +1,7 @@
 {
-  "extends": "../../../../../tsconfig.bazel.json",
+  "extends": "../../../../../tsconfig.base.json",
   "compilerOptions": {
-    "declaration": true,
-    "emitDeclarationOnly": true,
-    "outDir": "target_types",
+    "outDir": "target/types",
     "types": [
       "jest",
       "node",
@@ -14,5 +12,17 @@
   "include": [
     "**/*.ts",
     "**/*.tsx",
+  ],
+  "kbn_references": [
+    "@kbn/shared-ux-avatar-solution",
+    "@kbn/shared-ux-card-no-data",
+    "@kbn/shared-ux-page-no-data-types",
+    "@kbn/test-jest-helpers",
+    "@kbn/shared-ux-page-no-data-mocks",
+    "@kbn/i18n",
+    "@kbn/i18n-react",
+  ],
+  "exclude": [
+    "target/**/*",
   ]
 }

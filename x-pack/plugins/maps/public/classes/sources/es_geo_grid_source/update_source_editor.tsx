@@ -7,19 +7,13 @@
 
 import React, { Fragment, Component } from 'react';
 
-import uuid from 'uuid/v4';
+import { v4 as uuidv4 } from 'uuid';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiPanel, EuiSpacer, EuiComboBoxOptionOption, EuiTitle } from '@elastic/eui';
 import { DataViewField } from '@kbn/data-views-plugin/public';
 import { indexPatterns } from '@kbn/data-plugin/public';
 import { getDataViewNotFoundMessage } from '../../../../common/i18n_getters';
-import {
-  AGG_TYPE,
-  ES_GEO_FIELD_TYPE,
-  GRID_RESOLUTION,
-  LAYER_TYPE,
-  RENDER_AS,
-} from '../../../../common/constants';
+import { AGG_TYPE, GRID_RESOLUTION, LAYER_TYPE, RENDER_AS } from '../../../../common/constants';
 import { MetricsEditor } from '../../../components/metrics_editor';
 import { getIndexPatternService } from '../../../kibana_services';
 import { ResolutionEditor } from './resolution_editor';
@@ -41,7 +35,6 @@ interface Props {
 }
 
 interface State {
-  geoFieldType?: ES_GEO_FIELD_TYPE;
   metricsEditorKey: string;
   fields: DataViewField[];
   loadError?: string;
@@ -51,7 +44,7 @@ export class UpdateSourceEditor extends Component<Props, State> {
   private _isMounted?: boolean;
   state: State = {
     fields: [],
-    metricsEditorKey: uuid(),
+    metricsEditorKey: uuidv4(),
   };
 
   componentDidMount() {
@@ -80,11 +73,8 @@ export class UpdateSourceEditor extends Component<Props, State> {
       return;
     }
 
-    const geoField = indexPattern.fields.getByName(this.props.geoFieldName);
-
     this.setState({
       fields: indexPattern.fields.filter((field) => !indexPatterns.isNestedField(field)),
-      geoFieldType: geoField ? (geoField.type as ES_GEO_FIELD_TYPE) : undefined,
     });
   }
 
@@ -120,7 +110,7 @@ export class UpdateSourceEditor extends Component<Props, State> {
 
     // Metrics editor persists metrics in state.
     // Reset metricsEditorKey to force new instance and new internal state with latest metrics
-    this.setState({ metricsEditorKey: uuid() });
+    this.setState({ metricsEditorKey: uuidv4() });
   };
 
   _onRequestTypeSelect = (requestType: RENDER_AS) => {
@@ -188,7 +178,6 @@ export class UpdateSourceEditor extends Component<Props, State> {
           />
           <RenderAsSelect
             isColumnCompressed
-            geoFieldType={this.state.geoFieldType}
             renderAs={this.props.renderAs}
             onChange={this._onRequestTypeSelect}
           />

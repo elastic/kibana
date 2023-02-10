@@ -13,13 +13,18 @@ import {
   coreUsageStatsClientMock,
   coreUsageDataServiceMock,
 } from '@kbn/core-usage-data-server-mocks';
-import { setupServer } from '@kbn/core-test-helpers-test-utils';
+import { createHiddenTypeVariants, setupServer } from '@kbn/core-test-helpers-test-utils';
 import {
   registerBulkDeleteRoute,
   type InternalSavedObjectsRequestHandlerContext,
 } from '@kbn/core-saved-objects-server-internal';
 
 type SetupServerReturn = Awaited<ReturnType<typeof setupServer>>;
+
+const testTypes = [
+  { name: 'index-pattern', hide: false },
+  { name: 'hidden-from-http', hide: false, hideFromHttpApis: true },
+];
 
 describe('POST /api/saved_objects/_bulk_delete', () => {
   let server: SetupServerReturn['server'];
@@ -35,6 +40,13 @@ describe('POST /api/saved_objects/_bulk_delete', () => {
     savedObjectsClient.bulkDelete.mockResolvedValue({
       statuses: [],
     });
+
+    handlerContext.savedObjects.typeRegistry.getType.mockImplementation((typename: string) => {
+      return testTypes
+        .map((typeDesc) => createHiddenTypeVariants(typeDesc))
+        .find((fullTest) => fullTest.name === typename);
+    });
+
     const router =
       httpSetup.createRouter<InternalSavedObjectsRequestHandlerContext>('/api/saved_objects/');
     coreUsageStatsClient = coreUsageStatsClientMock.create();
@@ -93,5 +105,32 @@ describe('POST /api/saved_objects/_bulk_delete', () => {
 
     expect(savedObjectsClient.bulkDelete).toHaveBeenCalledTimes(1);
     expect(savedObjectsClient.bulkDelete).toHaveBeenCalledWith(docs, { force: true });
+  });
+
+  it('returns with status 400 when a type is hidden from the HTTP APIs', async () => {
+    const result = await supertest(httpSetup.server.listener)
+      .post('/api/saved_objects/_bulk_delete')
+      .send([
+        {
+          id: 'hiddenID',
+          type: 'hidden-from-http',
+        },
+      ])
+      .expect(400);
+    expect(result.body.message).toContain('Unsupported saved object type(s):');
+  });
+
+  it('returns with status 400 with `force` when a type is hidden from the HTTP APIs', async () => {
+    const result = await supertest(httpSetup.server.listener)
+      .post('/api/saved_objects/_bulk_delete')
+      .send([
+        {
+          id: 'hiddenID',
+          type: 'hidden-from-http',
+        },
+      ])
+      .query({ force: true })
+      .expect(400);
+    expect(result.body.message).toContain('Unsupported saved object type(s):');
   });
 });

@@ -1,14 +1,15 @@
 {
-  "extends": "../../tsconfig.bazel.json",
+  "extends": "../../tsconfig.base.json",
   "compilerOptions": {
-    "outDir": "target_types",
-    "declaration": true,
-    "emitDeclarationOnly": true,
+    "outDir": "target/types",
     "types": [
       "jest",
     ],
   },
   "include": [
     "**/*.ts"
+  ],
+  "exclude": [
+    "target/**/*",
   ]
 }

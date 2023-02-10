@@ -38,7 +38,7 @@ import { useTheme } from '../../../../hooks/use_theme';
 import { unit } from '../../../../utils/style';
 import { ChartContainer } from '../chart_container';
 import { isTimeseriesEmpty, onBrushEnd } from '../helper/helper';
-import { useApmParams } from '../../../../hooks/use_apm_params';
+import { useAnyOfApmParams } from '../../../../hooks/use_apm_params';
 import { useTimeRange } from '../../../../hooks/use_time_range';
 import {
   getMaxY,
@@ -74,7 +74,10 @@ export function BreakdownChart({
   const { chartRef, updatePointerEvent } = useChartPointerEventContext();
   const {
     query: { rangeFrom, rangeTo },
-  } = useApmParams('/services/{serviceName}');
+  } = useAnyOfApmParams(
+    '/services/{serviceName}',
+    '/mobile-services/{serviceName}'
+  );
   const theme = useTheme();
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 

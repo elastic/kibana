@@ -9,8 +9,6 @@ import { kea, MakeLogicType } from 'kea';
 
 import { isEqual } from 'lodash';
 
-import { i18n } from '@kbn/i18n';
-
 import { Status } from '../../../../../../../common/types/api';
 
 import {
@@ -22,11 +20,7 @@ import {
   FilteringValidationState,
 } from '../../../../../../../common/types/connectors';
 import { Actions } from '../../../../../shared/api_logic/create_api_logic';
-import {
-  flashAPIErrors,
-  flashSuccessToast,
-  clearFlashMessages,
-} from '../../../../../shared/flash_messages';
+import { clearFlashMessages } from '../../../../../shared/flash_messages';
 import {
   ConnectorFilteringApiLogic,
   PutConnectorFilteringArgs,
@@ -46,7 +40,7 @@ import { isConnectorIndex } from '../../../../utils/indices';
 
 type ConnectorFilteringActions = Pick<
   Actions<PutConnectorFilteringArgs, PutConnectorFilteringResponse>,
-  'apiError' | 'apiSuccess' | 'makeRequest'
+  'apiSuccess' | 'makeRequest'
 > & {
   addFilteringRule(filteringRule: FilteringRule): FilteringRule;
   applyDraft: () => void;
@@ -134,7 +128,7 @@ export const ConnectorFilteringLogic = kea<
   connect: {
     actions: [
       ConnectorFilteringApiLogic,
-      ['apiError', 'apiSuccess', 'makeRequest'],
+      ['apiSuccess', 'makeRequest'],
       ConnectorFilteringDraftApiLogic,
       [
         'apiError as draftApiError',
@@ -153,15 +147,6 @@ export const ConnectorFilteringLogic = kea<
       ),
   }),
   listeners: ({ actions, values }) => ({
-    apiError: (error) => flashAPIErrors(error),
-    apiSuccess: () => {
-      flashSuccessToast(
-        i18n.translate(
-          'xpack.enterpriseSearch.content.index.connector.filtering.successToastRules.title',
-          { defaultMessage: 'Sync rules updated' }
-        )
-      );
-    },
     applyDraft: () => {
       if (isConnectorIndex(values.index)) {
         actions.makeRequest({
@@ -171,16 +156,6 @@ export const ConnectorFilteringLogic = kea<
         });
       }
     },
-    draftApiError: (error) => flashAPIErrors(error),
-    draftApiSuccess: () => {
-      flashSuccessToast(
-        i18n.translate(
-          'xpack.enterpriseSearch.content.index.connector.syncRules.successToastDraft.title',
-          { defaultMessage: 'Draft rules saved' }
-        )
-      );
-    },
-    draftMakeRequest: () => clearFlashMessages(),
     fetchIndexApiSuccess: (index) => {
       if (
         !values.isEditing &&

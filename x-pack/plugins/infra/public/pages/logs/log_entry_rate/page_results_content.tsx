@@ -29,7 +29,7 @@ import { useLogEntryCategoriesModuleContext } from '../../../containers/logs/log
 import { useLogEntryRateModuleContext } from '../../../containers/logs/log_analysis/modules/log_entry_rate';
 import { useLogEntryFlyoutContext } from '../../../containers/logs/log_flyout';
 import { useLogViewContext } from '../../../hooks/use_log_view';
-import { LogsPageTemplate } from '../page_template';
+import { LogsPageTemplate } from '../shared/page_template';
 import { AnomaliesResults } from './sections/anomalies';
 import { useDatasetFiltering } from './use_dataset_filtering';
 import { useLogEntryAnomaliesResults } from './use_log_entry_anomalies_results';

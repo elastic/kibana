@@ -26,8 +26,9 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import type { DataView } from '@kbn/data-views-plugin/public';
 import type { IUnifiedSearchPluginServices } from '../types';
-import type { DataViewPickerPropsExtended } from '.';
+import type { DataViewPickerPropsExtended } from './data_view_picker';
 import type { DataViewListItemEnhanced } from './dataview_list';
 import type { TextBasedLanguagesListProps } from './text_languages_list';
 import type { TextBasedLanguagesTransitionModalProps } from './text_languages_transition_modal';
@@ -57,6 +58,15 @@ export const TextBasedLanguagesList = (props: TextBasedLanguagesListProps) => (
     <LazyTextBasedLanguagesList {...props} />
   </React.Suspense>
 );
+
+const mapAdHocDataView = (adHocDataView: DataView) => {
+  return {
+    title: adHocDataView.title,
+    name: adHocDataView.name,
+    id: adHocDataView.id!,
+    isAdhoc: true,
+  };
+};
 
 export function ChangeDataView({
   isMissingCurrent,
@@ -98,33 +108,22 @@ export function ChangeDataView({
 
   useEffect(() => {
     const fetchDataViews = async () => {
-      const dataViewsRefs: DataViewListItemEnhanced[] = savedDataViews
+      const savedDataViewRefs: DataViewListItemEnhanced[] = savedDataViews
         ? savedDataViews
         : await data.dataViews.getIdsWithTitle();
-      if (adHocDataViews?.length) {
-        adHocDataViews.forEach((adHocDataView) => {
-          if (adHocDataView.id) {
-            dataViewsRefs.push({
-              title: adHocDataView.title,
-              name: adHocDataView.name,
-              id: adHocDataView.id,
-              isAdhoc: true,
-            });
-          }
-        });
-      }
-      setDataViewsList(dataViewsRefs);
+      const adHocDataViewRefs: DataViewListItemEnhanced[] =
+        adHocDataViews?.map(mapAdHocDataView) || [];
+
+      setDataViewsList(savedDataViewRefs.concat(adHocDataViewRefs));
     };
     fetchDataViews();
-  }, [data, currentDataViewId, adHocDataViews, savedDataViews]);
+  }, [data, currentDataViewId, adHocDataViews, savedDataViews, isTextBasedLangSelected]);
 
   useEffect(() => {
-    if (trigger.label) {
-      if (textBasedLanguage) {
-        setTriggerLabel(textBasedLanguage.toUpperCase());
-      } else {
-        setTriggerLabel(trigger.label);
-      }
+    if (textBasedLanguage) {
+      setTriggerLabel(textBasedLanguage.toUpperCase());
+    } else {
+      setTriggerLabel(trigger.label);
     }
   }, [textBasedLanguage, trigger.label]);
 
@@ -157,7 +156,8 @@ export function ChangeDataView({
         {...rest}
       >
         <>
-          {isAdHocSelected && (
+          {/* we don't want to display the adHoc icon on text based mode */}
+          {isAdHocSelected && !isTextBasedLangSelected && (
             <EuiIcon
               type={adhoc}
               color="primary"
@@ -218,11 +218,11 @@ export function ChangeDataView({
         ) : (
           <React.Fragment />
         ),
-        <EuiHorizontalRule margin="none" />
+        <EuiHorizontalRule margin="none" key="dataviewActions-divider" />
       );
     }
     panelItems.push(
-      <>
+      <React.Fragment key="add-dataview">
         {onDataViewCreated && (
           <EuiFlexGroup
             alignItems="center"
@@ -303,8 +303,8 @@ export function ChangeDataView({
           isTextBasedLangSelected={isTextBasedLangSelected}
           setPopoverIsOpen={setPopoverIsOpen}
           onChangeDataView={async (newId) => {
-            const dataView = await data.dataViews.get(newId);
-            await data.dataViews.refreshFields(dataView);
+            // refreshing the field list
+            await dataViews.get(newId, undefined, true);
             setSelectedDataViewId(newId);
             setPopoverIsOpen(false);
             if (isTextBasedLangSelected && !isTextLangTransitionModalDismissed) {
@@ -324,17 +324,18 @@ export function ChangeDataView({
           }}
           onCreateDefaultAdHocDataView={onCreateDefaultAdHocDataView}
         />
-      </>
+      </React.Fragment>
     );
 
     if (textBasedLanguages?.length) {
       panelItems.push(
-        <EuiHorizontalRule margin="none" />,
+        <EuiHorizontalRule margin="none" key="textbasedLanguages-divider" />,
         <EuiFlexGroup
           alignItems="center"
           gutterSize="none"
           justifyContent="spaceBetween"
           data-test-subj="select-text-based-language-panel"
+          key="text-based-languages-switcher"
           css={css`
             margin: ${euiTheme.size.s};
             margin-bottom: 0;

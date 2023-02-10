@@ -13,10 +13,10 @@ import type { EuiFlexItemProps } from '@elastic/eui';
 import { TimelineId } from '../../../../../../../common/types';
 import { isAlertFromEndpointEvent } from '../../../../../../common/utils/endpoint_alert_check';
 import { SummaryValueCell } from '../../../../../../common/components/event_details/table/summary_value_cell';
-import { useRiskScore } from '../../../../../../risk_score/containers';
+import { useRiskScore } from '../../../../../../explore/containers/risk_score';
 import { RiskScoreEntity } from '../../../../../../../common/search_strategy';
 import { getEmptyTagValue } from '../../../../../../common/components/empty_value';
-import { RiskScore } from '../../../../../../common/components/severity/common';
+import { RiskScore } from '../../../../../../explore/components/risk_score/severity/common';
 import {
   FirstLastSeen,
   FirstLastSeenType,

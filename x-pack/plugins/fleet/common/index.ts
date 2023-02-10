@@ -71,8 +71,6 @@ export {
 } from './services';
 
 export type { FleetAuthz } from './authz';
-// eslint-disable-next-line @kbn/imports/no_boundary_crossing
-export { createFleetAuthzMock } from './mocks';
 export type {
   // Request/Response
   GetOneAgentResponse,
@@ -95,7 +93,7 @@ export type {
   GetAgentPoliciesRequest,
   GetAgentPoliciesResponse,
   GetAgentPoliciesResponseItem,
-  DeletePackagePoliciesResponse,
+  PostDeletePackagePoliciesResponse,
   GetPackagesResponse,
   BulkInstallPackagesResponse,
   FleetErrorResponse,
@@ -147,6 +145,7 @@ export type {
   KibanaAssetReference,
   KibanaSavedObjectType,
   EsAssetReference,
+  AssetsGroupedByServiceByType,
   KibanaAssetTypeToParts,
   KibanaAssetParts,
   KibanaAssetType,

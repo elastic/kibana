@@ -5,13 +5,12 @@
  * 2.0.
  */
 
-import { isEqual } from 'lodash';
-import { merge } from 'lodash';
-import { numberValidator } from '@kbn/ml-agg-utils';
-
+import { isEqual, merge } from 'lodash';
 import { useReducer } from 'react';
 
 import { i18n } from '@kbn/i18n';
+import { numberValidator } from '@kbn/ml-agg-utils';
+import { getNestedProperty, setNestedProperty } from '@kbn/ml-nested-property';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 
 import { PostTransformsUpdateRequestSchema } from '../../../../../../common/api_schemas/update_transforms';
@@ -20,7 +19,6 @@ import {
   DEFAULT_TRANSFORM_SETTINGS_MAX_PAGE_SEARCH_SIZE,
 } from '../../../../../../common/constants';
 import { TransformConfigUnion } from '../../../../../../common/types/transform';
-import { getNestedProperty, setNestedProperty } from '../../../../../../common/utils/object_utils';
 
 import {
   isValidFrequency,

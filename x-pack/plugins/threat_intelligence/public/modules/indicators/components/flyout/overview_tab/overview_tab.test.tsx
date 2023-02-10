@@ -9,14 +9,14 @@ import { TestProvidersComponent } from '../../../../../common/mocks/test_provide
 import { render, screen } from '@testing-library/react';
 import React from 'react';
 import { generateMockIndicator, Indicator } from '../../../../../../common/types/indicator';
-import {
-  IndicatorsFlyoutOverview,
-  TI_FLYOUT_OVERVIEW_HIGH_LEVEL_BLOCKS,
-  TI_FLYOUT_OVERVIEW_TABLE,
-  TI_FLYOUT_OVERVIEW_TITLE,
-} from '.';
+import { IndicatorsFlyoutOverview } from '.';
 import { EMPTY_PROMPT_TEST_ID } from '../empty_prompt';
 import { IndicatorsFlyoutContext } from '../context';
+import {
+  INDICATORS_FLYOUT_OVERVIEW_HIGH_LEVEL_BLOCKS,
+  INDICATORS_FLYOUT_OVERVIEW_TABLE,
+  INDICATORS_FLYOUT_OVERVIEW_TITLE,
+} from './test_ids';
 
 describe('<IndicatorsFlyoutOverview />', () => {
   describe('invalid indicator', () => {
@@ -56,8 +56,8 @@ describe('<IndicatorsFlyoutOverview />', () => {
       </TestProvidersComponent>
     );
 
-    expect(screen.queryByTestId(TI_FLYOUT_OVERVIEW_TABLE)).toBeInTheDocument();
-    expect(screen.queryByTestId(TI_FLYOUT_OVERVIEW_HIGH_LEVEL_BLOCKS)).toBeInTheDocument();
+    expect(screen.queryByTestId(INDICATORS_FLYOUT_OVERVIEW_TABLE)).toBeInTheDocument();
+    expect(screen.queryByTestId(INDICATORS_FLYOUT_OVERVIEW_HIGH_LEVEL_BLOCKS)).toBeInTheDocument();
   });
 
   it('should render the indicator name value in the title', () => {
@@ -75,7 +75,9 @@ describe('<IndicatorsFlyoutOverview />', () => {
       </TestProvidersComponent>
     );
 
-    expect(screen.queryByTestId(TI_FLYOUT_OVERVIEW_TITLE)?.innerHTML).toContain(indicatorName);
+    expect(screen.queryByTestId(INDICATORS_FLYOUT_OVERVIEW_TITLE)?.innerHTML).toContain(
+      indicatorName
+    );
   });
 
   it('should render the indicator name passed via context in the title', () => {
@@ -95,7 +97,7 @@ describe('<IndicatorsFlyoutOverview />', () => {
       </TestProvidersComponent>
     );
 
-    expect(screen.queryByTestId(TI_FLYOUT_OVERVIEW_TITLE)?.innerHTML).toContain(
+    expect(screen.queryByTestId(INDICATORS_FLYOUT_OVERVIEW_TITLE)?.innerHTML).toContain(
       context.indicatorName
     );
   });

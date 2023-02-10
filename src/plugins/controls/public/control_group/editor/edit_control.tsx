@@ -13,7 +13,7 @@ import React, { useEffect, useRef } from 'react';
 import { OverlayRef } from '@kbn/core/public';
 import { toMountPoint } from '@kbn/kibana-react-plugin/public';
 import { EmbeddableFactoryNotFoundError } from '@kbn/embeddable-plugin/public';
-import { useReduxContainerContext } from '@kbn/presentation-util-plugin/public';
+import { useReduxEmbeddableContext } from '@kbn/presentation-util-plugin/public';
 import { ControlGroupReduxState } from '../types';
 import { ControlEditor } from './control_editor';
 import { pluginServices } from '../../services';
@@ -40,16 +40,17 @@ export const EditControlButton = ({ embeddableId }: { embeddableId: string }) =>
     theme: { theme$ },
   } = pluginServices.getServices();
   // Redux embeddable container Context
-  const reduxContainerContext = useReduxContainerContext<
+  const reduxContext = useReduxEmbeddableContext<
     ControlGroupReduxState,
-    typeof controlGroupReducers
+    typeof controlGroupReducers,
+    ControlGroupContainer
   >();
   const {
-    containerActions: { untilEmbeddableLoaded, removeEmbeddable, replaceEmbeddable },
+    embeddableInstance: controlGroup,
     actions: { setControlWidth, setControlGrow },
     useEmbeddableSelector,
     useEmbeddableDispatch,
-  } = reduxContainerContext;
+  } = reduxContext;
   const dispatch = useEmbeddableDispatch();
 
   // current state
@@ -63,7 +64,7 @@ export const EditControlButton = ({ embeddableId }: { embeddableId: string }) =>
 
   const editControl = async () => {
     const ControlsServicesProvider = pluginServices.getContextProvider();
-    const embeddable = (await untilEmbeddableLoaded(
+    const embeddable = (await controlGroup.untilEmbeddableLoaded(
       embeddableId
     )) as ControlEmbeddable<DataControlInput>;
 
@@ -71,8 +72,6 @@ export const EditControlButton = ({ embeddableId }: { embeddableId: string }) =>
       const panel = panels[embeddableId];
       let factory = getControlFactory(panel.type);
       if (!factory) throw new EmbeddableFactoryNotFoundError(panel.type);
-
-      const controlGroup = embeddable.getRoot() as ControlGroupContainer;
 
       let inputToReturn: Partial<DataControlInput> = {};
 
@@ -153,7 +152,7 @@ export const EditControlButton = ({ embeddableId }: { embeddableId: string }) =>
                   buttonColor: 'danger',
                 }).then((confirmed) => {
                   if (confirmed) {
-                    removeEmbeddable(embeddableId);
+                    controlGroup.removeEmbeddable(embeddableId);
                     removed = true;
                     flyoutInstance.close();
                   }
@@ -177,7 +176,7 @@ export const EditControlButton = ({ embeddableId }: { embeddableId: string }) =>
 
     initialInputPromise.then(
       async (promise) => {
-        await replaceEmbeddable(embeddable.id, promise.controlInput, promise.type);
+        await controlGroup.replaceEmbeddable(embeddable.id, promise.controlInput, promise.type);
       },
       () => {} // swallow promise rejection because it can be part of normal flow
     );

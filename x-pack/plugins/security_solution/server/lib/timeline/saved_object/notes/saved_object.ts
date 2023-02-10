@@ -7,7 +7,7 @@
 
 import { failure } from 'io-ts/lib/PathReporter';
 import { getOr } from 'lodash/fp';
-import uuid from 'uuid';
+import { v1 as uuidv1 } from 'uuid';
 
 import { pipe } from 'fp-ts/lib/pipeable';
 import { map, fold } from 'fp-ts/lib/Either';
@@ -15,6 +15,7 @@ import { identity } from 'fp-ts/lib/function';
 
 import type { SavedObjectsFindOptions } from '@kbn/core/server';
 import type { AuthenticatedUser } from '@kbn/security-plugin/common/model';
+import { getUserDisplayName } from '@kbn/user-profile-components';
 import { UNAUTHENTICATED_USER } from '../../../../../common/constants';
 import type {
   SavedNote,
@@ -91,7 +92,7 @@ export const persistNote = async ({
     if (getOr(null, 'output.statusCode', err) === 403) {
       const noteToReturn: NoteResult = {
         ...note,
-        noteId: uuid.v1(),
+        noteId: uuidv1(),
         version: '',
         timelineId: '',
         timelineVersion: '',
@@ -258,17 +259,17 @@ export const convertSavedObjectToSavedNote = (
     }, identity)
   );
 
-const pickSavedNote = (
+export const pickSavedNote = (
   noteId: string | null,
   savedNote: SavedNote,
   userInfo: AuthenticatedUser | null
 ) => {
   if (noteId == null) {
     savedNote.created = new Date().valueOf();
-    savedNote.createdBy = userInfo?.username ?? UNAUTHENTICATED_USER;
+    savedNote.createdBy = userInfo ? getUserDisplayName(userInfo) : UNAUTHENTICATED_USER;
   }
 
   savedNote.updated = new Date().valueOf();
-  savedNote.updatedBy = userInfo?.username ?? UNAUTHENTICATED_USER;
+  savedNote.updatedBy = userInfo ? getUserDisplayName(userInfo) : UNAUTHENTICATED_USER;
   return savedNote;
 };

@@ -55,6 +55,7 @@ export const ImportExceptionListFlyout = React.memo(
     const [file, setFile] = useState<File | null>(null);
     const [overwrite, setOverwrite] = useState(false);
     const [asNewList, setAsNewList] = useState(false);
+    const [alreadyExistingItem, setAlreadyExistingItem] = useState(false);
 
     const resetForm = useCallback(() => {
       if (filePickerRef.current?.fileInput) {
@@ -97,7 +98,8 @@ export const ImportExceptionListFlyout = React.memo(
       // eslint-disable-next-line react-hooks/exhaustive-deps
       [resetForm, addSuccess, handleRefresh]
     );
-    const handleImportError = useCallback(
+
+    const handleImportErrors = useCallback(
       (errors: BulkErrorSchema[]) => {
         errors.forEach((error) => {
           if (!error.error.message.includes('AbortError')) {
@@ -107,23 +109,38 @@ export const ImportExceptionListFlyout = React.memo(
       },
       [addError]
     );
-    const [alreadyExistingItem, setAlreadyExistingItem] = useState(false);
 
     useEffect(() => {
       if (!importExceptionListState.loading) {
         if (importExceptionListState?.result?.success) {
           handleImportSuccess(importExceptionListState?.result);
-        } else if (importExceptionListState?.result?.errors) {
-          handleImportError(importExceptionListState?.result?.errors);
+        } else {
+          const errorsToDisplay: BulkErrorSchema[] = [];
+          // @ts-expect-error
+          if (importExceptionListState?.error?.body) {
+            errorsToDisplay.push({
+              // @ts-expect-error
+              error: { ...importExceptionListState?.error?.body },
+            });
+          }
+          if (importExceptionListState?.result?.errors) {
+            importExceptionListState?.result?.errors.forEach((err) => {
+              if (err.error.message.includes('already exists')) {
+                setAlreadyExistingItem(true);
+              }
+              errorsToDisplay.push(err);
+            });
+          }
+          handleImportErrors(errorsToDisplay);
         }
       }
     }, [
-      handleImportError,
+      handleImportErrors,
       handleImportSuccess,
-      importExceptionListState.error,
+      importExceptionListState?.error,
       importExceptionListState.loading,
-      importExceptionListState.result,
-      setAlreadyExistingItem,
+      importExceptionListState?.result,
+      importExceptionListState?.result?.errors,
     ]);
     const handleFileChange = useCallback((files: FileList | null) => {
       setFile(files?.item(0) ?? null);

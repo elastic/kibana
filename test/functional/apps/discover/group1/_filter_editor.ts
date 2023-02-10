@@ -39,7 +39,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     describe('filter editor', function () {
       it('should add a phrases filter', async function () {
-        await filterBar.addFilter('extension.raw', 'is one of', 'jpg');
+        await filterBar.addFilter({
+          field: 'extension.raw',
+          operation: 'is one of',
+          value: ['jpg'],
+        });
         expect(await filterBar.hasFilter('extension.raw', 'jpg')).to.be(true);
       });
 
@@ -52,7 +56,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('should support filtering on nested fields', async () => {
-        await filterBar.addFilter('nestedField.child', 'is', 'nestedValue');
+        await filterBar.addFilter({
+          field: 'nestedField.child',
+          operation: 'is',
+          value: 'nestedValue',
+        });
         expect(await filterBar.hasFilter('nestedField.child', 'nestedValue')).to.be(true);
         await retry.try(async function () {
           expect(await PageObjects.discover.getHitCount()).to.be('1');
@@ -105,7 +113,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
 
         it('should support range filter on version fields', async () => {
-          await filterBar.addFilter('version', 'is between', '2.0.0', '3.0.0');
+          await filterBar.addFilter({
+            field: 'version',
+            operation: 'is between',
+            value: { from: '2.0.0', to: '3.0.0' },
+          });
           expect(await filterBar.hasFilter('version', '2.0.0 to 3.0.0')).to.be(true);
           await retry.try(async function () {
             expect(await PageObjects.discover.getHitCount()).to.be('1');

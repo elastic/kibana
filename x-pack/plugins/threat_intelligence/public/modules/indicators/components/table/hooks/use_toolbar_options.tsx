@@ -11,8 +11,7 @@ import { i18n } from '@kbn/i18n';
 import { BrowserField } from '@kbn/rule-registry-plugin/common';
 import { useInspector } from '../../../../../hooks';
 import { IndicatorsFieldBrowser } from '../components';
-
-const INSPECT_BUTTON_TEST_ID = 'tiIndicatorsGridInspect';
+import { INSPECT_BUTTON_TEST_ID } from './test_ids';
 
 const INSPECT_BUTTON_TITLE = i18n.translate('xpack.threatIntelligence.inspectTitle', {
   defaultMessage: 'Inspect',

@@ -7,7 +7,8 @@
 
 import React from 'react';
 import { mount } from 'enzyme';
-import { act, render, within } from '@testing-library/react';
+import { act, render, within, fireEvent } from '@testing-library/react';
+import { waitFor } from '@testing-library/dom';
 import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
 
 import { NONE_CONNECTOR_ID } from '../../../common/api';
@@ -21,11 +22,11 @@ import { CreateCaseForm } from './form';
 import { useCaseConfigure } from '../../containers/configure/use_configure';
 import { useCaseConfigureResponse } from '../configure_cases/__mock__';
 import { TestProviders } from '../../common/mock';
-import { useGetConnectors } from '../../containers/configure/use_connectors';
+import { useGetSupportedActionConnectors } from '../../containers/configure/use_get_supported_action_connectors';
 import { useGetTags } from '../../containers/use_get_tags';
 
 jest.mock('../../containers/use_get_tags');
-jest.mock('../../containers/configure/use_connectors');
+jest.mock('../../containers/configure/use_get_supported_action_connectors');
 jest.mock('../../containers/configure/use_configure');
 jest.mock('../markdown_editor/plugins/lens/use_lens_draft_comment');
 jest.mock('../app/use_available_owners', () => ({
@@ -33,7 +34,7 @@ jest.mock('../app/use_available_owners', () => ({
 }));
 
 const useGetTagsMock = useGetTags as jest.Mock;
-const useGetConnectorsMock = useGetConnectors as jest.Mock;
+const useGetConnectorsMock = useGetSupportedActionConnectors as jest.Mock;
 const useCaseConfigureMock = useCaseConfigure as jest.Mock;
 
 const initialCaseValue: FormProps = {
@@ -53,6 +54,7 @@ const casesFormProps: CreateCaseFormProps = {
 
 describe('CreateCaseForm', () => {
   let globalForm: FormHook;
+  const draftStorageKey = `cases.caseView.createCase.description.markdownEditor`;
 
   const MockHookWrapperComponent: React.FC<{ testProviderProps?: unknown }> = ({
     children,
@@ -78,6 +80,10 @@ describe('CreateCaseForm', () => {
     useGetTagsMock.mockReturnValue({ data: ['test'] });
     useGetConnectorsMock.mockReturnValue({ isLoading: false, data: connectorsMock });
     useCaseConfigureMock.mockImplementation(() => useCaseConfigureResponse);
+  });
+
+  afterEach(() => {
+    sessionStorage.removeItem(draftStorageKey);
   });
 
   it('renders with steps', async () => {
@@ -211,5 +217,47 @@ describe('CreateCaseForm', () => {
 
     expect(titleInput).toHaveValue('title');
     expect(descriptionInput).toHaveValue('description');
+  });
+
+  describe('draft comment ', () => {
+    it('should clear session storage key on cancel', () => {
+      const result = render(
+        <MockHookWrapperComponent>
+          <CreateCaseForm
+            {...casesFormProps}
+            initialValue={{ title: 'title', description: 'description' }}
+          />
+        </MockHookWrapperComponent>
+      );
+
+      const cancelBtn = result.getByTestId('create-case-cancel');
+
+      fireEvent.click(cancelBtn);
+
+      fireEvent.click(result.getByTestId('confirmModalConfirmButton'));
+
+      expect(casesFormProps.onCancel).toHaveBeenCalled();
+      expect(sessionStorage.getItem(draftStorageKey)).toBe(null);
+    });
+
+    it('should clear session storage key on submit', () => {
+      const result = render(
+        <MockHookWrapperComponent>
+          <CreateCaseForm
+            {...casesFormProps}
+            initialValue={{ title: 'title', description: 'description' }}
+          />
+        </MockHookWrapperComponent>
+      );
+
+      const submitBtn = result.getByTestId('create-case-submit');
+
+      fireEvent.click(submitBtn);
+
+      waitFor(() => {
+        expect(casesFormProps.onSuccess).toHaveBeenCalled();
+        expect(sessionStorage.getItem(draftStorageKey)).toBe(null);
+      });
+    });
   });
 });

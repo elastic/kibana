@@ -5,9 +5,11 @@
  * 2.0.
  */
 
-import { renderHook, act } from '@testing-library/react-hooks';
-import React from 'react';
-import { TestProviders } from '../common/mock';
+import { renderHook } from '@testing-library/react-hooks';
+import { waitFor } from '@testing-library/dom';
+import { useToasts } from '../common/lib/kibana';
+import type { AppMockRenderer } from '../common/mock';
+import { createAppMockRenderer } from '../common/mock';
 import { useGetFeatureIds } from './use_get_feature_ids';
 import * as api from './api';
 
@@ -15,56 +17,54 @@ jest.mock('./api');
 jest.mock('../common/lib/kibana');
 
 describe('useGetFeaturesIds', () => {
+  const addSuccess = jest.fn();
+  const addError = jest.fn();
+
+  (useToasts as jest.Mock).mockReturnValue({ addSuccess, addError });
+
+  let appMockRender: AppMockRenderer;
+
   beforeEach(() => {
+    appMockRender = createAppMockRenderer();
     jest.clearAllMocks();
-    jest.restoreAllMocks();
   });
 
-  it('inits with empty data', async () => {
-    jest.spyOn(api, 'getFeatureIds').mockRejectedValue([]);
-    const { result } = renderHook(() => useGetFeatureIds(['context1']), {
-      wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
+  it('returns the features ids correctly', async () => {
+    const spy = jest.spyOn(api, 'getFeatureIds').mockRejectedValue([]);
+
+    const { waitForNextUpdate } = renderHook(() => useGetFeatureIds(['context1']), {
+      wrapper: appMockRender.AppWrapper,
     });
 
-    await act(async () => {
-      expect(result.current.alertFeatureIds).toEqual([]);
-      expect(result.current.isLoading).toEqual(true);
-      expect(result.current.isError).toEqual(false);
-    });
-  });
+    await waitForNextUpdate();
 
-  it('fetches data and returns it correctly', async () => {
-    const spy = jest.spyOn(api, 'getFeatureIds');
-    const { result } = renderHook(() => useGetFeatureIds(['context1']), {
-      wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
-    });
-
-    await act(async () => {
+    await waitFor(() => {
       expect(spy).toHaveBeenCalledWith(
         { registrationContext: ['context1'] },
         expect.any(AbortSignal)
       );
     });
-
-    await act(async () => {
-      expect(result.current.alertFeatureIds).toEqual(['siem', 'observability']);
-      expect(result.current.isLoading).toEqual(false);
-      expect(result.current.isError).toEqual(false);
-    });
   });
 
-  it('sets isError to true when an error occurs', async () => {
-    const spy = jest.spyOn(api, 'getFeatureIds');
-    spy.mockImplementation(() => {
-      throw new Error('Something went wrong');
+  it('shows a toast error when the api return an error', async () => {
+    (useToasts as jest.Mock).mockReturnValue({ addError });
+
+    const spy = jest
+      .spyOn(api, 'getFeatureIds')
+      .mockRejectedValue(new Error('Something went wrong'));
+
+    const { waitForNextUpdate } = renderHook(() => useGetFeatureIds(['context1']), {
+      wrapper: appMockRender.AppWrapper,
     });
 
-    const { result } = renderHook(() => useGetFeatureIds(['context1']), {
-      wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
-    });
+    await waitForNextUpdate();
 
-    expect(result.current.alertFeatureIds).toEqual([]);
-    expect(result.current.isLoading).toEqual(false);
-    expect(result.current.isError).toEqual(true);
+    await waitFor(() => {
+      expect(spy).toHaveBeenCalledWith(
+        { registrationContext: ['context1'] },
+        expect.any(AbortSignal)
+      );
+      expect(addError).toHaveBeenCalled();
+    });
   });
 });

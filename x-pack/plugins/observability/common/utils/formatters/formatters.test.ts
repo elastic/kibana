@@ -5,7 +5,13 @@
  * 2.0.
  */
 
-import { asDecimal, asInteger, asPercent, asDecimalOrInteger } from './formatters';
+import {
+  asDecimal,
+  asInteger,
+  asPercent,
+  asPercentWithTwoDecimals,
+  asDecimalOrInteger,
+} from './formatters';
 
 describe('formatters', () => {
   describe('asDecimal', () => {
@@ -86,6 +92,33 @@ describe('formatters', () => {
     it('returns fallback when numerator or denominator is NaN', () => {
       expect(asPercent(3725, NaN, 'n/a')).toEqual('n/a');
       expect(asPercent(NaN, 10000, 'n/a')).toEqual('n/a');
+    });
+  });
+
+  describe('asPercentWithTwoDecimals', () => {
+    it('formats as integer when number is above 10', () => {
+      expect(asPercentWithTwoDecimals(3725, 10000, 'n/a')).toEqual('37.25%');
+    });
+
+    it('adds a decimal when value is below 10', () => {
+      expect(asPercentWithTwoDecimals(0.092, 1)).toEqual('9.20%');
+    });
+
+    it('formats when numerator is 0', () => {
+      expect(asPercentWithTwoDecimals(0, 1, 'n/a')).toEqual('0%');
+    });
+
+    it('returns fallback when denominator is undefined', () => {
+      expect(asPercentWithTwoDecimals(3725, undefined, 'n/a')).toEqual('n/a');
+    });
+
+    it('returns fallback when denominator is 0 ', () => {
+      expect(asPercentWithTwoDecimals(3725, 0, 'n/a')).toEqual('n/a');
+    });
+
+    it('returns fallback when numerator or denominator is NaN', () => {
+      expect(asPercentWithTwoDecimals(3725, NaN, 'n/a')).toEqual('n/a');
+      expect(asPercentWithTwoDecimals(NaN, 10000, 'n/a')).toEqual('n/a');
     });
   });
 

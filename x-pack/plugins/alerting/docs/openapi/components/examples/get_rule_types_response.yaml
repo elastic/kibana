@@ -1,0 +1,81 @@
+summary: Retrieve rule types associated with Kibana machine learning features
+value:
+  - id: xpack.ml.anomaly_detection_alert
+    action_groups:
+      - id: anomaly_score_match
+        name: Anomaly score matched the condition
+      - id: recovered
+        name: Recovered
+    action_variables:
+      context:
+        - name: timestamp
+          description: The bucket timestamp of the anomaly
+        - name: timestampIso8601
+          description: The bucket time of the anomaly in ISO8601 format
+        - name: jobIds
+          description: List of job IDs that triggered the alert
+        - name: message
+          description: Alert info message
+        - name: isInterim
+          description: Indicate if top hits contain interim results
+        - name: score
+          description: Anomaly score at the time of the notification action
+        - name: topRecords
+          description: Top records
+        - name: topInfluencers
+          description: Top influencers
+        - name: anomalyExplorerUrl
+          description: URL to open in the Anomaly Explorer
+          useWithTripleBracesInTemplates: true
+      params: []
+      state: []
+    authorized_consumers:
+      alerts:
+        all: true
+        read: true
+      ml:
+        all: true
+        read: true
+    default_action_group_id: anomaly_score_match
+    does_set_recovery_context: true
+    enabled_in_license: true
+    is_exportable: true
+    minimum_license_required: platinum
+    name: Anomaly detection alert
+    producer: ml
+    recovery_action_group:
+      id: recovered
+      name: Recovered
+    rule_task_timeout: 5m
+  - id: xpack.ml.anomaly_detection_jobs_health
+    action_groups:
+      - id: anomaly_detection_realtime_issue
+        name: Issue detected
+      - id: recovered
+        name: Recovered
+    action_variables:
+      context:
+        - name: results
+          description: Results of the rule execution
+        - name: message
+          description: Alert info message
+      params: []
+      state: []
+    authorized_consumers:
+      alerts:
+        all: true
+        read: true
+      ml:
+        all: true
+        read: true
+    default_action_group_id: anomaly_detection_realtime_issue
+    does_set_recovery_context: true
+    enabled_in_license: true
+    is_exportable: true
+    minimum_license_required: platinum
+    name: Anomaly detection jobs health
+    producer: ml
+    recovery_action_group:
+      id: recovered
+      name: Recovered
+    rule_task_timeout: 5m

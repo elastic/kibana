@@ -6,6 +6,7 @@ Object {
     "download": Object {
       "sourceURI": "http://default-registry.co",
     },
+    "features": Object {},
     "monitoring": Object {
       "enabled": true,
       "logs": false,
@@ -71,6 +72,7 @@ Object {
     "download": Object {
       "sourceURI": "http://default-registry.co",
     },
+    "features": Object {},
     "monitoring": Object {
       "enabled": true,
       "logs": false,
@@ -136,6 +138,7 @@ Object {
     "download": Object {
       "sourceURI": "http://default-registry.co",
     },
+    "features": Object {},
     "monitoring": Object {
       "enabled": true,
       "logs": false,

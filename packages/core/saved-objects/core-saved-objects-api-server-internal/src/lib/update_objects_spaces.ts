@@ -34,7 +34,7 @@ import type {
   IndexMapping,
   SavedObjectsSerializer,
 } from '@kbn/core-saved-objects-base-server-internal';
-import type { SavedObject } from '@kbn/core-saved-objects-common';
+import type { SavedObject } from '@kbn/core-saved-objects-server';
 import {
   getBulkOperationError,
   getExpectedVersionProperties,
@@ -204,33 +204,27 @@ export async function updateObjectsSpaces({
     }
   }
 
-  const authorizationResult = await securityExtension?.checkAuthorization({
-    types: new Set(typesAndSpaces.keys()),
-    spaces: spacesToAuthorize,
-    actions: new Set(['share_to_space']),
+  const authorizationResult = await securityExtension?.performAuthorization({
     // If a user tries to share/unshare an object to/from '*', they need to have 'share_to_space' privileges for the Global Resource (e.g.,
     // All privileges for All Spaces).
+    actions: new Set(['share_to_space']),
+    types: new Set(typesAndSpaces.keys()),
+    spaces: spacesToAuthorize,
+    enforceMap: typesAndSpaces,
+    auditCallback: (error) => {
+      for (const { value } of validObjects) {
+        securityExtension!.addAuditEvent({
+          action: AuditAction.UPDATE_OBJECTS_SPACES,
+          savedObject: { type: value.type, id: value.id },
+          addToSpaces,
+          deleteFromSpaces,
+          error,
+          ...(!error && { outcome: 'unknown' }), // If authorization was a success, the outcome is unknown because the update operation has not occurred yet
+        });
+      }
+    },
     options: { allowGlobalResource: true },
   });
-  if (authorizationResult) {
-    securityExtension!.enforceAuthorization({
-      typesAndSpaces,
-      action: 'share_to_space',
-      typeMap: authorizationResult.typeMap,
-      auditCallback: (error) => {
-        for (const { value } of validObjects) {
-          securityExtension!.addAuditEvent({
-            action: AuditAction.UPDATE_OBJECTS_SPACES,
-            savedObject: { type: value.type, id: value.id },
-            addToSpaces,
-            deleteFromSpaces,
-            error,
-            ...(!error && { outcome: 'unknown' }), // If authorization was a success, the outcome is unknown because the update operation has not occurred yet
-          });
-        }
-      },
-    });
-  }
 
   const time = new Date().toISOString();
   let bulkOperationRequestIndexCounter = 0;

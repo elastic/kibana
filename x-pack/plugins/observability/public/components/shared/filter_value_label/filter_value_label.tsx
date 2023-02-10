@@ -26,15 +26,19 @@ export function buildFilterLabel({
   dataView: DataView;
 }) {
   const indexField = dataView.getFieldByName(field)!;
+  const areMultipleValues = Array.isArray(value) && value.length > 1;
+  const filter = areMultipleValues
+    ? buildPhrasesFilter(indexField, value, dataView)
+    : buildPhraseFilter(indexField, Array.isArray(value) ? value[0] : value, dataView);
 
-  const filter =
-    value instanceof Array && value.length > 1
-      ? buildPhrasesFilter(indexField, value, dataView)
-      : buildPhraseFilter(indexField, value as string, dataView);
+  filter.meta.type = areMultipleValues ? 'phrases' : 'phrase';
 
-  filter.meta.type = value instanceof Array && value.length > 1 ? 'phrases' : 'phrase';
+  filter.meta.value = Array.isArray(value)
+    ? !areMultipleValues
+      ? `${value[0]}`
+      : undefined
+    : value;
 
-  filter.meta.value = value as string;
   filter.meta.key = label;
   filter.meta.alias = null;
   filter.meta.negate = negate;

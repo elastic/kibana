@@ -40,7 +40,7 @@
             "label": "type",
             "description": [],
             "signature": [
-              "\"metric\" | \"goal\" | \"gauge\" | \"heatmap\" | \"pie\""
+              "\"metric\" | \"goal\" | \"heatmap\" | \"gauge\""
             ],
             "path": "src/plugins/vis_types/vislib/public/types.ts",
             "deprecated": false,
@@ -289,7 +289,7 @@
             "label": "legendPosition",
             "description": [],
             "signature": [
-              "\"top\" | \"bottom\" | \"left\" | \"right\""
+              "\"right\" | \"left\" | \"top\" | \"bottom\""
             ],
             "path": "src/plugins/vis_types/vislib/public/types.ts",
             "deprecated": false,
@@ -359,7 +359,7 @@
         "label": "VislibChartType",
         "description": [],
         "signature": [
-          "\"metric\" | \"goal\" | \"gauge\" | \"heatmap\" | \"pie\""
+          "\"metric\" | \"goal\" | \"heatmap\" | \"gauge\""
         ],
         "path": "src/plugins/vis_types/vislib/public/types.ts",
         "deprecated": false,
@@ -408,7 +408,7 @@
         "label": "VislibChartType",
         "description": [],
         "signature": [
-          "{ readonly Pie: \"pie\"; readonly Heatmap: \"heatmap\"; readonly Gauge: \"gauge\"; readonly Goal: \"goal\"; readonly Metric: \"metric\"; }"
+          "{ readonly Heatmap: \"heatmap\"; readonly Gauge: \"gauge\"; readonly Goal: \"goal\"; readonly Metric: \"metric\"; }"
         ],
         "path": "src/plugins/vis_types/vislib/public/types.ts",
         "deprecated": false,

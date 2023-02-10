@@ -8,7 +8,7 @@
 import React, { useEffect, useState } from 'react';
 import type { FunctionComponent, ReactElement } from 'react';
 import type { EuiTourStepProps } from '@elastic/eui';
-import { EuiButton, EuiText, EuiTourStep } from '@elastic/eui';
+import { EuiButtonEmpty, EuiText, EuiTourStep } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 type TourType = 'addIntegrationButton' | 'integrationCard' | 'agentModalButton';
@@ -95,11 +95,16 @@ export const WithGuidedOnboardingTour: FunctionComponent<{
       title={config.title}
       anchorPosition={tourPosition ? tourPosition : 'rightUp'}
       footerAction={
-        <EuiButton onClick={() => setIsGuidedOnboardingTourOpen(false)} size="s" color="success">
+        <EuiButtonEmpty
+          onClick={() => setIsGuidedOnboardingTourOpen(false)}
+          size="xs"
+          color="text"
+          flush="right"
+        >
           {i18n.translate('xpack.fleet.guidedOnboardingTour.nextButtonLabel', {
             defaultMessage: 'Continue',
           })}
-        </EuiButton>
+        </EuiButtonEmpty>
       }
       isOpen={isGuidedOnboardingTourOpen}
       // Close the tour when the user clicks outside of the tour. This is a workaround for

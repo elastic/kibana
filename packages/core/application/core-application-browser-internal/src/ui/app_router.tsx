@@ -9,7 +9,7 @@
 import React, { FunctionComponent, useMemo } from 'react';
 import { Route, RouteComponentProps, Router, Switch } from 'react-router-dom';
 import { History } from 'history';
-import { Observable } from 'rxjs';
+import { EMPTY, Observable } from 'rxjs';
 import useObservable from 'react-use/lib/useObservable';
 
 import type { CoreTheme } from '@kbn/core-theme-browser';
@@ -27,6 +27,7 @@ interface Props {
   setAppLeaveHandler: (appId: string, handler: AppLeaveHandler) => void;
   setAppActionMenu: (appId: string, mount: MountPoint | undefined) => void;
   setIsMounting: (isMounting: boolean) => void;
+  hasCustomBranding$?: Observable<boolean>;
 }
 
 interface Params {
@@ -41,12 +42,15 @@ export const AppRouter: FunctionComponent<Props> = ({
   setAppActionMenu,
   appStatuses$,
   setIsMounting,
+  hasCustomBranding$,
 }) => {
   const appStatuses = useObservable(appStatuses$, new Map());
   const createScopedHistory = useMemo(
     () => (appPath: string) => new CoreScopedHistory(history, appPath),
     [history]
   );
+
+  const showPlainSpinner = useObservable(hasCustomBranding$ ?? EMPTY, false);
 
   return (
     <Router history={history}>
@@ -61,7 +65,15 @@ export const AppRouter: FunctionComponent<Props> = ({
                 appPath={path}
                 appStatus={appStatuses.get(appId) ?? AppStatus.inaccessible}
                 createScopedHistory={createScopedHistory}
-                {...{ appId, mounter, setAppLeaveHandler, setAppActionMenu, setIsMounting, theme$ }}
+                {...{
+                  appId,
+                  mounter,
+                  setAppLeaveHandler,
+                  setAppActionMenu,
+                  setIsMounting,
+                  theme$,
+                  showPlainSpinner,
+                }}
               />
             )}
           />
@@ -83,7 +95,14 @@ export const AppRouter: FunctionComponent<Props> = ({
                 appId={id ?? appId}
                 appStatus={appStatuses.get(appId) ?? AppStatus.inaccessible}
                 createScopedHistory={createScopedHistory}
-                {...{ mounter, setAppLeaveHandler, setAppActionMenu, setIsMounting, theme$ }}
+                {...{
+                  mounter,
+                  setAppLeaveHandler,
+                  setAppActionMenu,
+                  setIsMounting,
+                  theme$,
+                  showPlainSpinner,
+                }}
               />
             );
           }}

@@ -40,7 +40,6 @@ export const create = async (
   clientArgs: CasesClientArgs
 ): Promise<CaseResponse> => {
   const {
-    unsecuredSavedObjectsClient,
     services: { caseService, userActionService, licensingService, notificationService },
     user,
     logger,
@@ -103,9 +102,8 @@ export const create = async (
       refresh: false,
     });
 
-    await userActionService.createUserAction({
+    await userActionService.creator.createUserAction({
       type: ActionTypes.create_case,
-      unsecuredSavedObjectsClient,
       caseId: newCase.id,
       user,
       payload: {

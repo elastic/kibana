@@ -65,13 +65,16 @@ export default ({ getService }: FtrProviderContext) => {
       });
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/146450
-    describe.skip('Create rule button', () => {
+    describe('Create rule button', () => {
       it('Show Create Rule flyout when Create Rule button is clicked', async () => {
         await observability.alerts.common.navigateToRulesPage();
         await retry.waitFor(
           'Create Rule button is visible',
           async () => await testSubjects.exists('createRuleButton')
+        );
+        await retry.waitFor(
+          'Create Rule button is enabled',
+          async () => await testSubjects.isEnabled('createRuleButton')
         );
         await observability.alerts.rulesPage.clickCreateRuleButton();
         await retry.waitFor(
@@ -105,6 +108,10 @@ export default ({ getService }: FtrProviderContext) => {
         };
         const logThresholdRule = {
           params: {
+            logView: {
+              logViewId: 'Default',
+              type: 'log-view-reference',
+            },
             timeSize: 5,
             timeUnit: 'm',
             count: { value: 75, comparator: 'more than' },

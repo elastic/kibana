@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook, act } from '@testing-library/react-hooks';
 import {
   stubDataViewWithoutTimeField,
   stubLogstashDataView as dataView,
@@ -14,7 +14,10 @@ import {
 import { createStubDataView, stubFieldSpecMap } from '@kbn/data-plugin/public/stubs';
 import { DataViewField } from '@kbn/data-views-plugin/common';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
+import { coreMock } from '@kbn/core/public/mocks';
 import { type GroupedFieldsParams, useGroupedFields } from './use_grouped_fields';
+import * as ExistenceApi from './use_existing_fields';
+import { type ExistingFieldsReader } from './use_existing_fields';
 import { ExistenceFetchStatus, FieldListGroups, FieldsGroupNames } from '../types';
 
 describe('UnifiedFieldList useGroupedFields()', () => {
@@ -38,6 +41,7 @@ describe('UnifiedFieldList useGroupedFields()', () => {
     const dataViews = dataViewPluginMocks.createStartContract();
     mockedServices = {
       dataViews,
+      core: coreMock.createStart(),
     };
 
     dataViews.get.mockImplementation(async (id: string) => {
@@ -57,10 +61,11 @@ describe('UnifiedFieldList useGroupedFields()', () => {
 
     await waitForNextUpdate();
 
-    expect(result.current.fieldGroups).toMatchSnapshot();
-    expect(result.current.fieldsExistenceStatus).toBe(ExistenceFetchStatus.unknown);
-    expect(result.current.fieldsExistInIndex).toBe(false);
-    expect(result.current.scrollToTopResetCounter).toBeTruthy();
+    let fieldListGroupedProps = result.current.fieldListGroupedProps;
+    expect(fieldListGroupedProps.fieldGroups).toMatchSnapshot();
+    expect(fieldListGroupedProps.fieldsExistenceStatus).toBe(ExistenceFetchStatus.unknown);
+    expect(fieldListGroupedProps.fieldsExistInIndex).toBe(false);
+    expect(fieldListGroupedProps.scrollToTopResetCounter).toBeTruthy();
 
     rerender({
       ...props,
@@ -68,9 +73,10 @@ describe('UnifiedFieldList useGroupedFields()', () => {
       allFields: null,
     });
 
-    expect(result.current.fieldsExistenceStatus).toBe(ExistenceFetchStatus.unknown);
-    expect(result.current.fieldsExistInIndex).toBe(true);
-    expect(result.current.scrollToTopResetCounter).toBeTruthy();
+    fieldListGroupedProps = result.current.fieldListGroupedProps;
+    expect(fieldListGroupedProps.fieldsExistenceStatus).toBe(ExistenceFetchStatus.unknown);
+    expect(fieldListGroupedProps.fieldsExistInIndex).toBe(true);
+    expect(fieldListGroupedProps.scrollToTopResetCounter).toBeTruthy();
   });
 
   it('should work correctly for no data', async () => {
@@ -79,13 +85,28 @@ describe('UnifiedFieldList useGroupedFields()', () => {
       allFields: [],
       services: mockedServices,
     };
+
+    jest.spyOn(ExistenceApi, 'useExistingFieldsReader').mockImplementation(
+      (): ExistingFieldsReader => ({
+        hasFieldData: (dataViewId) => {
+          return dataViewId === props.dataViewId;
+        },
+        getFieldsExistenceStatus: (dataViewId) =>
+          dataViewId === props.dataViewId
+            ? ExistenceFetchStatus.succeeded
+            : ExistenceFetchStatus.unknown,
+        isFieldsExistenceInfoUnavailable: (dataViewId) => dataViewId !== props.dataViewId,
+      })
+    );
+
     const { result, waitForNextUpdate, rerender } = renderHook(useGroupedFields, {
       initialProps: props,
     });
 
     await waitForNextUpdate();
 
-    const fieldGroups = result.current.fieldGroups;
+    let fieldListGroupedProps = result.current.fieldListGroupedProps;
+    const fieldGroups = fieldListGroupedProps.fieldGroups;
 
     expect(
       Object.keys(fieldGroups!).map(
@@ -102,8 +123,8 @@ describe('UnifiedFieldList useGroupedFields()', () => {
     ]);
 
     expect(fieldGroups).toMatchSnapshot();
-    expect(result.current.fieldsExistenceStatus).toBe(ExistenceFetchStatus.succeeded);
-    expect(result.current.fieldsExistInIndex).toBe(false);
+    expect(fieldListGroupedProps.fieldsExistenceStatus).toBe(ExistenceFetchStatus.succeeded);
+    expect(fieldListGroupedProps.fieldsExistInIndex).toBe(false);
 
     rerender({
       ...props,
@@ -111,8 +132,11 @@ describe('UnifiedFieldList useGroupedFields()', () => {
       allFields: [],
     });
 
-    expect(result.current.fieldsExistenceStatus).toBe(ExistenceFetchStatus.succeeded);
-    expect(result.current.fieldsExistInIndex).toBe(true);
+    fieldListGroupedProps = result.current.fieldListGroupedProps;
+    expect(fieldListGroupedProps.fieldsExistenceStatus).toBe(ExistenceFetchStatus.succeeded);
+    expect(fieldListGroupedProps.fieldsExistInIndex).toBe(true);
+
+    (ExistenceApi.useExistingFieldsReader as jest.Mock).mockRestore();
   });
 
   it('should work correctly with fields', async () => {
@@ -121,13 +145,29 @@ describe('UnifiedFieldList useGroupedFields()', () => {
       allFields,
       services: mockedServices,
     };
+
+    jest.spyOn(ExistenceApi, 'useExistingFieldsReader').mockImplementation(
+      (): ExistingFieldsReader => ({
+        hasFieldData: (dataViewId) => {
+          return dataViewId === props.dataViewId;
+        },
+        getFieldsExistenceStatus: (dataViewId) =>
+          dataViewId === props.dataViewId
+            ? ExistenceFetchStatus.succeeded
+            : ExistenceFetchStatus.unknown,
+        isFieldsExistenceInfoUnavailable: (dataViewId) => dataViewId !== props.dataViewId,
+      })
+    );
+
     const { result, waitForNextUpdate, rerender } = renderHook(useGroupedFields, {
       initialProps: props,
     });
 
     await waitForNextUpdate();
 
-    const fieldGroups = result.current.fieldGroups;
+    let fieldListGroupedProps = result.current.fieldListGroupedProps;
+    const fieldGroups = fieldListGroupedProps.fieldGroups;
+    const scrollToTopResetCounter1 = fieldListGroupedProps.scrollToTopResetCounter;
 
     expect(
       Object.keys(fieldGroups!).map(
@@ -143,8 +183,8 @@ describe('UnifiedFieldList useGroupedFields()', () => {
       'MetaFields-3',
     ]);
 
-    expect(result.current.fieldsExistenceStatus).toBe(ExistenceFetchStatus.succeeded);
-    expect(result.current.fieldsExistInIndex).toBe(true);
+    expect(fieldListGroupedProps.fieldsExistenceStatus).toBe(ExistenceFetchStatus.succeeded);
+    expect(fieldListGroupedProps.fieldsExistInIndex).toBe(true);
 
     rerender({
       ...props,
@@ -152,24 +192,29 @@ describe('UnifiedFieldList useGroupedFields()', () => {
       allFields,
     });
 
-    expect(result.current.fieldsExistenceStatus).toBe(ExistenceFetchStatus.succeeded);
-    expect(result.current.fieldsExistInIndex).toBe(true);
+    fieldListGroupedProps = result.current.fieldListGroupedProps;
+    expect(fieldListGroupedProps.fieldsExistenceStatus).toBe(ExistenceFetchStatus.succeeded);
+    expect(fieldListGroupedProps.fieldsExistInIndex).toBe(true);
+    expect(result.current.fieldListGroupedProps.scrollToTopResetCounter).not.toBe(
+      scrollToTopResetCounter1
+    );
+
+    (ExistenceApi.useExistingFieldsReader as jest.Mock).mockRestore();
   });
 
-  it('should work correctly when filtered', async () => {
+  it('should work correctly when searched and filtered', async () => {
     const props: GroupedFieldsParams<DataViewField> = {
       dataViewId: dataView.id!,
       allFields: allFieldsIncludingUnmapped,
       services: mockedServices,
     };
-    const { result, waitForNextUpdate, rerender } = renderHook(useGroupedFields, {
+    const { result, waitForNextUpdate } = renderHook(useGroupedFields, {
       initialProps: props,
     });
 
     await waitForNextUpdate();
 
-    let fieldGroups = result.current.fieldGroups;
-    const scrollToTopResetCounter1 = result.current.scrollToTopResetCounter;
+    let fieldGroups = result.current.fieldListGroupedProps.fieldGroups;
 
     expect(
       Object.keys(fieldGroups!).map(
@@ -188,12 +233,11 @@ describe('UnifiedFieldList useGroupedFields()', () => {
       'MetaFields-3-3',
     ]);
 
-    rerender({
-      ...props,
-      onFilterField: (field: DataViewField) => field.name.startsWith('@'),
+    act(() => {
+      result.current.fieldListFiltersProps.onChangeNameFilter('@');
     });
 
-    fieldGroups = result.current.fieldGroups;
+    fieldGroups = result.current.fieldListGroupedProps.fieldGroups;
 
     expect(
       Object.keys(fieldGroups!).map(
@@ -212,7 +256,28 @@ describe('UnifiedFieldList useGroupedFields()', () => {
       'MetaFields-0-3',
     ]);
 
-    expect(result.current.scrollToTopResetCounter).not.toBe(scrollToTopResetCounter1);
+    act(() => {
+      result.current.fieldListFiltersProps.onChangeFieldTypes(['date']);
+    });
+
+    fieldGroups = result.current.fieldListGroupedProps.fieldGroups;
+
+    expect(
+      Object.keys(fieldGroups!).map(
+        (key) =>
+          `${key}-${fieldGroups![key as FieldsGroupNames]?.fields.length}-${
+            fieldGroups![key as FieldsGroupNames]?.fieldCount
+          }`
+      )
+    ).toStrictEqual([
+      'SpecialFields-0-0',
+      'SelectedFields-0-0',
+      'PopularFields-0-0',
+      'AvailableFields-1-25',
+      'UnmappedFields-1-28',
+      'EmptyFields-0-0',
+      'MetaFields-0-3',
+    ]);
   });
 
   it('should not change the scroll position if fields list is extended', async () => {
@@ -227,14 +292,16 @@ describe('UnifiedFieldList useGroupedFields()', () => {
 
     await waitForNextUpdate();
 
-    const scrollToTopResetCounter1 = result.current.scrollToTopResetCounter;
+    const scrollToTopResetCounter1 = result.current.fieldListGroupedProps.scrollToTopResetCounter;
 
     rerender({
       ...props,
       allFields: allFieldsIncludingUnmapped,
     });
 
-    expect(result.current.scrollToTopResetCounter).toBe(scrollToTopResetCounter1);
+    expect(result.current.fieldListGroupedProps.scrollToTopResetCounter).toBe(
+      scrollToTopResetCounter1
+    );
   });
 
   it('should work correctly when custom unsupported fields are skipped', async () => {
@@ -249,7 +316,7 @@ describe('UnifiedFieldList useGroupedFields()', () => {
 
     await waitForNextUpdate();
 
-    const fieldGroups = result.current.fieldGroups;
+    const fieldGroups = result.current.fieldListGroupedProps.fieldGroups;
 
     expect(
       Object.keys(fieldGroups!).map(
@@ -279,7 +346,7 @@ describe('UnifiedFieldList useGroupedFields()', () => {
 
     await waitForNextUpdate();
 
-    const fieldGroups = result.current.fieldGroups;
+    const fieldGroups = result.current.fieldListGroupedProps.fieldGroups;
 
     expect(
       Object.keys(fieldGroups!).map(
@@ -305,7 +372,8 @@ describe('UnifiedFieldList useGroupedFields()', () => {
       },
     });
 
-    const fieldGroups = result.current.fieldGroups;
+    const fieldListGroupedProps = result.current.fieldListGroupedProps;
+    const fieldGroups = fieldListGroupedProps.fieldGroups;
 
     expect(
       Object.keys(fieldGroups!).map(
@@ -320,8 +388,8 @@ describe('UnifiedFieldList useGroupedFields()', () => {
       'MetaFields-0',
     ]);
 
-    expect(result.current.fieldsExistenceStatus).toBe(ExistenceFetchStatus.succeeded);
-    expect(result.current.fieldsExistInIndex).toBe(true);
+    expect(fieldListGroupedProps.fieldsExistenceStatus).toBe(ExistenceFetchStatus.succeeded);
+    expect(fieldListGroupedProps.fieldsExistInIndex).toBe(true);
   });
 
   it('should work correctly when details are overwritten', async () => {
@@ -344,7 +412,7 @@ describe('UnifiedFieldList useGroupedFields()', () => {
 
     await waitForNextUpdate();
 
-    const fieldGroups = result.current.fieldGroups;
+    const fieldGroups = result.current.fieldListGroupedProps.fieldGroups;
 
     expect(fieldGroups[FieldsGroupNames.SelectedFields]?.helpText).toBe('test');
     expect(fieldGroups[FieldsGroupNames.AvailableFields]?.helpText).not.toBe('test');
@@ -358,7 +426,10 @@ describe('UnifiedFieldList useGroupedFields()', () => {
       dataViewId: dataView.id!,
       allFields,
       services: mockedServices,
-      fieldsExistenceReader: {
+    };
+
+    jest.spyOn(ExistenceApi, 'useExistingFieldsReader').mockImplementation(
+      (): ExistingFieldsReader => ({
         hasFieldData: (dataViewId, fieldName) => {
           return dataViewId === knownDataViewId && ['bytes', 'extension'].includes(fieldName);
         },
@@ -367,15 +438,16 @@ describe('UnifiedFieldList useGroupedFields()', () => {
             ? ExistenceFetchStatus.succeeded
             : ExistenceFetchStatus.unknown,
         isFieldsExistenceInfoUnavailable: (dataViewId) => dataViewId !== knownDataViewId,
-      },
-    };
+      })
+    );
 
     const { result, waitForNextUpdate, rerender } = renderHook(useGroupedFields, {
       initialProps: props,
     });
     await waitForNextUpdate();
 
-    fieldGroups = result.current.fieldGroups;
+    let fieldListGroupedProps = result.current.fieldListGroupedProps;
+    fieldGroups = fieldListGroupedProps.fieldGroups;
 
     expect(
       Object.keys(fieldGroups!).map(
@@ -391,8 +463,8 @@ describe('UnifiedFieldList useGroupedFields()', () => {
       'MetaFields-3',
     ]);
 
-    expect(result.current.fieldsExistenceStatus).toBe(ExistenceFetchStatus.succeeded);
-    expect(result.current.fieldsExistInIndex).toBe(true);
+    expect(fieldListGroupedProps.fieldsExistenceStatus).toBe(ExistenceFetchStatus.succeeded);
+    expect(fieldListGroupedProps.fieldsExistInIndex).toBe(true);
 
     rerender({
       ...props,
@@ -402,7 +474,8 @@ describe('UnifiedFieldList useGroupedFields()', () => {
 
     await waitForNextUpdate();
 
-    fieldGroups = result.current.fieldGroups;
+    fieldListGroupedProps = result.current.fieldListGroupedProps;
+    fieldGroups = fieldListGroupedProps.fieldGroups;
 
     expect(
       Object.keys(fieldGroups!).map(
@@ -417,8 +490,10 @@ describe('UnifiedFieldList useGroupedFields()', () => {
       'MetaFields-0',
     ]);
 
-    expect(result.current.fieldsExistenceStatus).toBe(ExistenceFetchStatus.unknown);
-    expect(result.current.fieldsExistInIndex).toBe(true);
+    expect(fieldListGroupedProps.fieldsExistenceStatus).toBe(ExistenceFetchStatus.unknown);
+    expect(fieldListGroupedProps.fieldsExistInIndex).toBe(true);
+
+    (ExistenceApi.useExistingFieldsReader as jest.Mock).mockRestore();
   });
 
   it('should work correctly when popular fields limit is present', async () => {
@@ -437,7 +512,7 @@ describe('UnifiedFieldList useGroupedFields()', () => {
 
     await waitForNextUpdate();
 
-    const fieldGroups = result.current.fieldGroups;
+    const fieldGroups = result.current.fieldListGroupedProps.fieldGroups;
 
     expect(
       Object.keys(fieldGroups!).map(
@@ -470,7 +545,7 @@ describe('UnifiedFieldList useGroupedFields()', () => {
 
     await waitForNextUpdate();
 
-    const fieldGroups = result.current.fieldGroups;
+    const fieldGroups = result.current.fieldListGroupedProps.fieldGroups;
     expect(fieldGroups).toMatchSnapshot();
   });
 
@@ -485,7 +560,7 @@ describe('UnifiedFieldList useGroupedFields()', () => {
 
     await waitForNextUpdate();
 
-    const fieldGroups = result.current.fieldGroups;
+    const fieldGroups = result.current.fieldListGroupedProps.fieldGroups;
 
     expect(
       Object.keys(fieldGroups!).map(
@@ -519,7 +594,7 @@ describe('UnifiedFieldList useGroupedFields()', () => {
 
     await waitForNextUpdate();
 
-    const fieldGroups = result.current.fieldGroups;
+    const fieldGroups = result.current.fieldListGroupedProps.fieldGroups;
 
     expect(
       Object.keys(fieldGroups!).map(
@@ -536,5 +611,49 @@ describe('UnifiedFieldList useGroupedFields()', () => {
     ]);
 
     expect(fieldGroups.SelectedFields?.fields).toBe(customSortedFields);
+  });
+
+  it('should include filters props', async () => {
+    const { result, waitForNextUpdate } = renderHook(useGroupedFields, {
+      initialProps: {
+        dataViewId: dataView.id!,
+        allFields,
+        services: mockedServices,
+      },
+    });
+
+    await waitForNextUpdate();
+
+    const { fieldListFiltersProps, fieldListGroupedProps } = result.current;
+    const fieldGroups = fieldListGroupedProps.fieldGroups;
+
+    expect(fieldGroups.AvailableFields?.fields?.length).toBe(25);
+    expect(fieldGroups.AvailableFields?.fieldSearchHighlight).toBeUndefined();
+    expect(fieldListFiltersProps.screenReaderDescriptionId).toBe(
+      fieldListGroupedProps.screenReaderDescriptionId
+    );
+
+    act(() => {
+      fieldListFiltersProps.onChangeNameFilter('Me');
+    });
+
+    const {
+      fieldListFiltersProps: newFieldListFiltersProps,
+      fieldListGroupedProps: newFieldListGroupedProps,
+    } = result.current;
+    const newFieldGroups = newFieldListGroupedProps.fieldGroups;
+    expect(newFieldGroups.AvailableFields?.fields?.length).toBe(4);
+    expect(newFieldGroups.AvailableFields?.fieldSearchHighlight).toBe('me');
+    expect(newFieldListFiltersProps.screenReaderDescriptionId).toBe(
+      newFieldListGroupedProps.screenReaderDescriptionId
+    );
+
+    act(() => {
+      newFieldListFiltersProps.onChangeFieldTypes?.(['date']);
+    });
+
+    expect(result.current.fieldListGroupedProps.fieldGroups.AvailableFields?.fields?.length).toBe(
+      3
+    );
   });
 });

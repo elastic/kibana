@@ -234,6 +234,12 @@ export const getEuiContextMapping = (): EuiTokensObject => {
     'euiColumnActions.moveRight': i18n.translate('core.euiColumnActions.moveRight', {
       defaultMessage: 'Move right',
     }),
+    'euiColumnSelector.dragHandleAriaLabel': i18n.translate(
+      'core.euiColumnSelector.dragHandleAriaLabel',
+      {
+        defaultMessage: 'Drag handle',
+      }
+    ),
     'euiColumnSelector.hideAll': i18n.translate('core.euiColumnSelector.hideAll', {
       defaultMessage: 'Hide all',
     }),
@@ -1013,7 +1019,8 @@ export const getEuiContextMapping = (): EuiTokensObject => {
     'euiPopover.screenReaderAnnouncement': i18n.translate(
       'core.euiPopover.screenReaderAnnouncement',
       {
-        defaultMessage: 'You are in a dialog. To close this dialog, hit escape.',
+        defaultMessage:
+          'You are in a dialog. Press Escape, or tap/click outside the dialog to close.',
       }
     ),
     'euiProgress.valueText': ({ value }: EuiValues) =>
@@ -1323,6 +1330,9 @@ export const getEuiContextMapping = (): EuiTokensObject => {
     'euiQuickSelect.valueLabel': i18n.translate('core.euiQuickSelect.valueLabel', {
       defaultMessage: 'Time value',
     }),
+    'euiQuickSelectPopover.buttonLabel': i18n.translate('core.euiQuickSelectPopover.buttonLabel', {
+      defaultMessage: 'Date quick select',
+    }),
     'euiRecentlyUsed.legend': i18n.translate('core.euiRecentlyUsed.legend', {
       defaultMessage: 'Recently used date ranges',
     }),
@@ -1627,7 +1637,7 @@ export const getEuiContextMapping = (): EuiTokensObject => {
       'core.euiSuperSelect.screenReaderAnnouncement',
       {
         defaultMessage:
-          'You are in a form selector and must select a single option. Use the up and down keys to navigate or escape to close.',
+          'You are in a form selector and must select a single option. Use the Up and Down arrow keys to navigate or Escape to close.',
       }
     ),
     'euiSuperSelectControl.selectAnOption': ({ selectedValue }: EuiValues) =>
@@ -1767,6 +1777,16 @@ export const getEuiContextMapping = (): EuiTokensObject => {
       i18n.translate('core.euiNotificationEventReadIcon.unreadAria', {
         defaultMessage: '{eventName} is unread',
         values: { eventName },
+      }),
+    'euiSkeletonLoading.loadingAriaText': ({ contentAriaLabel }: EuiValues) =>
+      i18n.translate('core.euiSkeletonLoading.loadingAriaText', {
+        defaultMessage: 'Loading {contentAriaLabel}',
+        values: { contentAriaLabel },
+      }),
+    'euiSkeletonLoading.loadedAriaText': ({ contentAriaLabel }: EuiValues) =>
+      i18n.translate('core.euiSkeletonLoading.loadedAriaText', {
+        defaultMessage: 'Loaded {contentAriaLabel}',
+        values: { contentAriaLabel },
       }),
   };
 };

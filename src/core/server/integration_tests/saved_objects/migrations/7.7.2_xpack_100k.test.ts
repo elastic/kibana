@@ -8,7 +8,7 @@
 
 import path from 'path';
 import { unlink } from 'fs/promises';
-import { REPO_ROOT } from '@kbn/utils';
+import { REPO_ROOT } from '@kbn/repo-info';
 import { Env } from '@kbn/config';
 import { getEnvOptions } from '@kbn/config-mocks';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
@@ -29,7 +29,7 @@ async function removeLogFile() {
 }
 
 /** Number of SO documents dropped during the migration because they belong to an unused type */
-const UNUSED_SO_COUNT = 4;
+const UNUSED_SO_COUNT = 5;
 
 describe('migration from 7.7.2-xpack with 100k objects', () => {
   let esServer: TestElasticsearchUtils;

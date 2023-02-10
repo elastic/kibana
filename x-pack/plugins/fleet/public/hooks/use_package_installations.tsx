@@ -11,8 +11,8 @@ import semverLt from 'semver/functions/lt';
 import { installationStatuses } from '../../common/constants';
 import type { PackagePolicy } from '../types';
 
-import { useGetPackages } from './use_request/epm';
-import { useGetAgentPolicies } from './use_request/agent_policy';
+import { useGetPackagesQuery } from './use_request/epm';
+import { useGetAgentPoliciesQuery } from './use_request/agent_policy';
 
 interface UpdatableIntegration {
   currentVersion: string;
@@ -26,12 +26,12 @@ interface UpdatableIntegration {
   }>;
 }
 
-export const usePackageInstallations = () => {
-  const { data: allPackages, isLoading: isLoadingPackages } = useGetPackages({
+export const usePackageInstallationsQuery = () => {
+  const { data: allPackages, isLoading: isLoadingPackages } = useGetPackagesQuery({
     prerelease: true,
   });
 
-  const { data: agentPolicyData, isLoading: isLoadingPolicies } = useGetAgentPolicies({
+  const { data: agentPolicyData, isLoading: isLoadingPolicies } = useGetAgentPoliciesQuery({
     full: true,
   });
 

@@ -47,7 +47,7 @@ export const createBytesFormatter = (format: InfraWaffleMapDataFormat) => (bytes
   // is greater then the max label then use the max label.
   const power = Math.min(Math.floor(Math.log(Math.abs(value)) / Math.log(base)), labels.length - 1);
   if (power < 0) {
-    return `${formatNumber(value)}${labels[0]}`;
+    return `${formatNumber(value)} ${labels[0]}`;
   }
-  return `${formatNumber(value / Math.pow(base, power))}${labels[power]}`;
+  return `${formatNumber(value / Math.pow(base, power))} ${labels[power]}`;
 };

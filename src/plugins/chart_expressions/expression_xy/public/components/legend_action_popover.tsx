@@ -10,7 +10,11 @@ import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiContextMenuPanelDescriptor, EuiIcon, EuiPopover, EuiContextMenu } from '@elastic/eui';
 import { useLegendAction } from '@elastic/charts';
-import type { FilterEvent } from '../types';
+import type { CellValueAction } from '../types';
+
+export type LegendCellValueActions = Array<
+  Omit<CellValueAction, 'execute'> & { execute: () => void }
+>;
 
 export interface LegendActionPopoverProps {
   /**
@@ -20,20 +24,31 @@ export interface LegendActionPopoverProps {
   /**
    * Callback on filter value
    */
-  onFilter: (data: FilterEvent['data']) => void;
+  onFilter: (param?: { negate?: boolean }) => void;
   /**
-   * Determines the filter event data
+   * Compatible actions to be added to the popover actions
    */
-  context: FilterEvent['data'];
+  legendCellValueActions?: LegendCellValueActions;
 }
 
 export const LegendActionPopover: React.FunctionComponent<LegendActionPopoverProps> = ({
   label,
   onFilter,
-  context,
+  legendCellValueActions = [],
 }) => {
   const [popoverOpen, setPopoverOpen] = useState(false);
   const [ref, onClose] = useLegendAction<HTMLDivElement>();
+
+  const legendCellValueActionPanelItems = legendCellValueActions.map((action) => ({
+    name: action.displayName,
+    'data-test-subj': `legend-${label}-${action.id}`,
+    icon: <EuiIcon type={action.iconType} size="m" />,
+    onClick: () => {
+      action.execute();
+      setPopoverOpen(false);
+    },
+  }));
+
   const panels: EuiContextMenuPanelDescriptor[] = [
     {
       id: 'main',
@@ -47,7 +62,7 @@ export const LegendActionPopover: React.FunctionComponent<LegendActionPopoverPro
           icon: <EuiIcon type="plusInCircle" size="m" />,
           onClick: () => {
             setPopoverOpen(false);
-            onFilter(context);
+            onFilter();
           },
         },
         {
@@ -58,9 +73,10 @@ export const LegendActionPopover: React.FunctionComponent<LegendActionPopoverPro
           icon: <EuiIcon type="minusInCircle" size="m" />,
           onClick: () => {
             setPopoverOpen(false);
-            onFilter({ ...context, negate: true });
+            onFilter({ negate: true });
           },
         },
+        ...legendCellValueActionPanelItems,
       ],
     },
   ];

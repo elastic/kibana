@@ -44,6 +44,7 @@ export const ExploreMatchingButton = ({
           <EuiButton
             fullWidth
             size="s"
+            data-test-subj="explore-matching-indices-button"
             onClick={() => {
               setPopoverIsOpen(false);
               onCreateDefaultAdHocDataView(dataViewSearchString);

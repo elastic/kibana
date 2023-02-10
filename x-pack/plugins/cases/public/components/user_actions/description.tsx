@@ -8,12 +8,15 @@
 import React from 'react';
 import classNames from 'classnames';
 import type { EuiCommentProps } from '@elastic/eui';
+import styled from 'styled-components';
+import { EuiText } from '@elastic/eui';
 
 import type { UserActionBuilder, UserActionBuilderArgs, UserActionTreeProps } from './types';
 import { createCommonUpdateUserActionBuilder } from './common';
 import { UserActionContentToolbar } from './content_toolbar';
 import { UserActionTimestamp } from './timestamp';
 import { UserActionMarkdown } from './markdown_form';
+import { getMarkdownEditorStorageKey } from '../markdown_editor/utils';
 import * as i18n from './translations';
 import { HoverableAvatarResolver } from '../user_profiles/hoverable_avatar_resolver';
 import { HoverableUsernameResolver } from '../user_profiles/hoverable_username_resolver';
@@ -31,10 +34,25 @@ type GetDescriptionUserActionArgs = Pick<
   | 'handleManageMarkdownEditId'
   | 'handleManageQuote'
   | 'userProfiles'
+  | 'appId'
 > &
   Pick<UserActionTreeProps, 'onUpdateField' | 'isLoadingDescription'>;
 
+const MyEuiCommentFooter = styled(EuiText)`
+  ${({ theme }) => `
+    border-top: ${theme.eui.euiBorderThin};
+    padding: ${theme.eui.euiSizeS};
+  `}
+`;
+
+const hasDraftComment = (appId = '', caseId: string, commentId: string): boolean => {
+  const draftStorageKey = getMarkdownEditorStorageKey(appId, caseId, commentId);
+
+  return Boolean(sessionStorage.getItem(draftStorageKey));
+};
+
 export const getDescriptionUserAction = ({
+  appId,
   userProfiles,
   caseData,
   commentRefs,
@@ -51,23 +69,39 @@ export const getDescriptionUserAction = ({
     'data-test-subj': 'description-action',
     timestamp: <UserActionTimestamp createdAt={caseData.createdAt} />,
     children: (
-      <UserActionMarkdown
-        key={isEditable ? DESCRIPTION_ID : undefined}
-        ref={(element) => (commentRefs.current[DESCRIPTION_ID] = element)}
-        id={DESCRIPTION_ID}
-        content={caseData.description}
-        isEditable={isEditable}
-        onSaveContent={(content: string) => {
-          onUpdateField({ key: DESCRIPTION_ID, value: content });
-        }}
-        onChangeEditable={handleManageMarkdownEditId}
-      />
+      <>
+        <UserActionMarkdown
+          key={isEditable ? DESCRIPTION_ID : undefined}
+          ref={(element) => (commentRefs.current[DESCRIPTION_ID] = element)}
+          caseId={caseData.id}
+          id={DESCRIPTION_ID}
+          content={caseData.description}
+          isEditable={isEditable}
+          onSaveContent={(content: string) => {
+            onUpdateField({ key: DESCRIPTION_ID, value: content });
+          }}
+          onChangeEditable={handleManageMarkdownEditId}
+        />
+        {!isEditable &&
+        !isLoadingDescription &&
+        hasDraftComment(appId, caseData.id, DESCRIPTION_ID) ? (
+          <MyEuiCommentFooter>
+            <EuiText color="subdued" size="xs" data-test-subj="description-unsaved-draft">
+              {i18n.UNSAVED_DRAFT_DESCRIPTION}
+            </EuiText>
+          </MyEuiCommentFooter>
+        ) : (
+          ''
+        )}
+      </>
     ),
     timelineAvatar: (
       <HoverableAvatarResolver user={caseData.createdBy} userProfiles={userProfiles} />
     ),
     className: classNames({
       isEdit: manageMarkdownEditIds.includes(DESCRIPTION_ID),
+      draftFooter:
+        !isEditable && !isLoadingDescription && hasDraftComment(appId, caseData.id, DESCRIPTION_ID),
     }),
     actions: (
       <UserActionContentToolbar id={DESCRIPTION_ID}>

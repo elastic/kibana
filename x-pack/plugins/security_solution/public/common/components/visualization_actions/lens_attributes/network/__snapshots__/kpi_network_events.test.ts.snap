@@ -107,6 +107,35 @@ Object {
       },
       Object {
         "meta": Object {
+          "alias": null,
+          "disabled": false,
+          "key": "source.ip",
+          "negate": false,
+          "params": Object {
+            "query": "192.168.1.1",
+          },
+          "type": "phrase",
+        },
+        "query": Object {
+          "bool": Object {
+            "minimum_should_match": 1,
+            "should": Array [
+              Object {
+                "match_phrase": Object {
+                  "source.ip": "192.168.1.1",
+                },
+              },
+              Object {
+                "match_phrase": Object {
+                  "destination.ip": "192.168.1.1",
+                },
+              },
+            ],
+          },
+        },
+      },
+      Object {
+        "meta": Object {
           "alias": "",
           "disabled": false,
           "key": "bool",

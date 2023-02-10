@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import {
   EuiCodeBlock,
   EuiLoadingContent,
@@ -19,7 +19,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { sendGetFileByPath, useStartServices } from '../../../../../hooks';
+import { useGetFileByPathQuery, useStartServices } from '../../../../../hooks';
 
 interface Props {
   licenseName?: string;
@@ -33,29 +33,21 @@ export const LicenseModal: React.FunctionComponent<Props> = ({
   onClose,
 }) => {
   const { notifications } = useStartServices();
-  const [licenseText, setLicenseText] = useState<string | undefined>(undefined);
 
-  useEffect(() => {
-    async function fetchData() {
-      try {
-        const { data } = await sendGetFileByPath(licensePath);
-        setLicenseText(data || '');
-      } catch (err) {
-        notifications.toasts.addError(err, {
-          title: i18n.translate('xpack.fleet.epm.errorLoadingLicense', {
-            defaultMessage: 'Error loading license information',
-          }),
-        });
-      }
-    }
-    fetchData();
-  }, [licensePath, notifications]);
+  const { data: licenseText, error: licenseError } = useGetFileByPathQuery(licensePath);
+
+  if (licenseError) {
+    notifications.toasts.addError(licenseError, {
+      title: i18n.translate('xpack.fleet.epm.errorLoadingLicense', {
+        defaultMessage: 'Error loading license information',
+      }),
+    });
+  }
+
   return (
     <EuiModal maxWidth={true} onClose={onClose}>
       <EuiModalHeader>
-        <EuiModalHeaderTitle>
-          <h1>{licenseName}</h1>
-        </EuiModalHeaderTitle>
+        <EuiModalHeaderTitle>{licenseName}</EuiModalHeaderTitle>
       </EuiModalHeader>
       <EuiModalBody>
         <EuiCodeBlock overflowHeight={360}>

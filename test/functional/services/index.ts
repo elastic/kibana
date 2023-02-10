@@ -25,7 +25,11 @@ import {
   DashboardReplacePanelService,
   DashboardExpectService,
   DashboardPanelActionsService,
+  DashboardCustomizePanelProvider,
+  DashboardBadgeActionsProvider,
   DashboardVisualizationsService,
+  DashboardDrilldownPanelActionsProvider,
+  DashboardDrilldownsManageProvider,
 } from './dashboard';
 import { DocTableService } from './doc_table';
 import { EmbeddingService } from './embedding';
@@ -71,6 +75,10 @@ export const services = {
   dashboardAddPanel: DashboardAddPanelService,
   dashboardReplacePanel: DashboardReplacePanelService,
   dashboardPanelActions: DashboardPanelActionsService,
+  dashboardCustomizePanel: DashboardCustomizePanelProvider,
+  dashboardBadgeActions: DashboardBadgeActionsProvider,
+  dashboardDrilldownPanelActions: DashboardDrilldownPanelActionsProvider,
+  dashboardDrilldownsManage: DashboardDrilldownsManageProvider,
   flyout: FlyoutService,
   comboBox: ComboBoxService,
   dataGrid: DataGridService,

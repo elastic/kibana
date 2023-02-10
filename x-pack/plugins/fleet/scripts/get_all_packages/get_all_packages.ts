@@ -6,7 +6,7 @@
  */
 
 import fetch from 'node-fetch';
-import { kibanaPackageJson } from '@kbn/utils';
+import { kibanaPackageJson } from '@kbn/repo-info';
 import { ToolingLog } from '@kbn/tooling-log';
 import { chunk } from 'lodash';
 
@@ -14,7 +14,7 @@ import yargs from 'yargs/yargs';
 
 import type { PackageInfo } from '../../common';
 
-const REGISTRY_URL = 'https://epr-snapshot.elastic.co';
+const REGISTRY_URL = 'https://epr.elastic.co';
 const KIBANA_URL = 'http://localhost:5601';
 const KIBANA_USERNAME = 'elastic';
 const KIBANA_PASSWORD = 'changeme';

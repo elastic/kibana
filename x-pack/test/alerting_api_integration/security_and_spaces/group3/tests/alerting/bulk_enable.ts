@@ -34,14 +34,13 @@ export default ({ getService }: FtrProviderContext) => {
       const { user, space } = scenario;
 
       describe(scenario.id, () => {
-        afterEach(() => objectRemover.removeAll());
-
         it('should handle bulk enable of one rule appropriately based on id', async () => {
           const { body: createdRule } = await supertest
             .post(`${getUrlPrefix(space.id)}/api/alerting/rule`)
             .set('kbn-xsrf', 'foo')
             .send({ ...getTestRuleData(), enabled: false })
             .expect(200);
+          objectRemover.add(space.id, createdRule.id, 'rule', 'alerting');
 
           const response = await supertestWithoutAuth
             .patch(`${getUrlPrefix(space.id)}/internal/alerting/rules/_bulk_enable`)
@@ -58,7 +57,6 @@ export default ({ getService }: FtrProviderContext) => {
                 statusCode: 403,
               });
               expect(response.statusCode).to.eql(403);
-              objectRemover.add(space.id, createdRule.id, 'rule', 'alerting');
               break;
             case 'global_read at space1':
               expect(response.body).to.eql({
@@ -67,7 +65,6 @@ export default ({ getService }: FtrProviderContext) => {
                 statusCode: 403,
               });
               expect(response.statusCode).to.eql(403);
-              objectRemover.add(space.id, createdRule.id, 'rule', 'alerting');
               break;
             case 'space_1_all_alerts_none_actions at space1':
             case 'superuser at space1':
@@ -94,6 +91,7 @@ export default ({ getService }: FtrProviderContext) => {
                     schedule: { interval: '1m' },
                     actions: [],
                     params: {},
+                    running: false,
                     snoozeSchedule: [],
                     updatedAt: response.body.rules[0].updatedAt,
                     createdAt: response.body.rules[0].createdAt,
@@ -126,6 +124,7 @@ export default ({ getService }: FtrProviderContext) => {
               })
             )
             .expect(200);
+          objectRemover.add(space.id, createdRule.id, 'rule', 'alerting');
 
           const response = await supertestWithoutAuth
             .patch(`${getUrlPrefix(space.id)}/internal/alerting/rules/_bulk_enable`)
@@ -142,7 +141,6 @@ export default ({ getService }: FtrProviderContext) => {
                 statusCode: 403,
               });
               expect(response.statusCode).to.eql(403);
-              objectRemover.add(space.id, createdRule.id, 'rule', 'alerting');
               break;
             case 'global_read at space1':
               expect(response.body).to.eql({
@@ -152,7 +150,6 @@ export default ({ getService }: FtrProviderContext) => {
                 statusCode: 403,
               });
               expect(response.statusCode).to.eql(403);
-              objectRemover.add(space.id, createdRule.id, 'rule', 'alerting');
               break;
             case 'space_1_all at space1':
             case 'space_1_all_alerts_none_actions at space1':
@@ -162,7 +159,6 @@ export default ({ getService }: FtrProviderContext) => {
                 message: 'No rules found for bulk enable',
               });
               expect(response.statusCode).to.eql(400);
-              objectRemover.add(space.id, createdRule.id, 'rule', 'alerting');
               break;
             case 'superuser at space1':
             case 'space_1_all_with_restricted_fixture at space1':
@@ -185,6 +181,7 @@ export default ({ getService }: FtrProviderContext) => {
               })
             )
             .expect(200);
+          objectRemover.add(space.id, createdRule.id, 'rule', 'alerting');
 
           const response = await supertestWithoutAuth
             .patch(`${getUrlPrefix(space.id)}/internal/alerting/rules/_bulk_enable`)
@@ -201,7 +198,6 @@ export default ({ getService }: FtrProviderContext) => {
                 statusCode: 403,
               });
               expect(response.statusCode).to.eql(403);
-              objectRemover.add(space.id, createdRule.id, 'rule', 'alerting');
               break;
             case 'space_1_all at space1':
             case 'space_1_all_alerts_none_actions at space1':
@@ -213,7 +209,6 @@ export default ({ getService }: FtrProviderContext) => {
                 message: 'No rules found for bulk enable',
               });
               expect(response.statusCode).to.eql(400);
-              objectRemover.add(space.id, createdRule.id, 'rule', 'alerting');
               break;
             case 'superuser at space1':
               expect(response.body).to.eql(defaultSuccessfulResponse);
@@ -235,6 +230,7 @@ export default ({ getService }: FtrProviderContext) => {
               })
             )
             .expect(200);
+          objectRemover.add(space.id, createdRule.id, 'rule', 'alerting');
 
           const response = await supertestWithoutAuth
             .patch(`${getUrlPrefix(space.id)}/internal/alerting/rules/_bulk_enable`)
@@ -251,7 +247,6 @@ export default ({ getService }: FtrProviderContext) => {
                 statusCode: 403,
               });
               expect(response.statusCode).to.eql(403);
-              objectRemover.add(space.id, createdRule.id, 'rule', 'alerting');
               break;
             case 'global_read at space1':
               expect(response.body).to.eql({
@@ -260,7 +255,6 @@ export default ({ getService }: FtrProviderContext) => {
                 statusCode: 403,
               });
               expect(response.statusCode).to.eql(403);
-              objectRemover.add(space.id, createdRule.id, 'rule', 'alerting');
               break;
             case 'superuser at space1':
             case 'space_1_all at space1':
@@ -284,6 +278,9 @@ export default ({ getService }: FtrProviderContext) => {
                 .expect(200)
             )
           );
+          rules.map((rule) => {
+            objectRemover.add(space.id, rule.body.id, 'rule', 'alerting');
+          });
 
           const response = await supertestWithoutAuth
             .patch(`${getUrlPrefix(space.id)}/internal/alerting/rules/_bulk_enable`)
@@ -300,11 +297,6 @@ export default ({ getService }: FtrProviderContext) => {
                 statusCode: 403,
               });
               expect(response.statusCode).to.eql(403);
-              await Promise.all(
-                rules.map((rule) => {
-                  objectRemover.add(space.id, rule.body.id, 'rule', 'alerting');
-                })
-              );
               break;
             case 'global_read at space1':
               expect(response.body).to.eql({
@@ -313,11 +305,6 @@ export default ({ getService }: FtrProviderContext) => {
                 statusCode: 403,
               });
               expect(response.statusCode).to.eql(403);
-              await Promise.all(
-                rules.map((rule) => {
-                  objectRemover.add(space.id, rule.body.id, 'rule', 'alerting');
-                })
-              );
               break;
             case 'space_1_all_alerts_none_actions at space1':
             case 'superuser at space1':
@@ -341,6 +328,9 @@ export default ({ getService }: FtrProviderContext) => {
                 .expect(200)
             )
           );
+          rules.map((rule) => {
+            objectRemover.add(space.id, rule.body.id, 'rule', 'alerting');
+          });
 
           const response = await supertestWithoutAuth
             .patch(`${getUrlPrefix(space.id)}/internal/alerting/rules/_bulk_enable`)
@@ -357,11 +347,6 @@ export default ({ getService }: FtrProviderContext) => {
                 statusCode: 403,
               });
               expect(response.statusCode).to.eql(403);
-              await Promise.all(
-                rules.map((rule) => {
-                  objectRemover.add(space.id, rule.body.id, 'rule', 'alerting');
-                })
-              );
               break;
             case 'global_read at space1':
               expect(response.body).to.eql({
@@ -370,11 +355,6 @@ export default ({ getService }: FtrProviderContext) => {
                 statusCode: 403,
               });
               expect(response.statusCode).to.eql(403);
-              await Promise.all(
-                rules.map((rule) => {
-                  objectRemover.add(space.id, rule.body.id, 'rule', 'alerting');
-                })
-              );
               break;
             case 'space_1_all_alerts_none_actions at space1':
             case 'superuser at space1':
@@ -382,11 +362,6 @@ export default ({ getService }: FtrProviderContext) => {
             case 'space_1_all_with_restricted_fixture at space1':
               expect(response.body).to.eql({ ...defaultSuccessfulResponse, total: 3 });
               expect(response.statusCode).to.eql(200);
-              await Promise.all(
-                rules.map((rule) => {
-                  objectRemover.add(space.id, rule.body.id, 'rule', 'alerting');
-                })
-              );
               break;
             default:
               throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);
@@ -399,6 +374,7 @@ export default ({ getService }: FtrProviderContext) => {
             .set('kbn-xsrf', 'foo')
             .send(getTestRuleData())
             .expect(200);
+          objectRemover.add('other', createdRule.id, 'rule', 'alerting');
 
           const response = await supertestWithoutAuth
             .patch(`${getUrlPrefix('other')}/internal/alerting/rules/_bulk_enable`)
@@ -419,7 +395,6 @@ export default ({ getService }: FtrProviderContext) => {
                 statusCode: 403,
               });
               expect(response.statusCode).to.eql(403);
-              objectRemover.add('other', createdRule.id, 'rule', 'alerting');
               await getScheduledTask(createdRule.scheduled_task_id);
               break;
             case 'no_kibana_privileges at space1':
@@ -434,7 +409,6 @@ export default ({ getService }: FtrProviderContext) => {
               });
               expect(response.statusCode).to.eql(403);
               expect(response.statusCode).to.eql(403);
-              objectRemover.add('other', createdRule.id, 'rule', 'alerting');
               break;
             default:
               throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);
@@ -446,23 +420,23 @@ export default ({ getService }: FtrProviderContext) => {
     describe('Validation tests', () => {
       const { user, space } = SuperuserAtSpace1;
       it('should throw an error when bulk enable of rules when both ids and filter supplied in payload', async () => {
-        const { body: createdRule1 } = await supertest
+        const { body: createdRule } = await supertest
           .post(`${getUrlPrefix(space.id)}/api/alerting/rule`)
           .set('kbn-xsrf', 'foo')
           .send(getTestRuleData({ tags: ['foo'] }))
           .expect(200);
+        objectRemover.add(space.id, createdRule.id, 'rule', 'alerting');
 
         const response = await supertestWithoutAuth
           .patch(`${getUrlPrefix(space.id)}/internal/alerting/rules/_bulk_enable`)
           .set('kbn-xsrf', 'foo')
-          .send({ filter: 'fake_filter', ids: [createdRule1.id] })
+          .send({ filter: 'fake_filter', ids: [createdRule.id] })
           .auth(user.username, user.password);
 
         expect(response.statusCode).to.eql(400);
         expect(response.body.message).to.eql(
           "Both 'filter' and 'ids' are supplied. Define either 'ids' or 'filter' properties in method's arguments"
         );
-        objectRemover.add(space.id, createdRule1.id, 'rule', 'alerting');
       });
 
       it('should return an error if we pass more than 1000 ids', async () => {
@@ -482,11 +456,12 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       it('should return an error if we do not pass any arguments', async () => {
-        await supertest
+        const { body: createdRule } = await supertest
           .post(`${getUrlPrefix(space.id)}/api/alerting/rule`)
           .set('kbn-xsrf', 'foo')
           .send(getTestRuleData())
           .expect(200);
+        objectRemover.add(space.id, createdRule.id, 'rule', 'alerting');
 
         const response = await supertestWithoutAuth
           .patch(`${getUrlPrefix(space.id)}/internal/alerting/rules/_bulk_enable`)

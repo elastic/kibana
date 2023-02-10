@@ -10,7 +10,6 @@ import { kea, MakeLogicType } from 'kea';
 import { Status } from '../../../../../../common/types/api';
 import { MlInferenceHistoryItem } from '../../../../../../common/types/pipelines';
 import { Actions } from '../../../../shared/api_logic/create_api_logic';
-import { clearFlashMessages, flashAPIErrors } from '../../../../shared/flash_messages';
 import {
   FetchMlInferencePipelineHistoryApiLogicArgs,
   FetchMlInferencePipelineHistoryApiLogicResponse,
@@ -48,10 +47,6 @@ export const InferenceHistoryLogic = kea<
       ['data as inferenceHistoryData', 'status as fetchIndexInferenceHistoryStatus'],
     ],
   },
-  listeners: () => ({
-    fetchIndexInferenceHistory: () => clearFlashMessages(),
-    fetchIndexInferenceHistoryError: (error) => flashAPIErrors(error),
-  }),
   path: ['enterprise_search', 'content', 'pipelines_inference_history'],
   selectors: ({ selectors }) => ({
     inferenceHistory: [

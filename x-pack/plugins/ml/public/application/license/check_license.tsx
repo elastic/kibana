@@ -24,10 +24,10 @@ let mlLicense: MlClientLicense | null = null;
 export function setLicenseCache(
   licensingStart: LicensingPluginStart,
   application: CoreStart['application'],
-  postInitFunctions?: Array<(lic: MlLicense) => void>
+  callback?: (lic: MlLicense) => void
 ) {
   mlLicense = new MlClientLicense(application);
-  mlLicense.setup(licensingStart.license$, postInitFunctions);
+  mlLicense.setup(licensingStart.license$, callback);
   return mlLicense;
 }
 

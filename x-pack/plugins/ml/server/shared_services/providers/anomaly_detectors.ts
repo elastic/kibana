@@ -32,9 +32,10 @@ export function getAnomalyDetectorsProvider(getGuards: GetGuards): AnomalyDetect
       request: KibanaRequest,
       savedObjectsClient: SavedObjectsClientContract
     ) {
+      const guards = getGuards(request, savedObjectsClient);
       return {
         async jobs(jobId?: string) {
-          return await getGuards(request, savedObjectsClient)
+          return await guards
             .isFullLicense()
             .hasMlCapabilities(['canGetJobs'])
             .ok(async ({ mlClient }) => {
@@ -45,7 +46,7 @@ export function getAnomalyDetectorsProvider(getGuards: GetGuards): AnomalyDetect
             });
         },
         async jobStats(jobId?: string) {
-          return await getGuards(request, savedObjectsClient)
+          return await guards
             .isFullLicense()
             .hasMlCapabilities(['canGetJobs'])
             .ok(async ({ mlClient }) => {
@@ -56,7 +57,7 @@ export function getAnomalyDetectorsProvider(getGuards: GetGuards): AnomalyDetect
             });
         },
         async datafeeds(datafeedId?: string) {
-          return await getGuards(request, savedObjectsClient)
+          return await guards
             .isFullLicense()
             .hasMlCapabilities(['canGetDatafeeds'])
             .ok(async ({ mlClient }) => {
@@ -67,7 +68,7 @@ export function getAnomalyDetectorsProvider(getGuards: GetGuards): AnomalyDetect
             });
         },
         async datafeedStats(datafeedId?: string) {
-          return await getGuards(request, savedObjectsClient)
+          return await guards
             .isFullLicense()
             .hasMlCapabilities(['canGetDatafeeds'])
             .ok(async ({ mlClient }) => {

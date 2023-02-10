@@ -7,16 +7,9 @@
 
 import { kea, MakeLogicType } from 'kea';
 
-import { i18n } from '@kbn/i18n';
-
 import { AnalyticsCollection } from '../../../../../common/types/analytics';
 import { Status } from '../../../../../common/types/api';
 import { Actions } from '../../../shared/api_logic/create_api_logic';
-import {
-  flashAPIErrors,
-  clearFlashMessages,
-  flashSuccessToast,
-} from '../../../shared/flash_messages';
 import { KibanaLogic } from '../../../shared/kibana';
 import {
   DeleteAnalyticsCollectionAPILogic,
@@ -25,7 +18,6 @@ import {
 import { ROOT_PATH } from '../../routes';
 
 export interface DeleteAnalyticsCollectionActions {
-  apiError: Actions<{}, DeleteAnalyticsCollectionApiLogicResponse>['apiError'];
   apiSuccess: Actions<{}, DeleteAnalyticsCollectionApiLogicResponse>['apiSuccess'];
   deleteAnalyticsCollection(id: string): { id: string };
   makeRequest: Actions<{}, DeleteAnalyticsCollectionApiLogicResponse>['makeRequest'];
@@ -43,17 +35,11 @@ export const DeleteAnalyticsCollectionLogic = kea<
     deleteAnalyticsCollection: (id) => ({ id }),
   },
   connect: {
-    actions: [DeleteAnalyticsCollectionAPILogic, ['makeRequest', 'apiSuccess', 'apiError']],
+    actions: [DeleteAnalyticsCollectionAPILogic, ['makeRequest', 'apiSuccess']],
     values: [DeleteAnalyticsCollectionAPILogic, ['status']],
   },
   listeners: ({ actions }) => ({
-    apiError: (e) => flashAPIErrors(e),
-    apiSuccess: async (undefined, breakpoint) => {
-      flashSuccessToast(
-        i18n.translate('xpack.enterpriseSearch.analytics.collectionsDelete.action.successMessage', {
-          defaultMessage: 'The collection has been successfully deleted',
-        })
-      );
+    apiSuccess: async (_, breakpoint) => {
       // Wait for propagation of the collection deletion
       await breakpoint(1000);
       KibanaLogic.values.navigateToUrl(ROOT_PATH);
@@ -61,7 +47,6 @@ export const DeleteAnalyticsCollectionLogic = kea<
     deleteAnalyticsCollection: ({ id }) => {
       actions.makeRequest({ id });
     },
-    makeRequest: () => clearFlashMessages(),
   }),
   path: ['enterprise_search', 'analytics', 'collections', 'delete'],
   selectors: ({ selectors }) => ({

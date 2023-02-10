@@ -1,9 +1,7 @@
 {
   "extends": "../../../tsconfig.base.json",
   "compilerOptions": {
-    "outDir": "./target/types",
-    "emitDeclarationOnly": true,
-    "declaration": true,
+    "outDir": "target/types",
   },
   "include": [
     "common/**/*",
@@ -16,12 +14,40 @@
     "../../../typings/**/*"
   ],
   "kbn_references": [
-    { "path": "../../../src/core/tsconfig.json" },
-    { "path": "../../../src/plugins/data/tsconfig.json" },
-    { "path": "../../../src/plugins/navigation/tsconfig.json" },
-    { "path": "../../../x-pack/plugins/fleet/tsconfig.json" },
-    { "path": "../../../x-pack/plugins/fleet/tsconfig.json" },
-    { "path": "../../../x-pack/plugins/task_manager/tsconfig.json" },
-    { "path": "../../../x-pack/plugins/security/tsconfig.json" }
+    "@kbn/core",
+    "@kbn/data-plugin",
+    "@kbn/fleet-plugin",
+    "@kbn/fleet-plugin",
+    "@kbn/task-manager-plugin",
+    "@kbn/security-plugin",
+    "@kbn/config-schema",
+    "@kbn/licensing-plugin",
+    "@kbn/kibana-react-plugin",
+    "@kbn/shared-ux-link-redirect-app",
+    "@kbn/usage-collection-plugin",
+    "@kbn/cloud-plugin",
+    "@kbn/unified-search-plugin",
+    "@kbn/charts-plugin",
+    "@kbn/discover-plugin",
+    "@kbn/i18n",
+    "@kbn/ui-theme",
+    "@kbn/i18n-react",
+    "@kbn/es-query",
+    "@kbn/rison",
+    "@kbn/data-views-plugin",
+    "@kbn/std",
+    "@kbn/monaco",
+    "@kbn/utility-types",
+    "@kbn/core-logging-server-mocks",
+    "@kbn/utility-types-jest",
+    "@kbn/securitysolution-es-utils",
+    "@kbn/core-elasticsearch-client-server-mocks",
+    "@kbn/es-types",
+    "@kbn/core-elasticsearch-server",
+    "@kbn/ecs",
+    "@kbn/core-saved-objects-api-server",
+  ],
+  "exclude": [
+    "target/**/*",
   ]
 }

@@ -7,10 +7,10 @@
 
 import React from 'react';
 import { mount } from 'enzyme';
-import { waitFor, act } from '@testing-library/react';
+import { waitFor, act, fireEvent } from '@testing-library/react';
 import { noop } from 'lodash/fp';
 
-import { noCreateCasesPermissions, TestProviders } from '../../common/mock';
+import { noCreateCasesPermissions, TestProviders, createAppMockRenderer } from '../../common/mock';
 
 import { CommentType } from '../../../common/api';
 import { SECURITY_SOLUTION_OWNER } from '../../../common/constants';
@@ -20,6 +20,7 @@ import { AddComment } from '.';
 import { CasesTimelineIntegrationProvider } from '../timeline_context';
 import { timelineIntegrationMock } from '../__mock__/timeline';
 import type { CaseAttachmentWithoutOwner } from '../../types';
+import type { AppMockRenderer } from '../../common/mock';
 
 jest.mock('../../containers/use_create_attachments');
 
@@ -47,11 +48,17 @@ const sampleData: CaseAttachmentWithoutOwner = {
   comment: 'what a cool comment',
   type: CommentType.user as const,
 };
+const appId = 'testAppId';
+const draftKey = `cases.${appId}.${addCommentProps.caseId}.${addCommentProps.id}.markdownEditor`;
 
 describe('AddComment ', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     useCreateAttachmentsMock.mockImplementation(() => defaultResponse);
+  });
+
+  afterEach(() => {
+    sessionStorage.removeItem(draftKey);
   });
 
   it('should post comment on submit click', async () => {
@@ -206,6 +213,73 @@ describe('AddComment ', () => {
 
     await waitFor(() => {
       expect(wrapper.find(`[data-test-subj="add-comment"] textarea`).text()).toBe('[title](url)');
+    });
+  });
+});
+
+describe('draft comment ', () => {
+  let appMockRenderer: AppMockRenderer;
+
+  beforeEach(() => {
+    appMockRenderer = createAppMockRenderer();
+    jest.clearAllMocks();
+  });
+
+  beforeAll(() => {
+    jest.useFakeTimers();
+  });
+
+  afterEach(() => {
+    jest.clearAllTimers();
+  });
+
+  afterAll(() => {
+    jest.useRealTimers();
+  });
+
+  it('should clear session storage on submit', async () => {
+    const result = appMockRenderer.render(<AddComment {...addCommentProps} />);
+
+    fireEvent.change(result.getByLabelText('caseComment'), {
+      target: { value: sampleData.comment },
+    });
+
+    act(() => {
+      jest.advanceTimersByTime(1000);
+    });
+
+    await waitFor(() => {
+      expect(result.getByLabelText('caseComment')).toHaveValue(sessionStorage.getItem(draftKey));
+    });
+
+    fireEvent.click(result.getByTestId('submit-comment'));
+
+    await waitFor(() => {
+      expect(onCommentSaving).toBeCalled();
+      expect(createAttachments).toBeCalledWith({
+        caseId: addCommentProps.caseId,
+        caseOwner: SECURITY_SOLUTION_OWNER,
+        data: [sampleData],
+        updateCase: onCommentPosted,
+      });
+      expect(result.getByLabelText('caseComment').textContent).toBe('');
+      expect(sessionStorage.getItem(draftKey)).toBe('');
+    });
+  });
+
+  describe('existing storage key', () => {
+    beforeEach(() => {
+      sessionStorage.setItem(draftKey, 'value set in storage');
+    });
+
+    afterEach(() => {
+      sessionStorage.removeItem(draftKey);
+    });
+
+    it('should have draft comment same as existing session storage', async () => {
+      const result = appMockRenderer.render(<AddComment {...addCommentProps} />);
+
+      expect(result.getByLabelText('caseComment')).toHaveValue('value set in storage');
     });
   });
 });

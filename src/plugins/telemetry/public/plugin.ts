@@ -12,22 +12,17 @@ import type {
   CoreSetup,
   HttpStart,
   PluginInitializerContext,
-  SavedObjectsClientContract,
-  SavedObjectsBatchResponse,
   ApplicationStart,
   DocLinksStart,
+  HttpSetup,
 } from '@kbn/core/public';
 import type { ScreenshotModePluginSetup } from '@kbn/screenshot-mode-plugin/public';
 import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
 import { ElasticV3BrowserShipper } from '@kbn/analytics-shippers-elastic-v3-browser';
 
 import { of } from 'rxjs';
+import { FetchTelemetryConfigResponse, FetchTelemetryConfigRoute } from '../common/routes';
 import { TelemetrySender, TelemetryService, TelemetryNotifications } from './services';
-import type {
-  TelemetrySavedObjectAttributes,
-  TelemetrySavedObject,
-} from '../common/telemetry_config/types';
-import { getNotifyUserAboutOptInDefault } from '../common/telemetry_config/get_telemetry_notify_user_about_optin_default';
 import { renderWelcomeTelemetryNotice } from './render_welcome_telemetry_notice';
 
 /**
@@ -122,7 +117,6 @@ export class TelemetryPlugin implements Plugin<TelemetryPluginSetup, TelemetryPl
   private telemetryNotifications?: TelemetryNotifications;
   private telemetryService?: TelemetryService;
   private canUserChangeSettings: boolean = true;
-  private savedObjectsClient?: SavedObjectsClientContract;
 
   constructor(initializerContext: PluginInitializerContext<TelemetryPluginConfig>) {
     this.currentKibanaVersion = initializerContext.env.packageInfo.version;
@@ -169,7 +163,7 @@ export class TelemetryPlugin implements Plugin<TelemetryPluginSetup, TelemetryPl
     });
 
     this.telemetrySender = new TelemetrySender(this.telemetryService, async () => {
-      await this.refreshConfig();
+      await this.refreshConfig(http);
       analytics.optIn({ global: { enabled: this.telemetryService!.isOptedIn } });
     });
 
@@ -200,7 +194,6 @@ export class TelemetryPlugin implements Plugin<TelemetryPluginSetup, TelemetryPl
     overlays,
     theme,
     application,
-    savedObjects,
     docLinks,
   }: CoreStart): TelemetryPluginStart {
     if (!this.telemetryService) {
@@ -220,8 +213,6 @@ export class TelemetryPlugin implements Plugin<TelemetryPluginSetup, TelemetryPl
     });
     this.telemetryNotifications = telemetryNotifications;
 
-    this.savedObjectsClient = savedObjects.client;
-
     application.currentAppId$.subscribe(async () => {
       const isUnauthenticated = this.getIsUnauthenticated(http);
       if (isUnauthenticated) {
@@ -229,7 +220,7 @@ export class TelemetryPlugin implements Plugin<TelemetryPluginSetup, TelemetryPl
       }
 
       // Refresh and get telemetry config
-      const updatedConfig = await this.refreshConfig();
+      const updatedConfig = await this.refreshConfig(http);
 
       analytics.optIn({ global: { enabled: this.telemetryService!.isOptedIn } });
 
@@ -267,14 +258,17 @@ export class TelemetryPlugin implements Plugin<TelemetryPluginSetup, TelemetryPl
     };
   }
 
-  private async refreshConfig(): Promise<TelemetryPluginConfig | undefined> {
-    if (this.savedObjectsClient && this.telemetryService) {
-      // Update the telemetry config based as a mix of the config files and saved objects
-      const telemetrySavedObject = await this.getTelemetrySavedObject(this.savedObjectsClient);
-      const updatedConfig = await this.updateConfigsBasedOnSavedObjects(telemetrySavedObject);
+  /**
+   * Retrieve the up-to-date configuration
+   * @param http HTTP helper to make requests to the server
+   * @private
+   */
+  private async refreshConfig(http: HttpStart | HttpSetup): Promise<TelemetryPluginConfig> {
+    const updatedConfig = await this.fetchUpdatedConfig(http);
+    if (this.telemetryService) {
       this.telemetryService.config = updatedConfig;
-      return updatedConfig;
     }
+    return updatedConfig;
   }
 
   /**
@@ -321,74 +315,22 @@ export class TelemetryPlugin implements Plugin<TelemetryPluginSetup, TelemetryPl
     }
   }
 
-  private async updateConfigsBasedOnSavedObjects(
-    telemetrySavedObject: TelemetrySavedObject
-  ): Promise<TelemetryPluginConfig> {
-    const configTelemetrySendUsageFrom = this.config.sendUsageFrom;
-    const configTelemetryOptIn = this.config.optIn as boolean;
-    const configTelemetryAllowChangingOptInStatus = this.config.allowChangingOptInStatus;
-
-    const currentKibanaVersion = this.currentKibanaVersion;
-
-    const { getTelemetryAllowChangingOptInStatus, getTelemetryOptIn, getTelemetrySendUsageFrom } =
-      await import('../common/telemetry_config');
-
-    const allowChangingOptInStatus = getTelemetryAllowChangingOptInStatus({
-      configTelemetryAllowChangingOptInStatus,
-      telemetrySavedObject,
-    });
-
-    const optIn = getTelemetryOptIn({
-      configTelemetryOptIn,
-      allowChangingOptInStatus,
-      telemetrySavedObject,
-      currentKibanaVersion,
-    });
-
-    const sendUsageFrom = getTelemetrySendUsageFrom({
-      configTelemetrySendUsageFrom,
-      telemetrySavedObject,
-    });
-
-    const telemetryNotifyUserAboutOptInDefault = getNotifyUserAboutOptInDefault({
-      telemetrySavedObject,
-      allowChangingOptInStatus,
-      configTelemetryOptIn,
-      telemetryOptedIn: optIn,
-    });
+  /**
+   * Fetch configuration from the server and merge it with the one the browser already knows
+   * @param http The HTTP helper to make the requests
+   * @private
+   */
+  private async fetchUpdatedConfig(http: HttpStart | HttpSetup): Promise<TelemetryPluginConfig> {
+    const { allowChangingOptInStatus, optIn, sendUsageFrom, telemetryNotifyUserAboutOptInDefault } =
+      await http.get<FetchTelemetryConfigResponse>(FetchTelemetryConfigRoute);
 
     return {
       ...this.config,
+      allowChangingOptInStatus,
       optIn,
       sendUsageFrom,
       telemetryNotifyUserAboutOptInDefault,
       userCanChangeSettings: this.canUserChangeSettings,
     };
-  }
-
-  private async getTelemetrySavedObject(savedObjectsClient: SavedObjectsClientContract) {
-    try {
-      // Use bulk get API here to avoid the queue. This could fail independent requests if we don't have rights to access the telemetry object otherwise
-      const {
-        savedObjects: [{ attributes }],
-      } = (await savedObjectsClient.bulkGet([
-        {
-          id: 'telemetry',
-          type: 'telemetry',
-        },
-      ])) as SavedObjectsBatchResponse<TelemetrySavedObjectAttributes>;
-      return attributes;
-    } catch (error) {
-      const errorCode = error[Symbol('SavedObjectsClientErrorCode')];
-      if (errorCode === 'SavedObjectsClient/notFound') {
-        return null;
-      }
-
-      if (errorCode === 'SavedObjectsClient/forbidden') {
-        return false;
-      }
-
-      throw error;
-    }
   }
 }

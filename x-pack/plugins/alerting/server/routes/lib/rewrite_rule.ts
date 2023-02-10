@@ -9,10 +9,11 @@ import { omit } from 'lodash';
 import { RuleTypeParams, SanitizedRule, RuleLastRun } from '../../types';
 
 export const rewriteRuleLastRun = (lastRun: RuleLastRun) => {
-  const { outcomeMsg, alertsCount, ...rest } = lastRun;
+  const { outcomeMsg, outcomeOrder, alertsCount, ...rest } = lastRun;
   return {
     alerts_count: alertsCount,
     outcome_msg: outcomeMsg,
+    outcome_order: outcomeOrder,
     ...rest,
   };
 };
@@ -64,8 +65,9 @@ export const rewriteRule = ({
     ...(frequency
       ? {
           frequency: {
-            ...frequency,
+            summary: frequency.summary,
             notify_when: frequency.notifyWhen,
+            throttle: frequency.throttle,
           },
         }
       : {}),

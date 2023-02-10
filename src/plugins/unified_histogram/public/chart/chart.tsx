@@ -18,10 +18,12 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { DataView, DataViewField, DataViewType } from '@kbn/data-views-plugin/public';
-import type { TypedLensByValueInput } from '@kbn/lens-plugin/public';
+import type { LensEmbeddableInput } from '@kbn/lens-plugin/public';
+import type { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
+import { Subject } from 'rxjs';
 import { HitsCounter } from '../hits_counter';
 import { Histogram } from './histogram';
-import { useChartPanels } from './use_chart_panels';
+import { useChartPanels } from './hooks/use_chart_panels';
 import type {
   UnifiedHistogramBreakdownContext,
   UnifiedHistogramChartContext,
@@ -30,33 +32,44 @@ import type {
   UnifiedHistogramChartLoadEvent,
   UnifiedHistogramRequestContext,
   UnifiedHistogramServices,
+  UnifiedHistogramInput$,
+  UnifiedHistogramInputMessage,
 } from '../types';
 import { BreakdownFieldSelector } from './breakdown_field_selector';
-import { useTotalHits } from './use_total_hits';
-import { useRequestParams } from './use_request_params';
-import { useChartStyles } from './use_chart_styles';
-import { useChartActions } from './use_chart_actions';
-import { useRefetchId } from './use_refetch_id';
-import { getLensAttributes } from './get_lens_attributes';
+import { useTotalHits } from './hooks/use_total_hits';
+import { useRequestParams } from './hooks/use_request_params';
+import { useChartStyles } from './hooks/use_chart_styles';
+import { useChartActions } from './hooks/use_chart_actions';
+import { getLensAttributes } from './utils/get_lens_attributes';
+import { useRefetch } from './hooks/use_refetch';
+import { useEditVisualization } from './hooks/use_edit_visualization';
 
 export interface ChartProps {
   className?: string;
   services: UnifiedHistogramServices;
   dataView: DataView;
-  lastReloadRequestTime?: number;
+  query?: Query | AggregateQuery;
+  filters?: Filter[];
+  timeRange?: TimeRange;
   request?: UnifiedHistogramRequestContext;
   hits?: UnifiedHistogramHitsContext;
   chart?: UnifiedHistogramChartContext;
   breakdown?: UnifiedHistogramBreakdownContext;
   appendHitsCounter?: ReactElement;
   appendHistogram?: ReactElement;
-  onEditVisualization?: (lensAttributes: TypedLensByValueInput['attributes']) => void;
+  disableAutoFetching?: boolean;
+  disableTriggers?: LensEmbeddableInput['disableTriggers'];
+  disabledActions?: LensEmbeddableInput['disabledActions'];
+  input$?: UnifiedHistogramInput$;
+  getRelativeTimeRange?: () => TimeRange;
   onResetChartHeight?: () => void;
   onChartHiddenChange?: (chartHidden: boolean) => void;
   onTimeIntervalChange?: (timeInterval: string) => void;
   onBreakdownFieldChange?: (breakdownField: DataViewField | undefined) => void;
   onTotalHitsChange?: (status: UnifiedHistogramFetchStatus, result?: number | Error) => void;
   onChartLoad?: (event: UnifiedHistogramChartLoadEvent) => void;
+  onFilter?: LensEmbeddableInput['onFilter'];
+  onBrushEnd?: LensEmbeddableInput['onBrushEnd'];
 }
 
 const HistogramMemoized = memo(Histogram);
@@ -65,20 +78,28 @@ export function Chart({
   className,
   services,
   dataView,
-  lastReloadRequestTime,
+  query: originalQuery,
+  filters: originalFilters,
+  timeRange: originalTimeRange,
   request,
   hits,
   chart,
   breakdown,
   appendHitsCounter,
   appendHistogram,
-  onEditVisualization: originalOnEditVisualization,
+  disableAutoFetching,
+  disableTriggers,
+  disabledActions,
+  input$: originalInput$,
+  getRelativeTimeRange: originalGetRelativeTimeRange,
   onResetChartHeight,
   onChartHiddenChange,
   onTimeIntervalChange,
   onBreakdownFieldChange,
   onTotalHitsChange,
   onChartLoad,
+  onFilter,
+  onBrushEnd,
 }: ChartProps) {
   const {
     showChartOptionsPopover,
@@ -107,15 +128,20 @@ export function Chart({
     dataView.isTimeBased()
   );
 
-  const { filters, query, relativeTimeRange } = useRequestParams({
+  const input$ = useMemo(
+    () => originalInput$ ?? new Subject<UnifiedHistogramInputMessage>(),
+    [originalInput$]
+  );
+
+  const { filters, query, getTimeRange, updateTimeRange, relativeTimeRange } = useRequestParams({
     services,
-    lastReloadRequestTime,
-    request,
+    query: originalQuery,
+    filters: originalFilters,
+    timeRange: originalTimeRange,
   });
 
-  const refetchId = useRefetchId({
+  const refetch$ = useRefetch({
     dataView,
-    lastReloadRequestTime,
     request,
     hits,
     chart,
@@ -124,28 +150,21 @@ export function Chart({
     filters,
     query,
     relativeTimeRange,
+    disableAutoFetching,
+    input$,
+    beforeRefetch: updateTimeRange,
   });
-
-  // We need to update the absolute time range whenever the refetchId changes
-  const timeRange = useMemo(
-    () => services.data.query.timefilter.timefilter.getAbsoluteTime(),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [services.data.query.timefilter.timefilter, refetchId]
-  );
 
   useTotalHits({
     services,
     dataView,
-    lastReloadRequestTime,
     request,
     hits,
-    chart,
     chartVisible,
-    breakdown,
     filters,
     query,
-    timeRange,
-    refetchId,
+    getTimeRange,
+    refetch$,
     onTotalHitsChange,
   });
 
@@ -173,15 +192,17 @@ export function Chart({
     [breakdown?.field, chart?.timeInterval, chart?.title, dataView, filters, query]
   );
 
-  const onEditVisualization = useMemo(
-    () =>
-      originalOnEditVisualization
-        ? () => {
-            originalOnEditVisualization(lensAttributes);
-          }
-        : undefined,
-    [lensAttributes, originalOnEditVisualization]
+  const getRelativeTimeRange = useMemo(
+    () => originalGetRelativeTimeRange ?? (() => relativeTimeRange),
+    [originalGetRelativeTimeRange, relativeTimeRange]
   );
+
+  const onEditVisualization = useEditVisualization({
+    services,
+    dataView,
+    getRelativeTimeRange,
+    lensAttributes,
+  });
 
   return (
     <EuiFlexGroup
@@ -288,14 +309,18 @@ export function Chart({
             <HistogramMemoized
               services={services}
               dataView={dataView}
-              lastReloadRequestTime={lastReloadRequestTime}
               request={request}
               hits={hits}
               chart={chart}
-              timeRange={timeRange}
+              getTimeRange={getTimeRange}
+              refetch$={refetch$}
               lensAttributes={lensAttributes}
+              disableTriggers={disableTriggers}
+              disabledActions={disabledActions}
               onTotalHitsChange={onTotalHitsChange}
               onChartLoad={onChartLoad}
+              onFilter={onFilter}
+              onBrushEnd={onBrushEnd}
             />
           </section>
           {appendHistogram}

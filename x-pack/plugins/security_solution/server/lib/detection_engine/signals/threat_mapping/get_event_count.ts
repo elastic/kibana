@@ -11,7 +11,7 @@ import { getQueryFilter } from '../get_query_filter';
 import { singleSearchAfter } from '../single_search_after';
 import { buildEventsSearchQuery } from '../build_events_query';
 
-export const MAX_PER_PAGE = 3000;
+export const MAX_PER_PAGE = 9000;
 
 export const getEventList = async ({
   services,
@@ -27,6 +27,7 @@ export const getEventList = async ({
   secondaryTimestamp,
   runtimeMappings,
   exceptionFilter,
+  eventListConfig,
 }: EventsOptions): Promise<estypes.SearchResponse<EventDoc>> => {
   const calculatedPerPage = perPage ?? MAX_PER_PAGE;
   if (calculatedPerPage > 10000) {
@@ -59,6 +60,7 @@ export const getEventList = async ({
     sortOrder: 'desc',
     trackTotalHits: false,
     runtimeMappings,
+    overrideBody: eventListConfig,
   });
 
   ruleExecutionLogger.debug(`Retrieved events items of size: ${searchResult.hits.hits.length}`);

@@ -1,9 +1,7 @@
 {
   "extends": "../../../tsconfig.base.json",
   "compilerOptions": {
-    "outDir": "./target/types",
-    "emitDeclarationOnly": true,
-    "declaration": true,
+    "outDir": "target/types",
     "isolatedModules": true,
   },
   "include": [
@@ -12,8 +10,14 @@
     "common/**/*"
   ],
   "kbn_references": [
-    { "path": "../../../src/core/tsconfig.json" },
-    { "path": "../licensing/tsconfig.json" },
-    { "path": "../license_api_guard/tsconfig.json" }
+    "@kbn/core",
+    "@kbn/licensing-plugin",
+    "@kbn/license-api-guard-plugin",
+    "@kbn/i18n",
+    "@kbn/core-http-request-handler-context-server",
+    "@kbn/core-custom-branding-common",
+  ],
+  "exclude": [
+    "target/**/*",
   ]
 }

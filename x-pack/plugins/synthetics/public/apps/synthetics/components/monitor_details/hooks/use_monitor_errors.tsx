@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import { useEsSearch } from '@kbn/observability-plugin/public';
+import { useTimeZone } from '@kbn/observability-plugin/public';
 import { useParams } from 'react-router-dom';
 import { useMemo } from 'react';
-import { Ping } from '../../../../../../common/runtime_types';
+import { useSelectedLocation } from './use_selected_location';
+import { PingState } from '../../../../../../common/runtime_types';
 import {
   EXCLUDE_RUN_ONCE_FILTER,
   SUMMARY_FILTER,
@@ -16,6 +17,7 @@ import {
 import { SYNTHETICS_INDEX_PATTERN } from '../../../../../../common/constants';
 import { useSyntheticsRefreshContext } from '../../../contexts';
 import { useGetUrlParams } from '../../../hooks';
+import { useReduxEsSearch } from '../../../hooks/use_redux_es_search';
 
 export function useMonitorErrors(monitorIdArg?: string) {
   const { lastRefresh } = useSyntheticsRefreshContext();
@@ -24,7 +26,11 @@ export function useMonitorErrors(monitorIdArg?: string) {
 
   const { dateRangeStart, dateRangeEnd } = useGetUrlParams();
 
-  const { data, loading } = useEsSearch(
+  const selectedLocation = useSelectedLocation();
+
+  const timeZone = useTimeZone();
+
+  const { data, loading } = useReduxEsSearch(
     {
       index: SYNTHETICS_INDEX_PATTERN,
       body: {
@@ -39,6 +45,7 @@ export function useMonitorErrors(monitorIdArg?: string) {
                   '@timestamp': {
                     gte: dateRangeStart,
                     lte: dateRangeEnd,
+                    time_zone: timeZone,
                   },
                 },
               },
@@ -52,21 +59,26 @@ export function useMonitorErrors(monitorIdArg?: string) {
                   config_id: monitorIdArg ?? monitorId,
                 },
               },
+              {
+                term: {
+                  'observer.geo.name': selectedLocation?.label,
+                },
+              },
             ],
           },
         },
-        sort: [{ '@timestamp': 'desc' }],
+        sort: [{ 'state.started_at': 'desc' }],
         aggs: {
           errorStates: {
             terms: {
               field: 'state.id',
-              size: 1000,
+              size: 10000,
             },
             aggs: {
               summary: {
                 top_hits: {
                   size: 1,
-                  _source: ['error', 'state', 'monitor'],
+                  _source: ['error', 'state', 'monitor', '@timestamp'],
                   sort: [{ '@timestamp': 'desc' }],
                 },
               },
@@ -76,17 +88,18 @@ export function useMonitorErrors(monitorIdArg?: string) {
       },
     },
     [lastRefresh, monitorId, monitorIdArg, dateRangeStart, dateRangeEnd],
-    { name: 'getMonitorErrors' }
+    { name: 'getMonitorErrors', isRequestReady: Boolean(selectedLocation?.label) }
   );
 
   return useMemo(() => {
     const errorStates = (data?.aggregations?.errorStates.buckets ?? []).map((loc) => {
-      return loc.summary.hits.hits?.[0]._source as Ping;
+      return loc.summary.hits.hits?.[0]._source as PingState;
     });
 
     return {
       errorStates,
       loading,
+      data,
     };
   }, [data, loading]);
 }

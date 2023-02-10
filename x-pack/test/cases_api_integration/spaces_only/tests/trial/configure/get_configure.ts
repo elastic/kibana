@@ -12,16 +12,16 @@ import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
 import { ObjectRemover as ActionsRemover } from '../../../../../alerting_api_integration/common/lib';
 import {
-  getServiceNowConnector,
-  createConnector,
   createConfiguration,
   getConfiguration,
   getConfigurationRequest,
   removeServerGeneratedPropertiesFromSavedObject,
   getConfigurationOutput,
   getAuthWithSuperUser,
+  getServiceNowConnector,
+  createConnector,
   getServiceNowSimulationServer,
-} from '../../../../common/lib/utils';
+} from '../../../../common/lib/api';
 import { nullUser } from '../../../../common/lib/mock';
 
 // eslint-disable-next-line import/no-default-export

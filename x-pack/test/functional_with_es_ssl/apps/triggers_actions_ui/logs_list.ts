@@ -51,6 +51,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const spaces = getService('spaces');
 
   async function refreshLogsList() {
+    await pageObjects.common.navigateToApp('triggersActions');
     await testSubjects.click('logsTab');
   }
 

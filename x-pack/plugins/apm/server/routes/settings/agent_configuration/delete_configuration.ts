@@ -6,6 +6,7 @@
  */
 
 import { APMInternalESClient } from '../../../lib/helpers/create_es_client/create_internal_es_client';
+import { APM_AGENT_CONFIGURATION_INDEX } from '../apm_indices/get_apm_indices';
 
 export async function deleteConfiguration({
   configurationId,
@@ -16,7 +17,7 @@ export async function deleteConfiguration({
 }) {
   const params = {
     refresh: 'wait_for' as const,
-    index: internalESClient.apmIndices.apmAgentConfigurationIndex,
+    index: APM_AGENT_CONFIGURATION_INDEX,
     id: configurationId,
   };
 

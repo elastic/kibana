@@ -32,8 +32,6 @@ export const ALERTS_COUNT =
 export const ALERTS_TREND_SIGNAL_RULE_NAME_PANEL =
   '[data-test-subj="render-content-kibana.alert.rule.name"]';
 
-export const CHART_SELECT = '[data-test-subj="chartSelect"]';
-
 export const CLOSE_ALERT_BTN = '[data-test-subj="close-alert-status"]';
 
 export const CLOSE_SELECTED_ALERTS_BTN = '[data-test-subj="close-alert-status"]';
@@ -64,6 +62,12 @@ export const MANAGE_ALERT_DETECTION_RULES_BTN = '[data-test-subj="manage-alert-d
 
 export const MARK_ALERT_ACKNOWLEDGED_BTN = '[data-test-subj="acknowledged-alert-status"]';
 
+export const ALERTS_REFRESH_BTN = '[data-test-subj="querySubmitButton"]';
+
+export const ALERTS_HISTOGRAM_PANEL_LOADER = '[data-test-subj="loadingPanelAlertsHistogram"]';
+
+export const ALERTS_CONTAINER_LOADING_BAR = '[data-test-subj="events-container-loading-true"]';
+
 export const NUMBER_OF_ALERTS =
   '[data-test-subj="events-viewer-panel"] [data-test-subj="server-side-event-count"]';
 
@@ -86,7 +90,7 @@ export const RULE_NAME = '[data-test-subj^=formatted-field][data-test-subj$=rule
 
 export const SELECTED_ALERTS = '[data-test-subj="selectedShowBulkActionsButton"]';
 
-export const SELECT_TABLE = '[data-test-subj="table"]';
+export const SELECT_AGGREGATION_CHART = '[data-test-subj="chart-select-table"]';
 
 export const SEND_ALERT_TO_TIMELINE_BTN = '[data-test-subj="send-alert-to-timeline-button"]';
 
@@ -101,6 +105,8 @@ export const SOURCE_IP = '[data-test-subj^=formatted-field][data-test-subj$=sour
 export const TAKE_ACTION_POPOVER_BTN = '[data-test-subj="selectedShowBulkActionsButton"]';
 
 export const TIMELINE_CONTEXT_MENU_BTN = '[data-test-subj="timeline-context-menu-button"]';
+
+export const TIMELINE_CONTEXT_MENU = '[data-test-subj="actions-context-menu"]';
 
 export const USER_NAME = '[data-test-subj^=formatted-field][data-test-subj$=user\\.name]';
 
@@ -121,3 +127,10 @@ export const USER_RISK_HEADER_COLIMN =
 export const USER_RISK_COLUMN = '[data-gridcell-column-id="user.risk.calculated_level"]';
 
 export const ACTION_COLUMN = '[data-gridcell-column-id="default-timeline-control-column"]';
+
+export const DATAGRID_CHANGES_IN_PROGRESS = '[data-test-subj="body-data-grid"] .euiProgress';
+
+export const EVENT_CONTAINER_TABLE_LOADING = '[data-test-subj="events-container-loading-true"]';
+
+export const EVENT_CONTAINER_TABLE_NOT_LOADING =
+  '[data-test-subj="events-container-loading-false"]';

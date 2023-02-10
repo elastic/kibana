@@ -17,53 +17,54 @@ import React from 'react';
 import { AGENT_NAMES } from '../../../../common/agent_name';
 import { getAgentIcon } from './get_agent_icon';
 import { AgentIcon } from '.';
+import { MockApmPluginStorybook } from '../../../context/apm_plugin/mock_apm_plugin_storybook';
 
 export default {
   title: 'shared/AgentIcon',
   component: AgentIcon,
 };
 
-export const List: Story = (_args, { globals }) => {
-  const darkMode = globals.euiTheme.includes('dark');
-
+export const List: Story = () => {
   return (
-    <EuiFlexGroup gutterSize="l" wrap={true}>
-      {AGENT_NAMES.map((agentName) => {
-        return (
-          <EuiFlexItem key={agentName} grow={false}>
-            <EuiCard
-              icon={
-                <>
-                  <p>
+    <MockApmPluginStorybook>
+      <EuiFlexGroup gutterSize="l" wrap={true}>
+        {AGENT_NAMES.map((agentName) => {
+          return (
+            <EuiFlexItem key={agentName} grow={false}>
+              <EuiCard
+                icon={
+                  <>
+                    <p>
+                      <EuiToolTip
+                        position="top"
+                        content="Icon rendered with `EuiImage`"
+                      >
+                        <EuiImage
+                          size="s"
+                          hasShadow
+                          alt={agentName}
+                          src={getAgentIcon(agentName, false)}
+                        />
+                      </EuiToolTip>
+                    </p>
+                  </>
+                }
+                title={agentName}
+                description={
+                  <div>
                     <EuiToolTip
-                      position="top"
-                      content="Icon rendered with `EuiImage`"
+                      position="bottom"
+                      content="Icon rendered with `AgentIcon`"
                     >
-                      <EuiImage
-                        size="s"
-                        hasShadow
-                        alt={agentName}
-                        src={getAgentIcon(agentName, darkMode)}
-                      />
+                      <AgentIcon agentName={agentName} />
                     </EuiToolTip>
-                  </p>
-                </>
-              }
-              title={agentName}
-              description={
-                <div>
-                  <EuiToolTip
-                    position="bottom"
-                    content="Icon rendered with `AgentIcon`"
-                  >
-                    <AgentIcon agentName={agentName} />
-                  </EuiToolTip>
-                </div>
-              }
-            />
-          </EuiFlexItem>
-        );
-      })}
-    </EuiFlexGroup>
+                  </div>
+                }
+              />
+            </EuiFlexItem>
+          );
+        })}
+      </EuiFlexGroup>
+    </MockApmPluginStorybook>
   );
 };

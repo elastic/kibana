@@ -6,7 +6,8 @@
  */
 
 import { BaseDataGenerator } from '@kbn/security-solution-plugin/common/endpoint/data_generators/base_data_generator';
-import { kibanaPackageJson } from '@kbn/utils';
+// @ts-expect-error we have to check types with "allowJs: false" for now, causing this import to fail
+import { kibanaPackageJson } from '@kbn/repo-info';
 import { mergeWith } from 'lodash';
 import { EndpointMetadataGenerator } from '@kbn/security-solution-plugin/common/endpoint/data_generators/endpoint_metadata_generator';
 import { HostMetadata } from '@kbn/security-solution-plugin/common/endpoint/types';

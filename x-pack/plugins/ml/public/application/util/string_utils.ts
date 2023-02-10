@@ -12,7 +12,7 @@ import d3 from 'd3';
 import he from 'he';
 
 import { escapeKuery } from '@kbn/es-query';
-import { isDefined } from '../../../common/types/guards';
+import { isDefined } from '@kbn/ml-is-defined';
 import { CustomUrlAnomalyRecordDoc } from '../../../common/types/custom_urls';
 import { Detector } from '../../../common/types/anomaly_detection_jobs';
 

@@ -5,13 +5,22 @@
  * 2.0.
  */
 
-import { journey, step, before } from '@elastic/synthetics';
+import { journey, step, before, after } from '@elastic/synthetics';
+import moment from 'moment';
+import { recordVideo } from '../record_video';
 import { createExploratoryViewUrl } from '../../public/components/shared/exploratory_view/configurations/exploratory_view_url';
 import { loginToKibana, TIMEOUT_60_SEC, waitForLoadingToFinish } from '../utils';
 
 journey('Exploratory view', async ({ page, params }) => {
+  recordVideo(page);
+
   before(async () => {
     await waitForLoadingToFinish({ page });
+  });
+
+  after(async () => {
+    // eslint-disable-next-line no-console
+    console.log(await page.video()?.path());
   });
 
   const expUrl = createExploratoryViewUrl({
@@ -20,8 +29,8 @@ journey('Exploratory view', async ({ page, params }) => {
       {
         dataType: 'synthetics',
         time: {
-          from: 'now-10y',
-          to: 'now',
+          from: moment().subtract(10, 'y').toISOString(),
+          to: moment().toISOString(),
         },
         name: 'synthetics-series-1',
         breakdown: 'monitor.type',

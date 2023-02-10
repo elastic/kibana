@@ -6,7 +6,6 @@
  */
 
 import type { SavedObjectsClient } from '@kbn/core-saved-objects-api-server-internal';
-import type { SavedObject } from '@kbn/core-saved-objects-common';
 import type {
   AddAuditEventParams,
   AuthorizationTypeEntry,
@@ -15,7 +14,9 @@ import type {
   CheckAuthorizationResult,
   EnforceAuthorizationParams,
   ISavedObjectsSecurityExtension,
+  PerformAuthorizationParams,
   RedactNamespacesParams,
+  SavedObject,
 } from '@kbn/core-saved-objects-server';
 
 import { ALL_SPACES_ID, UNKNOWN_SPACE } from '../../common/constants';
@@ -45,7 +46,7 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
     this.checkPrivilegesFunc = checkPrivileges;
   }
 
-  async checkAuthorization<A extends string>(
+  private async checkAuthorization<A extends string>(
     params: CheckAuthorizationParams<A>
   ): Promise<CheckAuthorizationResult<A>> {
     const { types, spaces, actions, options = { allowGlobalResource: false } } = params;
@@ -156,6 +157,31 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
       throw error;
     }
     auditCallback?.();
+  }
+
+  async performAuthorization<A extends string>(
+    params: PerformAuthorizationParams<A>
+  ): Promise<CheckAuthorizationResult<A>> {
+    const checkResult: CheckAuthorizationResult<A> = await this.checkAuthorization({
+      types: params.types,
+      spaces: params.spaces,
+      actions: params.actions,
+      options: { allowGlobalResource: params.options?.allowGlobalResource === true },
+    });
+
+    const typesAndSpaces = params.enforceMap;
+    if (typesAndSpaces !== undefined && checkResult) {
+      params.actions.forEach((action) => {
+        this.enforceAuthorization({
+          typesAndSpaces,
+          action,
+          typeMap: checkResult.typeMap,
+          auditCallback: params.auditCallback,
+        });
+      });
+    }
+
+    return checkResult;
   }
 
   addAuditEvent(params: AddAuditEventParams): void {

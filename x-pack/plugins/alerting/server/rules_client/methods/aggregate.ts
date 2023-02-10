@@ -22,6 +22,7 @@ export interface AggregateOptions extends IndexType {
     id: string;
   };
   filter?: string | KueryNode;
+  maxTags?: number;
 }
 
 interface IndexType {
@@ -79,7 +80,9 @@ export interface RuleAggregation {
 
 export async function aggregate(
   context: RulesClientContext,
-  { options: { fields, filter, ...options } = {} }: { options?: AggregateOptions } = {}
+  {
+    options: { fields, filter, maxTags = 50, ...options } = {},
+  }: { options?: AggregateOptions } = {}
 ): Promise<AggregateResult> {
   let authorizationTuple;
   try {
@@ -123,7 +126,7 @@ export async function aggregate(
         terms: { field: 'alert.attributes.muteAll' },
       },
       tags: {
-        terms: { field: 'alert.attributes.tags', order: { _key: 'asc' }, size: 50 },
+        terms: { field: 'alert.attributes.tags', order: { _key: 'asc' }, size: maxTags },
       },
       snoozed: {
         nested: {

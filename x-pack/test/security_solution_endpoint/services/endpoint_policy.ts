@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import {
   CreateAgentPolicyRequest,
   CreateAgentPolicyResponse,
@@ -14,9 +14,10 @@ import {
   PACKAGE_POLICY_SAVED_OBJECT_TYPE,
   DeleteAgentPolicyRequest,
   DeletePackagePoliciesRequest,
+  epmRouteService,
   GetPackagePoliciesResponse,
   GetFullAgentPolicyResponse,
-  GetPackagesResponse,
+  type GetInfoResponse,
 } from '@kbn/fleet-plugin/common';
 import { policyFactory } from '@kbn/security-solution-plugin/common/endpoint/models/policy_config';
 import { Immutable } from '@kbn/security-solution-plugin/common/endpoint/types';
@@ -31,9 +32,6 @@ const INGEST_API_AGENT_POLICIES = `${INGEST_API_ROOT}/agent_policies`;
 const INGEST_API_AGENT_POLICIES_DELETE = `${INGEST_API_AGENT_POLICIES}/delete`;
 const INGEST_API_PACKAGE_POLICIES = `${INGEST_API_ROOT}/package_policies`;
 const INGEST_API_PACKAGE_POLICIES_DELETE = `${INGEST_API_PACKAGE_POLICIES}/delete`;
-const INGEST_API_EPM_PACKAGES = `${INGEST_API_ROOT}/epm/packages`;
-
-const SECURITY_PACKAGES_ROUTE = `${INGEST_API_EPM_PACKAGES}?category=security&prerelease=true`;
 
 /**
  * Holds information about the test resources created to support an Endpoint Policy
@@ -48,7 +46,7 @@ export interface PolicyTestResourceInfo {
   /**
    * Information about the endpoint package
    */
-  packageInfo: Immutable<GetPackagesResponse['items'][0]>;
+  packageInfo: Immutable<GetInfoResponse['item']>;
   /** will clean up (delete) the objects created (Agent Policy + Package Policy) */
   cleanup: () => Promise<void>;
 }
@@ -72,18 +70,19 @@ export function EndpointPolicyTestResourcesProvider({ getService }: FtrProviderC
     // so we'll retrieve a list of packages for a category of Security, and will then find the
     // endpoint package info. in the list. The request is kicked off here, but handled below after
     // Agent Policy creation so that they can be executed concurrently
-    let apiRequest: Promise<GetPackagesResponse['items'][0] | undefined>;
+    let apiRequest: Promise<GetInfoResponse['item'] | undefined>;
+    const path = epmRouteService.getInfoPath('endpoint');
 
     return () => {
       if (!apiRequest) {
-        log.info(`Setting up call to retrieve Endpoint package from ${SECURITY_PACKAGES_ROUTE}`);
+        log.info(`Setting up call to retrieve Endpoint package from ${path}`);
 
         // Currently (as of 2020-june) the package registry used in CI is the public one and
         // at times it encounters network connection issues. We use `retry.try` below to see if
         // subsequent requests get through.
         apiRequest = retry.try(() => {
           return supertest
-            .get(SECURITY_PACKAGES_ROUTE)
+            .get(path)
             .set('kbn-xsrf', 'xxx')
             .expect(200)
             .catch((error) => {
@@ -92,15 +91,10 @@ export function EndpointPolicyTestResourcesProvider({ getService }: FtrProviderC
                 error
               );
             })
-            .then((response: { body: GetPackagesResponse }) => {
-              const { body: secPackages } = response;
-              const endpointPackageInfo = secPackages.items.find(
-                (epmPackage) => epmPackage.name === 'endpoint'
-              );
+            .then((response: { body: GetInfoResponse }) => {
+              const endpointPackageInfo = response.body.item;
               if (!endpointPackageInfo) {
-                throw new Error(
-                  `Endpoint package was not in response from ${SECURITY_PACKAGES_ROUTE}`
-                );
+                throw new Error(`Endpoint package was not in response from ${path}`);
               }
 
               log.info(`Endpoint package version: ${endpointPackageInfo.version}`);
@@ -127,7 +121,7 @@ export function EndpointPolicyTestResourcesProvider({ getService }: FtrProviderC
     /**
      * Retrieves the currently installed endpoint package
      */
-    async getEndpointPackage(): Promise<Immutable<GetPackagesResponse['items'][0]>> {
+    async getEndpointPackage(): Promise<Immutable<GetInfoResponse['item']>> {
       const endpointPackage = await retrieveEndpointPackageInfo();
 
       if (!endpointPackage) {
@@ -165,7 +159,7 @@ export function EndpointPolicyTestResourcesProvider({ getService }: FtrProviderC
       let agentPolicy: CreateAgentPolicyResponse['item'];
       try {
         const newAgentPolicyData: CreateAgentPolicyRequest['body'] = {
-          name: `East Coast ${uuid.v4()}`,
+          name: `East Coast ${uuidv4()}`,
           description: 'East Coast call center',
           namespace: 'default',
         };
@@ -186,7 +180,7 @@ export function EndpointPolicyTestResourcesProvider({ getService }: FtrProviderC
       let packagePolicy: CreatePackagePolicyResponse['item'];
       try {
         const newPackagePolicyData: CreatePackagePolicyRequest['body'] = {
-          name: `Protect East Coast ${uuid.v4()}`,
+          name: `Protect East Coast ${uuidv4()}`,
           description: 'Protect the worlds data - but in the East Coast',
           policy_id: agentPolicy!.id,
           enabled: true,

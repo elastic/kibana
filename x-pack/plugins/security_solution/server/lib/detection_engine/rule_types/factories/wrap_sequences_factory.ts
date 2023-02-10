@@ -5,12 +5,11 @@
  * 2.0.
  */
 
-import type { Logger } from '@kbn/core/server';
-
 import type { WrapSequences } from '../../signals/types';
 import { buildAlertGroupFromSequence } from './utils/build_alert_group_from_sequence';
 import type { ConfigType } from '../../../../config';
 import type { CompleteRule, RuleParams } from '../../rule_schema';
+import type { IRuleExecutionLogForExecutors } from '../../rule_monitoring';
 import type {
   BaseFieldsLatest,
   WrappedFieldsLatest,
@@ -18,7 +17,7 @@ import type {
 
 export const wrapSequencesFactory =
   ({
-    logger,
+    ruleExecutionLogger,
     completeRule,
     ignoreFields,
     mergeStrategy,
@@ -26,7 +25,7 @@ export const wrapSequencesFactory =
     indicesToQuery,
     alertTimestampOverride,
   }: {
-    logger: Logger;
+    ruleExecutionLogger: IRuleExecutionLogForExecutors;
     completeRule: CompleteRule<RuleParams>;
     ignoreFields: ConfigType['alertIgnoreFields'];
     mergeStrategy: ConfigType['alertMergeStrategy'];
@@ -39,7 +38,7 @@ export const wrapSequencesFactory =
       (acc: Array<WrappedFieldsLatest<BaseFieldsLatest>>, sequence) => [
         ...acc,
         ...buildAlertGroupFromSequence(
-          logger,
+          ruleExecutionLogger,
           sequence,
           completeRule,
           mergeStrategy,

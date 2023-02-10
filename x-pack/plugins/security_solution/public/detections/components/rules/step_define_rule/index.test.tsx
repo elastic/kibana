@@ -10,6 +10,7 @@ import { shallow } from 'enzyme';
 
 import { StepDefineRule, aggregatableFields } from '.';
 import { stepDefineDefaultValue } from '../../../pages/detection_engine/rules/utils';
+import { mockBrowserFields } from '../../../../common/containers/source/mock';
 
 jest.mock('../../../../common/lib/kibana');
 jest.mock('../../../../common/hooks/use_selector', () => {
@@ -19,6 +20,21 @@ jest.mock('../../../../common/hooks/use_selector', () => {
     useDeepEqualSelector: () => ({
       kibanaDataViews: [{ id: 'world' }],
       sourcererScope: 'my-selected-dataview-id',
+      selectedDataView: {
+        id: 'security-solution',
+        browserFields: mockBrowserFields,
+        patternList: [],
+      },
+    }),
+  };
+});
+jest.mock('../../../../common/components/link_to', () => {
+  const originalModule = jest.requireActual('../../../../common/components/link_to');
+  return {
+    ...originalModule,
+    getTimelineUrl: jest.fn(),
+    useFormatUrl: jest.fn().mockReturnValue({
+      formatUrl: jest.fn().mockImplementation((path: string) => path),
     }),
   };
 });
@@ -34,6 +50,15 @@ jest.mock('../../../../common/containers/sourcerer', () => {
 jest.mock('react-router-dom', () => {
   const actual = jest.requireActual('react-router-dom');
   return { ...actual, useLocation: jest.fn().mockReturnValue({ pathname: '/alerts' }) };
+});
+
+jest.mock('react-redux', () => {
+  const original = jest.requireActual('react-redux');
+
+  return {
+    ...original,
+    useDispatch: jest.fn(),
+  };
 });
 
 test('aggregatableFields', function () {

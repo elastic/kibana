@@ -6,6 +6,12 @@
 
 Retrieves all connectors.
 
+[NOTE]
+====
+For the most up-to-date API details, refer to the
+{kib-repo}/tree/{branch}/x-pack/plugins/actions/docs/openapi[open API specification]. For a preview, check out <<connector-apis>>.
+====
+
 [discrete]
 [[get-all-connectors-api-request]]
 === {api-request-title}

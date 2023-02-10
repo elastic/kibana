@@ -13,10 +13,18 @@
     "functions": [],
     "interfaces": [],
     "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
     "misc": [
       {
         "parentPluginId": "@kbn/core-analytics-server",
-        "id": "def-server.AnalyticsServicePreboot",
+        "id": "def-common.AnalyticsServicePreboot",
         "type": "Type",
         "tags": [],
         "label": "AnalyticsServicePreboot",
@@ -91,7 +99,7 @@
       },
       {
         "parentPluginId": "@kbn/core-analytics-server",
-        "id": "def-server.AnalyticsServiceSetup",
+        "id": "def-common.AnalyticsServiceSetup",
         "type": "Type",
         "tags": [],
         "label": "AnalyticsServiceSetup",
@@ -166,7 +174,7 @@
       },
       {
         "parentPluginId": "@kbn/core-analytics-server",
-        "id": "def-server.AnalyticsServiceStart",
+        "id": "def-common.AnalyticsServiceStart",
         "type": "Type",
         "tags": [],
         "label": "AnalyticsServiceStart",
@@ -200,14 +208,6 @@
         "initialIsOpen": false
       }
     ],
-    "objects": []
-  },
-  "common": {
-    "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
     "objects": []
   }
 }

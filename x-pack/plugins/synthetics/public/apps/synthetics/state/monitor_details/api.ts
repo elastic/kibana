@@ -6,6 +6,7 @@
  */
 
 import { SavedObject } from '@kbn/core/types';
+import moment from 'moment';
 import { apiService } from '../../../../utils/api_service';
 import {
   EncryptedSyntheticsSavedMonitor,
@@ -47,7 +48,7 @@ export const fetchMonitorRecentPings = async ({
     SYNTHETICS_API_URLS.PINGS,
     {
       monitorId,
-      from: from ?? new Date(0).toISOString(),
+      from: from ?? moment().subtract(30, 'days').toISOString(),
       to: to ?? new Date().toISOString(),
       locations,
       sort,

@@ -9,6 +9,7 @@ import { KueryNode } from '@kbn/es-query';
 import { retryIfBulkEditConflicts } from './retry_if_bulk_edit_conflicts';
 import { RETRY_IF_CONFLICTS_ATTEMPTS } from './wait_before_next_retry';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
+import { BulkEditSkipReason } from '../../../common/bulk_edit';
 
 const mockFilter: KueryNode = {
   type: 'function',
@@ -28,6 +29,11 @@ const mockSuccessfulResult = {
     { id: '2', type: 'alert', attributes: { name: 'Test rule 2' }, references: [] },
   ],
   errors: [],
+  skipped: [
+    { id: 'skip-1', name: 'skip-1', skip_reason: 'RULE_NOT_MODIFIED' as BulkEditSkipReason },
+    { id: 'skip-2', name: 'skip-2', skip_reason: 'RULE_NOT_MODIFIED' as BulkEditSkipReason },
+    { id: 'skip-5', name: 'skip-5', skip_reason: 'RULE_NOT_MODIFIED' as BulkEditSkipReason },
+  ],
 };
 
 async function OperationSuccessful() {
@@ -78,6 +84,11 @@ describe('retryIfBulkEditConflicts', () => {
     expect(result).toEqual({
       apiKeysToInvalidate: [],
       errors: [],
+      skipped: [
+        { id: 'skip-1', name: 'skip-1', skip_reason: 'RULE_NOT_MODIFIED' },
+        { id: 'skip-2', name: 'skip-2', skip_reason: 'RULE_NOT_MODIFIED' },
+        { id: 'skip-5', name: 'skip-5', skip_reason: 'RULE_NOT_MODIFIED' },
+      ],
       results: [
         {
           attributes: {},
@@ -130,7 +141,7 @@ describe('retryIfBulkEditConflicts', () => {
     expect(mockLogger.warn).toBeCalledWith(`${mockOperationName} conflicts, exceeded retries`);
   });
 
-  for (let i = 1; i <= RETRY_IF_CONFLICTS_ATTEMPTS; i++) {
+  for (let i = 1; i <= RETRY_IF_CONFLICTS_ATTEMPTS + 1; i++) {
     test(`should work when operation conflicts ${i} times`, async () => {
       const result = await retryIfBulkEditConflicts(
         mockLogger,
@@ -141,4 +152,30 @@ describe('retryIfBulkEditConflicts', () => {
       expect(result).toBe(result);
     });
   }
+
+  test('should not return duplicated skip results when the underlying bulkEditOperation is retried multiple times and returns the same skip results on every attempt', async () => {
+    const result = await retryIfBulkEditConflicts(
+      mockLogger,
+      mockOperationName,
+      getOperationConflictsTimes(3),
+      mockFilter,
+      undefined,
+      ['apikey1', 'apikey2'],
+      [],
+      [],
+      [
+        { id: 'skip-1', name: 'skip-1', skip_reason: 'RULE_NOT_MODIFIED' },
+        { id: 'skip-2', name: 'skip-2', skip_reason: 'RULE_NOT_MODIFIED' },
+        { id: 'skip-2', name: 'skip-2', skip_reason: 'RULE_NOT_MODIFIED' },
+        { id: 'skip-3', name: 'skip-3', skip_reason: 'RULE_NOT_MODIFIED' },
+      ]
+    );
+
+    expect(result.skipped).toEqual([
+      { id: 'skip-1', name: 'skip-1', skip_reason: 'RULE_NOT_MODIFIED' },
+      { id: 'skip-2', name: 'skip-2', skip_reason: 'RULE_NOT_MODIFIED' },
+      { id: 'skip-3', name: 'skip-3', skip_reason: 'RULE_NOT_MODIFIED' },
+      { id: 'skip-5', name: 'skip-5', skip_reason: 'RULE_NOT_MODIFIED' },
+    ]);
+  });
 });

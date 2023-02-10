@@ -30,6 +30,7 @@ import { Dataset } from '@kbn/rule-registry-plugin/server';
 import type { ListPluginSetup } from '@kbn/lists-plugin/server';
 import type { ILicense } from '@kbn/licensing-plugin/server';
 
+import { siemGuideId, siemGuideConfig } from '../common/guided_onboarding/siem_guide_config';
 import {
   createEqlAlertType,
   createIndicatorMatchAlertType,
@@ -170,6 +171,8 @@ export class Plugin implements ISecuritySolutionPlugin {
       plugins,
       endpointAppContextService: this.endpointAppContextService,
       ruleExecutionLogService,
+      kibanaVersion: pluginContext.env.packageInfo.version,
+      kibanaBranch: pluginContext.env.packageInfo.branch,
     });
 
     const router = core.http.createRouter<SecuritySolutionRequestHandlerContext>();
@@ -356,6 +359,8 @@ export class Plugin implements ISecuritySolutionPlugin {
       appClientFactory.setup({
         getSpaceId: depsStart.spaces?.spacesService?.getSpaceId,
         config,
+        kibanaVersion: pluginContext.env.packageInfo.version,
+        kibanaBranch: pluginContext.env.packageInfo.branch,
       });
 
       const endpointFieldsStrategy = endpointFieldsProvider(
@@ -397,6 +402,11 @@ export class Plugin implements ISecuritySolutionPlugin {
     });
 
     featureUsageService.setup(plugins.licensing);
+
+    /**
+     * Register a config for the security guide
+     */
+    plugins.guidedOnboarding.registerGuideConfig(siemGuideId, siemGuideConfig);
 
     return {};
   }
@@ -472,10 +482,6 @@ export class Plugin implements ISecuritySolutionPlugin {
 
     this.endpointAppContextService.start({
       fleetAuthzService: authz,
-      agentService,
-      packageService,
-      packagePolicyService,
-      agentPolicyService,
       endpointMetadataService: new EndpointMetadataService(
         core.savedObjects,
         agentPolicyService,
@@ -511,7 +517,8 @@ export class Plugin implements ISecuritySolutionPlugin {
       this.kibanaIndex!,
       DEFAULT_ALERTS_INDEX,
       this.endpointAppContextService,
-      exceptionListClient
+      exceptionListClient,
+      packageService
     );
 
     artifactService.start(this.telemetryReceiver);
@@ -522,11 +529,13 @@ export class Plugin implements ISecuritySolutionPlugin {
       this.telemetryReceiver
     );
 
-    if (plugins.taskManager) {
-      this.checkMetadataTransformsTask?.start({
-        taskManager: plugins.taskManager,
-      });
-    }
+    plugins.fleet?.fleetSetupCompleted().then(() => {
+      if (plugins.taskManager) {
+        this.checkMetadataTransformsTask?.start({
+          taskManager: plugins.taskManager,
+        });
+      }
+    });
 
     return {};
   }

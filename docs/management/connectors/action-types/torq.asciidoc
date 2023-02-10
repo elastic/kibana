@@ -1,0 +1,65 @@
+[role="xpack"]
+[[torq-action-type]]
+=== Torq connector and action
+++++
+<titleabbrev>Torq</titleabbrev>
+++++
+
+The Torq connector uses a Torq webhook to trigger workflows with Kibana actions.
+
+[float]
+[[torq-connector-configuration]]
+==== Connector configuration
+Torq connectors have the following configuration properties.
+
+Name:: The name of the connector. The name is used to identify a connector in the Stack Management UI connector listing, and in the connector list when configuring an action.
+
+Torq endpoint URL:: Endpoint URL (webhook) of the Elastic Security integration you created in Torq.
+
+Torq authentication header secret:: Secret of the webhook authentication header.
+
+[float]
+[[Preconfigured-torq-configuration]]
+==== Preconfigured connector type
+
+[source,yaml]
+--
+ my-torq:
+   name: preconfigured-torq-connector-type
+   actionTypeId: .torq
+   config:
+     webhookIntegrationUrl: https://hooks.torq.io/v1/somehook
+   secrets:
+     token: mytorqtoken
+--
+
+Config defines information for the connector type.
+
+`webhookIntegrationUrl`:: An address that corresponds to **Torq endpoint URL**.
+
+Secrets defines sensitive information for the connector type.
+
+`token`:: A string that corresponds to **Torq authentication header secret**.
+
+[float]
+[[define-torq-ui]]
+==== Define connector in Stack Management
+
+Define Torq connector properties.
+
+[role="screenshot"]
+image::management/connectors/images/torq-configured-connector.png[configured Torq connector]
+
+Test Torq action parameters.
+
+[role="screenshot"]
+image::management/connectors/images/torq-connector-test.png[Torq connector test]
+
+[float]
+[[torq-action-configuration]]
+==== Action configuration
+
+ Torq actions have the following configuration properties.
+
+ Body:: JSON payload to send to Torq.
+

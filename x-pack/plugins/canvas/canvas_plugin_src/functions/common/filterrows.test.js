@@ -7,7 +7,7 @@
 
 import { of } from 'rxjs';
 import { TestScheduler } from 'rxjs/testing';
-import { functionWrapper } from '@kbn/presentation-util-plugin/common';
+import { functionWrapper } from '@kbn/presentation-util-plugin/test_helpers';
 import { testTable } from './__fixtures__/test_tables';
 import { filterrows } from './filterrows';
 

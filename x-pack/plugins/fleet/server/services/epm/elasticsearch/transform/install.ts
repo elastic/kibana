@@ -9,6 +9,7 @@ import type { ElasticsearchClient, Logger, SavedObjectsClientContract } from '@k
 import { errors } from '@elastic/elasticsearch';
 import { safeLoad } from 'js-yaml';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
+import { uniqBy } from 'lodash';
 
 import {
   PACKAGE_TEMPLATE_SUFFIX,
@@ -35,7 +36,7 @@ import { getInstallation } from '../../packages';
 import { retryTransientEsErrors } from '../retry';
 
 import { deleteTransforms } from './remove';
-import { getAsset } from './common';
+import { getAsset, TRANSFORM_DEST_IDX_ALIAS_LATEST_SFX } from './common';
 
 const DEFAULT_TRANSFORM_TEMPLATES_PRIORITY = 250;
 enum TRANSFORM_SPECS_TYPES {
@@ -55,6 +56,8 @@ interface DestinationIndexTemplateInstallation extends TransformModuleBase {
 interface TransformInstallation extends TransformModuleBase {
   installationName: string;
   content: any;
+  transformVersion?: string;
+  installationOrder?: number;
 }
 
 const installLegacyTransformsAssets = async (
@@ -67,6 +70,13 @@ const installLegacyTransformsAssets = async (
   esReferences: EsAssetReference[] = [],
   previousInstalledTransformEsAssets: EsAssetReference[] = []
 ) => {
+  await deleteTransforms(
+    esClient,
+    previousInstalledTransformEsAssets.map((asset) => asset.id),
+    // For legacy transforms, delete destination indices upon deleting transforms
+    true
+  );
+
   let installedTransforms: EsAssetReference[] = [];
   if (transformPaths.length > 0) {
     const transformRefs = transformPaths.reduce<EsAssetReference[]>((acc, path) => {
@@ -126,11 +136,16 @@ const installLegacyTransformsAssets = async (
 const processTransformAssetsPerModule = (
   installablePackage: InstallablePackage,
   installNameSuffix: string,
-  transformPaths: string[]
+  transformPaths: string[],
+  previousInstalledTransformEsAssets: EsAssetReference[] = []
 ) => {
   const transformsSpecifications = new Map();
   const destinationIndexTemplates: DestinationIndexTemplateInstallation[] = [];
   const transforms: TransformInstallation[] = [];
+  const aliasesRefs: string[] = [];
+  const transformsToRemove: EsAssetReference[] = [];
+  const transformsToRemoveWithDestIndex: EsAssetReference[] = [];
+  const indicesToAddRefs: EsAssetReference[] = [];
 
   transformPaths.forEach((path: string) => {
     const { transformModuleId, fileName } = getTransformFolderAndFileNames(
@@ -150,38 +165,143 @@ const processTransformAssetsPerModule = (
     if (fileName === TRANSFORM_SPECS_TYPES.FIELDS) {
       const validFields = processFields(content);
       const mappings = generateMappings(validFields);
+      const templateName = getTransformAssetNameForInstallation(
+        installablePackage,
+        transformModuleId,
+        'template'
+      );
+      const indexToModify = destinationIndexTemplates.findIndex(
+        (t) => t.transformModuleId === transformModuleId && t.installationName === templateName
+      );
+      const template = {
+        transformModuleId,
+        _meta: getESAssetMetadata({ packageName: installablePackage.name }),
+        installationName: getTransformAssetNameForInstallation(
+          installablePackage,
+          transformModuleId,
+          'template'
+        ),
+        template: {},
+      } as DestinationIndexTemplateInstallation;
+      if (indexToModify === -1) {
+        destinationIndexTemplates.push(template);
+      } else {
+        destinationIndexTemplates[indexToModify] = template;
+      }
       packageAssets?.set('mappings', mappings);
     }
 
     if (fileName === TRANSFORM_SPECS_TYPES.TRANSFORM) {
-      transformsSpecifications.get(transformModuleId)?.set('destinationIndex', content.dest);
-      transformsSpecifications.get(transformModuleId)?.set('transform', content);
-      content._meta = getESAssetMetadata({ packageName: installablePackage.name });
-      transforms.push({
-        transformModuleId,
-        installationName: getTransformAssetNameForInstallation(
-          installablePackage,
-          transformModuleId,
-          `default-${installNameSuffix}`
-        ),
-        content,
+      const installationOrder =
+        isFinite(content._meta?.order) && content._meta?.order >= 0 ? content._meta?.order : 0;
+      const transformVersion = content._meta?.fleet_transform_version ?? '0.1.0';
+      // The “all” alias for the transform destination indices will be adjusted to include the new transform destination index as well as everything it previously included
+      const allIndexAliasName = `${content.dest.index}.all`;
+      // The “latest” alias for the transform destination indices will point solely to the new transform destination index
+      const latestIndexAliasName = `${content.dest.index}.latest`;
+
+      transformsSpecifications
+        .get(transformModuleId)
+        ?.set('originalDestinationIndexName', content.dest.index);
+
+      // Create two aliases associated with the destination index
+      // for better handling during upgrades
+      const alias = {
+        [allIndexAliasName]: {},
+        [latestIndexAliasName]: {},
+      };
+
+      const versionedIndexName = `${content.dest.index}-${installNameSuffix}`;
+      content.dest.index = versionedIndexName;
+      indicesToAddRefs.push({
+        id: versionedIndexName,
+        type: ElasticsearchAssetType.index,
       });
+      transformsSpecifications.get(transformModuleId)?.set('destinationIndex', content.dest);
+      transformsSpecifications.get(transformModuleId)?.set('destinationIndexAlias', alias);
+      transformsSpecifications.get(transformModuleId)?.set('transform', content);
+      transformsSpecifications.get(transformModuleId)?.set('transformVersion', transformVersion);
+      content._meta = {
+        ...(content._meta ?? {}),
+        ...getESAssetMetadata({ packageName: installablePackage.name }),
+      };
+
+      const installationName = getTransformAssetNameForInstallation(
+        installablePackage,
+        transformModuleId,
+        // transform_id is versioned by fleet_transform_version and not by package version
+        `default-${transformVersion}`
+      );
+
+      const currentTransformSameAsPrev =
+        previousInstalledTransformEsAssets.find((t) => t.id === installationName) !== undefined;
+      if (previousInstalledTransformEsAssets.length === 0) {
+        aliasesRefs.push(allIndexAliasName, latestIndexAliasName);
+        transforms.push({
+          transformModuleId,
+          installationName,
+          installationOrder,
+          transformVersion,
+          content,
+        });
+        transformsSpecifications.get(transformModuleId)?.set('transformVersionChanged', true);
+      } else {
+        if (!currentTransformSameAsPrev) {
+          // If upgrading from old json schema to new yml schema
+          // We need to make sure to delete those transforms by matching the legacy naming convention
+          const versionFromOldJsonSchema = previousInstalledTransformEsAssets.find((t) =>
+            t.id.startsWith(
+              getLegacyTransformNameForInstallation(
+                installablePackage,
+                `${transformModuleId}/default.json`
+              )
+            )
+          );
+
+          if (versionFromOldJsonSchema !== undefined) {
+            transformsToRemoveWithDestIndex.push(versionFromOldJsonSchema);
+          }
+
+          // If upgrading from yml to newer version of yaml
+          // Match using new naming convention
+          const installNameWithoutVersion = installationName.split(transformVersion)[0];
+          const prevVersion = previousInstalledTransformEsAssets.find((t) =>
+            t.id.startsWith(installNameWithoutVersion)
+          );
+          if (prevVersion !== undefined) {
+            transformsToRemove.push(prevVersion);
+          }
+          transforms.push({
+            transformModuleId,
+            installationName,
+            installationOrder,
+            transformVersion,
+            content,
+          });
+          transformsSpecifications.get(transformModuleId)?.set('transformVersionChanged', true);
+          aliasesRefs.push(allIndexAliasName, latestIndexAliasName);
+        } else {
+          transformsSpecifications.get(transformModuleId)?.set('transformVersionChanged', false);
+        }
+      }
     }
 
+    // Create index templates for destination indices if destination_index_template OR fields are defined
     if (fileName === TRANSFORM_SPECS_TYPES.MANIFEST) {
       if (isPopulatedObject(content, ['start']) && content.start === false) {
         transformsSpecifications.get(transformModuleId)?.set('start', false);
       }
-      // If manifest.yml contains destination_index_template
-      // Combine the mappings and other index template settings from manifest.yml into a single index template
-      // Create the index template and track the template in EsAssetReferences
-      if (
-        isPopulatedObject(content, ['destination_index_template']) ||
-        isPopulatedObject(packageAssets.get('mappings'))
-      ) {
-        const destinationIndexTemplate =
-          (content.destination_index_template as Record<string, unknown>) ?? {};
-        destinationIndexTemplates.push({
+
+      if (content.destination_index_template) {
+        const templateName = getTransformAssetNameForInstallation(
+          installablePackage,
+          transformModuleId,
+          'template'
+        );
+        const indexToModify = destinationIndexTemplates.findIndex(
+          (t) => t.transformModuleId === transformModuleId && t.installationName === templateName
+        );
+        const template = {
           transformModuleId,
           _meta: getESAssetMetadata({ packageName: installablePackage.name }),
           installationName: getTransformAssetNameForInstallation(
@@ -189,9 +309,14 @@ const processTransformAssetsPerModule = (
             transformModuleId,
             'template'
           ),
-          template: destinationIndexTemplate,
-        } as DestinationIndexTemplateInstallation);
-        packageAssets.set('destinationIndexTemplate', destinationIndexTemplate);
+          template: content.destination_index_template,
+        } as DestinationIndexTemplateInstallation;
+        if (indexToModify === -1) {
+          destinationIndexTemplates.push(template);
+        } else {
+          destinationIndexTemplates[indexToModify] = template;
+        }
+        packageAssets.set('destinationIndexTemplate', template);
       }
     }
   });
@@ -199,30 +324,42 @@ const processTransformAssetsPerModule = (
   const indexTemplatesRefs = destinationIndexTemplates.map((template) => ({
     id: template.installationName,
     type: ElasticsearchAssetType.indexTemplate,
+    version: transformsSpecifications.get(template.transformModuleId)?.get('transformVersion'),
   }));
   const componentTemplatesRefs = [
     ...destinationIndexTemplates.map((template) => ({
       id: `${template.installationName}${USER_SETTINGS_TEMPLATE_SUFFIX}`,
       type: ElasticsearchAssetType.componentTemplate,
+      version: transformsSpecifications.get(template.transformModuleId)?.get('transformVersion'),
     })),
     ...destinationIndexTemplates.map((template) => ({
       id: `${template.installationName}${PACKAGE_TEMPLATE_SUFFIX}`,
       type: ElasticsearchAssetType.componentTemplate,
+      version: transformsSpecifications.get(template.transformModuleId)?.get('transformVersion'),
     })),
   ];
 
-  const transformRefs = transforms.map((t) => ({
+  const sortedTransforms = transforms.sort(
+    (t1, t2) => (t1.installationOrder ?? 0) - (t2.installationOrder ?? 1)
+  );
+
+  const transformRefs = sortedTransforms.map((t) => ({
     id: t.installationName,
     type: ElasticsearchAssetType.transform,
+    version: t.transformVersion,
   }));
 
   return {
+    indicesToAddRefs,
     indexTemplatesRefs,
     componentTemplatesRefs,
     transformRefs,
-    transforms,
+    transforms: sortedTransforms,
     destinationIndexTemplates,
     transformsSpecifications,
+    aliasesRefs,
+    transformsToRemove,
+    transformsToRemoveWithDestIndex,
   };
 };
 
@@ -239,21 +376,60 @@ const installTransformsAssets = async (
   let installedTransforms: EsAssetReference[] = [];
   if (transformPaths.length > 0) {
     const {
+      indicesToAddRefs,
       indexTemplatesRefs,
       componentTemplatesRefs,
       transformRefs,
       transforms,
       destinationIndexTemplates,
       transformsSpecifications,
-    } = processTransformAssetsPerModule(installablePackage, installNameSuffix, transformPaths);
+      aliasesRefs,
+      transformsToRemove,
+      transformsToRemoveWithDestIndex,
+    } = processTransformAssetsPerModule(
+      installablePackage,
+      installNameSuffix,
+      transformPaths,
+      previousInstalledTransformEsAssets
+    );
+
+    // ensure the .latest alias points to only the latest
+    // by removing any associate of old destination indices
+    await Promise.all(
+      aliasesRefs
+        .filter((a) => a.endsWith(TRANSFORM_DEST_IDX_ALIAS_LATEST_SFX))
+        .map((alias) => deleteAliasFromIndices({ esClient, logger, alias }))
+    );
+
+    // delete all previous transform
+    await Promise.all([
+      deleteTransforms(
+        esClient,
+        transformsToRemoveWithDestIndex.map((asset) => asset.id),
+        // Delete destination indices if specified or if from old json schema
+        true
+      ),
+      deleteTransforms(
+        esClient,
+        transformsToRemove.map((asset) => asset.id),
+        // Else, keep destination indices by default
+        false
+      ),
+    ]);
+
     // get and save refs associated with the transforms before installing
     esReferences = await updateEsAssetReferences(
       savedObjectsClient,
       installablePackage.name,
       esReferences,
       {
-        assetsToAdd: [...indexTemplatesRefs, ...componentTemplatesRefs, ...transformRefs],
-        assetsToRemove: previousInstalledTransformEsAssets,
+        assetsToAdd: [
+          ...indicesToAddRefs,
+          ...indexTemplatesRefs,
+          ...componentTemplatesRefs,
+          ...transformRefs,
+        ],
+        assetsToRemove: [...transformsToRemove, ...transformsToRemoveWithDestIndex],
       }
     );
 
@@ -261,10 +437,15 @@ const installTransformsAssets = async (
     await Promise.all(
       destinationIndexTemplates
         .map((destinationIndexTemplate) => {
-          const customMappings =
-            transformsSpecifications
-              .get(destinationIndexTemplate.transformModuleId)
-              ?.get('mappings') ?? {};
+          const transformSpec = transformsSpecifications.get(
+            destinationIndexTemplate.transformModuleId
+          );
+          const customMappings = transformSpec?.get('mappings') ?? {};
+          const pipelineId = transformSpec?.get('destinationIndex')?.pipeline;
+          const transformVersionChanged = transformSpec?.get('transformVersionChanged') ?? true;
+
+          if (!transformVersionChanged) return;
+
           const registryElasticsearch: RegistryElasticsearch = {
             'index_template.settings': destinationIndexTemplate.template.settings,
             'index_template.mappings': destinationIndexTemplate.template.mappings,
@@ -275,7 +456,11 @@ const installTransformsAssets = async (
             templateName: destinationIndexTemplate.installationName,
             registryElasticsearch,
             packageName: installablePackage.name,
-            defaultSettings: {},
+            defaultSettings: {
+              // Adding destination pipeline here because else these templates will be overridden
+              // by index setting
+              ...(pipelineId ? { default_pipeline: pipelineId } : {}),
+            },
           });
 
           if (destinationIndexTemplate || customMappings) {
@@ -285,10 +470,12 @@ const installTransformsAssets = async (
               componentTemplates,
               indexTemplate: {
                 templateName: destinationIndexTemplate.installationName,
-                // @ts-expect-error We don't need to pass data_stream property here
-                // as this template is applied to only an index and not a data stream
+                // @ts-expect-error data_stream property is not needed here
                 indexTemplate: {
-                  template: { settings: undefined, mappings: undefined },
+                  template: {
+                    settings: undefined,
+                    mappings: undefined,
+                  },
                   priority: DEFAULT_TRANSFORM_TEMPLATES_PRIORITY,
                   index_patterns: [
                     transformsSpecifications
@@ -309,37 +496,81 @@ const installTransformsAssets = async (
     await Promise.all(
       transforms.map(async (transform) => {
         const index = transform.content.dest.index;
-        const pipelineId = transform.content.dest.pipeline;
 
+        const aliases = transformsSpecifications
+          .get(transform.transformModuleId)
+          ?.get('destinationIndexAlias');
         try {
-          await retryTransientEsErrors(
+          const resp = await retryTransientEsErrors(
             () =>
               esClient.indices.create(
                 {
                   index,
-                  ...(pipelineId ? { settings: { default_pipeline: pipelineId } } : {}),
+                  aliases,
                 },
                 { ignore: [400] }
               ),
             { logger }
           );
+          logger.debug(`Created destination index: ${index}`);
+
+          // If index already exists, we still need to update the destination index alias
+          // to point '{destinationIndexName}.latest' to the versioned index
+          // @ts-ignore status is a valid field of resp
+          if (resp.status === 400 && aliases) {
+            await retryTransientEsErrors(
+              () =>
+                esClient.indices.updateAliases({
+                  body: {
+                    actions: Object.keys(aliases).map((alias) => ({ add: { index, alias } })),
+                  },
+                }),
+              { logger }
+            );
+            logger.debug(`Created aliases for destination index: ${index}`);
+          }
         } catch (err) {
+          logger.error(
+            `Error creating destination index: ${JSON.stringify({
+              index,
+              aliases: transformsSpecifications
+                .get(transform.transformModuleId)
+                ?.get('destinationIndexAlias'),
+            })} with error ${err}`
+          );
+
           throw new Error(err.message);
         }
       })
     );
 
-    // create & optionally start transforms
-    const transformsPromises = transforms.map(async (transform) => {
-      return handleTransformInstall({
-        esClient,
-        logger,
-        transform,
-        startTransform: transformsSpecifications.get(transform.transformModuleId)?.get('start'),
-      });
-    });
+    // If the transforms have specific installation order, install & optionally start transforms sequentially
+    const shouldInstallSequentially =
+      uniqBy(transforms, 'installationOrder').length === transforms.length;
 
-    installedTransforms = await Promise.all(transformsPromises).then((results) => results.flat());
+    if (shouldInstallSequentially) {
+      for (const transform of transforms) {
+        const installTransform = await handleTransformInstall({
+          esClient,
+          logger,
+          transform,
+          startTransform: transformsSpecifications.get(transform.transformModuleId)?.get('start'),
+        });
+        installedTransforms.push(installTransform);
+      }
+    } else {
+      // Else, create & start all the transforms at once for speed
+      const transformsPromises = transforms.map(async (transform) => {
+        return handleTransformInstall({
+          esClient,
+          logger,
+          transform,
+          startTransform: transformsSpecifications.get(transform.transformModuleId)?.get('start'),
+        });
+      });
+
+      installedTransforms = await Promise.all(transformsPromises).then((results) => results.flat());
+    }
   }
 
   return { installedTransforms, esReferences };
@@ -364,7 +595,7 @@ export const installTransforms = async (
     previousInstalledTransformEsAssets = installation.installed_es.filter(
       ({ type, id }) => type === ElasticsearchAssetType.transform
     );
-    if (previousInstalledTransformEsAssets.length) {
+    if (previousInstalledTransformEsAssets.length > 0) {
       logger.debug(
         `Found previous transform references:\n ${JSON.stringify(
           previousInstalledTransformEsAssets
@@ -372,12 +603,6 @@ export const installTransforms = async (
       );
     }
   }
-
-  // delete all previous transform
-  await deleteTransforms(
-    esClient,
-    previousInstalledTransformEsAssets.map((asset) => asset.id)
-  );
 
   const installNameSuffix = `${installablePackage.version}`;
 
@@ -412,6 +637,36 @@ export const isTransform = (path: string) => {
   return !path.endsWith('/') && pathParts.type === ElasticsearchAssetType.transform;
 };
 
+async function deleteAliasFromIndices({
+  esClient,
+  logger,
+  alias,
+}: {
+  esClient: ElasticsearchClient;
+  logger: Logger;
+  alias: string;
+}) {
+  try {
+    const resp = await esClient.indices.getAlias({ name: alias });
+    const indicesMatchingAlias = Object.keys(resp);
+    logger.debug(`Deleting alias: '${alias}' matching indices ${indicesMatchingAlias}`);
+
+    if (indicesMatchingAlias.length > 0) {
+      await retryTransientEsErrors(
+        () =>
+          // defer validation on put if the source index is not available
+          esClient.indices.deleteAlias(
+            { index: indicesMatchingAlias, name: alias },
+            { ignore: [404] }
+          ),
+        { logger }
+      );
+      logger.debug(`Deleted alias: '${alias}' matching indices ${indicesMatchingAlias}`);
+    }
+  } catch (err) {
+    logger.error(`Error deleting alias: ${alias}`);
+  }
+}
 async function handleTransformInstall({
   esClient,
   logger,
@@ -434,6 +689,7 @@ async function handleTransformInstall({
         }),
       { logger }
     );
+    logger.debug(`Created transform: ${transform.installationName}`);
   } catch (err) {
     // swallow the error if the transform already exists.
     const isAlreadyExistError =
@@ -460,12 +716,12 @@ async function handleTransformInstall({
 const getLegacyTransformNameForInstallation = (
   installablePackage: InstallablePackage,
   path: string,
-  suffix: string
+  suffix?: string
 ) => {
   const pathPaths = path.split('/');
   const filename = pathPaths?.pop()?.split('.')[0];
   const folderName = pathPaths?.pop();
-  return `${installablePackage.name}.${folderName}-${filename}-${suffix}`;
+  return `${installablePackage.name}.${folderName}-${filename}${suffix ? '-' + suffix : ''}`;
 };
 
 const getTransformAssetNameForInstallation = (

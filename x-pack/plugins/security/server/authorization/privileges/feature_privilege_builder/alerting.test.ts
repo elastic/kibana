@@ -130,6 +130,7 @@ describe(`feature_privilege_builder`, () => {
             "alerting:1.0.0-zeta1:alert-type/my-feature/alert/get",
             "alerting:1.0.0-zeta1:alert-type/my-feature/alert/find",
             "alerting:1.0.0-zeta1:alert-type/my-feature/alert/getAuthorizedAlertsIndices",
+            "alerting:1.0.0-zeta1:alert-type/my-feature/alert/getAlertSummary",
           ]
         `);
       });
@@ -179,6 +180,7 @@ describe(`feature_privilege_builder`, () => {
             "alerting:1.0.0-zeta1:alert-type/my-feature/alert/get",
             "alerting:1.0.0-zeta1:alert-type/my-feature/alert/find",
             "alerting:1.0.0-zeta1:alert-type/my-feature/alert/getAuthorizedAlertsIndices",
+            "alerting:1.0.0-zeta1:alert-type/my-feature/alert/getAlertSummary",
           ]
         `);
       });
@@ -276,6 +278,7 @@ describe(`feature_privilege_builder`, () => {
             "alerting:1.0.0-zeta1:alert-type/my-feature/alert/get",
             "alerting:1.0.0-zeta1:alert-type/my-feature/alert/find",
             "alerting:1.0.0-zeta1:alert-type/my-feature/alert/getAuthorizedAlertsIndices",
+            "alerting:1.0.0-zeta1:alert-type/my-feature/alert/getAlertSummary",
             "alerting:1.0.0-zeta1:alert-type/my-feature/alert/update",
           ]
         `);
@@ -342,6 +345,7 @@ describe(`feature_privilege_builder`, () => {
             "alerting:1.0.0-zeta1:alert-type/my-feature/alert/get",
             "alerting:1.0.0-zeta1:alert-type/my-feature/alert/find",
             "alerting:1.0.0-zeta1:alert-type/my-feature/alert/getAuthorizedAlertsIndices",
+            "alerting:1.0.0-zeta1:alert-type/my-feature/alert/getAlertSummary",
             "alerting:1.0.0-zeta1:alert-type/my-feature/alert/update",
           ]
         `);
@@ -446,10 +450,12 @@ describe(`feature_privilege_builder`, () => {
             "alerting:1.0.0-zeta1:alert-type/my-feature/alert/get",
             "alerting:1.0.0-zeta1:alert-type/my-feature/alert/find",
             "alerting:1.0.0-zeta1:alert-type/my-feature/alert/getAuthorizedAlertsIndices",
+            "alerting:1.0.0-zeta1:alert-type/my-feature/alert/getAlertSummary",
             "alerting:1.0.0-zeta1:alert-type/my-feature/alert/update",
             "alerting:1.0.0-zeta1:readonly-alert-type/my-feature/alert/get",
             "alerting:1.0.0-zeta1:readonly-alert-type/my-feature/alert/find",
             "alerting:1.0.0-zeta1:readonly-alert-type/my-feature/alert/getAuthorizedAlertsIndices",
+            "alerting:1.0.0-zeta1:readonly-alert-type/my-feature/alert/getAlertSummary",
           ]
         `);
       });
@@ -521,10 +527,12 @@ describe(`feature_privilege_builder`, () => {
             "alerting:1.0.0-zeta1:another-alert-type/my-feature/alert/get",
             "alerting:1.0.0-zeta1:another-alert-type/my-feature/alert/find",
             "alerting:1.0.0-zeta1:another-alert-type/my-feature/alert/getAuthorizedAlertsIndices",
+            "alerting:1.0.0-zeta1:another-alert-type/my-feature/alert/getAlertSummary",
             "alerting:1.0.0-zeta1:another-alert-type/my-feature/alert/update",
             "alerting:1.0.0-zeta1:readonly-alert-type/my-feature/alert/get",
             "alerting:1.0.0-zeta1:readonly-alert-type/my-feature/alert/find",
             "alerting:1.0.0-zeta1:readonly-alert-type/my-feature/alert/getAuthorizedAlertsIndices",
+            "alerting:1.0.0-zeta1:readonly-alert-type/my-feature/alert/getAlertSummary",
           ]
         `);
       });

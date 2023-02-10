@@ -72,6 +72,7 @@ export type {
 } from './src/extensions/encryption';
 export type {
   CheckAuthorizationParams,
+  PerformAuthorizationParams,
   AuthorizationTypeEntry,
   AuthorizationTypeMap,
   CheckAuthorizationResult,
@@ -88,3 +89,23 @@ export {
   SECURITY_EXTENSION_ID,
   SPACES_EXTENSION_ID,
 } from './src/extensions/extensions';
+export type {
+  SavedObjectsModelVersion,
+  SavedObjectsModelVersionMap,
+  SavedObjectsModelVersionMapProvider,
+  SavedObjectsModelChange,
+  SavedObjectsModelExpansionChange,
+  SavedObjectModelTransformationDoc,
+  SavedObjectModelTransformationContext,
+  SavedObjectModelTransformationFn,
+  SavedObjectModelBidirectionalTransformation,
+  SavedObjectModelTransformationResult,
+} from './src/model_version';
+
+export type {
+  SavedObject,
+  SavedObjectAttribute,
+  SavedObjectAttributes,
+  SavedObjectAttributeSingle,
+  SavedObjectReference,
+} from '@kbn/core-saved-objects-common/src/server_types';

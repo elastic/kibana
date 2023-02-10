@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { REPO_ROOT } from '@kbn/utils';
+import { REPO_ROOT } from '@kbn/repo-info';
 import { resolve } from 'path';
 
 const loadJsonFile = jest.requireActual('load-json-file');

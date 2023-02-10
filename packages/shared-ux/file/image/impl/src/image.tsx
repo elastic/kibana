@@ -49,7 +49,7 @@ export const Image = ({ src, url, alt, onLoad, onError, meta, ...rest }: Props) 
 
   return (
     <EuiImage
-      alt=""
+      alt={alt ?? ''}
       loading={'lazy'}
       {...rest}
       className={classNames(rest.className, { blurhash: currentSrc === blurhashSrc })}

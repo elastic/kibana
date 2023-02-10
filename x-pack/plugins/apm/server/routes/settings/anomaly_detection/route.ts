@@ -73,6 +73,7 @@ const createAnomalyDetectionJobsRoute = createApmServerRoute({
     const { environments } = params.body;
     const licensingContext = await context.licensing;
     const coreContext = await context.core;
+    const esClient = (await context.core).elasticsearch.client;
 
     const [mlClient, indices] = await Promise.all([
       getMlClient(resources),
@@ -88,6 +89,7 @@ const createAnomalyDetectionJobsRoute = createApmServerRoute({
 
     await createAnomalyDetectionJobs({
       mlClient,
+      esClient: esClient.asCurrentUser,
       indices,
       environments,
       logger,

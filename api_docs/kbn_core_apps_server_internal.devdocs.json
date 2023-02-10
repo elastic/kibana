@@ -10,10 +10,18 @@
   },
   "server": {
     "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
     "functions": [
       {
         "parentPluginId": "@kbn/core-apps-server-internal",
-        "id": "def-server.registerRouteForBundle",
+        "id": "def-common.registerRouteForBundle",
         "type": "Function",
         "tags": [],
         "label": "registerRouteForBundle",
@@ -22,17 +30,17 @@
           "(router: ",
           {
             "pluginId": "@kbn/core-http-server",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnCoreHttpServerPluginApi",
-            "section": "def-server.IRouter",
+            "section": "def-common.IRouter",
             "text": "IRouter"
           },
           "<",
           {
             "pluginId": "@kbn/core-http-server",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnCoreHttpServerPluginApi",
-            "section": "def-server.RequestHandlerContextBase",
+            "section": "def-common.RequestHandlerContextBase",
             "text": "RequestHandlerContextBase"
           },
           ">, {\n    publicPath,\n    routePath,\n    bundlesPath,\n    fileHashCache,\n    isDist,\n  }: { publicPath: string; routePath: string; bundlesPath: string; fileHashCache: ",
@@ -45,7 +53,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-apps-server-internal",
-            "id": "def-server.registerRouteForBundle.$1",
+            "id": "def-common.registerRouteForBundle.$1",
             "type": "Object",
             "tags": [],
             "label": "router",
@@ -53,17 +61,17 @@
             "signature": [
               {
                 "pluginId": "@kbn/core-http-server",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreHttpServerPluginApi",
-                "section": "def-server.IRouter",
+                "section": "def-common.IRouter",
                 "text": "IRouter"
               },
               "<",
               {
                 "pluginId": "@kbn/core-http-server",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreHttpServerPluginApi",
-                "section": "def-server.RequestHandlerContextBase",
+                "section": "def-common.RequestHandlerContextBase",
                 "text": "RequestHandlerContextBase"
               },
               ">"
@@ -75,7 +83,7 @@
           },
           {
             "parentPluginId": "@kbn/core-apps-server-internal",
-            "id": "def-server.registerRouteForBundle.$2",
+            "id": "def-common.registerRouteForBundle.$2",
             "type": "Object",
             "tags": [],
             "label": "{\n    publicPath,\n    routePath,\n    bundlesPath,\n    fileHashCache,\n    isDist,\n  }",
@@ -86,7 +94,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/core-apps-server-internal",
-                "id": "def-server.registerRouteForBundle.$2.publicPath",
+                "id": "def-common.registerRouteForBundle.$2.publicPath",
                 "type": "string",
                 "tags": [],
                 "label": "publicPath",
@@ -97,7 +105,7 @@
               },
               {
                 "parentPluginId": "@kbn/core-apps-server-internal",
-                "id": "def-server.registerRouteForBundle.$2.routePath",
+                "id": "def-common.registerRouteForBundle.$2.routePath",
                 "type": "string",
                 "tags": [],
                 "label": "routePath",
@@ -108,7 +116,7 @@
               },
               {
                 "parentPluginId": "@kbn/core-apps-server-internal",
-                "id": "def-server.registerRouteForBundle.$2.bundlesPath",
+                "id": "def-common.registerRouteForBundle.$2.bundlesPath",
                 "type": "string",
                 "tags": [],
                 "label": "bundlesPath",
@@ -119,7 +127,7 @@
               },
               {
                 "parentPluginId": "@kbn/core-apps-server-internal",
-                "id": "def-server.registerRouteForBundle.$2.fileHashCache",
+                "id": "def-common.registerRouteForBundle.$2.fileHashCache",
                 "type": "Object",
                 "tags": [],
                 "label": "fileHashCache",
@@ -133,7 +141,7 @@
               },
               {
                 "parentPluginId": "@kbn/core-apps-server-internal",
-                "id": "def-server.registerRouteForBundle.$2.isDist",
+                "id": "def-common.registerRouteForBundle.$2.isDist",
                 "type": "boolean",
                 "tags": [],
                 "label": "isDist",
@@ -149,14 +157,6 @@
         "initialIsOpen": false
       }
     ],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
-    "objects": []
-  },
-  "common": {
-    "classes": [],
-    "functions": [],
     "interfaces": [],
     "enums": [],
     "misc": [],

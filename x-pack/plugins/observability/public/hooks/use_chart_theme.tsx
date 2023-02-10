@@ -22,7 +22,7 @@ export function useChartTheme(): PartialTheme[] {
         chartMargins: {
           left: 10,
           right: 10,
-          top: 10,
+          top: 35,
           bottom: 10,
         },
         background: {

@@ -28,6 +28,10 @@ export interface AttachmentMetadata {
   indicatorFeedName: string;
 }
 
+const AttachmentChildrenLazy = React.lazy(
+  () => import('../components/attachment_children/attachment_children')
+);
+
 /**
  * Create an {@link ExternalReferenceAttachmentType} object used to register an external reference
  * to the case plugin with our Threat Intelligence plugin initializes.
@@ -49,14 +53,7 @@ export const generateAttachmentType = (): ExternalReferenceAttachmentType => ({
       />
     ),
     timelineAvatar: <EuiAvatar name="indicator" color="subdued" iconType="crosshairs" />,
-    children: React.lazy(async () => {
-      const { initComponent } = await import(
-        '../components/attachment_children/attachment_children'
-      );
-      return {
-        default: initComponent(),
-      };
-    }),
+    children: AttachmentChildrenLazy,
   }),
   icon: 'crosshairs',
 });

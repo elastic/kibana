@@ -15,11 +15,11 @@ import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { VisualizationContainer } from '@kbn/visualizations-plugin/public';
 import { ExpressionRenderDefinition } from '@kbn/expressions-plugin/common/expression_renderers';
 import { METRIC_TYPE } from '@kbn/analytics';
+import { extractContainerType, extractVisualizationType } from '@kbn/chart-expressions-common';
+
 import { ExpressionTagcloudRendererDependencies } from '../plugin';
 import { TagcloudRendererConfig } from '../../common/types';
 import { EXPRESSION_NAME } from '../../common';
-// eslint-disable-next-line @kbn/imports/no_boundary_crossing
-import { extractContainerType, extractVisualizationType } from '../../../common';
 
 export const strings = {
   getDisplayName: () =>

@@ -72,7 +72,7 @@ export default ({ getService }: FtrProviderContext) => {
           expect(notifyWhen).to.eql('onActiveAlert');
         });
 
-        it('When creating throttle with "NOTIFICATION_THROTTLE_NO_ACTIONS" set and no actions, the rule should have its kibana alerting "mute_all" set to "true" and notify_when set to "onActiveAlert"', async () => {
+        it('When creating throttle with "NOTIFICATION_THROTTLE_NO_ACTIONS" set and no actions, the rule should have its kibana alerting "mute_all" set to "true" and notify_when set to null', async () => {
           const ruleWithThrottle: RuleCreateProps = {
             ...getSimpleRule(),
             throttle: NOTIFICATION_THROTTLE_NO_ACTIONS,
@@ -82,10 +82,10 @@ export default ({ getService }: FtrProviderContext) => {
             body: { mute_all: muteAll, notify_when: notifyWhen },
           } = await supertest.get(`/api/alerting/rule/${rule.id}`);
           expect(muteAll).to.eql(true);
-          expect(notifyWhen).to.eql('onActiveAlert');
+          expect(notifyWhen).to.eql(null);
         });
 
-        it('When creating throttle with "NOTIFICATION_THROTTLE_NO_ACTIONS" set and with actions set, the rule should have its kibana alerting "mute_all" set to "true" and notify_when set to "onActiveAlert"', async () => {
+        it('When creating throttle with "NOTIFICATION_THROTTLE_NO_ACTIONS" set and with actions set, the rule should have its kibana alerting "mute_all" set to "true" and notify_when set to null', async () => {
           // create a new action
           const { body: hookAction } = await supertest
             .post('/api/actions/action')
@@ -102,7 +102,7 @@ export default ({ getService }: FtrProviderContext) => {
             body: { mute_all: muteAll, notify_when: notifyWhen },
           } = await supertest.get(`/api/alerting/rule/${rule.id}`);
           expect(muteAll).to.eql(true);
-          expect(notifyWhen).to.eql('onActiveAlert');
+          expect(notifyWhen).to.eql(null);
         });
 
         it('When creating throttle with "NOTIFICATION_THROTTLE_RULE" set and no actions, the rule should have its kibana alerting "mute_all" set to "false" and notify_when set to "onActiveAlert"', async () => {

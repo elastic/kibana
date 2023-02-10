@@ -7,13 +7,13 @@
  */
 
 import type { Observable } from 'rxjs';
-
 import { monaco } from './monaco_imports';
 
 export interface LangModuleType {
   ID: string;
   lexerRules?: monaco.languages.IMonarchLanguage;
   languageConfiguration?: monaco.languages.LanguageConfiguration;
+  getSuggestionProvider?: Function;
 }
 
 export interface CompleteLangModuleType extends LangModuleType {

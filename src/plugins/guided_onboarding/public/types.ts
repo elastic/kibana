@@ -8,9 +8,9 @@
 
 import { Observable } from 'rxjs';
 import { HttpSetup } from '@kbn/core/public';
-import type { GuideState, GuideId, GuideStepIds } from '@kbn/guided-onboarding';
+import type { GuideState, GuideId, GuideStepIds, GuideConfig } from '@kbn/guided-onboarding';
 import type { CloudStart } from '@kbn/cloud-plugin/public';
-import type { PluginStatus, PluginState, GuideConfig } from '../common';
+import type { PluginStatus, PluginState } from '../common';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface GuidedOnboardingPluginSetup {}
@@ -38,6 +38,7 @@ export interface GuidedOnboardingApi {
   deactivateGuide: (guide: GuideState) => Promise<{ pluginState: PluginState } | undefined>;
   completeGuide: (guideId: GuideId) => Promise<{ pluginState: PluginState } | undefined>;
   isGuideStepActive$: (guideId: GuideId, stepId: GuideStepIds) => Observable<boolean>;
+  isGuideStepReadyToComplete$: (guideId: GuideId, stepId: GuideStepIds) => Observable<boolean>;
   startGuideStep: (
     guideId: GuideId,
     stepId: GuideStepIds
@@ -52,5 +53,6 @@ export interface GuidedOnboardingApi {
   ) => Promise<{ pluginState: PluginState } | undefined>;
   skipGuidedOnboarding: () => Promise<{ pluginState: PluginState } | undefined>;
   isGuidePanelOpen$: Observable<boolean>;
+  isLoading$: Observable<boolean>;
   getGuideConfig: (guideId: GuideId) => Promise<GuideConfig | undefined>;
 }

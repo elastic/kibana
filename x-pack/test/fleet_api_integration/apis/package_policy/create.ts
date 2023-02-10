@@ -7,7 +7,7 @@
 import type { Client } from '@elastic/elasticsearch';
 import expect from '@kbn/expect';
 import { Installation } from '@kbn/fleet-plugin/common';
-import uuid from 'uuid/v4';
+import { v4 as uuidv4 } from 'uuid';
 
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { skipIfNoDockerRegistry } from '../../helpers';
@@ -44,7 +44,7 @@ export default function (providerContext: FtrProviderContext) {
         .post(`/api/fleet/agent_policies`)
         .set('kbn-xsrf', 'xxxx')
         .send({
-          name: `Test policy ${uuid()}`,
+          name: `Test policy ${uuidv4()}`,
           namespace: 'default',
         })
         .expect(200);
@@ -287,7 +287,7 @@ export default function (providerContext: FtrProviderContext) {
         .post(`/api/fleet/agent_policies`)
         .set('kbn-xsrf', 'xxxx')
         .send({
-          name: `Test policy ${uuid()}`,
+          name: `Test policy ${uuidv4()}`,
           namespace: 'default',
         });
       const otherAgentPolicyId = agentPolicyResponse.item.id;
@@ -455,7 +455,7 @@ export default function (providerContext: FtrProviderContext) {
             policy_id: agentPolicyId,
             package: {
               name: 'integration_to_input',
-              version: '0.9.1',
+              version: '2.0.0',
             },
             name: 'integration_to_input-1',
             description: '',
@@ -486,7 +486,7 @@ export default function (providerContext: FtrProviderContext) {
             policy_id: agentPolicyId,
             package: {
               name: 'integration_to_input',
-              version: '0.9.1',
+              version: '2.0.0',
             },
             name: 'integration_to_input-2',
             description: '',

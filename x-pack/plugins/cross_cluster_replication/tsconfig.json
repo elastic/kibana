@@ -1,9 +1,7 @@
 {
   "extends": "../../../tsconfig.base.json",
   "compilerOptions": {
-    "outDir": "./target/types",
-    "emitDeclarationOnly": true,
-    "declaration": true,
+    "outDir": "target/types",
   },
   "include": [
     "common/**/*",
@@ -11,20 +9,27 @@
     "server/**/*",
   ],
   "kbn_references": [
-    { "path": "../../../src/core/tsconfig.json" },
+    "@kbn/core",
     // required plugins
-    { "path": "../../../src/plugins/home/tsconfig.json" },
-    { "path": "../licensing/tsconfig.json" },
-    { "path": "../../../src/plugins/management/tsconfig.json" },
-    { "path": "../remote_clusters/tsconfig.json" },
-    { "path": "../index_management/tsconfig.json" },
-    { "path": "../features/tsconfig.json" },
+    "@kbn/licensing-plugin",
+    "@kbn/management-plugin",
+    "@kbn/remote-clusters-plugin",
+    "@kbn/index-management-plugin",
+    "@kbn/features-plugin",
     // optional plugins
-    { "path": "../../../src/plugins/usage_collection/tsconfig.json" },
+    "@kbn/usage-collection-plugin",
     // required bundles
-    { "path": "../../../src/plugins/kibana_react/tsconfig.json" },
-    { "path": "../../../src/plugins/es_ui_shared/tsconfig.json" },
-    { "path": "../../../src/plugins/data/tsconfig.json" },
-    { "path": "../license_api_guard/tsconfig.json" },
+    "@kbn/kibana-react-plugin",
+    "@kbn/es-ui-shared-plugin",
+    "@kbn/data-plugin",
+    "@kbn/license-api-guard-plugin",
+    "@kbn/i18n",
+    "@kbn/i18n-react",
+    "@kbn/analytics",
+    "@kbn/test-jest-helpers",
+    "@kbn/config-schema",
+  ],
+  "exclude": [
+    "target/**/*",
   ]
 }

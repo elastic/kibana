@@ -9,18 +9,18 @@
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { schema } from '@kbn/config-schema';
 import { loggerMock } from '@kbn/logging-mocks';
-import { isEqual } from 'lodash';
 import { Payload } from 'elastic-apm-node';
 import {
   AuthorizationTypeEntry,
-  EnforceAuthorizationParams,
+  CheckAuthorizationResult,
   ISavedObjectsSecurityExtension,
+  PerformAuthorizationParams,
   SavedObjectsMappingProperties,
   SavedObjectsRawDocSource,
   SavedObjectsType,
   SavedObjectsTypeMappingDefinition,
 } from '@kbn/core-saved-objects-server';
-import { SavedObject, SavedObjectReference } from '@kbn/core-saved-objects-common';
+import { SavedObject, SavedObjectReference } from '@kbn/core-saved-objects-server';
 import {
   SavedObjectsBaseOptions,
   SavedObjectsBulkCreateObject,
@@ -97,6 +97,7 @@ export const expectErrorInvalidType = (obj: TypeIdTuple, overrides?: Record<stri
   expectErrorResult(obj, createUnsupportedTypeErrorPayload(obj.type), overrides);
 
 export const KIBANA_VERSION = '2.0.0';
+export const ALLOWED_CONVERT_VERSION = '8.0.0';
 export const CUSTOM_INDEX_TYPE = 'customIndex';
 /** This type has namespaceType: 'agnostic'. */
 export const NAMESPACE_AGNOSTIC_TYPE = 'globalType';
@@ -235,49 +236,47 @@ export const enforceError = SavedObjectsErrorHelpers.decorateForbiddenError(
   'User lacks privileges'
 );
 
-export const setupCheckAuthorized = (
+export const setupPerformAuthFullyAuthorized = (
   mockSecurityExt: jest.Mocked<ISavedObjectsSecurityExtension>
 ) => {
-  mockSecurityExt.checkAuthorization.mockResolvedValue({
-    status: 'fully_authorized',
-    typeMap: authMap,
-  });
-};
-
-export const setupCheckPartiallyAuthorized = (
-  mockSecurityExt: jest.Mocked<ISavedObjectsSecurityExtension>
-) => {
-  mockSecurityExt.checkAuthorization.mockResolvedValue({
-    status: 'partially_authorized',
-    typeMap: authMap,
-  });
-};
-
-export const setupCheckUnauthorized = (
-  mockSecurityExt: jest.Mocked<ISavedObjectsSecurityExtension>
-) => {
-  mockSecurityExt.checkAuthorization.mockResolvedValue({
-    status: 'unauthorized',
-    typeMap: new Map([]),
-  });
-};
-
-export const setupEnforceSuccess = (
-  mockSecurityExt: jest.Mocked<ISavedObjectsSecurityExtension>
-) => {
-  mockSecurityExt.enforceAuthorization.mockImplementation(
-    (params: EnforceAuthorizationParams<string>) => {
+  mockSecurityExt.performAuthorization.mockImplementation(
+    (params: PerformAuthorizationParams<string>): Promise<CheckAuthorizationResult<string>> => {
       const { auditCallback } = params;
       auditCallback?.(undefined);
+      return Promise.resolve({ status: 'fully_authorized', typeMap: authMap });
     }
   );
 };
 
-export const setupEnforceFailure = (
+export const setupPerformAuthPartiallyAuthorized = (
   mockSecurityExt: jest.Mocked<ISavedObjectsSecurityExtension>
 ) => {
-  mockSecurityExt.enforceAuthorization.mockImplementation(
-    (params: EnforceAuthorizationParams<string>) => {
+  mockSecurityExt.performAuthorization.mockImplementation(
+    (params: PerformAuthorizationParams<string>): Promise<CheckAuthorizationResult<string>> => {
+      const { auditCallback } = params;
+      auditCallback?.(undefined);
+      return Promise.resolve({ status: 'partially_authorized', typeMap: authMap });
+    }
+  );
+};
+
+export const setupPerformAuthUnauthorized = (
+  mockSecurityExt: jest.Mocked<ISavedObjectsSecurityExtension>
+) => {
+  mockSecurityExt.performAuthorization.mockImplementation(
+    (params: PerformAuthorizationParams<string>): Promise<CheckAuthorizationResult<string>> => {
+      const { auditCallback } = params;
+      auditCallback?.(undefined);
+      return Promise.resolve({ status: 'unauthorized', typeMap: new Map([]) });
+    }
+  );
+};
+
+export const setupPerformAuthEnforceFailure = (
+  mockSecurityExt: jest.Mocked<ISavedObjectsSecurityExtension>
+) => {
+  mockSecurityExt.performAuthorization.mockImplementation(
+    (params: PerformAuthorizationParams<string>) => {
       const { auditCallback } = params;
       auditCallback?.(enforceError);
       throw enforceError;
@@ -374,6 +373,7 @@ export const createDocumentMigrator = (registry: SavedObjectTypeRegistry) => {
   return new DocumentMigrator({
     typeRegistry: registry,
     kibanaVersion: KIBANA_VERSION,
+    convertVersion: ALLOWED_CONVERT_VERSION,
     log: loggerMock.create(),
   });
 };
@@ -484,7 +484,7 @@ export const mockUpdateResponse = (
   );
 };
 
-export const updateSuccess = async <T>(
+export const updateSuccess = async <T extends Partial<unknown>>(
   client: ElasticsearchClientMock,
   repository: SavedObjectsRepository,
   registry: SavedObjectTypeRegistry,
@@ -849,27 +849,6 @@ export const getSuccess = async (
   expect(client.get).toHaveBeenCalledTimes(1);
   return result;
 };
-
-export function setsAreEqual<T>(setA: Set<T>, setB: Set<T>) {
-  return isEqual(Array(setA).sort(), Array(setB).sort());
-}
-
-export function typeMapsAreEqual(mapA: Map<string, Set<string>>, mapB: Map<string, Set<string>>) {
-  return (
-    mapA.size === mapB.size &&
-    Array.from(mapA.keys()).every((key) => setsAreEqual(mapA.get(key)!, mapB.get(key)!))
-  );
-}
-
-export function namespaceMapsAreEqual(
-  mapA: Map<string, string[] | undefined>,
-  mapB: Map<string, string[] | undefined>
-) {
-  return (
-    mapA.size === mapB.size &&
-    Array.from(mapA.keys()).every((key) => isEqual(mapA.get(key)?.sort(), mapB.get(key)?.sort()))
-  );
-}
 
 export const getMockEsBulkDeleteResponse = (
   registry: SavedObjectTypeRegistry,

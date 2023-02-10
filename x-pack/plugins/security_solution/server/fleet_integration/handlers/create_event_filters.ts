@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import { i18n } from '@kbn/i18n';
 import {
   ENDPOINT_EVENT_FILTERS_LIST_ID,
@@ -94,9 +94,10 @@ export const createNonInteractiveSessionEventFilter = (
           value: 'false',
         },
       ],
-      itemId: uuid.v4(),
+      itemId: uuidv4(),
       meta: [],
       comments: [],
+      expireTime: undefined,
     });
   } catch (err) {
     logger.error(`Error creating Event Filter: ${wrapErrorIfNeeded(err)}`);

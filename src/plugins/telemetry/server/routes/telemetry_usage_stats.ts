@@ -7,8 +7,8 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { IRouter } from '@kbn/core/server';
-import {
+import type { IRouter } from '@kbn/core/server';
+import type {
   TelemetryCollectionManagerPluginSetup,
   StatsGetterConfig,
 } from '@kbn/telemetry-collection-manager-plugin/server';

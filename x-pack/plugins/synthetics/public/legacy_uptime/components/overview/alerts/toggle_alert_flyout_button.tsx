@@ -17,7 +17,7 @@ import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { CLIENT_ALERT_TYPES } from '../../../../../common/constants/alerts';
+import { CLIENT_ALERT_TYPES } from '../../../../../common/constants/uptime_alerts';
 import { ClientPluginsStart } from '../../../../plugin';
 
 import { ToggleFlyoutTranslations } from './translations';

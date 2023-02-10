@@ -6,17 +6,30 @@
  */
 
 import * as React from 'react';
+import { render, screen, waitFor } from '@testing-library/react';
 import { RouteComponentProps, Router } from 'react-router-dom';
+import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { createMemoryHistory, createLocation } from 'history';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
+
 import TriggersActionsUIHome, { MatchParams } from './home';
 import { hasShowActionsCapability } from './lib/capabilities';
-import { useKibana } from '../common/lib/kibana';
 import { getIsExperimentalFeatureEnabled } from '../common/get_experimental_features';
+
 jest.mock('../common/lib/kibana');
 jest.mock('../common/get_experimental_features');
 jest.mock('./lib/capabilities');
-const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
+
+jest.mock('./sections/rules_list/components/rules_list', () => {
+  return () => <div data-test-subj="rulesListComponents">{'Render Rule list component'}</div>;
+});
+
+jest.mock('./components/health_check', () => ({
+  HealthCheck: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+}));
+jest.mock('./context/health_context', () => ({
+  HealthContextProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+}));
 
 describe('home', () => {
   beforeEach(() => {
@@ -24,10 +37,12 @@ describe('home', () => {
     (getIsExperimentalFeatureEnabled as jest.Mock).mockClear();
   });
 
-  it('renders the documentation link', async () => {
+  it('renders rule list components', async () => {
     const props: RouteComponentProps<MatchParams> = {
-      history: createMemoryHistory(),
-      location: createLocation('/'),
+      history: createMemoryHistory({
+        initialEntries: ['/rules'],
+      }),
+      location: createLocation('/rules'),
       match: {
         isExact: true,
         path: `/rules`,
@@ -38,16 +53,17 @@ describe('home', () => {
       },
     };
 
-    const wrapper = mountWithIntl(
-      <Router history={useKibanaMock().services.history}>
-        <TriggersActionsUIHome {...props} />
-      </Router>
+    render(
+      <IntlProvider locale="en">
+        <Router history={props.history}>
+          <TriggersActionsUIHome {...props} />
+        </Router>
+      </IntlProvider>
     );
-    const documentationLink = wrapper.find('[data-test-subj="documentationLink"]');
-    expect(documentationLink.exists()).toBeTruthy();
-    expect(documentationLink.first().prop('href')).toEqual(
-      'https://www.elastic.co/guide/en/kibana/mocked-test-branch/create-and-manage-rules.html'
-    );
+
+    await waitFor(() => {
+      expect(screen.getByTestId('rulesListComponents')).toBeInTheDocument();
+    });
   });
 
   it('hides the internal alerts table route if the config is not set', async () => {
@@ -67,7 +83,11 @@ describe('home', () => {
       },
     };
 
-    let home = mountWithIntl(<TriggersActionsUIHome {...props} />);
+    let home = mountWithIntl(
+      <Router history={props.history}>
+        <TriggersActionsUIHome {...props} />
+      </Router>
+    );
 
     // Just rules/logs
     expect(home.find('span.euiTab__content').length).toBe(2);
@@ -79,7 +99,11 @@ describe('home', () => {
       return false;
     });
 
-    home = mountWithIntl(<TriggersActionsUIHome {...props} />);
+    home = mountWithIntl(
+      <Router history={props.history}>
+        <TriggersActionsUIHome {...props} />
+      </Router>
+    );
     // alerts now too!
     expect(home.find('span.euiTab__content').length).toBe(3);
   });

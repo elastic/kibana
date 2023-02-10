@@ -1,19 +1,29 @@
 {
-    "extends": "../../../../tsconfig.base.json",
-    "include": [
-      "**/*",
-      "../cypress.config.ts"
+  "extends": "../../../../tsconfig.base.json",
+  "include": [
+    "**/*",
+    "../cypress.config.ts"
+  ],
+  "exclude": [
+    "target/**/*"
+  ],
+  "compilerOptions": {
+    "outDir": "target/types",
+    "types": [
+      "cypress",
+      "node",
+      "cypress-react-selector"
     ],
-    "exclude": [
-      "target/**/*"
-    ],
-    "compilerOptions": {
-      "outDir": "target/types",
-      "types": [
-        "cypress",
-        "node",
-        "cypress-react-selector"
-      ],
-      "resolveJsonModule": true,
-    },
-  }
+    "resolveJsonModule": true,
+  },
+  "kbn_references": [
+    "@kbn/cypress-config",
+    // cypress projects that are nested inside of other ts project use code
+    // from the parent ts project in ways that can't be automatically deteceted
+    // at this time so we have to force the inclusion of this reference
+    {
+      "path": "../tsconfig.json",
+      "force": true
+    }
+  ]
+}

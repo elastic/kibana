@@ -16,8 +16,12 @@ describe('Inspect', () => {
   context('Network stats and tables', () => {
     before(() => {
       login();
+    });
+
+    beforeEach(() => {
       visit(NETWORK_URL);
     });
+
     afterEach(() => {
       closesModal();
     });

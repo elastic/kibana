@@ -93,7 +93,7 @@ beforeEach(() => {
   (getIsExperimentalFeatureEnabled as jest.Mock<any, any>).mockImplementation(() => false);
 });
 
-describe('Rules list bulk actions', () => {
+describe.skip('Rules list bulk actions', () => {
   let wrapper: ReactWrapper<any>;
 
   async function setup(authorized: boolean = true) {

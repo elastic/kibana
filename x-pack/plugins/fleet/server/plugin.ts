@@ -58,6 +58,13 @@ import { INTEGRATIONS_PLUGIN_ID } from '../common';
 import { parseExperimentalConfigValue } from '../common/experimental_features';
 
 import {
+  getRouteRequiredAuthz,
+  makeRouterWithFleetAuthz,
+  calculateRouteAuthz,
+  getAuthzFromRequest,
+} from './services/security';
+
+import {
   PLUGIN_ID,
   OUTPUT_SAVED_OBJECT_TYPE,
   AGENT_POLICY_SAVED_OBJECT_TYPE,
@@ -93,7 +100,6 @@ import {
   fetchAgentsUsage,
   fetchFleetUsage,
 } from './collectors/register';
-import { getAuthzFromRequest, makeRouterWithFleetAuthz } from './routes/security';
 import { FleetArtifactsClient } from './services/artifacts';
 import type { FleetRouter } from './types/request_context';
 import { TelemetryEventsSender } from './telemetry/sender';
@@ -337,11 +343,23 @@ export class FleetPlugin
       PLUGIN_ID,
       async (context, request) => {
         const plugin = this;
-        const esClient = (await context.core).elasticsearch.client;
+        const coreContext = await context.core;
+        const authz = await getAuthzFromRequest(request);
+        const esClient = coreContext.elasticsearch.client;
+        const soClient = coreContext.savedObjects.getClient();
+        const routeRequiredAuthz = getRouteRequiredAuthz(request.route.method, request.route.path);
+        const routeAuthz = routeRequiredAuthz
+          ? calculateRouteAuthz(authz, routeRequiredAuthz)
+          : undefined;
+
+        const getInternalSoClient = (): SavedObjectsClientContract =>
+          appContextService
+            .getSavedObjects()
+            .getScopedClient(request, { excludedExtensions: [SECURITY_EXTENSION_ID] });
 
         return {
           get agentClient() {
-            const agentService = plugin.setupAgentService(esClient.asInternalUser);
+            const agentService = plugin.setupAgentService(esClient.asInternalUser, soClient);
 
             return {
               asCurrentUser: agentService.asScoped(request),
@@ -356,17 +374,20 @@ export class FleetPlugin
               asInternalUser: service.asInternalUser,
             };
           },
-          authz: await getAuthzFromRequest(request),
-          epm: {
+          authz,
+
+          get internalSoClient() {
             // Use a lazy getter to avoid constructing this client when not used by a request handler
-            get internalSoClient() {
-              return appContextService
-                .getSavedObjects()
-                .getScopedClient(request, { excludedExtensions: [SECURITY_EXTENSION_ID] });
-            },
+            return getInternalSoClient();
           },
           get spaceId() {
             return deps.spaces.spacesService.getSpaceId(request);
+          },
+
+          get limitedToPackages() {
+            if (routeAuthz && routeAuthz.granted) {
+              return routeAuthz.scopeDataToPackages;
+            }
           },
         };
       }
@@ -384,10 +405,11 @@ export class FleetPlugin
     // Only some endpoints require superuser so we pass a raw IRouter here
 
     // For all the routes we enforce the user to have role superuser
-    const { router: fleetAuthzRouter, onPostAuthHandler: fleetAuthzOnPostAuthHandler } =
-      makeRouterWithFleetAuthz(router);
+    const fleetAuthzRouter = makeRouterWithFleetAuthz(
+      router,
+      this.initializerContext.logger.get('fleet_authz_router')
+    );
 
-    core.http.registerOnPostAuth(fleetAuthzOnPostAuthHandler);
     registerRoutes(fleetAuthzRouter, config);
 
     this.telemetryEventsSender.setup(deps.telemetry);
@@ -480,6 +502,7 @@ export class FleetPlugin
       }
     })();
 
+    const internalSoClient = new SavedObjectsClient(core.savedObjects.createInternalRepository());
     return {
       authz: {
         fromRequest: getAuthzFromRequest,
@@ -488,9 +511,12 @@ export class FleetPlugin
       esIndexPatternService: new ESIndexPatternSavedObjectService(),
       packageService: this.setupPackageService(
         core.elasticsearch.client.asInternalUser,
-        new SavedObjectsClient(core.savedObjects.createInternalRepository())
+        internalSoClient
       ),
-      agentService: this.setupAgentService(core.elasticsearch.client.asInternalUser),
+      agentService: this.setupAgentService(
+        core.elasticsearch.client.asInternalUser,
+        internalSoClient
+      ),
       agentPolicyService: {
         get: agentPolicyService.get,
         list: agentPolicyService.list,
@@ -514,12 +540,15 @@ export class FleetPlugin
     this.fleetStatus$.complete();
   }
 
-  private setupAgentService(internalEsClient: ElasticsearchClient): AgentService {
+  private setupAgentService(
+    internalEsClient: ElasticsearchClient,
+    internalSoClient: SavedObjectsClientContract
+  ): AgentService {
     if (this.agentService) {
       return this.agentService;
     }
 
-    this.agentService = new AgentServiceImpl(internalEsClient);
+    this.agentService = new AgentServiceImpl(internalEsClient, internalSoClient);
     return this.agentService;
   }
 
