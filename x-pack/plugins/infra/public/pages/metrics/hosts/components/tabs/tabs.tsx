@@ -12,18 +12,18 @@ import { MetricsGrid } from './metrics/metrics_grid';
 import { AlertsTabContent } from './alerts';
 
 import { AlertsTabBadge } from './alerts_tab_badge';
-import { tabIds } from '../../constants';
+import { TabIds } from '../../types';
 
 const tabs = [
   {
-    id: tabIds.METRICS,
+    id: TabIds.METRICS,
     name: i18n.translate('xpack.infra.hostsViewPage.tabs.metricsCharts.title', {
       defaultMessage: 'Metrics',
     }),
     'data-test-subj': 'hostsView-tabs-metrics',
   },
   {
-    id: tabIds.ALERTS,
+    id: TabIds.ALERTS,
     name: i18n.translate('xpack.infra.hostsViewPage.tabs.alerts.title', {
       defaultMessage: 'Alerts',
     }),
@@ -60,13 +60,13 @@ export const Tabs = () => {
     <>
       <EuiTabs>{tabEntries}</EuiTabs>
       <EuiSpacer />
-      {renderedTabsSet.current.has(tabIds.METRICS) && (
-        <div hidden={selectedTabId !== tabIds.METRICS}>
+      {renderedTabsSet.current.has(TabIds.METRICS) && (
+        <div hidden={selectedTabId !== TabIds.METRICS}>
           <MetricsGrid />
         </div>
       )}
-      {renderedTabsSet.current.has(tabIds.ALERTS) && (
-        <div hidden={selectedTabId !== tabIds.ALERTS}>
+      {renderedTabsSet.current.has(TabIds.ALERTS) && (
+        <div hidden={selectedTabId !== TabIds.ALERTS}>
           <AlertsTabContent />
         </div>
       )}
