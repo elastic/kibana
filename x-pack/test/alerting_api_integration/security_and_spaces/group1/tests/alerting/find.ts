@@ -55,8 +55,8 @@ const findTestUtils = (
                     },
                   },
                 ],
-                notify_when: null,
-                throttle: null,
+                notify_when: undefined,
+                throttle: undefined,
               })
             )
             .expect(200);
