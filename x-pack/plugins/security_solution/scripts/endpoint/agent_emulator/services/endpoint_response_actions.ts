@@ -31,6 +31,7 @@ import type {
   ResponseActionGetFileOutputContent,
   ResponseActionGetFileParameters,
   FileUploadMetadata,
+  ResponseActionExecuteOutputContent,
 } from '../../../../common/endpoint/types';
 import type { EndpointActionListRequestQuery } from '../../../../common/endpoint/schema/actions';
 import { EndpointActionGenerator } from '../../../../common/endpoint/data_generators/endpoint_action_generator';
@@ -141,6 +142,12 @@ export const sendEndpointActionResponse = async (
         endpointResponse.EndpointActions.data.output?.content as ResponseActionGetFileOutputContent
       ).code = endpointActionGenerator.randomGetFileFailureCode();
     }
+
+    if (endpointResponse.EndpointActions.data.command === 'execute') {
+      (
+        endpointResponse.EndpointActions.data.output?.content as ResponseActionExecuteOutputContent
+      ).stderr = 'execute command timed out';
+    }
   }
 
   await esClient.index({
@@ -188,11 +195,17 @@ export const sendEndpointActionResponse = async (
   }
 
   // For `get-file`, upload a file to ES
-  if (action.command === 'get-file' && !endpointResponse.error) {
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    const filePath = (
-      action as ActionDetails<ResponseActionGetFileOutputContent, ResponseActionGetFileParameters>
-    )?.parameters?.path!;
+  if ((action.command === 'execute' || action.command === 'get-file') && !endpointResponse.error) {
+    const filePath =
+      action.command === 'execute'
+        ? '/execute/file/path'
+        : // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+          (
+            action as ActionDetails<
+              ResponseActionGetFileOutputContent,
+              ResponseActionGetFileParameters
+            >
+          )?.parameters?.path!;
 
     const fileName = basename(filePath.replace(/\\/g, '/'));
     const fileMetaDoc: FileUploadMetadata = generateFileMetadataDocumentMock({
@@ -215,7 +228,7 @@ export const sendEndpointActionResponse = async (
           sha256: '8d61673c9d782297b3c774ded4e3d88f31a8869a8f25cf5cdd402ba6822d1d28',
         },
         mime_type: 'application/zip',
-        name: 'upload.zip',
+        name: action.command === 'execute' ? 'full-output.zip' : 'upload.zip',
         extension: 'zip',
         size: 125,
         Status: 'READY',
@@ -302,6 +315,16 @@ const getOutputDataIfNeeded = (action: ActionDetails): ResponseOutput => {
           },
         },
       } as ResponseOutput<ResponseActionGetFileOutputContent>;
+
+    case 'execute':
+      const outputFileId = getFileDownloadId(action, action.agents[0]);
+      return {
+        output: endpointActionGenerator.generateExecuteActionResponseOutput({
+          content: {
+            outputFileId,
+          },
+        }),
+      } as ResponseOutput<ResponseActionExecuteOutputContent>;
 
     default:
       return { output: undefined };
