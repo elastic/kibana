@@ -16,3 +16,15 @@ export const defaultTransactionTypes = [
   TRANSACTION_PAGE_LOAD,
   TRANSACTION_MOBILE,
 ];
+
+export function getDefaultTransactionType(agentName?: string) {
+  if (isRumAgentName(agentName)) {
+    return TRANSACTION_PAGE_LOAD;
+  }
+
+  if (isMobileAgentName(agentName)) {
+    return TRANSACTION_MOBILE;
+  }
+
+  return TRANSACTION_REQUEST;
+}
