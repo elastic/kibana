@@ -15,7 +15,7 @@ import { getEnvOptions } from '@kbn/config-mocks';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { Root } from '@kbn/core-root-server-internal';
 import { SearchTotalHits } from '@elastic/elasticsearch/lib/api/types';
-import { getMigrationDocLink } from './test_utils';
+import { getMigrationDocLink } from '../test_utils';
 import {
   createRootWithCorePlugins,
   TestElasticsearchUtils,
@@ -181,6 +181,7 @@ function createTestServers() {
         //
         dataArchive: Path.join(
           __dirname,
+          '..',
           'archives',
           '7_13_corrupt_and_transform_failures_docs.zip'
         ),
