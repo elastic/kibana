@@ -10,6 +10,7 @@ import {
   CreateExceptionListItemSchema,
   EntriesArray,
 } from '@kbn/securitysolution-io-ts-list-types';
+import { ADD_TO_BLOCKLIST_FLYOUT_TITLE } from './translations';
 import { useSecurityContext } from '../../../hooks/use_security_context';
 
 export interface BlockListFlyoutProps {
@@ -53,8 +54,14 @@ export const BlockListFlyout: VFC<BlockListFlyoutProps> = ({ indicatorFileHash }
     type: 'simple',
   };
 
+  // texts to customize the flyout
+  const labels = {
+    flyoutCreateTitle: ADD_TO_BLOCKLIST_FLYOUT_TITLE,
+  };
+
   const props = {
     apiClient: exceptionListApiClient,
+    labels,
     item,
     policies: [],
     FormComponent,

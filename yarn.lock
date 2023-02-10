@@ -5389,6 +5389,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/validate-next-docs-cli@link:packages/kbn-validate-next-docs-cli":
+  version "0.0.0"
+  uid ""
+
 "@kbn/vis-default-editor-plugin@link:src/plugins/vis_default_editor":
   version "0.0.0"
   uid ""
