@@ -13,7 +13,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const baseIntegrationTestsConfig = await readConfigFile(require.resolve('./config.ts'));
   return {
     ...baseIntegrationTestsConfig.getAll(),
-    testFiles: ['./apis/security/security_trial'],
+    testFiles: [require.resolve('./apis/security/security_trial')],
     junit: {
       reportName: 'X-Pack API Integration Tests (Security Trial)',
     },
