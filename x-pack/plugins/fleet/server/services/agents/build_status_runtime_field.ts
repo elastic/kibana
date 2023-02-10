@@ -7,41 +7,80 @@
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/types';
 import type { SavedObjectsClientContract } from '@kbn/core/server';
+import type { Logger } from '@kbn/core/server';
+import once from 'lodash/once';
 
 import { AGENT_POLLING_THRESHOLD_MS } from '../../constants';
 import { agentPolicyService } from '../agent_policy';
+import { appContextService } from '../app_context';
 const MISSED_INTERVALS_BEFORE_OFFLINE = 10;
 const MS_BEFORE_OFFLINE = MISSED_INTERVALS_BEFORE_OFFLINE * AGENT_POLLING_THRESHOLD_MS;
-
+const DEFAULT_MAX_AGENT_POLICIES_WITH_INACTIVITY_TIMEOUT = 750;
 export type InactivityTimeouts = Awaited<
   ReturnType<typeof agentPolicyService['getInactivityTimeouts']>
 >;
 
-const _buildInactiveClause = (
-  now: number,
-  inactivityTimeouts: InactivityTimeouts,
-  field: (path: string) => string
-) => {
+const _buildInactiveClause = (opts: {
+  now: number;
+  inactivityTimeouts: InactivityTimeouts;
+  maxAgentPoliciesWithInactivityTimeout: number;
+  field: (path: string) => string;
+  logger?: Logger;
+}) => {
+  const { now, inactivityTimeouts, maxAgentPoliciesWithInactivityTimeout, field, logger } = opts;
+  // if there are no policies with inactivity timeouts, then no agents are inactive
+  if (inactivityTimeouts.length === 0) {
+    return 'false';
+  }
+
+  const totalAgentPoliciesWithInactivityTimeouts = inactivityTimeouts.reduce(
+    (total, { policyIds }) => total + policyIds.length,
+    0
+  );
+
+  // if too many agent policies have inactivity timeouts, then we can't use the inactivity timeout
+  // as the query becomes too large see github.com/elastic/kibana/issues/150577
+  if (totalAgentPoliciesWithInactivityTimeouts > maxAgentPoliciesWithInactivityTimeout) {
+    // only log this warning once as this code is executed a lot
+    once(() => {
+      logger?.warn(
+        `There are ${totalAgentPoliciesWithInactivityTimeouts} agent policies with an inactivity timeout set but the maximum allowed is ${maxAgentPoliciesWithInactivityTimeout}. Agents will be marked as inactive after 2 weeks of inactivity.`
+      );
+    })();
+    return 'false';
+  }
+
   const policyClauses = inactivityTimeouts
     .map(({ inactivityTimeout, policyIds }) => {
       const inactivityTimeoutMs = inactivityTimeout * 1000;
-      const policyOrs = policyIds
-        .map((policyId) => `${field('policy_id')}.value == '${policyId}'`)
-        .join(' || ');
+      const policyIdMatches = `[${policyIds.map((id) => `'${id}'`).join(',')}].contains(${field(
+        'policy_id'
+      )}.value)`;
 
-      return `(${policyOrs}) && lastCheckinMillis < ${now - inactivityTimeoutMs}L`;
+      return `${policyIdMatches} && lastCheckinMillis < ${now - inactivityTimeoutMs}L`;
     })
     .join(' || ');
 
-  const agentIsInactive = policyClauses.length ? `${policyClauses}` : 'false'; // if no policies have inactivity timeouts, then no agents are inactive
-
-  return `lastCheckinMillis > 0 && ${field('policy_id')}.size() > 0 && ${agentIsInactive}`;
+  return `lastCheckinMillis > 0 && ${field('policy_id')}.size() > 0 && ${policyClauses}`;
 };
 
-function _buildSource(inactivityTimeouts: InactivityTimeouts, pathPrefix?: string) {
+function _buildSource(
+  inactivityTimeouts: InactivityTimeouts,
+  maxAgentPoliciesWithInactivityTimeout: number,
+  pathPrefix?: string,
+  logger?: Logger
+) {
   const normalizedPrefix = pathPrefix ? `${pathPrefix}${pathPrefix.endsWith('.') ? '' : '.'}` : '';
   const field = (path: string) => `doc['${normalizedPrefix + path}']`;
   const now = Date.now();
+  const agentIsInactive = _buildInactiveClause({
+    now,
+    inactivityTimeouts,
+    maxAgentPoliciesWithInactivityTimeout,
+    field,
+    logger,
+  });
+
   return `
     long lastCheckinMillis = ${field('last_checkin')}.size() > 0 
       ? ${field('last_checkin')}.value.toInstant().toEpochMilli() 
@@ -52,7 +91,7 @@ function _buildSource(inactivityTimeouts: InactivityTimeouts, pathPrefix?: strin
         );
     if (${field('active')}.size() > 0 && ${field('active')}.value == false) {
       emit('unenrolled'); 
-    } else if (${_buildInactiveClause(now, inactivityTimeouts, field)}) {
+    } else if (${agentIsInactive}) {
       emit('inactive');
     } else if (
         lastCheckinMillis > 0 
@@ -83,15 +122,28 @@ function _buildSource(inactivityTimeouts: InactivityTimeouts, pathPrefix?: strin
       emit('degraded');
     } else { 
       emit('online'); 
-    }`;
+    }`.replace(/\s{2,}/g, ' '); // remove newlines and double spaces to save characters
 }
 
 // exported for testing
-export function _buildStatusRuntimeField(
-  inactivityTimeouts: InactivityTimeouts,
-  pathPrefix?: string
-): NonNullable<estypes.SearchRequest['runtime_mappings']> {
-  const source = _buildSource(inactivityTimeouts, pathPrefix);
+export function _buildStatusRuntimeField(opts: {
+  inactivityTimeouts: InactivityTimeouts;
+  maxAgentPoliciesWithInactivityTimeout?: number;
+  pathPrefix?: string;
+  logger?: Logger;
+}): NonNullable<estypes.SearchRequest['runtime_mappings']> {
+  const {
+    inactivityTimeouts,
+    maxAgentPoliciesWithInactivityTimeout = DEFAULT_MAX_AGENT_POLICIES_WITH_INACTIVITY_TIMEOUT,
+    pathPrefix,
+    logger,
+  } = opts;
+  const source = _buildSource(
+    inactivityTimeouts,
+    maxAgentPoliciesWithInactivityTimeout,
+    pathPrefix,
+    logger
+  );
   return {
     status: {
       type: 'keyword',
@@ -111,7 +163,15 @@ export async function buildAgentStatusRuntimeField(
   soClient: SavedObjectsClientContract,
   pathPrefix?: string
 ) {
+  const config = appContextService.getConfig();
+  const logger = appContextService.getLogger();
+  const maxAgentPoliciesWithInactivityTimeout = config?.maxAgentPoliciesWithInactivityTimeout;
   const inactivityTimeouts = await agentPolicyService.getInactivityTimeouts(soClient);
 
-  return _buildStatusRuntimeField(inactivityTimeouts, pathPrefix);
+  return _buildStatusRuntimeField({
+    inactivityTimeouts,
+    maxAgentPoliciesWithInactivityTimeout,
+    pathPrefix,
+    logger,
+  });
 }

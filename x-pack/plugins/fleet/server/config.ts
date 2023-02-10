@@ -120,6 +120,7 @@ export const config: PluginConfigDescriptor = {
     fleetServerHosts: PreconfiguredFleetServerHostsSchema,
     proxies: PreconfiguredFleetProxiesSchema,
     agentIdVerificationEnabled: schema.boolean({ defaultValue: true }),
+    maxAgentPoliciesWithInactivityTimeout: schema.maybe(schema.number()),
     setup: schema.maybe(
       schema.object({
         agentPolicySchemaUpgradeBatchSize: schema.maybe(schema.number()),

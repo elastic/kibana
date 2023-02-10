@@ -32,6 +32,7 @@ export interface FleetConfigType {
   packages?: PreconfiguredPackage[];
   outputs?: PreconfiguredOutput[];
   agentIdVerificationEnabled?: boolean;
+  maxAgentPoliciesWithInactivityTimeout?: number;
   enableExperimental?: string[];
   packageVerification?: {
     gpgKeyPath?: string;
