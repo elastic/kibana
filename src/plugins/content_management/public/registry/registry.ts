@@ -6,17 +6,17 @@
  * Side Public License, v 1.
  */
 
-import type { ContentTypeDetails } from './content_type_details';
+import type { ContentTypeDefinition } from './content_type_definition';
 import { ContentType } from './content_type';
 
 export class ContentTypeRegistry {
   private readonly types: Map<string, ContentType> = new Map();
 
-  public register(details: ContentTypeDetails): ContentType {
-    if (this.types.has(details.id)) {
-      throw new Error(`Content type with id "${details.id}" already registered.`);
+  public register(definition: ContentTypeDefinition): ContentType {
+    if (this.types.has(definition.id)) {
+      throw new Error(`Content type with id "${definition.id}" already registered.`);
     }
-    const type = new ContentType(details);
+    const type = new ContentType(definition);
     this.types.set(type.id(), type);
 
     return type;

@@ -6,33 +6,29 @@
  * Side Public License, v 1.
  */
 
-import { ContentTypeDetails, ContentTypeKind } from './content_type_details';
+import { ContentTypeDefinition } from './content_type_definition';
 import type { CrudClient } from '../crud_client';
 
 export class ContentType {
-  constructor(public readonly details: ContentTypeDetails) {}
+  constructor(public readonly definition: ContentTypeDefinition) {}
 
   id(): string {
-    return this.details.id;
+    return this.definition.id;
   }
 
   name(): string {
-    return this.details.name ?? this.id();
+    return this.definition.name ?? this.id();
   }
 
   description(): string {
-    return this.details.description ?? '';
-  }
-
-  kind(): ContentTypeKind {
-    return this.details.kind ?? 'other';
+    return this.definition.description ?? '';
   }
 
   icon(): string {
-    return this.details.icon ?? 'questionInCircle';
+    return this.definition.icon ?? 'questionInCircle';
   }
 
   crud(): CrudClient | undefined {
-    return this.details.crud;
+    return this.definition.crud;
   }
 }

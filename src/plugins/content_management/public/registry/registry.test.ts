@@ -26,7 +26,6 @@ test('registering a content type', () => {
   expect(type.name()).toBe('Test');
   expect(type.icon()).toBe('test');
   expect(type.description()).toBe('Test description');
-  expect(type.kind()).toBe('other');
 });
 
 test('registering already registered content type throws', () => {

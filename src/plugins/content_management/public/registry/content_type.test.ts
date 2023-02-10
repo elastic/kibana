@@ -7,7 +7,7 @@
  */
 
 import { ContentType } from './content_type';
-import type { ContentTypeDetails } from './content_type_details';
+import type { ContentTypeDefinition } from './content_type_definition';
 
 test('create a content type with just an id', () => {
   const type = new ContentType({ id: 'test' });
@@ -16,23 +16,20 @@ test('create a content type with just an id', () => {
   expect(type.name()).toBe('test');
   expect(type.icon()).toBe('questionInCircle');
   expect(type.description()).toBe('');
-  expect(type.kind()).toBe('other');
 });
 
-test('create a content type with all the full details', () => {
-  const details: ContentTypeDetails = {
+test('create a content type with all the full definition', () => {
+  const definition: ContentTypeDefinition = {
     id: 'test',
     name: 'Test',
     icon: 'test',
     description: 'Test description',
-    kind: 'user',
   };
-  const type = new ContentType(details);
+  const type = new ContentType(definition);
 
-  expect(type.id()).toBe(details.id);
-  expect(type.name()).toBe(details.name);
-  expect(type.icon()).toBe(details.icon);
-  expect(type.description()).toBe(details.description);
-  expect(type.kind()).toBe(details.kind);
-  expect(type.details).toEqual(details);
+  expect(type.id()).toBe(definition.id);
+  expect(type.name()).toBe(definition.name);
+  expect(type.icon()).toBe(definition.icon);
+  expect(type.description()).toBe(definition.description);
+  expect(type.definition).toEqual(definition);
 });

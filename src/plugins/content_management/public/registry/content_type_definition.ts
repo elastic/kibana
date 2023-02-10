@@ -11,7 +11,7 @@ import type { CrudClient } from '../crud_client';
 /**
  * Content type definition as it is registered in the content registry.
  */
-export interface ContentTypeDetails {
+export interface ContentTypeDefinition {
   /**
    * ID of the type. Must be unique. Like "dashboard", "visualization", etc.
    */
@@ -35,19 +35,8 @@ export interface ContentTypeDetails {
   icon?: string;
 
   /**
-   * Specifies item type. Defaults to 'other'.
-   */
-  kind?: ContentTypeKind;
-
-  /**
    * CRUD client to use for this type.
    * If not provided the default CRUD client is used assuming that this type has a server-side content registry
    */
   crud?: CrudClient;
 }
-
-/**
- * Specifies whether this type represents user-like items (like user profiles)
- * or something else (like dashboards). Defaults to 'other'.
- */
-export type ContentTypeKind = 'user' | 'other';

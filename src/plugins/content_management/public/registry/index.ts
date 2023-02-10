@@ -6,6 +6,6 @@
  * Side Public License, v 1.
  */
 
-export type { ContentTypeKind, ContentTypeDetails } from './content_type_details';
+export type { ContentTypeDefinition } from './content_type_definition';
 export { ContentType } from './content_type';
 export { ContentTypeRegistry } from './registry';
