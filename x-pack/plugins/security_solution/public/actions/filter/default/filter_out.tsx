@@ -28,7 +28,7 @@ export const createFilterOutAction = ({ order }: { order?: number }): CellAction
   execute: async ({ field, metadata }) => {
     const services = KibanaServices.get();
     const filterManager = services.data.query.filterManager;
-    const negate = metadata?.negateFilters === undefined ? true : !metadata.negateFilters;
+    const negate = !metadata?.negateFilters;
 
     const makeFilter = (currentVal: string | string[] | null | undefined) =>
       currentVal == null || currentVal?.length === 0

@@ -58,7 +58,7 @@ export const getAlertsTypeTableColumns = (): Array<EuiBasicTableColumn<AlertsTyp
                 value: 'denied',
                 type: 'keyword',
               }}
-              metadata={{ negateFilters: type === 'Detection' ? true : false }} // Detection: event.type != denied
+              metadata={{ negateFilters: type === 'Detection' }} // Detection: event.type != denied
             >
               {ALERT_TYPE_LABEL[type as AlertType]}
             </CellActions>
