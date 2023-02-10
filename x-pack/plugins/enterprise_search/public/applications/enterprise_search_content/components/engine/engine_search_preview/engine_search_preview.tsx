@@ -13,6 +13,7 @@ import {
   EuiBadge,
   EuiBasicTable,
   EuiBasicTableColumn,
+  EuiButton,
   EuiFieldSearch,
   EuiFlexGroup,
   EuiFlexItem,
@@ -118,13 +119,18 @@ const ResultView: React.FC<ResultViewProps> = ({ result }) => {
 
 const InputView: React.FC<InputViewProps> = ({ getInputProps }) => {
   return (
-    <EuiFieldSearch
-      fullWidth
-      placeholder="search"
-      {...getInputProps({})}
-      isClearable
-      aria-label="Search Input"
-    />
+    <EuiFlexGroup gutterSize="s">
+      <EuiFieldSearch
+        fullWidth
+        placeholder="search"
+        {...getInputProps({})}
+        isClearable
+        aria-label="Search Input"
+      />
+      <EuiButton type="submit" color="primary" fill>
+        Search
+      </EuiButton>
+    </EuiFlexGroup>
   );
 };
 
