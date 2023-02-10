@@ -170,7 +170,7 @@ describe('migrating from 7.3.0-xpack which used v1 migrations', () => {
     await removeLogFile();
     await startServers({
       oss: false,
-      dataArchive: Path.join(__dirname, 'archives', '7.3.0_xpack_sample_saved_objects.zip'),
+      dataArchive: Path.join(__dirname, '..', 'archives', '7.3.0_xpack_sample_saved_objects.zip'),
     });
   });
 
