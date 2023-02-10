@@ -32,7 +32,7 @@ export const getModelVersionTransforms = ({
       ? typeDefinition.modelVersions()
       : typeDefinition.modelVersions ?? {};
 
-  Object.entries(modelVersionMap)
+  const transforms = Object.entries(modelVersionMap)
     .filter(([_, definition]) => !!definition.modelChange.transformation)
     .map<Transform>(([rawModelVersion, definition]) => {
       const modelVersion = assertValidModelVersion(rawModelVersion);
@@ -49,7 +49,7 @@ export const getModelVersionTransforms = ({
       };
     });
 
-  return [];
+  return transforms;
 };
 
 export const convertModelVersionTransformFn = ({
@@ -63,11 +63,14 @@ export const convertModelVersionTransformFn = ({
   definition: SavedObjectsModelVersion;
   log: Logger;
 }): TransformFn => {
+  if (!definition.modelChange.transformation) {
+    throw new Error('cannot convert model change without a transform');
+  }
   const context: SavedObjectModelTransformationContext = {
     log,
     modelVersion,
   };
-  const modelTransformFn = definition.modelChange.transformation!.up;
+  const modelTransformFn = definition.modelChange.transformation.up;
 
   return function convertedTransform(doc: SavedObjectUnsanitizedDoc) {
     try {
