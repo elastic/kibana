@@ -19,7 +19,7 @@ import {
   createTestServers,
   type TestElasticsearchUtils,
 } from '@kbn/core-test-helpers-kbn-server';
-import { delay } from './test_utils';
+import { delay } from '../test_utils';
 
 const logFilePath = Path.join(__dirname, 'check_target_mappings.log');
 
@@ -126,7 +126,7 @@ describe('migration v2 - CHECK_TARGET_MAPPINGS', () => {
         settings: {
           es: {
             license: 'basic',
-            dataArchive: Path.join(__dirname, 'archives', '8.4.0_with_sample_data_logs.zip'),
+            dataArchive: Path.join(__dirname, '..', 'archives', '8.4.0_with_sample_data_logs.zip'),
           },
         },
       });

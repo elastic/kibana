@@ -17,7 +17,7 @@ import {
 import { Root } from '@kbn/core-root-server-internal';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { LogRecord } from '@kbn/logging';
-import { getDocVersion } from './test_utils';
+import { getDocVersion } from '../test_utils';
 import { retryAsync } from '@kbn/core-saved-objects-migration-server-mocks';
 
 const logFilePath = Path.join(__dirname, 'incompatible_cluster_routing_allocation.log');
@@ -35,6 +35,7 @@ const { startES } = createTestServers({
       license: 'basic',
       dataArchive: Path.join(
         __dirname,
+        '..',
         'archives',
         '8.0.0_v1_migrations_sample_data_saved_objects.zip'
       ),

@@ -154,7 +154,7 @@ describe('migration v2', () => {
           //   { id: 'foo:2', type: 'foo', foo: { status: 'unmigrated' }, migrationVersion: { foo: '7.13.0' } },
           //   { id: 'foo:3', type: 'foo', foo: { status: 'unmigrated' }, migrationVersion: { foo: '7.13.0' } },
           // ];
-          dataArchive: Path.join(__dirname, 'archives', '7.13.0_concurrent_5k_foo.zip'),
+          dataArchive: Path.join(__dirname, '..', 'archives', '7.13.0_concurrent_5k_foo.zip'),
         },
       },
     });
