@@ -22,6 +22,7 @@ const apmTransactionDurationIndicatorSchema = t.type({
     }),
     t.partial({
       index: t.string,
+      filter: t.string,
     }),
   ]),
 });
@@ -41,6 +42,7 @@ const apmTransactionErrorRateIndicatorSchema = t.type({
         t.union([t.literal('2xx'), t.literal('3xx'), t.literal('4xx'), t.literal('5xx')])
       ),
       index: t.string,
+      filter: t.string,
     }),
   ]),
 });
