@@ -137,7 +137,12 @@ describe('migration v2', () => {
           //     namespace: 'spacex',
           //   },
           // ];
-          dataArchive: Path.join(__dirname, 'archives', '7.13.2_so_with_multiple_namespaces.zip'),
+          dataArchive: Path.join(
+            __dirname,
+            '..',
+            'archives',
+            '7.13.2_so_with_multiple_namespaces.zip'
+          ),
         },
       },
     });

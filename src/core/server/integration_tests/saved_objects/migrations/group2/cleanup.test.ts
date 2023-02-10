@@ -16,7 +16,7 @@ import {
   type TestElasticsearchUtils,
 } from '@kbn/core-test-helpers-kbn-server';
 import { Root } from '@kbn/core-root-server-internal';
-import { getMigrationDocLink } from './test_utils';
+import { getMigrationDocLink } from '../test_utils';
 
 const migrationDocLink = getMigrationDocLink().resolveMigrationFailures;
 const logFilePath = Path.join(__dirname, 'cleanup.log');
@@ -96,7 +96,7 @@ describe('migration v2', () => {
           //   _seq_no: 0,
           //     _primary_term: 1
           // }
-          dataArchive: Path.join(__dirname, 'archives', '7.13.0_with_corrupted_so.zip'),
+          dataArchive: Path.join(__dirname, '..', 'archives', '7.13.0_with_corrupted_so.zip'),
         },
       },
     });
