@@ -277,10 +277,6 @@ paths:
         - $ref: '#/components/parameters/kbn_xsrf'
       requestBody:
         content:
-          application/gzip:
-            schema:
-              type: string
-              format: binary
           application/zip:
             schema:
               type: string
