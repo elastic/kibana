@@ -992,14 +992,16 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
       timeout: number = 2 * 60 * 1000
     ) {
       await retry.waitForWithTimeout(
-        `job record count to be ${expectedCount}`,
+        `job ${jobId} record count to be ${expectedCount}`,
         timeout,
         async () => {
           const count = await this.getADJobRecordCount(jobId);
           if (count === expectedCount) {
             return true;
           } else {
-            throw new Error(`expected job record count to be ${expectedCount} but got ${count}`);
+            throw new Error(
+              `expected job ${jobId} record count to be ${expectedCount} but got ${count}`
+            );
           }
         }
       );

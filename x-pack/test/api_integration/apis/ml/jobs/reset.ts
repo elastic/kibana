@@ -7,7 +7,6 @@
 
 import expect from '@kbn/expect';
 
-import { JOB_STATE, DATAFEED_STATE } from '@kbn/ml-plugin/common/constants/states';
 import { ANNOTATION_TYPE } from '@kbn/ml-plugin/common/constants/annotations';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import { COMMON_REQUEST_HEADERS } from '../../../../functional/services/ml/common_api';
@@ -58,11 +57,6 @@ export default ({ getService }: FtrProviderContext) => {
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/farequote');
       await ml.testResources.createIndexPatternIfNeeded('ft_farequote', '@timestamp');
       await ml.testResources.setKibanaTimeZoneToUTC();
-
-      for (const job of testSetupJobConfigs) {
-        await ml.api.deleteAnomalyDetectionJobES(job.job_id);
-      }
-      await ml.api.cleanMlIndices();
     });
 
     after(async () => {
@@ -73,17 +67,11 @@ export default ({ getService }: FtrProviderContext) => {
       for (const job of testSetupJobConfigs) {
         const jobId = job.job_id;
         const datafeedId = `datafeed-${jobId}`;
-        await ml.api.createAnomalyDetectionJob(job);
-        await ml.api.openAnomalyDetectionJob(jobId);
-        await ml.api.createDatafeed({
+        await ml.api.createAndRunAnomalyDetectionLookbackJob(job, {
           ...DATAFEED_CONFIG,
           datafeed_id: datafeedId,
           job_id: jobId,
         });
-
-        await ml.api.startDatafeed(datafeedId, { start: '0', end: `${Date.now()}` });
-        await ml.api.waitForDatafeedState(datafeedId, DATAFEED_STATE.STOPPED);
-        await ml.api.waitForJobState(jobId, JOB_STATE.CLOSED);
 
         await createAnnotation(jobId, 'test test test');
         await ml.api.assertAnnotationsCount(jobId, 2);
