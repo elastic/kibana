@@ -1160,10 +1160,13 @@ export class DataViewsService {
    * @param {boolean} [options.displayErrors=true] - If set false, API consumer is responsible for displaying and handling errors.
    * @returns default data view
    */
-  async getDefaultDataView(options?: {
-    displayErrors: boolean;
-    refreshFields?: boolean;
-  }): Promise<DataView | null> {
+  async getDefaultDataView(
+    options: {
+      displayErrors?: boolean;
+      refreshFields?: boolean;
+    } = {}
+  ): Promise<DataView | null> {
+    const { displayErrors = true, refreshFields } = options;
     const patterns = await this.getIdsWithTitle();
     let defaultId: string | undefined = await this.config.get('defaultIndex');
     const exists = defaultId ? patterns.some((pattern) => pattern.id === defaultId) : false;
@@ -1184,7 +1187,7 @@ export class DataViewsService {
     }
 
     if (defaultId) {
-      return this.get(defaultId, options?.displayErrors, options?.refreshFields);
+      return this.get(defaultId, displayErrors, refreshFields);
     } else {
       return null;
     }

@@ -434,7 +434,7 @@ describe('IndexPatterns', () => {
       expect(savedObjectsClient.find).toBeCalledTimes(1);
     });
 
-    test('gets default data view and passes down correct arguments (refreshFields and displayErrors)', async () => {
+    test('gets default data view and passes down defined arguments (refreshFields and displayErrors)', async () => {
       uiSettings.get = jest.fn().mockResolvedValue(indexPatternObj.id);
       savedObjectsClient.get = jest.fn().mockResolvedValue(indexPatternObj);
       savedObjectsClient.find = jest.fn().mockResolvedValue([indexPatternObj]);
@@ -453,6 +453,23 @@ describe('IndexPatterns', () => {
 
       expect(indexPatterns.get).toBeCalledWith(indexPatternObj.id, displayErrors, refreshFields);
       expect(indexPatterns.refreshFields).toBeCalledWith(dataView, displayErrors);
+    });
+
+    test('gets default data view and passes down undefined arguments (refreshFields and displayErrors)', async () => {
+      uiSettings.get = jest.fn().mockResolvedValue(indexPatternObj.id);
+      savedObjectsClient.get = jest.fn().mockResolvedValue(indexPatternObj);
+      savedObjectsClient.find = jest.fn().mockResolvedValue([indexPatternObj]);
+      jest.spyOn(indexPatterns, 'get');
+      jest.spyOn(indexPatterns, 'refreshFields');
+
+      await indexPatterns.get(indexPatternObj.id); // to cache the result
+
+      expect(await indexPatterns.getDefaultDataView()).toBeInstanceOf(DataView);
+      expect(savedObjectsClient.get).toBeCalledTimes(1);
+      expect(savedObjectsClient.find).toBeCalledTimes(1);
+
+      expect(indexPatterns.get).toBeCalledWith(indexPatternObj.id, true, undefined);
+      expect(indexPatterns.refreshFields).not.toBeCalled();
     });
 
     test('returns undefined if no data views exist', async () => {
