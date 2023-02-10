@@ -7,6 +7,7 @@
 
 import React, { useCallback } from 'react';
 import { isEmpty } from 'lodash/fp';
+import { sortBy } from 'lodash';
 
 import {
   EuiButtonIcon,
@@ -26,6 +27,7 @@ import * as i18n from '../translations';
 import type { CaseUserWithProfileInfo, UserInfoWithAvatar } from '../../user_profiles/types';
 import { HoverableUserWithAvatar } from '../../user_profiles/hoverable_user_with_avatar';
 import { convertToUserInfo } from '../../user_profiles/user_converter';
+import { getSortField } from '../../user_profiles/sort';
 
 interface UserListProps {
   theCase: Case;
@@ -90,8 +92,9 @@ export const UserList: React.FC<UserListProps> = React.memo(
     );
 
     const validUsers = getValidUsers(users, userProfiles ?? new Map());
+    const orderedUsers = sortBy(validUsers, getSortField);
 
-    if (validUsers.length === 0) {
+    if (orderedUsers.length === 0) {
       return null;
     }
 
@@ -107,7 +110,7 @@ export const UserList: React.FC<UserListProps> = React.memo(
               </EuiFlexItem>
             </EuiFlexGroup>
           )}
-          {renderUsers(validUsers, handleSendEmail)}
+          {renderUsers(orderedUsers, handleSendEmail)}
         </EuiText>
       </EuiFlexItem>
     );
