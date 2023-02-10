@@ -4544,7 +4544,7 @@
                 "section": "def-common.SavedObjectsClientContract",
                 "text": "SavedObjectsClientContract"
               },
-              ", options: Readonly<{ page?: number | undefined; kuery?: any; sortField?: string | undefined; perPage?: number | undefined; sortOrder?: \"asc\" | \"desc\" | undefined; showUpgradeable?: boolean | undefined; } & {}> & { withPackagePolicies?: boolean | undefined; }) => Promise<{ items: ",
+              ", options: Readonly<{ page?: number | undefined; kuery?: any; sortField?: string | undefined; perPage?: number | undefined; sortOrder?: \"asc\" | \"desc\" | undefined; showUpgradeable?: boolean | undefined; } & {}> & { withPackagePolicies?: boolean | undefined; fields?: string[] | undefined; }) => Promise<{ items: ",
               {
                 "pluginId": "fleet",
                 "scope": "common",
@@ -4587,7 +4587,7 @@
                 "label": "options",
                 "description": [],
                 "signature": [
-                  "Readonly<{ page?: number | undefined; kuery?: any; sortField?: string | undefined; perPage?: number | undefined; sortOrder?: \"asc\" | \"desc\" | undefined; showUpgradeable?: boolean | undefined; } & {}> & { withPackagePolicies?: boolean | undefined; }"
+                  "Readonly<{ page?: number | undefined; kuery?: any; sortField?: string | undefined; perPage?: number | undefined; sortOrder?: \"asc\" | \"desc\" | undefined; showUpgradeable?: boolean | undefined; } & {}> & { withPackagePolicies?: boolean | undefined; fields?: string[] | undefined; }"
                 ],
                 "path": "x-pack/plugins/fleet/server/services/agent_policy.ts",
                 "deprecated": false,
