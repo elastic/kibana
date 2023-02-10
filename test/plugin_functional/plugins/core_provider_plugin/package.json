@@ -1,5 +1,5 @@
 {
-  "name": "core_provider_plugin",
+  "name": "@kbn/core-provider-plugin",
   "version": "1.0.0",
   "main": "target/test/plugin_functional/plugins/core_provider_plugin",
   "kibana": {
