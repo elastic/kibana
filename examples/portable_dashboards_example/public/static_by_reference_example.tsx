@@ -7,6 +7,7 @@
  */
 
 import React from 'react';
+import { css } from '@emotion/react';
 
 import { buildPhraseFilter, Filter } from '@kbn/es-query';
 import type { DataView } from '@kbn/data-views-plugin/public';
@@ -41,11 +42,11 @@ export const StaticByReferenceExample = ({
       <EuiSpacer size="m" />
       <EuiPanel
         hasBorder={true}
-        // Once https://github.com/elastic/kibana/pull/145628 is merged, we should (hopefully) be able to make the dashboard
-        // conform to the height of the panel by uncommenting this:
-        // css={css`
-        //   height: 300px;
-        // `}
+        // By specifying the height of the EuiPanel, we make it so that the dashboard height is
+        // constrained to the container - so, the dashboard is rendered with a vertical scrollbar
+        css={css`
+          height: 600px;
+        `}
       >
         <DashboardContainerRenderer
           savedObjectId={dashboardId}
