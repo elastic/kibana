@@ -195,17 +195,17 @@ describe('SLO Edit Page', () => {
 
           expect(screen.queryByTestId('indexSelectionSelectedValue')).toBeNull();
 
-          expect(screen.queryByTestId('sloFormCustomKqlFilterQueryInput')).toHaveValue(
+          expect(screen.queryByTestId('customKqlIndicatorFormQueryFilterInput')).toHaveValue(
             SLO_EDIT_FORM_DEFAULT_VALUES.indicator.type === 'sli.kql.custom'
               ? SLO_EDIT_FORM_DEFAULT_VALUES.indicator.params.filter
               : ''
           );
-          expect(screen.queryByTestId('sloFormCustomKqlGoodQueryInput')).toHaveValue(
+          expect(screen.queryByTestId('customKqlIndicatorFormGoodQueryInput')).toHaveValue(
             SLO_EDIT_FORM_DEFAULT_VALUES.indicator.type === 'sli.kql.custom'
               ? SLO_EDIT_FORM_DEFAULT_VALUES.indicator.params.good
               : ''
           );
-          expect(screen.queryByTestId('sloFormCustomKqlTotalQueryInput')).toHaveValue(
+          expect(screen.queryByTestId('customKqlIndicatorFormTotalQueryInput')).toHaveValue(
             SLO_EDIT_FORM_DEFAULT_VALUES.indicator.type === 'sli.kql.custom'
               ? SLO_EDIT_FORM_DEFAULT_VALUES.indicator.params.total
               : ''
@@ -249,9 +249,12 @@ describe('SLO Edit Page', () => {
           render(<SloEditPage />, config);
 
           userEvent.type(screen.getByTestId('indexSelection'), 'some-index');
-          userEvent.type(screen.getByTestId('sloFormCustomKqlFilterQueryInput'), 'irrelevant');
-          userEvent.type(screen.getByTestId('sloFormCustomKqlGoodQueryInput'), 'irrelevant');
-          userEvent.type(screen.getByTestId('sloFormCustomKqlTotalQueryInput'), 'irrelevant');
+          userEvent.type(
+            screen.getByTestId('customKqlIndicatorFormQueryFilterInput'),
+            'irrelevant'
+          );
+          userEvent.type(screen.getByTestId('customKqlIndicatorFormGoodQueryInput'), 'irrelevant');
+          userEvent.type(screen.getByTestId('customKqlIndicatorFormTotalQueryInput'), 'irrelevant');
           userEvent.selectOptions(
             screen.getByTestId('sloFormBudgetingMethodSelect'),
             'occurrences'
@@ -337,13 +340,13 @@ describe('SLO Edit Page', () => {
             slo.indicator.params.index!
           );
 
-          expect(screen.queryByTestId('sloFormCustomKqlFilterQueryInput')).toHaveValue(
+          expect(screen.queryByTestId('customKqlIndicatorFormQueryFilterInput')).toHaveValue(
             slo.indicator.type === 'sli.kql.custom' ? slo.indicator.params.filter : ''
           );
-          expect(screen.queryByTestId('sloFormCustomKqlGoodQueryInput')).toHaveValue(
+          expect(screen.queryByTestId('customKqlIndicatorFormGoodQueryInput')).toHaveValue(
             slo.indicator.type === 'sli.kql.custom' ? slo.indicator.params.good : ''
           );
-          expect(screen.queryByTestId('sloFormCustomKqlTotalQueryInput')).toHaveValue(
+          expect(screen.queryByTestId('customKqlIndicatorFormTotalQueryInput')).toHaveValue(
             slo.indicator.type === 'sli.kql.custom' ? slo.indicator.params.total : ''
           );
 
