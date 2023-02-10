@@ -468,6 +468,8 @@ describe('Cases API', () => {
       total: 20,
       userActions: [...caseUserActionsWithRegisteredAttachmentsSnake],
     };
+    const filterActionType = 'all';
+    const sortOrder = 'asc';
 
     beforeEach(() => {
       fetchMock.mockClear();
@@ -475,24 +477,36 @@ describe('Cases API', () => {
     });
 
     it('should be called with correct check url, method, signal', async () => {
-      await findCaseUserActions(basicCase.id, abortCtrl.signal);
+      await findCaseUserActions(basicCase.id, filterActionType, sortOrder, abortCtrl.signal);
       expect(fetchMock).toHaveBeenCalledWith(`${CASES_URL}/${basicCase.id}/user_actions/_find`, {
         method: 'GET',
         signal: abortCtrl.signal,
         query: {
+          types: [],
+          sortOrder: 'asc',
           perPage: MAX_DOCS_PER_PAGE,
         },
       });
     });
 
     it('should return correct response', async () => {
-      const resp = await findCaseUserActions(basicCase.id, abortCtrl.signal);
+      const resp = await findCaseUserActions(
+        basicCase.id,
+        filterActionType,
+        sortOrder,
+        abortCtrl.signal
+      );
       expect(resp).toEqual(findCaseUserActionsResponse);
     });
 
     it('should not covert to camel case registered attachments', async () => {
       fetchMock.mockResolvedValue(findCaseUserActionsSnake);
-      const resp = await findCaseUserActions(basicCase.id, abortCtrl.signal);
+      const resp = await findCaseUserActions(
+        basicCase.id,
+        filterActionType,
+        sortOrder,
+        abortCtrl.signal
+      );
       expect(resp).toEqual(findCaseUserActionsResponse);
     });
   });

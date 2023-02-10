@@ -36,6 +36,9 @@ const wrapper: React.FC<string> = ({ children }) => (
 );
 
 describe('UseFindCaseUserActions', () => {
+  const filterActionType = 'all';
+  const sortOrder = 'asc';
+
   beforeEach(() => {
     jest.clearAllMocks();
     jest.restoreAllMocks();
@@ -43,7 +46,7 @@ describe('UseFindCaseUserActions', () => {
 
   it('returns proper state on findCaseUserActions', async () => {
     const { result, waitForNextUpdate } = renderHook<string, UseFindCaseUserActions>(
-      () => useFindCaseUserActions(basicCase.id),
+      () => useFindCaseUserActions(basicCase.id, filterActionType, sortOrder),
       { wrapper }
     );
 
@@ -71,13 +74,18 @@ describe('UseFindCaseUserActions', () => {
     (useToasts as jest.Mock).mockReturnValue({ addError });
 
     const { waitForNextUpdate } = renderHook<string, UseFindCaseUserActions>(
-      () => useFindCaseUserActions(basicCase.id),
+      () => useFindCaseUserActions(basicCase.id, filterActionType, sortOrder),
       { wrapper }
     );
 
     await waitForNextUpdate();
 
-    expect(spy).toHaveBeenCalledWith(basicCase.id, expect.any(AbortSignal));
+    expect(spy).toHaveBeenCalledWith(
+      basicCase.id,
+      filterActionType,
+      sortOrder,
+      expect.any(AbortSignal)
+    );
     expect(addError).toHaveBeenCalled();
   });
 
@@ -93,7 +101,7 @@ describe('UseFindCaseUserActions', () => {
       );
 
       const { result, waitForNextUpdate } = renderHook<string, UseFindCaseUserActions>(
-        () => useFindCaseUserActions(basicCase.id),
+        () => useFindCaseUserActions(basicCase.id, filterActionType, sortOrder),
         { wrapper }
       );
 
@@ -121,7 +129,7 @@ describe('UseFindCaseUserActions', () => {
       );
 
       const { result, waitForNextUpdate } = renderHook<string, UseFindCaseUserActions>(
-        () => useFindCaseUserActions(basicCase.id),
+        () => useFindCaseUserActions(basicCase.id, filterActionType, sortOrder),
         { wrapper }
       );
 
@@ -145,7 +153,7 @@ describe('UseFindCaseUserActions', () => {
       );
 
       const { result, waitForNextUpdate } = renderHook<string, UseFindCaseUserActions>(
-        () => useFindCaseUserActions(basicCase.id),
+        () => useFindCaseUserActions(basicCase.id, filterActionType, sortOrder),
         { wrapper }
       );
 
@@ -174,7 +182,7 @@ describe('UseFindCaseUserActions', () => {
       );
 
       const { result, waitForNextUpdate } = renderHook<string, UseFindCaseUserActions>(
-        () => useFindCaseUserActions(basicCase.id),
+        () => useFindCaseUserActions(basicCase.id, filterActionType, sortOrder),
         { wrapper }
       );
 
@@ -199,7 +207,7 @@ describe('UseFindCaseUserActions', () => {
       );
 
       const { result, waitForNextUpdate } = renderHook<string, UseFindCaseUserActions>(
-        () => useFindCaseUserActions(basicCase.id),
+        () => useFindCaseUserActions(basicCase.id, filterActionType, sortOrder),
         { wrapper }
       );
 

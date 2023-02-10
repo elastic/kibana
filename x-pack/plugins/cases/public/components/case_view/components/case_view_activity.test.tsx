@@ -5,6 +5,10 @@
  * 2.0.
  */
 
+import React from 'react';
+import userEvent from '@testing-library/user-event';
+import { fireEvent, waitFor } from '@testing-library/dom';
+import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
 import {
   alertComment,
   basicCase,
@@ -12,7 +16,6 @@ import {
   connectorsMock,
   getAlertUserAction,
 } from '../../../containers/mock';
-import React from 'react';
 import type { AppMockRenderer } from '../../../common/mock';
 import { createAppMockRenderer, noUpdateCasesPermissions } from '../../../common/mock';
 import { CaseViewActivity } from './case_view_activity';
@@ -25,9 +28,7 @@ import { useGetSupportedActionConnectors } from '../../../containers/configure/u
 import { useGetTags } from '../../../containers/use_get_tags';
 import { useBulkGetUserProfiles } from '../../../containers/user_profiles/use_bulk_get_user_profiles';
 import { useGetCaseConnectors } from '../../../containers/use_get_case_connectors';
-import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
 import { waitForComponentToUpdate } from '../../../common/test_utils';
-import { waitFor } from '@testing-library/dom';
 import { getCaseConnectorsMockResponse } from '../../../common/mock/connectors';
 
 jest.mock('../../../containers/use_find_case_user_actions');
@@ -74,15 +75,18 @@ const caseViewProps: CaseViewProps = {
     },
   ],
 };
-const fetchCaseUserActions = jest.fn();
+const filterActionType = 'all';
+const sortOrder = 'asc';
+
 const pushCaseToExternalService = jest.fn();
+const refetchFindCaseUserActions = jest.fn();
 
 const defaultUseFindCaseUserActions = {
   data: {
     caseUserActions: [...caseUserActions, getAlertUserAction()],
     participants: [caseData.createdBy],
   },
-  refetch: fetchCaseUserActions,
+  refetch: refetchFindCaseUserActions,
   isLoading: false,
   isError: false,
 };
@@ -135,7 +139,11 @@ describe('Case View Page activity tab', () => {
     expect(result.getByTestId('case-tags')).toBeTruthy();
     expect(result.getByTestId('connector-edit-header')).toBeTruthy();
     expect(result.getByTestId('case-view-status-action-button')).toBeTruthy();
-    expect(useFindCaseUserActionsMock).toHaveBeenCalledWith(caseData.id);
+    expect(useFindCaseUserActionsMock).toHaveBeenCalledWith(
+      caseData.id,
+      filterActionType,
+      sortOrder
+    );
 
     await waitForComponentToUpdate();
   });
@@ -152,7 +160,11 @@ describe('Case View Page activity tab', () => {
     expect(result.getByTestId('case-tags')).toBeTruthy();
     expect(result.getByTestId('connector-edit-header')).toBeTruthy();
     expect(result.queryByTestId('case-view-status-action-button')).not.toBeInTheDocument();
-    expect(useFindCaseUserActionsMock).toHaveBeenCalledWith(caseData.id);
+    expect(useFindCaseUserActionsMock).toHaveBeenCalledWith(
+      caseData.id,
+      filterActionType,
+      sortOrder
+    );
 
     await waitForComponentToUpdate();
   });
@@ -169,7 +181,11 @@ describe('Case View Page activity tab', () => {
     expect(result.getByTestId('case-tags')).toBeTruthy();
     expect(result.getByTestId('connector-edit-header')).toBeTruthy();
     expect(result.getByTestId('case-severity-selection')).toBeDisabled();
-    expect(useFindCaseUserActionsMock).toHaveBeenCalledWith(caseData.id);
+    expect(useFindCaseUserActionsMock).toHaveBeenCalledWith(
+      caseData.id,
+      filterActionType,
+      sortOrder
+    );
 
     await waitForComponentToUpdate();
   });
@@ -183,7 +199,11 @@ describe('Case View Page activity tab', () => {
     const result = appMockRender.render(<CaseViewActivity {...caseProps} />);
     expect(result.getByTestId('case-view-loading-content')).toBeTruthy();
     expect(result.queryByTestId('case-view-activity')).toBeFalsy();
-    expect(useFindCaseUserActionsMock).toHaveBeenCalledWith(caseData.id);
+    expect(useFindCaseUserActionsMock).toHaveBeenCalledWith(
+      caseData.id,
+      filterActionType,
+      sortOrder
+    );
   });
 
   it('should not render the assignees on basic license', () => {
@@ -216,6 +236,61 @@ describe('Case View Page activity tab', () => {
 
     await waitFor(() => {
       expect(result.getByTestId('case-view-edit-connector')).toBeInTheDocument();
+    });
+  });
+
+  describe('filter activity', () => {
+    beforeEach(() => {
+      useFindCaseUserActionsMock.mockReturnValue({
+        ...defaultUseFindCaseUserActions,
+      });
+    });
+
+    it('should render comment filter', async () => {
+      const result = appMockRender.render(<CaseViewActivity {...caseProps} />);
+      expect(useFindCaseUserActionsMock).toHaveBeenCalledWith(
+        caseData.id,
+        filterActionType,
+        sortOrder
+      );
+
+      userEvent.click(result.getByTestId('user-actions-filter-activity-button-comments'));
+
+      await waitFor(() => {
+        expect(useFindCaseUserActionsMock).toHaveBeenCalledWith(caseData.id, 'user', sortOrder);
+      });
+    });
+
+    it('should render action filter', async () => {
+      const result = appMockRender.render(<CaseViewActivity {...caseProps} />);
+      expect(useFindCaseUserActionsMock).toHaveBeenCalledWith(
+        caseData.id,
+        filterActionType,
+        sortOrder
+      );
+
+      userEvent.click(result.getByTestId('user-actions-filter-activity-button-actions'));
+
+      await waitFor(() => {
+        expect(useFindCaseUserActionsMock).toHaveBeenCalledWith(caseData.id, 'action', sortOrder);
+      });
+    });
+
+    it('should render by desc sort order', async () => {
+      const result = appMockRender.render(<CaseViewActivity {...caseProps} />);
+      expect(useFindCaseUserActionsMock).toHaveBeenCalledWith(
+        caseData.id,
+        filterActionType,
+        sortOrder
+      );
+
+      const sortSelect = result.getByTestId('user-actions-sort-select');
+
+      fireEvent.change(sortSelect, { target: { value: 'desc' } });
+
+      await waitFor(() => {
+        expect(useFindCaseUserActionsMock).toHaveBeenCalledWith(caseData.id, 'all', 'desc');
+      });
     });
   });
 });

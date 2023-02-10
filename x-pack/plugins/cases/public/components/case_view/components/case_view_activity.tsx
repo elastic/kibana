@@ -8,7 +8,7 @@
 /* eslint-disable complexity */
 
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingContent } from '@elastic/eui';
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useMemo, useState, useEffect } from 'react';
 import { isEqual, uniq } from 'lodash';
 import { useGetCaseConnectors } from '../../../containers/use_get_case_connectors';
 import { useCasesFeatures } from '../../../common/use_cases_features';
@@ -31,7 +31,10 @@ import * as i18n from '../translations';
 import { SeveritySidebarSelector } from '../../severity/sidebar_selector';
 import { useFindCaseUserActions } from '../../../containers/use_find_case_user_actions';
 import { AssignUsers } from './assign_users';
+import { UserActionsActivityBar } from '../../user_actions_activity_bar';
 import type { Assignee } from '../../user_profiles/types';
+import type { Params } from '../../user_actions_activity_bar';
+import type { FilterType, SortOrderType } from '../../user_actions_activity_bar/types';
 
 export const CaseViewActivity = ({
   ruleDetailsNavigation,
@@ -46,6 +49,9 @@ export const CaseViewActivity = ({
   showAlertDetails?: (alertId: string, index: string) => void;
   useFetchAlertData: UseFetchAlertData;
 }) => {
+  const [filterOptions, setFilterOptions] = useState<FilterType>('all');
+  const [sortOrder, setSortOrder] = useState<SortOrderType>('asc');
+
   const { permissions } = useCasesContext();
   const { getCaseViewUrl } = useCaseViewNavigation();
   const { caseAssignmentAuthorized, pushToServiceAuthorized } = useCasesFeatures();
@@ -54,9 +60,11 @@ export const CaseViewActivity = ({
     caseData.id
   );
 
-  const { data: userActionsData, isLoading: isLoadingUserActions } = useFindCaseUserActions(
-    caseData.id
-  );
+  const {
+    data: userActionsData,
+    isLoading: isLoadingUserActions,
+    refetch: refetchFindCaseUserActions,
+  } = useFindCaseUserActions(caseData.id, filterOptions, sortOrder);
 
   const assignees = useMemo(
     () => caseData.assignees.map((assignee) => assignee.uid),
@@ -143,6 +151,11 @@ export const CaseViewActivity = ({
     [onUpdateField]
   );
 
+  useEffect(() => {
+    refetchFindCaseUserActions();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [filterOptions, sortOrder]);
+
   const showUserActions =
     !isLoadingUserActions &&
     !isLoadingCaseConnectors &&
@@ -153,6 +166,14 @@ export const CaseViewActivity = ({
   const showConnectorSidebar =
     pushToServiceAuthorized && userActionsData && caseConnectors && supportedActionConnectors;
 
+  const handleUserActionsActivityChanged = useCallback(
+    (params: Params) => {
+      setFilterOptions(params.type);
+      setSortOrder(params.sortOrder);
+    },
+    [setFilterOptions, setSortOrder]
+  );
+
   return (
     <>
       <EuiFlexItem grow={6}>
@@ -161,6 +182,12 @@ export const CaseViewActivity = ({
         )}
         {showUserActions && (
           <EuiFlexGroup direction="column" responsive={false} data-test-subj="case-view-activity">
+            <EuiFlexItem grow={false}>
+              <UserActionsActivityBar
+                onUserActionsActivityChanged={handleUserActionsActivityChanged}
+                params={{ type: filterOptions, sortOrder }}
+              />
+            </EuiFlexItem>
             <EuiFlexItem>
               <UserActions
                 userProfiles={userProfiles}

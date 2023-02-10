@@ -14,6 +14,7 @@ import type {
   FetchCasesProps,
   ResolvedCase,
   FindCaseUserActions,
+  CaseUserActionTypeWithAll,
 } from '../../common/ui/types';
 import { SeverityAll, SortFieldCase, StatusAll } from '../../common/ui/types';
 import type {
@@ -151,16 +152,22 @@ export const getSingleCaseMetrics = async (
 
 export const findCaseUserActions = async (
   caseId: string,
+  filterActionType: CaseUserActionTypeWithAll,
+  sortOrder: 'asc' | 'desc',
   signal: AbortSignal
 ): Promise<FindCaseUserActions> => {
+  const query = {
+    types: filterActionType !== 'all' ? [filterActionType] : [],
+    sortOrder: sortOrder ?? 'asc',
+    perPage: MAX_DOCS_PER_PAGE,
+  };
+
   const response = await KibanaServices.get().http.fetch<UserActionFindResponse>(
     getCaseFindUserActionsUrl(caseId),
     {
       method: 'GET',
+      query,
       signal,
-      query: {
-        perPage: MAX_DOCS_PER_PAGE,
-      },
     }
   );
 

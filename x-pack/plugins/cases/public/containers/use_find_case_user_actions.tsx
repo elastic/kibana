@@ -8,7 +8,7 @@
 import { isEmpty, uniqBy } from 'lodash/fp';
 
 import { useQuery } from '@tanstack/react-query';
-import type { CaseUserActions } from '../../common/ui/types';
+import type { CaseUserActions, CaseUserActionTypeWithAll } from '../../common/ui/types';
 import { ActionTypes } from '../../common/api';
 import { findCaseUserActions } from './api';
 import { isPushedUserAction } from '../../common/utils/user_actions';
@@ -43,14 +43,23 @@ export const getProfileUids = (userActions: CaseUserActions[]) => {
   return uids;
 };
 
-export const useFindCaseUserActions = (caseId: string) => {
+export const useFindCaseUserActions = (
+  caseId: string,
+  filterActionType: CaseUserActionTypeWithAll,
+  sortOrder: 'asc' | 'desc'
+) => {
   const toasts = useToasts();
   const abortCtrlRef = new AbortController();
 
   return useQuery(
-    casesQueriesKeys.userActions(caseId),
+    casesQueriesKeys.userActions(caseId, filterActionType, sortOrder),
     async () => {
-      const response = await findCaseUserActions(caseId, abortCtrlRef.signal);
+      const response = await findCaseUserActions(
+        caseId,
+        filterActionType,
+        sortOrder,
+        abortCtrlRef.signal
+      );
       const participants = !isEmpty(response.userActions)
         ? uniqBy('createdBy.username', response.userActions).map((cau) => cau.createdBy)
         : [];
