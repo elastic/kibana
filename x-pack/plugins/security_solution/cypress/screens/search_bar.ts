@@ -29,7 +29,12 @@ export const ADD_FILTER_FORM_SAVE_BUTTON = '[data-test-subj="saveFilter"]';
 
 export const GLOBAL_SEARCH_BAR_FILTER_ITEM = '#popoverFor_filter0';
 
+export const GLOBAL_SEARCH_BAR_FILTER_ITEM_DELETE = '#popoverFor_filter0 button[title^="Delete"]';
+
 export const GLOBAL_SEARCH_BAR_FILTER_ITEM_AT = (value: number) => `#popoverFor_filter${value}`;
+
+export const GLOBAL_SEARCH_BAR_FILTER_ITEM_DELETE_BTN_AT = (value: number) =>
+  `#popoverFor_filter${value} button[title^="Delete"]`;
 
 export const GLOBAL_SEARCH_BAR_PINNED_FILTER = '.globalFilterItem-isPinned';
 

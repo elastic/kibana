@@ -134,3 +134,13 @@ export const EVENT_CONTAINER_TABLE_LOADING = '[data-test-subj="events-container-
 
 export const EVENT_CONTAINER_TABLE_NOT_LOADING =
   '[data-test-subj="events-container-loading-false"]';
+
+export const ALERT_TABLE_SUMMARY_VIEW_SELECTABLE = '[data-test-subj="summary-view-selector"]';
+
+export const ALERT_TABLE_GRID_VIEW_OPTION = '[data-test-subj="gridView"]';
+
+export const EVENT_SUMMARY_COLUMN = '[data-gridcell-column-id="eventSummary"]';
+
+export const EVENT_SUMMARY_ALERT_RENDERER_CONTENT = '[data-test-subj="alertRenderer"]';
+
+export const ALERT_TABLE_EVENT_RENDERED_VIEW_OPTION = '[data-test-subj="eventRenderedView"]';

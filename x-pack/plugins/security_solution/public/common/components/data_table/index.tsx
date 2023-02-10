@@ -309,6 +309,10 @@ export const DataTableComponent = React.memo<DataTableProps>(
       [dispatch, id]
     );
 
+    const closeCellPopover = useCallback(() => {
+      dataGridRef.current?.closeCellPopover();
+    }, []);
+
     const columnsWithCellActions: EuiDataGridColumn[] = useMemo(
       () =>
         columnHeaders.map((header) => {
@@ -320,7 +324,7 @@ export const DataTableComponent = React.memo<DataTableProps>(
               header: columnHeaders.find((h) => h.id === header.id),
               pageSize: pagination.pageSize,
               scopeId: id,
-              closeCellPopover: dataGridRef.current?.closeCellPopover,
+              closeCellPopover,
             });
           return {
             ...header,
@@ -359,6 +363,7 @@ export const DataTableComponent = React.memo<DataTableProps>(
         dispatch,
         id,
         pagination.pageSize,
+        closeCellPopover,
       ]
     );
 

@@ -54,8 +54,8 @@ const UserNameComponent: React.FC<Props> = ({
   const openUserDetailsSidePanel = useCallback(
     (e) => {
       e.preventDefault();
-
       if (onClick) {
+        // closing popover
         onClick();
       }
       if (eventContext && isInTimelineContext) {

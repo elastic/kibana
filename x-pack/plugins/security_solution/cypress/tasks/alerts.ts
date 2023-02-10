@@ -32,6 +32,8 @@ import {
   CLOSED_ALERTS_FILTER_BTN,
   OPENED_ALERTS_FILTER_BTN,
   ACKNOWLEDGED_ALERTS_FILTER_BTN,
+  ALERT_TABLE_SUMMARY_VIEW_SELECTABLE,
+  ALERT_TABLE_EVENT_RENDERED_VIEW_OPTION,
 } from '../screens/alerts';
 import { LOADING_INDICATOR, REFRESH_BUTTON } from '../screens/security_header';
 import {
@@ -326,6 +328,11 @@ export const waitForAlertsPanelToBeLoaded = () => {
   cy.get(ALERTS_HISTOGRAM_PANEL_LOADER).should('not.exist');
 };
 
+export const waitForTopNHistogramToLoad = () => {
+  cy.get(ALERTS_HISTOGRAM_PANEL_LOADER).should('exist');
+  cy.get(ALERTS_HISTOGRAM_PANEL_LOADER).should('not.exist');
+};
+
 export const expandAlertTableCellValue = (columnSelector: string, row = 1) => {
   cy.get(columnSelector).eq(1).focus().find(CELL_EXPAND_VALUE).click({ force: true });
 };
@@ -371,4 +378,9 @@ export const resetFilters = () => {
    * waitforpagefilters();
    *
    * */
+};
+
+export const switchAlertTableToEventRenderedView = () => {
+  cy.get(ALERT_TABLE_SUMMARY_VIEW_SELECTABLE).should('be.visible').trigger('click');
+  cy.get(ALERT_TABLE_EVENT_RENDERED_VIEW_OPTION).should('be.visible').trigger('click');
 };

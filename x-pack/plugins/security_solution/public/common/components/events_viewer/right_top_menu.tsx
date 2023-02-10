@@ -75,7 +75,11 @@ export const RightTopMenu = ({
       {tGridEventRenderedViewEnabled &&
         [TableId.alertsOnRuleDetailsPage, TableId.alertsOnAlertsPage].includes(tableId) && (
           <UpdatedFlexItem grow={false} $show={!loading}>
-            <SummaryViewSelector viewSelected={tableView} onViewChange={onViewChange} />
+            <SummaryViewSelector
+              data-test-subj="summary-view-selector"
+              viewSelected={tableView}
+              onViewChange={onViewChange}
+            />
           </UpdatedFlexItem>
         )}
       {menuOptions}

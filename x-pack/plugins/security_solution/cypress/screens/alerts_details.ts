@@ -7,6 +7,8 @@
 
 export const ALERT_FLYOUT = '[data-test-subj="timeline:details-panel:flyout"]';
 
+export const ALERT_FLYOUT_CLOSE_BTN = `${ALERT_FLYOUT} [data-test-subj="euiFlyoutCloseButton"]`;
+
 export const CELL_TEXT = '.euiText';
 
 export const ENRICHMENT_COUNT_NOTIFICATION = '[data-test-subj="enrichment-count-notification"]';

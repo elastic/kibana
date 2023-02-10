@@ -83,6 +83,7 @@ const SummaryViewSelectorComponent = ({ viewSelected, onViewChange }: SummaryVie
       {
         label: gridView,
         key: 'gridView',
+        'data-test-subj': 'gridView',
         checked: (viewSelected === 'gridView' ? 'on' : undefined) as EuiSelectableOption['checked'],
         meta: [
           {
@@ -99,6 +100,7 @@ const SummaryViewSelectorComponent = ({ viewSelected, onViewChange }: SummaryVie
       {
         label: eventRenderedView,
         key: 'eventRenderedView',
+        'data-test-subj': 'eventRenderedView',
         checked: (viewSelected === 'eventRenderedView'
           ? 'on'
           : undefined) as EuiSelectableOption['checked'],
@@ -140,6 +142,7 @@ const SummaryViewSelectorComponent = ({ viewSelected, onViewChange }: SummaryVie
 
   return (
     <EuiPopover
+      data-test-subj="summary-view-selector"
       panelPaddingSize="none"
       button={button}
       isOpen={isPopoverOpen}
