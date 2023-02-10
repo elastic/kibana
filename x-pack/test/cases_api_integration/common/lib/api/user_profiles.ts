@@ -12,6 +12,7 @@ import { UserProfileBulkGetParams, UserProfileServiceStart } from '@kbn/security
 import { INTERNAL_SUGGEST_USER_PROFILES_URL } from '@kbn/cases-plugin/common/constants';
 import { SuggestUserProfilesRequest } from '@kbn/cases-plugin/common/api';
 import { UserProfileService } from '@kbn/cases-plugin/server/services';
+import { UserProfileAvatarData } from '@kbn/security-plugin/common';
 import { superUser } from '../authentication/users';
 import { User } from '../authentication/types';
 import { getSpaceUrlPrefix } from './helpers';
@@ -68,6 +69,31 @@ export const suggestUserProfiles = async ({
     .expect(expectedHttpCode);
 
   return profiles;
+};
+
+/**
+ * Updates the avatar of a user.
+ * The API needs a valid user session.
+ * The session acts as the user identifier
+ * whose the avatar is updated.
+ */
+export const updateUserProfileAvatar = async ({
+  supertest,
+  req,
+  expectedHttpCode = 200,
+  headers = {},
+}: {
+  supertest: SuperTest.SuperTest<SuperTest.Test>;
+  req: UserProfileAvatarData;
+  expectedHttpCode?: number;
+  headers?: Record<string, unknown>;
+}): Promise<void> => {
+  await supertest
+    .post('/internal/security/user_profile/_data')
+    .set('kbn-xsrf', 'true')
+    .set(headers)
+    .send({ avatar: req })
+    .expect(expectedHttpCode);
 };
 
 export const loginUsers = async ({

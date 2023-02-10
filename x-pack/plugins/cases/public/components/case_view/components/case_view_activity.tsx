@@ -242,7 +242,7 @@ export const CaseViewActivity = ({
             users={reporterAsArray}
             userProfiles={userProfiles}
           />
-          {caseUsers?.participants ? (
+          {caseUsers != null ? (
             <UserList
               dataTestSubj="case-view-user-list-participants"
               theCase={caseData}
