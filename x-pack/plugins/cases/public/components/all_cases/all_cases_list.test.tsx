@@ -1038,7 +1038,6 @@ describe('AllCasesListGeneric', () => {
       });
     });
 
-    // Flaky: https://github.com/elastic/kibana/issues/148490
     describe('Assignees', () => {
       it('should hide the assignees column on basic license', async () => {
         useLicenseMock.mockReturnValue({ isAtLeastPlatinum: () => false });
