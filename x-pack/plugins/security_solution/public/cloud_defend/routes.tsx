@@ -6,11 +6,11 @@
  */
 
 import React from 'react';
-import type { CloudSecurityPosturePageId } from '@kbn/cloud-security-posture-plugin/public';
-import {
-  CLOUD_SECURITY_POSTURE_BASE_PATH,
-  type CspSecuritySolutionContext,
-} from '@kbn/cloud-security-posture-plugin/public';
+import type {
+  CloudDefendPageId,
+  CloudDefendSecuritySolutionContext,
+} from '@kbn/cloud-defend-plugin/public';
+import { CLOUD_DEFEND_BASE_PATH } from '@kbn/cloud-defend-plugin/public';
 import { TrackApplicationView } from '@kbn/usage-collection-plugin/public';
 import type { SecurityPageName, SecuritySubPluginRoutes } from '../app/types';
 import { useKibana } from '../common/lib/kibana';
@@ -20,35 +20,35 @@ import { FiltersGlobal } from '../common/components/filters_global';
 import { PluginTemplateWrapper } from '../common/components/plugin_template_wrapper';
 
 // This exists only for the type signature cast
-const CloudPostureSpyRoute = ({ pageName, ...rest }: { pageName?: CloudSecurityPosturePageId }) => (
+const CloudDefendSpyRoute = ({ pageName, ...rest }: { pageName?: CloudDefendPageId }) => (
   <SpyRoute pageName={pageName as SecurityPageName | undefined} {...rest} />
 );
 
-const cspSecuritySolutionContext: CspSecuritySolutionContext = {
+const cloudDefendSecuritySolutionContext: CloudDefendSecuritySolutionContext = {
   getFiltersGlobalComponent: () => FiltersGlobal,
-  getSpyRouteComponent: () => CloudPostureSpyRoute,
+  getSpyRouteComponent: () => CloudDefendSpyRoute,
 };
 
-const CloudSecurityPosture = () => {
-  const { cloudSecurityPosture } = useKibana().services;
-  const CloudSecurityPostureRouter = cloudSecurityPosture.getCloudSecurityPostureRouter();
+const CloudDefend = () => {
+  const { cloudDefend } = useKibana().services;
+  const CloudDefendRouter = cloudDefend.getCloudDefendRouter();
 
   return (
     <PluginTemplateWrapper>
-      <TrackApplicationView viewId="cloud_security_posture">
+      <TrackApplicationView viewId="cloud_defend">
         <SecuritySolutionPageWrapper noPadding noTimeline>
-          <CloudSecurityPostureRouter securitySolutionContext={cspSecuritySolutionContext} />
+          <CloudDefendRouter securitySolutionContext={cloudDefendSecuritySolutionContext} />
         </SecuritySolutionPageWrapper>
       </TrackApplicationView>
     </PluginTemplateWrapper>
   );
 };
 
-CloudSecurityPosture.displayName = 'CloudSecurityPosture';
+CloudDefend.displayName = 'CloudDefend';
 
 export const routes: SecuritySubPluginRoutes = [
   {
-    path: CLOUD_SECURITY_POSTURE_BASE_PATH,
-    component: CloudSecurityPosture,
+    path: CLOUD_DEFEND_BASE_PATH,
+    component: CloudDefend,
   },
 ];

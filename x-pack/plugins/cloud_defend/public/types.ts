@@ -8,6 +8,11 @@
 import type { FleetSetup, FleetStart } from '@kbn/fleet-plugin/public';
 import { NewPackagePolicy } from '@kbn/fleet-plugin/public';
 import type { ComponentType, ReactNode } from 'react';
+import type {
+  UsageCollectionSetup,
+  UsageCollectionStart,
+} from '@kbn/usage-collection-plugin/public';
+import type { CloudDefendRouterProps } from './application/router';
 import type { CloudDefendPageId } from './common/navigation/types';
 
 /**
@@ -16,14 +21,18 @@ import type { CloudDefendPageId } from './common/navigation/types';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface CloudDefendPluginSetup {}
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface CloudDefendPluginStart {}
+export interface CloudDefendPluginStart {
+  /** Gets the cloud defend router component for embedding in the security solution. */
+  getCloudDefendRouter(): ComponentType<CloudDefendRouterProps>;
+}
 
 export interface CloudDefendPluginSetupDeps {
   fleet: FleetSetup;
+  usageCollection?: UsageCollectionSetup;
 }
 export interface CloudDefendPluginStartDeps {
   fleet: FleetStart;
+  usageCollection?: UsageCollectionStart;
 }
 
 export interface CloudDefendSecuritySolutionContext {

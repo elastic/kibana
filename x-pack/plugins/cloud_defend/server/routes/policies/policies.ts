@@ -4,17 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { SavedObjectsClientContract } from '@kbn/core/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import type { AgentPolicy, PackagePolicy } from '@kbn/fleet-plugin/common';
 import { POLICIES_ROUTE_PATH, INTEGRATION_PACKAGE_NAME } from '../../../common/constants';
-import { policiesQueryParamsSchema } from '../../../common/schemas/benchmark';
-import type { Benchmark } from '../../../common/types';
-import {
-  getBenchmarkFromPackagePolicy,
-  getBenchmarkTypeFilter,
-  isNonNullable,
-} from '../../../common/utils/helpers';
+import { policiesQueryParamsSchema } from '../../../common/schemas/policy';
+import type { ControlPolicy } from '../../../common/types';
+import { getControlPolicyFromPackagePolicy, isNonNullable } from '../../../common/utils/helpers';
 import { CloudDefendRouter } from '../../types';
 import {
   getAgentStatusesByAgentPolicies,
@@ -28,35 +23,35 @@ export const PACKAGE_POLICY_SAVED_OBJECT_TYPE = 'ingest-package-policies';
 const createPolicies = (
   agentPolicies: AgentPolicy[],
   agentStatusByAgentPolicyId: AgentStatusByAgentPolicyMap,
-  cspPackagePolicies: PackagePolicy[]
-): Promise<Benchmark[]> => {
-  const cspPackagePoliciesMap = new Map(
-    cspPackagePolicies.map((packagePolicy) => [packagePolicy.id, packagePolicy])
+  cloudDefendPackagePolicies: PackagePolicy[]
+): Promise<ControlPolicy[]> => {
+  const cloudDefendPackagePoliciesMap = new Map(
+    cloudDefendPackagePolicies.map((packagePolicy) => [packagePolicy.id, packagePolicy])
   );
 
   return Promise.all(
     agentPolicies.flatMap((agentPolicy) => {
-      const cspPackagesOnAgent =
+      const cloudDefendPackagesOnAgent =
         agentPolicy.package_policies
           ?.map(({ id: pckPolicyId }) => {
-            return cspPackagePoliciesMap.get(pckPolicyId);
+            return cloudDefendPackagePoliciesMap.get(pckPolicyId);
           })
           .filter(isNonNullable) ?? [];
 
-      const benchmarks = cspPackagesOnAgent.map(async (cspPackage) => {
-        const benchmarkId = getBenchmarkFromPackagePolicy(cspPackage.inputs);
+      const policies = cloudDefendPackagesOnAgent.map(async (cloudDefendPackage) => {
+        const policyId = getControlPolicyFromPackagePolicy(cloudDefendPackage.inputs);
         const agentPolicyStatus = {
           id: agentPolicy.id,
           name: agentPolicy.name,
           agents: agentStatusByAgentPolicyId[agentPolicy.id]?.total,
         };
         return {
-          package_policy: cspPackage,
+          package_policy: cloudDefendPackage,
           agent_policy: agentPolicyStatus,
         };
       });
 
-      return benchmarks;
+      return policies;
     })
   );
 };
@@ -98,7 +93,6 @@ export const defineGetPoliciesRoute = (router: CloudDefendRouter): void =>
         );
 
         const policies = await createPolicies(
-          cloudDefendContext.soClient,
           agentPolicies,
           agentStatusesByAgentPolicyId,
           cloudDefendPackagePolicies.items

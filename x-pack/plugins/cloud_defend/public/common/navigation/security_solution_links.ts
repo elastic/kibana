@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import { cloudPosturePages } from './constants';
-import type { CloudSecurityPosturePageId, CspPage } from './types';
+import { cloudDefendPages } from './constants';
+import type { CloudDefendPageId, CloudDefendPage } from './types';
 
-interface CloudSecurityPostureLinkItem<TId extends string = CloudSecurityPosturePageId> {
+interface CloudDefendLinkItem<TId extends string = CloudDefendPageId> {
   id: TId;
   title: string;
   path: string;
 }
 
-interface CloudSecurityPostureNavTab<TId extends string = CloudSecurityPosturePageId> {
+interface CloudDefendNavTab<TId extends string = CloudDefendPageId> {
   id: TId;
   name: string;
   href: string;
@@ -23,27 +23,27 @@ interface CloudSecurityPostureNavTab<TId extends string = CloudSecurityPosturePa
 
 /**
  * Gets the cloud security posture link properties of a CSP page for navigation in the security solution.
- * @param cloudSecurityPosturePage the name of the cloud posture page.
+ * @param cloudDefendPage the name of the cloud posture page.
  */
-export const getSecuritySolutionLink = <TId extends string = CloudSecurityPosturePageId>(
-  cloudSecurityPosturePage: CspPage
-): CloudSecurityPostureLinkItem<TId> => ({
-  id: cloudPosturePages[cloudSecurityPosturePage].id as TId,
-  title: cloudPosturePages[cloudSecurityPosturePage].name,
-  path: cloudPosturePages[cloudSecurityPosturePage].path,
+export const getSecuritySolutionLink = <TId extends string = CloudDefendPageId>(
+  cloudDefendPage: CloudDefendPage
+): CloudDefendLinkItem<TId> => ({
+  id: cloudDefendPages[cloudDefendPage].id as TId,
+  title: cloudDefendPages[cloudDefendPage].name,
+  path: cloudDefendPages[cloudDefendPage].path,
 });
 
 /**
- * Gets the cloud security posture link properties of a CSP page for navigation in the old security solution navigation.
- * @param cloudSecurityPosturePage the name of the cloud posture page.
+ * Gets the link properties of a Cloud Defend page for navigation in the old security solution navigation.
+ * @param cloudDefendPage the name of the cloud defend page.
  * @param basePath the base path for links.
  */
-export const getSecuritySolutionNavTab = <TId extends string = CloudSecurityPosturePageId>(
-  cloudSecurityPosturePage: CspPage,
+export const getSecuritySolutionNavTab = <TId extends string = CloudDefendPageId>(
+  cloudDefendPage: CloudDefendPage,
   basePath: string
-): CloudSecurityPostureNavTab<TId> => ({
-  id: cloudPosturePages[cloudSecurityPosturePage].id as TId,
-  name: cloudPosturePages[cloudSecurityPosturePage].name,
-  href: `${basePath}${cloudPosturePages[cloudSecurityPosturePage].path}`,
-  disabled: !!cloudPosturePages[cloudSecurityPosturePage].disabled,
+): CloudDefendNavTab<TId> => ({
+  id: cloudDefendPages[cloudDefendPage].id as TId,
+  name: cloudDefendPages[cloudDefendPage].name,
+  href: `${basePath}${cloudDefendPages[cloudDefendPage].path}`,
+  disabled: !!cloudDefendPages[cloudDefendPage].disabled,
 });

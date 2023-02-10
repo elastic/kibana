@@ -6,27 +6,22 @@
  */
 
 import { pagePathGetters, pkgKeyFromPackageInfo } from '@kbn/fleet-plugin/public';
-import { useCisKubernetesIntegration } from '../api/use_cis_kubernetes_integration';
+import { INTEGRATION_PACKAGE_NAME } from '../../../common/constants';
+import { useCloudDefendIntegration } from '../api/use_cloud_defend_integration';
 import { useKibana } from '../hooks/use_kibana';
 
-export const useCISIntegrationPoliciesLink = ({
-  addAgentToPolicyId = '',
-  integration = '',
-}: {
-  addAgentToPolicyId?: string;
-  integration?: string;
-}): string | undefined => {
+export const useCloudDefendIntegrationLink = (): string | undefined => {
   const { http } = useKibana().services;
-  const cisIntegration = useCisKubernetesIntegration();
-  if (!cisIntegration.isSuccess) return;
+  const cloudDefendIntegration = useCloudDefendIntegration();
+
+  if (!cloudDefendIntegration.isSuccess) return;
 
   const path = pagePathGetters
-    .integration_details_policies({
-      addAgentToPolicyId,
-      integration,
+    .add_integration_to_policy({
+      integration: INTEGRATION_PACKAGE_NAME,
       pkgkey: pkgKeyFromPackageInfo({
-        name: cisIntegration.data.item.name,
-        version: cisIntegration.data.item.version,
+        name: cloudDefendIntegration.data.item.name,
+        version: cloudDefendIntegration.data.item.version,
       }),
     })
     .join('');

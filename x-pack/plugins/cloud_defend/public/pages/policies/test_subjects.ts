@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-export const BENCHMARKS_PAGE_HEADER = 'benchmarks-page-header';
-export const BENCHMARKS_TABLE_DATA_TEST_SUBJ = 'csp_benchmarks_table';
-export const ADD_INTEGRATION_TEST_SUBJ = 'csp_add_integration';
-export const BENCHMARKS_TABLE_COLUMNS = {
-  INTEGRATION_NAME: 'benchmarks-table-column-integration-name',
-  MONITORING: 'benchmarks-table-column-monitoring',
-  RULES: 'benchmarks-table-column-rules',
-  INTEGRATION: 'benchmarks-table-column-integration',
-  AGENT_POLICY: 'benchmarks-table-column-agent-policy',
-  NUMBER_OF_AGENTS: 'benchmarks-table-column-number-of-agents',
-  CREATED_BY: 'benchmarks-table-column-created-by',
-  CREATED_AT: 'benchmarks-table-column-created-at',
+export const POLICIES_PAGE_HEADER = 'policies-page-header';
+export const POLICIES_TABLE_DATA_TEST_SUBJ = 'cloud_defend_policies_table';
+export const ADD_INTEGRATION_TEST_SUBJ = 'cloud_defend_add_integration';
+export const POLICIES_TABLE_COLUMNS = {
+  INTEGRATION_NAME: 'policies-table-column-integration-name',
+  MONITORING: 'policies-table-column-monitoring',
+  RULES: 'policies-table-column-rules',
+  INTEGRATION: 'policies-table-column-integration',
+  AGENT_POLICY: 'policies-table-column-agent-policy',
+  NUMBER_OF_AGENTS: 'policies-table-column-number-of-agents',
+  CREATED_BY: 'policies-table-column-created-by',
+  CREATED_AT: 'policies-table-column-created-at',
 };

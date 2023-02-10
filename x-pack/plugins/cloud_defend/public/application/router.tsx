@@ -11,7 +11,7 @@ import { Redirect, Route, Switch } from 'react-router-dom';
 import { cloudDefendPages } from '../common/navigation/constants';
 import type { CloudDefendSecuritySolutionContext } from '../types';
 import { SecuritySolutionContext } from './security_solution_context';
-import * as pages from '../pages';
+import { Policies } from '../pages/policies';
 import { CloudDefendRoute } from './route';
 
 const queryClient = new QueryClient({
@@ -27,7 +27,7 @@ export const CloudDefendRouter = ({ securitySolutionContext }: CloudDefendRouter
   const routerElement = (
     <QueryClientProvider client={queryClient}>
       <Switch>
-        <CloudDefendRoute {...cloudDefendPages.policies} component={pages.Policies} />
+        <CloudDefendRoute {...cloudDefendPages.policies} component={Policies} />
 
         <Route>
           <Redirect to={cloudDefendPages.policies.path} />

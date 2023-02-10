@@ -58,7 +58,7 @@ export type CloudDefendRequestHandlerContext = CustomRequestHandlerContext<{
 }>;
 
 /**
- * Convenience type for routers in Csp that includes the CspRequestHandlerContext type
+ * Convenience type for routers in cloud_defend that includes the CloudDefendRequestHandlerContext type
  * @internal
  */
 export type CloudDefendRouter = IRouter<CloudDefendRequestHandlerContext>;

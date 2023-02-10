@@ -20,4 +20,4 @@ export type CloudDefendPage = 'policies';
  * All the IDs for the cloud defend pages.
  * This needs to match the cloud defend page entries in `SecurityPageName` in `x-pack/plugins/security_solution/common/constants.ts`.
  */
-export type CloudDefendPageId = 'cloud_security_posture-policies';
+export type CloudDefendPageId = 'cloud_defend-policies';

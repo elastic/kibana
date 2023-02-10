@@ -53,7 +53,9 @@ export class CloudDefendPlugin implements Plugin<CloudDefendPluginSetup, CloudDe
         (
           <KibanaContextProvider services={{ ...core, ...plugins }}>
             <RedirectAppLinks coreStart={core}>
-              <Router {...props} />
+              <div style={{ width: '100%', height: '100%' }}>
+                <Router {...props} />
+              </div>
             </RedirectAppLinks>
           </KibanaContextProvider>
         ),

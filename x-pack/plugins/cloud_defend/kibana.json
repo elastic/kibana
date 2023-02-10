@@ -9,6 +9,6 @@
   "description": "Defend for Containers",
   "server": true,
   "ui": true,
-  "requiredPlugins": ["fleet", "kibanaReact"],
+  "requiredPlugins": ["fleet", "kibanaReact", "usageCollection", "navigation"],
   "optionalPlugins": []
 }
