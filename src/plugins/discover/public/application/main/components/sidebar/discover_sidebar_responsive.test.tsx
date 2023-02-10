@@ -294,13 +294,13 @@ describe('discover responsive sidebar', function () {
     const comp = await mountComponent(props);
 
     const a11yDescription = findTestSubject(comp, 'fieldListGrouped__ariaDescription');
+    expect(a11yDescription.prop('aria-live')).toBe('polite');
     expect(a11yDescription.text()).toBe(
       '1 selected field. 4 popular fields. 3 available fields. 20 empty fields. 2 meta fields.'
     );
 
     const searchInput = findTestSubject(comp, 'fieldListFiltersFieldSearch');
     expect(searchInput.first().prop('aria-describedby')).toBe(a11yDescription.prop('id'));
-    expect(a11yDescription.prop('aria-live')).toBe('polite');
   });
 
   it('should not have selected fields if no columns selected', async function () {
