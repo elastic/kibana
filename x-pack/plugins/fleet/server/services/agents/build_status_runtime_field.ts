@@ -8,7 +8,6 @@
 import type * as estypes from '@elastic/elasticsearch/lib/api/types';
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 import type { Logger } from '@kbn/core/server';
-import once from 'lodash/once';
 
 import { AGENT_POLLING_THRESHOLD_MS } from '../../constants';
 import { agentPolicyService } from '../agent_policy';
@@ -20,6 +19,7 @@ export type InactivityTimeouts = Awaited<
   ReturnType<typeof agentPolicyService['getInactivityTimeouts']>
 >;
 
+let inactivityTimeoutsDisabled = false;
 const _buildInactiveCondition = (opts: {
   now: number;
   inactivityTimeouts: InactivityTimeouts;
@@ -41,13 +41,21 @@ const _buildInactiveCondition = (opts: {
   // if too many agent policies have inactivity timeouts, then we can't use the inactivity timeout
   // as the query becomes too large see github.com/elastic/kibana/issues/150577
   if (totalAgentPoliciesWithInactivityTimeouts > maxAgentPoliciesWithInactivityTimeout) {
-    // only log this warning once as this code is executed a lot
-    once(() => {
+    if (!inactivityTimeoutsDisabled) {
+      // only log this once as this function is executed a lot
       logger?.warn(
         `There are ${totalAgentPoliciesWithInactivityTimeouts} agent policies with an inactivity timeout set but the maximum allowed is ${maxAgentPoliciesWithInactivityTimeout}. Agents will not be marked as inactive.`
       );
-    })();
+      inactivityTimeoutsDisabled = true;
+    }
     return null;
+  }
+
+  if (inactivityTimeoutsDisabled) {
+    logger?.info(
+      `There are ${totalAgentPoliciesWithInactivityTimeouts} agent policies which is now below the maximum allowed of ${maxAgentPoliciesWithInactivityTimeout}. Agents will now be marked as inactive again.`
+    );
+    inactivityTimeoutsDisabled = false;
   }
 
   const policyClauses = inactivityTimeouts
