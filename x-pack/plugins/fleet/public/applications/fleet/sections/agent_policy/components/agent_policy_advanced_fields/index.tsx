@@ -28,7 +28,6 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 
-
 import { dataTypes } from '../../../../../../../common/constants';
 import type { NewAgentPolicy, AgentPolicy } from '../../../../types';
 import { useStartServices } from '../../../../hooks';
@@ -46,7 +45,6 @@ import {
   DEFAULT_SELECT_VALUE,
   useFleetServerHostsOptions,
 } from './hooks';
-
 
 interface Props {
   agentPolicy: Partial<NewAgentPolicy | AgentPolicy>;
@@ -479,12 +477,13 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
                   'This setting is deprecated and will be removed in a future release. Consider using inactivity timeout instead',
               })}
             >
-              <EuiBetaBadge label={i18n.translate(
-                  "xpack.fleet.agentPolicyForm.unenrollmentTimeoutDeprecatedLabel",
-                  {defaultMessage: "Deprecated"}
-                )} size="s">
-
-              </EuiBetaBadge>
+              <EuiBetaBadge
+                label={i18n.translate(
+                  'xpack.fleet.agentPolicyForm.unenrollmentTimeoutDeprecatedLabel',
+                  { defaultMessage: 'Deprecated' }
+                )}
+                size="s"
+              />
             </EuiToolTip>
           </h4>
         }
