@@ -211,7 +211,12 @@ export const BLOCK_LIST_DESCRIPTION = `[data-test-subj="blocklist-form-descripti
 
 export const BLOCK_LIST_ADD_BUTTON = `[class="eui-textTruncate"]`;
 
+export const BLOCK_LIST_FLYOUT_CLOSE_BUTTON = `[data-test-subj="euiFlyoutCloseButton"]`;
+
 export const BLOCK_LIST_TOAST_LIST = `[data-test-subj="globalToastList"]`;
+
+export const BLOCK_LIST_VALUE_INPUT = (iocId: string) =>
+  `[data-test-subj="blocklist-form-values-input-${iocId}"]`;
 
 /* Miscellaneous */
 
