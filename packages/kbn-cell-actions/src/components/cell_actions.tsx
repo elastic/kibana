@@ -20,14 +20,12 @@ export const CellActions: React.FC<CellActionsProps> = ({
   visibleCellActions = 3,
   metadata,
 }) => {
-  const extraContentNodeRef = useRef<HTMLDivElement | null>(null);
   const nodeRef = useRef<HTMLDivElement | null>(null);
 
   const actionContext: CellActionExecutionContext = useMemo(
     () => ({
       field,
       trigger: { id: triggerId },
-      extraContentNodeRef,
       nodeRef,
       metadata,
     }),
@@ -46,8 +44,6 @@ export const CellActions: React.FC<CellActionsProps> = ({
         >
           {children}
         </HoverActionsPopover>
-
-        <div ref={extraContentNodeRef} />
       </div>
     );
   }
@@ -60,7 +56,6 @@ export const CellActions: React.FC<CellActionsProps> = ({
         showActionTooltips={showActionTooltips}
         visibleCellActions={visibleCellActions}
       />
-      <div ref={extraContentNodeRef} />
     </div>
   );
 };

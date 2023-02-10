@@ -53,9 +53,6 @@ describe('createShowTopNAction', () => {
   const context = {
     field: { name: 'user.name', value: 'the-value', type: 'keyword' },
     trigger: { id: 'trigger' },
-    extraContentNodeRef: {
-      current: element,
-    },
     nodeRef: {
       current: element,
     },

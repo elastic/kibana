@@ -303,7 +303,7 @@ export const DataTableComponent = React.memo<DataTableProps>(
       [dispatch, id]
     );
 
-    const columnsCellActionsProps = useMemo<UseDataGridColumnsCellActionsProps>(() => {
+    const columnsCellActionsProps = useMemo((): UseDataGridColumnsCellActionsProps => {
       const fields: UseDataGridColumnsCellActionsProps['fields'] = disableCellActions
         ? []
         : columnHeaders.map((column) => ({
@@ -321,6 +321,7 @@ export const DataTableComponent = React.memo<DataTableProps>(
         metadata: {
           scopeId: id,
         },
+        dataGridRef,
       };
     }, [disableCellActions, columnHeaders, data, id]);
 
@@ -328,26 +329,24 @@ export const DataTableComponent = React.memo<DataTableProps>(
 
     const columnsWithCellActions: EuiDataGridColumn[] = useMemo(
       () =>
-        columnHeaders.map((header, columnIndex) => {
-          return {
-            ...header,
-            actions: {
-              ...header.actions,
-              additional: [
-                {
-                  iconType: 'cross',
-                  label: REMOVE_COLUMN,
-                  onClick: () => {
-                    dispatch(dataTableActions.removeColumn({ id, columnId: header.id }));
-                  },
-                  size: 'xs',
+        columnHeaders.map((header, columnIndex) => ({
+          ...header,
+          actions: {
+            ...header.actions,
+            additional: [
+              {
+                iconType: 'cross',
+                label: REMOVE_COLUMN,
+                onClick: () => {
+                  dispatch(dataTableActions.removeColumn({ id, columnId: header.id }));
                 },
-              ],
-            },
-            cellActions: columnsCellActions[columnIndex] ?? [],
-            visibleCellActions: 3,
-          };
-        }),
+                size: 'xs',
+              },
+            ],
+          },
+          cellActions: columnsCellActions[columnIndex] ?? [],
+          visibleCellActions: 3,
+        })),
       [columnHeaders, columnsCellActions, dispatch, id]
     );
 
