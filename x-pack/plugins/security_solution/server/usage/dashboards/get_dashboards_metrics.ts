@@ -35,18 +35,22 @@ export const getDashboardMetrics = async ({
   const tagId = tag?.id;
   if (!tagId) {
     logger.debug(`No ${SECURITY_TAG_NAME} tag found, therefore not collecting telemetry from it`);
-    return [];
+    return {};
   }
   const dashboardsResponse = await savedObjectsClient.find({
     type: 'dashboard',
     hasReference: { id: tagId, type: 'tag' },
   });
   return {
-    dashboard_tag: { createdAt: tag.created_at },
+    dashboard_tag: {
+      created_at: tag.created_at,
+      linked_dashboards_count: dashboardsResponse.saved_objects.length,
+    },
     dashboards: dashboardsResponse.saved_objects.map((d) => ({
-      createdAt: d.created_at,
+      created_at: d.created_at,
       id: d.id,
-      ...(d.error ? { error: d?.error } : {}),
+      ...(d?.error?.message ? { error_message: d?.error?.message } : {}),
+      ...(d?.error?.statusCode ? { error_status_code: d?.error?.statusCode } : {}),
     })),
   };
 };
