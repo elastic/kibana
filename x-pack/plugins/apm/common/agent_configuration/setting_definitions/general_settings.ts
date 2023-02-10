@@ -452,7 +452,7 @@ export const generalSettings: RawSettingDefinition[] = [
           'Setting it to 0 will disable stack trace collection. Any positive integer value will be used as the maximum number of frames to collect. Setting it -1 means that all frames will be collected.',
       }
     ),
-    includeAgents: ['java', 'dotnet', 'go'],
+    includeAgents: ['java', 'dotnet', 'go', 'python'],
   },
 
   {
@@ -490,7 +490,7 @@ export const generalSettings: RawSettingDefinition[] = [
       { text: 'restart', value: 'restart' },
       { text: 'restart_external', value: 'restart_external' },
     ],
-    includeAgents: ['java', 'nodejs'],
+    includeAgents: ['java', 'nodejs', 'python'],
   },
 
   // Transaction max spans
