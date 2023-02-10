@@ -39,17 +39,11 @@ type ErrorDistributionAPIResponse =
 
 interface Props {
   fetchStatus: FETCH_STATUS;
-  distribution: ErrorDistributionAPIResponse;
+  distribution?: ErrorDistributionAPIResponse;
   title: React.ReactNode;
-  isEmpty: boolean;
 }
 
-export function ErrorDistribution({
-  distribution,
-  title,
-  fetchStatus,
-  isEmpty,
-}: Props) {
+export function ErrorDistribution({ distribution, title, fetchStatus }: Props) {
   const { core } = useApmPluginContext();
   const theme = useTheme();
 
@@ -62,7 +56,7 @@ export function ErrorDistribution({
   );
   const timeseries = [
     {
-      data: distribution.currentPeriod,
+      data: distribution?.currentPeriod ?? [],
       color: currentPeriodColor,
       title: i18n.translate('xpack.apm.errorGroup.chart.ocurrences', {
         defaultMessage: 'Error occurrences',
@@ -71,7 +65,7 @@ export function ErrorDistribution({
     ...(comparisonEnabled
       ? [
           {
-            data: distribution.previousPeriod,
+            data: distribution?.previousPeriod ?? [],
             color: previousPeriodColor,
             title: previousPeriodLabel,
           },
@@ -94,7 +88,7 @@ export function ErrorDistribution({
         <span>{title}</span>
       </EuiTitle>
       <ChartContainer
-        hasData={!isEmpty}
+        hasData={!!distribution}
         height={256}
         status={fetchStatus}
         id="errorDistribution"

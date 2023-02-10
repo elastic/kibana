@@ -36,8 +36,6 @@ type ErrorGroupMainStatistics =
   APIReturnType<'GET /internal/apm/services/{serviceName}/errors/groups/main_statistics'>;
 type ErrorGroupDetailedStatistics =
   APIReturnType<'POST /internal/apm/services/{serviceName}/errors/groups/detailed_statistics'>;
-type ErrorsDistribution =
-  APIReturnType<'GET /internal/apm/services/{serviceName}/errors/distribution'>;
 
 const INITIAL_STATE_MAIN_STATISTICS: {
   errorGroupMainStatistics: ErrorGroupMainStatistics['errorGroups'];
@@ -52,12 +50,6 @@ const INITIAL_STATE_MAIN_STATISTICS: {
 const INITIAL_STATE_DETAILED_STATISTICS: ErrorGroupDetailedStatistics = {
   currentPeriod: {},
   previousPeriod: {},
-};
-
-const INITIAL_STATE_ERRORS_DISTRIBUTION: ErrorsDistribution = {
-  currentPeriod: [],
-  previousPeriod: [],
-  bucketSize: 0,
 };
 
 export function ErrorGroupOverview() {
@@ -79,13 +71,12 @@ export function ErrorGroupOverview() {
   } = useApmParams('/services/{serviceName}/errors');
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
-  const { errorDistributionData = INITIAL_STATE_ERRORS_DISTRIBUTION, status } =
-    useErrorGroupDistributionFetcher({
-      serviceName,
-      groupId: undefined,
-      environment,
-      kuery,
-    });
+  const { errorDistributionData, status } = useErrorGroupDistributionFetcher({
+    serviceName,
+    groupId: undefined,
+    environment,
+    kuery,
+  });
 
   const {
     data: errorGroupListData = INITIAL_STATE_MAIN_STATISTICS,
@@ -197,9 +188,6 @@ export function ErrorGroupOverview() {
                     'xpack.apm.serviceDetails.metrics.errorOccurrencesChart.title',
                     { defaultMessage: 'Error occurrences' }
                   )}
-                  isEmpty={
-                    errorDistributionData === INITIAL_STATE_ERRORS_DISTRIBUTION
-                  }
                 />
               </EuiPanel>
             </EuiFlexItem>

@@ -32,16 +32,8 @@ import { TopErroneousTransactions } from './top_erroneous_transactions';
 import { maybe } from '../../../../common/utils/maybe';
 import { fromQuery, toQuery } from '../../shared/links/url_helpers';
 
-type ErrorDistributionAPIResponse =
-  APIReturnType<'GET /internal/apm/services/{serviceName}/errors/distribution'>;
 type ErrorSamplesAPIResponse =
   APIReturnType<'GET /internal/apm/services/{serviceName}/errors/{groupId}/samples'>;
-
-const emptyState: ErrorDistributionAPIResponse = {
-  currentPeriod: [],
-  previousPeriod: [],
-  bucketSize: 0,
-};
 
 const emptyErrorSamples: ErrorSamplesAPIResponse = {
   errorSampleIds: [],
@@ -169,15 +161,13 @@ export function ErrorGroupDetails() {
     [environment, kuery, serviceName, start, end, groupId]
   );
 
-  const {
-    errorDistributionData = emptyState,
-    status: errorDistributionStatus,
-  } = useErrorGroupDistributionFetcher({
-    serviceName,
-    groupId,
-    environment,
-    kuery,
-  });
+  const { errorDistributionData, status: errorDistributionStatus } =
+    useErrorGroupDistributionFetcher({
+      serviceName,
+      groupId,
+      environment,
+      kuery,
+    });
 
   useEffect(() => {
     const selectedSample = errorSamplesData?.errorSampleIds.find(
@@ -223,7 +213,6 @@ export function ErrorGroupDetails() {
                   defaultMessage: 'Error occurrences',
                 }
               )}
-              isEmpty={errorDistributionData === emptyState}
             />
           </EuiPanel>
         </EuiFlexItem>
