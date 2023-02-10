@@ -15,6 +15,12 @@ export class ContentRegistry {
 
   constructor(private eventBus: EventBus) {}
 
+  /**
+   * Register a new content in the registry.
+   *
+   * @param contentType The content type to register
+   * @param config The content configuration
+   */
   register<S extends ContentStorage = ContentStorage>(
     contentType: string,
     config: ContentConfig<S>

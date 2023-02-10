@@ -51,19 +51,32 @@ export class EventBus {
   }
 
   /**
-   * Register an event listener for specific events on specific content types
-   * @param type The event type (<contentType>.<eventType>. e.g. "dashboard.getItemSuccess")
+   *
+   *
+   * @param type The event type e.g. "getItemSuccess")
    * @param cb Callback to execute
    *
    * @example
    *
    * ```ts
+   * // Register an event for all content types
    * eventBus.on('getItemSuccess', (event) => {})
+   *
+   * // Register an event for the "dashboard" content type
+   * * eventBus.on('getItemSuccess', 'dashboard', (event) => {})
    * ```
    */
-  async on(type: ContentEventType, cb: EventListener): Promise<void>;
+
+  /**
+   * Register an event listener for specific events on specific content types
+   *
+   * @param eventType - The event type to listen to
+   * @param contentType - The content type to listen to (if not specified all content types will send the event type)
+   * @param cb - Handler to call when the event occurs
+   */
+  async on(eventType: ContentEventType, cb: EventListener): Promise<void>;
   async on<ContentType extends string = string>(
-    type: ContentEventType,
+    eventType: ContentEventType,
     contentType: ContentType,
     cb: EventListener
   ): Promise<void>;
@@ -95,10 +108,15 @@ export class EventBus {
     eventTypeListeners[contentType].push(cb);
   }
 
+  /**
+   * Send an event to the CM event bus
+   * @param event The event to send
+   */
   emit(event: ContentEvent) {
     this._events$.next(event);
   }
 
+  /** Content management events Observable */
   public get events$() {
     return this._events$.asObservable();
   }

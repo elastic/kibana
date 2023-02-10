@@ -12,13 +12,23 @@ import { EventBus } from './event_bus';
 import { ContentRegistry } from './registry';
 
 export interface CoreApi {
+  /**
+   * Register a new content in the registry.
+   *
+   * @param contentType The content type to register
+   * @param config The content configuration
+   */
   register: ContentRegistry['register'];
+  /** Handler to retrieve a content crud instance */
   crud: (contentType: string) => ContentCrud;
+  /** Content management event bus */
   eventBus: EventBus;
 }
 
 export interface CoreSetup {
+  /** Content registry instance */
   contentRegistry: ContentRegistry;
+  /** Api exposed to other plugins */
   api: CoreApi;
 }
 

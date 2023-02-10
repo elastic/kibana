@@ -9,6 +9,7 @@
 import type { RequestHandlerContext } from '@kbn/core-http-request-handler-context-server';
 import { ContentCrud } from './crud';
 
+/** Context that is sent to all storage instance methods */
 export interface StorageContext {
   requestHandlerContext?: RequestHandlerContext;
 }
@@ -31,11 +32,13 @@ export interface ContentStorage {
 }
 
 export interface ContentConfig<S extends ContentStorage = ContentStorage> {
-  /** The storage layer for the content.*/
+  /** The storage layer for the content. It must implment the ContentStorage interface. */
   storage: S;
 }
 
 export interface Content {
+  /** Content configuration. */
   config: ContentConfig<ContentStorage>;
+  /** Content crud instance. */
   crud: ContentCrud;
 }
