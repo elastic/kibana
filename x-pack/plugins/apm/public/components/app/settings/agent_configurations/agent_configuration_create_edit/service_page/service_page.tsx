@@ -22,6 +22,7 @@ import { AgentConfigurationIntake } from '../../../../../../../common/agent_conf
 import {
   omitAllOption,
   getOptionLabel,
+  ALL_OPTION_VALUE,
 } from '../../../../../../../common/agent_configuration/all_option';
 import { useFetcher, FETCH_STATUS } from '../../../../../../hooks/use_fetcher';
 import { FormRowSelect } from './form_row_select';
@@ -97,6 +98,16 @@ export function ServicePage({ newConfig, setNewConfig, onClickNext }: Props) {
     (newConfig.agent_name &&
       !isOpenTelemetryAgentName(newConfig.agent_name as AgentName));
 
+  const INCORRECT_SERVICE_NAME_TRANSLATED = i18n.translate(
+    'xpack.apm.settings.agentConfiguration.service.otel.error',
+    {
+      defaultMessage:
+        'Select service uses an OpenTelemetry agent, which is not supported',
+    }
+  );
+
+  const isAllOptionSelected = newConfig.service.name === ALL_OPTION_VALUE;
+
   return (
     <>
       {/* Service name options */}
@@ -123,24 +134,23 @@ export function ServicePage({ newConfig, setNewConfig, onClickNext }: Props) {
         }}
         dataTestSubj="serviceNameComboBox"
         isInvalid={!isAgentConfigurationSupported}
+        error={INCORRECT_SERVICE_NAME_TRANSLATED}
       />
-      {!isAgentConfigurationSupported && (
+      {isAllOptionSelected && (
         <EuiCallOut
           title={i18n.translate(
-            'xpack.apm.settings.agentConfiguration.otel.error.calloutTitle',
+            'xpack.apm.settings.agentConfiguration.all.option.calloutTitle',
             {
-              defaultMessage:
-                'Services with OpenTelemetry Agents are not supported',
+              defaultMessage: 'Proceed with caution!',
             }
           )}
-          color="danger"
-          iconType="alert"
+          color="warning"
+          iconType="help"
         >
           <EuiText size="s">
             <FormattedMessage
-              defaultMessage="Selected service uses an OpenTelemetry agent. OpenTelemetry agents
-            are currently not supported by the agent configuration service."
-              id="xpack.apm.settings.agentConfiguration.otel.error.calloutDescription"
+              defaultMessage="All services, except the ones using OpenTelemtry agents, will be affected by this configuration."
+              id="xpack.apm.settings.agentConfiguration.all.option.calloutDescription"
             />
           </EuiText>
         </EuiCallOut>
