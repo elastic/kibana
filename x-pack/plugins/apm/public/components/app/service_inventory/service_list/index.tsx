@@ -307,7 +307,8 @@ export function ServiceList({
   const { link } = useApmRouter();
 
   const showTransactionTypeColumn = items.some(
-    ({ transactionType }) => !isDefaultTransactionType(transactionType)
+    ({ transactionType }) =>
+      transactionType && !isDefaultTransactionType(transactionType)
   );
 
   const {

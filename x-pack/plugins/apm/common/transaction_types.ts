@@ -30,10 +30,6 @@ export function getDefaultTransactionType(agentName?: string) {
   return TRANSACTION_REQUEST;
 }
 
-export function isDefaultTransactionType(transactionType?: string) {
-  if (!transactionType) {
-    return false;
-  }
-
+export function isDefaultTransactionType(transactionType: string) {
   return defaultTransactionTypes.includes(transactionType);
 }
