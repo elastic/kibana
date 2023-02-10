@@ -99,6 +99,7 @@ describe('CaseViewPage', () => {
   const data = caseProps.caseData;
   let appMockRenderer: AppMockRenderer;
   const caseConnectors = getCaseConnectorsMockResponse();
+  const refetchFindCaseUserActions = jest.fn();
 
   beforeEach(() => {
     mockGetCase();
@@ -354,6 +355,7 @@ describe('CaseViewPage', () => {
       isError: false,
       isLoading: true,
       isFetching: true,
+      refetch: refetchFindCaseUserActions,
     });
 
     const result = appMockRenderer.render(
