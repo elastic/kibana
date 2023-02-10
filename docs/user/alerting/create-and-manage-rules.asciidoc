@@ -22,7 +22,7 @@ available, go to <<alerting-getting-started>>.
 [float]
 === Required permissions
 
-Access to rules is granted based on your privileges to {alert-features}. For
+Access to rules is granted based on your {alert-features} privileges. For
 more information, go to <<alerting-security>>.
 
 [float]
@@ -33,12 +33,12 @@ Many rules must be created within the context of a {kib} app like
 <<metrics-app,Metrics>>, <<xpack-apm,APM>>, or <<uptime-app,Uptime>>, but others
 are generic. Generic rule types can be created in *{rules-ui}* by clicking the
 *Create rule* button. This will launch a flyout that guides you through selecting
-a rule type and configuring its conditions and action type. For details on what
-types of rules are available and how to configure them, refer to <<stack-rules>>.
+a rule type and configuring its conditions and action type.
 
 After a rule is created, you can open the action menu (…) and select *Edit rule*
 to re-open the flyout and change the rule properties.
 
+////
 [float]
 [[defining-rules-general-details]]
 ==== General rule details
@@ -86,6 +86,7 @@ rule notify setting to `On status changes`.
 
 [role="screenshot"]
 image::images/rule-flyout-general-details.png[alt='All rules have name, tags, check every, and notify properties in common']
+////
 
 [float]
 [[defining-rules-type-conditions]]
@@ -93,24 +94,22 @@ image::images/rule-flyout-general-details.png[alt='All rules have name, tags, ch
 
 Depending upon the {kib} app and context, you might be prompted to choose the type of rule to create. Some apps will preselect the type of rule for you.
 
-[role="screenshot"]
-image::images/rule-flyout-rule-type-selection.png[Choosing the type of rule to create]
-
 Each rule type provides its own way of defining the conditions to detect, but an expression formed by a series of clauses is a common pattern. Each clause has a UI control that allows you to define the clause. For example, in an index threshold rule, the `WHEN` clause allows you to select an aggregation operation to apply to a numeric field.
 
 [role="screenshot"]
 image::images/rule-flyout-rule-conditions.png[UI for defining rule conditions on an index threshold rule]
 
+For details on what types of rules are available and how to configure them,
+refer to <<rule-types>>.
+
+
 [float]
 [[defining-rules-actions-details]]
 ==== Action type and details
 
-Actions are optional when you create a rule. However, to receive notifications when a rule meets the defined conditions, you must add one or more actions. Start by selecting a type of connector for your action:
+Actions are optional when you create a rule. However, to receive notifications when a rule meets the defined conditions, you must add one or more actions.
 
-[role="screenshot"]
-image::images/rule-flyout-connector-type-selection.png[UI for selecting an action type]
-
-Each action must specify a <<alerting-concepts-connectors, connector>> instance. If no connectors exist for the selected type, click **Add connector** to create one.
+Each action must specify a connector, which provides connection information for {kib} services or integrates with third party systems. If no connectors exist, click **Add connector** to create one. For more information about each type of connector, refer to <<action-types>>.
 
 After you have selected a connector, use the **Run When** dropdown to choose the action group to associate with this action. When a rule meets the defined condition, it is marked as **Active** and alerts are created and assigned to an action group. In addition to the action groups defined by the selected rule type, each rule also has a **Recovered** action group that is assigned when a rule's conditions are no longer detected.
 
