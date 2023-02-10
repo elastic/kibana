@@ -138,8 +138,12 @@ export default function ({ getService }: FtrProviderContext) {
             testData.expected.runtimeFieldsEditorContent
           );
 
-          await ml.testExecution.logTestStep('inputs the dependent variable');
+          // @todo
+          await ml.testExecution.logTestStep('opens field stats flyout');
           await ml.dataFrameAnalyticsCreation.assertDependentVariableInputExists();
+          await ml.dataFrameAnalyticsCreation.clickDependentVariableInputFieldStatTrigger('y');
+
+          await ml.testExecution.logTestStep('inputs the dependent variable');
           await ml.dataFrameAnalyticsCreation.selectDependentVariable(testData.dependentVariable);
 
           await ml.testExecution.logTestStep('inputs the training percent');

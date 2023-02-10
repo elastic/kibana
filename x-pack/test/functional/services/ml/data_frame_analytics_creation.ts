@@ -15,20 +15,22 @@ import {
 import { FtrProviderContext } from '../../ftr_provider_context';
 import type { CanvasElementColorStats } from '../canvas_element';
 import type { MlCommonUI } from './common_ui';
-import { MlApi } from './api';
+import type { MlApi } from './api';
+import type { MlFieldStatsFlyout } from './field_stats_flyout';
 
 export function MachineLearningDataFrameAnalyticsCreationProvider(
   { getPageObject, getService }: FtrProviderContext,
   mlCommonUI: MlCommonUI,
-  mlApi: MlApi
+  mlApi: MlApi,
+  mlFieldStatsFlyout: MlFieldStatsFlyout
 ) {
   const headerPage = getPageObject('header');
   const commonPage = getPageObject('common');
 
-  const testSubjects = getService('testSubjects');
+  const aceEditor = getService('aceEditor');
   const comboBox = getService('comboBox');
   const retry = getService('retry');
-  const aceEditor = getService('aceEditor');
+  const testSubjects = getService('testSubjects');
 
   return {
     async assertJobTypeSelectExists() {
@@ -202,6 +204,17 @@ export function MachineLearningDataFrameAnalyticsCreationProvider(
       });
     },
 
+    async clickIncludeFieldsInputFieldStatTrigger(
+      fieldName: string,
+      fieldType?: 'keyword' | 'date' | 'number'
+    ) {
+      await mlFieldStatsFlyout.clickFieldStatTrigger(
+        'mlAnalyticsCreateJobWizardIncludesSelect',
+        fieldName,
+        fieldType
+      );
+    },
+
     async assertIncludeFieldsSelectionExists() {
       await testSubjects.existOrFail('mlAnalyticsCreateJobWizardIncludesTable', { timeout: 8000 });
 
@@ -253,6 +266,30 @@ export function MachineLearningDataFrameAnalyticsCreationProvider(
           '~mlAnalyticsCreateJobWizardDependentVariableSelect > comboBoxInput'
         );
       });
+    },
+
+    async clickDependentVariableInputFieldStatTrigger(
+      fieldName: string,
+      fieldType?: 'keyword' | 'date' | 'number'
+    ) {
+      await mlFieldStatsFlyout.clickFieldStatComboBoxTrigger(
+        'mlAnalyticsCreateJobWizardDependentVariableSelect loaded',
+        fieldName,
+        fieldType
+      );
+    },
+
+    async assertFieldStatTopValuesContent(
+      fieldName: string,
+      fieldType: 'keyword' | 'date' | 'number',
+      expectedContent: string[]
+    ) {
+      await mlFieldStatsFlyout.assertTopValuesContent(
+        'mlAnalyticsCreateJobWizardDependentVariableSelect loaded',
+        fieldName,
+        fieldType,
+        expectedContent
+      );
     },
 
     async assertDependentVariableInputMissing() {

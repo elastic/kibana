@@ -67,6 +67,7 @@ export function MachineLearningProvider(context: FtrProviderContext) {
   const commonAPI = MachineLearningCommonAPIProvider(context);
   const commonUI = MachineLearningCommonUIProvider(context);
   const commonDataGrid = MachineLearningCommonDataGridProvider(context);
+  const commonFieldStatsFlyout = MachineLearningFieldStatsFlyoutProvider(context);
 
   const anomaliesTable = MachineLearningAnomaliesTableProvider(context);
   const anomalyCharts = AnomalyChartsProvider(context);
@@ -85,7 +86,8 @@ export function MachineLearningProvider(context: FtrProviderContext) {
   const dataFrameAnalyticsCreation = MachineLearningDataFrameAnalyticsCreationProvider(
     context,
     commonUI,
-    api
+    api,
+    commonFieldStatsFlyout
   );
   const dataFrameAnalyticsEdit = MachineLearningDataFrameAnalyticsEditProvider(context, commonUI);
   const dataFrameAnalyticsResults = MachineLearningDataFrameAnalyticsResultsProvider(
@@ -104,7 +106,6 @@ export function MachineLearningProvider(context: FtrProviderContext) {
   const dataVisualizerIndexPatternManagement =
     MachineLearningDataVisualizerIndexPatternManagementProvider(context, dataVisualizerTable);
 
-  const fieldStatsFlyout = MachineLearningFieldStatsFlyoutProvider(context);
   const forecast = MachineLearningForecastProvider(context);
   const jobAnnotations = MachineLearningJobAnnotationsProvider(context);
   const jobManagement = MachineLearningJobManagementProvider(context, api);
@@ -149,6 +150,7 @@ export function MachineLearningProvider(context: FtrProviderContext) {
     commonAPI,
     commonConfig,
     commonDataGrid,
+    commonFieldStatsFlyout,
     commonUI,
     customUrls,
     dashboardJobSelectionTable,
@@ -164,7 +166,6 @@ export function MachineLearningProvider(context: FtrProviderContext) {
     dataVisualizerIndexBased,
     dataVisualizerIndexPatternManagement,
     dataVisualizerTable,
-    fieldStatsFlyout,
     forecast,
     jobAnnotations,
     jobManagement,

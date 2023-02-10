@@ -16,7 +16,7 @@ export default function ({ getService }: FtrProviderContext) {
   describe('outlier detection creation', function () {
     before(async () => {
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/ihp_outlier');
-      await ml.testResources.createIndexPatternIfNeeded('ft_ihp_outlier', '@timestamp');
+      await ml.testResources.createIndexPatternIfNeeded('ft_ihp_outlier');
       await ml.testResources.setKibanaTimeZoneToUTC();
 
       await ml.securityUI.loginAsMlPowerUser();
@@ -28,6 +28,14 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     const jobId = `ihp_1_${Date.now()}`;
+
+    const fieldStatsEntries = [
+      {
+        fieldName: '1stFlrSF',
+        type: 'keyword' as 'number' | 'keyword' | 'date',
+        isIncludeFieldInput: true,
+      },
+    ];
 
     const testDataList = [
       {
@@ -170,6 +178,16 @@ export default function ({ getService }: FtrProviderContext) {
 
           await ml.testExecution.logTestStep('displays the include fields selection');
           await ml.dataFrameAnalyticsCreation.assertIncludeFieldsSelectionExists();
+
+          await ml.testExecution.logTestStep('opens field stats flyout from include fields input');
+          for (const { fieldName, type: fieldType } of fieldStatsEntries.filter(
+            (e) => e.isIncludeFieldInput
+          )) {
+            await ml.dataFrameAnalyticsCreation.clickIncludeFieldsInputFieldStatTrigger(
+              fieldName,
+              fieldType
+            );
+          }
 
           await ml.testExecution.logTestStep(
             'sets the sample size to 10000 for the scatterplot matrix'

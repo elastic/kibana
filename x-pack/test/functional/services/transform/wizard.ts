@@ -382,7 +382,7 @@ export function TransformWizardProvider({ getService, getPageObjects }: FtrProvi
       fieldName: string,
       fieldType?: 'keyword' | 'date' | 'number'
     ) {
-      await ml.fieldStatsFlyout.clickFieldStatButtonTrigger(
+      await ml.commonFieldStatsFlyout.clickFieldStatComboBoxTrigger(
         'transformWizardUniqueKeysSelector',
         fieldName,
         fieldType
@@ -420,7 +420,7 @@ export function TransformWizardProvider({ getService, getPageObjects }: FtrProvi
       fieldName: string,
       fieldType?: 'keyword' | 'date' | 'number'
     ) {
-      await ml.fieldStatsFlyout.clickFieldStatButtonTrigger(
+      await ml.commonFieldStatsFlyout.clickFieldStatComboBoxTrigger(
         'transformWizardSortFieldSelector',
         fieldName,
         fieldType
@@ -452,7 +452,7 @@ export function TransformWizardProvider({ getService, getPageObjects }: FtrProvi
       fieldName: string,
       fieldType?: 'keyword' | 'date' | 'number'
     ) {
-      await ml.fieldStatsFlyout.clickFieldStatButtonTrigger(
+      await ml.commonFieldStatsFlyout.clickFieldStatComboBoxTrigger(
         'transformGroupBySelection',
         fieldName,
         fieldType
@@ -522,7 +522,7 @@ export function TransformWizardProvider({ getService, getPageObjects }: FtrProvi
       fieldName: string,
       fieldType?: 'keyword' | 'date' | 'number'
     ) {
-      await ml.fieldStatsFlyout.clickFieldStatButtonTrigger(
+      await ml.commonFieldStatsFlyout.clickFieldStatComboBoxTrigger(
         'transformAggregationSelection',
         fieldName,
         fieldType

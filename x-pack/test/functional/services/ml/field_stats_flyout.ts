@@ -12,14 +12,67 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 export type MlFieldStatsFlyout = ProvidedType<typeof MachineLearningFieldStatsFlyoutProvider>;
 
 export function MachineLearningFieldStatsFlyoutProvider({ getService }: FtrProviderContext) {
+  const browser = getService('browser');
   const comboBox = getService('comboBox');
   const find = getService('find');
   const retry = getService('retry');
   const testSubjects = getService('testSubjects');
 
   return {
-    // @todo: remove if not needed
-    async clickFieldStatButtonTrigger(
+    async clickFieldStatContentByType(
+      testSubj: string,
+      fieldName: string,
+      fieldType?: 'keyword' | 'date' | 'number'
+    ) {
+      await retry.tryForTime(2000, async () => {
+        // escape popover
+        await browser.pressKeys(browser.keys.ESCAPE);
+
+        if (fieldType === 'date') {
+          await testSubjects.existOrFail(`mlFieldStatsFlyoutContent ${fieldName}-histogram`);
+        } else {
+          await testSubjects.existOrFail(
+            `mlFieldStatsFlyoutContent ${fieldName}-buttonGroup-topValuesButton`
+          );
+          await testSubjects.click(
+            `mlFieldStatsFlyoutContent ${fieldName}-buttonGroup-topValuesButton`
+          );
+
+          await testSubjects.existOrFail(`mlFieldStatsFlyoutContent ${fieldName}-topValues`);
+        }
+
+        if (fieldType === 'number') {
+          await testSubjects.existOrFail(
+            `mlFieldStatsFlyoutContent ${fieldName}-buttonGroup-distributionButton`
+          );
+          await testSubjects.click(
+            `mlFieldStatsFlyoutContent ${fieldName}-buttonGroup-distributionButton`
+          );
+          expect(
+            await find.existsByCssSelector('[data-test-subj="mlFieldStatsFlyout"] .echChart')
+          ).to.eql(true);
+        }
+      });
+    },
+
+    async clickFieldStatTrigger(
+      testSubj: string,
+      fieldName: string,
+      fieldType?: 'keyword' | 'date' | 'number'
+    ) {
+      const selector = `~${testSubj} > ~mlInspectFieldStatsButton-${fieldName}`;
+
+      await retry.tryForTime(2000, async () => {
+        await testSubjects.existOrFail(selector);
+        await testSubjects.click(selector);
+        await testSubjects.existOrFail('mlFieldStatsFlyout');
+
+        await testSubjects.existOrFail(`mlFieldStatsFlyoutContent ${fieldName}-title`);
+
+        await this.clickFieldStatContentByType(testSubj, fieldName, fieldType);
+      });
+    },
+    async clickFieldStatComboBoxTrigger(
       parentComboBoxSelector: string,
       fieldName: string,
       fieldType?: 'keyword' | 'date' | 'number'
@@ -36,19 +89,25 @@ export function MachineLearningFieldStatsFlyoutProvider({ getService }: FtrProvi
 
         await testSubjects.existOrFail(`mlFieldStatsFlyoutContent ${fieldName}-title`);
 
-        if (fieldType === 'date') {
-          await testSubjects.existOrFail(`mlFieldStatsFlyoutContent ${fieldName}-histogram`);
-        } else {
-          await testSubjects.existOrFail(`mlFieldStatsFlyoutContent ${fieldName}-topValues`);
-        }
+        await this.clickFieldStatContentByType(parentComboBoxSelector, fieldName, fieldType);
+      });
+    },
 
-        if (fieldType === 'number') {
-          await testSubjects.existOrFail(
-            `mlFieldStatsFlyoutContent ${fieldName}-buttonGroup-distributionButton`
-          );
-          expect(
-            await find.existsByCssSelector('[data-test-subj="mlFieldStatsFlyoutContent"] .echChart')
-          ).to.eql(true);
+    async assertTopValuesContent(
+      parentComboBoxSelector: string,
+      fieldName: string,
+      fieldType: string,
+      expectedValues: string[]
+    ) {
+      await retry.tryForTime(2000, async () => {
+        // check for top values chart
+        await testSubjects.existOrFail(`mlFieldStatsFlyoutContent ${fieldName}-topValues`);
+        const topValuesRows = await testSubjects.findAll(
+          `mlFieldStatsFlyoutContent ${fieldName}-topValues-formattedFieldValue`
+        );
+        expect(topValuesRows.length).to.eql(expectedValues.length);
+        for (const [idx, expecteValue] of expectedValues.entries()) {
+          expect(await topValuesRows[idx].getVisibleText()).to.eql(expecteValue);
         }
       });
     },

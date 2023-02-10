@@ -8,15 +8,30 @@
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import { AnalyticsTableRowDetails } from '../../../services/ml/data_frame_analytics_table';
 
+type FieldStatsType = 'number' | 'keyword' | 'date';
 export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const ml = getService('ml');
   const editedDescription = 'Edited description';
 
+  const fieldStatsEntries = [
+    {
+      fieldName: 'g1',
+      type: 'number' as FieldStatsType,
+      isDependentVariableInput: true,
+      isIncludeFieldInput: true,
+    },
+    {
+      fieldName: 'p3',
+      type: 'number' as FieldStatsType,
+      isIncludeFieldInput: true,
+    },
+  ];
+
   describe('regression creation', function () {
     before(async () => {
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/egs_regression');
-      await ml.testResources.createIndexPatternIfNeeded('ft_egs_regression', '@timestamp');
+      await ml.testResources.createIndexPatternIfNeeded('ft_egs_regression');
       await ml.testResources.setKibanaTimeZoneToUTC();
 
       await ml.securityUI.loginAsMlPowerUser();
@@ -38,6 +53,7 @@ export default function ({ getService }: FtrProviderContext) {
         get destinationIndex(): string {
           return `user-${jobId}`;
         },
+        fieldStatsEntries,
         runtimeFields: {
           uppercase_stab: {
             type: 'keyword',
@@ -132,8 +148,20 @@ export default function ({ getService }: FtrProviderContext) {
             testData.expected.runtimeFieldsEditorContent
           );
 
-          await ml.testExecution.logTestStep('inputs the dependent variable');
+          await ml.testExecution.logTestStep(
+            'opens field stats flyout from dependent variable input'
+          );
           await ml.dataFrameAnalyticsCreation.assertDependentVariableInputExists();
+          for (const { fieldName, type: fieldType } of fieldStatsEntries.filter(
+            (e) => e.isDependentVariableInput
+          )) {
+            await ml.dataFrameAnalyticsCreation.clickDependentVariableInputFieldStatTrigger(
+              fieldName,
+              fieldType
+            );
+          }
+
+          await ml.testExecution.logTestStep('inputs the dependent variable');
           await ml.dataFrameAnalyticsCreation.selectDependentVariable(testData.dependentVariable);
 
           await ml.testExecution.logTestStep('inputs the training percent');
@@ -145,6 +173,16 @@ export default function ({ getService }: FtrProviderContext) {
 
           await ml.testExecution.logTestStep('displays the include fields selection');
           await ml.dataFrameAnalyticsCreation.assertIncludeFieldsSelectionExists();
+
+          await ml.testExecution.logTestStep('opens field stats flyout from include fields input');
+          for (const { fieldName, type: fieldType } of fieldStatsEntries.filter(
+            (e) => e.isIncludeFieldInput
+          )) {
+            await ml.dataFrameAnalyticsCreation.clickDependentVariableInputFieldStatTrigger(
+              fieldName,
+              fieldType
+            );
+          }
 
           await ml.testExecution.logTestStep(
             'sets the sample size to 10000 for the scatterplot matrix'
