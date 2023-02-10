@@ -184,7 +184,7 @@ describe('Guided setup', () => {
 
         test('shows redirect button when a guide has been viewed but not started', async () => {
           const { exists } = await setupComponentWithPluginStateMock(httpClient, {
-            status: 'in_progress',
+            status: 'not_started',
             isActivePeriod: true,
             activeGuide: { ...testGuideStep1InProgressState, status: 'not_started' },
           });
@@ -453,6 +453,7 @@ describe('Guided setup', () => {
         // The guide panel should remain open after marking a step done
         expect(exists('guidePanel')).toBe(true);
         // Dependent on the Test guide config, which expects step 3 to start
+        // expect(component.debug()).toBe(0)
         expect(find('onboarding--stepButton--testGuide--step3').text()).toEqual('Start');
       });
 
