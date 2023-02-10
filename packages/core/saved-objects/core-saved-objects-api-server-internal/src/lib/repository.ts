@@ -97,7 +97,6 @@ import {
   type IKibanaMigrator,
 } from '@kbn/core-saved-objects-base-server-internal';
 import pMap from 'p-map';
-import { AuthorizeObjectWithExistingSpaces } from '@kbn/core-saved-objects-server/src/extensions/security';
 import { PointInTimeFinder } from './point_in_time_finder';
 import { createRepositoryEsClient, type RepositoryEsClient } from './repository_es_client';
 import { getSearchDsl } from './search_dsl';
@@ -1463,7 +1462,7 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
           type: obj.type,
           id: obj.id,
           existingNamespaces: obj.namespaces ?? [],
-        } as AuthorizeObjectWithExistingSpaces;
+        };
       }),
     });
 
@@ -1586,7 +1585,7 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
       throw SavedObjectsErrorHelpers.createGenericNotFoundEsUnavailableError();
     }
 
-    const authObjects = new Array<AuthorizeBulkGetObject>();
+    const authObjects: AuthorizeBulkGetObject[] = [];
     const result = {
       saved_objects: expectedBulkGetResults.map((expectedResult) => {
         if (isLeft(expectedResult)) {

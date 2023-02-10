@@ -5844,28 +5844,6 @@ describe('#authorizeDisableLegacyUrlAliases', () => {
     expect(checkPrivileges).not.toHaveBeenCalled();
   });
 
-  test('throws an error when `targetSpace` is empty', async () => {
-    const { securityExtension, checkPrivileges } = setup();
-    setupSimpleCheckPrivsMockResolve(checkPrivileges, 'a', 'bulk_update', true);
-    await expect(
-      securityExtension.authorizeDisableLegacyUrlAliases([
-        { targetType: 'a', targetSpace: '', sourceId: 'id' },
-      ])
-    ).rejects.toThrowError('No spaces specified for authorization');
-    expect(checkPrivileges).not.toHaveBeenCalled();
-  });
-
-  test('throws an error when `targetType` is empty', async () => {
-    const { securityExtension, checkPrivileges } = setup();
-    setupSimpleCheckPrivsMockResolve(checkPrivileges, 'a', 'bulk_update', true);
-    await expect(
-      securityExtension.authorizeDisableLegacyUrlAliases([
-        { targetType: '', targetSpace: 'x', sourceId: 'id' },
-      ])
-    ).rejects.toThrowError('No types specified for authorization');
-    expect(checkPrivileges).not.toHaveBeenCalled();
-  });
-
   test('throws an error when checkAuthorization fails', async () => {
     const { securityExtension, checkPrivileges } = setup();
     checkPrivileges.mockRejectedValue(new Error('Oh no!'));

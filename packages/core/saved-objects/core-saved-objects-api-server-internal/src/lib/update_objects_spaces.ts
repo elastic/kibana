@@ -187,8 +187,6 @@ export async function updateObjectsSpaces({
     };
   });
 
-  // If a user tries to share/unshare an object to/from '*', they need to have 'share_to_space' privileges for the Global Resource (e.g.,
-  // All privileges for All Spaces).
   const authorizationResult = await securityExtension?.authorizeUpdateSpaces({
     namespace,
     spacesToAdd,

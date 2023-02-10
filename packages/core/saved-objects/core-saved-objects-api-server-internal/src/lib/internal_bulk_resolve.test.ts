@@ -34,7 +34,7 @@ import {
 } from '@kbn/core-saved-objects-server';
 import {
   enforceError,
-  setupAuthorizeAndRedactInternalBulkResolveEnforceFailure,
+  setupAuthorizeAndRedactInternalBulkResolveFailure,
   setupAuthorizeAndRedactInternalBulkResolveSuccess,
 } from '../test_helpers/repository.test.common';
 import { savedObjectsExtensionsMock } from '../mocks/saved_objects_extensions.mock';
@@ -469,7 +469,7 @@ describe('internalBulkResolve', () => {
     });
 
     test(`propagates decorated error when unauthorized`, async () => {
-      setupAuthorizeAndRedactInternalBulkResolveEnforceFailure(mockSecurityExt);
+      setupAuthorizeAndRedactInternalBulkResolveFailure(mockSecurityExt);
       await expect(internalBulkResolve(params)).rejects.toThrow(enforceError);
       expect(mockSecurityExt.authorizeAndRedactInternalBulkResolve).toHaveBeenCalledTimes(1);
     });
@@ -498,7 +498,7 @@ describe('internalBulkResolve', () => {
 
     describe('calls authorizeAndRedactInternalBulkResolve of the security extension', () => {
       beforeEach(() => {
-        setupAuthorizeAndRedactInternalBulkResolveEnforceFailure(mockSecurityExt);
+        setupAuthorizeAndRedactInternalBulkResolveFailure(mockSecurityExt);
       });
 
       test(`in the default space`, async () => {

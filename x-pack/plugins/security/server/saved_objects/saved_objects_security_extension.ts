@@ -29,7 +29,6 @@ import type {
   AuthorizeDeleteParams,
   AuthorizeFindParams,
   AuthorizeGetParams,
-  AuthorizeObjectWithExistingSpaces,
   AuthorizeOpenPointInTimeParams,
   AuthorizeUpdateParams,
   AuthorizeUpdateSpacesParams,
@@ -40,6 +39,7 @@ import type {
   RedactNamespacesParams,
   SavedObject,
 } from '@kbn/core-saved-objects-server';
+import type { AuthorizeObject } from '@kbn/core-saved-objects-server/src/extensions/security';
 import { ALL_NAMESPACES_STRING, SavedObjectsUtils } from '@kbn/core-saved-objects-utils-server';
 import type { EcsEvent } from '@kbn/ecs';
 
@@ -161,7 +161,7 @@ interface InternalAuthorizeParams {
   spaces: Set<string>;
   /**
    * A map of types (key) to spaces (value) that will be affected by the action(s).
-   * If undefined, enforce with be bypassed.
+   * If undefined, enforce will be bypassed.
    */
   enforceMap?: Map<string, Set<string>>;
   /** Options for authorization*/
@@ -204,47 +204,21 @@ interface AuditHelperParams {
   objects?: Array<{ type: string; id: string }>;
   /** Whether or not to use success as the non-failure outcome. Default is 'unknown' */
   useSuccessOutcome?: boolean;
-  /** The spaces in which to add the objects. Default is none */
+  /**
+   * The spaces in which to add the objects.
+   * Used only with the AuditAction.UPDATE_OBJECTS_SPACES.
+   * Default is none
+   */
   addToSpaces?: string[];
-  /** The spaces from which to remove the objects. Default is none */
+  /**
+   * The spaces from which to remove the objects.
+   * Used only with the AuditAction.UPDATE_OBJECTS_SPACES.
+   * Default is none
+   */
   deleteFromSpaces?: string[];
   /** Error information produced by the action */
   error?: Error;
 }
-
-/**
- * The UpdateSpacesAuditHelperParams interface contains parameters to log
- * audit events for the UPDATE_OBJECTS_SPACES audit action within the
- * ISavedObjectsSecurityExtension.
- */
-interface UpdateSpacesAuditHelperParams extends AuditHelperParams {
-  /** The audit action to log is always UPDATE_OBJECTS_SPACES */
-  action: AuditAction.UPDATE_OBJECTS_SPACES;
-  /** Spaces to which the the object(s) are being added */
-  addToSpaces?: string[];
-  /** Spaces from which the the object(s) are being removed */
-  deleteFromSpaces?: string[];
-}
-
-/**
- * FUTURE: The TypesAndSpacesAuditHelperParams interface contains parameters to log
- * audit events for the FIND and OPEN_POINT_IN_TIME audit actions within the
- * ISavedObjectsSecurityExtension.
- */
-// export interface TypesAndSpacesAuditHelperParams extends AuditHelperParams {
-//   /**
-//    * The audit action to log is either FIND or OPEN_POINT_IN_TIME.
-//    */
-//   action: AuditAction.FIND | AuditAction.OPEN_POINT_IN_TIME;
-//   /**
-//    * The spaces requested for the action.
-//    */
-//   spaces?: Set<string>;
-//   /**
-//    * The types requested for the action.
-//    */
-//   types?: Set<string>;
-// }
 
 /**
  * The AuditOptions interface contains optional settings for audit
@@ -306,7 +280,7 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
   private readonly checkPrivilegesFunc: CheckSavedObjectsPrivileges;
   private readonly actionMap: Map<
     SecurityAction,
-    { authzAction: string | undefined; auditAction: AuditAction | undefined }
+    { authzAction?: string; auditAction?: AuditAction }
   >;
 
   constructor({ actions, auditLogger, errors, checkPrivileges }: Params) {
@@ -381,10 +355,7 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
     ]);
   }
 
-  private validateObjectsArray(
-    objects: AuthorizeObjectWithExistingSpaces[],
-    action: SecurityAction
-  ) {
+  private assertObjectsArrayNotEmpty(objects: AuthorizeObject[], action: SecurityAction) {
     if (objects.length === 0) {
       throw new Error(
         `No objects specified for ${
@@ -463,7 +434,7 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
         } else {
           const entry = privilegeActionsMap.get(privilege)!; // always defined
           objTypes = [entry.type];
-          action = entry.action as A;
+          action = entry.action;
         }
 
         for (const type of objTypes) {
@@ -507,9 +478,9 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
     return { typeMap, status: 'unauthorized' };
   }
 
-  private auditHelper(params: AuditHelperParams | UpdateSpacesAuditHelperParams) {
-    const { action, useSuccessOutcome, objects, error, addToSpaces, deleteFromSpaces } =
-      params as UpdateSpacesAuditHelperParams;
+  private auditHelper(params: AuditHelperParams) {
+    const { action, useSuccessOutcome, objects, error, addToSpaces, deleteFromSpaces } = params;
+
     // If there are no objects, we at least want to add a single audit log for the action
     const toAudit = !!objects && objects?.length > 0 ? objects : ([undefined] as undefined[]);
     for (const obj of toAudit) {
@@ -527,8 +498,8 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
   }
 
   /**
-   * The enforce method uses the result of an authoriation check authorization map) and a map
-   * of types to spaces (type map) to determinthe if the action is authorized for all types and spaces
+   * The enforce method uses the result of an authorization check authorization map) and a map
+   * of types to spaces (type map) to determine if the action is authorized for all types and spaces
    * within the type map. If unauthorized for any type this method will throw.
    */
   private enforceAuthorization<A extends string>(params: EnforceAuthorizationParams<A>): void {
@@ -577,10 +548,10 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
   }
 
   /**
-   * The authorize method is the central method for authorization within the extention. It handles
+   * The authorize method is the central method for authorization within the extension. It handles
    * checking and enforcing authorization, and passing audit parameters down to the enforce method.
    *
-   * If an enforce map is not privided, this method will NOT enforce authorization nor audit the action.
+   * If an enforce map is not provided, this method will NOT enforce authorization nor audit the action.
    * If an enforce map is provided and the action is unauthorized for any type in any space mapped for
    * that type, this method will throw (because the enforce method will throw).
    *
@@ -595,11 +566,9 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
     if (params.actions.size === 0) {
       throw new Error('No actions specified for authorization');
     }
-    if (params.types.has('')) params.types.delete('');
     if (params.types.size === 0) {
       throw new Error('No types specified for authorization');
     }
-    if (params.spaces.has('')) params.spaces.delete(''); // Not sure we need this anymore now that the level above throws an error on an empty space
     if (params.spaces.size === 0) {
       throw new Error('No spaces specified for authorization');
     }
@@ -690,17 +659,16 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
         ? SecurityAction.BULK_CREATE
         : SecurityAction.CREATE;
 
-    if (objects.length === 0) {
-      throw new Error(
-        `No objects specified for ${
-          this.actionMap.get(action)?.authzAction ?? 'unknown'
-        } authorization`
-      );
-    }
+    this.assertObjectsArrayNotEmpty(objects, action);
 
     const enforceMap = new Map<string, Set<string>>();
     const spacesToAuthorize = new Set<string>([namespaceString]); // Always check authZ for the active space
 
+    // If a user tries to create an object with `initialNamespaces: ['*']`, they need to have 'create' privileges for the Global Resource
+    // (e.g., All privileges for All Spaces).
+    // Inversely, if a user tries to overwrite an object that already exists in '*', they don't need to 'create' privileges for the Global
+    // Resource, so in that case we have to filter out that string from spacesToAuthorize (because `allowGlobalResource: true` is used
+    // below.)
     for (const obj of objects) {
       const spacesToEnforce = enforceMap.get(obj.type) ?? new Set([namespaceString]); // Always enforce authZ for the active space
       for (const space of obj.initialNamespaces ?? []) {
@@ -710,8 +678,10 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
       enforceMap.set(obj.type, spacesToEnforce);
 
       for (const space of obj.existingNamespaces) {
-        if (space === ALL_NAMESPACES_STRING) continue; // Don't accidentally check for global privileges when the object exists in '*'
-        spacesToAuthorize.add(space); // existing namespaces are included so we can later redact if necessary
+        // Don't accidentally check for global privileges when the object exists in '*'
+        if (space !== ALL_NAMESPACES_STRING) {
+          spacesToAuthorize.add(space); // existing namespaces are included so we can later redact if necessary
+        }
       }
     }
 
@@ -754,13 +724,7 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
         ? SecurityAction.BULK_UPDATE
         : SecurityAction.UPDATE;
 
-    if (objects.length === 0) {
-      throw new Error(
-        `No objects specified for ${
-          this.actionMap.get(action)?.authzAction ?? 'unknown'
-        } authorization`
-      );
-    }
+    this.assertObjectsArrayNotEmpty(objects, action);
 
     const enforceMap = new Map<string, Set<string>>();
     const spacesToAuthorize = new Set<string>([namespaceString]); // Always check authZ for the active space
@@ -826,7 +790,7 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
         ? SecurityAction.BULK_DELETE
         : SecurityAction.DELETE;
 
-    this.validateObjectsArray(objects, action);
+    this.assertObjectsArrayNotEmpty(objects, action);
 
     for (const obj of objects) {
       const { type } = obj;
@@ -870,14 +834,7 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
     const action = SecurityAction.BULK_GET;
     const namespace = SavedObjectsUtils.namespaceIdToString(params.namespace);
     const { objects } = params;
-
-    if (objects.length === 0) {
-      throw new Error(
-        `No objects specified for ${
-          this.actionMap.get(action)?.authzAction ?? 'unknown'
-        } authorization`
-      );
-    }
+    this.assertObjectsArrayNotEmpty(objects, action);
 
     const successAuditObjects = new Array<{ type: string; id: string }>();
     const enforceMap = new Map<string, Set<string>>();
@@ -935,13 +892,7 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
   ): Promise<CheckAuthorizationResult<A>> {
     const action = SecurityAction.CHECK_CONFLICTS;
     const { namespace, objects } = params;
-    if (objects.length === 0) {
-      throw new Error(
-        `No objects specified for ${
-          this.actionMap.get(action)?.authzAction ?? 'unknown'
-        } authorization`
-      );
-    }
+    this.assertObjectsArrayNotEmpty(objects, action);
 
     const namespaceString = SavedObjectsUtils.namespaceIdToString(namespace);
     const typesAndSpaces = new Map<string, Set<string>>();
@@ -989,7 +940,7 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
     });
 
     if (preAuthorizationResult?.status === 'unauthorized') {
-      // If the user is unauthorized to find *anything* they requested, return an empty response
+      // If the user is unauthorized to find *anything* they requested, throw
       this.addAuditEvent({
         action: AuditAction.OPEN_POINT_IN_TIME,
         error: new Error('User is unauthorized for any requested types/spaces'),
@@ -997,7 +948,6 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
         // requestedTypes: types,
         // requestedSpaces: namespaces,
       });
-      // this.auditHelper({ action: AuditAction.OPEN_POINT_IN_TIME, objects: auditObjects });
       throw SavedObjectsErrorHelpers.decorateForbiddenError(new Error('unauthorized'));
     }
     this.addAuditEvent({
@@ -1038,8 +988,6 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
       addSpacesToAuthorize(obj.spacesWithMatchingAliases);
       addSpacesToAuthorize(obj.spacesWithMatchingOrigins);
     }
-    // const action =
-    //   purpose === 'updateObjectsSpaces' ? ('share_to_space' as const) : ('bulk_get' as const);
     const action =
       purpose === 'updateObjectsSpaces'
         ? SecurityAction.COLLECT_MULTINAMESPACE_REFERENCES_UPDATE_SPACES
@@ -1113,9 +1061,6 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
         if (spaces.length) {
           // Only generate success audit records for "non-empty results" with 1+ spaces
           // ("empty result" means the object was a non-multi-namespace type, or hidden type, or not found)
-          // ToDo: this is one of the remaining calls to addAuditEvent outside of the security extension
-          // This is a bit complicated to change now, but can ultimately be removed when authz logic is
-          // migrated from the repo level to the extension level.
           this.addAuditEvent({
             action: AuditAction.COLLECT_MULTINAMESPACE_REFERENCES,
             savedObject: { type, id },
@@ -1202,7 +1147,7 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
     params: AuthorizeAndRedactInternalBulkResolveParams<T>
   ): Promise<Array<SavedObjectsResolveResponse<T> | BulkResolveError>> {
     const { namespace, objects } = params;
-    const namespaceString = SavedObjectsUtils.namespaceIdToString(namespace); // ToDo: prefer this methodology for other methods (as opposed to having to pass in the qualified namespaceString)?
+    const namespaceString = SavedObjectsUtils.namespaceIdToString(namespace);
     const typesAndSpaces = new Map<string, Set<string>>();
     const spacesToAuthorize = new Set<string>();
     const auditableObjects: Array<{ type: string; id: string }> = [];
@@ -1210,7 +1155,7 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
     for (const result of objects) {
       let auditableObject: { type: string; id: string } | undefined;
       if (isBulkResolveError(result)) {
-        const { type, id, error } = result as BulkResolveError;
+        const { type, id, error } = result;
         if (!SavedObjectsErrorHelpers.isBadRequestError(error)) {
           // Only "not found" errors should show up as audit events (not "unsupported type" errors)
           auditableObject = { type, id };
@@ -1237,13 +1182,13 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
       return objects;
     }
 
-    const { typeMap } = (await this.authorize({
+    const { typeMap } = await this.authorize({
       actions: new Set([SecurityAction.INTERNAL_BULK_RESOLVE]),
       types: new Set(typesAndSpaces.keys()),
       spaces: spacesToAuthorize,
       enforceMap: typesAndSpaces,
       auditOptions: { useSuccessOutcome: true },
-    })) ?? { typeMap: new Map() }; // ToDo: Not sure if this is the best approach
+    });
 
     return objects.map((result) => {
       if (isBulkResolveError(result)) {
@@ -1264,14 +1209,8 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
   ): Promise<CheckAuthorizationResult<A>> {
     const action = SecurityAction.UPDATE_OBJECTS_SPACES;
     const { objects, spacesToAdd, spacesToRemove } = params;
+    this.assertObjectsArrayNotEmpty(objects, action);
 
-    if (params.objects.length === 0) {
-      throw new Error(
-        `No objects specified for ${
-          this.actionMap.get(action)?.authzAction ?? 'unknown'
-        } authorization`
-      );
-    }
     const namespaceString = SavedObjectsUtils.namespaceIdToString(params.namespace);
     const typesAndSpaces = new Map<string, Set<string>>();
     const spacesToAuthorize = new Set<string>();
@@ -1297,8 +1236,8 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
     const addToSpaces = spacesToAdd.length ? spacesToAdd : undefined;
     const deleteFromSpaces = spacesToRemove.length ? spacesToRemove : undefined;
     return await this.authorize({
-      // If a user tries to share/unshare an object to/from '*', they need to have 'share_to_space' privileges for the Global Resource (e.g.,
-      // All privileges for All Spaces).
+      // If a user tries to share/unshare an object to/from '*', they need to have 'share_to_space' privileges for the Global Resource
+      // (e.g., All privileges for All Spaces).
       actions: new Set([SecurityAction.UPDATE_OBJECTS_SPACES]),
       types: new Set(typesAndSpaces.keys()),
       spaces: spacesToAuthorize,
@@ -1323,7 +1262,7 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
       spaces: new Set(namespaces),
     });
     if (preAuthorizationResult?.status === 'unauthorized') {
-      // If the user is unauthorized to find *anything* they requested, return an empty response
+      // If the user is unauthorized to find *anything* they requested, audit but don't throw
       // This is one of the last remaining calls to addAuditEvent outside of the sec ext
       this.addAuditEvent({
         action: AuditAction.FIND,
@@ -1360,8 +1299,8 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
         types: new Set(objects.map((obj) => obj.type)),
         spaces: spacesToAuthorize,
       });
-      return authorizationResult?.typeMap;
-    } else return undefined;
+      return authorizationResult.typeMap;
+    }
   }
 
   async authorizeDisableLegacyUrlAliases(aliases: LegacyUrlAliasTarget[]) {
@@ -1394,7 +1333,7 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
     });
   }
 
-  async auditObjectsForSpaceDeletion<T>(
+  auditObjectsForSpaceDeletion<T>(
     spaceId: string,
     resultObjects: Array<SavedObjectsFindResult<T>>
   ) {

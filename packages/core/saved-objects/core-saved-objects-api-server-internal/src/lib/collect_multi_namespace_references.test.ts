@@ -27,8 +27,8 @@ import { collectMultiNamespaceReferences } from './collect_multi_namespace_refer
 import type { CreatePointInTimeFinderFn } from './point_in_time_finder';
 import {
   enforceError,
-  setupAuthorizeAndRedactMultiNamespaceReferenecesEnforceFailure,
-  setupAuthorizeAndRedactMultiNamespaceReferenecesSuccess,
+  setupAuthorizeAndRedactMultiNamespaceReferenencesFailure,
+  setupAuthorizeAndRedactMultiNamespaceReferenencesSuccess,
 } from '../test_helpers/repository.test.common';
 import { savedObjectsExtensionsMock } from '../mocks/saved_objects_extensions.mock';
 import {
@@ -519,7 +519,7 @@ describe('collectMultiNamespaceReferences', () => {
       test(`propagates decorated error when not authorized`, async () => {
         // Unlike other functions, it doesn't validate the level of authorization first, so we need to
         // carry on and mock the security function to create an unauthorized condition
-        setupAuthorizeAndRedactMultiNamespaceReferenecesEnforceFailure(mockSecurityExt);
+        setupAuthorizeAndRedactMultiNamespaceReferenencesFailure(mockSecurityExt);
 
         await expect(collectMultiNamespaceReferences(params)).rejects.toThrow(enforceError);
         expect(mockSecurityExt.authorizeAndRedactMultiNamespaceReferences).toHaveBeenCalledTimes(1);
@@ -528,7 +528,7 @@ describe('collectMultiNamespaceReferences', () => {
 
     describe('calls authorizeAndRedactMultiNamespaceReferences of the security extension', () => {
       beforeEach(() => {
-        setupAuthorizeAndRedactMultiNamespaceReferenecesEnforceFailure(mockSecurityExt);
+        setupAuthorizeAndRedactMultiNamespaceReferenencesFailure(mockSecurityExt);
       });
 
       test(`in the default space`, async () => {
@@ -589,9 +589,9 @@ describe('collectMultiNamespaceReferences', () => {
 
     describe('success', () => {
       beforeEach(async () => {
-        setupAuthorizeAndRedactMultiNamespaceReferenecesSuccess(mockSecurityExt);
+        setupAuthorizeAndRedactMultiNamespaceReferenencesSuccess(mockSecurityExt);
       });
-      // ToDo: this test doesm't seem particularly useful as it only verifies the mock passthrough, but
+      // Note: this test doesn't seem particularly useful as it only verifies the mock passthrough, but
       // I am not sure what else can be done at this level now that the extension handles everything
       test(`returns a result when successful`, async () => {
         const result = await collectMultiNamespaceReferences(params);
@@ -599,7 +599,7 @@ describe('collectMultiNamespaceReferences', () => {
         expect(result.objects).toEqual(expectedObjects);
       });
       test(`returns empty array when no objects are provided`, async () => {
-        setupAuthorizeAndRedactMultiNamespaceReferenecesSuccess(mockSecurityExt);
+        setupAuthorizeAndRedactMultiNamespaceReferenencesSuccess(mockSecurityExt);
 
         const result = await collectMultiNamespaceReferences({ ...params, objects: [] });
         expect(result).toEqual({ objects: [] });

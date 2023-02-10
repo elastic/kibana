@@ -92,7 +92,7 @@ export interface AuthorizeBulkGetObject extends AuthorizeObjectWithExistingSpace
    */
   objectNamespaces?: string[];
   /**
-   * Whether or not an error occured when getting this object. Populated by
+   * Whether or not an error occurred when getting this object. Populated by
    * the result of a query. Default is false.
    */
   error?: boolean;
@@ -495,7 +495,7 @@ export interface ISavedObjectsSecurityExtension {
   /**
    * Performs authorization for the disableLegacyUrlAliases method of the SecureSpacesClientWrapper
    * There is no return for this method. If unauthorized the method with throw, otherwise will resolve.
-   * @param aliases - array of legacuy url alias targets
+   * @param aliases - array of legacy url alias targets
    */
   authorizeDisableLegacyUrlAliases: (aliases: LegacyUrlAliasTarget[]) => void;
 

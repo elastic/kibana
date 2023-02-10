@@ -13,8 +13,6 @@ import { Payload } from 'elastic-apm-node';
 import type {
   AuthorizationTypeEntry,
   AuthorizeAndRedactMultiNamespaceReferencesParams,
-  AuthorizeCreateParams,
-  AuthorizeUpdateParams,
   CheckAuthorizationResult,
   ISavedObjectsSecurityExtension,
   SavedObjectsMappingProperties,
@@ -23,6 +21,7 @@ import type {
   SavedObjectsTypeMappingDefinition,
   SavedObject,
   SavedObjectReference,
+  AuthorizeFindParams,
 } from '@kbn/core-saved-objects-server';
 import type {
   SavedObjectsBaseOptions,
@@ -49,17 +48,7 @@ import {
 import { DocumentMigrator } from '@kbn/core-saved-objects-migration-server-internal';
 import {
   AuthorizeAndRedactInternalBulkResolveParams,
-  AuthorizeBulkCreateParams,
-  AuthorizeBulkDeleteParams,
-  AuthorizeBulkGetParams,
-  AuthorizeBulkUpdateParams,
-  AuthorizeCheckConflictsParams,
-  AuthorizeDeleteParams,
   GetFindRedactTypeMapParams,
-  AuthorizeGetParams,
-  AuthorizeOpenPointInTimeParams,
-  AuthorizeUpdateSpacesParams,
-  AuthorizeFindParams,
   AuthorizationTypeMap,
   SavedObjectsErrorHelpers,
 } from '@kbn/core-saved-objects-server';
@@ -253,136 +242,17 @@ export const enforceError = SavedObjectsErrorHelpers.decorateForbiddenError(
   'User lacks privileges'
 );
 
-export const setupAuthorizeCreate = (
-  mockSecurityExt: jest.Mocked<ISavedObjectsSecurityExtension>,
+// Note: Only using 'any' here because we don't care about/use the method parameters of the mock
+// The only alternative I can see is to use a union of all the parameter interfaces which would
+// be lengthy.
+export const setupAuthorizeFunc = (
+  jestMock: jest.MockInstance<Promise<CheckAuthorizationResult<string>>, any>,
   status: 'fully_authorized' | 'partially_authorized' | 'unauthorized'
 ) => {
-  mockSecurityExt.authorizeCreate.mockImplementation(
-    (params: AuthorizeCreateParams): Promise<CheckAuthorizationResult<string>> => {
-      if (status === 'unauthorized') throw enforceError;
-      return Promise.resolve({ status, typeMap: authMap });
-    }
-  );
-};
-
-export const setupAuthorizeBulkCreate = (
-  mockSecurityExt: jest.Mocked<ISavedObjectsSecurityExtension>,
-  status: 'fully_authorized' | 'partially_authorized' | 'unauthorized'
-) => {
-  mockSecurityExt.authorizeBulkCreate.mockImplementation(
-    (params: AuthorizeBulkCreateParams): Promise<CheckAuthorizationResult<string>> => {
-      if (status === 'unauthorized') throw enforceError;
-      return Promise.resolve({ status, typeMap: authMap });
-    }
-  );
-};
-
-export const setupAuthorizeUpdate = (
-  mockSecurityExt: jest.Mocked<ISavedObjectsSecurityExtension>,
-  status: 'fully_authorized' | 'partially_authorized' | 'unauthorized'
-) => {
-  mockSecurityExt.authorizeUpdate.mockImplementation(
-    (params: AuthorizeUpdateParams): Promise<CheckAuthorizationResult<string>> => {
-      if (status === 'unauthorized') throw enforceError;
-      return Promise.resolve({ status, typeMap: authMap });
-    }
-  );
-};
-
-export const setupAuthorizeBulkUpdate = (
-  mockSecurityExt: jest.Mocked<ISavedObjectsSecurityExtension>,
-  status: 'fully_authorized' | 'partially_authorized' | 'unauthorized'
-) => {
-  mockSecurityExt.authorizeBulkUpdate.mockImplementation(
-    (params: AuthorizeBulkUpdateParams): Promise<CheckAuthorizationResult<string>> => {
-      if (status === 'unauthorized') throw enforceError;
-      return Promise.resolve({ status, typeMap: authMap });
-    }
-  );
-};
-
-export const setupAuthorizeDelete = (
-  mockSecurityExt: jest.Mocked<ISavedObjectsSecurityExtension>,
-  status: 'fully_authorized' | 'partially_authorized' | 'unauthorized'
-) => {
-  mockSecurityExt.authorizeDelete.mockImplementation(
-    (params: AuthorizeDeleteParams): Promise<CheckAuthorizationResult<string>> => {
-      if (status === 'unauthorized') throw enforceError;
-      return Promise.resolve({ status, typeMap: authMap });
-    }
-  );
-};
-
-export const setupAuthorizeBulkDelete = (
-  mockSecurityExt: jest.Mocked<ISavedObjectsSecurityExtension>,
-  status: 'fully_authorized' | 'partially_authorized' | 'unauthorized'
-) => {
-  mockSecurityExt.authorizeBulkDelete.mockImplementation(
-    (params: AuthorizeBulkDeleteParams): Promise<CheckAuthorizationResult<string>> => {
-      if (status === 'unauthorized') throw enforceError;
-      return Promise.resolve({ status, typeMap: authMap });
-    }
-  );
-};
-
-export const setupAuthorizeGet = (
-  mockSecurityExt: jest.Mocked<ISavedObjectsSecurityExtension>,
-  status: 'fully_authorized' | 'partially_authorized' | 'unauthorized'
-) => {
-  mockSecurityExt.authorizeGet.mockImplementation(
-    (params: AuthorizeGetParams): Promise<CheckAuthorizationResult<string>> => {
-      if (status === 'unauthorized') throw enforceError;
-      return Promise.resolve({ status, typeMap: authMap });
-    }
-  );
-};
-
-export const setupAuthorizeBulkGet = (
-  mockSecurityExt: jest.Mocked<ISavedObjectsSecurityExtension>,
-  status: 'fully_authorized' | 'partially_authorized' | 'unauthorized'
-) => {
-  mockSecurityExt.authorizeBulkGet.mockImplementation(
-    (params: AuthorizeBulkGetParams): Promise<CheckAuthorizationResult<string>> => {
-      if (status === 'unauthorized') throw enforceError;
-      return Promise.resolve({ status, typeMap: authMap });
-    }
-  );
-};
-
-export const setupAuthorizeCheckConflicts = (
-  mockSecurityExt: jest.Mocked<ISavedObjectsSecurityExtension>,
-  status: 'fully_authorized' | 'partially_authorized' | 'unauthorized'
-) => {
-  mockSecurityExt.authorizeCheckConflicts.mockImplementation(
-    (params: AuthorizeCheckConflictsParams): Promise<CheckAuthorizationResult<string>> => {
-      if (status === 'unauthorized') throw enforceError;
-      return Promise.resolve({ status, typeMap: authMap });
-    }
-  );
-};
-
-export const setupAuthorizeRemoveReferences = (
-  mockSecurityExt: jest.Mocked<ISavedObjectsSecurityExtension>,
-  status: 'fully_authorized' | 'partially_authorized' | 'unauthorized'
-) => {
-  mockSecurityExt.authorizeRemoveReferences.mockImplementation(
-    (params: AuthorizeDeleteParams): Promise<CheckAuthorizationResult<string>> => {
-      if (status === 'unauthorized') throw enforceError;
-      return Promise.resolve({ status, typeMap: authMap });
-    }
-  );
-};
-
-export const setupAuthorizeOpenPointInTime = (
-  mockSecurityExt: jest.Mocked<ISavedObjectsSecurityExtension>,
-  status: 'fully_authorized' | 'partially_authorized' | 'unauthorized'
-) => {
-  mockSecurityExt.authorizeOpenPointInTime.mockImplementation(
-    (params: AuthorizeOpenPointInTimeParams): Promise<CheckAuthorizationResult<string>> => {
-      if (status === 'unauthorized') throw enforceError;
-      return Promise.resolve({ status, typeMap: authMap });
-    }
-  );
+  jestMock.mockImplementation((): Promise<CheckAuthorizationResult<string>> => {
+    if (status === 'unauthorized') throw enforceError;
+    return Promise.resolve({ status, typeMap: authMap });
+  });
 };
 
 export const setupAuthorizeFind = (
@@ -397,8 +267,7 @@ export const setupAuthorizeFind = (
 };
 
 export const setupGetFindRedactTypeMap = (
-  mockSecurityExt: jest.Mocked<ISavedObjectsSecurityExtension>,
-  status: 'fully_authorized' | 'partially_authorized' | 'unauthorized'
+  mockSecurityExt: jest.Mocked<ISavedObjectsSecurityExtension>
 ) => {
   mockSecurityExt.getFindRedactTypeMap.mockImplementation(
     (params: GetFindRedactTypeMapParams): Promise<AuthorizationTypeMap<string>> => {
@@ -407,19 +276,7 @@ export const setupGetFindRedactTypeMap = (
   );
 };
 
-export const setupAuthorizeUpdateSpaces = (
-  mockSecurityExt: jest.Mocked<ISavedObjectsSecurityExtension>,
-  status: 'fully_authorized' | 'partially_authorized' | 'unauthorized'
-) => {
-  mockSecurityExt.authorizeUpdateSpaces.mockImplementation(
-    (params: AuthorizeUpdateSpacesParams): Promise<CheckAuthorizationResult<string>> => {
-      if (status === 'unauthorized') throw enforceError;
-      return Promise.resolve({ status, typeMap: authMap });
-    }
-  );
-};
-
-export const setupAuthorizeAndRedactInternalBulkResolveEnforceFailure = (
+export const setupAuthorizeAndRedactInternalBulkResolveFailure = (
   mockSecurityExt: jest.Mocked<ISavedObjectsSecurityExtension>
 ) => {
   mockSecurityExt.authorizeAndRedactInternalBulkResolve.mockImplementation(
@@ -439,7 +296,7 @@ export const setupAuthorizeAndRedactInternalBulkResolveSuccess = (
   );
 };
 
-export const setupAuthorizeAndRedactMultiNamespaceReferenecesEnforceFailure = (
+export const setupAuthorizeAndRedactMultiNamespaceReferenencesFailure = (
   mockSecurityExt: jest.Mocked<ISavedObjectsSecurityExtension>
 ) => {
   mockSecurityExt.authorizeAndRedactMultiNamespaceReferences.mockImplementation(
@@ -449,7 +306,7 @@ export const setupAuthorizeAndRedactMultiNamespaceReferenecesEnforceFailure = (
   );
 };
 
-export const setupAuthorizeAndRedactMultiNamespaceReferenecesSuccess = (
+export const setupAuthorizeAndRedactMultiNamespaceReferenencesSuccess = (
   mockSecurityExt: jest.Mocked<ISavedObjectsSecurityExtension>
 ) => {
   mockSecurityExt.authorizeAndRedactMultiNamespaceReferences.mockImplementation(

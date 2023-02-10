@@ -57,15 +57,8 @@ import {
   generateIndexPatternSearchResults,
   bulkDeleteSuccess,
   ENCRYPTED_TYPE,
+  setupAuthorizeFunc,
   setupAuthorizeFind,
-  setupAuthorizeCreate,
-  setupAuthorizeBulkCreate,
-  setupAuthorizeGet,
-  setupAuthorizeBulkGet,
-  setupAuthorizeBulkUpdate,
-  setupAuthorizeDelete,
-  setupAuthorizeBulkDelete,
-  setupAuthorizeOpenPointInTime,
 } from '../test_helpers/repository.test.common';
 import { savedObjectsExtensionsMock } from '../mocks/saved_objects_extensions.mock';
 
@@ -891,7 +884,7 @@ describe('SavedObjectsRepository Spaces Extension', () => {
   describe(`with security extension`, () => {
     // Note: resolve, bulkResolve, and collectMultiNamespaceReferences are not tested here because they
     // receive parameter arguments from internal methods (internalBulkResolve and the internal
-    // implemenation of collectMultiNamespaceReferences). Arguments to these methods are tested above.
+    // implementation of collectMultiNamespaceReferences). Arguments to these methods are tested above.
     const currentSpace = 'current_space';
 
     beforeEach(() => {
@@ -962,7 +955,7 @@ describe('SavedObjectsRepository Spaces Extension', () => {
     describe(`#create`, () => {
       test(`calls authorizeCreate with the current namespace`, async () => {
         const type = CUSTOM_INDEX_TYPE;
-        setupAuthorizeCreate(mockSecurityExt, 'fully_authorized');
+        setupAuthorizeFunc(mockSecurityExt.authorizeCreate as jest.Mock, 'fully_authorized');
         await repository.create(type, { attr: 'value' });
         expect(mockSpacesExt.getCurrentNamespace).toBeCalledTimes(1);
         expect(mockSpacesExt.getCurrentNamespace).toHaveBeenCalledWith(undefined);
@@ -995,7 +988,7 @@ describe('SavedObjectsRepository Spaces Extension', () => {
       });
 
       test(`calls authorizeBulkCreate with the current namespace`, async () => {
-        setupAuthorizeBulkCreate(mockSecurityExt, 'fully_authorized');
+        setupAuthorizeFunc(mockSecurityExt.authorizeBulkCreate, 'fully_authorized');
         await bulkCreateSuccess(client, repository, [obj1, obj2]);
         expect(mockSpacesExt.getCurrentNamespace).toBeCalledTimes(1);
         expect(mockSpacesExt.getCurrentNamespace).toHaveBeenCalledWith(undefined);
@@ -1008,7 +1001,7 @@ describe('SavedObjectsRepository Spaces Extension', () => {
 
     describe(`#get`, () => {
       test(`calls authorizeGet with the current namespace`, async () => {
-        setupAuthorizeGet(mockSecurityExt, 'fully_authorized');
+        setupAuthorizeFunc(mockSecurityExt.authorizeGet, 'fully_authorized');
         const type = CUSTOM_INDEX_TYPE;
         const id = 'some-id';
 
@@ -1056,7 +1049,7 @@ describe('SavedObjectsRepository Spaces Extension', () => {
       };
 
       test(`calls authorizeBulkGet with the current namespace`, async () => {
-        setupAuthorizeBulkGet(mockSecurityExt, 'fully_authorized');
+        setupAuthorizeFunc(mockSecurityExt.authorizeBulkGet, 'fully_authorized');
         await bulkGetSuccess(client, repository, registry, [obj1, obj2]);
         expect(mockSpacesExt.getCurrentNamespace).toBeCalledTimes(1);
         expect(mockSpacesExt.getCurrentNamespace).toHaveBeenCalledWith(undefined);
@@ -1104,7 +1097,7 @@ describe('SavedObjectsRepository Spaces Extension', () => {
       };
 
       test(`calls authorizeBulkUpdate with the current namespace`, async () => {
-        setupAuthorizeBulkUpdate(mockSecurityExt, 'fully_authorized');
+        setupAuthorizeFunc(mockSecurityExt.authorizeBulkUpdate, 'fully_authorized');
         await bulkUpdateSuccess(
           client,
           repository,
@@ -1127,7 +1120,7 @@ describe('SavedObjectsRepository Spaces Extension', () => {
       test(`calls authorizeDelete with the current namespace`, async () => {
         const type = CUSTOM_INDEX_TYPE;
         const id = 'some-id';
-        setupAuthorizeDelete(mockSecurityExt, 'fully_authorized');
+        setupAuthorizeFunc(mockSecurityExt.authorizeBulkDelete, 'fully_authorized');
         await deleteSuccess(client, repository, registry, type, id);
         expect(mockSpacesExt.getCurrentNamespace).toBeCalledTimes(1);
         expect(mockSpacesExt.getCurrentNamespace).toHaveBeenCalledWith(undefined);
@@ -1174,7 +1167,7 @@ describe('SavedObjectsRepository Spaces Extension', () => {
       });
 
       test(`calls authorizeBulkDelete with the current namespace`, async () => {
-        setupAuthorizeBulkDelete(mockSecurityExt, 'fully_authorized');
+        setupAuthorizeFunc(mockSecurityExt.authorizeBulkDelete, 'fully_authorized');
         await bulkDeleteSuccess(client, repository, registry, testObjs, options, internalOptions);
         expect(mockSpacesExt.getCurrentNamespace).toBeCalledTimes(1);
         expect(mockSpacesExt.getCurrentNamespace).toHaveBeenCalledWith(undefined);
@@ -1220,7 +1213,7 @@ describe('SavedObjectsRepository Spaces Extension', () => {
 
     describe(`#openPointInTimeForType`, () => {
       test(`calls authorizeOpenPointInTime with the current namespace`, async () => {
-        setupAuthorizeOpenPointInTime(mockSecurityExt, 'fully_authorized');
+        setupAuthorizeFunc(mockSecurityExt.authorizeOpenPointInTime, 'fully_authorized');
         await repository.openPointInTimeForType(CUSTOM_INDEX_TYPE);
         expect(mockSpacesExt.getSearchableNamespaces).toBeCalledTimes(1);
         expect(mockSpacesExt.getSearchableNamespaces).toBeCalledWith(undefined); // will resolve current space

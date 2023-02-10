@@ -56,7 +56,7 @@ export interface BulkResolveError {
 }
 
 /**
- * Decorates an error - adds information or additional explaination of an error to
+ * Decorates an error - adds information or additional explanation of an error to
  * provide more context.
  *
  */
@@ -89,7 +89,7 @@ function isSavedObjectsClientError(error: any): error is DecoratedError {
 }
 
 /**
- * Decorates an bad request error to add information or additional explaination of an error to
+ * Decorates an bad request error to add information or additional explanation of an error to
  * provide more context. Bad requests come in a few flavors: unsupported type, invalid version,
  * elastic search cannot execute script, or plain vanilla bad request.
  */

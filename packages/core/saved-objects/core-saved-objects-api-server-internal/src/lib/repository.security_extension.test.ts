@@ -56,21 +56,11 @@ import {
   expectUpdateResult,
   bulkDeleteSuccess,
   createBulkDeleteSuccessStatus,
-  setupAuthorizeCreate,
-  setupAuthorizeUpdate,
-  setupAuthorizeBulkUpdate,
-  setupAuthorizeBulkCreate,
-  setupAuthorizeDelete,
-  setupAuthorizeBulkDelete,
-  setupAuthorizeCheckConflicts,
-  setupAuthorizeGet,
-  setupAuthorizeBulkGet,
-  setupAuthorizeRemoveReferences,
   REMOVE_REFS_COUNT,
-  setupAuthorizeOpenPointInTime,
-  setupAuthorizeFind,
   setupGetFindRedactTypeMap,
   generateIndexPatternSearchResults,
+  setupAuthorizeFunc,
+  setupAuthorizeFind,
 } from '../test_helpers/repository.test.common';
 import { savedObjectsExtensionsMock } from '../mocks/saved_objects_extensions.mock';
 import { arrayMapsAreEqual } from '@kbn/core-saved-objects-utils-server';
@@ -129,6 +119,7 @@ describe('SavedObjectsRepository Security Extension', () => {
     mockSecurityExt = savedObjectsExtensionsMock.createSecurityExtension();
     mockGetCurrentTime.mockReturnValue(mockTimestamp);
     repository = instantiateRepository();
+    setupGetFindRedactTypeMap(mockSecurityExt);
   });
 
   afterEach(() => {
@@ -146,7 +137,7 @@ describe('SavedObjectsRepository Security Extension', () => {
     });
 
     test(`propagates decorated error when unauthorized`, async () => {
-      setupAuthorizeGet(mockSecurityExt, 'unauthorized');
+      setupAuthorizeFunc(mockSecurityExt.authorizeGet, 'unauthorized');
 
       await expect(
         getSuccess(client, repository, registry, type, id, { namespace })
@@ -156,7 +147,7 @@ describe('SavedObjectsRepository Security Extension', () => {
     });
 
     test(`returns result when partially authorized`, async () => {
-      setupAuthorizeGet(mockSecurityExt, 'partially_authorized');
+      setupAuthorizeFunc(mockSecurityExt.authorizeGet, 'partially_authorized');
       setupRedactPassthrough(mockSecurityExt);
 
       const result = await getSuccess(client, repository, registry, type, id, { namespace });
@@ -167,7 +158,7 @@ describe('SavedObjectsRepository Security Extension', () => {
     });
 
     test(`returns result when fully authorized`, async () => {
-      setupAuthorizeGet(mockSecurityExt, 'fully_authorized');
+      setupAuthorizeFunc(mockSecurityExt.authorizeGet, 'fully_authorized');
       setupRedactPassthrough(mockSecurityExt);
 
       const result = await getSuccess(client, repository, registry, type, id, { namespace });
@@ -204,7 +195,7 @@ describe('SavedObjectsRepository Security Extension', () => {
     });
 
     test(`calls redactNamespaces with authorization map`, async () => {
-      setupAuthorizeGet(mockSecurityExt, 'fully_authorized');
+      setupAuthorizeFunc(mockSecurityExt.authorizeGet, 'fully_authorized');
       setupRedactPassthrough(mockSecurityExt);
 
       await getSuccess(client, repository, registry, type, id, { namespace });
@@ -230,7 +221,7 @@ describe('SavedObjectsRepository Security Extension', () => {
     });
 
     test(`propagates decorated error when unauthorized`, async () => {
-      setupAuthorizeUpdate(mockSecurityExt, 'unauthorized');
+      setupAuthorizeFunc(mockSecurityExt.authorizeUpdate, 'unauthorized');
       await expect(
         updateSuccess(client, repository, registry, type, id, attributes, { namespace })
       ).rejects.toThrow(enforceError);
@@ -239,7 +230,7 @@ describe('SavedObjectsRepository Security Extension', () => {
     });
 
     test(`returns result when partially authorized`, async () => {
-      setupAuthorizeUpdate(mockSecurityExt, 'partially_authorized');
+      setupAuthorizeFunc(mockSecurityExt.authorizeUpdate, 'partially_authorized');
       setupRedactPassthrough(mockSecurityExt);
 
       const result = await updateSuccess(client, repository, registry, type, id, attributes, {
@@ -254,7 +245,7 @@ describe('SavedObjectsRepository Security Extension', () => {
     });
 
     test(`returns result when fully authorized`, async () => {
-      setupAuthorizeUpdate(mockSecurityExt, 'fully_authorized');
+      setupAuthorizeFunc(mockSecurityExt.authorizeUpdate, 'fully_authorized');
       setupRedactPassthrough(mockSecurityExt);
 
       const result = await updateSuccess(client, repository, registry, type, id, attributes, {
@@ -299,7 +290,7 @@ describe('SavedObjectsRepository Security Extension', () => {
     });
 
     test(`calls redactNamespaces with authorization map`, async () => {
-      setupAuthorizeUpdate(mockSecurityExt, 'fully_authorized');
+      setupAuthorizeFunc(mockSecurityExt.authorizeUpdate, 'fully_authorized');
       setupRedactPassthrough(mockSecurityExt);
 
       await updateSuccess(client, repository, registry, type, id, attributes, { namespace });
@@ -325,7 +316,7 @@ describe('SavedObjectsRepository Security Extension', () => {
     });
 
     test(`propagates decorated error when unauthorized`, async () => {
-      setupAuthorizeCreate(mockSecurityExt, 'unauthorized');
+      setupAuthorizeFunc(mockSecurityExt.authorizeCreate, 'unauthorized');
       await expect(repository.create(type, attributes, { namespace })).rejects.toThrow(
         enforceError
       );
@@ -334,7 +325,7 @@ describe('SavedObjectsRepository Security Extension', () => {
     });
 
     test(`returns result when partially authorized`, async () => {
-      setupAuthorizeCreate(mockSecurityExt, 'partially_authorized');
+      setupAuthorizeFunc(mockSecurityExt.authorizeCreate, 'partially_authorized');
       setupRedactPassthrough(mockSecurityExt);
 
       const result = await repository.create(type, attributes, {
@@ -354,7 +345,7 @@ describe('SavedObjectsRepository Security Extension', () => {
     });
 
     test(`returns result when fully authorized`, async () => {
-      setupAuthorizeCreate(mockSecurityExt, 'fully_authorized');
+      setupAuthorizeFunc(mockSecurityExt.authorizeCreate as jest.Mock, 'fully_authorized');
       setupRedactPassthrough(mockSecurityExt);
 
       const result = await repository.create(type, attributes, {
@@ -416,7 +407,7 @@ describe('SavedObjectsRepository Security Extension', () => {
     });
 
     test(`calls redactNamespaces with authorization map`, async () => {
-      setupAuthorizeCreate(mockSecurityExt, 'fully_authorized');
+      setupAuthorizeFunc(mockSecurityExt.authorizeCreate as jest.Mock, 'fully_authorized');
       setupRedactPassthrough(mockSecurityExt);
 
       await repository.create(type, attributes, { namespace });
@@ -455,7 +446,7 @@ describe('SavedObjectsRepository Security Extension', () => {
     });
 
     test(`propagates decorated error when unauthorized`, async () => {
-      setupAuthorizeDelete(mockSecurityExt, 'unauthorized');
+      setupAuthorizeFunc(mockSecurityExt.authorizeDelete, 'unauthorized');
 
       await expect(
         deleteSuccess(client, repository, registry, type, id, { namespace })
@@ -465,7 +456,7 @@ describe('SavedObjectsRepository Security Extension', () => {
     });
 
     test(`returns empty object result when partially authorized`, async () => {
-      setupAuthorizeDelete(mockSecurityExt, 'partially_authorized');
+      setupAuthorizeFunc(mockSecurityExt.authorizeDelete, 'partially_authorized');
       setupRedactPassthrough(mockSecurityExt);
 
       const result = await deleteSuccess(client, repository, registry, type, id, {
@@ -478,7 +469,7 @@ describe('SavedObjectsRepository Security Extension', () => {
     });
 
     test(`returns empty object result when fully authorized`, async () => {
-      setupAuthorizeDelete(mockSecurityExt, 'fully_authorized');
+      setupAuthorizeFunc(mockSecurityExt.authorizeDelete, 'fully_authorized');
       setupRedactPassthrough(mockSecurityExt);
 
       const result = await deleteSuccess(client, repository, registry, type, id, {
@@ -514,7 +505,7 @@ describe('SavedObjectsRepository Security Extension', () => {
     });
 
     test(`propagates decorated error when unauthorized`, async () => {
-      setupAuthorizeRemoveReferences(mockSecurityExt, 'unauthorized');
+      setupAuthorizeFunc(mockSecurityExt.authorizeRemoveReferences, 'unauthorized');
 
       await expect(
         removeReferencesToSuccess(client, repository, type, id, { namespace })
@@ -524,7 +515,7 @@ describe('SavedObjectsRepository Security Extension', () => {
     });
 
     test(`returns result when partially authorized`, async () => {
-      setupAuthorizeRemoveReferences(mockSecurityExt, 'partially_authorized');
+      setupAuthorizeFunc(mockSecurityExt.authorizeRemoveReferences, 'partially_authorized');
       setupRedactPassthrough(mockSecurityExt);
 
       const result = await removeReferencesToSuccess(client, repository, type, id, { namespace });
@@ -535,7 +526,7 @@ describe('SavedObjectsRepository Security Extension', () => {
     });
 
     test(`returns result when fully authorized`, async () => {
-      setupAuthorizeRemoveReferences(mockSecurityExt, 'fully_authorized');
+      setupAuthorizeFunc(mockSecurityExt.authorizeRemoveReferences, 'fully_authorized');
       setupRedactPassthrough(mockSecurityExt);
 
       const result = await removeReferencesToSuccess(client, repository, type, id, { namespace });
@@ -595,7 +586,7 @@ describe('SavedObjectsRepository Security Extension', () => {
     });
 
     test(`propagates decorated error when unauthorized`, async () => {
-      setupAuthorizeCheckConflicts(mockSecurityExt, 'unauthorized');
+      setupAuthorizeFunc(mockSecurityExt.authorizeCheckConflicts, 'unauthorized');
 
       await expect(
         checkConflictsSuccess(client, repository, registry, [obj1, obj2], { namespace })
@@ -605,7 +596,7 @@ describe('SavedObjectsRepository Security Extension', () => {
     });
 
     test(`returns result when partially authorized`, async () => {
-      setupAuthorizeCheckConflicts(mockSecurityExt, 'partially_authorized');
+      setupAuthorizeFunc(mockSecurityExt.authorizeCheckConflicts, 'partially_authorized');
       setupRedactPassthrough(mockSecurityExt);
 
       const result = await checkConflictsSuccess(client, repository, registry, [obj1, obj2], {
@@ -618,7 +609,7 @@ describe('SavedObjectsRepository Security Extension', () => {
     });
 
     test(`returns result when fully authorized`, async () => {
-      setupAuthorizeCheckConflicts(mockSecurityExt, 'fully_authorized');
+      setupAuthorizeFunc(mockSecurityExt.authorizeCheckConflicts, 'fully_authorized');
       setupRedactPassthrough(mockSecurityExt);
 
       const result = await checkConflictsSuccess(client, repository, registry, [obj1, obj2], {
@@ -649,7 +640,7 @@ describe('SavedObjectsRepository Security Extension', () => {
     });
 
     test(`returns result when partially authorized`, async () => {
-      setupAuthorizeOpenPointInTime(mockSecurityExt, 'partially_authorized');
+      setupAuthorizeFunc(mockSecurityExt.authorizeOpenPointInTime, 'partially_authorized');
 
       client.openPointInTime.mockResponseOnce({ id });
       const result = await repository.openPointInTimeForType(type);
@@ -660,7 +651,7 @@ describe('SavedObjectsRepository Security Extension', () => {
     });
 
     test(`returns result when fully authorized`, async () => {
-      setupAuthorizeOpenPointInTime(mockSecurityExt, 'fully_authorized');
+      setupAuthorizeFunc(mockSecurityExt.authorizeOpenPointInTime, 'fully_authorized');
 
       client.openPointInTime.mockResponseOnce({ id });
       const result = await repository.openPointInTimeForType(type);
@@ -671,12 +662,12 @@ describe('SavedObjectsRepository Security Extension', () => {
     });
 
     test(`throws an error when unauthorized`, async () => {
-      setupAuthorizeOpenPointInTime(mockSecurityExt, 'unauthorized');
+      setupAuthorizeFunc(mockSecurityExt.authorizeOpenPointInTime, 'unauthorized');
       await expect(repository.openPointInTimeForType(type)).rejects.toThrowError();
     });
 
     test(`calls authorizeOpenPointInTime with correct parameters`, async () => {
-      setupAuthorizeOpenPointInTime(mockSecurityExt, 'fully_authorized');
+      setupAuthorizeFunc(mockSecurityExt.authorizeOpenPointInTime, 'fully_authorized');
       client.openPointInTime.mockResponseOnce({ id });
       const namespaces = [namespace, 'x', 'y', 'z'];
       await repository.openPointInTimeForType(type, { namespaces });
@@ -733,7 +724,6 @@ describe('SavedObjectsRepository Security Extension', () => {
 
     test(`returns result when getFindRedactTypeMap is unauthorized`, async () => {
       setupAuthorizeFind(mockSecurityExt, 'fully_authorized');
-      setupGetFindRedactTypeMap(mockSecurityExt, 'unauthorized');
       setupRedactPassthrough(mockSecurityExt);
 
       const generatedResults = generateIndexPatternSearchResults(namespace);
@@ -784,7 +774,6 @@ describe('SavedObjectsRepository Security Extension', () => {
 
     test(`returns result of es find when fully authorized`, async () => {
       setupAuthorizeFind(mockSecurityExt, 'fully_authorized');
-      setupGetFindRedactTypeMap(mockSecurityExt, 'fully_authorized');
       setupRedactPassthrough(mockSecurityExt);
 
       const { result, generatedResults } = await findSuccess(
@@ -815,7 +804,6 @@ describe('SavedObjectsRepository Security Extension', () => {
 
     test(`uses the authorization map when partially authorized`, async () => {
       setupAuthorizeFind(mockSecurityExt, 'partially_authorized');
-      setupGetFindRedactTypeMap(mockSecurityExt, 'partially_authorized');
       setupRedactPassthrough(mockSecurityExt);
 
       await findSuccess(
@@ -840,7 +828,6 @@ describe('SavedObjectsRepository Security Extension', () => {
 
     test(`returns result of es find when partially authorized`, async () => {
       setupAuthorizeFind(mockSecurityExt, 'partially_authorized');
-      setupGetFindRedactTypeMap(mockSecurityExt, 'partially_authorized');
       setupRedactPassthrough(mockSecurityExt);
 
       const { result, generatedResults } = await findSuccess(
@@ -871,7 +858,6 @@ describe('SavedObjectsRepository Security Extension', () => {
 
     test(`calls authorizeFind with correct parameters`, async () => {
       setupAuthorizeFind(mockSecurityExt, 'partially_authorized');
-      setupGetFindRedactTypeMap(mockSecurityExt, 'partially_authorized');
       setupRedactPassthrough(mockSecurityExt);
       await findSuccess(client, repository, { type, namespaces: [namespace] }, 'ns-2');
 
@@ -884,7 +870,6 @@ describe('SavedObjectsRepository Security Extension', () => {
 
     test(`calls GetFindRedactTypeMap with correct parameters`, async () => {
       setupAuthorizeFind(mockSecurityExt, 'partially_authorized');
-      setupGetFindRedactTypeMap(mockSecurityExt, 'partially_authorized');
       setupRedactPassthrough(mockSecurityExt);
       const { generatedResults } = await findSuccess(
         client,
@@ -910,7 +895,6 @@ describe('SavedObjectsRepository Security Extension', () => {
 
     test(`calls redactNamespaces with authorization map`, async () => {
       setupAuthorizeFind(mockSecurityExt, 'fully_authorized');
-      setupGetFindRedactTypeMap(mockSecurityExt, 'fully_authorized');
       setupRedactPassthrough(mockSecurityExt);
 
       const { generatedResults } = await findSuccess(client, repository, {
@@ -984,7 +968,7 @@ describe('SavedObjectsRepository Security Extension', () => {
     });
 
     test(`propagates decorated error when unauthorized`, async () => {
-      setupAuthorizeBulkGet(mockSecurityExt, 'unauthorized');
+      setupAuthorizeFunc(mockSecurityExt.authorizeBulkGet, 'unauthorized');
 
       await expect(
         bulkGetSuccess(client, repository, registry, [obj1, obj2], { namespace })
@@ -994,7 +978,7 @@ describe('SavedObjectsRepository Security Extension', () => {
     });
 
     test(`returns result when partially authorized`, async () => {
-      setupAuthorizeBulkGet(mockSecurityExt, 'partially_authorized');
+      setupAuthorizeFunc(mockSecurityExt.authorizeBulkGet, 'partially_authorized');
       setupRedactPassthrough(mockSecurityExt);
 
       const { result, mockResponse } = await bulkGetSuccess(
@@ -1022,7 +1006,7 @@ describe('SavedObjectsRepository Security Extension', () => {
     });
 
     test(`returns result when fully authorized`, async () => {
-      setupAuthorizeBulkGet(mockSecurityExt, 'fully_authorized');
+      setupAuthorizeFunc(mockSecurityExt.authorizeBulkGet, 'fully_authorized');
       setupRedactPassthrough(mockSecurityExt);
 
       const { result, mockResponse } = await bulkGetSuccess(
@@ -1102,7 +1086,7 @@ describe('SavedObjectsRepository Security Extension', () => {
     });
 
     test(`calls redactNamespaces with authorization map`, async () => {
-      setupAuthorizeBulkGet(mockSecurityExt, 'partially_authorized');
+      setupAuthorizeFunc(mockSecurityExt.authorizeBulkGet, 'partially_authorized');
       setupRedactPassthrough(mockSecurityExt);
 
       const objects = [obj1, obj2];
@@ -1157,7 +1141,7 @@ describe('SavedObjectsRepository Security Extension', () => {
     });
 
     test(`propagates decorated error when unauthorized`, async () => {
-      setupAuthorizeBulkCreate(mockSecurityExt, 'unauthorized');
+      setupAuthorizeFunc(mockSecurityExt.authorizeBulkCreate as jest.Mock, 'unauthorized');
 
       await expect(
         bulkCreateSuccess(client, repository, [obj1, obj2], { namespace })
@@ -1167,7 +1151,7 @@ describe('SavedObjectsRepository Security Extension', () => {
     });
 
     test(`returns result when partially authorized`, async () => {
-      setupAuthorizeBulkCreate(mockSecurityExt, 'partially_authorized');
+      setupAuthorizeFunc(mockSecurityExt.authorizeBulkCreate as jest.Mock, 'partially_authorized');
       setupRedactPassthrough(mockSecurityExt);
 
       const objects = [obj1, obj2];
@@ -1181,7 +1165,7 @@ describe('SavedObjectsRepository Security Extension', () => {
     });
 
     test(`returns result when fully authorized`, async () => {
-      setupAuthorizeBulkCreate(mockSecurityExt, 'fully_authorized');
+      setupAuthorizeFunc(mockSecurityExt.authorizeBulkCreate as jest.Mock, 'fully_authorized');
       setupRedactPassthrough(mockSecurityExt);
 
       const objects = [obj1, obj2];
@@ -1195,7 +1179,7 @@ describe('SavedObjectsRepository Security Extension', () => {
     });
 
     test(`calls authorizeCreate with correct parameters`, async () => {
-      setupAuthorizeBulkCreate(mockSecurityExt, 'fully_authorized');
+      setupAuthorizeFunc(mockSecurityExt.authorizeBulkCreate as jest.Mock, 'fully_authorized');
 
       await bulkCreateSuccess(client, repository, [obj1, obj2], {
         namespace,
@@ -1238,7 +1222,7 @@ describe('SavedObjectsRepository Security Extension', () => {
       };
       const optionsNamespace = 'ns-5';
 
-      setupAuthorizeBulkCreate(mockSecurityExt, 'fully_authorized');
+      setupAuthorizeFunc(mockSecurityExt.authorizeBulkCreate as jest.Mock, 'fully_authorized');
 
       await bulkCreateSuccess(client, repository, [objA, objB], {
         namespace: optionsNamespace,
@@ -1281,7 +1265,7 @@ describe('SavedObjectsRepository Security Extension', () => {
       };
       const optionsNamespace = 'ns-5';
 
-      setupAuthorizeBulkCreate(mockSecurityExt, 'fully_authorized');
+      setupAuthorizeFunc(mockSecurityExt.authorizeBulkCreate as jest.Mock, 'fully_authorized');
 
       await bulkCreateSuccess(client, repository, [objA, objB], {
         namespace: optionsNamespace,
@@ -1313,7 +1297,7 @@ describe('SavedObjectsRepository Security Extension', () => {
     });
 
     test(`calls redactNamespaces with authorization map`, async () => {
-      setupAuthorizeBulkCreate(mockSecurityExt, 'fully_authorized');
+      setupAuthorizeFunc(mockSecurityExt.authorizeBulkCreate as jest.Mock, 'fully_authorized');
       setupRedactPassthrough(mockSecurityExt);
 
       const objects = [obj1, obj2];
@@ -1357,7 +1341,7 @@ describe('SavedObjectsRepository Security Extension', () => {
     });
 
     test(`propagates decorated error when unauthorized`, async () => {
-      setupAuthorizeBulkUpdate(mockSecurityExt, 'unauthorized');
+      setupAuthorizeFunc(mockSecurityExt.authorizeBulkUpdate, 'unauthorized');
 
       await expect(bulkUpdateSuccess(client, repository, registry, [obj1, obj2])).rejects.toThrow(
         enforceError
@@ -1367,7 +1351,7 @@ describe('SavedObjectsRepository Security Extension', () => {
     });
 
     test(`returns result when partially authorized`, async () => {
-      setupAuthorizeUpdate(mockSecurityExt, 'partially_authorized');
+      setupAuthorizeFunc(mockSecurityExt.authorizeUpdate, 'partially_authorized');
       setupRedactPassthrough(mockSecurityExt);
 
       const objects = [obj1, obj2];
@@ -1381,7 +1365,7 @@ describe('SavedObjectsRepository Security Extension', () => {
     });
 
     test(`returns result when fully authorized`, async () => {
-      setupAuthorizeUpdate(mockSecurityExt, 'fully_authorized');
+      setupAuthorizeFunc(mockSecurityExt.authorizeUpdate, 'fully_authorized');
       setupRedactPassthrough(mockSecurityExt);
 
       const objects = [obj1, obj2];
@@ -1395,7 +1379,7 @@ describe('SavedObjectsRepository Security Extension', () => {
     });
 
     test(`calls authorizeBulkUpdate with correct parameters`, async () => {
-      setupAuthorizeUpdate(mockSecurityExt, 'fully_authorized');
+      setupAuthorizeFunc(mockSecurityExt.authorizeUpdate, 'fully_authorized');
 
       await bulkUpdateSuccess(client, repository, registry, [obj1, obj2], {
         namespace,
@@ -1433,7 +1417,7 @@ describe('SavedObjectsRepository Security Extension', () => {
         namespace: 'ns-2', // object namespace
       };
 
-      setupAuthorizeUpdate(mockSecurityExt, 'fully_authorized');
+      setupAuthorizeFunc(mockSecurityExt.authorizeUpdate, 'fully_authorized');
 
       await bulkUpdateSuccess(client, repository, registry, [objA, objB], {
         namespace,
@@ -1464,7 +1448,7 @@ describe('SavedObjectsRepository Security Extension', () => {
     });
 
     test(`calls redactNamespaces with authorization map`, async () => {
-      setupAuthorizeBulkUpdate(mockSecurityExt, 'fully_authorized');
+      setupAuthorizeFunc(mockSecurityExt.authorizeBulkUpdate, 'fully_authorized');
       setupRedactPassthrough(mockSecurityExt);
 
       const objects = [obj1, obj2];
@@ -1530,7 +1514,7 @@ describe('SavedObjectsRepository Security Extension', () => {
     });
 
     test(`propagates decorated error when unauthorized`, async () => {
-      setupAuthorizeBulkDelete(mockSecurityExt, 'unauthorized');
+      setupAuthorizeFunc(mockSecurityExt.authorizeBulkDelete, 'unauthorized');
 
       await expect(
         bulkDeleteSuccess(client, repository, registry, testObjs, options)
@@ -1540,7 +1524,7 @@ describe('SavedObjectsRepository Security Extension', () => {
     });
 
     test(`returns result when partially authorized`, async () => {
-      setupAuthorizeBulkDelete(mockSecurityExt, 'partially_authorized');
+      setupAuthorizeFunc(mockSecurityExt.authorizeBulkDelete, 'partially_authorized');
       setupRedactPassthrough(mockSecurityExt);
 
       const result = await bulkDeleteSuccess(
@@ -1560,7 +1544,7 @@ describe('SavedObjectsRepository Security Extension', () => {
     });
 
     test(`returns result when fully authorized`, async () => {
-      setupAuthorizeBulkDelete(mockSecurityExt, 'fully_authorized');
+      setupAuthorizeFunc(mockSecurityExt.authorizeBulkDelete, 'fully_authorized');
       setupRedactPassthrough(mockSecurityExt);
 
       const result = await bulkDeleteSuccess(
@@ -1580,7 +1564,7 @@ describe('SavedObjectsRepository Security Extension', () => {
     });
 
     test(`calls authorizeBulkDelete with correct actions, types, spaces, and enforce map`, async () => {
-      setupAuthorizeBulkDelete(mockSecurityExt, 'fully_authorized');
+      setupAuthorizeFunc(mockSecurityExt.authorizeBulkDelete, 'fully_authorized');
       await bulkDeleteSuccess(client, repository, registry, testObjs, options, internalOptions);
 
       expect(mockSecurityExt.authorizeBulkDelete).toHaveBeenCalledTimes(1);
