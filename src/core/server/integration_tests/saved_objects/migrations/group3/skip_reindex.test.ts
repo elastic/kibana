@@ -16,7 +16,7 @@ import {
   createTestServers,
   type TestElasticsearchUtils,
 } from '@kbn/core-test-helpers-kbn-server';
-import { delay } from './test_utils';
+import { delay } from '../test_utils';
 import { SemVer } from 'semver';
 
 const logFilePath = Path.join(__dirname, 'skip_reindex.log');
