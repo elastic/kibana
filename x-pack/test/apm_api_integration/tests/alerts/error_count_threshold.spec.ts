@@ -135,7 +135,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 - Service name: opbeans-java
 - Environment: production
 - Threshold: 1
-- Triggered value: 15 errors over the last 1 hour`
+- Triggered value: 15 errors over the last 1 hr`
         );
       });
 

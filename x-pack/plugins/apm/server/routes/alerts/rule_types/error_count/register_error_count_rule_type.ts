@@ -6,7 +6,11 @@
  */
 
 import { getAlertDetailsUrl } from '@kbn/infra-plugin/server/lib/alerting/common/utils';
-import { ProcessorEvent } from '@kbn/observability-plugin/common';
+import {
+  formatDurationFromTimeUnitChar,
+  ProcessorEvent,
+  TimeUnitChar,
+} from '@kbn/observability-plugin/common';
 import { termQuery } from '@kbn/observability-plugin/server';
 import {
   ALERT_EVALUATION_THRESHOLD,
@@ -32,7 +36,6 @@ import {
   formatErrorCountReason,
   RULE_TYPES_CONFIG,
 } from '../../../../../common/rules/apm_rule_types';
-import { getIntervalLabel } from '../../../../../common/rules/get_interval_label';
 import { errorCountParamsSchema } from '../../../../../common/rules/schema';
 import { environmentQuery } from '../../../../../common/utils/environment_query';
 import { getAlertUrlErrorCount } from '../../../../../common/utils/formatters';
@@ -204,9 +207,9 @@ export function registerErrorCountRuleType({
               .scheduleActions(ruleTypeConfig.defaultActionGroupId, {
                 alertDetailsUrl,
                 environment: getEnvironmentLabel(environment),
-                interval: getIntervalLabel(
+                interval: formatDurationFromTimeUnitChar(
                   ruleParams.windowSize,
-                  ruleParams.windowUnit
+                  ruleParams.windowUnit as TimeUnitChar
                 ),
                 reason: alertReason,
                 serviceName,
