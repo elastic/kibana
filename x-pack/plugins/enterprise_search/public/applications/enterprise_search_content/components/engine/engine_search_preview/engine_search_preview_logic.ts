@@ -9,52 +9,60 @@ import { kea, MakeLogicType } from 'kea';
 
 import { FieldConfiguration, SearchFieldConfiguration } from '@elastic/search-ui';
 
-import { Status } from '../../../../../../common/types/api';
-import { GenerateEngineApiKeyLogic } from '../../../api/generate_engine_api_key/generate_engine_api_key_logic';
+import { FetchEngineFieldCapabilitiesApiLogic } from '../../../api/engines/fetch_engine_field_capabilities_api_logic';
+import { EngineNameLogic } from '../engine_name_logic';
 
-interface EngineSearchPreviewActions {}
+// interface EngineSearchPreviewActions {}
 
 export interface EngineSearchPreviewLogicValues {
   resultFields: Record<string, FieldConfiguration>;
   searchableFields: Record<string, SearchFieldConfiguration>;
 }
 
-const fields = {
-  resultFields: ['name'],
-  searchableFields: ['name'],
-};
-
-export const EngineSearchPreviewLogic = kea<
-  MakeLogicType<EngineSearchPreviewLogicValues, EngineSearchPreviewActions>
->({
+export const EngineSearchPreviewLogic = kea<MakeLogicType<EngineSearchPreviewLogicValues, {}>>({
   actions: {},
-  connect: {},
-  listeners: ({ actions }) => ({}),
-  path: ['enterprise_search', 'content', 'engine_search_preview_logic'],
-  reducers: () => ({
-    resultFields: [
-      fields.resultFields.reduce<EngineSearchPreviewLogicValues['resultFields']>(
-        (acc, field) => ({
-          ...acc,
-          [field]: {
-            raw: {},
-            snippet: {},
-          },
-        }),
-        {}
-      ),
+  connect: {
+    actions: [
+      FetchEngineFieldCapabilitiesApiLogic,
+      ['makeRequest as fetchEngineFieldCapabilities'],
     ],
-    searchableFields: [
-      fields.searchableFields.reduce<EngineSearchPreviewLogicValues['searchableFields']>(
-        (acc, field) => ({
-          ...acc,
-          [field]: {
-            weight: 1,
-          },
-        }),
-        {}
-      ),
+    values: [
+      EngineNameLogic,
+      ['engineName'],
+      FetchEngineFieldCapabilitiesApiLogic,
+      ['data as engineFieldCapabilitiesData', 'status as engineFieldCapabilitiesStatus'],
     ],
+  },
+  events: ({ actions, values }) => ({
+    afterMount: () => {
+      if (!values.engineFieldCapabilitiesData) {
+        actions.fetchEngineFieldCapabilities({
+          engineName: values.engineName,
+        });
+      }
+    },
   }),
-  selectors: ({ selectors }) => ({}),
+  // listeners: ({ actions }) => ({}),
+  path: ['enterprise_search', 'content', 'engine_search_preview_logic'],
+  selectors: ({ selectors }) => ({
+    resultFields: [
+      () => [selectors.engineFieldCapabilitiesData],
+      (data) => {
+        if (!data) return {};
+
+        const resultFields = Object.fromEntries(
+          Object.entries(data.field_capabilities.fields)
+            .filter(([, mappings]) => {
+              return Object.values(mappings).some(({ metadata_field: isMeta }) => !isMeta);
+            })
+            .map(([key]) => {
+              return [key, { raw: {}, snippet: {} }];
+            })
+        );
+
+        return resultFields;
+      },
+    ],
+    searchableFields: [() => [selectors.engineFieldCapabilitiesData], () => ({})],
+  }),
 });
