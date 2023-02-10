@@ -67,7 +67,6 @@ export default ({ getService }: FtrProviderContext) => {
 
     it('should assign trained model to space for user with access to that space', async () => {
       await ml.api.assertTrainedModelSpaces(trainedModelId, [defaultSpaceId]);
-      const jobType = 'trained-model';
       const body = await runRequest(
         {
           modelIds: [trainedModelId],
@@ -78,7 +77,7 @@ export default ({ getService }: FtrProviderContext) => {
         USER.ML_POWERUSER_SPACE1
       );
 
-      expect(body).to.eql({ [trainedModelId]: { type: jobType, success: true } });
+      expect(body).to.eql({ [trainedModelId]: { type: 'trained-model', success: true } });
       await ml.api.assertTrainedModelSpaces(trainedModelId, [idSpace1]);
     });
 
