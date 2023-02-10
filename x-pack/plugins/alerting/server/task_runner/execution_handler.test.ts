@@ -907,6 +907,11 @@ describe('Execution Handler', () => {
             ],
           ]
       `);
+    expect(alertingEventLogger.logAction).toBeCalledWith({
+      alertSummary: { new: 1, ongoing: 0, recovered: 0 },
+      id: '1',
+      typeId: 'testActionTypeId',
+    });
   });
 
   test('skips summary actions (per rule run) when there is no alerts', async () => {
@@ -946,6 +951,7 @@ describe('Execution Handler', () => {
 
     expect(getSummarizedAlertsMock).not.toHaveBeenCalled();
     expect(actionsClient.bulkEnqueueExecution).not.toHaveBeenCalled();
+    expect(alertingEventLogger.logAction).not.toHaveBeenCalled();
   });
 
   test('triggers summary actions (custom interval)', async () => {
@@ -1030,6 +1036,11 @@ describe('Execution Handler', () => {
             ],
           ]
       `);
+    expect(alertingEventLogger.logAction).toBeCalledWith({
+      alertSummary: { new: 1, ongoing: 0, recovered: 0 },
+      id: '1',
+      typeId: 'testActionTypeId',
+    });
   });
 
   test('does not trigger summary actions if it is still being throttled (custom interval)', async () => {
@@ -1075,6 +1086,7 @@ describe('Execution Handler', () => {
     );
     expect(getSummarizedAlertsMock).not.toHaveBeenCalled();
     expect(actionsClient.bulkEnqueueExecution).not.toHaveBeenCalled();
+    expect(alertingEventLogger.logAction).not.toHaveBeenCalled();
   });
 
   test('removes the obsolete actions from the task state', async () => {

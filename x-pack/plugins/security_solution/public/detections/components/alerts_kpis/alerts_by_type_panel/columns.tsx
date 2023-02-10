@@ -12,7 +12,7 @@ import type { AlertsTypeData, AlertType } from './types';
 import { DefaultDraggable } from '../../../../common/components/draggables';
 import { FormattedCount } from '../../../../common/components/formatted_number';
 import { ALERTS_HEADERS_RULE_NAME } from '../../alerts_table/translations';
-import { ALERT_TYPE_COLOR } from './helpers';
+import { ALERT_TYPE_COLOR, ALERT_TYPE_LABEL } from './helpers';
 import { COUNT_TABLE_TITLE } from '../alerts_count_panel/translations';
 import * as i18n from './translations';
 
@@ -46,7 +46,7 @@ export const getAlertsTypeTableColumns = (): Array<EuiBasicTableColumn<AlertsTyp
       return (
         <EuiHealth color={ALERT_TYPE_COLOR[type as AlertType]}>
           <EuiText grow={false} size="xs">
-            {type}
+            {ALERT_TYPE_LABEL[type as AlertType]}
           </EuiText>
         </EuiHealth>
       );
