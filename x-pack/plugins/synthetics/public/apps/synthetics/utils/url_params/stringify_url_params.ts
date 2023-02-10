@@ -22,29 +22,35 @@ export const stringifyUrlParams = (params: Partial<SyntheticsUrlParams>, ignoreE
     delete params.absoluteDateRangeStart;
     delete params.absoluteDateRangeEnd;
 
-    Object.keys(params).forEach((key: string) => {
-      // @ts-ignore
-      const val = params[key];
-      if (val == null || val === '') {
-        // @ts-ignore
-        delete params[key];
-      }
-      if (key === 'dateRangeStart' && val === DATE_RANGE_START) {
-        delete params[key];
-      }
-      if (key === 'dateRangeEnd' && val === DATE_RANGE_END) {
-        delete params[key];
-      }
-      if (key === 'refreshPaused' && val === AUTOREFRESH_IS_PAUSED) {
-        delete params[key];
-      }
-      if (key === 'refreshInterval' && val === AUTOREFRESH_INTERVAL) {
-        delete params[key];
-      }
-      if (key === 'focusConnectorField' && val === FOCUS_CONNECTOR_FIELD) {
-        delete params[key];
-      }
-    });
+    replaceDefaults(params);
   }
   return `?${stringify(params, { sort: false })}`;
+};
+
+export const replaceDefaults = (params: Partial<SyntheticsUrlParams>) => {
+  Object.keys(params).forEach((key: string) => {
+    // @ts-ignore
+    const val = params[key];
+    if (val == null || val === '' || val === undefined) {
+      // @ts-ignore
+      delete params[key];
+    }
+    if (key === 'dateRangeStart' && val === DATE_RANGE_START) {
+      delete params[key];
+    }
+    if (key === 'dateRangeEnd' && val === DATE_RANGE_END) {
+      delete params[key];
+    }
+    if (key === 'refreshPaused' && val === AUTOREFRESH_IS_PAUSED) {
+      delete params[key];
+    }
+    if (key === 'refreshInterval' && val === AUTOREFRESH_INTERVAL) {
+      delete params[key];
+    }
+    if (key === 'focusConnectorField' && val === FOCUS_CONNECTOR_FIELD) {
+      delete params[key];
+    }
+  });
+
+  return params;
 };

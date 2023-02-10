@@ -84,12 +84,22 @@ export const MonitorHistory = () => {
                   <EuiFlexGroup gutterSize="xs">
                     <EuiFlexItem>
                       {monitorId && (
-                        <MonitorErrorsCount from={from} to={to} monitorId={[monitorId]} />
+                        <MonitorErrorsCount
+                          from={from}
+                          to={to}
+                          monitorId={[monitorId]}
+                          id="monitorErrorsCountHistory"
+                        />
                       )}
                     </EuiFlexItem>
                     <EuiFlexItem>
                       {monitorId && (
-                        <MonitorErrorSparklines from={from} to={to} monitorId={[monitorId]} />
+                        <MonitorErrorSparklines
+                          from={from}
+                          to={to}
+                          monitorId={[monitorId]}
+                          id="monitorErrorsSparklineHistory"
+                        />
                       )}
                     </EuiFlexItem>
                   </EuiFlexGroup>
@@ -97,10 +107,10 @@ export const MonitorHistory = () => {
                 <EuiFlexItem>
                   <EuiFlexGroup gutterSize="xs">
                     <EuiFlexItem>
-                      <DurationPanel from={from} to={to} />
+                      <DurationPanel from={from} to={to} id="durationAvgValueHistory" />
                     </EuiFlexItem>
                     <EuiFlexItem>
-                      <DurationSparklines from={from} to={to} />
+                      <DurationSparklines from={from} to={to} id="durationAvgSparklineHistory" />
                     </EuiFlexItem>
                   </EuiFlexGroup>
                 </EuiFlexItem>

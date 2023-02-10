@@ -32,12 +32,7 @@ export const SyntheticsDatePicker = ({ fullWidth }: { fullWidth?: boolean }) => 
   // read time from state and update the url
   const sharedTimeState = data?.query.timefilter.timefilter.getTime();
 
-  const {
-    refreshInterval,
-    refreshPaused,
-    dateRangeStart: start,
-    dateRangeEnd: end,
-  } = getUrlParams();
+  const { dateRangeStart: start, dateRangeEnd: end } = getUrlParams();
 
   useEffect(() => {
     const { from, to } = sharedTimeState ?? {};
@@ -71,8 +66,6 @@ export const SyntheticsDatePicker = ({ fullWidth }: { fullWidth?: boolean }) => 
       start={start}
       end={end}
       commonlyUsedRanges={euiCommonlyUsedRanges}
-      isPaused={refreshPaused}
-      refreshInterval={refreshInterval}
       onTimeChange={({ start: startN, end: endN }) => {
         if (data?.query?.timefilter?.timefilter) {
           data?.query.timefilter.timefilter.setTime({ from: startN, to: endN });
@@ -82,13 +75,6 @@ export const SyntheticsDatePicker = ({ fullWidth }: { fullWidth?: boolean }) => 
         refreshApp();
       }}
       onRefresh={refreshApp}
-      onRefreshChange={({ isPaused, refreshInterval: newRefreshInterval }) => {
-        updateUrl({
-          refreshInterval:
-            newRefreshInterval === undefined ? newRefreshInterval : newRefreshInterval,
-          refreshPaused: isPaused,
-        });
-      }}
     />
   );
 };

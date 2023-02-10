@@ -57,7 +57,7 @@ export function LastRefreshed() {
     >
       <FormattedMessage
         id="xpack.synthetics.lastUpdated.label"
-        defaultMessage="Last refreshed: {updatedDate}"
+        defaultMessage="Updated {updatedDate}"
         values={{
           updatedDate,
         }}

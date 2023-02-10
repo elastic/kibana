@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { useHistory } from 'react-router-dom';
+import { useHistory, useLocation } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import { RefreshButton } from '../common/components/refresh_button';
@@ -21,6 +21,7 @@ import { MONITORS_ROUTE, OVERVIEW_ROUTE } from '../../../../../common/constants'
 
 export const getMonitorsRoute = (
   history: ReturnType<typeof useHistory>,
+  location: ReturnType<typeof useLocation>,
   syntheticsPath: string,
   baseTitle: string
 ): RouteProps[] => {
@@ -39,7 +40,7 @@ export const getMonitorsRoute = (
       dataTestSubj: 'syntheticsOverviewPage',
       pageHeader: {
         ...sharedProps,
-        tabs: getMonitorsTabs(syntheticsPath, 'overview'),
+        tabs: getMonitorsTabs(syntheticsPath, 'overview', location),
       },
     },
     {
@@ -52,13 +53,17 @@ export const getMonitorsRoute = (
       dataTestSubj: 'syntheticsMonitorManagementPage',
       pageHeader: {
         ...sharedProps,
-        tabs: getMonitorsTabs(syntheticsPath, 'management'),
+        tabs: getMonitorsTabs(syntheticsPath, 'management', location),
       },
     },
   ];
 };
 
-const getMonitorsTabs = (syntheticsPath: string, selected: 'overview' | 'management') => {
+const getMonitorsTabs = (
+  syntheticsPath: string,
+  selected: 'overview' | 'management',
+  location: ReturnType<typeof useLocation>
+) => {
   return [
     {
       label: (
@@ -67,7 +72,7 @@ const getMonitorsTabs = (syntheticsPath: string, selected: 'overview' | 'managem
           defaultMessage="Overview"
         />
       ),
-      href: `${syntheticsPath}${OVERVIEW_ROUTE}`,
+      href: `${syntheticsPath}${OVERVIEW_ROUTE}${location.search}`,
       isSelected: selected === 'overview',
       'data-test-subj': 'syntheticsMonitorOverviewTab',
     },
@@ -78,7 +83,7 @@ const getMonitorsTabs = (syntheticsPath: string, selected: 'overview' | 'managem
           defaultMessage="Management"
         />
       ),
-      href: `${syntheticsPath}${MONITORS_ROUTE}`,
+      href: `${syntheticsPath}${MONITORS_ROUTE}${location.search}`,
       isSelected: selected === 'management',
       'data-test-subj': 'syntheticsMonitorManagementTab',
     },

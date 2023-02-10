@@ -61,17 +61,29 @@ export const MonitorSummary = () => {
                 <AvailabilitySparklines from={from} to={to} id="availabilitySparklineSummary" />
               </EuiFlexItem>
               <EuiFlexItem grow={false} style={{ marginLeft: 40 }}>
-                <DurationPanel from={from} to={to} />
+                <DurationPanel from={from} to={to} id="durationAvgValueSummary" />
               </EuiFlexItem>
               <EuiFlexItem>
-                <DurationSparklines from={from} to={to} />
+                <DurationSparklines from={from} to={to} id="durationAvgSparklineSummary" />
               </EuiFlexItem>
               <EuiFlexItem grow={false} style={{ marginLeft: 40 }}>
-                {monitorId && <MonitorErrorsCount from={from} to={to} monitorId={[monitorId]} />}
+                {monitorId && (
+                  <MonitorErrorsCount
+                    from={from}
+                    to={to}
+                    monitorId={[monitorId]}
+                    id="monitorErrorsCountSummary"
+                  />
+                )}
               </EuiFlexItem>
               <EuiFlexItem>
                 {monitorId && (
-                  <MonitorErrorSparklines from={from} to={to} monitorId={[monitorId]} />
+                  <MonitorErrorSparklines
+                    from={from}
+                    to={to}
+                    monitorId={[monitorId]}
+                    id="monitorErrorsSparklineSummary"
+                  />
                 )}
               </EuiFlexItem>
             </EuiFlexGroup>

@@ -13,16 +13,16 @@ interface SyntheticsRefreshContext {
   refreshInterval: number;
   refreshApp: () => void;
   setRefreshInterval: (interval: number) => void;
-  isPaused: boolean;
-  setIsPaused: (isPaused: boolean) => void;
+  refreshPaused: boolean;
+  setRefreshPaused: (isPaused: boolean) => void;
 }
 
 export const APP_DEFAULT_REFRESH_INTERVAL = 1000 * 30;
 
 const defaultContext: SyntheticsRefreshContext = {
   lastRefresh: 0,
-  isPaused: false,
-  setIsPaused: () => {},
+  refreshPaused: false,
+  setRefreshPaused: () => {},
   setRefreshInterval: () => {},
   refreshInterval: APP_DEFAULT_REFRESH_INTERVAL,
   refreshApp: () => {
@@ -39,7 +39,7 @@ export const SyntheticsRefreshContextProvider: React.FC = ({ children }) => {
 
   const { refreshInterval: urlRefreshInterval, refreshPaused: urlIsPaused } = getUrlsParams();
 
-  const [isPaused, setIsPaused] = useState(() => urlIsPaused);
+  const [refreshPaused, setRefreshPaused] = useState(() => urlIsPaused);
   const [refreshInterval, setRefreshInterval] = useState(
     () => urlRefreshInterval ?? APP_DEFAULT_REFRESH_INTERVAL
   );
@@ -48,25 +48,26 @@ export const SyntheticsRefreshContextProvider: React.FC = ({ children }) => {
     if (urlRefreshInterval) {
       setRefreshInterval(urlRefreshInterval);
     }
-    if (urlIsPaused) {
-      setIsPaused(urlIsPaused);
+    if (urlIsPaused !== undefined) {
+      setRefreshPaused(urlIsPaused);
     }
   }, [urlRefreshInterval, urlIsPaused]);
 
   useEffect(() => {
-    if (refreshInterval !== defaultContext.refreshInterval) {
-      updateUrlParams({ refreshInterval });
+    if (refreshInterval === APP_DEFAULT_REFRESH_INTERVAL) {
+      updateUrlParams({ refreshInterval: undefined }, true);
     } else {
-      updateUrlParams({ refreshInterval: undefined });
+      updateUrlParams({ refreshInterval }, true);
     }
-    if (isPaused !== undefined) {
-      if (isPaused !== defaultContext.isPaused) {
-        updateUrlParams({ refreshPaused: isPaused });
-      } else {
-        updateUrlParams({ refreshPaused: undefined });
-      }
+  }, [refreshInterval, updateUrlParams]);
+
+  useEffect(() => {
+    if (!refreshPaused) {
+      updateUrlParams({ refreshPaused: undefined }, true);
+    } else {
+      updateUrlParams({ refreshPaused }, true);
     }
-  }, [refreshInterval, isPaused, updateUrlParams]);
+  }, [refreshPaused, updateUrlParams]);
 
   const refreshApp = useCallback(() => {
     const refreshTime = Date.now();
@@ -74,18 +75,25 @@ export const SyntheticsRefreshContextProvider: React.FC = ({ children }) => {
   }, [setLastRefresh]);
 
   const value = useMemo(() => {
-    return { lastRefresh, refreshApp, refreshInterval, setRefreshInterval, isPaused, setIsPaused };
-  }, [isPaused, lastRefresh, refreshApp, refreshInterval]);
+    return {
+      lastRefresh,
+      refreshApp,
+      refreshInterval,
+      setRefreshInterval,
+      refreshPaused,
+      setRefreshPaused,
+    };
+  }, [refreshPaused, lastRefresh, refreshApp, refreshInterval]);
 
   useEffect(() => {
-    if (isPaused) {
+    if (refreshPaused) {
       return;
     }
     const interval = setInterval(() => {
       refreshApp();
     }, value.refreshInterval);
     return () => clearInterval(interval);
-  }, [isPaused, refreshApp, value.refreshInterval]);
+  }, [refreshPaused, refreshApp, value.refreshInterval]);
 
   return <SyntheticsRefreshContext.Provider value={value} children={children} />;
 };

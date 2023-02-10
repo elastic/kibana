@@ -10,18 +10,18 @@ import { EuiAutoRefreshButton, OnRefreshChangeProps } from '@elastic/eui';
 import { useSyntheticsRefreshContext } from '../../../contexts';
 
 export const AutoRefreshButton = () => {
-  const { refreshInterval, setRefreshInterval, isPaused, setIsPaused } =
+  const { refreshInterval, setRefreshInterval, refreshPaused, setRefreshPaused } =
     useSyntheticsRefreshContext();
 
   const onRefreshChange = (newProps: OnRefreshChangeProps) => {
-    setIsPaused(newProps.isPaused);
     setRefreshInterval(newProps.refreshInterval);
+    setRefreshPaused(newProps.isPaused);
   };
 
   return (
     <EuiAutoRefreshButton
       size="m"
-      isPaused={isPaused}
+      isPaused={refreshPaused}
       refreshInterval={refreshInterval}
       onRefreshChange={onRefreshChange}
       shortHand
