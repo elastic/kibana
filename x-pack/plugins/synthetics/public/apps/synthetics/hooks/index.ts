@@ -20,3 +20,4 @@ export * from './use_composite_image';
 export * from './use_dimensions';
 export * from './use_fleet_permissions';
 export * from './use_monitor_enable_handler';
+export * from './use_edit_monitor_locator';

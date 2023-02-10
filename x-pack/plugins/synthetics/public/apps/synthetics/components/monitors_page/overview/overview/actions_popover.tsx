@@ -39,7 +39,7 @@ import {
   useCanUpdatePrivateMonitor,
 } from '../../../../hooks';
 import { setFlyoutConfig } from '../../../../state/overview/actions';
-import { useEditMonitorLocator } from '../../hooks/use_edit_monitor_locator';
+import { useEditMonitorLocator } from '../../../../hooks/use_edit_monitor_locator';
 import { useMonitorDetailLocator } from '../../../../hooks/use_monitor_detail_locator';
 import { NoPermissionsTooltip } from '../../../common/components/permissions';
 

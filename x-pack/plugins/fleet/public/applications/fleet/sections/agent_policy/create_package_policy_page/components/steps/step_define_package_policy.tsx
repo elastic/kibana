@@ -19,6 +19,7 @@ import {
   EuiFlexItem,
   EuiLink,
   EuiCallOut,
+  EuiSpacer,
 } from '@elastic/eui';
 
 import styled from 'styled-components';
@@ -102,15 +103,18 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
     return validationResults ? (
       <>
         {isManaged && (
-          <EuiCallOut
-            title={
-              <FormattedMessage
-                id="xpack.fleet.createPackagePolicy.stepConfigure.managedReadonly"
-                defaultMessage="This is a managed package policy. You cannot modify it here."
-              />
-            }
-            iconType="lock"
-          />
+          <>
+            <EuiCallOut
+              title={
+                <FormattedMessage
+                  id="xpack.fleet.createPackagePolicy.stepConfigure.managedReadonly"
+                  defaultMessage="This is a managed package policy. You cannot modify it here."
+                />
+              }
+              iconType="lock"
+            />
+            <EuiSpacer size="m" />
+          </>
         )}
         <FormGroupResponsiveFields
           title={
