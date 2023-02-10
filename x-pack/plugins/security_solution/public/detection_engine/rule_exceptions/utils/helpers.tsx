@@ -9,6 +9,7 @@ import React from 'react';
 import type { EuiCommentProps } from '@elastic/eui';
 import { EuiText, EuiAvatar } from '@elastic/eui';
 import { capitalize, omit } from 'lodash';
+import type { Moment } from 'moment';
 import moment from 'moment';
 
 import type {
@@ -153,9 +154,10 @@ export const prepareExceptionItemsForBulkClose = (
       return {
         ...item,
         entries: newEntries,
+        comments: [], // Strips out unneeded comments attribute for bulk close as they are not needed and are throwing type errors
       };
     } else {
-      return item;
+      return { ...item, comments: [] };
     }
   });
 };
@@ -173,6 +175,23 @@ export const enrichNewExceptionItemsWithComments = (
     return {
       ...item,
       comments,
+    };
+  });
+};
+
+/**
+ * Adds expireTime to all new exceptionItems if not present already
+ * @param exceptionItems new or existing ExceptionItem[]
+ * @param expireTime new expireTime
+ */
+export const enrichNewExceptionItemsWithExpireTime = (
+  exceptionItems: ExceptionsBuilderReturnExceptionItem[],
+  expireTime: Moment
+): ExceptionsBuilderReturnExceptionItem[] => {
+  return exceptionItems.map((item: ExceptionsBuilderReturnExceptionItem) => {
+    return {
+      ...item,
+      expire_time: expireTime.toISOString(),
     };
   });
 };
