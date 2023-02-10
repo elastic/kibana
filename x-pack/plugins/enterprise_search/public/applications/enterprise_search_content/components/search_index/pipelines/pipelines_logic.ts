@@ -77,7 +77,7 @@ type PipelinesActions = Pick<
     AttachMlInferencePipelineResponse
   >['apiSuccess'];
   closeAddMlInferencePipelineModal: () => void;
-  closeModal: () => void;
+  closePipelineSettings: () => void;
   createCustomPipeline: Actions<
     CreateCustomPipelineApiLogicArgs,
     CreateCustomPipelineApiLogicResponse
@@ -132,7 +132,7 @@ type PipelinesActions = Pick<
   fetchMlInferenceProcessors: typeof FetchMlInferencePipelineProcessorsApiLogic.actions.makeRequest;
   fetchMlInferenceProcessorsApiError: (error: HttpError) => HttpError;
   openAddMlInferencePipelineModal: () => void;
-  openModal: () => void;
+  openPipelineSettings: () => void;
   savePipeline: () => void;
   setPipelineState(pipeline: IngestPipelineParams): {
     pipeline: IngestPipelineParams;
@@ -152,15 +152,15 @@ interface PipelinesValues {
   pipelineName: string;
   pipelineState: IngestPipelineParams;
   showAddMlInferencePipelineModal: boolean;
-  showModal: boolean;
+  showPipelineSettings: boolean;
 }
 
 export const PipelinesLogic = kea<MakeLogicType<PipelinesValues, PipelinesActions>>({
   actions: {
     closeAddMlInferencePipelineModal: true,
-    closeModal: true,
+    closePipelineSettings: true,
     openAddMlInferencePipelineModal: true,
-    openModal: true,
+    openPipelineSettings: true,
     savePipeline: true,
     setPipelineState: (pipeline: IngestPipelineParams) => ({ pipeline }),
   },
@@ -241,7 +241,7 @@ export const PipelinesLogic = kea<MakeLogicType<PipelinesValues, PipelinesAction
       // Needed to ensure correct JSON is available in the JSON configurations tab
       actions.fetchCustomPipeline({ indexName: values.index.name });
     },
-    closeModal: () =>
+    closePipelineSettings: () =>
       actions.setPipelineState(
         isConnectorIndex(values.index) || isCrawlerIndex(values.index)
           ? values.index.connector?.pipeline ?? values.defaultPipelineValues
@@ -297,7 +297,7 @@ export const PipelinesLogic = kea<MakeLogicType<PipelinesValues, PipelinesAction
       actions.fetchCustomPipeline({ indexName: values.index.name });
     },
     fetchIndexApiSuccess: (index) => {
-      if (!values.showModal) {
+      if (!values.showPipelineSettings) {
         // Don't do this when the modal is open to avoid overwriting the values while editing
         const pipeline =
           isConnectorIndex(index) || isCrawlerIndex(index)
@@ -306,7 +306,7 @@ export const PipelinesLogic = kea<MakeLogicType<PipelinesValues, PipelinesAction
         actions.setPipelineState(pipeline ?? values.defaultPipelineValues);
       }
     },
-    openModal: () => {
+    openPipelineSettings: () => {
       const pipeline =
         isCrawlerIndex(values.index) || isConnectorIndex(values.index)
           ? values.index.connector?.pipeline
@@ -341,12 +341,12 @@ export const PipelinesLogic = kea<MakeLogicType<PipelinesValues, PipelinesAction
         openAddMlInferencePipelineModal: () => true,
       },
     ],
-    showModal: [
+    showPipelineSettings: [
       false,
       {
         apiSuccess: () => false,
-        closeModal: () => false,
-        openModal: () => true,
+        closePipelineSettings: () => false,
+        openPipelineSettings: () => true,
       },
     ],
   }),
