@@ -111,6 +111,7 @@ const ExtraActionsPopOverContent: React.FC<ExtraActionsPopOverContentProps> = ({
           key={action.id}
           icon={action.getIconType(actionContext)}
           aria-label={action.getDisplayName(actionContext)}
+          data-test-subj={`actionItem-${action.id}`}
           onClick={() => {
             closePopOver();
             action.execute(actionContext);

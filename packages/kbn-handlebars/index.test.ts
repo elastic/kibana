@@ -506,12 +506,13 @@ describe('blocks', () => {
     it('should call multiple decorators in the same program body in the expected order and get the expected output', () => {
       let decoratorCall = 0;
       let progCall = 0;
-      expectTemplate('{{*decorator}}con{{*decorator}}tent')
-        .beforeRender(() => {
+      expectTemplate('{{*decorator}}con{{*decorator}}tent', {
+        beforeRender() {
           // ensure the counters are reset between EVAL/AST render calls
           decoratorCall = 0;
           progCall = 0;
-        })
+        },
+      })
         .withInput({
           decoratorCall: 0,
           progCall: 0,
