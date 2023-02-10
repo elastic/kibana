@@ -469,6 +469,36 @@ describe('parseAndVerifyDataStreams', () => {
       "Invalid manifest for data stream 'stream1': one or more fields missing of 'title', 'type'"
     );
   });
+
+  it('should parse valid data stream', async () => {
+    expect(
+      parseAndVerifyDataStreams({
+        paths: ['input-only-0.1.0/data_stream/stream1/manifest.yml'],
+        pkgName: 'input-only',
+        pkgVersion: '0.1.0',
+        manifests: {
+          'input-only-0.1.0/data_stream/stream1/manifest.yml': Buffer.from(
+            `
+          title: Custom Logs
+          type: logs
+          dataset: ds
+          version: 0.1.0`,
+            'utf8'
+          ),
+        },
+      })
+    ).toEqual([
+      {
+        dataset: 'ds',
+        elasticsearch: {},
+        package: 'input-only',
+        path: 'stream1',
+        release: 'ga',
+        title: 'Custom Logs',
+        type: 'logs',
+      },
+    ]);
+  });
 });
 
 describe('parseAndVerifyStreams', () => {
@@ -486,6 +516,40 @@ describe('parseAndVerifyStreams', () => {
       'Invalid manifest for data stream input-only-0.1.0/data_stream/stream1: stream is missing one or more fields of: input, title'
     );
   });
+
+  it('should parse a valid stream', async () => {
+    expect(
+      parseAndVerifyStreams(
+        [
+          {
+            title: 'stream',
+            input: 'logs',
+            description: 'desc',
+            vars: [
+              {
+                name: 'var1',
+                type: 'string',
+              },
+            ],
+          },
+        ],
+        'input-only-0.1.0/data_stream/stream1'
+      )
+    ).toEqual([
+      {
+        title: 'stream',
+        input: 'logs',
+        description: 'desc',
+        template_path: 'stream.yml.hbs',
+        vars: [
+          {
+            name: 'var1',
+            type: 'string',
+          },
+        ],
+      },
+    ]);
+  });
 });
 
 describe('parseAndVerifyVars', () => {
@@ -502,6 +566,27 @@ describe('parseAndVerifyVars', () => {
     ).toThrowError(
       'Invalid var definition for input-only-0.1.0/data_stream/stream1/var1: one of mandatory fields \'name\' and \'type\' missing in var: {"name":"var1"}'
     );
+  });
+
+  it('should parse valid vars', () => {
+    expect(
+      parseAndVerifyVars(
+        [
+          {
+            name: 'var1',
+            type: 'string',
+            title: 'Var',
+          },
+        ],
+        'input-only-0.1.0/data_stream/stream1/var1'
+      )
+    ).toEqual([
+      {
+        name: 'var1',
+        type: 'string',
+        title: 'Var',
+      },
+    ]);
   });
 });
 
@@ -536,6 +621,26 @@ describe('parseAndVerifyInputs', () => {
     ).toThrowError(
       'Invalid top-level manifest: one of mandatory fields \'type\', \'title\' missing in input: {"type":"logs"}'
     );
+  });
+
+  it('should return valid input', () => {
+    expect(
+      parseAndVerifyInputs(
+        [
+          {
+            type: 'logs',
+            title: 'title',
+            vars: [
+              {
+                name: 'var1',
+                type: 'string',
+              },
+            ],
+          },
+        ],
+        ''
+      )
+    ).toEqual([{ title: 'title', type: 'logs', vars: [{ name: 'var1', type: 'string' }] }]);
   });
 });
 
