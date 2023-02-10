@@ -56,6 +56,7 @@ import {
   getServiceGroupFieldsAgg,
 } from '../get_service_group_fields';
 import { transactionDurationParamsSchema } from '../../../../../common/rules/schema';
+import { getIntervalLabel } from '../../../../../common/rules/get_interval_label';
 
 const ruleTypeConfig = RULE_TYPES_CONFIG[ApmRuleType.TransactionDuration];
 
@@ -272,7 +273,10 @@ export function registerTransactionDurationRuleType({
           .scheduleActions(ruleTypeConfig.defaultActionGroupId, {
             alertDetailsUrl,
             environment: environmentLabel,
-            interval: `${ruleParams.windowSize}${ruleParams.windowUnit}`,
+            interval: getIntervalLabel(
+              ruleParams.windowSize,
+              ruleParams.windowUnit
+            ),
             reason,
             serviceName,
             threshold: ruleParams.threshold,

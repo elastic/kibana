@@ -9,7 +9,7 @@ import { AggregationType, ApmRuleType } from '@kbn/apm-plugin/common/rules/apm_r
 import { apm, timerange } from '@kbn/apm-synthtrace-client';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { waitForActiveAlert } from '../../common/utils/wait_for_active_alert';
-import { createAlertingRule } from '../alerts/alerting_api_helper';
+import { createApmRule } from '../alerts/alerting_api_helper';
 
 export default function ServiceAlerts({ getService }: FtrProviderContext) {
   const registry = getService('registry');
@@ -44,7 +44,7 @@ export default function ServiceAlerts({ getService }: FtrProviderContext) {
   }
 
   function createRule() {
-    return createAlertingRule({
+    return createApmRule({
       supertest,
       name: `Latency threshold | ${goService}`,
       params: {

@@ -8,7 +8,7 @@ import { AggregationType, ApmRuleType } from '@kbn/apm-plugin/common/rules/apm_r
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
 import { waitForActiveAlert } from '../../../common/utils/wait_for_active_alert';
-import { createAlertingRule } from '../../alerts/alerting_api_helper';
+import { createApmRule } from '../../alerts/alerting_api_helper';
 import {
   createServiceGroupApi,
   deleteAllServiceGroups,
@@ -28,7 +28,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   const end = Date.now();
 
   function createRule() {
-    return createAlertingRule({
+    return createApmRule({
       supertest,
       name: 'Latency threshold | synth-go',
       params: {

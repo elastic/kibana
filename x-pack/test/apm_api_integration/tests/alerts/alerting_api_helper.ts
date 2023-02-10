@@ -8,6 +8,9 @@
 import type { SuperTest, Test } from 'supertest';
 import { ApmRuleType } from '@kbn/apm-plugin/common/rules/apm_rule_types';
 import { ApmRuleParamsType } from '@kbn/apm-plugin/common/rules/schema';
+import { ApmApiClient } from '../../common/config';
+import { ApmDocumentType } from '../../../../plugins/apm/common/document_type';
+import { RollupInterval } from '../../../../plugins/apm/common/rollup';
 
 export async function createIndexConnector({
   supertest,
@@ -18,7 +21,7 @@ export async function createIndexConnector({
   name: string;
   indexName: string;
 }) {
-  const { body: createdAction } = await supertest
+  const { body } = await supertest
     .post(`/api/actions/connector`)
     .set('kbn-xsrf', 'foo')
     .send({
@@ -29,10 +32,10 @@ export async function createIndexConnector({
       },
       connector_type_id: '.index',
     });
-  return createdAction.id as string;
+  return body.id as string;
 }
 
-export async function createAlertingRule<T extends ApmRuleType>({
+export async function createApmRule<T extends ApmRuleType>({
   supertest,
   name,
   ruleTypeId,
@@ -45,7 +48,7 @@ export async function createAlertingRule<T extends ApmRuleType>({
   params: ApmRuleParamsType[T];
   actions?: any[];
 }) {
-  const { body: createdRule } = await supertest
+  const { body } = await supertest
     .post(`/api/alerting/rule`)
     .set('kbn-xsrf', 'foo')
     .send({
@@ -59,5 +62,56 @@ export async function createAlertingRule<T extends ApmRuleType>({
       rule_type_id: ruleTypeId,
       actions,
     });
-  return createdRule;
+  return body;
+}
+
+function getTimerange() {
+  return {
+    start: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString(),
+    end: new Date(Date.now() + 5 * 60 * 1000).toISOString(),
+  };
+}
+
+export async function fetchServiceInventoryAlertCounts(apmApiClient: ApmApiClient) {
+  const timerange = getTimerange();
+  const serviceInventoryResponse = await apmApiClient.readUser({
+    endpoint: 'GET /internal/apm/services',
+    params: {
+      query: {
+        ...timerange,
+        environment: 'ENVIRONMENT_ALL',
+        kuery: '',
+        probability: 1,
+        documentType: ApmDocumentType.ServiceTransactionMetric,
+        rollupInterval: RollupInterval.SixtyMinutes,
+      },
+    },
+  });
+  return serviceInventoryResponse.body.items.reduce<Record<string, number>>((acc, item) => {
+    return { ...acc, [item.serviceName]: item.alertsCount ?? 0 };
+  }, {});
+}
+
+export async function fetchServiceTabAlertCount({
+  apmApiClient,
+  serviceName,
+}: {
+  apmApiClient: ApmApiClient;
+  serviceName: string;
+}) {
+  const timerange = getTimerange();
+  const alertsCountReponse = await apmApiClient.readUser({
+    endpoint: 'GET /internal/apm/services/{serviceName}/alerts_count',
+    params: {
+      path: {
+        serviceName: serviceName,
+      },
+      query: {
+        ...timerange,
+        environment: 'ENVIRONMENT_ALL',
+      },
+    },
+  });
+
+  return alertsCountReponse.body.alertsCount;
 }

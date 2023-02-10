@@ -12,7 +12,7 @@ import { range } from 'lodash';
 import { ANOMALY_SEVERITY } from '@kbn/apm-plugin/common/ml_constants';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { createAndRunApmMlJobs } from '../../common/utils/create_and_run_apm_ml_jobs';
-import { createAlertingRule } from './alerting_api_helper';
+import { createApmRule } from './alerting_api_helper';
 import { waitForRuleStatus } from './wait_for_rule_status';
 
 export default function ApiTest({ getService }: FtrProviderContext) {
@@ -83,7 +83,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         });
 
         it('checks if alert is active', async () => {
-          const createdRule = await createAlertingRule({
+          const createdRule = await createApmRule({
             supertest,
             name: 'Latency anomaly | service-a',
             params: {
