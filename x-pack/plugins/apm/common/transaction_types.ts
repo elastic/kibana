@@ -5,6 +5,14 @@
  * 2.0.
  */
 
+import { isRumAgentName, isMobileAgentName } from './agent_name';
+
 export const TRANSACTION_PAGE_LOAD = 'page-load';
 export const TRANSACTION_REQUEST = 'request';
-export const TRANSACTION_ROUTE_CHANGE = 'route-change';
+export const TRANSACTION_MOBILE = 'mobile';
+
+export const defaultTransactionTypes = [
+  TRANSACTION_REQUEST,
+  TRANSACTION_PAGE_LOAD,
+  TRANSACTION_MOBILE,
+];
