@@ -3861,10 +3861,6 @@
   version "0.0.0"
   uid ""
 
-"@kbn/dashboard-embeddable-examples-plugin@link:examples/dashboard_embeddable_examples":
-  version "0.0.0"
-  uid ""
-
 "@kbn/dashboard-enhanced-plugin@link:x-pack/plugins/dashboard_enhanced":
   version "0.0.0"
   uid ""
@@ -4618,6 +4614,10 @@
   uid ""
 
 "@kbn/plugin-helpers@link:packages/kbn-plugin-helpers":
+  version "0.0.0"
+  uid ""
+
+"@kbn/portable-dashboards-example@link:examples/portable_dashboards_example":
   version "0.0.0"
   uid ""
 
@@ -5386,6 +5386,10 @@
   uid ""
 
 "@kbn/ux-plugin@link:x-pack/plugins/ux":
+  version "0.0.0"
+  uid ""
+
+"@kbn/validate-next-docs-cli@link:packages/kbn-validate-next-docs-cli":
   version "0.0.0"
   uid ""
 

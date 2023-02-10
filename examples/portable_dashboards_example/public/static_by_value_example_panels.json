@@ -1,0 +1,335 @@
+{
+  "a514e5f6-1d0d-4fe9-85a9-f7ba40665033": {
+    "type": "visualization",
+    "gridData": {
+      "x": 0,
+      "y": 0,
+      "w": 28,
+      "h": 10,
+      "i": "a514e5f6-1d0d-4fe9-85a9-f7ba40665033"
+    },
+    "explicitInput": {
+      "id": "a514e5f6-1d0d-4fe9-85a9-f7ba40665033",
+      "savedVis": {
+        "id": "",
+        "title": "",
+        "description": "",
+        "type": "markdown",
+        "params": {
+          "fontSize": 12,
+          "openLinksInNewTab": false,
+          "markdown": "### By Value Dashboard\nThis dashboard is currently being loaded using some pre-configured JSON for the panels. This isn't ideal, and there are plans to improve the way that by-value embedded dashboards are handled - specifically, we want to add the ability to create a by-value dashboard input as part of the `getCreationOptions` callback.\n\nThat being said, we currently recommend by-reference dashboards until this process can be improved. "
+        },
+        "uiState": {},
+        "data": {
+          "aggs": [],
+          "searchSource": {
+            "query": {
+              "query": "",
+              "language": "kuery"
+            },
+            "filter": []
+          }
+        }
+      },
+      "enhancements": {}
+    }
+  },
+  "b06b849e-f4fd-423c-a582-5c4bfec812c9": {
+    "type": "lens",
+    "gridData": {
+      "x": 30,
+      "y": 0,
+      "w": 20,
+      "h": 21,
+      "i": "b06b849e-f4fd-423c-a582-5c4bfec812c9"
+    },
+    "explicitInput": {
+      "id": "b06b849e-f4fd-423c-a582-5c4bfec812c9",
+      "title": "Destinations",
+      "attributes": {
+        "title": "",
+        "visualizationType": "lnsPie",
+        "type": "lens",
+        "references": [
+          {
+            "type": "index-pattern",
+            "id": "90943e30-9a47-11e8-b64d-95841ca0b247",
+            "name": "indexpattern-datasource-layer-40169fc7-829a-4158-b280-b2e058a980c0"
+          }
+        ],
+        "state": {
+          "visualization": {
+            "shape": "donut",
+            "layers": [
+              {
+                "layerId": "40169fc7-829a-4158-b280-b2e058a980c0",
+                "primaryGroups": ["5cb6a35a-6ae5-4463-b3b2-639d04824cc2"],
+                "metrics": ["7f731486-71f2-40d9-8069-ef3fdb5ed2e7"],
+                "numberDisplay": "percent",
+                "categoryDisplay": "default",
+                "legendDisplay": "default",
+                "nestedLegend": false,
+                "layerType": "data"
+              }
+            ]
+          },
+          "query": {
+            "query": "",
+            "language": "kuery"
+          },
+          "filters": [],
+          "datasourceStates": {
+            "formBased": {
+              "layers": {
+                "40169fc7-829a-4158-b280-b2e058a980c0": {
+                  "columns": {
+                    "5cb6a35a-6ae5-4463-b3b2-639d04824cc2": {
+                      "label": "Top 5 values of geo.dest",
+                      "dataType": "string",
+                      "operationType": "terms",
+                      "scale": "ordinal",
+                      "sourceField": "geo.dest",
+                      "isBucketed": true,
+                      "params": {
+                        "size": 5,
+                        "orderBy": {
+                          "type": "column",
+                          "columnId": "7f731486-71f2-40d9-8069-ef3fdb5ed2e7"
+                        },
+                        "orderDirection": "desc",
+                        "otherBucket": true,
+                        "missingBucket": false,
+                        "parentFormat": {
+                          "id": "terms"
+                        },
+                        "include": [],
+                        "exclude": [],
+                        "includeIsRegex": false,
+                        "excludeIsRegex": false
+                      }
+                    },
+                    "7f731486-71f2-40d9-8069-ef3fdb5ed2e7": {
+                      "label": "Count of records",
+                      "dataType": "number",
+                      "operationType": "count",
+                      "isBucketed": false,
+                      "scale": "ratio",
+                      "sourceField": "___records___",
+                      "params": {
+                        "emptyAsNull": true
+                      }
+                    }
+                  },
+                  "columnOrder": [
+                    "5cb6a35a-6ae5-4463-b3b2-639d04824cc2",
+                    "7f731486-71f2-40d9-8069-ef3fdb5ed2e7"
+                  ],
+                  "incompleteColumns": {},
+                  "sampling": 1
+                }
+              }
+            },
+            "textBased": {
+              "layers": {}
+            }
+          },
+          "internalReferences": [],
+          "adHocDataViews": {}
+        }
+      },
+      "hidePanelTitles": false,
+      "enhancements": {}
+    }
+  },
+  "a4121cab-b6f2-4de3-af71-ec9b5a6f0a2a": {
+    "type": "lens",
+    "gridData": {
+      "x": 0,
+      "y": 9,
+      "w": 28,
+      "h": 11,
+      "i": "a4121cab-b6f2-4de3-af71-ec9b5a6f0a2a"
+    },
+    "explicitInput": {
+      "id": "a4121cab-b6f2-4de3-af71-ec9b5a6f0a2a",
+      "enhancements": {},
+      "attributes": {
+        "visualizationType": "lnsXY",
+        "state": {
+          "datasourceStates": {
+            "formBased": {
+              "layers": {
+                "7d9a32b1-8cc2-410c-83a5-2eb66a3f0321": {
+                  "columnOrder": [
+                    "a8511a62-2b78-4ba4-9425-a417df6e059f",
+                    "b5f3dc78-dba8-4db8-87b6-24a0b9cca260",
+                    "b5f3dc78-dba8-4db8-87b6-24a0b9cca260X0",
+                    "b5f3dc78-dba8-4db8-87b6-24a0b9cca260X1",
+                    "b5f3dc78-dba8-4db8-87b6-24a0b9cca260X2",
+                    "b5f3dc78-dba8-4db8-87b6-24a0b9cca260X3"
+                  ],
+                  "columns": {
+                    "a8511a62-2b78-4ba4-9425-a417df6e059f": {
+                      "dataType": "number",
+                      "isBucketed": true,
+                      "label": "bytes",
+                      "operationType": "range",
+                      "params": {
+                        "maxBars": "auto",
+                        "ranges": [
+                          {
+                            "from": 0,
+                            "label": "",
+                            "to": 1000
+                          }
+                        ],
+                        "type": "histogram"
+                      },
+                      "scale": "interval",
+                      "sourceField": "bytes"
+                    },
+                    "b5f3dc78-dba8-4db8-87b6-24a0b9cca260": {
+                      "customLabel": true,
+                      "dataType": "number",
+                      "isBucketed": false,
+                      "label": "% of visits",
+                      "operationType": "formula",
+                      "params": {
+                        "format": {
+                          "id": "percent",
+                          "params": {
+                            "decimals": 1
+                          }
+                        },
+                        "formula": "count() / overall_sum(count())",
+                        "isFormulaBroken": false
+                      },
+                      "references": ["b5f3dc78-dba8-4db8-87b6-24a0b9cca260X3"],
+                      "scale": "ratio"
+                    },
+                    "b5f3dc78-dba8-4db8-87b6-24a0b9cca260X0": {
+                      "customLabel": true,
+                      "dataType": "number",
+                      "isBucketed": false,
+                      "label": "Part of count() / overall_sum(count())",
+                      "operationType": "count",
+                      "scale": "ratio",
+                      "sourceField": "___records___"
+                    },
+                    "b5f3dc78-dba8-4db8-87b6-24a0b9cca260X1": {
+                      "customLabel": true,
+                      "dataType": "number",
+                      "isBucketed": false,
+                      "label": "Part of count() / overall_sum(count())",
+                      "operationType": "count",
+                      "scale": "ratio",
+                      "sourceField": "___records___"
+                    },
+                    "b5f3dc78-dba8-4db8-87b6-24a0b9cca260X2": {
+                      "customLabel": true,
+                      "dataType": "number",
+                      "isBucketed": false,
+                      "label": "Part of count() / overall_sum(count())",
+                      "operationType": "overall_sum",
+                      "references": ["b5f3dc78-dba8-4db8-87b6-24a0b9cca260X1"],
+                      "scale": "ratio"
+                    },
+                    "b5f3dc78-dba8-4db8-87b6-24a0b9cca260X3": {
+                      "customLabel": true,
+                      "dataType": "number",
+                      "isBucketed": false,
+                      "label": "Part of count() / overall_sum(count())",
+                      "operationType": "math",
+                      "params": {
+                        "tinymathAst": {
+                          "args": [
+                            "b5f3dc78-dba8-4db8-87b6-24a0b9cca260X0",
+                            "b5f3dc78-dba8-4db8-87b6-24a0b9cca260X2"
+                          ],
+                          "location": {
+                            "max": 30,
+                            "min": 0
+                          },
+                          "name": "divide",
+                          "text": "count() / overall_sum(count())",
+                          "type": "function"
+                        }
+                      },
+                      "references": [
+                        "b5f3dc78-dba8-4db8-87b6-24a0b9cca260X0",
+                        "b5f3dc78-dba8-4db8-87b6-24a0b9cca260X2"
+                      ],
+                      "scale": "ratio"
+                    }
+                  },
+                  "incompleteColumns": {}
+                }
+              }
+            }
+          },
+          "filters": [],
+          "query": {
+            "language": "kuery",
+            "query": ""
+          },
+          "visualization": {
+            "axisTitlesVisibilitySettings": {
+              "x": false,
+              "yLeft": false,
+              "yRight": true
+            },
+            "fittingFunction": "None",
+            "gridlinesVisibilitySettings": {
+              "x": true,
+              "yLeft": true,
+              "yRight": true
+            },
+            "layers": [
+              {
+                "accessors": ["b5f3dc78-dba8-4db8-87b6-24a0b9cca260"],
+                "layerId": "7d9a32b1-8cc2-410c-83a5-2eb66a3f0321",
+                "position": "top",
+                "seriesType": "bar_stacked",
+                "showGridlines": false,
+                "xAccessor": "a8511a62-2b78-4ba4-9425-a417df6e059f",
+                "layerType": "data"
+              }
+            ],
+            "legend": {
+              "isVisible": true,
+              "position": "right",
+              "legendSize": "auto"
+            },
+            "preferredSeriesType": "bar_stacked",
+            "tickLabelsVisibilitySettings": {
+              "x": true,
+              "yLeft": true,
+              "yRight": true
+            },
+            "valueLabels": "hide",
+            "yLeftExtent": {
+              "mode": "full"
+            },
+            "yRightExtent": {
+              "mode": "full"
+            }
+          }
+        },
+        "references": [
+          {
+            "id": "90943e30-9a47-11e8-b64d-95841ca0b247",
+            "name": "indexpattern-datasource-current-indexpattern",
+            "type": "index-pattern"
+          },
+          {
+            "id": "90943e30-9a47-11e8-b64d-95841ca0b247",
+            "name": "indexpattern-datasource-layer-7d9a32b1-8cc2-410c-83a5-2eb66a3f0321",
+            "type": "index-pattern"
+          }
+        ]
+      },
+      "title": "[Logs] Bytes distribution"
+    }
+  }
+}
