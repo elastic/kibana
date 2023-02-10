@@ -815,6 +815,35 @@ describe('DocumentMigrator', () => {
         ]);
       });
 
+      it('does not fail when encountering documents with coreMigrationVersion higher than the latest known', () => {
+        const migrator = new DocumentMigrator({
+          ...testOpts(),
+          typeRegistry: createRegistry(
+            { name: 'dog', namespaceType: 'multiple', convertToMultiNamespaceTypeVersion: '1.0.0' }
+            // no migration transforms are defined, the migrationVersion will be derived from 'convertToMultiNamespaceTypeVersion'
+          ),
+        });
+        migrator.prepareMigrations();
+        const obj = {
+          id: 'mischievous',
+          type: 'dog',
+          attributes: { name: 'Ann' },
+          migrationVersion: { dog: '0.1.0' },
+          coreMigrationVersion: '2.0.0',
+        } as SavedObjectUnsanitizedDoc;
+        const actual = migrator.migrateAndConvert(obj);
+        expect(actual).toEqual([
+          {
+            id: 'mischievous',
+            type: 'dog',
+            attributes: { name: 'Ann' },
+            migrationVersion: { dog: '1.0.0' },
+            coreMigrationVersion: '2.0.0',
+            namespaces: ['default'],
+          },
+        ]);
+      });
+
       it('skips reference transforms and conversion transforms when using `migrate`', () => {
         const migrator = new DocumentMigrator({
           ...testOpts(),
