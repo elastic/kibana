@@ -8,9 +8,9 @@
 import type { SuperTest, Test } from 'supertest';
 import { ApmRuleType } from '@kbn/apm-plugin/common/rules/apm_rule_types';
 import { ApmRuleParamsType } from '@kbn/apm-plugin/common/rules/schema';
+import { ApmDocumentType } from '@kbn/apm-plugin/common/document_type';
+import { RollupInterval } from '@kbn/apm-plugin/common/rollup';
 import { ApmApiClient } from '../../common/config';
-import { ApmDocumentType } from '../../../../plugins/apm/common/document_type';
-import { RollupInterval } from '../../../../plugins/apm/common/rollup';
 
 export async function createIndexConnector({
   supertest,
@@ -104,7 +104,7 @@ export async function fetchServiceTabAlertCount({
     endpoint: 'GET /internal/apm/services/{serviceName}/alerts_count',
     params: {
       path: {
-        serviceName: serviceName,
+        serviceName,
       },
       query: {
         ...timerange,
