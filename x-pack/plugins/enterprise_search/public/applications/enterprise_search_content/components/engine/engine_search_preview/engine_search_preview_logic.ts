@@ -12,15 +12,20 @@ import { FieldConfiguration, SearchFieldConfiguration } from '@elastic/search-ui
 import { FetchEngineFieldCapabilitiesApiLogic } from '../../../api/engines/fetch_engine_field_capabilities_api_logic';
 import { EngineNameLogic } from '../engine_name_logic';
 
-// interface EngineSearchPreviewActions {}
+interface EngineSearchPreviewActions {
+  fetchEngineFieldCapabilities: typeof FetchEngineFieldCapabilitiesApiLogic.actions.makeRequest;
+}
 
-export interface EngineSearchPreviewLogicValues {
+export interface EngineSearchPreviewValues {
+  engineFieldCapabilitiesData: typeof FetchEngineFieldCapabilitiesApiLogic.values.data;
+  engineName: typeof EngineNameLogic.values.engineName;
   resultFields: Record<string, FieldConfiguration>;
   searchableFields: Record<string, SearchFieldConfiguration>;
 }
 
-export const EngineSearchPreviewLogic = kea<MakeLogicType<EngineSearchPreviewLogicValues, {}>>({
-  actions: {},
+export const EngineSearchPreviewLogic = kea<
+  MakeLogicType<EngineSearchPreviewValues, EngineSearchPreviewActions>
+>({
   connect: {
     actions: [
       FetchEngineFieldCapabilitiesApiLogic,
@@ -30,7 +35,7 @@ export const EngineSearchPreviewLogic = kea<MakeLogicType<EngineSearchPreviewLog
       EngineNameLogic,
       ['engineName'],
       FetchEngineFieldCapabilitiesApiLogic,
-      ['data as engineFieldCapabilitiesData', 'status as engineFieldCapabilitiesStatus'],
+      ['data as engineFieldCapabilitiesData'],
     ],
   },
   events: ({ actions, values }) => ({
@@ -42,7 +47,6 @@ export const EngineSearchPreviewLogic = kea<MakeLogicType<EngineSearchPreviewLog
       }
     },
   }),
-  // listeners: ({ actions }) => ({}),
   path: ['enterprise_search', 'content', 'engine_search_preview_logic'],
   selectors: ({ selectors }) => ({
     resultFields: [
@@ -63,6 +67,24 @@ export const EngineSearchPreviewLogic = kea<MakeLogicType<EngineSearchPreviewLog
         return resultFields;
       },
     ],
-    searchableFields: [() => [selectors.engineFieldCapabilitiesData], () => ({})],
+    searchableFields: [
+      () => [selectors.engineFieldCapabilitiesData],
+      (data) => {
+        if (!data) return {};
+
+        const searchableFields = Object.fromEntries(
+          Object.entries(data.field_capabilities.fields)
+            .filter(([, mappings]) =>
+              Object.entries(mappings).some(
+                ([type, { metadata_field: isMeta, searchable: isSearchable }]) =>
+                  type === 'text' && !isMeta && isSearchable
+              )
+            )
+            .map(([key]) => [key, { weight: 1 }])
+        );
+
+        return searchableFields;
+      },
+    ],
   }),
 });
