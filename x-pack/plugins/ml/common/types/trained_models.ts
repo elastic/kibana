@@ -9,6 +9,7 @@ import type { DataFrameAnalyticsConfig } from './data_frame_analytics';
 import type { FeatureImportanceBaseline, TotalFeatureImportance } from './feature_importance';
 import type { XOR } from './common';
 import type { DeploymentState, TrainedModelType } from '../constants/trained_models';
+import type { MlSavedObjectType } from './saved_objects';
 
 export interface IngestStats {
   count: number;
@@ -235,4 +236,48 @@ export interface NodeDeploymentStatsResponse {
 export interface NodesOverviewResponse {
   _nodes: { total: number; failed: number; successful: number };
   nodes: NodeDeploymentStatsResponse[];
+}
+
+export interface MemoryUsageInfo {
+  id: string;
+  type: MlSavedObjectType;
+  size: number;
+  nodeNames: string[];
+}
+
+export interface MemoryStatsResponse {
+  _nodes: { total: number; failed: number; successful: number };
+  cluster_name: string;
+  nodes: Record<
+    string,
+    {
+      jvm: {
+        heap_max_in_bytes: number;
+        java_inference_in_bytes: number;
+        java_inference_max_in_bytes: number;
+      };
+      mem: {
+        adjusted_total_in_bytes: number;
+        total_in_bytes: number;
+        ml: {
+          data_frame_analytics_in_bytes: number;
+          native_code_overhead_in_bytes: number;
+          max_in_bytes: number;
+          anomaly_detectors_in_bytes: number;
+          native_inference_in_bytes: number;
+        };
+      };
+      transport_address: string;
+      roles: string[];
+      name: string;
+      attributes: Record<`${'ml.'}${string}`, string>;
+      ephemeral_id: string;
+    }
+  >;
+}
+
+// @ts-expect-error TrainedModelDeploymentStatsResponse missing properties from MlTrainedModelDeploymentStats
+export interface TrainedModelStatsResponse extends estypes.MlTrainedModelStats {
+  deployment_stats?: Omit<TrainedModelDeploymentStatsResponse, 'model_id'>;
+  model_size_stats?: TrainedModelModelSizeStats;
 }
