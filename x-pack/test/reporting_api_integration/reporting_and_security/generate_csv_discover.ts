@@ -12,6 +12,8 @@ import { FtrProviderContext } from '../ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
 export default function ({ getService }: FtrProviderContext) {
+  const log = getService('log');
+  const kibanaServer = getService('kibanaServer');
   const reportingAPI = getService('reportingAPI');
   const esVersion = getService('esVersion');
 
@@ -20,6 +22,11 @@ export default function ({ getService }: FtrProviderContext) {
 
     before(async () => {
       await reportingAPI.initEcommerce();
+
+      log.info(`updating Advanced Settings`);
+      await kibanaServer.uiSettings.update({
+        'csv:quoteValues': true,
+      });
 
       const fromTime = '2019-06-20T00:00:00.000Z';
       const toTime = '2019-06-24T00:00:00.000Z';
