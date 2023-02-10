@@ -128,10 +128,12 @@ journey('Overview Search', async ({ page, params }) => {
         delay: 300,
       });
       await page.waitForSelector(`text=${gmailJourney}`);
-      expect(await elastic.count()).toBe(0);
-      expect(await cnn.count()).toBe(0);
-      expect(await google.count()).toBe(0);
-      expect(await gmail.count()).toBe(1);
+      await retry.try(async () => {
+        expect(await elastic.count()).toBe(0);
+        expect(await cnn.count()).toBe(0);
+        expect(await google.count()).toBe(0);
+        expect(await gmail.count()).toBe(1);
+      });
       await page.click('[aria-label="Clear input"]');
       await page.type('[data-test-subj="syntheticsOverviewSearchInput"]', 'tag', {
         delay: 300,
