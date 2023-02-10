@@ -10,7 +10,6 @@ import execa from 'execa';
 import { find } from 'lodash';
 import { ToolingLog } from '@kbn/tooling-log';
 import axios from 'axios';
-import { ChildProcess } from 'child_process';
 import { agentRouteService, enrollmentAPIKeyRouteService } from '@kbn/fleet-plugin/common';
 import { indexFleetEndpointPolicy } from '@kbn/security-solution-plugin/common/endpoint/data_loaders/index_fleet_endpoint_policy';
 import { KbnClient } from '@kbn/test';
@@ -29,8 +28,7 @@ export interface AgentManagerParams {
 export class AgentManager extends Manager {
   private params: AgentManagerParams;
   private log: ToolingLog;
-  private agentProcess?: ChildProcess;
-  private vmName: string;
+  private vmName?: string;
   private kbnClient: KbnClient;
   private agentPolicyId?: string;
   constructor(params: AgentManagerParams, log: ToolingLog, kbnClient: KbnClient) {
@@ -38,7 +36,7 @@ export class AgentManager extends Manager {
     this.log = log;
     this.params = params;
     this.agentPolicyId = undefined;
-    this.vmName = 'endpoint' + Math.random().toString(36).slice(2);
+    this.vmName = undefined;
     this.kbnClient = kbnClient;
   }
 
@@ -68,6 +66,8 @@ export class AgentManager extends Manager {
     )?.api_key;
 
     const hostIp = find(os.networkInterfaces().en0, { family: 'IPv4' })?.address ?? '0.0.0.0';
+
+    this.vmName = 'endpoint' + Math.random().toString(36).slice(2);
 
     execa.commandSync(`multipass launch --name ${this.vmName}`);
 
@@ -114,17 +114,11 @@ export class AgentManager extends Manager {
 
   protected _cleanup() {
     this.log.info('Cleaning up the agent process');
-    execa.commandSync(`multipass delete ${this.vmName}`);
-    execa.commandSync(`multipass purge`);
-    if (this.agentProcess) {
-      if (!this.agentProcess.kill(9)) {
-        this.log.warning('Unable to kill agent process');
-      }
+    if (this.vmName) {
+      execa.commandSync(`multipass delete ${this.vmName}`);
 
-      this.agentProcess.on('close', () => {
-        this.log.info('Agent process closed');
-      });
-      delete this.agentProcess;
+      this.log.info('Agent process closed');
+      execa.commandSync(`multipass purge`);
     }
     return;
   }

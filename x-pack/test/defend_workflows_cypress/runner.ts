@@ -48,8 +48,8 @@ async function withFleetAgent(
   try {
     await runner({});
   } finally {
-    fleetManager.cleanup();
     agentManager.cleanup();
+    fleetManager.cleanup();
   }
 }
 

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ChildProcess, spawn } from 'child_process';
+import execa from 'execa';
 import { ToolingLog } from '@kbn/tooling-log';
 import { KbnClient } from '@kbn/test';
 import { agentPolicyRouteService, appRoutesService } from '@kbn/fleet-plugin/common';
@@ -25,7 +25,7 @@ export interface AgentManagerParams {
 }
 
 export class FleetManager extends Manager {
-  private fleetProcess?: ChildProcess;
+  private fleetContainerId?: string;
   private config: AgentManagerParams;
   private log: ToolingLog;
   private kbnClient: KbnClient;
@@ -87,10 +87,8 @@ export class FleetManager extends Manager {
           artifact,
         ];
         this.log.info('docker ' + args.join(' '));
-        this.fleetProcess = spawn('docker', args, {
-          stdio: 'inherit',
-        });
-        this.fleetProcess.on('error', rej);
+        const { stdout } = await execa('docker', args);
+        this.fleetContainerId = stdout;
         setTimeout(res, 15000);
       } catch (error) {
         rej(error);
@@ -100,16 +98,13 @@ export class FleetManager extends Manager {
 
   protected _cleanup() {
     this.log.info('Removing old fleet config');
-    if (this.fleetProcess) {
+    if (this.fleetContainerId) {
       this.log.info('Closing fleet process');
-      if (!this.fleetProcess.kill(9)) {
-        this.log.warning('Unable to kill fleet server process');
-      }
 
-      this.fleetProcess.on('close', () => {
-        this.log.info('Fleet server process closed');
-      });
-      delete this.fleetProcess;
+      execa.sync('docker', ['kill', this.fleetContainerId]);
+      this.log.info('Fleet server process closed');
+
+      delete this.fleetContainerId;
     }
   }
 }
