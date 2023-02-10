@@ -141,30 +141,6 @@ export const javaSettings: RawSettingDefinition[] = [
   },
 
   {
-    key: 'mongodb_capture_statement_commands',
-    type: 'boolean',
-    defaultValue: 'false',
-    label: i18n.translate(
-      'xpack.apm.agentConfig.mongodbCaptureStatementCommands.label',
-      {
-        defaultMessage: 'MongoDB capture statement commands',
-      }
-    ),
-    description: i18n.translate(
-      'xpack.apm.agentConfig.mongodbCaptureStatementCommands.description',
-      {
-        defaultMessage:
-          'MongoDB command names for which the command document will be captured, limited to common read-only operations by default. ' +
-          'Set to `""` (empty) to disable capture, and `*` to capture all (which is discouraged as it may lead to sensitive information capture).\n' +
-          '\n' +
-          'This option supports the wildcard `*`, which matches zero or more characters. Examples: `/foo/*/bar/*/baz*`, `*foo*`. ' +
-          'Matching is case insensitive by default. Prepending an element with `(?-i)` makes the matching case sensitive.',
-      }
-    ),
-    includeAgents: ['java'],
-  },
-
-  {
     key: 'span_min_duration',
     type: 'duration',
     defaultValue: '0ms',
