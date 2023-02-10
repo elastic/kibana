@@ -11,7 +11,6 @@ import { USER } from '../../../../functional/services/ml/security_common';
 import { COMMON_REQUEST_HEADERS } from '../../../../functional/services/ml/common_api';
 
 export default ({ getService }: FtrProviderContext) => {
-  const esArchiver = getService('esArchiver');
   const ml = getService('ml');
   const spacesService = getService('spaces');
   const supertest = getService('supertestWithoutAuth');
@@ -42,7 +41,6 @@ export default ({ getService }: FtrProviderContext) => {
 
   describe('POST saved_objects/update_trained_models_spaces', () => {
     before(async () => {
-      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/ihp_outlier');
       await spacesService.create({ id: idSpace1, name: 'space_one', disabledFeatures: [] });
       await spacesService.create({ id: idSpace2, name: 'space_two', disabledFeatures: [] });
 
