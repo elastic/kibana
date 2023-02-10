@@ -28,7 +28,7 @@ export const ResearchConfiguration: React.FC<ResearchConfigurationProps> = ({
           'xpack.enterpriseSearch.content.indices.configurationConnector.researchConfiguration.description',
           {
             defaultMessage:
-              'This connector can be configured to connect to your data source using the supported authentication mechanisms. Consult with your administrator for the correct credentials to use to connect.',
+              'This connector supports several authentication methods. Ask your administrator for the correct connection credentials.',
           }
         )}
       </EuiText>
