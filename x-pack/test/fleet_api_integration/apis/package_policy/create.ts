@@ -455,7 +455,7 @@ export default function (providerContext: FtrProviderContext) {
             policy_id: agentPolicyId,
             package: {
               name: 'integration_to_input',
-              version: '0.9.1',
+              version: '2.0.0',
             },
             name: 'integration_to_input-1',
             description: '',
@@ -486,7 +486,7 @@ export default function (providerContext: FtrProviderContext) {
             policy_id: agentPolicyId,
             package: {
               name: 'integration_to_input',
-              version: '0.9.1',
+              version: '2.0.0',
             },
             name: 'integration_to_input-2',
             description: '',
