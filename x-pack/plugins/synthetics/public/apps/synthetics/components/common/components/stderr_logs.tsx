@@ -36,6 +36,7 @@ export const StdErrorLogs = ({
   title,
   summaryMessage,
   hideTitle = false,
+  pageSize = 5,
 }: {
   monitorId?: string;
   checkGroup?: string;
@@ -43,6 +44,7 @@ export const StdErrorLogs = ({
   title?: string;
   summaryMessage?: string;
   hideTitle?: boolean;
+  pageSize?: number;
 }) => {
   const columns = [
     {
@@ -128,6 +130,9 @@ export const StdErrorLogs = ({
         itemId="id"
         executeQueryOptions={{
           defaultFields: ['@timestamp', 'synthetics.payload.message'],
+        }}
+        pagination={{
+          pageSize,
         }}
       />
     </>

@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { resolve } from 'path';
 import { FtrConfigProviderContext } from '@kbn/test';
 import { services } from './services';
 
@@ -13,7 +12,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const xPackAPITestsConfig = await readConfigFile(require.resolve('../api_integration/config.ts'));
 
   const kibanaPort = xPackAPITestsConfig.get('servers.kibana.port');
-  const idpPath = resolve(__dirname, './fixtures/saml/idp_metadata.xml');
+  const idpPath = require.resolve('@kbn/security-api-integration-helpers/saml/idp_metadata.xml');
 
   return {
     testFiles: [require.resolve('./tests/saml_cloud')],
