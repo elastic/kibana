@@ -38,7 +38,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       // Add it
       await testSubjects.click('trustedAppsListPage-emptyState-addButton');
+      await testSubjects.click('trustedApps-form-nameTextField');
       await testSubjects.setValue('trustedApps-form-nameTextField', 'Windows Defender');
+      await testSubjects.click('trustedApps-form-conditionsBuilder-group1-entry0-value');
       await testSubjects.setValue('trustedApps-form-conditionsBuilder-group1-entry0-value', SHA256);
       await testSubjects.click('trustedAppsListPage-flyout-submitButton');
       expect(
