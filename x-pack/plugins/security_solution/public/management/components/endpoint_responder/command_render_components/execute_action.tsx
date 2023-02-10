@@ -26,16 +26,17 @@ export const ExecuteActionResult = memo<
   const actionRequestBody = useMemo<undefined | ExecuteActionRequestBody>(() => {
     const endpointId = command.commandDefinition?.meta?.endpointId;
 
-    return endpointId
-      ? {
-          endpoint_ids: [endpointId],
-          parameters: {
-            command: command.args.args.command[0],
-            timeout: parsedExecuteTimeout(command.args.args.timeout?.[0]),
-          },
-          comment: command.args.args?.comment?.[0],
-        }
-      : undefined;
+    if (!endpointId) {
+      return;
+    }
+    return {
+      endpoint_ids: [endpointId],
+      parameters: {
+        command: command.args.args.command[0],
+        timeout: parsedExecuteTimeout(command.args.args.timeout?.[0]),
+      },
+      comment: command.args.args?.comment?.[0],
+    };
   }, [
     command.commandDefinition?.meta?.endpointId,
     command.args.args.command,
