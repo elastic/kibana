@@ -22,7 +22,6 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   const registry = getService('registry');
 
   const supertest = getService('supertest');
-  const log = getService('log');
   const es = getService('es');
   const apmApiClient = getService('apmApiClient');
   const esDeleteAllIndices = getService('esDeleteAllIndices');
@@ -30,7 +29,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   const synthtraceEsClient = getService('synthtraceEsClient');
 
   registry.when('error count threshold alert', { config: 'basic', archives: [] }, () => {
-    let ruleId: string | undefined;
+    let ruleId: string;
     let actionId: string | undefined;
 
     const INDEX_NAME = 'error-count';
@@ -109,6 +108,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             },
           ],
         });
+        expect(createdRule.id).to.not.eql(undefined);
         ruleId = createdRule.id;
       });
 
@@ -117,7 +117,6 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           id: ruleId,
           expectedStatus: 'active',
           supertest,
-          log,
         });
         expect(executionStatus.status).to.be('active');
       });
@@ -126,7 +125,6 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         const resp = await waitForDocumentInIndex<{ message: string }>({
           es,
           indexName: INDEX_NAME,
-          log,
         });
 
         expect(resp.hits.hits[0]._source?.message).eql(

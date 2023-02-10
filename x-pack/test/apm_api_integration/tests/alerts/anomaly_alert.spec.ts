@@ -20,7 +20,6 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
   const supertest = getService('supertest');
   const ml = getService('ml');
-  const log = getService('log');
   const es = getService('es');
 
   const synthtraceEsClient = getService('synthtraceEsClient');
@@ -96,14 +95,16 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           });
 
           ruleId = createdRule.id;
-
-          const executionStatus = await waitForRuleStatus({
-            id: ruleId,
-            expectedStatus: 'active',
-            supertest,
-            log,
-          });
-          expect(executionStatus.status).to.be('active');
+          if (!ruleId) {
+            expect(ruleId).to.not.eql(undefined);
+          } else {
+            const executionStatus = await waitForRuleStatus({
+              id: ruleId,
+              expectedStatus: 'active',
+              supertest,
+            });
+            expect(executionStatus.status).to.be('active');
+          }
         });
       });
     }
