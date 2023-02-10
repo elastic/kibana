@@ -205,13 +205,13 @@ export const NEW_CASE_CREATE_BUTTON = `[data-test-subj="create-case-submit"]`;
 
 /* Block list */
 
-export const BLOCK_LIST_NAME = '[data-test-subj="blocklist-form-name-input"]';
+export const BLOCK_LIST_NAME = `[data-test-subj="blocklist-form-name-input"]`;
 
-export const BLOCK_LIST_DESCRIPTION = '[data-test-subj="blocklist-form-description-input"]';
+export const BLOCK_LIST_DESCRIPTION = `[data-test-subj="blocklist-form-description-input"]`;
 
-export const BLOCK_LIST_ADD_BUTTON = '[class="eui-textTruncate"]';
+export const BLOCK_LIST_ADD_BUTTON = `[class="eui-textTruncate"]`;
 
-export const BLOCK_LIST_TOAST_LIST = '[data-test-subj="globalToastList"]';
+export const BLOCK_LIST_TOAST_LIST = `[data-test-subj="globalToastList"]`;
 
 /* Miscellaneous */
 
