@@ -7,9 +7,10 @@
 
 import { isRumAgentName, isMobileAgentName } from './agent_name';
 
-export const TRANSACTION_PAGE_LOAD = 'page-load';
+const TRANSACTION_PAGE_LOAD = 'page-load';
+const TRANSACTION_MOBILE = 'mobile';
+
 export const TRANSACTION_REQUEST = 'request';
-export const TRANSACTION_MOBILE = 'mobile';
 
 export const defaultTransactionTypes = [
   TRANSACTION_REQUEST,
@@ -27,4 +28,12 @@ export function getDefaultTransactionType(agentName?: string) {
   }
 
   return TRANSACTION_REQUEST;
+}
+
+export function isDefaultTransactionType(transactionType?: string) {
+  if (!transactionType) {
+    return false;
+  }
+
+  return defaultTransactionTypes.includes(transactionType);
 }

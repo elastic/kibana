@@ -22,10 +22,7 @@ import {
   ServiceInventoryFieldName,
   ServiceListItem,
 } from '../../../../../common/service_inventory';
-import {
-  TRANSACTION_PAGE_LOAD,
-  TRANSACTION_REQUEST,
-} from '../../../../../common/transaction_types';
+import { isDefaultTransactionType } from '../../../../../common/transaction_types';
 import {
   asMillisecondDuration,
   asPercent,
@@ -310,9 +307,7 @@ export function ServiceList({
   const { link } = useApmRouter();
 
   const showTransactionTypeColumn = items.some(
-    ({ transactionType }) =>
-      transactionType !== TRANSACTION_REQUEST &&
-      transactionType !== TRANSACTION_PAGE_LOAD
+    ({ transactionType }) => !isDefaultTransactionType(transactionType)
   );
 
   const {
