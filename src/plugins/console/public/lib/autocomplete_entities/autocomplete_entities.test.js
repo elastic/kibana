@@ -135,7 +135,8 @@ describe('Autocomplete entities', () => {
         mapping.getMappings('my-index*', [], autoCompleteContext);
 
         const fields = await autoCompleteContext.asyncResultsState.results;
-        expect(fields).toEqual([
+
+        const expectedResult = [
           {
             name: '@timestamp',
             type: 'date',
@@ -144,7 +145,10 @@ describe('Autocomplete entities', () => {
             name: 'name',
             type: 'keyword',
           },
-        ]);
+        ];
+
+        expect(fields).toEqual(expectedResult);
+        expect(mapping.getMappings('my-index*', [], autoCompleteContext)).toEqual(expectedResult);
       });
 
       test('returns mappings for data streams', () => {
@@ -199,8 +203,6 @@ describe('Autocomplete entities', () => {
           },
         ]);
       });
-
-      test('returns mappings for wildcards', () => {});
 
       test('Multi fields 1.0 style', function () {
         mapping.loadMappings({
