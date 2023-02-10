@@ -97,6 +97,13 @@ export const useFetchIndexPatterns = (rules: Rule[] | null): ReturnUseFetchExcep
       if (activeSpaceId !== '' && memoDataViewId) {
         setDataViewLoading(true);
         const dv = await data.dataViews.get(memoDataViewId);
+        dv.setIndexPattern(
+          dv
+            .getIndexPattern()
+            .split(',')
+            .filter((ip) => !ip.includes('.alerts'))
+            .join(',')
+        );
         const fieldsWithUnmappedInfo = await data.dataViews.getFieldsForIndexPattern(dv, {
           pattern: '',
           includeUnmapped: true,
