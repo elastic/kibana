@@ -151,10 +151,27 @@ export default ({ getService }: FtrProviderContext): void => {
           createCase(supertestWithoutAuth, getPostCaseRequest(), 200, null, secOnlyHeaders),
         ]);
 
+        /**
+         * Update superUser profile avatar.
+         * Need for schema and response verification
+         */
+        await updateUserProfileAvatar({
+          supertest,
+          req: {
+            initials: 'ES',
+            color: '#6092C0',
+            imageUrl: 'my-image',
+          },
+          headers: superUserHeaders,
+        });
+
         const userProfiles = await bulkGetUserProfiles({
           supertest,
-          // @ts-expect-error: profile uids are defined for both users
-          req: { uids: [superUserCase.created_by.profile_uid, secUserCase.created_by.profile_uid] },
+          req: {
+            // @ts-expect-error: profile uids are defined for both users
+            uids: [superUserCase.created_by.profile_uid, secUserCase.created_by.profile_uid],
+            dataPath: 'avatar',
+          },
         });
 
         superUserProfile = userProfiles[0];
@@ -171,19 +188,6 @@ export default ({ getService }: FtrProviderContext): void => {
 
       describe('schema', () => {
         it('ensures that the schema of security plugin is as expected', async () => {
-          const avatar = {
-            initials: 'ES',
-            color: '#6092C0',
-            imageUrl: 'my-image',
-          };
-
-          // update user profile avatar
-          await updateUserProfileAvatar({
-            supertest,
-            req: avatar,
-            headers: superUserHeaders,
-          });
-
           const res = await bulkGetUserProfiles({
             supertest: supertestWithoutAuth,
             req: {
@@ -201,7 +205,7 @@ export default ({ getService }: FtrProviderContext): void => {
                 full_name: userProfile.user.full_name ?? null,
                 username: userProfile.user.username ?? null,
               },
-              avatar,
+              avatar: userProfile.data.avatar,
               uid: userProfile.uid,
             };
 
@@ -241,6 +245,7 @@ export default ({ getService }: FtrProviderContext): void => {
                 full_name: superUserProfile.user.full_name,
                 email: superUserProfile.user.email,
               },
+              avatar: superUserProfile.data.avatar,
               uid: superUserProfile.uid,
             },
           ]);
@@ -251,6 +256,7 @@ export default ({ getService }: FtrProviderContext): void => {
               full_name: superUserProfile.user.full_name,
               email: superUserProfile.user.email,
             },
+            avatar: superUserProfile.data.avatar,
             uid: superUserProfile.uid,
           });
 
@@ -287,6 +293,7 @@ export default ({ getService }: FtrProviderContext): void => {
                 full_name: superUserProfile.user.full_name,
                 email: superUserProfile.user.email,
               },
+              avatar: superUserProfile.data.avatar,
               uid: superUserProfile.uid,
             },
           ]);
@@ -297,6 +304,7 @@ export default ({ getService }: FtrProviderContext): void => {
               full_name: superUserProfile.user.full_name,
               email: superUserProfile.user.email,
             },
+            avatar: superUserProfile.data.avatar,
             uid: superUserProfile.uid,
           });
 
@@ -341,6 +349,7 @@ export default ({ getService }: FtrProviderContext): void => {
                 full_name: superUserProfile.user.full_name,
                 email: superUserProfile.user.email,
               },
+              avatar: superUserProfile.data.avatar,
               uid: superUserProfile.uid,
             },
           ]);
@@ -351,6 +360,7 @@ export default ({ getService }: FtrProviderContext): void => {
               full_name: superUserProfile.user.full_name,
               email: superUserProfile.user.email,
             },
+            avatar: superUserProfile.data.avatar,
             uid: superUserProfile.uid,
           });
 
@@ -403,6 +413,7 @@ export default ({ getService }: FtrProviderContext): void => {
                 full_name: superUserProfile.user.full_name,
                 email: superUserProfile.user.email,
               },
+              avatar: superUserProfile.data.avatar,
               uid: superUserProfile.uid,
             },
           ]);
@@ -413,6 +424,7 @@ export default ({ getService }: FtrProviderContext): void => {
               full_name: superUserProfile.user.full_name,
               email: superUserProfile.user.email,
             },
+            avatar: superUserProfile.data.avatar,
             uid: superUserProfile.uid,
           });
 
