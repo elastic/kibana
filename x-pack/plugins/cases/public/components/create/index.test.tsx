@@ -6,14 +6,11 @@
  */
 
 import React from 'react';
-import type { ReactWrapper } from 'enzyme';
-import { mount } from 'enzyme';
-import { act, waitFor } from '@testing-library/react';
+import type { RenderResult } from '@testing-library/react';
+import { waitFor, within } from '@testing-library/react';
 
-import type { EuiComboBoxOptionOption } from '@elastic/eui';
-import { EuiComboBox } from '@elastic/eui';
-
-import { TestProviders } from '../../common/mock';
+import type { AppMockRenderer } from '../../common/mock';
+import { createAppMockRenderer } from '../../common/mock';
 import { useCaseConfigure } from '../../containers/configure/use_configure';
 import { useGetIncidentTypes } from '../connectors/resilient/use_get_incident_types';
 import { useGetSeverity } from '../connectors/resilient/use_get_severity';
@@ -32,6 +29,7 @@ import {
 import { CreateCase } from '.';
 import { useGetSupportedActionConnectors } from '../../containers/configure/use_get_supported_action_connectors';
 import { useGetTags } from '../../containers/use_get_tags';
+import userEvent from '@testing-library/user-event';
 
 jest.mock('../../containers/api');
 jest.mock('../../containers/user_profiles/api');
@@ -54,24 +52,16 @@ const useGetIssueTypesMock = useGetIssueTypes as jest.Mock;
 const useGetFieldsByIssueTypeMock = useGetFieldsByIssueType as jest.Mock;
 const fetchTags = jest.fn();
 
-const fillForm = (wrapper: ReactWrapper) => {
-  wrapper
-    .find(`[data-test-subj="caseTitle"] input`)
-    .first()
-    .simulate('change', { target: { value: sampleData.title } });
+const fillForm = async (renderer: RenderResult) => {
+  const titleInput = within(await renderer.findByTestId('caseTitle')).getByTestId('input');
 
-  wrapper
-    .find(`[data-test-subj="caseDescription"] textarea`)
-    .first()
-    .simulate('change', { target: { value: sampleData.description } });
+  userEvent.paste(titleInput, sampleData.title);
 
-  act(() => {
-    (
-      wrapper.find(EuiComboBox).at(0).props() as unknown as {
-        onChange: (a: EuiComboBoxOptionOption[]) => void;
-      }
-    ).onChange(sampleTags.map((tag) => ({ label: tag })));
-  });
+  const descriptionInput = within(await renderer.findByTestId('caseDescription')).getByTestId(
+    'euiMarkdownEditorTextArea'
+  );
+
+  userEvent.paste(descriptionInput, sampleData.description);
 };
 
 const defaultProps = {
@@ -80,6 +70,8 @@ const defaultProps = {
 };
 
 describe('CreateCase case', () => {
+  let appMockRenderer: AppMockRenderer;
+
   beforeEach(() => {
     jest.clearAllMocks();
     useGetConnectorsMock.mockReturnValue(sampleConnectorData);
@@ -92,52 +84,35 @@ describe('CreateCase case', () => {
       data: sampleTags,
       refetch: fetchTags,
     }));
+
+    appMockRenderer = createAppMockRenderer();
   });
 
-  it('it renders', async () => {
-    const wrapper = mount(
-      <TestProviders>
-        <CreateCase {...defaultProps} />
-      </TestProviders>
-    );
-    await act(async () => {
-      expect(wrapper.find(`[data-test-subj="create-case-submit"]`).exists()).toBeTruthy();
-      expect(wrapper.find(`[data-test-subj="create-case-cancel"]`).exists()).toBeTruthy();
-    });
+  it('renders', async () => {
+    const result = appMockRenderer.render(<CreateCase {...defaultProps} />);
+
+    expect(await result.findByTestId('create-case-submit')).toBeInTheDocument();
+    expect(await result.findByTestId('create-case-cancel')).toBeInTheDocument();
   });
 
   it('should open modal on cancel click', async () => {
-    const wrapper = mount(
-      <TestProviders>
-        <CreateCase {...defaultProps} />
-      </TestProviders>
-    );
+    const result = appMockRenderer.render(<CreateCase {...defaultProps} />);
 
-    wrapper.find(`[data-test-subj="create-case-cancel"]`).first().simulate('click');
+    expect(await result.findByTestId('create-case-cancel')).toBeInTheDocument();
+    userEvent.click(await result.findByTestId('create-case-cancel'));
 
-    await waitFor(() => {
-      expect(
-        wrapper.find(`[data-test-subj="cancel-creation-confirmation-modal"]`).exists()
-      ).toBeTruthy();
-    });
+    expect(await result.findByTestId('cancel-creation-confirmation-modal')).toBeInTheDocument();
   });
 
   it('should confirm cancelation on modal confirm click', async () => {
-    const wrapper = mount(
-      <TestProviders>
-        <CreateCase {...defaultProps} />
-      </TestProviders>
-    );
+    const result = appMockRenderer.render(<CreateCase {...defaultProps} />);
 
-    wrapper.find(`[data-test-subj="create-case-cancel"]`).first().simulate('click');
+    expect(await result.findByTestId('create-case-cancel')).toBeInTheDocument();
+    userEvent.click(await result.findByTestId('create-case-cancel'));
 
-    await waitFor(() => {
-      expect(
-        wrapper.find(`[data-test-subj="cancel-creation-confirmation-modal"]`).exists()
-      ).toBeTruthy();
-    });
+    expect(await result.findByTestId('cancel-creation-confirmation-modal')).toBeInTheDocument();
 
-    wrapper.find(`button[data-test-subj="confirmModalConfirmButton"]`).simulate('click');
+    userEvent.click(await result.findByTestId('confirmModalConfirmButton'));
 
     await waitFor(() => {
       expect(defaultProps.onCancel).toHaveBeenCalled();
@@ -145,41 +120,26 @@ describe('CreateCase case', () => {
   });
 
   it('should close modal on modal cancel click', async () => {
-    const wrapper = mount(
-      <TestProviders>
-        <CreateCase {...defaultProps} />
-      </TestProviders>
-    );
+    const result = appMockRenderer.render(<CreateCase {...defaultProps} />);
 
-    wrapper.find(`[data-test-subj="create-case-cancel"]`).first().simulate('click');
+    expect(await result.findByTestId('create-case-cancel')).toBeInTheDocument();
+    userEvent.click(await result.findByTestId('create-case-cancel'));
 
-    await waitFor(() => {
-      expect(
-        wrapper.find(`[data-test-subj="cancel-creation-confirmation-modal"]`).exists()
-      ).toBeTruthy();
-    });
+    expect(await result.findByTestId('cancel-creation-confirmation-modal')).toBeInTheDocument();
+    userEvent.click(await result.findByTestId('confirmModalCancelButton'));
 
-    wrapper.find(`button[data-test-subj="confirmModalCancelButton"]`).simulate('click');
-
-    await waitFor(() => {
-      expect(
-        wrapper.find(`[data-test-subj="cancel-creation-confirmation-modal"]`).exists()
-      ).toBeFalsy();
-    });
+    expect(result.queryByTestId('cancel-creation-confirmation-modal')).not.toBeInTheDocument();
   });
 
   it('should redirect to new case when posting the case', async () => {
-    const wrapper = mount(
-      <TestProviders>
-        <CreateCase {...defaultProps} />
-      </TestProviders>
-    );
+    const result = appMockRenderer.render(<CreateCase {...defaultProps} />);
 
-    await act(async () => {
-      fillForm(wrapper);
-      wrapper.find(`button[data-test-subj="create-case-submit"]`).first().simulate('click');
+    await fillForm(result);
+
+    userEvent.click(result.getByTestId('create-case-submit'));
+
+    await waitFor(() => {
+      expect(defaultProps.onSuccess).toHaveBeenCalled();
     });
-
-    expect(defaultProps.onSuccess).toHaveBeenCalled();
   });
 });
