@@ -22,6 +22,7 @@ import type {
   QueryDslQueryContainer,
   SortCombinations,
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { QueryClientProvider } from '@tanstack/react-query';
 import { useFetchAlerts } from './hooks/use_fetch_alerts';
 import { AlertsTable } from './alerts_table';
 import { BulkActionsContext } from './bulk_actions/context';
@@ -39,6 +40,7 @@ import { bulkActionsReducer } from './bulk_actions/reducer';
 import { useGetUserCasesPermissions } from './hooks/use_get_user_cases_permissions';
 import { useColumns } from './hooks/use_columns';
 import { InspectButtonContainer } from './toolbar/components/inspect';
+import { alertsTableQueryClient } from './query_client';
 
 const DefaultPagination = {
   pageSize: 10,
@@ -289,7 +291,7 @@ const AlertsTableState = ({
   const userCasesPermissions = useGetUserCasesPermissions(alertsTableConfiguration.casesFeatureId);
 
   return hasAlertsTableConfiguration ? (
-    <>
+    <QueryClientProvider client={alertsTableQueryClient}>
       {!isLoading && alertsCount === 0 && (
         <InspectButtonContainer>
           <EmptyState
@@ -320,7 +322,7 @@ const AlertsTableState = ({
           initialBulkActionsState={initialBulkActionsState}
         />
       )}
-    </>
+    </QueryClientProvider>
   ) : (
     <EuiEmptyPrompt
       data-test-subj="alertsTableNoConfiguration"
