@@ -60,7 +60,7 @@ const getFlyoutTitle = (isOnFailure: boolean) => {
   );
 };
 
-export const AddProcessorForm: FunctionComponent<Props> = ({
+export const AddProcessorForm: FunctionComponent<React.PropsWithChildren<Props>> = ({
   isOnFailure,
   onOpen,
   form,

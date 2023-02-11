@@ -44,7 +44,7 @@ function getPercentLabel(percent: number): string {
   }
 }
 
-export const TopValues: FC<Props> = ({ stats, fieldFormat, barColor, compressed, onAddFilter }) => {
+export const TopValues: FC<React.PropsWithChildren<Props>> = ({ stats, fieldFormat, barColor, compressed, onAddFilter }) => {
   const {
     services: {
       data: { fieldFormats },

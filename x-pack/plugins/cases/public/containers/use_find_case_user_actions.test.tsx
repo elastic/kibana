@@ -31,7 +31,7 @@ const initialData = {
   isLoading: true,
 };
 
-const wrapper: React.FC<string> = ({ children }) => (
+const wrapper: React.FC<React.PropsWithChildren<string>> = ({ children }) => (
   <QueryClientProvider client={testQueryClient}>{children}</QueryClientProvider>
 );
 

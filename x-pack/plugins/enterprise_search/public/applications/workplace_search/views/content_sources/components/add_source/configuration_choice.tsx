@@ -33,7 +33,7 @@ interface CardProps {
   disabledMessage?: string;
 }
 
-const ConnectorCard: React.FC<CardProps> = ({
+const ConnectorCard: React.FC<React.PropsWithChildren<CardProps>> = ({
   title,
   description,
   buttonText,
@@ -61,7 +61,7 @@ interface ConfigurationChoiceProps {
   sourceData: SourceDataItem;
 }
 
-export const ConfigurationChoice: React.FC<ConfigurationChoiceProps> = ({
+export const ConfigurationChoice: React.FC<React.PropsWithChildren<ConfigurationChoiceProps>> = ({
   sourceData: { name, categories = [], serviceType },
 }) => {
   const externalConnectorAvailable = hasExternalConnectorOption(serviceType);

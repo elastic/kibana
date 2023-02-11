@@ -18,7 +18,7 @@ interface EmptyPromptProps {
   readOnly?: boolean;
 }
 
-export const EmptyPrompt: React.FunctionComponent<EmptyPromptProps> = ({
+export const EmptyPrompt: React.FunctionComponent<React.PropsWithChildren<EmptyPromptProps>> = ({
   history,
   readOnly = false,
 }) => (

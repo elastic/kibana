@@ -15,7 +15,7 @@ interface Props {
   message?: string;
 }
 
-export const LoadingError: FunctionComponent<Props> = ({
+export const LoadingError: FunctionComponent<React.PropsWithChildren<Props>> = ({
   statusCode,
   message,
   onResendRequest,

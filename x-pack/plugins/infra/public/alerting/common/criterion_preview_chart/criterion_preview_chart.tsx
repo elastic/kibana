@@ -77,7 +77,7 @@ export const getChartTheme = (isDarkMode: boolean): Theme => {
   return isDarkMode ? DARK_THEME : LIGHT_THEME;
 };
 
-export const EmptyContainer: React.FC = ({ children }) => (
+export const EmptyContainer: React.FC<React.PropsWithChildren<unknown>> = ({ children }) => (
   <div
     style={{
       width: '100%',
@@ -91,7 +91,7 @@ export const EmptyContainer: React.FC = ({ children }) => (
   </div>
 );
 
-export const ChartContainer: React.FC = ({ children }) => (
+export const ChartContainer: React.FC<React.PropsWithChildren<unknown>> = ({ children }) => (
   <div
     style={{
       width: '100%',

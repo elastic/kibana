@@ -47,7 +47,7 @@ const copyCloudIdHandler = (
   };
 };
 
-export const ElasticsearchCloudId: React.FC = () => {
+export const ElasticsearchCloudId: React.FC<React.PropsWithChildren<unknown>> = () => {
   const cloud = useCloudDetails();
   const { sendEnterpriseSearchTelemetry } = useActions(TelemetryLogic);
   const { http } = useValues(HttpLogic);

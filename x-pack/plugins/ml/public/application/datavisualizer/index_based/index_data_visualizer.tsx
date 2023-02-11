@@ -33,7 +33,7 @@ interface RecognizerModule {
   };
 }
 
-export const IndexDataVisualizerPage: FC = () => {
+export const IndexDataVisualizerPage: FC<React.PropsWithChildren<unknown>> = () => {
   useTimefilter({ timeRangeSelector: false, autoRefreshSelector: false });
   const {
     services: {

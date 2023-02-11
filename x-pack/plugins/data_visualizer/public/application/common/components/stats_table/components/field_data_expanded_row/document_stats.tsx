@@ -37,7 +37,7 @@ const metaTableTitle = i18n.translate(
   }
 );
 
-export const DocumentStatsTable: FC<FieldDataRowProps> = ({ config }) => {
+export const DocumentStatsTable: FC<React.PropsWithChildren<FieldDataRowProps>> = ({ config }) => {
   if (
     config?.stats === undefined ||
     config.stats.cardinality === undefined ||

@@ -8,9 +8,7 @@
 import { EuiPanel, EuiTitle, useEuiTheme, EuiPanelProps } from '@elastic/eui';
 import React from 'react';
 
-export const PanelWithTitle: React.FC<
-  { title?: string; titleLeftAlign?: boolean } & EuiPanelProps
-> = ({ title, hasBorder = true, hasShadow = false, children, titleLeftAlign, ...props }) => {
+export const PanelWithTitle: React.FC<React.PropsWithChildren<{ title?: string; titleLeftAlign?: boolean } & EuiPanelProps>> = ({ title, hasBorder = true, hasShadow = false, children, titleLeftAlign, ...props }) => {
   const { euiTheme } = useEuiTheme();
 
   return (

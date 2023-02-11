@@ -35,7 +35,7 @@ const EVERYTHING_PLACEHOLDER = i18n.translate(
   }
 );
 
-export const GroupByExpression: React.FC<Props> = ({
+export const GroupByExpression: React.FC<React.PropsWithChildren<Props>> = ({
   selectedGroups = [],
   fields,
   label,

@@ -28,7 +28,7 @@ import { addBuildingBlockStyle } from '../data_table/helpers';
 import { getPageRowIndex } from '../data_table/pagination';
 import { RowAction } from './row_action';
 
-const EmptyHeaderCellRender: ComponentType = () => null;
+const EmptyHeaderCellRender: ComponentType<React.PropsWithChildren<unknown>> = () => null;
 
 export interface TransformColumnsProps {
   columnHeaders: ColumnHeaderOptions[];

@@ -48,7 +48,7 @@ interface ProductSelectorProps {
   isWorkplaceSearchAdmin: boolean;
 }
 
-export const ProductSelector: React.FC<ProductSelectorProps> = ({
+export const ProductSelector: React.FC<React.PropsWithChildren<ProductSelectorProps>> = ({
   access,
   isWorkplaceSearchAdmin,
 }) => {

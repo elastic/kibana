@@ -36,7 +36,7 @@ interface JobMessagesProps {
  * Component for rendering job messages for anomaly detection
  * and data frame analytics jobs.
  */
-export const JobMessages: FC<JobMessagesProps> = ({
+export const JobMessages: FC<React.PropsWithChildren<JobMessagesProps>> = ({
   messages,
   loading,
   error,

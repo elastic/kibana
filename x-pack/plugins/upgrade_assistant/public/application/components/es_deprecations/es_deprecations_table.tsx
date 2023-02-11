@@ -156,7 +156,7 @@ const getSortedItems = (deprecations: EnrichedDeprecationInfo[], sortConfig: Sor
   return isSortAscending ? sorted : sorted.reverse();
 };
 
-export const EsDeprecationsTable: React.FunctionComponent<Props> = ({
+export const EsDeprecationsTable: React.FunctionComponent<React.PropsWithChildren<Props>> = ({
   deprecations = [],
   reload,
 }) => {

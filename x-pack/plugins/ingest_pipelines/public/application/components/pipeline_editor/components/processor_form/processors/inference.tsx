@@ -135,7 +135,7 @@ const fieldsConfig: FieldsConfig = {
   },
 };
 
-export const Inference: FunctionComponent = () => {
+export const Inference: FunctionComponent<React.PropsWithChildren<unknown>> = () => {
   const { services } = useKibana();
   const documentationDocsLink = services.documentation.getDocumentationUrl();
   return (

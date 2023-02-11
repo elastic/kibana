@@ -19,7 +19,7 @@ export const getLangIdentOutputComponent = (inferrer: LangIdentInference) => (
   <LangIdentOutput inferrer={inferrer} />
 );
 
-const LangIdentOutput: FC<{ inferrer: LangIdentInference }> = ({ inferrer }) => {
+const LangIdentOutput: FC<React.PropsWithChildren<{ inferrer: LangIdentInference }>> = ({ inferrer }) => {
   const result = useObservable(inferrer.getInferenceResult$(), inferrer.getInferenceResult());
   if (!result) {
     return null;
@@ -37,10 +37,10 @@ const LangIdentOutput: FC<{ inferrer: LangIdentInference }> = ({ inferrer }) => 
   );
 };
 
-const LanguageIdent: FC<{
+const LanguageIdent: FC<React.PropsWithChildren<{
   response: FormattedTextClassificationResponse;
   inputText: string;
-}> = ({ response, inputText }) => {
+}>> = ({ response, inputText }) => {
   const langCode = response[0].value;
   const lang = getLanguage(langCode);
 

@@ -29,7 +29,7 @@ interface Props {
   state: State;
 }
 
-export const ConfigurationStepDetails: FC<Props> = ({ setCurrentStep, state }) => {
+export const ConfigurationStepDetails: FC<React.PropsWithChildren<Props>> = ({ setCurrentStep, state }) => {
   const mlContext = useMlContext();
   const { currentDataView } = mlContext;
   const { form, isJobCreated } = state;

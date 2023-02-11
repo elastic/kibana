@@ -16,7 +16,7 @@ interface Props {
   customDataTestSubj?: string;
 }
 
-const UserActionPropertyActionsComponent: React.FC<Props> = ({
+const UserActionPropertyActionsComponent: React.FC<React.PropsWithChildren<Props>> = ({
   isLoading,
   propertyActions,
   customDataTestSubj = 'user-action',

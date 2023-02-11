@@ -15,7 +15,7 @@ import { MlEntitySelector, type MlEntitySelectorProps } from '../../components/m
 /**
  * Custom filter component to use with {@link EuiInMemoryTable}
  */
-export const EntityFilter: FC<CustomComponentProps> = React.memo(({ query, onChange }) => {
+export const EntityFilter: FC<React.PropsWithChildren<CustomComponentProps>> = React.memo(({ query, onChange }) => {
   const [isOpen, setIsOpen] = useState<boolean>(false);
 
   const hasActiveFilters = query.hasOrFieldClause('job_id') || query.hasSimpleFieldClause('job_id');

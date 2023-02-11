@@ -11,7 +11,7 @@ import { ExamplesList } from '../../../examples_list';
 import { DocumentStatsTable } from './document_stats';
 import { ExpandedRowContent } from './expanded_row_content';
 
-export const OtherContent: FC<FieldDataRowProps> = ({ config }) => {
+export const OtherContent: FC<React.PropsWithChildren<FieldDataRowProps>> = ({ config }) => {
   const { stats } = config;
   if (stats === undefined) return null;
   return stats.count === undefined ? (

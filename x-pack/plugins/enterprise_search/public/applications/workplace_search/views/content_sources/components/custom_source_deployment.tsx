@@ -25,7 +25,7 @@ interface Props {
   baseServiceType?: string;
   small?: boolean;
 }
-export const CustomSourceDeployment: React.FC<Props> = ({
+export const CustomSourceDeployment: React.FC<React.PropsWithChildren<Props>> = ({
   source,
   baseServiceType,
   small = false,

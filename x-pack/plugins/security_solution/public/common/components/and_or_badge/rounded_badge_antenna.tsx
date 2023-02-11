@@ -40,7 +40,7 @@ const BottomAntenna = styled(EuiFlexItem)`
   }
 `;
 
-export const RoundedBadgeAntenna: React.FC<{ type: AndOr }> = ({ type }) => (
+export const RoundedBadgeAntenna: React.FC<React.PropsWithChildren<{ type: AndOr }>> = ({ type }) => (
   <EuiFlexGroup
     className="andBadgeContainer"
     gutterSize="none"

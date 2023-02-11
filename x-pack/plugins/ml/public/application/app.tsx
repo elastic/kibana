@@ -70,7 +70,7 @@ export interface MlServicesContext {
 
 export type MlGlobalServices = ReturnType<typeof getMlGlobalServices>;
 
-const App: FC<AppProps> = ({ coreStart, deps, appMountParams }) => {
+const App: FC<React.PropsWithChildren<AppProps>> = ({ coreStart, deps, appMountParams }) => {
   const redirectToMlAccessDeniedPage = async () => {
     const accessDeniedPageUrl = await deps.share.url.locators.get(ML_APP_LOCATOR)!.getUrl({
       page: ML_PAGES.ACCESS_DENIED,

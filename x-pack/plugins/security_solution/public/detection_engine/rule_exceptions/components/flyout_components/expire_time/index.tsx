@@ -24,7 +24,7 @@ const SectionHeader = styled(EuiTitle)`
   `}
 `;
 
-const ExceptionItemExpireTime: React.FC<ExceptionItmeExpireTimeProps> = ({
+const ExceptionItemExpireTime: React.FC<React.PropsWithChildren<ExceptionItmeExpireTimeProps>> = ({
   expireTime,
   setExpireTime,
   setExpireError,

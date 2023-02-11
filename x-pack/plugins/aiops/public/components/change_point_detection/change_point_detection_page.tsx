@@ -35,7 +35,7 @@ import { SplitFieldSelector } from './split_field_selector';
 import { FunctionPicker } from './function_picker';
 import { ChartComponent } from './chart_component';
 
-export const ChangePointDetectionPage: FC = () => {
+export const ChangePointDetectionPage: FC<React.PropsWithChildren<unknown>> = () => {
   const {
     requestParams,
     updateRequestParams,

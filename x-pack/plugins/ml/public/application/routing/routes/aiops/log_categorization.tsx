@@ -46,7 +46,7 @@ export const logCategorizationRouteFactory = (
   disabled: !AIOPS_ENABLED,
 });
 
-const PageWrapper: FC<PageProps> = ({ location, deps }) => {
+const PageWrapper: FC<React.PropsWithChildren<PageProps>> = ({ location, deps }) => {
   const { redirectToMlAccessDeniedPage } = deps;
 
   const { index, savedSearchId }: Record<string, any> = parse(location.search, { sort: false });

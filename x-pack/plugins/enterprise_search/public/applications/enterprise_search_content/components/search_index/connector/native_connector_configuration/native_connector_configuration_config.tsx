@@ -23,9 +23,7 @@ interface NativeConnectorConfigurationConfigProps {
   status: ConnectorStatus;
 }
 
-export const NativeConnectorConfigurationConfig: React.FC<
-  NativeConnectorConfigurationConfigProps
-> = ({ nativeConnector, status }) => {
+export const NativeConnectorConfigurationConfig: React.FC<React.PropsWithChildren<NativeConnectorConfigurationConfigProps>> = ({ nativeConnector, status }) => {
   return (
     <ConnectorConfigurationConfig>
       <EuiText size="s">

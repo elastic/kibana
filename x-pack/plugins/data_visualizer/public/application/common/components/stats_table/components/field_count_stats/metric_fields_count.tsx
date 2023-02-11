@@ -17,7 +17,7 @@ export interface MetricFieldsCountProps {
   metricsStats?: MetricFieldsStats;
 }
 
-export const MetricFieldsCount: FC<MetricFieldsCountProps> = ({ metricsStats }) => {
+export const MetricFieldsCount: FC<React.PropsWithChildren<MetricFieldsCountProps>> = ({ metricsStats }) => {
   if (
     !metricsStats ||
     metricsStats.visibleMetricsCount === undefined ||

@@ -21,7 +21,7 @@ import { ALL_TRANSFORMS_SELECTION } from '../../../common/constants';
 export type TransformHealthRuleTriggerProps =
   RuleTypeParamsExpressionProps<TransformHealthRuleParams>;
 
-const TransformHealthRuleTrigger: FC<TransformHealthRuleTriggerProps> = ({
+const TransformHealthRuleTrigger: FC<React.PropsWithChildren<TransformHealthRuleTriggerProps>> = ({
   ruleParams,
   setRuleParams,
   errors,

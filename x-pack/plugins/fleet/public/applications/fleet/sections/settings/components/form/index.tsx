@@ -27,7 +27,7 @@ interface InputProps {
   };
 }
 
-export const TextInput: React.FunctionComponent<InputProps> = ({
+export const TextInput: React.FunctionComponent<React.PropsWithChildren<InputProps>> = ({
   label,
   inputProps,
   placeholder,
@@ -43,7 +43,7 @@ export const TextInput: React.FunctionComponent<InputProps> = ({
   </EuiFormRow>
 );
 
-export const TextAreaInput: React.FunctionComponent<InputProps> = ({
+export const TextAreaInput: React.FunctionComponent<React.PropsWithChildren<InputProps>> = ({
   label,
   inputProps,
   placeholder,

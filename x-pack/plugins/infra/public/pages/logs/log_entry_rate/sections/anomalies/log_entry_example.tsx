@@ -74,7 +74,7 @@ type Props = LogEntryExample & {
   anomaly: LogEntryAnomaly;
 };
 
-export const LogEntryExampleMessage: React.FunctionComponent<Props> = ({
+export const LogEntryExampleMessage: React.FunctionComponent<React.PropsWithChildren<Props>> = ({
   id,
   dataset,
   message,
@@ -279,9 +279,9 @@ export const exampleMessageColumnConfigurations: LogColumnConfiguration[] = [
   },
 ];
 
-export const LogEntryExampleMessageHeaders: React.FunctionComponent<{
+export const LogEntryExampleMessageHeaders: React.FunctionComponent<React.PropsWithChildren<{
   dateTime: number;
-}> = ({ dateTime }) => {
+}>> = ({ dateTime }) => {
   return (
     <LogEntryExampleMessageHeadersWrapper>
       <>

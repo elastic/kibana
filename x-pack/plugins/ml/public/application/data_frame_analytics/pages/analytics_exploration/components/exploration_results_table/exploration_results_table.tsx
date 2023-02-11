@@ -29,7 +29,7 @@ interface Props {
   searchQuery: ResultsSearchQuery;
 }
 
-export const ExplorationResultsTable: FC<Props> = React.memo(
+export const ExplorationResultsTable: FC<React.PropsWithChildren<Props>> = React.memo(
   ({ indexPattern, jobConfig, needsDestIndexPattern, searchQuery }) => {
     const {
       services: {

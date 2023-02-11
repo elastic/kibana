@@ -20,7 +20,7 @@ import { TechnicalPreviewBadge } from '../components/technical_preview_badge';
 
 import { MlPageHeader } from '../components/page_header';
 
-export const ChangePointDetectionPage: FC = () => {
+export const ChangePointDetectionPage: FC<React.PropsWithChildren<unknown>> = () => {
   const { services } = useMlKibana();
 
   const context = useMlContext();

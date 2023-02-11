@@ -31,7 +31,7 @@ interface Props {
   hasError: boolean;
 }
 
-export const PipelinesPreview: FC<Props> = ({
+export const PipelinesPreview: FC<React.PropsWithChildren<Props>> = ({
   processors,
   onDownload,
   onClickToCreatePipeline,

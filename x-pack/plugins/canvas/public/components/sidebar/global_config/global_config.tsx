@@ -26,7 +26,7 @@ const strings = {
     }),
 };
 
-export const GlobalConfig: FC = () => {
+export const GlobalConfig: FC<React.PropsWithChildren<unknown>> = () => {
   const tabs = [
     {
       id: 'general',

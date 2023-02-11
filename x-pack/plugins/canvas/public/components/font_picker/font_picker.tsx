@@ -20,7 +20,7 @@ interface Props {
   value?: FontValue;
 }
 
-export const FontPicker: FC<Props> = ({ value, onSelect }) => {
+export const FontPicker: FC<React.PropsWithChildren<Props>> = ({ value, onSelect }) => {
   // While fonts are strongly-typed, we also support custom fonts someone might type in.
   // So let's cast the fonts and allow for additions.
   const displayedFonts: DisplayedFont[] = fonts;

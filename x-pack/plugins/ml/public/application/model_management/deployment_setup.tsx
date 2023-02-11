@@ -49,7 +49,7 @@ const THREADS_MAX_EXPONENT = 4;
 /**
  * Form for setting threading params.
  */
-export const DeploymentSetup: FC<DeploymentSetupProps> = ({ config, onConfigChange }) => {
+export const DeploymentSetup: FC<React.PropsWithChildren<DeploymentSetupProps>> = ({ config, onConfigChange }) => {
   const numOfAllocation = config.numOfAllocations;
   const threadsPerAllocations = config.threadsPerAllocations;
 
@@ -250,7 +250,7 @@ interface StartDeploymentModalProps {
 /**
  * Modal window wrapper for {@link DeploymentSetup}
  */
-export const StartUpdateDeploymentModal: FC<StartDeploymentModalProps> = ({
+export const StartUpdateDeploymentModal: FC<React.PropsWithChildren<StartDeploymentModalProps>> = ({
   modelId,
   onConfigChange,
   onClose,

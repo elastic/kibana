@@ -30,7 +30,7 @@ interface ResultTabsProps {
   error?: string;
 }
 
-const ResultTabsComponent: React.FC<ResultTabsProps> = ({
+const ResultTabsComponent: React.FC<React.PropsWithChildren<ResultTabsProps>> = ({
   actionId,
   agentIds,
   ecsMapping,

@@ -46,9 +46,9 @@ const columns = [
   },
 ];
 
-export const EvaluationQualityMetricsTable: FC<{
+export const EvaluationQualityMetricsTable: FC<React.PropsWithChildren<{
   evaluationMetricsItems: ClassificationMetricItem[];
-}> = ({ evaluationMetricsItems }) => (
+}>> = ({ evaluationMetricsItems }) => (
   <>
     <EuiAccordion
       id="recall-and-accuracy"

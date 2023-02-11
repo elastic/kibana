@@ -18,13 +18,13 @@ interface DisabledLinkPanelProps {
   dataTestSubjPrefix: string;
   docLink?: string;
   learnMoreUrl?: string;
-  LinkPanelViewComponent: React.ComponentType<LinkPanelViewProps>;
+  LinkPanelViewComponent: React.ComponentType<React.PropsWithChildren<LinkPanelViewProps>>;
   listItems: LinkPanelListItem[];
   moreButtons?: React.ReactElement;
   titleCopy: string;
 }
 
-const DisabledLinkPanelComponent: React.FC<DisabledLinkPanelProps> = ({
+const DisabledLinkPanelComponent: React.FC<React.PropsWithChildren<DisabledLinkPanelProps>> = ({
   bodyCopy,
   buttonCopy,
   dataTestSubjPrefix,

@@ -19,7 +19,7 @@ import * as i18n from './translations';
 
 const SEVERITY_DONUT_CHART_ID = 'alerts-summary-severity-donut';
 
-export const SeverityLevelPanel: React.FC<ChartsPanelProps> = ({
+export const SeverityLevelPanel: React.FC<React.PropsWithChildren<ChartsPanelProps>> = ({
   filters,
   query,
   signalIndexName,

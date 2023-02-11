@@ -20,7 +20,7 @@ interface Props {
   onReset?: () => void;
 }
 
-const ChartContextMenuComponent: React.FC<Props> = ({
+const ChartContextMenuComponent: React.FC<React.PropsWithChildren<Props>> = ({
   defaultStackByField,
   defaultStackByField1,
   onReset = noop,

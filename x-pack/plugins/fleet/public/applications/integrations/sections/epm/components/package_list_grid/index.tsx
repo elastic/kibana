@@ -61,7 +61,7 @@ export interface Props {
   showMissingIntegrationMessage?: boolean;
 }
 
-export const PackageListGrid: FunctionComponent<Props> = ({
+export const PackageListGrid: FunctionComponent<React.PropsWithChildren<Props>> = ({
   isLoading,
   controls,
   title,

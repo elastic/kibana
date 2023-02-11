@@ -9,7 +9,7 @@ import React from 'react';
 import { EuiButton, EuiEmptyPrompt } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-export const EmptyPrompt: React.FunctionComponent<{
+export const EmptyPrompt: React.FunctionComponent<React.PropsWithChildren<{
   hasFleetAllPrivileges: boolean;
   setEnrollmentFlyoutState: (
     value: React.SetStateAction<{
@@ -17,7 +17,7 @@ export const EmptyPrompt: React.FunctionComponent<{
       selectedPolicyId?: string | undefined;
     }>
   ) => void;
-}> = ({ hasFleetAllPrivileges, setEnrollmentFlyoutState }) => {
+}>> = ({ hasFleetAllPrivileges, setEnrollmentFlyoutState }) => {
   return (
     <EuiEmptyPrompt
       title={

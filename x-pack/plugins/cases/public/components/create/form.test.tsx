@@ -56,7 +56,7 @@ describe('CreateCaseForm', () => {
   let globalForm: FormHook;
   const draftStorageKey = `cases.caseView.createCase.description.markdownEditor`;
 
-  const MockHookWrapperComponent: React.FC<{ testProviderProps?: unknown }> = ({
+  const MockHookWrapperComponent: React.FC<React.PropsWithChildren<{ testProviderProps?: unknown }>> = ({
     children,
     testProviderProps = {},
   }) => {

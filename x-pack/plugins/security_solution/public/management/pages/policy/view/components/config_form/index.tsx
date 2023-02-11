@@ -49,7 +49,7 @@ interface ConfigFormProps {
   rightCorner?: ReactNode;
 }
 
-export const ConfigFormHeading: FC = memo(({ children }) => (
+export const ConfigFormHeading: FC<React.PropsWithChildren<unknown>> = memo(({ children }) => (
   <EuiTitle size="xxs">
     <h5>{children}</h5>
   </EuiTitle>
@@ -57,7 +57,7 @@ export const ConfigFormHeading: FC = memo(({ children }) => (
 
 ConfigFormHeading.displayName = 'ConfigFormHeading';
 
-export const ConfigForm: FC<ConfigFormProps> = memo(
+export const ConfigForm: FC<React.PropsWithChildren<ConfigFormProps>> = memo(
   ({ type, supportedOss, osRestriction, dataTestSubj, rightCorner, children }) => {
     const paddingSize = useContext(ThemeContext).eui.euiPanelPaddingModifiers.paddingMedium;
     return (

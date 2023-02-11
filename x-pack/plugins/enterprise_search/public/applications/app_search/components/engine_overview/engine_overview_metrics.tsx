@@ -21,7 +21,7 @@ import { SuggestedCurationsCallout } from './components/suggested_curations_call
 
 import { EngineOverviewLogic } from '.';
 
-export const EngineOverviewMetrics: React.FC = () => {
+export const EngineOverviewMetrics: React.FC<React.PropsWithChildren<unknown>> = () => {
   const { loadOverviewMetrics } = useActions(EngineOverviewLogic);
   const { dataLoading } = useValues(EngineOverviewLogic);
 

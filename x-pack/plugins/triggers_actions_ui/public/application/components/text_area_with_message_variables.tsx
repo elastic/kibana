@@ -23,7 +23,7 @@ interface Props {
   errors?: string[];
 }
 
-export const TextAreaWithMessageVariables: React.FunctionComponent<Props> = ({
+export const TextAreaWithMessageVariables: React.FunctionComponent<React.PropsWithChildren<Props>> = ({
   messageVariables,
   paramsProperty,
   index,

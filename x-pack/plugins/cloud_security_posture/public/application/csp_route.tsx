@@ -20,7 +20,7 @@ const STATIC_PATH_PAGE_IDS = Object.fromEntries(
   Object.values(cloudPosturePages).map(({ id }) => [id, true])
 );
 
-export const CspRoute: React.FC<CspRouteProps> = ({
+export const CspRoute: React.FC<React.PropsWithChildren<CspRouteProps>> = ({
   id,
   children,
   component: Component,

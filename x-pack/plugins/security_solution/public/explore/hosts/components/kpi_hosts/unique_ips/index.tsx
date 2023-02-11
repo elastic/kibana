@@ -53,7 +53,7 @@ export const fieldsMapping: Readonly<StatItems[]> = [
   },
 ];
 
-const HostsKpiUniqueIpsComponent: React.FC<HostsKpiProps> = ({
+const HostsKpiUniqueIpsComponent: React.FC<React.PropsWithChildren<HostsKpiProps>> = ({
   filterQuery,
   from,
   indexNames,

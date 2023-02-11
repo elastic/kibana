@@ -16,7 +16,7 @@ import deepEqual from 'fast-deep-equal';
 import { AnomalySwimlaneEmbeddableInput } from '..';
 
 export const initComponent = memoize(
-  (fieldFormats: FieldFormatsStart, EmbeddableComponent: FC<AnomalySwimlaneEmbeddableInput>) => {
+  (fieldFormats: FieldFormatsStart, EmbeddableComponent: FC<React.PropsWithChildren<AnomalySwimlaneEmbeddableInput>>) => {
     return React.memo(
       (props: PersistableStateAttachmentViewProps) => {
         const { persistableStateAttachmentState } = props;

@@ -29,7 +29,7 @@ interface Props {
   componentTemplateDetails: ComponentTemplateDeserialized;
 }
 
-export const ManageButton: React.FunctionComponent<Props> = ({
+export const ManageButton: React.FunctionComponent<React.PropsWithChildren<Props>> = ({
   actions,
   componentTemplateDetails,
 }) => {

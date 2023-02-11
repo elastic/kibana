@@ -16,7 +16,7 @@ interface Props {
   alertFilters: { [key: string]: string[] };
 }
 
-export const AddFilterButton: React.FC<Props> = ({ newFilters, onNewFilter, alertFilters }) => {
+export const AddFilterButton: React.FC<React.PropsWithChildren<Props>> = ({ newFilters, onNewFilter, alertFilters }) => {
   const [isPopoverOpen, setPopover] = useState(false);
 
   const getSelectedItems = (fieldName: string) => alertFilters?.[fieldName] ?? [];

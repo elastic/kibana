@@ -18,7 +18,7 @@ interface Props {
   alert: CommonAlert;
   compressed?: boolean;
 }
-export const AlertConfiguration: React.FC<Props> = (props: Props) => {
+export const AlertConfiguration: React.FC<React.PropsWithChildren<Props>> = (props: Props) => {
   const { alert, compressed } = props;
   const [showFlyout, setShowFlyout] = React.useState(false);
   const [isEnabled, setIsEnabled] = React.useState(alert.enabled);

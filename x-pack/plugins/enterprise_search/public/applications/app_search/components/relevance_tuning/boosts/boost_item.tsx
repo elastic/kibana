@@ -23,7 +23,7 @@ interface Props {
   name: string;
 }
 
-export const BoostItem: React.FC<Props> = ({ id, boost, index, name }) => {
+export const BoostItem: React.FC<React.PropsWithChildren<Props>> = ({ id, boost, index, name }) => {
   const summary = useMemo(() => getBoostSummary(boost), [boost]);
 
   return (

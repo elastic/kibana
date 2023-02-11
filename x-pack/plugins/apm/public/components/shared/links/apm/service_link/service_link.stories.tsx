@@ -16,7 +16,7 @@ export default {
   title: 'shared/ServiceLink',
   component: ServiceLink,
   decorators: [
-    (StoryComponent: ComponentType) => {
+    (StoryComponent: ComponentType<React.PropsWithChildren<unknown>>) => {
       return (
         <MockApmPluginStorybook>
           <StoryComponent />

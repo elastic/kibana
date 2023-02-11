@@ -40,7 +40,7 @@ interface Props {
   createNewEmbeddable: (factory: EmbeddableFactoryDefinition) => () => void;
 }
 
-export const EditorMenu: FC<Props> = ({
+export const EditorMenu: FC<React.PropsWithChildren<Props>> = ({
   factories,
   isDarkThemeEnabled,
   promotedVisTypes,

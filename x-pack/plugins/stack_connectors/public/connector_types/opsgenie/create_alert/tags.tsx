@@ -38,7 +38,7 @@ const options: Array<EuiComboBoxOptionOption<string>> = [
   },
 ];
 
-const TagsComponent: React.FC<TagsProps> = ({ onChange, values, executionMode }) => {
+const TagsComponent: React.FC<React.PropsWithChildren<TagsProps>> = ({ onChange, values, executionMode }) => {
   const tagOptions = useMemo(() => values.map((value) => getTagAsOption(value)), [values]);
 
   const onCreateOption = useCallback(

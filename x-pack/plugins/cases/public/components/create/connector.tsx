@@ -53,7 +53,7 @@ const ConnectorFields = ({ connectors, isEdit, field, setErrors }: ConnectorsFie
 };
 ConnectorFields.displayName = 'ConnectorFields';
 
-const ConnectorComponent: React.FC<Props> = ({ connectors, isLoading, isLoadingConnectors }) => {
+const ConnectorComponent: React.FC<React.PropsWithChildren<Props>> = ({ connectors, isLoading, isLoadingConnectors }) => {
   const { getFields, setFieldValue } = useFormContext();
   const { connector: configurationConnector } = useCaseConfigure();
   const { actions } = useApplicationCapabilities();

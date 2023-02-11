@@ -29,7 +29,7 @@ import { getDeleteDomainConfirmationMessage } from '../utils';
 
 import { CustomFormattedTimestamp } from './custom_formatted_timestamp';
 
-export const DomainsTable: React.FC = () => {
+export const DomainsTable: React.FC<React.PropsWithChildren<unknown>> = () => {
   const { domains, meta, dataLoading } = useValues(CrawlerDomainsLogic);
   const { fetchCrawlerDomainsData, onPaginate, deleteDomain } = useActions(CrawlerDomainsLogic);
 

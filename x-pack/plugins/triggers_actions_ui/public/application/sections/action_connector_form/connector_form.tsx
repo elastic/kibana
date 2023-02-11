@@ -95,7 +95,7 @@ const formSerializer = (formData: ConnectorFormSchema): ConnectorFormSchema => {
   };
 };
 
-const ConnectorFormComponent: React.FC<Props> = ({
+const ConnectorFormComponent: React.FC<React.PropsWithChildren<Props>> = ({
   actionTypeModel,
   connector,
   isEdit,

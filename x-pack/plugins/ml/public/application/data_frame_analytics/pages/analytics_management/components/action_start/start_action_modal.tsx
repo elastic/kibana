@@ -11,7 +11,7 @@ import { EuiConfirmModal, EUI_MODAL_CONFIRM_BUTTON } from '@elastic/eui';
 
 import { StartAction } from './use_start_action';
 
-export const StartActionModal: FC<StartAction> = ({ closeModal, item, startAndCloseModal }) => {
+export const StartActionModal: FC<React.PropsWithChildren<StartAction>> = ({ closeModal, item, startAndCloseModal }) => {
   return (
     <>
       {item !== undefined && (

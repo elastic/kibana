@@ -17,7 +17,7 @@ interface Props {
   packageInfo: PackageInfo;
 }
 
-export const CustomViewPage: React.FC<Props> = memo(({ packageInfo }) => {
+export const CustomViewPage: React.FC<React.PropsWithChildren<Props>> = memo(({ packageInfo }) => {
   const customViewExtension = useUIExtension(packageInfo.name, 'package-detail-custom');
   const { getPath } = useLink();
   const pkgkey = useMemo(() => pkgKeyFromPackageInfo(packageInfo), [packageInfo]);

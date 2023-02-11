@@ -95,12 +95,12 @@ export interface SecuritySolutionPluginContext {
   /**
    * Gets the `FiltersGlobal` component for embedding a filter bar in the security solution application.
    * */
-  getFiltersGlobalComponent: () => ComponentType<{ children: ReactNode }>;
+  getFiltersGlobalComponent: () => ComponentType<React.PropsWithChildren<{ children: ReactNode }>>;
 
   /**
    * Gets the `PageWrapper` component for embedding a filter bar in the security solution application.
    * */
-  getPageWrapper: () => ComponentType<{ children: ReactNode }>;
+  getPageWrapper: () => ComponentType<React.PropsWithChildren<{ children: ReactNode }>>;
 
   /**
    * Get the user's license to drive the Threat Intelligence plugin's visibility.

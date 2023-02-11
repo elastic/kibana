@@ -39,7 +39,7 @@ const StyledEuiContextMenuPanel = styled(EuiContextMenuPanel)`
   visibility: inherit;
 `;
 
-const OverflowButton: React.FC<OverflowButtonProps> = React.memo(
+const OverflowButton: React.FC<React.PropsWithChildren<OverflowButtonProps>> = React.memo(
   ({
     closePopOver,
     Component,

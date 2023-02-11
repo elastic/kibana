@@ -50,7 +50,7 @@ interface OwnProps {
 
 export type FlowTargetSelectProps = OwnProps;
 
-const FlowTargetSelectComponent: React.FC<FlowTargetSelectProps> = ({
+const FlowTargetSelectComponent: React.FC<React.PropsWithChildren<FlowTargetSelectProps>> = ({
   id,
   isLoading = false,
   selectedDirection,

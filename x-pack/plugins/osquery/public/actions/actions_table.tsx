@@ -33,7 +33,7 @@ interface ActionTableResultsButtonProps {
   actionId: string;
 }
 
-const ActionTableResultsButton: React.FC<ActionTableResultsButtonProps> = ({ actionId }) => {
+const ActionTableResultsButton: React.FC<React.PropsWithChildren<ActionTableResultsButtonProps>> = ({ actionId }) => {
   const navProps = useRouterNavigate(`live_queries/${actionId}`);
 
   const detailsText = i18n.translate(

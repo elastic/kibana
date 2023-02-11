@@ -16,7 +16,7 @@ const LazyComponent = lazy(() =>
   }))
 );
 
-export const ReportingPanelContent: FC<Omit<Props, 'intl'>> = (props) => {
+export const ReportingPanelContent: FC<React.PropsWithChildren<Omit<Props, 'intl'>>> = (props) => {
   return (
     <Suspense fallback={<PanelSpinner />}>
       <LazyComponent {...props} />

@@ -21,7 +21,7 @@ import { waitForComponentToPaint } from '../../common/test_utils';
 describe('Case Owner Selection', () => {
   let globalForm: FormHook;
 
-  const MockHookWrapperComponent: React.FC = ({ children }) => {
+  const MockHookWrapperComponent: React.FC<React.PropsWithChildren<unknown>> = ({ children }) => {
     const { form } = useForm<FormProps>({
       defaultValue: { selectedOwner: '' },
       schema: {

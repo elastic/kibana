@@ -17,9 +17,7 @@ export type EnterpriseSearchEnginesPageTemplateProps = PageTemplateProps & {
   engineName?: string;
 };
 
-export const EnterpriseSearchEnginesPageTemplate: React.FC<
-  EnterpriseSearchEnginesPageTemplateProps
-> = ({ children, pageChrome, pageViewTelemetry, engineName, ...pageTemplateProps }) => {
+export const EnterpriseSearchEnginesPageTemplate: React.FC<React.PropsWithChildren<EnterpriseSearchEnginesPageTemplateProps>> = ({ children, pageChrome, pageViewTelemetry, engineName, ...pageTemplateProps }) => {
   const navItems = useEnterpriseSearchEngineNav(engineName, pageTemplateProps.isEmptyState);
   return (
     <EnterpriseSearchPageTemplateWrapper

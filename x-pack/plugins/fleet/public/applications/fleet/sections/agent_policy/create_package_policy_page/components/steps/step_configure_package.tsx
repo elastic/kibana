@@ -29,7 +29,7 @@ import type { PackagePolicyValidationResults } from '../../services';
 
 import { PackagePolicyInputPanel } from './components';
 
-export const StepConfigurePackagePolicy: React.FunctionComponent<{
+export const StepConfigurePackagePolicy: React.FunctionComponent<React.PropsWithChildren<{
   packageInfo: PackageInfo;
   showOnlyIntegration?: string;
   packagePolicy: NewPackagePolicy;
@@ -38,7 +38,7 @@ export const StepConfigurePackagePolicy: React.FunctionComponent<{
   submitAttempted: boolean;
   noTopRule?: boolean;
   isEditPage?: boolean;
-}> = ({
+}>> = ({
   packageInfo,
   showOnlyIntegration,
   packagePolicy,

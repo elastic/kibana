@@ -89,7 +89,7 @@ function getRemoveFilter({ entityName, entityValue, filter }: EntityCellProps) {
  * of the entity, such as a partitioning or influencer field value, and optionally links for
  * adding or removing a filter on this entity.
  */
-export const EntityCell: FC<EntityCellProps> = ({
+export const EntityCell: FC<React.PropsWithChildren<EntityCellProps>> = ({
   entityName,
   entityValue,
   filter,

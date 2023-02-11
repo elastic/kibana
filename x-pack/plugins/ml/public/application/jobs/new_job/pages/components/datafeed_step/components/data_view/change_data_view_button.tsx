@@ -12,7 +12,7 @@ import { EuiButtonEmpty } from '@elastic/eui';
 import { Description } from './description';
 import { ChangeDataViewModal } from './change_data_view';
 
-export const ChangeDataView: FC<{ isDisabled: boolean }> = ({ isDisabled }) => {
+export const ChangeDataView: FC<React.PropsWithChildren<{ isDisabled: boolean }>> = ({ isDisabled }) => {
   const [showFlyout, setShowFlyout] = useState(false);
 
   return (

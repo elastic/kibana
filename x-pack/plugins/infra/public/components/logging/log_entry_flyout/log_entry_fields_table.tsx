@@ -16,10 +16,10 @@ import { TimeKey } from '../../../../common/time';
 import { JsonScalar, jsonScalarRT } from '../../../../common/typed_json';
 import { FieldValue } from '../log_text_stream/field_value';
 
-export const LogEntryFieldsTable: React.FC<{
+export const LogEntryFieldsTable: React.FC<React.PropsWithChildren<{
   logEntry: LogEntry;
   onSetFieldFilter?: (filter: Query, logEntryId: string, timeKey?: TimeKey) => void;
-}> = ({ logEntry, onSetFieldFilter }) => {
+}>> = ({ logEntry, onSetFieldFilter }) => {
   const createSetFilterHandler = useMemo(
     () =>
       onSetFieldFilter

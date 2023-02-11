@@ -9,9 +9,9 @@ import { i18n } from '@kbn/i18n';
 import React, { FunctionComponent } from 'react';
 import { EuiCallOut } from '@elastic/eui';
 
-export const SystemIndicesOverwrittenCallOut: FunctionComponent<{
+export const SystemIndicesOverwrittenCallOut: FunctionComponent<React.PropsWithChildren<{
   featureStates: string[] | undefined;
-}> = ({ featureStates }) => {
+}>> = ({ featureStates }) => {
   return (
     <EuiCallOut
       data-test-subj="systemIndicesInfoCallOut"

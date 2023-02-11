@@ -67,7 +67,7 @@ enum STATE {
   SAVE_FAILED,
 }
 
-export const JobDetails: FC<Props> = ({
+export const JobDetails: FC<React.PropsWithChildren<Props>> = ({
   children,
   createADJobInWizard,
   createADJob,

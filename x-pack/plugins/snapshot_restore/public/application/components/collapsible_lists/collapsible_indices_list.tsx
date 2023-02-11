@@ -15,7 +15,7 @@ interface Props {
   indices: string[] | string | undefined;
 }
 
-export const CollapsibleIndicesList: React.FunctionComponent<Props> = ({ indices }) => {
+export const CollapsibleIndicesList: React.FunctionComponent<React.PropsWithChildren<Props>> = ({ indices }) => {
   const { hiddenItemsCount, isShowingFullList, items, setIsShowingFullList } = useCollapsibleList({
     items: indices,
   });

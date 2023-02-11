@@ -22,7 +22,7 @@ interface Props {
   rowFieldNames: DeprecationTableColumns[];
 }
 
-export const IndexSettingsTableRow: React.FunctionComponent<Props> = ({
+export const IndexSettingsTableRow: React.FunctionComponent<React.PropsWithChildren<Props>> = ({
   rowFieldNames,
   deprecation,
 }) => {

@@ -29,7 +29,7 @@ interface LensMarkDownRendererProps {
   timeRange?: TypedLensByValueInput['timeRange'];
 }
 
-const LensMarkDownRendererComponent: React.FC<LensMarkDownRendererProps> = ({
+const LensMarkDownRendererComponent: React.FC<React.PropsWithChildren<LensMarkDownRendererProps>> = ({
   attributes,
   timeRange,
 }) => {

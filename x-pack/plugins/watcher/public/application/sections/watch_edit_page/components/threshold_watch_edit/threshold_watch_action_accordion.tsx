@@ -71,7 +71,7 @@ interface Props {
   };
 }
 
-export const WatchActionsAccordion: React.FunctionComponent<Props> = ({
+export const WatchActionsAccordion: React.FunctionComponent<React.PropsWithChildren<Props>> = ({
   settings,
   actionErrors,
 }) => {

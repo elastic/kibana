@@ -38,7 +38,7 @@ function getFormattedValue(value: number, totalCount: number): string {
 
 const BOOLEAN_DISTRIBUTION_CHART_HEIGHT = 70;
 
-export const BooleanContent: FC<FieldDataRowProps> = ({ config, onAddFilter }) => {
+export const BooleanContent: FC<React.PropsWithChildren<FieldDataRowProps>> = ({ config, onAddFilter }) => {
   const fieldFormat = 'fieldFormat' in config ? config.fieldFormat : undefined;
   const formattedPercentages = useMemo(() => getTFPercentage(config), [config]);
   const theme = useDataVizChartTheme();

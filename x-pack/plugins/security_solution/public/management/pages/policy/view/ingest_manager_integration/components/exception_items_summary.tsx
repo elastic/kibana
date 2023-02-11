@@ -90,7 +90,7 @@ export const ExceptionItemsSummary = memo<ExceptionItemsSummaryProps>(
 
 ExceptionItemsSummary.displayName = 'ExceptionItemsSummary';
 
-const SummaryStat: FC<{ value: number; color?: EuiBadgeProps['color']; isSmall?: boolean }> = memo(
+const SummaryStat: FC<React.PropsWithChildren<{ value: number; color?: EuiBadgeProps['color']; isSmall?: boolean }>> = memo(
   ({ children, value, color, isSmall = false, ...commonProps }) => {
     return (
       <EuiText className="eui-displayInlineBlock" size={isSmall ? 'xs' : 's'}>

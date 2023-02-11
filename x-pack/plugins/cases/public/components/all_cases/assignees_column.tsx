@@ -24,7 +24,7 @@ export interface AssigneesColumnProps {
   compressedDisplayLimit?: number;
 }
 
-const AssigneesColumnComponent: React.FC<AssigneesColumnProps> = ({
+const AssigneesColumnComponent: React.FC<React.PropsWithChildren<AssigneesColumnProps>> = ({
   assignees,
   userProfiles,
   compressedDisplayLimit = COMPRESSED_AVATAR_LIMIT,

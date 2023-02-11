@@ -14,7 +14,7 @@ import { ENGINE_CURATIONS_PATH } from '../../../routes';
 import { SuggestionsCallout } from '../../curations/components/suggestions_callout';
 import { EngineLogic, generateEnginePath } from '../../engine';
 
-export const SuggestedCurationsCallout: React.FC = () => {
+export const SuggestedCurationsCallout: React.FC<React.PropsWithChildren<unknown>> = () => {
   const {
     engine: {
       adaptive_relevance_suggestions: adaptiveRelevanceSuggestions,

@@ -15,7 +15,7 @@ interface AccordionTitleProps extends RuleStatusIconProps {
   title: string;
 }
 
-const AccordionTitleComponent: React.FC<AccordionTitleProps> = ({ name, title, type }) => (
+const AccordionTitleComponent: React.FC<React.PropsWithChildren<AccordionTitleProps>> = ({ name, title, type }) => (
   <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
     <EuiFlexItem grow={false}>
       <RuleStatusIcon name={name} type={type} />

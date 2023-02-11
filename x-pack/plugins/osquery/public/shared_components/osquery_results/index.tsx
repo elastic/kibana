@@ -18,7 +18,7 @@ import type { StartPlugins } from '../../types';
 import type { OsqueryActionResultsProps } from './types';
 import { OsqueryResult } from './osquery_result';
 
-const OsqueryActionResultsComponent: React.FC<OsqueryActionResultsProps> = ({
+const OsqueryActionResultsComponent: React.FC<React.PropsWithChildren<OsqueryActionResultsProps>> = ({
   agentIds,
   ruleName,
   actionItems,
@@ -52,7 +52,7 @@ type OsqueryActionResultsWrapperProps = {
   services: CoreStart & StartPlugins;
 } & OsqueryActionResultsProps;
 
-const OsqueryActionResultsWrapperComponent: React.FC<OsqueryActionResultsWrapperProps> = ({
+const OsqueryActionResultsWrapperComponent: React.FC<React.PropsWithChildren<OsqueryActionResultsWrapperProps>> = ({
   services,
   ...restProps
 }) => (

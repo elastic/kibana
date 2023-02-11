@@ -22,7 +22,7 @@ interface FilteringPanelProps {
   filteringRules: FilteringRule[];
 }
 
-export const FilteringPanel: React.FC<FilteringPanelProps> = ({
+export const FilteringPanel: React.FC<React.PropsWithChildren<FilteringPanelProps>> = ({
   advancedSnippet,
   filteringRules,
 }) => {

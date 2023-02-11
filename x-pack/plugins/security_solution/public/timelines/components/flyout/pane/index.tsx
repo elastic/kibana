@@ -45,7 +45,7 @@ const IndexPatternFieldEditorOverlayGlobalStyle = createGlobalStyle<{
   }
 `;
 
-const FlyoutPaneComponent: React.FC<FlyoutPaneComponentProps> = ({
+const FlyoutPaneComponent: React.FC<React.PropsWithChildren<FlyoutPaneComponentProps>> = ({
   timelineId,
   visible = true,
 }) => {

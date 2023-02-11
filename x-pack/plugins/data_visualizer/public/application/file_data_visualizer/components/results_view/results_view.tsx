@@ -34,7 +34,7 @@ interface Props {
   disableButtons: boolean;
 }
 
-export const ResultsView: FC<Props> = ({
+export const ResultsView: FC<React.PropsWithChildren<Props>> = ({
   data,
   fileName,
   results,

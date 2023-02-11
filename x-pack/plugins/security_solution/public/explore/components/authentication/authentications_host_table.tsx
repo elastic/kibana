@@ -29,7 +29,7 @@ const TABLE_QUERY_ID = 'authenticationsHostsTableQuery';
 
 const tableType = hostsModel.HostsTableType.authentications;
 
-const AuthenticationsHostTableComponent: React.FC<HostsComponentsQueryProps> = ({
+const AuthenticationsHostTableComponent: React.FC<React.PropsWithChildren<HostsComponentsQueryProps>> = ({
   endDate,
   filterQuery,
   indexNames,

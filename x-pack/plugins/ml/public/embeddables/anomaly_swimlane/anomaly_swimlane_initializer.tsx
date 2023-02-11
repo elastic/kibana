@@ -41,7 +41,7 @@ export interface AnomalySwimlaneInitializerProps {
   onCancel: () => void;
 }
 
-export const AnomalySwimlaneInitializer: FC<AnomalySwimlaneInitializerProps> = ({
+export const AnomalySwimlaneInitializer: FC<React.PropsWithChildren<AnomalySwimlaneInitializerProps>> = ({
   defaultTitle,
   influencers,
   onCreate,

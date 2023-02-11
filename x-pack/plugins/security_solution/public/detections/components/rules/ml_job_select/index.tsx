@@ -51,7 +51,7 @@ const MlJobEuiButton = styled(EuiButton)`
   margin-top: 20px;
 `;
 
-const JobDisplay: React.FC<MlJobValue> = ({ description, name, id }) => (
+const JobDisplay: React.FC<React.PropsWithChildren<MlJobValue>> = ({ description, name, id }) => (
   <JobDisplayContainer>
     <strong>{name ?? id}</strong>
     <EuiToolTip content={description}>
@@ -77,7 +77,7 @@ const renderJobOption = (option: MlJobOption) => (
   />
 );
 
-export const MlJobSelect: React.FC<MlJobSelectProps> = ({ describedByIds = [], field }) => {
+export const MlJobSelect: React.FC<React.PropsWithChildren<MlJobSelectProps>> = ({ describedByIds = [], field }) => {
   const jobIds = field.value as string[];
   const { isInvalid, errorMessage } = getFieldValidityAndErrorMessage(field);
   const { loading, jobs } = useSecurityJobs();

@@ -19,7 +19,7 @@ import { useGetFieldsByIssueType } from './use_get_fields_by_issue_type';
 import { SearchIssues } from './search_issues';
 import { ConnectorCard } from '../card';
 
-const JiraFieldsComponent: React.FunctionComponent<ConnectorFieldsProps<JiraFieldsType>> = ({
+const JiraFieldsComponent: React.FunctionComponent<React.PropsWithChildren<ConnectorFieldsProps<JiraFieldsType>>> = ({
   connector,
   fields,
   isEdit = true,

@@ -18,7 +18,7 @@ interface Props {
   onCancel: () => void;
 }
 
-export const ManageLicenseModal: React.FC<Props> = ({
+export const ManageLicenseModal: React.FC<React.PropsWithChildren<Props>> = ({
   licenseType,
   ruleTypeId,
   onConfirm,

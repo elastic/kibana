@@ -29,7 +29,7 @@ interface ViewErrorsInLogsActionProps {
   timestamp?: string;
 }
 
-const ViewErrorsInLogsActionComponent: React.FC<ViewErrorsInLogsActionProps> = ({
+const ViewErrorsInLogsActionComponent: React.FC<React.PropsWithChildren<ViewErrorsInLogsActionProps>> = ({
   actionId,
   agentId,
   timestamp,
@@ -81,7 +81,7 @@ const renderErrorMessage = (error: string) => (
   </EuiCodeBlock>
 );
 
-const ScheduledQueryErrorsTableComponent: React.FC<ScheduledQueryErrorsTableProps> = ({
+const ScheduledQueryErrorsTableComponent: React.FC<React.PropsWithChildren<ScheduledQueryErrorsTableProps>> = ({
   actionId,
   interval,
 }) => {

@@ -145,13 +145,13 @@ function doesAgentPolicyHaveLimitedPackage(policy: AgentPolicy, pkgInfo: Package
     : false;
 }
 
-export const StepSelectAgentPolicy: React.FunctionComponent<{
+export const StepSelectAgentPolicy: React.FunctionComponent<React.PropsWithChildren<{
   packageInfo?: PackageInfo;
   agentPolicy: AgentPolicy | undefined;
   updateAgentPolicy: (agentPolicy: AgentPolicy | undefined) => void;
   setHasAgentPolicyError: (hasError: boolean) => void;
   selectedAgentPolicyId?: string;
-}> = ({
+}>> = ({
   packageInfo,
   agentPolicy,
   updateAgentPolicy,

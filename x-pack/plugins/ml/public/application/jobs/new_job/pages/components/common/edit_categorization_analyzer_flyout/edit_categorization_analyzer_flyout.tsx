@@ -27,7 +27,7 @@ import { getNewJobDefaults } from '../../../../../../services/ml_server_info';
 
 const EDITOR_HEIGHT = '800px';
 
-export const EditCategorizationAnalyzerFlyout: FC = () => {
+export const EditCategorizationAnalyzerFlyout: FC<React.PropsWithChildren<unknown>> = () => {
   const { jobCreator: jc, jobCreatorUpdate } = useContext(JobCreatorContext);
   const jobCreator = jc as CategorizationJobCreator;
   const [showJsonFlyout, setShowJsonFlyout] = useState(false);
@@ -121,7 +121,7 @@ export const EditCategorizationAnalyzerFlyout: FC = () => {
   );
 };
 
-const FlyoutButton: FC<{ onClick(): void }> = ({ onClick }) => {
+const FlyoutButton: FC<React.PropsWithChildren<{ onClick(): void }>> = ({ onClick }) => {
   return (
     <EuiButtonEmpty onClick={onClick} flush="left" data-test-subj="mlJobWizardButtonPreviewJobJson">
       <FormattedMessage
@@ -132,11 +132,11 @@ const FlyoutButton: FC<{ onClick(): void }> = ({ onClick }) => {
   );
 };
 
-const Contents: FC<{
+const Contents: FC<React.PropsWithChildren<{
   title: string;
   value: string;
   onChange(s: string): void;
-}> = ({ title, value, onChange }) => {
+}>> = ({ title, value, onChange }) => {
   return (
     <EuiFlexItem>
       <EuiTitle size="s">

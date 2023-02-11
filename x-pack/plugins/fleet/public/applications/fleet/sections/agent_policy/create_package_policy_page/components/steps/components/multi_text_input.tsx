@@ -38,7 +38,7 @@ interface RowProps {
   showDeleteButton?: boolean;
 }
 
-const Row: FunctionComponent<RowProps> = ({
+const Row: FunctionComponent<React.PropsWithChildren<RowProps>> = ({
   index,
   value,
   onChange,
@@ -92,7 +92,7 @@ function defaultValue(value: string[]) {
   return value.length > 0 ? value : [''];
 }
 
-export const MultiTextInput: FunctionComponent<Props> = ({
+export const MultiTextInput: FunctionComponent<React.PropsWithChildren<Props>> = ({
   value,
   onChange,
   onBlur,

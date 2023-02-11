@@ -15,7 +15,7 @@ import type { ConnectorFieldsProps } from '../types';
 import { ConnectorCard } from '../card';
 import { connectorValidator } from './validator';
 
-const SwimlaneComponent: React.FunctionComponent<ConnectorFieldsProps<SwimlaneFieldsType>> = ({
+const SwimlaneComponent: React.FunctionComponent<React.PropsWithChildren<ConnectorFieldsProps<SwimlaneFieldsType>>> = ({
   connector,
   isEdit = true,
 }) => {

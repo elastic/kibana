@@ -67,11 +67,11 @@ export function getInfluencersItems(
   return items;
 }
 
-export const DetailsItems: FC<{
+export const DetailsItems: FC<React.PropsWithChildren<{
   anomaly: AnomaliesTableRecord;
   filter: EntityCellFilter;
   modelPlotEnabled: boolean;
-}> = ({ anomaly, filter, modelPlotEnabled }) => {
+}>> = ({ anomaly, filter, modelPlotEnabled }) => {
   const source = anomaly.source;
 
   // TODO - when multivariate analyses are more common,
@@ -328,7 +328,7 @@ export const DetailsItems: FC<{
   );
 };
 
-export const AnomalyExplanationDetails: FC<{ anomaly: AnomaliesTableRecord }> = ({ anomaly }) => {
+export const AnomalyExplanationDetails: FC<React.PropsWithChildren<{ anomaly: AnomaliesTableRecord }>> = ({ anomaly }) => {
   const {
     services: { docLinks },
   } = useMlKibana();
@@ -604,7 +604,7 @@ export const AnomalyExplanationDetails: FC<{ anomaly: AnomaliesTableRecord }> = 
   );
 };
 
-const RecordScore: FC<{ score: number }> = ({ score }) => {
+const RecordScore: FC<React.PropsWithChildren<{ score: number }>> = ({ score }) => {
   return (
     <div
       css={{
@@ -731,7 +731,7 @@ function getImpactTooltip(
   return impactTooltips[type].medium;
 }
 
-const ImpactVisual: FC<{ score: number }> = ({ score }) => {
+const ImpactVisual: FC<React.PropsWithChildren<{ score: number }>> = ({ score }) => {
   const {
     euiTheme: { colors },
   } = useEuiTheme();

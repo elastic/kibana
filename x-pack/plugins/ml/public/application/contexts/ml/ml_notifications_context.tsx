@@ -38,7 +38,7 @@ export const MlNotificationsContext = React.createContext<{
   setLastCheckedAt: () => {},
 });
 
-export const MlNotificationsContextProvider: FC = ({ children }) => {
+export const MlNotificationsContextProvider: FC<React.PropsWithChildren<unknown>> = ({ children }) => {
   const {
     services: {
       mlServices: { mlApiServices },

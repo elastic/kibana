@@ -26,7 +26,7 @@ interface SectionProps {
   section: SectionConfig;
 }
 
-export const Section: FC<SectionProps> = ({ section }) => {
+export const Section: FC<React.PropsWithChildren<SectionProps>> = ({ section }) => {
   if (section.items.length === 0) {
     return null;
   }
@@ -67,7 +67,7 @@ interface ExpandedRowDetailsPaneProps {
   dataTestSubj: string;
 }
 
-export const ExpandedRowDetailsPane: FC<ExpandedRowDetailsPaneProps> = ({
+export const ExpandedRowDetailsPane: FC<React.PropsWithChildren<ExpandedRowDetailsPaneProps>> = ({
   sections,
   dataTestSubj,
 }) => {

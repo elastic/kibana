@@ -34,7 +34,7 @@ interface Props {
   onDeleteJob: (i: number) => void;
 }
 
-export const DetectorList: FC<Props> = ({ isActive, onEditJob, onDeleteJob }) => {
+export const DetectorList: FC<React.PropsWithChildren<Props>> = ({ isActive, onEditJob, onDeleteJob }) => {
   const {
     jobCreator: jc,
     jobCreatorUpdated,
@@ -63,7 +63,7 @@ export const DetectorList: FC<Props> = ({ isActive, onEditJob, onDeleteJob }) =>
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [jobValidatorUpdated]);
 
-  const Buttons: FC<{ index: number }> = ({ index }) => {
+  const Buttons: FC<React.PropsWithChildren<{ index: number }>> = ({ index }) => {
     return (
       <EuiFlexGroup gutterSize="s">
         <EuiFlexItem>
@@ -150,7 +150,7 @@ export const DetectorList: FC<Props> = ({ isActive, onEditJob, onDeleteJob }) =>
   );
 };
 
-const NoDetectorsWarning: FC<{ show: boolean }> = ({ show }) => {
+const NoDetectorsWarning: FC<React.PropsWithChildren<{ show: boolean }>> = ({ show }) => {
   if (show === false) {
     return null;
   }
@@ -174,7 +174,7 @@ const NoDetectorsWarning: FC<{ show: boolean }> = ({ show }) => {
   );
 };
 
-const DetectorsValidationWarning: FC<{ validation: Validation }> = ({ validation }) => {
+const DetectorsValidationWarning: FC<React.PropsWithChildren<{ validation: Validation }>> = ({ validation }) => {
   if (validation.valid === true) {
     return null;
   }
@@ -188,6 +188,6 @@ const DetectorsValidationWarning: FC<{ validation: Validation }> = ({ validation
   );
 };
 
-const StringifiedDetector: FC<{ detector: Detector }> = ({ detector }) => {
+const StringifiedDetector: FC<React.PropsWithChildren<{ detector: Detector }>> = ({ detector }) => {
   return <div data-test-subj="mlDetectorIdentifier">{detectorToString(detector)}</div>;
 };

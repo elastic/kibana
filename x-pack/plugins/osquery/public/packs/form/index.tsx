@@ -54,7 +54,7 @@ interface PackFormProps {
   isReadOnly?: boolean;
 }
 
-const PackFormComponent: React.FC<PackFormProps> = ({
+const PackFormComponent: React.FC<React.PropsWithChildren<PackFormProps>> = ({
   defaultValue,
   editMode = false,
   isReadOnly = false,

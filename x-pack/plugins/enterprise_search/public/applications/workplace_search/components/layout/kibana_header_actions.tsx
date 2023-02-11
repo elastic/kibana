@@ -14,7 +14,7 @@ import { EuiButtonEmptyTo } from '../../../shared/react_router_helpers';
 import { NAV } from '../../constants';
 import { PRIVATE_SOURCES_PATH } from '../../routes';
 
-export const WorkplaceSearchHeaderActions: React.FC = () => {
+export const WorkplaceSearchHeaderActions: React.FC<React.PropsWithChildren<unknown>> = () => {
   if (!externalUrl.enterpriseSearchUrl) return null;
 
   return (

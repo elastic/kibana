@@ -30,7 +30,7 @@ import { NotObscuredByBottomBar } from '..';
 import { StepConfigurePackagePolicy, StepDefinePackagePolicy } from '../../../components';
 import { prepareInputPackagePolicyDataset } from '../../../services/prepare_input_pkg_policy_dataset';
 
-const ExpandableAdvancedSettings: React.FC = ({ children }) => {
+const ExpandableAdvancedSettings: React.FC<React.PropsWithChildren<unknown>> = ({ children }) => {
   const [isShowingAdvanced, setIsShowingAdvanced] = useState<boolean>(false);
 
   return (
@@ -60,7 +60,7 @@ const ExpandableAdvancedSettings: React.FC = ({ children }) => {
     </EuiFlexItem>
   );
 };
-const AddIntegrationError: React.FC<{ error: Error | string; title?: JSX.Element }> = ({
+const AddIntegrationError: React.FC<React.PropsWithChildren<{ error: Error | string; title?: JSX.Element }>> = ({
   error,
   title,
 }) => (
@@ -79,7 +79,7 @@ const AddIntegrationError: React.FC<{ error: Error | string; title?: JSX.Element
   />
 );
 
-export const AddIntegrationPageStep: React.FC<MultiPageStepLayoutProps> = (props) => {
+export const AddIntegrationPageStep: React.FC<React.PropsWithChildren<MultiPageStepLayoutProps>> = (props) => {
   const { onNext, onBack, isManaged, setIsManaged, packageInfo, integrationInfo, agentPolicy } =
     props;
 

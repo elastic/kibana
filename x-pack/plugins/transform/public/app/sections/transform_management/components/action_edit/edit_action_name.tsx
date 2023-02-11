@@ -23,7 +23,7 @@ export const editActionNameText = i18n.translate(
   }
 );
 
-export const EditActionName: FC = () => {
+export const EditActionName: FC<React.PropsWithChildren<unknown>> = () => {
   const { canCreateTransform } = useContext(AuthorizationContext).capabilities;
 
   if (!canCreateTransform) {

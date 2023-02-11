@@ -26,7 +26,7 @@ import { useListDetailsView } from '../../hooks';
 import * as i18n from '../../translations';
 import { ExportExceptionsListModal } from '../../components/export_exceptions_list_modal';
 
-export const ListsDetailViewComponent: FC = () => {
+export const ListsDetailViewComponent: FC<React.PropsWithChildren<unknown>> = () => {
   const { detailName: exceptionListId } = useParams<{
     detailName: string;
   }>();

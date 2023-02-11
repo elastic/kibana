@@ -21,7 +21,7 @@ interface Props {
   field?: SearchField;
 }
 
-export const RelevanceTuningItem: React.FC<Props> = ({ name, type, boosts = [], field }) => {
+export const RelevanceTuningItem: React.FC<React.PropsWithChildren<Props>> = ({ name, type, boosts = [], field }) => {
   return (
     <EuiFlexGroup alignItems="center" responsive={false}>
       <EuiFlexItem>

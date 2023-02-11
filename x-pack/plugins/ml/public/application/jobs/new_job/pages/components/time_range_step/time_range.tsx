@@ -28,7 +28,7 @@ import {
   type TMlStorageMapped,
 } from '../../../../../../../common/types/storage';
 
-export const TimeRangeStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep }) => {
+export const TimeRangeStep: FC<React.PropsWithChildren<StepProps>> = ({ setCurrentStep, isCurrentStep }) => {
   const timefilter = useTimefilter();
   const { services } = useMlKibana();
   const mlContext = useMlContext();

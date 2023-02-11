@@ -52,7 +52,7 @@ interface Props {
   refresh(): void;
 }
 
-export const RevertModelSnapshotFlyout: FC<Props> = ({
+export const RevertModelSnapshotFlyout: FC<React.PropsWithChildren<Props>> = ({
   snapshot,
   snapshots,
   job,

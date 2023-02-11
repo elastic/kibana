@@ -34,7 +34,7 @@ interface FleetStatus extends FleetStatusState {
 
 const FleetStatusContext = React.createContext<FleetStatus | undefined>(undefined);
 
-export const FleetStatusProvider: React.FC = ({ children }) => {
+export const FleetStatusProvider: React.FC<React.PropsWithChildren<unknown>> = ({ children }) => {
   const config = useConfig();
   const [forceDisplayInstructions, setForceDisplayInstructions] = useState(false);
 

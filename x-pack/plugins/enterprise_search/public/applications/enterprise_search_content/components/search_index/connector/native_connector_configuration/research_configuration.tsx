@@ -16,7 +16,7 @@ import { NativeConnector } from '../types';
 interface ResearchConfigurationProps {
   nativeConnector: NativeConnector;
 }
-export const ResearchConfiguration: React.FC<ResearchConfigurationProps> = ({
+export const ResearchConfiguration: React.FC<React.PropsWithChildren<ResearchConfigurationProps>> = ({
   nativeConnector,
 }) => {
   const { docsUrl, externalDocsUrl, name } = nativeConnector;

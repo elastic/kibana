@@ -7,7 +7,7 @@
 
 import { FunctionComponent } from 'react';
 
-export const SetupModeRenderer: FunctionComponent<Record<any, any>>;
+export const SetupModeRenderer: FunctionComponent<React.PropsWithChildren<Record<any, any>>>;
 export interface SetupModeProps {
   setupMode: any;
   flyoutComponent: any;

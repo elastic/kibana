@@ -18,7 +18,7 @@ interface OwnProps {
   timelineId?: string;
 }
 
-export const NewTemplateTimelineComponent: React.FC<OwnProps> = ({
+export const NewTemplateTimelineComponent: React.FC<React.PropsWithChildren<OwnProps>> = ({
   closeGearMenu,
   outline,
   title,

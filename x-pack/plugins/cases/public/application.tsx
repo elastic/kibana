@@ -38,7 +38,7 @@ interface CasesAppWithContextProps {
   persistableStateAttachmentTypeRegistry: PersistableStateAttachmentTypeRegistry;
 }
 
-const CasesAppWithContext: React.FC<CasesAppWithContextProps> = React.memo(
+const CasesAppWithContext: React.FC<React.PropsWithChildren<CasesAppWithContextProps>> = React.memo(
   ({ externalReferenceAttachmentTypeRegistry, persistableStateAttachmentTypeRegistry }) => {
     const [darkMode] = useUiSetting$<boolean>('theme:darkMode');
 
@@ -55,7 +55,7 @@ const CasesAppWithContext: React.FC<CasesAppWithContextProps> = React.memo(
 
 CasesAppWithContext.displayName = 'CasesAppWithContext';
 
-export const App: React.FC<{ deps: RenderAppProps }> = ({ deps }) => {
+export const App: React.FC<React.PropsWithChildren<{ deps: RenderAppProps }>> = ({ deps }) => {
   const { mountParams, coreStart, pluginsStart, storage, kibanaVersion } = deps;
   const { history, theme$ } = mountParams;
 

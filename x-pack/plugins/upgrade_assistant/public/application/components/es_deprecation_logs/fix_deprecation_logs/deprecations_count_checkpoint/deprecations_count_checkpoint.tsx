@@ -56,7 +56,7 @@ interface Props {
   setCheckpoint: (value: string) => void;
 }
 
-export const DeprecationsCountCheckpoint: FunctionComponent<Props> = ({
+export const DeprecationsCountCheckpoint: FunctionComponent<React.PropsWithChildren<Props>> = ({
   checkpoint,
   setCheckpoint,
 }) => {

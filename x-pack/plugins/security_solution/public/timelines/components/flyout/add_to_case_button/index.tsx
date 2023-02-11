@@ -26,7 +26,7 @@ interface Props {
   timelineId: string;
 }
 
-const AddToCaseButtonComponent: React.FC<Props> = ({ timelineId }) => {
+const AddToCaseButtonComponent: React.FC<React.PropsWithChildren<Props>> = ({ timelineId }) => {
   const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
   const {
     cases,

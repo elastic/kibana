@@ -46,6 +46,6 @@ const fieldsConfig: FieldsConfig = {
   },
 };
 
-export const Pipeline: FunctionComponent = () => {
+export const Pipeline: FunctionComponent<React.PropsWithChildren<unknown>> = () => {
   return <UseField config={fieldsConfig.name} component={Field} path="fields.name" />;
 };

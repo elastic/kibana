@@ -39,7 +39,7 @@ const sorting = {
   },
 } as const;
 
-const AnomaliesUserTableComponent: React.FC<AnomaliesUserTableProps> = ({
+const AnomaliesUserTableComponent: React.FC<React.PropsWithChildren<AnomaliesUserTableProps>> = ({
   startDate,
   endDate,
   userName,

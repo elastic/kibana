@@ -19,7 +19,7 @@ import { breadcrumbService } from '../../services/breadcrumbs';
 import { saveTemplate } from '../../services/api';
 import { getTemplateDetailsLink } from '../../services/routing';
 
-export const TemplateCreate: React.FunctionComponent<RouteComponentProps> = ({ history }) => {
+export const TemplateCreate: React.FunctionComponent<React.PropsWithChildren<RouteComponentProps>> = ({ history }) => {
   const [isSaving, setIsSaving] = useState<boolean>(false);
   const [saveError, setSaveError] = useState<any>(null);
   const search = parse(useLocation().search.substring(1));

@@ -54,7 +54,7 @@ interface FilterOption {
 const stringSortAscending = (a: string, b: string): number => a.localeCompare(b);
 const toFilterOption = (value: string): FilterOption => ({ name: value, value });
 
-export const PackagePoliciesTable: React.FunctionComponent<Props> = ({
+export const PackagePoliciesTable: React.FunctionComponent<React.PropsWithChildren<Props>> = ({
   packagePolicies: originalPackagePolicies,
   agentPolicy,
   ...rest

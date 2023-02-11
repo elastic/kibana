@@ -12,7 +12,7 @@ import { createEndpointLibraryRowRenderer } from '../../timeline/body/renderers/
 import { LOADED_LIBRARY } from '../../timeline/body/renderers/system/translations';
 import { ROW_RENDERER_BROWSER_EXAMPLE_TIMELINE_ID } from '../constants';
 
-const LibraryExampleComponent: React.FC = () => {
+const LibraryExampleComponent: React.FC<React.PropsWithChildren<unknown>> = () => {
   const libraryRowRenderer = createEndpointLibraryRowRenderer({
     actionName: 'load',
     text: LOADED_LIBRARY,

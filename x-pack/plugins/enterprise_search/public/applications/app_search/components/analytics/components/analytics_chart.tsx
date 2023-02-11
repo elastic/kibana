@@ -31,7 +31,7 @@ interface Props {
     isDashed?: boolean;
   }>;
 }
-export const AnalyticsChart: React.FC<Props> = ({ height = 300, lines }) => {
+export const AnalyticsChart: React.FC<React.PropsWithChildren<Props>> = ({ height = 300, lines }) => {
   const { charts } = useValues(KibanaLogic);
 
   return (

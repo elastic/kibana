@@ -13,7 +13,7 @@ interface Props {
   enabled: boolean;
   phase: string & keyof Phases;
 }
-export const PhaseIcon: FunctionComponent<Props> = ({ enabled, phase }) => {
+export const PhaseIcon: FunctionComponent<React.PropsWithChildren<Props>> = ({ enabled, phase }) => {
   return (
     <div
       className={`ilmPhaseIcon ilmPhaseIcon--${phase} ${enabled ? '' : 'ilmPhaseIcon--disabled'}`}

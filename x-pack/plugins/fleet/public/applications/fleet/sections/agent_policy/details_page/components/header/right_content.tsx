@@ -43,7 +43,7 @@ const Divider = styled.div`
   border-left: ${(props) => props.theme.eui.euiBorderThin};
 `;
 
-export const HeaderRightContent: React.FunctionComponent<HeaderRightContentProps> = ({
+export const HeaderRightContent: React.FunctionComponent<React.PropsWithChildren<HeaderRightContentProps>> = ({
   isLoading,
   policyId,
   agentPolicy,

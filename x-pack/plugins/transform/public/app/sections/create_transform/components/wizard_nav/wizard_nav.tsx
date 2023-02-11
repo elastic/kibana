@@ -18,7 +18,7 @@ interface StepsNavProps {
   next?(): void;
 }
 
-export const WizardNav: FC<StepsNavProps> = ({
+export const WizardNav: FC<React.PropsWithChildren<StepsNavProps>> = ({
   previous,
   previousActive = true,
   next,

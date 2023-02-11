@@ -28,7 +28,7 @@ export interface ValidationSummary {
   success: number;
 }
 
-export const ValidationStepWrapper: FC<CreateAnalyticsStepProps> = ({
+export const ValidationStepWrapper: FC<React.PropsWithChildren<CreateAnalyticsStepProps>> = ({
   state,
   setCurrentStep,
   step,

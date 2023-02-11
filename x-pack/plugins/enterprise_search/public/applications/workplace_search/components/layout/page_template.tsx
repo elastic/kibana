@@ -14,7 +14,7 @@ import { SendWorkplaceSearchTelemetry } from '../../../shared/telemetry';
 
 import { useWorkplaceSearchNav } from './nav';
 
-export const WorkplaceSearchPageTemplate: React.FC<PageTemplateProps> = ({
+export const WorkplaceSearchPageTemplate: React.FC<React.PropsWithChildren<PageTemplateProps>> = ({
   children,
   pageChrome,
   pageViewTelemetry,

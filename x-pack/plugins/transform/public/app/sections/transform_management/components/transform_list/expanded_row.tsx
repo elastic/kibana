@@ -44,7 +44,7 @@ interface Props {
 
 type StateValues = Optional<TransformListRow['stats'], 'stats' | 'checkpointing'>;
 
-export const ExpandedRow: FC<Props> = ({ item, onAlertEdit }) => {
+export const ExpandedRow: FC<React.PropsWithChildren<Props>> = ({ item, onAlertEdit }) => {
   const {
     ml: { formatHumanReadableDateTimeSeconds },
   } = useAppDependencies();

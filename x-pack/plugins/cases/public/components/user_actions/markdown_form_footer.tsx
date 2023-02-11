@@ -17,7 +17,7 @@ interface UserActionMarkdownFooterProps {
   handleCancelAction: () => void;
 }
 
-const UserActionMarkdownFooterComponent: React.FC<UserActionMarkdownFooterProps> = ({
+const UserActionMarkdownFooterComponent: React.FC<React.PropsWithChildren<UserActionMarkdownFooterProps>> = ({
   handleSaveAction,
   handleCancelAction,
 }) => {

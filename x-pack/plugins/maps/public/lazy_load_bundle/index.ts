@@ -34,7 +34,7 @@ export interface LazyLoadedMapModules {
     params: AppMountParameters,
     deps: {
       coreStart: CoreStart;
-      AppUsageTracker: React.FC;
+      AppUsageTracker: React.FC<React.PropsWithChildren<unknown>>;
       savedObjectsTagging?: SavedObjectTaggingPluginStart;
     }
   ) => Promise<() => void>;

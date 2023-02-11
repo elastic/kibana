@@ -23,7 +23,7 @@ interface Props {
   onCopy?: () => void;
 }
 
-export const InstallSection: React.FunctionComponent<Props> = ({
+export const InstallSection: React.FunctionComponent<React.PropsWithChildren<Props>> = ({
   installCommand,
   isK8s,
   enrollToken,

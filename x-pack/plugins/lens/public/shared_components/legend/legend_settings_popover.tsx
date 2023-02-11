@@ -165,7 +165,7 @@ export const MaxLinesInput = ({
   );
 };
 
-export const LegendSettingsPopover: React.FunctionComponent<LegendSettingsPopoverProps> = ({
+export const LegendSettingsPopover: React.FunctionComponent<React.PropsWithChildren<LegendSettingsPopoverProps>> = ({
   legendOptions,
   mode,
   onDisplayChange,

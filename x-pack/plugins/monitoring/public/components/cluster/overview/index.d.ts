@@ -7,7 +7,7 @@
 
 import { FunctionComponent } from 'react';
 
-export const Overview: FunctionComponent<OverviewProps>;
+export const Overview: FunctionComponent<React.PropsWithChildren<OverviewProps>>;
 
 export interface OverviewProps {
   cluster: unknown;

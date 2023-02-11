@@ -20,7 +20,7 @@ import { useMonitorAddEditBreadcrumbs } from './use_breadcrumbs';
 import { getMonitorAPI } from '../../state/monitor_management/api';
 import { EDIT_MONITOR_STEPS } from './steps/step_config';
 
-const MonitorEditPage: React.FC = () => {
+const MonitorEditPage: React.FC<React.PropsWithChildren<unknown>> = () => {
   useTrackPageview({ app: 'synthetics', path: 'edit-monitor' });
   useTrackPageview({ app: 'synthetics', path: 'edit-monitor', delay: 15000 });
   const { monitorId } = useParams<{ monitorId: string }>();

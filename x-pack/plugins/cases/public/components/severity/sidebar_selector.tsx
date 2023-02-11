@@ -18,7 +18,7 @@ interface Props {
   isDisabled: boolean;
 }
 
-export const SeveritySidebarSelector: React.FC<Props> = ({
+export const SeveritySidebarSelector: React.FC<React.PropsWithChildren<Props>> = ({
   selectedSeverity,
   onSeverityChange,
   isLoading,

@@ -34,7 +34,7 @@ interface Props {
   onRepositoryDeleted: (repositoriesDeleted: Array<Repository['name']>) => void;
 }
 
-export const RepositoryTable: React.FunctionComponent<Props> = ({
+export const RepositoryTable: React.FunctionComponent<React.PropsWithChildren<Props>> = ({
   repositories,
   managedRepository,
   reload,

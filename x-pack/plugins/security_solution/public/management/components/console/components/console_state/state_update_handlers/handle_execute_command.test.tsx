@@ -37,7 +37,7 @@ describe('When a Console command is entered by the user', () => {
   });
 
   it('should display custom help output when Command service has `getHelp()` defined', async () => {
-    const HelpComponent: React.FunctionComponent = () => {
+    const HelpComponent: React.FunctionComponent<React.PropsWithChildren<unknown>> = () => {
       return <div data-test-subj="custom-help">{'help output'}</div>;
     };
     render({ HelpComponent });

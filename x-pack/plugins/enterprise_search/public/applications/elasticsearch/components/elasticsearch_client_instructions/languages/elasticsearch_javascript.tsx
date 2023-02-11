@@ -13,7 +13,7 @@ import { EuiCodeBlock, EuiLink, EuiText, EuiSpacer } from '@elastic/eui';
 
 import { docLinks } from '../../../../shared/doc_links';
 
-export const ElasticsearchJavascript: React.FC<{ cloudId?: string }> = ({ cloudId }) => {
+export const ElasticsearchJavascript: React.FC<React.PropsWithChildren<{ cloudId?: string }>> = ({ cloudId }) => {
   return (
     <>
       <EuiText>

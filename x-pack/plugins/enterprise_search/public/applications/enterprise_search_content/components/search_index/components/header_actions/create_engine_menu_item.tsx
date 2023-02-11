@@ -23,7 +23,7 @@ export interface CreateEngineMenuItemProps {
   isHiddenIndex?: boolean;
 }
 
-export const CreateEngineMenuItem: React.FC<CreateEngineMenuItemProps> = ({
+export const CreateEngineMenuItem: React.FC<React.PropsWithChildren<CreateEngineMenuItemProps>> = ({
   indexName,
   ingestionMethod,
   isHiddenIndex,

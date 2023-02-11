@@ -62,7 +62,7 @@ function getTooltipContent(maxScoreLabel: string, totalScoreLabel: string) {
   );
 }
 
-const Influencer: FC<InfluencerProps> = ({ influencerFieldName, influencerFilter, valueData }) => {
+const Influencer: FC<React.PropsWithChildren<InfluencerProps>> = ({ influencerFieldName, influencerFilter, valueData }) => {
   const maxScore = Math.floor(valueData.maxAnomalyScore);
   const maxScoreLabel = getFormattedSeverityScore(valueData.maxAnomalyScore);
   const severity = getSeverity(maxScore);
@@ -115,7 +115,7 @@ const Influencer: FC<InfluencerProps> = ({ influencerFieldName, influencerFilter
   );
 };
 
-const InfluencersByName: FC<InfluencersByNameProps> = ({
+const InfluencersByName: FC<React.PropsWithChildren<InfluencersByNameProps>> = ({
   influencerFieldName,
   influencerFilter,
   fieldValues,
@@ -142,7 +142,7 @@ const InfluencersByName: FC<InfluencersByNameProps> = ({
   );
 };
 
-export const InfluencersList: FC<InfluencersListProps> = ({ influencers, influencerFilter }) => {
+export const InfluencersList: FC<React.PropsWithChildren<InfluencersListProps>> = ({ influencers, influencerFilter }) => {
   if (influencers === undefined || Object.keys(influencers).length === 0) {
     return (
       <EuiFlexGroup justifyContent="spaceAround" className="ml-influencers-list">

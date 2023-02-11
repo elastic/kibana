@@ -18,7 +18,7 @@ interface JobSelectorBadgeProps {
   removeId?: Function;
 }
 
-export const JobSelectorBadge: FC<JobSelectorBadgeProps> = ({
+export const JobSelectorBadge: FC<React.PropsWithChildren<JobSelectorBadgeProps>> = ({
   icon,
   id,
   isGroup = false,

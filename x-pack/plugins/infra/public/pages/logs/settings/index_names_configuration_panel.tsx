@@ -14,11 +14,11 @@ import { FormElement } from './form_elements';
 import { getFormRowProps, getInputFieldProps } from './form_field_props';
 import { FormValidationError } from './validation_errors';
 
-export const IndexNamesConfigurationPanel: React.FC<{
+export const IndexNamesConfigurationPanel: React.FC<React.PropsWithChildren<{
   isLoading: boolean;
   isReadOnly: boolean;
   indexNamesFormElement: FormElement<LogIndexNameReference, FormValidationError>;
-}> = ({ isLoading, isReadOnly, indexNamesFormElement }) => {
+}>> = ({ isLoading, isReadOnly, indexNamesFormElement }) => {
   useTrackPageview({ app: 'infra_logs', path: 'log_source_configuration_index_name' });
   useTrackPageview({
     app: 'infra_logs',

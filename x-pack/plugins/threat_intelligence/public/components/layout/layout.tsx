@@ -16,7 +16,7 @@ export interface LayoutProps {
   subHeader?: ReactNode;
 }
 
-export const DefaultPageLayout: FC<LayoutProps> = ({
+export const DefaultPageLayout: FC<React.PropsWithChildren<LayoutProps>> = ({
   children,
   pageTitle,
   border = true,

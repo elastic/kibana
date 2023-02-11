@@ -27,7 +27,7 @@ const Li = styled.ul`
   text-align: left;
 `;
 
-const IlmPhasesEmptyPromptComponent: React.FC = () => {
+const IlmPhasesEmptyPromptComponent: React.FC<React.PropsWithChildren<unknown>> = () => {
   const title = useMemo(() => <h2>{i18n.TITLE}</h2>, []);
   const body = useMemo(() => <p>{i18n.BODY}</p>, []);
   const footer = useMemo(

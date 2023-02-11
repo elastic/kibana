@@ -27,7 +27,7 @@ interface SourceInfoCardProps {
   contentSource: ContentSourceFullData;
 }
 
-export const SourceInfoCard: React.FC<SourceInfoCardProps> = ({
+export const SourceInfoCard: React.FC<React.PropsWithChildren<SourceInfoCardProps>> = ({
   contentSource: { createdAt, name, serviceType, isFederatedSource, mainIcon },
 }) => (
   <EuiFlexGroup gutterSize="none" justifyContent="spaceBetween" alignItems="center">

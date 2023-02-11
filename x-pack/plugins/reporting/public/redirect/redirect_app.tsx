@@ -41,7 +41,7 @@ const i18nTexts = {
   ),
 };
 
-export const RedirectApp: FunctionComponent<Props> = ({ apiClient, screenshotMode, share }) => {
+export const RedirectApp: FunctionComponent<React.PropsWithChildren<Props>> = ({ apiClient, screenshotMode, share }) => {
   const [error, setError] = useState<undefined | Error>();
 
   useEffect(() => {

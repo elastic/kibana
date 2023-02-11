@@ -45,7 +45,7 @@ export interface Props {
   zoomScale: number;
 }
 
-export const Workpad: FC<Props> = ({
+export const Workpad: FC<React.PropsWithChildren<Props>> = ({
   fetchAllRenderables,
   getAnimation,
   grid,

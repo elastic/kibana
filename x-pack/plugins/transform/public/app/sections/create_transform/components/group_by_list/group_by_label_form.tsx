@@ -30,7 +30,7 @@ interface Props {
   onChange(item: PivotGroupByConfig): void;
 }
 
-export const GroupByLabelForm: React.FC<Props> = ({
+export const GroupByLabelForm: React.FC<React.PropsWithChildren<Props>> = ({
   deleteHandler,
   item,
   otherAggNames,

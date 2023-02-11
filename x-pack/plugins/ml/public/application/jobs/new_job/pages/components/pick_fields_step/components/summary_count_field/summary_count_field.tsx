@@ -17,7 +17,7 @@ import {
 } from '../../../../../common/job_creator';
 import { Description } from './description';
 
-export const SummaryCountField: FC = () => {
+export const SummaryCountField: FC<React.PropsWithChildren<unknown>> = () => {
   const {
     jobCreator: jc,
     jobCreatorUpdate,

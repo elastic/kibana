@@ -20,7 +20,7 @@ interface MlAdminJobDescriptionProps {
   refreshJob: (job: SecurityJob) => void;
 }
 
-const MlAdminJobDescriptionComponent: FC<MlAdminJobDescriptionProps> = ({
+const MlAdminJobDescriptionComponent: FC<React.PropsWithChildren<MlAdminJobDescriptionProps>> = ({
   job,
   loading,
   refreshJob,

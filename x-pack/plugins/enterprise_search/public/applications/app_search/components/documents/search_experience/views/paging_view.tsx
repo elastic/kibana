@@ -16,7 +16,7 @@ interface Props {
   'aria-label': string;
 }
 
-export const PagingView: React.FC<Props> = ({
+export const PagingView: React.FC<React.PropsWithChildren<Props>> = ({
   current = 1,
   onChange,
   totalPages,

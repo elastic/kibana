@@ -132,7 +132,7 @@ export interface AppContextTestRender {
    * `AppRootContext`
    */
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  AppWrapper: React.FC<any>;
+  AppWrapper: React.FC<React.PropsWithChildren<any>>;
   /**
    * Renders the given UI within the created `AppWrapper` providing the given UI a mocked
    * endpoint runtime context environment
@@ -234,7 +234,7 @@ export const createAppRootMockRenderer = (): AppContextTestRender => {
     },
   });
 
-  const AppWrapper: React.FC<{ children: React.ReactElement }> = ({ children }) => (
+  const AppWrapper: React.FC<React.PropsWithChildren<{ children: React.ReactElement }>> = ({ children }) => (
     <KibanaContextProvider services={startServices}>
       <AppRootProvider store={store} history={history} coreStart={coreStart} depsStart={depsStart}>
         <QueryClientProvider client={queryClient}>

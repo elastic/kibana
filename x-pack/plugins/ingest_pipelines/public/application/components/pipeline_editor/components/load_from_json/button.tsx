@@ -21,7 +21,7 @@ const i18nTexts = {
   }),
 };
 
-export const LoadFromJsonButton: FunctionComponent<Props> = ({ onDone }) => {
+export const LoadFromJsonButton: FunctionComponent<React.PropsWithChildren<Props>> = ({ onDone }) => {
   return (
     <ModalProvider onDone={onDone}>
       {(openModal) => {

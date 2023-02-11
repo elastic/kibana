@@ -11,12 +11,10 @@ import React from 'react';
 
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
 
-export const LoadingOverlayWrapper: React.FC<
-  React.HTMLAttributes<HTMLDivElement> & {
-    isLoading: boolean;
-    loadingChildren?: React.ReactNode;
-  }
-> = ({ children, isLoading, loadingChildren, ...rest }) => {
+export const LoadingOverlayWrapper: React.FC<React.PropsWithChildren<React.HTMLAttributes<HTMLDivElement> & {
+  isLoading: boolean;
+  loadingChildren?: React.ReactNode;
+}>> = ({ children, isLoading, loadingChildren, ...rest }) => {
   return (
     <RelativeDiv {...rest}>
       {children}
@@ -25,7 +23,7 @@ export const LoadingOverlayWrapper: React.FC<
   );
 };
 
-const Overlay: React.FC = ({ children }) => (
+const Overlay: React.FC<React.PropsWithChildren<unknown>> = ({ children }) => (
   <OverlayDiv>{children ? children : <EuiLoadingSpinner size="xl" />}</OverlayDiv>
 );
 

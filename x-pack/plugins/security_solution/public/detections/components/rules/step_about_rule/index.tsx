@@ -66,7 +66,7 @@ const TagContainer = styled.div`
 
 TagContainer.displayName = 'TagContainer';
 
-const StepAboutRuleComponent: FC<StepAboutRuleProps> = ({
+const StepAboutRuleComponent: FC<React.PropsWithChildren<StepAboutRuleProps>> = ({
   addPadding = false,
   defaultValues: initialState,
   defineRuleData,

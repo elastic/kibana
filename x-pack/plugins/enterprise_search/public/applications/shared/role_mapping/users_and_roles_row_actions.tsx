@@ -26,7 +26,7 @@ interface Props {
   onDeleteClick(): void;
 }
 
-export const UsersAndRolesRowActions: React.FC<Props> = ({
+export const UsersAndRolesRowActions: React.FC<React.PropsWithChildren<Props>> = ({
   onManageClick,
   onDeleteClick,
   username,

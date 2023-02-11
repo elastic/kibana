@@ -15,7 +15,7 @@ import type { FieldDataRowProps } from '../../types/field_data_row';
 import { ExamplesList } from '../../../examples_list';
 import { ExpandedRowContent } from './expanded_row_content';
 
-export const TextContent: FC<FieldDataRowProps> = ({ config }) => {
+export const TextContent: FC<React.PropsWithChildren<FieldDataRowProps>> = ({ config }) => {
   const { stats } = config;
   if (stats === undefined) return null;
 

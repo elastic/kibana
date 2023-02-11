@@ -22,7 +22,7 @@ interface SavedObjectTagListProps {
   tagRender?: (tag: TagWithOptionalId) => JSX.Element;
 }
 
-const SavedObjectTagList: FC<SavedObjectTagListProps> = ({
+const SavedObjectTagList: FC<React.PropsWithChildren<SavedObjectTagListProps>> = ({
   object,
   tags: allTags,
   onClick,
@@ -43,7 +43,7 @@ interface GetConnectedTagListOptions {
 
 export const getConnectedTagListComponent = ({
   cache,
-}: GetConnectedTagListOptions): FC<TagListComponentProps> => {
+}: GetConnectedTagListOptions): FC<React.PropsWithChildren<TagListComponentProps>> => {
   return (props: TagListComponentProps) => {
     const tags = useObservable(cache.getState$(), cache.getState());
     return <SavedObjectTagList {...props} tags={tags} />;

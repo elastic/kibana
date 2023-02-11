@@ -34,7 +34,7 @@ const AlertDetailsRoute = () => (
   </TrackApplicationView>
 );
 
-const AlertsContainerComponent: React.FC = () => {
+const AlertsContainerComponent: React.FC<React.PropsWithChildren<unknown>> = () => {
   useReadonlyHeader(i18n.READ_ONLY_BADGE_TOOLTIP);
   const isAlertDetailsPageEnabled = useIsExperimentalFeatureEnabled('alertDetailsPageEnabled');
   return (

@@ -76,7 +76,7 @@ export interface StepCreateFormProps {
   onChange(s: StepDetailsExposedState): void;
 }
 
-export const StepCreateForm: FC<StepCreateFormProps> = React.memo(
+export const StepCreateForm: FC<React.PropsWithChildren<StepCreateFormProps>> = React.memo(
   ({ createDataView, transformConfig, transformId, onChange, overrides, timeFieldName }) => {
     const defaults = { ...getDefaultStepCreateState(), ...overrides };
 

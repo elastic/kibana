@@ -35,7 +35,7 @@ interface Props {
   }) => void;
 }
 
-const TakeActionMenuComponent: React.FC<Props> = ({
+const TakeActionMenuComponent: React.FC<React.PropsWithChildren<Props>> = ({
   addSuccessToast,
   canUserCreateAndReadCases,
   getMarkdownComments,

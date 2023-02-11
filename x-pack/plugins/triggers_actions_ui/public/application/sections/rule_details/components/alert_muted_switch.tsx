@@ -16,7 +16,7 @@ interface ComponentOpts {
   disabled: boolean;
 }
 
-export const AlertMutedSwitch: React.FunctionComponent<ComponentOpts> = ({
+export const AlertMutedSwitch: React.FunctionComponent<React.PropsWithChildren<ComponentOpts>> = ({
   alert,
   onMuteAction,
   disabled,

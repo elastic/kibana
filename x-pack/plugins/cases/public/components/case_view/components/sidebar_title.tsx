@@ -12,7 +12,7 @@ interface SidebarTitleProps {
   title: string;
 }
 
-const SidebarTitleComponent: React.FC<SidebarTitleProps> = ({ title }) => {
+const SidebarTitleComponent: React.FC<React.PropsWithChildren<SidebarTitleProps>> = ({ title }) => {
   return (
     <EuiTitle size="xs">
       <h2>{title}</h2>

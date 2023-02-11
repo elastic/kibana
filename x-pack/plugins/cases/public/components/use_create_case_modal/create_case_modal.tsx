@@ -18,7 +18,7 @@ export interface CreateCaseModalProps {
   onSuccess: (theCase: Case) => Promise<void>;
 }
 
-const CreateModalComponent: React.FC<CreateCaseModalProps> = ({
+const CreateModalComponent: React.FC<React.PropsWithChildren<CreateCaseModalProps>> = ({
   isModalOpen,
   onCloseCaseModal,
   onSuccess,

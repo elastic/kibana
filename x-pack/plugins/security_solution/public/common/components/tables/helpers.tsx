@@ -93,7 +93,7 @@ interface RowItemOverflowProps {
   overflowIndexStart: number;
 }
 
-export const RowItemOverflowComponent: React.FC<RowItemOverflowProps> = ({
+export const RowItemOverflowComponent: React.FC<React.PropsWithChildren<RowItemOverflowProps>> = ({
   fieldName,
   values,
   fieldType,
@@ -143,7 +143,7 @@ interface PopoverComponentProps {
   idPrefix: string;
 }
 
-const PopoverComponent: React.FC<PopoverComponentProps> = ({ children, count, idPrefix }) => {
+const PopoverComponent: React.FC<React.PropsWithChildren<PopoverComponentProps>> = ({ children, count, idPrefix }) => {
   const [isOpen, setIsOpen] = useState(false);
   const onButtonClick = useCallback(() => {
     setIsOpen(!isOpen);

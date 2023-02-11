@@ -20,7 +20,7 @@ const MyEuiBadge = styled(EuiBadge)`
   max-width: 200px;
 `;
 
-const TagsComponent: React.FC<TagsProps> = ({ tags, color = 'default', gutterSize }) => (
+const TagsComponent: React.FC<React.PropsWithChildren<TagsProps>> = ({ tags, color = 'default', gutterSize }) => (
   <>
     {tags.length > 0 && (
       <EuiBadgeGroup gutterSize={gutterSize}>

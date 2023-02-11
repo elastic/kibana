@@ -35,7 +35,7 @@ import { DisplaySettingsLogic } from './display_settings_logic';
 
 const emptyField = { fieldName: '', label: '' };
 
-export const FieldEditorModal: React.FC = () => {
+export const FieldEditorModal: React.FC<React.PropsWithChildren<unknown>> = () => {
   const { toggleFieldEditorModal, addDetailField, updateDetailField } =
     useActions(DisplaySettingsLogic);
 

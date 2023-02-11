@@ -77,7 +77,7 @@ const ALLOW_TIME_RANGE_ON_TRANSFORM_CONFIG = false;
 
 const advancedEditorsSidebarWidth = '220px';
 
-export const ConfigSectionTitle: FC<{ title: string }> = ({ title }) => (
+export const ConfigSectionTitle: FC<React.PropsWithChildren<{ title: string }>> = ({ title }) => (
   <>
     <EuiSpacer size="m" />
     <EuiTitle size="xs">
@@ -93,7 +93,7 @@ export interface StepDefineFormProps {
   searchItems: SearchItems;
 }
 
-export const StepDefineForm: FC<StepDefineFormProps> = React.memo((props) => {
+export const StepDefineForm: FC<React.PropsWithChildren<StepDefineFormProps>> = React.memo((props) => {
   const [globalState, setGlobalState] = useUrlState('_g');
   const { searchItems } = props;
   const { dataView } = searchItems;

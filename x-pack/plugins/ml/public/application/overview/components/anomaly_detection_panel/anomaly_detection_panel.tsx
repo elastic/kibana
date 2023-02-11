@@ -42,7 +42,7 @@ interface Props {
   setLazyJobCount: React.Dispatch<React.SetStateAction<number>>;
 }
 
-export const AnomalyDetectionPanel: FC<Props> = ({
+export const AnomalyDetectionPanel: FC<React.PropsWithChildren<Props>> = ({
   anomalyTimelineService,
   jobCreationDisabled,
   setLazyJobCount,

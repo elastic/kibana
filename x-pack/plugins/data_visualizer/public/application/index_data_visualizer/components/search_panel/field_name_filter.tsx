@@ -17,7 +17,7 @@ interface Props {
   showEmptyFields: boolean;
 }
 
-export const DataVisualizerFieldNamesFilter: FC<Props> = ({
+export const DataVisualizerFieldNamesFilter: FC<React.PropsWithChildren<Props>> = ({
   overallStats,
   setVisibleFieldNames,
   visibleFieldNames,

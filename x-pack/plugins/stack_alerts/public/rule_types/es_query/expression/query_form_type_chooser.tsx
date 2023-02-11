@@ -58,7 +58,7 @@ export interface QueryFormTypeProps {
   onFormTypeSelect: (formType: SearchType | null) => void;
 }
 
-export const QueryFormTypeChooser: React.FC<QueryFormTypeProps> = ({
+export const QueryFormTypeChooser: React.FC<React.PropsWithChildren<QueryFormTypeProps>> = ({
   searchType,
   onFormTypeSelect,
 }) => {

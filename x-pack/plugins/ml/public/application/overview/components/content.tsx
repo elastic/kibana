@@ -20,7 +20,7 @@ interface Props {
   setDfaLazyJobCount: React.Dispatch<React.SetStateAction<number>>;
 }
 
-export const OverviewContent: FC<Props> = ({
+export const OverviewContent: FC<React.PropsWithChildren<Props>> = ({
   createAnomalyDetectionJobDisabled,
   setAdLazyJobCount,
   setDfaLazyJobCount,

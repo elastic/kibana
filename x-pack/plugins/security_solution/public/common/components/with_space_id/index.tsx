@@ -24,7 +24,7 @@ interface WithSpaceIdArgs {
  *
  * */
 export const withSpaceId = <P extends WithSpaceIdArgs>(
-  Component: ComponentType<OmitSpaceId<P> & WithSpaceIdArgs>,
+  Component: ComponentType<React.PropsWithChildren<OmitSpaceId<P> & WithSpaceIdArgs>>,
   fallback?: ReactElement
 ) => {
   const ComponentWithSpaceId = (props: OmitSpaceId<P>) => {

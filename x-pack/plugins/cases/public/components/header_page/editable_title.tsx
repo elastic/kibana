@@ -43,7 +43,7 @@ export interface EditableTitleProps {
   onSubmit: (title: string) => void;
 }
 
-const EditableTitleComponent: React.FC<EditableTitleProps> = ({ onSubmit, isLoading, title }) => {
+const EditableTitleComponent: React.FC<React.PropsWithChildren<EditableTitleProps>> = ({ onSubmit, isLoading, title }) => {
   const { releasePhase, permissions } = useCasesContext();
   const [editMode, setEditMode] = useState(false);
   const [errors, setErrors] = useState<string[]>([]);

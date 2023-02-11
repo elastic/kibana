@@ -29,7 +29,7 @@ import { StepProps } from '.';
 import { CollapsibleIndicesList } from '../../collapsible_lists';
 import { PolicyFeatureStatesSummary } from '../../summaries';
 
-export const RestoreSnapshotStepReview: React.FunctionComponent<StepProps> = ({
+export const RestoreSnapshotStepReview: React.FunctionComponent<React.PropsWithChildren<StepProps>> = ({
   restoreSettings,
   updateCurrentStep,
 }) => {

@@ -29,7 +29,7 @@ export interface EntryPointsTableProps {
   items: EntryPoint[];
 }
 
-export const EntryPointsTable: React.FC<EntryPointsTableProps> = ({ domain, indexName, items }) => {
+export const EntryPointsTable: React.FC<React.PropsWithChildren<EntryPointsTableProps>> = ({ domain, indexName, items }) => {
   const { onAdd, onDelete, onUpdate } = useActions(EntryPointsTableLogic);
   const field = 'value';
 

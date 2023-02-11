@@ -31,7 +31,7 @@ interface ICrawlerSummaryProps {
   stats: CrawlRequestStats | null;
 }
 
-export const CrawlDetailsSummary: React.FC<ICrawlerSummaryProps> = ({
+export const CrawlDetailsSummary: React.FC<React.PropsWithChildren<ICrawlerSummaryProps>> = ({
   crawlDepth,
   crawlType,
   crawlerLogsEnabled,

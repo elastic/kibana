@@ -17,7 +17,7 @@ export interface ComponentOpts {
   disableRule: (rule: Rule) => Promise<void>;
 }
 
-export const RuleEnabledSwitch: React.FunctionComponent<ComponentOpts> = ({
+export const RuleEnabledSwitch: React.FunctionComponent<React.PropsWithChildren<ComponentOpts>> = ({
   item,
   onRuleChanged,
   disableRule,

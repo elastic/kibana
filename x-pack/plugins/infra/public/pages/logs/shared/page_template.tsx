@@ -17,7 +17,7 @@ export interface LogsPageTemplateProps extends LazyObservabilityPageTemplateProp
   isDataLoading?: boolean;
 }
 
-export const LogsPageTemplate: React.FC<LogsPageTemplateProps> = ({
+export const LogsPageTemplate: React.FC<React.PropsWithChildren<LogsPageTemplateProps>> = ({
   hasData = true,
   isDataLoading = false,
   'data-test-subj': _dataTestSubj,

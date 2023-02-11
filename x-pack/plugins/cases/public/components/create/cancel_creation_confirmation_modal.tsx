@@ -15,7 +15,7 @@ type Props = Pick<
   'title' | 'confirmButtonText' | 'cancelButtonText' | 'onConfirm' | 'onCancel'
 >;
 
-const CancelCreationConfirmationModalComponent: React.FC<Props> = ({
+const CancelCreationConfirmationModalComponent: React.FC<React.PropsWithChildren<Props>> = ({
   title,
   confirmButtonText = i18n.CONFIRM_MODAL_BUTTON,
   cancelButtonText = i18n.CANCEL_MODAL_BUTTON,

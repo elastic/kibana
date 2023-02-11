@@ -44,7 +44,7 @@ const rowItems: ItemsPerRow[] = [
 
 export const tlsTableId = 'tls-table';
 
-const TlsTableComponent: React.FC<TlsTableProps> = ({
+const TlsTableComponent: React.FC<React.PropsWithChildren<TlsTableProps>> = ({
   data,
   fakeTotalCount,
   id,

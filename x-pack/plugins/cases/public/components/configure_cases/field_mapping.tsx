@@ -25,7 +25,7 @@ export interface FieldMappingProps {
   mappings: CaseConnectorMapping[];
 }
 
-const FieldMappingComponent: React.FC<FieldMappingProps> = ({
+const FieldMappingComponent: React.FC<React.PropsWithChildren<FieldMappingProps>> = ({
   actionTypeName,
   isLoading,
   mappings,

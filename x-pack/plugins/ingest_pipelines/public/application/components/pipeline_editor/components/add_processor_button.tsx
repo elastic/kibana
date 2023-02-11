@@ -22,7 +22,7 @@ const addProcessorButtonLabel = i18n.translate(
   }
 );
 
-export const AddProcessorButton: FunctionComponent<Props> = (props) => {
+export const AddProcessorButton: FunctionComponent<React.PropsWithChildren<Props>> = (props) => {
   const { onClick, renderButtonAsLink } = props;
   const {
     state: { editor },

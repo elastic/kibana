@@ -21,7 +21,7 @@ export default {
   title: 'app/Alerts/AlertsFlyout',
   component: AlertsFlyout,
   decorators: [
-    (Story: ComponentType) => {
+    (Story: ComponentType<React.PropsWithChildren<unknown>>) => {
       return (
         <KibanaContextProvider
           services={{

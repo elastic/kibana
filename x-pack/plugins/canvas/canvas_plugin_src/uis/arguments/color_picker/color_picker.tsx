@@ -25,7 +25,7 @@ interface Props {
   argValue: string;
 }
 
-const ColorPicker: FC<Props> = ({ onValueChange, argValue }) => {
+const ColorPicker: FC<React.PropsWithChildren<Props>> = ({ onValueChange, argValue }) => {
   const [color, setColor, errors] = useColorPickerState(argValue);
 
   const pickColor: EuiSetColorMethod = (value, meta) => {

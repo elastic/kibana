@@ -21,7 +21,7 @@ export interface CallOutProps {
   showDismissButton?: boolean;
 }
 
-const CallOutComponent: FC<CallOutProps> = ({
+const CallOutComponent: FC<React.PropsWithChildren<CallOutProps>> = ({
   message,
   iconType,
   dismissButtonText,

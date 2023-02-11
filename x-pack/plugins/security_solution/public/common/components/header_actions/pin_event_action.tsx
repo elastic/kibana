@@ -23,7 +23,7 @@ interface PinEventActionProps {
   timelineType: TimelineType;
 }
 
-const PinEventActionComponent: React.FC<PinEventActionProps> = ({
+const PinEventActionComponent: React.FC<React.PropsWithChildren<PinEventActionProps>> = ({
   ariaLabel,
   isAlert,
   noteIds,

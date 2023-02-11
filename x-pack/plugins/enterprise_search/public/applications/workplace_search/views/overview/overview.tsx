@@ -39,7 +39,7 @@ const HEADER_DESCRIPTION = i18n.translate(
   { defaultMessage: "Your organizations's statistics and activity" }
 );
 
-export const Overview: React.FC = () => {
+export const Overview: React.FC<React.PropsWithChildren<unknown>> = () => {
   const {
     organization: { name: orgName, defaultOrgName },
   } = useValues(AppLogic);

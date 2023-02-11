@@ -206,7 +206,7 @@ const axisOrientationOptions: Array<{
   },
 ];
 
-export const AxisSettingsPopover: React.FunctionComponent<AxisSettingsPopoverProps> = ({
+export const AxisSettingsPopover: React.FunctionComponent<React.PropsWithChildren<AxisSettingsPopoverProps>> = ({
   layers,
   axis,
   axisTitle,

@@ -20,7 +20,7 @@ interface ElasticsearchTemplateProps extends PageTemplateProps {
   cluster?: any;
 }
 
-export const ElasticsearchTemplate: React.FC<ElasticsearchTemplateProps> = ({
+export const ElasticsearchTemplate: React.FC<React.PropsWithChildren<ElasticsearchTemplateProps>> = ({
   cluster,
   ...props
 }) => {

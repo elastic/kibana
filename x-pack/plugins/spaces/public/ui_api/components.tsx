@@ -33,7 +33,7 @@ export const getComponents = ({
   /**
    * Returns a function that creates a lazy-loading version of a component.
    */
-  function wrapLazy<T>(fn: () => Promise<FC<T>>, options: { showLoadingSpinner?: boolean } = {}) {
+  function wrapLazy<T>(fn: () => Promise<FC<React.PropsWithChildren<T>>>, options: { showLoadingSpinner?: boolean } = {}) {
     const { showLoadingSpinner } = options;
     return (props: JSX.IntrinsicAttributes & PropsWithRef<PropsWithChildren<T>>) => (
       <LazyWrapper

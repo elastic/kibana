@@ -27,7 +27,7 @@ import { MetricsSourceConfigurationProperties } from '../../../../../common/metr
 const mockedFetch = jest.fn();
 
 const renderUseMetricsExplorerDataHook = () => {
-  const wrapper: React.FC = ({ children }) => {
+  const wrapper: React.FC<React.PropsWithChildren<unknown>> = ({ children }) => {
     const services = {
       http: {
         fetch: mockedFetch,

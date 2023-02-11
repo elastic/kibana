@@ -10,11 +10,9 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
 import { MissingSetupPrivilegesToolTip } from './missing_setup_privileges_tooltip';
 
-export const CreateJobButton: React.FunctionComponent<
-  {
-    hasSetupCapabilities?: boolean;
-  } & PropsOf<typeof EuiButton>
-> = ({ hasSetupCapabilities = true, children, ...buttonProps }) => {
+export const CreateJobButton: React.FunctionComponent<React.PropsWithChildren<{
+  hasSetupCapabilities?: boolean;
+} & PropsOf<typeof EuiButton>>> = ({ hasSetupCapabilities = true, children, ...buttonProps }) => {
   const button = (
     <EuiButton isDisabled={!hasSetupCapabilities} {...buttonProps}>
       {children ?? (
@@ -35,7 +33,7 @@ export const CreateJobButton: React.FunctionComponent<
   );
 };
 
-export const RecreateJobButton: React.FunctionComponent<PropsOf<typeof CreateJobButton>> = ({
+export const RecreateJobButton: React.FunctionComponent<React.PropsWithChildren<PropsOf<typeof CreateJobButton>>> = ({
   children,
   ...otherProps
 }) => (

@@ -142,7 +142,7 @@ const documentFieldConfig: FieldConfig<object[], {}, string> = {
   ],
 };
 
-export const DocumentsTab: FunctionComponent<Props> = ({
+export const DocumentsTab: FunctionComponent<React.PropsWithChildren<Props>> = ({
   validateAndTestPipeline,
   isRunningTest,
   form,

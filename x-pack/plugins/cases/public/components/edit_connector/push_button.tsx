@@ -20,7 +20,7 @@ interface PushButtonProps {
   pushToService: () => Promise<void>;
 }
 
-const PushButtonComponent: React.FC<PushButtonProps> = ({
+const PushButtonComponent: React.FC<React.PropsWithChildren<PushButtonProps>> = ({
   disabled,
   errorsMsg,
   isLoading,

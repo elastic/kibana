@@ -35,7 +35,7 @@ interface Props {
   onCancel: () => void;
 }
 
-export const AddPolicyToTemplateConfirmModal: React.FunctionComponent<Props> = ({
+export const AddPolicyToTemplateConfirmModal: React.FunctionComponent<React.PropsWithChildren<Props>> = ({
   policy,
   onSuccess,
   onCancel,

@@ -22,7 +22,7 @@ export const fromMapRouteFactory = (): MlRoute => ({
   breadcrumbs: [],
 });
 
-const PageWrapper: FC<PageProps> = ({ location, deps }) => {
+const PageWrapper: FC<React.PropsWithChildren<PageProps>> = ({ location, deps }) => {
   const {
     dashboard,
     dataViewId,

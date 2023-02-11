@@ -73,7 +73,7 @@ interface StepPanelProps {
   loading: boolean;
 }
 
-const StepAboutRuleToggleDetailsComponent: React.FC<StepPanelProps> = ({
+const StepAboutRuleToggleDetailsComponent: React.FC<React.PropsWithChildren<StepPanelProps>> = ({
   stepData,
   stepDataDetails,
   loading,

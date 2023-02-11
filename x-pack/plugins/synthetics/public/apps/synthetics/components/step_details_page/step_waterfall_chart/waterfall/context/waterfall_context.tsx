@@ -52,7 +52,7 @@ export interface IWaterfallContext {
 
 export const WaterfallContext = createContext<Partial<IWaterfallContext>>({});
 
-export const WaterfallProvider: React.FC<IWaterfallContext> = ({
+export const WaterfallProvider: React.FC<React.PropsWithChildren<IWaterfallContext>> = ({
   children,
   data,
   markerItems,

@@ -18,7 +18,7 @@ import { SynonymSet } from '../types';
 
 import { SynonymIcon } from '.';
 
-export const SynonymCard: React.FC<SynonymSet> = (synonymSet) => {
+export const SynonymCard: React.FC<React.PropsWithChildren<SynonymSet>> = (synonymSet) => {
   const { openModal } = useActions(SynonymsLogic);
 
   const [firstSynonym, ...remainingSynonyms] = synonymSet.synonyms;

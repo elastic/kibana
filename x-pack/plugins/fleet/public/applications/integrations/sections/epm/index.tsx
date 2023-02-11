@@ -17,7 +17,7 @@ import { Detail } from './screens/detail';
 import { Policy } from './screens/policy';
 import { CustomLanguagesOverview } from './screens/detail/custom_languages_overview';
 
-export const EPMApp: React.FunctionComponent = () => {
+export const EPMApp: React.FunctionComponent<React.PropsWithChildren<unknown>> = () => {
   useBreadcrumbs('integrations');
 
   return (

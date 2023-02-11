@@ -46,7 +46,7 @@ export interface TestPipelineConfig {
   verbose?: boolean;
 }
 
-export const TestPipelineFlyout: React.FunctionComponent<Props> = ({
+export const TestPipelineFlyout: React.FunctionComponent<React.PropsWithChildren<Props>> = ({
   handleTestPipeline,
   resetTestOutput,
   isRunningTest,

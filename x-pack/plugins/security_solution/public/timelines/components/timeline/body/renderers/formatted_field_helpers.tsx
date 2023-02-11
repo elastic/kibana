@@ -49,7 +49,7 @@ interface RenderRuleNameProps {
   value: string | number | null | undefined;
 }
 
-export const RenderRuleName: React.FC<RenderRuleNameProps> = ({
+export const RenderRuleName: React.FC<React.PropsWithChildren<RenderRuleNameProps>> = ({
   children,
   Component,
   contextId,
@@ -260,7 +260,7 @@ export const renderEventModule = ({
   );
 };
 
-const GenericLinkComponent: React.FC<{
+const GenericLinkComponent: React.FC<React.PropsWithChildren<{
   children?: React.ReactNode;
   /** `Component` is only used with `EuiDataGrid`; the grid keeps a reference to `Component` for show / hide functionality */
   Component?: typeof EuiButtonEmpty | typeof EuiButtonIcon;
@@ -269,7 +269,7 @@ const GenericLinkComponent: React.FC<{
   onClick?: (e: SyntheticEvent) => void;
   title?: string;
   iconType?: string;
-}> = ({ children, Component, dataTestSubj, href, onClick, title, iconType = 'link' }) => {
+}>> = ({ children, Component, dataTestSubj, href, onClick, title, iconType = 'link' }) => {
   return Component ? (
     <Component
       data-test-subj={dataTestSubj}

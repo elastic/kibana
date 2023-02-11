@@ -13,7 +13,7 @@ interface Props {
   errorText: string | null;
 }
 
-export const ErrorMessage: FC<Props> = ({ errorText }) => {
+export const ErrorMessage: FC<React.PropsWithChildren<Props>> = ({ errorText }) => {
   return errorText === null ? null : (
     <>
       <EuiCallOut

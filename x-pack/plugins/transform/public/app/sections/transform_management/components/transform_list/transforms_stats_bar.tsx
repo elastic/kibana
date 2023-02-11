@@ -105,7 +105,7 @@ interface TransformStatsBarProps {
   transformsList: TransformListRow[];
 }
 
-export const TransformStatsBar: FC<TransformStatsBarProps> = ({
+export const TransformStatsBar: FC<React.PropsWithChildren<TransformStatsBarProps>> = ({
   transformNodes,
   transformsList,
 }) => {

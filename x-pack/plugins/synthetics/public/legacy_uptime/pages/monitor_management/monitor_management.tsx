@@ -22,7 +22,7 @@ import { Loader } from '../../components/monitor_management/loader/loader';
 import { ERROR_HEADING_LABEL } from './content';
 import { useMonitorList } from '../../components/monitor_management/hooks/use_monitor_list';
 
-export const MonitorManagementPage: React.FC = () => {
+export const MonitorManagementPage: React.FC<React.PropsWithChildren<unknown>> = () => {
   useTrackPageview({ app: 'uptime', path: 'manage-monitors' });
   useTrackPageview({ app: 'uptime', path: 'manage-monitors', delay: 15000 });
   useMonitorManagementBreadcrumbs();

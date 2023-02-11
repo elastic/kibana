@@ -43,9 +43,9 @@ const ValueWrapper = React.memo<{ value: LegendItem['value'] }>(({ value }) =>
 
 ValueWrapper.displayName = 'ValueWrapper';
 
-const DraggableLegendItemComponent: React.FC<{
+const DraggableLegendItemComponent: React.FC<React.PropsWithChildren<{
   legendItem: LegendItem;
-}> = ({ legendItem }) => {
+}>> = ({ legendItem }) => {
   const [defaultNumberFormat] = useUiSetting$<string>(DEFAULT_NUMBER_FORMAT);
   const { color, count, dataProviderId, field, scopeId, value } = legendItem;
 

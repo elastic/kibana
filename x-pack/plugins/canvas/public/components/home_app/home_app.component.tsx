@@ -13,7 +13,7 @@ export interface Props {
   onLoad: () => void;
 }
 
-export const HomeApp: FC<Props> = ({ onLoad = () => {} }) => {
+export const HomeApp: FC<React.PropsWithChildren<Props>> = ({ onLoad = () => {} }) => {
   onLoad();
   setDocTitle('Canvas');
   return <Home />;

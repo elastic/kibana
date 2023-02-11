@@ -86,7 +86,7 @@ interface SaveConfigProps {
   onDeleteConfig?(): void;
 }
 
-export const SaveConfig: React.FC<SaveConfigProps> = ({
+export const SaveConfig: React.FC<React.PropsWithChildren<SaveConfigProps>> = ({
   name,
   configuration,
   advanceStep,

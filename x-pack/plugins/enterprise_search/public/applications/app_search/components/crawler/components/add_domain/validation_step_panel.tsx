@@ -27,7 +27,7 @@ interface ValidationStepPanelProps {
   action?: React.ReactNode;
 }
 
-export const ValidationStepPanel: React.FC<ValidationStepPanelProps> = ({
+export const ValidationStepPanel: React.FC<React.PropsWithChildren<ValidationStepPanelProps>> = ({
   step,
   label,
   action,

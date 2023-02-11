@@ -30,7 +30,7 @@ interface MlAnomalyAlertFlyoutProps {
  * @param onSave
  * @constructor
  */
-export const MlAnomalyAlertFlyout: FC<MlAnomalyAlertFlyoutProps> = ({
+export const MlAnomalyAlertFlyout: FC<React.PropsWithChildren<MlAnomalyAlertFlyoutProps>> = ({
   initialAlert,
   jobIds,
   onCloseFlyout,
@@ -97,7 +97,7 @@ interface JobListMlAnomalyAlertFlyoutProps {
  * @param unsetShowFunction
  * @constructor
  */
-export const JobListMlAnomalyAlertFlyout: FC<JobListMlAnomalyAlertFlyoutProps> = ({
+export const JobListMlAnomalyAlertFlyout: FC<React.PropsWithChildren<JobListMlAnomalyAlertFlyoutProps>> = ({
   setShowFunction,
   unsetShowFunction,
   onSave,
@@ -135,7 +135,7 @@ interface EditRuleFlyoutProps {
   onSave: () => void;
 }
 
-export const EditAlertRule: FC<EditRuleFlyoutProps> = ({ initialAlert, onSave }) => {
+export const EditAlertRule: FC<React.PropsWithChildren<EditRuleFlyoutProps>> = ({ initialAlert, onSave }) => {
   const [isVisible, setIsVisible] = useState(false);
   return (
     <>

@@ -15,7 +15,7 @@ export interface Props {
   stateSlice: typeof ON_FAILURE_STATE_SCOPE | typeof PROCESSOR_STATE_SCOPE;
 }
 
-export const PipelineProcessorsEditor: FunctionComponent<Props> = memo(
+export const PipelineProcessorsEditor: FunctionComponent<React.PropsWithChildren<Props>> = memo(
   function PipelineProcessorsEditor({ stateSlice }) {
     const {
       onTreeAction,

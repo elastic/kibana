@@ -27,7 +27,7 @@ interface Props {
   filters?: string;
 }
 
-export const DataStreamTable: React.FunctionComponent<Props> = ({
+export const DataStreamTable: React.FunctionComponent<React.PropsWithChildren<Props>> = ({
   dataStreams,
   reload,
   history,

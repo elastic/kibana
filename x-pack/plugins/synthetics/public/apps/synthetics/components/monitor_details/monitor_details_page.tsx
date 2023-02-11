@@ -13,7 +13,7 @@ import { ConfigKey } from '../../../../../common/runtime_types';
 import { useMonitorListBreadcrumbs } from '../monitors_page/hooks/use_breadcrumbs';
 import { useSelectedMonitor } from './hooks/use_selected_monitor';
 
-export const MonitorDetailsPage: React.FC<{ children: React.ReactElement }> = ({ children }) => {
+export const MonitorDetailsPage: React.FC<React.PropsWithChildren<{ children: React.ReactElement }>> = ({ children }) => {
   const { monitor, error } = useSelectedMonitor();
 
   const { monitorId } = useParams<{ monitorId: string }>();

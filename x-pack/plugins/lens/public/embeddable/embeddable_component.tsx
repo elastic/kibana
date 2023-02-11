@@ -125,7 +125,7 @@ interface EmbeddablePanelWrapperProps {
   withDefaultActions?: boolean;
 }
 
-const EmbeddablePanelWrapper: FC<EmbeddablePanelWrapperProps> = ({
+const EmbeddablePanelWrapper: FC<React.PropsWithChildren<EmbeddablePanelWrapperProps>> = ({
   factory,
   uiActions,
   actionPredicate,

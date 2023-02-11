@@ -32,7 +32,7 @@ interface Props {
   settingErrors: RepositorySettingsValidation;
 }
 
-export const HDFSSettings: React.FunctionComponent<Props> = ({
+export const HDFSSettings: React.FunctionComponent<React.PropsWithChildren<Props>> = ({
   repository,
   updateRepositorySettings,
   settingErrors,

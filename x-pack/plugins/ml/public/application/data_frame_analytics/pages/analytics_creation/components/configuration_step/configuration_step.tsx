@@ -17,7 +17,7 @@ export interface ConfigurationStepProps extends CreateAnalyticsStepProps {
   isClone: boolean;
 }
 
-export const ConfigurationStep: FC<ConfigurationStepProps> = ({
+export const ConfigurationStep: FC<React.PropsWithChildren<ConfigurationStepProps>> = ({
   actions,
   state,
   setCurrentStep,

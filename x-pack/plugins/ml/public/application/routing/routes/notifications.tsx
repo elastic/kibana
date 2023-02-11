@@ -43,7 +43,7 @@ export const notificationsRouteFactory = (
   'data-test-subj': 'mlPageNotifications',
 });
 
-const PageWrapper: FC<PageProps> = ({ deps }) => {
+const PageWrapper: FC<React.PropsWithChildren<PageProps>> = ({ deps }) => {
   const { redirectToMlAccessDeniedPage } = deps;
 
   const { context } = useResolver(

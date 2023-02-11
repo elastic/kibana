@@ -44,7 +44,7 @@ interface Tab {
   title: string;
 }
 
-export const EngineApiIntegrationStage: React.FC = () => {
+export const EngineApiIntegrationStage: React.FC<React.PropsWithChildren<unknown>> = () => {
   const [selectedTab, setSelectedTab] = React.useState<TabId>('curl');
   const { engineName } = useValues(EngineViewLogic);
   const enterpriseSearchUrl = getEnterpriseSearchUrl();

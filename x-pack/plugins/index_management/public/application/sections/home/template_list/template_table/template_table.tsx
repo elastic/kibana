@@ -29,7 +29,7 @@ interface Props {
   history: ScopedHistory;
 }
 
-export const TemplateTable: React.FunctionComponent<Props> = ({
+export const TemplateTable: React.FunctionComponent<React.PropsWithChildren<Props>> = ({
   templates,
   reload,
   editTemplate,

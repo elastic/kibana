@@ -43,7 +43,7 @@ interface ListExceptionItemsProps {
   onCreateExceptionListItem: () => void;
 }
 
-const ListExceptionItemsComponent: FC<ListExceptionItemsProps> = ({
+const ListExceptionItemsComponent: FC<React.PropsWithChildren<ListExceptionItemsProps>> = ({
   isReadOnly,
   exceptions,
   listType,

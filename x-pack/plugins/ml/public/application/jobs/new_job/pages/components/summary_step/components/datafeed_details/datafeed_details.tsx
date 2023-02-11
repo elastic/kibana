@@ -17,7 +17,7 @@ import { ListItems, defaultLabel, Italic } from '../common';
 
 const EDITOR_HEIGHT = '200px';
 
-export const DatafeedDetails: FC = () => {
+export const DatafeedDetails: FC<React.PropsWithChildren<unknown>> = () => {
   const { jobCreator } = useContext(JobCreatorContext);
   const { datafeeds } = getNewJobDefaults();
 

@@ -12,7 +12,7 @@ import { i18n } from '@kbn/i18n';
 
 import { docLinks } from '../doc_links';
 
-export const ElasticsearchResources: React.FC = () => (
+export const ElasticsearchResources: React.FC<React.PropsWithChildren<unknown>> = () => (
   <>
     <EuiTitle size="xs">
       <h4>

@@ -76,7 +76,7 @@ interface GroupManagerModalProps {
   saveItems(): void;
 }
 
-export const GroupManagerModal: React.FC<GroupManagerModalProps> = ({
+export const GroupManagerModal: React.FC<React.PropsWithChildren<GroupManagerModalProps>> = ({
   children,
   label,
   allItems,

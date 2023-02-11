@@ -35,7 +35,7 @@ export interface Props {
   useLensCompatibleFields?: boolean;
 }
 
-const FieldSelectionComponent: React.FC<Props> = ({
+const FieldSelectionComponent: React.FC<React.PropsWithChildren<Props>> = ({
   chartOptionsContextMenu,
   setStackByField0,
   setStackByField0ComboboxInputRef,

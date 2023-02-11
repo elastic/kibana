@@ -15,7 +15,7 @@ interface LogEntryRateSetupContentProps {
   onOpenSetup: () => void;
 }
 
-export const LogEntryRateSetupContent: React.FunctionComponent<LogEntryRateSetupContentProps> = ({
+export const LogEntryRateSetupContent: React.FunctionComponent<React.PropsWithChildren<LogEntryRateSetupContentProps>> = ({
   onOpenSetup,
 }) => {
   useTrackPageview({ app: 'infra_logs', path: 'log_entry_rate_setup' });

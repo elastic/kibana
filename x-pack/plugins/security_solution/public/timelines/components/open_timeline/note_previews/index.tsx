@@ -41,7 +41,7 @@ interface ToggleEventDetailsButtonProps {
   timelineId: string;
 }
 
-const ToggleEventDetailsButtonComponent: React.FC<ToggleEventDetailsButtonProps> = ({
+const ToggleEventDetailsButtonComponent: React.FC<React.PropsWithChildren<ToggleEventDetailsButtonProps>> = ({
   eventId,
   timelineId,
 }) => {

@@ -21,7 +21,7 @@ interface Props {
   pageHeader?: EuiPageHeaderProps;
 }
 
-export const UptimePageTemplateComponent: React.FC<Props & EuiPageTemplateProps> = ({
+export const UptimePageTemplateComponent: React.FC<React.PropsWithChildren<Props & EuiPageTemplateProps>> = ({
   path,
   pageHeader,
   children,

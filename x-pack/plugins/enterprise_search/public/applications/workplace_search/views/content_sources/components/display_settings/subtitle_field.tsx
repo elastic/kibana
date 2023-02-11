@@ -19,7 +19,7 @@ interface SubtitleFieldProps {
   subtitleFieldHover: boolean;
 }
 
-export const SubtitleField: React.FC<SubtitleFieldProps> = ({
+export const SubtitleField: React.FC<React.PropsWithChildren<SubtitleFieldProps>> = ({
   result,
   subtitleField,
   subtitleFieldHover,

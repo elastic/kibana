@@ -28,7 +28,7 @@ export interface Props extends ArgumentProps {
   argId: string;
 }
 
-export const NumberFormatArgInput: FunctionComponent<Props> = ({
+export const NumberFormatArgInput: FunctionComponent<React.PropsWithChildren<Props>> = ({
   numberFormats,
   onValueChange,
   argValue,

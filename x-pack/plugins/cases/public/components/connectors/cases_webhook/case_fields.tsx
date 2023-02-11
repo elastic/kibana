@@ -13,7 +13,7 @@ import type { ConnectorFieldsProps } from '../types';
 import { ConnectorCard } from '../card';
 import * as i18n from './translations';
 
-const CasesWebhookComponent: React.FunctionComponent<ConnectorFieldsProps<null>> = ({
+const CasesWebhookComponent: React.FunctionComponent<React.PropsWithChildren<ConnectorFieldsProps<null>>> = ({
   connector,
   isEdit = true,
 }) => (

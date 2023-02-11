@@ -29,7 +29,7 @@ interface AllocatedModelsProps {
   hideColumns?: string[];
 }
 
-export const AllocatedModels: FC<AllocatedModelsProps> = ({
+export const AllocatedModels: FC<React.PropsWithChildren<AllocatedModelsProps>> = ({
   models,
   hideColumns = ['node_name'],
 }) => {

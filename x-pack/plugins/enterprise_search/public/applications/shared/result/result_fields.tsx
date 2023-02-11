@@ -16,7 +16,7 @@ interface Props {
   isExpanded: boolean;
 }
 
-export const ResultFields: React.FC<Props> = ({ fields, isExpanded }) => {
+export const ResultFields: React.FC<React.PropsWithChildren<Props>> = ({ fields, isExpanded }) => {
   return (
     <EuiTable>
       <EuiTableBody>

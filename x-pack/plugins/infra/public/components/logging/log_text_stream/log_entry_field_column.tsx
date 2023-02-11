@@ -27,7 +27,7 @@ interface LogEntryFieldColumnProps {
   render?: (value: JsonValue) => React.ReactNode;
 }
 
-export const LogEntryFieldColumn: React.FunctionComponent<LogEntryFieldColumnProps> = ({
+export const LogEntryFieldColumn: React.FunctionComponent<React.PropsWithChildren<LogEntryFieldColumnProps>> = ({
   columnValue,
   highlights: [firstHighlight], // we only support one highlight for now
   isActiveHighlight,

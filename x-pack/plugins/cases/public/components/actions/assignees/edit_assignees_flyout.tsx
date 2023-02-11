@@ -40,7 +40,7 @@ const FlyoutBody = styled(EuiFlyoutBody)`
   }
 `;
 
-const EditAssigneesFlyoutComponent: React.FC<Props> = ({
+const EditAssigneesFlyoutComponent: React.FC<React.PropsWithChildren<Props>> = ({
   selectedCases,
   onClose,
   onSaveAssignees,

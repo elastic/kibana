@@ -13,7 +13,7 @@ import { useActiveKibanaSpace } from '../../../hooks/use_kibana_space';
 import { useLogViewContext } from '../../../hooks/use_log_view';
 import { ConnectedLogViewErrorPage } from '../shared/page_log_view_error';
 
-export const LogEntryCategoriesPageProviders: React.FunctionComponent = ({ children }) => {
+export const LogEntryCategoriesPageProviders: React.FunctionComponent<React.PropsWithChildren<unknown>> = ({ children }) => {
   const { hasFailedLoading, isLoading, isUninitialized, resolvedLogView, logViewId } =
     useLogViewContext();
   const { space } = useActiveKibanaSpace();

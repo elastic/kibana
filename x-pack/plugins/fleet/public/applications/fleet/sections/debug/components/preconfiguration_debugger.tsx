@@ -46,7 +46,7 @@ const fetchPreconfiguredPolicies = async () => {
   return response.data?.items ?? [];
 };
 
-export const PreconfigurationDebugger: React.FunctionComponent = () => {
+export const PreconfigurationDebugger: React.FunctionComponent<React.PropsWithChildren<unknown>> = () => {
   const { getHref } = useLink();
   const { notifications } = useStartServices();
 

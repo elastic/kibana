@@ -39,7 +39,7 @@ interface Props {
   error: any;
 }
 
-export const PolicyRetentionSchedule: React.FunctionComponent<Props> = ({
+export const PolicyRetentionSchedule: React.FunctionComponent<React.PropsWithChildren<Props>> = ({
   retentionSettings,
   onRetentionScheduleUpdated,
   isLoading,

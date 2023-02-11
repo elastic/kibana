@@ -35,7 +35,7 @@ enum TAB {
   MEMORY_USAGE,
 }
 
-export const ExpandedRow: FC<ExpandedRowProps> = ({ item }) => {
+export const ExpandedRow: FC<React.PropsWithChildren<ExpandedRowProps>> = ({ item }) => {
   const bytesFormatter = useFieldFormatter(FIELD_FORMAT_IDS.BYTES);
   const [selectedTab, setSelectedTab] = useState<TAB>(TAB.DETAILS);
 

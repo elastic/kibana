@@ -14,7 +14,7 @@ export interface TrainedModelLinkProps {
   id: string;
 }
 
-export const TrainedModelLink: FC<TrainedModelLinkProps> = ({ id }) => {
+export const TrainedModelLink: FC<React.PropsWithChildren<TrainedModelLinkProps>> = ({ id }) => {
   const href = useMlLink({
     page: ML_PAGES.TRAINED_MODELS_MANAGE,
     pageState: { modelId: id },

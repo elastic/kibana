@@ -65,7 +65,7 @@ export interface AddToTimelineButtonProps extends HoverActionComponentProps {
   timelineType?: string;
 }
 
-const AddToTimelineButton: React.FC<AddToTimelineButtonProps> = React.memo(
+const AddToTimelineButton: React.FC<React.PropsWithChildren<AddToTimelineButtonProps>> = React.memo(
   ({
     Component,
     dataProvider,

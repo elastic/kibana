@@ -23,7 +23,7 @@ import type { Embeddable } from '@kbn/lens-plugin/public';
 import { getMlGlobalServices } from '../../../application/app';
 
 export function createFlyout(
-  FlyoutComponent: React.FunctionComponent<any>,
+  FlyoutComponent: React.FunctionComponent<React.PropsWithChildren<any>>,
   embeddable: MapEmbeddable | Embeddable,
   coreStart: CoreStart,
   share: SharePluginStart,

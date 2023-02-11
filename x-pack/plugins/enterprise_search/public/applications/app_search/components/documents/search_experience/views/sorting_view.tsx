@@ -28,7 +28,7 @@ interface Props {
   onChange(value: string): void;
 }
 
-export const SortingView: React.FC<Props> = ({ onChange, options, value }) => {
+export const SortingView: React.FC<React.PropsWithChildren<Props>> = ({ onChange, options, value }) => {
   // If we don't have the value in options, unset it
   const valuesFromOptions = options.map(getValueFromOption);
   const selectedValue = value && !valuesFromOptions.includes(value) ? undefined : value;

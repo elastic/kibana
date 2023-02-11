@@ -48,7 +48,7 @@ import { Security } from './views/security';
 import { SettingsRouter } from './views/settings';
 import { SetupGuide } from './views/setup_guide';
 
-export const WorkplaceSearch: React.FC<InitialAppData> = (props) => {
+export const WorkplaceSearch: React.FC<React.PropsWithChildren<InitialAppData>> = (props) => {
   const { config } = useValues(KibanaLogic);
   const { errorConnectingMessage } = useValues(HttpLogic);
   const { enterpriseSearchVersion, kibanaVersion } = props;
@@ -71,7 +71,7 @@ export const WorkplaceSearch: React.FC<InitialAppData> = (props) => {
   return <WorkplaceSearchConfigured {...props} />;
 };
 
-export const WorkplaceSearchConfigured: React.FC<InitialAppData> = (props) => {
+export const WorkplaceSearchConfigured: React.FC<React.PropsWithChildren<InitialAppData>> = (props) => {
   const { hasInitialized } = useValues(AppLogic);
   const { initializeAppData, setContext } = useActions(AppLogic);
   const { renderHeaderActions, setChromeIsVisible } = useValues(KibanaLogic);
@@ -151,7 +151,7 @@ export const WorkplaceSearchConfigured: React.FC<InitialAppData> = (props) => {
   );
 };
 
-export const WorkplaceSearchUnconfigured: React.FC = () => (
+export const WorkplaceSearchUnconfigured: React.FC<React.PropsWithChildren<unknown>> = () => (
   <Switch>
     <Route exact path={SETUP_GUIDE_PATH}>
       <SetupGuide />

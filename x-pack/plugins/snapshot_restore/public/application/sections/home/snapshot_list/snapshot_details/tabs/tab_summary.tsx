@@ -35,7 +35,7 @@ interface Props {
   snapshotDetails: SnapshotDetails;
 }
 
-export const TabSummary: React.FC<Props> = ({ snapshotDetails }) => {
+export const TabSummary: React.FC<React.PropsWithChildren<Props>> = ({ snapshotDetails }) => {
   const {
     versionId,
     version,

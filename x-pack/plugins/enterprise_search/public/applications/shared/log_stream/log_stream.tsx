@@ -26,7 +26,7 @@ interface Props extends Omit<LogStreamProps, 'startTimestamp' | 'endTimestamp'> 
   hoursAgo?: number;
 }
 
-export const EntSearchLogStream: React.FC<Props> = ({
+export const EntSearchLogStream: React.FC<React.PropsWithChildren<Props>> = ({
   startTimestamp,
   endTimestamp,
   hoursAgo = 24,

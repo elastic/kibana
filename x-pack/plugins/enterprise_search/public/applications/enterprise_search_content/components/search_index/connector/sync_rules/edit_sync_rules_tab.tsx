@@ -12,7 +12,7 @@ import { i18n } from '@kbn/i18n';
 
 import { ConnectorSyncRulesForm } from './connector_sync_form';
 
-export const EditSyncRulesTab: React.FC<{ revertAction: () => void }> = ({
+export const EditSyncRulesTab: React.FC<React.PropsWithChildren<{ revertAction: () => void }>> = ({
   children,
   revertAction,
 }) => {

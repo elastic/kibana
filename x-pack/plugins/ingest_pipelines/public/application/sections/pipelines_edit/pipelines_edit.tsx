@@ -48,7 +48,7 @@ const ManagedPipelineCallout = () => (
   </EuiCallOut>
 );
 
-export const PipelinesEdit: React.FunctionComponent<RouteComponentProps<MatchParams>> = ({
+export const PipelinesEdit: React.FunctionComponent<React.PropsWithChildren<RouteComponentProps<MatchParams>>> = ({
   match: {
     params: { name },
   },

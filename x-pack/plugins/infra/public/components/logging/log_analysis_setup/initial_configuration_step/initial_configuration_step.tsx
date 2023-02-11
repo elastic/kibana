@@ -42,7 +42,7 @@ export const createInitialConfigurationStep = (
   children: <InitialConfigurationStep {...props} />,
 });
 
-export const InitialConfigurationStep: React.FunctionComponent<InitialConfigurationStepProps> = ({
+export const InitialConfigurationStep: React.FunctionComponent<React.PropsWithChildren<InitialConfigurationStepProps>> = ({
   setStartTime,
   setEndTime,
   startTime,
@@ -104,7 +104,7 @@ const initialConfigurationStepTitle = i18n.translate(
   }
 );
 
-const ValidationErrors: React.FC<{ errors: ValidationUIError[] }> = ({ errors }) => {
+const ValidationErrors: React.FC<React.PropsWithChildren<{ errors: ValidationUIError[] }>> = ({ errors }) => {
   if (errors.length === 0) {
     return null;
   }

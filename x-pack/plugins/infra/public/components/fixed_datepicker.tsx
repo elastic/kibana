@@ -14,7 +14,7 @@ import { euiStyled, EuiTheme } from '@kbn/kibana-react-plugin/common';
 // return type depends on types that are not exported from EUI. You get a TS4023
 // error if the return type is not specified.
 export const FixedDatePicker: StyledComponent<
-  FunctionComponent<EuiDatePickerProps>,
+  FunctionComponent<React.PropsWithChildren<EuiDatePickerProps>>,
   EuiTheme
 > = euiStyled(
   ({

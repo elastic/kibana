@@ -43,7 +43,7 @@ import {
 } from '../../common/components/event_log';
 import { useMultipleSpaces } from '../../../hooks/use_multiple_spaces';
 
-const getEmptyFunctionComponent: React.FC<SpacesContextProps> = ({ children }) => <>{children}</>;
+const getEmptyFunctionComponent: React.FC<React.PropsWithChildren<SpacesContextProps>> = ({ children }) => <>{children}</>;
 
 const getParsedDate = (date: string) => {
   if (date.includes('now')) {
@@ -574,7 +574,7 @@ export const ConnectorEventLogListTable = <T extends ConnectorEventLogListOption
   );
 };
 
-const ConnectorEventLogListTableWithSpaces: React.FC<ConnectorEventLogListTableProps> = (props) => {
+const ConnectorEventLogListTableWithSpaces: React.FC<React.PropsWithChildren<ConnectorEventLogListTableProps>> = (props) => {
   const { spaces } = useKibana().services;
 
   // eslint-disable-next-line react-hooks/exhaustive-deps

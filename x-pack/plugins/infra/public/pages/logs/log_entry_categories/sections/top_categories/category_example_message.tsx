@@ -31,7 +31,7 @@ import { LogEntryContextMenu } from '../../../../../components/logging/log_text_
 export const exampleMessageScale = 'medium' as const;
 export const exampleTimestampFormat = 'dateTime' as const;
 
-export const CategoryExampleMessage: React.FunctionComponent<{
+export const CategoryExampleMessage: React.FunctionComponent<React.PropsWithChildren<{
   id: string;
   dataset: string;
   message: string;
@@ -39,7 +39,7 @@ export const CategoryExampleMessage: React.FunctionComponent<{
   timestamp: number;
   tiebreaker: number;
   context: LogEntryContext;
-}> = ({ id, dataset, message, timestamp, timeRange, tiebreaker, context }) => {
+}>> = ({ id, dataset, message, timestamp, timeRange, tiebreaker, context }) => {
   const trackMetric = useUiTracker({ app: 'infra_logs' });
   const [, { setContextEntry }] = useViewLogInProviderContext();
   // handle special cases for the dataset value

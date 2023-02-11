@@ -69,7 +69,7 @@ interface ExplainLogRateSpikesAnalysisProps {
   searchQuery: Query['query'];
 }
 
-export const ExplainLogRateSpikesAnalysis: FC<ExplainLogRateSpikesAnalysisProps> = ({
+export const ExplainLogRateSpikesAnalysis: FC<React.PropsWithChildren<ExplainLogRateSpikesAnalysisProps>> = ({
   dataView,
   earliest,
   latest,

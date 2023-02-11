@@ -19,7 +19,7 @@ interface Props {
   repository: Repository;
 }
 
-export const DefaultDetails: React.FunctionComponent<Props> = ({
+export const DefaultDetails: React.FunctionComponent<React.PropsWithChildren<Props>> = ({
   repository: { name, settings },
 }) => {
   return (

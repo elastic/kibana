@@ -25,12 +25,12 @@ interface SeverityItems {
   count: number;
   checked?: FilterChecked;
 }
-export const SeverityFilterGroup: React.FC<{
+export const SeverityFilterGroup: React.FC<React.PropsWithChildren<{
   severityCount: SeverityCount;
   selectedSeverities: RiskSeverity[];
   onSelect: (newSelection: RiskSeverity[]) => void;
   title: string;
-}> = ({ severityCount, selectedSeverities, onSelect, title }) => {
+}>> = ({ severityCount, selectedSeverities, onSelect, title }) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
   const onButtonClick = useCallback(() => {

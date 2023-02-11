@@ -148,7 +148,7 @@ interface Props {
   totalIndicesChecked: number | undefined;
 }
 
-const SummaryActionsComponent: React.FC<Props> = ({
+const SummaryActionsComponent: React.FC<React.PropsWithChildren<Props>> = ({
   addSuccessToast,
   canUserCreateAndReadCases,
   defaultNumberFormat,

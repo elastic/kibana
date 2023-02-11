@@ -26,7 +26,7 @@ interface Props {
   id: string;
 }
 
-export const SourceIdentifier: React.FC<Props> = ({ id }) => (
+export const SourceIdentifier: React.FC<React.PropsWithChildren<Props>> = ({ id }) => (
   <>
     <EuiFlexGroup gutterSize="s" alignItems="center">
       <EuiFlexItem grow={false}>

@@ -29,6 +29,6 @@ const fieldTypeToTokenMap = {
   [InternalSchemaType.Nested]: 'tokenNested',
 };
 
-export const ResultToken: React.FC<Props> = ({ fieldType }) => {
+export const ResultToken: React.FC<React.PropsWithChildren<Props>> = ({ fieldType }) => {
   return <EuiToken iconType={fieldTypeToTokenMap[fieldType]} />;
 };

@@ -131,9 +131,7 @@ describe('AlertsTable.BulkActions', () => {
     rowCount: 2,
   };
 
-  const AlertsTableWithBulkActionsContext: React.FunctionComponent<
-    AlertsTableProps & { initialBulkActionsState?: BulkActionsState }
-  > = (props) => {
+  const AlertsTableWithBulkActionsContext: React.FunctionComponent<React.PropsWithChildren<AlertsTableProps & { initialBulkActionsState?: BulkActionsState }>> = (props) => {
     const initialBulkActionsState = useReducer(
       bulkActionsReducer,
       props.initialBulkActionsState || defaultBulkActionsState

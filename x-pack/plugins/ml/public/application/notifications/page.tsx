@@ -15,7 +15,7 @@ import { NodeAvailableWarning } from '../components/node_available_warning';
 import { UpgradeWarning } from '../components/upgrade';
 import { HelpMenu } from '../components/help_menu';
 
-export const NotificationsPage: FC = () => {
+export const NotificationsPage: FC<React.PropsWithChildren<unknown>> = () => {
   const {
     services: { docLinks },
   } = useMlKibana();

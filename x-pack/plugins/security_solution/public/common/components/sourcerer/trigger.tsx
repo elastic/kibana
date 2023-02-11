@@ -24,7 +24,7 @@ interface Props {
   selectedPatterns: string[];
   signalIndexName: string | null;
 }
-export const TriggerComponent: FC<Props> = ({
+export const TriggerComponent: FC<React.PropsWithChildren<Props>> = ({
   activePatterns,
   disabled,
   isModified,

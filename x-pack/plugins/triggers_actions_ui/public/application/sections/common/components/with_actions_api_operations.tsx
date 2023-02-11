@@ -33,8 +33,8 @@ export interface ComponentOpts {
 export type PropsWithOptionalApiHandlers<T> = Omit<T, keyof ComponentOpts> & Partial<ComponentOpts>;
 
 export function withActionOperations<T>(
-  WrappedComponent: React.ComponentType<T & ComponentOpts>
-): React.FunctionComponent<PropsWithOptionalApiHandlers<T>> {
+  WrappedComponent: React.ComponentType<React.PropsWithChildren<T & ComponentOpts>>
+): React.FunctionComponent<React.PropsWithChildren<PropsWithOptionalApiHandlers<T>>> {
   return (props: PropsWithOptionalApiHandlers<T>) => {
     const { http } = useKibana().services;
     return (

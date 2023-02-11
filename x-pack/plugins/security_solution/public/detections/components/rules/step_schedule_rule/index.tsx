@@ -25,7 +25,7 @@ interface StepScheduleRuleProps extends RuleStepProps {
   onRuleDataChange?: (data: ScheduleStepRule) => void;
 }
 
-const StepScheduleRuleComponent: FC<StepScheduleRuleProps> = ({
+const StepScheduleRuleComponent: FC<React.PropsWithChildren<StepScheduleRuleProps>> = ({
   addPadding = false,
   defaultValues: initialState,
   descriptionColumns = 'singleSplit',

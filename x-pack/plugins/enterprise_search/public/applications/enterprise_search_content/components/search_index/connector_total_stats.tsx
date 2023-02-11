@@ -28,7 +28,7 @@ import { NATIVE_CONNECTORS } from './connector/constants';
 import { NameAndDescriptionStats } from './name_and_description_stats';
 import { OverviewLogic } from './overview.logic';
 
-export const ConnectorTotalStats: React.FC = () => {
+export const ConnectorTotalStats: React.FC<React.PropsWithChildren<unknown>> = () => {
   const { indexData, isError, isLoading } = useValues(OverviewLogic);
   const hideStats = isLoading || isError;
 

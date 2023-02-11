@@ -16,7 +16,7 @@ export interface AssignFlyoutHeaderProps {
   tagCache: ITagsCache;
 }
 
-export const AssignFlyoutHeader: FC<AssignFlyoutHeaderProps> = ({ tagCache, tagIds }) => {
+export const AssignFlyoutHeader: FC<React.PropsWithChildren<AssignFlyoutHeaderProps>> = ({ tagCache, tagIds }) => {
   const tags = useMemo(() => {
     return tagCache.getState().filter((tag) => tagIds.includes(tag.id));
   }, [tagCache, tagIds]);

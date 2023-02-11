@@ -21,7 +21,7 @@ import { CategorizationPerPartitionSwitch } from './categorization_per_partition
 import { CategorizationPerPartitionStopOnWarnSwitch } from './categorization_stop_on_warn_switch';
 import { CategorizationPerPartitionFieldDropdown } from './categorization_per_partition_dropdown';
 
-export const CategorizationPerPartitionField: FC = () => {
+export const CategorizationPerPartitionField: FC<React.PropsWithChildren<unknown>> = () => {
   const { jobCreator: jc, jobCreatorUpdated } = useContext(JobCreatorContext);
   const jobCreator = jc as AdvancedJobCreator | CategorizationJobCreator;
   const [enablePerPartitionCategorization, setEnablePerPartitionCategorization] = useState(false);

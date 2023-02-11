@@ -21,7 +21,7 @@ interface CreateTransformButtonProps {
   transformNodes: number;
 }
 
-export const CreateTransformButton: FC<CreateTransformButtonProps> = ({
+export const CreateTransformButton: FC<React.PropsWithChildren<CreateTransformButtonProps>> = ({
   onClick,
   transformNodes,
 }) => {

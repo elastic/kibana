@@ -32,7 +32,7 @@ interface JobItemProps {
   onEditRequest: (job: ModuleJobUI) => void;
 }
 
-export const JobItem: FC<JobItemProps> = memo(
+export const JobItem: FC<React.PropsWithChildren<JobItemProps>> = memo(
   ({ job, jobOverride, isSaving, jobPrefix, onEditRequest }) => {
     const {
       id,

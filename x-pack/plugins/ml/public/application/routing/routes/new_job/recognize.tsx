@@ -48,7 +48,7 @@ export const checkViewOrCreateRouteFactory = (): MlRoute => ({
   breadcrumbs: [],
 });
 
-const PageWrapper: FC<PageProps> = ({ location, deps }) => {
+const PageWrapper: FC<React.PropsWithChildren<PageProps>> = ({ location, deps }) => {
   const { id, index, savedSearchId }: Record<string, any> = parse(location.search, { sort: false });
   const { context, results } = useResolver(
     index,
@@ -70,7 +70,7 @@ const PageWrapper: FC<PageProps> = ({ location, deps }) => {
   );
 };
 
-const CheckViewOrCreateWrapper: FC<PageProps> = ({ location, deps }) => {
+const CheckViewOrCreateWrapper: FC<React.PropsWithChildren<PageProps>> = ({ location, deps }) => {
   const { id: moduleId, index: dataViewId }: Record<string, any> = parse(location.search, {
     sort: false,
   });

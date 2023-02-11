@@ -12,7 +12,7 @@ import { IndicatorsFiltersContext, IndicatorsFiltersContextValue } from '.';
 /**
  * Container used to wrap components and share the {@link FilterManager} through React context.
  */
-export const IndicatorsFilters: FC = ({ children }) => {
+export const IndicatorsFilters: FC<React.PropsWithChildren<unknown>> = ({ children }) => {
   const securityContext = useSecurityContext();
 
   const {

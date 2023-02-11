@@ -66,7 +66,7 @@ interface CustomUrlEditorProps {
 /*
  * React component for the form for editing a custom URL.
  */
-export const CustomUrlEditor: FC<CustomUrlEditorProps> = ({
+export const CustomUrlEditor: FC<React.PropsWithChildren<CustomUrlEditorProps>> = ({
   customUrl,
   setEditCustomUrl,
   savedCustomUrls,

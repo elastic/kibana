@@ -32,7 +32,7 @@ export const collectionViewBreadcrumbs = [
   }),
 ];
 
-export const AnalyticsCollectionView: React.FC = () => {
+export const AnalyticsCollectionView: React.FC<React.PropsWithChildren<unknown>> = () => {
   const { fetchAnalyticsCollection } = useActions(FetchAnalyticsCollectionLogic);
   const { analyticsCollection, isLoading } = useValues(FetchAnalyticsCollectionLogic);
   const { id, section } = useParams<{ id: string; section: string }>();

@@ -97,7 +97,7 @@ const strings = {
     }),
 };
 
-export const VarConfig: FC<Props> = ({
+export const VarConfig: FC<React.PropsWithChildren<Props>> = ({
   variables,
   onCopyVar,
   onDeleteVar,

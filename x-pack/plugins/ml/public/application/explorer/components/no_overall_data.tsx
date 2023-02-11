@@ -8,7 +8,7 @@
 import React, { FC } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-export const NoOverallData: FC = () => {
+export const NoOverallData: FC<React.PropsWithChildren<unknown>> = () => {
   return (
     <FormattedMessage
       id="xpack.ml.anomalySwimLane.noOverallDataMessage"

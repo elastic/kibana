@@ -27,7 +27,7 @@ import { useAvailablePackages } from './hooks/use_available_packages';
 
 import type { ExtendedIntegrationCategory } from './category_facets';
 
-const NoEprCallout: FunctionComponent<{ statusCode?: number }> = ({
+const NoEprCallout: FunctionComponent<React.PropsWithChildren<{ statusCode?: number }>> = ({
   statusCode,
 }: {
   statusCode?: number;
@@ -97,9 +97,9 @@ function OnPremLink() {
   );
 }
 
-export const AvailablePackages: React.FC<{
+export const AvailablePackages: React.FC<React.PropsWithChildren<{
   setPrereleaseEnabled: (isEnabled: boolean) => void;
-}> = ({ setPrereleaseEnabled }) => {
+}>> = ({ setPrereleaseEnabled }) => {
   useBreadcrumbs('integrations_all');
 
   const {

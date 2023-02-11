@@ -81,7 +81,7 @@ interface DocsColumnResultsProps {
   isLive?: boolean;
 }
 
-const DocsColumnResults: React.FC<DocsColumnResultsProps> = ({ count, isLive }) => (
+const DocsColumnResults: React.FC<React.PropsWithChildren<DocsColumnResultsProps>> = ({ count, isLive }) => (
   <EuiFlexGroup gutterSize="s" alignItems="center">
     <EuiFlexItem grow={false}>
       {count ? <EuiNotificationBadge color="subdued">{count}</EuiNotificationBadge> : '-'}
@@ -100,7 +100,7 @@ interface AgentsColumnResultsProps {
   failed?: number;
 }
 
-const AgentsColumnResults: React.FC<AgentsColumnResultsProps> = ({
+const AgentsColumnResults: React.FC<React.PropsWithChildren<AgentsColumnResultsProps>> = ({
   successful,
   pending,
   failed,
@@ -143,7 +143,7 @@ interface PackQueriesStatusTableProps {
   showResultsHeader?: boolean;
 }
 
-const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = ({
+const PackQueriesStatusTableComponent: React.FC<React.PropsWithChildren<PackQueriesStatusTableProps>> = ({
   actionId,
   queryId,
   agentIds,

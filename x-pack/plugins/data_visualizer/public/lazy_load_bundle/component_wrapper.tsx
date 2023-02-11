@@ -11,7 +11,7 @@ const FileDataVisualizerComponent = React.lazy(
   () => import('../application/file_data_visualizer/file_data_visualizer')
 );
 
-export const FileDataVisualizerWrapper: FC = () => {
+export const FileDataVisualizerWrapper: FC<React.PropsWithChildren<unknown>> = () => {
   return (
     <React.Suspense fallback={<div />}>
       <FileDataVisualizerComponent />

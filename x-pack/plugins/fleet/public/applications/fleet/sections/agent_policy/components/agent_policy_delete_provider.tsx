@@ -22,7 +22,7 @@ export type DeleteAgentPolicy = (agentPolicy: string, onSuccess?: OnSuccessCallb
 
 type OnSuccessCallback = (agentPolicyDeleted: string) => void;
 
-export const AgentPolicyDeleteProvider: React.FunctionComponent<Props> = ({
+export const AgentPolicyDeleteProvider: React.FunctionComponent<React.PropsWithChildren<Props>> = ({
   children,
   hasFleetServer,
 }) => {

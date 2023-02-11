@@ -34,7 +34,7 @@ const RoundBadge = styled(EuiBadge)`
 
 RoundBadge.displayName = 'RoundBadge';
 
-export const RoundedBadge: React.FC<{ type: AndOr }> = ({ type }) => (
+export const RoundedBadge: React.FC<React.PropsWithChildren<{ type: AndOr }>> = ({ type }) => (
   <RoundBadge data-test-subj="and-or-badge" color="hollow">
     {type === 'and' ? i18n.AND : i18n.OR}
   </RoundBadge>

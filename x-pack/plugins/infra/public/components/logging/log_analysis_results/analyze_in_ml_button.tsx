@@ -11,9 +11,9 @@ import React, { useCallback } from 'react';
 import { shouldHandleLinkEvent } from '@kbn/observability-plugin/public';
 import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
 
-export const AnalyzeInMlButton: React.FunctionComponent<{
+export const AnalyzeInMlButton: React.FunctionComponent<React.PropsWithChildren<{
   href?: string;
-}> = ({ href }) => {
+}>> = ({ href }) => {
   const {
     services: { application },
   } = useKibanaContextForPlugin();

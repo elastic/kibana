@@ -175,7 +175,7 @@ export interface BarChartComponentProps {
 
 const NO_LEGEND_DATA: LegendItem[] = [];
 
-export const BarChartComponent: React.FC<BarChartComponentProps> = ({
+export const BarChartComponent: React.FC<React.PropsWithChildren<BarChartComponentProps>> = ({
   barChart,
   configs,
   stackByField,

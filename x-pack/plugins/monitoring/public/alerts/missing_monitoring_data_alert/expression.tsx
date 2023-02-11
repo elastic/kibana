@@ -20,7 +20,7 @@ export interface Props {
   paramDetails: CommonAlertParamDetails;
 }
 
-export const Expression: React.FC<Props> = (props) => {
+export const Expression: React.FC<React.PropsWithChildren<Props>> = (props) => {
   const { ruleParams, paramDetails, setRuleParams, errors } = props;
 
   const alertParamsUi = Object.keys(ruleParams).map((alertParamName) => {

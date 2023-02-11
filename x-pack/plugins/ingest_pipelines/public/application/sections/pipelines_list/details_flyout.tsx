@@ -41,7 +41,7 @@ export interface Props {
   onClose: () => void;
 }
 
-export const PipelineDetailsFlyout: FunctionComponent<Props> = ({
+export const PipelineDetailsFlyout: FunctionComponent<React.PropsWithChildren<Props>> = ({
   pipeline,
   onClose,
   onEditClick,

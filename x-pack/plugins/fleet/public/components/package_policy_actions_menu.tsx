@@ -18,13 +18,13 @@ import { ContextMenuActions } from './context_menu_actions';
 import { DangerEuiContextMenuItem } from './danger_eui_context_menu_item';
 import { PackagePolicyDeleteProvider } from './package_policy_delete_provider';
 
-export const PackagePolicyActionsMenu: React.FunctionComponent<{
+export const PackagePolicyActionsMenu: React.FunctionComponent<React.PropsWithChildren<{
   agentPolicy?: AgentPolicy;
   packagePolicy: InMemoryPackagePolicy;
   showAddAgent?: boolean;
   defaultIsOpen?: boolean;
   upgradePackagePolicyHref?: string;
-}> = ({
+}>> = ({
   agentPolicy,
   packagePolicy,
   showAddAgent,

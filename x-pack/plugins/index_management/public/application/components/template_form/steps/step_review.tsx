@@ -80,7 +80,7 @@ const PreviewTab = ({ template }: { template: { [key: string]: any } }) => {
   );
 };
 
-export const StepReview: React.FunctionComponent<Props> = React.memo(
+export const StepReview: React.FunctionComponent<React.PropsWithChildren<Props>> = React.memo(
   ({ template, navigateToStep }) => {
     const {
       name,

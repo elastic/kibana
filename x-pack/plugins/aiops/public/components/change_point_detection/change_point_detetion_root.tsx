@@ -37,7 +37,7 @@ export interface ChangePointDetectionAppStateProps {
   appDependencies: AiopsAppDependencies;
 }
 
-export const ChangePointDetectionAppState: FC<ChangePointDetectionAppStateProps> = ({
+export const ChangePointDetectionAppState: FC<React.PropsWithChildren<ChangePointDetectionAppStateProps>> = ({
   dataView,
   savedSearch,
   appDependencies,

@@ -27,7 +27,7 @@ describe('Assignees', () => {
   let globalForm: FormHook;
   let appMockRender: AppMockRenderer;
 
-  const MockHookWrapperComponent: React.FC = ({ children }) => {
+  const MockHookWrapperComponent: React.FC<React.PropsWithChildren<unknown>> = ({ children }) => {
     const { form } = useForm<FormProps>();
     globalForm = form;
 

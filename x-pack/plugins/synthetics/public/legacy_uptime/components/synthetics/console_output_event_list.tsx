@@ -21,7 +21,7 @@ const CONSOLE_STEP_TYPES = ['stderr', 'stdout', 'cmd/status'];
 const isConsoleStep = (step: JourneyStep) =>
   CONSOLE_STEP_TYPES.some((type) => type === step.synthetics.type);
 
-export const ConsoleOutputEventList: FC<Props> = ({ journey }) => (
+export const ConsoleOutputEventList: FC<React.PropsWithChildren<Props>> = ({ journey }) => (
   <div>
     <EuiTitle>
       <h4>

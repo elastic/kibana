@@ -54,7 +54,7 @@ export interface SolutionNavPanelItemsProps {
 /**
  * Renders the side navigation panel for secondary links
  */
-const SolutionNavPanelComponent: React.FC<SolutionNavPanelProps> = ({
+const SolutionNavPanelComponent: React.FC<React.PropsWithChildren<SolutionNavPanelProps>> = ({
   onClose,
   onOutsideClick,
   title,
@@ -123,7 +123,7 @@ const SolutionNavPanelComponent: React.FC<SolutionNavPanelProps> = ({
 };
 export const SolutionNavPanel = React.memo(SolutionNavPanelComponent);
 
-const SolutionNavPanelCategories: React.FC<SolutionNavPanelCategoriesProps> = ({
+const SolutionNavPanelCategories: React.FC<React.PropsWithChildren<SolutionNavPanelCategoriesProps>> = ({
   categories,
   items,
   onClose,
@@ -160,7 +160,7 @@ const SolutionNavPanelCategories: React.FC<SolutionNavPanelCategoriesProps> = ({
   );
 };
 
-const SolutionNavPanelItems: React.FC<SolutionNavPanelItemsProps> = ({ items, onClose }) => {
+const SolutionNavPanelItems: React.FC<React.PropsWithChildren<SolutionNavPanelItemsProps>> = ({ items, onClose }) => {
   const panelLinkClassNames = classNames('solutionGroupedNavPanelLink');
   const panelLinkItemClassNames = classNames('solutionGroupedNavPanelLinkItem');
   return (

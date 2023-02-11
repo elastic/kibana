@@ -153,7 +153,7 @@ const createFormInitialState = (
 
 export interface ArtifactFlyoutProps {
   apiClient: ExceptionsListApiClient;
-  FormComponent: React.ComponentType<ArtifactFormComponentProps>;
+  FormComponent: React.ComponentType<React.PropsWithChildren<ArtifactFormComponentProps>>;
   policies: PolicyData[];
   policiesIsLoading: boolean;
   onSuccess(): void;

@@ -25,7 +25,7 @@ interface Props {
   setIsComplete: OverviewStepProps['setIsComplete'];
 }
 
-const FixIssuesStep: FunctionComponent<Props> = ({ setIsComplete }) => {
+const FixIssuesStep: FunctionComponent<React.PropsWithChildren<Props>> = ({ setIsComplete }) => {
   // We consider ES and Kibana issues to be fixed when there are 0 critical issues.
   const [isEsFixed, setIsEsFixed] = useState(false);
   const [isKibanaFixed, setIsKibanaFixed] = useState(false);

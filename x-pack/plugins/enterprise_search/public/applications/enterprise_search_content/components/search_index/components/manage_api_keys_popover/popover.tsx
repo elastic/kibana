@@ -24,7 +24,7 @@ import { KibanaLogic } from '../../../../../shared/kibana';
 import { IndexViewLogic } from '../../index_view_logic';
 import { OverviewLogic } from '../../overview.logic';
 
-export const ManageKeysPopover: React.FC = () => {
+export const ManageKeysPopover: React.FC<React.PropsWithChildren<unknown>> = () => {
   const { isManageKeysPopoverOpen } = useValues(OverviewLogic);
   const { ingestionMethod } = useValues(IndexViewLogic);
   const { toggleManageApiKeyPopover, openGenerateModal } = useActions(OverviewLogic);

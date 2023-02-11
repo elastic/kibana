@@ -28,7 +28,7 @@ const FlexGroupWithMinWidth = styled(EuiFlexGroup)`
   min-width: 0px;
 `;
 
-export const DownloadSourceTable: React.FunctionComponent<DownloadSourceTableProps> = ({
+export const DownloadSourceTable: React.FunctionComponent<React.PropsWithChildren<DownloadSourceTableProps>> = ({
   downloadSources,
   deleteDownloadSource,
 }) => {

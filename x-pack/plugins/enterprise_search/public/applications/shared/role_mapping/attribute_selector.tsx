@@ -30,7 +30,7 @@ const attributeValueExamples: AttributeExamples = {
   metadata: '{"_reserved": true}',
 };
 
-export const AttributeSelector: React.FC<Props> = ({
+export const AttributeSelector: React.FC<React.PropsWithChildren<Props>> = ({
   attributeName,
   attributeValue = '',
   attributeValueInvalid,

@@ -21,7 +21,7 @@ interface Props {
 
 import './input_row.scss';
 
-export const InputRow: React.FC<Props> = ({
+export const InputRow: React.FC<React.PropsWithChildren<Props>> = ({
   value,
   placeholder,
   autoFocus,

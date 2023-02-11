@@ -57,7 +57,7 @@ const iconMap: Record<string, string> = {
 };
 const defaultToken = 'questionInCircle';
 
-export const ResultField: React.FC<ResultFieldProps> = ({
+export const ResultField: React.FC<React.PropsWithChildren<ResultFieldProps>> = ({
   iconType,
   fieldName,
   fieldValue,

@@ -38,7 +38,7 @@ const LANGUAGE_COLUMN: EuiTableFieldDataColumnType<EngineDetails> = {
   render: (language: string) => language || UNIVERSAL_LANGUAGE,
 };
 
-export const EnginesTable: React.FC<EnginesTableProps> = ({
+export const EnginesTable: React.FC<React.PropsWithChildren<EnginesTableProps>> = ({
   items,
   loading,
   noItemsMessage,

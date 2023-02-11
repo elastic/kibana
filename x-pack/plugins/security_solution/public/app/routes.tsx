@@ -28,7 +28,7 @@ interface RouterProps {
   setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'];
 }
 
-const PageRouterComponent: FC<RouterProps> = ({
+const PageRouterComponent: FC<React.PropsWithChildren<RouterProps>> = ({
   children,
   history,
   onAppLeave,

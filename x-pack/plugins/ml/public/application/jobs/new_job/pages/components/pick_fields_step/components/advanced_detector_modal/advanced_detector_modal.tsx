@@ -69,7 +69,7 @@ const excludeFrequentOptions: EuiComboBoxOptionOption[] = [
   { label: 'over' },
 ];
 
-export const AdvancedDetectorModal: FC<Props> = ({
+export const AdvancedDetectorModal: FC<React.PropsWithChildren<Props>> = ({
   payload,
   fields,
   aggs,

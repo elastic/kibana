@@ -14,7 +14,7 @@ interface Props {
   disabled?: boolean;
 }
 
-export const StartDatafeedSwitch: FC<Props> = ({
+export const StartDatafeedSwitch: FC<React.PropsWithChildren<Props>> = ({
   startDatafeed,
   setStartDatafeed,
   disabled = false,

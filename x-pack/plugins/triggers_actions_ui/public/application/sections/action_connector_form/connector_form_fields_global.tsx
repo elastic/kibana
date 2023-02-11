@@ -40,7 +40,7 @@ const nameConfig: FieldConfig<{ name: string }, ConnectorFormData> = {
   ],
 };
 
-const ConnectorFormFieldsGlobalComponent: React.FC<ConnectorFormFieldsProps> = ({ canSave }) => {
+const ConnectorFormFieldsGlobalComponent: React.FC<React.PropsWithChildren<ConnectorFormFieldsProps>> = ({ canSave }) => {
   return (
     <>
       <HiddenField path={'id'} />

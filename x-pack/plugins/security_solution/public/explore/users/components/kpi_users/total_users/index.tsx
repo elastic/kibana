@@ -43,7 +43,7 @@ export const fieldsMapping: Readonly<StatItems[]> = [
 
 const QUERY_ID = 'TotalUsersKpiQuery';
 
-const TotalUsersKpiComponent: React.FC<UsersKpiProps> = ({
+const TotalUsersKpiComponent: React.FC<React.PropsWithChildren<UsersKpiProps>> = ({
   filterQuery,
   from,
   indexNames,

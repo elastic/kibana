@@ -17,7 +17,7 @@ interface Props {
   error: RepositorySettingsValidation['maxRestoreBytesPerSec'];
 }
 
-export const MaxRestoreField: React.FunctionComponent<Props> = ({
+export const MaxRestoreField: React.FunctionComponent<React.PropsWithChildren<Props>> = ({
   isInvalid,
   error,
   defaultValue,

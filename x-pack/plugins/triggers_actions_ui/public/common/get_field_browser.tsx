@@ -10,7 +10,7 @@ import { EuiLoadingSpinner } from '@elastic/eui';
 
 import type { FieldBrowserProps } from '../application/sections/field_browser';
 
-const FieldBrowserLazy: React.FC<FieldBrowserProps> = lazy(
+const FieldBrowserLazy: React.FC<React.PropsWithChildren<FieldBrowserProps>> = lazy(
   () => import('../application/sections/field_browser')
 );
 

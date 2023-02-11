@@ -14,7 +14,7 @@ interface EventTypeIndicatorProps {
   type: RuleExecutionEventType;
 }
 
-const EventTypeIndicatorComponent: React.FC<EventTypeIndicatorProps> = ({ type }) => {
+const EventTypeIndicatorComponent: React.FC<React.PropsWithChildren<EventTypeIndicatorProps>> = ({ type }) => {
   const icon = getBadgeIcon(type);
   const text = getBadgeText(type);
 

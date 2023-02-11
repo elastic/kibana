@@ -17,7 +17,7 @@ interface CreateResultCalloutProps {
   onReset: () => {};
 }
 
-export const CreateResultCallout: FC<CreateResultCalloutProps> = memo(
+export const CreateResultCallout: FC<React.PropsWithChildren<CreateResultCalloutProps>> = memo(
   ({ saveState, resultsUrl, onReset }) => {
     if (saveState === SAVE_STATE.NOT_SAVED) {
       return null;

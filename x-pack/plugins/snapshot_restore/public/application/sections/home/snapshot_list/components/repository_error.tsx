@@ -12,7 +12,7 @@ import { EuiEmptyPrompt, EuiLink, EuiPageContent_Deprecated as EuiPageContent } 
 import { reactRouterNavigate } from '../../../../../shared_imports';
 import { linkToRepositories } from '../../../../services/navigation';
 
-export const RepositoryError: React.FunctionComponent = () => {
+export const RepositoryError: React.FunctionComponent<React.PropsWithChildren<unknown>> = () => {
   const history = useHistory();
   return (
     <EuiPageContent verticalPosition="center" horizontalPosition="center" color="danger">

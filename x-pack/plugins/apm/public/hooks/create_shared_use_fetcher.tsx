@@ -16,12 +16,10 @@ interface SharedUseFetcher<TEndpoint extends APIEndpoint> {
   useFetcherResult: () => FetcherResult<APIReturnType<TEndpoint>> & {
     refetch: () => void;
   };
-  Provider: React.FunctionComponent<
-    {
-      children: React.ReactElement;
-      params: {};
-    } & APIClientRequestParamsOf<TEndpoint>
-  >;
+  Provider: React.FunctionComponent<React.PropsWithChildren<{
+    children: React.ReactElement;
+    params: {};
+  } & APIClientRequestParamsOf<TEndpoint>>>;
 }
 
 export function createSharedUseFetcher<TEndpoint extends APIEndpoint>(

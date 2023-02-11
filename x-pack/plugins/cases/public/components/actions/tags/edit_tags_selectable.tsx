@@ -51,7 +51,7 @@ const itemToSelectableOption = (item: {
   } as ItemSelectableOption;
 };
 
-const EditTagsSelectableComponent: React.FC<Props> = ({
+const EditTagsSelectableComponent: React.FC<React.PropsWithChildren<Props>> = ({
   selectedCases,
   tags,
   isLoading,

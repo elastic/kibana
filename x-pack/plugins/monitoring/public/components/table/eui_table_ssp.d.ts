@@ -7,4 +7,4 @@
 
 import { FunctionComponent } from 'react';
 
-export const EuiMonitoringSSPTable: FunctionComponent<Record<any, any>>;
+export const EuiMonitoringSSPTable: FunctionComponent<React.PropsWithChildren<Record<any, any>>>;

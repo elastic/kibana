@@ -12,7 +12,7 @@ import React, { FC } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiEmptyPrompt } from '@elastic/eui';
 
-export const ExplorerNoJobsSelected: FC = () => {
+export const ExplorerNoJobsSelected: FC<React.PropsWithChildren<unknown>> = () => {
   return (
     <EuiEmptyPrompt
       iconType="alert"

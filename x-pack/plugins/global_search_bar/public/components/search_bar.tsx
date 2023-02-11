@@ -67,7 +67,7 @@ interface SearchBarProps {
   darkMode: boolean;
 }
 
-export const SearchBar: FC<SearchBarProps> = ({
+export const SearchBar: FC<React.PropsWithChildren<SearchBarProps>> = ({
   globalSearch,
   taggingApi,
   navigateToUrl,

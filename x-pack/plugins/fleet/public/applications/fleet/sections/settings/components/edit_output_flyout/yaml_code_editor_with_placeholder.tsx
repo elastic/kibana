@@ -60,9 +60,7 @@ export type YamlCodeEditorWithPlaceholderProps = Pick<CodeEditorProps, 'value' |
   disabled?: boolean;
 };
 
-export const YamlCodeEditorWithPlaceholder: React.FunctionComponent<
-  YamlCodeEditorWithPlaceholderProps
-> = (props) => {
+export const YamlCodeEditorWithPlaceholder: React.FunctionComponent<React.PropsWithChildren<YamlCodeEditorWithPlaceholderProps>> = (props) => {
   const { placeholder, disabled, ...editorProps } = props;
 
   if (disabled) {

@@ -32,7 +32,7 @@ interface EntityConfigProps {
   onConfigChange: (fieldType: EntityFieldType, config: Partial<UiPartitionFieldConfig>) => void;
 }
 
-export const EntityConfig: FC<EntityConfigProps> = ({
+export const EntityConfig: FC<React.PropsWithChildren<EntityConfigProps>> = ({
   entity,
   isModelPlotEnabled,
   config,

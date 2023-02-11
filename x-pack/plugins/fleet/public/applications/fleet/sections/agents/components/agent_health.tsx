@@ -79,7 +79,7 @@ function getStatusComponent(status: Agent['status']): React.ReactElement {
   }
 }
 
-export const AgentHealth: React.FunctionComponent<Props> = ({
+export const AgentHealth: React.FunctionComponent<React.PropsWithChildren<Props>> = ({
   agent,
   showOfflinePreviousStatus,
 }) => {

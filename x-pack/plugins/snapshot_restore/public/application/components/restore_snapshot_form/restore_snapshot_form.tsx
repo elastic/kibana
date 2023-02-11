@@ -33,7 +33,7 @@ interface Props {
   onSave: (repository: RestoreSettings) => void;
 }
 
-export const RestoreSnapshotForm: React.FunctionComponent<Props> = ({
+export const RestoreSnapshotForm: React.FunctionComponent<React.PropsWithChildren<Props>> = ({
   snapshotDetails,
   isSaving,
   saveError,

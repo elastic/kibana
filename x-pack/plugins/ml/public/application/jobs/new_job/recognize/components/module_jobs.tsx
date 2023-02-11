@@ -31,7 +31,7 @@ interface ModuleJobsProps {
 
 export const SETUP_RESULTS_WIDTH = '200px';
 
-export const ModuleJobs: FC<ModuleJobsProps> = ({
+export const ModuleJobs: FC<React.PropsWithChildren<ModuleJobsProps>> = ({
   jobs,
   jobPrefix,
   jobOverrides,

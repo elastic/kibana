@@ -19,7 +19,7 @@ export interface JobGroupsInputProps {
   validation: Validation;
 }
 
-export const JobGroupsInput: FC<JobGroupsInputProps> = memo(
+export const JobGroupsInput: FC<React.PropsWithChildren<JobGroupsInputProps>> = memo(
   ({ existingGroups, selectedGroups, onChange, validation }) => {
     const options = existingGroups.map<EuiComboBoxOptionOption>((g) => ({
       label: g,

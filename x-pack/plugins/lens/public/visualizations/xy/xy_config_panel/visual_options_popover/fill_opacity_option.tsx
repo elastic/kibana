@@ -25,7 +25,7 @@ export interface FillOpacityOptionProps {
   isFillOpacityEnabled?: boolean;
 }
 
-export const FillOpacityOption: React.FC<FillOpacityOptionProps> = ({
+export const FillOpacityOption: React.FC<React.PropsWithChildren<FillOpacityOptionProps>> = ({
   onChange,
   value,
   isFillOpacityEnabled = true,

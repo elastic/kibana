@@ -46,7 +46,7 @@ interface Props {
   canCreateDataView: boolean;
 }
 
-export const AdvancedSettings: FC<Props> = ({
+export const AdvancedSettings: FC<React.PropsWithChildren<Props>> = ({
   index,
   dataView,
   initialized,
@@ -183,7 +183,7 @@ interface JsonEditorProps {
   onChange(value: string): void;
 }
 
-const IndexSettings: FC<JsonEditorProps> = ({ initialized, data, onChange }) => {
+const IndexSettings: FC<React.PropsWithChildren<JsonEditorProps>> = ({ initialized, data, onChange }) => {
   return (
     <React.Fragment>
       <EuiFormRow
@@ -208,7 +208,7 @@ const IndexSettings: FC<JsonEditorProps> = ({ initialized, data, onChange }) => 
   );
 };
 
-const Mappings: FC<JsonEditorProps> = ({ initialized, data, onChange }) => {
+const Mappings: FC<React.PropsWithChildren<JsonEditorProps>> = ({ initialized, data, onChange }) => {
   return (
     <React.Fragment>
       <EuiFormRow
@@ -233,7 +233,7 @@ const Mappings: FC<JsonEditorProps> = ({ initialized, data, onChange }) => {
   );
 };
 
-const IngestPipeline: FC<JsonEditorProps> = ({ initialized, data, onChange }) => {
+const IngestPipeline: FC<React.PropsWithChildren<JsonEditorProps>> = ({ initialized, data, onChange }) => {
   return (
     <React.Fragment>
       <EuiFormRow

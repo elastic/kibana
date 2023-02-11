@@ -56,7 +56,7 @@ interface ThemeContextProps {
   darkMode: boolean;
 }
 
-export const SyntheticsThemeContextProvider: React.FC<ThemeContextProps> = ({
+export const SyntheticsThemeContextProvider: React.FC<React.PropsWithChildren<ThemeContextProps>> = ({
   darkMode,
   children,
 }) => {

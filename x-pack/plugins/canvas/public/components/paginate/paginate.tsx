@@ -21,7 +21,7 @@ export type PaginateProps = Omit<InPaginateProps, 'startPage'> & {
 
 export type PaginateChildProps = Omit<PaginateProps, 'children'>;
 
-export const Paginate: React.FunctionComponent<PaginateProps> = ({
+export const Paginate: React.FunctionComponent<React.PropsWithChildren<PaginateProps>> = ({
   children,
   ...childrenProps
 }) => {

@@ -230,7 +230,7 @@ interface Props {
   hasManagedJob?: boolean;
 }
 
-export const DeleteSpaceAwareItemCheckModal: FC<Props> = ({
+export const DeleteSpaceAwareItemCheckModal: FC<React.PropsWithChildren<Props>> = ({
   canDeleteCallback,
   onCloseCallback,
   refreshJobsCallback,

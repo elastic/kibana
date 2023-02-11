@@ -43,7 +43,7 @@ import { NATIVE_CONNECTORS } from '../constants';
 import { ConnectorCheckable } from './connector_checkable';
 import { SelectConnectorLogic } from './select_connector_logic';
 
-export const SelectConnector: React.FC = () => {
+export const SelectConnector: React.FC<React.PropsWithChildren<unknown>> = () => {
   const { indexData, status: indexApiStatus } = useValues(CachedFetchIndexApiLogic);
   const { selectedNativeConnector } = useValues(SelectConnectorLogic);
   const { saveNativeConnector, setSelectedConnector } = useActions(SelectConnectorLogic);

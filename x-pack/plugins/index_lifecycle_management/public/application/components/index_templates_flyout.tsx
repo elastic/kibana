@@ -26,7 +26,7 @@ interface Props {
   indexTemplates: string[];
   close: () => void;
 }
-export const IndexTemplatesFlyout: FunctionComponent<Props> = ({
+export const IndexTemplatesFlyout: FunctionComponent<React.PropsWithChildren<Props>> = ({
   policyName,
   indexTemplates,
   close,

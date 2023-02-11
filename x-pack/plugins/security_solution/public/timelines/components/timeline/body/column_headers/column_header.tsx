@@ -60,7 +60,7 @@ interface ColumneHeaderProps {
   timelineId: string;
 }
 
-const ColumnHeaderComponent: React.FC<ColumneHeaderProps> = ({
+const ColumnHeaderComponent: React.FC<React.PropsWithChildren<ColumneHeaderProps>> = ({
   draggableIndex,
   header,
   timelineId,

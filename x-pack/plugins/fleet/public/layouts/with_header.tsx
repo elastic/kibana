@@ -20,7 +20,7 @@ export interface WithHeaderLayoutProps extends HeaderProps {
   children?: React.ReactNode;
 }
 
-export const WithHeaderLayout: React.FC<WithHeaderLayoutProps> = ({
+export const WithHeaderLayout: React.FC<React.PropsWithChildren<WithHeaderLayoutProps>> = ({
   restrictWidth,
   restrictHeaderWidth,
   children,

@@ -47,7 +47,7 @@ const ActionsContainer = styled.div`
   display: flex;
 `;
 
-const PreviewActionsComponent: React.FC<ActionProps> = ({
+const PreviewActionsComponent: React.FC<React.PropsWithChildren<ActionProps>> = ({
   ariaRowindex,
   columnValues,
   onEventDetailsPanelOpened,

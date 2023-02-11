@@ -33,7 +33,7 @@ export interface ResetActionNameProps {
   isBulkAction: boolean;
 }
 
-export const ResetActionName: FC<ResetActionNameProps> = ({
+export const ResetActionName: FC<React.PropsWithChildren<ResetActionNameProps>> = ({
   canResetTransform,
   disabled,
   isBulkAction,

@@ -44,7 +44,7 @@ const tooManyBucketsCalloutMsg = i18n.translate(
   }
 );
 
-export const ExplorerAnomaliesContainer: FC<ExplorerAnomaliesContainerProps> = ({
+export const ExplorerAnomaliesContainer: FC<React.PropsWithChildren<ExplorerAnomaliesContainerProps>> = ({
   id,
   chartsData,
   showCharts,

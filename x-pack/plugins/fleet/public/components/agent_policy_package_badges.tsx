@@ -23,7 +23,7 @@ interface Props {
   excludeFleetServer?: boolean;
 }
 
-export const AgentPolicyPackageBadges: React.FunctionComponent<Props> = ({
+export const AgentPolicyPackageBadges: React.FunctionComponent<React.PropsWithChildren<Props>> = ({
   agentPolicyId,
   hideTitle,
   excludeFleetServer,

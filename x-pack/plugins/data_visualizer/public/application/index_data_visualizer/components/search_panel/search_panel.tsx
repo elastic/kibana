@@ -53,7 +53,7 @@ interface Props {
   onAddFilter?: (field: DataViewField | string, value: string, type: '+' | '-') => void;
 }
 
-export const SearchPanel: FC<Props> = ({
+export const SearchPanel: FC<React.PropsWithChildren<Props>> = ({
   dataView,
   searchString,
   searchQueryLanguage,

@@ -37,7 +37,7 @@ interface Props {
   pattern?: string;
 }
 
-const StatsRollupComponent: React.FC<Props> = ({
+const StatsRollupComponent: React.FC<React.PropsWithChildren<Props>> = ({
   defaultNumberFormat,
   docsCount,
   incompatible,

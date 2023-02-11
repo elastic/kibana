@@ -58,7 +58,7 @@ const cancelButtonText = i18n.translate(
   }
 );
 
-export const SwitchModal: FC<Props> = ({ onCancel, onConfirm, type }) => (
+export const SwitchModal: FC<React.PropsWithChildren<Props>> = ({ onCancel, onConfirm, type }) => (
   <EuiConfirmModal
     title={type === 'pivot' ? pivotModalTitle : sourceModalTitle}
     onCancel={onCancel}

@@ -21,7 +21,7 @@ interface Props {
   restores: SnapshotRestore[];
 }
 
-export const RestoreTable: React.FunctionComponent<Props> = React.memo(({ restores }) => {
+export const RestoreTable: React.FunctionComponent<React.PropsWithChildren<Props>> = React.memo(({ restores }) => {
   const { i18n, uiMetricService } = useServices();
 
   const [tableState, setTableState] = useState<{ page: any; sort: any }>({ page: {}, sort: {} });

@@ -13,7 +13,7 @@ import { i18n } from '@kbn/i18n';
 
 import { StepDefineFormHook } from '../step_define';
 
-export const DatePickerApplySwitch: FC<StepDefineFormHook> = ({
+export const DatePickerApplySwitch: FC<React.PropsWithChildren<StepDefineFormHook>> = ({
   datePicker: {
     actions: { setDatePickerApplyEnabled },
     state: { isDatePickerApplyEnabled },

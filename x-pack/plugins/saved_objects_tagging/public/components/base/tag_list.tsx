@@ -19,7 +19,7 @@ export interface TagListProps {
 /**
  * Displays a list of tag
  */
-export const TagList: FC<TagListProps> = ({ tags, onClick, tagRender }) => {
+export const TagList: FC<React.PropsWithChildren<TagListProps>> = ({ tags, onClick, tagRender }) => {
   return (
     <EuiBadgeGroup>
       {tags.map((tag) =>

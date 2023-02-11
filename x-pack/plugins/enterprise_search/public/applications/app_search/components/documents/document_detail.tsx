@@ -29,7 +29,7 @@ const DOCUMENT_DETAIL_TITLE = (documentId: string) =>
     values: { documentId },
   });
 
-export const DocumentDetail: React.FC = () => {
+export const DocumentDetail: React.FC<React.PropsWithChildren<unknown>> = () => {
   const { dataLoading, fields } = useValues(DocumentDetailLogic);
   const { deleteDocument, getDocumentDetails, setFields } = useActions(DocumentDetailLogic);
   const { isMetaEngine, isElasticsearchEngine } = useValues(EngineLogic);

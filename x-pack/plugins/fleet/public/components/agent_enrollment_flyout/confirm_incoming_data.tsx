@@ -23,7 +23,7 @@ interface Props {
   troubleshootLink: string;
 }
 
-export const ConfirmIncomingData: React.FunctionComponent<Props> = ({
+export const ConfirmIncomingData: React.FunctionComponent<React.PropsWithChildren<Props>> = ({
   agentIds,
   installedPolicy,
   agentDataConfirmed,

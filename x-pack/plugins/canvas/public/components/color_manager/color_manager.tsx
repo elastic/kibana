@@ -47,7 +47,7 @@ export interface Props {
   value?: string;
 }
 
-export const ColorManager: FC<Props> = ({
+export const ColorManager: FC<React.PropsWithChildren<Props>> = ({
   hasButtons = false,
   onAddColor,
   onChange,

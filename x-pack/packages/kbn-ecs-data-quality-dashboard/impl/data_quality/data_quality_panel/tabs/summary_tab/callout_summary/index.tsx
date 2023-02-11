@@ -33,7 +33,7 @@ interface Props {
   patternDocsCount: number;
 }
 
-const CalloutSummaryComponent: React.FC<Props> = ({
+const CalloutSummaryComponent: React.FC<React.PropsWithChildren<Props>> = ({
   addSuccessToast,
   addToNewCaseDisabled,
   defaultNumberFormat,

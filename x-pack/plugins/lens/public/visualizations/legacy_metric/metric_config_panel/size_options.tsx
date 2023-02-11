@@ -56,7 +56,7 @@ const titleSizes = [
   },
 ];
 
-export const SizeOptions: React.FC<TitlePositionProps> = ({ state, setState }) => {
+export const SizeOptions: React.FC<React.PropsWithChildren<TitlePositionProps>> = ({ state, setState }) => {
   const currSizeIndex = titleSizes.findIndex(
     (size) => size.id === (state.size || DEFAULT_TITLE_SIZE)
   );

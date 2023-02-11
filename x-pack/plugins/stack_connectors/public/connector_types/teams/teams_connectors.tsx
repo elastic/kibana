@@ -35,7 +35,7 @@ const getWebhookUrlConfig = (docLinks: DocLinksStart): FieldConfig => ({
   ],
 });
 
-const TeamsActionFields: React.FunctionComponent<ActionConnectorFieldsProps> = ({
+const TeamsActionFields: React.FunctionComponent<React.PropsWithChildren<ActionConnectorFieldsProps>> = ({
   readOnly,
   isEdit,
 }) => {

@@ -32,8 +32,8 @@ export const createSpacesReactContext = <Services extends Partial<CoreStart>>(
     spacesDataPromise,
     services,
   };
-  const Provider: React.FC = ({ children }) =>
-    createElement(context.Provider as React.ComponentType<any>, { value, children });
+  const Provider: React.FC<React.PropsWithChildren<unknown>> = ({ children }) =>
+    createElement(context.Provider as React.ComponentType<React.PropsWithChildren<any>>, { value, children });
 
   return {
     value,

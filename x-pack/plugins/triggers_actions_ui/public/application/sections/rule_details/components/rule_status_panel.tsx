@@ -46,7 +46,7 @@ type ComponentOpts = Pick<
 > &
   RuleStatusPanelProps;
 
-export const RuleStatusPanel: React.FC<ComponentOpts> = ({
+export const RuleStatusPanel: React.FC<React.PropsWithChildren<ComponentOpts>> = ({
   rule,
   bulkEnableRules,
   bulkDisableRules,

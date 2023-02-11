@@ -39,7 +39,7 @@ interface KibanaLogicProps {
   setBreadcrumbs(crumbs: ChromeBreadcrumb[]): void;
   setChromeIsVisible(isVisible: boolean): void;
   setDocTitle(title: string): void;
-  renderHeaderActions(HeaderActions: FC): void;
+  renderHeaderActions(HeaderActions: FC<React.PropsWithChildren<unknown>>): void;
   // Required plugins
   charts: ChartsPluginStart;
   guidedOnboarding: GuidedOnboardingPluginStart;

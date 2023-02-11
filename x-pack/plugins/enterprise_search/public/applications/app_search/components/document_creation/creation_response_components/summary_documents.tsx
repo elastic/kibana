@@ -14,7 +14,7 @@ interface ExampleDocumentJsonProps {
   document: object;
   errors?: string[];
 }
-export const ExampleDocumentJson: React.FC<ExampleDocumentJsonProps> = ({ document, errors }) => {
+export const ExampleDocumentJson: React.FC<React.PropsWithChildren<ExampleDocumentJsonProps>> = ({ document, errors }) => {
   return (
     <>
       {errors && (
@@ -47,7 +47,7 @@ export const ExampleDocumentJson: React.FC<ExampleDocumentJsonProps> = ({ docume
 interface MoreDocumentsTextProps {
   documents: number;
 }
-export const MoreDocumentsText: React.FC<MoreDocumentsTextProps> = ({ documents }) => {
+export const MoreDocumentsText: React.FC<React.PropsWithChildren<MoreDocumentsTextProps>> = ({ documents }) => {
   return (
     <EuiText>
       <p>

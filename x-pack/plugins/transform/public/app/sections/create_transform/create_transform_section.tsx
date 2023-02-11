@@ -28,7 +28,7 @@ import { PrivilegesWrapper } from '../../lib/authorization';
 import { Wizard } from './components/wizard';
 
 type Props = RouteComponentProps<{ savedObjectId: string }>;
-export const CreateTransformSection: FC<Props> = ({ match }) => {
+export const CreateTransformSection: FC<React.PropsWithChildren<Props>> = ({ match }) => {
   // Set breadcrumb and page title
   useEffect(() => {
     breadcrumbService.setBreadcrumbs(BREADCRUMB_SECTION.CREATE_TRANSFORM);

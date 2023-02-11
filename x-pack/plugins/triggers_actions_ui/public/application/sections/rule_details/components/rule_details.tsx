@@ -84,7 +84,7 @@ const ruleDetailStyle = {
   minWidth: 0,
 };
 
-export const RuleDetails: React.FunctionComponent<RuleDetailsProps> = ({
+export const RuleDetails: React.FunctionComponent<React.PropsWithChildren<RuleDetailsProps>> = ({
   rule,
   ruleType,
   actionTypes,

@@ -20,7 +20,7 @@ import { EnterpriseSearchEnginesPageTemplate } from '../layout/engines_page_temp
 import { EngineOverviewLogic } from './engine_overview_logic';
 import { EngineViewHeaderActions } from './engine_view_header_actions';
 
-export const EngineOverview: React.FC = () => {
+export const EngineOverview: React.FC<React.PropsWithChildren<unknown>> = () => {
   const {
     euiTheme: { colors: colors },
   } = useEuiTheme();

@@ -18,7 +18,7 @@ export interface AssignFlyoutActionBarProps {
   onDeselectAll: () => void;
 }
 
-export const AssignFlyoutActionBar: FC<AssignFlyoutActionBarProps> = ({
+export const AssignFlyoutActionBar: FC<React.PropsWithChildren<AssignFlyoutActionBarProps>> = ({
   resultCount,
   initiallyAssigned,
   pendingChanges,

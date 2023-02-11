@@ -40,7 +40,7 @@ const Wrapper = styled.div`
   margin-top: -${({ theme }) => theme.eui.euiSizeS};
 `;
 
-export const AlertsCountComponent: React.FC<AlertsCountProps> = ({
+export const AlertsCountComponent: React.FC<React.PropsWithChildren<AlertsCountProps>> = ({
   data,
   loading,
   stackByField0,

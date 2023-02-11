@@ -58,7 +58,7 @@ interface Props {
   };
 }
 
-export const IndexSettingsResolutionCell: React.FunctionComponent<Props> = ({ status }) => {
+export const IndexSettingsResolutionCell: React.FunctionComponent<React.PropsWithChildren<Props>> = ({ status }) => {
   const { statusType } = status;
   if (statusType === 'in_progress') {
     return (

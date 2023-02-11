@@ -41,7 +41,7 @@ import { EnterpriseSearchEnginesPageTemplate } from '../layout/engines_page_temp
 import { AddIndicesFlyout } from './add_indices_flyout';
 import { EngineIndicesLogic } from './engine_indices_logic';
 
-export const EngineIndices: React.FC = () => {
+export const EngineIndices: React.FC<React.PropsWithChildren<unknown>> = () => {
   const subduedBackground = useEuiBackgroundColor('subdued');
   const { sendEnterpriseSearchTelemetry } = useActions(TelemetryLogic);
   const { engineData, engineName, isLoadingEngine, addIndicesFlyoutOpen } =

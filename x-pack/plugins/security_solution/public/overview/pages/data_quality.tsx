@@ -132,7 +132,7 @@ const renderOption = (
   </EuiToolTip>
 );
 
-const DataQualityComponent: React.FC = () => {
+const DataQualityComponent: React.FC<React.PropsWithChildren<unknown>> = () => {
   const theme = useTheme();
   const toasts = useToasts();
   const addSuccessToast = useCallback(

@@ -23,7 +23,7 @@ interface Props {
   readOnly: boolean;
 }
 
-export const UpdateStep: FunctionComponent<Props> = ({ display, readOnly }) => (
+export const UpdateStep: FunctionComponent<React.PropsWithChildren<Props>> = ({ display, readOnly }) => (
   <span data-test-subj="updateStep" style={{ display: display ? 'block' : 'none' }}>
     <EuiText>
       <h3>{i18n.STEP_4A}</h3>

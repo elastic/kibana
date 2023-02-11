@@ -29,7 +29,7 @@ export interface Props {
   isByValueEnabled?: boolean;
 }
 
-export const AddEmbeddableFlyout: FC<Props> = ({
+export const AddEmbeddableFlyout: FC<React.PropsWithChildren<Props>> = ({
   onSelect,
   availableEmbeddables,
   onClose,

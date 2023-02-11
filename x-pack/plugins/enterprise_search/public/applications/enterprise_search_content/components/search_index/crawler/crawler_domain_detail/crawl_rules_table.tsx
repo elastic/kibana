@@ -113,7 +113,7 @@ const DEFAULT_DESCRIPTION = (
   </p>
 );
 
-export const CrawlRulesTable: React.FC<CrawlRulesTableProps> = ({
+export const CrawlRulesTable: React.FC<React.PropsWithChildren<CrawlRulesTableProps>> = ({
   description = DEFAULT_DESCRIPTION,
   domainId,
   indexName,

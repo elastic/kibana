@@ -31,7 +31,7 @@ interface Props {
   inferrer: InferrerType;
 }
 
-export const IndexInputForm: FC<Props> = ({ inferrer }) => {
+export const IndexInputForm: FC<React.PropsWithChildren<Props>> = ({ inferrer }) => {
   const data = useIndexInput({ inferrer });
   const { reloadExamples, selectedField } = data;
 

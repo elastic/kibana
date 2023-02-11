@@ -15,7 +15,7 @@ interface SplitFieldSelectorProps {
   onChange: (value: string | undefined) => void;
 }
 
-export const SplitFieldSelector: FC<SplitFieldSelectorProps> = React.memo(({ value, onChange }) => {
+export const SplitFieldSelector: FC<React.PropsWithChildren<SplitFieldSelectorProps>> = React.memo(({ value, onChange }) => {
   const { splitFieldsOptions } = useChangePointDetectionContext();
 
   const options = useMemo<Array<EuiComboBoxOptionOption<string>>>(() => {

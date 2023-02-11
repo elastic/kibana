@@ -24,7 +24,7 @@ export interface Props {
   onLoadJson: OnDoneLoadJsonHandler;
 }
 
-export const ProcessorsEmptyPrompt: FunctionComponent<Props> = ({ onLoadJson }) => {
+export const ProcessorsEmptyPrompt: FunctionComponent<React.PropsWithChildren<Props>> = ({ onLoadJson }) => {
   const { onTreeAction } = usePipelineProcessorsContext();
   const { services } = useKibana();
 

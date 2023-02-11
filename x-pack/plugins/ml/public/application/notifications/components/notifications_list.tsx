@@ -59,7 +59,7 @@ export const getDefaultNotificationsListState = (): ListingPageUrlState => ({
   sortDirection: 'desc',
 });
 
-export const NotificationsList: FC = () => {
+export const NotificationsList: FC<React.PropsWithChildren<unknown>> = () => {
   const {
     services: {
       mlServices: { mlApiServices },

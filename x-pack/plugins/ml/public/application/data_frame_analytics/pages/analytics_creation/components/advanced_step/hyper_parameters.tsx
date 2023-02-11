@@ -18,7 +18,7 @@ interface Props extends CreateAnalyticsFormProps {
   advancedParamErrors: AdvancedParamErrors;
 }
 
-export const HyperParameters: FC<Props> = ({ actions, state, advancedParamErrors }) => {
+export const HyperParameters: FC<React.PropsWithChildren<Props>> = ({ actions, state, advancedParamErrors }) => {
   const { setFormState } = actions;
 
   const {

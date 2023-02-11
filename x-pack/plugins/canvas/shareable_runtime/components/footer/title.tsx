@@ -19,7 +19,7 @@ interface Props {
 /**
  * The title of the workpad displayed in the left-hand of the footer.
  */
-export const TitleComponent: FC<Props> = ({ title }) => (
+export const TitleComponent: FC<React.PropsWithChildren<Props>> = ({ title }) => (
   <EuiFlexGroup gutterSize="s" justifyContent="flexStart" alignItems="center">
     <EuiFlexItem grow={false} style={{ flexShrink: 0 }}>
       <EuiLink href="https://www.elastic.co" title="Powered by Elastic.co">
@@ -37,7 +37,7 @@ export const TitleComponent: FC<Props> = ({ title }) => (
 /**
  * A store-connected container for the `Title` component.
  */
-export const Title: FC<{}> = () => {
+export const Title: FC<React.PropsWithChildren<{}>> = () => {
   const [{ workpad }] = useCanvasShareableState();
 
   if (!workpad) {

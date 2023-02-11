@@ -24,7 +24,7 @@ export interface FieldTableHeaderProps {
   onFilterSelectedChange: (enabled: boolean) => void;
 }
 
-const FieldTableHeaderComponent: React.FC<FieldTableHeaderProps> = ({
+const FieldTableHeaderComponent: React.FC<React.PropsWithChildren<FieldTableHeaderProps>> = ({
   fieldCount,
   filterSelectedEnabled,
   onFilterSelectedChange,

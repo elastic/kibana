@@ -70,7 +70,7 @@ interface Props {
   deprecationResolutionState?: DeprecationResolutionState;
 }
 
-export const ResolutionTableCell: React.FunctionComponent<Props> = ({
+export const ResolutionTableCell: React.FunctionComponent<React.PropsWithChildren<Props>> = ({
   deprecationId,
   isAutomated,
   deprecationResolutionState,

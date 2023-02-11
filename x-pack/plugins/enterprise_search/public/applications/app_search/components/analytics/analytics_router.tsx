@@ -32,7 +32,7 @@ import {
   QueryDetail,
 } from './views';
 
-export const AnalyticsRouter: React.FC = () => {
+export const AnalyticsRouter: React.FC<React.PropsWithChildren<unknown>> = () => {
   return (
     <Switch>
       <Route exact path={ENGINE_ANALYTICS_PATH}>

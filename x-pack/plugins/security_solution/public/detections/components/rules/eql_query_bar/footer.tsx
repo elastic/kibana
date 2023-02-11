@@ -68,7 +68,7 @@ const Spinner = styled(EuiLoadingSpinner)`
 
 const singleSelection = { asPlainText: true };
 
-export const EqlQueryBarFooter: FC<Props> = ({
+export const EqlQueryBarFooter: FC<React.PropsWithChildren<Props>> = ({
   errors,
   isLoading,
   isSizeOptionDisabled,

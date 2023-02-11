@@ -42,7 +42,7 @@ interface Props {
   validation: RepositoryValidation;
 }
 
-export const RepositoryFormStepOne: React.FunctionComponent<Props> = ({
+export const RepositoryFormStepOne: React.FunctionComponent<React.PropsWithChildren<Props>> = ({
   repository,
   onNext,
   updateRepository,

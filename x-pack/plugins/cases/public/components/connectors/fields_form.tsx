@@ -17,7 +17,7 @@ interface Props extends Omit<ConnectorFieldsProps<ConnectorTypeFields['fields']>
   connector: CaseActionConnector | null;
 }
 
-const ConnectorFieldsFormComponent: React.FC<Props> = ({ connector, isEdit, onChange, fields }) => {
+const ConnectorFieldsFormComponent: React.FC<React.PropsWithChildren<Props>> = ({ connector, isEdit, onChange, fields }) => {
   const { caseConnectorsRegistry } = getCaseConnectors();
 
   if (connector == null || connector.actionTypeId == null || connector.actionTypeId === '.none') {

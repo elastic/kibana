@@ -50,7 +50,7 @@ export interface AgentDiagnosticsProps {
   agent: Agent;
 }
 
-export const AgentDiagnosticsTab: React.FunctionComponent<AgentDiagnosticsProps> = ({ agent }) => {
+export const AgentDiagnosticsTab: React.FunctionComponent<React.PropsWithChildren<AgentDiagnosticsProps>> = ({ agent }) => {
   const { notifications } = useStartServices();
   const { getAbsolutePath } = useLink();
   const [isSubmitting, setIsSubmitting] = useState(false);

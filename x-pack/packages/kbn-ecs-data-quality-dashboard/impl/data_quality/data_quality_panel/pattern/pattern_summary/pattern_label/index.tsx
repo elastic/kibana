@@ -27,7 +27,7 @@ interface Props {
   pattern: string;
 }
 
-const PatternLabelComponent: React.FC<Props> = ({
+const PatternLabelComponent: React.FC<React.PropsWithChildren<Props>> = ({
   ilmExplainPhaseCounts,
   incompatible,
   indices,

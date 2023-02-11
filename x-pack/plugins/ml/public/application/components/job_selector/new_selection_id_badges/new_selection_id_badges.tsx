@@ -20,7 +20,7 @@ interface NewSelectionIdBadgesProps {
   showAllBadges?: boolean;
 }
 
-export const NewSelectionIdBadges: FC<NewSelectionIdBadgesProps> = ({
+export const NewSelectionIdBadges: FC<React.PropsWithChildren<NewSelectionIdBadgesProps>> = ({
   limit,
   maps,
   newSelection,

@@ -18,7 +18,7 @@ interface Props {
   showCta?: boolean;
 }
 
-export const LegacyIndexTemplatesDeprecation: React.FunctionComponent<Props> = ({
+export const LegacyIndexTemplatesDeprecation: React.FunctionComponent<React.PropsWithChildren<Props>> = ({
   history,
   showCta,
 }) => {

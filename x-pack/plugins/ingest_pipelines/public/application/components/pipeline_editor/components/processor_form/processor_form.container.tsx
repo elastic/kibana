@@ -47,7 +47,7 @@ const formOptions: FormOptions = {
   stripEmptyFields: false,
 };
 
-export const ProcessorFormContainer: FunctionComponent<Props> = ({
+export const ProcessorFormContainer: FunctionComponent<React.PropsWithChildren<Props>> = ({
   processor,
   onFormUpdate,
   onSubmit,

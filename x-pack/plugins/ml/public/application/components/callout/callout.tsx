@@ -38,19 +38,19 @@ export const statusToEuiIconType = (status: VALIDATION_STATUS) => {
   }
 };
 
-const Link: FC<{ url: string }> = ({ url }) => (
+const Link: FC<React.PropsWithChildren<{ url: string }>> = ({ url }) => (
   <EuiLink href={url} target="_BLANK">
     <FormattedMessage id="xpack.ml.validateJob.learnMoreLinkText" defaultMessage="Learn more" />
   </EuiLink>
 );
 
-const Message: FC<Pick<CalloutMessage, 'text' | 'url'>> = ({ text, url }) => (
+const Message: FC<React.PropsWithChildren<Pick<CalloutMessage, 'text' | 'url'>>> = ({ text, url }) => (
   <>
     {text} {url && <Link url={url} />}
   </>
 );
 
-export const Callout: FC<CalloutMessage> = ({ heading, status, text, url }) => (
+export const Callout: FC<React.PropsWithChildren<CalloutMessage>> = ({ heading, status, text, url }) => (
   <>
     <EuiCallOut
       data-test-subj={'mlValidationCallout'}

@@ -16,7 +16,7 @@ interface Props {
   analysisType: DataFrameAnalysisConfigType;
 }
 
-export const ViewResultsPanel: FC<Props> = ({ jobId, analysisType }) => {
+export const ViewResultsPanel: FC<React.PropsWithChildren<Props>> = ({ jobId, analysisType }) => {
   const analyticsExplorationPageLink = useMlLink({
     page: ML_PAGES.DATA_FRAME_ANALYTICS_EXPLORATION,
     pageState: {

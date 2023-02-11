@@ -51,7 +51,7 @@ function splitAnomalySeverities(anomalies: Anomaly[]) {
   return severities;
 }
 
-export const Anomalies: FC<Props> = ({ anomalyData }) => {
+export const Anomalies: FC<React.PropsWithChildren<Props>> = ({ anomalyData }) => {
   const anomalies = anomalyData === undefined ? [] : anomalyData;
   const severities: Severities = splitAnomalySeverities(anomalies);
 

@@ -19,7 +19,7 @@ interface TitleFieldProps {
   titleFieldHover: boolean;
 }
 
-export const TitleField: React.FC<TitleFieldProps> = ({ result, titleField, titleFieldHover }) => {
+export const TitleField: React.FC<React.PropsWithChildren<TitleFieldProps>> = ({ result, titleField, titleFieldHover }) => {
   const title = titleField ? result[titleField] : '';
   const titleDisplay = Array.isArray(title) ? title.join(', ') : title;
   return (

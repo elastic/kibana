@@ -40,7 +40,7 @@ export interface ConflictingEnginesSets {
   [key: string]: Set<string>;
 }
 
-export const MetaEnginesTable: React.FC<EnginesTableProps> = ({
+export const MetaEnginesTable: React.FC<React.PropsWithChildren<EnginesTableProps>> = ({
   items,
   loading,
   noItemsMessage,

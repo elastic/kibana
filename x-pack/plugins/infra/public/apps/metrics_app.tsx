@@ -50,7 +50,7 @@ export const renderApp = (
   };
 };
 
-const MetricsApp: React.FC<{
+const MetricsApp: React.FC<React.PropsWithChildren<{
   core: CoreStart;
   history: History<unknown>;
   pluginStart: InfraClientStartExports;
@@ -58,7 +58,7 @@ const MetricsApp: React.FC<{
   setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'];
   storage: Storage;
   theme$: AppMountParameters['theme$'];
-}> = ({ core, history, pluginStart, plugins, setHeaderActionMenu, storage, theme$ }) => {
+}>> = ({ core, history, pluginStart, plugins, setHeaderActionMenu, storage, theme$ }) => {
   const uiCapabilities = core.application.capabilities;
 
   return (

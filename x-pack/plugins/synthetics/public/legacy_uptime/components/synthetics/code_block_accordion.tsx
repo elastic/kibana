@@ -20,7 +20,7 @@ interface Props {
  * Utility for showing `EuiAccordions` with code blocks which we use frequently in synthetics to display
  * stack traces, long error messages, and synthetics journey code.
  */
-export const CodeBlockAccordion: FC<Props> = ({
+export const CodeBlockAccordion: FC<React.PropsWithChildren<Props>> = ({
   buttonContent,
   children,
   id,

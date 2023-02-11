@@ -14,7 +14,7 @@ interface ApiKeyProps {
   label?: string;
 }
 
-export const ApiKey: React.FC<ApiKeyProps> = ({ apiKey, label }) => (
+export const ApiKey: React.FC<React.PropsWithChildren<ApiKeyProps>> = ({ apiKey, label }) => (
   <>
     {label && (
       <>

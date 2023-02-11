@@ -23,7 +23,7 @@ const secretsFormSchema: SecretsFieldSchema[] = [
   { id: 'apiKeySecret', label: i18n.API_KEY_SECRET_LABEL, isPasswordField: true },
 ];
 
-const ResilientConnectorFields: React.FC<ActionConnectorFieldsProps> = ({ readOnly, isEdit }) => {
+const ResilientConnectorFields: React.FC<React.PropsWithChildren<ActionConnectorFieldsProps>> = ({ readOnly, isEdit }) => {
   return (
     <SimpleConnectorForm
       isEdit={isEdit}

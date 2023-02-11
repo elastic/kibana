@@ -42,7 +42,7 @@ export interface ExtendedFeatureImportance extends FeatureImportance {
   absImportance: number;
 }
 
-export const DecisionPathPopover: FC<DecisionPathPopoverProps> = ({
+export const DecisionPathPopover: FC<React.PropsWithChildren<DecisionPathPopoverProps>> = ({
   baseline,
   featureImportance,
   predictedValue,

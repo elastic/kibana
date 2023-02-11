@@ -18,7 +18,7 @@ export interface RowProps {
   selectedThirdParty: ThirdPartyField;
 }
 
-const FieldMappingRowComponent: React.FC<RowProps> = ({
+const FieldMappingRowComponent: React.FC<React.PropsWithChildren<RowProps>> = ({
   isLoading,
   casesField,
   selectedActionType,

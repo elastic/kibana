@@ -56,7 +56,7 @@ function useFormDefaultValue(sourcePipeline?: Pipeline) {
   return { formDefaultValue, canEditName: !locationSearchParams.has('name') };
 }
 
-export const PipelinesCreate: React.FunctionComponent<RouteComponentProps & Props> = ({
+export const PipelinesCreate: React.FunctionComponent<React.PropsWithChildren<RouteComponentProps & Props>> = ({
   sourcePipeline,
 }) => {
   const history = useHistory<LocationState>();

@@ -66,7 +66,7 @@ const LoadingChart = styled(EuiLoadingChart)`
 
 export const scoreFormatter = (d: number) => Math.round(d).toString();
 
-const RiskScoreOverTimeComponent: React.FC<RiskScoreOverTimeProps> = ({
+const RiskScoreOverTimeComponent: React.FC<React.PropsWithChildren<RiskScoreOverTimeProps>> = ({
   from,
   to,
   riskScore,

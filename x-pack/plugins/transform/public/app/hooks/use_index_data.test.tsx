@@ -48,7 +48,7 @@ const runtimeMappings = {
 describe('Transform: useIndexData()', () => {
   test('dataView set triggers loading', async () => {
     const mlShared = await getMlSharedImports();
-    const wrapper: FC = ({ children }) => (
+    const wrapper: FC<React.PropsWithChildren<unknown>> = ({ children }) => (
       <IntlProvider locale="en">
         <MlSharedContext.Provider value={mlShared}>{children}</MlSharedContext.Provider>
       </IntlProvider>

@@ -17,7 +17,7 @@ interface LicenseCalloutProps {
   message?: string;
 }
 
-export const LicenseCallout: React.FC<LicenseCalloutProps> = ({ message }) => {
+export const LicenseCallout: React.FC<React.PropsWithChildren<LicenseCalloutProps>> = ({ message }) => {
   const title = (
     <>
       {message}{' '}

@@ -19,7 +19,7 @@ interface Props {
   hasErrors: boolean;
 }
 
-export const EmailActionFields: React.FunctionComponent<Props> = ({
+export const EmailActionFields: React.FunctionComponent<React.PropsWithChildren<Props>> = ({
   action,
   editAction,
   errors,

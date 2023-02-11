@@ -44,7 +44,7 @@ interface Props {
   setGroupBySelection: (groupBySelection: GroupBySelection) => void;
 }
 
-export const AlertsSummaryChartsPanel: React.FC<Props> = ({
+export const AlertsSummaryChartsPanel: React.FC<React.PropsWithChildren<Props>> = ({
   alignHeader,
   filters,
   addFilter,

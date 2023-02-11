@@ -28,7 +28,7 @@ interface ColorRangeLegendProps {
  *
  * @param props ColorRangeLegendProps
  */
-export const ColorRangeLegend: FC<ColorRangeLegendProps> = ({
+export const ColorRangeLegend: FC<React.PropsWithChildren<ColorRangeLegendProps>> = ({
   colorRange,
   justifyTicks = false,
   showTicks = true,

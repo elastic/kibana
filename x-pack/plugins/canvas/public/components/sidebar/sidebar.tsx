@@ -12,7 +12,7 @@ interface Props {
   commit: Function;
 }
 
-export const Sidebar: FunctionComponent<Props> = ({ commit }) => {
+export const Sidebar: FunctionComponent<React.PropsWithChildren<Props>> = ({ commit }) => {
   return (
     <div className="canvasSidebar">
       <SidebarContent commit={commit} />

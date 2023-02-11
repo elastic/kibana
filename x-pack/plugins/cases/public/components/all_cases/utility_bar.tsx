@@ -29,7 +29,7 @@ interface Props {
   deselectCases: () => void;
 }
 
-export const CasesTableUtilityBar: FunctionComponent<Props> = React.memo(
+export const CasesTableUtilityBar: FunctionComponent<React.PropsWithChildren<Props>> = React.memo(
   ({ isSelectorView, totalCases, selectedCases, deselectCases }) => {
     const { euiTheme } = useEuiTheme();
     const [isPopoverOpen, setIsPopoverOpen] = useState(false);

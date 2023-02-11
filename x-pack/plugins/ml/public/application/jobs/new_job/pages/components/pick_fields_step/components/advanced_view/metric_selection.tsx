@@ -32,7 +32,7 @@ const emptyRichDetector: RichDetector = {
   useNull: null,
 };
 
-export const AdvancedDetectors: FC<Props> = ({ setIsValid }) => {
+export const AdvancedDetectors: FC<React.PropsWithChildren<Props>> = ({ setIsValid }) => {
   const { jobCreator: jc, jobCreatorUpdate, jobCreatorUpdated } = useContext(JobCreatorContext);
   const jobCreator = jc as AdvancedJobCreator;
 

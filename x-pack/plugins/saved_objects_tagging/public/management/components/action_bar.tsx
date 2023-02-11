@@ -44,7 +44,7 @@ const actionToMenuItem = (
   };
 };
 
-export const ActionBar: FC<ActionBarProps> = ({
+export const ActionBar: FC<React.PropsWithChildren<ActionBarProps>> = ({
   actions,
   onActionSelected,
   selectedCount,

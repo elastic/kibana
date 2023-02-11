@@ -16,7 +16,7 @@ interface MlAdminJobsDescriptionProps {
   jobIds: string[];
 }
 
-const MlAdminJobsDescriptionComponent: FC<MlAdminJobsDescriptionProps> = ({ jobIds }) => {
+const MlAdminJobsDescriptionComponent: FC<React.PropsWithChildren<MlAdminJobsDescriptionProps>> = ({ jobIds }) => {
   const { loading, jobs, refetch: refreshJobs, isMlAdmin } = useSecurityJobs();
 
   if (!isMlAdmin) {

@@ -34,7 +34,7 @@ export interface ClosureOptionsRadioComponentProps {
   onChangeClosureType: (newClosureType: ClosureType) => void;
 }
 
-const ClosureOptionsRadioComponent: React.FC<ClosureOptionsRadioComponentProps> = ({
+const ClosureOptionsRadioComponent: React.FC<React.PropsWithChildren<ClosureOptionsRadioComponentProps>> = ({
   closureTypeSelected,
   disabled,
   onChangeClosureType,

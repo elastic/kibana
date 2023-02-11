@@ -40,7 +40,7 @@ const Wrapper = styled.div`
   }
 `;
 
-const VisualizationActionsComponent: React.FC<VisualizationActionsProps> = ({
+const VisualizationActionsComponent: React.FC<React.PropsWithChildren<VisualizationActionsProps>> = ({
   className,
   extraActions,
   getLensAttributes,

@@ -11,7 +11,7 @@ import { useKibana } from '../../hooks/use_kibana';
 import { useSecurityContext } from '../../hooks/use_security_context';
 import { SecuritySolutionPluginTemplateWrapper } from '../security_solution_plugin_template_wrapper';
 
-export const EnterpriseGuard: FC = ({ children }) => {
+export const EnterpriseGuard: FC<React.PropsWithChildren<unknown>> = ({ children }) => {
   const { licenseService } = useSecurityContext();
   const {
     services: { http },

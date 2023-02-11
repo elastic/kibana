@@ -39,7 +39,7 @@ interface SourceConfigFieldsProps {
   sourceConfigData: SourceConfigData;
 }
 
-export const SourceConfigFields: React.FC<SourceConfigFieldsProps> = ({
+export const SourceConfigFields: React.FC<React.PropsWithChildren<SourceConfigFieldsProps>> = ({
   isOauth1,
   sourceConfigData,
 }) => {

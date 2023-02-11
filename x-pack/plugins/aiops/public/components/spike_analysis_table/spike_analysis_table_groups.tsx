@@ -62,7 +62,7 @@ interface SpikeAnalysisTableProps {
   loading: boolean;
 }
 
-export const SpikeAnalysisGroupsTable: FC<SpikeAnalysisTableProps> = ({
+export const SpikeAnalysisGroupsTable: FC<React.PropsWithChildren<SpikeAnalysisTableProps>> = ({
   changePoints,
   groupTableItems,
   dataViewId,

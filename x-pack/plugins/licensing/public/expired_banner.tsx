@@ -16,7 +16,7 @@ interface Props {
   uploadUrl: string;
 }
 
-const ExpiredBanner: React.FunctionComponent<Props> = (props) => (
+const ExpiredBanner: React.FunctionComponent<React.PropsWithChildren<Props>> = (props) => (
   <EuiCallOut
     iconType="help"
     color="warning"

@@ -31,7 +31,7 @@ export interface Props {
   setSelectedSubCategory?: (c: string | undefined) => void;
 }
 
-export const SearchBox: FunctionComponent<Props> = ({
+export const SearchBox: FunctionComponent<React.PropsWithChildren<Props>> = ({
   searchTerm,
   setSearchTerm,
   selectedCategory,

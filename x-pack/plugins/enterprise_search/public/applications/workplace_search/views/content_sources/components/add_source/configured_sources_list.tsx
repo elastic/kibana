@@ -44,7 +44,7 @@ interface ConfiguredSourcesProps {
   isOrganization: boolean;
 }
 
-export const ConfiguredSourcesList: React.FC<ConfiguredSourcesProps> = ({
+export const ConfiguredSourcesList: React.FC<React.PropsWithChildren<ConfiguredSourcesProps>> = ({
   sources,
   isOrganization,
 }) => {

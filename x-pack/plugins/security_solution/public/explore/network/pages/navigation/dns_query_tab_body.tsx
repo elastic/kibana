@@ -49,7 +49,7 @@ export const histogramConfigs: Omit<MatrixHistogramConfigs, 'title'> = {
   lensAttributes: dnsTopDomainsLensAttributes,
 };
 
-const DnsQueryTabBodyComponent: React.FC<NetworkComponentQueryProps> = ({
+const DnsQueryTabBodyComponent: React.FC<React.PropsWithChildren<NetworkComponentQueryProps>> = ({
   deleteQuery,
   endDate,
   filterQuery,

@@ -23,7 +23,7 @@ const SectionHeader = styled(EuiTitle)`
   `}
 `;
 
-const ExceptionsLinkedToRuleComponent: React.FC<ExceptionsLinkedToRuleComponentProps> = ({
+const ExceptionsLinkedToRuleComponent: React.FC<React.PropsWithChildren<ExceptionsLinkedToRuleComponentProps>> = ({
   rule,
 }): JSX.Element => {
   return (

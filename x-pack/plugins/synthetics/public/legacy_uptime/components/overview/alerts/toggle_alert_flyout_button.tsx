@@ -39,7 +39,7 @@ const noWritePermissionsTooltipContent = i18n.translate(
   }
 );
 
-export const ToggleAlertFlyoutButtonComponent: React.FC<Props> = ({
+export const ToggleAlertFlyoutButtonComponent: React.FC<React.PropsWithChildren<Props>> = ({
   alertOptions,
   setAlertFlyoutVisible,
 }) => {

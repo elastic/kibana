@@ -23,10 +23,10 @@ const Wrapper = styled.div`
   overflow: hidden;
 `;
 
-const MlJobItemComponent: FC<{
+const MlJobItemComponent: FC<React.PropsWithChildren<{
   job: MlSummaryJob;
   switchComponent: ReactNode;
-}> = ({ job, switchComponent, ...props }) => {
+}>> = ({ job, switchComponent, ...props }) => {
   const isStarted = isJobStarted(job.jobState, job.datafeedState);
 
   return (

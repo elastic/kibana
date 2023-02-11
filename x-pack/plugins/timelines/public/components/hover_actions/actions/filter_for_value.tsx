@@ -21,7 +21,7 @@ export const FILTER_FOR_VALUE_KEYBOARD_SHORTCUT = 'f';
 
 export type FilterForValueProps = HoverActionComponentProps & FilterValueFnArgs;
 
-const FilterForValueButton: React.FC<FilterForValueProps> = React.memo(
+const FilterForValueButton: React.FC<React.PropsWithChildren<FilterForValueProps>> = React.memo(
   ({
     Component,
     defaultFocusedButtonRef,

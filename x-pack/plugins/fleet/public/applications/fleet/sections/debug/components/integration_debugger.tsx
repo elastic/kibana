@@ -50,7 +50,7 @@ const fetchInstalledIntegrations = async () => {
   return installedIntegrations;
 };
 
-export const IntegrationDebugger: React.FunctionComponent = () => {
+export const IntegrationDebugger: React.FunctionComponent<React.PropsWithChildren<unknown>> = () => {
   const { http, notifications } = useStartServices();
   const { getHref } = useLink();
 

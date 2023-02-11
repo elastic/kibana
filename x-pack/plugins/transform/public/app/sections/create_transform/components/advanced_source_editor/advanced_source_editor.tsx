@@ -13,7 +13,7 @@ import { CodeEditor } from '@kbn/kibana-react-plugin/public';
 
 import { StepDefineFormHook } from '../step_define';
 
-export const AdvancedSourceEditor: FC<StepDefineFormHook> = ({
+export const AdvancedSourceEditor: FC<React.PropsWithChildren<StepDefineFormHook>> = ({
   searchBar: {
     actions: { setSearchString },
   },

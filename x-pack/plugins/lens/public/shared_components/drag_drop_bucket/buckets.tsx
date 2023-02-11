@@ -32,7 +32,7 @@ export const DraggableBucketContainer = ({
     id: string;
     children: React.ReactNode;
     isInsidePanel?: boolean;
-    Container?: React.FunctionComponent<BucketContainerProps>;
+    Container?: React.FunctionComponent<React.PropsWithChildren<BucketContainerProps>>;
   }
 >) => {
   const { euiTheme } = useEuiTheme();

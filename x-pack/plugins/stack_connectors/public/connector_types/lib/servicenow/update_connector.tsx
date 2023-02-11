@@ -93,7 +93,7 @@ export interface Props {
 
 const PATH_PREFIX = 'updatedConnector.';
 
-const UpdateConnectorComponent: React.FC<Props> = ({
+const UpdateConnectorComponent: React.FC<React.PropsWithChildren<Props>> = ({
   actionTypeId,
   isOAuth,
   isLoading,

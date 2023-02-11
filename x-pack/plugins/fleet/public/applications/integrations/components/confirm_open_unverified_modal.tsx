@@ -12,12 +12,12 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
 
-export const ConfirmOpenUnverifiedModal: React.FC<{
+export const ConfirmOpenUnverifiedModal: React.FC<React.PropsWithChildren<{
   onCancel: () => void;
   onConfirm: () => void;
   pkgName: string;
   docLinks: DocLinksStart;
-}> = ({ onCancel, onConfirm, pkgName, docLinks }) => {
+}>> = ({ onCancel, onConfirm, pkgName, docLinks }) => {
   return (
     <EuiConfirmModal
       title={

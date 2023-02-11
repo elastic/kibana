@@ -37,7 +37,7 @@ export interface FormFlyoutProps extends Omit<EuiFlyoutProps, 'onClose'> {
   isSubmitButtonHidden?: boolean;
 }
 
-export const FormFlyout: FunctionComponent<FormFlyoutProps> = ({
+export const FormFlyout: FunctionComponent<React.PropsWithChildren<FormFlyoutProps>> = ({
   title,
   submitButtonText,
   submitButtonColor,

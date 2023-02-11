@@ -63,7 +63,7 @@ export interface Props extends Pick<GlobalTimeArgs, 'from' | 'to' | 'deleteQuery
   value?: string[] | string | null;
 }
 
-const TopNComponent: React.FC<Props> = ({
+const TopNComponent: React.FC<React.PropsWithChildren<Props>> = ({
   combinedQueries,
   defaultView,
   deleteQuery,

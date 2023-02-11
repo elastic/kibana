@@ -21,7 +21,7 @@ interface LoadIntegrationAssetsButtonProps {
   fill?: EuiButtonProps['fill'];
 }
 
-const LoadIntegrationAssetsButtonComponent: React.FC<LoadIntegrationAssetsButtonProps> = ({
+const LoadIntegrationAssetsButtonComponent: React.FC<React.PropsWithChildren<LoadIntegrationAssetsButtonProps>> = ({
   fill,
 }) => {
   const { data } = useAssetsStatus();

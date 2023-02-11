@@ -24,7 +24,7 @@ interface StepsNavProps {
   next?(): void;
 }
 
-export const WizardNav: FC<StepsNavProps> = ({
+export const WizardNav: FC<React.PropsWithChildren<StepsNavProps>> = ({
   previous,
   previousActive = true,
   next,
@@ -50,7 +50,7 @@ export const WizardNav: FC<StepsNavProps> = ({
   </Fragment>
 );
 
-export const PreviousButton: FC<StepsNavProps> = ({ previous, previousActive = true }) => (
+export const PreviousButton: FC<React.PropsWithChildren<StepsNavProps>> = ({ previous, previousActive = true }) => (
   <EuiButtonEmpty
     disabled={!previousActive}
     onClick={previous}
@@ -62,7 +62,7 @@ export const PreviousButton: FC<StepsNavProps> = ({ previous, previousActive = t
   </EuiButtonEmpty>
 );
 
-export const NextButton: FC<StepsNavProps> = ({ next, nextActive = true }) => (
+export const NextButton: FC<React.PropsWithChildren<StepsNavProps>> = ({ next, nextActive = true }) => (
   <EuiButton
     fill
     disabled={!nextActive}

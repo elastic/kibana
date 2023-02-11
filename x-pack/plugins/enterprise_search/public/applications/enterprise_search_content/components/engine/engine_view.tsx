@@ -27,7 +27,7 @@ import { EngineViewHeaderActions } from './engine_view_header_actions';
 import { EngineViewLogic } from './engine_view_logic';
 import { EngineHeaderDocsAction } from './header_docs_action';
 
-export const EngineView: React.FC = () => {
+export const EngineView: React.FC<React.PropsWithChildren<unknown>> = () => {
   const { fetchEngine, closeDeleteEngineModal } = useActions(EngineViewLogic);
   const {
     engineName,

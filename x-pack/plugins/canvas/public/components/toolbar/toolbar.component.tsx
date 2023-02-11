@@ -52,7 +52,7 @@ export interface Props {
   workpadName: string;
 }
 
-export const Toolbar: FC<Props> = ({
+export const Toolbar: FC<React.PropsWithChildren<Props>> = ({
   isWriteable,
   selectedElement,
   selectedPageNumber,

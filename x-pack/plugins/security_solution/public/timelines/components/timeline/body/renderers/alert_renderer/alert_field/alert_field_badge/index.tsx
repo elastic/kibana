@@ -25,7 +25,7 @@ interface Props {
   value: string | number | null | undefined;
 }
 
-const AlertFieldBadgeComponent: React.FC<Props> = ({
+const AlertFieldBadgeComponent: React.FC<React.PropsWithChildren<Props>> = ({
   contextId,
   eventId,
   field,

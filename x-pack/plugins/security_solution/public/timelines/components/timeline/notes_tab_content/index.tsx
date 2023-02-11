@@ -75,7 +75,7 @@ interface UsernameWithAvatar {
   username: string;
 }
 
-const UsernameWithAvatarComponent: React.FC<UsernameWithAvatar> = ({ username }) => (
+const UsernameWithAvatarComponent: React.FC<React.PropsWithChildren<UsernameWithAvatar>> = ({ username }) => (
   <StyledEuiFlexGroup gutterSize="s" responsive={false} alignItems="center">
     <EuiFlexItem grow={false}>
       <EuiAvatar data-test-subj="avatar" name={username} size="l" />
@@ -92,7 +92,7 @@ interface ParticipantsProps {
   users: TimelineResultNote[];
 }
 
-const ParticipantsComponent: React.FC<ParticipantsProps> = ({ users }) => {
+const ParticipantsComponent: React.FC<React.PropsWithChildren<ParticipantsProps>> = ({ users }) => {
   const List = useMemo(
     () =>
       users.map((user) => (
@@ -130,7 +130,7 @@ interface NotesTabContentProps {
   timelineId: string;
 }
 
-const NotesTabContentComponent: React.FC<NotesTabContentProps> = ({ timelineId }) => {
+const NotesTabContentComponent: React.FC<React.PropsWithChildren<NotesTabContentProps>> = ({ timelineId }) => {
   const dispatch = useDispatch();
   const { kibanaSecuritySolutionsPrivileges } = useUserPrivileges();
 

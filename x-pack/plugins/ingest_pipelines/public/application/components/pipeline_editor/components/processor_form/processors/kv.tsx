@@ -161,7 +161,7 @@ const fieldsConfig: FieldsConfig = {
   },
 };
 
-export const Kv: FunctionComponent = () => {
+export const Kv: FunctionComponent<React.PropsWithChildren<unknown>> = () => {
   return (
     <>
       <FieldNameField

@@ -22,7 +22,7 @@ interface Props {
   error: Error;
 }
 
-export const SectionError: React.FunctionComponent<Props> = ({ title, error, ...rest }) => {
+export const SectionError: React.FunctionComponent<React.PropsWithChildren<Props>> = ({ title, error, ...rest }) => {
   const {
     cause: causeRoot, // wrapEsError() on the server adds a "cause" array
     message,

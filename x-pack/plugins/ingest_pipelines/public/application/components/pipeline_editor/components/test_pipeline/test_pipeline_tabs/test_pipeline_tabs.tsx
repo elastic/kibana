@@ -16,7 +16,7 @@ interface Props {
   selectedTab: TestPipelineFlyoutTab;
 }
 
-export const Tabs: React.FunctionComponent<Props> = ({ onTabChange, selectedTab }) => {
+export const Tabs: React.FunctionComponent<React.PropsWithChildren<Props>> = ({ onTabChange, selectedTab }) => {
   const tabs: Array<{
     id: TestPipelineFlyoutTab;
     name: React.ReactNode;

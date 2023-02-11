@@ -41,7 +41,7 @@ export interface Props {
   type: string;
 }
 
-export const NewSearchIndexTemplate: React.FC<Props> = ({
+export const NewSearchIndexTemplate: React.FC<React.PropsWithChildren<Props>> = ({
   buttonLoading,
   children,
   disabled,

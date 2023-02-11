@@ -64,11 +64,11 @@ interface BasicTimelineTab {
   timelineDescription: string;
 }
 
-const QueryTab: React.FC<{
+const QueryTab: React.FC<React.PropsWithChildren<{
   renderCellValue: (props: CellValueElementProps) => React.ReactNode;
   rowRenderers: RowRenderer[];
   timelineId: TimelineId;
-}> = memo(({ renderCellValue, rowRenderers, timelineId }) => (
+}>> = memo(({ renderCellValue, rowRenderers, timelineId }) => (
   <Suspense fallback={<EuiLoadingContent lines={10} />}>
     <QueryTabContent
       renderCellValue={renderCellValue}
@@ -79,11 +79,11 @@ const QueryTab: React.FC<{
 ));
 QueryTab.displayName = 'QueryTab';
 
-const EqlTab: React.FC<{
+const EqlTab: React.FC<React.PropsWithChildren<{
   renderCellValue: (props: CellValueElementProps) => React.ReactNode;
   rowRenderers: RowRenderer[];
   timelineId: TimelineId;
-}> = memo(({ renderCellValue, rowRenderers, timelineId }) => (
+}>> = memo(({ renderCellValue, rowRenderers, timelineId }) => (
   <Suspense fallback={<EuiLoadingContent lines={10} />}>
     <EqlTabContent
       renderCellValue={renderCellValue}
@@ -94,32 +94,32 @@ const EqlTab: React.FC<{
 ));
 EqlTab.displayName = 'EqlTab';
 
-const GraphTab: React.FC<{ timelineId: TimelineId }> = memo(({ timelineId }) => (
+const GraphTab: React.FC<React.PropsWithChildren<{ timelineId: TimelineId }>> = memo(({ timelineId }) => (
   <Suspense fallback={<EuiLoadingContent lines={10} />}>
     <GraphTabContent timelineId={timelineId} />
   </Suspense>
 ));
 GraphTab.displayName = 'GraphTab';
 
-const NotesTab: React.FC<{ timelineId: TimelineId }> = memo(({ timelineId }) => (
+const NotesTab: React.FC<React.PropsWithChildren<{ timelineId: TimelineId }>> = memo(({ timelineId }) => (
   <Suspense fallback={<EuiLoadingContent lines={10} />}>
     <NotesTabContent timelineId={timelineId} />
   </Suspense>
 ));
 NotesTab.displayName = 'NotesTab';
 
-const SessionTab: React.FC<{ timelineId: TimelineId }> = memo(({ timelineId }) => (
+const SessionTab: React.FC<React.PropsWithChildren<{ timelineId: TimelineId }>> = memo(({ timelineId }) => (
   <Suspense fallback={<EuiLoadingContent lines={10} />}>
     <SessionTabContent timelineId={timelineId} />
   </Suspense>
 ));
 SessionTab.displayName = 'SessionTab';
 
-const PinnedTab: React.FC<{
+const PinnedTab: React.FC<React.PropsWithChildren<{
   renderCellValue: (props: CellValueElementProps) => React.ReactNode;
   rowRenderers: RowRenderer[];
   timelineId: TimelineId;
-}> = memo(({ renderCellValue, rowRenderers, timelineId }) => (
+}>> = memo(({ renderCellValue, rowRenderers, timelineId }) => (
   <Suspense fallback={<EuiLoadingContent lines={10} />}>
     <PinnedTabContent
       renderCellValue={renderCellValue}
@@ -229,7 +229,7 @@ const StyledEuiTab = styled(EuiTab)`
   }
 `;
 
-const TabsContentComponent: React.FC<BasicTimelineTab> = ({
+const TabsContentComponent: React.FC<React.PropsWithChildren<BasicTimelineTab>> = ({
   renderCellValue,
   rowRenderers,
   timelineId,

@@ -36,7 +36,7 @@ interface LayoutProps {
   pageChrome?: BreadcrumbTrail;
 }
 
-export const PersonalDashboardLayout: React.FC<LayoutProps> = ({
+export const PersonalDashboardLayout: React.FC<React.PropsWithChildren<LayoutProps>> = ({
   children,
   isLoading,
   pageChrome,

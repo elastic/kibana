@@ -14,7 +14,7 @@ import type { VegaChartViewProps } from './vega_chart_view';
 
 const VegaChartView = React.lazy(() => import('./vega_chart_view'));
 
-export const VegaChart: FC<VegaChartViewProps> = (props) => (
+export const VegaChart: FC<React.PropsWithChildren<VegaChartViewProps>> = (props) => (
   <EuiErrorBoundary>
     <Suspense fallback={<VegaChartLoading />}>
       <VegaChartView {...props} />

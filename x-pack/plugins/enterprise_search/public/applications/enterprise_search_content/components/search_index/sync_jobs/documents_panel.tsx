@@ -20,7 +20,7 @@ interface SyncJobDocumentsPanelProps {
   volume: number;
 }
 
-export const SyncJobDocumentsPanel: React.FC<SyncJobDocumentsPanelProps> = (syncJobDocuments) => {
+export const SyncJobDocumentsPanel: React.FC<React.PropsWithChildren<SyncJobDocumentsPanelProps>> = (syncJobDocuments) => {
   const columns: Array<EuiBasicTableColumn<SyncJobDocumentsPanelProps>> = [
     {
       field: 'added',

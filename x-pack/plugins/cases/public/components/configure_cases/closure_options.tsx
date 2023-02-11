@@ -18,7 +18,7 @@ export interface ClosureOptionsProps {
   onChangeClosureType: (newClosureType: ClosureType) => void;
 }
 
-const ClosureOptionsComponent: React.FC<ClosureOptionsProps> = ({
+const ClosureOptionsComponent: React.FC<React.PropsWithChildren<ClosureOptionsProps>> = ({
   closureTypeSelected,
   disabled,
   onChangeClosureType,

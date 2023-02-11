@@ -26,7 +26,7 @@ export interface LegendActionPopoverProps {
   context: ClickTriggerEvent['data'];
 }
 
-export const LegendActionPopover: React.FunctionComponent<LegendActionPopoverProps> = ({
+export const LegendActionPopover: React.FunctionComponent<React.PropsWithChildren<LegendActionPopoverProps>> = ({
   label,
   onFilter,
   context,

@@ -34,7 +34,7 @@ export interface TestPipelineFlyoutForm {
   documents: string | Document[];
 }
 
-export const TestPipelineFlyout: React.FunctionComponent<Props> = ({
+export const TestPipelineFlyout: React.FunctionComponent<React.PropsWithChildren<Props>> = ({
   onClose,
   activeTab,
   setActiveTab,

@@ -30,7 +30,7 @@ const CREATE_COMMENT_WARNING_DESC = i18n.translate(
   }
 );
 
-const WebhookParamsFields: React.FunctionComponent<ActionParamsProps<CasesWebhookActionParams>> = ({
+const WebhookParamsFields: React.FunctionComponent<React.PropsWithChildren<ActionParamsProps<CasesWebhookActionParams>>> = ({
   actionConnector,
   actionParams,
   editAction,

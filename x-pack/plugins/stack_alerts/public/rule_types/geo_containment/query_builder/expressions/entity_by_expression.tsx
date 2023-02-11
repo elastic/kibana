@@ -32,7 +32,7 @@ export function getValidIndexPatternFields(fields: DataViewField[]): DataViewFie
   });
 }
 
-export const EntityByExpression: FunctionComponent<Props> = ({
+export const EntityByExpression: FunctionComponent<React.PropsWithChildren<Props>> = ({
   errors,
   entity,
   setAlertParamsEntity,

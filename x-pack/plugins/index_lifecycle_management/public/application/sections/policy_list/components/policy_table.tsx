@@ -75,7 +75,7 @@ interface Props {
 
 const SHOW_MANAGED_POLICIES_BY_DEFAULT = 'ILM_SHOW_MANAGED_POLICIES_BY_DEFAULT';
 
-export const PolicyTable: React.FunctionComponent<Props> = ({ policies }) => {
+export const PolicyTable: React.FunctionComponent<React.PropsWithChildren<Props>> = ({ policies }) => {
   const history = useHistory();
   const {
     services: { getUrlForApp },

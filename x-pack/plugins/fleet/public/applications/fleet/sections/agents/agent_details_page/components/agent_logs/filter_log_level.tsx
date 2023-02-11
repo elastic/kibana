@@ -25,10 +25,10 @@ function sortLogLevels(levels: string[]): string[] {
   ];
 }
 
-export const LogLevelFilter: React.FunctionComponent<{
+export const LogLevelFilter: React.FunctionComponent<React.PropsWithChildren<{
   selectedLevels: string[];
   onToggleLevel: (level: string) => void;
-}> = memo(({ selectedLevels, onToggleLevel }) => {
+}>> = memo(({ selectedLevels, onToggleLevel }) => {
   const { unifiedSearch } = useStartServices();
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(false);

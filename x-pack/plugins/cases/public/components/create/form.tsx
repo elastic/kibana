@@ -80,7 +80,7 @@ export interface CreateCaseFormProps extends Pick<Partial<CreateCaseFormFieldsPr
 }
 
 const empty: ActionConnector[] = [];
-export const CreateCaseFormFields: React.FC<CreateCaseFormFieldsProps> = React.memo(
+export const CreateCaseFormFields: React.FC<React.PropsWithChildren<CreateCaseFormFieldsProps>> = React.memo(
   ({ connectors, isLoadingConnectors, withSteps, owner, draftStorageKey }) => {
     const { isSubmitting } = useFormContext();
     const { isSyncAlertsEnabled, caseAssignmentAuthorized } = useCasesFeatures();
@@ -185,7 +185,7 @@ export const CreateCaseFormFields: React.FC<CreateCaseFormFieldsProps> = React.m
 
 CreateCaseFormFields.displayName = 'CreateCaseFormFields';
 
-export const CreateCaseForm: React.FC<CreateCaseFormProps> = React.memo(
+export const CreateCaseForm: React.FC<React.PropsWithChildren<CreateCaseFormProps>> = React.memo(
   ({
     withSteps = true,
     afterCaseCreated,

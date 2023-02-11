@@ -29,7 +29,7 @@ export interface AlertsProcessBarProps {
   groupBySelection: GroupBySelection;
 }
 
-export const AlertsProgressBar: React.FC<AlertsProcessBarProps> = ({
+export const AlertsProgressBar: React.FC<React.PropsWithChildren<AlertsProcessBarProps>> = ({
   data,
   isLoading,
   groupBySelection,

@@ -14,7 +14,7 @@ import { EuiText, EuiButton, EuiSpacer } from '@elastic/eui';
 import { useAppContext } from '../../../app_context';
 import { uiMetricService, UIM_BACKUP_DATA_ON_PREM_CLICK } from '../../../lib/ui_metric';
 
-const SnapshotRestoreAppLink: React.FunctionComponent = () => {
+const SnapshotRestoreAppLink: React.FunctionComponent<React.PropsWithChildren<unknown>> = () => {
   const {
     plugins: { share },
   } = useAppContext();
@@ -40,7 +40,7 @@ const SnapshotRestoreAppLink: React.FunctionComponent = () => {
   );
 };
 
-export const OnPremBackup: React.FunctionComponent = () => {
+export const OnPremBackup: React.FunctionComponent<React.PropsWithChildren<unknown>> = () => {
   return (
     <>
       <EuiText>

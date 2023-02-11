@@ -18,7 +18,7 @@ import { CreateCustomPipelineApiLogic } from '../../../../api/index/create_custo
 
 import { IndexViewLogic } from '../../index_view_logic';
 
-export const CustomizeIngestPipelineItem: React.FC = () => {
+export const CustomizeIngestPipelineItem: React.FC<React.PropsWithChildren<unknown>> = () => {
   const { indexName, ingestionMethod } = useValues(IndexViewLogic);
   const { isCloud } = useValues(KibanaLogic);
   const { hasPlatinumLicense } = useValues(LicensingLogic);

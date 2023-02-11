@@ -56,7 +56,7 @@ const defaultRule = {
   source_type: undefined,
 };
 
-export const EditFieldRuleFlyout: React.FC<EditFieldRuleFlyoutProps> = ({
+export const EditFieldRuleFlyout: React.FC<React.PropsWithChildren<EditFieldRuleFlyoutProps>> = ({
   onClose,
   fieldRule,
   isNewRule,

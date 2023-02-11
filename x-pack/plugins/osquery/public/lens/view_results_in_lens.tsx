@@ -29,7 +29,7 @@ interface ViewResultsInLensActionProps {
   mode?: string;
 }
 
-const ViewResultsInLensActionComponent: React.FC<ViewResultsInLensActionProps> = ({
+const ViewResultsInLensActionComponent: React.FC<React.PropsWithChildren<ViewResultsInLensActionProps>> = ({
   actionId,
   buttonType,
   endDate,

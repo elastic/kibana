@@ -22,7 +22,7 @@ interface GroupRowSourcesDropdownProps {
   closePopover(): void;
 }
 
-export const GroupRowSourcesDropdown: React.FC<GroupRowSourcesDropdownProps> = ({
+export const GroupRowSourcesDropdown: React.FC<React.PropsWithChildren<GroupRowSourcesDropdownProps>> = ({
   isPopoverOpen,
   numOptions,
   groupSources,

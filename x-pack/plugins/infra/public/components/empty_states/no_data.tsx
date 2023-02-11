@@ -18,7 +18,7 @@ interface NoDataProps {
   testString?: string;
 }
 
-export const NoData: React.FC<NoDataProps> = ({
+export const NoData: React.FC<React.PropsWithChildren<NoDataProps>> = ({
   titleText,
   bodyText,
   refetchText,

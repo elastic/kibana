@@ -13,7 +13,7 @@ import { AdvancedStepForm } from './advanced_step_form';
 import { AdvancedStepDetails } from './advanced_step_details';
 import { ANALYTICS_STEPS } from '../../page';
 
-export const AdvancedStep: FC<CreateAnalyticsStepProps> = ({
+export const AdvancedStep: FC<React.PropsWithChildren<CreateAnalyticsStepProps>> = ({
   actions,
   state,
   step,

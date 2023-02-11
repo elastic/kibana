@@ -56,7 +56,7 @@ const getMockedDatePickeDependencies = () => {
   } as unknown as DatePickerDependencies;
 };
 
-const Wrapper: FC = ({ children }) => (
+const Wrapper: FC<React.PropsWithChildren<unknown>> = ({ children }) => (
   <I18nProvider>
     <DatePickerContextProvider {...getMockedDatePickeDependencies()}>
       {children}

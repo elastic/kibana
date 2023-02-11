@@ -57,7 +57,7 @@ export interface EqlQueryBarProps {
   onValiditingChange?: (arg: boolean) => void;
 }
 
-export const EqlQueryBar: FC<EqlQueryBarProps> = ({
+export const EqlQueryBar: FC<React.PropsWithChildren<EqlQueryBarProps>> = ({
   dataTestSubj,
   field,
   isLoading = false,

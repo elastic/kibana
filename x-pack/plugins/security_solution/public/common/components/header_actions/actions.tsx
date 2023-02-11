@@ -45,7 +45,7 @@ const ActionsContainer = styled.div`
   display: flex;
 `;
 
-const ActionsComponent: React.FC<ActionProps> = ({
+const ActionsComponent: React.FC<React.PropsWithChildren<ActionProps>> = ({
   ariaRowindex,
   checked,
   columnValues,

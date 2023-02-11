@@ -107,7 +107,7 @@ type ProgressMessageProps = Pick<
   LogTextStreamLoadingItemViewProps,
   'timestamp' | 'position' | 'isStreaming'
 >;
-const ProgressMessage: React.FC<ProgressMessageProps> = ({ timestamp, position, isStreaming }) => {
+const ProgressMessage: React.FC<React.PropsWithChildren<ProgressMessageProps>> = ({ timestamp, position, isStreaming }) => {
   const formattedTimestamp =
     isStreaming && position === 'end' ? (
       <FormattedRelative units="second" value={timestamp} updateInterval={1} />
@@ -143,7 +143,7 @@ const ProgressMessage: React.FC<ProgressMessageProps> = ({ timestamp, position, 
   );
 };
 
-const ProgressSpinner: React.FC<{ kind: 'streaming' | 'loading' }> = ({ kind }) => (
+const ProgressSpinner: React.FC<React.PropsWithChildren<{ kind: 'streaming' | 'loading' }>> = ({ kind }) => (
   <>
     <EuiFlexItem grow={false}>
       <EuiLoadingSpinner size="l" />
@@ -170,7 +170,7 @@ type ProgressCtaProps = Pick<
   LogTextStreamLoadingItemViewProps,
   'position' | 'startDateExpression' | 'endDateExpression' | 'onExtendRange' | 'onStreamStart'
 >;
-const ProgressCta: React.FC<ProgressCtaProps> = ({
+const ProgressCta: React.FC<React.PropsWithChildren<ProgressCtaProps>> = ({
   position,
   startDateExpression,
   endDateExpression,
@@ -211,7 +211,7 @@ const ProgressCta: React.FC<ProgressCtaProps> = ({
   );
 };
 
-const ProgressExtendMessage: React.FC<{ amount: number; unit: Unit }> = ({ amount, unit }) => {
+const ProgressExtendMessage: React.FC<React.PropsWithChildren<{ amount: number; unit: Unit }>> = ({ amount, unit }) => {
   switch (unit) {
     case 'ms':
       return (

@@ -24,7 +24,7 @@ interface Props {
   series: SeriesUrl;
 }
 
-const AddDataComponents: Record<AppDataType, React.FC | null> = {
+const AddDataComponents: Record<AppDataType, React.FC<React.PropsWithChildren<unknown>> | null> = {
   mobile: MobileAddData,
   ux: UXAddData,
   synthetics: SyntheticsAddData,

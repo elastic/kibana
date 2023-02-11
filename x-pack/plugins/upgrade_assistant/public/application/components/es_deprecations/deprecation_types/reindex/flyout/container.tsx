@@ -27,7 +27,7 @@ export interface ReindexFlyoutProps extends ReindexStateContext {
   closeFlyout: () => void;
 }
 
-export const ReindexFlyout: React.FunctionComponent<ReindexFlyoutProps> = ({
+export const ReindexFlyout: React.FunctionComponent<React.PropsWithChildren<ReindexFlyoutProps>> = ({
   reindexState,
   startReindex,
   cancelReindex,

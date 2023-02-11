@@ -42,7 +42,7 @@ const rowItems: ItemsPerRow[] = [
   },
 ];
 
-const NetworkHttpTableComponent: React.FC<NetworkHttpTableProps> = ({
+const NetworkHttpTableComponent: React.FC<React.PropsWithChildren<NetworkHttpTableProps>> = ({
   data,
   fakeTotalCount,
   id,

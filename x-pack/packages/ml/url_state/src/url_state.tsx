@@ -90,7 +90,7 @@ export const urlStateStore = createContext<UrlState>({
 
 export const { Provider } = urlStateStore;
 
-export const UrlStateProvider: FC = ({ children }) => {
+export const UrlStateProvider: FC<React.PropsWithChildren<unknown>> = ({ children }) => {
   const history = useHistory();
   const { search: searchString } = useLocation();
 

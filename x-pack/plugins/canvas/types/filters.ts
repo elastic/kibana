@@ -47,13 +47,13 @@ export type ComplexFilterViewField<FilterValue> = (
 export interface SimpleFilterViewField {
   label: string;
   formatter?: (value?: unknown) => string | null;
-  component?: FC<any>;
+  component?: FC<React.PropsWithChildren<any>>;
 }
 
 export interface FormattedFilterViewField {
   label: string;
   formattedValue: string;
-  component?: FC<any>;
+  component?: FC<React.PropsWithChildren<any>>;
 }
 
 export type FilterViewInstance<FilterValue = unknown> = Record<

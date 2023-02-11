@@ -45,7 +45,7 @@ export const fieldsConfig: FieldsConfig = {
 
 type Props = Partial<FieldConfig>;
 
-export const IgnoreMissingField: FunctionComponent<Props> = (props) => (
+export const IgnoreMissingField: FunctionComponent<React.PropsWithChildren<Props>> = (props) => (
   <UseField
     config={{ ...fieldsConfig.ignore_missing, ...props }}
     component={ToggleField}

@@ -65,7 +65,7 @@ const getUnknownUsers = (
   return unknownUsers;
 };
 
-const EditAssigneesSelectableComponent: React.FC<Props> = ({
+const EditAssigneesSelectableComponent: React.FC<React.PropsWithChildren<Props>> = ({
   selectedCases,
   onChangeAssignees,
 }) => {

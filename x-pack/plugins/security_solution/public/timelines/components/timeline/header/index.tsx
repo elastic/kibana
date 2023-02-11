@@ -24,7 +24,7 @@ interface Props {
   timelineId: string;
 }
 
-const TimelineHeaderComponent: React.FC<Props> = ({
+const TimelineHeaderComponent: React.FC<React.PropsWithChildren<Props>> = ({
   filterManager,
   show,
   showCallOutUnauthorizedMsg,

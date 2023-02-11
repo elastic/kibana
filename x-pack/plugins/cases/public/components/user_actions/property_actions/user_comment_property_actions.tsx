@@ -21,7 +21,7 @@ interface Props {
   onQuote: () => void;
 }
 
-const UserCommentPropertyActionsComponent: React.FC<Props> = ({
+const UserCommentPropertyActionsComponent: React.FC<React.PropsWithChildren<Props>> = ({
   isLoading,
   commentContent,
   onEdit,

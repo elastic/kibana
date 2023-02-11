@@ -131,7 +131,7 @@ export const getStyle = (
   };
 };
 
-const DraggableOnWrapperComponent: React.FC<Props> = ({
+const DraggableOnWrapperComponent: React.FC<React.PropsWithChildren<Props>> = ({
   dataProvider,
   hideTopN = false,
   onFilterAdded,
@@ -315,7 +315,7 @@ const DraggableOnWrapperComponent: React.FC<Props> = ({
   );
 };
 
-const DraggableWrapperComponent: React.FC<Props> = ({
+const DraggableWrapperComponent: React.FC<React.PropsWithChildren<Props>> = ({
   dataProvider,
   hideTopN = false,
   isDraggable = false,

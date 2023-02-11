@@ -29,7 +29,7 @@ function getViewBox(defaultWidth: number, defaultViewBox: ViewBoxParams): ViewBo
   };
 }
 
-export const ShapePreview: FC<Props> = ({ shape }) => {
+export const ShapePreview: FC<React.PropsWithChildren<Props>> = ({ shape }) => {
   const [shapeData, setShapeData] = useState<SvgConfig>(getDefaultShapeData());
 
   const shapeRef = useCallback<RefCallback<ShapeRef>>((node) => {

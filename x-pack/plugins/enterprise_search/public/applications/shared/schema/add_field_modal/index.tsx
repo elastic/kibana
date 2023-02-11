@@ -47,7 +47,7 @@ interface Props {
   addFieldFormErrors?: string[] | null;
 }
 
-export const SchemaAddFieldModal: React.FC<Props> = ({
+export const SchemaAddFieldModal: React.FC<React.PropsWithChildren<Props>> = ({
   addNewField,
   addFieldFormErrors,
   closeAddFieldModal,

@@ -12,7 +12,7 @@ import { HelpMenu } from '../components/help_menu';
 import { useMlKibana } from '../contexts/kibana';
 import { MlPageHeader } from '../components/page_header';
 
-export const Settings: FC = () => {
+export const Settings: FC<React.PropsWithChildren<unknown>> = () => {
   const {
     services: { docLinks },
   } = useMlKibana();

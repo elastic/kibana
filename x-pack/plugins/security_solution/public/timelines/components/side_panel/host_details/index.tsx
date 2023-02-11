@@ -64,7 +64,7 @@ interface HostDetailsProps {
   isDraggable?: boolean;
 }
 
-export const HostDetailsPanel: React.FC<HostDetailsProps> = React.memo(
+export const HostDetailsPanel: React.FC<React.PropsWithChildren<HostDetailsProps>> = React.memo(
   ({ contextID, expandedHost, handleOnHostClosed, isDraggable, isFlyoutView }) => {
     const { hostName } = expandedHost;
 

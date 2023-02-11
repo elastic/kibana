@@ -18,8 +18,8 @@ interface Props {
   disableLinks?: boolean;
 }
 
-const MarkdownRendererComponent: React.FC<Props> = ({ children, disableLinks }) => {
-  const MarkdownLinkProcessingComponent: React.FC<EuiLinkAnchorProps> = useMemo(
+const MarkdownRendererComponent: React.FC<React.PropsWithChildren<Props>> = ({ children, disableLinks }) => {
+  const MarkdownLinkProcessingComponent: React.FC<React.PropsWithChildren<EuiLinkAnchorProps>> = useMemo(
     // eslint-disable-next-line react/display-name
     () => (props) => <MarkdownLink {...props} disableLinks={disableLinks} />,
     [disableLinks]

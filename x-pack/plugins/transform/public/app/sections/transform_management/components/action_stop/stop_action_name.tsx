@@ -41,7 +41,7 @@ export interface StopActionNameProps {
   items: TransformListRow[];
   forceDisable?: boolean;
 }
-export const StopActionName: FC<StopActionNameProps> = ({ items, forceDisable }) => {
+export const StopActionName: FC<React.PropsWithChildren<StopActionNameProps>> = ({ items, forceDisable }) => {
   const isBulkAction = items.length > 1;
   const { canStartStopTransform } = useContext(AuthorizationContext).capabilities;
 

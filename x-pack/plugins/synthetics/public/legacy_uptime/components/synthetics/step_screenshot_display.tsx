@@ -94,7 +94,7 @@ const ComposedStepImage = ({
   return <BaseStepImage stepIndex={stepIndex} stepName={stepName} url={url} />;
 };
 
-export const StepScreenshotDisplay: FC<StepScreenshotDisplayProps> = ({
+export const StepScreenshotDisplay: FC<React.PropsWithChildren<StepScreenshotDisplayProps>> = ({
   checkGroup,
   isFullScreenshot: isScreenshotBlob,
   isScreenshotRef,

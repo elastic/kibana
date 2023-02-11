@@ -39,7 +39,7 @@ export interface JobSelectorControlProps {
   options?: Array<EuiComboBoxOptionOption<string>>;
 }
 
-export const JobSelectorControl: FC<JobSelectorControlProps> = ({
+export const JobSelectorControl: FC<React.PropsWithChildren<JobSelectorControlProps>> = ({
   jobsAndGroupIds,
   onChange,
   adJobsApiService,

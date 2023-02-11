@@ -47,7 +47,7 @@ interface Props {
 
 const SPEC_ID = 'metric_distribution';
 
-export const MetricDistributionChart: FC<Props> = ({
+export const MetricDistributionChart: FC<React.PropsWithChildren<Props>> = ({
   width,
   height,
   chartData,

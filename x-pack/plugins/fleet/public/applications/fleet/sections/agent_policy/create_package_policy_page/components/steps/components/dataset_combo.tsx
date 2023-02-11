@@ -18,13 +18,13 @@ interface SelectedDataset {
 
 const GENERIC_DATASET_NAME = 'generic';
 
-export const DatasetComboBox: React.FC<{
+export const DatasetComboBox: React.FC<React.PropsWithChildren<{
   value?: SelectedDataset | string;
   onChange: (newValue: SelectedDataset) => void;
   datastreams: DataStream[];
   pkgName?: string;
   isDisabled?: boolean;
-}> = ({ value, onChange, datastreams, isDisabled, pkgName = '' }) => {
+}>> = ({ value, onChange, datastreams, isDisabled, pkgName = '' }) => {
   const datasetOptions =
     datastreams.map((datastream: DataStream) => ({
       label: datastream.dataset,

@@ -12,7 +12,7 @@ import OsqueryLogo from './osquery.svg';
 
 export type OsqueryIconProps = Omit<EuiIconProps, 'type'>;
 
-const OsqueryIconComponent: React.FC<OsqueryIconProps> = (props) => (
+const OsqueryIconComponent: React.FC<React.PropsWithChildren<OsqueryIconProps>> = (props) => (
   <EuiIcon size="xl" type={OsqueryLogo} {...props} />
 );
 

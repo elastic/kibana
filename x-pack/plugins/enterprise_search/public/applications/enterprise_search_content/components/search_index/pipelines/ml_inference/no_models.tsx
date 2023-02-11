@@ -17,7 +17,7 @@ import noMlModelsGraphicLight from '../../../../../../assets/images/no_ml_models
 
 import { docLinks } from '../../../../../shared/doc_links';
 
-export const NoModelsPanel: React.FC = () => {
+export const NoModelsPanel: React.FC<React.PropsWithChildren<unknown>> = () => {
   const { colorMode } = useEuiTheme();
 
   return (

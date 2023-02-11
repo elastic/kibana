@@ -201,7 +201,7 @@ interface DefaultFieldRendererProps {
   rowItems: string[] | null | undefined;
 }
 
-export const DefaultFieldRendererComponent: React.FC<DefaultFieldRendererProps> = ({
+export const DefaultFieldRendererComponent: React.FC<React.PropsWithChildren<DefaultFieldRendererProps>> = ({
   attrName,
   displayCount = 1,
   idPrefix,

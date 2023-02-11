@@ -14,7 +14,7 @@ import { AnalyticsLayout } from '../analytics_layout';
 import { AnalyticsSearch, RecentQueriesTable } from '../components';
 import { RECENT_QUERIES } from '../constants';
 
-export const RecentQueries: React.FC = () => {
+export const RecentQueries: React.FC<React.PropsWithChildren<unknown>> = () => {
   const { recentQueries } = useValues(AnalyticsLogic);
 
   return (

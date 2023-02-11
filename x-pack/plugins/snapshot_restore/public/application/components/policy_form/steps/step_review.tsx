@@ -27,7 +27,7 @@ import { StepProps } from '.';
 import { CollapsibleIndicesList } from '../../collapsible_lists';
 import { PolicyFeatureStatesSummary } from '../../summaries';
 
-export const PolicyStepReview: React.FunctionComponent<StepProps> = ({
+export const PolicyStepReview: React.FunctionComponent<React.PropsWithChildren<StepProps>> = ({
   policy,
   updateCurrentStep,
 }) => {

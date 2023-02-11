@@ -32,7 +32,7 @@ interface Props {
   agents: Agent[] | string;
 }
 
-export const AgentReassignAgentPolicyModal: React.FunctionComponent<Props> = ({
+export const AgentReassignAgentPolicyModal: React.FunctionComponent<React.PropsWithChildren<Props>> = ({
   onClose,
   agents,
 }) => {

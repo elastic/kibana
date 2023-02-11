@@ -22,7 +22,7 @@ interface StatusItemProps {
   details: string[];
 }
 
-export const StatusItem: React.FC<StatusItemProps> = ({ details }) => {
+export const StatusItem: React.FC<React.PropsWithChildren<StatusItemProps>> = ({ details }) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
   const onButtonClick = () => setIsPopoverOpen((isOpen) => !isOpen);

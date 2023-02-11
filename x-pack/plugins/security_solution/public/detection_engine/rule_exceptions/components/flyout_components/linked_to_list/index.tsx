@@ -25,7 +25,7 @@ const SectionHeader = styled(EuiTitle)`
   `}
 `;
 
-const ExceptionsLinkedToListsComponent: React.FC<ExceptionsLinkedToListComponentProps> = ({
+const ExceptionsLinkedToListsComponent: React.FC<React.PropsWithChildren<ExceptionsLinkedToListComponentProps>> = ({
   isLoadingReferences,
   errorFetchingReferences,
   listAndReferences,

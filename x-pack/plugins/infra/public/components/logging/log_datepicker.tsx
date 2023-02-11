@@ -18,7 +18,7 @@ interface LogDatepickerProps {
   onStopStreaming?: () => void;
 }
 
-export const LogDatepicker: React.FC<LogDatepickerProps> = ({
+export const LogDatepicker: React.FC<React.PropsWithChildren<LogDatepickerProps>> = ({
   startDateExpression,
   endDateExpression,
   isStreaming,

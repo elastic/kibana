@@ -19,7 +19,7 @@ interface Props {
   forceRefresh?: boolean;
 }
 
-export const SavedObjectsWarning: FC<Props> = ({
+export const SavedObjectsWarning: FC<React.PropsWithChildren<Props>> = ({
   mlSavedObjectType,
   onCloseFlyout,
   forceRefresh,

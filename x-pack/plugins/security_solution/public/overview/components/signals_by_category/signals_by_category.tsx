@@ -37,7 +37,7 @@ interface Props {
   hideQueryToggle?: boolean;
 }
 
-const SignalsByCategoryComponent: React.FC<Props> = ({
+const SignalsByCategoryComponent: React.FC<React.PropsWithChildren<Props>> = ({
   combinedQueries,
   filters,
   headerChildren,

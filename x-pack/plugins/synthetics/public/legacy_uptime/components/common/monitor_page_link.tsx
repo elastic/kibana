@@ -20,7 +20,7 @@ interface DetailPageLinkProps {
   linkParameters: string | undefined;
 }
 
-export const MonitorPageLink: FC<DetailPageLinkProps> = ({
+export const MonitorPageLink: FC<React.PropsWithChildren<DetailPageLinkProps>> = ({
   children,
   monitorId,
   linkParameters,

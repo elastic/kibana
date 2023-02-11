@@ -19,7 +19,7 @@ interface PipelinePanelProps {
   pipeline: IngestPipelineParams;
 }
 
-export const PipelinePanel: React.FC<PipelinePanelProps> = ({ pipeline }) => {
+export const PipelinePanel: React.FC<React.PropsWithChildren<PipelinePanelProps>> = ({ pipeline }) => {
   const items: Array<{ setting: string; value: string | boolean }> = [
     {
       setting: i18n.translate('xpack.enterpriseSearch.content.index.syncJobs.pipeline.name', {

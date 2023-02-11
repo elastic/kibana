@@ -27,7 +27,7 @@ import { LandingImageCards } from '../components/landing_links_images';
 import * as i18n from './translations';
 
 /* eslint-disable @elastic/eui/href-or-on-click */
-const Header: React.FC<{ canCreateDashboard: boolean }> = ({ canCreateDashboard }) => {
+const Header: React.FC<React.PropsWithChildren<{ canCreateDashboard: boolean }>> = ({ canCreateDashboard }) => {
   const { isLoading, url } = useCreateSecurityDashboardLink();
   const { navigateTo } = useNavigateTo();
   return (

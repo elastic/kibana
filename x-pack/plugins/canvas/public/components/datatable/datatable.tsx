@@ -58,7 +58,7 @@ interface Props {
   showHeader?: boolean;
 }
 
-export const Datatable: FC<Props> = ({
+export const Datatable: FC<React.PropsWithChildren<Props>> = ({
   datatable,
   paginate = false,
   perPage = 10,

@@ -46,7 +46,7 @@ import { UserName } from './user_name';
 // simple black-list to prevent dragging and dropping fields such as message name
 const columnNamesNotDraggable = [MESSAGE_FIELD_NAME];
 
-const FormattedFieldValueComponent: React.FC<{
+const FormattedFieldValueComponent: React.FC<React.PropsWithChildren<{
   asPlainText?: boolean;
   /** `Component` is only used with `EuiDataGrid`; the grid keeps a reference to `Component` for show / hide functionality */
   Component?: typeof EuiButtonEmpty | typeof EuiButtonIcon;
@@ -65,7 +65,7 @@ const FormattedFieldValueComponent: React.FC<{
   truncate?: boolean;
   value: string | number | undefined | null;
   linkValue?: string | null | undefined;
-}> = ({
+}>> = ({
   asPlainText,
   Component,
   contextId,

@@ -28,7 +28,7 @@ const StyledContent = styled.div<{ $isDetails: boolean }>`
   padding: ${({ $isDetails }) => ($isDetails ? '0 8px' : undefined)};
 `;
 
-const ExpandedCellValueActionsComponent: React.FC<Props> = ({
+const ExpandedCellValueActionsComponent: React.FC<React.PropsWithChildren<Props>> = ({
   field,
   globalFilters,
   onFilterAdded,

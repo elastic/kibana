@@ -37,7 +37,7 @@ interface MatchParams {
   snapshotId?: string;
 }
 
-export const SnapshotList: React.FunctionComponent<RouteComponentProps<MatchParams>> = ({
+export const SnapshotList: React.FunctionComponent<React.PropsWithChildren<RouteComponentProps<MatchParams>>> = ({
   location: { search },
   history,
 }) => {

@@ -15,7 +15,7 @@ import { SwitchModal } from '../switch_modal';
 
 import { StepDefineFormHook } from '../step_define';
 
-export const AdvancedPivotEditorSwitch: FC<StepDefineFormHook> = ({
+export const AdvancedPivotEditorSwitch: FC<React.PropsWithChildren<StepDefineFormHook>> = ({
   advancedPivotEditor: {
     actions: { setAdvancedEditorSwitchModalVisible, toggleAdvancedEditor },
     state: {

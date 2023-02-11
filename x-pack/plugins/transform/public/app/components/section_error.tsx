@@ -14,7 +14,7 @@ interface Props {
   actions?: JSX.Element;
 }
 
-export const SectionError: React.FunctionComponent<Props> = ({
+export const SectionError: React.FunctionComponent<React.PropsWithChildren<Props>> = ({
   title,
   error,
   actions,

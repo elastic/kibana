@@ -18,7 +18,7 @@ interface Props {
   fieldFormat?: any; // Kibana formatter for field being viewed
 }
 
-export const MetricDistributionChartTooltipHeader: FC<Props> = ({
+export const MetricDistributionChartTooltipHeader: FC<React.PropsWithChildren<Props>> = ({
   chartPoint,
   maxWidth,
   fieldFormat,

@@ -46,7 +46,7 @@ const permissions = {
 
 const attachments = [{ type: CommentType.user as const, comment: 'test' }];
 
-const CasesFixtureAppWithContext: React.FC<CasesFixtureAppDeps> = (props) => {
+const CasesFixtureAppWithContext: React.FC<React.PropsWithChildren<CasesFixtureAppDeps>> = (props) => {
   const { cases } = props;
 
   const createCaseFlyout = cases.hooks.getUseCasesAddToNewCaseFlyout();
@@ -91,7 +91,7 @@ const CasesFixtureAppWithContext: React.FC<CasesFixtureAppDeps> = (props) => {
   );
 };
 
-const CasesFixtureApp: React.FC<{ deps: RenderAppProps }> = ({ deps }) => {
+const CasesFixtureApp: React.FC<React.PropsWithChildren<{ deps: RenderAppProps }>> = ({ deps }) => {
   const { mountParams, coreStart, pluginsStart } = deps;
   const { history, theme$ } = mountParams;
   const { cases } = pluginsStart;

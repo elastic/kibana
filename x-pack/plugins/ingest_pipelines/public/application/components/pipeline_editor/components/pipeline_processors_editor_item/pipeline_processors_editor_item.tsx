@@ -46,7 +46,7 @@ export interface Props {
   renderOnFailureHandlers?: () => React.ReactNode;
 }
 
-export const PipelineProcessorsEditorItem: FunctionComponent<Props> = memo(
+export const PipelineProcessorsEditorItem: FunctionComponent<React.PropsWithChildren<Props>> = memo(
   function PipelineProcessorsEditorItem({
     processor,
     description,

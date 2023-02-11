@@ -34,7 +34,7 @@ interface ToastNotificationTextProps {
   previewTextLength?: number;
 }
 
-export const ToastNotificationText: FC<ToastNotificationTextProps> = ({
+export const ToastNotificationText: FC<React.PropsWithChildren<ToastNotificationTextProps>> = ({
   overlays,
   text,
   theme,

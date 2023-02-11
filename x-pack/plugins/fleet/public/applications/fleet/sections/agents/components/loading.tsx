@@ -8,7 +8,7 @@
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
 
-export const Loading: React.FunctionComponent<{}> = () => (
+export const Loading: React.FunctionComponent<React.PropsWithChildren<{}>> = () => (
   <EuiFlexGroup justifyContent="spaceAround">
     <EuiFlexItem grow={false}>
       <EuiLoadingSpinner size="xl" />

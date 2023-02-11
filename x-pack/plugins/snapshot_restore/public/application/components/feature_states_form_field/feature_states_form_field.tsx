@@ -24,7 +24,7 @@ interface Props {
   isLoadingFeatures?: boolean;
 }
 
-export const FeatureStatesFormField: FunctionComponent<Props> = ({
+export const FeatureStatesFormField: FunctionComponent<React.PropsWithChildren<Props>> = ({
   isLoadingFeatures = false,
   featuresOptions,
   selectedOptions,

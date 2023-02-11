@@ -48,7 +48,7 @@ interface Props {
   onCheckCompleted: OnCheckCompleted;
 }
 
-const DataQualitySummaryComponent: React.FC<Props> = ({
+const DataQualitySummaryComponent: React.FC<React.PropsWithChildren<Props>> = ({
   addSuccessToast,
   canUserCreateAndReadCases,
   defaultNumberFormat,

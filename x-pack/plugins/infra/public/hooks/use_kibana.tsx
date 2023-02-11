@@ -44,7 +44,7 @@ export const useKibanaContextForPluginProvider = (
   return Provider;
 };
 
-export const createLazyComponentWithKibanaContext = <T extends React.ComponentType<any>>(
+export const createLazyComponentWithKibanaContext = <T extends React.ComponentType<React.PropsWithChildren<any>>>(
   coreSetup: InfraClientCoreSetup,
   lazyComponentFactory: () => Promise<{ default: T }>
 ) =>

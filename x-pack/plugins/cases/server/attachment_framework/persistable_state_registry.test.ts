@@ -7,7 +7,7 @@
 
 import { PersistableStateAttachmentTypeRegistry } from './persistable_state_registry';
 
-export const ExpressionComponent: React.FunctionComponent = () => {
+export const ExpressionComponent: React.FunctionComponent<React.PropsWithChildren<unknown>> = () => {
   return null;
 };
 

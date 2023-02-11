@@ -16,7 +16,7 @@ interface Props {
   onTimeFieldChanged: (e: React.ChangeEvent<HTMLSelectElement>) => void;
 }
 
-export const StepDetailsTimeField: FC<Props> = ({
+export const StepDetailsTimeField: FC<React.PropsWithChildren<Props>> = ({
   dataViewAvailableTimeFields,
   dataViewTimeField,
   onTimeFieldChanged,

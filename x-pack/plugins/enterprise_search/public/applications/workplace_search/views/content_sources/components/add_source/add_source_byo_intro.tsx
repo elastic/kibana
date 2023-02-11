@@ -41,7 +41,7 @@ import { AddSourceHeader } from './add_source_header';
 
 import './add_source.scss';
 
-export const AddSourceBYOIntro: React.FC = () => {
+export const AddSourceBYOIntro: React.FC<React.PropsWithChildren<unknown>> = () => {
   const { name, categories = [], serviceType } = staticGenericExternalSourceData;
   const { isOrganization } = useValues(AppLogic);
 

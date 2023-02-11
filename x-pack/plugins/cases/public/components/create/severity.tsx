@@ -39,7 +39,7 @@ const SeverityFieldFormComponent = ({ isLoading }: { isLoading: boolean }) => {
 };
 SeverityFieldFormComponent.displayName = 'SeverityFieldForm';
 
-const SeverityComponent: React.FC<Props> = ({ isLoading }) => (
+const SeverityComponent: React.FC<React.PropsWithChildren<Props>> = ({ isLoading }) => (
   <UseField
     path={'severity'}
     component={SeverityFieldFormComponent}

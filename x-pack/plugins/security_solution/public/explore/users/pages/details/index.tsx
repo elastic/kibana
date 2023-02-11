@@ -70,7 +70,7 @@ import { LandingPageComponent } from '../../../../common/components/landing_page
 const QUERY_ID = 'UsersDetailsQueryId';
 const ES_USER_FIELD = 'user.name';
 
-const UsersDetailsComponent: React.FC<UsersDetailsProps> = ({
+const UsersDetailsComponent: React.FC<React.PropsWithChildren<UsersDetailsProps>> = ({
   detailName,
   usersDetailsPagePath,
 }) => {

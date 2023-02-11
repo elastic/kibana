@@ -20,7 +20,7 @@ interface Props {
   onStatusChanged: (status: CaseStatuses) => void;
 }
 
-const StatusContextMenuComponent: React.FC<Props> = ({
+const StatusContextMenuComponent: React.FC<React.PropsWithChildren<Props>> = ({
   currentStatus,
   disabled = false,
   isLoading = false,

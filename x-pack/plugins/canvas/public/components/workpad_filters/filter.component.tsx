@@ -25,15 +25,13 @@ const descriptionStyle = {
 };
 
 const renderElement = (
-  Component: FC<
-    Omit<CustomComponentProps, 'updateFilter'> & { onChange?: CustomComponentProps['updateFilter'] }
-  >,
+  Component: FC<React.PropsWithChildren<Omit<CustomComponentProps, 'updateFilter'> & { onChange?: CustomComponentProps['updateFilter'] }>>,
   { updateFilter, ...props }: CustomComponentProps
 ) => {
   return <Component {...props} onChange={updateFilter} />;
 };
 
-export const Filter: FC<Props> = ({ filter, ...restProps }) => {
+export const Filter: FC<React.PropsWithChildren<Props>> = ({ filter, ...restProps }) => {
   const filterView = Object.values(filter).map((filterValue) => {
     const description = filterValue.component
       ? renderElement(filterValue.component, { value: filterValue.formattedValue, ...restProps })

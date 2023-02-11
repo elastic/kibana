@@ -25,7 +25,7 @@ interface Props {
   response?: Response;
 }
 
-export const OutputPane: FunctionComponent<Props> = ({ isLoading, response }) => {
+export const OutputPane: FunctionComponent<React.PropsWithChildren<Props>> = ({ isLoading, response }) => {
   const outputTabLabel = (
     <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
       <EuiFlexItem grow={false}>

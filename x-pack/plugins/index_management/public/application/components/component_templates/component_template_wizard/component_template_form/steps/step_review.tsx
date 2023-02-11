@@ -52,7 +52,7 @@ interface Props {
   dataStreams?: string[];
 }
 
-export const StepReview: React.FunctionComponent<Props> = React.memo(
+export const StepReview: React.FunctionComponent<React.PropsWithChildren<Props>> = React.memo(
   ({ dataStreams, componentTemplate }) => {
     const { name } = componentTemplate;
 

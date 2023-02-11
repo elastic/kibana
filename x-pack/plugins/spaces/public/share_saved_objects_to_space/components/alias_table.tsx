@@ -32,7 +32,7 @@ interface Props {
   aliasesToDisable: InternalLegacyUrlAliasTarget[];
 }
 
-export const AliasTable: FunctionComponent<Props> = ({ spaces, aliasesToDisable }) => {
+export const AliasTable: FunctionComponent<React.PropsWithChildren<Props>> = ({ spaces, aliasesToDisable }) => {
   const [pageIndex, setPageIndex] = useState(0);
   const [pageSize, setPageSize] = useState(5);
 

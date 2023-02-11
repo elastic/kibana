@@ -31,7 +31,7 @@ const statuses = {
   },
 } as const;
 
-export const StatusBadge: React.FC<Props> = ({ status }) => {
+export const StatusBadge: React.FC<React.PropsWithChildren<Props>> = ({ status }) => {
   return (
     <EuiBadge color={statuses[status].color} data-test-subj="case-status-badge">
       {statuses[status].label}

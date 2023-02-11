@@ -41,7 +41,7 @@ export const modelsListRouteFactory = (
   'data-test-subj': 'mlPageModelManagement',
 });
 
-const PageWrapper: FC<PageProps> = ({ location, deps }) => {
+const PageWrapper: FC<React.PropsWithChildren<PageProps>> = ({ location, deps }) => {
   const { context } = useResolver(
     undefined,
     undefined,

@@ -19,7 +19,7 @@ export type JsonEditorProps = Pick<
   'editAction' | 'index' | 'messageVariables' | 'subActionParams'
 >;
 
-const JsonEditorComponent: React.FC<JsonEditorProps> = ({
+const JsonEditorComponent: React.FC<React.PropsWithChildren<JsonEditorProps>> = ({
   editAction,
   index,
   messageVariables,

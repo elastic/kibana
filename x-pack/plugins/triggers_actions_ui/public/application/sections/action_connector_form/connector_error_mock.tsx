@@ -10,7 +10,7 @@ import { TextField } from '@kbn/es-ui-shared-plugin/static/forms/components';
 import { UseField } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { ActionConnectorFieldsProps } from '../../../types';
 
-const TestConnectorError: React.FunctionComponent<ActionConnectorFieldsProps> = ({
+const TestConnectorError: React.FunctionComponent<React.PropsWithChildren<ActionConnectorFieldsProps>> = ({
   readOnly,
   isEdit,
   registerPreSubmitValidator,

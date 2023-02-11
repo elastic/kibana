@@ -34,7 +34,7 @@ import { linkToAddRepository } from '../../../services/navigation';
 import { InlineLoading } from '../..';
 import { StepProps } from '.';
 
-export const PolicyStepLogistics: React.FunctionComponent<StepProps> = ({
+export const PolicyStepLogistics: React.FunctionComponent<React.PropsWithChildren<StepProps>> = ({
   policy,
   updatePolicy,
   isEditing,

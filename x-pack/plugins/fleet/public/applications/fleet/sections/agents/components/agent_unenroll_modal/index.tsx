@@ -25,7 +25,7 @@ interface Props {
   hasFleetServer?: boolean;
 }
 
-export const AgentUnenrollAgentModal: React.FunctionComponent<Props> = ({
+export const AgentUnenrollAgentModal: React.FunctionComponent<React.PropsWithChildren<Props>> = ({
   onClose,
   agents,
   agentCount,

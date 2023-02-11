@@ -47,7 +47,7 @@ export interface Props {
   selectedConnector: { id: string; type: ConnectorTypes };
   updateConnectorDisabled: boolean;
 }
-const ConnectorsComponent: React.FC<Props> = ({
+const ConnectorsComponent: React.FC<React.PropsWithChildren<Props>> = ({
   actionTypes,
   connectors,
   disabled,

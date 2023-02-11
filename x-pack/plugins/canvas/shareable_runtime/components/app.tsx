@@ -27,7 +27,7 @@ interface Props {
 /**
  * The overall Canvas Shareable Workpad app; the highest-layer component.
  */
-export const App: FC<Props> = ({ workpad, stage }) => {
+export const App: FC<React.PropsWithChildren<Props>> = ({ workpad, stage }) => {
   const renderers: { [key: string]: RendererSpec } = {};
 
   renderFunctions.forEach((fn) => {

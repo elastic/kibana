@@ -13,7 +13,7 @@ const dg = new DataGenerator();
 const data1 = dg.generateGroupedSeries(20, 1);
 const data2 = dg.generateGroupedSeries(20, 5);
 
-const AttachmentContent: React.FC = (props) => {
+const AttachmentContent: React.FC<React.PropsWithChildren<unknown>> = (props) => {
   return (
     <EuiFlexGroup data-test-subj="test-attachment-content">
       <EuiFlexItem>

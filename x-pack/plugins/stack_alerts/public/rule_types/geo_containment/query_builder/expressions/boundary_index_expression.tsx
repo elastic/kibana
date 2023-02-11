@@ -35,7 +35,7 @@ interface KibanaDeps {
   http: HttpSetup;
 }
 
-export const BoundaryIndexExpression: FunctionComponent<Props> = ({
+export const BoundaryIndexExpression: FunctionComponent<React.PropsWithChildren<Props>> = ({
   ruleParams,
   errors,
   boundaryIndexPattern,

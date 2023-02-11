@@ -27,7 +27,7 @@ const useCloudId = (): string | undefined => {
   return cloud?.cloudId;
 };
 
-export const ElasticsearchClientInstructions: React.FC<{ language: string }> = ({ language }) => {
+export const ElasticsearchClientInstructions: React.FC<React.PropsWithChildren<{ language: string }>> = ({ language }) => {
   const cloudId = useCloudId();
 
   switch (language) {

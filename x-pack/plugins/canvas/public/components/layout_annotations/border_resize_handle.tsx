@@ -15,7 +15,7 @@ interface Props {
   zoomScale?: number;
 }
 
-export const BorderResizeHandle: FC<Props> = ({ transformMatrix, zoomScale = 1 }) => (
+export const BorderResizeHandle: FC<React.PropsWithChildren<Props>> = ({ transformMatrix, zoomScale = 1 }) => (
   <div
     className="canvasBorderResizeHandle canvasLayoutAnnotation"
     style={{

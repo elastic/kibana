@@ -32,7 +32,7 @@ export const fieldsMapping: Readonly<StatItems[]> = [
   },
 ];
 
-const NetworkKpiTlsHandshakesComponent: React.FC<NetworkKpiProps> = ({
+const NetworkKpiTlsHandshakesComponent: React.FC<React.PropsWithChildren<NetworkKpiProps>> = ({
   filterQuery,
   from,
   indexNames,

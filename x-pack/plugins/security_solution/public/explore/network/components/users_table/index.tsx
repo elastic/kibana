@@ -53,7 +53,7 @@ const rowItems: ItemsPerRow[] = [
 
 export const usersTableId = 'users-table';
 
-const UsersTableComponent: React.FC<UsersTableProps> = ({
+const UsersTableComponent: React.FC<React.PropsWithChildren<UsersTableProps>> = ({
   data,
   fakeTotalCount,
   flowTarget,

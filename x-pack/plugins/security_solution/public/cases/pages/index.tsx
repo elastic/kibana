@@ -44,7 +44,7 @@ const TimelineDetailsPanel = () => {
   );
 };
 
-const CaseContainerComponent: React.FC = () => {
+const CaseContainerComponent: React.FC<React.PropsWithChildren<unknown>> = () => {
   const { cases } = useKibana().services;
   const { getAppUrl, navigateTo } = useNavigation();
   const userCasesPermissions = useGetUserCasesPermissions();

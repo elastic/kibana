@@ -31,7 +31,7 @@ export interface Statuses {
   permissionCheckStatus: IMPORT_STATUS;
 }
 
-export const ImportProgress: FC<{ statuses: Statuses }> = ({ statuses }) => {
+export const ImportProgress: FC<React.PropsWithChildren<{ statuses: Statuses }>> = ({ statuses }) => {
   const {
     reading,
     readStatus,
@@ -294,7 +294,7 @@ export const ImportProgress: FC<{ statuses: Statuses }> = ({ statuses }) => {
   );
 };
 
-const UploadFunctionProgress: FC<{ progress: number }> = ({ progress }) => {
+const UploadFunctionProgress: FC<React.PropsWithChildren<{ progress: number }>> = ({ progress }) => {
   return (
     <React.Fragment>
       <p>

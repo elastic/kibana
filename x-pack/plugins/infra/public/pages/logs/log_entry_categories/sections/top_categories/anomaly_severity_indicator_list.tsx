@@ -11,9 +11,9 @@ import { LogEntryCategoryDataset } from '../../../../../../common/log_analysis';
 import { getFriendlyNameForPartitionId } from '../../../../../../common/log_analysis';
 import { AnomalySeverityIndicator } from '../../../../../components/logging/log_analysis_results/anomaly_severity_indicator';
 
-export const AnomalySeverityIndicatorList: React.FunctionComponent<{
+export const AnomalySeverityIndicatorList: React.FunctionComponent<React.PropsWithChildren<{
   datasets: LogEntryCategoryDataset[];
-}> = ({ datasets }) => (
+}>> = ({ datasets }) => (
   <ul>
     {datasets.map((dataset) => {
       const datasetLabel = getFriendlyNameForPartitionId(dataset.name);

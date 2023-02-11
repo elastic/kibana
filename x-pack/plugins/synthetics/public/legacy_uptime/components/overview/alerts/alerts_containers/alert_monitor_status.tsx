@@ -32,7 +32,7 @@ interface Props {
   };
 }
 
-export const AlertMonitorStatus: React.FC<Props> = ({
+export const AlertMonitorStatus: React.FC<React.PropsWithChildren<Props>> = ({
   enabled,
   numTimes,
   setRuleParams,

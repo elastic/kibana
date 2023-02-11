@@ -24,12 +24,12 @@ import type { AgentPolicy, PackageInfo } from '../../../../../types';
 
 const toTitleCase = (str: string) => str.charAt(0).toUpperCase() + str.substr(1);
 
-export const PostInstallAddAgentModal: React.FunctionComponent<{
+export const PostInstallAddAgentModal: React.FunctionComponent<React.PropsWithChildren<{
   onConfirm: () => void;
   onCancel: () => void;
   packageInfo: PackageInfo;
   agentPolicy: AgentPolicy;
-}> = ({ onConfirm, onCancel, packageInfo, agentPolicy }) => {
+}>> = ({ onConfirm, onCancel, packageInfo, agentPolicy }) => {
   const isGuidedOnboardingActive = useIsGuidedOnboardingActive(packageInfo.name);
 
   return (

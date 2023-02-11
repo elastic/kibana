@@ -77,7 +77,7 @@ const EventsTrSupplementContainerWrapper = React.memo(({ children }) => {
 
 EventsTrSupplementContainerWrapper.displayName = 'EventsTrSupplementContainerWrapper';
 
-const StatefulEventComponent: React.FC<Props> = ({
+const StatefulEventComponent: React.FC<React.PropsWithChildren<Props>> = ({
   actionsColumnWidth,
   containerRef,
   columnHeaders,

@@ -32,7 +32,7 @@ interface Props {
   showStopDatafeedsFlyout(job: MlSummaryJob[]): void;
 }
 
-export const StopDatafeedsConfirmModal: FC<Props> = ({
+export const StopDatafeedsConfirmModal: FC<React.PropsWithChildren<Props>> = ({
   setShowFunction,
   unsetShowFunction,
   refreshJobs,

@@ -15,7 +15,7 @@ interface Props {
   repository: AzureRepository;
 }
 
-export const AzureDetails: React.FunctionComponent<Props> = ({ repository }) => {
+export const AzureDetails: React.FunctionComponent<React.PropsWithChildren<Props>> = ({ repository }) => {
   const {
     settings: {
       client,

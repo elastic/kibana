@@ -1204,7 +1204,7 @@ export const FIELD = (readOnly?: boolean): FieldMap => ({
   },
   [ConfigKey.SYNTHETICS_ARGS]: {
     fieldKey: ConfigKey.SYNTHETICS_ARGS,
-    component: ComboBox as React.ComponentType<EuiComboBoxProps<string>>,
+    component: ComboBox as React.ComponentType<React.PropsWithChildren<EuiComboBoxProps<string>>>,
     controlled: true,
     label: i18n.translate('xpack.synthetics.monitorConfig.syntheticsArgs.label', {
       defaultMessage: 'Synthetics args',

@@ -22,7 +22,7 @@ interface TestsSelectionControlProps {
   errors?: string[];
 }
 
-export const TestsSelectionControl: FC<TestsSelectionControlProps> = React.memo(
+export const TestsSelectionControl: FC<React.PropsWithChildren<TestsSelectionControlProps>> = React.memo(
   ({ config, onChange, errors }) => {
     const uiConfig = getResultTestConfig(config);
 

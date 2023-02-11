@@ -42,7 +42,7 @@ interface Props {
   chartReady: boolean;
 }
 
-export const CreateCalendar: FC<Props> = ({
+export const CreateCalendar: FC<React.PropsWithChildren<Props>> = ({
   calendarEvents,
   setCalendarEvents,
   minSelectableTimeStamp,
@@ -262,7 +262,7 @@ interface ChartProps {
   overlayColor: string;
 }
 
-const Chart: FC<ChartProps> = memo(
+const Chart: FC<React.PropsWithChildren<ChartProps>> = memo(
   ({ eventRateData, anomalies, loading, onBrushEnd, overlayRanges, overlayColor }) => (
     <EventRateChart
       eventRateChartData={eventRateData}

@@ -17,7 +17,7 @@ export type GetAllCasesSelectorModalProps = Omit<
   'externalReferenceAttachmentTypeRegistry' | 'persistableStateAttachmentTypeRegistry'
 >;
 
-const AllCasesSelectorModalLazy: React.FC<AllCasesSelectorModalProps> = lazy(
+const AllCasesSelectorModalLazy: React.FC<React.PropsWithChildren<AllCasesSelectorModalProps>> = lazy(
   () => import('../../components/all_cases/selector_modal')
 );
 export const getAllCasesSelectorModalLazy = ({

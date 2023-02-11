@@ -27,7 +27,7 @@ interface Props {
   title: string;
 }
 
-export const JobConfigErrorCallout: FC<Props> = ({
+export const JobConfigErrorCallout: FC<React.PropsWithChildren<Props>> = ({
   jobCapsServiceErrorMessage,
   jobConfigErrorMessage,
   title,

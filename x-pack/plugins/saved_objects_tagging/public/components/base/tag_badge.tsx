@@ -18,7 +18,7 @@ export interface TagBadgeProps {
 /**
  * The badge representation of a Tag, which is the default display to be used for them.
  */
-export const TagBadge: FC<TagBadgeProps> = ({ tag, onClick }) => {
+export const TagBadge: FC<React.PropsWithChildren<TagBadgeProps>> = ({ tag, onClick }) => {
   const onClickProps = onClick
     ? {
         onClick: () => {

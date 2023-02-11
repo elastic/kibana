@@ -20,7 +20,7 @@ interface Props {
   rightColumn?: JSX.Element;
 }
 
-export const DefaultLayout: React.FunctionComponent<Props> = ({
+export const DefaultLayout: React.FunctionComponent<React.PropsWithChildren<Props>> = ({
   section,
   children,
   rightColumn,

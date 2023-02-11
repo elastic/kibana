@@ -16,7 +16,7 @@ import { getToastNotificationService } from '../../../../../../../services/toast
 
 const DTR_IDX = 0;
 
-export const SingleMetricDetectorsSummary: FC = () => {
+export const SingleMetricDetectorsSummary: FC<React.PropsWithChildren<unknown>> = () => {
   const {
     jobCreator: jc,
     chartLoader,

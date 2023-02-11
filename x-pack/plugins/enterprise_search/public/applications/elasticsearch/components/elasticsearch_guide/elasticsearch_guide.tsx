@@ -31,7 +31,7 @@ import { EnterpriseSearchElasticsearchPageTemplate } from '../layout';
 
 // Replace FormattedMessage with i18n strings
 
-export const ElasticsearchGuide: React.FC = () => {
+export const ElasticsearchGuide: React.FC<React.PropsWithChildren<unknown>> = () => {
   const languages = [
     { value: 'dotnet', text: '.Net' },
     { value: 'go', text: 'Go' },

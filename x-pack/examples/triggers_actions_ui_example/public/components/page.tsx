@@ -25,7 +25,7 @@ interface PageProps {
   isHome?: boolean;
 }
 
-export const Page: React.FC<PageProps> = (props) => {
+export const Page: React.FC<React.PropsWithChildren<PageProps>> = (props) => {
   const { title, crumb, isHome, children } = props;
 
   const history = useHistory();

@@ -40,7 +40,7 @@ interface Props {
   estimate: SyncEstimate;
 }
 
-export const FrequencyItem: React.FC<Props> = ({
+export const FrequencyItem: React.FC<React.PropsWithChildren<Props>> = ({
   type,
   label,
   description,

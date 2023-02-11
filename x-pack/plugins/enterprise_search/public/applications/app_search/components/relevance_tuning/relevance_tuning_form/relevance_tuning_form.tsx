@@ -28,7 +28,7 @@ import { RelevanceTuningItemContent } from './relevance_tuning_item_content';
 
 import './relevance_tuning_form.scss';
 
-export const RelevanceTuningForm: React.FC = () => {
+export const RelevanceTuningForm: React.FC<React.PropsWithChildren<unknown>> = () => {
   const {
     filterInputValue,
     schemaFields,

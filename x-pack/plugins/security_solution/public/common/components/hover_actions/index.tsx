@@ -129,7 +129,7 @@ const isFocusTrapDisabled = ({
   return !ownFocus;
 };
 
-export const HoverActions: React.FC<Props> = React.memo(
+export const HoverActions: React.FC<React.PropsWithChildren<Props>> = React.memo(
   ({
     additionalContent = null,
     closePopOver,

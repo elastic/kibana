@@ -10,7 +10,7 @@ import userEvent from '@testing-library/user-event';
 import { focusNextElement } from './helpers';
 
 // dummy component for testing
-const TestButtonList: FC<any> = (props: any) => (
+const TestButtonList: FC<React.PropsWithChildren<any>> = (props: any) => (
   <>
     {[...Array(100)].map((_, idx) => (
       <button key={idx} {...props}>

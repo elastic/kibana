@@ -25,7 +25,7 @@ const getPageSizeValue = () => {
   return value;
 };
 
-export const CertificatesPage: React.FC = () => {
+export const CertificatesPage: React.FC<React.PropsWithChildren<unknown>> = () => {
   useTrackPageview({ app: 'uptime', path: 'certificates' });
   useTrackPageview({ app: 'uptime', path: 'certificates', delay: 15000 });
 

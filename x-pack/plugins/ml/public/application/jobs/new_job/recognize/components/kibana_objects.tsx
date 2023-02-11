@@ -27,7 +27,7 @@ export interface KibanaObjectItemProps {
   isSaving: boolean;
 }
 
-export const KibanaObjects: FC<KibanaObjectItemProps> = memo(
+export const KibanaObjects: FC<React.PropsWithChildren<KibanaObjectItemProps>> = memo(
   ({ objectType, kibanaObjects, isSaving }) => {
     const kibanaObjectLabels: Record<string, string> = {
       dashboard: i18n.translate('xpack.ml.newJob.recognize.dashboardsLabel', {

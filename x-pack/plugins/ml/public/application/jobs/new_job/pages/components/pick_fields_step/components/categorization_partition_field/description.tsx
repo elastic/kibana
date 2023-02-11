@@ -13,7 +13,7 @@ import { EuiDescribedFormGroup } from '@elastic/eui';
 interface Props {
   children: React.ReactNode;
 }
-export const Description: FC<Props> = memo(({ children }) => {
+export const Description: FC<React.PropsWithChildren<Props>> = memo(({ children }) => {
   const title = i18n.translate('xpack.ml.newJob.wizard.perPartitionCategorization.enable.title', {
     defaultMessage: 'Per-partition categorization',
   });

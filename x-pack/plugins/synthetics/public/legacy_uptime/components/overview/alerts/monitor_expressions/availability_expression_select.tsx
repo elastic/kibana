@@ -55,7 +55,7 @@ const DEFAULT_THRESHOLD = '99';
 
 const isThresholdInvalid = (n: number): boolean => isNaN(n) || n <= 0 || n > 100;
 
-export const AvailabilityExpressionSelect: React.FC<Props> = ({
+export const AvailabilityExpressionSelect: React.FC<React.PropsWithChildren<Props>> = ({
   ruleParams,
   isOldAlert,
   setRuleParams,

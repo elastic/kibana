@@ -61,7 +61,7 @@ const tabToUiMetricMap: { [key: string]: string } = {
   [TAB_HISTORY]: UIM_POLICY_DETAIL_PANEL_HISTORY_TAB,
 };
 
-export const PolicyDetails: React.FunctionComponent<Props> = ({
+export const PolicyDetails: React.FunctionComponent<React.PropsWithChildren<Props>> = ({
   policyName,
   onClose,
   onPolicyDeleted,

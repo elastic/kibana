@@ -17,7 +17,7 @@ export interface SetupModeToggleButtonProps {
   toggleSetupMode: (state: boolean) => void;
 }
 
-export const SetupModeToggleButton: React.FC<SetupModeToggleButtonProps> = (
+export const SetupModeToggleButton: React.FC<React.PropsWithChildren<SetupModeToggleButtonProps>> = (
   props: SetupModeToggleButtonProps
 ) => {
   const [isLoading, setIsLoading] = React.useState(false);

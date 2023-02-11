@@ -18,7 +18,7 @@ interface Props {
   numberOfLines: number;
 }
 
-export const FileContents: FC<Props> = ({ data, format, numberOfLines }) => {
+export const FileContents: FC<React.PropsWithChildren<Props>> = ({ data, format, numberOfLines }) => {
   let mode = EDITOR_MODE.TEXT;
   if (format === EDITOR_MODE.JSON) {
     mode = EDITOR_MODE.JSON;

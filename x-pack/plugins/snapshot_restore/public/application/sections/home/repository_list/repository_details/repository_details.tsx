@@ -59,7 +59,7 @@ interface Props {
   onRepositoryDeleted: (repositoriesDeleted: Array<Repository['name']>) => void;
 }
 
-export const RepositoryDetails: React.FunctionComponent<Props> = ({
+export const RepositoryDetails: React.FunctionComponent<React.PropsWithChildren<Props>> = ({
   repositoryName,
   onClose,
   onRepositoryDeleted,

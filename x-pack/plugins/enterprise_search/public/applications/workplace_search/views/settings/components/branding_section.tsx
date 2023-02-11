@@ -53,7 +53,7 @@ interface Props {
   resetImage(): void;
 }
 
-export const BrandingSection: React.FC<Props> = ({
+export const BrandingSection: React.FC<React.PropsWithChildren<Props>> = ({
   imageType,
   description,
   helpText,

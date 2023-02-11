@@ -35,7 +35,7 @@ import { overrideTransformForCloning } from '../../common/transform';
 
 type Props = RouteComponentProps<{ transformId: string }>;
 
-export const CloneTransformSection: FC<Props> = ({ match, location }) => {
+export const CloneTransformSection: FC<React.PropsWithChildren<Props>> = ({ match, location }) => {
   const { dataViewId }: Record<string, any> = parse(location.search, {
     sort: false,
   });

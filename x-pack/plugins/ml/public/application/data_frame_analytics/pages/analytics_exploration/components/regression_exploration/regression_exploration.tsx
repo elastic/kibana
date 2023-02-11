@@ -18,7 +18,7 @@ interface Props {
   jobId: string;
 }
 
-export const RegressionExploration: FC<Props> = ({ jobId }) => (
+export const RegressionExploration: FC<React.PropsWithChildren<Props>> = ({ jobId }) => (
   <ExplorationPageWrapper
     jobId={jobId}
     title={i18n.translate('xpack.ml.dataframe.analytics.regressionExploration.tableJobIdTitle', {

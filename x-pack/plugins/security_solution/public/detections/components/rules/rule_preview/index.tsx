@@ -73,7 +73,7 @@ const refreshedTimeframe = (startDate: string, endDate: string) => {
   };
 };
 
-const RulePreviewComponent: React.FC<RulePreviewProps> = ({
+const RulePreviewComponent: React.FC<React.PropsWithChildren<RulePreviewProps>> = ({
   isDisabled,
   defineRuleData,
   aboutRuleData,

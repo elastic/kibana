@@ -42,7 +42,7 @@ export interface FleetServerHostsFlyoutProps {
   proxies: FleetProxy[];
 }
 
-export const FleetServerHostsFlyout: React.FunctionComponent<FleetServerHostsFlyoutProps> = ({
+export const FleetServerHostsFlyout: React.FunctionComponent<React.PropsWithChildren<FleetServerHostsFlyoutProps>> = ({
   onClose,
   fleetServerHost,
   proxies,

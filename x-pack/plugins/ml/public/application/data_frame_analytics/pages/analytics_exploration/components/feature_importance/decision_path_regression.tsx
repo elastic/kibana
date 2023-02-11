@@ -26,7 +26,7 @@ interface RegressionDecisionPathProps {
   topClasses?: TopClasses;
 }
 
-export const RegressionDecisionPath: FC<RegressionDecisionPathProps> = ({
+export const RegressionDecisionPath: FC<React.PropsWithChildren<RegressionDecisionPathProps>> = ({
   baseline,
   featureImportance,
   predictedValue,

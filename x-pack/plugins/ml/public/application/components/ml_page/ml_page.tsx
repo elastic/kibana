@@ -47,7 +47,7 @@ export const MlPageControlsContext = createContext<{
  * Main page component of the ML App
  * @constructor
  */
-export const MlPage: FC<{ pageDeps: PageDependencies }> = React.memo(({ pageDeps }) => {
+export const MlPage: FC<React.PropsWithChildren<{ pageDeps: PageDependencies }>> = React.memo(({ pageDeps }) => {
   const navigateToPath = useNavigateToPath();
   const {
     services: {
@@ -155,7 +155,7 @@ interface CommonPageWrapperProps {
   headerPortal: HtmlPortalNode;
 }
 
-const CommonPageWrapper: FC<CommonPageWrapperProps> = React.memo(({ pageDeps, routeList }) => {
+const CommonPageWrapper: FC<React.PropsWithChildren<CommonPageWrapperProps>> = React.memo(({ pageDeps, routeList }) => {
   const {
     services: { application },
   } = useMlKibana();

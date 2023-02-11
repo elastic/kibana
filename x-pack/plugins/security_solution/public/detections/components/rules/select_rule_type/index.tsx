@@ -29,7 +29,7 @@ interface SelectRuleTypeProps {
   isUpdateView: boolean;
 }
 
-export const SelectRuleType: React.FC<SelectRuleTypeProps> = ({
+export const SelectRuleType: React.FC<React.PropsWithChildren<SelectRuleTypeProps>> = ({
   describedByIds = [],
   field,
   isUpdateView,

@@ -61,7 +61,7 @@ const StyledEuiIconTip = euiStyled(EuiIconTip)`
   margin-bottom: 0 !important;
 `;
 
-const ConnectorsDropdownComponent: React.FC<Props> = ({
+const ConnectorsDropdownComponent: React.FC<React.PropsWithChildren<Props>> = ({
   connectors,
   disabled,
   isLoading,

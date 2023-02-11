@@ -19,7 +19,7 @@ interface Props {
   validationMessages: CalloutMessage[];
 }
 
-export const ValidationStep: FC<Props> = ({
+export const ValidationStep: FC<React.PropsWithChildren<Props>> = ({
   checksInProgress,
   validationMessages,
   setCurrentStep,

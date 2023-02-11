@@ -54,7 +54,7 @@ export interface RuleCommonExpressionsProps extends CommonRuleParams {
   onChangeExcludeHitsFromPreviousRun: (exclude: boolean) => void;
 }
 
-export const RuleCommonExpressions: React.FC<RuleCommonExpressionsProps> = ({
+export const RuleCommonExpressions: React.FC<React.PropsWithChildren<RuleCommonExpressionsProps>> = ({
   esFields,
   thresholdComparator,
   threshold,

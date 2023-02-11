@@ -35,7 +35,7 @@ import { mountLicensingLogic } from './shared/licensing';
  */
 
 export const renderApp = (
-  App: React.FC<InitialAppData>,
+  App: React.FC<React.PropsWithChildren<InitialAppData>>,
   { params, core, plugins }: { params: AppMountParameters; core: CoreStart; plugins: PluginsStart },
   { config, data }: { config: ClientConfigType; data: ClientData }
 ) => {
@@ -50,7 +50,7 @@ export const renderApp = (
   };
   const productAccess = data.access || noProductAccess;
 
-  const EmptyContext: FC = ({ children }) => <>{children}</>;
+  const EmptyContext: FC<React.PropsWithChildren<unknown>> = ({ children }) => <>{children}</>;
   const CloudContext = plugins.cloud?.CloudContextProvider || EmptyContext;
 
   resetContext({ createStore: true });
@@ -118,7 +118,7 @@ export const renderApp = (
  */
 
 export const renderHeaderActions = (
-  HeaderActions: React.FC,
+  HeaderActions: React.FC<React.PropsWithChildren<unknown>>,
   store: Store,
   kibanaHeaderEl: HTMLElement
 ) => {

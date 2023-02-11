@@ -19,7 +19,7 @@ export interface PageProps {
   title?: React.ReactNode;
 }
 
-export const Page: React.FC<PageProps> = ({ title = 'Untitled', children }) => {
+export const Page: React.FC<React.PropsWithChildren<PageProps>> = ({ title = 'Untitled', children }) => {
   return (
     <EuiPageBody style={{ maxWidth: 1200, margin: '0 auto' }}>
       <EuiPageHeader>

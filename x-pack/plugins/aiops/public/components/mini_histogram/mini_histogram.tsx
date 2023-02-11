@@ -23,7 +23,7 @@ interface MiniHistogramProps {
   label: string;
 }
 
-export const MiniHistogram: FC<MiniHistogramProps> = ({ chartData, isLoading, label }) => {
+export const MiniHistogram: FC<React.PropsWithChildren<MiniHistogramProps>> = ({ chartData, isLoading, label }) => {
   const { charts } = useAiopsAppContext();
 
   const euiTheme = useEuiTheme();

@@ -90,7 +90,7 @@ type Props = Pick<
   | 'toggleLogging'
 >;
 
-export const DeprecationLoggingToggle: FunctionComponent<Props> = ({
+export const DeprecationLoggingToggle: FunctionComponent<React.PropsWithChildren<Props>> = ({
   isDeprecationLogIndexingEnabled,
   isLoading,
   isUpdating,

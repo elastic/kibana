@@ -21,7 +21,7 @@ interface OverviewPageLinkProps {
   pagination: string;
 }
 
-export const OverviewPageLink: FunctionComponent<OverviewPageLinkProps> = ({
+export const OverviewPageLink: FunctionComponent<React.PropsWithChildren<OverviewPageLinkProps>> = ({
   dataTestSubj,
   direction,
   pagination,

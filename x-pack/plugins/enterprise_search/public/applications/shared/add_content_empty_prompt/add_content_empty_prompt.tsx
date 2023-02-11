@@ -38,7 +38,7 @@ interface EmptyPromptProps {
   buttonLabel?: string;
 }
 
-export const AddContentEmptyPrompt: React.FC<EmptyPromptProps> = ({ title, buttonLabel }) => {
+export const AddContentEmptyPrompt: React.FC<React.PropsWithChildren<EmptyPromptProps>> = ({ title, buttonLabel }) => {
   const { colorMode } = useEuiTheme();
 
   return (

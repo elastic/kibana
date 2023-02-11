@@ -81,7 +81,7 @@ interface TransformListProps {
   transformsLoading: boolean;
 }
 
-export const TransformList: FC<TransformListProps> = ({
+export const TransformList: FC<React.PropsWithChildren<TransformListProps>> = ({
   onCreateTransform,
   transformNodes,
   transforms,

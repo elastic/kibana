@@ -16,7 +16,7 @@ import { EngineLogic } from '../engine';
 import { ReindexJob } from './reindex_job';
 import { Schema, MetaEngineSchema } from './views';
 
-export const SchemaRouter: React.FC = () => {
+export const SchemaRouter: React.FC<React.PropsWithChildren<unknown>> = () => {
   const { isMetaEngine } = useValues(EngineLogic);
 
   return (

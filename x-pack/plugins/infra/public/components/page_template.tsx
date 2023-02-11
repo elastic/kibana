@@ -9,7 +9,7 @@ import React from 'react';
 import type { LazyObservabilityPageTemplateProps } from '@kbn/observability-plugin/public';
 import { useKibanaContextForPlugin } from '../hooks/use_kibana';
 
-export const PageTemplate: React.FC<LazyObservabilityPageTemplateProps> = (pageTemplateProps) => {
+export const PageTemplate: React.FC<React.PropsWithChildren<LazyObservabilityPageTemplateProps>> = (pageTemplateProps) => {
   const {
     services: {
       observability: {

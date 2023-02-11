@@ -17,7 +17,7 @@ import {
 } from '../../../../../common/job_creator';
 import { Description } from './description';
 
-export const CategorizationField: FC = () => {
+export const CategorizationField: FC<React.PropsWithChildren<unknown>> = () => {
   const { jobCreator: jc, jobCreatorUpdate, jobCreatorUpdated } = useContext(JobCreatorContext);
   const jobCreator = jc as AdvancedJobCreator | CategorizationJobCreator;
   const { catFields } = newJobCapsService;

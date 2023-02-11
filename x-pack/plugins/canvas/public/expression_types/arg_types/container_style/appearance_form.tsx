@@ -39,7 +39,7 @@ const opacities = [
   { value: 0.1, text: '10%' },
 ];
 
-export const AppearanceForm: FunctionComponent<Props> = ({
+export const AppearanceForm: FunctionComponent<React.PropsWithChildren<Props>> = ({
   padding = '',
   opacity = 1,
   overflow = 'hidden',

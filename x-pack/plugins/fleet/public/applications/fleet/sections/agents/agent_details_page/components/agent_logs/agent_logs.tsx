@@ -66,7 +66,7 @@ export interface AgentLogsState {
 
 export const AgentLogsUrlStateHelper = createStateContainerReactHelpers();
 
-const AgentPolicyLogsNotEnabledCallout: React.FunctionComponent<{ agentPolicy: AgentPolicy }> = ({
+const AgentPolicyLogsNotEnabledCallout: React.FunctionComponent<React.PropsWithChildren<{ agentPolicy: AgentPolicy }>> = ({
   agentPolicy,
 }) => {
   const { getHref } = useLink();
@@ -110,7 +110,7 @@ const AgentPolicyLogsNotEnabledCallout: React.FunctionComponent<{ agentPolicy: A
   );
 };
 
-export const AgentLogsUI: React.FunctionComponent<AgentLogsProps> = memo(
+export const AgentLogsUI: React.FunctionComponent<React.PropsWithChildren<AgentLogsProps>> = memo(
   ({ agent, agentPolicy, state }) => {
     const { data, application, http } = useStartServices();
     const { update: updateState } = AgentLogsUrlStateHelper.useTransitions();

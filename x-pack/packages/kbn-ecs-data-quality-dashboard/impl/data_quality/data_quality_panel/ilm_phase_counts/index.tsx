@@ -24,7 +24,7 @@ interface Props {
   pattern: string;
 }
 
-const IlmPhaseCountsComponent: React.FC<Props> = ({ ilmExplainPhaseCounts, pattern }) => (
+const IlmPhaseCountsComponent: React.FC<React.PropsWithChildren<Props>> = ({ ilmExplainPhaseCounts, pattern }) => (
   <PhaseCountsFlexGroup gutterSize="none">
     {phases.map((phase) =>
       ilmExplainPhaseCounts[phase] != null && ilmExplainPhaseCounts[phase] > 0 ? (

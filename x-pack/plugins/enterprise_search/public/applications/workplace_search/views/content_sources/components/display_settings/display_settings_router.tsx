@@ -19,7 +19,7 @@ import {
 
 import { DisplaySettings } from './display_settings';
 
-export const DisplaySettingsRouter: React.FC = () => {
+export const DisplaySettingsRouter: React.FC<React.PropsWithChildren<unknown>> = () => {
   const { isOrganization } = useValues(AppLogic);
   return (
     <Switch>

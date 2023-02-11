@@ -22,7 +22,7 @@ interface Props {
 /**
  * The Settings Popover for Canvas Shareable Workpads.
  */
-export const SettingsComponent: FC<Props> = ({ refs }) => {
+export const SettingsComponent: FC<React.PropsWithChildren<Props>> = ({ refs }) => {
   const [isPopoverOpen, setPopoverOpen] = useState(false);
   const button = (
     <EuiButtonIcon
@@ -97,7 +97,7 @@ export const SettingsComponent: FC<Props> = ({ refs }) => {
 /**
  * A store-connected container for the `Settings` component.
  */
-export const Settings: FC<{}> = () => {
+export const Settings: FC<React.PropsWithChildren<{}>> = () => {
   const [{ refs }] = useCanvasShareableState();
 
   return <SettingsComponent refs={refs} />;

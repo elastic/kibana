@@ -15,7 +15,7 @@ interface HelpMenuProps {
 }
 
 // Component for adding a documentation link to the help menu
-export const HelpMenu: FC<HelpMenuProps> = React.memo(({ docLink, appName }) => {
+export const HelpMenu: FC<React.PropsWithChildren<HelpMenuProps>> = React.memo(({ docLink, appName }) => {
   const { chrome } = useMlKibana().services;
 
   useEffect(() => {

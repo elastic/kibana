@@ -35,7 +35,7 @@ const modelObjectNoun = i18n.translate('xpack.ml.management.jobsSpacesList.model
   defaultMessage: 'trained model',
 });
 
-export const MLSavedObjectsSpacesList: FC<Props> = ({
+export const MLSavedObjectsSpacesList: FC<React.PropsWithChildren<Props>> = ({
   spacesApi,
   spaceIds,
   id,

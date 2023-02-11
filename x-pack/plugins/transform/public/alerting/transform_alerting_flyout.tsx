@@ -21,7 +21,7 @@ interface TransformAlertFlyoutProps {
   onCloseFlyout: () => void;
 }
 
-export const TransformAlertFlyout: FC<TransformAlertFlyoutProps> = ({
+export const TransformAlertFlyout: FC<React.PropsWithChildren<TransformAlertFlyoutProps>> = ({
   initialAlert,
   ruleParams,
   onCloseFlyout,

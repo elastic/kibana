@@ -18,7 +18,7 @@ interface Props {
 
 export type ExecuteRetention = () => void;
 
-export const RetentionExecuteModalProvider: React.FunctionComponent<Props> = ({ children }) => {
+export const RetentionExecuteModalProvider: React.FunctionComponent<React.PropsWithChildren<Props>> = ({ children }) => {
   const { i18n } = useServices();
   const toastNotifications = useToastNotifications();
 

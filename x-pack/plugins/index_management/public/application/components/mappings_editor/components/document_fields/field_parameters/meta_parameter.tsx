@@ -18,7 +18,7 @@ interface Props {
   defaultToggleValue: boolean;
 }
 
-export const MetaParameter: FunctionComponent<Props> = ({ defaultToggleValue }) => (
+export const MetaParameter: FunctionComponent<React.PropsWithChildren<Props>> = ({ defaultToggleValue }) => (
   <EditFieldFormRow
     title={i18n.translate('xpack.idxMgmt.mappingsEditor.metaParameterTitle', {
       defaultMessage: 'Set metadata',

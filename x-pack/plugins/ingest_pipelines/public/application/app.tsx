@@ -42,7 +42,7 @@ export const AppWithoutRouter = () => (
   </Switch>
 );
 
-export const App: FunctionComponent = () => {
+export const App: FunctionComponent<React.PropsWithChildren<unknown>> = () => {
   const { apiError } = useAuthorizationContext();
   const { history, executionContext } = useKibana().services;
 

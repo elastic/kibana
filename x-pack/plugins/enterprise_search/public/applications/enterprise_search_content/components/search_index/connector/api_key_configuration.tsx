@@ -24,10 +24,10 @@ import { Status } from '../../../../../../common/types/api';
 import { GenerateConnectorApiKeyApiLogic } from '../../../api/connector/generate_connector_api_key_api_logic';
 import { ApiKey } from '../../api_key/api_key';
 
-const ConfirmModal: React.FC<{
+const ConfirmModal: React.FC<React.PropsWithChildren<{
   onCancel: () => void;
   onConfirm: () => void;
-}> = ({ onCancel, onConfirm }) => (
+}>> = ({ onCancel, onConfirm }) => (
   <EuiConfirmModal
     title={i18n.translate(
       'xpack.enterpriseSearch.content.indices.configurationConnector.apiKey.confirmModal.title',
@@ -61,7 +61,7 @@ const ConfirmModal: React.FC<{
   </EuiConfirmModal>
 );
 
-export const ApiKeyConfig: React.FC<{ hasApiKey: boolean; indexName: string }> = ({
+export const ApiKeyConfig: React.FC<React.PropsWithChildren<{ hasApiKey: boolean; indexName: string }>> = ({
   hasApiKey,
   indexName,
 }) => {

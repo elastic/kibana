@@ -20,7 +20,7 @@ import { EnterpriseSearchAnalyticsPageTemplate } from '../layout/page_template';
 import { AnalyticsCollectionTable } from './analytics_collection_table';
 import { AnalyticsCollectionsLogic } from './analytics_collections_logic';
 
-export const AnalyticsOverview: React.FC = () => {
+export const AnalyticsOverview: React.FC<React.PropsWithChildren<unknown>> = () => {
   const { fetchAnalyticsCollections } = useActions(AnalyticsCollectionsLogic);
   const { analyticsCollections, isLoading, hasNoAnalyticsCollections } =
     useValues(AnalyticsCollectionsLogic);

@@ -21,7 +21,7 @@ import { LogEntryRatePage } from './log_entry_rate';
 import { LogsSettingsPage } from './settings';
 import { StreamPage } from './stream';
 
-export const LogsPageContent: React.FunctionComponent = () => {
+export const LogsPageContent: React.FunctionComponent<React.PropsWithChildren<unknown>> = () => {
   const uiCapabilities = useKibana().services.application?.capabilities;
   const { setHeaderActionMenu, theme$ } = useContext(HeaderActionMenuContext);
 

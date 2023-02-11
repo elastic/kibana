@@ -109,7 +109,7 @@ export interface Props {
   initialSearch?: string;
 }
 
-export const SavedElementsModal: FunctionComponent<Props> = ({
+export const SavedElementsModal: FunctionComponent<React.PropsWithChildren<Props>> = ({
   customElements,
   onAddCustomElement,
   onClose,

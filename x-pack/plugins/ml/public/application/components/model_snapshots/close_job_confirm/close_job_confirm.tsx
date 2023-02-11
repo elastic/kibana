@@ -19,7 +19,7 @@ interface Props {
   hideCloseJobModalVisible(): void;
   forceCloseJob(): void;
 }
-export const CloseJobConfirm: FC<Props> = ({
+export const CloseJobConfirm: FC<React.PropsWithChildren<Props>> = ({
   combinedJobState,
   hideCloseJobModalVisible,
   forceCloseJob,

@@ -32,7 +32,7 @@ interface Props {
   staticHeight: boolean;
 }
 
-export const Map: React.FC<Props> = ({
+export const Map: React.FC<React.PropsWithChildren<Props>> = ({
   nodes,
   options,
   currentTime,

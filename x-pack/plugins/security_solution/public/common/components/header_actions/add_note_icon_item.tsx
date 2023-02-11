@@ -19,7 +19,7 @@ interface AddEventNoteActionProps {
   toggleShowNotes: () => void;
 }
 
-const AddEventNoteActionComponent: React.FC<AddEventNoteActionProps> = ({
+const AddEventNoteActionComponent: React.FC<React.PropsWithChildren<AddEventNoteActionProps>> = ({
   ariaLabel,
   showNotes,
   timelineType,

@@ -22,7 +22,7 @@ export interface LineCurveOptionProps {
   isCurveTypeEnabled?: boolean;
 }
 
-export const LineCurveOption: React.FC<LineCurveOptionProps> = ({
+export const LineCurveOption: React.FC<React.PropsWithChildren<LineCurveOptionProps>> = ({
   onChange,
   value,
   isCurveTypeEnabled = true,

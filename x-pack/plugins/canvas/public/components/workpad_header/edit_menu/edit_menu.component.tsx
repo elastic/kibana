@@ -209,7 +209,7 @@ export interface Props {
   hasPasteData: boolean;
 }
 
-export const EditMenu: FunctionComponent<Props> = ({
+export const EditMenu: FunctionComponent<React.PropsWithChildren<Props>> = ({
   cutNodes,
   copyNodes,
   pasteNodes,

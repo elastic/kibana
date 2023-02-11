@@ -101,7 +101,7 @@ interface Props {
   errors: IErrorObject;
 }
 
-export const Criterion: React.FC<Props> = ({
+export const Criterion: React.FC<React.PropsWithChildren<Props>> = ({
   idx,
   fields,
   criterion,

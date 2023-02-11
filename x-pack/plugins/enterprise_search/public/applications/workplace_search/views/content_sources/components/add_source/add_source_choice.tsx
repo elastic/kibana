@@ -29,7 +29,7 @@ import { ConfigurationChoice } from './configuration_choice';
 
 import './add_source.scss';
 
-export const AddSourceChoice: React.FC = () => {
+export const AddSourceChoice: React.FC<React.PropsWithChildren<unknown>> = () => {
   const { serviceType } = useParams<{ serviceType: string }>();
   const sourceData = getSourceData(serviceType);
 

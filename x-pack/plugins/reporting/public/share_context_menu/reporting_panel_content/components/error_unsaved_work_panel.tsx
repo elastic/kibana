@@ -16,7 +16,7 @@ const i18nTexts = {
   }),
 };
 
-export const ErrorUnsavedWorkPanel: FunctionComponent = () => {
+export const ErrorUnsavedWorkPanel: FunctionComponent<React.PropsWithChildren<unknown>> = () => {
   return (
     <EuiCallOut size="s" title={i18nTexts.title} iconType="alert" color="danger">
       <EuiText size="s">

@@ -17,7 +17,7 @@ interface Props {
   onFilterGroupChanged: (filterGroup: Status) => void;
 }
 
-const AlertsTableFilterGroupComponent: React.FC<Props> = ({
+const AlertsTableFilterGroupComponent: React.FC<React.PropsWithChildren<Props>> = ({
   status = FILTER_OPEN,
   onFilterGroupChanged,
 }) => {

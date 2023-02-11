@@ -29,7 +29,7 @@ interface Props {
   isExperimental?: boolean;
 }
 
-const FlyoutHeaderComponent: React.FC<Props> = ({
+const FlyoutHeaderComponent: React.FC<React.PropsWithChildren<Props>> = ({
   icon,
   actionTypeName,
   actionTypeMessage,

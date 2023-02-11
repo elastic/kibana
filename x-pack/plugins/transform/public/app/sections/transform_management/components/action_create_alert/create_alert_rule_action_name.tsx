@@ -22,7 +22,7 @@ export const crateAlertRuleActionNameText = i18n.translate(
   }
 );
 
-export const CreateAlertRuleActionName: FC<CreateAlertRuleActionProps> = ({ disabled }) => {
+export const CreateAlertRuleActionName: FC<React.PropsWithChildren<CreateAlertRuleActionProps>> = ({ disabled }) => {
   if (disabled) {
     return (
       <EuiToolTip

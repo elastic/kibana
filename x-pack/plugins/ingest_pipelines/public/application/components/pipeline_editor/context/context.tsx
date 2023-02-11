@@ -17,7 +17,7 @@ interface Props extends ProcessorsContextProps {
   children: React.ReactNode;
 }
 
-export const ProcessorsEditorContextProvider: FunctionComponent<Props> = ({
+export const ProcessorsEditorContextProvider: FunctionComponent<React.PropsWithChildren<Props>> = ({
   children,
   onUpdate,
   value,

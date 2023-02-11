@@ -22,7 +22,7 @@ export interface ConfirmDeleteUsersProps {
   onSuccess?(): void;
 }
 
-export const ConfirmDeleteUsers: FunctionComponent<ConfirmDeleteUsersProps> = ({
+export const ConfirmDeleteUsers: FunctionComponent<React.PropsWithChildren<ConfirmDeleteUsersProps>> = ({
   usernames,
   onCancel,
   onSuccess,

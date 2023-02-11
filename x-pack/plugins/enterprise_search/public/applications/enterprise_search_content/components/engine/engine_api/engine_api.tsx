@@ -39,7 +39,7 @@ import { EngineApiIntegrationStage } from './engine_api_integration';
 import { EngineApiLogic } from './engine_api_logic';
 import { GenerateEngineApiKeyModal } from './generate_engine_api_key_modal/generate_engine_api_key_modal';
 
-export const EngineAPI: React.FC = () => {
+export const EngineAPI: React.FC<React.PropsWithChildren<unknown>> = () => {
   const { engineName, isLoadingEngine } = useValues(EngineViewLogic);
   const { engineData } = useValues(EngineIndicesLogic);
   const { isGenerateModalOpen } = useValues(EngineApiLogic);

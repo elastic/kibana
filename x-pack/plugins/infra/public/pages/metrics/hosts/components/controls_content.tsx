@@ -30,7 +30,7 @@ const REFRESH_CONFIG = {
   value: 0,
 };
 
-export const ControlsContent: React.FC<Props> = ({
+export const ControlsContent: React.FC<React.PropsWithChildren<Props>> = ({
   timeRange,
   dataView,
   query,

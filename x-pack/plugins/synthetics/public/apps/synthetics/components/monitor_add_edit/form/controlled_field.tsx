@@ -18,7 +18,7 @@ import { selectServiceLocationsState } from '../../../state';
 import { FieldMeta, FormConfig } from '../types';
 
 type Props<TFieldKey extends keyof FormConfig = any> = FieldMeta<TFieldKey> & {
-  component: React.ComponentType<any>;
+  component: React.ComponentType<React.PropsWithChildren<any>>;
   field: ControllerRenderProps<FormConfig, TFieldKey>;
   fieldState: ControllerFieldState;
   formRowProps: Partial<EuiFormRowProps>;

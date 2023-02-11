@@ -71,7 +71,7 @@ interface Props {
   agentPolicies?: AgentPolicy[];
 }
 
-export const NewEnrollmentTokenModal: React.FunctionComponent<Props> = ({
+export const NewEnrollmentTokenModal: React.FunctionComponent<React.PropsWithChildren<Props>> = ({
   onClose,
   agentPolicies = [],
 }) => {

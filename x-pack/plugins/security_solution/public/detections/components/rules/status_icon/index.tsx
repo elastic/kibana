@@ -26,7 +26,7 @@ const RuleStatusIconStyled = styled.div`
   }
 `;
 
-const RuleStatusIconComponent: React.FC<RuleStatusIconProps> = ({ name, type }) => {
+const RuleStatusIconComponent: React.FC<React.PropsWithChildren<RuleStatusIconProps>> = ({ name, type }) => {
   const theme = useEuiTheme();
   const color = type === 'passive' ? theme.euiColorLightestShade : theme.euiColorPrimary;
   return (

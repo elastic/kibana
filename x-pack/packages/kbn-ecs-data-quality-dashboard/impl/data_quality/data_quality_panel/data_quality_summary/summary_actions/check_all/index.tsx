@@ -42,7 +42,7 @@ interface Props {
 
 const DELAY_AFTER_EVERY_CHECK_COMPLETES = 3000; // ms
 
-const CheckAllComponent: React.FC<Props> = ({
+const CheckAllComponent: React.FC<React.PropsWithChildren<Props>> = ({
   defaultNumberFormat,
   ilmPhases,
   incrementCheckAllIndiciesChecked,

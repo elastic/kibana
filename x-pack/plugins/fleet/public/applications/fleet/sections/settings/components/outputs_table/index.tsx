@@ -41,7 +41,7 @@ function displayOutputType(type: string) {
   }
 }
 
-export const OutputsTable: React.FunctionComponent<OutputsTableProps> = ({
+export const OutputsTable: React.FunctionComponent<React.PropsWithChildren<OutputsTableProps>> = ({
   outputs,
   deleteOutput,
 }) => {

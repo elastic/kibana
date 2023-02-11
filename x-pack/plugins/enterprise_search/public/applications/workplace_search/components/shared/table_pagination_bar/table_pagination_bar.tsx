@@ -23,7 +23,7 @@ interface TablePaginationBarProps {
 
 const MAX_PAGES = 100;
 
-export const TablePaginationBar: React.FC<TablePaginationBarProps> = ({
+export const TablePaginationBar: React.FC<React.PropsWithChildren<TablePaginationBarProps>> = ({
   itemLabel = 'Items',
   itemsPerPage = 10,
   totalPages,

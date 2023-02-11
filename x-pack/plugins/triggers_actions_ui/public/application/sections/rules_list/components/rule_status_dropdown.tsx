@@ -44,7 +44,7 @@ export interface ComponentOpts {
   hideSnoozeOption?: boolean;
 }
 
-export const RuleStatusDropdown: React.FunctionComponent<ComponentOpts> = ({
+export const RuleStatusDropdown: React.FunctionComponent<React.PropsWithChildren<ComponentOpts>> = ({
   rule,
   onRuleChanged,
   disableRule,
@@ -212,7 +212,7 @@ interface RuleStatusMenuProps {
   activeSnoozes?: string[];
 }
 
-const RuleStatusMenu: React.FunctionComponent<RuleStatusMenuProps> = ({
+const RuleStatusMenu: React.FunctionComponent<React.PropsWithChildren<RuleStatusMenuProps>> = ({
   onChangeEnabledStatus,
   onClosePopover,
   isEnabled,

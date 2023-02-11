@@ -42,7 +42,7 @@ const FlyoutBody = styled(EuiFlyoutBody)`
   }
 `;
 
-const EditTagsFlyoutComponent: React.FC<Props> = ({ selectedCases, onClose, onSaveTags }) => {
+const EditTagsFlyoutComponent: React.FC<React.PropsWithChildren<Props>> = ({ selectedCases, onClose, onSaveTags }) => {
   const { data: tags, isLoading } = useGetTags();
 
   const [tagsSelection, setTagsSelection] = useState<ItemsSelectionState>({

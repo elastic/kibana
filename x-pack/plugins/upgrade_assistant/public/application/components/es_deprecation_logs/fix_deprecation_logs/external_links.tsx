@@ -63,7 +63,7 @@ export const getDeprecationDataView = async (dataService: DataPublicPluginStart)
   }
 };
 
-const DiscoverAppLink: FunctionComponent<Props> = ({ checkpoint }) => {
+const DiscoverAppLink: FunctionComponent<React.PropsWithChildren<Props>> = ({ checkpoint }) => {
   const {
     services: { data: dataService },
     plugins: { share },
@@ -125,7 +125,7 @@ const DiscoverAppLink: FunctionComponent<Props> = ({ checkpoint }) => {
   );
 };
 
-const ObservabilityAppLink: FunctionComponent<Props> = ({ checkpoint }) => {
+const ObservabilityAppLink: FunctionComponent<React.PropsWithChildren<Props>> = ({ checkpoint }) => {
   const {
     services: {
       core: { http },
@@ -164,7 +164,7 @@ const ObservabilityAppLink: FunctionComponent<Props> = ({ checkpoint }) => {
   );
 };
 
-export const ExternalLinks: FunctionComponent<Props> = ({ checkpoint }) => {
+export const ExternalLinks: FunctionComponent<React.PropsWithChildren<Props>> = ({ checkpoint }) => {
   const { infra: hasInfraPlugin } = useAppContext().plugins;
 
   return (

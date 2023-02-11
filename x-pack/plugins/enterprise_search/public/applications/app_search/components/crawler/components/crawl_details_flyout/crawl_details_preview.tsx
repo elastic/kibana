@@ -21,7 +21,7 @@ interface CrawlDetailsPreviewProps {
   crawlerLogsEnabled?: boolean;
 }
 
-export const CrawlDetailsPreview: React.FC<CrawlDetailsPreviewProps> = ({
+export const CrawlDetailsPreview: React.FC<React.PropsWithChildren<CrawlDetailsPreviewProps>> = ({
   crawlerLogsEnabled = false,
 }) => {
   const { crawlRequest } = useValues(CrawlDetailLogic);

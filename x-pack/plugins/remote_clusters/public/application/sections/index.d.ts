@@ -6,6 +6,6 @@
  */
 import { ComponentType } from 'react';
 
-export declare const RemoteClusterEdit: ComponentType;
-export declare const RemoteClusterAdd: ComponentType;
-export declare const RemoteClusterList: ComponentType;
+export declare const RemoteClusterEdit: ComponentType<React.PropsWithChildren<unknown>>;
+export declare const RemoteClusterAdd: ComponentType<React.PropsWithChildren<unknown>>;
+export declare const RemoteClusterList: ComponentType<React.PropsWithChildren<unknown>>;

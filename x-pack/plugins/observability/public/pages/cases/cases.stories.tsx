@@ -19,7 +19,7 @@ export default {
   title: 'app/Cases',
   component: CasesPage,
   decorators: [
-    (Story: ComponentType) => {
+    (Story: ComponentType<React.PropsWithChildren<unknown>>) => {
       const KibanaReactContext = createKibanaReactContext({
         application: {
           capabilities: { [casesFeatureId]: { read_cases: true } },

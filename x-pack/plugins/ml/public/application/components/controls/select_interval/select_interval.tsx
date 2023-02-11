@@ -70,7 +70,7 @@ export const useTableInterval = (): [TableInterval, (v: TableInterval) => void] 
 /*
  * React component for rendering a select element with various aggregation interval levels.
  */
-export const SelectInterval: FC = () => {
+export const SelectInterval: FC<React.PropsWithChildren<unknown>> = () => {
   const [interval, setInterval] = useTableInterval();
 
   return <SelectIntervalUI interval={interval} onChange={setInterval} />;
@@ -80,7 +80,7 @@ interface SelectIntervalUIProps {
   interval: TableInterval;
   onChange: (interval: TableInterval) => void;
 }
-export const SelectIntervalUI: FC<SelectIntervalUIProps> = ({ interval, onChange }) => {
+export const SelectIntervalUI: FC<React.PropsWithChildren<SelectIntervalUIProps>> = ({ interval, onChange }) => {
   const handleOnChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     onChange(optionValueToInterval(e.target.value));
   };

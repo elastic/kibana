@@ -30,7 +30,7 @@ import { ServiceNowActionConnector, ServiceNowConfig, ServiceNowSecrets } from '
 // eslint-disable-next-line import/no-default-export
 export { ServiceNowConnectorFields as default };
 
-const ServiceNowConnectorFields: React.FC<ActionConnectorFieldsProps> = ({
+const ServiceNowConnectorFields: React.FC<React.PropsWithChildren<ActionConnectorFieldsProps>> = ({
   readOnly,
   registerPreSubmitValidator,
   isEdit,

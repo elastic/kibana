@@ -91,7 +91,7 @@ export const usePollingAgentCount = (policyId: string, opts?: UsePollingAgentCou
   return agentIds;
 };
 
-export const ConfirmAgentEnrollment: React.FunctionComponent<Props> = ({
+export const ConfirmAgentEnrollment: React.FunctionComponent<React.PropsWithChildren<Props>> = ({
   policyId,
   troubleshootLink,
   onClickViewAgents,

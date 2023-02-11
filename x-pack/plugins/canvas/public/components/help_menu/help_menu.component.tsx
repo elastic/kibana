@@ -22,7 +22,7 @@ interface Props {
   hideHelpMenu: ChromeHelpMenuActions['hideHelpMenu'];
 }
 
-export const HelpMenu: FC<Props> = ({ hideHelpMenu, showKeyboardShortcutsDocFlyout }) => {
+export const HelpMenu: FC<React.PropsWithChildren<Props>> = ({ hideHelpMenu, showKeyboardShortcutsDocFlyout }) => {
   const onKeyboardShortcutButtonClick = useCallback(() => {
     hideHelpMenu();
     showKeyboardShortcutsDocFlyout();

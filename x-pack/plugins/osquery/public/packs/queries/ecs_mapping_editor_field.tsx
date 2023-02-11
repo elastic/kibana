@@ -150,7 +150,7 @@ interface ECSComboboxFieldProps {
   error?: string;
 }
 
-const ECSComboboxFieldComponent: React.FC<ECSComboboxFieldProps> = ({
+const ECSComboboxFieldComponent: React.FC<React.PropsWithChildren<ECSComboboxFieldProps>> = ({
   euiFieldProps = {},
   idAria,
   index,
@@ -362,7 +362,7 @@ interface OsqueryColumnFieldProps {
   isLastItem: boolean;
 }
 
-const OsqueryColumnFieldComponent: React.FC<OsqueryColumnFieldProps> = ({
+const OsqueryColumnFieldComponent: React.FC<React.PropsWithChildren<OsqueryColumnFieldProps>> = ({
   euiFieldProps,
   idAria,
   index,
@@ -627,7 +627,7 @@ export const defaultEcsFormData = {
   },
 };
 
-export const ECSMappingEditorForm: React.FC<ECSMappingEditorFormProps> = ({
+export const ECSMappingEditorForm: React.FC<React.PropsWithChildren<ECSMappingEditorFormProps>> = ({
   isDisabled,
   osquerySchemaOptions,
   isLastItem,

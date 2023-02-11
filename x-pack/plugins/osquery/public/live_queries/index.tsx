@@ -38,7 +38,7 @@ interface LiveQueryProps {
   agentSelection?: AgentSelection;
 }
 
-const LiveQueryComponent: React.FC<LiveQueryProps> = ({
+const LiveQueryComponent: React.FC<React.PropsWithChildren<LiveQueryProps>> = ({
   agentId,
   agentIds,
   alertIds,

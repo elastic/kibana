@@ -152,7 +152,7 @@ export interface Props {
   setAutoplayInterval: (interval: number) => void;
 }
 
-export const ViewMenu: FunctionComponent<Props> = ({
+export const ViewMenu: FunctionComponent<React.PropsWithChildren<Props>> = ({
   enterFullscreen,
   fitToWindow,
   isWriteable,

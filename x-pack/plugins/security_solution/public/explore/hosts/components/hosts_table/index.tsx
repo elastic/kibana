@@ -70,7 +70,7 @@ const getSorting = (sortField: HostsFields, direction: Direction): SortingBasicT
   direction,
 });
 
-const HostsTableComponent: React.FC<HostsTableProps> = ({
+const HostsTableComponent: React.FC<React.PropsWithChildren<HostsTableProps>> = ({
   data,
   fakeTotalCount,
   id,

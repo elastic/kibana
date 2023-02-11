@@ -56,7 +56,7 @@ interface Props {
   isLoading: boolean;
 }
 
-export const SnapshotTable: React.FunctionComponent<Props> = (props: Props) => {
+export const SnapshotTable: React.FunctionComponent<React.PropsWithChildren<Props>> = (props: Props) => {
   const {
     snapshots,
     repositories,

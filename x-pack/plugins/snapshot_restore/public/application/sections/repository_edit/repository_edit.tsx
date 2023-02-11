@@ -29,7 +29,7 @@ interface MatchParams {
   name: string;
 }
 
-export const RepositoryEdit: React.FunctionComponent<RouteComponentProps<MatchParams>> = ({
+export const RepositoryEdit: React.FunctionComponent<React.PropsWithChildren<RouteComponentProps<MatchParams>>> = ({
   history,
 }) => {
   const { i18n } = useServices();

@@ -51,7 +51,7 @@ interface Props {
   tlsRole: TLSRole;
 }
 
-export const TLSOptions: React.FunctionComponent<Props> = memo(
+export const TLSOptions: React.FunctionComponent<React.PropsWithChildren<Props>> = memo(
   ({ onChange, defaultValues = defaultConfig, tlsRole }) => {
     const [verificationVersionInputRef, setVerificationVersionInputRef] =
       useState<HTMLInputElement | null>(null);

@@ -13,7 +13,7 @@ import { getIndicesListPath } from '../../../services/navigation';
 import { useKibana } from '../../../../shared_imports';
 import { IndexTemplatesFlyout } from '../../../components/index_templates_flyout';
 
-export const EditWarning: FunctionComponent = () => {
+export const EditWarning: FunctionComponent<React.PropsWithChildren<unknown>> = () => {
   const { isNewPolicy, indices, indexTemplates, policyName, policy } = useEditPolicyContext();
   const {
     services: { getUrlForApp },

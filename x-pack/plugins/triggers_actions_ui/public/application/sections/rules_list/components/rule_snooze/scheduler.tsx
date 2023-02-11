@@ -55,7 +55,7 @@ const useDefaultTimzezone = () => {
   return kibanaTz;
 };
 
-export const RuleSnoozeScheduler: React.FunctionComponent<ComponentOpts> = ({
+export const RuleSnoozeScheduler: React.FunctionComponent<React.PropsWithChildren<ComponentOpts>> = ({
   onClose,
   initialSchedule,
   hasTitle = true,
@@ -92,7 +92,7 @@ export const RuleSnoozeScheduler: React.FunctionComponent<ComponentOpts> = ({
   );
 };
 
-const RuleSnoozeSchedulerPanel: React.FunctionComponent<PanelOpts> = ({
+const RuleSnoozeSchedulerPanel: React.FunctionComponent<React.PropsWithChildren<PanelOpts>> = ({
   onSaveSchedule,
   initialSchedule,
   isLoading,

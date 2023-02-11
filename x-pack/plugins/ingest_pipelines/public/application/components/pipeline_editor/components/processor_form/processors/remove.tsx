@@ -44,7 +44,7 @@ const fieldsConfig: FieldsConfig = {
   },
 };
 
-export const Remove: FunctionComponent = () => {
+export const Remove: FunctionComponent<React.PropsWithChildren<unknown>> = () => {
   return (
     <>
       <UseField config={fieldsConfig.field} component={ComboBoxField} path="fields.field" />

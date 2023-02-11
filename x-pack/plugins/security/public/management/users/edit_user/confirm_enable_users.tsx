@@ -22,7 +22,7 @@ export interface ConfirmEnableUsersProps {
   onSuccess?(): void;
 }
 
-export const ConfirmEnableUsers: FunctionComponent<ConfirmEnableUsersProps> = ({
+export const ConfirmEnableUsers: FunctionComponent<React.PropsWithChildren<ConfirmEnableUsersProps>> = ({
   usernames,
   onCancel,
   onSuccess,

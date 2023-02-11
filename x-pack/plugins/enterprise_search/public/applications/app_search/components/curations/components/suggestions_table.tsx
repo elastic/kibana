@@ -93,7 +93,7 @@ const columns: Array<EuiBasicTableColumn<CurationSuggestion>> = [
   },
 ];
 
-export const SuggestionsTable: React.FC = () => {
+export const SuggestionsTable: React.FC<React.PropsWithChildren<unknown>> = () => {
   const { loadSuggestions, onPaginate } = useActions(SuggestionsLogic);
   const { meta, suggestions, dataLoading } = useValues(SuggestionsLogic);
 

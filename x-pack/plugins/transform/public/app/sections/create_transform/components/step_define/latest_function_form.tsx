@@ -18,7 +18,7 @@ interface LatestFunctionFormProps {
   latestFunctionService: LatestFunctionService;
 }
 
-export const LatestFunctionForm: FC<LatestFunctionFormProps> = ({
+export const LatestFunctionForm: FC<React.PropsWithChildren<LatestFunctionFormProps>> = ({
   copyToClipboard,
   copyToClipboardDescription,
   latestFunctionService,

@@ -21,7 +21,7 @@ interface Props {
   isManaged?: boolean;
 }
 
-export const InstallationMessage: React.FunctionComponent<Props> = ({
+export const InstallationMessage: React.FunctionComponent<React.PropsWithChildren<Props>> = ({
   isK8s,
   isManaged = true,
 }) => {

@@ -21,7 +21,7 @@ interface Props {
   editorProps: { [key: string]: any };
 }
 
-export const TextEditor: FunctionComponent<Props> = ({ field, editorProps }) => {
+export const TextEditor: FunctionComponent<React.PropsWithChildren<Props>> = ({ field, editorProps }) => {
   const { value, helpText, setValue, label } = field;
   const { errorMessage } = getFieldValidityAndErrorMessage(field);
 

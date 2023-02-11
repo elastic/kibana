@@ -28,7 +28,7 @@ const indexNameExistsMessage = i18n.translate(
   }
 );
 
-export const DetailsStepForm: FC<CreateAnalyticsStepProps> = ({
+export const DetailsStepForm: FC<React.PropsWithChildren<CreateAnalyticsStepProps>> = ({
   actions,
   state,
   setCurrentStep,

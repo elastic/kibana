@@ -36,7 +36,7 @@ const COPY_TO_CLIPBOARD_RUNTIME_MAPPINGS = i18n.translate(
   }
 );
 
-export const AdvancedRuntimeMappingsSettings: FC<StepDefineFormHook> = (props) => {
+export const AdvancedRuntimeMappingsSettings: FC<React.PropsWithChildren<StepDefineFormHook>> = (props) => {
   const {
     actions: { applyRuntimeMappingsEditorChanges },
     state: {

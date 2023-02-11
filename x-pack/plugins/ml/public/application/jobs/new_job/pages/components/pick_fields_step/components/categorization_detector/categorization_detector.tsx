@@ -14,7 +14,7 @@ import { JobCreatorContext } from '../../../job_creator_context';
 import { CategorizationJobCreator } from '../../../../../common/job_creator';
 import { CountCard, RareCard } from './detector_cards';
 
-export const CategorizationDetector: FC = () => {
+export const CategorizationDetector: FC<React.PropsWithChildren<unknown>> = () => {
   const { jobCreator: jc, jobCreatorUpdate, jobCreatorUpdated } = useContext(JobCreatorContext);
   const jobCreator = jc as CategorizationJobCreator;
   const [categorizationDetectorType, setCategorizationDetectorType] = useState(

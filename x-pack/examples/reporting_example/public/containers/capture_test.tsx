@@ -30,7 +30,7 @@ import { ROUTES } from '../constants';
 
 import './capture_test.scss';
 
-const ItemsContainer: FunctionComponent<{ count: string }> = ({ count, children }) => (
+const ItemsContainer: FunctionComponent<React.PropsWithChildren<{ count: string }>> = ({ count, children }) => (
   <div
     className="reportingExample__captureContainer"
     data-shared-items-container
@@ -55,7 +55,7 @@ const tabs: Array<EuiTabbedContentTab & { id: MyForwardableState['captureTest'] 
   },
 ];
 
-export const CaptureTest: FunctionComponent = () => {
+export const CaptureTest: FunctionComponent<React.PropsWithChildren<unknown>> = () => {
   const { forwardedState } = useApplicationContext();
   const tabToRender = forwardedState?.captureTest;
   const history = useHistory();

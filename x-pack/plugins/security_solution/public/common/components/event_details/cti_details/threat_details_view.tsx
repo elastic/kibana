@@ -22,7 +22,7 @@ import { EnrichmentIcon } from './enrichment_icon';
 import { EnrichmentAccordionGroup } from './enrichment_accordion_group';
 import { EnrichmentNoData } from './enrichment_no_data';
 
-const EnrichmentSectionHeader: React.FC<{ type?: ENRICHMENT_TYPES }> = ({ type }) => {
+const EnrichmentSectionHeader: React.FC<React.PropsWithChildren<{ type?: ENRICHMENT_TYPES }>> = ({ type }) => {
   return type ? (
     <>
       <EuiFlexGroup direction="row" gutterSize="xs" alignItems="baseline">
@@ -44,13 +44,13 @@ const EnrichmentSectionHeader: React.FC<{ type?: ENRICHMENT_TYPES }> = ({ type }
   ) : null;
 };
 
-const EnrichmentSection: React.FC<{
+const EnrichmentSection: React.FC<React.PropsWithChildren<{
   enrichments: CtiEnrichment[];
   type?: ENRICHMENT_TYPES;
   loading?: boolean;
   dataTestSubj: string;
   children?: React.ReactNode;
-}> = ({ enrichments, type, loading, dataTestSubj, children }) => {
+}>> = ({ enrichments, type, loading, dataTestSubj, children }) => {
   return (
     <div data-test-subj={dataTestSubj}>
       <EnrichmentSectionHeader type={type} />
@@ -72,12 +72,12 @@ const EnrichmentSection: React.FC<{
   );
 };
 
-const ThreatDetailsViewComponent: React.FC<{
+const ThreatDetailsViewComponent: React.FC<React.PropsWithChildren<{
   enrichments: CtiEnrichment[];
   showInvestigationTimeEnrichments: boolean;
   loading: boolean;
   children?: React.ReactNode;
-}> = ({ enrichments, showInvestigationTimeEnrichments, loading, children }) => {
+}>> = ({ enrichments, showInvestigationTimeEnrichments, loading, children }) => {
   const {
     [ENRICHMENT_TYPES.IndicatorMatchRule]: indicatorMatches,
     [ENRICHMENT_TYPES.InvestigationTime]: threatIntelEnrichments,

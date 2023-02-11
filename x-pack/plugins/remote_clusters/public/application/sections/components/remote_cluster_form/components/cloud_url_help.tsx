@@ -10,7 +10,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiLink, EuiPopover, EuiPopoverTitle, EuiText } from '@elastic/eui';
 import { useAppContext } from '../../../../app_context';
 
-export const CloudUrlHelp: FunctionComponent = () => {
+export const CloudUrlHelp: FunctionComponent<React.PropsWithChildren<unknown>> = () => {
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const { cloudBaseUrl } = useAppContext();
   return (

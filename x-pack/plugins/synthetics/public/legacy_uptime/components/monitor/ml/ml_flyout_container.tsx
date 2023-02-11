@@ -76,7 +76,7 @@ const showMLJobNotification = (
   }
 };
 
-export const MachineLearningFlyout: React.FC<Props> = ({ onClose }) => {
+export const MachineLearningFlyout: React.FC<React.PropsWithChildren<Props>> = ({ onClose }) => {
   const core = useKibana();
   const dispatch = useDispatch();
   const { data: hasMLJob, error } = useSelector(hasNewMLJobSelector);

@@ -13,14 +13,14 @@ import { SetupStatus } from '../../../../../common/log_analysis';
 import { useKibanaContextForPlugin } from '../../../../hooks/use_kibana';
 import { CreateJobButton, RecreateJobButton } from '../create_job_button';
 
-export const LogAnalysisModuleListCard: React.FC<{
+export const LogAnalysisModuleListCard: React.FC<React.PropsWithChildren<{
   jobId: string;
   hasSetupCapabilities: boolean;
   moduleDescription: string;
   moduleName: string;
   moduleStatus: SetupStatus;
   onViewSetup: () => void;
-}> = ({
+}>> = ({
   jobId,
   hasSetupCapabilities,
   moduleDescription,

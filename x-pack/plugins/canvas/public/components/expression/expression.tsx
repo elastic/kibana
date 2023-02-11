@@ -89,7 +89,7 @@ interface Props {
   toggleCompactView: () => void;
 }
 
-export const Expression: FC<Props> = ({
+export const Expression: FC<React.PropsWithChildren<Props>> = ({
   functionDefinitions,
   formState,
   updateValue,

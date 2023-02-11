@@ -17,7 +17,7 @@ import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type { AnomalyChartsEmbeddableInput } from '../embeddables';
 
 export const initComponent = memoize(
-  (fieldFormats: FieldFormatsStart, EmbeddableComponent: FC<AnomalyChartsEmbeddableInput>) => {
+  (fieldFormats: FieldFormatsStart, EmbeddableComponent: FC<React.PropsWithChildren<AnomalyChartsEmbeddableInput>>) => {
     return React.memo(
       (props: PersistableStateAttachmentViewProps) => {
         const { persistableStateAttachmentState } = props;

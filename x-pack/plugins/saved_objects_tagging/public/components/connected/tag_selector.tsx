@@ -23,7 +23,7 @@ export const getConnectedTagSelectorComponent = ({
   cache,
   capabilities,
   openCreateModal,
-}: GetConnectedTagSelectorOptions): FC<TagSelectorComponentProps> => {
+}: GetConnectedTagSelectorOptions): FC<React.PropsWithChildren<TagSelectorComponentProps>> => {
   return (props: TagSelectorComponentProps) => {
     const tags = useObservable(cache.getState$(), cache.getState());
     return (

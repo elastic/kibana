@@ -22,7 +22,7 @@ interface Props extends Omit<EuiIconTipProps, 'type' | 'color'> {
   icon: IconType;
 }
 
-export const TooltipIcon: FC<Props> = ({ icon = IconType.info, ...rest }) => {
+export const TooltipIcon: FC<React.PropsWithChildren<Props>> = ({ icon = IconType.info, ...rest }) => {
   const icons = {
     [IconType.error]: { type: 'alert', color: 'danger' },
     [IconType.warning]: { type: 'alert', color: 'warning' },

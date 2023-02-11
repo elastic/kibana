@@ -23,7 +23,7 @@ export const INPUT_TIMEOUT = 250;
 /**
  * Manages the state of the field browser
  */
-export const FieldBrowserComponent: React.FC<FieldBrowserProps> = ({
+export const FieldBrowserComponent: React.FC<React.PropsWithChildren<FieldBrowserProps>> = ({
   columnIds,
   browserFields,
   onResetColumns,

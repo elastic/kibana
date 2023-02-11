@@ -74,7 +74,7 @@ interface Props {
   state: CreateAnalyticsFormProps['state'];
 }
 
-export const RuntimeMappings: FC<Props> = ({ actions, state }) => {
+export const RuntimeMappings: FC<React.PropsWithChildren<Props>> = ({ actions, state }) => {
   const [isRuntimeMappingsEditorEnabled, setIsRuntimeMappingsEditorEnabled] =
     useState<boolean>(false);
   const [isRuntimeMappingsEditorSwitchModalVisible, setRuntimeMappingsEditorSwitchModalVisible] =

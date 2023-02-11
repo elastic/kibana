@@ -47,7 +47,7 @@ interface ExceptionsViewerUtilityProps {
 /**
  * Utilities include exception item counts and group by options
  */
-const ExceptionsViewerUtilityComponent: React.FC<ExceptionsViewerUtilityProps> = ({
+const ExceptionsViewerUtilityComponent: React.FC<React.PropsWithChildren<ExceptionsViewerUtilityProps>> = ({
   pagination,
   lastUpdated,
   exceptionsToShow,

@@ -20,7 +20,7 @@ interface Props {
   label: string;
 }
 
-export const DownloadDiagnosticsButton: React.FC<Props> = ({ label }) => {
+export const DownloadDiagnosticsButton: React.FC<React.PropsWithChildren<Props>> = ({ label }) => {
   const { http } = useValues(HttpLogic);
   const { isOrganization } = useValues(AppLogic);
   const {

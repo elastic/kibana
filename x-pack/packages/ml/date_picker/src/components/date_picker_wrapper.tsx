@@ -98,7 +98,7 @@ interface DatePickerWrapperProps {
  * @param props - `DatePickerWrapper` component props
  * @returns {React.ReactElement} The DatePickerWrapper component.
  */
-export const DatePickerWrapper: FC<DatePickerWrapperProps> = (props) => {
+export const DatePickerWrapper: FC<React.PropsWithChildren<DatePickerWrapperProps>> = (props) => {
   const { isAutoRefreshOnly, isLoading = false, showRefresh, width, flexGroup = true } = props;
   const {
     data,

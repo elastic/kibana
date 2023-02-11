@@ -22,7 +22,7 @@ interface ConnectorFormFieldsProps {
   registerPreSubmitValidator: (validator: ConnectorValidationFunc) => void;
 }
 
-const ConnectorFormFieldsComponent: React.FC<ConnectorFormFieldsProps> = ({
+const ConnectorFormFieldsComponent: React.FC<React.PropsWithChildren<ConnectorFormFieldsProps>> = ({
   actionTypeModel,
   isEdit,
   registerPreSubmitValidator,

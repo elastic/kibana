@@ -36,7 +36,7 @@ const LeftColumn = styled(EuiFlexItem)`
   }
 `;
 
-const UnverifiedCallout: React.FC = () => {
+const UnverifiedCallout: React.FC<React.PropsWithChildren<unknown>> = () => {
   const { docLinks } = useStartServices();
 
   return (
@@ -70,11 +70,11 @@ const UnverifiedCallout: React.FC = () => {
   );
 };
 
-const PrereleaseCallout: React.FC<{
+const PrereleaseCallout: React.FC<React.PropsWithChildren<{
   packageName: string;
   latestGAVersion?: string;
   packageTitle: string;
-}> = ({ packageName, packageTitle, latestGAVersion }) => {
+}>> = ({ packageName, packageTitle, latestGAVersion }) => {
   const { getHref } = useLink();
   const overviewPathLatestGA = getHref('integration_details_overview', {
     pkgkey: `${packageName}-${latestGAVersion}`,
@@ -109,7 +109,7 @@ const PrereleaseCallout: React.FC<{
   );
 };
 
-export const OverviewPage: React.FC<Props> = memo(
+export const OverviewPage: React.FC<React.PropsWithChildren<Props>> = memo(
   ({ packageInfo, integrationInfo, latestGAVersion }) => {
     const screenshots = useMemo(
       () => integrationInfo?.screenshots || packageInfo.screenshots || [],

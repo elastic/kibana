@@ -1732,7 +1732,7 @@ JavaWithLongLines.args = {
   ],
 };
 JavaWithLongLines.decorators = [
-  (StoryComponent: ComponentType) => (
+  (StoryComponent: ComponentType<React.PropsWithChildren<unknown>>) => (
     <div style={{ border: '1px dotted #aaa', width: 768 }}>
       <StoryComponent />
     </div>

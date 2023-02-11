@@ -35,7 +35,7 @@ interface AddQueryFlyoutProps {
 
 const additionalZIndexStyle = { style: 'z-index: 6000' };
 
-const SavedQueryFlyoutComponent: React.FC<AddQueryFlyoutProps> = ({
+const SavedQueryFlyoutComponent: React.FC<React.PropsWithChildren<AddQueryFlyoutProps>> = ({
   defaultValue,
   onClose,
   isExternal,

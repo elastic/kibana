@@ -32,7 +32,7 @@ export interface SearchEnginesPopoverProps {
   isHiddenIndex?: boolean;
 }
 
-export const SearchEnginesPopover: React.FC<SearchEnginesPopoverProps> = ({
+export const SearchEnginesPopover: React.FC<React.PropsWithChildren<SearchEnginesPopoverProps>> = ({
   indexName,
   ingestionMethod,
   isHiddenIndex,

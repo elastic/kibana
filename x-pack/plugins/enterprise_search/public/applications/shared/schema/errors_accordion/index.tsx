@@ -39,7 +39,7 @@ interface Props {
   generateViewPath?(id: string): string;
 }
 
-export const SchemaErrorsAccordion: React.FC<Props> = ({
+export const SchemaErrorsAccordion: React.FC<React.PropsWithChildren<Props>> = ({
   fieldCoercionErrors,
   schema,
   generateViewPath,

@@ -29,7 +29,7 @@ interface ContentFieldsPanelProps {
   removeField: (id: string) => void;
 }
 
-export const ContentFieldsPanel: React.FC<ContentFieldsPanelProps> = ({
+export const ContentFieldsPanel: React.FC<React.PropsWithChildren<ContentFieldsPanelProps>> = ({
   contentFields,
   editNewField,
   editExistingField,

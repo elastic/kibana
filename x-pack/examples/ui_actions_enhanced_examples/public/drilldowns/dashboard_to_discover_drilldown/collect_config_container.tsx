@@ -15,7 +15,7 @@ export interface CollectConfigContainerProps extends CollectConfigProps {
   params: Params;
 }
 
-export const CollectConfigContainer: React.FC<CollectConfigContainerProps> = ({
+export const CollectConfigContainer: React.FC<React.PropsWithChildren<CollectConfigContainerProps>> = ({
   config,
   onConfig,
   params: { start },

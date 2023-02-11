@@ -29,7 +29,7 @@ interface Props {
 
 export type FeaturesOption = EuiComboBoxOptionOption<string>;
 
-export const IncludeGlobalStateField: FunctionComponent<Props> = ({ policy, onUpdate }) => {
+export const IncludeGlobalStateField: FunctionComponent<React.PropsWithChildren<Props>> = ({ policy, onUpdate }) => {
   const { config = {} } = policy;
 
   const onIncludeGlobalStateToggle = (event: EuiSwitchEvent) => {

@@ -27,7 +27,7 @@ interface Props {
   canCreateDataView: boolean;
 }
 
-export const SimpleSettings: FC<Props> = ({
+export const SimpleSettings: FC<React.PropsWithChildren<Props>> = ({
   index,
   initialized,
   onIndexChange,

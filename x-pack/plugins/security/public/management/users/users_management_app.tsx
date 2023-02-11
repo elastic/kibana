@@ -144,7 +144,7 @@ export interface ProvidersProps {
   onChange?: BreadcrumbsChangeHandler;
 }
 
-export const Providers: FunctionComponent<ProvidersProps> = ({
+export const Providers: FunctionComponent<React.PropsWithChildren<ProvidersProps>> = ({
   services,
   theme$,
   history,

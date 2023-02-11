@@ -44,7 +44,7 @@ interface AnomalyContextMenuProps {
   interval?: number;
   chartsCount: number;
 }
-export const AnomalyContextMenu: FC<AnomalyContextMenuProps> = ({
+export const AnomalyContextMenu: FC<React.PropsWithChildren<AnomalyContextMenuProps>> = ({
   selectedJobs,
   selectedCells,
   bounds,

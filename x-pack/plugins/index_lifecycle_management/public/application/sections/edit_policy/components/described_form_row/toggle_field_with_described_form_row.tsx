@@ -19,7 +19,7 @@ type Props = Omit<DescribedFormRowProps, 'switchProps'> & {
   switchProps: Omit<SwitchProps, 'label'> & { path: string };
 };
 
-export const ToggleFieldWithDescribedFormRow: FunctionComponent<Props> = ({
+export const ToggleFieldWithDescribedFormRow: FunctionComponent<React.PropsWithChildren<Props>> = ({
   switchProps,
   ...passThroughProps
 }) => (

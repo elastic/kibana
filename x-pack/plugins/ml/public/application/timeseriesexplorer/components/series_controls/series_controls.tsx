@@ -79,7 +79,7 @@ interface SeriesControlsProps {
 /**
  * Component for handling the detector and entities controls.
  */
-export const SeriesControls: FC<SeriesControlsProps> = ({
+export const SeriesControls: FC<React.PropsWithChildren<SeriesControlsProps>> = ({
   bounds,
   selectedDetectorIndex,
   selectedJobId,

@@ -30,7 +30,7 @@ interface Props {
   partitionedFieldMetadata: PartitionedFieldMetadata;
 }
 
-const EcsCompliantTabComponent: React.FC<Props> = ({
+const EcsCompliantTabComponent: React.FC<React.PropsWithChildren<Props>> = ({
   indexName,
   onAddToNewCase,
   partitionedFieldMetadata,

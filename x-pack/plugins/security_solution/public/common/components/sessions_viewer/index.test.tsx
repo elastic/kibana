@@ -73,7 +73,7 @@ jest.mock('../../hooks/use_license', () => {
 
 // creating a dummy component for testing data table to avoid mocking all the implementation details
 // but still test if the data table will render properly
-const SessionsViewerEventsViewer: React.FC<Props> = ({
+const SessionsViewerEventsViewer: React.FC<React.PropsWithChildren<Props>> = ({
   defaultModel,
   start,
   end,

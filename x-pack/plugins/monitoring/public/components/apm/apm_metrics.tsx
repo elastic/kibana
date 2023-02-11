@@ -42,7 +42,7 @@ interface Props {
       container: boolean;
     };
   };
-  StatusComponent: React.FC<{ stats: Stats }>;
+  StatusComponent: React.FC<React.PropsWithChildren<{ stats: Stats }>>;
 }
 
 const createCharts = (series: unknown[], props: Partial<Props>) => {

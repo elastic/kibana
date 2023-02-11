@@ -26,7 +26,7 @@ export interface SettingsPageProps {
   deleteFleetProxy: (proxy: FleetProxy) => void;
 }
 
-export const SettingsPage: React.FunctionComponent<SettingsPageProps> = ({
+export const SettingsPage: React.FunctionComponent<React.PropsWithChildren<SettingsPageProps>> = ({
   outputs,
   proxies,
   fleetServerHosts,

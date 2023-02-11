@@ -14,7 +14,7 @@ import { WorkpadConfig } from '../../workpad_config';
 // @ts-expect-error unconverted component
 import { SidebarSection } from '../sidebar_section';
 
-export const GeneralConfig: FC = () => {
+export const GeneralConfig: FC<React.PropsWithChildren<unknown>> = () => {
   return (
     <Fragment>
       <SidebarSection>

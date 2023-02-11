@@ -36,7 +36,7 @@ interface BulkEditFormWrapperProps {
   flyoutSize?: EuiFlyoutSize;
 }
 
-const BulkEditFormWrapperComponent: FC<BulkEditFormWrapperProps> = ({
+const BulkEditFormWrapperComponent: FC<React.PropsWithChildren<BulkEditFormWrapperProps>> = ({
   form,
   title,
   banner,

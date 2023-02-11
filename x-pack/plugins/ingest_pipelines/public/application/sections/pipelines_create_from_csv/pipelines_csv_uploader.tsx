@@ -37,7 +37,7 @@ function getOptions(actions: FieldCopyAction[]) {
   }));
 }
 
-export const PipelinesCsvUploader: FC<Props> = ({
+export const PipelinesCsvUploader: FC<React.PropsWithChildren<Props>> = ({
   actionOptions,
   onFilePickerChange,
   onFileUpload,

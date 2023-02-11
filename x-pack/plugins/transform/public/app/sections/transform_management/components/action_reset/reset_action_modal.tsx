@@ -12,7 +12,7 @@ import { ResetAction } from './use_reset_action';
 import { isManagedTransform } from '../../../../common/managed_transforms_utils';
 import { ManagedTransformsWarningCallout } from '../managed_transforms_callout/managed_transforms_callout';
 
-export const ResetActionModal: FC<ResetAction> = ({
+export const ResetActionModal: FC<React.PropsWithChildren<ResetAction>> = ({
   closeModal,
   resetAndCloseModal,
   items,

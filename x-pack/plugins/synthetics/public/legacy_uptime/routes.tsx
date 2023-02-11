@@ -63,7 +63,7 @@ import { ServiceAllowedWrapper } from './pages/monitor_management/service_allowe
 
 type RouteProps = LazyObservabilityPageTemplateProps & {
   path: string;
-  component: React.FC;
+  component: React.FC<React.PropsWithChildren<unknown>>;
   dataTestSubj: string;
   title: string;
   telemetryId: UptimePage;
@@ -277,7 +277,7 @@ const getRoutes = (): RouteProps[] => {
   ];
 };
 
-const RouteInit: React.FC<Pick<RouteProps, 'path' | 'title' | 'telemetryId'>> = ({
+const RouteInit: React.FC<React.PropsWithChildren<Pick<RouteProps, 'path' | 'title' | 'telemetryId'>>> = ({
   path,
   title,
   telemetryId,
@@ -289,7 +289,7 @@ const RouteInit: React.FC<Pick<RouteProps, 'path' | 'title' | 'telemetryId'>> = 
   return null;
 };
 
-export const PageRouter: FC = () => {
+export const PageRouter: FC<React.PropsWithChildren<unknown>> = () => {
   const routes = getRoutes();
   const { addInspectorRequest } = useInspectorContext();
 

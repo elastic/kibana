@@ -25,7 +25,7 @@ interface Props {
   onSuccess?(): void;
 }
 
-export const ConfirmDeleteModal: FunctionComponent<Props> = ({
+export const ConfirmDeleteModal: FunctionComponent<React.PropsWithChildren<Props>> = ({
   space,
   onSuccess,
   onCancel,

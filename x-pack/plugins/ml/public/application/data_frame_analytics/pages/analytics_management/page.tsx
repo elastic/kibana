@@ -36,7 +36,7 @@ export const getDefaultDFAListState = (): ListingPageUrlState => ({
   sortDirection: 'asc',
 });
 
-export const Page: FC = () => {
+export const Page: FC<React.PropsWithChildren<unknown>> = () => {
   const [blockRefresh, setBlockRefresh] = useState(false);
   const [globalState] = useUrlState('_g');
 

@@ -28,7 +28,7 @@ const NO_NAVIGATION = false;
 
 type RuleNavigationLoadingState = RuleNavigation | false | null;
 
-export const ViewInApp: React.FunctionComponent<ViewInAppProps> = ({ rule }) => {
+export const ViewInApp: React.FunctionComponent<React.PropsWithChildren<ViewInAppProps>> = ({ rule }) => {
   const {
     application: { navigateToApp },
     alerting: maybeAlerting,

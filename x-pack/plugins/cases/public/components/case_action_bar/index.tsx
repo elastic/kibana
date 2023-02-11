@@ -48,7 +48,7 @@ export interface CaseActionBarProps {
   isLoading: boolean;
   onUpdateField: (args: OnUpdateFields) => void;
 }
-const CaseActionBarComponent: React.FC<CaseActionBarProps> = ({
+const CaseActionBarComponent: React.FC<React.PropsWithChildren<CaseActionBarProps>> = ({
   caseData,
   isLoading,
   onUpdateField,

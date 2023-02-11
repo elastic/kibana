@@ -17,7 +17,7 @@ import { IndexNameLogic } from '../index_name_logic';
 import { InferencePipelineCard } from './inference_pipeline_card';
 import { PipelinesLogic } from './pipelines_logic';
 
-export const MlInferencePipelineProcessorsCard: React.FC = () => {
+export const MlInferencePipelineProcessorsCard: React.FC<React.PropsWithChildren<unknown>> = () => {
   const { indexName } = useValues(IndexNameLogic);
   const { mlInferencePipelineProcessors: inferencePipelines } = useValues(PipelinesLogic);
   const { fetchMlInferenceProcessors } = useActions(PipelinesLogic);

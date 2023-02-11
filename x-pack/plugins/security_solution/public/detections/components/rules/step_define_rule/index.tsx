@@ -124,7 +124,7 @@ const RuleTypeEuiFormRow = styled(EuiFormRow).attrs<{ $isVisible: boolean }>(({ 
   },
 }))<{ $isVisible: boolean }>``;
 
-const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
+const StepDefineRuleComponent: FC<React.PropsWithChildren<StepDefineRuleProps>> = ({
   addPadding = false,
   defaultValues: initialState,
   descriptionColumns = 'singleSplit',

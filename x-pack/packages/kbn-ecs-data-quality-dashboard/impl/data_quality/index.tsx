@@ -51,7 +51,7 @@ interface Props {
 }
 
 /** Renders the `Data Quality` dashboard content */
-const DataQualityPanelComponent: React.FC<Props> = ({
+const DataQualityPanelComponent: React.FC<React.PropsWithChildren<Props>> = ({
   addSuccessToast,
   canUserCreateAndReadCases,
   defaultNumberFormat,

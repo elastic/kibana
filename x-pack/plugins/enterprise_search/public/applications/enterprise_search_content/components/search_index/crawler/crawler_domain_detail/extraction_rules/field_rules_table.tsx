@@ -26,7 +26,7 @@ export interface FieldRulesTableProps {
   removeRule: (id: string) => void;
 }
 
-export const FieldRulesTable: React.FC<FieldRulesTableProps> = ({
+export const FieldRulesTable: React.FC<React.PropsWithChildren<FieldRulesTableProps>> = ({
   editRule,
   fieldRules,
   removeRule,

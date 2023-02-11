@@ -92,7 +92,7 @@ export function getAlertType(): RuleTypeModel {
   };
 }
 
-export const PeopleinSpaceExpression: React.FunctionComponent<PeopleinSpaceParamsProps> = ({
+export const PeopleinSpaceExpression: React.FunctionComponent<React.PropsWithChildren<PeopleinSpaceParamsProps>> = ({
   ruleParams,
   setRuleParams,
   errors,

@@ -22,7 +22,7 @@ jest.mock('../../../../common/hooks/use_selector', () => ({
 }));
 
 describe('useGroupTakeActionsItems', () => {
-  const wrapperContainer: React.FC<{ children?: React.ReactNode }> = ({ children }) => (
+  const wrapperContainer: React.FC<React.PropsWithChildren<{ children?: React.ReactNode }>> = ({ children }) => (
     <TestProviders>{children}</TestProviders>
   );
   it('returns array take actions items available for alerts table if showAlertStatusActions is true', async () => {

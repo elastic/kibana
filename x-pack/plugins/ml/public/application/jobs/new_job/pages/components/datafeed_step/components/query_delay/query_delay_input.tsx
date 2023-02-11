@@ -12,7 +12,7 @@ import { Description } from './description';
 import { useStringifiedValue } from '../hooks';
 import { DEFAULT_QUERY_DELAY } from '../../../../../../../../../common/constants/new_job';
 
-export const QueryDelayInput: FC = () => {
+export const QueryDelayInput: FC<React.PropsWithChildren<unknown>> = () => {
   const { jobCreator, jobCreatorUpdate, jobValidator, jobValidatorUpdated } =
     useContext(JobCreatorContext);
   const [validation, setValidation] = useState(jobValidator.queryDelay);

@@ -81,10 +81,10 @@ export class UrlDrilldown implements Drilldown<Config, ActionContext, ActionFact
 
   public readonly getDisplayName = () => txtUrlDrilldownDisplayName;
 
-  public readonly actionMenuItem: React.FC<{
+  public readonly actionMenuItem: React.FC<React.PropsWithChildren<{
     config: Omit<SerializedAction<UrlDrilldownConfig>, 'factoryId'>;
     context: ActionContext | ActionExecutionContext<ActionContext>;
-  }> = ({ config, context }) => {
+  }>> = ({ config, context }) => {
     const [title, setTitle] = React.useState(config.name);
     React.useEffect(() => {
       let unmounted = false;
@@ -113,7 +113,7 @@ export class UrlDrilldown implements Drilldown<Config, ActionContext, ActionFact
       IMAGE_CLICK_TRIGGER,
     ];
   }
-  public readonly CollectConfig: React.FC<CollectConfigProps> = ({ config, onConfig, context }) => {
+  public readonly CollectConfig: React.FC<React.PropsWithChildren<CollectConfigProps>> = ({ config, onConfig, context }) => {
     const [variables, exampleUrl] = React.useMemo(
       () => [this.getVariableList(context), this.getExampleUrl(context)],
       [context]

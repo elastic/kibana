@@ -22,7 +22,7 @@ interface Props {
   xJsonMode: XJsonModeType;
 }
 
-export const RuntimeMappingsEditor: FC<Props> = memo(
+export const RuntimeMappingsEditor: FC<React.PropsWithChildren<Props>> = memo(
   ({
     convertToJson,
     xJsonMode,

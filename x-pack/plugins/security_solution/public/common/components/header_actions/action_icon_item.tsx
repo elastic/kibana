@@ -23,7 +23,7 @@ interface ActionIconItemProps {
   buttonType?: 'text' | 'icon';
 }
 
-const ActionIconItemComponent: React.FC<ActionIconItemProps> = ({
+const ActionIconItemComponent: React.FC<React.PropsWithChildren<ActionIconItemProps>> = ({
   width = DEFAULT_ACTION_BUTTON_WIDTH,
   dataTestSubj,
   content,

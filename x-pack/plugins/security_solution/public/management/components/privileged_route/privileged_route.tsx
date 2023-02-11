@@ -15,7 +15,7 @@ import { MANAGEMENT_ROUTING_RESPONSE_ACTIONS_HISTORY_PATH } from '../../common/c
 
 export interface PrivilegedRouteProps {
   path: string;
-  component: ComponentType<{}>;
+  component: ComponentType<React.PropsWithChildren<{}>>;
   hasPrivilege: boolean;
 }
 

@@ -42,7 +42,7 @@ interface Props {
   onSubmit: (title: string) => void;
 }
 
-const EditableTitleComponent: React.FC<Props> = ({
+const EditableTitleComponent: React.FC<React.PropsWithChildren<Props>> = ({
   disabled = false,
   onSubmit,
   isLoading,

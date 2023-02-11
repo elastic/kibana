@@ -24,7 +24,7 @@ import type { ReindexState } from '../use_reindex_state';
 import { StepProgress, StepProgressStep } from './step_progress';
 import { getReindexProgressLabel } from '../../../../../lib/utils';
 
-const ErrorCallout: React.FunctionComponent<{ errorMessage: string | null }> = ({
+const ErrorCallout: React.FunctionComponent<React.PropsWithChildren<{ errorMessage: string | null }>> = ({
   errorMessage,
 }) => (
   <EuiCallOut color="danger" title="There was an error">
@@ -41,10 +41,10 @@ const PausedCallout = () => (
   />
 );
 
-const ReindexingDocumentsStepTitle: React.FunctionComponent<{
+const ReindexingDocumentsStepTitle: React.FunctionComponent<React.PropsWithChildren<{
   reindexState: ReindexState;
   cancelReindex: () => void;
-}> = ({ reindexState: { lastCompletedStep, status, cancelLoadingState }, cancelReindex }) => {
+}>> = ({ reindexState: { lastCompletedStep, status, cancelLoadingState }, cancelReindex }) => {
   if (status === ReindexStatus.cancelled) {
     return (
       <>
@@ -252,7 +252,7 @@ interface Props {
  * Displays a list of steps in the reindex operation, the current status, a progress bar,
  * and any error messages that are encountered.
  */
-export const ReindexProgress: React.FunctionComponent<Props> = (props) => {
+export const ReindexProgress: React.FunctionComponent<React.PropsWithChildren<Props>> = (props) => {
   const {
     errorMessage,
     lastCompletedStep = -1,

@@ -22,9 +22,9 @@ const StyledEuiColorPaletteDisplay = styled(EuiColorPaletteDisplay)`
   }
 `;
 
-export const AgentStatusBar: React.FC<{
+export const AgentStatusBar: React.FC<React.PropsWithChildren<{
   agentStatus: { [k in SimplifiedAgentStatus]: number };
-}> = ({ agentStatus }) => {
+}>> = ({ agentStatus }) => {
   const palette = useMemo(() => {
     return AGENT_STATUSES.reduce((acc, status) => {
       const previousStop = acc.length > 0 ? acc[acc.length - 1].stop : 0;

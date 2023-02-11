@@ -16,7 +16,7 @@ interface Props {
   setIsValid: (proceed: boolean) => void;
 }
 
-export const GeoSettings: FC<Props> = ({ setIsValid }) => {
+export const GeoSettings: FC<React.PropsWithChildren<Props>> = ({ setIsValid }) => {
   return (
     <>
       <EuiFlexGroup gutterSize="xl">

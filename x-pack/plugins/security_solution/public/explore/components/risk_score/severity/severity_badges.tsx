@@ -11,9 +11,9 @@ import type { RiskSeverity } from '../../../../../common/search_strategy';
 import { RiskScore, RISK_SEVERITY_COLOUR } from './common';
 import type { SeverityCount } from './types';
 
-export const SeverityBadges: React.FC<{
+export const SeverityBadges: React.FC<React.PropsWithChildren<{
   severityCount: SeverityCount;
-}> = React.memo(({ severityCount }) => (
+}>> = React.memo(({ severityCount }) => (
   <EuiFlexGroup
     justifyContent="spaceBetween"
     gutterSize="m"
@@ -34,7 +34,7 @@ export const SeverityBadges: React.FC<{
 
 SeverityBadges.displayName = 'SeverityBadges';
 
-const SeverityBadge: React.FC<{ status: RiskSeverity; count: number }> = React.memo(
+const SeverityBadge: React.FC<React.PropsWithChildren<{ status: RiskSeverity; count: number }>> = React.memo(
   ({ status, count }) => (
     <EuiFlexGroup alignItems="center" gutterSize="s">
       <EuiFlexItem grow={false}>

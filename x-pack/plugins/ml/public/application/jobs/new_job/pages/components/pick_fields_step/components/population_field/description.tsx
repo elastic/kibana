@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiDescribedFormGroup } from '@elastic/eui';
 
-export const Description: FC = memo(({ children }) => {
+export const Description: FC<React.PropsWithChildren<unknown>> = memo(({ children }) => {
   const title = i18n.translate('xpack.ml.newJob.wizard.pickFieldsStep.populationField.title', {
     defaultMessage: 'Population field',
   });

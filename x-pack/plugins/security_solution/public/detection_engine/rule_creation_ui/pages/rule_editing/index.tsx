@@ -81,7 +81,7 @@ import { useGetSavedQuery } from '../../../../detections/pages/detection_engine/
 
 const formHookNoop = async (): Promise<undefined> => undefined;
 
-const EditRulePageComponent: FC = () => {
+const EditRulePageComponent: FC<React.PropsWithChildren<unknown>> = () => {
   const [, dispatchToaster] = useStateToaster();
   const [
     {

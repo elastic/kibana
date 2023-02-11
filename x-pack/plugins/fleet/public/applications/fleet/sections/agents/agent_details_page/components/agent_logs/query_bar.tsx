@@ -23,11 +23,11 @@ import {
 
 const EXCLUDED_FIELDS = [AGENT_ID_FIELD.name, DATASET_FIELD.name, LOG_LEVEL_FIELD.name];
 
-export const LogQueryBar: React.FunctionComponent<{
+export const LogQueryBar: React.FunctionComponent<React.PropsWithChildren<{
   query: string;
   isQueryValid: boolean;
   onUpdateQuery: (query: string, runQuery?: boolean) => void;
-}> = memo(({ query, isQueryValid, onUpdateQuery }) => {
+}>> = memo(({ query, isQueryValid, onUpdateQuery }) => {
   const { data, notifications, http, docLinks, uiSettings, unifiedSearch, storage, dataViews } =
     useStartServices();
   const [indexPatternFields, setIndexPatternFields] = useState<FieldSpec[]>();

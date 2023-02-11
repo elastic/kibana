@@ -27,7 +27,7 @@ interface Props extends CreateAnalyticsFormProps {
   step: ANALYTICS_STEPS;
 }
 
-export const CreateStep: FC<Props> = ({ actions, state, step }) => {
+export const CreateStep: FC<React.PropsWithChildren<Props>> = ({ actions, state, step }) => {
   const {
     services: {
       application: { capabilities },

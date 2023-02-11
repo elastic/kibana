@@ -151,7 +151,7 @@ const getUsersColumns = (
   return columns;
 };
 
-const UsersTableComponent: React.FC<UsersTableProps> = ({
+const UsersTableComponent: React.FC<React.PropsWithChildren<UsersTableProps>> = ({
   users,
   totalCount,
   type,

@@ -33,7 +33,7 @@ export interface CustomAssetsAccordionProps {
   initialIsOpen?: boolean;
 }
 
-export const CustomAssetsAccordion: FunctionComponent<CustomAssetsAccordionProps> = ({
+export const CustomAssetsAccordion: FunctionComponent<React.PropsWithChildren<CustomAssetsAccordionProps>> = ({
   views,
   initialIsOpen = false,
 }) => {

@@ -56,7 +56,7 @@ export const globalFields: Record<keyof GlobalFields, { path: string; config?: F
     },
   };
 
-export const GlobalFieldsProvider: FunctionComponent = ({ children }) => {
+export const GlobalFieldsProvider: FunctionComponent<React.PropsWithChildren<unknown>> = ({ children }) => {
   return (
     <UseMultiFields<GlobalFieldsTypes> fields={globalFields}>
       {(fields) => {

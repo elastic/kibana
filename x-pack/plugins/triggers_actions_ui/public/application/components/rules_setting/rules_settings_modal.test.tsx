@@ -63,7 +63,7 @@ const modalProps: RulesSettingsModalProps = {
   onSave: jest.fn(),
 };
 
-const RulesSettingsModalWithProviders: React.FunctionComponent<RulesSettingsModalProps> = (
+const RulesSettingsModalWithProviders: React.FunctionComponent<React.PropsWithChildren<RulesSettingsModalProps>> = (
   props
 ) => (
   <IntlProvider locale="en">

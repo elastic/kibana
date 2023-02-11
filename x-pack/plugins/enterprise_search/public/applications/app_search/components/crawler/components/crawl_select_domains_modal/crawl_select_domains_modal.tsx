@@ -33,7 +33,7 @@ import { SimplifiedSelectable } from './simplified_selectable';
 
 import './crawl_select_domains_modal.scss';
 
-export const CrawlSelectDomainsModal: React.FC = () => {
+export const CrawlSelectDomainsModal: React.FC<React.PropsWithChildren<unknown>> = () => {
   const { domains } = useValues(CrawlerLogic);
   const domainUrls = domains.map((domain) => domain.url);
 

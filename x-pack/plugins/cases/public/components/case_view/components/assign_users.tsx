@@ -36,7 +36,7 @@ interface AssigneesListProps {
   onAssigneeRemoved: (removedAssigneeUID: string) => void;
 }
 
-const AssigneesList: React.FC<AssigneesListProps> = ({
+const AssigneesList: React.FC<React.PropsWithChildren<AssigneesListProps>> = ({
   assignees,
   currentUserProfile,
   permissions,
@@ -94,7 +94,7 @@ export interface AssignUsersProps {
   isLoading: boolean;
 }
 
-const AssignUsersComponent: React.FC<AssignUsersProps> = ({
+const AssignUsersComponent: React.FC<React.PropsWithChildren<AssignUsersProps>> = ({
   caseAssignees,
   userProfiles,
   currentUserProfile,

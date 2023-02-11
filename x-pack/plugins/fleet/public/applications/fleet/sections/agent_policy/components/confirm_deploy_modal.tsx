@@ -12,12 +12,12 @@ import { i18n } from '@kbn/i18n';
 
 import type { AgentPolicy } from '../../../types';
 
-export const ConfirmDeployAgentPolicyModal: React.FunctionComponent<{
+export const ConfirmDeployAgentPolicyModal: React.FunctionComponent<React.PropsWithChildren<{
   onConfirm: () => void;
   onCancel: () => void;
   agentCount: number;
   agentPolicy: AgentPolicy;
-}> = ({ onConfirm, onCancel, agentCount, agentPolicy }) => {
+}>> = ({ onConfirm, onCancel, agentCount, agentPolicy }) => {
   return (
     <EuiConfirmModal
       title={

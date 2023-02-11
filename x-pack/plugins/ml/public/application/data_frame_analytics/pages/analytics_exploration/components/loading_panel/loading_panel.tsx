@@ -8,7 +8,7 @@
 import React, { FC } from 'react';
 import { EuiLoadingSpinner, EuiPanel, EuiSpacer } from '@elastic/eui';
 
-export const LoadingPanel: FC = () => (
+export const LoadingPanel: FC<React.PropsWithChildren<unknown>> = () => (
   <>
     <EuiPanel className="eui-textCenter">
       <EuiLoadingSpinner size="xl" />

@@ -15,7 +15,7 @@ import { SearchIndexRouter } from '../search_index/search_index_router';
 
 import { SearchIndices } from './search_indices';
 
-export const SearchIndicesRouter: React.FC = () => {
+export const SearchIndicesRouter: React.FC<React.PropsWithChildren<unknown>> = () => {
   return (
     <Switch>
       <Route exact path={NEW_INDEX_PATH}>

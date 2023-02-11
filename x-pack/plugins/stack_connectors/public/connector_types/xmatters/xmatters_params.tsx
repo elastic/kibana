@@ -58,7 +58,7 @@ const severityOptions = [
   },
 ];
 
-const XmattersParamsFields: React.FunctionComponent<ActionParamsProps<XmattersActionParams>> = ({
+const XmattersParamsFields: React.FunctionComponent<React.PropsWithChildren<ActionParamsProps<XmattersActionParams>>> = ({
   actionParams,
   editAction,
   index,

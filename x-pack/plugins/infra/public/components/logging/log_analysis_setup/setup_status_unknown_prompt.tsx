@@ -15,7 +15,7 @@ interface Props {
   retry: () => void;
 }
 
-export const LogAnalysisSetupStatusUnknownPrompt: React.FunctionComponent<Props> = ({
+export const LogAnalysisSetupStatusUnknownPrompt: React.FunctionComponent<React.PropsWithChildren<Props>> = ({
   retry,
 }: Props) => (
   <EmptyPrompt

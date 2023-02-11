@@ -23,7 +23,7 @@ interface Props {
   [key: string]: any;
 }
 
-export const InlineLoading: React.FunctionComponent<Props> = ({ children, ...rest }) => {
+export const InlineLoading: React.FunctionComponent<React.PropsWithChildren<Props>> = ({ children, ...rest }) => {
   return (
     <EuiFlexGroup justifyContent="flexStart" alignItems="center" gutterSize="s">
       <EuiFlexItem grow={false}>
@@ -38,7 +38,7 @@ export const InlineLoading: React.FunctionComponent<Props> = ({ children, ...res
   );
 };
 
-export const SectionLoading: React.FunctionComponent<Props> = ({ children }) => {
+export const SectionLoading: React.FunctionComponent<React.PropsWithChildren<Props>> = ({ children }) => {
   return (
     <EuiEmptyPrompt
       title={<EuiLoadingSpinner size="xl" />}
@@ -53,7 +53,7 @@ export const SectionLoading: React.FunctionComponent<Props> = ({ children }) => 
  * For tabbed sections, or within the context of a wizard,
  * the <SectionLoading/> component may be more appropriate
  */
-export const PageLoading: React.FunctionComponent<Props> = ({ children }) => {
+export const PageLoading: React.FunctionComponent<React.PropsWithChildren<Props>> = ({ children }) => {
   return (
     <EuiPageContent verticalPosition="center" horizontalPosition="center" color="subdued">
       <EuiEmptyPrompt

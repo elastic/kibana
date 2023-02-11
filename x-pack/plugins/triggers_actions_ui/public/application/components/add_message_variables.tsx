@@ -27,7 +27,7 @@ interface Props {
   showButtonTitle?: boolean;
 }
 
-export const AddMessageVariables: React.FunctionComponent<Props> = ({
+export const AddMessageVariables: React.FunctionComponent<React.PropsWithChildren<Props>> = ({
   buttonTitle,
   messageVariables,
   paramsProperty,

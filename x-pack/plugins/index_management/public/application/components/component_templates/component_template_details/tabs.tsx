@@ -48,7 +48,7 @@ const TABS: Tab[] = [
   },
 ];
 
-export const ComponentTemplateTabs: React.FunctionComponent<Props> = ({
+export const ComponentTemplateTabs: React.FunctionComponent<React.PropsWithChildren<Props>> = ({
   setActiveTab,
   activeTab,
 }) => {

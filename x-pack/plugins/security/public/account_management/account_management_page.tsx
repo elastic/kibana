@@ -19,7 +19,7 @@ import { useCurrentUser, useUserProfile } from '../components';
 import { Breadcrumb } from '../components/breadcrumb';
 import { UserProfile } from './user_profile';
 
-export const AccountManagementPage: FunctionComponent = () => {
+export const AccountManagementPage: FunctionComponent<React.PropsWithChildren<unknown>> = () => {
   const { services } = useKibana<CoreStart>();
 
   const currentUser = useCurrentUser();

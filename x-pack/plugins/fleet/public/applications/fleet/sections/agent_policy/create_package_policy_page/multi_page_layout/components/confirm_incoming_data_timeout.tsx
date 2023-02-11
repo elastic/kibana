@@ -22,7 +22,7 @@ interface Props {
   packageInfo?: PackageInfo;
 }
 
-export const ConfirmIncomingDataTimeout: React.FunctionComponent<Props> = ({
+export const ConfirmIncomingDataTimeout: React.FunctionComponent<React.PropsWithChildren<Props>> = ({
   agentIds,
   troubleshootLink,
   packageInfo,

@@ -31,7 +31,7 @@ interface NewSavedQueryFormProps {
   handleSubmit: (payload: unknown) => Promise<void>;
 }
 
-const NewSavedQueryFormComponent: React.FC<NewSavedQueryFormProps> = ({
+const NewSavedQueryFormComponent: React.FC<React.PropsWithChildren<NewSavedQueryFormProps>> = ({
   defaultValue,
   handleSubmit,
 }) => {

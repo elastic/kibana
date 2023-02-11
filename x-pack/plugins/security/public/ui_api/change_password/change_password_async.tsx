@@ -14,7 +14,7 @@ import type { ChangePasswordProps } from './change_password';
 
 export const getChangePasswordComponent = async (
   core: CoreStart
-): Promise<React.FC<ChangePasswordProps>> => {
+): Promise<React.FC<React.PropsWithChildren<ChangePasswordProps>>> => {
   const { ChangePassword } = await import('./change_password');
 
   return (props: ChangePasswordProps) => {

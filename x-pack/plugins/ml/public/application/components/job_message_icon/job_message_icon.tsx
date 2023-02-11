@@ -17,7 +17,7 @@ interface Props {
 
 const [INFO, WARNING, ERROR] = ['info', 'warning', 'error'];
 
-export const JobIcon: FC<Props> = ({ message, showTooltip = false }) => {
+export const JobIcon: FC<React.PropsWithChildren<Props>> = ({ message, showTooltip = false }) => {
   if (message === undefined) {
     return <span />;
   }

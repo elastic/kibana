@@ -12,7 +12,7 @@ export interface Props {
   title: React.ReactNode;
 }
 
-export const Section: React.FC<Props> = ({ title, children }) => {
+export const Section: React.FC<React.PropsWithChildren<Props>> = ({ title, children }) => {
   return (
     <section>
       <EuiTitle size="m">

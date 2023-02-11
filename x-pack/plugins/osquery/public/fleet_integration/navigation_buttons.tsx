@@ -17,7 +17,7 @@ interface NavigationButtonsProps {
   agentPolicyId?: string | undefined;
 }
 
-const NavigationButtonsComponent: React.FC<NavigationButtonsProps> = ({
+const NavigationButtonsComponent: React.FC<React.PropsWithChildren<NavigationButtonsProps>> = ({
   isDisabled = false,
   agentPolicyId,
 }) => {

@@ -17,7 +17,7 @@ import {
 } from '../../../../common/constants/cloud';
 import { isTrialLicense } from '../../license/check_license';
 
-export const NodeAvailableWarning: FC = () => {
+export const NodeAvailableWarning: FC<React.PropsWithChildren<unknown>> = () => {
   if (mlNodesAvailable() === true || permissionToViewMlNodeCount() === false) {
     return null;
   }

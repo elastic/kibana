@@ -52,7 +52,7 @@ import './data_grid.scss';
 // TODO Fix row hovering + bar highlighting
 // import { hoveredRow$ } from './column_chart';
 
-export const DataGridTitle: FC<{ title: string }> = ({ title }) => (
+export const DataGridTitle: FC<React.PropsWithChildren<{ title: string }>> = ({ title }) => (
   <EuiTitle size="xs">
     <span>{title}</span>
   </EuiTitle>
@@ -78,7 +78,7 @@ function isWithHeader(arg: any): arg is PropsWithHeader {
 
 type Props = PropsWithHeader | PropsWithoutHeader;
 
-export const DataGrid: FC<Props> = memo(
+export const DataGrid: FC<React.PropsWithChildren<Props>> = memo(
   (props) => {
     const {
       baseline,

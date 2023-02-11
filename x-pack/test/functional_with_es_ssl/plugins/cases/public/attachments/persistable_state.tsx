@@ -14,7 +14,7 @@ import {
 import { EuiButtonIcon } from '@elastic/eui';
 import { EmbeddableComponentProps, TypedLensByValueInput } from '@kbn/lens-plugin/public';
 
-const AttachmentActions: React.FC = () => {
+const AttachmentActions: React.FC<React.PropsWithChildren<unknown>> = () => {
   return (
     <EuiButtonIcon
       data-test-subj="test-attachment-action"
@@ -26,8 +26,8 @@ const AttachmentActions: React.FC = () => {
 };
 
 const getLazyComponent = (
-  EmbeddableComponent: React.ComponentType<EmbeddableComponentProps>
-): React.LazyExoticComponent<React.FC<PersistableStateAttachmentViewProps>> =>
+  EmbeddableComponent: React.ComponentType<React.PropsWithChildren<EmbeddableComponentProps>>
+): React.LazyExoticComponent<React.FC<React.PropsWithChildren<PersistableStateAttachmentViewProps>>> =>
   React.lazy(() => {
     return Promise.resolve().then(() => {
       return {
@@ -53,7 +53,7 @@ const getLazyComponent = (
   });
 
 export const getPersistableStateAttachmentRegular = (
-  EmbeddableComponent: React.ComponentType<EmbeddableComponentProps>
+  EmbeddableComponent: React.ComponentType<React.PropsWithChildren<EmbeddableComponentProps>>
 ): PersistableStateAttachmentType => ({
   id: '.test',
   icon: 'casesApp',

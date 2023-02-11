@@ -25,7 +25,7 @@ interface Props {
   navigateToApp: ApplicationStart['navigateToApp'];
 }
 
-export const SpacesDescription: FC<Props> = (props: Props) => {
+export const SpacesDescription: FC<React.PropsWithChildren<Props>> = (props: Props) => {
   const panelProps = {
     id: props.id,
     className: 'spcDescription',

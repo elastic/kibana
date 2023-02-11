@@ -43,7 +43,7 @@ const sorting = {
 export const isModifiedOrPrevented = (event: React.MouseEvent) =>
   event.metaKey || event.altKey || event.ctrlKey || event.shiftKey || event.defaultPrevented;
 
-export const TagTable: FC<TagTableProps> = ({
+export const TagTable: FC<React.PropsWithChildren<TagTableProps>> = ({
   loading,
   capabilities,
   tags,

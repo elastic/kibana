@@ -18,7 +18,7 @@ interface Props extends TotalFieldsCountProps, MetricFieldsCountProps {
   showEmptyFields: boolean;
   toggleShowEmptyFields: () => void;
 }
-export const FieldCountPanel: FC<Props> = ({
+export const FieldCountPanel: FC<React.PropsWithChildren<Props>> = ({
   metricsStats,
   fieldsCountStats,
   showEmptyFields,

@@ -16,7 +16,7 @@ interface Props {
   message?: string;
 }
 
-export const DeprecationsPageLoadingError: FunctionComponent<Props> = ({
+export const DeprecationsPageLoadingError: FunctionComponent<React.PropsWithChildren<Props>> = ({
   deprecationSource,
   message,
 }) => (

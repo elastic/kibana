@@ -13,7 +13,7 @@ import { EuiCodeBlock, EuiLink, EuiText, EuiSpacer } from '@elastic/eui';
 
 import { docLinks } from '../../../../shared/doc_links';
 
-export const ElasticsearchRust: React.FC = () => {
+export const ElasticsearchRust: React.FC<React.PropsWithChildren<unknown>> = () => {
   return (
     <>
       <EuiText>

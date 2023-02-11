@@ -56,7 +56,7 @@ const getRoutingKeyConfig = (docLinks: DocLinksStart): FieldConfig => ({
   ],
 });
 
-const PagerDutyActionConnectorFields: React.FunctionComponent<ActionConnectorFieldsProps> = ({
+const PagerDutyActionConnectorFields: React.FunctionComponent<React.PropsWithChildren<ActionConnectorFieldsProps>> = ({
   readOnly,
   isEdit,
 }) => {

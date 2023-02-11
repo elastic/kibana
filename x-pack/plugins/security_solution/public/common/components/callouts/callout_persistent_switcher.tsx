@@ -16,7 +16,7 @@ export interface CallOutPersistentSwitcherProps {
   message: CallOutMessage;
 }
 
-const CallOutPersistentSwitcherComponent: FC<CallOutPersistentSwitcherProps> = ({
+const CallOutPersistentSwitcherComponent: FC<React.PropsWithChildren<CallOutPersistentSwitcherProps>> = ({
   condition,
   message,
 }): JSX.Element | null =>

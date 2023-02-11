@@ -56,7 +56,7 @@ import { SourceLayout } from './source_layout';
 
 const MAX_LENGTH = 28;
 
-export const SourceContent: React.FC = () => {
+export const SourceContent: React.FC<React.PropsWithChildren<unknown>> = () => {
   const [searchTerm, setSearchTerm] = useState('');
 
   const { setActivePage, searchContentSourceDocuments, setContentFilterValue } =

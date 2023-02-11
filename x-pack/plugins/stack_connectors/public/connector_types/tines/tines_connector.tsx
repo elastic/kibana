@@ -35,7 +35,7 @@ const secretsFormSchema: SecretsFieldSchema[] = [
   },
 ];
 
-const TinesActionConnectorFields: React.FunctionComponent<ActionConnectorFieldsProps> = ({
+const TinesActionConnectorFields: React.FunctionComponent<React.PropsWithChildren<ActionConnectorFieldsProps>> = ({
   readOnly,
   isEdit,
 }) => (

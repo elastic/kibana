@@ -21,7 +21,7 @@ interface Props {
   onClose: () => void;
 }
 
-export const QuickStartTab: React.FunctionComponent<Props> = ({ onClose }) => {
+export const QuickStartTab: React.FunctionComponent<React.PropsWithChildren<Props>> = ({ onClose }) => {
   const {
     fleetServerHost,
     setFleetServerHost,

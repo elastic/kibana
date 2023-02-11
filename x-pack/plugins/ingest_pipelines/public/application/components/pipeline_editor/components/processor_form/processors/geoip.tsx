@@ -55,7 +55,7 @@ const fieldsConfig: FieldsConfig = {
   },
 };
 
-export const GeoIP: FunctionComponent = () => {
+export const GeoIP: FunctionComponent<React.PropsWithChildren<unknown>> = () => {
   return (
     <>
       <FieldNameField

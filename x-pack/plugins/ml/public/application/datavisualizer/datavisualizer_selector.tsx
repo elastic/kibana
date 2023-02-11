@@ -47,7 +47,7 @@ function startTrialDescription() {
   );
 }
 
-export const DatavisualizerSelector: FC = () => {
+export const DatavisualizerSelector: FC<React.PropsWithChildren<unknown>> = () => {
   useTimefilter({ timeRangeSelector: false, autoRefreshSelector: false });
   const {
     services: {

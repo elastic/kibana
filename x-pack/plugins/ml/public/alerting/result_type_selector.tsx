@@ -17,7 +17,7 @@ export interface ResultTypeSelectorProps {
   onChange: (value: AnomalyResultType) => void;
 }
 
-export const ResultTypeSelector: FC<ResultTypeSelectorProps> = React.memo(
+export const ResultTypeSelector: FC<React.PropsWithChildren<ResultTypeSelectorProps>> = React.memo(
   ({ value: selectedResultType = [], onChange, availableOption }) => {
     const resultTypeOptions = useMemo(() => {
       return [

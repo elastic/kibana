@@ -50,7 +50,7 @@ const rowItems: ItemsPerRow[] = [
   },
 ];
 
-const NetworkDnsTableComponent: React.FC<NetworkDnsTableProps> = ({
+const NetworkDnsTableComponent: React.FC<React.PropsWithChildren<NetworkDnsTableProps>> = ({
   data,
   fakeTotalCount,
   id,

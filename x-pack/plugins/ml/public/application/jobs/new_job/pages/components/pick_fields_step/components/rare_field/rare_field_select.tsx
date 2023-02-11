@@ -24,7 +24,7 @@ interface Props {
   placeholder?: string;
 }
 
-export const RareFieldSelect: FC<Props> = ({
+export const RareFieldSelect: FC<React.PropsWithChildren<Props>> = ({
   fields,
   changeHandler,
   selectedField,

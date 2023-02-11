@@ -29,7 +29,7 @@ import { useGetMappedNonEcsValue } from '.';
  * is typically called in a `useEffect`, as illustrated by `EuiDataGrid`'s code sandbox example:
  * https://codesandbox.io/s/zhxmo
  */
-const RenderCellValue: React.FC<CellValueElementProps> = ({ columnId, data, setCellProps }) => {
+const RenderCellValue: React.FC<React.PropsWithChildren<CellValueElementProps>> = ({ columnId, data, setCellProps }) => {
   const value = useGetMappedNonEcsValue({
     data,
     fieldName: columnId,

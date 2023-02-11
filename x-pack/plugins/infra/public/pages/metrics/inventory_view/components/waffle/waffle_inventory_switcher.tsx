@@ -19,7 +19,7 @@ const getDisplayNameForType = (type: InventoryItemType) => {
   return inventoryModel.displayName;
 };
 
-export const WaffleInventorySwitcher: React.FC = () => {
+export const WaffleInventorySwitcher: React.FC<React.PropsWithChildren<unknown>> = () => {
   const {
     changeNodeType,
     changeGroupBy,

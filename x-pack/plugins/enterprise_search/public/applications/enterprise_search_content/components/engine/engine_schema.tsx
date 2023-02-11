@@ -20,7 +20,7 @@ import { EngineIndicesLogic } from './engine_indices_logic';
 
 import { EngineViewLogic } from './engine_view_logic';
 
-export const EngineSchema: React.FC = () => {
+export const EngineSchema: React.FC<React.PropsWithChildren<unknown>> = () => {
   const { engineName } = useValues(EngineIndicesLogic);
   const { isLoadingEngineSchema, schemaFields } = useValues(EngineViewLogic);
   const { fetchEngineSchema } = useActions(EngineViewLogic);

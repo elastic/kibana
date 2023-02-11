@@ -8,7 +8,7 @@
 import React from 'react';
 import { EuiLink, EuiText } from '@elastic/eui';
 
-export const Link: React.FC<{ path?: string; copy: string }> = ({ path, copy }) =>
+export const Link: React.FC<React.PropsWithChildren<{ path?: string; copy: string }>> = ({ path, copy }) =>
   path ? (
     <EuiLink href={path} target="_blank" data-test-subj="panel-link">
       {copy}

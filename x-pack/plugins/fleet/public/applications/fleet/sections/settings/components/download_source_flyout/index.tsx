@@ -37,7 +37,7 @@ export interface EditDownloadSourceFlyoutProps {
   onClose: () => void;
 }
 
-export const EditDownloadSourceFlyout: React.FunctionComponent<EditDownloadSourceFlyoutProps> = ({
+export const EditDownloadSourceFlyout: React.FunctionComponent<React.PropsWithChildren<EditDownloadSourceFlyoutProps>> = ({
   onClose,
   downloadSource,
 }) => {

@@ -26,7 +26,7 @@ import { MetaEngineSchemaLogic } from '../schema_meta_engine_logic';
 
 import { TruncatedEnginesList } from '.';
 
-export const MetaEnginesConflictsTable: React.FC = () => {
+export const MetaEnginesConflictsTable: React.FC<React.PropsWithChildren<unknown>> = () => {
   const { conflictingFields } = useValues(MetaEngineSchemaLogic);
 
   return (

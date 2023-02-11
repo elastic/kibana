@@ -53,7 +53,7 @@ interface Props {
   handleUsernameSelectChange(username: string): void;
 }
 
-export const UserSelector: React.FC<Props> = ({
+export const UserSelector: React.FC<React.PropsWithChildren<Props>> = ({
   isNewUser,
   smtpSettingsPresent,
   userFormUserIsExisting,

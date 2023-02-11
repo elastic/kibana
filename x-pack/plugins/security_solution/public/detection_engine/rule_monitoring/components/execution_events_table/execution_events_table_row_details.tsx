@@ -16,7 +16,7 @@ interface ExecutionEventsTableRowDetailsProps {
   item: RuleExecutionEvent;
 }
 
-const ExecutionEventsTableRowDetailsComponent: React.FC<ExecutionEventsTableRowDetailsProps> = ({
+const ExecutionEventsTableRowDetailsComponent: React.FC<React.PropsWithChildren<ExecutionEventsTableRowDetailsProps>> = ({
   item,
 }) => {
   return (

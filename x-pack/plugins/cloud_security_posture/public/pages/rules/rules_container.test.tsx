@@ -35,7 +35,7 @@ const queryClient = new QueryClient({
 });
 
 const getWrapper =
-  ({ canUpdate = true }: { canUpdate: boolean } = { canUpdate: true }): React.FC =>
+  ({ canUpdate = true }: { canUpdate: boolean } = { canUpdate: true }): React.FC<React.PropsWithChildren<unknown>> =>
   ({ children }) => {
     const coreStart = coreMock.createStart();
     const core = {

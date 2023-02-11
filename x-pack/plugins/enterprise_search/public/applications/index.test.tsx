@@ -58,7 +58,7 @@ describe('renderApp', () => {
    * Helper for automatically mounting and unmounting future tests
    */
   let unmount: any;
-  const mount = (App: React.FC) => {
+  const mount = (App: React.FC<React.PropsWithChildren<unknown>>) => {
     unmount = renderApp(App, kibanaDeps, pluginData);
   };
 

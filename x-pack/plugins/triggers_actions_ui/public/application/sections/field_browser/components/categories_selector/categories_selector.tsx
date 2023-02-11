@@ -71,7 +71,7 @@ const renderOption = (option: CategoryOption, searchValue: string) => {
   );
 };
 
-const CategoriesSelectorComponent: React.FC<CategoriesSelectorProps> = ({
+const CategoriesSelectorComponent: React.FC<React.PropsWithChildren<CategoriesSelectorProps>> = ({
   filteredBrowserFields,
   setSelectedCategoryIds,
   selectedCategoryIds,

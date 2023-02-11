@@ -11,7 +11,7 @@ import { ExternalReferenceAttachmentType } from '@kbn/cases-plugin/public/client
 
 const AttachmentContentLazy = lazy(() => import('./external_references_content'));
 
-const AttachmentActions: React.FC = () => {
+const AttachmentActions: React.FC<React.PropsWithChildren<unknown>> = () => {
   return (
     <EuiButtonIcon
       data-test-subj="test-attachment-action"

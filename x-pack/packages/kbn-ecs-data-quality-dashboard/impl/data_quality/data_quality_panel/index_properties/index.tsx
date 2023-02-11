@@ -73,7 +73,7 @@ interface Props {
   updatePatternRollup: (patternRollup: PatternRollup) => void;
 }
 
-const IndexPropertiesComponent: React.FC<Props> = ({
+const IndexPropertiesComponent: React.FC<React.PropsWithChildren<Props>> = ({
   addSuccessToast,
   canUserCreateAndReadCases,
   defaultNumberFormat,

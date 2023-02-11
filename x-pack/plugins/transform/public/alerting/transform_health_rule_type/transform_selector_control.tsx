@@ -23,7 +23,7 @@ function convertToEuiOptions(values: string[]) {
   return values.map((v) => ({ value: v, label: v }));
 }
 
-export const TransformSelectorControl: FC<TransformSelectorControlProps> = ({
+export const TransformSelectorControl: FC<React.PropsWithChildren<TransformSelectorControlProps>> = ({
   label,
   errors,
   onChange,

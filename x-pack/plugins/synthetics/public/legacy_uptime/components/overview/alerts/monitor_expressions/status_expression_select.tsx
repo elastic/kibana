@@ -17,7 +17,7 @@ interface Props {
   setRuleParams: (key: string, value: any) => void;
 }
 
-export const StatusExpressionSelect: React.FC<Props> = ({
+export const StatusExpressionSelect: React.FC<React.PropsWithChildren<Props>> = ({
   ruleParams,
   hasFilters,
   setRuleParams,

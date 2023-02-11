@@ -25,7 +25,7 @@ interface Props extends StepProps {
   setAdditionalExpanded: (a: boolean) => void;
 }
 
-export const JobDetailsStep: FC<Props> = ({
+export const JobDetailsStep: FC<React.PropsWithChildren<Props>> = ({
   setCurrentStep,
   isCurrentStep,
   advancedExpanded,

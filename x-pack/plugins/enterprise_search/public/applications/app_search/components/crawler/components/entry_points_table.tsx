@@ -28,7 +28,7 @@ interface EntryPointsTableProps {
   items: EntryPoint[];
 }
 
-export const EntryPointsTable: React.FC<EntryPointsTableProps> = ({
+export const EntryPointsTable: React.FC<React.PropsWithChildren<EntryPointsTableProps>> = ({
   domain,
   engineName,
   items,

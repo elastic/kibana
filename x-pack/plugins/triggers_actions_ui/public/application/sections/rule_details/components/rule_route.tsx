@@ -25,7 +25,7 @@ type WithRuleSummaryProps = {
   refreshToken?: number;
 } & Pick<RuleApis, 'loadRuleSummary'>;
 
-export const RuleRoute: React.FunctionComponent<WithRuleSummaryProps> = ({
+export const RuleRoute: React.FunctionComponent<React.PropsWithChildren<WithRuleSummaryProps>> = ({
   rule,
   ruleType,
   readOnly,

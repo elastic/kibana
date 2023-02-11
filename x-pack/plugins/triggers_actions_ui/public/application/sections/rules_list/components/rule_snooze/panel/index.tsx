@@ -25,7 +25,7 @@ type SnoozePanelProps = Pick<
   | 'showAddSchedule'
 >;
 
-export const SnoozePanel: React.FC<SnoozePanelProps> = ({
+export const SnoozePanel: React.FC<React.PropsWithChildren<SnoozePanelProps>> = ({
   interval,
   snoozeRule,
   unsnoozeRule,

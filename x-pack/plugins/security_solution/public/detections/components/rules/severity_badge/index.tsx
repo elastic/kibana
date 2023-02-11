@@ -24,7 +24,7 @@ interface Props {
   value: Severity;
 }
 
-const SeverityBadgeComponent: React.FC<Props> = ({ value }) => {
+const SeverityBadgeComponent: React.FC<React.PropsWithChildren<Props>> = ({ value }) => {
   const displayValue = upperFirst(value);
   const color = severityToColorMap[value] ?? 'subdued';
 

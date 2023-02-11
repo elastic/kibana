@@ -30,7 +30,7 @@ interface Props {
   repository: Repository;
 }
 
-export const TypeDetails: React.FunctionComponent<Props> = ({ repository }) => {
+export const TypeDetails: React.FunctionComponent<React.PropsWithChildren<Props>> = ({ repository }) => {
   const { type, settings } = repository;
   switch (type) {
     case REPOSITORY_TYPES.fs:

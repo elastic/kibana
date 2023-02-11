@@ -10,7 +10,7 @@ import { RenderArgData } from '../../expression_types/types';
 
 type FunctionFormComponentProps = RenderArgData;
 
-export const FunctionFormComponent: FunctionComponent<FunctionFormComponentProps> = (props) => {
+export const FunctionFormComponent: FunctionComponent<React.PropsWithChildren<FunctionFormComponentProps>> = (props) => {
   const passedProps = {
     name: props.name,
     removable: props.removable,

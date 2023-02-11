@@ -25,7 +25,7 @@ interface CodeEditorFieldProps {
   helpText?: string;
 }
 
-const CodeEditorFieldComponent: React.FC<CodeEditorFieldProps> = ({
+const CodeEditorFieldComponent: React.FC<React.PropsWithChildren<CodeEditorFieldProps>> = ({
   euiFieldProps,
   labelAppend,
   helpText,

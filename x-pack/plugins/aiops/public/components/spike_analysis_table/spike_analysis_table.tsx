@@ -55,7 +55,7 @@ interface SpikeAnalysisTableProps {
   isExpandedRow?: boolean;
 }
 
-export const SpikeAnalysisTable: FC<SpikeAnalysisTableProps> = ({
+export const SpikeAnalysisTable: FC<React.PropsWithChildren<SpikeAnalysisTableProps>> = ({
   changePoints,
   dataViewId,
   loading,

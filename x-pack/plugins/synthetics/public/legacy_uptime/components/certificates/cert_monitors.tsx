@@ -14,7 +14,7 @@ interface Props {
   monitors: CertMonitor[];
 }
 
-export const CertMonitors: React.FC<Props> = ({ monitors }) => {
+export const CertMonitors: React.FC<React.PropsWithChildren<Props>> = ({ monitors }) => {
   return (
     <span>
       {monitors.map((mon: CertMonitor, ind: number) => (

@@ -20,12 +20,12 @@ export interface ConsoleRegistrationInterface<TMeta extends object = any> {
   meta?: TMeta;
 
   /** An optional component used to render the Overlay page title where the console will be displayed */
-  PageTitleComponent?: ComponentType<ManagedConsoleExtensionComponentProps<TMeta>>;
+  PageTitleComponent?: ComponentType<React.PropsWithChildren<ManagedConsoleExtensionComponentProps<TMeta>>>;
 
   /**
    * An optional component that will be rendered in the Responder page overlay, above the Console area
    */
-  PageBodyComponent?: ComponentType<ManagedConsoleExtensionComponentProps<TMeta>>;
+  PageBodyComponent?: ComponentType<React.PropsWithChildren<ManagedConsoleExtensionComponentProps<TMeta>>>;
 
   /**
    * An array of Action components (likely buttons) that will be rendered into the Responder page
@@ -34,7 +34,7 @@ export interface ConsoleRegistrationInterface<TMeta extends object = any> {
    * NOTE: this is an Array of `Component`'s - not `JSX`. These will be initialized/rendered when
    * the Responder page overlay is shown.
    */
-  ActionComponents?: Array<ComponentType<ManagedConsoleExtensionComponentProps<TMeta>>>;
+  ActionComponents?: Array<ComponentType<React.PropsWithChildren<ManagedConsoleExtensionComponentProps<TMeta>>>>;
 
   /** controls the visibility of the console close button */
   showCloseButton?: boolean;

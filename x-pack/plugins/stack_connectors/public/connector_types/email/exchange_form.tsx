@@ -20,7 +20,7 @@ interface ExchangeFormFieldsProps {
   readOnly: boolean;
 }
 
-const ExchangeFormFields: React.FC<ExchangeFormFieldsProps> = ({ readOnly }) => {
+const ExchangeFormFields: React.FC<React.PropsWithChildren<ExchangeFormFieldsProps>> = ({ readOnly }) => {
   const { docLinks } = useKibana().services;
 
   return (

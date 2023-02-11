@@ -30,7 +30,7 @@ import { docLinks } from '../../../shared/doc_links';
 import { DocumentsLogic } from './documents_logic';
 import { IndexNameLogic } from './index_name_logic';
 
-export const SearchIndexIndexMappings: React.FC = () => {
+export const SearchIndexIndexMappings: React.FC<React.PropsWithChildren<unknown>> = () => {
   const { indexName } = useValues(IndexNameLogic);
   const { makeMappingRequest } = useActions(DocumentsLogic);
   const { mappingData } = useValues(DocumentsLogic);

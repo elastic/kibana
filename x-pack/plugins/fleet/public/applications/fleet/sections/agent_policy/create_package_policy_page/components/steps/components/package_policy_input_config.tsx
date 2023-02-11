@@ -22,7 +22,7 @@ import { isAdvancedVar, validationHasErrors } from '../../../services';
 
 import { PackagePolicyInputVarField } from './package_policy_input_var_field';
 
-export const PackagePolicyInputConfig: React.FunctionComponent<{
+export const PackagePolicyInputConfig: React.FunctionComponent<React.PropsWithChildren<{
   hasInputStreams: boolean;
   packageInputVars?: RegistryVarsEntry[];
   packagePolicyInput: NewPackagePolicyInput;
@@ -30,7 +30,7 @@ export const PackagePolicyInputConfig: React.FunctionComponent<{
   inputVarsValidationResults: PackagePolicyConfigValidationResults;
   forceShowErrors?: boolean;
   isEditPage?: boolean;
-}> = memo(
+}>> = memo(
   ({
     hasInputStreams,
     packageInputVars,

@@ -12,12 +12,10 @@ import type { HoverableUserWithAvatarProps } from './hoverable_user_with_avatar'
 import { HoverableUserWithAvatar } from './hoverable_user_with_avatar';
 import { convertToUserInfo } from './user_converter';
 
-const HoverableUserWithAvatarResolverComponent: React.FC<
-  {
-    user: ElasticUser;
-    userProfiles?: Map<string, UserProfileWithAvatar>;
-  } & Pick<HoverableUserWithAvatarProps, 'boldName'>
-> = ({ user, userProfiles, boldName = true }) => {
+const HoverableUserWithAvatarResolverComponent: React.FC<React.PropsWithChildren<{
+  user: ElasticUser;
+  userProfiles?: Map<string, UserProfileWithAvatar>;
+} & Pick<HoverableUserWithAvatarProps, 'boldName'>>> = ({ user, userProfiles, boldName = true }) => {
   const { userInfo } = convertToUserInfo(user, userProfiles) ?? { userInfo: undefined };
 
   return <HoverableUserWithAvatar userInfo={userInfo} boldName={boldName} />;

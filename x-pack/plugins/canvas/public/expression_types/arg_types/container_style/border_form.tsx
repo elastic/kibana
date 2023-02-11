@@ -38,7 +38,7 @@ interface Props {
   colors: string[];
 }
 
-export const BorderForm: FunctionComponent<Props> = ({
+export const BorderForm: FunctionComponent<React.PropsWithChildren<Props>> = ({
   value = '',
   radius = '',
   onChange,

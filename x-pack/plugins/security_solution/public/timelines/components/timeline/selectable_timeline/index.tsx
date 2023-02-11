@@ -82,7 +82,7 @@ export interface SelectableTimelineProps {
   placeholder?: string;
 }
 
-const SelectableTimelineComponent: React.FC<SelectableTimelineProps> = ({
+const SelectableTimelineComponent: React.FC<React.PropsWithChildren<SelectableTimelineProps>> = ({
   hideUntitled = false,
   getSelectableOptions,
   onClosePopover,

@@ -24,7 +24,7 @@ import { BASE_PATH, Section } from '../../constants';
 import { breadcrumbService, docTitleService } from '../../services/navigation';
 import { addRepository } from '../../services/http';
 
-export const RepositoryAdd: React.FunctionComponent<RouteComponentProps> = ({
+export const RepositoryAdd: React.FunctionComponent<React.PropsWithChildren<RouteComponentProps>> = ({
   history,
   location: { search },
 }) => {

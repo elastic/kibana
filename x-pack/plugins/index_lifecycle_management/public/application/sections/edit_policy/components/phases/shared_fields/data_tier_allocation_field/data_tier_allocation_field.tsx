@@ -44,7 +44,7 @@ interface Props {
 /**
  * Top-level layout control for the data tier allocation field.
  */
-export const DataTierAllocationField: FunctionComponent<Props> = ({ phase, description }) => {
+export const DataTierAllocationField: FunctionComponent<React.PropsWithChildren<Props>> = ({ phase, description }) => {
   const {
     services: { cloud },
   } = useKibana();

@@ -36,7 +36,7 @@ interface Props {
   setValue(indexPermissionsValue: boolean): void;
 }
 
-export const DocumentPermissionsField: React.FC<Props> = ({
+export const DocumentPermissionsField: React.FC<React.PropsWithChildren<Props>> = ({
   needsPermissions,
   indexPermissionsValue,
   setValue,

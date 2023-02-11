@@ -15,7 +15,7 @@ interface Props {
   action: RecordedAction | null;
 }
 
-export const StateChange: FC<Props> = ({ action }) => {
+export const StateChange: FC<React.PropsWithChildren<Props>> = ({ action }) => {
   if (!action) {
     return null;
   }

@@ -49,9 +49,7 @@ const additionalInformation = JSON.stringify({
   date: '{{date}}',
 });
 
-const ServiceNowITOMParamsFields: React.FunctionComponent<
-  ActionParamsProps<ServiceNowITOMActionParams>
-> = ({ actionConnector, actionParams, editAction, index, messageVariables, errors }) => {
+const ServiceNowITOMParamsFields: React.FunctionComponent<React.PropsWithChildren<ActionParamsProps<ServiceNowITOMActionParams>>> = ({ actionConnector, actionParams, editAction, index, messageVariables, errors }) => {
   const params = useMemo(
     () => (actionParams.subActionParams ?? {}) as ServiceNowITOMActionParams['subActionParams'],
     [actionParams.subActionParams]

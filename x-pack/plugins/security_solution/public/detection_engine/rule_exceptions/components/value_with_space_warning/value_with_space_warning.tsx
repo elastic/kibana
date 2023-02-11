@@ -19,7 +19,7 @@ const Container = styled.div`
   display: inline;
   margin-left: ${({ theme }) => `${theme.eui.euiSizeXS}`};
 `;
-export const ValueWithSpaceWarning: FC<ValueWithSpaceWarningProps> = ({
+export const ValueWithSpaceWarning: FC<React.PropsWithChildren<ValueWithSpaceWarningProps>> = ({
   value,
   tooltipIconType = 'iInCircle',
   tooltipIconText,

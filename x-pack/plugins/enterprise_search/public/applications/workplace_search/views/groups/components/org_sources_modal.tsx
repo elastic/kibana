@@ -25,7 +25,7 @@ const MODAL_LABEL = i18n.translate(
   }
 );
 
-export const OrgSourcesModal: React.FC = () => {
+export const OrgSourcesModal: React.FC<React.PropsWithChildren<unknown>> = () => {
   const {
     addGroupSource,
     selectAllSources,

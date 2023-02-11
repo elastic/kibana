@@ -27,7 +27,7 @@ const scatterSeriesStyle = {
   },
 };
 
-export const Scatter: FC<Props> = ({ chartData }) => {
+export const Scatter: FC<React.PropsWithChildren<Props>> = ({ chartData }) => {
   const { LINE_COLOR } = useChartColors();
   return (
     <LineSeries

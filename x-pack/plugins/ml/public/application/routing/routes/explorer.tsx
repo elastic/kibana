@@ -69,7 +69,7 @@ export const explorerRouteFactory = (
   'data-test-subj': 'mlPageAnomalyExplorer',
 });
 
-const PageWrapper: FC<PageProps> = ({ deps }) => {
+const PageWrapper: FC<React.PropsWithChildren<PageProps>> = ({ deps }) => {
   const { context, results } = useResolver(
     undefined,
     undefined,
@@ -99,7 +99,7 @@ interface ExplorerUrlStateManagerProps {
   jobsWithTimeRange: MlJobWithTimeRange[];
 }
 
-const ExplorerUrlStateManager: FC<ExplorerUrlStateManagerProps> = ({ jobsWithTimeRange }) => {
+const ExplorerUrlStateManager: FC<React.PropsWithChildren<ExplorerUrlStateManagerProps>> = ({ jobsWithTimeRange }) => {
   const {
     services: { cases },
   } = useMlKibana();

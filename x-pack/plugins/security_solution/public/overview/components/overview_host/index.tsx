@@ -35,7 +35,7 @@ export interface OwnProps {
 const OverviewHostStatsManage = manageQuery(OverviewHostStats);
 export type OverviewHostProps = OwnProps;
 
-const OverviewHostComponent: React.FC<OverviewHostProps> = ({
+const OverviewHostComponent: React.FC<React.PropsWithChildren<OverviewHostProps>> = ({
   endDate,
   filterQuery,
   indexNames,

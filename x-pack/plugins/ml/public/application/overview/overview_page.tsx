@@ -23,7 +23,7 @@ import { MlPageHeader } from '../components/page_header';
 import { PageTitle } from '../components/page_title';
 import { useIsServerless } from '../contexts/kibana/use_is_serverless';
 
-export const OverviewPage: FC = () => {
+export const OverviewPage: FC<React.PropsWithChildren<unknown>> = () => {
   const serverless = useIsServerless();
   const canViewMlNodes = checkPermission('canViewMlNodes');
 

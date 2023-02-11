@@ -33,7 +33,7 @@ interface Props {
   value?: string;
 }
 
-export const ColorPalette: FC<Props> = ({
+export const ColorPalette: FC<React.PropsWithChildren<Props>> = ({
   colors = [],
   colorsPerRow = 6,
   onChange,

@@ -14,7 +14,7 @@ interface SolutionFilterProps {
   onChange?: (selectedSolutions: string[]) => void;
 }
 
-export const SolutionFilter: React.FunctionComponent<SolutionFilterProps> = ({
+export const SolutionFilter: React.FunctionComponent<React.PropsWithChildren<SolutionFilterProps>> = ({
   solutions,
   onChange,
 }: SolutionFilterProps) => {

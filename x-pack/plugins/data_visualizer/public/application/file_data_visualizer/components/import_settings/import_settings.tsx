@@ -37,7 +37,7 @@ interface Props {
   results: FindFileStructureResponse;
 }
 
-export const ImportSettings: FC<Props> = ({
+export const ImportSettings: FC<React.PropsWithChildren<Props>> = ({
   index,
   dataView,
   initialized,

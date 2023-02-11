@@ -35,10 +35,10 @@ const FlexItemWithMinWidth = styled(EuiFlexItem)`
   min-width: 0px;
 `;
 
-export const AgentDetailsOverviewSection: React.FunctionComponent<{
+export const AgentDetailsOverviewSection: React.FunctionComponent<React.PropsWithChildren<{
   agent: Agent;
   agentPolicy?: AgentPolicy;
-}> = memo(({ agent, agentPolicy }) => {
+}>> = memo(({ agent, agentPolicy }) => {
   const kibanaVersion = useKibanaVersion();
   const { displayAgentMetrics } = ExperimentalFeaturesService.get();
 

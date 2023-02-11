@@ -46,7 +46,7 @@ interface Props {
   phase: PhaseWithTiming;
 }
 
-export const MinAgeField: FunctionComponent<Props> = ({ phase }): React.ReactElement => {
+export const MinAgeField: FunctionComponent<React.PropsWithChildren<Props>> = ({ phase }): React.ReactElement => {
   const minAgeValuePath = `phases.${phase}.min_age`;
   const minAgeUnitPath = `_meta.${phase}.minAgeUnit`;
 

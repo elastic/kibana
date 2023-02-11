@@ -15,10 +15,10 @@ import {
 } from '../../services/agent_status';
 import type { SimplifiedAgentStatus } from '../../../../types';
 
-export const AgentStatusBadges: React.FC<{
+export const AgentStatusBadges: React.FC<React.PropsWithChildren<{
   showInactive?: boolean;
   agentStatus: { [k in SimplifiedAgentStatus]: number };
-}> = memo(({ agentStatus, showInactive }) => {
+}>> = memo(({ agentStatus, showInactive }) => {
   const agentStatuses = useMemo(() => {
     return AGENT_STATUSES.filter((status) =>
       showInactive ? true : status !== 'inactive' && status !== 'unenrolled'
@@ -36,7 +36,7 @@ export const AgentStatusBadges: React.FC<{
   );
 });
 
-const AgentStatusBadge: React.FC<{ status: SimplifiedAgentStatus; count: number }> = memo(
+const AgentStatusBadge: React.FC<React.PropsWithChildren<{ status: SimplifiedAgentStatus; count: number }>> = memo(
   ({ status, count }) => {
     return (
       <>

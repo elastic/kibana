@@ -104,7 +104,7 @@ interface ExplorerQueryBarProps {
   updateLanguage: (language: string) => void;
 }
 
-export const ExplorerQueryBar: FC<ExplorerQueryBarProps> = ({
+export const ExplorerQueryBar: FC<React.PropsWithChildren<ExplorerQueryBarProps>> = ({
   filterActive,
   filterPlaceHolder,
   indexPattern,

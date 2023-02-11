@@ -14,7 +14,7 @@ interface Props {
   setIsValid: (proceed: boolean) => void;
 }
 
-export const CategorizationSettings: FC<Props> = ({ setIsValid }) => {
+export const CategorizationSettings: FC<React.PropsWithChildren<Props>> = ({ setIsValid }) => {
   return (
     <>
       <EuiFlexGroup gutterSize="xl">

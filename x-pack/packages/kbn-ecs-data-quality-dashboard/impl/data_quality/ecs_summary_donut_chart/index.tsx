@@ -86,7 +86,7 @@ interface Props {
   theme: Theme;
 }
 
-const EcsSummaryDonutChartComponent: React.FC<Props> = ({
+const EcsSummaryDonutChartComponent: React.FC<React.PropsWithChildren<Props>> = ({
   defaultTabId,
   getGroupByFieldsOnClick,
   height = DEFAULT_HEIGHT,

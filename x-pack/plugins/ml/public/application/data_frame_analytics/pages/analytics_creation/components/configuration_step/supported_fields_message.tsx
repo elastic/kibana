@@ -67,7 +67,7 @@ interface Props {
   jobType: AnalyticsJobType;
 }
 
-export const SupportedFieldsMessage: FC<Props> = ({ jobType }) => {
+export const SupportedFieldsMessage: FC<React.PropsWithChildren<Props>> = ({ jobType }) => {
   const [sourceIndexContainsSupportedFields, setSourceIndexContainsSupportedFields] =
     useState<boolean>(true);
   const [sourceIndexFieldsCheckFailed, setSourceIndexFieldsCheckFailed] = useState<boolean>(false);

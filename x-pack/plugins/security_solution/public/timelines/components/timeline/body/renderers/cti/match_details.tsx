@@ -21,7 +21,7 @@ interface MatchDetailsProps {
   sourceValue: string;
 }
 
-export const MatchDetails: React.FC<MatchDetailsProps> = ({
+export const MatchDetails: React.FC<React.PropsWithChildren<MatchDetailsProps>> = ({
   contextId,
   eventId,
   isDraggable,

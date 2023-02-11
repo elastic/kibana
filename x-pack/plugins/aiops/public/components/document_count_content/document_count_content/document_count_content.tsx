@@ -34,7 +34,7 @@ export interface DocumentCountContentProps {
   windowParameters?: WindowParameters;
 }
 
-export const DocumentCountContent: FC<DocumentCountContentProps> = ({
+export const DocumentCountContent: FC<React.PropsWithChildren<DocumentCountContentProps>> = ({
   brushSelectionUpdateHandler,
   clearSelectionHandler,
   documentCountStats,

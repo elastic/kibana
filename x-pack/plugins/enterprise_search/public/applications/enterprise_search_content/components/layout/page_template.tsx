@@ -13,7 +13,7 @@ import { EnterpriseSearchPageTemplateWrapper, PageTemplateProps } from '../../..
 import { useEnterpriseSearchNav } from '../../../shared/layout';
 import { SendEnterpriseSearchTelemetry } from '../../../shared/telemetry';
 
-export const EnterpriseSearchContentPageTemplate: React.FC<PageTemplateProps> = ({
+export const EnterpriseSearchContentPageTemplate: React.FC<React.PropsWithChildren<PageTemplateProps>> = ({
   children,
   pageChrome,
   pageViewTelemetry,

@@ -57,7 +57,7 @@ const jobDetails: JobDetails = {
   },
 };
 
-export const JobType: FC<Props> = ({ type, setFormState }) => {
+export const JobType: FC<React.PropsWithChildren<Props>> = ({ type, setFormState }) => {
   const [selectedCard, setSelectedCard] = useState<any>({});
 
   return (

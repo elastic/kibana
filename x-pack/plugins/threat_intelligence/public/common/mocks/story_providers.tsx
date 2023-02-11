@@ -53,7 +53,7 @@ export interface StoryProvidersComponentProps {
 
 const securityLayout = {
   getPluginWrapper:
-    (): FC =>
+    (): FC<React.PropsWithChildren<unknown>> =>
     ({ children }) =>
       <div>{children}</div>,
 };

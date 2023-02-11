@@ -12,6 +12,6 @@ import type { FeatureImportance } from '../../../../../../../common/types/featur
 interface DecisionPathJSONViewerProps {
   featureImportance: FeatureImportance[];
 }
-export const DecisionPathJSONViewer: FC<DecisionPathJSONViewerProps> = ({ featureImportance }) => {
+export const DecisionPathJSONViewer: FC<React.PropsWithChildren<DecisionPathJSONViewerProps>> = ({ featureImportance }) => {
   return <EuiCodeBlock isCopyable={true}>{JSON.stringify(featureImportance)}</EuiCodeBlock>;
 };

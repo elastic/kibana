@@ -29,7 +29,7 @@ interface AdministrationListPageProps {
   headerBackComponent?: React.ReactNode;
 }
 
-export const AdministrationListPage: FC<AdministrationListPageProps & CommonProps> = memo(
+export const AdministrationListPage: FC<React.PropsWithChildren<AdministrationListPageProps & CommonProps>> = memo(
   ({
     title,
     subtitle,

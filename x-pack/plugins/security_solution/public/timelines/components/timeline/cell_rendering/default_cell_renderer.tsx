@@ -24,7 +24,7 @@ const StyledContent = styled.div<{ $isDetails: boolean }>`
   padding: ${({ $isDetails }) => ($isDetails ? '0 8px' : undefined)};
 `;
 
-export const DefaultCellRenderer: React.FC<CellValueElementProps> = ({
+export const DefaultCellRenderer: React.FC<React.PropsWithChildren<CellValueElementProps>> = ({
   data,
   ecsData,
   eventId,

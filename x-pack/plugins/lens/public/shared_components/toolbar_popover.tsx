@@ -41,7 +41,7 @@ export interface ToolbarPopoverProps {
   handleClose?: () => void;
 }
 
-export const ToolbarPopover: React.FunctionComponent<ToolbarPopoverProps> = ({
+export const ToolbarPopover: React.FunctionComponent<React.PropsWithChildren<ToolbarPopoverProps>> = ({
   children,
   title,
   type,

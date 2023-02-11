@@ -22,7 +22,7 @@ interface Props {
   onChange: ({ minute, hour, date }: { minute?: string; hour?: string; date?: string }) => void;
 }
 
-export const CronMonthly: React.FunctionComponent<Props> = ({
+export const CronMonthly: React.FunctionComponent<React.PropsWithChildren<Props>> = ({
   disabled,
   minute,
   minuteOptions,

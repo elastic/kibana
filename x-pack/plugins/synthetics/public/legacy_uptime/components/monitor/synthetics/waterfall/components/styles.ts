@@ -56,7 +56,7 @@ export const WaterfallChartTopContainer = euiStyled(EuiFlexGroup)`
 `;
 
 export const WaterfallChartFixedTopContainerSidebarCover: StyledComponent<
-  FunctionComponent<EuiPanelProps>,
+  FunctionComponent<React.PropsWithChildren<EuiPanelProps>>,
   EuiTheme
 > = euiStyled(EuiPanel)`
   height: 100%;
@@ -99,7 +99,7 @@ export const WaterfallChartSidebarContainer = euiStyled.div<WaterfallChartSideba
 `;
 
 export const WaterfallChartSidebarContainerInnerPanel: StyledComponent<
-  FunctionComponent<EuiPanelProps>,
+  FunctionComponent<React.PropsWithChildren<EuiPanelProps>>,
   EuiTheme
 > = euiStyled(EuiPanel)`
   border: 0;

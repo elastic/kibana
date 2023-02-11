@@ -53,7 +53,7 @@ const defaultEntities = {
  * @param handleDuplicates
  * @constructor
  */
-export const MlEntitySelector: FC<MlEntitySelectorProps> = ({
+export const MlEntitySelector: FC<React.PropsWithChildren<MlEntitySelectorProps>> = ({
   entityTypes = defaultEntities,
   multiSelect = true,
   selectedOptions,

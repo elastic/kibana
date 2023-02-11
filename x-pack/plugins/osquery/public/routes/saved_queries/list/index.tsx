@@ -45,7 +45,7 @@ interface PlayButtonProps {
   savedQuery: SavedQuerySO;
 }
 
-const PlayButtonComponent: React.FC<PlayButtonProps> = ({ disabled = false, savedQuery }) => {
+const PlayButtonComponent: React.FC<React.PropsWithChildren<PlayButtonProps>> = ({ disabled = false, savedQuery }) => {
   const { push } = useHistory();
 
   // TODO: Add href
@@ -93,7 +93,7 @@ interface EditButtonProps {
   savedQueryName: string;
 }
 
-const EditButtonComponent: React.FC<EditButtonProps> = ({
+const EditButtonComponent: React.FC<React.PropsWithChildren<EditButtonProps>> = ({
   disabled = false,
   savedQueryId,
   savedQueryName,

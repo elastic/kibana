@@ -36,7 +36,7 @@ const sorting = {
   },
 } as const;
 
-const AnomaliesNetworkTableComponent: React.FC<AnomaliesNetworkTableProps> = ({
+const AnomaliesNetworkTableComponent: React.FC<React.PropsWithChildren<AnomaliesNetworkTableProps>> = ({
   startDate,
   endDate,
   skip,

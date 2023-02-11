@@ -27,7 +27,7 @@ export const defaultLabel = i18n.translate('xpack.ml.newJob.wizard.summaryStep.d
   defaultMessage: 'default',
 });
 
-export const JobSectionTitle: FC = () => (
+export const JobSectionTitle: FC<React.PropsWithChildren<unknown>> = () => (
   <EuiTitle size="s">
     <h3>
       <FormattedMessage
@@ -38,7 +38,7 @@ export const JobSectionTitle: FC = () => (
   </EuiTitle>
 );
 
-export const DatafeedSectionTitle: FC = () => (
+export const DatafeedSectionTitle: FC<React.PropsWithChildren<unknown>> = () => (
   <EuiTitle size="s">
     <h3>
       <FormattedMessage
@@ -49,4 +49,4 @@ export const DatafeedSectionTitle: FC = () => (
   </EuiTitle>
 );
 
-export const Italic: FC = ({ children }) => <span style={{ fontStyle: 'italic' }}>{children}</span>;
+export const Italic: FC<React.PropsWithChildren<unknown>> = ({ children }) => <span style={{ fontStyle: 'italic' }}>{children}</span>;

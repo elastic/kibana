@@ -40,7 +40,7 @@ interface Props {
   disabled?: boolean;
 }
 
-export const DocumentCreationButtons: React.FC<Props> = ({
+export const DocumentCreationButtons: React.FC<React.PropsWithChildren<Props>> = ({
   isFlyout = false,
   disabled = false,
 }) => {

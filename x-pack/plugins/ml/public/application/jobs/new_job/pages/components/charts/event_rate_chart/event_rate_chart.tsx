@@ -40,7 +40,7 @@ interface Props {
   onBrushEnd?: BrushEndListener;
 }
 
-export const EventRateChart: FC<Props> = ({
+export const EventRateChart: FC<React.PropsWithChildren<Props>> = ({
   eventRateChartData,
   anomalyData,
   height,

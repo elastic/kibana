@@ -17,7 +17,7 @@ interface Props {
   onSwitchChange?: (isSynced: boolean) => void;
 }
 
-const SyncAlertsSwitchComponent: React.FC<Props> = ({
+const SyncAlertsSwitchComponent: React.FC<React.PropsWithChildren<Props>> = ({
   disabled,
   isSynced = true,
   showLabel = false,

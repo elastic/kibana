@@ -29,7 +29,7 @@ interface TableRowProps {
   rowFieldNames: DeprecationTableColumns[];
 }
 
-const ReindexTableRowCells: React.FunctionComponent<TableRowProps> = ({
+const ReindexTableRowCells: React.FunctionComponent<React.PropsWithChildren<TableRowProps>> = ({
   rowFieldNames,
   deprecation,
 }) => {
@@ -93,7 +93,7 @@ const ReindexTableRowCells: React.FunctionComponent<TableRowProps> = ({
   );
 };
 
-export const ReindexTableRow: React.FunctionComponent<TableRowProps> = (props) => {
+export const ReindexTableRow: React.FunctionComponent<React.PropsWithChildren<TableRowProps>> = (props) => {
   const {
     services: { api },
   } = useAppContext();

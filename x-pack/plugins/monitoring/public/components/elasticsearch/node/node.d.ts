@@ -7,7 +7,7 @@
 
 import { FunctionComponent } from 'react';
 
-export const Node: FunctionComponent<NodeProps>;
+export const Node: FunctionComponent<React.PropsWithChildren<NodeProps>>;
 export interface NodeProps {
   nodeSummary: unknown;
   metrics: unknown;

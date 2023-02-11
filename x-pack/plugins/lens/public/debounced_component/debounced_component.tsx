@@ -13,8 +13,8 @@ import { debounce } from 'lodash';
  * only renders once there is a pause in props changes for at least `delay` milliseconds.
  * During the debounce phase, it will return the previously rendered value.
  */
-export function debouncedComponent<TProps>(component: FunctionComponent<TProps>, delay = 256) {
-  const MemoizedComponent = memo(component) as unknown as FunctionComponent<TProps>;
+export function debouncedComponent<TProps>(component: FunctionComponent<React.PropsWithChildren<TProps>>, delay = 256) {
+  const MemoizedComponent = memo(component) as unknown as FunctionComponent<React.PropsWithChildren<TProps>>;
 
   return (props: TProps) => {
     const [cachedProps, setCachedProps] = useState(props);

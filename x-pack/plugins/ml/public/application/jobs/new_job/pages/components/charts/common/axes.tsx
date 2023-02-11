@@ -21,7 +21,7 @@ function tickFormatter(d: number): string {
   return (Math.round(d * 100) / 100).toString();
 }
 
-export const Axes: FC<Props> = ({ chartData }) => {
+export const Axes: FC<React.PropsWithChildren<Props>> = ({ chartData }) => {
   const yDomain = getYRange(chartData);
 
   return (

@@ -22,7 +22,7 @@ interface Props {
   onClick?: ActionsNavigation['onClick'];
 }
 
-const HostIsolationCommentEventComponent: React.FC<Props> = ({
+const HostIsolationCommentEventComponent: React.FC<React.PropsWithChildren<Props>> = ({
   type,
   endpoints,
   href,

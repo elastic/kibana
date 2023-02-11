@@ -35,7 +35,7 @@ import { resultMetaData } from '../../../../../shared/result/result_metadata';
 import { DocumentsLogic } from '../../documents_logic';
 import { IndexViewLogic } from '../../index_view_logic';
 
-export const DocumentList: React.FC = () => {
+export const DocumentList: React.FC<React.PropsWithChildren<unknown>> = () => {
   const {
     docsPerPage,
     isLoading,

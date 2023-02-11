@@ -41,7 +41,7 @@ export interface AddIndicesFlyoutProps {
   onClose: () => void;
 }
 
-export const AddIndicesFlyout: React.FC<AddIndicesFlyoutProps> = ({ onClose }) => {
+export const AddIndicesFlyout: React.FC<React.PropsWithChildren<AddIndicesFlyoutProps>> = ({ onClose }) => {
   const { selectedIndices, updateEngineStatus, updateEngineError } = useValues(AddIndicesLogic);
   const { setSelectedIndices, submitSelectedIndices } = useActions(AddIndicesLogic);
 

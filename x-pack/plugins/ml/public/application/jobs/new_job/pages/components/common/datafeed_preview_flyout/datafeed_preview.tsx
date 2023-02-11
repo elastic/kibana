@@ -21,10 +21,10 @@ import { CombinedJob } from '../../../../../../../../common/types/anomaly_detect
 import { MLJobEditor } from '../../../../../jobs_list/components/ml_job_editor';
 import { useMlApiContext } from '../../../../../../contexts/kibana';
 
-export const DatafeedPreview: FC<{
+export const DatafeedPreview: FC<React.PropsWithChildren<{
   combinedJob: CombinedJob | null;
   heightOffset?: number;
-}> = ({ combinedJob, heightOffset = 0 }) => {
+}>> = ({ combinedJob, heightOffset = 0 }) => {
   const {
     jobs: { datafeedPreview },
   } = useMlApiContext();

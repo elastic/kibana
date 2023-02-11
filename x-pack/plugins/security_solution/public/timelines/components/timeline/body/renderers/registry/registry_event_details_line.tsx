@@ -29,7 +29,7 @@ interface Props {
   userName: string | null | undefined;
 }
 
-const RegistryEventDetailsLineComponent: React.FC<Props> = ({
+const RegistryEventDetailsLineComponent: React.FC<React.PropsWithChildren<Props>> = ({
   contextId,
   hostName,
   id,

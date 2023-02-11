@@ -19,7 +19,7 @@ import type { State } from '../../store';
 import { createStore } from '../../store';
 
 describe('useSignalHelpers', () => {
-  const wrapperContainer: React.FC<{ children?: React.ReactNode }> = ({ children }) => (
+  const wrapperContainer: React.FC<React.PropsWithChildren<{ children?: React.ReactNode }>> = ({ children }) => (
     <TestProviders>{children}</TestProviders>
   );
 

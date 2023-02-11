@@ -36,7 +36,7 @@ interface UnwrappedEmbeddableFactory {
   isEditable: boolean;
 }
 
-export const EditorMenu: FC<Props> = ({ addElement }) => {
+export const EditorMenu: FC<React.PropsWithChildren<Props>> = ({ addElement }) => {
   const embeddablesService = useEmbeddablesService();
   const { pathname, search, hash } = useLocation();
   const platformService = usePlatformService();

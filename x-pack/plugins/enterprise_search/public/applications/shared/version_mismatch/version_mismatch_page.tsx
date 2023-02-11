@@ -16,7 +16,7 @@ interface Props {
   kibanaVersion?: string;
 }
 
-export const VersionMismatchPage: React.FC<Props> = (props) => (
+export const VersionMismatchPage: React.FC<React.PropsWithChildren<Props>> = (props) => (
   <KibanaPageTemplate isEmptyState>
     <VersionMismatchError {...props} />
   </KibanaPageTemplate>

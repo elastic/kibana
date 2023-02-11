@@ -28,7 +28,7 @@ interface Props {
   selectedNodeAttrs: string;
 }
 
-export const NodeAttrsDetails: React.FunctionComponent<Props> = ({ close, selectedNodeAttrs }) => {
+export const NodeAttrsDetails: React.FunctionComponent<React.PropsWithChildren<Props>> = ({ close, selectedNodeAttrs }) => {
   const { data, isLoading, error, resendRequest } = useLoadNodeDetails(selectedNodeAttrs);
   let content;
   if (isLoading) {

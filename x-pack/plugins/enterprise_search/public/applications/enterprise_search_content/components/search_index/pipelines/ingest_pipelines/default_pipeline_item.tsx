@@ -24,14 +24,14 @@ import { ElasticsearchIndexWithIngestion } from '../../../../../../../common/typ
 import { isApiIndex } from '../../../../utils/indices';
 import { CurlRequest } from '../../components/curl_request/curl_request';
 
-export const DefaultPipelineItem: React.FC<{
+export const DefaultPipelineItem: React.FC<React.PropsWithChildren<{
   index: ElasticsearchIndexWithIngestion;
   indexName: string;
   ingestionMethod: string;
   openPipelineSettings: () => void;
   pipelineName: string;
   pipelineState: IngestPipelineParams;
-}> = ({ index, indexName, ingestionMethod, openPipelineSettings, pipelineName, pipelineState }) => {
+}>> = ({ index, indexName, ingestionMethod, openPipelineSettings, pipelineName, pipelineState }) => {
   /**
    * If we don't open the accordion on load, the curl code never shows the copy button
    * Because if the accordion is closed, the code block is not present in the DOM

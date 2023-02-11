@@ -39,9 +39,7 @@ const defaultFields: Fields = {
   priority: [],
 };
 
-const ServiceNowParamsFields: React.FunctionComponent<
-  ActionParamsProps<ServiceNowITSMActionParams>
-> = ({ actionConnector, actionParams, editAction, index, errors, messageVariables }) => {
+const ServiceNowParamsFields: React.FunctionComponent<React.PropsWithChildren<ActionParamsProps<ServiceNowITSMActionParams>>> = ({ actionConnector, actionParams, editAction, index, errors, messageVariables }) => {
   const {
     docLinks,
     http,

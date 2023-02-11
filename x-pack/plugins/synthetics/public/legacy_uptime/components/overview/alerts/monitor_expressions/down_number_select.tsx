@@ -17,7 +17,7 @@ interface Props {
   setRuleParams: (key: string, value: any) => void;
 }
 
-export const DownNoExpressionSelect: React.FC<Props> = ({
+export const DownNoExpressionSelect: React.FC<React.PropsWithChildren<Props>> = ({
   defaultNumTimes,
   hasFilters,
   isEnabled,

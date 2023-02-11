@@ -23,7 +23,7 @@ const strings = {
     }),
 };
 
-export const GroupSettings: FunctionComponent = () => (
+export const GroupSettings: FunctionComponent<React.PropsWithChildren<unknown>> = () => (
   <div className="canvasSidebar__panel canvasSidebar__panel--isEmpty">
     <EuiText size="s">
       <p>{strings.getUngroupDescription()}</p>

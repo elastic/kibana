@@ -48,9 +48,7 @@ interface ExceptionsFlyoutAlertsActionsComponentProps {
   onDisableBulkClose: (arg: boolean) => void;
 }
 
-const ExceptionItemsFlyoutAlertsActionsComponent: React.FC<
-  ExceptionsFlyoutAlertsActionsComponentProps
-> = ({
+const ExceptionItemsFlyoutAlertsActionsComponent: React.FC<React.PropsWithChildren<ExceptionsFlyoutAlertsActionsComponentProps>> = ({
   isAlertDataLoading,
   exceptionListItems,
   exceptionListType,

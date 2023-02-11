@@ -26,7 +26,7 @@ import './error_state_prompt.scss';
  */
 const WORKPLACE_SEARCH_PERSONAL_DASHBOARD_PATH = '/p/';
 
-export const ErrorStatePrompt: React.FC = () => {
+export const ErrorStatePrompt: React.FC<React.PropsWithChildren<unknown>> = () => {
   const { errorConnectingMessage } = useValues(HttpLogic);
   const { config, cloud, setChromeIsVisible, history } = useValues(KibanaLogic);
   const isCloudEnabled = cloud.isCloudEnabled;

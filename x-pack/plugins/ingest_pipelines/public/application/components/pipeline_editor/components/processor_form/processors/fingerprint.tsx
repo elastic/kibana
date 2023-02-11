@@ -74,7 +74,7 @@ const fieldsConfig: FieldsConfig = {
   },
 };
 
-export const Fingerprint: FunctionComponent = () => {
+export const Fingerprint: FunctionComponent<React.PropsWithChildren<unknown>> = () => {
   return (
     <>
       <UseField

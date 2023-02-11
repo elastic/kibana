@@ -22,7 +22,7 @@ interface CaseViewActions {
   currentExternalIncident: Case['externalService'];
 }
 
-const ActionsComponent: React.FC<CaseViewActions> = ({ caseData, currentExternalIncident }) => {
+const ActionsComponent: React.FC<React.PropsWithChildren<CaseViewActions>> = ({ caseData, currentExternalIncident }) => {
   const { mutate: deleteCases } = useDeleteCases();
   const { navigateToAllCases } = useAllCasesNavigation();
   const { permissions } = useCasesContext();

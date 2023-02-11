@@ -17,7 +17,7 @@ export interface UserRepresentationProps {
   onRemoveAssignee: (removedAssigneeUID: string) => void;
 }
 
-const RemovableUserComponent: React.FC<UserRepresentationProps> = ({
+const RemovableUserComponent: React.FC<React.PropsWithChildren<UserRepresentationProps>> = ({
   assignee,
   onRemoveAssignee,
 }) => {

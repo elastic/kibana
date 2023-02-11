@@ -24,7 +24,7 @@ interface ResultInternals {
   previously: 'on' | undefined;
 }
 
-export const AssignFlyoutResultList: FC<AssignFlyoutResultListProps> = ({
+export const AssignFlyoutResultList: FC<React.PropsWithChildren<AssignFlyoutResultListProps>> = ({
   results,
   isLoading,
   initialStatus,
@@ -87,7 +87,7 @@ export const AssignFlyoutResultList: FC<AssignFlyoutResultListProps> = ({
   );
 };
 
-const ResultActionLabel: FC<{ action: AssignmentAction }> = ({ action }) => {
+const ResultActionLabel: FC<React.PropsWithChildren<{ action: AssignmentAction }>> = ({ action }) => {
   if (action === 'unchanged') {
     return null;
   }

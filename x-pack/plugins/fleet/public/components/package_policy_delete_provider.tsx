@@ -26,7 +26,7 @@ export type DeletePackagePoliciesPrompt = (
 
 type OnSuccessCallback = (packagePoliciesDeleted: string[]) => void;
 
-export const PackagePolicyDeleteProvider: React.FunctionComponent<Props> = ({
+export const PackagePolicyDeleteProvider: React.FunctionComponent<React.PropsWithChildren<Props>> = ({
   agentPolicy,
   children,
 }) => {

@@ -38,7 +38,7 @@ import { SourcesLogic } from './sources_logic';
 
 import './sources.scss';
 
-export const SourcesRouter: React.FC = () => {
+export const SourcesRouter: React.FC<React.PropsWithChildren<unknown>> = () => {
   const { pathname } = useLocation() as Location;
   const { resetSourcesState } = useActions(SourcesLogic);
   const {

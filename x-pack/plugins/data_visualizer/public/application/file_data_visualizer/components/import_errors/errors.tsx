@@ -23,7 +23,7 @@ interface Props {
   statuses: Statuses;
 }
 
-export const ImportErrors: FC<Props> = ({ errors, statuses }) => {
+export const ImportErrors: FC<React.PropsWithChildren<Props>> = ({ errors, statuses }) => {
   return (
     <EuiCallOut title={title(statuses)} color="danger" iconType="cross">
       {errors.map((e, i) => (
@@ -94,7 +94,7 @@ function title(statuses: Statuses) {
   }
 }
 
-const ImportError: FC<{ error: any }> = ({ error }) => {
+const ImportError: FC<React.PropsWithChildren<{ error: any }>> = ({ error }) => {
   const errorObj = toString(error);
   return (
     <>

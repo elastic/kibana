@@ -54,7 +54,7 @@ const CHOOSE_PIPELINE_LABEL = i18n.translate(
   { defaultMessage: 'Existing' }
 );
 
-const NoSourceFieldsError: React.FC = () => (
+const NoSourceFieldsError: React.FC<React.PropsWithChildren<unknown>> = () => (
   <FormattedMessage
     id="xpack.enterpriseSearch.content.indices.pipelines.addInferencePipelineModal.steps.configure.sourceField.error"
     defaultMessage="Selecting a source field is required for pipeline configuration, but this index does not have a field mapping. {learnMore}"
@@ -71,7 +71,7 @@ const NoSourceFieldsError: React.FC = () => (
   />
 );
 
-export const ConfigurePipeline: React.FC = () => {
+export const ConfigurePipeline: React.FC<React.PropsWithChildren<unknown>> = () => {
   const {
     addInferencePipelineModal: { configuration },
     formErrors,

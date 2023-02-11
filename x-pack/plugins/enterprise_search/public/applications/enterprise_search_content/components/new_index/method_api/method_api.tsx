@@ -18,7 +18,7 @@ import { NewSearchIndexTemplate } from '../new_search_index_template';
 
 import { MethodApiLogic } from './method_api_logic';
 
-export const MethodApi: React.FC = () => {
+export const MethodApi: React.FC<React.PropsWithChildren<unknown>> = () => {
   const { makeRequest } = useActions(MethodApiLogic);
   return (
     <NewSearchIndexTemplate

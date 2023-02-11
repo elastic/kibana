@@ -70,7 +70,7 @@ interface Props {
   runtimeMappings?: MappingRuntimeFields;
 }
 
-export const ChartCollapse: React.FC<Props> = ({
+export const ChartCollapse: React.FC<React.PropsWithChildren<Props>> = ({
   groupBySelection,
   filters,
   query,

@@ -30,7 +30,7 @@ interface Props {
  * A call-to-action for users to migrate to data tiers if their cluster is still running
  * the deprecated node.data:true config.
  */
-export const CloudDataTierCallout: FunctionComponent<Props> = ({ linkToCloudDeployment }) => {
+export const CloudDataTierCallout: FunctionComponent<React.PropsWithChildren<Props>> = ({ linkToCloudDeployment }) => {
   return (
     <EuiCallOut title={i18nTexts.title} data-test-subj="cloudDataTierCallout">
       {i18nTexts.body}{' '}

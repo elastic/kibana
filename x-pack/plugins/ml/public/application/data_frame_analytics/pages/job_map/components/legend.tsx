@@ -32,7 +32,7 @@ const getJobTypeList = () => (
   </>
 );
 
-export const JobMapLegend: FC<{ theme: EuiThemeType }> = ({ theme }) => {
+export const JobMapLegend: FC<React.PropsWithChildren<{ theme: EuiThemeType }>> = ({ theme }) => {
   const [showJobTypes, setShowJobTypes] = useState<boolean>(false);
 
   return (

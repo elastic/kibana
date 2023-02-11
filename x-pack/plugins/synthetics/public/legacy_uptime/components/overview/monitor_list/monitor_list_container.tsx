@@ -31,7 +31,7 @@ const getPageSizeValue = () => {
   return value;
 };
 
-export const MonitorList: React.FC<MonitorListProps> = (props) => {
+export const MonitorList: React.FC<React.PropsWithChildren<MonitorListProps>> = (props) => {
   const filters = useSelector(esKuerySelector);
   const { filterCheck, pending } = useOverviewFilterCheck();
 

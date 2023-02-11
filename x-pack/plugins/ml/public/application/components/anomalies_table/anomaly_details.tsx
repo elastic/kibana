@@ -53,7 +53,7 @@ interface Props {
   job: ExplorerJob;
 }
 
-export const AnomalyDetails: FC<Props> = ({
+export const AnomalyDetails: FC<React.PropsWithChildren<Props>> = ({
   anomaly,
   examples,
   definition,
@@ -117,14 +117,14 @@ export const AnomalyDetails: FC<Props> = ({
   );
 };
 
-const Contents: FC<{
+const Contents: FC<React.PropsWithChildren<{
   anomaly: AnomaliesTableRecordExtended;
   isAggregatedData: boolean;
   filter: EntityCellFilter;
   influencersLimit: number;
   influencerFilter: EntityCellFilter;
   job: ExplorerJob;
-}> = ({ anomaly, isAggregatedData, filter, influencersLimit, influencerFilter, job }) => {
+}>> = ({ anomaly, isAggregatedData, filter, influencersLimit, influencerFilter, job }) => {
   const {
     euiTheme: { colors },
   } = useEuiTheme();
@@ -166,7 +166,7 @@ const Contents: FC<{
   );
 };
 
-const Description: FC<{ anomaly: AnomaliesTableRecordExtended }> = ({ anomaly }) => {
+const Description: FC<React.PropsWithChildren<{ anomaly: AnomaliesTableRecordExtended }>> = ({ anomaly }) => {
   const source = anomaly.source;
 
   let anomalyDescription = i18n.translate('xpack.ml.anomaliesTable.anomalyDetails.anomalyInLabel', {
@@ -234,12 +234,12 @@ const Description: FC<{ anomaly: AnomaliesTableRecordExtended }> = ({ anomaly })
   );
 };
 
-const Details: FC<{
+const Details: FC<React.PropsWithChildren<{
   anomaly: AnomaliesTableRecordExtended;
   isAggregatedData: boolean;
   filter: EntityCellFilter;
   job: ExplorerJob;
-}> = ({ anomaly, isAggregatedData, filter, job }) => {
+}>> = ({ anomaly, isAggregatedData, filter, job }) => {
   const isInterimResult = anomaly.source?.is_interim ?? false;
   return (
     <>
@@ -279,11 +279,11 @@ const Details: FC<{
   );
 };
 
-const Influencers: FC<{
+const Influencers: FC<React.PropsWithChildren<{
   anomaly: AnomaliesTableRecordExtended;
   influencersLimit: number;
   influencerFilter: EntityCellFilter;
-}> = ({ anomaly, influencersLimit, influencerFilter }) => {
+}>> = ({ anomaly, influencersLimit, influencerFilter }) => {
   const [showAllInfluencers, setShowAllInfluencers] = useState(false);
   const toggleAllInfluencers = setShowAllInfluencers.bind(null, (prev) => !prev);
 
@@ -354,7 +354,7 @@ const Influencers: FC<{
   return null;
 };
 
-const CategoryExamples: FC<{ definition: CategoryDefinition; examples: string[] }> = ({
+const CategoryExamples: FC<React.PropsWithChildren<{ definition: CategoryDefinition; examples: string[] }>> = ({
   definition,
   examples,
 }) => {

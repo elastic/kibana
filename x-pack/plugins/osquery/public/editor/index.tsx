@@ -38,7 +38,7 @@ const ResizeWrapper = styled.div`
 `;
 
 const MIN_HEIGHT = 100;
-const OsqueryEditorComponent: React.FC<OsqueryEditorProps> = ({
+const OsqueryEditorComponent: React.FC<React.PropsWithChildren<OsqueryEditorProps>> = ({
   defaultValue,
   onChange,
   commands,

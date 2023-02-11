@@ -70,7 +70,7 @@ const CompressedPre = styled('pre')`
   }
 `;
 
-const HitPreview: React.FC<{ hit: SearchHit }> = ({ hit }) => {
+const HitPreview: React.FC<React.PropsWithChildren<{ hit: SearchHit }>> = ({ hit }) => {
   const hitForDisplay = omit(
     getFlattenedObject(hit._source as Record<string, unknown>),
     DATA_PREVIEW_OMIT_KEYS
@@ -90,7 +90,7 @@ const HitPreview: React.FC<{ hit: SearchHit }> = ({ hit }) => {
   );
 };
 
-const HitTimestamp: React.FC<{ hit: SearchHit }> = ({ hit }) => {
+const HitTimestamp: React.FC<React.PropsWithChildren<{ hit: SearchHit }>> = ({ hit }) => {
   const source = (hit?._source as Record<string, any>) || {};
   const timestamp = source?.['@timestamp'] || '-';
   return (
@@ -102,7 +102,7 @@ const HitTimestamp: React.FC<{ hit: SearchHit }> = ({ hit }) => {
   );
 };
 
-const AgentDataPreview: React.FC<{ dataPreview: SearchHit[] }> = ({ dataPreview }) => {
+const AgentDataPreview: React.FC<React.PropsWithChildren<{ dataPreview: SearchHit[] }>> = ({ dataPreview }) => {
   const previewData = dataPreview.slice(0, MAX_AGENT_DATA_PREVIEW_COUNT);
   return (
     <>
@@ -124,7 +124,7 @@ const AgentDataPreview: React.FC<{ dataPreview: SearchHit[] }> = ({ dataPreview 
   );
 };
 
-export const ConfirmIncomingDataWithPreview: React.FunctionComponent<Props> = ({
+export const ConfirmIncomingDataWithPreview: React.FunctionComponent<React.PropsWithChildren<Props>> = ({
   agentIds,
   packageInfo,
   agentDataConfirmed,

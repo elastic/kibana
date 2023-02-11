@@ -71,9 +71,7 @@ function indexParamToArray(index: string | string[]): string[] {
   return isString(index) ? [index] : index;
 }
 
-export const IndexThresholdRuleTypeExpression: React.FunctionComponent<
-  Omit<RuleTypeParamsExpressionProps<IndexThresholdRuleParams>, 'unifiedSearch'>
-> = ({ ruleParams, ruleInterval, setRuleParams, setRuleProperty, errors, charts, data }) => {
+export const IndexThresholdRuleTypeExpression: React.FunctionComponent<React.PropsWithChildren<Omit<RuleTypeParamsExpressionProps<IndexThresholdRuleParams>, 'unifiedSearch'>>> = ({ ruleParams, ruleInterval, setRuleParams, setRuleProperty, errors, charts, data }) => {
   const {
     index,
     timeField,

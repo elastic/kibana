@@ -46,7 +46,7 @@ export const createProcessStep = (props: ProcessStepProps): EuiContainedStepProp
       : undefined,
 });
 
-export const ProcessStep: React.FunctionComponent<ProcessStepProps> = ({
+export const ProcessStep: React.FunctionComponent<React.PropsWithChildren<ProcessStepProps>> = ({
   cleanUpAndSetUp,
   errorMessages,
   isConfigurationValid,

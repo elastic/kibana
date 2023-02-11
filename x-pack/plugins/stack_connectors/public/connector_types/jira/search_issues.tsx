@@ -22,7 +22,7 @@ interface Props {
   onChange: (parentIssueKey: string) => void;
 }
 
-const SearchIssuesComponent: React.FC<Props> = ({
+const SearchIssuesComponent: React.FC<React.PropsWithChildren<Props>> = ({
   selectedValue,
   http,
   toastNotifications,

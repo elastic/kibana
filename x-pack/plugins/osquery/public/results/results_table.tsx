@@ -67,7 +67,7 @@ export interface ResultsTableComponentProps {
   error?: string;
 }
 
-const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
+const ResultsTableComponent: React.FC<React.PropsWithChildren<ResultsTableComponentProps>> = ({
   actionId,
   agentIds,
   ecsMapping,

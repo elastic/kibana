@@ -22,7 +22,7 @@ export interface Props {
   renderError: Function;
 }
 
-export const templateFromReactComponent = (Component: ComponentType<any>) => {
+export const templateFromReactComponent = (Component: ComponentType<React.PropsWithChildren<any>>) => {
   const WrappedComponent: ForwardRefRenderFunction<UpdatePropsRef<Props>, Props> = (props, ref) => {
     const [updatedProps, setUpdatedProps] = useState<Props>(props);
 

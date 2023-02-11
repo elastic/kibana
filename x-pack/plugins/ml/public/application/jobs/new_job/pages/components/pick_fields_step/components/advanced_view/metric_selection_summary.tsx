@@ -9,6 +9,6 @@ import React, { FC } from 'react';
 
 import { DetectorList } from './detector_list';
 
-export const AdvancedDetectorsSummary: FC = () => (
+export const AdvancedDetectorsSummary: FC<React.PropsWithChildren<unknown>> = () => (
   <DetectorList isActive={false} onEditJob={() => {}} onDeleteJob={() => {}} />
 );

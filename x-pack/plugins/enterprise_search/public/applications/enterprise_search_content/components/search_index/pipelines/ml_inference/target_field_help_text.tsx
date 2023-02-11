@@ -25,7 +25,7 @@ export interface TargetFieldHelpTextProps {
   targetField: string;
 }
 
-export const TargetFieldHelpText: React.FC<TargetFieldHelpTextProps> = ({
+export const TargetFieldHelpText: React.FC<React.PropsWithChildren<TargetFieldHelpTextProps>> = ({
   pipelineName,
   targetField,
   model,

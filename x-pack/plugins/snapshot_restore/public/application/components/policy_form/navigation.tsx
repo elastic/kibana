@@ -16,7 +16,7 @@ interface Props {
   isFormValid: boolean;
 }
 
-export const PolicyNavigation: React.FunctionComponent<Props> = ({
+export const PolicyNavigation: React.FunctionComponent<React.PropsWithChildren<Props>> = ({
   currentStep,
   maxCompletedStep,
   updateCurrentStep,

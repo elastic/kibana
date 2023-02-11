@@ -41,7 +41,7 @@ interface Props {
   handleSaveMapping(): void;
 }
 
-export const RoleMappingFlyout: React.FC<Props> = ({
+export const RoleMappingFlyout: React.FC<React.PropsWithChildren<Props>> = ({
   children,
   isNew,
   disabled,

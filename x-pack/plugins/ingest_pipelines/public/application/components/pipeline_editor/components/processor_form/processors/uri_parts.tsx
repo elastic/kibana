@@ -59,7 +59,7 @@ export const fieldsConfig: FieldsConfig = {
   },
 };
 
-export const UriParts: FunctionComponent = () => {
+export const UriParts: FunctionComponent<React.PropsWithChildren<unknown>> = () => {
   return (
     <>
       <FieldNameField

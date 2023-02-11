@@ -36,7 +36,7 @@ describe('useExecutionResults', () => {
         },
       },
     });
-    const wrapper: React.FC = ({ children }) => (
+    const wrapper: React.FC<React.PropsWithChildren<unknown>> = ({ children }) => (
       <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
     );
     return wrapper;

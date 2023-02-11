@@ -16,9 +16,7 @@ import {
 import { RulesListNotifyBadge } from './notify_badge';
 import { RulesListNotifyBadgePropsWithApi } from './types';
 
-export const RulesListNotifyBadgeWithApi: React.FunctionComponent<
-  RulesListNotifyBadgePropsWithApi
-> = (props) => {
+export const RulesListNotifyBadgeWithApi: React.FunctionComponent<React.PropsWithChildren<RulesListNotifyBadgePropsWithApi>> = (props) => {
   const { onRuleChanged, rule, isLoading, showTooltipInline, showOnHover } = props;
   const { http } = useKibana().services;
   const [currentlyOpenNotify, setCurrentlyOpenNotify] = useState<string>();

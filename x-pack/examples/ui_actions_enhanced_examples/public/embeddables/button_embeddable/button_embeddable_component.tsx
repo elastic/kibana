@@ -12,7 +12,7 @@ export interface ButtonEmbeddableComponentProps {
   onClick: () => void;
 }
 
-export const ButtonEmbeddableComponent: React.FC<ButtonEmbeddableComponentProps> = ({
+export const ButtonEmbeddableComponent: React.FC<React.PropsWithChildren<ButtonEmbeddableComponentProps>> = ({
   onClick,
 }) => {
   return (

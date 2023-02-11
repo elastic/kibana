@@ -43,7 +43,7 @@ export class CloudChatPlugin implements Plugin {
       console.debug(`Error setting up Chat: ${e.toString()}`)
     );
 
-    const CloudChatContextProvider: FC = ({ children }) => {
+    const CloudChatContextProvider: FC<React.PropsWithChildren<unknown>> = ({ children }) => {
       // There's a risk that the request for chat config will take too much time to complete, and the provider
       // will maintain a stale value.  To avoid this, we'll use an Observable.
       const chatConfig = useObservable(this.chatConfig$, undefined);

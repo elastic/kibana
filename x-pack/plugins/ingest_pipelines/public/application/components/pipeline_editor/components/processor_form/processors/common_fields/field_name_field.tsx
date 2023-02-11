@@ -47,7 +47,7 @@ interface Props {
   additionalValidations?: ValidationConfig[];
 }
 
-export const FieldNameField: FunctionComponent<Props> = ({ helpText, additionalValidations }) => (
+export const FieldNameField: FunctionComponent<React.PropsWithChildren<Props>> = ({ helpText, additionalValidations }) => (
   <UseField
     config={{
       ...fieldsConfig.field,

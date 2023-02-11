@@ -26,7 +26,7 @@ import { RoleMappingsLogic } from './role_mappings_logic';
 
 const roleTypes = ['admin', 'user'] as unknown as Role[];
 
-export const User: React.FC = () => {
+export const User: React.FC<React.PropsWithChildren<unknown>> = () => {
   const {
     handleSaveUser,
     closeUsersAndRolesFlyout,

@@ -23,7 +23,7 @@ interface Props {
   visibleFieldTypes: string[];
 }
 
-export const DataVisualizerFieldTypesFilter: FC<Props> = ({
+export const DataVisualizerFieldTypesFilter: FC<React.PropsWithChildren<Props>> = ({
   fields,
   setVisibleFieldTypes,
   visibleFieldTypes,

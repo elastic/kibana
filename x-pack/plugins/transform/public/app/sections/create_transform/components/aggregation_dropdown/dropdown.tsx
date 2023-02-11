@@ -20,7 +20,7 @@ interface Props {
   >['renderOption'];
 }
 
-export const DropDown: React.FC<Props> = ({
+export const DropDown: React.FC<React.PropsWithChildren<Props>> = ({
   renderOption,
   changeHandler,
   options,

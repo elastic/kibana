@@ -15,7 +15,7 @@ const services = {
   setBreadcrumbs: startMock.chrome.setBreadcrumbs,
 };
 
-const wrapComponent = (Component: FunctionComponent) => (props: any) =>
+const wrapComponent = (Component: FunctionComponent<React.PropsWithChildren<unknown>>) => (props: any) =>
   (
     <KibanaContextProvider services={services}>
       <Component {...props} />

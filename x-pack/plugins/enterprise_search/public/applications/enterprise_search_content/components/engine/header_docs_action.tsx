@@ -11,7 +11,7 @@ import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
 import { docLinks } from '../../../shared/doc_links';
 
-export const EngineHeaderDocsAction: React.FC = () => (
+export const EngineHeaderDocsAction: React.FC<React.PropsWithChildren<unknown>> = () => (
   <EuiFlexGroup gutterSize="s">
     <EuiFlexItem>
       <EuiButtonEmpty

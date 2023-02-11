@@ -21,7 +21,7 @@ interface Props {
   jobType: JOB_TYPE;
 }
 
-export const WizardHorizontalSteps: FC<Props> = ({
+export const WizardHorizontalSteps: FC<React.PropsWithChildren<Props>> = ({
   currentStep,
   highestStep,
   setCurrentStep,

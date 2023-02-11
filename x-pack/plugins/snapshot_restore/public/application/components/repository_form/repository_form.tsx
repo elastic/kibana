@@ -25,7 +25,7 @@ interface Props {
   onSave: (repository: Repository | EmptyRepository) => void;
 }
 
-export const RepositoryForm: React.FunctionComponent<Props> = ({
+export const RepositoryForm: React.FunctionComponent<React.PropsWithChildren<Props>> = ({
   repository: originalRepository,
   isManagedRepository,
   isEditing,

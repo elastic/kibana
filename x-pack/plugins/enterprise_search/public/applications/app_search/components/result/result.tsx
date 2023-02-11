@@ -40,7 +40,7 @@ interface Props {
 
 const RESULT_CUTOFF = 5;
 
-export const Result: React.FC<Props> = ({
+export const Result: React.FC<React.PropsWithChildren<Props>> = ({
   result,
   isMetaEngine,
   showScore = false,

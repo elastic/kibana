@@ -28,7 +28,7 @@ export interface CloudStart {
   /**
    * A React component that provides a pre-wired `React.Context` which connects components to Cloud services.
    */
-  CloudContextProvider: FC<{}>;
+  CloudContextProvider: FC<React.PropsWithChildren<{}>>;
   /**
    * `true` when Kibana is running on Elastic Cloud.
    */
@@ -96,7 +96,7 @@ export interface CloudSetup {
    * Registers CloudServiceProviders so start's `CloudContextProvider` hooks them.
    * @param contextProvider The React component from the Service Provider.
    */
-  registerCloudService: (contextProvider: FC) => void;
+  registerCloudService: (contextProvider: FC<React.PropsWithChildren<unknown>>) => void;
 }
 
 interface CloudUrls {
@@ -109,7 +109,7 @@ interface CloudUrls {
 export class CloudPlugin implements Plugin<CloudSetup> {
   private readonly config: CloudConfigType;
   private readonly isCloudEnabled: boolean;
-  private readonly contextProviders: FC[] = [];
+  private readonly contextProviders: FC<React.PropsWithChildren<unknown>>[] = [];
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
     this.config = this.initializerContext.config.get<CloudConfigType>();
@@ -146,7 +146,7 @@ export class CloudPlugin implements Plugin<CloudSetup> {
 
     // Nest all the registered context providers under the Cloud Services Provider.
     // This way, plugins only need to require Cloud's context provider to have all the enriched Cloud services.
-    const CloudContextProvider: FC = ({ children }) => {
+    const CloudContextProvider: FC<React.PropsWithChildren<unknown>> = ({ children }) => {
       return (
         <>
           {this.contextProviders.reduce(

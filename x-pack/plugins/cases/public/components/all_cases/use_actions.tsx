@@ -29,7 +29,7 @@ import { useAssigneesAction } from '../actions/assignees/use_assignees_action';
 import { EditAssigneesFlyout } from '../actions/assignees/edit_assignees_flyout';
 import { useCopyIDAction } from '../actions/copy_id/use_copy_id_action';
 
-const ActionColumnComponent: React.FC<{ theCase: Case; disableActions: boolean }> = ({
+const ActionColumnComponent: React.FC<React.PropsWithChildren<{ theCase: Case; disableActions: boolean }>> = ({
   theCase,
   disableActions,
 }) => {

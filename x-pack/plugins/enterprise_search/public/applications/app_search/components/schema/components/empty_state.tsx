@@ -16,7 +16,7 @@ import { SchemaAddFieldModal } from '../../../../shared/schema';
 import { INDEXING_SCHEMA_DOCS_URL } from '../../../routes';
 import { SchemaLogic } from '../schema_logic';
 
-export const EmptyState: React.FC = () => {
+export const EmptyState: React.FC<React.PropsWithChildren<unknown>> = () => {
   const { isModalOpen } = useValues(SchemaLogic);
   const { addSchemaField, closeModal } = useActions(SchemaLogic);
 

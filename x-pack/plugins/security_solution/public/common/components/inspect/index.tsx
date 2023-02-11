@@ -22,7 +22,7 @@ interface InspectButtonContainerProps {
   children: React.ReactNode;
 }
 
-export const InspectButtonContainer: React.FC<InspectButtonContainerProps> = ({
+export const InspectButtonContainer: React.FC<React.PropsWithChildren<InspectButtonContainerProps>> = ({
   children,
   show = true,
 }) => (
@@ -43,7 +43,7 @@ interface InspectButtonProps {
   title: string | React.ReactElement | React.ReactNode;
 }
 
-const InspectButtonComponent: React.FC<InspectButtonProps> = ({
+const InspectButtonComponent: React.FC<React.PropsWithChildren<InspectButtonProps>> = ({
   compact = false,
   inputId = InputsModelId.global,
   inspectIndex = 0,

@@ -21,7 +21,7 @@ import { AuthenticationPanelViewContent } from './authentication_panel_view_cont
 
 import './authentication_panel.scss';
 
-export const AuthenticationPanel: React.FC = () => {
+export const AuthenticationPanel: React.FC<React.PropsWithChildren<unknown>> = () => {
   const { isEditing, isModalVisible } = useValues(AuthenticationPanelLogic);
 
   return (

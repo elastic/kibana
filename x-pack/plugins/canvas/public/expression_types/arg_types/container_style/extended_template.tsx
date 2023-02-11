@@ -29,7 +29,7 @@ interface Props {
   workpad: CanvasWorkpad;
 }
 
-export const ExtendedTemplate: FunctionComponent<Props> = ({
+export const ExtendedTemplate: FunctionComponent<React.PropsWithChildren<Props>> = ({
   getArgValue,
   setArgValue,
   workpad,

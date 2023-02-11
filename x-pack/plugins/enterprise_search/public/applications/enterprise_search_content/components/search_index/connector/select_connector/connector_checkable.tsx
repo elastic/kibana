@@ -33,7 +33,7 @@ export type ConnectorCheckableProps = Omit<
   serviceType: string;
 };
 
-export const ConnectorCheckable: React.FC<ConnectorCheckableProps> = ({
+export const ConnectorCheckable: React.FC<React.PropsWithChildren<ConnectorCheckableProps>> = ({
   documentationUrl,
   name,
   serviceType,

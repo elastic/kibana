@@ -30,7 +30,7 @@ export interface SearchBarProps {
  * @param onFiltersChange
  * @constructor
  */
-export const SearchBarWrapper: FC<SearchBarProps> = ({
+export const SearchBarWrapper: FC<React.PropsWithChildren<SearchBarProps>> = ({
   query,
   filters,
   onQueryChange,

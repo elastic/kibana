@@ -20,7 +20,7 @@ import { TrustedAppsApiClient } from '../../pages/trusted_apps/service/api_clien
 import { artifactListPageLabels } from './translations';
 
 export const getFormComponentMock = (): {
-  FormComponentMock: jest.Mock<React.FunctionComponent<ArtifactFormComponentProps>>;
+  FormComponentMock: jest.Mock<React.FunctionComponent<React.PropsWithChildren<ArtifactFormComponentProps>>>;
   /**
    * Returns the props object that the Form component was last called with
    */
@@ -39,7 +39,7 @@ export const getFormComponentMock = (): {
         )}
       </div>
     );
-  }) as unknown as jest.Mock<React.FunctionComponent<ArtifactFormComponentProps>>);
+  }) as unknown as jest.Mock<React.FunctionComponent<React.PropsWithChildren<ArtifactFormComponentProps>>>);
 
   const getLastFormComponentProps = (): ArtifactFormComponentProps => {
     return FormComponentMock.mock.calls[FormComponentMock.mock.calls.length - 1][0];

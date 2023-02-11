@@ -23,7 +23,7 @@ interface Props {
   'aria-label'?: string;
 }
 
-export const ChartWrapper: FC<Props> = ({
+export const ChartWrapper: FC<React.PropsWithChildren<Props>> = ({
   loading = false,
   height = '100%',
   children,

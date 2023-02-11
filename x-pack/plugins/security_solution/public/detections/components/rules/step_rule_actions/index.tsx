@@ -88,7 +88,7 @@ const DisplayActionsHeader = () => {
   );
 };
 
-const StepRuleActionsComponent: FC<StepRuleActionsProps> = ({
+const StepRuleActionsComponent: FC<React.PropsWithChildren<StepRuleActionsProps>> = ({
   addPadding = false,
   defaultValues,
   isReadOnlyView,

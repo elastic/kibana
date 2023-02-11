@@ -14,7 +14,7 @@ import { EuiButton } from '@elastic/eui';
 import { ADD_SOURCE_ENGINES_BUTTON_LABEL } from '../i18n';
 import { SourceEnginesLogic } from '../source_engines_logic';
 
-export const AddSourceEnginesButton: React.FC = () => {
+export const AddSourceEnginesButton: React.FC<React.PropsWithChildren<unknown>> = () => {
   const { openModal } = useActions(SourceEnginesLogic);
 
   return (

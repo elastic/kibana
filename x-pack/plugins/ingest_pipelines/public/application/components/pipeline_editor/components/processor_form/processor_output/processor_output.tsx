@@ -82,7 +82,7 @@ const i18nTexts = {
   }),
 };
 
-export const ProcessorOutput: FunctionComponent<Props> = ({
+export const ProcessorOutput: FunctionComponent<React.PropsWithChildren<Props>> = ({
   processorOutput,
   documents,
   selectedDocumentIndex,
@@ -105,7 +105,7 @@ export const ProcessorOutput: FunctionComponent<Props> = ({
     status,
   } = processorOutput!;
 
-  const NoOutputCallOut: FunctionComponent = () => (
+  const NoOutputCallOut: FunctionComponent<React.PropsWithChildren<unknown>> = () => (
     <EuiCallOut title={i18nTexts.noOutputCalloutTitle} iconType="pin" />
   );
 

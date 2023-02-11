@@ -39,7 +39,7 @@ interface Props {
   timelineId: TimelineId;
 }
 
-const SessionTabContent: React.FC<Props> = ({ timelineId }) => {
+const SessionTabContent: React.FC<React.PropsWithChildren<Props>> = ({ timelineId }) => {
   const [height, setHeight] = useState(0);
   const measuredRef = useCallback((node) => {
     if (node !== null) {

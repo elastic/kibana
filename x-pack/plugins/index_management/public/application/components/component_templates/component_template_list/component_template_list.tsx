@@ -39,7 +39,7 @@ interface Props {
 
 const { useGlobalFlyout } = GlobalFlyout;
 
-export const ComponentTemplateList: React.FunctionComponent<Props> = ({
+export const ComponentTemplateList: React.FunctionComponent<React.PropsWithChildren<Props>> = ({
   componentTemplateName,
   history,
 }) => {

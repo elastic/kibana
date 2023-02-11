@@ -88,7 +88,7 @@ interface Props {
   pageState: ListingPageUrlState;
   updatePageState: (update: Partial<ListingPageUrlState>) => void;
 }
-export const DataFrameAnalyticsList: FC<Props> = ({
+export const DataFrameAnalyticsList: FC<React.PropsWithChildren<Props>> = ({
   isMlEnabledInSpace = true,
   blockRefresh = false,
   pageState,

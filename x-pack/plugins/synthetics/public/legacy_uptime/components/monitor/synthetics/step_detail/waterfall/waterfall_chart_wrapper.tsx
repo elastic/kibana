@@ -32,7 +32,7 @@ interface Props {
   markerItems?: MarkerItems;
 }
 
-export const WaterfallChartWrapper: React.FC<Props> = ({
+export const WaterfallChartWrapper: React.FC<React.PropsWithChildren<Props>> = ({
   data,
   total,
   markerItems,

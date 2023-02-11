@@ -53,7 +53,7 @@ const groupByOptions: Array<{ value: FilterField; text: string }> = [
   { value: 'column', text: strings.getGroupByColumnLabel() },
 ];
 
-export const WorkpadFilters: FC<Props> = ({
+export const WorkpadFilters: FC<React.PropsWithChildren<Props>> = ({
   filtersGroups,
   onGroupByChange,
   groupFiltersByField,

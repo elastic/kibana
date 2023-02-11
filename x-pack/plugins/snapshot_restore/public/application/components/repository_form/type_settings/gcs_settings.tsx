@@ -22,7 +22,7 @@ interface Props {
   settingErrors: RepositorySettingsValidation;
 }
 
-export const GCSSettings: React.FunctionComponent<Props> = ({
+export const GCSSettings: React.FunctionComponent<React.PropsWithChildren<Props>> = ({
   repository,
   updateRepositorySettings,
   settingErrors,

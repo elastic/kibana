@@ -45,7 +45,7 @@ import {
   TransformAlertFlyoutWrapper,
 } from '../../../alerting/transform_alerting_flyout';
 
-export const TransformManagement: FC = () => {
+export const TransformManagement: FC<React.PropsWithChildren<unknown>> = () => {
   const { esTransform } = useDocumentationLinks();
 
   const [transformsLoading, setTransformsLoading] = useState(false);
@@ -236,7 +236,7 @@ export const TransformManagement: FC = () => {
   );
 };
 
-export const TransformManagementSection: FC = () => {
+export const TransformManagementSection: FC<React.PropsWithChildren<unknown>> = () => {
   // Set breadcrumb and page title
   useEffect(() => {
     breadcrumbService.setBreadcrumbs(BREADCRUMB_SECTION.HOME);

@@ -141,7 +141,7 @@ export interface Columns<T, U = T> {
   width?: string;
 }
 
-const PaginatedTableComponent: FC<SiemTables> = ({
+const PaginatedTableComponent: FC<React.PropsWithChildren<SiemTables>> = ({
   activePage,
   columns,
   dataTestSubj = DEFAULT_DATA_TEST_SUBJ,
@@ -352,7 +352,7 @@ const PaginatedTableComponent: FC<SiemTables> = ({
 
 export const PaginatedTable = memo(PaginatedTableComponent);
 
-type BasicTableType = ComponentType<EuiBasicTableProps<any>>; // eslint-disable-line @typescript-eslint/no-explicit-any
+type BasicTableType = ComponentType<React.PropsWithChildren<EuiBasicTableProps<any>>>; // eslint-disable-line @typescript-eslint/no-explicit-any
 const BasicTable = styled(EuiBasicTable as BasicTableType)`
   tbody {
     th,

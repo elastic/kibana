@@ -143,7 +143,7 @@ const ThreatTacticDescription = styled.div`
   padding-left: ${(props) => props.theme.eui.euiSizeL};
 `;
 
-const EventDetailsComponent: React.FC<Props> = ({
+const EventDetailsComponent: React.FC<React.PropsWithChildren<Props>> = ({
   browserFields,
   data,
   detailsEcsData,

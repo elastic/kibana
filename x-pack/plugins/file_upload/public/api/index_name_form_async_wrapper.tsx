@@ -11,7 +11,7 @@ import { lazyLoadModules } from '../lazy_load_bundle';
 import { IndexNameFormProps } from '..';
 
 interface State {
-  IndexNameForm: React.ComponentType<IndexNameFormProps> | null;
+  IndexNameForm: React.ComponentType<React.PropsWithChildren<IndexNameFormProps>> | null;
 }
 
 export class IndexNameFormAsyncWrapper extends React.Component<IndexNameFormProps, State> {

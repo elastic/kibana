@@ -88,7 +88,7 @@ export const StyledEuiFlexItem = styled(EuiFlexItem)`
   align-items: center;
 `;
 
-const DonutChartWrapperComponent: React.FC<DonutChartWrapperProps> = ({
+const DonutChartWrapperComponent: React.FC<React.PropsWithChildren<DonutChartWrapperProps>> = ({
   children,
   dataExists,
   donutTextWrapperClassName,

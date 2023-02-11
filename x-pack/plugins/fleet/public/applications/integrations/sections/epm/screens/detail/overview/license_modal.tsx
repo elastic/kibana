@@ -27,7 +27,7 @@ interface Props {
   onClose: () => void;
 }
 
-export const LicenseModal: React.FunctionComponent<Props> = ({
+export const LicenseModal: React.FunctionComponent<React.PropsWithChildren<Props>> = ({
   licenseName = 'LICENSE.txt',
   licensePath,
   onClose,

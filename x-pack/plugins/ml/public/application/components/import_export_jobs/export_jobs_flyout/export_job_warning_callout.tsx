@@ -16,7 +16,7 @@ interface Props {
   jobs: JobDependencies;
 }
 
-export const ExportJobDependenciesWarningCallout: FC<Props> = ({ jobs: allJobs }) => {
+export const ExportJobDependenciesWarningCallout: FC<React.PropsWithChildren<Props>> = ({ jobs: allJobs }) => {
   const [jobs, jobsWithCalendars, jobsWithFilters] = filterJobs(allJobs);
   const usingCalendars = jobsWithCalendars.length > 0;
   const usingFilters = jobsWithFilters.length > 0;
@@ -85,7 +85,7 @@ export const ExportJobDependenciesWarningCallout: FC<Props> = ({ jobs: allJobs }
   );
 };
 
-const CalendarJobList: FC<{ jobs: JobDependencies }> = ({ jobs }) => (
+const CalendarJobList: FC<React.PropsWithChildren<{ jobs: JobDependencies }>> = ({ jobs }) => (
   <>
     {jobs.length > 0 && (
       <>
@@ -109,7 +109,7 @@ const CalendarJobList: FC<{ jobs: JobDependencies }> = ({ jobs }) => (
   </>
 );
 
-const FilterJobList: FC<{ jobs: JobDependencies }> = ({ jobs }) => (
+const FilterJobList: FC<React.PropsWithChildren<{ jobs: JobDependencies }>> = ({ jobs }) => (
   <>
     {jobs.length > 0 && (
       <>

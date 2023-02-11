@@ -9,7 +9,7 @@ import React, { FC } from 'react';
 import { EuiBadge } from '@elastic/eui';
 import { tabColor } from '../../../../../../common/util/group_color_utils';
 
-export const JobGroup: FC<{ name: string }> = ({ name }) => (
+export const JobGroup: FC<React.PropsWithChildren<{ name: string }>> = ({ name }) => (
   <EuiBadge key={`${name}-id`} data-test-subj="mlJobGroup" color={tabColor(name)}>
     {name}
   </EuiBadge>

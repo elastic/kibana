@@ -10,7 +10,7 @@ import React from 'react';
 import { useLicense } from '../../common/use_license';
 import { PlatinumLicenseCallout } from './platinum_callout';
 
-const CaseCalloutsComponent: React.FC = () => {
+const CaseCalloutsComponent: React.FC<React.PropsWithChildren<unknown>> = () => {
   const { euiTheme } = useEuiTheme();
   const { isAtLeastPlatinum } = useLicense();
 

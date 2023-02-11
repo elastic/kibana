@@ -14,7 +14,7 @@ import { EuiCallOut, EuiSpacer, EuiGlobalToastList } from '@elastic/eui';
 import { FLASH_MESSAGE_TYPES, DEFAULT_TOAST_TIMEOUT } from './constants';
 import { FlashMessagesLogic } from './flash_messages_logic';
 
-export const FlashMessages: React.FC = ({ children }) => {
+export const FlashMessages: React.FC<React.PropsWithChildren<unknown>> = ({ children }) => {
   const { messages } = useValues(FlashMessagesLogic);
 
   return (
@@ -41,7 +41,7 @@ export const FlashMessages: React.FC = ({ children }) => {
  * so that they don't rerender/reset their timers when navigating between pages,
  * and also to prevent z-index issues with flyouts and modals
  */
-export const Toasts: React.FC = () => {
+export const Toasts: React.FC<React.PropsWithChildren<unknown>> = () => {
   const { toastMessages } = useValues(FlashMessagesLogic);
   const { dismissToastMessage } = useActions(FlashMessagesLogic);
 

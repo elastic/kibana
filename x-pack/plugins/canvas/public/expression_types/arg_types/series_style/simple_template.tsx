@@ -33,7 +33,7 @@ type Props = {
   workpad: CanvasWorkpad;
 } & ResolvedArgProps<ResolvedLabels>;
 
-export const SimpleTemplate: FunctionComponent<Props> = (props) => {
+export const SimpleTemplate: FunctionComponent<React.PropsWithChildren<Props>> = (props) => {
   const {
     typeInstance,
     argValue,

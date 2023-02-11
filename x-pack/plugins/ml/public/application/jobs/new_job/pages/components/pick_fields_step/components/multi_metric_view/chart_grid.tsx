@@ -31,7 +31,7 @@ interface ChartGridProps {
   loading?: boolean;
 }
 
-export const ChartGrid: FC<ChartGridProps> = ({
+export const ChartGrid: FC<React.PropsWithChildren<ChartGridProps>> = ({
   aggFieldPairList,
   chartSettings,
   splitField,

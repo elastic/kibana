@@ -50,7 +50,7 @@ export interface PageTemplateProps {
   product?: string;
 }
 
-export const PageTemplate: React.FC<PageTemplateProps> = ({
+export const PageTemplate: React.FC<React.PropsWithChildren<PageTemplateProps>> = ({
   title,
   pageTitle,
   tabs,

@@ -32,11 +32,11 @@ import { Tags } from './tags';
 import { Priority } from './priority';
 import type { JsonEditorProps } from './json_editor';
 
-const JsonEditorLazy: React.FC<JsonEditorProps> = lazy(() => import('./json_editor'));
+const JsonEditorLazy: React.FC<React.PropsWithChildren<JsonEditorProps>> = lazy(() => import('./json_editor'));
 
 type FormViewProps = Omit<CreateAlertProps, 'editAction'>;
 
-const FormView: React.FC<FormViewProps> = ({
+const FormView: React.FC<React.PropsWithChildren<FormViewProps>> = ({
   editSubAction,
   editOptionalSubAction,
   errors,
@@ -122,7 +122,7 @@ export type CreateAlertProps = Pick<
   showSaveError: boolean;
 };
 
-const CreateAlertComponent: React.FC<CreateAlertProps> = ({
+const CreateAlertComponent: React.FC<React.PropsWithChildren<CreateAlertProps>> = ({
   editSubAction,
   editAction,
   editOptionalSubAction,

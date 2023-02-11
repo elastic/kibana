@@ -31,7 +31,7 @@ import { useToastNotificationService } from '../../services/toast_notification_s
 interface Props {
   onClose: () => void;
 }
-export const JobSpacesSyncFlyout: FC<Props> = ({ onClose }) => {
+export const JobSpacesSyncFlyout: FC<React.PropsWithChildren<Props>> = ({ onClose }) => {
   const { displayErrorToast, displaySuccessToast } = useToastNotificationService();
   const [loading, setLoading] = useState(false);
   const [canSync, setCanSync] = useState(false);

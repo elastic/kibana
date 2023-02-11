@@ -235,7 +235,7 @@ describe('UserActionMarkdown ', () => {
   describe('draft comment ', () => {
     const content = 'test content';
     const initialState = { content };
-    const MockHookWrapperComponent: React.FC<{ testProviderProps?: unknown }> = ({
+    const MockHookWrapperComponent: React.FC<React.PropsWithChildren<{ testProviderProps?: unknown }>> = ({
       children,
       testProviderProps = {},
     }) => {

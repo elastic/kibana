@@ -19,7 +19,7 @@ import {
   isMultiMetricJobCreator,
 } from '../../../../../common/job_creator';
 
-export const SplitFieldSelector: FC = () => {
+export const SplitFieldSelector: FC<React.PropsWithChildren<unknown>> = () => {
   const { jobCreator: jc, jobCreatorUpdate, jobCreatorUpdated } = useContext(JobCreatorContext);
   const jobCreator = jc as MultiMetricJobCreator | RareJobCreator;
 

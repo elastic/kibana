@@ -17,7 +17,7 @@ interface Props {
   }) => JSX.Element;
 }
 
-export const Fullscreen: FC<Props> = ({ children }) => {
+export const Fullscreen: FC<React.PropsWithChildren<Props>> = ({ children }) => {
   const { isFullscreen } = useContext(WorkpadRoutingContext);
 
   return <Component isFullscreen={isFullscreen} children={children} />;

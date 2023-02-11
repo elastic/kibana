@@ -44,7 +44,7 @@ import {
 import { PrivateSourcesTable } from './components/private_sources_table';
 import { SecurityLogic } from './security_logic';
 
-export const Security: React.FC = () => {
+export const Security: React.FC<React.PropsWithChildren<unknown>> = () => {
   const [confirmModalVisible, setConfirmModalVisibility] = useState(false);
 
   const hideConfirmModal = () => setConfirmModalVisibility(false);

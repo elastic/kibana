@@ -51,7 +51,7 @@ const prettifyFormJson = (policy: SerializedPolicy): PolicyJson => {
   };
 };
 
-export const PolicyJsonFlyout: React.FunctionComponent<Props> = ({ policyName, close }) => {
+export const PolicyJsonFlyout: React.FunctionComponent<React.PropsWithChildren<Props>> = ({ policyName, close }) => {
   /**
    * policy === undefined: we are checking validity
    * policy === null: we have determined the policy is invalid

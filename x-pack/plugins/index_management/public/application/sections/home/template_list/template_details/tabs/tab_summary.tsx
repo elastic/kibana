@@ -40,7 +40,7 @@ const i18nTexts = {
   }),
 };
 
-export const TabSummary: React.FunctionComponent<Props> = ({ templateDetails }) => {
+export const TabSummary: React.FunctionComponent<React.PropsWithChildren<Props>> = ({ templateDetails }) => {
   const {
     version,
     priority,

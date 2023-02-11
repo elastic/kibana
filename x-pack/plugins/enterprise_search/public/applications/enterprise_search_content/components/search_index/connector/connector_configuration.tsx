@@ -45,7 +45,7 @@ import { ConnectorConfigurationConfig } from './connector_configuration_config';
 import { ConnectorNameAndDescription } from './connector_name_and_description/connector_name_and_description';
 import { NativeConnectorConfiguration } from './native_connector_configuration/native_connector_configuration';
 
-export const ConnectorConfiguration: React.FC = () => {
+export const ConnectorConfiguration: React.FC<React.PropsWithChildren<unknown>> = () => {
   const { data: apiKeyData } = useValues(GenerateConnectorApiKeyApiLogic);
   const { index, recheckIndexLoading } = useValues(IndexViewLogic);
   const { indexName } = useValues(IndexNameLogic);

@@ -51,7 +51,7 @@ const referenceModalInitialState: ReferenceFlyoutState = {
   valueListId: '',
 };
 
-export const ValueListsFlyoutComponent: React.FC<ValueListsFlyoutProps> = ({
+export const ValueListsFlyoutComponent: React.FC<React.PropsWithChildren<ValueListsFlyoutProps>> = ({
   onClose,
   showFlyout,
 }) => {

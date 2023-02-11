@@ -17,7 +17,7 @@ export interface InPaginateProps {
   children: (props: PaginateChildProps) => React.ReactNode;
 }
 
-export const Paginate: React.FunctionComponent<InPaginateProps> = ({
+export const Paginate: React.FunctionComponent<React.PropsWithChildren<InPaginateProps>> = ({
   perPage = 10,
   startPage = 0,
   rows,

@@ -13,7 +13,7 @@ import type { TimelineProps } from './types';
 import * as i18n from './translations';
 import { useAppToasts } from '../../../../hooks/use_app_toasts';
 
-export const TimelineMarkDownRendererComponent: React.FC<TimelineProps> = ({
+export const TimelineMarkDownRendererComponent: React.FC<React.PropsWithChildren<TimelineProps>> = ({
   id,
   title,
   graphEventId,

@@ -24,7 +24,7 @@ interface FilteringRulesTableProps {
   showOrder: boolean;
 }
 
-export const FilteringRulesTable: React.FC<FilteringRulesTableProps> = ({
+export const FilteringRulesTable: React.FC<React.PropsWithChildren<FilteringRulesTableProps>> = ({
   showOrder,
   filteringRules,
 }) => {

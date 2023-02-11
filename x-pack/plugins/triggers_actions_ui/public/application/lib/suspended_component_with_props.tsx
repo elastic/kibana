@@ -10,7 +10,7 @@ import { EuiLoadingSpinnerSize } from '@elastic/eui/src/components/loading/loadi
 import { CenterJustifiedSpinner } from '../components/center_justified_spinner';
 
 export function suspendedComponentWithProps<T = unknown>(
-  ComponentToSuspend: React.ComponentType<T>,
+  ComponentToSuspend: React.ComponentType<React.PropsWithChildren<T>>,
   size?: EuiLoadingSpinnerSize
 ) {
   return (props: T) => (

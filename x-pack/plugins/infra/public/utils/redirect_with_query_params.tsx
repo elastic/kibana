@@ -15,7 +15,7 @@ interface RedirectWithQueryParamsProps extends Omit<RedirectProps, 'to'> {
 
 // This workaround preserves query parameters in the redirect
 // https://github.com/ReactTraining/react-router/issues/5818#issuecomment-379212014
-export const RedirectWithQueryParams: React.FunctionComponent<RedirectWithQueryParamsProps> = ({
+export const RedirectWithQueryParams: React.FunctionComponent<React.PropsWithChildren<RedirectWithQueryParamsProps>> = ({
   from,
   to,
   ...rest

@@ -21,7 +21,7 @@ interface DensityChartProps {
   height: number;
 }
 
-export const DensityChart: React.FC<DensityChartProps> = ({
+export const DensityChart: React.FC<React.PropsWithChildren<DensityChartProps>> = ({
   buckets,
   start,
   end,

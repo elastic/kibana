@@ -17,7 +17,7 @@ export interface PageProps {
   nextStepPath: string;
 }
 
-export const Page: FC<PageProps> = ({ nextStepPath }) => {
+export const Page: FC<React.PropsWithChildren<PageProps>> = ({ nextStepPath }) => {
   const RESULTS_PER_PAGE = 20;
   const { uiSettings, savedObjects } = useMlKibana().services;
   const navigateToPath = useNavigateToPath();

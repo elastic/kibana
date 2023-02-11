@@ -23,7 +23,7 @@ export interface MappingProps {
   mappings: CaseConnectorMapping[];
 }
 
-const MappingComponent: React.FC<MappingProps> = ({
+const MappingComponent: React.FC<React.PropsWithChildren<MappingProps>> = ({
   actionTypeName,
   connectorType,
   isLoading,

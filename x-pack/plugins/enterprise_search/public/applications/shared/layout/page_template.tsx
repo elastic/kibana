@@ -44,7 +44,7 @@ export type PageTemplateProps = KibanaPageTemplateProps & {
   pageViewTelemetry?: string;
 };
 
-export const EnterpriseSearchPageTemplateWrapper: React.FC<PageTemplateProps> = ({
+export const EnterpriseSearchPageTemplateWrapper: React.FC<React.PropsWithChildren<PageTemplateProps>> = ({
   children,
   className,
   customPageSections,

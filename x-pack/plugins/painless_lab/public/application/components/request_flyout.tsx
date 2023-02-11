@@ -27,7 +27,7 @@ interface Props {
   response?: string;
 }
 
-export const RequestFlyout: FunctionComponent<Props> = ({
+export const RequestFlyout: FunctionComponent<React.PropsWithChildren<Props>> = ({
   onClose,
   requestBody,
   response,

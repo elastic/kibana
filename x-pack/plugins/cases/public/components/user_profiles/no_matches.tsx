@@ -17,7 +17,7 @@ import {
 import React from 'react';
 import * as i18n from './translations';
 
-const NoMatchesComponent: React.FC = () => {
+const NoMatchesComponent: React.FC<React.PropsWithChildren<unknown>> = () => {
   return (
     <EuiFlexGroup
       alignItems="center"

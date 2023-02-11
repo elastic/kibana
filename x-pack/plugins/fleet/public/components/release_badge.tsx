@@ -36,7 +36,7 @@ const RELEASE_BADGE_DESCRIPTION: { [key in Exclude<IntegrationCardReleaseLabel, 
   }),
 };
 
-export const HeaderReleaseBadge: React.FC<{ release: IntegrationCardReleaseLabel }> = ({
+export const HeaderReleaseBadge: React.FC<React.PropsWithChildren<{ release: IntegrationCardReleaseLabel }>> = ({
   release,
 }) => {
   if (release === 'ga') return null;
@@ -49,7 +49,7 @@ export const HeaderReleaseBadge: React.FC<{ release: IntegrationCardReleaseLabel
   );
 };
 
-export const InlineReleaseBadge: React.FC<{ release: IntegrationCardReleaseLabel }> = ({
+export const InlineReleaseBadge: React.FC<React.PropsWithChildren<{ release: IntegrationCardReleaseLabel }>> = ({
   release,
 }) => {
   if (release === 'ga') return null;

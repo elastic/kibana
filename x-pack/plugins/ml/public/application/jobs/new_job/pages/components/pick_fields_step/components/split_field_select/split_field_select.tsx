@@ -25,7 +25,7 @@ interface Props {
   placeholder?: string;
 }
 
-export const SplitFieldSelect: FC<Props> = ({
+export const SplitFieldSelect: FC<React.PropsWithChildren<Props>> = ({
   fields,
   changeHandler,
   selectedField,

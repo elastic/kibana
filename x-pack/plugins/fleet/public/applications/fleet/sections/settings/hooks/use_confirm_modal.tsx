@@ -53,7 +53,7 @@ export function useConfirmModal() {
   };
 }
 
-export function withConfirmModalProvider<T>(WrappedComponent: React.FunctionComponent<T>) {
+export function withConfirmModalProvider<T>(WrappedComponent: React.FunctionComponent<React.PropsWithChildren<T>>) {
   return (props: T) => (
     <ConfirmModalProvider>
       <WrappedComponent {...props} />
@@ -61,7 +61,7 @@ export function withConfirmModalProvider<T>(WrappedComponent: React.FunctionComp
   );
 }
 
-export const ConfirmModalProvider: React.FunctionComponent = ({ children }) => {
+export const ConfirmModalProvider: React.FunctionComponent<React.PropsWithChildren<unknown>> = ({ children }) => {
   const [isVisible, setIsVisible] = useState(false);
   const [modal, setModal] = useState<ModalState>({
     onCancel: () => {},

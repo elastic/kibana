@@ -30,7 +30,7 @@ export interface SeverityLevelProps {
   addFilter?: ({ field, value }: { field: string; value: string | number }) => void;
 }
 
-export const SeverityLevelChart: React.FC<SeverityLevelProps> = ({
+export const SeverityLevelChart: React.FC<React.PropsWithChildren<SeverityLevelProps>> = ({
   data,
   isLoading,
   addFilter,

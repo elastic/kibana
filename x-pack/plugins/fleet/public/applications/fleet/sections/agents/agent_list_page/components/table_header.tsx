@@ -16,7 +16,7 @@ import {} from '@elastic/eui';
 import { AgentStatusBadges } from './status_badges';
 import type { SelectionMode } from './types';
 
-export const AgentTableHeader: React.FunctionComponent<{
+export const AgentTableHeader: React.FunctionComponent<React.PropsWithChildren<{
   agentStatus?: { [k in SimplifiedAgentStatus]: number };
   showInactive: boolean;
   totalAgents: number;
@@ -25,7 +25,7 @@ export const AgentTableHeader: React.FunctionComponent<{
   setSelectionMode: (mode: SelectionMode) => void;
   selectedAgents: Agent[];
   setSelectedAgents: (agents: Agent[]) => void;
-}> = ({
+}>> = ({
   agentStatus,
   totalAgents,
   selectableAgents,

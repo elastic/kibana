@@ -89,7 +89,7 @@ export const getHeaderAlignment = ({
   }
 };
 
-const HeaderSectionComponent: React.FC<HeaderSectionProps> = ({
+const HeaderSectionComponent: React.FC<React.PropsWithChildren<HeaderSectionProps>> = ({
   alignHeader,
   border,
   children,

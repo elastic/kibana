@@ -72,7 +72,7 @@ export interface StackedBarChartProps {
   showFrames: boolean;
 }
 
-export const StackedBarChart: React.FC<StackedBarChartProps> = ({
+export const StackedBarChart: React.FC<React.PropsWithChildren<StackedBarChartProps>> = ({
   height,
   asPercentages,
   onBrushEnd,

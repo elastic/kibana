@@ -14,7 +14,7 @@ export interface InspectorContextValue {
 
 export const InspectorContext = createContext<InspectorContextValue | undefined>(undefined);
 
-export const InspectorProvider: FC = ({ children }) => {
+export const InspectorProvider: FC<React.PropsWithChildren<unknown>> = ({ children }) => {
   const inspectorAdapters = useMemo(() => ({ requests: new RequestAdapter() }), []);
 
   return (

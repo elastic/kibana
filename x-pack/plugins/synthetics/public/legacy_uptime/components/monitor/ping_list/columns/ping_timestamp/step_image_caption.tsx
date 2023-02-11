@@ -32,7 +32,7 @@ export interface StepImageCaptionProps {
   isLoading: boolean;
 }
 
-export const StepImageCaption: React.FC<StepImageCaptionProps> = ({
+export const StepImageCaption: React.FC<React.PropsWithChildren<StepImageCaptionProps>> = ({
   captionContent,
   imgRef,
   imgSrc,

@@ -14,7 +14,7 @@ import { i18n } from '@kbn/i18n';
 
 import { ExternalConnectorLogic } from './external_connector_logic';
 
-export const ExternalConnectorFormFields: React.FC = () => {
+export const ExternalConnectorFormFields: React.FC<React.PropsWithChildren<unknown>> = () => {
   const {
     urlValid,
     externalConnectorApiKey,

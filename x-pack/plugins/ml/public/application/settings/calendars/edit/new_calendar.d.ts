@@ -7,8 +7,8 @@
 
 import { FC } from 'react';
 
-declare const NewCalendar: FC<{
+declare const NewCalendar: FC<React.PropsWithChildren<{
   calendarId?: string;
   canCreateCalendar: boolean;
   canDeleteCalendar: boolean;
-}>;
+}>>;

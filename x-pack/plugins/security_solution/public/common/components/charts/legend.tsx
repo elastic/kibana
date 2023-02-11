@@ -17,9 +17,9 @@ import React from 'react';
 
 import { LegendItem } from './legend_item';
 
-const LegendComponent: React.FC<{
+const LegendComponent: React.FC<React.PropsWithChildren<{
   legendItems: LegendItem[];
-}> = ({ legendItems }) => {
+}>> = ({ legendItems }) => {
   if (legendItems.length === 0) {
     return null;
   }

@@ -72,7 +72,7 @@ function getListItems(details: object): EuiDescriptionListProps['listItems'] {
   });
 }
 
-export const Controls: FC<Props> = React.memo(
+export const Controls: FC<React.PropsWithChildren<Props>> = React.memo(
   ({ details, getNodeData, modelId, refreshJobsCallback, updateElements }) => {
     const [showFlyout, setShowFlyout] = useState<boolean>(false);
     const [selectedNode, setSelectedNode] = useState<cytoscape.NodeSingular | undefined>();

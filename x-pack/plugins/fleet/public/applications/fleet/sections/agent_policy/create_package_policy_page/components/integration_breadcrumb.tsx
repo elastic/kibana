@@ -6,11 +6,11 @@
  */
 import { useBreadcrumbs } from '../../../../hooks';
 
-export const IntegrationBreadcrumb: React.FunctionComponent<{
+export const IntegrationBreadcrumb: React.FunctionComponent<React.PropsWithChildren<{
   pkgTitle: string;
   pkgkey: string;
   integration?: string;
-}> = ({ pkgTitle, pkgkey, integration }) => {
+}>> = ({ pkgTitle, pkgkey, integration }) => {
   useBreadcrumbs('add_integration_to_policy', {
     pkgTitle,
     pkgkey,

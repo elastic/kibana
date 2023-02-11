@@ -11,7 +11,7 @@ import { SourceProvider } from '../../../containers/metrics_source';
 import { MetricsTimeProvider } from './hooks/use_metrics_time';
 
 export const withMetricPageProviders =
-  <T extends object>(Component: React.ComponentType<T>) =>
+  <T extends object>(Component: React.ComponentType<React.PropsWithChildren<T>>) =>
   (props: T) =>
     (
       <EuiErrorBoundary>

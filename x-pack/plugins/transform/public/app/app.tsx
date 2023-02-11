@@ -27,7 +27,7 @@ import { CloneTransformSection } from './sections/clone_transform';
 import { CreateTransformSection } from './sections/create_transform';
 import { TransformManagementSection } from './sections/transform_management';
 
-export const App: FC<{ history: ScopedHistory }> = ({ history }) => {
+export const App: FC<React.PropsWithChildren<{ history: ScopedHistory }>> = ({ history }) => {
   const { apiError } = useContext(AuthorizationContext);
   if (apiError !== null) {
     return (

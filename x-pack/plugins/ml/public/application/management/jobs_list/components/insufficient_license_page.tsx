@@ -16,7 +16,7 @@ interface Props {
   basePath: CoreStart['http']['basePath'];
 }
 
-export const InsufficientLicensePage: FC<Props> = ({ basePath }) => (
+export const InsufficientLicensePage: FC<React.PropsWithChildren<Props>> = ({ basePath }) => (
   <>
     <EuiPageContent
       verticalPosition="center"

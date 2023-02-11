@@ -32,7 +32,7 @@ import {
 
 export type OnAddFilter = <T extends string>(key: T, value: Serializable, negate: boolean) => void;
 
-export const PageTitle: React.FC = ({ children }) => (
+export const PageTitle: React.FC<React.PropsWithChildren<unknown>> = ({ children }) => (
   <EuiTitle size="l">
     <div>
       {children}
@@ -236,11 +236,11 @@ const getCellValue = (value: unknown) => {
   if (typeof value === 'string' || typeof value === 'number') return value;
 };
 
-const FilterableCell: React.FC<{
+const FilterableCell: React.FC<React.PropsWithChildren<{
   onAddFilter(): void;
   onAddNegateFilter(): void;
   field: string;
-}> = ({ children, onAddFilter, onAddNegateFilter, field }) => (
+}>> = ({ children, onAddFilter, onAddNegateFilter, field }) => (
   <div
     css={css`
       position: relative;

@@ -14,7 +14,7 @@ export interface ConnectorContextValue {
 
 export const ConnectorContext = React.createContext<ConnectorContextValue | undefined>(undefined);
 
-export const ConnectorProvider: React.FC<{ value: ConnectorContextValue }> = ({
+export const ConnectorProvider: React.FC<React.PropsWithChildren<{ value: ConnectorContextValue }>> = ({
   children,
   value,
 }) => {

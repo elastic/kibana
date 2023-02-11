@@ -87,7 +87,7 @@ export const validateChangePasswordForm = (
   return errors;
 };
 
-export const ChangePasswordModal: FunctionComponent<ChangePasswordModalProps> = ({
+export const ChangePasswordModal: FunctionComponent<React.PropsWithChildren<ChangePasswordModalProps>> = ({
   username,
   defaultValues = {
     current_password: '',

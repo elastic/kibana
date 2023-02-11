@@ -22,6 +22,6 @@ interface Props {
   level: 'critical' | 'warning';
 }
 
-export const LevelInfoTip: FunctionComponent<Props> = ({ level }) => {
+export const LevelInfoTip: FunctionComponent<React.PropsWithChildren<Props>> = ({ level }) => {
   return <EuiIconTip content={i18nTexts[level]} position="top" type="iInCircle" />;
 };

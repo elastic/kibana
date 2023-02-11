@@ -17,11 +17,11 @@ import { SUPPORTED_FIELD_TYPES } from '../../../../../../common/constants';
 import { EmbeddedMapComponent } from '../../embedded_map';
 import { ExpandedRowPanel } from '../../stats_table/components/field_data_expanded_row/expanded_row_panel';
 
-export const GeoPointContentWithMap: FC<{
+export const GeoPointContentWithMap: FC<React.PropsWithChildren<{
   config: FieldVisConfig;
   dataView: DataView | undefined;
   combinedQuery: CombinedQuery;
-}> = ({ config, dataView, combinedQuery }) => {
+}>> = ({ config, dataView, combinedQuery }) => {
   const { stats } = config;
   const [layerList, setLayerList] = useState<LayerDescriptor[]>([]);
   const {

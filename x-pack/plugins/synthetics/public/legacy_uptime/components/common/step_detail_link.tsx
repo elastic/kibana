@@ -19,7 +19,7 @@ interface StepDetailLinkProps {
   stepIndex: number;
 }
 
-export const StepDetailLink: FC<StepDetailLinkProps> = ({ children, checkGroupId, stepIndex }) => {
+export const StepDetailLink: FC<React.PropsWithChildren<StepDetailLinkProps>> = ({ children, checkGroupId, stepIndex }) => {
   const to = `/journey/${checkGroupId}/step/${stepIndex}`;
 
   return (

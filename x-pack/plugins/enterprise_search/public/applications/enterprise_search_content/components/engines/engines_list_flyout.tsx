@@ -40,7 +40,7 @@ import { EngineError } from '../engine/engine_error';
 
 import { EnginesListFlyoutLogic } from './engines_list_flyout_logic';
 
-export const EngineListIndicesFlyout: React.FC = () => {
+export const EngineListIndicesFlyout: React.FC<React.PropsWithChildren<unknown>> = () => {
   const {
     fetchEngineData,
     fetchEngineName,

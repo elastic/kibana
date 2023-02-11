@@ -57,7 +57,7 @@ export const fieldsMapping: Readonly<StatItems[]> = [
   },
 ];
 
-const UsersKpiAuthenticationsComponent: React.FC<UsersKpiProps> = ({
+const UsersKpiAuthenticationsComponent: React.FC<React.PropsWithChildren<UsersKpiProps>> = ({
   filterQuery,
   from,
   indexNames,

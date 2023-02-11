@@ -13,7 +13,7 @@ interface Props {
   checkGroup?: string;
 }
 
-export const EmptyJourney: FC<Props> = ({ checkGroup }) => (
+export const EmptyJourney: FC<React.PropsWithChildren<Props>> = ({ checkGroup }) => (
   <EuiEmptyPrompt
     iconType="cross"
     title={

@@ -13,7 +13,7 @@ import { DetailsStepDetails } from './details_step_details';
 import { DetailsStepForm } from './details_step_form';
 import { ANALYTICS_STEPS } from '../../page';
 
-export const DetailsStep: FC<CreateAnalyticsStepProps> = ({
+export const DetailsStep: FC<React.PropsWithChildren<CreateAnalyticsStepProps>> = ({
   actions,
   state,
   setCurrentStep,

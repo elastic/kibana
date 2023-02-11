@@ -19,7 +19,7 @@ interface Props {
   children?: React.ReactNode;
 }
 
-const ExperimentalBadge: React.FC = () => (
+const ExperimentalBadge: React.FC<React.PropsWithChildren<unknown>> = () => (
   <EuiBetaBadge
     label={i18n.EXPERIMENTAL_LABEL}
     tooltipContent={i18n.EXPERIMENTAL_DESC}
@@ -29,13 +29,13 @@ const ExperimentalBadge: React.FC = () => (
 
 ExperimentalBadge.displayName = 'ExperimentalBadge';
 
-const BetaBadge: React.FC = () => (
+const BetaBadge: React.FC<React.PropsWithChildren<unknown>> = () => (
   <EuiBetaBadge label={i18n.BETA_LABEL} tooltipContent={i18n.BETA_DESC} tooltipPosition="bottom" />
 );
 
 BetaBadge.displayName = 'BetaBadge';
 
-const TitleComponent: React.FC<Props> = ({ title, releasePhase, children }) => (
+const TitleComponent: React.FC<React.PropsWithChildren<Props>> = ({ title, releasePhase, children }) => (
   <EuiFlexGroup alignItems="baseline" gutterSize="s" responsive={false}>
     <EuiFlexItem grow={false}>
       <EuiFlexGroup alignItems="center" gutterSize="none" responsive={false}>

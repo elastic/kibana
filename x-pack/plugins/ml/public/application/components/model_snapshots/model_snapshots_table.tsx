@@ -40,7 +40,7 @@ export enum COMBINED_JOB_STATE {
   UNKNOWN,
 }
 
-export const ModelSnapshotTable: FC<Props> = ({ job, refreshJobList }) => {
+export const ModelSnapshotTable: FC<React.PropsWithChildren<Props>> = ({ job, refreshJobList }) => {
   const canCreateJob = checkPermission('canCreateJob');
   const canStartStopDatafeed = checkPermission('canStartStopDatafeed');
 

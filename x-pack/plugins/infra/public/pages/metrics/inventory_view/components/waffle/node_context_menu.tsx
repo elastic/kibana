@@ -37,7 +37,7 @@ interface Props {
   nodeType: InventoryItemType;
 }
 
-export const NodeContextMenu: React.FC<Props & { theme?: EuiTheme }> = withTheme(
+export const NodeContextMenu: React.FC<React.PropsWithChildren<Props & { theme?: EuiTheme }>> = withTheme(
   ({ options, currentTime, node, nodeType }) => {
     const [flyoutVisible, setFlyoutVisible] = useState(false);
     const inventoryModel = findInventoryModel(nodeType);

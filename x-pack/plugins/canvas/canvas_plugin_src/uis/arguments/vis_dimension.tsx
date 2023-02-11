@@ -24,7 +24,7 @@ type VisDimensionArgInputProps = {
   };
 } & ResolvedArgProps<ResolvedColumns>;
 
-const VisDimensionArgInput: React.FC<VisDimensionArgInputProps> = ({
+const VisDimensionArgInput: React.FC<React.PropsWithChildren<VisDimensionArgInputProps>> = ({
   argValue,
   typeInstance,
   onValueChange,

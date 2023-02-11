@@ -127,14 +127,14 @@ RelatedAlertsByProcessAncestry.displayName = 'RelatedAlertsByProcessAncestry';
 /**
  * Fetches data, displays a loading and error state and notifies about on success
  */
-const FetchAndNotifyCachedAlertsByProcessAncestry: React.FC<{
+const FetchAndNotifyCachedAlertsByProcessAncestry: React.FC<React.PropsWithChildren<{
   data: TimelineEventsDetailsItem;
   eventId: string;
   index: TimelineEventsDetailsItem;
   originalDocumentId: TimelineEventsDetailsItem;
   isActiveTimelines: boolean;
   onCacheLoad: (cache: Cache) => void;
-}> = ({ data, originalDocumentId, index, isActiveTimelines, onCacheLoad, eventId }) => {
+}>> = ({ data, originalDocumentId, index, isActiveTimelines, onCacheLoad, eventId }) => {
   const { values: wrappedProcessEntityId } = data;
   const { values: indices } = index;
   const { values: wrappedDocumentId } = originalDocumentId;
@@ -170,11 +170,11 @@ FetchAndNotifyCachedAlertsByProcessAncestry.displayName =
 /**
  * Renders the alert table and the timeline button from a filled cache.
  */
-const ActualRelatedAlertsByProcessAncestry: React.FC<{
+const ActualRelatedAlertsByProcessAncestry: React.FC<React.PropsWithChildren<{
   alertIds: string[];
   eventId: string;
   scopeId?: string;
-}> = ({ alertIds, eventId, scopeId }) => {
+}>> = ({ alertIds, eventId, scopeId }) => {
   const shouldUseFilters = alertIds && alertIds.length && alertIds.length >= dataProviderLimit;
   const dataProviders = useMemo(() => {
     if (alertIds && alertIds.length) {

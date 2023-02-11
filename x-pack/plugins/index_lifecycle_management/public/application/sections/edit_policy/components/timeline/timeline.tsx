@@ -120,7 +120,7 @@ interface Props {
  * Display a timeline given ILM policy phase information. This component is re-usable and memo-ized
  * and should not rely directly on any application-specific context.
  */
-export const Timeline: FunctionComponent<Props> = memo(
+export const Timeline: FunctionComponent<React.PropsWithChildren<Props>> = memo(
   ({ hasDeletePhase, isUsingRollover, ...phasesMinAge }) => {
     const absoluteTimings: AbsoluteTimings = {
       hot: { min_age: phasesMinAge.hotPhaseMinAge },

@@ -11,7 +11,7 @@ import { i18n } from '@kbn/i18n';
 import moment from 'moment';
 import { useErrorFailedTests } from '../hooks/use_last_error_state';
 
-export const ErrorDuration: React.FC = () => {
+export const ErrorDuration: React.FC<React.PropsWithChildren<unknown>> = () => {
   const { failedTests } = useErrorFailedTests();
 
   const state = failedTests?.[0]?.state;

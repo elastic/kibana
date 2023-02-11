@@ -74,7 +74,7 @@ const getDataProvider = ({
   and: [],
 });
 
-const NonDecoratedIpComponent: React.FC<{
+const NonDecoratedIpComponent: React.FC<React.PropsWithChildren<{
   contextId: string;
   eventId: string;
   fieldName: string;
@@ -83,7 +83,7 @@ const NonDecoratedIpComponent: React.FC<{
   isDraggable: boolean;
   truncate?: boolean;
   value: string | object | null | undefined;
-}> = ({
+}>> = ({
   contextId,
   eventId,
   fieldName,
@@ -152,7 +152,7 @@ interface AddressLinksItemProps extends Omit<AddressLinksProps, 'addresses'> {
   address: string;
 }
 
-const AddressLinksItemComponent: React.FC<AddressLinksItemProps> = ({
+const AddressLinksItemComponent: React.FC<React.PropsWithChildren<AddressLinksItemProps>> = ({
   address,
   Component,
   contextId,
@@ -300,7 +300,7 @@ interface AddressLinksProps {
   title?: string;
 }
 
-const AddressLinksComponent: React.FC<AddressLinksProps> = ({
+const AddressLinksComponent: React.FC<React.PropsWithChildren<AddressLinksProps>> = ({
   addresses,
   Component,
   contextId,
@@ -367,7 +367,7 @@ const AddressLinks = React.memo(
     deepEqual(prevProps.addresses, nextProps.addresses)
 );
 
-const FormattedIpComponent: React.FC<{
+const FormattedIpComponent: React.FC<React.PropsWithChildren<{
   Component?: typeof EuiButtonEmpty | typeof EuiButtonIcon;
   contextId: string;
   eventId: string;
@@ -380,7 +380,7 @@ const FormattedIpComponent: React.FC<{
   title?: string;
   truncate?: boolean;
   value: string | object | null | undefined;
-}> = ({
+}>> = ({
   Component,
   contextId,
   eventId,

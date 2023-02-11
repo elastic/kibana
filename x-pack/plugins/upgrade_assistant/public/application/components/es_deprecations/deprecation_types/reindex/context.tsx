@@ -32,7 +32,7 @@ interface Props {
   indexName: string;
 }
 
-export const ReindexStatusProvider: React.FunctionComponent<Props> = ({
+export const ReindexStatusProvider: React.FunctionComponent<React.PropsWithChildren<Props>> = ({
   api,
   indexName,
   children,

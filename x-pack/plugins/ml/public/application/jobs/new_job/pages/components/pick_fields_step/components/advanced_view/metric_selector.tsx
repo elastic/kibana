@@ -23,7 +23,7 @@ interface Props {
 
 const MAX_WIDTH = 560;
 
-export const MetricSelector: FC<Props> = ({
+export const MetricSelector: FC<React.PropsWithChildren<Props>> = ({
   payload,
   fields,
   aggs,

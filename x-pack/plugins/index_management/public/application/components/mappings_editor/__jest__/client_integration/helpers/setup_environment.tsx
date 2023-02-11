@@ -84,7 +84,7 @@ const defaultProps: MappingsEditorProps = {
 };
 
 export const WithAppDependencies =
-  (Comp: MemoExoticComponent<ComponentType<MappingsEditorProps>>) =>
+  (Comp: MemoExoticComponent<ComponentType<React.PropsWithChildren<MappingsEditorProps>>>) =>
   (props: Partial<MappingsEditorProps>) =>
     (
       <KibanaReactContextProvider>

@@ -33,7 +33,7 @@ interface Props {
   setAdvancedExpanded: (a: boolean) => void;
 }
 
-export const AdvancedSection: FC<Props> = ({ advancedExpanded, setAdvancedExpanded }) => {
+export const AdvancedSection: FC<React.PropsWithChildren<Props>> = ({ advancedExpanded, setAdvancedExpanded }) => {
   const { jobCreator } = useContext(JobCreatorContext);
 
   if (jobCreator.type === JOB_TYPE.ADVANCED) {

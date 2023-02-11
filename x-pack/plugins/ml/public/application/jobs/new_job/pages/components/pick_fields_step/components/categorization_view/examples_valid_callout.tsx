@@ -41,7 +41,7 @@ const allChecksButtonContent = i18n.translate(
   }
 );
 
-export const ExamplesValidCallout: FC<Props> = ({
+export const ExamplesValidCallout: FC<React.PropsWithChildren<Props>> = ({
   overallValidStatus,
   validationChecks,
   categorizationAnalyzer,
@@ -93,7 +93,7 @@ export const ExamplesValidCallout: FC<Props> = ({
   );
 };
 
-const AnalyzerUsed: FC<{ categorizationAnalyzer: CategorizationAnalyzer }> = ({
+const AnalyzerUsed: FC<React.PropsWithChildren<{ categorizationAnalyzer: CategorizationAnalyzer }>> = ({
   categorizationAnalyzer,
 }) => {
   let analyzer = '';
@@ -120,7 +120,7 @@ const AnalyzerUsed: FC<{ categorizationAnalyzer: CategorizationAnalyzer }> = ({
   );
 };
 
-const AllValidationChecks: FC<{ validationChecks: FieldExampleCheck[] }> = ({
+const AllValidationChecks: FC<React.PropsWithChildren<{ validationChecks: FieldExampleCheck[] }>> = ({
   validationChecks,
 }) => {
   const list: EuiListGroupItemProps[] = Object.keys(VALIDATION_CHECK_DESCRIPTION).map((k, i) => {

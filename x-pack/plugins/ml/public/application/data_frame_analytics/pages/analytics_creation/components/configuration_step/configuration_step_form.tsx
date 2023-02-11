@@ -114,7 +114,7 @@ function getRuntimeDepVarOptions(jobType: AnalyticsJobType, runtimeMappings: Run
   return runtimeOptions;
 }
 
-export const ConfigurationStepForm: FC<ConfigurationStepProps> = ({
+export const ConfigurationStepForm: FC<React.PropsWithChildren<ConfigurationStepProps>> = ({
   actions,
   isClone,
   state,

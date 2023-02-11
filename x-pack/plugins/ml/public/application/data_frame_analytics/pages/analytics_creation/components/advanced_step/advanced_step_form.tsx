@@ -122,7 +122,7 @@ export type AdvancedParamErrors = {
   [key in ANALYSIS_ADVANCED_FIELDS]?: string;
 };
 
-export const AdvancedStepForm: FC<CreateAnalyticsStepProps> = ({
+export const AdvancedStepForm: FC<React.PropsWithChildren<CreateAnalyticsStepProps>> = ({
   actions,
   state,
   setCurrentStep,

@@ -20,7 +20,7 @@ interface IntegrationStatusBadgeProps {
   integration: IntegrationDetails;
 }
 
-const IntegrationStatusBadgeComponent: React.FC<IntegrationStatusBadgeProps> = ({
+const IntegrationStatusBadgeComponent: React.FC<React.PropsWithChildren<IntegrationStatusBadgeProps>> = ({
   integration,
 }) => {
   const { installationStatus } = integration;

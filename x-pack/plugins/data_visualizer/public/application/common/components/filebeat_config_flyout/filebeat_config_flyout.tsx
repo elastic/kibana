@@ -36,7 +36,7 @@ interface Props {
   ingestPipelineId: string;
   closeFlyout(): void;
 }
-export const FilebeatConfigFlyout: FC<Props> = ({
+export const FilebeatConfigFlyout: FC<React.PropsWithChildren<Props>> = ({
   index,
   results,
   ingestPipelineId,
@@ -101,11 +101,11 @@ export const FilebeatConfigFlyout: FC<Props> = ({
   );
 };
 
-const Contents: FC<{
+const Contents: FC<React.PropsWithChildren<{
   value: string;
   index: string;
   username: string | null;
-}> = ({ value, index, username }) => {
+}>> = ({ value, index, username }) => {
   return (
     <EuiFlexItem data-test-subj="fileDataVisFilebeatConfigPanel">
       <EuiTitle size="s">

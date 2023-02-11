@@ -76,7 +76,7 @@ export const createNodeDetailLink = (
   });
 };
 
-export const MetricsExplorerChartContextMenu: React.FC<Props> = ({
+export const MetricsExplorerChartContextMenu: React.FC<React.PropsWithChildren<Props>> = ({
   onFilter,
   options,
   series,

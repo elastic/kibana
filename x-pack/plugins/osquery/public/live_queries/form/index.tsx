@@ -58,7 +58,7 @@ interface LiveQueryFormProps {
   hideAgentsField?: boolean;
 }
 
-const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
+const LiveQueryFormComponent: React.FC<React.PropsWithChildren<LiveQueryFormProps>> = ({
   defaultValue,
   onSuccess,
   queryField = true,

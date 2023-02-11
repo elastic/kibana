@@ -21,7 +21,7 @@ interface CurlRequestParams {
   pipeline?: IngestPipelineParams;
 }
 
-export const CurlRequest: React.FC<CurlRequestParams> = ({
+export const CurlRequest: React.FC<React.PropsWithChildren<CurlRequestParams>> = ({
   indexName,
   apiKey,
   document,

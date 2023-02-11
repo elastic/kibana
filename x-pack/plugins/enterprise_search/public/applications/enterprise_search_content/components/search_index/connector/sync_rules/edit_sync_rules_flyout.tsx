@@ -43,7 +43,7 @@ enum FilteringTabs {
   ADVANCED = 'advanced',
 }
 
-export const EditSyncRulesFlyout: React.FC<EditFilteringFlyoutProps> = ({
+export const EditSyncRulesFlyout: React.FC<React.PropsWithChildren<EditFilteringFlyoutProps>> = ({
   errors,
   hasAdvancedFilteringFeature,
   hasBasicFilteringFeature,

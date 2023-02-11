@@ -10,7 +10,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { useMlLocator, useNavigateToPath } from '../../../contexts/kibana';
 import { ML_PAGES } from '../../../../../common/constants/locator';
 
-export const JobsActionMenu: FC = () => {
+export const JobsActionMenu: FC<React.PropsWithChildren<unknown>> = () => {
   const navigateToPath = useNavigateToPath();
   const mlLocator = useMlLocator();
 

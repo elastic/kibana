@@ -21,7 +21,7 @@ export interface TypeFilterProps {
   filters: string[];
 }
 
-export const TypeFilter: React.FunctionComponent<TypeFilterProps> = ({
+export const TypeFilter: React.FunctionComponent<React.PropsWithChildren<TypeFilterProps>> = ({
   options,
   onChange: onFilterChange,
   filters,

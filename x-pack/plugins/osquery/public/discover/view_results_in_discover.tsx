@@ -21,7 +21,7 @@ interface ViewResultsInDiscoverActionProps {
   mode?: string;
 }
 
-const ViewResultsInDiscoverActionComponent: React.FC<ViewResultsInDiscoverActionProps> = ({
+const ViewResultsInDiscoverActionComponent: React.FC<React.PropsWithChildren<ViewResultsInDiscoverActionProps>> = ({
   actionId,
   buttonType,
   endDate,

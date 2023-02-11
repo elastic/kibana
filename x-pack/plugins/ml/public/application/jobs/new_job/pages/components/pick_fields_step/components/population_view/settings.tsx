@@ -15,7 +15,7 @@ interface Props {
   setIsValid: (proceed: boolean) => void;
 }
 
-export const PopulationSettings: FC<Props> = ({ setIsValid }) => {
+export const PopulationSettings: FC<React.PropsWithChildren<Props>> = ({ setIsValid }) => {
   return (
     <Fragment>
       <EuiFlexGroup gutterSize="xl">

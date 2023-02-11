@@ -271,7 +271,7 @@ function useFeatures(
   return features;
 }
 
-export const EditRolePage: FunctionComponent<Props> = ({
+export const EditRolePage: FunctionComponent<React.PropsWithChildren<Props>> = ({
   userAPIClient,
   dataViews,
   rolesAPIClient,

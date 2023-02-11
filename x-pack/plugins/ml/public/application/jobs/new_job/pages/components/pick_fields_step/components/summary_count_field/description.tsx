@@ -16,7 +16,7 @@ interface Props {
   validation: Validation;
 }
 
-export const Description: FC<Props> = memo(({ children, validation }) => {
+export const Description: FC<React.PropsWithChildren<Props>> = memo(({ children, validation }) => {
   const title = i18n.translate('xpack.ml.newJob.wizard.pickFieldsStep.summaryCountField.title', {
     defaultMessage: 'Summary count field',
   });

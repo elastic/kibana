@@ -110,7 +110,7 @@ export interface HeaderActionProps {
   timelineId: string;
 }
 
-export type HeaderCellRender = ComponentType | ComponentType<HeaderActionProps>;
+export type HeaderCellRender = ComponentType<React.PropsWithChildren<unknown>> | ComponentType<React.PropsWithChildren<HeaderActionProps>>;
 
 type GenericActionRowCellRenderProps = Pick<
   EuiDataGridCellValueElementProps,

@@ -43,7 +43,7 @@ import * as i18n from '../../../../detections/pages/detection_engine/rules/trans
 import { RulesPageTourComponent } from '../../components/rules_table/alternative_tour/tour';
 import { useInvalidateFetchRuleManagementFiltersQuery } from '../../../rule_management/api/hooks/use_fetch_rule_management_filters_query';
 
-const RulesPageComponent: React.FC = () => {
+const RulesPageComponent: React.FC<React.PropsWithChildren<unknown>> = () => {
   const [isImportModalVisible, showImportModal, hideImportModal] = useBoolState();
   const [isValueListFlyoutVisible, showValueListFlyout, hideValueListFlyout] = useBoolState();
   const { navigateToApp } = useKibana().services.application;

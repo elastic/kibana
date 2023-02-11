@@ -28,7 +28,7 @@ import {
 } from './fields';
 import { useCore } from '../../../../app_context';
 
-export const PolicyStepSettings: React.FunctionComponent<StepProps> = ({
+export const PolicyStepSettings: React.FunctionComponent<React.PropsWithChildren<StepProps>> = ({
   policy,
   indices,
   dataStreams,

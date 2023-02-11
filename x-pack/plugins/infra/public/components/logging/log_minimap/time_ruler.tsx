@@ -19,7 +19,7 @@ interface TimeRulerProps {
   width: number;
 }
 
-export const TimeRuler: React.FC<TimeRulerProps> = ({ end, height, start, tickCount, width }) => {
+export const TimeRuler: React.FC<React.PropsWithChildren<TimeRulerProps>> = ({ end, height, start, tickCount, width }) => {
   const yScale = scaleTime().domain([start, end]).range([0, height]);
 
   const ticks = yScale.ticks(tickCount);

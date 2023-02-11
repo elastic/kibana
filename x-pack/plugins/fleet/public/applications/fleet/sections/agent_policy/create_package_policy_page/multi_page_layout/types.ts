@@ -17,7 +17,7 @@ import type {
 
 export interface MultiPageStep {
   title: string;
-  component: React.FC<MultiPageStepLayoutProps>;
+  component: React.FC<React.PropsWithChildren<MultiPageStepLayoutProps>>;
 }
 
 export interface MultiPageStepLayoutProps {

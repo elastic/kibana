@@ -62,7 +62,7 @@ export interface SubChartProps {
 
 const NUM_DISPLAYED_FRAMES = 5;
 
-export const SubChart: React.FC<SubChartProps> = ({
+export const SubChart: React.FC<React.PropsWithChildren<SubChartProps>> = ({
   index,
   color,
   category,

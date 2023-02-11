@@ -26,7 +26,7 @@ interface JobEditorProps {
   theme?: string;
   onChange?: EuiCodeEditorProps['onChange'];
 }
-export const JsonEditor: FC<JobEditorProps> = ({
+export const JsonEditor: FC<React.PropsWithChildren<JobEditorProps>> = ({
   value,
   height = '500px',
   width = '100%',

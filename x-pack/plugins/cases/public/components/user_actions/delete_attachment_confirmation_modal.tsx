@@ -12,7 +12,7 @@ import { CANCEL_BUTTON } from './property_actions/translations';
 
 type Pros = Pick<EuiConfirmModalProps, 'title' | 'confirmButtonText' | 'onConfirm' | 'onCancel'>;
 
-const DeleteAttachmentConfirmationModalComponent: React.FC<Pros> = ({
+const DeleteAttachmentConfirmationModalComponent: React.FC<React.PropsWithChildren<Pros>> = ({
   title,
   confirmButtonText,
   onConfirm,

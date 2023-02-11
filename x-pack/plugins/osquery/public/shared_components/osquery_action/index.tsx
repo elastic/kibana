@@ -24,7 +24,7 @@ export interface OsqueryActionProps {
   onSuccess?: () => void;
 }
 
-const OsqueryActionComponent: React.FC<OsqueryActionProps> = ({
+const OsqueryActionComponent: React.FC<React.PropsWithChildren<OsqueryActionProps>> = ({
   agentId,
   formType = 'simple',
   defaultValues,

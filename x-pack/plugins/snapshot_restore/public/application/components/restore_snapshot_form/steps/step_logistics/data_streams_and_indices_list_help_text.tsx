@@ -16,7 +16,7 @@ interface Props {
   dataStreams: string[];
 }
 
-export const DataStreamsAndIndicesListHelpText: FunctionComponent<Props> = ({
+export const DataStreamsAndIndicesListHelpText: FunctionComponent<React.PropsWithChildren<Props>> = ({
   onSelectionChange,
   selectedIndicesAndDataStreams,
   indices,

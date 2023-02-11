@@ -26,7 +26,7 @@ interface CspAppDeps {
   params: AppMountParameters;
 }
 
-export const TestProvider: React.FC<Partial<CspAppDeps>> = ({
+export const TestProvider: React.FC<React.PropsWithChildren<Partial<CspAppDeps>>> = ({
   core = coreMock.createStart(),
   deps = {
     data: dataPluginMock.createStartContract(),

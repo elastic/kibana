@@ -25,7 +25,7 @@ const i18nTexts = {
   ),
 };
 
-export const TestPipelineActions: FunctionComponent = () => {
+export const TestPipelineActions: FunctionComponent<React.PropsWithChildren<unknown>> = () => {
   const { testPipelineData, testPipelineDataDispatch } = useTestPipelineContext();
 
   const {

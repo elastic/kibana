@@ -113,7 +113,7 @@ const HTML = `<!-- ${strings.getIncludeRuntimeLabel()} -->
   KbnCanvas.share();
 </script>`;
 
-export const SnippetsStep: FC<{ onCopy: OnCopyFn }> = ({ onCopy }) => (
+export const SnippetsStep: FC<React.PropsWithChildren<{ onCopy: OnCopyFn }>> = ({ onCopy }) => (
   <div>
     <EuiText size="s">
       <p>{strings.getSnippetsStepDescription()}</p>

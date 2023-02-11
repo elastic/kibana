@@ -22,7 +22,7 @@ export type LayerWizard = {
    */
   order: number;
   description: string;
-  icon: string | FunctionComponent<any>;
+  icon: string | FunctionComponent<React.PropsWithChildren<any>>;
   renderWizard(renderWizardArguments: RenderWizardArguments): ReactElement<any>;
   prerequisiteSteps?: Array<{ id: string; label: string }>;
   disabledReason?: string;

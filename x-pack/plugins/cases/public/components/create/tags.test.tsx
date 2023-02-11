@@ -27,7 +27,7 @@ const useGetTagsMock = useGetTags as jest.Mock;
 describe('Tags', () => {
   let globalForm: FormHook;
 
-  const MockHookWrapperComponent: React.FC = ({ children }) => {
+  const MockHookWrapperComponent: React.FC<React.PropsWithChildren<unknown>> = ({ children }) => {
     const { form } = useForm<FormProps>({
       defaultValue: { tags: [] },
       schema: {

@@ -16,7 +16,7 @@ import { CategorizationView } from '../../../pick_fields_step/components/categor
 import { RareView } from '../../../pick_fields_step/components/rare_view';
 import { GeoView } from '../../../pick_fields_step/components/geo_view';
 
-export const DetectorChart: FC = () => {
+export const DetectorChart: FC<React.PropsWithChildren<unknown>> = () => {
   const { jobCreator } = useContext(JobCreatorContext);
 
   return (

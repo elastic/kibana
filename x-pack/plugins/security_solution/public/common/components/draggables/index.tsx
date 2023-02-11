@@ -198,7 +198,7 @@ export type BadgeDraggableType = Omit<DefaultDraggableType, 'id'> & {
  * prevent a tooltip from being displayed, or pass arbitrary content
  * @param queryValue - defaults to `value`, this query overrides the `queryMatch.value` used by the `DataProvider` that represents the data
  */
-const DraggableBadgeComponent: React.FC<BadgeDraggableType> = ({
+const DraggableBadgeComponent: React.FC<React.PropsWithChildren<BadgeDraggableType>> = ({
   contextId,
   eventId,
   field,

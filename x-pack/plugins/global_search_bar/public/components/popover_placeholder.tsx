@@ -15,7 +15,7 @@ interface PopoverPlaceholderProps {
   basePath: string;
 }
 
-export const PopoverPlaceholder: FC<PopoverPlaceholderProps> = ({ basePath, darkMode }) => {
+export const PopoverPlaceholder: FC<React.PropsWithChildren<PopoverPlaceholderProps>> = ({ basePath, darkMode }) => {
   return (
     <EuiFlexGroup
       style={{ minHeight: 300 }}

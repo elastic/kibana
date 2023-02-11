@@ -18,7 +18,7 @@ import { NotFound } from '../not_found';
 
 import { EnginesList } from './engines_list';
 
-export const EnginesRouter: React.FC = () => {
+export const EnginesRouter: React.FC<React.PropsWithChildren<unknown>> = () => {
   const { productAccess } = useValues(KibanaLogic);
   const enginesSectionEnabled = productAccess.hasSearchEnginesAccess;
   if (!enginesSectionEnabled) {

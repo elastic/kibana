@@ -27,7 +27,7 @@ import { REMOVE_INDEX_SETTINGS_SUGGESTIONS } from '../../../constants';
 import { useCore, useServices } from '../../../app_context';
 import { StepProps } from '.';
 
-export const RestoreSnapshotStepSettings: React.FunctionComponent<StepProps> = ({
+export const RestoreSnapshotStepSettings: React.FunctionComponent<React.PropsWithChildren<StepProps>> = ({
   restoreSettings,
   updateRestoreSettings,
   snapshotDetails,

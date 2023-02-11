@@ -37,7 +37,7 @@ import { getCheckedOptionLabels, getSelectableOptions } from './utils';
 
 import './deduplication_panel.scss';
 
-export const DeduplicationPanel: React.FC = () => {
+export const DeduplicationPanel: React.FC<React.PropsWithChildren<unknown>> = () => {
   const { domain } = useValues(CrawlerDomainDetailLogic);
   const { submitDeduplicationUpdate } = useActions(CrawlerDomainDetailLogic);
 

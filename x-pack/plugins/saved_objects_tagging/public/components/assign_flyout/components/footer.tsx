@@ -16,7 +16,7 @@ export interface AssignFlyoutFooterProps {
   onSave: () => void;
 }
 
-export const AssignFlyoutFooter: FC<AssignFlyoutFooterProps> = ({
+export const AssignFlyoutFooter: FC<React.PropsWithChildren<AssignFlyoutFooterProps>> = ({
   isSaving,
   hasPendingChanges,
   onCancel,

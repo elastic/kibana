@@ -55,7 +55,7 @@ interface ResultsTypeFieldProps {
   euiFieldProps?: Record<string, unknown>;
 }
 
-const ResultsTypeFieldComponent: React.FC<ResultsTypeFieldProps> = ({ euiFieldProps = {} }) => {
+const ResultsTypeFieldComponent: React.FC<React.PropsWithChildren<ResultsTypeFieldProps>> = ({ euiFieldProps = {} }) => {
   const [selectedOption, setSelectedOption] = useState(SNAPSHOT_OPTION.value);
   const { defaultValues } = useFormState();
 

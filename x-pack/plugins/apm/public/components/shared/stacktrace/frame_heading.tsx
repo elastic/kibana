@@ -49,10 +49,10 @@ function FrameHeading({
   isLibraryFrame,
   idx,
 }: Props) {
-  const FileDetail: ComponentType = isLibraryFrame
+  const FileDetail: ComponentType<React.PropsWithChildren<unknown>> = isLibraryFrame
     ? LibraryFrameFileDetail
     : AppFrameFileDetail;
-  let Renderer: ComponentType<FrameHeadingRendererProps>;
+  let Renderer: ComponentType<React.PropsWithChildren<FrameHeadingRendererProps>>;
   switch (codeLanguage?.toString().toLowerCase()) {
     case 'c#':
       Renderer = CSharpFrameHeadingRenderer;

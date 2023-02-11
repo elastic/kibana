@@ -28,7 +28,7 @@ interface BuilderLogicButtonsProps {
   onOrClicked: () => void;
 }
 
-export const BuilderLogicButtons: React.FC<BuilderLogicButtonsProps> = ({
+export const BuilderLogicButtons: React.FC<React.PropsWithChildren<BuilderLogicButtonsProps>> = ({
   isAndDisabled = false,
   isNested,
   isNestedDisabled = true,

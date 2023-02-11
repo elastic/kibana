@@ -39,7 +39,7 @@ interface EventDetailsPanelProps {
   isReadOnly?: boolean;
 }
 
-const EventDetailsPanelComponent: React.FC<EventDetailsPanelProps> = ({
+const EventDetailsPanelComponent: React.FC<React.PropsWithChildren<EventDetailsPanelProps>> = ({
   browserFields,
   entityType = 'events', // Default to events so only alerts have to pass entityType in
   expandedEvent,

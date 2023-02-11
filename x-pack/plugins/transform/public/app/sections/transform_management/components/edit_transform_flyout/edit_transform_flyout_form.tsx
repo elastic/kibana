@@ -31,7 +31,7 @@ interface EditTransformFlyoutFormProps {
   dataViewId?: string;
 }
 
-export const EditTransformFlyoutForm: FC<EditTransformFlyoutFormProps> = ({
+export const EditTransformFlyoutForm: FC<React.PropsWithChildren<EditTransformFlyoutFormProps>> = ({
   editTransformFlyout: [state, dispatch],
   dataViewId,
 }) => {

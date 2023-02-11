@@ -15,7 +15,7 @@ interface SidebarContentProps {
   commit?: Function;
 }
 
-export const SidebarContent: React.FC<SidebarContentProps> = ({ commit }) => {
+export const SidebarContent: React.FC<React.PropsWithChildren<SidebarContentProps>> = ({ commit }) => {
   const selectedToplevelNodes = useSelector<State, string[]>(
     (state) => getSelectedToplevelNodes(state),
     shallowEqual

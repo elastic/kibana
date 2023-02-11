@@ -16,7 +16,7 @@ export default {
   title: 'shared/DependencyLink',
   component: DependencyLink,
   decorators: [
-    (StoryComponent: ComponentType) => {
+    (StoryComponent: ComponentType<React.PropsWithChildren<unknown>>) => {
       return (
         <MockApmPluginStorybook>
           <StoryComponent />

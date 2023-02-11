@@ -22,7 +22,7 @@ interface Props {
 const SHOW_PLACEHOLDERS = 5;
 const LINES_PER_LOADING_PLACEHOLDER = 4;
 
-const NewsFeedComponent: React.FC<Props> = ({ news }) => (
+const NewsFeedComponent: React.FC<React.PropsWithChildren<Props>> = ({ news }) => (
   <>
     <SidebarHeader title={NEWS_FEED_TITLE} />
     {news == null ? (

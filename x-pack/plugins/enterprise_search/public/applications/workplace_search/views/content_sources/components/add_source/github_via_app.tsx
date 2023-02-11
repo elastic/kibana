@@ -42,7 +42,7 @@ interface GithubViaAppProps {
   isGithubEnterpriseServer: boolean;
 }
 
-export const GitHubViaApp: React.FC<GithubViaAppProps> = ({ isGithubEnterpriseServer }) => {
+export const GitHubViaApp: React.FC<React.PropsWithChildren<GithubViaAppProps>> = ({ isGithubEnterpriseServer }) => {
   const { isOrganization } = useValues(AppLogic);
   const {
     githubAppId,

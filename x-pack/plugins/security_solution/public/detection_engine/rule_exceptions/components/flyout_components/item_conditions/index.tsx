@@ -100,7 +100,7 @@ interface ExceptionsFlyoutConditionsComponentProps {
   ) => DataViewBase;
 }
 
-const ExceptionsConditionsComponent: React.FC<ExceptionsFlyoutConditionsComponentProps> = ({
+const ExceptionsConditionsComponent: React.FC<React.PropsWithChildren<ExceptionsFlyoutConditionsComponentProps>> = ({
   exceptionItemName,
   allowLargeValueLists,
   exceptionListItems,

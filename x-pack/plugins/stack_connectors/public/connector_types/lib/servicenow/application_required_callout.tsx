@@ -29,7 +29,7 @@ interface Props {
   message?: string | null;
 }
 
-const ApplicationRequiredCalloutComponent: React.FC<Props> = ({ appId, message }) => {
+const ApplicationRequiredCalloutComponent: React.FC<React.PropsWithChildren<Props>> = ({ appId, message }) => {
   return (
     <>
       <EuiSpacer size="s" />

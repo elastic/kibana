@@ -14,7 +14,7 @@ import { SendAppSearchTelemetry } from '../../../shared/telemetry';
 
 import { useAppSearchNav } from './nav';
 
-export const AppSearchPageTemplate: React.FC<PageTemplateProps> = ({
+export const AppSearchPageTemplate: React.FC<React.PropsWithChildren<PageTemplateProps>> = ({
   children,
   pageChrome,
   pageViewTelemetry,

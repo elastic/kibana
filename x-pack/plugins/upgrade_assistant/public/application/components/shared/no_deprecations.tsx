@@ -41,7 +41,7 @@ interface Props {
   navigateToOverviewPage: () => void;
 }
 
-export const NoDeprecationsPrompt: FunctionComponent<Props> = ({
+export const NoDeprecationsPrompt: FunctionComponent<React.PropsWithChildren<Props>> = ({
   deprecationType,
   navigateToOverviewPage,
 }) => {

@@ -80,7 +80,7 @@ const getFieldConfig = ({
   defaultValue,
 });
 
-const FormRow: React.FC<FormRowProps> = ({
+const FormRow: React.FC<React.PropsWithChildren<FormRowProps>> = ({
   id,
   label,
   readOnly,
@@ -118,7 +118,7 @@ const FormRow: React.FC<FormRowProps> = ({
   );
 };
 
-const SimpleConnectorFormComponent: React.FC<SimpleConnectorFormProps> = ({
+const SimpleConnectorFormComponent: React.FC<React.PropsWithChildren<SimpleConnectorFormProps>> = ({
   isEdit,
   readOnly,
   configFormSchema,

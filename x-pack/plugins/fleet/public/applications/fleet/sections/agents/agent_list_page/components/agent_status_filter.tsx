@@ -72,7 +72,7 @@ const TourStepNoHeaderFooter = styled(EuiTourStep)`
   }
 `;
 
-const InactiveAgentsTourStep: React.FC<{ isOpen: boolean }> = ({ children, isOpen }) => (
+const InactiveAgentsTourStep: React.FC<React.PropsWithChildren<{ isOpen: boolean }>> = ({ children, isOpen }) => (
   <TourStepNoHeaderFooter
     content={
       <EuiText size="s">
@@ -95,13 +95,13 @@ const InactiveAgentsTourStep: React.FC<{ isOpen: boolean }> = ({ children, isOpe
   </TourStepNoHeaderFooter>
 );
 
-export const AgentStatusFilter: React.FC<{
+export const AgentStatusFilter: React.FC<React.PropsWithChildren<{
   selectedStatus: string[];
   onSelectedStatusChange: (status: string[]) => void;
   disabled?: boolean;
   totalInactiveAgents: number;
   isOpenByDefault?: boolean;
-}> = (props) => {
+}>> = (props) => {
   const {
     selectedStatus,
     onSelectedStatusChange,

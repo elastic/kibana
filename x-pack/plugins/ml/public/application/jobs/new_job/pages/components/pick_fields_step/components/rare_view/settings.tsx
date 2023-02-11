@@ -16,7 +16,7 @@ interface Props {
   setIsValid: (proceed: boolean) => void;
 }
 
-export const RareSettings: FC<Props> = ({ setIsValid }) => {
+export const RareSettings: FC<React.PropsWithChildren<Props>> = ({ setIsValid }) => {
   return (
     <>
       <EuiFlexGroup gutterSize="xl">

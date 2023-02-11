@@ -66,7 +66,7 @@ export default {
   title: 'app/TransactionDetails/waterfall/SpanFlyout',
   component: SpanFlyout,
   decorators: [
-    (StoryComponent: ComponentType) => {
+    (StoryComponent: ComponentType<React.PropsWithChildren<unknown>>) => {
       const coreMock = {
         http: {
           get: async (): Promise<SpanDetailsApiReturnType> => {

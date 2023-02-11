@@ -32,9 +32,7 @@ export interface InvestigateInTimelineButtonProps {
   isDisabled?: boolean;
 }
 
-export const InvestigateInTimelineButton: React.FunctionComponent<
-  InvestigateInTimelineButtonProps
-> = ({ asEmptyButton, children, dataProviders, filters, timeRange, keepDataView, ...rest }) => {
+export const InvestigateInTimelineButton: React.FunctionComponent<React.PropsWithChildren<InvestigateInTimelineButtonProps>> = ({ asEmptyButton, children, dataProviders, filters, timeRange, keepDataView, ...rest }) => {
   const dispatch = useDispatch();
 
   const getDataViewsSelector = useMemo(

@@ -29,7 +29,7 @@ interface ConfirmDeleteDescriptionProps {
   agentPolicyCount: number;
 }
 
-const ConfirmDeleteDescription: React.FunctionComponent<ConfirmDeleteDescriptionProps> = ({
+const ConfirmDeleteDescription: React.FunctionComponent<React.PropsWithChildren<ConfirmDeleteDescriptionProps>> = ({
   downloadSource,
   agentCount,
   agentPolicyCount,

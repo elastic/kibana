@@ -17,7 +17,7 @@ import { schema } from './schema';
 describe('SubmitCaseButton', () => {
   const onSubmit = jest.fn();
 
-  const MockHookWrapperComponent: React.FC = ({ children }) => {
+  const MockHookWrapperComponent: React.FC<React.PropsWithChildren<unknown>> = ({ children }) => {
     const { form } = useForm<FormProps>({
       defaultValue: { title: 'My title' },
       schema: {

@@ -38,7 +38,7 @@ interface PivotFunctionFormProps {
   stepDefineForm: StepDefineFormHook;
 }
 
-export const PivotFunctionForm: FC<PivotFunctionFormProps> = ({
+export const PivotFunctionForm: FC<React.PropsWithChildren<PivotFunctionFormProps>> = ({
   applyPivotChangesHandler,
   copyToClipboardPivot,
   copyToClipboardPivotDescription,

@@ -41,7 +41,7 @@ const alignButtonIcons = [
   },
 ];
 
-export const AlignOptions: React.FC<TitlePositionProps> = ({ state, setState }) => {
+export const AlignOptions: React.FC<React.PropsWithChildren<TitlePositionProps>> = ({ state, setState }) => {
   return (
     <EuiButtonGroup
       legend={i18n.translate('xpack.lens.legacyMetric.titleAlignLabel', {

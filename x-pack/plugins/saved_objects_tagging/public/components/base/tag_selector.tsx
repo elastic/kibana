@@ -100,7 +100,7 @@ const renderOption = (option: TagComboBoxOption, searchValue: string, contentCla
   }
 };
 
-export const TagSelector: FC<TagSelectorProps> = ({
+export const TagSelector: FC<React.PropsWithChildren<TagSelectorProps>> = ({
   tags,
   selected,
   onTagsSelected,

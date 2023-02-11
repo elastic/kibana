@@ -19,7 +19,7 @@ const lineSeriesStyle = {
   ...seriesStyle,
 };
 
-export const Line: FC<Props> = ({ chartData }) => {
+export const Line: FC<React.PropsWithChildren<Props>> = ({ chartData }) => {
   const { LINE_COLOR } = useChartColors();
   return (
     <LineSeries

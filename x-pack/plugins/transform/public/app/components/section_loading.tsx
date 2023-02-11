@@ -22,7 +22,7 @@ interface Props {
   [key: string]: any;
 }
 
-export const SectionLoading: React.FunctionComponent<Props> = ({ inline, children, ...rest }) => {
+export const SectionLoading: React.FunctionComponent<React.PropsWithChildren<Props>> = ({ inline, children, ...rest }) => {
   if (inline) {
     return (
       <EuiFlexGroup justifyContent="flexStart" alignItems="center" gutterSize="s">

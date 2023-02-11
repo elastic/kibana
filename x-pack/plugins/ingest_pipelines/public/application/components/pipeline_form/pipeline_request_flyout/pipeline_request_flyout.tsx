@@ -18,7 +18,7 @@ interface Props {
   readProcessors: ReadProcessorsFunction;
 }
 
-export const PipelineRequestFlyout: FunctionComponent<Props> = ({
+export const PipelineRequestFlyout: FunctionComponent<React.PropsWithChildren<Props>> = ({
   closeFlyout,
   readProcessors,
 }) => {

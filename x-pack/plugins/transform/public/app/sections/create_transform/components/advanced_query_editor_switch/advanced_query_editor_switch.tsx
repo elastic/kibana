@@ -16,7 +16,7 @@ import { defaultSearch } from '../step_define';
 
 import { StepDefineFormHook } from '../step_define';
 
-export const AdvancedQueryEditorSwitch: FC<StepDefineFormHook> = ({
+export const AdvancedQueryEditorSwitch: FC<React.PropsWithChildren<StepDefineFormHook>> = ({
   advancedSourceEditor: {
     actions: {
       setAdvancedSourceEditorSwitchModalVisible,

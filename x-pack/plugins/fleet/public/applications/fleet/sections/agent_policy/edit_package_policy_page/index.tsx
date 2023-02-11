@@ -552,10 +552,10 @@ const IntegrationsBreadcrumb = memo<{
   return null;
 });
 
-const PoliciesBreadcrumb: React.FunctionComponent<{
+const PoliciesBreadcrumb: React.FunctionComponent<React.PropsWithChildren<{
   policyName: string;
   policyId: string;
-}> = ({ policyName, policyId }) => {
+}>> = ({ policyName, policyId }) => {
   useBreadcrumbs('edit_integration', { policyName, policyId });
   return null;
 };
@@ -569,10 +569,10 @@ const IntegrationsUpgradeBreadcrumb = memo<{
   return null;
 });
 
-const UpgradeBreadcrumb: React.FunctionComponent<{
+const UpgradeBreadcrumb: React.FunctionComponent<React.PropsWithChildren<{
   policyName: string;
   policyId: string;
-}> = ({ policyName, policyId }) => {
+}>> = ({ policyName, policyId }) => {
   useBreadcrumbs('upgrade_package_policy', { policyName, policyId });
   return null;
 };

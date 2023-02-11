@@ -31,7 +31,7 @@ interface OnboardingCardProps {
   complete?: boolean;
 }
 
-export const OnboardingCard: React.FC<OnboardingCardProps> = ({
+export const OnboardingCard: React.FC<React.PropsWithChildren<OnboardingCardProps>> = ({
   title,
   icon,
   description,

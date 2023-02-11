@@ -24,7 +24,7 @@ interface Props {
 
 const MAX_CHARACTER_LENGTH = 30;
 
-export const ResultHeaderItem: React.FC<Props> = ({ field, type, value, href }) => {
+export const ResultHeaderItem: React.FC<React.PropsWithChildren<Props>> = ({ field, type, value, href }) => {
   let formattedValue = '-';
   if (typeof value === 'string') {
     formattedValue = value;

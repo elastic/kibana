@@ -26,7 +26,7 @@ interface HeaderContentProps {
   sort: Sort[];
 }
 
-const HeaderContentComponent: React.FC<HeaderContentProps> = ({
+const HeaderContentComponent: React.FC<React.PropsWithChildren<HeaderContentProps>> = ({
   children,
   header,
   isLoading,

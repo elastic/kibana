@@ -38,7 +38,7 @@ export const hasFilters = (filters?: { [key: string]: string[] }) => {
   return Object.values(FILTER_FIELDS).some((f) => filters[f].length);
 };
 
-export const AlertMonitorStatusComponent: React.FC<AlertMonitorStatusProps> = (props) => {
+export const AlertMonitorStatusComponent: React.FC<React.PropsWithChildren<AlertMonitorStatusProps>> = (props) => {
   const { ruleParams, isOldAlert, setRuleParams, snapshotCount, snapshotLoading } = props;
 
   const alertFilters = ruleParams?.filters ?? {};

@@ -28,7 +28,7 @@ const strings = {
     }),
 };
 
-export const WorkpadStep: FC<{ onDownload: OnDownloadFn }> = ({ onDownload }) => (
+export const WorkpadStep: FC<React.PropsWithChildren<{ onDownload: OnDownloadFn }>> = ({ onDownload }) => (
   <EuiText size="s">
     <p>{strings.getStepDescription()}</p>
     <EuiSpacer size="s" />

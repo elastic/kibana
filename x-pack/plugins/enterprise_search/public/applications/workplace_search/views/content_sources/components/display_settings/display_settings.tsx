@@ -43,7 +43,7 @@ interface DisplaySettingsProps {
   tabId: number;
 }
 
-export const DisplaySettings: React.FC<DisplaySettingsProps> = ({ tabId }) => {
+export const DisplaySettings: React.FC<React.PropsWithChildren<DisplaySettingsProps>> = ({ tabId }) => {
   const { initializeDisplaySettings, setServerData, handleSelectedTabChanged } =
     useActions(DisplaySettingsLogic);
 

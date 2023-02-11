@@ -15,7 +15,7 @@ interface CardProps {
   isSelected: boolean;
 }
 
-export const CountCard: FC<CardProps> = ({ onClick, isSelected }) => (
+export const CountCard: FC<React.PropsWithChildren<CardProps>> = ({ onClick, isSelected }) => (
   <EuiFlexItem>
     <EuiCard
       data-test-subj={`mlJobWizardCategorizationDetectorCountCard${isSelected ? ' selected' : ''}`}
@@ -38,7 +38,7 @@ export const CountCard: FC<CardProps> = ({ onClick, isSelected }) => (
   </EuiFlexItem>
 );
 
-export const RareCard: FC<CardProps> = ({ onClick, isSelected }) => (
+export const RareCard: FC<React.PropsWithChildren<CardProps>> = ({ onClick, isSelected }) => (
   <EuiFlexItem>
     <EuiCard
       data-test-subj={`mlJobWizardCategorizationDetectorRareCard${isSelected ? ' selected' : ''}`}

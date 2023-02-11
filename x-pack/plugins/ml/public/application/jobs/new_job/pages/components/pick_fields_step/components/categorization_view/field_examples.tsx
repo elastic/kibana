@@ -16,7 +16,7 @@ interface Props {
 
 const TOKEN_HIGHLIGHT_COLOR = '#b0ccf7';
 
-export const FieldExamples: FC<Props> = ({ fieldExamples }) => {
+export const FieldExamples: FC<React.PropsWithChildren<Props>> = ({ fieldExamples }) => {
   if (fieldExamples === null || fieldExamples.length === 0) {
     return null;
   }
@@ -72,6 +72,6 @@ export const FieldExamples: FC<Props> = ({ fieldExamples }) => {
   );
 };
 
-const Token: FC = ({ children }) => (
+const Token: FC<React.PropsWithChildren<unknown>> = ({ children }) => (
   <span style={{ backgroundColor: TOKEN_HIGHLIGHT_COLOR }}>{children}</span>
 );

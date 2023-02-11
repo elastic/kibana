@@ -28,7 +28,7 @@ interface Props {
   isQueryView?: boolean;
   isAnalyticsView?: boolean;
 }
-export const AnalyticsLayout: React.FC<Props> = ({
+export const AnalyticsLayout: React.FC<React.PropsWithChildren<Props>> = ({
   title,
   breadcrumbs = [],
   isQueryView,

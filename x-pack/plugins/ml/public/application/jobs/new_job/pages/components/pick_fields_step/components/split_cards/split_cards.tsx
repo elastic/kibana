@@ -26,7 +26,7 @@ interface Panel {
   marginBottom: number;
 }
 
-export const SplitCards: FC<Props> = memo(
+export const SplitCards: FC<React.PropsWithChildren<Props>> = memo(
   ({ fieldValues, splitField, children, numberOfDetectors, jobType, animate = false }) => {
     const panels: Panel[] = [];
 

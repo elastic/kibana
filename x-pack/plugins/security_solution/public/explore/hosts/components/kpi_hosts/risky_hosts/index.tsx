@@ -37,7 +37,7 @@ import type { KpiRiskScoreStrategyResponse } from '../../../../../../common/sear
 import { RiskScoreEntity, RiskSeverity } from '../../../../../../common/search_strategy';
 import { RiskScore } from '../../../../components/risk_score/severity/common';
 
-const KpiBaseComponentLoader: React.FC = () => (
+const KpiBaseComponentLoader: React.FC<React.PropsWithChildren<unknown>> = () => (
   <EuiFlexGroup justifyContent="center" alignItems="center" data-test-subj="KpiLoader">
     <EuiFlexItem grow={false}>
       <EuiLoadingSpinner size="xl" />
@@ -65,11 +65,11 @@ const RiskScoreContainer = styled(EuiFlexItem)`
  * we decided not to go forward with this for 8.1
  * saving the code for future implementation
  */
-const RiskyHostsComponent: React.FC<{
+const RiskyHostsComponent: React.FC<React.PropsWithChildren<{
   error: unknown;
   loading: boolean;
   data?: KpiRiskScoreStrategyResponse;
-}> = ({ error, loading, data }) => {
+}>> = ({ error, loading, data }) => {
   useInspectQuery(QUERY_ID, loading, data);
   useErrorToast(i18n.ERROR_TITLE, error);
 

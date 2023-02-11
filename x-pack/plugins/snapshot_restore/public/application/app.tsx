@@ -32,7 +32,7 @@ import {
 } from './sections';
 import { useAppContext, useConfig } from './app_context';
 
-export const App: React.FunctionComponent = () => {
+export const App: React.FunctionComponent<React.PropsWithChildren<unknown>> = () => {
   const { slm_ui: slmUi } = useConfig();
   const { apiError } = useAuthorizationContext();
   const { core } = useAppContext();

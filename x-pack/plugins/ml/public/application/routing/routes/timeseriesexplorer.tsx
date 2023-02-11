@@ -73,7 +73,7 @@ export const timeSeriesExplorerRouteFactory = (
   enableDatePicker: true,
 });
 
-const PageWrapper: FC<PageProps> = ({ deps }) => {
+const PageWrapper: FC<React.PropsWithChildren<PageProps>> = ({ deps }) => {
   const { context, results } = useResolver(
     undefined,
     undefined,
@@ -107,7 +107,7 @@ interface TimeSeriesExplorerUrlStateManager {
   jobsWithTimeRange: MlJobWithTimeRange[];
 }
 
-export const TimeSeriesExplorerUrlStateManager: FC<TimeSeriesExplorerUrlStateManager> = ({
+export const TimeSeriesExplorerUrlStateManager: FC<React.PropsWithChildren<TimeSeriesExplorerUrlStateManager>> = ({
   config,
   jobsWithTimeRange,
 }) => {

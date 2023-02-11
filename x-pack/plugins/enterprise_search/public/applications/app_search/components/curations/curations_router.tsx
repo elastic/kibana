@@ -18,7 +18,7 @@ import {
 import { Curation } from './curation';
 import { Curations, CurationCreation, CurationSuggestion } from './views';
 
-export const CurationsRouter: React.FC = () => {
+export const CurationsRouter: React.FC<React.PropsWithChildren<unknown>> = () => {
   return (
     <Switch>
       <Route exact path={ENGINE_CURATIONS_PATH}>

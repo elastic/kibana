@@ -75,7 +75,7 @@ const defaultContext: SyntheticsSettingsContextValues = {
 };
 export const SyntheticsSettingsContext = createContext(defaultContext);
 
-export const SyntheticsSettingsContextProvider: React.FC<SyntheticsAppProps> = ({
+export const SyntheticsSettingsContextProvider: React.FC<React.PropsWithChildren<SyntheticsAppProps>> = ({
   children,
   ...props
 }) => {

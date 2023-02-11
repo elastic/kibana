@@ -141,7 +141,7 @@ interface AreaChartComponentProps {
   visualizationActionsOptions?: VisualizationActionsProps;
 }
 
-export const AreaChartComponent: React.FC<AreaChartComponentProps> = ({
+export const AreaChartComponent: React.FC<React.PropsWithChildren<AreaChartComponentProps>> = ({
   areaChart,
   configs,
   visualizationActionsOptions,

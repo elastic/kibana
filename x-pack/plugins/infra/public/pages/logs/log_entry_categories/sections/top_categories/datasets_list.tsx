@@ -11,9 +11,9 @@ import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { LogEntryCategoryDataset } from '../../../../../../common/log_analysis';
 import { getFriendlyNameForPartitionId } from '../../../../../../common/log_analysis';
 
-export const DatasetsList: React.FunctionComponent<{
+export const DatasetsList: React.FunctionComponent<React.PropsWithChildren<{
   datasets: LogEntryCategoryDataset[];
-}> = ({ datasets }) => (
+}>> = ({ datasets }) => (
   <ul>
     {datasets.map((dataset) => {
       const datasetLabel = getFriendlyNameForPartitionId(dataset.name);

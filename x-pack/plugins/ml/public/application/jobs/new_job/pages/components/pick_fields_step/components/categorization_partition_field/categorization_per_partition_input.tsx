@@ -19,7 +19,7 @@ interface Props {
   selectedField: string | null;
 }
 
-export const CategorizationPerPartitionFieldSelect: FC<Props> = ({
+export const CategorizationPerPartitionFieldSelect: FC<React.PropsWithChildren<Props>> = ({
   fields,
   changeHandler,
   selectedField,

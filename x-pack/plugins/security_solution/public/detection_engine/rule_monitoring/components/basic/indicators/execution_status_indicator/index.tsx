@@ -23,7 +23,7 @@ interface ExecutionStatusIndicatorProps {
   showTooltip?: boolean;
 }
 
-const ExecutionStatusIndicatorComponent: React.FC<ExecutionStatusIndicatorProps> = ({
+const ExecutionStatusIndicatorComponent: React.FC<React.PropsWithChildren<ExecutionStatusIndicatorProps>> = ({
   status,
   showTooltip = false,
 }) => {

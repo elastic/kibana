@@ -17,7 +17,7 @@ interface Props {
   loading: boolean;
 }
 
-export const InformationText: FC<Props> = ({
+export const InformationText: FC<React.PropsWithChildren<Props>> = ({
   eventRateLength,
   fieldSelected,
   categoriesLength,

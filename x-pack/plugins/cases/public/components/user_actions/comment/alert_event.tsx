@@ -26,7 +26,7 @@ interface MultipleAlertsProps extends SingleAlertProps {
   totalAlerts: number;
 }
 
-const RuleLink: React.FC<SingleAlertProps> = memo(
+const RuleLink: React.FC<React.PropsWithChildren<SingleAlertProps>> = memo(
   ({ onRuleDetailsClick, getRuleDetailsHref, ruleId, ruleName, loadingAlertData, actionId }) => {
     const onLinkClick = useCallback(
       (ev) => {
@@ -61,7 +61,7 @@ const RuleLink: React.FC<SingleAlertProps> = memo(
 
 RuleLink.displayName = 'RuleLink';
 
-const SingleAlertCommentEventComponent: React.FC<SingleAlertProps> = ({
+const SingleAlertCommentEventComponent: React.FC<React.PropsWithChildren<SingleAlertProps>> = ({
   actionId,
   getRuleDetailsHref,
   loadingAlertData = false,
@@ -88,7 +88,7 @@ SingleAlertCommentEventComponent.displayName = 'SingleAlertCommentEvent';
 
 export const SingleAlertCommentEvent = memo(SingleAlertCommentEventComponent);
 
-const MultipleAlertsCommentEventComponent: React.FC<MultipleAlertsProps> = ({
+const MultipleAlertsCommentEventComponent: React.FC<React.PropsWithChildren<MultipleAlertsProps>> = ({
   actionId,
   getRuleDetailsHref,
   loadingAlertData = false,

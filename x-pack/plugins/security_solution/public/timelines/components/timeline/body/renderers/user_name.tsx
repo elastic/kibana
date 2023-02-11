@@ -33,7 +33,7 @@ interface Props {
   title?: string;
 }
 
-const UserNameComponent: React.FC<Props> = ({
+const UserNameComponent: React.FC<React.PropsWithChildren<Props>> = ({
   fieldName,
   Component,
   contextId,

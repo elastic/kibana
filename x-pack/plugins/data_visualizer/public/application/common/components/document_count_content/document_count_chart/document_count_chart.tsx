@@ -59,7 +59,7 @@ export function LoadingSpinner() {
   );
 }
 
-export const DocumentCountChart: FC<Props> = ({
+export const DocumentCountChart: FC<React.PropsWithChildren<Props>> = ({
   width,
   chartPoints,
   timeRangeEarliest,

@@ -12,7 +12,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 
 import { isUpgradeInProgress } from '../../services/upgrade_service';
 
-export const UpgradeWarning: FC = () => {
+export const UpgradeWarning: FC<React.PropsWithChildren<unknown>> = () => {
   if (isUpgradeInProgress() === true) {
     return (
       <React.Fragment>

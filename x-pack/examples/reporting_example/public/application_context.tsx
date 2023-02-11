@@ -15,7 +15,7 @@ interface ContextValue {
 
 const ApplicationContext = createContext<undefined | ContextValue>(undefined);
 
-export const ApplicationContextProvider: FC<{ forwardedState: ContextValue['forwardedState'] }> = ({
+export const ApplicationContextProvider: FC<React.PropsWithChildren<{ forwardedState: ContextValue['forwardedState'] }>> = ({
   forwardedState,
   children,
 }) => {

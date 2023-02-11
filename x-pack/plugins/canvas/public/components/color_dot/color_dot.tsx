@@ -16,7 +16,7 @@ interface Props {
   value?: string;
 }
 
-export const ColorDot: FC<Props> = ({ value, children }) => {
+export const ColorDot: FC<React.PropsWithChildren<Props>> = ({ value, children }) => {
   const tc = tinycolor(value);
   let style = {};
 

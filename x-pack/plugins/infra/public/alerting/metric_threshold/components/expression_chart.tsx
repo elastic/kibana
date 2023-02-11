@@ -45,7 +45,7 @@ interface Props {
   groupBy?: string | string[];
 }
 
-export const ExpressionChart: React.FC<Props> = ({
+export const ExpressionChart: React.FC<React.PropsWithChildren<Props>> = ({
   expression,
   derivedIndexPattern,
   source,

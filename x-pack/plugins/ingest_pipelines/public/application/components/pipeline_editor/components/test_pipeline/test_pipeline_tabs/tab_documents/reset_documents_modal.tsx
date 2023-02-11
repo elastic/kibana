@@ -41,7 +41,7 @@ const i18nTexts = {
   ),
 };
 
-export const ResetDocumentsModal: FunctionComponent<Props> = ({
+export const ResetDocumentsModal: FunctionComponent<React.PropsWithChildren<Props>> = ({
   confirmResetTestOutput,
   closeModal,
 }) => {

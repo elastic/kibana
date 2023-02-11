@@ -25,7 +25,7 @@ interface SwimLanePaginationProps {
   onPaginationChange: (arg: { perPage?: number; fromPage?: number }) => void;
 }
 
-export const SwimLanePagination: FC<SwimLanePaginationProps> = ({
+export const SwimLanePagination: FC<React.PropsWithChildren<SwimLanePaginationProps>> = ({
   cardinality,
   fromPage,
   perPage,

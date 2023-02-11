@@ -64,7 +64,7 @@ function isVersionUnsupported(version?: string) {
   return semverLt(version, ROLLING_UPGRADE_MINIMUM_SUPPORTED_VERSION);
 }
 
-export const AgentUpgradeAgentModal: React.FunctionComponent<AgentUpgradeAgentModalProps> = ({
+export const AgentUpgradeAgentModal: React.FunctionComponent<React.PropsWithChildren<AgentUpgradeAgentModalProps>> = ({
   onClose,
   agents,
   agentCount,

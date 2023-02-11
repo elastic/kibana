@@ -50,7 +50,7 @@ interface Props {
   value?: string[] | string | null;
 }
 
-export const ShowTopNButton: React.FC<Props> = React.memo(
+export const ShowTopNButton: React.FC<React.PropsWithChildren<Props>> = React.memo(
   ({
     className,
     Component,

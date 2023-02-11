@@ -42,7 +42,7 @@ interface Foo {
 let globalItems: Foo[] = [];
 const getLastItems = () => globalItems;
 
-export const Library: React.FC = () => {
+export const Library: React.FC<React.PropsWithChildren<unknown>> = () => {
   const props = {
     isMetaEngine: false,
     result: {

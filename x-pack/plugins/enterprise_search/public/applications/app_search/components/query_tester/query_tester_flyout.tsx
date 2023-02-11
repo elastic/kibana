@@ -16,7 +16,7 @@ interface Props {
   onClose: () => void;
 }
 
-export const QueryTesterFlyout: React.FC<Props> = ({ onClose }) => {
+export const QueryTesterFlyout: React.FC<React.PropsWithChildren<Props>> = ({ onClose }) => {
   return (
     <EuiFlyout onClose={onClose} aria-labelledby="queryTesterFlyoutTitle" ownFocus>
       <EuiFlyoutHeader hasBorder>

@@ -108,7 +108,7 @@ const useGetLifespanMetrics = (
   }, [features, metrics]);
 };
 
-const CreationDate: React.FC<{ date: string }> = React.memo(({ date }) => {
+const CreationDate: React.FC<React.PropsWithChildren<{ date: string }>> = React.memo(({ date }) => {
   const creationDate = getMaybeDate(date);
   if (!creationDate.isValid()) {
     return getEmptyTagValue();
@@ -156,10 +156,10 @@ const Title = euiStyled(EuiFlexItem)`
   font-weight: bold;
 `;
 
-const CaseStatusMetricsItem: React.FC<{
+const CaseStatusMetricsItem: React.FC<React.PropsWithChildren<{
   title: string;
   value: JSX.Element | string;
-}> = React.memo(({ title, value }) => (
+}>> = React.memo(({ title, value }) => (
   <EuiFlexGroup direction="column" gutterSize="s" responsive={false}>
     <Title>{title}</Title>
     <EuiFlexItem>{value}</EuiFlexItem>
@@ -167,11 +167,11 @@ const CaseStatusMetricsItem: React.FC<{
 ));
 CaseStatusMetricsItem.displayName = 'CaseStatusMetricsItem';
 
-const CaseStatusMetricsOpenCloseDuration: React.FC<{
+const CaseStatusMetricsOpenCloseDuration: React.FC<React.PropsWithChildren<{
   title: string;
   value?: string;
   reopens: string[];
-}> = React.memo(({ title, value, reopens }) => {
+}>> = React.memo(({ title, value, reopens }) => {
   const valueText = getOpenCloseDurationText(value, reopens);
 
   return (
@@ -201,10 +201,10 @@ const caseWasReopened = (reopens: string[]) => {
   return reopens.length > 0;
 };
 
-const ValueWithExplanationIcon: React.FC<{
+const ValueWithExplanationIcon: React.FC<React.PropsWithChildren<{
   value: string | JSX.Element;
   explanationValues: string[];
-}> = React.memo(({ value, explanationValues }) => {
+}>> = React.memo(({ value, explanationValues }) => {
   const content = (
     <>
       {CASE_REOPENED_ON}

@@ -36,7 +36,7 @@ interface ExceptionItemsViewerProps {
   onEditExceptionItem: (item: ExceptionListItemSchema) => void;
 }
 
-const ExceptionItemsViewerComponent: React.FC<ExceptionItemsViewerProps> = ({
+const ExceptionItemsViewerComponent: React.FC<React.PropsWithChildren<ExceptionItemsViewerProps>> = ({
   isReadOnly,
   exceptions,
   isEndpoint,

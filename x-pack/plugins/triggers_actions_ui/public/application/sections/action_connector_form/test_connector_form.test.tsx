@@ -65,7 +65,7 @@ const actionType = {
 const actionTypeRegistry = actionTypeRegistryMock.create();
 actionTypeRegistry.get.mockReturnValue(actionType);
 
-const ExecutionModeComponent: React.FC<Pick<ActionParamsProps<{}>, 'executionMode'>> = ({
+const ExecutionModeComponent: React.FC<React.PropsWithChildren<Pick<ActionParamsProps<{}>, 'executionMode'>>> = ({
   executionMode,
 }) => {
   return (

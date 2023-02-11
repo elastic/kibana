@@ -27,7 +27,7 @@ interface Props {
   showCallToAction?: boolean;
 }
 
-export const TabSummary: React.FunctionComponent<Props> = ({
+export const TabSummary: React.FunctionComponent<React.PropsWithChildren<Props>> = ({
   componentTemplateDetails,
   showCallToAction,
 }) => {

@@ -23,7 +23,7 @@ interface Props {
   data: ReturnType<typeof useIndexInput>;
 }
 
-export const InferenceInputFormIndexControls: FC<Props> = ({ inferrer, data }) => {
+export const InferenceInputFormIndexControls: FC<React.PropsWithChildren<Props>> = ({ inferrer, data }) => {
   const {
     dataViewListItems,
     fieldNames,

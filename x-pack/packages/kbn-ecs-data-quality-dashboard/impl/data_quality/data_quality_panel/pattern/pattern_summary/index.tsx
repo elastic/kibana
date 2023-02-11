@@ -22,7 +22,7 @@ interface Props {
   patternDocsCount: number;
 }
 
-const PatternSummaryComponent: React.FC<Props> = ({
+const PatternSummaryComponent: React.FC<React.PropsWithChildren<Props>> = ({
   defaultNumberFormat,
   ilmExplainPhaseCounts,
   incompatible,

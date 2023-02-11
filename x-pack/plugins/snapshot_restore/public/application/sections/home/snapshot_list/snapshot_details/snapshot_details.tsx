@@ -52,7 +52,7 @@ const panelTypeToUiMetricMap: { [key: string]: string } = {
   [TAB_FAILURES]: UIM_SNAPSHOT_DETAIL_PANEL_FAILED_INDICES_TAB,
 };
 
-export const SnapshotDetails: React.FunctionComponent<Props> = ({
+export const SnapshotDetails: React.FunctionComponent<React.PropsWithChildren<Props>> = ({
   repositoryName,
   snapshotId,
   onClose,

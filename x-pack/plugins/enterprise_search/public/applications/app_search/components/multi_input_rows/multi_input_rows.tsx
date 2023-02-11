@@ -35,7 +35,7 @@ interface Props {
   inputPlaceholder?: string;
 }
 
-export const MultiInputRows: React.FC<Props> = ({
+export const MultiInputRows: React.FC<React.PropsWithChildren<Props>> = ({
   id,
   initialValues = [''],
   onChange,

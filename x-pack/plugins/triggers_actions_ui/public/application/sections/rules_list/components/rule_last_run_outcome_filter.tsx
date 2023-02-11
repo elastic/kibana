@@ -19,7 +19,7 @@ interface RuleLastRunOutcomeFilterProps {
   onChange?: (selectedRuleOutcomeIds: string[]) => void;
 }
 
-export const RuleLastRunOutcomeFilter: React.FunctionComponent<RuleLastRunOutcomeFilterProps> = ({
+export const RuleLastRunOutcomeFilter: React.FunctionComponent<React.PropsWithChildren<RuleLastRunOutcomeFilterProps>> = ({
   selectedOutcomes,
   onChange,
 }: RuleLastRunOutcomeFilterProps) => {

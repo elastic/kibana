@@ -24,7 +24,7 @@ export interface ChartComponentProps {
   annotation: ChangePointAnnotation;
 }
 
-export const ChartComponent: FC<ChartComponentProps> = React.memo(({ annotation }) => {
+export const ChartComponent: FC<React.PropsWithChildren<ChartComponentProps>> = React.memo(({ annotation }) => {
   const {
     lens: { EmbeddableComponent },
   } = useAiopsAppContext();

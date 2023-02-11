@@ -98,7 +98,7 @@ interface Props {
   theme$: Observable<CoreTheme>;
 }
 
-export const SettingsPage: React.FC<Props> = memo(({ packageInfo, theme$ }: Props) => {
+export const SettingsPage: React.FC<React.PropsWithChildren<Props>> = memo(({ packageInfo, theme$ }: Props) => {
   const { name, title, latestVersion, version, keepPoliciesUpToDate } = packageInfo;
   const [isUpgradingPackagePolicies, setIsUpgradingPackagePolicies] = useState<boolean>(false);
   const getPackageInstallStatus = useGetPackageInstallStatus();

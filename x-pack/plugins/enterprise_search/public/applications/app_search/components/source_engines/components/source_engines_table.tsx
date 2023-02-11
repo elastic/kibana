@@ -26,7 +26,7 @@ import {
 import { REMOVE_SOURCE_ENGINE_BUTTON_LABEL, REMOVE_SOURCE_ENGINE_CONFIRM_DIALOGUE } from '../i18n';
 import { SourceEnginesLogic } from '../source_engines_logic';
 
-export const SourceEnginesTable: React.FC = () => {
+export const SourceEnginesTable: React.FC<React.PropsWithChildren<unknown>> = () => {
   const {
     myRole: { canManageMetaEngineSourceEngines },
   } = useValues(AppLogic);

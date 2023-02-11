@@ -11,7 +11,7 @@ import {
   JobSelectorFlyoutProps,
 } from '../../../application/components/job_selector/job_selector_flyout';
 
-export const JobSelectorFlyout: FC<JobSelectorFlyoutProps> = ({
+export const JobSelectorFlyout: FC<React.PropsWithChildren<JobSelectorFlyoutProps>> = ({
   selectedIds,
   withTimeRangeSelector,
   dateFormatTz,

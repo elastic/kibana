@@ -16,7 +16,7 @@ interface Props {
     dataTestSubj?: string;
   }>;
 }
-export const AnalyticsCards: React.FC<Props> = ({ stats }) => (
+export const AnalyticsCards: React.FC<React.PropsWithChildren<Props>> = ({ stats }) => (
   <EuiFlexGroup direction="column">
     {stats.map(({ text, stat, dataTestSubj }) => (
       <EuiFlexItem key={text}>

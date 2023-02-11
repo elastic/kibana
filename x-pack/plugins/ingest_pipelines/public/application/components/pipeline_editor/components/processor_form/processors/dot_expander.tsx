@@ -48,7 +48,7 @@ const fieldsConfig: FieldsConfig = {
   },
 };
 
-export const DotExpander: FunctionComponent = () => {
+export const DotExpander: FunctionComponent<React.PropsWithChildren<unknown>> = () => {
   return (
     <>
       <FieldNameField

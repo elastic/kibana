@@ -13,7 +13,7 @@ export interface CategoriesBadgesProps {
   selectedCategoryIds: string[];
 }
 
-const CategoriesBadgesComponent: React.FC<CategoriesBadgesProps> = ({
+const CategoriesBadgesComponent: React.FC<React.PropsWithChildren<CategoriesBadgesProps>> = ({
   setSelectedCategoryIds,
   selectedCategoryIds,
 }) => {

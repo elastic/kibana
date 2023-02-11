@@ -19,7 +19,7 @@ interface FileTooLargeProps {
   maxFileSize: number;
 }
 
-export const FileTooLarge: FC<FileTooLargeProps> = ({ fileSize, maxFileSize }) => {
+export const FileTooLarge: FC<React.PropsWithChildren<FileTooLargeProps>> = ({ fileSize, maxFileSize }) => {
   const fileSizeFormatted = numeral(fileSize).format(FILE_SIZE_DISPLAY_FORMAT);
   const maxFileSizeFormatted = numeral(maxFileSize).format(FILE_SIZE_DISPLAY_FORMAT);
 
@@ -81,7 +81,7 @@ interface FileCouldNotBeReadProps {
   showEditFlyout(): void;
 }
 
-export const FileCouldNotBeRead: FC<FileCouldNotBeReadProps> = ({
+export const FileCouldNotBeRead: FC<React.PropsWithChildren<FileCouldNotBeReadProps>> = ({
   error,
   loaded,
   showEditFlyout,
@@ -132,7 +132,7 @@ export const FileCouldNotBeRead: FC<FileCouldNotBeReadProps> = ({
   );
 };
 
-export const Explanation: FC<{ error: FindFileStructureErrorResponse }> = ({ error }) => {
+export const Explanation: FC<React.PropsWithChildren<{ error: FindFileStructureErrorResponse }>> = ({ error }) => {
   if (!error?.body?.attributes?.body?.error?.suppressed?.length) {
     return null;
   }
@@ -147,7 +147,7 @@ export const Explanation: FC<{ error: FindFileStructureErrorResponse }> = ({ err
   );
 };
 
-export const FindFileStructurePermissionDenied: FC = () => {
+export const FindFileStructurePermissionDenied: FC<React.PropsWithChildren<unknown>> = () => {
   return (
     <>
       <EuiCallOut

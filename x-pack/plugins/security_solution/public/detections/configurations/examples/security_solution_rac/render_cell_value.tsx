@@ -24,9 +24,7 @@ const reason =
  * accepts `EuiDataGridCellValueElementProps`, plus `data`
  * from the TGrid
  */
-export const RenderCellValue: React.FC<
-  EuiDataGridCellValueElementProps & CellValueElementProps
-> = ({
+export const RenderCellValue: React.FC<React.PropsWithChildren<EuiDataGridCellValueElementProps & CellValueElementProps>> = ({
   columnId,
   data,
   eventId,

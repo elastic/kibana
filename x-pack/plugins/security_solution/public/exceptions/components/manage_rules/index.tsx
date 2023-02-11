@@ -33,7 +33,7 @@ interface ManageRulesProps {
   onRuleSelectionChange: (rulesSelectedToAdd: Rule[]) => void;
 }
 
-export const ManageRules: FC<ManageRulesProps> = memo(
+export const ManageRules: FC<React.PropsWithChildren<ManageRulesProps>> = memo(
   ({
     linkedRules,
     showButtonLoader,

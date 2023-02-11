@@ -66,7 +66,7 @@ export interface HeaderPageProps extends HeaderProps {
   'data-test-subj'?: string;
 }
 
-const HeaderPageComponent: React.FC<HeaderPageProps> = ({
+const HeaderPageComponent: React.FC<React.PropsWithChildren<HeaderPageProps>> = ({
   showBackButton = false,
   border,
   children,

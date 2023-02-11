@@ -22,7 +22,7 @@ interface Props {
   failedJobMessage: string | undefined;
 }
 
-export const ProgressStats: FC<Props> = ({ currentProgress, failedJobMessage }) => {
+export const ProgressStats: FC<React.PropsWithChildren<Props>> = ({ currentProgress, failedJobMessage }) => {
   if (currentProgress === undefined) return null;
 
   return (

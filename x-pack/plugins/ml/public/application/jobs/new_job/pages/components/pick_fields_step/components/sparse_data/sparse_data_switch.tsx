@@ -12,7 +12,7 @@ import { JobCreatorContext } from '../../../job_creator_context';
 import { Description } from './description';
 import { ES_AGGREGATION } from '../../../../../../../../../common/constants/aggregation_types';
 
-export const SparseDataSwitch: FC = () => {
+export const SparseDataSwitch: FC<React.PropsWithChildren<unknown>> = () => {
   const { jobCreator, jobCreatorUpdated, jobCreatorUpdate } = useContext(JobCreatorContext);
   const [sparseData, setSparseData] = useState(jobCreator.sparseData);
   const [enabled, setEnabled] = useState(false);

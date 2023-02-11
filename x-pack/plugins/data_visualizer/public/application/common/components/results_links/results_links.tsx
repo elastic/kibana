@@ -58,7 +58,7 @@ interface GlobalState {
 
 const RECHECK_DELAY_MS = 3000;
 
-export const ResultsLinks: FC<Props> = ({
+export const ResultsLinks: FC<React.PropsWithChildren<Props>> = ({
   fieldStats,
   index,
   dataViewId,

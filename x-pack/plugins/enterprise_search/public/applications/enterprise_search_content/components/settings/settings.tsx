@@ -18,7 +18,7 @@ import { EnterpriseSearchContentPageTemplate } from '../layout/page_template';
 import { SettingsLogic } from './settings_logic';
 import { SettingsPanel } from './settings_panel';
 
-export const Settings: React.FC = () => {
+export const Settings: React.FC<React.PropsWithChildren<unknown>> = () => {
   const { makeRequest, setPipeline } = useActions(SettingsLogic);
   const { defaultPipeline, hasNoChanges, isLoading, pipelineState } = useValues(SettingsLogic);
 

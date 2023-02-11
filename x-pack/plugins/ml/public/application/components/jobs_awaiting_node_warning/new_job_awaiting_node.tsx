@@ -16,7 +16,7 @@ interface Props {
   jobType: JobType;
 }
 
-export const NewJobAwaitingNodeWarning: FC<Props> = () => {
+export const NewJobAwaitingNodeWarning: FC<React.PropsWithChildren<Props>> = () => {
   if (lazyMlNodesAvailable() === false) {
     return null;
   }

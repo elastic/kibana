@@ -16,11 +16,11 @@ import { getFormRowProps } from './form_field_props';
 import { IndexPatternSelector } from './index_pattern_selector';
 import { FormValidationError } from './validation_errors';
 
-export const IndexPatternConfigurationPanel: React.FC<{
+export const IndexPatternConfigurationPanel: React.FC<React.PropsWithChildren<{
   isLoading: boolean;
   isReadOnly: boolean;
   indexPatternFormElement: FormElement<LogDataViewReference | undefined, FormValidationError>;
-}> = ({ isLoading, isReadOnly, indexPatternFormElement }) => {
+}>> = ({ isLoading, isReadOnly, indexPatternFormElement }) => {
   useTrackPageview({ app: 'infra_logs', path: 'log_source_configuration_index_pattern' });
   useTrackPageview({
     app: 'infra_logs',

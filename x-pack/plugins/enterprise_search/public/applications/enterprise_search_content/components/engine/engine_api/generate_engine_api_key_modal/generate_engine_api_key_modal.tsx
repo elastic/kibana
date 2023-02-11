@@ -40,7 +40,7 @@ interface GenerateEngineApiKeyModalProps {
   onClose(): void;
 }
 
-export const GenerateEngineApiKeyModal: React.FC<GenerateEngineApiKeyModalProps> = ({
+export const GenerateEngineApiKeyModal: React.FC<React.PropsWithChildren<GenerateEngineApiKeyModalProps>> = ({
   engineName,
   onClose,
 }) => {

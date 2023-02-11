@@ -30,7 +30,7 @@ const getExpirationTimeOptions = (unitSize = '0') =>
     value,
   }));
 
-export const PolicyStepRetention: React.FunctionComponent<StepProps> = ({
+export const PolicyStepRetention: React.FunctionComponent<React.PropsWithChildren<StepProps>> = ({
   policy,
   updatePolicy,
   errors,

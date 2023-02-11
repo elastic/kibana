@@ -19,7 +19,7 @@ import { EngineLogic, generateEnginePath } from '../engine';
 
 import { RelevanceTuningLogic } from '.';
 
-export const RelevanceTuningCallouts: React.FC = () => {
+export const RelevanceTuningCallouts: React.FC<React.PropsWithChildren<unknown>> = () => {
   const { schemaFieldsWithConflicts } = useValues(RelevanceTuningLogic);
   const {
     engine: { invalidBoosts, unsearchedUnconfirmedFields },

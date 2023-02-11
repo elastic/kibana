@@ -15,7 +15,7 @@ import { CodeEditor } from '@kbn/kibana-react-plugin/public';
 
 import { ConnectorFilteringLogic } from './connector_filtering_logic';
 
-export const AdvancedSyncRules: React.FC = () => {
+export const AdvancedSyncRules: React.FC<React.PropsWithChildren<unknown>> = () => {
   const { hasJsonValidationError: hasError, localAdvancedSnippet } =
     useValues(ConnectorFilteringLogic);
   const { setLocalAdvancedSnippet } = useActions(ConnectorFilteringLogic);

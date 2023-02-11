@@ -46,14 +46,14 @@ function selectedDateToParam(selectedDate: Moment | null) {
   return undefined;
 }
 
-export const AnalysisSetupTimerangeForm: React.FunctionComponent<{
+export const AnalysisSetupTimerangeForm: React.FunctionComponent<React.PropsWithChildren<{
   disabled?: boolean;
   setStartTime: (startTime: number | undefined) => void;
   setEndTime: (endTime: number | undefined) => void;
   startTime: number | undefined;
   endTime: number | undefined;
   validationErrors?: TimeRangeValidationError[];
-}> = ({
+}>> = ({
   disabled = false,
   setStartTime,
   setEndTime,

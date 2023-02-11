@@ -13,7 +13,7 @@ import { newJobCapsService } from '../../../../../../../services/new_job_capabil
 import { GeoJobCreator } from '../../../../../common/job_creator';
 import { Description } from './description';
 
-export const GeoField: FC = () => {
+export const GeoField: FC<React.PropsWithChildren<unknown>> = () => {
   const { jobCreator: jc, jobCreatorUpdate, jobCreatorUpdated } = useContext(JobCreatorContext);
   const jobCreator = jc as GeoJobCreator;
   const { geoFields } = newJobCapsService;

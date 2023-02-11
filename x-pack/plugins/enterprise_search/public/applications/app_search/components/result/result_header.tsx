@@ -27,7 +27,7 @@ interface Props {
   showClick: boolean;
 }
 
-export const ResultHeader: React.FC<Props> = ({
+export const ResultHeader: React.FC<React.PropsWithChildren<Props>> = ({
   showScore,
   resultMeta,
   isMetaEngine,

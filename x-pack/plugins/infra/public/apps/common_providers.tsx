@@ -21,13 +21,13 @@ import { InfraClientStartDeps, InfraClientStartExports } from '../types';
 import { HeaderActionMenuProvider } from '../utils/header_action_menu_provider';
 import { TriggersActionsProvider } from '../utils/triggers_actions_context';
 
-export const CommonInfraProviders: React.FC<{
+export const CommonInfraProviders: React.FC<React.PropsWithChildren<{
   appName: string;
   storage: Storage;
   triggersActionsUI: TriggersAndActionsUIPublicPluginStart;
   setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'];
   theme$: AppMountParameters['theme$'];
-}> = ({ children, triggersActionsUI, setHeaderActionMenu, appName, storage, theme$ }) => {
+}>> = ({ children, triggersActionsUI, setHeaderActionMenu, appName, storage, theme$ }) => {
   const [darkMode] = useUiSetting$<boolean>('theme:darkMode');
 
   return (
@@ -50,7 +50,7 @@ export interface CoreProvidersProps {
   theme$: AppMountParameters['theme$'];
 }
 
-export const CoreProviders: React.FC<CoreProvidersProps> = ({
+export const CoreProviders: React.FC<React.PropsWithChildren<CoreProvidersProps>> = ({
   children,
   core,
   pluginStart,
@@ -72,7 +72,7 @@ export const CoreProviders: React.FC<CoreProvidersProps> = ({
   );
 };
 
-const DataUIProviders: React.FC<{ appName: string; storage: Storage }> = ({
+const DataUIProviders: React.FC<React.PropsWithChildren<{ appName: string; storage: Storage }>> = ({
   appName,
   children,
   storage,

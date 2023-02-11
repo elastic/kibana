@@ -50,7 +50,7 @@ export const explainLogRateSpikesRouteFactory = (
   disabled: !AIOPS_ENABLED,
 });
 
-const PageWrapper: FC<PageProps> = ({ location, deps, ...restProps }) => {
+const PageWrapper: FC<React.PropsWithChildren<PageProps>> = ({ location, deps, ...restProps }) => {
   const { redirectToMlAccessDeniedPage } = deps;
 
   const { index, savedSearchId }: Record<string, any> = parse(location.search, { sort: false });

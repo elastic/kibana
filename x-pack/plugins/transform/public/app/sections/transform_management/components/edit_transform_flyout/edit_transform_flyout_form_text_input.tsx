@@ -19,7 +19,7 @@ interface EditTransformFlyoutFormTextInputProps {
   value: string;
 }
 
-export const EditTransformFlyoutFormTextInput: FC<EditTransformFlyoutFormTextInputProps> = ({
+export const EditTransformFlyoutFormTextInput: FC<React.PropsWithChildren<EditTransformFlyoutFormTextInputProps>> = ({
   dataTestSubj,
   errorMessages,
   helpText,

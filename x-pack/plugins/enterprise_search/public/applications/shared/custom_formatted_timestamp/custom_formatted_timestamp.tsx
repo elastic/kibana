@@ -15,7 +15,7 @@ interface CustomFormattedTimestampProps {
   timestamp: string | number | Date;
 }
 
-export const CustomFormattedTimestamp: React.FC<CustomFormattedTimestampProps> = ({
+export const CustomFormattedTimestamp: React.FC<React.PropsWithChildren<CustomFormattedTimestampProps>> = ({
   timestamp,
 }) => {
   const date = new Date(timestamp);

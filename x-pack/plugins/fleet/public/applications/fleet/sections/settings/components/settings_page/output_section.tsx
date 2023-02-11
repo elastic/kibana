@@ -18,7 +18,7 @@ export interface OutputSectionProps {
   deleteOutput: (output: Output) => void;
 }
 
-export const OutputSection: React.FunctionComponent<OutputSectionProps> = ({
+export const OutputSection: React.FunctionComponent<React.PropsWithChildren<OutputSectionProps>> = ({
   outputs,
   deleteOutput,
 }) => {

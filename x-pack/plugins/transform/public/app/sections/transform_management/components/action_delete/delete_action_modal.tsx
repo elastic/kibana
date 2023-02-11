@@ -19,7 +19,7 @@ import { DeleteAction } from './use_delete_action';
 import { isManagedTransform } from '../../../../common/managed_transforms_utils';
 import { ManagedTransformsWarningCallout } from '../managed_transforms_callout/managed_transforms_callout';
 
-export const DeleteActionModal: FC<DeleteAction> = ({
+export const DeleteActionModal: FC<React.PropsWithChildren<DeleteAction>> = ({
   closeModal,
   deleteAndCloseModal,
   deleteDestIndex,

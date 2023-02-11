@@ -33,7 +33,7 @@ const SectionHeader = styled(EuiTitle)`
   `}
 `;
 
-const ExceptionsAddToRulesOrListsComponent: React.FC<ExceptionsAddToRulesOrListsComponentProps> = ({
+const ExceptionsAddToRulesOrListsComponent: React.FC<React.PropsWithChildren<ExceptionsAddToRulesOrListsComponentProps>> = ({
   rules,
   isBulkAction,
   selectedRadioOption,

@@ -59,7 +59,7 @@ export function useStepFromQueryString(history: History) {
   return { activeStep, updateStep };
 }
 
-export const ComponentTemplateEdit: React.FunctionComponent<RouteComponentProps<MatchParams>> = ({
+export const ComponentTemplateEdit: React.FunctionComponent<React.PropsWithChildren<RouteComponentProps<MatchParams>>> = ({
   match: {
     params: { name },
   },

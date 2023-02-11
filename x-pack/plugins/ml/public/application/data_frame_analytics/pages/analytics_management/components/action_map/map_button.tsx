@@ -27,7 +27,7 @@ interface MapButtonProps {
   item: DataFrameAnalyticsListRow;
 }
 
-export const MapButton: FC<MapButtonProps> = ({ item }) => {
+export const MapButton: FC<React.PropsWithChildren<MapButtonProps>> = ({ item }) => {
   const disabled =
     !isRegressionAnalysis(item.config.analysis) &&
     !isOutlierAnalysis(item.config.analysis) &&

@@ -50,7 +50,7 @@ const XXL_BREAKPOINT = 1400;
 const localStorage = new Storage(window.localStorage);
 
 export interface DataVisualizerStateContextProviderProps {
-  IndexDataVisualizerComponent: FC<IndexDataVisualizerViewProps>;
+  IndexDataVisualizerComponent: FC<React.PropsWithChildren<IndexDataVisualizerViewProps>>;
   getAdditionalLinks?: GetAdditionalLinks;
 }
 export type IndexDataVisualizerSpec = typeof IndexDataVisualizer;
@@ -85,7 +85,7 @@ export const getLocatorParams = (params: {
   return locatorParams;
 };
 
-export const DataVisualizerStateContextProvider: FC<DataVisualizerStateContextProviderProps> = ({
+export const DataVisualizerStateContextProvider: FC<React.PropsWithChildren<DataVisualizerStateContextProviderProps>> = ({
   IndexDataVisualizerComponent,
   getAdditionalLinks,
 }) => {
@@ -270,9 +270,9 @@ export const DataVisualizerStateContextProvider: FC<DataVisualizerStateContextPr
   );
 };
 
-export const IndexDataVisualizer: FC<{
+export const IndexDataVisualizer: FC<React.PropsWithChildren<{
   getAdditionalLinks?: GetAdditionalLinks;
-}> = ({ getAdditionalLinks }) => {
+}>> = ({ getAdditionalLinks }) => {
   const coreStart = getCoreStart();
   const {
     data,

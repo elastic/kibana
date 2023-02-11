@@ -35,7 +35,7 @@ export interface PreviewAlertConditionProps {
   alertParams: MlAnomalyDetectionAlertParams;
 }
 
-const AlertInstancePreview: FC<PreviewResponse['results'][number]> = React.memo(
+const AlertInstancePreview: FC<React.PropsWithChildren<PreviewResponse['results'][number]>> = React.memo(
   ({ jobIds, timestampIso8601, score, topInfluencers, topRecords }) => {
     const listItems = [
       {
@@ -113,7 +113,7 @@ const AlertInstancePreview: FC<PreviewResponse['results'][number]> = React.memo(
   }
 );
 
-export const PreviewAlertCondition: FC<PreviewAlertConditionProps> = ({
+export const PreviewAlertCondition: FC<React.PropsWithChildren<PreviewAlertConditionProps>> = ({
   alertingApiService,
   alertParams,
 }) => {

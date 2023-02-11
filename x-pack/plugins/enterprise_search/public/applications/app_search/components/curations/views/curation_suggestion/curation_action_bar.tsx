@@ -15,7 +15,7 @@ import { i18n } from '@kbn/i18n';
 import { CurationActionsPopover } from './curation_actions_popover';
 import { CurationSuggestionLogic } from './curation_suggestion_logic';
 
-export const CurationActionBar: React.FC = () => {
+export const CurationActionBar: React.FC<React.PropsWithChildren<unknown>> = () => {
   const { acceptSuggestion, rejectSuggestion } = useActions(CurationSuggestionLogic);
 
   return (

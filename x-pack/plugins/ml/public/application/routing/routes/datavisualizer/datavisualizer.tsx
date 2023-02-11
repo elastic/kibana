@@ -32,7 +32,7 @@ export const selectorRouteFactory = (
   ],
 });
 
-const PageWrapper: FC<PageProps> = ({ location, deps }) => {
+const PageWrapper: FC<React.PropsWithChildren<PageProps>> = ({ location, deps }) => {
   const { redirectToMlAccessDeniedPage } = deps;
 
   const { context } = useResolver(

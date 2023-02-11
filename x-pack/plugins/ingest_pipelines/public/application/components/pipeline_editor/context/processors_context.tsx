@@ -61,7 +61,7 @@ export interface Props {
   onUpdate: (arg: OnUpdateHandlerArg) => void;
 }
 
-export const PipelineProcessorsContextProvider: FunctionComponent<Props> = ({
+export const PipelineProcessorsContextProvider: FunctionComponent<React.PropsWithChildren<Props>> = ({
   value: { processors: originalProcessors, onFailure: originalOnFailureProcessors },
   onUpdate,
   onFlyoutOpen,

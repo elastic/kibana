@@ -16,7 +16,7 @@ interface LogDateRowProps {
 /**
  * Show a row with the date in the log stream
  */
-export const LogDateRow: React.FC<LogDateRowProps> = ({ timestamp }) => {
+export const LogDateRow: React.FC<React.PropsWithChildren<LogDateRowProps>> = ({ timestamp }) => {
   const formattedDate = localizedDate(timestamp);
 
   return (

@@ -16,7 +16,7 @@ import { useCharts } from '../../hooks/use_charts';
 import { useBreadcrumbContainerContext } from '../../hooks/use_breadcrumbs';
 import { ApmOverview } from '../../../components/apm/overview';
 
-export const ApmOverviewPage: React.FC<ComponentProps> = ({ clusters }) => {
+export const ApmOverviewPage: React.FC<React.PropsWithChildren<ComponentProps>> = ({ clusters }) => {
   const globalState = useContext(GlobalStateContext);
   const { zoomInfo, onBrush } = useCharts();
   const { services } = useKibana<{ data: any }>();

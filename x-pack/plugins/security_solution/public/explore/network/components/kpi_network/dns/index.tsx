@@ -33,7 +33,7 @@ export const fieldsMapping: Readonly<StatItems[]> = [
   },
 ];
 
-const NetworkKpiDnsComponent: React.FC<NetworkKpiProps> = ({
+const NetworkKpiDnsComponent: React.FC<React.PropsWithChildren<NetworkKpiProps>> = ({
   filterQuery,
   from,
   indexNames,

@@ -14,7 +14,7 @@ interface Props {
   description: string;
 }
 
-export const RoleOptionLabel: React.FC<Props> = ({ label, description }) => (
+export const RoleOptionLabel: React.FC<React.PropsWithChildren<Props>> = ({ label, description }) => (
   <>
     <EuiText size="s">{label.charAt(0).toUpperCase() + label.toLowerCase().slice(1)}</EuiText>
     <EuiSpacer size="xs" />

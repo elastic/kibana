@@ -31,7 +31,7 @@ export interface FormState {
   expression: string;
 }
 
-export const Expression: FC<ExpressionProps> = ({ done }) => {
+export const Expression: FC<React.PropsWithChildren<ExpressionProps>> = ({ done }) => {
   const { element, pageId } = useSelector((state: State) => ({
     pageId: getSelectedPage(state),
     element: getSelectedElement(state),
@@ -44,7 +44,7 @@ export const Expression: FC<ExpressionProps> = ({ done }) => {
   return <ExpressionContainer key={element.id} done={done} element={element} pageId={pageId} />;
 };
 
-const ExpressionContainer: FC<ExpressionContainerProps> = ({ done, element, pageId }) => {
+const ExpressionContainer: FC<React.PropsWithChildren<ExpressionContainerProps>> = ({ done, element, pageId }) => {
   const expressions = useExpressionsService();
   const dispatch = useDispatch();
   const [isCompact, setCompact] = useState<boolean>(true);

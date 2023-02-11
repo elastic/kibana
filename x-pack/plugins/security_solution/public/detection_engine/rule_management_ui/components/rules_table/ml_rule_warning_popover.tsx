@@ -37,7 +37,7 @@ interface MlRuleWarningPopoverComponentProps {
   jobs: SecurityJob[];
 }
 
-const MlRuleWarningPopoverComponent: React.FC<MlRuleWarningPopoverComponentProps> = ({
+const MlRuleWarningPopoverComponent: React.FC<React.PropsWithChildren<MlRuleWarningPopoverComponentProps>> = ({
   rule,
   loadingJobs,
   jobs,

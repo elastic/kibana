@@ -26,7 +26,7 @@ import { IngestionStatus } from '../../../../types';
 import { CancelSyncsLogic } from '../../connector/cancel_syncs_logic';
 import { IndexViewLogic } from '../../index_view_logic';
 
-export const SyncsContextMenu: React.FC = () => {
+export const SyncsContextMenu: React.FC<React.PropsWithChildren<unknown>> = () => {
   const { ingestionMethod, ingestionStatus, isCanceling, isSyncing, isWaitingForSync } =
     useValues(IndexViewLogic);
   const { cancelSyncs } = useActions(CancelSyncsLogic);

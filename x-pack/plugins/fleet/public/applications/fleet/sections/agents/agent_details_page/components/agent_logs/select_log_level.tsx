@@ -17,7 +17,7 @@ import { AGENT_LOG_LEVELS, DEFAULT_LOG_LEVEL } from './constants';
 
 const LEVEL_VALUES = Object.values(AGENT_LOG_LEVELS);
 
-export const SelectLogLevel: React.FC<{ agent: Agent }> = memo(({ agent }) => {
+export const SelectLogLevel: React.FC<React.PropsWithChildren<{ agent: Agent }>> = memo(({ agent }) => {
   const { notifications } = useStartServices();
   const [isLoading, setIsLoading] = useState(false);
   const [agentLogLevel, setAgentLogLevel] = useState(

@@ -9,7 +9,7 @@ import React, { FC } from 'react';
 
 import { EuiFlexGroup, EuiFlexItem, EuiProgress, EuiText } from '@elastic/eui';
 
-export const ProgressBar: FC<{ progress: number }> = ({ progress }) => (
+export const ProgressBar: FC<React.PropsWithChildren<{ progress: number }>> = ({ progress }) => (
   <EuiFlexGroup alignItems="center" gutterSize="xs">
     <EuiFlexItem style={{ width: '100px' }} grow={false}>
       <EuiProgress value={progress} max={100} color="primary" size="m">

@@ -56,7 +56,7 @@ interface Props {
   pageSizeOptions: number[];
 }
 
-export const AgentListTable: React.FC<Props> = (props: Props) => {
+export const AgentListTable: React.FC<React.PropsWithChildren<Props>> = (props: Props) => {
   const {
     agents,
     isLoading,

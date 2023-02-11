@@ -32,9 +32,7 @@ const SearchSourceExpressionMemoized = memo<SearchSourceExpressionProps>(
   areSearchSourceExpressionPropsEqual
 );
 
-export const EsQueryRuleTypeExpression: React.FunctionComponent<
-  RuleTypeParamsExpressionProps<EsQueryRuleParams, EsQueryRuleMetaData>
-> = (props) => {
+export const EsQueryRuleTypeExpression: React.FunctionComponent<React.PropsWithChildren<RuleTypeParamsExpressionProps<EsQueryRuleParams, EsQueryRuleMetaData>>> = (props) => {
   const { ruleParams, errors, setRuleProperty, setRuleParams } = props;
   const isSearchSource = isSearchSourceRule(ruleParams);
   // metadata provided only when open alert from Discover page

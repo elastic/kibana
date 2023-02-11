@@ -45,7 +45,7 @@ export interface Props {
   loading: boolean;
 }
 
-export const DocumentCountContent: FC<Props> = ({
+export const DocumentCountContent: FC<React.PropsWithChildren<Props>> = ({
   documentCountStats,
   totalCount,
   samplingProbability,

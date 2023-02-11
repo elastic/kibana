@@ -31,7 +31,7 @@ interface Props {
   setCurrentStep: React.Dispatch<React.SetStateAction<WIZARD_STEPS>>;
 }
 
-export const WizardSteps: FC<Props> = ({ currentStep, setCurrentStep }) => {
+export const WizardSteps: FC<React.PropsWithChildren<Props>> = ({ currentStep, setCurrentStep }) => {
   const mlContext = useMlContext();
   const { services } = useMlKibana();
   const fieldStatsServices: FieldStatsServices = useMemo(() => {
@@ -187,7 +187,7 @@ export const WizardSteps: FC<Props> = ({ currentStep, setCurrentStep }) => {
   );
 };
 
-const Title: FC<{ 'data-test-subj': string }> = ({ 'data-test-subj': dataTestSubj, children }) => {
+const Title: FC<React.PropsWithChildren<{ 'data-test-subj': string }>> = ({ 'data-test-subj': dataTestSubj, children }) => {
   return (
     <Fragment>
       <EuiTitle size="s">

@@ -35,7 +35,7 @@ const UppercaseEuiTitle = styled(EuiTitle)`
   text-transform: uppercase;
 `;
 
-const ThreatSummaryPanelTitle: React.FC = ({ children }) => (
+const ThreatSummaryPanelTitle: React.FC<React.PropsWithChildren<unknown>> = ({ children }) => (
   <UppercaseEuiTitle size="xxxs">
     <h5>{children}</h5>
   </UppercaseEuiTitle>
@@ -45,9 +45,9 @@ const StyledEnrichmentFieldTitle = styled(EuiTitle)`
   width: 220px;
 `;
 
-const EnrichmentFieldTitle: React.FC<{
+const EnrichmentFieldTitle: React.FC<React.PropsWithChildren<{
   title: string | React.ReactNode | undefined;
-}> = ({ title }) => (
+}>> = ({ title }) => (
   <StyledEnrichmentFieldTitle size="xxxs">
     <h6>{title}</h6>
   </StyledEnrichmentFieldTitle>
@@ -58,10 +58,10 @@ const StyledEuiFlexGroup = styled(EuiFlexGroup)`
   margin-top: ${({ theme }) => theme.eui.euiSizeS};
 `;
 
-export const EnrichedDataRow: React.FC<{
+export const EnrichedDataRow: React.FC<React.PropsWithChildren<{
   field: string | React.ReactNode | undefined;
   value: React.ReactNode;
-}> = ({ field, value }) => (
+}>> = ({ field, value }) => (
   <StyledEuiFlexGroup
     direction="row"
     gutterSize="none"
@@ -76,10 +76,10 @@ export const EnrichedDataRow: React.FC<{
   </StyledEuiFlexGroup>
 );
 
-export const ThreatSummaryPanelHeader: React.FC<{
+export const ThreatSummaryPanelHeader: React.FC<React.PropsWithChildren<{
   title: string | React.ReactNode;
   toolTipContent: React.ReactNode;
-}> = ({ title, toolTipContent }) => {
+}>> = ({ title, toolTipContent }) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
   const onClick = useCallback(() => {
@@ -121,7 +121,7 @@ export const ThreatSummaryPanelHeader: React.FC<{
   );
 };
 
-const ThreatSummaryViewComponent: React.FC<{
+const ThreatSummaryViewComponent: React.FC<React.PropsWithChildren<{
   browserFields: BrowserFields;
   data: TimelineEventsDetailsItem[];
   enrichments: CtiEnrichment[];
@@ -131,7 +131,7 @@ const ThreatSummaryViewComponent: React.FC<{
   userRisk: UserRisk;
   isDraggable?: boolean;
   isReadOnly?: boolean;
-}> = ({
+}>> = ({
   browserFields,
   data,
   enrichments,

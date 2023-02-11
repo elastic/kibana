@@ -13,11 +13,11 @@ import { CategoryExampleMessage } from './category_example_message';
 
 const exampleCount = 5;
 
-export const CategoryDetailsRow: React.FunctionComponent<{
+export const CategoryDetailsRow: React.FunctionComponent<React.PropsWithChildren<{
   categoryId: number;
   timeRange: TimeRange;
   sourceId: string;
-}> = ({ categoryId, timeRange, sourceId }) => {
+}>> = ({ categoryId, timeRange, sourceId }) => {
   const {
     getLogEntryCategoryExamples,
     hasFailedLoadingLogEntryCategoryExamples,

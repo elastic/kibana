@@ -9,11 +9,11 @@ import { EuiCallOut } from '@elastic/eui';
 import React from 'react';
 import { RecreateJobButton } from '../log_analysis_setup/create_job_button';
 
-export const RecreateJobCallout: React.FC<{
+export const RecreateJobCallout: React.FC<React.PropsWithChildren<{
   hasSetupCapabilities?: boolean;
   onRecreateMlJob: () => void;
   title?: React.ReactNode;
-}> = ({ children, hasSetupCapabilities, onRecreateMlJob, title }) => (
+}>> = ({ children, hasSetupCapabilities, onRecreateMlJob, title }) => (
   <EuiCallOut color="warning" iconType="alert" title={title}>
     {children}
     <RecreateJobButton

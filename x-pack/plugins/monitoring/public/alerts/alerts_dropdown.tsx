@@ -18,7 +18,7 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { MonitoringStartServices } from '../types';
 import { useAlertsModal } from '../application/hooks/use_alerts_modal';
 
-export const AlertsDropdown: React.FC<{}> = () => {
+export const AlertsDropdown: React.FC<React.PropsWithChildren<{}>> = () => {
   const alertsEnableModalProvider = useAlertsModal();
   const { navigateToApp } = useKibana<MonitoringStartServices>().services.application;
 

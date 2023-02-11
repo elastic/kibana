@@ -39,7 +39,7 @@ interface StartAppComponent {
   theme$: AppMountParameters['theme$'];
 }
 
-const StartAppComponent: FC<StartAppComponent> = ({
+const StartAppComponent: FC<React.PropsWithChildren<StartAppComponent>> = ({
   children,
   history,
   setHeaderActionMenu,
@@ -102,7 +102,7 @@ interface SecurityAppComponentProps {
   theme$: AppMountParameters['theme$'];
 }
 
-const SecurityAppComponent: React.FC<SecurityAppComponentProps> = ({
+const SecurityAppComponent: React.FC<React.PropsWithChildren<SecurityAppComponentProps>> = ({
   children,
   history,
   onAppLeave,

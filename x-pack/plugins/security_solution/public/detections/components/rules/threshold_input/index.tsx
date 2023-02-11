@@ -42,7 +42,7 @@ const valueDescribedByIds = ['detectionEngineStepDefineRuleThresholdValue'];
 const cardinalityFieldDescribedByIds = ['detectionEngineStepDefineRuleThresholdCardinalityField'];
 const cardinalityValueDescribedByIds = ['detectionEngineStepDefineRuleThresholdCardinalityValue'];
 
-const ThresholdInputComponent: React.FC<ThresholdInputProps> = ({
+const ThresholdInputComponent: React.FC<React.PropsWithChildren<ThresholdInputProps>> = ({
   thresholdField,
   thresholdValue,
   browserFields,

@@ -15,7 +15,7 @@ const Fallback = () => (
 );
 
 interface Props<T> {
-  getLazyComponent: () => FC<T>;
+  getLazyComponent: () => FC<React.PropsWithChildren<T>>;
   lazyComponentProps: T;
 }
 

@@ -49,7 +49,7 @@ interface Props {
   onTimeFieldChange: (timeField: string) => void;
 }
 
-export const IndexSelectPopover: React.FunctionComponent<Props> = ({
+export const IndexSelectPopover: React.FunctionComponent<React.PropsWithChildren<Props>> = ({
   index,
   esFields,
   timeField,

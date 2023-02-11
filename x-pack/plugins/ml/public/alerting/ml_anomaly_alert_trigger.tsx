@@ -36,7 +36,7 @@ import { BetaBadge } from './beta_badge';
 export type MlAnomalyAlertTriggerProps =
   RuleTypeParamsExpressionProps<MlAnomalyDetectionAlertParams>;
 
-const MlAnomalyAlertTrigger: FC<MlAnomalyAlertTriggerProps> = ({
+const MlAnomalyAlertTrigger: FC<React.PropsWithChildren<MlAnomalyAlertTriggerProps>> = ({
   ruleParams,
   setRuleParams,
   setRuleProperty,

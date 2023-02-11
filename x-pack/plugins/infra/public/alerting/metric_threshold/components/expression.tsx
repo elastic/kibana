@@ -54,7 +54,7 @@ const defaultExpression = {
 } as MetricExpression;
 export { defaultExpression };
 
-export const Expressions: React.FC<Props> = (props) => {
+export const Expressions: React.FC<React.PropsWithChildren<Props>> = (props) => {
   const { setRuleParams, ruleParams, errors, metadata } = props;
   const { http, notifications, docLinks } = useKibanaContextForPlugin().services;
   const { source, createDerivedIndexPattern } = useSourceViaHttp({

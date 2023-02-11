@@ -14,7 +14,7 @@ import { i18n } from '@kbn/i18n';
 
 import { AddDomainLogic } from './add_domain_logic';
 
-export const AddDomainFormErrors: React.FC = () => {
+export const AddDomainFormErrors: React.FC<React.PropsWithChildren<unknown>> = () => {
   const { errors } = useValues(AddDomainLogic);
 
   if (errors.length > 0) {

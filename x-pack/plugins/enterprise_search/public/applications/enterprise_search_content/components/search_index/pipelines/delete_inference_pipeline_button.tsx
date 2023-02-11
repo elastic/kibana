@@ -26,7 +26,7 @@ const DELETE_PIPELINE_LABEL = i18n.translate(
   }
 );
 
-export const DeleteInferencePipelineButton: React.FC<DeleteInferencePipelineButtonProps> = (
+export const DeleteInferencePipelineButton: React.FC<React.PropsWithChildren<DeleteInferencePipelineButtonProps>> = (
   props
 ) => {
   if (props.pipeline.pipelineReferences.length > 1) {

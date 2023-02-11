@@ -105,7 +105,7 @@ const CurrentPageOfTotal = ({
   </EuiTextColor>
 );
 
-const DistributionBar: React.FC<Omit<Props, 'pageEnd' | 'pageStart'>> = ({
+const DistributionBar: React.FC<React.PropsWithChildren<Omit<Props, 'pageEnd' | 'pageStart'>>> = ({
   passed,
   failed,
   distributionOnClick,

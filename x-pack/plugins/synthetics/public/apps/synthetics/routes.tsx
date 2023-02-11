@@ -43,7 +43,7 @@ import { getErrorDetailsRouteConfig } from './components/error_details/route_con
 
 export type RouteProps = LazyObservabilityPageTemplateProps & {
   path: string;
-  component: React.FC;
+  component: React.FC<React.PropsWithChildren<unknown>>;
   dataTestSubj: string;
   title: string;
 };
@@ -162,14 +162,14 @@ const getRoutes = (
   ];
 };
 
-const RouteInit: React.FC<Pick<RouteProps, 'path' | 'title'>> = ({ path, title }) => {
+const RouteInit: React.FC<React.PropsWithChildren<Pick<RouteProps, 'path' | 'title'>>> = ({ path, title }) => {
   useEffect(() => {
     document.title = title;
   }, [path, title]);
   return null;
 };
 
-export const PageRouter: FC = () => {
+export const PageRouter: FC<React.PropsWithChildren<unknown>> = () => {
   const { application, observability } = useKibana<ClientPluginsStart>().services;
   const { addInspectorRequest } = useInspectorContext();
   const { euiTheme } = useEuiTheme();

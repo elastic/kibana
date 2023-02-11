@@ -20,7 +20,7 @@ export default {
   title: 'alerting/TransactionDurationRuleType',
   component: TransactionDurationRuleType,
   decorators: [
-    (StoryComponent: ComponentType) => {
+    (StoryComponent: ComponentType<React.PropsWithChildren<unknown>>) => {
       return (
         <KibanaReactContext.Provider>
           <div style={{ width: 400 }}>

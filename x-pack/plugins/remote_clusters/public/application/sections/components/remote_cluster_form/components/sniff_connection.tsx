@@ -20,7 +20,7 @@ import { transportPortUrl } from '../../../../services/documentation';
 import { validateSeed } from '../validators';
 import { Props } from './connection_mode';
 
-export const SniffConnection: FunctionComponent<Props> = ({
+export const SniffConnection: FunctionComponent<React.PropsWithChildren<Props>> = ({
   fields,
   fieldsErrors,
   areErrorsVisible,

@@ -46,7 +46,7 @@ interface ExplorationProps {
   jobId: string;
 }
 
-export const OutlierExploration: FC<ExplorationProps> = React.memo(({ jobId }) => {
+export const OutlierExploration: FC<React.PropsWithChildren<ExplorationProps>> = React.memo(({ jobId }) => {
   const { indexPattern, indexPatternErrorMessage, jobConfig, needsDestIndexPattern } =
     useResultsViewConfig(jobId);
   const [pageUrlState, setPageUrlState] = useExplorationUrlState();

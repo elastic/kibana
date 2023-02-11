@@ -45,7 +45,7 @@ const CommandCode = styled.pre({
   overflow: 'auto',
 });
 
-export const PlatformSelector: React.FunctionComponent<Props> = ({
+export const PlatformSelector: React.FunctionComponent<React.PropsWithChildren<Props>> = ({
   linuxCommand,
   macCommand,
   windowsCommand,

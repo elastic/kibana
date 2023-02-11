@@ -17,7 +17,7 @@ interface Props {
   setCanProceed?: (proceed: boolean) => void;
 }
 
-export const PopulationView: FC<Props> = ({ isActive, setCanProceed }) => {
+export const PopulationView: FC<React.PropsWithChildren<Props>> = ({ isActive, setCanProceed }) => {
   const [metricsValid, setMetricValid] = useState(false);
   const [settingsValid, setSettingsValid] = useState(false);
 

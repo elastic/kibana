@@ -44,7 +44,7 @@ const i18nTexts = {
   },
 };
 
-export const DefaultToDataTiersNotice: FunctionComponent<{ phase: PhaseWithAllocation }> = ({
+export const DefaultToDataTiersNotice: FunctionComponent<React.PropsWithChildren<{ phase: PhaseWithAllocation }>> = ({
   phase,
 }) => {
   return (

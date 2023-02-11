@@ -42,7 +42,7 @@ interface EnginesListTableProps {
   onDelete: (engine: EnterpriseSearchEngine) => void;
   viewEngineIndices: (engineName: string) => void;
 }
-export const EnginesListTable: React.FC<EnginesListTableProps> = ({
+export const EnginesListTable: React.FC<React.PropsWithChildren<EnginesListTableProps>> = ({
   enginesList,
   isLoading,
   meta,

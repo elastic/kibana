@@ -40,7 +40,7 @@ interface Props {
   onSave: (policy: SlmPolicyPayload) => void;
 }
 
-export const PolicyForm: React.FunctionComponent<Props> = ({
+export const PolicyForm: React.FunctionComponent<React.PropsWithChildren<Props>> = ({
   policy: originalPolicy,
   dataStreams,
   indices,

@@ -36,7 +36,7 @@ interface Props {
 const UseField = getUseField({ component: Field });
 const FormRow = getFormRow({ titleTag: 'h3' });
 
-export const PipelineFormFields: React.FunctionComponent<Props> = ({
+export const PipelineFormFields: React.FunctionComponent<React.PropsWithChildren<Props>> = ({
   processors,
   onFailure,
   onLoadJson,

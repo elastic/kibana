@@ -39,7 +39,7 @@ window.scrollTo = jest.fn();
 const MockKibanaContextProvider = createKibanaContextProviderMock();
 
 /** A utility for wrapping children in the providers required to run most tests */
-const TestProvidersComponent: React.FC<Props> = ({
+const TestProvidersComponent: React.FC<React.PropsWithChildren<Props>> = ({
   children,
   store = configureStore({
     preloadedState: state,

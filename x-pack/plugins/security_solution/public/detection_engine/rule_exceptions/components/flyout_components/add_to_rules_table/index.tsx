@@ -16,7 +16,7 @@ interface ExceptionsAddToRulesComponentProps {
   onRuleSelectionChange: (rulesSelectedToAdd: Rule[]) => void;
 }
 
-const ExceptionsAddToRulesTableComponent: React.FC<ExceptionsAddToRulesComponentProps> = ({
+const ExceptionsAddToRulesTableComponent: React.FC<React.PropsWithChildren<ExceptionsAddToRulesComponentProps>> = ({
   initiallySelectedRules,
   onRuleSelectionChange,
 }) => {

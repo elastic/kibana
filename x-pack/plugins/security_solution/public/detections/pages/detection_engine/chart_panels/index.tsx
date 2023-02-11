@@ -56,7 +56,7 @@ export interface Props {
   updateDateRangeCallback: UpdateDateRange;
 }
 
-const ChartPanelsComponent: React.FC<Props> = ({
+const ChartPanelsComponent: React.FC<React.PropsWithChildren<Props>> = ({
   addFilter,
   alertsDefaultFilters,
   isLoadingIndexPattern,

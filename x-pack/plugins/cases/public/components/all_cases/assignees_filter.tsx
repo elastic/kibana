@@ -29,7 +29,7 @@ export interface AssigneesFilterPopoverProps {
   onSelectionChange: (users: AssigneesFilteringSelection[]) => void;
 }
 
-const AssigneesFilterPopoverComponent: React.FC<AssigneesFilterPopoverProps> = ({
+const AssigneesFilterPopoverComponent: React.FC<React.PropsWithChildren<AssigneesFilterPopoverProps>> = ({
   selectedAssignees,
   currentUserProfile,
   isLoading,

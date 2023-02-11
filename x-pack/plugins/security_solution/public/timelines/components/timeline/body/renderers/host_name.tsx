@@ -33,7 +33,7 @@ interface Props {
   title?: string;
 }
 
-const HostNameComponent: React.FC<Props> = ({
+const HostNameComponent: React.FC<React.PropsWithChildren<Props>> = ({
   fieldName,
   fieldType,
   isAggregatable,

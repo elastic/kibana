@@ -98,7 +98,7 @@ interface OwnProps {
 
 type AlertsTableComponentProps = OwnProps & PropsFromRedux;
 
-export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
+export const AlertsTableComponent: React.FC<React.PropsWithChildren<AlertsTableComponentProps>> = ({
   defaultFilters,
   from,
   globalFilters,

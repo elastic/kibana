@@ -28,7 +28,7 @@ interface Props {
   history: ScopedHistory;
 }
 
-export const LegacyTemplateTable: React.FunctionComponent<Props> = ({
+export const LegacyTemplateTable: React.FunctionComponent<React.PropsWithChildren<Props>> = ({
   templates,
   reload,
   editTemplate,

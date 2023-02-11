@@ -136,11 +136,11 @@ export const LogColumnsConfigurationPanel = React.memo<{
   );
 });
 
-const LogColumnConfigurationPanel: React.FunctionComponent<{
+const LogColumnConfigurationPanel: React.FunctionComponent<React.PropsWithChildren<{
   logColumnConfiguration: LogColumnConfiguration;
   dragHandleProps: DragHandleProps;
   onRemove: (logColumnConfiguration: LogColumnConfiguration) => void;
-}> = ({ logColumnConfiguration, dragHandleProps, onRemove }) => {
+}>> = ({ logColumnConfiguration, dragHandleProps, onRemove }) => {
   const removeColumn = useCallback(
     () => onRemove(logColumnConfiguration),
     [logColumnConfiguration, onRemove]
@@ -178,9 +178,7 @@ interface LogColumnConfigurationPanelProps<LogColumnConfigurationType> {
   onRemove: () => void;
 }
 
-const TimestampLogColumnConfigurationPanel: React.FunctionComponent<
-  LogColumnConfigurationPanelProps<TimestampLogColumnConfiguration>
-> = ({ dragHandleProps, onRemove }) => (
+const TimestampLogColumnConfigurationPanel: React.FunctionComponent<React.PropsWithChildren<LogColumnConfigurationPanelProps<TimestampLogColumnConfiguration>>> = ({ dragHandleProps, onRemove }) => (
   <ExplainedLogColumnConfigurationPanel
     fieldName="Timestamp"
     helpText={
@@ -198,9 +196,7 @@ const TimestampLogColumnConfigurationPanel: React.FunctionComponent<
   />
 );
 
-const MessageLogColumnConfigurationPanel: React.FunctionComponent<
-  LogColumnConfigurationPanelProps<MessageLogColumnConfiguration>
-> = ({ dragHandleProps, onRemove }) => (
+const MessageLogColumnConfigurationPanel: React.FunctionComponent<React.PropsWithChildren<LogColumnConfigurationPanelProps<MessageLogColumnConfiguration>>> = ({ dragHandleProps, onRemove }) => (
   <ExplainedLogColumnConfigurationPanel
     fieldName="Message"
     helpText={
@@ -215,9 +211,7 @@ const MessageLogColumnConfigurationPanel: React.FunctionComponent<
   />
 );
 
-const FieldLogColumnConfigurationPanel: React.FunctionComponent<
-  LogColumnConfigurationPanelProps<FieldLogColumnConfiguration>
-> = ({
+const FieldLogColumnConfigurationPanel: React.FunctionComponent<React.PropsWithChildren<LogColumnConfigurationPanelProps<FieldLogColumnConfiguration>>> = ({
   dragHandleProps,
   logColumnConfiguration: {
     fieldColumn: { field },
@@ -251,12 +245,12 @@ const FieldLogColumnConfigurationPanel: React.FunctionComponent<
   );
 };
 
-const ExplainedLogColumnConfigurationPanel: React.FunctionComponent<{
+const ExplainedLogColumnConfigurationPanel: React.FunctionComponent<React.PropsWithChildren<{
   fieldName: React.ReactNode;
   helpText: React.ReactNode;
   onRemove: () => void;
   dragHandleProps: DragHandleProps;
-}> = ({ fieldName, helpText, onRemove, dragHandleProps }) => (
+}>> = ({ fieldName, helpText, onRemove, dragHandleProps }) => (
   <EuiPanel
     color="subdued"
     data-test-subj={`logColumnPanel systemLogColumnPanel systemLogColumnPanel:${fieldName}`}
@@ -281,10 +275,10 @@ const ExplainedLogColumnConfigurationPanel: React.FunctionComponent<{
   </EuiPanel>
 );
 
-const RemoveLogColumnButton: React.FunctionComponent<{
+const RemoveLogColumnButton: React.FunctionComponent<React.PropsWithChildren<{
   onClick?: () => void;
   columnDescription: string;
-}> = ({ onClick, columnDescription }) => {
+}>> = ({ onClick, columnDescription }) => {
   const removeColumnLabel = i18n.translate(
     'xpack.infra.sourceConfiguration.removeLogColumnButtonLabel',
     {
@@ -305,7 +299,7 @@ const RemoveLogColumnButton: React.FunctionComponent<{
   );
 };
 
-const LogColumnConfigurationEmptyPrompt: React.FunctionComponent = () => (
+const LogColumnConfigurationEmptyPrompt: React.FunctionComponent<React.PropsWithChildren<unknown>> = () => (
   <EuiEmptyPrompt
     iconType="list"
     title={

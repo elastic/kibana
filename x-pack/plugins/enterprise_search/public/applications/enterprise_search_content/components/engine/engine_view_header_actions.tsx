@@ -17,7 +17,7 @@ import { TelemetryLogic } from '../../../shared/telemetry/telemetry_logic';
 
 import { EngineViewLogic } from './engine_view_logic';
 
-export const EngineViewHeaderActions: React.FC = () => {
+export const EngineViewHeaderActions: React.FC<React.PropsWithChildren<unknown>> = () => {
   const { engineData } = useValues(EngineViewLogic);
 
   const { openDeleteEngineModal } = useActions(EngineViewLogic);

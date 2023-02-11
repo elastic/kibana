@@ -82,7 +82,7 @@ const geti18nTexts = (
   }
 };
 
-export const SearchableSnapshotField: FunctionComponent<Props> = ({
+export const SearchableSnapshotField: FunctionComponent<React.PropsWithChildren<Props>> = ({
   phase,
   canBeDisabled = true,
 }) => {

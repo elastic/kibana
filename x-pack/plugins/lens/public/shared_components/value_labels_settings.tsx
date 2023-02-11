@@ -40,7 +40,7 @@ export interface VisualOptionsProps {
   onValueLabelChange: (newMode: ValueLabelConfig) => void;
 }
 
-export const ValueLabelsSettings: FC<VisualOptionsProps> = ({
+export const ValueLabelsSettings: FC<React.PropsWithChildren<VisualOptionsProps>> = ({
   isVisible = true,
   valueLabels = 'hide',
   onValueLabelChange,

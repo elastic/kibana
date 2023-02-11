@@ -40,7 +40,7 @@ interface SecurityNavControlProps {
   userMenuLinks$: Observable<UserMenuLink[]>;
 }
 
-export const SecurityNavControl: FunctionComponent<SecurityNavControlProps> = ({
+export const SecurityNavControl: FunctionComponent<React.PropsWithChildren<SecurityNavControlProps>> = ({
   editProfileUrl,
   logoutUrl,
   userMenuLinks$,

@@ -25,7 +25,7 @@ import { useNavigateToPath } from '../../../../../contexts/kibana';
 import { ML_PAGES } from '../../../../../../../common/constants/locator';
 import { checkPermission } from '../../../../../capabilities/check_capabilities';
 
-export const AnalyticsEmptyPrompt: FC = () => {
+export const AnalyticsEmptyPrompt: FC<React.PropsWithChildren<unknown>> = () => {
   const {
     services: {
       docLinks,

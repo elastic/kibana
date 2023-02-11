@@ -38,7 +38,7 @@ interface AlertsFlyoutProps {
   onPaginate: (pageIndex: number) => void;
   id?: string;
 }
-export const AlertsFlyout: React.FunctionComponent<AlertsFlyoutProps> = ({
+export const AlertsFlyout: React.FunctionComponent<React.PropsWithChildren<AlertsFlyoutProps>> = ({
   alert,
   alertsTableConfiguration,
   flyoutIndex,

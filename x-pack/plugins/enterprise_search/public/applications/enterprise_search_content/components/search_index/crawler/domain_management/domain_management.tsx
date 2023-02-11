@@ -27,7 +27,7 @@ import { DomainManagementLogic } from './domain_management_logic';
 import { DomainsPanel } from './domains_panel';
 import { EmptyStatePanel } from './empty_state_panel';
 
-export const SearchIndexDomainManagement: React.FC = () => {
+export const SearchIndexDomainManagement: React.FC<React.PropsWithChildren<unknown>> = () => {
   DeleteCrawlerDomainApiLogic.mount();
   GetCrawlerDomainsApiLogic.mount();
   const { domains, isLoading } = useValues(DomainManagementLogic);

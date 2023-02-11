@@ -28,7 +28,7 @@ interface Props {
   esDocsBase: string;
 }
 
-export const StepAliases: React.FunctionComponent<Props> = React.memo(
+export const StepAliases: React.FunctionComponent<React.PropsWithChildren<Props>> = React.memo(
   ({ defaultValue = {}, onChange, esDocsBase }) => {
     const { jsonContent, setJsonContent, error } = useJsonStep({
       defaultValue,

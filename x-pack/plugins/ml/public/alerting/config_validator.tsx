@@ -27,7 +27,7 @@ interface ConfigValidatorProps {
 /**
  * Validated alert configuration
  */
-export const ConfigValidator: FC<ConfigValidatorProps> = React.memo(
+export const ConfigValidator: FC<React.PropsWithChildren<ConfigValidatorProps>> = React.memo(
   ({ jobConfigs = [], alertInterval, alertParams, alertNotifyWhen, maxNumberOfBuckets }) => {
     if (jobConfigs.length === 0) return null;
 

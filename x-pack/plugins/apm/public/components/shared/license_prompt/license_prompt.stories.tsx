@@ -20,7 +20,7 @@ export default {
   title: 'shared/LicensePrompt',
   component: LicensePrompt,
   decorators: [
-    (Story: ComponentType) => (
+    (Story: ComponentType<React.PropsWithChildren<unknown>>) => (
       <ApmPluginContext.Provider value={contextMock}>
         <Story />
       </ApmPluginContext.Provider>

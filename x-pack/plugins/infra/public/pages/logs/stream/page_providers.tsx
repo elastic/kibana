@@ -20,7 +20,7 @@ import { ViewLogInContextProvider } from '../../../containers/logs/view_log_in_c
 import { useLogViewContext } from '../../../hooks/use_log_view';
 import { MatchedStateFromActor } from '../../../observability_logs/xstate_helpers';
 
-const ViewLogInContext: React.FC = ({ children }) => {
+const ViewLogInContext: React.FC<React.PropsWithChildren<unknown>> = ({ children }) => {
   const { startTimestamp, endTimestamp } = useLogPositionStateContext();
   const { logViewId } = useLogViewContext();
 
@@ -39,9 +39,9 @@ const ViewLogInContext: React.FC = ({ children }) => {
   );
 };
 
-const LogEntriesStateProvider: React.FC<{
+const LogEntriesStateProvider: React.FC<React.PropsWithChildren<{
   logStreamPageState: InitializedLogStreamPageState;
-}> = ({ children, logStreamPageState }) => {
+}>> = ({ children, logStreamPageState }) => {
   const { logViewId } = useLogViewContext();
   const { startTimestamp, endTimestamp, targetPosition } = useLogPositionStateContext();
   const {
@@ -66,9 +66,9 @@ const LogEntriesStateProvider: React.FC<{
   );
 };
 
-const LogHighlightsState: React.FC<{
+const LogHighlightsState: React.FC<React.PropsWithChildren<{
   logStreamPageState: InitializedLogStreamPageState;
-}> = ({ children, logStreamPageState }) => {
+}>> = ({ children, logStreamPageState }) => {
   const { logViewId, logView } = useLogViewContext();
   const { topCursor, bottomCursor, entries } = useLogStreamContext();
   const serializedParsedQuery = useMemo(
@@ -88,9 +88,9 @@ const LogHighlightsState: React.FC<{
   return <LogHighlightsStateProvider {...highlightsProps}>{children}</LogHighlightsStateProvider>;
 };
 
-export const LogStreamPageContentProviders: React.FC<{
+export const LogStreamPageContentProviders: React.FC<React.PropsWithChildren<{
   logStreamPageState: InitializedLogStreamPageState;
-}> = ({ children, logStreamPageState }) => {
+}>> = ({ children, logStreamPageState }) => {
   return (
     <LogViewConfigurationProvider>
       <LogEntryFlyoutProvider>

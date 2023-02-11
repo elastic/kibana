@@ -15,11 +15,11 @@ import {
   ShardFailureSearchStrategyError,
 } from '../../common/search_strategies/common/errors';
 
-export const DataSearchErrorCallout: React.FC<{
+export const DataSearchErrorCallout: React.FC<React.PropsWithChildren<{
   title: React.ReactNode;
   errors: SearchStrategyError[];
   onRetry?: () => void;
-}> = ({ errors, onRetry, title }) => {
+}>> = ({ errors, onRetry, title }) => {
   const calloutColor = errors.some((error) => error.type !== 'aborted') ? 'danger' : 'warning';
 
   return (
@@ -39,7 +39,7 @@ export const DataSearchErrorCallout: React.FC<{
   );
 };
 
-const DataSearchErrorMessage: React.FC<{ error: SearchStrategyError }> = ({ error }) => {
+const DataSearchErrorMessage: React.FC<React.PropsWithChildren<{ error: SearchStrategyError }>> = ({ error }) => {
   if (error.type === 'aborted') {
     return <AbortedRequestErrorMessage error={error} />;
   } else if (error.type === 'shardFailure') {
@@ -49,9 +49,9 @@ const DataSearchErrorMessage: React.FC<{ error: SearchStrategyError }> = ({ erro
   }
 };
 
-const AbortedRequestErrorMessage: React.FC<{
+const AbortedRequestErrorMessage: React.FC<React.PropsWithChildren<{
   error?: AbortedRequestSearchStrategyError;
-}> = ({}) => (
+}>> = ({}) => (
   <FormattedMessage
     tagName="p"
     id="xpack.infra.dataSearch.abortedRequestErrorMessage"
@@ -59,11 +59,11 @@ const AbortedRequestErrorMessage: React.FC<{
   />
 );
 
-const GenericErrorMessage: React.FC<{ error: GenericSearchStrategyError }> = ({ error }) => (
+const GenericErrorMessage: React.FC<React.PropsWithChildren<{ error: GenericSearchStrategyError }>> = ({ error }) => (
   <p>{error.message ?? `${error}`}</p>
 );
 
-const ShardFailureErrorMessage: React.FC<{ error: ShardFailureSearchStrategyError }> = ({
+const ShardFailureErrorMessage: React.FC<React.PropsWithChildren<{ error: ShardFailureSearchStrategyError }>> = ({
   error,
 }) => (
   <FormattedMessage

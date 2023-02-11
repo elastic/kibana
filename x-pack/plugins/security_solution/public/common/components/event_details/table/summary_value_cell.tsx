@@ -16,7 +16,7 @@ import { CELL_ACTIONS_DETAILS_FLYOUT_TRIGGER } from '../../../../../common/const
 
 const style = { flexGrow: 0 };
 
-export const SummaryValueCell: React.FC<AlertSummaryRow['description']> = ({
+export const SummaryValueCell: React.FC<React.PropsWithChildren<AlertSummaryRow['description']>> = ({
   data,
   eventId,
   fieldFromBrowserField,

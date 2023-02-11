@@ -25,7 +25,7 @@ interface Props {
 }
 type Columns = Array<EuiBasicTableColumn<RecentQuery>>;
 
-export const RecentQueriesTable: React.FC<Props> = ({ items }) => {
+export const RecentQueriesTable: React.FC<React.PropsWithChildren<Props>> = ({ items }) => {
   const TERM_COLUMN = {
     ...TERM_COLUMN_PROPS,
     field: 'query_string',

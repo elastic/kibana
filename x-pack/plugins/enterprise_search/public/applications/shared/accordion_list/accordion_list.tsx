@@ -31,7 +31,7 @@ interface Props {
   title: string;
 }
 
-export const AccordionList: React.FC<Props> = ({
+export const AccordionList: React.FC<React.PropsWithChildren<Props>> = ({
   hasBorder,
   iconType,
   initialIsOpen,

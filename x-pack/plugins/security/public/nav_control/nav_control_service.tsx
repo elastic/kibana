@@ -156,7 +156,7 @@ export interface ProvidersProps {
   theme$: Observable<CoreTheme>;
 }
 
-export const Providers: FunctionComponent<ProvidersProps> = ({
+export const Providers: FunctionComponent<React.PropsWithChildren<ProvidersProps>> = ({
   authc,
   services,
   theme$,

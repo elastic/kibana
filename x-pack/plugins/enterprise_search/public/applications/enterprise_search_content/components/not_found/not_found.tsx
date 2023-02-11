@@ -13,7 +13,7 @@ import { NotFoundPrompt } from '../../../shared/not_found';
 import { SendEnterpriseSearchTelemetry } from '../../../shared/telemetry';
 import { EnterpriseSearchContentPageTemplate } from '../layout';
 
-export const NotFound: React.FC<PageTemplateProps> = ({ pageChrome = [] }) => {
+export const NotFound: React.FC<React.PropsWithChildren<PageTemplateProps>> = ({ pageChrome = [] }) => {
   return (
     <EnterpriseSearchContentPageTemplate pageChrome={[...pageChrome, '404']} customPageSections>
       <SendEnterpriseSearchTelemetry action="error" metric="not_found" />

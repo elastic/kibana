@@ -16,7 +16,7 @@ interface Props {
   setIsFixed: (isFixed: boolean) => void;
 }
 
-export const KibanaDeprecationIssuesPanel: FunctionComponent<Props> = ({ setIsFixed }) => {
+export const KibanaDeprecationIssuesPanel: FunctionComponent<React.PropsWithChildren<Props>> = ({ setIsFixed }) => {
   const {
     services: {
       core: { deprecations },

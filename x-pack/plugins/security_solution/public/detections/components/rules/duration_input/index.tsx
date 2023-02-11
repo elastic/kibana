@@ -75,7 +75,7 @@ const MyEuiSelect = styled(EuiSelect)`
 // This component is similar to the ScheduleItem component, but instead of combining the value
 // and unit into a single string it keeps them separate. This makes the component simpler and
 // allows for easier validation of values and units in APIs as well.
-const DurationInputComponent: React.FC<DurationInputProps> = ({
+const DurationInputComponent: React.FC<React.PropsWithChildren<DurationInputProps>> = ({
   durationValueField,
   durationUnitField,
   minimumValue = 0,

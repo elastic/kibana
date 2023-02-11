@@ -14,7 +14,7 @@ interface Props {
   processor: ProcessorInternal;
 }
 
-export const ProcessorInformation: FunctionComponent<Props> = memo(({ processor }) => {
+export const ProcessorInformation: FunctionComponent<React.PropsWithChildren<Props>> = memo(({ processor }) => {
   const processorDescriptor = getProcessorDescriptor(processor.type);
   const label = processorDescriptor?.label ?? processor.type;
   const description =

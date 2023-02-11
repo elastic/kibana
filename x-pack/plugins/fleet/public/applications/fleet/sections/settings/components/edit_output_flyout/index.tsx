@@ -52,7 +52,7 @@ const OUTPUT_TYPE_OPTIONS = [
   { value: 'logstash', text: 'Logstash' },
 ];
 
-export const EditOutputFlyout: React.FunctionComponent<EditOutputFlyoutProps> = ({
+export const EditOutputFlyout: React.FunctionComponent<React.PropsWithChildren<EditOutputFlyoutProps>> = ({
   onClose,
   output,
   proxies,

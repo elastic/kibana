@@ -88,7 +88,7 @@ export interface EntryItemProps {
   allowCustomOptions?: boolean;
 }
 
-export const BuilderEntryItem: React.FC<EntryItemProps> = ({
+export const BuilderEntryItem: React.FC<React.PropsWithChildren<EntryItemProps>> = ({
   allowLargeValueLists = false,
   autocompleteService,
   entry,

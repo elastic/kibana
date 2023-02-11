@@ -22,7 +22,7 @@ const panelStyle = {
   paddingTop: '15px',
 };
 
-export const FiltersGroup: FC<Props> = ({ filtersGroup, id }) => {
+export const FiltersGroup: FC<React.PropsWithChildren<Props>> = ({ filtersGroup, id }) => {
   const { name, filters: groupFilters } = filtersGroup;
 
   const filledFilterViews: FormattedFilterViewInstance[] = groupFilters.map((filter) => {

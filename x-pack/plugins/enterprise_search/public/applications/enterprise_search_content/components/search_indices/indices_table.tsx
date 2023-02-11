@@ -41,7 +41,7 @@ interface IndicesTableProps {
   onDelete: (index: ElasticsearchViewIndex) => void;
 }
 
-export const IndicesTable: React.FC<IndicesTableProps> = ({
+export const IndicesTable: React.FC<React.PropsWithChildren<IndicesTableProps>> = ({
   indices,
   isLoading,
   meta,

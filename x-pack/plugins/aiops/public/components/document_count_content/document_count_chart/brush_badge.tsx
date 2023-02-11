@@ -22,7 +22,7 @@ interface BrushBadgeProps {
   width: number;
 }
 
-export const BrushBadge: FC<BrushBadgeProps> = ({
+export const BrushBadge: FC<React.PropsWithChildren<BrushBadgeProps>> = ({
   label,
   marginLeft,
   timestampFrom,

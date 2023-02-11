@@ -28,7 +28,7 @@ interface QueryDetailsFlyoutProps {
 }
 const additionalZIndexStyle = { style: 'z-index: 6000' };
 
-const QueryDetailsFlyoutComponent: React.FC<QueryDetailsFlyoutProps> = ({ action, onClose }) => (
+const QueryDetailsFlyoutComponent: React.FC<React.PropsWithChildren<QueryDetailsFlyoutProps>> = ({ action, onClose }) => (
   <EuiPortal>
     <EuiFlyout
       size="m"

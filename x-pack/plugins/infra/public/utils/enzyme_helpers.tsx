@@ -40,7 +40,7 @@ interface ReactHookWrapper<Args, HookValue> {
  */
 export const mountHook = <Args extends {}, HookValue extends any>(
   body: (args: Args) => HookValue,
-  WrapperComponent?: React.ComponentType,
+  WrapperComponent?: React.ComponentType<React.PropsWithChildren<unknown>>,
   initialArgs: Args = {} as Args
 ): ReactHookWrapper<Args, HookValue> => {
   const hookValueCallback = jest.fn();
@@ -65,7 +65,7 @@ export const mountHook = <Args extends {}, HookValue extends any>(
     hookValueCallback(body(props));
     return null;
   };
-  const TestComponent: React.FunctionComponent<Args> = (args) =>
+  const TestComponent: React.FunctionComponent<React.PropsWithChildren<Args>> = (args) =>
     WrapperComponent ? (
       <WrapperComponent>
         <HookComponent {...args} />

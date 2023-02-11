@@ -20,7 +20,7 @@ type AdditionalOptionsProps = Pick<
   'subActionParams' | 'editOptionalSubAction' | 'messageVariables' | 'index'
 >;
 
-const AdditionalOptionsComponent: React.FC<AdditionalOptionsProps> = ({
+const AdditionalOptionsComponent: React.FC<React.PropsWithChildren<AdditionalOptionsProps>> = ({
   subActionParams,
   editOptionalSubAction,
   messageVariables,

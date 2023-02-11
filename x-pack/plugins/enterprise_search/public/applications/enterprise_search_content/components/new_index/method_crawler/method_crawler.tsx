@@ -24,7 +24,7 @@ import { NewSearchIndexTemplate } from '../new_search_index_template';
 
 import { MethodCrawlerLogic } from './method_crawler_logic';
 
-export const MethodCrawler: React.FC = () => {
+export const MethodCrawler: React.FC<React.PropsWithChildren<unknown>> = () => {
   const { status } = useValues(CreateCrawlerIndexApiLogic);
   const { makeRequest } = useActions(CreateCrawlerIndexApiLogic);
   const { isCloud } = useValues(KibanaLogic);

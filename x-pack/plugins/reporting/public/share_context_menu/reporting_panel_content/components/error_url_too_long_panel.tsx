@@ -21,7 +21,7 @@ const i18nTexts = {
   }),
 };
 
-export const ErrorUrlTooLongPanel: FunctionComponent<Props> = ({ isUnsaved }) => (
+export const ErrorUrlTooLongPanel: FunctionComponent<React.PropsWithChildren<Props>> = ({ isUnsaved }) => (
   <EuiCallOut title={i18nTexts.title} size="s" iconType="alert" color="danger">
     <EuiText size="s">
       <p>

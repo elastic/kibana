@@ -25,7 +25,7 @@ type AdditionalOptionsProps = Pick<
   'subActionParams' | 'editOptionalSubAction' | 'index' | 'messageVariables'
 >;
 
-const AdditionalOptions: React.FC<AdditionalOptionsProps> = ({
+const AdditionalOptions: React.FC<React.PropsWithChildren<AdditionalOptionsProps>> = ({
   subActionParams,
   editOptionalSubAction,
   index,
@@ -84,7 +84,7 @@ type CloseAlertProps = Pick<
   showSaveError: boolean;
 };
 
-const CloseAlertComponent: React.FC<CloseAlertProps> = ({
+const CloseAlertComponent: React.FC<React.PropsWithChildren<CloseAlertProps>> = ({
   editSubAction,
   editOptionalSubAction,
   errors,

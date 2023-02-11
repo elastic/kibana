@@ -211,7 +211,7 @@ export type CommandExecutionComponent<
   TStore extends object = any,
   /** The metadata defined on the Command Definition */
   TMeta = any
-> = ComponentType<CommandExecutionComponentProps<TArgs, TStore, TMeta>>;
+> = ComponentType<React.PropsWithChildren<CommandExecutionComponentProps<TArgs, TStore, TMeta>>>;
 
 /**
  * The component props for an argument `SelectorComponent`
@@ -260,7 +260,7 @@ export interface CommandArgumentValueSelectorProps<TSelection = any, TState = an
  * Component for rendering an argument's value selector
  */
 export type CommandArgumentValueSelectorComponent =
-  ComponentType<CommandArgumentValueSelectorProps>;
+  ComponentType<React.PropsWithChildren<CommandArgumentValueSelectorProps>>;
 
 export interface ConsoleProps extends CommonProps {
   /**
@@ -277,7 +277,7 @@ export interface ConsoleProps extends CommonProps {
   /**
    * A component to be used in the Console's header title area (left side)
    */
-  TitleComponent?: ComponentType;
+  TitleComponent?: ComponentType<React.PropsWithChildren<unknown>>;
 
   /** The string to display to the left of the input area */
   prompt?: string;

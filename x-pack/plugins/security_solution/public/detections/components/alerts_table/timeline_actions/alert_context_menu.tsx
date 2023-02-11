@@ -55,7 +55,7 @@ interface AlertContextMenuProps {
   scopeId: string;
 }
 
-const AlertContextMenuComponent: React.FC<AlertContextMenuProps & PropsFromRedux> = ({
+const AlertContextMenuComponent: React.FC<React.PropsWithChildren<AlertContextMenuProps & PropsFromRedux>> = ({
   ariaLabel = i18n.MORE_ACTIONS,
   ariaRowindex,
   columnValues,
@@ -338,7 +338,7 @@ type AddExceptionFlyoutWrapperProps = Omit<
  * Due to the conditional nature of the flyout and how we use the `ecsData` field,
  * we cannot use the fetch hook within the flyout component itself
  */
-export const AddExceptionFlyoutWrapper: React.FC<AddExceptionFlyoutWrapperProps> = ({
+export const AddExceptionFlyoutWrapper: React.FC<React.PropsWithChildren<AddExceptionFlyoutWrapperProps>> = ({
   ruleId,
   ruleRuleId,
   ruleIndices,

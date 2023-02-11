@@ -35,7 +35,7 @@ import {
   AgentDiagnosticsTab,
 } from './components';
 
-export const AgentDetailsPage: React.FunctionComponent = () => {
+export const AgentDetailsPage: React.FunctionComponent<React.PropsWithChildren<unknown>> = () => {
   const {
     params: { agentId, tabId = '' },
   } = useRouteMatch<{ agentId: string; tabId?: string }>();
@@ -218,10 +218,10 @@ export const AgentDetailsPage: React.FunctionComponent = () => {
   );
 };
 
-const AgentDetailsPageContent: React.FunctionComponent<{
+const AgentDetailsPageContent: React.FunctionComponent<React.PropsWithChildren<{
   agent: Agent;
   agentPolicy?: AgentPolicy;
-}> = ({ agent, agentPolicy }) => {
+}>> = ({ agent, agentPolicy }) => {
   useBreadcrumbs('agent_details', {
     agentHost:
       typeof agent.local_metadata.host === 'object' &&

@@ -51,7 +51,7 @@ interface Props {
   onClose: () => void;
 }
 
-export const ChangeDataViewModal: FC<Props> = ({ onClose }) => {
+export const ChangeDataViewModal: FC<React.PropsWithChildren<Props>> = ({ onClose }) => {
   const {
     services: {
       savedObjects,
@@ -236,10 +236,10 @@ export const ChangeDataViewModal: FC<Props> = ({ onClose }) => {
   );
 };
 
-const ValidationMessage: FC<{
+const ValidationMessage: FC<React.PropsWithChildren<{
   validationResponse: DatafeedValidationResponse | null;
   dataViewTitle: string;
-}> = ({ validationResponse, dataViewTitle }) => {
+}>> = ({ validationResponse, dataViewTitle }) => {
   if (validationResponse === null) {
     return (
       <EuiCallOut

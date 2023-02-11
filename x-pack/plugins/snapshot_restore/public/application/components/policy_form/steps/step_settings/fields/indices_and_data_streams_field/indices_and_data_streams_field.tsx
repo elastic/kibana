@@ -53,7 +53,7 @@ interface Props {
  * they share an array "indices" in the snapshot lifecycle policy config. See
  * this github issue for progress: https://github.com/elastic/elasticsearch/issues/58474
  */
-export const IndicesAndDataStreamsField: FunctionComponent<Props> = ({
+export const IndicesAndDataStreamsField: FunctionComponent<React.PropsWithChildren<Props>> = ({
   isManagedPolicy,
   dataStreams,
   indices,

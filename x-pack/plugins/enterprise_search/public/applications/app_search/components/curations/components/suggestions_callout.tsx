@@ -31,7 +31,7 @@ interface SuggestionsCalloutProps {
   style?: React.CSSProperties;
 }
 
-export const SuggestionsCallout: React.FC<SuggestionsCalloutProps> = ({
+export const SuggestionsCallout: React.FC<React.PropsWithChildren<SuggestionsCalloutProps>> = ({
   title,
   description,
   buttonTo,

@@ -19,7 +19,7 @@ interface PipelineSettingsFormProps {
   setPipeline: (pipeline: IngestPipelineParams) => void;
 }
 
-export const PipelineSettingsForm: React.FC<PipelineSettingsFormProps> = ({
+export const PipelineSettingsForm: React.FC<React.PropsWithChildren<PipelineSettingsFormProps>> = ({
   ingestionMethod,
   setPipeline,
   pipeline,

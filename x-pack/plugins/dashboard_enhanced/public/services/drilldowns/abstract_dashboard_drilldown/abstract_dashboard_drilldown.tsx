@@ -52,13 +52,9 @@ export abstract class AbstractDashboardDrilldown<Context extends object = object
 
   public readonly euiIcon = 'dashboardApp';
 
-  private readonly ReactCollectConfig: React.FC<
-    CollectConfigProps<Config, BaseActionFactoryContext>
-  >;
+  private readonly ReactCollectConfig: React.FC<React.PropsWithChildren<CollectConfigProps<Config, BaseActionFactoryContext>>>;
 
-  public readonly CollectConfig: React.FC<
-    CollectConfigProps<DrilldownConfig, BaseActionFactoryContext>
-  >;
+  public readonly CollectConfig: React.FC<React.PropsWithChildren<CollectConfigProps<DrilldownConfig, BaseActionFactoryContext>>>;
 
   public readonly createConfig = () => ({
     dashboardId: '',

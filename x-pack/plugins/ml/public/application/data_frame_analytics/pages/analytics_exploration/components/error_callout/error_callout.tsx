@@ -13,7 +13,7 @@ interface Props {
   error: string | JSX.Element;
 }
 
-export const ErrorCallout: FC<Props> = ({ error }) => {
+export const ErrorCallout: FC<React.PropsWithChildren<Props>> = ({ error }) => {
   let errorCallout = (
     <EuiCallOut
       title={i18n.translate('xpack.ml.dataframe.analytics.errorCallout.generalErrorTitle', {

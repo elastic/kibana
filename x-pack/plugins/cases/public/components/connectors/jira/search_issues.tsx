@@ -21,7 +21,7 @@ interface Props {
   onChange: (parentIssueKey: string) => void;
 }
 
-const SearchIssuesComponent: React.FC<Props> = ({ selectedValue, actionConnector, onChange }) => {
+const SearchIssuesComponent: React.FC<React.PropsWithChildren<Props>> = ({ selectedValue, actionConnector, onChange }) => {
   const [query, setQuery] = useState<string | null>(null);
   const [selectedOptions, setSelectedOptions] = useState<Array<EuiComboBoxOptionOption<string>>>(
     []

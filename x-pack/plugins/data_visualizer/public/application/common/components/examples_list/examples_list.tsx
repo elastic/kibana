@@ -23,7 +23,7 @@ const EMPTY_EXAMPLE = i18n.translate(
   'xpack.dataVisualizer.dataGrid.field.examplesList.emptyExampleMessage',
   { defaultMessage: '(empty)' }
 );
-export const ExamplesList: FC<Props> = ({ examples }) => {
+export const ExamplesList: FC<React.PropsWithChildren<Props>> = ({ examples }) => {
   if (examples === undefined || examples === null || !Array.isArray(examples)) {
     return null;
   }

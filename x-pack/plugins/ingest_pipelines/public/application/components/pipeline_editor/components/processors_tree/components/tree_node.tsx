@@ -28,7 +28,7 @@ export interface Props {
 
 const INDENTATION_PX = 34;
 
-export const TreeNode: FunctionComponent<Props> = ({
+export const TreeNode: FunctionComponent<React.PropsWithChildren<Props>> = ({
   processor,
   processorInfo,
   onAction,

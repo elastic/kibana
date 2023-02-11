@@ -26,7 +26,7 @@ interface FormTestProviderProps {
   connectorServices?: ConnectorServices;
 }
 
-const FormTestProviderComponent: React.FC<FormTestProviderProps> = ({
+const FormTestProviderComponent: React.FC<React.PropsWithChildren<FormTestProviderProps>> = ({
   children,
   defaultValue,
   onSubmit,
@@ -65,7 +65,7 @@ export const createAppMockRenderer = (): AppMockRenderer => {
   const services = createStartServicesMock();
   const theme$ = of({ darkMode: false });
 
-  const AppWrapper: React.FC<{ children: React.ReactElement }> = ({ children }) => (
+  const AppWrapper: React.FC<React.PropsWithChildren<{ children: React.ReactElement }>> = ({ children }) => (
     <I18nProvider>
       <KibanaContextProvider services={services}>
         <KibanaThemeProvider theme$={theme$}>{children}</KibanaThemeProvider>

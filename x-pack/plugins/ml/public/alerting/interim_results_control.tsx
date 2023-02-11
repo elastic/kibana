@@ -14,7 +14,7 @@ interface InterimResultsControlProps {
   onChange: (update: boolean) => void;
 }
 
-export const InterimResultsControl: FC<InterimResultsControlProps> = React.memo(
+export const InterimResultsControl: FC<React.PropsWithChildren<InterimResultsControlProps>> = React.memo(
   ({ value, onChange }) => {
     return (
       <EuiFormRow>

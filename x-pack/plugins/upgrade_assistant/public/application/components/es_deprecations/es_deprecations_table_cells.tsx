@@ -35,7 +35,7 @@ const i18nTexts = {
   ),
 };
 
-export const EsDeprecationsTableCells: React.FunctionComponent<Props> = ({
+export const EsDeprecationsTableCells: React.FunctionComponent<React.PropsWithChildren<Props>> = ({
   resolutionTableCell,
   fieldName,
   deprecation,

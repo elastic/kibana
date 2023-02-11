@@ -31,7 +31,7 @@ interface EditSavedQueryFormProps {
   viewMode?: boolean;
 }
 
-const EditSavedQueryFormComponent: React.FC<EditSavedQueryFormProps> = ({
+const EditSavedQueryFormComponent: React.FC<React.PropsWithChildren<EditSavedQueryFormProps>> = ({
   defaultValue,
   handleSubmit,
   viewMode,

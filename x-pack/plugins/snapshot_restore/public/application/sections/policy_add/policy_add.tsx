@@ -24,7 +24,7 @@ import { BASE_PATH, DEFAULT_POLICY_SCHEDULE } from '../../constants';
 import { breadcrumbService, docTitleService } from '../../services/navigation';
 import { addPolicy, useLoadIndices } from '../../services/http';
 
-export const PolicyAdd: React.FunctionComponent<RouteComponentProps> = ({
+export const PolicyAdd: React.FunctionComponent<React.PropsWithChildren<RouteComponentProps>> = ({
   history,
   location: { pathname },
 }) => {

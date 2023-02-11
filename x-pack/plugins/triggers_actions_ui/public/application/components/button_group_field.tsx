@@ -39,7 +39,7 @@ interface Props {
   [key: string]: any;
 }
 
-const ButtonGroupFieldComponent: React.FC<Props> = ({
+const ButtonGroupFieldComponent: React.FC<React.PropsWithChildren<Props>> = ({
   path,
   label,
   helpText,

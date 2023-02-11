@@ -26,7 +26,7 @@ interface Props {
   embeddable: Embeddable;
 }
 
-export const Layer: FC<Props> = ({ layer, layerIndex, embeddable }) => {
+export const Layer: FC<React.PropsWithChildren<Props>> = ({ layer, layerIndex, embeddable }) => {
   return (
     <>
       <EuiSplitPanel.Outer grow>

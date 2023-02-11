@@ -25,7 +25,7 @@ interface Props {
   agentCount: number;
 }
 
-export const AgentRequestDiagnosticsModal: React.FunctionComponent<Props> = ({
+export const AgentRequestDiagnosticsModal: React.FunctionComponent<React.PropsWithChildren<Props>> = ({
   onClose,
   agents,
   agentCount,

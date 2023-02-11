@@ -67,7 +67,7 @@ const renderUsers = (
     </MyFlexGroup>
   ));
 
-export const UserList: React.FC<UserListProps> = React.memo(
+export const UserList: React.FC<React.PropsWithChildren<UserListProps>> = React.memo(
   ({ email, headline, loading, users, userProfiles, dataTestSubj }) => {
     const handleSendEmail = useCallback(
       (emailAddress: string | undefined | null) => {

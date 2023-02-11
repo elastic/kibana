@@ -82,7 +82,7 @@ const ConvertFieldBadge = styled(ProviderFieldBadge)`
   }
 `;
 
-const TemplateFieldBadgeComponent: React.FC<TemplateFieldBadgeProps> = ({ type, toggleType }) => {
+const TemplateFieldBadgeComponent: React.FC<React.PropsWithChildren<TemplateFieldBadgeProps>> = ({ type, toggleType }) => {
   if (type !== DataProviderType.template) {
     return (
       <ConvertFieldBadge onClick={toggleType}>{i18n.CONVERT_TO_TEMPLATE_FIELD}</ConvertFieldBadge>

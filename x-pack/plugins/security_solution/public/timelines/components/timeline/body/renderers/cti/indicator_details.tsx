@@ -27,7 +27,7 @@ interface IndicatorDetailsProps {
   isDraggable?: boolean;
 }
 
-export const IndicatorDetails: React.FC<IndicatorDetailsProps> = ({
+export const IndicatorDetails: React.FC<React.PropsWithChildren<IndicatorDetailsProps>> = ({
   contextId,
   eventId,
   feedName,

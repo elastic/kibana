@@ -48,7 +48,7 @@ function PageLoadingUI() {
   );
 }
 
-const PageLoadingTracking: React.FunctionComponent<{ pageViewTitle: string }> = ({
+const PageLoadingTracking: React.FunctionComponent<React.PropsWithChildren<{ pageViewTitle: string }>> = ({
   pageViewTitle,
 }) => {
   const path = pageViewTitle.toLowerCase().replace(/-/g, '').replace(/\s+/g, '_');
@@ -57,7 +57,7 @@ const PageLoadingTracking: React.FunctionComponent<{ pageViewTitle: string }> = 
   return <PageLoadingUI />;
 };
 
-export const PageLoading: React.FunctionComponent<{ pageViewTitle?: string }> = ({
+export const PageLoading: React.FunctionComponent<React.PropsWithChildren<{ pageViewTitle?: string }>> = ({
   pageViewTitle,
 }) => {
   if (pageViewTitle) {

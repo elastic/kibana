@@ -34,7 +34,7 @@ interface HealthStatus {
   hasPermanentEncryptionKey: boolean;
 }
 
-export const HealthCheck: React.FunctionComponent<Props> = ({
+export const HealthCheck: React.FunctionComponent<React.PropsWithChildren<Props>> = ({
   children,
   waitForCheck,
   inFlyout = false,

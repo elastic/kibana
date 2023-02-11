@@ -15,7 +15,7 @@ interface Props {
   destIndex?: string;
 }
 
-export const IndexPatternPrompt: FC<Props> = ({ destIndex, color }) => {
+export const IndexPatternPrompt: FC<React.PropsWithChildren<Props>> = ({ destIndex, color }) => {
   const {
     services: {
       http: { basePath },

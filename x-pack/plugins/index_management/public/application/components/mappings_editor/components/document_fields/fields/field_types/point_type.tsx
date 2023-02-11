@@ -28,7 +28,7 @@ const getDefaultToggleValue = (param: ParameterName, field: FieldType) => {
   return field[param] !== undefined && field[param] !== getFieldConfig(param).defaultValue;
 };
 
-export const PointType: FunctionComponent<Props> = ({ field }) => {
+export const PointType: FunctionComponent<React.PropsWithChildren<Props>> = ({ field }) => {
   return (
     <>
       <BasicParametersSection>

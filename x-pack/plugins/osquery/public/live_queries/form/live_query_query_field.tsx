@@ -34,7 +34,7 @@ export interface LiveQueryQueryFieldProps {
   disabled?: boolean;
 }
 
-const LiveQueryQueryFieldComponent: React.FC<LiveQueryQueryFieldProps> = ({
+const LiveQueryQueryFieldComponent: React.FC<React.PropsWithChildren<LiveQueryQueryFieldProps>> = ({
   disabled,
   handleSubmitForm,
 }) => {

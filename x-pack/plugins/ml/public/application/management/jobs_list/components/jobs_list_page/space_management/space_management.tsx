@@ -36,7 +36,7 @@ interface Props {
   setCurrentTab: (tabId: MlSavedObjectType) => void;
 }
 
-export const SpaceManagement: FC<Props> = ({ spacesApi, setCurrentTab }) => {
+export const SpaceManagement: FC<React.PropsWithChildren<Props>> = ({ spacesApi, setCurrentTab }) => {
   const { getList } = useManagementApiService();
   const [currentTabId, setCurrentTabId] = useState<MlSavedObjectType>('anomaly-detector');
   const [items, setItems] = useState<ManagementListResponse>();
@@ -208,7 +208,7 @@ export const SpaceManagement: FC<Props> = ({ spacesApi, setCurrentTab }) => {
   );
 };
 
-export const RefreshButton: FC<{ onRefreshClick: () => void; isRefreshing: boolean }> = ({
+export const RefreshButton: FC<React.PropsWithChildren<{ onRefreshClick: () => void; isRefreshing: boolean }>> = ({
   onRefreshClick,
   isRefreshing,
 }) => (

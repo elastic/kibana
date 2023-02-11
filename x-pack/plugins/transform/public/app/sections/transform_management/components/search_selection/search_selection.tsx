@@ -18,7 +18,7 @@ interface SearchSelectionProps {
 
 const fixedPageSize: number = 8;
 
-export const SearchSelection: FC<SearchSelectionProps> = ({ onSearchSelected }) => {
+export const SearchSelection: FC<React.PropsWithChildren<SearchSelectionProps>> = ({ onSearchSelected }) => {
   const { uiSettings, savedObjects } = useAppDependencies();
 
   return (

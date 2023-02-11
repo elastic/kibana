@@ -11,7 +11,7 @@ import { EuiSwitch } from '@elastic/eui';
 import { JobCreatorContext } from '../../../job_creator_context';
 import { AdvancedJobCreator, CategorizationJobCreator } from '../../../../../common/job_creator';
 
-export const CategorizationPerPartitionStopOnWarnSwitch: FC = () => {
+export const CategorizationPerPartitionStopOnWarnSwitch: FC<React.PropsWithChildren<unknown>> = () => {
   const { jobCreator: jc, jobCreatorUpdate, jobCreatorUpdated } = useContext(JobCreatorContext);
   const jobCreator = jc as AdvancedJobCreator | CategorizationJobCreator;
   const [stopOnWarn, setStopOnWarn] = useState(jobCreator.perPartitionStopOnWarn);

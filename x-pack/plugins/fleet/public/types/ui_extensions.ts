@@ -27,7 +27,7 @@ export interface UIExtensionsStorage {
  * the pages displaying the ability to edit/create an Integration Policy
  */
 export type PackagePolicyReplaceDefineStepExtensionComponent =
-  ComponentType<PackagePolicyReplaceDefineStepExtensionComponentProps>;
+  ComponentType<React.PropsWithChildren<PackagePolicyReplaceDefineStepExtensionComponentProps>>;
 
 export type PackagePolicyReplaceDefineStepExtensionComponentProps = (
   | (PackagePolicyEditExtensionComponentProps & { isEditPage: true })
@@ -43,7 +43,7 @@ export type PackagePolicyReplaceDefineStepExtensionComponentProps = (
  * Integration Policy
  */
 export type PackagePolicyEditExtensionComponent =
-  ComponentType<PackagePolicyEditExtensionComponentProps>;
+  ComponentType<React.PropsWithChildren<PackagePolicyEditExtensionComponentProps>>;
 
 export interface PackagePolicyEditExtensionComponentProps {
   /** The current integration policy being edited */
@@ -71,7 +71,7 @@ export interface PackagePolicyEditExtensionComponentProps {
  * Policy response view
  */
 export type PackagePolicyResponseExtensionComponent =
-  ComponentType<PackagePolicyResponseExtensionComponentProps>;
+  ComponentType<React.PropsWithChildren<PackagePolicyResponseExtensionComponentProps>>;
 
 export interface PackagePolicyResponseExtensionComponentProps {
   /** The current agent to retrieve response from */
@@ -84,7 +84,7 @@ export interface PackagePolicyResponseExtensionComponentProps {
  * UI Component Extension is used on the pages displaying the ability to see
  * a generic endpoint errors list
  */
-export type PackageGenericErrorsListComponent = ComponentType<PackageGenericErrorsListProps>;
+export type PackageGenericErrorsListComponent = ComponentType<React.PropsWithChildren<PackageGenericErrorsListProps>>;
 
 export interface PackageGenericErrorsListProps {
   /** A list of errors from a package */
@@ -132,7 +132,7 @@ export interface PackagePolicyEditTabsExtension {
  * Integration Policy
  */
 export type PackagePolicyCreateExtensionComponent =
-  ComponentType<PackagePolicyCreateExtensionComponentProps>;
+  ComponentType<React.PropsWithChildren<PackagePolicyCreateExtensionComponentProps>>;
 
 export interface PackagePolicyCreateExtensionComponentProps {
   /** The integration policy being created */
@@ -160,7 +160,7 @@ export interface PackagePolicyCreateExtension {
  * UI Component Extension is used on the pages displaying the ability to Create a multi step
  * Integration Policy
  */
-export type PackagePolicyCreateMultiStepExtensionComponent = ComponentType<{}>;
+export type PackagePolicyCreateMultiStepExtensionComponent = ComponentType<React.PropsWithChildren<{}>>;
 
 /** Extension point registration contract for Integration Policy Create views in multi-step onboarding */
 export interface PackagePolicyCreateMultiStepExtension {
@@ -172,7 +172,7 @@ export interface PackagePolicyCreateMultiStepExtension {
 /**
  * UI Component Extension is used to display a Custom tab (and view) under a given Integration
  */
-export type PackageCustomExtensionComponent = ComponentType<PackageCustomExtensionComponentProps>;
+export type PackageCustomExtensionComponent = ComponentType<React.PropsWithChildren<PackageCustomExtensionComponentProps>>;
 
 export interface PackageCustomExtensionComponentProps {
   /** The package key value that should be used used for URLs */
@@ -190,7 +190,7 @@ export interface PackageCustomExtension {
 /**
  * UI Component Extension for displaying custom views under the Assets tab for a given Integration
  */
-export type PackageAssetsComponent = ComponentType<{}>;
+export type PackageAssetsComponent = ComponentType<React.PropsWithChildren<{}>>;
 
 /** Extension point registration contract for Integration details Assets view */
 export interface PackageAssetsExtension {
@@ -203,7 +203,7 @@ export interface AgentEnrollmentFlyoutFinalStepExtension {
   package: string;
   view: 'agent-enrollment-flyout';
   title: EuiStepProps['title'];
-  Component: ComponentType<{}>;
+  Component: ComponentType<React.PropsWithChildren<{}>>;
 }
 
 /** Fleet UI Extension Point */

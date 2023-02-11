@@ -45,7 +45,7 @@ export interface FieldTableProps extends Pick<FieldBrowserProps, 'columnIds' | '
   onHide: () => void;
 }
 
-const FieldTableComponent: React.FC<FieldTableProps> = ({
+const FieldTableComponent: React.FC<React.PropsWithChildren<FieldTableProps>> = ({
   columnIds,
   filteredBrowserFields,
   filterSelectedEnabled,

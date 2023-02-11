@@ -31,7 +31,7 @@ export type DeleteRoleMappings = (
 type OnSuccessCallback = (deletedRoleMappings: string[]) => void;
 type OnCancelCallback = () => void;
 
-export const DeleteProvider: React.FunctionComponent<Props> = ({
+export const DeleteProvider: React.FunctionComponent<React.PropsWithChildren<Props>> = ({
   roleMappingsAPI,
   children,
   notifications,

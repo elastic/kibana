@@ -16,7 +16,7 @@ const strings = {
     }),
 };
 
-export const CanvasLoading: FC<{ msg?: string }> = ({
+export const CanvasLoading: FC<React.PropsWithChildren<{ msg?: string }>> = ({
   msg = `${strings.getLoadingLabel()}...`,
 }) => (
   <div className="canvasContainer--loading">

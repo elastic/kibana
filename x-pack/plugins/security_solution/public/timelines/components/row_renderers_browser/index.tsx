@@ -68,7 +68,7 @@ interface StatefulRowRenderersBrowserProps {
   timelineId: string;
 }
 
-const StatefulRowRenderersBrowserComponent: React.FC<StatefulRowRenderersBrowserProps> = ({
+const StatefulRowRenderersBrowserComponent: React.FC<React.PropsWithChildren<StatefulRowRenderersBrowserProps>> = ({
   timelineId,
 }) => {
   const dispatch = useDispatch();

@@ -31,7 +31,7 @@ export interface LogCategorizationAppStateProps {
   appDependencies: AiopsAppDependencies;
 }
 
-export const LogCategorizationAppState: FC<LogCategorizationAppStateProps> = ({
+export const LogCategorizationAppState: FC<React.PropsWithChildren<LogCategorizationAppStateProps>> = ({
   dataView,
   savedSearch,
   appDependencies,

@@ -17,7 +17,7 @@ interface StatisticCardProps {
   actionPath?: string;
 }
 
-export const StatisticCard: React.FC<StatisticCardProps> = ({ title, count = 0, actionPath }) => {
+export const StatisticCard: React.FC<React.PropsWithChildren<StatisticCardProps>> = ({ title, count = 0, actionPath }) => {
   const linkableCard = (
     <EuiCardTo
       to={actionPath || ''}

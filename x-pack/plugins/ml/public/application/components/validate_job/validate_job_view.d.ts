@@ -6,11 +6,11 @@
  */
 
 import { FC } from 'react';
-declare const ValidateJob: FC<{
+declare const ValidateJob: FC<React.PropsWithChildren<{
   getJobConfig: any;
   getDuration: any;
   ml: any;
   embedded?: boolean;
   setIsValid?: (valid: boolean) => void;
   idFilterList?: string[];
-}>;
+}>>;

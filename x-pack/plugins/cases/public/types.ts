@@ -106,7 +106,7 @@ export interface CasesUiStart {
      * @return {ReactElement<GetCasesProps>}
      */
     getCases: (props: GetCasesProps) => ReactElement<GetCasesProps>;
-    getCasesContext: () => React.FC<GetCasesContextProps>;
+    getCasesContext: () => React.FC<React.PropsWithChildren<GetCasesContextProps>>;
 
     /**
      * Modal to select a case in a list of all owner cases

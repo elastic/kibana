@@ -11,7 +11,7 @@ interface Props {
   title: string;
 }
 
-const EmptyPromptTitleComponent: React.FC<Props> = ({ title }) => <h2>{title}</h2>;
+const EmptyPromptTitleComponent: React.FC<React.PropsWithChildren<Props>> = ({ title }) => <h2>{title}</h2>;
 
 EmptyPromptTitleComponent.displayName = 'EmptyPromptTitleComponent';
 

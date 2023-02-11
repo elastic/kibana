@@ -48,7 +48,7 @@ function getDocumentCountStatsSplitLabel(changePoint?: ChangePoint, group?: Grou
   }
 }
 
-export const ExplainLogRateSpikesPage: FC = () => {
+export const ExplainLogRateSpikesPage: FC<React.PropsWithChildren<unknown>> = () => {
   const { data: dataService } = useAiopsAppContext();
   const { dataView, savedSearch } = useDataSource();
 

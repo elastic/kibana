@@ -60,7 +60,7 @@ export enum SearchIndexTabId {
   CRAWLER_CONFIGURATION = 'crawler_configuration',
 }
 
-export const SearchIndex: React.FC = () => {
+export const SearchIndex: React.FC<React.PropsWithChildren<unknown>> = () => {
   const { hasFilteringFeature, index, isInitialLoading } = useValues(IndexViewLogic);
 
   const { tabId = SearchIndexTabId.OVERVIEW } = useParams<{

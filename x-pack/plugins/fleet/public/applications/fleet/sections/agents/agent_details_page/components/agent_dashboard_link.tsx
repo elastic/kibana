@@ -37,10 +37,10 @@ const EuiButtonCompressed = styled(EuiButton)`
   height: 32px;
 `;
 
-export const AgentDashboardLink: React.FunctionComponent<{
+export const AgentDashboardLink: React.FunctionComponent<React.PropsWithChildren<{
   agent: Agent;
   agentPolicy?: AgentPolicy;
-}> = ({ agent, agentPolicy }) => {
+}>> = ({ agent, agentPolicy }) => {
   const { isInstalled, link, isLoading } = useAgentDashboardLink(agent);
   const { getHref } = useLink();
 

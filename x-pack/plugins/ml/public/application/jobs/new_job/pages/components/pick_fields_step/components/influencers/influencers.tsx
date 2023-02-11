@@ -17,7 +17,7 @@ import {
 } from '../../../../../common/job_creator';
 import { Description } from './description';
 
-export const Influencers: FC = () => {
+export const Influencers: FC<React.PropsWithChildren<unknown>> = () => {
   const { jobCreator: jc, jobCreatorUpdate, jobCreatorUpdated } = useContext(JobCreatorContext);
   const jobCreator = jc as MultiMetricJobCreator | PopulationJobCreator | AdvancedJobCreator;
   const { fields } = newJobCapsService;

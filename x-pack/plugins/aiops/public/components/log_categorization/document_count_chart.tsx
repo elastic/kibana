@@ -23,7 +23,7 @@ interface Props {
   documentCountStats?: DocumentCountStats;
 }
 
-export const DocumentCountChart: FC<Props> = ({
+export const DocumentCountChart: FC<React.PropsWithChildren<Props>> = ({
   eventRate,
   sparkLines,
   totalCount,

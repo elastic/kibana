@@ -107,7 +107,7 @@ const styleButtons = [
   },
 ];
 
-export const TextStylePicker: FC<Props> = ({
+export const TextStylePicker: FC<React.PropsWithChildren<Props>> = ({
   align = 'left',
   color,
   colors,

@@ -21,7 +21,7 @@ import { EmptyMessage } from '../../user_profiles/empty_message';
 import { NoMatches } from '../../user_profiles/no_matches';
 import type { CurrentUserProfile } from '../../types';
 
-const PopoverButton: React.FC<{ togglePopover: () => void; isDisabled: boolean }> = ({
+const PopoverButton: React.FC<React.PropsWithChildren<{ togglePopover: () => void; isDisabled: boolean }>> = ({
   togglePopover,
   isDisabled,
 }) => (
@@ -47,7 +47,7 @@ export interface SuggestUsersPopoverProps {
   onClosePopover: () => void;
 }
 
-const SuggestUsersPopoverComponent: React.FC<SuggestUsersPopoverProps> = ({
+const SuggestUsersPopoverComponent: React.FC<React.PropsWithChildren<SuggestUsersPopoverProps>> = ({
   assignedUsersWithProfiles,
   currentUserProfile,
   isLoading,

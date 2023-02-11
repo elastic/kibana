@@ -60,7 +60,7 @@ const deactivatedBadge = <EuiBadge color="hollow">{DEACTIVATED_LABEL}</EuiBadge>
 
 type Users = Array<Omit<SharedUser, 'elasticsearchUser | roleMapping'>>;
 
-export const UsersTable: React.FC<Props> = ({
+export const UsersTable: React.FC<React.PropsWithChildren<Props>> = ({
   accessItemKey,
   singleUserRoleMappings,
   initializeSingleUserRoleMapping,

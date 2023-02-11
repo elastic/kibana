@@ -18,7 +18,7 @@ interface Props {
 }
 
 export type FileDataVisualizerSpec = typeof FileDataVisualizer;
-export const FileDataVisualizer: FC<Props> = ({ getAdditionalLinks }) => {
+export const FileDataVisualizer: FC<React.PropsWithChildren<Props>> = ({ getAdditionalLinks }) => {
   const coreStart = getCoreStart();
   const { data, maps, embeddable, discover, share, security, fileUpload, cloud } =
     getPluginsStart();
@@ -33,7 +33,7 @@ export const FileDataVisualizer: FC<Props> = ({ getAdditionalLinks }) => {
     ...coreStart,
   };
 
-  const EmptyContext: FC = ({ children }) => <>{children}</>;
+  const EmptyContext: FC<React.PropsWithChildren<unknown>> = ({ children }) => <>{children}</>;
   const CloudContext = cloud?.CloudContextProvider || EmptyContext;
 
   return (

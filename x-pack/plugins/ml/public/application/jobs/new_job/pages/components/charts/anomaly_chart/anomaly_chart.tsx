@@ -32,7 +32,7 @@ interface Props {
   loading?: boolean;
 }
 
-export const AnomalyChart: FC<Props> = ({
+export const AnomalyChart: FC<React.PropsWithChildren<Props>> = ({
   chartType,
   chartData = [],
   modelData,

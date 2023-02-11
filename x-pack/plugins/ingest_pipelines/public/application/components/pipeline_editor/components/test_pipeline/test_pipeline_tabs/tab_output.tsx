@@ -32,7 +32,7 @@ interface Props {
   testOutput?: any;
 }
 
-export const OutputTab: React.FunctionComponent<Props> = ({
+export const OutputTab: React.FunctionComponent<React.PropsWithChildren<Props>> = ({
   handleTestPipeline,
   isRunningTest,
   cachedVerbose,

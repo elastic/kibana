@@ -31,7 +31,7 @@ interface Props {
   onClose: () => void;
 }
 
-export const LensLayerSelectionFlyout: FC<Props> = ({ onClose, embeddable }) => {
+export const LensLayerSelectionFlyout: FC<React.PropsWithChildren<Props>> = ({ onClose, embeddable }) => {
   const { euiTheme } = useEuiTheme();
   const {
     services: { data, lens },

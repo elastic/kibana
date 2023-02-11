@@ -90,7 +90,7 @@ interface Props {
   updatePatternRollup: (patternRollup: PatternRollup) => void;
 }
 
-const PatternComponent: React.FC<Props> = ({
+const PatternComponent: React.FC<React.PropsWithChildren<Props>> = ({
   addSuccessToast,
   canUserCreateAndReadCases,
   defaultNumberFormat,

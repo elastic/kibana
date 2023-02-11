@@ -15,7 +15,7 @@ interface TransformFunctionSelectorProps {
   onChange: (update: TransformFunction) => void;
 }
 
-export const TransformFunctionSelector: FC<TransformFunctionSelectorProps> = ({
+export const TransformFunctionSelector: FC<React.PropsWithChildren<TransformFunctionSelectorProps>> = ({
   selectedFunction,
   onChange,
 }) => {

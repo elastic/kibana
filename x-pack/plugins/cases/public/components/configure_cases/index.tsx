@@ -49,7 +49,7 @@ const FormWrapper = styled.div`
   `}
 `;
 
-export const ConfigureCases: React.FC = React.memo(() => {
+export const ConfigureCases: React.FC<React.PropsWithChildren<unknown>> = React.memo(() => {
   const { permissions } = useCasesContext();
   const { triggersActionsUi } = useKibana().services;
   useCasesBreadcrumbs(CasesDeepLinkId.casesConfigure);

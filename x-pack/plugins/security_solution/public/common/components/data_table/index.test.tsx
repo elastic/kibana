@@ -66,7 +66,7 @@ window.matchMedia = jest.fn().mockImplementation((query) => {
   };
 });
 
-export const TestCellRenderer: React.FC<CellValueElementProps> = ({ columnId, data }) => (
+export const TestCellRenderer: React.FC<React.PropsWithChildren<CellValueElementProps>> = ({ columnId, data }) => (
   <>
     {getMappedNonEcsValue({
       data,

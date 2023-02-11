@@ -77,7 +77,7 @@ interface Props {
   updatePageState?: (update: Partial<ListingPageUrlState>) => void;
 }
 
-export const ModelsList: FC<Props> = ({
+export const ModelsList: FC<React.PropsWithChildren<Props>> = ({
   pageState: pageStateExternal,
   updatePageState: updatePageStateExternal,
 }) => {

@@ -21,7 +21,7 @@ const Wrapper = styled.div`
   overflow: hidden;
 `;
 
-export const IntegrationDescriptionComponent: React.FC<{ integration: IntegrationDetails }> = ({
+export const IntegrationDescriptionComponent: React.FC<React.PropsWithChildren<{ integration: IntegrationDetails }>> = ({
   integration,
 }) => {
   return (
@@ -35,9 +35,9 @@ export const IntegrationDescriptionComponent: React.FC<{ integration: Integratio
 
 export const IntegrationDescription = React.memo(IntegrationDescriptionComponent);
 
-export const RelatedIntegrationsDescription: React.FC<{
+export const RelatedIntegrationsDescription: React.FC<React.PropsWithChildren<{
   relatedIntegrations: RelatedIntegrationArray;
-}> = ({ relatedIntegrations }) => {
+}>> = ({ relatedIntegrations }) => {
   const { integrations } = useRelatedIntegrations(relatedIntegrations);
 
   return (

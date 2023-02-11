@@ -45,7 +45,7 @@ interface Props {
   selectedAgentPolicyId?: string;
 }
 
-export const StepSelectHosts: React.FunctionComponent<Props> = ({
+export const StepSelectHosts: React.FunctionComponent<React.PropsWithChildren<Props>> = ({
   agentPolicy,
   updateAgentPolicy,
   newAgentPolicy,

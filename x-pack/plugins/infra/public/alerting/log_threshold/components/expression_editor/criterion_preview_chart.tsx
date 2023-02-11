@@ -58,7 +58,7 @@ interface Props {
   showThreshold: boolean;
 }
 
-export const CriterionPreview: React.FC<Props> = ({
+export const CriterionPreview: React.FC<React.PropsWithChildren<Props>> = ({
   ruleParams,
   chartCriterion,
   sourceId,
@@ -118,7 +118,7 @@ interface ChartProps {
   showThreshold: boolean;
 }
 
-const CriterionPreviewChart: React.FC<ChartProps> = ({
+const CriterionPreviewChart: React.FC<React.PropsWithChildren<ChartProps>> = ({
   buckets,
   sourceId,
   threshold,

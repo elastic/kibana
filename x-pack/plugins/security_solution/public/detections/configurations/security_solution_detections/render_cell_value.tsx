@@ -30,7 +30,7 @@ import { SUPPRESSED_ALERT_TOOLTIP } from './translations';
  * accepts `EuiDataGridCellValueElementProps`, plus `data`
  * from the TGrid
  */
-export const RenderCellValue: React.FC<EuiDataGridCellValueElementProps & CellValueElementProps> = (
+export const RenderCellValue: React.FC<React.PropsWithChildren<EuiDataGridCellValueElementProps & CellValueElementProps>> = (
   props
 ) => {
   const { columnId, rowIndex, scopeId } = props;

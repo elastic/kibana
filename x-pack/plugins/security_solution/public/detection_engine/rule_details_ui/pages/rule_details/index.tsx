@@ -166,7 +166,7 @@ export const RULE_DETAILS_TAB_NAME: Record<string, string> = {
 
 type DetectionEngineComponentProps = PropsFromRedux;
 
-const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
+const RuleDetailsPageComponent: React.FC<React.PropsWithChildren<DetectionEngineComponentProps>> = ({
   clearEventsDeleted,
   clearEventsLoading,
   clearSelected,

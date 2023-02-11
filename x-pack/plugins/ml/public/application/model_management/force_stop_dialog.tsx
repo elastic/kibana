@@ -19,7 +19,7 @@ interface ForceStopModelConfirmDialogProps {
   onConfirm: () => void;
 }
 
-export const ForceStopModelConfirmDialog: FC<ForceStopModelConfirmDialogProps> = ({
+export const ForceStopModelConfirmDialog: FC<React.PropsWithChildren<ForceStopModelConfirmDialogProps>> = ({
   model,
   onConfirm,
   onCancel,

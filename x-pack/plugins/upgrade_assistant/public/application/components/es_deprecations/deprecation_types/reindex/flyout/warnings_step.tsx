@@ -38,7 +38,7 @@ interface CheckedIds {
 }
 
 const warningToComponentMap: {
-  [key in ReindexWarningTypes]: React.FunctionComponent<WarningCheckboxProps>;
+  [key in ReindexWarningTypes]: React.FunctionComponent<React.PropsWithChildren<WarningCheckboxProps>>;
 } = {
   customTypeName: CustomTypeNameWarningCheckbox,
   indexSetting: DeprecatedSettingWarningCheckbox,
@@ -57,7 +57,7 @@ interface WarningsConfirmationFlyoutProps {
  * Displays warning text about destructive changes required to reindex this index. The user
  * must acknowledge each change before being allowed to proceed.
  */
-export const WarningsFlyoutStep: React.FunctionComponent<WarningsConfirmationFlyoutProps> = ({
+export const WarningsFlyoutStep: React.FunctionComponent<React.PropsWithChildren<WarningsConfirmationFlyoutProps>> = ({
   warnings,
   hideWarningsStep,
   continueReindex,

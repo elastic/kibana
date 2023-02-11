@@ -33,7 +33,7 @@ interface Props {
   totalWarningDeprecations: number;
 }
 
-export const DeprecationCount: FunctionComponent<Props> = ({
+export const DeprecationCount: FunctionComponent<React.PropsWithChildren<Props>> = ({
   totalCriticalDeprecations,
   totalWarningDeprecations,
 }) => {

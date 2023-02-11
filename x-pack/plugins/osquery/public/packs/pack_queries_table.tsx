@@ -21,7 +21,7 @@ export interface PackQueriesTableProps {
   setSelectedItems?: (selection: PackQueryFormData[]) => void;
 }
 
-const PackQueriesTableComponent: React.FC<PackQueriesTableProps> = ({
+const PackQueriesTableComponent: React.FC<React.PropsWithChildren<PackQueriesTableProps>> = ({
   data,
   isReadOnly,
   onDeleteClick,

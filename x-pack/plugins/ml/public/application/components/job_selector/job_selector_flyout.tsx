@@ -57,7 +57,7 @@ export interface JobSelectorFlyoutProps {
   onTimeRangeConfigChange?: (v: boolean) => void;
 }
 
-export const JobSelectorFlyoutContent: FC<JobSelectorFlyoutProps> = ({
+export const JobSelectorFlyoutContent: FC<React.PropsWithChildren<JobSelectorFlyoutProps>> = ({
   dateFormatTz,
   selectedIds = [],
   singleSelection,

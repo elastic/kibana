@@ -48,7 +48,7 @@ export interface ExpandableSectionProps {
   urlStateKey: ExpandablePanels;
 }
 
-export const ExpandableSection: FC<ExpandableSectionProps> = ({
+export const ExpandableSection: FC<React.PropsWithChildren<ExpandableSectionProps>> = ({
   headerItems,
   content,
   isExpanded: isExpandedDefault,

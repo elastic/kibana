@@ -15,7 +15,7 @@ interface Props {
   onClick(): void;
 }
 
-export const UsersHeading: React.FC<Props> = ({ onClick }) => (
+export const UsersHeading: React.FC<React.PropsWithChildren<Props>> = ({ onClick }) => (
   <>
     <EuiFlexGroup justifyContent="spaceBetween">
       <EuiFlexItem>

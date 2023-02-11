@@ -46,7 +46,7 @@ function getItemIdToExpandedRowMap(
   }, {} as ItemIdToExpandedRowMap);
 }
 
-export const FieldsStatsGrid: FC<Props> = ({ results }) => {
+export const FieldsStatsGrid: FC<React.PropsWithChildren<Props>> = ({ results }) => {
   const restorableDefaults = getDefaultDataVisualizerListState();
 
   const [dataVisualizerListState, setDataVisualizerListState] =

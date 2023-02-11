@@ -20,7 +20,7 @@ export interface Props extends ColorManagerProps {
   colors?: string[];
 }
 
-export const ColorPicker: FC<Props> = ({
+export const ColorPicker: FC<React.PropsWithChildren<Props>> = ({
   colors = [],
   hasButtons = false,
   onAddColor,

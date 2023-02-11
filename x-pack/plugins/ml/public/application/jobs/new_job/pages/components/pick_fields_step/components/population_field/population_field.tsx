@@ -19,7 +19,7 @@ import {
   isPopulationJobCreator,
 } from '../../../../../common/job_creator';
 
-export const PopulationFieldSelector: FC = () => {
+export const PopulationFieldSelector: FC<React.PropsWithChildren<unknown>> = () => {
   const { jobCreator: jc, jobCreatorUpdate, jobCreatorUpdated } = useContext(JobCreatorContext);
   const jobCreator = jc as PopulationJobCreator | RareJobCreator;
 

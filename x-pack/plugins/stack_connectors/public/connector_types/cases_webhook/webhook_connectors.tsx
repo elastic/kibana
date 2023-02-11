@@ -52,7 +52,7 @@ const fields = {
   ],
 };
 type PossibleStepNumbers = 1 | 2 | 3 | 4;
-const CasesWebhookActionConnectorFields: React.FunctionComponent<ActionConnectorFieldsProps> = ({
+const CasesWebhookActionConnectorFields: React.FunctionComponent<React.PropsWithChildren<ActionConnectorFieldsProps>> = ({
   readOnly,
 }) => {
   const { docLinks } = useKibana().services;

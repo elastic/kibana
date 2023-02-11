@@ -9,7 +9,7 @@ import { EuiLoadingSpinner } from '@elastic/eui';
 import React, { lazy, Suspense } from 'react';
 import type { AlertsSearchBarProps } from '../application/sections/alerts_search_bar';
 
-const AlertsSearchBarLazy: React.FC<AlertsSearchBarProps> = lazy(
+const AlertsSearchBarLazy: React.FC<React.PropsWithChildren<AlertsSearchBarProps>> = lazy(
   () => import('../application/sections/alerts_search_bar/alerts_search_bar')
 );
 

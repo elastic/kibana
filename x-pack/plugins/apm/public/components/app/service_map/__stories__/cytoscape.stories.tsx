@@ -15,7 +15,7 @@ export default {
   title: 'app/ServiceMap/cytoscape',
   component: Cytoscape,
   decorators: [
-    (StoryComponent: ComponentType) => {
+    (StoryComponent: ComponentType<React.PropsWithChildren<unknown>>) => {
       return (
         <MockApmPluginStorybook>
           <StoryComponent />

@@ -17,7 +17,7 @@ interface Props {
   tooltipContent: string;
 }
 
-export const EvaluateStat: FC<Props> = ({
+export const EvaluateStat: FC<React.PropsWithChildren<Props>> = ({
   isLoading,
   title,
   description,

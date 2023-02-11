@@ -7,7 +7,7 @@
 
 import { FunctionComponent } from 'react';
 
-export const NodeStatusIcon: FunctionComponent<NodeStatusIconProps>;
+export const NodeStatusIcon: FunctionComponent<React.PropsWithChildren<NodeStatusIconProps>>;
 export interface NodeStatusIconProps {
   isOnline: boolean;
   status: string;

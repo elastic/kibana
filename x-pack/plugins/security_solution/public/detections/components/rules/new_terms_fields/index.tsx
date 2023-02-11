@@ -21,7 +21,7 @@ const FIELD_COMBO_BOX_WIDTH = 410;
 
 const fieldDescribedByIds = 'detectionEngineStepDefineRuleNewTermsField';
 
-export const NewTermsFieldsComponent: React.FC<NewTermsFieldsProps> = ({
+export const NewTermsFieldsComponent: React.FC<React.PropsWithChildren<NewTermsFieldsProps>> = ({
   browserFields,
   field,
 }: NewTermsFieldsProps) => {

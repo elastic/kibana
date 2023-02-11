@@ -27,7 +27,7 @@ interface Props {
   values: string[] | number[] | null | undefined;
 }
 
-const AlertFieldComponent: React.FC<Props> = ({
+const AlertFieldComponent: React.FC<React.PropsWithChildren<Props>> = ({
   contextId,
   'data-test-subj': dataTestSubj = 'alertField',
   eventId,

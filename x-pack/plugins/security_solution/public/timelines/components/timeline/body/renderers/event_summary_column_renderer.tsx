@@ -78,12 +78,12 @@ export const eventSummaryColumnRenderer: ColumnRenderer = {
   },
 };
 
-const SummaryCell: React.FC<{
+const SummaryCell: React.FC<React.PropsWithChildren<{
   scopeId: string;
   ecsData: Ecs;
   rowRenderers: RowRenderer[];
   values: string[] | undefined | null;
-}> = ({ ecsData, rowRenderers, scopeId, values }) => {
+}>> = ({ ecsData, rowRenderers, scopeId, values }) => {
   const rowRenderer = useMemo(
     () => getRowRenderer({ data: ecsData, rowRenderers }),
     [ecsData, rowRenderers]

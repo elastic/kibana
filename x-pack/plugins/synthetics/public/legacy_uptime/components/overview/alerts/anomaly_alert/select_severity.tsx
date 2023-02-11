@@ -110,7 +110,7 @@ interface Props {
   value: TableSeverity;
 }
 
-export const SelectSeverity: FC<Props> = ({ onChange, value }) => {
+export const SelectSeverity: FC<React.PropsWithChildren<Props>> = ({ onChange, value }) => {
   const [severity, setSeverity] = useState(DEFAULT_SEVERITY);
 
   const onSeverityChange = (valueDisplay: string) => {

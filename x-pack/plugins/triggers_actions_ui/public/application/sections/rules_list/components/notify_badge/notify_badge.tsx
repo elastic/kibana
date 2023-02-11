@@ -30,7 +30,7 @@ import {
 } from './translations';
 import { RulesListNotifyBadgeProps } from './types';
 
-export const RulesListNotifyBadge: React.FunctionComponent<RulesListNotifyBadgeProps> = (props) => {
+export const RulesListNotifyBadge: React.FunctionComponent<React.PropsWithChildren<RulesListNotifyBadgeProps>> = (props) => {
   const {
     isLoading = false,
     rule,

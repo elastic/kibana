@@ -22,7 +22,7 @@ export interface CloudChatServices {
 
 const ServicesContext = createContext<CloudChatServices>({});
 
-export const ServicesProvider: FC<CloudChatServices> = ({ children, ...services }) => (
+export const ServicesProvider: FC<React.PropsWithChildren<CloudChatServices>> = ({ children, ...services }) => (
   <ServicesContext.Provider value={services}>{children}</ServicesContext.Provider>
 );
 

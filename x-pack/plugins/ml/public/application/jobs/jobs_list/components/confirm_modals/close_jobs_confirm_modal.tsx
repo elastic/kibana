@@ -31,7 +31,7 @@ interface Props {
   refreshJobs(): void;
 }
 
-export const CloseJobsConfirmModal: FC<Props> = ({
+export const CloseJobsConfirmModal: FC<React.PropsWithChildren<Props>> = ({
   setShowFunction,
   unsetShowFunction,
   refreshJobs,

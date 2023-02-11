@@ -12,7 +12,7 @@ import { getIdentifier } from '../setup_mode/formatting';
 import { isSetupModeFeatureEnabled } from '../../lib/setup_mode';
 import { SetupModeFeature } from '../../../common/enums';
 
-export const EuiMonitoringTable: FunctionComponent<Record<any, any>> = ({
+export const EuiMonitoringTable: FunctionComponent<React.PropsWithChildren<Record<any, any>>> = ({
   rows: items,
   search = {},
   columns: _columns,

@@ -51,7 +51,7 @@ interface Props {
   repositories: string[];
 }
 
-export const SnapshotSearchBar: React.FunctionComponent<Props> = ({
+export const SnapshotSearchBar: React.FunctionComponent<React.PropsWithChildren<Props>> = ({
   listParams,
   setListParams,
   reload,

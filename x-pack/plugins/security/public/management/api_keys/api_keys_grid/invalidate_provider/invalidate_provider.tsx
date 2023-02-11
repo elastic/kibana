@@ -29,7 +29,7 @@ export type InvalidateApiKeys = (
 
 type OnSuccessCallback = (apiKeysInvalidated: ApiKeyToInvalidate[]) => void;
 
-export const InvalidateProvider: React.FunctionComponent<Props> = ({
+export const InvalidateProvider: React.FunctionComponent<React.PropsWithChildren<Props>> = ({
   isAdmin,
   children,
   notifications,

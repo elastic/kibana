@@ -21,7 +21,7 @@ const RedirectBtn = styled.span`
   cursor: pointer;
 `;
 
-export const MonitorRedirects: React.FC<Props> = ({ monitorStatus }) => {
+export const MonitorRedirects: React.FC<React.PropsWithChildren<Props>> = ({ monitorStatus }) => {
   const list = monitorStatus?.http?.response?.redirects;
 
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);

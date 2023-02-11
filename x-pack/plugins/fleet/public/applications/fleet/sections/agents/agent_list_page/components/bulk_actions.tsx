@@ -46,7 +46,7 @@ export interface Props {
   agentPolicies: AgentPolicy[];
 }
 
-export const AgentBulkActions: React.FunctionComponent<Props> = ({
+export const AgentBulkActions: React.FunctionComponent<React.PropsWithChildren<Props>> = ({
   totalAgents,
   totalInactiveAgents,
   selectionMode,

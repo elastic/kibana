@@ -35,7 +35,7 @@ interface SummaryTableItem {
   value: number | string | undefined | null;
 }
 
-export const NumberContent: FC<FieldDataRowProps> = ({ config, onAddFilter }) => {
+export const NumberContent: FC<React.PropsWithChildren<FieldDataRowProps>> = ({ config, onAddFilter }) => {
   const { stats } = config;
 
   const distributionChartData = useMemo(

@@ -73,7 +73,7 @@ const StyledLinkButton = styled(EuiButton)`
   }
 `;
 
-const EventsByDatasetComponent: React.FC<Props> = ({
+const EventsByDatasetComponent: React.FC<React.PropsWithChildren<Props>> = ({
   combinedQueries,
   deleteQuery,
   filters,

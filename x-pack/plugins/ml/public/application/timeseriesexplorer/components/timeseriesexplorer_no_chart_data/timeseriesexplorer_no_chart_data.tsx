@@ -14,10 +14,10 @@ import { EuiEmptyPrompt } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { Entity } from '../entity_control/entity_control';
 
-export const TimeseriesexplorerNoChartData: FC<{
+export const TimeseriesexplorerNoChartData: FC<React.PropsWithChildren<{
   dataNotChartable?: boolean;
   entities?: Entity[];
-}> = ({ dataNotChartable, entities }) => (
+}>> = ({ dataNotChartable, entities }) => (
   <EuiEmptyPrompt
     iconType="iInCircle"
     title={

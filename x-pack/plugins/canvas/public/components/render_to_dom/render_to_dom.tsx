@@ -12,7 +12,7 @@ interface Props {
   style?: CSSProperties;
 }
 
-export const RenderToDom: FC<Props> = ({ render, style }) => {
+export const RenderToDom: FC<React.PropsWithChildren<Props>> = ({ render, style }) => {
   // https://reactjs.org/docs/hooks-faq.html#how-can-i-measure-a-dom-node
   const ref = useCallback(
     (node: HTMLDivElement) => {

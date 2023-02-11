@@ -55,7 +55,7 @@ const mockFlappingSetting: RulesSettingsFlapping = {
   updatedAt: new Date().toISOString(),
 };
 
-const RulesSettingsLinkWithProviders: React.FunctionComponent<{}> = () => (
+const RulesSettingsLinkWithProviders: React.FunctionComponent<React.PropsWithChildren<{}>> = () => (
   <IntlProvider locale="en">
     <QueryClientProvider client={queryClient}>
       <RulesSettingsLink />

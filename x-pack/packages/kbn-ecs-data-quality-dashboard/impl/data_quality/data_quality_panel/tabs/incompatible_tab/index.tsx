@@ -52,7 +52,7 @@ interface Props {
   patternDocsCount: number;
 }
 
-const IncompatibleTabComponent: React.FC<Props> = ({
+const IncompatibleTabComponent: React.FC<React.PropsWithChildren<Props>> = ({
   addSuccessToast,
   addToNewCaseDisabled,
   defaultNumberFormat,

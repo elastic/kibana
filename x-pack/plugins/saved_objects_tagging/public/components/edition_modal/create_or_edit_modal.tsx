@@ -46,7 +46,7 @@ interface CreateOrEditModalProps {
   setField: <T extends keyof TagAttributes>(field: T) => (value: TagAttributes[T]) => void;
 }
 
-export const CreateOrEditModal: FC<CreateOrEditModalProps> = ({
+export const CreateOrEditModal: FC<React.PropsWithChildren<CreateOrEditModalProps>> = ({
   onClose,
   onSubmit,
   validation,

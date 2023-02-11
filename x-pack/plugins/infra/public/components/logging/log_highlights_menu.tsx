@@ -32,7 +32,7 @@ interface LogHighlightsMenuProps {
   goToNextHighlight: () => void;
 }
 
-export const LogHighlightsMenu: React.FC<LogHighlightsMenuProps> = ({
+export const LogHighlightsMenu: React.FC<React.PropsWithChildren<LogHighlightsMenuProps>> = ({
   onChange,
   isLoading,
   activeHighlights,

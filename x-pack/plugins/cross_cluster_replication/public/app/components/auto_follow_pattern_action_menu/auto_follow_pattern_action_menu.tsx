@@ -45,7 +45,7 @@ const allValuesSame = (values: boolean[]) => {
   return true;
 };
 
-const AutoFollowPatternActionMenuUI: FunctionComponent<Props> = ({
+const AutoFollowPatternActionMenuUI: FunctionComponent<React.PropsWithChildren<Props>> = ({
   patterns,
   deleteAutoFollowPattern,
   pauseAutoFollowPattern,

@@ -45,7 +45,7 @@ export interface Props {
  * This component is the public interface to our optimised tree rendering private components and
  * also contains top-level state concerns for an instance of the component
  */
-export const ProcessorsTree: FunctionComponent<Props> = memo((props) => {
+export const ProcessorsTree: FunctionComponent<React.PropsWithChildren<Props>> = memo((props) => {
   const { processors, baseSelector, onAction, movingProcessor } = props;
   // These refs are created here so they can be shared with all
   // recursively rendered trees. Their values should come from react-virtualized

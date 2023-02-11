@@ -41,7 +41,7 @@ interface ConnectInstanceProps {
   onFormCreated(name: string): void;
 }
 
-export const ConnectInstance: React.FC<ConnectInstanceProps> = ({
+export const ConnectInstance: React.FC<React.PropsWithChildren<ConnectInstanceProps>> = ({
   configuration: { needsSubdomain, hasOauthRedirect, needsCredentials },
   features,
   objTypes,

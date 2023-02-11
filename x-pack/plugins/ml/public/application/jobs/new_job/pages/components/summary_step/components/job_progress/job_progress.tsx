@@ -12,7 +12,7 @@ interface Props {
   progress: number;
 }
 
-export const JobProgress: FC<Props> = ({ progress }) => {
+export const JobProgress: FC<React.PropsWithChildren<Props>> = ({ progress }) => {
   if (progress > 0 && progress < 100) {
     return <EuiProgress value={progress} color="primary" size="xs" max={100} />;
   } else {

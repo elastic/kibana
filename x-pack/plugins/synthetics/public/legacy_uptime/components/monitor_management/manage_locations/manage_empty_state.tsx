@@ -12,11 +12,11 @@ import { PrivateLocation } from '../../../../../common/runtime_types';
 import { EmptyLocations } from './empty_locations';
 import { selectAgentPolicies } from '../../../state/private_locations';
 
-export const ManageEmptyState: FC<{
+export const ManageEmptyState: FC<React.PropsWithChildren<{
   privateLocations: PrivateLocation[];
   hasFleetPermissions: boolean;
   setIsAddingNew: (val: boolean) => void;
-}> = ({ children, privateLocations, setIsAddingNew, hasFleetPermissions }) => {
+}>> = ({ children, privateLocations, setIsAddingNew, hasFleetPermissions }) => {
   const { data: agentPolicies } = useSelector(selectAgentPolicies);
 
   if (agentPolicies?.total === 0) {

@@ -12,12 +12,12 @@ import { TimeRange } from '../../../../../../common/time';
 import { getFriendlyNameForPartitionId } from '../../../../../../common/log_analysis';
 import { AnalyzeCategoryDatasetInMlAction } from './analyze_dataset_in_ml_action';
 
-export const DatasetActionsList: React.FunctionComponent<{
+export const DatasetActionsList: React.FunctionComponent<React.PropsWithChildren<{
   categorizationJobId: string;
   categoryId: number;
   datasets: LogEntryCategoryDataset[];
   timeRange: TimeRange;
-}> = ({ categorizationJobId, categoryId, datasets, timeRange }) => (
+}>> = ({ categorizationJobId, categoryId, datasets, timeRange }) => (
   <ul>
     {datasets.map((dataset) => {
       const datasetLabel = getFriendlyNameForPartitionId(dataset.name);

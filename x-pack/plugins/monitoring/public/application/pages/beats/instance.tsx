@@ -17,7 +17,7 @@ import { Beat } from '../../../components/beats/beat';
 import { useBreadcrumbContainerContext } from '../../hooks/use_breadcrumbs';
 import { BeatsTemplate } from './beats_template';
 
-export const BeatsInstancePage: React.FC<ComponentProps> = ({ clusters }) => {
+export const BeatsInstancePage: React.FC<React.PropsWithChildren<ComponentProps>> = ({ clusters }) => {
   const { instance }: { instance: string } = useParams();
 
   const globalState = useContext(GlobalStateContext);

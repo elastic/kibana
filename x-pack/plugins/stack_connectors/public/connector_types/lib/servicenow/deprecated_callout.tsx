@@ -14,7 +14,7 @@ interface Props {
   onMigrate?: () => void;
 }
 
-const DeprecatedCalloutComponent: React.FC<Props> = ({ onMigrate }) => {
+const DeprecatedCalloutComponent: React.FC<React.PropsWithChildren<Props>> = ({ onMigrate }) => {
   const update =
     onMigrate != null ? (
       <EuiLink onClick={onMigrate} data-test-subj="update-connector-btn">

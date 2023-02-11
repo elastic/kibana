@@ -19,7 +19,7 @@ export const collectionsCreateBreadcrumbs = [
   }),
 ];
 
-export const AddAnalyticsCollection: React.FC = () => {
+export const AddAnalyticsCollection: React.FC<React.PropsWithChildren<unknown>> = () => {
   return (
     <EnterpriseSearchAnalyticsPageTemplate
       pageChrome={[...collectionsCreateBreadcrumbs]}

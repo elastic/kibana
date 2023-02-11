@@ -17,7 +17,7 @@ export interface Props {
   dataTestSubj?: string;
 }
 
-const StatusStatsComponent: React.FC<Props> = ({
+const StatusStatsComponent: React.FC<React.PropsWithChildren<Props>> = ({
   caseCount,
   caseStatus,
   isLoading,

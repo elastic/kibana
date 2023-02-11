@@ -13,7 +13,7 @@ import { EngineOverviewLogic } from '..';
 import { AnalyticsCards } from '../../analytics';
 import { TOTAL_QUERIES, TOTAL_DOCUMENTS, TOTAL_CLICKS } from '../../analytics/constants';
 
-export const TotalStats: React.FC = () => {
+export const TotalStats: React.FC<React.PropsWithChildren<unknown>> = () => {
   const { totalQueries, documentCount, totalClicks } = useValues(EngineOverviewLogic);
 
   return (

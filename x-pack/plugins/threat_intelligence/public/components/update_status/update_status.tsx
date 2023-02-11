@@ -16,7 +16,7 @@ interface UpdateStatusProps {
   isUpdating: boolean;
 }
 
-export const UpdateStatus: React.FC<UpdateStatusProps> = ({ isUpdating, updatedAt }) => (
+export const UpdateStatus: React.FC<React.PropsWithChildren<UpdateStatusProps>> = ({ isUpdating, updatedAt }) => (
   <EuiFlexGroup>
     <EuiFlexItem grow={false}>
       <EuiText size="xs" color="subdued" data-test-subj="updateStatus">

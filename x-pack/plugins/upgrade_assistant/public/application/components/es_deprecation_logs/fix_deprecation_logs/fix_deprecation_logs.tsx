@@ -92,7 +92,7 @@ interface Props {
   privilegesMissing: MissingPrivileges;
 }
 
-const FixDeprecationLogsUI: FunctionComponent<Props> = ({ hasPrivileges, privilegesMissing }) => {
+const FixDeprecationLogsUI: FunctionComponent<React.PropsWithChildren<Props>> = ({ hasPrivileges, privilegesMissing }) => {
   const {
     services: {
       core: { docLinks },

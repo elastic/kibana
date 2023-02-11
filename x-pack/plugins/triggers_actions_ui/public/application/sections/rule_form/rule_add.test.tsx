@@ -57,7 +57,7 @@ jest.mock('../../lib/action_connector_api', () => ({
 const actionTypeRegistry = actionTypeRegistryMock.create();
 const ruleTypeRegistry = ruleTypeRegistryMock.create();
 
-export const TestExpression: FunctionComponent<any> = () => {
+export const TestExpression: FunctionComponent<React.PropsWithChildren<any>> = () => {
   return (
     <EuiFormLabel>
       <FormattedMessage

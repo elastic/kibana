@@ -52,7 +52,7 @@ interface Props {
   theme: Theme;
 }
 
-const BodyComponent: React.FC<Props> = ({
+const BodyComponent: React.FC<React.PropsWithChildren<Props>> = ({
   addSuccessToast,
   canUserCreateAndReadCases,
   defaultNumberFormat,

@@ -62,7 +62,7 @@ export type HostRiskScoreColumns = [
   Columns<RiskScoreItem[RiskScoreFields.hostRisk]>
 ];
 
-const HostRiskScoreTableComponent: React.FC<HostRiskScoreTableProps> = ({
+const HostRiskScoreTableComponent: React.FC<React.PropsWithChildren<HostRiskScoreTableProps>> = ({
   data,
   id,
   isInspect,

@@ -32,7 +32,7 @@ BulkActionsContainer.displayName = 'BulkActionsContainer';
 /**
  * Stateless component integrating the bulk actions menu and the select all button
  */
-const BulkActionsComponent: React.FC<OwnProps> = ({
+const BulkActionsComponent: React.FC<React.PropsWithChildren<OwnProps>> = ({
   selectedCount,
   totalItems,
   showClearSelection,

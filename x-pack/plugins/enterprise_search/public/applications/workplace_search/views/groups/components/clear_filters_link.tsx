@@ -21,7 +21,7 @@ const CLEAR_FILTERS = i18n.translate(
   }
 );
 
-export const ClearFiltersLink: React.FC<{}> = () => {
+export const ClearFiltersLink: React.FC<React.PropsWithChildren<{}>> = () => {
   const { resetGroupsFilters } = useActions(GroupsLogic);
 
   return (

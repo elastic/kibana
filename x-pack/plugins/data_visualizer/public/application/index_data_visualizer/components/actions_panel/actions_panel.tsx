@@ -30,7 +30,7 @@ interface Props {
 
 const ACTIONS_PANEL_WIDTH = '240px';
 
-export const ActionsPanel: FC<Props> = ({
+export const ActionsPanel: FC<React.PropsWithChildren<Props>> = ({
   dataView,
   searchString,
   searchQueryLanguage,

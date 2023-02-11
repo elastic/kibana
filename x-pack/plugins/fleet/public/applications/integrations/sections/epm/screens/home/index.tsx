@@ -111,7 +111,7 @@ export const mapToCard = ({
   };
 };
 
-export const EPMHomePage: React.FC = () => {
+export const EPMHomePage: React.FC<React.PropsWithChildren<unknown>> = () => {
   const [prereleaseEnabled, setPrereleaseEnabled] = useState<boolean>(false);
 
   // loading packages to find installed ones

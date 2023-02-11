@@ -37,7 +37,7 @@ const getPipelineNameFromLocation = (location: Location) => {
   return pipeline;
 };
 
-export const PipelinesList: React.FunctionComponent<RouteComponentProps> = ({
+export const PipelinesList: React.FunctionComponent<React.PropsWithChildren<RouteComponentProps>> = ({
   history,
   location,
 }) => {

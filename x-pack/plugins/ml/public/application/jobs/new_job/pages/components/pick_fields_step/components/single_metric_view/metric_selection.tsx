@@ -23,7 +23,7 @@ interface Props {
 
 const DTR_IDX = 0;
 
-export const SingleMetricDetectors: FC<Props> = ({ setIsValid }) => {
+export const SingleMetricDetectors: FC<React.PropsWithChildren<Props>> = ({ setIsValid }) => {
   const {
     jobCreator: jc,
     jobCreatorUpdate,

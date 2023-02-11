@@ -147,7 +147,7 @@ function getformSerializer(initialTemplateData: LogisticsForm = {}) {
   };
 }
 
-export const StepLogistics: React.FunctionComponent<Props> = React.memo(
+export const StepLogistics: React.FunctionComponent<React.PropsWithChildren<Props>> = React.memo(
   ({ defaultValue, isEditing = false, onChange, isLegacy = false }) => {
     const { form } = useForm({
       schema: schemas.logistics,

@@ -12,9 +12,7 @@ import {
   missingMlSetupPrivilegesDescription,
 } from './missing_privileges_messages';
 
-export const MissingSetupPrivilegesToolTip: React.FC<
-  Omit<PropsOf<EuiToolTip>, 'content' | 'title'>
-> = (props) => (
+export const MissingSetupPrivilegesToolTip: React.FC<React.PropsWithChildren<Omit<PropsOf<EuiToolTip>, 'content' | 'title'>>> = (props) => (
   <EuiToolTip
     {...props}
     content={missingMlSetupPrivilegesDescription}

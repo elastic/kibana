@@ -25,7 +25,7 @@ interface Props {
   cert: Cert;
 }
 
-export const FingerprintCol: React.FC<Props> = ({ cert }) => {
+export const FingerprintCol: React.FC<React.PropsWithChildren<Props>> = ({ cert }) => {
   const ShaComponent = ({ text, val }: { text: string; val: string }) => {
     return (
       <StyledSpan data-test-subj={val} className="eui-textNoWrap">

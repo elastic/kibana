@@ -7,13 +7,13 @@
 import React, { useCallback, useMemo, useState } from 'react';
 import { EuiFilterButton, EuiFilterGroup, EuiFilterSelectItem, EuiPopover } from '@elastic/eui';
 
-export const JobIdFilter: React.FC<{
+export const JobIdFilter: React.FC<React.PropsWithChildren<{
   selectedJobIds: string[];
   jobIds: string[];
   jobNameById: Record<string, string | undefined>;
   onSelect: (jobIds: string[]) => void;
   title: string;
-}> = ({ selectedJobIds, onSelect, title, jobIds, jobNameById }) => {
+}>> = ({ selectedJobIds, onSelect, title, jobIds, jobNameById }) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
   const onButtonClick = useCallback(() => {

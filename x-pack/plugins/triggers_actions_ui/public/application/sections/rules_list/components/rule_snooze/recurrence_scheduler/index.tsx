@@ -47,7 +47,7 @@ interface ComponentOpts {
   onChange: (schedule: RecurrenceSchedule) => void;
 }
 
-export const RecurrenceScheduler: React.FC<ComponentOpts> = ({
+export const RecurrenceScheduler: React.FC<React.PropsWithChildren<ComponentOpts>> = ({
   startDate,
   endDate,
   onChange,

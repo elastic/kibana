@@ -39,7 +39,7 @@ import { LinkedAgentCount, AgentPolicyActionMenu } from '../components';
 
 import { CreateAgentPolicyFlyout } from './components';
 
-export const AgentPolicyListPage: React.FunctionComponent<{}> = () => {
+export const AgentPolicyListPage: React.FunctionComponent<React.PropsWithChildren<{}>> = () => {
   useBreadcrumbs('policies_list');
   const { getPath } = useLink();
   const hasFleetAllPrivileges = useAuthz().fleet.all;

@@ -106,7 +106,7 @@ interface ExpandableSectionResultsProps {
   searchQuery: SavedSearchQuery;
 }
 
-export const ExpandableSectionResults: FC<ExpandableSectionResultsProps> = ({
+export const ExpandableSectionResults: FC<React.PropsWithChildren<ExpandableSectionResultsProps>> = ({
   colorRange,
   indexData,
   indexPattern,

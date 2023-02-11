@@ -18,11 +18,11 @@ interface Props extends PropsOf<typeof EuiText> {
   'data-test-subj'?: string;
 }
 
-export const PrivilegeDisplay: FC<Props> = (props: Props) => {
+export const PrivilegeDisplay: FC<React.PropsWithChildren<Props>> = (props: Props) => {
   return <SimplePrivilegeDisplay {...props} />;
 };
 
-const SimplePrivilegeDisplay: FC<Props> = (props: Props) => {
+const SimplePrivilegeDisplay: FC<React.PropsWithChildren<Props>> = (props: Props) => {
   const { privilege, ...rest } = props;
 
   const text = <EuiText {...rest}>{getDisplayValue(privilege)}</EuiText>;

@@ -41,7 +41,7 @@ interface Props {
   onPolicyExecuted: () => void;
 }
 
-export const PolicyTable: React.FunctionComponent<Props> = ({
+export const PolicyTable: React.FunctionComponent<React.PropsWithChildren<Props>> = ({
   policies,
   reload,
   openPolicyDetailsUrl,

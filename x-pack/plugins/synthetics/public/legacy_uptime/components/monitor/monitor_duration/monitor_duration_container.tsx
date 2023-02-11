@@ -27,7 +27,7 @@ import { MonitorIdParam } from '../../../../../common/types';
 import { getMLJobId } from '../../../../../common/lib';
 import { useUptimeSettingsContext } from '../../../contexts/uptime_settings_context';
 
-export const MonitorDuration: React.FC<MonitorIdParam> = ({ monitorId }) => {
+export const MonitorDuration: React.FC<React.PropsWithChildren<MonitorIdParam>> = ({ monitorId }) => {
   const { dateRangeStart, dateRangeEnd, absoluteDateRangeStart, absoluteDateRangeEnd } =
     useGetUrlParams();
 

@@ -59,7 +59,7 @@ export { getTrailingBreadcrumbs } from './utils';
 
 const NetworkDetailsManage = manageQuery(IpOverview);
 
-const NetworkDetailsComponent: React.FC = () => {
+const NetworkDetailsComponent: React.FC<React.PropsWithChildren<unknown>> = () => {
   const dispatch = useDispatch();
   const capabilities = useMlCapabilities();
   const { to, from, setQuery, isInitializing } = useGlobalTime();

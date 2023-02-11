@@ -16,7 +16,7 @@ interface ActionTypeFilterProps {
   filters: string[];
 }
 
-export const ActionTypeFilter: React.FunctionComponent<ActionTypeFilterProps> = ({
+export const ActionTypeFilter: React.FunctionComponent<React.PropsWithChildren<ActionTypeFilterProps>> = ({
   actionTypes,
   onChange: onFilterChange,
   filters,

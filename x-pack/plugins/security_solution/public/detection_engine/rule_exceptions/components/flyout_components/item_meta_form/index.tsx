@@ -15,7 +15,7 @@ interface ExceptionsFlyoutMetaComponentProps {
   onChange: (value: [string, string]) => void;
 }
 
-const ExceptionsFlyoutMetaComponent: React.FC<ExceptionsFlyoutMetaComponentProps> = ({
+const ExceptionsFlyoutMetaComponent: React.FC<React.PropsWithChildren<ExceptionsFlyoutMetaComponentProps>> = ({
   exceptionItemName,
   onChange,
 }): JSX.Element => {

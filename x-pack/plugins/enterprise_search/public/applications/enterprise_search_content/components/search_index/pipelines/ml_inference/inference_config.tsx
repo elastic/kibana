@@ -21,7 +21,7 @@ import { getMLType } from '../../../shared/ml_inference/utils';
 import { MLInferenceLogic } from './ml_inference_logic';
 import { ZeroShotClassificationInferenceConfiguration } from './zero_shot_inference_configuration';
 
-export const InferenceConfiguration: React.FC = () => {
+export const InferenceConfiguration: React.FC<React.PropsWithChildren<unknown>> = () => {
   const {
     addInferencePipelineModal: { configuration },
     selectedMLModel,
@@ -40,7 +40,7 @@ export const InferenceConfiguration: React.FC = () => {
   }
 };
 
-const InferenceConfigurationWrapper: React.FC = ({ children }) => {
+const InferenceConfigurationWrapper: React.FC<React.PropsWithChildren<unknown>> = ({ children }) => {
   return (
     <>
       <EuiSpacer />

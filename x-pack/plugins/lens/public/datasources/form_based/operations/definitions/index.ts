@@ -271,9 +271,7 @@ interface BaseOperationDefinitionProps<
    * React component for operation specific settings shown in the flyout editor
    */
   allowAsReference?: AR;
-  paramEditor?: React.ComponentType<
-    AR extends true ? ParamEditorProps<C, GenericIndexPatternColumn> : ParamEditorProps<C>
-  >;
+  paramEditor?: React.ComponentType<React.PropsWithChildren<AR extends true ? ParamEditorProps<C, GenericIndexPatternColumn> : ParamEditorProps<C>>>;
   getAdvancedOptions?: (params: ParamEditorProps<C>) => AdvancedOption[] | undefined;
   /**
    * Returns true if the `column` can also be used on `newIndexPattern`.
@@ -348,7 +346,7 @@ interface BaseOperationDefinitionProps<
   /**
    * React component for operation field specific behaviour
    */
-  renderFieldInput?: React.ComponentType<FieldInputProps<C>>;
+  renderFieldInput?: React.ComponentType<React.PropsWithChildren<FieldInputProps<C>>>;
   /**
    * Builds the correct parameter for field additions
    */
@@ -384,7 +382,7 @@ interface BaseOperationDefinitionProps<
   /**
    * Component rendered as inline help
    */
-  helpComponent?: React.ComponentType<{}>;
+  helpComponent?: React.ComponentType<React.PropsWithChildren<{}>>;
   /**
    * Title for the help component
    */

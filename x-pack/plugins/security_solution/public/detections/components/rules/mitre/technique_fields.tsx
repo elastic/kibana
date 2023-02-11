@@ -57,7 +57,7 @@ interface AddTechniqueProps {
   onFieldChange: (threats: Threats) => void;
 }
 
-export const MitreAttackTechniqueFields: React.FC<AddTechniqueProps> = ({
+export const MitreAttackTechniqueFields: React.FC<React.PropsWithChildren<AddTechniqueProps>> = ({
   field,
   idAria,
   isDisabled,

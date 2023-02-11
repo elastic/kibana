@@ -23,7 +23,7 @@ interface Props {
   backToContent?: React.ReactNode;
 }
 
-export const NotFoundPrompt: React.FC<Props> = ({
+export const NotFoundPrompt: React.FC<React.PropsWithChildren<Props>> = ({
   productSupportUrl,
   backToLink = '/',
   backToContent,

@@ -37,7 +37,7 @@ interface Props {
 const fieldNameToComboBoxOption = (fieldName: string) => ({ label: fieldName });
 const comboBoxOptionToFieldName = ({ label }: { label: string }) => label;
 
-export const CustomizationModal: React.FC<Props> = ({
+export const CustomizationModal: React.FC<React.PropsWithChildren<Props>> = ({
   filterFields,
   onClose,
   onSave,

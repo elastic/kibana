@@ -32,7 +32,7 @@ const FlexItemWithoutLabel = styled(EuiFlexItem)`
   text-align: center;
 `;
 
-export const EntryItem: React.FC<EntryItemProps> = ({
+export const EntryItem: React.FC<React.PropsWithChildren<EntryItemProps>> = ({
   entry,
   indexPattern,
   threatIndexPatterns,

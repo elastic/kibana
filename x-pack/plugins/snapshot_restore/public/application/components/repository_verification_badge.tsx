@@ -15,7 +15,7 @@ interface Props {
   verificationResults: RepositoryVerification | null;
 }
 
-export const RepositoryVerificationBadge: React.FunctionComponent<Props> = ({
+export const RepositoryVerificationBadge: React.FunctionComponent<React.PropsWithChildren<Props>> = ({
   verificationResults,
 }) => {
   if (!verificationResults) {

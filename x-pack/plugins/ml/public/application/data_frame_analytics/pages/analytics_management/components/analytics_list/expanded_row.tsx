@@ -50,7 +50,7 @@ interface LoadedStatProps {
   resultProperty: REGRESSION_STATS;
 }
 
-const LoadedStat: FC<LoadedStatProps> = ({ isLoading, evalData, resultProperty }) => {
+const LoadedStat: FC<React.PropsWithChildren<LoadedStatProps>> = ({ isLoading, evalData, resultProperty }) => {
   return (
     <Fragment>
       {isLoading === false && evalData.error !== null && <EuiIcon type="alert" size="s" />}
@@ -66,7 +66,7 @@ interface Props {
 
 const defaultEval: Eval = { mse: '', msle: '', huber: '', rSquared: '', error: null };
 
-export const ExpandedRow: FC<Props> = ({ item }) => {
+export const ExpandedRow: FC<React.PropsWithChildren<Props>> = ({ item }) => {
   const [trainingEval, setTrainingEval] = useState<Eval>(defaultEval);
   const [generalizationEval, setGeneralizationEval] = useState<Eval>(defaultEval);
   const [isLoadingTraining, setIsLoadingTraining] = useState<boolean>(false);

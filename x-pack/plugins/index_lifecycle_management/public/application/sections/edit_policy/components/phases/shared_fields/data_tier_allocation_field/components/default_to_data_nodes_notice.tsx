@@ -15,7 +15,7 @@ import {
   nodeAllocationMigrationGuidance,
 } from './no_custom_attributes_messages';
 
-export const DefaultToDataNodesNotice: FunctionComponent<{ phase: PhaseWithAllocation }> = ({
+export const DefaultToDataNodesNotice: FunctionComponent<React.PropsWithChildren<{ phase: PhaseWithAllocation }>> = ({
   phase,
 }) => {
   return (

@@ -16,7 +16,7 @@ export interface ErrorsPopoverProps {
   errors: string[];
 }
 
-export const ErrorsPopover: FC<ErrorsPopoverProps> = ({ ariaLabel, errors }) => {
+export const ErrorsPopover: FC<React.PropsWithChildren<ErrorsPopoverProps>> = ({ ariaLabel, errors }) => {
   const [isOpen, setIsOpen] = useState(false);
 
   const handleToggle = useCallback(() => {

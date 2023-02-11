@@ -66,7 +66,7 @@ interface EditProps {
   id?: string;
 }
 
-export const PipelineEditView: React.FC<EditProps> = ({
+export const PipelineEditView: React.FC<React.PropsWithChildren<EditProps>> = ({
   pipelineService,
   logstashLicenseService,
   toasts,

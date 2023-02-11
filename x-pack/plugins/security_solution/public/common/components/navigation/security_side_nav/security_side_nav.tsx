@@ -32,10 +32,10 @@ type FormatSideNavItems = (navItems: NavLinkItem) => SideNavItem;
 /**
  * Renders the navigation item for "Get Started" custom link
  */
-const GetStartedCustomLinkComponent: React.FC<{
+const GetStartedCustomLinkComponent: React.FC<React.PropsWithChildren<{
   isSelected: boolean;
   title: string;
-}> = ({ isSelected, title }) => (
+}>> = ({ isSelected, title }) => (
   <SecuritySolutionLinkAnchor
     deepLinkId={SecurityPageName.landing}
     color={isSelected ? 'primary' : 'text'}
@@ -147,7 +147,7 @@ const useSelectedId = (): SecurityPageName => {
  * Main security navigation component.
  * It takes the links to render from the generic application `links` configs.
  */
-export const SecuritySideNav: React.FC = () => {
+export const SecuritySideNav: React.FC<React.PropsWithChildren<unknown>> = () => {
   const [items, footerItems] = useSideNavItems();
   const selectedId = useSelectedId();
 

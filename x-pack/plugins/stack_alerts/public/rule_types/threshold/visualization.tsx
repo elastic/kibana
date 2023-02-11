@@ -107,7 +107,7 @@ enum LoadingStateType {
 }
 
 type MetricResult = [number, number]; // [epochMillis, value]
-export const ThresholdVisualization: React.FunctionComponent<Props> = ({
+export const ThresholdVisualization: React.FunctionComponent<React.PropsWithChildren<Props>> = ({
   ruleParams,
   alertInterval,
   aggregationTypes,

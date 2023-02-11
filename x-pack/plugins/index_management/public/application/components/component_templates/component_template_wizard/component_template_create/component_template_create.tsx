@@ -25,7 +25,7 @@ interface Props {
   sourceComponentTemplate?: any;
 }
 
-export const ComponentTemplateCreate: React.FunctionComponent<RouteComponentProps & Props> = ({
+export const ComponentTemplateCreate: React.FunctionComponent<React.PropsWithChildren<RouteComponentProps & Props>> = ({
   history,
   sourceComponentTemplate,
 }) => {

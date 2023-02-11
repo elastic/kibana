@@ -23,7 +23,7 @@ interface ExceptionsAddToRulesOptionsComponentProps {
   onRadioChange: (option: AddToRuleListsRadioOptions) => void;
 }
 
-const ExceptionsAddToRulesOptionsComponent: React.FC<ExceptionsAddToRulesOptionsComponentProps> = ({
+const ExceptionsAddToRulesOptionsComponent: React.FC<React.PropsWithChildren<ExceptionsAddToRulesOptionsComponentProps>> = ({
   possibleRules,
   isSingleRule,
   isBulkAction,

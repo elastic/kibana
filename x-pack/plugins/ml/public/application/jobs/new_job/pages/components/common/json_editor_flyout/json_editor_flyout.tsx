@@ -42,7 +42,7 @@ interface Props {
   jobEditorMode: EDITOR_MODE;
   datafeedEditorMode: EDITOR_MODE;
 }
-export const JsonEditorFlyout: FC<Props> = ({ isDisabled, jobEditorMode, datafeedEditorMode }) => {
+export const JsonEditorFlyout: FC<React.PropsWithChildren<Props>> = ({ isDisabled, jobEditorMode, datafeedEditorMode }) => {
   const { jobCreator, jobCreatorUpdate, jobCreatorUpdated } = useContext(JobCreatorContext);
   const { displayErrorToast } = useToastNotificationService();
   const [showJsonFlyout, setShowJsonFlyout] = useState(false);
@@ -246,7 +246,7 @@ export const JsonEditorFlyout: FC<Props> = ({ isDisabled, jobEditorMode, datafee
   );
 };
 
-const FlyoutButton: FC<{ isDisabled: boolean; onClick(): void; editJsonMode: boolean }> = ({
+const FlyoutButton: FC<React.PropsWithChildren<{ isDisabled: boolean; onClick(): void; editJsonMode: boolean }>> = ({
   isDisabled,
   onClick,
   editJsonMode,
@@ -268,13 +268,13 @@ const FlyoutButton: FC<{ isDisabled: boolean; onClick(): void; editJsonMode: boo
   );
 };
 
-const Contents: FC<{
+const Contents: FC<React.PropsWithChildren<{
   title: string;
   value: string;
   editJson: boolean;
   onChange(s: string): void;
   heightOffset?: number;
-}> = ({ title, value, editJson, onChange, heightOffset = 0 }) => {
+}>> = ({ title, value, editJson, onChange, heightOffset = 0 }) => {
   // the ace editor requires a fixed height
   const editorHeight = useMemo(
     () => `${window.innerHeight - 230 - heightOffset}px`,

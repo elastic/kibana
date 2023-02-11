@@ -19,7 +19,7 @@ interface SourcesTableProps extends ISourceRow {
   sources: ContentSourceDetails[];
 }
 
-export const SourcesTable: React.FC<SourcesTableProps> = ({
+export const SourcesTable: React.FC<React.PropsWithChildren<SourcesTableProps>> = ({
   sources,
   showDetails,
   isOrganization,

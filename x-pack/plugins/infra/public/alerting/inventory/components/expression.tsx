@@ -103,7 +103,7 @@ export const defaultExpression = {
   },
 } as InventoryMetricConditions;
 
-export const Expressions: React.FC<Props> = (props) => {
+export const Expressions: React.FC<React.PropsWithChildren<Props>> = (props) => {
   const { http, notifications } = useKibanaContextForPlugin().services;
   const { setRuleParams, ruleParams, errors, metadata } = props;
   const { source, createDerivedIndexPattern } = useSourceViaHttp({
@@ -432,7 +432,7 @@ const StyledHealth = euiStyled(EuiHealth)`
   margin-left: 4px;
 `;
 
-export const ExpressionRow: React.FC<ExpressionRowProps> = (props) => {
+export const ExpressionRow: React.FC<React.PropsWithChildren<ExpressionRowProps>> = (props) => {
   const [isExpanded, setRowState] = useState(true);
   const toggleRowState = useCallback(() => setRowState(!isExpanded), [isExpanded]);
 
@@ -683,14 +683,14 @@ export const ExpressionRow: React.FC<ExpressionRowProps> = (props) => {
   );
 };
 
-const ThresholdElement: React.FC<{
+const ThresholdElement: React.FC<React.PropsWithChildren<{
   updateComparator: (c?: string) => void;
   updateThreshold: (t?: number[]) => void;
   threshold: InventoryMetricConditions['threshold'];
   comparator: InventoryMetricConditions['comparator'];
   errors: IErrorObject;
   metric?: SnapshotMetricType;
-}> = ({ updateComparator, updateThreshold, threshold, metric, comparator, errors }) => {
+}>> = ({ updateComparator, updateThreshold, threshold, metric, comparator, errors }) => {
   return (
     <>
       <StyledExpression>

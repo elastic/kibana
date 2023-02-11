@@ -50,7 +50,7 @@ export interface StartActionNameProps {
   forceDisable?: boolean;
   transformNodes: number;
 }
-export const StartActionName: FC<StartActionNameProps> = ({
+export const StartActionName: FC<React.PropsWithChildren<StartActionNameProps>> = ({
   items,
   forceDisable,
   transformNodes,

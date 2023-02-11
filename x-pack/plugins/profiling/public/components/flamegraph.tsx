@@ -180,7 +180,7 @@ export interface FlameGraphProps {
   onInformationWindowClose: () => void;
 }
 
-export const FlameGraph: React.FC<FlameGraphProps> = ({
+export const FlameGraph: React.FC<React.PropsWithChildren<FlameGraphProps>> = ({
   id,
   comparisonMode,
   primaryFlamegraph,

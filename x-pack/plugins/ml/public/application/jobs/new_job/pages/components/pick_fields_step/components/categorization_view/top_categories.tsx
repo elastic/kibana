@@ -16,7 +16,7 @@ import { useToastNotificationService } from '../../../../../../../services/toast
 import { NUMBER_OF_CATEGORY_EXAMPLES } from '../../../../../../../../../common/constants/categorization_job';
 import { extractErrorProperties } from '../../../../../../../../../common/util/errors';
 
-export const TopCategories: FC = () => {
+export const TopCategories: FC<React.PropsWithChildren<unknown>> = () => {
   const { displayErrorToast } = useToastNotificationService();
   const { jobCreator: jc, resultsLoader } = useContext(JobCreatorContext);
   const jobCreator = jc as CategorizationJobCreator;

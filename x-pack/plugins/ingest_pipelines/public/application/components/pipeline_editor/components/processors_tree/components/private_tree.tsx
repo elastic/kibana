@@ -57,7 +57,7 @@ const isDropZoneBelowDisabled = (processor: ProcessorInfo, selectedProcessor: Pr
  * enables users to click outside of the tree and cancel moving a
  * processor.
  */
-export const PrivateTree: FunctionComponent<PrivateProps> = ({
+export const PrivateTree: FunctionComponent<React.PropsWithChildren<PrivateProps>> = ({
   processors,
   selector,
   movingProcessor,

@@ -15,7 +15,7 @@ interface MetricFieldSelectorProps {
   onChange: (value: string) => void;
 }
 
-export const MetricFieldSelector: FC<MetricFieldSelectorProps> = React.memo(
+export const MetricFieldSelector: FC<React.PropsWithChildren<MetricFieldSelectorProps>> = React.memo(
   ({ value, onChange }) => {
     const { metricFieldOptions } = useChangePointDetectionContext();
 

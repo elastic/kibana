@@ -82,7 +82,7 @@ export function isViewBySwimLaneData(arg: any): arg is ViewBySwimLaneData {
  * Provides a custom tooltip for the anomaly swim lane chart.
  */
 const SwimLaneTooltip =
-  (fieldName?: string): FC<{ values: TooltipValue[] }> =>
+  (fieldName?: string): FC<React.PropsWithChildren<{ values: TooltipValue[] }>> =>
   ({ values }) => {
     const tooltipData: TooltipValue[] = [];
 
@@ -166,7 +166,7 @@ export interface SwimlaneProps {
  * Anomaly swim lane container responsible for handling resizing, pagination and
  * providing swim lane vis with required props.
  */
-export const SwimlaneContainer: FC<SwimlaneProps> = ({
+export const SwimlaneContainer: FC<React.PropsWithChildren<SwimlaneProps>> = ({
   id,
   onResize,
   perPage,

@@ -47,7 +47,7 @@ const DefaultPagination = {
 
 interface CaseUi {
   ui: {
-    getCasesContext: () => React.FC<any>;
+    getCasesContext: () => React.FC<React.PropsWithChildren<any>>;
   };
 }
 
@@ -77,10 +77,10 @@ const EmptyConfiguration: AlertsTableConfigurationRegistry = {
   getRenderCellValue: () => () => null,
 };
 
-const AlertsTableWithBulkActionsContextComponent: React.FunctionComponent<{
+const AlertsTableWithBulkActionsContextComponent: React.FunctionComponent<React.PropsWithChildren<{
   tableProps: AlertsTableProps;
   initialBulkActionsState: [BulkActionsState, React.Dispatch<BulkActionsReducerAction>];
-}> = ({ tableProps, initialBulkActionsState }) => (
+}>> = ({ tableProps, initialBulkActionsState }) => (
   <BulkActionsContext.Provider value={initialBulkActionsState}>
     <AlertsTable {...tableProps} />
   </BulkActionsContext.Provider>

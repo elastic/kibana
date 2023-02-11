@@ -28,7 +28,7 @@ import { IndexNameLogic } from './index_name_logic';
 import './documents.scss';
 import { IndexViewLogic } from './index_view_logic';
 
-export const SearchIndexDocuments: React.FC = () => {
+export const SearchIndexDocuments: React.FC<React.PropsWithChildren<unknown>> = () => {
   const { indexName } = useValues(IndexNameLogic);
   const { ingestionMethod } = useValues(IndexViewLogic);
   const { simplifiedMapping } = useValues(DocumentsLogic);

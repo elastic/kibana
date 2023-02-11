@@ -7,7 +7,7 @@
 
 import { FunctionComponent } from 'react';
 
-export const ClusterStatus: FunctionComponent<ClusterStatusProps>;
+export const ClusterStatus: FunctionComponent<React.PropsWithChildren<ClusterStatusProps>>;
 
 export interface ClusterStatusProps {
   stats: unknown;

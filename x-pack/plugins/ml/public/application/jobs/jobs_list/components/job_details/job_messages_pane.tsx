@@ -26,7 +26,7 @@ interface JobMessagesPaneProps {
   refreshJobList?: () => void;
 }
 
-export const JobMessagesPane: FC<JobMessagesPaneProps> = React.memo(
+export const JobMessagesPane: FC<React.PropsWithChildren<JobMessagesPaneProps>> = React.memo(
   ({ jobId, start, end, actionHandler, refreshJobList, showClearButton }) => {
     const canCreateJob = checkPermission('canCreateJob');
 

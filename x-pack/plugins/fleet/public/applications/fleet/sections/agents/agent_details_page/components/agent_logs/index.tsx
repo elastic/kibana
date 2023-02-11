@@ -19,7 +19,7 @@ import { DEFAULT_LOGS_STATE, STATE_STORAGE_KEY } from './constants';
 import type { AgentLogsProps, AgentLogsState } from './agent_logs';
 import { AgentLogsUI, AgentLogsUrlStateHelper } from './agent_logs';
 
-export const AgentLogs: React.FunctionComponent<Pick<AgentLogsProps, 'agent' | 'agentPolicy'>> =
+export const AgentLogs: React.FunctionComponent<React.PropsWithChildren<Pick<AgentLogsProps, 'agent' | 'agentPolicy'>>> =
   memo(({ agent, agentPolicy }) => {
     const stateContainer = useMemo(
       () =>

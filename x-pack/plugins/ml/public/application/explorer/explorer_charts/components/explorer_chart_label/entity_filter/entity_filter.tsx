@@ -24,7 +24,7 @@ interface EntityFilterProps {
   influencerFieldName: string;
   influencerFieldValue: string;
 }
-export const EntityFilter: FC<EntityFilterProps> = ({
+export const EntityFilter: FC<React.PropsWithChildren<EntityFilterProps>> = ({
   onFilter,
   influencerFieldName,
   influencerFieldValue,

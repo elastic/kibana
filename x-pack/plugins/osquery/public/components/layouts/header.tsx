@@ -45,7 +45,7 @@ export interface HeaderProps {
   'data-test-subj'?: string;
 }
 
-const HeaderColumns: React.FC<Omit<HeaderProps, 'tabs'>> = memo(
+const HeaderColumns: React.FC<React.PropsWithChildren<Omit<HeaderProps, 'tabs'>>> = memo(
   ({ leftColumn, rightColumn, rightColumnGrow }) => (
     <EuiFlexGroup alignItems="center">
       {leftColumn ? <EuiFlexItem>{leftColumn}</EuiFlexItem> : null}
@@ -56,7 +56,7 @@ const HeaderColumns: React.FC<Omit<HeaderProps, 'tabs'>> = memo(
 
 HeaderColumns.displayName = 'HeaderColumns';
 
-const HeaderComponent: React.FC<HeaderProps> = ({
+const HeaderComponent: React.FC<React.PropsWithChildren<HeaderProps>> = ({
   children,
   leftColumn,
   rightColumn,

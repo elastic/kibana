@@ -45,7 +45,7 @@ interface SelectedOption {
   };
 }
 
-const SavedQueriesDropdownComponent: React.FC<SavedQueriesDropdownProps> = ({
+const SavedQueriesDropdownComponent: React.FC<React.PropsWithChildren<SavedQueriesDropdownProps>> = ({
   disabled,
   onChange,
 }) => {

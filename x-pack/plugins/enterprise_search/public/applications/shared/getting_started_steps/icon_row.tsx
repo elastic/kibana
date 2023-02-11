@@ -80,7 +80,7 @@ const icons = [
   },
 ];
 
-export const IconRow: React.FC = () => {
+export const IconRow: React.FC<React.PropsWithChildren<unknown>> = () => {
   return (
     <EuiFlexGroup gutterSize="s" alignItems="center" className="gettingStartedSteps">
       <EuiFlexItem grow={false}>

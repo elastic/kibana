@@ -37,7 +37,7 @@ interface Props {
   patternDocsCount: number;
 }
 
-const CustomTabComponent: React.FC<Props> = ({
+const CustomTabComponent: React.FC<React.PropsWithChildren<Props>> = ({
   addSuccessToast,
   defaultNumberFormat,
   docsCount,

@@ -18,7 +18,7 @@ interface Props {
   disabled?: boolean;
 }
 
-export const SchemaFieldTypeSelect: React.FC<Props> = ({
+export const SchemaFieldTypeSelect: React.FC<React.PropsWithChildren<Props>> = ({
   fieldName,
   fieldType,
   updateExistingFieldType,

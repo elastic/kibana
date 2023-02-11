@@ -30,7 +30,7 @@ import { apiTokenSort } from '../utils/api_token_sort';
 
 import { Key } from './key';
 
-export const CredentialsList: React.FC = () => {
+export const CredentialsList: React.FC<React.PropsWithChildren<unknown>> = () => {
   const { deleteApiKey, onPaginate, showCredentialsForm } = useActions(CredentialsLogic);
 
   const { apiTokens, meta, isCredentialsDataComplete } = useValues(CredentialsLogic);

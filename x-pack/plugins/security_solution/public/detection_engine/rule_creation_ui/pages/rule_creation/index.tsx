@@ -104,7 +104,7 @@ MyEuiPanel.displayName = 'MyEuiPanel';
 const isShouldRerenderStep = (step: RuleStep, activeStep: RuleStep) =>
   activeStep !== step ? '0' : '1';
 
-const CreateRulePageComponent: React.FC = () => {
+const CreateRulePageComponent: React.FC<React.PropsWithChildren<unknown>> = () => {
   const [
     {
       loading: userInfoLoading,

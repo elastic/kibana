@@ -43,7 +43,7 @@ import { ErrorType, extractErrorProperties } from '../../../../../common/util/er
 interface Props {
   isDisabled: boolean;
 }
-export const ImportJobsFlyout: FC<Props> = ({ isDisabled }) => {
+export const ImportJobsFlyout: FC<React.PropsWithChildren<Props>> = ({ isDisabled }) => {
   const {
     jobs: { bulkCreateJobs },
     dataFrameAnalytics: { createDataFrameAnalytics },
@@ -334,7 +334,7 @@ export const ImportJobsFlyout: FC<Props> = ({ isDisabled }) => {
     [jobIdObjects]
   );
 
-  const DeleteJobButton: FC<{ index: number }> = ({ index }) => (
+  const DeleteJobButton: FC<React.PropsWithChildren<{ index: number }>> = ({ index }) => (
     <EuiButtonIcon
       iconType="trash"
       aria-label={i18n.translate('xpack.ml.importExport.importFlyout.deleteButtonAria', {
@@ -524,7 +524,7 @@ export const ImportJobsFlyout: FC<Props> = ({ isDisabled }) => {
   );
 };
 
-const FlyoutButton: FC<{ isDisabled: boolean; onClick(): void }> = ({ isDisabled, onClick }) => {
+const FlyoutButton: FC<React.PropsWithChildren<{ isDisabled: boolean; onClick(): void }>> = ({ isDisabled, onClick }) => {
   return (
     <EuiButtonEmpty
       iconType="importAction"

@@ -29,7 +29,7 @@ export interface AddToCaseButtonProps {
   iconProps?: Record<string, string>;
 }
 
-export const AddToCaseButton: React.FC<AddToCaseButtonProps> = ({
+export const AddToCaseButton: React.FC<React.PropsWithChildren<AddToCaseButtonProps>> = ({
   actionId,
   agentIds = [],
   queryId = '',

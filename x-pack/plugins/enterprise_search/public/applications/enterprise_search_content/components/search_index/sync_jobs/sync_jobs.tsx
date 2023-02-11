@@ -26,7 +26,7 @@ import { IndexViewLogic } from '../index_view_logic';
 import { SyncJobFlyout } from './sync_job_flyout';
 import { SyncJobsViewLogic, SyncJobView } from './sync_jobs_view_logic';
 
-export const SyncJobs: React.FC = () => {
+export const SyncJobs: React.FC<React.PropsWithChildren<unknown>> = () => {
   const { connectorId } = useValues(IndexViewLogic);
   const { syncJobs, syncJobsLoading, syncJobsPagination } = useValues(SyncJobsViewLogic);
   const { fetchSyncJobs } = useActions(SyncJobsViewLogic);

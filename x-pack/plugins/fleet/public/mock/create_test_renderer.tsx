@@ -50,8 +50,8 @@ export interface TestRenderer {
   /** The Interface returned by the Fleet plugin `start()` phase */
   startInterface: MockedFleetStart;
   kibanaVersion: string;
-  AppWrapper: React.FC<any>;
-  HookWrapper: React.FC<any>;
+  AppWrapper: React.FC<React.PropsWithChildren<any>>;
+  HookWrapper: React.FC<React.PropsWithChildren<any>>;
   render: UiRender;
   renderHook: <TProps, TResult>(
     callback: (props: TProps) => TResult

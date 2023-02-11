@@ -17,7 +17,7 @@ export const dashboards = [
   { value: 'dashboard3', label: 'Dashboard 3' },
 ];
 
-const InteractiveDemo: React.FC = () => {
+const InteractiveDemo: React.FC<React.PropsWithChildren<unknown>> = () => {
   const [activeDashboardId, setActiveDashboardId] = React.useState('dashboard1');
   const [currentFilters, setCurrentFilters] = React.useState(false);
   const [keepRange, setKeepRange] = React.useState(false);

@@ -17,7 +17,7 @@ export type GetRecentCasesProps = Omit<
   'externalReferenceAttachmentTypeRegistry' | 'persistableStateAttachmentTypeRegistry'
 >;
 
-const RecentCasesLazy: React.FC<RecentCasesProps> = lazy(
+const RecentCasesLazy: React.FC<React.PropsWithChildren<RecentCasesProps>> = lazy(
   () => import('../../components/recent_cases')
 );
 export const getRecentCasesLazy = ({

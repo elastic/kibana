@@ -17,7 +17,7 @@ export interface AttachmentViewObject<Props = {}> {
   timelineAvatar?: EuiCommentProps['timelineAvatar'];
   actions?: EuiCommentProps['actions'];
   event?: EuiCommentProps['event'];
-  children?: React.LazyExoticComponent<React.FC<Props>>;
+  children?: React.LazyExoticComponent<React.FC<React.PropsWithChildren<Props>>>;
 }
 
 export interface CommonAttachmentViewProps {

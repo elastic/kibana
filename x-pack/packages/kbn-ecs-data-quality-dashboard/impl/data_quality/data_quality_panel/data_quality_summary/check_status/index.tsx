@@ -25,7 +25,7 @@ interface Props {
   setLastChecked: (lastChecked: string) => void;
 }
 
-const CheckStatusComponent: React.FC<Props> = ({
+const CheckStatusComponent: React.FC<React.PropsWithChildren<Props>> = ({
   addSuccessToast,
   checkAllIndiciesChecked,
   checkAllTotalIndiciesToCheck,

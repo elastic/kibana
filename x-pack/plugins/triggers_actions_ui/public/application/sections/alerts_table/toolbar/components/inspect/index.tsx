@@ -21,7 +21,7 @@ interface InspectButtonContainerProps {
   children: React.ReactNode;
 }
 
-export const InspectButtonContainer: React.FC<InspectButtonContainerProps> = ({
+export const InspectButtonContainer: React.FC<React.PropsWithChildren<InspectButtonContainerProps>> = ({
   children,
   hide,
 }) => (
@@ -36,7 +36,7 @@ interface InspectButtonProps {
   getInspectQuery: GetInspectQuery;
 }
 
-const InspectButtonComponent: React.FC<InspectButtonProps> = ({ getInspectQuery }) => {
+const InspectButtonComponent: React.FC<React.PropsWithChildren<InspectButtonProps>> = ({ getInspectQuery }) => {
   const [isShowingModal, setIsShowingModal] = useState(false);
 
   const onOpenModal = () => {

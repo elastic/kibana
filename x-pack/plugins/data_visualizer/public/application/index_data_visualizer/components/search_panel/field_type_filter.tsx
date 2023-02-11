@@ -16,11 +16,11 @@ import { FieldTypeIcon } from '../../../common/components/field_type_icon';
 import { MultiSelectPicker, Option } from '../../../common/components/multi_select_picker';
 import { jobTypeLabels } from '../../../common/util/field_types_utils';
 
-export const DataVisualizerFieldTypeFilter: FC<{
+export const DataVisualizerFieldTypeFilter: FC<React.PropsWithChildren<{
   indexedFieldTypes: SupportedFieldType[];
   setVisibleFieldTypes(q: string[]): void;
   visibleFieldTypes: string[];
-}> = ({ indexedFieldTypes, setVisibleFieldTypes, visibleFieldTypes }) => {
+}>> = ({ indexedFieldTypes, setVisibleFieldTypes, visibleFieldTypes }) => {
   const euiTheme = useCurrentEuiTheme();
   const options: Option[] = useMemo(() => {
     return indexedFieldTypes.map((indexedFieldName) => {

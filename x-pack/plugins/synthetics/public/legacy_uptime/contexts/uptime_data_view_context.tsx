@@ -12,9 +12,9 @@ import { useHasData } from '../components/overview/empty_state/use_has_data';
 
 export const UptimeDataViewContext = createContext({} as DataView);
 
-export const UptimeDataViewContextProvider: React.FC<{
+export const UptimeDataViewContextProvider: React.FC<React.PropsWithChildren<{
   dataViews: DataViewsPublicPluginStart;
-}> = ({ children, dataViews }) => {
+}>> = ({ children, dataViews }) => {
   const { settings, data: indexStatus } = useHasData();
 
   const heartbeatIndices = settings?.heartbeatIndices || '';

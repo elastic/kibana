@@ -14,7 +14,7 @@ interface ExplorerChartsErrorCalloutsProps {
   errorMessagesByType: ExplorerChartSeriesErrorMessages;
 }
 
-export const ExplorerChartsErrorCallOuts: FC<ExplorerChartsErrorCalloutsProps> = ({
+export const ExplorerChartsErrorCallOuts: FC<React.PropsWithChildren<ExplorerChartsErrorCalloutsProps>> = ({
   errorMessagesByType,
 }) => {
   if (!errorMessagesByType || Object.keys(errorMessagesByType).length === 0) return null;

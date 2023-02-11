@@ -13,7 +13,7 @@ interface Props {
 }
 
 // eslint-disable-next-line react/function-component-definition
-export const Prompt: React.FC<Props> = ({ prompt }) => {
+export const Prompt: React.FC<React.PropsWithChildren<Props>> = ({ prompt }) => {
   const { setPrompt } = useNavigationWarningPrompt();
 
   useEffect(() => {

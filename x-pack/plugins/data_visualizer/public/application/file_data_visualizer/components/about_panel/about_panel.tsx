@@ -29,7 +29,7 @@ interface Props {
   hasPermissionToImport: boolean;
 }
 
-export const AboutPanel: FC<Props> = ({ onFilePickerChange, hasPermissionToImport }) => {
+export const AboutPanel: FC<React.PropsWithChildren<Props>> = ({ onFilePickerChange, hasPermissionToImport }) => {
   return (
     <EuiPageBody
       paddingSize="none"
@@ -65,7 +65,7 @@ export const AboutPanel: FC<Props> = ({ onFilePickerChange, hasPermissionToImpor
   );
 };
 
-export const LoadingPanel: FC = () => {
+export const LoadingPanel: FC<React.PropsWithChildren<unknown>> = () => {
   return (
     <EuiPage restrictWidth={400} data-test-subj="dataVisualizerPageFileLoading">
       <EuiPageBody>

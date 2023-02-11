@@ -14,7 +14,7 @@ import { CodeEditor } from '@kbn/kibana-react-plugin/public';
 
 import { useAppContext } from '../../context';
 
-export const ParametersTab: FunctionComponent = () => {
+export const ParametersTab: FunctionComponent<React.PropsWithChildren<unknown>> = () => {
   const {
     store: { payload },
     updatePayload,

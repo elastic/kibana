@@ -27,7 +27,7 @@ interface MetaEnginesTableExpandedRowProps {
   conflictingEngines: Set<string>;
 }
 
-export const MetaEnginesTableExpandedRow: React.FC<MetaEnginesTableExpandedRowProps> = ({
+export const MetaEnginesTableExpandedRow: React.FC<React.PropsWithChildren<MetaEnginesTableExpandedRowProps>> = ({
   sourceEngines,
   conflictingEngines,
 }) => (

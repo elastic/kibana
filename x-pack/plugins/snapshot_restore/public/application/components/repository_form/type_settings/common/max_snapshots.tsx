@@ -17,7 +17,7 @@ interface Props {
   error: RepositorySettingsValidation['maxSnapshotBytesPerSec'];
 }
 
-export const MaxSnapshotsField: React.FunctionComponent<Props> = ({
+export const MaxSnapshotsField: React.FunctionComponent<React.PropsWithChildren<Props>> = ({
   isInvalid,
   error,
   defaultValue,

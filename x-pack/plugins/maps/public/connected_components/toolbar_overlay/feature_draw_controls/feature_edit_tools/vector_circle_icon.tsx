@@ -7,7 +7,7 @@
 
 import React, { FunctionComponent } from 'react';
 
-export const VectorCircleIcon: FunctionComponent = (props) => (
+export const VectorCircleIcon: FunctionComponent<React.PropsWithChildren<unknown>> = (props) => (
   <svg
     width="16"
     height="16"

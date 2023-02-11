@@ -16,7 +16,7 @@ interface Props {
   selectedElementId: string | null;
 }
 
-export const ElementSettings: React.FC<Props> = ({ selectedElementId }) => {
+export const ElementSettings: React.FC<React.PropsWithChildren<Props>> = ({ selectedElementId }) => {
   const element = useSelector((state: State) => {
     return getElementById(state, selectedElementId, getSelectedPage(state));
   }, deepEqual);

@@ -17,7 +17,7 @@ export const getInferenceInfoComponent = (taskLabel: string, info: string[]) => 
   <InferenceInfo taskLabel={taskLabel} info={info} />
 );
 
-const InferenceInfo: FC<Props> = ({ taskLabel, info }) => {
+const InferenceInfo: FC<React.PropsWithChildren<Props>> = ({ taskLabel, info }) => {
   if (info.length === 0) {
     return null;
   }

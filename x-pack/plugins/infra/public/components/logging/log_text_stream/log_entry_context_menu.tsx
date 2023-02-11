@@ -39,7 +39,7 @@ const DEFAULT_MENU_LABEL = i18n.translate(
   }
 );
 
-export const LogEntryContextMenu: React.FC<LogEntryContextMenuProps> = ({
+export const LogEntryContextMenu: React.FC<React.PropsWithChildren<LogEntryContextMenuProps>> = ({
   'aria-label': ariaLabel,
   isOpen,
   onOpen,

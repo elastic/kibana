@@ -31,7 +31,7 @@ interface Props {
   onChange(item: PivotAggsConfig): void;
 }
 
-export const AggLabelForm: React.FC<Props> = ({
+export const AggLabelForm: React.FC<React.PropsWithChildren<Props>> = ({
   deleteHandler,
   item,
   otherAggNames,

@@ -38,7 +38,7 @@ const AddFieldPopoverContainer = styled.div`
   min-width: 350px;
 `;
 
-const AddDataProviderPopoverComponent: React.FC<AddDataProviderPopoverProps> = ({
+const AddDataProviderPopoverComponent: React.FC<React.PropsWithChildren<AddDataProviderPopoverProps>> = ({
   browserFields,
   timelineId,
 }) => {

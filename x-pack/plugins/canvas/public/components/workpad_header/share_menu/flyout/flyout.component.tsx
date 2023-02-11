@@ -101,7 +101,7 @@ const steps = (onDownload: OnDownloadFn, onCopy: OnCopyFn) => [
   },
 ];
 
-export const ShareWebsiteFlyout: FC<Props> = ({
+export const ShareWebsiteFlyout: FC<React.PropsWithChildren<Props>> = ({
   onClose,
   unsupportedRenderers,
   renderedWorkpad,

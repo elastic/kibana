@@ -49,7 +49,7 @@ const initVisualizationData: {
   isLoading: true,
 };
 
-const LensEmbeddableComponent: React.FC<LensEmbeddableComponentProps> = ({
+const LensEmbeddableComponent: React.FC<React.PropsWithChildren<LensEmbeddableComponentProps>> = ({
   applyGlobalQueriesAndFilters = true,
   extraActions,
   extraOptions,

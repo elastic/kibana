@@ -38,7 +38,7 @@ export interface OverviewNetworkProps {
 
 const OverviewNetworkStatsManage = manageQuery(OverviewNetworkStats);
 
-const OverviewNetworkComponent: React.FC<OverviewNetworkProps> = ({
+const OverviewNetworkComponent: React.FC<React.PropsWithChildren<OverviewNetworkProps>> = ({
   endDate,
   filterQuery,
   indexNames,

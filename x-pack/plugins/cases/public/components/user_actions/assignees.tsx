@@ -19,11 +19,11 @@ import type { UserActionBuilder, UserActionResponse } from './types';
 import * as i18n from './translations';
 import { getUsernameDataTestSubj } from '../user_profiles/data_test_subject';
 
-const FormatListItem: React.FC<{
+const FormatListItem: React.FC<React.PropsWithChildren<{
   children: React.ReactElement;
   index: number;
   listSize: number;
-}> = ({ children, index, listSize }) => {
+}>> = ({ children, index, listSize }) => {
   if (shouldAddAnd(index, listSize)) {
     return (
       <>
@@ -51,21 +51,21 @@ export const shouldAddAnd = (index: number, arrayLength: number) => {
   return arrayLength > 1 && index === arrayLength - 1;
 };
 
-const Themselves: React.FC<{
+const Themselves: React.FC<React.PropsWithChildren<{
   index: number;
   numOfAssigness: number;
-}> = ({ index, numOfAssigness }) => (
+}>> = ({ index, numOfAssigness }) => (
   <FormatListItem index={index} listSize={numOfAssigness}>
     <>{i18n.THEMSELVES}</>
   </FormatListItem>
 );
 Themselves.displayName = 'Themselves';
 
-const AssigneeComponent: React.FC<{
+const AssigneeComponent: React.FC<React.PropsWithChildren<{
   assignee: Assignee;
   index: number;
   numOfAssigness: number;
-}> = ({ assignee, index, numOfAssigness }) => (
+}>> = ({ assignee, index, numOfAssigness }) => (
   <FormatListItem index={index} listSize={numOfAssigness}>
     <UserToolTip userInfo={assignee.profile}>
       <strong>{getName(assignee.profile?.user)}</strong>

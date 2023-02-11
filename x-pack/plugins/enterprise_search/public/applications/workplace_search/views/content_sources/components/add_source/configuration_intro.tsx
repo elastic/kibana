@@ -42,7 +42,7 @@ interface ConfigurationIntroProps {
   advanceStepTo: string;
 }
 
-export const ConfigurationIntro: React.FC<ConfigurationIntroProps> = ({
+export const ConfigurationIntro: React.FC<React.PropsWithChildren<ConfigurationIntroProps>> = ({
   name,
   advanceStepTo,
   header,

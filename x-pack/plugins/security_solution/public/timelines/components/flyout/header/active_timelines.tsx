@@ -47,7 +47,7 @@ const TitleConatiner = styled(EuiFlexItem)`
   text-overflow: ellipsis;
 `;
 
-const ActiveTimelinesComponent: React.FC<ActiveTimelinesProps> = ({
+const ActiveTimelinesComponent: React.FC<React.PropsWithChildren<ActiveTimelinesProps>> = ({
   timelineId,
   timelineStatus,
   timelineType,

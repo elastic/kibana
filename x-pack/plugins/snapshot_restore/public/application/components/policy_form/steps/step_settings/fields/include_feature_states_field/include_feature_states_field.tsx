@@ -33,7 +33,7 @@ interface Props {
 
 export type FeaturesOption = EuiComboBoxOptionOption<string>;
 
-export const IncludeFeatureStatesField: FunctionComponent<Props> = ({ policy, onUpdate }) => {
+export const IncludeFeatureStatesField: FunctionComponent<React.PropsWithChildren<Props>> = ({ policy, onUpdate }) => {
   const { config = {} } = policy;
   const {
     error: errorLoadingFeatures,

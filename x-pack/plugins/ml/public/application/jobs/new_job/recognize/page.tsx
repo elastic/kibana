@@ -70,7 +70,7 @@ export enum SAVE_STATE {
   PARTIAL_FAILURE,
 }
 
-export const Page: FC<PageProps> = ({ moduleId, existingGroupIds }) => {
+export const Page: FC<React.PropsWithChildren<PageProps>> = ({ moduleId, existingGroupIds }) => {
   const {
     services: {
       notifications,

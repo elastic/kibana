@@ -17,7 +17,7 @@ interface Props {
   jobId: string;
 }
 
-export const ClassificationExploration: FC<Props> = ({ jobId }) => (
+export const ClassificationExploration: FC<React.PropsWithChildren<Props>> = ({ jobId }) => (
   <div className="mlDataFrameAnalyticsClassification">
     <ExplorationPageWrapper
       jobId={jobId}

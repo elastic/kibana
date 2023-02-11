@@ -65,7 +65,7 @@ interface Props {
   minAgeDays?: LogRetentionPolicy['minAgeDays'];
 }
 
-export const NoLogging: React.FC<Props> = ({ type, disabledAt }) => {
+export const NoLogging: React.FC<React.PropsWithChildren<Props>> = ({ type, disabledAt }) => {
   return (
     <>
       <FormattedMessage
@@ -93,7 +93,7 @@ export const NoLogging: React.FC<Props> = ({ type, disabledAt }) => {
   );
 };
 
-export const CustomPolicy: React.FC<Props> = ({ type }) => (
+export const CustomPolicy: React.FC<React.PropsWithChildren<Props>> = ({ type }) => (
   <FormattedMessage
     id="xpack.enterpriseSearch.appSearch.logRetention.customPolicy"
     defaultMessage="You have a custom {logsType} log retention policy."
@@ -101,7 +101,7 @@ export const CustomPolicy: React.FC<Props> = ({ type }) => (
   />
 );
 
-export const DefaultPolicy: React.FC<Props> = ({ type, minAgeDays }) => (
+export const DefaultPolicy: React.FC<React.PropsWithChildren<Props>> = ({ type, minAgeDays }) => (
   <FormattedMessage
     id="xpack.enterpriseSearch.appSearch.logRetention.defaultPolicy"
     defaultMessage="Your {logsType} logs are being stored for at least {minAgeDays, plural, one {# day} other {# days}}."

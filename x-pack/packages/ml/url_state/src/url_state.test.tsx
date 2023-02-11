@@ -66,7 +66,7 @@ describe('useUrlState', () => {
   });
 
   test('pushes a properly encoded search string to history', () => {
-    const TestComponent: FC = () => {
+    const TestComponent: FC<React.PropsWithChildren<unknown>> = () => {
       const [, setUrlState] = useUrlState('_a');
       return <button onClick={() => setUrlState({ query: {} })}>ButtonText</button>;
     };

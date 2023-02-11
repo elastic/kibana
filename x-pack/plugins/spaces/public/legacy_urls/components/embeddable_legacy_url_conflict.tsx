@@ -12,7 +12,7 @@ import type { InternalProps } from './embeddable_legacy_url_conflict_internal';
 
 export const getEmbeddableLegacyUrlConflict = async (
   internalProps: InternalProps
-): Promise<React.FC<EmbeddableLegacyUrlConflictProps>> => {
+): Promise<React.FC<React.PropsWithChildren<EmbeddableLegacyUrlConflictProps>>> => {
   const { EmbeddableLegacyUrlConflictInternal } = await import(
     './embeddable_legacy_url_conflict_internal'
   );

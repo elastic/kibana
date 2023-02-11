@@ -35,7 +35,7 @@ interface Props {
   firstWizardStep: WIZARD_STEPS;
 }
 
-export const Wizard: FC<Props> = ({
+export const Wizard: FC<React.PropsWithChildren<Props>> = ({
   jobCreator,
   chartLoader,
   mapLoader,

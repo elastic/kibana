@@ -27,7 +27,7 @@ interface LogAccordionProps {
   isError?: boolean;
 }
 
-const CustomWarning: React.FC<{ message: string }> = ({ message }) => (
+const CustomWarning: React.FC<React.PropsWithChildren<{ message: string }>> = ({ message }) => (
   <EuiCallOut color={'warning'} iconType="alert" data-test-subj={'preview-abort'}>
     <EuiText>
       <p>{message}</p>
@@ -42,7 +42,7 @@ const addLogs = (
   allLogs: SortedLogs[]
 ) => (logs.length ? [{ startedAt, logs, duration }, ...allLogs] : allLogs);
 
-export const PreviewLogsComponent: React.FC<PreviewLogsComponentProps> = ({
+export const PreviewLogsComponent: React.FC<React.PropsWithChildren<PreviewLogsComponentProps>> = ({
   logs,
   hasNoiseWarning,
   isAborted,
@@ -73,7 +73,7 @@ export const PreviewLogsComponent: React.FC<PreviewLogsComponentProps> = ({
   );
 };
 
-const LogAccordion: React.FC<LogAccordionProps> = ({ logs, isError, children }) => {
+const LogAccordion: React.FC<React.PropsWithChildren<LogAccordionProps>> = ({ logs, isError, children }) => {
   const firstLog = logs[0];
   if (!(children || firstLog)) return null;
 
@@ -113,12 +113,12 @@ const LogAccordion: React.FC<LogAccordionProps> = ({ logs, isError, children }) 
   );
 };
 
-export const CalloutGroup: React.FC<{
+export const CalloutGroup: React.FC<React.PropsWithChildren<{
   logs: string[];
   duration: number;
   startedAt?: string;
   isError?: boolean;
-}> = ({ logs, startedAt, isError, duration }) => {
+}>> = ({ logs, startedAt, isError, duration }) => {
   return logs.length > 0 ? (
     <>
       {logs.map((log, i) => (

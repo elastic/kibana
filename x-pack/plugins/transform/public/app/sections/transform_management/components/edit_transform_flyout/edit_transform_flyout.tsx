@@ -47,7 +47,7 @@ interface EditTransformFlyoutProps {
   dataViewId?: string;
 }
 
-export const EditTransformFlyout: FC<EditTransformFlyoutProps> = ({
+export const EditTransformFlyout: FC<React.PropsWithChildren<EditTransformFlyoutProps>> = ({
   closeFlyout,
   config,
   dataViewId,

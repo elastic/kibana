@@ -42,7 +42,7 @@ interface Props {
   dataStreamsCount: number;
 }
 
-export const DataStreamsGlobalStateCallOut: FunctionComponent<Props> = ({ dataStreamsCount }) => {
+export const DataStreamsGlobalStateCallOut: FunctionComponent<React.PropsWithChildren<Props>> = ({ dataStreamsCount }) => {
   const { docLinks } = useCore();
   return (
     <EuiCallOut

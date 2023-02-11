@@ -19,10 +19,10 @@ import {
 } from '../../../../common/log_views';
 import { LogsPageTemplate } from './page_template';
 
-export const LogViewErrorPage: React.FC<{
+export const LogViewErrorPage: React.FC<React.PropsWithChildren<{
   errors: Error[];
   onRetry: () => void;
-}> = ({ errors, onRetry }) => {
+}>> = ({ errors, onRetry }) => {
   const settingsLinkProps = useLinkProps({ app: 'logs', pathname: '/settings' });
 
   return (
@@ -75,7 +75,7 @@ export const LogViewErrorPage: React.FC<{
 
 export const LogSourceErrorPage = LogViewErrorPage;
 
-export const ConnectedLogViewErrorPage: React.FC = () => {
+export const ConnectedLogViewErrorPage: React.FC<React.PropsWithChildren<unknown>> = () => {
   const { logViewStateService } = useLogViewContext();
 
   const errors = useSelector(logViewStateService, (state) => {
@@ -95,7 +95,7 @@ export const ConnectedLogViewErrorPage: React.FC = () => {
   return <LogSourceErrorPage errors={errors} onRetry={retry} />;
 };
 
-const LogSourceErrorMessage: React.FC<{ error: Error }> = ({ error }) => {
+const LogSourceErrorMessage: React.FC<React.PropsWithChildren<{ error: Error }>> = ({ error }) => {
   if (error instanceof ResolveLogViewError) {
     return (
       <LogSourceErrorCallout
@@ -152,7 +152,7 @@ const LogSourceErrorMessage: React.FC<{ error: Error }> = ({ error }) => {
   }
 };
 
-const LogSourceErrorCallout: React.FC<{ title: React.ReactNode }> = ({ title, children }) => (
+const LogSourceErrorCallout: React.FC<React.PropsWithChildren<{ title: React.ReactNode }>> = ({ title, children }) => (
   <EuiCallOut className="eui-textLeft" color="danger" iconType="alert" title={title}>
     <p>{children}</p>
   </EuiCallOut>

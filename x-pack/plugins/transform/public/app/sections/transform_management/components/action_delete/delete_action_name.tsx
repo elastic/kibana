@@ -33,7 +33,7 @@ export interface DeleteActionNameProps {
   isBulkAction: boolean;
 }
 
-export const DeleteActionName: FC<DeleteActionNameProps> = ({
+export const DeleteActionName: FC<React.PropsWithChildren<DeleteActionNameProps>> = ({
   canDeleteTransform,
   disabled,
   isBulkAction,

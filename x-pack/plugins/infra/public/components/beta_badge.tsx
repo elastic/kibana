@@ -9,7 +9,7 @@ import { EuiBetaBadge } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 
-export const BetaBadge: React.FunctionComponent = () => (
+export const BetaBadge: React.FunctionComponent<React.PropsWithChildren<unknown>> = () => (
   <EuiBetaBadge
     aria-label={betaBadgeLabel}
     label={betaBadgeLabel}

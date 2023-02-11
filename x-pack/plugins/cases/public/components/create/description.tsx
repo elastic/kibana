@@ -22,7 +22,7 @@ interface Props {
 
 export const fieldName = 'description';
 
-const DescriptionComponent: React.FC<Props> = ({ isLoading, draftStorageKey }) => {
+const DescriptionComponent: React.FC<React.PropsWithChildren<Props>> = ({ isLoading, draftStorageKey }) => {
   const { draftComment, hasIncomingLensState, openLensModal, clearDraftComment } =
     useLensDraftComment();
   const { setFieldValue } = useFormContext();

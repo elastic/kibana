@@ -117,7 +117,7 @@ const fieldsConfig: FieldsConfig = {
 /**
  * Disambiguate from global Date object
  */
-export const DateProcessor: FunctionComponent = () => {
+export const DateProcessor: FunctionComponent<React.PropsWithChildren<unknown>> = () => {
   return (
     <>
       <FieldNameField

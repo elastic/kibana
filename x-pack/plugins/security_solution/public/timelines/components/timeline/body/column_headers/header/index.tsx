@@ -31,7 +31,7 @@ interface Props {
   timelineId: string;
 }
 
-export const HeaderComponent: React.FC<Props> = ({
+export const HeaderComponent: React.FC<React.PropsWithChildren<Props>> = ({
   header,
   onFilterChange = noop,
   sort,

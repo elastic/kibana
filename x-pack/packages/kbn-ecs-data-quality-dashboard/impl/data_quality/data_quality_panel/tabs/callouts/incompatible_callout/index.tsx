@@ -19,7 +19,7 @@ interface Props {
   enrichedFieldMetadata: EnrichedFieldMetadata[];
 }
 
-const IncompatibleCalloutComponent: React.FC<Props> = ({ children, enrichedFieldMetadata }) => (
+const IncompatibleCalloutComponent: React.FC<React.PropsWithChildren<Props>> = ({ children, enrichedFieldMetadata }) => (
   <EuiCallOut
     color="danger"
     size="s"

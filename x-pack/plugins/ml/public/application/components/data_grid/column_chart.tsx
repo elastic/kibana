@@ -41,7 +41,7 @@ const columnChartTheme = {
   },
   scales: { barsPadding: 0.1 },
 };
-export const ColumnChart: FC<Props> = ({
+export const ColumnChart: FC<React.PropsWithChildren<Props>> = ({
   chartData,
   columnType,
   dataTestSubj,

@@ -18,7 +18,7 @@ interface Props {
   messageText?: string;
 }
 
-export const UnsavedChangesPrompt: React.FC<Props> = ({
+export const UnsavedChangesPrompt: React.FC<React.PropsWithChildren<Props>> = ({
   hasUnsavedChanges,
   messageText = DEFAULT_MESSAGE_TEXT,
 }) => {

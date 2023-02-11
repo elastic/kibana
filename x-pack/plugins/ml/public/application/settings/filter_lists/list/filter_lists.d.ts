@@ -7,7 +7,7 @@
 
 import { FC } from 'react';
 
-declare const FilterLists: FC<{
+declare const FilterLists: FC<React.PropsWithChildren<{
   canCreateFilter: boolean;
   canDeleteFilter: boolean;
-}>;
+}>>;

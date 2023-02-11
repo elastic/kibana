@@ -16,7 +16,7 @@ interface ActionConnectorWarningsComponentProps {
   actionConnectorsWarnings: WarningSchema[];
   importedActionConnectorsCount?: number;
 }
-const ActionConnectorWarningsComponent: FC<ActionConnectorWarningsComponentProps> = ({
+const ActionConnectorWarningsComponent: FC<React.PropsWithChildren<ActionConnectorWarningsComponentProps>> = ({
   actionConnectorsWarnings,
   importedActionConnectorsCount,
 }) => {

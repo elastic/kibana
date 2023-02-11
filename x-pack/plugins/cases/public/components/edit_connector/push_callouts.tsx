@@ -16,7 +16,7 @@ interface PushCalloutsProps {
   onEditClick: () => void;
 }
 
-const PushCalloutsComponent: React.FC<PushCalloutsProps> = ({
+const PushCalloutsComponent: React.FC<React.PropsWithChildren<PushCalloutsProps>> = ({
   hasConnectors,
   hasLicenseError,
   errorsMsg,

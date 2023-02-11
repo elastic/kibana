@@ -91,7 +91,7 @@ interface ExplorerPageProps {
   updateLanguage?: (language: string) => void;
 }
 
-const ExplorerPage: FC<ExplorerPageProps> = ({
+const ExplorerPage: FC<React.PropsWithChildren<ExplorerPageProps>> = ({
   children,
   jobSelectorProps,
   noInfluencersConfigured,
@@ -155,7 +155,7 @@ export function getDefaultPanelsState() {
   };
 }
 
-export const Explorer: FC<ExplorerUIProps> = ({
+export const Explorer: FC<React.PropsWithChildren<ExplorerUIProps>> = ({
   invalidTimeRangeError,
   showCharts,
   severity,

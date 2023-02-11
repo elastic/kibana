@@ -24,7 +24,7 @@ const ChartTypeIcon = styled(EuiIcon)`
 `;
 const AlertViewOptions: AlertViewSelection[] = ['charts', 'trend', 'table', 'treemap'];
 
-const ChartSelectComponent: React.FC<Props> = ({
+const ChartSelectComponent: React.FC<React.PropsWithChildren<Props>> = ({
   alertViewSelection,
   setAlertViewSelection,
 }: Props) => {

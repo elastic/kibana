@@ -25,7 +25,7 @@ interface LogViewSwitcherProps {
  * It currently renders a read-only expression to tell the user to which logView
  * is the new alert associated with.
  */
-export const LogViewSwitcher: React.FC<LogViewSwitcherProps> = ({ logView }) => {
+export const LogViewSwitcher: React.FC<React.PropsWithChildren<LogViewSwitcherProps>> = ({ logView }) => {
   return (
     <EuiFlexGroup gutterSize="s">
       <EuiFlexItem grow={false}>

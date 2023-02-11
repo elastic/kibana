@@ -35,7 +35,7 @@ interface Props {
   searchItems: SearchItems;
 }
 
-export const StepDefineSummary: FC<Props> = ({
+export const StepDefineSummary: FC<React.PropsWithChildren<Props>> = ({
   formState: {
     isDatePickerApplyEnabled,
     timeRangeMs,

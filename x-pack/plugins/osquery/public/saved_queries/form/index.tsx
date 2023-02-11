@@ -38,7 +38,7 @@ interface SavedQueryFormProps {
   idSet?: Set<string>;
 }
 
-const SavedQueryFormComponent: React.FC<SavedQueryFormProps> = ({
+const SavedQueryFormComponent: React.FC<React.PropsWithChildren<SavedQueryFormProps>> = ({
   viewMode,
   hasPlayground,
   isValid,

@@ -29,7 +29,7 @@ interface SwimlaneAnnotationContainerProps {
   tooltipService: ChartTooltipService;
 }
 
-export const SwimlaneAnnotationContainer: FC<SwimlaneAnnotationContainerProps> = ({
+export const SwimlaneAnnotationContainer: FC<React.PropsWithChildren<SwimlaneAnnotationContainerProps>> = ({
   chartWidth,
   domain,
   annotationsData,

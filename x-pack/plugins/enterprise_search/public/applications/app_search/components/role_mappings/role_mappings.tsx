@@ -30,7 +30,7 @@ import { RoleMapping } from './role_mapping';
 import { RoleMappingsLogic } from './role_mappings_logic';
 import { User } from './user';
 
-export const RoleMappings: React.FC = () => {
+export const RoleMappings: React.FC<React.PropsWithChildren<unknown>> = () => {
   const {
     enableRoleBasedAccess,
     initializeRoleMappings,

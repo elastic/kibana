@@ -11,7 +11,7 @@ import { EuiSwitch } from '@elastic/eui';
 import { JobCreatorContext } from '../../../../../job_creator_context';
 import { Description } from './description';
 
-export const DedicatedIndexSwitch: FC = () => {
+export const DedicatedIndexSwitch: FC<React.PropsWithChildren<unknown>> = () => {
   const { jobCreator, jobCreatorUpdate } = useContext(JobCreatorContext);
   const [useDedicatedIndex, setUseDedicatedIndex] = useState(jobCreator.useDedicatedIndex);
 

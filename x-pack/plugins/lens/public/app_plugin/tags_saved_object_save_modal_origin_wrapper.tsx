@@ -22,9 +22,7 @@ export type TagEnhancedSavedObjectSaveModalOriginProps = Omit<OriginSaveModalPro
   onSave: (props: OriginSaveProps) => void;
 };
 
-export const TagEnhancedSavedObjectSaveModalOrigin: FC<
-  TagEnhancedSavedObjectSaveModalOriginProps
-> = ({ initialTags, onSave, savedObjectsTagging, options, ...otherProps }) => {
+export const TagEnhancedSavedObjectSaveModalOrigin: FC<React.PropsWithChildren<TagEnhancedSavedObjectSaveModalOriginProps>> = ({ initialTags, onSave, savedObjectsTagging, options, ...otherProps }) => {
   const [selectedTags, setSelectedTags] = useState(initialTags);
 
   const tagSelectorOption = useMemo(

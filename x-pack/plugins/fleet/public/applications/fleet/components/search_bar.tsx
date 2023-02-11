@@ -35,7 +35,7 @@ interface Props {
   dataTestSubj?: string;
 }
 
-export const SearchBar: React.FunctionComponent<Props> = ({
+export const SearchBar: React.FunctionComponent<React.PropsWithChildren<Props>> = ({
   value,
   fieldPrefix,
   onChange,

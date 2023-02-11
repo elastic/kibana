@@ -14,7 +14,7 @@ interface TextBlockProps {
   text: string | null | undefined;
 }
 
-const TextBlockComponent: React.FC<TextBlockProps> = ({ text }) => {
+const TextBlockComponent: React.FC<React.PropsWithChildren<TextBlockProps>> = ({ text }) => {
   return (
     <EuiCodeBlock
       className="eui-fullWidth"

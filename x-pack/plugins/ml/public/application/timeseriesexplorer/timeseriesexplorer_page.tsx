@@ -25,7 +25,7 @@ interface TimeSeriesExplorerPageProps {
   noSingleMetricJobsFound?: boolean;
 }
 
-export const TimeSeriesExplorerPage: FC<TimeSeriesExplorerPageProps> = ({
+export const TimeSeriesExplorerPage: FC<React.PropsWithChildren<TimeSeriesExplorerPageProps>> = ({
   children,
   dateFormatTz,
   resizeRef,

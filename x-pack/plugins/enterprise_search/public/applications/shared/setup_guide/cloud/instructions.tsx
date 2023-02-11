@@ -26,7 +26,7 @@ interface Props {
   productName: string;
 }
 
-export const CloudSetupInstructions: React.FC<Props> = ({ productName, cloudDeploymentLink }) => (
+export const CloudSetupInstructions: React.FC<React.PropsWithChildren<Props>> = ({ productName, cloudDeploymentLink }) => (
   <EuiPageContent>
     <EuiSteps
       headingElement="h2"

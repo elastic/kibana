@@ -114,7 +114,7 @@ const fieldsConfig: FieldsConfig = {
   },
 };
 
-export const Grok: FunctionComponent = () => {
+export const Grok: FunctionComponent<React.PropsWithChildren<unknown>> = () => {
   return (
     <>
       <FieldNameField

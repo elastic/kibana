@@ -24,6 +24,6 @@ const healthToColor = (health: Health) => {
   }
 };
 
-export const DataHealth: React.FunctionComponent<Props> = ({ health }) => (
+export const DataHealth: React.FunctionComponent<React.PropsWithChildren<Props>> = ({ health }) => (
   <EuiHealth color={healthToColor(health)}>{health}</EuiHealth>
 );

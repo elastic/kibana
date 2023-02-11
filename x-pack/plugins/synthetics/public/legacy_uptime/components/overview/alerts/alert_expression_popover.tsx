@@ -29,7 +29,7 @@ const getColor = (
   return isOpen ? 'primary' : 'success';
 };
 
-export const AlertExpressionPopover: React.FC<AlertExpressionPopoverProps> = ({
+export const AlertExpressionPopover: React.FC<React.PropsWithChildren<AlertExpressionPopoverProps>> = ({
   'aria-label': ariaLabel,
   content,
   'data-test-subj': dataTestSubj,

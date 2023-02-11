@@ -32,7 +32,7 @@ export interface FleetProxyFlyoutProps {
   fleetProxy?: FleetProxy;
 }
 
-export const FleetProxyFlyout: React.FunctionComponent<FleetProxyFlyoutProps> = ({
+export const FleetProxyFlyout: React.FunctionComponent<React.PropsWithChildren<FleetProxyFlyoutProps>> = ({
   onClose,
   fleetProxy,
 }) => {

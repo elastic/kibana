@@ -45,12 +45,12 @@ export const getSelectAgentPolicyStep = ({
   };
 };
 
-const SelectAgentPolicyStepContent: React.FunctionComponent<{
+const SelectAgentPolicyStepContent: React.FunctionComponent<React.PropsWithChildren<{
   policyId?: string;
   setPolicyId: (v?: string) => void;
   eligibleFleetServerPolicies: GetAgentPoliciesResponseItem[];
   refreshEligibleFleetServerPolicies: () => void;
-}> = ({
+}>> = ({
   policyId,
   setPolicyId,
   eligibleFleetServerPolicies,

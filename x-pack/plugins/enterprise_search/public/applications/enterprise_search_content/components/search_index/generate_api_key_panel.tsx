@@ -25,7 +25,7 @@ import { ManageKeysPopover } from './components/manage_api_keys_popover/popover'
 import { IndexViewLogic } from './index_view_logic';
 import { OverviewLogic } from './overview.logic';
 
-export const GenerateApiKeyPanel: React.FC = () => {
+export const GenerateApiKeyPanel: React.FC<React.PropsWithChildren<unknown>> = () => {
   const { apiKey, isGenerateModalOpen } = useValues(OverviewLogic);
   const { indexName, ingestionMethod } = useValues(IndexViewLogic);
   const { closeGenerateModal } = useActions(OverviewLogic);

@@ -62,7 +62,7 @@ export type UserRiskScoreColumns = [
   Columns<UserRiskScoreItem[RiskScoreFields.userRisk]>
 ];
 
-const UserRiskScoreTableComponent: React.FC<UserRiskScoreTableProps> = ({
+const UserRiskScoreTableComponent: React.FC<React.PropsWithChildren<UserRiskScoreTableProps>> = ({
   data,
   id,
   isInspect,

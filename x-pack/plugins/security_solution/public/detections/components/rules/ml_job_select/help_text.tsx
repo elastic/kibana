@@ -15,7 +15,7 @@ const HelpTextWarningContainer = styled.div`
   margin-top: 10px;
 `;
 
-const HelpTextComponent: React.FC<{ href: string; notRunningJobIds: string[] }> = ({
+const HelpTextComponent: React.FC<React.PropsWithChildren<{ href: string; notRunningJobIds: string[] }>> = ({
   href,
   notRunningJobIds,
 }) => (

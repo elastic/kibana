@@ -19,7 +19,7 @@ export interface RuleActionsPopoverProps {
   onRunRule: (ruleId: string) => void;
 }
 
-export const RuleActionsPopover: React.FunctionComponent<RuleActionsPopoverProps> = ({
+export const RuleActionsPopover: React.FunctionComponent<React.PropsWithChildren<RuleActionsPopoverProps>> = ({
   rule,
   canSaveRule,
   onDelete,

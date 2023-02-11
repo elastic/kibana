@@ -79,7 +79,7 @@ export const useDatePickerContext = (): DatePickerDependencies => {
  * @returns {React.ReactElement} The DatePickerContextProvider component.
  */
 
-export const DatePickerContextProvider: FC<DatePickerDependencies> = (props) => {
+export const DatePickerContextProvider: FC<React.PropsWithChildren<DatePickerDependencies>> = (props) => {
   const { children, ...deps } = props;
   return <DatePickerContext.Provider value={deps}>{children}</DatePickerContext.Provider>;
 };

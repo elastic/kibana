@@ -20,7 +20,7 @@ interface LayoutProps {
   modalClosePath?: string;
 }
 
-export const NoDataLayout: React.FunctionComponent<LayoutProps> = withRouter<
+export const NoDataLayout: React.FunctionComponent<React.PropsWithChildren<LayoutProps>> = withRouter<
   any,
   React.FunctionComponent<LayoutProps>
 >(({ actionSection, title, modalClosePath, children }: React.PropsWithChildren<LayoutProps>) => {

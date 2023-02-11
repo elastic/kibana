@@ -88,7 +88,7 @@ const StyledFullHeightContainer = styled.div`
 
 type DetectionEngineComponentProps = PropsFromRedux;
 
-const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ({
+const DetectionEnginePageComponent: React.FC<React.PropsWithChildren<DetectionEngineComponentProps>> = ({
   clearEventsLoading,
   clearEventsDeleted,
 }) => {

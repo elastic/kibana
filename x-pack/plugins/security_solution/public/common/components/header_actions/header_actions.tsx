@@ -65,7 +65,7 @@ const ActionsContainer = styled.div`
   display: flex;
 `;
 
-const HeaderActionsComponent: React.FC<HeaderActionProps> = ({
+const HeaderActionsComponent: React.FC<React.PropsWithChildren<HeaderActionProps>> = ({
   width,
   browserFields,
   columnHeaders,

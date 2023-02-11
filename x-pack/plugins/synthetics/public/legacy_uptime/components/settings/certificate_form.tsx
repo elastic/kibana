@@ -29,7 +29,7 @@ export type PartialSettings = Partial<Omit<DynamicSettings, 'defaultEmail'>> & {
 
 export type OnFieldChangeType = (changedValues: PartialSettings) => void;
 
-export const CertificateExpirationForm: React.FC<SettingsFormProps> = ({
+export const CertificateExpirationForm: React.FC<React.PropsWithChildren<SettingsFormProps>> = ({
   loading,
   onChange,
   formFields,

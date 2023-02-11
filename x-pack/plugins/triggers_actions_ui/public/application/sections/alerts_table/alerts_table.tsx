@@ -73,7 +73,7 @@ const renderAlertLifecycleStatus = ({
   return basicRenderCellValue({ data, columnId });
 };
 
-const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTableProps) => {
+const AlertsTable: React.FunctionComponent<React.PropsWithChildren<AlertsTableProps>> = (props: AlertsTableProps) => {
   const [rowClasses, setRowClasses] = useState<EuiDataGridStyle['rowClasses']>({});
   const alertsData = props.useFetchAlertsData();
   const {

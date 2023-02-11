@@ -50,7 +50,7 @@ type NavItemsById = Record<
   { title: string; panelItems: DefaultSideNavItem[]; categories?: LinkCategories }
 >;
 
-export const SolutionGroupedNavComponent: React.FC<SolutionGroupedNavProps> = ({
+export const SolutionGroupedNavComponent: React.FC<React.PropsWithChildren<SolutionGroupedNavProps>> = ({
   items,
   selectedId,
   footerItems = [],
@@ -155,7 +155,7 @@ export const SolutionGroupedNavComponent: React.FC<SolutionGroupedNavProps> = ({
 };
 export const SolutionGroupedNav = React.memo(SolutionGroupedNavComponent);
 
-const SolutionNavItems: React.FC<SolutionNavItemsProps> = ({
+const SolutionNavItems: React.FC<React.PropsWithChildren<SolutionNavItemsProps>> = ({
   items,
   selectedId,
   activePanelNavId,
@@ -177,7 +177,7 @@ const SolutionNavItems: React.FC<SolutionNavItemsProps> = ({
   </>
 );
 
-const SolutionNavItemComponent: React.FC<SolutionNavItemProps> = ({
+const SolutionNavItemComponent: React.FC<React.PropsWithChildren<SolutionNavItemProps>> = ({
   item,
   isSelected,
   isActive,

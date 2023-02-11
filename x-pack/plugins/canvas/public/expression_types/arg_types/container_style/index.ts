@@ -31,7 +31,7 @@ interface OuterProps {
   onValueChange: Function;
 }
 
-const wrap = (Component: ComponentType<any>) =>
+const wrap = (Component: ComponentType<React.PropsWithChildren<any>>) =>
   // TODO: this should be in a helper
   withHandlers<OuterProps, Handlers>({
     getArgValue:

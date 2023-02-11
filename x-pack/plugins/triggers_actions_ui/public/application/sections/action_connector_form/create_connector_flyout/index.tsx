@@ -34,7 +34,7 @@ export interface CreateConnectorFlyoutProps {
   onTestConnector?: (connector: ActionConnector) => void;
 }
 
-const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
+const CreateConnectorFlyoutComponent: React.FC<React.PropsWithChildren<CreateConnectorFlyoutProps>> = ({
   actionTypeRegistry,
   featureId,
   onClose,

@@ -98,7 +98,7 @@ interface Props {
   suggestion: EMSTermJoinConfig;
 }
 
-export const ChoroplethMap: FC<Props> = ({ stats, suggestion }) => {
+export const ChoroplethMap: FC<React.PropsWithChildren<Props>> = ({ stats, suggestion }) => {
   const {
     services: {
       data: { fieldFormats },

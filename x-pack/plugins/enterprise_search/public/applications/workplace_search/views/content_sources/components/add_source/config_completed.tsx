@@ -41,7 +41,7 @@ interface ConfigCompletedProps {
   showFeedbackLink?: boolean;
 }
 
-export const ConfigCompleted: React.FC<ConfigCompletedProps> = ({
+export const ConfigCompleted: React.FC<React.PropsWithChildren<ConfigCompletedProps>> = ({
   name,
   advanceStep,
   accountContextOnly,

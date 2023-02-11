@@ -32,7 +32,7 @@ const initialValidation: TagValidation = {
   errors: {},
 };
 
-export const CreateTagModal: FC<CreateTagModalProps> = ({
+export const CreateTagModal: FC<React.PropsWithChildren<CreateTagModalProps>> = ({
   defaultValues,
   tagClient,
   onClose,

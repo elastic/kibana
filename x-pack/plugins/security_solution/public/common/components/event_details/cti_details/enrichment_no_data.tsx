@@ -15,7 +15,7 @@ const InlineBlock = styled.div`
   line-height: 1.7em;
 `;
 
-export const EnrichmentNoData: React.FC<{ type?: ENRICHMENT_TYPES }> = ({ type }) => {
+export const EnrichmentNoData: React.FC<React.PropsWithChildren<{ type?: ENRICHMENT_TYPES }>> = ({ type }) => {
   if (!type) return null;
   return (
     <InlineBlock data-test-subj="no-enrichments-found">

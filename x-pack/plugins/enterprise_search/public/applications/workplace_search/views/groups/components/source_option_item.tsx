@@ -19,7 +19,7 @@ interface SourceOptionItemProps {
   source: ContentSource;
 }
 
-export const SourceOptionItem: React.FC<SourceOptionItemProps> = ({ source }) => (
+export const SourceOptionItem: React.FC<React.PropsWithChildren<SourceOptionItemProps>> = ({ source }) => (
   <EuiFlexGroup gutterSize="m" justifyContent="flexStart" alignItems="center" responsive={false}>
     <EuiFlexItem grow={false}>
       <SourceIcon {...source} size="s" />

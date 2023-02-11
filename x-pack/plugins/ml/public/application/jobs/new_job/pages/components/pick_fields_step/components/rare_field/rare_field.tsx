@@ -15,7 +15,7 @@ import { Description } from './description';
 import type { Field } from '../../../../../../../../../common/types/fields';
 import { RareJobCreator } from '../../../../../common/job_creator';
 
-export const RareFieldSelector: FC = () => {
+export const RareFieldSelector: FC<React.PropsWithChildren<unknown>> = () => {
   const { jobCreator: jc, jobCreatorUpdate, jobCreatorUpdated } = useContext(JobCreatorContext);
   const jobCreator = jc as RareJobCreator;
 

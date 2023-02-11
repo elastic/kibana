@@ -30,7 +30,7 @@ export interface AdvancedOptionsSectionProps {
   inputs: OutputFormInputsType;
 }
 
-export const AdvancedOptionsSection: React.FunctionComponent<AdvancedOptionsSectionProps> = ({
+export const AdvancedOptionsSection: React.FunctionComponent<React.PropsWithChildren<AdvancedOptionsSectionProps>> = ({
   enabled,
   inputs,
 }) => {

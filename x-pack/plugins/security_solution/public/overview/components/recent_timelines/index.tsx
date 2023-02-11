@@ -36,7 +36,7 @@ interface Props {
 
 const PAGE_SIZE = 3;
 
-const StatefulRecentTimelinesComponent: React.FC<Props> = ({ filterBy }) => {
+const StatefulRecentTimelinesComponent: React.FC<React.PropsWithChildren<Props>> = ({ filterBy }) => {
   const dispatch = useDispatch();
   const updateIsLoading = useCallback(
     (payload) => dispatch(dispatchUpdateIsLoading(payload)),

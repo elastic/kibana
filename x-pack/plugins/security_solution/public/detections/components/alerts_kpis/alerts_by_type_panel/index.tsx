@@ -19,7 +19,7 @@ import * as i18n from './translations';
 
 const ALERTS_BY_TYPE_CHART_ID = 'alerts-summary-alert_by_type';
 
-export const AlertsByTypePanel: React.FC<ChartsPanelProps> = ({
+export const AlertsByTypePanel: React.FC<React.PropsWithChildren<ChartsPanelProps>> = ({
   filters,
   query,
   signalIndexName,

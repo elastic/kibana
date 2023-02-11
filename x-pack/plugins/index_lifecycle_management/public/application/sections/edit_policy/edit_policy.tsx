@@ -54,7 +54,7 @@ import { FormInternal } from './types';
 
 const policyNamePath = 'name';
 
-export const EditPolicy: React.FunctionComponent = () => {
+export const EditPolicy: React.FunctionComponent<React.PropsWithChildren<unknown>> = () => {
   useEffect(() => {
     window.scrollTo(0, 0);
   }, []);

@@ -91,7 +91,7 @@ function getBaselineBadgeOverflow(
     : 0;
 }
 
-export const DocumentCountChart: FC<DocumentCountChartProps> = ({
+export const DocumentCountChart: FC<React.PropsWithChildren<DocumentCountChartProps>> = ({
   brushSelectionUpdateHandler,
   width,
   chartPoints,

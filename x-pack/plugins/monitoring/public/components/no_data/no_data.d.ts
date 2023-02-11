@@ -7,4 +7,4 @@
 
 import { FunctionComponent } from 'react';
 
-export const NoData: FunctionComponent<Record<any, any>>;
+export const NoData: FunctionComponent<React.PropsWithChildren<Record<any, any>>>;

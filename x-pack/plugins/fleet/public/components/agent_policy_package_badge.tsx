@@ -19,7 +19,7 @@ interface Props {
   pkgTitle: string;
 }
 
-export const AgentPolicyPackageBadge: React.FunctionComponent<Props> = ({
+export const AgentPolicyPackageBadge: React.FunctionComponent<React.PropsWithChildren<Props>> = ({
   excludeFleetServer,
   pkgName,
   pkgVersion,

@@ -23,7 +23,7 @@ const FIELD_COMBO_BOX_WIDTH = 410;
 
 const fieldDescribedByIds = 'detectionEngineStepDefineRuleGroupByField';
 
-export const GroupByComponent: React.FC<GroupByFieldsProps> = ({
+export const GroupByComponent: React.FC<React.PropsWithChildren<GroupByFieldsProps>> = ({
   browserFields,
   isDisabled,
   field,

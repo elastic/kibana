@@ -36,7 +36,7 @@ const fieldsConfig: FieldsConfig = {
   },
 };
 
-export const Fail: FunctionComponent = () => {
+export const Fail: FunctionComponent<React.PropsWithChildren<unknown>> = () => {
   return (
     <UseField
       data-test-subj="messageField"

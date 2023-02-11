@@ -13,7 +13,7 @@ interface HelpCenterContentProps {
   appName: string;
 }
 
-export const HelpCenterContent: React.FC<HelpCenterContentProps> = ({ feedbackLink, appName }) => {
+export const HelpCenterContent: React.FC<React.PropsWithChildren<HelpCenterContentProps>> = ({ feedbackLink, appName }) => {
   const chrome = useKibana().services.chrome;
 
   useEffect(() => {

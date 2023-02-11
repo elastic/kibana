@@ -60,7 +60,7 @@ export function mockMoment() {
 }
 
 // Useful for getting the rendered href from any kind of link component
-export async function getRenderedHref(Component: React.FC, location: Location) {
+export async function getRenderedHref(Component: React.FC<React.PropsWithChildren<unknown>>, location: Location) {
   const el = render(
     <MemoryRouter initialEntries={[location]}>
       <MockApmPluginContextWrapper>

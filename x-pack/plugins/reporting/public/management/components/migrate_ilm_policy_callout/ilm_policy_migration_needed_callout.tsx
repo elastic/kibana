@@ -59,7 +59,7 @@ interface Props {
   onMigrationDone: () => void;
 }
 
-export const IlmPolicyMigrationNeededCallOut: FunctionComponent<Props> = ({
+export const IlmPolicyMigrationNeededCallOut: FunctionComponent<React.PropsWithChildren<Props>> = ({
   toasts,
   onMigrationDone,
 }) => {

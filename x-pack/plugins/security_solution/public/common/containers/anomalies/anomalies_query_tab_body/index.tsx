@@ -17,7 +17,7 @@ import { histogramConfigs } from './histogram_configs';
 
 const ID = 'anomaliesHistogramQuery';
 
-const AnomaliesQueryTabBodyComponent: React.FC<AnomaliesQueryTabBodyProps> = ({
+const AnomaliesQueryTabBodyComponent: React.FC<React.PropsWithChildren<AnomaliesQueryTabBodyProps>> = ({
   deleteQuery,
   endDate,
   setQuery,

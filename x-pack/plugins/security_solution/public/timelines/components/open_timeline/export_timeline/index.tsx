@@ -17,14 +17,14 @@ export interface ExportTimeline {
   isEnableDownloader: boolean;
 }
 
-export const EditTimelineActionsComponent: React.FC<{
+export const EditTimelineActionsComponent: React.FC<React.PropsWithChildren<{
   deleteTimelines: DeleteTimelines | undefined;
   ids: string[];
   isEnableDownloader: boolean;
   isDeleteTimelineModalOpen: boolean;
   onComplete: () => void;
   title: string;
-}> = ({
+}>> = ({
   deleteTimelines,
   ids,
   isEnableDownloader,

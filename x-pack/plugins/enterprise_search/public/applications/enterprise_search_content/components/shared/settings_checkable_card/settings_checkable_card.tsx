@@ -9,13 +9,13 @@ import React from 'react';
 
 import { EuiCheckableCard, EuiText, EuiTitle } from '@elastic/eui';
 
-export const SettingsCheckableCard: React.FC<{
+export const SettingsCheckableCard: React.FC<React.PropsWithChildren<{
   checked: boolean;
   description: string;
   id: string;
   label: string;
   onChange: React.ChangeEventHandler<HTMLInputElement>;
-}> = ({ checked, description, id, label, onChange }) => (
+}>> = ({ checked, description, id, label, onChange }) => (
   <EuiCheckableCard
     label={
       <EuiTitle size="xs">

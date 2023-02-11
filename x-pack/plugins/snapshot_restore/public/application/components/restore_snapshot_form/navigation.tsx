@@ -15,7 +15,7 @@ interface Props {
   updateCurrentStep: (step: number) => void;
 }
 
-export const RestoreSnapshotNavigation: React.FunctionComponent<Props> = ({
+export const RestoreSnapshotNavigation: React.FunctionComponent<React.PropsWithChildren<Props>> = ({
   currentStep,
   maxCompletedStep,
   updateCurrentStep,

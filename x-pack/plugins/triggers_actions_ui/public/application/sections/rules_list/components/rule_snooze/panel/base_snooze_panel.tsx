@@ -53,7 +53,7 @@ export interface BaseSnoozePanelProps {
   inPopover?: boolean;
 }
 
-export const BaseSnoozePanel: React.FunctionComponent<BaseSnoozePanelProps> = ({
+export const BaseSnoozePanel: React.FunctionComponent<React.PropsWithChildren<BaseSnoozePanelProps>> = ({
   isLoading,
   interval = '3d',
   snoozeRule,

@@ -28,7 +28,7 @@ interface AddSourceHeaderProps {
   categories?: string[];
 }
 
-export const AddSourceHeader: React.FC<AddSourceHeaderProps> = ({
+export const AddSourceHeader: React.FC<React.PropsWithChildren<AddSourceHeaderProps>> = ({
   name,
   serviceType,
   categories = [],

@@ -16,7 +16,7 @@ interface MlUserJobsDescriptionProps {
   jobIds: string[];
 }
 
-const MlUserJobsDescriptionComponent: FC<MlUserJobsDescriptionProps> = ({ jobIds }) => {
+const MlUserJobsDescriptionComponent: FC<React.PropsWithChildren<MlUserJobsDescriptionProps>> = ({ jobIds }) => {
   const { isMlUser, jobs } = useInstalledSecurityJobs();
 
   if (!isMlUser) {

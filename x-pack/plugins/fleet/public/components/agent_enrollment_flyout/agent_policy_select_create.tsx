@@ -30,7 +30,7 @@ interface Props {
   refreshAgentPolicies: () => void;
 }
 
-export const SelectCreateAgentPolicy: React.FC<Props> = ({
+export const SelectCreateAgentPolicy: React.FC<React.PropsWithChildren<Props>> = ({
   agentPolicies,
   excludeFleetServer,
   setSelectedPolicyId,

@@ -14,7 +14,7 @@ export default {
   title: 'app/settings/Schema',
   component: ConfirmSwitchModal,
   decorators: [
-    (StoryComponent: ComponentType) => {
+    (StoryComponent: ComponentType<React.PropsWithChildren<unknown>>) => {
       return (
         <MockApmPluginStorybook>
           <StoryComponent />

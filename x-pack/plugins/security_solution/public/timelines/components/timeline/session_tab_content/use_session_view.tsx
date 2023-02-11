@@ -56,7 +56,7 @@ interface NavigationProps {
   activeTab?: TimelineTabs;
 }
 
-const NavigationComponent: React.FC<NavigationProps> = ({
+const NavigationComponent: React.FC<React.PropsWithChildren<NavigationProps>> = ({
   fullScreen,
   globalFullScreen,
   onCloseOverlay,

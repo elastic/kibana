@@ -81,7 +81,7 @@ const STANDARD_SOURCES_EMPTY_TABLE_DESCRIPTION = (
   />
 );
 
-export const PrivateSourcesTable: React.FC<PrivateSourcesTableProps> = ({
+export const PrivateSourcesTable: React.FC<React.PropsWithChildren<PrivateSourcesTableProps>> = ({
   sourceType,
   sourceSection: { isEnabled: sectionEnabled, contentSources },
   updateSource,

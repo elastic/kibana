@@ -40,7 +40,7 @@ export type Props = EuiDescribedFormGroupProps & {
   fieldNotices?: React.ReactNode;
 };
 
-export const DescribedFormRow: FunctionComponent<Props> = ({
+export const DescribedFormRow: FunctionComponent<React.PropsWithChildren<Props>> = ({
   children,
   switchProps,
   description,

@@ -33,7 +33,7 @@ interface GenericConfirmationModalProps {
   onSave(): void;
 }
 
-export const GenericConfirmationModal: React.FC<GenericConfirmationModalProps> = ({
+export const GenericConfirmationModal: React.FC<React.PropsWithChildren<GenericConfirmationModalProps>> = ({
   description,
   onClose,
   onSave,

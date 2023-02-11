@@ -27,7 +27,7 @@ export default {
   title: 'app/Shared/FieldValueSuggestions',
   component: FieldValueSelection,
   decorators: [
-    (Story: ComponentType<FieldValueSelectionProps>) => (
+    (Story: ComponentType<React.PropsWithChildren<FieldValueSelectionProps>>) => (
       <IntlProvider locale="en">
         <KibanaReactContext.Provider>
           <FieldValueSelection

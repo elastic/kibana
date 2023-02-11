@@ -23,7 +23,7 @@ import { CrawlerLogic } from './crawler/crawler_logic';
 import { NameAndDescriptionStats } from './name_and_description_stats';
 import { OverviewLogic } from './overview.logic';
 
-export const CrawlerTotalStats: React.FC = () => {
+export const CrawlerTotalStats: React.FC<React.PropsWithChildren<unknown>> = () => {
   const { domains, dataLoading } = useValues(CrawlerLogic);
   const { indexData, isError, isLoading } = useValues(OverviewLogic);
   const documentCount = indexData?.count ?? 0;

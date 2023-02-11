@@ -61,7 +61,7 @@ interface ProviderProps {
   activeStep?: JourneyStep;
 }
 
-export const WaterfallProvider: React.FC<ProviderProps> = ({
+export const WaterfallProvider: React.FC<React.PropsWithChildren<ProviderProps>> = ({
   children,
   data,
   markerItems,

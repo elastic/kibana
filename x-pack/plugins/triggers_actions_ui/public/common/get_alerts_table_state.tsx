@@ -10,7 +10,7 @@ import React, { lazy, Suspense } from 'react';
 
 import type { AlertsTableStateProps } from '../application/sections/alerts_table/alerts_table_state';
 
-const AlertsTableStateLazy: React.FC<AlertsTableStateProps> = lazy(
+const AlertsTableStateLazy: React.FC<React.PropsWithChildren<AlertsTableStateProps>> = lazy(
   () => import('../application/sections/alerts_table/alerts_table_state')
 );
 

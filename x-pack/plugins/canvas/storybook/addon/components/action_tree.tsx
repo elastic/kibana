@@ -68,7 +68,7 @@ const jsonToTree: (obj: Record<string, any>) => Node[] = (obj) => {
   return values.filter((value) => value !== null) as Node[];
 };
 
-export const ActionTree: FC<{ action: RecordedAction | null }> = ({ action }) => {
+export const ActionTree: FC<React.PropsWithChildren<{ action: RecordedAction | null }>> = ({ action }) => {
   const items = action ? actionToTree(action) : null;
   let tree = <></>;
 

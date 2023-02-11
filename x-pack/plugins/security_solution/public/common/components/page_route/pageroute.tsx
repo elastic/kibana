@@ -7,7 +7,7 @@
 
 import React, { useEffect } from 'react';
 
-export const PageRoute = (props: { title: string; component: React.ReactType }) => {
+export const PageRoute = (props: { title: string; component: React.ElementType }) => {
   const { title, ...rest } = props;
   useEffect(() => {
     document.title = `${title} - Kibana`;

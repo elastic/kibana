@@ -123,7 +123,7 @@ const METHOD_BUTTON_GROUP_OPTIONS: ButtonGroupOption[] = [
   },
 ];
 
-export const NewIndex: React.FC = () => {
+export const NewIndex: React.FC<React.PropsWithChildren<unknown>> = () => {
   const { search } = useLocation();
   const { method: methodParam } = parseQueryParams(search);
 

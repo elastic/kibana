@@ -41,7 +41,7 @@ export const changePointDetectionRouteFactory = (
   disabled: !CHANGE_POINT_DETECTION_ENABLED,
 });
 
-const PageWrapper: FC<PageProps> = ({ location, deps }) => {
+const PageWrapper: FC<React.PropsWithChildren<PageProps>> = ({ location, deps }) => {
   const { index, savedSearchId }: Record<string, any> = parse(location.search, { sort: false });
   const { context } = useResolver(
     index,

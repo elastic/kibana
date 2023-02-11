@@ -14,7 +14,7 @@ import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { EngineLogic } from '../engine';
 import { QueryTesterButton } from '../query_tester';
 
-export const KibanaHeaderActions: React.FC = () => {
+export const KibanaHeaderActions: React.FC<React.PropsWithChildren<unknown>> = () => {
   const { engineName } = useValues(EngineLogic);
 
   return (

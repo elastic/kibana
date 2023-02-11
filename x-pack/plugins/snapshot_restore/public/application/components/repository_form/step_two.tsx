@@ -37,7 +37,7 @@ interface Props {
   onBack: () => void;
 }
 
-export const RepositoryFormStepTwo: React.FunctionComponent<Props> = ({
+export const RepositoryFormStepTwo: React.FunctionComponent<React.PropsWithChildren<Props>> = ({
   repository,
   isManagedRepository,
   isEditing,

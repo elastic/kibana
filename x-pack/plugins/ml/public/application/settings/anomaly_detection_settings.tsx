@@ -28,7 +28,7 @@ import { ml } from '../services/ml_api_service';
 import { ML_PAGES } from '../../../common/constants/locator';
 import { useCreateAndNavigateToMlLink } from '../contexts/kibana/use_create_url';
 
-export const AnomalyDetectionSettings: FC = () => {
+export const AnomalyDetectionSettings: FC<React.PropsWithChildren<unknown>> = () => {
   const [calendarsCount, setCalendarsCount] = useState(0);
   const [filterListsCount, setFilterListsCount] = useState(0);
 

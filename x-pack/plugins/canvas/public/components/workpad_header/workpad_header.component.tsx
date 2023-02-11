@@ -65,7 +65,7 @@ export interface Props {
   addElement: (element: Partial<ElementSpec>) => void;
 }
 
-export const WorkpadHeader: FC<Props> = ({
+export const WorkpadHeader: FC<React.PropsWithChildren<Props>> = ({
   isWriteable,
   canUserWrite,
   commit,

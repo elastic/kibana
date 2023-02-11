@@ -139,7 +139,7 @@ interface MLEMSTermJoinConfig extends EMSTermJoinConfig {
   jobId: string;
 }
 
-export const AnomaliesMap: FC<Props> = ({ anomalies, jobIds }) => {
+export const AnomaliesMap: FC<React.PropsWithChildren<Props>> = ({ anomalies, jobIds }) => {
   const [EMSSuggestions, setEMSSuggestions] = useState<MLEMSTermJoinConfig[] | undefined>();
   const {
     services: { maps: mapsPlugin },

@@ -25,7 +25,7 @@ interface AnalyticsCollectionTableProps {
   isLoading: boolean;
 }
 
-export const AnalyticsCollectionTable: React.FC<AnalyticsCollectionTableProps> = ({
+export const AnalyticsCollectionTable: React.FC<React.PropsWithChildren<AnalyticsCollectionTableProps>> = ({
   collections,
   isLoading,
 }) => {

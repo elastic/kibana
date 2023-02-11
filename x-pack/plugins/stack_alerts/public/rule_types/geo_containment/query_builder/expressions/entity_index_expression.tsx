@@ -41,7 +41,7 @@ interface KibanaDeps {
   http: HttpSetup;
 }
 
-export const EntityIndexExpression: FunctionComponent<Props> = ({
+export const EntityIndexExpression: FunctionComponent<React.PropsWithChildren<Props>> = ({
   setAlertParamsDate,
   setAlertParamsGeoField,
   errors,

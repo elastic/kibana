@@ -69,7 +69,7 @@ interface FilterOption {
 
 type ChangePointTypeFilterOptions = Array<EuiComboBoxOptionOption<ChangePointUIValue>>;
 
-export const ChangePointTypeFilter: FC<ChangePointTypeFilterProps> = ({ value, onChange }) => {
+export const ChangePointTypeFilter: FC<React.PropsWithChildren<ChangePointTypeFilterProps>> = ({ value, onChange }) => {
   const options = useMemo<ChangePointTypeFilterOptions>(() => {
     return [{ value: undefined, description: '' }, ...changePointTypes].map((v) => ({
       value: v.value,

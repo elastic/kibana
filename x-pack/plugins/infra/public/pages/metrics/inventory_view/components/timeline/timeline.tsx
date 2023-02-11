@@ -50,7 +50,7 @@ interface Props {
   isVisible: boolean;
 }
 
-export const Timeline: React.FC<Props> = ({ interval, yAxisFormatter, isVisible }) => {
+export const Timeline: React.FC<React.PropsWithChildren<Props>> = ({ interval, yAxisFormatter, isVisible }) => {
   const { sourceId, source } = useSourceContext();
   const { metric, nodeType, accountId, region } = useWaffleOptionsContext();
   const { currentTime, jumpToTime, stopAutoReload } = useWaffleTimeContext();

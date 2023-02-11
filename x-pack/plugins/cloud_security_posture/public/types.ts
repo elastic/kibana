@@ -31,7 +31,7 @@ export interface CspClientPluginSetup {}
  */
 export interface CspClientPluginStart {
   /** Gets the cloud security posture router component for embedding in the security solution. */
-  getCloudSecurityPostureRouter(): ComponentType<CspRouterProps>;
+  getCloudSecurityPostureRouter(): ComponentType<React.PropsWithChildren<CspRouterProps>>;
 }
 
 export interface CspClientPluginSetupDeps {
@@ -60,10 +60,10 @@ export interface CspClientPluginStartDeps {
  */
 export interface CspSecuritySolutionContext {
   /** Gets the `FiltersGlobal` component for embedding a filter bar in the security solution application. */
-  getFiltersGlobalComponent: () => ComponentType<{ children: ReactNode }>;
+  getFiltersGlobalComponent: () => ComponentType<React.PropsWithChildren<{ children: ReactNode }>>;
   /** Gets the `SpyRoute` component for navigation highlighting and breadcrumbs. */
-  getSpyRouteComponent: () => ComponentType<{
+  getSpyRouteComponent: () => ComponentType<React.PropsWithChildren<{
     pageName: CloudSecurityPosturePageId;
     state?: Record<string, string | undefined>;
-  }>;
+  }>>;
 }

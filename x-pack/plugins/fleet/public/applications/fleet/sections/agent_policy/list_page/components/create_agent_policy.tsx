@@ -42,7 +42,7 @@ interface Props extends Omit<EuiFlyoutProps, 'onClose'> {
   onClose: (createdAgentPolicy?: AgentPolicy) => void;
 }
 
-export const CreateAgentPolicyFlyout: React.FunctionComponent<Props> = ({
+export const CreateAgentPolicyFlyout: React.FunctionComponent<React.PropsWithChildren<Props>> = ({
   onClose,
   as,
   ...restOfProps

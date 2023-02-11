@@ -19,7 +19,7 @@ interface Props {
   isDisabled: boolean;
 }
 
-export const SeverityFilter: React.FC<Props> = ({
+export const SeverityFilter: React.FC<React.PropsWithChildren<Props>> = ({
   selectedSeverity,
   onSeverityChange,
   isLoading,

@@ -39,7 +39,7 @@ const defaultFormValue: Pipeline = Object.freeze({
   _meta: {},
 });
 
-export const PipelineForm: React.FunctionComponent<PipelineFormProps> = ({
+export const PipelineForm: React.FunctionComponent<React.PropsWithChildren<PipelineFormProps>> = ({
   defaultValue = defaultFormValue,
   onSave,
   isSaving,

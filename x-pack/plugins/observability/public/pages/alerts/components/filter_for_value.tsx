@@ -24,7 +24,7 @@ interface FilterForValueProps {
   addToQuery: (value: string) => void;
 }
 
-const FilterForValueButton: React.FC<FilterForValueProps> = React.memo(
+const FilterForValueButton: React.FC<React.PropsWithChildren<FilterForValueProps>> = React.memo(
   ({ Component, field, value, addToQuery }) => {
     const text = useMemo(() => `${field}${value != null ? `: "${value}"` : ''}`, [field, value]);
     const onClick = useCallback(() => {

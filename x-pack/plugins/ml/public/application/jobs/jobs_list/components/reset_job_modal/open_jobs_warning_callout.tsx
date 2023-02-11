@@ -16,7 +16,7 @@ interface Props {
   jobs: MlSummaryJob[];
 }
 
-export const OpenJobsWarningCallout: FC<Props> = ({ jobs }) => {
+export const OpenJobsWarningCallout: FC<React.PropsWithChildren<Props>> = ({ jobs }) => {
   const openJobsCount = useMemo(
     () => jobs.filter((j) => j.jobState !== JOB_STATE.CLOSED).length,
     [jobs]

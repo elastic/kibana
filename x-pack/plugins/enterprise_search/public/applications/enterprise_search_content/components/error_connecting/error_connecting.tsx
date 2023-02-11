@@ -13,7 +13,7 @@ import { ErrorStatePrompt } from '../../../shared/error_state';
 import { SetEnterpriseSearchChrome as SetPageChrome } from '../../../shared/kibana_chrome';
 import { SendEnterpriseSearchTelemetry as SendTelemetry } from '../../../shared/telemetry';
 
-export const ErrorConnecting: React.FC = () => {
+export const ErrorConnecting: React.FC<React.PropsWithChildren<unknown>> = () => {
   return (
     <>
       <SetPageChrome />

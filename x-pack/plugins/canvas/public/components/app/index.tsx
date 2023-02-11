@@ -28,7 +28,7 @@ class ShortcutManagerContextWrapper extends React.Component {
   }
 }
 
-export const App: FC<{ history: ScopedHistory }> = ({ history }) => {
+export const App: FC<React.PropsWithChildren<{ history: ScopedHistory }>> = ({ history }) => {
   const { updatePath } = useNavLinkService();
 
   useEffect(() => {

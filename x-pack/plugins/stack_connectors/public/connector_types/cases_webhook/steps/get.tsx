@@ -21,7 +21,7 @@ interface Props {
   readOnly: boolean;
 }
 
-export const GetStep: FunctionComponent<Props> = ({ display, readOnly }) => (
+export const GetStep: FunctionComponent<React.PropsWithChildren<Props>> = ({ display, readOnly }) => (
   <span data-test-subj="getStep" style={{ display: display ? 'block' : 'none' }}>
     <EuiText>
       <h3>{i18n.STEP_3}</h3>

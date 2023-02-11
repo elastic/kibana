@@ -39,7 +39,7 @@ interface Props {
   status: string;
 }
 
-const StatusComponent: React.FC<Props> = ({ status }) => (
+const StatusComponent: React.FC<React.PropsWithChildren<Props>> = ({ status }) => (
   <StatusContainer>
     <EuiIcon
       className={STATUS_CLASS_NAME}

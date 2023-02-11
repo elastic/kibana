@@ -20,7 +20,7 @@ export interface ApiKeysEmptyPromptProps {
   readOnly?: boolean;
 }
 
-export const ApiKeysEmptyPrompt: FunctionComponent<ApiKeysEmptyPromptProps> = ({
+export const ApiKeysEmptyPrompt: FunctionComponent<React.PropsWithChildren<ApiKeysEmptyPromptProps>> = ({
   error,
   readOnly,
   children,

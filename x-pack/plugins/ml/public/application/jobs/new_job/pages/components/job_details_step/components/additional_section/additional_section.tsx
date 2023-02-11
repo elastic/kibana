@@ -23,7 +23,7 @@ interface Props {
   setAdditionalExpanded: (a: boolean) => void;
 }
 
-export const AdditionalSection: FC<Props> = ({ additionalExpanded, setAdditionalExpanded }) => {
+export const AdditionalSection: FC<React.PropsWithChildren<Props>> = ({ additionalExpanded, setAdditionalExpanded }) => {
   return (
     <Fragment>
       <EuiSpacer />

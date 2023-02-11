@@ -15,7 +15,7 @@ interface BannerProps {
   bannerConfig: BannerConfiguration;
 }
 
-export const Banner: FC<BannerProps> = ({ bannerConfig }) => {
+export const Banner: FC<React.PropsWithChildren<BannerProps>> = ({ bannerConfig }) => {
   const { textContent, textColor, backgroundColor } = bannerConfig;
   return (
     <div

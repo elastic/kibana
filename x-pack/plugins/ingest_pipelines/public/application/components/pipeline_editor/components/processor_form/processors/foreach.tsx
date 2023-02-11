@@ -54,7 +54,7 @@ const fieldsConfig: FieldsConfig = {
   },
 };
 
-export const Foreach: FunctionComponent = () => {
+export const Foreach: FunctionComponent<React.PropsWithChildren<unknown>> = () => {
   return (
     <>
       <FieldNameField

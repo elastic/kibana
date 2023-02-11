@@ -40,7 +40,7 @@ import { isCrawlerIndex } from '../../../../utils/indices';
 
 import { AutomaticCrawlSchedulerLogic } from './automatic_crawl_scheduler_logic';
 
-export const AutomaticCrawlScheduler: React.FC = () => {
+export const AutomaticCrawlScheduler: React.FC<React.PropsWithChildren<unknown>> = () => {
   const {
     setCrawlAutomatically,
     setCrawlFrequency,

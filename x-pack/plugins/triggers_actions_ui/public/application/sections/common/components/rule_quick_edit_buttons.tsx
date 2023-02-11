@@ -34,7 +34,7 @@ export type ComponentOpts = {
   updateRulesToBulkEdit: (props: UpdateRulesToBulkEditProps) => void;
 } & BulkOperationsComponentOpts;
 
-export const RuleQuickEditButtons: React.FunctionComponent<ComponentOpts> = ({
+export const RuleQuickEditButtons: React.FunctionComponent<React.PropsWithChildren<ComponentOpts>> = ({
   selectedItems,
   isAllSelected = false,
   getFilter,

@@ -14,7 +14,7 @@ interface DisplayMoreOptionsProps {
   toggleShowingMoreOptions: () => void;
 }
 
-const DisplayMoreOptionsComponent: React.FC<DisplayMoreOptionsProps> = ({
+const DisplayMoreOptionsComponent: React.FC<React.PropsWithChildren<DisplayMoreOptionsProps>> = ({
   showingMoreOptions,
   toggleShowingMoreOptions,
 }) => {

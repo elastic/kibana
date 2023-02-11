@@ -68,7 +68,7 @@ const defaultDefaultValues: UserFormValues = {
   roles: [],
 };
 
-export const UserForm: FunctionComponent<UserFormProps> = ({
+export const UserForm: FunctionComponent<React.PropsWithChildren<UserFormProps>> = ({
   isNewUser = false,
   isReservedUser = false,
   defaultValues = defaultDefaultValues,

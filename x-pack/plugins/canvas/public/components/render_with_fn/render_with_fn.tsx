@@ -32,7 +32,7 @@ interface Props {
 
 const style = { height: '100%', width: '100%' };
 
-export const RenderWithFn: FC<Props> = ({
+export const RenderWithFn: FC<React.PropsWithChildren<Props>> = ({
   name: functionName,
   renderFn,
   reuseNode = false,

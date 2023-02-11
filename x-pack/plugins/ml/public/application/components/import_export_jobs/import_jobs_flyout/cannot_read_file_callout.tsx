@@ -11,7 +11,7 @@ import { i18n } from '@kbn/i18n';
 
 import { EuiCallOut, EuiSpacer } from '@elastic/eui';
 
-export const CannotReadFileCallout: FC = () => {
+export const CannotReadFileCallout: FC<React.PropsWithChildren<unknown>> = () => {
   return (
     <>
       <EuiSpacer size="l" />

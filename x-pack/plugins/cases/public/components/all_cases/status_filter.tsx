@@ -30,7 +30,7 @@ const AllStatusBadge = () => {
 
 AllStatusBadge.displayName = 'AllStatusBadge';
 
-const StatusFilterComponent: React.FC<Props> = ({
+const StatusFilterComponent: React.FC<React.PropsWithChildren<Props>> = ({
   stats,
   selectedStatus,
   onStatusChanged,

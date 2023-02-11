@@ -57,7 +57,7 @@ interface RuleSectionProps {
   title: string;
   grow?: EuiFlexItemProps['grow'];
 }
-const RuleSection: React.FC<RuleSectionProps> = ({
+const RuleSection: React.FC<React.PropsWithChildren<RuleSectionProps>> = ({
   grow,
   title,
   children,

@@ -30,7 +30,7 @@ interface ConfigureOauthProps {
   onFormCreated(name: string): void;
 }
 
-export const ConfigureOauth: React.FC<ConfigureOauthProps> = ({ name, onFormCreated, header }) => {
+export const ConfigureOauth: React.FC<React.PropsWithChildren<ConfigureOauthProps>> = ({ name, onFormCreated, header }) => {
   const [formLoading, setFormLoading] = useState(false);
 
   const { getPreContentSourceConfigData, setSelectedGithubOrganizations, createContentSource } =

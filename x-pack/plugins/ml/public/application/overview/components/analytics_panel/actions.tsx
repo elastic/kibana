@@ -20,7 +20,7 @@ interface Props {
   item: DataFrameAnalyticsListRow;
 }
 
-export const ViewLink: FC<Props> = ({ item }) => {
+export const ViewLink: FC<React.PropsWithChildren<Props>> = ({ item }) => {
   const { disabled, tooltipContent } = getViewLinkStatus(item);
 
   const viewJobResultsButtonText = i18n.translate(

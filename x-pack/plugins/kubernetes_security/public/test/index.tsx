@@ -30,7 +30,7 @@ export interface AppContextTestRender {
    * A wrapper around `AppRootContext` component. Uses the mocked modules as input to the
    * `AppRootContext`
    */
-  AppWrapper: React.FC<any>;
+  AppWrapper: React.FC<React.PropsWithChildren<any>>;
   /**
    * Renders the given UI within the created `AppWrapper` providing the given UI a mocked
    * endpoint runtime context environment
@@ -114,7 +114,7 @@ export const createAppRootMockRenderer = (): AppContextTestRender => {
     },
   });
 
-  const AppWrapper: React.FC<{ children: React.ReactElement }> = ({ children }) => (
+  const AppWrapper: React.FC<React.PropsWithChildren<{ children: React.ReactElement }>> = ({ children }) => (
     <AppRootProvider history={history} coreStart={coreStart}>
       <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
     </AppRootProvider>

@@ -20,7 +20,7 @@ interface Props {
   ariaLabel?: string;
 }
 
-export const ShapePickerPopover: FC<Props> = ({ shapes, onChange, value, ariaLabel }) => {
+export const ShapePickerPopover: FC<React.PropsWithChildren<Props>> = ({ shapes, onChange, value, ariaLabel }) => {
   const button = (handleClick: React.MouseEventHandler<any>) => (
     <EuiPanel paddingSize="s" hasShadow={false}>
       <EuiLink aria-label={ariaLabel} style={{ fontSize: 0 }} onClick={handleClick}>

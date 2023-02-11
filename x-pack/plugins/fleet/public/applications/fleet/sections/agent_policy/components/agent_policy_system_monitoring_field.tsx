@@ -16,7 +16,7 @@ interface Props {
   updateSysMonitoring: (newValue: boolean) => void;
 }
 
-export const AgentPolicyFormSystemMonitoringCheckbox: React.FunctionComponent<Props> = ({
+export const AgentPolicyFormSystemMonitoringCheckbox: React.FunctionComponent<React.PropsWithChildren<Props>> = ({
   withSysMonitoring,
   updateSysMonitoring,
 }) => {

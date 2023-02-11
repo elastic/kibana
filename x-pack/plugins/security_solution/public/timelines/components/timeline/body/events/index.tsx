@@ -51,7 +51,7 @@ interface Props {
   trailingControlColumns: ControlColumnProps[];
 }
 
-const EventsComponent: React.FC<Props> = ({
+const EventsComponent: React.FC<React.PropsWithChildren<Props>> = ({
   actionsColumnWidth,
   columnHeaders,
   containerRef,

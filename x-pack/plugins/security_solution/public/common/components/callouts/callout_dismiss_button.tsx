@@ -18,7 +18,7 @@ export interface CallOutDismissButtonProps {
   onClick?: (message: CallOutMessage) => void;
 }
 
-export const CallOutDismissButton: FC<CallOutDismissButtonProps> = ({
+export const CallOutDismissButton: FC<React.PropsWithChildren<CallOutDismissButtonProps>> = ({
   message,
   text,
   onClick = noop,

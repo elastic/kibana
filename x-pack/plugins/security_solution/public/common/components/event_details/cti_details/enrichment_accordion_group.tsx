@@ -39,7 +39,7 @@ const StyledEuiAccordion = styled(EuiAccordion)`
   }
 `;
 
-const ThreatDetailsDescription: React.FC<ThreatDetailsRow['description']> = ({
+const ThreatDetailsDescription: React.FC<React.PropsWithChildren<ThreatDetailsRow['description']>> = ({
   fieldName,
   value,
 }) => {
@@ -95,10 +95,10 @@ const buildThreatDetailsItems = (enrichment: CtiEnrichment) =>
       },
     }));
 
-const EnrichmentAccordion: React.FC<{
+const EnrichmentAccordion: React.FC<React.PropsWithChildren<{
   enrichment: CtiEnrichment;
   index: number;
-}> = ({ enrichment, index }) => {
+}>> = ({ enrichment, index }) => {
   const {
     id = `threat-details-item`,
     field,
@@ -132,7 +132,7 @@ const EnrichmentAccordion: React.FC<{
   );
 };
 
-export const EnrichmentAccordionGroup: React.FC<{ enrichments: CtiEnrichment[] }> = ({
+export const EnrichmentAccordionGroup: React.FC<React.PropsWithChildren<{ enrichments: CtiEnrichment[] }>> = ({
   enrichments,
 }) => (
   <>

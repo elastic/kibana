@@ -82,7 +82,7 @@ const datasetColumnName = i18n.translate(
   }
 );
 
-export const AnomaliesTable: React.FunctionComponent<{
+export const AnomaliesTable: React.FunctionComponent<React.PropsWithChildren<{
   results: LogEntryAnomalies;
   timeRange: TimeRange;
   changeSortOptions: ChangeSortOptions;
@@ -93,7 +93,7 @@ export const AnomaliesTable: React.FunctionComponent<{
   fetchNextPage?: FetchNextPage;
   fetchPreviousPage?: FetchPreviousPage;
   isLoading: boolean;
-}> = ({
+}>> = ({
   results,
   timeRange,
   changeSortOptions,

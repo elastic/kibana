@@ -17,13 +17,13 @@ export interface ComponentProps {
 }
 interface RouteInitProps {
   path: string;
-  component: React.ComponentType<ComponentProps>;
+  component: React.ComponentType<React.PropsWithChildren<ComponentProps>>;
   codePaths: string[];
   fetchAllClusters: boolean;
   unsetGlobalState?: boolean;
 }
 
-export const RouteInit: React.FC<RouteInitProps> = ({
+export const RouteInit: React.FC<React.PropsWithChildren<RouteInitProps>> = ({
   path,
   component,
   codePaths,

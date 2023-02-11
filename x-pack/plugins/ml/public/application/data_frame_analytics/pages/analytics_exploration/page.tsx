@@ -27,10 +27,10 @@ import {
 import { AnalyticsEmptyPrompt } from '../analytics_management/components/empty_prompt';
 import { SavedObjectsWarning } from '../../../components/saved_objects_warning';
 
-export const Page: FC<{
+export const Page: FC<React.PropsWithChildren<{
   jobId: string;
   analysisType: DataFrameAnalysisConfigType;
-}> = ({ jobId, analysisType }) => {
+}>> = ({ jobId, analysisType }) => {
   const [analyticsId, setAnalyticsId] = useState<AnalyticsSelectorIds | undefined>();
   const [isIdSelectorFlyoutVisible, setIsIdSelectorFlyoutVisible] = useState<boolean>(!jobId);
   const [jobsExist, setJobsExist] = useState(true);

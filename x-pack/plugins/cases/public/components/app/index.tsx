@@ -22,7 +22,7 @@ interface CasesAppProps {
   persistableStateAttachmentTypeRegistry: PersistableStateAttachmentTypeRegistry;
 }
 
-const CasesAppComponent: React.FC<CasesAppProps> = ({
+const CasesAppComponent: React.FC<React.PropsWithChildren<CasesAppProps>> = ({
   externalReferenceAttachmentTypeRegistry,
   persistableStateAttachmentTypeRegistry,
 }) => {

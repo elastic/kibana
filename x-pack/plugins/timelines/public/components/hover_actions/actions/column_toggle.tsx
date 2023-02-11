@@ -38,7 +38,7 @@ export interface ColumnToggleProps extends HoverActionComponentProps {
   toggleColumn: (column: ColumnHeaderOptions) => void;
 }
 
-const ColumnToggleButton: React.FC<ColumnToggleProps> = React.memo(
+const ColumnToggleButton: React.FC<React.PropsWithChildren<ColumnToggleProps>> = React.memo(
   ({
     Component,
     defaultFocusedButtonRef,

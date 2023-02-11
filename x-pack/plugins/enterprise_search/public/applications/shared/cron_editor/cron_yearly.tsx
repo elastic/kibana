@@ -34,7 +34,7 @@ interface Props {
   }) => void;
 }
 
-export const CronYearly: React.FunctionComponent<Props> = ({
+export const CronYearly: React.FunctionComponent<React.PropsWithChildren<Props>> = ({
   disabled,
   minute,
   minuteOptions,

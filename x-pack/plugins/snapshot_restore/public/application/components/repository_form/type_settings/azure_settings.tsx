@@ -28,7 +28,7 @@ interface Props {
   settingErrors: RepositorySettingsValidation;
 }
 
-export const AzureSettings: React.FunctionComponent<Props> = ({
+export const AzureSettings: React.FunctionComponent<React.PropsWithChildren<Props>> = ({
   repository,
   updateRepositorySettings,
   settingErrors,

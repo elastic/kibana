@@ -22,7 +22,7 @@ import {
   SERVICE_LOCATIONS_ERROR_LABEL,
 } from './content';
 
-export const EditMonitorPage: React.FC = () => {
+export const EditMonitorPage: React.FC<React.PropsWithChildren<unknown>> = () => {
   useTrackPageview({ app: 'uptime', path: 'edit-monitor' });
   useTrackPageview({ app: 'uptime', path: 'edit-monitor', delay: 15000 });
   useMonitorManagementBreadcrumbs({ isEditMonitor: true });

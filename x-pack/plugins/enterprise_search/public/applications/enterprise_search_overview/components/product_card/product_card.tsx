@@ -48,7 +48,7 @@ export interface ProductCardProps {
   url: string;
 }
 
-export const ProductCard: React.FC<ProductCardProps> = ({
+export const ProductCard: React.FC<React.PropsWithChildren<ProductCardProps>> = ({
   cta,
   description,
   emptyCta = false,

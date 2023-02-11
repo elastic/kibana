@@ -39,7 +39,7 @@ interface ConfigureCustomProps {
   sourceData: SourceDataItem;
 }
 
-export const ConfigureCustom: React.FC<ConfigureCustomProps> = ({ sourceData }) => {
+export const ConfigureCustom: React.FC<React.PropsWithChildren<ConfigureCustomProps>> = ({ sourceData }) => {
   const { setCustomSourceNameValue, createContentSource } = useActions(AddCustomSourceLogic);
   const { customSourceNameValue, buttonLoading } = useValues(AddCustomSourceLogic);
 

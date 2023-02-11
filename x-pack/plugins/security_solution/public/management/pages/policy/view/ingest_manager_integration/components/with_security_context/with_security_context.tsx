@@ -15,7 +15,7 @@ import { RenderContextProviders } from './render_context_providers';
 interface WithSecurityContextProps<P extends {}> {
   coreStart: CoreStart;
   depsStart: Pick<StartPlugins, 'data' | 'fleet'>;
-  WrappedComponent: ComponentType<P>;
+  WrappedComponent: ComponentType<React.PropsWithChildren<P>>;
 }
 
 /**
@@ -31,7 +31,7 @@ export const withSecurityContext = <P extends {}>({
   coreStart,
   depsStart,
   WrappedComponent,
-}: WithSecurityContextProps<P>): ComponentType<P> => {
+}: WithSecurityContextProps<P>): ComponentType<React.PropsWithChildren<P>> => {
   let store: ReturnType<typeof createFleetContextReduxStore>; // created on first render
 
   return memo((props) => {

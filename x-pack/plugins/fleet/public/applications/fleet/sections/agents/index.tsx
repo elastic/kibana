@@ -20,7 +20,7 @@ import { FleetServerRequirementPage, MissingESRequirementsPage } from './agent_r
 import { AgentDetailsPage } from './agent_details_page';
 import { NoAccessPage } from './error_pages/no_access';
 
-export const AgentsApp: React.FunctionComponent = () => {
+export const AgentsApp: React.FunctionComponent<React.PropsWithChildren<unknown>> = () => {
   useBreadcrumbs('agent_list');
   const history = useHistory();
   const { agents } = useConfig();

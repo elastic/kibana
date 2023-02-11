@@ -14,7 +14,7 @@ import { proxySettingsUrl } from '../../../../services/documentation';
 import { Props } from './connection_mode';
 import { CloudUrlHelp } from './cloud_url_help';
 
-export const ProxyConnection: FunctionComponent<Props> = (props) => {
+export const ProxyConnection: FunctionComponent<React.PropsWithChildren<Props>> = (props) => {
   const { fields, fieldsErrors, areErrorsVisible, onFieldsChange } = props;
   const { isCloudEnabled } = useAppContext();
   const { proxyAddress, serverName, proxySocketConnections, cloudUrl, cloudUrlEnabled } = fields;

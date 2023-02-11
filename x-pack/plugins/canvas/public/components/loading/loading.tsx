@@ -16,7 +16,7 @@ interface Props {
   text?: string;
 }
 
-export const Loading: FC<Props> = ({
+export const Loading: FC<React.PropsWithChildren<Props>> = ({
   animated = false,
   text = '',
   backgroundColor = '#000000',

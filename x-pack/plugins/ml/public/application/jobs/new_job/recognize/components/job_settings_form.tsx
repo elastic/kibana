@@ -45,7 +45,7 @@ interface JobSettingsFormProps {
   jobs: ModuleJobUI[];
 }
 
-export const JobSettingsForm: FC<JobSettingsFormProps> = ({
+export const JobSettingsForm: FC<React.PropsWithChildren<JobSettingsFormProps>> = ({
   onSubmit,
   onJobPrefixChange,
   saveState,

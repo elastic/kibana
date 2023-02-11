@@ -16,7 +16,7 @@ export interface UserActionContentToolbarProps {
   withCopyLinkAction?: boolean;
 }
 
-const UserActionContentToolbarComponent: React.FC<UserActionContentToolbarProps> = ({
+const UserActionContentToolbarComponent: React.FC<React.PropsWithChildren<UserActionContentToolbarProps>> = ({
   id,
   withCopyLinkAction = true,
   children,

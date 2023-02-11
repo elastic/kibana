@@ -26,7 +26,7 @@ interface MlJobEditorProps {
   onChange?: EuiCodeEditorProps['onChange'];
   'data-test-subj'?: string;
 }
-export const MLJobEditor: FC<MlJobEditorProps> = ({
+export const MLJobEditor: FC<React.PropsWithChildren<MlJobEditorProps>> = ({
   value,
   height = '500px',
   width = '100%',

@@ -17,7 +17,7 @@ export default {
   title: 'shared/charts/InstancesLatencyDistributionChart',
   component: InstancesLatencyDistributionChart,
   decorators: [
-    (StoryComponent: ComponentType) => {
+    (StoryComponent: ComponentType<React.PropsWithChildren<unknown>>) => {
       return (
         <MockApmPluginStorybook>
           <StoryComponent />

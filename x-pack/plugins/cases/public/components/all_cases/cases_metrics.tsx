@@ -31,7 +31,7 @@ const MetricsFlexGroup = styled.div`
   `}
 `;
 
-export const CasesMetrics: React.FC = () => {
+export const CasesMetrics: React.FC<React.PropsWithChildren<unknown>> = () => {
   const {
     data: { countOpenCases, countInProgressCases, countClosedCases } = {
       countOpenCases: 0,

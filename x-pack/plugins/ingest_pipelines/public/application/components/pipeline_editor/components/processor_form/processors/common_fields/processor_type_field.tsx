@@ -66,7 +66,7 @@ const typeConfig: FieldConfig<string> = {
   ],
 };
 
-export const ProcessorTypeField: FunctionComponent<Props> = ({ initialType }) => {
+export const ProcessorTypeField: FunctionComponent<React.PropsWithChildren<Props>> = ({ initialType }) => {
   const {
     services: { documentation },
   } = useKibana();

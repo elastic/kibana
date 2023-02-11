@@ -19,7 +19,7 @@ interface LinkToPageProps {
 
 const ITEM_TYPES = inventoryModels.map((m) => m.id).join('|');
 
-export const LinkToMetricsPage: React.FC<LinkToPageProps> = (props) => {
+export const LinkToMetricsPage: React.FC<React.PropsWithChildren<LinkToPageProps>> = (props) => {
   return (
     <Switch>
       <Route

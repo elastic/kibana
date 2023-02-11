@@ -49,7 +49,7 @@ const TimeRangeOptions: TimeRangeOption[] = [
   },
 ];
 
-export const TimeExpressionSelect: React.FC<Props> = ({
+export const TimeExpressionSelect: React.FC<React.PropsWithChildren<Props>> = ({
   defaultTimerangeCount,
   defaultTimerangeUnit,
   isEnabled,

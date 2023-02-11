@@ -7,7 +7,7 @@
 
 import React, { FunctionComponent } from 'react';
 
-export const ChoroplethLayerIcon: FunctionComponent = () => (
+export const ChoroplethLayerIcon: FunctionComponent<React.PropsWithChildren<unknown>> = () => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
     width="49"

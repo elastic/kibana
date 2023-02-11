@@ -35,7 +35,7 @@ interface PolicyIdComboBoxFieldProps {
   options: Array<EuiComboBoxOptionOption<string>>;
 }
 
-const PolicyIdComboBoxFieldComponent: React.FC<PolicyIdComboBoxFieldProps> = ({
+const PolicyIdComboBoxFieldComponent: React.FC<React.PropsWithChildren<PolicyIdComboBoxFieldProps>> = ({
   euiFieldProps,
   options,
 }) => {

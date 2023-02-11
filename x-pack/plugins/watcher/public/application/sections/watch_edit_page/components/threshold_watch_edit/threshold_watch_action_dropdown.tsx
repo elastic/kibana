@@ -42,7 +42,7 @@ interface Props {
   isLoading: boolean;
 }
 
-export const WatchActionsDropdown: React.FunctionComponent<Props> = ({ settings, isLoading }) => {
+export const WatchActionsDropdown: React.FunctionComponent<React.PropsWithChildren<Props>> = ({ settings, isLoading }) => {
   const { addAction } = useContext(WatchContext);
 
   const [isPopoverOpen, setIsPopOverOpen] = useState<boolean>(false);

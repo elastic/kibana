@@ -19,7 +19,7 @@ import { PipelinesPreview } from './pipelines_preview';
 import { Error } from './error_display';
 import { Instructions } from './instructions';
 
-export const PipelinesCreateFromCsv: React.FunctionComponent<RouteComponentProps> = ({
+export const PipelinesCreateFromCsv: React.FunctionComponent<React.PropsWithChildren<RouteComponentProps>> = ({
   history,
 }) => {
   const [isLoading, setIsLoading] = useState<boolean>(false);

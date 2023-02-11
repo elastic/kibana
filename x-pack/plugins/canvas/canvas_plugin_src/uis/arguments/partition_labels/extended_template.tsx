@@ -44,7 +44,7 @@ const VALUES_FIELD = 'values';
 const VALUES_FORMAT_FIELD = 'valuesFormat';
 const PERCENT_DECIMALS_FIELD = 'percentDecimals';
 
-export const ExtendedTemplate: FunctionComponent<Props> = ({ onValueChange, argValue }) => {
+export const ExtendedTemplate: FunctionComponent<React.PropsWithChildren<Props>> = ({ onValueChange, argValue }) => {
   const showLabels = getFieldValue(argValue, SHOW_FIELD);
   const showValues = getFieldValue(argValue, VALUES_FIELD);
   const valueFormat = getFieldValue(argValue, VALUES_FORMAT_FIELD);

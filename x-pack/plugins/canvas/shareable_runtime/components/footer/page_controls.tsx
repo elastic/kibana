@@ -50,7 +50,7 @@ interface Props {
 /**
  * The page count and paging controls within the footer of the Shareable Canvas Workpad.
  */
-export const PageControlsComponent: FC<Props> = ({
+export const PageControlsComponent: FC<React.PropsWithChildren<Props>> = ({
   onSetPageNumber,
   page,
   totalPages,
@@ -102,7 +102,7 @@ export const PageControlsComponent: FC<Props> = ({
 /**
  * A store-connected container for the `PageControls` component.
  */
-export const PageControls: FC<{}> = () => {
+export const PageControls: FC<React.PropsWithChildren<{}>> = () => {
   const [{ workpad, footer, stage }, dispatch] = useCanvasShareableState();
 
   if (!workpad) {

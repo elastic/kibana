@@ -21,7 +21,7 @@ export interface OptionMap {
   [key: string]: boolean;
 }
 
-export const SimplifiedSelectable: React.FC<Props> = ({
+export const SimplifiedSelectable: React.FC<React.PropsWithChildren<Props>> = ({
   emptyMessage,
   options,
   selectedOptions,

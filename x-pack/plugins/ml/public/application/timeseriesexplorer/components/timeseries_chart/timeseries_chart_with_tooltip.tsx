@@ -31,7 +31,7 @@ interface TimeSeriesChartWithTooltipsProps {
   lastRefresh: number;
   contextAggregationInterval: any;
 }
-export const TimeSeriesChartWithTooltips: FC<TimeSeriesChartWithTooltipsProps> = ({
+export const TimeSeriesChartWithTooltips: FC<React.PropsWithChildren<TimeSeriesChartWithTooltipsProps>> = ({
   bounds,
   detectorIndex,
   renderFocusChartOnly,

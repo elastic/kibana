@@ -82,7 +82,7 @@ interface GraphOverlayProps {
   Navigation: JSX.Element | null;
 }
 
-const GraphOverlayComponent: React.FC<GraphOverlayProps> = ({
+const GraphOverlayComponent: React.FC<React.PropsWithChildren<GraphOverlayProps>> = ({
   SessionView,
   Navigation,
   scopeId,

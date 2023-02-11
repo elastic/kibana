@@ -9,7 +9,7 @@ import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiEmptyPrompt, EuiLoadingSpinner } from '@elastic/eui';
 
-export const FleetSetupLoading: React.FunctionComponent = () => (
+export const FleetSetupLoading: React.FunctionComponent<React.PropsWithChildren<unknown>> = () => (
   <EuiEmptyPrompt
     title={
       <h2>

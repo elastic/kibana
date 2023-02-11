@@ -16,7 +16,7 @@ export interface Props {
   onDrop?: (files: FileList) => void;
 }
 
-export const UploadDropzone: FC<Props> = ({ onDrop = () => {}, disabled, children }) => {
+export const UploadDropzone: FC<React.PropsWithChildren<Props>> = ({ onDrop = () => {}, disabled, children }) => {
   return (
     <Dropzone
       {...{ onDrop, disabled }}

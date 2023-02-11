@@ -53,7 +53,7 @@ const MockKibanaContextProvider = createKibanaContextProviderMock();
 const { storage } = createSecuritySolutionStorageMock();
 
 /** A utility for wrapping children in the providers required to run most tests */
-export const TestProvidersComponent: React.FC<Props> = ({
+export const TestProvidersComponent: React.FC<React.PropsWithChildren<Props>> = ({
   children,
   store = createStore(state, SUB_PLUGINS_REDUCER, kibanaObservable, storage),
   onDragEnd = jest.fn(),
@@ -85,7 +85,7 @@ export const TestProvidersComponent: React.FC<Props> = ({
  * A utility for wrapping children in the providers required to run most tests
  * WITH user privileges provider.
  */
-const TestProvidersWithPrivilegesComponent: React.FC<Props> = ({
+const TestProvidersWithPrivilegesComponent: React.FC<React.PropsWithChildren<Props>> = ({
   children,
   store = createStore(state, SUB_PLUGINS_REDUCER, kibanaObservable, storage),
   onDragEnd = jest.fn(),

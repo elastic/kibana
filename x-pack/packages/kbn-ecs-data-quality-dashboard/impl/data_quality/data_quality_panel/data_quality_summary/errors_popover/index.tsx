@@ -35,7 +35,7 @@ interface Props {
   errorSummary: ErrorSummary[];
 }
 
-const ErrorsPopoverComponent: React.FC<Props> = ({ addSuccessToast, errorSummary }) => {
+const ErrorsPopoverComponent: React.FC<React.PropsWithChildren<Props>> = ({ addSuccessToast, errorSummary }) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const onClick = useCallback(() => setIsPopoverOpen((isOpen) => !isOpen), []);
   const closePopover = useCallback(() => setIsPopoverOpen(false), []);

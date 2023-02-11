@@ -22,7 +22,7 @@ interface DetectorTitleProps {
   deleteDetector?: (dtrIds: number) => void;
 }
 
-export const DetectorTitle: FC<DetectorTitleProps> = ({
+export const DetectorTitle: FC<React.PropsWithChildren<DetectorTitleProps>> = ({
   index,
   agg,
   field,

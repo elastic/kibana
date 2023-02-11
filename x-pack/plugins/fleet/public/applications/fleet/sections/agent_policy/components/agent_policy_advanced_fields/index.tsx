@@ -54,7 +54,7 @@ interface Props {
   onDelete?: () => void;
 }
 
-export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> = ({
+export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<React.PropsWithChildren<Props>> = ({
   agentPolicy,
   updateAgentPolicy,
   validation,

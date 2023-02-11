@@ -20,7 +20,7 @@ interface Props {
 
 const { emptyField } = fieldValidators;
 
-const CredentialsAuthComponent: React.FC<Props> = ({ isLoading, readOnly, pathPrefix = '' }) => {
+const CredentialsAuthComponent: React.FC<React.PropsWithChildren<Props>> = ({ isLoading, readOnly, pathPrefix = '' }) => {
   return (
     <>
       <UseField

@@ -152,7 +152,7 @@ const NO_SORTING: Sort[] = [];
 
 const trailingControlColumns: ControlColumnProps[] = []; // stable reference
 
-export const EqlTabContentComponent: React.FC<Props> = ({
+export const EqlTabContentComponent: React.FC<React.PropsWithChildren<Props>> = ({
   activeTab,
   columns,
   end,

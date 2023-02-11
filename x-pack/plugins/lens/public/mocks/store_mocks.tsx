@@ -97,9 +97,9 @@ export const mountWithProvider = async (
   component: React.ReactElement,
   store?: MountStoreProps,
   options?: {
-    wrappingComponent?: React.FC<{
+    wrappingComponent?: React.FC<React.PropsWithChildren<{
       children: React.ReactNode;
-    }>;
+    }>>;
     attachTo?: HTMLElement;
   }
 ) => {
@@ -117,17 +117,17 @@ export const getMountWithProviderParams = (
   component: React.ReactElement,
   store?: MountStoreProps,
   options?: {
-    wrappingComponent?: React.FC<{
+    wrappingComponent?: React.FC<React.PropsWithChildren<{
       children: React.ReactNode;
-    }>;
+    }>>;
     attachTo?: HTMLElement;
   }
 ) => {
   const { store: lensStore, deps } = makeLensStore(store || {});
 
-  let wrappingComponent: React.FC<{
+  let wrappingComponent: React.FC<React.PropsWithChildren<{
     children: React.ReactNode;
-  }> = ({ children }) => <Provider store={lensStore}>{children}</Provider>;
+  }>> = ({ children }) => <Provider store={lensStore}>{children}</Provider>;
 
   let restOptions: {
     attachTo?: HTMLElement | undefined;

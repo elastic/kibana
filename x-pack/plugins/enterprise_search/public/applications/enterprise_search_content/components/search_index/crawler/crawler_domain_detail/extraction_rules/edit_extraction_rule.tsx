@@ -96,7 +96,7 @@ const extractionFilterOptions = [
   value: ruleOption,
 }));
 
-export const EditExtractionRule: React.FC<EditExtractionRuleProps> = ({
+export const EditExtractionRule: React.FC<React.PropsWithChildren<EditExtractionRuleProps>> = ({
   cancelEditing,
   extractionRule,
   isNewRule,

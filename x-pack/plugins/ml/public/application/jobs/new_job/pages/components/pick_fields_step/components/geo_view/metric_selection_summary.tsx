@@ -13,7 +13,7 @@ import { JobCreatorContext } from '../../../job_creator_context';
 import { useMlKibana } from '../../../../../../../contexts/kibana';
 import { GeoMapExamples } from './geo_map_examples';
 
-export const GeoDetectorsSummary: FC = () => {
+export const GeoDetectorsSummary: FC<React.PropsWithChildren<unknown>> = () => {
   const [layerList, setLayerList] = useState<LayerDescriptor[]>([]);
   const [fieldValues, setFieldValues] = useState<string[]>([]);
 

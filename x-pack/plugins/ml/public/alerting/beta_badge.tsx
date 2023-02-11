@@ -9,7 +9,7 @@ import React, { FC } from 'react';
 import { EuiBetaBadge, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-export const BetaBadge: FC<{ message: string }> = ({ message }) => {
+export const BetaBadge: FC<React.PropsWithChildren<{ message: string }>> = ({ message }) => {
   return (
     <EuiFlexGroup gutterSize={'none'} justifyContent={'flexEnd'}>
       <EuiFlexItem grow={false}>

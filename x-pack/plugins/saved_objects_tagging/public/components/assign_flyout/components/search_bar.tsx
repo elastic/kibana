@@ -15,7 +15,7 @@ export interface AssignFlyoutSearchBarProps {
   types: string[];
 }
 
-export const AssignFlyoutSearchBar: FC<AssignFlyoutSearchBarProps> = ({
+export const AssignFlyoutSearchBar: FC<React.PropsWithChildren<AssignFlyoutSearchBarProps>> = ({
   onChange,
   types,
   isLoading,

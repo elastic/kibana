@@ -31,7 +31,7 @@ interface TagManagementPageParams {
   assignableTypes: string[];
 }
 
-export const TagManagementPage: FC<TagManagementPageParams> = ({
+export const TagManagementPage: FC<React.PropsWithChildren<TagManagementPageParams>> = ({
   setBreadcrumbs,
   core,
   tagClient,

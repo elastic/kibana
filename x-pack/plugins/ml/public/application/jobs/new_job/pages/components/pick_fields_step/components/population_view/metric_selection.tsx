@@ -27,7 +27,7 @@ interface Props {
 
 type DetectorFieldValues = Record<number, string[]>;
 
-export const PopulationDetectors: FC<Props> = ({ setIsValid }) => {
+export const PopulationDetectors: FC<React.PropsWithChildren<Props>> = ({ setIsValid }) => {
   const {
     jobCreator: jc,
     jobCreatorUpdate,

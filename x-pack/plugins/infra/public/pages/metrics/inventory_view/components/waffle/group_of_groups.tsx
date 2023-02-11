@@ -27,7 +27,7 @@ interface Props {
   currentTime: number;
 }
 
-export const GroupOfGroups: React.FC<Props> = (props) => {
+export const GroupOfGroups: React.FC<React.PropsWithChildren<Props>> = (props) => {
   return (
     <GroupOfGroupsContainer>
       <GroupName group={props.group} onDrilldown={props.onDrilldown} options={props.options} />

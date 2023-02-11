@@ -10,6 +10,4 @@ import type { EuiDataGridCellValueElementProps } from '@elastic/eui';
 import type { CellValueElementProps } from '../../../../../common/types';
 import { RenderCellValue } from '../../../configurations/security_solution_detections';
 
-export const PreviewRenderCellValue: React.FC<
-  EuiDataGridCellValueElementProps & CellValueElementProps
-> = (props) => RenderCellValue({ ...props, enableActions: false, asPlainText: true });
+export const PreviewRenderCellValue: React.FC<React.PropsWithChildren<EuiDataGridCellValueElementProps & CellValueElementProps>> = (props) => RenderCellValue({ ...props, enableActions: false, asPlainText: true });

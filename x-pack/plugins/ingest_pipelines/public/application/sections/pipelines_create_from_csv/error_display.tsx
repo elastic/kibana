@@ -13,7 +13,7 @@ interface Props {
   error: { title: string; message: string };
 }
 
-export const Error: FC<Props> = ({ error }) => {
+export const Error: FC<React.PropsWithChildren<Props>> = ({ error }) => {
   return (
     <EuiCallOut title={error.title} color="danger" iconType="alert" data-test-subj="errorCallout">
       <p>

@@ -30,7 +30,7 @@ interface Props {
   onDownload?: () => void;
 }
 
-export const KubernetesInstructions: React.FunctionComponent<Props> = ({
+export const KubernetesInstructions: React.FunctionComponent<React.PropsWithChildren<Props>> = ({
   enrollmentAPIKey,
   onCopy,
   onDownload,

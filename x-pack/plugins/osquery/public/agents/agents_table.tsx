@@ -41,7 +41,7 @@ interface AgentsTableProps {
 const perPage = 10;
 const DEBOUNCE_DELAY = 300; // ms
 
-const AgentsTableComponent: React.FC<AgentsTableProps> = ({ agentSelection, onChange, error }) => {
+const AgentsTableComponent: React.FC<React.PropsWithChildren<AgentsTableProps>> = ({ agentSelection, onChange, error }) => {
   // search related
   const [searchValue, setSearchValue] = useState<string>('');
   const [modifyingSearch, setModifyingSearch] = useState<boolean>(false);

@@ -24,7 +24,7 @@ import { ingestionMethodToText } from '../../utils/indices';
 
 import { IndicesLogic } from './indices_logic';
 
-export const DeleteIndexModal: React.FC = () => {
+export const DeleteIndexModal: React.FC<React.PropsWithChildren<unknown>> = () => {
   const { closeDeleteModal, deleteIndex } = useActions(IndicesLogic);
   const {
     deleteModalIndexName: indexName,

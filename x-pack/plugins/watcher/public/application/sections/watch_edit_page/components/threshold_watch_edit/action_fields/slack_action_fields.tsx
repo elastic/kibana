@@ -16,7 +16,7 @@ interface Props {
   children: React.ReactNode;
 }
 
-export const SlackActionFields: React.FunctionComponent<Props> = ({
+export const SlackActionFields: React.FunctionComponent<React.PropsWithChildren<Props>> = ({
   action,
   editAction,
   children,

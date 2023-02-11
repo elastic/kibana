@@ -14,7 +14,7 @@ import { MMLCallout } from '../mml_callout';
 import { ML_JOB_AGGREGATION } from '../../../../../../../../../../../common/constants/aggregation_types';
 import { isCategorizationJobCreator } from '../../../../../../../common/job_creator';
 
-export const ModelPlotSwitch: FC = () => {
+export const ModelPlotSwitch: FC<React.PropsWithChildren<unknown>> = () => {
   const { jobCreator, jobCreatorUpdate, jobCreatorUpdated } = useContext(JobCreatorContext);
   const [modelPlotEnabled, setModelPlotEnabled] = useState(jobCreator.modelPlot);
   const [enabled, setEnabled] = useState(false);

@@ -24,7 +24,7 @@ interface Props {
   type?: 'health' | 'badge';
 }
 
-export const Tag: FunctionComponent<Props> = ({
+export const Tag: FunctionComponent<React.PropsWithChildren<Props>> = ({
   name,
   color = '#666666',
   type = 'health',

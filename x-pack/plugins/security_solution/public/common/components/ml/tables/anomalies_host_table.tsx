@@ -36,7 +36,7 @@ const sorting = {
   },
 } as const;
 
-const AnomaliesHostTableComponent: React.FC<AnomaliesHostTableProps> = ({
+const AnomaliesHostTableComponent: React.FC<React.PropsWithChildren<AnomaliesHostTableProps>> = ({
   startDate,
   endDate,
   hostName,

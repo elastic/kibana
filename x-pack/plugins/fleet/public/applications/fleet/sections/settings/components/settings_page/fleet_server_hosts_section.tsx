@@ -19,7 +19,7 @@ export interface FleetServerHostsSectionProps {
   deleteFleetServerHost: (fleetServerHost: FleetServerHost) => void;
 }
 
-export const FleetServerHostsSection: React.FunctionComponent<FleetServerHostsSectionProps> = ({
+export const FleetServerHostsSection: React.FunctionComponent<React.PropsWithChildren<FleetServerHostsSectionProps>> = ({
   fleetServerHosts,
   deleteFleetServerHost,
 }) => {

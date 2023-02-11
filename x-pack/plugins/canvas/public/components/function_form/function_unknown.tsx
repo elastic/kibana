@@ -24,7 +24,7 @@ interface Props {
   argType: string;
 }
 
-export const FunctionUnknown: FunctionComponent<Props> = ({ argType }) => (
+export const FunctionUnknown: FunctionComponent<React.PropsWithChildren<Props>> = ({ argType }) => (
   <div className="canvasFunctionForm canvasFunctionForm--unknown-expression">
     {strings.getUnknownArgumentTypeErrorMessage(argType)}
   </div>

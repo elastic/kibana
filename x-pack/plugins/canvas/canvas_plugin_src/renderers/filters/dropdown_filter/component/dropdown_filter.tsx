@@ -33,7 +33,7 @@ export interface Props {
   commit: (value: string) => void;
 }
 
-export const DropdownFilter: FunctionComponent<Props> = ({
+export const DropdownFilter: FunctionComponent<React.PropsWithChildren<Props>> = ({
   initialValue = '',
   commit,
   choices = [],

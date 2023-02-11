@@ -16,7 +16,7 @@ import { ENGINE_PATH, ENGINE_TAB_PATH, EngineViewTabs } from '../../routes';
 import { EngineNameLogic } from './engine_name_logic';
 import { EngineView } from './engine_view';
 
-export const EngineRouter: React.FC = () => {
+export const EngineRouter: React.FC<React.PropsWithChildren<unknown>> = () => {
   const engineName = decodeURIComponent(useParams<{ engineName: string }>().engineName);
   const engineNameLogic = EngineNameLogic({ engineName });
   const { setEngineName } = useActions(engineNameLogic);

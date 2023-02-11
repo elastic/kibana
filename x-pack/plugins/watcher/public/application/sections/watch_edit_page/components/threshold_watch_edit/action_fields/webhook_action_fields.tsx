@@ -33,7 +33,7 @@ const HTTP_VERBS = ['head', 'get', 'post', 'put', 'delete'];
 
 const SCHEME = ['http', 'https'];
 
-export const WebhookActionFields: React.FunctionComponent<Props> = ({
+export const WebhookActionFields: React.FunctionComponent<React.PropsWithChildren<Props>> = ({
   action,
   editAction,
   errors,

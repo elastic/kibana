@@ -51,7 +51,7 @@ const getConnectorWithoutSecrets = (
   secrets: {},
 });
 
-const ReadOnlyConnectorMessage: React.FC<{ href: string }> = ({ href }) => {
+const ReadOnlyConnectorMessage: React.FC<React.PropsWithChildren<{ href: string }>> = ({ href }) => {
   return (
     <>
       <EuiText>
@@ -69,7 +69,7 @@ const ReadOnlyConnectorMessage: React.FC<{ href: string }> = ({ href }) => {
   );
 };
 
-const EditConnectorFlyoutComponent: React.FC<EditConnectorFlyoutProps> = ({
+const EditConnectorFlyoutComponent: React.FC<React.PropsWithChildren<EditConnectorFlyoutProps>> = ({
   actionTypeRegistry,
   connector,
   onClose,

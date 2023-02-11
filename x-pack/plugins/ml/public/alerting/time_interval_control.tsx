@@ -17,7 +17,7 @@ type TimeIntervalControlProps = Omit<EuiFieldTextProps, 'value' | 'onChange'> & 
   onChange: (update: string) => void;
 };
 
-export const TimeIntervalControl: FC<TimeIntervalControlProps> = ({
+export const TimeIntervalControl: FC<React.PropsWithChildren<TimeIntervalControlProps>> = ({
   value,
   onChange,
   label,

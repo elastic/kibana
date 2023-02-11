@@ -13,7 +13,7 @@ interface ChartEmptyStateProps {
   body: string | JSX.Element;
 }
 
-export const ChartEmptyState: FC<ChartEmptyStateProps> = ({ title, body }) => (
+export const ChartEmptyState: FC<React.PropsWithChildren<ChartEmptyStateProps>> = ({ title, body }) => (
   <EuiEmptyPrompt
     title={
       <EuiTitle>

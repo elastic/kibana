@@ -31,9 +31,9 @@ interface FieldTypeTableItem {
   description: string;
 }
 
-export const FieldTypesHelpPopover: FC<{
+export const FieldTypesHelpPopover: FC<React.PropsWithChildren<{
   fieldTypes: string[];
-}> = ({ fieldTypes }) => {
+}>> = ({ fieldTypes }) => {
   {
     const { services } = useDataVisualizerKibana();
     const { docLinks } = services;

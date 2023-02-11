@@ -31,7 +31,7 @@ const FixedHeightDiv = styled.div`
   height: 300px;
 `;
 
-export const PackagePolicyInputVarField: React.FunctionComponent<{
+export const PackagePolicyInputVarField: React.FunctionComponent<React.PropsWithChildren<{
   varDef: RegistryVarsEntry;
   value: any;
   onChange: (newValue: any) => void;
@@ -42,7 +42,7 @@ export const PackagePolicyInputVarField: React.FunctionComponent<{
   packageName?: string;
   datastreams?: DataStream[];
   isEditPage?: boolean;
-}> = memo(
+}>> = memo(
   ({
     varDef,
     value,

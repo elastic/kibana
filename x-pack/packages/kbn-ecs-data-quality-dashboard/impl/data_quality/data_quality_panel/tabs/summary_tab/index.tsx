@@ -49,7 +49,7 @@ interface Props {
   theme: Theme;
 }
 
-const SummaryTabComponent: React.FC<Props> = ({
+const SummaryTabComponent: React.FC<React.PropsWithChildren<Props>> = ({
   addSuccessToast,
   addToNewCaseDisabled,
   defaultNumberFormat,

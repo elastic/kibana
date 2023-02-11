@@ -50,7 +50,7 @@ const columns: Array<EuiTableFieldDataColumnType<TableItem>> = [
 
 const PAGE_SIZE = 5;
 
-const TopRiskScoreContributorsComponent: React.FC<TopRiskScoreContributorsProps> = ({
+const TopRiskScoreContributorsComponent: React.FC<React.PropsWithChildren<TopRiskScoreContributorsProps>> = ({
   rules = [],
   loading,
   queryId,

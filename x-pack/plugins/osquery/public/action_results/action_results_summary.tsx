@@ -27,7 +27,7 @@ const renderErrorMessage = (error: string) => (
   </EuiCodeBlock>
 );
 
-const ActionResultsSummaryComponent: React.FC<ActionResultsSummaryProps> = ({
+const ActionResultsSummaryComponent: React.FC<React.PropsWithChildren<ActionResultsSummaryProps>> = ({
   actionId,
   expirationDate,
   agentIds,

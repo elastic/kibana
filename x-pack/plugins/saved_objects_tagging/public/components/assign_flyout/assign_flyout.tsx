@@ -40,7 +40,7 @@ const getObjectStatus = (object: AssignableObject, assignedTags: string[]): Assi
   return assignedCount === 0 ? 'none' : assignedCount === assignedTags.length ? 'full' : 'partial';
 };
 
-export const AssignFlyout: FC<AssignFlyoutProps> = ({
+export const AssignFlyout: FC<React.PropsWithChildren<AssignFlyoutProps>> = ({
   tagIds,
   tagCache,
   allowedTypes,

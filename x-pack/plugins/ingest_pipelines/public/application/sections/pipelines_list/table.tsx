@@ -31,7 +31,7 @@ export interface Props {
   onDeletePipelineClick: (pipelineName: string[]) => void;
 }
 
-export const PipelineTable: FunctionComponent<Props> = ({
+export const PipelineTable: FunctionComponent<React.PropsWithChildren<Props>> = ({
   pipelines,
   onReloadClick,
   onEditPipelineClick,

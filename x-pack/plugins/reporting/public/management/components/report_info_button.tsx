@@ -15,7 +15,7 @@ interface Props {
   onClick: () => void;
 }
 
-export const ReportInfoButton: FunctionComponent<Props> = ({ job, onClick }) => {
+export const ReportInfoButton: FunctionComponent<React.PropsWithChildren<Props>> = ({ job, onClick }) => {
   let message = i18n.translate('xpack.reporting.listing.table.reportInfoButtonTooltip', {
     defaultMessage: 'See report info.',
   });

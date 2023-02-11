@@ -24,7 +24,7 @@ export interface SeveritySelectorProps {
 
 const MAX_ANOMALY_SCORE = 100;
 
-export const SeverityControl: FC<SeveritySelectorProps> = React.memo(({ value, onChange }) => {
+export const SeverityControl: FC<React.PropsWithChildren<SeveritySelectorProps>> = React.memo(({ value, onChange }) => {
   const levels: EuiRangeProps['levels'] = [
     {
       min: ANOMALY_THRESHOLD.LOW,

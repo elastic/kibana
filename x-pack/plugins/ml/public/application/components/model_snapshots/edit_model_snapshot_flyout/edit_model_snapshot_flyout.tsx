@@ -38,7 +38,7 @@ interface Props {
   closeFlyout(reload: boolean): void;
 }
 
-export const EditModelSnapshotFlyout: FC<Props> = ({ snapshot, job, closeFlyout }) => {
+export const EditModelSnapshotFlyout: FC<React.PropsWithChildren<Props>> = ({ snapshot, job, closeFlyout }) => {
   const { toasts } = useNotifications();
   const [description, setDescription] = useState(snapshot.description);
   const [retain, setRetain] = useState(snapshot.retain);

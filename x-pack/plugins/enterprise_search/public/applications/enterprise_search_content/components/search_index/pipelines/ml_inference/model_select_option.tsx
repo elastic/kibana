@@ -22,7 +22,7 @@ import { TrainedModelHealth } from '../ml_model_health';
 export interface MlModelSelectOptionProps {
   model: TrainedModel;
 }
-export const MlModelSelectOption: React.FC<MlModelSelectOptionProps> = ({ model }) => {
+export const MlModelSelectOption: React.FC<React.PropsWithChildren<MlModelSelectOptionProps>> = ({ model }) => {
   const type = getMLType(getMlModelTypesForModelConfig(model));
   const title = getModelDisplayTitle(type);
   return (

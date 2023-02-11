@@ -17,7 +17,7 @@ export type GetCasesProps = Omit<
   'externalReferenceAttachmentTypeRegistry' | 'persistableStateAttachmentTypeRegistry'
 >;
 
-const CasesRoutesLazy: React.FC<CasesProps> = lazy(() => import('../../components/app/routes'));
+const CasesRoutesLazy: React.FC<React.PropsWithChildren<CasesProps>> = lazy(() => import('../../components/app/routes'));
 
 export const getCasesLazy = ({
   externalReferenceAttachmentTypeRegistry,

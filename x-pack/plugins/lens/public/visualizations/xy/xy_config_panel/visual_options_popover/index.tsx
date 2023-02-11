@@ -44,7 +44,7 @@ export interface VisualOptionsPopoverProps {
   datasourceLayers: FramePublicAPI['datasourceLayers'];
 }
 
-export const VisualOptionsPopover: React.FC<VisualOptionsPopoverProps> = ({
+export const VisualOptionsPopover: React.FC<React.PropsWithChildren<VisualOptionsPopoverProps>> = ({
   state,
   setState,
   datasourceLayers,

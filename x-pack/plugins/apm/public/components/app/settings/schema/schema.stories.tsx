@@ -80,7 +80,7 @@ export default {
     },
   },
   decorators: [
-    (StoryComponent: ComponentType, { args }: Meta<Args>) => {
+    (StoryComponent: ComponentType<React.PropsWithChildren<unknown>>, { args }: Meta<Args>) => {
       if (args?.isMigrating) {
         const expiryDate = new Date();
         expiryDate.setMinutes(expiryDate.getMinutes() + 5);

@@ -45,7 +45,7 @@ export interface Props {
 /**
  * The panel used to configure Autolay in Shareable Canvas Workpads.
  */
-export const AutoplaySettingsComponent: FC<Props> = ({
+export const AutoplaySettingsComponent: FC<React.PropsWithChildren<Props>> = ({
   isEnabled,
   interval,
   onSetAutoplay,

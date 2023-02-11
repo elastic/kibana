@@ -26,7 +26,7 @@ import { SimplifiedSelectable } from '../../../../../shared/simplified_selectabl
 
 import { CrawlCustomSettingsFlyoutLogic } from './crawl_custom_settings_flyout_logic';
 
-export const CrawlCustomSettingsFlyoutDomainsPanel: React.FC = () => {
+export const CrawlCustomSettingsFlyoutDomainsPanel: React.FC<React.PropsWithChildren<unknown>> = () => {
   const { domainUrls, selectedDomainUrls } = useValues(CrawlCustomSettingsFlyoutLogic);
   const { onSelectDomainUrls } = useActions(CrawlCustomSettingsFlyoutLogic);
 

@@ -13,7 +13,7 @@ interface Props {
   isOldAlert: boolean;
 }
 
-export const OldAlertCallOut: React.FC<Props> = ({ isOldAlert }) => {
+export const OldAlertCallOut: React.FC<React.PropsWithChildren<Props>> = ({ isOldAlert }) => {
   if (!isOldAlert) return null;
   return (
     <>

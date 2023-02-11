@@ -16,7 +16,7 @@ interface Props {
   'aria-label'?: string;
 }
 
-export const FieldLoadingError: FunctionComponent<Props> = (props) => {
+export const FieldLoadingError: FunctionComponent<React.PropsWithChildren<Props>> = (props) => {
   const { title, body, resendRequest } = props;
   return (
     <>

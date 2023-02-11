@@ -25,7 +25,7 @@ interface ConfirmDescriptionProps {
   agentPolicyCount: number;
 }
 
-const ConfirmDescription: React.FunctionComponent<ConfirmDescriptionProps> = ({
+const ConfirmDescription: React.FunctionComponent<React.PropsWithChildren<ConfirmDescriptionProps>> = ({
   output,
   agentCount,
   agentPolicyCount,

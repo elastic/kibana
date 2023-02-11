@@ -24,7 +24,7 @@ export interface VegaChartViewProps {
   vegaSpec: TopLevelSpec;
 }
 
-export const VegaChartView: FC<VegaChartViewProps> = ({ vegaSpec }) => {
+export const VegaChartView: FC<React.PropsWithChildren<VegaChartViewProps>> = ({ vegaSpec }) => {
   const htmlId = useMemo(() => htmlIdGenerator()(), []);
 
   useEffect(() => {

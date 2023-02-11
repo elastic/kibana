@@ -36,7 +36,7 @@ const TITLE_MAP = {
 interface Props {
   type: LogRetentionOptions;
 }
-export const LogRetentionCallout: React.FC<Props> = ({ type }) => {
+export const LogRetentionCallout: React.FC<React.PropsWithChildren<Props>> = ({ type }) => {
   const { fetchLogRetention } = useActions(LogRetentionLogic);
   const { logRetention } = useValues(LogRetentionLogic);
   const {

@@ -19,7 +19,7 @@ import { waitFor } from '@testing-library/dom';
 import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 
 let globalForm: FormHook;
-const MockHookWrapperComponent: React.FC = ({ children }) => {
+const MockHookWrapperComponent: React.FC<React.PropsWithChildren<unknown>> = ({ children }) => {
   const { form } = useForm<FormProps>({
     defaultValue: { severity: CaseSeverity.LOW },
     schema: {

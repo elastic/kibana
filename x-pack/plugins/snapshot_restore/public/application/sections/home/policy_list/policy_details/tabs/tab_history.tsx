@@ -32,7 +32,7 @@ interface Props {
   policy: SlmPolicy;
 }
 
-export const TabHistory: React.FunctionComponent<Props> = ({ policy }) => {
+export const TabHistory: React.FunctionComponent<React.PropsWithChildren<Props>> = ({ policy }) => {
   const { lastSuccess, lastFailure, nextExecutionMillis, name, repository } = policy;
   const { history } = useServices();
 

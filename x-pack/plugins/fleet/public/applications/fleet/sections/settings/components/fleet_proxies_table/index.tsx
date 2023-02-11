@@ -23,7 +23,7 @@ const NameFlexItemWithMaxWidth = styled(EuiFlexItem)`
   max-width: 250px;
 `;
 
-export const FleetProxiesTable: React.FunctionComponent<FleetProxiesTableProps> = ({
+export const FleetProxiesTable: React.FunctionComponent<React.PropsWithChildren<FleetProxiesTableProps>> = ({
   proxies,
   deleteFleetProxy,
 }) => {

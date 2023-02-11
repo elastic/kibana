@@ -77,7 +77,7 @@ export interface TrainedModelHealthProps {
   modelStateReason?: string;
 }
 
-export const TrainedModelHealth: React.FC<TrainedModelHealthProps> = ({
+export const TrainedModelHealth: React.FC<React.PropsWithChildren<TrainedModelHealthProps>> = ({
   modelState,
   modelStateReason,
 }) => {

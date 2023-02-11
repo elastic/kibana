@@ -32,7 +32,7 @@ const getPageTitle = (monitorId: string, selectedMonitor: Ping | null) => {
   return monitorId;
 };
 
-export const MonitorPageTitleContent: React.FC = () => {
+export const MonitorPageTitleContent: React.FC<React.PropsWithChildren<unknown>> = () => {
   const monitorId = useMonitorId();
   const selectedMonitor = useSelector(monitorStatusSelector);
   const type = selectedMonitor?.monitor?.type;
@@ -108,7 +108,7 @@ export const MonitorPageTitleContent: React.FC = () => {
   );
 };
 
-export const MonitorPageTitle: React.FC = () => {
+export const MonitorPageTitle: React.FC<React.PropsWithChildren<unknown>> = () => {
   const monitorId = useMonitorId();
 
   const selectedMonitor = useSelector(monitorStatusSelector);

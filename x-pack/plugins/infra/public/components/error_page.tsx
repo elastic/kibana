@@ -17,7 +17,7 @@ interface Props {
 }
 
 // Represents a fully constructed page, including page template.
-export const ErrorPage: React.FC<Props> = ({ detailedMessage, retry, shortMessage }) => {
+export const ErrorPage: React.FC<React.PropsWithChildren<Props>> = ({ detailedMessage, retry, shortMessage }) => {
   return (
     <PageTemplate isEmptyState={true}>
       <EuiCallOut

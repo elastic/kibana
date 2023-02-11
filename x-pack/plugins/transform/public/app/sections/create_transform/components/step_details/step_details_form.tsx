@@ -70,7 +70,7 @@ interface StepDetailsFormProps {
   stepDefineState: StepDefineExposedState;
 }
 
-export const StepDetailsForm: FC<StepDetailsFormProps> = React.memo(
+export const StepDetailsForm: FC<React.PropsWithChildren<StepDetailsFormProps>> = React.memo(
   ({ overrides = {}, onChange, searchItems, stepDefineState }) => {
     const deps = useAppDependencies();
     const { capabilities } = deps.application;

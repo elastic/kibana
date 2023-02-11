@@ -30,7 +30,7 @@ interface Props {
   settingErrors: RepositorySettingsValidation;
 }
 
-export const ReadonlySettings: React.FunctionComponent<Props> = ({
+export const ReadonlySettings: React.FunctionComponent<React.PropsWithChildren<Props>> = ({
   repository,
   updateRepositorySettings,
   settingErrors,

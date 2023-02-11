@@ -25,7 +25,7 @@ interface AnalyticsCollectionIntegrateProps {
 
 export type TabKey = 'javascriptEmbed' | 'searchuiEmbed' | 'javascriptClientEmbed';
 
-export const AnalyticsCollectionIntegrate: React.FC<AnalyticsCollectionIntegrateProps> = ({
+export const AnalyticsCollectionIntegrate: React.FC<React.PropsWithChildren<AnalyticsCollectionIntegrateProps>> = ({
   collection,
 }) => {
   const analyticsDNSUrl = getEnterpriseSearchUrl(`/api/analytics/collections/${collection.id}`);

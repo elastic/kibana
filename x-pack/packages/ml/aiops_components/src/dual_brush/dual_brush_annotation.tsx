@@ -16,7 +16,7 @@ interface BrushAnnotationProps {
   max: number;
 }
 
-export const DualBrushAnnotation: FC<BrushAnnotationProps> = ({ id, min, max }) => {
+export const DualBrushAnnotation: FC<React.PropsWithChildren<BrushAnnotationProps>> = ({ id, min, max }) => {
   const { euiTheme } = useEuiTheme();
   const { colors } = euiTheme;
 

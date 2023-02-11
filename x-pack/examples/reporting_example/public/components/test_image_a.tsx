@@ -11,7 +11,7 @@ import { VIS } from '../constants';
 
 type Props = React.DetailedHTMLProps<React.ImgHTMLAttributes<HTMLImageElement>, HTMLImageElement>;
 
-export const TestImageA: FunctionComponent<Props> = ({
+export const TestImageA: FunctionComponent<React.PropsWithChildren<Props>> = ({
   width = VIS.width,
   height = VIS.height,
   ...restProps

@@ -74,7 +74,7 @@ interface MissingClusterPrivilegesProps {
   privilegesCount: number;
 }
 
-const MissingClusterPrivileges: FC<MissingClusterPrivilegesProps> = ({
+const MissingClusterPrivileges: FC<React.PropsWithChildren<MissingClusterPrivilegesProps>> = ({
   missingPrivileges,
   privilegesCount,
 }) => (
@@ -105,7 +105,7 @@ const MissingClusterPrivileges: FC<MissingClusterPrivilegesProps> = ({
   </EuiFlexGroup>
 );
 
-export const PrivilegesWrapper: FC<{ privileges: string | string[] }> = ({
+export const PrivilegesWrapper: FC<React.PropsWithChildren<{ privileges: string | string[] }>> = ({
   children,
   privileges,
 }) => (

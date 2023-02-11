@@ -13,7 +13,7 @@ import { useMlKibana } from '../../../contexts/kibana';
 import { MlPageHeader } from '../../../components/page_header';
 import { SourceSelection } from '../analytics_management/components/source_selection';
 
-export const Page: FC = () => {
+export const Page: FC<React.PropsWithChildren<unknown>> = () => {
   const {
     services: { docLinks },
   } = useMlKibana();

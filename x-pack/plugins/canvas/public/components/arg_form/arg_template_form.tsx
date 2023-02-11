@@ -35,13 +35,13 @@ export interface ArgTemplateFormProps {
   };
   handlers?: { [key: string]: (...args: any[]) => any };
   error?: unknown;
-  errorTemplate: React.FunctionComponent<ArgTemplateFormProps['argumentProps']>;
+  errorTemplate: React.FunctionComponent<React.PropsWithChildren<ArgTemplateFormProps['argumentProps']>>;
 }
 
 const mergeWithFormHandlers = (handlers: ArgTemplateFormProps['handlers']) =>
   Object.assign(new ExpressionFormHandlers(), handlers);
 
-const ArgTemplateFormComponent: React.FunctionComponent<ArgTemplateFormProps> = ({
+const ArgTemplateFormComponent: React.FunctionComponent<React.PropsWithChildren<ArgTemplateFormProps>> = ({
   template,
   argumentProps,
   handlers,

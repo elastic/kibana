@@ -26,7 +26,7 @@ interface AddToDashboardControlProps extends ReturnType<typeof useDashboardTable
   disabled: boolean;
   children?: React.ReactElement;
 }
-export const AddToDashboardControl: FC<AddToDashboardControlProps> = ({
+export const AddToDashboardControl: FC<React.PropsWithChildren<AddToDashboardControlProps>> = ({
   onClose,
   dashboardItems,
   isLoading,

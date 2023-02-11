@@ -26,7 +26,7 @@ interface StartActionNameProps {
   item: DataFrameAnalyticsListRow;
 }
 
-export const StartActionName: FC<StartActionNameProps> = ({
+export const StartActionName: FC<React.PropsWithChildren<StartActionNameProps>> = ({
   canStartStopDataFrameAnalytics,
   isDisabled,
   item,

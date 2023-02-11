@@ -15,7 +15,7 @@ import { useQueryToggle } from '../../../../common/containers/query_toggle';
 
 const TlsTableManage = manageQuery(TlsTable);
 
-const TlsQueryTabBodyComponent: React.FC<FTQueryTabBodyProps> = ({
+const TlsQueryTabBodyComponent: React.FC<React.PropsWithChildren<FTQueryTabBodyProps>> = ({
   endDate,
   filterQuery,
   flowTarget,

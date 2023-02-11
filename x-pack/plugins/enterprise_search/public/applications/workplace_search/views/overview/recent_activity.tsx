@@ -32,7 +32,7 @@ export interface FeedActivity {
   sourceId?: string;
 }
 
-export const RecentActivity: React.FC = () => {
+export const RecentActivity: React.FC<React.PropsWithChildren<unknown>> = () => {
   const {
     organization: { name, defaultOrgName },
   } = useValues(AppLogic);
@@ -80,7 +80,7 @@ export const RecentActivity: React.FC = () => {
   );
 };
 
-export const RecentActivityItem: React.FC<FeedActivity> = ({
+export const RecentActivityItem: React.FC<React.PropsWithChildren<FeedActivity>> = ({
   id,
   status,
   message,

@@ -32,7 +32,7 @@ export interface ConnectorConfiguration {
 export interface CaseConnector<UIProps = unknown> {
   id: string;
   fieldsComponent: React.LazyExoticComponent<
-    React.ComponentType<ConnectorFieldsProps<UIProps>>
+    React.ComponentType<React.PropsWithChildren<ConnectorFieldsProps<UIProps>>>
   > | null;
 }
 

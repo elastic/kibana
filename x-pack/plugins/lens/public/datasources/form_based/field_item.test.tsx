@@ -64,7 +64,7 @@ const mockedServices = {
   },
 };
 
-const InnerFieldItemWrapper: React.FC<FieldItemProps> = (props) => {
+const InnerFieldItemWrapper: React.FC<React.PropsWithChildren<FieldItemProps>> = (props) => {
   return (
     <KibanaContextProvider services={mockedServices}>
       <InnerFieldItem {...props} />

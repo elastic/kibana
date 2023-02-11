@@ -15,7 +15,7 @@ interface Props {
   kibanaVersion?: string;
 }
 
-export const VersionMismatchError: React.FC<Props> = ({
+export const VersionMismatchError: React.FC<React.PropsWithChildren<Props>> = ({
   enterpriseSearchVersion,
   kibanaVersion,
 }) => {

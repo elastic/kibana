@@ -44,7 +44,7 @@ interface CredentialItemProps {
 
 const inputSelectAll = (e: React.MouseEvent<HTMLInputElement>) => e.currentTarget.select();
 
-export const CredentialItem: React.FC<CredentialItemProps> = ({
+export const CredentialItem: React.FC<React.PropsWithChildren<CredentialItemProps>> = ({
   label,
   value,
   testSubj,

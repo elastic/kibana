@@ -70,7 +70,7 @@ describe('<FilterOutButtonIcon /> <FilterOutButtonEmpty /> <FilterOutContextMenu
   });
 
   it('should render one Component (for EuiDataGrid use)', () => {
-    const mockComponent: FunctionComponent = () => <EuiButtonIcon iconType="plusInCircle" />;
+    const mockComponent: FunctionComponent<React.PropsWithChildren<unknown>> = () => <EuiButtonIcon iconType="plusInCircle" />;
 
     const component = render(
       <FilterOutCellAction data={mockIndicator} field={mockField} Component={mockComponent} />

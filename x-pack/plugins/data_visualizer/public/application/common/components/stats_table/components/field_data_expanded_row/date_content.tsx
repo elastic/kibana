@@ -24,7 +24,7 @@ interface SummaryTableItem {
   value: number | string | undefined | null;
 }
 
-export const DateContent: FC<FieldDataRowProps> = ({ config }) => {
+export const DateContent: FC<React.PropsWithChildren<FieldDataRowProps>> = ({ config }) => {
   const { stats } = config;
   if (stats === undefined) return null;
 

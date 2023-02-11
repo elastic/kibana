@@ -21,7 +21,7 @@ interface Props {
   stepIndex: number;
 }
 
-export const StepDetailContainer: React.FC<Props> = ({ checkGroup, stepIndex }) => {
+export const StepDetailContainer: React.FC<React.PropsWithChildren<Props>> = ({ checkGroup, stepIndex }) => {
   const { activeStep, journey } = useStepDetailPage();
 
   useMonitorBreadcrumb({ details: journey?.details, activeStep, performanceBreakDownView: true });

@@ -22,7 +22,7 @@ const i18nTexts = {
   },
 };
 
-export const FormErrorsCallout: FunctionComponent = () => {
+export const FormErrorsCallout: FunctionComponent<React.PropsWithChildren<unknown>> = () => {
   const {
     errors: { hasErrors },
     isFormSubmitted,

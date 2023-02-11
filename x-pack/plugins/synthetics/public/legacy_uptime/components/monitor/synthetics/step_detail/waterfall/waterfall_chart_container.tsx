@@ -30,7 +30,7 @@ interface Props {
   stepIndex: number;
 }
 
-export const WaterfallChartContainer: React.FC<Props> = ({ checkGroup, stepIndex, activeStep }) => {
+export const WaterfallChartContainer: React.FC<React.PropsWithChildren<Props>> = ({ checkGroup, stepIndex, activeStep }) => {
   const dispatch = useDispatch();
 
   useEffect(() => {

@@ -22,7 +22,7 @@ import { IndicatorsFilters } from '../containers/filters';
 import { UpdateStatus } from '../../../components/update_status';
 import { QueryBar } from '../../query_bar/query_bar';
 
-const IndicatorsPageProviders: FC = ({ children }) => (
+const IndicatorsPageProviders: FC<React.PropsWithChildren<unknown>> = ({ children }) => (
   <IndicatorsFilters>
     <FieldTypesProvider>
       <InspectorProvider>

@@ -28,7 +28,7 @@ const i18nTexts = {
   ),
 };
 
-export const NodeAllocation: FunctionComponent<SharedProps> = ({
+export const NodeAllocation: FunctionComponent<React.PropsWithChildren<SharedProps>> = ({
   phase,
   nodes,
   isLoading,

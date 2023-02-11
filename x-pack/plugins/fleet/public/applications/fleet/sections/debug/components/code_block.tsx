@@ -12,7 +12,7 @@ import { CodeEditor } from '@kbn/kibana-react-plugin/public';
 /**
  * A read-only code block with various default settings suitable for displaying API responses, etc
  */
-export const CodeBlock: React.FunctionComponent<{ value: string }> = ({ value }) => {
+export const CodeBlock: React.FunctionComponent<React.PropsWithChildren<{ value: string }>> = ({ value }) => {
   return (
     <CodeEditor
       isCopyable

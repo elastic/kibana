@@ -17,7 +17,7 @@ export interface ComponentProps {
   allFields: NormalizedFields['byId'];
 }
 
-const typeToParametersFormMap: { [key in DataType]?: ComponentType<any> } = {
+const typeToParametersFormMap: { [key in DataType]?: ComponentType<React.PropsWithChildren<any>> } = {
   alias: AliasTypeRequiredParameters,
   token_count: TokenCountTypeRequiredParameters,
   scaled_float: ScaledFloatTypeRequiredParameters,
@@ -27,5 +27,5 @@ const typeToParametersFormMap: { [key in DataType]?: ComponentType<any> } = {
 export const getRequiredParametersFormForType = (
   type: MainType,
   subType?: SubType
-): ComponentType<ComponentProps> | undefined =>
+): ComponentType<React.PropsWithChildren<ComponentProps>> | undefined =>
   typeToParametersFormMap[subType as DataType] || typeToParametersFormMap[type];

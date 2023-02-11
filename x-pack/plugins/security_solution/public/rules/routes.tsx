@@ -47,7 +47,7 @@ const RulesSubRoutes = [
   },
 ];
 
-const RulesContainerComponent: React.FC = () => {
+const RulesContainerComponent: React.FC<React.PropsWithChildren<unknown>> = () => {
   useReadonlyHeader(i18n.READ_ONLY_BADGE_TOOLTIP);
 
   return (

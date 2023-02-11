@@ -18,7 +18,7 @@ interface Props {
   selectedField: string;
 }
 
-export const TimeFieldSelect: FC<Props> = ({ fields, changeHandler, selectedField }) => {
+export const TimeFieldSelect: FC<React.PropsWithChildren<Props>> = ({ fields, changeHandler, selectedField }) => {
   const { jobCreator } = useContext(JobCreatorContext);
   const options: EuiComboBoxOptionOption[] = createFieldOptions(
     fields,

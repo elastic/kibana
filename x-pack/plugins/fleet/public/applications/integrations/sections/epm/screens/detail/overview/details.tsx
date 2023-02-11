@@ -58,7 +58,7 @@ const Replacements = euiStyled(EuiFlexItem)`
   }
 `;
 
-export const Details: React.FC<Props> = memo(({ packageInfo }) => {
+export const Details: React.FC<React.PropsWithChildren<Props>> = memo(({ packageInfo }) => {
   const { data: categoriesData, isLoading: isLoadingCategories } = useGetCategoriesQuery();
   const packageCategories: string[] = useMemo(() => {
     if (!isLoadingCategories && categoriesData?.items) {

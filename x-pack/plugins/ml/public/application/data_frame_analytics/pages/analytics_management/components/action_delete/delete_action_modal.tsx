@@ -17,7 +17,7 @@ import {
 
 import { DeleteAction } from './use_delete_action';
 
-export const DeleteActionModal: FC<DeleteAction> = ({
+export const DeleteActionModal: FC<React.PropsWithChildren<DeleteAction>> = ({
   closeModal,
   deleteAndCloseModal,
   deleteTargetIndex,

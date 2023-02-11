@@ -18,7 +18,7 @@ export interface Props {
   children: React.ReactElement;
 }
 
-export const RulesPageTourComponent: React.FC<Props> = ({ children }) => {
+export const RulesPageTourComponent: React.FC<React.PropsWithChildren<Props>> = ({ children }) => {
   const tourConfig = {
     currentTourStep: 1,
     isTourActive: true,

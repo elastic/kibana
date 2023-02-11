@@ -27,9 +27,7 @@ const defaultFields: Fields = {
   priority: [],
 };
 
-const ServiceNowSIRFieldsComponent: React.FunctionComponent<
-  ConnectorFieldsProps<ServiceNowSIRFieldsType>
-> = ({ isEdit = true, fields, connector, onChange }) => {
+const ServiceNowSIRFieldsComponent: React.FunctionComponent<React.PropsWithChildren<ConnectorFieldsProps<ServiceNowSIRFieldsType>>> = ({ isEdit = true, fields, connector, onChange }) => {
   const init = useRef(true);
   const {
     category = null,

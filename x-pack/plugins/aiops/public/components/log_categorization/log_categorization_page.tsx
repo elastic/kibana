@@ -40,7 +40,7 @@ import { InformationText } from './information_text';
 
 const BAR_TARGET = 20;
 
-export const LogCategorizationPage: FC = () => {
+export const LogCategorizationPage: FC<React.PropsWithChildren<unknown>> = () => {
   const {
     notifications: { toasts },
   } = useAiopsAppContext();

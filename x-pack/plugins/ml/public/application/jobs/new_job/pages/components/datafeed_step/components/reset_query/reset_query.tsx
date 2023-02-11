@@ -12,7 +12,7 @@ import { EuiButtonEmpty, EuiConfirmModal, EuiCodeBlock, EuiSpacer } from '@elast
 import { JobCreatorContext } from '../../../job_creator_context';
 import { getDefaultDatafeedQuery } from '../../../../../utils/new_job_utils';
 
-export const ResetQueryButton: FC = () => {
+export const ResetQueryButton: FC<React.PropsWithChildren<unknown>> = () => {
   const { jobCreator, jobCreatorUpdate } = useContext(JobCreatorContext);
   const [confirmModalVisible, setConfirmModalVisible] = useState(false);
   const [defaultQueryString] = useState(JSON.stringify(getDefaultDatafeedQuery(), null, 2));

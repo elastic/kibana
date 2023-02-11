@@ -26,7 +26,7 @@ interface Props {
   title: string;
 }
 
-const CompareFieldsTableComponent: React.FC<Props> = ({
+const CompareFieldsTableComponent: React.FC<React.PropsWithChildren<Props>> = ({
   enrichedFieldMetadata,
   getTableColumns,
   title,

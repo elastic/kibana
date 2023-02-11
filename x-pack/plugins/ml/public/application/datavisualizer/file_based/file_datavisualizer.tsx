@@ -23,7 +23,7 @@ import { mlNodesAvailable, getMlNodeCount } from '../../ml_nodes_check/check_ml_
 import { checkPermission } from '../../capabilities/check_capabilities';
 import { MlPageHeader } from '../../components/page_header';
 
-export const FileDataVisualizerPage: FC = () => {
+export const FileDataVisualizerPage: FC<React.PropsWithChildren<unknown>> = () => {
   useTimefilter({ timeRangeSelector: false, autoRefreshSelector: false });
   const {
     services: {

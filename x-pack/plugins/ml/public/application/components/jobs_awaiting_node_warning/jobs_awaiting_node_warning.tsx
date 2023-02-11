@@ -15,7 +15,7 @@ interface Props {
   jobCount: number;
 }
 
-export const JobsAwaitingNodeWarning: FC<Props> = ({ jobCount }) => {
+export const JobsAwaitingNodeWarning: FC<React.PropsWithChildren<Props>> = ({ jobCount }) => {
   if (lazyMlNodesAvailable() === false || jobCount === 0) {
     return null;
   }

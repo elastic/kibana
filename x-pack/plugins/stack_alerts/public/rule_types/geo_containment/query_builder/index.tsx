@@ -62,9 +62,7 @@ function validateQuery(query: Query) {
   return true;
 }
 
-export const GeoContainmentAlertTypeExpression: React.FunctionComponent<
-  RuleTypeParamsExpressionProps<GeoContainmentAlertParams>
-> = ({ ruleParams, ruleInterval, setRuleParams, setRuleProperty, errors, data, unifiedSearch }) => {
+export const GeoContainmentAlertTypeExpression: React.FunctionComponent<React.PropsWithChildren<RuleTypeParamsExpressionProps<GeoContainmentAlertParams>>> = ({ ruleParams, ruleInterval, setRuleParams, setRuleProperty, errors, data, unifiedSearch }) => {
   const {
     index,
     indexId,

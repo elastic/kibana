@@ -26,7 +26,7 @@ interface HealthTruncateTextProps {
  * @param healthColor - color for EuiHealth component
  * @param tooltipContent - tooltip content
  */
-export const HealthTruncateText: React.FC<HealthTruncateTextProps> = ({
+export const HealthTruncateText: React.FC<React.PropsWithChildren<HealthTruncateTextProps>> = ({
   tooltipContent,
   children,
   healthColor,

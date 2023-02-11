@@ -18,7 +18,7 @@ interface Props {
   hasErrors: boolean;
 }
 
-export const LoggingActionFields: React.FunctionComponent<Props> = ({
+export const LoggingActionFields: React.FunctionComponent<React.PropsWithChildren<Props>> = ({
   action,
   editAction,
   errors,

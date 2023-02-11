@@ -7,6 +7,6 @@
 
 import React, { FC } from 'react';
 
-export const StepCreateSummary: FC = React.memo(() => {
+export const StepCreateSummary: FC<React.PropsWithChildren<unknown>> = React.memo(() => {
   return null;
 });

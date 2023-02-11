@@ -70,7 +70,7 @@ export const shouldShowStreamsByDefault = (
   );
 };
 
-export const PackagePolicyInputPanel: React.FunctionComponent<{
+export const PackagePolicyInputPanel: React.FunctionComponent<React.PropsWithChildren<{
   packageInput: RegistryInput;
   packageInfo: PackageInfo;
   packagePolicy: NewPackagePolicy;
@@ -81,7 +81,7 @@ export const PackagePolicyInputPanel: React.FunctionComponent<{
   inputValidationResults: PackagePolicyInputValidationResults;
   forceShowErrors?: boolean;
   isEditPage?: boolean;
-}> = memo(
+}>> = memo(
   ({
     packageInput,
     packageInfo,

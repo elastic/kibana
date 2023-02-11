@@ -27,7 +27,7 @@ interface SettingsPanelProps {
   value: boolean;
 }
 
-export const SettingsPanel: React.FC<SettingsPanelProps> = ({
+export const SettingsPanel: React.FC<React.PropsWithChildren<SettingsPanelProps>> = ({
   description,
   label,
   link,

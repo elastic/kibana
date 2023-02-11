@@ -21,7 +21,7 @@ interface SourceIconProps {
   iconAsBase64?: string;
 }
 
-export const SourceIcon: React.FC<SourceIconProps> = ({
+export const SourceIcon: React.FC<React.PropsWithChildren<SourceIconProps>> = ({
   name,
   serviceType,
   className,

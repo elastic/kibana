@@ -49,7 +49,7 @@ interface Props {
   setSelectedCategory: (category: Category | null) => void;
 }
 
-export const CategoryTable: FC<Props> = ({
+export const CategoryTable: FC<React.PropsWithChildren<Props>> = ({
   categories,
   sparkLines,
   eventRate,

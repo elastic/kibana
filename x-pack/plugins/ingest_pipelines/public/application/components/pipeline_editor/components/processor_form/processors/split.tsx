@@ -66,7 +66,7 @@ const fieldsConfig: FieldsConfig = {
   },
 };
 
-export const Split: FunctionComponent = () => {
+export const Split: FunctionComponent<React.PropsWithChildren<unknown>> = () => {
   return (
     <>
       <FieldNameField

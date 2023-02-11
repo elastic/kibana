@@ -24,7 +24,7 @@ import { LogStream } from '../../../components/log_stream';
 
 const MODAL_MARGIN = 25;
 
-export const PageViewLogInContext: React.FC = () => {
+export const PageViewLogInContext: React.FC<React.PropsWithChildren<unknown>> = () => {
   const [{ contextEntry, startTimestamp, endTimestamp, sourceId }, { setContextEntry }] =
     useViewLogInProviderContext();
   const closeModal = useCallback(() => setContextEntry(undefined), [setContextEntry]);
@@ -78,7 +78,7 @@ const LogInContextWrapper = euiStyled.div<{ width: number | string; height: numb
   max-height: 75vh; // Same as EuiModal
 `;
 
-const LogEntryContext: React.FC<{ context: LogEntry['context'] }> = ({ context }) => {
+const LogEntryContext: React.FC<React.PropsWithChildren<{ context: LogEntry['context'] }>> = ({ context }) => {
   let text;
   if ('container.id' in context) {
     text = (

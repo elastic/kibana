@@ -39,10 +39,10 @@ export interface UserPanelProps {
   openUserDetailsPanel: (userName: string, onClose?: (() => void) | undefined) => void;
 }
 
-const UserPanelSection: React.FC<{
+const UserPanelSection: React.FC<React.PropsWithChildren<{
   title?: string | React.ReactElement;
   grow?: EuiFlexItemProps['grow'];
-}> = ({ grow, title, children }) =>
+}>> = ({ grow, title, children }) =>
   children ? (
     <EuiFlexItem grow={grow}>
       {title && (

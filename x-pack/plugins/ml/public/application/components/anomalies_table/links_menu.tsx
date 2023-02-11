@@ -795,7 +795,7 @@ export const LinksMenuUI = (props: LinksMenuProps) => {
   );
 };
 
-export const LinksMenu: FC<Omit<LinksMenuProps, 'onItemClick'>> = (props) => {
+export const LinksMenu: FC<React.PropsWithChildren<Omit<LinksMenuProps, 'onItemClick'>>> = (props) => {
   const [isPopoverOpen, setPopoverOpen] = useState(false);
 
   const onButtonClick = setPopoverOpen.bind(null, !isPopoverOpen);

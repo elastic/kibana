@@ -38,7 +38,7 @@ interface Props {
   isEditing?: boolean;
 }
 
-export const StepLogistics: React.FunctionComponent<Props> = React.memo(
+export const StepLogistics: React.FunctionComponent<React.PropsWithChildren<Props>> = React.memo(
   ({ defaultValue, isEditing, onChange }) => {
     const { form } = useForm({
       schema: logisticsFormSchema,

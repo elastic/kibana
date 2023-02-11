@@ -20,7 +20,7 @@ interface SourcesListProps {
   removeFilteredSource(sourceId: string): void;
 }
 
-export const SourcesList: React.FC<SourcesListProps> = ({
+export const SourcesList: React.FC<React.PropsWithChildren<SourcesListProps>> = ({
   contentSources,
   filteredSources,
   addFilteredSource,

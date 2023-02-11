@@ -46,7 +46,7 @@ interface PasswordFieldProps {
   [key: string]: any;
 }
 
-const PasswordFieldComponent: React.FC<PasswordFieldProps> = ({
+const PasswordFieldComponent: React.FC<React.PropsWithChildren<PasswordFieldProps>> = ({
   path,
   label,
   helpText,

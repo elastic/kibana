@@ -45,7 +45,7 @@ const strings = {
     }),
 };
 
-const MultiElementSidebar: React.FC = () => (
+const MultiElementSidebar: React.FC<React.PropsWithChildren<unknown>> = () => (
   <Fragment>
     <SidebarHeader title={strings.getMultiElementSidebarTitle()} />
     <EuiSpacer />
@@ -53,7 +53,7 @@ const MultiElementSidebar: React.FC = () => (
   </Fragment>
 );
 
-const GroupedElementSidebar: React.FC = () => (
+const GroupedElementSidebar: React.FC<React.PropsWithChildren<unknown>> = () => (
   <Fragment>
     <SidebarHeader title={strings.getGroupedElementSidebarTitle()} />
     <EuiSpacer />
@@ -61,7 +61,7 @@ const GroupedElementSidebar: React.FC = () => (
   </Fragment>
 );
 
-const SingleElementSidebar: React.FC<{ selectedElementId: string | null }> = ({
+const SingleElementSidebar: React.FC<React.PropsWithChildren<{ selectedElementId: string | null }>> = ({
   selectedElementId,
 }) => (
   <Fragment>
@@ -70,7 +70,7 @@ const SingleElementSidebar: React.FC<{ selectedElementId: string | null }> = ({
   </Fragment>
 );
 
-export const SidebarContent: React.FC<SidebarContentProps> = ({
+export const SidebarContent: React.FC<React.PropsWithChildren<SidebarContentProps>> = ({
   selectedToplevelNodes,
   selectedElementId,
 }) => {

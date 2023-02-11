@@ -21,7 +21,7 @@ interface Props {
   field: SearchField;
 }
 
-export const WeightSlider: React.FC<Props> = ({ name, field }) => {
+export const WeightSlider: React.FC<React.PropsWithChildren<Props>> = ({ name, field }) => {
   const { updateFieldWeight } = useActions(RelevanceTuningLogic);
 
   return (

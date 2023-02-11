@@ -61,7 +61,7 @@ interface DefinePivotStepProps {
   searchItems: SearchItems;
 }
 
-const StepDefine: FC<DefinePivotStepProps> = ({
+const StepDefine: FC<React.PropsWithChildren<DefinePivotStepProps>> = ({
   isCurrentStep,
   stepDefineState,
   setCurrentStep,
@@ -106,7 +106,7 @@ export const CreateTransformWizardContext = createContext<{
   runtimeMappings: undefined,
 });
 
-export const Wizard: FC<WizardProps> = React.memo(({ cloneConfig, searchItems }) => {
+export const Wizard: FC<React.PropsWithChildren<WizardProps>> = React.memo(({ cloneConfig, searchItems }) => {
   const appDependencies = useAppDependencies();
   const {
     ml: { FieldStatsFlyoutProvider },

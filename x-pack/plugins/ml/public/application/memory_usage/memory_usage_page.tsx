@@ -20,7 +20,7 @@ enum TAB {
   MEMORY_USAGE,
 }
 
-export const MemoryUsagePage: FC = () => {
+export const MemoryUsagePage: FC<React.PropsWithChildren<unknown>> = () => {
   const serverless = useIsServerless();
   const [selectedTab, setSelectedTab] = useState<TAB>(TAB.NODES);
   useTimefilter({ timeRangeSelector: false, autoRefreshSelector: true });

@@ -15,7 +15,7 @@ interface Props {
   repository: ReadonlyRepository;
 }
 
-export const ReadonlyDetails: React.FunctionComponent<Props> = ({ repository }) => {
+export const ReadonlyDetails: React.FunctionComponent<React.PropsWithChildren<Props>> = ({ repository }) => {
   const {
     settings: { url },
   } = repository;

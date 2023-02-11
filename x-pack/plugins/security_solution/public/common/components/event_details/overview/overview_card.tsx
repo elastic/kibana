@@ -50,7 +50,7 @@ interface OverviewCardProps {
   title: string;
 }
 
-export const OverviewCard: React.FC<OverviewCardProps> = ({ title, children }) => (
+export const OverviewCard: React.FC<React.PropsWithChildren<OverviewCardProps>> = ({ title, children }) => (
   <OverviewPanel borderRadius="none" hasShadow={false} hasBorder={false} paddingSize="s">
     <EuiText size="s">{title}</EuiText>
     <EuiSpacer size="s" />
@@ -76,7 +76,7 @@ type OverviewCardWithActionsProps = OverviewCardProps & {
   dataTestSubj?: string;
 };
 
-export const OverviewCardWithActions: React.FC<OverviewCardWithActionsProps> = ({
+export const OverviewCardWithActions: React.FC<React.PropsWithChildren<OverviewCardWithActionsProps>> = ({
   title,
   children,
   contextId,

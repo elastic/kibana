@@ -30,7 +30,7 @@ const filter: FormattedFilterViewInstance = {
   },
 };
 
-const component: FC<any> = ({ value }) => (
+const component: FC<React.PropsWithChildren<any>> = ({ value }) => (
   <EuiText>
     <EuiTextColor color="success">
       <h3>{value}</h3>

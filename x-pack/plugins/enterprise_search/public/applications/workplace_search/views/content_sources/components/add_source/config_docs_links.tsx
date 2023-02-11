@@ -22,7 +22,7 @@ interface ConfigDocsLinksProps {
   discussUrl?: string;
 }
 
-export const ConfigDocsLinks: React.FC<ConfigDocsLinksProps> = ({
+export const ConfigDocsLinks: React.FC<React.PropsWithChildren<ConfigDocsLinksProps>> = ({
   name,
   documentationUrl,
   applicationPortalUrl,

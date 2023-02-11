@@ -21,7 +21,7 @@ export default {
   title: 'app/RumDashboard/CoreVitalItem',
   component: CoreVitalItem,
   decorators: [
-    (Story: ComponentType) => (
+    (Story: ComponentType<React.PropsWithChildren<unknown>>) => (
       <IntlProvider locale="en">
         <KibanaReactContext.Provider>
           <Story />

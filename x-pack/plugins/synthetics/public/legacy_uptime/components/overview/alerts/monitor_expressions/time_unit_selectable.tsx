@@ -24,7 +24,7 @@ interface Props {
   timeRangeOptions: TimeRangeOption[];
 }
 
-export const TimeUnitSelectable: React.FC<Props> = ({
+export const TimeUnitSelectable: React.FC<React.PropsWithChildren<Props>> = ({
   'aria-label': ariaLabel,
   'data-test-subj': dataTestSubj,
   headlineText: headlineText,

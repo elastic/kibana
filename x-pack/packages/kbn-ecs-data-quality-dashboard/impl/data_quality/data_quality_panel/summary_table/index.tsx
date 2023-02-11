@@ -51,7 +51,7 @@ interface Props {
   toggleExpanded: (indexName: string) => void;
 }
 
-const SummaryTableComponent: React.FC<Props> = ({
+const SummaryTableComponent: React.FC<React.PropsWithChildren<Props>> = ({
   defaultNumberFormat,
   getTableColumns,
   itemIdToExpandedRowMap,

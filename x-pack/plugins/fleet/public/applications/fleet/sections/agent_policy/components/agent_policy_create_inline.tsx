@@ -44,7 +44,7 @@ interface Props {
   agentPolicyName: string;
 }
 
-export const AgentPolicyCreateInlineForm: React.FunctionComponent<Props> = ({
+export const AgentPolicyCreateInlineForm: React.FunctionComponent<React.PropsWithChildren<Props>> = ({
   updateAgentPolicy,
   isFleetServerPolicy,
   agentPolicyName,

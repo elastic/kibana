@@ -11,7 +11,7 @@ import { getNewJobDefaults } from '../../../../../../../services/ml_server_info'
 import { JobCreatorContext } from '../../../job_creator_context';
 import { Description } from './description';
 
-export const ScrollSizeInput: FC = () => {
+export const ScrollSizeInput: FC<React.PropsWithChildren<unknown>> = () => {
   const { jobCreator, jobCreatorUpdate, jobValidator, jobValidatorUpdated } =
     useContext(JobCreatorContext);
   const [validation, setValidation] = useState(jobValidator.scrollSize);

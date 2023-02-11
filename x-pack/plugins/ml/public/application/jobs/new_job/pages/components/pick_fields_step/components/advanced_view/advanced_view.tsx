@@ -18,7 +18,7 @@ interface Props {
   setCanProceed?: (proceed: boolean) => void;
 }
 
-export const AdvancedView: FC<Props> = ({ isActive, setCanProceed }) => {
+export const AdvancedView: FC<React.PropsWithChildren<Props>> = ({ isActive, setCanProceed }) => {
   const [metricsValid, setMetricValid] = useState(false);
   const [settingsValid, setSettingsValid] = useState(false);
 

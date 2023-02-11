@@ -46,7 +46,7 @@ const ConnectorSpan = styled.span`
   }
 `;
 
-export const AlertDefaultsForm: React.FC<SettingsFormProps> = ({
+export const AlertDefaultsForm: React.FC<React.PropsWithChildren<SettingsFormProps>> = ({
   onChange,
   loading,
   formFields,

@@ -19,7 +19,7 @@ import {
 } from '@elastic/eui';
 
 import { useDocumentationLinks } from '../../../../hooks/use_documentation_links';
-export const EditTransformFlyoutCallout: FC = () => {
+export const EditTransformFlyoutCallout: FC<React.PropsWithChildren<unknown>> = () => {
   const { esTransformUpdate } = useDocumentationLinks();
 
   return (

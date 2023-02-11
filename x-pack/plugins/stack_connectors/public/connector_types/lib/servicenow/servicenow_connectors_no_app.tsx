@@ -12,7 +12,7 @@ import { ConnectorFormSchema } from '@kbn/triggers-actions-ui-plugin/public';
 import { Credentials } from './credentials';
 import { ServiceNowConfig, ServiceNowSecrets } from './types';
 
-const ServiceNowConnectorFieldsNoApp: React.FC<ActionConnectorFieldsProps> = ({
+const ServiceNowConnectorFieldsNoApp: React.FC<React.PropsWithChildren<ActionConnectorFieldsProps>> = ({
   isEdit,
   readOnly,
 }) => {

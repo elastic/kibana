@@ -20,7 +20,7 @@ import { FetchMlInferenceErrorsApiLogic } from '../../../api/pipelines/fetch_ml_
 
 import { InferenceErrorsLogic } from './inference_errors_logic';
 
-export const InferenceErrors: React.FC = () => {
+export const InferenceErrors: React.FC<React.PropsWithChildren<unknown>> = () => {
   const { indexName, isLoading, inferenceErrors } = useValues(InferenceErrorsLogic);
   const { makeRequest } = useActions(FetchMlInferenceErrorsApiLogic);
 

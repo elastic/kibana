@@ -23,7 +23,7 @@ const mergeQueryStrings = (query: string, queryFromHash: string) => {
   return stringify({ ...queryObject, ...hashObject });
 };
 
-export const CanvasRouter: FC<{ history: History }> = ({ history }) => (
+export const CanvasRouter: FC<React.PropsWithChildren<{ history: History }>> = ({ history }) => (
   <Router history={history}>
     <Route
       path="/"

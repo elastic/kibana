@@ -12,7 +12,7 @@ import stringify from 'json-stable-stringify';
 import React from 'react';
 import type { State } from 'xstate';
 
-export const InvalidStateCallout: React.FC<{ state: State<any, any, any, any, any> }> = ({
+export const InvalidStateCallout: React.FC<React.PropsWithChildren<{ state: State<any, any, any, any, any> }>> = ({
   state,
 }) => (
   <EuiCallOut title={invalidStateCalloutTitle} color="danger" iconType="alert">

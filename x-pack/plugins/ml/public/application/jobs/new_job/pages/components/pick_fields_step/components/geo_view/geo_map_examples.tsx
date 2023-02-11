@@ -23,7 +23,7 @@ interface Props {
   layerList: LayerDescriptor[];
 }
 
-export const GeoMapExamples: FC<Props> = ({
+export const GeoMapExamples: FC<React.PropsWithChildren<Props>> = ({
   geoField,
   splitField,
   fieldValues,

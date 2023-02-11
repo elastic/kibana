@@ -37,7 +37,7 @@ type Props = Omit<_EuiPanelDivlike, 'title'> & {
   className?: string;
 };
 
-export const DataPanel: React.FC<Props> = ({
+export const DataPanel: React.FC<React.PropsWithChildren<Props>> = ({
   title,
   titleSize = 'xs',
   subtitle,

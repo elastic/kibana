@@ -36,7 +36,7 @@ import { NativeConnectorAdvancedConfiguration } from './native_connector_advance
 import { NativeConnectorConfigurationConfig } from './native_connector_configuration_config';
 import { ResearchConfiguration } from './research_configuration';
 
-export const NativeConnectorConfiguration: React.FC = () => {
+export const NativeConnectorConfiguration: React.FC<React.PropsWithChildren<unknown>> = () => {
   const { index } = useValues(IndexViewLogic);
 
   if (!isConnectorIndex(index)) {

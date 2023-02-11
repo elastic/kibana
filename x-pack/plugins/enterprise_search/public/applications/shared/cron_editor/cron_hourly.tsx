@@ -18,7 +18,7 @@ interface Props {
   onChange: ({ minute }: { minute?: string }) => void;
 }
 
-export const CronHourly: React.FunctionComponent<Props> = ({
+export const CronHourly: React.FunctionComponent<React.PropsWithChildren<Props>> = ({
   disabled,
   minute,
   minuteOptions,

@@ -45,7 +45,7 @@ export interface EventFiltersFlyoutProps {
   };
 }
 
-export const EventFiltersFlyout: React.FC<EventFiltersFlyoutProps> = memo(
+export const EventFiltersFlyout: React.FC<React.PropsWithChildren<EventFiltersFlyoutProps>> = memo(
   ({ onCancel: onClose, data, ...flyoutProps }) => {
     const toasts = useToasts();
     const http = useHttp();

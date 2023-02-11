@@ -33,7 +33,7 @@ const embeddablesRegistry: {
 
 const renderEmbeddableFactory = (core: CoreStart, plugins: StartDeps) => {
   const I18nContext = core.i18n.Context;
-  const EmbeddableRenderer: FC<{ embeddable: IEmbeddable }> = ({ embeddable }) => {
+  const EmbeddableRenderer: FC<React.PropsWithChildren<{ embeddable: IEmbeddable }>> = ({ embeddable }) => {
     const currentAppId = useObservable(core.application.currentAppId$, undefined);
 
     if (!currentAppId) {

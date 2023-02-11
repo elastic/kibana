@@ -28,7 +28,7 @@ import { EngineListIndicesFlyout } from './engines_list_flyout';
 import { EnginesListFlyoutLogic } from './engines_list_flyout_logic';
 import { EnginesListLogic } from './engines_list_logic';
 
-const CreateButton: React.FC = () => {
+const CreateButton: React.FC<React.PropsWithChildren<unknown>> = () => {
   const { openEngineCreate } = useActions(EnginesListLogic);
   return (
     <EuiButton
@@ -45,7 +45,7 @@ const CreateButton: React.FC = () => {
   );
 };
 
-export const EnginesList: React.FC = () => {
+export const EnginesList: React.FC<React.PropsWithChildren<unknown>> = () => {
   const {
     closeDeleteEngineModal,
     closeEngineCreate,

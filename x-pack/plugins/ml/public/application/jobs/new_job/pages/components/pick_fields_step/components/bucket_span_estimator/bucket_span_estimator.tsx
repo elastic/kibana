@@ -18,7 +18,7 @@ interface Props {
   setEstimating(estimating: boolean): void;
 }
 
-export const BucketSpanEstimator: FC<Props> = ({ setEstimating }) => {
+export const BucketSpanEstimator: FC<React.PropsWithChildren<Props>> = ({ setEstimating }) => {
   const { jobCreator, jobCreatorUpdated } = useContext(JobCreatorContext);
   const { status, estimateBucketSpan } = useEstimateBucketSpan();
   const [noDetectors, setNoDetectors] = useState(jobCreator.detectors.length === 0);

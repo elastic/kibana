@@ -49,7 +49,7 @@ export const defaultExpression = {
   influencerFilter: undefined,
 };
 
-export const Expression: React.FC<Props> = (props) => {
+export const Expression: React.FC<React.PropsWithChildren<Props>> = (props) => {
   const { hasInfraMLCapabilities, isLoading: isLoadingMLCapabilities } = useInfraMLCapabilities();
   const { http, notifications } = useKibanaContextForPlugin().services;
   const { space } = useActiveKibanaSpace();

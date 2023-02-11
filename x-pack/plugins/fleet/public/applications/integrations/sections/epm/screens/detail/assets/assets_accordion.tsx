@@ -33,7 +33,7 @@ interface Props {
   savedObjects: AssetSavedObject[];
 }
 
-export const AssetsAccordion: FunctionComponent<Props> = ({ savedObjects, type }) => {
+export const AssetsAccordion: FunctionComponent<React.PropsWithChildren<Props>> = ({ savedObjects, type }) => {
   const { http } = useStartServices();
 
   const isDashboard = type === KibanaAssetType.dashboard;

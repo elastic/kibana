@@ -22,7 +22,7 @@ interface Props {
   nameLabel?: ReactElement<any, any>;
 }
 
-export const AgentPolicyGeneralFields: React.FunctionComponent<Props> = ({
+export const AgentPolicyGeneralFields: React.FunctionComponent<React.PropsWithChildren<Props>> = ({
   agentPolicy,
   updateAgentPolicy,
   validation,

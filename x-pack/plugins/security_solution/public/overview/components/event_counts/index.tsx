@@ -29,7 +29,7 @@ interface Props extends Pick<GlobalTimeArgs, 'from' | 'to' | 'setQuery'> {
   query: Query;
 }
 
-const EventCountsComponent: React.FC<Props> = ({
+const EventCountsComponent: React.FC<React.PropsWithChildren<Props>> = ({
   filters,
   from,
   indexNames,

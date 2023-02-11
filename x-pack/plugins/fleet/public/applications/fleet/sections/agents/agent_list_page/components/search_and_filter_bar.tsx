@@ -40,7 +40,7 @@ const FlexEndEuiFlexItem = styled(EuiFlexItem)`
   align-self: flex-end;
 `;
 
-export const SearchAndFilterBar: React.FunctionComponent<{
+export const SearchAndFilterBar: React.FunctionComponent<React.PropsWithChildren<{
   agentPolicies: AgentPolicy[];
   draftKuery: string;
   onDraftKueryChange: (kuery: string) => void;
@@ -65,7 +65,7 @@ export const SearchAndFilterBar: React.FunctionComponent<{
   visibleAgents: Agent[];
   onClickAgentActivity: () => void;
   showAgentActivityTour: { isOpen: boolean };
-}> = ({
+}>> = ({
   agentPolicies,
   draftKuery,
   onDraftKueryChange,

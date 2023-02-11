@@ -13,7 +13,7 @@ interface FlyoutPanelProps {
   title: string;
 }
 
-export const FlyoutPanel: React.FC<FlyoutPanelProps> = ({ children, title }) => {
+export const FlyoutPanel: React.FC<React.PropsWithChildren<FlyoutPanelProps>> = ({ children, title }) => {
   return (
     <EuiPanel paddingSize="l" color="subdued" hasShadow={false}>
       <EuiTitle size="xs">

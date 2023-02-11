@@ -19,7 +19,7 @@ interface Props {
   detectorIndex: number;
 }
 
-export const ByFieldSelector: FC<Props> = ({ detectorIndex }) => {
+export const ByFieldSelector: FC<React.PropsWithChildren<Props>> = ({ detectorIndex }) => {
   const { jobCreator: jc, jobCreatorUpdate, jobCreatorUpdated } = useContext(JobCreatorContext);
   const jobCreator = jc as PopulationJobCreator;
 

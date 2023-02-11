@@ -19,7 +19,7 @@ interface ConnectorCardProps {
   isLoading: boolean;
 }
 
-const ConnectorCardDisplay: React.FC<ConnectorCardProps> = ({
+const ConnectorCardDisplay: React.FC<React.PropsWithChildren<ConnectorCardProps>> = ({
   connectorType,
   title,
   listItems,

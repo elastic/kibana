@@ -46,7 +46,7 @@ const Error = () => (
   </EuiFlexGroup>
 );
 
-export const ChartPanel: React.FC<ChartPanelProps> = ({
+export const ChartPanel: React.FC<React.PropsWithChildren<ChartPanelProps>> = ({
   title,
   hasBorder = true,
   isLoading,

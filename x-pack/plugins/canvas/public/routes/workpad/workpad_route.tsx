@@ -39,7 +39,7 @@ export const WorkpadRoute = () => {
   );
 };
 
-const WorkpadRouteComponent: FC<{ route: WorkpadRouteProps }> = ({ route }) => {
+const WorkpadRouteComponent: FC<React.PropsWithChildren<{ route: WorkpadRouteProps }>> = ({ route }) => {
   const getRedirectPath = useCallback(
     (workpadId: string) =>
       `/workpad/${workpadId}${
@@ -88,7 +88,7 @@ export const ExportWorkpadRoute = () => {
   );
 };
 
-const ExportWorkpadRouteComponent: FC<{ route: WorkpadRouteProps }> = ({ route: { match } }) => {
+const ExportWorkpadRouteComponent: FC<React.PropsWithChildren<{ route: WorkpadRouteProps }>> = ({ route: { match } }) => {
   const getRedirectPath = useCallback(
     (workpadId: string) => `/export/workpad/pdf/${workpadId}/page/${match.params.pageNumber}`,
     [match.params.pageNumber]
@@ -109,7 +109,7 @@ const ExportWorkpadRouteComponent: FC<{ route: WorkpadRouteProps }> = ({ route: 
   );
 };
 
-export const ExportRouteManager: FC = ({ children }) => {
+export const ExportRouteManager: FC<React.PropsWithChildren<unknown>> = ({ children }) => {
   const params = useParams<WorkpadPageRouteParams>();
   usePageSync();
 
@@ -122,7 +122,7 @@ export const ExportRouteManager: FC = ({ children }) => {
   return <>{children}</>;
 };
 
-export const WorkpadHistoryManager: FC = ({ children }) => {
+export const WorkpadHistoryManager: FC<React.PropsWithChildren<unknown>> = ({ children }) => {
   useRestoreHistory();
   useWorkpadHistory();
   usePageSync();
@@ -131,12 +131,12 @@ export const WorkpadHistoryManager: FC = ({ children }) => {
   return <>{children}</>;
 };
 
-const WorkpadLoaderComponent: FC<{
+const WorkpadLoaderComponent: FC<React.PropsWithChildren<{
   params: WorkpadRouteProps['match']['params'];
   loadPages?: boolean;
   getRedirectPath: (workpadId: string) => string;
   children: (workpad: CanvasWorkpad) => JSX.Element;
-}> = ({ params, children, loadPages, getRedirectPath }) => {
+}>> = ({ params, children, loadPages, getRedirectPath }) => {
   const [workpad, error] = useWorkpad(params.id, loadPages, getRedirectPath);
   const notifyService = useNotifyService();
 

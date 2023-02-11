@@ -15,7 +15,7 @@ interface FunctionPickerProps {
   onChange: (value: string) => void;
 }
 
-export const FunctionPicker: FC<FunctionPickerProps> = React.memo(({ value, onChange }) => {
+export const FunctionPicker: FC<React.PropsWithChildren<FunctionPickerProps>> = React.memo(({ value, onChange }) => {
   const options = Object.keys(fnOperationTypeMapping).map((v) => {
     return {
       value: v,

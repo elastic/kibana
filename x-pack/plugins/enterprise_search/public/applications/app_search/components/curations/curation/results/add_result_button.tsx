@@ -16,7 +16,7 @@ import { CurationLogic } from '..';
 
 import { AddResultLogic } from '.';
 
-export const AddResultButton: React.FC = () => {
+export const AddResultButton: React.FC<React.PropsWithChildren<unknown>> = () => {
   const { openFlyout } = useActions(AddResultLogic);
   const { isAutomated } = useValues(CurationLogic);
 

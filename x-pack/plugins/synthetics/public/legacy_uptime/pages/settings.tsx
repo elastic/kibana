@@ -59,7 +59,7 @@ export const isValidCertVal = (val?: number): string | undefined => {
   }
 };
 
-export const SettingsPage: React.FC = () => {
+export const SettingsPage: React.FC<React.PropsWithChildren<unknown>> = () => {
   const dss = useSelector(selectDynamicSettings);
 
   useBreadcrumbs([{ text: Translations.settings.breadcrumbText }]);

@@ -62,7 +62,7 @@ const fieldsConfig: FieldsConfig = {
   },
 };
 
-export const Gsub: FunctionComponent = () => {
+export const Gsub: FunctionComponent<React.PropsWithChildren<unknown>> = () => {
   return (
     <>
       <FieldNameField

@@ -36,7 +36,7 @@ const FlexGroupWithMinWidth = styled(EuiFlexGroup)`
   min-width: 0px;
 `;
 
-export const FleetServerHostsTable: React.FunctionComponent<FleetServerHostsTableProps> = ({
+export const FleetServerHostsTable: React.FunctionComponent<React.PropsWithChildren<FleetServerHostsTableProps>> = ({
   fleetServerHosts,
   deleteFleetServerHost,
 }) => {

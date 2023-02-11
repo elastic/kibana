@@ -36,7 +36,7 @@ const REFRESH_INTERVAL_OVERRIDE = {
   value: 10000,
 };
 
-export const GlobalStateProvider: React.FC<GlobalStateProviderProps> = ({
+export const GlobalStateProvider: React.FC<React.PropsWithChildren<GlobalStateProviderProps>> = ({
   uiSettings,
   query,
   toasts,

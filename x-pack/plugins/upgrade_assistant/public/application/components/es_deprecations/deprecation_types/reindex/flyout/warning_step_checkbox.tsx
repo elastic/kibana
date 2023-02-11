@@ -28,14 +28,14 @@ export const hasReindexWarning = (
   return Boolean(warnings.find((warning) => warning.warningType === warningType));
 };
 
-const WarningCheckbox: React.FunctionComponent<{
+const WarningCheckbox: React.FunctionComponent<React.PropsWithChildren<{
   isChecked: boolean;
   warningId: string;
   label: React.ReactNode;
   description: React.ReactNode;
   documentationUrl?: string;
   onChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
-}> = ({ isChecked, warningId, label, onChange, description, documentationUrl }) => (
+}>> = ({ isChecked, warningId, label, onChange, description, documentationUrl }) => (
   <>
     <EuiText>
       <EuiFlexGroup justifyContent="spaceBetween">
@@ -82,7 +82,7 @@ export interface WarningCheckboxProps {
   meta?: ReindexWarning['meta'];
 }
 
-export const CustomTypeNameWarningCheckbox: React.FunctionComponent<WarningCheckboxProps> = ({
+export const CustomTypeNameWarningCheckbox: React.FunctionComponent<React.PropsWithChildren<WarningCheckboxProps>> = ({
   isChecked,
   onChange,
   docLinks,
@@ -118,7 +118,7 @@ export const CustomTypeNameWarningCheckbox: React.FunctionComponent<WarningCheck
   );
 };
 
-export const DeprecatedSettingWarningCheckbox: React.FunctionComponent<WarningCheckboxProps> = ({
+export const DeprecatedSettingWarningCheckbox: React.FunctionComponent<React.PropsWithChildren<WarningCheckboxProps>> = ({
   isChecked,
   onChange,
   docLinks,
@@ -161,9 +161,7 @@ export const DeprecatedSettingWarningCheckbox: React.FunctionComponent<WarningCh
   );
 };
 
-export const ReplaceIndexWithAliasWarningCheckbox: React.FunctionComponent<
-  WarningCheckboxProps
-> = ({ isChecked, onChange, docLinks, id, meta }) => {
+export const ReplaceIndexWithAliasWarningCheckbox: React.FunctionComponent<React.PropsWithChildren<WarningCheckboxProps>> = ({ isChecked, onChange, docLinks, id, meta }) => {
   return (
     <WarningCheckbox
       isChecked={isChecked}

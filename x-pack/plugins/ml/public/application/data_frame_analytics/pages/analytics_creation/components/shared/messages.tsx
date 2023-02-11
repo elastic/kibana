@@ -15,7 +15,7 @@ interface Props {
   messages: FormMessage[];
 }
 
-export const Messages: FC<Props> = ({ messages }) => {
+export const Messages: FC<React.PropsWithChildren<Props>> = ({ messages }) => {
   return (
     <>
       {messages.map((requestMessage, i) => (

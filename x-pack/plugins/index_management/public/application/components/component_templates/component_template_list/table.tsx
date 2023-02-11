@@ -33,7 +33,7 @@ export interface Props {
   history: ScopedHistory;
 }
 
-export const ComponentTable: FunctionComponent<Props> = ({
+export const ComponentTable: FunctionComponent<React.PropsWithChildren<Props>> = ({
   componentTemplates,
   onReloadClick,
   onDeleteClick,

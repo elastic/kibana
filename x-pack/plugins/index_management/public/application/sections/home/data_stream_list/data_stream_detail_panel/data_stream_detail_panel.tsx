@@ -43,7 +43,7 @@ interface DetailsListProps {
   }>;
 }
 
-const DetailsList: React.FunctionComponent<DetailsListProps> = ({ details }) => {
+const DetailsList: React.FunctionComponent<React.PropsWithChildren<DetailsListProps>> = ({ details }) => {
   const groups: any[] = [];
   let items: any[];
 
@@ -81,7 +81,7 @@ interface Props {
   onClose: (shouldReload?: boolean) => void;
 }
 
-export const DataStreamDetailPanel: React.FunctionComponent<Props> = ({
+export const DataStreamDetailPanel: React.FunctionComponent<React.PropsWithChildren<Props>> = ({
   dataStreamName,
   onClose,
 }) => {

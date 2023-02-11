@@ -22,7 +22,7 @@ export const fromLensRouteFactory = (): MlRoute => ({
   breadcrumbs: [],
 });
 
-const PageWrapper: FC<PageProps> = ({ location, deps }) => {
+const PageWrapper: FC<React.PropsWithChildren<PageProps>> = ({ location, deps }) => {
   const { lensId, vis, from, to, query, filters, layerIndex }: Record<string, any> = parse(
     location.search,
     {

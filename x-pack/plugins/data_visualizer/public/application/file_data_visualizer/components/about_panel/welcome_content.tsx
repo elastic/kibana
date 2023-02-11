@@ -16,7 +16,7 @@ interface Props {
   hasPermissionToImport: boolean;
 }
 
-export const WelcomeContent: FC<Props> = ({ hasPermissionToImport }) => {
+export const WelcomeContent: FC<React.PropsWithChildren<Props>> = ({ hasPermissionToImport }) => {
   const {
     services: {
       fileUpload: { getMaxBytesFormatted },

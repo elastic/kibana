@@ -44,7 +44,7 @@ type UiRender = (ui: React.ReactElement, options?: RenderOptions) => RenderResul
 window.scrollTo = jest.fn();
 
 /** A utility for wrapping children in the providers required to run most tests */
-const TestProvidersComponent: React.FC<TestProviderProps> = ({
+const TestProvidersComponent: React.FC<React.PropsWithChildren<TestProviderProps>> = ({
   children,
   features,
   owner = [SECURITY_SOLUTION_OWNER],
@@ -103,7 +103,7 @@ export interface AppMockRenderer {
   render: UiRender;
   coreStart: StartServices;
   queryClient: QueryClient;
-  AppWrapper: React.FC<{ children: React.ReactElement }>;
+  AppWrapper: React.FC<React.PropsWithChildren<{ children: React.ReactElement }>>;
 }
 
 export const testQueryClient = new QueryClient({
@@ -147,7 +147,7 @@ export const createAppMockRenderer = ({
     },
   });
 
-  const AppWrapper: React.FC<{ children: React.ReactElement }> = ({ children }) => (
+  const AppWrapper: React.FC<React.PropsWithChildren<{ children: React.ReactElement }>> = ({ children }) => (
     <I18nProvider>
       <KibanaContextProvider services={services}>
         <ThemeProvider theme={() => ({ eui: euiDarkVars, darkMode: true })}>

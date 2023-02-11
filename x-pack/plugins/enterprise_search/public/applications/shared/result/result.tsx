@@ -22,7 +22,7 @@ interface ResultProps {
   metaData: MetaDataProps;
 }
 
-export const Result: React.FC<ResultProps> = ({ metaData, fields }) => {
+export const Result: React.FC<React.PropsWithChildren<ResultProps>> = ({ metaData, fields }) => {
   const [isExpanded, setIsExpanded] = useState(false);
 
   const tooltipText =

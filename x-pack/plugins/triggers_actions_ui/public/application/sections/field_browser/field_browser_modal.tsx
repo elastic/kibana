@@ -85,7 +85,7 @@ export type FieldBrowserModalProps = Pick<
  * This component has no internal state, but it uses lifecycle methods to
  * set focus to the search input, scroll to the selected category, etc
  */
-const FieldBrowserModalComponent: React.FC<FieldBrowserModalProps> = ({
+const FieldBrowserModalComponent: React.FC<React.PropsWithChildren<FieldBrowserModalProps>> = ({
   appliedFilterInput,
   columnIds,
   filteredBrowserFields,

@@ -26,7 +26,7 @@ interface Props {
   'data-test-subj'?: string;
 }
 
-export const NoDeprecationIssues: FunctionComponent<Props> = (props) => {
+export const NoDeprecationIssues: FunctionComponent<React.PropsWithChildren<Props>> = (props) => {
   const { isPartial = false } = props;
 
   return (

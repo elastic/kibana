@@ -29,7 +29,7 @@ interface ListWithSearchComponentProps {
   refreshExceptions?: boolean;
 }
 
-const ListWithSearchComponent: FC<ListWithSearchComponentProps> = ({
+const ListWithSearchComponent: FC<React.PropsWithChildren<ListWithSearchComponentProps>> = ({
   list,
   isReadOnly,
   refreshExceptions,

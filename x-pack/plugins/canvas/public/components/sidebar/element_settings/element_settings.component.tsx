@@ -45,7 +45,7 @@ interface Props {
   element: PositionedElement;
 }
 
-export const ElementSettings: FunctionComponent<Props> = ({ element }) => {
+export const ElementSettings: FunctionComponent<React.PropsWithChildren<Props>> = ({ element }) => {
   const tabs = useMemo(() => {
     const filtersTab = isExpressionWithFilters(element.expression) && {
       id: 'filters',

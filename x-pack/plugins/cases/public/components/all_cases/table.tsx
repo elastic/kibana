@@ -41,7 +41,7 @@ const Div = styled.div`
   margin-top: ${({ theme }) => theme.eui.euiSizeM};
 `;
 
-export const CasesTable: FunctionComponent<CasesTableProps> = ({
+export const CasesTable: FunctionComponent<React.PropsWithChildren<CasesTableProps>> = ({
   columns,
   data,
   goToCreateCase,

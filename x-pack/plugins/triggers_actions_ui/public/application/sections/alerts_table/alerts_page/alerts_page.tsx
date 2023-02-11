@@ -20,7 +20,7 @@ const consumers = [
   AlertConsumers.INFRASTRUCTURE,
 ];
 
-const AlertsPage: React.FunctionComponent = () => {
+const AlertsPage: React.FunctionComponent<React.PropsWithChildren<unknown>> = () => {
   const { alertsTableConfigurationRegistry } = useKibana().services;
 
   const alertStateProps = {

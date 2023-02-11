@@ -48,7 +48,7 @@ function getExperimentalFeatureValue(
   )?.features?.[feature];
 }
 
-export const ExperimentDatastreamSettings: React.FunctionComponent<Props> = ({
+export const ExperimentDatastreamSettings: React.FunctionComponent<React.PropsWithChildren<Props>> = ({
   registryDataStream,
   experimentalDataFeatures,
   setNewExperimentalDataFeatures,

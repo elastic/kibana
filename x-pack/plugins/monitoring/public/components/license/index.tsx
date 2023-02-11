@@ -30,7 +30,7 @@ import { Legacy } from '../../legacy_shims';
 interface AddLicenseProps {
   uploadPath?: string;
 }
-const AddLicense: FunctionComponent<AddLicenseProps> = ({ uploadPath }) => {
+const AddLicense: FunctionComponent<React.PropsWithChildren<AddLicenseProps>> = ({ uploadPath }) => {
   return (
     <EuiCard
       title={
@@ -148,7 +148,7 @@ export interface LicenseUpdateInfoProps {
   uploadLicensePath?: string;
 }
 
-const LicenseUpdateInfoForPrimary: FunctionComponent<LicenseUpdateInfoProps> = ({
+const LicenseUpdateInfoForPrimary: FunctionComponent<React.PropsWithChildren<LicenseUpdateInfoProps>> = ({
   isPrimaryCluster,
   uploadLicensePath,
 }) => {
@@ -160,7 +160,7 @@ const LicenseUpdateInfoForPrimary: FunctionComponent<LicenseUpdateInfoProps> = (
   return <AddLicense uploadPath={uploadLicensePath} />;
 };
 
-const LicenseUpdateInfoForRemote: FunctionComponent<LicenseUpdateInfoProps> = ({
+const LicenseUpdateInfoForRemote: FunctionComponent<React.PropsWithChildren<LicenseUpdateInfoProps>> = ({
   isPrimaryCluster,
 }) => {
   if (isPrimaryCluster) {
@@ -189,7 +189,7 @@ const LicenseUpdateInfoForRemote: FunctionComponent<LicenseUpdateInfoProps> = ({
 };
 
 export interface LicenseProps extends LicenseStatusProps, LicenseUpdateInfoProps {}
-export const License: FunctionComponent<LicenseProps> = (props) => {
+export const License: FunctionComponent<React.PropsWithChildren<LicenseProps>> = (props) => {
   const { status, type, isExpired, expiryDate } = props;
   const licenseManagement = `${Legacy.shims.getBasePath()}/app/management/stack/license_management`;
   return (

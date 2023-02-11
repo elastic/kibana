@@ -39,7 +39,7 @@ interface SourcesViewProps {
   children: React.ReactNode;
 }
 
-export const SourcesView: React.FC<SourcesViewProps> = ({ children }) => {
+export const SourcesView: React.FC<React.PropsWithChildren<SourcesViewProps>> = ({ children }) => {
   const { resetPermissionsModal } = useActions(SourcesLogic);
   const { dataLoading, permissionsModal } = useValues(SourcesLogic);
 

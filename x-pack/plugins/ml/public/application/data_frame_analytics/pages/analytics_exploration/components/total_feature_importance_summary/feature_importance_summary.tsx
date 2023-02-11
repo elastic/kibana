@@ -92,7 +92,7 @@ const calculateTotalMeanImportance = (featureClass: ClassificationTotalFeatureIm
   );
 };
 
-export const FeatureImportanceSummaryPanel: FC<FeatureImportanceSummaryPanelProps> = ({
+export const FeatureImportanceSummaryPanel: FC<React.PropsWithChildren<FeatureImportanceSummaryPanelProps>> = ({
   totalFeatureImportance,
   jobConfig,
 }) => {

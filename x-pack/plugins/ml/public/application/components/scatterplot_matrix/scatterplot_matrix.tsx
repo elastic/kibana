@@ -69,7 +69,7 @@ interface OptionLabelWithIconTipProps {
   tooltip: string;
 }
 
-const OptionLabelWithIconTip: FC<OptionLabelWithIconTipProps> = ({ label, tooltip }) => (
+const OptionLabelWithIconTip: FC<React.PropsWithChildren<OptionLabelWithIconTipProps>> = ({ label, tooltip }) => (
   <>
     {label}
     <EuiIconTip
@@ -106,7 +106,7 @@ export interface ScatterplotMatrixProps {
   query?: Query;
 }
 
-export const ScatterplotMatrix: FC<ScatterplotMatrixProps> = ({
+export const ScatterplotMatrix: FC<React.PropsWithChildren<ScatterplotMatrixProps>> = ({
   fields: allFields,
   index,
   resultsField,

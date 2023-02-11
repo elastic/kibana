@@ -20,7 +20,7 @@ const SmallText = styled.span`
   font-size: ${({ theme }) => theme.eui.euiFontSizeS};
 `;
 
-const MlCardDescriptionComponent: React.FC<MlCardDescriptionProps> = ({
+const MlCardDescriptionComponent: React.FC<React.PropsWithChildren<MlCardDescriptionProps>> = ({
   hasValidLicense = false,
 }) => (
   <SmallText>

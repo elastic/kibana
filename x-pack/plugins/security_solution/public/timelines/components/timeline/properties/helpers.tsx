@@ -29,7 +29,7 @@ interface AddToFavoritesButtonProps {
   timelineId: string;
 }
 
-const AddToFavoritesButtonComponent: React.FC<AddToFavoritesButtonProps> = ({ timelineId }) => {
+const AddToFavoritesButtonComponent: React.FC<React.PropsWithChildren<AddToFavoritesButtonProps>> = ({ timelineId }) => {
   const dispatch = useDispatch();
   const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
 

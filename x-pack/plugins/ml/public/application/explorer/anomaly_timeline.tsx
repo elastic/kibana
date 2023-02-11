@@ -66,7 +66,7 @@ interface AnomalyTimelineProps {
   explorerState: ExplorerState;
 }
 
-export const AnomalyTimeline: FC<AnomalyTimelineProps> = React.memo(
+export const AnomalyTimeline: FC<React.PropsWithChildren<AnomalyTimelineProps>> = React.memo(
   ({ explorerState }) => {
     const {
       services: {

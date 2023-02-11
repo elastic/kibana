@@ -18,7 +18,7 @@ interface ExplorerLinkProps {
   linkName: React.ReactNode;
 }
 
-export const ExplorerLink: React.FC<ExplorerLinkProps> = ({
+export const ExplorerLink: React.FC<React.PropsWithChildren<ExplorerLinkProps>> = ({
   score,
   startDate,
   endDate,

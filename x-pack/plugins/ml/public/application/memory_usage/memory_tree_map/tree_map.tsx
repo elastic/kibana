@@ -65,7 +65,7 @@ const TYPE_OPTIONS: EuiComboBoxOptionOption[] = Object.entries(TYPE_LABELS).map(
   })
 );
 
-export const JobMemoryTreeMap: FC<Props> = ({ node, type, height }) => {
+export const JobMemoryTreeMap: FC<React.PropsWithChildren<Props>> = ({ node, type, height }) => {
   const isDarkTheme = useUiSettings().get('theme:darkMode');
   const { theme, baseTheme } = useMemo(
     () =>

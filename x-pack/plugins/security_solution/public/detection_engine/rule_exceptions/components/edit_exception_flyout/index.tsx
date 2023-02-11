@@ -96,7 +96,7 @@ const SectionHeader = styled(EuiTitle)`
   `}
 `;
 
-const EditExceptionFlyoutComponent: React.FC<EditExceptionFlyoutProps> = ({
+const EditExceptionFlyoutComponent: React.FC<React.PropsWithChildren<EditExceptionFlyoutProps>> = ({
   list,
   itemToEdit,
   rule,

@@ -91,13 +91,13 @@ export const renderApp = (
   };
 };
 
-const MonitoringApp: React.FC<{
+const MonitoringApp: React.FC<React.PropsWithChildren<{
   core: CoreStart;
   plugins: MonitoringStartPluginDependencies;
   externalConfig: ExternalConfig;
   setHeaderActionMenu: (element: MountPoint<HTMLElement> | undefined) => void;
   theme$: Observable<CoreTheme>;
-}> = ({ core, plugins, externalConfig, setHeaderActionMenu, theme$ }) => {
+}>> = ({ core, plugins, externalConfig, setHeaderActionMenu, theme$ }) => {
   const history = createPreserveQueryHistory();
 
   const darkModeObservable: Observable<boolean> = useMemo(

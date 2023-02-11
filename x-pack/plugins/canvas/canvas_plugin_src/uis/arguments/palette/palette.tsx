@@ -29,7 +29,7 @@ interface Props {
   };
 }
 
-export const PaletteArgInput: FC<Props> = ({
+export const PaletteArgInput: FC<React.PropsWithChildren<Props>> = ({
   onValueChange,
   argId,
   argValue,
@@ -74,7 +74,7 @@ export const PaletteArgInput: FC<Props> = ({
   return <PalettePicker id={argId} palette={palette} onChange={handleChange} />;
 };
 
-export const SimplePaletteArgInput: FC<Props> = (props) => {
+export const SimplePaletteArgInput: FC<React.PropsWithChildren<Props>> = (props) => {
   const { typeInstance } = props;
   const { type, ...restOptions } = typeInstance.options ?? {};
   return (
@@ -82,7 +82,7 @@ export const SimplePaletteArgInput: FC<Props> = (props) => {
   );
 };
 
-export const StopsPaletteArgInput: FC<Props> = (props) => (
+export const StopsPaletteArgInput: FC<React.PropsWithChildren<Props>> = (props) => (
   <PaletteArgInput
     {...props}
     typeInstance={{

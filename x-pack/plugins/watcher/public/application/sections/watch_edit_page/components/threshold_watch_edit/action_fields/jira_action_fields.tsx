@@ -20,7 +20,7 @@ interface Props {
   children: React.ReactNode;
 }
 
-export const JiraActionFields: React.FunctionComponent<Props> = ({
+export const JiraActionFields: React.FunctionComponent<React.PropsWithChildren<Props>> = ({
   action,
   editAction,
   errors,

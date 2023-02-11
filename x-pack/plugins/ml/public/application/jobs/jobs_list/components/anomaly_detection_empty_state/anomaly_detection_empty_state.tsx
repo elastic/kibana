@@ -22,7 +22,7 @@ import { useMlKibana, useMlLocator, useNavigateToPath } from '../../../../contex
 import { checkPermission } from '../../../../capabilities/check_capabilities';
 import { mlNodesAvailable } from '../../../../ml_nodes_check';
 
-export const AnomalyDetectionEmptyState: FC = () => {
+export const AnomalyDetectionEmptyState: FC<React.PropsWithChildren<unknown>> = () => {
   const disableCreateAnomalyDetectionJob = !checkPermission('canCreateJob') || !mlNodesAvailable();
 
   const {

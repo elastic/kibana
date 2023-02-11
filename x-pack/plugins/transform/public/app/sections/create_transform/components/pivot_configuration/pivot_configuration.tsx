@@ -23,7 +23,7 @@ export const PivotConfigurationContext = createContext<
   StepDefineFormHook['pivotConfig'] | undefined
 >(undefined);
 
-export const PivotConfiguration: FC<StepDefineFormHook['pivotConfig']> = memo(
+export const PivotConfiguration: FC<React.PropsWithChildren<StepDefineFormHook['pivotConfig']>> = memo(
   ({ actions, state }) => {
     const {
       ml: { useFieldStatsTrigger, FieldStatsInfoButton },

@@ -17,7 +17,7 @@ interface AgentIdToNameProps {
   agentId: string;
 }
 
-const AgentIdToNameComponent: React.FC<AgentIdToNameProps> = ({ agentId }) => {
+const AgentIdToNameComponent: React.FC<React.PropsWithChildren<AgentIdToNameProps>> = ({ agentId }) => {
   const getUrlForApp = useKibana().services.application.getUrlForApp;
   const { data } = useAgentDetails({ agentId, skip: !agentId });
 

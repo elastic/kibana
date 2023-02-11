@@ -70,7 +70,7 @@ export const getDefaultAiOpsListState = (
 
 export const restorableDefaults = getDefaultAiOpsListState();
 
-export const ExplainLogRateSpikesAppState: FC<ExplainLogRateSpikesAppStateProps> = ({
+export const ExplainLogRateSpikesAppState: FC<React.PropsWithChildren<ExplainLogRateSpikesAppStateProps>> = ({
   dataView,
   savedSearch,
   appDependencies,

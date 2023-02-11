@@ -45,7 +45,7 @@ interface Props {
   handleDeleteMapping(roleMappingId: string): void;
 }
 
-export const RoleMappingsTable: React.FC<Props> = ({
+export const RoleMappingsTable: React.FC<React.PropsWithChildren<Props>> = ({
   accessItemKey,
   accessHeader,
   roleMappings,

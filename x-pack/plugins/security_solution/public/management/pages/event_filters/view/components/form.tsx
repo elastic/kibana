@@ -117,7 +117,7 @@ type EventFilterItemEntries = Array<{
   type: Exclude<ExceptionListItemSchema['entries'][number]['type'], 'list'>;
 }>;
 
-export const EventFiltersForm: React.FC<ArtifactFormComponentProps & { allowSelectOs?: boolean }> =
+export const EventFiltersForm: React.FC<React.PropsWithChildren<ArtifactFormComponentProps & { allowSelectOs?: boolean }>> =
   memo(({ allowSelectOs = true, item: exception, policies, policiesIsLoading, onChange, mode }) => {
     const getTestId = useTestIdGenerator('eventFilters-form');
     const { http } = useKibana().services;

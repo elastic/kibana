@@ -18,7 +18,7 @@ export interface ExplorerNoResultsFoundProps {
 /*
  * React component for rendering EuiEmptyPrompt when no results were found.
  */
-export const ExplorerNoResultsFound: FC<ExplorerNoResultsFoundProps> = ({
+export const ExplorerNoResultsFound: FC<React.PropsWithChildren<ExplorerNoResultsFoundProps>> = ({
   hasResults,
   selectedJobsRunning,
 }) => {

@@ -229,7 +229,7 @@ interface CustomConnectorSelectionItem {
   getText: (actionConnector: ActionConnector) => string;
   getComponent: (
     actionConnector: ActionConnector
-  ) => React.LazyExoticComponent<ComponentType<{ actionConnector: ActionConnector }>> | undefined;
+  ) => React.LazyExoticComponent<ComponentType<React.PropsWithChildren<{ actionConnector: ActionConnector }>>> | undefined;
 }
 
 export interface ActionTypeModel<ActionConfig = any, ActionSecrets = any, ActionParams = any> {
@@ -241,9 +241,9 @@ export interface ActionTypeModel<ActionConfig = any, ActionSecrets = any, Action
     actionParams: ActionParams
   ) => Promise<GenericValidationResult<Partial<ActionParams> | unknown>>;
   actionConnectorFields: React.LazyExoticComponent<
-    ComponentType<ActionConnectorFieldsProps>
+    ComponentType<React.PropsWithChildren<ActionConnectorFieldsProps>>
   > | null;
-  actionParamsFields: React.LazyExoticComponent<ComponentType<ActionParamsProps<ActionParams>>>;
+  actionParamsFields: React.LazyExoticComponent<ComponentType<React.PropsWithChildren<ActionParamsProps<ActionParams>>>>;
   defaultActionParams?: RecursivePartial<ActionParams>;
   defaultRecoveredActionParams?: RecursivePartial<ActionParams>;
   customConnectorSelectItem?: CustomConnectorSelectionItem;
@@ -375,15 +375,15 @@ export interface RuleTypeModel<Params extends RuleTypeParams = RuleTypeParams> {
   documentationUrl: string | ((docLinks: DocLinksStart) => string) | null;
   validate: (ruleParams: Params) => ValidationResult;
   ruleParamsExpression:
-    | React.FunctionComponent<any>
-    | React.LazyExoticComponent<ComponentType<RuleTypeParamsExpressionProps<Params>>>;
+    | React.FunctionComponent<React.PropsWithChildren<any>>
+    | React.LazyExoticComponent<ComponentType<React.PropsWithChildren<RuleTypeParamsExpressionProps<Params>>>>;
   requiresAppContext: boolean;
   defaultActionMessage?: string;
   defaultRecoveryMessage?: string;
   defaultSummaryMessage?: string;
   alertDetailsAppSection?:
-    | React.FunctionComponent<any>
-    | React.LazyExoticComponent<ComponentType<any>>;
+    | React.FunctionComponent<React.PropsWithChildren<any>>
+    | React.LazyExoticComponent<ComponentType<React.PropsWithChildren<any>>>;
 }
 
 export interface IErrorObject {
@@ -505,8 +505,8 @@ export type GetRenderCellValue = ({
 }) => (props: unknown) => React.ReactNode;
 
 export type AlertTableFlyoutComponent =
-  | React.FunctionComponent<AlertsTableFlyoutBaseProps>
-  | React.LazyExoticComponent<ComponentType<AlertsTableFlyoutBaseProps>>
+  | React.FunctionComponent<React.PropsWithChildren<AlertsTableFlyoutBaseProps>>
+  | React.LazyExoticComponent<ComponentType<React.PropsWithChildren<AlertsTableFlyoutBaseProps>>>
   | null;
 
 export interface AlertsTableFlyoutBaseProps {

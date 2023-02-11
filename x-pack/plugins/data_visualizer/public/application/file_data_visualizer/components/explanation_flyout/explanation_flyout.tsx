@@ -26,7 +26,7 @@ interface Props {
   results: FindFileStructureResponse;
   closeFlyout(): void;
 }
-export const ExplanationFlyout: FC<Props> = ({ results, closeFlyout }) => {
+export const ExplanationFlyout: FC<React.PropsWithChildren<Props>> = ({ results, closeFlyout }) => {
   const explanation = results.explanation!;
   return (
     <EuiFlyout onClose={closeFlyout} hideCloseButton size={'m'}>
@@ -59,7 +59,7 @@ export const ExplanationFlyout: FC<Props> = ({ results, closeFlyout }) => {
   );
 };
 
-const Content: FC<{ explanation: string[] }> = ({ explanation }) => (
+const Content: FC<React.PropsWithChildren<{ explanation: string[] }>> = ({ explanation }) => (
   <>
     <EuiText size={'s'}>
       <FormattedMessage

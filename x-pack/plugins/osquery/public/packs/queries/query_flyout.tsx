@@ -45,7 +45,7 @@ interface QueryFlyoutProps {
   onClose: () => void;
 }
 
-const QueryFlyoutComponent: React.FC<QueryFlyoutProps> = ({
+const QueryFlyoutComponent: React.FC<React.PropsWithChildren<QueryFlyoutProps>> = ({
   uniqueQueryIds,
   defaultValue,
   onSave,

@@ -15,7 +15,7 @@ interface Props {
   aliases: Aliases | undefined;
 }
 
-export const TabAliases: React.FunctionComponent<Props> = ({ aliases }) => {
+export const TabAliases: React.FunctionComponent<React.PropsWithChildren<Props>> = ({ aliases }) => {
   if (aliases && Object.keys(aliases).length) {
     return (
       <div data-test-subj="aliasesTabContent">

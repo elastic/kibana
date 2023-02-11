@@ -29,7 +29,7 @@ export interface TestQueryRowProps {
   hasValidationErrors: boolean;
 }
 
-export const TestQueryRow: React.FC<TestQueryRowProps> = ({
+export const TestQueryRow: React.FC<React.PropsWithChildren<TestQueryRowProps>> = ({
   fetch,
   copyQuery,
   hasValidationErrors,

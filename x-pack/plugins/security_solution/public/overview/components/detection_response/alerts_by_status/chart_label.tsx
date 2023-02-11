@@ -16,7 +16,7 @@ const PlaceHolder = styled.div`
   padding: ${(props) => props.theme.eui.euiSizeS};
 `;
 
-const ChartLabelComponent: React.FC<ChartLabelProps> = ({ count }) => {
+const ChartLabelComponent: React.FC<React.PropsWithChildren<ChartLabelProps>> = ({ count }) => {
   return count != null ? (
     <b>
       <FormattedCount count={count} />

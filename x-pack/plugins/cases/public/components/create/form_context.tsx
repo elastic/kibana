@@ -48,7 +48,7 @@ interface Props {
   initialValue?: Pick<CasePostRequest, 'title' | 'description'>;
 }
 
-export const FormContext: React.FC<Props> = ({
+export const FormContext: React.FC<React.PropsWithChildren<Props>> = ({
   afterCaseCreated,
   children,
   onSuccess,

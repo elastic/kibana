@@ -17,7 +17,7 @@ interface StatProps {
   stat: StatsBarStat;
 }
 
-export const Stat: FC<StatProps> = ({ stat }) => {
+export const Stat: FC<React.PropsWithChildren<StatProps>> = ({ stat }) => {
   return (
     <span className="stat">
       <span>{stat.label}</span>:{' '}

@@ -23,7 +23,7 @@ const secretsFormSchema: SecretsFieldSchema[] = [
   { id: 'apiToken', label: i18n.JIRA_API_TOKEN_LABEL, isPasswordField: true },
 ];
 
-const JiraConnectorFields: React.FC<ActionConnectorFieldsProps> = ({ readOnly, isEdit }) => {
+const JiraConnectorFields: React.FC<React.PropsWithChildren<ActionConnectorFieldsProps>> = ({ readOnly, isEdit }) => {
   return (
     <SimpleConnectorForm
       isEdit={isEdit}

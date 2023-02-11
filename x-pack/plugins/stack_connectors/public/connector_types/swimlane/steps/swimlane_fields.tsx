@@ -66,7 +66,7 @@ const mappingConfig: FieldConfig<SwimlaneFieldMappingConfig | null> = {
   ],
 };
 
-const MappingField: React.FC<{
+const MappingField: React.FC<React.PropsWithChildren<{
   path: string;
   label: string;
   validationLabel: string;
@@ -75,7 +75,7 @@ const MappingField: React.FC<{
   connectorType: SwimlaneConnectorType;
   readOnly: boolean;
   dataTestSubj?: string;
-}> = React.memo(
+}>> = React.memo(
   ({
     path,
     options,
@@ -142,7 +142,7 @@ const MappingField: React.FC<{
   }
 );
 
-const SwimlaneFieldsComponent: React.FC<Props> = ({ fields, readOnly }) => {
+const SwimlaneFieldsComponent: React.FC<React.PropsWithChildren<Props>> = ({ fields, readOnly }) => {
   const [{ config }] = useFormData({
     watch: ['config.connectorType'],
   });

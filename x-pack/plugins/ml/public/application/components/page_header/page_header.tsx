@@ -13,7 +13,7 @@ import { MlPageControlsContext } from '../ml_page/ml_page';
 /**
  * Component for setting the page header content.
  */
-export const MlPageHeader: FC = ({ children }) => {
+export const MlPageHeader: FC<React.PropsWithChildren<unknown>> = ({ children }) => {
   const { headerPortal, setIsHeaderMounted } = useContext(MlPageControlsContext);
 
   useEffect(() => {
@@ -30,7 +30,7 @@ export const MlPageHeader: FC = ({ children }) => {
 /**
  * Renders content of the {@link MlPageHeader}
  */
-export const MlPageHeaderRenderer: FC = () => {
+export const MlPageHeaderRenderer: FC<React.PropsWithChildren<unknown>> = () => {
   const { headerPortal, isHeaderMounted } = useContext(MlPageControlsContext);
 
   return isHeaderMounted ? <OutPortal node={headerPortal} /> : <EuiLoadingContent lines={1} />;

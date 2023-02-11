@@ -89,7 +89,7 @@ interface Props {
   deprecationResolutionState?: DeprecationResolutionState;
 }
 
-export const KibanaDeprecationsTable: React.FunctionComponent<Props> = ({
+export const KibanaDeprecationsTable: React.FunctionComponent<React.PropsWithChildren<Props>> = ({
   deprecations,
   reload,
   toggleFlyout,

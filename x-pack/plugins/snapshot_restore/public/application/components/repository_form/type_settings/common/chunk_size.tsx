@@ -17,7 +17,7 @@ interface Props {
   error: RepositorySettingsValidation['chunkSize'];
 }
 
-export const ChunkSizeField: React.FunctionComponent<Props> = ({
+export const ChunkSizeField: React.FunctionComponent<React.PropsWithChildren<Props>> = ({
   isInvalid,
   error,
   defaultValue,

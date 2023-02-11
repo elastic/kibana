@@ -31,7 +31,7 @@ const dataViewTitleHeader = css({
   minWidth: '300px',
 });
 
-export const PageHeader: FC = () => {
+export const PageHeader: FC<React.PropsWithChildren<unknown>> = () => {
   const [, setGlobalState] = useUrlState('_g');
   const { dataView } = useDataSource();
 

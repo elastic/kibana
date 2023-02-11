@@ -79,7 +79,7 @@ const defaultDefaultValues: ApiKeyFormValues = {
   role_descriptors: '{}',
 };
 
-export const ApiKeyFlyout: FunctionComponent<ApiKeyFlyoutProps> = ({
+export const ApiKeyFlyout: FunctionComponent<React.PropsWithChildren<ApiKeyFlyoutProps>> = ({
   onSuccess,
   onCancel,
   apiKey,

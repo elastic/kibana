@@ -21,7 +21,7 @@ interface MlAuditIconProps {
   message: MlSummaryJob['auditMessage'];
 }
 
-const MlAuditIconComponent: FC<MlAuditIconProps> = ({ message }) => {
+const MlAuditIconComponent: FC<React.PropsWithChildren<MlAuditIconProps>> = ({ message }) => {
   if (!message) {
     return null;
   }

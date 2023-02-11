@@ -14,7 +14,7 @@ type MarkdownLinkProps = { disableLinks?: boolean } & EuiLinkAnchorProps;
 /** prevents search engine manipulation by noting the linked document is not trusted or endorsed by us */
 const REL_NOFOLLOW = 'nofollow';
 
-const MarkdownLinkComponent: React.FC<MarkdownLinkProps> = ({
+const MarkdownLinkComponent: React.FC<React.PropsWithChildren<MarkdownLinkProps>> = ({
   disableLinks,
   href,
   target,

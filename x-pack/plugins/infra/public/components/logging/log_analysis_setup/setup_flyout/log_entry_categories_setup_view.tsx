@@ -12,9 +12,9 @@ import { useLogEntryCategoriesSetup } from '../../../../containers/logs/log_anal
 import { createInitialConfigurationStep } from '../initial_configuration_step';
 import { createProcessStep } from '../process_step';
 
-export const LogEntryCategoriesSetupView: React.FC<{
+export const LogEntryCategoriesSetupView: React.FC<React.PropsWithChildren<{
   onClose: () => void;
-}> = ({ onClose }) => {
+}>> = ({ onClose }) => {
   const {
     categoryQualityWarnings,
     cleanUpAndSetUp,

@@ -34,7 +34,7 @@ interface Props {
   inputType: INPUT_TYPE;
 }
 
-export const SelectedModel: FC<Props> = ({ model, inputType }) => {
+export const SelectedModel: FC<React.PropsWithChildren<Props>> = ({ model, inputType }) => {
   const { trainedModels } = useMlApiContext();
 
   const inferrer: InferrerType | undefined = useMemo(() => {

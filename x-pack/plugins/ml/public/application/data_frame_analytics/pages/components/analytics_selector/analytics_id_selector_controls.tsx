@@ -21,7 +21,7 @@ interface Props {
   selectedId?: string;
 }
 
-export const AnalyticsIdSelectorControls: FC<Props> = ({
+export const AnalyticsIdSelectorControls: FC<React.PropsWithChildren<Props>> = ({
   setIsIdSelectorFlyoutVisible,
   selectedId,
 }) => (

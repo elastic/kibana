@@ -20,7 +20,7 @@ import { getToastNotificationService } from '../../../../../../../services/toast
 
 type DetectorFieldValues = Record<number, string[]>;
 
-export const PopulationDetectorsSummary: FC = () => {
+export const PopulationDetectorsSummary: FC<React.PropsWithChildren<unknown>> = () => {
   const {
     jobCreator: jc,
     chartLoader,

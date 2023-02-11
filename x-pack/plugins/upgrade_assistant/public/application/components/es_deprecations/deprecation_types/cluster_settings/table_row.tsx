@@ -22,7 +22,7 @@ interface Props {
   rowFieldNames: DeprecationTableColumns[];
 }
 
-export const ClusterSettingsTableRow: React.FunctionComponent<Props> = ({
+export const ClusterSettingsTableRow: React.FunctionComponent<React.PropsWithChildren<Props>> = ({
   rowFieldNames,
   deprecation,
 }) => {

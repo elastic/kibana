@@ -57,7 +57,7 @@ export default {
   title: 'app/TransactionDetails/waterfall/TransactionFlyout',
   component: TransactionFlyout,
   decorators: [
-    (StoryComponent: ComponentType) => {
+    (StoryComponent: ComponentType<React.PropsWithChildren<unknown>>) => {
       const coreMock = {
         http: {
           get: async (): Promise<TransactionDetailsApiReturnType> => {

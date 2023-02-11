@@ -38,7 +38,7 @@ import { WildcardType } from './wildcard_type';
 import { PointType } from './point_type';
 import { VersionType } from './version_type';
 
-const typeToParametersFormMap: { [key in DataType]?: ComponentType<any> } = {
+const typeToParametersFormMap: { [key in DataType]?: ComponentType<React.PropsWithChildren<any>> } = {
   alias: AliasType,
   keyword: KeywordType,
   numeric: NumericType,
@@ -73,12 +73,12 @@ export const getParametersFormForType = (
   type: MainType,
   subType?: SubType
 ):
-  | ComponentType<{
+  | ComponentType<React.PropsWithChildren<{
       field: NormalizedField;
       allFields: NormalizedFields['byId'];
       isMultiField: boolean;
       kibanaVersion: SemVer;
-    }>
+    }>>
   | undefined =>
   subType === undefined
     ? typeToParametersFormMap[type]

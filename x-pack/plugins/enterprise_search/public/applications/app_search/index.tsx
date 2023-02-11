@@ -42,7 +42,7 @@ import {
   META_ENGINE_CREATION_PATH,
 } from './routes';
 
-export const AppSearch: React.FC<InitialAppData> = (props) => {
+export const AppSearch: React.FC<React.PropsWithChildren<InitialAppData>> = (props) => {
   const { config } = useValues(KibanaLogic);
   const { errorConnectingMessage } = useValues(HttpLogic);
   const { enterpriseSearchVersion, kibanaVersion } = props;
@@ -75,7 +75,7 @@ export const AppSearch: React.FC<InitialAppData> = (props) => {
   );
 };
 
-export const AppSearchUnconfigured: React.FC = () => (
+export const AppSearchUnconfigured: React.FC<React.PropsWithChildren<unknown>> = () => (
   <Switch>
     <Route>
       <Redirect to={SETUP_GUIDE_PATH} />
@@ -83,7 +83,7 @@ export const AppSearchUnconfigured: React.FC = () => (
   </Switch>
 );
 
-export const AppSearchConfigured: React.FC<Required<InitialAppData>> = (props) => {
+export const AppSearchConfigured: React.FC<React.PropsWithChildren<Required<InitialAppData>>> = (props) => {
   const {
     myRole: {
       canManageEngines,

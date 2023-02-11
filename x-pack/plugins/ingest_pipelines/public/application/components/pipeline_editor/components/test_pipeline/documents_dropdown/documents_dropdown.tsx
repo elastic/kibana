@@ -50,7 +50,7 @@ interface Props {
   openFlyout: (activeFlyoutTab: TestPipelineFlyoutTab) => void;
 }
 
-export const DocumentsDropdown: FunctionComponent<Props> = ({
+export const DocumentsDropdown: FunctionComponent<React.PropsWithChildren<Props>> = ({
   documents,
   selectedDocumentIndex,
   updateSelectedDocument,

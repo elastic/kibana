@@ -11,7 +11,7 @@ import type { ActionParamsProps } from '@kbn/triggers-actions-ui-plugin/public';
 import { TextAreaWithMessageVariables } from '@kbn/triggers-actions-ui-plugin/public';
 import { TeamsActionParams } from '../types';
 
-const TeamsParamsFields: React.FunctionComponent<ActionParamsProps<TeamsActionParams>> = ({
+const TeamsParamsFields: React.FunctionComponent<React.PropsWithChildren<ActionParamsProps<TeamsActionParams>>> = ({
   actionParams,
   editAction,
   index,

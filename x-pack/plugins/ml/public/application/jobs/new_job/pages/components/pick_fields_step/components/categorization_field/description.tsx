@@ -13,7 +13,7 @@ import { EuiDescribedFormGroup, EuiFormRow } from '@elastic/eui';
 interface Props {
   isOptional: boolean;
 }
-export const Description: FC<Props> = memo(({ children, isOptional }) => {
+export const Description: FC<React.PropsWithChildren<Props>> = memo(({ children, isOptional }) => {
   const title = i18n.translate('xpack.ml.newJob.wizard.pickFieldsStep.categorizationField.title', {
     defaultMessage: 'Categorization field',
   });

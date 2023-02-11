@@ -31,7 +31,7 @@ interface ExecutionEventsTableProps {
   ruleId: string;
 }
 
-const ExecutionEventsTableComponent: React.FC<ExecutionEventsTableProps> = ({ ruleId }) => {
+const ExecutionEventsTableComponent: React.FC<React.PropsWithChildren<ExecutionEventsTableProps>> = ({ ruleId }) => {
   const getItemId = useCallback((item: RuleExecutionEvent): string => {
     return `${item.timestamp} ${item.sequence}`;
   }, []);

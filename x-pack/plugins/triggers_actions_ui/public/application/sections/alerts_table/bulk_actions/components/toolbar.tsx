@@ -91,7 +91,7 @@ const useBulkActionsToMenuItemMapper = (
   return bulkActionsItems;
 };
 
-const BulkActionsComponent: React.FC<BulkActionsProps> = ({
+const BulkActionsComponent: React.FC<React.PropsWithChildren<BulkActionsProps>> = ({
   totalItems,
   items,
   alerts,

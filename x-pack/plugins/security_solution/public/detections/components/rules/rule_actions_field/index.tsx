@@ -56,7 +56,7 @@ const ContainerActions = styled.div.attrs(
     )}
 `;
 
-export const RuleActionsField: React.FC<Props> = ({ field, messageVariables }) => {
+export const RuleActionsField: React.FC<React.PropsWithChildren<Props>> = ({ field, messageVariables }) => {
   const [fieldErrors, setFieldErrors] = useState<string | null>(null);
   const form = useFormContext();
   const { isSubmitted, isSubmitting, isValid } = form;

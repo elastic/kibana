@@ -32,7 +32,7 @@ const AgentPolicyName = styled(EuiDescriptionListDescription)`
   overflow: hidden;
 `;
 
-export const CreatePackagePolicySinglePageLayout: React.FunctionComponent<{
+export const CreatePackagePolicySinglePageLayout: React.FunctionComponent<React.PropsWithChildren<{
   from: EditPackagePolicyFrom;
   cancelUrl: string;
   onCancel?: React.ReactEventHandler;
@@ -45,7 +45,7 @@ export const CreatePackagePolicySinglePageLayout: React.FunctionComponent<{
     isSelected: boolean;
     onClick: React.ReactEventHandler;
   }>;
-}> = memo(
+}>> = memo(
   ({
     from,
     cancelUrl,

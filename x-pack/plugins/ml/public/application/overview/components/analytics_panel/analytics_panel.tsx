@@ -31,7 +31,7 @@ import { AnalyticsEmptyPrompt } from '../../../data_frame_analytics/pages/analyt
 interface Props {
   setLazyJobCount: React.Dispatch<React.SetStateAction<number>>;
 }
-export const AnalyticsPanel: FC<Props> = ({ setLazyJobCount }) => {
+export const AnalyticsPanel: FC<React.PropsWithChildren<Props>> = ({ setLazyJobCount }) => {
   const refresh = useRefresh();
 
   const [analytics, setAnalytics] = useState<DataFrameAnalyticsListRow[]>([]);

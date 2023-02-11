@@ -11,7 +11,7 @@ import React from 'react';
 import { fullHeightContentStyles } from '../../../../page_template.styles';
 import { LogsPageTemplate, LogsPageTemplateProps } from '../../shared/page_template';
 
-export const LogStreamPageTemplate: React.FC<LogsPageTemplateProps> = React.memo((props) => (
+export const LogStreamPageTemplate: React.FC<React.PropsWithChildren<LogsPageTemplateProps>> = React.memo((props) => (
   <div className={APP_WRAPPER_CLASS}>
     <LogsPageTemplate
       pageHeader={{

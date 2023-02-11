@@ -12,7 +12,7 @@ import { JobCreatorContext } from '../../../../../job_creator_context';
 import { Description } from './description';
 import { CombinedJob } from '../../../../../../../../../../../common/types/anomaly_detection_jobs';
 
-export const CustomUrlsSelection: FC = () => {
+export const CustomUrlsSelection: FC<React.PropsWithChildren<unknown>> = () => {
   const { jobCreator, jobCreatorUpdate } = useContext(JobCreatorContext);
 
   const setCustomUrls = (customUrls: UrlConfig[]) => {

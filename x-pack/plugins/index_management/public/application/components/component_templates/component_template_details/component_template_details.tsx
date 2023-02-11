@@ -45,7 +45,7 @@ export const defaultFlyoutProps = {
   'aria-labelledby': 'componentTemplateDetailsFlyoutTitle',
 };
 
-export const ComponentTemplateDetailsFlyoutContent: React.FunctionComponent<Props> = ({
+export const ComponentTemplateDetailsFlyoutContent: React.FunctionComponent<React.PropsWithChildren<Props>> = ({
   componentTemplateName,
   onClose,
   actions,

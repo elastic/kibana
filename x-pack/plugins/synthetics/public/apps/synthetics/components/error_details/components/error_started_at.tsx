@@ -11,7 +11,7 @@ import { i18n } from '@kbn/i18n';
 import { useErrorFailedTests } from '../hooks/use_last_error_state';
 import { useFormatTestRunAt } from '../../../utils/monitor_test_result/test_time_formats';
 
-export const ErrorStartedAt: React.FC = () => {
+export const ErrorStartedAt: React.FC<React.PropsWithChildren<unknown>> = () => {
   const { failedTests } = useErrorFailedTests();
 
   const state = failedTests?.[0]?.state;

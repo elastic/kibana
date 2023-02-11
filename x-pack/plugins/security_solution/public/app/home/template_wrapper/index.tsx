@@ -54,7 +54,7 @@ const StyledKibanaPageTemplate = styled(KibanaPageTemplate)<
   }
 `;
 
-export const SecuritySolutionTemplateWrapper: React.FC<Omit<KibanaPageTemplateProps, 'ref'>> =
+export const SecuritySolutionTemplateWrapper: React.FC<React.PropsWithChildren<Omit<KibanaPageTemplateProps, 'ref'>>> =
   React.memo(({ children, ...rest }) => {
     const solutionNav = useSecuritySolutionNavigation();
     const isPolicySettingsVisible = useIsPolicySettingsBarVisible();

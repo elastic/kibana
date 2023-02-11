@@ -17,7 +17,7 @@ import { useLocations } from '../../components/monitor_management/hooks/use_loca
 import { useMonitorManagementBreadcrumbs } from './use_monitor_management_breadcrumbs';
 import { getAgentPoliciesAction } from '../../state/private_locations';
 
-export const AddMonitorPage: React.FC = () => {
+export const AddMonitorPage: React.FC<React.PropsWithChildren<unknown>> = () => {
   useTrackPageview({ app: 'uptime', path: 'add-monitor' });
   useTrackPageview({ app: 'uptime', path: 'add-monitor', delay: 15000 });
 

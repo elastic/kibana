@@ -25,7 +25,7 @@ interface Props {
 const showMoveToReference = (action: UserAction, commentId: string | null): commentId is string =>
   action === Actions.update && commentId != null;
 
-const CommentListActions: React.FC<Props> = React.memo(({ userAction, handleOutlineComment }) => (
+const CommentListActions: React.FC<React.PropsWithChildren<Props>> = React.memo(({ userAction, handleOutlineComment }) => (
   <EuiFlexGroup responsive={false}>
     <EuiFlexItem grow={false}>
       <UserActionCopyLink id={userAction.id} />

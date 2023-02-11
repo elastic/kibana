@@ -57,7 +57,7 @@ import { EmptyPrompt } from './components/empty_prompt';
 
 const REFRESH_INTERVAL_MS = 30000;
 
-export const AgentListPage: React.FunctionComponent<{}> = () => {
+export const AgentListPage: React.FunctionComponent<React.PropsWithChildren<{}>> = () => {
   const { displayAgentMetrics } = ExperimentalFeaturesService.get();
 
   const { notifications, cloud } = useStartServices();

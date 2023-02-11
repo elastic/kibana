@@ -35,7 +35,7 @@ const getWebhookUrlConfig = (docLinks: DocLinksStart): FieldConfig => ({
   ],
 });
 
-const SlackActionFields: React.FunctionComponent<ActionConnectorFieldsProps> = ({
+const SlackActionFields: React.FunctionComponent<React.PropsWithChildren<ActionConnectorFieldsProps>> = ({
   isEdit,
   readOnly,
 }) => {

@@ -10,7 +10,7 @@ import { EuiLoadingContent } from '@elastic/eui';
 import { FileUploadComponentProps, lazyLoadModules } from '../lazy_load_bundle';
 
 interface State {
-  GeoUploadWizard: React.ComponentType<FileUploadComponentProps> | null;
+  GeoUploadWizard: React.ComponentType<React.PropsWithChildren<FileUploadComponentProps>> | null;
 }
 
 export class GeoUploadWizardAsyncWrapper extends React.Component<FileUploadComponentProps, State> {

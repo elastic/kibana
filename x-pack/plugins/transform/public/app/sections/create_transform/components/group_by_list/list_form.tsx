@@ -26,7 +26,7 @@ interface ListProps {
   onChange(id: string, item: PivotGroupByConfig): void;
 }
 
-export const GroupByListForm: React.FC<ListProps> = ({
+export const GroupByListForm: React.FC<React.PropsWithChildren<ListProps>> = ({
   deleteHandler,
   list,
   onChange,

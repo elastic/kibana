@@ -36,7 +36,7 @@ const actionOptions = [
   },
 ];
 
-const OpsgenieParamFields: React.FC<ActionParamsProps<OpsgenieActionParams>> = ({
+const OpsgenieParamFields: React.FC<React.PropsWithChildren<ActionParamsProps<OpsgenieActionParams>>> = ({
   actionParams,
   editAction,
   errors,

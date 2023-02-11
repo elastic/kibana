@@ -66,7 +66,7 @@ export const defaultSessionsFilter: Required<Pick<Filter, 'meta' | 'query'>> = {
   },
 };
 
-const SessionsViewComponent: React.FC<SessionsComponentsProps> = ({
+const SessionsViewComponent: React.FC<React.PropsWithChildren<SessionsComponentsProps>> = ({
   tableId,
   endDate,
   entityType = 'sessions',

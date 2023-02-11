@@ -56,7 +56,7 @@ interface SourceRowProps extends ISourceRow {
   source: ContentSourceDetails;
 }
 
-export const SourceRow: React.FC<SourceRowProps> = ({
+export const SourceRow: React.FC<React.PropsWithChildren<SourceRowProps>> = ({
   source: {
     id,
     serviceType,

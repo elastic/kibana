@@ -18,7 +18,7 @@ interface Props {
   hasErrors: boolean;
 }
 
-export const IndexActionFields: React.FunctionComponent<Props> = ({
+export const IndexActionFields: React.FunctionComponent<React.PropsWithChildren<Props>> = ({
   action,
   editAction,
   errors,

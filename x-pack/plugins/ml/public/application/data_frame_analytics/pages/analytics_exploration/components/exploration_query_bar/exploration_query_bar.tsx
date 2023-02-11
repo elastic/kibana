@@ -46,7 +46,7 @@ export interface ExplorationQueryBarProps {
   };
 }
 
-export const ExplorationQueryBar: FC<ExplorationQueryBarProps> = ({
+export const ExplorationQueryBar: FC<React.PropsWithChildren<ExplorationQueryBarProps>> = ({
   indexPattern,
   setSearchQuery,
   filters,

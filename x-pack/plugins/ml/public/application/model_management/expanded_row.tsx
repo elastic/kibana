@@ -109,7 +109,7 @@ export function useListItemsFormatter() {
   );
 }
 
-export const ExpandedRow: FC<ExpandedRowProps> = ({ item }) => {
+export const ExpandedRow: FC<React.PropsWithChildren<ExpandedRowProps>> = ({ item }) => {
   const [modelItems, setModelItems] = useState<AllocatedModel[]>([]);
 
   const formatToListItems = useListItemsFormatter();

@@ -39,7 +39,7 @@ export const analyticsMapRouteFactory = (
   'data-test-subj': 'mlPageAnalyticsMap',
 });
 
-const PageWrapper: FC<PageProps> = ({ deps }) => {
+const PageWrapper: FC<React.PropsWithChildren<PageProps>> = ({ deps }) => {
   const { context } = useResolver(
     undefined,
     undefined,

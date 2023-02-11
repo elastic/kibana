@@ -103,7 +103,7 @@ export type Props = OwnProps & PropsFromRedux;
 
 const trailingControlColumns: ControlColumnProps[] = []; // stable reference
 
-export const PinnedTabContentComponent: React.FC<Props> = ({
+export const PinnedTabContentComponent: React.FC<React.PropsWithChildren<Props>> = ({
   columns,
   timelineId,
   itemsPerPage,

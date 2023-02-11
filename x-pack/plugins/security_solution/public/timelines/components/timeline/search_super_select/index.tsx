@@ -66,7 +66,7 @@ const getBasicSelectableOptions = (timelineId: string) => [
   } as EuiSelectableOption,
 ];
 
-const SearchTimelineSuperSelectComponent: React.FC<SearchTimelineSuperSelectProps> = ({
+const SearchTimelineSuperSelectComponent: React.FC<React.PropsWithChildren<SearchTimelineSuperSelectProps>> = ({
   isDisabled,
   hideUntitled = false,
   timelineId,

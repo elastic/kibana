@@ -91,7 +91,7 @@ const LoadingPanelContainer = styled.div`
 
 LoadingPanelContainer.displayName = 'LoadingPanelContainer';
 
-const PopoverRowItems = styled(EuiPopover as unknown as FC)<
+const PopoverRowItems = styled(EuiPopover as unknown as FC<React.PropsWithChildren<unknown>>)<
   EuiPopoverProps & {
     className?: string;
     id?: string;
@@ -206,7 +206,7 @@ const TimelinePaginationContainer = styled.div<{ hideLastPage: boolean }>`
   }
 `;
 
-export const PagingControlComponent: React.FC<PagingControlProps> = ({
+export const PagingControlComponent: React.FC<React.PropsWithChildren<PagingControlProps>> = ({
   activePage,
   isLoading,
   onPageClick,

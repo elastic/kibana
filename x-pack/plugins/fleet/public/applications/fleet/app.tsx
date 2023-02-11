@@ -66,7 +66,7 @@ const FEEDBACK_URL = 'https://ela.st/fleet-feedback';
 
 const queryClient = new QueryClient();
 
-const ErrorLayout: FunctionComponent<{ isAddIntegrationsPath: boolean }> = ({
+const ErrorLayout: FunctionComponent<React.PropsWithChildren<{ isAddIntegrationsPath: boolean }>> = ({
   isAddIntegrationsPath,
   children,
 }) => (
@@ -87,7 +87,7 @@ const Panel = styled(EuiPanel)`
   margin-left: auto;
 `;
 
-const PermissionsError: React.FunctionComponent<{ error: string }> = memo(({ error }) => {
+const PermissionsError: React.FunctionComponent<React.PropsWithChildren<{ error: string }>> = memo(({ error }) => {
   if (error === 'MISSING_SECURITY') {
     return <MissingESRequirementsPage missingRequirements={['security_required', 'api_keys']} />;
   }
@@ -137,7 +137,7 @@ const PermissionsError: React.FunctionComponent<{ error: string }> = memo(({ err
   );
 });
 
-export const WithPermissionsAndSetup: React.FC = memo(({ children }) => {
+export const WithPermissionsAndSetup: React.FC<React.PropsWithChildren<unknown>> = memo(({ children }) => {
   useBreadcrumbs('base');
   const core = useStartServices();
   const { notifications } = core;
@@ -230,7 +230,7 @@ export const WithPermissionsAndSetup: React.FC = memo(({ children }) => {
  * Fleet Application context all the way down to the Router, but with no permissions or setup checks
  * and no routes defined
  */
-export const FleetAppContext: React.FC<{
+export const FleetAppContext: React.FC<React.PropsWithChildren<{
   startServices: FleetStartServices;
   config: FleetConfigType;
   history: AppMountParameters['history'];
@@ -239,7 +239,7 @@ export const FleetAppContext: React.FC<{
   theme$: AppMountParameters['theme$'];
   /** For testing purposes only */
   routerHistory?: History<any>;
-}> = memo(
+}>> = memo(
   ({
     children,
     startServices,
@@ -318,75 +318,73 @@ export const AppRoutes = memo(
     const flyoutContext = useFlyoutContext();
     const fleetStatus = useFleetStatus();
 
-    return (
-      <>
-        <FleetTopNav setHeaderActionMenu={setHeaderActionMenu} />
+    return <>
+      <FleetTopNav setHeaderActionMenu={setHeaderActionMenu} />
 
-        <Switch>
-          <Route path={FLEET_ROUTING_PATHS.agents}>
-            <AgentsApp />
-          </Route>
-          <Route path={FLEET_ROUTING_PATHS.policies}>
-            <AgentPolicyApp />
-          </Route>
-          <Route path={FLEET_ROUTING_PATHS.enrollment_tokens}>
-            <EnrollmentTokenListPage />
-          </Route>
-          <Route path={FLEET_ROUTING_PATHS.data_streams}>
-            <DataStreamApp />
-          </Route>
+      <Switch>
+        <Route path={FLEET_ROUTING_PATHS.agents}>
+          <AgentsApp />
+        </Route>
+        <Route path={FLEET_ROUTING_PATHS.policies}>
+          <AgentPolicyApp />
+        </Route>
+        <Route path={FLEET_ROUTING_PATHS.enrollment_tokens}>
+          <EnrollmentTokenListPage />
+        </Route>
+        <Route path={FLEET_ROUTING_PATHS.data_streams}>
+          <DataStreamApp />
+        </Route>
 
-          <Route path={FLEET_ROUTING_PATHS.settings}>
-            <SettingsApp />
-          </Route>
+        <Route path={FLEET_ROUTING_PATHS.settings}>
+          <SettingsApp />
+        </Route>
 
-          {/* TODO: Move this route to the Integrations app */}
-          <Route path={FLEET_ROUTING_PATHS.add_integration_to_policy}>
-            <CreatePackagePolicyPage />
-          </Route>
+        {/* TODO: Move this route to the Integrations app */}
+        <Route path={FLEET_ROUTING_PATHS.add_integration_to_policy}>
+          <CreatePackagePolicyPage />
+        </Route>
 
-          <Route
-            render={({ location }) => {
-              // BWC < 7.15 Fleet was using a hash router: redirect old routes using hash
-              const shouldRedirectHash = location.pathname === '' && location.hash.length > 0;
-              if (!shouldRedirectHash) {
-                return <Redirect to={FLEET_ROUTING_PATHS.agents} />;
-              }
-              const pathname = location.hash.replace(/^#(\/fleet)?/, '');
+        <Route
+          render={({ location }) => {
+            // BWC < 7.15 Fleet was using a hash router: redirect old routes using hash
+            const shouldRedirectHash = location.pathname === '' && location.hash.length > 0;
+            if (!shouldRedirectHash) {
+              return <Redirect to={FLEET_ROUTING_PATHS.agents} />;
+            }
+            const pathname = location.hash.replace(/^#(\/fleet)?/, '');
 
-              return (
-                <Redirect
-                  to={{
-                    ...location,
-                    pathname,
-                    hash: undefined,
-                  }}
-                />
-              );
-            }}
+            return (
+              <Redirect
+                to={{
+                  ...location,
+                  pathname,
+                  hash: undefined,
+                }}
+              />
+            );
+          }}
+        />
+      </Switch>
+
+      {flyoutContext.isEnrollmentFlyoutOpen && (
+        <EuiPortal>
+          <AgentEnrollmentFlyout
+            defaultMode={
+              fleetStatus.isReady && !fleetStatus.missingRequirements?.includes('fleet_server')
+                ? 'managed'
+                : 'standalone'
+            }
+            isIntegrationFlow={true}
+            onClose={() => flyoutContext.closeEnrollmentFlyout()}
           />
-        </Switch>
+        </EuiPortal>
+      )}
 
-        {flyoutContext.isEnrollmentFlyoutOpen && (
-          <EuiPortal>
-            <AgentEnrollmentFlyout
-              defaultMode={
-                fleetStatus.isReady && !fleetStatus.missingRequirements?.includes('fleet_server')
-                  ? 'managed'
-                  : 'standalone'
-              }
-              isIntegrationFlow={true}
-              onClose={() => flyoutContext.closeEnrollmentFlyout()}
-            />
-          </EuiPortal>
-        )}
-
-        {flyoutContext.isFleetServerFlyoutOpen && (
-          <EuiPortal>
-            <FleetServerFlyout onClose={() => flyoutContext.closeFleetServerFlyout()} />
-          </EuiPortal>
-        )}
-      </>
-    );
+      {flyoutContext.isFleetServerFlyoutOpen && (
+        <EuiPortal>
+          <FleetServerFlyout onClose={() => flyoutContext.closeFleetServerFlyout()} />
+        </EuiPortal>
+      )}
+    </>;
   }
 );

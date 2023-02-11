@@ -28,7 +28,7 @@ interface Props {
 
 const getIndexFromId = (id: string) => parseInt(id.split('_')[1], 10);
 
-export const MultiCheckboxFacetsView: React.FC<Props> = ({
+export const MultiCheckboxFacetsView: React.FC<React.PropsWithChildren<Props>> = ({
   label,
   onMoreClick,
   onRemove,

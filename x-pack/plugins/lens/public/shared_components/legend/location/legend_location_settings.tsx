@@ -137,7 +137,7 @@ const locationAlignmentButtonsIcons: Array<{
   },
 ];
 
-export const LegendLocationSettings: React.FunctionComponent<LegendLocationSettingsProps> = ({
+export const LegendLocationSettings: React.FunctionComponent<React.PropsWithChildren<LegendLocationSettingsProps>> = ({
   location,
   onLocationChange = () => {},
   position,

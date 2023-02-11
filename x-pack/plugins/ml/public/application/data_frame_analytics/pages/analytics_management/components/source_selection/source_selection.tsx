@@ -25,7 +25,7 @@ import { getDataViewAndSavedSearch, isCcsIndexPattern } from '../../../../../uti
 
 const fixedPageSize: number = 20;
 
-export const SourceSelection: FC = () => {
+export const SourceSelection: FC<React.PropsWithChildren<unknown>> = () => {
   const {
     services: { savedObjects, uiSettings },
   } = useMlKibana();

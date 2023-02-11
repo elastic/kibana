@@ -25,7 +25,7 @@ interface AdvancedSettingsProps {
   onChange: (update: Partial<MlAnomalyDetectionAlertAdvancedSettings>) => void;
 }
 
-export const AdvancedSettings: FC<AdvancedSettingsProps> = React.memo(({ value, onChange }) => {
+export const AdvancedSettings: FC<React.PropsWithChildren<AdvancedSettingsProps>> = React.memo(({ value, onChange }) => {
   return (
     <EuiAccordion
       id="mlAnomalyAlertAdvancedSettings"

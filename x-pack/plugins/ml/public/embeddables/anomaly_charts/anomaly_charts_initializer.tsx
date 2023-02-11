@@ -31,7 +31,7 @@ export interface AnomalyChartsInitializerProps {
   onCancel: () => void;
 }
 
-export const AnomalyChartsInitializer: FC<AnomalyChartsInitializerProps> = ({
+export const AnomalyChartsInitializer: FC<React.PropsWithChildren<AnomalyChartsInitializerProps>> = ({
   defaultTitle,
   initialInput,
   onCreate,

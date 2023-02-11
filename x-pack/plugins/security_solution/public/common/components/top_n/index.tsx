@@ -89,7 +89,7 @@ export interface OwnProps {
 type PropsFromRedux = ConnectedProps<typeof connector>;
 type Props = OwnProps & PropsFromRedux;
 
-const StatefulTopNComponent: React.FC<Props> = ({
+const StatefulTopNComponent: React.FC<React.PropsWithChildren<Props>> = ({
   activeTimelineEventType,
   activeTimelineFilters,
   activeTimelineFrom,
@@ -176,6 +176,6 @@ const StatefulTopNComponent: React.FC<Props> = ({
 
 StatefulTopNComponent.displayName = 'StatefulTopNComponent';
 
-export const StatefulTopN: React.FunctionComponent<OwnProps> = connector(
+export const StatefulTopN: React.FunctionComponent<React.PropsWithChildren<OwnProps>> = connector(
   React.memo(StatefulTopNComponent)
 );

@@ -19,7 +19,7 @@ interface FilteringStatusCalloutsProps {
   state: FilteringValidationState;
 }
 
-export const SyncRulesStateCallouts: React.FC<FilteringStatusCalloutsProps> = ({
+export const SyncRulesStateCallouts: React.FC<React.PropsWithChildren<FilteringStatusCalloutsProps>> = ({
   applyDraft,
   editDraft,
   state,

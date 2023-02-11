@@ -150,7 +150,7 @@ hookUseFetchAlerts.mockImplementation(() => [
 const hookUseFetchBrowserFieldCapabilities = useFetchBrowserFieldCapabilities as jest.Mock;
 hookUseFetchBrowserFieldCapabilities.mockImplementation(() => [false, {}]);
 
-const AlertsTableWithLocale: React.FunctionComponent<AlertsTableStateProps> = (props) => (
+const AlertsTableWithLocale: React.FunctionComponent<React.PropsWithChildren<AlertsTableStateProps>> = (props) => (
   <IntlProvider locale="en">
     <AlertsTableState {...props} />
   </IntlProvider>

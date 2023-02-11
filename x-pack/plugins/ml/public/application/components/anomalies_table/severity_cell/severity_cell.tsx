@@ -27,7 +27,7 @@ interface SeverityCellProps {
 /**
  * Renders anomaly severity score with single or multi-bucket impact marker.
  */
-export const SeverityCell: FC<SeverityCellProps> = memo(({ score, isMultiBucketAnomaly }) => {
+export const SeverityCell: FC<React.PropsWithChildren<SeverityCellProps>> = memo(({ score, isMultiBucketAnomaly }) => {
   const severity = getFormattedSeverityScore(score);
   const color = getSeverityColor(score);
   return isMultiBucketAnomaly ? (

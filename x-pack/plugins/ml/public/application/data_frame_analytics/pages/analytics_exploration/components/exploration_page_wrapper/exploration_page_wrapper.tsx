@@ -71,11 +71,11 @@ export interface EvaluatePanelProps {
 interface Props {
   jobId: string;
   title: string;
-  EvaluatePanel: FC<EvaluatePanelProps>;
-  FeatureImportanceSummaryPanel: FC<FeatureImportanceSummaryPanelProps>;
+  EvaluatePanel: FC<React.PropsWithChildren<EvaluatePanelProps>>;
+  FeatureImportanceSummaryPanel: FC<React.PropsWithChildren<FeatureImportanceSummaryPanelProps>>;
 }
 
-export const ExplorationPageWrapper: FC<Props> = ({
+export const ExplorationPageWrapper: FC<React.PropsWithChildren<Props>> = ({
   jobId,
   title,
   EvaluatePanel,

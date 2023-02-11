@@ -31,7 +31,7 @@ interface SectionProps {
   section: SectionConfig;
 }
 
-export const Section: FC<SectionProps> = ({ section }) => {
+export const Section: FC<React.PropsWithChildren<SectionProps>> = ({ section }) => {
   if (section.items.length === 0) {
     return null;
   }
@@ -50,7 +50,7 @@ interface ExpandedRowDetailsPaneProps {
   sections: SectionConfig[];
 }
 
-export const ExpandedRowDetailsPane: FC<ExpandedRowDetailsPaneProps> = ({ sections }) => {
+export const ExpandedRowDetailsPane: FC<React.PropsWithChildren<ExpandedRowDetailsPaneProps>> = ({ sections }) => {
   return (
     <div data-test-subj="transformDetailsTabContent">
       <EuiFlexGroup>

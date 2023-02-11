@@ -20,7 +20,7 @@ import { getNewJobDefaults } from '../../../../../../../services/ml_server_info'
 import { ListItems, falseLabel, trueLabel, defaultLabel, Italic } from '../common';
 import { useMlContext } from '../../../../../../../contexts/ml';
 
-export const JobDetails: FC = () => {
+export const JobDetails: FC<React.PropsWithChildren<unknown>> = () => {
   const { jobCreator } = useContext(JobCreatorContext);
   const mlContext = useMlContext();
   const dateFormat: string = mlContext.kibanaConfig.get('dateFormat');

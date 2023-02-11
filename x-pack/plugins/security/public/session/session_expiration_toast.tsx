@@ -25,7 +25,7 @@ export interface SessionExpirationToastProps {
   onExtend: () => Promise<any>;
 }
 
-export const SessionExpirationToast: FunctionComponent<SessionExpirationToastProps> = ({
+export const SessionExpirationToast: FunctionComponent<React.PropsWithChildren<SessionExpirationToastProps>> = ({
   sessionState$,
   onExtend,
 }) => {

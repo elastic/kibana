@@ -19,7 +19,7 @@ interface Props {
   exampleCount: number;
   onReload: () => void;
 }
-export const LogEntryExampleMessages: React.FunctionComponent<Props> = ({
+export const LogEntryExampleMessages: React.FunctionComponent<React.PropsWithChildren<Props>> = ({
   isLoading,
   hasFailedLoading,
   exampleCount,

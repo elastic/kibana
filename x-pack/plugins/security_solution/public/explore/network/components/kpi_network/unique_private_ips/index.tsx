@@ -60,7 +60,7 @@ export const fieldsMapping: Readonly<StatItems[]> = [
   },
 ];
 
-const NetworkKpiUniquePrivateIpsComponent: React.FC<NetworkKpiProps> = ({
+const NetworkKpiUniquePrivateIpsComponent: React.FC<React.PropsWithChildren<NetworkKpiProps>> = ({
   filterQuery,
   from,
   indexNames,

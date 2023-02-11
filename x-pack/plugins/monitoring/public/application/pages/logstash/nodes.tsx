@@ -26,7 +26,7 @@ interface SetupModeProps {
   bottomBarComponent: any;
 }
 
-export const LogStashNodesPage: React.FC<ComponentProps> = ({ clusters }) => {
+export const LogStashNodesPage: React.FC<React.PropsWithChildren<ComponentProps>> = ({ clusters }) => {
   const globalState = useContext(GlobalStateContext);
   const { services } = useKibana<{ data: any }>();
   const clusterUuid = globalState.cluster_uuid;

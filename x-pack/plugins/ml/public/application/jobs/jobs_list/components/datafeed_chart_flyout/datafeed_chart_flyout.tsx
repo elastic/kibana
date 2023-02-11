@@ -101,7 +101,7 @@ const customTooltip: CustomAnnotationTooltip = ({ details, datum }) => (
   </div>
 );
 
-export const DatafeedChartFlyout: FC<DatafeedChartFlyoutProps> = ({
+export const DatafeedChartFlyout: FC<React.PropsWithChildren<DatafeedChartFlyoutProps>> = ({
   jobId,
   end,
   onClose,
@@ -638,7 +638,7 @@ interface JobListDatafeedChartFlyoutProps {
  * @param refreshJobs function to refresh the jobs list
  * @constructor
  */
-export const JobListDatafeedChartFlyout: FC<JobListDatafeedChartFlyoutProps> = ({
+export const JobListDatafeedChartFlyout: FC<React.PropsWithChildren<JobListDatafeedChartFlyoutProps>> = ({
   setShowFunction,
   unsetShowFunction,
   refreshJobs,

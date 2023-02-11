@@ -10,7 +10,7 @@ import React from 'react';
 import { EuiEmptyPrompt } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-export const EmptyEnginesPrompt: React.FC = ({ children }) => {
+export const EmptyEnginesPrompt: React.FC<React.PropsWithChildren<unknown>> = ({ children }) => {
   return (
     <EuiEmptyPrompt
       iconType="aggregate"

@@ -166,7 +166,7 @@ export type Props = OwnProps & PropsFromRedux;
 
 const trailingControlColumns: ControlColumnProps[] = []; // stable reference
 
-export const QueryTabContentComponent: React.FC<Props> = ({
+export const QueryTabContentComponent: React.FC<React.PropsWithChildren<Props>> = ({
   activeTab,
   columns,
   dataProviders,

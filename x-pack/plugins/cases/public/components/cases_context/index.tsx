@@ -59,7 +59,7 @@ export interface CasesContextStateValue extends Omit<CasesContextValue, 'appId' 
   appTitle?: string;
 }
 
-export const CasesProvider: React.FC<{ value: CasesContextProps }> = ({
+export const CasesProvider: React.FC<React.PropsWithChildren<{ value: CasesContextProps }>> = ({
   children,
   value: {
     externalReferenceAttachmentTypeRegistry,

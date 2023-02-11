@@ -25,7 +25,7 @@ export interface StepImagePopoverProps {
   borderRadius?: string | number;
 }
 
-export const JourneyScreenshotPreview: React.FC<StepImagePopoverProps> = ({
+export const JourneyScreenshotPreview: React.FC<React.PropsWithChildren<StepImagePopoverProps>> = ({
   checkGroup,
   stepName,
   stepNumber,

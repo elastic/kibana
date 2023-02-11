@@ -15,7 +15,7 @@ interface Props {
   json: object;
 }
 
-export const ExpandedRowJsonPane: FC<Props> = ({ json }) => {
+export const ExpandedRowJsonPane: FC<React.PropsWithChildren<Props>> = ({ json }) => {
   return (
     <div data-test-subj="transformJsonTabContent">
       <EuiFlexGroup>

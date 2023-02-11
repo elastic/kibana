@@ -36,7 +36,7 @@ import * as i18n from './translations';
 const HTTP_VERBS = ['post', 'put'];
 const { emptyField, urlField } = fieldValidators;
 
-const WebhookActionConnectorFields: React.FunctionComponent<ActionConnectorFieldsProps> = ({
+const WebhookActionConnectorFields: React.FunctionComponent<React.PropsWithChildren<ActionConnectorFieldsProps>> = ({
   readOnly,
 }) => {
   const { getFieldDefaultValue } = useFormContext();

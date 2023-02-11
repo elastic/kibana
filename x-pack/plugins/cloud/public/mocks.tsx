@@ -24,7 +24,7 @@ function createSetupMock() {
   };
 }
 
-const getContextProvider: () => React.FC =
+const getContextProvider: () => React.FC<React.PropsWithChildren<unknown>> =
   () =>
   ({ children }) =>
     <>{children}</>;

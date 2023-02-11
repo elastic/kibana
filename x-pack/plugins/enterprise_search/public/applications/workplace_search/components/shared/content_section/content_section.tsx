@@ -24,7 +24,7 @@ interface ContentSectionProps {
   testSubj?: string;
 }
 
-export const ContentSection: React.FC<ContentSectionProps> = ({
+export const ContentSection: React.FC<React.PropsWithChildren<ContentSectionProps>> = ({
   children,
   isOrganization = true,
   className = '',

@@ -25,12 +25,12 @@ import type { TimeRange as TimeRangeMs } from '@kbn/ml-date-picker';
 import { useFieldStatsFlyoutContext } from './use_field_stats_flytout_context';
 import { FieldStatsContent } from './field_stats_content';
 
-export const FieldStatsFlyout: FC<{
+export const FieldStatsFlyout: FC<React.PropsWithChildren<{
   dataView: DataView;
   fieldStatsServices: FieldStatsServices;
   timeRangeMs?: TimeRangeMs;
   dslQuery?: FieldStatsProps['dslQuery'];
-}> = ({ dataView, fieldStatsServices, timeRangeMs, dslQuery }) => {
+}>> = ({ dataView, fieldStatsServices, timeRangeMs, dslQuery }) => {
   const { setIsFlyoutVisible, isFlyoutVisible, fieldName } = useFieldStatsFlyoutContext();
 
   const closeFlyout = useCallback(() => setIsFlyoutVisible(false), []); // eslint-disable-line react-hooks/exhaustive-deps

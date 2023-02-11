@@ -61,7 +61,7 @@ export type EventsQueryTabBodyComponentProps = QueryTabBodyProps & {
 
 const EXTERNAL_ALERTS_URL_PARAM = 'onlyExternalAlerts';
 
-const EventsQueryTabBodyComponent: React.FC<EventsQueryTabBodyComponentProps> = ({
+const EventsQueryTabBodyComponent: React.FC<React.PropsWithChildren<EventsQueryTabBodyComponentProps>> = ({
   additionalFilters,
   deleteQuery,
   endDate,

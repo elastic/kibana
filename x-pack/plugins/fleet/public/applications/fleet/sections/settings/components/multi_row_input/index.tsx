@@ -83,7 +83,7 @@ function displayErrors(errors?: string[]) {
     : null;
 }
 
-const SortableTextField: FunctionComponent<SortableTextFieldProps> = React.memo(
+const SortableTextField: FunctionComponent<React.PropsWithChildren<SortableTextFieldProps>> = React.memo(
   ({
     id,
     index,
@@ -178,7 +178,7 @@ const SortableTextField: FunctionComponent<SortableTextFieldProps> = React.memo(
   }
 );
 
-const NonSortableTextField: FunctionComponent<NonSortableTextFieldProps> = React.memo(
+const NonSortableTextField: FunctionComponent<React.PropsWithChildren<NonSortableTextFieldProps>> = React.memo(
   ({
     index,
     deletable,
@@ -245,7 +245,7 @@ const NonSortableTextField: FunctionComponent<NonSortableTextFieldProps> = React
   }
 );
 
-export const MultiRowInput: FunctionComponent<MultiRowInputProps> = ({
+export const MultiRowInput: FunctionComponent<React.PropsWithChildren<MultiRowInputProps>> = ({
   id,
   value: valueFromProps,
   onChange,

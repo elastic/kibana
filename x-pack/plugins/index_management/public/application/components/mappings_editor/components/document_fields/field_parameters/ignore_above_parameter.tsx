@@ -18,7 +18,7 @@ interface Props {
   defaultToggleValue: boolean;
 }
 
-export const IgnoreAboveParameter: FunctionComponent<Props> = ({ defaultToggleValue }) => (
+export const IgnoreAboveParameter: FunctionComponent<React.PropsWithChildren<Props>> = ({ defaultToggleValue }) => (
   <EditFieldFormRow
     title={i18n.translate('xpack.idxMgmt.mappingsEditor.ignoreAboveFieldTitle', {
       defaultMessage: 'Set length limit',

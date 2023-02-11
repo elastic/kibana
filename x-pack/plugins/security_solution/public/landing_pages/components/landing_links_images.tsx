@@ -55,7 +55,7 @@ const TitleText = styled.h2`
 
 const SecuritySolutionLink = withSecuritySolutionLink(Link);
 
-export const LandingLinksImages: React.FC<LandingImagesProps> = ({ items }) => (
+export const LandingLinksImages: React.FC<React.PropsWithChildren<LandingImagesProps>> = ({ items }) => (
   <EuiFlexGroup direction="column">
     {items.map(({ title, description, image, id, isBeta, betaOptions }) => (
       <EuiFlexItem key={id} data-test-subj="LandingItem">
@@ -112,7 +112,7 @@ const PrimaryTitleCard = styled(EuiCard)`
 
 const SecuritySolutionCard = withSecuritySolutionLink(PrimaryTitleCard);
 
-export const LandingImageCards: React.FC<LandingImagesProps> = React.memo(({ items }) => (
+export const LandingImageCards: React.FC<React.PropsWithChildren<LandingImagesProps>> = React.memo(({ items }) => (
   <EuiFlexGroup direction="row" wrap>
     {items.map(({ id, image, title, description, isBeta, betaOptions }) => (
       <LandingImageCardItem key={id} data-test-subj="LandingImageCard-item" grow={false}>

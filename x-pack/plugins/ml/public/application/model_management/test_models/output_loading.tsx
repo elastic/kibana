@@ -8,7 +8,7 @@
 import React, { FC } from 'react';
 import { EuiLoadingContent, EuiLoadingContentProps } from '@elastic/eui';
 
-export const OutputLoadingContent: FC<{ text: string }> = ({ text }) => {
+export const OutputLoadingContent: FC<React.PropsWithChildren<{ text: string }>> = ({ text }) => {
   const actualLines = text.split(/\r\n|\r|\n/).length + 1;
   const lines = actualLines > 4 && actualLines <= 10 ? actualLines : 4;
 

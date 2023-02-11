@@ -36,7 +36,7 @@ import {
   API_KEY_NAME_PLACEHOLDER,
 } from '../constants';
 
-export const ApiKeyFlyout: React.FC = () => {
+export const ApiKeyFlyout: React.FC<React.PropsWithChildren<unknown>> = () => {
   const { setNameInputBlurred, setApiKeyName, onApiFormSubmit, hideApiKeyForm } =
     useActions(ApiKeysLogic);
   const {

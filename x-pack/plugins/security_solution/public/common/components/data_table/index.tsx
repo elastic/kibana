@@ -363,7 +363,7 @@ export const DataTableComponent = React.memo<DataTableProps>(
     );
 
     const renderTableCellValue = useMemo(() => {
-      const Cell: React.FC<EuiDataGridCellValueElementProps> = ({
+      const Cell: React.FC<React.PropsWithChildren<EuiDataGridCellValueElementProps>> = ({
         columnId,
         rowIndex,
         colIndex,

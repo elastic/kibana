@@ -37,7 +37,7 @@ const queryClient = new QueryClient({
 });
 
 const getTestComponent =
-  (params: PageUrlParams): React.FC =>
+  (params: PageUrlParams): React.FC<React.PropsWithChildren<unknown>> =>
   () => {
     const coreStart = coreMock.createStart();
     const core = {

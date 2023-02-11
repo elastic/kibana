@@ -44,7 +44,7 @@ export const jobListRouteFactory = (navigateToPath: NavigateToPath, basePath: st
   enableDatePicker: true,
 });
 
-const PageWrapper: FC<PageProps> = ({ deps }) => {
+const PageWrapper: FC<React.PropsWithChildren<PageProps>> = ({ deps }) => {
   const { context } = useResolver(
     undefined,
     undefined,

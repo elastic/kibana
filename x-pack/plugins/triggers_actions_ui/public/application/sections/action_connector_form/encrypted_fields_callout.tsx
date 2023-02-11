@@ -19,7 +19,7 @@ export interface EncryptedFieldsCalloutProps {
   isMissingSecrets?: boolean | undefined;
 }
 
-const Callout: React.FC<{ title: string; dataTestSubj: string }> = ({ title, dataTestSubj }) => {
+const Callout: React.FC<React.PropsWithChildren<{ title: string; dataTestSubj: string }>> = ({ title, dataTestSubj }) => {
   return (
     <>
       <EuiSpacer size="s" />
@@ -60,7 +60,7 @@ const getCommaSeparatedLabel = (labels: string[]) => {
   return `${commaSeparatedLabelsWithoutLastItem}, and ${lastLabel}`;
 };
 
-const EncryptedFieldsCalloutComponent: React.FC<EncryptedFieldsCalloutProps> = ({
+const EncryptedFieldsCalloutComponent: React.FC<React.PropsWithChildren<EncryptedFieldsCalloutProps>> = ({
   isEdit,
   isMissingSecrets,
 }) => {

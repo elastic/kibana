@@ -12,7 +12,7 @@ import React from 'react';
 
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
 
-export const MlUnavailablePrompt: React.FunctionComponent<{}> = () => (
+export const MlUnavailablePrompt: React.FunctionComponent<React.PropsWithChildren<{}>> = () => (
   <EmptyPrompt
     title={
       <h2>

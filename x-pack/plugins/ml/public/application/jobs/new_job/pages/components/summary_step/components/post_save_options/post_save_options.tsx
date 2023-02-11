@@ -21,7 +21,7 @@ interface Props {
   jobRunner: JobRunner | null;
 }
 
-export const PostSaveOptions: FC<Props> = ({ jobRunner }) => {
+export const PostSaveOptions: FC<React.PropsWithChildren<Props>> = ({ jobRunner }) => {
   const {
     services: { notifications },
   } = useMlKibana();

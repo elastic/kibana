@@ -24,7 +24,7 @@ interface AdvancedTabProps {
   selectedPolicyId?: string;
 }
 
-export const AdvancedTab: React.FunctionComponent<AdvancedTabProps> = ({
+export const AdvancedTab: React.FunctionComponent<React.PropsWithChildren<AdvancedTabProps>> = ({
   selectedPolicyId,
   onClose,
 }) => {

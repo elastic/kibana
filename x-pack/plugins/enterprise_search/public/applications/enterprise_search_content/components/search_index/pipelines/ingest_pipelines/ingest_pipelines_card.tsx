@@ -21,7 +21,7 @@ import { CustomizeIngestPipelineItem } from './customize_pipeline_item';
 import { DefaultPipelineItem } from './default_pipeline_item';
 import { IngestPipelineFlyout } from './ingest_pipeline_flyout';
 
-export const IngestPipelinesCard: React.FC = () => {
+export const IngestPipelinesCard: React.FC<React.PropsWithChildren<unknown>> = () => {
   const { indexName, ingestionMethod } = useValues(IndexViewLogic);
 
   const {

@@ -25,7 +25,7 @@ import {
 } from './filter';
 
 const formatterFactory = (value: unknown) => () => JSON.stringify(value);
-const fc: FC<any> = () => null;
+const fc: FC<React.PropsWithChildren<any>> = () => null;
 
 const simpleFilterValue: FilterType = {
   type: 'exactly',

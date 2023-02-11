@@ -36,7 +36,7 @@ interface BaseProps {
 type Props = BaseProps &
   Pick<EuiBadgeProps, 'iconType' | 'iconSide' | 'onClick' | 'onClickAriaLabel'>;
 
-const RuleStatusComponent: React.FC<Props> = ({
+const RuleStatusComponent: React.FC<React.PropsWithChildren<Props>> = ({
   contextId,
   eventId,
   fieldName,

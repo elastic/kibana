@@ -38,7 +38,7 @@ interface Props {
   currentTab: JobType;
 }
 
-export const ExportJobsFlyout: FC<Props> = ({ isDisabled, currentTab }) => {
+export const ExportJobsFlyout: FC<React.PropsWithChildren<Props>> = ({ isDisabled, currentTab }) => {
   const mlApiServices = useMlApiContext();
   const {
     getJobs,
@@ -396,7 +396,7 @@ export const ExportJobsFlyout: FC<Props> = ({ isDisabled, currentTab }) => {
   );
 };
 
-const FlyoutButton: FC<{ isDisabled: boolean; onClick(): void }> = ({ isDisabled, onClick }) => {
+const FlyoutButton: FC<React.PropsWithChildren<{ isDisabled: boolean; onClick(): void }>> = ({ isDisabled, onClick }) => {
   return (
     <EuiButtonEmpty
       iconType="exportAction"
@@ -409,7 +409,7 @@ const FlyoutButton: FC<{ isDisabled: boolean; onClick(): void }> = ({ isDisabled
   );
 };
 
-const LoadingSpinner: FC = () => (
+const LoadingSpinner: FC<React.PropsWithChildren<unknown>> = () => (
   <>
     <EuiSpacer size="l" />
     <EuiFlexGroup justifyContent="spaceAround">
@@ -420,7 +420,7 @@ const LoadingSpinner: FC = () => (
   </>
 );
 
-const SwitchTabsConfirm: FC<{ onCancel: () => void; onConfirm: () => void }> = ({
+const SwitchTabsConfirm: FC<React.PropsWithChildren<{ onCancel: () => void; onConfirm: () => void }>> = ({
   onCancel,
   onConfirm,
 }) => (

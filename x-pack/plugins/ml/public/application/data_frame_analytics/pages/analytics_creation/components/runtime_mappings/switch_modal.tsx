@@ -41,7 +41,7 @@ const modalMessage = i18n.translate(
   }
 );
 
-export const SwitchModal: FC<Props> = ({ onCancel, onConfirm }) => (
+export const SwitchModal: FC<React.PropsWithChildren<Props>> = ({ onCancel, onConfirm }) => (
   <EuiConfirmModal
     title={modalTitle}
     onCancel={onCancel}

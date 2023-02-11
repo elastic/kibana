@@ -60,7 +60,7 @@ interface Props {
   sendToBack: () => void;
 }
 
-export const SidebarHeader: FunctionComponent<Props> = ({
+export const SidebarHeader: FunctionComponent<React.PropsWithChildren<Props>> = ({
   title,
   showLayerControls = false,
   bringToFront,

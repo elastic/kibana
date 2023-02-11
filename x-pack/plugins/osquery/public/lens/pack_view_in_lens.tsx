@@ -20,7 +20,7 @@ interface PackViewInActionProps {
   };
   actionId?: string;
 }
-const PackViewInLensActionComponent: React.FC<PackViewInActionProps> = ({ item }) => {
+const PackViewInLensActionComponent: React.FC<React.PropsWithChildren<PackViewInActionProps>> = ({ item }) => {
   const { action_id: actionId, interval } = item;
   const { data: lastResultsData } = usePackQueryLastResults({
     actionId,

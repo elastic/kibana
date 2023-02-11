@@ -21,7 +21,7 @@ interface Props {
   createPipeline: boolean;
 }
 
-export const ImportSummary: FC<Props> = ({
+export const ImportSummary: FC<React.PropsWithChildren<Props>> = ({
   index,
   dataView,
   ingestPipelineId,

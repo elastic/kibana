@@ -23,7 +23,7 @@ import {
 } from '../constants';
 import { getCurationsBreadcrumbs } from '../utils';
 
-export const CurationCreation: React.FC = () => {
+export const CurationCreation: React.FC<React.PropsWithChildren<unknown>> = () => {
   const { createCuration } = useActions(CurationsLogic);
 
   return (

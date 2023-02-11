@@ -64,7 +64,7 @@ const renderStory = (
   </EuiFlexGroup>
 );
 
-const TinesParamsFields: React.FunctionComponent<ActionParamsProps<TinesExecuteActionParams>> = ({
+const TinesParamsFields: React.FunctionComponent<React.PropsWithChildren<ActionParamsProps<TinesExecuteActionParams>>> = ({
   actionConnector,
   actionParams,
   editAction,

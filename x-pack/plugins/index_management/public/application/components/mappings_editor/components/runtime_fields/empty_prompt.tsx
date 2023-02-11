@@ -15,7 +15,7 @@ interface Props {
   runtimeFieldsDocsUri: string;
 }
 
-export const EmptyPrompt: FunctionComponent<Props> = ({ createField, runtimeFieldsDocsUri }) => {
+export const EmptyPrompt: FunctionComponent<React.PropsWithChildren<Props>> = ({ createField, runtimeFieldsDocsUri }) => {
   return (
     <EuiEmptyPrompt
       iconType="managementApp"

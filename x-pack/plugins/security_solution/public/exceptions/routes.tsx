@@ -39,7 +39,7 @@ const ExceptionsListDetailRoute = () => (
   </PluginTemplateWrapper>
 );
 
-const ExceptionsContainerComponent: React.FC = () => {
+const ExceptionsContainerComponent: React.FC<React.PropsWithChildren<unknown>> = () => {
   useReadonlyHeader(i18n.READ_ONLY_BADGE_TOOLTIP);
 
   return (

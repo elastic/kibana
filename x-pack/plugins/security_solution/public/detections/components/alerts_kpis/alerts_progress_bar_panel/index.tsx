@@ -32,7 +32,7 @@ interface Props {
   groupBySelection: GroupBySelection;
   setGroupBySelection: (groupBySelection: GroupBySelection) => void;
 }
-export const AlertsProgressBarPanel: React.FC<Props> = ({
+export const AlertsProgressBarPanel: React.FC<React.PropsWithChildren<Props>> = ({
   filters,
   query,
   signalIndexName,

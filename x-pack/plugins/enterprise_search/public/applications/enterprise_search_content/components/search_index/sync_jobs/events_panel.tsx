@@ -33,7 +33,7 @@ interface SyncJobEvent {
   title: string;
 }
 
-export const SyncJobEventsPanel: React.FC<SyncJobsEventPanelProps> = ({
+export const SyncJobEventsPanel: React.FC<React.PropsWithChildren<SyncJobsEventPanelProps>> = ({
   cancelationRequestedAt,
   canceledAt,
   completed,

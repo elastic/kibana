@@ -18,7 +18,7 @@ interface Props {
   history: RouteComponentProps['history'];
 }
 
-export const EmptyPrompt: FunctionComponent<Props> = ({ history }) => {
+export const EmptyPrompt: FunctionComponent<React.PropsWithChildren<Props>> = ({ history }) => {
   const { documentation } = useComponentTemplatesContext();
 
   return (

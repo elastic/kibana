@@ -28,7 +28,7 @@ interface BottomBarProps {
 /**
  * Bottom bar component for Data Visualizer page.
  */
-export const BottomBar: FC<BottomBarProps> = ({ mode, onChangeMode, onCancel, disableImport }) => {
+export const BottomBar: FC<React.PropsWithChildren<BottomBarProps>> = ({ mode, onChangeMode, onCancel, disableImport }) => {
   if (mode === DATAVISUALIZER_MODE.READ) {
     return (
       <EuiBottomBar>

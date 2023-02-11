@@ -26,7 +26,7 @@ import { WithoutHeaderLayout } from '../../../layouts';
 import type { GetFleetStatusResponse } from '../../../types';
 import { useStartServices } from '../../../hooks';
 
-export const RequirementItem: React.FunctionComponent<{ isMissing: boolean }> = ({
+export const RequirementItem: React.FunctionComponent<React.PropsWithChildren<{ isMissing: boolean }>> = ({
   isMissing,
   children,
 }) => {
@@ -48,9 +48,9 @@ export const RequirementItem: React.FunctionComponent<{ isMissing: boolean }> = 
   );
 };
 
-export const MissingESRequirementsPage: React.FunctionComponent<{
+export const MissingESRequirementsPage: React.FunctionComponent<React.PropsWithChildren<{
   missingRequirements: GetFleetStatusResponse['missing_requirements'];
-}> = ({ missingRequirements }) => {
+}>> = ({ missingRequirements }) => {
   const { docLinks } = useStartServices();
 
   return (

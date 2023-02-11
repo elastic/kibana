@@ -17,7 +17,7 @@ export interface ESFieldSelectProps {
   fields: string[];
 }
 
-export const ESFieldSelect: React.FunctionComponent<ESFieldSelectProps> = ({
+export const ESFieldSelect: React.FunctionComponent<React.PropsWithChildren<ESFieldSelectProps>> = ({
   value,
   fields = [],
   onChange,

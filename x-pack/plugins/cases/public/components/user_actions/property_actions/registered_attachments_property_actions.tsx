@@ -17,7 +17,7 @@ interface Props {
   onDelete: () => void;
 }
 
-const RegisteredAttachmentsPropertyActionsComponent: React.FC<Props> = ({
+const RegisteredAttachmentsPropertyActionsComponent: React.FC<React.PropsWithChildren<Props>> = ({
   isLoading,
   onDelete,
 }) => {

@@ -47,7 +47,7 @@ export const overviewRouteFactory = (
   'data-test-subj': 'mlPageOverview',
 });
 
-const PageWrapper: FC<PageProps> = ({ deps }) => {
+const PageWrapper: FC<React.PropsWithChildren<PageProps>> = ({ deps }) => {
   const { redirectToMlAccessDeniedPage } = deps;
 
   const { context } = useResolver(
@@ -83,6 +83,6 @@ export const appRootRouteFactory = (navigateToPath: NavigateToPath, basePath: st
   breadcrumbs: [],
 });
 
-const Page: FC = () => {
+const Page: FC<React.PropsWithChildren<unknown>> = () => {
   return <Redirect to={createPath(ML_PAGES.OVERVIEW)} />;
 };

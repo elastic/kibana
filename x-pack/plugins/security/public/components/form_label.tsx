@@ -36,7 +36,7 @@ export interface FormLabelProps {
  * @throws Error if not a child of a `<Formik>` component.
  * @throws Error if not a child of a `<FormChanges>` component.
  */
-export const FormLabel: FunctionComponent<FormLabelProps> = (props) => {
+export const FormLabel: FunctionComponent<React.PropsWithChildren<FormLabelProps>> = (props) => {
   const formik = useFormikContext();
   const { report } = useFormChangesContext();
 

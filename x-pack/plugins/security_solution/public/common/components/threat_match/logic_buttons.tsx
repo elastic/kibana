@@ -22,7 +22,7 @@ interface LogicButtonsProps {
   onOrClicked: () => void;
 }
 
-export const LogicButtons: React.FC<LogicButtonsProps> = ({
+export const LogicButtons: React.FC<React.PropsWithChildren<LogicButtonsProps>> = ({
   isOrDisabled = false,
   isAndDisabled = false,
   onAndClicked,

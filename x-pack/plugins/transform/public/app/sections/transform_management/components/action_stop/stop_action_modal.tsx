@@ -12,7 +12,7 @@ import { StopAction } from './use_stop_action';
 import { isManagedTransform } from '../../../../common/managed_transforms_utils';
 import { ManagedTransformsWarningCallout } from '../managed_transforms_callout/managed_transforms_callout';
 
-export const StopActionModal: FC<StopAction> = ({ closeModal, items, stopAndCloseModal }) => {
+export const StopActionModal: FC<React.PropsWithChildren<StopAction>> = ({ closeModal, items, stopAndCloseModal }) => {
   const hasManagedTransforms = useMemo(() => items.some((t) => isManagedTransform(t)), [items]);
 
   const isBulkAction = items.length > 1;

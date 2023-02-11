@@ -22,15 +22,13 @@ const Icon = styled(EuiIcon)`
   margin-block-end: unset !important;
 `;
 
-export const PackageIcon: React.FunctionComponent<
-  UsePackageIconType & Omit<EuiIconProps, 'type'>
-> = ({ packageName, integrationName, version, icons, tryApi, ...euiIconProps }) => {
+export const PackageIcon: React.FunctionComponent<React.PropsWithChildren<UsePackageIconType & Omit<EuiIconProps, 'type'>>> = ({ packageName, integrationName, version, icons, tryApi, ...euiIconProps }) => {
   const iconType = usePackageIconType({ packageName, integrationName, version, icons, tryApi });
   // @ts-expect-error loading="lazy" is not supported by EuiIcon
   return <Icon size="s" type={iconType} {...euiIconProps} loading="lazy" />;
 };
 
-export const CardIcon: React.FunctionComponent<UsePackageIconType & Omit<EuiIconProps, 'type'>> = (
+export const CardIcon: React.FunctionComponent<React.PropsWithChildren<UsePackageIconType & Omit<EuiIconProps, 'type'>>> = (
   props
 ) => {
   const { icons } = props;
