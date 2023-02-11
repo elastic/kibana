@@ -639,12 +639,12 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = memo(
                         label: (selected) =>
                           selected.length === 0
                             ? i18n.translate(
-                                'expressionHeatmapVis.tooltipActions.emptyFilterSelection',
+                                'expressionHeatmap.tooltipActions.emptyFilterSelection',
                                 {
                                   defaultMessage: 'Select at least one series to filter',
                                 }
                               )
-                            : i18n.translate('expressionHeatmapVis.tooltipActions.filterValues', {
+                            : i18n.translate('expressionHeatmap.tooltipActions.filterValues', {
                                 defaultMessage: 'Filter {seriesNumber} series',
                                 values: { seriesNumber: selected.length },
                               }),
