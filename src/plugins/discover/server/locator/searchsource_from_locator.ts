@@ -89,7 +89,7 @@ const getQuery = (searchSource: SearchSource, params: DiscoverAppLocatorParams) 
   if (paramsQuery) {
     query = paramsQuery;
   } else if (savedSearchQuery) {
-    // FIXME: cannot combine 2 queries (using AND): query can not be an array in SearchSourceFields
+    // NOTE: cannot combine 2 queries (using AND): query can not be an array in SearchSourceFields
     query = savedSearchQuery;
   }
 
@@ -145,7 +145,6 @@ export function searchSourceFromLocatorFactory(services: LocatorServicesDeps) {
 
     // Inject sort
     if (savedSearch.attributes.sort) {
-      // FIXME: uses some casting: validate this?
       const sort = getSortForSearchSource(
         savedSearch.attributes.sort as Array<[string, string]>,
         index
