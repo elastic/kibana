@@ -18,3 +18,24 @@ export const parsedPidOrEntityIdParameter = (parameters: {
     entity_id: parameters?.entityId?.[0] ?? '',
   };
 };
+
+const UNIT_TO_MILLISECONDS = (value: number) => ({
+  h: (): number => value * 60 * 60 * 1000,
+  m: (): number => value * 60 * 1000,
+  s: (): number => value * 1000,
+});
+
+const convertToMilliseconds = (value: number, unit: 'h' | 'm' | 's'): number =>
+  UNIT_TO_MILLISECONDS(value)[unit]();
+
+const EXECUTE_TIMEOUT_REGEX = /^\d+(?=(h|m|s){1}$)/;
+export const validateUnitOfTime = (value: string): boolean => EXECUTE_TIMEOUT_REGEX.test(value);
+
+export const parsedExecuteTimeout = (timeout?: string): undefined | number => {
+  const timeoutMatch = timeout?.trim().match(EXECUTE_TIMEOUT_REGEX);
+  if (!timeoutMatch) {
+    return;
+  }
+
+  return convertToMilliseconds(Number(timeoutMatch[0]), timeoutMatch[1] as 'h' | 'm' | 's');
+};

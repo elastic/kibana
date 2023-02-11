@@ -4,6 +4,7 @@ disabled:
 
   # Base config files, only necessary to inform config finding script
   - test/functional/config.base.js
+  - test/functional/firefox/config.base.ts
   - x-pack/test/functional/config.base.js
   - x-pack/test/detection_engine_api_integration/security_and_spaces/config.base.ts
   - x-pack/test/functional_enterprise_search/base_config.ts
@@ -100,7 +101,11 @@ enabled:
   - test/functional/apps/visualize/group6/config.ts
   - test/functional/apps/visualize/replaced_vislib_chart_types/config.ts
   - test/functional/config.ccs.ts
-  - test/functional/config.firefox.js
+  - test/functional/firefox/console.config.ts
+  - test/functional/firefox/dashboard.config.ts
+  - test/functional/firefox/discover.config.ts
+  - test/functional/firefox/home.config.ts
+  - test/functional/firefox/visualize.config.ts
   - test/health_gateway/config.ts
   - test/interactive_setup_api_integration/enrollment_flow.config.ts
   - test/interactive_setup_api_integration/manual_configuration_flow_without_tls.config.ts
