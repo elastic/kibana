@@ -36,6 +36,12 @@ export {
 } from './api';
 
 export type {
+  CaseResponse,
+  CasesBulkGetRequestCertainFields,
+  CasesBulkGetResponseCertainFields,
+} from './api';
+
+export type {
   Case,
   Ecs,
   CasesFeatures,
