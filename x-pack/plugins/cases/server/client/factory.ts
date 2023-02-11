@@ -32,6 +32,7 @@ import type {
 } from '@kbn/rule-registry-plugin/server';
 
 import type { PublicMethodsOf } from '@kbn/utility-types';
+import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import { SAVED_OBJECT_TYPES } from '../../common/constants';
 import { Authorization } from '../authorization/authorization';
 import {
@@ -55,7 +56,7 @@ import { EmailNotificationService } from '../services/notifications/email_notifi
 interface CasesClientFactoryArgs {
   securityPluginSetup: SecurityPluginSetup;
   securityPluginStart: SecurityPluginStart;
-  spacesPluginStart: SpacesPluginStart;
+  spacesPluginStart?: SpacesPluginStart;
   featuresPluginStart: FeaturesPluginStart;
   actionsPluginStart: ActionsPluginStart;
   licensingPluginStart: LicensingPluginStart;
@@ -153,7 +154,8 @@ export class CasesClientFactory {
       externalReferenceAttachmentTypeRegistry: this.options.externalReferenceAttachmentTypeRegistry,
       securityStartPlugin: this.options.securityPluginStart,
       publicBaseUrl: this.options.publicBaseUrl,
-      spaceId: this.options.spacesPluginStart.spacesService.getSpaceId(request),
+      spaceId:
+        this.options.spacesPluginStart?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID,
       savedObjectsSerializer,
     });
   }
@@ -208,7 +210,8 @@ export class CasesClientFactory {
       notifications: this.options.notifications,
       security: this.options.securityPluginStart,
       publicBaseUrl: this.options.publicBaseUrl,
-      spaceId: this.options.spacesPluginStart.spacesService.getSpaceId(request),
+      spaceId:
+        this.options.spacesPluginStart?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID,
     });
 
     return {

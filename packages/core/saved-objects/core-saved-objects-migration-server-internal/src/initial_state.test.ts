@@ -120,6 +120,11 @@ describe('createInitialState', () => {
               },
               Object {
                 "term": Object {
+                  "type": "maps-telemetry",
+                },
+              },
+              Object {
+                "term": Object {
                   "type": "ml-telemetry",
                 },
               },
