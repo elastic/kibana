@@ -505,7 +505,7 @@ for (let i = 0; i < TIMES_TO_RUN; i++) {
           ...sampleDataWithoutTags,
           connector: {
             id: 'resilient-2',
-            name: 'My Connector 2',
+            name: 'My Resilient connector',
             type: '.resilient',
             fields: { incidentTypes: ['21'], severityCode: '4' },
           },
@@ -515,7 +515,7 @@ for (let i = 0; i < TIMES_TO_RUN; i++) {
           caseId: sampleId,
           connector: {
             id: 'resilient-2',
-            name: 'My Connector 2',
+            name: 'My Resilient connector',
             type: '.resilient',
             fields: { incidentTypes: ['21'], severityCode: '4' },
           },
