@@ -38,24 +38,48 @@ a rule type and configuring its conditions and action type.
 After a rule is created, you can open the action menu (…) and select *Edit rule*
 to re-open the flyout and change the rule properties.
 
-////
 [float]
-[[defining-rules-general-details]]
-==== General rule details
+[[defining-rules-type-conditions]]
+==== Rule type and conditions
 
-All rules share the following four properties:
+Depending upon the {kib} app and context, you might be prompted to choose the type of rule to create. Some apps will preselect the type of rule for you.
 
-Name:: The name of the rule. While this name does not have to be unique, a
-distinctive name can help you identify a rule.
-Tags:: A list of tag names that can be applied to a rule. Tags can help you
-organize and find rules.
-Check every:: Defines how often to evaluate the rule condition. Checks are
-queued; they run as close to the defined value as capacity allows. For more
-details, go to <<alerting-production-considerations,Alerting production considerations>>.
-Notify:: Defines how often alerts generate actions. Options include running
-actions at each check interval, only when the alert status changes, or at a
-custom action interval.
-+
+Each rule type provides its own way of defining the conditions to detect, but an expression formed by a series of clauses is a common pattern. Each clause has a UI control that allows you to define the clause. For example, in an index threshold rule, the `WHEN` clause allows you to select an aggregation operation to apply to a numeric field.
+
+[role="screenshot"]
+image::images/rule-flyout-rule-conditions.png[UI for defining rule conditions on an index threshold rule]
+
+For details on what types of rules are available and how to configure them,
+refer to <<rule-types>>.
+
+All rules must have a value in **Check every**. This check interval defines how often to evaluate the rule condition. Checks are queued; they run as close to the defined value as capacity allows.
+
+[float]
+[[defining-rules-actions-details]]
+==== Action type and frequency
+
+Actions are optional when you create a rule. However, to receive notifications when a rule meets the defined conditions, you must add one or more actions.
+
+Each action must specify a connector, which provides connection information for {kib} services or integrates with third party systems. If no connectors exist, click **Add connector** to create one. For more information about each type of connector, refer to <<action-types>>.
+
+After you select a connector, you must set the action frequency. If the rule type supports alert summaries, you can choose from the following options:
+
+* *For each alert*:
+  * *On check intervals*: Actions run on the check interval if the rule conditions are met. 
+  * *On custom action intervals*: Actions run on the specified intervals if the rule conditions are met.  
+  * *On status changes*: Actions run only when the alert status changes.
+* *Summary of alerts*:
+  * *On check intervals*: An alert summary is generated on the check interval if the rule conditions are met.
+  * *On custom action intervals*: An alert summary is generated on the specified intervals if the rule conditions are met.
+
+If you choose one of the *For each alert* options, you must also choose which action group from the *Run when* dropdown to associate with this action. When a rule meets the defined condition, it is marked as _active_ and alerts are created and assigned to an action group. In addition to the action groups defined by the selected rule type, each rule also has a _recovered_ action group that is assigned when a rule's conditions are no longer detected.
+
+If the rule type does not support alert summaries, only the *For each alert* options are available. 
+
+NOTE: If you specify a custom action interval, it cannot be shorter than the rule's check interval.
+
+////
+
 --
 [[alerting-concepts-suppressing-duplicate-notifications]]
 [TIP]
@@ -83,35 +107,7 @@ To get notified only once when a server exceeds the threshold, you can set the
 rule notify setting to `On status changes`. 
 ==============================================
 --
-
-[role="screenshot"]
-image::images/rule-flyout-general-details.png[alt='All rules have name, tags, check every, and notify properties in common']
 ////
-
-[float]
-[[defining-rules-type-conditions]]
-==== Rule type and conditions
-
-Depending upon the {kib} app and context, you might be prompted to choose the type of rule to create. Some apps will preselect the type of rule for you.
-
-Each rule type provides its own way of defining the conditions to detect, but an expression formed by a series of clauses is a common pattern. Each clause has a UI control that allows you to define the clause. For example, in an index threshold rule, the `WHEN` clause allows you to select an aggregation operation to apply to a numeric field.
-
-[role="screenshot"]
-image::images/rule-flyout-rule-conditions.png[UI for defining rule conditions on an index threshold rule]
-
-For details on what types of rules are available and how to configure them,
-refer to <<rule-types>>.
-
-
-[float]
-[[defining-rules-actions-details]]
-==== Action type and details
-
-Actions are optional when you create a rule. However, to receive notifications when a rule meets the defined conditions, you must add one or more actions.
-
-Each action must specify a connector, which provides connection information for {kib} services or integrates with third party systems. If no connectors exist, click **Add connector** to create one. For more information about each type of connector, refer to <<action-types>>.
-
-After you have selected a connector, use the **Run When** dropdown to choose the action group to associate with this action. When a rule meets the defined condition, it is marked as **Active** and alerts are created and assigned to an action group. In addition to the action groups defined by the selected rule type, each rule also has a **Recovered** action group that is assigned when a rule's conditions are no longer detected.
 
 Each action type exposes different properties. For example, an email action allows you to set the recipients, the subject, and a message body in markdown format. See <<action-types>> for details on the types of actions provided by {kib} and their properties.
 
@@ -122,7 +118,7 @@ You can attach more than one action. Clicking the *Add action* button will promp
 
 [float]
 [[defining-rules-actions-variables]]
-===== Action variables
+==== Action variables
 
 Using the https://mustache.github.io/[Mustache] template syntax `{{variable name}}`, you can pass rule values to an action at the time a condition is detected. You can access the list of available variables using the "add rule variable" button:
 
