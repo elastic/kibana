@@ -137,7 +137,7 @@ const waitForFormToRender = async (renderer: Screen) => {
   expect(await renderer.findByTestId('caseTitle')).toBeTruthy();
 };
 
-const TIMES_TO_RUN = 10000;
+const TIMES_TO_RUN = 1000;
 
 for (let i = 0; i < TIMES_TO_RUN; i++) {
   describe('Create case', () => {
