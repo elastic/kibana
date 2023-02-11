@@ -24,6 +24,7 @@ exports[`kbnLoadingIndicator shows logo image when customLogo is set 1`] = `
 <EuiImage
   alt="logo"
   aria-label="User logo"
+  data-test-subj="globalLoadingIndicator-hidden"
   size={24}
   src="customLogo"
 />

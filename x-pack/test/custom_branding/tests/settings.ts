@@ -25,13 +25,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.settings.clearAdvancedSettings('xpackCustomBranding:pageTitle');
       }
       try {
-        const logoImg = await find.byCssSelector('img[alt="xpackCustomBranding:logo"]');
+        await find.byCssSelector('img[alt="xpackCustomBranding:logo"]');
         await PageObjects.settings.clearAdvancedSettings('xpackCustomBranding:logo');
       } catch (e) {
         log.debug('It is expected not to find custom branding properties set');
       }
       try {
-        const logoText = await find.byCssSelector('img[alt="xpackCustomBranding:customizedLogo"]');
+        await find.byCssSelector('img[alt="xpackCustomBranding:customizedLogo"]');
         await PageObjects.settings.clearAdvancedSettings('xpackCustomBranding:customizedLogo');
       } catch (e) {
         log.debug('It is expected not to find custom branding properties set');
